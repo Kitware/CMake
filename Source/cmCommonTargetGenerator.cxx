@@ -47,13 +47,6 @@ std::string const& cmCommonTargetGenerator::GetConfigName() const
   return this->ConfigName;
 }
 
-std::string cmCommonTargetGenerator::Convert(
-  std::string const& source, cmOutputConverter::RelativeRoot relative,
-  cmOutputConverter::OutputFormat output)
-{
-  return this->LocalGenerator->Convert(source, relative, output);
-}
-
 const char* cmCommonTargetGenerator::GetFeature(const std::string& feature)
 {
   return this->GeneratorTarget->GetFeature(feature, this->ConfigName);
@@ -204,8 +197,9 @@ std::string cmCommonTargetGenerator::GetManifests()
   std::vector<std::string> manifests;
   for (std::vector<cmSourceFile const*>::iterator mi = manifest_srcs.begin();
        mi != manifest_srcs.end(); ++mi) {
-    manifests.push_back(this->Convert(
-      (*mi)->GetFullPath(), this->LocalGenerator->GetWorkingDirectory(),
+    manifests.push_back(this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->ConvertToRelativePath(
+        this->LocalGenerator->GetWorkingDirectory(), (*mi)->GetFullPath()),
       cmOutputConverter::SHELL));
   }
 

@@ -24,40 +24,14 @@ class cmOutputConverter
 public:
   cmOutputConverter(cmState::Snapshot snapshot);
 
-  /**
-   * Convert something to something else. This is a centralized conversion
-   * routine used by the generators to handle relative paths and the like.
-   * The flags determine what is actually done.
-   *
-   * relative: treat the argument as a directory and convert it to make it
-   * relative or full or unchanged. If relative (HOME, START etc) then that
-   * specifies what it should be relative to.
-   *
-   * output: make the result suitable for output to a...
-   *
-   * optional: should any relative path operation be controlled by the rel
-   * path setting
-   */
-  enum RelativeRoot
-  {
-    HOME,
-    START,
-    HOME_OUTPUT,
-    START_OUTPUT
-  };
   enum OutputFormat
   {
-    MAKERULE,
     SHELL,
     WATCOMQUOTE,
     RESPONSE
   };
   std::string ConvertToOutputFormat(const std::string& source,
                                     OutputFormat output) const;
-  std::string Convert(const std::string& remote, RelativeRoot local,
-                      OutputFormat output) const;
-  std::string ConvertToRelativePath(const std::string& remote,
-                                    RelativeRoot local) const;
   std::string ConvertDirectorySeparatorsForShell(
     const std::string& source) const;
 

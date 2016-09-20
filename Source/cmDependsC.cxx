@@ -239,19 +239,18 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // written by the original local generator for this directory
   // convert the dependencies to paths relative to the home output
   // directory.  We must do the same here.
-  std::string obj_i = this->LocalGenerator->ConvertToRelativePath(
-    obj, cmOutputConverter::HOME_OUTPUT);
-  std::string obj_m = this->LocalGenerator->ConvertToOutputFormat(
-    obj_i, cmOutputConverter::MAKERULE);
+  std::string binDir = this->LocalGenerator->GetBinaryDirectory();
+  std::string obj_i = this->LocalGenerator->ConvertToRelativePath(binDir, obj);
+  std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i.c_str());
   internalDepends << obj_i << std::endl;
 
   for (std::set<std::string>::const_iterator i = dependencies.begin();
        i != dependencies.end(); ++i) {
-    makeDepends << obj_m << ": "
-                << this->LocalGenerator->Convert(
-                     *i, cmOutputConverter::HOME_OUTPUT,
-                     cmOutputConverter::MAKERULE)
-                << std::endl;
+    makeDepends
+      << obj_m << ": "
+      << cmSystemTools::ConvertToOutputPath(
+           this->LocalGenerator->ConvertToRelativePath(binDir, *i).c_str())
+      << std::endl;
     internalDepends << " " << *i << std::endl;
   }
   makeDepends << std::endl;

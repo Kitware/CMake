@@ -46,49 +46,12 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
   return this->ConvertToOutputFormat(remote, format);
 }
 
-std::string cmOutputConverter::ConvertToRelativePath(
-  const std::string& source, RelativeRoot relative) const
-{
-  std::string result;
-
-  switch (relative) {
-    case HOME:
-      result = this->ConvertToRelativePath(
-        this->GetState()->GetSourceDirectory(), source);
-      break;
-    case START:
-      result = this->ConvertToRelativePath(
-        this->StateSnapshot.GetDirectory().GetCurrentSource(), source);
-      break;
-    case HOME_OUTPUT:
-      result = this->ConvertToRelativePath(
-        this->GetState()->GetBinaryDirectory(), source);
-      break;
-    case START_OUTPUT:
-      result = this->ConvertToRelativePath(
-        this->StateSnapshot.GetDirectory().GetCurrentBinary(), source);
-      break;
-  }
-  return result;
-}
-
-std::string cmOutputConverter::Convert(const std::string& source,
-                                       RelativeRoot relative,
-                                       OutputFormat output) const
-{
-  // Convert the path to a relative path.
-  std::string result = this->ConvertToRelativePath(source, relative);
-  return this->ConvertToOutputFormat(result, output);
-}
-
 std::string cmOutputConverter::ConvertToOutputFormat(const std::string& source,
                                                      OutputFormat output) const
 {
   std::string result = source;
   // Convert it to an output path.
-  if (output == MAKERULE) {
-    result = cmSystemTools::ConvertToOutputPath(result.c_str());
-  } else if (output == SHELL || output == WATCOMQUOTE) {
+  if (output == SHELL || output == WATCOMQUOTE) {
     result = this->ConvertDirectorySeparatorsForShell(source);
     result = this->EscapeForShell(result, true, false, output == WATCOMQUOTE);
   } else if (output == RESPONSE) {

@@ -138,14 +138,20 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetOutPathPDB = this->LocalGenerator->ConvertToOutputFormat(
     targetFullPathPDB, cmOutputConverter::SHELL);
   // Convert to the output path to use in constructing commands.
-  std::string targetOutPath = this->Convert(
-    targetFullPath, cmOutputConverter::START_OUTPUT, cmOutputConverter::SHELL);
-  std::string targetOutPathReal =
-    this->Convert(targetFullPathReal, cmOutputConverter::START_OUTPUT,
-                  cmOutputConverter::SHELL);
+  std::string targetOutPath = this->LocalGenerator->ConvertToOutputFormat(
+    this->LocalGenerator->ConvertToRelativePath(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath),
+    cmOutputConverter::SHELL);
+  std::string targetOutPathReal = this->LocalGenerator->ConvertToOutputFormat(
+    this->LocalGenerator->ConvertToRelativePath(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal),
+    cmOutputConverter::SHELL);
   std::string targetOutPathImport =
-    this->Convert(targetFullPathImport, cmOutputConverter::START_OUTPUT,
-                  cmOutputConverter::SHELL);
+    this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->ConvertToRelativePath(
+        this->LocalGenerator->GetCurrentBinaryDirectory(),
+        targetFullPathImport),
+      cmOutputConverter::SHELL);
 
   // Get the language to use for linking this executable.
   std::string linkLanguage =
@@ -219,25 +225,27 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // may need to be cleaned.
   std::vector<std::string> exeCleanFiles;
   exeCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-    targetFullPath, cmOutputConverter::START_OUTPUT));
+    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath));
 #ifdef _WIN32
   // There may be a manifest file for this target.  Add it to the
   // clean set just in case.
   exeCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-    (targetFullPath + ".manifest").c_str(), cmOutputConverter::START_OUTPUT));
+    this->LocalGenerator->GetCurrentBinaryDirectory(),
+    (targetFullPath + ".manifest").c_str()));
 #endif
   if (targetNameReal != targetName) {
     exeCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-      targetFullPathReal, cmOutputConverter::START_OUTPUT));
+      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal));
   }
   if (!targetNameImport.empty()) {
     exeCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-      targetFullPathImport, cmOutputConverter::START_OUTPUT));
+      this->LocalGenerator->GetCurrentBinaryDirectory(),
+      targetFullPathImport));
     std::string implib;
     if (this->GeneratorTarget->GetImplibGNUtoMS(targetFullPathImport,
                                                 implib)) {
       exeCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-        implib, cmOutputConverter::START_OUTPUT));
+        this->LocalGenerator->GetCurrentBinaryDirectory(), implib));
     }
   }
 
@@ -245,7 +253,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // cleaned.  We do not want to delete the .pdb file just before
   // linking the target.
   this->CleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-    targetFullPathPDB, cmOutputConverter::START_OUTPUT));
+    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathPDB));
 
   // Add the pre-build and pre-link rules building but not when relinking.
   if (!relink) {
@@ -317,14 +325,19 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     vars.Language = linkLanguage.c_str();
     vars.Objects = buildObjs.c_str();
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
-    objectDir = this->Convert(objectDir, cmOutputConverter::START_OUTPUT,
-                              cmOutputConverter::SHELL);
+
+    objectDir = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->ConvertToRelativePath(
+        this->LocalGenerator->GetCurrentBinaryDirectory(), objectDir),
+      cmOutputConverter::SHELL);
     vars.ObjectDir = objectDir.c_str();
     cmOutputConverter::OutputFormat output = (useWatcomQuote)
       ? cmOutputConverter::WATCOMQUOTE
       : cmOutputConverter::SHELL;
-    std::string target = this->Convert(
-      targetFullPathReal, cmOutputConverter::START_OUTPUT, output);
+    std::string target = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->ConvertToRelativePath(
+        this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal),
+      output);
     vars.Target = target.c_str();
     vars.TargetPDB = targetOutPathPDB.c_str();
 
