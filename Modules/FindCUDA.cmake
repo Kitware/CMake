@@ -303,6 +303,8 @@
 #                            CUDA_ADD_CUBLAS_TO_TARGET macro).
 #   CUDA_cudart_static_LIBRARY -- Statically linkable cuda runtime library.
 #                                 Only available for CUDA version 5.5+
+#   CUDA_cudadevrt_LIBRARY -- Device runtime library.
+#                             Required for separable compilation.
 #   CUDA_cupti_LIBRARY    -- CUDA Profiling Tools Interface library.
 #                            Only available for CUDA version 4.0+.
 #   CUDA_curand_LIBRARY   -- CUDA Random Number Generation library.
@@ -564,6 +566,7 @@ macro(cuda_unset_include_and_libraries)
     unset(CUDA_CUDARTEMU_LIBRARY CACHE)
   endif()
   unset(CUDA_cudart_static_LIBRARY CACHE)
+  unset(CUDA_cudadevrt_LIBRARY CACHE)
   unset(CUDA_cublas_LIBRARY CACHE)
   unset(CUDA_cublas_device_LIBRARY CACHE)
   unset(CUDA_cublasemu_LIBRARY CACHE)
@@ -793,6 +796,10 @@ else()
   # If not available, silently disable the option.
   set(CUDA_USE_STATIC_CUDA_RUNTIME OFF CACHE INTERNAL "")
   set(CUDA_CUDART_LIBRARY_VAR CUDA_CUDART_LIBRARY)
+endif()
+if(NOT CUDA_VERSION VERSION_LESS "5.0")
+  cuda_find_library_local_first(CUDA_cudadevrt_LIBRARY cudadevrt "\"cudadevrt\" library")
+  mark_as_advanced(CUDA_cudadevrt_LIBRARY)
 endif()
 
 if(CUDA_USE_STATIC_CUDA_RUNTIME)
@@ -1736,6 +1743,12 @@ macro(CUDA_ADD_LIBRARY cuda_target)
   target_link_libraries(${cuda_target}
     ${CUDA_LIBRARIES}
     )
+
+  if(CUDA_SEPARABLE_COMPILATION)
+    target_link_libraries(${cuda_target}
+      ${CUDA_cudadevrt_LIBRARY}
+      )
+  endif()
 
   # We need to set the linker language based on what the expected generated file
   # would be. CUDA_C_OR_CXX is computed based on CUDA_HOST_COMPILATION_CPP.
