@@ -29,6 +29,11 @@
 #include <string.h>
 #include <utility>
 
+static std::string const kBINARY_DIR = "BINARY_DIR";
+static std::string const kBUILDSYSTEM_TARGETS = "BUILDSYSTEM_TARGETS";
+static std::string const kSOURCE_DIR = "SOURCE_DIR";
+static std::string const kSUBDIRECTORIES = "SUBDIRECTORIES";
+
 struct cmState::SnapshotDataType
 {
   cmState::PositionType ScopeParent;
@@ -93,6 +98,8 @@ struct cmState::BuildsystemDirectoryStateType
 
   std::vector<std::string> CompileOptions;
   std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
+
+  std::vector<std::string> NormalTargetNames;
 
   std::string ProjectName;
 
@@ -324,6 +331,7 @@ cmState::Snapshot cmState::Reset()
     it->CompileOptions.clear();
     it->CompileOptionsBacktraces.clear();
     it->DirectoryEnd = pos;
+    it->NormalTargetNames.clear();
     it->Properties.clear();
     it->Children.clear();
   }
@@ -1667,6 +1675,30 @@ const char* cmState::Directory::GetProperty(const std::string& prop,
     }
     return "";
   }
+  if (prop == kBINARY_DIR) {
+    output = this->GetCurrentBinary();
+    return output.c_str();
+  }
+  if (prop == kSOURCE_DIR) {
+    output = this->GetCurrentSource();
+    return output.c_str();
+  }
+  if (prop == kSUBDIRECTORIES) {
+    std::vector<std::string> child_dirs;
+    std::vector<cmState::Snapshot> const& children =
+      this->DirectoryState->Children;
+    for (std::vector<cmState::Snapshot>::const_iterator ci = children.begin();
+         ci != children.end(); ++ci) {
+      child_dirs.push_back(ci->GetDirectory().GetCurrentSource());
+    }
+    output = cmJoin(child_dirs, ";");
+    return output.c_str();
+  }
+  if (prop == kBUILDSYSTEM_TARGETS) {
+    output = cmJoin(this->DirectoryState->NormalTargetNames, ";");
+    return output.c_str();
+  }
+
   if (prop == "LISTFILE_STACK") {
     std::vector<std::string> listFiles;
     cmState::Snapshot snp = this->Snapshot_;
@@ -1731,6 +1763,11 @@ std::vector<std::string> cmState::Directory::GetPropertyKeys() const
     keys.push_back(it->first);
   }
   return keys;
+}
+
+void cmState::Directory::AddNormalTargetName(std::string const& name)
+{
+  this->DirectoryState->NormalTargetNames.push_back(name);
 }
 
 bool operator==(const cmState::Snapshot& lhs, const cmState::Snapshot& rhs)

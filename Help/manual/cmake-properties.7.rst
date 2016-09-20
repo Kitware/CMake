@@ -54,6 +54,8 @@ Properties on Directories
    :maxdepth: 1
 
    /prop_dir/ADDITIONAL_MAKE_CLEAN_FILES
+   /prop_dir/BINARY_DIR
+   /prop_dir/BUILDSYSTEM_TARGETS
    /prop_dir/CACHE_VARIABLES
    /prop_dir/CLEAN_NO_CUSTOM
    /prop_dir/CMAKE_CONFIGURE_DEPENDS
@@ -73,6 +75,8 @@ Properties on Directories
    /prop_dir/RULE_LAUNCH_COMPILE
    /prop_dir/RULE_LAUNCH_CUSTOM
    /prop_dir/RULE_LAUNCH_LINK
+   /prop_dir/SOURCE_DIR
+   /prop_dir/SUBDIRECTORIES
    /prop_dir/TEST_INCLUDE_FILE
    /prop_dir/VARIABLES
    /prop_dir/VS_GLOBAL_SECTION_POST_section

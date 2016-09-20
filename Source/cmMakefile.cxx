@@ -1930,6 +1930,7 @@ cmTarget* cmMakefile::AddNewTarget(cmState::TargetType type,
         name, cmTarget(name, type, cmTarget::VisibilityNormal, this)))
       .first;
   this->GetGlobalGenerator()->IndexTarget(&it->second);
+  this->GetStateSnapshot().GetDirectory().AddNormalTargetName(name);
   return &it->second;
 }
 
