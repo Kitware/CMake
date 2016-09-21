@@ -14,7 +14,8 @@
 
 static const wchar_t cmdConsoleBufChild[] = L"testConsoleBufChild";
 
-static const wchar_t SyncEventName[] = L"SyncEvent";
+static const wchar_t BeforeInputEventName[] = L"BeforeInputEvent";
+static const wchar_t AfterOutputEventName[] = L"AfterOutputEvent";
 
 // यूनिकोड είναι здорово!
 static const wchar_t UnicodeTestString[] = L"\u092F\u0942\u0928\u093F\u0915\u094B\u0921 "
