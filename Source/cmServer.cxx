@@ -14,6 +14,7 @@
 #include "cmServer.h"
 
 #include "cmServerProtocol.h"
+#include "cmSystemTools.h"
 #include "cmVersionMacros.h"
 #include "cmake.h"
 
@@ -22,17 +23,22 @@
 #include "cm_jsoncpp_value.h"
 #endif
 
-const char kTYPE_KEY[] = "type";
-const char kCOOKIE_KEY[] = "cookie";
-const char REPLY_TO_KEY[] = "inReplyTo";
-const char ERROR_MESSAGE_KEY[] = "errorMessage";
+#include <fstream>
+#include <iostream>
+#include <memory>
 
-const char ERROR_TYPE[] = "error";
-const char REPLY_TYPE[] = "reply";
-const char PROGRESS_TYPE[] = "progress";
+static const std::string kTYPE_KEY = "type";
+static const std::string kCOOKIE_KEY = "cookie";
+static const std::string kREPLY_TO_KEY = "inReplyTo";
+static const std::string kERROR_MESSAGE_KEY = "errorMessage";
 
-const char START_MAGIC[] = "[== CMake Server ==[";
-const char END_MAGIC[] = "]== CMake Server ==]";
+static const std::string kERROR_TYPE = "error";
+static const std::string kREPLY_TYPE = "reply";
+static const std::string kPROGRESS_TYPE = "progress";
+static const std::string kMESSAGE_TYPE = "message";
+
+static const std::string kSTART_MAGIC = "[== CMake Server ==[";
+static const std::string kEND_MAGIC = "]== CMake Server ==]";
 
 typedef struct
 {
@@ -85,6 +91,20 @@ void read_stdin(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf)
     free(buf->base);
 }
 
+class cmServer::DebugInfo
+{
+public:
+  DebugInfo()
+    : StartTime(uv_hrtime())
+  {
+  }
+
+  bool PrintStatistics = false;
+
+  std::string OutputFile;
+  uint64_t StartTime;
+};
+
 cmServer::cmServer(bool supportExperimental)
   : SupportExperimental(supportExperimental)
 {
@@ -124,18 +144,33 @@ void cmServer::PopOne()
     return;
   }
 
+  std::unique_ptr<DebugInfo> debug;
+  Json::Value debugValue = value["debug"];
+  if (!debugValue.isNull()) {
+    debug = std::make_unique<DebugInfo>();
+    debug->OutputFile = debugValue["dumpToFile"].asString();
+    debug->PrintStatistics = debugValue["showStats"].asBool();
+  }
+
   const cmServerRequest request(this, value[kTYPE_KEY].asString(),
                                 value[kCOOKIE_KEY].asString(), value);
 
   if (request.Type == "") {
     cmServerResponse response(request);
     response.SetError("No type given in request.");
-    this->WriteResponse(response);
+    this->WriteResponse(response, nullptr);
     return;
   }
 
-  this->WriteResponse(this->Protocol ? this->Protocol->Process(request)
-                                     : this->SetProtocolVersion(request));
+  cmSystemTools::SetMessageCallback(reportMessage,
+                                    const_cast<cmServerRequest*>(&request));
+  if (this->Protocol) {
+    this->Protocol->CMakeInstance()->SetProgressCallback(
+      reportProgress, const_cast<cmServerRequest*>(&request));
+    this->WriteResponse(this->Protocol->Process(request), debug.get());
+  } else {
+    this->WriteResponse(this->SetProtocolVersion(request), debug.get());
+  }
 }
 
 void cmServer::handleData(const std::string& data)
@@ -154,11 +189,11 @@ void cmServer::handleData(const std::string& data)
       line.erase(ls - 1, 1);
     this->DataBuffer.erase(this->DataBuffer.begin(),
                            this->DataBuffer.begin() + needle + 1);
-    if (line == START_MAGIC) {
+    if (line == kSTART_MAGIC) {
       this->JsonData.clear();
       continue;
     }
-    if (line == END_MAGIC) {
+    if (line == kEND_MAGIC) {
       this->Queue.push_back(this->JsonData);
       this->JsonData.clear();
       if (!this->Writing) {
@@ -207,7 +242,31 @@ void cmServer::PrintHello() const
     protocolVersions.append(tmp);
   }
 
-  this->WriteJsonObject(hello);
+  this->WriteJsonObject(hello, nullptr);
+}
+
+void cmServer::reportProgress(const char* msg, float progress, void* data)
+{
+  const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
+  assert(request);
+  if (progress < 0.0 || progress > 1.0) {
+    request->ReportMessage(msg, "");
+  } else {
+    request->ReportProgress(0, static_cast<int>(progress * 1000), 1000, msg);
+  }
+}
+
+void cmServer::reportMessage(const char* msg, const char* title,
+                             bool& /* cancel */, void* data)
+{
+  const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
+  assert(request);
+  assert(msg);
+  std::string titleString;
+  if (title) {
+    titleString = title;
+  }
+  request->ReportMessage(std::string(msg), titleString);
 }
 
 cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
@@ -292,16 +351,44 @@ bool cmServer::Serve()
   return true;
 }
 
-void cmServer::WriteJsonObject(const Json::Value& jsonValue) const
+void cmServer::WriteJsonObject(const Json::Value& jsonValue,
+                               const DebugInfo* debug) const
 {
   Json::FastWriter writer;
 
-  std::string result = std::string("\n") + std::string(START_MAGIC) +
-    std::string("\n") + writer.write(jsonValue) + std::string(END_MAGIC) +
-    std::string("\n");
+  auto beforeJson = uv_hrtime();
+  std::string result = writer.write(jsonValue);
+
+  if (debug) {
+    Json::Value copy = jsonValue;
+    if (debug->PrintStatistics) {
+      Json::Value stats = Json::objectValue;
+      auto endTime = uv_hrtime();
+
+      stats["jsonSerialization"] = double(endTime - beforeJson) / 1000000.0;
+      stats["totalTime"] = double(endTime - debug->StartTime) / 1000000.0;
+      stats["size"] = static_cast<int>(result.size());
+      if (!debug->OutputFile.empty()) {
+        stats["dumpFile"] = debug->OutputFile;
+      }
+
+      copy["zzzDebug"] = stats;
+
+      result = writer.write(copy); // Update result to include debug info
+    }
+
+    if (!debug->OutputFile.empty()) {
+      std::ofstream myfile;
+      myfile.open(debug->OutputFile);
+      myfile << result;
+      myfile.close();
+    }
+  }
 
   this->Writing = true;
-  write_data(this->OutputStream, result, on_stdout_write);
+  write_data(this->OutputStream, std::string("\n") + kSTART_MAGIC +
+               std::string("\n") + result + kEND_MAGIC + std::string("\n"),
+             on_stdout_write);
 }
 
 cmServerProtocol* cmServer::FindMatchingProtocol(
@@ -328,39 +415,59 @@ void cmServer::WriteProgress(const cmServerRequest& request, int min,
   assert(message.length() != 0);
 
   Json::Value obj = Json::objectValue;
-  obj[kTYPE_KEY] = PROGRESS_TYPE;
-  obj[REPLY_TO_KEY] = request.Type;
+  obj[kTYPE_KEY] = kPROGRESS_TYPE;
+  obj[kREPLY_TO_KEY] = request.Type;
   obj[kCOOKIE_KEY] = request.Cookie;
   obj["progressMessage"] = message;
   obj["progressMinimum"] = min;
   obj["progressMaximum"] = max;
   obj["progressCurrent"] = current;
 
-  this->WriteJsonObject(obj);
+  this->WriteJsonObject(obj, nullptr);
+}
+
+void cmServer::WriteMessage(const cmServerRequest& request,
+                            const std::string& message,
+                            const std::string& title) const
+{
+  if (message.empty())
+    return;
+
+  Json::Value obj = Json::objectValue;
+  obj[kTYPE_KEY] = kMESSAGE_TYPE;
+  obj[kREPLY_TO_KEY] = request.Type;
+  obj[kCOOKIE_KEY] = request.Cookie;
+  obj["message"] = message;
+  if (!title.empty()) {
+    obj["title"] = title;
+  }
+
+  WriteJsonObject(obj, nullptr);
 }
 
 void cmServer::WriteParseError(const std::string& message) const
 {
   Json::Value obj = Json::objectValue;
-  obj[kTYPE_KEY] = ERROR_TYPE;
-  obj[ERROR_MESSAGE_KEY] = message;
-  obj[REPLY_TO_KEY] = "";
+  obj[kTYPE_KEY] = kERROR_TYPE;
+  obj[kERROR_MESSAGE_KEY] = message;
+  obj[kREPLY_TO_KEY] = "";
   obj[kCOOKIE_KEY] = "";
 
-  this->WriteJsonObject(obj);
+  this->WriteJsonObject(obj, nullptr);
 }
 
-void cmServer::WriteResponse(const cmServerResponse& response) const
+void cmServer::WriteResponse(const cmServerResponse& response,
+                             const DebugInfo* debug) const
 {
   assert(response.IsComplete());
 
   Json::Value obj = response.Data();
   obj[kCOOKIE_KEY] = response.Cookie;
-  obj[kTYPE_KEY] = response.IsError() ? ERROR_TYPE : REPLY_TYPE;
-  obj[REPLY_TO_KEY] = response.Type;
+  obj[kTYPE_KEY] = response.IsError() ? kERROR_TYPE : kREPLY_TYPE;
+  obj[kREPLY_TO_KEY] = response.Type;
   if (response.IsError()) {
-    obj[ERROR_MESSAGE_KEY] = response.ErrorMessage();
+    obj[kERROR_MESSAGE_KEY] = response.ErrorMessage();
   }
 
-  this->WriteJsonObject(obj);
+  this->WriteJsonObject(obj, debug);
 }

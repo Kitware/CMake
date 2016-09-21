@@ -68,6 +68,40 @@ Messages sent to and from the process are wrapped in magic strings::
 The server is now ready to accept further requests via stdin.
 
 
+Debugging
+=========
+
+CMake server mode can be asked to provide statistics on execution times, etc.
+or to dump a copy of the response into a file. This is done passing a "debug"
+JSON object as a child of the request.
+
+The debug object supports the "showStats" key, which takes a boolean and makes
+the server mode return a "zzzDebug" object with stats as part of its response.
+"dumpToFile" takes a string value and will cause the cmake server to copy
+the response into the given filename.
+
+This is a response from the cmake server with "showStats" set to true::
+
+  [== CMake Server ==[
+  {
+    "cookie":"",
+    "errorMessage":"Waiting for type \"handshake\".",
+    "inReplyTo":"unknown",
+   "type":"error",
+    "zzzDebug": {
+      "dumpFile":"/tmp/error.txt",
+      "jsonSerialization":0.011016,
+      "size":111,
+      "totalTime":0.025995
+    }
+  }
+  ]== CMake Server ==]
+
+The server has made a copy of this response into the file /tmp/error.txt and
+took 0.011 seconds to turn the JSON response into a string, and it took 0.025
+seconds to process the request in total. The reply has a size of 111 bytes.
+
+
 Protocol API
 ============
 
@@ -130,6 +164,21 @@ a message of type "reply" or "error" that complete the request.
 
 "progress" messages may not be emitted after the "reply" or "error" message for
 the request that triggered the responses was delivered.
+
+
+Type "message"
+^^^^^^^^^^^^^^
+
+A message is triggered when the server processes a request and produces some
+form of output that should be displayed to the user. A Message has a "message"
+with the actual text to display as well as a "title" with a suggested dialog
+box title.
+
+Example::
+
+  [== CMake Server ==[
+  {"cookie":"","message":"Something happened.","title":"Title Text","inReplyTo":"handshake","type":"message"}
+  ]== CMake Server ==]
 
 
 Specific Message Types

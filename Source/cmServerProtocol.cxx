@@ -22,17 +22,14 @@
 #include "cm_jsoncpp_value.h"
 #endif
 
-namespace {
 // Vocabulary:
 
-const std::string kBUILD_DIRECTORY_KEY = "buildDirectory";
-const std::string kCOOKIE_KEY = "cookie";
-const std::string kEXTRA_GENERATOR_KEY = "extraGenerator";
-const std::string kGENERATOR_KEY = "generator";
-const std::string kSOURCE_DIRECTORY_KEY = "sourceDirectory";
-const std::string kTYPE_KEY = "type";
-
-} // namespace
+static const std::string kBUILD_DIRECTORY_KEY = "buildDirectory";
+static const std::string kCOOKIE_KEY = "cookie";
+static const std::string kEXTRA_GENERATOR_KEY = "extraGenerator";
+static const std::string kGENERATOR_KEY = "generator";
+static const std::string kSOURCE_DIRECTORY_KEY = "sourceDirectory";
+static const std::string kTYPE_KEY = "type";
 
 cmServerRequest::cmServerRequest(cmServer* server, const std::string& t,
                                  const std::string& c, const Json::Value& d)
@@ -47,6 +44,12 @@ void cmServerRequest::ReportProgress(int min, int current, int max,
                                      const std::string& message) const
 {
   this->m_Server->WriteProgress(*this, min, current, max, message);
+}
+
+void cmServerRequest::ReportMessage(const std::string& message,
+                                    const std::string& title) const
+{
+  m_Server->WriteMessage(*this, message, title);
 }
 
 cmServerResponse cmServerRequest::Reply(const Json::Value& data) const

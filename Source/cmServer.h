@@ -31,6 +31,8 @@ class cmServerResponse;
 class cmServer
 {
 public:
+  class DebugInfo;
+
   cmServer(bool supportExperimental);
   ~cmServer();
 
@@ -43,6 +45,10 @@ public:
 private:
   void RegisterProtocol(cmServerProtocol* protocol);
 
+  static void reportProgress(const char* msg, float progress, void* data);
+  static void reportMessage(const char* msg, const char* title, bool& cancel,
+                            void* data);
+
   // Handle requests:
   cmServerResponse SetProtocolVersion(const cmServerRequest& request);
 
@@ -51,10 +57,14 @@ private:
   // Write responses:
   void WriteProgress(const cmServerRequest& request, int min, int current,
                      int max, const std::string& message) const;
-  void WriteResponse(const cmServerResponse& response) const;
+  void WriteMessage(const cmServerRequest& request, const std::string& message,
+                    const std::string& title) const;
+  void WriteResponse(const cmServerResponse& response,
+                     const DebugInfo* debug) const;
   void WriteParseError(const std::string& message) const;
 
-  void WriteJsonObject(Json::Value const& jsonValue) const;
+  void WriteJsonObject(Json::Value const& jsonValue,
+                       const DebugInfo* debug) const;
 
   static cmServerProtocol* FindMatchingProtocol(
     const std::vector<cmServerProtocol*>& protocols, int major, int minor);
