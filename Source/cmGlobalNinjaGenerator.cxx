@@ -561,12 +561,22 @@ void cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
   }
 }
 
+bool cmGlobalNinjaGenerator::CheckLanguages(
+  std::vector<std::string> const& languages, cmMakefile* mf) const
+{
+  if (std::find(languages.begin(), languages.end(), "Fortran") !=
+      languages.end()) {
+    mf->IssueMessage(cmake::FATAL_ERROR,
+                     "The Ninja generator does not support Fortran yet.");
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+  return true;
+}
+
 void cmGlobalNinjaGenerator::EnableLanguage(
   std::vector<std::string> const& langs, cmMakefile* mf, bool optional)
 {
-  if (std::find(langs.begin(), langs.end(), "Fortran") != langs.end()) {
-    cmSystemTools::Error("The Ninja generator does not support Fortran yet.");
-  }
   this->cmGlobalGenerator::EnableLanguage(langs, mf, optional);
   for (std::vector<std::string>::const_iterator l = langs.begin();
        l != langs.end(); ++l) {
