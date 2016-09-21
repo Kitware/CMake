@@ -355,6 +355,7 @@ protected:
 private:
   std::string GetEditCacheCommand() const CM_OVERRIDE;
   void FindMakeProgram(cmMakefile* mf) CM_OVERRIDE;
+  void CheckNinjaFeatures();
   bool CheckLanguages(std::vector<std::string> const& languages,
                       cmMakefile* mf) const CM_OVERRIDE;
 
@@ -441,6 +442,8 @@ private:
 
   std::string NinjaCommand;
   std::string NinjaVersion;
+  bool NinjaSupportsConsolePool;
+  bool NinjaSupportsImplicitOuts;
 
 private:
   void InitOutputPathPrefix();

@@ -473,6 +473,8 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
   , UsingGCCOnWindows(false)
   , ComputingUnknownDependencies(false)
   , PolicyCMP0058(cmPolicies::WARN)
+  , NinjaSupportsConsolePool(false)
+  , NinjaSupportsImplicitOuts(false)
 {
 #ifdef _WIN32
   cm->GetState()->SetWindowsShell(true);
@@ -558,7 +560,18 @@ void cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
     cmSystemTools::RunSingleCommand(command, &version, CM_NULLPTR, CM_NULLPTR,
                                     CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
     this->NinjaVersion = cmSystemTools::TrimWhitespace(version);
+    this->CheckNinjaFeatures();
   }
+}
+
+void cmGlobalNinjaGenerator::CheckNinjaFeatures()
+{
+  this->NinjaSupportsConsolePool = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    RequiredNinjaVersionForConsolePool().c_str());
+  this->NinjaSupportsImplicitOuts = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    this->RequiredNinjaVersionForImplicitOuts().c_str());
 }
 
 bool cmGlobalNinjaGenerator::CheckLanguages(
@@ -1311,16 +1324,12 @@ std::string cmGlobalNinjaGenerator::ninjaCmd() const
 
 bool cmGlobalNinjaGenerator::SupportsConsolePool() const
 {
-  return !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForConsolePool().c_str());
+  return this->NinjaSupportsConsolePool;
 }
 
 bool cmGlobalNinjaGenerator::SupportsImplicitOuts() const
 {
-  return !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    this->RequiredNinjaVersionForImplicitOuts().c_str());
+  return this->NinjaSupportsImplicitOuts;
 }
 
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
