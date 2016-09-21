@@ -54,7 +54,8 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   }
 
   // Add a module output directory flag if necessary.
-  std::string mod_dir = target->GetFortranModuleDirectory();
+  std::string mod_dir =
+    target->GetFortranModuleDirectory(this->WorkingDirectory);
   if (!mod_dir.empty()) {
     mod_dir = this->ConvertToOutputFormat(
       this->ConvertToRelativePath(this->WorkingDirectory, mod_dir),

@@ -537,12 +537,13 @@ public:
   void GetTargetVersion(bool soversion, int& major, int& minor,
                         int& patch) const;
 
-  std::string GetFortranModuleDirectory() const;
+  std::string GetFortranModuleDirectory(std::string const& working_dir) const;
 
 private:
   void AddSourceCommon(const std::string& src);
 
-  std::string CreateFortranModuleDirectory() const;
+  std::string CreateFortranModuleDirectory(
+    std::string const& working_dir) const;
   mutable bool FortranModuleDirectoryCreated;
   mutable std::string FortranModuleDirectory;
 
