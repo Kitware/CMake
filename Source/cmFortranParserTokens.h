@@ -69,16 +69,20 @@ extern int cmFortran_yydebug;
     F90PPR_ELIF = 279,
     F90PPR_ENDIF = 280,
     COMMA = 281,
-    DCOLON = 282,
-    UNTERMINATED_STRING = 283,
-    STRING = 284,
-    WORD = 285,
-    CPP_INCLUDE_ANGLE = 286,
-    END = 287,
-    INCLUDE = 288,
-    INTERFACE = 289,
-    MODULE = 290,
-    USE = 291
+    COLON = 282,
+    DCOLON = 283,
+    LPAREN = 284,
+    RPAREN = 285,
+    UNTERMINATED_STRING = 286,
+    STRING = 287,
+    WORD = 288,
+    CPP_INCLUDE_ANGLE = 289,
+    END = 290,
+    INCLUDE = 291,
+    INTERFACE = 292,
+    MODULE = 293,
+    SUBMODULE = 294,
+    USE = 295
   };
 #endif
 /* Tokens.  */
@@ -106,16 +110,20 @@ extern int cmFortran_yydebug;
 #define F90PPR_ELIF 279
 #define F90PPR_ENDIF 280
 #define COMMA 281
-#define DCOLON 282
-#define UNTERMINATED_STRING 283
-#define STRING 284
-#define WORD 285
-#define CPP_INCLUDE_ANGLE 286
-#define END 287
-#define INCLUDE 288
-#define INTERFACE 289
-#define MODULE 290
-#define USE 291
+#define COLON 282
+#define DCOLON 283
+#define LPAREN 284
+#define RPAREN 285
+#define UNTERMINATED_STRING 286
+#define STRING 287
+#define WORD 288
+#define CPP_INCLUDE_ANGLE 289
+#define END 290
+#define INCLUDE 291
+#define INTERFACE 292
+#define MODULE 293
+#define SUBMODULE 294
+#define USE 295
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -126,7 +134,7 @@ union YYSTYPE
 
   char* string;
 
-#line 130 "cmFortranParserTokens.h" /* yacc.c:1909  */
+#line 138 "cmFortranParserTokens.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

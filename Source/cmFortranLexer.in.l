@@ -146,6 +146,7 @@ $[ \t]*endif    { return F90PPR_ENDIF; }
 , { return COMMA; }
 
 :: { return DCOLON; }
+: { return COLON; }
 
 <fixed_fmt>\n[ ]{5}[^ ]  { return GARBAGE; }
 
@@ -155,6 +156,7 @@ $[ \t]*endif    { return F90PPR_ENDIF; }
 [Ii][Nn][Cc][Ll][Uu][Dd][Ee] { return INCLUDE; }
 [Ii][Nn][Tt][Ee][Rr][Ff][Aa][Cc][Ee] { return INTERFACE; }
 [Mm][Oo][Dd][Uu][Ll][Ee] { return MODULE; }
+[Ss][Uu][bb][Mm][Oo][Dd][Uu][Ll][Ee] { return SUBMODULE; }
 [Uu][Ss][Ee] { return USE; }
 
 [a-zA-Z_][a-zA-Z_0-9]* {
@@ -162,7 +164,10 @@ $[ \t]*endif    { return F90PPR_ENDIF; }
   return WORD;
 }
 
-[^ \t\n\r;,!'"a-zA-Z=&]+ { return GARBAGE; }
+\( { return LPAREN; }
+\) { return RPAREN; }
+
+[^ \t\n\r:;,!'"a-zA-Z=&()]+ { return GARBAGE; }
 
 ;|\n { return EOSTMT; }
 

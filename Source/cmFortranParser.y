@@ -85,7 +85,7 @@ static void cmFortran_yyerror(yyscan_t yyscanner, const char* message)
 %token CPP_IFDEF CPP_IFNDEF CPP_IF CPP_ELSE CPP_ELIF CPP_ENDIF
 %token F90PPR_IFDEF F90PPR_IFNDEF F90PPR_IF
 %token F90PPR_ELSE F90PPR_ELIF F90PPR_ENDIF
-%token COMMA DCOLON
+%token COMMA COLON DCOLON LPAREN RPAREN
 %token <number> UNTERMINATED_STRING
 %token <string> STRING WORD
 %token <string> CPP_INCLUDE_ANGLE
@@ -93,6 +93,7 @@ static void cmFortran_yyerror(yyscan_t yyscanner, const char* message)
 %token INCLUDE
 %token INTERFACE
 %token MODULE
+%token SUBMODULE
 %token USE
 
 /*-------------------------------------------------------------------------*/
@@ -113,8 +114,25 @@ stmt:
   }
 | MODULE WORD other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
-    cmFortranParser_RuleModule(parser, $2);
+    if (cmsysString_strcasecmp($2, "function") != 0 &&
+        cmsysString_strcasecmp($2, "procedure") != 0 &&
+        cmsysString_strcasecmp($2, "subroutine") != 0) {
+      cmFortranParser_RuleModule(parser, $2);
+    }
     free($2);
+  }
+| SUBMODULE LPAREN WORD RPAREN WORD other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleUse(parser, $3);
+    free($3);
+    free($5);
+  }
+| SUBMODULE LPAREN WORD COLON WORD RPAREN WORD other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleUse(parser, $3);
+    free($3);
+    free($5);
+    free($7);
   }
 | INTERFACE WORD other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
@@ -217,11 +235,15 @@ misc_code:
 | INCLUDE
 | INTERFACE
 | MODULE
+| SUBMODULE
 | USE
 | STRING              { free ($1); }
 | GARBAGE
 | ASSIGNMENT_OP
+| COLON
 | DCOLON
+| LPAREN
+| RPAREN
 | COMMA
 | UNTERMINATED_STRING
 ;
