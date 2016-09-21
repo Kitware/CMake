@@ -140,10 +140,10 @@ std::string cmGlobalNinjaGenerator::EncodeDepfileSpace(const std::string& path)
 
 void cmGlobalNinjaGenerator::WriteBuild(
   std::ostream& os, const std::string& comment, const std::string& rule,
-  const cmNinjaDeps& outputs, const cmNinjaDeps& explicitDeps,
-  const cmNinjaDeps& implicitDeps, const cmNinjaDeps& orderOnlyDeps,
-  const cmNinjaVars& variables, const std::string& rspfile, int cmdLineLimit,
-  bool* usedResponseFile)
+  const cmNinjaDeps& outputs, const cmNinjaDeps& implicitOuts,
+  const cmNinjaDeps& explicitDeps, const cmNinjaDeps& implicitDeps,
+  const cmNinjaDeps& orderOnlyDeps, const cmNinjaVars& variables,
+  const std::string& rspfile, int cmdLineLimit, bool* usedResponseFile)
 {
   // Make sure there is a rule.
   if (rule.empty()) {
@@ -204,6 +204,13 @@ void cmGlobalNinjaGenerator::WriteBuild(
       this->CombinedBuildOutputs.insert(EncodePath(*i));
     }
   }
+  if (!implicitOuts.empty()) {
+    build += " |";
+    for (cmNinjaDeps::const_iterator i = implicitOuts.begin();
+         i != implicitOuts.end(); ++i) {
+      build += " " + EncodeIdent(EncodePath(*i), os);
+    }
+  }
   build += ":";
 
   // Write the rule.
@@ -244,7 +251,8 @@ void cmGlobalNinjaGenerator::WritePhonyBuild(
   const cmNinjaDeps& explicitDeps, const cmNinjaDeps& implicitDeps,
   const cmNinjaDeps& orderOnlyDeps, const cmNinjaVars& variables)
 {
-  this->WriteBuild(os, comment, "phony", outputs, explicitDeps, implicitDeps,
+  this->WriteBuild(os, comment, "phony", outputs,
+                   /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps,
                    orderOnlyDeps, variables);
 }
 
@@ -288,7 +296,8 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
     vars["depfile"] = depfile;
   }
   this->WriteBuild(*this->BuildFileStream, comment, "CUSTOM_COMMAND", outputs,
-                   deps, cmNinjaDeps(), orderOnly, vars);
+                   /*implicitOuts=*/cmNinjaDeps(), deps, cmNinjaDeps(),
+                   orderOnly, vars);
 
   if (this->ComputingUnknownDependencies) {
     // we need to track every dependency that comes in, since we are trying
@@ -330,7 +339,8 @@ void cmGlobalNinjaGenerator::WriteMacOSXContentBuild(const std::string& input,
   cmNinjaVars vars;
 
   this->WriteBuild(*this->BuildFileStream, "", "COPY_OSX_CONTENT", outputs,
-                   deps, cmNinjaDeps(), cmNinjaDeps(), cmNinjaVars());
+                   /*implicitOuts=*/cmNinjaDeps(), deps, cmNinjaDeps(),
+                   cmNinjaDeps(), cmNinjaVars());
 }
 
 void cmGlobalNinjaGenerator::WriteRule(
@@ -1271,6 +1281,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   this->WriteBuild(os, "Re-run CMake if any of its inputs changed.",
                    "RERUN_CMAKE",
                    /*outputs=*/cmNinjaDeps(1, ninjaBuildFile),
+                   /*implicitOuts=*/cmNinjaDeps(),
                    /*explicitDeps=*/cmNinjaDeps(), implicitDeps,
                    /*orderOnlyDeps=*/cmNinjaDeps(), variables);
 
@@ -1295,6 +1306,13 @@ bool cmGlobalNinjaGenerator::SupportsConsolePool() const
     RequiredNinjaVersionForConsolePool().c_str());
 }
 
+bool cmGlobalNinjaGenerator::SupportsImplicitOuts() const
+{
+  return !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    this->RequiredNinjaVersionForImplicitOuts().c_str());
+}
+
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
 {
   WriteRule(*this->RulesFileStream, "CLEAN", ninjaCmd() + " -t clean",
@@ -1308,6 +1326,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
             /*generator=*/false);
   WriteBuild(os, "Clean all the built files.", "CLEAN",
              /*outputs=*/cmNinjaDeps(1, this->NinjaOutputPath("clean")),
+             /*implicitOuts=*/cmNinjaDeps(),
              /*explicitDeps=*/cmNinjaDeps(),
              /*implicitDeps=*/cmNinjaDeps(),
              /*orderOnlyDeps=*/cmNinjaDeps(),
@@ -1327,6 +1346,7 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
             /*generator=*/false);
   WriteBuild(os, "Print all primary targets available.", "HELP",
              /*outputs=*/cmNinjaDeps(1, this->NinjaOutputPath("help")),
+             /*implicitOuts=*/cmNinjaDeps(),
              /*explicitDeps=*/cmNinjaDeps(),
              /*implicitDeps=*/cmNinjaDeps(),
              /*orderOnlyDeps=*/cmNinjaDeps(),

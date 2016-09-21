@@ -106,6 +106,7 @@ public:
    */
   void WriteBuild(std::ostream& os, const std::string& comment,
                   const std::string& rule, const cmNinjaDeps& outputs,
+                  const cmNinjaDeps& implicitOuts,
                   const cmNinjaDeps& explicitDeps,
                   const cmNinjaDeps& implicitDeps,
                   const cmNinjaDeps& orderOnlyDeps,
@@ -338,7 +339,9 @@ public:
   // Ninja generator uses 'deps' and 'msvc_deps_prefix' introduced in 1.3
   static std::string RequiredNinjaVersion() { return "1.3"; }
   static std::string RequiredNinjaVersionForConsolePool() { return "1.5"; }
+  static std::string RequiredNinjaVersionForImplicitOuts() { return "1.7"; }
   bool SupportsConsolePool() const;
+  bool SupportsImplicitOuts() const;
 
   std::string NinjaOutputPath(std::string const& path);
   bool HasOutputPathPrefix() const { return !this->OutputPathPrefix.empty(); }
