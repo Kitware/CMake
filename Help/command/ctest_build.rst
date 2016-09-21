@@ -13,6 +13,7 @@ Perform the :ref:`CTest Build Step` as a :ref:`Dashboard Client`.
               [NUMBER_ERRORS <num-err-var>]
               [NUMBER_WARNINGS <num-warn-var>]
               [RETURN_VALUE <result-var>]
+              [CAPTURE_CMAKE_ERROR <result-var>]
               )
 
 Build the project and store results in ``Build.xml``
@@ -65,6 +66,10 @@ The options are:
 
 ``RETURN_VALUE <result-var>``
   Store the return value of the native build tool in the given variable.
+
+``CAPTURE_CMAKE_ERROR <result-var>``
+  Store in the ``<result-var>`` variable -1 if there are any errors running
+  the command and prevent ctest from returning non-zero if an error occurs.
 
 ``QUIET``
   Suppress any CTest-specific non-error output that would have been

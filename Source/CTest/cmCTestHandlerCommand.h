@@ -47,6 +47,7 @@ public:
   {
     ct_NONE,
     ct_RETURN_VALUE,
+    ct_CAPTURE_CMAKE_ERROR,
     ct_BUILD,
     ct_SOURCE,
     ct_SUBMIT_INDEX,

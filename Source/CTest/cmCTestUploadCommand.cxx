@@ -45,11 +45,19 @@ bool cmCTestUploadCommand::CheckArgumentKeyword(std::string const& arg)
     this->Quiet = true;
     return true;
   }
+  if (arg == "CAPTURE_CMAKE_ERROR") {
+    this->ArgumentDoing = ArgumentDoingCaptureCMakeError;
+    return true;
+  }
   return false;
 }
 
 bool cmCTestUploadCommand::CheckArgumentValue(std::string const& arg)
 {
+  if (this->ArgumentDoing == ArgumentDoingCaptureCMakeError) {
+    this->Values[ct_CAPTURE_CMAKE_ERROR] = arg.c_str();
+    return true;
+  }
   if (this->ArgumentDoing == ArgumentDoingFiles) {
     if (cmSystemTools::FileExists(arg.c_str())) {
       this->Files.insert(arg);

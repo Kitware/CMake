@@ -6,7 +6,8 @@ Perform the :ref:`CTest Configure Step` as a :ref:`Dashboard Client`.
 ::
 
   ctest_configure([BUILD <build-dir>] [SOURCE <source-dir>] [APPEND]
-                  [OPTIONS <options>] [RETURN_VALUE <result-var>] [QUIET])
+                  [OPTIONS <options>] [RETURN_VALUE <result-var>] [QUIET]
+                  [CAPTURE_CMAKE_ERROR <result-var>])
 
 Configure the project build tree and record results in ``Configure.xml``
 for submission with the :command:`ctest_submit` command.
@@ -32,6 +33,10 @@ The options are:
 ``RETURN_VALUE <result-var>``
   Store in the ``<result-var>`` variable the return value of the native
   configuration tool.
+
+``CAPTURE_CMAKE_ERROR <result-var>``
+  Store in the ``<result-var>`` variable -1 if there are any errors running
+  the command and prevent ctest from returning non-zero if an error occurs.
 
 ``QUIET``
   Suppress any CTest-specific non-error messages that would have
