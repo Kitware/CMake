@@ -367,6 +367,7 @@ private:
   void CheckNinjaFeatures();
   bool CheckLanguages(std::vector<std::string> const& languages,
                       cmMakefile* mf) const CM_OVERRIDE;
+  bool CheckFortran(cmMakefile* mf) const;
 
   void OpenBuildFileStream();
   void CloseBuildFileStream();
