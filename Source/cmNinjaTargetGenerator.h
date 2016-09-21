@@ -70,6 +70,8 @@ protected:
   cmMakefile* GetMakefile() const { return this->Makefile; }
 
   std::string LanguageCompilerRule(const std::string& lang) const;
+  std::string LanguagePreprocessRule(std::string const& lang) const;
+  bool NeedExplicitPreprocessing(std::string const& lang) const;
 
   std::string OrderDependsTargetForTarget();
 
@@ -106,6 +108,9 @@ protected:
 
   /// @return the object file path for the given @a source.
   std::string GetObjectFilePath(cmSourceFile const* source) const;
+
+  /// @return the preprocessed source file path for the given @a source.
+  std::string GetPreprocessedFilePath(cmSourceFile const* source) const;
 
   /// @return the file path where the target named @a name is generated.
   std::string GetTargetFilePath(const std::string& name) const;
