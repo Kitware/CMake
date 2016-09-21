@@ -444,6 +444,7 @@ private:
   std::string NinjaVersion;
   bool NinjaSupportsConsolePool;
   bool NinjaSupportsImplicitOuts;
+  unsigned long NinjaSupportsDyndeps;
 
 private:
   void InitOutputPathPrefix();

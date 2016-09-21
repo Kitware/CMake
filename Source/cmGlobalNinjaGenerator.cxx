@@ -475,6 +475,7 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
   , PolicyCMP0058(cmPolicies::WARN)
   , NinjaSupportsConsolePool(false)
   , NinjaSupportsImplicitOuts(false)
+  , NinjaSupportsDyndeps(0)
 {
 #ifdef _WIN32
   cm->GetState()->SetWindowsShell(true);
@@ -572,6 +573,16 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
   this->NinjaSupportsImplicitOuts = !cmSystemTools::VersionCompare(
     cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
     this->RequiredNinjaVersionForImplicitOuts().c_str());
+  {
+    // Our ninja branch adds ".dyndep-#" to its version number,
+    // where '#' is a feature-specific version number.  Extract it.
+    static std::string const k_DYNDEP_ = ".dyndep-";
+    std::string::size_type pos = this->NinjaVersion.find(k_DYNDEP_);
+    if (pos != std::string::npos) {
+      const char* fv = this->NinjaVersion.c_str() + pos + k_DYNDEP_.size();
+      cmSystemTools::StringToULong(fv, &this->NinjaSupportsDyndeps);
+    }
+  }
 }
 
 bool cmGlobalNinjaGenerator::CheckLanguages(
