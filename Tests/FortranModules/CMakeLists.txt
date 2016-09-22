@@ -5,6 +5,33 @@ if(NOT DEFINED CMake_TEST_NESTED_MAKE_PROGRAM AND NOT CMAKE_GENERATOR MATCHES "V
   set(CMake_TEST_NESTED_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM}")
 endif()
 
+if("x${CMake_TEST_Fortran_SUBMODULES}" STREQUAL "x"
+    AND NOT CMAKE_VERSION VERSION_LESS 3.6.20160923 # for CheckFortranSourceCompiles SRC_EXT
+    )
+  include(CheckFortranSourceCompiles)
+  CHECK_Fortran_SOURCE_COMPILES([[
+module parent
+  interface
+    module function id(x)
+       real, intent(in) :: x
+       real :: id
+    end function id
+  end interface
+end module parent
+submodule ( parent ) child
+contains
+  module procedure id
+    f = x
+  end procedure id
+end submodule child
+program main
+end program
+]] HAVE_SUBMODULES SRC_EXT F90)
+  set(CMake_TEST_Fortran_SUBMODULES ${HAVE_SUBMODULES})
+elseif(CMake_TEST_Fortran_SUBMODULES)
+  message(STATUS "Enabling Fortran submodule tests by explicit request.")
+endif()
+
 add_executable(test_module
   test_module_main.f90
   test_module_implementation.f90
@@ -76,3 +103,7 @@ endif()
 add_subdirectory(Library)
 add_subdirectory(Subdir)
 add_subdirectory(Executable)
+
+if(CMake_TEST_Fortran_SUBMODULES)
+  add_subdirectory(Submodules)
+endif()
