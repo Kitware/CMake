@@ -60,14 +60,6 @@
 #  * Mandatory : YES
 #  * Default   : :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`
 #
-# .. variable:: CPACK_RPM_DEBUGINFO_PACKAGE
-#               CPACK_RPM_<component>_DEBUGINFO_PACKAGE
-#
-#  Option to additionally generate debuginfo RPM package(s).
-#
-#  * Mandatory : NO
-#  * Default   : OFF
-#
 # .. variable:: CPACK_RPM_PACKAGE_NAME
 #               CPACK_RPM_<component>_PACKAGE_NAME
 #
@@ -706,6 +698,96 @@
 #   symbolic link(s) is also on a relocatable path, relocating it during
 #   package installation may cause initial symbolic link to point to an
 #   invalid location.
+#
+# Packaging of debug information
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# Debuginfo packages contain debug symbols and sources for debugging packaged
+# binaries.
+#
+# .. note::
+#
+#  Currently multiple debuginfo packages are generated if component based
+#  packaging is used - one debuginfo package per component. This duplicates
+#  sources if multiple binaries are using them. This is a side effect of
+#  how CPackRPM currently generates component packages and will be addressed
+#  in later versions of the generator.
+#
+# Debuginfo RPM packaging has it's own set of variables:
+#
+# .. variable:: CPACK_RPM_DEBUGINFO_PACKAGE
+#               CPACK_RPM_<component>_DEBUGINFO_PACKAGE
+#
+#  Enable generation of debuginfo RPM package(s).
+#
+#  * Mandatory : NO
+#  * Default   : OFF
+#
+# .. note::
+#
+#  Binaries must contain debug symbols before packaging so use either ``Debug``
+#  or ``RelWithDebInfo`` for :variable:`CMAKE_BUILD_TYPE` variable value.
+#
+# .. note::
+#
+#  Packages generated from packages without binary files, with binary files but
+#  without execute permissions or without debug symbols will be empty.
+#
+# .. variable:: CPACK_BUILD_SOURCE_DIRS
+#
+#  Provides locations of root directories of source files from which binaries
+#  were built.
+#
+#  * Mandatory : YES if :variable:`CPACK_RPM_DEBUGINFO_PACKAGE` is set
+#  * Default   : -
+#
+# .. note::
+#
+#  For CMake project :variable:`CPACK_BUILD_SOURCE_DIRS` is set by default to
+#  point to :variable:`CMAKE_SOURCE_DIR` and :variable:`CMAKE_BINARY_DIR` paths.
+#
+# .. note::
+#
+#  Sources with path prefixes that do not fall under any location provided with
+#  :variable:`CPACK_BUILD_SOURCE_DIRS` will not be present in debuginfo package.
+#
+# .. variable:: CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX
+#               CPACK_RPM_<component>_BUILD_SOURCE_DIRS_PREFIX
+#
+#  Prefix of location where sources will be placed during package installation.
+#
+#  * Mandatory : YES if :variable:`CPACK_RPM_DEBUGINFO_PACKAGE` is set
+#  * Default   : "/usr/src/debug/<CPACK_PACKAGE_FILE_NAME>" and
+#                for component packaging "/usr/src/debug/<CPACK_PACKAGE_FILE_NAME>-<component>"
+#
+# .. note::
+#
+#  Each source path prefix is additionaly suffixed by ``src_<index>`` where
+#  index is index of the path used from :variable:`CPACK_BUILD_SOURCE_DIRS`
+#  variable. This produces ``<CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX>/src_<index>``
+#  replacement path.
+#  Limitation is that replaced path part must be shorter or of equal
+#  length than the length of its replacement. If that is not the case either
+#  :variable:`CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX` variable has to be set to
+#  a shorter path or source directories must be placed on a longer path.
+#
+# .. variable:: CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS
+#
+#  Directories containing sources that should be excluded from debuginfo packages.
+#
+#  * Mandatory : NO
+#  * Default   : "/usr /usr/src /usr/src/debug"
+#
+#  Listed paths are owned by other RPM packages and should therefore not be
+#  deleted on debuginfo package uninstallation.
+#
+# .. variable:: CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS_ADDITION
+#
+#  Paths that should be appended to :variable:`CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS`
+#  for exclusion.
+#
+#  * Mandatory : NO
+#  * Default   : -
 #
 # Packaging of sources (SRPM)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^
