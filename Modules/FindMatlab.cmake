@@ -18,6 +18,7 @@
 # * ``MX_LIBRARY``, ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the MX,
 #   ENG and MAT libraries of Matlab
 # * ``MAIN_PROGRAM`` the Matlab binary program.
+# * ``MEX_COMPILER`` the MEX compiler.
 #
 # .. note::
 #
@@ -835,7 +836,7 @@ endfunction()
 #   ``NAME``
 #     name of the target.
 #   ``SRC``
-#     list of tje source files.
+#     list of source files.
 #   ``LINK_TO``
 #     a list of additional link dependencies.  The target links to ``libmex``
 #     by default. If ``Matlab_MX_LIBRARY`` is defined, it also
