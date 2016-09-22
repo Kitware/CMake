@@ -139,6 +139,10 @@ public:
     std::vector<std::string> Environment;
     std::vector<std::string> Labels;
     std::set<std::string> LockedResources;
+    std::set<std::string> FixturesSetup;
+    std::set<std::string> FixturesCleanup;
+    std::set<std::string> FixturesRequired;
+    std::set<std::string> RequireSuccessDepends;
   };
 
   struct cmCTestTestResult
@@ -250,6 +254,11 @@ private:
   // compute the lists of tests that will actually run
   // based on LastTestFailed.log
   void ComputeTestListForRerunFailed();
+
+  // add required setup/cleanup tests not already in the
+  // list of tests to be run and update dependencies between
+  // tests to account for fixture setup/cleanup
+  void UpdateForFixtures(ListOfTests& tests) const;
 
   void UpdateMaxTestNameWidth();
 

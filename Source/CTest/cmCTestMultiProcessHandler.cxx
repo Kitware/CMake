@@ -137,6 +137,16 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   testRun->SetIndex(test);
   testRun->SetTestProperties(this->Properties[test]);
 
+  // Find any failed dependencies for this test. We assume the more common
+  // scenario has no failed tests, so make it the outer loop.
+  for (std::vector<std::string>::const_iterator it = this->Failed->begin();
+       it != this->Failed->end(); ++it) {
+    if (this->Properties[test]->RequireSuccessDepends.find(*it) !=
+        this->Properties[test]->RequireSuccessDepends.end()) {
+      testRun->AddFailedDependency(*it);
+    }
+  }
+
   std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(this->Properties[test]->Directory);
 
