@@ -19,6 +19,7 @@
 #   ENG and MAT libraries of Matlab
 # * ``MAIN_PROGRAM`` the Matlab binary program.
 # * ``MEX_COMPILER`` the MEX compiler.
+# * ``SIMULINK`` the Simulink environment.
 #
 # .. note::
 #
@@ -1464,6 +1465,21 @@ if(_matlab_find_mat GREATER -1)
 endif()
 unset(_matlab_find_mat)
 
+# Component Simulink
+list(FIND Matlab_FIND_COMPONENTS SIMULINK _matlab_find_simulink)
+if(_matlab_find_simulink GREATER -1)
+  find_path(
+    Matlab_SIMULINK_INCLUDE_DIR
+    simstruc.h
+    PATHS "${Matlab_ROOT_DIR}/simulink/include"
+    NO_DEFAULT_PATH
+    )
+  if(Matlab_SIMULINK_INCLUDE_DIR)
+    set(Matlab_SIMULINK_FOUND TRUE)
+    list(APPEND Matlab_INCLUDE_DIRS "${Matlab_SIMULINK_INCLUDE_DIR}")
+  endif()
+endif()
+unset(_matlab_find_simulink)
 
 unset(_matlab_lib_dir_for_search)
 
