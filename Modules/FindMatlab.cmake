@@ -821,12 +821,13 @@ endfunction()
 #   order to produce a MEX file. The final name of the produced output may be
 #   specified, as well as additional link libraries, and a documentation entry
 #   for the MEX file. Remaining arguments of the call are passed to the
-#   :command:`add_library` command.
+#   :command:`add_library` or :command:`add_executable` command.
 #
 #   ::
 #
 #      matlab_add_mex(
 #          NAME <name>
+#          [EXECUTABLE | MODULE | SHARED]
 #          SRC src1 [src2 ...]
 #          [OUTPUT_NAME output_name]
 #          [DOCUMENTATION file.txt]
@@ -853,6 +854,10 @@ endfunction()
 #     mex file, and with extension `.m`. In that case, typing ``help <name>``
 #     in Matlab prints the documentation contained in this file.
 #
+#   ``MODULE`` or ``SHARED`` may be given to specify the type of library to be
+#     created. ``EXECUTABLE`` may be given to create an executable instead of
+#     a library. If no type is given explicitly, the type is ``SHARED``.
+#
 #   The documentation file is not processed and should be in the following
 #   format:
 #
@@ -861,7 +866,7 @@ endfunction()
 #     % This is the documentation
 #     function ret = mex_target_output_name(input1)
 #
-function(matlab_add_mex )
+function(matlab_add_mex)
 
   if(NOT WIN32)
     # we do not need all this on Windows
@@ -873,6 +878,7 @@ function(matlab_add_mex )
 
   endif()
 
+  set(options EXECUTABLE MODULE SHARED)
   set(oneValueArgs NAME DOCUMENTATION OUTPUT_NAME)
   set(multiValueArgs LINK_TO SRC)
 
@@ -887,11 +893,25 @@ function(matlab_add_mex )
     set(${prefix}_OUTPUT_NAME ${${prefix}_NAME})
   endif()
 
-  add_library(${${prefix}_NAME}
-    SHARED
+  if(${prefix}_EXECUTABLE)
+    add_executable(${${prefix}_NAME}
       ${${prefix}_SRC}
       ${${prefix}_DOCUMENTATION}
       ${${prefix}_UNPARSED_ARGUMENTS})
+  else()
+    if(${prefix}_MODULE)
+      set(type MODULE)
+    else()
+      set(type SHARED)
+    endif()
+
+    add_library(${${prefix}_NAME}
+      ${type}
+      ${${prefix}_SRC}
+      ${${prefix}_DOCUMENTATION}
+      ${${prefix}_UNPARSED_ARGUMENTS})
+  endif()
+
   target_include_directories(${${prefix}_NAME} PRIVATE ${Matlab_INCLUDE_DIRS})
 
   if(DEFINED Matlab_MX_LIBRARY)
