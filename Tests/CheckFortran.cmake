@@ -22,6 +22,7 @@ project(CheckFortran Fortran)
 file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
   \"set(CMAKE_Fortran_COMPILER \\\"\${CMAKE_Fortran_COMPILER}\\\")\\n\"
   \"set(CMAKE_Fortran_FLAGS \\\"\${CMAKE_Fortran_FLAGS}\\\")\\n\"
+  \"set(CMAKE_Fortran_COMPILER_SUPPORTS_F90 \\\"\${CMAKE_Fortran_COMPILER_SUPPORTS_F90}\\\")\\n\"
   )
 ")
   execute_process(
@@ -47,4 +48,6 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
   mark_as_advanced(CMAKE_Fortran_COMPILER)
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}" CACHE STRING "Fortran flags")
   mark_as_advanced(CMAKE_Fortran_FLAGS)
+  set(CMAKE_Fortran_COMPILER_SUPPORTS_F90 "${CMAKE_Fortran_COMPILER_SUPPORTS_F90}" CACHE BOOL "Fortran compiler supports F90")
+  mark_as_advanced(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 endif()
