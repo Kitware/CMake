@@ -14,6 +14,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
+#include "cmFortranParser.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGeneratorTarget.h"
@@ -27,6 +28,9 @@
 #include "cmTargetDepend.h"
 #include "cmVersion.h"
 #include "cmake.h"
+
+#include "cm_jsoncpp_reader.h"
+#include "cm_jsoncpp_writer.h"
 
 #include <algorithm>
 #include <ctype.h>
@@ -1486,3 +1490,124 @@ Compilation of source files within a target is split into the following steps:
    ``mod1.mod`` will always be up to date before ``src2.f90.o`` is built
    (because the latter consumes the module).
 */
+
+int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
+                              std::vector<std::string>::const_iterator argEnd)
+{
+  std::string arg_tdi;
+  std::string arg_pp;
+  std::string arg_dep;
+  std::string arg_obj;
+  std::string arg_ddi;
+  for (std::vector<std::string>::const_iterator a = argBeg; a != argEnd; ++a) {
+    std::string const& arg = *a;
+    if (cmHasLiteralPrefix(arg, "--tdi=")) {
+      arg_tdi = arg.substr(6);
+    } else if (cmHasLiteralPrefix(arg, "--pp=")) {
+      arg_pp = arg.substr(5);
+    } else if (cmHasLiteralPrefix(arg, "--dep=")) {
+      arg_dep = arg.substr(6);
+    } else if (cmHasLiteralPrefix(arg, "--obj=")) {
+      arg_obj = arg.substr(6);
+    } else if (cmHasLiteralPrefix(arg, "--ddi=")) {
+      arg_ddi = arg.substr(6);
+    } else {
+      cmSystemTools::Error("-E cmake_ninja_depends unknown argument: ",
+                           arg.c_str());
+      return 1;
+    }
+  }
+  if (arg_tdi.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_depends requires value for --tdi=");
+    return 1;
+  }
+  if (arg_pp.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_depends requires value for --pp=");
+    return 1;
+  }
+  if (arg_dep.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_depends requires value for --dep=");
+    return 1;
+  }
+  if (arg_obj.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_depends requires value for --obj=");
+    return 1;
+  }
+  if (arg_ddi.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_depends requires value for --ddi=");
+    return 1;
+  }
+
+  std::vector<std::string> includes;
+  {
+    Json::Value tdio;
+    Json::Value const& tdi = tdio;
+    {
+      cmsys::ifstream tdif(arg_tdi.c_str(), std::ios::in | std::ios::binary);
+      Json::Reader reader;
+      if (!reader.parse(tdif, tdio, false)) {
+        cmSystemTools::Error("-E cmake_ninja_depends failed to parse ",
+                             arg_tdi.c_str(),
+                             reader.getFormattedErrorMessages().c_str());
+        return 1;
+      }
+    }
+
+    Json::Value const& tdi_include_dirs = tdi["include-dirs"];
+    if (tdi_include_dirs.isArray()) {
+      for (Json::Value::const_iterator i = tdi_include_dirs.begin();
+           i != tdi_include_dirs.end(); ++i) {
+        includes.push_back(i->asString());
+      }
+    }
+  }
+
+  cmFortranSourceInfo info;
+  std::set<std::string> defines;
+  cmFortranParser parser(includes, defines, info);
+  if (!cmFortranParser_FilePush(&parser, arg_pp.c_str())) {
+    cmSystemTools::Error("-E cmake_ninja_depends failed to open ",
+                         arg_pp.c_str());
+    return 1;
+  }
+  if (cmFortran_yyparse(parser.Scanner) != 0) {
+    // Failed to parse the file.
+    return 1;
+  }
+
+  {
+    cmGeneratedFileStream depfile(arg_dep.c_str());
+    depfile << cmSystemTools::ConvertToUnixOutputPath(arg_pp) << ":";
+    for (std::set<std::string>::iterator i = info.Includes.begin();
+         i != info.Includes.end(); ++i) {
+      depfile << " \\\n " << cmSystemTools::ConvertToUnixOutputPath(*i);
+    }
+    depfile << "\n";
+  }
+
+  Json::Value ddi(Json::objectValue);
+  ddi["object"] = arg_obj;
+
+  Json::Value& ddi_provides = ddi["provides"] = Json::arrayValue;
+  for (std::set<std::string>::iterator i = info.Provides.begin();
+       i != info.Provides.end(); ++i) {
+    ddi_provides.append(*i);
+  }
+  Json::Value& ddi_requires = ddi["requires"] = Json::arrayValue;
+  for (std::set<std::string>::iterator i = info.Requires.begin();
+       i != info.Requires.end(); ++i) {
+    // Require modules not provided in the same source.
+    if (!info.Provides.count(*i)) {
+      ddi_requires.append(*i);
+    }
+  }
+
+  cmGeneratedFileStream ddif(arg_ddi.c_str());
+  ddif << ddi;
+  if (!ddif) {
+    cmSystemTools::Error("-E cmake_ninja_depends failed to write ",
+                         arg_ddi.c_str());
+    return 1;
+  }
+  return 0;
+}
