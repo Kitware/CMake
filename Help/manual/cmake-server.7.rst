@@ -49,12 +49,16 @@ Operation
 Start :manual:`cmake(1)` in the server command mode, supplying the path to
 the build directory to process::
 
-  cmake -E server
+  cmake -E server (--debug|--pipe <NAMED_PIPE>)
 
-The server will start up and reply with an hello message on stdout::
+The server will communicate using stdin/stdout (with the ``--debug`` parameter)
+or using a named pipe (with the ``--pipe <NAMED_PIPE>`` parameter).
+
+When connecting to the server (via named pipe or by starting it in ``--debug``
+mode), the server will reply with a hello message::
 
   [== CMake Server ==[
-  {"supportedProtocolVersions":[{"major":0,"minor":1}],"type":"hello"}
+  {"supportedProtocolVersions":[{"major":1,"minor":0}],"type":"hello"}
   ]== CMake Server ==]
 
 Messages sent to and from the process are wrapped in magic strings::
@@ -65,7 +69,8 @@ Messages sent to and from the process are wrapped in magic strings::
   }
   ]== CMake Server ==]
 
-The server is now ready to accept further requests via stdin.
+The server is now ready to accept further requests via the named pipe
+or stdin.
 
 
 Debugging

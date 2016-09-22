@@ -789,6 +789,7 @@ target_link_libraries(cmake CMakeLib)
 if(CMake_HAVE_SERVER_MODE)
   add_library(CMakeServerLib
     cmServer.cxx cmServer.h
+    cmServerConnection.cxx cmServerConnection.h
     cmServerProtocol.cxx cmServerProtocol.h
     )
   target_link_libraries(CMakeServerLib CMakeLib)

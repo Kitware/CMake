@@ -25,6 +25,7 @@
 
 #if defined(HAVE_SERVER_MODE) && HAVE_SERVER_MODE
 #include "cmServer.h"
+#include "cmServerConnection.h"
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -913,32 +914,49 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
       return 0;
     } else if (args[1] == "server") {
-      if (args.size() > 3) {
-        cmSystemTools::Error("Too many arguments to start server mode");
-        return 1;
-      }
+      const std::string pipePrefix = "--pipe=";
       bool supportExperimental = false;
-      if (args.size() == 3) {
-        if (args[2] == "--experimental") {
+      bool isDebug = false;
+      std::string pipe;
+
+      for (size_t i = 2; i < args.size(); ++i) {
+        const std::string& a = args[i];
+
+        if (a == "--experimental") {
           supportExperimental = true;
+        } else if (a == "--debug") {
+          pipe.clear();
+          isDebug = true;
+        } else if (a.substr(0, pipePrefix.size()) == pipePrefix) {
+          isDebug = false;
+          pipe = a.substr(pipePrefix.size());
+          if (pipe.empty()) {
+            cmSystemTools::Error("No pipe given after --pipe=");
+            return 2;
+          }
         } else {
           cmSystemTools::Error("Unknown argument for server mode");
           return 1;
         }
       }
 #if defined(HAVE_SERVER_MODE) && HAVE_SERVER_MODE
-      cmServer server(supportExperimental);
-      if (server.Serve()) {
+      cmServerConnection* conn;
+      if (isDebug) {
+        conn = new cmServerStdIoConnection;
+      } else {
+        conn = new cmServerPipeConnection(pipe);
+      }
+      cmServer server(conn, supportExperimental);
+      std::string errorMessage;
+      if (server.Serve(&errorMessage)) {
         return 0;
       } else {
-        cmSystemTools::Error(
-          "CMake server could not find any supported protocol. "
-          "Try with \"--experimental\" to enable "
-          "experimental support.");
+        cmSystemTools::Error(errorMessage.c_str());
         return 1;
       }
 #else
       static_cast<void>(supportExperimental);
+      static_cast<void>(isDebug);
       cmSystemTools::Error("CMake was not built with server mode enabled");
       return 1;
 #endif
