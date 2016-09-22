@@ -27,6 +27,7 @@
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmVersion.h"
+#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 #include "cm_jsoncpp_reader.h"
@@ -1607,6 +1608,225 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
   if (!ddif) {
     cmSystemTools::Error("-E cmake_ninja_depends failed to write ",
                          arg_ddi.c_str());
+    return 1;
+  }
+  return 0;
+}
+
+struct cmFortranObjectInfo
+{
+  std::string Object;
+  std::vector<std::string> Provides;
+  std::vector<std::string> Requires;
+};
+
+bool cmGlobalNinjaGenerator::WriteDyndepFile(
+  std::string const& dir_top_src, std::string const& dir_top_bld,
+  std::string const& dir_cur_src, std::string const& dir_cur_bld,
+  std::string const& arg_dd, std::vector<std::string> const& arg_ddis,
+  std::string const& module_dir,
+  std::vector<std::string> const& linked_target_dirs)
+{
+  // Setup path conversions.
+  {
+    cmState::Snapshot snapshot =
+      this->GetCMakeInstance()->GetCurrentSnapshot();
+    snapshot.GetDirectory().SetCurrentSource(dir_cur_src);
+    snapshot.GetDirectory().SetCurrentBinary(dir_cur_bld);
+    snapshot.GetDirectory().SetRelativePathTopSource(dir_top_src.c_str());
+    snapshot.GetDirectory().SetRelativePathTopBinary(dir_top_bld.c_str());
+    CM_AUTO_PTR<cmMakefile> mfd(new cmMakefile(this, snapshot));
+    CM_AUTO_PTR<cmLocalNinjaGenerator> lgd(static_cast<cmLocalNinjaGenerator*>(
+      this->CreateLocalGenerator(mfd.get())));
+    this->Makefiles.push_back(mfd.release());
+    this->LocalGenerators.push_back(lgd.release());
+  }
+
+  std::vector<cmFortranObjectInfo> objects;
+  for (std::vector<std::string>::const_iterator ddii = arg_ddis.begin();
+       ddii != arg_ddis.end(); ++ddii) {
+    // Load the ddi file and compute the module file paths it provides.
+    Json::Value ddio;
+    Json::Value const& ddi = ddio;
+    cmsys::ifstream ddif(ddii->c_str(), std::ios::in | std::ios::binary);
+    Json::Reader reader;
+    if (!reader.parse(ddif, ddio, false)) {
+      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse ",
+                           ddii->c_str(),
+                           reader.getFormattedErrorMessages().c_str());
+      return false;
+    }
+
+    cmFortranObjectInfo info;
+    info.Object = ddi["object"].asString();
+    Json::Value const& ddi_provides = ddi["provides"];
+    if (ddi_provides.isArray()) {
+      for (Json::Value::const_iterator i = ddi_provides.begin();
+           i != ddi_provides.end(); ++i) {
+        info.Provides.push_back(i->asString());
+      }
+    }
+    Json::Value const& ddi_requires = ddi["requires"];
+    if (ddi_requires.isArray()) {
+      for (Json::Value::const_iterator i = ddi_requires.begin();
+           i != ddi_requires.end(); ++i) {
+        info.Requires.push_back(i->asString());
+      }
+    }
+    objects.push_back(info);
+  }
+
+  // Map from module name to module file path, if known.
+  std::map<std::string, std::string> mod_files;
+
+  // Populate the module map with those provided by linked targets first.
+  for (std::vector<std::string>::const_iterator di =
+         linked_target_dirs.begin();
+       di != linked_target_dirs.end(); ++di) {
+    std::string const ltmn = *di + "/FortranModules.json";
+    Json::Value ltm;
+    cmsys::ifstream ltmf(ltmn.c_str(), std::ios::in | std::ios::binary);
+    Json::Reader reader;
+    if (ltmf && !reader.parse(ltmf, ltm, false)) {
+      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse ",
+                           di->c_str(),
+                           reader.getFormattedErrorMessages().c_str());
+      return false;
+    }
+    if (ltm.isObject()) {
+      for (Json::Value::iterator i = ltm.begin(); i != ltm.end(); ++i) {
+        mod_files[i.key().asString()] = i->asString();
+      }
+    }
+  }
+
+  // Extend the module map with those provided by this target.
+  // We do this after loading the modules provided by linked targets
+  // in case we have one of the same name that must be preferred.
+  Json::Value tm = Json::objectValue;
+  for (std::vector<cmFortranObjectInfo>::iterator oi = objects.begin();
+       oi != objects.end(); ++oi) {
+    for (std::vector<std::string>::iterator i = oi->Provides.begin();
+         i != oi->Provides.end(); ++i) {
+      std::string const mod = module_dir + *i + ".mod";
+      mod_files[*i] = mod;
+      tm[*i] = mod;
+    }
+  }
+
+  cmGeneratedFileStream ddf(arg_dd.c_str());
+  ddf << "ninja_dyndep_version = 1.0\n";
+
+  for (std::vector<cmFortranObjectInfo>::iterator oi = objects.begin();
+       oi != objects.end(); ++oi) {
+    std::string const ddComment;
+    std::string const ddRule = "dyndep";
+    cmNinjaDeps ddOutputs;
+    cmNinjaDeps ddImplicitOuts;
+    cmNinjaDeps ddExplicitDeps;
+    cmNinjaDeps ddImplicitDeps;
+    cmNinjaDeps ddOrderOnlyDeps;
+    cmNinjaVars ddVars;
+
+    ddOutputs.push_back(oi->Object);
+    for (std::vector<std::string>::iterator i = oi->Provides.begin();
+         i != oi->Provides.end(); ++i) {
+      ddImplicitOuts.push_back(this->ConvertToNinjaPath(mod_files[*i]));
+    }
+    for (std::vector<std::string>::iterator i = oi->Requires.begin();
+         i != oi->Requires.end(); ++i) {
+      std::map<std::string, std::string>::iterator m = mod_files.find(*i);
+      if (m != mod_files.end()) {
+        ddImplicitDeps.push_back(this->ConvertToNinjaPath(m->second));
+      }
+    }
+    if (!oi->Provides.empty()) {
+      ddVars["restat"] = "1";
+    }
+
+    this->WriteBuild(ddf, ddComment, ddRule, ddOutputs, ddImplicitOuts,
+                     ddExplicitDeps, ddImplicitDeps, ddOrderOnlyDeps, ddVars);
+  }
+
+  // Store the map of modules provided by this target in a file for
+  // use by dependents that reference this target in linked-target-dirs.
+  std::string const target_mods_file =
+    cmSystemTools::GetFilenamePath(arg_dd) + "/FortranModules.json";
+  cmGeneratedFileStream tmf(target_mods_file.c_str());
+  tmf << tm;
+
+  return true;
+}
+
+int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
+                             std::vector<std::string>::const_iterator argEnd)
+{
+  std::string arg_dd;
+  std::string arg_tdi;
+  std::vector<std::string> arg_ddis;
+  for (std::vector<std::string>::const_iterator a = argBeg; a != argEnd; ++a) {
+    std::string const& arg = *a;
+    if (cmHasLiteralPrefix(arg, "--tdi=")) {
+      arg_tdi = arg.substr(6);
+    } else if (cmHasLiteralPrefix(arg, "--dd=")) {
+      arg_dd = arg.substr(5);
+    } else if (!cmHasLiteralPrefix(arg, "--") &&
+               cmHasLiteralSuffix(arg, ".ddi")) {
+      arg_ddis.push_back(arg);
+    } else {
+      cmSystemTools::Error("-E cmake_ninja_dyndep unknown argument: ",
+                           arg.c_str());
+      return 1;
+    }
+  }
+  if (arg_tdi.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_dyndep requires value for --tdi=");
+    return 1;
+  }
+  if (arg_dd.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_dyndep requires value for --dd=");
+    return 1;
+  }
+
+  Json::Value tdio;
+  Json::Value const& tdi = tdio;
+  {
+    cmsys::ifstream tdif(arg_tdi.c_str(), std::ios::in | std::ios::binary);
+    Json::Reader reader;
+    if (!reader.parse(tdif, tdio, false)) {
+      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse ",
+                           arg_tdi.c_str(),
+                           reader.getFormattedErrorMessages().c_str());
+      return 1;
+    }
+  }
+
+  std::string const dir_cur_bld = tdi["dir-cur-bld"].asString();
+  std::string const dir_cur_src = tdi["dir-cur-src"].asString();
+  std::string const dir_top_bld = tdi["dir-top-bld"].asString();
+  std::string const dir_top_src = tdi["dir-top-src"].asString();
+  std::string module_dir = tdi["module-dir"].asString();
+  if (!module_dir.empty()) {
+    module_dir += "/";
+  }
+  std::vector<std::string> linked_target_dirs;
+  Json::Value const& tdi_linked_target_dirs = tdi["linked-target-dirs"];
+  if (tdi_linked_target_dirs.isArray()) {
+    for (Json::Value::const_iterator i = tdi_linked_target_dirs.begin();
+         i != tdi_linked_target_dirs.end(); ++i) {
+      linked_target_dirs.push_back(i->asString());
+    }
+  }
+
+  cmake cm;
+  cm.SetHomeDirectory(dir_top_src);
+  cm.SetHomeOutputDirectory(dir_top_bld);
+  CM_AUTO_PTR<cmGlobalNinjaGenerator> ggd(
+    static_cast<cmGlobalNinjaGenerator*>(cm.CreateGlobalGenerator("Ninja")));
+  if (!ggd.get() ||
+      !ggd->WriteDyndepFile(dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld,
+                            arg_dd, arg_ddis, module_dir,
+                            linked_target_dirs)) {
     return 1;
   }
   return 0;
