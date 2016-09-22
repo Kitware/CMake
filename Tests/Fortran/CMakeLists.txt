@@ -67,7 +67,7 @@ function(test_fortran_c_interface_module)
     SYMBOL_NAMESPACE "F_"
     SYMBOLS ${FORTRAN_FUNCTIONS}
     )
-  include_directories("${testf_BINARY_DIR}")
+  include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
   # if the name mangling is not found for a F90 compiler
   # print out some diagnostic stuff for the dashboard
@@ -111,7 +111,7 @@ function(test_fortran_c_interface_module)
   target_link_libraries(maincxx mycxx)
 
   # print out some stuff to help debug on machines via cdash
-  file(READ "${testf_BINARY_DIR}/foo.h" fooh)
+  file(READ "${CMAKE_CURRENT_BINARY_DIR}/foo.h" fooh)
   message("foo.h contents:\n${fooh}")
 endfunction()
 
@@ -167,7 +167,7 @@ if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     in_interface/module.f90)
 
   add_definitions(-DFOO -DBAR=1)
-  include_directories(${testf_SOURCE_DIR}/include)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
   add_executable(test_preprocess test_preprocess.F90 test_preprocess_module.F90)
 
   set(TEST_MODULE_DEPENDS 1)
@@ -183,15 +183,15 @@ if(TEST_MODULE_DEPENDS)
     set(External_CONFIG_TYPE)
     set(External_BUILD_TYPE -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE})
   endif()
-  set(External_SOURCE_DIR "${testf_SOURCE_DIR}/External")
-  set(External_BINARY_DIR "${testf_BINARY_DIR}/External")
-  if("${testf_BINARY_DIR}" MATCHES " ")
+  set(External_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/External")
+  set(External_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/External")
+  if("${CMAKE_CURRENT_BINARY_DIR}" MATCHES " ")
     # Our build tree has a space, so the build tool supports spaces.
     # Test using modules from a path with spaces.
     string(APPEND External_BINARY_DIR " Build")
   endif()
   add_custom_command(
-    OUTPUT ${testf_BINARY_DIR}/ExternalProject
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ExternalProject
     COMMAND ${CMAKE_CTEST_COMMAND}
     ARGS ${External_CONFIG_TYPE}
          --build-and-test
@@ -213,13 +213,13 @@ if(TEST_MODULE_DEPENDS)
                          ${External_BUILD_TYPE}
     VERBATIM
     )
-  add_custom_target(ExternalTarget ALL DEPENDS ${testf_BINARY_DIR}/ExternalProject)
+  add_custom_target(ExternalTarget ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/ExternalProject)
 
   # Test module output directory if available.
   if(CMAKE_Fortran_MODDIR_FLAG)
-    set(Library_MODDIR "${testf_BINARY_DIR}/Library/modules")
+    set(Library_MODDIR "${CMAKE_CURRENT_BINARY_DIR}/Library/modules")
   else()
-    set(Library_MODDIR "${testf_BINARY_DIR}/Library")
+    set(Library_MODDIR "${CMAKE_CURRENT_BINARY_DIR}/Library")
   endif()
 
   add_subdirectory(Library)
