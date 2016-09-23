@@ -2790,21 +2790,20 @@ bool cmCTest::CompressString(std::string& str)
   int ret;
   z_stream strm;
 
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  strm.opaque = Z_NULL;
+  ret = deflateInit(&strm, -1); // default compression level
+  if (ret != Z_OK) {
+    return false;
+  }
+
   unsigned char* in =
     reinterpret_cast<unsigned char*>(const_cast<char*>(str.c_str()));
   // zlib makes the guarantee that this is the maximum output size
   int outSize =
     static_cast<int>(static_cast<double>(str.size()) * 1.001 + 13.0);
   unsigned char* out = new unsigned char[outSize];
-
-  strm.zalloc = Z_NULL;
-  strm.zfree = Z_NULL;
-  strm.opaque = Z_NULL;
-  ret = deflateInit(&strm, -1); // default compression level
-  if (ret != Z_OK) {
-    delete[] out;
-    return false;
-  }
 
   strm.avail_in = static_cast<uInt>(str.size());
   strm.next_in = in;
