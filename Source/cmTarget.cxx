@@ -1164,7 +1164,8 @@ const char* cmTarget::GetProperty(const std::string& prop,
       }
     }
     // Support "<CONFIG>_LOCATION".
-    else if (cmHasLiteralSuffix(prop, "_LOCATION")) {
+    else if (cmHasLiteralSuffix(prop, "_LOCATION") &&
+             !cmHasLiteralPrefix(prop, "XCODE_ATTRIBUTE_")) {
       std::string configName(prop.c_str(), prop.size() - 9);
       if (configName != "IMPORTED") {
         if (!this->HandleLocationPropertyPolicy(context)) {
