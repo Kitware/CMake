@@ -96,6 +96,11 @@
 #  Contact information for questions and comments about the installation
 #  process.
 #
+# .. variable:: CPACK_NSIS_<compName>_INSTALL_DIRECTORY
+#
+#  Custom install directory for the specified component <compName> instead
+#  of $INSTDIR.
+#
 # .. variable:: CPACK_NSIS_CREATE_ICONS_EXTRA
 #
 #  Additional NSIS commands for creating start menu shortcuts.
