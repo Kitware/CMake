@@ -186,6 +186,14 @@ Example::
   ]== CMake Server ==]
 
 
+Type "signal"
+^^^^^^^^^^^^^
+
+The server can send signals when it detects changes in the system state. Signals
+are of type "signal", have an empty "cookie" and "inReplyTo" field and always
+have a "name" set to show which signal was sent.
+
+
 Specific Message Types
 ----------------------
 

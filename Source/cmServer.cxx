@@ -14,6 +14,7 @@
 #include "cmServer.h"
 
 #include "cmServerConnection.h"
+#include "cmServerDictionary.h"
 #include "cmServerProtocol.h"
 #include "cmSystemTools.h"
 #include "cmVersionMacros.h"
@@ -27,19 +28,6 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
-
-static const std::string kTYPE_KEY = "type";
-static const std::string kCOOKIE_KEY = "cookie";
-static const std::string kREPLY_TO_KEY = "inReplyTo";
-static const std::string kERROR_MESSAGE_KEY = "errorMessage";
-
-static const std::string kERROR_TYPE = "error";
-static const std::string kREPLY_TYPE = "reply";
-static const std::string kPROGRESS_TYPE = "progress";
-static const std::string kMESSAGE_TYPE = "message";
-
-static const std::string kSTART_MAGIC = "[== CMake Server ==[";
-static const std::string kEND_MAGIC = "]== CMake Server ==]";
 
 class cmServer::DebugInfo
 {
@@ -144,16 +132,16 @@ void cmServer::PrintHello() const
   Json::Value hello = Json::objectValue;
   hello[kTYPE_KEY] = "hello";
 
-  Json::Value& protocolVersions = hello["supportedProtocolVersions"] =
+  Json::Value& protocolVersions = hello[kSUPPORTED_PROTOCOL_VERSIONS] =
     Json::arrayValue;
 
   for (auto const& proto : this->SupportedProtocols) {
     auto version = proto->ProtocolVersion();
     Json::Value tmp = Json::objectValue;
-    tmp["major"] = version.first;
-    tmp["minor"] = version.second;
+    tmp[kMAJOR_KEY] = version.first;
+    tmp[kMINOR_KEY] = version.second;
     if (proto->IsExperimental()) {
-      tmp["experimental"] = true;
+      tmp[kIS_EXPERIMENTAL_KEY] = true;
     }
     protocolVersions.append(tmp);
   }
@@ -193,31 +181,37 @@ void cmServer::reportMessage(const char* msg, const char* title,
 
 cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
 {
-  if (request.Type != "handshake")
-    return request.ReportError("Waiting for type \"handshake\".");
+  if (request.Type != kHANDSHAKE_TYPE)
+    return request.ReportError("Waiting for type \"" + kHANDSHAKE_TYPE +
+                               "\".");
 
-  Json::Value requestedProtocolVersion = request.Data["protocolVersion"];
+  Json::Value requestedProtocolVersion = request.Data[kPROTOCOL_VERSION_KEY];
   if (requestedProtocolVersion.isNull())
-    return request.ReportError(
-      "\"protocolVersion\" is required for \"handshake\".");
+    return request.ReportError("\"" + kPROTOCOL_VERSION_KEY +
+                               "\" is required for \"" + kHANDSHAKE_TYPE +
+                               "\".");
 
   if (!requestedProtocolVersion.isObject())
-    return request.ReportError("\"protocolVersion\" must be a JSON object.");
+    return request.ReportError("\"" + kPROTOCOL_VERSION_KEY +
+                               "\" must be a JSON object.");
 
-  Json::Value majorValue = requestedProtocolVersion["major"];
+  Json::Value majorValue = requestedProtocolVersion[kMAJOR_KEY];
   if (!majorValue.isInt())
-    return request.ReportError("\"major\" must be set and an integer.");
+    return request.ReportError("\"" + kMAJOR_KEY +
+                               "\" must be set and an integer.");
 
-  Json::Value minorValue = requestedProtocolVersion["minor"];
+  Json::Value minorValue = requestedProtocolVersion[kMINOR_KEY];
   if (!minorValue.isNull() && !minorValue.isInt())
-    return request.ReportError("\"minor\" must be unset or an integer.");
+    return request.ReportError("\"" + kMINOR_KEY +
+                               "\" must be unset or an integer.");
 
   const int major = majorValue.asInt();
   const int minor = minorValue.isNull() ? -1 : minorValue.asInt();
   if (major < 0)
-    return request.ReportError("\"major\" must be >= 0.");
+    return request.ReportError("\"" + kMAJOR_KEY + "\" must be >= 0.");
   if (!minorValue.isNull() && minor < 0)
-    return request.ReportError("\"minor\" must be >= 0 when set.");
+    return request.ReportError("\"" + kMINOR_KEY +
+                               "\" must be >= 0 when set.");
 
   this->Protocol =
     this->FindMatchingProtocol(this->SupportedProtocols, major, minor);
@@ -226,7 +220,7 @@ cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
   }
 
   std::string errorMessage;
-  if (!this->Protocol->Activate(request, &errorMessage)) {
+  if (!this->Protocol->Activate(this, request, &errorMessage)) {
     this->Protocol = CM_NULLPTR;
     return request.ReportError("Failed to activate protocol version: " +
                                errorMessage);
@@ -311,10 +305,10 @@ void cmServer::WriteProgress(const cmServerRequest& request, int min,
   obj[kTYPE_KEY] = kPROGRESS_TYPE;
   obj[kREPLY_TO_KEY] = request.Type;
   obj[kCOOKIE_KEY] = request.Cookie;
-  obj["progressMessage"] = message;
-  obj["progressMinimum"] = min;
-  obj["progressMaximum"] = max;
-  obj["progressCurrent"] = current;
+  obj[kPROGRESS_MESSAGE_KEY] = message;
+  obj[kPROGRESS_MINIMUM_KEY] = min;
+  obj[kPROGRESS_MAXIMUM_KEY] = max;
+  obj[kPROGRESS_CURRENT_KEY] = current;
 
   this->WriteJsonObject(obj, nullptr);
 }
@@ -330,9 +324,9 @@ void cmServer::WriteMessage(const cmServerRequest& request,
   obj[kTYPE_KEY] = kMESSAGE_TYPE;
   obj[kREPLY_TO_KEY] = request.Type;
   obj[kCOOKIE_KEY] = request.Cookie;
-  obj["message"] = message;
+  obj[kMESSAGE_KEY] = message;
   if (!title.empty()) {
-    obj["title"] = title;
+    obj[kTITLE_KEY] = title;
   }
 
   WriteJsonObject(obj, nullptr);
@@ -347,6 +341,19 @@ void cmServer::WriteParseError(const std::string& message) const
   obj[kCOOKIE_KEY] = "";
 
   this->WriteJsonObject(obj, nullptr);
+}
+
+void cmServer::WriteSignal(const std::string& name,
+                           const Json::Value& data) const
+{
+  assert(data.isObject());
+  Json::Value obj = data;
+  obj[kTYPE_KEY] = kSIGNAL_TYPE;
+  obj[kREPLY_TO_KEY] = "";
+  obj[kCOOKIE_KEY] = "";
+  obj[kNAME_KEY] = name;
+
+  WriteJsonObject(obj, nullptr);
 }
 
 void cmServer::WriteResponse(const cmServerResponse& response,

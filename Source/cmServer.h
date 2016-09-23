@@ -63,6 +63,7 @@ private:
   void WriteResponse(const cmServerResponse& response,
                      const DebugInfo* debug) const;
   void WriteParseError(const std::string& message) const;
+  void WriteSignal(const std::string& name, const Json::Value& obj) const;
 
   void WriteJsonObject(Json::Value const& jsonValue,
                        const DebugInfo* debug) const;
@@ -95,6 +96,7 @@ private:
 
   mutable bool Writing = false;
 
-  friend class cmServerRequest;
   friend class cmServerConnection;
+  friend class cmServerProtocol;
+  friend class cmServerRequest;
 };

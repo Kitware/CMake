@@ -13,14 +13,13 @@
 
 #include "cmServerConnection.h"
 
+#include "cmServerDictionary.h"
+
 #include <cmServer.h>
 
 #include <assert.h>
 
 namespace {
-
-static const std::string kSTART_MAGIC = "[== CMake Server ==[";
-static const std::string kEND_MAGIC = "]== CMake Server ==]";
 
 struct write_req_t
 {

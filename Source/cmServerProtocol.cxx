@@ -14,22 +14,16 @@
 
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmServer.h"
+#include "cmServerDictionary.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+
+#include "cmServerDictionary.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cm_jsoncpp_reader.h"
 #include "cm_jsoncpp_value.h"
 #endif
-
-// Vocabulary:
-
-static const std::string kBUILD_DIRECTORY_KEY = "buildDirectory";
-static const std::string kCOOKIE_KEY = "cookie";
-static const std::string kEXTRA_GENERATOR_KEY = "extraGenerator";
-static const std::string kGENERATOR_KEY = "generator";
-static const std::string kSOURCE_DIRECTORY_KEY = "sourceDirectory";
-static const std::string kTYPE_KEY = "type";
 
 cmServerRequest::cmServerRequest(cmServer* server, const std::string& t,
                                  const std::string& c, const Json::Value& d)
@@ -115,14 +109,24 @@ Json::Value cmServerResponse::Data() const
   return this->m_Data;
 }
 
-bool cmServerProtocol::Activate(const cmServerRequest& request,
+bool cmServerProtocol::Activate(cmServer* server,
+                                const cmServerRequest& request,
                                 std::string* errorMessage)
 {
+  assert(server);
+  this->m_Server = server;
   this->m_CMakeInstance = std::make_unique<cmake>();
   const bool result = this->DoActivate(request, errorMessage);
   if (!result)
     this->m_CMakeInstance = CM_NULLPTR;
   return result;
+}
+
+void cmServerProtocol::SendSignal(const std::string& name,
+                                  const Json::Value& data) const
+{
+  if (this->m_Server)
+    this->m_Server->WriteSignal(name, data);
 }
 
 cmake* cmServerProtocol::CMakeInstance() const
