@@ -4,7 +4,8 @@
 #
 # Check if given Fortran source compiles and links into an executable::
 #
-#   CHECK_Fortran_SOURCE_COMPILES(<code> <var> [FAIL_REGEX <fail-regex>])
+#   CHECK_Fortran_SOURCE_COMPILES(<code> <var> [FAIL_REGEX <fail-regex>]
+#                                 [SRC_EXT <ext>])
 #
 # The arguments are:
 #
@@ -13,8 +14,10 @@
 # ``<var>``
 #   Variable to store whether the source code compiled.
 #   Will be created as an internal cache variable.
-# ``<fail-regex>``
+# ``FAIL_REGEX <fail-regex>``
 #   Fail if test output matches this regex.
+# ``SRC_EXT <ext>``
+#   Use source extension ``.<ext>`` instead of the default ``.F``.
 #
 # The following variables may be set before calling this macro to modify
 # the way the check is run::
@@ -43,9 +46,10 @@
 macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
   if(NOT DEFINED "${VAR}")
     set(_FAIL_REGEX)
+    set(_SRC_EXT)
     set(_key)
     foreach(arg ${ARGN})
-      if("${arg}" MATCHES "^(FAIL_REGEX)$")
+      if("${arg}" MATCHES "^(FAIL_REGEX|SRC_EXT)$")
         set(_key "${arg}")
       elseif(_key)
         list(APPEND _${_key} "${arg}")
@@ -53,6 +57,9 @@ macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
         message(FATAL_ERROR "Unknown argument:\n  ${arg}\n")
       endif()
     endforeach()
+    if(NOT _SRC_EXT)
+      set(_SRC_EXT F)
+    endif()
     set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
     if(CMAKE_REQUIRED_LIBRARIES)
@@ -67,7 +74,7 @@ macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
     else()
       set(CHECK_Fortran_SOURCE_COMPILES_ADD_INCLUDES)
     endif()
-    file(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.F"
+    file(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.${_SRC_EXT}"
       "${SOURCE}\n")
 
     if(NOT CMAKE_REQUIRED_QUIET)
@@ -75,7 +82,7 @@ macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
     endif()
     try_compile(${VAR}
       ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.F
+      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.${_SRC_EXT}
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       ${CHECK_Fortran_SOURCE_COMPILES_ADD_LIBRARIES}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
