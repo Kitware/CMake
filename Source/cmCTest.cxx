@@ -1506,22 +1506,17 @@ std::string cmCTest::Base64EncodeFile(std::string const& file)
                         | std::ios::binary
 #endif
                       );
-  unsigned char* file_buffer = new unsigned char[len + 1];
-  ifs.read(reinterpret_cast<char*>(file_buffer), len);
+  std::vector<char> file_buffer(len + 1);
+  ifs.read(&file_buffer[0], len);
   ifs.close();
 
-  unsigned char* encoded_buffer = new unsigned char[(len * 3) / 2 + 5];
+  std::vector<char> encoded_buffer((len * 3) / 2 + 5);
 
-  size_t const rlen = cmsysBase64_Encode(file_buffer, len, encoded_buffer, 1);
+  size_t const rlen = cmsysBase64_Encode(
+    reinterpret_cast<unsigned char*>(&file_buffer[0]), len,
+    reinterpret_cast<unsigned char*>(&encoded_buffer[0]), 1);
 
-  std::string base64 = "";
-  for (size_t i = 0; i < rlen; i++) {
-    base64 += encoded_buffer[i];
-  }
-  delete[] file_buffer;
-  delete[] encoded_buffer;
-
-  return base64;
+  return std::string(&encoded_buffer[0], rlen);
 }
 
 bool cmCTest::SubmitExtraFiles(const VectorOfStrings& files)
