@@ -3097,9 +3097,21 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       --build-project testf
       --build-two-config
       --build-options ${build_options}
-        -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
       --test-command testf)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
+
+    if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+      add_test(FortranModules ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/FortranModules"
+        "${CMake_BINARY_DIR}/Tests/FortranModules"
+        ${build_generator_args}
+        --build-project FortranModules
+        --build-options ${build_options}
+          -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
+        )
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranModules")
+    endif()
 
     # FortranCInterface tests.
     if(UNIX)
