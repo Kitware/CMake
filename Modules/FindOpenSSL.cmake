@@ -142,15 +142,15 @@ if(WIN32 AND NOT CYGWIN)
 
     if(OPENSSL_USE_STATIC_LIBS)
       set(_OPENSSL_PATH_SUFFIXES
-        "lib"
-        "VC/static"
         "lib/VC/static"
+        "VC/static"
+        "lib"
         )
     else()
       set(_OPENSSL_PATH_SUFFIXES
-        "lib"
-        "VC"
         "lib/VC"
+        "VC"
+        "lib"
         )
     endif ()
 
@@ -227,8 +227,8 @@ if(WIN32 AND NOT CYGWIN)
       NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        "lib"
         "lib/MinGW"
+        "lib"
     )
 
     find_library(SSL_EAY
@@ -237,8 +237,8 @@ if(WIN32 AND NOT CYGWIN)
       NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        "lib"
         "lib/MinGW"
+        "lib"
     )
 
     mark_as_advanced(SSL_EAY LIB_EAY)
