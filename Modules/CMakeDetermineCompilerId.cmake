@@ -266,6 +266,11 @@ Id flags: ${testflags}
     else()
       set(id_toolset "")
     endif()
+    if("${lang}" STREQUAL "Swift")
+      set(id_lang_version "SWIFT_VERSION = 2.3;")
+    else()
+      set(id_lang_version "")
+    endif()
     if(CMAKE_OSX_DEPLOYMENT_TARGET)
       set(id_deployment_target
         "MACOSX_DEPLOYMENT_TARGET = \"${CMAKE_OSX_DEPLOYMENT_TARGET}\";")
