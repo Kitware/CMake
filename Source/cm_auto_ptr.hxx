@@ -14,7 +14,13 @@
 
 #include <cmConfigure.h>
 
-// FIXME: Use std::auto_ptr on compilers that do not warn about it.
+#ifdef CMake_HAVE_CXX_AUTO_PTR
+
+#include <memory>
+#define CM_AUTO_PTR std::auto_ptr
+
+#else
+
 #define CM_AUTO_PTR cm::auto_ptr
 
 // The HP compiler cannot handle the conversions necessary to use
@@ -216,6 +222,8 @@ public:
 #if __has_warning("-Wdeprecated")
 #pragma clang diagnostic pop
 #endif
+#endif
+
 #endif
 
 #endif
