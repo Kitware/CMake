@@ -2803,34 +2803,29 @@ bool cmCTest::CompressString(std::string& str)
   // zlib makes the guarantee that this is the maximum output size
   int outSize =
     static_cast<int>(static_cast<double>(str.size()) * 1.001 + 13.0);
-  unsigned char* out = new unsigned char[outSize];
+  std::vector<unsigned char> out(outSize);
 
   strm.avail_in = static_cast<uInt>(str.size());
   strm.next_in = in;
   strm.avail_out = outSize;
-  strm.next_out = out;
+  strm.next_out = &out[0];
   ret = deflate(&strm, Z_FINISH);
 
   if (ret == Z_STREAM_ERROR || ret != Z_STREAM_END) {
     cmCTestLog(this, ERROR_MESSAGE, "Error during gzip compression."
                  << std::endl);
-    delete[] out;
     return false;
   }
 
   (void)deflateEnd(&strm);
 
   // Now base64 encode the resulting binary string
-  unsigned char* base64EncodedBuffer = new unsigned char[(outSize * 3) / 2];
+  std::vector<unsigned char> base64EncodedBuffer((outSize * 3) / 2);
 
   size_t rlen =
-    cmsysBase64_Encode(out, strm.total_out, base64EncodedBuffer, 1);
+    cmsysBase64_Encode(&out[0], strm.total_out, &base64EncodedBuffer[0], 1);
 
-  str = "";
-  str.append(reinterpret_cast<char*>(base64EncodedBuffer), rlen);
-
-  delete[] base64EncodedBuffer;
-  delete[] out;
+  str.assign(reinterpret_cast<char*>(&base64EncodedBuffer[0]), rlen);
 
   return true;
 }
