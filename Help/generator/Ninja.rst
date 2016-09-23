@@ -21,3 +21,13 @@ are generated:
 
 ``sub/dir/package``
   Runs the package step in the subdirectory, if any.
+
+Fortran Support
+^^^^^^^^^^^^^^^
+
+The ``Ninja`` generator conditionally supports Fortran when the ``ninja``
+tool has the required features.  As of this version of CMake the needed
+features have not been integrated into upstream Ninja.  Kitware maintains
+a branch of Ninja with the required features on `github.com/Kitware/ninja`_.
+
+.. _`github.com/Kitware/ninja`: https://github.com/Kitware/ninja/tree/features-for-fortran#readme

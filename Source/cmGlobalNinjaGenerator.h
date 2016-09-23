@@ -347,6 +347,15 @@ public:
   bool HasOutputPathPrefix() const { return !this->OutputPathPrefix.empty(); }
   void StripNinjaOutputPathPrefixAsSuffix(std::string& path);
 
+  bool WriteDyndepFile(std::string const& dir_top_src,
+                       std::string const& dir_top_bld,
+                       std::string const& dir_cur_src,
+                       std::string const& dir_cur_bld,
+                       std::string const& arg_dd,
+                       std::vector<std::string> const& arg_ddis,
+                       std::string const& module_dir,
+                       std::vector<std::string> const& linked_target_dirs);
+
 protected:
   void Generate() CM_OVERRIDE;
 
@@ -355,6 +364,10 @@ protected:
 private:
   std::string GetEditCacheCommand() const CM_OVERRIDE;
   void FindMakeProgram(cmMakefile* mf) CM_OVERRIDE;
+  void CheckNinjaFeatures();
+  bool CheckLanguages(std::vector<std::string> const& languages,
+                      cmMakefile* mf) const CM_OVERRIDE;
+  bool CheckFortran(cmMakefile* mf) const;
 
   void OpenBuildFileStream();
   void CloseBuildFileStream();
@@ -439,6 +452,9 @@ private:
 
   std::string NinjaCommand;
   std::string NinjaVersion;
+  bool NinjaSupportsConsolePool;
+  bool NinjaSupportsImplicitOuts;
+  unsigned long NinjaSupportsDyndeps;
 
 private:
   void InitOutputPathPrefix();

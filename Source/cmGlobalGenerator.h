@@ -381,6 +381,8 @@ protected:
   void SetLanguageEnabledFlag(const std::string& l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const std::string& l, cmMakefile* mf);
   void FillExtensionToLanguageMap(const std::string& l, cmMakefile* mf);
+  virtual bool CheckLanguages(std::vector<std::string> const& languages,
+                              cmMakefile* mf) const;
   virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
                                    const char* envVar) const;
 

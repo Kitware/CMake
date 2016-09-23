@@ -70,6 +70,10 @@ protected:
   cmMakefile* GetMakefile() const { return this->Makefile; }
 
   std::string LanguageCompilerRule(const std::string& lang) const;
+  std::string LanguagePreprocessRule(std::string const& lang) const;
+  bool NeedExplicitPreprocessing(std::string const& lang) const;
+  std::string LanguageDyndepRule(std::string const& lang) const;
+  bool NeedDyndep(std::string const& lang) const;
 
   std::string OrderDependsTargetForTarget();
 
@@ -107,6 +111,15 @@ protected:
   /// @return the object file path for the given @a source.
   std::string GetObjectFilePath(cmSourceFile const* source) const;
 
+  /// @return the preprocessed source file path for the given @a source.
+  std::string GetPreprocessedFilePath(cmSourceFile const* source) const;
+
+  /// @return the dyndep file path for this target.
+  std::string GetDyndepFilePath(std::string const& lang) const;
+
+  /// @return the target dependency scanner info file path
+  std::string GetTargetDependInfoPath(std::string const& lang) const;
+
   /// @return the file path where the target named @a name is generated.
   std::string GetTargetFilePath(const std::string& name) const;
 
@@ -118,6 +131,7 @@ protected:
   void WriteObjectBuildStatements();
   void WriteObjectBuildStatement(cmSourceFile const* source,
                                  bool writeOrderDependsTargetForTarget);
+  void WriteTargetDependInfo(std::string const& lang);
 
   void ExportObjectCompileCommand(
     std::string const& language, std::string const& sourceFileName,
@@ -161,6 +175,7 @@ private:
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
   cmNinjaDeps Objects;
+  cmNinjaDeps DDIFiles; // TODO: Make per-language.
   std::vector<cmCustomCommand const*> CustomCommands;
   cmNinjaDeps ExtraFiles;
 };

@@ -319,6 +319,12 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
   }
 }
 
+bool cmGlobalGenerator::CheckLanguages(
+  std::vector<std::string> const& /* languages */, cmMakefile* /* mf */) const
+{
+  return true;
+}
+
 // enable the given language
 //
 // The following files are loaded in this order:
@@ -427,6 +433,10 @@ void cmGlobalGenerator::EnableLanguage(
 
   // find and make sure CMAKE_MAKE_PROGRAM is defined
   this->FindMakeProgram(mf);
+
+  if (!this->CheckLanguages(languages, mf)) {
+    return;
+  }
 
   // try and load the CMakeSystem.cmake if it is there
   std::string fpath = rootBin;
