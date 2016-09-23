@@ -123,8 +123,9 @@ void cmServer::RegisterProtocol(cmServerProtocol* protocol)
                          [version](cmServerProtocol* p) {
                            return p->ProtocolVersion() == version;
                          });
-  if (it == this->SupportedProtocols.end())
+  if (it == this->SupportedProtocols.end()) {
     this->SupportedProtocols.push_back(protocol);
+  }
 }
 
 void cmServer::PrintHello() const
@@ -181,37 +182,44 @@ void cmServer::reportMessage(const char* msg, const char* title,
 
 cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
 {
-  if (request.Type != kHANDSHAKE_TYPE)
+  if (request.Type != kHANDSHAKE_TYPE) {
     return request.ReportError("Waiting for type \"" + kHANDSHAKE_TYPE +
                                "\".");
+  }
 
   Json::Value requestedProtocolVersion = request.Data[kPROTOCOL_VERSION_KEY];
-  if (requestedProtocolVersion.isNull())
+  if (requestedProtocolVersion.isNull()) {
     return request.ReportError("\"" + kPROTOCOL_VERSION_KEY +
                                "\" is required for \"" + kHANDSHAKE_TYPE +
                                "\".");
+  }
 
-  if (!requestedProtocolVersion.isObject())
+  if (!requestedProtocolVersion.isObject()) {
     return request.ReportError("\"" + kPROTOCOL_VERSION_KEY +
                                "\" must be a JSON object.");
+  }
 
   Json::Value majorValue = requestedProtocolVersion[kMAJOR_KEY];
-  if (!majorValue.isInt())
+  if (!majorValue.isInt()) {
     return request.ReportError("\"" + kMAJOR_KEY +
                                "\" must be set and an integer.");
+  }
 
   Json::Value minorValue = requestedProtocolVersion[kMINOR_KEY];
-  if (!minorValue.isNull() && !minorValue.isInt())
+  if (!minorValue.isNull() && !minorValue.isInt()) {
     return request.ReportError("\"" + kMINOR_KEY +
                                "\" must be unset or an integer.");
+  }
 
   const int major = majorValue.asInt();
   const int minor = minorValue.isNull() ? -1 : minorValue.asInt();
-  if (major < 0)
+  if (major < 0) {
     return request.ReportError("\"" + kMAJOR_KEY + "\" must be >= 0.");
-  if (!minorValue.isNull() && minor < 0)
+  }
+  if (!minorValue.isNull() && minor < 0) {
     return request.ReportError("\"" + kMINOR_KEY +
                                "\" must be >= 0 when set.");
+  }
 
   this->Protocol =
     this->FindMatchingProtocol(this->SupportedProtocols, major, minor);
@@ -284,12 +292,15 @@ cmServerProtocol* cmServer::FindMatchingProtocol(
   cmServerProtocol* bestMatch = nullptr;
   for (auto protocol : protocols) {
     auto version = protocol->ProtocolVersion();
-    if (major != version.first)
+    if (major != version.first) {
       continue;
-    if (minor == version.second)
+    }
+    if (minor == version.second) {
       return protocol;
-    if (!bestMatch || bestMatch->ProtocolVersion().second < version.second)
+    }
+    if (!bestMatch || bestMatch->ProtocolVersion().second < version.second) {
       bestMatch = protocol;
+    }
   }
   return minor < 0 ? bestMatch : nullptr;
 }
@@ -317,8 +328,9 @@ void cmServer::WriteMessage(const cmServerRequest& request,
                             const std::string& message,
                             const std::string& title) const
 {
-  if (message.empty())
+  if (message.empty()) {
     return;
+  }
 
   Json::Value obj = Json::objectValue;
   obj[kTYPE_KEY] = kMESSAGE_TYPE;

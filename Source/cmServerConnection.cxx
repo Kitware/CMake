@@ -146,8 +146,9 @@ void cmServerConnection::ReadData(const std::string& data)
     }
     std::string line = this->RawReadBuffer.substr(0, needle);
     const auto ls = line.size();
-    if (ls > 1 && line.at(ls - 1) == '\r')
+    if (ls > 1 && line.at(ls - 1) == '\r') {
       line.erase(ls - 1, 1);
+    }
     this->RawReadBuffer.erase(this->RawReadBuffer.begin(),
                               this->RawReadBuffer.begin() +
                                 static_cast<long>(needle) + 1);
