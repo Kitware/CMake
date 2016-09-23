@@ -52,6 +52,8 @@ add_definitions(-DFOO -DBAR=1)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_executable(test_preprocess test_preprocess.F90 test_preprocess_module.F90)
 
+add_executable(test_non_pp_include test_non_pp_include_main.f90)
+
 # Build the external project separately using a custom target.
 # Make sure it uses the same build configuration as this test.
 if(CMAKE_CONFIGURATION_TYPES)

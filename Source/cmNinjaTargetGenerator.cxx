@@ -841,6 +841,18 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     // directive.
     ppVars["INCLUDES"] = vars["INCLUDES"];
 
+    // Prepend source file's original directory as an include directory
+    // so e.g. Fortran INCLUDE statements can look for files in it.
+    std::vector<std::string> sourceDirectory;
+    sourceDirectory.push_back(
+      cmSystemTools::GetParentDirectory(source->GetFullPath()));
+
+    std::string sourceDirectoryFlag = this->LocalGenerator->GetIncludeFlags(
+      sourceDirectory, this->GeneratorTarget, language, false, false,
+      this->GetConfigName());
+
+    vars["INCLUDES"] = sourceDirectoryFlag + " " + vars["INCLUDES"];
+
     // Explicit preprocessing always uses a depfile.
     ppVars["DEP_FILE"] =
       cmGlobalNinjaGenerator::EncodeDepfileSpace(ppFileName + ".d");
