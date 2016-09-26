@@ -2996,6 +2996,15 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     buildSettings->AddAttribute("GCC_VERSION",
                                 this->CreateString(this->GeneratorToolset));
   }
+  if (this->GetLanguageEnabled("Swift")) {
+    std::string swiftVersion = "2.3";
+    if (const char* vers = this->CurrentMakefile->GetDefinition(
+          "CMAKE_Swift_LANGUAGE_VERSION")) {
+      swiftVersion = vers;
+    }
+    buildSettings->AddAttribute("SWIFT_VERSION",
+                                this->CreateString(swiftVersion));
+  }
 
   std::string symroot = root->GetCurrentBinaryDirectory();
   symroot += "/build";

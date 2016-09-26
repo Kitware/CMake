@@ -84,6 +84,7 @@
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)";
 				SYMROOT = .;
 				@id_toolset@
+				@id_lang_version@
 				@id_deployment_target@
 				@id_sdkroot@
 			};
