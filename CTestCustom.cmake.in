@@ -70,6 +70,8 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   # Ignore clang's summary warning, assuming prior text has matched some
   # other warning expression:
   "[0-9,]+ warnings? generated."
+  # similarly for PGI
+  "compilation completed with warnings"
 
 # scanbuild exceptions
   "char_traits.h:.*: warning: Null pointer argument in call to string length function"
