@@ -18,6 +18,8 @@
 # * ``MX_LIBRARY``, ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the MX,
 #   ENG and MAT libraries of Matlab
 # * ``MAIN_PROGRAM`` the Matlab binary program.
+# * ``MEX_COMPILER`` the MEX compiler.
+# * ``SIMULINK`` the Simulink environment.
 #
 # .. note::
 #
@@ -819,12 +821,13 @@ endfunction()
 #   order to produce a MEX file. The final name of the produced output may be
 #   specified, as well as additional link libraries, and a documentation entry
 #   for the MEX file. Remaining arguments of the call are passed to the
-#   :command:`add_library` command.
+#   :command:`add_library` or :command:`add_executable` command.
 #
 #   ::
 #
 #      matlab_add_mex(
 #          NAME <name>
+#          [EXECUTABLE | MODULE | SHARED]
 #          SRC src1 [src2 ...]
 #          [OUTPUT_NAME output_name]
 #          [DOCUMENTATION file.txt]
@@ -835,7 +838,7 @@ endfunction()
 #   ``NAME``
 #     name of the target.
 #   ``SRC``
-#     list of tje source files.
+#     list of source files.
 #   ``LINK_TO``
 #     a list of additional link dependencies.  The target links to ``libmex``
 #     by default. If ``Matlab_MX_LIBRARY`` is defined, it also
@@ -851,6 +854,10 @@ endfunction()
 #     mex file, and with extension `.m`. In that case, typing ``help <name>``
 #     in Matlab prints the documentation contained in this file.
 #
+#   ``MODULE`` or ``SHARED`` may be given to specify the type of library to be
+#     created. ``EXECUTABLE`` may be given to create an executable instead of
+#     a library. If no type is given explicitly, the type is ``SHARED``.
+#
 #   The documentation file is not processed and should be in the following
 #   format:
 #
@@ -859,7 +866,7 @@ endfunction()
 #     % This is the documentation
 #     function ret = mex_target_output_name(input1)
 #
-function(matlab_add_mex )
+function(matlab_add_mex)
 
   if(NOT WIN32)
     # we do not need all this on Windows
@@ -871,6 +878,7 @@ function(matlab_add_mex )
 
   endif()
 
+  set(options EXECUTABLE MODULE SHARED)
   set(oneValueArgs NAME DOCUMENTATION OUTPUT_NAME)
   set(multiValueArgs LINK_TO SRC)
 
@@ -885,11 +893,25 @@ function(matlab_add_mex )
     set(${prefix}_OUTPUT_NAME ${${prefix}_NAME})
   endif()
 
-  add_library(${${prefix}_NAME}
-    SHARED
+  if(${prefix}_EXECUTABLE)
+    add_executable(${${prefix}_NAME}
       ${${prefix}_SRC}
       ${${prefix}_DOCUMENTATION}
       ${${prefix}_UNPARSED_ARGUMENTS})
+  else()
+    if(${prefix}_MODULE)
+      set(type MODULE)
+    else()
+      set(type SHARED)
+    endif()
+
+    add_library(${${prefix}_NAME}
+      ${type}
+      ${${prefix}_SRC}
+      ${${prefix}_DOCUMENTATION}
+      ${${prefix}_UNPARSED_ARGUMENTS})
+  endif()
+
   target_include_directories(${${prefix}_NAME} PRIVATE ${Matlab_INCLUDE_DIRS})
 
   if(DEFINED Matlab_MX_LIBRARY)
@@ -1463,6 +1485,21 @@ if(_matlab_find_mat GREATER -1)
 endif()
 unset(_matlab_find_mat)
 
+# Component Simulink
+list(FIND Matlab_FIND_COMPONENTS SIMULINK _matlab_find_simulink)
+if(_matlab_find_simulink GREATER -1)
+  find_path(
+    Matlab_SIMULINK_INCLUDE_DIR
+    simstruc.h
+    PATHS "${Matlab_ROOT_DIR}/simulink/include"
+    NO_DEFAULT_PATH
+    )
+  if(Matlab_SIMULINK_INCLUDE_DIR)
+    set(Matlab_SIMULINK_FOUND TRUE)
+    list(APPEND Matlab_INCLUDE_DIRS "${Matlab_SIMULINK_INCLUDE_DIR}")
+  endif()
+endif()
+unset(_matlab_find_simulink)
 
 unset(_matlab_lib_dir_for_search)
 
