@@ -225,6 +225,7 @@ set(_FindMatlab_SELF_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 include(FindPackageHandleStandardArgs)
 include(CheckCXXCompilerFlag)
+include(CheckCCompilerFlag)
 
 
 # The currently supported versions. Other version can be added by the user by
@@ -871,7 +872,11 @@ function(matlab_add_mex)
   if(NOT WIN32)
     # we do not need all this on Windows
     # pthread options
-    check_cxx_compiler_flag(-pthread                    HAS_MINUS_PTHREAD)
+    if(CMAKE_CXX_COMPILER_LOADED)
+      check_cxx_compiler_flag(-pthread HAS_MINUS_PTHREAD)
+    elseif(CMAKE_C_COMPILER_LOADED)
+      check_c_compiler_flag(-pthread HAS_MINUS_PTHREAD)
+    endif()
     # we should use try_compile instead, the link flags are discarded from
     # this compiler_flag function.
     #check_cxx_compiler_flag(-Wl,--exclude-libs,ALL HAS_SYMBOL_HIDING_CAPABILITY)
