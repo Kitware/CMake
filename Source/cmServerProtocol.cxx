@@ -97,10 +97,10 @@ bool cmServerResponse::IsError() const
 
 std::string cmServerResponse::ErrorMessage() const
 {
-  if (this->m_Payload == PAYLOAD_ERROR)
+  if (this->m_Payload == PAYLOAD_ERROR) {
     return this->m_ErrorMessage;
-  else
-    return std::string();
+  }
+  return std::string();
 }
 
 Json::Value cmServerResponse::Data() const
@@ -117,16 +117,18 @@ bool cmServerProtocol::Activate(cmServer* server,
   this->m_Server = server;
   this->m_CMakeInstance = std::make_unique<cmake>();
   const bool result = this->DoActivate(request, errorMessage);
-  if (!result)
+  if (!result) {
     this->m_CMakeInstance = CM_NULLPTR;
+  }
   return result;
 }
 
 void cmServerProtocol::SendSignal(const std::string& name,
                                   const Json::Value& data) const
 {
-  if (this->m_Server)
+  if (this->m_Server) {
     this->m_Server->WriteSignal(name, data);
+  }
 }
 
 cmake* cmServerProtocol::CMakeInstance() const
@@ -155,17 +157,19 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
   std::string extraGenerator = request.Data[kEXTRA_GENERATOR_KEY].asString();
 
   if (buildDirectory.empty()) {
-    if (errorMessage)
+    if (errorMessage) {
       *errorMessage =
         std::string("\"") + kBUILD_DIRECTORY_KEY + "\" is missing.";
+    }
     return false;
   }
   cmake* cm = CMakeInstance();
   if (cmSystemTools::PathExists(buildDirectory)) {
     if (!cmSystemTools::FileIsDirectory(buildDirectory)) {
-      if (errorMessage)
+      if (errorMessage) {
         *errorMessage = std::string("\"") + kBUILD_DIRECTORY_KEY +
           "\" exists but is not a directory.";
+      }
       return false;
     }
 
@@ -177,18 +181,20 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
       const std::string cachedGenerator =
         std::string(state->GetCacheEntryValue("CMAKE_GENERATOR"));
       if (cachedGenerator.empty() && generator.empty()) {
-        if (errorMessage)
+        if (errorMessage) {
           *errorMessage =
             std::string("\"") + kGENERATOR_KEY + "\" is required but unset.";
+        }
         return false;
       }
       if (generator.empty()) {
         generator = cachedGenerator;
       }
       if (generator != cachedGenerator) {
-        if (errorMessage)
+        if (errorMessage) {
           *errorMessage = std::string("\"") + kGENERATOR_KEY +
             "\" set but incompatible with configured generator.";
+        }
         return false;
       }
 
@@ -197,9 +203,10 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
         std::string(state->GetCacheEntryValue("CMAKE_EXTRA_GENERATOR"));
       if (!cachedExtraGenerator.empty() && !extraGenerator.empty() &&
           cachedExtraGenerator != extraGenerator) {
-        if (errorMessage)
+        if (errorMessage) {
           *errorMessage = std::string("\"") + kEXTRA_GENERATOR_KEY +
             "\" is set but incompatible with configured extra generator.";
+        }
         return false;
       }
       if (extraGenerator.empty()) {
@@ -211,9 +218,10 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
         std::string(state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY"));
       if (!cachedSourceDirectory.empty() && !sourceDirectory.empty() &&
           cachedSourceDirectory != sourceDirectory) {
-        if (errorMessage)
+        if (errorMessage) {
           *errorMessage = std::string("\"") + kSOURCE_DIRECTORY_KEY +
             "\" is set but incompatible with configured source directory.";
+        }
         return false;
       }
       if (sourceDirectory.empty()) {
@@ -223,21 +231,24 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
   }
 
   if (sourceDirectory.empty()) {
-    if (errorMessage)
+    if (errorMessage) {
       *errorMessage = std::string("\"") + kSOURCE_DIRECTORY_KEY +
         "\" is unset but required.";
+    }
     return false;
   }
   if (!cmSystemTools::FileIsDirectory(sourceDirectory)) {
-    if (errorMessage)
+    if (errorMessage) {
       *errorMessage =
         std::string("\"") + kSOURCE_DIRECTORY_KEY + "\" is not a directory.";
+    }
     return false;
   }
   if (generator.empty()) {
-    if (errorMessage)
+    if (errorMessage) {
       *errorMessage =
         std::string("\"") + kGENERATOR_KEY + "\" is unset but required.";
+    }
     return false;
   }
 
@@ -247,10 +258,11 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
 
   cmGlobalGenerator* gg = cm->CreateGlobalGenerator(fullGeneratorName);
   if (!gg) {
-    if (errorMessage)
+    if (errorMessage) {
       *errorMessage =
         std::string("Could not set up the requested combination of \"") +
         kGENERATOR_KEY + "\" and \"" + kEXTRA_GENERATOR_KEY + "\"";
+    }
     return false;
   }
 
