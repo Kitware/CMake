@@ -1059,6 +1059,7 @@ void cmGlobalGenerator::Configure()
 
   cmMakefile* dirMf = new cmMakefile(this, snapshot);
   this->Makefiles.push_back(dirMf);
+  this->IndexMakefile(dirMf);
 
   this->BinaryDirectories.insert(
     this->CMakeInstance->GetHomeOutputDirectory());
@@ -1528,6 +1529,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->TargetDependencies.clear();
   this->TargetSearchIndex.clear();
   this->GeneratorTargetSearchIndex.clear();
+  this->MakefileSearchIndex.clear();
   this->ProjectMap.clear();
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
@@ -1805,6 +1807,7 @@ std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
 void cmGlobalGenerator::AddMakefile(cmMakefile* mf)
 {
   this->Makefiles.push_back(mf);
+  this->IndexMakefile(mf);
 
   // update progress
   // estimate how many lg there will be
@@ -1962,12 +1965,9 @@ void cmGlobalGenerator::FillProjectMap()
 
 cmMakefile* cmGlobalGenerator::FindMakefile(const std::string& start_dir) const
 {
-  for (std::vector<cmMakefile*>::const_iterator it = this->Makefiles.begin();
-       it != this->Makefiles.end(); ++it) {
-    std::string sd = (*it)->GetCurrentSourceDirectory();
-    if (sd == start_dir) {
-      return *it;
-    }
+  MakefileMap::const_iterator i = this->MakefileSearchIndex.find(start_dir);
+  if (i != this->MakefileSearchIndex.end()) {
+    return i->second;
   }
   return CM_NULLPTR;
 }
@@ -2010,6 +2010,17 @@ void cmGlobalGenerator::IndexGeneratorTarget(cmGeneratorTarget* gt)
   if (!gt->IsImported() || gt->IsImportedGloballyVisible()) {
     this->GeneratorTargetSearchIndex[gt->GetName()] = gt;
   }
+}
+
+void cmGlobalGenerator::IndexMakefile(cmMakefile* mf)
+{
+  // FIXME: add_subdirectory supports multiple build directories
+  // sharing the same source directory.  We currently index only the
+  // first one, because that is what FindMakefile has always returned.
+  // All of its callers will need to be modified to support looking
+  // up directories by build directory path.
+  this->MakefileSearchIndex.insert(
+    MakefileMap::value_type(mf->GetCurrentSourceDirectory(), mf));
 }
 
 cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const
