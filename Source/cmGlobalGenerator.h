@@ -462,19 +462,27 @@ private:
   typedef std::unordered_map<std::string, cmTarget*> TargetMap;
   typedef std::unordered_map<std::string, cmGeneratorTarget*>
     GeneratorTargetMap;
+  typedef std::unordered_map<std::string, cmMakefile*> MakefileMap;
 #else
   typedef cmsys::hash_map<std::string, cmTarget*> TargetMap;
   typedef cmsys::hash_map<std::string, cmGeneratorTarget*> GeneratorTargetMap;
+  typedef cmsys::hash_map<std::string, cmMakefile*> MakefileMap;
 #endif
 #else
   typedef std::map<std::string, cmTarget*> TargetMap;
   typedef std::map<std::string, cmGeneratorTarget*> GeneratorTargetMap;
+  typedef std::map<std::string, cmMakefile*> MakefileMap;
 #endif
   // Map efficiently from target name to cmTarget instance.
   // Do not use this structure for looping over all targets.
   // It contains both normal and globally visible imported targets.
   TargetMap TargetSearchIndex;
   GeneratorTargetMap GeneratorTargetSearchIndex;
+
+  // Map efficiently from source directory path to cmMakefile instance.
+  // Do not use this structure for looping over all directories.
+  // It may not contain all of them (see note in IndexMakefile method).
+  MakefileMap MakefileSearchIndex;
 
   cmMakefile* TryCompileOuterMakefile;
   // If you add a new map here, make sure it is copied
@@ -527,6 +535,8 @@ private:
   void CreateGeneratorTargets(TargetTypes targetTypes);
 
   void ClearGeneratorMembers();
+
+  void IndexMakefile(cmMakefile* mf);
 
   virtual const char* GetBuildIgnoreErrorsFlag() const { return CM_NULLPTR; }
 
