@@ -49,6 +49,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "stl_deque.h:1051"
   "(Lexer|Parser).*warning.*conversion.*may (alter its value|change the sign)"
   "(Lexer|Parser).*warning.*(statement is unreachable|will never be executed)"
+  "(Lexer|Parser).*warning.*variable.*was set but never used"
   "PGC-W-0095-Type cast required for this conversion.*ProcessUNIX.c"
   "[Qq]t([Cc]ore|[Gg]ui|[Ww]idgets).*warning.*conversion.*may alter its value"
   "warning:.*is.*very unsafe.*consider using.*"
@@ -70,6 +71,8 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   # Ignore clang's summary warning, assuming prior text has matched some
   # other warning expression:
   "[0-9,]+ warnings? generated."
+  # similarly for PGI
+  "compilation completed with warnings"
 
 # scanbuild exceptions
   "char_traits.h:.*: warning: Null pointer argument in call to string length function"
