@@ -3142,7 +3142,26 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const& lang,
 {
   this->AddDefinition("CMAKE_CFG_INTDIR",
                       this->GetGlobalGenerator()->GetCMakeCFGIntDir());
-  this->GetGlobalGenerator()->EnableLanguage(lang, this, optional);
+  // If RC is explicitly listed we need to do it after other languages.
+  // On some platforms we enable RC implicitly while enabling others.
+  // Do not let that look like recursive enable_language(RC).
+  std::vector<std::string> langs;
+  std::vector<std::string> langsRC;
+  langs.reserve(lang.size());
+  for (std::vector<std::string>::const_iterator i = lang.begin();
+       i != lang.end(); ++i) {
+    if (i->compare("RC") == 0) {
+      langsRC.push_back(*i);
+    } else {
+      langs.push_back(*i);
+    }
+  }
+  if (!langs.empty()) {
+    this->GetGlobalGenerator()->EnableLanguage(langs, this, optional);
+  }
+  if (!langsRC.empty()) {
+    this->GetGlobalGenerator()->EnableLanguage(langsRC, this, optional);
+  }
 }
 
 int cmMakefile::TryCompile(const std::string& srcdir,
