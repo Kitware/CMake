@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindBoost
 # ---------
@@ -201,26 +204,6 @@
 # the Boost CMake package configuration for details on what it provides.
 #
 # Set Boost_NO_BOOST_CMAKE to ON to disable the search for boost-cmake.
-
-#=============================================================================
-# Copyright 2006-2012 Kitware, Inc.
-# Copyright 2006-2008 Andreas Schneider <mail@cynapses.org>
-# Copyright 2007      Wengo
-# Copyright 2007      Mike Jackson
-# Copyright 2008      Andreas Pakulat <apaku@gmx.de>
-# Copyright 2008-2012 Philip Lowman <philip@yhbt.com>
-# Copyright 2016      Alex Turbov <i.zaufi@gmail.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 
 #-------------------------------------------------------------------------------
 # Before we go searching, check whether boost-cmake is available, unless the

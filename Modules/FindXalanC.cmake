@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindXalanC
 # -----------
@@ -39,19 +42,6 @@
 #   the Xalan library
 
 # Written by Roger Leigh <rleigh@codelibre.net>
-
-#=============================================================================
-# Copyright 2016 University of Dundee
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 function(_XalanC_GET_VERSION  version_hdr)
     file(STRINGS ${version_hdr} _contents REGEX "^[ \t]*#define XALAN_VERSION_.*")

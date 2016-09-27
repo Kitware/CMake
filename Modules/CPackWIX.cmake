@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CPackWIX
 # --------
@@ -265,19 +268,6 @@
 #     follow the localization or convention of the system on which the
 #     installation is performed.
 #
-
-#=============================================================================
-# Copyright 2014-2015 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 if(NOT CPACK_WIX_ROOT)
   file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)

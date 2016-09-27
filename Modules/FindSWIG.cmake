@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindSWIG
 # --------
@@ -21,21 +24,6 @@
 # All information is collected from the SWIG_EXECUTABLE so the version
 # to be found can be changed from the command line by means of setting
 # SWIG_EXECUTABLE
-
-#=============================================================================
-# Copyright 2004-2009 Kitware, Inc.
-# Copyright 2011 Mathieu Malaterre <mathieu.malaterre@gmail.com>
-# Copyright 2014 Sylvain Joubert <joubert.sy@gmail.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 find_program(SWIG_EXECUTABLE NAMES swig3.0 swig2.0 swig)
 

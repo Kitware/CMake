@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindCxxTest
 # -----------
@@ -133,20 +136,6 @@
 #                 TS_ASSERT_EQUALS( 1 + 1, 2 );
 #              }
 #           };
-
-#=============================================================================
-# Copyright 2008-2010 Kitware, Inc.
-# Copyright 2008-2010 Philip Lowman <philip@yhbt.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # Version 1.4 (11/18/10) (CMake 2.8.4)
 #     Issue 11384: Added support to the CXX_ADD_TEST macro so header

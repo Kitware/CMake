@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # SelectLibraryConfigurations
 # ---------------------------
@@ -23,20 +26,6 @@
 # configuration types, then basename_LIBRARY and basename_LIBRARIES will
 # take only the release value, or the debug value if the release one is
 # not set.
-
-#=============================================================================
-# Copyright 2009 Will Dicharry <wdicharry@stellarscience.com>
-# Copyright 2005-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # This macro was adapted from the FindQt4 CMake module and is maintained by Will
 # Dicharry <wdicharry@stellarscience.com>.

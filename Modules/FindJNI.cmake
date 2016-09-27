@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindJNI
 # -------
@@ -21,19 +24,6 @@
 #   JAVA_INCLUDE_PATH     = the include path to jni.h
 #   JAVA_INCLUDE_PATH2    = the include path to jni_md.h
 #   JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
-
-#=============================================================================
-# Copyright 2001-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # Expand {libarch} occurences to java_libarch subdirectory(-ies) and set ${_var}
 macro(java_append_library_directories _var)
