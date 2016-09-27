@@ -18,11 +18,16 @@
 
 #include "cmExternalMakefileProjectGenerator.h"
 
+#include <map>
+#include <set>
 #include <string>
 #include <vector>
 
 class cmLocalGenerator;
 class cmMakefile;
+class cmGeneratorTarget;
+class cmXMLWriter;
+class cmSourceFile;
 
 class cmExtraCodeLiteGenerator : public cmExternalMakefileProjectGenerator
 {
@@ -38,6 +43,20 @@ protected:
   std::string GetCleanCommand(const cmMakefile* mf) const;
   std::string GetRebuildCommand(const cmMakefile* mf) const;
   std::string GetSingleFileBuildCommand(const cmMakefile* mf) const;
+  std::vector<std::string> CreateProjectsByTarget(cmXMLWriter* xml);
+  std::vector<std::string> CreateProjectsByProjectMaps(cmXMLWriter* xml);
+  std::string CollectSourceFiles(const cmMakefile* makefile,
+                                 const cmGeneratorTarget* gt,
+                                 std::map<std::string, cmSourceFile*>& cFiles,
+                                 std::set<std::string>& otherFiles);
+  void FindMatchingHeaderfiles(std::map<std::string, cmSourceFile*>& cFiles,
+                               std::set<std::string>& otherFiles);
+  void CreateProjectSourceEntries(std::map<std::string, cmSourceFile*>& cFiles,
+                                  std::set<std::string>& otherFiles,
+                                  cmXMLWriter* xml,
+                                  const std::string& projectPath,
+                                  const cmMakefile* mf,
+                                  const std::string& projectType);
 
 public:
   cmExtraCodeLiteGenerator();
@@ -48,6 +67,8 @@ public:
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
+                            const std::string& filename);
+  void CreateNewProjectFile(const cmGeneratorTarget* lg,
                             const std::string& filename);
 };
 

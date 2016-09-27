@@ -5,7 +5,11 @@ Generates CodeLite project files.
 
 Project files for CodeLite will be created in the top directory and
 in every subdirectory which features a CMakeLists.txt file containing
-a PROJECT() call. The appropriate make program can build the
+a :command:`project` call.
+The :variable:`CMAKE_CODELITE_USE_TARGETS` variable may be set to ``ON``
+to change the default behaviour from projects to targets as the basis
+for project files.
+The appropriate make program can build the
 project through the default make target.  A "make install" target is
 also provided.
 
