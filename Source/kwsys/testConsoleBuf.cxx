@@ -103,7 +103,7 @@ static void dumpBuffers(const T *expected, const T *received, size_t size) {
     }
     std::cerr << std::endl;
   }
-  std::cerr << std::endl << std::flush;
+  std::cerr << std::endl;
 }
 
 //----------------------------------------------------------------------------
@@ -331,21 +331,23 @@ static int testPipe()
           didFail = encodedTestString.compare(buffer2) == 0 ? 0 : 1;
         }
         if (didFail != 0) {
-          std::cerr << "Pipe's output didn't match expected output!" << std::endl << std::flush;
+          std::cerr << "Pipe's output didn't match expected output!" << std::endl;
           dumpBuffers<char>(encodedTestString.c_str(), buffer, encodedTestString.size());
           dumpBuffers<char>(encodedInputTestString.c_str(), buffer + encodedTestString.size() + 1, encodedInputTestString.size());
           dumpBuffers<char>(encodedTestString.c_str(), buffer2, encodedTestString.size());
         }
       } catch (const std::runtime_error &ex) {
         DWORD lastError = GetLastError();
-        std::cerr << "In function " << __FUNCTION__ << ":" << ex.what() << std::endl << std::flush;
+        std::cerr << "In function testPipe, line " <<  __LINE__ << ": "
+                  << ex.what() << std::endl;
         displayError(lastError);
       }
       finishProcess(didFail == 0);
     }
   } catch (const std::runtime_error &ex) {
     DWORD lastError = GetLastError();
-    std::cerr << "In function " << __FUNCTION__ << ":" << ex.what() << std::endl << std::flush;
+    std::cerr << "In function testPipe, line " <<  __LINE__ << ": "
+              << ex.what() << std::endl;
     displayError(lastError);
   }
   finishPipe(inPipeRead, inPipeWrite);
@@ -368,11 +370,11 @@ static int testFile()
         (errFile = createFile(L"stderrFile.txt")) == INVALID_HANDLE_VALUE) {
       throw std::runtime_error("createFile failed!");
     }
-    int length = 0;
     DWORD bytesWritten = 0;
     char buffer[200];
     char buffer2[200];
 
+    int length;
     if ((length = WideCharToMultiByte(TestCodepage, 0, UnicodeInputTestString, -1,
                                       buffer, sizeof(buffer),
                                       NULL, NULL)) == 0) {
@@ -424,21 +426,23 @@ static int testFile()
           didFail = encodedTestString.compare(buffer2) == 0 ? 0 : 1;
         }
         if (didFail != 0) {
-          std::cerr << "File's output didn't match expected output!" << std::endl << std::flush;
+          std::cerr << "File's output didn't match expected output!" << std::endl;
           dumpBuffers<char>(encodedTestString.c_str(), buffer, encodedTestString.size());
           dumpBuffers<char>(encodedInputTestString.c_str(), buffer + encodedTestString.size() + 1, encodedInputTestString.size() - 1);
           dumpBuffers<char>(encodedTestString.c_str(), buffer2, encodedTestString.size());
         }
       } catch (const std::runtime_error &ex) {
         DWORD lastError = GetLastError();
-        std::cerr << "In function " << __FUNCTION__ << ":" << ex.what() << std::endl << std::flush;
+        std::cerr << "In function testFile, line " <<  __LINE__ << ": "
+                  << ex.what() << std::endl;
         displayError(lastError);
       }
       finishProcess(didFail == 0);
     }
   } catch (const std::runtime_error &ex) {
     DWORD lastError = GetLastError();
-    std::cerr << "In function " << __FUNCTION__ << ":" << ex.what() << std::endl << std::flush;
+    std::cerr << "In function testFile, line " <<  __LINE__ << ": "
+              << ex.what() << std::endl;
     displayError(lastError);
   }
   finishFile(inFile);
@@ -508,18 +512,18 @@ static int testConsole()
           forceNewConsole = true;
         }
       } else {
-        std::cerr << "RegGetValueW(FontFamily) failed!" << std::endl << std::flush;
+        std::cerr << "RegGetValueW(FontFamily) failed!" << std::endl;
       }
       RegCloseKey(hConsoleKey);
     } else {
-      std::cerr << "RegOpenKeyExW(HKEY_CURRENT_USER\\Console) failed!" << std::endl << std::flush;
+      std::cerr << "RegOpenKeyExW(HKEY_CURRENT_USER\\Console) failed!" << std::endl;
     }
   }
   if (forceNewConsole || GetConsoleMode(parentOut, &consoleMode) == 0) {
     // Not a real console, let's create new one.
     FreeConsole();
     if (!AllocConsole()) {
-      std::cerr << "AllocConsole failed!" << std::endl << std::flush;
+      std::cerr << "AllocConsole failed!" << std::endl;
       return didFail;
     }
     SECURITY_ATTRIBUTES securityAttributes;
@@ -561,11 +565,11 @@ static int testConsole()
         consoleFont.FontFamily = TestFontFamily;
         wcscpy(consoleFont.FaceName, TestFaceName);
         if (!setConsoleFont(hOut, FALSE, &consoleFont)) {
-          std::cerr << "SetCurrentConsoleFontEx failed!" << std::endl << std::flush;
+          std::cerr << "SetCurrentConsoleFontEx failed!" << std::endl;
         }
       }
     } else {
-      std::cerr << "GetCurrentConsoleFontEx failed!" << std::endl << std::flush;
+      std::cerr << "GetCurrentConsoleFontEx failed!" << std::endl;
     }
   } else {
 #endif
@@ -599,7 +603,7 @@ static int testConsole()
       INPUT_RECORD inputBuffer[(sizeof(UnicodeInputTestString) /
                                 sizeof(UnicodeInputTestString[0])) * 2];
       memset(&inputBuffer, 0, sizeof(inputBuffer));
-      unsigned int i = 0;
+      unsigned int i;
       for (i = 0; i < (sizeof(UnicodeInputTestString) /
                        sizeof(UnicodeInputTestString[0]) - 1); i++) {
         writeInputKeyEvent(&inputBuffer[i*2], UnicodeInputTestString[i]);
@@ -650,7 +654,7 @@ static int testConsole()
       ) {
         didFail = 0;
       } else {
-        std::cerr << "Console's output didn't match expected output!" << std::endl << std::flush;
+        std::cerr << "Console's output didn't match expected output!" << std::endl;
         dumpBuffers<wchar_t>(wideTestString.c_str(), outputBuffer, wideTestString.size());
         dumpBuffers<wchar_t>(wideTestString.c_str(), outputBuffer + screenBufferInfo.dwSize.X * 1, wideTestString.size());
         dumpBuffers<wchar_t>(UnicodeInputTestString, outputBuffer + screenBufferInfo.dwSize.X * 2, (sizeof(UnicodeInputTestString) - 1) / sizeof(WCHAR));
@@ -659,7 +663,8 @@ static int testConsole()
       delete[] outputBuffer;
     } catch (const std::runtime_error &ex) {
       DWORD lastError = GetLastError();
-      std::cerr << "In function " << __FUNCTION__ << ":" << ex.what() << std::endl << std::flush;
+      std::cerr << "In function testConsole, line " <<  __LINE__ << ": "
+                << ex.what() << std::endl;
       displayError(lastError);
     }
     finishProcess(didFail == 0);
