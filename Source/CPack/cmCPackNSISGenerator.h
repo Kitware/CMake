@@ -84,6 +84,11 @@ protected:
   std::string CreateComponentGroupDescription(cmCPackComponentGroup* group,
                                               std::ostream& macrosOut);
 
+  /// Returns the custom install directory if available for the specified
+  /// component, otherwise $INSTDIR is returned.
+  std::string CustomComponentInstallDirectory(
+    const std::string& componentName);
+
   /// Translations any newlines found in the string into \\r\\n, so that the
   /// resulting string can be used within NSIS.
   static std::string TranslateNewlines(std::string str);
