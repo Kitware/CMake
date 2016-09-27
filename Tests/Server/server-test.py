@@ -68,9 +68,25 @@ for obj in testData:
         if debug: print("Doing handshake:", json.dumps(data))
         major = -1
         minor = -1
+        generator = 'Ninja'
+        extraGenerator = 'CodeBlocks'
+        sourceDirectory = sourceDir
+        buildDirectory = buildDir
         if 'major' in data: major = data['major']
         if 'minor' in data: minor = data['minor']
-        cmakelib.handshake(proc, major, minor)
+        if 'buildDirectory' in data: buildDirectory = data['buildDirectory']
+        if 'sourceDirectory' in data: sourceDirectory = data['sourceDirectory']
+        if 'generator' in data: generator = data['generator']
+        if 'extraGenerator' in data: extraGenerator = data['extraGenerator']
+        cmakelib.handshake(proc, major, minor, sourceDirectory, buildDirectory,
+          generator, extraGenerator)
+    elif 'validateGlobalSettings' in obj:
+        data = obj['validateGlobalSettings']
+        if not 'buildDirectory' in data: data['buildDirectory'] = buildDir
+        if not 'sourceDirectory' in data: data['sourceDirectory'] = sourceDir
+        if not 'generator' in data: data['generator'] = 'Ninja'
+        if not 'extraGenerator' in data: data['extraGenerator'] = 'CodeBlocks'
+        cmakelib.validateGlobalSettings(proc, cmakeCommand, data)
     elif 'message' in obj:
         print("MESSAGE:", obj["message"])
     else:

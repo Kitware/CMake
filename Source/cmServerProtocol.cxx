@@ -13,6 +13,7 @@
 #include "cmServerProtocol.h"
 
 #include "cmExternalMakefileProjectGenerator.h"
+#include "cmGlobalGenerator.h"
 #include "cmServer.h"
 #include "cmServerDictionary.h"
 #include "cmSystemTools.h"
@@ -279,10 +280,199 @@ const cmServerResponse cmServerProtocol1_0::Process(
 {
   assert(this->m_State >= STATE_ACTIVE);
 
+  if (request.Type == kCOMPUTE_TYPE) {
+    return this->ProcessCompute(request);
+  }
+  if (request.Type == kCONFIGURE_TYPE) {
+    return this->ProcessConfigure(request);
+  }
+  if (request.Type == kGLOBAL_SETTINGS_TYPE) {
+    return this->ProcessGlobalSettings(request);
+  }
+  if (request.Type == kSET_GLOBAL_SETTINGS_TYPE) {
+    return this->ProcessSetGlobalSettings(request);
+  }
+
   return request.ReportError("Unknown command!");
 }
 
 bool cmServerProtocol1_0::IsExperimental() const
 {
   return true;
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessCompute(
+  const cmServerRequest& request)
+{
+  if (this->m_State > STATE_CONFIGURED) {
+    return request.ReportError("This build system was already generated.");
+  }
+  if (this->m_State < STATE_CONFIGURED) {
+    return request.ReportError("This project was not configured yet.");
+  }
+
+  cmake* cm = this->CMakeInstance();
+  int ret = cm->Generate();
+
+  if (ret < 0) {
+    return request.ReportError("Failed to compute build system.");
+  }
+  m_State = STATE_COMPUTED;
+  return request.Reply(Json::Value());
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessConfigure(
+  const cmServerRequest& request)
+{
+  if (this->m_State == STATE_INACTIVE) {
+    return request.ReportError("This instance is inactive.");
+  }
+
+  // Make sure the types of cacheArguments matches (if given):
+  std::vector<std::string> cacheArgs;
+  bool cacheArgumentsError = false;
+  const Json::Value passedArgs = request.Data[kCACHE_ARGUMENTS_KEY];
+  if (!passedArgs.isNull()) {
+    if (passedArgs.isString()) {
+      cacheArgs.push_back(passedArgs.asString());
+    } else if (passedArgs.isArray()) {
+      for (auto i = passedArgs.begin(); i != passedArgs.end(); ++i) {
+        if (!i->isString()) {
+          cacheArgumentsError = true;
+          break;
+        }
+        cacheArgs.push_back(i->asString());
+      }
+    } else {
+      cacheArgumentsError = true;
+    }
+  }
+  if (cacheArgumentsError) {
+    request.ReportError(
+      "cacheArguments must be unset, a string or an array of strings.");
+  }
+
+  cmake* cm = this->CMakeInstance();
+  std::string sourceDir = cm->GetHomeDirectory();
+  const std::string buildDir = cm->GetHomeOutputDirectory();
+
+  if (buildDir.empty()) {
+    return request.ReportError(
+      "No build directory set via setGlobalSettings.");
+  }
+
+  if (cm->LoadCache(buildDir)) {
+    // build directory has been set up before
+    const char* cachedSourceDir =
+      cm->GetState()->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY");
+    if (!cachedSourceDir) {
+      return request.ReportError("No CMAKE_HOME_DIRECTORY found in cache.");
+    }
+    if (sourceDir.empty()) {
+      sourceDir = std::string(cachedSourceDir);
+      cm->SetHomeDirectory(sourceDir);
+    }
+
+    const char* cachedGenerator =
+      cm->GetState()->GetInitializedCacheValue("CMAKE_GENERATOR");
+    if (cachedGenerator) {
+      cmGlobalGenerator* gen = cm->GetGlobalGenerator();
+      if (gen && gen->GetName() != cachedGenerator) {
+        return request.ReportError("Configured generator does not match with "
+                                   "CMAKE_GENERATOR found in cache.");
+      }
+    }
+  } else {
+    // build directory has not been set up before
+    if (sourceDir.empty()) {
+      return request.ReportError("No sourceDirectory set via "
+                                 "setGlobalSettings and no cache found in "
+                                 "buildDirectory.");
+    }
+  }
+
+  if (cm->AddCMakePaths() != 1) {
+    return request.ReportError("Failed to set CMake paths.");
+  }
+
+  if (!cm->SetCacheArgs(cacheArgs)) {
+    return request.ReportError("cacheArguments could not be set.");
+  }
+
+  int ret = cm->Configure();
+  if (ret < 0) {
+    return request.ReportError("Configuration failed.");
+  }
+  m_State = STATE_CONFIGURED;
+  return request.Reply(Json::Value());
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessGlobalSettings(
+  const cmServerRequest& request)
+{
+  cmake* cm = this->CMakeInstance();
+  Json::Value obj = Json::objectValue;
+
+  // Capabilities information:
+  obj[kCAPABILITIES_KEY] = cm->ReportCapabilitiesJson(true);
+
+  obj[kDEBUG_OUTPUT_KEY] = cm->GetDebugOutput();
+  obj[kTRACE_KEY] = cm->GetTrace();
+  obj[kTRACE_EXPAND_KEY] = cm->GetTraceExpand();
+  obj[kWARN_UNINITIALIZED_KEY] = cm->GetWarnUninitialized();
+  obj[kWARN_UNUSED_KEY] = cm->GetWarnUnused();
+  obj[kWARN_UNUSED_CLI_KEY] = cm->GetWarnUnusedCli();
+  obj[kCHECK_SYSTEM_VARS_KEY] = cm->GetCheckSystemVars();
+
+  obj[kSOURCE_DIRECTORY_KEY] = cm->GetHomeDirectory();
+  obj[kBUILD_DIRECTORY_KEY] = cm->GetHomeOutputDirectory();
+
+  // Currently used generator:
+  cmGlobalGenerator* gen = cm->GetGlobalGenerator();
+  obj[kGENERATOR_KEY] = gen ? gen->GetName() : std::string();
+  obj[kEXTRA_GENERATOR_KEY] =
+    gen ? gen->GetExtraGeneratorName() : std::string();
+
+  return request.Reply(obj);
+}
+
+static void setBool(const cmServerRequest& request, const std::string& key,
+                    std::function<void(bool)> setter)
+{
+  if (request.Data[key].isNull()) {
+    return;
+  }
+  setter(request.Data[key].asBool());
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessSetGlobalSettings(
+  const cmServerRequest& request)
+{
+  const std::vector<std::string> boolValues = {
+    kDEBUG_OUTPUT_KEY,       kTRACE_KEY,       kTRACE_EXPAND_KEY,
+    kWARN_UNINITIALIZED_KEY, kWARN_UNUSED_KEY, kWARN_UNUSED_CLI_KEY,
+    kCHECK_SYSTEM_VARS_KEY
+  };
+  for (auto i : boolValues) {
+    if (!request.Data[i].isNull() && !request.Data[i].isBool()) {
+      return request.ReportError("\"" + i +
+                                 "\" must be unset or a bool value.");
+    }
+  }
+
+  cmake* cm = this->CMakeInstance();
+
+  setBool(request, kDEBUG_OUTPUT_KEY,
+          [cm](bool e) { cm->SetDebugOutputOn(e); });
+  setBool(request, kTRACE_KEY, [cm](bool e) { cm->SetTrace(e); });
+  setBool(request, kTRACE_EXPAND_KEY, [cm](bool e) { cm->SetTraceExpand(e); });
+  setBool(request, kWARN_UNINITIALIZED_KEY,
+          [cm](bool e) { cm->SetWarnUninitialized(e); });
+  setBool(request, kWARN_UNUSED_KEY, [cm](bool e) { cm->SetWarnUnused(e); });
+  setBool(request, kWARN_UNUSED_CLI_KEY,
+          [cm](bool e) { cm->SetWarnUnusedCli(e); });
+  setBool(request, kCHECK_SYSTEM_VARS_KEY,
+          [cm](bool e) { cm->SetCheckSystemVars(e); });
+
+  return request.Reply(Json::Value());
 }

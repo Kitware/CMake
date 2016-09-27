@@ -248,3 +248,129 @@ which will result in a response type "reply"::
   ]== CMake Server ==]
 
 indicating that the server is ready for action.
+
+
+Type "globalSettings"
+^^^^^^^^^^^^^^^^^^^^^
+
+This request can be sent after the initial handshake. It will return a
+JSON structure with information on cmake state.
+
+Example::
+
+  [== CMake Server ==[
+  {"type":"globalSettings"}
+  ]== CMake Server ==]
+
+which will result in a response type "reply"::
+
+  [== CMake Server ==[
+  {
+    "buildDirectory": "/tmp/test-build",
+    "capabilities": {
+      "generators": [
+        {
+          "extraGenerators": [],
+          "name": "Watcom WMake",
+          "platformSupport": false,
+          "toolsetSupport": false
+        },
+        <...>
+      ],
+      "serverMode": false,
+      "version": {
+        "isDirty": false,
+        "major": 3,
+        "minor": 6,
+        "patch": 20160830,
+        "string": "3.6.20160830-gd6abad",
+        "suffix": "gd6abad"
+      }
+    },
+    "checkSystemVars": false,
+    "cookie": "",
+    "extraGenerator": "",
+    "generator": "Ninja",
+    "debugOutput": false,
+    "inReplyTo": "globalSettings",
+    "sourceDirectory": "/home/code/cmake",
+    "trace": false,
+    "traceExpand": false,
+    "type": "reply",
+    "warnUninitialized": false,
+    "warnUnused": false,
+    "warnUnusedCli": true
+  }
+  ]== CMake Server ==]
+
+
+Type "setGlobalSettings"
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+This request can be sent to change the global settings attributes. Unknown
+attributes are going to be ignored. Read-only attributes reported by
+"globalSettings" are all capabilities, buildDirectory, generator,
+extraGenerator and sourceDirectory. Any attempt to set these will be ignored,
+too.
+
+All other settings will be changed.
+
+The server will respond with an empty reply message or an error.
+
+Example::
+
+  [== CMake Server ==[
+  {"type":"setGlobalSettings","debugOutput":true}
+  ]== CMake Server ==]
+
+CMake will reply to this with::
+
+  [== CMake Server ==[
+  {"inReplyTo":"setGlobalSettings","type":"reply"}
+  ]== CMake Server ==]
+
+
+Type "configure"
+^^^^^^^^^^^^^^^^
+
+This request will configure a project for build.
+
+To configure a build directory already containing cmake files, it is enough to
+set "buildDirectory" via "setGlobalSettings". To create a fresh build directory
+you also need to set "currentGenerator" and "sourceDirectory" via "setGlobalSettings"
+in addition to "buildDirectory".
+
+You may a list of strings to "configure" via the "cacheArguments" key. These
+strings will be interpreted similar to command line arguments related to
+cache handling that are passed to the cmake command line client.
+
+Example::
+
+  [== CMake Server ==[
+  {"type":"configure", "cacheArguments":["-Dsomething=else"]}
+  ]== CMake Server ==]
+
+CMake will reply like this (after reporting progress for some time)::
+
+  [== CMake Server ==[
+  {"cookie":"","inReplyTo":"configure","type":"reply"}
+  ]== CMake Server ==]
+
+
+Type "compute"
+^^^^^^^^^^^^^^
+
+This requist will generate build system files in the build directory and
+is only available after a project was successfully "configure"d.
+
+Example::
+
+  [== CMake Server ==[
+  {"type":"compute"}
+  ]== CMake Server ==]
+
+CMake will reply (after reporting progress information)::
+
+  [== CMake Server ==[
+  {"cookie":"","inReplyTo":"compute","type":"reply"}
+  ]== CMake Server ==]
