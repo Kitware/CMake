@@ -60,14 +60,6 @@
 #  * Mandatory : YES
 #  * Default   : :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`
 #
-# .. variable:: CPACK_RPM_DEBUGINFO_PACKAGE
-#               CPACK_RPM_<component>_DEBUGINFO_PACKAGE
-#
-#  Option to additionally generate debuginfo RPM package(s).
-#
-#  * Mandatory : NO
-#  * Default   : OFF
-#
 # .. variable:: CPACK_RPM_PACKAGE_NAME
 #               CPACK_RPM_<component>_PACKAGE_NAME
 #
@@ -707,6 +699,96 @@
 #   package installation may cause initial symbolic link to point to an
 #   invalid location.
 #
+# Packaging of debug information
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# Debuginfo packages contain debug symbols and sources for debugging packaged
+# binaries.
+#
+# .. note::
+#
+#  Currently multiple debuginfo packages are generated if component based
+#  packaging is used - one debuginfo package per component. This duplicates
+#  sources if multiple binaries are using them. This is a side effect of
+#  how CPackRPM currently generates component packages and will be addressed
+#  in later versions of the generator.
+#
+# Debuginfo RPM packaging has it's own set of variables:
+#
+# .. variable:: CPACK_RPM_DEBUGINFO_PACKAGE
+#               CPACK_RPM_<component>_DEBUGINFO_PACKAGE
+#
+#  Enable generation of debuginfo RPM package(s).
+#
+#  * Mandatory : NO
+#  * Default   : OFF
+#
+# .. note::
+#
+#  Binaries must contain debug symbols before packaging so use either ``Debug``
+#  or ``RelWithDebInfo`` for :variable:`CMAKE_BUILD_TYPE` variable value.
+#
+# .. note::
+#
+#  Packages generated from packages without binary files, with binary files but
+#  without execute permissions or without debug symbols will be empty.
+#
+# .. variable:: CPACK_BUILD_SOURCE_DIRS
+#
+#  Provides locations of root directories of source files from which binaries
+#  were built.
+#
+#  * Mandatory : YES if :variable:`CPACK_RPM_DEBUGINFO_PACKAGE` is set
+#  * Default   : -
+#
+# .. note::
+#
+#  For CMake project :variable:`CPACK_BUILD_SOURCE_DIRS` is set by default to
+#  point to :variable:`CMAKE_SOURCE_DIR` and :variable:`CMAKE_BINARY_DIR` paths.
+#
+# .. note::
+#
+#  Sources with path prefixes that do not fall under any location provided with
+#  :variable:`CPACK_BUILD_SOURCE_DIRS` will not be present in debuginfo package.
+#
+# .. variable:: CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX
+#               CPACK_RPM_<component>_BUILD_SOURCE_DIRS_PREFIX
+#
+#  Prefix of location where sources will be placed during package installation.
+#
+#  * Mandatory : YES if :variable:`CPACK_RPM_DEBUGINFO_PACKAGE` is set
+#  * Default   : "/usr/src/debug/<CPACK_PACKAGE_FILE_NAME>" and
+#                for component packaging "/usr/src/debug/<CPACK_PACKAGE_FILE_NAME>-<component>"
+#
+# .. note::
+#
+#  Each source path prefix is additionaly suffixed by ``src_<index>`` where
+#  index is index of the path used from :variable:`CPACK_BUILD_SOURCE_DIRS`
+#  variable. This produces ``<CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX>/src_<index>``
+#  replacement path.
+#  Limitation is that replaced path part must be shorter or of equal
+#  length than the length of its replacement. If that is not the case either
+#  :variable:`CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX` variable has to be set to
+#  a shorter path or source directories must be placed on a longer path.
+#
+# .. variable:: CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS
+#
+#  Directories containing sources that should be excluded from debuginfo packages.
+#
+#  * Mandatory : NO
+#  * Default   : "/usr /usr/src /usr/src/debug"
+#
+#  Listed paths are owned by other RPM packages and should therefore not be
+#  deleted on debuginfo package uninstallation.
+#
+# .. variable:: CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS_ADDITION
+#
+#  Paths that should be appended to :variable:`CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS`
+#  for exclusion.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
 # Packaging of sources (SRPM)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
@@ -1321,13 +1403,37 @@ endif()
 # We need to check if the binaries were compiled with debug symbols
 # because without them the package will be useless
 function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
+  if(NOT CPACK_BUILD_SOURCE_DIRS)
+    message(FATAL_ERROR "CPackRPM: CPACK_BUILD_SOURCE_DIRS variable is not set!"
+      " Required for debuginfo packaging. See documentation of"
+      " CPACK_RPM_DEBUGINFO_PACKAGE variable for details.")
+  endif()
+
   # With objdump we should check the debug symbols
   find_program(OBJDUMP_EXECUTABLE objdump)
   if(NOT OBJDUMP_EXECUTABLE)
-    message(WARNING "CPackRPM: objdump binary could not be found!")
+    message(FATAL_ERROR "CPackRPM: objdump binary could not be found!"
+      " Required for debuginfo packaging. See documentation of"
+      " CPACK_RPM_DEBUGINFO_PACKAGE variable for details.")
   endif()
 
+  # With debugedit we prepare source files list
+  find_program(DEBUGEDIT_EXECUTABLE debugedit "/usr/lib/rpm/")
+  if(NOT DEBUGEDIT_EXECUTABLE)
+    message(FATAL_ERROR "CPackRPM: debugedit binary could not be found!"
+      " Required for debuginfo packaging. See documentation of"
+      " CPACK_RPM_DEBUGINFO_PACKAGE variable for details.")
+  endif()
+
+  unset(mkdir_list_)
+  unset(cp_list_)
+  unset(additional_sources_)
+
   foreach(F IN LISTS INSTALL_FILES)
+    if(IS_DIRECTORY "${WORKING_DIR}/${F}" OR IS_SYMLINK "${WORKING_DIR}/${F}")
+      continue()
+    endif()
+
     execute_process(COMMAND "${OBJDUMP_EXECUTABLE}" -h ${WORKING_DIR}/${F}
                     WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}"
                     RESULT_VARIABLE OBJDUMP_EXEC_RESULT
@@ -1335,11 +1441,98 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
     # Check that if the given file was executable or not
     if(NOT OBJDUMP_EXEC_RESULT)
       string(FIND "${OBJDUMP_OUT}" "debug" FIND_RESULT)
-      if(NOT FIND_RESULT GREATER -1)
+      if(FIND_RESULT GREATER -1)
+        set(index_ 0)
+        foreach(source_dir_ IN LISTS CPACK_BUILD_SOURCE_DIRS)
+          string(LENGTH "${source_dir_}" source_dir_len_)
+          string(LENGTH "${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}" debuginfo_dir_len)
+          if(source_dir_len_ LESS debuginfo_dir_len)
+            message(FATAL_ERROR "CPackRPM: source dir path '${source_dir_}' is"
+              " longer than debuginfo sources dir path '${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}'!"
+              " Source dir path must be shorter than debuginfo sources dir path."
+              " Set CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX variable to a shorter value"
+              " or make source dir path longer."
+              " Required for debuginfo packaging. See documentation of"
+              " CPACK_RPM_DEBUGINFO_PACKAGE variable for details.")
+          endif()
+
+          file(REMOVE "${CPACK_RPM_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}/debugsources_add.list")
+          execute_process(COMMAND "${DEBUGEDIT_EXECUTABLE}" -b "${source_dir_}" -d "${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}" -i -l "${CPACK_RPM_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}/debugsources_add.list" "${WORKING_DIR}/${F}"
+              RESULT_VARIABLE res_
+              OUTPUT_VARIABLE opt_
+              ERROR_VARIABLE err_
+            )
+
+          file(STRINGS
+            "${CPACK_RPM_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}/debugsources_add.list"
+            sources_)
+          list(REMOVE_DUPLICATES sources_)
+
+          foreach(source_ IN LISTS sources_)
+            if(EXISTS "${source_dir_}/${source_}" AND NOT IS_DIRECTORY "${source_dir_}/${source_}")
+              get_filename_component(path_part_ "${source_}" DIRECTORY)
+              list(APPEND mkdir_list_ "%{buildroot}${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}/${path_part_}")
+              list(APPEND cp_list_ "cp \"${source_dir_}/${source_}\" \"%{buildroot}${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}/${path_part_}\"")
+
+              list(APPEND additional_sources_ "${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}/${source_}")
+            endif()
+          endforeach()
+
+          math(EXPR index_ "${index_} + 1")
+        endforeach()
+      else()
         message(WARNING "CPackRPM: File: ${F} does not contain debug symbols. They will possibly be missing from debuginfo package!")
       endif()
     endif()
   endforeach()
+
+  list(REMOVE_DUPLICATES mkdir_list_)
+  unset(TMP_RPM_DEBUGINFO_INSTALL)
+  foreach(part_ IN LISTS mkdir_list_)
+    string(APPEND TMP_RPM_DEBUGINFO_INSTALL "mkdir -p \"${part_}\"\n")
+  endforeach()
+
+  list(REMOVE_DUPLICATES cp_list_)
+  foreach(part_ IN LISTS cp_list_)
+    string(APPEND TMP_RPM_DEBUGINFO_INSTALL "${part_}\n")
+  endforeach()
+
+  if(NOT DEFINED CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS)
+    set(CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS /usr /usr/src /usr/src/debug)
+    if(CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS_ADDITION)
+      if(CPACK_RPM_PACKAGE_DEBUG)
+        message("CPackRPM:Debug: Adding ${CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS_ADDITION} to builtin omit list.")
+      endif()
+      list(APPEND CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS "${CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS_ADDITION}")
+    endif()
+  endif()
+  if(CPACK_RPM_PACKAGE_DEBUG)
+    message("CPackRPM:Debug: CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS= ${CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS}")
+  endif()
+
+  list(REMOVE_DUPLICATES additional_sources_)
+  unset(additional_sources_all_)
+  foreach(source_ IN LISTS additional_sources_)
+    string(REPLACE "/" ";" split_source_ " ${source_}")
+    list(REMOVE_AT split_source_ 0)
+    unset(tmp_path_)
+    # Now generate all segments of the path
+    foreach(segment_ IN LISTS split_source_)
+      string(APPEND tmp_path_ "/${segment_}")
+      list(APPEND additional_sources_all_ "${tmp_path_}")
+    endforeach()
+  endforeach()
+
+  list(REMOVE_DUPLICATES additional_sources_all_)
+  list(REMOVE_ITEM additional_sources_all_ ${CPACK_RPM_DEBUGINFO_EXCLUDE_DIRS})
+
+  unset(TMP_DEBUGINFO_ADDITIONAL_SOURCES)
+  foreach(source_ IN LISTS additional_sources_all_)
+    string(APPEND TMP_DEBUGINFO_ADDITIONAL_SOURCES "${source_}\n")
+  endforeach()
+
+  set(TMP_RPM_DEBUGINFO_INSTALL "${TMP_RPM_DEBUGINFO_INSTALL}" PARENT_SCOPE)
+  set(TMP_DEBUGINFO_ADDITIONAL_SOURCES "${TMP_DEBUGINFO_ADDITIONAL_SOURCES}" PARENT_SCOPE)
 endfunction()
 
 function(cpack_rpm_variable_fallback OUTPUT_VAR_NAME)
@@ -1860,6 +2053,41 @@ function(cpack_rpm_generate_package)
     set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "")
   endif()
 
+  cpack_rpm_variable_fallback("CPACK_RPM_DEBUGINFO_PACKAGE"
+    "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_DEBUGINFO_PACKAGE"
+    "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEBUGINFO_PACKAGE"
+    "CPACK_RPM_DEBUGINFO_PACKAGE")
+  if(CPACK_RPM_DEBUGINFO_PACKAGE)
+    cpack_rpm_variable_fallback("CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_BUILD_SOURCE_DIRS_PREFIX"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_BUILD_SOURCE_DIRS_PREFIX"
+      "CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX")
+    if(NOT CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX)
+      set(CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX "/usr/src/debug/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}")
+    endif()
+    cpack_rpm_debugsymbol_check("${CPACK_RPM_INSTALL_FILES}" "${WDIR}")
+
+    set(TMP_RPM_DEBUGINFO "
+# Modified version of %%debug_package macro
+# defined in /usr/lib/rpm/macros as that one
+# can't handle injection of extra source files.
+%ifnarch noarch
+%global __debug_package 1
+%package debuginfo
+Summary: Debug information for package %{name}
+Group: Development/Debug
+AutoReqProv: 0
+%description debuginfo
+This package provides debug information for package %{name}.
+Debug information is useful when developing applications that use this
+package or when debugging this package.
+%files debuginfo -f debugfiles.list
+%defattr(-,root,root)
+${TMP_DEBUGINFO_ADDITIONAL_SOURCES}
+%endif
+")
+  endif()
+
   # Prepare install files
   cpack_rpm_prepare_install_files(
       "${CPACK_RPM_INSTALL_FILES}"
@@ -1917,15 +2145,6 @@ function(cpack_rpm_generate_package)
     cpack_rpm_variable_fallback("CPACK_RPM_USER_BINARY_SPECFILE"
       "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE"
       "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_USER_BINARY_SPECFILE")
-  endif()
-
-  cpack_rpm_variable_fallback("CPACK_RPM_DEBUGINFO_PACKAGE"
-    "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_DEBUGINFO_PACKAGE"
-    "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEBUGINFO_PACKAGE"
-    "CPACK_RPM_DEBUGINFO_PACKAGE")
-  if(CPACK_RPM_DEBUGINFO_PACKAGE)
-    cpack_rpm_debugsymbol_check("${CPACK_ABSOLUTE_DESTINATION_FILES}" "${WDIR}")
-    set(TMP_RPM_DEBUGINFO "%debug_package")
   endif()
 
   cpack_rpm_variable_fallback("CPACK_RPM_FILE_NAME"
@@ -2104,6 +2323,8 @@ then
 fi
 mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
 
+\@TMP_RPM_DEBUGINFO_INSTALL\@
+
 %clean
 
 %post
@@ -2158,7 +2379,7 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
     execute_process(
       COMMAND "${RPMBUILD_EXECUTABLE}" ${RPMBUILD_FLAGS}
               --define "_topdir ${CPACK_RPM_DIRECTORY}"
-              --buildroot "%_topdir/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}" # TODO should I remove this variable? or change the path?
+              --buildroot "%_topdir/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
               --target "${CPACK_RPM_PACKAGE_ARCHITECTURE}"
               "${CPACK_RPM_BINARY_SPECFILE}"
       WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
