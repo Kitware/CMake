@@ -905,7 +905,7 @@ Function .onInit
 
   MessageBox MB_YESNOCANCEL|MB_ICONEXCLAMATION \
   "@CPACK_NSIS_PACKAGE_NAME@ is already installed. $\n$\nDo you want to uninstall the old version before installing the new one?" \
-  IDYES uninst IDNO inst
+  /SD IDYES IDYES uninst IDNO inst
   Abort
 
 ;Run the uninstaller
@@ -913,7 +913,7 @@ uninst:
   ClearErrors
   StrLen $2 "\Uninstall.exe"
   StrCpy $3 $0 -$2 # remove "\Uninstall.exe" from UninstallString to get path
-  ExecWait '"$0" _?=$3' ;Do not copy the uninstaller to a temp file
+  ExecWait '"$0" /S _?=$3' ;Do not copy the uninstaller to a temp file
 
   IfErrors uninst_failed inst
 uninst_failed:
