@@ -4,6 +4,19 @@
 
 #include "cmAlgorithms.h"
 
+static std::string escape_arg(const std::string& arg)
+{
+  // replace ";" with "\;" so output argument lists will split correctly
+  std::string escapedArg;
+  for (size_t i = 0; i < arg.size(); ++i) {
+    if (arg[i] == ';') {
+      escapedArg += '\\';
+    }
+    escapedArg += arg[i];
+  }
+  return escapedArg;
+}
+
 bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
                                           cmExecutionStatus&)
 {
@@ -165,10 +178,18 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
         insideValues = NONE;
         break;
       case MULTI:
-        multi[currentArgName].push_back(*argIter);
+        if (parseFromArgV) {
+          multi[currentArgName].push_back(escape_arg(*argIter));
+        } else {
+          multi[currentArgName].push_back(*argIter);
+        }
         break;
       default:
-        unparsed.push_back(*argIter);
+        if (parseFromArgV) {
+          unparsed.push_back(escape_arg(*argIter));
+        } else {
+          unparsed.push_back(*argIter);
+        }
         break;
     }
   }
