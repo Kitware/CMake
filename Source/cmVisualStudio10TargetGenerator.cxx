@@ -1804,7 +1804,8 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   }
 
   if (this->MSTools) {
-    cmsys::RegularExpression clangToolset("v[0-9]+_clang_.*");
+    cmsys::RegularExpression clangToolset(
+      "(v[0-9]+_clang_.*|LLVM-vs[0-9]+.*)");
     const char* toolset = this->GlobalGenerator->GetPlatformToolset();
     if (toolset && clangToolset.find(toolset)) {
       this->WriteString("<ObjectFileName>"
