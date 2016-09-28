@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindBLAS
 # --------
@@ -36,19 +39,6 @@
 # bit,sequential code, lp64 model), # Intel( older versions of mkl 32
 # and 64 bit), ACML,ACML_MP,ACML_GPU,Apple, NAS, Generic C/CXX should be
 # enabled to use Intel mkl
-
-#=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)

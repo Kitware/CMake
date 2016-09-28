@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CMakeDependentOption
 # --------------------
@@ -19,19 +22,6 @@
 # OFF.  If the status of USE_BAR or USE_ZOT ever changes, any value for
 # the USE_FOO option is saved so that when the option is re-enabled it
 # retains its old value.
-
-#=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 macro(CMAKE_DEPENDENT_OPTION option doc default depends force)
   if(${option}_ISSET MATCHES "^${option}_ISSET$")

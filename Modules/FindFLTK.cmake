@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindFLTK
 # --------
@@ -53,19 +56,6 @@
 #      FLTK_GL_LIBRARY     = the full path to fltk_gl.lib
 #      FLTK_FORMS_LIBRARY  = the full path to fltk_forms.lib
 #      FLTK_IMAGES_LIBRARY = the full path to fltk_images.lib
-
-#=============================================================================
-# Copyright 2001-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 if(NOT FLTK_SKIP_OPENGL)
   find_package(OpenGL)

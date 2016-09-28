@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindOpenMP
 # ----------
@@ -33,22 +36,6 @@
 # The specification dates are formatted as integers of the form
 # ``CCYYMM`` where these represent the decimal digits of the century,
 # year, and month.
-
-#=============================================================================
-# Copyright 2009 Kitware, Inc.
-# Copyright 2008-2009 André Rigland Brodtkorb <Andre.Brodtkorb@ifi.uio.no>
-# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
-# Copyright 2014 Nicolas Bock <nicolasbock@gmail.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 set(_OPENMP_REQUIRED_VARS)
 set(CMAKE_REQUIRED_QUIET_SAVE ${CMAKE_REQUIRED_QUIET})

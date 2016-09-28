@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindCURL
 # --------
@@ -12,20 +15,6 @@
 #   CURL_LIBRARIES      - List of libraries when using curl.
 #   CURL_FOUND          - True if curl found.
 #   CURL_VERSION_STRING - the version of curl found (since CMake 2.8.8)
-
-#=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # Look for the header file.
 find_path(CURL_INCLUDE_DIR NAMES curl/curl.h)

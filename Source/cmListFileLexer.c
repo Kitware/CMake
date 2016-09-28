@@ -549,17 +549,8 @@ static yyconst flex_int32_t yy_rule_can_match_eol[25] =
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "cmListFileLexer.in.l"
 #line 2 "cmListFileLexer.in.l"
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 /*
 
 This file must be translated to C and modified to build everywhere.

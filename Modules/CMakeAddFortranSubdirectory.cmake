@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CMakeAddFortranSubdirectory
 # ---------------------------
@@ -38,20 +41,6 @@
 # NO_EXTERNAL_INSTALL is required for forward compatibility with a
 # future version that supports installation of the external project
 # binaries during "make install".
-
-#=============================================================================
-# Copyright 2011-2012 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 
 set(_MS_MINGW_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 include(CheckLanguage)

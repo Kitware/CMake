@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindPythonLibs
 # --------------
@@ -36,19 +39,6 @@
 # ``find_package(PythonLibs)``, call ``find_package(PythonInterp)`` first to
 # get the currently active Python version by default with a consistent version
 # of PYTHON_LIBRARIES.
-
-#=============================================================================
-# Copyright 2001-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # Use the executable's path as a hint
 set(_Python_LIBRARY_PATH_HINT)

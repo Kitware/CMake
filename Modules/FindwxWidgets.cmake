@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindwxWidgets
 # -------------
@@ -103,20 +106,6 @@
 #    include(${wxWidgets_USE_FILE})
 #    # and for each of your dependent executable/library targets:
 #    target_link_libraries(<YourTarget> ${wxWidgets_LIBRARIES})
-
-#=============================================================================
-# Copyright 2004-2009 Kitware, Inc.
-# Copyright 2007-2009 Miguel A. Figueroa-Villanueva <miguelf at ieee dot org>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 #
 # FIXME: check this and provide a correct sample usage...

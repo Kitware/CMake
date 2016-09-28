@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # UseJava
 # -------
@@ -399,21 +402,6 @@
 #  ``OUTPUT_DIR <path>``
 #    Sets the directory where the header files will be generated. Same behavior as option
 #    '-d' of javah tool. If not specified, ${CMAKE_CURRENT_BINARY_DIR} is used as output directory.
-
-#=============================================================================
-# Copyright 2013 OpenGamma Ltd. <graham@opengamma.com>
-# Copyright 2010-2011 Andreas schneider <asn@redhat.com>
-# Copyright 2010-2013 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
 

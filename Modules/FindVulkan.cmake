@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindVulkan
 # ----------
@@ -24,19 +27,6 @@
 #   Vulkan_INCLUDE_DIR    - the Vulkan include directory
 #   Vulkan_LIBRARY        - the path to the Vulkan library
 #
-
-#=============================================================================
-# Copyright 2016 Matthaeus G. Chajdas
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 if(WIN32)
   find_path(Vulkan_INCLUDE_DIR

@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CMakeDetermineVSServicePack
 # ---------------------------
@@ -27,21 +30,6 @@
 #   vc90, vc90sp1
 #   vc100, vc100sp1
 #   vc110, vc110sp1, vc110sp2, vc110sp3, vc110sp4
-
-#=============================================================================
-# Copyright 2009-2013 Kitware, Inc.
-# Copyright 2009-2010 Philip Lowman <philip@yhbt.com>
-# Copyright 2010-2011 Aaron C. meadows <cmake@shadowguarddev.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 if(NOT CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 2.8.8)
   message(DEPRECATION

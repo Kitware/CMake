@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindArmadillo
 # -------------
@@ -27,20 +30,6 @@
 #   ARMADILLO_VERSION_PATCH - patch version number
 #   ARMADILLO_VERSION_STRING - version number as a string (ex: "1.0.4")
 #   ARMADILLO_VERSION_NAME - name of the version (ex: "Antipodean Antileech")
-
-#=============================================================================
-# Copyright 2011 Clement Creusot <creusot@cs.york.ac.uk>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 
 # UNIX paths are standard, no need to write.
 find_library(ARMADILLO_LIBRARY

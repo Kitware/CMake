@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindCABLE
 # ---------
@@ -19,19 +22,6 @@
 # To build Tcl wrappers, you should add shared library and link it to
 # ${CABLE_TCL_LIBRARY}.  You should also add ${CABLE_INCLUDE_DIR} as an
 # include directory.
-
-#=============================================================================
-# Copyright 2001-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 if(NOT CABLE)
   find_path(CABLE_BUILD_DIR cableVersion.h)

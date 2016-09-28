@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindQt3
 # -------
@@ -34,19 +37,6 @@
 # they will be set
 #  QT_WRAP_CPP, set true if QT_MOC_EXECUTABLE is found
 #  QT_WRAP_UI set true if QT_UIC_EXECUTABLE is found
-
-#=============================================================================
-# Copyright 2005-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # If Qt4 has already been found, fail.
 if(QT4_FOUND)

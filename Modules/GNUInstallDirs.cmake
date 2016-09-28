@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # GNUInstallDirs
 # --------------
@@ -116,21 +119,6 @@
 #   ``CMAKE_INSTALL_FULL_<dir>`` variables, it is exposed publicly to
 #   allow users who create additional path variables to also compute
 #   absolute paths where necessary, using the same logic.
-
-#=============================================================================
-# Copyright 2015 Alex Turbov <i.zaufi@gmail.com>
-# Copyright 2011 Nikita Krupen'ko <krnekit@gmail.com>
-# Copyright 2011 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # Installation directories
 #
