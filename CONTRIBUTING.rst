@@ -29,9 +29,11 @@ Code Style
 We use `clang-format`_ to define our style for C++ code in the CMake source
 tree.  See the `.clang-format`_ configuration file for our style settings.
 Use ``clang-format`` version 3.8 or higher to format source files.
+See also the `Utilities/Scripts/clang-format.bash`_ script.
 
 .. _`clang-format`: http://clang.llvm.org/docs/ClangFormat.html
 .. _`.clang-format`: .clang-format
+.. _`Utilities/Scripts/clang-format.bash`: Utilities/Scripts/clang-format.bash
 
 License
 =======
