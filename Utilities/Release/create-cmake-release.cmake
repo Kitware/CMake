@@ -66,7 +66,6 @@ endfunction()
 
 write_docs_shell_script("create-${CMAKE_CREATE_VERSION}-docs.sh")
 write_batch_shell_script("create-${CMAKE_CREATE_VERSION}-batch1.sh" ${RELEASE_SCRIPTS_BATCH_1})
-unset(CMAKE_DOC_TARBALL) # No pre-built docs in second batch.
 write_batch_shell_script("create-${CMAKE_CREATE_VERSION}-batch2.sh" ${RELEASE_SCRIPTS_BATCH_2})
 
 message("Run one at a time:
