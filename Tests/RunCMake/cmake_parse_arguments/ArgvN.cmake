@@ -23,8 +23,16 @@ function(test2 arg1)
   TEST(pref_OPT2 FALSE)
   TEST(pref_SINGLE1 "foo;bar")
   TEST(pref_SINGLE2 UNDEFINED)
-  TEST(pref_MULTI1 bar foo bar)
+  TEST(pref_MULTI1 bar "foo;bar")
   TEST(pref_MULTI2 UNDEFINED)
   TEST(pref_UNPARSED_ARGUMENTS UNDEFINED)
 endfunction()
-test2("first named" OPT1 SINGLE1 "foo;bar" MULTI1 bar foo bar)
+test2("first named" OPT1 SINGLE1 "foo;bar" MULTI1 bar "foo;bar")
+
+function(test3 arg1)
+  cmake_parse_arguments(PARSE_ARGV 0
+    pref "" "" "")
+
+  TEST(pref_UNPARSED_ARGUMENTS "foo;bar" dog cat)
+endfunction()
+test3("foo;bar" dog cat)

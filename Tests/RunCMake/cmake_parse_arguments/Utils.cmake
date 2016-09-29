@@ -17,4 +17,5 @@ SET (asdf "some value")
 TEST(asdf "some value")
 
 SET (asdf some list)
+TEST(asdf some list)
 TEST(asdf "some;list")
