@@ -10,6 +10,7 @@ macro(do_test bsname file)
     "${CMAKE_SOURCE_DIR}/${file}"
     "${CMAKE_SOURCE_DIR}"
     "${CMAKE_BINARY_DIR}"
+    "${CMAKE_GENERATOR}"
     RESULT_VARIABLE test_result
     )
 
@@ -20,5 +21,6 @@ endmacro()
 
 do_test("test_handshake" "tc_handshake.json")
 do_test("test_globalSettings" "tc_globalSettings.json")
+do_test("test_buildsystem1" "tc_buildsystem1.json")
 
 add_executable(Server empty.cpp)

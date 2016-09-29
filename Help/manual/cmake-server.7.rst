@@ -374,3 +374,264 @@ CMake will reply (after reporting progress information)::
   [== CMake Server ==[
   {"cookie":"","inReplyTo":"compute","type":"reply"}
   ]== CMake Server ==]
+
+
+Type "codemodel"
+^^^^^^^^^^^^^^^^
+
+The "codemodel" request can be used after a project was "compute"d successfully.
+
+It will list the complete project structure as it is known to cmake.
+
+The reply will contain a key "projects", which will contain a list of
+project objects, one for each (sub-)project defined in the cmake build system.
+
+Each project object can have the following keys:
+
+"name"
+  contains the (sub-)projects name.
+"sourceDirectory"
+  contains the current source directory
+"buildDirectory"
+  contains the current build directory.
+"configurations"
+  contains a list of configuration objects.
+
+Configuration objects are used to destinquish between different
+configurations the build directory might have enabled. While most generators
+only support one configuration, others support several.
+
+Each configuration object can have the following keys:
+
+"name"
+  contains the name of the configuration. The name may be empty.
+"targets"
+  contains a list of target objects, one for each build target.
+
+Target objects define individual build targets for a certain configuration.
+
+Each target object can have the following keys:
+
+"name"
+  contains the name of the target.
+"type"
+  defines the type of build of the target. Possible values are
+  "STATIC_LIBRARY", "MODULE_LIBRARY", "SHARED_LIBRARY", "OBJECT_LIBRARY",
+  "EXECUTABLE", "UTILITY" and "INTERFACE_LIBRARY".
+"fullName"
+  contains the full name of the build result (incl. extensions, etc.).
+"sourceDirectory"
+  contains the current source directory.
+"buildDirectory"
+  contains the current build directory.
+"artifacts"
+  with a list of build artifacts. The list is sorted with the most
+  important artifacts first (e.g. a .DLL file is listed before a
+  .PDB file on windows).
+"linkerLanguage"
+  contains the language of the linker used to produce the artifact.
+"linkLibraries"
+  with a list of libraries to link to. This value is encoded in the
+  system's native shell format.
+"linkFlags"
+  with a list of flags to pass to the linker. This value is encoded in
+  the system's native shell format.
+"linkLanguageFlags"
+  with the flags for a compiler using the linkerLanguage. This value is
+  encoded in the system's native shell format.
+"frameworkPath"
+  with the framework path (on Apple computers). This value is encoded
+  in the system's native shell format.
+"linkPath"
+  with the link path. This value is encoded in the system's native shell
+  format.
+"sysroot"
+  with the sysroot path.
+"fileGroups"
+  contains the source files making up the target.
+
+FileGroups are used to group sources using similar settings together.
+
+Each fileGroup object may contain the following keys:
+
+"language"
+  contains the programming language used by all files in the group.
+"compileFlags"
+  with a string containing all the flags passed to the compiler
+  when building any of the files in this group. This value is encoded in
+  the system's native shell format.
+"includePath"
+  with a list of include paths. Each include path is an object
+  containing a "path" with the actual include path and "isSystem" with a bool
+  value informing whether this is a normal include or a system include. This
+  value is encoded in the system's native shell format.
+"defines"
+  with a list of defines in the form "SOMEVALUE" or "SOMEVALUE=42". This
+  value is encoded in the system's native shell format.
+"sources"
+  with a list of source files.
+
+All file paths in the fileGroup are either absolute or relative to the
+sourceDirectory of the target.
+
+Example::
+
+  [== CMake Server ==[
+  {"type":"project"}
+  ]== CMake Server ==]
+
+CMake will reply::
+
+  [== CMake Server ==[
+  {
+    "cookie":"",
+    "type":"reply",
+    "inReplyTo":"project",
+
+    "projects":
+    [
+      {
+        "name":"CMAKE_FORM",
+        "sourceDirectory":"/home/code/src/cmake/Source/CursesDialog/form"
+        "buildDirectory":"/tmp/cmake-build-test/Source/CursesDialog/form",
+        "configurations":
+        [
+          {
+            "name":"",
+            "targets":
+            [
+              {
+                "artifactDirectory":"/tmp/cmake/Source/CursesDialog/form",
+                "fileGroups":
+                [
+                  {
+                    "compileFlags":"  -std=gnu11",
+                    "defines":
+                    [
+                      "SOMETHING=1",
+                      "LIBARCHIVE_STATIC"
+                    ],
+                    "includePath":
+                    [
+                      { "path":"/tmp/cmake-build-test/Utilities" },
+                      { "isSystem": true, "path":"/usr/include/something" },
+                      ...
+                    ]
+                    "language":"C",
+                    "sources":
+                    [
+                      "fld_arg.c",
+                      ...
+                      "fty_regex.c"
+                    ]
+                  }
+                ],
+                "fullName":"libcmForm.a",
+                "linkerLanguage":"C",
+                "name":"cmForm",
+                "type":"STATIC_LIBRARY"
+              }
+            ]
+          }
+        ],
+      },
+      ...
+    ]
+  }
+  ]== CMake Server ==]
+
+The output can be tailored to the specific needs via parameter passed when
+requesting "project" information.
+
+You can have a "depth" key, which accepts "project", "configuration" and
+"target" as string values. These cause the output to be trimmed at the
+appropriate depth of the output tree.
+
+You can also set "configurations" to an array of strings with configuration
+names to list. This will cause any configuration that is not listed to be
+trimmed from the output.
+
+Generated files can be included in the listing by setting "includeGeneratedFiles"
+to "true". This setting defaults to "false", so generated files are not
+listed by default.
+
+Finally you can limit the target types that are going to be listed. This is
+done by providing a list of target types as an array of strings to the
+"targetTypes" key.
+
+
+Type "cmakeInputs"
+^^^^^^^^^^^^^^^^^^
+
+The "cmakeInputs" requests will report files used by CMake as part
+of the build system itself.
+
+This request is only available after a project was successfully
+"configure"d.
+
+Example::
+
+  [== CMake Server ==[
+  {"type":"cmakeInputs"}
+  ]== CMake Server ==]
+
+CMake will reply with the following information::
+
+  [== CMake Server ==[
+  {"buildFiles":
+    [
+      {"isCMake":true,"isTemporary":false,"sources":["/usr/lib/cmake/...", ... ]},
+      {"isCMake":false,"isTemporary":false,"sources":["CMakeLists.txt", ...]},
+      {"isCMake":false,"isTemporary":true,"sources":["/tmp/build/CMakeFiles/...", ...]}
+    ],
+    "cmakeRootDirectory":"/usr/lib/cmake",
+    "sourceDirectory":"/home/code/src/cmake",
+    "cookie":"",
+    "inReplyTo":"cmakeInputs",
+    "type":"reply"
+  }
+  ]== CMake Server ==]
+
+All file names are either relative to the top level source directory or
+absolute.
+
+The list of files which "isCMake" set to true are part of the cmake installation.
+
+The list of files witch "isTemporary" set to true are part of the build directory
+and will not survive the build directory getting cleaned out.
+
+
+Type "cache"
+^^^^^^^^^^^^
+
+The "cache" request can be used once a project is configured and will
+list the cached configuration values.
+
+Example::
+
+  [== CMake Server ==[
+  {"type":"cache"}
+  ]== CMake Server ==]
+
+CMake will respond with the following output::
+
+  [== CMake Server ==[
+  {
+    "cookie":"","inReplyTo":"cache","type":"reply",
+    "cache":
+    [
+      {
+        "key":"SOMEVALUE",
+        "properties":
+        {
+          "ADVANCED":"1",
+          "HELPSTRING":"This is not helpful"
+        }
+        "type":"STRING",
+        "value":"TEST"}
+    ]
+  }
+  ]== CMake Server ==]
+
+The output can be limited to a list of keys by passing an array of key names
+to the "keys" optional field of the "cache" request.

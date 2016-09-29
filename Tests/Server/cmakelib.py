@@ -102,10 +102,20 @@ def waitForMessage(cmakeCommand, expected):
     sys.exit(-1)
   return packet
 
-def waitForReply(cmakeCommand, originalType, cookie):
-  packet = waitForRawMessage(cmakeCommand)
-  if packet['cookie'] != cookie or packet['type'] != 'reply' or packet['inReplyTo'] != originalType:
+def waitForReply(cmakeCommand, originalType, cookie, skipProgress):
+  gotResult = False
+  while True:
+    packet = waitForRawMessage(cmakeCommand)
+    t = packet['type']
+    if packet['cookie'] != cookie or packet['inReplyTo'] != originalType:
+      sys.exit(1)
+    if t == 'message' or t == 'progress':
+      if skipProgress:
+        continue
+    if t == 'reply':
+        break
     sys.exit(1)
+
   return packet
 
 def waitForError(cmakeCommand, originalType, cookie, message):
@@ -126,10 +136,10 @@ def handshake(cmakeCommand, major, minor, source, build, generator, extraGenerat
   writePayload(cmakeCommand, { 'type': 'handshake', 'protocolVersion': version,
     'cookie': 'TEST_HANDSHAKE', 'sourceDirectory': source, 'buildDirectory': build,
     'generator': generator, 'extraGenerator': extraGenerator })
-  waitForReply(cmakeCommand, 'handshake', 'TEST_HANDSHAKE')
+  waitForReply(cmakeCommand, 'handshake', 'TEST_HANDSHAKE', False)
 
 def validateGlobalSettings(cmakeCommand, cmakeCommandPath, data):
-  packet = waitForReply(cmakeCommand, 'globalSettings', '')
+  packet = waitForReply(cmakeCommand, 'globalSettings', '', False)
 
   capabilities = packet['capabilities']
 

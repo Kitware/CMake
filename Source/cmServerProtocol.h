@@ -108,6 +108,9 @@ private:
                   std::string* errorMessage) override;
 
   // Handle requests:
+  cmServerResponse ProcessCache(const cmServerRequest& request);
+  cmServerResponse ProcessCMakeInputs(const cmServerRequest& request);
+  cmServerResponse ProcessCodeModel(const cmServerRequest& request);
   cmServerResponse ProcessCompute(const cmServerRequest& request);
   cmServerResponse ProcessConfigure(const cmServerRequest& request);
   cmServerResponse ProcessGlobalSettings(const cmServerRequest& request);

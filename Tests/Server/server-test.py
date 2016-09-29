@@ -1,24 +1,25 @@
-import sys, cmakelib, json
+import sys, cmakelib, json, os, shutil
 
 debug = True
 
 cmakeCommand = sys.argv[1]
 testFile = sys.argv[2]
 sourceDir = sys.argv[3]
-buildDir = sys.argv[4]
+buildDir = sys.argv[4] + "/" + os.path.splitext(os.path.basename(testFile))[0]
+cmakeGenerator = sys.argv[5]
 
-print("SourceDir: ", sourceDir, " -- BuildDir: ", buildDir)
+print("Test:", testFile,
+      "\n-- SourceDir:", sourceDir,
+      "\n-- BuildDir:", buildDir,
+      "\n-- Generator:", cmakeGenerator)
+
+if os.path.exists(buildDir):
+    shutil.rmtree(buildDir)
 
 proc = cmakelib.initProc(cmakeCommand)
 
 with open(testFile) as f:
-    testText = f.read()
-    testText = testText.replace('%BUILDDIR%', buildDir)
-    testText = testText.replace('%SOURCEDIR%', sourceDir)
-    testData = json.loads(testText)
-
-buildDir = sys.argv[3]
-sourceDir = sys.argv[4]
+    testData = json.loads(f.read())
 
 for obj in testData:
     if 'sendRaw' in obj:
@@ -38,9 +39,11 @@ for obj in testData:
         if debug: print("Waiting for reply:", json.dumps(data))
         originalType = ""
         cookie = ""
+        skipProgress = False;
         if 'cookie' in data: cookie = data['cookie']
         if 'type' in data: originalType = data['type']
-        cmakelib.waitForReply(proc, originalType, cookie)
+        if 'skipProgress' in data: skipProgress = data['skipProgress']
+        cmakelib.waitForReply(proc, originalType, cookie, skipProgress)
     elif 'error' in obj:
         data = obj['error']
         if debug: print("Waiting for error:", json.dumps(data))
@@ -68,8 +71,8 @@ for obj in testData:
         if debug: print("Doing handshake:", json.dumps(data))
         major = -1
         minor = -1
-        generator = 'Ninja'
-        extraGenerator = 'CodeBlocks'
+        generator = cmakeGenerator
+        extraGenerator = ''
         sourceDirectory = sourceDir
         buildDirectory = buildDir
         if 'major' in data: major = data['major']
@@ -78,14 +81,18 @@ for obj in testData:
         if 'sourceDirectory' in data: sourceDirectory = data['sourceDirectory']
         if 'generator' in data: generator = data['generator']
         if 'extraGenerator' in data: extraGenerator = data['extraGenerator']
+        if not os.path.isabs(buildDirectory):
+            buildDirectory = buildDir + "/" + buildDirectory
+        if not os.path.isabs(sourceDirectory):
+            sourceDirectory = sourceDir + "/" + sourceDirectory
         cmakelib.handshake(proc, major, minor, sourceDirectory, buildDirectory,
           generator, extraGenerator)
     elif 'validateGlobalSettings' in obj:
         data = obj['validateGlobalSettings']
         if not 'buildDirectory' in data: data['buildDirectory'] = buildDir
         if not 'sourceDirectory' in data: data['sourceDirectory'] = sourceDir
-        if not 'generator' in data: data['generator'] = 'Ninja'
-        if not 'extraGenerator' in data: data['extraGenerator'] = 'CodeBlocks'
+        if not 'generator' in data: data['generator'] = cmakeGenerator
+        if not 'extraGenerator' in data: data['extraGenerator'] = ''
         cmakelib.validateGlobalSettings(proc, cmakeCommand, data)
     elif 'message' in obj:
         print("MESSAGE:", obj["message"])
