@@ -71,6 +71,13 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro)
   endif()
 endif()
 
+foreach(lang C CXX)
+  # Suppress warnings from PGI compiler.
+  if (CMAKE_${lang}_COMPILER_ID STREQUAL "PGI")
+    set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} -w")
+  endif()
+endforeach()
+
 # use the ansi CXX compile flag for building cmake
 if (CMAKE_ANSI_CXXFLAGS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")
