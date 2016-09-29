@@ -83,6 +83,17 @@ if(BUILD_TESTING)
     set(MAKE_SUPPORTS_SPACES 0)
   endif()
 
+  # assume no resources building to test
+  set(CMake_TEST_RESOURCES FALSE)
+  # for windows and cygwin assume we have resources
+  if(WIN32 OR CYGWIN)
+    set(CMake_TEST_RESOURCES TRUE)
+  endif()
+  # for borland and watcom there is no resource support
+  if(WATCOM OR BORLAND)
+    set(CMake_TEST_RESOURCES FALSE)
+  endif()
+
   set(build_generator_args
     --build-generator ${CMAKE_GENERATOR}
     )
@@ -262,17 +273,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(CompileFeatures CompileFeatures)
   ADD_TEST_MACRO(CMakeCommands.target_compile_features target_compile_features)
 
-  # assume no resources building to test
-  set(TEST_RESOURCES FALSE)
-  # for windows and cygwin assume we have resources
-  if(WIN32 OR CYGWIN)
-    set(TEST_RESOURCES TRUE)
-  endif()
-  # for borland and watcom there is no resource support
-  if(WATCOM OR BORLAND)
-    set(TEST_RESOURCES FALSE)
-  endif()
-  if(TEST_RESOURCES)
+  if(CMake_TEST_RESOURCES)
     ADD_TEST_MACRO(VSResource VSResource)
     if (CMAKE_GENERATOR MATCHES "Ninja")
       add_test_macro(VSResourceNinjaForceRSP VSResourceNinjaForceRSP)
