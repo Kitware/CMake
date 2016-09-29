@@ -58,7 +58,8 @@
 #        The test generator that is actually used (chosen using user preferences
 #        and interpreters found in the system)
 #    CXXTEST_TESTGEN_INTERPRETER (since CMake 2.8.3)
-#        The full path to the Perl or Python executable on the system
+#        The full path to the Perl or Python executable on the system, on
+#        platforms where the script cannot be executed using its shebang line.
 #
 #
 #
@@ -210,7 +211,13 @@ if(PYTHONINTERP_FOUND OR PERL_FOUND)
 
    if(PYTHONINTERP_FOUND AND (CXXTEST_USE_PYTHON OR NOT PERL_FOUND OR NOT DEFINED CXXTEST_USE_PYTHON))
       set(CXXTEST_TESTGEN_EXECUTABLE ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE})
-      set(CXXTEST_TESTGEN_INTERPRETER ${PYTHON_EXECUTABLE})
+      execute_process(COMMAND ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE} --version
+        OUTPUT_VARIABLE _CXXTEST_OUT ERROR_VARIABLE _CXXTEST_OUT RESULT_VARIABLE _CXXTEST_RESULT)
+      if(_CXXTEST_RESULT EQUAL 0)
+        set(CXXTEST_TESTGEN_INTERPRETER "")
+      else()
+        set(CXXTEST_TESTGEN_INTERPRETER ${PYTHON_EXECUTABLE})
+      endif()
       FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG
           CXXTEST_INCLUDE_DIR CXXTEST_PYTHON_TESTGEN_EXECUTABLE)
 
