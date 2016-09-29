@@ -31,6 +31,7 @@ CMAKE_USE_OPENSSL:BOOL=ON
 OPENSSL_CRYPTO_LIBRARY:FILEPATH=/home/kitware/openssl-1.0.2h/lib/libcrypto.a
 OPENSSL_INCLUDE_DIR:PATH=/home/kitware/openssl-1.0.2h/include
 OPENSSL_SSL_LIBRARY:FILEPATH=/home/kitware/openssl-1.0.2h/lib/libssl.a
+PYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3
 CPACK_SYSTEM_NAME:STRING=Linux-x86_64
 BUILD_QtDialog:BOOL:=TRUE
 CMake_ENABLE_SERVER_MODE:BOOL=TRUE
