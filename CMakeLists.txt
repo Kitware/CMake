@@ -695,15 +695,25 @@ endif()
 CMAKE_SETUP_TESTING()
 
 # Check whether to build server mode or not:
-set(CMake_ENABLE_SERVER_MODE 0)
-if(NOT CMake_TEST_EXTERNAL_CMAKE AND CMAKE_USE_LIBUV)
-  list(FIND CMAKE_CXX_COMPILE_FEATURES cxx_auto_type CMake_HAVE_CXX_AUTO_TYPE)
-  list(FIND CMAKE_CXX_COMPILE_FEATURES cxx_range_for CMake_HAVE_CXX_RANGE_FOR)
-  if(CMake_HAVE_CXX_AUTO_TYPE AND CMake_HAVE_CXX_RANGE_FOR)
-    if(CMake_HAVE_CXX_MAKE_UNIQUE)
+if(NOT CMake_TEST_EXTERNAL_CMAKE)
+  if(NOT DEFINED CMake_ENABLE_SERVER_MODE)
+    list(FIND CMAKE_CXX_COMPILE_FEATURES cxx_auto_type CMake_HAVE_CXX_AUTO_TYPE)
+    list(FIND CMAKE_CXX_COMPILE_FEATURES cxx_range_for CMake_HAVE_CXX_RANGE_FOR)
+    if(CMAKE_USE_LIBUV
+        AND CMake_HAVE_CXX_AUTO_TYPE
+        AND CMake_HAVE_CXX_MAKE_UNIQUE
+        AND CMake_HAVE_CXX_RANGE_FOR
+        )
       set(CMake_ENABLE_SERVER_MODE 1)
+    else()
+      set(CMake_ENABLE_SERVER_MODE 0)
     endif()
   endif()
+  if(CMake_ENABLE_SERVER_MODE AND NOT CMAKE_USE_LIBUV)
+    message(FATAL_ERROR "The server mode requires libuv!")
+  endif()
+else()
+  set(CMake_ENABLE_SERVER_MODE 0)
 endif()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
