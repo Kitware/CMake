@@ -66,6 +66,10 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#if defined(_WIN32) && !defined(_MSC_VER) && defined(__GNUC__)
+# include <strings.h> /* for strcasecmp */
+#endif
+
 #ifdef _MSC_VER
 # define umask _umask // Note this is still umask on Borland
 #endif
