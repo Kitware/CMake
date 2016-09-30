@@ -4,6 +4,7 @@
 
 #include "cmCacheManager.h"
 #include "cmExternalMakefileProjectGenerator.h"
+#include "cmFileMonitor.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
@@ -214,6 +215,11 @@ bool cmServerProtocol::Activate(cmServer* server,
   return result;
 }
 
+cmFileMonitor* cmServerProtocol::FileMonitor() const
+{
+  return this->m_Server ? this->m_Server->FileMonitor() : nullptr;
+}
+
 void cmServerProtocol::SendSignal(const std::string& name,
                                   const Json::Value& data) const
 {
@@ -365,6 +371,30 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
   return true;
 }
 
+void cmServerProtocol1_0::HandleCMakeFileChanges(const std::string& path,
+                                                 int event, int status)
+{
+  assert(status == 0);
+  static_cast<void>(status);
+
+  if (!m_isDirty) {
+    m_isDirty = true;
+    SendSignal(kDIRTY_SIGNAL, Json::objectValue);
+  }
+  Json::Value obj = Json::objectValue;
+  obj[kPATH_KEY] = path;
+  Json::Value properties = Json::arrayValue;
+  if (event & UV_RENAME) {
+    properties.append(kRENAME_PROPERTY_VALUE);
+  }
+  if (event & UV_CHANGE) {
+    properties.append(kCHANGE_PROPERTY_VALUE);
+  }
+
+  obj[kPROPERTIES_KEY] = properties;
+  SendSignal(kFILE_CHANGE_SIGNAL, obj);
+}
+
 const cmServerResponse cmServerProtocol1_0::Process(
   const cmServerRequest& request)
 {
@@ -384,6 +414,9 @@ const cmServerResponse cmServerProtocol1_0::Process(
   }
   if (request.Type == kCONFIGURE_TYPE) {
     return this->ProcessConfigure(request);
+  }
+  if (request.Type == kFILESYSTEM_WATCHERS_TYPE) {
+    return this->ProcessFileSystemWatchers(request);
   }
   if (request.Type == kGLOBAL_SETTINGS_TYPE) {
     return this->ProcessGlobalSettings(request);
@@ -862,6 +895,8 @@ cmServerResponse cmServerProtocol1_0::ProcessConfigure(
     return request.ReportError("This instance is inactive.");
   }
 
+  FileMonitor()->StopMonitoring();
+
   // Make sure the types of cacheArguments matches (if given):
   std::vector<std::string> cacheArgs;
   bool cacheArgumentsError = false;
@@ -938,7 +973,17 @@ cmServerResponse cmServerProtocol1_0::ProcessConfigure(
   if (ret < 0) {
     return request.ReportError("Configuration failed.");
   }
+
+  std::vector<std::string> toWatchList;
+  getCMakeInputs(gg, std::string(), buildDir, nullptr, &toWatchList, nullptr);
+
+  FileMonitor()->MonitorPaths(toWatchList,
+                              [this](const std::string& p, int e, int s) {
+                                this->HandleCMakeFileChanges(p, e, s);
+                              });
+
   m_State = STATE_CONFIGURED;
+  m_isDirty = false;
   return request.Reply(Json::Value());
 }
 
@@ -1010,4 +1055,23 @@ cmServerResponse cmServerProtocol1_0::ProcessSetGlobalSettings(
           [cm](bool e) { cm->SetCheckSystemVars(e); });
 
   return request.Reply(Json::Value());
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessFileSystemWatchers(
+  const cmServerRequest& request)
+{
+  const cmFileMonitor* const fm = FileMonitor();
+  Json::Value result = Json::objectValue;
+  Json::Value files = Json::arrayValue;
+  for (const auto& f : fm->WatchedFiles()) {
+    files.append(f);
+  }
+  Json::Value directories = Json::arrayValue;
+  for (const auto& d : fm->WatchedDirectories()) {
+    directories.append(d);
+  }
+  result[kWATCHED_FILES_KEY] = files;
+  result[kWATCHED_DIRECTORIES_KEY] = directories;
+
+  return request.Reply(result);
 }

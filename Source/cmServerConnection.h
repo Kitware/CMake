@@ -10,6 +10,7 @@
 #endif
 
 class cmServer;
+class cmFileMonitor;
 class LoopGuard;
 
 class cmServerConnection
@@ -29,6 +30,8 @@ public:
 
   virtual void Connect(uv_stream_t* server) { (void)(server); }
 
+  cmFileMonitor* FileMonitor() const { return this->mFileMonitor; }
+
 protected:
   virtual bool DoSetup(std::string* errorMessage) = 0;
   virtual void TearDown() = 0;
@@ -46,6 +49,7 @@ protected:
 
 private:
   uv_loop_t* mLoop = nullptr;
+  cmFileMonitor* mFileMonitor = nullptr;
   cmServer* Server = nullptr;
 
   friend class LoopGuard;

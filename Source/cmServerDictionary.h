@@ -6,12 +6,16 @@
 
 // Vocabulary:
 
+static const std::string kDIRTY_SIGNAL = "dirty";
+static const std::string kFILE_CHANGE_SIGNAL = "fileChange";
+
 static const std::string kCACHE_TYPE = "cache";
 static const std::string kCMAKE_INPUTS_TYPE = "cmakeInputs";
 static const std::string kCODE_MODEL_TYPE = "codemodel";
 static const std::string kCOMPUTE_TYPE = "compute";
 static const std::string kCONFIGURE_TYPE = "configure";
 static const std::string kERROR_TYPE = "error";
+static const std::string kFILESYSTEM_WATCHERS_TYPE = "fileSystemWatchers";
 static const std::string kGLOBAL_SETTINGS_TYPE = "globalSettings";
 static const std::string kHANDSHAKE_TYPE = "handshake";
 static const std::string kMESSAGE_TYPE = "message";
@@ -80,6 +84,11 @@ static const std::string kVALUE_KEY = "value";
 static const std::string kWARN_UNINITIALIZED_KEY = "warnUninitialized";
 static const std::string kWARN_UNUSED_CLI_KEY = "warnUnusedCli";
 static const std::string kWARN_UNUSED_KEY = "warnUnused";
+static const std::string kWATCHED_DIRECTORIES_KEY = "watchedDirectories";
+static const std::string kWATCHED_FILES_KEY = "watchedFiles";
 
 static const std::string kSTART_MAGIC = "[== CMake Server ==[";
 static const std::string kEND_MAGIC = "]== CMake Server ==]";
+
+static const std::string kRENAME_PROPERTY_VALUE = "rename";
+static const std::string kCHANGE_PROPERTY_VALUE = "change";

@@ -237,6 +237,11 @@ bool cmServer::Serve(std::string* errorMessage)
   return Connection->ProcessEvents(errorMessage);
 }
 
+cmFileMonitor* cmServer::FileMonitor() const
+{
+  return Connection->FileMonitor();
+}
+
 void cmServer::WriteJsonObject(const Json::Value& jsonValue,
                                const DebugInfo* debug) const
 {

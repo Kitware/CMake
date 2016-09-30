@@ -13,6 +13,7 @@
 #include <string>
 
 class cmake;
+class cmFileMonitor;
 class cmServer;
 
 class cmServerRequest;
@@ -81,6 +82,7 @@ public:
   bool Activate(cmServer* server, const cmServerRequest& request,
                 std::string* errorMessage);
 
+  cmFileMonitor* FileMonitor() const;
   void SendSignal(const std::string& name, const Json::Value& data) const;
 
 protected:
@@ -107,6 +109,8 @@ private:
   bool DoActivate(const cmServerRequest& request,
                   std::string* errorMessage) override;
 
+  void HandleCMakeFileChanges(const std::string& path, int event, int status);
+
   // Handle requests:
   cmServerResponse ProcessCache(const cmServerRequest& request);
   cmServerResponse ProcessCMakeInputs(const cmServerRequest& request);
@@ -115,6 +119,7 @@ private:
   cmServerResponse ProcessConfigure(const cmServerRequest& request);
   cmServerResponse ProcessGlobalSettings(const cmServerRequest& request);
   cmServerResponse ProcessSetGlobalSettings(const cmServerRequest& request);
+  cmServerResponse ProcessFileSystemWatchers(const cmServerRequest& request);
 
   enum State
   {
@@ -124,4 +129,6 @@ private:
     STATE_COMPUTED
   };
   State m_State = STATE_INACTIVE;
+
+  bool m_isDirty = false;
 };

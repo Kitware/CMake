@@ -194,6 +194,49 @@ are of type "signal", have an empty "cookie" and "inReplyTo" field and always
 have a "name" set to show which signal was sent.
 
 
+Specific Signals
+----------------
+
+The cmake server may sent signals with the following names:
+
+"dirty" Signal
+^^^^^^^^^^^^^^
+
+The "dirty" signal is sent whenever the server determines that the configuration
+of the project is no longer up-to-date. This happens when any of the files that have
+an influence on the build system is changed.
+
+The "dirty" signal may look like this::
+
+  [== CMake Server ==[
+  {
+    "cookie":"",
+    "inReplyTo":"",
+    "name":"dirty",
+    "type":"signal"}
+  ]== CMake Server ==]
+
+
+"fileChange" Signal
+^^^^^^^^^^^^^^^^^^^
+
+The "fileChange" signal is sent whenever a watched file is changed. It contains
+the "path" that has changed and a list of "properties" with the kind of change
+that was detected. Possible changes are "change" and "rename".
+
+The "fileChange" signal looks like this::
+
+  [== CMake Server ==[
+  {
+    "cookie":"",
+    "inReplyTo":"",
+    "name":"fileChange",
+    "path":"/absolute/CMakeLists.txt",
+    "properties":["change"],
+    "type":"signal"}
+  ]== CMake Server ==]
+
+
 Specific Message Types
 ----------------------
 
@@ -635,3 +678,26 @@ CMake will respond with the following output::
 
 The output can be limited to a list of keys by passing an array of key names
 to the "keys" optional field of the "cache" request.
+
+
+Type "fileSystemWatchers"
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The server can watch the filesystem for changes. The "fileSystemWatchers"
+command will report on the files and directories watched.
+
+Example::
+
+  [== CMake Server ==]
+  {"type":"fileSystemWatchers"}
+  [== CMake Server ==]
+
+CMake will respond with the following output::
+
+  [== CMake Server ==]
+  {
+    "cookie":"","inReplyTo":"fileSystemWatchers","type":"reply",
+    "watchedFiles": [ "/absolute/path" ],
+    "watchedDirectories": [ "/absolute" ]
+  }
+  [== CMake Server ==]
