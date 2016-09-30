@@ -102,4 +102,18 @@ for obj in testData:
 
     print("Completed")
 
+# Tell the server to exit.
+proc.stdin.close()
+proc.stdout.close()
+
+# Wait for the server to exit.
+# If this version of python supports it, terminate the server after a timeout.
+try:
+    proc.wait(timeout=5)
+except TypeError:
+    proc.wait()
+except:
+    proc.terminate()
+    raise
+
 sys.exit(0)
