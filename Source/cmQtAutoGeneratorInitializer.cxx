@@ -478,7 +478,7 @@ static bool ListQt5RccInputs(cmSourceFile* sf, cmGeneratorTarget const* target,
         << " failed:\n"
         << rccStdOut << "\n"
         << rccStdErr << std::endl;
-    std::cerr << err.str();
+    cmSystemTools::Error(err.str().c_str());
     return false;
   }
 
@@ -507,7 +507,7 @@ static bool ListQt5RccInputs(cmSourceFile* sf, cmGeneratorTarget const* target,
           std::ostringstream err;
           err << "AUTOGEN: error: Rcc lists unparsable output " << eline
               << std::endl;
-          std::cerr << err.str();
+          cmSystemTools::Error(err.str().c_str());
           return false;
         }
         pos += searchString.length();
