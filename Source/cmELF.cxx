@@ -289,6 +289,10 @@ public:
   }
 
 private:
+  // ByteSwap(ELF_Dyn) assumes d_val and d_ptr are the same size
+  typedef char dyn_size_assert
+    [sizeof(ELF_Dyn().d_un.d_val) == sizeof(ELF_Dyn().d_un.d_ptr) ? 1 : -1];
+
   void ByteSwap(ELF_Ehdr& elf_header)
   {
     cmELFByteSwap(elf_header.e_type);
@@ -323,121 +327,7 @@ private:
   void ByteSwap(ELF_Dyn& dyn)
   {
     cmELFByteSwap(dyn.d_tag);
-    switch (dyn.d_tag) {
-      case DT_NULL: /* dyn.d_un ignored */
-        break;
-      case DT_NEEDED:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_PLTRELSZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_PLTGOT:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_HASH:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_STRTAB:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_SYMTAB:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_RELA:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_RELASZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_RELAENT:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_STRSZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_SYMENT:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_INIT:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_FINI:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_SONAME:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_RPATH:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_SYMBOLIC: /* dyn.d_un ignored */
-        break;
-      case DT_REL:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_RELSZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_RELENT:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_PLTREL:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_DEBUG:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_TEXTREL: /* dyn.d_un ignored */
-        break;
-      case DT_JMPREL:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-#ifdef T_BIND_NOW
-      case T_BIND_NOW: /* dyn.d_un ignored */
-        break;
-#endif
-#ifdef DT_INIT_ARRAY
-      case DT_INIT_ARRAY:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-#endif
-#ifdef DT_FINI_ARRAY
-      case DT_FINI_ARRAY:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-#endif
-#ifdef DT_INIT_ARRAYSZ
-      case DT_INIT_ARRAYSZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-#endif
-#ifdef DT_FINI_ARRAYSZ
-      case DT_FINI_ARRAYSZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-#endif
-#ifdef DT_RUNPATH
-      case DT_RUNPATH:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-#endif
-#ifdef DT_FLAGS
-      case DT_FLAGS:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-#endif
-#ifdef DT_PREINIT_ARRAY
-      case DT_PREINIT_ARRAY:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-#endif
-#ifdef DT_PREINIT_ARRAYSZ
-      case DT_PREINIT_ARRAYSZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-#endif
-    }
+    cmELFByteSwap(dyn.d_un.d_val);
   }
 
   bool FileTypeValid(ELF_Half et)
