@@ -32,6 +32,8 @@ bool cmAuxSourceDirectoryCommand::InitialPass(
     sourceListValue = def;
   }
 
+  std::vector<std::string> files;
+
   // Load all the files in the directory
   cmsys::Directory dir;
   if (dir.Load(tdir.c_str())) {
@@ -55,14 +57,16 @@ bool cmAuxSourceDirectoryCommand::InitialPass(
           // depends can be done
           cmSourceFile* sf = this->Makefile->GetOrCreateSource(fullname);
           sf->SetProperty("ABSTRACT", "0");
-          if (!sourceListValue.empty()) {
-            sourceListValue += ";";
-          }
-          sourceListValue += fullname;
+          files.push_back(fullname);
         }
       }
     }
   }
+  std::sort(files.begin(), files.end());
+  if (!sourceListValue.empty()) {
+    sourceListValue += ";";
+  }
+  sourceListValue += cmJoin(files, ";");
   this->Makefile->AddDefinition(args[1], sourceListValue.c_str());
   return true;
 }
