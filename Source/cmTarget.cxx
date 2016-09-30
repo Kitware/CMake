@@ -102,6 +102,7 @@ cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
     this->SetPropertyDefault("ANDROID_JAR_DEPENDENCIES", CM_NULLPTR);
     this->SetPropertyDefault("ANDROID_ASSETS_DIRECTORIES", CM_NULLPTR);
     this->SetPropertyDefault("ANDROID_ANT_ADDITIONAL_OPTIONS", CM_NULLPTR);
+    this->SetPropertyDefault("BUILD_RPATH", CM_NULLPTR);
     this->SetPropertyDefault("INSTALL_NAME_DIR", CM_NULLPTR);
     this->SetPropertyDefault("INSTALL_RPATH", "");
     this->SetPropertyDefault("INSTALL_RPATH_USE_LINK_PATH", "OFF");

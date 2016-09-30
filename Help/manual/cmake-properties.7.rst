@@ -121,6 +121,7 @@ Properties on Targets
    /prop_tgt/AUTORCC
    /prop_tgt/AUTORCC_OPTIONS
    /prop_tgt/BINARY_DIR
+   /prop_tgt/BUILD_RPATH
    /prop_tgt/BUILD_WITH_INSTALL_RPATH
    /prop_tgt/BUNDLE_EXTENSION
    /prop_tgt/BUNDLE

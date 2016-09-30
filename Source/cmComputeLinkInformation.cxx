@@ -1710,6 +1710,12 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     const char* install_rpath = this->Target->GetProperty("INSTALL_RPATH");
     cmCLI_ExpandListUnique(install_rpath, runtimeDirs, emitted);
   }
+  if (use_build_rpath) {
+    // Add directories explicitly specified by user
+    if (const char* build_rpath = this->Target->GetProperty("BUILD_RPATH")) {
+      cmCLI_ExpandListUnique(build_rpath, runtimeDirs, emitted);
+    }
+  }
   if (use_build_rpath || use_link_rpath) {
     std::string rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
     const char* stagePath =
