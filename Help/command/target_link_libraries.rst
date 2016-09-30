@@ -62,6 +62,12 @@ Each ``<item>`` may be:
   dependencies, so they are generally safe to specify only as private link
   items that will not propagate to dependents.
 
+  Link flags specified here are inserted into the link command in the same
+  place as the link libraries. This might not be correct, depending on
+  the linker. Use the :prop_tgt:`LINK_FLAGS` target property to add link
+  flags explicitly. The flags will then be placed at the toolchain-defined
+  flag position in the link command.
+
 * A ``debug``, ``optimized``, or ``general`` keyword immediately followed
   by another ``<item>``.  The item following such a keyword will be used
   only for the corresponding build configuration.  The ``debug`` keyword
