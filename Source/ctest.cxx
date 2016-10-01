@@ -10,6 +10,9 @@
 #include "cmake.h"
 
 #include <cmsys/Encoding.hxx>
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+#include <cmsys/ConsoleBuf.hxx>
+#endif
 #include <iostream>
 #include <string.h>
 #include <string>
@@ -110,6 +113,11 @@ static const char* cmDocumentationOptions[][2] = {
 // this is a test driver program for cmCTest.
 int main(int argc, char const* const* argv)
 {
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+  // Replace streambuf so we can output Unicode to console
+  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
+  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
+#endif
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   argc = encoding_args.argc();

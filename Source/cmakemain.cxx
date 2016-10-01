@@ -18,6 +18,9 @@
 
 #include <cmConfigure.h>
 #include <cmsys/Encoding.hxx>
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+#include <cmsys/ConsoleBuf.hxx>
+#endif
 #include <iostream>
 #include <string.h>
 #include <string>
@@ -153,6 +156,11 @@ static void cmakemainProgressCallback(const char* m, float prog,
 
 int main(int ac, char const* const* av)
 {
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+  // Replace streambuf so we can output Unicode to console
+  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
+  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
+#endif
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);
   ac = args.argc();
