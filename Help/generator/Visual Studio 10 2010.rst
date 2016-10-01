@@ -4,7 +4,7 @@ Visual Studio 10 2010
 Generates Visual Studio 10 (VS 2010) project files.
 
 The :variable:`CMAKE_GENERATOR_PLATFORM` variable may be set
-to specify a target platform name.
+to specify a target platform name (architecture).
 
 For compatibility with CMake versions prior to 3.1, one may specify
 a target platform name optionally at the end of this generator name:

@@ -66,10 +66,12 @@
  Specify platform name if supported by generator.
 
  Some CMake generators support a platform name to be given to the
- native build system to choose a compiler or SDK.  This is supported only on
- specific generators::
+ native build system to choose a compiler or SDK.  See the
+ :variable:`CMAKE_GENERATOR_PLATFORM` variable.
+ This is supported only on specific generators:
 
-   Visual Studio >= 8
+ * For :ref:`Visual Studio Generators` with VS 2005 and above this
+   specifies the target architecture.
 
  See native build system documentation for allowed platform names.
 
