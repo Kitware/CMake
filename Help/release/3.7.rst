@@ -242,6 +242,10 @@ CPack
   :variable:`CPACK_RPM_SOURCE_PKG_BUILD_PARAMS` and
   :variable:`CPACK_RPM_SOURCE_PKG_PACKAGING_INSTALL_PREFIX`.
 
+* The CPack NSIS generator now supports
+  :variable:`CPACK_NSIS_<compName>_INSTALL_DIRECTORY`.
+  This can be used to set component specific installation directories.
+
 * The CPack WIX generator now supports
   :variable:`CPACK_WIX_SKIP_PROGRAM_FOLDER` to allow specification
   of a custom absolute installation prefix outside
