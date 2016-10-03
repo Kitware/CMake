@@ -164,6 +164,7 @@ void cmServerConnection::ReadData(const std::string& data)
 
 void cmServerConnection::HandleEof()
 {
+  this->FileMonitor()->StopMonitoring();
   this->TearDown();
 }
 
