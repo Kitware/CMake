@@ -306,16 +306,12 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   // reset lg to the first makefile
   lg = static_cast<cmLocalUnixMakefileGenerator3*>(this->LocalGenerators[0]);
 
-  // Build the path to the cache file.
-  std::string cache = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  cache += "/CMakeCache.txt";
-
   std::string currentBinDir = lg->GetCurrentBinaryDirectory();
   // Save the list to the cmake file.
   cmakefileStream
     << "# The top level Makefile was generated from the following files:\n"
     << "set(CMAKE_MAKEFILE_DEPENDS\n"
-    << "  \"" << lg->ConvertToRelativePath(currentBinDir, cache) << "\"\n";
+    << "  \"CMakeCache.txt\"\n";
   for (std::vector<std::string>::const_iterator i = lfiles.begin();
        i != lfiles.end(); ++i) {
     cmakefileStream << "  \"" << lg->ConvertToRelativePath(currentBinDir, *i)
