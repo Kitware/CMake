@@ -76,13 +76,14 @@ static bool cmOutputConverterNotAbove(const char* a, const char* b)
           cmSystemTools::IsSubDirectory(a, b));
 }
 
-std::string cmOutputConverter::ConvertToRelativePath(
-  std::string const& local_path, std::string const& remote_path) const
+bool cmOutputConverter::ContainedInDirectory(std::string const& local_path,
+                                             std::string const& remote_path,
+                                             cmState::Directory directory)
 {
   const std::string relativePathTopBinary =
-    this->StateSnapshot.GetDirectory().GetRelativePathTopBinary();
+    directory.GetRelativePathTopBinary();
   const std::string relativePathTopSource =
-    this->StateSnapshot.GetDirectory().GetRelativePathTopSource();
+    directory.GetRelativePathTopSource();
 
   const bool bothInBinary =
     cmOutputConverterNotAbove(local_path.c_str(),
@@ -96,7 +97,14 @@ std::string cmOutputConverter::ConvertToRelativePath(
     cmOutputConverterNotAbove(remote_path.c_str(),
                               relativePathTopSource.c_str());
 
-  if (!(bothInSource || bothInBinary)) {
+  return bothInSource || bothInBinary;
+}
+
+std::string cmOutputConverter::ConvertToRelativePath(
+  std::string const& local_path, std::string const& remote_path) const
+{
+  if (!ContainedInDirectory(local_path, remote_path,
+                            this->StateSnapshot.GetDirectory())) {
     return remote_path;
   }
 

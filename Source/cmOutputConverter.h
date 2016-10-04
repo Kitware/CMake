@@ -99,6 +99,10 @@ public:
   };
   static FortranFormat GetFortranFormat(const char* value);
 
+  static bool ContainedInDirectory(std::string const& local_path,
+                                   std::string const& remote_path,
+                                   cmState::Directory directory);
+
   /**
    * Convert the given remote path to a relative path with respect to
    * the given local path.  Both paths must use forward slashes and not
