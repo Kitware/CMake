@@ -79,13 +79,6 @@ static bool cmOutputConverterNotAbove(const char* a, const char* b)
 std::string cmOutputConverter::ConvertToRelativePath(
   std::string const& local_path, std::string const& remote_path) const
 {
-  // The paths should never be quoted.
-  assert(local_path[0] != '\"');
-  assert(remote_path[0] != '\"');
-
-  // The local path should never have a trailing slash.
-  assert(local_path.empty() || local_path[local_path.size() - 1] != '/');
-
   const std::string relativePathTopBinary =
     this->StateSnapshot.GetDirectory().GetRelativePathTopBinary();
   const std::string relativePathTopSource =
