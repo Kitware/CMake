@@ -66,7 +66,9 @@ public:
     Shell_Flag_AllowMakeVariables = (1 << 6),
 
     /** The target shell quoting uses extra single Quotes for Watcom tools.  */
-    Shell_Flag_WatcomQuote = (1 << 7)
+    Shell_Flag_WatcomQuote = (1 << 7),
+
+    Shell_Flag_IsUnix = (1 << 8)
   };
 
   std::string EscapeForShell(const std::string& str, bool makeVars = false,
@@ -116,11 +118,11 @@ private:
   static int Shell__CharIsWhitespace(char c);
   static int Shell__CharNeedsQuotesOnUnix(char c);
   static int Shell__CharNeedsQuotesOnWindows(char c);
-  static int Shell__CharNeedsQuotes(char c, int isUnix, int flags);
+  static int Shell__CharNeedsQuotes(char c, int flags);
   static int Shell__CharIsMakeVariableName(char c);
   static const char* Shell__SkipMakeVariables(const char* c);
-  static int Shell__ArgumentNeedsQuotes(const char* in, int isUnix, int flags);
-  static std::string Shell__GetArgument(const char* in, int isUnix, int flags);
+  static int Shell__ArgumentNeedsQuotes(const char* in, int flags);
+  static std::string Shell__GetArgument(const char* in, int flags);
 
 private:
   cmState::Snapshot StateSnapshot;
