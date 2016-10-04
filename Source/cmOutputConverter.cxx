@@ -240,9 +240,8 @@ std::string cmOutputConverter::EscapeForShell(const std::string& str,
     flags |= Shell_Flag_NMake;
   }
 
-  return this->GetState()->UseWindowsShell()
-    ? Shell_GetArgumentForWindows(str.c_str(), flags)
-    : Shell_GetArgumentForUnix(str.c_str(), flags);
+  return Shell__GetArgument(str.c_str(), !this->GetState()->UseWindowsShell(),
+                           flags);
 }
 
 std::string cmOutputConverter::EscapeForCMake(const std::string& str)
@@ -271,7 +270,7 @@ std::string cmOutputConverter::EscapeForCMake(const std::string& str)
 std::string cmOutputConverter::EscapeWindowsShellArgument(const char* arg,
                                                           int shell_flags)
 {
-  return Shell_GetArgumentForWindows(arg, shell_flags);
+  return Shell__GetArgument(arg, 0, shell_flags);
 }
 
 cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
@@ -631,16 +630,4 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int isUnix,
   }
 
   return out.str();
-}
-
-std::string cmOutputConverter::Shell_GetArgumentForWindows(const char* in,
-                                                           int flags)
-{
-  return Shell__GetArgument(in, 0, flags);
-}
-
-std::string cmOutputConverter::Shell_GetArgumentForUnix(const char* in,
-                                                        int flags)
-{
-  return Shell__GetArgument(in, 1, flags);
 }

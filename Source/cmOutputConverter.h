@@ -33,8 +33,7 @@ public:
   void SetLinkScriptShell(bool linkScriptShell);
 
   /**
-   * Flags to pass to Shell_GetArgumentForWindows or
-   * Shell_GetArgumentForUnix.  These modify the generated
+   * Flags to pass to Shell_GetArgument.  These modify the generated
    * quoting and escape sequences to work under alternative
    * environments.
    */
@@ -69,16 +68,6 @@ public:
     /** The target shell quoting uses extra single Quotes for Watcom tools.  */
     Shell_Flag_WatcomQuote = (1 << 7)
   };
-
-  /**
-   * Transform the given command line argument for use in a Windows or
-   * Unix shell.  Returns a pointer to the end of the command line
-   * argument in the provided output buffer.  Flags may be passed to
-   * modify the generated quoting and escape sequences to work under
-   * alternative environments.
-   */
-  static std::string Shell_GetArgumentForWindows(const char* in, int flags);
-  static std::string Shell_GetArgumentForUnix(const char* in, int flags);
 
   std::string EscapeForShell(const std::string& str, bool makeVars = false,
                              bool forEcho = false,
