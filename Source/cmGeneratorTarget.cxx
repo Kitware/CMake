@@ -4965,6 +4965,9 @@ bool cmGeneratorTarget::HaveBuildTreeRPATH(const std::string& config) const
   if (this->GetPropertyAsBool("SKIP_BUILD_RPATH")) {
     return false;
   }
+  if (this->GetProperty("BUILD_RPATH")) {
+    return true;
+  }
   if (cmLinkImplementationLibraries const* impl =
         this->GetLinkImplementationLibraries(config)) {
     return !impl->Libraries.empty();
