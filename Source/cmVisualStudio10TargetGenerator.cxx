@@ -2736,8 +2736,10 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
       (*this->BuildFileStream) << cmVS10EscapeXML(artifactDir)
                                << "\\</AppxPackageArtifactsDir>\n";
       this->WriteString("<ProjectPriFullPath>", 2);
-      (*this->BuildFileStream) << cmVS10EscapeXML(artifactDir)
-                               << "\\resources.pri</ProjectPriFullPath>\n";
+      std::string resourcePriFile =
+        this->DefaultArtifactDir + "/resources.pri";
+      this->ConvertToWindowsSlash(resourcePriFile);
+      (*this->BuildFileStream) << resourcePriFile << "</ProjectPriFullPath>\n";
 
       // If we are missing files and we don't have a certificate and
       // aren't targeting WP8.0, add a default certificate
