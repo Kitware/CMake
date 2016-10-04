@@ -32,16 +32,6 @@ class cmMakefile;
                       cmCPackLog_msg.str().c_str());                          \
   } while (0)
 
-#ifdef cerr
-#undef cerr
-#endif
-#define cerr no_cerr_use_cmCPack_Log
-
-#ifdef cout
-#undef cout
-#endif
-#define cout no_cout_use_cmCPack_Log
-
 /** \class cmCPackGenerator
  * \brief A superclass of all CPack Generators
  *

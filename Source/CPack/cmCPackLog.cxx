@@ -15,8 +15,6 @@ cmCPackLog::cmCPackLog()
   this->NewLine = true;
 
   this->LastTag = cmCPackLog::NOTAG;
-#undef cerr
-#undef cout
   this->DefaultOutput = &std::cout;
   this->DefaultError = &std::cerr;
 

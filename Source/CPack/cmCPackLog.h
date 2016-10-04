@@ -19,16 +19,6 @@
     (ctSelf)->Log(logType, __FILE__, __LINE__, cmCPackLog_msg.str().c_str()); \
   } while (0)
 
-#ifdef cerr
-#undef cerr
-#endif
-#define cerr no_cerr_use_cmCPack_Log
-
-#ifdef cout
-#undef cout
-#endif
-#define cout no_cout_use_cmCPack_Log
-
 /** \class cmCPackLog
  * \brief A container for CPack generators
  *

@@ -375,11 +375,7 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
   xml.StartElement("DefectList");
   for (cc = 0; cc < this->GlobalResults.size(); cc++) {
     if (this->GlobalResults[cc]) {
-#ifdef cerr
-#undef cerr
-#endif
       std::cerr.width(35);
-#define cerr no_cerr
       cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                          this->ResultStringsLong[cc]
                            << " - " << this->GlobalResults[cc] << std::endl,

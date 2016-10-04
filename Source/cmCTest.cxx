@@ -2651,13 +2651,6 @@ static const char* cmCTestStringLogType[] = { "DEBUG",
                                               "ERROR_MESSAGE",
                                               CM_NULLPTR };
 
-#ifdef cerr
-#undef cerr
-#endif
-#ifdef cout
-#undef cout
-#endif
-
 #define cmCTestLogOutputFileLine(stream)                                      \
   if (this->ShowLineNumbers) {                                                \
     (stream) << std::endl << file << ":" << line << " ";                      \

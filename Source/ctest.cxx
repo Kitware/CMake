@@ -163,11 +163,7 @@ int main(int argc, char const* const* argv)
       doc.SetSection("Name", cmDocumentationName);
       doc.SetSection("Usage", cmDocumentationUsage);
       doc.PrependSection("Options", cmDocumentationOptions);
-#ifdef cout
-#undef cout
-#endif
       return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
-#define cout no_cout_use_cmCTestLog
     }
   }
 
