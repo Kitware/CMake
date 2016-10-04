@@ -1374,8 +1374,7 @@ std::string cmLocalGenerator::GetTargetFortranFlags(
   return std::string();
 }
 
-std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib,
-                                                     OutputFormat format)
+std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   // Work-ardound command line parsing limitations in MSVC 6.0
@@ -1392,17 +1391,14 @@ std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib,
         // Append the rest of the path with no space.
         sp += lib.substr(pos);
 
-        // Convert to an output path.
-        return this->ConvertToOutputFormat(sp.c_str(), format);
+        return sp;
       }
     }
   }
 #endif
 
   // Normal behavior.
-  return this->ConvertToOutputFormat(
-    this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), lib),
-    format);
+  return this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), lib);
 }
 
 /**
@@ -1517,7 +1513,8 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
       continue;
     }
     if (li->IsPath) {
-      linkLibs += this->ConvertToLinkReference(li->Value, shellFormat);
+      linkLibs += this->ConvertToOutputFormat(
+        this->ConvertToLinkReference(li->Value), shellFormat);
     } else {
       linkLibs += li->Value;
     }

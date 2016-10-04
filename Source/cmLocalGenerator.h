@@ -367,9 +367,7 @@ protected:
   std::string& CreateSafeUniqueObjectFileName(const std::string& sin,
                                               std::string const& dir_max);
 
-  virtual std::string ConvertToLinkReference(
-    std::string const& lib,
-    cmOutputConverter::OutputFormat format = cmOutputConverter::SHELL);
+  virtual std::string ConvertToLinkReference(std::string const& lib);
 
   /** Check whether the native build system supports the given
       definition.  Issues a warning.  */
