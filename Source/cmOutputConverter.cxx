@@ -86,11 +86,6 @@ std::string cmOutputConverter::ConvertToRelativePath(
   // The local path should never have a trailing slash.
   assert(local_path.empty() || local_path[local_path.size() - 1] != '/');
 
-  // If the path is already relative then just return the path.
-  if (!cmSystemTools::FileIsFullPath(remote_path.c_str())) {
-    return remote_path;
-  }
-
   const std::string relativePathTopBinary =
     this->StateSnapshot.GetDirectory().GetRelativePathTopBinary();
   const std::string relativePathTopSource =
