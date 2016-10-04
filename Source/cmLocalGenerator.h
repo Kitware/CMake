@@ -82,6 +82,9 @@ public:
     return this->GlobalGenerator;
   }
 
+  std::string GetLinkLibsCMP0065(std::string const& linkLanguage,
+                                 cmGeneratorTarget& tgt) const;
+
   cmState* GetState() const;
   cmState::Snapshot GetStateSnapshot() const;
 

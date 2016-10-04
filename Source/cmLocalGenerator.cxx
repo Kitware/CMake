@@ -1428,58 +1428,14 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   }
   cmComputeLinkInformation& cli = *pcli;
 
-  // Collect library linking flags command line options.
-  std::string linkLibs;
-
   std::string linkLanguage = cli.GetLinkLanguage();
+
+  std::string linkLibs = this->GetLinkLibsCMP0065(linkLanguage, tgt);
 
   std::string libPathFlag =
     this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
   std::string libPathTerminator =
     this->Makefile->GetSafeDefinition("CMAKE_LIBRARY_PATH_TERMINATOR");
-
-  // Flags to link an executable to shared libraries.
-  if (tgt.GetType() == cmState::EXECUTABLE &&
-      this->StateSnapshot.GetState()->GetGlobalPropertyAsBool(
-        "TARGET_SUPPORTS_SHARED_LIBS")) {
-    bool add_shlib_flags = false;
-    switch (tgt.GetPolicyStatusCMP0065()) {
-      case cmPolicies::WARN:
-        if (!tgt.GetPropertyAsBool("ENABLE_EXPORTS") &&
-            this->Makefile->PolicyOptionalWarningEnabled(
-              "CMAKE_POLICY_WARNING_CMP0065")) {
-          std::ostringstream w;
-          /* clang-format off */
-          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0065) << "\n"
-            "For compatibility with older versions of CMake, "
-            "additional flags may be added to export symbols on all "
-            "executables regardless of their ENABLE_EXPORTS property.";
-          /* clang-format on */
-          this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
-        }
-      case cmPolicies::OLD:
-        // OLD behavior is to always add the flags
-        add_shlib_flags = true;
-        break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        this->IssueMessage(
-          cmake::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0065));
-      case cmPolicies::NEW:
-        // NEW behavior is to only add the flags if ENABLE_EXPORTS is on
-        add_shlib_flags = tgt.GetPropertyAsBool("ENABLE_EXPORTS");
-        break;
-    }
-
-    if (add_shlib_flags) {
-      std::string linkFlagsVar = "CMAKE_SHARED_LIBRARY_LINK_";
-      linkFlagsVar += linkLanguage;
-      linkFlagsVar += "_FLAGS";
-      linkLibs = this->Makefile->GetSafeDefinition(linkFlagsVar);
-      linkLibs += " ";
-    }
-  }
 
   // Append the framework search path flags.
   std::string fwSearchFlagVar = "CMAKE_";
@@ -1570,6 +1526,56 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   }
 
   linkLibraries = fout.str();
+}
+
+std::string cmLocalGenerator::GetLinkLibsCMP0065(
+  std::string const& linkLanguage, cmGeneratorTarget& tgt) const
+{
+  std::string linkLibs;
+
+  // Flags to link an executable to shared libraries.
+  if (tgt.GetType() == cmState::EXECUTABLE &&
+      this->StateSnapshot.GetState()->GetGlobalPropertyAsBool(
+        "TARGET_SUPPORTS_SHARED_LIBS")) {
+    bool add_shlib_flags = false;
+    switch (tgt.GetPolicyStatusCMP0065()) {
+      case cmPolicies::WARN:
+        if (!tgt.GetPropertyAsBool("ENABLE_EXPORTS") &&
+            this->Makefile->PolicyOptionalWarningEnabled(
+              "CMAKE_POLICY_WARNING_CMP0065")) {
+          std::ostringstream w;
+          /* clang-format off */
+          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0065) << "\n"
+            "For compatibility with older versions of CMake, "
+            "additional flags may be added to export symbols on all "
+            "executables regardless of their ENABLE_EXPORTS property.";
+          /* clang-format on */
+          this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        }
+      case cmPolicies::OLD:
+        // OLD behavior is to always add the flags
+        add_shlib_flags = true;
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        this->IssueMessage(
+          cmake::FATAL_ERROR,
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0065));
+      case cmPolicies::NEW:
+        // NEW behavior is to only add the flags if ENABLE_EXPORTS is on
+        add_shlib_flags = tgt.GetPropertyAsBool("ENABLE_EXPORTS");
+        break;
+    }
+
+    if (add_shlib_flags) {
+      std::string linkFlagsVar = "CMAKE_SHARED_LIBRARY_LINK_";
+      linkFlagsVar += linkLanguage;
+      linkFlagsVar += "_FLAGS";
+      linkLibs = this->Makefile->GetSafeDefinition(linkFlagsVar);
+      linkLibs += " ";
+    }
+  }
+  return linkLibs;
 }
 
 void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
