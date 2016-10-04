@@ -24,7 +24,7 @@ public:
   bool ProcessEvents(std::string* errorMessage);
 
   void ReadData(const std::string& data);
-  void HandleEof();
+  void TriggerShutdown();
   void WriteData(const std::string& data);
   void ProcessNextRequest();
 
@@ -51,6 +51,8 @@ private:
   uv_loop_t* mLoop = nullptr;
   cmFileMonitor* mFileMonitor = nullptr;
   cmServer* Server = nullptr;
+  uv_signal_t* SIGINTHandler = nullptr;
+  uv_signal_t* SIGHUPHandler = nullptr;
 
   friend class LoopGuard;
 };
@@ -58,6 +60,7 @@ private:
 class cmServerStdIoConnection : public cmServerConnection
 {
 public:
+  cmServerStdIoConnection();
   bool DoSetup(std::string* errorMessage) override;
 
   void TearDown() override;
@@ -65,9 +68,11 @@ public:
 private:
   typedef union
   {
-    uv_tty_t tty;
-    uv_pipe_t pipe;
+    uv_tty_t* tty;
+    uv_pipe_t* pipe;
   } InOutUnion;
+
+  bool usesTty = false;
 
   InOutUnion Input;
   InOutUnion Output;
@@ -85,6 +90,6 @@ public:
 
 private:
   const std::string PipeName;
-  uv_pipe_t ServerPipe;
-  uv_pipe_t ClientPipe;
+  uv_pipe_t* ServerPipe = nullptr;
+  uv_pipe_t* ClientPipe = nullptr;
 };
