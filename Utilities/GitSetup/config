@@ -1,5 +1,5 @@
 [hooks]
-	url = http://cmake.org/cmake.git
+	url = https://cmake.org/cmake.git
 [ssh]
 	host = cmake.org
 	key = id_git_cmake
