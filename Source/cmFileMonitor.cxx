@@ -12,7 +12,7 @@
 namespace {
 void on_directory_change(uv_fs_event_t* handle, const char* filename,
                          int events, int status);
-void on_handle_close(uv_handle_t* handle);
+void on_fs_close(uv_handle_t* handle);
 } // namespace
 
 class cmIBaseWatcher
@@ -177,7 +177,7 @@ public:
   {
     if (this->Handle) {
       uv_fs_event_stop(this->Handle);
-      uv_close(reinterpret_cast<uv_handle_t*>(this->Handle), &on_handle_close);
+      uv_close(reinterpret_cast<uv_handle_t*>(this->Handle), &on_fs_close);
       this->Handle = nullptr;
     }
     cmVirtualDirectoryWatcher::StopWatching();
@@ -292,9 +292,9 @@ void on_directory_change(uv_fs_event_t* handle, const char* filename,
   watcher->Trigger(pathSegment, events, status);
 }
 
-void on_handle_close(uv_handle_t* handle)
+void on_fs_close(uv_handle_t* handle)
 {
-  delete (reinterpret_cast<uv_fs_event_t*>(handle));
+  delete reinterpret_cast<uv_fs_event_t*>(handle);
 }
 
 } // namespace
