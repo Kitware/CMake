@@ -105,38 +105,141 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
   packageFileNames.clear();
   std::string initialTopLevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
 
-  // The default behavior is to have one package by component group
-  // unless CPACK_COMPONENTS_IGNORE_GROUP is specified.
-  if (!ignoreGroup) {
-    std::map<std::string, cmCPackComponentGroup>::iterator compGIt;
-    for (compGIt = this->ComponentGroups.begin();
-         compGIt != this->ComponentGroups.end(); ++compGIt) {
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Packaging component group: "
-                      << compGIt->first << std::endl);
-      retval &= PackageOnePack(initialTopLevel, compGIt->first);
-    }
-    // Handle Orphan components (components not belonging to any groups)
-    std::map<std::string, cmCPackComponent>::iterator compIt;
-    for (compIt = this->Components.begin(); compIt != this->Components.end();
-         ++compIt) {
-      // Does the component belong to a group?
-      if (compIt->second.Group == CM_NULLPTR) {
-        cmCPackLogger(
-          cmCPackLog::LOG_VERBOSE, "Component <"
-            << compIt->second.Name
-            << "> does not belong to any group, package it separately."
-            << std::endl);
-        retval &= PackageOnePack(initialTopLevel, compIt->first);
+  const char* mainComponent = this->GetOption("CPACK_RPM_MAIN_COMPONENT");
+
+  if (mainComponent) {
+    std::string mainComponentUpper(mainComponent);
+    std::transform(mainComponentUpper.begin(), mainComponentUpper.end(),
+                   mainComponentUpper.begin(), ::toupper);
+
+    // The default behavior is to have one package by component group
+    // unless CPACK_COMPONENTS_IGNORE_GROUP is specified.
+    if (!ignoreGroup) {
+      std::map<std::string, cmCPackComponentGroup>::iterator mainCompGIt =
+        this->ComponentGroups.end();
+
+      std::map<std::string, cmCPackComponentGroup>::iterator compGIt;
+      for (compGIt = this->ComponentGroups.begin();
+           compGIt != this->ComponentGroups.end(); ++compGIt) {
+        std::string component(compGIt->first);
+        std::transform(component.begin(), component.end(), component.begin(),
+                       ::toupper);
+
+        if (mainComponentUpper == component) {
+          // main component will be handled last
+          mainCompGIt = compGIt;
+          continue;
+        }
+
+        cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Packaging component group: "
+                        << compGIt->first << std::endl);
+        retval &= PackageOnePack(initialTopLevel, compGIt->first);
+      }
+      // Handle Orphan components (components not belonging to any groups)
+      std::map<std::string, cmCPackComponent>::iterator mainCompIt =
+        this->Components.end();
+      std::map<std::string, cmCPackComponent>::iterator compIt;
+      for (compIt = this->Components.begin(); compIt != this->Components.end();
+           ++compIt) {
+        // Does the component belong to a group?
+        if (compIt->second.Group == CM_NULLPTR) {
+          std::string component(compIt->first);
+          std::transform(component.begin(), component.end(), component.begin(),
+                         ::toupper);
+
+          if (mainComponentUpper == component) {
+            // main component will be handled last
+            mainCompIt = compIt;
+            continue;
+          }
+
+          cmCPackLogger(
+            cmCPackLog::LOG_VERBOSE, "Component <"
+              << compIt->second.Name
+              << "> does not belong to any group, package it separately."
+              << std::endl);
+          retval &= PackageOnePack(initialTopLevel, compIt->first);
+        }
+      }
+
+      if (retval) {
+        if (mainCompGIt != this->ComponentGroups.end()) {
+          retval &= PackageOnePack(initialTopLevel, mainCompGIt->first);
+        } else if (mainCompIt != this->Components.end()) {
+          retval &= PackageOnePack(initialTopLevel, mainCompIt->first);
+        } else {
+          cmCPackLogger(cmCPackLog::LOG_ERROR, "CPACK_RPM_MAIN_COMPONENT set"
+                          << " to non existing component.\n");
+          retval = 0;
+        }
       }
     }
-  }
-  // CPACK_COMPONENTS_IGNORE_GROUPS is set
-  // We build 1 package per component
-  else {
-    std::map<std::string, cmCPackComponent>::iterator compIt;
-    for (compIt = this->Components.begin(); compIt != this->Components.end();
-         ++compIt) {
-      retval &= PackageOnePack(initialTopLevel, compIt->first);
+    // CPACK_COMPONENTS_IGNORE_GROUPS is set
+    // We build 1 package per component
+    else {
+      std::map<std::string, cmCPackComponent>::iterator mainCompIt =
+        this->Components.end();
+
+      std::map<std::string, cmCPackComponent>::iterator compIt;
+      for (compIt = this->Components.begin(); compIt != this->Components.end();
+           ++compIt) {
+        std::string component(compIt->first);
+        std::transform(component.begin(), component.end(), component.begin(),
+                       ::toupper);
+
+        if (mainComponentUpper == component) {
+          // main component will be handled last
+          mainCompIt = compIt;
+          continue;
+        }
+
+        retval &= PackageOnePack(initialTopLevel, compIt->first);
+      }
+
+      if (retval) {
+        if (mainCompIt != this->Components.end()) {
+          retval &= PackageOnePack(initialTopLevel, mainCompIt->first);
+        } else {
+          cmCPackLogger(cmCPackLog::LOG_ERROR, "CPACK_RPM_MAIN_COMPONENT set"
+                          << " to non existing component.\n");
+          retval = 0;
+        }
+      }
+    }
+  } else {
+    // The default behavior is to have one package by component group
+    // unless CPACK_COMPONENTS_IGNORE_GROUP is specified.
+    if (!ignoreGroup) {
+      std::map<std::string, cmCPackComponentGroup>::iterator compGIt;
+      for (compGIt = this->ComponentGroups.begin();
+           compGIt != this->ComponentGroups.end(); ++compGIt) {
+        cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Packaging component group: "
+                        << compGIt->first << std::endl);
+        retval &= PackageOnePack(initialTopLevel, compGIt->first);
+      }
+      // Handle Orphan components (components not belonging to any groups)
+      std::map<std::string, cmCPackComponent>::iterator compIt;
+      for (compIt = this->Components.begin(); compIt != this->Components.end();
+           ++compIt) {
+        // Does the component belong to a group?
+        if (compIt->second.Group == CM_NULLPTR) {
+          cmCPackLogger(
+            cmCPackLog::LOG_VERBOSE, "Component <"
+              << compIt->second.Name
+              << "> does not belong to any group, package it separately."
+              << std::endl);
+          retval &= PackageOnePack(initialTopLevel, compIt->first);
+        }
+      }
+    }
+    // CPACK_COMPONENTS_IGNORE_GROUPS is set
+    // We build 1 package per component
+    else {
+      std::map<std::string, cmCPackComponent>::iterator compIt;
+      for (compIt = this->Components.begin(); compIt != this->Components.end();
+           ++compIt) {
+        retval &= PackageOnePack(initialTopLevel, compIt->first);
+      }
     }
   }
 

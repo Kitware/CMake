@@ -95,6 +95,17 @@
 #    and it is up to the packager to set the variables in a manner that will
 #    prevent such errors.
 #
+# .. variable:: CPACK_RPM_MAIN_COMPONENT
+#
+#  Main component that is packaged without component suffix.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  This variable can be set to any component or group name so that component or
+#  group rpm package is generated without component suffix in filename and
+#  package name.
+#
 # .. variable:: CPACK_RPM_PACKAGE_VERSION
 #
 #  The RPM package version.
@@ -1649,10 +1660,16 @@ function(cpack_rpm_generate_package)
   endif()
 
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    string(APPEND CPACK_RPM_PACKAGE_NAME "-${CPACK_RPM_PACKAGE_COMPONENT}")
-    cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_NAME"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_NAME"
-      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_NAME")
+    string(TOUPPER "${CPACK_RPM_MAIN_COMPONENT}"
+      CPACK_RPM_MAIN_COMPONENT_UPPER)
+
+    if(NOT CPACK_RPM_MAIN_COMPONENT_UPPER STREQUAL CPACK_RPM_PACKAGE_COMPONENT_UPPER)
+      string(APPEND CPACK_RPM_PACKAGE_NAME "-${CPACK_RPM_PACKAGE_COMPONENT}")
+
+      cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_NAME"
+        "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_NAME"
+        "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_NAME")
+    endif()
   endif()
 
   # CPACK_RPM_PACKAGE_VERSION (mandatory)
@@ -2164,7 +2181,15 @@ ${TMP_DEBUGINFO_ADDITIONAL_SOURCES}
       cmake_policy(POP)
     else()
       # old file name format for back compatibility
-      set(CPACK_RPM_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
+      string(TOUPPER "${CPACK_RPM_MAIN_COMPONENT}"
+        CPACK_RPM_MAIN_COMPONENT_UPPER)
+
+      if(CPACK_RPM_MAIN_COMPONENT_UPPER STREQUAL CPACK_RPM_PACKAGE_COMPONENT_UPPER)
+        # this is the main component so ignore the component filename part
+        set(CPACK_RPM_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}.rpm")
+      else()
+        set(CPACK_RPM_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
+      endif()
     endif()
     # else example:
     #set(CPACK_RPM_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}-${CPACK_RPM_PACKAGE_ARCHITECTURE}.rpm")
