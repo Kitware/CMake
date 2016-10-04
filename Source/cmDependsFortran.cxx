@@ -198,16 +198,13 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
       stamp += ".mod.stamp";
       fcStream << "\n";
       fcStream << "  \""
-               << this->LocalGenerator->ConvertToRelativePath(currentBinDir,
-                                                              mod_lower)
+               << this->MaybeConvertToRelativePath(currentBinDir, mod_lower)
                << "\"\n";
       fcStream << "  \""
-               << this->LocalGenerator->ConvertToRelativePath(currentBinDir,
-                                                              mod_upper)
+               << this->MaybeConvertToRelativePath(currentBinDir, mod_upper)
                << "\"\n";
       fcStream << "  \""
-               << this->LocalGenerator->ConvertToRelativePath(currentBinDir,
-                                                              stamp)
+               << this->MaybeConvertToRelativePath(currentBinDir, stamp)
                << "\"\n";
     }
     fcStream << "  )\n";
@@ -323,17 +320,16 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
 
   // Write the include dependencies to the output stream.
   std::string binDir = this->LocalGenerator->GetBinaryDirectory();
-  std::string obj_i = this->LocalGenerator->ConvertToRelativePath(binDir, obj);
+  std::string obj_i = this->MaybeConvertToRelativePath(binDir, obj);
   std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i.c_str());
   internalDepends << obj_i << std::endl;
   internalDepends << " " << src << std::endl;
   for (std::set<std::string>::const_iterator i = info.Includes.begin();
        i != info.Includes.end(); ++i) {
-    makeDepends
-      << obj_m << ": "
-      << cmSystemTools::ConvertToOutputPath(
-           this->LocalGenerator->ConvertToRelativePath(binDir, *i).c_str())
-      << std::endl;
+    makeDepends << obj_m << ": "
+                << cmSystemTools::ConvertToOutputPath(
+                     this->MaybeConvertToRelativePath(binDir, *i).c_str())
+                << std::endl;
     internalDepends << " " << *i << std::endl;
   }
   makeDepends << std::endl;
@@ -359,7 +355,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       proxy += *i;
       proxy += ".mod.proxy";
       proxy = cmSystemTools::ConvertToOutputPath(
-        this->LocalGenerator->ConvertToRelativePath(binDir, proxy).c_str());
+        this->MaybeConvertToRelativePath(binDir, proxy).c_str());
 
       // since we require some things add them to our list of requirements
       makeDepends << obj_m << ".requires: " << proxy << std::endl;
@@ -375,8 +371,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     if (!required->second.empty()) {
       // This module is known.  Depend on its timestamp file.
       std::string stampFile = cmSystemTools::ConvertToOutputPath(
-        this->LocalGenerator->ConvertToRelativePath(binDir, required->second)
-          .c_str());
+        this->MaybeConvertToRelativePath(binDir, required->second).c_str());
       makeDepends << obj_m << ": " << stampFile << "\n";
     } else {
       // This module is not known to CMake.  Try to locate it where
@@ -384,7 +379,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       std::string module;
       if (this->FindModule(*i, module)) {
         module = cmSystemTools::ConvertToOutputPath(
-          this->LocalGenerator->ConvertToRelativePath(binDir, module).c_str());
+          this->MaybeConvertToRelativePath(binDir, module).c_str());
         makeDepends << obj_m << ": " << module << "\n";
       }
     }
@@ -398,7 +393,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     proxy += *i;
     proxy += ".mod.proxy";
     proxy = cmSystemTools::ConvertToOutputPath(
-      this->LocalGenerator->ConvertToRelativePath(binDir, proxy).c_str());
+      this->MaybeConvertToRelativePath(binDir, proxy).c_str());
     makeDepends << proxy << ": " << obj_m << ".provides" << std::endl;
   }
 
@@ -420,14 +415,14 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       modFile += "/";
       modFile += *i;
       modFile = this->LocalGenerator->ConvertToOutputFormat(
-        this->LocalGenerator->ConvertToRelativePath(binDir, modFile),
+        this->MaybeConvertToRelativePath(binDir, modFile),
         cmOutputConverter::SHELL);
       std::string stampFile = stamp_dir;
       stampFile += "/";
       stampFile += m;
       stampFile += ".mod.stamp";
       stampFile = this->LocalGenerator->ConvertToOutputFormat(
-        this->LocalGenerator->ConvertToRelativePath(binDir, stampFile),
+        this->MaybeConvertToRelativePath(binDir, stampFile),
         cmOutputConverter::SHELL);
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod " << modFile
                   << " " << stampFile;
@@ -448,7 +443,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     std::string driver = this->TargetDirectory;
     driver += "/build";
     driver = cmSystemTools::ConvertToOutputPath(
-      this->LocalGenerator->ConvertToRelativePath(binDir, driver).c_str());
+      this->MaybeConvertToRelativePath(binDir, driver).c_str());
     makeDepends << driver << ": " << obj_m << ".provides.build\n";
   }
 
@@ -707,4 +702,10 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
   // including the case none was given, this will compare the whole
   // content.
   return cmFortranStreamsDiffer(finModFile, finStampFile);
+}
+
+std::string cmDependsFortran::MaybeConvertToRelativePath(
+  std::string const& base, std::string const& path)
+{
+  return this->LocalGenerator->ConvertToRelativePath(base, path);
 }
