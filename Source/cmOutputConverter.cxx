@@ -91,21 +91,22 @@ std::string cmOutputConverter::ConvertToRelativePath(
     return remote_path;
   }
 
+  const std::string relativePathTopBinary =
+    this->StateSnapshot.GetDirectory().GetRelativePathTopBinary();
+  const std::string relativePathTopSource =
+    this->StateSnapshot.GetDirectory().GetRelativePathTopSource();
+
   const bool bothInBinary =
-    cmOutputConverterNotAbove(
-      local_path.c_str(),
-      this->StateSnapshot.GetDirectory().GetRelativePathTopBinary()) &&
-    cmOutputConverterNotAbove(
-      remote_path.c_str(),
-      this->StateSnapshot.GetDirectory().GetRelativePathTopBinary());
+    cmOutputConverterNotAbove(local_path.c_str(),
+                              relativePathTopBinary.c_str()) &&
+    cmOutputConverterNotAbove(remote_path.c_str(),
+                              relativePathTopBinary.c_str());
 
   const bool bothInSource =
-    cmOutputConverterNotAbove(
-      local_path.c_str(),
-      this->StateSnapshot.GetDirectory().GetRelativePathTopSource()) &&
-    cmOutputConverterNotAbove(
-      remote_path.c_str(),
-      this->StateSnapshot.GetDirectory().GetRelativePathTopSource());
+    cmOutputConverterNotAbove(local_path.c_str(),
+                              relativePathTopSource.c_str()) &&
+    cmOutputConverterNotAbove(remote_path.c_str(),
+                              relativePathTopSource.c_str());
 
   if (!(bothInSource || bothInBinary)) {
     return remote_path;
