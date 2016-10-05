@@ -132,20 +132,12 @@ public:
 
   // Forward to the per-class implementation.
   virtual unsigned int GetNumberOfSections() const = 0;
-  virtual unsigned int GetDynamicEntryCount() = 0;
   virtual unsigned long GetDynamicEntryPosition(int j) = 0;
   virtual cmELF::DynamicEntryList GetDynamicEntries() = 0;
   virtual std::vector<char> EncodeDynamicEntries(
     const cmELF::DynamicEntryList&) = 0;
   virtual StringEntry const* GetDynamicSectionString(unsigned int tag) = 0;
   virtual void PrintInfo(std::ostream& os) const = 0;
-
-  bool ReadBytes(unsigned long pos, unsigned long size, char* buf)
-  {
-    this->Stream.seekg(pos);
-    this->Stream.read(buf, size);
-    return !this->Stream.fail();
-  }
 
   // Lookup the SONAME in the DYNAMIC section.
   StringEntry const* GetSOName()
@@ -249,8 +241,7 @@ public:
     return static_cast<unsigned int>(this->ELFHeader.e_shnum);
   }
 
-  // Get the file position and size of a dynamic section entry.
-  unsigned int GetDynamicEntryCount() CM_OVERRIDE;
+  // Get the file position of a dynamic section entry.
   unsigned long GetDynamicEntryPosition(int j) CM_OVERRIDE;
 
   cmELF::DynamicEntryList GetDynamicEntries() CM_OVERRIDE;
@@ -533,20 +524,6 @@ bool cmELFInternalImpl<Types>::LoadDynamicSection()
 }
 
 template <class Types>
-unsigned int cmELFInternalImpl<Types>::GetDynamicEntryCount()
-{
-  if (!this->LoadDynamicSection()) {
-    return 0;
-  }
-  for (unsigned int i = 0; i < this->DynamicSectionEntries.size(); ++i) {
-    if (this->DynamicSectionEntries[i].d_tag == DT_NULL) {
-      return i;
-    }
-  }
-  return static_cast<unsigned int>(this->DynamicSectionEntries.size());
-}
-
-template <class Types>
 unsigned long cmELFInternalImpl<Types>::GetDynamicEntryPosition(int j)
 {
   if (!this->LoadDynamicSection()) {
@@ -793,14 +770,6 @@ unsigned int cmELF::GetNumberOfSections() const
   return 0;
 }
 
-unsigned int cmELF::GetDynamicEntryCount() const
-{
-  if (this->Valid()) {
-    return this->Internal->GetDynamicEntryCount();
-  }
-  return 0;
-}
-
 unsigned long cmELF::GetDynamicEntryPosition(int index) const
 {
   if (this->Valid()) {
@@ -826,14 +795,6 @@ std::vector<char> cmELF::EncodeDynamicEntries(
   }
 
   return std::vector<char>();
-}
-
-bool cmELF::ReadBytes(unsigned long pos, unsigned long size, char* buf) const
-{
-  if (this->Valid()) {
-    return this->Internal->ReadBytes(pos, size, buf);
-  }
-  return false;
 }
 
 bool cmELF::GetSOName(std::string& soname)
