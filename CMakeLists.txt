@@ -10,6 +10,10 @@ if(POLICY CMP0053)
 endif()
 project(CMake)
 
+# Make sure we can find internal find_package modules only used for
+# building CMake and not for shipping externally
+list(INSERT CMAKE_MODULE_PATH 0 ${CMake_SOURCE_DIR}/Source/Modules)
+
 if(CMAKE_BOOTSTRAP)
   # Running from bootstrap script.  Set local variable and remove from cache.
   set(CMAKE_BOOTSTRAP 1)
@@ -441,7 +445,7 @@ macro (CMAKE_BUILD_UTILITIES)
   # Build jsoncpp library.
   if(CMAKE_USE_SYSTEM_JSONCPP)
     if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-      include(${CMake_SOURCE_DIR}/Source/Modules/FindJsonCpp.cmake)
+      find_package(JsonCpp)
     else()
       message(FATAL_ERROR "CMAKE_USE_SYSTEM_JSONCPP requires CMake >= 3.0")
     endif()
@@ -487,7 +491,7 @@ int main(void) { return 0; }
   if(CMAKE_USE_LIBUV)
     if(CMAKE_USE_SYSTEM_LIBUV)
       if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-        include(${CMake_SOURCE_DIR}/Source/Modules/FindLibUV.cmake)
+        find_package(LibUV)
       else()
         message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBUV requires CMake >= 3.0")
       endif()
