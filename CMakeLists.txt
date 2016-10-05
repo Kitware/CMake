@@ -491,7 +491,7 @@ int main(void) { return 0; }
   if(CMAKE_USE_LIBUV)
     if(CMAKE_USE_SYSTEM_LIBUV)
       if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-        find_package(LibUV)
+        find_package(LibUV 1.0.0)
       else()
         message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBUV requires CMake >= 3.0")
       endif()
