@@ -110,7 +110,8 @@ void cmMakefileTargetGenerator::CreateRuleFile()
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
   this->BuildFileStream =
-    new cmGeneratedFileStream(this->BuildFileNameFull.c_str());
+    new cmGeneratedFileStream(this->BuildFileNameFull.c_str(), false,
+                              this->GlobalGenerator->GetMakefileEncoding());
   this->BuildFileStream->SetCopyIfDifferent(true);
   if (!this->BuildFileStream) {
     return;
@@ -231,7 +232,9 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
   // make sure the depend file exists
   if (!cmSystemTools::FileExists(dependFileNameFull.c_str())) {
     // Write an empty dependency file.
-    cmGeneratedFileStream depFileStream(dependFileNameFull.c_str());
+    cmGeneratedFileStream depFileStream(
+      dependFileNameFull.c_str(), false,
+      this->GlobalGenerator->GetMakefileEncoding());
     depFileStream << "# Empty dependencies file for "
                   << this->GeneratorTarget->GetName() << ".\n"
                   << "# This may be replaced when dependencies are built."
@@ -243,7 +246,8 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
   this->FlagFileNameFull = this->TargetBuildDirectoryFull;
   this->FlagFileNameFull += "/flags.make";
   this->FlagFileStream =
-    new cmGeneratedFileStream(this->FlagFileNameFull.c_str());
+    new cmGeneratedFileStream(this->FlagFileNameFull.c_str(), false,
+                              this->GlobalGenerator->GetMakefileEncoding());
   this->FlagFileStream->SetCopyIfDifferent(true);
   if (!this->FlagFileStream) {
     return;

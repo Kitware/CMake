@@ -201,7 +201,8 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
     this->GetCMakeInstance()->GetHomeOutputDirectory();
   makefileName += cmake::GetCMakeFilesDirectory();
   makefileName += "/Makefile2";
-  cmGeneratedFileStream makefileStream(makefileName.c_str());
+  cmGeneratedFileStream makefileStream(makefileName.c_str(), false,
+                                       this->GetMakefileEncoding());
   if (!makefileStream) {
     return;
   }
