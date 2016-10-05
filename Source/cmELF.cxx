@@ -700,6 +700,12 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
 const long cmELF::TagRPath = DT_RPATH;
 const long cmELF::TagRunPath = DT_RUNPATH;
 
+#ifdef DT_MIPS_RLD_MAP_REL
+const long cmELF::TagMipsRldMapRel = DT_MIPS_RLD_MAP_REL;
+#else
+const long cmELF::TagMipsRldMapRel = 0;
+#endif
+
 cmELF::cmELF(const char* fname)
   : Internal(CM_NULLPTR)
 {

@@ -2536,6 +2536,10 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
       zeroSize[i] = se[i]->Size;
     }
 
+    // Get size of one DYNAMIC entry
+    unsigned long const sizeof_dentry =
+      elf.GetDynamicEntryPosition(1) - elf.GetDynamicEntryPosition(0);
+
     // Adjust the entry list as necessary to remove the run path
     unsigned long entriesErased = 0;
     for (cmELF::DynamicEntryList::iterator it = dentries.begin();
@@ -2545,6 +2549,26 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
         entriesErased++;
         continue;
       } else {
+        if (cmELF::TagMipsRldMapRel != 0 &&
+            it->first == cmELF::TagMipsRldMapRel) {
+          // Background: debuggers need to know the "linker map" which contains
+          // the addresses each dynamic object is loaded at. Most arches use
+          // the DT_DEBUG tag which the dynamic linker writes to (directly) and
+          // contain the location of the linker map, however on MIPS the
+          // .dynamic section is always read-only so this is not possible. MIPS
+          // objects instead contain a DT_MIPS_RLD_MAP tag which contains the
+          // address where the dyanmic linker will write to (an indirect
+          // version of DT_DEBUG). Since this doesn't work when using PIE, a
+          // relative equivalent was created - DT_MIPS_RLD_MAP_REL. Since this
+          // version contains a relative offset, moving it changes the
+          // calculated address. This may cause the dyanmic linker to write
+          // into memory it should not be changing.
+          //
+          // To fix this, we adjust the value of DT_MIPS_RLD_MAP_REL here. If
+          // we move it up by n bytes, we add n bytes to the value of this tag.
+          it->second += entriesErased * sizeof_dentry;
+        }
+
         it++;
       }
     }

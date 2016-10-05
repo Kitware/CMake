@@ -107,7 +107,7 @@ public:
 
   /** Interesting dynamic tags.
       If the tag is 0, it does not exist in the host ELF implementation */
-  static const long TagRPath, TagRunPath;
+  static const long TagRPath, TagRunPath, TagMipsRldMapRel;
 
 private:
   friend class cmELFInternal;
