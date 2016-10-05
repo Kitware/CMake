@@ -7,6 +7,8 @@
 
 #include <iosfwd>
 #include <string>
+#include <utility>
+#include <vector>
 
 #if !defined(CMAKE_USE_ELF_PARSER)
 #error "This file may be included only if CMAKE_USE_ELF_PARSER is enabled."
@@ -61,6 +63,9 @@ public:
     int IndexInSection;
   };
 
+  /** Represent entire dynamic section header */
+  typedef std::vector<std::pair<long, unsigned long> > DynamicEntryList;
+
   /** Get the type of the file opened.  */
   FileType GetFileType() const;
 
@@ -74,6 +79,15 @@ public:
   /** Get the position of a DYNAMIC section header entry.  Returns
       zero on error.  */
   unsigned long GetDynamicEntryPosition(int index) const;
+
+  /** Get a copy of all the DYNAMIC section header entries.
+      Returns an empty vector on error */
+  DynamicEntryList GetDynamicEntries() const;
+
+  /** Encodes a DYNAMIC section header entry list into a char vector according
+      to the type of ELF file this is */
+  std::vector<char> EncodeDynamicEntries(
+    const DynamicEntryList& entries) const;
 
   /** Read bytes from the file.  */
   bool ReadBytes(unsigned long pos, unsigned long size, char* buf) const;
@@ -90,6 +104,10 @@ public:
 
   /** Print human-readable information about the ELF file.  */
   void PrintInfo(std::ostream& os) const;
+
+  /** Interesting dynamic tags.
+      If the tag is 0, it does not exist in the host ELF implementation */
+  static const long TagRPath, TagRunPath;
 
 private:
   friend class cmELFInternal;

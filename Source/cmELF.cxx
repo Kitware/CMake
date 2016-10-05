@@ -134,6 +134,9 @@ public:
   virtual unsigned int GetNumberOfSections() const = 0;
   virtual unsigned int GetDynamicEntryCount() = 0;
   virtual unsigned long GetDynamicEntryPosition(int j) = 0;
+  virtual cmELF::DynamicEntryList GetDynamicEntries() = 0;
+  virtual std::vector<char> EncodeDynamicEntries(
+    const cmELF::DynamicEntryList&) = 0;
   virtual StringEntry const* GetDynamicSectionString(unsigned int tag) = 0;
   virtual void PrintInfo(std::ostream& os) const = 0;
 
@@ -249,6 +252,10 @@ public:
   // Get the file position and size of a dynamic section entry.
   unsigned int GetDynamicEntryCount() CM_OVERRIDE;
   unsigned long GetDynamicEntryPosition(int j) CM_OVERRIDE;
+
+  cmELF::DynamicEntryList GetDynamicEntries() CM_OVERRIDE;
+  std::vector<char> EncodeDynamicEntries(const cmELF::DynamicEntryList&)
+    CM_OVERRIDE;
 
   // Lookup a string from the dynamic section with the given tag.
   StringEntry const* GetDynamicSectionString(unsigned int tag) CM_OVERRIDE;
@@ -553,6 +560,54 @@ unsigned long cmELFInternalImpl<Types>::GetDynamicEntryPosition(int j)
 }
 
 template <class Types>
+cmELF::DynamicEntryList cmELFInternalImpl<Types>::GetDynamicEntries()
+{
+  cmELF::DynamicEntryList result;
+
+  // Ensure entries have been read from file
+  if (!this->LoadDynamicSection()) {
+    return result;
+  }
+
+  // Copy into public array
+  result.reserve(this->DynamicSectionEntries.size());
+  for (typename std::vector<ELF_Dyn>::iterator di =
+         this->DynamicSectionEntries.begin();
+       di != this->DynamicSectionEntries.end(); ++di) {
+    ELF_Dyn& dyn = *di;
+    result.push_back(
+      std::pair<unsigned long, unsigned long>(dyn.d_tag, dyn.d_un.d_val));
+  }
+
+  return result;
+}
+
+template <class Types>
+std::vector<char> cmELFInternalImpl<Types>::EncodeDynamicEntries(
+  const cmELF::DynamicEntryList& entries)
+{
+  std::vector<char> result;
+  result.reserve(sizeof(ELF_Dyn) * entries.size());
+
+  for (cmELF::DynamicEntryList::const_iterator it = entries.begin();
+       it != entries.end(); it++) {
+    // Store the entry in an ELF_Dyn, byteswap it, then serialize to chars
+    ELF_Dyn dyn;
+    dyn.d_tag = static_cast<tagtype>(it->first);
+    dyn.d_un.d_val = static_cast<tagtype>(it->second);
+
+    if (this->NeedSwap) {
+      ByteSwap(dyn);
+    }
+
+    char* pdyn = reinterpret_cast<char*>(&dyn);
+    result.insert(result.end(), pdyn, pdyn + sizeof(ELF_Dyn));
+  }
+
+  return result;
+}
+
+template <class Types>
 cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
   unsigned int tag)
 {
@@ -641,6 +696,9 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
 
 //============================================================================
 // External class implementation.
+
+const long cmELF::TagRPath = DT_RPATH;
+const long cmELF::TagRunPath = DT_RUNPATH;
 
 cmELF::cmELF(const char* fname)
   : Internal(CM_NULLPTR)
@@ -743,6 +801,25 @@ unsigned long cmELF::GetDynamicEntryPosition(int index) const
     return this->Internal->GetDynamicEntryPosition(index);
   }
   return 0;
+}
+
+cmELF::DynamicEntryList cmELF::GetDynamicEntries() const
+{
+  if (this->Valid()) {
+    return this->Internal->GetDynamicEntries();
+  }
+
+  return cmELF::DynamicEntryList();
+}
+
+std::vector<char> cmELF::EncodeDynamicEntries(
+  const cmELF::DynamicEntryList& dentries) const
+{
+  if (this->Valid()) {
+    return this->Internal->EncodeDynamicEntries(dentries);
+  }
+
+  return std::vector<char>();
 }
 
 bool cmELF::ReadBytes(unsigned long pos, unsigned long size, char* buf) const
