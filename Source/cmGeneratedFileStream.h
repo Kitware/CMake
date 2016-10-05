@@ -5,6 +5,7 @@
 
 #include <cmConfigure.h>
 
+#include <cm_codecvt.hxx>
 #include <cmsys/FStream.hxx>
 #include <string>
 
@@ -71,12 +72,13 @@ class cmGeneratedFileStream : private cmGeneratedFileStreamBase,
 {
 public:
   typedef cmsys::ofstream Stream;
+  typedef codecvt::Encoding Encoding;
 
   /**
    * This constructor prepares a default stream.  The open method must
    * be used before writing to the stream.
    */
-  cmGeneratedFileStream();
+  cmGeneratedFileStream(Encoding encoding = codecvt::None);
 
   /**
    * This constructor takes the name of the file to be generated.  It
@@ -84,7 +86,8 @@ public:
    * file cannot be opened an error message is produced unless the
    * second argument is set to true.
    */
-  cmGeneratedFileStream(const char* name, bool quiet = false);
+  cmGeneratedFileStream(const char* name, bool quiet = false,
+                        Encoding encoding = codecvt::None);
 
   /**
    * The destructor checks the stream status to be sure the temporary
