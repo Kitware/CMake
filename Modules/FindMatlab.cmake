@@ -1259,6 +1259,7 @@ if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
         Matlab_ENG_LIBRARY
         Matlab_MAT_LIBRARY
         Matlab_MEX_EXTENSION
+        Matlab_SIMULINK_INCLUDE_DIR
 
         # internal
         Matlab_MEXEXTENSIONS_PROG
