@@ -1427,7 +1427,8 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
     execute_process(COMMAND "${OBJDUMP_EXECUTABLE}" -h ${WORKING_DIR}/${F}
                     WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}"
                     RESULT_VARIABLE OBJDUMP_EXEC_RESULT
-                    OUTPUT_VARIABLE OBJDUMP_OUT)
+                    OUTPUT_VARIABLE OBJDUMP_OUT
+                    ERROR_QUIET)
     # Check that if the given file was executable or not
     if(NOT OBJDUMP_EXEC_RESULT)
       string(FIND "${OBJDUMP_OUT}" "debug" FIND_RESULT)
