@@ -384,6 +384,8 @@ set(SRCS
   cm_sha2.c
   cm_utf8.h
   cm_utf8.c
+  cm_codecvt.hxx
+  cm_codecvt.cxx
   )
 
 set(COMMAND_INCLUDES "#include \"cmTargetPropCommandBase.cxx\"\n")
