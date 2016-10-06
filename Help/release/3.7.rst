@@ -176,7 +176,14 @@ Modules
 * A :module:`FindICU` module was introduced to find the International
   Components for Unicode (ICU) libraries and programs.
 
-* The :module:`FindMatlab` module learned to find a SIMULINK component.
+* The :module:`FindMatlab` module learned to find the SIMULINK and MAT
+  components.
+
+* The :module:`FindMatlab` module :command:`matlab_add_mex` command learned
+  to add executables and modules.
+
+* The :module:`FindMatlab` module :command:`matlab_add_unit_test` command
+  learned to support inline Matlab test code.
 
 * The :module:`FindOpenCL` module now provides imported targets.
 

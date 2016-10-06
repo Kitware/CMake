@@ -737,9 +737,9 @@ endfunction()
 #     added to the Matlab path.
 #   ``CUSTOM_MATLAB_COMMAND``
 #     Matlab script command to run as the test.
-#     IIf this is not set, then the following is run:
-#     "runtests('matlab_file_name'), exit(max([ans(1,:).Failed]))
-#     matlab_file_name comes from UNITTEST_FILE without the .m.
+#     If this is not set, then the following is run:
+#     ``runtests('matlab_file_name'), exit(max([ans(1,:).Failed]))``
+#     where ``matlab_file_name`` is the ``UNITTEST_FILE`` without the extension.
 #   ``UNITTEST_PRECOMMAND``
 #     Matlab script command to be ran before the file
 #     containing the test (eg. GPU device initialisation based on CMake
@@ -753,7 +753,7 @@ endfunction()
 #   ``MATLAB_ADDITIONAL_STARTUP_OPTIONS``
 #     a list of additional option in order
 #     to run Matlab from the command line.
-#     -nosplash -nodesktop -nodisplay are always added.
+#     ``-nosplash -nodesktop -nodisplay`` are always added.
 #   ``TEST_ARGS``
 #     Additional options provided to the add_test command. These
 #     options are added to the default options (eg. "CONFIGURATIONS Release")
@@ -763,7 +763,7 @@ endfunction()
 #   ``WORKING_DIRECTORY``
 #     This will be the working directory for the test. If specified it will
 #     also be the output directory used for the log file of the test run.
-#     If not specifed the temporary directory ${CMAKE_BINARY_DIR}/Matlab will
+#     If not specifed the temporary directory ``${CMAKE_BINARY_DIR}/Matlab`` will
 #     be used as the working directory and the log location.
 #
 function(matlab_add_unit_test)
@@ -844,7 +844,6 @@ endfunction()
 #     the same folder without any processing, with the same name as the final
 #     mex file, and with extension `.m`. In that case, typing ``help <name>``
 #     in Matlab prints the documentation contained in this file.
-#
 #   ``MODULE`` or ``SHARED`` may be given to specify the type of library to be
 #     created. ``EXECUTABLE`` may be given to create an executable instead of
 #     a library. If no type is given explicitly, the type is ``SHARED``.
@@ -1246,8 +1245,8 @@ if(_numbers_of_matlab_roots GREATER 0)
 endif()
 
 
-# check if the root changed against the previous defined one, if so
-# clear all the cached variables
+# check if the root changed wrt. the previous defined one, if so
+# clear all the cached variables for being able to reconfigure properly
 if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
 
   if(NOT Matlab_ROOT_DIR_LAST_CACHED STREQUAL Matlab_ROOT_DIR)
