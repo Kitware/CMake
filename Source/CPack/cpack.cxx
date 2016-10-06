@@ -415,9 +415,7 @@ int main(int argc, char const* const* argv)
     }
     doc.SetSection("Generators", v);
 
-#undef cout
     return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
-#define cout no_cout_use_cmCPack_Log
   }
 
   if (cmSystemTools::GetErrorOccuredFlag()) {
