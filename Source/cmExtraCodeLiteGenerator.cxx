@@ -60,7 +60,6 @@ void cmExtraCodeLiteGenerator::Generate()
   // loop projects and locate the root project.
   // and extract the information for creating the worspace
   // root makefile
-  const cmMakefile* rmf = CM_NULLPTR;
   for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
          it = projectMap.begin();
        it != projectMap.end(); ++it) {
@@ -75,7 +74,6 @@ void cmExtraCodeLiteGenerator::Generate()
       workspaceFileName = workspaceOutputDir + "/";
       workspaceFileName += workspaceProjectName + ".workspace";
       this->WorkspacePath = it->second[0]->GetCurrentBinaryDirectory();
-      rmf = it->second[0]->GetMakefile();
       ;
       break;
     }
@@ -89,7 +87,7 @@ void cmExtraCodeLiteGenerator::Generate()
   xml.Attribute("Name", workspaceProjectName);
 
   bool const targetsAreProjects =
-    rmf && rmf->IsOn("CMAKE_CODELITE_USE_TARGETS");
+    this->GlobalGenerator->GlobalSettingIsOn("CMAKE_CODELITE_USE_TARGETS");
 
   std::vector<std::string> ProjectNames;
   if (targetsAreProjects) {
