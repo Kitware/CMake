@@ -17,8 +17,8 @@ foreach(f
   endif()
 endforeach()
 
-string(APPEND CMAKE_C_FLAGS " -Werror")
-string(APPEND CMAKE_CXX_FLAGS " -Werror")
+string(APPEND CMAKE_C_FLAGS " -Werror -Wno-attributes")
+string(APPEND CMAKE_CXX_FLAGS " -Werror -Wno-attributes")
 string(APPEND CMAKE_EXE_LINKER_FLAGS " -Wl,-no-undefined")
 
 if(CMAKE_ANDROID_NDK)

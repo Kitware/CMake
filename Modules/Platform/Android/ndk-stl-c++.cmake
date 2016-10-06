@@ -3,7 +3,13 @@ set(_ANDROID_STL_RTTI 1)
 set(_ANDROID_STL_EXCEPTIONS 1)
 macro(__android_stl_cxx lang filename)
   # Add the include directory.
-  __android_stl_inc(${lang} "${CMAKE_ANDROID_NDK}/sources/cxx-stl/llvm-libc++/libcxx/include" 1)
+  if(EXISTS "${CMAKE_ANDROID_NDK}/sources/cxx-stl/llvm-libc++/libcxx/include/cstddef")
+    # r12 and below
+    __android_stl_inc(${lang} "${CMAKE_ANDROID_NDK}/sources/cxx-stl/llvm-libc++/libcxx/include" 1)
+  else()
+    # r13 and above
+    __android_stl_inc(${lang} "${CMAKE_ANDROID_NDK}/sources/cxx-stl/llvm-libc++/include" 1)
+  endif()
 
   # Add a secondary include directory if it exists.
   __android_stl_inc(${lang} "${CMAKE_ANDROID_NDK}/sources/android/support/include" 0)
