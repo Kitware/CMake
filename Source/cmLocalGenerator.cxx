@@ -1531,7 +1531,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
 std::string cmLocalGenerator::GetLinkLibsCMP0065(
   std::string const& linkLanguage, cmGeneratorTarget& tgt) const
 {
-  std::string linkLibs;
+  std::string linkFlags;
 
   // Flags to link an executable to shared libraries.
   if (tgt.GetType() == cmState::EXECUTABLE &&
@@ -1571,11 +1571,10 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
       std::string linkFlagsVar = "CMAKE_SHARED_LIBRARY_LINK_";
       linkFlagsVar += linkLanguage;
       linkFlagsVar += "_FLAGS";
-      linkLibs = this->Makefile->GetSafeDefinition(linkFlagsVar);
-      linkLibs += " ";
+      linkFlags = this->Makefile->GetSafeDefinition(linkFlagsVar);
     }
   }
-  return linkLibs;
+  return linkFlags;
 }
 
 void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
