@@ -79,7 +79,7 @@ cmGlobalVisualStudio15Generator::cmGlobalVisualStudio15Generator(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\15.0\\Setup\\VC;"
     "ProductDir",
     vc15Express, cmSystemTools::KeyWOW64_32);
-  this->DefaultPlatformToolset = "v140";
+  this->DefaultPlatformToolset = "v141";
   this->Version = VS15;
 }
 
