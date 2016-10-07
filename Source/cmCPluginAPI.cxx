@@ -162,7 +162,14 @@ void CCONV cmAddLinkDirectoryForTarget(void* arg, const char* tgt,
                                        const char* d)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  mf->AddLinkDirectoryForTarget(tgt, d);
+  cmTarget* t = mf->FindLocalNonAliasTarget(tgt);
+  if (!t) {
+    cmSystemTools::Error(
+      "Attempt to add link directories to non-existent target: ", tgt,
+      " for directory ", d);
+    return;
+  }
+  t->AddLinkDirectory(d);
 }
 
 void CCONV cmAddExecutable(void* arg, const char* exename, int numSrcs,

@@ -202,7 +202,6 @@ public:
   void AddLinkLibrary(const std::string&, cmTargetLinkLibraryType type);
   void AddLinkLibraryForTarget(const std::string& tgt, const std::string&,
                                cmTargetLinkLibraryType type);
-  void AddLinkDirectoryForTarget(const std::string& tgt, const std::string& d);
 
   /**
    * Add a subdirectory to the build.

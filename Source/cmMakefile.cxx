@@ -1245,20 +1245,6 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
   i->second.AddLinkLibrary(*this, target, lib, llt);
 }
 
-void cmMakefile::AddLinkDirectoryForTarget(const std::string& target,
-                                           const std::string& d)
-{
-  cmTarget* t = this->FindLocalNonAliasTarget(target);
-  if (!t) {
-    cmSystemTools::Error(
-      "Attempt to add link directories to non-existent target: ",
-      target.c_str(), " for directory ", d.c_str());
-    return;
-  }
-
-  t->AddLinkDirectory(d);
-}
-
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
 {
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
