@@ -479,6 +479,7 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
 void cmTarget::MergeLinkLibraries(cmMakefile& mf, const std::string& selfname,
                                   const LinkLibraryVectorType& libs)
 {
+  assert(this->PrevLinkedLibraries.empty());
   // Only add on libraries we haven't added on before.
   // Assumption: the global link libraries could only grow, never shrink
   LinkLibraryVectorType::const_iterator i = libs.begin();
