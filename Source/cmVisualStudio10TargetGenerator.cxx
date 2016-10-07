@@ -76,7 +76,7 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetRcFlagTable() const
     cmGlobalVisualStudioGenerator::VSVersion v =
       this->LocalGenerator->GetVersion();
     if (v >= cmGlobalVisualStudioGenerator::VS15) {
-        return cmVS15MASMFlagTable;
+        return cmVS15RCFlagTable;
     } else if (v >= cmGlobalVisualStudioGenerator::VS14) {
       return cmVS14RCFlagTable;
     } else if (v >= cmGlobalVisualStudioGenerator::VS12) {

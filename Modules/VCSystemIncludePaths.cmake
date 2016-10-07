@@ -1,4 +1,5 @@
-﻿file(WRITE
+﻿ENABLE_LANGUAGE(CXX)
+file(WRITE
      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/vc_system_include_paths.cxx
      "#ifndef __cplusplus\n"
      "# error \"The CMAKE_CXX_COMPILER is set to a C compiler\"\n"

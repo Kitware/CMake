@@ -83,7 +83,7 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio15Generator::NewFactory()
 
 cmGlobalVisualStudio15Generator::cmGlobalVisualStudio15Generator(
   cmake* cm, const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio12Generator(cm, name, platformName)
+  : cmGlobalVisualStudio14Generator(cm, name, platformName)
 {
   std::string vc15Express;
   this->ExpressEdition = false;
@@ -100,36 +100,6 @@ bool cmGlobalVisualStudio15Generator::MatchesGeneratorName(
     return genName == this->GetName();
   }
   return false;
-}
-
-bool cmGlobalVisualStudio15Generator::InitializeWindows(cmMakefile* mf)
-{
-  if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
-    return this->SelectWindows10SDK(mf, false);
-  }
-  return true;
-}
-
-bool cmGlobalVisualStudio15Generator::InitializeWindowsStore(cmMakefile* mf)
-{
-  std::ostringstream e;
-  if (!this->SelectWindowsStoreToolset(this->DefaultPlatformToolset)) {
-    if (this->DefaultPlatformToolset.empty()) {
-      e << this->GetName() << " supports Windows Store '8.0', '8.1' and "
-                              "'10.0', but not '"
-        << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
-    } else {
-      e << "A Windows Store component with CMake requires both the Windows "
-        << "Desktop SDK as well as the Windows Store '" << this->SystemVersion
-        << "' SDK. Please make sure that you have both installed";
-    }
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return false;
-  }
-  if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
-    return this->SelectWindows10SDK(mf, true);
-  }
-  return true;
 }
 
 bool cmGlobalVisualStudio15Generator::SelectWindows10SDK(cmMakefile* mf,
@@ -178,26 +148,11 @@ void cmGlobalVisualStudio15Generator::WriteSLNHeader(std::ostream& fout)
 
 bool cmGlobalVisualStudio15Generator::IsWindowsDesktopToolsetInstalled() const
 {
-  //const char desktop10Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
-  //                            "VisualStudio\\15.0\\VC\\Runtimes";
-
-  //std::vector<std::string> vc15;
-  //return cmSystemTools::GetRegistrySubKeys(desktop10Key, vc15,
-  //                                         cmSystemTools::KeyWOW64_32);
-
   return true;
 }
 
 bool cmGlobalVisualStudio15Generator::IsWindowsStoreToolsetInstalled() const
 {
-  //const char universal10Key[] =
-  //  "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
-  //  "VisualStudio\\15.0\\Setup\\Build Tools for Windows 10;SrcPath";
-
-  //std::string win10SDK;
-  //return cmSystemTools::ReadRegistryValue(universal10Key, win10SDK,
-  //                                        cmSystemTools::KeyWOW64_32);
-
   return true;
 }
 

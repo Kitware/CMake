@@ -12,10 +12,10 @@
 #ifndef cmGlobalVisualStudio15Generator_h
 #define cmGlobalVisualStudio15Generator_h
 
-#include "cmGlobalVisualStudio12Generator.h"
+#include "cmGlobalVisualStudio14Generator.h"
 
 /** \class cmGlobalVisualStudio15Generator  */
-class cmGlobalVisualStudio15Generator : public cmGlobalVisualStudio12Generator
+class cmGlobalVisualStudio15Generator : public cmGlobalVisualStudio14Generator
 {
 public:
   cmGlobalVisualStudio15Generator(cmake* cm, const std::string& name,
@@ -30,8 +30,7 @@ public:
 
   virtual const char* GetToolsVersion() { return "15.0"; }
 protected:
-  virtual bool InitializeWindows(cmMakefile* mf);
-  virtual bool InitializeWindowsStore(cmMakefile* mf);
+
   virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
 
   // These aren't virtual because we need to check if the selected version
