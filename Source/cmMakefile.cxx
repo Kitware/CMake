@@ -1221,7 +1221,12 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
                                          cmTargetLinkLibraryType llt)
 {
   cmTargets::iterator i = this->Targets.find(target);
-  if (i != this->Targets.end()) {
+  if (i == this->Targets.end()) {
+    std::ostringstream e;
+    e << "Attempt to add link library \"" << lib << "\" to target \"" << target
+      << "\" which is not built in this directory.";
+    this->IssueMessage(cmake::FATAL_ERROR, e.str());
+  } else {
     cmTarget* tgt = this->GetGlobalGenerator()->FindTarget(lib);
     if (tgt) {
       // if it is not a static or shared library then you can not link to it
@@ -1239,11 +1244,6 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
       }
     }
     i->second.AddLinkLibrary(*this, target, lib, llt);
-  } else {
-    std::ostringstream e;
-    e << "Attempt to add link library \"" << lib << "\" to target \"" << target
-      << "\" which is not built in this directory.";
-    this->IssueMessage(cmake::FATAL_ERROR, e.str());
   }
 }
 
