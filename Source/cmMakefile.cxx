@@ -1248,14 +1248,15 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
 void cmMakefile::AddLinkDirectoryForTarget(const std::string& target,
                                            const std::string& d)
 {
-  cmTargets::iterator i = this->Targets.find(target);
-  if (i == this->Targets.end()) {
+  cmTarget* t = this->FindLocalNonAliasTarget(target);
+  if (!t) {
     cmSystemTools::Error(
       "Attempt to add link directories to non-existent target: ",
       target.c_str(), " for directory ", d.c_str());
     return;
   }
-  i->second.AddLinkDirectory(d);
+
+  t->AddLinkDirectory(d);
 }
 
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
