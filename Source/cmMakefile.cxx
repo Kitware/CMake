@@ -1216,35 +1216,6 @@ void cmMakefile::AddLinkLibrary(const std::string& lib,
   this->LinkLibraries.push_back(tmp);
 }
 
-void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
-                                         const std::string& lib,
-                                         cmTargetLinkLibraryType llt)
-{
-  cmTarget* t = this->FindLocalNonAliasTarget(target);
-  if (!t) {
-    std::ostringstream e;
-    e << "Attempt to add link library \"" << lib << "\" to target \"" << target
-      << "\" which is not built in this directory.";
-    this->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return;
-  }
-
-  cmTarget* tgt = this->GetGlobalGenerator()->FindTarget(lib);
-  if (tgt && (tgt->GetType() != cmState::STATIC_LIBRARY) &&
-      (tgt->GetType() != cmState::SHARED_LIBRARY) &&
-      (tgt->GetType() != cmState::INTERFACE_LIBRARY) &&
-      !tgt->IsExecutableWithExports()) {
-    std::ostringstream e;
-    e << "Target \"" << lib << "\" of type "
-      << cmState::GetTargetTypeName(tgt->GetType())
-      << " may not be linked into another target.  "
-      << "One may link only to STATIC or SHARED libraries, or "
-      << "to executables with the ENABLE_EXPORTS property set.";
-    this->IssueMessage(cmake::FATAL_ERROR, e.str());
-  }
-  t->AddLinkLibrary(*this, lib, llt);
-}
-
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
 {
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
