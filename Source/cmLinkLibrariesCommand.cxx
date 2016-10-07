@@ -30,7 +30,7 @@ bool cmLinkLibrariesCommand::InitialPass(std::vector<std::string> const& args,
       }
       this->Makefile->AddLinkLibrary(*i, OPTIMIZED_LibraryType);
     } else {
-      this->Makefile->AddLinkLibrary(*i);
+      this->Makefile->AddLinkLibrary(*i, GENERAL_LibraryType);
     }
   }
 

@@ -199,7 +199,6 @@ public:
   /**
    * Add a link library to the build.
    */
-  void AddLinkLibrary(const std::string&);
   void AddLinkLibrary(const std::string&, cmTargetLinkLibraryType type);
   void AddLinkLibraryForTarget(const std::string& tgt, const std::string&,
                                cmTargetLinkLibraryType type);

@@ -1267,11 +1267,6 @@ void cmMakefile::AddLinkDirectoryForTarget(const std::string& target,
   }
 }
 
-void cmMakefile::AddLinkLibrary(const std::string& lib)
-{
-  this->AddLinkLibrary(lib, GENERAL_LibraryType);
-}
-
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
 {
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
