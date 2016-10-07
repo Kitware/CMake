@@ -27,10 +27,12 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
           expected_content_list "${PACKAGE_CONTENT}")
 
       if(NOT expected_content_list)
+        string(REPLACE "\n" "\n actual> " msg_actual "\n${PACKAGE_CONTENT}")
+        string(REPLACE "\n" "\n expect> " msg_expected "\n${EXPECTED_FILE_CONTENT_${file_no_}}")
         message(FATAL_ERROR
           "Unexpected file content for file No. '${file_no_}'!\n"
-          " Content: '${PACKAGE_CONTENT}'\n\n"
-          " Expected: '${EXPECTED_FILE_CONTENT_${file_no_}}'"
+          "The content was:${msg_actual}\n"
+          "which does not match:${msg_expected}\n"
           "${output_error_message}")
       endif()
     else()
