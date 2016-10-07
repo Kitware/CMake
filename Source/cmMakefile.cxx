@@ -1207,15 +1207,6 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
   return true;
 }
 
-void cmMakefile::AddLinkLibrary(const std::string& lib,
-                                cmTargetLinkLibraryType llt)
-{
-  cmTarget::LibraryID tmp;
-  tmp.first = lib;
-  tmp.second = llt;
-  this->LinkLibraries.push_back(tmp);
-}
-
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
 {
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
@@ -1247,7 +1238,7 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   }
 
   // link libraries
-  this->LinkLibraries = parent->LinkLibraries;
+  this->SetProperty("LINK_LIBRARIES", parent->GetProperty("LINK_LIBRARIES"));
 
   // link directories
   this->SetProperty("LINK_DIRECTORIES",
@@ -1804,14 +1795,29 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
     }
   }
 
-  cmTarget::LinkLibraryVectorType::const_iterator i =
-    this->LinkLibraries.begin();
-  for (; i != this->LinkLibraries.end(); ++i) {
-    // This is equivalent to the target_link_libraries plain signature.
-    target.AddLinkLibrary(*this, i->first, i->second);
-    target.AppendProperty(
-      "INTERFACE_LINK_LIBRARIES",
-      target.GetDebugGeneratorExpressions(i->first, i->second).c_str());
+  if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
+    std::vector<std::string> linkLibs;
+    cmSystemTools::ExpandListArgument(linkLibsProp, linkLibs);
+
+    for (std::vector<std::string>::iterator j = linkLibs.begin();
+         j != linkLibs.end(); ++j) {
+      std::string libraryName = *j;
+      cmTargetLinkLibraryType libType = GENERAL_LibraryType;
+      if (libraryName == "optimized") {
+        libType = OPTIMIZED_LibraryType;
+        ++j;
+        libraryName = *j;
+      } else if (libraryName == "debug") {
+        libType = DEBUG_LibraryType;
+        ++j;
+        libraryName = *j;
+      }
+      // This is equivalent to the target_link_libraries plain signature.
+      target.AddLinkLibrary(*this, libraryName, libType);
+      target.AppendProperty(
+        "INTERFACE_LINK_LIBRARIES",
+        target.GetDebugGeneratorExpressions(libraryName, libType).c_str());
+    }
   }
 }
 
@@ -2074,19 +2080,32 @@ void cmMakefile::ExpandVariablesCMP0019()
       }
     }
   }
-  for (cmTarget::LinkLibraryVectorType::iterator l =
-         this->LinkLibraries.begin();
-       l != this->LinkLibraries.end(); ++l) {
-    if (mightExpandVariablesCMP0019(l->first.c_str())) {
-      std::string orig = l->first;
-      this->ExpandVariablesInString(l->first, true, true);
-      if (pol == cmPolicies::WARN && l->first != orig) {
-        /* clang-format off */
+
+  if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
+    std::vector<std::string> linkLibs;
+    cmSystemTools::ExpandListArgument(linkLibsProp, linkLibs);
+
+    for (std::vector<std::string>::iterator l = linkLibs.begin();
+         l != linkLibs.end(); ++l) {
+      std::string libName = *l;
+      if (libName == "optimized") {
+        ++l;
+        libName = *l;
+      } else if (libName == "debug") {
+        ++l;
+        libName = *l;
+      }
+      if (mightExpandVariablesCMP0019(libName.c_str())) {
+        std::string orig = libName;
+        this->ExpandVariablesInString(libName, true, true);
+        if (pol == cmPolicies::WARN && libName != orig) {
+          /* clang-format off */
         w << "Evaluated link library\n"
           << "  " << orig << "\n"
           << "as\n"
-          << "  " << l->first << "\n";
-        /* clang-format on */
+          << "  " << libName << "\n";
+          /* clang-format on */
+        }
       }
     }
   }

@@ -197,11 +197,6 @@ public:
     const char* comment = CM_NULLPTR, bool uses_terminal = false);
 
   /**
-   * Add a link library to the build.
-   */
-  void AddLinkLibrary(const std::string&, cmTargetLinkLibraryType type);
-
-  /**
    * Add a subdirectory to the build.
    */
   void AddSubDirectory(const std::string& fullSrcDir,
@@ -807,8 +802,6 @@ protected:
 
   std::vector<std::string> ListFiles;
   std::vector<std::string> OutputFiles;
-
-  cmTarget::LinkLibraryVectorType LinkLibraries;
 
   std::vector<cmInstallGenerator*> InstallGenerators;
   std::vector<cmTestGenerator*> TestGenerators;
