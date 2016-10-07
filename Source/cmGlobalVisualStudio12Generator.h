@@ -22,6 +22,9 @@ public:
   // version number
   virtual const char* GetToolsVersion() { return "12.0"; }
 protected:
+  bool ParseGeneratorToolset(std::string const& ts,
+                             cmMakefile* mf) CM_OVERRIDE;
+
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);
   virtual bool SelectWindowsPhoneToolset(std::string& toolset) const;

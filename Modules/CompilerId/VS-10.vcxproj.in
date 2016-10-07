@@ -16,6 +16,9 @@
     @id_WindowsSDKDesktopARMSupport@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup>
+    @id_PreferredToolArchitecture@
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|@id_platform@'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     @id_toolset@
