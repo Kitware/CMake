@@ -2518,9 +2518,9 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
       std::swap(se[0], se[1]);
     }
 
-    // Get the size of the dynamic section header.
-    unsigned int count = elf.GetDynamicEntryCount();
-    if (count == 0) {
+    // Obtain a copy of the dynamic entries
+    cmELF::DynamicEntryList dentries = elf.GetDynamicEntries();
+    if (dentries.empty()) {
       // This should happen only for invalid ELF files where a DT_NULL
       // appears before the end of the table.
       if (emsg) {
@@ -2536,40 +2536,46 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
       zeroSize[i] = se[i]->Size;
     }
 
-    // Get the range of file positions corresponding to each entry and
-    // the rest of the table after them.
-    unsigned long entryBegin[3] = { 0, 0, 0 };
-    unsigned long entryEnd[2] = { 0, 0 };
-    for (int i = 0; i < se_count; ++i) {
-      entryBegin[i] = elf.GetDynamicEntryPosition(se[i]->IndexInSection);
-      entryEnd[i] = elf.GetDynamicEntryPosition(se[i]->IndexInSection + 1);
-    }
-    entryBegin[se_count] = elf.GetDynamicEntryPosition(count);
+    // Get size of one DYNAMIC entry
+    unsigned long const sizeof_dentry =
+      elf.GetDynamicEntryPosition(1) - elf.GetDynamicEntryPosition(0);
 
-    // The data are to be written over the old table entries starting at
-    // the first one being removed.
-    bytesBegin = entryBegin[0];
-    unsigned long bytesEnd = entryBegin[se_count];
-
-    // Allocate a buffer to hold the part of the file to be written.
-    // Initialize it with zeros.
-    bytes.resize(bytesEnd - bytesBegin, 0);
-
-    // Read the part of the DYNAMIC section header that will move.
-    // The remainder of the buffer will be left with zeros which
-    // represent a DT_NULL entry.
-    char* data = &bytes[0];
-    for (int i = 0; i < se_count; ++i) {
-      // Read data between the entries being removed.
-      unsigned long sz = entryBegin[i + 1] - entryEnd[i];
-      if (sz > 0 && !elf.ReadBytes(entryEnd[i], sz, data)) {
-        if (emsg) {
-          *emsg = "Failed to read DYNAMIC section header.";
+    // Adjust the entry list as necessary to remove the run path
+    unsigned long entriesErased = 0;
+    for (cmELF::DynamicEntryList::iterator it = dentries.begin();
+         it != dentries.end();) {
+      if (it->first == cmELF::TagRPath || it->first == cmELF::TagRunPath) {
+        it = dentries.erase(it);
+        entriesErased++;
+        continue;
+      } else {
+        if (cmELF::TagMipsRldMapRel != 0 &&
+            it->first == cmELF::TagMipsRldMapRel) {
+          // Background: debuggers need to know the "linker map" which contains
+          // the addresses each dynamic object is loaded at. Most arches use
+          // the DT_DEBUG tag which the dynamic linker writes to (directly) and
+          // contain the location of the linker map, however on MIPS the
+          // .dynamic section is always read-only so this is not possible. MIPS
+          // objects instead contain a DT_MIPS_RLD_MAP tag which contains the
+          // address where the dyanmic linker will write to (an indirect
+          // version of DT_DEBUG). Since this doesn't work when using PIE, a
+          // relative equivalent was created - DT_MIPS_RLD_MAP_REL. Since this
+          // version contains a relative offset, moving it changes the
+          // calculated address. This may cause the dyanmic linker to write
+          // into memory it should not be changing.
+          //
+          // To fix this, we adjust the value of DT_MIPS_RLD_MAP_REL here. If
+          // we move it up by n bytes, we add n bytes to the value of this tag.
+          it->second += entriesErased * sizeof_dentry;
         }
-        return false;
+
+        it++;
       }
-      data += sz;
     }
+
+    // Encode new entries list
+    bytes = elf.EncodeDynamicEntries(dentries);
+    bytesBegin = elf.GetDynamicEntryPosition(0);
   }
 
   // Open the file for update.
