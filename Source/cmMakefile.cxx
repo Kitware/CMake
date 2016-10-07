@@ -1220,8 +1220,8 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
                                          const std::string& lib,
                                          cmTargetLinkLibraryType llt)
 {
-  cmTargets::iterator i = this->Targets.find(target);
-  if (i == this->Targets.end()) {
+  cmTarget* t = this->FindLocalNonAliasTarget(target);
+  if (!t) {
     std::ostringstream e;
     e << "Attempt to add link library \"" << lib << "\" to target \"" << target
       << "\" which is not built in this directory.";
@@ -1242,7 +1242,7 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
       << "to executables with the ENABLE_EXPORTS property set.";
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
   }
-  i->second.AddLinkLibrary(*this, target, lib, llt);
+  t->AddLinkLibrary(*this, target, lib, llt);
 }
 
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
