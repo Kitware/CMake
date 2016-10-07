@@ -578,8 +578,7 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
   }
 }
 
-void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& target,
-                              const std::string& lib,
+void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
                               cmTargetLinkLibraryType llt)
 {
   cmTarget* tgt = this->Makefile->FindTargetToUse(lib);
@@ -597,7 +596,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& target,
 
   if (cmGeneratorExpression::Find(lib) != std::string::npos ||
       (tgt && tgt->GetType() == cmState::INTERFACE_LIBRARY) ||
-      (target == lib)) {
+      (this->Name == lib)) {
     return;
   }
 
@@ -615,7 +614,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& target,
   // and we removing one instance will break the link line. Duplicates
   // will be appropriately eliminated at emit time.
   if (this->RecordDependencies) {
-    std::string targetEntry = target;
+    std::string targetEntry = this->Name;
     targetEntry += "_LIB_DEPENDS";
     std::string dependencies;
     const char* old_val = mf.GetDefinition(targetEntry);

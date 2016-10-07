@@ -1242,7 +1242,7 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
       << "to executables with the ENABLE_EXPORTS property set.";
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
   }
-  t->AddLinkLibrary(*this, target, lib, llt);
+  t->AddLinkLibrary(*this, lib, llt);
 }
 
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
@@ -1808,7 +1808,7 @@ void cmMakefile::SetProjectName(std::string const& p)
   this->StateSnapshot.SetProjectName(p);
 }
 
-void cmMakefile::AddGlobalLinkInformation(const std::string& name,
+void cmMakefile::AddGlobalLinkInformation(const std::string& /* name */,
                                           cmTarget& target)
 {
   // for these targets do not add anything
@@ -1838,7 +1838,7 @@ void cmMakefile::AddGlobalLinkInformation(const std::string& name,
     this->LinkLibraries.begin();
   for (; i != this->LinkLibraries.end(); ++i) {
     // This is equivalent to the target_link_libraries plain signature.
-    target.AddLinkLibrary(*this, name, i->first, i->second);
+    target.AddLinkLibrary(*this, i->first, i->second);
     target.AppendProperty(
       "INTERFACE_LINK_LIBRARIES",
       target.GetDebugGeneratorExpressions(i->first, i->second).c_str());

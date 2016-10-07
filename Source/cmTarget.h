@@ -142,8 +142,8 @@ public:
    */
   void ClearDependencyInformation(cmMakefile& mf, const std::string& target);
 
-  void AddLinkLibrary(cmMakefile& mf, const std::string& target,
-                      const std::string& lib, cmTargetLinkLibraryType llt);
+  void AddLinkLibrary(cmMakefile& mf, const std::string& lib,
+                      cmTargetLinkLibraryType llt);
   enum TLLSignature
   {
     KeywordTLLSignature,
