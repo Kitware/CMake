@@ -299,7 +299,6 @@ private:
   std::vector<cmCustomCommand> PreLinkCommands;
   std::vector<cmCustomCommand> PostBuildCommands;
   std::vector<std::pair<TLLSignature, cmListFileContext> > TLLCommands;
-  LinkLibraryVectorType PrevLinkedLibraries;
   LinkLibraryVectorType OriginalLinkLibraries;
   cmMakefile* Makefile;
   cmTargetInternalPointer Internal;

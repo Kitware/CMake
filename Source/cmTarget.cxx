@@ -479,9 +479,6 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
 void cmTarget::MergeLinkLibraries(cmMakefile& mf, const std::string& selfname,
                                   const LinkLibraryVectorType& libs)
 {
-  assert(this->PrevLinkedLibraries.empty());
-  // Only add on libraries we haven't added on before.
-  // Assumption: the global link libraries could only grow, never shrink
   LinkLibraryVectorType::const_iterator i = libs.begin();
   for (; i != libs.end(); ++i) {
     // This is equivalent to the target_link_libraries plain signature.
@@ -490,7 +487,6 @@ void cmTarget::MergeLinkLibraries(cmMakefile& mf, const std::string& selfname,
       "INTERFACE_LINK_LIBRARIES",
       this->GetDebugGeneratorExpressions(i->first, i->second).c_str());
   }
-  this->PrevLinkedLibraries = libs;
 }
 
 void cmTarget::AddLinkDirectory(const std::string& d)
