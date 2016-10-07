@@ -14,3 +14,10 @@ a target platform name optionally at the end of this generator name:
 
 ``Visual Studio 15 ARM``
   Specify target platform ``ARM``.
+
+Toolset Selection
+^^^^^^^^^^^^^^^^^
+
+The ``v141`` toolset that comes with Visual Studio 15 is selected by
+default.  The :variable:`CMAKE_GENERATOR_TOOLSET` option may be set, perhaps
+via the :manual:`cmake(1)` ``-T`` option, to specify another toolset.
