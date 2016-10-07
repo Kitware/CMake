@@ -1226,25 +1226,26 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
     e << "Attempt to add link library \"" << lib << "\" to target \"" << target
       << "\" which is not built in this directory.";
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
-  } else {
-    cmTarget* tgt = this->GetGlobalGenerator()->FindTarget(lib);
-    if (tgt) {
-      // if it is not a static or shared library then you can not link to it
-      if (!((tgt->GetType() == cmState::STATIC_LIBRARY) ||
-            (tgt->GetType() == cmState::SHARED_LIBRARY) ||
-            (tgt->GetType() == cmState::INTERFACE_LIBRARY) ||
-            tgt->IsExecutableWithExports())) {
-        std::ostringstream e;
-        e << "Target \"" << lib << "\" of type "
-          << cmState::GetTargetTypeName(tgt->GetType())
-          << " may not be linked into another target.  "
-          << "One may link only to STATIC or SHARED libraries, or "
-          << "to executables with the ENABLE_EXPORTS property set.";
-        this->IssueMessage(cmake::FATAL_ERROR, e.str());
-      }
-    }
-    i->second.AddLinkLibrary(*this, target, lib, llt);
+    return;
   }
+
+  cmTarget* tgt = this->GetGlobalGenerator()->FindTarget(lib);
+  if (tgt) {
+    // if it is not a static or shared library then you can not link to it
+    if (!((tgt->GetType() == cmState::STATIC_LIBRARY) ||
+          (tgt->GetType() == cmState::SHARED_LIBRARY) ||
+          (tgt->GetType() == cmState::INTERFACE_LIBRARY) ||
+          tgt->IsExecutableWithExports())) {
+      std::ostringstream e;
+      e << "Target \"" << lib << "\" of type "
+        << cmState::GetTargetTypeName(tgt->GetType())
+        << " may not be linked into another target.  "
+        << "One may link only to STATIC or SHARED libraries, or "
+        << "to executables with the ENABLE_EXPORTS property set.";
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+    }
+  }
+  i->second.AddLinkLibrary(*this, target, lib, llt);
 }
 
 void cmMakefile::AddLinkDirectoryForTarget(const std::string& target,
