@@ -805,9 +805,6 @@ protected:
   // Tests
   std::map<std::string, cmTest*> Tests;
 
-  // The link-library paths.  Order matters, use std::vector (not std::set).
-  std::vector<std::string> LinkDirectories;
-
   // The set of include directories that are marked as system include
   // directories.
   std::set<std::string> SystemIncludeDirectories;

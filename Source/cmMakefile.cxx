@@ -1857,10 +1857,7 @@ void cmMakefile::AddGlobalLinkInformation(const std::string& name,
       if (*j->rbegin() == '/') {
         newdir = j->substr(0, j->size() - 1);
       }
-      if (std::find(this->LinkDirectories.begin(), this->LinkDirectories.end(),
-                    newdir) == this->LinkDirectories.end()) {
-        target.AddLinkDirectory(*j);
-      }
+      target.AddLinkDirectory(*j);
     }
   }
 
