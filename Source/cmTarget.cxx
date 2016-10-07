@@ -476,19 +476,6 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
   return this->Makefile->GetOrCreateSource(src);
 }
 
-void cmTarget::MergeLinkLibraries(cmMakefile& mf, const std::string& selfname,
-                                  const LinkLibraryVectorType& libs)
-{
-  LinkLibraryVectorType::const_iterator i = libs.begin();
-  for (; i != libs.end(); ++i) {
-    // This is equivalent to the target_link_libraries plain signature.
-    this->AddLinkLibrary(mf, selfname, i->first, i->second);
-    this->AppendProperty(
-      "INTERFACE_LINK_LIBRARIES",
-      this->GetDebugGeneratorExpressions(i->first, i->second).c_str());
-  }
-}
-
 void cmTarget::AddLinkDirectory(const std::string& d)
 {
   // Make sure we don't add unnecessary search directories.

@@ -1863,7 +1863,16 @@ void cmMakefile::AddGlobalLinkInformation(const std::string& name,
       }
     }
   }
-  target.MergeLinkLibraries(*this, name, this->LinkLibraries);
+
+  cmTarget::LinkLibraryVectorType::const_iterator i =
+    this->LinkLibraries.begin();
+  for (; i != this->LinkLibraries.end(); ++i) {
+    // This is equivalent to the target_link_libraries plain signature.
+    target.AddLinkLibrary(*this, name, i->first, i->second);
+    target.AppendProperty(
+      "INTERFACE_LINK_LIBRARIES",
+      target.GetDebugGeneratorExpressions(i->first, i->second).c_str());
+  }
 }
 
 void cmMakefile::AddAlias(const std::string& lname, std::string const& tgtName)

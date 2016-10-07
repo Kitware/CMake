@@ -153,9 +153,6 @@ public:
                            cmListFileContext const& lfc);
   void GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const;
 
-  void MergeLinkLibraries(cmMakefile& mf, const std::string& selfname,
-                          const LinkLibraryVectorType& libs);
-
   const std::vector<std::string>& GetLinkDirectories() const;
 
   void AddLinkDirectory(const std::string& d);
