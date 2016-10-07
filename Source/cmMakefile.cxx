@@ -1250,13 +1250,6 @@ void cmMakefile::AddLinkDirectoryForTarget(const std::string& target,
 {
   cmTargets::iterator i = this->Targets.find(target);
   if (i != this->Targets.end()) {
-    if (this->IsAlias(target)) {
-      std::ostringstream e;
-      e << "ALIAS target \"" << target << "\" "
-        << "may not be linked into another target.";
-      this->IssueMessage(cmake::FATAL_ERROR, e.str());
-      return;
-    }
     i->second.AddLinkDirectory(d);
   } else {
     cmSystemTools::Error(
