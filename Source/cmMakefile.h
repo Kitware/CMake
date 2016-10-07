@@ -779,7 +779,7 @@ public:
 
 protected:
   // add link libraries and directories to the target
-  void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
+  void AddGlobalLinkInformation(cmTarget& target);
 
   // Check for a an unused variable
   void LogUnused(const char* reason, const std::string& name) const;

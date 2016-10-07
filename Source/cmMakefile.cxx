@@ -1808,8 +1808,7 @@ void cmMakefile::SetProjectName(std::string const& p)
   this->StateSnapshot.SetProjectName(p);
 }
 
-void cmMakefile::AddGlobalLinkInformation(const std::string& /* name */,
-                                          cmTarget& target)
+void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
 {
   // for these targets do not add anything
   switch (target.GetType()) {
@@ -1874,7 +1873,7 @@ cmTarget* cmMakefile::AddLibrary(const std::string& lname,
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
   target->AddSources(srcs);
-  this->AddGlobalLinkInformation(lname, *target);
+  this->AddGlobalLinkInformation(*target);
   return target;
 }
 
@@ -1887,7 +1886,7 @@ cmTarget* cmMakefile::AddExecutable(const char* exeName,
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
   target->AddSources(srcs);
-  this->AddGlobalLinkInformation(exeName, *target);
+  this->AddGlobalLinkInformation(*target);
   return target;
 }
 
