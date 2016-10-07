@@ -483,7 +483,6 @@ void cmTarget::MergeLinkLibraries(cmMakefile& mf, const std::string& selfname,
   // Only add on libraries we haven't added on before.
   // Assumption: the global link libraries could only grow, never shrink
   LinkLibraryVectorType::const_iterator i = libs.begin();
-  i += this->PrevLinkedLibraries.size();
   for (; i != libs.end(); ++i) {
     // This is equivalent to the target_link_libraries plain signature.
     this->AddLinkLibrary(mf, selfname, i->first, i->second);
