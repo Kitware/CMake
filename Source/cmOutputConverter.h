@@ -33,8 +33,7 @@ public:
   void SetLinkScriptShell(bool linkScriptShell);
 
   /**
-   * Flags to pass to Shell_GetArgumentForWindows or
-   * Shell_GetArgumentForUnix.  These modify the generated
+   * Flags to pass to Shell_GetArgument.  These modify the generated
    * quoting and escape sequences to work under alternative
    * environments.
    */
@@ -67,18 +66,10 @@ public:
     Shell_Flag_AllowMakeVariables = (1 << 6),
 
     /** The target shell quoting uses extra single Quotes for Watcom tools.  */
-    Shell_Flag_WatcomQuote = (1 << 7)
-  };
+    Shell_Flag_WatcomQuote = (1 << 7),
 
-  /**
-   * Transform the given command line argument for use in a Windows or
-   * Unix shell.  Returns a pointer to the end of the command line
-   * argument in the provided output buffer.  Flags may be passed to
-   * modify the generated quoting and escape sequences to work under
-   * alternative environments.
-   */
-  static std::string Shell_GetArgumentForWindows(const char* in, int flags);
-  static std::string Shell_GetArgumentForUnix(const char* in, int flags);
+    Shell_Flag_IsUnix = (1 << 8)
+  };
 
   std::string EscapeForShell(const std::string& str, bool makeVars = false,
                              bool forEcho = false,
@@ -99,16 +90,9 @@ public:
   };
   static FortranFormat GetFortranFormat(const char* value);
 
-  /**
-   * Convert the given remote path to a relative path with respect to
-   * the given local path.  The local path must be given in component
-   * form (see SystemTools::SplitPath) without a trailing slash.  The
-   * remote path must use forward slashes and not already be escaped
-   * or quoted.
-   */
-  std::string ConvertToRelativePath(const std::vector<std::string>& local,
-                                    const std::string& in_remote,
-                                    bool force = false) const;
+  static bool ContainedInDirectory(std::string const& local_path,
+                                   std::string const& remote_path,
+                                   cmState::Directory directory);
 
   /**
    * Convert the given remote path to a relative path with respect to
@@ -134,11 +118,11 @@ private:
   static int Shell__CharIsWhitespace(char c);
   static int Shell__CharNeedsQuotesOnUnix(char c);
   static int Shell__CharNeedsQuotesOnWindows(char c);
-  static int Shell__CharNeedsQuotes(char c, int isUnix, int flags);
+  static int Shell__CharNeedsQuotes(char c, int flags);
   static int Shell__CharIsMakeVariableName(char c);
   static const char* Shell__SkipMakeVariables(const char* c);
-  static int Shell__ArgumentNeedsQuotes(const char* in, int isUnix, int flags);
-  static std::string Shell__GetArgument(const char* in, int isUnix, int flags);
+  static int Shell__ArgumentNeedsQuotes(const char* in, int flags);
+  static std::string Shell__GetArgument(const char* in, int flags);
 
 private:
   cmState::Snapshot StateSnapshot;

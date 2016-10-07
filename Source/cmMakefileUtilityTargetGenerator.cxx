@@ -46,7 +46,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
       << this->GlobalGenerator->IncludeDirective << " " << root
       << cmSystemTools::ConvertToOutputPath(
            this->LocalGenerator
-             ->ConvertToRelativePath(
+             ->MaybeConvertToRelativePath(
                this->LocalGenerator->GetBinaryDirectory(),
                this->ProgressFileNameFull)
              .c_str())

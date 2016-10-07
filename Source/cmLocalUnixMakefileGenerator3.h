@@ -184,6 +184,9 @@ public:
   // Eclipse generator.
   void GetIndividualFileTargets(std::vector<std::string>& targets);
 
+  std::string MaybeConvertToRelativePath(std::string const& base,
+                                         std::string const& path);
+
 protected:
   void WriteLocalMakefile();
 

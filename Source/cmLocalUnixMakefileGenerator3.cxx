@@ -141,7 +141,7 @@ void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
 {
   // Compute the path to use when referencing the current output
   // directory from the top output directory.
-  this->HomeRelativeOutputPath = this->ConvertToRelativePath(
+  this->HomeRelativeOutputPath = this->MaybeConvertToRelativePath(
     this->GetBinaryDirectory(), this->GetCurrentBinaryDirectory());
   if (this->HomeRelativeOutputPath == ".") {
     this->HomeRelativeOutputPath = "";
@@ -548,7 +548,8 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
 
   // Construct the left hand side of the rule.
   std::string tgt = cmSystemTools::ConvertToOutputPath(
-    this->ConvertToRelativePath(this->GetBinaryDirectory(), target).c_str());
+    this->MaybeConvertToRelativePath(this->GetBinaryDirectory(), target)
+      .c_str());
 
   const char* space = "";
   if (tgt.size() == 1) {
@@ -577,7 +578,7 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
          dep != depends.end(); ++dep) {
       replace = *dep;
       replace = cmSystemTools::ConvertToOutputPath(
-        this->ConvertToRelativePath(binDir, replace).c_str());
+        this->MaybeConvertToRelativePath(binDir, replace).c_str());
       os << cmMakeSafe(tgt) << space << ": " << cmMakeSafe(replace) << "\n";
     }
   }
@@ -969,7 +970,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       // working directory will be the start-output directory.
       bool had_slash = cmd.find('/') != cmd.npos;
       if (workingDir.empty()) {
-        cmd = this->ConvertToRelativePath(currentBinDir, cmd);
+        cmd = this->MaybeConvertToRelativePath(currentBinDir, cmd);
       }
       bool has_slash = cmd.find('/') != cmd.npos;
       if (had_slash && !has_slash) {
@@ -994,8 +995,8 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         if (!outputs.empty()) {
           if (workingDir.empty()) {
             output = this->ConvertToOutputFormat(
-              this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(),
-                                          outputs[0]),
+              this->MaybeConvertToRelativePath(
+                this->GetCurrentBinaryDirectory(), outputs[0]),
               cmOutputConverter::SHELL);
 
           } else {
@@ -1082,14 +1083,15 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
     fout << "file(REMOVE_RECURSE\n";
     for (std::vector<std::string>::const_iterator f = files.begin();
          f != files.end(); ++f) {
-      std::string fc = this->ConvertToRelativePath(currentBinDir, *f);
+      std::string fc = this->MaybeConvertToRelativePath(currentBinDir, *f);
       fout << "  " << cmOutputConverter::EscapeForCMake(fc) << "\n";
     }
     fout << ")\n";
   }
   std::string remove = "$(CMAKE_COMMAND) -P ";
   remove += this->ConvertToOutputFormat(
-    this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), cleanfile),
+    this->MaybeConvertToRelativePath(this->GetCurrentBinaryDirectory(),
+                                     cleanfile),
     cmOutputConverter::SHELL);
   commands.push_back(remove);
 
@@ -1858,7 +1860,8 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
     }
     for (std::vector<std::string>::iterator i = includes.begin();
          i != includes.end(); ++i) {
-      cmakefileStream << "  \"" << this->ConvertToRelativePath(binaryDir, *i)
+      cmakefileStream << "  \""
+                      << this->MaybeConvertToRelativePath(binaryDir, *i)
                       << "\"\n";
     }
     cmakefileStream << "  )\n";
@@ -1923,7 +1926,7 @@ std::string cmLocalUnixMakefileGenerator3::GetRecursiveMakeCall(
   if (!tgt.empty()) {
     // The make target is always relative to the top of the build tree.
     std::string tgt2 =
-      this->ConvertToRelativePath(this->GetBinaryDirectory(), tgt);
+      this->MaybeConvertToRelativePath(this->GetBinaryDirectory(), tgt);
 
     // The target may have been written with windows paths.
     cmSystemTools::ConvertToOutputSlashes(tgt2);
@@ -2094,4 +2097,14 @@ void cmLocalUnixMakefileGenerator3::CreateCDCommand(
     std::transform(commands.begin(), commands.end(), commands.begin(),
                    std::bind1st(std::plus<std::string>(), prefix));
   }
+}
+
+std::string cmLocalUnixMakefileGenerator3::MaybeConvertToRelativePath(
+  std::string const& base, std::string const& path)
+{
+  if (!cmOutputConverter::ContainedInDirectory(
+        base, path, this->GetStateSnapshot().GetDirectory())) {
+    return path;
+  }
+  return cmOutputConverter::ForceToRelativePath(base, path);
 }

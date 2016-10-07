@@ -78,6 +78,9 @@ protected:
 private:
   cmDependsFortran(cmDependsFortran const&); // Purposely not implemented.
   void operator=(cmDependsFortran const&);   // Purposely not implemented.
+
+  std::string MaybeConvertToRelativePath(std::string const& base,
+                                         std::string const& path);
 };
 
 #endif

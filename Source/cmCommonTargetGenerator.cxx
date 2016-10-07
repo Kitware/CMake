@@ -75,8 +75,10 @@ void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
   // Append the flag and value.  Use ConvertToLinkReference to help
   // vs6's "cl -link" pass it to the linker.
   std::string flag = defFileFlag;
-  flag += (this->LocalGenerator->ConvertToLinkReference(
-    this->ModuleDefinitionFile->GetFullPath()));
+  flag += this->LocalGenerator->ConvertToOutputFormat(
+    this->LocalGenerator->ConvertToLinkReference(
+      this->ModuleDefinitionFile->GetFullPath()),
+    cmOutputConverter::SHELL);
   this->LocalGenerator->AppendFlags(flags, flag);
 }
 

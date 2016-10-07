@@ -76,44 +76,35 @@ static bool cmOutputConverterNotAbove(const char* a, const char* b)
           cmSystemTools::IsSubDirectory(a, b));
 }
 
-std::string cmOutputConverter::ConvertToRelativePath(
-  const std::vector<std::string>& local, const std::string& in_remote,
-  bool force) const
+bool cmOutputConverter::ContainedInDirectory(std::string const& local_path,
+                                             std::string const& remote_path,
+                                             cmState::Directory directory)
 {
-  std::string local_path = cmSystemTools::JoinPath(local);
-  return force ? this->ForceToRelativePath(local_path, in_remote)
-               : this->ConvertToRelativePath(local_path, in_remote);
+  const std::string relativePathTopBinary =
+    directory.GetRelativePathTopBinary();
+  const std::string relativePathTopSource =
+    directory.GetRelativePathTopSource();
+
+  const bool bothInBinary =
+    cmOutputConverterNotAbove(local_path.c_str(),
+                              relativePathTopBinary.c_str()) &&
+    cmOutputConverterNotAbove(remote_path.c_str(),
+                              relativePathTopBinary.c_str());
+
+  const bool bothInSource =
+    cmOutputConverterNotAbove(local_path.c_str(),
+                              relativePathTopSource.c_str()) &&
+    cmOutputConverterNotAbove(remote_path.c_str(),
+                              relativePathTopSource.c_str());
+
+  return bothInSource || bothInBinary;
 }
 
 std::string cmOutputConverter::ConvertToRelativePath(
   std::string const& local_path, std::string const& remote_path) const
 {
-  // The paths should never be quoted.
-  assert(local_path[0] != '\"');
-  assert(remote_path[0] != '\"');
-
-  // The local path should never have a trailing slash.
-  assert(local_path.empty() || local_path[local_path.size() - 1] != '/');
-
-  // If the path is already relative then just return the path.
-  if (!cmSystemTools::FileIsFullPath(remote_path.c_str())) {
-    return remote_path;
-  }
-
-  // Skip conversion if the path and local are not both in the source
-  // or both in the binary tree.
-  if (!((cmOutputConverterNotAbove(
-           local_path.c_str(),
-           this->StateSnapshot.GetDirectory().GetRelativePathTopBinary()) &&
-         cmOutputConverterNotAbove(
-           remote_path.c_str(),
-           this->StateSnapshot.GetDirectory().GetRelativePathTopBinary())) ||
-        (cmOutputConverterNotAbove(
-           local_path.c_str(),
-           this->StateSnapshot.GetDirectory().GetRelativePathTopSource()) &&
-         cmOutputConverterNotAbove(
-           remote_path.c_str(),
-           this->StateSnapshot.GetDirectory().GetRelativePathTopSource())))) {
+  if (!ContainedInDirectory(local_path, remote_path,
+                            this->StateSnapshot.GetDirectory())) {
     return remote_path;
   }
 
@@ -248,10 +239,11 @@ std::string cmOutputConverter::EscapeForShell(const std::string& str,
   if (this->GetState()->UseNMake()) {
     flags |= Shell_Flag_NMake;
   }
+  if (!this->GetState()->UseWindowsShell()) {
+    flags |= Shell_Flag_IsUnix;
+  }
 
-  return this->GetState()->UseWindowsShell()
-    ? Shell_GetArgumentForWindows(str.c_str(), flags)
-    : Shell_GetArgumentForUnix(str.c_str(), flags);
+  return Shell__GetArgument(str.c_str(), flags);
 }
 
 std::string cmOutputConverter::EscapeForCMake(const std::string& str)
@@ -280,7 +272,7 @@ std::string cmOutputConverter::EscapeForCMake(const std::string& str)
 std::string cmOutputConverter::EscapeWindowsShellArgument(const char* arg,
                                                           int shell_flags)
 {
-  return Shell_GetArgumentForWindows(arg, shell_flags);
+  return Shell__GetArgument(arg, shell_flags);
 }
 
 cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
@@ -366,10 +358,10 @@ int cmOutputConverter::Shell__CharNeedsQuotesOnWindows(char c)
           (c == '>') || (c == '|') || (c == '^'));
 }
 
-int cmOutputConverter::Shell__CharNeedsQuotes(char c, int isUnix, int flags)
+int cmOutputConverter::Shell__CharNeedsQuotes(char c, int flags)
 {
   /* On Windows the built-in command shell echo never needs quotes.  */
-  if (!isUnix && (flags & Shell_Flag_EchoWindows)) {
+  if (!(flags & Shell_Flag_IsUnix) && (flags & Shell_Flag_EchoWindows)) {
     return 0;
   }
 
@@ -378,7 +370,7 @@ int cmOutputConverter::Shell__CharNeedsQuotes(char c, int isUnix, int flags)
     return 1;
   }
 
-  if (isUnix) {
+  if (flags & Shell_Flag_IsUnix) {
     /* On UNIX several special characters need quotes to preserve them.  */
     if (Shell__CharNeedsQuotesOnUnix(c)) {
       return 1;
@@ -436,8 +428,7 @@ flag later when we understand applications of this better.
 */
 #define KWSYS_SYSTEM_SHELL_QUOTE_MAKE_VARIABLES 0
 
-int cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in, int isUnix,
-                                                  int flags)
+int cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in, int flags)
 {
   /* The empty string needs quotes.  */
   if (!*in) {
@@ -469,14 +460,14 @@ int cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in, int isUnix,
       }
 
       /* Check whether this character needs quotes.  */
-      if (Shell__CharNeedsQuotes(*c, isUnix, flags)) {
+      if (Shell__CharNeedsQuotes(*c, flags)) {
         return 1;
       }
     }
   }
 
   /* On Windows some single character arguments need quotes.  */
-  if (!isUnix && *in && !*(in + 1)) {
+  if (flags & Shell_Flag_IsUnix && *in && !*(in + 1)) {
     char c = *in;
     if ((c == '?') || (c == '&') || (c == '^') || (c == '|') || (c == '#')) {
       return 1;
@@ -486,8 +477,7 @@ int cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in, int isUnix,
   return 0;
 }
 
-std::string cmOutputConverter::Shell__GetArgument(const char* in, int isUnix,
-                                                  int flags)
+std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
 {
   std::ostringstream out;
 
@@ -498,11 +488,11 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int isUnix,
   int windows_backslashes = 0;
 
   /* Whether the argument must be quoted.  */
-  int needQuotes = Shell__ArgumentNeedsQuotes(in, isUnix, flags);
+  int needQuotes = Shell__ArgumentNeedsQuotes(in, flags);
   if (needQuotes) {
     /* Add the opening quote for this argument.  */
     if (flags & Shell_Flag_WatcomQuote) {
-      if (isUnix) {
+      if (flags & Shell_Flag_IsUnix) {
         out << '"';
       }
       out << '\'';
@@ -534,7 +524,7 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int isUnix,
     }
 
     /* Check whether this character needs escaping for the shell.  */
-    if (isUnix) {
+    if (flags & Shell_Flag_IsUnix) {
       /* On Unix a few special characters need escaping even inside a
          quoted argument.  */
       if (*c == '\\' || *c == '"' || *c == '`' || *c == '$') {
@@ -631,7 +621,7 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int isUnix,
     /* Add the closing quote for this argument.  */
     if (flags & Shell_Flag_WatcomQuote) {
       out << '\'';
-      if (isUnix) {
+      if (flags & Shell_Flag_IsUnix) {
         out << '"';
       }
     } else {
@@ -640,16 +630,4 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int isUnix,
   }
 
   return out.str();
-}
-
-std::string cmOutputConverter::Shell_GetArgumentForWindows(const char* in,
-                                                           int flags)
-{
-  return Shell__GetArgument(in, 0, flags);
-}
-
-std::string cmOutputConverter::Shell_GetArgumentForUnix(const char* in,
-                                                        int flags)
-{
-  return Shell__GetArgument(in, 1, flags);
 }
