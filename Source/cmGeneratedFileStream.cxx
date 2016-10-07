@@ -10,13 +10,21 @@
 #include <cm_zlib.h>
 #endif
 
-cmGeneratedFileStream::cmGeneratedFileStream()
+cmGeneratedFileStream::cmGeneratedFileStream(Encoding encoding)
   : cmGeneratedFileStreamBase()
   , Stream()
 {
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  if (encoding != codecvt::None) {
+    imbue(std::locale(getloc(), new codecvt(encoding)));
+  }
+#else
+  static_cast<void>(encoding);
+#endif
 }
 
-cmGeneratedFileStream::cmGeneratedFileStream(const char* name, bool quiet)
+cmGeneratedFileStream::cmGeneratedFileStream(const char* name, bool quiet,
+                                             Encoding encoding)
   : cmGeneratedFileStreamBase(name)
   , Stream(TempName.c_str())
 {
@@ -26,6 +34,13 @@ cmGeneratedFileStream::cmGeneratedFileStream(const char* name, bool quiet)
                          this->TempName.c_str());
     cmSystemTools::ReportLastSystemError("");
   }
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  if (encoding != codecvt::None) {
+    imbue(std::locale(getloc(), new codecvt(encoding)));
+  }
+#else
+  static_cast<void>(encoding);
+#endif
 }
 
 cmGeneratedFileStream::~cmGeneratedFileStream()

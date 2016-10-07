@@ -10,6 +10,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
+#include "cm_codecvt.hxx"
 
 #include <iosfwd>
 #include <map>
@@ -58,6 +59,12 @@ public:
   virtual bool MatchesGeneratorName(const std::string& name) const
   {
     return this->GetName() == name;
+  }
+
+  /** Get encoding used by generator for makefile files */
+  virtual codecvt::Encoding GetMakefileEncoding() const
+  {
+    return codecvt::None;
   }
 
   /** Tell the generator about the target system.  */
