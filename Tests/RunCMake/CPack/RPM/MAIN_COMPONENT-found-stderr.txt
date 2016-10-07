@@ -1,0 +1,3 @@
+^CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/MAIN_COMPONENT-build-found-subtest/_CPack_Packages/.*/RPM/SPECS/main_component-headers.spec
+CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/MAIN_COMPONENT-build-found-subtest/_CPack_Packages/.*/RPM/SPECS/main_component-libs.spec
+CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/MAIN_COMPONENT-build-found-subtest/_CPack_Packages/.*/RPM/SPECS/main_component.spec$

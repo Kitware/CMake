@@ -1,0 +1,3 @@
+^CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/SINGLE_DEBUGINFO-build-valid-subtest/_CPack_Packages/.*/RPM/SPECS/single_debuginfo-headers.spec
+CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/SINGLE_DEBUGINFO-build-valid-subtest/_CPack_Packages/.*/RPM/SPECS/single_debuginfo-libs.spec
+CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/SINGLE_DEBUGINFO-build-valid-subtest/_CPack_Packages/.*/RPM/SPECS/single_debuginfo.spec$
