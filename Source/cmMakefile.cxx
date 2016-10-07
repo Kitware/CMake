@@ -1232,10 +1232,10 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
   cmTarget* tgt = this->GetGlobalGenerator()->FindTarget(lib);
   if (tgt) {
     // if it is not a static or shared library then you can not link to it
-    if (!((tgt->GetType() == cmState::STATIC_LIBRARY) ||
-          (tgt->GetType() == cmState::SHARED_LIBRARY) ||
-          (tgt->GetType() == cmState::INTERFACE_LIBRARY) ||
-          tgt->IsExecutableWithExports())) {
+    if ((tgt->GetType() != cmState::STATIC_LIBRARY) &&
+        (tgt->GetType() != cmState::SHARED_LIBRARY) &&
+        (tgt->GetType() != cmState::INTERFACE_LIBRARY) &&
+        !tgt->IsExecutableWithExports()) {
       std::ostringstream e;
       e << "Target \"" << lib << "\" of type "
         << cmState::GetTargetTypeName(tgt->GetType())
