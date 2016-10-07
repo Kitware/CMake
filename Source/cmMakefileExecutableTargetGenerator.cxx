@@ -192,6 +192,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     this->LocalGenerator->AppendFlags(
       linkFlags, this->Makefile->GetDefinition(export_flag_var));
   }
+
+  this->LocalGenerator->AppendFlags(linkFlags,
+                                    this->LocalGenerator->GetLinkLibsCMP0065(
+                                      linkLanguage, *this->GeneratorTarget));
+
   if (this->GeneratorTarget->GetProperty("LINK_WHAT_YOU_USE")) {
     this->LocalGenerator->AppendFlags(linkFlags, " -Wl,--no-as-needed");
   }
