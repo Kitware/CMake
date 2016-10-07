@@ -1832,14 +1832,9 @@ cmTarget* cmMakefile::AddLibrary(const std::string& lname,
                                  const std::vector<std::string>& srcs,
                                  bool excludeFromAll)
 {
-  // wrong type ? default to STATIC
-  if ((type != cmState::STATIC_LIBRARY) && (type != cmState::SHARED_LIBRARY) &&
-      (type != cmState::MODULE_LIBRARY) && (type != cmState::OBJECT_LIBRARY) &&
-      (type != cmState::INTERFACE_LIBRARY)) {
-    this->IssueMessage(cmake::INTERNAL_ERROR,
-                       "cmMakefile::AddLibrary given invalid target type.");
-    type = cmState::STATIC_LIBRARY;
-  }
+  assert(type == cmState::STATIC_LIBRARY || type == cmState::SHARED_LIBRARY ||
+         type == cmState::MODULE_LIBRARY || type == cmState::OBJECT_LIBRARY ||
+         type == cmState::INTERFACE_LIBRARY);
 
   cmTarget* target = this->AddNewTarget(type, lname);
   // Clear its dependencies. Otherwise, dependencies might persist
