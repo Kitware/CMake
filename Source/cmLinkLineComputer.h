@@ -23,8 +23,13 @@ public:
 
   std::string ComputeLinkLibs(cmComputeLinkInformation& cli);
 
+  std::string ComputeLinkPath(cmComputeLinkInformation& cli,
+                              std::string const& libPathFlag,
+                              std::string const& libPathTerminator);
+
 private:
   std::string ConvertToOutputFormat(std::string const& input);
+  std::string ConvertToOutputForExisting(std::string const& input);
 
   cmState::Directory StateDir;
   cmOutputConverter* OutputConverter;

@@ -1441,17 +1441,8 @@ void cmLocalGenerator::OutputLinkLibraries(
     }
   }
 
-  // Append the library search path flags.
-  std::vector<std::string> const& libDirs = cli.GetDirectories();
-  for (std::vector<std::string>::const_iterator libDir = libDirs.begin();
-       libDir != libDirs.end(); ++libDir) {
-    std::string libpath =
-      this->ConvertToOutputForExisting(*libDir, shellFormat);
-    linkPath += " " + libPathFlag;
-    linkPath += libpath;
-    linkPath += libPathTerminator;
-    linkPath += " ";
-  }
+  linkPath =
+    linkLineComputer->ComputeLinkPath(cli, libPathFlag, libPathTerminator);
 
   std::string linkLibs = linkLineComputer->ComputeLinkLibs(cli);
 

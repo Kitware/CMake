@@ -72,3 +72,31 @@ std::string cmLinkLineComputer::ConvertToOutputFormat(std::string const& input)
 
   return this->OutputConverter->ConvertToOutputFormat(input, shellFormat);
 }
+
+std::string cmLinkLineComputer::ConvertToOutputForExisting(
+  std::string const& input)
+{
+  cmOutputConverter::OutputFormat shellFormat = (this->ForResponse)
+    ? cmOutputConverter::RESPONSE
+    : ((this->UseWatcomQuote) ? cmOutputConverter::WATCOMQUOTE
+                              : cmOutputConverter::SHELL);
+
+  return this->OutputConverter->ConvertToOutputForExisting(input, shellFormat);
+}
+
+std::string cmLinkLineComputer::ComputeLinkPath(
+  cmComputeLinkInformation& cli, std::string const& libPathFlag,
+  std::string const& libPathTerminator)
+{
+  std::string linkPath;
+  std::vector<std::string> const& libDirs = cli.GetDirectories();
+  for (std::vector<std::string>::const_iterator libDir = libDirs.begin();
+       libDir != libDirs.end(); ++libDir) {
+    std::string libpath = this->ConvertToOutputForExisting(*libDir);
+    linkPath += " " + libPathFlag;
+    linkPath += libpath;
+    linkPath += libPathTerminator;
+    linkPath += " ";
+  }
+  return linkPath;
+}
