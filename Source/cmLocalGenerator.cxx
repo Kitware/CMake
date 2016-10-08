@@ -1407,7 +1407,14 @@ std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib)
 #endif
 
   // Normal behavior.
-  return this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), lib);
+  std::string relLib = lib;
+  cmState::Directory stateDir = this->GetStateSnapshot().GetDirectory();
+  if (cmOutputConverter::ContainedInDirectory(
+        stateDir.GetCurrentBinary(), lib, stateDir)) {
+    relLib = cmOutputConverter::ForceToRelativePath(
+      stateDir.GetCurrentBinary(), lib);
+  }
+  return relLib;
 }
 
 /**
