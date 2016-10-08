@@ -1463,31 +1463,33 @@ void cmLocalGenerator::OutputLinkLibraries(
     linkLibs += " ";
   }
 
+  std::string rpath;
+
   // Check what kind of rpath flags to use.
   if (cli.GetRuntimeSep().empty()) {
     // Each rpath entry gets its own option ("-R a -R b -R c")
     std::vector<std::string> runtimeDirs;
     cli.GetRPath(runtimeDirs, relink);
 
-    std::string rpath;
     for (std::vector<std::string>::iterator ri = runtimeDirs.begin();
          ri != runtimeDirs.end(); ++ri) {
       rpath += cli.GetRuntimeFlag();
       rpath += this->ConvertToOutputFormat(*ri, shellFormat);
       rpath += " ";
     }
-    fout << rpath;
   } else {
     // All rpath entries are combined ("-Wl,-rpath,a:b:c").
-    std::string rpath = cli.GetRPathString(relink);
+    std::string rpathString = cli.GetRPathString(relink);
 
     // Store the rpath option in the stream.
-    if (!rpath.empty()) {
-      fout << cli.GetRuntimeFlag();
-      fout << this->EscapeForShell(rpath, escapeAllowMakeVars);
-      fout << " ";
+    if (!rpathString.empty()) {
+      rpath += cli.GetRuntimeFlag();
+      rpath += this->EscapeForShell(rpathString, escapeAllowMakeVars);
+      rpath += " ";
     }
   }
+
+  fout << rpath;
 
   // Write the library flags to the build rule.
   fout << linkLibs;
