@@ -22,18 +22,20 @@ public:
 
   virtual std::string ConvertToLinkReference(std::string const& input) const;
 
-  std::string ComputeLinkLibs(cmComputeLinkInformation& cli);
-
   std::string ComputeLinkPath(cmComputeLinkInformation& cli,
                               std::string const& libPathFlag,
                               std::string const& libPathTerminator);
 
-  std::string ComputeRPath(cmComputeLinkInformation& cli);
-
   std::string ComputeFrameworkPath(cmComputeLinkInformation& cli,
                                    std::string const& fwSearchFlag);
 
+  std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
+                                   std::string const& stdLibString);
+
 private:
+  std::string ComputeLinkLibs(cmComputeLinkInformation& cli);
+  std::string ComputeRPath(cmComputeLinkInformation& cli);
+
   std::string ConvertToOutputFormat(std::string const& input);
   std::string ConvertToOutputForExisting(std::string const& input);
 

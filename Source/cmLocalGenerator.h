@@ -351,8 +351,7 @@ protected:
   void OutputLinkLibraries(cmComputeLinkInformation* pcli,
                            cmLinkLineComputer* linkLineComputer,
                            std::string& linkLibraries,
-                           std::string& frameworkPath, std::string& linkPath,
-                           bool forResponseFile);
+                           std::string& frameworkPath, std::string& linkPath);
 
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,

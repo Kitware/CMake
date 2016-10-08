@@ -1610,8 +1610,7 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
   cmComputeLinkInformation* pcli =
     this->GeneratorTarget->GetLinkInformation(config);
   this->LocalGenerator->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
-                                            frameworkPath, linkPath,
-                                            useResponseFile);
+                                            frameworkPath, linkPath);
   linkLibs = frameworkPath + linkPath + linkLibs;
 
   if (useResponseFile && linkLibs.find_first_not_of(' ') != linkLibs.npos) {

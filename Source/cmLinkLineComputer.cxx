@@ -152,3 +152,28 @@ std::string cmLinkLineComputer::ComputeFrameworkPath(
   }
   return frameworkPath;
 }
+
+std::string cmLinkLineComputer::ComputeLinkLibraries(
+  cmComputeLinkInformation& cli, std::string const& stdLibString)
+{
+  std::ostringstream fout;
+  fout << this->ComputeRPath(cli);
+
+  // Write the library flags to the build rule.
+  fout << this->ComputeLinkLibs(cli);
+
+  // Add the linker runtime search path if any.
+  std::string rpath_link = cli.GetRPathLinkString();
+  if (!cli.GetRPathLinkFlag().empty() && !rpath_link.empty()) {
+    fout << cli.GetRPathLinkFlag();
+    fout << this->OutputConverter->EscapeForShell(rpath_link,
+                                                  !this->ForResponse);
+    fout << " ";
+  }
+
+  if (!stdLibString.empty()) {
+    fout << stdLibString << " ";
+  }
+
+  return fout.str();
+}
