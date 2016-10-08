@@ -1431,8 +1431,9 @@ void cmLocalGenerator::OutputLinkLibraries(
   std::string fwSearchFlagVar = "CMAKE_";
   fwSearchFlagVar += linkLanguage;
   fwSearchFlagVar += "_FRAMEWORK_SEARCH_FLAG";
-  const char* fwSearchFlag = this->Makefile->GetDefinition(fwSearchFlagVar);
-  if (fwSearchFlag && *fwSearchFlag) {
+  std::string fwSearchFlag =
+    this->Makefile->GetSafeDefinition(fwSearchFlagVar);
+  if (!fwSearchFlag.empty()) {
     std::vector<std::string> const& fwDirs = cli.GetFrameworkPaths();
     for (std::vector<std::string>::const_iterator fdi = fwDirs.begin();
          fdi != fwDirs.end(); ++fdi) {
