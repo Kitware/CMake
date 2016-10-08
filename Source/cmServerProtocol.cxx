@@ -732,7 +732,7 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
     cmLinkLineComputer linkLineComputer(lg,
                                         lg->GetStateSnapshot().GetDirectory());
     lg->GetTargetFlags(&linkLineComputer, config, linkLibs, linkLanguageFlags,
-                       linkFlags, frameworkPath, linkPath, target, false);
+                       linkFlags, frameworkPath, linkPath, target);
 
     linkLibs = cmSystemTools::TrimWhitespace(linkLibs);
     linkFlags = cmSystemTools::TrimWhitespace(linkFlags);

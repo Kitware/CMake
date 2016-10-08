@@ -1602,8 +1602,7 @@ cmLinkLineComputer* cmMakefileTargetGenerator::CreateLinkLineComputer(
 
 void cmMakefileTargetGenerator::CreateLinkLibs(
   cmLinkLineComputer* linkLineComputer, std::string& linkLibs,
-  bool useResponseFile, std::vector<std::string>& makefile_depends,
-  bool useWatcomQuote)
+  bool useResponseFile, std::vector<std::string>& makefile_depends)
 {
   std::string frameworkPath;
   std::string linkPath;
@@ -1612,7 +1611,7 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
     this->GeneratorTarget->GetLinkInformation(config);
   this->LocalGenerator->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                             frameworkPath, linkPath,
-                                            useResponseFile, useWatcomQuote);
+                                            useResponseFile);
   linkLibs = frameworkPath + linkPath + linkLibs;
 
   if (useResponseFile && linkLibs.find_first_not_of(' ') != linkLibs.npos) {

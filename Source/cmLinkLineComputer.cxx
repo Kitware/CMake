@@ -136,3 +136,19 @@ std::string cmLinkLineComputer::ComputeRPath(cmComputeLinkInformation& cli)
   }
   return rpath;
 }
+
+std::string cmLinkLineComputer::ComputeFrameworkPath(
+  cmComputeLinkInformation& cli, std::string const& fwSearchFlag)
+{
+  std::string frameworkPath;
+  if (!fwSearchFlag.empty()) {
+    std::vector<std::string> const& fwDirs = cli.GetFrameworkPaths();
+    for (std::vector<std::string>::const_iterator fdi = fwDirs.begin();
+         fdi != fwDirs.end(); ++fdi) {
+      frameworkPath += fwSearchFlag;
+      frameworkPath += this->ConvertToOutputFormat(*fdi);
+      frameworkPath += " ";
+    }
+  }
+  return frameworkPath;
+}

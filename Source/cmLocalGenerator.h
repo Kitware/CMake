@@ -318,7 +318,7 @@ public:
                       const std::string& config, std::string& linkLibs,
                       std::string& flags, std::string& linkFlags,
                       std::string& frameworkPath, std::string& linkPath,
-                      cmGeneratorTarget* target, bool useWatcomQuote);
+                      cmGeneratorTarget* target);
   void GetTargetDefines(cmGeneratorTarget const* target,
                         std::string const& config, std::string const& lang,
                         std::set<std::string>& defines) const;
@@ -352,7 +352,7 @@ protected:
                            cmLinkLineComputer* linkLineComputer,
                            std::string& linkLibraries,
                            std::string& frameworkPath, std::string& linkPath,
-                           bool forResponseFile, bool useWatcomQuote);
+                           bool forResponseFile);
 
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,

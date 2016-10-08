@@ -1151,8 +1151,7 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
 void cmLocalGenerator::GetTargetFlags(
   cmLinkLineComputer* linkLineComputer, const std::string& config,
   std::string& linkLibs, std::string& flags, std::string& linkFlags,
-  std::string& frameworkPath, std::string& linkPath, cmGeneratorTarget* target,
-  bool useWatcomQuote)
+  std::string& frameworkPath, std::string& linkPath, cmGeneratorTarget* target)
 {
   const std::string buildType = cmSystemTools::UpperCase(config);
   cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
@@ -1208,8 +1207,7 @@ void cmLocalGenerator::GetTargetFlags(
       }
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
-                                  frameworkPath, linkPath, false,
-                                  useWatcomQuote);
+                                  frameworkPath, linkPath, false);
       }
     } break;
     case cmState::EXECUTABLE: {
@@ -1231,8 +1229,7 @@ void cmLocalGenerator::GetTargetFlags(
       this->AddLanguageFlags(flags, linkLanguage, buildType);
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
-                                  frameworkPath, linkPath, false,
-                                  useWatcomQuote);
+                                  frameworkPath, linkPath, false);
       }
       if (cmSystemTools::IsOn(
             this->Makefile->GetDefinition("BUILD_SHARED_LIBS"))) {
@@ -1400,10 +1397,8 @@ std::string cmLocalGenerator::GetTargetFortranFlags(
 void cmLocalGenerator::OutputLinkLibraries(
   cmComputeLinkInformation* pcli, cmLinkLineComputer* linkLineComputer,
   std::string& linkLibraries, std::string& frameworkPath,
-  std::string& linkPath, bool forResponseFile, bool useWatcomQuote)
+  std::string& linkPath, bool forResponseFile)
 {
-  OutputFormat shellFormat =
-    (forResponseFile) ? RESPONSE : ((useWatcomQuote) ? WATCOMQUOTE : SHELL);
   cmComputeLinkInformation& cli = *pcli;
 
   std::string linkLanguage = cli.GetLinkLanguage();
@@ -1428,16 +1423,8 @@ void cmLocalGenerator::OutputLinkLibraries(
   fwSearchFlagVar += "_FRAMEWORK_SEARCH_FLAG";
   std::string fwSearchFlag =
     this->Makefile->GetSafeDefinition(fwSearchFlagVar);
-  if (!fwSearchFlag.empty()) {
-    std::vector<std::string> const& fwDirs = cli.GetFrameworkPaths();
-    for (std::vector<std::string>::const_iterator fdi = fwDirs.begin();
-         fdi != fwDirs.end(); ++fdi) {
-      frameworkPath += fwSearchFlag;
-      frameworkPath += this->ConvertToOutputFormat(*fdi, shellFormat);
-      frameworkPath += " ";
-    }
-  }
 
+  frameworkPath = linkLineComputer->ComputeFrameworkPath(cli, fwSearchFlag);
   linkPath =
     linkLineComputer->ComputeLinkPath(cli, libPathFlag, libPathTerminator);
 

@@ -475,11 +475,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     this->GetGlobalGenerator()->CreateLinkLineComputer(
       this->GetLocalGenerator(),
       this->GetLocalGenerator()->GetStateSnapshot().GetDirectory()));
+  linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
 
-  localGen.GetTargetFlags(linkLineComputer.get(), this->GetConfigName(),
-                          vars["LINK_LIBRARIES"], vars["FLAGS"],
-                          vars["LINK_FLAGS"], frameworkPath, linkPath,
-                          &genTarget, useWatcomQuote);
+  localGen.GetTargetFlags(
+    linkLineComputer.get(), this->GetConfigName(), vars["LINK_LIBRARIES"],
+    vars["FLAGS"], vars["LINK_FLAGS"], frameworkPath, linkPath, &genTarget);
   if (this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS") &&
       (gt.GetType() == cmState::SHARED_LIBRARY ||
        gt.IsExecutableWithExports())) {

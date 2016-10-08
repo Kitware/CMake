@@ -514,7 +514,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       linkLineComputer->SetRelink(relink);
 
       this->CreateLinkLibs(linkLineComputer.get(), linkLibs,
-                           useResponseFileForLibs, depends, useWatcomQuote);
+                           useResponseFileForLibs, depends);
     }
 
     // Construct object file lists that may be needed to expand the

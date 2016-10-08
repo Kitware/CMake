@@ -30,6 +30,9 @@ public:
 
   std::string ComputeRPath(cmComputeLinkInformation& cli);
 
+  std::string ComputeFrameworkPath(cmComputeLinkInformation& cli,
+                                   std::string const& fwSearchFlag);
+
 private:
   std::string ConvertToOutputFormat(std::string const& input);
   std::string ConvertToOutputForExisting(std::string const& input);
