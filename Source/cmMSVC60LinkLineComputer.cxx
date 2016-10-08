@@ -5,8 +5,9 @@
 
 #include "cmSystemTools.h"
 
-cmMSVC60LinkLineComputer::cmMSVC60LinkLineComputer(cmState::Directory stateDir)
-  : cmLinkLineComputer(stateDir)
+cmMSVC60LinkLineComputer::cmMSVC60LinkLineComputer(
+  cmOutputConverter* outputConverter, cmState::Directory stateDir)
+  : cmLinkLineComputer(outputConverter, stateDir)
 {
 }
 

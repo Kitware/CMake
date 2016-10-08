@@ -1453,24 +1453,7 @@ void cmLocalGenerator::OutputLinkLibraries(
     linkPath += " ";
   }
 
-  std::string linkLibs;
-
-  // Append the link items.
-  typedef cmComputeLinkInformation::ItemVector ItemVector;
-  ItemVector const& items = cli.GetItems();
-  for (ItemVector::const_iterator li = items.begin(); li != items.end();
-       ++li) {
-    if (li->Target && li->Target->GetType() == cmState::INTERFACE_LIBRARY) {
-      continue;
-    }
-    if (li->IsPath) {
-      linkLibs += this->ConvertToOutputFormat(
-        linkLineComputer->ConvertToLinkReference(li->Value), shellFormat);
-    } else {
-      linkLibs += li->Value;
-    }
-    linkLibs += " ";
-  }
+  std::string linkLibs = linkLineComputer->ComputeLinkLibs(cli);
 
   std::string rpath;
 

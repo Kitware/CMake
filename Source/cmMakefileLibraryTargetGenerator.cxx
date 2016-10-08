@@ -163,6 +163,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 
   CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
     this->CreateLinkLineComputer(
+      this->LocalGenerator,
       this->LocalGenerator->GetStateSnapshot().GetDirectory()));
 
   this->AddModuleDefinitionFlag(linkLineComputer.get(), extraFlags);
@@ -193,6 +194,7 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 
   CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
     this->CreateLinkLineComputer(
+      this->LocalGenerator,
       this->LocalGenerator->GetStateSnapshot().GetDirectory()));
 
   this->AddModuleDefinitionFlag(linkLineComputer.get(), extraFlags);
@@ -505,7 +507,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
       CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
         this->CreateLinkLineComputer(
+          this->LocalGenerator,
           this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+      linkLineComputer->SetForResponse(useResponseFileForLibs);
+      linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
 
       this->CreateLinkLibs(linkLineComputer.get(), linkLibs, relink,
                            useResponseFileForLibs, depends, useWatcomQuote);

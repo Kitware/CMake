@@ -365,6 +365,7 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries(
       this->Makefile->IsOn(createRule + "_USE_WATCOM_QUOTE");
     CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
       this->GetGlobalGenerator()->CreateLinkLineComputer(
+        this->LocalGenerator,
         this->LocalGenerator->GetStateSnapshot().GetDirectory()));
 
     this->LocalGenerator->GetTargetFlags(

@@ -219,6 +219,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   {
     CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
       this->CreateLinkLineComputer(
+        this->LocalGenerator,
         this->LocalGenerator->GetStateSnapshot().GetDirectory()));
 
     this->AddModuleDefinitionFlag(linkLineComputer.get(), linkFlags);
@@ -305,7 +306,10 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
     CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
       this->CreateLinkLineComputer(
+        this->LocalGenerator,
         this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+    linkLineComputer->SetForResponse(useResponseFileForLibs);
+    linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
 
     // Collect up flags to link in needed libraries.
     std::string linkLibs;

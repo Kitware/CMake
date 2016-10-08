@@ -1590,12 +1590,14 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
 }
 
 cmLinkLineComputer* cmMakefileTargetGenerator::CreateLinkLineComputer(
-  cmState::Directory stateDir)
+  cmOutputConverter* outputConverter, cmState::Directory stateDir)
 {
   if (this->Makefile->IsOn("MSVC60")) {
-    return this->GlobalGenerator->CreateMSVC60LinkLineComputer(stateDir);
+    return this->GlobalGenerator->CreateMSVC60LinkLineComputer(outputConverter,
+                                                               stateDir);
   }
-  return this->GlobalGenerator->CreateLinkLineComputer(stateDir);
+  return this->GlobalGenerator->CreateLinkLineComputer(outputConverter,
+                                                       stateDir);
 }
 
 void cmMakefileTargetGenerator::CreateLinkLibs(

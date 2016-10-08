@@ -473,7 +473,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
     this->GetGlobalGenerator()->CreateLinkLineComputer(
-      localGen.GetStateSnapshot().GetDirectory()));
+      this->GetLocalGenerator(),
+      this->GetLocalGenerator()->GetStateSnapshot().GetDirectory()));
 
   localGen.GetTargetFlags(linkLineComputer.get(), this->GetConfigName(),
                           vars["LINK_LIBRARIES"], vars["FLAGS"],

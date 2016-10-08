@@ -583,9 +583,9 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     gg->CreateGenerationObjects();
     cmGeneratorTarget* gtgt = gg->FindGeneratorTarget(tgt->GetName());
     cmLocalGenerator* lg = gtgt->GetLocalGenerator();
-    CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
-      gg->CreateLinkLineComputer(lg->GetStateSnapshot().GetDirectory()));
-    lg->GetTargetFlags(linkLineComputer.get(), buildType, linkLibs, flags,
+    cmLinkLineComputer linkLineComputer(lg,
+                                        lg->GetStateSnapshot().GetDirectory());
+    lg->GetTargetFlags(&linkLineComputer, buildType, linkLibs, flags,
                        linkFlags, frameworkPath, linkPath, gtgt, false);
     linkLibs = frameworkPath + linkPath + linkLibs;
 

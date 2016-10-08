@@ -12,7 +12,8 @@ class cmGlobalNinjaGenerator;
 class cmNinjaLinkLineComputer : public cmLinkLineComputer
 {
 public:
-  cmNinjaLinkLineComputer(cmState::Directory stateDir,
+  cmNinjaLinkLineComputer(cmOutputConverter* outputConverter,
+                          cmState::Directory stateDir,
                           cmGlobalNinjaGenerator const* gg);
 
   std::string ConvertToLinkReference(std::string const& input) const

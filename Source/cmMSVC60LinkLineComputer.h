@@ -9,7 +9,8 @@
 class cmMSVC60LinkLineComputer : public cmLinkLineComputer
 {
 public:
-  cmMSVC60LinkLineComputer(cmState::Directory stateDir);
+  cmMSVC60LinkLineComputer(cmOutputConverter* outputConverter,
+                           cmState::Directory stateDir);
 
   std::string ConvertToLinkReference(std::string const& input) const
     CM_OVERRIDE;

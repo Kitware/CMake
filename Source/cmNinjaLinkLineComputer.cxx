@@ -5,8 +5,9 @@
 #include "cmGlobalNinjaGenerator.h"
 
 cmNinjaLinkLineComputer::cmNinjaLinkLineComputer(
-  cmState::Directory stateDir, cmGlobalNinjaGenerator const* gg)
-  : cmLinkLineComputer(stateDir)
+  cmOutputConverter* outputConverter, cmState::Directory stateDir,
+  cmGlobalNinjaGenerator const* gg)
+  : cmLinkLineComputer(outputConverter, stateDir)
   , GG(gg)
 {
 }
