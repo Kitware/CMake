@@ -233,7 +233,7 @@ public:
     return this->RulesFileStream;
   }
 
-  std::string ConvertToNinjaPath(const std::string& path);
+  std::string ConvertToNinjaPath(const std::string& path) const;
   std::string ConvertToNinjaFolderRule(const std::string& path);
 
   struct MapToNinjaPathImpl
@@ -333,7 +333,7 @@ public:
   bool SupportsConsolePool() const;
   bool SupportsImplicitOuts() const;
 
-  std::string NinjaOutputPath(std::string const& path);
+  std::string NinjaOutputPath(std::string const& path) const;
   bool HasOutputPathPrefix() const { return !this->OutputPathPrefix.empty(); }
   void StripNinjaOutputPathPrefixAsSuffix(std::string& path);
 
