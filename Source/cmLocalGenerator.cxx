@@ -1419,6 +1419,15 @@ void cmLocalGenerator::OutputLinkLibraries(
   std::string libPathTerminator =
     this->Makefile->GetSafeDefinition("CMAKE_LIBRARY_PATH_TERMINATOR");
 
+  // Add standard libraries for this language.
+  std::string standardLibsVar = "CMAKE_";
+  standardLibsVar += cli.GetLinkLanguage();
+  standardLibsVar += "_STANDARD_LIBRARIES";
+  std::string stdLibString;
+  if (const char* stdLibs = this->Makefile->GetDefinition(standardLibsVar)) {
+    stdLibString = stdLibs;
+  }
+
   // Append the framework search path flags.
   std::string fwSearchFlagVar = "CMAKE_";
   fwSearchFlagVar += linkLanguage;
@@ -1502,14 +1511,6 @@ void cmLocalGenerator::OutputLinkLibraries(
     fout << " ";
   }
 
-  // Add standard libraries for this language.
-  std::string standardLibsVar = "CMAKE_";
-  standardLibsVar += cli.GetLinkLanguage();
-  standardLibsVar += "_STANDARD_LIBRARIES";
-  std::string stdLibString;
-  if (const char* stdLibs = this->Makefile->GetDefinition(standardLibsVar)) {
-    stdLibString = stdLibs;
-  }
   if (!stdLibString.empty()) {
     fout << stdLibString << " ";
   }
