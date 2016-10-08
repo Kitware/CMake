@@ -18,6 +18,7 @@ public:
 
   void SetUseWatcomQuote(bool useWatcomQuote);
   void SetForResponse(bool forResponse);
+  void SetRelink(bool relink);
 
   virtual std::string ConvertToLinkReference(std::string const& input) const;
 
@@ -26,6 +27,8 @@ public:
   std::string ComputeLinkPath(cmComputeLinkInformation& cli,
                               std::string const& libPathFlag,
                               std::string const& libPathTerminator);
+
+  std::string ComputeRPath(cmComputeLinkInformation& cli);
 
 private:
   std::string ConvertToOutputFormat(std::string const& input);
@@ -36,6 +39,7 @@ private:
 
   bool ForResponse;
   bool UseWatcomQuote;
+  bool Relink;
 };
 
 #endif

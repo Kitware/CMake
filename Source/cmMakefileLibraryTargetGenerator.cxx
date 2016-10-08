@@ -511,8 +511,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
           this->LocalGenerator->GetStateSnapshot().GetDirectory()));
       linkLineComputer->SetForResponse(useResponseFileForLibs);
       linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
+      linkLineComputer->SetRelink(relink);
 
-      this->CreateLinkLibs(linkLineComputer.get(), linkLibs, relink,
+      this->CreateLinkLibs(linkLineComputer.get(), linkLibs,
                            useResponseFileForLibs, depends, useWatcomQuote);
     }
 

@@ -154,7 +154,7 @@ protected:
 
   /** Create list of flags for link libraries. */
   void CreateLinkLibs(cmLinkLineComputer* linkLineComputer,
-                      std::string& linkLibs, bool relink, bool useResponseFile,
+                      std::string& linkLibs, bool useResponseFile,
                       std::vector<std::string>& makefile_depends,
                       bool useWatcomQuote);
 

@@ -310,10 +310,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
         this->LocalGenerator->GetStateSnapshot().GetDirectory()));
     linkLineComputer->SetForResponse(useResponseFileForLibs);
     linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
+    linkLineComputer->SetRelink(relink);
 
     // Collect up flags to link in needed libraries.
     std::string linkLibs;
-    this->CreateLinkLibs(linkLineComputer.get(), linkLibs, relink,
+    this->CreateLinkLibs(linkLineComputer.get(), linkLibs,
                          useResponseFileForLibs, depends, useWatcomQuote);
 
     // Construct object file lists that may be needed to expand the

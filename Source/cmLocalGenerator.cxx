@@ -1208,7 +1208,7 @@ void cmLocalGenerator::GetTargetFlags(
       }
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
-                                  frameworkPath, linkPath, false, false,
+                                  frameworkPath, linkPath, false,
                                   useWatcomQuote);
       }
     } break;
@@ -1231,7 +1231,7 @@ void cmLocalGenerator::GetTargetFlags(
       this->AddLanguageFlags(flags, linkLanguage, buildType);
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
-                                  frameworkPath, linkPath, false, false,
+                                  frameworkPath, linkPath, false,
                                   useWatcomQuote);
       }
       if (cmSystemTools::IsOn(
@@ -1400,8 +1400,7 @@ std::string cmLocalGenerator::GetTargetFortranFlags(
 void cmLocalGenerator::OutputLinkLibraries(
   cmComputeLinkInformation* pcli, cmLinkLineComputer* linkLineComputer,
   std::string& linkLibraries, std::string& frameworkPath,
-  std::string& linkPath, bool relink, bool forResponseFile,
-  bool useWatcomQuote)
+  std::string& linkPath, bool forResponseFile, bool useWatcomQuote)
 {
   OutputFormat shellFormat =
     (forResponseFile) ? RESPONSE : ((useWatcomQuote) ? WATCOMQUOTE : SHELL);
@@ -1446,31 +1445,7 @@ void cmLocalGenerator::OutputLinkLibraries(
 
   std::string linkLibs = linkLineComputer->ComputeLinkLibs(cli);
 
-  std::string rpath;
-
-  // Check what kind of rpath flags to use.
-  if (cli.GetRuntimeSep().empty()) {
-    // Each rpath entry gets its own option ("-R a -R b -R c")
-    std::vector<std::string> runtimeDirs;
-    cli.GetRPath(runtimeDirs, relink);
-
-    for (std::vector<std::string>::iterator ri = runtimeDirs.begin();
-         ri != runtimeDirs.end(); ++ri) {
-      rpath += cli.GetRuntimeFlag();
-      rpath += this->ConvertToOutputFormat(*ri, shellFormat);
-      rpath += " ";
-    }
-  } else {
-    // All rpath entries are combined ("-Wl,-rpath,a:b:c").
-    std::string rpathString = cli.GetRPathString(relink);
-
-    // Store the rpath option in the stream.
-    if (!rpathString.empty()) {
-      rpath += cli.GetRuntimeFlag();
-      rpath += this->EscapeForShell(rpathString, escapeAllowMakeVars);
-      rpath += " ";
-    }
-  }
+  std::string rpath = linkLineComputer->ComputeRPath(cli);
 
   std::ostringstream fout;
   fout << rpath;

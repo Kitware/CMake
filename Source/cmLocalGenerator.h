@@ -352,8 +352,7 @@ protected:
                            cmLinkLineComputer* linkLineComputer,
                            std::string& linkLibraries,
                            std::string& frameworkPath, std::string& linkPath,
-                           bool relink, bool forResponseFile,
-                           bool useWatcomQuote);
+                           bool forResponseFile, bool useWatcomQuote);
 
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,

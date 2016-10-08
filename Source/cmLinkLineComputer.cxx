@@ -12,6 +12,7 @@ cmLinkLineComputer::cmLinkLineComputer(cmOutputConverter* outputConverter,
   , OutputConverter(outputConverter)
   , ForResponse(false)
   , UseWatcomQuote(false)
+  , Relink(false)
 {
 }
 
@@ -27,6 +28,11 @@ void cmLinkLineComputer::SetUseWatcomQuote(bool useWatcomQuote)
 void cmLinkLineComputer::SetForResponse(bool forResponse)
 {
   this->ForResponse = forResponse;
+}
+
+void cmLinkLineComputer::SetRelink(bool relink)
+{
+  this->Relink = relink;
 }
 
 std::string cmLinkLineComputer::ConvertToLinkReference(
@@ -99,4 +105,34 @@ std::string cmLinkLineComputer::ComputeLinkPath(
     linkPath += " ";
   }
   return linkPath;
+}
+
+std::string cmLinkLineComputer::ComputeRPath(cmComputeLinkInformation& cli)
+{
+  std::string rpath;
+  // Check what kind of rpath flags to use.
+  if (cli.GetRuntimeSep().empty()) {
+    // Each rpath entry gets its own option ("-R a -R b -R c")
+    std::vector<std::string> runtimeDirs;
+    cli.GetRPath(runtimeDirs, this->Relink);
+
+    for (std::vector<std::string>::iterator ri = runtimeDirs.begin();
+         ri != runtimeDirs.end(); ++ri) {
+      rpath += cli.GetRuntimeFlag();
+      rpath += this->ConvertToOutputFormat(*ri);
+      rpath += " ";
+    }
+  } else {
+    // All rpath entries are combined ("-Wl,-rpath,a:b:c").
+    std::string rpathString = cli.GetRPathString(this->Relink);
+
+    // Store the rpath option in the stream.
+    if (!rpathString.empty()) {
+      rpath += cli.GetRuntimeFlag();
+      rpath +=
+        this->OutputConverter->EscapeForShell(rpathString, !this->ForResponse);
+      rpath += " ";
+    }
+  }
+  return rpath;
 }
