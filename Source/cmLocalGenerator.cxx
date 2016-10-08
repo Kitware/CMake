@@ -1155,6 +1155,7 @@ void cmLocalGenerator::GetTargetFlags(
   bool useWatcomQuote)
 {
   const std::string buildType = cmSystemTools::UpperCase(config);
+  cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
   const char* libraryLinkVariable =
     "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
 
@@ -1205,9 +1206,11 @@ void cmLocalGenerator::GetTargetFlags(
           linkFlags += " ";
         }
       }
-      this->OutputLinkLibraries(linkLineComputer, linkLibs, frameworkPath,
-                                linkPath, *target, false, false,
-                                useWatcomQuote);
+      if (pcli) {
+        this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
+                                  frameworkPath, linkPath, false, false,
+                                  useWatcomQuote);
+      }
     } break;
     case cmState::EXECUTABLE: {
       linkFlags += this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
@@ -1226,9 +1229,11 @@ void cmLocalGenerator::GetTargetFlags(
         return;
       }
       this->AddLanguageFlags(flags, linkLanguage, buildType);
-      this->OutputLinkLibraries(linkLineComputer, linkLibs, frameworkPath,
-                                linkPath, *target, false, false,
-                                useWatcomQuote);
+      if (pcli) {
+        this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
+                                  frameworkPath, linkPath, false, false,
+                                  useWatcomQuote);
+      }
       if (cmSystemTools::IsOn(
             this->Makefile->GetDefinition("BUILD_SHARED_LIBS"))) {
         std::string sFlagVar = std::string("CMAKE_SHARED_BUILD_") +
@@ -1393,19 +1398,16 @@ std::string cmLocalGenerator::GetTargetFortranFlags(
  * to the name of the library.  This will not link a library against itself.
  */
 void cmLocalGenerator::OutputLinkLibraries(
-  cmLinkLineComputer* linkLineComputer, std::string& linkLibraries,
-  std::string& frameworkPath, std::string& linkPath, cmGeneratorTarget& tgt,
-  bool relink, bool forResponseFile, bool useWatcomQuote)
+  cmComputeLinkInformation* pcli, cmLinkLineComputer* linkLineComputer,
+  std::string& linkLibraries, std::string& frameworkPath,
+  std::string& linkPath, bool relink, bool forResponseFile,
+  bool useWatcomQuote)
 {
   OutputFormat shellFormat =
     (forResponseFile) ? RESPONSE : ((useWatcomQuote) ? WATCOMQUOTE : SHELL);
   bool escapeAllowMakeVars = !forResponseFile;
   std::ostringstream fout;
-  std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  cmComputeLinkInformation* pcli = tgt.GetLinkInformation(config);
-  if (!pcli) {
-    return;
-  }
+
   cmComputeLinkInformation& cli = *pcli;
 
   std::string linkLanguage = cli.GetLinkLanguage();

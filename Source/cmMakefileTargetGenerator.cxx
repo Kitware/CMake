@@ -1605,9 +1605,12 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
 {
   std::string frameworkPath;
   std::string linkPath;
-  this->LocalGenerator->OutputLinkLibraries(
-    linkLineComputer, linkLibs, frameworkPath, linkPath,
-    *this->GeneratorTarget, relink, useResponseFile, useWatcomQuote);
+  std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  cmComputeLinkInformation* pcli =
+    this->GeneratorTarget->GetLinkInformation(config);
+  this->LocalGenerator->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
+                                            frameworkPath, linkPath, relink,
+                                            useResponseFile, useWatcomQuote);
   linkLibs = frameworkPath + linkPath + linkLibs;
 
   if (useResponseFile && linkLibs.find_first_not_of(' ') != linkLibs.npos) {

@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+class cmComputeLinkInformation;
 class cmCustomCommandGenerator;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
@@ -347,11 +348,12 @@ public:
 
 protected:
   ///! put all the libraries for a target on into the given stream
-  void OutputLinkLibraries(cmLinkLineComputer* linkLineComputer,
+  void OutputLinkLibraries(cmComputeLinkInformation* pcli,
+                           cmLinkLineComputer* linkLineComputer,
                            std::string& linkLibraries,
                            std::string& frameworkPath, std::string& linkPath,
-                           cmGeneratorTarget&, bool relink,
-                           bool forResponseFile, bool useWatcomQuote);
+                           bool relink, bool forResponseFile,
+                           bool useWatcomQuote);
 
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,
