@@ -20,7 +20,9 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmInstallGenerator.h"
+#include "cmLinkLineComputer.h"
 #include "cmLocalGenerator.h"
+#include "cmMSVC60LinkLineComputer.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
@@ -1410,6 +1412,18 @@ cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
   }
 #endif
   return autogenTargets;
+}
+
+cmLinkLineComputer* cmGlobalGenerator::CreateLinkLineComputer(
+  cmState::Directory stateDir) const
+{
+  return new cmLinkLineComputer(stateDir);
+}
+
+cmLinkLineComputer* cmGlobalGenerator::CreateMSVC60LinkLineComputer(
+  cmState::Directory stateDir) const
+{
+  return new cmMSVC60LinkLineComputer(stateDir);
 }
 
 void cmGlobalGenerator::FinalizeTargetCompileInfo()

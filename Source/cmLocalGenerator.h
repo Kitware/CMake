@@ -24,6 +24,7 @@ class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
 class cmSourceFile;
+class cmLinkLineComputer;
 
 /** \class cmLocalGenerator
  * \brief Create required build files for a directory.
@@ -312,7 +313,8 @@ public:
 
   /** Fill out these strings for the given target.  Libraries to link,
    *  flags, and linkflags. */
-  void GetTargetFlags(const std::string& config, std::string& linkLibs,
+  void GetTargetFlags(cmLinkLineComputer* linkLineComputer,
+                      const std::string& config, std::string& linkLibs,
                       std::string& flags, std::string& linkFlags,
                       std::string& frameworkPath, std::string& linkPath,
                       cmGeneratorTarget* target, bool useWatcomQuote);
@@ -345,7 +347,8 @@ public:
 
 protected:
   ///! put all the libraries for a target on into the given stream
-  void OutputLinkLibraries(std::string& linkLibraries,
+  void OutputLinkLibraries(cmLinkLineComputer* linkLineComputer,
+                           std::string& linkLibraries,
                            std::string& frameworkPath, std::string& linkPath,
                            cmGeneratorTarget&, bool relink,
                            bool forResponseFile, bool useWatcomQuote);
@@ -369,8 +372,6 @@ protected:
 
   std::string& CreateSafeUniqueObjectFileName(const std::string& sin,
                                               std::string const& dir_max);
-
-  virtual std::string ConvertToLinkReference(std::string const& lib);
 
   /** Check whether the native build system supports the given
       definition.  Issues a warning.  */

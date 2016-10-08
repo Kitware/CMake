@@ -120,12 +120,6 @@ cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
 
 // Virtual protected methods.
 
-std::string cmLocalNinjaGenerator::ConvertToLinkReference(
-  std::string const& lib)
-{
-  return this->GetGlobalNinjaGenerator()->ConvertToNinjaPath(lib);
-}
-
 std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
   std::string const& path, cmOutputConverter::OutputFormat format,
   bool forceFullPaths)

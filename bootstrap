@@ -297,6 +297,8 @@ CMAKE_CXX_SOURCES="\
   cmFileTimeComparison \
   cmGlobalUnixMakefileGenerator3 \
   cmLocalUnixMakefileGenerator3 \
+  cmLinkLineComputer \
+  cmMSVC60LinkLineComputer \
   cmMakefileExecutableTargetGenerator \
   cmMakefileLibraryTargetGenerator \
   cmMakefileTargetGenerator \

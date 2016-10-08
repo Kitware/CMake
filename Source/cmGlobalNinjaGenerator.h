@@ -70,6 +70,9 @@ public:
   std::string EncodePath(const std::string& path);
   static std::string EncodeDepfileSpace(const std::string& path);
 
+  cmLinkLineComputer* CreateLinkLineComputer(cmState::Directory stateDir) const
+    CM_OVERRIDE;
+
   /**
    * Write the given @a comment to the output stream @a os. It
    * handles new line character properly.

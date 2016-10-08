@@ -5,6 +5,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmLinkLineComputer.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
@@ -159,7 +160,12 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 
   this->LocalGenerator->AddConfigVariableFlags(
     extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->ConfigName);
-  this->AddModuleDefinitionFlag(extraFlags);
+
+  CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+    this->CreateLinkLineComputer(
+      this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+
+  this->AddModuleDefinitionFlag(linkLineComputer.get(), extraFlags);
 
   if (this->GeneratorTarget->GetProperty("LINK_WHAT_YOU_USE")) {
     this->LocalGenerator->AppendFlags(extraFlags, " -Wl,--no-as-needed");
@@ -184,7 +190,12 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
     extraFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
   this->LocalGenerator->AddConfigVariableFlags(
     extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->ConfigName);
-  this->AddModuleDefinitionFlag(extraFlags);
+
+  CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+    this->CreateLinkLineComputer(
+      this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+
+  this->AddModuleDefinitionFlag(linkLineComputer.get(), extraFlags);
 
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
 }

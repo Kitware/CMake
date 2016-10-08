@@ -12,6 +12,7 @@
 #include "cmInstallGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmLinkLineComputer.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
@@ -1148,9 +1149,10 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
 }
 
 void cmLocalGenerator::GetTargetFlags(
-  const std::string& config, std::string& linkLibs, std::string& flags,
-  std::string& linkFlags, std::string& frameworkPath, std::string& linkPath,
-  cmGeneratorTarget* target, bool useWatcomQuote)
+  cmLinkLineComputer* linkLineComputer, const std::string& config,
+  std::string& linkLibs, std::string& flags, std::string& linkFlags,
+  std::string& frameworkPath, std::string& linkPath, cmGeneratorTarget* target,
+  bool useWatcomQuote)
 {
   const std::string buildType = cmSystemTools::UpperCase(config);
   const char* libraryLinkVariable =
@@ -1203,8 +1205,9 @@ void cmLocalGenerator::GetTargetFlags(
           linkFlags += " ";
         }
       }
-      this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath, *target,
-                                false, false, useWatcomQuote);
+      this->OutputLinkLibraries(linkLineComputer, linkLibs, frameworkPath,
+                                linkPath, *target, false, false,
+                                useWatcomQuote);
     } break;
     case cmState::EXECUTABLE: {
       linkFlags += this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
@@ -1223,8 +1226,9 @@ void cmLocalGenerator::GetTargetFlags(
         return;
       }
       this->AddLanguageFlags(flags, linkLanguage, buildType);
-      this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath, *target,
-                                false, false, useWatcomQuote);
+      this->OutputLinkLibraries(linkLineComputer, linkLibs, frameworkPath,
+                                linkPath, *target, false, false,
+                                useWatcomQuote);
       if (cmSystemTools::IsOn(
             this->Makefile->GetDefinition("BUILD_SHARED_LIBS"))) {
         std::string sFlagVar = std::string("CMAKE_SHARED_BUILD_") +
@@ -1383,51 +1387,15 @@ std::string cmLocalGenerator::GetTargetFortranFlags(
   return std::string();
 }
 
-std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib)
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  // Work-ardound command line parsing limitations in MSVC 6.0
-  if (this->Makefile->IsOn("MSVC60")) {
-    // Search for the last space.
-    std::string::size_type pos = lib.rfind(' ');
-    if (pos != lib.npos) {
-      // Find the slash after the last space, if any.
-      pos = lib.find('/', pos);
-
-      // Convert the portion of the path with a space to a short path.
-      std::string sp;
-      if (cmSystemTools::GetShortPath(lib.substr(0, pos).c_str(), sp)) {
-        // Append the rest of the path with no space.
-        sp += lib.substr(pos);
-
-        return sp;
-      }
-    }
-  }
-#endif
-
-  // Normal behavior.
-  std::string relLib = lib;
-  cmState::Directory stateDir = this->GetStateSnapshot().GetDirectory();
-  if (cmOutputConverter::ContainedInDirectory(
-        stateDir.GetCurrentBinary(), lib, stateDir)) {
-    relLib = cmOutputConverter::ForceToRelativePath(
-      stateDir.GetCurrentBinary(), lib);
-  }
-  return relLib;
-}
-
 /**
  * Output the linking rules on a command line.  For executables,
  * targetLibrary should be a NULL pointer.  For libraries, it should point
  * to the name of the library.  This will not link a library against itself.
  */
-void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
-                                           std::string& frameworkPath,
-                                           std::string& linkPath,
-                                           cmGeneratorTarget& tgt, bool relink,
-                                           bool forResponseFile,
-                                           bool useWatcomQuote)
+void cmLocalGenerator::OutputLinkLibraries(
+  cmLinkLineComputer* linkLineComputer, std::string& linkLibraries,
+  std::string& frameworkPath, std::string& linkPath, cmGeneratorTarget& tgt,
+  bool relink, bool forResponseFile, bool useWatcomQuote)
 {
   OutputFormat shellFormat =
     (forResponseFile) ? RESPONSE : ((useWatcomQuote) ? WATCOMQUOTE : SHELL);
@@ -1486,7 +1454,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
     }
     if (li->IsPath) {
       linkLibs += this->ConvertToOutputFormat(
-        this->ConvertToLinkReference(li->Value), shellFormat);
+        linkLineComputer->ConvertToLinkReference(li->Value), shellFormat);
     } else {
       linkLibs += li->Value;
     }

@@ -76,8 +76,6 @@ public:
   void AppendCustomCommandDeps(cmCustomCommandGenerator const& ccg,
                                cmNinjaDeps& ninjaDeps);
 
-  std::string ConvertToLinkReference(std::string const& lib) CM_OVERRIDE;
-
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
     cmGeneratorTarget const* gt = CM_NULLPTR) CM_OVERRIDE;

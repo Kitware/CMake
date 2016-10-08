@@ -5,6 +5,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmLinkLineComputer.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
@@ -215,7 +216,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   this->LocalGenerator->AppendFlags(
     linkFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
 
-  this->AddModuleDefinitionFlag(linkFlags);
+  {
+    CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+      this->CreateLinkLineComputer(
+        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+
+    this->AddModuleDefinitionFlag(linkLineComputer.get(), linkFlags);
+  }
 
   // Construct a list of files associated with this executable that
   // may need to be cleaned.

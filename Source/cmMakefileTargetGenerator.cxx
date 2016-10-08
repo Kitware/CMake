@@ -10,6 +10,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmLinkLineComputer.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
@@ -1588,15 +1589,29 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
   return responseFileName;
 }
 
+cmLinkLineComputer* cmMakefileTargetGenerator::CreateLinkLineComputer(
+  cmState::Directory stateDir)
+{
+  if (this->Makefile->IsOn("MSVC60")) {
+    return this->GlobalGenerator->CreateMSVC60LinkLineComputer(stateDir);
+  }
+  return this->GlobalGenerator->CreateLinkLineComputer(stateDir);
+}
+
 void cmMakefileTargetGenerator::CreateLinkLibs(
   std::string& linkLibs, bool relink, bool useResponseFile,
   std::vector<std::string>& makefile_depends, bool useWatcomQuote)
 {
   std::string frameworkPath;
   std::string linkPath;
-  this->LocalGenerator->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
-                                            *this->GeneratorTarget, relink,
-                                            useResponseFile, useWatcomQuote);
+
+  CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+    this->CreateLinkLineComputer(
+      this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+
+  this->LocalGenerator->OutputLinkLibraries(
+    linkLineComputer.get(), linkLibs, frameworkPath, linkPath,
+    *this->GeneratorTarget, relink, useResponseFile, useWatcomQuote);
   linkLibs = frameworkPath + linkPath + linkLibs;
 
   if (useResponseFile && linkLibs.find_first_not_of(' ') != linkLibs.npos) {
