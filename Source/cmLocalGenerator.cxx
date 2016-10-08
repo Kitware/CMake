@@ -1506,8 +1506,12 @@ void cmLocalGenerator::OutputLinkLibraries(
   std::string standardLibsVar = "CMAKE_";
   standardLibsVar += cli.GetLinkLanguage();
   standardLibsVar += "_STANDARD_LIBRARIES";
+  std::string stdLibString;
   if (const char* stdLibs = this->Makefile->GetDefinition(standardLibsVar)) {
-    fout << stdLibs << " ";
+    stdLibString = stdLibs;
+  }
+  if (!stdLibString.empty()) {
+    fout << stdLibString << " ";
   }
 
   linkLibraries = fout.str();
