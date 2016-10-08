@@ -502,8 +502,13 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     // Collect up flags to link in needed libraries.
     std::string linkLibs;
     if (this->GeneratorTarget->GetType() != cmState::STATIC_LIBRARY) {
-      this->CreateLinkLibs(linkLibs, relink, useResponseFileForLibs, depends,
-                           useWatcomQuote);
+
+      CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+        this->CreateLinkLineComputer(
+          this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+
+      this->CreateLinkLibs(linkLineComputer.get(), linkLibs, relink,
+                           useResponseFileForLibs, depends, useWatcomQuote);
     }
 
     // Construct object file lists that may be needed to expand the

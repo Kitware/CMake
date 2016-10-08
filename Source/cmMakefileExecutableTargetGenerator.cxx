@@ -303,10 +303,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     // Set path conversion for link script shells.
     this->LocalGenerator->SetLinkScriptShell(useLinkScript);
 
+    CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+      this->CreateLinkLineComputer(
+        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+
     // Collect up flags to link in needed libraries.
     std::string linkLibs;
-    this->CreateLinkLibs(linkLibs, relink, useResponseFileForLibs, depends,
-                         useWatcomQuote);
+    this->CreateLinkLibs(linkLineComputer.get(), linkLibs, relink,
+                         useResponseFileForLibs, depends, useWatcomQuote);
 
     // Construct object file lists that may be needed to expand the
     // rule.

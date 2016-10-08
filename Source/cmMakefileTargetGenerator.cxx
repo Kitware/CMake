@@ -1599,18 +1599,14 @@ cmLinkLineComputer* cmMakefileTargetGenerator::CreateLinkLineComputer(
 }
 
 void cmMakefileTargetGenerator::CreateLinkLibs(
-  std::string& linkLibs, bool relink, bool useResponseFile,
-  std::vector<std::string>& makefile_depends, bool useWatcomQuote)
+  cmLinkLineComputer* linkLineComputer, std::string& linkLibs, bool relink,
+  bool useResponseFile, std::vector<std::string>& makefile_depends,
+  bool useWatcomQuote)
 {
   std::string frameworkPath;
   std::string linkPath;
-
-  CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
-    this->CreateLinkLineComputer(
-      this->LocalGenerator->GetStateSnapshot().GetDirectory()));
-
   this->LocalGenerator->OutputLinkLibraries(
-    linkLineComputer.get(), linkLibs, frameworkPath, linkPath,
+    linkLineComputer, linkLibs, frameworkPath, linkPath,
     *this->GeneratorTarget, relink, useResponseFile, useWatcomQuote);
   linkLibs = frameworkPath + linkPath + linkLibs;
 
