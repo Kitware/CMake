@@ -58,12 +58,6 @@ public:
     return this->HomeRelativeOutputPath;
   }
 
-  void ExpandRuleVariables(std::string& string,
-                           const RuleVariables& replaceValues)
-  {
-    cmLocalGenerator::ExpandRuleVariables(string, replaceValues);
-  }
-
   std::string BuildCommandLine(const std::vector<std::string>& cmdLines);
 
   void AppendTargetOutputs(cmGeneratorTarget* target, cmNinjaDeps& outputs);

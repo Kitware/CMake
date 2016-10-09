@@ -332,7 +332,6 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     std::string manifests = this->GetManifests();
 
     cmLocalGenerator::RuleVariables vars;
-    vars.RuleLauncher = "RULE_LAUNCH_LINK";
     vars.CMTarget = this->GeneratorTarget;
     vars.Language = linkLanguage.c_str();
     vars.Objects = buildObjs.c_str();
@@ -383,10 +382,20 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       real_link_commands.push_back(cmakeCommand);
     }
 
+    std::string launcher;
+
+    const char* val = this->LocalGenerator->GetRuleLauncher(
+      this->GeneratorTarget, "RULE_LAUNCH_LINK");
+    if (val && *val) {
+      launcher = val;
+      launcher += " ";
+    }
+
     // Expand placeholders in the commands.
     this->LocalGenerator->TargetImplib = targetOutPathImport;
     for (std::vector<std::string>::iterator i = real_link_commands.begin();
          i != real_link_commands.end(); ++i) {
+      *i = launcher + *i;
       this->LocalGenerator->ExpandRuleVariables(*i, vars);
     }
     this->LocalGenerator->TargetImplib = "";

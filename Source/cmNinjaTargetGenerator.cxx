@@ -374,7 +374,6 @@ void cmNinjaTargetGenerator::WriteLanguageRules(const std::string& language)
 void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
 {
   cmLocalGenerator::RuleVariables vars;
-  vars.RuleLauncher = "RULE_LAUNCH_COMPILE";
   vars.CMTarget = this->GetGeneratorTarget();
   vars.Language = lang.c_str();
   vars.Source = "$IN_ABS";
@@ -456,6 +455,14 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     ConvertToNinjaPath(this->GetTargetDependInfoPath(lang)),
     cmLocalGenerator::SHELL);
 
+  std::string launcher;
+  const char* val = this->GetLocalGenerator()->GetRuleLauncher(
+    this->GetGeneratorTarget(), "RULE_LAUNCH_COMPILE");
+  if (val && *val) {
+    launcher = val;
+    launcher += " ";
+  }
+
   if (explicitPP) {
     // Lookup the explicit preprocessing rule.
     std::string const ppVar = "CMAKE_" + lang + "_PREPROCESS_SOURCE";
@@ -467,7 +474,6 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     std::string const ppDepfile = "$DEP_FILE";
 
     cmLocalGenerator::RuleVariables ppVars;
-    ppVars.RuleLauncher = vars.RuleLauncher;
     ppVars.CMTarget = vars.CMTarget;
     ppVars.Language = vars.Language;
     ppVars.Object = "$out"; // for RULE_LAUNCH_COMPILE
@@ -496,6 +502,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
 
     for (std::vector<std::string>::iterator i = ppCmds.begin();
          i != ppCmds.end(); ++i) {
+      *i = launcher + *i;
       this->GetLocalGenerator()->ExpandRuleVariables(*i, ppVars);
     }
 
@@ -608,6 +615,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
 
   for (std::vector<std::string>::iterator i = compileCmds.begin();
        i != compileCmds.end(); ++i) {
+    *i = launcher + *i;
     this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
   }
 

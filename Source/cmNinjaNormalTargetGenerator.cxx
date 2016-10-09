@@ -168,7 +168,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
 
   if (!this->GetGlobalGenerator()->HasRule(ruleName)) {
     cmLocalGenerator::RuleVariables vars;
-    vars.RuleLauncher = "RULE_LAUNCH_LINK";
     vars.CMTarget = this->GetGeneratorTarget();
     vars.Language = this->TargetLinkLanguage.c_str();
 
@@ -238,10 +237,19 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
       vars.LanguageCompileFlags = langFlags.c_str();
     }
 
+    std::string launcher;
+    const char* val = this->GetLocalGenerator()->GetRuleLauncher(
+      this->GetGeneratorTarget(), "RULE_LAUNCH_LINK");
+    if (val && *val) {
+      launcher = val;
+      launcher += " ";
+    }
+
     // Rule for linking library/executable.
     std::vector<std::string> linkCmds = this->ComputeLinkCmd();
     for (std::vector<std::string>::iterator i = linkCmds.begin();
          i != linkCmds.end(); ++i) {
+      *i = launcher + *i;
       this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
     }
     {

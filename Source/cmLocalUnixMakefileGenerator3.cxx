@@ -984,13 +984,11 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
 
       std::string launcher;
       // Short-circuit if there is no launcher.
-      const char* prop = "RULE_LAUNCH_CUSTOM";
-      const char* val = this->GetRuleLauncher(target, prop);
+      const char* val = this->GetRuleLauncher(target, "RULE_LAUNCH_CUSTOM");
       if (val && *val) {
         // Expand rules in the empty string.  It may insert the launcher and
         // perform replacements.
         RuleVariables vars;
-        vars.RuleLauncher = prop;
         vars.CMTarget = target;
         std::string output;
         const std::vector<std::string>& outputs = ccg.GetOutputs();
@@ -1005,6 +1003,8 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         }
         vars.Output = output.c_str();
 
+        launcher = val;
+        launcher += " ";
         this->ExpandRuleVariables(launcher, vars);
         if (!launcher.empty()) {
           launcher += " ";

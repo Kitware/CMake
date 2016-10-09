@@ -346,6 +346,13 @@ public:
   void CreateEvaluationFileOutputs(const std::string& config);
   void ProcessEvaluationFiles(std::vector<std::string>& generatedFiles);
 
+  // Expand rule variables in CMake of the type found in language rules
+  void ExpandRuleVariables(std::string& string,
+                           const RuleVariables& replaceValues);
+
+  const char* GetRuleLauncher(cmGeneratorTarget* target,
+                              const std::string& prop);
+
 protected:
   ///! put all the libraries for a target on into the given stream
   void OutputLinkLibraries(cmComputeLinkInformation* pcli,
@@ -353,17 +360,9 @@ protected:
                            std::string& linkLibraries,
                            std::string& frameworkPath, std::string& linkPath);
 
-  // Expand rule variables in CMake of the type found in language rules
-  void ExpandRuleVariables(std::string& string,
-                           const RuleVariables& replaceValues);
   // Expand rule variables in a single string
   std::string ExpandRuleVariable(std::string const& variable,
                                  const RuleVariables& replaceValues);
-
-  const char* GetRuleLauncher(cmGeneratorTarget* target,
-                              const std::string& prop);
-  void InsertRuleLauncher(std::string& s, cmGeneratorTarget* target,
-                          const std::string& prop);
 
   // Handle old-style install rules stored in the targets.
   void GenerateTargetInstallRules(

@@ -767,10 +767,6 @@ std::string cmLocalGenerator::ExpandRuleVariable(
 void cmLocalGenerator::ExpandRuleVariables(std::string& s,
                                            const RuleVariables& replaceValues)
 {
-  if (replaceValues.RuleLauncher) {
-    this->InsertRuleLauncher(s, replaceValues.CMTarget,
-                             replaceValues.RuleLauncher);
-  }
   std::string::size_type start = s.find('<');
   // no variables to expand
   if (start == s.npos) {
@@ -812,17 +808,6 @@ const char* cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
     return target->GetProperty(prop);
   }
   return this->Makefile->GetProperty(prop);
-}
-
-void cmLocalGenerator::InsertRuleLauncher(std::string& s,
-                                          cmGeneratorTarget* target,
-                                          const std::string& prop)
-{
-  if (const char* val = this->GetRuleLauncher(target, prop)) {
-    std::ostringstream wrapped;
-    wrapped << val << " " << s;
-    s = wrapped.str();
-  }
 }
 
 std::string cmLocalGenerator::ConvertToIncludeReference(

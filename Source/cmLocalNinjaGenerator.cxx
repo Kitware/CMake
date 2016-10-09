@@ -468,8 +468,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
 std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   cmCustomCommandGenerator const& ccg)
 {
-  const char* property = "RULE_LAUNCH_CUSTOM";
-  const char* property_value = this->Makefile->GetProperty(property);
+  const char* property_value =
+    this->Makefile->GetProperty("RULE_LAUNCH_CUSTOM");
 
   if (!property_value || !*property_value) {
     return std::string();
@@ -478,7 +478,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   // Expand rules in the empty string.  It may insert the launcher and
   // perform replacements.
   RuleVariables vars;
-  vars.RuleLauncher = property;
+
   std::string output;
   const std::vector<std::string>& outputs = ccg.GetOutputs();
   if (!outputs.empty()) {
@@ -491,7 +491,9 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   }
   vars.Output = output.c_str();
 
-  std::string launcher;
+  std::string launcher = property_value;
+  launcher += " ";
+
   this->ExpandRuleVariables(launcher, vars);
   if (!launcher.empty()) {
     launcher += " ";
