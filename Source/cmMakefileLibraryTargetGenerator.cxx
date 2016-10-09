@@ -11,6 +11,7 @@
 #include "cmMakefile.h"
 #include "cmOSXBundleGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
@@ -520,7 +521,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
     std::string manifests = this->GetManifests();
 
-    cmLocalGenerator::RuleVariables vars;
+    cmRulePlaceholderExpander::RuleVariables vars;
     vars.TargetPDB = targetOutPathPDB.c_str();
 
     // Setup the target version.
@@ -606,8 +607,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       launcher += " ";
     }
 
+    CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+      this->LocalGenerator->CreateRulePlaceholderExpander());
     // Construct the main link rule and expand placeholders.
-    this->LocalGenerator->TargetImplib = targetOutPathImport;
+    rulePlaceholderExpander->SetTargetImpLib(targetOutPathImport);
     if (useArchiveRules) {
       // Construct the individual object list strings.
       std::vector<std::string> object_strings;
@@ -621,8 +624,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
                archiveCreateCommands.begin();
              i != archiveCreateCommands.end(); ++i) {
           std::string cmd = launcher + *i;
-          this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, cmd,
-                                                    vars);
+          rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
+                                                       cmd, vars);
           real_link_commands.push_back(cmd);
         }
       }
@@ -633,8 +636,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
                archiveAppendCommands.begin();
              i != archiveAppendCommands.end(); ++i) {
           std::string cmd = launcher + *i;
-          this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, cmd,
-                                                    vars);
+          rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
+                                                       cmd, vars);
           real_link_commands.push_back(cmd);
         }
       }
@@ -644,8 +647,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
              archiveFinishCommands.begin();
            i != archiveFinishCommands.end(); ++i) {
         std::string cmd = launcher + *i;
-        this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, cmd,
-                                                  vars);
+        rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, cmd,
+                                                     vars);
         // If there is no ranlib the command will be ":".  Skip it.
         if (!cmd.empty() && cmd[0] != ':') {
           real_link_commands.push_back(cmd);
@@ -668,11 +671,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       for (std::vector<std::string>::iterator i = real_link_commands.begin();
            i != real_link_commands.end(); ++i) {
         *i = launcher + *i;
-        this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, *i,
-                                                  vars);
+        rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, *i,
+                                                     vars);
       }
     }
-    this->LocalGenerator->TargetImplib = "";
 
     // Restore path conversion to normal shells.
     this->LocalGenerator->SetLinkScriptShell(false);

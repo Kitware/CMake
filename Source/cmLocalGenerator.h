@@ -24,6 +24,7 @@ class cmComputeLinkInformation;
 class cmCustomCommandGenerator;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
+class cmRulePlaceholderExpander;
 class cmMakefile;
 class cmSourceFile;
 class cmLinkLineComputer;
@@ -84,6 +85,8 @@ public:
   {
     return this->GlobalGenerator;
   }
+
+  virtual cmRulePlaceholderExpander* CreateRulePlaceholderExpander() const;
 
   std::string GetLinkLibsCMP0065(std::string const& linkLanguage,
                                  cmGeneratorTarget& tgt) const;
@@ -218,10 +221,6 @@ public:
   // preprocessed files and assembly files.
   void GetIndividualFileTargets(std::vector<std::string>&) {}
 
-  struct RuleVariables : cmRulePlaceholderExpander::RuleVariables
-  {
-  };
-
   /**
    * Get the relative path from the generator output directory to a
    * per-target support directory.
@@ -315,11 +314,6 @@ public:
   void CreateEvaluationFileOutputs(const std::string& config);
   void ProcessEvaluationFiles(std::vector<std::string>& generatedFiles);
 
-  // Expand rule variables in CMake of the type found in language rules
-  void ExpandRuleVariables(cmOutputConverter* outputConverter,
-                           std::string& string,
-                           const RuleVariables& replaceValues);
-
   const char* GetRuleLauncher(cmGeneratorTarget* target,
                               const std::string& prop);
 
@@ -361,10 +355,6 @@ protected:
   std::string CompilerSysroot;
 
   bool EmitUniversalBinaryFlags;
-
-  // Hack for ExpandRuleVariable until object-oriented version is
-  // committed.
-  std::string TargetImplib;
 
   KWIML_INT_uint64_t BackwardsCompatibility;
   bool BackwardsCompatibilityFinal;

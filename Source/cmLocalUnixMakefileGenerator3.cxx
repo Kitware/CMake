@@ -14,6 +14,7 @@
 #include "cmMakefile.h"
 #include "cmMakefileTargetGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
@@ -945,6 +946,9 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
     *content << dir;
   }
 
+  CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    this->CreateRulePlaceholderExpander());
+
   // Add each command line to the set of commands.
   std::vector<std::string> commands1;
   std::string currentBinDir = this->GetCurrentBinaryDirectory();
@@ -988,7 +992,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       if (val && *val) {
         // Expand rules in the empty string.  It may insert the launcher and
         // perform replacements.
-        RuleVariables vars;
+        cmRulePlaceholderExpander::RuleVariables vars;
         vars.CMTargetName = target->GetName().c_str();
         vars.CMTargetType = cmState::GetTargetTypeName(target->GetType());
         std::string output;
@@ -1006,7 +1010,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
 
         launcher = val;
         launcher += " ";
-        this->ExpandRuleVariables(this, launcher, vars);
+        rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);
         if (!launcher.empty()) {
           launcher += " ";
         }

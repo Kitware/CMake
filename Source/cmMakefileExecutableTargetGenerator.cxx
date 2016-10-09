@@ -11,6 +11,7 @@
 #include "cmMakefile.h"
 #include "cmOSXBundleGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -331,7 +332,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
     std::string manifests = this->GetManifests();
 
-    cmLocalGenerator::RuleVariables vars;
+    cmRulePlaceholderExpander::RuleVariables vars;
     vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
     vars.CMTargetType =
       cmState::GetTargetTypeName(this->GeneratorTarget->GetType());
@@ -393,15 +394,17 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       launcher += " ";
     }
 
+    CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+      this->LocalGenerator->CreateRulePlaceholderExpander());
+
     // Expand placeholders in the commands.
-    this->LocalGenerator->TargetImplib = targetOutPathImport;
+    rulePlaceholderExpander->SetTargetImpLib(targetOutPathImport);
     for (std::vector<std::string>::iterator i = real_link_commands.begin();
          i != real_link_commands.end(); ++i) {
       *i = launcher + *i;
-      this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, *i,
-                                                vars);
+      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, *i,
+                                                   vars);
     }
-    this->LocalGenerator->TargetImplib = "";
 
     // Restore path conversion to normal shells.
     this->LocalGenerator->SetLinkScriptShell(false);

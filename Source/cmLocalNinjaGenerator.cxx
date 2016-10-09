@@ -10,6 +10,7 @@
 #include "cmGlobalNinjaGenerator.h"
 #include "cmMakefile.h"
 #include "cmNinjaTargetGenerator.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
@@ -27,10 +28,18 @@ cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
   : cmLocalCommonGenerator(gg, mf, mf->GetState()->GetBinaryDirectory())
   , HomeRelativeOutputPath("")
 {
-  this->TargetImplib = "$TARGET_IMPLIB";
 }
 
 // Virtual public methods.
+
+cmRulePlaceholderExpander*
+cmLocalNinjaGenerator::CreateRulePlaceholderExpander() const
+{
+  cmRulePlaceholderExpander* ret = new cmRulePlaceholderExpander(
+    this->Compilers, this->VariableMappings, this->CompilerSysroot);
+  ret->SetTargetImpLib("$TARGET_IMPLIB");
+  return ret;
+}
 
 cmLocalNinjaGenerator::~cmLocalNinjaGenerator()
 {
@@ -477,7 +486,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
 
   // Expand rules in the empty string.  It may insert the launcher and
   // perform replacements.
-  RuleVariables vars;
+  cmRulePlaceholderExpander::RuleVariables vars;
 
   std::string output;
   const std::vector<std::string>& outputs = ccg.GetOutputs();
@@ -494,7 +503,10 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   std::string launcher = property_value;
   launcher += " ";
 
-  this->ExpandRuleVariables(this, launcher, vars);
+  CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    this->CreateRulePlaceholderExpander());
+
+  rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);
   if (!launcher.empty()) {
     launcher += " ";
   }

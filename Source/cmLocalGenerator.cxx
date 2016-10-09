@@ -133,6 +133,13 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   }
 }
 
+cmRulePlaceholderExpander* cmLocalGenerator::CreateRulePlaceholderExpander()
+  const
+{
+  return new cmRulePlaceholderExpander(this->Compilers, this->VariableMappings,
+                                       this->CompilerSysroot);
+}
+
 cmLocalGenerator::~cmLocalGenerator()
 {
   cmDeleteAll(this->GeneratorTargets);
@@ -559,17 +566,6 @@ cmState* cmLocalGenerator::GetState() const
 cmState::Snapshot cmLocalGenerator::GetStateSnapshot() const
 {
   return this->Makefile->GetStateSnapshot();
-}
-
-void cmLocalGenerator::ExpandRuleVariables(cmOutputConverter* outputConverter,
-                                           std::string& s,
-                                           const RuleVariables& replaceValues)
-{
-  cmRulePlaceholderExpander rulePlaceholderExpander(
-    this->Compilers, this->VariableMappings, this->CompilerSysroot);
-  rulePlaceholderExpander.SetTargetImpLib(this->TargetImplib);
-  rulePlaceholderExpander.ExpandRuleVariables(outputConverter, s,
-                                              replaceValues);
 }
 
 const char* cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,

@@ -15,6 +15,7 @@
 #include "cmNinjaTypes.h"
 #include "cmOSXBundleGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
@@ -167,7 +168,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
   std::string rspcontent;
 
   if (!this->GetGlobalGenerator()->HasRule(ruleName)) {
-    cmLocalGenerator::RuleVariables vars;
+    cmRulePlaceholderExpander::RuleVariables vars;
     vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
     vars.CMTargetType =
       cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType());
@@ -248,13 +249,16 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
       launcher += " ";
     }
 
+    CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+      this->GetLocalGenerator()->CreateRulePlaceholderExpander());
+
     // Rule for linking library/executable.
     std::vector<std::string> linkCmds = this->ComputeLinkCmd();
     for (std::vector<std::string>::iterator i = linkCmds.begin();
          i != linkCmds.end(); ++i) {
       *i = launcher + *i;
-      this->GetLocalGenerator()->ExpandRuleVariables(this->GetLocalGenerator(),
-                                                     *i, vars);
+      rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
+                                                   *i, vars);
     }
     {
       // If there is no ranlib the command will be ":".  Skip it.

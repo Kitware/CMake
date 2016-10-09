@@ -42,6 +42,8 @@ public:
 
   void Generate() CM_OVERRIDE;
 
+  cmRulePlaceholderExpander* CreateRulePlaceholderExpander() const CM_OVERRIDE;
+
   std::string GetTargetDirectory(cmGeneratorTarget const* target) const
     CM_OVERRIDE;
 
