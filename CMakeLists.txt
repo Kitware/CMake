@@ -366,14 +366,19 @@ macro (CMAKE_BUILD_UTILITIES)
   set(CMAKE_COMPRESS_LIBRARIES "cmcompress")
   add_subdirectory(Utilities/cmcompress)
   CMAKE_SET_TARGET_FOLDER(cmcompress "Utilities/3rdParty")
-  if(CMAKE_USE_SYSTEM_BZIP2)
-    find_package(BZip2)
-  else()
-    set(BZIP2_INCLUDE_DIR
-      "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmbzip2")
-    set(BZIP2_LIBRARIES cmbzip2)
-    add_subdirectory(Utilities/cmbzip2)
-    CMAKE_SET_TARGET_FOLDER(cmbzip2 "Utilities/3rdParty")
+
+  #---------------------------------------------------------------------
+  # Build or use system libbz2 for libarchive.
+  if(NOT CMAKE_USE_SYSTEM_LIBARCHIVE)
+    if(CMAKE_USE_SYSTEM_BZIP2)
+      find_package(BZip2)
+    else()
+      set(BZIP2_INCLUDE_DIR
+        "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmbzip2")
+      set(BZIP2_LIBRARIES cmbzip2)
+      add_subdirectory(Utilities/cmbzip2)
+      CMAKE_SET_TARGET_FOLDER(cmbzip2 "Utilities/3rdParty")
+    endif()
   endif()
 
   #---------------------------------------------------------------------
