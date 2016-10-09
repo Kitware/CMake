@@ -733,6 +733,18 @@ std::string cmLocalGenerator::ExpandRuleVariable(
       this->Makefile->GetSafeDefinition(compilerOptionExternalToolchain);
     variableMappings[compilerOptionSysroot] =
       this->Makefile->GetSafeDefinition(compilerOptionSysroot);
+
+    for (const char* const* replaceIter = cmArrayBegin(ruleReplaceVars);
+         replaceIter != cmArrayEnd(ruleReplaceVars); ++replaceIter) {
+      std::string const& lang = *i;
+      std::string actualReplace = *replaceIter;
+      if (actualReplace.find("${LANG}") != actualReplace.npos) {
+        cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
+      }
+
+      variableMappings[actualReplace] =
+        this->Makefile->GetSafeDefinition(actualReplace);
+    }
   }
 
   std::map<std::string, std::string>::iterator compIt =
@@ -781,20 +793,6 @@ std::string cmLocalGenerator::ExpandRuleVariable(
     return ret;
   }
 
-  for (const char* const* replaceIter = cmArrayBegin(ruleReplaceVars);
-       replaceIter != cmArrayEnd(ruleReplaceVars); ++replaceIter) {
-    for (std::vector<std::string>::iterator i = enabledLanguages.begin();
-         i != enabledLanguages.end(); ++i) {
-      std::string const& lang = *i;
-      std::string actualReplace = *replaceIter;
-      if (actualReplace.find("${LANG}") != actualReplace.npos) {
-        cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
-      }
-
-      variableMappings[actualReplace] =
-        this->Makefile->GetSafeDefinition(actualReplace);
-    }
-  }
   std::map<std::string, std::string>::iterator mapIt =
     variableMappings.find(variable);
   if (mapIt != variableMappings.end()) {
