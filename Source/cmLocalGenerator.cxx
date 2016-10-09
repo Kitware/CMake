@@ -40,6 +40,28 @@
 #include <StorageDefs.h>
 #endif
 
+// List of variables that are replaced when
+// rules are expanced.  These variables are
+// replaced in the form <var> with GetSafeDefinition(var).
+// ${LANG} is replaced in the variable first with all enabled
+// languages.
+static const char* ruleReplaceVars[] = {
+  "CMAKE_${LANG}_COMPILER",
+  "CMAKE_SHARED_LIBRARY_CREATE_${LANG}_FLAGS",
+  "CMAKE_SHARED_MODULE_CREATE_${LANG}_FLAGS",
+  "CMAKE_SHARED_MODULE_${LANG}_FLAGS",
+  "CMAKE_SHARED_LIBRARY_${LANG}_FLAGS",
+  "CMAKE_${LANG}_LINK_FLAGS",
+  "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
+  "CMAKE_${LANG}_ARCHIVE",
+  "CMAKE_AR",
+  "CMAKE_CURRENT_SOURCE_DIR",
+  "CMAKE_CURRENT_BINARY_DIR",
+  "CMAKE_RANLIB",
+  "CMAKE_LINKER",
+  "CMAKE_CL_SHOWINCLUDES_PREFIX"
+};
+
 cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   : cmOutputConverter(makefile->GetStateSnapshot())
   , StateSnapshot(makefile->GetStateSnapshot())
@@ -56,6 +78,58 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   this->BackwardsCompatibilityFinal = false;
 
   this->ComputeObjectMaxPath();
+
+  std::vector<std::string> enabledLanguages =
+    this->GetState()->GetEnabledLanguages();
+
+  this->CompilerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+
+  for (std::vector<std::string>::iterator i = enabledLanguages.begin();
+       i != enabledLanguages.end(); ++i) {
+    std::string const& lang = *i;
+    if (lang == "NONE") {
+      continue;
+    }
+    this->Compilers["CMAKE_" + lang + "_COMPILER"] = lang;
+
+    this->VariableMappings["CMAKE_" + lang + "_COMPILER"] =
+      this->Makefile->GetSafeDefinition("CMAKE_" + lang + "_COMPILER");
+
+    std::string const& compilerArg1 = "CMAKE_" + lang + "_COMPILER_ARG1";
+    std::string const& compilerTarget = "CMAKE_" + lang + "_COMPILER_TARGET";
+    std::string const& compilerOptionTarget =
+      "CMAKE_" + lang + "_COMPILE_OPTIONS_TARGET";
+    std::string const& compilerExternalToolchain =
+      "CMAKE_" + lang + "_COMPILER_EXTERNAL_TOOLCHAIN";
+    std::string const& compilerOptionExternalToolchain =
+      "CMAKE_" + lang + "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN";
+    std::string const& compilerOptionSysroot =
+      "CMAKE_" + lang + "_COMPILE_OPTIONS_SYSROOT";
+
+    this->VariableMappings[compilerArg1] =
+      this->Makefile->GetSafeDefinition(compilerArg1);
+    this->VariableMappings[compilerTarget] =
+      this->Makefile->GetSafeDefinition(compilerTarget);
+    this->VariableMappings[compilerOptionTarget] =
+      this->Makefile->GetSafeDefinition(compilerOptionTarget);
+    this->VariableMappings[compilerExternalToolchain] =
+      this->Makefile->GetSafeDefinition(compilerExternalToolchain);
+    this->VariableMappings[compilerOptionExternalToolchain] =
+      this->Makefile->GetSafeDefinition(compilerOptionExternalToolchain);
+    this->VariableMappings[compilerOptionSysroot] =
+      this->Makefile->GetSafeDefinition(compilerOptionSysroot);
+
+    for (const char* const* replaceIter = cmArrayBegin(ruleReplaceVars);
+         replaceIter != cmArrayEnd(ruleReplaceVars); ++replaceIter) {
+      std::string actualReplace = *replaceIter;
+      if (actualReplace.find("${LANG}") != actualReplace.npos) {
+        cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
+      }
+
+      this->VariableMappings[actualReplace] =
+        this->Makefile->GetSafeDefinition(actualReplace);
+    }
+  }
 }
 
 cmLocalGenerator::~cmLocalGenerator()
@@ -486,28 +560,6 @@ cmState::Snapshot cmLocalGenerator::GetStateSnapshot() const
   return this->Makefile->GetStateSnapshot();
 }
 
-// List of variables that are replaced when
-// rules are expanced.  These variables are
-// replaced in the form <var> with GetSafeDefinition(var).
-// ${LANG} is replaced in the variable first with all enabled
-// languages.
-static const char* ruleReplaceVars[] = {
-  "CMAKE_${LANG}_COMPILER",
-  "CMAKE_SHARED_LIBRARY_CREATE_${LANG}_FLAGS",
-  "CMAKE_SHARED_MODULE_CREATE_${LANG}_FLAGS",
-  "CMAKE_SHARED_MODULE_${LANG}_FLAGS",
-  "CMAKE_SHARED_LIBRARY_${LANG}_FLAGS",
-  "CMAKE_${LANG}_LINK_FLAGS",
-  "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
-  "CMAKE_${LANG}_ARCHIVE",
-  "CMAKE_AR",
-  "CMAKE_CURRENT_SOURCE_DIR",
-  "CMAKE_CURRENT_BINARY_DIR",
-  "CMAKE_RANLIB",
-  "CMAKE_LINKER",
-  "CMAKE_CL_SHOWINCLUDES_PREFIX"
-};
-
 std::string cmLocalGenerator::ExpandRuleVariable(
   std::string const& variable, const RuleVariables& replaceValues)
 {
@@ -689,84 +741,29 @@ std::string cmLocalGenerator::ExpandRuleVariable(
       cmSystemTools::CollapseFullPath(cmSystemTools::GetCMakeCommand()),
       SHELL);
   }
-  std::vector<std::string> enabledLanguages =
-    this->GetState()->GetEnabledLanguages();
-
-  std::map<std::string, std::string> compilers;
-
-  std::map<std::string, std::string> variableMappings;
-
-  std::string compilerSysroot =
-    this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
-
-  for (std::vector<std::string>::iterator i = enabledLanguages.begin();
-       i != enabledLanguages.end(); ++i) {
-    std::string const& lang = *i;
-    if (lang == "NONE") {
-      continue;
-    }
-    compilers["CMAKE_" + lang + "_COMPILER"] = lang;
-
-    variableMappings["CMAKE_" + lang + "_COMPILER"] =
-      this->Makefile->GetSafeDefinition("CMAKE_" + lang + "_COMPILER");
-
-    std::string const& compilerArg1 = "CMAKE_" + lang + "_COMPILER_ARG1";
-    std::string const& compilerTarget = "CMAKE_" + lang + "_COMPILER_TARGET";
-    std::string const& compilerOptionTarget =
-      "CMAKE_" + lang + "_COMPILE_OPTIONS_TARGET";
-    std::string const& compilerExternalToolchain =
-      "CMAKE_" + lang + "_COMPILER_EXTERNAL_TOOLCHAIN";
-    std::string const& compilerOptionExternalToolchain =
-      "CMAKE_" + lang + "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN";
-    std::string const& compilerOptionSysroot =
-      "CMAKE_" + lang + "_COMPILE_OPTIONS_SYSROOT";
-
-    variableMappings[compilerArg1] =
-      this->Makefile->GetSafeDefinition(compilerArg1);
-    variableMappings[compilerTarget] =
-      this->Makefile->GetSafeDefinition(compilerTarget);
-    variableMappings[compilerOptionTarget] =
-      this->Makefile->GetSafeDefinition(compilerOptionTarget);
-    variableMappings[compilerExternalToolchain] =
-      this->Makefile->GetSafeDefinition(compilerExternalToolchain);
-    variableMappings[compilerOptionExternalToolchain] =
-      this->Makefile->GetSafeDefinition(compilerOptionExternalToolchain);
-    variableMappings[compilerOptionSysroot] =
-      this->Makefile->GetSafeDefinition(compilerOptionSysroot);
-
-    for (const char* const* replaceIter = cmArrayBegin(ruleReplaceVars);
-         replaceIter != cmArrayEnd(ruleReplaceVars); ++replaceIter) {
-      std::string const& lang = *i;
-      std::string actualReplace = *replaceIter;
-      if (actualReplace.find("${LANG}") != actualReplace.npos) {
-        cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
-      }
-
-      variableMappings[actualReplace] =
-        this->Makefile->GetSafeDefinition(actualReplace);
-    }
-  }
 
   std::map<std::string, std::string>::iterator compIt =
-    compilers.find(variable);
+    this->Compilers.find(variable);
 
-  if (compIt != compilers.end()) {
+  if (compIt != this->Compilers.end()) {
     std::string ret = this->ConvertToOutputForExisting(
-      variableMappings["CMAKE_" + compIt->second + "_COMPILER"]);
+      this->VariableMappings["CMAKE_" + compIt->second + "_COMPILER"]);
     std::string const& compilerArg1 =
-      variableMappings[compIt->first + "_COMPILER_ARG1"];
+      this->VariableMappings[compIt->first + "_COMPILER_ARG1"];
     std::string const& compilerTarget =
-      variableMappings["CMAKE_" + compIt->second + "_COMPILER_TARGET"];
+      this->VariableMappings["CMAKE_" + compIt->second + "_COMPILER_TARGET"];
     std::string const& compilerOptionTarget =
-      variableMappings["CMAKE_" + compIt->second + "_COMPILE_OPTIONS_TARGET"];
+      this->VariableMappings["CMAKE_" + compIt->second +
+                             "_COMPILE_OPTIONS_TARGET"];
     std::string const& compilerExternalToolchain =
-      variableMappings["CMAKE_" + compIt->second +
-                       "_COMPILER_EXTERNAL_TOOLCHAIN"];
+      this->VariableMappings["CMAKE_" + compIt->second +
+                             "_COMPILER_EXTERNAL_TOOLCHAIN"];
     std::string const& compilerOptionExternalToolchain =
-      variableMappings["CMAKE_" + compIt->second +
-                       "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN"];
+      this->VariableMappings["CMAKE_" + compIt->second +
+                             "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN"];
     std::string const& compilerOptionSysroot =
-      variableMappings["CMAKE_" + compIt->second + "_COMPILE_OPTIONS_SYSROOT"];
+      this->VariableMappings["CMAKE_" + compIt->second +
+                             "_COMPILE_OPTIONS_SYSROOT"];
 
     // if there is a required first argument to the compiler add it
     // to the compiler string
@@ -785,17 +782,17 @@ std::string cmLocalGenerator::ExpandRuleVariable(
       ret += compilerOptionExternalToolchain;
       ret += this->EscapeForShell(compilerExternalToolchain, true);
     }
-    if (!compilerSysroot.empty() && !compilerOptionSysroot.empty()) {
+    if (!this->CompilerSysroot.empty() && !compilerOptionSysroot.empty()) {
       ret += " ";
       ret += compilerOptionSysroot;
-      ret += this->EscapeForShell(compilerSysroot, true);
+      ret += this->EscapeForShell(this->CompilerSysroot, true);
     }
     return ret;
   }
 
   std::map<std::string, std::string>::iterator mapIt =
-    variableMappings.find(variable);
-  if (mapIt != variableMappings.end()) {
+    this->VariableMappings.find(variable);
+  if (mapIt != this->VariableMappings.end()) {
     if (variable.find("_FLAG") == variable.npos) {
       return this->ConvertToOutputForExisting(mapIt->second);
     }

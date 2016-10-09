@@ -390,6 +390,10 @@ protected:
   std::vector<cmGeneratorTarget*> OwnedImportedGeneratorTargets;
   std::map<std::string, std::string> AliasTargets;
 
+  std::map<std::string, std::string> Compilers;
+  std::map<std::string, std::string> VariableMappings;
+  std::string CompilerSysroot;
+
   bool EmitUniversalBinaryFlags;
 
   // Hack for ExpandRuleVariable until object-oriented version is
