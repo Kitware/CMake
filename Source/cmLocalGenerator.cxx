@@ -726,17 +726,18 @@ std::string cmLocalGenerator::ExpandRuleVariable(
         std::string arg1 = compIt->first + "_ARG1";
         compilerArg1 = this->Makefile->GetDefinition(arg1);
         compilerTarget = this->Makefile->GetDefinition(
-          std::string("CMAKE_") + lang + "_COMPILER_TARGET");
+          std::string("CMAKE_") + compIt->second + "_COMPILER_TARGET");
         compilerOptionTarget = this->Makefile->GetDefinition(
-          std::string("CMAKE_") + lang + "_COMPILE_OPTIONS_TARGET");
+          std::string("CMAKE_") + compIt->second + "_COMPILE_OPTIONS_TARGET");
         compilerExternalToolchain = this->Makefile->GetDefinition(
-          std::string("CMAKE_") + lang + "_COMPILER_EXTERNAL_TOOLCHAIN");
-        compilerOptionExternalToolchain =
-          this->Makefile->GetDefinition(std::string("CMAKE_") + lang +
-                                        "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN");
+          std::string("CMAKE_") + compIt->second +
+          "_COMPILER_EXTERNAL_TOOLCHAIN");
+        compilerOptionExternalToolchain = this->Makefile->GetDefinition(
+          std::string("CMAKE_") + compIt->second +
+          "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN");
         compilerSysroot = this->Makefile->GetDefinition("CMAKE_SYSROOT");
         compilerOptionSysroot = this->Makefile->GetDefinition(
-          std::string("CMAKE_") + lang + "_COMPILE_OPTIONS_SYSROOT");
+          std::string("CMAKE_") + compIt->second + "_COMPILE_OPTIONS_SYSROOT");
       }
       if (actualReplace.find("${LANG}") != actualReplace.npos) {
         cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
