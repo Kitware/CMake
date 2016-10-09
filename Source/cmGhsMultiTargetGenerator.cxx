@@ -244,7 +244,7 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
       flags, this->GeneratorTarget, lang);
 
     // Append old-style preprocessor definition flags.
-    if (std::string(" ") != std::string(this->Makefile->GetDefineFlags())) {
+    if (this->Makefile->GetDefineFlags() != " ") {
       this->LocalGenerator->AppendFlags(flags,
                                         this->Makefile->GetDefineFlags());
     }
