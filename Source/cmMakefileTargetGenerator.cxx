@@ -545,7 +545,9 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   }
   cmLocalGenerator::RuleVariables vars;
   vars.RuleLauncher = "RULE_LAUNCH_COMPILE";
-  vars.CMTarget = this->GeneratorTarget;
+  vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
+  vars.CMTargetType =
+    cmState::GetTargetTypeName(this->GeneratorTarget->GetType());
   vars.Language = lang.c_str();
   vars.Target = targetOutPathReal.c_str();
   vars.TargetPDB = targetOutPathPDB.c_str();

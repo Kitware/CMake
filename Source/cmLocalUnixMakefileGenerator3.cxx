@@ -989,7 +989,8 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         // Expand rules in the empty string.  It may insert the launcher and
         // perform replacements.
         RuleVariables vars;
-        vars.CMTarget = target;
+        vars.CMTargetName = target->GetName().c_str();
+        vars.CMTargetType = cmState::GetTargetTypeName(target->GetType());
         std::string output;
         const std::vector<std::string>& outputs = ccg.GetOutputs();
         if (!outputs.empty()) {

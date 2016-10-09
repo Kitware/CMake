@@ -222,7 +222,8 @@ public:
   struct RuleVariables
   {
     RuleVariables() { memset(this, 0, sizeof(*this)); }
-    cmGeneratorTarget* CMTarget;
+    const char* CMTargetName;
+    const char* CMTargetType;
     const char* TargetPDB;
     const char* TargetCompilePDB;
     const char* TargetVersionMajor;

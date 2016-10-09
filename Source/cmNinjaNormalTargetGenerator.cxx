@@ -168,7 +168,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
 
   if (!this->GetGlobalGenerator()->HasRule(ruleName)) {
     cmLocalGenerator::RuleVariables vars;
-    vars.CMTarget = this->GetGeneratorTarget();
+    vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
+    vars.CMTargetType =
+      cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType());
+
     vars.Language = this->TargetLinkLanguage.c_str();
 
     std::string responseFlag;

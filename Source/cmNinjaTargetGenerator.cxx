@@ -374,7 +374,9 @@ void cmNinjaTargetGenerator::WriteLanguageRules(const std::string& language)
 void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
 {
   cmLocalGenerator::RuleVariables vars;
-  vars.CMTarget = this->GetGeneratorTarget();
+  vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
+  vars.CMTargetType =
+    cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType());
   vars.Language = lang.c_str();
   vars.Source = "$IN_ABS";
   vars.Object = "$out";
@@ -474,7 +476,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     std::string const ppDepfile = "$DEP_FILE";
 
     cmLocalGenerator::RuleVariables ppVars;
-    ppVars.CMTarget = vars.CMTarget;
+    ppVars.CMTargetName = vars.CMTargetName;
+    ppVars.CMTargetType = vars.CMTargetType;
     ppVars.Language = vars.Language;
     ppVars.Object = "$out"; // for RULE_LAUNCH_COMPILE
     ppVars.PreprocessedSource = "$out";

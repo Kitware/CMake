@@ -724,12 +724,14 @@ std::string cmLocalGenerator::ExpandRuleVariable(
       return replaceValues.Language;
     }
   }
-  if (replaceValues.CMTarget) {
+  if (replaceValues.CMTargetName) {
     if (variable == "TARGET_NAME") {
-      return replaceValues.CMTarget->GetName();
+      return replaceValues.CMTargetName;
     }
+  }
+  if (replaceValues.CMTargetType) {
     if (variable == "TARGET_TYPE") {
-      return cmState::GetTargetTypeName(replaceValues.CMTarget->GetType());
+      return replaceValues.CMTargetType;
     }
   }
   if (replaceValues.Output) {
@@ -747,7 +749,7 @@ std::string cmLocalGenerator::ExpandRuleVariable(
     this->Compilers.find(variable);
 
   if (compIt != this->Compilers.end()) {
-    std::string ret = this->ConvertToOutputForExisting(
+    std::string ret = outputConverter->ConvertToOutputForExisting(
       this->VariableMappings["CMAKE_" + compIt->second + "_COMPILER"]);
     std::string const& compilerArg1 =
       this->VariableMappings[compIt->first + "_COMPILER_ARG1"];
