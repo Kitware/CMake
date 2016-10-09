@@ -8,6 +8,7 @@
 #include "cmListFileCache.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmState.h"
 #include "cmake.h"
 
@@ -217,41 +218,8 @@ public:
   // preprocessed files and assembly files.
   void GetIndividualFileTargets(std::vector<std::string>&) {}
 
-  // Create a struct to hold the varibles passed into
-  // ExpandRuleVariables
-  struct RuleVariables
+  struct RuleVariables : cmRulePlaceholderExpander::RuleVariables
   {
-    RuleVariables();
-    const char* CMTargetName;
-    const char* CMTargetType;
-    const char* TargetPDB;
-    const char* TargetCompilePDB;
-    const char* TargetVersionMajor;
-    const char* TargetVersionMinor;
-    const char* Language;
-    const char* Objects;
-    const char* Target;
-    const char* LinkLibraries;
-    const char* Source;
-    const char* AssemblySource;
-    const char* PreprocessedSource;
-    const char* Output;
-    const char* Object;
-    const char* ObjectDir;
-    const char* ObjectFileDir;
-    const char* Flags;
-    const char* ObjectsQuoted;
-    const char* SONameFlag;
-    const char* TargetSOName;
-    const char* TargetInstallNameDir;
-    const char* LinkFlags;
-    const char* Manifests;
-    const char* LanguageCompileFlags;
-    const char* Defines;
-    const char* Includes;
-    const char* RuleLauncher;
-    const char* DependencyFile;
-    const char* FilterPrefix;
   };
 
   /**
@@ -361,11 +329,6 @@ protected:
                            cmLinkLineComputer* linkLineComputer,
                            std::string& linkLibraries,
                            std::string& frameworkPath, std::string& linkPath);
-
-  // Expand rule variables in a single string
-  std::string ExpandRuleVariable(cmOutputConverter* outputConverter,
-                                 std::string const& variable,
-                                 const RuleVariables& replaceValues);
 
   // Handle old-style install rules stored in the targets.
   void GenerateTargetInstallRules(
