@@ -250,7 +250,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
     for (std::vector<std::string>::iterator i = linkCmds.begin();
          i != linkCmds.end(); ++i) {
       *i = launcher + *i;
-      this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
+      this->GetLocalGenerator()->ExpandRuleVariables(this->GetLocalGenerator(),
+                                                     *i, vars);
     }
     {
       // If there is no ranlib the command will be ":".  Skip it.

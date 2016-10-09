@@ -503,7 +503,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     for (std::vector<std::string>::iterator i = ppCmds.begin();
          i != ppCmds.end(); ++i) {
       *i = launcher + *i;
-      this->GetLocalGenerator()->ExpandRuleVariables(*i, ppVars);
+      this->GetLocalGenerator()->ExpandRuleVariables(this->GetLocalGenerator(),
+                                                     *i, ppVars);
     }
 
     // Run CMake dependency scanner on preprocessed output.
@@ -616,7 +617,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   for (std::vector<std::string>::iterator i = compileCmds.begin();
        i != compileCmds.end(); ++i) {
     *i = launcher + *i;
-    this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
+    this->GetLocalGenerator()->ExpandRuleVariables(this->GetLocalGenerator(),
+                                                   *i, vars);
   }
 
   std::string cmdLine =
@@ -1003,7 +1005,8 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
 
   for (std::vector<std::string>::iterator i = compileCmds.begin();
        i != compileCmds.end(); ++i) {
-    this->GetLocalGenerator()->ExpandRuleVariables(*i, compileObjectVars);
+    this->GetLocalGenerator()->ExpandRuleVariables(this->GetLocalGenerator(),
+                                                   *i, compileObjectVars);
   }
 
   std::string cmdLine =

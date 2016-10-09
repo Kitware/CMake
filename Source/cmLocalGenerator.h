@@ -347,7 +347,8 @@ public:
   void ProcessEvaluationFiles(std::vector<std::string>& generatedFiles);
 
   // Expand rule variables in CMake of the type found in language rules
-  void ExpandRuleVariables(std::string& string,
+  void ExpandRuleVariables(cmOutputConverter* outputConverter,
+                           std::string& string,
                            const RuleVariables& replaceValues);
 
   const char* GetRuleLauncher(cmGeneratorTarget* target,
@@ -361,7 +362,8 @@ protected:
                            std::string& frameworkPath, std::string& linkPath);
 
   // Expand rule variables in a single string
-  std::string ExpandRuleVariable(std::string const& variable,
+  std::string ExpandRuleVariable(cmOutputConverter* outputConverter,
+                                 std::string const& variable,
                                  const RuleVariables& replaceValues);
 
   // Handle old-style install rules stored in the targets.

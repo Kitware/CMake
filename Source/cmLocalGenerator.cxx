@@ -561,7 +561,8 @@ cmState::Snapshot cmLocalGenerator::GetStateSnapshot() const
 }
 
 std::string cmLocalGenerator::ExpandRuleVariable(
-  std::string const& variable, const RuleVariables& replaceValues)
+  cmOutputConverter* outputConverter, std::string const& variable,
+  const RuleVariables& replaceValues)
 {
   if (replaceValues.LinkFlags) {
     if (variable == "LINK_FLAGS") {
@@ -737,7 +738,7 @@ std::string cmLocalGenerator::ExpandRuleVariable(
     }
   }
   if (variable == "CMAKE_COMMAND") {
-    return this->ConvertToOutputFormat(
+    return outputConverter->ConvertToOutputFormat(
       cmSystemTools::CollapseFullPath(cmSystemTools::GetCMakeCommand()),
       SHELL);
   }
@@ -780,12 +781,12 @@ std::string cmLocalGenerator::ExpandRuleVariable(
         !compilerOptionExternalToolchain.empty()) {
       ret += " ";
       ret += compilerOptionExternalToolchain;
-      ret += this->EscapeForShell(compilerExternalToolchain, true);
+      ret += outputConverter->EscapeForShell(compilerExternalToolchain, true);
     }
     if (!this->CompilerSysroot.empty() && !compilerOptionSysroot.empty()) {
       ret += " ";
       ret += compilerOptionSysroot;
-      ret += this->EscapeForShell(this->CompilerSysroot, true);
+      ret += outputConverter->EscapeForShell(this->CompilerSysroot, true);
     }
     return ret;
   }
@@ -794,14 +795,15 @@ std::string cmLocalGenerator::ExpandRuleVariable(
     this->VariableMappings.find(variable);
   if (mapIt != this->VariableMappings.end()) {
     if (variable.find("_FLAG") == variable.npos) {
-      return this->ConvertToOutputForExisting(mapIt->second);
+      return outputConverter->ConvertToOutputForExisting(mapIt->second);
     }
     return mapIt->second;
   }
   return variable;
 }
 
-void cmLocalGenerator::ExpandRuleVariables(std::string& s,
+void cmLocalGenerator::ExpandRuleVariables(cmOutputConverter* outputConverter,
+                                           std::string& s,
                                            const RuleVariables& replaceValues)
 {
   std::string::size_type start = s.find('<');
@@ -825,7 +827,8 @@ void cmLocalGenerator::ExpandRuleVariables(std::string& s,
     } else {
       // extract the var
       std::string var = s.substr(start + 1, end - start - 1);
-      std::string replace = this->ExpandRuleVariable(var, replaceValues);
+      std::string replace =
+        this->ExpandRuleVariable(outputConverter, var, replaceValues);
       expandedInput += s.substr(pos, start - pos);
       expandedInput += replace;
       // move to next one

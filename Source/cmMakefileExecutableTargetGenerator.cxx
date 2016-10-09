@@ -396,7 +396,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     for (std::vector<std::string>::iterator i = real_link_commands.begin();
          i != real_link_commands.end(); ++i) {
       *i = launcher + *i;
-      this->LocalGenerator->ExpandRuleVariables(*i, vars);
+      this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, *i,
+                                                vars);
     }
     this->LocalGenerator->TargetImplib = "";
 

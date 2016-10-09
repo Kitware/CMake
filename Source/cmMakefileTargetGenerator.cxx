@@ -600,7 +600,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     if (this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS") &&
         lang_can_export_cmds && compileCommands.size() == 1) {
       std::string compileCommand = compileCommands[0];
-      this->LocalGenerator->ExpandRuleVariables(compileCommand, vars);
+      this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator,
+                                                compileCommand, vars);
       std::string workingDirectory = cmSystemTools::CollapseFullPath(
         this->LocalGenerator->GetCurrentBinaryDirectory());
       compileCommand.replace(compileCommand.find(langFlags), langFlags.size(),
@@ -659,7 +660,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     // Expand placeholders in the commands.
     for (std::vector<std::string>::iterator i = compileCommands.begin();
          i != compileCommands.end(); ++i) {
-      this->LocalGenerator->ExpandRuleVariables(*i, vars);
+      this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, *i,
+                                                vars);
     }
 
     // Change the command working directory to the local build tree.
@@ -722,7 +724,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         // Expand placeholders in the commands.
         for (std::vector<std::string>::iterator i = preprocessCommands.begin();
              i != preprocessCommands.end(); ++i) {
-          this->LocalGenerator->ExpandRuleVariables(*i, vars);
+          this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, *i,
+                                                    vars);
         }
 
         this->LocalGenerator->CreateCDCommand(
@@ -769,7 +772,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         // Expand placeholders in the commands.
         for (std::vector<std::string>::iterator i = assemblyCommands.begin();
              i != assemblyCommands.end(); ++i) {
-          this->LocalGenerator->ExpandRuleVariables(*i, vars);
+          this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, *i,
+                                                    vars);
         }
 
         this->LocalGenerator->CreateCDCommand(

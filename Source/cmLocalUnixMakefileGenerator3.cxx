@@ -1005,7 +1005,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
 
         launcher = val;
         launcher += " ";
-        this->ExpandRuleVariables(launcher, vars);
+        this->ExpandRuleVariables(this, launcher, vars);
         if (!launcher.empty()) {
           launcher += " ";
         }

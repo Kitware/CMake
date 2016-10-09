@@ -619,7 +619,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
                archiveCreateCommands.begin();
              i != archiveCreateCommands.end(); ++i) {
           std::string cmd = launcher + *i;
-          this->LocalGenerator->ExpandRuleVariables(cmd, vars);
+          this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, cmd,
+                                                    vars);
           real_link_commands.push_back(cmd);
         }
       }
@@ -630,7 +631,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
                archiveAppendCommands.begin();
              i != archiveAppendCommands.end(); ++i) {
           std::string cmd = launcher + *i;
-          this->LocalGenerator->ExpandRuleVariables(cmd, vars);
+          this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, cmd,
+                                                    vars);
           real_link_commands.push_back(cmd);
         }
       }
@@ -640,7 +642,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
              archiveFinishCommands.begin();
            i != archiveFinishCommands.end(); ++i) {
         std::string cmd = launcher + *i;
-        this->LocalGenerator->ExpandRuleVariables(cmd, vars);
+        this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, cmd,
+                                                  vars);
         // If there is no ranlib the command will be ":".  Skip it.
         if (!cmd.empty() && cmd[0] != ':') {
           real_link_commands.push_back(cmd);
@@ -663,7 +666,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       for (std::vector<std::string>::iterator i = real_link_commands.begin();
            i != real_link_commands.end(); ++i) {
         *i = launcher + *i;
-        this->LocalGenerator->ExpandRuleVariables(*i, vars);
+        this->LocalGenerator->ExpandRuleVariables(this->LocalGenerator, *i,
+                                                  vars);
       }
     }
     this->LocalGenerator->TargetImplib = "";

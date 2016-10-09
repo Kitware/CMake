@@ -494,7 +494,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   std::string launcher = property_value;
   launcher += " ";
 
-  this->ExpandRuleVariables(launcher, vars);
+  this->ExpandRuleVariables(this, launcher, vars);
   if (!launcher.empty()) {
     launcher += " ";
   }
