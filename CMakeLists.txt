@@ -383,19 +383,21 @@ macro (CMAKE_BUILD_UTILITIES)
 
   #---------------------------------------------------------------------
   # Build or use system liblzma for libarchive.
-  if(CMAKE_USE_SYSTEM_LIBLZMA)
-    find_package(LibLZMA)
-    if(NOT LIBLZMA_FOUND)
-      message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBLZMA is ON but LibLZMA is not found!")
+  if(NOT CMAKE_USE_SYSTEM_LIBARCHIVE)
+    if(CMAKE_USE_SYSTEM_LIBLZMA)
+      find_package(LibLZMA)
+      if(NOT LIBLZMA_FOUND)
+        message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBLZMA is ON but LibLZMA is not found!")
+      endif()
+      set(LZMA_INCLUDE_DIR ${LIBLZMA_INCLUDE_DIRS})
+      set(LZMA_LIBRARY ${LIBLZMA_LIBRARIES})
+    else()
+      add_subdirectory(Utilities/cmliblzma)
+      CMAKE_SET_TARGET_FOLDER(cmliblzma "Utilities/3rdParty")
+      set(LZMA_INCLUDE_DIR
+        "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmliblzma/liblzma/api")
+      set(LZMA_LIBRARY cmliblzma)
     endif()
-    set(LZMA_INCLUDE_DIR ${LIBLZMA_INCLUDE_DIRS})
-    set(LZMA_LIBRARY ${LIBLZMA_LIBRARIES})
-  else()
-    add_subdirectory(Utilities/cmliblzma)
-    CMAKE_SET_TARGET_FOLDER(cmliblzma "Utilities/3rdParty")
-    set(LZMA_INCLUDE_DIR
-      "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmliblzma/liblzma/api")
-    set(LZMA_LIBRARY cmliblzma)
   endif()
 
   #---------------------------------------------------------------------
