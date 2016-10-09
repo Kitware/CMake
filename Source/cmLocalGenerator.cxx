@@ -740,6 +740,30 @@ std::string cmLocalGenerator::ExpandRuleVariable(
         compilerSysroot = this->Makefile->GetDefinition("CMAKE_SYSROOT");
         compilerOptionSysroot = this->Makefile->GetDefinition(
           std::string("CMAKE_") + compIt->second + "_COMPILE_OPTIONS_SYSROOT");
+
+        std::string ret = this->ConvertToOutputForExisting(replace);
+        // if there is a required first argument to the compiler add it
+        // to the compiler string
+        if (compilerArg1) {
+          ret += " ";
+          ret += compilerArg1;
+        }
+        if (compilerTarget && compilerOptionTarget) {
+          ret += " ";
+          ret += compilerOptionTarget;
+          ret += compilerTarget;
+        }
+        if (compilerExternalToolchain && compilerOptionExternalToolchain) {
+          ret += " ";
+          ret += compilerOptionExternalToolchain;
+          ret += this->EscapeForShell(compilerExternalToolchain, true);
+        }
+        if (compilerSysroot && compilerOptionSysroot) {
+          ret += " ";
+          ret += compilerOptionSysroot;
+          ret += this->EscapeForShell(compilerSysroot, true);
+        }
+        return ret;
       }
       if (actualReplace.find("${LANG}") != actualReplace.npos) {
         cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
@@ -747,29 +771,7 @@ std::string cmLocalGenerator::ExpandRuleVariable(
       if (actualReplace == variable) {
         // if the variable is not a FLAG then treat it like a path
         if (variable.find("_FLAG") == variable.npos) {
-          std::string ret = this->ConvertToOutputForExisting(replace);
-          // if there is a required first argument to the compiler add it
-          // to the compiler string
-          if (compilerArg1) {
-            ret += " ";
-            ret += compilerArg1;
-          }
-          if (compilerTarget && compilerOptionTarget) {
-            ret += " ";
-            ret += compilerOptionTarget;
-            ret += compilerTarget;
-          }
-          if (compilerExternalToolchain && compilerOptionExternalToolchain) {
-            ret += " ";
-            ret += compilerOptionExternalToolchain;
-            ret += this->EscapeForShell(compilerExternalToolchain, true);
-          }
-          if (compilerSysroot && compilerOptionSysroot) {
-            ret += " ";
-            ret += compilerOptionSysroot;
-            ret += this->EscapeForShell(compilerSysroot, true);
-          }
-          return ret;
+          return this->ConvertToOutputForExisting(replace);
         }
         return replace;
       }
