@@ -999,12 +999,9 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
           if (workingDir.empty()) {
             output = this->MaybeConvertToRelativePath(
               this->GetCurrentBinaryDirectory(), output);
-            output =
-              this->ConvertToOutputFormat(output, cmOutputConverter::SHELL);
-          } else {
-            output =
-              this->ConvertToOutputFormat(output, cmOutputConverter::SHELL);
           }
+          output =
+            this->ConvertToOutputFormat(output, cmOutputConverter::SHELL);
         }
         vars.Output = output.c_str();
 
