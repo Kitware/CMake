@@ -112,7 +112,6 @@ protected:
   void WriteObjectsVariable(std::string& variableName,
                             std::string& variableNameExternal,
                             bool useWatcomQuote);
-  void WriteObjectsString(std::string& buildObjs);
   void WriteObjectsStrings(std::vector<std::string>& objStrings,
                            std::string::size_type limit = std::string::npos);
 

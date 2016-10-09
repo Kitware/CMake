@@ -1217,13 +1217,6 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
                          << "\n";
 }
 
-void cmMakefileTargetGenerator::WriteObjectsString(std::string& buildObjs)
-{
-  std::vector<std::string> objStrings;
-  this->WriteObjectsStrings(objStrings);
-  buildObjs = objStrings[0];
-}
-
 class cmMakefileTargetGeneratorObjectStrings
 {
 public:
@@ -1677,7 +1670,9 @@ void cmMakefileTargetGenerator::CreateObjectLists(
     }
   } else if (useLinkScript) {
     if (!useArchiveRules) {
-      this->WriteObjectsString(buildObjs);
+      std::vector<std::string> objStrings;
+      this->WriteObjectsStrings(objStrings);
+      buildObjs = objStrings[0];
     }
   } else {
     buildObjs = "$(";
