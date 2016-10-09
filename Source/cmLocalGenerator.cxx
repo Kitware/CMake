@@ -505,8 +505,7 @@ static const char* ruleReplaceVars[] = {
   "CMAKE_CURRENT_BINARY_DIR",
   "CMAKE_RANLIB",
   "CMAKE_LINKER",
-  "CMAKE_CL_SHOWINCLUDES_PREFIX",
-  CM_NULLPTR
+  "CMAKE_CL_SHOWINCLUDES_PREFIX"
 };
 
 std::string cmLocalGenerator::ExpandRuleVariable(
@@ -693,12 +692,12 @@ std::string cmLocalGenerator::ExpandRuleVariable(
   std::vector<std::string> enabledLanguages =
     this->GetState()->GetEnabledLanguages();
   // loop over language specific replace variables
-  int pos = 0;
-  while (ruleReplaceVars[pos]) {
+  for (const char* const* replaceIter = cmArrayBegin(ruleReplaceVars);
+       replaceIter != cmArrayEnd(ruleReplaceVars); ++replaceIter) {
     for (std::vector<std::string>::iterator i = enabledLanguages.begin();
          i != enabledLanguages.end(); ++i) {
       const char* lang = i->c_str();
-      std::string actualReplace = ruleReplaceVars[pos];
+      std::string actualReplace = *replaceIter;
       // If this is the compiler then look for the extra variable
       // _COMPILER_ARG1 which must be the first argument to the compiler
       const char* compilerArg1 = CM_NULLPTR;
@@ -759,7 +758,6 @@ std::string cmLocalGenerator::ExpandRuleVariable(
         return replace;
       }
     }
-    pos++;
   }
   return variable;
 }
