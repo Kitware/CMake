@@ -691,6 +691,17 @@ std::string cmLocalGenerator::ExpandRuleVariable(
   }
   std::vector<std::string> enabledLanguages =
     this->GetState()->GetEnabledLanguages();
+
+  std::map<std::string, std::string> compilers;
+  for (std::vector<std::string>::iterator i = enabledLanguages.begin();
+       i != enabledLanguages.end(); ++i) {
+    std::string const& lang = *i;
+    if (lang == "NONE") {
+      continue;
+    }
+    compilers["CMAKE_" + lang + "_COMPILER"] = lang;
+  }
+
   // loop over language specific replace variables
   for (const char* const* replaceIter = cmArrayBegin(ruleReplaceVars);
        replaceIter != cmArrayEnd(ruleReplaceVars); ++replaceIter) {
@@ -707,9 +718,12 @@ std::string cmLocalGenerator::ExpandRuleVariable(
       const char* compilerOptionExternalToolchain = CM_NULLPTR;
       const char* compilerSysroot = CM_NULLPTR;
       const char* compilerOptionSysroot = CM_NULLPTR;
-      if (actualReplace == "CMAKE_${LANG}_COMPILER") {
-        std::string arg1 = actualReplace + "_ARG1";
-        cmSystemTools::ReplaceString(arg1, "${LANG}", lang);
+
+      std::map<std::string, std::string>::iterator compIt =
+        compilers.find(variable);
+
+      if (compIt != compilers.end()) {
+        std::string arg1 = compIt->first + "_ARG1";
         compilerArg1 = this->Makefile->GetDefinition(arg1);
         compilerTarget = this->Makefile->GetDefinition(
           std::string("CMAKE_") + lang + "_COMPILER_TARGET");
