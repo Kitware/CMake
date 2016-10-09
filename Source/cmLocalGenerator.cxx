@@ -735,6 +735,54 @@ std::string cmLocalGenerator::ExpandRuleVariable(
       this->Makefile->GetSafeDefinition(compilerOptionSysroot);
   }
 
+  std::map<std::string, std::string>::iterator compIt =
+    compilers.find(variable);
+
+  std::string replace = this->Makefile->GetSafeDefinition(variable);
+
+  if (compIt != compilers.end()) {
+    std::string ret = this->ConvertToOutputForExisting(
+      variableMappings["CMAKE_" + compIt->second + "_COMPILER"]);
+    std::string const& compilerArg1 =
+      variableMappings[compIt->first + "_COMPILER_ARG1"];
+    std::string const& compilerTarget =
+      variableMappings["CMAKE_" + compIt->second + "_COMPILER_TARGET"];
+    std::string const& compilerOptionTarget =
+      variableMappings["CMAKE_" + compIt->second + "_COMPILE_OPTIONS_TARGET"];
+    std::string const& compilerExternalToolchain =
+      variableMappings["CMAKE_" + compIt->second +
+                       "_COMPILER_EXTERNAL_TOOLCHAIN"];
+    std::string const& compilerOptionExternalToolchain =
+      variableMappings["CMAKE_" + compIt->second +
+                       "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN"];
+    std::string const& compilerOptionSysroot =
+      variableMappings["CMAKE_" + compIt->second + "_COMPILE_OPTIONS_SYSROOT"];
+
+    // if there is a required first argument to the compiler add it
+    // to the compiler string
+    if (!compilerArg1.empty()) {
+      ret += " ";
+      ret += compilerArg1;
+    }
+    if (!compilerTarget.empty() && !compilerOptionTarget.empty()) {
+      ret += " ";
+      ret += compilerOptionTarget;
+      ret += compilerTarget;
+    }
+    if (!compilerExternalToolchain.empty() &&
+        !compilerOptionExternalToolchain.empty()) {
+      ret += " ";
+      ret += compilerOptionExternalToolchain;
+      ret += this->EscapeForShell(compilerExternalToolchain, true);
+    }
+    if (!compilerSysroot.empty() && !compilerOptionSysroot.empty()) {
+      ret += " ";
+      ret += compilerOptionSysroot;
+      ret += this->EscapeForShell(compilerSysroot, true);
+    }
+    return ret;
+  }
+
   // loop over language specific replace variables
   for (const char* const* replaceIter = cmArrayBegin(ruleReplaceVars);
        replaceIter != cmArrayEnd(ruleReplaceVars); ++replaceIter) {
@@ -742,56 +790,6 @@ std::string cmLocalGenerator::ExpandRuleVariable(
          i != enabledLanguages.end(); ++i) {
       std::string const& lang = *i;
       std::string actualReplace = *replaceIter;
-
-      std::map<std::string, std::string>::iterator compIt =
-        compilers.find(variable);
-
-      std::string replace = this->Makefile->GetSafeDefinition(variable);
-
-      if (compIt != compilers.end()) {
-        std::string ret = this->ConvertToOutputForExisting(
-          variableMappings["CMAKE_" + compIt->second + "_COMPILER"]);
-        std::string const& compilerArg1 =
-          variableMappings[compIt->first + "_COMPILER_ARG1"];
-        std::string const& compilerTarget =
-          variableMappings["CMAKE_" + compIt->second + "_COMPILER_TARGET"];
-        std::string const& compilerOptionTarget =
-          variableMappings["CMAKE_" + compIt->second +
-                           "_COMPILE_OPTIONS_TARGET"];
-        std::string const& compilerExternalToolchain =
-          variableMappings["CMAKE_" + compIt->second +
-                           "_COMPILER_EXTERNAL_TOOLCHAIN"];
-        std::string const& compilerOptionExternalToolchain =
-          variableMappings["CMAKE_" + compIt->second +
-                           "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN"];
-        std::string const& compilerOptionSysroot =
-          variableMappings["CMAKE_" + compIt->second +
-                           "_COMPILE_OPTIONS_SYSROOT"];
-
-        // if there is a required first argument to the compiler add it
-        // to the compiler string
-        if (!compilerArg1.empty()) {
-          ret += " ";
-          ret += compilerArg1;
-        }
-        if (!compilerTarget.empty() && !compilerOptionTarget.empty()) {
-          ret += " ";
-          ret += compilerOptionTarget;
-          ret += compilerTarget;
-        }
-        if (!compilerExternalToolchain.empty() &&
-            !compilerOptionExternalToolchain.empty()) {
-          ret += " ";
-          ret += compilerOptionExternalToolchain;
-          ret += this->EscapeForShell(compilerExternalToolchain, true);
-        }
-        if (!compilerSysroot.empty() && !compilerOptionSysroot.empty()) {
-          ret += " ";
-          ret += compilerOptionSysroot;
-          ret += this->EscapeForShell(compilerSysroot, true);
-        }
-        return ret;
-      }
       if (actualReplace.find("${LANG}") != actualReplace.npos) {
         cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
       }
