@@ -722,6 +722,8 @@ std::string cmLocalGenerator::ExpandRuleVariable(
       std::map<std::string, std::string>::iterator compIt =
         compilers.find(variable);
 
+      std::string replace = this->Makefile->GetSafeDefinition(variable);
+
       if (compIt != compilers.end()) {
         std::string arg1 = compIt->first + "_ARG1";
         compilerArg1 = this->Makefile->GetDefinition(arg1);
@@ -743,7 +745,6 @@ std::string cmLocalGenerator::ExpandRuleVariable(
         cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
       }
       if (actualReplace == variable) {
-        std::string replace = this->Makefile->GetSafeDefinition(variable);
         // if the variable is not a FLAG then treat it like a path
         if (variable.find("_FLAG") == variable.npos) {
           std::string ret = this->ConvertToOutputForExisting(replace);
