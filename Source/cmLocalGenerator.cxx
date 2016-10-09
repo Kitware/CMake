@@ -738,8 +738,6 @@ std::string cmLocalGenerator::ExpandRuleVariable(
   std::map<std::string, std::string>::iterator compIt =
     compilers.find(variable);
 
-  std::string replace = this->Makefile->GetSafeDefinition(variable);
-
   if (compIt != compilers.end()) {
     std::string ret = this->ConvertToOutputForExisting(
       variableMappings["CMAKE_" + compIt->second + "_COMPILER"]);
@@ -783,7 +781,6 @@ std::string cmLocalGenerator::ExpandRuleVariable(
     return ret;
   }
 
-  // loop over language specific replace variables
   for (const char* const* replaceIter = cmArrayBegin(ruleReplaceVars);
        replaceIter != cmArrayEnd(ruleReplaceVars); ++replaceIter) {
     for (std::vector<std::string>::iterator i = enabledLanguages.begin();
@@ -793,14 +790,18 @@ std::string cmLocalGenerator::ExpandRuleVariable(
       if (actualReplace.find("${LANG}") != actualReplace.npos) {
         cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
       }
-      if (actualReplace == variable) {
-        // if the variable is not a FLAG then treat it like a path
-        if (variable.find("_FLAG") == variable.npos) {
-          return this->ConvertToOutputForExisting(replace);
-        }
-        return replace;
-      }
+
+      variableMappings[actualReplace] =
+        this->Makefile->GetSafeDefinition(actualReplace);
     }
+  }
+  std::map<std::string, std::string>::iterator mapIt =
+    variableMappings.find(variable);
+  if (mapIt != variableMappings.end()) {
+    if (variable.find("_FLAG") == variable.npos) {
+      return this->ConvertToOutputForExisting(mapIt->second);
+    }
+    return mapIt->second;
   }
   return variable;
 }
