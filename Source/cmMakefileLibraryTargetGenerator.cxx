@@ -352,18 +352,6 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
 
-  const char* forbiddenFlagVar = CM_NULLPTR;
-  switch (this->GeneratorTarget->GetType()) {
-    case cmState::SHARED_LIBRARY:
-      forbiddenFlagVar = "_CREATE_SHARED_LIBRARY_FORBIDDEN_FLAGS";
-      break;
-    case cmState::MODULE_LIBRARY:
-      forbiddenFlagVar = "_CREATE_SHARED_MODULE_FORBIDDEN_FLAGS";
-      break;
-    default:
-      break;
-  }
-
   // Clean files associated with this library.
   std::vector<std::string> libCleanFiles;
   libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
@@ -585,11 +573,6 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     this->LocalGenerator->AddArchitectureFlags(
       langFlags, this->GeneratorTarget, linkLanguage, this->ConfigName);
 
-    // remove any language flags that might not work with the
-    // particular os
-    if (forbiddenFlagVar) {
-      this->RemoveForbiddenFlags(forbiddenFlagVar, linkLanguage, langFlags);
-    }
     vars.LanguageCompileFlags = langFlags.c_str();
 
     // Construct the main link rule and expand placeholders.

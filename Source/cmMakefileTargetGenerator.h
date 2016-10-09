@@ -168,8 +168,6 @@ protected:
                        const std::string& lang) CM_OVERRIDE;
 
   virtual void CloseFileStreams();
-  void RemoveForbiddenFlags(const char* flagVar, const std::string& linkLang,
-                            std::string& linkFlags);
   cmLocalUnixMakefileGenerator3* LocalGenerator;
   cmGlobalUnixMakefileGenerator3* GlobalGenerator;
 
