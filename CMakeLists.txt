@@ -368,6 +368,23 @@ macro (CMAKE_BUILD_UTILITIES)
   CMAKE_SET_TARGET_FOLDER(cmcompress "Utilities/3rdParty")
 
   #---------------------------------------------------------------------
+  # Build expat library for CMake, CTest, and libarchive.
+  if(CMAKE_USE_SYSTEM_EXPAT)
+    find_package(EXPAT)
+    if(NOT EXPAT_FOUND)
+      message(FATAL_ERROR
+        "CMAKE_USE_SYSTEM_EXPAT is ON but a expat is not found!")
+    endif()
+    set(CMAKE_EXPAT_INCLUDES ${EXPAT_INCLUDE_DIRS})
+    set(CMAKE_EXPAT_LIBRARIES ${EXPAT_LIBRARIES})
+  else()
+    set(CMAKE_EXPAT_INCLUDES)
+    set(CMAKE_EXPAT_LIBRARIES cmexpat)
+    add_subdirectory(Utilities/cmexpat)
+    CMAKE_SET_TARGET_FOLDER(cmexpat "Utilities/3rdParty")
+  endif()
+
+  #---------------------------------------------------------------------
   # Build or use system libbz2 for libarchive.
   if(NOT CMAKE_USE_SYSTEM_LIBARCHIVE)
     if(CMAKE_USE_SYSTEM_BZIP2)
@@ -410,6 +427,8 @@ macro (CMAKE_BUILD_UTILITIES)
     set(CMAKE_TAR_INCLUDES ${LibArchive_INCLUDE_DIRS})
     set(CMAKE_TAR_LIBRARIES ${LibArchive_LIBRARIES})
   else()
+    set(EXPAT_INCLUDE_DIR ${CMAKE_EXPAT_INCLUDES})
+    set(EXPAT_LIBRARY ${CMAKE_EXPAT_LIBRARIES})
     set(ZLIB_INCLUDE_DIR ${CMAKE_ZLIB_INCLUDES})
     set(ZLIB_LIBRARY ${CMAKE_ZLIB_LIBRARIES})
     add_definitions(-DLIBARCHIVE_STATIC)
@@ -419,7 +438,7 @@ macro (CMAKE_BUILD_UTILITIES)
     set(ENABLE_ZLIB ON CACHE INTERNAL "Enable the use of the system found ZLIB library if found")
     set(ENABLE_BZip2 ON CACHE INTERNAL "Enable the use of the system found BZip2 library if found")
     set(ENABLE_LIBXML2 OFF CACHE INTERNAL "Enable the use of the system found libxml2 library if found")
-    set(ENABLE_EXPAT OFF CACHE INTERNAL "Enable the use of the system found EXPAT library if found")
+    set(ENABLE_EXPAT ON CACHE INTERNAL "Enable the use of the system found EXPAT library if found")
     set(ENABLE_PCREPOSIX OFF CACHE INTERNAL "Enable the use of the system found PCREPOSIX library if found")
     set(ENABLE_LibGCC OFF CACHE INTERNAL "Enable the use of the system found LibGCC library if found")
     set(ENABLE_XATTR OFF CACHE INTERNAL "Enable extended attribute support")
@@ -429,23 +448,6 @@ macro (CMAKE_BUILD_UTILITIES)
     add_subdirectory(Utilities/cmlibarchive)
     CMAKE_SET_TARGET_FOLDER(cmlibarchive "Utilities/3rdParty")
     set(CMAKE_TAR_LIBRARIES cmlibarchive ${BZIP2_LIBRARIES})
-  endif()
-
-  #---------------------------------------------------------------------
-  # Build expat library for CMake and CTest.
-  if(CMAKE_USE_SYSTEM_EXPAT)
-    find_package(EXPAT)
-    if(NOT EXPAT_FOUND)
-      message(FATAL_ERROR
-        "CMAKE_USE_SYSTEM_EXPAT is ON but a expat is not found!")
-    endif()
-    set(CMAKE_EXPAT_INCLUDES ${EXPAT_INCLUDE_DIRS})
-    set(CMAKE_EXPAT_LIBRARIES ${EXPAT_LIBRARIES})
-  else()
-    set(CMAKE_EXPAT_INCLUDES)
-    set(CMAKE_EXPAT_LIBRARIES cmexpat)
-    add_subdirectory(Utilities/cmexpat)
-    CMAKE_SET_TARGET_FOLDER(cmexpat "Utilities/3rdParty")
   endif()
 
   #---------------------------------------------------------------------
