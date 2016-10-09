@@ -1228,10 +1228,12 @@ class cmMakefileTargetGeneratorObjectStrings
 {
 public:
   cmMakefileTargetGeneratorObjectStrings(std::vector<std::string>& strings,
-                                         cmLocalUnixMakefileGenerator3* lg,
+                                         cmOutputConverter* outputConverter,
+                                         cmState::Directory stateDir,
                                          std::string::size_type limit)
     : Strings(strings)
-    , LocalGenerator(lg)
+    , OutputConverter(outputConverter)
+    , StateDir(stateDir)
     , LengthLimit(limit)
   {
     this->Space = "";
@@ -1239,10 +1241,8 @@ public:
   void Feed(std::string const& obj)
   {
     // Construct the name of the next object.
-    this->NextObject = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), obj),
-      cmOutputConverter::RESPONSE);
+    this->NextObject = this->OutputConverter->ConvertToOutputFormat(
+      this->MaybeConvertToRelativePath(obj), cmOutputConverter::RESPONSE);
 
     // Roll over to next string if the limit will be exceeded.
     if (this->LengthLimit != std::string::npos &&
@@ -1262,8 +1262,19 @@ public:
   }
   void Done() { this->Strings.push_back(this->CurrentString); }
 private:
+  std::string MaybeConvertToRelativePath(std::string const& obj)
+  {
+    if (!cmOutputConverter::ContainedInDirectory(
+          this->StateDir.GetCurrentBinary(), obj, this->StateDir)) {
+      return obj;
+    }
+    return cmOutputConverter::ForceToRelativePath(
+      this->StateDir.GetCurrentBinary(), obj);
+  }
+
   std::vector<std::string>& Strings;
-  cmLocalUnixMakefileGenerator3* LocalGenerator;
+  cmOutputConverter* OutputConverter;
+  cmState::Directory StateDir;
   std::string::size_type LengthLimit;
   std::string CurrentString;
   std::string NextObject;
@@ -1273,8 +1284,9 @@ private:
 void cmMakefileTargetGenerator::WriteObjectsStrings(
   std::vector<std::string>& objStrings, std::string::size_type limit)
 {
-  cmMakefileTargetGeneratorObjectStrings helper(objStrings,
-                                                this->LocalGenerator, limit);
+  cmMakefileTargetGeneratorObjectStrings helper(
+    objStrings, this->LocalGenerator,
+    this->LocalGenerator->GetStateSnapshot().GetDirectory(), limit);
   for (std::vector<std::string>::const_iterator i = this->Objects.begin();
        i != this->Objects.end(); ++i) {
     helper.Feed(*i);
