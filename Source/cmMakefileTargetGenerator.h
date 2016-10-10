@@ -20,6 +20,7 @@ class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmGlobalUnixMakefileGenerator3;
 class cmSourceFile;
+class cmLinkLineComputer;
 
 /** \class cmMakefileTargetGenerator
  * \brief Support Routines for writing makefiles
@@ -139,6 +140,9 @@ protected:
                         std::vector<std::string>& makefile_commands,
                         std::vector<std::string>& makefile_depends);
 
+  cmLinkLineComputer* CreateLinkLineComputer(
+    cmOutputConverter* outputConverter, cmState::Directory stateDir);
+
   /** Create a response file with the given set of options.  Returns
       the relative path from the target build working directory to the
       response file name.  */
@@ -149,9 +153,9 @@ protected:
   bool CheckUseResponseFileForLibraries(std::string const& l) const;
 
   /** Create list of flags for link libraries. */
-  void CreateLinkLibs(std::string& linkLibs, bool relink, bool useResponseFile,
-                      std::vector<std::string>& makefile_depends,
-                      bool useWatcomQuote);
+  void CreateLinkLibs(cmLinkLineComputer* linkLineComputer,
+                      std::string& linkLibs, bool useResponseFile,
+                      std::vector<std::string>& makefile_depends);
 
   /** Create lists of object files for linking and cleaning.  */
   void CreateObjectLists(bool useLinkScript, bool useArchiveRules,

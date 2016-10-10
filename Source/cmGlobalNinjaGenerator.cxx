@@ -11,6 +11,7 @@
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
+#include "cmNinjaLinkLineComputer.h"
 #include "cmOutputConverter.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
@@ -62,6 +63,14 @@ void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
     lpos = rpos + 1;
   }
   os << "# " << comment.substr(lpos) << "\n\n";
+}
+
+cmLinkLineComputer* cmGlobalNinjaGenerator::CreateLinkLineComputer(
+  cmOutputConverter* outputConverter, cmState::Directory /* stateDir */) const
+{
+  return new cmNinjaLinkLineComputer(
+    outputConverter,
+    this->LocalGenerators[0]->GetStateSnapshot().GetDirectory(), this);
 }
 
 std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
@@ -830,7 +839,8 @@ static void EnsureTrailingSlash(std::string& path)
 #endif
 }
 
-std::string cmGlobalNinjaGenerator::ConvertToNinjaPath(const std::string& path)
+std::string cmGlobalNinjaGenerator::ConvertToNinjaPath(
+  const std::string& path) const
 {
   cmLocalNinjaGenerator* ng =
     static_cast<cmLocalNinjaGenerator*>(this->LocalGenerators[0]);
@@ -1421,7 +1431,8 @@ void cmGlobalNinjaGenerator::InitOutputPathPrefix()
   EnsureTrailingSlash(this->OutputPathPrefix);
 }
 
-std::string cmGlobalNinjaGenerator::NinjaOutputPath(std::string const& path)
+std::string cmGlobalNinjaGenerator::NinjaOutputPath(
+  std::string const& path) const
 {
   if (!this->HasOutputPathPrefix() || cmSystemTools::FileIsFullPath(path)) {
     return path;

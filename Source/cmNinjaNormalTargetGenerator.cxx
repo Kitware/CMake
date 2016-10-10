@@ -8,6 +8,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
+#include "cmLinkLineComputer.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
@@ -470,9 +471,15 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   vars["TARGET_FILE"] =
     localGen.ConvertToOutputFormat(targetOutputReal, cmOutputConverter::SHELL);
 
-  localGen.GetTargetFlags(this->GetConfigName(), vars["LINK_LIBRARIES"],
-                          vars["FLAGS"], vars["LINK_FLAGS"], frameworkPath,
-                          linkPath, &genTarget, useWatcomQuote);
+  CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+    this->GetGlobalGenerator()->CreateLinkLineComputer(
+      this->GetLocalGenerator(),
+      this->GetLocalGenerator()->GetStateSnapshot().GetDirectory()));
+  linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
+
+  localGen.GetTargetFlags(
+    linkLineComputer.get(), this->GetConfigName(), vars["LINK_LIBRARIES"],
+    vars["FLAGS"], vars["LINK_FLAGS"], frameworkPath, linkPath, &genTarget);
   if (this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS") &&
       (gt.GetType() == cmState::SHARED_LIBRARY ||
        gt.IsExecutableWithExports())) {
@@ -497,7 +504,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   this->addPoolNinjaVariable("JOB_POOL_LINK", &gt, vars);
 
-  this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);
+  this->AddModuleDefinitionFlag(linkLineComputer.get(), vars["LINK_FLAGS"]);
   vars["LINK_FLAGS"] =
     cmGlobalNinjaGenerator::EncodeLiteral(vars["LINK_FLAGS"]);
 

@@ -12,6 +12,7 @@
 #include "cmInstallGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmLinkLineComputer.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
@@ -1148,11 +1149,12 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
 }
 
 void cmLocalGenerator::GetTargetFlags(
-  const std::string& config, std::string& linkLibs, std::string& flags,
-  std::string& linkFlags, std::string& frameworkPath, std::string& linkPath,
-  cmGeneratorTarget* target, bool useWatcomQuote)
+  cmLinkLineComputer* linkLineComputer, const std::string& config,
+  std::string& linkLibs, std::string& flags, std::string& linkFlags,
+  std::string& frameworkPath, std::string& linkPath, cmGeneratorTarget* target)
 {
   const std::string buildType = cmSystemTools::UpperCase(config);
+  cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
   const char* libraryLinkVariable =
     "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
 
@@ -1203,8 +1205,10 @@ void cmLocalGenerator::GetTargetFlags(
           linkFlags += " ";
         }
       }
-      this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath, *target,
-                                false, false, useWatcomQuote);
+      if (pcli) {
+        this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
+                                  frameworkPath, linkPath);
+      }
     } break;
     case cmState::EXECUTABLE: {
       linkFlags += this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
@@ -1223,8 +1227,10 @@ void cmLocalGenerator::GetTargetFlags(
         return;
       }
       this->AddLanguageFlags(flags, linkLanguage, buildType);
-      this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath, *target,
-                                false, false, useWatcomQuote);
+      if (pcli) {
+        this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
+                                  frameworkPath, linkPath);
+      }
       if (cmSystemTools::IsOn(
             this->Makefile->GetDefinition("BUILD_SHARED_LIBS"))) {
         std::string sFlagVar = std::string("CMAKE_SHARED_BUILD_") +
@@ -1383,155 +1389,46 @@ std::string cmLocalGenerator::GetTargetFortranFlags(
   return std::string();
 }
 
-std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib)
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  // Work-ardound command line parsing limitations in MSVC 6.0
-  if (this->Makefile->IsOn("MSVC60")) {
-    // Search for the last space.
-    std::string::size_type pos = lib.rfind(' ');
-    if (pos != lib.npos) {
-      // Find the slash after the last space, if any.
-      pos = lib.find('/', pos);
-
-      // Convert the portion of the path with a space to a short path.
-      std::string sp;
-      if (cmSystemTools::GetShortPath(lib.substr(0, pos).c_str(), sp)) {
-        // Append the rest of the path with no space.
-        sp += lib.substr(pos);
-
-        return sp;
-      }
-    }
-  }
-#endif
-
-  // Normal behavior.
-  return this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), lib);
-}
-
 /**
  * Output the linking rules on a command line.  For executables,
  * targetLibrary should be a NULL pointer.  For libraries, it should point
  * to the name of the library.  This will not link a library against itself.
  */
-void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
-                                           std::string& frameworkPath,
-                                           std::string& linkPath,
-                                           cmGeneratorTarget& tgt, bool relink,
-                                           bool forResponseFile,
-                                           bool useWatcomQuote)
+void cmLocalGenerator::OutputLinkLibraries(
+  cmComputeLinkInformation* pcli, cmLinkLineComputer* linkLineComputer,
+  std::string& linkLibraries, std::string& frameworkPath,
+  std::string& linkPath)
 {
-  OutputFormat shellFormat =
-    (forResponseFile) ? RESPONSE : ((useWatcomQuote) ? WATCOMQUOTE : SHELL);
-  bool escapeAllowMakeVars = !forResponseFile;
-  std::ostringstream fout;
-  std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  cmComputeLinkInformation* pcli = tgt.GetLinkInformation(config);
-  if (!pcli) {
-    return;
-  }
   cmComputeLinkInformation& cli = *pcli;
 
   std::string linkLanguage = cli.GetLinkLanguage();
-
-  std::string linkLibs;
 
   std::string libPathFlag =
     this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
   std::string libPathTerminator =
     this->Makefile->GetSafeDefinition("CMAKE_LIBRARY_PATH_TERMINATOR");
 
-  // Append the framework search path flags.
-  std::string fwSearchFlagVar = "CMAKE_";
-  fwSearchFlagVar += linkLanguage;
-  fwSearchFlagVar += "_FRAMEWORK_SEARCH_FLAG";
-  const char* fwSearchFlag = this->Makefile->GetDefinition(fwSearchFlagVar);
-  if (fwSearchFlag && *fwSearchFlag) {
-    std::vector<std::string> const& fwDirs = cli.GetFrameworkPaths();
-    for (std::vector<std::string>::const_iterator fdi = fwDirs.begin();
-         fdi != fwDirs.end(); ++fdi) {
-      frameworkPath += fwSearchFlag;
-      frameworkPath += this->ConvertToOutputFormat(*fdi, shellFormat);
-      frameworkPath += " ";
-    }
-  }
-
-  // Append the library search path flags.
-  std::vector<std::string> const& libDirs = cli.GetDirectories();
-  for (std::vector<std::string>::const_iterator libDir = libDirs.begin();
-       libDir != libDirs.end(); ++libDir) {
-    std::string libpath =
-      this->ConvertToOutputForExisting(*libDir, shellFormat);
-    linkPath += " " + libPathFlag;
-    linkPath += libpath;
-    linkPath += libPathTerminator;
-    linkPath += " ";
-  }
-
-  // Append the link items.
-  typedef cmComputeLinkInformation::ItemVector ItemVector;
-  ItemVector const& items = cli.GetItems();
-  for (ItemVector::const_iterator li = items.begin(); li != items.end();
-       ++li) {
-    if (li->Target && li->Target->GetType() == cmState::INTERFACE_LIBRARY) {
-      continue;
-    }
-    if (li->IsPath) {
-      linkLibs += this->ConvertToOutputFormat(
-        this->ConvertToLinkReference(li->Value), shellFormat);
-    } else {
-      linkLibs += li->Value;
-    }
-    linkLibs += " ";
-  }
-
-  // Check what kind of rpath flags to use.
-  if (cli.GetRuntimeSep().empty()) {
-    // Each rpath entry gets its own option ("-R a -R b -R c")
-    std::vector<std::string> runtimeDirs;
-    cli.GetRPath(runtimeDirs, relink);
-
-    std::string rpath;
-    for (std::vector<std::string>::iterator ri = runtimeDirs.begin();
-         ri != runtimeDirs.end(); ++ri) {
-      rpath += cli.GetRuntimeFlag();
-      rpath += this->ConvertToOutputFormat(*ri, shellFormat);
-      rpath += " ";
-    }
-    fout << rpath;
-  } else {
-    // All rpath entries are combined ("-Wl,-rpath,a:b:c").
-    std::string rpath = cli.GetRPathString(relink);
-
-    // Store the rpath option in the stream.
-    if (!rpath.empty()) {
-      fout << cli.GetRuntimeFlag();
-      fout << this->EscapeForShell(rpath, escapeAllowMakeVars);
-      fout << " ";
-    }
-  }
-
-  // Write the library flags to the build rule.
-  fout << linkLibs;
-
-  // Add the linker runtime search path if any.
-  std::string rpath_link = cli.GetRPathLinkString();
-  if (!cli.GetRPathLinkFlag().empty() && !rpath_link.empty()) {
-    fout << cli.GetRPathLinkFlag();
-    fout << this->EscapeForShell(rpath_link, escapeAllowMakeVars);
-    fout << " ";
-  }
-
   // Add standard libraries for this language.
   std::string standardLibsVar = "CMAKE_";
   standardLibsVar += cli.GetLinkLanguage();
   standardLibsVar += "_STANDARD_LIBRARIES";
+  std::string stdLibString;
   if (const char* stdLibs = this->Makefile->GetDefinition(standardLibsVar)) {
-    fout << stdLibs << " ";
+    stdLibString = stdLibs;
   }
 
-  linkLibraries = fout.str();
+  // Append the framework search path flags.
+  std::string fwSearchFlagVar = "CMAKE_";
+  fwSearchFlagVar += linkLanguage;
+  fwSearchFlagVar += "_FRAMEWORK_SEARCH_FLAG";
+  std::string fwSearchFlag =
+    this->Makefile->GetSafeDefinition(fwSearchFlagVar);
+
+  frameworkPath = linkLineComputer->ComputeFrameworkPath(cli, fwSearchFlag);
+  linkPath =
+    linkLineComputer->ComputeLinkPath(cli, libPathFlag, libPathTerminator);
+
+  linkLibraries = linkLineComputer->ComputeLinkLibraries(cli, stdLibString);
 }
 
 std::string cmLocalGenerator::GetLinkLibsCMP0065(
