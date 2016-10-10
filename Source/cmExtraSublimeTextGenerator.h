@@ -64,6 +64,8 @@ private:
 
   std::string ComputeDefines(cmSourceFile* source, cmLocalGenerator* lg,
                              cmGeneratorTarget* gtgt);
+
+  bool ExcludeBuildFolder;
 };
 
 #endif
