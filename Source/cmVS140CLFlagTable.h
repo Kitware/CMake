@@ -1,4 +1,4 @@
-static cmVS7FlagTable cmVS14CLFlagTable[] = {
+static cmVS7FlagTable cmVS140CLFlagTable[] = {
 
   // Enum Properties
   { "DebugInformationFormat", "", "None", "None", 0 },
@@ -60,9 +60,6 @@ static cmVS7FlagTable cmVS14CLFlagTable[] = {
   { "BufferSecurityCheck", "GS-", "Disable Security Check", "false", 0 },
   { "BufferSecurityCheck", "GS", "Enable Security Check", "true", 0 },
 
-  { "ControlFlowGuard", "guard:cf", "Yes", "Guard", 0 },
-  { "ControlFlowGuard", "", "No", "false", 0 },
-
   { "EnableEnhancedInstructionSet", "arch:SSE", "Streaming SIMD Extensions",
     "StreamingSIMDExtensions", 0 },
   { "EnableEnhancedInstructionSet", "arch:SSE2", "Streaming SIMD Extensions 2",
@@ -78,10 +75,6 @@ static cmVS7FlagTable cmVS14CLFlagTable[] = {
   { "FloatingPointModel", "fp:precise", "Precise", "Precise", 0 },
   { "FloatingPointModel", "fp:strict", "Strict", "Strict", 0 },
   { "FloatingPointModel", "fp:fast", "Fast", "Fast", 0 },
-
-  { "LanguageStandard", "std:c++14", "ISO C++14 Standard", "stdcpp14", 0 },
-  { "LanguageStandard", "std:c++latest", "ISO C++ Latest Draft Standard",
-    "stdcpplatest", 0 },
 
   { "PrecompiledHeader", "Yc", "Create", "Create",
     cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue },
@@ -171,9 +164,6 @@ static cmVS7FlagTable cmVS14CLFlagTable[] = {
   { "TreatWChar_tAsBuiltInType", "Zc:wchar_t", "", "true", 0 },
   { "ForceConformanceInForLoopScope", "Zc:forScope-", "", "false", 0 },
   { "ForceConformanceInForLoopScope", "Zc:forScope", "", "true", 0 },
-  { "RemoveUnreferencedCodeData", "Zc:inline", "", "true", 0 },
-  { "EnforceTypeConversionRules", "Zc:rvalueCast-", "", "false", 0 },
-  { "EnforceTypeConversionRules", "Zc:rvalueCast", "", "true", 0 },
   { "RuntimeTypeInfo", "GR-", "", "false", 0 },
   { "RuntimeTypeInfo", "GR", "", "true", 0 },
   { "OpenMPSupport", "openmp-", "", "false", 0 },
@@ -225,8 +215,6 @@ static cmVS7FlagTable cmVS14CLFlagTable[] = {
     "", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
 
   // String Properties
-  { "WarningVersion", "Wv:", "Warning Version", "",
-    cmVS7FlagTable::UserValue },
   // Skip [TrackerLogDirectory] - no command line Switch.
   { "PreprocessOutputPath", "Fi", "Preprocess Output Path", "",
     cmVS7FlagTable::UserValue },

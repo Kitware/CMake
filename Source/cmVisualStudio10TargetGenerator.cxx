@@ -25,7 +25,8 @@
 #include "cmVS12LinkFlagTable.h"
 #include "cmVS12MASMFlagTable.h"
 #include "cmVS12RCFlagTable.h"
-#include "cmVS14CLFlagTable.h"
+#include "cmVS140CLFlagTable.h"
+#include "cmVS141CLFlagTable.h"
 #include "cmVS14LibFlagTable.h"
 #include "cmVS14LinkFlagTable.h"
 #include "cmVS14MASMFlagTable.h"
@@ -43,7 +44,13 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetClFlagTable() const
     cmGlobalVisualStudioGenerator::VSVersion v =
       this->LocalGenerator->GetVersion();
     if (v >= cmGlobalVisualStudioGenerator::VS14) {
-      return cmVS14CLFlagTable;
+      // FIXME: All flag table selection should be based on the toolset name.
+      // See issue #16153.  For now, treat VS 15's toolset as a special case.
+      const char* toolset = this->GlobalGenerator->GetPlatformToolset();
+      if (toolset && cmHasLiteralPrefix(toolset, "v141")) {
+        return cmVS141CLFlagTable;
+      }
+      return cmVS140CLFlagTable;
     } else if (v >= cmGlobalVisualStudioGenerator::VS12) {
       return cmVS12CLFlagTable;
     } else if (v == cmGlobalVisualStudioGenerator::VS11) {
