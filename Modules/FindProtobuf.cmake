@@ -264,7 +264,7 @@ function(_protobuf_find_libraries name filename)
     mark_as_advanced(${name}_LIBRARY_RELEASE)
 
     find_library(${name}_LIBRARY_DEBUG
-      NAMES ${filename}
+      NAMES ${filename}d ${filename}
       PATHS ${Protobuf_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Debug)
     mark_as_advanced(${name}_LIBRARY_DEBUG)
 
