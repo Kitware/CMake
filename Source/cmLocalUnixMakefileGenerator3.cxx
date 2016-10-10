@@ -995,16 +995,13 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         std::string output;
         const std::vector<std::string>& outputs = ccg.GetOutputs();
         if (!outputs.empty()) {
+          output = outputs[0];
           if (workingDir.empty()) {
-            output = this->ConvertToOutputFormat(
-              this->MaybeConvertToRelativePath(
-                this->GetCurrentBinaryDirectory(), outputs[0]),
-              cmOutputConverter::SHELL);
-
-          } else {
-            output = this->ConvertToOutputFormat(outputs[0],
-                                                 cmOutputConverter::SHELL);
+            output = this->MaybeConvertToRelativePath(
+              this->GetCurrentBinaryDirectory(), output);
           }
+          output =
+            this->ConvertToOutputFormat(output, cmOutputConverter::SHELL);
         }
         vars.Output = output.c_str();
 

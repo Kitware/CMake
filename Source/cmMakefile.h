@@ -447,7 +447,7 @@ public:
   /**
    * Get a list of preprocessor define flags.
    */
-  const char* GetDefineFlags() const { return this->DefineFlags.c_str(); }
+  std::string GetDefineFlags() const { return this->DefineFlags; }
 
   /**
    * Make sure CMake can write this file

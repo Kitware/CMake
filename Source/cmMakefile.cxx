@@ -3970,10 +3970,8 @@ cmPolicies::PolicyStatus cmMakefile::GetPolicyStatus(
 bool cmMakefile::PolicyOptionalWarningEnabled(std::string const& var)
 {
   // Check for an explicit CMAKE_POLICY_WARNING_CMP<NNNN> setting.
-  if (!var.empty()) {
-    if (const char* val = this->GetDefinition(var)) {
-      return cmSystemTools::IsOn(val);
-    }
+  if (const char* val = this->GetDefinition(var)) {
+    return cmSystemTools::IsOn(val);
   }
   // Enable optional policy warnings with --debug-output, --trace,
   // or --trace-expand.
