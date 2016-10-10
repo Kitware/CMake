@@ -43,6 +43,8 @@ elseif(CMAKE_ANDROID_STL_TYPE STREQUAL "system")
   add_definitions(-DSTL_SYSTEM)
 elseif(CMAKE_ANDROID_STL_TYPE MATCHES [[^gabi\+\+]])
   add_definitions(-DSTL_GABI)
+elseif(CMAKE_ANDROID_STL_TYPE MATCHES [[^stlport]])
+  add_definitions(-DSTL_STLPORT)
 endif()
 
 string(REPLACE "-" "_" abi "${CMAKE_ANDROID_ARCH_ABI}")

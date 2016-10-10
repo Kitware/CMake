@@ -6,6 +6,9 @@
 #ifndef STL_SYSTEM
 #include <exception>
 #include <typeinfo>
+#ifndef STL_STLPORT
+#include <cxxabi.h>
+#endif
 #ifndef STL_GABI
 #include <iostream>
 #include <string>
