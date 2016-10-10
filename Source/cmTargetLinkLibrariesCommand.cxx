@@ -338,7 +338,35 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
   // Handle normal case first.
   if (this->CurrentProcessingState != ProcessingKeywordLinkInterface &&
       this->CurrentProcessingState != ProcessingPlainLinkInterface) {
-    this->Makefile->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
+
+    cmTarget* t =
+      this->Makefile->FindLocalNonAliasTarget(this->Target->GetName());
+    if (!t) {
+      std::ostringstream e;
+      e << "Attempt to add link library \"" << lib << "\" to target \""
+        << this->Target->GetName()
+        << "\" which is not built in this directory.";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    } else {
+
+      cmTarget* tgt = this->Makefile->GetGlobalGenerator()->FindTarget(lib);
+
+      if (tgt && (tgt->GetType() != cmState::STATIC_LIBRARY) &&
+          (tgt->GetType() != cmState::SHARED_LIBRARY) &&
+          (tgt->GetType() != cmState::INTERFACE_LIBRARY) &&
+          !tgt->IsExecutableWithExports()) {
+        std::ostringstream e;
+        e << "Target \"" << lib << "\" of type "
+          << cmState::GetTargetTypeName(tgt->GetType())
+          << " may not be linked into another target.  "
+          << "One may link only to STATIC or SHARED libraries, or "
+          << "to executables with the ENABLE_EXPORTS property set.";
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      }
+
+      this->Target->AddLinkLibrary(*this->Makefile, lib, llt);
+    }
+
     if (this->CurrentProcessingState == ProcessingLinkLibraries) {
       this->Target->AppendProperty(
         "INTERFACE_LINK_LIBRARIES",

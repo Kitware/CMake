@@ -476,23 +476,6 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
   return this->Makefile->GetOrCreateSource(src);
 }
 
-void cmTarget::MergeLinkLibraries(cmMakefile& mf, const std::string& selfname,
-                                  const LinkLibraryVectorType& libs)
-{
-  // Only add on libraries we haven't added on before.
-  // Assumption: the global link libraries could only grow, never shrink
-  LinkLibraryVectorType::const_iterator i = libs.begin();
-  i += this->PrevLinkedLibraries.size();
-  for (; i != libs.end(); ++i) {
-    // This is equivalent to the target_link_libraries plain signature.
-    this->AddLinkLibrary(mf, selfname, i->first, i->second);
-    this->AppendProperty(
-      "INTERFACE_LINK_LIBRARIES",
-      this->GetDebugGeneratorExpressions(i->first, i->second).c_str());
-  }
-  this->PrevLinkedLibraries = libs;
-}
-
 void cmTarget::AddLinkDirectory(const std::string& d)
 {
   // Make sure we don't add unnecessary search directories.
@@ -595,8 +578,7 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
   }
 }
 
-void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& target,
-                              const std::string& lib,
+void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
                               cmTargetLinkLibraryType llt)
 {
   cmTarget* tgt = this->Makefile->FindTargetToUse(lib);
@@ -614,7 +596,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& target,
 
   if (cmGeneratorExpression::Find(lib) != std::string::npos ||
       (tgt && tgt->GetType() == cmState::INTERFACE_LIBRARY) ||
-      (target == lib)) {
+      (this->Name == lib)) {
     return;
   }
 
@@ -632,7 +614,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& target,
   // and we removing one instance will break the link line. Duplicates
   // will be appropriately eliminated at emit time.
   if (this->RecordDependencies) {
-    std::string targetEntry = target;
+    std::string targetEntry = this->Name;
     targetEntry += "_LIB_DEPENDS";
     std::string dependencies;
     const char* old_val = mf.GetDefinition(targetEntry);

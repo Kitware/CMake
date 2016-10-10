@@ -142,8 +142,8 @@ public:
    */
   void ClearDependencyInformation(cmMakefile& mf, const std::string& target);
 
-  void AddLinkLibrary(cmMakefile& mf, const std::string& target,
-                      const std::string& lib, cmTargetLinkLibraryType llt);
+  void AddLinkLibrary(cmMakefile& mf, const std::string& lib,
+                      cmTargetLinkLibraryType llt);
   enum TLLSignature
   {
     KeywordTLLSignature,
@@ -152,9 +152,6 @@ public:
   bool PushTLLCommandTrace(TLLSignature signature,
                            cmListFileContext const& lfc);
   void GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const;
-
-  void MergeLinkLibraries(cmMakefile& mf, const std::string& selfname,
-                          const LinkLibraryVectorType& libs);
 
   const std::vector<std::string>& GetLinkDirectories() const;
 
@@ -299,7 +296,6 @@ private:
   std::vector<cmCustomCommand> PreLinkCommands;
   std::vector<cmCustomCommand> PostBuildCommands;
   std::vector<std::pair<TLLSignature, cmListFileContext> > TLLCommands;
-  LinkLibraryVectorType PrevLinkedLibraries;
   LinkLibraryVectorType OriginalLinkLibraries;
   cmMakefile* Makefile;
   cmTargetInternalPointer Internal;

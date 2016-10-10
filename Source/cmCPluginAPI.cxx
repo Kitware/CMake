@@ -162,7 +162,14 @@ void CCONV cmAddLinkDirectoryForTarget(void* arg, const char* tgt,
                                        const char* d)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  mf->AddLinkDirectoryForTarget(tgt, d);
+  cmTarget* t = mf->FindLocalNonAliasTarget(tgt);
+  if (!t) {
+    cmSystemTools::Error(
+      "Attempt to add link directories to non-existent target: ", tgt,
+      " for directory ", d);
+    return;
+  }
+  t->AddLinkDirectory(d);
 }
 
 void CCONV cmAddExecutable(void* arg, const char* exename, int numSrcs,
@@ -330,6 +337,35 @@ void CCONV cmAddCustomCommandToTarget(void* arg, const char* target,
                                cctype, no_comment, no_working_dir);
 }
 
+static void addLinkLibrary(cmMakefile* mf, std::string const& target,
+                           std::string const& lib, cmTargetLinkLibraryType llt)
+{
+  cmTarget* t = mf->FindLocalNonAliasTarget(target);
+  if (!t) {
+    std::ostringstream e;
+    e << "Attempt to add link library \"" << lib << "\" to target \"" << target
+      << "\" which is not built in this directory.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  }
+
+  cmTarget* tgt = mf->GetGlobalGenerator()->FindTarget(lib);
+  if (tgt && (tgt->GetType() != cmState::STATIC_LIBRARY) &&
+      (tgt->GetType() != cmState::SHARED_LIBRARY) &&
+      (tgt->GetType() != cmState::INTERFACE_LIBRARY) &&
+      !tgt->IsExecutableWithExports()) {
+    std::ostringstream e;
+    e << "Target \"" << lib << "\" of type "
+      << cmState::GetTargetTypeName(tgt->GetType())
+      << " may not be linked into another target.  "
+      << "One may link only to STATIC or SHARED libraries, or "
+      << "to executables with the ENABLE_EXPORTS property set.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  }
+
+  t->AddLinkLibrary(*mf, lib, llt);
+}
+
 void CCONV cmAddLinkLibraryForTarget(void* arg, const char* tgt,
                                      const char* value, int libtype)
 {
@@ -337,13 +373,13 @@ void CCONV cmAddLinkLibraryForTarget(void* arg, const char* tgt,
 
   switch (libtype) {
     case CM_LIBRARY_GENERAL:
-      mf->AddLinkLibraryForTarget(tgt, value, GENERAL_LibraryType);
+      addLinkLibrary(mf, tgt, value, GENERAL_LibraryType);
       break;
     case CM_LIBRARY_DEBUG:
-      mf->AddLinkLibraryForTarget(tgt, value, DEBUG_LibraryType);
+      addLinkLibrary(mf, tgt, value, DEBUG_LibraryType);
       break;
     case CM_LIBRARY_OPTIMIZED:
-      mf->AddLinkLibraryForTarget(tgt, value, OPTIMIZED_LibraryType);
+      addLinkLibrary(mf, tgt, value, OPTIMIZED_LibraryType);
       break;
   }
 }
