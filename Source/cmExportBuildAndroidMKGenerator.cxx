@@ -9,6 +9,8 @@
 #include "cmMakefile.h"
 #include "cmTargetExport.h"
 
+#include <algorithm>
+
 cmExportBuildAndroidMKGenerator::cmExportBuildAndroidMKGenerator()
 {
   this->LG = CM_NULLPTR;
@@ -164,6 +166,16 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
       }
     }
   }
+
+  // Tell the NDK build system if prebuilt static libraries use C++.
+  if (target->GetType() == cmState::STATIC_LIBRARY) {
+    cmLinkImplementation const* li = target->GetLinkImplementation(config);
+    if (std::find(li->Languages.begin(), li->Languages.end(), "CXX") !=
+        li->Languages.end()) {
+      os << "LOCAL_HAS_CPP := true\n";
+    }
+  }
+
   switch (target->GetType()) {
     case cmState::SHARED_LIBRARY:
     case cmState::MODULE_LIBRARY:
