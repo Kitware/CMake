@@ -1160,7 +1160,7 @@ function(_ep_command_line_to_initial_cache var args force)
       endif()
     else()
       # Assume this is a list to append to the last var
-      list(APPEND accumulator "${line}")
+      string(APPEND accumulator ";${line}")
     endif()
   endforeach()
   # Catch the final line of the args
