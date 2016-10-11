@@ -1458,20 +1458,19 @@ void cmake::CreateDefaultGlobalGenerator()
     const char* GeneratorName;
   };
   static VSVersionedGenerator const vsGenerators[] = {
-    /* clang-format needs this comment to break after the opening brace */
-    { "7.1", "Visual Studio 7 .NET 2003" },
-    { "8.0", "Visual Studio 8 2005" },
-    { "9.0", "Visual Studio 9 2008" },
-    { "10.0", "Visual Studio 10 2010" },
-    { "11.0", "Visual Studio 11 2012" },
-    { "12.0", "Visual Studio 12 2013" },
-    { "14.0", "Visual Studio 14 2015" },
-    { "15.0", "Visual Studio 15" }
+    { "15.0", "Visual Studio 15" },      //
+    { "14.0", "Visual Studio 14 2015" }, //
+    { "12.0", "Visual Studio 12 2013" }, //
+    { "11.0", "Visual Studio 11 2012" }, //
+    { "10.0", "Visual Studio 10 2010" }, //
+    { "9.0", "Visual Studio 9 2008" },   //
+    { "8.0", "Visual Studio 8 2005" },   //
+    { "7.1", "Visual Studio 7 .NET 2003" }
   };
   for (VSVersionedGenerator const* g = cmArrayBegin(vsGenerators);
-       g != cmArrayEnd(vsGenerators); ++g) {
+       found.empty() && g != cmArrayEnd(vsGenerators); ++g) {
     for (const char* const* v = cmArrayBegin(vsVariants);
-         v != cmArrayEnd(vsVariants); ++v) {
+         found.empty() && v != cmArrayEnd(vsVariants); ++v) {
       std::string reg = vsregBase + *v + g->MSVersion;
       reg += ";InstallDir";
       std::string dir;
@@ -1479,7 +1478,6 @@ void cmake::CreateDefaultGlobalGenerator()
                                            cmSystemTools::KeyWOW64_32) &&
           cmSystemTools::PathExists(dir)) {
         found = g->GeneratorName;
-        break;
       }
     }
   }
