@@ -1452,12 +1452,12 @@ void cmake::CreateDefaultGlobalGenerator()
   vsVerions.push_back("VisualStudio\\");
   vsVerions.push_back("VCExpress\\");
   vsVerions.push_back("WDExpress\\");
-  struct VSRegistryEntryName
+  struct VSVersionedGenerator
   {
     const char* MSVersion;
     const char* GeneratorName;
   };
-  VSRegistryEntryName version[] = {
+  static VSVersionedGenerator const vsGenerators[] = {
     /* clang-format needs this comment to break after the opening brace */
     { "7.1", "Visual Studio 7 .NET 2003" },
     { "8.0", "Visual Studio 8 2005" },
@@ -1469,15 +1469,15 @@ void cmake::CreateDefaultGlobalGenerator()
     { "15.0", "Visual Studio 15" },
     { 0, 0 }
   };
-  for (int i = 0; version[i].MSVersion != 0; i++) {
+  for (int i = 0; vsGenerators[i].MSVersion != 0; i++) {
     for (size_t b = 0; b < vsVerions.size(); b++) {
-      std::string reg = vsregBase + vsVerions[b] + version[i].MSVersion;
+      std::string reg = vsregBase + vsVerions[b] + vsGenerators[i].MSVersion;
       reg += ";InstallDir";
       std::string dir;
       if (cmSystemTools::ReadRegistryValue(reg, dir,
                                            cmSystemTools::KeyWOW64_32) &&
           cmSystemTools::PathExists(dir)) {
-        found = version[i].GeneratorName;
+        found = vsGenerators[i].GeneratorName;
         break;
       }
     }
