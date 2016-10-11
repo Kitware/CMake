@@ -1447,7 +1447,7 @@ void cmake::CreateDefaultGlobalGenerator()
   std::string installedCompiler;
   // Try to find the newest VS installed on the computer and
   // use that as a default if -G is not specified
-  const std::string vsregBase = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\";
+  const std::string vsregBase = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\";
   std::vector<std::string> vsVerions;
   vsVerions.push_back("VisualStudio\\");
   vsVerions.push_back("VCExpress\\");
@@ -1472,9 +1472,11 @@ void cmake::CreateDefaultGlobalGenerator()
   for (int i = 0; version[i].MSVersion != 0; i++) {
     for (size_t b = 0; b < vsVerions.size(); b++) {
       std::string reg = vsregBase + vsVerions[b] + version[i].MSVersion;
-      reg += ";InstallDir]";
-      cmSystemTools::ExpandRegistryValues(reg, cmSystemTools::KeyWOW64_32);
-      if (!(reg == "/registry")) {
+      reg += ";InstallDir";
+      std::string dir;
+      if (cmSystemTools::ReadRegistryValue(reg, dir,
+                                           cmSystemTools::KeyWOW64_32) &&
+          cmSystemTools::PathExists(dir)) {
         installedCompiler = version[i].GeneratorName;
         break;
       }
