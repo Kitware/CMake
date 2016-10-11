@@ -1444,7 +1444,7 @@ int cmake::ActualConfigure()
 void cmake::CreateDefaultGlobalGenerator()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
-  std::string installedCompiler;
+  std::string found;
   // Try to find the newest VS installed on the computer and
   // use that as a default if -G is not specified
   const std::string vsregBase = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\";
@@ -1477,13 +1477,12 @@ void cmake::CreateDefaultGlobalGenerator()
       if (cmSystemTools::ReadRegistryValue(reg, dir,
                                            cmSystemTools::KeyWOW64_32) &&
           cmSystemTools::PathExists(dir)) {
-        installedCompiler = version[i].GeneratorName;
+        found = version[i].GeneratorName;
         break;
       }
     }
   }
-  cmGlobalGenerator* gen =
-    this->CreateGlobalGenerator(installedCompiler.c_str());
+  cmGlobalGenerator* gen = this->CreateGlobalGenerator(found);
   if (!gen) {
     gen = new cmGlobalNMakeMakefileGenerator(this);
   }
