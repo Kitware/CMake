@@ -221,7 +221,7 @@ public:
   // ExpandRuleVariables
   struct RuleVariables
   {
-    RuleVariables() { memset(this, 0, sizeof(*this)); }
+    RuleVariables();
     const char* CMTargetName;
     const char* CMTargetType;
     const char* TargetPDB;

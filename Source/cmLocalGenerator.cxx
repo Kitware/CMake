@@ -560,6 +560,11 @@ cmState::Snapshot cmLocalGenerator::GetStateSnapshot() const
   return this->Makefile->GetStateSnapshot();
 }
 
+cmLocalGenerator::RuleVariables::RuleVariables()
+{
+  memset(this, 0, sizeof(*this));
+}
+
 std::string cmLocalGenerator::ExpandRuleVariable(
   cmOutputConverter* outputConverter, std::string const& variable,
   const RuleVariables& replaceValues)
