@@ -1448,10 +1448,10 @@ void cmake::CreateDefaultGlobalGenerator()
   // Try to find the newest VS installed on the computer and
   // use that as a default if -G is not specified
   const std::string vsregBase = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\";
-  std::vector<std::string> vsVerions;
-  vsVerions.push_back("VisualStudio\\");
-  vsVerions.push_back("VCExpress\\");
-  vsVerions.push_back("WDExpress\\");
+  static const char* const vsVariants[] = {
+    /* clang-format needs this comment to break after the opening brace */
+    "VisualStudio\\", "VCExpress\\", "WDExpress\\"
+  };
   struct VSVersionedGenerator
   {
     const char* MSVersion;
@@ -1470,8 +1470,9 @@ void cmake::CreateDefaultGlobalGenerator()
   };
   for (VSVersionedGenerator const* g = cmArrayBegin(vsGenerators);
        g != cmArrayEnd(vsGenerators); ++g) {
-    for (size_t b = 0; b < vsVerions.size(); b++) {
-      std::string reg = vsregBase + vsVerions[b] + g->MSVersion;
+    for (const char* const* v = cmArrayBegin(vsVariants);
+         v != cmArrayEnd(vsVariants); ++v) {
+      std::string reg = vsregBase + *v + g->MSVersion;
       reg += ";InstallDir";
       std::string dir;
       if (cmSystemTools::ReadRegistryValue(reg, dir,
