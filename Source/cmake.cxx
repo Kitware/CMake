@@ -1466,18 +1466,18 @@ void cmake::CreateDefaultGlobalGenerator()
     { "11.0", "Visual Studio 11 2012" },
     { "12.0", "Visual Studio 12 2013" },
     { "14.0", "Visual Studio 14 2015" },
-    { "15.0", "Visual Studio 15" },
-    { 0, 0 }
+    { "15.0", "Visual Studio 15" }
   };
-  for (int i = 0; vsGenerators[i].MSVersion != 0; i++) {
+  for (VSVersionedGenerator const* g = cmArrayBegin(vsGenerators);
+       g != cmArrayEnd(vsGenerators); ++g) {
     for (size_t b = 0; b < vsVerions.size(); b++) {
-      std::string reg = vsregBase + vsVerions[b] + vsGenerators[i].MSVersion;
+      std::string reg = vsregBase + vsVerions[b] + g->MSVersion;
       reg += ";InstallDir";
       std::string dir;
       if (cmSystemTools::ReadRegistryValue(reg, dir,
                                            cmSystemTools::KeyWOW64_32) &&
           cmSystemTools::PathExists(dir)) {
-        found = vsGenerators[i].GeneratorName;
+        found = g->GeneratorName;
         break;
       }
     }
