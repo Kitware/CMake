@@ -2590,7 +2590,7 @@ unsigned long SystemTools::FileLength(const std::string& filename)
   return length;
 }
 
-int SystemTools::Strucmp(const char *s1, const char *s2)
+int SystemTools::Strucmp(const char *l, const char *r)
 {
   int lc;
   int rc;
