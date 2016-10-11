@@ -1467,17 +1467,23 @@ void cmake::CreateDefaultGlobalGenerator()
     { "8.0", "Visual Studio 8 2005" },   //
     { "7.1", "Visual Studio 7 .NET 2003" }
   };
+  static const char* const vsEntries[] = {
+    "\\Setup\\VC;ProductDir", //
+    ";InstallDir"             //
+  };
   for (VSVersionedGenerator const* g = cmArrayBegin(vsGenerators);
        found.empty() && g != cmArrayEnd(vsGenerators); ++g) {
     for (const char* const* v = cmArrayBegin(vsVariants);
          found.empty() && v != cmArrayEnd(vsVariants); ++v) {
-      std::string reg = vsregBase + *v + g->MSVersion;
-      reg += ";InstallDir";
-      std::string dir;
-      if (cmSystemTools::ReadRegistryValue(reg, dir,
-                                           cmSystemTools::KeyWOW64_32) &&
-          cmSystemTools::PathExists(dir)) {
-        found = g->GeneratorName;
+      for (const char* const* e = cmArrayBegin(vsEntries);
+           found.empty() && e != cmArrayEnd(vsEntries); ++e) {
+        std::string const reg = vsregBase + *v + g->MSVersion + *e;
+        std::string dir;
+        if (cmSystemTools::ReadRegistryValue(reg, dir,
+                                             cmSystemTools::KeyWOW64_32) &&
+            cmSystemTools::PathExists(dir)) {
+          found = g->GeneratorName;
+        }
       }
     }
   }
