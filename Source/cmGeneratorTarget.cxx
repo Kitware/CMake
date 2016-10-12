@@ -18,6 +18,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
+#include "cmTargetPropertyComputer.h"
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
@@ -41,6 +42,28 @@
 #else
 #define UNORDERED_SET std::set
 #endif
+
+template <>
+const char* cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
+  cmGeneratorTarget const* tgt, cmMessenger* /* messenger */,
+  cmListFileBacktrace const& /* context */)
+{
+  return tgt->GetSourcesProperty();
+}
+
+template <>
+const char* cmTargetPropertyComputer::ComputeLocationForBuild<
+  cmGeneratorTarget>(cmGeneratorTarget const* tgt)
+{
+  return tgt->GetLocation("");
+}
+
+template <>
+const char* cmTargetPropertyComputer::ComputeLocation<cmGeneratorTarget>(
+  cmGeneratorTarget const* tgt, const std::string& config)
+{
+  return tgt->GetLocation(config);
+}
 
 class cmGeneratorTarget::TargetPropertyEntry
 {
@@ -318,6 +341,21 @@ cmGeneratorTarget::~cmGeneratorTarget()
   cmDeleteAll(this->CompileDefinitionsEntries);
   cmDeleteAll(this->SourceEntries);
   cmDeleteAll(this->LinkInformation);
+}
+
+const char* cmGeneratorTarget::GetSourcesProperty() const
+{
+  std::vector<std::string> values;
+  for (std::vector<cmGeneratorTarget::TargetPropertyEntry *>::const_iterator
+         it = this->SourceEntries.begin(),
+         end = this->SourceEntries.end();
+       it != end; ++it) {
+    values.push_back((*it)->ge->GetInput());
+  }
+  static std::string value;
+  value.clear();
+  value = cmJoin(values, "");
+  return value.c_str();
 }
 
 cmGlobalGenerator* cmGeneratorTarget::GetGlobalGenerator() const

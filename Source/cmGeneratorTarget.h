@@ -532,6 +532,8 @@ public:
 
   std::string GetFortranModuleDirectory(std::string const& working_dir) const;
 
+  const char* GetSourcesProperty() const;
+
 private:
   void AddSourceCommon(const std::string& src);
 
