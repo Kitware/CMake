@@ -1100,8 +1100,9 @@ const char* cmTarget::GetProperty(const std::string& prop,
       // available configuration.
       //
       if (this->IsImported()) {
-        this->Properties.SetProperty(
-          propLOCATION, this->ImportedGetFullPath("", false).c_str());
+        static std::string loc;
+        loc = this->ImportedGetFullPath("", false);
+        return loc.c_str();
       } else {
         // For a non-imported target this is deprecated because it
         // cannot take into account the per-configuration name of the
@@ -1112,7 +1113,9 @@ const char* cmTarget::GetProperty(const std::string& prop,
           gg->CreateGenerationObjects();
         }
         cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
-        this->Properties.SetProperty(propLOCATION, gt->GetLocationForBuild());
+        static std::string loc;
+        loc = gt->GetLocationForBuild();
+        return loc.c_str();
       }
 
     }
@@ -1125,16 +1128,18 @@ const char* cmTarget::GetProperty(const std::string& prop,
       const char* configName = prop.c_str() + 9;
 
       if (this->IsImported()) {
-        this->Properties.SetProperty(
-          prop, this->ImportedGetFullPath(configName, false).c_str());
+        static std::string loc;
+        loc = this->ImportedGetFullPath(configName, false);
+        return loc.c_str();
       } else {
         cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
         if (!gg->GetConfigureDoneCMP0026()) {
           gg->CreateGenerationObjects();
         }
         cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
-        this->Properties.SetProperty(
-          prop, gt->GetFullPath(configName, false).c_str());
+        static std::string loc;
+        loc = gt->GetFullPath(configName, false);
+        return loc.c_str();
       }
     }
     // Support "<CONFIG>_LOCATION".
@@ -1146,16 +1151,18 @@ const char* cmTarget::GetProperty(const std::string& prop,
           return CM_NULLPTR;
         }
         if (this->IsImported()) {
-          this->Properties.SetProperty(
-            prop, this->ImportedGetFullPath(configName, false).c_str());
+          static std::string loc;
+          loc = this->ImportedGetFullPath(configName, false);
+          return loc.c_str();
         } else {
           cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
           if (!gg->GetConfigureDoneCMP0026()) {
             gg->CreateGenerationObjects();
           }
           cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
-          this->Properties.SetProperty(
-            prop, gt->GetFullPath(configName, false).c_str());
+          static std::string loc;
+          loc = gt->GetFullPath(configName, false);
+          return loc.c_str();
         }
       }
     }
@@ -1330,7 +1337,9 @@ const char* cmTarget::GetProperty(const std::string& prop,
           }
         }
       }
-      this->Properties.SetProperty("SOURCES", ss.str().c_str());
+      static std::string srcs;
+      srcs = ss.str();
+      return srcs.c_str();
     }
   }
 
