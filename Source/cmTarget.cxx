@@ -852,7 +852,20 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     e << "NAME property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
+  } else if (prop == "EXPORT_NAME" && this->IsImported()) {
+    std::ostringstream e;
+    e << "EXPORT_NAME property can't be set on imported targets (\""
+      << this->Name << "\")\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  } else if (prop == "SOURCES" && this->IsImported()) {
+    std::ostringstream e;
+    e << "SOURCES property can't be set on imported targets (\"" << this->Name
+      << "\")\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
   }
+
   if (prop == "INCLUDE_DIRECTORIES") {
     this->Internal->IncludeDirectoriesEntries.clear();
     this->Internal->IncludeDirectoriesBacktraces.clear();
@@ -885,11 +898,6 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
     }
-  } else if (prop == "EXPORT_NAME" && this->IsImported()) {
-    std::ostringstream e;
-    e << "EXPORT_NAME property can't be set on imported targets (\""
-      << this->Name << "\")\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
   } else if (prop == "LINK_LIBRARIES") {
     this->Internal->LinkImplementationPropertyEntries.clear();
     this->Internal->LinkImplementationPropertyBacktraces.clear();
@@ -899,14 +907,6 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       this->Internal->LinkImplementationPropertyBacktraces.push_back(lfbt);
     }
   } else if (prop == "SOURCES") {
-    if (this->IsImported()) {
-      std::ostringstream e;
-      e << "SOURCES property can't be set on imported targets (\""
-        << this->Name << "\")\n";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-      return;
-    }
-
     this->Internal->SourceEntries.clear();
     this->Internal->SourceBacktraces.clear();
     if (value) {
@@ -930,6 +930,18 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
   if (prop == "NAME") {
     std::ostringstream e;
     e << "NAME property is read-only\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  } else if (prop == "EXPORT_NAME" && this->IsImported()) {
+    std::ostringstream e;
+    e << "EXPORT_NAME property can't be set on imported targets (\""
+      << this->Name << "\")\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  } else if (prop == "SOURCES" && this->IsImported()) {
+    std::ostringstream e;
+    e << "SOURCES property can't be set on imported targets (\"" << this->Name
+      << "\")\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
@@ -957,11 +969,6 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
     }
-  } else if (prop == "EXPORT_NAME" && this->IsImported()) {
-    std::ostringstream e;
-    e << "EXPORT_NAME property can't be set on imported targets (\""
-      << this->Name << "\")\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
   } else if (prop == "LINK_LIBRARIES") {
     if (value && *value) {
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
@@ -969,13 +976,6 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       this->Internal->LinkImplementationPropertyBacktraces.push_back(lfbt);
     }
   } else if (prop == "SOURCES") {
-    if (this->IsImported()) {
-      std::ostringstream e;
-      e << "SOURCES property can't be set on imported targets (\""
-        << this->Name << "\")\n";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-      return;
-    }
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
     this->Internal->SourceEntries.push_back(value);
     this->Internal->SourceBacktraces.push_back(lfbt);
