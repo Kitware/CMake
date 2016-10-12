@@ -709,13 +709,9 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
 
 void cmTarget::SetProperty(const std::string& prop, const char* value)
 {
-  if (this->GetType() == cmState::INTERFACE_LIBRARY &&
-      !cmTargetPropertyComputer::WhiteListedInterfaceProperty(prop)) {
-    std::ostringstream e;
-    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
-         "The property \""
-      << prop << "\" is not allowed.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+  if (!cmTargetPropertyComputer::PassesWhitelist(
+        this->GetType(), prop, this->Makefile->GetMessenger(),
+        this->Makefile->GetBacktrace())) {
     return;
   }
   if (prop == "NAME") {
@@ -793,13 +789,9 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
 void cmTarget::AppendProperty(const std::string& prop, const char* value,
                               bool asString)
 {
-  if (this->GetType() == cmState::INTERFACE_LIBRARY &&
-      !cmTargetPropertyComputer::WhiteListedInterfaceProperty(prop)) {
-    std::ostringstream e;
-    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
-         "The property \""
-      << prop << "\" is not allowed.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+  if (!cmTargetPropertyComputer::PassesWhitelist(
+        this->GetType(), prop, this->Makefile->GetMessenger(),
+        this->Makefile->GetBacktrace())) {
     return;
   }
   if (prop == "NAME") {
@@ -1012,13 +1004,9 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 const char* cmTarget::GetProperty(const std::string& prop,
                                   cmMakefile* context) const
 {
-  if (this->GetType() == cmState::INTERFACE_LIBRARY &&
-      !cmTargetPropertyComputer::WhiteListedInterfaceProperty(prop)) {
-    std::ostringstream e;
-    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
-         "The property \""
-      << prop << "\" is not allowed.";
-    context->IssueMessage(cmake::FATAL_ERROR, e.str());
+  if (!cmTargetPropertyComputer::PassesWhitelist(this->GetType(), prop,
+                                                 context->GetMessenger(),
+                                                 context->GetBacktrace())) {
     return CM_NULLPTR;
   }
 

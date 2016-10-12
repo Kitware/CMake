@@ -270,3 +270,19 @@ bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
 
   return false;
 }
+
+bool cmTargetPropertyComputer::PassesWhitelist(
+  cmState::TargetType tgtType, std::string const& prop, cmMessenger* messenger,
+  cmListFileBacktrace const& context)
+{
+  if (tgtType == cmState::INTERFACE_LIBRARY &&
+      !WhiteListedInterfaceProperty(prop)) {
+    std::ostringstream e;
+    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
+         "The property \""
+      << prop << "\" is not allowed.";
+    messenger->IssueMessage(cmake::FATAL_ERROR, e.str(), context);
+    return false;
+  }
+  return true;
+}
