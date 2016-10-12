@@ -35,6 +35,134 @@
 #define UNORDERED_SET std::set
 #endif
 
+template <>
+const char* cmTargetPropertyComputer::ComputeLocationForBuild<cmTarget>(
+  cmTarget const* tgt)
+{
+  static std::string loc;
+  if (tgt->IsImported()) {
+    loc = tgt->ImportedGetFullPath("", false);
+    return loc.c_str();
+  }
+
+  cmGlobalGenerator* gg = tgt->GetGlobalGenerator();
+  if (!gg->GetConfigureDoneCMP0026()) {
+    gg->CreateGenerationObjects();
+  }
+  cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
+  loc = gt->GetLocationForBuild();
+  return loc.c_str();
+}
+
+template <>
+const char* cmTargetPropertyComputer::ComputeLocation<cmTarget>(
+  cmTarget const* tgt, const std::string& config)
+{
+  static std::string loc;
+  if (tgt->IsImported()) {
+    loc = tgt->ImportedGetFullPath(config, false);
+    return loc.c_str();
+  }
+
+  cmGlobalGenerator* gg = tgt->GetGlobalGenerator();
+  if (!gg->GetConfigureDoneCMP0026()) {
+    gg->CreateGenerationObjects();
+  }
+  cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
+  loc = gt->GetFullPath(config, false);
+  return loc.c_str();
+}
+
+template <>
+const char* cmTargetPropertyComputer::GetSources<cmTarget>(
+  cmTarget const* tgt, cmMessenger* messenger,
+  cmListFileBacktrace const& context)
+{
+  cmStringRange entries = tgt->GetSourceEntries();
+  if (entries.empty()) {
+    return CM_NULLPTR;
+  }
+
+  std::ostringstream ss;
+  const char* sep = "";
+  for (std::vector<std::string>::const_iterator i = entries.begin();
+       i != entries.end(); ++i) {
+    std::string const& entry = *i;
+
+    std::vector<std::string> files;
+    cmSystemTools::ExpandListArgument(entry, files);
+    for (std::vector<std::string>::const_iterator li = files.begin();
+         li != files.end(); ++li) {
+      if (cmHasLiteralPrefix(*li, "$<TARGET_OBJECTS:") &&
+          (*li)[li->size() - 1] == '>') {
+        std::string objLibName = li->substr(17, li->size() - 18);
+
+        if (cmGeneratorExpression::Find(objLibName) != std::string::npos) {
+          ss << sep;
+          sep = ";";
+          ss << *li;
+          continue;
+        }
+
+        bool addContent = false;
+        bool noMessage = true;
+        std::ostringstream e;
+        cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+        switch (context.GetBottom().GetPolicy(cmPolicies::CMP0051)) {
+          case cmPolicies::WARN:
+            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0051) << "\n";
+            noMessage = false;
+          case cmPolicies::OLD:
+            break;
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::NEW:
+            addContent = true;
+        }
+        if (!noMessage) {
+          e << "Target \"" << tgt->GetName()
+            << "\" contains "
+               "$<TARGET_OBJECTS> generator expression in its sources "
+               "list.  "
+               "This content was not previously part of the SOURCES "
+               "property "
+               "when that property was read at configure time.  Code "
+               "reading "
+               "that property needs to be adapted to ignore the generator "
+               "expression using the string(GENEX_STRIP) command.";
+          messenger->IssueMessage(messageType, e.str(), context);
+        }
+        if (addContent) {
+          ss << sep;
+          sep = ";";
+          ss << *li;
+        }
+      } else if (cmGeneratorExpression::Find(*li) == std::string::npos) {
+        ss << sep;
+        sep = ";";
+        ss << *li;
+      } else {
+        cmSourceFile* sf = tgt->GetMakefile()->GetOrCreateSource(*li);
+        // Construct what is known about this source file location.
+        cmSourceFileLocation const& location = sf->GetLocation();
+        std::string sname = location.GetDirectory();
+        if (!sname.empty()) {
+          sname += "/";
+        }
+        sname += location.GetName();
+
+        ss << sep;
+        sep = ";";
+        // Append this list entry.
+        ss << sname;
+      }
+    }
+  }
+  static std::string srcs;
+  srcs = ss.str();
+  return srcs.c_str();
+}
+
 class cmTargetInternals
 {
 public:

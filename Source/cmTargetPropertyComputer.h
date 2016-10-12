@@ -6,6 +6,7 @@
 #include <cmConfigure.h> // IWYU pragma: keep
 
 #include "cmListFileCache.h"
+#include "cmSystemTools.h"
 
 #include <map>
 #include <string>
@@ -16,12 +17,22 @@ class cmMessenger;
 class cmTargetPropertyComputer
 {
 public:
-  static const char* GetProperty(cmTarget const* tgt, const std::string& prop,
+  template <typename Target>
+  static const char* GetProperty(Target const* tgt, const std::string& prop,
                                  cmMessenger* messenger,
-                                 cmListFileBacktrace const& context);
-
-  static std::map<std::string, std::string> ComputeFileLocations(
-    cmTarget const* tgt);
+                                 cmListFileBacktrace const& context)
+  {
+    if (const char* loc = GetLocation(tgt, prop, messenger, context)) {
+      return loc;
+    }
+    if (cmSystemTools::GetFatalErrorOccured()) {
+      return CM_NULLPTR;
+    }
+    if (prop == "SOURCES") {
+      return GetSources(tgt, messenger, context);
+    }
+    return CM_NULLPTR;
+  }
 
   static bool WhiteListedInterfaceProperty(const std::string& prop);
 
@@ -34,14 +45,65 @@ private:
                                            cmMessenger* messenger,
                                            cmListFileBacktrace const& context);
 
-  static const char* ComputeLocationForBuild(cmTarget const* tgt);
-  static const char* ComputeLocation(cmTarget const* tgt,
+  template <typename Target>
+  static const char* ComputeLocationForBuild(Target const* tgt);
+  template <typename Target>
+  static const char* ComputeLocation(Target const* tgt,
                                      std::string const& config);
-  static const char* GetLocation(cmTarget const* tgt, std::string const& prop,
-                                 cmMessenger* messenger,
-                                 cmListFileBacktrace const& context);
 
-  static const char* GetSources(cmTarget const* tgt, cmMessenger* messenger,
+  template <typename Target>
+  static const char* GetLocation(Target const* tgt, std::string const& prop,
+                                 cmMessenger* messenger,
+                                 cmListFileBacktrace const& context)
+
+  {
+    // Watch for special "computed" properties that are dependent on
+    // other properties or variables.  Always recompute them.
+    if (tgt->GetType() == cmState::EXECUTABLE ||
+        tgt->GetType() == cmState::STATIC_LIBRARY ||
+        tgt->GetType() == cmState::SHARED_LIBRARY ||
+        tgt->GetType() == cmState::MODULE_LIBRARY ||
+        tgt->GetType() == cmState::UNKNOWN_LIBRARY) {
+      static const std::string propLOCATION = "LOCATION";
+      if (prop == propLOCATION) {
+        if (!tgt->IsImported() &&
+            !HandleLocationPropertyPolicy(tgt->GetName(), messenger,
+                                          context)) {
+          return CM_NULLPTR;
+        }
+        return ComputeLocationForBuild(tgt);
+      }
+
+      // Support "LOCATION_<CONFIG>".
+      else if (cmHasLiteralPrefix(prop, "LOCATION_")) {
+        if (!tgt->IsImported() &&
+            !HandleLocationPropertyPolicy(tgt->GetName(), messenger,
+                                          context)) {
+          return CM_NULLPTR;
+        }
+        const char* configName = prop.c_str() + 9;
+        return ComputeLocation(tgt, configName);
+      }
+
+      // Support "<CONFIG>_LOCATION".
+      else if (cmHasLiteralSuffix(prop, "_LOCATION") &&
+               !cmHasLiteralPrefix(prop, "XCODE_ATTRIBUTE_")) {
+        std::string configName(prop.c_str(), prop.size() - 9);
+        if (configName != "IMPORTED") {
+          if (!tgt->IsImported() &&
+              !HandleLocationPropertyPolicy(tgt->GetName(), messenger,
+                                            context)) {
+            return CM_NULLPTR;
+          }
+          return ComputeLocation(tgt, configName);
+        }
+      }
+    }
+    return CM_NULLPTR;
+  }
+
+  template <typename Target>
+  static const char* GetSources(Target const* tgt, cmMessenger* messenger,
                                 cmListFileBacktrace const& context);
 };
 
