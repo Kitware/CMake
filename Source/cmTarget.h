@@ -208,7 +208,7 @@ public:
   }
 
   // Get the properties
-  cmPropertyMap& GetProperties() const { return this->Properties; }
+  cmPropertyMap const& GetProperties() const { return this->Properties; }
 
   bool GetMappedConfig(std::string const& desired_config, const char** loc,
                        const char** imp, std::string& suffix) const;
@@ -282,7 +282,7 @@ private:
                                   bool implib) const;
 
 private:
-  mutable cmPropertyMap Properties;
+  cmPropertyMap Properties;
   std::set<std::string> SystemIncludeDirectories;
   std::set<std::string> LinkDirectoriesEmmitted;
   std::set<std::string> Utilities;

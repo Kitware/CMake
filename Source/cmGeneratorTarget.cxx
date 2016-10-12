@@ -3950,7 +3950,7 @@ void cmGeneratorTarget::ComputeVersionedName(std::string& vName,
 
 std::vector<std::string> cmGeneratorTarget::GetPropertyKeys() const
 {
-  cmPropertyMap propsObject = this->Target->GetProperties();
+  cmPropertyMap const& propsObject = this->Target->GetProperties();
   std::vector<std::string> props;
   props.reserve(propsObject.size());
   for (cmPropertyMap::const_iterator it = propsObject.begin();
