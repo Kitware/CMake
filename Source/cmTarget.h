@@ -30,6 +30,7 @@
 
 class cmMakefile;
 class cmSourceFile;
+class cmGlobalGenerator;
 class cmTargetInternals;
 
 class cmTargetInternalPointer
@@ -75,6 +76,8 @@ public:
    * Return the type of target.
    */
   cmState::TargetType GetType() const { return this->TargetTypeValue; }
+
+  cmGlobalGenerator* GetGlobalGenerator() const;
 
   ///! Set/Get the name of the target
   const std::string& GetName() const { return this->Name; }

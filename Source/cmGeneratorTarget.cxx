@@ -320,6 +320,11 @@ cmGeneratorTarget::~cmGeneratorTarget()
   cmDeleteAll(this->LinkInformation);
 }
 
+cmGlobalGenerator* cmGeneratorTarget::GetGlobalGenerator() const
+{
+  return this->GetLocalGenerator()->GetGlobalGenerator();
+}
+
 cmLocalGenerator* cmGeneratorTarget::GetLocalGenerator() const
 {
   return this->LocalGenerator;

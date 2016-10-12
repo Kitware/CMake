@@ -272,6 +272,11 @@ cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
   }
 }
 
+cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
+{
+  return this->GetMakefile()->GetGlobalGenerator();
+}
+
 void cmTarget::AddUtility(const std::string& u, cmMakefile* makefile)
 {
   if (this->Utilities.insert(u).second && makefile) {

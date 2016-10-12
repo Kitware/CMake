@@ -32,6 +32,8 @@ public:
 
   cmLocalGenerator* GetLocalGenerator() const;
 
+  cmGlobalGenerator* GetGlobalGenerator() const;
+
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
   const char* GetLocation(const std::string& config) const;
