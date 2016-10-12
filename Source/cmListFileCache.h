@@ -120,6 +120,8 @@ public:
   cmListFileBacktrace& operator=(cmListFileBacktrace const& r);
   ~cmListFileBacktrace();
 
+  cmState::Snapshot GetBottom() const { return this->Bottom; }
+
   // Get a backtrace with the given file scope added to the top.
   // May not be called until after construction with a valid snapshot.
   cmListFileBacktrace Push(std::string const& file) const;
