@@ -1032,9 +1032,6 @@ void cmTarget::CheckProperty(const std::string& prop,
 
 bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
 {
-  if (this->IsImported()) {
-    return true;
-  }
   std::ostringstream e;
   const char* modal = CM_NULLPTR;
   cmake::MessageType messageType = cmake::AUTHOR_WARNING;
@@ -1090,7 +1087,9 @@ const char* cmTarget::GetProperty(const std::string& prop,
       this->GetType() == cmState::UNKNOWN_LIBRARY) {
     static const std::string propLOCATION = "LOCATION";
     if (prop == propLOCATION) {
-      if (!this->HandleLocationPropertyPolicy(context)) {
+
+      if (!this->IsImported() &&
+          !this->HandleLocationPropertyPolicy(context)) {
         return CM_NULLPTR;
       }
 
@@ -1122,7 +1121,8 @@ const char* cmTarget::GetProperty(const std::string& prop,
 
     // Support "LOCATION_<CONFIG>".
     else if (cmHasLiteralPrefix(prop, "LOCATION_")) {
-      if (!this->HandleLocationPropertyPolicy(context)) {
+      if (!this->IsImported() &&
+          !this->HandleLocationPropertyPolicy(context)) {
         return CM_NULLPTR;
       }
       const char* configName = prop.c_str() + 9;
@@ -1147,7 +1147,8 @@ const char* cmTarget::GetProperty(const std::string& prop,
              !cmHasLiteralPrefix(prop, "XCODE_ATTRIBUTE_")) {
       std::string configName(prop.c_str(), prop.size() - 9);
       if (configName != "IMPORTED") {
-        if (!this->HandleLocationPropertyPolicy(context)) {
+        if (!this->IsImported() &&
+            !this->HandleLocationPropertyPolicy(context)) {
           return CM_NULLPTR;
         }
         if (this->IsImported()) {
