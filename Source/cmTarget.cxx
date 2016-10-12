@@ -1030,7 +1030,19 @@ void cmTarget::CheckProperty(const std::string& prop,
   }
 }
 
-bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
+class cmTargetPropertyComputer
+{
+public:
+  static const char* GetProperty(cmTarget const* tgt, const std::string& prop,
+                                 cmMakefile* context);
+
+private:
+  static bool HandleLocationPropertyPolicy(std::string const& tgtName,
+                                           cmMakefile* context);
+};
+
+bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
+  std::string const& tgtName, cmMakefile* context)
 {
   std::ostringstream e;
   const char* modal = CM_NULLPTR;
@@ -1050,7 +1062,7 @@ bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
 
   if (modal) {
     e << "The LOCATION property " << modal << " not be read from target \""
-      << this->GetName()
+      << tgtName
       << "\".  Use the target name directly with "
          "add_custom_command, or use the generator expression $<TARGET_FILE>, "
          "as appropriate.\n";
@@ -1060,36 +1072,21 @@ bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
   return messageType != cmake::FATAL_ERROR;
 }
 
-const char* cmTarget::GetProperty(const std::string& prop) const
+const char* cmTargetPropertyComputer::GetProperty(cmTarget const* tgt,
+                                                  const std::string& prop,
+                                                  cmMakefile* context)
 {
-  return this->GetProperty(prop, this->Makefile);
-}
-
-const char* cmTarget::GetProperty(const std::string& prop,
-                                  cmMakefile* context) const
-{
-  if (this->GetType() == cmState::INTERFACE_LIBRARY &&
-      !whiteListedInterfaceProperty(prop)) {
-    std::ostringstream e;
-    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
-         "The property \""
-      << prop << "\" is not allowed.";
-    context->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return CM_NULLPTR;
-  }
-
   // Watch for special "computed" properties that are dependent on
   // other properties or variables.  Always recompute them.
-  if (this->GetType() == cmState::EXECUTABLE ||
-      this->GetType() == cmState::STATIC_LIBRARY ||
-      this->GetType() == cmState::SHARED_LIBRARY ||
-      this->GetType() == cmState::MODULE_LIBRARY ||
-      this->GetType() == cmState::UNKNOWN_LIBRARY) {
+  if (tgt->GetType() == cmState::EXECUTABLE ||
+      tgt->GetType() == cmState::STATIC_LIBRARY ||
+      tgt->GetType() == cmState::SHARED_LIBRARY ||
+      tgt->GetType() == cmState::MODULE_LIBRARY ||
+      tgt->GetType() == cmState::UNKNOWN_LIBRARY) {
     static const std::string propLOCATION = "LOCATION";
     if (prop == propLOCATION) {
-
-      if (!this->IsImported() &&
-          !this->HandleLocationPropertyPolicy(context)) {
+      if (!tgt->IsImported() &&
+          !HandleLocationPropertyPolicy(tgt->GetName(), context)) {
         return CM_NULLPTR;
       }
 
@@ -1098,20 +1095,20 @@ const char* cmTarget::GetProperty(const std::string& prop,
       // For an imported target this is the location of an arbitrary
       // available configuration.
       //
-      if (this->IsImported()) {
+      if (tgt->IsImported()) {
         static std::string loc;
-        loc = this->ImportedGetFullPath("", false);
+        loc = tgt->ImportedGetFullPath("", false);
         return loc.c_str();
       } else {
         // For a non-imported target this is deprecated because it
         // cannot take into account the per-configuration name of the
         // target because the configuration type may not be known at
         // CMake time.
-        cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
+        cmGlobalGenerator* gg = tgt->GetMakefile()->GetGlobalGenerator();
         if (!gg->GetConfigureDoneCMP0026()) {
           gg->CreateGenerationObjects();
         }
-        cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
+        cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
         static std::string loc;
         loc = gt->GetLocationForBuild();
         return loc.c_str();
@@ -1121,22 +1118,22 @@ const char* cmTarget::GetProperty(const std::string& prop,
 
     // Support "LOCATION_<CONFIG>".
     else if (cmHasLiteralPrefix(prop, "LOCATION_")) {
-      if (!this->IsImported() &&
-          !this->HandleLocationPropertyPolicy(context)) {
+      if (!tgt->IsImported() &&
+          !HandleLocationPropertyPolicy(tgt->GetName(), context)) {
         return CM_NULLPTR;
       }
       const char* configName = prop.c_str() + 9;
 
-      if (this->IsImported()) {
+      if (tgt->IsImported()) {
         static std::string loc;
-        loc = this->ImportedGetFullPath(configName, false);
+        loc = tgt->ImportedGetFullPath(configName, false);
         return loc.c_str();
       } else {
-        cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
+        cmGlobalGenerator* gg = tgt->GetMakefile()->GetGlobalGenerator();
         if (!gg->GetConfigureDoneCMP0026()) {
           gg->CreateGenerationObjects();
         }
-        cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
+        cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
         static std::string loc;
         loc = gt->GetFullPath(configName, false);
         return loc.c_str();
@@ -1147,20 +1144,20 @@ const char* cmTarget::GetProperty(const std::string& prop,
              !cmHasLiteralPrefix(prop, "XCODE_ATTRIBUTE_")) {
       std::string configName(prop.c_str(), prop.size() - 9);
       if (configName != "IMPORTED") {
-        if (!this->IsImported() &&
-            !this->HandleLocationPropertyPolicy(context)) {
+        if (!tgt->IsImported() &&
+            !HandleLocationPropertyPolicy(tgt->GetName(), context)) {
           return CM_NULLPTR;
         }
-        if (this->IsImported()) {
+        if (tgt->IsImported()) {
           static std::string loc;
-          loc = this->ImportedGetFullPath(configName, false);
+          loc = tgt->ImportedGetFullPath(configName, false);
           return loc.c_str();
         } else {
-          cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
+          cmGlobalGenerator* gg = tgt->GetMakefile()->GetGlobalGenerator();
           if (!gg->GetConfigureDoneCMP0026()) {
             gg->CreateGenerationObjects();
           }
-          cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
+          cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
           static std::string loc;
           loc = gt->GetFullPath(configName, false);
           return loc.c_str();
@@ -1169,15 +1166,15 @@ const char* cmTarget::GetProperty(const std::string& prop,
     }
   }
   if (prop == "SOURCES") {
-    if (this->Internal->SourceEntries.empty()) {
+    cmStringRange entries = tgt->GetSourceEntries();
+    if (entries.empty()) {
       return CM_NULLPTR;
     }
 
     std::ostringstream ss;
     const char* sep = "";
-    for (std::vector<std::string>::const_iterator i =
-           this->Internal->SourceEntries.begin();
-         i != this->Internal->SourceEntries.end(); ++i) {
+    for (std::vector<std::string>::const_iterator i = entries.begin();
+         i != entries.end(); ++i) {
       std::string const& entry = *i;
 
       std::vector<std::string> files;
@@ -1211,7 +1208,7 @@ const char* cmTarget::GetProperty(const std::string& prop,
               addContent = true;
           }
           if (!noMessage) {
-            e << "Target \"" << this->Name
+            e << "Target \"" << tgt->GetName()
               << "\" contains "
                  "$<TARGET_OBJECTS> generator expression in its sources "
                  "list.  "
@@ -1233,7 +1230,7 @@ const char* cmTarget::GetProperty(const std::string& prop,
           sep = ";";
           ss << *li;
         } else {
-          cmSourceFile* sf = this->Makefile->GetOrCreateSource(*li);
+          cmSourceFile* sf = tgt->GetMakefile()->GetOrCreateSource(*li);
           // Construct what is known about this source file location.
           cmSourceFileLocation const& location = sf->GetLocation();
           std::string sname = location.GetDirectory();
@@ -1253,6 +1250,35 @@ const char* cmTarget::GetProperty(const std::string& prop,
     srcs = ss.str();
     return srcs.c_str();
   }
+  return CM_NULLPTR;
+}
+
+const char* cmTarget::GetProperty(const std::string& prop) const
+{
+  return this->GetProperty(prop, this->Makefile);
+}
+
+const char* cmTarget::GetProperty(const std::string& prop,
+                                  cmMakefile* context) const
+{
+  if (this->GetType() == cmState::INTERFACE_LIBRARY &&
+      !whiteListedInterfaceProperty(prop)) {
+    std::ostringstream e;
+    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
+         "The property \""
+      << prop << "\" is not allowed.";
+    context->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return CM_NULLPTR;
+  }
+
+  if (const char* result =
+        cmTargetPropertyComputer::GetProperty(this, prop, context)) {
+    return result;
+  }
+  if (cmSystemTools::GetFatalErrorOccured()) {
+    return CM_NULLPTR;
+  }
+
   static UNORDERED_SET<std::string> specialProps;
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
   MAKE_STATIC_PROP(LINK_LIBRARIES);

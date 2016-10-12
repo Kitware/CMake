@@ -267,9 +267,10 @@ public:
     bool operator()(cmTarget const* t1, cmTarget const* t2) const;
   };
 
-private:
-  bool HandleLocationPropertyPolicy(cmMakefile* context) const;
+  std::string ImportedGetFullPath(const std::string& config,
+                                  bool implib) const;
 
+private:
   const char* GetSuffixVariableInternal(bool implib) const;
   const char* GetPrefixVariableInternal(bool implib) const;
 
@@ -277,9 +278,6 @@ private:
   // If the variable is not defined use the given default instead.
   void SetPropertyDefault(const std::string& property,
                           const char* default_value);
-
-  std::string ImportedGetFullPath(const std::string& config,
-                                  bool implib) const;
 
 private:
   cmPropertyMap Properties;
