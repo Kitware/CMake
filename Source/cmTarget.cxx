@@ -1039,6 +1039,10 @@ public:
 private:
   static bool HandleLocationPropertyPolicy(std::string const& tgtName,
                                            cmMakefile* context);
+
+  static const char* ComputeLocationForBuild(cmTarget const* tgt);
+  static const char* ComputeLocation(cmTarget const* tgt,
+                                     std::string const& config);
 };
 
 bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
@@ -1072,6 +1076,42 @@ bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
   return messageType != cmake::FATAL_ERROR;
 }
 
+const char* cmTargetPropertyComputer::ComputeLocationForBuild(
+  cmTarget const* tgt)
+{
+  static std::string loc;
+  if (tgt->IsImported()) {
+    loc = tgt->ImportedGetFullPath("", false);
+    return loc.c_str();
+  }
+
+  cmGlobalGenerator* gg = tgt->GetMakefile()->GetGlobalGenerator();
+  if (!gg->GetConfigureDoneCMP0026()) {
+    gg->CreateGenerationObjects();
+  }
+  cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
+  loc = gt->GetLocationForBuild();
+  return loc.c_str();
+}
+
+const char* cmTargetPropertyComputer::ComputeLocation(
+  cmTarget const* tgt, std::string const& config)
+{
+  static std::string loc;
+  if (tgt->IsImported()) {
+    loc = tgt->ImportedGetFullPath(config, false);
+    return loc.c_str();
+  }
+
+  cmGlobalGenerator* gg = tgt->GetMakefile()->GetGlobalGenerator();
+  if (!gg->GetConfigureDoneCMP0026()) {
+    gg->CreateGenerationObjects();
+  }
+  cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
+  loc = gt->GetFullPath(config, false);
+  return loc.c_str();
+}
+
 const char* cmTargetPropertyComputer::GetProperty(cmTarget const* tgt,
                                                   const std::string& prop,
                                                   cmMakefile* context)
@@ -1089,31 +1129,7 @@ const char* cmTargetPropertyComputer::GetProperty(cmTarget const* tgt,
           !HandleLocationPropertyPolicy(tgt->GetName(), context)) {
         return CM_NULLPTR;
       }
-
-      // Set the LOCATION property of the target.
-      //
-      // For an imported target this is the location of an arbitrary
-      // available configuration.
-      //
-      if (tgt->IsImported()) {
-        static std::string loc;
-        loc = tgt->ImportedGetFullPath("", false);
-        return loc.c_str();
-      } else {
-        // For a non-imported target this is deprecated because it
-        // cannot take into account the per-configuration name of the
-        // target because the configuration type may not be known at
-        // CMake time.
-        cmGlobalGenerator* gg = tgt->GetMakefile()->GetGlobalGenerator();
-        if (!gg->GetConfigureDoneCMP0026()) {
-          gg->CreateGenerationObjects();
-        }
-        cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
-        static std::string loc;
-        loc = gt->GetLocationForBuild();
-        return loc.c_str();
-      }
-
+      return ComputeLocationForBuild(tgt);
     }
 
     // Support "LOCATION_<CONFIG>".
@@ -1123,22 +1139,9 @@ const char* cmTargetPropertyComputer::GetProperty(cmTarget const* tgt,
         return CM_NULLPTR;
       }
       const char* configName = prop.c_str() + 9;
-
-      if (tgt->IsImported()) {
-        static std::string loc;
-        loc = tgt->ImportedGetFullPath(configName, false);
-        return loc.c_str();
-      } else {
-        cmGlobalGenerator* gg = tgt->GetMakefile()->GetGlobalGenerator();
-        if (!gg->GetConfigureDoneCMP0026()) {
-          gg->CreateGenerationObjects();
-        }
-        cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
-        static std::string loc;
-        loc = gt->GetFullPath(configName, false);
-        return loc.c_str();
-      }
+      return ComputeLocation(tgt, configName);
     }
+
     // Support "<CONFIG>_LOCATION".
     else if (cmHasLiteralSuffix(prop, "_LOCATION") &&
              !cmHasLiteralPrefix(prop, "XCODE_ATTRIBUTE_")) {
@@ -1148,20 +1151,7 @@ const char* cmTargetPropertyComputer::GetProperty(cmTarget const* tgt,
             !HandleLocationPropertyPolicy(tgt->GetName(), context)) {
           return CM_NULLPTR;
         }
-        if (tgt->IsImported()) {
-          static std::string loc;
-          loc = tgt->ImportedGetFullPath(configName, false);
-          return loc.c_str();
-        } else {
-          cmGlobalGenerator* gg = tgt->GetMakefile()->GetGlobalGenerator();
-          if (!gg->GetConfigureDoneCMP0026()) {
-            gg->CreateGenerationObjects();
-          }
-          cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
-          static std::string loc;
-          loc = gt->GetFullPath(configName, false);
-          return loc.c_str();
-        }
+        return ComputeLocation(tgt, configName);
       }
     }
   }
