@@ -200,9 +200,11 @@ public:
   void AppendProperty(const std::string& prop, const char* value,
                       bool asString = false);
   const char* GetProperty(const std::string& prop) const;
-  const char* GetProperty(const std::string& prop, cmMakefile* context) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
+  const char* GetComputedProperty(const std::string& prop,
+                                  cmMessenger* messenger,
+                                  cmListFileBacktrace const& context) const;
 
   bool IsImported() const { return this->IsImportedTarget; }
   bool IsImportedGloballyVisible() const
