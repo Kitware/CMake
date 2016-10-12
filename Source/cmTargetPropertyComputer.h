@@ -23,6 +23,8 @@ public:
   static std::map<std::string, std::string> ComputeFileLocations(
     cmTarget const* tgt);
 
+  static bool WhiteListedInterfaceProperty(const std::string& prop);
+
 private:
   static bool HandleLocationPropertyPolicy(std::string const& tgtName,
                                            cmMessenger* messenger,
@@ -35,9 +37,8 @@ private:
                                  cmMessenger* messenger,
                                  cmListFileBacktrace const& context);
 
-  static const char* GetSources(cmTarget const* tgt,
-    cmMessenger* messenger,
-    cmListFileBacktrace const& context);
+  static const char* GetSources(cmTarget const* tgt, cmMessenger* messenger,
+                                cmListFileBacktrace const& context);
 };
 
 #endif

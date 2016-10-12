@@ -154,7 +154,7 @@ const char* cmTargetPropertyComputer::GetLocation(
 }
 
 const char* cmTargetPropertyComputer::GetSources(
-  cmTarget const* tgt,cmMessenger* messenger,
+  cmTarget const* tgt, cmMessenger* messenger,
   cmListFileBacktrace const& context)
 {
   cmStringRange entries = tgt->GetSourceEntries();
@@ -240,4 +240,33 @@ const char* cmTargetPropertyComputer::GetSources(
   static std::string srcs;
   srcs = ss.str();
   return srcs.c_str();
+}
+
+bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
+  const std::string& prop)
+{
+  if (cmHasLiteralPrefix(prop, "INTERFACE_")) {
+    return true;
+  }
+  static UNORDERED_SET<std::string> builtIns;
+  if (builtIns.empty()) {
+    builtIns.insert("COMPATIBLE_INTERFACE_BOOL");
+    builtIns.insert("COMPATIBLE_INTERFACE_NUMBER_MAX");
+    builtIns.insert("COMPATIBLE_INTERFACE_NUMBER_MIN");
+    builtIns.insert("COMPATIBLE_INTERFACE_STRING");
+    builtIns.insert("EXPORT_NAME");
+    builtIns.insert("IMPORTED");
+    builtIns.insert("NAME");
+    builtIns.insert("TYPE");
+  }
+
+  if (builtIns.count(prop)) {
+    return true;
+  }
+
+  if (cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_")) {
+    return true;
+  }
+
+  return false;
 }
