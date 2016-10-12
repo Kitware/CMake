@@ -362,6 +362,8 @@ set(SRCS
   cmSystemTools.h
   cmTarget.cxx
   cmTarget.h
+  cmTargetPropertyComputer.cxx
+  cmTargetPropertyComputer.h
   cmTargetExport.h
   cmTest.cxx
   cmTest.h

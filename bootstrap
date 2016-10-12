@@ -310,6 +310,7 @@ CMAKE_CXX_SOURCES="\
   cmBootstrapCommands2 \
   cmCommandsForBootstrap \
   cmTarget \
+  cmTargetPropertyComputer \
   cmTest \
   cmCustomCommand \
   cmCustomCommandGenerator \
