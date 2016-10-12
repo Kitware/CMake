@@ -1222,10 +1222,16 @@ const char* cmTarget::GetProperty(const std::string& prop) const
       return this->GetName().c_str();
     }
     if (prop == propBINARY_DIR) {
-      return this->GetMakefile()->GetCurrentBinaryDirectory();
+      return this->GetMakefile()
+        ->GetStateSnapshot()
+        .GetDirectory()
+        .GetCurrentBinary();
     }
     if (prop == propSOURCE_DIR) {
-      return this->GetMakefile()->GetCurrentSourceDirectory();
+      return this->GetMakefile()
+        ->GetStateSnapshot()
+        .GetDirectory()
+        .GetCurrentSource();
     }
   }
 
@@ -1234,7 +1240,8 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     const bool chain = this->GetMakefile()->GetState()->IsPropertyChained(
       prop, cmProperty::TARGET);
     if (chain) {
-      return this->Makefile->GetProperty(prop, chain);
+      return this->Makefile->GetStateSnapshot().GetDirectory().GetProperty(
+        prop, chain);
     }
   }
   return retVal;
