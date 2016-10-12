@@ -8,6 +8,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessenger.h"
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
 #include "cmSourceFile.h"
@@ -1034,29 +1035,34 @@ class cmTargetPropertyComputer
 {
 public:
   static const char* GetProperty(cmTarget const* tgt, const std::string& prop,
-                                 cmMakefile* context);
+                                 cmMessenger* messenger,
+                                 cmListFileBacktrace const& context);
 
 private:
   static bool HandleLocationPropertyPolicy(std::string const& tgtName,
-                                           cmMakefile* context);
+                                           cmMessenger* messenger,
+                                           cmListFileBacktrace const& context);
 
   static const char* ComputeLocationForBuild(cmTarget const* tgt);
   static const char* ComputeLocation(cmTarget const* tgt,
                                      std::string const& config);
   static const char* GetLocation(cmTarget const* tgt,
                                  std::string const& config,
-                                 cmMakefile* context);
+                                 cmMessenger* messenger,
+                                 cmListFileBacktrace const& context);
 
-  static const char* GetSources(cmTarget const* tgt, cmMakefile* context);
+  static const char* GetSources(cmTarget const* tgt, cmMessenger* messenger,
+                                cmListFileBacktrace const& context);
 };
 
 bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
-  std::string const& tgtName, cmMakefile* context)
+  std::string const& tgtName, cmMessenger* messenger,
+  cmListFileBacktrace const& context)
 {
   std::ostringstream e;
   const char* modal = CM_NULLPTR;
   cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-  switch (context->GetPolicyStatus(cmPolicies::CMP0026)) {
+  switch (context.GetBottom().GetPolicy(cmPolicies::CMP0026)) {
     case cmPolicies::WARN:
       e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0026) << "\n";
       modal = "should";
@@ -1075,7 +1081,7 @@ bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
       << "\".  Use the target name directly with "
          "add_custom_command, or use the generator expression $<TARGET_FILE>, "
          "as appropriate.\n";
-    context->IssueMessage(messageType, e.str());
+    messenger->IssueMessage(messageType, e.str(), context);
   }
 
   return messageType != cmake::FATAL_ERROR;
@@ -1117,9 +1123,9 @@ const char* cmTargetPropertyComputer::ComputeLocation(
   return loc.c_str();
 }
 
-const char* cmTargetPropertyComputer::GetLocation(cmTarget const* tgt,
-                                                  const std::string& prop,
-                                                  cmMakefile* context)
+const char* cmTargetPropertyComputer::GetLocation(
+  cmTarget const* tgt, const std::string& prop, cmMessenger* messenger,
+  cmListFileBacktrace const& context)
 {
   // Watch for special "computed" properties that are dependent on
   // other properties or variables.  Always recompute them.
@@ -1131,7 +1137,7 @@ const char* cmTargetPropertyComputer::GetLocation(cmTarget const* tgt,
     static const std::string propLOCATION = "LOCATION";
     if (prop == propLOCATION) {
       if (!tgt->IsImported() &&
-          !HandleLocationPropertyPolicy(tgt->GetName(), context)) {
+          !HandleLocationPropertyPolicy(tgt->GetName(), messenger, context)) {
         return CM_NULLPTR;
       }
       return ComputeLocationForBuild(tgt);
@@ -1140,7 +1146,7 @@ const char* cmTargetPropertyComputer::GetLocation(cmTarget const* tgt,
     // Support "LOCATION_<CONFIG>".
     else if (cmHasLiteralPrefix(prop, "LOCATION_")) {
       if (!tgt->IsImported() &&
-          !HandleLocationPropertyPolicy(tgt->GetName(), context)) {
+          !HandleLocationPropertyPolicy(tgt->GetName(), messenger, context)) {
         return CM_NULLPTR;
       }
       const char* configName = prop.c_str() + 9;
@@ -1153,7 +1159,8 @@ const char* cmTargetPropertyComputer::GetLocation(cmTarget const* tgt,
       std::string configName(prop.c_str(), prop.size() - 9);
       if (configName != "IMPORTED") {
         if (!tgt->IsImported() &&
-            !HandleLocationPropertyPolicy(tgt->GetName(), context)) {
+            !HandleLocationPropertyPolicy(tgt->GetName(), messenger,
+                                          context)) {
           return CM_NULLPTR;
         }
         return ComputeLocation(tgt, configName);
@@ -1163,8 +1170,9 @@ const char* cmTargetPropertyComputer::GetLocation(cmTarget const* tgt,
   return CM_NULLPTR;
 }
 
-const char* cmTargetPropertyComputer::GetSources(cmTarget const* tgt,
-                                                 cmMakefile* context)
+const char* cmTargetPropertyComputer::GetSources(
+  cmTarget const* tgt, cmMessenger* messenger,
+  cmListFileBacktrace const& context)
 {
   cmStringRange entries = tgt->GetSourceEntries();
 
@@ -1197,7 +1205,7 @@ const char* cmTargetPropertyComputer::GetSources(cmTarget const* tgt,
         bool noMessage = true;
         std::ostringstream e;
         cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-        switch (context->GetPolicyStatus(cmPolicies::CMP0051)) {
+        switch (context.GetBottom().GetPolicy(cmPolicies::CMP0051)) {
           case cmPolicies::WARN:
             e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0051) << "\n";
             noMessage = false;
@@ -1219,7 +1227,7 @@ const char* cmTargetPropertyComputer::GetSources(cmTarget const* tgt,
                "reading "
                "that property needs to be adapted to ignore the generator "
                "expression using the string(GENEX_STRIP) command.";
-          context->IssueMessage(messageType, e.str());
+          messenger->IssueMessage(messageType, e.str(), context);
         }
         if (addContent) {
           ss << sep;
@@ -1252,18 +1260,18 @@ const char* cmTargetPropertyComputer::GetSources(cmTarget const* tgt,
   return srcs.c_str();
 }
 
-const char* cmTargetPropertyComputer::GetProperty(cmTarget const* tgt,
-                                                  const std::string& prop,
-                                                  cmMakefile* context)
+const char* cmTargetPropertyComputer::GetProperty(
+  cmTarget const* tgt, const std::string& prop, cmMessenger* messenger,
+  cmListFileBacktrace const& context)
 {
-  if (const char* loc = GetLocation(tgt, prop, context)) {
+  if (const char* loc = GetLocation(tgt, prop, messenger, context)) {
     return loc;
   }
   if (cmSystemTools::GetFatalErrorOccured()) {
     return CM_NULLPTR;
   }
   if (prop == "SOURCES") {
-    return GetSources(tgt, context);
+    return GetSources(tgt, messenger, context);
   }
   return CM_NULLPTR;
 }
@@ -1286,8 +1294,8 @@ const char* cmTarget::GetProperty(const std::string& prop,
     return CM_NULLPTR;
   }
 
-  if (const char* result =
-        cmTargetPropertyComputer::GetProperty(this, prop, context)) {
+  if (const char* result = cmTargetPropertyComputer::GetProperty(
+        this, prop, context->GetMessenger(), context->GetBacktrace())) {
     return result;
   }
   if (cmSystemTools::GetFatalErrorOccured()) {
