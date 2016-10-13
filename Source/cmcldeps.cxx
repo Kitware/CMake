@@ -205,7 +205,7 @@ static int process(const std::string& srcfilename, const std::string& dfile,
   std::vector<std::string> command;
   for (std::vector<std::string>::iterator i = args.begin(); i != args.end();
        ++i) {
-    command.push_back(i->c_str());
+    command.push_back(*i);
   }
   // run the command
   int exit_code = 0;
