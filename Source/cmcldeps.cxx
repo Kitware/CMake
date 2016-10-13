@@ -279,12 +279,7 @@ int main()
     clrest = replace(clrest, "/fo", "/out:");
     clrest = replace(clrest, objfile, objfile + ".dep.obj ");
 
-    // rc: src\x\x.rc  ->  cl: /Tc src\x\x.rc
-    if (srcfile.find(' ') != std::string::npos)
-      srcfile = "\"" + srcfile + "\"";
-    clrest = replace(clrest, srcfile, "/Tc " + srcfile);
-
-    cl = "\"" + cl + "\" /P /DRC_INVOKED ";
+    cl = "\"" + cl + "\" /P /DRC_INVOKED /TC ";
 
     // call cl in object dir so the .i is generated there
     std::string objdir;
