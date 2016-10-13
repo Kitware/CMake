@@ -1208,9 +1208,7 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
        i != this->ExternalObjects.end(); ++i) {
     object =
       this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir, *i);
-    *this->BuildFileStream << " " << lineContinue << "\n"
-                           << this->Makefile->GetSafeDefinition(
-                                "CMAKE_OBJECT_NAME");
+    *this->BuildFileStream << " " << lineContinue << "\n";
     *this->BuildFileStream << this->LocalGenerator->ConvertToQuotedOutputPath(
       i->c_str(), useWatcomQuote);
   }
@@ -1420,52 +1418,6 @@ void cmMakefileTargetGenerator::CloseFileStreams()
   delete this->BuildFileStream;
   delete this->InfoFileStream;
   delete this->FlagFileStream;
-}
-
-void cmMakefileTargetGenerator::RemoveForbiddenFlags(
-  const char* flagVar, const std::string& linkLang, std::string& linkFlags)
-{
-  // check for language flags that are not allowed at link time, and
-  // remove them, -w on darwin for gcc -w -dynamiclib sends -w to libtool
-  // which fails, there may be more]
-
-  std::string removeFlags = "CMAKE_";
-  removeFlags += linkLang;
-  removeFlags += flagVar;
-  std::string removeflags = this->Makefile->GetSafeDefinition(removeFlags);
-  std::vector<std::string> removeList;
-  cmSystemTools::ExpandListArgument(removeflags, removeList);
-
-  for (std::vector<std::string>::iterator i = removeList.begin();
-       i != removeList.end(); ++i) {
-    std::string tmp;
-    std::string::size_type lastPosition = 0;
-
-    for (;;) {
-      std::string::size_type position = linkFlags.find(*i, lastPosition);
-
-      if (position == std::string::npos) {
-        tmp += linkFlags.substr(lastPosition);
-        break;
-      } else {
-        std::string::size_type prefixLength = position - lastPosition;
-        tmp += linkFlags.substr(lastPosition, prefixLength);
-        lastPosition = position + i->length();
-
-        bool validFlagStart =
-          position == 0 || isspace(linkFlags[position - 1]);
-
-        bool validFlagEnd =
-          lastPosition == linkFlags.size() || isspace(linkFlags[lastPosition]);
-
-        if (!validFlagStart || !validFlagEnd) {
-          tmp += *i;
-        }
-      }
-    }
-
-    linkFlags = tmp;
-  }
 }
 
 void cmMakefileTargetGenerator::CreateLinkScript(
