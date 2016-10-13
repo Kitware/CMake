@@ -932,7 +932,7 @@ void cmake::GetRegisteredGenerators(
          gen != genList.end(); ++gen) {
       GeneratorInfo info;
       info.name = cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
-        (*i)->GetName(), *gen);
+        *gen, (*i)->GetName());
       info.baseName = *gen;
       info.extraName = (*i)->GetName();
       info.supportsPlatform = false;
