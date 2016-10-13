@@ -51,6 +51,11 @@ install(TARGETS foo bar
   # duplicate install rules for the pieces of the framework.
 )
 
+# test that framework post-build commands run
+add_custom_command(TARGET foo POST_BUILD COMMAND ${CMAKE_COMMAND} -E touch foo-post-build)
+add_custom_target(fooCustom ALL COMMAND ${CMAKE_COMMAND} -E copy foo-post-build foo-custom)
+add_dependencies(fooCustom foo)
+
 # Make a static library and apply the framework properties to it to verify
 # that everything still builds correctly, but it will not actually produce
 # a framework... The framework properties only apply when the library type
