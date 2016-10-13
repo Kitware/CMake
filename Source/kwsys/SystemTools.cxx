@@ -2592,15 +2592,13 @@ unsigned long SystemTools::FileLength(const std::string& filename)
 
 int SystemTools::Strucmp(const char *s1, const char *s2)
 {
-  // lifted from Graphvis http://www.graphviz.org
-  while ((*s1 != '\0')
-         && (tolower(*s1) == tolower(*s2)))
-    {
-      s1++;
-      s2++;
-    }
-
-  return tolower(*s1) - tolower(*s2);
+    int lc;
+    int rc;
+    do {
+        lc = tolower(*s1++);
+        rc = tolower(*s2++);
+    } while (lc == rc && lc);
+    return lc - rc;
 }
 
 // return file's modified time
