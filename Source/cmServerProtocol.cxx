@@ -458,7 +458,7 @@ void cmServerProtocol::ProcessTargetInfo(std::string tgtName,
 
   Json::Value& target_defines = root["compile_definitions"] = Json::arrayValue;
 
-  std::string lang = language ? language : "C";
+  std::string lang = language ? language : "CXX";
 
   std::vector<std::string> cdefs;
   tgt->GetCompileDefinitions(cdefs, config, lang);
