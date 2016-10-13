@@ -1313,54 +1313,7 @@ int cmake::ActualConfigure()
       cmSystemTools::SetForceUnixPaths(
         this->GlobalGenerator->GetForceUnixPaths());
     } else {
-#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
-      std::string installedCompiler;
-      // Try to find the newest VS installed on the computer and
-      // use that as a default if -G is not specified
-      const std::string vsregBase =
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\";
-      std::vector<std::string> vsVerions;
-      vsVerions.push_back("VisualStudio\\");
-      vsVerions.push_back("VCExpress\\");
-      vsVerions.push_back("WDExpress\\");
-      struct VSRegistryEntryName
-      {
-        const char* MSVersion;
-        const char* GeneratorName;
-      };
-      VSRegistryEntryName version[] = {
-        /* clang-format needs this comment to break after the opening brace */
-        { "7.1", "Visual Studio 7 .NET 2003" },
-        { "8.0", "Visual Studio 8 2005" },
-        { "9.0", "Visual Studio 9 2008" },
-        { "10.0", "Visual Studio 10 2010" },
-        { "11.0", "Visual Studio 11 2012" },
-        { "12.0", "Visual Studio 12 2013" },
-        { "14.0", "Visual Studio 14 2015" },
-        { "15.0", "Visual Studio 15" },
-        { 0, 0 }
-      };
-      for (int i = 0; version[i].MSVersion != 0; i++) {
-        for (size_t b = 0; b < vsVerions.size(); b++) {
-          std::string reg = vsregBase + vsVerions[b] + version[i].MSVersion;
-          reg += ";InstallDir]";
-          cmSystemTools::ExpandRegistryValues(reg, cmSystemTools::KeyWOW64_32);
-          if (!(reg == "/registry")) {
-            installedCompiler = version[i].GeneratorName;
-            break;
-          }
-        }
-      }
-      cmGlobalGenerator* gen =
-        this->CreateGlobalGenerator(installedCompiler.c_str());
-      if (!gen) {
-        gen = new cmGlobalNMakeMakefileGenerator(this);
-      }
-      this->SetGlobalGenerator(gen);
-      std::cout << "-- Building for: " << gen->GetName() << "\n";
-#else
-      this->SetGlobalGenerator(new cmGlobalUnixMakefileGenerator3(this));
-#endif
+      this->CreateDefaultGlobalGenerator();
     }
     if (!this->GlobalGenerator) {
       cmSystemTools::Error("Could not create generator");
@@ -1486,6 +1439,63 @@ int cmake::ActualConfigure()
     return -1;
   }
   return 0;
+}
+
+void cmake::CreateDefaultGlobalGenerator()
+{
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
+  std::string found;
+  // Try to find the newest VS installed on the computer and
+  // use that as a default if -G is not specified
+  const std::string vsregBase = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\";
+  static const char* const vsVariants[] = {
+    /* clang-format needs this comment to break after the opening brace */
+    "VisualStudio\\", "VCExpress\\", "WDExpress\\"
+  };
+  struct VSVersionedGenerator
+  {
+    const char* MSVersion;
+    const char* GeneratorName;
+  };
+  static VSVersionedGenerator const vsGenerators[] = {
+    { "15.0", "Visual Studio 15" },      //
+    { "14.0", "Visual Studio 14 2015" }, //
+    { "12.0", "Visual Studio 12 2013" }, //
+    { "11.0", "Visual Studio 11 2012" }, //
+    { "10.0", "Visual Studio 10 2010" }, //
+    { "9.0", "Visual Studio 9 2008" },   //
+    { "8.0", "Visual Studio 8 2005" },   //
+    { "7.1", "Visual Studio 7 .NET 2003" }
+  };
+  static const char* const vsEntries[] = {
+    "\\Setup\\VC;ProductDir", //
+    ";InstallDir"             //
+  };
+  for (VSVersionedGenerator const* g = cmArrayBegin(vsGenerators);
+       found.empty() && g != cmArrayEnd(vsGenerators); ++g) {
+    for (const char* const* v = cmArrayBegin(vsVariants);
+         found.empty() && v != cmArrayEnd(vsVariants); ++v) {
+      for (const char* const* e = cmArrayBegin(vsEntries);
+           found.empty() && e != cmArrayEnd(vsEntries); ++e) {
+        std::string const reg = vsregBase + *v + g->MSVersion + *e;
+        std::string dir;
+        if (cmSystemTools::ReadRegistryValue(reg, dir,
+                                             cmSystemTools::KeyWOW64_32) &&
+            cmSystemTools::PathExists(dir)) {
+          found = g->GeneratorName;
+        }
+      }
+    }
+  }
+  cmGlobalGenerator* gen = this->CreateGlobalGenerator(found);
+  if (!gen) {
+    gen = new cmGlobalNMakeMakefileGenerator(this);
+  }
+  this->SetGlobalGenerator(gen);
+  std::cout << "-- Building for: " << gen->GetName() << "\n";
+#else
+  this->SetGlobalGenerator(new cmGlobalUnixMakefileGenerator3(this));
+#endif
 }
 
 void cmake::PreLoadCMakeFiles()

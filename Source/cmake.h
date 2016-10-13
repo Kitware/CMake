@@ -500,6 +500,8 @@ private:
   // Print a list of valid generators to stderr.
   void PrintGeneratorList();
 
+  void CreateDefaultGlobalGenerator();
+
   /**
    * Convert a message type between a warning and an error, based on the state
    * of the error output CMake variables, in the cache.
