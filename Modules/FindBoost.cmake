@@ -1313,13 +1313,13 @@ string(APPEND _boost_DEBUG_ABI_TAG "d")
 #  p        using the STLport standard library rather than the
 #           default one supplied with your compiler
 if(Boost_USE_STLPORT)
-  set( _boost_RELEASE_ABI_TAG "${_boost_RELEASE_ABI_TAG}p")
-  set( _boost_DEBUG_ABI_TAG   "${_boost_DEBUG_ABI_TAG}p")
+  string(APPEND _boost_RELEASE_ABI_TAG "p")
+  string(APPEND _boost_DEBUG_ABI_TAG "p")
 endif()
 #  n        using the STLport deprecated "native iostreams" feature
 if(Boost_USE_STLPORT_DEPRECATED_NATIVE_IOSTREAMS)
-  set( _boost_RELEASE_ABI_TAG "${_boost_RELEASE_ABI_TAG}n")
-  set( _boost_DEBUG_ABI_TAG   "${_boost_DEBUG_ABI_TAG}n")
+  string(APPEND _boost_RELEASE_ABI_TAG "n")
+  string(APPEND _boost_DEBUG_ABI_TAG "n")
 endif()
 
 if(Boost_DEBUG)
