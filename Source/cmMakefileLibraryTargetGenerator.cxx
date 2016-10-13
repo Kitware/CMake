@@ -161,7 +161,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
     extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->ConfigName);
   this->AddModuleDefinitionFlag(extraFlags);
 
-  if (this->GeneratorTarget->GetProperty("LINK_WHAT_YOU_USE")) {
+  if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
     this->LocalGenerator->AppendFlags(extraFlags, " -Wl,--no-as-needed");
   }
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
@@ -638,7 +638,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       // Get the set of commands.
       std::string linkRule = this->GetLinkRule(linkRuleVar);
       cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
-      if (this->GeneratorTarget->GetProperty("LINK_WHAT_YOU_USE") &&
+      if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE") &&
           (this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY)) {
         std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(
           cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);

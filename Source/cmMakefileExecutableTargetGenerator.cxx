@@ -192,7 +192,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     this->LocalGenerator->AppendFlags(
       linkFlags, this->Makefile->GetDefinition(export_flag_var));
   }
-  if (this->GeneratorTarget->GetProperty("LINK_WHAT_YOU_USE")) {
+  if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
     this->LocalGenerator->AppendFlags(linkFlags, " -Wl,--no-as-needed");
   }
 
@@ -354,7 +354,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     vars.LinkFlags = linkFlags.c_str();
     vars.Manifests = manifests.c_str();
 
-    if (this->GeneratorTarget->GetProperty("LINK_WHAT_YOU_USE")) {
+    if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
       std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
       cmakeCommand += " -E __run_iwyu --lwyu=";
