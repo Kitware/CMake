@@ -66,75 +66,79 @@ static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 %%
 
 
-Start:
-exp
-{
-  cmExpr_yyget_extra(yyscanner)->SetResult($<Number>1);
-}
+start:
+  exp {
+    cmExpr_yyget_extra(yyscanner)->SetResult($<Number>1);
+  }
 
 exp:
-bitwiseor
-{$<Number>$ = $<Number>1;}
-|
-exp exp_OR bitwiseor
-{$<Number>$ = $<Number>1 | $<Number>3;}
+  bitwiseor {
+    $<Number>$ = $<Number>1;
+  }
+| exp exp_OR bitwiseor {
+    $<Number>$ = $<Number>1 | $<Number>3;
+  }
 
 bitwiseor:
-bitwisexor
-{$<Number>$ = $<Number>1;}
-|
-bitwiseor exp_XOR bitwisexor
-{$<Number>$ = $<Number>1 ^ $<Number>3;}
+  bitwisexor {
+    $<Number>$ = $<Number>1;
+  }
+| bitwiseor exp_XOR bitwisexor {
+    $<Number>$ = $<Number>1 ^ $<Number>3;
+  }
 
 bitwisexor:
-bitwiseand
-{$<Number>$ = $<Number>1;}
-|
-bitwisexor exp_AND bitwiseand
-{$<Number>$ = $<Number>1 & $<Number>3;}
+  bitwiseand {
+    $<Number>$ = $<Number>1;
+  }
+| bitwisexor exp_AND bitwiseand {
+    $<Number>$ = $<Number>1 & $<Number>3;
+  }
 
 bitwiseand:
-shift
-{$<Number>$ = $<Number>1;}
-|
-bitwiseand exp_SHIFTLEFT shift
-{$<Number>$ = $<Number>1 << $<Number>3;}
-|
-bitwiseand exp_SHIFTRIGHT shift
-{$<Number>$ = $<Number>1 >> $<Number>3;}
-
+  shift {
+    $<Number>$ = $<Number>1;
+  }
+| bitwiseand exp_SHIFTLEFT shift {
+    $<Number>$ = $<Number>1 << $<Number>3;
+  }
+| bitwiseand exp_SHIFTRIGHT shift {
+    $<Number>$ = $<Number>1 >> $<Number>3;
+  }
 
 shift:
-term
-{$<Number>$ = $<Number>1;}
-|
-shift exp_PLUS term
-{$<Number>$ = $<Number>1 + $<Number>3;}
-|
-shift exp_MINUS term
-{$<Number>$ = $<Number>1 - $<Number>3;}
+  term {
+    $<Number>$ = $<Number>1;
+  }
+| shift exp_PLUS term {
+    $<Number>$ = $<Number>1 + $<Number>3;
+  }
+| shift exp_MINUS term {
+    $<Number>$ = $<Number>1 - $<Number>3;
+  }
 
 term:
-factor
-{$<Number>$ = $<Number>1;}
-|
-term exp_TIMES factor
-{$<Number>$ = $<Number>1 * $<Number>3;}
-|
-term exp_DIVIDE factor
-{$<Number>$ = $<Number>1 / $<Number>3;}
-|
-term exp_MOD factor
-{$<Number>$ = $<Number>1 % $<Number>3;}
+  factor {
+    $<Number>$ = $<Number>1;
+  }
+| term exp_TIMES factor {
+    $<Number>$ = $<Number>1 * $<Number>3;
+  }
+| term exp_DIVIDE factor {
+    $<Number>$ = $<Number>1 / $<Number>3;
+  }
+| term exp_MOD factor {
+    $<Number>$ = $<Number>1 % $<Number>3;
+  }
 
 factor:
-exp_NUMBER
-{$<Number>$ = $<Number>1;}
-|
-exp_OPENPARENT exp exp_CLOSEPARENT
-{$<Number>$ = $<Number>2;}
+  exp_NUMBER {
+    $<Number>$ = $<Number>1;
+  }
+| exp_OPENPARENT exp exp_CLOSEPARENT {
+    $<Number>$ = $<Number>2;
+  }
 ;
-
 
 %%
 /* End of grammar */
