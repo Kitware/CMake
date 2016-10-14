@@ -52,13 +52,12 @@
  Specify toolset name if supported by generator.
 
  Some CMake generators support a toolset name to be given to the
- native build system to choose a compiler.  This is supported only on
- specific generators:
+ native build system to choose a compiler.
+ See the :variable:`CMAKE_GENERATOR_TOOLSET` variable.
+ This is supported only on specific generators:
 
- ::
-
-   Visual Studio >= 10
-   Xcode >= 3.0
+ * :ref:`Visual Studio Generators` for VS 2010 and above
+ * The :generator:`Xcode` generator for Xcode 3.0 and above
 
  See native build system documentation for allowed toolset names.
 

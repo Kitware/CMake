@@ -145,10 +145,36 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     return false;
   }
 
-  this->GeneratorToolset = ts;
+  if (!this->ParseGeneratorToolset(ts, mf)) {
+    return false;
+  }
   if (const char* toolset = this->GetPlatformToolset()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET", toolset);
   }
+  if (const char* hostArch = this->GetPlatformToolsetHostArchitecture()) {
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE", hostArch);
+  }
+  return true;
+}
+
+bool cmGlobalVisualStudio10Generator::ParseGeneratorToolset(
+  std::string const& ts, cmMakefile* mf)
+{
+  if (ts.find_first_of(",=") != ts.npos) {
+    std::ostringstream e;
+    /* clang-format off */
+    e <<
+      "Generator\n"
+      "  " << this->GetName() << "\n"
+      "does not recognize the toolset\n"
+      "  " << ts << "\n"
+      "that was specified.";
+    /* clang-format on */
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
+  }
+
+  this->GeneratorToolset = ts;
   return true;
 }
 
@@ -320,6 +346,15 @@ const char* cmGlobalVisualStudio10Generator::GetPlatformToolset() const
     return this->DefaultPlatformToolset.c_str();
   }
   return 0;
+}
+
+const char*
+cmGlobalVisualStudio10Generator::GetPlatformToolsetHostArchitecture() const
+{
+  if (!this->GeneratorToolsetHostArchitecture.empty()) {
+    return this->GeneratorToolsetHostArchitecture.c_str();
+  }
+  return CM_NULLPTR;
 }
 
 void cmGlobalVisualStudio10Generator::FindMakeProgram(cmMakefile* mf)

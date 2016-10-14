@@ -22,6 +22,7 @@ public:
   virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
   virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
   virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
+  virtual bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand, const std::string& makeProgram,
@@ -47,6 +48,9 @@ public:
 
   /** The toolset name for the target platform.  */
   const char* GetPlatformToolset() const;
+
+  /** The toolset host architecture name (e.g. x64 for 64-bit host tools).  */
+  const char* GetPlatformToolsetHostArchitecture() const;
 
   /** Return the CMAKE_SYSTEM_NAME.  */
   std::string const& GetSystemName() const { return this->SystemName; }
@@ -101,6 +105,7 @@ protected:
   std::string const& GetMSBuildCommand();
 
   std::string GeneratorToolset;
+  std::string GeneratorToolsetHostArchitecture;
   std::string DefaultPlatformToolset;
   std::string WindowsTargetPlatformVersion;
   std::string SystemName;

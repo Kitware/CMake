@@ -82,6 +82,7 @@ Variables that Provide Information
    /variable/CMAKE_VS_NsightTegra_VERSION
    /variable/CMAKE_VS_PLATFORM_NAME
    /variable/CMAKE_VS_PLATFORM_TOOLSET
+   /variable/CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE
    /variable/CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION
    /variable/CMAKE_XCODE_PLATFORM_TOOLSET
    /variable/PROJECT_BINARY_DIR

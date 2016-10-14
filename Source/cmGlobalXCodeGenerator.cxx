@@ -220,6 +220,19 @@ bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
                                                  cmMakefile* mf)
 {
   if (this->XcodeVersion >= 30) {
+    if (ts.find_first_of(",=") != ts.npos) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "does not recognize the toolset\n"
+        "  " << ts << "\n"
+        "that was specified.";
+      /* clang-format on */
+      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return false;
+    }
     this->GeneratorToolset = ts;
     if (!this->GeneratorToolset.empty()) {
       mf->AddDefinition("CMAKE_XCODE_PLATFORM_TOOLSET",

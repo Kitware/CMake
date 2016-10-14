@@ -329,6 +329,15 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->WriteString("</PropertyGroup>\n", 1);
   }
 
+  if (const char* hostArch =
+        this->GlobalGenerator->GetPlatformToolsetHostArchitecture()) {
+    this->WriteString("<PropertyGroup>\n", 1);
+    this->WriteString("<PreferredToolArchitecture>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(hostArch)
+                             << "</PreferredToolArchitecture>\n";
+    this->WriteString("</PropertyGroup>\n", 1);
+  }
+
   this->WriteProjectConfigurations();
   this->WriteString("<PropertyGroup Label=\"Globals\">\n", 1);
   this->WriteString("<ProjectGUID>", 2);
