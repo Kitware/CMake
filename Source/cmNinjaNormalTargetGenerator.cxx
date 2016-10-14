@@ -652,7 +652,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   std::string postBuildCmdLine = localGen.BuildCommandLine(postBuildCmdLines);
 
   cmNinjaVars symlinkVars;
-  if (targetOutput == targetOutputReal) {
+  bool const symlinkNeeded =
+    (targetOutput != targetOutputReal && !gt.IsFrameworkOnApple());
+  if (!symlinkNeeded) {
     vars["POST_BUILD"] = postBuildCmdLine;
   } else {
     vars["POST_BUILD"] = ":";
@@ -694,7 +696,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                        commandLineLengthLimit, &usedResponseFile);
   this->WriteLinkRule(usedResponseFile);
 
-  if (targetOutput != targetOutputReal && !gt.IsFrameworkOnApple()) {
+  if (symlinkNeeded) {
     if (targetType == cmState::EXECUTABLE) {
       globalGen.WriteBuild(
         this->GetBuildFileStream(),
