@@ -102,6 +102,10 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
         cmakeConfigureCommand += "\"";
       }
 
+      if (this->Makefile->IsOn("CTEST_USE_LAUNCHERS")) {
+        cmakeConfigureCommand += " \"-DCTEST_USE_LAUNCHERS:BOOL=TRUE\"";
+      }
+
       cmakeConfigureCommand += " \"-G";
       cmakeConfigureCommand += cmakeGeneratorName;
       cmakeConfigureCommand += "\"";
