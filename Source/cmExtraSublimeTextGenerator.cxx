@@ -55,10 +55,14 @@ cmExtraSublimeTextGenerator::GetFactory()
 cmExtraSublimeTextGenerator::cmExtraSublimeTextGenerator()
   : cmExternalMakefileProjectGenerator()
 {
+  this->ExcludeBuildFolder = false;
 }
 
 void cmExtraSublimeTextGenerator::Generate()
 {
+  this->ExcludeBuildFolder = this->GlobalGenerator->GlobalSettingIsOn(
+    "CMAKE_SUBLIME_TEXT_2_EXCLUDE_BUILD_TREE");
+
   // for each sub project in the project create a sublime text 2 project
   for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
          it = this->GlobalGenerator->GetProjectMap().begin();
@@ -84,6 +88,7 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
   const std::vector<cmLocalGenerator*>& lgs, const std::string& filename)
 {
   const cmMakefile* mf = lgs[0]->GetMakefile();
+
   cmGeneratedFileStream fout(filename.c_str());
   if (!fout) {
     return;
@@ -102,8 +107,10 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
     if ((!outputRelativeToSourceRoot.empty()) &&
         ((outputRelativeToSourceRoot.length() < 3) ||
          (outputRelativeToSourceRoot.substr(0, 3) != "../"))) {
-      fout << ",\n\t\t\t\"folder_exclude_patterns\": [\""
-           << outputRelativeToSourceRoot << "\"]";
+      if (this->ExcludeBuildFolder) {
+        fout << ",\n\t\t\t\"folder_exclude_patterns\": [\""
+             << outputRelativeToSourceRoot << "\"]";
+      }
     }
   } else {
     fout << "\t{\n\t\t\t\"path\": \"./\"";
