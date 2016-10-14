@@ -1499,6 +1499,7 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
   {
     fprintf(out, " -> %s", archive_entry_symlink(entry));
   }
+  fflush(out);
 }
 
 long copy_data(struct archive* ar, struct archive* aw)
