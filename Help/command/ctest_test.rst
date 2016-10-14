@@ -32,9 +32,11 @@ The options are:
   :variable:`CTEST_BINARY_DIRECTORY` variable is used.
 
 ``APPEND``
-  Mark results for append to those previously submitted to a
+  Mark ``Test.xml`` for append to results previously submitted to a
   dashboard server since the last :command:`ctest_start` call.
   Append semantics are defined by the dashboard server in use.
+  This does *not* cause results to be appended to a ``.xml`` file
+  produced by a previous call to this command.
 
 ``START <start-number>``
   Specify the beginning of a range of test numbers.
