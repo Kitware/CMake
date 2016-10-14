@@ -118,17 +118,28 @@ shift:
   }
 
 term:
+  unary {
+    $<Number>$ = $<Number>1;
+  }
+| term exp_TIMES unary {
+    $<Number>$ = $<Number>1 * $<Number>3;
+  }
+| term exp_DIVIDE unary {
+    $<Number>$ = $<Number>1 / $<Number>3;
+  }
+| term exp_MOD unary {
+    $<Number>$ = $<Number>1 % $<Number>3;
+  }
+
+unary:
   factor {
     $<Number>$ = $<Number>1;
   }
-| term exp_TIMES factor {
-    $<Number>$ = $<Number>1 * $<Number>3;
+| exp_PLUS unary {
+    $<Number>$ = + $<Number>2;
   }
-| term exp_DIVIDE factor {
-    $<Number>$ = $<Number>1 / $<Number>3;
-  }
-| term exp_MOD factor {
-    $<Number>$ = $<Number>1 % $<Number>3;
+| exp_MINUS unary {
+    $<Number>$ = - $<Number>2;
   }
 
 factor:
