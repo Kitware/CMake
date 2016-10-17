@@ -18,6 +18,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
+#include "cmTargetPropertyComputer.h"
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
@@ -41,6 +42,28 @@
 #else
 #define UNORDERED_SET std::set
 #endif
+
+template <>
+const char* cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
+  cmGeneratorTarget const* tgt, cmMessenger* /* messenger */,
+  cmListFileBacktrace const& /* context */)
+{
+  return tgt->GetSourcesProperty();
+}
+
+template <>
+const char* cmTargetPropertyComputer::ComputeLocationForBuild<
+  cmGeneratorTarget>(cmGeneratorTarget const* tgt)
+{
+  return tgt->GetLocation("");
+}
+
+template <>
+const char* cmTargetPropertyComputer::ComputeLocation<cmGeneratorTarget>(
+  cmGeneratorTarget const* tgt, const std::string& config)
+{
+  return tgt->GetLocation(config);
+}
 
 class cmGeneratorTarget::TargetPropertyEntry
 {
@@ -320,6 +343,26 @@ cmGeneratorTarget::~cmGeneratorTarget()
   cmDeleteAll(this->LinkInformation);
 }
 
+const char* cmGeneratorTarget::GetSourcesProperty() const
+{
+  std::vector<std::string> values;
+  for (std::vector<cmGeneratorTarget::TargetPropertyEntry *>::const_iterator
+         it = this->SourceEntries.begin(),
+         end = this->SourceEntries.end();
+       it != end; ++it) {
+    values.push_back((*it)->ge->GetInput());
+  }
+  static std::string value;
+  value.clear();
+  value = cmJoin(values, "");
+  return value.c_str();
+}
+
+cmGlobalGenerator* cmGeneratorTarget::GetGlobalGenerator() const
+{
+  return this->GetLocalGenerator()->GetGlobalGenerator();
+}
+
 cmLocalGenerator* cmGeneratorTarget::GetLocalGenerator() const
 {
   return this->LocalGenerator;
@@ -354,6 +397,18 @@ std::string cmGeneratorTarget::GetExportName() const
 
 const char* cmGeneratorTarget::GetProperty(const std::string& prop) const
 {
+  if (!cmTargetPropertyComputer::PassesWhitelist(
+        this->GetType(), prop, this->Makefile->GetMessenger(),
+        this->GetBacktrace())) {
+    return 0;
+  }
+  if (const char* result = cmTargetPropertyComputer::GetProperty(
+        this, prop, this->Makefile->GetMessenger(), this->GetBacktrace())) {
+    return result;
+  }
+  if (cmSystemTools::GetFatalErrorOccured()) {
+    return CM_NULLPTR;
+  }
   return this->Target->GetProperty(prop);
 }
 
@@ -3966,7 +4021,7 @@ void cmGeneratorTarget::ComputeVersionedName(std::string& vName,
 
 std::vector<std::string> cmGeneratorTarget::GetPropertyKeys() const
 {
-  cmPropertyMap propsObject = this->Target->GetProperties();
+  cmPropertyMap const& propsObject = this->Target->GetProperties();
   std::vector<std::string> props;
   props.reserve(propsObject.size());
   for (cmPropertyMap::const_iterator it = propsObject.begin();

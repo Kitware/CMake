@@ -8,11 +8,13 @@
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessenger.h"
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSystemTools.h"
+#include "cmTargetPropertyComputer.h"
 #include "cmake.h"
 
 #include <algorithm>
@@ -32,6 +34,134 @@
 #else
 #define UNORDERED_SET std::set
 #endif
+
+template <>
+const char* cmTargetPropertyComputer::ComputeLocationForBuild<cmTarget>(
+  cmTarget const* tgt)
+{
+  static std::string loc;
+  if (tgt->IsImported()) {
+    loc = tgt->ImportedGetFullPath("", false);
+    return loc.c_str();
+  }
+
+  cmGlobalGenerator* gg = tgt->GetGlobalGenerator();
+  if (!gg->GetConfigureDoneCMP0026()) {
+    gg->CreateGenerationObjects();
+  }
+  cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
+  loc = gt->GetLocationForBuild();
+  return loc.c_str();
+}
+
+template <>
+const char* cmTargetPropertyComputer::ComputeLocation<cmTarget>(
+  cmTarget const* tgt, const std::string& config)
+{
+  static std::string loc;
+  if (tgt->IsImported()) {
+    loc = tgt->ImportedGetFullPath(config, false);
+    return loc.c_str();
+  }
+
+  cmGlobalGenerator* gg = tgt->GetGlobalGenerator();
+  if (!gg->GetConfigureDoneCMP0026()) {
+    gg->CreateGenerationObjects();
+  }
+  cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
+  loc = gt->GetFullPath(config, false);
+  return loc.c_str();
+}
+
+template <>
+const char* cmTargetPropertyComputer::GetSources<cmTarget>(
+  cmTarget const* tgt, cmMessenger* messenger,
+  cmListFileBacktrace const& context)
+{
+  cmStringRange entries = tgt->GetSourceEntries();
+  if (entries.empty()) {
+    return CM_NULLPTR;
+  }
+
+  std::ostringstream ss;
+  const char* sep = "";
+  for (std::vector<std::string>::const_iterator i = entries.begin();
+       i != entries.end(); ++i) {
+    std::string const& entry = *i;
+
+    std::vector<std::string> files;
+    cmSystemTools::ExpandListArgument(entry, files);
+    for (std::vector<std::string>::const_iterator li = files.begin();
+         li != files.end(); ++li) {
+      if (cmHasLiteralPrefix(*li, "$<TARGET_OBJECTS:") &&
+          (*li)[li->size() - 1] == '>') {
+        std::string objLibName = li->substr(17, li->size() - 18);
+
+        if (cmGeneratorExpression::Find(objLibName) != std::string::npos) {
+          ss << sep;
+          sep = ";";
+          ss << *li;
+          continue;
+        }
+
+        bool addContent = false;
+        bool noMessage = true;
+        std::ostringstream e;
+        cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+        switch (context.GetBottom().GetPolicy(cmPolicies::CMP0051)) {
+          case cmPolicies::WARN:
+            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0051) << "\n";
+            noMessage = false;
+          case cmPolicies::OLD:
+            break;
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::NEW:
+            addContent = true;
+        }
+        if (!noMessage) {
+          e << "Target \"" << tgt->GetName()
+            << "\" contains "
+               "$<TARGET_OBJECTS> generator expression in its sources "
+               "list.  "
+               "This content was not previously part of the SOURCES "
+               "property "
+               "when that property was read at configure time.  Code "
+               "reading "
+               "that property needs to be adapted to ignore the generator "
+               "expression using the string(GENEX_STRIP) command.";
+          messenger->IssueMessage(messageType, e.str(), context);
+        }
+        if (addContent) {
+          ss << sep;
+          sep = ";";
+          ss << *li;
+        }
+      } else if (cmGeneratorExpression::Find(*li) == std::string::npos) {
+        ss << sep;
+        sep = ";";
+        ss << *li;
+      } else {
+        cmSourceFile* sf = tgt->GetMakefile()->GetOrCreateSource(*li);
+        // Construct what is known about this source file location.
+        cmSourceFileLocation const& location = sf->GetLocation();
+        std::string sname = location.GetDirectory();
+        if (!sname.empty()) {
+          sname += "/";
+        }
+        sname += location.GetName();
+
+        ss << sep;
+        sep = ";";
+        // Append this list entry.
+        ss << sname;
+      }
+    }
+  }
+  static std::string srcs;
+  srcs = ss.str();
+  return srcs.c_str();
+}
 
 class cmTargetInternals
 {
@@ -268,6 +398,11 @@ cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
     this->SetPropertyDefault("JOB_POOL_COMPILE", CM_NULLPTR);
     this->SetPropertyDefault("JOB_POOL_LINK", CM_NULLPTR);
   }
+}
+
+cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
+{
+  return this->GetMakefile()->GetGlobalGenerator();
 }
 
 void cmTarget::AddUtility(const std::string& u, cmMakefile* makefile)
@@ -705,43 +840,11 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
   return cmMakeRange(this->Internal->LinkImplementationPropertyBacktraces);
 }
 
-static bool whiteListedInterfaceProperty(const std::string& prop)
-{
-  if (cmHasLiteralPrefix(prop, "INTERFACE_")) {
-    return true;
-  }
-  static UNORDERED_SET<std::string> builtIns;
-  if (builtIns.empty()) {
-    builtIns.insert("COMPATIBLE_INTERFACE_BOOL");
-    builtIns.insert("COMPATIBLE_INTERFACE_NUMBER_MAX");
-    builtIns.insert("COMPATIBLE_INTERFACE_NUMBER_MIN");
-    builtIns.insert("COMPATIBLE_INTERFACE_STRING");
-    builtIns.insert("EXPORT_NAME");
-    builtIns.insert("IMPORTED");
-    builtIns.insert("NAME");
-    builtIns.insert("TYPE");
-  }
-
-  if (builtIns.count(prop)) {
-    return true;
-  }
-
-  if (cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_")) {
-    return true;
-  }
-
-  return false;
-}
-
 void cmTarget::SetProperty(const std::string& prop, const char* value)
 {
-  if (this->GetType() == cmState::INTERFACE_LIBRARY &&
-      !whiteListedInterfaceProperty(prop)) {
-    std::ostringstream e;
-    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
-         "The property \""
-      << prop << "\" is not allowed.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+  if (!cmTargetPropertyComputer::PassesWhitelist(
+        this->GetType(), prop, this->Makefile->GetMessenger(),
+        this->Makefile->GetBacktrace())) {
     return;
   }
   if (prop == "NAME") {
@@ -749,7 +852,20 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     e << "NAME property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
+  } else if (prop == "EXPORT_NAME" && this->IsImported()) {
+    std::ostringstream e;
+    e << "EXPORT_NAME property can't be set on imported targets (\""
+      << this->Name << "\")\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  } else if (prop == "SOURCES" && this->IsImported()) {
+    std::ostringstream e;
+    e << "SOURCES property can't be set on imported targets (\"" << this->Name
+      << "\")\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
   }
+
   if (prop == "INCLUDE_DIRECTORIES") {
     this->Internal->IncludeDirectoriesEntries.clear();
     this->Internal->IncludeDirectoriesBacktraces.clear();
@@ -782,11 +898,6 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
     }
-  } else if (prop == "EXPORT_NAME" && this->IsImported()) {
-    std::ostringstream e;
-    e << "EXPORT_NAME property can't be set on imported targets (\""
-      << this->Name << "\")\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
   } else if (prop == "LINK_LIBRARIES") {
     this->Internal->LinkImplementationPropertyEntries.clear();
     this->Internal->LinkImplementationPropertyBacktraces.clear();
@@ -796,14 +907,6 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       this->Internal->LinkImplementationPropertyBacktraces.push_back(lfbt);
     }
   } else if (prop == "SOURCES") {
-    if (this->IsImported()) {
-      std::ostringstream e;
-      e << "SOURCES property can't be set on imported targets (\""
-        << this->Name << "\")\n";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-      return;
-    }
-
     this->Internal->SourceEntries.clear();
     this->Internal->SourceBacktraces.clear();
     if (value) {
@@ -819,18 +922,26 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
 void cmTarget::AppendProperty(const std::string& prop, const char* value,
                               bool asString)
 {
-  if (this->GetType() == cmState::INTERFACE_LIBRARY &&
-      !whiteListedInterfaceProperty(prop)) {
-    std::ostringstream e;
-    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
-         "The property \""
-      << prop << "\" is not allowed.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+  if (!cmTargetPropertyComputer::PassesWhitelist(
+        this->GetType(), prop, this->Makefile->GetMessenger(),
+        this->Makefile->GetBacktrace())) {
     return;
   }
   if (prop == "NAME") {
     std::ostringstream e;
     e << "NAME property is read-only\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  } else if (prop == "EXPORT_NAME" && this->IsImported()) {
+    std::ostringstream e;
+    e << "EXPORT_NAME property can't be set on imported targets (\""
+      << this->Name << "\")\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  } else if (prop == "SOURCES" && this->IsImported()) {
+    std::ostringstream e;
+    e << "SOURCES property can't be set on imported targets (\"" << this->Name
+      << "\")\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
@@ -858,11 +969,6 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
     }
-  } else if (prop == "EXPORT_NAME" && this->IsImported()) {
-    std::ostringstream e;
-    e << "EXPORT_NAME property can't be set on imported targets (\""
-      << this->Name << "\")\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
   } else if (prop == "LINK_LIBRARIES") {
     if (value && *value) {
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
@@ -870,13 +976,6 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       this->Internal->LinkImplementationPropertyBacktraces.push_back(lfbt);
     }
   } else if (prop == "SOURCES") {
-    if (this->IsImported()) {
-      std::ostringstream e;
-      e << "SOURCES property can't be set on imported targets (\""
-        << this->Name << "\")\n";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-      return;
-    }
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
     this->Internal->SourceEntries.push_back(value);
     this->Internal->SourceBacktraces.push_back(lfbt);
@@ -1030,136 +1129,15 @@ void cmTarget::CheckProperty(const std::string& prop,
   }
 }
 
-bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
+const char* cmTarget::GetComputedProperty(
+  const std::string& prop, cmMessenger* messenger,
+  cmListFileBacktrace const& context) const
 {
-  if (this->IsImported()) {
-    return true;
-  }
-  std::ostringstream e;
-  const char* modal = CM_NULLPTR;
-  cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-  switch (context->GetPolicyStatus(cmPolicies::CMP0026)) {
-    case cmPolicies::WARN:
-      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0026) << "\n";
-      modal = "should";
-    case cmPolicies::OLD:
-      break;
-    case cmPolicies::REQUIRED_ALWAYS:
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::NEW:
-      modal = "may";
-      messageType = cmake::FATAL_ERROR;
-  }
-
-  if (modal) {
-    e << "The LOCATION property " << modal << " not be read from target \""
-      << this->GetName()
-      << "\".  Use the target name directly with "
-         "add_custom_command, or use the generator expression $<TARGET_FILE>, "
-         "as appropriate.\n";
-    context->IssueMessage(messageType, e.str());
-  }
-
-  return messageType != cmake::FATAL_ERROR;
+  return cmTargetPropertyComputer::GetProperty(this, prop, messenger, context);
 }
 
 const char* cmTarget::GetProperty(const std::string& prop) const
 {
-  return this->GetProperty(prop, this->Makefile);
-}
-
-const char* cmTarget::GetProperty(const std::string& prop,
-                                  cmMakefile* context) const
-{
-  if (this->GetType() == cmState::INTERFACE_LIBRARY &&
-      !whiteListedInterfaceProperty(prop)) {
-    std::ostringstream e;
-    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
-         "The property \""
-      << prop << "\" is not allowed.";
-    context->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return CM_NULLPTR;
-  }
-
-  // Watch for special "computed" properties that are dependent on
-  // other properties or variables.  Always recompute them.
-  if (this->GetType() == cmState::EXECUTABLE ||
-      this->GetType() == cmState::STATIC_LIBRARY ||
-      this->GetType() == cmState::SHARED_LIBRARY ||
-      this->GetType() == cmState::MODULE_LIBRARY ||
-      this->GetType() == cmState::UNKNOWN_LIBRARY) {
-    static const std::string propLOCATION = "LOCATION";
-    if (prop == propLOCATION) {
-      if (!this->HandleLocationPropertyPolicy(context)) {
-        return CM_NULLPTR;
-      }
-
-      // Set the LOCATION property of the target.
-      //
-      // For an imported target this is the location of an arbitrary
-      // available configuration.
-      //
-      if (this->IsImported()) {
-        this->Properties.SetProperty(
-          propLOCATION, this->ImportedGetFullPath("", false).c_str());
-      } else {
-        // For a non-imported target this is deprecated because it
-        // cannot take into account the per-configuration name of the
-        // target because the configuration type may not be known at
-        // CMake time.
-        cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
-        if (!gg->GetConfigureDoneCMP0026()) {
-          gg->CreateGenerationObjects();
-        }
-        cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
-        this->Properties.SetProperty(propLOCATION, gt->GetLocationForBuild());
-      }
-
-    }
-
-    // Support "LOCATION_<CONFIG>".
-    else if (cmHasLiteralPrefix(prop, "LOCATION_")) {
-      if (!this->HandleLocationPropertyPolicy(context)) {
-        return CM_NULLPTR;
-      }
-      const char* configName = prop.c_str() + 9;
-
-      if (this->IsImported()) {
-        this->Properties.SetProperty(
-          prop, this->ImportedGetFullPath(configName, false).c_str());
-      } else {
-        cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
-        if (!gg->GetConfigureDoneCMP0026()) {
-          gg->CreateGenerationObjects();
-        }
-        cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
-        this->Properties.SetProperty(
-          prop, gt->GetFullPath(configName, false).c_str());
-      }
-    }
-    // Support "<CONFIG>_LOCATION".
-    else if (cmHasLiteralSuffix(prop, "_LOCATION") &&
-             !cmHasLiteralPrefix(prop, "XCODE_ATTRIBUTE_")) {
-      std::string configName(prop.c_str(), prop.size() - 9);
-      if (configName != "IMPORTED") {
-        if (!this->HandleLocationPropertyPolicy(context)) {
-          return CM_NULLPTR;
-        }
-        if (this->IsImported()) {
-          this->Properties.SetProperty(
-            prop, this->ImportedGetFullPath(configName, false).c_str());
-        } else {
-          cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
-          if (!gg->GetConfigureDoneCMP0026()) {
-            gg->CreateGenerationObjects();
-          }
-          cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
-          this->Properties.SetProperty(
-            prop, gt->GetFullPath(configName, false).c_str());
-        }
-      }
-    }
-  }
   static UNORDERED_SET<std::string> specialProps;
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
   MAKE_STATIC_PROP(LINK_LIBRARIES);
@@ -1244,93 +1222,16 @@ const char* cmTarget::GetProperty(const std::string& prop,
       return this->GetName().c_str();
     }
     if (prop == propBINARY_DIR) {
-      return this->GetMakefile()->GetCurrentBinaryDirectory();
+      return this->GetMakefile()
+        ->GetStateSnapshot()
+        .GetDirectory()
+        .GetCurrentBinary();
     }
     if (prop == propSOURCE_DIR) {
-      return this->GetMakefile()->GetCurrentSourceDirectory();
-    }
-    if (prop == propSOURCES) {
-      if (this->Internal->SourceEntries.empty()) {
-        return CM_NULLPTR;
-      }
-
-      std::ostringstream ss;
-      const char* sep = "";
-      for (std::vector<std::string>::const_iterator i =
-             this->Internal->SourceEntries.begin();
-           i != this->Internal->SourceEntries.end(); ++i) {
-        std::string const& entry = *i;
-
-        std::vector<std::string> files;
-        cmSystemTools::ExpandListArgument(entry, files);
-        for (std::vector<std::string>::const_iterator li = files.begin();
-             li != files.end(); ++li) {
-          if (cmHasLiteralPrefix(*li, "$<TARGET_OBJECTS:") &&
-              (*li)[li->size() - 1] == '>') {
-            std::string objLibName = li->substr(17, li->size() - 18);
-
-            if (cmGeneratorExpression::Find(objLibName) != std::string::npos) {
-              ss << sep;
-              sep = ";";
-              ss << *li;
-              continue;
-            }
-
-            bool addContent = false;
-            bool noMessage = true;
-            std::ostringstream e;
-            cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-            switch (context->GetPolicyStatus(cmPolicies::CMP0051)) {
-              case cmPolicies::WARN:
-                e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0051) << "\n";
-                noMessage = false;
-              case cmPolicies::OLD:
-                break;
-              case cmPolicies::REQUIRED_ALWAYS:
-              case cmPolicies::REQUIRED_IF_USED:
-              case cmPolicies::NEW:
-                addContent = true;
-            }
-            if (!noMessage) {
-              e << "Target \"" << this->Name
-                << "\" contains "
-                   "$<TARGET_OBJECTS> generator expression in its sources "
-                   "list.  "
-                   "This content was not previously part of the SOURCES "
-                   "property "
-                   "when that property was read at configure time.  Code "
-                   "reading "
-                   "that property needs to be adapted to ignore the generator "
-                   "expression using the string(GENEX_STRIP) command.";
-              context->IssueMessage(messageType, e.str());
-            }
-            if (addContent) {
-              ss << sep;
-              sep = ";";
-              ss << *li;
-            }
-          } else if (cmGeneratorExpression::Find(*li) == std::string::npos) {
-            ss << sep;
-            sep = ";";
-            ss << *li;
-          } else {
-            cmSourceFile* sf = this->Makefile->GetOrCreateSource(*li);
-            // Construct what is known about this source file location.
-            cmSourceFileLocation const& location = sf->GetLocation();
-            std::string sname = location.GetDirectory();
-            if (!sname.empty()) {
-              sname += "/";
-            }
-            sname += location.GetName();
-
-            ss << sep;
-            sep = ";";
-            // Append this list entry.
-            ss << sname;
-          }
-        }
-      }
-      this->Properties.SetProperty("SOURCES", ss.str().c_str());
+      return this->GetMakefile()
+        ->GetStateSnapshot()
+        .GetDirectory()
+        .GetCurrentSource();
     }
   }
 
@@ -1339,7 +1240,8 @@ const char* cmTarget::GetProperty(const std::string& prop,
     const bool chain = this->GetMakefile()->GetState()->IsPropertyChained(
       prop, cmProperty::TARGET);
     if (chain) {
-      return this->Makefile->GetProperty(prop, chain);
+      return this->Makefile->GetStateSnapshot().GetDirectory().GetProperty(
+        prop, chain);
     }
   }
   return retVal;

@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetTargetPropertyCommand.h"
 
+#include "cmTargetPropertyComputer.h"
+
 // cmSetTargetPropertyCommand
 bool cmGetTargetPropertyCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
@@ -22,7 +24,16 @@ bool cmGetTargetPropertyCommand::InitialPass(
         prop_exists = true;
       }
     } else if (!args[2].empty()) {
-      const char* prop_cstr = tgt->GetProperty(args[2], this->Makefile);
+      const char* prop_cstr = 0;
+      cmListFileBacktrace bt = this->Makefile->GetBacktrace();
+      cmMessenger* messenger = this->Makefile->GetMessenger();
+      if (cmTargetPropertyComputer::PassesWhitelist(tgt->GetType(), args[2],
+                                                    messenger, bt)) {
+        prop_cstr = tgt->GetComputedProperty(args[2], messenger, bt);
+        if (!prop_cstr) {
+          prop_cstr = tgt->GetProperty(args[2]);
+        }
+      }
       if (prop_cstr) {
         prop = prop_cstr;
         prop_exists = true;
