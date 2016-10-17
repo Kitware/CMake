@@ -22,7 +22,9 @@ When the test outputs a line that matches ``regex`` its start time is
 reset to the current time and its timeout duration is changed to
 ``seconds``.  Prior to this, the timeout duration is determined by the
 :prop_test:`TIMEOUT` property or the :variable:`CTEST_TEST_TIMEOUT`
-variable if either of these are set.
+variable if either of these are set.  Because the test's start time is
+reset, its execution time will not include any time that was spent
+waiting for the matching output.
 
 :prop_test:`TIMEOUT_AFTER_MATCH` is useful for avoiding spurious
 timeouts when your test must wait for some system resource to become

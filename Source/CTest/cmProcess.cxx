@@ -225,6 +225,7 @@ void cmProcess::ChangeTimeout(double t)
 void cmProcess::ResetStartTime()
 {
   cmsysProcess_ResetStartTime(this->Process);
+  this->StartTime = cmSystemTools::GetTime();
 }
 
 int cmProcess::GetExitException()
