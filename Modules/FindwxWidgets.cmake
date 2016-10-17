@@ -491,23 +491,26 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     # Select one default tree inside the already determined wx tree.
     # Prefer static/shared order usually consistent with build
     # settings.
+    set(_WX_TOOL "")
+    set(_WX_TOOLVER "")
+    set(_WX_ARCH "")
     if(MINGW)
-      set(WX_LIB_DIR_PREFIX gcc)
+      set(_WX_TOOL gcc)
     elseif(MSVC)
-      set(WX_LIB_DIR_PREFIX vc)
+      set(_WX_TOOL vc)
       if(MSVC14)
-        set(WX_LIB_DIR_PREFIX ${WX_LIB_DIR_PREFIX}140)
+        set(_WX_TOOLVER 140)
       elseif(MSVC12)
-        set(WX_LIB_DIR_PREFIX ${WX_LIB_DIR_PREFIX}120)
+        set(_WX_TOOLVER 120)
       elseif(MSVC11)
-        set(WX_LIB_DIR_PREFIX ${WX_LIB_DIR_PREFIX}110)
+        set(_WX_TOOLVER 110)
       elseif(MSVC10)
-        set(WX_LIB_DIR_PREFIX ${WX_LIB_DIR_PREFIX}100)
+        set(_WX_TOOLVER 100)
       elseif(MSVC90)
-        set(WX_LIB_DIR_PREFIX ${WX_LIB_DIR_PREFIX}90)
+        set(_WX_TOOLVER 90)
       endif()
       if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(WX_LIB_DIR_PREFIX ${WX_LIB_DIR_PREFIX}_x64)
+        set(_WX_ARCH _x64)
       endif()
     endif()
     if(BUILD_SHARED_LIBS)
@@ -522,8 +525,10 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
           mswunivu/wx/setup.h
           mswunivud/wx/setup.h
         PATHS
-        ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_dll   # prefer shared
-        ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_lib
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}${_WX_ARCH}_dll   # prefer shared
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_ARCH}_dll                 # prefer shared
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}${_WX_ARCH}_lib
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_ARCH}_lib
         DOC "Path to wxWidgets libraries"
         NO_DEFAULT_PATH
         )
@@ -539,12 +544,17 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
           mswunivu/wx/setup.h
           mswunivud/wx/setup.h
         PATHS
-        ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_lib   # prefer static
-        ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_dll
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}${_WX_ARCH}_lib   # prefer static
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_ARCH}_lib                 # prefer static
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}${_WX_ARCH}_dll
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_ARCH}_dll
         DOC "Path to wxWidgets libraries"
         NO_DEFAULT_PATH
         )
     endif()
+    unset(_WX_TOOL)
+    unset(_WX_TOOLVER)
+    unset(_WX_ARCH)
 
     # If wxWidgets_LIB_DIR changed, clear all libraries.
     if(NOT WX_LIB_DIR STREQUAL wxWidgets_LIB_DIR)
