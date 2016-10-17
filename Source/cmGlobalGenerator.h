@@ -334,6 +334,8 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig() const { return false; }
 
+  virtual bool UseFolderProperty() const;
+
   std::string GetSharedLibFlagsForLanguage(std::string const& lang) const;
 
   /** Generate an <output>.rule file path for a given command output.  */
@@ -463,7 +465,6 @@ protected:
     std::string const& name) const;
 
   const char* GetPredefinedTargetsFolder();
-  virtual bool UseFolderProperty();
 
 private:
 #if defined(CMAKE_BUILD_WITH_CMAKE)
