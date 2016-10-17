@@ -14,6 +14,7 @@
 #include "cmNinjaNormalTargetGenerator.h"
 #include "cmNinjaUtilityTargetGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
@@ -373,9 +374,10 @@ void cmNinjaTargetGenerator::WriteLanguageRules(const std::string& language)
 
 void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
 {
-  cmLocalGenerator::RuleVariables vars;
-  vars.RuleLauncher = "RULE_LAUNCH_COMPILE";
-  vars.CMTarget = this->GetGeneratorTarget();
+  cmRulePlaceholderExpander::RuleVariables vars;
+  vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
+  vars.CMTargetType =
+    cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType());
   vars.Language = lang.c_str();
   vars.Source = "$IN_ABS";
   vars.Object = "$out";
@@ -452,9 +454,20 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   vars.Flags = flags.c_str();
   vars.DependencyFile = depfile.c_str();
 
+  CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    this->GetLocalGenerator()->CreateRulePlaceholderExpander());
+
   std::string const tdi = this->GetLocalGenerator()->ConvertToOutputFormat(
     ConvertToNinjaPath(this->GetTargetDependInfoPath(lang)),
     cmLocalGenerator::SHELL);
+
+  std::string launcher;
+  const char* val = this->GetLocalGenerator()->GetRuleLauncher(
+    this->GetGeneratorTarget(), "RULE_LAUNCH_COMPILE");
+  if (val && *val) {
+    launcher = val;
+    launcher += " ";
+  }
 
   if (explicitPP) {
     // Lookup the explicit preprocessing rule.
@@ -466,9 +479,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     std::string const ppDeptype = ""; // no deps= for multiple outputs
     std::string const ppDepfile = "$DEP_FILE";
 
-    cmLocalGenerator::RuleVariables ppVars;
-    ppVars.RuleLauncher = vars.RuleLauncher;
-    ppVars.CMTarget = vars.CMTarget;
+    cmRulePlaceholderExpander::RuleVariables ppVars;
+    ppVars.CMTargetName = vars.CMTargetName;
+    ppVars.CMTargetType = vars.CMTargetType;
     ppVars.Language = vars.Language;
     ppVars.Object = "$out"; // for RULE_LAUNCH_COMPILE
     ppVars.PreprocessedSource = "$out";
@@ -496,7 +509,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
 
     for (std::vector<std::string>::iterator i = ppCmds.begin();
          i != ppCmds.end(); ++i) {
-      this->GetLocalGenerator()->ExpandRuleVariables(*i, ppVars);
+      *i = launcher + *i;
+      rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
+                                                   *i, ppVars);
     }
 
     // Run CMake dependency scanner on preprocessed output.
@@ -608,7 +623,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
 
   for (std::vector<std::string>::iterator i = compileCmds.begin();
        i != compileCmds.end(); ++i) {
-    this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
+    *i = launcher + *i;
+    rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(), *i,
+                                                 vars);
   }
 
   std::string cmdLine =
@@ -961,7 +978,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
     return;
   }
 
-  cmLocalGenerator::RuleVariables compileObjectVars;
+  cmRulePlaceholderExpander::RuleVariables compileObjectVars;
   compileObjectVars.Language = language.c_str();
 
   std::string escapedSourceFileName = sourceFileName;
@@ -993,9 +1010,13 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   std::vector<std::string> compileCmds;
   cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
 
+  CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    this->GetLocalGenerator()->CreateRulePlaceholderExpander());
+
   for (std::vector<std::string>::iterator i = compileCmds.begin();
        i != compileCmds.end(); ++i) {
-    this->GetLocalGenerator()->ExpandRuleVariables(*i, compileObjectVars);
+    rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(), *i,
+                                                 compileObjectVars);
   }
 
   std::string cmdLine =

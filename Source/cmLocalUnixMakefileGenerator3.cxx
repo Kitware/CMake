@@ -14,6 +14,7 @@
 #include "cmMakefile.h"
 #include "cmMakefileTargetGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
@@ -945,6 +946,9 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
     *content << dir;
   }
 
+  CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    this->CreateRulePlaceholderExpander());
+
   // Add each command line to the set of commands.
   std::vector<std::string> commands1;
   std::string currentBinDir = this->GetCurrentBinaryDirectory();
@@ -984,14 +988,13 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
 
       std::string launcher;
       // Short-circuit if there is no launcher.
-      const char* prop = "RULE_LAUNCH_CUSTOM";
-      const char* val = this->GetRuleLauncher(target, prop);
+      const char* val = this->GetRuleLauncher(target, "RULE_LAUNCH_CUSTOM");
       if (val && *val) {
         // Expand rules in the empty string.  It may insert the launcher and
         // perform replacements.
-        RuleVariables vars;
-        vars.RuleLauncher = prop;
-        vars.CMTarget = target;
+        cmRulePlaceholderExpander::RuleVariables vars;
+        vars.CMTargetName = target->GetName().c_str();
+        vars.CMTargetType = cmState::GetTargetTypeName(target->GetType());
         std::string output;
         const std::vector<std::string>& outputs = ccg.GetOutputs();
         if (!outputs.empty()) {
@@ -1005,7 +1008,9 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         }
         vars.Output = output.c_str();
 
-        this->ExpandRuleVariables(launcher, vars);
+        launcher = val;
+        launcher += " ";
+        rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);
         if (!launcher.empty()) {
           launcher += " ";
         }

@@ -14,6 +14,7 @@
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
 #include "cmMakefile.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -40,6 +41,28 @@
 #include <StorageDefs.h>
 #endif
 
+// List of variables that are replaced when
+// rules are expanced.  These variables are
+// replaced in the form <var> with GetSafeDefinition(var).
+// ${LANG} is replaced in the variable first with all enabled
+// languages.
+static const char* ruleReplaceVars[] = {
+  "CMAKE_${LANG}_COMPILER",
+  "CMAKE_SHARED_LIBRARY_CREATE_${LANG}_FLAGS",
+  "CMAKE_SHARED_MODULE_CREATE_${LANG}_FLAGS",
+  "CMAKE_SHARED_MODULE_${LANG}_FLAGS",
+  "CMAKE_SHARED_LIBRARY_${LANG}_FLAGS",
+  "CMAKE_${LANG}_LINK_FLAGS",
+  "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
+  "CMAKE_${LANG}_ARCHIVE",
+  "CMAKE_AR",
+  "CMAKE_CURRENT_SOURCE_DIR",
+  "CMAKE_CURRENT_BINARY_DIR",
+  "CMAKE_RANLIB",
+  "CMAKE_LINKER",
+  "CMAKE_CL_SHOWINCLUDES_PREFIX"
+};
+
 cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   : cmOutputConverter(makefile->GetStateSnapshot())
   , StateSnapshot(makefile->GetStateSnapshot())
@@ -56,6 +79,65 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   this->BackwardsCompatibilityFinal = false;
 
   this->ComputeObjectMaxPath();
+
+  std::vector<std::string> enabledLanguages =
+    this->GetState()->GetEnabledLanguages();
+
+  this->CompilerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+
+  for (std::vector<std::string>::iterator i = enabledLanguages.begin();
+       i != enabledLanguages.end(); ++i) {
+    std::string const& lang = *i;
+    if (lang == "NONE") {
+      continue;
+    }
+    this->Compilers["CMAKE_" + lang + "_COMPILER"] = lang;
+
+    this->VariableMappings["CMAKE_" + lang + "_COMPILER"] =
+      this->Makefile->GetSafeDefinition("CMAKE_" + lang + "_COMPILER");
+
+    std::string const& compilerArg1 = "CMAKE_" + lang + "_COMPILER_ARG1";
+    std::string const& compilerTarget = "CMAKE_" + lang + "_COMPILER_TARGET";
+    std::string const& compilerOptionTarget =
+      "CMAKE_" + lang + "_COMPILE_OPTIONS_TARGET";
+    std::string const& compilerExternalToolchain =
+      "CMAKE_" + lang + "_COMPILER_EXTERNAL_TOOLCHAIN";
+    std::string const& compilerOptionExternalToolchain =
+      "CMAKE_" + lang + "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN";
+    std::string const& compilerOptionSysroot =
+      "CMAKE_" + lang + "_COMPILE_OPTIONS_SYSROOT";
+
+    this->VariableMappings[compilerArg1] =
+      this->Makefile->GetSafeDefinition(compilerArg1);
+    this->VariableMappings[compilerTarget] =
+      this->Makefile->GetSafeDefinition(compilerTarget);
+    this->VariableMappings[compilerOptionTarget] =
+      this->Makefile->GetSafeDefinition(compilerOptionTarget);
+    this->VariableMappings[compilerExternalToolchain] =
+      this->Makefile->GetSafeDefinition(compilerExternalToolchain);
+    this->VariableMappings[compilerOptionExternalToolchain] =
+      this->Makefile->GetSafeDefinition(compilerOptionExternalToolchain);
+    this->VariableMappings[compilerOptionSysroot] =
+      this->Makefile->GetSafeDefinition(compilerOptionSysroot);
+
+    for (const char* const* replaceIter = cmArrayBegin(ruleReplaceVars);
+         replaceIter != cmArrayEnd(ruleReplaceVars); ++replaceIter) {
+      std::string actualReplace = *replaceIter;
+      if (actualReplace.find("${LANG}") != actualReplace.npos) {
+        cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
+      }
+
+      this->VariableMappings[actualReplace] =
+        this->Makefile->GetSafeDefinition(actualReplace);
+    }
+  }
+}
+
+cmRulePlaceholderExpander* cmLocalGenerator::CreateRulePlaceholderExpander()
+  const
+{
+  return new cmRulePlaceholderExpander(this->Compilers, this->VariableMappings,
+                                       this->CompilerSysroot);
 }
 
 cmLocalGenerator::~cmLocalGenerator()
@@ -486,325 +568,6 @@ cmState::Snapshot cmLocalGenerator::GetStateSnapshot() const
   return this->Makefile->GetStateSnapshot();
 }
 
-// List of variables that are replaced when
-// rules are expanced.  These variables are
-// replaced in the form <var> with GetSafeDefinition(var).
-// ${LANG} is replaced in the variable first with all enabled
-// languages.
-static const char* ruleReplaceVars[] = {
-  "CMAKE_${LANG}_COMPILER",
-  "CMAKE_SHARED_LIBRARY_CREATE_${LANG}_FLAGS",
-  "CMAKE_SHARED_MODULE_CREATE_${LANG}_FLAGS",
-  "CMAKE_SHARED_MODULE_${LANG}_FLAGS",
-  "CMAKE_SHARED_LIBRARY_${LANG}_FLAGS",
-  "CMAKE_${LANG}_LINK_FLAGS",
-  "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
-  "CMAKE_${LANG}_ARCHIVE",
-  "CMAKE_AR",
-  "CMAKE_CURRENT_SOURCE_DIR",
-  "CMAKE_CURRENT_BINARY_DIR",
-  "CMAKE_RANLIB",
-  "CMAKE_LINKER",
-  "CMAKE_CL_SHOWINCLUDES_PREFIX",
-  CM_NULLPTR
-};
-
-std::string cmLocalGenerator::ExpandRuleVariable(
-  std::string const& variable, const RuleVariables& replaceValues)
-{
-  if (replaceValues.LinkFlags) {
-    if (variable == "LINK_FLAGS") {
-      return replaceValues.LinkFlags;
-    }
-  }
-  if (replaceValues.Manifests) {
-    if (variable == "MANIFESTS") {
-      return replaceValues.Manifests;
-    }
-  }
-  if (replaceValues.Flags) {
-    if (variable == "FLAGS") {
-      return replaceValues.Flags;
-    }
-  }
-
-  if (replaceValues.Source) {
-    if (variable == "SOURCE") {
-      return replaceValues.Source;
-    }
-  }
-  if (replaceValues.PreprocessedSource) {
-    if (variable == "PREPROCESSED_SOURCE") {
-      return replaceValues.PreprocessedSource;
-    }
-  }
-  if (replaceValues.AssemblySource) {
-    if (variable == "ASSEMBLY_SOURCE") {
-      return replaceValues.AssemblySource;
-    }
-  }
-  if (replaceValues.Object) {
-    if (variable == "OBJECT") {
-      return replaceValues.Object;
-    }
-  }
-  if (replaceValues.ObjectDir) {
-    if (variable == "OBJECT_DIR") {
-      return replaceValues.ObjectDir;
-    }
-  }
-  if (replaceValues.ObjectFileDir) {
-    if (variable == "OBJECT_FILE_DIR") {
-      return replaceValues.ObjectFileDir;
-    }
-  }
-  if (replaceValues.Objects) {
-    if (variable == "OBJECTS") {
-      return replaceValues.Objects;
-    }
-  }
-  if (replaceValues.ObjectsQuoted) {
-    if (variable == "OBJECTS_QUOTED") {
-      return replaceValues.ObjectsQuoted;
-    }
-  }
-  if (replaceValues.Defines && variable == "DEFINES") {
-    return replaceValues.Defines;
-  }
-  if (replaceValues.Includes && variable == "INCLUDES") {
-    return replaceValues.Includes;
-  }
-  if (replaceValues.TargetPDB) {
-    if (variable == "TARGET_PDB") {
-      return replaceValues.TargetPDB;
-    }
-  }
-  if (replaceValues.TargetCompilePDB) {
-    if (variable == "TARGET_COMPILE_PDB") {
-      return replaceValues.TargetCompilePDB;
-    }
-  }
-  if (replaceValues.DependencyFile) {
-    if (variable == "DEP_FILE") {
-      return replaceValues.DependencyFile;
-    }
-  }
-
-  if (replaceValues.Target) {
-    if (variable == "TARGET_QUOTED") {
-      std::string targetQuoted = replaceValues.Target;
-      if (!targetQuoted.empty() && targetQuoted[0] != '\"') {
-        targetQuoted = '\"';
-        targetQuoted += replaceValues.Target;
-        targetQuoted += '\"';
-      }
-      return targetQuoted;
-    }
-    if (variable == "TARGET_UNQUOTED") {
-      std::string unquoted = replaceValues.Target;
-      std::string::size_type sz = unquoted.size();
-      if (sz > 2 && unquoted[0] == '\"' && unquoted[sz - 1] == '\"') {
-        unquoted = unquoted.substr(1, sz - 2);
-      }
-      return unquoted;
-    }
-    if (replaceValues.LanguageCompileFlags) {
-      if (variable == "LANGUAGE_COMPILE_FLAGS") {
-        return replaceValues.LanguageCompileFlags;
-      }
-    }
-    if (replaceValues.Target) {
-      if (variable == "TARGET") {
-        return replaceValues.Target;
-      }
-    }
-    if (variable == "TARGET_IMPLIB") {
-      return this->TargetImplib;
-    }
-    if (variable == "TARGET_VERSION_MAJOR") {
-      if (replaceValues.TargetVersionMajor) {
-        return replaceValues.TargetVersionMajor;
-      }
-      return "0";
-    }
-    if (variable == "TARGET_VERSION_MINOR") {
-      if (replaceValues.TargetVersionMinor) {
-        return replaceValues.TargetVersionMinor;
-      }
-      return "0";
-    }
-    if (replaceValues.Target) {
-      if (variable == "TARGET_BASE") {
-        // Strip the last extension off the target name.
-        std::string targetBase = replaceValues.Target;
-        std::string::size_type pos = targetBase.rfind('.');
-        if (pos != targetBase.npos) {
-          return targetBase.substr(0, pos);
-        }
-        return targetBase;
-      }
-    }
-  }
-  if (variable == "TARGET_SONAME" || variable == "SONAME_FLAG" ||
-      variable == "TARGET_INSTALLNAME_DIR") {
-    // All these variables depend on TargetSOName
-    if (replaceValues.TargetSOName) {
-      if (variable == "TARGET_SONAME") {
-        return replaceValues.TargetSOName;
-      }
-      if (variable == "SONAME_FLAG" && replaceValues.SONameFlag) {
-        return replaceValues.SONameFlag;
-      }
-      if (replaceValues.TargetInstallNameDir &&
-          variable == "TARGET_INSTALLNAME_DIR") {
-        return replaceValues.TargetInstallNameDir;
-      }
-    }
-    return "";
-  }
-  if (replaceValues.LinkLibraries) {
-    if (variable == "LINK_LIBRARIES") {
-      return replaceValues.LinkLibraries;
-    }
-  }
-  if (replaceValues.Language) {
-    if (variable == "LANGUAGE") {
-      return replaceValues.Language;
-    }
-  }
-  if (replaceValues.CMTarget) {
-    if (variable == "TARGET_NAME") {
-      return replaceValues.CMTarget->GetName();
-    }
-    if (variable == "TARGET_TYPE") {
-      return cmState::GetTargetTypeName(replaceValues.CMTarget->GetType());
-    }
-  }
-  if (replaceValues.Output) {
-    if (variable == "OUTPUT") {
-      return replaceValues.Output;
-    }
-  }
-  if (variable == "CMAKE_COMMAND") {
-    return this->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(cmSystemTools::GetCMakeCommand()),
-      SHELL);
-  }
-  std::vector<std::string> enabledLanguages =
-    this->GetState()->GetEnabledLanguages();
-  // loop over language specific replace variables
-  int pos = 0;
-  while (ruleReplaceVars[pos]) {
-    for (std::vector<std::string>::iterator i = enabledLanguages.begin();
-         i != enabledLanguages.end(); ++i) {
-      const char* lang = i->c_str();
-      std::string actualReplace = ruleReplaceVars[pos];
-      // If this is the compiler then look for the extra variable
-      // _COMPILER_ARG1 which must be the first argument to the compiler
-      const char* compilerArg1 = CM_NULLPTR;
-      const char* compilerTarget = CM_NULLPTR;
-      const char* compilerOptionTarget = CM_NULLPTR;
-      const char* compilerExternalToolchain = CM_NULLPTR;
-      const char* compilerOptionExternalToolchain = CM_NULLPTR;
-      const char* compilerSysroot = CM_NULLPTR;
-      const char* compilerOptionSysroot = CM_NULLPTR;
-      if (actualReplace == "CMAKE_${LANG}_COMPILER") {
-        std::string arg1 = actualReplace + "_ARG1";
-        cmSystemTools::ReplaceString(arg1, "${LANG}", lang);
-        compilerArg1 = this->Makefile->GetDefinition(arg1);
-        compilerTarget = this->Makefile->GetDefinition(
-          std::string("CMAKE_") + lang + "_COMPILER_TARGET");
-        compilerOptionTarget = this->Makefile->GetDefinition(
-          std::string("CMAKE_") + lang + "_COMPILE_OPTIONS_TARGET");
-        compilerExternalToolchain = this->Makefile->GetDefinition(
-          std::string("CMAKE_") + lang + "_COMPILER_EXTERNAL_TOOLCHAIN");
-        compilerOptionExternalToolchain =
-          this->Makefile->GetDefinition(std::string("CMAKE_") + lang +
-                                        "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN");
-        compilerSysroot = this->Makefile->GetDefinition("CMAKE_SYSROOT");
-        compilerOptionSysroot = this->Makefile->GetDefinition(
-          std::string("CMAKE_") + lang + "_COMPILE_OPTIONS_SYSROOT");
-      }
-      if (actualReplace.find("${LANG}") != actualReplace.npos) {
-        cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
-      }
-      if (actualReplace == variable) {
-        std::string replace = this->Makefile->GetSafeDefinition(variable);
-        // if the variable is not a FLAG then treat it like a path
-        if (variable.find("_FLAG") == variable.npos) {
-          std::string ret = this->ConvertToOutputForExisting(replace);
-          // if there is a required first argument to the compiler add it
-          // to the compiler string
-          if (compilerArg1) {
-            ret += " ";
-            ret += compilerArg1;
-          }
-          if (compilerTarget && compilerOptionTarget) {
-            ret += " ";
-            ret += compilerOptionTarget;
-            ret += compilerTarget;
-          }
-          if (compilerExternalToolchain && compilerOptionExternalToolchain) {
-            ret += " ";
-            ret += compilerOptionExternalToolchain;
-            ret += this->EscapeForShell(compilerExternalToolchain, true);
-          }
-          if (compilerSysroot && compilerOptionSysroot) {
-            ret += " ";
-            ret += compilerOptionSysroot;
-            ret += this->EscapeForShell(compilerSysroot, true);
-          }
-          return ret;
-        }
-        return replace;
-      }
-    }
-    pos++;
-  }
-  return variable;
-}
-
-void cmLocalGenerator::ExpandRuleVariables(std::string& s,
-                                           const RuleVariables& replaceValues)
-{
-  if (replaceValues.RuleLauncher) {
-    this->InsertRuleLauncher(s, replaceValues.CMTarget,
-                             replaceValues.RuleLauncher);
-  }
-  std::string::size_type start = s.find('<');
-  // no variables to expand
-  if (start == s.npos) {
-    return;
-  }
-  std::string::size_type pos = 0;
-  std::string expandedInput;
-  while (start != s.npos && start < s.size() - 2) {
-    std::string::size_type end = s.find('>', start);
-    // if we find a < with no > we are done
-    if (end == s.npos) {
-      return;
-    }
-    char c = s[start + 1];
-    // if the next char after the < is not A-Za-z then
-    // skip it and try to find the next < in the string
-    if (!isalpha(c)) {
-      start = s.find('<', start + 1);
-    } else {
-      // extract the var
-      std::string var = s.substr(start + 1, end - start - 1);
-      std::string replace = this->ExpandRuleVariable(var, replaceValues);
-      expandedInput += s.substr(pos, start - pos);
-      expandedInput += replace;
-      // move to next one
-      start = s.find('<', start + var.size() + 2);
-      pos = end + 1;
-    }
-  }
-  // add the rest of the input
-  expandedInput += s.substr(pos, s.size() - pos);
-  s = expandedInput;
-}
-
 const char* cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
                                               const std::string& prop)
 {
@@ -812,17 +575,6 @@ const char* cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
     return target->GetProperty(prop);
   }
   return this->Makefile->GetProperty(prop);
-}
-
-void cmLocalGenerator::InsertRuleLauncher(std::string& s,
-                                          cmGeneratorTarget* target,
-                                          const std::string& prop)
-{
-  if (const char* val = this->GetRuleLauncher(target, prop)) {
-    std::ostringstream wrapped;
-    wrapped << val << " " << s;
-    s = wrapped.str();
-  }
 }
 
 std::string cmLocalGenerator::ConvertToIncludeReference(

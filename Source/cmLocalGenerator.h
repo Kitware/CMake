@@ -8,6 +8,7 @@
 #include "cmListFileCache.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmState.h"
 #include "cmake.h"
 
@@ -23,6 +24,7 @@ class cmComputeLinkInformation;
 class cmCustomCommandGenerator;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
+class cmRulePlaceholderExpander;
 class cmMakefile;
 class cmSourceFile;
 class cmLinkLineComputer;
@@ -83,6 +85,8 @@ public:
   {
     return this->GlobalGenerator;
   }
+
+  virtual cmRulePlaceholderExpander* CreateRulePlaceholderExpander() const;
 
   std::string GetLinkLibsCMP0065(std::string const& linkLanguage,
                                  cmGeneratorTarget& tgt) const;
@@ -217,42 +221,6 @@ public:
   // preprocessed files and assembly files.
   void GetIndividualFileTargets(std::vector<std::string>&) {}
 
-  // Create a struct to hold the varibles passed into
-  // ExpandRuleVariables
-  struct RuleVariables
-  {
-    RuleVariables() { memset(this, 0, sizeof(*this)); }
-    cmGeneratorTarget* CMTarget;
-    const char* TargetPDB;
-    const char* TargetCompilePDB;
-    const char* TargetVersionMajor;
-    const char* TargetVersionMinor;
-    const char* Language;
-    const char* Objects;
-    const char* Target;
-    const char* LinkLibraries;
-    const char* Source;
-    const char* AssemblySource;
-    const char* PreprocessedSource;
-    const char* Output;
-    const char* Object;
-    const char* ObjectDir;
-    const char* ObjectFileDir;
-    const char* Flags;
-    const char* ObjectsQuoted;
-    const char* SONameFlag;
-    const char* TargetSOName;
-    const char* TargetInstallNameDir;
-    const char* LinkFlags;
-    const char* Manifests;
-    const char* LanguageCompileFlags;
-    const char* Defines;
-    const char* Includes;
-    const char* RuleLauncher;
-    const char* DependencyFile;
-    const char* FilterPrefix;
-  };
-
   /**
    * Get the relative path from the generator output directory to a
    * per-target support directory.
@@ -346,24 +314,15 @@ public:
   void CreateEvaluationFileOutputs(const std::string& config);
   void ProcessEvaluationFiles(std::vector<std::string>& generatedFiles);
 
+  const char* GetRuleLauncher(cmGeneratorTarget* target,
+                              const std::string& prop);
+
 protected:
   ///! put all the libraries for a target on into the given stream
   void OutputLinkLibraries(cmComputeLinkInformation* pcli,
                            cmLinkLineComputer* linkLineComputer,
                            std::string& linkLibraries,
                            std::string& frameworkPath, std::string& linkPath);
-
-  // Expand rule variables in CMake of the type found in language rules
-  void ExpandRuleVariables(std::string& string,
-                           const RuleVariables& replaceValues);
-  // Expand rule variables in a single string
-  std::string ExpandRuleVariable(std::string const& variable,
-                                 const RuleVariables& replaceValues);
-
-  const char* GetRuleLauncher(cmGeneratorTarget* target,
-                              const std::string& prop);
-  void InsertRuleLauncher(std::string& s, cmGeneratorTarget* target,
-                          const std::string& prop);
 
   // Handle old-style install rules stored in the targets.
   void GenerateTargetInstallRules(
@@ -391,11 +350,11 @@ protected:
   std::vector<cmGeneratorTarget*> OwnedImportedGeneratorTargets;
   std::map<std::string, std::string> AliasTargets;
 
-  bool EmitUniversalBinaryFlags;
+  std::map<std::string, std::string> Compilers;
+  std::map<std::string, std::string> VariableMappings;
+  std::string CompilerSysroot;
 
-  // Hack for ExpandRuleVariable until object-oriented version is
-  // committed.
-  std::string TargetImplib;
+  bool EmitUniversalBinaryFlags;
 
   KWIML_INT_uint64_t BackwardsCompatibility;
   bool BackwardsCompatibilityFinal;

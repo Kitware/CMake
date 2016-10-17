@@ -10,6 +10,7 @@
 #include "cmGlobalNinjaGenerator.h"
 #include "cmMakefile.h"
 #include "cmNinjaTargetGenerator.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
@@ -27,10 +28,18 @@ cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
   : cmLocalCommonGenerator(gg, mf, mf->GetState()->GetBinaryDirectory())
   , HomeRelativeOutputPath("")
 {
-  this->TargetImplib = "$TARGET_IMPLIB";
 }
 
 // Virtual public methods.
+
+cmRulePlaceholderExpander*
+cmLocalNinjaGenerator::CreateRulePlaceholderExpander() const
+{
+  cmRulePlaceholderExpander* ret = new cmRulePlaceholderExpander(
+    this->Compilers, this->VariableMappings, this->CompilerSysroot);
+  ret->SetTargetImpLib("$TARGET_IMPLIB");
+  return ret;
+}
 
 cmLocalNinjaGenerator::~cmLocalNinjaGenerator()
 {
@@ -468,8 +477,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
 std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   cmCustomCommandGenerator const& ccg)
 {
-  const char* property = "RULE_LAUNCH_CUSTOM";
-  const char* property_value = this->Makefile->GetProperty(property);
+  const char* property_value =
+    this->Makefile->GetProperty("RULE_LAUNCH_CUSTOM");
 
   if (!property_value || !*property_value) {
     return std::string();
@@ -477,8 +486,8 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
 
   // Expand rules in the empty string.  It may insert the launcher and
   // perform replacements.
-  RuleVariables vars;
-  vars.RuleLauncher = property;
+  cmRulePlaceholderExpander::RuleVariables vars;
+
   std::string output;
   const std::vector<std::string>& outputs = ccg.GetOutputs();
   if (!outputs.empty()) {
@@ -491,8 +500,13 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   }
   vars.Output = output.c_str();
 
-  std::string launcher;
-  this->ExpandRuleVariables(launcher, vars);
+  std::string launcher = property_value;
+  launcher += " ";
+
+  CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    this->CreateRulePlaceholderExpander());
+
+  rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);
   if (!launcher.empty()) {
     launcher += " ";
   }
