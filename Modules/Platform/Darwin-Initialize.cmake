@@ -90,7 +90,7 @@ elseif("${CMAKE_GENERATOR}" MATCHES Xcode
       endif()
     endforeach()
 
-    if(NOT CMAKE_OSX_DEPLOYMENT_TARGET AND _CURRENT_OSX_VERSION VERSION_LESS _CMAKE_OSX_DEPLOYMENT_TARGET)
+    if(NOT CMAKE_CROSSCOMPILING AND NOT CMAKE_OSX_DEPLOYMENT_TARGET AND _CURRENT_OSX_VERSION VERSION_LESS _CMAKE_OSX_DEPLOYMENT_TARGET)
       set(CMAKE_OSX_DEPLOYMENT_TARGET ${_CURRENT_OSX_VERSION} CACHE STRING
         "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value." FORCE)
     endif()
