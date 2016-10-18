@@ -9,6 +9,11 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmVS10CLFlagTable.h"
+#include "cmVS10LibFlagTable.h"
+#include "cmVS10LinkFlagTable.h"
+#include "cmVS10MASMFlagTable.h"
+#include "cmVS10RCFlagTable.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
 #include "cmake.h"
@@ -94,6 +99,11 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->SystemIsWindowsStore = false;
   this->MSBuildCommandInitialized = false;
   this->DefaultPlatformToolset = "v100";
+  this->DefaultClFlagTable = cmVS10CLFlagTable;
+  this->DefaultLibFlagTable = cmVS10LibFlagTable;
+  this->DefaultLinkFlagTable = cmVS10LinkFlagTable;
+  this->DefaultMasmFlagTable = cmVS10MASMFlagTable;
+  this->DefaultRcFlagTable = cmVS10RCFlagTable;
   this->Version = VS10;
 }
 
@@ -603,4 +613,29 @@ std::string cmGlobalVisualStudio10Generator::GetInstalledNsightTegraVersion()
     "Version",
     version, cmSystemTools::KeyWOW64_32);
   return version;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetClFlagTable() const
+{
+  return this->DefaultClFlagTable;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetRcFlagTable() const
+{
+  return this->DefaultRcFlagTable;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLibFlagTable() const
+{
+  return this->DefaultLibFlagTable;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLinkFlagTable() const
+{
+  return this->DefaultLinkFlagTable;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMasmFlagTable() const
+{
+  return this->DefaultMasmFlagTable;
 }

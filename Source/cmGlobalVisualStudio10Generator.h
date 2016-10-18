@@ -89,6 +89,12 @@ public:
 
   static std::string GetInstalledNsightTegraVersion();
 
+  cmIDEFlagTable const* GetClFlagTable() const;
+  cmIDEFlagTable const* GetRcFlagTable() const;
+  cmIDEFlagTable const* GetLibFlagTable() const;
+  cmIDEFlagTable const* GetLinkFlagTable() const;
+  cmIDEFlagTable const* GetMasmFlagTable() const;
+
 protected:
   virtual void Generate();
   virtual bool InitializeSystem(cmMakefile* mf);
@@ -112,6 +118,11 @@ protected:
   std::string SystemName;
   std::string SystemVersion;
   std::string NsightTegraVersion;
+  cmIDEFlagTable const* DefaultClFlagTable;
+  cmIDEFlagTable const* DefaultLibFlagTable;
+  cmIDEFlagTable const* DefaultLinkFlagTable;
+  cmIDEFlagTable const* DefaultMasmFlagTable;
+  cmIDEFlagTable const* DefaultRcFlagTable;
   bool SystemIsWindowsCE;
   bool SystemIsWindowsPhone;
   bool SystemIsWindowsStore;

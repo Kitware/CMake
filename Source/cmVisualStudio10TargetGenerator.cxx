@@ -10,129 +10,12 @@
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmVS10CLFlagTable.h"
-#include "cmVS10LibFlagTable.h"
-#include "cmVS10LinkFlagTable.h"
-#include "cmVS10MASMFlagTable.h"
-#include "cmVS10RCFlagTable.h"
-#include "cmVS11CLFlagTable.h"
-#include "cmVS11LibFlagTable.h"
-#include "cmVS11LinkFlagTable.h"
-#include "cmVS11MASMFlagTable.h"
-#include "cmVS11RCFlagTable.h"
-#include "cmVS12CLFlagTable.h"
-#include "cmVS12LibFlagTable.h"
-#include "cmVS12LinkFlagTable.h"
-#include "cmVS12MASMFlagTable.h"
-#include "cmVS12RCFlagTable.h"
-#include "cmVS140CLFlagTable.h"
-#include "cmVS141CLFlagTable.h"
-#include "cmVS14LibFlagTable.h"
-#include "cmVS14LinkFlagTable.h"
-#include "cmVS14MASMFlagTable.h"
-#include "cmVS14RCFlagTable.h"
 #include "cmVisualStudioGeneratorOptions.h"
 #include "windows.h"
 
 #include <cm_auto_ptr.hxx>
 
 static std::string const kWINDOWS_7_1_SDK = "Windows7.1SDK";
-
-cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetClFlagTable() const
-{
-  if (this->MSTools) {
-    cmGlobalVisualStudioGenerator::VSVersion v =
-      this->LocalGenerator->GetVersion();
-    if (v >= cmGlobalVisualStudioGenerator::VS14) {
-      // FIXME: All flag table selection should be based on the toolset name.
-      // See issue #16153.  For now, treat VS 15's toolset as a special case.
-      const char* toolset = this->GlobalGenerator->GetPlatformToolset();
-      if (toolset && cmHasLiteralPrefix(toolset, "v141")) {
-        return cmVS141CLFlagTable;
-      }
-      return cmVS140CLFlagTable;
-    } else if (v >= cmGlobalVisualStudioGenerator::VS12) {
-      return cmVS12CLFlagTable;
-    } else if (v == cmGlobalVisualStudioGenerator::VS11) {
-      return cmVS11CLFlagTable;
-    } else {
-      return cmVS10CLFlagTable;
-    }
-  }
-  return 0;
-}
-
-cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetRcFlagTable() const
-{
-  if (this->MSTools) {
-    cmGlobalVisualStudioGenerator::VSVersion v =
-      this->LocalGenerator->GetVersion();
-    if (v >= cmGlobalVisualStudioGenerator::VS14) {
-      return cmVS14RCFlagTable;
-    } else if (v >= cmGlobalVisualStudioGenerator::VS12) {
-      return cmVS12RCFlagTable;
-    } else if (v == cmGlobalVisualStudioGenerator::VS11) {
-      return cmVS11RCFlagTable;
-    } else {
-      return cmVS10RCFlagTable;
-    }
-  }
-  return 0;
-}
-
-cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLibFlagTable() const
-{
-  if (this->MSTools) {
-    cmGlobalVisualStudioGenerator::VSVersion v =
-      this->LocalGenerator->GetVersion();
-    if (v >= cmGlobalVisualStudioGenerator::VS14) {
-      return cmVS14LibFlagTable;
-    } else if (v >= cmGlobalVisualStudioGenerator::VS12) {
-      return cmVS12LibFlagTable;
-    } else if (v == cmGlobalVisualStudioGenerator::VS11) {
-      return cmVS11LibFlagTable;
-    } else {
-      return cmVS10LibFlagTable;
-    }
-  }
-  return 0;
-}
-
-cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLinkFlagTable() const
-{
-  if (this->MSTools) {
-    cmGlobalVisualStudioGenerator::VSVersion v =
-      this->LocalGenerator->GetVersion();
-    if (v >= cmGlobalVisualStudioGenerator::VS14) {
-      return cmVS14LinkFlagTable;
-    } else if (v >= cmGlobalVisualStudioGenerator::VS12) {
-      return cmVS12LinkFlagTable;
-    } else if (v == cmGlobalVisualStudioGenerator::VS11) {
-      return cmVS11LinkFlagTable;
-    } else {
-      return cmVS10LinkFlagTable;
-    }
-  }
-  return 0;
-}
-
-cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetMasmFlagTable() const
-{
-  if (this->MSTools) {
-    cmGlobalVisualStudioGenerator::VSVersion v =
-      this->LocalGenerator->GetVersion();
-    if (v >= cmGlobalVisualStudioGenerator::VS14) {
-      return cmVS14MASMFlagTable;
-    } else if (v >= cmGlobalVisualStudioGenerator::VS12) {
-      return cmVS12MASMFlagTable;
-    } else if (v == cmGlobalVisualStudioGenerator::VS11) {
-      return cmVS11MASMFlagTable;
-    } else {
-      return cmVS10MASMFlagTable;
-    }
-  }
-  return 0;
-}
 
 static std::string cmVS10EscapeXML(std::string arg)
 {
@@ -1533,9 +1416,11 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       (*this->BuildFileStream) << firstString;
       firstString = ""; // only do firstString once
       hasFlags = true;
+      cmGlobalVisualStudio10Generator* gg =
+        static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
       cmVisualStudioGeneratorOptions clOptions(
         this->LocalGenerator, cmVisualStudioGeneratorOptions::Compiler,
-        this->GetClFlagTable(), 0, this);
+        gg->GetClFlagTable(), 0, this);
       if (compileAs) {
         clOptions.AddFlag("CompileAs", compileAs);
       }
@@ -1696,8 +1581,10 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // copied from cmLocalVisualStudio7Generator.cxx 805
   // TODO: Integrate code below with cmLocalVisualStudio7Generator.
 
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
   CM_AUTO_PTR<Options> pOptions(new Options(
-    this->LocalGenerator, Options::Compiler, this->GetClFlagTable()));
+    this->LocalGenerator, Options::Compiler, gg->GetClFlagTable()));
   Options& clOptions = *pOptions;
 
   std::string flags;
@@ -1861,8 +1748,10 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
   std::string const& configName)
 {
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
   CM_AUTO_PTR<Options> pOptions(new Options(
-    this->LocalGenerator, Options::ResourceCompiler, this->GetRcFlagTable()));
+    this->LocalGenerator, Options::ResourceCompiler, gg->GetRcFlagTable()));
   Options& rcOptions = *pOptions;
 
   std::string CONFIG = cmSystemTools::UpperCase(configName);
@@ -1918,8 +1807,10 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions()
 bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
   std::string const& configName)
 {
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
   CM_AUTO_PTR<Options> pOptions(new Options(
-    this->LocalGenerator, Options::MasmCompiler, this->GetMasmFlagTable()));
+    this->LocalGenerator, Options::MasmCompiler, gg->GetMasmFlagTable()));
   Options& masmOptions = *pOptions;
 
   std::string CONFIG = cmSystemTools::UpperCase(configName);
@@ -1968,9 +1859,11 @@ void cmVisualStudio10TargetGenerator::WriteLibOptions(
     libflags, cmSystemTools::UpperCase(config), this->GeneratorTarget);
   if (!libflags.empty()) {
     this->WriteString("<Lib>\n", 2);
+    cmGlobalVisualStudio10Generator* gg =
+      static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
     cmVisualStudioGeneratorOptions libOptions(
       this->LocalGenerator, cmVisualStudioGeneratorOptions::Linker,
-      this->GetLibFlagTable(), 0, this);
+      gg->GetLibFlagTable(), 0, this);
     libOptions.Parse(libflags.c_str());
     libOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
     libOptions.OutputFlagMap(*this->BuildFileStream, "      ");
@@ -2163,8 +2056,10 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions()
 bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   std::string const& config)
 {
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
   CM_AUTO_PTR<Options> pOptions(new Options(
-    this->LocalGenerator, Options::Linker, this->GetLinkFlagTable(), 0, this));
+    this->LocalGenerator, Options::Linker, gg->GetLinkFlagTable(), 0, this));
   Options& linkOptions = *pOptions;
 
   const std::string& linkLanguage =
