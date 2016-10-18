@@ -29,9 +29,9 @@ struct cmStateDetail::SnapshotDataType
 {
   cmState::PositionType ScopeParent;
   cmState::PositionType DirectoryParent;
-  cmLinkedTree<cmState::PolicyStackEntry>::iterator Policies;
-  cmLinkedTree<cmState::PolicyStackEntry>::iterator PolicyRoot;
-  cmLinkedTree<cmState::PolicyStackEntry>::iterator PolicyScope;
+  cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator Policies;
+  cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator PolicyRoot;
+  cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator PolicyScope;
   cmState::SnapshotType SnapshotType;
   bool Keep;
   cmLinkedTree<std::string>::iterator ExecutionListFile;
@@ -45,7 +45,7 @@ struct cmStateDetail::SnapshotDataType
   std::vector<std::string>::size_type CompileOptionsPosition;
 };
 
-struct cmState::PolicyStackEntry : public cmPolicies::PolicyMap
+struct cmStateDetail::PolicyStackEntry : public cmPolicies::PolicyMap
 {
   typedef cmPolicies::PolicyMap derived;
   PolicyStackEntry(bool w = false)
@@ -1078,8 +1078,8 @@ cmState::Snapshot cmState::Snapshot::GetCallStackBottom() const
 void cmState::Snapshot::PushPolicy(cmPolicies::PolicyMap entry, bool weak)
 {
   PositionType pos = this->Position;
-  pos->Policies = this->State->PolicyStack.Push(pos->Policies,
-                                                PolicyStackEntry(entry, weak));
+  pos->Policies = this->State->PolicyStack.Push(
+    pos->Policies, cmStateDetail::PolicyStackEntry(entry, weak));
 }
 
 bool cmState::Snapshot::PopPolicy()
@@ -1102,7 +1102,8 @@ void cmState::Snapshot::SetPolicy(cmPolicies::PolicyID id,
 {
   // Update the policy stack from the top to the top-most strong entry.
   bool previous_was_weak = true;
-  for (cmLinkedTree<PolicyStackEntry>::iterator psi = this->Position->Policies;
+  for (cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator psi =
+         this->Position->Policies;
        previous_was_weak && psi != this->Position->PolicyRoot; ++psi) {
     psi->Set(id, status);
     previous_was_weak = psi->Weak;
@@ -1124,9 +1125,9 @@ cmPolicies::PolicyStatus cmState::Snapshot::GetPolicy(
 
   while (true) {
     assert(dir.IsValid());
-    cmLinkedTree<PolicyStackEntry>::iterator leaf =
+    cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator leaf =
       dir->DirectoryEnd->Policies;
-    cmLinkedTree<PolicyStackEntry>::iterator root =
+    cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator root =
       dir->DirectoryEnd->PolicyRoot;
     for (; leaf != root; ++leaf) {
       if (leaf->IsDefined(id)) {

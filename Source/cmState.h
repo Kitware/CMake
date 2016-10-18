@@ -26,11 +26,11 @@ class cmPropertyDefinition;
 namespace cmStateDetail {
 struct BuildsystemDirectoryStateType;
 struct SnapshotDataType;
+struct PolicyStackEntry;
 }
 
 class cmState
 {
-  struct PolicyStackEntry;
   typedef cmLinkedTree<cmStateDetail::SnapshotDataType>::iterator PositionType;
   friend class Snapshot;
   friend struct cmStateDetail::BuildsystemDirectoryStateType;
@@ -341,7 +341,7 @@ private:
 
   cmLinkedTree<std::string> ExecutionListFiles;
 
-  cmLinkedTree<PolicyStackEntry> PolicyStack;
+  cmLinkedTree<cmStateDetail::PolicyStackEntry> PolicyStack;
   cmLinkedTree<cmStateDetail::SnapshotDataType> SnapshotData;
   cmLinkedTree<cmDefinitions> VarTree;
 
