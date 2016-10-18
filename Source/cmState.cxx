@@ -35,7 +35,7 @@ struct cmState::SnapshotDataType
   cmState::SnapshotType SnapshotType;
   bool Keep;
   cmLinkedTree<std::string>::iterator ExecutionListFile;
-  cmLinkedTree<cmState::BuildsystemDirectoryStateType>::iterator
+  cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator
     BuildSystemDirectory;
   cmLinkedTree<cmDefinitions>::iterator Vars;
   cmLinkedTree<cmDefinitions>::iterator Root;
@@ -66,7 +66,7 @@ struct cmState::PolicyStackEntry : public cmPolicies::PolicyMap
   bool Weak;
 };
 
-struct cmState::BuildsystemDirectoryStateType
+struct cmStateDetail::BuildsystemDirectoryStateType
 {
   cmState::PositionType DirectoryEnd;
 
@@ -313,7 +313,7 @@ cmState::Snapshot cmState::Reset()
   this->ExecutionListFiles.Truncate();
 
   {
-    cmLinkedTree<BuildsystemDirectoryStateType>::iterator it =
+    cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator it =
       this->BuildsystemDirectory.Truncate();
     it->IncludeDirectories.clear();
     it->IncludeDirectoryBacktraces.clear();
@@ -1119,7 +1119,7 @@ cmPolicies::PolicyStatus cmState::Snapshot::GetPolicy(
     return status;
   }
 
-  cmLinkedTree<BuildsystemDirectoryStateType>::iterator dir =
+  cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator dir =
     this->Position->BuildSystemDirectory;
 
   while (true) {
@@ -1366,7 +1366,7 @@ void cmState::Snapshot::InitializeFromParent_ForSubdirsCommand()
 }
 
 cmState::Directory::Directory(
-  cmLinkedTree<BuildsystemDirectoryStateType>::iterator iter,
+  cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator iter,
   const cmState::Snapshot& snapshot)
   : DirectoryState(iter)
   , Snapshot_(snapshot)

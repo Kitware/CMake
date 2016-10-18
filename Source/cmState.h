@@ -23,13 +23,17 @@ class cmCommand;
 class cmListFileBacktrace;
 class cmPropertyDefinition;
 
+namespace cmStateDetail {
+struct BuildsystemDirectoryStateType;
+}
+
 class cmState
 {
   struct SnapshotDataType;
   struct PolicyStackEntry;
-  struct BuildsystemDirectoryStateType;
   typedef cmLinkedTree<SnapshotDataType>::iterator PositionType;
   friend class Snapshot;
+  friend struct cmStateDetail::BuildsystemDirectoryStateType;
 
 public:
   cmState();
@@ -117,7 +121,8 @@ public:
 
   class Directory
   {
-    Directory(cmLinkedTree<BuildsystemDirectoryStateType>::iterator iter,
+    Directory(cmLinkedTree<
+                cmStateDetail::BuildsystemDirectoryStateType>::iterator iter,
               Snapshot const& snapshot);
 
   public:
@@ -173,7 +178,8 @@ public:
     void ComputeRelativePathTopBinary();
 
   private:
-    cmLinkedTree<BuildsystemDirectoryStateType>::iterator DirectoryState;
+    cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator
+      DirectoryState;
     Snapshot Snapshot_;
     friend class Snapshot;
   };
@@ -329,7 +335,8 @@ private:
   cmPropertyMap GlobalProperties;
   cmCacheManager* CacheManager;
 
-  cmLinkedTree<BuildsystemDirectoryStateType> BuildsystemDirectory;
+  cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>
+    BuildsystemDirectory;
 
   cmLinkedTree<std::string> ExecutionListFiles;
 
