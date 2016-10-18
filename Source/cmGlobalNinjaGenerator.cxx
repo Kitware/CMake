@@ -1116,9 +1116,9 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
 
     // The directory-level rule should depend on the directory-level
     // rules of the subdirectories.
-    std::vector<cmState::Snapshot> const& children =
+    std::vector<cmStateSnapshot> const& children =
       lg->GetStateSnapshot().GetChildren();
-    for (std::vector<cmState::Snapshot>::const_iterator stateIt =
+    for (std::vector<cmStateSnapshot>::const_iterator stateIt =
            children.begin();
          stateIt != children.end(); ++stateIt) {
       targetsPerFolder[currentSourceFolder].push_back(
@@ -1667,8 +1667,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
 {
   // Setup path conversions.
   {
-    cmState::Snapshot snapshot =
-      this->GetCMakeInstance()->GetCurrentSnapshot();
+    cmStateSnapshot snapshot = this->GetCMakeInstance()->GetCurrentSnapshot();
     snapshot.GetDirectory().SetCurrentSource(dir_cur_src);
     snapshot.GetDirectory().SetCurrentBinary(dir_cur_bld);
     snapshot.GetDirectory().SetRelativePathTopSource(dir_top_src.c_str());

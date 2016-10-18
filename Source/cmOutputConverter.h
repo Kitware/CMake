@@ -13,7 +13,7 @@
 class cmOutputConverter
 {
 public:
-  cmOutputConverter(cmState::Snapshot snapshot);
+  cmOutputConverter(cmStateSnapshot snapshot);
 
   enum OutputFormat
   {
@@ -125,7 +125,7 @@ private:
   static std::string Shell__GetArgument(const char* in, int flags);
 
 private:
-  cmState::Snapshot StateSnapshot;
+  cmStateSnapshot StateSnapshot;
 
   bool LinkScriptShell;
 };

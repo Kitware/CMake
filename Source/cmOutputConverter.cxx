@@ -11,7 +11,7 @@
 #include <set>
 #include <sstream>
 
-cmOutputConverter::cmOutputConverter(cmState::Snapshot snapshot)
+cmOutputConverter::cmOutputConverter(cmStateSnapshot snapshot)
   : StateSnapshot(snapshot)
   , LinkScriptShell(false)
 {

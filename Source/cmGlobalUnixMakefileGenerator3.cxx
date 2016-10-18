@@ -436,9 +436,8 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
 
   // The directory-level rule should depend on the directory-level
   // rules of the subdirectories.
-  std::vector<cmState::Snapshot> children =
-    lg->GetStateSnapshot().GetChildren();
-  for (std::vector<cmState::Snapshot>::const_iterator ci = children.begin();
+  std::vector<cmStateSnapshot> children = lg->GetStateSnapshot().GetChildren();
+  for (std::vector<cmStateSnapshot>::const_iterator ci = children.begin();
        ci != children.end(); ++ci) {
     std::string subdir = ci->GetDirectory().GetCurrentBinary();
     subdir += "/";
@@ -507,7 +506,7 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     if (!this->Makefiles.empty()) {
       mf = this->Makefiles[0];
     } else {
-      cmState::Snapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
+      cmStateSnapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
       snapshot.GetDirectory().SetCurrentSource(
         this->CMakeInstance->GetHomeDirectory());
       snapshot.GetDirectory().SetCurrentBinary(
@@ -817,8 +816,8 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
         continue;
       }
 
-      cmState::Snapshot csnp = lg->GetStateSnapshot();
-      cmState::Snapshot tsnp = tlg->GetStateSnapshot();
+      cmStateSnapshot csnp = lg->GetStateSnapshot();
+      cmStateSnapshot tsnp = tlg->GetStateSnapshot();
 
       // Consider the directory containing the target and all its
       // parents until something excludes the target.

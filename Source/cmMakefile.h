@@ -70,7 +70,7 @@ public:
    * Construct an empty makefile.
    */
   cmMakefile(cmGlobalGenerator* globalGenerator,
-             const cmState::Snapshot& snapshot);
+             const cmStateSnapshot& snapshot);
 
   /**
    * Destructor.
@@ -753,7 +753,7 @@ public:
   void ClearMatches();
   void StoreMatches(cmsys::RegularExpression& re);
 
-  cmState::Snapshot GetStateSnapshot() const;
+  cmStateSnapshot GetStateSnapshot() const;
 
   const char* GetDefineFlagsCMP0059() const;
 
@@ -829,7 +829,7 @@ private:
   cmMakefile(const cmMakefile& mf);
   cmMakefile& operator=(const cmMakefile& mf);
 
-  cmState::Snapshot StateSnapshot;
+  cmStateSnapshot StateSnapshot;
   cmListFileBacktrace Backtrace;
 
   void ReadListFile(cmListFile const& listFile,

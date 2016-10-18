@@ -1062,7 +1062,7 @@ void cmGlobalGenerator::Configure()
   this->FirstTimeProgress = 0.0f;
   this->ClearGeneratorMembers();
 
-  cmState::Snapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
+  cmStateSnapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
 
   snapshot.GetDirectory().SetCurrentSource(
     this->CMakeInstance->GetHomeDirectory());
@@ -1909,10 +1909,10 @@ void cmGlobalGenerator::SetConfiguredFilesPath(cmGlobalGenerator* gen)
   }
 }
 
-bool cmGlobalGenerator::IsExcluded(cmState::Snapshot const& rootSnp,
-                                   cmState::Snapshot const& snp_) const
+bool cmGlobalGenerator::IsExcluded(cmStateSnapshot const& rootSnp,
+                                   cmStateSnapshot const& snp_) const
 {
-  cmState::Snapshot snp = snp_;
+  cmStateSnapshot snp = snp_;
   while (snp.IsValid()) {
     if (snp == rootSnp) {
       // No directory excludes itself.
@@ -1933,8 +1933,8 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 {
   assert(gen);
 
-  cmState::Snapshot rootSnp = root->GetStateSnapshot();
-  cmState::Snapshot snp = gen->GetStateSnapshot();
+  cmStateSnapshot rootSnp = root->GetStateSnapshot();
+  cmStateSnapshot snp = gen->GetStateSnapshot();
 
   return this->IsExcluded(rootSnp, snp);
 }
@@ -1974,7 +1974,7 @@ void cmGlobalGenerator::FillProjectMap()
   unsigned int i;
   for (i = 0; i < this->LocalGenerators.size(); ++i) {
     // for each local generator add all projects
-    cmState::Snapshot snp = this->LocalGenerators[i]->GetStateSnapshot();
+    cmStateSnapshot snp = this->LocalGenerators[i]->GetStateSnapshot();
     std::string name;
     do {
       std::string snpProjName = snp.GetProjectName();

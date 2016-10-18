@@ -481,7 +481,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     std::string homeOutputDir = this->GetHomeOutputDirectory();
     this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     this->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
-    cmState::Snapshot snapshot = this->GetCurrentSnapshot();
+    cmStateSnapshot snapshot = this->GetCurrentSnapshot();
     snapshot.GetDirectory().SetCurrentBinary(
       cmSystemTools::GetCurrentWorkingDirectory());
     snapshot.GetDirectory().SetCurrentSource(
@@ -517,7 +517,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   cmGlobalGenerator* gg = new cmGlobalGenerator(this);
   this->SetGlobalGenerator(gg);
 
-  cmState::Snapshot snapshot = this->GetCurrentSnapshot();
+  cmStateSnapshot snapshot = this->GetCurrentSnapshot();
   snapshot.GetDirectory().SetCurrentBinary(
     cmSystemTools::GetCurrentWorkingDirectory());
   snapshot.GetDirectory().SetCurrentSource(

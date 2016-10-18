@@ -249,7 +249,7 @@ void cmLocalGenerator::GenerateTestFiles()
     (*gi)->Compute(this);
     (*gi)->Generate(fout, config, configurationTypes);
   }
-  typedef std::vector<cmState::Snapshot> vec_t;
+  typedef std::vector<cmStateSnapshot> vec_t;
   vec_t const& children = this->Makefile->GetStateSnapshot().GetChildren();
   std::string parentBinDir = this->GetCurrentBinaryDirectory();
   for (vec_t::const_iterator i = children.begin(); i != children.end(); ++i) {
@@ -446,12 +446,12 @@ void cmLocalGenerator::GenerateInstallRules()
   this->GenerateTargetInstallRules(fout, config, configurationTypes);
 
   // Include install scripts from subdirectories.
-  std::vector<cmState::Snapshot> children =
+  std::vector<cmStateSnapshot> children =
     this->Makefile->GetStateSnapshot().GetChildren();
   if (!children.empty()) {
     fout << "if(NOT CMAKE_INSTALL_LOCAL_ONLY)\n";
     fout << "  # Include the install script for each subdirectory.\n";
-    for (std::vector<cmState::Snapshot>::const_iterator ci = children.begin();
+    for (std::vector<cmStateSnapshot>::const_iterator ci = children.begin();
          ci != children.end(); ++ci) {
       if (!ci->GetDirectory().GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
         std::string odir = ci->GetDirectory().GetCurrentBinary();
@@ -563,7 +563,7 @@ cmState* cmLocalGenerator::GetState() const
   return this->GlobalGenerator->GetCMakeInstance()->GetState();
 }
 
-cmState::Snapshot cmLocalGenerator::GetStateSnapshot() const
+cmStateSnapshot cmLocalGenerator::GetStateSnapshot() const
 {
   return this->Makefile->GetStateSnapshot();
 }
@@ -1868,7 +1868,7 @@ const char* cmLocalGenerator::GetFeature(const std::string& feature,
     featureName += "_";
     featureName += cmSystemTools::UpperCase(config);
   }
-  cmState::Snapshot snp = this->StateSnapshot;
+  cmStateSnapshot snp = this->StateSnapshot;
   while (snp.IsValid()) {
     if (const char* value = snp.GetDirectory().GetProperty(featureName)) {
       return value;

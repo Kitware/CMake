@@ -760,7 +760,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       cm.GetCurrentSnapshot().SetDefaultDefinitions();
       if (cmGlobalGenerator* ggd = cm.CreateGlobalGenerator(gen)) {
         cm.SetGlobalGenerator(ggd);
-        cmState::Snapshot snapshot = cm.GetCurrentSnapshot();
+        cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
         snapshot.GetDirectory().SetCurrentBinary(startOutDir);
         snapshot.GetDirectory().SetCurrentSource(startDir);
         CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(ggd, snapshot));

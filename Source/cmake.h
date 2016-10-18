@@ -407,14 +407,11 @@ public:
   void WatchUnusedCli(const std::string& var);
 
   cmState* GetState() const { return this->State; }
-  void SetCurrentSnapshot(cmState::Snapshot snapshot)
+  void SetCurrentSnapshot(cmStateSnapshot snapshot)
   {
     this->CurrentSnapshot = snapshot;
   }
-  cmState::Snapshot GetCurrentSnapshot() const
-  {
-    return this->CurrentSnapshot;
-  }
+  cmStateSnapshot GetCurrentSnapshot() const { return this->CurrentSnapshot; }
 
 protected:
   void RunCheckForUnusedVariables();
@@ -490,7 +487,7 @@ private:
   InstalledFilesMap InstalledFiles;
 
   cmState* State;
-  cmState::Snapshot CurrentSnapshot;
+  cmStateSnapshot CurrentSnapshot;
   cmMessenger* Messenger;
 
   std::vector<std::string> TraceOnlyThisSources;

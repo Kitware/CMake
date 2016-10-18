@@ -113,14 +113,14 @@ public:
 
   // Construct an empty backtrace whose bottom sits in the directory
   // indicated by the given valid snapshot.
-  cmListFileBacktrace(cmState::Snapshot snapshot);
+  cmListFileBacktrace(cmStateSnapshot snapshot);
 
   // Backtraces may be copied and assigned as values.
   cmListFileBacktrace(cmListFileBacktrace const& r);
   cmListFileBacktrace& operator=(cmListFileBacktrace const& r);
   ~cmListFileBacktrace();
 
-  cmState::Snapshot GetBottom() const { return this->Bottom; }
+  cmStateSnapshot GetBottom() const { return this->Bottom; }
 
   // Get a backtrace with the given file scope added to the top.
   // May not be called until after construction with a valid snapshot.
@@ -147,11 +147,11 @@ public:
 private:
   struct Entry;
 
-  cmState::Snapshot Bottom;
+  cmStateSnapshot Bottom;
   Entry* Cur;
-  cmListFileBacktrace(cmState::Snapshot bottom, Entry* up,
+  cmListFileBacktrace(cmStateSnapshot bottom, Entry* up,
                       cmListFileContext const& lfc);
-  cmListFileBacktrace(cmState::Snapshot bottom, Entry* cur);
+  cmListFileBacktrace(cmStateSnapshot bottom, Entry* cur);
 };
 
 struct cmListFile

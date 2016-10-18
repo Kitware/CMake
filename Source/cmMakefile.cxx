@@ -45,7 +45,7 @@ class cmMessenger;
 
 // default is not to be building executables
 cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
-                       cmState::Snapshot const& snapshot)
+                       cmStateSnapshot const& snapshot)
   : GlobalGenerator(globalGenerator)
   , StateSnapshot(snapshot)
   , Backtrace(snapshot)
@@ -1356,7 +1356,7 @@ private:
   cmMakefile* Makefile;
   cmGlobalGenerator* GG;
   cmMakefile* CurrentMakefile;
-  cmState::Snapshot Snapshot;
+  cmStateSnapshot Snapshot;
   bool ReportError;
 };
 
@@ -1538,7 +1538,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     return;
   }
 
-  cmState::Snapshot newSnapshot =
+  cmStateSnapshot newSnapshot =
     this->GetState()->CreateBuildsystemDirectorySnapshot(this->StateSnapshot);
 
   newSnapshot.GetDirectory().SetCurrentSource(srcPath);
@@ -3621,7 +3621,7 @@ void cmMakefile::AddCMakeDependFilesFromUser()
 std::string cmMakefile::FormatListFileStack() const
 {
   std::vector<std::string> listFiles;
-  cmState::Snapshot snp = this->StateSnapshot;
+  cmStateSnapshot snp = this->StateSnapshot;
   while (snp.IsValid()) {
     listFiles.push_back(snp.GetExecutionListFile());
     snp = snp.GetCallStackParent();
@@ -3918,7 +3918,7 @@ void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
   this->MarkVariableAsUsed(nMatchesVariable);
 }
 
-cmState::Snapshot cmMakefile::GetStateSnapshot() const
+cmStateSnapshot cmMakefile::GetStateSnapshot() const
 {
   return this->StateSnapshot;
 }
@@ -3999,7 +3999,7 @@ void cmMakefile::PopPolicy()
 
 void cmMakefile::PopSnapshot(bool reportError)
 {
-  // cmState::Snapshot manages nested policy scopes within it.
+  // cmStateSnapshot manages nested policy scopes within it.
   // Since the scope corresponding to the snapshot is closing,
   // reject any still-open nested policy scopes with an error.
   while (!this->StateSnapshot.CanPopPolicyScope()) {
