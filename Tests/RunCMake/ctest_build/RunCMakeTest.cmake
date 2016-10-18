@@ -13,6 +13,11 @@ function(run_BuildFailure)
   set(CASE_CMAKELISTS_SUFFIX_CODE [[
 add_custom_target(BuildFailure ALL COMMAND command-does-not-exist)
 ]])
+  set(CASE_CMAKELISTS_PREFIX_CODE [[
+if(NOT CTEST_USE_LAUNCHERS)
+  message(FATAL_ERROR "CTEST_USE_LAUNCHERS not set")
+endif()
+]])
   set(CASE_TEST_PREFIX_CODE [[
 cmake_policy(SET CMP0061 NEW)
 ]])
