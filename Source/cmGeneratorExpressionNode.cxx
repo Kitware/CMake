@@ -1035,7 +1035,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 #define TRANSITIVE_PROPERTY_COMPARE(PROPERTY)                                 \
   (#PROPERTY == propertyName || "INTERFACE_" #PROPERTY == propertyName) ||
         if (CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(
-              TRANSITIVE_PROPERTY_COMPARE) false) {
+              TRANSITIVE_PROPERTY_COMPARE) false) { // NOLINT(clang-tidy)
           reportError(
             context, content->GetOriginalExpression(),
             "$<TARGET_PROPERTY:...> expression in link libraries "
@@ -1052,7 +1052,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 #define ASSERT_TRANSITIVE_PROPERTY_METHOD(METHOD) dagCheckerParent->METHOD() ||
 
         assert(CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
-          ASSERT_TRANSITIVE_PROPERTY_METHOD) false);
+          ASSERT_TRANSITIVE_PROPERTY_METHOD) false); // NOLINT(clang-tidy)
 #undef ASSERT_TRANSITIVE_PROPERTY_METHOD
       }
     }
