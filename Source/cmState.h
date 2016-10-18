@@ -12,6 +12,7 @@
 #include "cmProperty.h"
 #include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
+#include "cmStateTypes.h"
 
 #include <map>
 #include <set>
@@ -22,51 +23,6 @@ class cmCacheManager;
 class cmCommand;
 class cmListFileBacktrace;
 class cmPropertyDefinition;
-
-namespace cmStateDetail {
-struct BuildsystemDirectoryStateType;
-struct SnapshotDataType;
-struct PolicyStackEntry;
-typedef cmLinkedTree<cmStateDetail::SnapshotDataType>::iterator PositionType;
-}
-
-namespace cmStateEnums {
-
-enum SnapshotType
-{
-  BaseType,
-  BuildsystemDirectoryType,
-  FunctionCallType,
-  MacroCallType,
-  IncludeFileType,
-  InlineListFileType,
-  PolicyScopeType,
-  VariableScopeType
-};
-
-enum TargetType
-{
-  EXECUTABLE,
-  STATIC_LIBRARY,
-  SHARED_LIBRARY,
-  MODULE_LIBRARY,
-  OBJECT_LIBRARY,
-  UTILITY,
-  GLOBAL_TARGET,
-  INTERFACE_LIBRARY,
-  UNKNOWN_LIBRARY
-};
-enum CacheEntryType
-{
-  BOOL = 0,
-  PATH,
-  FILEPATH,
-  STRING,
-  INTERNAL,
-  STATIC,
-  UNINITIALIZED
-};
-}
 
 class cmStateDirectory;
 class cmStateSnapshot;
