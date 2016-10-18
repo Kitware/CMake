@@ -69,97 +69,35 @@ enum CacheEntryType
 }
 
 class cmStateDirectory;
+class cmStateSnapshot;
 
 class cmState
 {
+  friend class cmStateSnapshot;
 
 public:
   cmState();
   ~cmState();
 
+  typedef cmStateSnapshot Snapshot;
   typedef cmStateDirectory Directory;
-
-  class Snapshot
-  {
-  public:
-    Snapshot(cmState* state = CM_NULLPTR);
-    Snapshot(cmState* state, cmStateDetail::PositionType position);
-
-    const char* GetDefinition(std::string const& name) const;
-    bool IsInitialized(std::string const& name) const;
-    void SetDefinition(std::string const& name, std::string const& value);
-    void RemoveDefinition(std::string const& name);
-    std::vector<std::string> UnusedKeys() const;
-    std::vector<std::string> ClosureKeys() const;
-    bool RaiseScope(std::string const& var, const char* varDef);
-
-    void SetListFile(std::string const& listfile);
-
-    std::string GetExecutionListFile() const;
-
-    std::vector<Snapshot> GetChildren();
-
-    bool IsValid() const;
-    Snapshot GetBuildsystemDirectoryParent() const;
-    Snapshot GetCallStackParent() const;
-    Snapshot GetCallStackBottom() const;
-    cmStateEnums::SnapshotType GetType() const;
-
-    void SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
-    cmPolicies::PolicyStatus GetPolicy(cmPolicies::PolicyID id) const;
-    bool HasDefinedPolicyCMP0011();
-    void PushPolicy(cmPolicies::PolicyMap entry, bool weak);
-    bool PopPolicy();
-    bool CanPopPolicyScope();
-
-    cmState* GetState() const;
-
-    cmStateDirectory GetDirectory() const;
-
-    void SetProjectName(std::string const& name);
-    std::string GetProjectName() const;
-
-    void InitializeFromParent_ForSubdirsCommand();
-
-    struct StrictWeakOrder
-    {
-      bool operator()(const cmState::Snapshot& lhs,
-                      const cmState::Snapshot& rhs) const;
-    };
-
-    void SetDirectoryDefinitions();
-    void SetDefaultDefinitions();
-
-  private:
-    friend bool operator==(const cmState::Snapshot& lhs,
-                           const cmState::Snapshot& rhs);
-    friend bool operator!=(const cmState::Snapshot& lhs,
-                           const cmState::Snapshot& rhs);
-    friend class cmState;
-    friend class cmStateDirectory;
-    friend struct StrictWeakOrder;
-
-    void InitializeFromParent();
-
-    cmState* State;
-    cmStateDetail::PositionType Position;
-  };
 
   static const char* GetTargetTypeName(cmStateEnums::TargetType targetType);
 
-  Snapshot CreateBaseSnapshot();
-  Snapshot CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot);
-  Snapshot CreateFunctionCallSnapshot(Snapshot originSnapshot,
-                                      std::string const& fileName);
-  Snapshot CreateMacroCallSnapshot(Snapshot originSnapshot,
-                                   std::string const& fileName);
-  Snapshot CreateIncludeFileSnapshot(Snapshot originSnapshot,
-                                     std::string const& fileName);
-  Snapshot CreateVariableScopeSnapshot(Snapshot originSnapshot);
-  Snapshot CreateInlineListFileSnapshot(Snapshot originSnapshot,
-                                        std::string const& fileName);
-  Snapshot CreatePolicyScopeSnapshot(Snapshot originSnapshot);
-  Snapshot Pop(Snapshot originSnapshot);
+  cmStateSnapshot CreateBaseSnapshot();
+  cmStateSnapshot CreateBuildsystemDirectorySnapshot(
+    cmStateSnapshot originSnapshot);
+  cmStateSnapshot CreateFunctionCallSnapshot(cmStateSnapshot originSnapshot,
+                                             std::string const& fileName);
+  cmStateSnapshot CreateMacroCallSnapshot(cmStateSnapshot originSnapshot,
+                                          std::string const& fileName);
+  cmStateSnapshot CreateIncludeFileSnapshot(cmStateSnapshot originSnapshot,
+                                            std::string const& fileName);
+  cmStateSnapshot CreateVariableScopeSnapshot(cmStateSnapshot originSnapshot);
+  cmStateSnapshot CreateInlineListFileSnapshot(cmStateSnapshot originSnapshot,
+                                               std::string const& fileName);
+  cmStateSnapshot CreatePolicyScopeSnapshot(cmStateSnapshot originSnapshot);
+  cmStateSnapshot Pop(cmStateSnapshot originSnapshot);
 
   static cmStateEnums::CacheEntryType StringToCacheEntryType(const char*);
   static const char* CacheEntryTypeToString(cmStateEnums::CacheEntryType);
@@ -204,7 +142,7 @@ public:
                               std::string& value,
                               cmStateEnums::CacheEntryType& type);
 
-  Snapshot Reset();
+  cmStateSnapshot Reset();
   // Define a property
   void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
                       const char* ShortDescription,
@@ -295,11 +233,77 @@ private:
   bool MSYSShell;
 };
 
+class cmStateSnapshot
+{
+public:
+  cmStateSnapshot(cmState* state = CM_NULLPTR);
+  cmStateSnapshot(cmState* state, cmStateDetail::PositionType position);
+
+  const char* GetDefinition(std::string const& name) const;
+  bool IsInitialized(std::string const& name) const;
+  void SetDefinition(std::string const& name, std::string const& value);
+  void RemoveDefinition(std::string const& name);
+  std::vector<std::string> UnusedKeys() const;
+  std::vector<std::string> ClosureKeys() const;
+  bool RaiseScope(std::string const& var, const char* varDef);
+
+  void SetListFile(std::string const& listfile);
+
+  std::string GetExecutionListFile() const;
+
+  std::vector<cmStateSnapshot> GetChildren();
+
+  bool IsValid() const;
+  cmStateSnapshot GetBuildsystemDirectoryParent() const;
+  cmStateSnapshot GetCallStackParent() const;
+  cmStateSnapshot GetCallStackBottom() const;
+  cmStateEnums::SnapshotType GetType() const;
+
+  void SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
+  cmPolicies::PolicyStatus GetPolicy(cmPolicies::PolicyID id) const;
+  bool HasDefinedPolicyCMP0011();
+  void PushPolicy(cmPolicies::PolicyMap entry, bool weak);
+  bool PopPolicy();
+  bool CanPopPolicyScope();
+
+  cmState* GetState() const;
+
+  cmStateDirectory GetDirectory() const;
+
+  void SetProjectName(std::string const& name);
+  std::string GetProjectName() const;
+
+  void InitializeFromParent_ForSubdirsCommand();
+
+  struct StrictWeakOrder
+  {
+    bool operator()(const cmStateSnapshot& lhs,
+                    const cmStateSnapshot& rhs) const;
+  };
+
+  void SetDirectoryDefinitions();
+  void SetDefaultDefinitions();
+
+private:
+  friend bool operator==(const cmStateSnapshot& lhs,
+                         const cmStateSnapshot& rhs);
+  friend bool operator!=(const cmStateSnapshot& lhs,
+                         const cmStateSnapshot& rhs);
+  friend class cmState;
+  friend class cmStateDirectory;
+  friend struct StrictWeakOrder;
+
+  void InitializeFromParent();
+
+  cmState* State;
+  cmStateDetail::PositionType Position;
+};
+
 class cmStateDirectory
 {
   cmStateDirectory(
     cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator iter,
-    cmState::Snapshot const& snapshot);
+    cmStateSnapshot const& snapshot);
 
 public:
   const char* GetCurrentSource() const;
@@ -356,11 +360,11 @@ private:
 private:
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator
     DirectoryState;
-  cmState::Snapshot Snapshot_;
-  friend class cmState::Snapshot;
+  cmStateSnapshot Snapshot_;
+  friend class cmStateSnapshot;
 };
 
-bool operator==(const cmState::Snapshot& lhs, const cmState::Snapshot& rhs);
-bool operator!=(const cmState::Snapshot& lhs, const cmState::Snapshot& rhs);
+bool operator==(const cmStateSnapshot& lhs, const cmStateSnapshot& rhs);
+bool operator!=(const cmStateSnapshot& lhs, const cmStateSnapshot& rhs);
 
 #endif
