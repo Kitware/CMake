@@ -68,6 +68,11 @@ Create custom targets to build projects in external trees
     Tell Git to clone with ``--depth 1``.  Use when ``GIT_TAG`` is not
     specified or when it names a branch in order to download only the
     tip of the branch without the rest of its history.
+  ``GIT_PROGRESS 1``
+    Tell Git to clone with ``--progress``.  For large projects, the clone step
+    does not output anything which can make the build appear to have stalled.
+    This option forces Git to output progress information during the clone step
+    so that forward progress is indicated.
   ``HG_REPOSITORY <url>``
     URL of mercurial repo
   ``HG_TAG <tag>``
@@ -509,7 +514,7 @@ define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
   "ExternalProject module."
   )
 
-function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name git_submodules git_shallow src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
+function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name git_submodules git_shallow git_progress src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
   if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.10)
     set(git_clone_shallow_options "--depth 1 --no-single-branch")
   else()
@@ -553,6 +558,11 @@ set(git_clone_options)
 set(git_shallow \"${git_shallow}\")
 if(git_shallow)
   list(APPEND git_clone_options ${git_clone_shallow_options})
+endif()
+
+set(git_progress \"${git_progress}\")
+if(git_progress)
+  list(APPEND git_clone_options --progress)
 endif()
 
 # try the clone 3 times incase there is an odd git clone issue
@@ -1795,6 +1805,7 @@ function(_ep_add_download_command name)
       set(tls_verify "${CMAKE_TLS_VERIFY}")
     endif()
     get_property(git_shallow TARGET ${name} PROPERTY _EP_GIT_SHALLOW)
+    get_property(git_progress TARGET ${name} PROPERTY _EP_GIT_PROGRESS)
 
     # For the download step, and the git clone operation, only the repository
     # should be recorded in a configured RepositoryInfo file. If the repo
@@ -1819,7 +1830,7 @@ function(_ep_add_download_command name)
     # The script will delete the source directory and then call git clone.
     #
     _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
-      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} "${git_submodules}" "${git_shallow}" ${src_name} ${work_dir}
+      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} "${git_submodules}" "${git_shallow}" "${git_progress}" ${src_name} ${work_dir}
       ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt "${tls_verify}"
       )
     set(comment "Performing download step (git clone) for '${name}'")
