@@ -339,13 +339,20 @@ void cmGlobalVisualStudio10Generator::EnableLanguage(
 
 const char* cmGlobalVisualStudio10Generator::GetPlatformToolset() const
 {
+  return this->GetPlatformToolsetString().c_str();
+}
+
+std::string const& cmGlobalVisualStudio10Generator::GetPlatformToolsetString()
+  const
+{
   if (!this->GeneratorToolset.empty()) {
-    return this->GeneratorToolset.c_str();
+    return this->GeneratorToolset;
   }
   if (!this->DefaultPlatformToolset.empty()) {
-    return this->DefaultPlatformToolset.c_str();
+    return this->DefaultPlatformToolset;
   }
-  return 0;
+  static std::string const empty;
+  return empty;
 }
 
 const char*

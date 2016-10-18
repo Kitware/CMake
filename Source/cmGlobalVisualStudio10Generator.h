@@ -48,6 +48,7 @@ public:
 
   /** The toolset name for the target platform.  */
   const char* GetPlatformToolset() const;
+  std::string const& GetPlatformToolsetString() const;
 
   /** The toolset host architecture name (e.g. x64 for 64-bit host tools).  */
   const char* GetPlatformToolsetHostArchitecture() const;
