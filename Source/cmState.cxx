@@ -27,8 +27,8 @@ static std::string const kSUBDIRECTORIES = "SUBDIRECTORIES";
 
 struct cmStateDetail::SnapshotDataType
 {
-  cmState::PositionType ScopeParent;
-  cmState::PositionType DirectoryParent;
+  cmStateDetail::PositionType ScopeParent;
+  cmStateDetail::PositionType DirectoryParent;
   cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator Policies;
   cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator PolicyRoot;
   cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator PolicyScope;
@@ -68,7 +68,7 @@ struct cmStateDetail::PolicyStackEntry : public cmPolicies::PolicyMap
 
 struct cmStateDetail::BuildsystemDirectoryStateType
 {
-  cmState::PositionType DirectoryEnd;
+  cmStateDetail::PositionType DirectoryEnd;
 
   std::string Location;
   std::string OutputLocation;
@@ -309,7 +309,7 @@ cmState::Snapshot cmState::Reset()
   this->GlobalProperties.clear();
   this->PropertyDefinitions.clear();
 
-  PositionType pos = this->SnapshotData.Truncate();
+  cmStateDetail::PositionType pos = this->SnapshotData.Truncate();
   this->ExecutionListFiles.Truncate();
 
   {
@@ -744,7 +744,8 @@ void cmState::Directory::ComputeRelativePathTopBinary()
 
 cmState::Snapshot cmState::CreateBaseSnapshot()
 {
-  PositionType pos = this->SnapshotData.Push(this->SnapshotData.Root());
+  cmStateDetail::PositionType pos =
+    this->SnapshotData.Push(this->SnapshotData.Root());
   pos->DirectoryParent = this->SnapshotData.Root();
   pos->ScopeParent = this->SnapshotData.Root();
   pos->SnapshotType = BaseType;
@@ -773,7 +774,8 @@ cmState::Snapshot cmState::CreateBuildsystemDirectorySnapshot(
   Snapshot originSnapshot)
 {
   assert(originSnapshot.IsValid());
-  PositionType pos = this->SnapshotData.Push(originSnapshot.Position);
+  cmStateDetail::PositionType pos =
+    this->SnapshotData.Push(originSnapshot.Position);
   pos->DirectoryParent = originSnapshot.Position;
   pos->ScopeParent = originSnapshot.Position;
   pos->SnapshotType = BuildsystemDirectoryType;
@@ -805,7 +807,7 @@ cmState::Snapshot cmState::CreateBuildsystemDirectorySnapshot(
 cmState::Snapshot cmState::CreateFunctionCallSnapshot(
   cmState::Snapshot originSnapshot, std::string const& fileName)
 {
-  PositionType pos =
+  cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
   pos->ScopeParent = originSnapshot.Position;
   pos->SnapshotType = FunctionCallType;
@@ -824,7 +826,7 @@ cmState::Snapshot cmState::CreateFunctionCallSnapshot(
 cmState::Snapshot cmState::CreateMacroCallSnapshot(
   cmState::Snapshot originSnapshot, std::string const& fileName)
 {
-  PositionType pos =
+  cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
   pos->SnapshotType = MacroCallType;
   pos->Keep = false;
@@ -839,7 +841,7 @@ cmState::Snapshot cmState::CreateMacroCallSnapshot(
 cmState::Snapshot cmState::CreateIncludeFileSnapshot(
   cmState::Snapshot originSnapshot, const std::string& fileName)
 {
-  PositionType pos =
+  cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
   pos->SnapshotType = IncludeFileType;
   pos->Keep = true;
@@ -854,7 +856,7 @@ cmState::Snapshot cmState::CreateIncludeFileSnapshot(
 cmState::Snapshot cmState::CreateVariableScopeSnapshot(
   cmState::Snapshot originSnapshot)
 {
-  PositionType pos =
+  cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
   pos->ScopeParent = originSnapshot.Position;
   pos->SnapshotType = VariableScopeType;
@@ -872,7 +874,7 @@ cmState::Snapshot cmState::CreateVariableScopeSnapshot(
 cmState::Snapshot cmState::CreateInlineListFileSnapshot(
   cmState::Snapshot originSnapshot, const std::string& fileName)
 {
-  PositionType pos =
+  cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
   pos->SnapshotType = InlineListFileType;
   pos->Keep = true;
@@ -886,7 +888,7 @@ cmState::Snapshot cmState::CreateInlineListFileSnapshot(
 cmState::Snapshot cmState::CreatePolicyScopeSnapshot(
   cmState::Snapshot originSnapshot)
 {
-  PositionType pos =
+  cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
   pos->SnapshotType = PolicyScopeType;
   pos->Keep = false;
@@ -897,8 +899,8 @@ cmState::Snapshot cmState::CreatePolicyScopeSnapshot(
 
 cmState::Snapshot cmState::Pop(cmState::Snapshot originSnapshot)
 {
-  PositionType pos = originSnapshot.Position;
-  PositionType prevPos = pos;
+  cmStateDetail::PositionType pos = originSnapshot.Position;
+  cmStateDetail::PositionType prevPos = pos;
   ++prevPos;
   prevPos->IncludeDirectoryPosition =
     prevPos->BuildSystemDirectory->IncludeDirectories.size();
@@ -934,7 +936,8 @@ std::vector<cmState::Snapshot> cmState::Snapshot::GetChildren()
   return this->Position->BuildSystemDirectory->Children;
 }
 
-cmState::Snapshot::Snapshot(cmState* state, PositionType position)
+cmState::Snapshot::Snapshot(cmState* state,
+                            cmStateDetail::PositionType position)
   : State(state)
   , Position(position)
 {
@@ -1022,7 +1025,7 @@ cmState::Snapshot cmState::Snapshot::GetBuildsystemDirectoryParent() const
   if (!this->State || this->Position == this->State->SnapshotData.Root()) {
     return snapshot;
   }
-  PositionType parentPos = this->Position->DirectoryParent;
+  cmStateDetail::PositionType parentPos = this->Position->DirectoryParent;
   if (parentPos != this->State->SnapshotData.Root()) {
     snapshot =
       Snapshot(this->State, parentPos->BuildSystemDirectory->DirectoryEnd);
@@ -1037,7 +1040,7 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
   assert(this->Position != this->State->SnapshotData.Root());
 
   Snapshot snapshot;
-  PositionType parentPos = this->Position;
+  cmStateDetail::PositionType parentPos = this->Position;
   while (parentPos->SnapshotType == cmState::PolicyScopeType ||
          parentPos->SnapshotType == cmState::VariableScopeType) {
     ++parentPos;
@@ -1066,7 +1069,7 @@ cmState::Snapshot cmState::Snapshot::GetCallStackBottom() const
   assert(this->State);
   assert(this->Position != this->State->SnapshotData.Root());
 
-  PositionType pos = this->Position;
+  cmStateDetail::PositionType pos = this->Position;
   while (pos->SnapshotType != cmState::BaseType &&
          pos->SnapshotType != cmState::BuildsystemDirectoryType &&
          pos != this->State->SnapshotData.Root()) {
@@ -1077,14 +1080,14 @@ cmState::Snapshot cmState::Snapshot::GetCallStackBottom() const
 
 void cmState::Snapshot::PushPolicy(cmPolicies::PolicyMap entry, bool weak)
 {
-  PositionType pos = this->Position;
+  cmStateDetail::PositionType pos = this->Position;
   pos->Policies = this->State->PolicyStack.Push(
     pos->Policies, cmStateDetail::PolicyStackEntry(entry, weak));
 }
 
 bool cmState::Snapshot::PopPolicy()
 {
-  PositionType pos = this->Position;
+  cmStateDetail::PositionType pos = this->Position;
   if (pos->Policies == pos->PolicyScope) {
     return false;
   }
@@ -1135,8 +1138,8 @@ cmPolicies::PolicyStatus cmState::Snapshot::GetPolicy(
         return status;
       }
     }
-    cmState::PositionType e = dir->DirectoryEnd;
-    cmState::PositionType p = e->DirectoryParent;
+    cmStateDetail::PositionType e = dir->DirectoryEnd;
+    cmStateDetail::PositionType p = e->DirectoryParent;
     if (p == this->State->SnapshotData.Root()) {
       break;
     }
@@ -1305,7 +1308,7 @@ void cmState::Snapshot::SetDirectoryDefinitions()
 
 void cmState::Snapshot::InitializeFromParent()
 {
-  PositionType parent = this->Position->DirectoryParent;
+  cmStateDetail::PositionType parent = this->Position->DirectoryParent;
   assert(this->Position->Vars.IsValid());
   assert(parent->Vars.IsValid());
 

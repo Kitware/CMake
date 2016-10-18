@@ -27,14 +27,11 @@ namespace cmStateDetail {
 struct BuildsystemDirectoryStateType;
 struct SnapshotDataType;
 struct PolicyStackEntry;
+typedef cmLinkedTree<cmStateDetail::SnapshotDataType>::iterator PositionType;
 }
 
 class cmState
 {
-  typedef cmLinkedTree<cmStateDetail::SnapshotDataType>::iterator PositionType;
-  friend class Snapshot;
-  friend struct cmStateDetail::BuildsystemDirectoryStateType;
-  friend struct cmStateDetail::SnapshotDataType;
 
 public:
   cmState();
@@ -58,7 +55,7 @@ public:
   {
   public:
     Snapshot(cmState* state = CM_NULLPTR);
-    Snapshot(cmState* state, PositionType position);
+    Snapshot(cmState* state, cmStateDetail::PositionType position);
 
     const char* GetDefinition(std::string const& name) const;
     bool IsInitialized(std::string const& name) const;
@@ -117,7 +114,7 @@ public:
     void InitializeFromParent();
 
     cmState* State;
-    cmState::PositionType Position;
+    cmStateDetail::PositionType Position;
   };
 
   class Directory
