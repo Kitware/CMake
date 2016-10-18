@@ -430,17 +430,19 @@ void cmExtraCodeLiteGenerator::CreateProjectSourceEntries(
 
   xml.StartElement("General");
   std::string outputPath = mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-  if (!outputPath.empty())
+  if (!outputPath.empty()) {
     xml.Attribute("OutputFile", outputPath + "/$(ProjectName)");
-  else
+  } else {
     xml.Attribute("OutputFile", "$(IntermediateDirectory)/$(ProjectName)");
+  }
   xml.Attribute("IntermediateDirectory", "./");
   xml.Attribute("Command", "./$(ProjectName)");
   xml.Attribute("CommandArguments", "");
-  if (!outputPath.empty())
+  if (!outputPath.empty()) {
     xml.Attribute("WorkingDirectory", outputPath);
-  else
+  } else {
     xml.Attribute("WorkingDirectory", "$(IntermediateDirectory)");
+  }
   xml.Attribute("PauseExecWhenProcTerminates", "yes");
   xml.EndElement(); // General
 

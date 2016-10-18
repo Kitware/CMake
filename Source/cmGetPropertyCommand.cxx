@@ -247,7 +247,7 @@ bool cmGetPropertyCommand::HandleTargetMode()
       }
       return this->StoreResult(CM_NULLPTR);
     }
-    const char* prop_cstr = 0;
+    const char* prop_cstr = CM_NULLPTR;
     cmListFileBacktrace bt = this->Makefile->GetBacktrace();
     cmMessenger* messenger = this->Makefile->GetMessenger();
     if (cmTargetPropertyComputer::PassesWhitelist(

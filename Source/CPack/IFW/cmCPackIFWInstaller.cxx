@@ -231,7 +231,7 @@ public:
 protected:
   void StartElement(const std::string& name, const char** /*atts*/) CM_OVERRIDE
   {
-    file = name == "file" ? true : false;
+    file = name == "file";
     if (file) {
       hasFiles = true;
     }

@@ -115,41 +115,59 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
   }
   if (subCommand == "STRINGS") {
     return this->HandleStringsCommand(args);
-  } else if (subCommand == "GLOB") {
+  }
+  if (subCommand == "GLOB") {
     return this->HandleGlobCommand(args, false);
-  } else if (subCommand == "GLOB_RECURSE") {
+  }
+  if (subCommand == "GLOB_RECURSE") {
     return this->HandleGlobCommand(args, true);
-  } else if (subCommand == "MAKE_DIRECTORY") {
+  }
+  if (subCommand == "MAKE_DIRECTORY") {
     return this->HandleMakeDirectoryCommand(args);
-  } else if (subCommand == "RENAME") {
+  }
+  if (subCommand == "RENAME") {
     return this->HandleRename(args);
-  } else if (subCommand == "REMOVE") {
+  }
+  if (subCommand == "REMOVE") {
     return this->HandleRemove(args, false);
-  } else if (subCommand == "REMOVE_RECURSE") {
+  }
+  if (subCommand == "REMOVE_RECURSE") {
     return this->HandleRemove(args, true);
-  } else if (subCommand == "COPY") {
+  }
+  if (subCommand == "COPY") {
     return this->HandleCopyCommand(args);
-  } else if (subCommand == "INSTALL") {
+  }
+  if (subCommand == "INSTALL") {
     return this->HandleInstallCommand(args);
-  } else if (subCommand == "DIFFERENT") {
+  }
+  if (subCommand == "DIFFERENT") {
     return this->HandleDifferentCommand(args);
-  } else if (subCommand == "RPATH_CHANGE" || subCommand == "CHRPATH") {
+  }
+  if (subCommand == "RPATH_CHANGE" || subCommand == "CHRPATH") {
     return this->HandleRPathChangeCommand(args);
-  } else if (subCommand == "RPATH_CHECK") {
+  }
+  if (subCommand == "RPATH_CHECK") {
     return this->HandleRPathCheckCommand(args);
-  } else if (subCommand == "RPATH_REMOVE") {
+  }
+  if (subCommand == "RPATH_REMOVE") {
     return this->HandleRPathRemoveCommand(args);
-  } else if (subCommand == "RELATIVE_PATH") {
+  }
+  if (subCommand == "RELATIVE_PATH") {
     return this->HandleRelativePathCommand(args);
-  } else if (subCommand == "TO_CMAKE_PATH") {
+  }
+  if (subCommand == "TO_CMAKE_PATH") {
     return this->HandleCMakePathCommand(args, false);
-  } else if (subCommand == "TO_NATIVE_PATH") {
+  }
+  if (subCommand == "TO_NATIVE_PATH") {
     return this->HandleCMakePathCommand(args, true);
-  } else if (subCommand == "TIMESTAMP") {
+  }
+  if (subCommand == "TIMESTAMP") {
     return this->HandleTimestampCommand(args);
-  } else if (subCommand == "GENERATE") {
+  }
+  if (subCommand == "GENERATE") {
     return this->HandleGenerateCommand(args);
-  } else if (subCommand == "LOCK") {
+  }
+  if (subCommand == "LOCK") {
     return this->HandleLockCommand(args);
   }
 

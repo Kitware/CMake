@@ -42,8 +42,9 @@ static std::vector<std::string> getConfigurations(const cmake* cm)
   }
 
   makefiles[0]->GetConfigurations(configurations);
-  if (configurations.empty())
+  if (configurations.empty()) {
     configurations.push_back("");
+  }
   return configurations;
 }
 
@@ -96,20 +97,24 @@ static void getCMakeInputs(const cmGlobalGenerator* gg,
       if (!sourceDir.empty()) {
         const std::string& relative =
           cmSystemTools::RelativePath(sourceDir.c_str(), jt->c_str());
-        if (toAdd.size() > relative.size())
+        if (toAdd.size() > relative.size()) {
           toAdd = relative;
+        }
       }
 
       if (isInternal) {
-        if (internalFiles)
+        if (internalFiles) {
           internalFiles->push_back(toAdd);
+        }
       } else {
         if (isTemporary) {
-          if (tmpFiles)
+          if (tmpFiles) {
             tmpFiles->push_back(toAdd);
+          }
         } else {
-          if (explicitFiles)
+          if (explicitFiles) {
             explicitFiles->push_back(toAdd);
+          }
         }
       }
     }
@@ -672,8 +677,9 @@ static Json::Value DumpSourceFilesList(
   Json::Value result = Json::arrayValue;
   for (auto it = fileGroups.begin(); it != fileGroups.end(); ++it) {
     Json::Value group = DumpSourceFileGroup(it->first, it->second, baseDir);
-    if (!group.isNull())
+    if (!group.isNull()) {
       result.append(group);
+    }
   }
 
   return result;
@@ -821,8 +827,8 @@ static Json::Value DumpProjectList(const cmake* cm, const std::string config)
     Json::Value pObj = Json::objectValue;
     pObj[kNAME_KEY] = projectIt.first;
 
-    assert(projectIt.second.size() >
-           0); // All Projects must have at least one local generator
+    // All Projects must have at least one local generator
+    assert(!projectIt.second.empty());
     const cmLocalGenerator* lg = projectIt.second.at(0);
 
     // Project structure information:

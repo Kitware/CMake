@@ -75,7 +75,7 @@ private:
       }
 
       // Support "LOCATION_<CONFIG>".
-      else if (cmHasLiteralPrefix(prop, "LOCATION_")) {
+      if (cmHasLiteralPrefix(prop, "LOCATION_")) {
         if (!tgt->IsImported() &&
             !HandleLocationPropertyPolicy(tgt->GetName(), messenger,
                                           context)) {
@@ -86,8 +86,8 @@ private:
       }
 
       // Support "<CONFIG>_LOCATION".
-      else if (cmHasLiteralSuffix(prop, "_LOCATION") &&
-               !cmHasLiteralPrefix(prop, "XCODE_ATTRIBUTE_")) {
+      if (cmHasLiteralSuffix(prop, "_LOCATION") &&
+          !cmHasLiteralPrefix(prop, "XCODE_ATTRIBUTE_")) {
         std::string configName(prop.c_str(), prop.size() - 9);
         if (configName != "IMPORTED") {
           if (!tgt->IsImported() &&

@@ -400,7 +400,7 @@ const char* cmGeneratorTarget::GetProperty(const std::string& prop) const
   if (!cmTargetPropertyComputer::PassesWhitelist(
         this->GetType(), prop, this->Makefile->GetMessenger(),
         this->GetBacktrace())) {
-    return 0;
+    return CM_NULLPTR;
   }
   if (const char* result = cmTargetPropertyComputer::GetProperty(
         this, prop, this->Makefile->GetMessenger(), this->GetBacktrace())) {
