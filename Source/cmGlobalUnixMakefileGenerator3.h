@@ -8,7 +8,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 #include <iosfwd>
 #include <map>

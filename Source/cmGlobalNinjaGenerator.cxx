@@ -13,7 +13,7 @@
 #include "cmMakefile.h"
 #include "cmNinjaLinkLineComputer.h"
 #include "cmOutputConverter.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"

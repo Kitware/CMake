@@ -4,7 +4,7 @@
 
 #include "cmCursesMainForm.h"
 #include "cmCursesStringWidget.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 
 #include <vector>

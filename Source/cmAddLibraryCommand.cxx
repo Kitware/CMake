@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddLibraryCommand.h"
 
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmake.h"
 
 // cmLibraryCommand

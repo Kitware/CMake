@@ -7,7 +7,7 @@
 
 #include "cmCursesForm.h"
 #include "cmCursesStandardIncludes.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 #include <stddef.h>
 #include <string>

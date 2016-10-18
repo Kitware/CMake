@@ -5,7 +5,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmPropertyDefinition.h"
 #include "cmSourceFile.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmTargetPropertyComputer.h"
 #include "cmTest.h"
 #include "cmake.h"

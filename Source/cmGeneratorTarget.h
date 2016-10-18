@@ -8,7 +8,7 @@
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 #include <map>
 #include <set>

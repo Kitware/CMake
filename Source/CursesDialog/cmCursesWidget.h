@@ -6,7 +6,7 @@
 #include <cmConfigure.h> // IWYU pragma: keep
 
 #include "cmCursesStandardIncludes.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 #include <string>
 

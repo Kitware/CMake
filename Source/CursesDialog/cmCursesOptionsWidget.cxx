@@ -3,7 +3,7 @@
 #include "cmCursesOptionsWidget.h"
 
 #include "cmCursesWidget.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 #define ctrl(z) ((z)&037)
 

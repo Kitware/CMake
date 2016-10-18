@@ -5,7 +5,7 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 #include <cmsys/RegularExpression.hxx>
 #include <map>

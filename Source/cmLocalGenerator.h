@@ -9,7 +9,7 @@
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmRulePlaceholderExpander.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmake.h"
 
 #include <cm_kwiml.h>

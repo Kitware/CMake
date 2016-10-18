@@ -15,7 +15,7 @@
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmSourceFile.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cm_auto_ptr.hxx"

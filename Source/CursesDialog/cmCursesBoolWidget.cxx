@@ -3,7 +3,7 @@
 #include "cmCursesBoolWidget.h"
 
 #include "cmCursesWidget.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 #include <string>
 

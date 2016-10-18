@@ -3,7 +3,7 @@
 #include "cmCursesDummyWidget.h"
 
 #include "cmCursesWidget.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 cmCursesDummyWidget::cmCursesDummyWidget(int width, int height, int left,
                                          int top)

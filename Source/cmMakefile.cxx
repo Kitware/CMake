@@ -17,7 +17,7 @@
 #include "cmListFileCache.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
 #include "cmVersion.h"

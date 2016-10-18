@@ -10,7 +10,7 @@
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmPropertyMap.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmTargetLinkLibraryType.h"
 
 #include <iosfwd>

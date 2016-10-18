@@ -3,7 +3,7 @@
 #include "cmCursesFilePathWidget.h"
 
 #include "cmCursesPathWidget.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 cmCursesFilePathWidget::cmCursesFilePathWidget(int width, int height, int left,
                                                int top)
