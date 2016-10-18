@@ -130,7 +130,7 @@ void cmGhsMultiTargetGenerator::Generate()
     this->WriteCompilerFlags(config, language);
     this->WriteCompilerDefinitions(config, language);
     this->WriteIncludes(config, language);
-    if (this->GeneratorTarget->GetType() == cmState::EXECUTABLE) {
+    if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
       this->WriteTargetLinkLibraries(config, language);
     }
     this->WriteCustomCommands();
@@ -174,7 +174,7 @@ GhsMultiGpj::Types cmGhsMultiTargetGenerator::GetGpjTag(
   GhsMultiGpj::Types output;
   if (cmGhsMultiTargetGenerator::DetermineIfTargetGroup(target)) {
     output = GhsMultiGpj::INTERGRITY_APPLICATION;
-  } else if (target->GetType() == cmState::STATIC_LIBRARY) {
+  } else if (target->GetType() == cmStateEnums::STATIC_LIBRARY) {
     output = GhsMultiGpj::LIBRARY;
   } else {
     output = GhsMultiGpj::PROGRAM;
@@ -195,13 +195,13 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string& config,
   std::string outputDir(this->GetOutputDirectory(config));
   std::string outputFilename(this->GetOutputFilename(config));
 
-  if (this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY) {
+  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
     std::string const static_library_suffix =
       this->Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
     *this->GetFolderBuildStreams() << "    -o \"" << outputDir
                                    << outputFilename << static_library_suffix
                                    << "\"" << std::endl;
-  } else if (this->GeneratorTarget->GetType() == cmState::EXECUTABLE) {
+  } else if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
     if (notKernel && !this->IsTargetGroup()) {
       *this->GetFolderBuildStreams() << "    -relprog" << std::endl;
     }

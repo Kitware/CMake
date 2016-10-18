@@ -187,7 +187,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
 {
   // Get the depender.
   cmGeneratorTarget const* depender = this->Targets[depender_index];
-  if (depender->GetType() == cmState::INTERFACE_LIBRARY) {
+  if (depender->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
     return;
   }
 
@@ -212,10 +212,10 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
            oi != objectFiles.end(); ++oi) {
         std::string objLib = (*oi)->GetObjectLibrary();
         if (!objLib.empty() && emitted.insert(objLib).second) {
-          if (depender->GetType() != cmState::EXECUTABLE &&
-              depender->GetType() != cmState::STATIC_LIBRARY &&
-              depender->GetType() != cmState::SHARED_LIBRARY &&
-              depender->GetType() != cmState::MODULE_LIBRARY) {
+          if (depender->GetType() != cmStateEnums::EXECUTABLE &&
+              depender->GetType() != cmStateEnums::STATIC_LIBRARY &&
+              depender->GetType() != cmStateEnums::SHARED_LIBRARY &&
+              depender->GetType() != cmStateEnums::MODULE_LIBRARY) {
             this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
               cmake::FATAL_ERROR,
               "Only executables and non-OBJECT libraries may "
@@ -287,7 +287,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
   // Skip targets that will not really be linked.  This is probably a
   // name conflict between an external library and an executable
   // within the project.
-  if (dependee && dependee->GetType() == cmState::EXECUTABLE &&
+  if (dependee && dependee->GetType() == cmStateEnums::EXECUTABLE &&
       !dependee->IsExecutableWithExports()) {
     dependee = CM_NULLPTR;
   }
@@ -316,7 +316,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
   cmGeneratorTarget const* dependee = dependee_name.Target;
 
   if (!dependee && !linking &&
-      (depender->GetType() != cmState::GLOBAL_TARGET)) {
+      (depender->GetType() != cmStateEnums::GLOBAL_TARGET)) {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     bool issueMessage = false;
     std::ostringstream e;
@@ -351,7 +351,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
   // Skip targets that will not really be linked.  This is probably a
   // name conflict between an external library and an executable
   // within the project.
-  if (linking && dependee && dependee->GetType() == cmState::EXECUTABLE &&
+  if (linking && dependee && dependee->GetType() == cmStateEnums::EXECUTABLE &&
       !dependee->IsExecutableWithExports()) {
     dependee = CM_NULLPTR;
   }
@@ -366,7 +366,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
                                              bool linking)
 {
   if (dependee->IsImported() ||
-      dependee->GetType() == cmState::INTERFACE_LIBRARY) {
+      dependee->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
     // Skip IMPORTED and INTERFACE targets but follow their utility
     // dependencies.
     std::set<cmLinkItem> const& utils = dependee->GetUtilityItems();
@@ -452,7 +452,7 @@ bool cmComputeTargetDepends::CheckComponents(
 
     // Make sure the component is all STATIC_LIBRARY targets.
     for (NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni) {
-      if (this->Targets[*ni]->GetType() != cmState::STATIC_LIBRARY) {
+      if (this->Targets[*ni]->GetType() != cmStateEnums::STATIC_LIBRARY) {
         this->ComplainAboutBadComponent(ccg, c);
         return false;
       }

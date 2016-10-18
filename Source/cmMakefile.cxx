@@ -730,7 +730,7 @@ void cmMakefile::AddCustomCommandToTarget(
     return;
   }
 
-  if (ti->second.GetType() == cmState::OBJECT_LIBRARY) {
+  if (ti->second.GetType() == cmStateEnums::OBJECT_LIBRARY) {
     std::ostringstream e;
     e << "Target \"" << target
       << "\" is an OBJECT library "
@@ -738,7 +738,7 @@ void cmMakefile::AddCustomCommandToTarget(
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (ti->second.GetType() == cmState::INTERFACE_LIBRARY) {
+  if (ti->second.GetType() == cmStateEnums::INTERFACE_LIBRARY) {
     std::ostringstream e;
     e << "Target \"" << target
       << "\" is an INTERFACE library "
@@ -1032,7 +1032,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
   const char* comment, bool uses_terminal)
 {
   // Create a target instance for this utility.
-  cmTarget* target = this->AddNewTarget(cmState::UTILITY, utilityName);
+  cmTarget* target = this->AddNewTarget(cmStateEnums::UTILITY, utilityName);
   if (excludeFromAll) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
@@ -1774,9 +1774,9 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
 {
   // for these targets do not add anything
   switch (target.GetType()) {
-    case cmState::UTILITY:
-    case cmState::GLOBAL_TARGET:
-    case cmState::INTERFACE_LIBRARY:
+    case cmStateEnums::UTILITY:
+    case cmStateEnums::GLOBAL_TARGET:
+    case cmStateEnums::INTERFACE_LIBRARY:
       return;
     default:;
   }
@@ -1828,13 +1828,15 @@ void cmMakefile::AddAlias(const std::string& lname, std::string const& tgtName)
 }
 
 cmTarget* cmMakefile::AddLibrary(const std::string& lname,
-                                 cmState::TargetType type,
+                                 cmStateEnums::TargetType type,
                                  const std::vector<std::string>& srcs,
                                  bool excludeFromAll)
 {
-  assert(type == cmState::STATIC_LIBRARY || type == cmState::SHARED_LIBRARY ||
-         type == cmState::MODULE_LIBRARY || type == cmState::OBJECT_LIBRARY ||
-         type == cmState::INTERFACE_LIBRARY);
+  assert(type == cmStateEnums::STATIC_LIBRARY ||
+         type == cmStateEnums::SHARED_LIBRARY ||
+         type == cmStateEnums::MODULE_LIBRARY ||
+         type == cmStateEnums::OBJECT_LIBRARY ||
+         type == cmStateEnums::INTERFACE_LIBRARY);
 
   cmTarget* target = this->AddNewTarget(type, lname);
   // Clear its dependencies. Otherwise, dependencies might persist
@@ -1853,7 +1855,7 @@ cmTarget* cmMakefile::AddExecutable(const char* exeName,
                                     const std::vector<std::string>& srcs,
                                     bool excludeFromAll)
 {
-  cmTarget* target = this->AddNewTarget(cmState::EXECUTABLE, exeName);
+  cmTarget* target = this->AddNewTarget(cmStateEnums::EXECUTABLE, exeName);
   if (excludeFromAll) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
@@ -1862,7 +1864,7 @@ cmTarget* cmMakefile::AddExecutable(const char* exeName,
   return target;
 }
 
-cmTarget* cmMakefile::AddNewTarget(cmState::TargetType type,
+cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
                                    const std::string& name)
 {
   cmTargets::iterator it =
@@ -2040,8 +2042,8 @@ void cmMakefile::ExpandVariablesCMP0019()
   for (cmTargets::iterator l = this->Targets.begin(); l != this->Targets.end();
        ++l) {
     cmTarget& t = l->second;
-    if (t.GetType() == cmState::INTERFACE_LIBRARY ||
-        t.GetType() == cmState::GLOBAL_TARGET) {
+    if (t.GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+        t.GetType() == cmStateEnums::GLOBAL_TARGET) {
       continue;
     }
     includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
@@ -3681,7 +3683,8 @@ void cmMakefile::RaiseScope(const std::string& var, const char* varDef)
 }
 
 cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
-                                        cmState::TargetType type, bool global)
+                                        cmStateEnums::TargetType type,
+                                        bool global)
 {
   // Create the target.
   CM_AUTO_PTR<cmTarget> target(
@@ -3767,7 +3770,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
     // The conflict is with a non-imported target.
     // Allow this if the user has requested support.
     cmake* cm = this->GetCMakeInstance();
-    if (isCustom && existing->GetType() == cmState::UTILITY &&
+    if (isCustom && existing->GetType() == cmStateEnums::UTILITY &&
         this != existing->GetMakefile() &&
         cm->GetState()->GetGlobalPropertyAsBool(
           "ALLOW_DUPLICATE_CUSTOM_TARGETS")) {
@@ -3781,22 +3784,22 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       << "\" because another target with the same name already exists.  "
       << "The existing target is ";
     switch (existing->GetType()) {
-      case cmState::EXECUTABLE:
+      case cmStateEnums::EXECUTABLE:
         e << "an executable ";
         break;
-      case cmState::STATIC_LIBRARY:
+      case cmStateEnums::STATIC_LIBRARY:
         e << "a static library ";
         break;
-      case cmState::SHARED_LIBRARY:
+      case cmStateEnums::SHARED_LIBRARY:
         e << "a shared library ";
         break;
-      case cmState::MODULE_LIBRARY:
+      case cmStateEnums::MODULE_LIBRARY:
         e << "a module library ";
         break;
-      case cmState::UTILITY:
+      case cmStateEnums::UTILITY:
         e << "a custom target ";
         break;
-      case cmState::INTERFACE_LIBRARY:
+      case cmStateEnums::INTERFACE_LIBRARY:
         e << "an interface library ";
         break;
       default:

@@ -36,7 +36,7 @@ public:
 
   static bool WhiteListedInterfaceProperty(const std::string& prop);
 
-  static bool PassesWhitelist(cmState::TargetType tgtType,
+  static bool PassesWhitelist(cmStateEnums::TargetType tgtType,
                               std::string const& prop, cmMessenger* messenger,
                               cmListFileBacktrace const& context);
 
@@ -59,11 +59,11 @@ private:
   {
     // Watch for special "computed" properties that are dependent on
     // other properties or variables.  Always recompute them.
-    if (tgt->GetType() == cmState::EXECUTABLE ||
-        tgt->GetType() == cmState::STATIC_LIBRARY ||
-        tgt->GetType() == cmState::SHARED_LIBRARY ||
-        tgt->GetType() == cmState::MODULE_LIBRARY ||
-        tgt->GetType() == cmState::UNKNOWN_LIBRARY) {
+    if (tgt->GetType() == cmStateEnums::EXECUTABLE ||
+        tgt->GetType() == cmStateEnums::STATIC_LIBRARY ||
+        tgt->GetType() == cmStateEnums::SHARED_LIBRARY ||
+        tgt->GetType() == cmStateEnums::MODULE_LIBRARY ||
+        tgt->GetType() == cmStateEnums::UNKNOWN_LIBRARY) {
       static const std::string propLOCATION = "LOCATION";
       if (prop == propLOCATION) {
         if (!tgt->IsImported() &&

@@ -68,16 +68,16 @@ cmMakefileTargetGenerator* cmMakefileTargetGenerator::New(
   cmMakefileTargetGenerator* result = CM_NULLPTR;
 
   switch (tgt->GetType()) {
-    case cmState::EXECUTABLE:
+    case cmStateEnums::EXECUTABLE:
       result = new cmMakefileExecutableTargetGenerator(tgt);
       break;
-    case cmState::STATIC_LIBRARY:
-    case cmState::SHARED_LIBRARY:
-    case cmState::MODULE_LIBRARY:
-    case cmState::OBJECT_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
+    case cmStateEnums::OBJECT_LIBRARY:
       result = new cmMakefileLibraryTargetGenerator(tgt);
       break;
-    case cmState::UTILITY:
+    case cmStateEnums::UTILITY:
       result = new cmMakefileUtilityTargetGenerator(tgt);
       break;
     default:
@@ -504,10 +504,10 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     std::string targetFullPathReal;
     std::string targetFullPathPDB;
     std::string targetFullPathCompilePDB;
-    if (this->GeneratorTarget->GetType() == cmState::EXECUTABLE ||
-        this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY ||
-        this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY ||
-        this->GeneratorTarget->GetType() == cmState::MODULE_LIBRARY) {
+    if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE ||
+        this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
+        this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
+        this->GeneratorTarget->GetType() == cmStateEnums::MODULE_LIBRARY) {
       targetFullPathReal =
         this->GeneratorTarget->GetFullPath(this->ConfigName, false, true);
       targetFullPathPDB =
@@ -515,7 +515,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       targetFullPathPDB += "/";
       targetFullPathPDB += this->GeneratorTarget->GetPDBName(this->ConfigName);
     }
-    if (this->GeneratorTarget->GetType() <= cmState::OBJECT_LIBRARY) {
+    if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
       targetFullPathCompilePDB =
         this->GeneratorTarget->GetCompilePDBPath(this->ConfigName);
       if (targetFullPathCompilePDB.empty()) {
@@ -1346,7 +1346,7 @@ void cmMakefileTargetGenerator::AppendTargetDepends(
   std::vector<std::string>& depends)
 {
   // Static libraries never depend on anything for linking.
-  if (this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY) {
+  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
     return;
   }
 

@@ -180,7 +180,7 @@ public:
   std::vector<cmListFileBacktrace> LinkImplementationPropertyBacktraces;
 };
 
-cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
+cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
                    Visibility vis, cmMakefile* mf)
 {
   assert(mf);
@@ -196,8 +196,8 @@ cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
   this->BuildInterfaceIncludesAppended = false;
 
   // only add dependency information for library targets
-  if (this->TargetTypeValue >= cmState::STATIC_LIBRARY &&
-      this->TargetTypeValue <= cmState::MODULE_LIBRARY) {
+  if (this->TargetTypeValue >= cmStateEnums::STATIC_LIBRARY &&
+      this->TargetTypeValue <= cmStateEnums::MODULE_LIBRARY) {
     this->RecordDependencies = true;
   } else {
     this->RecordDependencies = false;
@@ -214,8 +214,8 @@ cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
            "Android") == 0;
 
   // Setup default property values.
-  if (this->GetType() != cmState::INTERFACE_LIBRARY &&
-      this->GetType() != cmState::UTILITY) {
+  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
+      this->GetType() != cmStateEnums::UTILITY) {
     this->SetPropertyDefault("ANDROID_API", CM_NULLPTR);
     this->SetPropertyDefault("ANDROID_API_MIN", CM_NULLPTR);
     this->SetPropertyDefault("ANDROID_ARCH", CM_NULLPTR);
@@ -282,7 +282,7 @@ cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
   mf->GetConfigurations(configNames);
 
   // Setup per-configuration property default values.
-  if (this->GetType() != cmState::UTILITY) {
+  if (this->GetType() != cmStateEnums::UTILITY) {
     const char* configProps[] = {
       /* clang-format needs this comment to break after the opening brace */
       "ARCHIVE_OUTPUT_DIRECTORY_",
@@ -297,7 +297,7 @@ cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
          ci != configNames.end(); ++ci) {
       std::string configUpper = cmSystemTools::UpperCase(*ci);
       for (const char** p = configProps; *p; ++p) {
-        if (this->TargetTypeValue == cmState::INTERFACE_LIBRARY &&
+        if (this->TargetTypeValue == cmStateEnums::INTERFACE_LIBRARY &&
             strcmp(*p, "MAP_IMPORTED_CONFIG_") != 0) {
           continue;
         }
@@ -311,8 +311,8 @@ cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
       // compatibility with previous CMake versions in which executables
       // did not support this variable.  Projects may still specify the
       // property directly.
-      if (this->TargetTypeValue != cmState::EXECUTABLE &&
-          this->TargetTypeValue != cmState::INTERFACE_LIBRARY) {
+      if (this->TargetTypeValue != cmStateEnums::EXECUTABLE &&
+          this->TargetTypeValue != cmStateEnums::INTERFACE_LIBRARY) {
         std::string property = cmSystemTools::UpperCase(*ci);
         property += "_POSTFIX";
         this->SetPropertyDefault(property, CM_NULLPTR);
@@ -357,44 +357,45 @@ cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
       parentOptionsBts.end());
   }
 
-  if (this->GetType() != cmState::INTERFACE_LIBRARY &&
-      this->GetType() != cmState::UTILITY) {
+  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
+      this->GetType() != cmStateEnums::UTILITY) {
     this->SetPropertyDefault("C_VISIBILITY_PRESET", CM_NULLPTR);
     this->SetPropertyDefault("CXX_VISIBILITY_PRESET", CM_NULLPTR);
     this->SetPropertyDefault("VISIBILITY_INLINES_HIDDEN", CM_NULLPTR);
   }
 
-  if (this->TargetTypeValue == cmState::EXECUTABLE) {
+  if (this->TargetTypeValue == cmStateEnums::EXECUTABLE) {
     this->SetPropertyDefault("ANDROID_GUI", CM_NULLPTR);
     this->SetPropertyDefault("CROSSCOMPILING_EMULATOR", CM_NULLPTR);
     this->SetPropertyDefault("ENABLE_EXPORTS", CM_NULLPTR);
   }
-  if (this->TargetTypeValue == cmState::SHARED_LIBRARY ||
-      this->TargetTypeValue == cmState::MODULE_LIBRARY) {
+  if (this->TargetTypeValue == cmStateEnums::SHARED_LIBRARY ||
+      this->TargetTypeValue == cmStateEnums::MODULE_LIBRARY) {
     this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
   }
-  if (this->TargetTypeValue == cmState::SHARED_LIBRARY ||
-      this->TargetTypeValue == cmState::EXECUTABLE) {
+  if (this->TargetTypeValue == cmStateEnums::SHARED_LIBRARY ||
+      this->TargetTypeValue == cmStateEnums::EXECUTABLE) {
     this->SetPropertyDefault("WINDOWS_EXPORT_ALL_SYMBOLS", CM_NULLPTR);
   }
 
-  if (this->GetType() != cmState::INTERFACE_LIBRARY &&
-      this->GetType() != cmState::UTILITY) {
+  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
+      this->GetType() != cmStateEnums::UTILITY) {
     this->SetPropertyDefault("POSITION_INDEPENDENT_CODE", CM_NULLPTR);
   }
 
   // Record current policies for later use.
   this->Makefile->RecordPolicies(this->PolicyMap);
 
-  if (this->TargetTypeValue == cmState::INTERFACE_LIBRARY) {
+  if (this->TargetTypeValue == cmStateEnums::INTERFACE_LIBRARY) {
     // This policy is checked in a few conditions. The properties relevant
-    // to the policy are always ignored for cmState::INTERFACE_LIBRARY targets,
+    // to the policy are always ignored for cmStateEnums::INTERFACE_LIBRARY
+    // targets,
     // so ensure that the conditions don't lead to nonsense.
     this->PolicyMap.Set(cmPolicies::CMP0022, cmPolicies::NEW);
   }
 
-  if (this->GetType() != cmState::INTERFACE_LIBRARY &&
-      this->GetType() != cmState::UTILITY) {
+  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
+      this->GetType() != cmStateEnums::UTILITY) {
     this->SetPropertyDefault("JOB_POOL_COMPILE", CM_NULLPTR);
     this->SetPropertyDefault("JOB_POOL_LINK", CM_NULLPTR);
   }
@@ -432,26 +433,27 @@ cmListFileBacktrace const& cmTarget::GetBacktrace() const
 
 bool cmTarget::IsExecutableWithExports() const
 {
-  return (this->GetType() == cmState::EXECUTABLE &&
+  return (this->GetType() == cmStateEnums::EXECUTABLE &&
           this->GetPropertyAsBool("ENABLE_EXPORTS"));
 }
 
 bool cmTarget::HasImportLibrary() const
 {
-  return (this->DLLPlatform && (this->GetType() == cmState::SHARED_LIBRARY ||
-                                this->IsExecutableWithExports()));
+  return (this->DLLPlatform &&
+          (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+           this->IsExecutableWithExports()));
 }
 
 bool cmTarget::IsFrameworkOnApple() const
 {
-  return (this->GetType() == cmState::SHARED_LIBRARY &&
+  return (this->GetType() == cmStateEnums::SHARED_LIBRARY &&
           this->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("FRAMEWORK"));
 }
 
 bool cmTarget::IsAppBundleOnApple() const
 {
-  return (this->GetType() == cmState::EXECUTABLE &&
+  return (this->GetType() == cmStateEnums::EXECUTABLE &&
           this->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("MACOSX_BUNDLE"));
 }
@@ -730,7 +732,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
   }
 
   if (cmGeneratorExpression::Find(lib) != std::string::npos ||
-      (tgt && tgt->GetType() == cmState::INTERFACE_LIBRARY) ||
+      (tgt && tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) ||
       (this->Name == lib)) {
     return;
   }
@@ -986,10 +988,10 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
 
 void cmTarget::AppendBuildInterfaceIncludes()
 {
-  if (this->GetType() != cmState::SHARED_LIBRARY &&
-      this->GetType() != cmState::STATIC_LIBRARY &&
-      this->GetType() != cmState::MODULE_LIBRARY &&
-      this->GetType() != cmState::INTERFACE_LIBRARY &&
+  if (this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::STATIC_LIBRARY &&
+      this->GetType() != cmStateEnums::MODULE_LIBRARY &&
+      this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       !this->IsExecutableWithExports()) {
     return;
   }
@@ -1255,15 +1257,15 @@ bool cmTarget::GetPropertyAsBool(const std::string& prop) const
 const char* cmTarget::GetSuffixVariableInternal(bool implib) const
 {
   switch (this->GetType()) {
-    case cmState::STATIC_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_SUFFIX";
-    case cmState::SHARED_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
       return (implib ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
                      : "CMAKE_SHARED_LIBRARY_SUFFIX");
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       return (implib ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
                      : "CMAKE_SHARED_MODULE_SUFFIX");
-    case cmState::EXECUTABLE:
+    case cmStateEnums::EXECUTABLE:
       return (implib
                 ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
                 // Android GUI application packages store the native
@@ -1280,15 +1282,15 @@ const char* cmTarget::GetSuffixVariableInternal(bool implib) const
 const char* cmTarget::GetPrefixVariableInternal(bool implib) const
 {
   switch (this->GetType()) {
-    case cmState::STATIC_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_PREFIX";
-    case cmState::SHARED_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
       return (implib ? "CMAKE_IMPORT_LIBRARY_PREFIX"
                      : "CMAKE_SHARED_LIBRARY_PREFIX");
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       return (implib ? "CMAKE_IMPORT_LIBRARY_PREFIX"
                      : "CMAKE_SHARED_MODULE_PREFIX");
-    case cmState::EXECUTABLE:
+    case cmStateEnums::EXECUTABLE:
       return (implib
                 ? "CMAKE_IMPORT_LIBRARY_PREFIX"
                 // Android GUI application packages store the native
@@ -1322,7 +1324,7 @@ std::string cmTarget::ImportedGetFullPath(const std::string& config,
   const char* imp = CM_NULLPTR;
   std::string suffix;
 
-  if (this->GetType() != cmState::INTERFACE_LIBRARY &&
+  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetMappedConfig(config_upper, &loc, &imp, suffix)) {
     if (!pimplib) {
       if (loc) {
@@ -1340,7 +1342,7 @@ std::string cmTarget::ImportedGetFullPath(const std::string& config,
     } else {
       if (imp) {
         result = imp;
-      } else if (this->GetType() == cmState::SHARED_LIBRARY ||
+      } else if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
                  this->IsExecutableWithExports()) {
         std::string impProp = "IMPORTED_IMPLIB";
         impProp += suffix;
@@ -1378,9 +1380,10 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
                                const char** loc, const char** imp,
                                std::string& suffix) const
 {
-  if (this->GetType() == cmState::INTERFACE_LIBRARY) {
+  if (this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
     // This method attempts to find a config-specific LOCATION for the
-    // IMPORTED library. In the case of cmState::INTERFACE_LIBRARY, there is no
+    // IMPORTED library. In the case of cmStateEnums::INTERFACE_LIBRARY, there
+    // is no
     // LOCATION at all, so leaving *loc and *imp unchanged is the appropriate
     // and valid response.
     return true;

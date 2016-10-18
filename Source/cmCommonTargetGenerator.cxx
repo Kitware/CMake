@@ -171,7 +171,7 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories()
           // We can ignore the INTERFACE_LIBRARY items because
           // Target->GetLinkInformation already processed their
           // link interface and they don't have any output themselves.
-          && linkee->GetType() != cmState::INTERFACE_LIBRARY &&
+          && linkee->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
           emitted.insert(linkee).second) {
         cmLocalGenerator* lg = linkee->GetLocalGenerator();
         std::string di = lg->GetCurrentBinaryDirectory();

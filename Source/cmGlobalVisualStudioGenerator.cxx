@@ -81,7 +81,8 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
         for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
              t != targets.end(); ++t) {
           cmGeneratorTarget* tgt = *t;
-          if (tgt->GetType() == cmState::GLOBAL_TARGET || tgt->IsImported()) {
+          if (tgt->GetType() == cmStateEnums::GLOBAL_TARGET ||
+              tgt->IsImported()) {
             continue;
           }
           if (!this->IsExcluded(gen[0], tgt)) {
@@ -265,11 +266,11 @@ cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmGeneratorTarget* target)
 void cmGlobalVisualStudioGenerator::FollowLinkDepends(
   const cmGeneratorTarget* target, std::set<const cmGeneratorTarget*>& linked)
 {
-  if (target->GetType() == cmState::INTERFACE_LIBRARY) {
+  if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
     return;
   }
   if (linked.insert(target).second &&
-      target->GetType() == cmState::STATIC_LIBRARY) {
+      target->GetType() == cmStateEnums::STATIC_LIBRARY) {
     // Static library targets do not list their link dependencies so
     // we must follow them transitively now.
     TargetDependSet const& depends = this->GetTargetDirectDepends(target);
@@ -304,7 +305,7 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
 
 static bool VSLinkable(cmGeneratorTarget const* t)
 {
-  return t->IsLinkable() || t->GetType() == cmState::OBJECT_LIBRARY;
+  return t->IsLinkable() || t->GetType() == cmStateEnums::OBJECT_LIBRARY;
 }
 
 void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
@@ -333,10 +334,10 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
   // leaving them out for the static library itself but following them
   // transitively for other targets.
 
-  bool allowLinkable = (target->GetType() != cmState::STATIC_LIBRARY &&
-                        target->GetType() != cmState::SHARED_LIBRARY &&
-                        target->GetType() != cmState::MODULE_LIBRARY &&
-                        target->GetType() != cmState::EXECUTABLE);
+  bool allowLinkable = (target->GetType() != cmStateEnums::STATIC_LIBRARY &&
+                        target->GetType() != cmStateEnums::SHARED_LIBRARY &&
+                        target->GetType() != cmStateEnums::MODULE_LIBRARY &&
+                        target->GetType() != cmStateEnums::EXECUTABLE);
 
   TargetDependSet const& depends = this->GetTargetDirectDepends(target);
 
@@ -344,7 +345,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
   // Static libraries cannot depend on their link implementation
   // due to behavior (2), but they do not really need to.
   std::set<cmGeneratorTarget const*> linkDepends;
-  if (target->GetType() != cmState::STATIC_LIBRARY) {
+  if (target->GetType() != cmStateEnums::STATIC_LIBRARY) {
     for (TargetDependSet::const_iterator di = depends.begin();
          di != depends.end(); ++di) {
       cmTargetDepend dep = *di;
@@ -367,7 +368,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
   // Collect all targets linked by this target so we can avoid
   // intermediate targets below.
   TargetSet linked;
-  if (target->GetType() != cmState::STATIC_LIBRARY) {
+  if (target->GetType() != cmStateEnums::STATIC_LIBRARY) {
     linked = this->GetTargetLinkClosure(target);
   }
 

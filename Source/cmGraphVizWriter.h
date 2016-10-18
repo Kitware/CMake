@@ -60,7 +60,7 @@ protected:
 
   bool IgnoreThisTarget(const std::string& name);
 
-  bool GenerateForTargetType(cmState::TargetType targetType) const;
+  bool GenerateForTargetType(cmStateEnums::TargetType targetType) const;
 
   std::string GraphType;
   std::string GraphName;

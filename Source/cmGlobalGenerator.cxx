@@ -1371,14 +1371,14 @@ cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
     filteredTargets.reserve(targets.size());
     for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
          ti != targets.end(); ++ti) {
-      if ((*ti)->GetType() == cmState::GLOBAL_TARGET) {
+      if ((*ti)->GetType() == cmStateEnums::GLOBAL_TARGET) {
         continue;
       }
-      if ((*ti)->GetType() != cmState::EXECUTABLE &&
-          (*ti)->GetType() != cmState::STATIC_LIBRARY &&
-          (*ti)->GetType() != cmState::SHARED_LIBRARY &&
-          (*ti)->GetType() != cmState::MODULE_LIBRARY &&
-          (*ti)->GetType() != cmState::OBJECT_LIBRARY) {
+      if ((*ti)->GetType() != cmStateEnums::EXECUTABLE &&
+          (*ti)->GetType() != cmStateEnums::STATIC_LIBRARY &&
+          (*ti)->GetType() != cmStateEnums::SHARED_LIBRARY &&
+          (*ti)->GetType() != cmStateEnums::MODULE_LIBRARY &&
+          (*ti)->GetType() != cmStateEnums::OBJECT_LIBRARY) {
         continue;
       }
       if ((!(*ti)->GetPropertyAsBool("AUTOMOC") &&
@@ -1443,13 +1443,13 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
     cmTargets& targets = mf->GetTargets();
     for (cmTargets::iterator ti = targets.begin(); ti != targets.end(); ++ti) {
       cmTarget* t = &ti->second;
-      if (t->GetType() == cmState::GLOBAL_TARGET) {
+      if (t->GetType() == cmStateEnums::GLOBAL_TARGET) {
         continue;
       }
 
       t->AppendBuildInterfaceIncludes();
 
-      if (t->GetType() == cmState::INTERFACE_LIBRARY) {
+      if (t->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
 
@@ -1575,7 +1575,7 @@ void cmGlobalGenerator::CheckTargetProperties()
     this->Makefiles[i]->ConfigureFinalPass();
     cmTargets& targets = this->Makefiles[i]->GetTargets();
     for (cmTargets::iterator l = targets.begin(); l != targets.end(); l++) {
-      if (l->second.GetType() == cmState::INTERFACE_LIBRARY) {
+      if (l->second.GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
       const cmTarget::LinkLibraryVectorType& libs =
@@ -1942,7 +1942,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    cmGeneratorTarget* target) const
 {
-  if (target->GetType() == cmState::INTERFACE_LIBRARY ||
+  if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
       target->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
     // This target is excluded from its directory.
     return true;
@@ -2398,8 +2398,8 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
                                                cmMakefile* mf)
 {
   // Package
-  cmTarget target(gti.Name, cmState::GLOBAL_TARGET, cmTarget::VisibilityNormal,
-                  mf);
+  cmTarget target(gti.Name, cmStateEnums::GLOBAL_TARGET,
+                  cmTarget::VisibilityNormal, mf);
   target.SetProperty("EXCLUDE_FROM_ALL", "TRUE");
 
   std::vector<std::string> no_outputs;
@@ -2544,7 +2544,7 @@ void cmGlobalGenerator::GetTargetSets(TargetDependSet& projectTargets,
 
 bool cmGlobalGenerator::IsRootOnlyTarget(cmGeneratorTarget* target) const
 {
-  return (target->GetType() == cmState::GLOBAL_TARGET ||
+  return (target->GetType() == cmStateEnums::GLOBAL_TARGET ||
           target->GetName() == this->GetAllTargetName());
 }
 
@@ -2729,7 +2729,7 @@ void cmGlobalGenerator::WriteSummary()
       this->LocalGenerators[i]->GetGeneratorTargets();
     for (std::vector<cmGeneratorTarget*>::iterator it = tgts.begin();
          it != tgts.end(); ++it) {
-      if ((*it)->GetType() == cmState::INTERFACE_LIBRARY) {
+      if ((*it)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
       this->WriteSummary(*it);

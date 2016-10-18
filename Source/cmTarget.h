@@ -62,8 +62,8 @@ public:
     VisibilityImportedGlobally
   };
 
-  cmTarget(std::string const& name, cmState::TargetType type, Visibility vis,
-           cmMakefile* mf);
+  cmTarget(std::string const& name, cmStateEnums::TargetType type,
+           Visibility vis, cmMakefile* mf);
 
   enum CustomCommandType
   {
@@ -75,7 +75,7 @@ public:
   /**
    * Return the type of target.
    */
-  cmState::TargetType GetType() const { return this->TargetTypeValue; }
+  cmStateEnums::TargetType GetType() const { return this->TargetTypeValue; }
 
   cmGlobalGenerator* GetGlobalGenerator() const;
 
@@ -302,7 +302,7 @@ private:
   LinkLibraryVectorType OriginalLinkLibraries;
   cmMakefile* Makefile;
   cmTargetInternalPointer Internal;
-  cmState::TargetType TargetTypeValue;
+  cmStateEnums::TargetType TargetTypeValue;
   bool HaveInstallRule;
   bool RecordDependencies;
   bool DLLPlatform;

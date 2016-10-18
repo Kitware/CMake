@@ -42,7 +42,7 @@ bool cmCustomCommandGenerator::UseCrossCompilingEmulator(unsigned int c) const
 {
   std::string const& argv0 = this->CC.GetCommandLines()[c][0];
   cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(argv0);
-  if (target && target->GetType() == cmState::EXECUTABLE) {
+  if (target && target->GetType() == cmStateEnums::EXECUTABLE) {
     return target->GetProperty("CROSSCOMPILING_EMULATOR") != CM_NULLPTR;
   }
   return false;
@@ -52,12 +52,12 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
 {
   std::string const& argv0 = this->CC.GetCommandLines()[c][0];
   cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(argv0);
-  if (target && target->GetType() == cmState::EXECUTABLE &&
+  if (target && target->GetType() == cmStateEnums::EXECUTABLE &&
       (target->IsImported() ||
        !this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING"))) {
     return target->GetLocation(this->Config);
   }
-  if (target && target->GetType() == cmState::EXECUTABLE) {
+  if (target && target->GetType() == cmStateEnums::EXECUTABLE) {
     const char* emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
     if (emulator) {
       return std::string(emulator);

@@ -67,7 +67,7 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
 
   CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
 
-  cmTarget dummyHead("try_compile_dummy_exe", cmState::EXECUTABLE,
+  cmTarget dummyHead("try_compile_dummy_exe", cmStateEnums::EXECUTABLE,
                      cmTarget::VisibilityNormal, tgt->Target->GetMakefile());
 
   cmGeneratorTarget gDummyHead(&dummyHead, tgt->GetLocalGenerator());

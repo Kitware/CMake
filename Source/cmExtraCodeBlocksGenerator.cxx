@@ -302,7 +302,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
          ti != targets.end(); ti++) {
       std::string targetName = (*ti)->GetName();
       switch ((*ti)->GetType()) {
-        case cmState::GLOBAL_TARGET: {
+        case cmStateEnums::GLOBAL_TARGET: {
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
           if (strcmp((*lg)->GetCurrentBinaryDirectory(),
@@ -311,7 +311,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
                                compiler.c_str(), makeArgs);
           }
         } break;
-        case cmState::UTILITY:
+        case cmStateEnums::UTILITY:
           // Add all utility targets, except the Nightly/Continuous/
           // Experimental-"sub"targets as e.g. NightlyStart
           if (((targetName.find("Nightly") == 0) &&
@@ -326,11 +326,11 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
           this->AppendTarget(xml, targetName, CM_NULLPTR, make.c_str(), *lg,
                              compiler.c_str(), makeArgs);
           break;
-        case cmState::EXECUTABLE:
-        case cmState::STATIC_LIBRARY:
-        case cmState::SHARED_LIBRARY:
-        case cmState::MODULE_LIBRARY:
-        case cmState::OBJECT_LIBRARY: {
+        case cmStateEnums::EXECUTABLE:
+        case cmStateEnums::STATIC_LIBRARY:
+        case cmStateEnums::SHARED_LIBRARY:
+        case cmStateEnums::MODULE_LIBRARY:
+        case cmStateEnums::OBJECT_LIBRARY: {
           cmGeneratorTarget* gt = *ti;
           this->AppendTarget(xml, targetName, gt, make.c_str(), *lg,
                              compiler.c_str(), makeArgs);
@@ -364,12 +364,12 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
     for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
          ti != targets.end(); ti++) {
       switch ((*ti)->GetType()) {
-        case cmState::EXECUTABLE:
-        case cmState::STATIC_LIBRARY:
-        case cmState::SHARED_LIBRARY:
-        case cmState::MODULE_LIBRARY:
-        case cmState::OBJECT_LIBRARY:
-        case cmState::UTILITY: // can have sources since 2.6.3
+        case cmStateEnums::EXECUTABLE:
+        case cmStateEnums::STATIC_LIBRARY:
+        case cmStateEnums::SHARED_LIBRARY:
+        case cmStateEnums::MODULE_LIBRARY:
+        case cmStateEnums::OBJECT_LIBRARY:
+        case cmStateEnums::UTILITY: // can have sources since 2.6.3
         {
           std::vector<cmSourceFile*> sources;
           cmGeneratorTarget* gt = *ti;
@@ -379,7 +379,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
                si != sources.end(); si++) {
             // don't add source files from UTILITY target which have the
             // GENERATED property set:
-            if (gt->GetType() == cmState::UTILITY &&
+            if (gt->GetType() == cmStateEnums::UTILITY &&
                 (*si)->GetPropertyAsBool("GENERATED")) {
               continue;
             }
@@ -519,7 +519,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
   if (target != CM_NULLPTR) {
     int cbTargetType = this->GetCBTargetType(target);
     std::string workingDir = lg->GetCurrentBinaryDirectory();
-    if (target->GetType() == cmState::EXECUTABLE) {
+    if (target->GetType() == cmStateEnums::EXECUTABLE) {
       // Determine the directory where the executable target is created, and
       // set the working directory to this dir.
       const char* runtimeOutputDir =
@@ -537,7 +537,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
 
     std::string buildType = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
     std::string location;
-    if (target->GetType() == cmState::OBJECT_LIBRARY) {
+    if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
       location =
         this->CreateDummyTargetFile(const_cast<cmLocalGenerator*>(lg), target);
     } else {
@@ -713,17 +713,17 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
 int cmExtraCodeBlocksGenerator::GetCBTargetType(cmGeneratorTarget* target)
 {
   switch (target->GetType()) {
-    case cmState::EXECUTABLE:
+    case cmStateEnums::EXECUTABLE:
       if ((target->GetPropertyAsBool("WIN32_EXECUTABLE")) ||
           (target->GetPropertyAsBool("MACOSX_BUNDLE"))) {
         return 0;
       }
       return 1;
-    case cmState::STATIC_LIBRARY:
-    case cmState::OBJECT_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::OBJECT_LIBRARY:
       return 2;
-    case cmState::SHARED_LIBRARY:
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       return 3;
     default:
       return 4;

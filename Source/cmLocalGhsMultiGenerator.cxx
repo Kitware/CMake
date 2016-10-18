@@ -24,7 +24,7 @@ void cmLocalGhsMultiGenerator::Generate()
 
   for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
        l != tgts.end(); ++l) {
-    if ((*l)->GetType() == cmState::INTERFACE_LIBRARY) {
+    if ((*l)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     cmGhsMultiTargetGenerator tg(*l);

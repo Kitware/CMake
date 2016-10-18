@@ -43,6 +43,19 @@ enum SnapshotType
   PolicyScopeType,
   VariableScopeType
 };
+
+enum TargetType
+{
+  EXECUTABLE,
+  STATIC_LIBRARY,
+  SHARED_LIBRARY,
+  MODULE_LIBRARY,
+  OBJECT_LIBRARY,
+  UTILITY,
+  GLOBAL_TARGET,
+  INTERFACE_LIBRARY,
+  UNKNOWN_LIBRARY
+};
 }
 
 class cmState
@@ -185,20 +198,7 @@ public:
     friend class Snapshot;
   };
 
-  enum TargetType
-  {
-    EXECUTABLE,
-    STATIC_LIBRARY,
-    SHARED_LIBRARY,
-    MODULE_LIBRARY,
-    OBJECT_LIBRARY,
-    UTILITY,
-    GLOBAL_TARGET,
-    INTERFACE_LIBRARY,
-    UNKNOWN_LIBRARY
-  };
-
-  static const char* GetTargetTypeName(cmState::TargetType targetType);
+  static const char* GetTargetTypeName(cmStateEnums::TargetType targetType);
 
   Snapshot CreateBaseSnapshot();
   Snapshot CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot);

@@ -382,12 +382,12 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefileLanguageRules(
     std::vector<cmGeneratorTarget*> tgts = lg->GetGeneratorTargets();
     for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
          l != tgts.end(); l++) {
-      if (((*l)->GetType() == cmState::EXECUTABLE) ||
-          ((*l)->GetType() == cmState::STATIC_LIBRARY) ||
-          ((*l)->GetType() == cmState::SHARED_LIBRARY) ||
-          ((*l)->GetType() == cmState::MODULE_LIBRARY) ||
-          ((*l)->GetType() == cmState::OBJECT_LIBRARY) ||
-          ((*l)->GetType() == cmState::UTILITY)) {
+      if (((*l)->GetType() == cmStateEnums::EXECUTABLE) ||
+          ((*l)->GetType() == cmStateEnums::STATIC_LIBRARY) ||
+          ((*l)->GetType() == cmStateEnums::SHARED_LIBRARY) ||
+          ((*l)->GetType() == cmStateEnums::MODULE_LIBRARY) ||
+          ((*l)->GetType() == cmStateEnums::OBJECT_LIBRARY) ||
+          ((*l)->GetType() == cmStateEnums::UTILITY)) {
         cmGeneratorTarget* gt = *l;
         std::string tname = lg->GetRelativeTargetDirectory(gt);
         tname += "/DependInfo.cmake";
@@ -416,10 +416,12 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
        l != targets.end(); ++l) {
     cmGeneratorTarget* gtarget = *l;
     int type = gtarget->GetType();
-    if ((type == cmState::EXECUTABLE) || (type == cmState::STATIC_LIBRARY) ||
-        (type == cmState::SHARED_LIBRARY) ||
-        (type == cmState::MODULE_LIBRARY) ||
-        (type == cmState::OBJECT_LIBRARY) || (type == cmState::UTILITY)) {
+    if ((type == cmStateEnums::EXECUTABLE) ||
+        (type == cmStateEnums::STATIC_LIBRARY) ||
+        (type == cmStateEnums::SHARED_LIBRARY) ||
+        (type == cmStateEnums::MODULE_LIBRARY) ||
+        (type == cmStateEnums::OBJECT_LIBRARY) ||
+        (type == cmStateEnums::UTILITY)) {
       // Add this to the list of depends rules in this directory.
       if ((!check_all || !gtarget->GetPropertyAsBool("EXCLUDE_FROM_ALL")) &&
           (!check_relink ||
@@ -554,11 +556,12 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
       if (!name.empty() && emitted.insert(name).second &&
           // Handle user targets here.  Global targets are handled in
           // the local generator on a per-directory basis.
-          ((type == cmState::EXECUTABLE) ||
-           (type == cmState::STATIC_LIBRARY) ||
-           (type == cmState::SHARED_LIBRARY) ||
-           (type == cmState::MODULE_LIBRARY) ||
-           (type == cmState::OBJECT_LIBRARY) || (type == cmState::UTILITY))) {
+          ((type == cmStateEnums::EXECUTABLE) ||
+           (type == cmStateEnums::STATIC_LIBRARY) ||
+           (type == cmStateEnums::SHARED_LIBRARY) ||
+           (type == cmStateEnums::MODULE_LIBRARY) ||
+           (type == cmStateEnums::OBJECT_LIBRARY) ||
+           (type == cmStateEnums::UTILITY))) {
         // Add a rule to build the target by name.
         lg->WriteDivider(ruleFileStream);
         ruleFileStream << "# Target rules for targets named " << name
@@ -630,11 +633,12 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
     cmGeneratorTarget* gtarget = *t;
     int type = gtarget->GetType();
     std::string name = gtarget->GetName();
-    if (!name.empty() &&
-        ((type == cmState::EXECUTABLE) || (type == cmState::STATIC_LIBRARY) ||
-         (type == cmState::SHARED_LIBRARY) ||
-         (type == cmState::MODULE_LIBRARY) ||
-         (type == cmState::OBJECT_LIBRARY) || (type == cmState::UTILITY))) {
+    if (!name.empty() && ((type == cmStateEnums::EXECUTABLE) ||
+                          (type == cmStateEnums::STATIC_LIBRARY) ||
+                          (type == cmStateEnums::SHARED_LIBRARY) ||
+                          (type == cmStateEnums::MODULE_LIBRARY) ||
+                          (type == cmStateEnums::OBJECT_LIBRARY) ||
+                          (type == cmStateEnums::UTILITY))) {
       std::string makefileName;
       // Add a rule to build the target by name.
       localName = lg->GetRelativeTargetDirectory(gtarget);
@@ -808,7 +812,7 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
 
       cmLocalGenerator* tlg = gt->GetLocalGenerator();
 
-      if (gt->GetType() == cmState::INTERFACE_LIBRARY ||
+      if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
           gt->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
         continue;
       }
@@ -847,7 +851,7 @@ size_t cmGlobalUnixMakefileGenerator3::CountProgressMarksInTarget(
     TargetDependSet const& depends = this->GetTargetDirectDepends(target);
     for (TargetDependSet::const_iterator di = depends.begin();
          di != depends.end(); ++di) {
-      if ((*di)->GetType() == cmState::INTERFACE_LIBRARY) {
+      if ((*di)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
       count += this->CountProgressMarksInTarget(*di, emitted);
@@ -908,7 +912,7 @@ void cmGlobalUnixMakefileGenerator3::AppendGlobalTargetDepends(
        i != depends_set.end(); ++i) {
     // Create the target-level dependency.
     cmGeneratorTarget const* dep = *i;
-    if (dep->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (dep->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     cmLocalUnixMakefileGenerator3* lg3 =
@@ -950,13 +954,14 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
       for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
            t != targets.end(); ++t) {
         cmGeneratorTarget* target = *t;
-        cmState::TargetType type = target->GetType();
-        if ((type == cmState::EXECUTABLE) ||
-            (type == cmState::STATIC_LIBRARY) ||
-            (type == cmState::SHARED_LIBRARY) ||
-            (type == cmState::MODULE_LIBRARY) ||
-            (type == cmState::OBJECT_LIBRARY) ||
-            (type == cmState::GLOBAL_TARGET) || (type == cmState::UTILITY)) {
+        cmStateEnums::TargetType type = target->GetType();
+        if ((type == cmStateEnums::EXECUTABLE) ||
+            (type == cmStateEnums::STATIC_LIBRARY) ||
+            (type == cmStateEnums::SHARED_LIBRARY) ||
+            (type == cmStateEnums::MODULE_LIBRARY) ||
+            (type == cmStateEnums::OBJECT_LIBRARY) ||
+            (type == cmStateEnums::GLOBAL_TARGET) ||
+            (type == cmStateEnums::UTILITY)) {
           std::string name = target->GetName();
           if (emittedTargets.insert(name).second) {
             path = "... ";

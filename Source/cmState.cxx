@@ -117,26 +117,26 @@ cmState::~cmState()
   cmDeleteAll(this->Commands);
 }
 
-const char* cmState::GetTargetTypeName(cmState::TargetType targetType)
+const char* cmState::GetTargetTypeName(cmStateEnums::TargetType targetType)
 {
   switch (targetType) {
-    case cmState::STATIC_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
       return "STATIC_LIBRARY";
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       return "MODULE_LIBRARY";
-    case cmState::SHARED_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
       return "SHARED_LIBRARY";
-    case cmState::OBJECT_LIBRARY:
+    case cmStateEnums::OBJECT_LIBRARY:
       return "OBJECT_LIBRARY";
-    case cmState::EXECUTABLE:
+    case cmStateEnums::EXECUTABLE:
       return "EXECUTABLE";
-    case cmState::UTILITY:
+    case cmStateEnums::UTILITY:
       return "UTILITY";
-    case cmState::GLOBAL_TARGET:
+    case cmStateEnums::GLOBAL_TARGET:
       return "GLOBAL_TARGET";
-    case cmState::INTERFACE_LIBRARY:
+    case cmStateEnums::INTERFACE_LIBRARY:
       return "INTERFACE_LIBRARY";
-    case cmState::UNKNOWN_LIBRARY:
+    case cmStateEnums::UNKNOWN_LIBRARY:
       return "UNKNOWN_LIBRARY";
   }
   assert(0 && "Unexpected target type");

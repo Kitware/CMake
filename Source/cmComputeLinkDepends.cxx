@@ -262,7 +262,7 @@ cmComputeLinkDepends::Compute()
     LinkEntry const& e = this->EntryList[i];
     cmGeneratorTarget const* t = e.Target;
     // Entries that we know the linker will re-use do not need to be repeated.
-    bool uniquify = t && t->GetType() == cmState::SHARED_LIBRARY;
+    bool uniquify = t && t->GetType() == cmStateEnums::SHARED_LIBRARY;
     if (!uniquify || emmitted.insert(i).second) {
       this->FinalLinkEntries.push_back(e);
     }
@@ -345,7 +345,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
     if (cmLinkInterface const* iface =
           entry.Target->GetLinkInterface(this->Config, this->Target)) {
       const bool isIface =
-        entry.Target->GetType() == cmState::INTERFACE_LIBRARY;
+        entry.Target->GetType() == cmStateEnums::INTERFACE_LIBRARY;
       // This target provides its own link interface information.
       this->AddLinkEntries(depender_index, iface->Libraries);
 

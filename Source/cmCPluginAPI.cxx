@@ -350,9 +350,9 @@ static void addLinkLibrary(cmMakefile* mf, std::string const& target,
   }
 
   cmTarget* tgt = mf->GetGlobalGenerator()->FindTarget(lib);
-  if (tgt && (tgt->GetType() != cmState::STATIC_LIBRARY) &&
-      (tgt->GetType() != cmState::SHARED_LIBRARY) &&
-      (tgt->GetType() != cmState::INTERFACE_LIBRARY) &&
+  if (tgt && (tgt->GetType() != cmStateEnums::STATIC_LIBRARY) &&
+      (tgt->GetType() != cmStateEnums::SHARED_LIBRARY) &&
+      (tgt->GetType() != cmStateEnums::INTERFACE_LIBRARY) &&
       !tgt->IsExecutableWithExports()) {
     std::ostringstream e;
     e << "Target \"" << lib << "\" of type "
@@ -393,8 +393,8 @@ void CCONV cmAddLibrary(void* arg, const char* libname, int shared,
   for (i = 0; i < numSrcs; ++i) {
     srcs2.push_back(srcs[i]);
   }
-  mf->AddLibrary(libname,
-                 (shared ? cmState::SHARED_LIBRARY : cmState::STATIC_LIBRARY),
+  mf->AddLibrary(libname, (shared ? cmStateEnums::SHARED_LIBRARY
+                                  : cmStateEnums::STATIC_LIBRARY),
                  srcs2);
 }
 

@@ -83,10 +83,10 @@ bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
 }
 
 bool cmTargetPropertyComputer::PassesWhitelist(
-  cmState::TargetType tgtType, std::string const& prop, cmMessenger* messenger,
-  cmListFileBacktrace const& context)
+  cmStateEnums::TargetType tgtType, std::string const& prop,
+  cmMessenger* messenger, cmListFileBacktrace const& context)
 {
-  if (tgtType == cmState::INTERFACE_LIBRARY &&
+  if (tgtType == cmStateEnums::INTERFACE_LIBRARY &&
       !WhiteListedInterfaceProperty(prop)) {
     std::ostringstream e;
     e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "

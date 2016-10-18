@@ -163,9 +163,10 @@ public:
 
   /** Create a new imported target with the name and type given.  */
   cmTarget* AddImportedTarget(const std::string& name,
-                              cmState::TargetType type, bool global);
+                              cmStateEnums::TargetType type, bool global);
 
-  cmTarget* AddNewTarget(cmState::TargetType type, const std::string& name);
+  cmTarget* AddNewTarget(cmStateEnums::TargetType type,
+                         const std::string& name);
 
   /**
    * Add an executable to the build.
@@ -251,7 +252,8 @@ public:
   /**
    * Set the name of the library.
    */
-  cmTarget* AddLibrary(const std::string& libname, cmState::TargetType type,
+  cmTarget* AddLibrary(const std::string& libname,
+                       cmStateEnums::TargetType type,
                        const std::vector<std::string>& srcs,
                        bool excludeFromAll = false);
   void AddAlias(const std::string& libname, const std::string& tgt);

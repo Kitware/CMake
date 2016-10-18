@@ -79,8 +79,8 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
       cmTarget const& target = l->second;
 
       // Skip non-library targets.
-      if (target.GetType() < cmState::STATIC_LIBRARY ||
-          target.GetType() > cmState::MODULE_LIBRARY) {
+      if (target.GetType() < cmStateEnums::STATIC_LIBRARY ||
+          target.GetType() > cmStateEnums::MODULE_LIBRARY) {
         continue;
       }
 

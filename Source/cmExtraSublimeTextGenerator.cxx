@@ -156,7 +156,7 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
          ti != targets.end(); ti++) {
       std::string targetName = (*ti)->GetName();
       switch ((*ti)->GetType()) {
-        case cmState::GLOBAL_TARGET: {
+        case cmStateEnums::GLOBAL_TARGET: {
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
           if (strcmp((*lg)->GetCurrentBinaryDirectory(),
@@ -166,7 +166,7 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
                                false);
           }
         } break;
-        case cmState::UTILITY:
+        case cmStateEnums::UTILITY:
           // Add all utility targets, except the Nightly/Continuous/
           // Experimental-"sub"targets as e.g. NightlyStart
           if (((targetName.find("Nightly") == 0) &&
@@ -182,11 +182,11 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
                              makefile, compiler.c_str(), sourceFileFlags,
                              false);
           break;
-        case cmState::EXECUTABLE:
-        case cmState::STATIC_LIBRARY:
-        case cmState::SHARED_LIBRARY:
-        case cmState::MODULE_LIBRARY:
-        case cmState::OBJECT_LIBRARY: {
+        case cmStateEnums::EXECUTABLE:
+        case cmStateEnums::STATIC_LIBRARY:
+        case cmStateEnums::SHARED_LIBRARY:
+        case cmStateEnums::MODULE_LIBRARY:
+        case cmStateEnums::OBJECT_LIBRARY: {
           this->AppendTarget(fout, targetName, *lg, *ti, make.c_str(),
                              makefile, compiler.c_str(), sourceFileFlags,
                              false);

@@ -60,7 +60,7 @@ public:
   cmComputeLinkInformation* GetLinkInformation(
     const std::string& config) const;
 
-  cmState::TargetType GetType() const;
+  cmStateEnums::TargetType GetType() const;
   const std::string& GetName() const;
   std::string GetExportName() const;
 
@@ -198,7 +198,7 @@ public:
 
   bool LinkLanguagePropagatesToDependents() const
   {
-    return this->GetType() == cmState::STATIC_LIBRARY;
+    return this->GetType() == cmStateEnums::STATIC_LIBRARY;
   }
 
   /** Get the macro to define when building sources in this target.
