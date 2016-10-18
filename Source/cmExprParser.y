@@ -10,21 +10,12 @@ Run bison like this:
   bison --yacc --name-prefix=cmExpr_yy --defines=cmExprParserTokens.h -ocmExprParser.cxx cmExprParser.y
 
 Modify cmExprParser.cxx:
-  - remove TABs
-  - remove use of the 'register' storage class specifier
-  - add __HP_aCC to the #if test for yyerrorlab warning suppression
+  - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
 
 */
 
-/* Configure the parser to use a lexer object.  */
-#define YYPARSE_PARAM yyscanner
-#define YYLEX_PARAM yyscanner
-#define YYERROR_VERBOSE 1
-#define cmExpr_yyerror(x) \
-        cmExprError(yyscanner, x)
-#define yyGetParser (cmExpr_yyget_extra(yyscanner))
-
 /*-------------------------------------------------------------------------*/
+#define YYDEBUG 1
 #include "cmExprParserHelper.h" /* Interface to parser object.  */
 #include "cmExprLexer.h"  /* Interface to lexer object.  */
 #include "cmExprParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
@@ -34,13 +25,8 @@ Modify cmExprParser.cxx:
 /* Forward declare the lexer entry point.  */
 YY_DECL;
 
-/* Internal utility functions.  */
-static void cmExprError(yyscan_t yyscanner, const char* message);
-
-#define YYDEBUG 1
-//#define YYMAXDEPTH 100000
-//#define YYINITDEPTH 10000
-
+/* Helper function to forward error callback from parser.  */
+static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 
 /* Disable some warnings in the generated code.  */
 #ifdef _MSC_VER
@@ -50,7 +36,13 @@ static void cmExprError(yyscan_t yyscanner, const char* message);
 %}
 
 /* Generate a reentrant parser object.  */
-%pure_parser
+%define api.pure
+
+/* Configure the parser to use a lexer object.  */
+%lex-param   {yyscan_t yyscanner}
+%parse-param {yyscan_t yyscanner}
+
+%define parse.error verbose
 
 /*-------------------------------------------------------------------------*/
 /* Tokens */
@@ -74,82 +66,97 @@ static void cmExprError(yyscan_t yyscanner, const char* message);
 %%
 
 
-Start:
-exp
-{
-  yyGetParser->SetResult($<Number>1);
-}
+start:
+  exp {
+    cmExpr_yyget_extra(yyscanner)->SetResult($<Number>1);
+  }
 
 exp:
-bitwiseor
-{$<Number>$ = $<Number>1;}
-|
-exp exp_OR bitwiseor
-{$<Number>$ = $<Number>1 | $<Number>3;}
+  bitwiseor {
+    $<Number>$ = $<Number>1;
+  }
+| exp exp_OR bitwiseor {
+    $<Number>$ = $<Number>1 | $<Number>3;
+  }
 
 bitwiseor:
-bitwisexor
-{$<Number>$ = $<Number>1;}
-|
-bitwiseor exp_XOR bitwisexor
-{$<Number>$ = $<Number>1 ^ $<Number>3;}
+  bitwisexor {
+    $<Number>$ = $<Number>1;
+  }
+| bitwiseor exp_XOR bitwisexor {
+    $<Number>$ = $<Number>1 ^ $<Number>3;
+  }
 
 bitwisexor:
-bitwiseand
-{$<Number>$ = $<Number>1;}
-|
-bitwisexor exp_AND bitwiseand
-{$<Number>$ = $<Number>1 & $<Number>3;}
+  bitwiseand {
+    $<Number>$ = $<Number>1;
+  }
+| bitwisexor exp_AND bitwiseand {
+    $<Number>$ = $<Number>1 & $<Number>3;
+  }
 
 bitwiseand:
-shift
-{$<Number>$ = $<Number>1;}
-|
-bitwiseand exp_SHIFTLEFT shift
-{$<Number>$ = $<Number>1 << $<Number>3;}
-|
-bitwiseand exp_SHIFTRIGHT shift
-{$<Number>$ = $<Number>1 >> $<Number>3;}
-
+  shift {
+    $<Number>$ = $<Number>1;
+  }
+| bitwiseand exp_SHIFTLEFT shift {
+    $<Number>$ = $<Number>1 << $<Number>3;
+  }
+| bitwiseand exp_SHIFTRIGHT shift {
+    $<Number>$ = $<Number>1 >> $<Number>3;
+  }
 
 shift:
-term
-{$<Number>$ = $<Number>1;}
-|
-shift exp_PLUS term
-{$<Number>$ = $<Number>1 + $<Number>3;}
-|
-shift exp_MINUS term
-{$<Number>$ = $<Number>1 - $<Number>3;}
+  term {
+    $<Number>$ = $<Number>1;
+  }
+| shift exp_PLUS term {
+    $<Number>$ = $<Number>1 + $<Number>3;
+  }
+| shift exp_MINUS term {
+    $<Number>$ = $<Number>1 - $<Number>3;
+  }
 
 term:
-factor
-{$<Number>$ = $<Number>1;}
-|
-term exp_TIMES factor
-{$<Number>$ = $<Number>1 * $<Number>3;}
-|
-term exp_DIVIDE factor
-{$<Number>$ = $<Number>1 / $<Number>3;}
-|
-term exp_MOD factor
-{$<Number>$ = $<Number>1 % $<Number>3;}
+  unary {
+    $<Number>$ = $<Number>1;
+  }
+| term exp_TIMES unary {
+    $<Number>$ = $<Number>1 * $<Number>3;
+  }
+| term exp_DIVIDE unary {
+    $<Number>$ = $<Number>1 / $<Number>3;
+  }
+| term exp_MOD unary {
+    $<Number>$ = $<Number>1 % $<Number>3;
+  }
+
+unary:
+  factor {
+    $<Number>$ = $<Number>1;
+  }
+| exp_PLUS unary {
+    $<Number>$ = + $<Number>2;
+  }
+| exp_MINUS unary {
+    $<Number>$ = - $<Number>2;
+  }
 
 factor:
-exp_NUMBER
-{$<Number>$ = $<Number>1;}
-|
-exp_OPENPARENT exp exp_CLOSEPARENT
-{$<Number>$ = $<Number>2;}
+  exp_NUMBER {
+    $<Number>$ = $<Number>1;
+  }
+| exp_OPENPARENT exp exp_CLOSEPARENT {
+    $<Number>$ = $<Number>2;
+  }
 ;
-
 
 %%
 /* End of grammar */
 
 /*--------------------------------------------------------------------------*/
-void cmExprError(yyscan_t yyscanner, const char* message)
+void cmExpr_yyerror(yyscan_t yyscanner, const char* message)
 {
-  yyGetParser->Error(message);
+  cmExpr_yyget_extra(yyscanner)->Error(message);
 }
 
