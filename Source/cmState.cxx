@@ -25,7 +25,7 @@ static std::string const kBUILDSYSTEM_TARGETS = "BUILDSYSTEM_TARGETS";
 static std::string const kSOURCE_DIR = "SOURCE_DIR";
 static std::string const kSUBDIRECTORIES = "SUBDIRECTORIES";
 
-struct cmState::SnapshotDataType
+struct cmStateDetail::SnapshotDataType
 {
   cmState::PositionType ScopeParent;
   cmState::PositionType DirectoryParent;
