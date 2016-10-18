@@ -5,6 +5,7 @@
 #include "cmListFileLexer.h"
 #include "cmMessenger.h"
 #include "cmOutputConverter.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 

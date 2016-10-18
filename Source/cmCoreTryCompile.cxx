@@ -6,6 +6,7 @@
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmState.h"
 #include "cmake.h"
 #include <cmsys/Directory.hxx>
 

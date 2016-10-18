@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmUtilitySourceCommand.h"
 
+#include "cmState.h"
+
 // cmUtilitySourceCommand
 bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
                                          cmExecutionStatus&)

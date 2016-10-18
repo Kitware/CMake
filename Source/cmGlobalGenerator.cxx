@@ -28,6 +28,7 @@
 #include "cmPolicies.h"
 #include "cmQtAutoGeneratorInitializer.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmVersion.h"
 #include "cmake.h"

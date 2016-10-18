@@ -8,6 +8,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmUuid.h"
 #include "cmake.h"
 #include <cmsys/Encoding.hxx>

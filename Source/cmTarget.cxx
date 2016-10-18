@@ -13,6 +13,7 @@
 #include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmTargetPropertyComputer.h"
 #include "cmake.h"

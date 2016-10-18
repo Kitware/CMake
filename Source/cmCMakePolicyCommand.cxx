@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakePolicyCommand.h"
 
+#include "cmState.h"
 #include "cmVersion.h"
 
 // cmCMakePolicyCommand

@@ -15,6 +15,7 @@
 #include "cmPropertyMap.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"

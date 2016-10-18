@@ -12,6 +12,7 @@
 #include "cmOSXBundleGenerator.h"
 #include "cmOutputConverter.h"
 #include "cmRulePlaceholderExpander.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 

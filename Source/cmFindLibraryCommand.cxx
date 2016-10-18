@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindLibraryCommand.h"
 
+#include "cmState.h"
 #include <cmsys/Directory.hxx>
 
 cmFindLibraryCommand::cmFindLibraryCommand()

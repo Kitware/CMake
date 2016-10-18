@@ -2,6 +2,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"

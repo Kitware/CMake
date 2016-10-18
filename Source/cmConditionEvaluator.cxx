@@ -4,6 +4,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmOutputConverter.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 
 static std::string const keyAND = "AND";

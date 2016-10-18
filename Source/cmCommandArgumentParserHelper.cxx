@@ -6,6 +6,7 @@
 
 #include "cmCommandArgumentLexer.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 

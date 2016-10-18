@@ -10,6 +10,7 @@
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"

@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 
-#include "cmState.h"
 #include "cmStateSnapshot.h"
 
 /** \class cmListFileCache

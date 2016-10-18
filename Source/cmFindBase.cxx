@@ -3,6 +3,7 @@
 #include "cmFindBase.h"
 
 #include "cmAlgorithms.h"
+#include "cmState.h"
 #include "cmStateTypes.h"
 
 cmFindBase::cmFindBase()

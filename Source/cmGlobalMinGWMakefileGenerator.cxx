@@ -4,6 +4,7 @@
 
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 
 cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator(cmake* cm)
   : cmGlobalUnixMakefileGenerator3(cm)

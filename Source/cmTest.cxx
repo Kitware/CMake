@@ -4,6 +4,7 @@
 
 #include "cmMakefile.h"
 #include "cmProperty.h"
+#include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 

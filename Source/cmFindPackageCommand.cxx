@@ -3,6 +3,7 @@
 #include "cmFindPackageCommand.h"
 
 #include "cmAlgorithms.h"
+#include "cmState.h"
 #include <cmSystemTools.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Encoding.hxx>
