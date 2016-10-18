@@ -4,6 +4,7 @@
 #define cmGlobalVisualStudio10Generator_h
 
 #include "cmGlobalVisualStudio8Generator.h"
+#include "cmVisualStudio10ToolsetOptions.h"
 
 /** \class cmGlobalVisualStudio10Generator
  * \brief Write a Unix makefiles.
@@ -146,6 +147,7 @@ private:
 
   std::string MSBuildCommand;
   bool MSBuildCommandInitialized;
+  cmVisualStudio10ToolsetOptions ToolsetOptions;
   virtual std::string FindMSBuildCommand();
   virtual std::string FindDevEnvCommand();
   virtual std::string GetVSMakeProgram() { return this->GetMSBuildCommand(); }
