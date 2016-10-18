@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "cmState.h"
+#include "cmStateSnapshot.h"
 
 /** \class cmListFileCache
  * \brief A class to cache list file contents.

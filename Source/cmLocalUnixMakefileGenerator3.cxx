@@ -16,6 +16,8 @@
 #include "cmOutputConverter.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
+#include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"

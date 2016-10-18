@@ -7,7 +7,7 @@
 
 #include "cmInstalledFile.h"
 #include "cmListFileCache.h"
-#include "cmState.h"
+#include "cmStateSnapshot.h"
 
 #include <map>
 #include <set>

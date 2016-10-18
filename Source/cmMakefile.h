@@ -9,7 +9,7 @@
 #include "cmListFileCache.h"
 #include "cmNewLineStyle.h"
 #include "cmPolicies.h"
-#include "cmState.h"
+#include "cmStateSnapshot.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
 #include "cmake.h"

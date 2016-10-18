@@ -292,6 +292,8 @@ CMAKE_CXX_SOURCES="\
   cmSourceFile \
   cmSourceFileLocation \
   cmState \
+  cmStateDirectory \
+  cmStateSnapshot \
   cmSystemTools \
   cmTestGenerator \
   cmVersion \

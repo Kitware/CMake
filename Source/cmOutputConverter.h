@@ -5,7 +5,7 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmState.h"
+#include "cmStateSnapshot.h"
 
 #include <string>
 #include <vector>

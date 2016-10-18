@@ -7,6 +7,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmStateDirectory.h"
 #include "cmSystemTools.h"
 
 #include <assert.h>

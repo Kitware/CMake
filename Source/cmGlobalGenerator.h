@@ -6,7 +6,8 @@
 #include <cmConfigure.h>
 
 #include "cmExportSetMap.h"
-#include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"

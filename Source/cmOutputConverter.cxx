@@ -3,6 +3,8 @@
 #include "cmOutputConverter.h"
 
 #include "cmAlgorithms.h"
+#include "cmState.h"
+#include "cmStateDirectory.h"
 #include "cmSystemTools.h"
 
 #include <algorithm>

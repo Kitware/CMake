@@ -4,7 +4,7 @@
 #ifndef cmLinkLineComputer_h
 #define cmLinkLineComputer_h
 
-#include "cmState.h"
+#include "cmStateDirectory.h"
 
 class cmComputeLinkInformation;
 class cmOutputConverter;
