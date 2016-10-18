@@ -5,6 +5,7 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
+#include "cmAlgorithms.h"
 #include "cmListFileCache.h"
 #include "cmSystemTools.h"
 
