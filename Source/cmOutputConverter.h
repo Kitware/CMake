@@ -92,7 +92,7 @@ public:
 
   static bool ContainedInDirectory(std::string const& local_path,
                                    std::string const& remote_path,
-                                   cmState::Directory directory);
+                                   cmStateDirectory directory);
 
   /**
    * Convert the given remote path to a relative path with respect to

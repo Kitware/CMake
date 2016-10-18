@@ -78,7 +78,7 @@ static bool cmOutputConverterNotAbove(const char* a, const char* b)
 
 bool cmOutputConverter::ContainedInDirectory(std::string const& local_path,
                                              std::string const& remote_path,
-                                             cmState::Directory directory)
+                                             cmStateDirectory directory)
 {
   const std::string relativePathTopBinary =
     directory.GetRelativePathTopBinary();

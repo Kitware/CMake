@@ -72,7 +72,7 @@ public:
 
   cmLinkLineComputer* CreateLinkLineComputer(
     cmOutputConverter* outputConverter,
-    cmState::Directory stateDir) const CM_OVERRIDE;
+    cmStateDirectory stateDir) const CM_OVERRIDE;
 
   /**
    * Write the given @a comment to the output stream @a os. It

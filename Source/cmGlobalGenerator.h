@@ -108,10 +108,10 @@ public:
   virtual void Generate();
 
   virtual cmLinkLineComputer* CreateLinkLineComputer(
-    cmOutputConverter* outputConverter, cmState::Directory stateDir) const;
+    cmOutputConverter* outputConverter, cmStateDirectory stateDir) const;
 
   cmLinkLineComputer* CreateMSVC60LinkLineComputer(
-    cmOutputConverter* outputConverter, cmState::Directory stateDir) const;
+    cmOutputConverter* outputConverter, cmStateDirectory stateDir) const;
 
   /**
    * Set/Get and Clear the enabled languages.

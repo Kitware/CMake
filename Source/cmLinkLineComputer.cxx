@@ -7,7 +7,7 @@
 #include "cmOutputConverter.h"
 
 cmLinkLineComputer::cmLinkLineComputer(cmOutputConverter* outputConverter,
-                                       cmState::Directory stateDir)
+                                       cmStateDirectory stateDir)
   : StateDir(stateDir)
   , OutputConverter(outputConverter)
   , ForResponse(false)

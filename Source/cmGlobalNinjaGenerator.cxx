@@ -66,7 +66,7 @@ void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
 }
 
 cmLinkLineComputer* cmGlobalNinjaGenerator::CreateLinkLineComputer(
-  cmOutputConverter* outputConverter, cmState::Directory /* stateDir */) const
+  cmOutputConverter* outputConverter, cmStateDirectory /* stateDir */) const
 {
   return new cmNinjaLinkLineComputer(
     outputConverter,
