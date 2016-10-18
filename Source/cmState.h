@@ -79,9 +79,6 @@ public:
   cmState();
   ~cmState();
 
-  typedef cmStateSnapshot Snapshot;
-  typedef cmStateDirectory Directory;
-
   static const char* GetTargetTypeName(cmStateEnums::TargetType targetType);
 
   cmStateSnapshot CreateBaseSnapshot();
