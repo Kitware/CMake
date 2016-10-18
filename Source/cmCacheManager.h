@@ -34,7 +34,7 @@ private:
   struct CacheEntry
   {
     std::string Value;
-    cmState::CacheEntryType Type;
+    cmStateEnums::CacheEntryType Type;
     cmPropertyMap Properties;
     std::vector<std::string> GetPropertyList() const;
     const char* GetProperty(const std::string&) const;
@@ -44,7 +44,7 @@ private:
     bool Initialized;
     CacheEntry()
       : Value("")
-      , Type(cmState::UNINITIALIZED)
+      , Type(cmStateEnums::UNINITIALIZED)
       , Initialized(false)
     {
     }
@@ -70,8 +70,14 @@ public:
     const char* GetValue() const { return this->GetEntry().Value.c_str(); }
     bool GetValueAsBool() const;
     void SetValue(const char*);
-    cmState::CacheEntryType GetType() const { return this->GetEntry().Type; }
-    void SetType(cmState::CacheEntryType ty) { this->GetEntry().Type = ty; }
+    cmStateEnums::CacheEntryType GetType() const
+    {
+      return this->GetEntry().Type;
+    }
+    void SetType(cmStateEnums::CacheEntryType ty)
+    {
+      this->GetEntry().Type = ty;
+    }
     bool Initialized() { return this->GetEntry().Initialized; }
     cmCacheManager& Container;
     std::map<std::string, CacheEntry>::iterator Position;
@@ -137,7 +143,7 @@ public:
     return this->GetCacheIterator(key.c_str()).GetProperty(propName);
   }
 
-  cmState::CacheEntryType GetCacheEntryType(std::string const& key)
+  cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key)
   {
     return this->GetCacheIterator(key.c_str()).GetType();
   }
@@ -200,7 +206,8 @@ public:
 protected:
   ///! Add an entry into the cache
   void AddCacheEntry(const std::string& key, const char* value,
-                     const char* helpString, cmState::CacheEntryType type);
+                     const char* helpString,
+                     cmStateEnums::CacheEntryType type);
 
   ///! Get a cache entry object for a key
   CacheEntry* GetCacheEntry(const std::string& key);

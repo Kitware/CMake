@@ -93,7 +93,7 @@ std::string cmGlobalUnixMakefileGenerator3::GetEditCacheCommand() const
     if (!editCacheCommand.empty()) {
       cm->AddCacheEntry("CMAKE_EDIT_COMMAND", editCacheCommand.c_str(),
                         "Path to cache edit program executable.",
-                        cmState::INTERNAL);
+                        cmStateEnums::INTERNAL);
     }
   }
   const char* edit_cmd = cm->GetCacheDefinition("CMAKE_EDIT_COMMAND");

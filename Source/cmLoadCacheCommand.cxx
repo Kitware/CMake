@@ -140,7 +140,7 @@ void cmLoadCacheCommand::CheckLine(const char* line)
   // Check one line of the cache file.
   std::string var;
   std::string value;
-  cmState::CacheEntryType type = cmState::UNINITIALIZED;
+  cmStateEnums::CacheEntryType type = cmStateEnums::UNINITIALIZED;
   if (cmake::ParseCacheEntry(line, var, value, type)) {
     // Found a real entry.  See if this one was requested.
     if (this->VariablesToRead.find(var) != this->VariablesToRead.end()) {

@@ -66,7 +66,7 @@ bool cmIncludeExternalMSProjectCommand::InitialPass(
       std::string guidVariable = utility_name + "_GUID_CMAKE";
       this->Makefile->GetCMakeInstance()->AddCacheEntry(
         guidVariable.c_str(), customGuid.c_str(), "Stored GUID",
-        cmState::INTERNAL);
+        cmStateEnums::INTERNAL);
     }
 
     // Create a target instance for this utility.

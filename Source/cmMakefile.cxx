@@ -1643,20 +1643,21 @@ void cmMakefile::AddDefinition(const std::string& name, const char* value)
 
 void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
                                     const char* doc,
-                                    cmState::CacheEntryType type, bool force)
+                                    cmStateEnums::CacheEntryType type,
+                                    bool force)
 {
   const char* existingValue = this->GetState()->GetInitializedCacheValue(name);
   // must be outside the following if() to keep it alive long enough
   std::string nvalue;
 
-  if (existingValue &&
-      (this->GetState()->GetCacheEntryType(name) == cmState::UNINITIALIZED)) {
+  if (existingValue && (this->GetState()->GetCacheEntryType(name) ==
+                        cmStateEnums::UNINITIALIZED)) {
     // if this is not a force, then use the value from the cache
     // if it is a force, then use the value being passed in
     if (!force) {
       value = existingValue;
     }
-    if (type == cmState::PATH || type == cmState::FILEPATH) {
+    if (type == cmStateEnums::PATH || type == cmStateEnums::FILEPATH) {
       std::vector<std::string>::size_type cc;
       std::vector<std::string> files;
       nvalue = value ? value : "";
@@ -3177,7 +3178,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
       // Add this before the user-provided CMake arguments in case
       // one of the arguments is -DCMAKE_BUILD_TYPE=...
       cm.AddCacheEntry("CMAKE_BUILD_TYPE", config, "Build configuration",
-                       cmState::STRING);
+                       cmStateEnums::STRING);
     }
   }
   // if cmake args were provided then pass them in
@@ -3213,10 +3214,10 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   gg->EnableLanguagesFromGenerator(this->GetGlobalGenerator(), this);
   if (this->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS")) {
     cm.AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "TRUE", "",
-                     cmState::INTERNAL);
+                     cmStateEnums::INTERNAL);
   } else {
     cm.AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "FALSE", "",
-                     cmState::INTERNAL);
+                     cmStateEnums::INTERNAL);
   }
   if (cm.Configure() != 0) {
     cmSystemTools::Error(

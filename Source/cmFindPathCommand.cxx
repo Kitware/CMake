@@ -26,7 +26,8 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn,
     if (this->AlreadyInCacheWithoutMetaInfo) {
       this->Makefile->AddCacheDefinition(
         this->VariableName, "", this->VariableDocumentation.c_str(),
-        (this->IncludeFileInPath ? cmState::FILEPATH : cmState::PATH));
+        (this->IncludeFileInPath ? cmStateEnums::FILEPATH
+                                 : cmStateEnums::PATH));
     }
     return true;
   }
@@ -35,13 +36,13 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn,
   if (!result.empty()) {
     this->Makefile->AddCacheDefinition(
       this->VariableName, result.c_str(), this->VariableDocumentation.c_str(),
-      (this->IncludeFileInPath) ? cmState::FILEPATH : cmState::PATH);
+      (this->IncludeFileInPath) ? cmStateEnums::FILEPATH : cmStateEnums::PATH);
     return true;
   }
   this->Makefile->AddCacheDefinition(
     this->VariableName, (this->VariableName + "-NOTFOUND").c_str(),
     this->VariableDocumentation.c_str(),
-    (this->IncludeFileInPath) ? cmState::FILEPATH : cmState::PATH);
+    (this->IncludeFileInPath) ? cmStateEnums::FILEPATH : cmStateEnums::PATH);
   return true;
 }
 

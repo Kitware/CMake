@@ -315,7 +315,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         }
       }
       std::string var, value;
-      cmState::CacheEntryType type = cmState::UNINITIALIZED;
+      cmStateEnums::CacheEntryType type = cmStateEnums::UNINITIALIZED;
       if (cmState::ParseCacheEntry(entry, var, value, type)) {
         // The value is transformed if it is a filepath for example, so
         // we can't compare whether the value is already in the cache until
@@ -410,8 +410,8 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       std::vector<std::string> cacheKeys = this->State->GetCacheEntryKeys();
       for (std::vector<std::string>::const_iterator it = cacheKeys.begin();
            it != cacheKeys.end(); ++it) {
-        cmState::CacheEntryType t = this->State->GetCacheEntryType(*it);
-        if (t != cmState::STATIC) {
+        cmStateEnums::CacheEntryType t = this->State->GetCacheEntryType(*it);
+        if (t != cmStateEnums::STATIC) {
           if (regex.find(it->c_str())) {
             entriesToDelete.push_back(*it);
           }
@@ -859,14 +859,14 @@ int cmake::AddCMakePaths()
   // Save the value in the cache
   this->AddCacheEntry("CMAKE_COMMAND",
                       cmSystemTools::GetCMakeCommand().c_str(),
-                      "Path to CMake executable.", cmState::INTERNAL);
+                      "Path to CMake executable.", cmStateEnums::INTERNAL);
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  this->AddCacheEntry("CMAKE_CTEST_COMMAND",
-                      cmSystemTools::GetCTestCommand().c_str(),
-                      "Path to ctest program executable.", cmState::INTERNAL);
-  this->AddCacheEntry("CMAKE_CPACK_COMMAND",
-                      cmSystemTools::GetCPackCommand().c_str(),
-                      "Path to cpack program executable.", cmState::INTERNAL);
+  this->AddCacheEntry(
+    "CMAKE_CTEST_COMMAND", cmSystemTools::GetCTestCommand().c_str(),
+    "Path to ctest program executable.", cmStateEnums::INTERNAL);
+  this->AddCacheEntry(
+    "CMAKE_CPACK_COMMAND", cmSystemTools::GetCPackCommand().c_str(),
+    "Path to cpack program executable.", cmStateEnums::INTERNAL);
 #endif
   if (!cmSystemTools::FileExists(
         (cmSystemTools::GetCMakeRoot() + "/Modules/CMake.cmake").c_str())) {
@@ -879,7 +879,7 @@ int cmake::AddCMakePaths()
     return 0;
   }
   this->AddCacheEntry("CMAKE_ROOT", cmSystemTools::GetCMakeRoot().c_str(),
-                      "Path to CMake installation.", cmState::INTERNAL);
+                      "Path to CMake installation.", cmStateEnums::INTERNAL);
 
   return 1;
 }
@@ -1147,7 +1147,7 @@ struct SaveCacheEntry
   std::string key;
   std::string value;
   std::string help;
-  cmState::CacheEntryType type;
+  cmStateEnums::CacheEntryType type;
 };
 
 int cmake::HandleDeleteCacheVariables(const std::string& var)
@@ -1291,7 +1291,7 @@ int cmake::ActualConfigure()
       "CMAKE_HOME_DIRECTORY", this->GetHomeDirectory(),
       "Source directory with the top level CMakeLists.txt file for this "
       "project",
-      cmState::INTERNAL);
+      cmStateEnums::INTERNAL);
   }
 
   // no generator specified on the command line
@@ -1338,11 +1338,11 @@ int cmake::ActualConfigure()
   if (!this->State->GetInitializedCacheValue("CMAKE_GENERATOR")) {
     this->AddCacheEntry("CMAKE_GENERATOR",
                         this->GlobalGenerator->GetName().c_str(),
-                        "Name of generator.", cmState::INTERNAL);
+                        "Name of generator.", cmStateEnums::INTERNAL);
     this->AddCacheEntry("CMAKE_EXTRA_GENERATOR",
                         this->GlobalGenerator->GetExtraGeneratorName().c_str(),
                         "Name of external makefile project generator.",
-                        cmState::INTERNAL);
+                        cmStateEnums::INTERNAL);
   }
 
   if (const char* platformName =
@@ -1362,7 +1362,7 @@ int cmake::ActualConfigure()
   } else {
     this->AddCacheEntry("CMAKE_GENERATOR_PLATFORM",
                         this->GeneratorPlatform.c_str(),
-                        "Name of generator platform.", cmState::INTERNAL);
+                        "Name of generator platform.", cmStateEnums::INTERNAL);
   }
 
   if (const char* tsName =
@@ -1382,7 +1382,7 @@ int cmake::ActualConfigure()
   } else {
     this->AddCacheEntry("CMAKE_GENERATOR_TOOLSET",
                         this->GeneratorToolset.c_str(),
-                        "Name of generator toolset.", cmState::INTERNAL);
+                        "Name of generator toolset.", cmStateEnums::INTERNAL);
   }
 
   // reset any system configuration information, except for when we are
@@ -1411,13 +1411,14 @@ int cmake::ActualConfigure()
     if (!this->State->GetInitializedCacheValue("LIBRARY_OUTPUT_PATH")) {
       this->AddCacheEntry(
         "LIBRARY_OUTPUT_PATH", "",
-        "Single output directory for building all libraries.", cmState::PATH);
+        "Single output directory for building all libraries.",
+        cmStateEnums::PATH);
     }
     if (!this->State->GetInitializedCacheValue("EXECUTABLE_OUTPUT_PATH")) {
       this->AddCacheEntry(
         "EXECUTABLE_OUTPUT_PATH", "",
         "Single output directory for building all executables.",
-        cmState::PATH);
+        cmStateEnums::PATH);
     }
   }
 
@@ -1640,7 +1641,7 @@ void cmake::AddCacheEntry(const std::string& key, const char* value,
                           const char* helpString, int type)
 {
   this->State->AddCacheEntry(key, value, helpString,
-                             cmState::CacheEntryType(type));
+                             cmStateEnums::CacheEntryType(type));
   this->UnwatchUnusedCli(key);
 }
 
@@ -1694,7 +1695,8 @@ void cmake::AddDefaultGenerators()
 }
 
 bool cmake::ParseCacheEntry(const std::string& entry, std::string& var,
-                            std::string& value, cmState::CacheEntryType& type)
+                            std::string& value,
+                            cmStateEnums::CacheEntryType& type)
 {
   return cmState::ParseCacheEntry(entry, var, value, type);
 }
@@ -2464,7 +2466,7 @@ void cmake::SetSuppressDevWarnings(bool b)
   this->AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", value.c_str(),
                       "Suppress Warnings that are meant for"
                       " the author of the CMakeLists.txt files.",
-                      cmState::INTERNAL);
+                      cmStateEnums::INTERNAL);
 }
 
 bool cmake::GetSuppressDeprecatedWarnings() const
@@ -2488,7 +2490,7 @@ void cmake::SetSuppressDeprecatedWarnings(bool b)
   this->AddCacheEntry("CMAKE_WARN_DEPRECATED", value.c_str(),
                       "Whether to issue warnings for deprecated "
                       "functionality.",
-                      cmState::INTERNAL);
+                      cmStateEnums::INTERNAL);
 }
 
 bool cmake::GetDevWarningsAsErrors() const
@@ -2512,7 +2514,7 @@ void cmake::SetDevWarningsAsErrors(bool b)
   this->AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_ERRORS", value.c_str(),
                       "Suppress errors that are meant for"
                       " the author of the CMakeLists.txt files.",
-                      cmState::INTERNAL);
+                      cmStateEnums::INTERNAL);
 }
 
 bool cmake::GetDeprecatedWarningsAsErrors() const
@@ -2536,5 +2538,5 @@ void cmake::SetDeprecatedWarningsAsErrors(bool b)
   this->AddCacheEntry("CMAKE_ERROR_DEPRECATED", value.c_str(),
                       "Whether to issue deprecation errors for macros"
                       " and functions.",
-                      cmState::INTERNAL);
+                      cmStateEnums::INTERNAL);
 }

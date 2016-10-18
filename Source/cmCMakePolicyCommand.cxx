@@ -79,7 +79,7 @@ bool cmCMakePolicyCommand::HandleSetMode(std::vector<std::string> const& args)
         "For backwards compatibility, what version of CMake "
         "commands and "
         "syntax should this version of CMake try to support.",
-        cmState::STRING);
+        cmStateEnums::STRING);
     }
   }
   return true;

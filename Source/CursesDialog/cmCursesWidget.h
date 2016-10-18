@@ -41,7 +41,7 @@ public:
   /**
    * Get the type of the widget (STRING, PATH etc...)
    */
-  cmState::CacheEntryType GetType() { return this->Type; }
+  cmStateEnums::CacheEntryType GetType() { return this->Type; }
 
   /**
    * If there are any, print the widget specific commands
@@ -62,7 +62,7 @@ protected:
   cmCursesWidget(const cmCursesWidget& from);
   void operator=(const cmCursesWidget&);
 
-  cmState::CacheEntryType Type;
+  cmStateEnums::CacheEntryType Type;
   std::string Value;
   FIELD* Field;
   // The page in the main form this widget is in

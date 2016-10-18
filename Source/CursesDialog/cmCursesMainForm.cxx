@@ -106,10 +106,10 @@ void cmCursesMainForm::InitializeUI()
 
   for (std::vector<std::string>::const_iterator it = cacheKeys.begin();
        it != cacheKeys.end(); ++it) {
-    cmState::CacheEntryType t =
+    cmStateEnums::CacheEntryType t =
       this->CMakeInstance->GetState()->GetCacheEntryType(*it);
-    if (t != cmState::INTERNAL && t != cmState::STATIC &&
-        t != cmState::UNINITIALIZED) {
+    if (t != cmStateEnums::INTERNAL && t != cmStateEnums::STATIC &&
+        t != cmStateEnums::UNINITIALIZED) {
       ++count;
     }
   }
@@ -130,10 +130,10 @@ void cmCursesMainForm::InitializeUI()
     for (std::vector<std::string>::const_iterator it = cacheKeys.begin();
          it != cacheKeys.end(); ++it) {
       std::string key = *it;
-      cmState::CacheEntryType t =
+      cmStateEnums::CacheEntryType t =
         this->CMakeInstance->GetState()->GetCacheEntryType(*it);
-      if (t == cmState::INTERNAL || t == cmState::STATIC ||
-          t == cmState::UNINITIALIZED) {
+      if (t == cmStateEnums::INTERNAL || t == cmStateEnums::STATIC ||
+          t == cmStateEnums::UNINITIALIZED) {
         continue;
       }
 
@@ -148,10 +148,10 @@ void cmCursesMainForm::InitializeUI()
     for (std::vector<std::string>::const_iterator it = cacheKeys.begin();
          it != cacheKeys.end(); ++it) {
       std::string key = *it;
-      cmState::CacheEntryType t =
+      cmStateEnums::CacheEntryType t =
         this->CMakeInstance->GetState()->GetCacheEntryType(*it);
-      if (t == cmState::INTERNAL || t == cmState::STATIC ||
-          t == cmState::UNINITIALIZED) {
+      if (t == cmStateEnums::INTERNAL || t == cmStateEnums::STATIC ||
+          t == cmStateEnums::UNINITIALIZED) {
         continue;
       }
 
@@ -249,8 +249,9 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
     cmCursesWidget* cw =
       reinterpret_cast<cmCursesWidget*>(field_userptr(currentField));
     // If in edit mode, get out of it
-    if (cw->GetType() == cmState::STRING || cw->GetType() == cmState::PATH ||
-        cw->GetType() == cmState::FILEPATH) {
+    if (cw->GetType() == cmStateEnums::STRING ||
+        cw->GetType() == cmStateEnums::PATH ||
+        cw->GetType() == cmStateEnums::FILEPATH) {
       cmCursesStringWidget* sw = static_cast<cmCursesStringWidget*>(cw);
       sw->SetInEdit(false);
     }
@@ -704,7 +705,7 @@ void cmCursesMainForm::FillCacheManagerFromUI()
       std::string newValue = (*this->Entries)[i]->Entry->GetValue();
       std::string fixedOldValue;
       std::string fixedNewValue;
-      cmState::CacheEntryType t =
+      cmStateEnums::CacheEntryType t =
         this->CMakeInstance->GetState()->GetCacheEntryType(cacheKey);
       this->FixValue(t, oldValue, fixedOldValue);
       this->FixValue(t, newValue, fixedNewValue);
@@ -720,14 +721,14 @@ void cmCursesMainForm::FillCacheManagerFromUI()
   }
 }
 
-void cmCursesMainForm::FixValue(cmState::CacheEntryType type,
+void cmCursesMainForm::FixValue(cmStateEnums::CacheEntryType type,
                                 const std::string& in, std::string& out) const
 {
   out = in.substr(0, in.find_last_not_of(' ') + 1);
-  if (type == cmState::PATH || type == cmState::FILEPATH) {
+  if (type == cmStateEnums::PATH || type == cmStateEnums::FILEPATH) {
     cmSystemTools::ConvertToUnixSlashes(out);
   }
-  if (type == cmState::BOOL) {
+  if (type == cmStateEnums::BOOL) {
     if (cmSystemTools::IsOff(out.c_str())) {
       out = "OFF";
     } else {

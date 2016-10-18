@@ -101,7 +101,7 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(
       "Semicolon separated list of supported configuration types, "
       "only supports Debug, Release, MinSizeRel, and RelWithDebInfo, "
       "anything else will be ignored.",
-      cmState::STRING);
+      cmStateEnums::STRING);
   }
 
   // Create list of configurations requested by user's cache, if any.
@@ -118,7 +118,7 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(
   if (cmSystemTools::GetEnv("CMAKE_MSVCIDE_RUN_PATH", extraPath)) {
     mf->AddCacheDefinition("CMAKE_MSVCIDE_RUN_PATH", extraPath.c_str(),
                            "Saved environment variable CMAKE_MSVCIDE_RUN_PATH",
-                           cmState::STATIC);
+                           cmStateEnums::STATIC);
   }
 }
 

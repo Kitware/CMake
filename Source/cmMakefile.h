@@ -224,7 +224,7 @@ public:
   void AddDefinition(const std::string& name, const char* value);
   ///! Add a definition to this makefile and the global cmake cache.
   void AddCacheDefinition(const std::string& name, const char* value,
-                          const char* doc, cmState::CacheEntryType type,
+                          const char* doc, cmStateEnums::CacheEntryType type,
                           bool force = false);
 
   /**

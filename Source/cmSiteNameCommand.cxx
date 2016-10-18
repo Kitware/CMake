@@ -68,7 +68,8 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args,
 #endif
   this->Makefile->AddCacheDefinition(
     args[0], siteName.c_str(),
-    "Name of the computer/site where compile is being run", cmState::STRING);
+    "Name of the computer/site where compile is being run",
+    cmStateEnums::STRING);
 
   return true;
 }

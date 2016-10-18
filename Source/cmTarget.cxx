@@ -635,7 +635,7 @@ void cmTarget::ClearDependencyInformation(cmMakefile& mf,
   depname += "_LIB_DEPENDS";
   if (this->RecordDependencies) {
     mf.AddCacheDefinition(depname, "", "Dependencies for target",
-                          cmState::STATIC);
+                          cmStateEnums::STATIC);
   } else {
     if (mf.GetDefinition(depname)) {
       std::string message = "Target ";
@@ -773,7 +773,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
     dependencies += lib;
     dependencies += ";";
     mf.AddCacheDefinition(targetEntry, dependencies.c_str(),
-                          "Dependencies for the target", cmState::STATIC);
+                          "Dependencies for the target", cmStateEnums::STATIC);
   }
 }
 

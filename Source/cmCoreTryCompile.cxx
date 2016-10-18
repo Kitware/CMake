@@ -531,7 +531,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   // set the result var to the return value to indicate success or failure
   this->Makefile->AddCacheDefinition(argv[0], (res == 0 ? "TRUE" : "FALSE"),
                                      "Result of TRY_COMPILE",
-                                     cmState::INTERNAL);
+                                     cmStateEnums::INTERNAL);
 
   if (!outputVariable.empty()) {
     this->Makefile->AddDefinition(outputVariable, output.c_str());

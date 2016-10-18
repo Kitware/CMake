@@ -21,7 +21,7 @@ cmCursesStringWidget::cmCursesStringWidget(int width, int height, int left,
   : cmCursesWidget(width, height, left, top)
 {
   this->InEdit = false;
-  this->Type = cmState::STRING;
+  this->Type = cmStateEnums::STRING;
   set_field_fore(this->Field, A_NORMAL);
   set_field_back(this->Field, A_STANDOUT);
   field_opts_off(this->Field, O_STATIC);

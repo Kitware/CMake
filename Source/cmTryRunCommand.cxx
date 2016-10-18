@@ -189,7 +189,8 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
     strcpy(retChar, "FAILED_TO_RUN");
   }
   this->Makefile->AddCacheDefinition(this->RunResultVariable, retChar,
-                                     "Result of TRY_RUN", cmState::INTERNAL);
+                                     "Result of TRY_RUN",
+                                     cmStateEnums::INTERNAL);
 }
 
 /* This is only used when cross compiling. Instead of running the
@@ -231,7 +232,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
     comment += detailsString;
     this->Makefile->AddCacheDefinition(this->RunResultVariable,
                                        "PLEASE_FILL_OUT-FAILED_TO_RUN",
-                                       comment.c_str(), cmState::STRING);
+                                       comment.c_str(), cmStateEnums::STRING);
 
     cmState* state = this->Makefile->GetState();
     const char* existingValue =
@@ -254,9 +255,9 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
         "would have printed on stdout and stderr on its target platform.\n";
       comment += detailsString;
 
-      this->Makefile->AddCacheDefinition(internalRunOutputName,
-                                         "PLEASE_FILL_OUT-NOTFOUND",
-                                         comment.c_str(), cmState::STRING);
+      this->Makefile->AddCacheDefinition(
+        internalRunOutputName, "PLEASE_FILL_OUT-NOTFOUND", comment.c_str(),
+        cmStateEnums::STRING);
       cmState* state = this->Makefile->GetState();
       const char* existing = state->GetCacheEntryValue(internalRunOutputName);
       if (existing) {

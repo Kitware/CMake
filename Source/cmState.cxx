@@ -147,7 +147,7 @@ const char* cmCacheEntryTypes[] = { "BOOL",          "PATH",     "FILEPATH",
                                     "STRING",        "INTERNAL", "STATIC",
                                     "UNINITIALIZED", CM_NULLPTR };
 
-const char* cmState::CacheEntryTypeToString(cmState::CacheEntryType type)
+const char* cmState::CacheEntryTypeToString(cmStateEnums::CacheEntryType type)
 {
   if (type > 6) {
     return cmCacheEntryTypes[6];
@@ -155,16 +155,16 @@ const char* cmState::CacheEntryTypeToString(cmState::CacheEntryType type)
   return cmCacheEntryTypes[type];
 }
 
-cmState::CacheEntryType cmState::StringToCacheEntryType(const char* s)
+cmStateEnums::CacheEntryType cmState::StringToCacheEntryType(const char* s)
 {
   int i = 0;
   while (cmCacheEntryTypes[i]) {
     if (strcmp(s, cmCacheEntryTypes[i]) == 0) {
-      return static_cast<cmState::CacheEntryType>(i);
+      return static_cast<cmStateEnums::CacheEntryType>(i);
     }
     ++i;
   }
-  return STRING;
+  return cmStateEnums::STRING;
 }
 
 bool cmState::IsCacheEntryType(std::string const& key)
@@ -219,7 +219,7 @@ const char* cmState::GetInitializedCacheValue(std::string const& key) const
   return this->CacheManager->GetInitializedCacheValue(key);
 }
 
-cmState::CacheEntryType cmState::GetCacheEntryType(
+cmStateEnums::CacheEntryType cmState::GetCacheEntryType(
   std::string const& key) const
 {
   cmCacheManager::CacheIterator it =
@@ -279,7 +279,7 @@ bool cmState::GetCacheEntryPropertyAsBool(std::string const& key,
 
 void cmState::AddCacheEntry(const std::string& key, const char* value,
                             const char* helpString,
-                            cmState::CacheEntryType type)
+                            cmStateEnums::CacheEntryType type)
 {
   this->CacheManager->AddCacheEntry(key, value, helpString, type);
 }
@@ -1806,7 +1806,8 @@ static bool ParseEntryWithoutType(const std::string& entry, std::string& var,
 }
 
 bool cmState::ParseCacheEntry(const std::string& entry, std::string& var,
-                              std::string& value, CacheEntryType& type)
+                              std::string& value,
+                              cmStateEnums::CacheEntryType& type)
 {
   // input line is:         key:type=value
   static cmsys::RegularExpression reg(

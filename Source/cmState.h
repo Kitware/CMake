@@ -56,6 +56,16 @@ enum TargetType
   INTERFACE_LIBRARY,
   UNKNOWN_LIBRARY
 };
+enum CacheEntryType
+{
+  BOOL = 0,
+  PATH,
+  FILEPATH,
+  STRING,
+  INTERNAL,
+  STATIC,
+  UNINITIALIZED
+};
 }
 
 class cmState
@@ -214,18 +224,8 @@ public:
   Snapshot CreatePolicyScopeSnapshot(Snapshot originSnapshot);
   Snapshot Pop(Snapshot originSnapshot);
 
-  enum CacheEntryType
-  {
-    BOOL = 0,
-    PATH,
-    FILEPATH,
-    STRING,
-    INTERNAL,
-    STATIC,
-    UNINITIALIZED
-  };
-  static CacheEntryType StringToCacheEntryType(const char*);
-  static const char* CacheEntryTypeToString(CacheEntryType);
+  static cmStateEnums::CacheEntryType StringToCacheEntryType(const char*);
+  static const char* CacheEntryTypeToString(cmStateEnums::CacheEntryType);
   static bool IsCacheEntryType(std::string const& key);
 
   bool LoadCache(const std::string& path, bool internal,
@@ -239,7 +239,7 @@ public:
   std::vector<std::string> GetCacheEntryKeys() const;
   const char* GetCacheEntryValue(std::string const& key) const;
   const char* GetInitializedCacheValue(std::string const& key) const;
-  CacheEntryType GetCacheEntryType(std::string const& key) const;
+  cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key) const;
   void SetCacheEntryValue(std::string const& key, std::string const& value);
   void SetCacheValue(std::string const& key, std::string const& value);
 
@@ -264,7 +264,8 @@ public:
 
   ///! Break up a line like VAR:type="value" into var, type and value
   static bool ParseCacheEntry(const std::string& entry, std::string& var,
-                              std::string& value, CacheEntryType& type);
+                              std::string& value,
+                              cmStateEnums::CacheEntryType& type);
 
   Snapshot Reset();
   // Define a property
@@ -328,7 +329,8 @@ public:
 private:
   friend class cmake;
   void AddCacheEntry(const std::string& key, const char* value,
-                     const char* helpString, CacheEntryType type);
+                     const char* helpString,
+                     cmStateEnums::CacheEntryType type);
 
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;

@@ -308,7 +308,7 @@ bool cmFindBase::CheckForVariableInCache()
       // this.
       if (cached &&
           state->GetCacheEntryType(this->VariableName) ==
-            cmState::UNINITIALIZED) {
+            cmStateEnums::UNINITIALIZED) {
         this->AlreadyInCacheWithoutMetaInfo = true;
       }
       return true;

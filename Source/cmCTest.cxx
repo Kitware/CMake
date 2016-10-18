@@ -1969,7 +1969,7 @@ bool cmCTest::AddVariableDefinition(const std::string& arg)
 {
   std::string name;
   std::string value;
-  cmState::CacheEntryType type = cmState::UNINITIALIZED;
+  cmStateEnums::CacheEntryType type = cmStateEnums::UNINITIALIZED;
 
   if (cmake::ParseCacheEntry(arg, name, value, type)) {
     this->Definitions[name] = value;

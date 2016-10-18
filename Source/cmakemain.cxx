@@ -292,9 +292,9 @@ int do_cmake(int ac, char const* const* av)
     std::vector<std::string> keys = cm.GetState()->GetCacheEntryKeys();
     for (std::vector<std::string>::const_iterator it = keys.begin();
          it != keys.end(); ++it) {
-      cmState::CacheEntryType t = cm.GetState()->GetCacheEntryType(*it);
-      if (t != cmState::INTERNAL && t != cmState::STATIC &&
-          t != cmState::UNINITIALIZED) {
+      cmStateEnums::CacheEntryType t = cm.GetState()->GetCacheEntryType(*it);
+      if (t != cmStateEnums::INTERNAL && t != cmStateEnums::STATIC &&
+          t != cmStateEnums::UNINITIALIZED) {
         const char* advancedProp =
           cm.GetState()->GetCacheEntryProperty(*it, "ADVANCED");
         if (list_all_cached || !advancedProp) {

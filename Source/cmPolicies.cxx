@@ -233,7 +233,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, const char* version)
               "For backwards compatibility, what version of CMake "
               "commands and "
               "syntax should this version of CMake try to support.",
-              cmState::STRING);
+              cmStateEnums::STRING);
           }
         }
       }

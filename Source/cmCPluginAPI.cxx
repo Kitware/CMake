@@ -75,22 +75,22 @@ void CCONV cmAddCacheDefinition(void* arg, const char* name, const char* value,
 
   switch (type) {
     case CM_CACHE_BOOL:
-      mf->AddCacheDefinition(name, value, doc, cmState::BOOL);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::BOOL);
       break;
     case CM_CACHE_PATH:
-      mf->AddCacheDefinition(name, value, doc, cmState::PATH);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::PATH);
       break;
     case CM_CACHE_FILEPATH:
-      mf->AddCacheDefinition(name, value, doc, cmState::FILEPATH);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::FILEPATH);
       break;
     case CM_CACHE_STRING:
-      mf->AddCacheDefinition(name, value, doc, cmState::STRING);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::STRING);
       break;
     case CM_CACHE_INTERNAL:
-      mf->AddCacheDefinition(name, value, doc, cmState::INTERNAL);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::INTERNAL);
       break;
     case CM_CACHE_STATIC:
-      mf->AddCacheDefinition(name, value, doc, cmState::STATIC);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::STATIC);
       break;
   }
 }

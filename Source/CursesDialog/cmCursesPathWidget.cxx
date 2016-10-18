@@ -13,7 +13,7 @@ cmCursesPathWidget::cmCursesPathWidget(int width, int height, int left,
                                        int top)
   : cmCursesStringWidget(width, height, left, top)
 {
-  this->Type = cmState::PATH;
+  this->Type = cmStateEnums::PATH;
   this->Cycle = false;
   this->CurrentIndex = 0;
 }
@@ -50,7 +50,7 @@ void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
   std::vector<std::string> dirs;
 
   cmSystemTools::SimpleGlob(glob, dirs,
-                            (this->Type == cmState::PATH ? -1 : 0));
+                            (this->Type == cmStateEnums::PATH ? -1 : 0));
   if (this->CurrentIndex < dirs.size()) {
     cstr = dirs[this->CurrentIndex];
   }
