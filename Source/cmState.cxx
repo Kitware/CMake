@@ -32,7 +32,7 @@ struct cmStateDetail::SnapshotDataType
   cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator Policies;
   cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator PolicyRoot;
   cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator PolicyScope;
-  cmState::SnapshotType SnapshotType;
+  cmStateEnums::SnapshotType SnapshotType;
   bool Keep;
   cmLinkedTree<std::string>::iterator ExecutionListFile;
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator
@@ -748,7 +748,7 @@ cmState::Snapshot cmState::CreateBaseSnapshot()
     this->SnapshotData.Push(this->SnapshotData.Root());
   pos->DirectoryParent = this->SnapshotData.Root();
   pos->ScopeParent = this->SnapshotData.Root();
-  pos->SnapshotType = BaseType;
+  pos->SnapshotType = cmStateEnums::BaseType;
   pos->Keep = true;
   pos->BuildSystemDirectory =
     this->BuildsystemDirectory.Push(this->BuildsystemDirectory.Root());
@@ -778,7 +778,7 @@ cmState::Snapshot cmState::CreateBuildsystemDirectorySnapshot(
     this->SnapshotData.Push(originSnapshot.Position);
   pos->DirectoryParent = originSnapshot.Position;
   pos->ScopeParent = originSnapshot.Position;
-  pos->SnapshotType = BuildsystemDirectoryType;
+  pos->SnapshotType = cmStateEnums::BuildsystemDirectoryType;
   pos->Keep = true;
   pos->BuildSystemDirectory = this->BuildsystemDirectory.Push(
     originSnapshot.Position->BuildSystemDirectory);
@@ -810,7 +810,7 @@ cmState::Snapshot cmState::CreateFunctionCallSnapshot(
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
   pos->ScopeParent = originSnapshot.Position;
-  pos->SnapshotType = FunctionCallType;
+  pos->SnapshotType = cmStateEnums::FunctionCallType;
   pos->Keep = false;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
     originSnapshot.Position->ExecutionListFile, fileName);
@@ -828,7 +828,7 @@ cmState::Snapshot cmState::CreateMacroCallSnapshot(
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
-  pos->SnapshotType = MacroCallType;
+  pos->SnapshotType = cmStateEnums::MacroCallType;
   pos->Keep = false;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
     originSnapshot.Position->ExecutionListFile, fileName);
@@ -843,7 +843,7 @@ cmState::Snapshot cmState::CreateIncludeFileSnapshot(
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
-  pos->SnapshotType = IncludeFileType;
+  pos->SnapshotType = cmStateEnums::IncludeFileType;
   pos->Keep = true;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
     originSnapshot.Position->ExecutionListFile, fileName);
@@ -859,7 +859,7 @@ cmState::Snapshot cmState::CreateVariableScopeSnapshot(
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
   pos->ScopeParent = originSnapshot.Position;
-  pos->SnapshotType = VariableScopeType;
+  pos->SnapshotType = cmStateEnums::VariableScopeType;
   pos->Keep = false;
   pos->PolicyScope = originSnapshot.Position->Policies;
   assert(originSnapshot.Position->Vars.IsValid());
@@ -876,7 +876,7 @@ cmState::Snapshot cmState::CreateInlineListFileSnapshot(
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
-  pos->SnapshotType = InlineListFileType;
+  pos->SnapshotType = cmStateEnums::InlineListFileType;
   pos->Keep = true;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
     originSnapshot.Position->ExecutionListFile, fileName);
@@ -890,7 +890,7 @@ cmState::Snapshot cmState::CreatePolicyScopeSnapshot(
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
-  pos->SnapshotType = PolicyScopeType;
+  pos->SnapshotType = cmStateEnums::PolicyScopeType;
   pos->Keep = false;
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
@@ -943,7 +943,7 @@ cmState::Snapshot::Snapshot(cmState* state,
 {
 }
 
-cmState::SnapshotType cmState::Snapshot::GetType() const
+cmStateEnums::SnapshotType cmState::Snapshot::GetType() const
 {
   return this->Position->SnapshotType;
 }
@@ -1041,18 +1041,18 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
 
   Snapshot snapshot;
   cmStateDetail::PositionType parentPos = this->Position;
-  while (parentPos->SnapshotType == cmState::PolicyScopeType ||
-         parentPos->SnapshotType == cmState::VariableScopeType) {
+  while (parentPos->SnapshotType == cmStateEnums::PolicyScopeType ||
+         parentPos->SnapshotType == cmStateEnums::VariableScopeType) {
     ++parentPos;
   }
-  if (parentPos->SnapshotType == cmState::BuildsystemDirectoryType ||
-      parentPos->SnapshotType == cmState::BaseType) {
+  if (parentPos->SnapshotType == cmStateEnums::BuildsystemDirectoryType ||
+      parentPos->SnapshotType == cmStateEnums::BaseType) {
     return snapshot;
   }
 
   ++parentPos;
-  while (parentPos->SnapshotType == cmState::PolicyScopeType ||
-         parentPos->SnapshotType == cmState::VariableScopeType) {
+  while (parentPos->SnapshotType == cmStateEnums::PolicyScopeType ||
+         parentPos->SnapshotType == cmStateEnums::VariableScopeType) {
     ++parentPos;
   }
 
@@ -1070,8 +1070,8 @@ cmState::Snapshot cmState::Snapshot::GetCallStackBottom() const
   assert(this->Position != this->State->SnapshotData.Root());
 
   cmStateDetail::PositionType pos = this->Position;
-  while (pos->SnapshotType != cmState::BaseType &&
-         pos->SnapshotType != cmState::BuildsystemDirectoryType &&
+  while (pos->SnapshotType != cmStateEnums::BaseType &&
+         pos->SnapshotType != cmStateEnums::BuildsystemDirectoryType &&
          pos != this->State->SnapshotData.Root()) {
     ++pos;
   }

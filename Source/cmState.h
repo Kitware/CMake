@@ -30,24 +30,27 @@ struct PolicyStackEntry;
 typedef cmLinkedTree<cmStateDetail::SnapshotDataType>::iterator PositionType;
 }
 
+namespace cmStateEnums {
+
+enum SnapshotType
+{
+  BaseType,
+  BuildsystemDirectoryType,
+  FunctionCallType,
+  MacroCallType,
+  IncludeFileType,
+  InlineListFileType,
+  PolicyScopeType,
+  VariableScopeType
+};
+}
+
 class cmState
 {
 
 public:
   cmState();
   ~cmState();
-
-  enum SnapshotType
-  {
-    BaseType,
-    BuildsystemDirectoryType,
-    FunctionCallType,
-    MacroCallType,
-    IncludeFileType,
-    InlineListFileType,
-    PolicyScopeType,
-    VariableScopeType
-  };
 
   class Directory;
 
@@ -75,7 +78,7 @@ public:
     Snapshot GetBuildsystemDirectoryParent() const;
     Snapshot GetCallStackParent() const;
     Snapshot GetCallStackBottom() const;
-    SnapshotType GetType() const;
+    cmStateEnums::SnapshotType GetType() const;
 
     void SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
     cmPolicies::PolicyStatus GetPolicy(cmPolicies::PolicyID id) const;
