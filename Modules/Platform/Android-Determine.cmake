@@ -8,7 +8,7 @@
 # Support for NVIDIA Nsight Tegra Visual Studio Edition was previously
 # implemented in the CMake VS IDE generators.  Avoid interfering with
 # that functionality for now.  Later we may try to integrate this.
-if(CMAKE_VS_PLATFORM_NAME STREQUAL "Tegra-Android")
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
   return()
 endif()
 

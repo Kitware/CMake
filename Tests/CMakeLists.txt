@@ -2166,6 +2166,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     if(vs12)
       add_test_VSNsightTegra(vs12 "Visual Studio 12 2013")
     endif()
+    if(vs14)
+      add_test_VSNsightTegra(vs14 "Visual Studio 14 2015")
+    endif()
   endif()
 
   if (APPLE)
