@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIncludeCommand.h"
 
+#include "cmGlobalGenerator.h"
+#include "cmSystemTools.h"
+
 // cmIncludeCommand
 bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
                                    cmExecutionStatus&)

@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProjectCommand.h"
 
+#include "cmSystemTools.h"
+
 // cmProjectCommand
 bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
                                    cmExecutionStatus&)

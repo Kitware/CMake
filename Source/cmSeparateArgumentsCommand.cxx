@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSeparateArgumentsCommand.h"
 
+#include "cmSystemTools.h"
+
 // cmSeparateArgumentsCommand
 bool cmSeparateArgumentsCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)

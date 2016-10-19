@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmHexFileConverter.h"
 
+#include "cmSystemTools.h"
+
 #include <stdio.h>
 #include <string.h>
 

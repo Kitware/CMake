@@ -416,6 +416,8 @@ set(SRCS
   cmCMakePolicyCommand.h
   cmCommandArgumentsHelper.cxx
   cmCommandArgumentsHelper.h
+  cmConditionEvaluator.cxx
+  cmConditionEvaluator.h
   cmConfigureFileCommand.cxx
   cmConfigureFileCommand.h
   cmContinueCommand.cxx
@@ -446,6 +448,8 @@ set(SRCS
   cmExecProgramCommand.h
   cmExecuteProcessCommand.cxx
   cmExecuteProcessCommand.h
+  cmExpandedCommandArgument.cxx
+  cmExpandedCommandArgument.h
   cmFileCommand.cxx
   cmFileCommand.h
   cmFindBase.cxx
@@ -466,12 +470,96 @@ set(SRCS
   cmForEachCommand.h
   cmFunctionCommand.cxx
   cmFunctionCommand.h
+  cmGetCMakePropertyCommand.cxx
+  cmGetCMakePropertyCommand.h
+  cmGetDirectoryPropertyCommand.cxx
+  cmGetDirectoryPropertyCommand.h
+  cmGetFilenameComponentCommand.cxx
+  cmGetFilenameComponentCommand.h
+  cmGetPropertyCommand.cxx
+  cmGetPropertyCommand.h
+  cmGetSourceFilePropertyCommand.cxx
+  cmGetSourceFilePropertyCommand.h
+  cmGetTargetPropertyCommand.cxx
+  cmGetTargetPropertyCommand.h
+  cmGetTestPropertyCommand.cxx
+  cmGetTestPropertyCommand.h
+  cmHexFileConverter.cxx
+  cmHexFileConverter.h
+  cmIfCommand.cxx
+  cmIfCommand.h
+  cmIncludeCommand.cxx
+  cmIncludeCommand.h
+  cmIncludeDirectoryCommand.cxx
+  cmIncludeDirectoryCommand.h
+  cmIncludeRegularExpressionCommand.cxx
+  cmIncludeRegularExpressionCommand.h
+  cmInstallCommand.cxx
+  cmInstallCommand.h
+  cmInstallCommandArguments.cxx
+  cmInstallCommandArguments.h
+  cmInstallFilesCommand.cxx
+  cmInstallFilesCommand.h
+  cmInstallTargetsCommand.cxx
+  cmInstallTargetsCommand.h
+  cmLinkDirectoriesCommand.cxx
+  cmLinkDirectoriesCommand.h
+  cmListCommand.cxx
+  cmListCommand.h
+  cmMacroCommand.cxx
+  cmMacroCommand.h
+  cmMakeDirectoryCommand.cxx
+  cmMakeDirectoryCommand.h
+  cmMarkAsAdvancedCommand.cxx
+  cmMarkAsAdvancedCommand.h
+  cmMathCommand.cxx
+  cmMathCommand.h
+  cmMessageCommand.cxx
+  cmMessageCommand.h
+  cmOptionCommand.cxx
+  cmOptionCommand.h
   cmParseArgumentsCommand.cxx
   cmParseArgumentsCommand.h
   cmPathLabel.cxx
   cmPathLabel.h
+  cmProjectCommand.cxx
+  cmProjectCommand.h
+  cmReturnCommand.cxx
+  cmReturnCommand.h
   cmSearchPath.cxx
   cmSearchPath.h
+  cmSeparateArgumentsCommand.cxx
+  cmSeparateArgumentsCommand.h
+  cmSetCommand.cxx
+  cmSetCommand.h
+  cmSetDirectoryPropertiesCommand.cxx
+  cmSetDirectoryPropertiesCommand.h
+  cmSetPropertyCommand.cxx
+  cmSetPropertyCommand.h
+  cmSetSourceFilesPropertiesCommand.cxx
+  cmSetSourceFilesPropertiesCommand.h
+  cmSetTargetPropertiesCommand.cxx
+  cmSetTargetPropertiesCommand.h
+  cmSetTestsPropertiesCommand.cxx
+  cmSetTestsPropertiesCommand.h
+  cmSiteNameCommand.cxx
+  cmSiteNameCommand.h
+  cmStringCommand.cxx
+  cmStringCommand.h
+  cmSubdirCommand.cxx
+  cmSubdirCommand.h
+  cmTargetLinkLibrariesCommand.cxx
+  cmTargetLinkLibrariesCommand.h
+  cmTimestamp.cxx
+  cmTimestamp.h
+  cmTryCompileCommand.cxx
+  cmTryCompileCommand.h
+  cmTryRunCommand.cxx
+  cmTryRunCommand.h
+  cmUnsetCommand.cxx
+  cmUnsetCommand.h
+  cmWhileCommand.cxx
+  cmWhileCommand.h
 
   cm_auto_ptr.hxx
   cm_get_date.h

@@ -368,6 +368,50 @@ CMAKE_CXX_SOURCES="\
   cmParseArgumentsCommand \
   cmPathLabel \
   cmSearchPath \
+  cmConditionEvaluator \
+  cmExpandedCommandArgument \
+  cmGetCMakePropertyCommand \
+  cmGetDirectoryPropertyCommand \
+  cmGetFilenameComponentCommand \
+  cmGetPropertyCommand \
+  cmGetSourceFilePropertyCommand \
+  cmGetTargetPropertyCommand \
+  cmGetTestPropertyCommand \
+  cmHexFileConverter \
+  cmIfCommand \
+  cmIncludeCommand \
+  cmIncludeDirectoryCommand \
+  cmIncludeRegularExpressionCommand \
+  cmInstallCommand \
+  cmInstallCommandArguments \
+  cmInstallFilesCommand \
+  cmInstallTargetsCommand \
+  cmLinkDirectoriesCommand \
+  cmListCommand \
+  cmMacroCommand \
+  cmMakeDirectoryCommand \
+  cmMarkAsAdvancedCommand \
+  cmMathCommand \
+  cmMessageCommand \
+  cmOptionCommand \
+  cmProjectCommand \
+  cmReturnCommand \
+  cmSeparateArgumentsCommand \
+  cmSetCommand \
+  cmSetDirectoryPropertiesCommand \
+  cmSetPropertyCommand \
+  cmSetSourceFilesPropertiesCommand \
+  cmSetTargetPropertiesCommand \
+  cmSetTestsPropertiesCommand \
+  cmSiteNameCommand \
+  cmStringCommand \
+  cmSubdirCommand \
+  cmTargetLinkLibrariesCommand \
+  cmTimestamp \
+  cmTryCompileCommand \
+  cmTryRunCommand \
+  cmUnsetCommand \
+  cmWhileCommand \
 "
 
 if ${cmake_system_mingw}; then
@@ -1362,12 +1406,6 @@ objs=""
 for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}; do
   objs="${objs} ${a}.o"
 done
-
-# Generate dependencies for cmBootstrapCommands1.cxx
-for file in `grep "#include.*cm[^.]*.cxx" "${cmake_source_dir}/Source/cmBootstrapCommands2.cxx" | sed "s/.* \"\(.*\)\"/\1/"`; do
-  cmBootstrapCommands2Deps="${cmBootstrapCommands2Deps} `cmake_escape "${cmake_source_dir}/Source/$file"`"
-done
-cmBootstrapCommands2Deps=`echo $cmBootstrapCommands2Deps`
 
 if [ "x${cmake_ansi_cxx_flags}" != "x" ]; then
   cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags}"

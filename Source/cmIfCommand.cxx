@@ -4,6 +4,7 @@
 
 #include "cmOutputConverter.h"
 #include "cmStringCommand.h"
+#include "cmSystemTools.h"
 
 #include "cmConditionEvaluator.h"
 
