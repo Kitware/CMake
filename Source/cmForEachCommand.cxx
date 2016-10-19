@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmForEachCommand.h"
 
+#include "cmSystemTools.h"
+
 #include <cm_auto_ptr.hxx>
 
 cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf)

@@ -327,6 +327,47 @@ CMAKE_CXX_SOURCES="\
   cmExprLexer \
   cmExprParser \
   cmExprParserHelper \
+  cmAddCustomCommandCommand \
+  cmAddCustomTargetCommand \
+  cmAddDefinitionsCommand \
+  cmAddDependenciesCommand \
+  cmAddExecutableCommand \
+  cmAddLibraryCommand \
+  cmAddSubDirectoryCommand \
+  cmAddTestCommand \
+  cmBreakCommand \
+  cmBuildCommand \
+  cmCMakeMinimumRequired \
+  cmCMakePolicyCommand \
+  cmCommandArgumentsHelper \
+  cmConfigureFileCommand \
+  cmContinueCommand \
+  cmCoreTryCompile \
+  cmCreateTestSourceList \
+  cmDefinePropertyCommand \
+  cmElseCommand \
+  cmEnableLanguageCommand \
+  cmEnableTestingCommand \
+  cmEndForEachCommand \
+  cmEndFunctionCommand \
+  cmEndIfCommand \
+  cmEndMacroCommand \
+  cmEndWhileCommand \
+  cmExecProgramCommand \
+  cmExecuteProcessCommand \
+  cmFileCommand \
+  cmFindBase \
+  cmFindCommon \
+  cmFindFileCommand \
+  cmFindLibraryCommand \
+  cmFindPackageCommand \
+  cmFindPathCommand \
+  cmFindProgramCommand \
+  cmForEachCommand \
+  cmFunctionCommand \
+  cmParseArgumentsCommand \
+  cmPathLabel \
+  cmSearchPath \
 "
 
 if ${cmake_system_mingw}; then
@@ -1323,10 +1364,6 @@ for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_
 done
 
 # Generate dependencies for cmBootstrapCommands1.cxx
-for file in `grep "#include.*cm[^.]*.cxx" "${cmake_source_dir}/Source/cmBootstrapCommands1.cxx" | sed "s/.* \"\(.*\)\"/\1/"`; do
-  cmBootstrapCommands1Deps="${cmBootstrapCommands1Deps} `cmake_escape "${cmake_source_dir}/Source/$file"`"
-done
-cmBootstrapCommands1Deps=`echo $cmBootstrapCommands1Deps`
 for file in `grep "#include.*cm[^.]*.cxx" "${cmake_source_dir}/Source/cmBootstrapCommands2.cxx" | sed "s/.* \"\(.*\)\"/\1/"`; do
   cmBootstrapCommands2Deps="${cmBootstrapCommands2Deps} `cmake_escape "${cmake_source_dir}/Source/$file"`"
 done

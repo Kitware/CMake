@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindPathCommand.h"
 
+#include "cmSystemTools.h"
+
 #include <cmsys/Glob.hxx>
 
 cmFindPathCommand::cmFindPathCommand()

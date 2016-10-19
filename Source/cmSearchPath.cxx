@@ -4,6 +4,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmFindCommon.h"
+#include "cmSystemTools.h"
 
 cmSearchPath::cmSearchPath(cmFindCommon* findCmd)
   : FC(findCmd)

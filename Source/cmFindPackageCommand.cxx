@@ -4,9 +4,12 @@
 
 #include "cmAlgorithms.h"
 #include "cmState.h"
+#include "cmVersion.h"
+
 #include <cmSystemTools.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Encoding.hxx>
+#include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
 
 #ifdef CMAKE_BUILD_WITH_CMAKE

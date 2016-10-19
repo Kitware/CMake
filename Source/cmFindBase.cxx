@@ -5,6 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmSystemTools.h"
 
 cmFindBase::cmFindBase()
 {

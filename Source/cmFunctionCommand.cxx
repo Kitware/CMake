@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFunctionCommand.h"
 
+#include "cmState.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
 
 // define the class for function commands

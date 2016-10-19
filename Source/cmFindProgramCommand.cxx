@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindProgramCommand.h"
 
+#include "cmSystemTools.h"
+
 #include <stdlib.h>
 
 #if defined(__APPLE__)
