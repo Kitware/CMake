@@ -159,14 +159,10 @@ endif()
 set(SRCS
   cmArchiveWrite.cxx
   cmBase32.cxx
-  cmBootstrapCommands1.cxx
-  cmBootstrapCommands2.cxx
   cmCacheManager.cxx
   cmCacheManager.h
-  "${CMAKE_CURRENT_BINARY_DIR}/cmCommands.cxx"
   cmCLocaleEnvironmentScope.h
   cmCLocaleEnvironmentScope.cxx
-  cmCommands.h
   cmCommandArgumentLexer.cxx
   cmCommandArgumentParser.cxx
   cmCommandArgumentParserHelper.cxx
@@ -390,6 +386,10 @@ set(SRCS
   cmake.cxx
   cmake.h
 
+  cmCommands.cxx
+  cmCommands.h
+  cmAddCompileOptionsCommand.cxx
+  cmAddCompileOptionsCommand.h
   cmAddCustomCommandCommand.cxx
   cmAddCustomCommandCommand.h
   cmAddCustomTargetCommand.cxx
@@ -406,10 +406,16 @@ set(SRCS
   cmAddSubDirectoryCommand.h
   cmAddTestCommand.cxx
   cmAddTestCommand.h
+  cmAuxSourceDirectoryCommand.cxx
+  cmAuxSourceDirectoryCommand.h
   cmBreakCommand.cxx
   cmBreakCommand.h
   cmBuildCommand.cxx
   cmBuildCommand.h
+  cmBuildNameCommand.cxx
+  cmBuildNameCommand.h
+  cmCMakeHostSystemInformationCommand.cxx
+  cmCMakeHostSystemInformationCommand.h
   cmCMakeMinimumRequired.cxx
   cmCMakeMinimumRequired.h
   cmCMakePolicyCommand.cxx
@@ -430,6 +436,8 @@ set(SRCS
   cmDefinePropertyCommand.h
   cmElseCommand.cxx
   cmElseCommand.h
+  cmElseIfCommand.cxx
+  cmElseIfCommand.h
   cmEnableLanguageCommand.cxx
   cmEnableLanguageCommand.h
   cmEnableTestingCommand.cxx
@@ -450,6 +458,12 @@ set(SRCS
   cmExecuteProcessCommand.h
   cmExpandedCommandArgument.cxx
   cmExpandedCommandArgument.h
+  cmExportCommand.cxx
+  cmExportCommand.h
+  cmExportLibraryDependenciesCommand.cxx
+  cmExportLibraryDependenciesCommand.h
+  cmFLTKWrapUICommand.cxx
+  cmFLTKWrapUICommand.h
   cmFileCommand.cxx
   cmFileCommand.h
   cmFindBase.cxx
@@ -492,6 +506,8 @@ set(SRCS
   cmIncludeCommand.h
   cmIncludeDirectoryCommand.cxx
   cmIncludeDirectoryCommand.h
+  cmIncludeExternalMSProjectCommand.cxx
+  cmIncludeExternalMSProjectCommand.h
   cmIncludeRegularExpressionCommand.cxx
   cmIncludeRegularExpressionCommand.h
   cmInstallCommand.cxx
@@ -500,12 +516,20 @@ set(SRCS
   cmInstallCommandArguments.h
   cmInstallFilesCommand.cxx
   cmInstallFilesCommand.h
+  cmInstallProgramsCommand.cxx
+  cmInstallProgramsCommand.h
   cmInstallTargetsCommand.cxx
   cmInstallTargetsCommand.h
   cmLinkDirectoriesCommand.cxx
   cmLinkDirectoriesCommand.h
+  cmLinkLibrariesCommand.cxx
+  cmLinkLibrariesCommand.h
   cmListCommand.cxx
   cmListCommand.h
+  cmLoadCacheCommand.cxx
+  cmLoadCacheCommand.h
+  cmLoadCommandCommand.cxx
+  cmLoadCommandCommand.h
   cmMacroCommand.cxx
   cmMacroCommand.h
   cmMakeDirectoryCommand.cxx
@@ -518,12 +542,22 @@ set(SRCS
   cmMessageCommand.h
   cmOptionCommand.cxx
   cmOptionCommand.h
+  cmOutputRequiredFilesCommand.cxx
+  cmOutputRequiredFilesCommand.h
   cmParseArgumentsCommand.cxx
   cmParseArgumentsCommand.h
   cmPathLabel.cxx
   cmPathLabel.h
   cmProjectCommand.cxx
   cmProjectCommand.h
+  cmQTWrapCPPCommand.cxx
+  cmQTWrapCPPCommand.h
+  cmQTWrapUICommand.cxx
+  cmQTWrapUICommand.h
+  cmRemoveCommand.cxx
+  cmRemoveCommand.h
+  cmRemoveDefinitionsCommand.cxx
+  cmRemoveDefinitionsCommand.h
   cmReturnCommand.cxx
   cmReturnCommand.h
   cmSearchPath.cxx
@@ -544,12 +578,28 @@ set(SRCS
   cmSetTestsPropertiesCommand.h
   cmSiteNameCommand.cxx
   cmSiteNameCommand.h
+  cmSourceGroupCommand.cxx
+  cmSourceGroupCommand.h
   cmStringCommand.cxx
   cmStringCommand.h
   cmSubdirCommand.cxx
   cmSubdirCommand.h
+  cmSubdirDependsCommand.cxx
+  cmSubdirDependsCommand.h
+  cmTargetCompileDefinitionsCommand.cxx
+  cmTargetCompileDefinitionsCommand.h
+  cmTargetCompileFeaturesCommand.cxx
+  cmTargetCompileFeaturesCommand.h
+  cmTargetCompileOptionsCommand.cxx
+  cmTargetCompileOptionsCommand.h
+  cmTargetIncludeDirectoriesCommand.cxx
+  cmTargetIncludeDirectoriesCommand.h
   cmTargetLinkLibrariesCommand.cxx
   cmTargetLinkLibrariesCommand.h
+  cmTargetPropCommandBase.cxx
+  cmTargetPropCommandBase.h
+  cmTargetSourcesCommand.cxx
+  cmTargetSourcesCommand.h
   cmTimestamp.cxx
   cmTimestamp.h
   cmTryCompileCommand.cxx
@@ -558,8 +608,18 @@ set(SRCS
   cmTryRunCommand.h
   cmUnsetCommand.cxx
   cmUnsetCommand.h
+  cmUseMangledMesaCommand.cxx
+  cmUseMangledMesaCommand.h
+  cmUtilitySourceCommand.cxx
+  cmUtilitySourceCommand.h
+  cmVariableRequiresCommand.cxx
+  cmVariableRequiresCommand.h
+  cmVariableWatchCommand.cxx
+  cmVariableWatchCommand.h
   cmWhileCommand.cxx
   cmWhileCommand.h
+  cmWriteFileCommand.cxx
+  cmWriteFileCommand.h
 
   cm_auto_ptr.hxx
   cm_get_date.h
@@ -571,47 +631,6 @@ set(SRCS
   cm_codecvt.hxx
   cm_codecvt.cxx
   )
-
-set(COMMAND_INCLUDES "#include \"cmTargetPropCommandBase.h\"\n")
-list(APPEND SRCS cmTargetPropCommandBase.cxx cmTargetPropCommandBase.h)
-set(NEW_COMMANDS "")
-foreach(command_file
-    cmAddCompileOptionsCommand
-    cmAuxSourceDirectoryCommand
-    cmBuildNameCommand
-    cmCMakeHostSystemInformationCommand
-    cmElseIfCommand
-    cmExportCommand
-    cmExportLibraryDependenciesCommand
-    cmFLTKWrapUICommand
-    cmIncludeExternalMSProjectCommand
-    cmInstallProgramsCommand
-    cmLinkLibrariesCommand
-    cmLoadCacheCommand
-    cmLoadCommandCommand
-    cmOutputRequiredFilesCommand
-    cmQTWrapCPPCommand
-    cmQTWrapUICommand
-    cmRemoveCommand
-    cmRemoveDefinitionsCommand
-    cmSourceGroupCommand
-    cmSubdirDependsCommand
-    cmTargetCompileDefinitionsCommand
-    cmTargetCompileFeaturesCommand
-    cmTargetCompileOptionsCommand
-    cmTargetIncludeDirectoriesCommand
-    cmTargetSourcesCommand
-    cmUseMangledMesaCommand
-    cmUtilitySourceCommand
-    cmVariableRequiresCommand
-    cmVariableWatchCommand
-    cmWriteFileCommand
-    )
-  set(COMMAND_INCLUDES "${COMMAND_INCLUDES}#include \"${command_file}.h\"\n")
-  set(NEW_COMMANDS "${NEW_COMMANDS}commands.push_back(new ${command_file});\n")
-  list(APPEND SRCS ${command_file}.cxx ${command_file}.h)
-endforeach()
-configure_file(cmCommands.cxx.in ${CMAKE_CURRENT_BINARY_DIR}/cmCommands.cxx @ONLY)
 
 # Kdevelop only works on UNIX and not windows
 if(UNIX)

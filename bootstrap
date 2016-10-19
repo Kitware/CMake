@@ -309,9 +309,7 @@ CMAKE_CXX_SOURCES="\
   cmOutputConverter \
   cmOSXBundleGenerator \
   cmNewLineStyle \
-  cmBootstrapCommands1 \
-  cmBootstrapCommands2 \
-  cmCommandsForBootstrap \
+  cmCommands \
   cmTarget \
   cmTargetPropertyComputer \
   cmTest \
