@@ -186,6 +186,9 @@ public:
 
   static std::string GetActualName() { return "Ninja"; }
 
+  /** Get encoding used by generator for ninja files */
+  codecvt::Encoding GetMakefileEncoding() const CM_OVERRIDE;
+
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   void EnableLanguage(std::vector<std::string> const& languages,
