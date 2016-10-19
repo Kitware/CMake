@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLinkLibrariesCommand.h"
 
+#include "cmMakefile.h"
+
+class cmExecutionStatus;
+
 // cmLinkLibrariesCommand
 bool cmLinkLibrariesCommand::InitialPass(std::vector<std::string> const& args,
                                          cmExecutionStatus&)

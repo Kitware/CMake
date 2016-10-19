@@ -3,9 +3,15 @@
 #ifndef cmExportCommand_h
 #define cmExportCommand_h
 
-#include "cmCommand.h"
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
 
-class cmExportBuildFileGenerator;
+#include "cmCommand.h"
+#include "cmCommandArgumentsHelper.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
 class cmExportSet;
 
 /** \class cmExportLibraryDependenciesCommand

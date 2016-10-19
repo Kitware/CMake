@@ -3,7 +3,16 @@
 #ifndef cmTargetIncludeDirectoriesCommand_h
 #define cmTargetIncludeDirectoriesCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmTargetPropCommandBase.h"
+#include "cmTypeMacro.h"
+
+class cmCommand;
+class cmExecutionStatus;
+class cmTarget;
 
 class cmTargetIncludeDirectoriesCommand : public cmTargetPropCommandBase
 {

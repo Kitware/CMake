@@ -3,7 +3,15 @@
 #ifndef cmLoadCacheCommand_h
 #define cmLoadCacheCommand_h
 
+#include <cmConfigure.h>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
 
 /** \class cmLoadCacheCommand
  * \brief load a cache file

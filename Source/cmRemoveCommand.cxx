@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmRemoveCommand.h"
 
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
+
 // cmRemoveCommand
 bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
                                   cmExecutionStatus&)

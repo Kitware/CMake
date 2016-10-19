@@ -2,15 +2,22 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportCommand.h"
 
-#include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmake.h"
-
-#include <cmsys/Encoding.hxx>
 #include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <sstream>
 
 #include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportBuildFileGenerator.h"
+#include "cmExportSetMap.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 #if defined(__HAIKU__)
 #include <FindDirectory.h>
@@ -271,6 +278,7 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
+
 #undef GetCurrentDirectory
 void cmExportCommand::ReportRegistryError(std::string const& msg,
                                           std::string const& key, long err)

@@ -2,7 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetCompileFeaturesCommand.h"
 
+#include <algorithm>
+#include <sstream>
+
 #include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
+class cmTarget;
 
 bool cmTargetCompileFeaturesCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)

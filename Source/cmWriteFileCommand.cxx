@@ -8,6 +8,11 @@
 // include sys/stat.h after sys/types.h
 #include <sys/stat.h>
 
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
+
 // cmLibraryCommand
 bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args,
                                      cmExecutionStatus&)

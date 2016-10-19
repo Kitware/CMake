@@ -2,6 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakeHostSystemInformationCommand.h"
 
+#include <sstream>
+
+#include "cmMakefile.h"
+#include "cmsys/SystemInformation.hxx"
+
+class cmExecutionStatus;
+
 // cmCMakeHostSystemInformation
 bool cmCMakeHostSystemInformationCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)

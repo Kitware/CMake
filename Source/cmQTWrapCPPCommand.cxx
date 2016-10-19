@@ -2,6 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQTWrapCPPCommand.h"
 
+#include "cmCustomCommandLines.h"
+#include "cmMakefile.h"
+#include "cmSourceFile.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
+
 // cmQTWrapCPPCommand
 bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
                                      cmExecutionStatus&)

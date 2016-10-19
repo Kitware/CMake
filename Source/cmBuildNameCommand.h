@@ -3,7 +3,14 @@
 #ifndef cmBuildNameCommand_h
 #define cmBuildNameCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
 
 class cmBuildNameCommand : public cmCommand
 {

@@ -2,8 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOutputRequiredFilesCommand.h"
 
-#include "cmAlgorithms.h"
 #include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
+
+#include "cmAlgorithms.h"
+#include "cmGeneratorExpression.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmSourceFile.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+
+class cmExecutionStatus;
 
 /** \class cmDependInformation
  * \brief Store dependency information for a single source file.

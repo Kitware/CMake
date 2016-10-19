@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSubdirDependsCommand.h"
 
+#include "cmPolicies.h"
+
+class cmExecutionStatus;
+
 bool cmSubdirDependsCommand::InitialPass(std::vector<std::string> const&,
                                          cmExecutionStatus&)
 {

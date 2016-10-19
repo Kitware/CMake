@@ -3,7 +3,14 @@
 #ifndef cmUtilitySourceCommand_h
 #define cmUtilitySourceCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
 
 class cmUtilitySourceCommand : public cmCommand
 {

@@ -2,6 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceGroupCommand.h"
 
+#include <sstream>
+
+#include "cmMakefile.h"
+#include "cmSourceGroup.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
+
 // cmSourceGroupCommand
 bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus&)

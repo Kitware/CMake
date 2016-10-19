@@ -3,9 +3,18 @@
 #ifndef cmCMakeHostSystemInformationCommand_h
 #define cmCMakeHostSystemInformationCommand_h
 
-#include "cmCommand.h"
+#include <cmConfigure.h>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
-#include <cmsys/SystemInformation.hxx>
+#include "cmCommand.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
+namespace cmsys {
+class SystemInformation;
+} // namespace cmsys
 
 /** \class cmCMakeHostSystemInformationCommand
  * \brief Query host system specific information

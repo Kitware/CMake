@@ -3,7 +3,16 @@
 #ifndef cmTargetCompileDefinitionsCommand_h
 #define cmTargetCompileDefinitionsCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmTargetPropCommandBase.h"
+#include "cmTypeMacro.h"
+
+class cmCommand;
+class cmExecutionStatus;
+class cmTarget;
 
 class cmTargetCompileDefinitionsCommand : public cmTargetPropCommandBase
 {

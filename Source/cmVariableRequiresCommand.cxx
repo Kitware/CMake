@@ -2,7 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVariableRequiresCommand.h"
 
+#include "cmMakefile.h"
+#include "cmPolicies.h"
 #include "cmState.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmLibraryCommand
 bool cmVariableRequiresCommand::InitialPass(

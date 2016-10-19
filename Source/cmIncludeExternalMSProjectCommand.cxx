@@ -2,6 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIncludeExternalMSProjectCommand.h"
 
+#ifdef _WIN32
+#include "cmSystemTools.h"
+#endif
+
+class cmExecutionStatus;
+
 // cmIncludeExternalMSProjectCommand
 bool cmIncludeExternalMSProjectCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)

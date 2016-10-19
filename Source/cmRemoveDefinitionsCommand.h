@@ -3,7 +3,14 @@
 #ifndef cmRemoveDefinitionsCommand_h
 #define cmRemoveDefinitionsCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
 
 /** \class cmRemoveDefinitionsCommand
  * \brief Specify a list of compiler defines

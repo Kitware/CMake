@@ -2,7 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFLTKWrapUICommand.h"
 
+#include <stddef.h>
+
+#include "cmCustomCommandLines.h"
+#include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
+class cmTarget;
 
 // cmFLTKWrapUICommand
 bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,

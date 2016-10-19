@@ -3,7 +3,14 @@
 #ifndef cmInstallProgramsCommand_h
 #define cmInstallProgramsCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
 
 /** \class cmInstallProgramsCommand
  * \brief Specifies where to install some programs

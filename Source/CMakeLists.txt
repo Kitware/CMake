@@ -401,9 +401,8 @@ set(SRCS
   cm_codecvt.cxx
   )
 
-set(COMMAND_INCLUDES "#include \"cmTargetPropCommandBase.cxx\"\n")
-list(APPEND SRCS cmTargetPropCommandBase.cxx)
-set_property(SOURCE cmTargetPropCommandBase.cxx PROPERTY HEADER_FILE_ONLY ON)
+set(COMMAND_INCLUDES "#include \"cmTargetPropCommandBase.h\"\n")
+list(APPEND SRCS cmTargetPropCommandBase.cxx cmTargetPropCommandBase.h)
 set(NEW_COMMANDS "")
 foreach(command_file
     cmAddCompileOptionsCommand
@@ -418,6 +417,7 @@ foreach(command_file
     cmInstallProgramsCommand
     cmLinkLibrariesCommand
     cmLoadCacheCommand
+    cmLoadCommandCommand
     cmOutputRequiredFilesCommand
     cmQTWrapCPPCommand
     cmQTWrapUICommand
@@ -435,15 +435,10 @@ foreach(command_file
     cmVariableRequiresCommand
     cmVariableWatchCommand
     cmWriteFileCommand
-    # This one must be last because it includes windows.h and
-    # windows.h #defines GetCurrentDirectory which is a member
-    # of cmMakefile
-    cmLoadCommandCommand
     )
-  set(COMMAND_INCLUDES "${COMMAND_INCLUDES}#include \"${command_file}.cxx\"\n")
+  set(COMMAND_INCLUDES "${COMMAND_INCLUDES}#include \"${command_file}.h\"\n")
   set(NEW_COMMANDS "${NEW_COMMANDS}commands.push_back(new ${command_file});\n")
-  list(APPEND SRCS ${command_file}.cxx)
-  set_property(SOURCE ${command_file}.cxx PROPERTY HEADER_FILE_ONLY ON)
+  list(APPEND SRCS ${command_file}.cxx ${command_file}.h)
 endforeach()
 configure_file(cmCommands.cxx.in ${CMAKE_CURRENT_BINARY_DIR}/cmCommands.cxx @ONLY)
 

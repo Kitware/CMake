@@ -2,9 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAuxSourceDirectoryCommand.h"
 
-#include "cmSourceFile.h"
-
+#include <algorithm>
 #include <cmsys/Directory.hxx>
+#include <stddef.h>
+
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmSourceFile.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmAuxSourceDirectoryCommand
 bool cmAuxSourceDirectoryCommand::InitialPass(

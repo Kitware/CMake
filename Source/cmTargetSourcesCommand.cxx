@@ -2,7 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetSourcesCommand.h"
 
-#include "cmGeneratorExpression.h"
+#include <algorithm>
+#include <sstream>
+
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmTarget.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 bool cmTargetSourcesCommand::InitialPass(std::vector<std::string> const& args,
                                          cmExecutionStatus&)

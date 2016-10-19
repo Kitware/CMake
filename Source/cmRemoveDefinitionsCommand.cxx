@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmRemoveDefinitionsCommand.h"
 
+#include "cmMakefile.h"
+
+class cmExecutionStatus;
+
 // cmRemoveDefinitionsCommand
 bool cmRemoveDefinitionsCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)

@@ -3,7 +3,14 @@
 #ifndef cmWriteFileCommand_h
 #define cmWriteFileCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
 
 /** \class cmWriteFileCommand
  * \brief Writes a message to a file

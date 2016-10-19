@@ -2,12 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportLibraryDependenciesCommand.h"
 
+#include <cm_auto_ptr.hxx>
+#include <cmsys/FStream.hxx>
+
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
-#include "cmVersion.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmTargetLinkLibraryType.h"
 #include "cmake.h"
 
-#include <cm_auto_ptr.hxx>
+class cmExecutionStatus;
 
 bool cmExportLibraryDependenciesCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
