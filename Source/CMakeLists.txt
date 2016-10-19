@@ -386,6 +386,8 @@ set(SRCS
   cmake.cxx
   cmake.h
 
+  cmCommand.cxx
+  cmCommand.h
   cmCommands.cxx
   cmCommands.h
   cmAddCompileOptionsCommand.cxx
