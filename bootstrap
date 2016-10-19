@@ -240,91 +240,6 @@ CMAKE_UNUSED_SOURCES="\
 "
 
 CMAKE_CXX_SOURCES="\
-  cmake  \
-  cmakemain \
-  cmcmd  \
-  cmCommandArgumentLexer \
-  cmCommandArgumentParser \
-  cmCommandArgumentParserHelper \
-  cmCommonTargetGenerator \
-  cmCPackPropertiesGenerator \
-  cmDefinitions \
-  cmDepends \
-  cmDependsC \
-  cmDocumentationFormatter \
-  cmPolicies \
-  cmProperty \
-  cmPropertyMap \
-  cmPropertyDefinition \
-  cmPropertyDefinitionMap \
-  cmMakefile \
-  cmMessenger \
-  cmExportBuildFileGenerator \
-  cmExportFileGenerator \
-  cmExportInstallFileGenerator \
-  cmExportTryCompileFileGenerator \
-  cmExportSet \
-  cmExportSetMap \
-  cmExternalMakefileProjectGenerator \
-  cmGeneratorExpressionEvaluationFile \
-  cmGeneratedFileStream \
-  cmGeneratorTarget \
-  cmGeneratorExpressionContext \
-  cmGeneratorExpressionDAGChecker \
-  cmGeneratorExpressionEvaluator \
-  cmGeneratorExpressionLexer \
-  cmGeneratorExpressionNode \
-  cmGeneratorExpressionParser \
-  cmGeneratorExpression \
-  cmGlobalCommonGenerator \
-  cmGlobalGenerator \
-  cmInstallDirectoryGenerator \
-  cmLocalCommonGenerator \
-  cmLocalGenerator \
-  cmRulePlaceholderExpander \
-  cmInstalledFile \
-  cmInstallGenerator \
-  cmInstallExportGenerator \
-  cmInstallFilesGenerator \
-  cmInstallScriptGenerator \
-  cmInstallTargetGenerator \
-  cmScriptGenerator \
-  cmSourceFile \
-  cmSourceFileLocation \
-  cmState \
-  cmStateDirectory \
-  cmStateSnapshot \
-  cmSystemTools \
-  cmTestGenerator \
-  cmVersion \
-  cmFileTimeComparison \
-  cmGlobalUnixMakefileGenerator3 \
-  cmLocalUnixMakefileGenerator3 \
-  cmLinkLineComputer \
-  cmMSVC60LinkLineComputer \
-  cmMakefileExecutableTargetGenerator \
-  cmMakefileLibraryTargetGenerator \
-  cmMakefileTargetGenerator \
-  cmMakefileUtilityTargetGenerator \
-  cmOutputConverter \
-  cmOSXBundleGenerator \
-  cmNewLineStyle \
-  cmCommands \
-  cmTarget \
-  cmTargetPropertyComputer \
-  cmTest \
-  cmCustomCommand \
-  cmCustomCommandGenerator \
-  cmCacheManager \
-  cmListFileCache \
-  cmComputeLinkDepends \
-  cmComputeLinkInformation \
-  cmOrderDirectories \
-  cmComputeTargetDepends \
-  cmComputeComponentGraph \
-  cmExprLexer \
-  cmExprParser \
-  cmExprParserHelper \
   cmAddCustomCommandCommand \
   cmAddCustomTargetCommand \
   cmAddDefinitionsCommand \
@@ -337,12 +252,30 @@ CMAKE_CXX_SOURCES="\
   cmBuildCommand \
   cmCMakeMinimumRequired \
   cmCMakePolicyCommand \
+  cmCPackPropertiesGenerator \
+  cmCacheManager \
+  cmCommandArgumentLexer \
+  cmCommandArgumentParser \
+  cmCommandArgumentParserHelper \
   cmCommandArgumentsHelper \
+  cmCommands \
+  cmCommonTargetGenerator \
+  cmComputeComponentGraph \
+  cmComputeLinkDepends \
+  cmComputeLinkInformation \
+  cmComputeTargetDepends \
+  cmConditionEvaluator \
   cmConfigureFileCommand \
   cmContinueCommand \
   cmCoreTryCompile \
   cmCreateTestSourceList \
+  cmCustomCommand \
+  cmCustomCommandGenerator \
   cmDefinePropertyCommand \
+  cmDefinitions \
+  cmDepends \
+  cmDependsC \
+  cmDocumentationFormatter \
   cmElseCommand \
   cmEnableLanguageCommand \
   cmEnableTestingCommand \
@@ -353,7 +286,19 @@ CMAKE_CXX_SOURCES="\
   cmEndWhileCommand \
   cmExecProgramCommand \
   cmExecuteProcessCommand \
+  cmExpandedCommandArgument \
+  cmExportBuildFileGenerator \
+  cmExportFileGenerator \
+  cmExportInstallFileGenerator \
+  cmExportSet \
+  cmExportSetMap \
+  cmExportTryCompileFileGenerator \
+  cmExprLexer \
+  cmExprParser \
+  cmExprParserHelper \
+  cmExternalMakefileProjectGenerator \
   cmFileCommand \
+  cmFileTimeComparison \
   cmFindBase \
   cmFindCommon \
   cmFindFileCommand \
@@ -363,11 +308,16 @@ CMAKE_CXX_SOURCES="\
   cmFindProgramCommand \
   cmForEachCommand \
   cmFunctionCommand \
-  cmParseArgumentsCommand \
-  cmPathLabel \
-  cmSearchPath \
-  cmConditionEvaluator \
-  cmExpandedCommandArgument \
+  cmGeneratedFileStream \
+  cmGeneratorExpression \
+  cmGeneratorExpressionContext \
+  cmGeneratorExpressionDAGChecker \
+  cmGeneratorExpressionEvaluationFile \
+  cmGeneratorExpressionEvaluator \
+  cmGeneratorExpressionLexer \
+  cmGeneratorExpressionNode \
+  cmGeneratorExpressionParser \
+  cmGeneratorTarget \
   cmGetCMakePropertyCommand \
   cmGetDirectoryPropertyCommand \
   cmGetFilenameComponentCommand \
@@ -375,6 +325,9 @@ CMAKE_CXX_SOURCES="\
   cmGetSourceFilePropertyCommand \
   cmGetTargetPropertyCommand \
   cmGetTestPropertyCommand \
+  cmGlobalCommonGenerator \
+  cmGlobalGenerator \
+  cmGlobalUnixMakefileGenerator3 \
   cmHexFileConverter \
   cmIfCommand \
   cmIncludeCommand \
@@ -382,18 +335,51 @@ CMAKE_CXX_SOURCES="\
   cmIncludeRegularExpressionCommand \
   cmInstallCommand \
   cmInstallCommandArguments \
+  cmInstallDirectoryGenerator \
+  cmInstallExportGenerator \
   cmInstallFilesCommand \
+  cmInstallFilesGenerator \
+  cmInstallGenerator \
+  cmInstallScriptGenerator \
+  cmInstallTargetGenerator \
   cmInstallTargetsCommand \
+  cmInstalledFile \
   cmLinkDirectoriesCommand \
+  cmLinkLineComputer \
   cmListCommand \
+  cmListFileCache \
+  cmLocalCommonGenerator \
+  cmLocalGenerator \
+  cmLocalUnixMakefileGenerator3 \
+  cmMSVC60LinkLineComputer \
   cmMacroCommand \
   cmMakeDirectoryCommand \
+  cmMakefile \
+  cmMakefileExecutableTargetGenerator \
+  cmMakefileLibraryTargetGenerator \
+  cmMakefileTargetGenerator \
+  cmMakefileUtilityTargetGenerator \
   cmMarkAsAdvancedCommand \
   cmMathCommand \
   cmMessageCommand \
+  cmMessenger \
+  cmNewLineStyle \
+  cmOSXBundleGenerator \
   cmOptionCommand \
+  cmOrderDirectories \
+  cmOutputConverter \
+  cmParseArgumentsCommand \
+  cmPathLabel \
+  cmPolicies \
   cmProjectCommand \
+  cmProperty \
+  cmPropertyDefinition \
+  cmPropertyDefinitionMap \
+  cmPropertyMap \
   cmReturnCommand \
+  cmRulePlaceholderExpander \
+  cmScriptGenerator \
+  cmSearchPath \
   cmSeparateArgumentsCommand \
   cmSetCommand \
   cmSetDirectoryPropertiesCommand \
@@ -402,14 +388,28 @@ CMAKE_CXX_SOURCES="\
   cmSetTargetPropertiesCommand \
   cmSetTestsPropertiesCommand \
   cmSiteNameCommand \
+  cmSourceFile \
+  cmSourceFileLocation \
+  cmState \
+  cmStateDirectory \
+  cmStateSnapshot \
   cmStringCommand \
   cmSubdirCommand \
+  cmSystemTools \
+  cmTarget \
   cmTargetLinkLibrariesCommand \
+  cmTargetPropertyComputer \
+  cmTest \
+  cmTestGenerator \
   cmTimestamp \
   cmTryCompileCommand \
   cmTryRunCommand \
   cmUnsetCommand \
+  cmVersion \
   cmWhileCommand \
+  cmake  \
+  cmakemain \
+  cmcmd  \
 "
 
 if ${cmake_system_mingw}; then
