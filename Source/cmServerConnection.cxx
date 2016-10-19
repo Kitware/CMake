@@ -323,11 +323,10 @@ bool cmServerPipeConnection::DoSetup(std::string* errorMessage)
       ": " + uv_err_name(r);
     return false;
   }
-  auto serverStream = reinterpret_cast<uv_stream_t*>(&this->ServerPipe);
-  serverStream->data = this;
+  auto serverStream = reinterpret_cast<uv_stream_t*>(this->ServerPipe);
   if ((r = uv_listen(serverStream, 1, on_new_connection)) != 0) {
-    *errorMessage = std::string("Internal Error with ") + this->PipeName +
-      ": " + uv_err_name(r);
+    *errorMessage = std::string("Internal Error listening on ") +
+      this->PipeName + ": " + uv_err_name(r);
     return false;
   }
 
@@ -340,7 +339,7 @@ void cmServerPipeConnection::TearDown()
     uv_close(reinterpret_cast<uv_handle_t*>(this->ClientPipe), &on_pipe_close);
     this->WriteStream->data = nullptr;
   }
-  uv_close(reinterpret_cast<uv_handle_t*>(&this->ServerPipe), &on_pipe_close);
+  uv_close(reinterpret_cast<uv_handle_t*>(this->ServerPipe), &on_pipe_close);
 
   this->ClientPipe = nullptr;
   this->ServerPipe = nullptr;
@@ -364,7 +363,7 @@ void cmServerPipeConnection::Connect(uv_stream_t* server)
   this->ClientPipe = new uv_pipe_t;
   uv_pipe_init(this->Loop(), this->ClientPipe, 0);
   this->ClientPipe->data = this;
-  auto client = reinterpret_cast<uv_stream_t*>(&this->ClientPipe);
+  auto client = reinterpret_cast<uv_stream_t*>(this->ClientPipe);
   if (uv_accept(server, client) != 0) {
     uv_close(reinterpret_cast<uv_handle_t*>(client), nullptr);
     return;
