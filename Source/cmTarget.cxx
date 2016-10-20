@@ -855,13 +855,15 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     e << "NAME property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
-  } else if (prop == "EXPORT_NAME" && this->IsImported()) {
+  }
+  if (prop == "EXPORT_NAME" && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
       << this->Name << "\")\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
-  } else if (prop == "SOURCES" && this->IsImported()) {
+  }
+  if (prop == "SOURCES" && this->IsImported()) {
     std::ostringstream e;
     e << "SOURCES property can't be set on imported targets (\"" << this->Name
       << "\")\n";
@@ -935,13 +937,15 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     e << "NAME property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
-  } else if (prop == "EXPORT_NAME" && this->IsImported()) {
+  }
+  if (prop == "EXPORT_NAME" && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
       << this->Name << "\")\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
-  } else if (prop == "SOURCES" && this->IsImported()) {
+  }
+  if (prop == "SOURCES" && this->IsImported()) {
     std::ostringstream e;
     e << "SOURCES property can't be set on imported targets (\"" << this->Name
       << "\")\n";

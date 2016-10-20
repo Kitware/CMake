@@ -414,7 +414,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       return 0;
     }
 
-    else if (args[1] == "env") {
+    if (args[1] == "env") {
       std::vector<std::string>::const_iterator ai = args.begin() + 2;
       std::vector<std::string>::const_iterator ae = args.end();
       for (; ai != ae; ++ai) {
@@ -454,7 +454,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-    else if (args[1] == "environment") {
+    if (args[1] == "environment") {
       std::vector<std::string> env = cmSystemTools::GetEnvironmentVariables();
       std::vector<std::string>::iterator it;
       for (it = env.begin(); it != env.end(); ++it) {
@@ -464,7 +464,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 #endif
 
-    else if (args[1] == "make_directory" && args.size() > 2) {
+    if (args[1] == "make_directory" && args.size() > 2) {
       // If error occurs we want to continue copying next files.
       bool return_value = 0;
       for (std::string::size_type cc = 2; cc < args.size(); cc++) {
@@ -476,7 +476,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       return return_value;
     }
 
-    else if (args[1] == "remove_directory" && args.size() == 3) {
+    if (args[1] == "remove_directory" && args.size() == 3) {
       if (cmSystemTools::FileIsDirectory(args[2]) &&
           !cmSystemTools::RemoveADirectory(args[2])) {
         std::cerr << "Error removing directory \"" << args[2] << "\".\n";
@@ -486,7 +486,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
     // Remove file
-    else if (args[1] == "remove" && args.size() > 2) {
+    if (args[1] == "remove" && args.size() > 2) {
       bool force = false;
       for (std::string::size_type cc = 2; cc < args.size(); cc++) {
         if (args[cc] == "\\-f" || args[cc] == "-f") {
@@ -502,8 +502,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
       return 0;
     }
+
     // Touch file
-    else if (args[1] == "touch" && args.size() > 2) {
+    if (args[1] == "touch" && args.size() > 2) {
       for (std::string::size_type cc = 2; cc < args.size(); cc++) {
         if (!cmSystemTools::Touch(args[cc], true)) {
           return 1;
@@ -511,8 +512,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
       return 0;
     }
+
     // Touch file
-    else if (args[1] == "touch_nocreate" && args.size() > 2) {
+    if (args[1] == "touch_nocreate" && args.size() > 2) {
       for (std::string::size_type cc = 2; cc < args.size(); cc++) {
         // Complain if the file could not be removed, still exists,
         // and the -f option was not given.
@@ -522,8 +524,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
       return 0;
     }
+
     // capabilities
-    else if (args[1] == "capabilities") {
+    if (args[1] == "capabilities") {
       if (args.size() > 2) {
         std::cerr << "-E capabilities accepts no additional arguments\n";
         return 1;
@@ -538,7 +541,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
     // Sleep command
-    else if (args[1] == "sleep" && args.size() > 2) {
+    if (args[1] == "sleep" && args.size() > 2) {
       double total = 0;
       for (size_t i = 2; i < args.size(); ++i) {
         double num = 0.0;
@@ -559,7 +562,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
     // Clock command
-    else if (args[1] == "time" && args.size() > 2) {
+    if (args[1] == "time" && args.size() > 2) {
       std::vector<std::string> command(args.begin() + 2, args.end());
 
       clock_t clock_start, clock_finish;
@@ -583,8 +586,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
                 << "\n";
       return ret;
     }
+
     // Command to calculate the md5sum of a file
-    else if (args[1] == "md5sum" && args.size() >= 3) {
+    if (args[1] == "md5sum" && args.size() >= 3) {
       char md5out[32];
       int retval = 0;
       for (std::string::size_type cc = 2; cc < args.size(); cc++) {
@@ -606,7 +610,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
     // Command to change directory and run a program.
-    else if (args[1] == "chdir" && args.size() >= 4) {
+    if (args[1] == "chdir" && args.size() >= 4) {
       std::string directory = args[2];
       if (!cmSystemTools::FileExists(directory.c_str())) {
         cmSystemTools::Error("Directory does not exist for chdir command: ",
@@ -628,7 +632,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
     // Command to start progress for a build
-    else if (args[1] == "cmake_progress_start" && args.size() == 4) {
+    if (args[1] == "cmake_progress_start" && args.size() == 4) {
       // basically remove the directory
       std::string dirName = args[2];
       dirName += "/Progress";
@@ -660,7 +664,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
     // Command to report progress for a build
-    else if (args[1] == "cmake_progress_report" && args.size() >= 3) {
+    if (args[1] == "cmake_progress_report" && args.size() >= 3) {
       // This has been superseded by cmake_echo_color --progress-*
       // options.  We leave it here to avoid errors if somehow this
       // is invoked by an existing makefile without regenerating.
@@ -669,7 +673,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
     // Command to create a symbolic link.  Fails on platforms not
     // supporting them.
-    else if (args[1] == "create_symlink" && args.size() == 4) {
+    if (args[1] == "create_symlink" && args.size() == 4) {
       const char* destinationFileName = args[3].c_str();
       if ((cmSystemTools::FileExists(destinationFileName) ||
            cmSystemTools::FileIsSymlink(destinationFileName)) &&
@@ -690,16 +694,17 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
     // Internal CMake shared library support.
-    else if (args[1] == "cmake_symlink_library" && args.size() == 5) {
+    if (args[1] == "cmake_symlink_library" && args.size() == 5) {
       return cmcmd::SymlinkLibrary(args);
     }
+
     // Internal CMake versioned executable support.
-    else if (args[1] == "cmake_symlink_executable" && args.size() == 4) {
+    if (args[1] == "cmake_symlink_executable" && args.size() == 4) {
       return cmcmd::SymlinkExecutable(args);
     }
 
     // Internal CMake dependency scanning support.
-    else if (args[1] == "cmake_depends" && args.size() >= 6) {
+    if (args[1] == "cmake_depends" && args.size() >= 6) {
       const bool verbose = isCMakeVerbose();
 
       // Create a cmake object instance to process dependencies.
@@ -774,41 +779,47 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
     // Internal CMake link script support.
-    else if (args[1] == "cmake_link_script" && args.size() >= 3) {
+    if (args[1] == "cmake_link_script" && args.size() >= 3) {
       return cmcmd::ExecuteLinkScript(args);
     }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
     // Internal CMake ninja dependency scanning support.
-    else if (args[1] == "cmake_ninja_depends") {
+    if (args[1] == "cmake_ninja_depends") {
       return cmcmd_cmake_ninja_depends(args.begin() + 2, args.end());
     }
 
     // Internal CMake ninja dyndep support.
-    else if (args[1] == "cmake_ninja_dyndep") {
+    if (args[1] == "cmake_ninja_dyndep") {
       return cmcmd_cmake_ninja_dyndep(args.begin() + 2, args.end());
     }
 #endif
 
     // Internal CMake unimplemented feature notification.
-    else if (args[1] == "cmake_unimplemented_variable") {
+    if (args[1] == "cmake_unimplemented_variable") {
       std::cerr << "Feature not implemented for this platform.";
       if (args.size() == 3) {
         std::cerr << "  Variable " << args[2] << " is not set.";
       }
       std::cerr << std::endl;
       return 1;
-    } else if (args[1] == "vs_link_exe") {
+    }
+
+    if (args[1] == "vs_link_exe") {
       return cmcmd::VisualStudioLink(args, 1);
-    } else if (args[1] == "vs_link_dll") {
+    }
+
+    if (args[1] == "vs_link_dll") {
       return cmcmd::VisualStudioLink(args, 2);
     }
+
     // Internal CMake color makefile support.
-    else if (args[1] == "cmake_echo_color") {
+    if (args[1] == "cmake_echo_color") {
       return cmcmd::ExecuteEchoColor(args);
     }
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
-    else if (args[1] == "cmake_autogen" && args.size() >= 4) {
+    if (args[1] == "cmake_autogen" && args.size() >= 4) {
       cmQtAutoGenerators autogen;
       std::string const& config = args[3];
       bool autogenSuccess = autogen.Run(args[2], config);
@@ -817,7 +828,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 #endif
 
     // Tar files
-    else if (args[1] == "tar" && args.size() > 3) {
+    if (args[1] == "tar" && args.size() > 3) {
       const char* knownFormats[] = { "7zip", "gnutar", "pax", "paxr", "zip" };
 
       std::string flags = args[2];
@@ -921,7 +932,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 #endif
       }
       return 0;
-    } else if (args[1] == "server") {
+    }
+
+    if (args[1] == "server") {
       const std::string pipePrefix = "--pipe=";
       bool supportExperimental = false;
       bool isDebug = false;
@@ -958,28 +971,26 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string errorMessage;
       if (server.Serve(&errorMessage)) {
         return 0;
-      } else {
-        cmSystemTools::Error(errorMessage.c_str());
-        return 1;
       }
+      cmSystemTools::Error(errorMessage.c_str());
 #else
       static_cast<void>(supportExperimental);
       static_cast<void>(isDebug);
       cmSystemTools::Error("CMake was not built with server mode enabled");
-      return 1;
 #endif
+      return 1;
     }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     // Internal CMake Fortran module support.
-    else if (args[1] == "cmake_copy_f90_mod" && args.size() >= 4) {
+    if (args[1] == "cmake_copy_f90_mod" && args.size() >= 4) {
       return cmDependsFortran::CopyModule(args) ? 0 : 1;
     }
 #endif
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
     // Write registry value
-    else if (args[1] == "write_regv" && args.size() > 3) {
+    if (args[1] == "write_regv" && args.size() > 3) {
       return cmSystemTools::WriteRegistryValue(args[2].c_str(),
                                                args[3].c_str())
         ? 0
@@ -987,16 +998,21 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
     // Delete registry value
-    else if (args[1] == "delete_regv" && args.size() > 2) {
+    if (args[1] == "delete_regv" && args.size() > 2) {
       return cmSystemTools::DeleteRegistryValue(args[2].c_str()) ? 0 : 1;
     }
+
     // Remove file
-    else if (args[1] == "comspec" && args.size() > 2) {
+    if (args[1] == "comspec" && args.size() > 2) {
       std::cerr << "Win9x helper \"cmake -E comspec\" no longer supported\n";
       return 1;
-    } else if (args[1] == "env_vs8_wince" && args.size() == 3) {
+    }
+
+    if (args[1] == "env_vs8_wince" && args.size() == 3) {
       return cmcmd::WindowsCEEnvironment("8.0", args[2]);
-    } else if (args[1] == "env_vs9_wince" && args.size() == 3) {
+    }
+
+    if (args[1] == "env_vs9_wince" && args.size() == 3) {
       return cmcmd::WindowsCEEnvironment("9.0", args[2]);
     }
 #endif

@@ -24,7 +24,7 @@ bool cmGetTargetPropertyCommand::InitialPass(
         prop_exists = true;
       }
     } else if (!args[2].empty()) {
-      const char* prop_cstr = 0;
+      const char* prop_cstr = CM_NULLPTR;
       cmListFileBacktrace bt = this->Makefile->GetBacktrace();
       cmMessenger* messenger = this->Makefile->GetMessenger();
       if (cmTargetPropertyComputer::PassesWhitelist(tgt->GetType(), args[2],

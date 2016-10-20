@@ -275,8 +275,9 @@ std::string cmNinjaTargetGenerator::GetPreprocessedFilePath(
     objName.substr(0, objName.size() - objExt.size()) + "-pp." + ppExt;
 
   std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
-  if (!path.empty())
+  if (!path.empty()) {
     path += "/";
+  }
   path += this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   path += "/";
   path += ppName;
@@ -287,8 +288,9 @@ std::string cmNinjaTargetGenerator::GetDyndepFilePath(
   std::string const& lang) const
 {
   std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
-  if (!path.empty())
+  if (!path.empty()) {
     path += "/";
+  }
   path += this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   path += "/";
   path += lang;

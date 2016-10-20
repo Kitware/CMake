@@ -36,7 +36,7 @@ public:
 class cmVirtualDirectoryWatcher : public cmIBaseWatcher
 {
 public:
-  ~cmVirtualDirectoryWatcher()
+  ~cmVirtualDirectoryWatcher() override
   {
     for (auto i : this->Children) {
       delete i.second;
@@ -156,7 +156,7 @@ public:
     p->AddChildWatcher(ps, this);
   }
 
-  ~cmRealDirectoryWatcher()
+  ~cmRealDirectoryWatcher() override
   {
     // Handle is freed via uv_handle_close callback!
   }
