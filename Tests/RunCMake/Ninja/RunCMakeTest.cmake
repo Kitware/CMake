@@ -15,6 +15,12 @@ else()
   message(FATAL_ERROR "'ninja --version' reported:\n${ninja_out}")
 endif()
 
+function(run_NinjaToolMissing)
+  set(RunCMake_MAKE_PROGRAM ninja-tool-missing)
+  run_cmake(NinjaToolMissing)
+endfunction()
+run_NinjaToolMissing()
+
 function(run_CMP0058 case)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CMP0058-${case}-build)

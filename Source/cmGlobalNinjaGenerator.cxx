@@ -564,8 +564,17 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
     command.push_back(this->NinjaCommand);
     command.push_back("--version");
     std::string version;
-    cmSystemTools::RunSingleCommand(command, &version, CM_NULLPTR, CM_NULLPTR,
-                                    CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
+    std::string error;
+    if (!cmSystemTools::RunSingleCommand(command, &version, &error, CM_NULLPTR,
+                                         CM_NULLPTR,
+                                         cmSystemTools::OUTPUT_NONE)) {
+      mf->IssueMessage(cmake::FATAL_ERROR, "Running\n '" +
+                         cmJoin(command, "' '") + "'\n"
+                                                  "failed with:\n " +
+                         error);
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
     this->NinjaVersion = cmSystemTools::TrimWhitespace(version);
     this->CheckNinjaFeatures();
   }
