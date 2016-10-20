@@ -69,6 +69,9 @@ public:
   // return true if target is fortran only
   bool TargetIsFortranOnly(const cmGeneratorTarget* gt);
 
+  // return true if target is C# only
+  static bool TargetIsCSharpOnly(cmGeneratorTarget const* gt);
+
   /** Get the top-level registry key for this VS version.  */
   std::string GetRegistryBase();
 

@@ -49,6 +49,7 @@ public:
 
   bool IsDebug() const;
   bool IsWinRt() const;
+  bool IsManaged() const;
   // Write options to output.
   void OutputPreprocessorDefinitions(std::ostream& fout, const char* prefix,
                                      const char* suffix,

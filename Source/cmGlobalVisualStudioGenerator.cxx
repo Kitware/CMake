@@ -736,6 +736,27 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   return false;
 }
 
+bool cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(
+  cmGeneratorTarget const* gt)
+{
+  // check to see if this is a C# build
+  std::set<std::string> languages;
+  {
+    // Issue diagnostic if the source files depend on the config.
+    std::vector<cmSourceFile*> sources;
+    if (!gt->GetConfigCommonSourceFiles(sources)) {
+      return false;
+    }
+  }
+  gt->GetLanguages(languages, "");
+  if (languages.size() == 1) {
+    if (*languages.begin() == "CSharp") {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool cmGlobalVisualStudioGenerator::TargetCompare::operator()(
   cmGeneratorTarget const* l, cmGeneratorTarget const* r) const
 {
