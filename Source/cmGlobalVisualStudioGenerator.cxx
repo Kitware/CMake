@@ -395,7 +395,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
   }
 }
 
-void cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
+bool cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
 {
   // Visual Studio generators know how to lookup their build tool
   // directly instead of needing a helper module to do it, so we
@@ -403,6 +403,7 @@ void cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
   if (cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
     mf->AddDefinition("CMAKE_MAKE_PROGRAM", this->GetVSMakeProgram().c_str());
   }
+  return true;
 }
 
 std::string cmGlobalVisualStudioGenerator::GetUtilityDepend(

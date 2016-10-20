@@ -182,7 +182,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
 #endif
 }
 
-void cmGlobalXCodeGenerator::FindMakeProgram(cmMakefile* mf)
+bool cmGlobalXCodeGenerator::FindMakeProgram(cmMakefile* mf)
 {
   // The Xcode generator knows how to lookup its build tool
   // directly instead of needing a helper module to do it, so we
@@ -191,6 +191,7 @@ void cmGlobalXCodeGenerator::FindMakeProgram(cmMakefile* mf)
     mf->AddDefinition("CMAKE_MAKE_PROGRAM",
                       this->GetXcodeBuildCommand().c_str());
   }
+  return true;
 }
 
 std::string const& cmGlobalXCodeGenerator::GetXcodeBuildCommand()

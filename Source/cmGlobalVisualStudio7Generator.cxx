@@ -123,11 +123,14 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(
   }
 }
 
-void cmGlobalVisualStudio7Generator::FindMakeProgram(cmMakefile* mf)
+bool cmGlobalVisualStudio7Generator::FindMakeProgram(cmMakefile* mf)
 {
-  this->cmGlobalVisualStudioGenerator::FindMakeProgram(mf);
+  if (!this->cmGlobalVisualStudioGenerator::FindMakeProgram(mf)) {
+    return false;
+  }
   mf->AddDefinition("CMAKE_VS_DEVENV_COMMAND",
                     this->GetDevEnvCommand().c_str());
+  return true;
 }
 
 std::string const& cmGlobalVisualStudio7Generator::GetDevEnvCommand()

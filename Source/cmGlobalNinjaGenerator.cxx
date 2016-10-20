@@ -553,9 +553,11 @@ void cmGlobalNinjaGenerator::Generate()
   this->CloseBuildFileStream();
 }
 
-void cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
+bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
 {
-  this->cmGlobalGenerator::FindMakeProgram(mf);
+  if (!this->cmGlobalGenerator::FindMakeProgram(mf)) {
+    return false;
+  }
   if (const char* ninjaCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
     this->NinjaCommand = ninjaCommand;
     std::vector<std::string> command;
@@ -567,6 +569,7 @@ void cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
     this->NinjaVersion = cmSystemTools::TrimWhitespace(version);
     this->CheckNinjaFeatures();
   }
+  return true;
 }
 
 void cmGlobalNinjaGenerator::CheckNinjaFeatures()

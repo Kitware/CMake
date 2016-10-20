@@ -102,7 +102,7 @@ public:
   };
   class OrderedTargetDependSet;
 
-  virtual void FindMakeProgram(cmMakefile*);
+  bool FindMakeProgram(cmMakefile*) CM_OVERRIDE;
 
   virtual std::string ExpandCFGIntDir(const std::string& str,
                                       const std::string& config) const;

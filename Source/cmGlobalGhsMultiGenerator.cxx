@@ -73,7 +73,7 @@ void cmGlobalGhsMultiGenerator::EnableLanguage(
   this->cmGlobalGenerator::EnableLanguage(l, mf, optional);
 }
 
-void cmGlobalGhsMultiGenerator::FindMakeProgram(cmMakefile* mf)
+bool cmGlobalGhsMultiGenerator::FindMakeProgram(cmMakefile* mf)
 {
   // The GHS generator knows how to lookup its build tool
   // directly instead of needing a helper module to do it, so we
@@ -82,6 +82,7 @@ void cmGlobalGhsMultiGenerator::FindMakeProgram(cmMakefile* mf)
     mf->AddDefinition("CMAKE_MAKE_PROGRAM",
                       this->GetGhsBuildCommand().c_str());
   }
+  return true;
 }
 
 std::string const& cmGlobalGhsMultiGenerator::GetGhsBuildCommand()

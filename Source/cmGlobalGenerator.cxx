@@ -269,12 +269,13 @@ bool cmGlobalGenerator::IsExportedTargetsFile(
 }
 
 // Find the make program for the generator, required for try compiles
-void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
+bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
 {
   if (this->FindMakeProgramFile.empty()) {
     cmSystemTools::Error(
       "Generator implementation error, "
       "all generators must specify this->FindMakeProgramFile");
+    return false;
   }
   if (!mf->GetDefinition("CMAKE_MAKE_PROGRAM") ||
       cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
@@ -292,7 +293,7 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
         << "probably need to select a different build tool.";
     cmSystemTools::Error(err.str().c_str());
     cmSystemTools::SetFatalErrorOccured();
-    return;
+    return false;
   }
   std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   // if there are spaces in the make program use short path
@@ -311,6 +312,7 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     mf->AddCacheDefinition("CMAKE_MAKE_PROGRAM", makeProgram.c_str(),
                            "make program", cmStateEnums::FILEPATH);
   }
+  return true;
 }
 
 bool cmGlobalGenerator::CheckLanguages(
@@ -426,7 +428,9 @@ void cmGlobalGenerator::EnableLanguage(
   mf->AddDefinition("CMAKE_PLATFORM_INFO_DIR", rootBin.c_str());
 
   // find and make sure CMAKE_MAKE_PROGRAM is defined
-  this->FindMakeProgram(mf);
+  if (!this->FindMakeProgram(mf)) {
+    return;
+  }
 
   if (!this->CheckLanguages(languages, mf)) {
     return;

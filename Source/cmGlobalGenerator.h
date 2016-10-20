@@ -250,7 +250,7 @@ public:
   /*
    * Determine what program to use for building the project.
    */
-  virtual void FindMakeProgram(cmMakefile*);
+  virtual bool FindMakeProgram(cmMakefile*);
 
   ///! Find a target by name by searching the local generators.
   cmTarget* FindTarget(const std::string& name,

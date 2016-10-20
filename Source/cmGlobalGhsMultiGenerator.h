@@ -57,7 +57,7 @@ public:
   /*
   * Determine what program to use for building the project.
   */
-  virtual void FindMakeProgram(cmMakefile*);
+  bool FindMakeProgram(cmMakefile* mf) CM_OVERRIDE;
 
   cmGeneratedFileStream* GetBuildFileStream()
   {
