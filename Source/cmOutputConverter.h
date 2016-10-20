@@ -5,7 +5,7 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmState.h"
+#include "cmStateSnapshot.h"
 
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@
 class cmOutputConverter
 {
 public:
-  cmOutputConverter(cmState::Snapshot snapshot);
+  cmOutputConverter(cmStateSnapshot snapshot);
 
   enum OutputFormat
   {
@@ -92,7 +92,7 @@ public:
 
   static bool ContainedInDirectory(std::string const& local_path,
                                    std::string const& remote_path,
-                                   cmState::Directory directory);
+                                   cmStateDirectory directory);
 
   /**
    * Convert the given remote path to a relative path with respect to
@@ -125,7 +125,7 @@ private:
   static std::string Shell__GetArgument(const char* in, int flags);
 
 private:
-  cmState::Snapshot StateSnapshot;
+  cmStateSnapshot StateSnapshot;
 
   bool LinkScriptShell;
 };

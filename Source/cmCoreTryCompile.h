@@ -35,7 +35,7 @@ protected:
   the error message is stored in FindErrorMessage.
    */
   void FindOutputFile(const std::string& targetName,
-                      cmState::TargetType targetType);
+                      cmStateEnums::TargetType targetType);
 
   cmTypeMacro(cmCoreTryCompile, cmCommand);
 

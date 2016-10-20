@@ -13,7 +13,7 @@
 #include "cmMakefile.h"
 #include "cmNinjaLinkLineComputer.h"
 #include "cmOutputConverter.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
@@ -66,7 +66,7 @@ void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
 }
 
 cmLinkLineComputer* cmGlobalNinjaGenerator::CreateLinkLineComputer(
-  cmOutputConverter* outputConverter, cmState::Directory /* stateDir */) const
+  cmOutputConverter* outputConverter, cmStateDirectory /* stateDir */) const
 {
   return new cmNinjaLinkLineComputer(
     outputConverter,
@@ -956,17 +956,17 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
   bool realname = target->IsFrameworkOnApple();
 
   switch (target->GetType()) {
-    case cmState::EXECUTABLE:
-    case cmState::SHARED_LIBRARY:
-    case cmState::STATIC_LIBRARY:
-    case cmState::MODULE_LIBRARY: {
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY: {
       outputs.push_back(this->ConvertToNinjaPath(
         target->GetFullPath(configName, false, realname)));
       break;
     }
-    case cmState::OBJECT_LIBRARY:
-    case cmState::GLOBAL_TARGET:
-    case cmState::UTILITY: {
+    case cmStateEnums::OBJECT_LIBRARY:
+    case cmStateEnums::GLOBAL_TARGET:
+    case cmStateEnums::UTILITY: {
       std::string path =
         target->GetLocalGenerator()->GetCurrentBinaryDirectory() +
         std::string("/") + target->GetName();
@@ -982,7 +982,7 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
 void cmGlobalNinjaGenerator::AppendTargetDepends(
   cmGeneratorTarget const* target, cmNinjaDeps& outputs)
 {
-  if (target->GetType() == cmState::GLOBAL_TARGET) {
+  if (target->GetType() == cmStateEnums::GLOBAL_TARGET) {
     // These depend only on other CMake-provided targets, e.g. "all".
     std::set<std::string> const& utils = target->GetUtilities();
     for (std::set<std::string>::const_iterator i = utils.begin();
@@ -997,7 +997,7 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
     cmTargetDependSet const& targetDeps = this->GetTargetDirectDepends(target);
     for (cmTargetDependSet::const_iterator i = targetDeps.begin();
          i != targetDeps.end(); ++i) {
-      if ((*i)->GetType() == cmState::INTERFACE_LIBRARY) {
+      if ((*i)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
       this->AppendTargetOutputs(*i, outs);
@@ -1034,7 +1034,7 @@ void cmGlobalNinjaGenerator::ComputeTargetDependsClosure(
   cmTargetDependSet const& targetDeps = this->GetTargetDirectDepends(target);
   for (cmTargetDependSet::const_iterator i = targetDeps.begin();
        i != targetDeps.end(); ++i) {
-    if ((*i)->GetType() == cmState::INTERFACE_LIBRARY) {
+    if ((*i)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     if (depends.insert(*i).second) {
@@ -1102,11 +1102,13 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
            lg->GetGeneratorTargets().begin();
          ti != lg->GetGeneratorTargets().end(); ++ti) {
       cmGeneratorTarget const* gt = *ti;
-      cmState::TargetType const type = gt->GetType();
-      if ((type == cmState::EXECUTABLE || type == cmState::STATIC_LIBRARY ||
-           type == cmState::SHARED_LIBRARY ||
-           type == cmState::MODULE_LIBRARY ||
-           type == cmState::OBJECT_LIBRARY || type == cmState::UTILITY) &&
+      cmStateEnums::TargetType const type = gt->GetType();
+      if ((type == cmStateEnums::EXECUTABLE ||
+           type == cmStateEnums::STATIC_LIBRARY ||
+           type == cmStateEnums::SHARED_LIBRARY ||
+           type == cmStateEnums::MODULE_LIBRARY ||
+           type == cmStateEnums::OBJECT_LIBRARY ||
+           type == cmStateEnums::UTILITY) &&
           !gt->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
         targetsPerFolder[currentSourceFolder].push_back(gt->GetName());
       }
@@ -1114,9 +1116,9 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
 
     // The directory-level rule should depend on the directory-level
     // rules of the subdirectories.
-    std::vector<cmState::Snapshot> const& children =
+    std::vector<cmStateSnapshot> const& children =
       lg->GetStateSnapshot().GetChildren();
-    for (std::vector<cmState::Snapshot>::const_iterator stateIt =
+    for (std::vector<cmStateSnapshot>::const_iterator stateIt =
            children.begin();
          stateIt != children.end(); ++stateIt) {
       targetsPerFolder[currentSourceFolder].push_back(
@@ -1665,8 +1667,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
 {
   // Setup path conversions.
   {
-    cmState::Snapshot snapshot =
-      this->GetCMakeInstance()->GetCurrentSnapshot();
+    cmStateSnapshot snapshot = this->GetCMakeInstance()->GetCurrentSnapshot();
     snapshot.GetDirectory().SetCurrentSource(dir_cur_src);
     snapshot.GetDirectory().SetCurrentBinary(dir_cur_bld);
     snapshot.GetDirectory().SetRelativePathTopSource(dir_top_src.c_str());

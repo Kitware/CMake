@@ -15,7 +15,7 @@
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmSourceFile.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cm_auto_ptr.hxx"
@@ -1104,7 +1104,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (!prop) {
       if (target->IsImported() ||
-          target->GetType() == cmState::INTERFACE_LIBRARY) {
+          target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         return linkedTargetsContent;
       }
       if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
@@ -1224,7 +1224,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       reportError(context, content->GetOriginalExpression(), e.str());
       return std::string();
     }
-    if (gt->GetType() != cmState::OBJECT_LIBRARY) {
+    if (gt->GetType() != cmStateEnums::OBJECT_LIBRARY) {
       std::ostringstream e;
       e << "Objects of target \"" << tgtName
         << "\" referenced but is not an OBJECT library.";
@@ -1506,7 +1506,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
                     "for DLL target platforms.");
       return std::string();
     }
-    if (target->GetType() != cmState::SHARED_LIBRARY) {
+    if (target->GetType() != cmStateEnums::SHARED_LIBRARY) {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_SONAME_FILE is allowed only for "
                     "SHARED libraries.");
@@ -1542,11 +1542,11 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
       return std::string();
     }
 
-    cmState::TargetType targetType = target->GetType();
+    cmStateEnums::TargetType targetType = target->GetType();
 
-    if (targetType != cmState::SHARED_LIBRARY &&
-        targetType != cmState::MODULE_LIBRARY &&
-        targetType != cmState::EXECUTABLE) {
+    if (targetType != cmStateEnums::SHARED_LIBRARY &&
+        targetType != cmStateEnums::MODULE_LIBRARY &&
+        targetType != cmStateEnums::EXECUTABLE) {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_PDB_FILE is allowed only for "
                     "targets with linker created artifacts.");
@@ -1646,8 +1646,8 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                     "No target \"" + name + "\"");
       return std::string();
     }
-    if (target->GetType() >= cmState::OBJECT_LIBRARY &&
-        target->GetType() != cmState::UNKNOWN_LIBRARY) {
+    if (target->GetType() >= cmStateEnums::OBJECT_LIBRARY &&
+        target->GetType() != cmStateEnums::UNKNOWN_LIBRARY) {
       ::reportError(context, content->GetOriginalExpression(), "Target \"" +
                       name + "\" is not an executable or library.");
       return std::string();

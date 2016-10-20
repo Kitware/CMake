@@ -8,6 +8,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmUuid.h"
 #include "cmake.h"
 #include <cmsys/Encoding.hxx>
@@ -101,7 +102,7 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(
       "Semicolon separated list of supported configuration types, "
       "only supports Debug, Release, MinSizeRel, and RelWithDebInfo, "
       "anything else will be ignored.",
-      cmState::STRING);
+      cmStateEnums::STRING);
   }
 
   // Create list of configurations requested by user's cache, if any.
@@ -118,7 +119,7 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(
   if (cmSystemTools::GetEnv("CMAKE_MSVCIDE_RUN_PATH", extraPath)) {
     mf->AddCacheDefinition("CMAKE_MSVCIDE_RUN_PATH", extraPath.c_str(),
                            "Saved environment variable CMAKE_MSVCIDE_RUN_PATH",
-                           cmState::STATIC);
+                           cmStateEnums::STATIC);
   }
 }
 
@@ -345,7 +346,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   for (OrderedTargetDependSet::const_iterator tt = projectTargets.begin();
        tt != projectTargets.end(); ++tt) {
     cmGeneratorTarget const* target = *tt;
-    if (target->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
@@ -377,7 +378,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
   for (OrderedTargetDependSet::const_iterator tt = projectTargets.begin();
        tt != projectTargets.end(); ++tt) {
     cmGeneratorTarget const* target = *tt;
-    if (target->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     bool written = false;
@@ -446,7 +447,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
   for (OrderedTargetDependSet::const_iterator tt = projectTargets.begin();
        tt != projectTargets.end(); ++tt) {
     cmGeneratorTarget const* target = *tt;
-    if (target->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     const char* vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
@@ -676,7 +677,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   // if it is a utilitiy target then only make it part of the
   // default build if another target depends on it
   int type = target->GetType();
-  if (type == cmState::GLOBAL_TARGET) {
+  if (type == cmStateEnums::GLOBAL_TARGET) {
     // check if INSTALL target is part of default build
     if (target->GetName() == "INSTALL") {
       // inspect CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD properties
@@ -696,7 +697,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
     }
     return activeConfigs;
   }
-  if (type == cmState::UTILITY &&
+  if (type == cmStateEnums::UTILITY &&
       !this->IsDependedOn(projectTargets, target)) {
     return activeConfigs;
   }

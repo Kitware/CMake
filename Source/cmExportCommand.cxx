@@ -141,14 +141,14 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
       }
 
       if (cmTarget* target = gg->FindTarget(*currentTarget)) {
-        if (target->GetType() == cmState::OBJECT_LIBRARY) {
+        if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
           std::ostringstream e;
           e << "given OBJECT library \"" << *currentTarget
             << "\" which may not be exported.";
           this->SetError(e.str());
           return false;
         }
-        if (target->GetType() == cmState::UTILITY) {
+        if (target->GetType() == cmStateEnums::UTILITY) {
           this->SetError("given custom target \"" + *currentTarget +
                          "\" which may not be exported.");
           return false;

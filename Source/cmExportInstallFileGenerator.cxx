@@ -14,7 +14,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
@@ -81,7 +81,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     cmGeneratorTarget* gt = (*tei)->Target;
 
     requiresConfigFiles =
-      requiresConfigFiles || gt->GetType() != cmState::INTERFACE_LIBRARY;
+      requiresConfigFiles || gt->GetType() != cmStateEnums::INTERFACE_LIBRARY;
 
     this->GenerateImportTargetCode(os, gt);
 
@@ -120,7 +120,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         require2_8_12 = true;
       }
     }
-    if (gt->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       require3_0_0 = true;
     }
     if (gt->GetProperty("INTERFACE_SOURCES")) {
@@ -316,7 +316,7 @@ void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
        tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei) {
     // Collect import properties for this target.
     cmTargetExport const* te = *tei;
-    if (te->Target->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (te->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
 

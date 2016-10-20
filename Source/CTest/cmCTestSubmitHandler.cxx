@@ -8,6 +8,7 @@
 #include "cmCurl.h"
 #include "cmGeneratedFileStream.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmake.h"

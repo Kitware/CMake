@@ -6,7 +6,8 @@
 #include <cmConfigure.h>
 
 #include "cmExportSetMap.h"
-#include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
@@ -108,10 +109,10 @@ public:
   virtual void Generate();
 
   virtual cmLinkLineComputer* CreateLinkLineComputer(
-    cmOutputConverter* outputConverter, cmState::Directory stateDir) const;
+    cmOutputConverter* outputConverter, cmStateDirectory stateDir) const;
 
   cmLinkLineComputer* CreateMSVC60LinkLineComputer(
-    cmOutputConverter* outputConverter, cmState::Directory stateDir) const;
+    cmOutputConverter* outputConverter, cmStateDirectory stateDir) const;
 
   /**
    * Set/Get and Clear the enabled languages.
@@ -410,8 +411,8 @@ protected:
   // has been populated.
   void FillProjectMap();
   void CheckTargetProperties();
-  bool IsExcluded(cmState::Snapshot const& root,
-                  cmState::Snapshot const& snp) const;
+  bool IsExcluded(cmStateSnapshot const& root,
+                  cmStateSnapshot const& snp) const;
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
   bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) const;
   virtual void InitializeProgressMarks() {}

@@ -13,6 +13,7 @@
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -81,7 +82,7 @@ void cmLocalNinjaGenerator::Generate()
   std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
   for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
        t != targets.end(); ++t) {
-    if ((*t)->GetType() == cmState::INTERFACE_LIBRARY) {
+    if ((*t)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     cmNinjaTargetGenerator* tg = cmNinjaTargetGenerator::New(*t);

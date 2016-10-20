@@ -4,6 +4,7 @@
 
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmake.h"
 
 cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator(cmake* cm)

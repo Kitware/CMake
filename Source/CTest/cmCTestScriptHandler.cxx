@@ -22,6 +22,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -280,7 +281,7 @@ void cmCTestScriptHandler::CreateCMake()
   this->CMake->AddCMakePaths();
   this->GlobalGenerator = new cmGlobalGenerator(this->CMake);
 
-  cmState::Snapshot snapshot = this->CMake->GetCurrentSnapshot();
+  cmStateSnapshot snapshot = this->CMake->GetCurrentSnapshot();
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   snapshot.GetDirectory().SetCurrentSource(cwd);
   snapshot.GetDirectory().SetCurrentBinary(cwd);

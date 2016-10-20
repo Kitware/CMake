@@ -116,6 +116,6 @@ bool cmBuildCommand::TwoArgsSignature(std::vector<std::string> const& args)
   this->Makefile->AddCacheDefinition(define, makecommand.c_str(),
                                      "Command used to build entire project "
                                      "from the command line.",
-                                     cmState::STRING);
+                                     cmStateEnums::STRING);
   return true;
 }

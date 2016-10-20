@@ -63,7 +63,7 @@ void cmLocalVisualStudio10Generator::Generate()
   std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
   for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
        l != tgts.end(); ++l) {
-    if ((*l)->GetType() == cmState::INTERFACE_LIBRARY) {
+    if ((*l)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     if (static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
@@ -95,7 +95,7 @@ void cmLocalVisualStudio10Generator::ReadAndStoreExternalGUID(
   // save the GUID in the cache
   this->GlobalGenerator->GetCMakeInstance()->AddCacheEntry(
     guidStoreName.c_str(), parser.GUID.c_str(), "Stored GUID",
-    cmState::INTERNAL);
+    cmStateEnums::INTERNAL);
 }
 
 const char* cmLocalVisualStudio10Generator::ReportErrorLabel() const

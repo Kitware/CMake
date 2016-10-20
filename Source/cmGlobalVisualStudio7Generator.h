@@ -120,7 +120,7 @@ protected:
                                    const char* path,
                                    cmGeneratorTarget const* t) = 0;
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const std::string& name, cmState::TargetType type,
+    std::ostream& fout, const std::string& name, cmStateEnums::TargetType type,
     std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const std::string& platformMapping = "") = 0;

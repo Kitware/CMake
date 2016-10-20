@@ -360,6 +360,11 @@ set(SRCS
   cmSourceGroup.h
   cmState.cxx
   cmState.h
+  cmStateDirectory.cxx
+  cmStateDirectory.h
+  cmStateSnapshot.cxx
+  cmStateSnapshot.h
+  cmStateTypes.h
   cmSystemTools.cxx
   cmSystemTools.h
   cmTarget.cxx

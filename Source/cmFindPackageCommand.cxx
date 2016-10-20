@@ -3,6 +3,7 @@
 #include "cmFindPackageCommand.h"
 
 #include "cmAlgorithms.h"
+#include "cmState.h"
 #include <cmSystemTools.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Encoding.hxx>
@@ -890,7 +891,7 @@ bool cmFindPackageCommand::FindConfig()
   help += ".";
   // We force the value since we do not get here if it was already set.
   this->Makefile->AddCacheDefinition(this->Variable, init.c_str(),
-                                     help.c_str(), cmState::PATH, true);
+                                     help.c_str(), cmStateEnums::PATH, true);
   return found;
 }
 

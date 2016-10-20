@@ -3,6 +3,7 @@
 #include "cmDefinePropertyCommand.h"
 
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmake.h"
 
 bool cmDefinePropertyCommand::InitialPass(std::vector<std::string> const& args,

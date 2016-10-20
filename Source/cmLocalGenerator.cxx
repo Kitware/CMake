@@ -16,6 +16,8 @@
 #include "cmMakefile.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
+#include "cmStateDirectory.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTestGenerator.h"
@@ -199,7 +201,7 @@ void cmLocalGenerator::TraceDependencies()
   std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
   for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
        t != targets.end(); ++t) {
-    if ((*t)->GetType() == cmState::INTERFACE_LIBRARY) {
+    if ((*t)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     (*t)->TraceDependencies();
@@ -249,7 +251,7 @@ void cmLocalGenerator::GenerateTestFiles()
     (*gi)->Compute(this);
     (*gi)->Generate(fout, config, configurationTypes);
   }
-  typedef std::vector<cmState::Snapshot> vec_t;
+  typedef std::vector<cmStateSnapshot> vec_t;
   vec_t const& children = this->Makefile->GetStateSnapshot().GetChildren();
   std::string parentBinDir = this->GetCurrentBinaryDirectory();
   for (vec_t::const_iterator i = children.begin(); i != children.end(); ++i) {
@@ -446,12 +448,12 @@ void cmLocalGenerator::GenerateInstallRules()
   this->GenerateTargetInstallRules(fout, config, configurationTypes);
 
   // Include install scripts from subdirectories.
-  std::vector<cmState::Snapshot> children =
+  std::vector<cmStateSnapshot> children =
     this->Makefile->GetStateSnapshot().GetChildren();
   if (!children.empty()) {
     fout << "if(NOT CMAKE_INSTALL_LOCAL_ONLY)\n";
     fout << "  # Include the install script for each subdirectory.\n";
-    for (std::vector<cmState::Snapshot>::const_iterator ci = children.begin();
+    for (std::vector<cmStateSnapshot>::const_iterator ci = children.begin();
          ci != children.end(); ++ci) {
       if (!ci->GetDirectory().GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
         std::string odir = ci->GetDirectory().GetCurrentBinary();
@@ -542,7 +544,7 @@ void cmLocalGenerator::ComputeTargetManifest()
   for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
        t != targets.end(); ++t) {
     cmGeneratorTarget* target = *t;
-    if (target->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     for (std::vector<std::string>::iterator ci = configNames.begin();
@@ -563,7 +565,7 @@ cmState* cmLocalGenerator::GetState() const
   return this->GlobalGenerator->GetCMakeInstance()->GetState();
 }
 
-cmState::Snapshot cmLocalGenerator::GetStateSnapshot() const
+cmStateSnapshot cmLocalGenerator::GetStateSnapshot() const
 {
   return this->Makefile->GetStateSnapshot();
 }
@@ -911,12 +913,12 @@ void cmLocalGenerator::GetTargetFlags(
     "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
 
   switch (target->GetType()) {
-    case cmState::STATIC_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
       this->GetStaticLibraryFlags(linkFlags, buildType, target);
       break;
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";
-    case cmState::SHARED_LIBRARY: {
+    case cmStateEnums::SHARED_LIBRARY: {
       linkFlags = this->Makefile->GetSafeDefinition(libraryLinkVariable);
       linkFlags += " ";
       if (!buildType.empty()) {
@@ -962,7 +964,7 @@ void cmLocalGenerator::GetTargetFlags(
                                   frameworkPath, linkPath);
       }
     } break;
-    case cmState::EXECUTABLE: {
+    case cmStateEnums::EXECUTABLE: {
       linkFlags += this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
       linkFlags += " ";
       if (!buildType.empty()) {
@@ -1189,7 +1191,7 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
   std::string linkFlags;
 
   // Flags to link an executable to shared libraries.
-  if (tgt.GetType() == cmState::EXECUTABLE &&
+  if (tgt.GetType() == cmStateEnums::EXECUTABLE &&
       this->StateSnapshot.GetState()->GetGlobalPropertyAsBool(
         "TARGET_SUPPORTS_SHARED_LIBS")) {
     bool add_shlib_flags = false;
@@ -1334,8 +1336,8 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
     // found is part of the inName
     if (cmSystemTools::FileIsFullPath(inName.c_str())) {
       std::string tLocation;
-      if (target->GetType() >= cmState::EXECUTABLE &&
-          target->GetType() <= cmState::MODULE_LIBRARY) {
+      if (target->GetType() >= cmStateEnums::EXECUTABLE &&
+          target->GetType() <= cmStateEnums::MODULE_LIBRARY) {
         tLocation = target->GetLocation(config);
         tLocation = cmSystemTools::GetFilenamePath(tLocation);
         tLocation = cmSystemTools::CollapseFullPath(tLocation);
@@ -1352,23 +1354,23 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
       }
     }
     switch (target->GetType()) {
-      case cmState::EXECUTABLE:
-      case cmState::STATIC_LIBRARY:
-      case cmState::SHARED_LIBRARY:
-      case cmState::MODULE_LIBRARY:
-      case cmState::UNKNOWN_LIBRARY:
+      case cmStateEnums::EXECUTABLE:
+      case cmStateEnums::STATIC_LIBRARY:
+      case cmStateEnums::SHARED_LIBRARY:
+      case cmStateEnums::MODULE_LIBRARY:
+      case cmStateEnums::UNKNOWN_LIBRARY:
         dep = target->GetLocation(config);
         return true;
-      case cmState::OBJECT_LIBRARY:
+      case cmStateEnums::OBJECT_LIBRARY:
         // An object library has no single file on which to depend.
         // This was listed to get the target-level dependency.
         return false;
-      case cmState::INTERFACE_LIBRARY:
+      case cmStateEnums::INTERFACE_LIBRARY:
         // An interface library has no file on which to depend.
         // This was listed to get the target-level dependency.
         return false;
-      case cmState::UTILITY:
-      case cmState::GLOBAL_TARGET:
+      case cmStateEnums::UTILITY:
+      case cmStateEnums::GLOBAL_TARGET:
         // A utility target has no file on which to depend.  This was listed
         // only to get the target-level dependency.
         return false;
@@ -1584,8 +1586,8 @@ void cmLocalGenerator::AddVisibilityPresetFlags(
 
   std::string warnCMP0063;
   std::string* pWarnCMP0063 = CM_NULLPTR;
-  if (target->GetType() != cmState::SHARED_LIBRARY &&
-      target->GetType() != cmState::MODULE_LIBRARY &&
+  if (target->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      target->GetType() != cmStateEnums::MODULE_LIBRARY &&
       !target->IsExecutableWithExports()) {
     switch (target->GetPolicyStatusCMP0063()) {
       case cmPolicies::OLD:
@@ -1627,13 +1629,13 @@ void cmLocalGenerator::AddCMP0018Flags(std::string& flags,
 {
   int targetType = target->GetType();
 
-  bool shared = ((targetType == cmState::SHARED_LIBRARY) ||
-                 (targetType == cmState::MODULE_LIBRARY));
+  bool shared = ((targetType == cmStateEnums::SHARED_LIBRARY) ||
+                 (targetType == cmStateEnums::MODULE_LIBRARY));
 
   if (this->GetShouldUseOldFlags(shared, lang)) {
     this->AddSharedFlags(flags, lang, shared);
   } else {
-    if (target->GetType() == cmState::OBJECT_LIBRARY) {
+    if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
       if (target->GetPropertyAsBool("POSITION_INDEPENDENT_CODE")) {
         this->AddPositionIndependentFlags(flags, lang, targetType);
       }
@@ -1696,7 +1698,7 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
 {
   const char* picFlags = CM_NULLPTR;
 
-  if (targetType == cmState::EXECUTABLE) {
+  if (targetType == cmStateEnums::EXECUTABLE) {
     std::string flagsVar = "CMAKE_";
     flagsVar += lang;
     flagsVar += "_COMPILE_OPTIONS_PIE";
@@ -1868,7 +1870,7 @@ const char* cmLocalGenerator::GetFeature(const std::string& feature,
     featureName += "_";
     featureName += cmSystemTools::UpperCase(config);
   }
-  cmState::Snapshot snp = this->StateSnapshot;
+  cmStateSnapshot snp = this->StateSnapshot;
   while (snp.IsValid()) {
     if (const char* value = snp.GetDirectory().GetProperty(featureName)) {
       return value;
@@ -1933,7 +1935,7 @@ void cmLocalGenerator::GenerateTargetInstallRules(
   std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
   for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
        l != tgts.end(); ++l) {
-    if ((*l)->GetType() == cmState::INTERFACE_LIBRARY) {
+    if ((*l)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
 
@@ -1956,15 +1958,15 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 
       // Generate the proper install generator for this target type.
       switch ((*l)->GetType()) {
-        case cmState::EXECUTABLE:
-        case cmState::STATIC_LIBRARY:
-        case cmState::MODULE_LIBRARY: {
+        case cmStateEnums::EXECUTABLE:
+        case cmStateEnums::STATIC_LIBRARY:
+        case cmStateEnums::MODULE_LIBRARY: {
           // Use a target install generator.
           cmInstallTargetGeneratorLocal g(this, (*l)->GetName(),
                                           destination.c_str(), false);
           g.Generate(os, config, configurationTypes);
         } break;
-        case cmState::SHARED_LIBRARY: {
+        case cmStateEnums::SHARED_LIBRARY: {
 #if defined(_WIN32) || defined(__CYGWIN__)
           // Special code to handle DLL.  Install the import library
           // to the normal destination and the DLL to the runtime

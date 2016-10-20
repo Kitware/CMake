@@ -3,6 +3,8 @@
 #include "cmOutputConverter.h"
 
 #include "cmAlgorithms.h"
+#include "cmState.h"
+#include "cmStateDirectory.h"
 #include "cmSystemTools.h"
 
 #include <algorithm>
@@ -11,7 +13,7 @@
 #include <set>
 #include <sstream>
 
-cmOutputConverter::cmOutputConverter(cmState::Snapshot snapshot)
+cmOutputConverter::cmOutputConverter(cmStateSnapshot snapshot)
   : StateSnapshot(snapshot)
   , LinkScriptShell(false)
 {
@@ -78,7 +80,7 @@ static bool cmOutputConverterNotAbove(const char* a, const char* b)
 
 bool cmOutputConverter::ContainedInDirectory(std::string const& local_path,
                                              std::string const& remote_path,
-                                             cmState::Directory directory)
+                                             cmStateDirectory directory)
 {
   const std::string relativePathTopBinary =
     directory.GetRelativePathTopBinary();

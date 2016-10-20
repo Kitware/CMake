@@ -8,7 +8,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
@@ -127,7 +127,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
     for (std::vector<cmGeneratorTarget*>::const_iterator lt =
            (*lg)->GetGeneratorTargets().begin();
          lt != (*lg)->GetGeneratorTargets().end(); lt++) {
-      cmState::TargetType type = (*lt)->GetType();
+      cmStateEnums::TargetType type = (*lt)->GetType();
       std::string outputDir = (*lg)->GetCurrentBinaryDirectory();
       std::string filename = outputDir + "/" + (*lt)->GetName() + ".project";
       retval.push_back((*lt)->GetName());
@@ -136,11 +136,11 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
         this->WorkspacePath.c_str(), filename.c_str());
       std::string visualname = (*lt)->GetName();
       switch (type) {
-        case cmState::SHARED_LIBRARY:
-        case cmState::STATIC_LIBRARY:
-        case cmState::MODULE_LIBRARY:
+        case cmStateEnums::SHARED_LIBRARY:
+        case cmStateEnums::STATIC_LIBRARY:
+        case cmStateEnums::MODULE_LIBRARY:
           visualname = "lib" + visualname;
-        case cmState::EXECUTABLE:
+        case cmStateEnums::EXECUTABLE:
           xml->StartElement("Project");
           xml->Attribute("Name", visualname);
           xml->Attribute("Path", relafilename);
@@ -209,16 +209,16 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
 
   std::string projectType;
   switch (gt->GetType()) {
-    case cmState::EXECUTABLE: {
+    case cmStateEnums::EXECUTABLE: {
       projectType = "Executable";
     } break;
-    case cmState::STATIC_LIBRARY: {
+    case cmStateEnums::STATIC_LIBRARY: {
       projectType = "Static Library";
     } break;
-    case cmState::SHARED_LIBRARY: {
+    case cmStateEnums::SHARED_LIBRARY: {
       projectType = "Dynamic Library";
     } break;
-    case cmState::MODULE_LIBRARY: {
+    case cmStateEnums::MODULE_LIBRARY: {
       projectType = "Dynamic Library";
     } break;
     default: // intended fallthrough
@@ -226,10 +226,10 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
   }
 
   switch (gt->GetType()) {
-    case cmState::EXECUTABLE:
-    case cmState::STATIC_LIBRARY:
-    case cmState::SHARED_LIBRARY:
-    case cmState::MODULE_LIBRARY: {
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY: {
       std::vector<cmSourceFile*> sources;
       gt->GetSourceFiles(sources,
                          makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
@@ -511,9 +511,9 @@ void cmExtraCodeLiteGenerator::CreateNewProjectFile(
   xml.StartElement("CodeLite_Project");
   std::string visualname = gt->GetName();
   switch (gt->GetType()) {
-    case cmState::STATIC_LIBRARY:
-    case cmState::SHARED_LIBRARY:
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       visualname = "lib" + visualname;
     default: // intended fallthrough
       break;

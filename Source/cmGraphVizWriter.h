@@ -5,7 +5,7 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 #include <cmsys/RegularExpression.hxx>
 #include <map>
@@ -60,7 +60,7 @@ protected:
 
   bool IgnoreThisTarget(const std::string& name);
 
-  bool GenerateForTargetType(cmState::TargetType targetType) const;
+  bool GenerateForTargetType(cmStateEnums::TargetType targetType) const;
 
   std::string GraphType;
   std::string GraphName;

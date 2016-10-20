@@ -133,8 +133,8 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
       this->SetError(e.str());
       return false;
     }
-    cmState::TargetType type = aliasedTarget->GetType();
-    if (type != cmState::EXECUTABLE) {
+    cmStateEnums::TargetType type = aliasedTarget->GetType();
+    if (type != cmStateEnums::EXECUTABLE) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename << "\" because target \""
         << aliasedName << "\" is not an "
@@ -165,7 +165,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
     }
 
     // Create the imported target.
-    this->Makefile->AddImportedTarget(exename, cmState::EXECUTABLE,
+    this->Makefile->AddImportedTarget(exename, cmStateEnums::EXECUTABLE,
                                       importGlobal);
     return true;
   }

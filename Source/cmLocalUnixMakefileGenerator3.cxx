@@ -17,6 +17,8 @@
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmake.h"
@@ -120,7 +122,7 @@ void cmLocalUnixMakefileGenerator3::Generate()
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
        t != targets.end(); ++t) {
-    if ((*t)->GetType() == cmState::INTERFACE_LIBRARY) {
+    if ((*t)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     CM_AUTO_PTR<cmMakefileTargetGenerator> tg(
@@ -172,7 +174,7 @@ void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
   for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
        ti != targets.end(); ++ti) {
     cmGeneratorTarget* gt = *ti;
-    if (gt->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     std::vector<cmSourceFile const*> objectSources;
@@ -382,12 +384,12 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefileTargets(
   std::string localName;
   for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
        t != targets.end(); ++t) {
-    if (((*t)->GetType() == cmState::EXECUTABLE) ||
-        ((*t)->GetType() == cmState::STATIC_LIBRARY) ||
-        ((*t)->GetType() == cmState::SHARED_LIBRARY) ||
-        ((*t)->GetType() == cmState::MODULE_LIBRARY) ||
-        ((*t)->GetType() == cmState::OBJECT_LIBRARY) ||
-        ((*t)->GetType() == cmState::UTILITY)) {
+    if (((*t)->GetType() == cmStateEnums::EXECUTABLE) ||
+        ((*t)->GetType() == cmStateEnums::STATIC_LIBRARY) ||
+        ((*t)->GetType() == cmStateEnums::SHARED_LIBRARY) ||
+        ((*t)->GetType() == cmStateEnums::MODULE_LIBRARY) ||
+        ((*t)->GetType() == cmStateEnums::OBJECT_LIBRARY) ||
+        ((*t)->GetType() == cmStateEnums::UTILITY)) {
       emitted.insert((*t)->GetName());
 
       // for subdirs add a rule to build this specific target by name.
@@ -1558,7 +1560,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
   std::vector<cmGeneratorTarget*>::iterator glIt;
   for (glIt = targets.begin(); glIt != targets.end(); ++glIt) {
-    if ((*glIt)->GetType() == cmState::GLOBAL_TARGET) {
+    if ((*glIt)->GetType() == cmStateEnums::GLOBAL_TARGET) {
       std::string targetString =
         "Special rule for the target " + (*glIt)->GetName();
       std::vector<std::string> commands;

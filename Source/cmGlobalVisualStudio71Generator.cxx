@@ -246,7 +246,7 @@ void cmGlobalVisualStudio71Generator::WriteExternalProject(
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
-  std::ostream& fout, const std::string& name, cmState::TargetType,
+  std::ostream& fout, const std::string& name, cmStateEnums::TargetType,
   std::vector<std::string> const& configs,
   const std::set<std::string>& configsPartOfDefaultBuild,
   std::string const& platformMapping)

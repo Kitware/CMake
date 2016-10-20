@@ -90,7 +90,7 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn,
     if (this->AlreadyInCacheWithoutMetaInfo) {
       this->Makefile->AddCacheDefinition(this->VariableName, "",
                                          this->VariableDocumentation.c_str(),
-                                         cmState::FILEPATH);
+                                         cmStateEnums::FILEPATH);
     }
     return true;
   }
@@ -100,13 +100,13 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn,
     // Save the value in the cache
     this->Makefile->AddCacheDefinition(this->VariableName, result.c_str(),
                                        this->VariableDocumentation.c_str(),
-                                       cmState::FILEPATH);
+                                       cmStateEnums::FILEPATH);
 
     return true;
   }
   this->Makefile->AddCacheDefinition(
     this->VariableName, (this->VariableName + "-NOTFOUND").c_str(),
-    this->VariableDocumentation.c_str(), cmState::FILEPATH);
+    this->VariableDocumentation.c_str(), cmStateEnums::FILEPATH);
   return true;
 }
 

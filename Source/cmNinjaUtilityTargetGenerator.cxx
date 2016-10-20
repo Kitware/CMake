@@ -12,7 +12,7 @@
 #include "cmNinjaTypes.h"
 #include "cmOutputConverter.h"
 #include "cmSourceFile.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -151,7 +151,7 @@ void cmNinjaUtilityTargetGenerator::Generate()
   // Add an alias for the logical target name regardless of what directory
   // contains it.  Skip this for GLOBAL_TARGET because they are meant to
   // be per-directory and have one at the top-level anyway.
-  if (this->GetGeneratorTarget()->GetType() != cmState::GLOBAL_TARGET) {
+  if (this->GetGeneratorTarget()->GetType() != cmStateEnums::GLOBAL_TARGET) {
     this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
                                                this->GetGeneratorTarget());
   }

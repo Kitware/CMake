@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmUtilitySourceCommand.h"
 
+#include "cmState.h"
+
 // cmUtilitySourceCommand
 bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
                                          cmExecutionStatus&)
@@ -98,13 +100,13 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
   // Enter the value into the cache.
   this->Makefile->AddCacheDefinition(cacheEntry, utilityExecutable.c_str(),
                                      "Path to an internal program.",
-                                     cmState::FILEPATH);
+                                     cmStateEnums::FILEPATH);
   // add a value into the cache that maps from the
   // full path to the name of the project
   cmSystemTools::ConvertToUnixSlashes(utilityExecutable);
   this->Makefile->AddCacheDefinition(utilityExecutable, utilityName.c_str(),
                                      "Executable to project name.",
-                                     cmState::INTERNAL);
+                                     cmStateEnums::INTERNAL);
 
   return true;
 }

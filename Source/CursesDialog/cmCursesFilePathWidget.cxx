@@ -3,11 +3,11 @@
 #include "cmCursesFilePathWidget.h"
 
 #include "cmCursesPathWidget.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 cmCursesFilePathWidget::cmCursesFilePathWidget(int width, int height, int left,
                                                int top)
   : cmCursesPathWidget(width, height, left, top)
 {
-  this->Type = cmState::FILEPATH;
+  this->Type = cmStateEnums::FILEPATH;
 }

@@ -8,7 +8,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmXMLWriter.h"
@@ -74,7 +74,7 @@ void cmGlobalKdevelopGenerator::Generate()
       for (std::vector<cmGeneratorTarget*>::const_iterator ti =
              targets.begin();
            ti != targets.end(); ti++) {
-        if ((*ti)->GetType() == cmState::EXECUTABLE) {
+        if ((*ti)->GetType() == cmStateEnums::EXECUTABLE) {
           executable = (*ti)->GetLocation("");
           break;
         }

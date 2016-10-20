@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindLibraryCommand.h"
 
+#include "cmState.h"
 #include <cmsys/Directory.hxx>
 
 cmFindLibraryCommand::cmFindLibraryCommand()
@@ -26,7 +27,7 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn,
     if (this->AlreadyInCacheWithoutMetaInfo) {
       this->Makefile->AddCacheDefinition(this->VariableName, "",
                                          this->VariableDocumentation.c_str(),
-                                         cmState::FILEPATH);
+                                         cmStateEnums::FILEPATH);
     }
     return true;
   }
@@ -52,13 +53,13 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn,
     // Save the value in the cache
     this->Makefile->AddCacheDefinition(this->VariableName, library.c_str(),
                                        this->VariableDocumentation.c_str(),
-                                       cmState::FILEPATH);
+                                       cmStateEnums::FILEPATH);
     return true;
   }
   std::string notfound = this->VariableName + "-NOTFOUND";
   this->Makefile->AddCacheDefinition(this->VariableName, notfound.c_str(),
                                      this->VariableDocumentation.c_str(),
-                                     cmState::FILEPATH);
+                                     cmStateEnums::FILEPATH);
   return true;
 }
 

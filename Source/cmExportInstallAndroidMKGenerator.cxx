@@ -38,7 +38,7 @@ void cmExportInstallAndroidMKGenerator::GenerateImportHeaderCode(
        tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei) {
     // Collect import properties for this target.
     cmTargetExport const* te = *tei;
-    if (te->Target->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (te->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     std::string dest;

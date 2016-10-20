@@ -9,7 +9,7 @@
 #include "cmInstallType.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cm_auto_ptr.hxx"
@@ -80,36 +80,36 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   std::vector<std::string> filesFrom;
   std::vector<std::string> filesTo;
   std::string literal_args;
-  cmState::TargetType targetType = this->Target->GetType();
+  cmStateEnums::TargetType targetType = this->Target->GetType();
   cmInstallType type = cmInstallType();
   switch (targetType) {
-    case cmState::EXECUTABLE:
+    case cmStateEnums::EXECUTABLE:
       type = cmInstallType_EXECUTABLE;
       break;
-    case cmState::STATIC_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
       type = cmInstallType_STATIC_LIBRARY;
       break;
-    case cmState::SHARED_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
       type = cmInstallType_SHARED_LIBRARY;
       break;
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       type = cmInstallType_MODULE_LIBRARY;
       break;
-    case cmState::INTERFACE_LIBRARY:
+    case cmStateEnums::INTERFACE_LIBRARY:
       // Not reachable. We never create a cmInstallTargetGenerator for
       // an INTERFACE_LIBRARY.
       assert(0 && "INTERFACE_LIBRARY targets have no installable outputs.");
       break;
-    case cmState::OBJECT_LIBRARY:
-    case cmState::UTILITY:
-    case cmState::GLOBAL_TARGET:
-    case cmState::UNKNOWN_LIBRARY:
+    case cmStateEnums::OBJECT_LIBRARY:
+    case cmStateEnums::UTILITY:
+    case cmStateEnums::GLOBAL_TARGET:
+    case cmStateEnums::UNKNOWN_LIBRARY:
       this->Target->GetLocalGenerator()->IssueMessage(
         cmake::INTERNAL_ERROR,
         "cmInstallTargetGenerator created with non-installable target.");
       return;
   }
-  if (targetType == cmState::EXECUTABLE) {
+  if (targetType == cmStateEnums::EXECUTABLE) {
     // There is a bug in cmInstallCommand if this fails.
     assert(this->NamelinkMode == NamelinkModeNone);
 
@@ -337,7 +337,7 @@ std::string cmInstallTargetGenerator::GetInstallFilename(
 {
   std::string fname;
   // Compute the name of the library.
-  if (target->GetType() == cmState::EXECUTABLE) {
+  if (target->GetType() == cmStateEnums::EXECUTABLE) {
     std::string targetName;
     std::string targetNameReal;
     std::string targetNameImport;
@@ -471,9 +471,9 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(
   std::string const& toDestDirPath)
 {
   if (this->ImportLibrary ||
-      !(this->Target->GetType() == cmState::SHARED_LIBRARY ||
-        this->Target->GetType() == cmState::MODULE_LIBRARY ||
-        this->Target->GetType() == cmState::EXECUTABLE)) {
+      !(this->Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
+        this->Target->GetType() == cmStateEnums::MODULE_LIBRARY ||
+        this->Target->GetType() == cmStateEnums::EXECUTABLE)) {
     return;
   }
 
@@ -527,7 +527,7 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(
 
   // Edit the install_name of the target itself if necessary.
   std::string new_id;
-  if (this->Target->GetType() == cmState::SHARED_LIBRARY) {
+  if (this->Target->GetType() == cmStateEnums::SHARED_LIBRARY) {
     std::string for_build =
       this->Target->GetInstallNameDirForBuildTree(config);
     std::string for_install = this->Target->GetInstallNameDirForInstallTree();
@@ -704,7 +704,7 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os,
 
   // don't strip static and import libraries, because it removes the only
   // symbol table they have so you can't link to them anymore
-  if (this->Target->GetType() == cmState::STATIC_LIBRARY ||
+  if (this->Target->GetType() == cmStateEnums::STATIC_LIBRARY ||
       this->ImportLibrary) {
     return;
   }
@@ -731,7 +731,7 @@ void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
                                              const std::string& toDestDirPath)
 {
   // Static libraries need ranlib on this platform.
-  if (this->Target->GetType() != cmState::STATIC_LIBRARY) {
+  if (this->Target->GetType() != cmStateEnums::STATIC_LIBRARY) {
     return;
   }
 
@@ -767,10 +767,10 @@ void cmInstallTargetGenerator::AddUniversalInstallRule(
   }
 
   switch (this->Target->GetType()) {
-    case cmState::EXECUTABLE:
-    case cmState::STATIC_LIBRARY:
-    case cmState::SHARED_LIBRARY:
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       break;
 
     default:

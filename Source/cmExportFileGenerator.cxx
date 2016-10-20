@@ -11,7 +11,7 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
@@ -492,7 +492,7 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
   getPropertyContents(gtarget, "COMPATIBLE_INTERFACE_NUMBER_MAX",
                       ifaceProperties);
 
-  if (gtarget->GetType() != cmState::INTERFACE_LIBRARY) {
+  if (gtarget->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
     getCompatibleInterfaceProperties(gtarget, ifaceProperties, "");
 
     std::vector<std::string> configNames;
@@ -735,8 +735,8 @@ void cmExportFileGenerator::SetImportDetailProperties(
   cmMakefile* mf = target->Makefile;
 
   // Add the soname for unix shared libraries.
-  if (target->GetType() == cmState::SHARED_LIBRARY ||
-      target->GetType() == cmState::MODULE_LIBRARY) {
+  if (target->GetType() == cmStateEnums::SHARED_LIBRARY ||
+      target->GetType() == cmStateEnums::MODULE_LIBRARY) {
     if (!target->IsDLLPlatform()) {
       std::string prop;
       std::string value;
@@ -912,22 +912,22 @@ void cmExportFileGenerator::GenerateImportTargetCode(
   // Create the imported target.
   os << "# Create imported target " << targetName << "\n";
   switch (target->GetType()) {
-    case cmState::EXECUTABLE:
+    case cmStateEnums::EXECUTABLE:
       os << "add_executable(" << targetName << " IMPORTED)\n";
       break;
-    case cmState::STATIC_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
       os << "add_library(" << targetName << " STATIC IMPORTED)\n";
       break;
-    case cmState::SHARED_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
       os << "add_library(" << targetName << " SHARED IMPORTED)\n";
       break;
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       os << "add_library(" << targetName << " MODULE IMPORTED)\n";
       break;
-    case cmState::UNKNOWN_LIBRARY:
+    case cmStateEnums::UNKNOWN_LIBRARY:
       os << "add_library(" << targetName << " UNKNOWN IMPORTED)\n";
       break;
-    case cmState::INTERFACE_LIBRARY:
+    case cmStateEnums::INTERFACE_LIBRARY:
       os << "add_library(" << targetName << " INTERFACE IMPORTED)\n";
       break;
     default: // should never happen

@@ -32,7 +32,7 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
   cmState* state = this->Makefile->GetState();
   const char* existingValue = state->GetCacheEntryValue(args[0]);
   if (existingValue) {
-    if (state->GetCacheEntryType(args[0]) != cmState::UNINITIALIZED) {
+    if (state->GetCacheEntryType(args[0]) != cmStateEnums::UNINITIALIZED) {
       state->SetCacheEntryProperty(args[0], "HELPSTRING", args[1]);
       return true;
     }
@@ -43,6 +43,6 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
   }
   bool init = cmSystemTools::IsOn(initialValue.c_str());
   this->Makefile->AddCacheDefinition(args[0], init ? "ON" : "OFF",
-                                     args[1].c_str(), cmState::BOOL);
+                                     args[1].c_str(), cmStateEnums::BOOL);
   return true;
 }

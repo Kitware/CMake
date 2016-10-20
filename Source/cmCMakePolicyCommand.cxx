@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakePolicyCommand.h"
 
+#include "cmState.h"
 #include "cmVersion.h"
 
 // cmCMakePolicyCommand
@@ -79,7 +80,7 @@ bool cmCMakePolicyCommand::HandleSetMode(std::vector<std::string> const& args)
         "For backwards compatibility, what version of CMake "
         "commands and "
         "syntax should this version of CMake try to support.",
-        cmState::STRING);
+        cmStateEnums::STRING);
     }
   }
   return true;

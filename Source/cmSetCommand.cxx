@@ -64,8 +64,9 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   bool cache = false; // optional
   bool force = false; // optional
   bool parentScope = false;
-  cmState::CacheEntryType type = cmState::STRING; // required if cache
-  const char* docstring = CM_NULLPTR;             // required if cache
+  cmStateEnums::CacheEntryType type =
+    cmStateEnums::STRING;             // required if cache
+  const char* docstring = CM_NULLPTR; // required if cache
 
   unsigned int ignoreLastArgs = 0;
   // look for PARENT_SCOPE argument
@@ -115,12 +116,12 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   cmState* state = this->Makefile->GetState();
   const char* existingValue = state->GetCacheEntryValue(variable);
   if (existingValue &&
-      (state->GetCacheEntryType(variable) != cmState::UNINITIALIZED)) {
+      (state->GetCacheEntryType(variable) != cmStateEnums::UNINITIALIZED)) {
     // if the set is trying to CACHE the value but the value
     // is already in the cache and the type is not internal
     // then leave now without setting any definitions in the cache
     // or the makefile
-    if (cache && type != cmState::INTERNAL && !force) {
+    if (cache && type != cmStateEnums::INTERNAL && !force) {
       return true;
     }
   }

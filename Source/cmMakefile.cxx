@@ -18,6 +18,8 @@
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
 #include "cmVersion.h"
@@ -45,7 +47,7 @@ class cmMessenger;
 
 // default is not to be building executables
 cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
-                       cmState::Snapshot const& snapshot)
+                       cmStateSnapshot const& snapshot)
   : GlobalGenerator(globalGenerator)
   , StateSnapshot(snapshot)
   , Backtrace(snapshot)
@@ -730,7 +732,7 @@ void cmMakefile::AddCustomCommandToTarget(
     return;
   }
 
-  if (ti->second.GetType() == cmState::OBJECT_LIBRARY) {
+  if (ti->second.GetType() == cmStateEnums::OBJECT_LIBRARY) {
     std::ostringstream e;
     e << "Target \"" << target
       << "\" is an OBJECT library "
@@ -738,7 +740,7 @@ void cmMakefile::AddCustomCommandToTarget(
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (ti->second.GetType() == cmState::INTERFACE_LIBRARY) {
+  if (ti->second.GetType() == cmStateEnums::INTERFACE_LIBRARY) {
     std::ostringstream e;
     e << "Target \"" << target
       << "\" is an INTERFACE library "
@@ -1032,7 +1034,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
   const char* comment, bool uses_terminal)
 {
   // Create a target instance for this utility.
-  cmTarget* target = this->AddNewTarget(cmState::UTILITY, utilityName);
+  cmTarget* target = this->AddNewTarget(cmStateEnums::UTILITY, utilityName);
   if (excludeFromAll) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
@@ -1356,7 +1358,7 @@ private:
   cmMakefile* Makefile;
   cmGlobalGenerator* GG;
   cmMakefile* CurrentMakefile;
-  cmState::Snapshot Snapshot;
+  cmStateSnapshot Snapshot;
   bool ReportError;
 };
 
@@ -1538,7 +1540,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     return;
   }
 
-  cmState::Snapshot newSnapshot =
+  cmStateSnapshot newSnapshot =
     this->GetState()->CreateBuildsystemDirectorySnapshot(this->StateSnapshot);
 
   newSnapshot.GetDirectory().SetCurrentSource(srcPath);
@@ -1643,20 +1645,21 @@ void cmMakefile::AddDefinition(const std::string& name, const char* value)
 
 void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
                                     const char* doc,
-                                    cmState::CacheEntryType type, bool force)
+                                    cmStateEnums::CacheEntryType type,
+                                    bool force)
 {
   const char* existingValue = this->GetState()->GetInitializedCacheValue(name);
   // must be outside the following if() to keep it alive long enough
   std::string nvalue;
 
-  if (existingValue &&
-      (this->GetState()->GetCacheEntryType(name) == cmState::UNINITIALIZED)) {
+  if (existingValue && (this->GetState()->GetCacheEntryType(name) ==
+                        cmStateEnums::UNINITIALIZED)) {
     // if this is not a force, then use the value from the cache
     // if it is a force, then use the value being passed in
     if (!force) {
       value = existingValue;
     }
-    if (type == cmState::PATH || type == cmState::FILEPATH) {
+    if (type == cmStateEnums::PATH || type == cmStateEnums::FILEPATH) {
       std::vector<std::string>::size_type cc;
       std::vector<std::string> files;
       nvalue = value ? value : "";
@@ -1774,9 +1777,9 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
 {
   // for these targets do not add anything
   switch (target.GetType()) {
-    case cmState::UTILITY:
-    case cmState::GLOBAL_TARGET:
-    case cmState::INTERFACE_LIBRARY:
+    case cmStateEnums::UTILITY:
+    case cmStateEnums::GLOBAL_TARGET:
+    case cmStateEnums::INTERFACE_LIBRARY:
       return;
     default:;
   }
@@ -1828,13 +1831,15 @@ void cmMakefile::AddAlias(const std::string& lname, std::string const& tgtName)
 }
 
 cmTarget* cmMakefile::AddLibrary(const std::string& lname,
-                                 cmState::TargetType type,
+                                 cmStateEnums::TargetType type,
                                  const std::vector<std::string>& srcs,
                                  bool excludeFromAll)
 {
-  assert(type == cmState::STATIC_LIBRARY || type == cmState::SHARED_LIBRARY ||
-         type == cmState::MODULE_LIBRARY || type == cmState::OBJECT_LIBRARY ||
-         type == cmState::INTERFACE_LIBRARY);
+  assert(type == cmStateEnums::STATIC_LIBRARY ||
+         type == cmStateEnums::SHARED_LIBRARY ||
+         type == cmStateEnums::MODULE_LIBRARY ||
+         type == cmStateEnums::OBJECT_LIBRARY ||
+         type == cmStateEnums::INTERFACE_LIBRARY);
 
   cmTarget* target = this->AddNewTarget(type, lname);
   // Clear its dependencies. Otherwise, dependencies might persist
@@ -1853,7 +1858,7 @@ cmTarget* cmMakefile::AddExecutable(const char* exeName,
                                     const std::vector<std::string>& srcs,
                                     bool excludeFromAll)
 {
-  cmTarget* target = this->AddNewTarget(cmState::EXECUTABLE, exeName);
+  cmTarget* target = this->AddNewTarget(cmStateEnums::EXECUTABLE, exeName);
   if (excludeFromAll) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
@@ -1862,7 +1867,7 @@ cmTarget* cmMakefile::AddExecutable(const char* exeName,
   return target;
 }
 
-cmTarget* cmMakefile::AddNewTarget(cmState::TargetType type,
+cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
                                    const std::string& name)
 {
   cmTargets::iterator it =
@@ -2040,8 +2045,8 @@ void cmMakefile::ExpandVariablesCMP0019()
   for (cmTargets::iterator l = this->Targets.begin(); l != this->Targets.end();
        ++l) {
     cmTarget& t = l->second;
-    if (t.GetType() == cmState::INTERFACE_LIBRARY ||
-        t.GetType() == cmState::GLOBAL_TARGET) {
+    if (t.GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+        t.GetType() == cmStateEnums::GLOBAL_TARGET) {
       continue;
     }
     includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
@@ -3175,7 +3180,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
       // Add this before the user-provided CMake arguments in case
       // one of the arguments is -DCMAKE_BUILD_TYPE=...
       cm.AddCacheEntry("CMAKE_BUILD_TYPE", config, "Build configuration",
-                       cmState::STRING);
+                       cmStateEnums::STRING);
     }
   }
   // if cmake args were provided then pass them in
@@ -3211,10 +3216,10 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   gg->EnableLanguagesFromGenerator(this->GetGlobalGenerator(), this);
   if (this->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS")) {
     cm.AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "TRUE", "",
-                     cmState::INTERNAL);
+                     cmStateEnums::INTERNAL);
   } else {
     cm.AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "FALSE", "",
-                     cmState::INTERNAL);
+                     cmStateEnums::INTERNAL);
   }
   if (cm.Configure() != 0) {
     cmSystemTools::Error(
@@ -3618,7 +3623,7 @@ void cmMakefile::AddCMakeDependFilesFromUser()
 std::string cmMakefile::FormatListFileStack() const
 {
   std::vector<std::string> listFiles;
-  cmState::Snapshot snp = this->StateSnapshot;
+  cmStateSnapshot snp = this->StateSnapshot;
   while (snp.IsValid()) {
     listFiles.push_back(snp.GetExecutionListFile());
     snp = snp.GetCallStackParent();
@@ -3681,7 +3686,8 @@ void cmMakefile::RaiseScope(const std::string& var, const char* varDef)
 }
 
 cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
-                                        cmState::TargetType type, bool global)
+                                        cmStateEnums::TargetType type,
+                                        bool global)
 {
   // Create the target.
   CM_AUTO_PTR<cmTarget> target(
@@ -3767,7 +3773,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
     // The conflict is with a non-imported target.
     // Allow this if the user has requested support.
     cmake* cm = this->GetCMakeInstance();
-    if (isCustom && existing->GetType() == cmState::UTILITY &&
+    if (isCustom && existing->GetType() == cmStateEnums::UTILITY &&
         this != existing->GetMakefile() &&
         cm->GetState()->GetGlobalPropertyAsBool(
           "ALLOW_DUPLICATE_CUSTOM_TARGETS")) {
@@ -3781,22 +3787,22 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       << "\" because another target with the same name already exists.  "
       << "The existing target is ";
     switch (existing->GetType()) {
-      case cmState::EXECUTABLE:
+      case cmStateEnums::EXECUTABLE:
         e << "an executable ";
         break;
-      case cmState::STATIC_LIBRARY:
+      case cmStateEnums::STATIC_LIBRARY:
         e << "a static library ";
         break;
-      case cmState::SHARED_LIBRARY:
+      case cmStateEnums::SHARED_LIBRARY:
         e << "a shared library ";
         break;
-      case cmState::MODULE_LIBRARY:
+      case cmStateEnums::MODULE_LIBRARY:
         e << "a module library ";
         break;
-      case cmState::UTILITY:
+      case cmStateEnums::UTILITY:
         e << "a custom target ";
         break;
-      case cmState::INTERFACE_LIBRARY:
+      case cmStateEnums::INTERFACE_LIBRARY:
         e << "an interface library ";
         break;
       default:
@@ -3914,7 +3920,7 @@ void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
   this->MarkVariableAsUsed(nMatchesVariable);
 }
 
-cmState::Snapshot cmMakefile::GetStateSnapshot() const
+cmStateSnapshot cmMakefile::GetStateSnapshot() const
 {
   return this->StateSnapshot;
 }
@@ -3995,7 +4001,7 @@ void cmMakefile::PopPolicy()
 
 void cmMakefile::PopSnapshot(bool reportError)
 {
-  // cmState::Snapshot manages nested policy scopes within it.
+  // cmStateSnapshot manages nested policy scopes within it.
   // Since the scope corresponding to the snapshot is closing,
   // reject any still-open nested policy scopes with an error.
   while (!this->StateSnapshot.CanPopPolicyScope()) {

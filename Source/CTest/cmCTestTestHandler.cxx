@@ -10,6 +10,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 #include "cm_auto_ptr.hxx"

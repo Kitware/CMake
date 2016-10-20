@@ -3,6 +3,7 @@
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmake.h"
@@ -233,7 +234,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, const char* version)
               "For backwards compatibility, what version of CMake "
               "commands and "
               "syntax should this version of CMake try to support.",
-              cmState::STRING);
+              cmStateEnums::STRING);
           }
         }
       }

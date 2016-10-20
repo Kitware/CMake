@@ -10,6 +10,7 @@
 #include "cmCursesStringWidget.h"
 #include "cmCursesWidget.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -47,7 +48,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   const char* value = cm->GetState()->GetCacheEntryValue(key);
   assert(value);
   switch (cm->GetState()->GetCacheEntryType(key)) {
-    case cmState::BOOL:
+    case cmStateEnums::BOOL:
       this->Entry = new cmCursesBoolWidget(this->EntryWidth, 1, 1, 1);
       if (cmSystemTools::IsOn(value)) {
         static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(true);
@@ -55,15 +56,15 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
         static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(false);
       }
       break;
-    case cmState::PATH:
+    case cmStateEnums::PATH:
       this->Entry = new cmCursesPathWidget(this->EntryWidth, 1, 1, 1);
       static_cast<cmCursesPathWidget*>(this->Entry)->SetString(value);
       break;
-    case cmState::FILEPATH:
+    case cmStateEnums::FILEPATH:
       this->Entry = new cmCursesFilePathWidget(this->EntryWidth, 1, 1, 1);
       static_cast<cmCursesFilePathWidget*>(this->Entry)->SetString(value);
       break;
-    case cmState::STRING: {
+    case cmStateEnums::STRING: {
       const char* stringsProp =
         cm->GetState()->GetCacheEntryProperty(key, "STRINGS");
       if (stringsProp) {
@@ -83,7 +84,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
       }
       break;
     }
-    case cmState::UNINITIALIZED:
+    case cmStateEnums::UNINITIALIZED:
       cmSystemTools::Error("Found an undefined variable: ", key.c_str());
       break;
     default:

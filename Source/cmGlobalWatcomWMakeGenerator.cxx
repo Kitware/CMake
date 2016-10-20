@@ -5,6 +5,7 @@
 #include "cmDocumentationEntry.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmake.h"
 
 cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator(cmake* cm)

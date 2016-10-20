@@ -4,6 +4,7 @@
 
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 
 cmGlobalJOMMakefileGenerator::cmGlobalJOMMakefileGenerator(cmake* cm)
   : cmGlobalUnixMakefileGenerator3(cm)

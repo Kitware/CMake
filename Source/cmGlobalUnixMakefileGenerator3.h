@@ -8,7 +8,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 #include <iosfwd>
 #include <map>
@@ -248,8 +248,8 @@ private:
   const char* GetBuildIgnoreErrorsFlag() const CM_OVERRIDE { return "-i"; }
   std::string GetEditCacheCommand() const CM_OVERRIDE;
 
-  std::map<cmState::Snapshot, std::set<cmGeneratorTarget const*>,
-           cmState::Snapshot::StrictWeakOrder>
+  std::map<cmStateSnapshot, std::set<cmGeneratorTarget const*>,
+           cmStateSnapshot::StrictWeakOrder>
     DirectoryTargetsMap;
   void InitializeProgressMarks() CM_OVERRIDE;
 };

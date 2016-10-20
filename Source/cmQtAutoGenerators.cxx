@@ -8,6 +8,8 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
@@ -165,7 +167,7 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
 
-  cmState::Snapshot snapshot = cm.GetCurrentSnapshot();
+  cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
   snapshot.GetDirectory().SetCurrentBinary(targetDirectory);
   snapshot.GetDirectory().SetCurrentSource(targetDirectory);
 

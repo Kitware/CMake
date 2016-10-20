@@ -71,7 +71,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
     return true;
   }
 
-  if (this->Target->GetType() == cmState::OBJECT_LIBRARY) {
+  if (this->Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
     std::ostringstream e;
     e << "Object library target \"" << args[0] << "\" "
       << "may not link to anything.";
@@ -80,7 +80,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
     return true;
   }
 
-  if (this->Target->GetType() == cmState::UTILITY) {
+  if (this->Target->GetType() == cmStateEnums::UTILITY) {
     std::ostringstream e;
     const char* modal = CM_NULLPTR;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
@@ -278,7 +278,7 @@ void cmTargetLinkLibrariesCommand::LinkLibraryTypeSpecifierWarning(int left,
 bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
                                                  cmTargetLinkLibraryType llt)
 {
-  if (this->Target->GetType() == cmState::INTERFACE_LIBRARY &&
+  if (this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY &&
       this->CurrentProcessingState != ProcessingKeywordLinkInterface) {
     this->Makefile->IssueMessage(
       cmake::FATAL_ERROR,
@@ -351,9 +351,9 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
 
       cmTarget* tgt = this->Makefile->GetGlobalGenerator()->FindTarget(lib);
 
-      if (tgt && (tgt->GetType() != cmState::STATIC_LIBRARY) &&
-          (tgt->GetType() != cmState::SHARED_LIBRARY) &&
-          (tgt->GetType() != cmState::INTERFACE_LIBRARY) &&
+      if (tgt && (tgt->GetType() != cmStateEnums::STATIC_LIBRARY) &&
+          (tgt->GetType() != cmStateEnums::SHARED_LIBRARY) &&
+          (tgt->GetType() != cmStateEnums::INTERFACE_LIBRARY) &&
           !tgt->IsExecutableWithExports()) {
         std::ostringstream e;
         e << "Target \"" << lib << "\" of type "
@@ -375,7 +375,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
     }
     if (this->CurrentProcessingState != ProcessingKeywordPublicInterface &&
         this->CurrentProcessingState != ProcessingPlainPublicInterface) {
-      if (this->Target->GetType() == cmState::STATIC_LIBRARY) {
+      if (this->Target->GetType() == cmStateEnums::STATIC_LIBRARY) {
         std::string configLib =
           this->Target->GetDebugGeneratorExpressions(lib, llt);
         if (cmGeneratorExpression::IsValidTargetName(lib) ||
@@ -403,7 +403,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
     return true;
   }
 
-  if (this->Target->GetType() == cmState::INTERFACE_LIBRARY) {
+  if (this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
     return true;
   }
 

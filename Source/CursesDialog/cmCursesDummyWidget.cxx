@@ -3,13 +3,13 @@
 #include "cmCursesDummyWidget.h"
 
 #include "cmCursesWidget.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 
 cmCursesDummyWidget::cmCursesDummyWidget(int width, int height, int left,
                                          int top)
   : cmCursesWidget(width, height, left, top)
 {
-  this->Type = cmState::INTERNAL;
+  this->Type = cmStateEnums::INTERNAL;
 }
 
 bool cmCursesDummyWidget::HandleInput(int& /*key*/, cmCursesMainForm* /*fm*/,

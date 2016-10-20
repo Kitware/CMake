@@ -4,7 +4,7 @@
 #ifndef cmLinkLineComputer_h
 #define cmLinkLineComputer_h
 
-#include "cmState.h"
+#include "cmStateDirectory.h"
 
 class cmComputeLinkInformation;
 class cmOutputConverter;
@@ -13,7 +13,7 @@ class cmLinkLineComputer
 {
 public:
   cmLinkLineComputer(cmOutputConverter* outputConverter,
-                     cmState::Directory stateDir);
+                     cmStateDirectory stateDir);
   virtual ~cmLinkLineComputer();
 
   void SetUseWatcomQuote(bool useWatcomQuote);
@@ -39,7 +39,7 @@ private:
   std::string ConvertToOutputFormat(std::string const& input);
   std::string ConvertToOutputForExisting(std::string const& input);
 
-  cmState::Directory StateDir;
+  cmStateDirectory StateDir;
   cmOutputConverter* OutputConverter;
 
   bool ForResponse;

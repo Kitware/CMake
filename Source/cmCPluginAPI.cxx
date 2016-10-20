@@ -75,22 +75,22 @@ void CCONV cmAddCacheDefinition(void* arg, const char* name, const char* value,
 
   switch (type) {
     case CM_CACHE_BOOL:
-      mf->AddCacheDefinition(name, value, doc, cmState::BOOL);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::BOOL);
       break;
     case CM_CACHE_PATH:
-      mf->AddCacheDefinition(name, value, doc, cmState::PATH);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::PATH);
       break;
     case CM_CACHE_FILEPATH:
-      mf->AddCacheDefinition(name, value, doc, cmState::FILEPATH);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::FILEPATH);
       break;
     case CM_CACHE_STRING:
-      mf->AddCacheDefinition(name, value, doc, cmState::STRING);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::STRING);
       break;
     case CM_CACHE_INTERNAL:
-      mf->AddCacheDefinition(name, value, doc, cmState::INTERNAL);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::INTERNAL);
       break;
     case CM_CACHE_STATIC:
-      mf->AddCacheDefinition(name, value, doc, cmState::STATIC);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::STATIC);
       break;
   }
 }
@@ -350,9 +350,9 @@ static void addLinkLibrary(cmMakefile* mf, std::string const& target,
   }
 
   cmTarget* tgt = mf->GetGlobalGenerator()->FindTarget(lib);
-  if (tgt && (tgt->GetType() != cmState::STATIC_LIBRARY) &&
-      (tgt->GetType() != cmState::SHARED_LIBRARY) &&
-      (tgt->GetType() != cmState::INTERFACE_LIBRARY) &&
+  if (tgt && (tgt->GetType() != cmStateEnums::STATIC_LIBRARY) &&
+      (tgt->GetType() != cmStateEnums::SHARED_LIBRARY) &&
+      (tgt->GetType() != cmStateEnums::INTERFACE_LIBRARY) &&
       !tgt->IsExecutableWithExports()) {
     std::ostringstream e;
     e << "Target \"" << lib << "\" of type "
@@ -393,8 +393,8 @@ void CCONV cmAddLibrary(void* arg, const char* libname, int shared,
   for (i = 0; i < numSrcs; ++i) {
     srcs2.push_back(srcs[i]);
   }
-  mf->AddLibrary(libname,
-                 (shared ? cmState::SHARED_LIBRARY : cmState::STATIC_LIBRARY),
+  mf->AddLibrary(libname, (shared ? cmStateEnums::SHARED_LIBRARY
+                                  : cmStateEnums::STATIC_LIBRARY),
                  srcs2);
 }
 

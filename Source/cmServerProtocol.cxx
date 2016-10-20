@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServerProtocol.h"
 
-#include "cmCacheManager.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"
 #include "cmGeneratorTarget.h"
@@ -685,7 +684,7 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
   cmLocalGenerator* lg = target->GetLocalGenerator();
   const cmState* state = lg->GetState();
 
-  const cmState::TargetType type = target->GetType();
+  const cmStateEnums::TargetType type = target->GetType();
   const std::string typeName = state->GetTargetTypeName(type);
 
   Json::Value ttl = Json::arrayValue;

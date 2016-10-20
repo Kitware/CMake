@@ -5,9 +5,10 @@
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmOutputConverter.h"
+#include "cmStateDirectory.h"
 
 cmLinkLineComputer::cmLinkLineComputer(cmOutputConverter* outputConverter,
-                                       cmState::Directory stateDir)
+                                       cmStateDirectory stateDir)
   : StateDir(stateDir)
   , OutputConverter(outputConverter)
   , ForResponse(false)
@@ -55,7 +56,8 @@ std::string cmLinkLineComputer::ComputeLinkLibs(cmComputeLinkInformation& cli)
   ItemVector const& items = cli.GetItems();
   for (ItemVector::const_iterator li = items.begin(); li != items.end();
        ++li) {
-    if (li->Target && li->Target->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (li->Target &&
+        li->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     if (li->IsPath) {

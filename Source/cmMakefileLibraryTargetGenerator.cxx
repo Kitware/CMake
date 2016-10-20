@@ -13,6 +13,7 @@
 #include "cmOutputConverter.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -24,7 +25,7 @@ cmMakefileLibraryTargetGenerator::cmMakefileLibraryTargetGenerator(
   : cmMakefileTargetGenerator(target)
 {
   this->CustomCommandDriver = OnDepends;
-  if (this->GeneratorTarget->GetType() != cmState::INTERFACE_LIBRARY) {
+  if (this->GeneratorTarget->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
     this->GeneratorTarget->GetLibraryNames(
       this->TargetNameOut, this->TargetNameSO, this->TargetNameReal,
       this->TargetNameImport, this->TargetNamePDB, this->ConfigName);
@@ -57,24 +58,24 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
   // write the link rules
   // Write the rule for this target type.
   switch (this->GeneratorTarget->GetType()) {
-    case cmState::STATIC_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
       this->WriteStaticLibraryRules();
       break;
-    case cmState::SHARED_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
       this->WriteSharedLibraryRules(false);
       if (this->GeneratorTarget->NeedRelinkBeforeInstall(this->ConfigName)) {
         // Write rules to link an installable version of the target.
         this->WriteSharedLibraryRules(true);
       }
       break;
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       this->WriteModuleLibraryRules(false);
       if (this->GeneratorTarget->NeedRelinkBeforeInstall(this->ConfigName)) {
         // Write rules to link an installable version of the target.
         this->WriteModuleLibraryRules(true);
       }
       break;
-    case cmState::OBJECT_LIBRARY:
+    case cmStateEnums::OBJECT_LIBRARY:
       this->WriteObjectLibraryRules();
       break;
     default:
@@ -251,8 +252,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   this->LocalGenerator->AppendFlags(linkFlags, extraFlags);
 
   // Add OSX version flags, if any.
-  if (this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY ||
-      this->GeneratorTarget->GetType() == cmState::MODULE_LIBRARY) {
+  if (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
+      this->GeneratorTarget->GetType() == cmStateEnums::MODULE_LIBRARY) {
     this->AppendOSXVerFlag(linkFlags, linkLanguage, "COMPATIBILITY", true);
     this->AppendOSXVerFlag(linkFlags, linkLanguage, "CURRENT", false);
   }
@@ -345,13 +346,13 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     std::string buildEcho = "Linking ";
     buildEcho += linkLanguage;
     switch (this->GeneratorTarget->GetType()) {
-      case cmState::STATIC_LIBRARY:
+      case cmStateEnums::STATIC_LIBRARY:
         buildEcho += " static library ";
         break;
-      case cmState::SHARED_LIBRARY:
+      case cmStateEnums::SHARED_LIBRARY:
         buildEcho += " shared library ";
         break;
-      case cmState::MODULE_LIBRARY:
+      case cmStateEnums::MODULE_LIBRARY:
         if (this->GeneratorTarget->IsCFBundleOnApple()) {
           buildEcho += " CFBundle";
         }
@@ -399,7 +400,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 #ifdef _WIN32
   // There may be a manifest file for this target.  Add it to the
   // clean set just in case.
-  if (this->GeneratorTarget->GetType() != cmState::STATIC_LIBRARY) {
+  if (this->GeneratorTarget->GetType() != cmStateEnums::STATIC_LIBRARY) {
     libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(),
       (targetFullPath + ".manifest").c_str()));
@@ -409,7 +410,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   std::vector<std::string> commands1;
   // Add a command to remove any existing files for this library.
   // for static libs only
-  if (this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY) {
+  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
     this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
                                              this->GeneratorTarget, "target");
     this->LocalGenerator->CreateCDCommand(
@@ -443,7 +444,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   std::vector<std::string> archiveAppendCommands;
   std::vector<std::string> archiveFinishCommands;
   std::string::size_type archiveCommandLimit = std::string::npos;
-  if (this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY) {
+  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
     haveStaticLibraryRule = this->Makefile->IsDefinitionSet(linkRuleVar);
     std::string arCreateVar = "CMAKE_";
     arCreateVar += linkLanguage;
@@ -492,7 +493,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
     // Collect up flags to link in needed libraries.
     std::string linkLibs;
-    if (this->GeneratorTarget->GetType() != cmState::STATIC_LIBRARY) {
+    if (this->GeneratorTarget->GetType() != cmStateEnums::STATIC_LIBRARY) {
 
       CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
         this->CreateLinkLineComputer(
@@ -514,7 +515,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
                             useWatcomQuote);
 
     // maybe create .def file from list of objects
-    if (this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY &&
+    if (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY &&
         this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
       this->GenDefFile(real_link_commands, linkFlags);
     }
@@ -574,7 +575,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
     // Compute the directory portion of the install_name setting.
     std::string install_name_dir;
-    if (this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY) {
+    if (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY) {
       // Get the install_name directory for the build tree.
       install_name_dir =
         this->GeneratorTarget->GetInstallNameDirForBuildTree(this->ConfigName);
@@ -659,7 +660,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       std::string linkRule = this->GetLinkRule(linkRuleVar);
       cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
       if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE") &&
-          (this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY)) {
+          (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY)) {
         std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(
           cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
         cmakeCommand += " -E __run_iwyu --lwyu=";

@@ -327,19 +327,19 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     if (cmTarget* target =
           this->Makefile->FindLocalNonAliasTarget(*targetIt)) {
       // Found the target.  Check its type.
-      if (target->GetType() != cmState::EXECUTABLE &&
-          target->GetType() != cmState::STATIC_LIBRARY &&
-          target->GetType() != cmState::SHARED_LIBRARY &&
-          target->GetType() != cmState::MODULE_LIBRARY &&
-          target->GetType() != cmState::OBJECT_LIBRARY &&
-          target->GetType() != cmState::INTERFACE_LIBRARY) {
+      if (target->GetType() != cmStateEnums::EXECUTABLE &&
+          target->GetType() != cmStateEnums::STATIC_LIBRARY &&
+          target->GetType() != cmStateEnums::SHARED_LIBRARY &&
+          target->GetType() != cmStateEnums::MODULE_LIBRARY &&
+          target->GetType() != cmStateEnums::OBJECT_LIBRARY &&
+          target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
         std::ostringstream e;
         e << "TARGETS given target \"" << (*targetIt)
           << "\" which is not an executable, library, or module.";
         this->SetError(e.str());
         return false;
       }
-      if (target->GetType() == cmState::OBJECT_LIBRARY) {
+      if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
         std::ostringstream e;
         e << "TARGETS given OBJECT library \"" << (*targetIt)
           << "\" which may not be installed.";
@@ -387,7 +387,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     bool namelinkOnly = false;
 
     switch (target.GetType()) {
-      case cmState::SHARED_LIBRARY: {
+      case cmStateEnums::SHARED_LIBRARY: {
         // Shared libraries are handled differently on DLL and non-DLL
         // platforms.  All windows platforms are DLL platforms including
         // cygwin.  Currently no other platform is a DLL platform.
@@ -454,7 +454,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           }
         }
       } break;
-      case cmState::STATIC_LIBRARY: {
+      case cmStateEnums::STATIC_LIBRARY: {
         // Static libraries use ARCHIVE properties.
         if (!archiveArgs.GetDestination().empty()) {
           archiveGenerator =
@@ -468,7 +468,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           return false;
         }
       } break;
-      case cmState::MODULE_LIBRARY: {
+      case cmStateEnums::MODULE_LIBRARY: {
         // Modules use LIBRARY properties.
         if (!libraryArgs.GetDestination().empty()) {
           libraryGenerator =
@@ -484,7 +484,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           return false;
         }
       } break;
-      case cmState::EXECUTABLE: {
+      case cmStateEnums::EXECUTABLE: {
         if (target.IsAppBundleOnApple()) {
           // Application bundles use the BUNDLE properties.
           if (!bundleArgs.GetDestination().empty()) {
@@ -534,7 +534,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             CreateInstallTargetGenerator(target, archiveArgs, true, true);
         }
       } break;
-      case cmState::INTERFACE_LIBRARY:
+      case cmStateEnums::INTERFACE_LIBRARY:
         // Nothing to do. An INTERFACE_LIBRARY can be installed, but the
         // only effect of that is to make it exportable. It installs no
         // other files itself.
@@ -553,7 +553,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     bool createInstallGeneratorsForTargetFileSets = true;
 
     if (target.IsFrameworkOnApple() ||
-        target.GetType() == cmState::INTERFACE_LIBRARY) {
+        target.GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       createInstallGeneratorsForTargetFileSets = false;
     }
 

@@ -9,7 +9,7 @@
 #include "cmListFileCache.h"
 #include "cmNewLineStyle.h"
 #include "cmPolicies.h"
-#include "cmState.h"
+#include "cmStateSnapshot.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
 #include "cmake.h"
@@ -70,7 +70,7 @@ public:
    * Construct an empty makefile.
    */
   cmMakefile(cmGlobalGenerator* globalGenerator,
-             const cmState::Snapshot& snapshot);
+             const cmStateSnapshot& snapshot);
 
   /**
    * Destructor.
@@ -163,9 +163,10 @@ public:
 
   /** Create a new imported target with the name and type given.  */
   cmTarget* AddImportedTarget(const std::string& name,
-                              cmState::TargetType type, bool global);
+                              cmStateEnums::TargetType type, bool global);
 
-  cmTarget* AddNewTarget(cmState::TargetType type, const std::string& name);
+  cmTarget* AddNewTarget(cmStateEnums::TargetType type,
+                         const std::string& name);
 
   /**
    * Add an executable to the build.
@@ -223,7 +224,7 @@ public:
   void AddDefinition(const std::string& name, const char* value);
   ///! Add a definition to this makefile and the global cmake cache.
   void AddCacheDefinition(const std::string& name, const char* value,
-                          const char* doc, cmState::CacheEntryType type,
+                          const char* doc, cmStateEnums::CacheEntryType type,
                           bool force = false);
 
   /**
@@ -251,7 +252,8 @@ public:
   /**
    * Set the name of the library.
    */
-  cmTarget* AddLibrary(const std::string& libname, cmState::TargetType type,
+  cmTarget* AddLibrary(const std::string& libname,
+                       cmStateEnums::TargetType type,
                        const std::vector<std::string>& srcs,
                        bool excludeFromAll = false);
   void AddAlias(const std::string& libname, const std::string& tgt);
@@ -751,7 +753,7 @@ public:
   void ClearMatches();
   void StoreMatches(cmsys::RegularExpression& re);
 
-  cmState::Snapshot GetStateSnapshot() const;
+  cmStateSnapshot GetStateSnapshot() const;
 
   const char* GetDefineFlagsCMP0059() const;
 
@@ -827,7 +829,7 @@ private:
   cmMakefile(const cmMakefile& mf);
   cmMakefile& operator=(const cmMakefile& mf);
 
-  cmState::Snapshot StateSnapshot;
+  cmStateSnapshot StateSnapshot;
   cmListFileBacktrace Backtrace;
 
   void ReadListFile(cmListFile const& listFile,

@@ -21,6 +21,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmVersionConfig.h"
@@ -1969,7 +1970,7 @@ bool cmCTest::AddVariableDefinition(const std::string& arg)
 {
   std::string name;
   std::string value;
-  cmState::CacheEntryType type = cmState::UNINITIALIZED;
+  cmStateEnums::CacheEntryType type = cmStateEnums::UNINITIALIZED;
 
   if (cmake::ParseCacheEntry(arg, name, value, type)) {
     this->Definitions[name] = value;

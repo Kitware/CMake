@@ -17,6 +17,7 @@
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -31,15 +32,15 @@
 cmNinjaTargetGenerator* cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
 {
   switch (target->GetType()) {
-    case cmState::EXECUTABLE:
-    case cmState::SHARED_LIBRARY:
-    case cmState::STATIC_LIBRARY:
-    case cmState::MODULE_LIBRARY:
-    case cmState::OBJECT_LIBRARY:
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
+    case cmStateEnums::OBJECT_LIBRARY:
       return new cmNinjaNormalTargetGenerator(target);
 
-    case cmState::UTILITY:
-    case cmState::GLOBAL_TARGET:
+    case cmStateEnums::UTILITY:
+    case cmStateEnums::GLOBAL_TARGET:
       return new cmNinjaUtilityTargetGenerator(target);
 
     default:
@@ -186,8 +187,8 @@ std::string cmNinjaTargetGenerator::ComputeDefines(cmSourceFile const* source,
 cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
 {
   // Static libraries never depend on other targets for linking.
-  if (this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY ||
-      this->GeneratorTarget->GetType() == cmState::OBJECT_LIBRARY) {
+  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
+      this->GeneratorTarget->GetType() == cmStateEnums::OBJECT_LIBRARY) {
     return cmNinjaDeps();
   }
 
@@ -335,15 +336,15 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
       mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID")) {
     std::string pdbPath;
     std::string compilePdbPath;
-    if (this->GeneratorTarget->GetType() == cmState::EXECUTABLE ||
-        this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY ||
-        this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY ||
-        this->GeneratorTarget->GetType() == cmState::MODULE_LIBRARY) {
+    if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE ||
+        this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
+        this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
+        this->GeneratorTarget->GetType() == cmStateEnums::MODULE_LIBRARY) {
       pdbPath = this->GeneratorTarget->GetPDBDirectory(this->GetConfigName());
       pdbPath += "/";
       pdbPath += this->GeneratorTarget->GetPDBName(this->GetConfigName());
     }
-    if (this->GeneratorTarget->GetType() <= cmState::OBJECT_LIBRARY) {
+    if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
       compilePdbPath =
         this->GeneratorTarget->GetCompilePDBPath(this->GetConfigName());
       if (compilePdbPath.empty()) {

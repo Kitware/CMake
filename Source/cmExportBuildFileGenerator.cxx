@@ -9,7 +9,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
@@ -57,7 +57,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
           this->LG->GetMakefile()->GetBacktrace());
         return false;
       }
-      if (te->GetType() == cmState::INTERFACE_LIBRARY) {
+      if (te->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         this->GenerateRequiredCMakeVersion(os, "3.0.0");
       }
     }
@@ -134,12 +134,12 @@ void cmExportBuildFileGenerator::GenerateImportTargetsConfig(
     cmGeneratorTarget* target = *tei;
     ImportPropertyMap properties;
 
-    if (target->GetType() != cmState::INTERFACE_LIBRARY) {
+    if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
       this->SetImportLocationProperty(config, suffix, target, properties);
     }
     if (!properties.empty()) {
       // Get the rest of the target details.
-      if (target->GetType() != cmState::INTERFACE_LIBRARY) {
+      if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
         this->SetImportDetailProperties(config, suffix, target, properties,
                                         missingTargets);
         this->SetImportLinkInterface(config, suffix,
@@ -186,7 +186,7 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
 
   // Add the import library for windows DLLs.
   if (target->IsDLLPlatform() &&
-      (target->GetType() == cmState::SHARED_LIBRARY ||
+      (target->GetType() == cmStateEnums::SHARED_LIBRARY ||
        target->IsExecutableWithExports()) &&
       mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
     std::string prop = "IMPORTED_IMPLIB";
