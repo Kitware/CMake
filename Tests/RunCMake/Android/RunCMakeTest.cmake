@@ -174,11 +174,6 @@ foreach(ndk IN LISTS TEST_ANDROID_NDK)
             continue()
           endif()
 
-          # Skip combinations that seem to be broken.
-          if("${stl};${abi}" MATCHES [[^c\+\+_static;armeabi]])
-            continue()
-          endif()
-
           # Run the tests for this combination.
           if("${abi}" STREQUAL "armeabi")
             run_Android(ndk-armeabi-thumb) # default: -DCMAKE_ANDROID_ARCH_ABI=armeabi -DCMAKE_ANDROID_ARM_MODE=0
