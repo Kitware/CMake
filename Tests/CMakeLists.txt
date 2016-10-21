@@ -3081,8 +3081,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         -P ${CMAKE_CURRENT_SOURCE_DIR}/BootstrapTest.cmake
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BootstrapTest")
-    # Make this test run early during parallel execution
-    set_tests_properties(BootstrapTest PROPERTIES COST 5000)
+    # This test will use all processors.
+    set_tests_properties(BootstrapTest PROPERTIES RUN_SERIAL 1)
 
     # provide more time for the bootstrap test
     get_test_property(BootstrapTest TIMEOUT PREVIOUS_TIMEOUT)
