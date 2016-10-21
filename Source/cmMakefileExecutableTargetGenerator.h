@@ -21,6 +21,10 @@ public:
 
 protected:
   virtual void WriteExecutableRule(bool relink);
+  virtual void WriteDeviceExecutableRule(bool relink);
+
+private:
+  std::string DeviceLinkObject;
 };
 
 #endif
