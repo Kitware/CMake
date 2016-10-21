@@ -12,6 +12,7 @@
 #include "cmStateSnapshot.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
+#include "cm_unordered_map.hxx"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -26,14 +27,6 @@
 #include <stack>
 #include <string>
 #include <vector>
-
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#ifdef CMake_HAVE_CXX_UNORDERED_MAP
-#include <unordered_map>
-#else
-#include <cmsys/hash_map.hxx>
-#endif
-#endif
 
 class cmCommand;
 class cmCompiledGeneratorExpression;
@@ -783,15 +776,6 @@ protected:
 
   // libraries, classes, and executables
   mutable cmTargets Targets;
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#ifdef CMake_HAVE_CXX_UNORDERED_MAP
-  typedef std::unordered_map<std::string, cmTarget*> TargetMap;
-#else
-  typedef cmsys::hash_map<std::string, cmTarget*> TargetMap;
-#endif
-#else
-  typedef std::map<std::string, cmTarget*> TargetMap;
-#endif
   std::map<std::string, std::string> AliasTargets;
   std::vector<cmSourceFile*> SourceFiles;
 
@@ -863,6 +847,7 @@ private:
   friend class cmParseFileScope;
 
   std::vector<cmTarget*> ImportedTargetsOwned;
+  typedef CM_UNORDERED_MAP<std::string, cmTarget*> TargetMap;
   TargetMap ImportedTargets;
 
   // Internal policy stack management.
@@ -899,16 +884,8 @@ private:
    */
   cmSourceFile* LinearGetSourceFileWithOutput(const std::string& cname) const;
 
-// A map for fast output to input look up.
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#ifdef CMake_HAVE_CXX_UNORDERED_MAP
-  typedef std::unordered_map<std::string, cmSourceFile*> OutputToSourceMap;
-#else
-  typedef cmsys::hash_map<std::string, cmSourceFile*> OutputToSourceMap;
-#endif
-#else
-  typedef std::map<std::string, cmSourceFile*> OutputToSourceMap;
-#endif
+  // A map for fast output to input look up.
+  typedef CM_UNORDERED_MAP<std::string, cmSourceFile*> OutputToSourceMap;
   OutputToSourceMap OutputToSource;
 
   void UpdateOutputToSourceMap(std::vector<std::string> const& outputs,

@@ -12,6 +12,7 @@
 #include "cmPropertyMap.h"
 #include "cmStateTypes.h"
 #include "cmTargetLinkLibraryType.h"
+#include "cm_unordered_map.hxx"
 
 #include <iosfwd>
 #include <map>
@@ -19,14 +20,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#ifdef CMake_HAVE_CXX_UNORDERED_MAP
-#include <unordered_map>
-#else
-#include <cmsys/hash_map.hxx>
-#endif
-#endif
 
 class cmMakefile;
 class cmSourceFile;
@@ -324,15 +317,7 @@ private:
   cmListFileBacktrace Backtrace;
 };
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
-#ifdef CMake_HAVE_CXX_UNORDERED_MAP
-typedef std::unordered_map<std::string, cmTarget> cmTargets;
-#else
-typedef cmsys::hash_map<std::string, cmTarget> cmTargets;
-#endif
-#else
-typedef std::map<std::string, cmTarget> cmTargets;
-#endif
+typedef CM_UNORDERED_MAP<std::string, cmTarget> cmTargets;
 
 class cmTargetSet : public std::set<std::string>
 {

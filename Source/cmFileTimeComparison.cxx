@@ -7,14 +7,7 @@
 #include <time.h>
 #include <utility>
 
-// Use a hash table to avoid duplicate file time checks from disk.
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#ifdef CMake_HAVE_CXX_UNORDERED_MAP
-#include <unordered_map>
-#else
-#include <cmsys/hash_map.hxx>
-#endif
-#endif
+#include "cm_unordered_map.hxx"
 
 // Use a platform-specific API to get file times efficiently.
 #if !defined(_WIN32) || defined(__CYGWIN__)
@@ -35,27 +28,9 @@ public:
   bool FileTimesDiffer(const char* f1, const char* f2);
 
 private:
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-  // Use a hash table to efficiently map from file name to modification time.
-  class HashString
-  {
-  public:
-    size_t operator()(const std::string& s) const { return h(s.c_str()); }
-#ifdef CMake_HAVE_CXX_UNORDERED_MAP
-    std::hash<const char*> h;
-#else
-    cmsys::hash<const char*> h;
-#endif
-  };
-#ifdef CMake_HAVE_CXX_UNORDERED_MAP
-  typedef std::unordered_map<std::string,
-#else
-  typedef cmsys::hash_map<std::string,
-#endif
-                             cmFileTimeComparison_Type, HashString>
+  typedef CM_UNORDERED_MAP<std::string, cmFileTimeComparison_Type>
     FileStatsMap;
   FileStatsMap Files;
-#endif
 
   // Internal methods to lookup and compare modification times.
   inline bool Stat(const char* fname, cmFileTimeComparison_Type* st);
@@ -68,7 +43,6 @@ private:
 bool cmFileTimeComparisonInternal::Stat(const char* fname,
                                         cmFileTimeComparison_Type* st)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
   // Use the stored time if available.
   cmFileTimeComparisonInternal::FileStatsMap::iterator fit =
     this->Files.find(fname);
@@ -76,7 +50,6 @@ bool cmFileTimeComparisonInternal::Stat(const char* fname,
     *st = fit->second;
     return true;
   }
-#endif
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
   // POSIX version.  Use the stat function.
@@ -97,11 +70,8 @@ bool cmFileTimeComparisonInternal::Stat(const char* fname,
   *st = fdata.ftLastWriteTime;
 #endif
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
   // Store the time for future use.
   this->Files[fname] = *st;
-#endif
-
   return true;
 }
 
