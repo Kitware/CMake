@@ -84,7 +84,7 @@ public:
 
   virtual const char* GetToolsVersion() { return "4.0"; }
 
-  virtual void FindMakeProgram(cmMakefile*);
+  bool FindMakeProgram(cmMakefile* mf) CM_OVERRIDE;
 
   static std::string GetInstalledNsightTegraVersion();
 

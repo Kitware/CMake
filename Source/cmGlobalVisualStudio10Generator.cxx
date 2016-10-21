@@ -357,11 +357,14 @@ cmGlobalVisualStudio10Generator::GetPlatformToolsetHostArchitecture() const
   return CM_NULLPTR;
 }
 
-void cmGlobalVisualStudio10Generator::FindMakeProgram(cmMakefile* mf)
+bool cmGlobalVisualStudio10Generator::FindMakeProgram(cmMakefile* mf)
 {
-  this->cmGlobalVisualStudio8Generator::FindMakeProgram(mf);
+  if (!this->cmGlobalVisualStudio8Generator::FindMakeProgram(mf)) {
+    return false;
+  }
   mf->AddDefinition("CMAKE_VS_MSBUILD_COMMAND",
                     this->GetMSBuildCommand().c_str());
+  return true;
 }
 
 std::string const& cmGlobalVisualStudio10Generator::GetMSBuildCommand()

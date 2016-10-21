@@ -91,7 +91,7 @@ public:
 
   const char* GetIntelProjectVersion();
 
-  virtual void FindMakeProgram(cmMakefile*);
+  bool FindMakeProgram(cmMakefile* mf) CM_OVERRIDE;
 
   /** Is the Microsoft Assembler enabled?  */
   bool IsMasmEnabled() const { return this->MasmEnabled; }

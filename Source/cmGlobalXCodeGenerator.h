@@ -58,7 +58,7 @@ public:
                                         const std::string& suffix,
                                         std::string& dir);
 
-  virtual void FindMakeProgram(cmMakefile*);
+  bool FindMakeProgram(cmMakefile*) CM_OVERRIDE;
 
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGIntDir() const;

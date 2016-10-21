@@ -553,20 +553,32 @@ void cmGlobalNinjaGenerator::Generate()
   this->CloseBuildFileStream();
 }
 
-void cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
+bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
 {
-  this->cmGlobalGenerator::FindMakeProgram(mf);
+  if (!this->cmGlobalGenerator::FindMakeProgram(mf)) {
+    return false;
+  }
   if (const char* ninjaCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
     this->NinjaCommand = ninjaCommand;
     std::vector<std::string> command;
     command.push_back(this->NinjaCommand);
     command.push_back("--version");
     std::string version;
-    cmSystemTools::RunSingleCommand(command, &version, CM_NULLPTR, CM_NULLPTR,
-                                    CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
+    std::string error;
+    if (!cmSystemTools::RunSingleCommand(command, &version, &error, CM_NULLPTR,
+                                         CM_NULLPTR,
+                                         cmSystemTools::OUTPUT_NONE)) {
+      mf->IssueMessage(cmake::FATAL_ERROR, "Running\n '" +
+                         cmJoin(command, "' '") + "'\n"
+                                                  "failed with:\n " +
+                         error);
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
     this->NinjaVersion = cmSystemTools::TrimWhitespace(version);
     this->CheckNinjaFeatures();
   }
+  return true;
 }
 
 void cmGlobalNinjaGenerator::CheckNinjaFeatures()
