@@ -64,7 +64,7 @@ public:
   void FinalPass() CM_OVERRIDE;
   bool HasFinalPass() const CM_OVERRIDE
   {
-    return this->info.FinalPass ? true : false;
+    return this->info.FinalPass != CM_NULLPTR;
   }
 
   /**

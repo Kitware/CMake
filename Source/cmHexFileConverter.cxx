@@ -206,7 +206,7 @@ bool cmHexFileConverter::TryConvert(const char* inFileName,
     } else if (type == IntelHex) {
       success = ConvertIntelHexLine(buf, outFile);
     }
-    if (success == false) {
+    if (!success) {
       break;
     }
   }
