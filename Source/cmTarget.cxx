@@ -1403,7 +1403,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
     std::string mapProp = "MAP_IMPORTED_CONFIG_";
     mapProp += desired_config;
     if (const char* mapValue = this->GetProperty(mapProp)) {
-      cmSystemTools::ExpandListArgument(mapValue, mappedConfigs);
+      cmSystemTools::ExpandListArgument(mapValue, mappedConfigs, true);
     }
   }
 
@@ -1416,20 +1416,33 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   for (std::vector<std::string>::const_iterator mci = mappedConfigs.begin();
        !*loc && !*imp && mci != mappedConfigs.end(); ++mci) {
     // Look for this configuration.
-    std::string mcUpper = cmSystemTools::UpperCase(*mci);
-    std::string locProp = "IMPORTED_LOCATION_";
-    locProp += mcUpper;
-    *loc = this->GetProperty(locProp);
-    if (allowImp) {
-      std::string impProp = "IMPORTED_IMPLIB_";
-      impProp += mcUpper;
-      *imp = this->GetProperty(impProp);
-    }
+    if (mci->empty()) {
+      // An empty string in the mapping has a special meaning:
+      // look up the config-less properties.
+      *loc = this->GetProperty("IMPORTED_LOCATION");
+      if (allowImp) {
+        *imp = this->GetProperty("IMPORTED_IMPLIB");
+      }
+      // If it was found, set the suffix.
+      if (*loc || *imp) {
+        suffix = "";
+      }
+    } else {
+      std::string mcUpper = cmSystemTools::UpperCase(*mci);
+      std::string locProp = "IMPORTED_LOCATION_";
+      locProp += mcUpper;
+      *loc = this->GetProperty(locProp);
+      if (allowImp) {
+        std::string impProp = "IMPORTED_IMPLIB_";
+        impProp += mcUpper;
+        *imp = this->GetProperty(impProp);
+      }
 
-    // If it was found, use it for all properties below.
-    if (*loc || *imp) {
-      suffix = "_";
-      suffix += mcUpper;
+      // If it was found, use it for all properties below.
+      if (*loc || *imp) {
+        suffix = "_";
+        suffix += mcUpper;
+      }
     }
   }
 
