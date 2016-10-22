@@ -20,7 +20,8 @@ class cmInstalledFile;
 class cmMakefile;
 
 #define cmCPackTypeMacro(klass, superclass)                                   \
-  cmTypeMacro(klass, superclass);                                             \
+  typedef superclass Superclass;                                              \
+  const char* GetNameOfClass() CM_OVERRIDE { return #klass; }                 \
   static cmCPackGenerator* CreateGenerator() { return new klass; }            \
   class cmCPackTypeMacro_UseTrailingSemicolon
 
@@ -36,10 +37,10 @@ class cmMakefile;
  * \brief A superclass of all CPack Generators
  *
  */
-class cmCPackGenerator : public cmObject
+class cmCPackGenerator
 {
 public:
-  cmTypeMacro(cmCPackGenerator, cmObject);
+  virtual const char* GetNameOfClass() = 0;
   /**
    * If verbose then more information is printed out
    */
@@ -83,7 +84,7 @@ public:
    * Construct generator
    */
   cmCPackGenerator();
-  ~cmCPackGenerator() CM_OVERRIDE;
+  virtual ~cmCPackGenerator();
 
   //! Set and get the options
   void SetOption(const std::string& op, const char* value);
