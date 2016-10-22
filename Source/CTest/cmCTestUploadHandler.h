@@ -18,7 +18,7 @@
 class cmCTestUploadHandler : public cmCTestGenericHandler
 {
 public:
-  cmTypeMacro(cmCTestUploadHandler, cmCTestGenericHandler);
+  typedef cmCTestGenericHandler Superclass;
 
   cmCTestUploadHandler();
   ~cmCTestUploadHandler() CM_OVERRIDE {}

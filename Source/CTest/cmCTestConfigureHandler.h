@@ -15,7 +15,7 @@
 class cmCTestConfigureHandler : public cmCTestGenericHandler
 {
 public:
-  cmTypeMacro(cmCTestConfigureHandler, cmCTestGenericHandler);
+  typedef cmCTestGenericHandler Superclass;
 
   /*
    * The main entry point for this class

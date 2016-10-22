@@ -22,7 +22,7 @@ class cmake;
 class cmCTestBuildAndTestHandler : public cmCTestGenericHandler
 {
 public:
-  cmTypeMacro(cmCTestBuildAndTestHandler, cmCTestGenericHandler);
+  typedef cmCTestGenericHandler Superclass;
 
   /*
    * The main entry point for this class
