@@ -38,7 +38,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "find_path"; }
 
-  cmTypeMacro(cmFindPathCommand, cmFindBase);
   bool IncludeFileInPath;
 
 private:

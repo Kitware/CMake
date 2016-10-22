@@ -36,8 +36,6 @@ public:
   {
     return "include_regular_expression";
   }
-
-  cmTypeMacro(cmIncludeRegularExpressionCommand, cmCommand);
 };
 
 #endif

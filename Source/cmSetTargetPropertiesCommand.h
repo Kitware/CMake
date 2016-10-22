@@ -28,8 +28,6 @@ public:
   static bool SetOneTarget(const std::string& tname,
                            std::vector<std::string>& propertyPairs,
                            cmMakefile* mf);
-
-  cmTypeMacro(cmSetTargetPropertiesCommand, cmCommand);
 };
 
 #endif

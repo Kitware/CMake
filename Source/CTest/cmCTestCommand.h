@@ -26,8 +26,6 @@ public:
 
   cmCTest* CTest;
   cmCTestScriptHandler* CTestScriptHandler;
-
-  cmTypeMacro(cmCTestCommand, cmCommand);
 };
 
 #endif

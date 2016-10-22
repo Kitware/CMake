@@ -36,8 +36,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "file"; }
 
-  cmTypeMacro(cmFileCommand, cmCommand);
-
 protected:
   bool HandleRename(std::vector<std::string> const& args);
   bool HandleRemove(std::vector<std::string> const& args, bool recurse);

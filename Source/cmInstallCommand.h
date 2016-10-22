@@ -31,8 +31,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "install"; }
 
-  cmTypeMacro(cmInstallCommand, cmCommand);
-
 private:
   bool HandleScriptMode(std::vector<std::string> const& args);
   bool HandleTargetsMode(std::vector<std::string> const& args);

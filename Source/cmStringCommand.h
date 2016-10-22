@@ -39,8 +39,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "string"; }
 
-  cmTypeMacro(cmStringCommand, cmCommand);
-
 protected:
   bool HandleConfigureCommand(std::vector<std::string> const& args);
   bool HandleAsciiCommand(std::vector<std::string> const& args);

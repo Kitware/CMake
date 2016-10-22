@@ -34,8 +34,6 @@ public:
    * This determines if the command is invoked when in script mode.
    */
   bool IsScriptable() const CM_OVERRIDE { return true; }
-
-  cmTypeMacro(cmOptionCommand, cmCommand);
 };
 
 #endif

@@ -21,8 +21,6 @@ public:
                        const std::string& prop,
                        ArgumentFlags flags = NO_FLAGS);
 
-  cmTypeMacro(cmTargetPropCommandBase, cmCommand);
-
 protected:
   std::string Property;
   cmTarget* Target;

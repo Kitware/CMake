@@ -60,8 +60,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "find_package"; }
 
-  cmTypeMacro(cmFindPackageCommand, cmFindCommon);
-
 private:
   class PathLabel : public cmFindCommon::PathLabel
   {

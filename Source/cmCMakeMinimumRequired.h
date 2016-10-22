@@ -35,8 +35,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "cmake_minimum_required"; }
 
-  cmTypeMacro(cmCMakeMinimumRequired, cmCommand);
-
 private:
   std::vector<std::string> UnknownArguments;
   bool EnforceUnknownArguments();

@@ -41,8 +41,6 @@ public:
 
   bool HasFinalPass() const CM_OVERRIDE { return true; }
 
-  cmTypeMacro(cmInstallProgramsCommand, cmCommand);
-
 protected:
   std::string FindInstallSource(const char* name) const;
 

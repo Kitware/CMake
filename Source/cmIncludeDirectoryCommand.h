@@ -31,8 +31,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "include_directories"; }
 
-  cmTypeMacro(cmIncludeDirectoryCommand, cmCommand);
-
 protected:
   // used internally
   void GetIncludes(const std::string& arg, std::vector<std::string>& incs);

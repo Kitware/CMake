@@ -8,7 +8,6 @@
 class cmVariableRequiresCommand : public cmCommand
 {
 public:
-  cmTypeMacro(cmVariableRequiresCommand, cmCommand);
   cmCommand* Clone() CM_OVERRIDE { return new cmVariableRequiresCommand; }
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;

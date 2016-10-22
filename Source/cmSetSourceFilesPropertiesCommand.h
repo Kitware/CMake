@@ -28,8 +28,6 @@ public:
     return "set_source_files_properties";
   }
 
-  cmTypeMacro(cmSetSourceFilesPropertiesCommand, cmCommand);
-
   static bool RunCommand(cmMakefile* mf,
                          std::vector<std::string>::const_iterator filebeg,
                          std::vector<std::string>::const_iterator fileend,

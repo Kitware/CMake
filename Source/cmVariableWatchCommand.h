@@ -44,8 +44,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "variable_watch"; }
 
-  cmTypeMacro(cmVariableWatchCommand, cmCommand);
-
 protected:
   std::set<std::string> WatchedVariables;
 };

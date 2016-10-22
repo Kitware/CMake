@@ -32,8 +32,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "target_link_libraries"; }
 
-  cmTypeMacro(cmTargetLinkLibrariesCommand, cmCommand);
-
 private:
   void LinkLibraryTypeSpecifierWarning(int left, int right);
   static const char* LinkLibraryTypeNames[3];

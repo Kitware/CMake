@@ -34,8 +34,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "list"; }
 
-  cmTypeMacro(cmListCommand, cmCommand);
-
 protected:
   bool HandleLengthCommand(std::vector<std::string> const& args);
   bool HandleGetCommand(std::vector<std::string> const& args);

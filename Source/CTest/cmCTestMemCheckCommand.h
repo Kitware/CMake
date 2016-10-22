@@ -39,8 +39,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "ctest_memcheck"; }
 
-  cmTypeMacro(cmCTestMemCheckCommand, cmCTestTestCommand);
-
 protected:
   cmCTestGenericHandler* InitializeActualHandler() CM_OVERRIDE;
 };

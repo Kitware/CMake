@@ -66,8 +66,6 @@ public:
   // Filter the given variable definition based on policy CMP0054.
   static const char* GetDefinitionIfUnquoted(
     const cmMakefile* mf, cmExpandedCommandArgument const& argument);
-
-  cmTypeMacro(cmIfCommand, cmCommand);
 };
 
 #endif

@@ -39,8 +39,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "ctest_test"; }
 
-  cmTypeMacro(cmCTestTestCommand, cmCTestHandlerCommand);
-
 protected:
   virtual cmCTestGenericHandler* InitializeActualHandler();
   cmCTestGenericHandler* InitializeHandler() CM_OVERRIDE;

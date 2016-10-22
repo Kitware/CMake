@@ -37,8 +37,6 @@ public:
   {
     return "include_external_msproject";
   }
-
-  cmTypeMacro(cmIncludeExternalMSProjectCommand, cmCommand);
 };
 
 #endif

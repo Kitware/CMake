@@ -32,8 +32,6 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   std::string GetName() const CM_OVERRIDE { return "enable_language"; }
-
-  cmTypeMacro(cmEnableLanguageCommand, cmCommand);
 };
 
 #endif

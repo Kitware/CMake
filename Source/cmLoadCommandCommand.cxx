@@ -93,8 +93,6 @@ public:
     }
   }
 
-  cmTypeMacro(cmLoadedCommand, cmCommand);
-
   cmLoadedCommandInfo info;
 };
 

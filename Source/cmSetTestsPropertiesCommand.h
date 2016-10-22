@@ -22,8 +22,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "set_tests_properties"; }
 
-  cmTypeMacro(cmSetTestsPropertiesCommand, cmCommand);
-
   static bool SetOneTest(const std::string& tname,
                          std::vector<std::string>& propertyPairs,
                          cmMakefile* mf, std::string& errors);

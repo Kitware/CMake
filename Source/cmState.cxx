@@ -446,8 +446,7 @@ void cmState::RemoveUserDefinedCommands()
   std::vector<cmCommand*> renamedCommands;
   for (std::map<std::string, cmCommand*>::iterator j = this->Commands.begin();
        j != this->Commands.end();) {
-    if (j->second->IsA("cmMacroHelperCommand") ||
-        j->second->IsA("cmFunctionHelperCommand")) {
+    if (j->second->IsUserDefined()) {
       delete j->second;
       this->Commands.erase(j++);
     } else if (j->first != j->second->GetName()) {

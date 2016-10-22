@@ -37,8 +37,6 @@ protected:
   void FindOutputFile(const std::string& targetName,
                       cmStateEnums::TargetType targetType);
 
-  cmTypeMacro(cmCoreTryCompile, cmCommand);
-
   std::string BinaryDirectory;
   std::string OutputFile;
   std::string FindErrorMessage;

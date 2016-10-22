@@ -40,7 +40,7 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "ctest_coverage"; }
 
-  cmTypeMacro(cmCTestCoverageCommand, cmCTestHandlerCommand);
+  typedef cmCTestHandlerCommand Superclass;
 
 protected:
   cmCTestGenericHandler* InitializeHandler() CM_OVERRIDE;

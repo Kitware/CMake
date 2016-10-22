@@ -51,8 +51,6 @@ public:
   {
     return "ctest_empty_binary_directory";
   }
-
-  cmTypeMacro(cmCTestEmptyBinaryDirectoryCommand, cmCTestCommand);
 };
 
 #endif

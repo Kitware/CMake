@@ -8,7 +8,6 @@
 class cmExportLibraryDependenciesCommand : public cmCommand
 {
 public:
-  cmTypeMacro(cmExportLibraryDependenciesCommand, cmCommand);
   cmCommand* Clone() CM_OVERRIDE
   {
     return new cmExportLibraryDependenciesCommand;

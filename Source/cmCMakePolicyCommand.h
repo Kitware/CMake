@@ -36,8 +36,6 @@ public:
     */
   std::string GetName() const CM_OVERRIDE { return "cmake_policy"; }
 
-  cmTypeMacro(cmCMakePolicyCommand, cmCommand);
-
 private:
   bool HandleSetMode(std::vector<std::string> const& args);
   bool HandleGetMode(std::vector<std::string> const& args);

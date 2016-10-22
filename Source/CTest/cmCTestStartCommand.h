@@ -60,8 +60,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "ctest_start"; }
 
-  cmTypeMacro(cmCTestStartCommand, cmCTestCommand);
-
 private:
   bool InitialCheckout(std::ostream& ofs, std::string const& sourceDir);
   bool CreateNewTag;

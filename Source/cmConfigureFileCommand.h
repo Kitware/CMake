@@ -8,8 +8,6 @@
 class cmConfigureFileCommand : public cmCommand
 {
 public:
-  cmTypeMacro(cmConfigureFileCommand, cmCommand);
-
   cmCommand* Clone() CM_OVERRIDE { return new cmConfigureFileCommand; }
 
   /**

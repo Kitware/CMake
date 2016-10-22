@@ -40,8 +40,6 @@ public:
   void FinalPass() CM_OVERRIDE;
   bool HasFinalPass() const CM_OVERRIDE { return !this->IsFilesForm; }
 
-  cmTypeMacro(cmInstallFilesCommand, cmCommand);
-
 protected:
   void CreateInstallGenerator() const;
   std::string FindInstallSource(const char* name) const;

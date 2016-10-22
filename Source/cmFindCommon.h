@@ -19,7 +19,6 @@ class cmFindCommon : public cmCommand
 public:
   cmFindCommon();
   ~cmFindCommon() CM_OVERRIDE;
-  cmTypeMacro(cmFindCommon, cmCommand);
 
 protected:
   friend class cmSearchPath;
