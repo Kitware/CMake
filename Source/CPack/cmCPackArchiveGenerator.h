@@ -7,7 +7,6 @@
 
 #include "cmArchiveWrite.h"
 #include "cmCPackGenerator.h"
-#include "cmTypeMacro.h"
 
 #include <iosfwd>
 #include <string>

@@ -6,7 +6,6 @@
 #include <cmConfigure.h>
 
 #include "cmCPackGenerator.h"
-#include "cmTypeMacro.h"
 
 #include <string>
 #include <vector>

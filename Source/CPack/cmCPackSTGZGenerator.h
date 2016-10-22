@@ -7,7 +7,6 @@
 
 #include "cmCPackGenerator.h"
 #include "cmCPackTGZGenerator.h"
-#include "cmTypeMacro.h"
 
 #include <iosfwd>
 

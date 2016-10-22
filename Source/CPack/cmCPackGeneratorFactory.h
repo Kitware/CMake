@@ -5,9 +5,6 @@
 
 #include <cmConfigure.h>
 
-#include "cmObject.h"
-#include "cmTypeMacro.h"
-
 #include <map>
 #include <string>
 #include <vector>

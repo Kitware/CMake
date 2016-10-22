@@ -7,7 +7,6 @@
 
 #include "cmCPackArchiveGenerator.h"
 #include "cmCPackGenerator.h"
-#include "cmTypeMacro.h"
 
 /** \class cmCPackZIPGenerator
  * \brief A generator for ZIP files

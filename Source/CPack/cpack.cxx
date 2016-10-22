@@ -12,7 +12,6 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmTypeMacro.h"
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 

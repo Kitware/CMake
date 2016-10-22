@@ -3,6 +3,9 @@
 #ifndef cmCPackPKGGenerator_h
 #define cmCPackPKGGenerator_h
 
+#include <cmConfigure.h>
+#include <set>
+
 #include "cmCPackGenerator.h"
 
 class cmCPackComponent;

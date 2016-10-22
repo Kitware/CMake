@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "cmCommand.h"
-#include "cmTypeMacro.h"
 
 class cmDependInformation;
 class cmExecutionStatus;
