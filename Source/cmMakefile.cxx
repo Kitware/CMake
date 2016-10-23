@@ -266,7 +266,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
     pcmd->SetMakefile(this);
 
     // Decide whether to invoke the command.
-    if (pcmd->GetEnabled() && !cmSystemTools::GetFatalErrorOccured() &&
+    if (!cmSystemTools::GetFatalErrorOccured() &&
         (this->GetCMakeInstance()->GetWorkingMode() != cmake::SCRIPT_MODE ||
          pcmd->IsScriptable()))
 
