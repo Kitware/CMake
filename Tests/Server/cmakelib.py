@@ -46,11 +46,11 @@ def waitForRawMessage(cmakeCommand):
       stdoutdata += stdoutdataLine.decode('utf-8')
     else:
       break
-    begin = stdoutdata.find("[== CMake Server ==[\n")
-    end = stdoutdata.find("]== CMake Server ==]")
+    begin = stdoutdata.find('[== "CMake Server" ==[\n')
+    end = stdoutdata.find(']== "CMake Server" ==]')
 
     if (begin != -1 and end != -1):
-      begin += len("[== CMake Server ==[\n")
+      begin += len('[== "CMake Server" ==[\n')
       payload = stdoutdata[begin:end]
       if print_communication:
         print("\nSERVER>", json.loads(payload), "\n")
@@ -59,9 +59,9 @@ def waitForRawMessage(cmakeCommand):
 def writeRawData(cmakeCommand, content):
   writeRawData.counter += 1
   payload = """
-[== CMake Server ==[
+[== "CMake Server" ==[
 %s
-]== CMake Server ==]
+]== "CMake Server" ==]
 """ % content
 
   rn = ( writeRawData.counter % 2 ) == 0
