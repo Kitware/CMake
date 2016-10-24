@@ -39,8 +39,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "find_program"; }
 
-  cmTypeMacro(cmFindProgramCommand, cmFindBase);
-
 private:
   std::string FindProgram();
   std::string FindNormalProgram();

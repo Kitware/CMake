@@ -31,8 +31,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "add_custom_command"; }
 
-  cmTypeMacro(cmAddCustomCommandCommand, cmCommand);
-
 protected:
   bool CheckOutputs(const std::vector<std::string>& outputs);
 };

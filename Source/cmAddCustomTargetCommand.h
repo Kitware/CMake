@@ -31,8 +31,6 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   std::string GetName() const CM_OVERRIDE { return "add_custom_target"; }
-
-  cmTypeMacro(cmAddCustomTargetCommand, cmCommand);
 };
 
 #endif

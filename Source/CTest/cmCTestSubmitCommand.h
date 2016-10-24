@@ -55,7 +55,7 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "ctest_submit"; }
 
-  cmTypeMacro(cmCTestSubmitCommand, cmCTestHandlerCommand);
+  typedef cmCTestHandlerCommand Superclass;
 
 protected:
   cmCTestGenericHandler* InitializeHandler() CM_OVERRIDE;

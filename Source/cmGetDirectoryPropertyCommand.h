@@ -27,8 +27,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "get_directory_property"; }
 
-  cmTypeMacro(cmGetDirectoryPropertyCommand, cmCommand);
-
 private:
   void StoreResult(const std::string& variable, const char* prop);
 };

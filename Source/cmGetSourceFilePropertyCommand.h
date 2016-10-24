@@ -24,8 +24,6 @@ public:
   {
     return "get_source_file_property";
   }
-
-  cmTypeMacro(cmGetSourceFilePropertyCommand, cmCommand);
 };
 
 #endif

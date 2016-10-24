@@ -40,8 +40,6 @@ public:
     return "target_include_directories";
   }
 
-  cmTypeMacro(cmTargetIncludeDirectoriesCommand, cmTargetPropCommandBase);
-
 private:
   void HandleImportedTarget(const std::string& tgt) CM_OVERRIDE;
   void HandleMissingTarget(const std::string& name) CM_OVERRIDE;

@@ -18,7 +18,6 @@ class cmExecutionStatus;
 class cmOutputRequiredFilesCommand : public cmCommand
 {
 public:
-  cmTypeMacro(cmOutputRequiredFilesCommand, cmCommand);
   cmCommand* Clone() CM_OVERRIDE { return new cmOutputRequiredFilesCommand; }
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;

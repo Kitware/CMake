@@ -22,8 +22,6 @@ public:
    */
   cmCommand* Clone() CM_OVERRIDE { return new cmFindFileCommand; }
   std::string GetName() const CM_OVERRIDE { return "find_file"; }
-
-  cmTypeMacro(cmFindFileCommand, cmFindPathCommand);
 };
 
 #endif

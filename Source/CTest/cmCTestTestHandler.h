@@ -32,7 +32,7 @@ class cmCTestTestHandler : public cmCTestGenericHandler
   friend class cmCTestBatchTestHandler;
 
 public:
-  cmTypeMacro(cmCTestTestHandler, cmCTestGenericHandler);
+  typedef cmCTestGenericHandler Superclass;
 
   /**
    * The main entry point for this class

@@ -40,8 +40,6 @@ public:
                          std::vector<std::string>::const_iterator ait,
                          std::vector<std::string>::const_iterator aitend,
                          std::string& errors);
-
-  cmTypeMacro(cmSetDirectoryPropertiesCommand, cmCommand);
 };
 
 #endif

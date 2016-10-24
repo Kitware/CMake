@@ -15,7 +15,6 @@ class cmExecutionStatus;
 class cmBuildNameCommand : public cmCommand
 {
 public:
-  cmTypeMacro(cmBuildNameCommand, cmCommand);
   cmCommand* Clone() CM_OVERRIDE { return new cmBuildNameCommand; }
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;

@@ -23,7 +23,7 @@
 class cmCTestSubmitHandler : public cmCTestGenericHandler
 {
 public:
-  cmTypeMacro(cmCTestSubmitHandler, cmCTestGenericHandler);
+  typedef cmCTestGenericHandler Superclass;
 
   cmCTestSubmitHandler();
   ~cmCTestSubmitHandler() CM_OVERRIDE { this->LogFile = CM_NULLPTR; }

@@ -31,8 +31,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "math"; }
 
-  cmTypeMacro(cmMathCommand, cmCommand);
-
 protected:
   bool HandleExprCommand(std::vector<std::string> const& args);
 };

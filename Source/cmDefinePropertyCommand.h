@@ -22,8 +22,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "define_property"; }
 
-  cmTypeMacro(cmDefinePropertyCommand, cmCommand);
-
 private:
   std::string PropertyName;
   std::string BriefDocs;

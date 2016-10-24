@@ -29,8 +29,6 @@ public:
    */
   bool IsScriptable() const CM_OVERRIDE { return true; }
 
-  cmTypeMacro(cmSetPropertyCommand, cmCommand);
-
 private:
   std::set<std::string> Names;
   std::string PropertyName;

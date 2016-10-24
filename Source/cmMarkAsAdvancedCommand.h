@@ -37,8 +37,6 @@ public:
    * FindUnixMake.cmake used by the CTEST_BUILD command.
   */
   bool IsScriptable() const CM_OVERRIDE { return true; }
-
-  cmTypeMacro(cmMarkAsAdvancedCommand, cmCommand);
 };
 
 #endif

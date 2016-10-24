@@ -25,7 +25,7 @@ class cmXMLWriter;
 class cmCTestBuildHandler : public cmCTestGenericHandler
 {
 public:
-  cmTypeMacro(cmCTestBuildHandler, cmCTestGenericHandler);
+  typedef cmCTestGenericHandler Superclass;
 
   /*
    * The main entry point for this class

@@ -17,12 +17,9 @@ public:
   ~cmMacroHelperCommand() CM_OVERRIDE {}
 
   /**
-   * This is used to avoid including this command
-   * in documentation. This is mainly used by
-   * cmMacroHelperCommand and cmFunctionHelperCommand
-   * which cannot provide appropriate documentation.
+   * This determines if the command is defined in a cmake script.
    */
-  bool ShouldAppearInDocumentation() const CM_OVERRIDE { return false; }
+  bool IsUserDefined() const CM_OVERRIDE { return true; }
 
   /**
    * This is a virtual constructor for the command.
@@ -60,8 +57,6 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   std::string GetName() const CM_OVERRIDE { return this->Args[0]; }
-
-  cmTypeMacro(cmMacroHelperCommand, cmCommand);
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;

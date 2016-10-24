@@ -30,8 +30,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "try_run"; }
 
-  cmTypeMacro(cmTryRunCommand, cmCoreTryCompile);
-
 private:
   void RunExecutable(const std::string& runArgs,
                      std::string* runOutputContents);

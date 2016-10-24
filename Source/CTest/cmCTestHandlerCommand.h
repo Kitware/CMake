@@ -32,8 +32,6 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
 
-  cmTypeMacro(cmCTestHandlerCommand, cmCTestCommand);
-
   enum
   {
     ct_NONE,

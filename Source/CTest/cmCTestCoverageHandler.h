@@ -38,7 +38,7 @@ public:
 class cmCTestCoverageHandler : public cmCTestGenericHandler
 {
 public:
-  cmTypeMacro(cmCTestCoverageHandler, cmCTestGenericHandler);
+  typedef cmCTestGenericHandler Superclass;
 
   /*
    * The main entry point for this class

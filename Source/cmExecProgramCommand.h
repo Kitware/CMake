@@ -37,8 +37,6 @@ public:
    */
   bool IsScriptable() const CM_OVERRIDE { return true; }
 
-  cmTypeMacro(cmExecProgramCommand, cmCommand);
-
 private:
   static bool RunCommand(const char* command, std::string& output, int& retVal,
                          const char* directory = CM_NULLPTR,

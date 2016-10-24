@@ -53,8 +53,6 @@ public:
     return "cmake_host_system_information";
   }
 
-  cmTypeMacro(cmCMakeHostSystemInformationCommand, cmCommand);
-
 private:
   bool GetValue(cmsys::SystemInformation& info, std::string const& key,
                 std::string& value);

@@ -51,8 +51,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "foreach"; }
 
-  cmTypeMacro(cmForEachCommand, cmCommand);
-
 private:
   bool HandleInMode(std::vector<std::string> const& args);
 };

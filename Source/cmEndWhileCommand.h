@@ -44,8 +44,6 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   std::string GetName() const CM_OVERRIDE { return "endwhile"; }
-
-  cmTypeMacro(cmEndWhileCommand, cmCommand);
 };
 
 #endif

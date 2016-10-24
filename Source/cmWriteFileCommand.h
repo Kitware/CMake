@@ -40,8 +40,6 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   std::string GetName() const CM_OVERRIDE { return "write_file"; }
-
-  cmTypeMacro(cmWriteFileCommand, cmCommand);
 };
 
 #endif

@@ -21,8 +21,6 @@ class cmExecutionStatus;
 class cmQTWrapCPPCommand : public cmCommand
 {
 public:
-  cmTypeMacro(cmQTWrapCPPCommand, cmCommand);
-
   /**
    * This is a virtual constructor for the command.
    */

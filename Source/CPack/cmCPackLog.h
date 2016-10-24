@@ -23,13 +23,11 @@
  * \brief A container for CPack generators
  *
  */
-class cmCPackLog : public cmObject
+class cmCPackLog
 {
 public:
-  cmTypeMacro(cmCPackLog, cmObject);
-
   cmCPackLog();
-  ~cmCPackLog() CM_OVERRIDE;
+  ~cmCPackLog();
 
   enum __log_tags
   {

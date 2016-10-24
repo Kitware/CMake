@@ -23,7 +23,7 @@ class cmCPackComponent;
 class cmCPackArchiveGenerator : public cmCPackGenerator
 {
 public:
-  cmTypeMacro(cmCPackArchiveGenerator, cmCPackGenerator);
+  typedef cmCPackGenerator Superclass;
 
   /**
    * Construct generator

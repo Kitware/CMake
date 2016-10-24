@@ -38,8 +38,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "find_library"; }
 
-  cmTypeMacro(cmFindLibraryCommand, cmFindBase);
-
 protected:
   void AddArchitecturePaths(const char* suffix);
   void AddArchitecturePath(std::string const& dir,

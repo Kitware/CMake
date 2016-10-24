@@ -59,8 +59,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "subdirs"; }
 
-  cmTypeMacro(cmCTestSubdirCommand, cmCommand);
-
   cmCTestTestHandler* TestHandler;
 };
 
@@ -140,8 +138,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "add_subdirectory"; }
 
-  cmTypeMacro(cmCTestAddSubdirectoryCommand, cmCommand);
-
   cmCTestTestHandler* TestHandler;
 };
 
@@ -214,8 +210,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "add_test"; }
 
-  cmTypeMacro(cmCTestAddTestCommand, cmCommand);
-
   cmCTestTestHandler* TestHandler;
 };
 
@@ -253,8 +247,6 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   std::string GetName() const CM_OVERRIDE { return "set_tests_properties"; }
-
-  cmTypeMacro(cmCTestSetTestsPropertiesCommand, cmCommand);
 
   cmCTestTestHandler* TestHandler;
 };

@@ -20,7 +20,6 @@ class cmExecutionStatus;
 class cmQTWrapUICommand : public cmCommand
 {
 public:
-  cmTypeMacro(cmQTWrapUICommand, cmCommand);
   /**
    * This is a virtual constructor for the command.
    */

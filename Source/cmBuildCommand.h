@@ -40,8 +40,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "build_command"; }
 
-  cmTypeMacro(cmBuildCommand, cmCommand);
-
 private:
   bool IgnoreErrors() const;
 };

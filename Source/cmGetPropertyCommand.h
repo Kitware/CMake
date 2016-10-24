@@ -29,8 +29,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "get_property"; }
 
-  cmTypeMacro(cmGetPropertyCommand, cmCommand);
-
 private:
   enum OutType
   {

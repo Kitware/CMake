@@ -29,8 +29,6 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   std::string GetName() const CM_OVERRIDE { return "create_test_sourcelist"; }
-
-  cmTypeMacro(cmCreateTestSourceList, cmCommand);
 };
 
 #endif

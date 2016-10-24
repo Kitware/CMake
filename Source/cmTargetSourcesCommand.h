@@ -34,8 +34,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "target_sources"; }
 
-  cmTypeMacro(cmTargetSourcesCommand, cmTargetPropCommandBase);
-
 private:
   void HandleImportedTarget(const std::string& tgt) CM_OVERRIDE;
   void HandleMissingTarget(const std::string& name) CM_OVERRIDE;

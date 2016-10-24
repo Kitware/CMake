@@ -29,8 +29,6 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   std::string GetName() const CM_OVERRIDE { return "try_compile"; }
-
-  cmTypeMacro(cmTryCompileCommand, cmCoreTryCompile);
 };
 
 #endif

@@ -38,8 +38,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "load_cache"; }
 
-  cmTypeMacro(cmLoadCacheCommand, cmCommand);
-
 protected:
   std::set<std::string> VariablesToRead;
   std::string Prefix;

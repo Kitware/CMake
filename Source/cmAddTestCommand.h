@@ -30,8 +30,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "add_test"; }
 
-  cmTypeMacro(cmAddTestCommand, cmCommand);
-
 private:
   bool HandleNameMode(std::vector<std::string> const& args);
 };
