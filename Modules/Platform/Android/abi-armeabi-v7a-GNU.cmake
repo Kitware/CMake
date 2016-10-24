@@ -17,7 +17,6 @@ endif()
 
 string(APPEND _ANDROID_ABI_INIT_CFLAGS
   " -mfloat-abi=softfp"
-  " -fpic"
   )
 
 string(APPEND _ANDROID_ABI_INIT_LDFLAGS
