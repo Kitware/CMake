@@ -27,6 +27,7 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmGraphVizWriter.h"
 #include "cmVariableWatch.h"
+#include "cm_unordered_map.hxx"
 
 #include <cm_jsoncpp_writer.h>
 #endif
@@ -122,11 +123,7 @@ class cmCommand;
 namespace {
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#ifdef CMake_HAVE_CXX_UNORDERED_MAP
-typedef std::unordered_map<std::string, Json::Value> JsonValueMapType;
-#else
-typedef cmsys::hash_map<std::string, Json::Value> JsonValueMapType;
-#endif
+typedef CM_UNORDERED_MAP<std::string, Json::Value> JsonValueMapType;
 #endif
 
 } // namespace

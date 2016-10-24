@@ -12,6 +12,7 @@
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cm_codecvt.hxx"
+#include "cm_unordered_map.hxx"
 
 #include <iosfwd>
 #include <map>
@@ -22,11 +23,6 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmFileLockPool.h"
-#ifdef CMake_HAVE_CXX_UNORDERED_MAP
-#include <unordered_map>
-#else
-#include <cmsys/hash_map.hxx>
-#endif
 #endif
 
 class cmCustomCommandLines;
@@ -468,22 +464,9 @@ protected:
   const char* GetPredefinedTargetsFolder();
 
 private:
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#ifdef CMake_HAVE_CXX_UNORDERED_MAP
-  typedef std::unordered_map<std::string, cmTarget*> TargetMap;
-  typedef std::unordered_map<std::string, cmGeneratorTarget*>
-    GeneratorTargetMap;
-  typedef std::unordered_map<std::string, cmMakefile*> MakefileMap;
-#else
-  typedef cmsys::hash_map<std::string, cmTarget*> TargetMap;
-  typedef cmsys::hash_map<std::string, cmGeneratorTarget*> GeneratorTargetMap;
-  typedef cmsys::hash_map<std::string, cmMakefile*> MakefileMap;
-#endif
-#else
-  typedef std::map<std::string, cmTarget*> TargetMap;
-  typedef std::map<std::string, cmGeneratorTarget*> GeneratorTargetMap;
-  typedef std::map<std::string, cmMakefile*> MakefileMap;
-#endif
+  typedef CM_UNORDERED_MAP<std::string, cmTarget*> TargetMap;
+  typedef CM_UNORDERED_MAP<std::string, cmGeneratorTarget*> GeneratorTargetMap;
+  typedef CM_UNORDERED_MAP<std::string, cmMakefile*> MakefileMap;
   // Map efficiently from target name to cmTarget instance.
   // Do not use this structure for looping over all targets.
   // It contains both normal and globally visible imported targets.
