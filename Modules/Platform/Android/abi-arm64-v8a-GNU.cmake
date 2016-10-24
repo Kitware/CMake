@@ -1,7 +1,4 @@
 # <ndk>/build/core/toolchains/aarch64-linux-android-4.9/setup.mk
-string(APPEND _ANDROID_ABI_INIT_CFLAGS
-  " -fpic"
-  )
 
 # Suppress -Wl,-z,nocopyreloc flag on arm64-v8a
 set(_ANDROID_ABI_INIT_EXE_LDFLAGS_NO_nocopyreloc 1)
