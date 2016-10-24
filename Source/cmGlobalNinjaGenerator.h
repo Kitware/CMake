@@ -234,7 +234,6 @@ public:
   }
 
   std::string ConvertToNinjaPath(const std::string& path);
-  std::string ConvertToNinjaFolderRule(const std::string& path);
 
   struct MapToNinjaPathImpl
   {

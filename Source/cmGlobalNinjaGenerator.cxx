@@ -843,20 +843,6 @@ std::string cmGlobalNinjaGenerator::ConvertToNinjaPath(const std::string& path)
   return convPath;
 }
 
-std::string cmGlobalNinjaGenerator::ConvertToNinjaFolderRule(
-  const std::string& path)
-{
-  cmLocalNinjaGenerator* ng =
-    static_cast<cmLocalNinjaGenerator*>(this->LocalGenerators[0]);
-  std::string convPath = ng->ConvertToRelativePath(
-    this->LocalGenerators[0]->GetState()->GetSourceDirectory(), path + "/all");
-  convPath = this->NinjaOutputPath(convPath);
-#ifdef _WIN32
-  std::replace(convPath.begin(), convPath.end(), '/', '\\');
-#endif
-  return convPath;
-}
-
 void cmGlobalNinjaGenerator::AddCXXCompileCommand(
   const std::string& commandLine, const std::string& sourceFile)
 {
@@ -1083,11 +1069,11 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
          this->LocalGenerators.begin();
        lgi != this->LocalGenerators.end(); ++lgi) {
     cmLocalGenerator const* lg = *lgi;
-    const std::string currentSourceFolder(
-      lg->GetStateSnapshot().GetDirectory().GetCurrentSource());
+    const std::string currentBinaryFolder(
+      lg->GetStateSnapshot().GetDirectory().GetCurrentBinary());
     // The directory-level rule should depend on the target-level rules
     // for all targets in the directory.
-    targetsPerFolder[currentSourceFolder] = cmNinjaDeps();
+    targetsPerFolder[currentBinaryFolder] = cmNinjaDeps();
     for (std::vector<cmGeneratorTarget*>::const_iterator ti =
            lg->GetGeneratorTargets().begin();
          ti != lg->GetGeneratorTargets().end(); ++ti) {
@@ -1098,7 +1084,7 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
            type == cmState::MODULE_LIBRARY ||
            type == cmState::OBJECT_LIBRARY || type == cmState::UTILITY) &&
           !gt->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
-        targetsPerFolder[currentSourceFolder].push_back(gt->GetName());
+        targetsPerFolder[currentBinaryFolder].push_back(gt->GetName());
       }
     }
 
@@ -1109,28 +1095,30 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
     for (std::vector<cmState::Snapshot>::const_iterator stateIt =
            children.begin();
          stateIt != children.end(); ++stateIt) {
-      targetsPerFolder[currentSourceFolder].push_back(
-        this->ConvertToNinjaFolderRule(
-          stateIt->GetDirectory().GetCurrentSource()));
+      std::string const currentBinaryDir =
+        stateIt->GetDirectory().GetCurrentBinary();
+
+      targetsPerFolder[currentBinaryFolder].push_back(
+        this->ConvertToNinjaPath(currentBinaryDir + "/all"));
     }
   }
 
-  std::string const rootSourceDir =
-    this->LocalGenerators[0]->GetSourceDirectory();
+  std::string const rootBinaryDir =
+    this->LocalGenerators[0]->GetBinaryDirectory();
   for (std::map<std::string, cmNinjaDeps>::const_iterator it =
          targetsPerFolder.begin();
        it != targetsPerFolder.end(); ++it) {
     cmGlobalNinjaGenerator::WriteDivider(os);
-    std::string const& currentSourceDir = it->first;
+    std::string const& currentBinaryDir = it->first;
 
-    // Do not generate a rule for the root source dir.
-    if (rootSourceDir.length() >= currentSourceDir.length()) {
+    // Do not generate a rule for the root binary dir.
+    if (rootBinaryDir.length() >= currentBinaryDir.length()) {
       continue;
     }
 
-    std::string const comment = "Folder: " + currentSourceDir;
+    std::string const comment = "Folder: " + currentBinaryDir;
     cmNinjaDeps output(1);
-    output.push_back(this->ConvertToNinjaFolderRule(currentSourceDir));
+    output.push_back(this->ConvertToNinjaPath(currentBinaryDir + "/all"));
 
     this->WritePhonyBuild(os, comment, output, it->second);
   }
