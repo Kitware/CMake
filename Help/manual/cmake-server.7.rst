@@ -250,7 +250,9 @@ This is the only message ever sent by the server that is not of type "reply",
 
 It will contain "supportedProtocolVersions" with an array of server protocol
 versions supported by the cmake server. These are JSON objects with "major" and
-"minor" keys containing non-negative integer values.
+"minor" keys containing non-negative integer values. Some versions may be marked
+as experimental. These will contain the "isExperimental" key set to true. Enabling
+these requires a special command line argument when starting the cmake server mode.
 
 Example::
 
@@ -403,7 +405,7 @@ CMake will reply like this (after reporting progress for some time)::
 Type "compute"
 ^^^^^^^^^^^^^^
 
-This requist will generate build system files in the build directory and
+This request will generate build system files in the build directory and
 is only available after a project was successfully "configure"d.
 
 Example::
@@ -426,8 +428,19 @@ The "codemodel" request can be used after a project was "compute"d successfully.
 
 It will list the complete project structure as it is known to cmake.
 
-The reply will contain a key "projects", which will contain a list of
-project objects, one for each (sub-)project defined in the cmake build system.
+The reply will contain a key "configurations", which will contain a list of
+configuration objects. Configuration objects are used to destinquish between
+different configurations the build directory might have enabled. While most
+generators only support one configuration, others might support several.
+
+Each configuration object can have the following keys:
+
+"name"
+  contains the name of the configuration. The name may be empty.
+"projects"
+  contains a list of project objects, one for each build project.
+
+Project objects define one (sub-)project defined in the cmake build system.
 
 Each project object can have the following keys:
 
@@ -437,19 +450,8 @@ Each project object can have the following keys:
   contains the current source directory
 "buildDirectory"
   contains the current build directory.
-"configurations"
-  contains a list of configuration objects.
-
-Configuration objects are used to destinquish between different
-configurations the build directory might have enabled. While most generators
-only support one configuration, others support several.
-
-Each configuration object can have the following keys:
-
-"name"
-  contains the name of the configuration. The name may be empty.
 "targets"
-  contains a list of target objects, one for each build target.
+  contains a list of build system target objects.
 
 Target objects define individual build targets for a certain configuration.
 
@@ -520,87 +522,52 @@ sourceDirectory of the target.
 Example::
 
   [== CMake Server ==[
-  {"type":"project"}
+  {"type":"codemodel"}
   ]== CMake Server ==]
 
 CMake will reply::
 
   [== CMake Server ==[
   {
-    "cookie":"",
-    "type":"reply",
-    "inReplyTo":"project",
-
-    "projects":
-    [
+    "configurations": [
       {
-        "name":"CMAKE_FORM",
-        "sourceDirectory":"/home/code/src/cmake/Source/CursesDialog/form"
-        "buildDirectory":"/tmp/cmake-build-test/Source/CursesDialog/form",
-        "configurations":
-        [
+        "name": "",
+        "projects": [
           {
-            "name":"",
-            "targets":
-            [
+            "buildDirectory": "/tmp/build/Source/CursesDialog/form",
+            "name": "CMAKE_FORM",
+            "sourceDirectory": "/home/code/src/cmake/Source/CursesDialog/form",
+            "targets": [
               {
-                "artifactDirectory":"/tmp/cmake/Source/CursesDialog/form",
-                "fileGroups":
-                [
+                "artifacts": [ "/tmp/build/Source/CursesDialog/form/libcmForm.a" ],
+                "buildDirectory": "/tmp/build/Source/CursesDialog/form",
+                "fileGroups": [
                   {
-                    "compileFlags":"  -std=gnu11",
-                    "defines":
-                    [
-                      "SOMETHING=1",
-                      "LIBARCHIVE_STATIC"
-                    ],
-                    "includePath":
-                    [
-                      { "path":"/tmp/cmake-build-test/Utilities" },
-                      { "isSystem": true, "path":"/usr/include/something" },
-                      ...
-                    ]
-                    "language":"C",
-                    "sources":
-                    [
-                      "fld_arg.c",
-                      ...
-                      "fty_regex.c"
-                    ]
+                    "compileFlags": "  -std=gnu11",
+                    "defines": [ "CURL_STATICLIB", "LIBARCHIVE_STATIC" ],
+                    "includePath": [ { "path": "/tmp/build/Utilities" }, <...> ],
+                    "isGenerated": false,
+                    "language": "C",
+                    "sources": [ "fld_arg.c", <...> ]
                   }
                 ],
-                "fullName":"libcmForm.a",
-                "linkerLanguage":"C",
-                "name":"cmForm",
-                "type":"STATIC_LIBRARY"
+                "fullName": "libcmForm.a",
+                "linkerLanguage": "C",
+                "name": "cmForm",
+                "sourceDirectory": "/home/code/src/cmake/Source/CursesDialog/form",
+                "type": "STATIC_LIBRARY"
               }
             ]
-          }
-        ],
-      },
-      ...
-    ]
+          },
+          <...>
+        ]
+      }
+    ],
+    "cookie": "",
+    "inReplyTo": "codemodel",
+    "type": "reply"
   }
   ]== CMake Server ==]
-
-The output can be tailored to the specific needs via parameter passed when
-requesting "project" information.
-
-You can have a "depth" key, which accepts "project", "configuration" and
-"target" as string values. These cause the output to be trimmed at the
-appropriate depth of the output tree.
-
-You can also set "configurations" to an array of strings with configuration
-names to list. This will cause any configuration that is not listed to be
-trimmed from the output.
-
-Generated files can be included in the listing by setting "includeGeneratedFiles"
-to "true". This setting defaults to "false", so generated files are not
-listed by default.
-
-Finally you can limit the target types that are going to be listed. This is
-done by providing a list of target types as an array of strings to the
-"targetTypes" key.
 
 
 Type "cmakeInputs"
