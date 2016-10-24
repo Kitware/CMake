@@ -3,7 +3,14 @@
 #ifndef cmAddCompileOptionsCommand_h
 #define cmAddCompileOptionsCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
 
 class cmAddCompileOptionsCommand : public cmCommand
 {

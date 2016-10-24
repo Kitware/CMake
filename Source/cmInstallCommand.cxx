@@ -3,12 +3,14 @@
 #include "cmInstallCommand.h"
 
 #include "cmExportSet.h"
+#include "cmGlobalGenerator.h"
 #include "cmInstallCommandArguments.h"
 #include "cmInstallDirectoryGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmSystemTools.h"
 #include "cmTargetExport.h"
 
 #include <cmsys/Glob.hxx>

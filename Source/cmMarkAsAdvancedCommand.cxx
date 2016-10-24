@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMarkAsAdvancedCommand.h"
 
+#include "cmState.h"
+#include "cmSystemTools.h"
+
 // cmMarkAsAdvancedCommand
 bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& args,
                                           cmExecutionStatus&)

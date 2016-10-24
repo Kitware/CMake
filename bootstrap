@@ -240,93 +240,177 @@ CMAKE_UNUSED_SOURCES="\
 "
 
 CMAKE_CXX_SOURCES="\
-  cmake  \
-  cmakemain \
-  cmcmd  \
+  cmAddCustomCommandCommand \
+  cmAddCustomTargetCommand \
+  cmAddDefinitionsCommand \
+  cmAddDependenciesCommand \
+  cmAddExecutableCommand \
+  cmAddLibraryCommand \
+  cmAddSubDirectoryCommand \
+  cmAddTestCommand \
+  cmBreakCommand \
+  cmBuildCommand \
+  cmCMakeMinimumRequired \
+  cmCMakePolicyCommand \
+  cmCPackPropertiesGenerator \
+  cmCacheManager \
+  cmCommand \
   cmCommandArgumentLexer \
   cmCommandArgumentParser \
   cmCommandArgumentParserHelper \
+  cmCommandArgumentsHelper \
+  cmCommands \
   cmCommonTargetGenerator \
-  cmCPackPropertiesGenerator \
+  cmComputeComponentGraph \
+  cmComputeLinkDepends \
+  cmComputeLinkInformation \
+  cmComputeTargetDepends \
+  cmConditionEvaluator \
+  cmConfigureFileCommand \
+  cmContinueCommand \
+  cmCoreTryCompile \
+  cmCreateTestSourceList \
+  cmCustomCommand \
+  cmCustomCommandGenerator \
+  cmDefinePropertyCommand \
   cmDefinitions \
   cmDepends \
   cmDependsC \
   cmDocumentationFormatter \
-  cmPolicies \
-  cmProperty \
-  cmPropertyMap \
-  cmPropertyDefinition \
-  cmPropertyDefinitionMap \
-  cmMakefile \
-  cmMessenger \
+  cmElseCommand \
+  cmEnableLanguageCommand \
+  cmEnableTestingCommand \
+  cmEndForEachCommand \
+  cmEndFunctionCommand \
+  cmEndIfCommand \
+  cmEndMacroCommand \
+  cmEndWhileCommand \
+  cmExecProgramCommand \
+  cmExecuteProcessCommand \
+  cmExpandedCommandArgument \
   cmExportBuildFileGenerator \
   cmExportFileGenerator \
   cmExportInstallFileGenerator \
-  cmExportTryCompileFileGenerator \
   cmExportSet \
   cmExportSetMap \
+  cmExportTryCompileFileGenerator \
+  cmExprLexer \
+  cmExprParser \
+  cmExprParserHelper \
   cmExternalMakefileProjectGenerator \
-  cmGeneratorExpressionEvaluationFile \
+  cmFileCommand \
+  cmFileTimeComparison \
+  cmFindBase \
+  cmFindCommon \
+  cmFindFileCommand \
+  cmFindLibraryCommand \
+  cmFindPackageCommand \
+  cmFindPathCommand \
+  cmFindProgramCommand \
+  cmForEachCommand \
+  cmFunctionCommand \
   cmGeneratedFileStream \
-  cmGeneratorTarget \
+  cmGeneratorExpression \
   cmGeneratorExpressionContext \
   cmGeneratorExpressionDAGChecker \
+  cmGeneratorExpressionEvaluationFile \
   cmGeneratorExpressionEvaluator \
   cmGeneratorExpressionLexer \
   cmGeneratorExpressionNode \
   cmGeneratorExpressionParser \
-  cmGeneratorExpression \
+  cmGeneratorTarget \
+  cmGetCMakePropertyCommand \
+  cmGetDirectoryPropertyCommand \
+  cmGetFilenameComponentCommand \
+  cmGetPropertyCommand \
+  cmGetSourceFilePropertyCommand \
+  cmGetTargetPropertyCommand \
+  cmGetTestPropertyCommand \
   cmGlobalCommonGenerator \
   cmGlobalGenerator \
+  cmGlobalUnixMakefileGenerator3 \
+  cmHexFileConverter \
+  cmIfCommand \
+  cmIncludeCommand \
+  cmIncludeDirectoryCommand \
+  cmIncludeRegularExpressionCommand \
+  cmInstallCommand \
+  cmInstallCommandArguments \
   cmInstallDirectoryGenerator \
-  cmLocalCommonGenerator \
-  cmLocalGenerator \
-  cmRulePlaceholderExpander \
-  cmInstalledFile \
-  cmInstallGenerator \
   cmInstallExportGenerator \
+  cmInstallFilesCommand \
   cmInstallFilesGenerator \
+  cmInstallGenerator \
   cmInstallScriptGenerator \
   cmInstallTargetGenerator \
+  cmInstallTargetsCommand \
+  cmInstalledFile \
+  cmLinkDirectoriesCommand \
+  cmLinkLineComputer \
+  cmListCommand \
+  cmListFileCache \
+  cmLocalCommonGenerator \
+  cmLocalGenerator \
+  cmLocalUnixMakefileGenerator3 \
+  cmMSVC60LinkLineComputer \
+  cmMacroCommand \
+  cmMakeDirectoryCommand \
+  cmMakefile \
+  cmMakefileExecutableTargetGenerator \
+  cmMakefileLibraryTargetGenerator \
+  cmMakefileTargetGenerator \
+  cmMakefileUtilityTargetGenerator \
+  cmMarkAsAdvancedCommand \
+  cmMathCommand \
+  cmMessageCommand \
+  cmMessenger \
+  cmNewLineStyle \
+  cmOSXBundleGenerator \
+  cmOptionCommand \
+  cmOrderDirectories \
+  cmOutputConverter \
+  cmParseArgumentsCommand \
+  cmPathLabel \
+  cmPolicies \
+  cmProjectCommand \
+  cmProperty \
+  cmPropertyDefinition \
+  cmPropertyDefinitionMap \
+  cmPropertyMap \
+  cmReturnCommand \
+  cmRulePlaceholderExpander \
   cmScriptGenerator \
+  cmSearchPath \
+  cmSeparateArgumentsCommand \
+  cmSetCommand \
+  cmSetDirectoryPropertiesCommand \
+  cmSetPropertyCommand \
+  cmSetSourceFilesPropertiesCommand \
+  cmSetTargetPropertiesCommand \
+  cmSetTestsPropertiesCommand \
+  cmSiteNameCommand \
   cmSourceFile \
   cmSourceFileLocation \
   cmState \
   cmStateDirectory \
   cmStateSnapshot \
+  cmStringCommand \
+  cmSubdirCommand \
   cmSystemTools \
-  cmTestGenerator \
-  cmVersion \
-  cmFileTimeComparison \
-  cmGlobalUnixMakefileGenerator3 \
-  cmLocalUnixMakefileGenerator3 \
-  cmLinkLineComputer \
-  cmMSVC60LinkLineComputer \
-  cmMakefileExecutableTargetGenerator \
-  cmMakefileLibraryTargetGenerator \
-  cmMakefileTargetGenerator \
-  cmMakefileUtilityTargetGenerator \
-  cmOutputConverter \
-  cmOSXBundleGenerator \
-  cmNewLineStyle \
-  cmBootstrapCommands1 \
-  cmBootstrapCommands2 \
-  cmCommandsForBootstrap \
   cmTarget \
+  cmTargetLinkLibrariesCommand \
   cmTargetPropertyComputer \
   cmTest \
-  cmCustomCommand \
-  cmCustomCommandGenerator \
-  cmCacheManager \
-  cmListFileCache \
-  cmComputeLinkDepends \
-  cmComputeLinkInformation \
-  cmOrderDirectories \
-  cmComputeTargetDepends \
-  cmComputeComponentGraph \
-  cmExprLexer \
-  cmExprParser \
-  cmExprParserHelper \
+  cmTestGenerator \
+  cmTimestamp \
+  cmTryCompileCommand \
+  cmTryRunCommand \
+  cmUnsetCommand \
+  cmVersion \
+  cmWhileCommand \
+  cmake  \
+  cmakemain \
+  cmcmd  \
 "
 
 if ${cmake_system_mingw}; then
@@ -1321,16 +1405,6 @@ objs=""
 for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}; do
   objs="${objs} ${a}.o"
 done
-
-# Generate dependencies for cmBootstrapCommands1.cxx
-for file in `grep "#include.*cm[^.]*.cxx" "${cmake_source_dir}/Source/cmBootstrapCommands1.cxx" | sed "s/.* \"\(.*\)\"/\1/"`; do
-  cmBootstrapCommands1Deps="${cmBootstrapCommands1Deps} `cmake_escape "${cmake_source_dir}/Source/$file"`"
-done
-cmBootstrapCommands1Deps=`echo $cmBootstrapCommands1Deps`
-for file in `grep "#include.*cm[^.]*.cxx" "${cmake_source_dir}/Source/cmBootstrapCommands2.cxx" | sed "s/.* \"\(.*\)\"/\1/"`; do
-  cmBootstrapCommands2Deps="${cmBootstrapCommands2Deps} `cmake_escape "${cmake_source_dir}/Source/$file"`"
-done
-cmBootstrapCommands2Deps=`echo $cmBootstrapCommands2Deps`
 
 if [ "x${cmake_ansi_cxx_flags}" != "x" ]; then
   cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags}"

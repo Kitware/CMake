@@ -2,7 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetCompileDefinitionsCommand.h"
 
+#include <sstream>
+
 #include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmTarget.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 bool cmTargetCompileDefinitionsCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)

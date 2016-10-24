@@ -4,9 +4,12 @@
 
 #include "cmAlgorithms.h"
 #include "cmState.h"
+#include "cmVersion.h"
+
 #include <cmSystemTools.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Encoding.hxx>
+#include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -670,8 +673,8 @@ bool cmFindPackageCommand::HandlePackageMode()
   bool configFileSetFOUNDFalse = false;
 
   if (fileFound) {
-    if ((this->Makefile->IsDefinitionSet(foundVar)) &&
-        (this->Makefile->IsOn(foundVar) == false)) {
+    if (this->Makefile->IsDefinitionSet(foundVar) &&
+        !this->Makefile->IsOn(foundVar)) {
       // by removing Foo_FOUND here if it is FALSE, we don't really change
       // the situation for the Config file which is about to be included,
       // but we make it possible to detect later on whether the Config file
@@ -690,8 +693,8 @@ bool cmFindPackageCommand::HandlePackageMode()
       found = true;
 
       // Check whether the Config file has set Foo_FOUND to FALSE:
-      if ((this->Makefile->IsDefinitionSet(foundVar)) &&
-          (this->Makefile->IsOn(foundVar) == false)) {
+      if (this->Makefile->IsDefinitionSet(foundVar) &&
+          !this->Makefile->IsOn(foundVar)) {
         // we get here if the Config file has set Foo_FOUND actively to FALSE
         found = false;
         configFileSetFOUNDFalse = true;
@@ -1413,8 +1416,7 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   // Look for foo-config-version.cmake
   std::string version_file = version_file_base;
   version_file += "-version.cmake";
-  if ((haveResult == false) &&
-      (cmSystemTools::FileExists(version_file.c_str(), true))) {
+  if (!haveResult && cmSystemTools::FileExists(version_file.c_str(), true)) {
     result = this->CheckVersionFile(version_file, version);
     haveResult = true;
   }
@@ -1422,14 +1424,13 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   // Look for fooConfigVersion.cmake
   version_file = version_file_base;
   version_file += "Version.cmake";
-  if ((haveResult == false) &&
-      (cmSystemTools::FileExists(version_file.c_str(), true))) {
+  if (!haveResult && cmSystemTools::FileExists(version_file.c_str(), true)) {
     result = this->CheckVersionFile(version_file, version);
     haveResult = true;
   }
 
   // If no version was requested a versionless package is acceptable.
-  if ((haveResult == false) && (this->Version.empty())) {
+  if (!haveResult && this->Version.empty()) {
     result = true;
   }
 

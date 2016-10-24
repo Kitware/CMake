@@ -3,6 +3,7 @@
 #include "cmMessageCommand.h"
 
 #include "cmMessenger.h"
+#include "cmSystemTools.h"
 
 // cmLibraryCommand
 bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,

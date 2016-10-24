@@ -3,7 +3,14 @@
 #ifndef cmAuxSourceDirectoryCommand_h
 #define cmAuxSourceDirectoryCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
 
 /** \class cmAuxSourceDirectoryCommand
  * \brief Specify auxiliary source code directories.

@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLinkDirectoriesCommand.h"
 
+#include "cmSystemTools.h"
+
 // cmLinkDirectoriesCommand
 bool cmLinkDirectoriesCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)

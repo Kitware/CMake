@@ -2449,18 +2449,14 @@ public:
   {
   }
 
-  ~cURLEasyGuard(void)
+  ~cURLEasyGuard()
   {
     if (this->Easy) {
       ::curl_easy_cleanup(this->Easy);
     }
   }
 
-  inline void release(void)
-  {
-    this->Easy = CM_NULLPTR;
-    return;
-  }
+  void release() { this->Easy = CM_NULLPTR; }
 
 private:
   ::CURL* Easy;

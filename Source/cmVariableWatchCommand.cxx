@@ -2,7 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVariableWatchCommand.h"
 
+#include <sstream>
+
+#include "cmExecutionStatus.h"
+#include "cmListFileCache.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
 #include "cmVariableWatch.h"
+#include "cmake.h"
 
 struct cmVariableWatchCallbackData
 {

@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindCommon.h"
 
+#include "cmSystemTools.h"
+
 #include <algorithm>
 #include <functional>
 

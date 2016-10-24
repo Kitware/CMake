@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSubdirCommand.h"
 
+#include "cmSystemTools.h"
+
 // cmSubdirCommand
 bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args,
                                   cmExecutionStatus&)

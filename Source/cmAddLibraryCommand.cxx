@@ -2,8 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddLibraryCommand.h"
 
+#include "cmGlobalGenerator.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
 
 // cmLibraryCommand
@@ -268,8 +270,8 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
     yet its linker language. */
   if ((type == cmStateEnums::SHARED_LIBRARY ||
        type == cmStateEnums::MODULE_LIBRARY) &&
-      (this->Makefile->GetState()->GetGlobalPropertyAsBool(
-         "TARGET_SUPPORTS_SHARED_LIBS") == false)) {
+      !this->Makefile->GetState()->GetGlobalPropertyAsBool(
+        "TARGET_SUPPORTS_SHARED_LIBS")) {
     std::ostringstream w;
     w << "ADD_LIBRARY called with "
       << (type == cmStateEnums::SHARED_LIBRARY ? "SHARED" : "MODULE")

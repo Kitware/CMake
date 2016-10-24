@@ -5,16 +5,23 @@
 #include "cmCPluginAPI.cxx"
 #include "cmCPluginAPI.h"
 #include "cmDynamicLoader.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
 
-#include <cmsys/DynamicLoader.hxx>
+class cmExecutionStatus;
 
+#include <signal.h>
+#include <sstream>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __QNX__
 #include <malloc.h> /* for malloc/free on QNX */
 #endif
 
-#include <signal.h>
 extern "C" void TrapsForSignalsCFunction(int sig);
 
 // a class for loadabple commands
@@ -57,7 +64,7 @@ public:
   void FinalPass() CM_OVERRIDE;
   bool HasFinalPass() const CM_OVERRIDE
   {
-    return this->info.FinalPass ? true : false;
+    return this->info.FinalPass != CM_NULLPTR;
   }
 
   /**

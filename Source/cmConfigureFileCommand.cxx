@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmConfigureFileCommand.h"
 
+#include "cmSystemTools.h"
+
 #include <cmsys/RegularExpression.hxx>
 
 // cmConfigureFileCommand

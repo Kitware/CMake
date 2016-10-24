@@ -3,7 +3,14 @@
 #ifndef cmSourceGroupCommand_h
 #define cmSourceGroupCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
 
 /** \class cmSourceGroupCommand
  * \brief Adds a cmSourceGroup to the cmMakefile.

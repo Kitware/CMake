@@ -3,9 +3,14 @@
 #ifndef cmQTWrapUICommand_h
 #define cmQTWrapUICommand_h
 
-#include "cmCommand.h"
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
 
-#include "cmSourceFile.h"
+#include "cmCommand.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
 
 /** \class cmQTWrapUICommand
  * \brief Create .h and .cxx files rules for Qt user interfaces files

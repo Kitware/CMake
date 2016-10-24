@@ -3,6 +3,7 @@
 #include "cmStringCommand.h"
 
 #include "cmCryptoHash.h"
+#include "cmSystemTools.h"
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/SystemTools.hxx>

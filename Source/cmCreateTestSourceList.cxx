@@ -3,6 +3,7 @@
 #include "cmCreateTestSourceList.h"
 
 #include "cmSourceFile.h"
+#include "cmSystemTools.h"
 
 // cmCreateTestSourceList
 bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,

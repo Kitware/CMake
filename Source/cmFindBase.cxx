@@ -5,6 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmSystemTools.h"
 
 cmFindBase::cmFindBase()
 {
@@ -301,7 +302,7 @@ bool cmFindBase::CheckForVariableInCache()
     cmState* state = this->Makefile->GetState();
     const char* cacheEntry = state->GetCacheEntryValue(this->VariableName);
     bool found = !cmSystemTools::IsNOTFOUND(cacheValue);
-    bool cached = cacheEntry ? true : false;
+    bool cached = cacheEntry != CM_NULLPTR;
     if (found) {
       // If the user specifies the entry on the command line without a
       // type we should add the type and docstring but keep the

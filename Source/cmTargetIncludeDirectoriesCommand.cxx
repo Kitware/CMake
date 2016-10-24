@@ -2,7 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetIncludeDirectoriesCommand.h"
 
+#include <set>
+#include <sstream>
+
 #include "cmGeneratorExpression.h"
+#include "cmListFileCache.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 bool cmTargetIncludeDirectoriesCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)

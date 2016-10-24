@@ -3,7 +3,13 @@
 #include "cmLoadCacheCommand.h"
 
 #include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
+
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmLoadCacheCommand
 bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& args,

@@ -2,7 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmBuildNameCommand.h"
 
+#include <algorithm>
 #include <cmsys/RegularExpression.hxx>
+
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmBuildNameCommand
 bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args,

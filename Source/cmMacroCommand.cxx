@@ -3,6 +3,8 @@
 #include "cmMacroCommand.h"
 
 #include "cmAlgorithms.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
 
 // define the class for macro commands

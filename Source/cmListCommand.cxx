@@ -3,6 +3,7 @@
 #include "cmListCommand.h"
 
 #include "cmAlgorithms.h"
+#include "cmSystemTools.h"
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/SystemTools.hxx>
 

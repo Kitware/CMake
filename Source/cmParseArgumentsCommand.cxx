@@ -3,6 +3,7 @@
 #include "cmParseArgumentsCommand.h"
 
 #include "cmAlgorithms.h"
+#include "cmSystemTools.h"
 
 static std::string escape_arg(const std::string& arg)
 {

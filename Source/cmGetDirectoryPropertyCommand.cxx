@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetDirectoryPropertyCommand.h"
 
+#include "cmGlobalGenerator.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
 
 // cmGetDirectoryPropertyCommand

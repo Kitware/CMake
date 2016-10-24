@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIncludeDirectoryCommand.h"
 
+#include "cmSystemTools.h"
+
 // cmIncludeDirectoryCommand
 bool cmIncludeDirectoryCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)

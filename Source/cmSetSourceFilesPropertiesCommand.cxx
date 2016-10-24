@@ -3,6 +3,7 @@
 #include "cmSetSourceFilesPropertiesCommand.h"
 
 #include "cmSourceFile.h"
+#include "cmSystemTools.h"
 
 // cmSetSourceFilesPropertiesCommand
 bool cmSetSourceFilesPropertiesCommand::InitialPass(

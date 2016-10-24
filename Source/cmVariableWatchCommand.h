@@ -3,7 +3,15 @@
 #ifndef cmVariableWatchCommand_h
 #define cmVariableWatchCommand_h
 
+#include <cmConfigure.h>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmTypeMacro.h"
+
+class cmExecutionStatus;
 
 /** \class cmVariableWatchCommand
  * \brief Watch when the variable changes and invoke command

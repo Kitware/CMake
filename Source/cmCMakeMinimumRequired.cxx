@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakeMinimumRequired.h"
 
+#include "cmSystemTools.h"
 #include "cmVersion.h"
 
 // cmCMakeMinimumRequired

@@ -3,9 +3,17 @@
 #ifndef cmOutputRequiredFilesCommand_h
 #define cmOutputRequiredFilesCommand_h
 
+#include <cmConfigure.h>
+#include <set>
+#include <stdio.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmTypeMacro.h"
 
 class cmDependInformation;
+class cmExecutionStatus;
 
 class cmOutputRequiredFilesCommand : public cmCommand
 {

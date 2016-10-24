@@ -2,7 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallFilesCommand.h"
 
+#include "cmGlobalGenerator.h"
 #include "cmInstallFilesGenerator.h"
+#include "cmSystemTools.h"
 
 // cmExecutableCommand
 bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& args,

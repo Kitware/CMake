@@ -3,6 +3,7 @@
 #include "cmWhileCommand.h"
 
 #include "cmConditionEvaluator.h"
+#include "cmSystemTools.h"
 
 cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)
