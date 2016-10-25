@@ -7,7 +7,6 @@
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
-#include "cmTypeMacro.h"
 
 #include <iosfwd>
 #include <set>

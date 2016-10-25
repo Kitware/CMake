@@ -7,7 +7,6 @@
 
 #include "cmCPackArchiveGenerator.h"
 #include "cmCPackGenerator.h"
-#include "cmTypeMacro.h"
 
 /** \class cmCPackTGZGenerator
  * \brief A generator for TGZ files

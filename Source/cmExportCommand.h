@@ -9,7 +9,6 @@
 
 #include "cmCommand.h"
 #include "cmCommandArgumentsHelper.h"
-#include "cmTypeMacro.h"
 
 class cmExecutionStatus;
 class cmExportSet;

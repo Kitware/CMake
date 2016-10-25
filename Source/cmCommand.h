@@ -3,8 +3,6 @@
 #ifndef cmCommand_h
 #define cmCommand_h
 
-#include "cmObject.h"
-
 #include "cmCommandArgumentsHelper.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"

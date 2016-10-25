@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "cmCommand.h"
-#include "cmTypeMacro.h"
 
 class cmExecutionStatus;
 class cmSourceFile;
