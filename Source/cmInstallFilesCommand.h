@@ -3,7 +3,13 @@
 #ifndef cmInstallFilesCommand_h
 #define cmInstallFilesCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmInstallFilesCommand
  * \brief Specifies where to install some files

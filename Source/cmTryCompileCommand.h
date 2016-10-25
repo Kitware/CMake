@@ -3,7 +3,14 @@
 #ifndef cmTryCompileCommand_h
 #define cmTryCompileCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCoreTryCompile.h"
+
+class cmCommand;
+class cmExecutionStatus;
 
 /** \class cmTryCompileCommand
  * \brief Specifies where to install some files

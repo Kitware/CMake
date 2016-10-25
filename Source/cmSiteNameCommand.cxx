@@ -2,9 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSiteNameCommand.h"
 
+#include <cmsys/RegularExpression.hxx>
+
+#include "cmMakefile.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/RegularExpression.hxx>
+class cmExecutionStatus;
 
 // cmSiteNameCommand
 bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args,

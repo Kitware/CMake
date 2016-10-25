@@ -3,12 +3,13 @@
 #ifndef cmStringCommand_h
 #define cmStringCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
 
-class cmMakefile;
-namespace cmsys {
-class RegularExpression;
-}
+class cmExecutionStatus;
 
 /** \class cmStringCommand
  * \brief Common string operations

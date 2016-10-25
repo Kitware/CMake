@@ -3,7 +3,14 @@
 #ifndef cmEndWhileCommand_h
 #define cmEndWhileCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
+struct cmListFileArgument;
 
 /** \class cmEndWhileCommand
  * \brief ends a while loop

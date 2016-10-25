@@ -3,7 +3,13 @@
 #ifndef cmDependenciessCommand_h
 #define cmDependenciessCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmAddDependenciesCommand
  * \brief Add a dependency to a target

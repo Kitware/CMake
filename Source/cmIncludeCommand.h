@@ -3,7 +3,13 @@
 #ifndef cmIncludeCommand_h
 #define cmIncludeCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmIncludeCommand
  * \brief cmIncludeCommand defines a list of distant

@@ -3,7 +3,13 @@
 #ifndef cmExecProgramCommand_h
 #define cmExecProgramCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmExecProgramCommand
  * \brief Command that adds a target to the build system.

@@ -3,9 +3,16 @@
 #ifndef cmMacroCommand_h
 #define cmMacroCommand_h
 
-#include "cmCommand.h"
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
 
+#include "cmCommand.h"
 #include "cmFunctionBlocker.h"
+#include "cmListFileCache.h"
+
+class cmExecutionStatus;
+class cmMakefile;
 
 class cmMacroFunctionBlocker : public cmFunctionBlocker
 {

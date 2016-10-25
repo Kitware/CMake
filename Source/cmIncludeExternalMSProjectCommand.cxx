@@ -3,7 +3,10 @@
 #include "cmIncludeExternalMSProjectCommand.h"
 
 #ifdef _WIN32
+#include "cmMakefile.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #endif
 
 class cmExecutionStatus;

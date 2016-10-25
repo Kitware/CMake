@@ -3,6 +3,7 @@
 #include "cmConditionEvaluator.h"
 
 #include "cmAlgorithms.h"
+#include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmState.h"
 #include "cmSystemTools.h"

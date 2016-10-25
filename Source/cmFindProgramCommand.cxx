@@ -2,9 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindProgramCommand.h"
 
+#include "cmMakefile.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 
-#include <stdlib.h>
+class cmExecutionStatus;
 
 #if defined(__APPLE__)
 #include <CoreFoundation/CoreFoundation.h>

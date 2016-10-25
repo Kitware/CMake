@@ -3,7 +3,13 @@
 #ifndef cmMessageCommand_h
 #define cmMessageCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmMessageCommand
  * \brief Displays a message to the user

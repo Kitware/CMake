@@ -3,7 +3,13 @@
 #ifndef cmEnableLanguageCommand_h
 #define cmEnableLanguageCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmEnableLanguageCommand
  * \brief Specify the name for this build project.

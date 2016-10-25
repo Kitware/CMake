@@ -2,7 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMathCommand.h"
 
+#include <stdio.h>
+
 #include "cmExprParserHelper.h"
+#include "cmMakefile.h"
+
+class cmExecutionStatus;
 
 bool cmMathCommand::InitialPass(std::vector<std::string> const& args,
                                 cmExecutionStatus&)

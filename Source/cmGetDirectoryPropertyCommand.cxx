@@ -3,8 +3,12 @@
 #include "cmGetDirectoryPropertyCommand.h"
 
 #include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmGetDirectoryPropertyCommand
 bool cmGetDirectoryPropertyCommand::InitialPass(

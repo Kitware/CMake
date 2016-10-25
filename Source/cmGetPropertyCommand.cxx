@@ -2,14 +2,25 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetPropertyCommand.h"
 
+#include <sstream>
+
 #include "cmGlobalGenerator.h"
+#include "cmInstalledFile.h"
+#include "cmListFileCache.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmPropertyDefinition.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
-#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTargetPropertyComputer.h"
 #include "cmTest.h"
 #include "cmake.h"
+
+class cmExecutionStatus;
+class cmMessenger;
 
 cmGetPropertyCommand::cmGetPropertyCommand()
 {

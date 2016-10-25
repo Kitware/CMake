@@ -3,7 +3,13 @@
 #ifndef cmEndIfCommand_h
 #define cmEndIfCommand_h
 
-#include "cmIfCommand.h"
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
+#include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmEndIfCommand
  * \brief ends an if block

@@ -3,9 +3,16 @@
 #ifndef cmCommand_h
 #define cmCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommandArgumentsHelper.h"
-#include "cmListFileCache.h"
-#include "cmMakefile.h"
+#include "cmPolicies.h"
+
+class cmExecutionStatus;
+class cmMakefile;
+struct cmListFileArgument;
 
 /** \class cmCommand
  * \brief Superclass for all commands in CMake.

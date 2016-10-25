@@ -2,17 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportLibraryDependenciesCommand.h"
 
-#include <cm_auto_ptr.hxx>
 #include <cmsys/FStream.hxx>
+#include <map>
+#include <utility>
 
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
+#include "cm_auto_ptr.hxx"
+#include "cm_unordered_map.hxx"
 #include "cmake.h"
 
 class cmExecutionStatus;

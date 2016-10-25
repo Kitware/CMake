@@ -2,7 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetTargetPropertyCommand.h"
 
+#include <sstream>
+
+#include "cmListFileCache.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmTarget.h"
 #include "cmTargetPropertyComputer.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
+class cmMessenger;
 
 // cmSetTargetPropertyCommand
 bool cmGetTargetPropertyCommand::InitialPass(

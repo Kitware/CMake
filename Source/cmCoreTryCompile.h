@@ -4,6 +4,7 @@
 #define cmCoreTryCompile_h
 
 #include "cmCommand.h"
+#include "cmStateTypes.h"
 
 /** \class cmCoreTryCompile
  * \brief Base class for cmTryCompileCommand and cmTryRunCommand

@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTryCompileCommand.h"
 
+#include "cmMakefile.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
+
 // cmTryCompileCommand
 bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv,
                                       cmExecutionStatus&)

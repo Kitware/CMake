@@ -3,7 +3,13 @@
 #ifndef cmGetDirectoryPropertyCommand_h
 #define cmGetDirectoryPropertyCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 class cmGetDirectoryPropertyCommand : public cmCommand
 {

@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmEnableLanguageCommand.h"
 
+#include "cmMakefile.h"
+
+class cmExecutionStatus;
+
 // cmEnableLanguageCommand
 bool cmEnableLanguageCommand::InitialPass(std::vector<std::string> const& args,
                                           cmExecutionStatus&)

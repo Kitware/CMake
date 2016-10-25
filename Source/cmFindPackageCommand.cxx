@@ -2,25 +2,37 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindPackageCommand.h"
 
-#include "cmAlgorithms.h"
-#include "cmState.h"
-#include "cmVersion.h"
-
+#include <algorithm>
+#include <assert.h>
 #include <cmSystemTools.h>
 #include <cmsys/Directory.hxx>
-#include <cmsys/Encoding.hxx>
 #include <cmsys/FStream.hxx>
+#include <cmsys/Glob.hxx>
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/String.h>
+#include <functional>
+#include <iterator>
+#include <sstream>
+#include <stdio.h>
+#include <string.h>
+#include <utility>
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
-#include "cmVariableWatch.h"
-#endif
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmSearchPath.h"
+#include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmVersion.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 #if defined(__HAIKU__)
 #include <FindDirectory.h>
 #include <StorageDefs.h>
-#include <string.h>
 #endif
+
+class cmExecutionStatus;
+class cmFileList;
 
 cmFindPackageCommand::PathLabel cmFindPackageCommand::PathLabel::UserRegistry(
   "PACKAGE_REGISTRY");
@@ -1549,11 +1561,6 @@ void cmFindPackageCommand::StoreVersionFound()
   this->Makefile->AddDefinition(ver + "_COUNT", buf);
 }
 
-#include <cm_auto_ptr.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/String.h>
-
-class cmFileList;
 class cmFileListGeneratorBase
 {
 public:

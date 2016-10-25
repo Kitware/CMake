@@ -2,15 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIfCommand.h"
 
-#include "cmOutputConverter.h"
-#include "cmStringCommand.h"
-#include "cmSystemTools.h"
-
 #include "cmConditionEvaluator.h"
-
-#include <cmsys/RegularExpression.hxx>
-#include <list>
-#include <stdlib.h> // required for atof
+#include "cmExecutionStatus.h"
+#include "cmExpandedCommandArgument.h"
+#include "cmMakefile.h"
+#include "cmOutputConverter.h"
+#include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 static std::string cmIfCommandError(
   std::vector<cmExpandedCommandArgument> const& args)

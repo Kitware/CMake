@@ -3,7 +3,13 @@
 #ifndef cmLibrarysCommand_h
 #define cmLibrarysCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmLibrarysCommand
  * \brief Defines a list of executables to build.

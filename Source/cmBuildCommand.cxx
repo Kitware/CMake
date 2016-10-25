@@ -2,7 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmBuildCommand.h"
 
+#include <sstream>
+
 #include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 bool cmBuildCommand::InitialPass(std::vector<std::string> const& args,
                                  cmExecutionStatus&)

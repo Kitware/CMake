@@ -9,9 +9,9 @@
 #include "cmGlobalGenerator.h"
 #include "cmHexFileConverter.h"
 #include "cmInstallType.h"
-#include "cmake.h"
-
+#include "cmMakefile.h"
 #include "cmTimestamp.h"
+#include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmCurl.h"

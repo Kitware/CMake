@@ -3,7 +3,14 @@
 #ifndef cmSetSourceFilesPropertiesCommand_h
 #define cmSetSourceFilesPropertiesCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
+class cmMakefile;
 
 class cmSetSourceFilesPropertiesCommand : public cmCommand
 {

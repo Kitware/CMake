@@ -3,6 +3,7 @@
 #include "cmTargetPropCommandBase.h"
 
 #include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
 
 bool cmTargetPropCommandBase::HandleArguments(
   std::vector<std::string> const& args, const std::string& prop,

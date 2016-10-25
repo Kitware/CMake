@@ -5,6 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmState.h"
 #include "cmake.h"

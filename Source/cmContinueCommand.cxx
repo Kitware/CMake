@@ -3,7 +3,9 @@
 #include "cmContinueCommand.h"
 
 #include "cmExecutionStatus.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 // cmContinueCommand
 bool cmContinueCommand::InitialPass(std::vector<std::string> const& args,

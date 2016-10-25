@@ -2,8 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetTestPropertyCommand.h"
 
+#include "cmMakefile.h"
 #include "cmTest.h"
-#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmGetTestPropertyCommand
 bool cmGetTestPropertyCommand::InitialPass(

@@ -2,6 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCommand.h"
 
+#include "cmMakefile.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
+struct cmListFileArgument;
+
 bool cmCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args,
                                   cmExecutionStatus& status)
 {

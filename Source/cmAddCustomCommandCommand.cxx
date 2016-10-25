@@ -2,11 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddCustomCommandCommand.h"
 
-#include "cmTarget.h"
+#include <sstream>
 
-#include "cmSourceFile.h"
-
+#include "cmCustomCommand.h"
+#include "cmCustomCommandLines.h"
 #include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmSourceFile.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmAddCustomCommandCommand
 bool cmAddCustomCommandCommand::InitialPass(

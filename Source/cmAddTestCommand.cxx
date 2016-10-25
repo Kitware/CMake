@@ -2,9 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddTestCommand.h"
 
+#include <sstream>
+
+#include "cmMakefile.h"
+#include "cmTest.h"
 #include "cmTestGenerator.h"
 
-#include "cmTest.h"
+class cmExecutionStatus;
 
 // cmExecutableCommand
 bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args,

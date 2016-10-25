@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmEndFunctionCommand.h"
 
+class cmExecutionStatus;
+struct cmListFileArgument;
+
 bool cmEndFunctionCommand::InvokeInitialPass(
   std::vector<cmListFileArgument> const&, cmExecutionStatus&)
 {

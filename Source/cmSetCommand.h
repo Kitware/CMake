@@ -3,7 +3,13 @@
 #ifndef cmSetCommand_h
 #define cmSetCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmSetCommand
  * \brief Set a CMAKE variable

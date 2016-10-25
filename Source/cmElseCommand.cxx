@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmElseCommand.h"
 
+class cmExecutionStatus;
+
 bool cmElseCommand::InitialPass(std::vector<std::string> const&,
                                 cmExecutionStatus&)
 {

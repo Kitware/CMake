@@ -2,18 +2,23 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmStringCommand.h"
 
-#include "cmCryptoHash.h"
-#include "cmSystemTools.h"
-
+#include <algorithm>
 #include <cmsys/RegularExpression.hxx>
-#include <cmsys/SystemTools.hxx>
-
 #include <ctype.h>
-#include <stdlib.h> // required for atoi
-#include <time.h>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <cmTimestamp.h>
-#include <cmUuid.h>
+#include "cmAlgorithms.h"
+#include "cmCryptoHash.h"
+#include "cmGeneratorExpression.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cmTimestamp.h"
+#include "cmUuid.h"
+#include "cm_auto_ptr.hxx"
+
+class cmExecutionStatus;
 
 bool cmStringCommand::InitialPass(std::vector<std::string> const& args,
                                   cmExecutionStatus&)

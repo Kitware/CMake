@@ -2,7 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIncludeDirectoryCommand.h"
 
+#include <algorithm>
+#include <set>
+
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmIncludeDirectoryCommand
 bool cmIncludeDirectoryCommand::InitialPass(

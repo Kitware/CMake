@@ -3,7 +3,13 @@
 #ifndef cmCMakePolicyCommand_h
 #define cmCMakePolicyCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmCMakePolicyCommand
  * \brief Set how CMake should handle policies

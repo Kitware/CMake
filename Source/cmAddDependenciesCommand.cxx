@@ -2,7 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddDependenciesCommand.h"
 
-#include "cmGlobalGenerator.h"
+#include <sstream>
+
+#include "cmMakefile.h"
+#include "cmTarget.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmDependenciesCommand
 bool cmAddDependenciesCommand::InitialPass(

@@ -3,7 +3,13 @@
 #ifndef cmAddCustomTargetCommand_h
 #define cmAddCustomTargetCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmAddCustomTargetCommand
  * \brief Command that adds a target to the build system.
