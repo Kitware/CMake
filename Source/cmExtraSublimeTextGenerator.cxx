@@ -271,7 +271,9 @@ void cmExtraSublimeTextGenerator::AppendTarget(
        << this->BuildMakeCommand(make, makefileName.c_str(), targetName)
        << "],\n";
   fout << "\t\t\t\"working_dir\": \"${project_path}\",\n";
-  fout << "\t\t\t\"file_regex\": \"^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$\"\n";
+  fout << "\t\t\t\"file_regex\": \""
+          "^(..[^:]*)(?::|\\\\()([0-9]+)(?::|\\\\))(?:([0-9]+):)?\\\\s*(.*)"
+          "\"\n";
   fout << "\t\t}";
 }
 
