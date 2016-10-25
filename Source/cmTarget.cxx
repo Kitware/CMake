@@ -16,6 +16,7 @@
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmTargetPropertyComputer.h"
+#include "cm_unordered_set.hxx"
 #include "cmake.h"
 
 #include <algorithm>
@@ -25,16 +26,6 @@
 #include <set>
 #include <sstream>
 #include <string.h>
-
-#if defined(CMake_HAVE_CXX_UNORDERED_SET)
-#include <unordered_set>
-#define UNORDERED_SET std::unordered_set
-#elif defined(CMAKE_BUILD_WITH_CMAKE)
-#include <cmsys/hash_set.hxx>
-#define UNORDERED_SET cmsys::hash_set
-#else
-#define UNORDERED_SET std::set
-#endif
 
 template <>
 const char* cmTargetPropertyComputer::ComputeLocationForBuild<cmTarget>(
@@ -1145,7 +1136,7 @@ const char* cmTarget::GetComputedProperty(
 
 const char* cmTarget::GetProperty(const std::string& prop) const
 {
-  static UNORDERED_SET<std::string> specialProps;
+  static CM_UNORDERED_SET<std::string> specialProps;
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
   MAKE_STATIC_PROP(LINK_LIBRARIES);
   MAKE_STATIC_PROP(TYPE);
