@@ -239,8 +239,12 @@ namespace @KWSYS_NAMESPACE@
             m_activeInputCodepage = input_file_codepage;
             break;
           case FILE_TYPE_CHAR:
-            m_isConsoleInput = true;
-            break;
+            // Check for actual console.
+            DWORD consoleMode;
+            m_isConsoleInput = GetConsoleMode(m_hInput, &consoleMode) == 0 ? false : true;
+            if (m_isConsoleInput) {
+              break;
+            }
           case FILE_TYPE_PIPE:
             m_activeInputCodepage = input_pipe_codepage;
             break;
@@ -259,8 +263,12 @@ namespace @KWSYS_NAMESPACE@
             m_activeOutputCodepage = output_file_codepage;
             break;
           case FILE_TYPE_CHAR:
-            m_isConsoleOutput = true;
-            break;
+            // Check for actual console.
+            DWORD consoleMode;
+            m_isConsoleOutput = GetConsoleMode(m_hOutput, &consoleMode) == 0 ? false : true;
+            if (m_isConsoleOutput) {
+              break;
+            }
           case FILE_TYPE_PIPE:
             m_activeOutputCodepage = output_pipe_codepage;
             break;
