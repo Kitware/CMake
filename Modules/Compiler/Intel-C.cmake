@@ -9,20 +9,22 @@ set(CMAKE_DEPFILE_FLAGS_C "-MD -MT <OBJECT> -MF <DEPFILE>")
 
 if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
   set(_std -Qstd)
+  set(_ext c)
 else()
   set(_std -std)
+  set(_ext gnu)
 endif()
 
 if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 15.0.0)
   set(CMAKE_C11_STANDARD_COMPILE_OPTION "${_std}=c11")
-  set(CMAKE_C11_EXTENSION_COMPILE_OPTION "${_std}=gnu11")
+  set(CMAKE_C11_EXTENSION_COMPILE_OPTION "${_std}=${_ext}11")
 endif()
 
 if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 12.0)
   set(CMAKE_C90_STANDARD_COMPILE_OPTION "${_std}=c89")
-  set(CMAKE_C90_EXTENSION_COMPILE_OPTION "${_std}=gnu89")
+  set(CMAKE_C90_EXTENSION_COMPILE_OPTION "${_std}=${_ext}89")
   set(CMAKE_C99_STANDARD_COMPILE_OPTION "${_std}=c99")
-  set(CMAKE_C99_EXTENSION_COMPILE_OPTION "${_std}=gnu99")
+  set(CMAKE_C99_EXTENSION_COMPILE_OPTION "${_std}=${_ext}99")
 endif()
 
 if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 12.1)
@@ -42,6 +44,7 @@ if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 12.1)
 endif()
 
 unset(_std)
+unset(_ext)
 
 macro(cmake_record_c_compile_features)
   macro(_get_intel_c_features std_version list)
