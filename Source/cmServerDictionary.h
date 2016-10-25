@@ -87,8 +87,8 @@ static const std::string kWARN_UNUSED_KEY = "warnUnused";
 static const std::string kWATCHED_DIRECTORIES_KEY = "watchedDirectories";
 static const std::string kWATCHED_FILES_KEY = "watchedFiles";
 
-static const std::string kSTART_MAGIC = "[== CMake Server ==[";
-static const std::string kEND_MAGIC = "]== CMake Server ==]";
+static const std::string kSTART_MAGIC = "[== \"CMake Server\" ==[";
+static const std::string kEND_MAGIC = "]== \"CMake Server\" ==]";
 
 static const std::string kRENAME_PROPERTY_VALUE = "rename";
 static const std::string kCHANGE_PROPERTY_VALUE = "change";

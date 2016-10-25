@@ -57,17 +57,17 @@ or using a named pipe (with the ``--pipe <NAMED_PIPE>`` parameter).
 When connecting to the server (via named pipe or by starting it in ``--debug``
 mode), the server will reply with a hello message::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"supportedProtocolVersions":[{"major":1,"minor":0}],"type":"hello"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 Messages sent to and from the process are wrapped in magic strings::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {
     ... some JSON message ...
   }
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 The server is now ready to accept further requests via the named pipe
 or stdin.
@@ -87,7 +87,7 @@ the response into the given filename.
 
 This is a response from the cmake server with "showStats" set to true::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {
     "cookie":"",
     "errorMessage":"Waiting for type \"handshake\".",
@@ -100,7 +100,7 @@ This is a response from the cmake server with "showStats" set to true::
       "totalTime":0.025995
     }
   }
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 The server has made a copy of this response into the file /tmp/error.txt and
 took 0.011 seconds to turn the JSON response into a string, and it took 0.025
@@ -137,9 +137,9 @@ contain values.
 
 Example::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"cookie":"zimtstern","inReplyTo":"handshake","type":"reply"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 
 Type "error"
@@ -150,9 +150,9 @@ contain an "errorMessage".
 
 Example::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"cookie":"","errorMessage":"Protocol version not supported.","inReplyTo":"handshake","type":"error"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 
 Type "progress"
@@ -181,9 +181,9 @@ box title.
 
 Example::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"cookie":"","message":"Something happened.","title":"Title Text","inReplyTo":"handshake","type":"message"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 
 Type "signal"
@@ -208,13 +208,13 @@ an influence on the build system is changed.
 
 The "dirty" signal may look like this::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {
     "cookie":"",
     "inReplyTo":"",
     "name":"dirty",
     "type":"signal"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 
 "fileChange" Signal
@@ -226,7 +226,7 @@ that was detected. Possible changes are "change" and "rename".
 
 The "fileChange" signal looks like this::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {
     "cookie":"",
     "inReplyTo":"",
@@ -234,7 +234,7 @@ The "fileChange" signal looks like this::
     "path":"/absolute/CMakeLists.txt",
     "properties":["change"],
     "type":"signal"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 
 Specific Message Types
@@ -256,9 +256,9 @@ these requires a special command line argument when starting the cmake server mo
 
 Example::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"supportedProtocolVersions":[{"major":0,"minor":1}],"type":"hello"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 
 Type "handshake"
@@ -280,17 +280,17 @@ Protocol version 1.0 requires the following attributes to be set:
 
 Example::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"cookie":"zimtstern","type":"handshake","protocolVersion":{"major":0},
    "sourceDirectory":"/home/code/cmake", "buildDirectory":"/tmp/testbuild",
    "generator":"Ninja"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 which will result in a response type "reply"::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"cookie":"zimtstern","inReplyTo":"handshake","type":"reply"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 indicating that the server is ready for action.
 
@@ -303,13 +303,13 @@ JSON structure with information on cmake state.
 
 Example::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"type":"globalSettings"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 which will result in a response type "reply"::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {
     "buildDirectory": "/tmp/test-build",
     "capabilities": {
@@ -346,7 +346,7 @@ which will result in a response type "reply"::
     "warnUnused": false,
     "warnUnusedCli": true
   }
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 
 Type "setGlobalSettings"
@@ -364,15 +364,15 @@ The server will respond with an empty reply message or an error.
 
 Example::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"type":"setGlobalSettings","debugOutput":true}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 CMake will reply to this with::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"inReplyTo":"setGlobalSettings","type":"reply"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 
 Type "configure"
@@ -391,15 +391,15 @@ cache handling that are passed to the cmake command line client.
 
 Example::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"type":"configure", "cacheArguments":["-Dsomething=else"]}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 CMake will reply like this (after reporting progress for some time)::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"cookie":"","inReplyTo":"configure","type":"reply"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 
 Type "compute"
@@ -410,15 +410,15 @@ is only available after a project was successfully "configure"d.
 
 Example::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"type":"compute"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 CMake will reply (after reporting progress information)::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"cookie":"","inReplyTo":"compute","type":"reply"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 
 Type "codemodel"
@@ -521,13 +521,13 @@ sourceDirectory of the target.
 
 Example::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"type":"codemodel"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 CMake will reply::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {
     "configurations": [
       {
@@ -567,7 +567,7 @@ CMake will reply::
     "inReplyTo": "codemodel",
     "type": "reply"
   }
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 
 Type "cmakeInputs"
@@ -581,13 +581,13 @@ This request is only available after a project was successfully
 
 Example::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"type":"cmakeInputs"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 CMake will reply with the following information::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"buildFiles":
     [
       {"isCMake":true,"isTemporary":false,"sources":["/usr/lib/cmake/...", ... ]},
@@ -600,7 +600,7 @@ CMake will reply with the following information::
     "inReplyTo":"cmakeInputs",
     "type":"reply"
   }
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 All file names are either relative to the top level source directory or
 absolute.
@@ -619,13 +619,13 @@ list the cached configuration values.
 
 Example::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {"type":"cache"}
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 CMake will respond with the following output::
 
-  [== CMake Server ==[
+  [== "CMake Server" ==[
   {
     "cookie":"","inReplyTo":"cache","type":"reply",
     "cache":
@@ -641,7 +641,7 @@ CMake will respond with the following output::
         "value":"TEST"}
     ]
   }
-  ]== CMake Server ==]
+  ]== "CMake Server" ==]
 
 The output can be limited to a list of keys by passing an array of key names
 to the "keys" optional field of the "cache" request.
@@ -655,16 +655,16 @@ command will report on the files and directories watched.
 
 Example::
 
-  [== CMake Server ==]
+  [== "CMake Server" ==[
   {"type":"fileSystemWatchers"}
-  [== CMake Server ==]
+  ]== "CMake Server" ==]
 
 CMake will respond with the following output::
 
-  [== CMake Server ==]
+  [== "CMake Server" ==[
   {
     "cookie":"","inReplyTo":"fileSystemWatchers","type":"reply",
     "watchedFiles": [ "/absolute/path" ],
     "watchedDirectories": [ "/absolute" ]
   }
-  [== CMake Server ==]
+  ]== "CMake Server" ==]
