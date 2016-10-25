@@ -7,6 +7,8 @@ struct A
 
 void someFunc()
 {
-  A<A<int> > object;
+  /* clang-format off */
+  A<A<int>> object;
+  /* clang-format on */
   (void)object;
 }

@@ -130,6 +130,7 @@ $git_ls -z -- '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx' |
 
   # Exclude manually-formatted sources (e.g. with long lines).
   egrep -z -v '^Tests/PositionIndependentTargets/pic_test.h' |
+  egrep -z -v '^Tests/CompileFeatures/cxx_right_angle_brackets.cpp' |
 
   # Exclude sources with encoding not suported by clang-format.
   egrep -z -v '^Tests/RunCMake/CommandLine/cmake_depends/test_UTF-16LE.h' |
