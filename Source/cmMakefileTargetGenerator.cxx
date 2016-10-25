@@ -437,8 +437,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   langFlags += "_FLAGS)";
   this->LocalGenerator->AppendFlags(flags, langFlags);
 
-  std::string configUpper =
-    cmSystemTools::UpperCase(this->LocalGenerator->GetConfigName());
+  std::string config = this->LocalGenerator->GetConfigName();
+  std::string configUpper = cmSystemTools::UpperCase(config);
 
   // Add Fortran format flags.
   if (lang == "Fortran") {
@@ -446,12 +446,14 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   }
 
   // Add flags from source file properties.
-  if (source.GetProperty("COMPILE_FLAGS")) {
-    this->LocalGenerator->AppendFlags(flags,
-                                      source.GetProperty("COMPILE_FLAGS"));
+  if (const char* cflags = source.GetProperty("COMPILE_FLAGS")) {
+    cmGeneratorExpression ge;
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
+    const char* evaluatedFlags = cge->Evaluate(this->LocalGenerator, config,
+                                               false, this->GeneratorTarget);
+    this->LocalGenerator->AppendFlags(flags, evaluatedFlags);
     *this->FlagFileStream << "# Custom flags: " << relativeObj
-                          << "_FLAGS = " << source.GetProperty("COMPILE_FLAGS")
-                          << "\n"
+                          << "_FLAGS = " << evaluatedFlags << "\n"
                           << "\n";
   }
 
