@@ -12,7 +12,6 @@ endif()
 string(APPEND _ANDROID_ABI_INIT_CFLAGS
   " -msoft-float"
   " -mtune=xscale"
-  " -fpic"
   )
 
 include(Platform/Android/abi-common-GNU)

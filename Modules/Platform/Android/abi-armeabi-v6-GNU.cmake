@@ -11,7 +11,6 @@ endif()
 
 string(APPEND _ANDROID_ABI_INIT_CFLAGS
   " -mfloat-abi=softfp"
-  " -fpic"
   )
 
 include(Platform/Android/abi-common-GNU)
