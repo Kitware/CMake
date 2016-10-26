@@ -66,6 +66,7 @@ private:
                              cmGeneratorTarget* gtgt);
 
   bool ExcludeBuildFolder;
+  std::string EnvSettings;
 };
 
 #endif

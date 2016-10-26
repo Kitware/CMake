@@ -62,6 +62,8 @@ void cmExtraSublimeTextGenerator::Generate()
 {
   this->ExcludeBuildFolder = this->GlobalGenerator->GlobalSettingIsOn(
     "CMAKE_SUBLIME_TEXT_2_EXCLUDE_BUILD_TREE");
+  this->EnvSettings = this->GlobalGenerator->GetSafeGlobalSetting(
+    "CMAKE_SUBLIME_TEXT_2_ENV_SETTINGS");
 
   // for each sub project in the project create a sublime text 2 project
   for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
@@ -130,7 +132,37 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
 
   // End of build_systems
   fout << "\n\t]";
-  fout << "\n\t}";
+  std::string systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
+  std::vector<std::string> tokens;
+  cmSystemTools::ExpandListArgument(this->EnvSettings, tokens);
+
+  if (!this->EnvSettings.empty()) {
+    fout << ",";
+    fout << "\n\t\"env\":";
+    fout << "\n\t{";
+    fout << "\n\t\t" << systemName << ":";
+    fout << "\n\t\t{";
+    for (std::vector<std::string>::iterator i = tokens.begin();
+         i != tokens.end(); ++i) {
+      size_t const pos = i->find_first_of('=');
+
+      if (pos != std::string::npos) {
+        std::string varName = i->substr(0, pos);
+        std::string varValue = i->substr(pos + 1);
+
+        fout << "\n\t\t\t\"" << varName << "\":\"" << varValue << "\"";
+      } else {
+        std::ostringstream e;
+        e << "Could not parse Env Vars specified in "
+             "\"CMAKE_SUBLIME_TEXT_2_ENV_SETTINGS\""
+          << ", corrupted string " << *i;
+        mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      }
+    }
+    fout << "\n\t\t}";
+    fout << "\n\t}";
+  }
+  fout << "\n}";
 }
 
 void cmExtraSublimeTextGenerator::AppendAllTargets(
