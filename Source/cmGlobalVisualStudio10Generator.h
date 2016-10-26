@@ -4,6 +4,7 @@
 #define cmGlobalVisualStudio10Generator_h
 
 #include "cmGlobalVisualStudio8Generator.h"
+#include "cmVisualStudio10ToolsetOptions.h"
 
 /** \class cmGlobalVisualStudio10Generator
  * \brief Write a Unix makefiles.
@@ -48,6 +49,7 @@ public:
 
   /** The toolset name for the target platform.  */
   const char* GetPlatformToolset() const;
+  std::string const& GetPlatformToolsetString() const;
 
   /** The toolset host architecture name (e.g. x64 for 64-bit host tools).  */
   const char* GetPlatformToolsetHostArchitecture() const;
@@ -88,6 +90,12 @@ public:
 
   static std::string GetInstalledNsightTegraVersion();
 
+  cmIDEFlagTable const* GetClFlagTable() const;
+  cmIDEFlagTable const* GetRcFlagTable() const;
+  cmIDEFlagTable const* GetLibFlagTable() const;
+  cmIDEFlagTable const* GetLinkFlagTable() const;
+  cmIDEFlagTable const* GetMasmFlagTable() const;
+
 protected:
   virtual void Generate();
   virtual bool InitializeSystem(cmMakefile* mf);
@@ -111,6 +119,11 @@ protected:
   std::string SystemName;
   std::string SystemVersion;
   std::string NsightTegraVersion;
+  cmIDEFlagTable const* DefaultClFlagTable;
+  cmIDEFlagTable const* DefaultLibFlagTable;
+  cmIDEFlagTable const* DefaultLinkFlagTable;
+  cmIDEFlagTable const* DefaultMasmFlagTable;
+  cmIDEFlagTable const* DefaultRcFlagTable;
   bool SystemIsWindowsCE;
   bool SystemIsWindowsPhone;
   bool SystemIsWindowsStore;
@@ -134,6 +147,7 @@ private:
 
   std::string MSBuildCommand;
   bool MSBuildCommandInitialized;
+  cmVisualStudio10ToolsetOptions ToolsetOptions;
   virtual std::string FindMSBuildCommand();
   virtual std::string FindDevEnvCommand();
   virtual std::string GetVSMakeProgram() { return this->GetMSBuildCommand(); }

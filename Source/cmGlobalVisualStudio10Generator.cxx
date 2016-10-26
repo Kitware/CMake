@@ -9,6 +9,11 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmVS10CLFlagTable.h"
+#include "cmVS10LibFlagTable.h"
+#include "cmVS10LinkFlagTable.h"
+#include "cmVS10MASMFlagTable.h"
+#include "cmVS10RCFlagTable.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
 #include "cmake.h"
@@ -94,6 +99,11 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->SystemIsWindowsStore = false;
   this->MSBuildCommandInitialized = false;
   this->DefaultPlatformToolset = "v100";
+  this->DefaultClFlagTable = cmVS10CLFlagTable;
+  this->DefaultLibFlagTable = cmVS10LibFlagTable;
+  this->DefaultLinkFlagTable = cmVS10LinkFlagTable;
+  this->DefaultMasmFlagTable = cmVS10MASMFlagTable;
+  this->DefaultRcFlagTable = cmVS10RCFlagTable;
   this->Version = VS10;
 }
 
@@ -339,13 +349,20 @@ void cmGlobalVisualStudio10Generator::EnableLanguage(
 
 const char* cmGlobalVisualStudio10Generator::GetPlatformToolset() const
 {
+  return this->GetPlatformToolsetString().c_str();
+}
+
+std::string const& cmGlobalVisualStudio10Generator::GetPlatformToolsetString()
+  const
+{
   if (!this->GeneratorToolset.empty()) {
-    return this->GeneratorToolset.c_str();
+    return this->GeneratorToolset;
   }
   if (!this->DefaultPlatformToolset.empty()) {
-    return this->DefaultPlatformToolset.c_str();
+    return this->DefaultPlatformToolset;
   }
-  return 0;
+  static std::string const empty;
+  return empty;
 }
 
 const char*
@@ -596,4 +613,44 @@ std::string cmGlobalVisualStudio10Generator::GetInstalledNsightTegraVersion()
     "Version",
     version, cmSystemTools::KeyWOW64_32);
   return version;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetClFlagTable() const
+{
+  cmIDEFlagTable const* table = this->ToolsetOptions.GetClFlagTable(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+
+  return (table != CM_NULLPTR) ? table : this->DefaultClFlagTable;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetRcFlagTable() const
+{
+  cmIDEFlagTable const* table = this->ToolsetOptions.GetRcFlagTable(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+
+  return (table != CM_NULLPTR) ? table : this->DefaultRcFlagTable;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLibFlagTable() const
+{
+  cmIDEFlagTable const* table = this->ToolsetOptions.GetLibFlagTable(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+
+  return (table != CM_NULLPTR) ? table : this->DefaultLibFlagTable;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLinkFlagTable() const
+{
+  cmIDEFlagTable const* table = this->ToolsetOptions.GetLinkFlagTable(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+
+  return (table != CM_NULLPTR) ? table : this->DefaultLinkFlagTable;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMasmFlagTable() const
+{
+  cmIDEFlagTable const* table = this->ToolsetOptions.GetMasmFlagTable(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+
+  return (table != CM_NULLPTR) ? table : this->DefaultMasmFlagTable;
 }

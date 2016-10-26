@@ -121,12 +121,6 @@ private:
   bool IsXamlHeader(const std::string& headerFile);
   bool IsXamlSource(const std::string& headerFile);
 
-  cmIDEFlagTable const* GetClFlagTable() const;
-  cmIDEFlagTable const* GetRcFlagTable() const;
-  cmIDEFlagTable const* GetLibFlagTable() const;
-  cmIDEFlagTable const* GetLinkFlagTable() const;
-  cmIDEFlagTable const* GetMasmFlagTable() const;
-
   bool ForceOld(const std::string& source) const;
 
 private:
