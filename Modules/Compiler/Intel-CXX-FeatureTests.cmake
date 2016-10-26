@@ -3,6 +3,15 @@
 #   - https://software.intel.com/en-us/articles/c14-features-supported-by-intel-c-compiler
 #   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0096r3.html
 
+# Notes:
+# [1] Some Intel versions define some feature macros under -std=gnu++98
+#     that do not work in that mode (or work with warnings):
+#     - __cpp_attributes 200809
+#     - __cpp_init_captures 201304
+#     - __cpp_lambdas 200907
+#     - __cpp_rvalue_references 200610
+#     - __cpp_variadic_templates 200704
+
 # FIXME: Intel C++ feature detection works only when simulating the GNU compiler.
 # When simulating MSVC, Intel always sets __cplusplus to 199711L.
 if("x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
@@ -24,27 +33,29 @@ unset(DETECT_BUGGY_ICC15)
 set(Intel16_CXX14 "__INTEL_COMPILER >= 1600 && ${DETECT_CXX14}")
 set(_cmake_feature_test_cxx_aggregate_default_initializers "${Intel16_CXX14}")
 set(_cmake_feature_test_cxx_contextual_conversions "${Intel16_CXX14}")
-set(_cmake_feature_test_cxx_generic_lambdas "${Intel16_CXX14}")
+set(_cmake_feature_test_cxx_generic_lambdas "__cpp_generic_lambdas >= 201304")
 set(_cmake_feature_test_cxx_digit_separators "${Intel16_CXX14}")
 # This test is supposed to work in Intel 14 but the compiler has a bug
 # in versions 14 and 15::
 # https://software.intel.com/en-us/forums/intel-c-compiler/topic/600514
-# It also appears to fail with an internal compiler error on Intel 16.
+# It also appears to fail with an internal compiler error on Intel 16 and 17.
 #set(_cmake_feature_test_cxx_generalized_initializers "${Intel16_CXX14}")
 unset(Intel16_CXX14)
 
-set(Intel15_CXX14 "__INTEL_COMPILER >= 1500 && ${DETECT_CXX14}")
-set(_cmake_feature_test_cxx_decltype_auto "${Intel15_CXX14}")
-set(_cmake_feature_test_cxx_lambda_init_captures "${Intel15_CXX14}")
+set(Intel15 "__INTEL_COMPILER >= 1500")
+set(Intel15_CXX14 "${Intel15} && ${DETECT_CXX14}")
+set(_cmake_feature_test_cxx_decltype_auto "__cpp_decltype_auto >= 201304 || ${Intel15_CXX14}")
+set(_cmake_feature_test_cxx_lambda_init_captures "(__cpp_init_captures >= 201304 || ${Intel15}) && ${DETECT_CXX14}") # [1]
 set(_cmake_feature_test_cxx_attribute_deprecated "${Intel15_CXX14}")
-set(_cmake_feature_test_cxx_return_type_deduction "${Intel15_CXX14}")
+set(_cmake_feature_test_cxx_return_type_deduction "__cpp_return_type_deduction >= 201304 || ${Intel15_CXX14}")
 unset(Intel15_CXX14)
+unset(Intel15)
 
 set(Intel15_CXX11 "__INTEL_COMPILER >= 1500 && ${DETECT_CXX11}")
 set(_cmake_feature_test_cxx_alignas "${Intel15_CXX11}")
 set(_cmake_feature_test_cxx_alignof "${Intel15_CXX11}")
 set(_cmake_feature_test_cxx_inheriting_constructors "${Intel15_CXX11}")
-set(_cmake_feature_test_cxx_user_literals "${Intel15_CXX11}")
+set(_cmake_feature_test_cxx_user_literals "__cpp_user_defined_literals >= 200809 || ${Intel15_CXX11}")
 set(_cmake_feature_test_cxx_thread_local "${Intel15_CXX11}")
 unset(Intel15_CXX11)
 
@@ -54,12 +65,12 @@ set(_cmake_feature_test_cxx_decltype_incomplete_return_types "${Intel14_CXX11}")
 
 set(Intel14_CXX11 "__INTEL_COMPILER >= 1400 && ${DETECT_CXX11}")
 set(_cmake_feature_test_cxx_delegating_constructors "${Intel14_CXX11}")
-set(_cmake_feature_test_cxx_constexpr "${Intel14_CXX11}")
+set(_cmake_feature_test_cxx_constexpr "__cpp_constexpr >= 200704 || ${Intel14_CXX11}")
 set(_cmake_feature_test_cxx_sizeof_member "${Intel14_CXX11}")
 set(_cmake_feature_test_cxx_strong_enums "${Intel14_CXX11}")
 set(_cmake_feature_test_cxx_reference_qualified_functions "${Intel14_CXX11}")
-set(_cmake_feature_test_cxx_raw_string_literals "${Intel14_CXX11}")
-set(_cmake_feature_test_cxx_unicode_literals "${Intel14_CXX11}")
+set(_cmake_feature_test_cxx_raw_string_literals "__cpp_raw_strings >= 200710 || ${Intel14_CXX11}")
+set(_cmake_feature_test_cxx_unicode_literals "__cpp_unicode_literals >= 200710 || ${Intel14_CXX11}")
 set(_cmake_feature_test_cxx_inline_namespaces "${Intel14_CXX11}")
 set(_cmake_feature_test_cxx_unrestricted_unions "${Intel14_CXX11}")
 set(_cmake_feature_test_cxx_nonstatic_member_init "${Intel14_CXX11}")
@@ -77,22 +88,23 @@ set(_cmake_feature_test_cxx_range_for "${Intel13_CXX11}")
 set(_cmake_feature_test_cxx_uniform_initialization "${Intel13_CXX11}")
 unset(Intel13_CXX11)
 
-set(Intel121_CXX11 "${_cmake_oldestSupported} && ${DETECT_CXX11}")
-set(_cmake_feature_test_cxx_variadic_templates "${Intel121_CXX11}")
+set(Intel121 "${_cmake_oldestSupported}")
+set(Intel121_CXX11 "${Intel121} && ${DETECT_CXX11}")
+set(_cmake_feature_test_cxx_variadic_templates "(__cpp_variadic_templates >= 200704 || ${Intel121}) && ${DETECT_CXX11}") # [1]
 set(_cmake_feature_test_cxx_alias_templates "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_nullptr "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_trailing_return_types "${Intel121_CXX11}")
-set(_cmake_feature_test_cxx_attributes "${Intel121_CXX11}")
+set(_cmake_feature_test_cxx_attributes "__cpp_attributes >= 200809 || ${Intel121}")
 set(_cmake_feature_test_cxx_default_function_template_args "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_extended_friend_declarations "${Intel121_CXX11}")
-set(_cmake_feature_test_cxx_rvalue_references "${Intel121_CXX11}")
-set(_cmake_feature_test_cxx_decltype "${Intel121_CXX11}")
+set(_cmake_feature_test_cxx_rvalue_references "(__cpp_rvalue_references >= 200610 || ${Intel121}) && ${DETECT_CXX11}") # [1]
+set(_cmake_feature_test_cxx_decltype "__cpp_decltype >= 200707 || ${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_defaulted_functions "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_deleted_functions "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_local_type_template_args "${Intel121_CXX11}")
-set(_cmake_feature_test_cxx_lambdas "${Intel121_CXX11}")
-set(_cmake_feature_test_cxx_binary_literals "${Intel121_CXX11}")
-set(_cmake_feature_test_cxx_static_assert "${Intel121_CXX11}")
+set(_cmake_feature_test_cxx_lambdas "(__cpp_lambdas >= 200907 || ${Intel121}) && ${DETECT_CXX11}") # [1]
+set(_cmake_feature_test_cxx_binary_literals "__cpp_binary_literals >= 201304 || ${Intel121}")
+set(_cmake_feature_test_cxx_static_assert "(__cpp_static_assert >= 200410 || ${Intel121}) && ${DETECT_CXX11}")
 set(_cmake_feature_test_cxx_right_angle_brackets "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_auto_type "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_extern_templates "${Intel121_CXX11}")
@@ -101,6 +113,7 @@ set(_cmake_feature_test_cxx_long_long_type "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_func_identifier "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_template_template_parameters "${Intel121_CXX11}")
 unset(Intel121_CXX11)
+unset(Intel121)
 
 unset(DETECT_CXX11)
 unset(DETECT_CXX14)
