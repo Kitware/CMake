@@ -76,6 +76,7 @@
 # Available features in this version of CMake are listed in the
 # :prop_gbl:`CMAKE_C_KNOWN_FEATURES` and
 # :prop_gbl:`CMAKE_CXX_KNOWN_FEATURES` global properties.
+# The ``{c,cxx}_std_*`` meta-features are ignored if requested.
 #
 # See the :manual:`cmake-compile-features(7)` manual for information on
 # compile features.
@@ -358,7 +359,11 @@ function(write_compiler_detection_header
   endif()
 
   foreach(feature ${_WCD_FEATURES})
-    if (feature MATCHES "^cxx_")
+    if (feature MATCHES "^c_std_")
+      # ignored
+    elseif (feature MATCHES "^cxx_std_")
+      # ignored
+    elseif (feature MATCHES "^cxx_")
       list(APPEND _langs CXX)
       list(APPEND CXX_features ${feature})
     elseif (feature MATCHES "^c_")
