@@ -60,9 +60,11 @@ macro(_record_compiler_features lang compile_flags feature_list)
 endmacro()
 
 macro(_record_compiler_features_c std)
+  list(APPEND CMAKE_C${std}_COMPILE_FEATURES c_std_${std})
   _record_compiler_features(C "${CMAKE_C${std}_STANDARD_COMPILE_OPTION}" CMAKE_C${std}_COMPILE_FEATURES)
 endmacro()
 
 macro(_record_compiler_features_cxx std)
+  list(APPEND CMAKE_CXX${std}_COMPILE_FEATURES cxx_std_${std})
   _record_compiler_features(CXX "${CMAKE_CXX${std}_STANDARD_COMPILE_OPTION}" CMAKE_CXX${std}_COMPILE_FEATURES)
 endmacro()
