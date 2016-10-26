@@ -19,6 +19,7 @@ set(DETECT_CXX11 "((__cplusplus >= 201103L) || defined(__INTEL_CXX11_MODE__) || 
 #we look for the existence of __GXX_EXPERIMENTAL_CXX0X__ but not __INTEL_CXX11_MODE__
 set(DETECT_BUGGY_ICC15 "((__INTEL_COMPILER == 1500) && (__INTEL_COMPILER_UPDATE == 1))")
 set(DETECT_CXX14 "((__cplusplus >= 201300L) || ((__cplusplus == 201103L) && !defined(__INTEL_CXX11_MODE__)) || ((${DETECT_BUGGY_ICC15}) && defined(__GXX_EXPERIMENTAL_CXX0X__) && !defined(__INTEL_CXX11_MODE__) ) )")
+unset(DETECT_BUGGY_ICC15)
 
 set(Intel16_CXX14 "__INTEL_COMPILER >= 1600 && ${DETECT_CXX14}")
 set(_cmake_feature_test_cxx_aggregate_default_initializers "${Intel16_CXX14}")
@@ -30,12 +31,14 @@ set(_cmake_feature_test_cxx_digit_separators "${Intel16_CXX14}")
 # https://software.intel.com/en-us/forums/intel-c-compiler/topic/600514
 # It also appears to fail with an internal compiler error on Intel 16.
 #set(_cmake_feature_test_cxx_generalized_initializers "${Intel16_CXX14}")
+unset(Intel16_CXX14)
 
 set(Intel15_CXX14 "__INTEL_COMPILER >= 1500 && ${DETECT_CXX14}")
 set(_cmake_feature_test_cxx_decltype_auto "${Intel15_CXX14}")
 set(_cmake_feature_test_cxx_lambda_init_captures "${Intel15_CXX14}")
 set(_cmake_feature_test_cxx_attribute_deprecated "${Intel15_CXX14}")
 set(_cmake_feature_test_cxx_return_type_deduction "${Intel15_CXX14}")
+unset(Intel15_CXX14)
 
 set(Intel15_CXX11 "__INTEL_COMPILER >= 1500 && ${DETECT_CXX11}")
 set(_cmake_feature_test_cxx_alignas "${Intel15_CXX11}")
@@ -43,6 +46,7 @@ set(_cmake_feature_test_cxx_alignof "${Intel15_CXX11}")
 set(_cmake_feature_test_cxx_inheriting_constructors "${Intel15_CXX11}")
 set(_cmake_feature_test_cxx_user_literals "${Intel15_CXX11}")
 set(_cmake_feature_test_cxx_thread_local "${Intel15_CXX11}")
+unset(Intel15_CXX11)
 
 set(Intel14_CXX11 "${DETECT_CXX11} && (__INTEL_COMPILER > 1400 || (__INTEL_COMPILER == 1400 && __INTEL_COMPILER_UPDATE >= 2))")
 # Documented as 12.0+ but in testing it only works on 14.0.2+
@@ -64,12 +68,14 @@ set(_cmake_feature_test_cxx_override "${Intel14_CXX11}")
 set(_cmake_feature_test_cxx_final "${Intel14_CXX11}")
 set(_cmake_feature_test_cxx_noexcept "${Intel14_CXX11}")
 set(_cmake_feature_test_cxx_defaulted_move_initializers "${Intel14_CXX11}")
+unset(Intel14_CXX11)
 
 set(Intel13_CXX11 "__INTEL_COMPILER >= 1300 && ${DETECT_CXX11}")
 set(_cmake_feature_test_cxx_explicit_conversions "${Intel13_CXX11}")
 set(_cmake_feature_test_cxx_range_for "${Intel13_CXX11}")
 # Cannot find Intel documentation for N2640: cxx_uniform_initialization
 set(_cmake_feature_test_cxx_uniform_initialization "${Intel13_CXX11}")
+unset(Intel13_CXX11)
 
 set(Intel121_CXX11 "${_cmake_oldestSupported} && ${DETECT_CXX11}")
 set(_cmake_feature_test_cxx_variadic_templates "${Intel121_CXX11}")
@@ -94,3 +100,7 @@ set(_cmake_feature_test_cxx_variadic_macros "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_long_long_type "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_func_identifier "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_template_template_parameters "${Intel121_CXX11}")
+unset(Intel121_CXX11)
+
+unset(DETECT_CXX11)
+unset(DETECT_CXX14)
