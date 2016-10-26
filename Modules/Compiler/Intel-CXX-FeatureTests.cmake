@@ -12,12 +12,6 @@
 #     - __cpp_rvalue_references 200610
 #     - __cpp_variadic_templates 200704
 
-# FIXME: Intel C++ feature detection works only when simulating the GNU compiler.
-# When simulating MSVC, Intel always sets __cplusplus to 199711L.
-if("x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
-  return()
-endif()
-
 set(_cmake_feature_test_cxx_variable_templates "__cpp_variable_templates >= 201304")
 set(_cmake_feature_test_cxx_relaxed_constexpr "__cpp_constexpr >= 201304")
 
@@ -27,7 +21,7 @@ set(DETECT_CXX11 "((__cplusplus >= 201103L) || defined(__INTEL_CXX11_MODE__) || 
 #if you are compiling as 98/11/14. So to properly detect C++14 with this version
 #we look for the existence of __GXX_EXPERIMENTAL_CXX0X__ but not __INTEL_CXX11_MODE__
 set(DETECT_BUGGY_ICC15 "((__INTEL_COMPILER == 1500) && (__INTEL_COMPILER_UPDATE == 1))")
-set(DETECT_CXX14 "((__cplusplus >= 201300L) || ((__cplusplus == 201103L) && !defined(__INTEL_CXX11_MODE__)) || ((${DETECT_BUGGY_ICC15}) && defined(__GXX_EXPERIMENTAL_CXX0X__) && !defined(__INTEL_CXX11_MODE__) ) )")
+set(DETECT_CXX14 "((__cplusplus >= 201300L) || ((__cplusplus == 201103L) && !defined(__INTEL_CXX11_MODE__)) || ((${DETECT_BUGGY_ICC15}) && defined(__GXX_EXPERIMENTAL_CXX0X__) && !defined(__INTEL_CXX11_MODE__) ) || (defined(_MSC_VER) && defined(__INTEL_CXX11_MODE__) && defined(__cpp_aggregate_nsdmi)) )")
 unset(DETECT_BUGGY_ICC15)
 
 set(Intel16_CXX14 "__INTEL_COMPILER >= 1600 && ${DETECT_CXX14}")
@@ -61,7 +55,7 @@ unset(Intel15_CXX11)
 
 set(Intel14_CXX11 "${DETECT_CXX11} && (__INTEL_COMPILER > 1400 || (__INTEL_COMPILER == 1400 && __INTEL_COMPILER_UPDATE >= 2))")
 # Documented as 12.0+ but in testing it only works on 14.0.2+
-set(_cmake_feature_test_cxx_decltype_incomplete_return_types "${Intel14_CXX11}")
+set(_cmake_feature_test_cxx_decltype_incomplete_return_types "${Intel14_CXX11} && !defined(_MSC_VER)")
 
 set(Intel14_CXX11 "__INTEL_COMPILER >= 1400 && ${DETECT_CXX11}")
 set(_cmake_feature_test_cxx_delegating_constructors "${Intel14_CXX11}")
