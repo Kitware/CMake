@@ -3,7 +3,13 @@
 #ifndef cmDefinesPropertyCommand_h
 #define cmDefinesPropertyCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 class cmDefinePropertyCommand : public cmCommand
 {

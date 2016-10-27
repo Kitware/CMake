@@ -2,8 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOptionCommand.h"
 
+#include <algorithm>
+
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmOptionCommand
 bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,

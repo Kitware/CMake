@@ -2,18 +2,33 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallCommand.h"
 
+#include <algorithm>
+#include <cmsys/Glob.hxx>
+#include <sstream>
+#include <stddef.h>
+
+#include "cmAlgorithms.h"
+#include "cmCommandArgumentsHelper.h"
 #include "cmExportSet.h"
+#include "cmExportSetMap.h"
+#include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallCommandArguments.h"
 #include "cmInstallDirectoryGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallFilesGenerator.h"
+#include "cmInstallGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTargetExport.h"
+#include "cmake.h"
 
-#include <cmsys/Glob.hxx>
+class cmExecutionStatus;
 
 static cmInstallTargetGenerator* CreateInstallTargetGenerator(
   cmTarget& target, const cmInstallCommandArguments& args, bool impLib,

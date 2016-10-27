@@ -3,7 +3,14 @@
 #ifndef cmFindPathCommand_h
 #define cmFindPathCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmFindBase.h"
+
+class cmCommand;
+class cmExecutionStatus;
 
 /** \class cmFindPathCommand
  * \brief Define a command to search for a library.

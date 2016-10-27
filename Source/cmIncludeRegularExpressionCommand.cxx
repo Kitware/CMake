@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIncludeRegularExpressionCommand.h"
 
+#include "cmMakefile.h"
+
+class cmExecutionStatus;
+
 // cmIncludeRegularExpressionCommand
 bool cmIncludeRegularExpressionCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)

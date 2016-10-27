@@ -3,6 +3,11 @@
 #include "cmEndIfCommand.h"
 
 #include <stdlib.h> // required for atof
+
+#include "cmMakefile.h"
+
+class cmExecutionStatus;
+
 bool cmEndIfCommand::InitialPass(std::vector<std::string> const&,
                                  cmExecutionStatus&)
 {

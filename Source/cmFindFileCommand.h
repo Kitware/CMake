@@ -3,7 +3,12 @@
 #ifndef cmFindFileCommand_h
 #define cmFindFileCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+
 #include "cmFindPathCommand.h"
+
+class cmCommand;
 
 /** \class cmFindFileCommand
  * \brief Define a command to search for an executable program.

@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddDefinitionsCommand.h"
 
+#include "cmMakefile.h"
+
+class cmExecutionStatus;
+
 // cmAddDefinitionsCommand
 bool cmAddDefinitionsCommand::InitialPass(std::vector<std::string> const& args,
                                           cmExecutionStatus&)

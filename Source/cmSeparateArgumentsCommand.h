@@ -3,7 +3,13 @@
 #ifndef cmSeparateArgumentsCommand_h
 #define cmSeparateArgumentsCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmSeparateArgumentsCommand
  * \brief separate_arguments command

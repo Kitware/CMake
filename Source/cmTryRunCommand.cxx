@@ -2,11 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTryRunCommand.h"
 
-#include "cmState.h"
-#include "cmSystemTools.h"
-#include "cmTryCompileCommand.h"
-
 #include <cmsys/FStream.hxx>
+#include <stdio.h>
+#include <string.h>
+
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmTryRunCommand
 bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,

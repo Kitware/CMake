@@ -2,7 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetSourceFilePropertyCommand.h"
 
+#include "cmMakefile.h"
 #include "cmSourceFile.h"
+
+class cmExecutionStatus;
 
 // cmSetSourceFilePropertyCommand
 bool cmGetSourceFilePropertyCommand::InitialPass(

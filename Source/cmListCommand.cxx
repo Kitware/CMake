@@ -2,15 +2,22 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmListCommand.h"
 
-#include "cmAlgorithms.h"
-#include "cmSystemTools.h"
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/SystemTools.hxx>
-
 #include <algorithm>
 #include <assert.h>
-#include <ctype.h>
+#include <cmsys/RegularExpression.hxx>
+#include <iterator>
+#include <sstream>
+#include <stdio.h>
 #include <stdlib.h> // required for atoi
+
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
+
 bool cmListCommand::InitialPass(std::vector<std::string> const& args,
                                 cmExecutionStatus&)
 {

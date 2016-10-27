@@ -2,7 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSetDirectoryPropertiesCommand.h"
 
-#include "cmake.h"
+#include "cmMakefile.h"
+
+class cmExecutionStatus;
 
 // cmSetDirectoryPropertiesCommand
 bool cmSetDirectoryPropertiesCommand::InitialPass(

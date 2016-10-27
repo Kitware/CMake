@@ -3,7 +3,15 @@
 #ifndef cmTargetLinkLibrariesCommand_h
 #define cmTargetLinkLibrariesCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmTargetLinkLibraryType.h"
+
+class cmExecutionStatus;
+class cmTarget;
 
 /** \class cmTargetLinkLibrariesCommand
  * \brief Specify a list of libraries to link into executables.

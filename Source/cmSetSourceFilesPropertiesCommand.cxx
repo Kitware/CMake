@@ -2,8 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSetSourceFilesPropertiesCommand.h"
 
+#include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmSetSourceFilesPropertiesCommand
 bool cmSetSourceFilesPropertiesCommand::InitialPass(

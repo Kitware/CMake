@@ -3,7 +3,14 @@
 #ifndef cmEndForEachCommand_h
 #define cmEndForEachCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
+struct cmListFileArgument;
 
 /** \class cmEndForEachCommand
  * \brief ends an if block

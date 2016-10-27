@@ -3,7 +3,13 @@
 #ifndef cmSubdirCommand_h
 #define cmSubdirCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmSubdirCommand
  * \brief Specify a list of subdirectories to build.

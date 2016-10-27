@@ -2,8 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSetCommand.h"
 
+#include <algorithm>
+#include <string.h>
+
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmSetCommand
 bool cmSetCommand::InitialPass(std::vector<std::string> const& args,

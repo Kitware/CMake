@@ -3,7 +3,13 @@
 #ifndef cmSiteNameCommand_h
 #define cmSiteNameCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmSiteNameCommand
  * \brief site_name command

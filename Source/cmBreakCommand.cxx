@@ -2,7 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmBreakCommand.h"
 
+#include <sstream>
+
 #include "cmExecutionStatus.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmake.h"
 
 // cmBreakCommand
 bool cmBreakCommand::InitialPass(std::vector<std::string> const& args,

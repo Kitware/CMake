@@ -2,12 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindLibraryCommand.h"
 
-#include "cmGlobalGenerator.h"
-#include "cmState.h"
-#include "cmSystemTools.h"
-#include "cmVersion.h"
+#include <algorithm>
+#include <cmsys/RegularExpression.hxx>
+#include <set>
+#include <stdio.h>
+#include <string.h>
 
-#include <cmsys/Directory.hxx>
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 cmFindLibraryCommand::cmFindLibraryCommand()
 {

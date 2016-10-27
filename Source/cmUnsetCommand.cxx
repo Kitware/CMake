@@ -2,7 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmUnsetCommand.h"
 
+#include <string.h>
+
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmUnsetCommand
 bool cmUnsetCommand::InitialPass(std::vector<std::string> const& args,

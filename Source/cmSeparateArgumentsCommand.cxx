@@ -2,7 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSeparateArgumentsCommand.h"
 
+#include <algorithm>
+#include <sstream>
+
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmSeparateArgumentsCommand
 bool cmSeparateArgumentsCommand::InitialPass(

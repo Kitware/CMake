@@ -2,11 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExecuteProcessCommand.h"
 
+#include <cmsys/Process.h>
+#include <ctype.h> /* isspace */
+#include <sstream>
+#include <stdio.h>
+
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/Process.h>
-
-#include <ctype.h> /* isspace */
+class cmExecutionStatus;
 
 static bool cmExecuteProcessCommandIsWhitespace(char c)
 {

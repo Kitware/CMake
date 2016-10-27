@@ -2,8 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakePolicyCommand.h"
 
+#include <sstream>
+
+#include "cmMakefile.h"
+#include "cmPolicies.h"
 #include "cmState.h"
-#include "cmVersion.h"
+#include "cmStateTypes.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmCMakePolicyCommand
 bool cmCMakePolicyCommand::InitialPass(std::vector<std::string> const& args,

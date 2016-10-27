@@ -3,7 +3,13 @@
 #ifndef cmContinueCommand_h
 #define cmContinueCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmContinueCommand
  * \brief Continue from an enclosing foreach or while loop

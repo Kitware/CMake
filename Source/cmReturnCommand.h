@@ -3,7 +3,13 @@
 #ifndef cmReturnCommand_h
 #define cmReturnCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmReturnCommand
  * \brief Return from a directory or function

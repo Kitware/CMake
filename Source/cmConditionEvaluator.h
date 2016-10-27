@@ -5,6 +5,8 @@
 
 #include "cmCommand.h"
 #include "cmExpandedCommandArgument.h"
+#include "cmListFileCache.h"
+#include "cmake.h"
 
 #include <list>
 

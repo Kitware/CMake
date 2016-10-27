@@ -3,7 +3,13 @@
 #ifndef cmOptionCommand_h
 #define cmOptionCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmOptionCommand
  * \brief Provide an option to the user

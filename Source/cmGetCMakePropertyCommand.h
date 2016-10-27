@@ -3,7 +3,13 @@
 #ifndef cmGetCMakePropertyCommand_h
 #define cmGetCMakePropertyCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 class cmGetCMakePropertyCommand : public cmCommand
 {

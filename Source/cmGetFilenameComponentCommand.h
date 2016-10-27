@@ -3,7 +3,13 @@
 #ifndef cmGetFilenameComponentCommand_h
 #define cmGetFilenameComponentCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmGetFilenameComponentCommand
  * \brief Get a specific component of a filename.

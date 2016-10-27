@@ -3,7 +3,13 @@
 #ifndef cmMathCommand_h
 #define cmMathCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /// Mathematical expressions: math(EXPR ...) command.
 class cmMathCommand : public cmCommand

@@ -3,7 +3,13 @@
 #ifndef cmMarkAsAdvancedCommand_h
 #define cmMarkAsAdvancedCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmMarkAsAdvancedCommand
  * \brief mark_as_advanced command

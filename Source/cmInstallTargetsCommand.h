@@ -3,7 +3,13 @@
 #ifndef cmInstallTargetsCommand_h
 #define cmInstallTargetsCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmInstallTargetsCommand
  * \brief Specifies where to install some targets

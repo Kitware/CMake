@@ -3,7 +3,13 @@
 #ifndef cmEnableTestingCommand_h
 #define cmEnableTestingCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmEnableTestingCommand
  * \brief Enable testing for this directory and below.

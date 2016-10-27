@@ -3,7 +3,14 @@
 #ifndef cmSetTestsPropertiesCommand_h
 #define cmSetTestsPropertiesCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
+class cmMakefile;
 
 class cmSetTestsPropertiesCommand : public cmCommand
 {

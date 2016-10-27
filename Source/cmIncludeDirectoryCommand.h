@@ -3,7 +3,13 @@
 #ifndef cmIncludeDirectoryCommand_h
 #define cmIncludeDirectoryCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmIncludeDirectoryCommand
  * \brief Add include directories to the build.

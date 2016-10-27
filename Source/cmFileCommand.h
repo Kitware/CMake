@@ -3,9 +3,13 @@
 #ifndef cmFileCommand_h
 #define cmFileCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
 
-struct cmFileInstaller;
+class cmExecutionStatus;
 
 /** \class cmFileCommand
  * \brief Command for manipulation of files

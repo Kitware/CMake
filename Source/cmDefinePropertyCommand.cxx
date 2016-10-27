@@ -2,9 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDefinePropertyCommand.h"
 
+#include <sstream>
+
+#include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmState.h"
-#include "cmStateTypes.h"
-#include "cmake.h"
+
+class cmExecutionStatus;
 
 bool cmDefinePropertyCommand::InitialPass(std::vector<std::string> const& args,
                                           cmExecutionStatus&)

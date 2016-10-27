@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCreateTestSourceList.h"
 
+#include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 

@@ -2,7 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetFilenameComponentCommand.h"
 
+#include "cmMakefile.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmGetFilenameComponentCommand
 bool cmGetFilenameComponentCommand::InitialPass(

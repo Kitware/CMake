@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmEndMacroCommand.h"
 
+class cmExecutionStatus;
+struct cmListFileArgument;
+
 bool cmEndMacroCommand::InvokeInitialPass(
   std::vector<cmListFileArgument> const&, cmExecutionStatus&)
 {

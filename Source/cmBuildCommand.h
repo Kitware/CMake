@@ -3,7 +3,13 @@
 #ifndef cmBuildCommand_h
 #define cmBuildCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmBuildCommand
  * \brief build_command command

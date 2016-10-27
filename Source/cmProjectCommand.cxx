@@ -2,7 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProjectCommand.h"
 
+#include <cmsys/RegularExpression.hxx>
+#include <sstream>
+#include <stdio.h>
+
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmProjectCommand
 bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,

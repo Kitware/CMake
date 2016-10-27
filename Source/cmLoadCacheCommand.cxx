@@ -5,7 +5,7 @@
 #include <cmsys/FStream.hxx>
 
 #include "cmMakefile.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 

@@ -3,7 +3,13 @@
 #ifndef cmAddTestCommand_h
 #define cmAddTestCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmAddTestCommand
  * \brief Add a test to the lists of tests to run.

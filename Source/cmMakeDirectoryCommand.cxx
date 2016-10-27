@@ -2,7 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakeDirectoryCommand.h"
 
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmMakeDirectoryCommand
 bool cmMakeDirectoryCommand::InitialPass(std::vector<std::string> const& args,

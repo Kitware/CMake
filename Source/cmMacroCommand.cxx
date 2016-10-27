@@ -2,10 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMacroCommand.h"
 
+#include <algorithm>
+#include <sstream>
+#include <stdio.h>
+
 #include "cmAlgorithms.h"
+#include "cmExecutionStatus.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 // define the class for macro commands
 class cmMacroHelperCommand : public cmCommand

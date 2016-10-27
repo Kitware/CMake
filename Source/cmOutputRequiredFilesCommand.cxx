@@ -4,6 +4,8 @@
 
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
@@ -12,6 +14,7 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cm_unordered_map.hxx"
 
 class cmExecutionStatus;
 

@@ -2,13 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSetPropertyCommand.h"
 
+#include <sstream>
+
 #include "cmGlobalGenerator.h"
-#include "cmSetSourceFilesPropertiesCommand.h"
-#include "cmSetTargetPropertiesCommand.h"
-#include "cmSetTestsPropertiesCommand.h"
+#include "cmInstalledFile.h"
+#include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTest.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 cmSetPropertyCommand::cmSetPropertyCommand()
 {

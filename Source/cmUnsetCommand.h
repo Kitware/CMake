@@ -3,7 +3,13 @@
 #ifndef cmUnsetCommand_h
 #define cmUnsetCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmUnsetCommand
  * \brief Unset a CMAKE variable

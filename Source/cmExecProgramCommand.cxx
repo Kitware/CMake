@@ -2,9 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExecProgramCommand.h"
 
+#include <cmsys/Process.h>
+#include <stdio.h>
+
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/Process.h>
+class cmExecutionStatus;
 
 // cmExecProgramCommand
 bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,

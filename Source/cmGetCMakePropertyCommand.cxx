@@ -2,11 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetCMakePropertyCommand.h"
 
+#include <algorithm>
+#include <set>
+
 #include "cmAlgorithms.h"
 #include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
 #include "cmState.h"
-#include "cmStateTypes.h"
-#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmGetCMakePropertyCommand
 bool cmGetCMakePropertyCommand::InitialPass(
