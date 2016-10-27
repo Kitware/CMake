@@ -349,7 +349,11 @@ void cmGlobalVisualStudio10Generator::EnableLanguage(
 
 const char* cmGlobalVisualStudio10Generator::GetPlatformToolset() const
 {
-  return this->GetPlatformToolsetString().c_str();
+  std::string const& toolset = this->GetPlatformToolsetString();
+  if (toolset.empty()) {
+    return CM_NULLPTR;
+  }
+  return toolset.c_str();
 }
 
 std::string const& cmGlobalVisualStudio10Generator::GetPlatformToolsetString()
