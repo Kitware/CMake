@@ -259,7 +259,7 @@ static bool testValue(cmState* state, const std::string& key,
   if (!cachedValue.empty() && !value.empty() && cachedValue != value) {
     setErrorMessage(errorMessage, std::string("\"") + key +
                       "\" is set but incompatible with configured " +
-                      keyDescription + "value.");
+                      keyDescription + " value.");
     return false;
   }
   if (value.empty()) {
@@ -276,6 +276,8 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
     request.Data[kBUILD_DIRECTORY_KEY].asString();
   std::string generator = request.Data[kGENERATOR_KEY].asString();
   std::string extraGenerator = request.Data[kEXTRA_GENERATOR_KEY].asString();
+  std::string toolset = request.Data[kTOOLSET_KEY].asString();
+  std::string platform = request.Data[kPLATFORM_KEY].asString();
 
   if (buildDirectory.empty()) {
     setErrorMessage(errorMessage, std::string("\"") + kBUILD_DIRECTORY_KEY +
@@ -310,6 +312,18 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
       // check sourcedir:
       if (!testValue(state, "CMAKE_HOME_DIRECTORY", sourceDirectory,
                      "source directory", errorMessage)) {
+        return false;
+      }
+
+      // check toolset:
+      if (!testValue(state, "CMAKE_GENERATOR_TOOLSET", toolset, "toolset",
+                     errorMessage)) {
+        return false;
+      }
+
+      // check platform:
+      if (!testValue(state, "CMAKE_GENERATOR_PLATFORM", platform, "platform",
+                     errorMessage)) {
         return false;
       }
     }
@@ -354,10 +368,25 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
                                 "\" is not supported."));
     return false;
   }
+  if (!extraIt->supportsToolset && !toolset.empty()) {
+    setErrorMessage(errorMessage,
+                    std::string("Toolset was provided but is not supported by "
+                                "the requested generator."));
+    return false;
+  }
+  if (!extraIt->supportsPlatform && !platform.empty()) {
+    setErrorMessage(errorMessage,
+                    std::string("Platform was provided but is not supported "
+                                "by the requested generator."));
+    return false;
+  }
 
   const std::string fullGeneratorName =
     cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
       generator, extraGenerator);
+
+  cm->SetGeneratorToolset(toolset);
+  cm->SetGeneratorPlatform(platform);
 
   cmGlobalGenerator* gg = cm->CreateGlobalGenerator(fullGeneratorName);
   if (!gg) {
