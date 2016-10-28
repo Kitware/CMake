@@ -14,7 +14,8 @@
 int main(int argc, const char* argv[])
 {
   const char* substring_failure = "generated_exe_emulator_unexpected";
-  const char* substring_success = "generated_exe_emulator_expected";
+  // Require a slash to make sure it is a path and not a target name.
+  const char* substring_success = "/generated_exe_emulator_expected";
   const char* str = argv[1];
   if (argc < 2) {
     return EXIT_FAILURE;
