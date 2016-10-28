@@ -13,6 +13,8 @@ if (NOT XCODE_VERSION VERSION_LESS 6)
   run_cmake(XcodePlatformFrameworks)
 endif()
 
+run_cmake(PerConfigPerSourceFlags)
+
 # Use a single build tree for a few tests without cleaning.
 
 if(NOT XCODE_VERSION VERSION_LESS 5)
