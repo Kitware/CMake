@@ -276,7 +276,9 @@ Protocol version 1.0 requires the following attributes to be set:
   * "sourceDirectory" with a path to the sources
   * "buildDirectory" with a path to the build directory
   * "generator" with the generator name
-  * "extraGenerator" (optional!) with the extra generator to be used.
+  * "extraGenerator" (optional!) with the extra generator to be used
+  * "platform" with the generator platform (if supported by the generator)
+  * "toolset" with the generator toolset (if supported by the generator)
 
 Example::
 

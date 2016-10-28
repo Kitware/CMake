@@ -59,10 +59,10 @@
 { "recv": {"cookie":"zimtstern","inReplyTo":"handshake","type":"error","errorMessage":"Failed to activate protocol version: \"generator\" is unset but required."} },
 
 { "send": {"cookie":"zimtstern","type": "handshake","protocolVersion":{"major":1},"sourceDirectory":".","buildDirectory":"/tmp/build","generator":"XXXX","extraGenerator":"CodeBlocks"} },
-{ "recv": {"cookie":"zimtstern","inReplyTo":"handshake","type":"error","errorMessage":"Failed to activate protocol version: Could not set up the requested combination of \"generator\" and \"extraGenerator\""} },
+{ "recv": {"cookie":"zimtstern","inReplyTo":"handshake","type":"error","errorMessage":"Failed to activate protocol version: Generator \"XXXX\" not supported."} },
 
 { "send": {"cookie":"zimtstern","type": "handshake","protocolVersion":{"major":1},"sourceDirectory":".","buildDirectory":"/tmp/build","generator":"Ninja","extraGenerator":"XXXX"} },
-{ "recv": {"cookie":"zimtstern","inReplyTo":"handshake","type":"error","errorMessage":"Failed to activate protocol version: Could not set up the requested combination of \"generator\" and \"extraGenerator\""} },
+{ "recv": {"cookie":"zimtstern","inReplyTo":"handshake","type":"error","errorMessage":"Failed to activate protocol version: The combination of generator \"Ninja\" and extra generator \"XXXX\" is not supported."} },
 
 { "send": {"cookie":"zimtstern","type": "handshake","protocolVersion":{"major":1},"sourceDirectory":".","buildDirectory":"/tmp/build","generator":"Ninja","extraGenerator":"CodeBlocks"} },
 { "recv": {"cookie":"zimtstern","inReplyTo":"handshake","type":"reply"} },
