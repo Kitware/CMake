@@ -675,7 +675,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   if (!symlinkNeeded) {
     vars["POST_BUILD"] = postBuildCmdLine;
   } else {
-    vars["POST_BUILD"] = ":";
+    vars["POST_BUILD"] = cmGlobalNinjaGenerator::SHELL_NOOP;
     symlinkVars["POST_BUILD"] = postBuildCmdLine;
   }
   cmGlobalNinjaGenerator& globalGen = *this->GetGlobalGenerator();

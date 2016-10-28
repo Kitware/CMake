@@ -58,6 +58,9 @@ public:
   /// The indentation string used when generating Ninja's build file.
   static const char* INDENT;
 
+  /// The shell command used for a no-op.
+  static std::string const SHELL_NOOP;
+
   /// Write @a count times INDENT level to output stream @a os.
   static void Indent(std::ostream& os, int count);
 

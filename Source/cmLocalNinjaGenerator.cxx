@@ -299,15 +299,11 @@ void cmLocalNinjaGenerator::AppendCustomCommandDeps(
 std::string cmLocalNinjaGenerator::BuildCommandLine(
   const std::vector<std::string>& cmdLines)
 {
-  // If we have no commands but we need to build a command anyway, use ":".
+  // If we have no commands but we need to build a command anyway, use noop.
   // This happens when building a POST_BUILD value for link targets that
   // don't use POST_BUILD.
   if (cmdLines.empty()) {
-#ifdef _WIN32
-    return "cd .";
-#else
-    return ":";
-#endif
+    return cmGlobalNinjaGenerator::SHELL_NOOP;
   }
 
   std::ostringstream cmd;
