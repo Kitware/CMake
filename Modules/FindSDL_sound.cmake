@@ -19,7 +19,7 @@
 #   SDL_SOUND_INCLUDE_DIR, where to find SDL_sound.h
 #   SDL_SOUND_FOUND, if false, do not try to link to SDL_sound
 #   SDL_SOUND_LIBRARIES, this contains the list of libraries that you need
-#     to link against. This is a read-only variable and is marked INTERNAL.
+#     to link against.
 #   SDL_SOUND_EXTRAS, this is an optional variable for you to add your own
 #     flags to SDL_SOUND_LIBRARIES. This is prepended to SDL_SOUND_LIBRARIES.
 #     This is available mostly for cases this module failed to anticipate for
@@ -367,11 +367,10 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
        endif()
      endif()
 
+     set(SDL_SOUND_LIBRARIES ${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARIES_TMP})
    else()
-     set(SDL_SOUND_LIBRARIES "${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARY}" CACHE INTERNAL "SDL_sound and dependent libraries")
+     set(SDL_SOUND_LIBRARIES ${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARY})
    endif()
-
-   set(SDL_SOUND_LIBRARIES "${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARIES_TMP}" CACHE INTERNAL "SDL_sound and dependent libraries")
  endif()
 
 if(SDL_SOUND_INCLUDE_DIR AND EXISTS "${SDL_SOUND_INCLUDE_DIR}/SDL_sound.h")
