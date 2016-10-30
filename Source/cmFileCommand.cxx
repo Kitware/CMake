@@ -2600,7 +2600,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       // Do not return error for compatibility reason.
       std::string err = "Unexpected argument: ";
       err += *i;
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, err.c_str());
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, err);
     }
     ++i;
   }
@@ -2884,7 +2884,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
       // Do not return error for compatibility reason.
       std::string err = "Unexpected argument: ";
       err += *i;
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, err.c_str());
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, err);
     }
 
     ++i;

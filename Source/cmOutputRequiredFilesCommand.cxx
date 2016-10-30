@@ -206,7 +206,7 @@ protected:
             std::string message = "Skipping ";
             message += includeFile;
             message += " for file ";
-            message += info->FullPath.c_str();
+            message += info->FullPath;
             cmSystemTools::Error(message.c_str(), CM_NULLPTR);
           }
           continue;
@@ -520,7 +520,7 @@ bool cmOutputRequiredFilesCommand::InitialPass(
   const cmDependInformation* info = md.FindDependencies(this->File.c_str());
   if (info) {
     // write them out
-    FILE* fout = cmsys::SystemTools::Fopen(this->OutputFile.c_str(), "w");
+    FILE* fout = cmsys::SystemTools::Fopen(this->OutputFile, "w");
     if (!fout) {
       std::string err = "Can not open output file: ";
       err += this->OutputFile;

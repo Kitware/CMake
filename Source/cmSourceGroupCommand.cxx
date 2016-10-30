@@ -69,7 +69,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
         src += "/";
         src += args[i];
       }
-      src = cmSystemTools::CollapseFullPath(src.c_str());
+      src = cmSystemTools::CollapseFullPath(src);
       sg->AddGroupFile(src);
     } else {
       std::ostringstream err;

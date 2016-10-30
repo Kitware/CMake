@@ -90,8 +90,7 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
 
   std::string makecommand =
     this->Makefile->GetGlobalGenerator()->GenerateCMakeBuildCommand(
-      target, configuration.c_str(), "",
-      this->Makefile->IgnoreErrorsCMP0061());
+      target, configuration, "", this->Makefile->IgnoreErrorsCMP0061());
 
   this->Makefile->AddDefinition(variable, makecommand.c_str());
 

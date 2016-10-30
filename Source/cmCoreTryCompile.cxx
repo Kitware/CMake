@@ -40,7 +40,7 @@ static std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
 int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                                      bool isTryRun)
 {
-  this->BinaryDirectory = argv[1].c_str();
+  this->BinaryDirectory = argv[1];
   this->OutputFile = "";
   // which signature were we called with ?
   this->SrcFileSignature = true;
@@ -149,13 +149,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         }
       }
     } else if (doing == DoingOutputVariable) {
-      outputVariable = argv[i].c_str();
+      outputVariable = argv[i];
       doing = DoingNone;
     } else if (doing == DoingCopyFile) {
-      copyFile = argv[i].c_str();
+      copyFile = argv[i];
       doing = DoingNone;
     } else if (doing == DoingCopyFileError) {
-      copyFileError = argv[i].c_str();
+      copyFileError = argv[i];
       doing = DoingNone;
     } else if (doing == DoingSources) {
       sources.push_back(argv[i]);
@@ -163,7 +163,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       this->SrcFileSignature = false;
       projectName = argv[i].c_str();
     } else if (i == 4 && !this->SrcFileSignature) {
-      targetName = argv[i].c_str();
+      targetName = argv[i];
     } else {
       std::ostringstream m;
       m << "try_compile given unknown argument \"" << argv[i] << "\".";

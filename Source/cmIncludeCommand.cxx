@@ -69,7 +69,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
     module += ".cmake";
     std::string mfile = this->Makefile->GetModulesFile(module.c_str());
     if (!mfile.empty()) {
-      fname = mfile.c_str();
+      fname = mfile;
     }
   }
 
@@ -111,7 +111,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   std::string listFile = cmSystemTools::CollapseFullPath(
-    fname.c_str(), this->Makefile->GetCurrentSourceDirectory());
+    fname, this->Makefile->GetCurrentSourceDirectory());
   if (optional && !cmSystemTools::FileExists(listFile.c_str())) {
     if (!resultVarName.empty()) {
       this->Makefile->AddDefinition(resultVarName, "NOTFOUND");

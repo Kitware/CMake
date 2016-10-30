@@ -108,5 +108,5 @@ void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(const char* source,
   fin.close();
   fout.close();
   cmSystemTools::CopyFileIfDifferent(tempOutputFile.c_str(), outFile.c_str());
-  cmSystemTools::RemoveFile(tempOutputFile.c_str());
+  cmSystemTools::RemoveFile(tempOutputFile);
 }
