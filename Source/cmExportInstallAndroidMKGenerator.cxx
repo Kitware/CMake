@@ -26,7 +26,7 @@ void cmExportInstallAndroidMKGenerator::GenerateImportHeaderCode(
   std::string installDir = this->IEGen->GetDestination();
   os << "LOCAL_PATH := $(call my-dir)\n";
   size_t numDotDot = cmSystemTools::CountChar(installDir.c_str(), '/');
-  numDotDot += (installDir.size() > 0) ? 1 : 0;
+  numDotDot += installDir.empty() ? 0 : 1;
   std::string path;
   for (size_t n = 0; n < numDotDot; n++) {
     path += "/..";

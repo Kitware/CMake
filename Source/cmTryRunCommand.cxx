@@ -86,8 +86,9 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
 
   // although they could be used together, don't allow it, because
   // using OUTPUT_VARIABLE makes crosscompiling harder
-  if (this->OutputVariable.size() && (!this->RunOutputVariable.empty() ||
-                                      !this->CompileOutputVariable.empty())) {
+  if (!this->OutputVariable.empty() &&
+      (!this->RunOutputVariable.empty() ||
+       !this->CompileOutputVariable.empty())) {
     cmSystemTools::Error(
       "You cannot use OUTPUT_VARIABLE together with COMPILE_OUTPUT_VARIABLE "
       "or RUN_OUTPUT_VARIABLE. Please use only COMPILE_OUTPUT_VARIABLE and/or "
