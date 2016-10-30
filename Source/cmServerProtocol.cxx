@@ -82,7 +82,7 @@ static void getCMakeInputs(const cmGlobalGenerator* gg,
                            std::vector<std::string>* tmpFiles)
 {
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
-  const std::vector<cmMakefile*> makefiles = gg->GetMakefiles();
+  std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();
   for (auto it = makefiles.begin(); it != makefiles.end(); ++it) {
     const std::vector<std::string> listFiles = (*it)->GetListFiles();
 
@@ -850,7 +850,7 @@ static Json::Value DumpTargetsList(
   return result;
 }
 
-static Json::Value DumpProjectList(const cmake* cm, const std::string config)
+static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
 {
   Json::Value result = Json::arrayValue;
 
@@ -1059,7 +1059,7 @@ cmServerResponse cmServerProtocol1_0::ProcessGlobalSettings(
 }
 
 static void setBool(const cmServerRequest& request, const std::string& key,
-                    std::function<void(bool)> setter)
+                    std::function<void(bool)> const& setter)
 {
   if (request.Data[key].isNull()) {
     return;
