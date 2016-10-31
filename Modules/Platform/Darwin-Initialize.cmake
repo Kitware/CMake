@@ -125,10 +125,8 @@ if(CMAKE_OSX_SYSROOT)
       set(_CMAKE_OSX_SYSROOT_ORIG "")
     endif()
     set(_CMAKE_OSX_SYSROOT_PATH "${CMAKE_OSX_SYSROOT}")
-  endif()
-
-  if(CMAKE_OSX_SYSROOT)
-    # Transform the (maybe unversioned) sysroot into a versioned path.
+  else()
+    # Transform the sdk name into a path.
     execute_process(
       COMMAND xcodebuild -sdk ${CMAKE_OSX_SYSROOT} -version Path
       OUTPUT_VARIABLE _stdout
