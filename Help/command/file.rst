@@ -153,7 +153,8 @@ Move a file or directory within a filesystem from ``<oldname>`` to
   file(REMOVE_RECURSE [<files>...])
 
 Remove the given files.  The ``REMOVE_RECURSE`` mode will remove the given
-files and directories, also non-empty directories
+files and directories, also non-empty directories. No error is emitted if a
+given file does not exist.
 
 ------------------------------------------------------------------------------
 
