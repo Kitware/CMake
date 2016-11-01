@@ -52,8 +52,7 @@ macro(cmake_record_c_compile_features)
   endmacro()
 
   set(_result 0)
-  if (NOT "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC" AND
-      NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 12.1)
+  if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 12.1)
     if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 15.0.0)
       _get_intel_c_features(${CMAKE_C11_STANDARD_COMPILE_OPTION} CMAKE_C11_COMPILE_FEATURES)
     endif()
