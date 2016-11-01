@@ -963,7 +963,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
             (type == cmStateEnums::OBJECT_LIBRARY) ||
             (type == cmStateEnums::GLOBAL_TARGET) ||
             (type == cmStateEnums::UTILITY)) {
-          std::string name = target->GetName();
+          std::string const& name = target->GetName();
           if (emittedTargets.insert(name).second) {
             path = "... ";
             path += name;

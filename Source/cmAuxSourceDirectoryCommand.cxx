@@ -44,7 +44,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass(
 
   // Load all the files in the directory
   cmsys::Directory dir;
-  if (dir.Load(tdir.c_str())) {
+  if (dir.Load(tdir)) {
     size_t numfiles = dir.GetNumberOfFiles();
     for (size_t i = 0; i < numfiles; ++i) {
       std::string file = dir.GetFile(static_cast<unsigned long>(i));

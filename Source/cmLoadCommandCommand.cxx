@@ -208,7 +208,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // Try to find the program.
-  std::string fullPath = cmSystemTools::FindFile(moduleName.c_str(), path);
+  std::string fullPath = cmSystemTools::FindFile(moduleName, path);
   if (fullPath == "") {
     std::ostringstream e;
     e << "Attempt to load command failed from file \"" << moduleName << "\"";
@@ -237,14 +237,14 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
   // find the init function
   std::string initFuncName = args[0] + "Init";
   CM_INIT_FUNCTION initFunction =
-    (CM_INIT_FUNCTION)cmsys::DynamicLoader::GetSymbolAddress(
-      lib, initFuncName.c_str());
+    (CM_INIT_FUNCTION)cmsys::DynamicLoader::GetSymbolAddress(lib,
+                                                             initFuncName);
   if (!initFunction) {
     initFuncName = "_";
     initFuncName += args[0];
     initFuncName += "Init";
     initFunction = (CM_INIT_FUNCTION)(
-      cmsys::DynamicLoader::GetSymbolAddress(lib, initFuncName.c_str()));
+      cmsys::DynamicLoader::GetSymbolAddress(lib, initFuncName));
   }
   // if the symbol is found call it to set the name on the
   // function blocker

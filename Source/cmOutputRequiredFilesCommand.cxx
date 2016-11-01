@@ -180,33 +180,30 @@ protected:
     while (cmSystemTools::GetLineFromStream(fin, line)) {
       if (cmHasLiteralPrefix(line.c_str(), "#include")) {
         // if it is an include line then create a string class
-        std::string currentline = line;
-        size_t qstart = currentline.find('\"', 8);
+        size_t qstart = line.find('\"', 8);
         size_t qend;
         // if a quote is not found look for a <
         if (qstart == std::string::npos) {
-          qstart = currentline.find('<', 8);
+          qstart = line.find('<', 8);
           // if a < is not found then move on
           if (qstart == std::string::npos) {
-            cmSystemTools::Error("unknown include directive ",
-                                 currentline.c_str());
+            cmSystemTools::Error("unknown include directive ", line.c_str());
             continue;
           } else {
-            qend = currentline.find('>', qstart + 1);
+            qend = line.find('>', qstart + 1);
           }
         } else {
-          qend = currentline.find('\"', qstart + 1);
+          qend = line.find('\"', qstart + 1);
         }
         // extract the file being included
-        std::string includeFile =
-          currentline.substr(qstart + 1, qend - qstart - 1);
+        std::string includeFile = line.substr(qstart + 1, qend - qstart - 1);
         // see if the include matches the regular expression
         if (!this->IncludeFileRegularExpression.find(includeFile)) {
           if (this->Verbose) {
             std::string message = "Skipping ";
             message += includeFile;
             message += " for file ";
-            message += info->FullPath.c_str();
+            message += info->FullPath;
             cmSystemTools::Error(message.c_str(), CM_NULLPTR);
           }
           continue;
@@ -520,7 +517,7 @@ bool cmOutputRequiredFilesCommand::InitialPass(
   const cmDependInformation* info = md.FindDependencies(this->File.c_str());
   if (info) {
     // write them out
-    FILE* fout = cmsys::SystemTools::Fopen(this->OutputFile.c_str(), "w");
+    FILE* fout = cmsys::SystemTools::Fopen(this->OutputFile, "w");
     if (!fout) {
       std::string err = "Can not open output file: ";
       err += this->OutputFile;

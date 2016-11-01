@@ -17,7 +17,7 @@ public:
   ~cmFileMonitor();
 
   using Callback = std::function<void(const std::string&, int, int)>;
-  void MonitorPaths(const std::vector<std::string>& paths, Callback cb);
+  void MonitorPaths(const std::vector<std::string>& paths, Callback const& cb);
   void StopMonitoring();
 
   std::vector<std::string> WatchedFiles() const;

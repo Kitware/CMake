@@ -342,7 +342,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
       return false;
     }
   } else if (this->PropertyName == "TYPE") {
-    if (!cmState::IsCacheEntryType(this->PropertyValue.c_str())) {
+    if (!cmState::IsCacheEntryType(this->PropertyValue)) {
       std::ostringstream e;
       e << "given invalid CACHE entry TYPE \"" << this->PropertyValue << "\"";
       this->SetError(e.str());

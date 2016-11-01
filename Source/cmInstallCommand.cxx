@@ -986,7 +986,7 @@ bool cmInstallCommand::HandleDirectoryMode(
         std::ostringstream e;
         e << args[0] << " does not allow \"" << args[i]
           << "\" after PATTERN or REGEX.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
       }
       exclude_from_all = true;
