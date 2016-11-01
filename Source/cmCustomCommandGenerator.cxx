@@ -38,32 +38,44 @@ unsigned int cmCustomCommandGenerator::GetNumberOfCommands() const
   return static_cast<unsigned int>(this->CC.GetCommandLines().size());
 }
 
-bool cmCustomCommandGenerator::UseCrossCompilingEmulator(unsigned int c) const
+const char* cmCustomCommandGenerator::GetCrossCompilingEmulator(
+  unsigned int c) const
 {
+  if (!this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING")) {
+    return CM_NULLPTR;
+  }
   std::string const& argv0 = this->CC.GetCommandLines()[c][0];
   cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(argv0);
-  if (target && target->GetType() == cmStateEnums::EXECUTABLE) {
-    return target->GetProperty("CROSSCOMPILING_EMULATOR") != CM_NULLPTR;
+  if (target && target->GetType() == cmStateEnums::EXECUTABLE &&
+      !target->IsImported()) {
+    return target->GetProperty("CROSSCOMPILING_EMULATOR");
   }
-  return false;
+  return CM_NULLPTR;
 }
 
-std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
+const char* cmCustomCommandGenerator::GetArgv0Location(unsigned int c) const
 {
   std::string const& argv0 = this->CC.GetCommandLines()[c][0];
   cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(argv0);
   if (target && target->GetType() == cmStateEnums::EXECUTABLE &&
       (target->IsImported() ||
+       target->GetProperty("CROSSCOMPILING_EMULATOR") ||
        !this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING"))) {
     return target->GetLocation(this->Config);
   }
-  if (target && target->GetType() == cmStateEnums::EXECUTABLE) {
-    const char* emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
-    if (emulator) {
-      return std::string(emulator);
-    }
+  return CM_NULLPTR;
+}
+
+std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
+{
+  if (const char* emulator = this->GetCrossCompilingEmulator(c)) {
+    return std::string(emulator);
+  }
+  if (const char* location = this->GetArgv0Location(c)) {
+    return std::string(location);
   }
 
+  std::string const& argv0 = this->CC.GetCommandLines()[c][0];
   CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(argv0);
   std::string exe = cge->Evaluate(this->LG, this->Config);
 
@@ -99,13 +111,20 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
                                                std::string& cmd) const
 {
   unsigned int offset = 1;
-  if (this->UseCrossCompilingEmulator(c)) {
+  if (this->GetCrossCompilingEmulator(c) != CM_NULLPTR) {
     offset = 0;
   }
   cmCustomCommandLine const& commandLine = this->CC.GetCommandLines()[c];
   for (unsigned int j = offset; j < commandLine.size(); ++j) {
-    std::string arg =
-      this->GE->Parse(commandLine[j])->Evaluate(this->LG, this->Config);
+    std::string arg;
+    if (const char* location =
+          j == 0 ? this->GetArgv0Location(c) : CM_NULLPTR) {
+      // GetCommand returned the emulator instead of the argv0 location,
+      // so transform the latter now.
+      arg = location;
+    } else {
+      arg = this->GE->Parse(commandLine[j])->Evaluate(this->LG, this->Config);
+    }
     cmd += " ";
     if (this->OldStyle) {
       cmd += escapeForShellOldStyle(arg);
