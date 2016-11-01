@@ -50,8 +50,6 @@ public:
 
   std::string CreateGuidFromComponentId(std::string const& componentId);
 
-  static std::string CMakeEncodingToUtf8(std::string const& value);
-
 protected:
   cmCPackLog* Logger;
 

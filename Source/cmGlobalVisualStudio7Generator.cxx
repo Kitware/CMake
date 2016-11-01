@@ -731,11 +731,5 @@ bool cmGlobalVisualStudio7Generator::IsDependedOn(
 
 std::string cmGlobalVisualStudio7Generator::Encoding()
 {
-  std::ostringstream encoding;
-#ifdef CMAKE_ENCODING_UTF8
-  encoding << "UTF-8";
-#else
-  encoding << "Windows-1252";
-#endif
-  return encoding.str();
+  return "UTF-8";
 }

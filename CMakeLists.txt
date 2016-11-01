@@ -66,12 +66,8 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx_features.cmake)
 endif()
 
-# option to set the internal encoding of CMake to UTF-8
-option(CMAKE_ENCODING_UTF8 "Use UTF-8 encoding internally." ON)
-mark_as_advanced(CMAKE_ENCODING_UTF8)
-if(CMAKE_ENCODING_UTF8)
-  set(KWSYS_ENCODING_DEFAULT_CODEPAGE CP_UTF8)
-endif()
+# set the internal encoding of CMake to UTF-8
+set(KWSYS_ENCODING_DEFAULT_CODEPAGE CP_UTF8)
 
 # option to use COMPONENT with install command
 option(CMake_INSTALL_COMPONENTS "Using components when installing" OFF)
