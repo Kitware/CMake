@@ -29,7 +29,7 @@ Qt 4 and Qt 5 may be used together in the same
   set(CMAKE_AUTOMOC ON)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-  find_package(Qt5 COMPONENTS Widgets REQUIRED)
+  find_package(Qt5 COMPONENTS Widgets DBus REQUIRED)
   add_executable(publisher publisher.cpp)
   target_link_libraries(publisher Qt5::Widgets Qt5::DBus)
 
