@@ -1464,7 +1464,9 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
       needfc = true;
     }
     if (const char* cflags = sf.GetProperty("COMPILE_FLAGS")) {
-      fc.CompileFlags = cflags;
+      cmGeneratorExpression ge;
+      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
+      fc.CompileFlags = cge->Evaluate(lg, *i);
       needfc = true;
     }
     if (lg->FortranProject) {

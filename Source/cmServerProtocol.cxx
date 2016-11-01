@@ -686,7 +686,12 @@ static Json::Value DumpSourceFilesList(
       cmLocalGenerator* lg = target->GetLocalGenerator();
 
       std::string compileFlags = ld.Flags;
-      lg->AppendFlags(compileFlags, file->GetProperty("COMPILE_FLAGS"));
+      if (const char* cflags = file->GetProperty("COMPILE_FLAGS")) {
+        cmGeneratorExpression ge;
+        const char* processed =
+          ge.Parse(cflags)->Evaluate(target->GetLocalGenerator(), config);
+        lg->AppendFlags(compileFlags, processed);
+      }
       fileData.Flags = compileFlags;
 
       fileData.IncludePathList = ld.IncludePathList;

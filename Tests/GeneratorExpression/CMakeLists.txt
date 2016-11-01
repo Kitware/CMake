@@ -257,6 +257,7 @@ add_custom_target(check-part4 ALL
 # Cover test properties with generator expressions.
 add_executable(echo echo.c)
 add_executable(pwd pwd.c)
+set_property(SOURCE echo.c PROPERTY COMPILE_FLAGS $<1:-DSRC_GENEX_WORKS>)
 
 add_test(NAME echo-configuration COMMAND echo $<CONFIGURATION>)
 set_property(TEST echo-configuration PROPERTY

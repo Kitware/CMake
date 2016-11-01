@@ -675,7 +675,24 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     default:
       break;
   }
-  lg->AppendFlags(flags, sf->GetProperty("COMPILE_FLAGS"));
+  if (const char* cflags = sf->GetProperty("COMPILE_FLAGS")) {
+    cmGeneratorExpression ge;
+    std::string configName = "NO-PER-CONFIG-SUPPORT-IN-XCODE";
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> compiledExpr = ge.Parse(cflags);
+    const char* processed = compiledExpr->Evaluate(lg, configName);
+    if (compiledExpr->GetHadContextSensitiveCondition()) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Xcode does not support per-config per-source COMPILE_FLAGS:\n"
+        "  " << cflags << "\n"
+        "specified for source:\n"
+        "  " << sf->GetFullPath() << "\n";
+      /* clang-format on */
+      lg->IssueMessage(cmake::FATAL_ERROR, e.str());
+    }
+    lg->AppendFlags(flags, processed);
+  }
 
   // Add per-source definitions.
   BuildObjectListOrString flagsBuild(this, false);

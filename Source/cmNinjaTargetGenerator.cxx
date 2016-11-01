@@ -132,8 +132,14 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   }
 
   // Add source file specific flags.
-  this->LocalGenerator->AppendFlags(flags,
-                                    source->GetProperty("COMPILE_FLAGS"));
+  if (const char* cflags = source->GetProperty("COMPILE_FLAGS")) {
+    std::string config = this->LocalGenerator->GetConfigName();
+    cmGeneratorExpression ge;
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
+    const char* evaluatedFlags = cge->Evaluate(this->LocalGenerator, config,
+                                               false, this->GeneratorTarget);
+    this->LocalGenerator->AppendFlags(flags, evaluatedFlags);
+  }
 
   return flags;
 }
