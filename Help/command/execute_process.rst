@@ -20,7 +20,7 @@ Execute one or more child processes.
                   [OUTPUT_STRIP_TRAILING_WHITESPACE]
                   [ERROR_STRIP_TRAILING_WHITESPACE])
 
-Runs the given sequence of one or more commands with the standard
+Runs the given sequence of one or more commands in parallel with the standard
 output of each process piped to the standard input of the next.
 A single standard error pipe is used for all processes.
 
@@ -35,6 +35,9 @@ Options:
  are treated as normal arguments.
  (Use the ``INPUT_*``, ``OUTPUT_*``, and ``ERROR_*`` options to
  redirect stdin, stdout, and stderr.)
+
+ If a sequential execution of multiple commands is required, use multiple
+ :command:`execute_process` calls with a single ``COMMAND`` argument.
 
 ``WORKING_DIRECTORY``
  The named directory will be set as the current working directory of
