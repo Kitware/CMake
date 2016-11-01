@@ -1,0 +1,4 @@
+
+ADD_TEST_MACRO(Cuda.Complex CudaComplex)
+ADD_TEST_MACRO(Cuda.ConsumeCompileFeatures CudaConsumeCompileFeatures)
+ADD_TEST_MACRO(Cuda.ObjectLibrary CudaObjectLibrary)
