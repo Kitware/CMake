@@ -8,6 +8,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProcessOutput.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
@@ -225,16 +226,30 @@ void cmCTestLaunch::RunChild()
   if (!this->Passthru) {
     char* data = CM_NULLPTR;
     int length = 0;
+    cmProcessOutput processOutput;
+    std::string strdata;
     while (int p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) {
       if (p == cmsysProcess_Pipe_STDOUT) {
-        fout.write(data, length);
-        std::cout.write(data, length);
+        processOutput.DecodeText(data, length, strdata, 1);
+        fout.write(strdata.c_str(), strdata.size());
+        std::cout.write(strdata.c_str(), strdata.size());
         this->HaveOut = true;
       } else if (p == cmsysProcess_Pipe_STDERR) {
-        ferr.write(data, length);
-        std::cerr.write(data, length);
+        processOutput.DecodeText(data, length, strdata, 2);
+        ferr.write(strdata.c_str(), strdata.size());
+        std::cerr.write(strdata.c_str(), strdata.size());
         this->HaveErr = true;
       }
+    }
+    processOutput.DecodeText(std::string(), strdata, 1);
+    if (!strdata.empty()) {
+      fout.write(strdata.c_str(), strdata.size());
+      std::cout.write(strdata.c_str(), strdata.size());
+    }
+    processOutput.DecodeText(std::string(), strdata, 2);
+    if (!strdata.empty()) {
+      ferr.write(strdata.c_str(), strdata.size());
+      std::cerr.write(strdata.c_str(), strdata.size());
     }
   }
 

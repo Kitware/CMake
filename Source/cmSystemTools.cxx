@@ -3,6 +3,7 @@
 #include "cmSystemTools.h"
 
 #include "cmAlgorithms.h"
+#include "cmProcessOutput.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmArchiveWrite.h"
@@ -609,6 +610,8 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
   char* data;
   int length;
   int pipe;
+  cmProcessOutput processOutput;
+  std::string strdata;
   if (outputflag != OUTPUT_PASSTHROUGH &&
       (captureStdOut || captureStdErr || outputflag != OUTPUT_NONE)) {
     while ((pipe = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) >
@@ -624,28 +627,44 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
 
       if (pipe == cmsysProcess_Pipe_STDOUT) {
         if (outputflag != OUTPUT_NONE) {
-          cmSystemTools::Stdout(data, length);
+          processOutput.DecodeText(data, length, strdata, 1);
+          cmSystemTools::Stdout(strdata.c_str(), strdata.size());
         }
         if (captureStdOut) {
           tempStdOut.insert(tempStdOut.end(), data, data + length);
         }
       } else if (pipe == cmsysProcess_Pipe_STDERR) {
         if (outputflag != OUTPUT_NONE) {
-          cmSystemTools::Stderr(data, length);
+          processOutput.DecodeText(data, length, strdata, 2);
+          cmSystemTools::Stderr(strdata.c_str(), strdata.size());
         }
         if (captureStdErr) {
           tempStdErr.insert(tempStdErr.end(), data, data + length);
         }
       }
     }
+
+    if (outputflag != OUTPUT_NONE) {
+      processOutput.DecodeText(std::string(), strdata, 1);
+      if (!strdata.empty()) {
+        cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+      }
+      processOutput.DecodeText(std::string(), strdata, 2);
+      if (!strdata.empty()) {
+        cmSystemTools::Stderr(strdata.c_str(), strdata.size());
+      }
+    }
   }
 
   cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+
   if (captureStdOut) {
     captureStdOut->assign(tempStdOut.begin(), tempStdOut.end());
+    processOutput.DecodeText(*captureStdOut, *captureStdOut);
   }
   if (captureStdErr) {
     captureStdErr->assign(tempStdErr.begin(), tempStdErr.end());
+    processOutput.DecodeText(*captureStdErr, *captureStdErr);
   }
 
   bool result = true;
@@ -1643,6 +1662,8 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
   line = "";
   std::vector<char>::iterator outiter = out.begin();
   std::vector<char>::iterator erriter = err.begin();
+  cmProcessOutput processOutput;
+  std::string strdata;
   while (1) {
     // Check for a newline in stdout.
     for (; outiter != out.end(); ++outiter) {
@@ -1687,17 +1708,31 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
       return pipe;
     }
     if (pipe == cmsysProcess_Pipe_STDOUT) {
+      processOutput.DecodeText(data, length, strdata, 1);
       // Append to the stdout buffer.
       std::vector<char>::size_type size = out.size();
-      out.insert(out.end(), data, data + length);
+      out.insert(out.end(), strdata.begin(), strdata.end());
       outiter = out.begin() + size;
     } else if (pipe == cmsysProcess_Pipe_STDERR) {
+      processOutput.DecodeText(data, length, strdata, 2);
       // Append to the stderr buffer.
       std::vector<char>::size_type size = err.size();
-      err.insert(err.end(), data, data + length);
+      err.insert(err.end(), strdata.begin(), strdata.end());
       erriter = err.begin() + size;
     } else if (pipe == cmsysProcess_Pipe_None) {
       // Both stdout and stderr pipes have broken.  Return leftover data.
+      processOutput.DecodeText(std::string(), strdata, 1);
+      if (!strdata.empty()) {
+        std::vector<char>::size_type size = out.size();
+        out.insert(out.end(), strdata.begin(), strdata.end());
+        outiter = out.begin() + size;
+      }
+      processOutput.DecodeText(std::string(), strdata, 2);
+      if (!strdata.empty()) {
+        std::vector<char>::size_type size = err.size();
+        err.insert(err.end(), strdata.begin(), strdata.end());
+        erriter = err.begin() + size;
+      }
       if (!out.empty()) {
         line.append(&out[0], outiter - out.begin());
         out.erase(out.begin(), out.end());
