@@ -766,7 +766,7 @@ void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
 
 int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
                                         const char* dir, int timeout,
-                                        std::ostream& ofs)
+                                        std::ostream& ofs, Encoding encoding)
 {
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
@@ -810,7 +810,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 
   char* data;
   int length;
-  cmProcessOutput processOutput;
+  cmProcessOutput processOutput(encoding);
   std::string strdata;
   cmCTestOptionalLog(
     this->CTest, HANDLER_PROGRESS_OUTPUT, "   Each symbol represents "

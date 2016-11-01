@@ -574,7 +574,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      std::string* captureStdOut,
                                      std::string* captureStdErr, int* retVal,
                                      const char* dir, OutputOption outputflag,
-                                     double timeout)
+                                     double timeout, Encoding encoding)
 {
   std::vector<const char*> argv;
   for (std::vector<std::string>::const_iterator a = command.begin();
@@ -610,7 +610,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
   char* data;
   int length;
   int pipe;
-  cmProcessOutput processOutput;
+  cmProcessOutput processOutput(encoding);
   std::string strdata;
   if (outputflag != OUTPUT_PASSTHROUGH &&
       (captureStdOut || captureStdErr || outputflag != OUTPUT_NONE)) {

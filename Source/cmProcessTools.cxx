@@ -7,13 +7,13 @@
 #include <ostream>
 
 void cmProcessTools::RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
-                                OutputParser* err)
+                                OutputParser* err, Encoding encoding)
 {
   cmsysProcess_Execute(cp);
   char* data = CM_NULLPTR;
   int length = 0;
   int p;
-  cmProcessOutput processOutput;
+  cmProcessOutput processOutput(encoding);
   std::string strdata;
   while ((out || err) &&
          (p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR), p)) {

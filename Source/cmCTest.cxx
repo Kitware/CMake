@@ -961,7 +961,7 @@ int cmCTest::GetTestModelFromString(const char* str)
 
 int cmCTest::RunMakeCommand(const char* command, std::string& output,
                             int* retVal, const char* dir, int timeout,
-                            std::ostream& ofs)
+                            std::ostream& ofs, Encoding encoding)
 {
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
@@ -1000,7 +1000,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
 
   char* data;
   int length;
-  cmProcessOutput processOutput;
+  cmProcessOutput processOutput(encoding);
   std::string strdata;
   cmCTestLog(this, HANDLER_PROGRESS_OUTPUT, "   Each . represents "
                << tick_len << " bytes of output" << std::endl
@@ -1075,7 +1075,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
 
 int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
                      int* retVal, std::ostream* log, double testTimeOut,
-                     std::vector<std::string>* environment)
+                     std::vector<std::string>* environment, Encoding encoding)
 {
   bool modifyEnv = (environment && !environment->empty());
 
@@ -1170,7 +1170,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
 
   char* data;
   int length;
-  cmProcessOutput processOutput;
+  cmProcessOutput processOutput(encoding);
   std::string strdata;
   while (cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) {
     processOutput.DecodeText(data, length, strdata);
@@ -2523,7 +2523,7 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(
 
 bool cmCTest::RunCommand(const char* command, std::string* stdOut,
                          std::string* stdErr, int* retVal, const char* dir,
-                         double timeout)
+                         double timeout, Encoding encoding)
 {
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
 
@@ -2554,7 +2554,7 @@ bool cmCTest::RunCommand(const char* command, std::string* stdOut,
   std::vector<char> tempError;
   char* data;
   int length;
-  cmProcessOutput processOutput;
+  cmProcessOutput processOutput(encoding);
   std::string strdata;
   int res;
   bool done = false;

@@ -3,6 +3,7 @@
 #ifndef cmProcessTools_h
 #define cmProcessTools_h
 
+#include "cmProcessOutput.h"
 #include <cmConfigure.h>
 
 #include <iosfwd>
@@ -16,6 +17,7 @@
 class cmProcessTools
 {
 public:
+  typedef cmProcessOutput::Encoding Encoding;
   /** Abstract interface for process output parsers.  */
   class OutputParser
   {
@@ -79,7 +81,8 @@ public:
 
   /** Run a process and send output to given parsers.  */
   static void RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
-                         OutputParser* err = CM_NULLPTR);
+                         OutputParser* err = CM_NULLPTR,
+                         Encoding encoding = cmProcessOutput::Auto);
 };
 
 #endif

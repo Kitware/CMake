@@ -117,7 +117,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
 
 bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
                                       int& retVal, const char* dir,
-                                      bool verbose)
+                                      bool verbose, Encoding encoding)
 {
   if (cmSystemTools::GetRunCommandOutput()) {
     verbose = false;
@@ -215,7 +215,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   int length;
   char* data;
   int p;
-  cmProcessOutput processOutput;
+  cmProcessOutput processOutput(encoding);
   std::string strdata;
   while ((p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR), p)) {
     if (p == cmsysProcess_Pipe_STDOUT || p == cmsysProcess_Pipe_STDERR) {
