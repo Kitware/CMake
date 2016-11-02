@@ -36,8 +36,11 @@
 #
 # CMAKE_SWIG_FLAGS can be used to add special flags to all swig calls.
 #
-# Another special variable is CMAKE_SWIG_OUTDIR, it allows one to specify
-# where to write all the swig generated module (swig -outdir option)
+# CMAKE_SWIG_OUTDIR allows one to specify where to write
+# the language specific files (swig -outdir option).
+#
+# SWIG_OUTFILE_DIR allows one to specify where to write the output file
+# (swig -o option).  If not specified, CMAKE_SWIG_OUTDIR is used.
 #
 # The name-specific variable SWIG_MODULE_<name>_EXTRA_DEPS may be used to specify extra
 # dependencies for the generated modules.
@@ -142,6 +145,13 @@ macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   else()
     set(swig_outdir ${CMAKE_CURRENT_BINARY_DIR})
   endif()
+
+  if(SWIG_OUTFILE_DIR)
+    set(swig_outfile_dir ${SWIG_OUTFILE_DIR})
+  else()
+    set(swig_outfile_dir ${swig_outdir})
+  endif()
+
   if (NOT SWIG_MODULE_${name}_NOPROXY)
     SWIG_GET_EXTRA_OUTPUT_FILES(${SWIG_MODULE_${name}_LANGUAGE}
       swig_extra_generated_files
@@ -149,7 +159,7 @@ macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
       "${swig_source_file_fullname}")
   endif()
   set(swig_generated_file_fullname
-    "${swig_outdir}/${swig_source_file_name_we}")
+    "${swig_outfile_dir}/${swig_source_file_name_we}")
   # add the language into the name of the file (i.e. TCL_wrap)
   # this allows for the same .i file to be wrapped into different languages
   string(APPEND swig_generated_file_fullname
