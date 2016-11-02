@@ -227,10 +227,12 @@ static bool dprintf_IsQualifierNoDollar(const char *fmt)
  * Create an index with the type of each parameter entry and its
  * value (may vary in size)
  *
+ * Returns zero on success.
+ *
  ******************************************************************/
 
-static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
-                          va_list arglist)
+static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
+                         va_list arglist)
 {
   char *fmt = (char *)format;
   int param_num = 0;
@@ -393,6 +395,10 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
       i = this_param - 1;
 
+      if((i < 0) || (i >= MAX_PARAMETERS))
+        /* out of allowed range */
+        return 1;
+
       switch (*fmt) {
       case 'S':
         flags |= FLAGS_ALT;
@@ -549,7 +555,7 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
     }
   }
 
-  return max_param;
+  return 0;
 
 }
 
@@ -587,7 +593,8 @@ static int dprintf_formatf(
   char *workend = &work[sizeof(work) - 2];
 
   /* Do the actual %-code parsing */
-  dprintf_Pass1(format, vto, endpos, ap_save);
+  if(dprintf_Pass1(format, vto, endpos, ap_save))
+    return -1;
 
   end = &endpos[0]; /* the initial end-position from the list dprintf_Pass1()
                        created for us */
@@ -992,7 +999,7 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
   info.max = maxlength;
 
   retcode = dprintf_formatf(&info, addbyter, format, ap_save);
-  if(info.max) {
+  if((retcode != -1) && info.max) {
     /* we terminate this with a zero byte */
     if(info.max == info.length)
       /* we're at maximum, scrap the last letter */
@@ -1029,16 +1036,19 @@ static int alloc_addbyter(int output, FILE *data)
     infop->len =0;
   }
   else if(infop->len+1 >= infop->alloc) {
-    char *newptr;
+    char *newptr = NULL;
+    size_t newsize = infop->alloc*2;
 
-    newptr = realloc(infop->buffer, infop->alloc*2);
+    /* detect wrap-around or other overflow problems */
+    if(newsize > infop->alloc)
+      newptr = realloc(infop->buffer, newsize);
 
     if(!newptr) {
       infop->fail = 1;
       return -1; /* fail */
     }
     infop->buffer = newptr;
-    infop->alloc *= 2;
+    infop->alloc = newsize;
   }
 
   infop->buffer[ infop->len ] = outc;

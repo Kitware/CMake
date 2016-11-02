@@ -70,16 +70,14 @@
 #include "http.h" /* for HTTP proxy tunnel stuff */
 #include "socks.h"
 #include "pop3.h"
-
 #include "strtoofft.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "vtls/vtls.h"
 #include "connect.h"
 #include "strerror.h"
 #include "select.h"
 #include "multiif.h"
 #include "url.h"
-#include "rawstr.h"
 #include "curl_sasl.h"
 #include "curl_md5.h"
 #include "warnless.h"
@@ -663,7 +661,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
 
   if(pop3code != '+') {
     failf(data, "Got unexpected pop3-server response");
-    result = CURLE_FTP_WEIRD_SERVER_REPLY;
+    result = CURLE_WEIRD_SERVER_REPLY;
   }
   else {
     /* Does the server support APOP authentication? */
@@ -1412,11 +1410,11 @@ static CURLcode pop3_parse_url_options(struct connectdata *conn)
     while(*ptr && *ptr != ';')
       ptr++;
 
-    if(strnequal(key, "AUTH=", 5)) {
+    if(strncasecompare(key, "AUTH=", 5)) {
       result = Curl_sasl_parse_url_auth_option(&pop3c->sasl,
                                                value, ptr - value);
 
-      if(result && strnequal(value, "+APOP", ptr - value)) {
+      if(result && strncasecompare(value, "+APOP", ptr - value)) {
         pop3c->preftype = POP3_TYPE_APOP;
         pop3c->sasl.prefmech = SASL_AUTH_NONE;
         result = CURLE_OK;

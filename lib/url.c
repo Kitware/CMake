@@ -59,24 +59,13 @@
 #include <limits.h>
 #endif
 
-#ifdef USE_LIBIDN
-#include <idna.h>
-#include <tld.h>
-#include <stringprep.h>
-#ifdef HAVE_IDN_FREE_H
-#include <idn-free.h>
-#else
-/* prototype from idn-free.h, not provided by libidn 0.4.5's make install! */
-void idn_free (void *ptr);
-#endif
-#ifndef HAVE_IDN_FREE
-/* if idn_free() was not found in this version of libidn use free() instead */
-#define idn_free(x) (free)(x)
-#endif
+#ifdef USE_LIBIDN2
+#include <idn2.h>
+
 #elif defined(USE_WIN32_IDN)
 /* prototype for curl_win32_idn_to_ascii() */
 bool curl_win32_idn_to_ascii(const char *in, char **out);
-#endif  /* USE_LIBIDN */
+#endif  /* USE_LIBIDN2 */
 
 #include "urldata.h"
 #include "netrc.h"
@@ -88,7 +77,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "sendf.h"
 #include "progress.h"
 #include "cookie.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "strerror.h"
 #include "escape.h"
 #include "strtok.h"
@@ -100,7 +89,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "multiif.h"
 #include "easyif.h"
 #include "speedcheck.h"
-#include "rawstr.h"
 #include "warnless.h"
 #include "non-ascii.h"
 #include "inet_pton.h"
@@ -405,7 +393,7 @@ CURLcode Curl_close(struct Curl_easy *data)
   if(!data)
     return CURLE_OK;
 
-  Curl_expire(data, 0); /* shut off timers */
+  Curl_expire_clear(data); /* shut off timers */
 
   m = data->multi;
 
@@ -602,6 +590,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->tcp_keepintvl = 60;
   set->tcp_keepidle = 60;
   set->tcp_fastopen = FALSE;
+  set->tcp_nodelay = TRUE;
 
   set->ssl_enable_npn = TRUE;
   set->ssl_enable_alpn = TRUE;
@@ -780,6 +769,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * return error.
      */
     data->set.http_fail_on_error = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+  case CURLOPT_KEEP_SENDING_ON_ERROR:
+    data->set.http_keep_sending_on_error = (0 != va_arg(param, long)) ?
+                                           TRUE : FALSE;
     break;
   case CURLOPT_UPLOAD:
   case CURLOPT_PUT:
@@ -1225,23 +1218,23 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     if(argptr == NULL)
       break;
 
-    if(Curl_raw_equal(argptr, "ALL")) {
+    if(strcasecompare(argptr, "ALL")) {
       /* clear all cookies */
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       Curl_cookie_clearall(data->cookies);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
-    else if(Curl_raw_equal(argptr, "SESS")) {
+    else if(strcasecompare(argptr, "SESS")) {
       /* clear session cookies */
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       Curl_cookie_clearsess(data->cookies);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
-    else if(Curl_raw_equal(argptr, "FLUSH")) {
+    else if(strcasecompare(argptr, "FLUSH")) {
       /* flush cookies to file, takes care of the locking */
       Curl_flush_cookies(data, 0);
     }
-    else if(Curl_raw_equal(argptr, "RELOAD")) {
+    else if(strcasecompare(argptr, "RELOAD")) {
       /* reload cookies from file */
       Curl_cookie_loadfiles(data);
       break;
@@ -2614,7 +2607,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
       data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
   case CURLOPT_TLSAUTH_TYPE:
-    if(strnequal((char *)va_arg(param, char *), "SRP", strlen("SRP")))
+    if(strncasecompare((char *)va_arg(param, char *), "SRP", strlen("SRP")))
       data->set.ssl.authtype = CURL_TLSAUTH_SRP;
     else
       data->set.ssl.authtype = CURL_TLSAUTH_NONE;
@@ -2829,6 +2822,17 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
     return CURLE_OK;
   }
 
+  /*
+   * If this connection isn't marked to force-close, leave it open if there
+   * are other users of it
+   */
+  if(!conn->bits.close &&
+     (conn->send_pipe->size + conn->recv_pipe->size)) {
+    DEBUGF(infof(data, "Curl_disconnect, usecounter: %d\n",
+                 conn->send_pipe->size + conn->recv_pipe->size));
+    return CURLE_OK;
+  }
+
   if(conn->dns_entry != NULL) {
     Curl_resolv_unlock(data, conn->dns_entry);
     conn->dns_entry = NULL;
@@ -2876,7 +2880,7 @@ static bool SocketIsDead(curl_socket_t sock)
   int sval;
   bool ret_val = TRUE;
 
-  sval = Curl_socket_ready(sock, CURL_SOCKET_BAD, 0);
+  sval = SOCKET_READABLE(sock, 0);
   if(sval == 0)
     /* timeout */
     ret_val = FALSE;
@@ -2892,7 +2896,8 @@ static bool IsPipeliningPossible(const struct Curl_easy *handle,
                                  const struct connectdata *conn)
 {
   /* If a HTTP protocol and pipelining is enabled */
-  if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
+  if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
+     (!conn->bits.protoconnstart || !conn->bits.close)) {
 
     if(Curl_pipeline_wanted(handle->multi, CURLPIPE_HTTP1) &&
        (handle->set.httpversion != CURL_HTTP_VERSION_1_0) &&
@@ -3267,6 +3272,8 @@ ConnectionExists(struct Curl_easy *data,
       pipeLen = check->send_pipe->size + check->recv_pipe->size;
 
       if(canPipeline) {
+        if(check->bits.protoconnstart && check->bits.close)
+          continue;
 
         if(!check->bits.multiplex) {
           /* If not multiplexing, make sure the pipe has only GET requests */
@@ -3341,7 +3348,7 @@ ConnectionExists(struct Curl_easy *data,
          (needle->proxytype != check->proxytype ||
           needle->bits.httpproxy != check->bits.httpproxy ||
           needle->bits.tunnel_proxy != check->bits.tunnel_proxy ||
-          !Curl_raw_equal(needle->proxy.name, check->proxy.name) ||
+          !strcasecompare(needle->proxy.name, check->proxy.name) ||
           needle->port != check->port))
         /* don't mix connections that use different proxies */
         continue;
@@ -3384,8 +3391,8 @@ ConnectionExists(struct Curl_easy *data,
       if(!(needle->handler->flags & PROTOPT_CREDSPERREQUEST)) {
         /* This protocol requires credentials per connection,
            so verify that we're using the same name and password as well */
-        if(!strequal(needle->user, check->user) ||
-           !strequal(needle->passwd, check->passwd)) {
+        if(strcmp(needle->user, check->user) ||
+           strcmp(needle->passwd, check->passwd)) {
           /* one of them was different */
           continue;
         }
@@ -3396,14 +3403,14 @@ ConnectionExists(struct Curl_easy *data,
         /* The requested connection does not use a HTTP proxy or it uses SSL or
            it is a non-SSL protocol tunneled over the same HTTP proxy name and
            port number */
-        if((Curl_raw_equal(needle->handler->scheme, check->handler->scheme) ||
+        if((strcasecompare(needle->handler->scheme, check->handler->scheme) ||
             (get_protocol_family(check->handler->protocol) ==
              needle->handler->protocol && check->tls_upgraded)) &&
-           (!needle->bits.conn_to_host || Curl_raw_equal(
+           (!needle->bits.conn_to_host || strcasecompare(
             needle->conn_to_host.name, check->conn_to_host.name)) &&
            (!needle->bits.conn_to_port ||
              needle->conn_to_port == check->conn_to_port) &&
-           Curl_raw_equal(needle->host.name, check->host.name) &&
+           strcasecompare(needle->host.name, check->host.name) &&
            needle->remote_port == check->remote_port) {
           /* The schemes match or the the protocol family is the same and the
              previous connection was TLS upgraded, and the hostname and host
@@ -3445,8 +3452,8 @@ ConnectionExists(struct Curl_easy *data,
            possible. (Especially we must not reuse the same connection if
            partway through a handshake!) */
         if(wantNTLMhttp) {
-          if(!strequal(needle->user, check->user) ||
-             !strequal(needle->passwd, check->passwd))
+          if(strcmp(needle->user, check->user) ||
+             strcmp(needle->passwd, check->passwd))
             continue;
         }
         else if(check->ntlm.state != NTLMSTATE_NONE) {
@@ -3460,8 +3467,8 @@ ConnectionExists(struct Curl_easy *data,
           if(!check->proxyuser || !check->proxypasswd)
             continue;
 
-          if(!strequal(needle->proxyuser, check->proxyuser) ||
-             !strequal(needle->proxypasswd, check->proxypasswd))
+          if(strcmp(needle->proxyuser, check->proxyuser) ||
+             strcmp(needle->proxypasswd, check->proxypasswd))
             continue;
         }
         else if(check->proxyntlm.state != NTLMSTATE_NONE) {
@@ -3752,58 +3759,15 @@ static bool is_ASCII_name(const char *hostname)
   return TRUE;
 }
 
-#ifdef USE_LIBIDN
-/*
- * Check if characters in hostname is allowed in Top Level Domain.
- */
-static bool tld_check_name(struct Curl_easy *data,
-                           const char *ace_hostname)
-{
-  size_t err_pos;
-  char *uc_name = NULL;
-  int rc;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  const char *tld_errmsg = "<no msg>";
-#else
-  (void)data;
-#endif
-
-  /* Convert (and downcase) ACE-name back into locale's character set */
-  rc = idna_to_unicode_lzlz(ace_hostname, &uc_name, 0);
-  if(rc != IDNA_SUCCESS)
-    return FALSE;
-
-  /* Warning: err_pos receives "the decoded character offset rather than the
-     byte position in the string." And as of libidn 1.32 that character offset
-     is for UTF-8, even if the passed in string is another locale. */
-  rc = tld_check_lz(uc_name, &err_pos, NULL);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-#ifdef HAVE_TLD_STRERROR
-  if(rc != TLD_SUCCESS)
-    tld_errmsg = tld_strerror((Tld_rc)rc);
-#endif
-  if(rc != TLD_SUCCESS)
-    infof(data, "WARNING: TLD check for %s failed; %s\n",
-          uc_name, tld_errmsg);
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
-  if(uc_name)
-     idn_free(uc_name);
-  if(rc != TLD_SUCCESS)
-    return FALSE;
-
-  return TRUE;
-}
-#endif
-
 /*
  * Perform any necessary IDN conversion of hostname
  */
-static void fix_hostname(struct Curl_easy *data,
-                         struct connectdata *conn, struct hostname *host)
+static void fix_hostname(struct connectdata *conn, struct hostname *host)
 {
   size_t len;
+  struct Curl_easy *data = conn->data;
 
-#ifndef USE_LIBIDN
+#ifndef USE_LIBIDN2
   (void)data;
   (void)conn;
 #elif defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -3821,25 +3785,18 @@ static void fix_hostname(struct Curl_easy *data,
 
   /* Check name for non-ASCII and convert hostname to ACE form if we can */
   if(!is_ASCII_name(host->name)) {
-#ifdef USE_LIBIDN
-    if(stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
+#ifdef USE_LIBIDN2
+    if(idn2_check_version(IDN2_VERSION)) {
       char *ace_hostname = NULL;
-
-      int rc = idna_to_ascii_lz(host->name, &ace_hostname, 0);
-      infof(data, "Input domain encoded as `%s'\n",
-            stringprep_locale_charset());
-      if(rc == IDNA_SUCCESS) {
-        /* tld_check_name() displays a warning if the host name contains
-           "illegal" characters for this TLD */
-        (void)tld_check_name(data, ace_hostname);
-
-        host->encalloc = ace_hostname;
+      int rc = idn2_lookup_ul((const char *)host->name, &ace_hostname, 0);
+      if(rc == IDN2_OK) {
+        host->encalloc = (char *)ace_hostname;
         /* change the name pointer to point to the encoded hostname */
         host->name = host->encalloc;
       }
       else
         infof(data, "Failed to convert %s to ACE; %s\n", host->name,
-              Curl_idn_strerror(conn, rc));
+              idn2_strerror(rc));
     }
 #elif defined(USE_WIN32_IDN)
     char *ace_hostname = NULL;
@@ -3862,9 +3819,9 @@ static void fix_hostname(struct Curl_easy *data,
  */
 static void free_fixed_hostname(struct hostname *host)
 {
-#if defined(USE_LIBIDN)
+#if defined(USE_LIBIDN2)
   if(host->encalloc) {
-    idn_free(host->encalloc); /* must be freed with idn_free() since this was
+    idn2_free(host->encalloc); /* must be freed with idn2_free() since this was
                                  allocated by libidn */
     host->encalloc = NULL;
   }
@@ -4022,7 +3979,7 @@ static CURLcode findprotocol(struct Curl_easy *data,
      variables based on the URL. Now that the handler may be changed later
      when the protocol specific setup function is called. */
   for(pp = protocols; (p = *pp) != NULL; pp++) {
-    if(Curl_raw_equal(p->scheme, protostr)) {
+    if(strcasecompare(p->scheme, protostr)) {
       /* Protocol found in table. Check if allowed */
       if(!(data->set.allowed_protocols & p->protocol))
         /* nope, get out */
@@ -4091,7 +4048,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
    ************************************************************/
   if((2 == sscanf(data->change.url, "%15[^:]:%[^\n]",
                   protobuf, path)) &&
-     Curl_raw_equal(protobuf, "file")) {
+     strcasecompare(protobuf, "file")) {
     if(path[0] == '/' && path[1] == '/') {
       /* Allow omitted hostname (e.g. file:/<path>).  This is not strictly
        * speaking a valid file: URL by RFC 1738, but treating file:/<path> as
@@ -4145,7 +4102,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     path[0]=0;
 
     rc = sscanf(data->change.url,
-                "%15[^\n:]:%3[/]%[^\n/?]%[^\n]",
+                "%15[^\n:]:%3[/]%[^\n/?#]%[^\n]",
                 protobuf, slashbuf, conn->host.name, path);
     if(2 == rc) {
       failf(data, "Bad URL");
@@ -4157,7 +4114,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
        * The URL was badly formatted, let's try the browser-style _without_
        * protocol specified like 'http://'.
        */
-      rc = sscanf(data->change.url, "%[^\n/?]%[^\n]", conn->host.name, path);
+      rc = sscanf(data->change.url, "%[^\n/?#]%[^\n]", conn->host.name, path);
       if(1 > rc) {
         /*
          * We couldn't even get this format.
@@ -4262,10 +4219,10 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   }
 
   /* If the URL is malformatted (missing a '/' after hostname before path) we
-   * insert a slash here. The only letter except '/' we accept to start a path
-   * is '?'.
+   * insert a slash here. The only letters except '/' that can start a path is
+   * '?' and '#' - as controlled by the two sscanf() patterns above.
    */
-  if(path[0] == '?') {
+  if(path[0] != '/') {
     /* We need this function to deal with overlapping memory areas. We know
        that the memory area 'path' points to is 'urllen' bytes big and that
        is bigger than the path. Use +1 to move the zero byte too. */
@@ -4531,7 +4488,7 @@ static bool check_noproxy(const char* name, const char* no_proxy)
   char *endptr;
 
   if(no_proxy && no_proxy[0]) {
-    if(Curl_raw_equal("*", no_proxy)) {
+    if(strcasecompare("*", no_proxy)) {
       return TRUE;
     }
 
@@ -4569,7 +4526,7 @@ static bool check_noproxy(const char* name, const char* no_proxy)
       if((tok_end - tok_start) <= namelen) {
         /* Match the last part of the name to the domain we are checking. */
         const char *checkn = name + namelen - (tok_end - tok_start);
-        if(Curl_raw_nequal(no_proxy + tok_start, checkn,
+        if(strncasecompare(no_proxy + tok_start, checkn,
                            tok_end - tok_start)) {
           if((tok_end - tok_start) == namelen || *(checkn - 1) == '.') {
             /* We either have an exact match, or the previous character is a .
@@ -4648,7 +4605,7 @@ static char *detect_proxy(struct connectdata *conn)
      * This can cause 'internal' http/ftp requests to be
      * arbitrarily redirected by any external attacker.
      */
-    if(!prox && !Curl_raw_equal("http_proxy", proxy_env)) {
+    if(!prox && !strcasecompare("http_proxy", proxy_env)) {
       /* There was no lowercase variable, try the uppercase version: */
       Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
       prox=curl_getenv(proxy_env);
@@ -4705,7 +4662,13 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       conn->proxytype = CURLPROXY_SOCKS4A;
     else if(checkprefix("socks4", proxy) || checkprefix("socks", proxy))
       conn->proxytype = CURLPROXY_SOCKS4;
-    /* Any other xxx:// : change to http proxy */
+    else if(checkprefix("http:", proxy))
+      ; /* leave it as HTTP or HTTP/1.0 */
+    else {
+      /* Any other xxx:// reject! */
+      failf(data, "Unsupported proxy scheme for \'%s\'", proxy);
+      return CURLE_COULDNT_CONNECT;
+    }
   }
   else
     proxyptr = proxy; /* No xxx:// head: It's a HTTP proxy */
@@ -4725,21 +4688,24 @@ static CURLcode parse_proxy(struct Curl_easy *data,
          them. */
       Curl_safefree(conn->proxyuser);
       if(proxyuser && strlen(proxyuser) < MAX_CURL_USER_LENGTH)
-        conn->proxyuser = curl_easy_unescape(data, proxyuser, 0, NULL);
-      else
-        conn->proxyuser = strdup("");
-
-      if(!conn->proxyuser)
-        result = CURLE_OUT_OF_MEMORY;
+        result = Curl_urldecode(data, proxyuser, 0, &conn->proxyuser, NULL,
+                                FALSE);
       else {
+        conn->proxyuser = strdup("");
+        if(!conn->proxyuser)
+          result = CURLE_OUT_OF_MEMORY;
+      }
+
+      if(!result) {
         Curl_safefree(conn->proxypasswd);
         if(proxypasswd && strlen(proxypasswd) < MAX_CURL_PASSWORD_LENGTH)
-          conn->proxypasswd = curl_easy_unescape(data, proxypasswd, 0, NULL);
-        else
+          result = Curl_urldecode(data, proxypasswd, 0,
+                                  &conn->proxypasswd, NULL, FALSE);
+        else {
           conn->proxypasswd = strdup("");
-
-        if(!conn->proxypasswd)
-          result = CURLE_OUT_OF_MEMORY;
+          if(!conn->proxypasswd)
+            result = CURLE_OUT_OF_MEMORY;
+        }
       }
 
       if(!result) {
@@ -4846,6 +4812,7 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
 {
   char proxyuser[MAX_CURL_USER_LENGTH]="";
   char proxypasswd[MAX_CURL_PASSWORD_LENGTH]="";
+  CURLcode result;
 
   if(data->set.str[STRING_PROXYUSERNAME] != NULL) {
     strncpy(proxyuser, data->set.str[STRING_PROXYUSERNAME],
@@ -4858,15 +4825,11 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
     proxypasswd[MAX_CURL_PASSWORD_LENGTH-1] = '\0'; /*To be on safe side*/
   }
 
-  conn->proxyuser = curl_easy_unescape(data, proxyuser, 0, NULL);
-  if(!conn->proxyuser)
-    return CURLE_OUT_OF_MEMORY;
-
-  conn->proxypasswd = curl_easy_unescape(data, proxypasswd, 0, NULL);
-  if(!conn->proxypasswd)
-    return CURLE_OUT_OF_MEMORY;
-
-  return CURLE_OK;
+  result = Curl_urldecode(data, proxyuser, 0, &conn->proxyuser, NULL, FALSE);
+  if(!result)
+    result = Curl_urldecode(data, proxypasswd, 0, &conn->proxypasswd, NULL,
+                            FALSE);
+  return result;
 }
 #endif /* CURL_DISABLE_PROXY */
 
@@ -4940,9 +4903,8 @@ static CURLcode parse_url_login(struct Curl_easy *data,
     conn->bits.user_passwd = TRUE; /* enable user+password */
 
     /* Decode the user */
-    newname = curl_easy_unescape(data, userp, 0, NULL);
-    if(!newname) {
-      result = CURLE_OUT_OF_MEMORY;
+    result = Curl_urldecode(data, userp, 0, &newname, NULL, FALSE);
+    if(result) {
       goto out;
     }
 
@@ -4952,9 +4914,9 @@ static CURLcode parse_url_login(struct Curl_easy *data,
 
   if(passwdp) {
     /* We have a password in the URL so decode it */
-    char *newpasswd = curl_easy_unescape(data, passwdp, 0, NULL);
-    if(!newpasswd) {
-      result = CURLE_OUT_OF_MEMORY;
+    char *newpasswd;
+    result = Curl_urldecode(data, passwdp, 0, &newpasswd, NULL, FALSE);
+    if(result) {
       goto out;
     }
 
@@ -4964,9 +4926,9 @@ static CURLcode parse_url_login(struct Curl_easy *data,
 
   if(optionsp) {
     /* We have an options list in the URL so decode it */
-    char *newoptions = curl_easy_unescape(data, optionsp, 0, NULL);
-    if(!newoptions) {
-      result = CURLE_OUT_OF_MEMORY;
+    char *newoptions;
+    result = Curl_urldecode(data, optionsp, 0, &newoptions, NULL, FALSE);
+    if(result) {
       goto out;
     }
 
@@ -5457,7 +5419,8 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
     if(!hostname_to_match)
       return CURLE_OUT_OF_MEMORY;
     hostname_to_match_len = strlen(hostname_to_match);
-    host_match = curl_strnequal(ptr, hostname_to_match, hostname_to_match_len);
+    host_match = strncasecompare(ptr, hostname_to_match,
+                                 hostname_to_match_len);
     free(hostname_to_match);
     ptr += hostname_to_match_len;
 
@@ -6021,18 +5984,18 @@ static CURLcode create_conn(struct Curl_easy *data,
   /*************************************************************
    * IDN-fix the hostnames
    *************************************************************/
-  fix_hostname(data, conn, &conn->host);
+  fix_hostname(conn, &conn->host);
   if(conn->bits.conn_to_host)
-    fix_hostname(data, conn, &conn->conn_to_host);
+    fix_hostname(conn, &conn->conn_to_host);
   if(conn->proxy.name && *conn->proxy.name)
-    fix_hostname(data, conn, &conn->proxy);
+    fix_hostname(conn, &conn->proxy);
 
   /*************************************************************
    * Check whether the host and the "connect to host" are equal.
    * Do this after the hostnames have been IDN-fixed .
    *************************************************************/
   if(conn->bits.conn_to_host &&
-      Curl_raw_equal(conn->conn_to_host.name, conn->host.name)) {
+     strcasecompare(conn->conn_to_host.name, conn->host.name)) {
     conn->bits.conn_to_host = FALSE;
   }
 

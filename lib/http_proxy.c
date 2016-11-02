@@ -31,7 +31,6 @@
 #include "http.h"
 #include "url.h"
 #include "select.h"
-#include "rawstr.h"
 #include "progress.h"
 #include "non-ascii.h"
 #include "connect.h"
@@ -160,6 +159,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
       if(!result) {
         char *host=(char *)"";
+        const char *proxyconn="";
         const char *useragent="";
         const char *http = (conn->proxytype == CURLPROXY_HTTP_1_0) ?
           "1.0" : "1.1";
@@ -185,6 +185,9 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
             return CURLE_OUT_OF_MEMORY;
           }
         }
+        if(!Curl_checkProxyheaders(conn, "Proxy-Connection:"))
+          proxyconn = "Proxy-Connection: Keep-Alive\r\n";
+
         if(!Curl_checkProxyheaders(conn, "User-Agent:") &&
            data->set.str[STRING_USERAGENT])
           useragent = conn->allocptr.uagent;
@@ -194,13 +197,15 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            "CONNECT %s HTTP/%s\r\n"
                            "%s"  /* Host: */
                            "%s"  /* Proxy-Authorization */
-                           "%s", /* User-Agent */
+                           "%s"  /* User-Agent */
+                           "%s", /* Proxy-Connection */
                            hostheader,
                            http,
                            host,
                            conn->allocptr.proxyuserpwd?
                            conn->allocptr.proxyuserpwd:"",
-                           useragent);
+                           useragent,
+                           proxyconn);
 
         if(host && *host)
           free(host);
@@ -239,7 +244,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
     }
 
     if(!blocking) {
-      if(0 == Curl_socket_ready(tunnelsocket, CURL_SOCKET_BAD, 0))
+      if(0 == SOCKET_READABLE(tunnelsocket, 0))
         /* return so we'll be called again polling-style */
         return CURLE_OK;
       else {
@@ -274,8 +279,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         }
 
         /* loop every second at least, less if the timeout is near */
-        switch (Curl_socket_ready(tunnelsocket, CURL_SOCKET_BAD,
-                                  check<1000L?check:1000)) {
+        switch (SOCKET_READABLE(tunnelsocket, check<1000L?check:1000)) {
         case -1: /* select() error, stop reading */
           error = SELECT_ERROR;
           failf(data, "Proxy CONNECT aborted due to select/poll error");
@@ -568,7 +572,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       free(data->req.newurl);
       data->req.newurl = NULL;
       /* failure, close this connection to avoid re-use */
-      connclose(conn, "proxy CONNECT failure");
+      streamclose(conn, "proxy CONNECT failure");
       Curl_closesocket(conn, conn->sock[sockindex]);
       conn->sock[sockindex] = CURL_SOCKET_BAD;
     }
