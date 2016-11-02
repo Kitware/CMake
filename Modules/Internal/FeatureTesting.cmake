@@ -1,5 +1,5 @@
 
-macro(record_compiler_features lang compile_flags feature_list)
+macro(_record_compiler_features lang compile_flags feature_list)
   include("${CMAKE_ROOT}/Modules/Compiler/${CMAKE_${lang}_COMPILER_ID}-${lang}-FeatureTests.cmake" OPTIONAL)
 
   string(TOLOWER ${lang} lang_lc)
@@ -57,4 +57,12 @@ macro(record_compiler_features lang compile_flags feature_list)
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
       "Detecting ${lang} [${compile_flags}] compiler features failed to compile with the following output:\n${_output}\n${_copy_error}\n\n")
   endif()
+endmacro()
+
+macro(_record_compiler_features_c std)
+  _record_compiler_features(C "${CMAKE_C${std}_STANDARD_COMPILE_OPTION}" CMAKE_C${std}_COMPILE_FEATURES)
+endmacro()
+
+macro(_record_compiler_features_cxx std)
+  _record_compiler_features(CXX "${CMAKE_CXX${std}_STANDARD_COMPILE_OPTION}" CMAKE_CXX${std}_COMPILE_FEATURES)
 endmacro()

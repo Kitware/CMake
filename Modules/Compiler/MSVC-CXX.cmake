@@ -6,6 +6,6 @@ endif()
 
 macro(cmake_record_cxx_compile_features)
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.0)
-    record_compiler_features(CXX "" CMAKE_CXX_COMPILE_FEATURES)
+    _record_compiler_features(CXX "" CMAKE_CXX_COMPILE_FEATURES)
   endif()
 endmacro()
