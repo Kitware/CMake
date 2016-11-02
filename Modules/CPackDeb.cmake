@@ -34,7 +34,7 @@
 #
 # List of CPackDEB specific variables:
 #
-# .. variable:: CPACK_DEB_PACKAGE_COMPONENT
+# .. variable:: CPACK_DEB_COMPONENT_INSTALL
 #
 #  Enable component packaging for CPackDEB
 #

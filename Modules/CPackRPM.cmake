@@ -45,7 +45,7 @@
 #
 # List of CPackRPM specific variables:
 #
-# .. variable:: CPACK_RPM_PACKAGE_COMPONENT
+# .. variable:: CPACK_RPM_COMPONENT_INSTALL
 #
 #  Enable component packaging for CPackRPM
 #
@@ -472,7 +472,7 @@
 #  May be used to embed a pre (un)installation script in the spec file.
 #  The referred script file (or both) will be read and directly
 #  put after the ``%pre`` or ``%preun`` section
-#  If :variable:`CPACK_RPM_PACKAGE_COMPONENT` is set to ON the (un)install
+#  If :variable:`CPACK_RPM_COMPONENT_INSTALL` is set to ON the (un)install
 #  script for each component can be overridden with
 #  ``CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE`` and
 #  ``CPACK_RPM_<COMPONENT>_PRE_UNINSTALL_SCRIPT_FILE``.
@@ -491,7 +491,7 @@
 #  May be used to embed a post (un)installation script in the spec file.
 #  The referred script file (or both) will be read and directly
 #  put after the ``%post`` or ``%postun`` section.
-#  If :variable:`CPACK_RPM_PACKAGE_COMPONENT` is set to ON the (un)install
+#  If :variable:`CPACK_RPM_COMPONENT_INSTALL` is set to ON the (un)install
 #  script for each component can be overridden with
 #  ``CPACK_RPM_<COMPONENT>_POST_INSTALL_SCRIPT_FILE`` and
 #  ``CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE``.
