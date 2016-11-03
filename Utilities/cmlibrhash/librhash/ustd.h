@@ -5,6 +5,10 @@
 /* Include KWSys Large File Support configuration. */
 #include <cmsys/Configure.h>
 
+#if defined(_MSC_VER)
+# pragma warning(push,1)
+#endif
+
 #if _MSC_VER >= 1300
 
 # define int64_t __int64
