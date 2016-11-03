@@ -104,7 +104,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
   # Allow the user to enable/disable all system utility library options by
   # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
-  set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBUV ZLIB)
+  set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBRHASH LIBUV ZLIB)
   foreach(util ${UTILITIES})
     if(NOT DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util}
         AND DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
@@ -144,6 +144,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
     "${CMAKE_USE_SYSTEM_LIBRARY_LIBLZMA}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
   option(CMAKE_USE_SYSTEM_FORM "Use system-installed libform" "${CMAKE_USE_SYSTEM_LIBRARY_FORM}")
   option(CMAKE_USE_SYSTEM_JSONCPP "Use system-installed jsoncpp" "${CMAKE_USE_SYSTEM_LIBRARY_JSONCPP}")
+  option(CMAKE_USE_SYSTEM_LIBRHASH "Use system-installed librhash" "${CMAKE_USE_SYSTEM_LIBRARY_LIBRHASH}")
   option(CMAKE_USE_SYSTEM_LIBUV "Use system-installed libuv" "${CMAKE_USE_SYSTEM_LIBRARY_LIBUV}")
 
   # For now use system KWIML only if explicitly requested rather
@@ -298,9 +299,22 @@ macro (CMAKE_BUILD_UTILITIES)
     add_subdirectory(Utilities/KWIML)
   endif()
 
-  set(CMAKE_LIBRHASH_LIBRARIES cmlibrhash)
-  add_subdirectory(Utilities/cmlibrhash)
-  CMAKE_SET_TARGET_FOLDER(cmlibrhash "Utilities/3rdParty")
+  if(CMAKE_USE_SYSTEM_LIBRHASH)
+    if(NOT CMAKE_VERSION VERSION_LESS 3.0)
+      find_package(LibRHash)
+    else()
+      message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBRHASH requires CMake >= 3.0")
+    endif()
+    if(NOT LibRHash_FOUND)
+      message(FATAL_ERROR
+        "CMAKE_USE_SYSTEM_LIBRHASH is ON but LibRHash is not found!")
+    endif()
+    set(CMAKE_LIBRHASH_LIBRARIES LibRHash::LibRHash)
+  else()
+    set(CMAKE_LIBRHASH_LIBRARIES cmlibrhash)
+    add_subdirectory(Utilities/cmlibrhash)
+    CMAKE_SET_TARGET_FOLDER(cmlibrhash "Utilities/3rdParty")
+  endif()
 
   #---------------------------------------------------------------------
   # Build zlib library for Curl, CMake, and CTest.
