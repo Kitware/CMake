@@ -1438,8 +1438,8 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   }
 
   // If we needed to find one of the mapped configurations but did not
-  // then the target is not found.  The project does not want any
-  // other configuration.
+  // then the target location is not found.  The project does not want
+  // any other configuration.
   if (!mappedConfigs.empty() && !*loc && !*imp) {
     return false;
   }
@@ -1493,7 +1493,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
       }
     }
   }
-  // If we have not yet found it then the target is not available.
+  // If we have not yet found it then the target location is not available.
   if (!*loc && !*imp) {
     return false;
   }
