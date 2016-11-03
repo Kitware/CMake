@@ -88,7 +88,7 @@ set(_cmake_feature_test_cxx_variadic_templates "(__cpp_variadic_templates >= 200
 set(_cmake_feature_test_cxx_alias_templates "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_nullptr "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_trailing_return_types "${Intel121_CXX11}")
-set(_cmake_feature_test_cxx_attributes "__cpp_attributes >= 200809 || ${Intel121}")
+set(_cmake_feature_test_cxx_attributes "(__cpp_attributes >= 200809 || ${Intel121}) && ${DETECT_CXX11}") # [1]
 set(_cmake_feature_test_cxx_default_function_template_args "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_extended_friend_declarations "${Intel121_CXX11}")
 set(_cmake_feature_test_cxx_rvalue_references "(__cpp_rvalue_references >= 200610 || ${Intel121}) && ${DETECT_CXX11}") # [1]
