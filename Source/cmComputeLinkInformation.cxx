@@ -606,6 +606,12 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // of COMPATIBLE_INTERFACE_ enforcement.  The generators will ignore
       // this for the actual link line.
       this->Items.push_back(Item(std::string(), false, tgt));
+
+      // Also add the item the interface specifies to be used in its place.
+      std::string const& libName = tgt->GetImportedLibName(config);
+      if (!libName.empty()) {
+        this->AddItem(libName, CM_NULLPTR);
+      }
     } else {
       // Decide whether to use an import library.
       bool implib =

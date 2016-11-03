@@ -912,6 +912,9 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       this->Internal->SourceEntries.push_back(value);
       this->Internal->SourceBacktraces.push_back(lfbt);
     }
+  } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME") &&
+             !this->CheckImportedLibName(prop, value ? value : "")) {
+    /* error was reported by check method */
   } else {
     this->Properties.SetProperty(prop, value);
   }
@@ -979,6 +982,9 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
     this->Internal->SourceEntries.push_back(value);
     this->Internal->SourceBacktraces.push_back(lfbt);
+  } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME")) {
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+                                 prop + " property may not be APPENDed.");
   } else {
     this->Properties.AppendProperty(prop, value, asString);
   }
@@ -1374,20 +1380,41 @@ void cmTarget::SetPropertyDefault(const std::string& property,
   }
 }
 
+bool cmTarget::CheckImportedLibName(std::string const& prop,
+                                    std::string const& value) const
+{
+  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY ||
+      !this->IsImported()) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR, prop +
+        " property may be set only on imported INTERFACE library targets.");
+    return false;
+  }
+  if (!value.empty()) {
+    if (value[0] == '-') {
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, prop +
+                                     " property value\n  " + value +
+                                     "\nmay not start with '-'.");
+      return false;
+    }
+    std::string::size_type bad = value.find_first_of(":/\\;");
+    if (bad != value.npos) {
+      this->Makefile->IssueMessage(
+        cmake::FATAL_ERROR, prop + " property value\n  " + value +
+          "\nmay not contain '" + value.substr(bad, 1) + "'.");
+      return false;
+    }
+  }
+  return true;
+}
+
 bool cmTarget::GetMappedConfig(std::string const& desired_config,
                                const char** loc, const char** imp,
                                std::string& suffix) const
 {
-  if (this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-    // This method attempts to find a config-specific LOCATION for the
-    // IMPORTED library. In the case of cmStateEnums::INTERFACE_LIBRARY, there
-    // is no
-    // LOCATION at all, so leaving *loc and *imp unchanged is the appropriate
-    // and valid response.
-    return true;
-  }
-
-  std::string const locPropBase = "IMPORTED_LOCATION";
+  std::string const locPropBase =
+    this->GetType() == cmStateEnums::INTERFACE_LIBRARY ? "IMPORTED_LIBNAME"
+                                                       : "IMPORTED_LOCATION";
 
   // Track the configuration-specific property suffix.
   suffix = "_";
@@ -1445,7 +1472,9 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   // then the target location is not found.  The project does not want
   // any other configuration.
   if (!mappedConfigs.empty() && !*loc && !*imp) {
-    return false;
+    // Interface libraries are always available because their
+    // library name is optional so it is okay to leave *loc empty.
+    return this->GetType() == cmStateEnums::INTERFACE_LIBRARY;
   }
 
   // If we have not yet found it then there are no mapped
@@ -1499,7 +1528,9 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   }
   // If we have not yet found it then the target location is not available.
   if (!*loc && !*imp) {
-    return false;
+    // Interface libraries are always available because their
+    // library name is optional so it is okay to leave *loc empty.
+    return this->GetType() == cmStateEnums::INTERFACE_LIBRARY;
   }
 
   return true;

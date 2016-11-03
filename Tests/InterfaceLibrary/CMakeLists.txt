@@ -25,8 +25,25 @@ target_sources(iface_objlib INTERFACE $<TARGET_OBJECTS:objlib>)
 add_library(intermediate INTERFACE)
 target_link_libraries(intermediate INTERFACE iface_objlib)
 
+add_library(item_fake_tgt STATIC item_fake.cpp)
+set_property(TARGET item_fake_tgt PROPERTY OUTPUT_NAME item_fake)
+add_library(item_real STATIC item.cpp)
+add_library(item_iface INTERFACE IMPORTED)
+set_property(TARGET item_iface PROPERTY IMPORTED_LIBNAME item_real)
+add_dependencies(item_iface item_real)
+link_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 add_executable(InterfaceLibrary definetestexe.cpp)
-target_link_libraries(InterfaceLibrary iface_nodepends headeriface subiface intermediate)
+target_link_libraries(InterfaceLibrary
+  iface_nodepends
+  headeriface
+  subiface
+  intermediate
+
+  item_iface
+  item_fake # ensure that 'item_real' is ordered in place of item_iface
+  )
+add_dependencies(InterfaceLibrary item_fake_tgt)
 
 add_subdirectory(libsdir)
 
