@@ -4,6 +4,7 @@
 
 #include <cmConfigure.h>
 
+#include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -14,7 +15,6 @@
 
 #include <cm_auto_ptr.hxx>
 #include <cmsys/FStream.hxx>
-#include <cmsys/MD5.h>
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
 #include <iostream>
@@ -167,17 +167,14 @@ void cmCTestLaunch::ComputeFileNames()
 
   // We hash the input command working dir and command line to obtain
   // a repeatable and (probably) unique name for log files.
-  char hash[32];
-  cmsysMD5* md5 = cmsysMD5_New();
-  cmsysMD5_Initialize(md5);
-  cmsysMD5_Append(md5, (unsigned char const*)(this->CWD.c_str()), -1);
+  cmCryptoHash md5(cmCryptoHash::AlgoMD5);
+  md5.Initialize();
+  md5.Append(this->CWD);
   for (std::vector<std::string>::const_iterator ai = this->RealArgs.begin();
        ai != this->RealArgs.end(); ++ai) {
-    cmsysMD5_Append(md5, (unsigned char const*)ai->c_str(), -1);
+    md5.Append(*ai);
   }
-  cmsysMD5_FinalizeHex(md5, hash);
-  cmsysMD5_Delete(md5);
-  this->LogHash.assign(hash, 32);
+  this->LogHash = md5.FinalizeHex();
 
   // We store stdout and stderr in temporary log files.
   this->LogOut = this->LogDir;

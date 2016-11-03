@@ -26,7 +26,7 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #define CM_LG_ENCODE_OBJECT_NAMES
-#include <cmsys/MD5.h>
+#include "cmCryptoHash.h"
 #endif
 
 #include <algorithm>
@@ -2001,17 +2001,6 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 }
 
 #if defined(CM_LG_ENCODE_OBJECT_NAMES)
-static std::string cmLocalGeneratorMD5(const char* input)
-{
-  char md5out[32];
-  cmsysMD5* md5 = cmsysMD5_New();
-  cmsysMD5_Initialize(md5);
-  cmsysMD5_Append(md5, reinterpret_cast<unsigned char const*>(input), -1);
-  cmsysMD5_FinalizeHex(md5, md5out);
-  cmsysMD5_Delete(md5);
-  return std::string(md5out, 32);
-}
-
 static bool cmLocalGeneratorShortenObjectName(std::string& objName,
                                               std::string::size_type max_len)
 {
@@ -2020,7 +2009,8 @@ static bool cmLocalGeneratorShortenObjectName(std::string& objName,
   std::string::size_type pos =
     objName.find('/', objName.size() - max_len + 32);
   if (pos != objName.npos) {
-    std::string md5name = cmLocalGeneratorMD5(objName.substr(0, pos).c_str());
+    cmCryptoHash md5(cmCryptoHash::AlgoMD5);
+    std::string md5name = md5.HashString(objName.substr(0, pos));
     md5name += objName.substr(pos);
     objName = md5name;
 

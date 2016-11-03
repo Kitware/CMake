@@ -2553,7 +2553,8 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         this->SetError("DOWNLOAD missing sum value for EXPECTED_MD5.");
         return false;
       }
-      hash = CM_AUTO_PTR<cmCryptoHash>(cmCryptoHash::New("MD5"));
+      hash =
+        CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(cmCryptoHash::AlgoMD5));
       hashMatchMSG = "MD5 sum";
       expectedHash = cmSystemTools::LowerCase(*i);
     } else if (*i == "SHOW_PROGRESS") {
