@@ -289,6 +289,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
          ci != configNames.end(); ++ci) {
       std::string configUpper = cmSystemTools::UpperCase(*ci);
       for (const char** p = configProps; *p; ++p) {
+        // Interface libraries have no output locations, so honor only
+        // the configuration map.
         if (this->TargetTypeValue == cmStateEnums::INTERFACE_LIBRARY &&
             strcmp(*p, "MAP_IMPORTED_CONFIG_") != 0) {
           continue;
