@@ -121,7 +121,7 @@ $git_ls -z -- '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx' |
   egrep -z -v '^Source/cmListFileLexer(\.in\.l|\.c)' |
 
   # Exclude third-party sources.
-  egrep -z -v '^Source/(cm_sha2|bindexplib)' |
+  egrep -z -v '^Source/bindexplib' |
   egrep -z -v '^Source/(kwsys|CursesDialog/form)/' |
   egrep -z -v '^Utilities/(KW|cm).*/' |
 
