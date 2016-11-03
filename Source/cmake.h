@@ -535,12 +535,18 @@ private:
   }
 
 #define FOR_EACH_C_FEATURE(F)                                                 \
+  F(c_std_90)                                                                 \
+  F(c_std_99)                                                                 \
+  F(c_std_11)                                                                 \
   F(c_function_prototypes)                                                    \
   F(c_restrict)                                                               \
   F(c_static_assert)                                                          \
   F(c_variadic_macros)
 
 #define FOR_EACH_CXX_FEATURE(F)                                               \
+  F(cxx_std_98)                                                               \
+  F(cxx_std_11)                                                               \
+  F(cxx_std_14)                                                               \
   F(cxx_aggregate_default_initializers)                                       \
   F(cxx_alias_templates)                                                      \
   F(cxx_alignas)                                                              \

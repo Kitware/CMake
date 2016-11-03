@@ -23,10 +23,12 @@ macro(run_test feature lang)
 endmacro()
 
 get_property(c_features GLOBAL PROPERTY CMAKE_C_KNOWN_FEATURES)
+list(REMOVE_ITEM c_features c_std_90 c_std_99 c_std_11)
 foreach(feature ${c_features})
   run_test(${feature} C)
 endforeach()
 get_property(cxx_features GLOBAL PROPERTY CMAKE_CXX_KNOWN_FEATURES)
+list(REMOVE_ITEM cxx_features cxx_std_98 cxx_std_11 cxx_std_14)
 foreach(feature ${cxx_features})
   run_test(${feature} CXX)
 endforeach()
@@ -396,7 +398,7 @@ if (CMAKE_CXX_COMPILE_FEATURES)
   )
 
   add_executable(CompileFeaturesGenex2 genex_test.cpp)
-  target_compile_features(CompileFeaturesGenex2 PRIVATE cxx_static_assert)
+  target_compile_features(CompileFeaturesGenex2 PRIVATE cxx_std_11)
   target_compile_definitions(CompileFeaturesGenex2 PRIVATE
     HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>
     HAVE_AUTO_TYPE=$<COMPILE_FEATURES:cxx_auto_type>
@@ -405,10 +407,10 @@ if (CMAKE_CXX_COMPILE_FEATURES)
     HAVE_INHERITING_CONSTRUCTORS_AND_FINAL=$<COMPILE_FEATURES:cxx_inheriting_constructors,cxx_final>
   )
 
-  add_library(static_assert_iface INTERFACE)
-  target_compile_features(static_assert_iface INTERFACE cxx_static_assert)
+  add_library(std_11_iface INTERFACE)
+  target_compile_features(std_11_iface INTERFACE cxx_std_11)
   add_executable(CompileFeaturesGenex3 genex_test.cpp)
-  target_link_libraries(CompileFeaturesGenex3 PRIVATE static_assert_iface)
+  target_link_libraries(CompileFeaturesGenex3 PRIVATE std_11_iface)
   target_compile_definitions(CompileFeaturesGenex3 PRIVATE
     HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>
     HAVE_AUTO_TYPE=$<COMPILE_FEATURES:cxx_auto_type>
