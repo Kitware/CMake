@@ -298,6 +298,10 @@ macro (CMAKE_BUILD_UTILITIES)
     add_subdirectory(Utilities/KWIML)
   endif()
 
+  set(CMAKE_LIBRHASH_LIBRARIES cmlibrhash)
+  add_subdirectory(Utilities/cmlibrhash)
+  CMAKE_SET_TARGET_FOLDER(cmlibrhash "Utilities/3rdParty")
+
   #---------------------------------------------------------------------
   # Build zlib library for Curl, CMake, and CTest.
   set(CMAKE_ZLIB_HEADER "cm_zlib.h")

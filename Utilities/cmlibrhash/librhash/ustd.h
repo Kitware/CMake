@@ -2,6 +2,9 @@
 #ifndef LIBRHASH_USTD_H
 #define LIBRHASH_USTD_H
 
+/* Include KWSys Large File Support configuration. */
+#include <cmsys/Configure.h>
+
 #if _MSC_VER >= 1300
 
 # define int64_t __int64
