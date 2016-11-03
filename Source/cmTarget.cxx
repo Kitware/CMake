@@ -1387,6 +1387,8 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
     return true;
   }
 
+  std::string const locPropBase = "IMPORTED_LOCATION";
+
   // Track the configuration-specific property suffix.
   suffix = "_";
   suffix += desired_config;
@@ -1412,7 +1414,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
     if (mci->empty()) {
       // An empty string in the mapping has a special meaning:
       // look up the config-less properties.
-      *loc = this->GetProperty("IMPORTED_LOCATION");
+      *loc = this->GetProperty(locPropBase);
       if (allowImp) {
         *imp = this->GetProperty("IMPORTED_IMPLIB");
       }
@@ -1422,7 +1424,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
       }
     } else {
       std::string mcUpper = cmSystemTools::UpperCase(*mci);
-      std::string locProp = "IMPORTED_LOCATION_";
+      std::string locProp = locPropBase + "_";
       locProp += mcUpper;
       *loc = this->GetProperty(locProp);
       if (allowImp) {
@@ -1449,7 +1451,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   // If we have not yet found it then there are no mapped
   // configurations.  Look for an exact-match.
   if (!*loc && !*imp) {
-    std::string locProp = "IMPORTED_LOCATION";
+    std::string locProp = locPropBase;
     locProp += suffix;
     *loc = this->GetProperty(locProp);
     if (allowImp) {
@@ -1467,7 +1469,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
 
     // Look for a configuration-less location.  This may be set by
     // manually-written code.
-    *loc = this->GetProperty("IMPORTED_LOCATION");
+    *loc = this->GetProperty(locPropBase);
     if (allowImp) {
       *imp = this->GetProperty("IMPORTED_IMPLIB");
     }
@@ -1485,7 +1487,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
          !*loc && !*imp && aci != availableConfigs.end(); ++aci) {
       suffix = "_";
       suffix += cmSystemTools::UpperCase(*aci);
-      std::string locProp = "IMPORTED_LOCATION";
+      std::string locProp = locPropBase;
       locProp += suffix;
       *loc = this->GetProperty(locProp);
       if (allowImp) {
