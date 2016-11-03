@@ -20,7 +20,6 @@
 #cmakedefine CMAKE_USE_ELF_PARSER
 #cmakedefine CMAKE_USE_MACH_PARSER
 #cmakedefine CMAKE_USE_LIBUV
-#cmakedefine CMAKE_ENCODING_UTF8
 #cmakedefine CMake_HAVE_CXX_AUTO_PTR
 #cmakedefine CMake_HAVE_CXX_MAKE_UNIQUE
 #cmakedefine CMake_HAVE_CXX_NULLPTR

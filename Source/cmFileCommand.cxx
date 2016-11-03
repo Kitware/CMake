@@ -59,7 +59,7 @@ static mode_t mode_setuid = S_ISUID;
 static mode_t mode_setgid = S_ISGID;
 #endif
 
-#if defined(_WIN32) && defined(CMAKE_ENCODING_UTF8)
+#if defined(_WIN32)
 // libcurl doesn't support file:// urls for unicode filenames on Windows.
 // Convert string from UTF-8 to ACP if this is a file:// URL.
 static std::string fix_file_url_windows(const std::string& url)
@@ -2642,7 +2642,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     return false;
   }
 
-#if defined(_WIN32) && defined(CMAKE_ENCODING_UTF8)
+#if defined(_WIN32)
   url = fix_file_url_windows(url);
 #endif
 
@@ -2902,7 +2902,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
 
   unsigned long file_size = cmsys::SystemTools::FileLength(filename);
 
-#if defined(_WIN32) && defined(CMAKE_ENCODING_UTF8)
+#if defined(_WIN32)
   url = fix_file_url_windows(url);
 #endif
 

@@ -410,8 +410,7 @@ void cmCPackWIXGenerator::AddDefinition(cmWIXSourceWriter& source,
   std::ostringstream tmp;
   tmp << name << "=\"" << value << '"';
 
-  source.AddProcessingInstruction(
-    "define", cmWIXSourceWriter::CMakeEncodingToUtf8(tmp.str()));
+  source.AddProcessingInstruction("define", tmp.str());
 }
 
 bool cmCPackWIXGenerator::CreateWiXSourceFiles()
