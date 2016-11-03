@@ -32,8 +32,6 @@
 
 #include "byte_order.h"
 #include "algorithms.h"
-#include "torrent.h"
-#include "plug_openssl.h"
 #include "util.h"
 #include "hex.h"
 #include "rhash.h" /* RHash library interface */
@@ -155,8 +153,10 @@ RHASH_API rhash rhash_init(unsigned hash_id)
 			rctx->vector[i].hash_info = info;
 			rctx->vector[i].context = phash_ctx;
 
+#if 0
 			/* BTIH initialization is complex, save pointer for later */
 			if ((id & RHASH_BTIH) != 0) rctx->bt_ctx = phash_ctx;
+#endif
 			phash_ctx += (info->context_size + 7) & ~7;
 
 			/* initialize the i-th hash context */
@@ -508,6 +508,7 @@ const rhash_info* rhash_info_by_id(unsigned hash_id)
 	return rhash_info_table[rhash_ctz(hash_id)].info;
 }
 
+#if 0
 /**
  * Detect default digest output format for given hash algorithm.
  *
@@ -519,6 +520,7 @@ RHASH_API int rhash_is_base32(unsigned hash_id)
 	/* fast method is just to test a bit-mask */
 	return ((hash_id & (RHASH_TTH | RHASH_AICH)) != 0);
 }
+#endif
 
 /**
  * Returns size of binary digest for given hash algorithm.
@@ -572,6 +574,7 @@ RHASH_API const char* rhash_get_magnet_name(unsigned hash_id)
 	return (info ? info->magnet_name : 0);
 }
 
+#if 0
 static size_t rhash_get_magnet_url_size(const char* filepath,
 	rhash context, unsigned hash_mask, int flags)
 {
@@ -809,47 +812,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID reserved)
 }
 #endif
 
-/**
- * Process a BitTorrent-related rhash message.
- *
- * @param msg_id message identifier
- * @param bt BitTorrent context
- * @param ldata data depending on message
- * @param rdata data depending on message
- * @return message-specific data
- */
-static rhash_uptr_t process_bt_msg(unsigned msg_id, torrent_ctx* bt, rhash_uptr_t ldata, rhash_uptr_t rdata)
-{
-	if (bt == NULL) return RHASH_ERROR;
-
-	switch (msg_id) {
-	case RMSG_BT_ADD_FILE:
-		bt_add_file(bt, (const char*)ldata, *(unsigned long long*)rdata);
-		break;
-	case RMSG_BT_SET_OPTIONS:
-		bt_set_options(bt, (unsigned)ldata);
-		break;
-	case RMSG_BT_SET_ANNOUNCE:
-		bt_add_announce(bt, (const char*)ldata);
-		break;
-	case RMSG_BT_SET_PIECE_LENGTH:
-		bt_set_piece_length(bt, (size_t)ldata);
-		break;
-	case RMSG_BT_SET_BATCH_SIZE:
-		bt_set_piece_length(bt,
-			bt_default_piece_length(*(unsigned long long*)ldata));
-		break;
-	case RMSG_BT_SET_PROGRAM_NAME:
-		bt_set_program_name(bt, (const char*)ldata);
-		break;
-	case RMSG_BT_GET_TEXT:
-		return (rhash_uptr_t)bt_get_text(bt, (char**)ldata);
-	default:
-		return RHASH_ERROR; /* unknown message */
-	}
-	return 0;
-}
-
 #define PVOID2UPTR(p) ((rhash_uptr_t)((char*)p - 0))
 
 /**
@@ -902,18 +864,9 @@ RHASH_API rhash_uptr_t rhash_transmit(unsigned msg_id, void* dst, rhash_uptr_t l
 		return rhash_openssl_hash_mask;
 #endif
 
-	/* BitTorrent related messages */
-	case RMSG_BT_ADD_FILE:
-	case RMSG_BT_SET_OPTIONS:
-	case RMSG_BT_SET_ANNOUNCE:
-	case RMSG_BT_SET_PIECE_LENGTH:
-	case RMSG_BT_SET_PROGRAM_NAME:
-	case RMSG_BT_GET_TEXT:
-	case RMSG_BT_SET_BATCH_SIZE:
-		return process_bt_msg(msg_id, (torrent_ctx*)(((rhash_context_ext*)dst)->bt_ctx), ldata, rdata);
-
 	default:
 		return RHASH_ERROR; /* unknown message */
 	}
 	return 0;
 }
+#endif

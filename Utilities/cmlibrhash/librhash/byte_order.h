@@ -4,10 +4,6 @@
 #include "ustd.h"
 #include <stdlib.h>
 
-#ifdef IN_RHASH
-#include "config.h"
-#endif
-
 #ifdef __GLIBC__
 # include <endian.h>
 #endif
