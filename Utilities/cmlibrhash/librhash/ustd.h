@@ -9,29 +9,31 @@
 # pragma warning(push,1)
 #endif
 
-#if _MSC_VER >= 1300
+#include <cm_kwiml.h>
 
-# define int64_t __int64
-# define int32_t __int32
-# define int16_t __int16
-# define int8_t  __int8
-# define uint64_t unsigned __int64
-# define uint32_t unsigned __int32
-# define uint16_t unsigned __int16
-# define uint8_t  unsigned __int8
-
-/* disable warnings: The POSIX name for this item is deprecated. Use the ISO C++ conformant name. */
-#pragma warning(disable : 4996)
-
-#else /* _MSC_VER >= 1300 */
-
-# include <stdint.h>
-# include <unistd.h>
-
-#endif /* _MSC_VER >= 1300 */
-
-#if _MSC_VER <= 1300
-# include <stdlib.h> /* size_t for vc6.0 */
-#endif /* _MSC_VER <= 1300 */
+#ifndef KWIML_INT_HAVE_INT64_T
+# define int64_t KWIML_INT_int64_t
+#endif
+#ifndef KWIML_INT_HAVE_INT32_T
+# define int32_t KWIML_INT_int32_t
+#endif
+#ifndef KWIML_INT_HAVE_INT16_T
+# define int16_t KWIML_INT_int16_t
+#endif
+#ifndef KWIML_INT_HAVE_INT8_T
+# define int8_t KWIML_INT_int8_t
+#endif
+#ifndef KWIML_INT_HAVE_UINT64_T
+# define uint64_t KWIML_INT_uint64_t
+#endif
+#ifndef KWIML_INT_HAVE_UINT32_T
+# define uint32_t KWIML_INT_uint32_t
+#endif
+#ifndef KWIML_INT_HAVE_UINT16_T
+# define uint16_t KWIML_INT_uint16_t
+#endif
+#ifndef KWIML_INT_HAVE_UINT8_T
+# define uint8_t KWIML_INT_uint8_t
+#endif
 
 #endif /* LIBRHASH_USTD_H */
