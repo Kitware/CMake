@@ -360,6 +360,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       this->GetType() != cmStateEnums::UTILITY) {
     this->SetPropertyDefault("C_VISIBILITY_PRESET", CM_NULLPTR);
     this->SetPropertyDefault("CXX_VISIBILITY_PRESET", CM_NULLPTR);
+    this->SetPropertyDefault("CUDA_VISIBILITY_PRESET", CM_NULLPTR);
     this->SetPropertyDefault("VISIBILITY_INLINES_HIDDEN", CM_NULLPTR);
   }
 
