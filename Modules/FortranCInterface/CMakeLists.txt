@@ -94,6 +94,9 @@ add_library(myfort STATIC mysub.f my_sub.f ${myfort_modules})
 # Provide symbols through C but fall back to Fortran.
 add_library(symbols STATIC ${symbol_sources})
 target_link_libraries(symbols myfort)
+# In case the Fortran compiler produces PIC by default make sure
+# the C compiler produces PIC even if it is not its default.
+set_property(TARGET symbols PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 # Require symbols through Fortran.
 add_executable(FortranCInterface main.F call_sub.f ${call_mod})
