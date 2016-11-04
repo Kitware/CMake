@@ -334,8 +334,9 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalOptions(
       } else {
         fout << "<AdditionalOptions>";
       }
-      fout << cmVisualStudio10GeneratorOptionsEscapeForXML(this->FlagString)
-           << " %(AdditionalOptions)</AdditionalOptions>\n";
+      fout << "%(AdditionalOptions) "
+           << cmVisualStudio10GeneratorOptionsEscapeForXML(this->FlagString)
+           << "</AdditionalOptions>\n";
     } else {
       fout << prefix << "AdditionalOptions=\"";
       fout << cmVisualStudioGeneratorOptionsEscapeForXML(this->FlagString);
