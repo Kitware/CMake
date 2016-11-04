@@ -41,6 +41,12 @@ private:
   {
   };
 
+  struct TargetsFileAndConfigs
+  {
+    std::string File;
+    std::vector<std::string> Configs;
+  };
+
   std::string ConvertPath(std::string const& path, bool forceRelative);
   void ConvertToWindowsSlash(std::string& s);
   void WriteString(const char* line, int indentLevel);
@@ -77,6 +83,7 @@ private:
                                std::string const& version);
   void WriteCommonMissingFiles(const std::string& manifestFile);
   void WriteTargetSpecificReferences();
+  void WriteTargetsFileReferences();
 
   bool ComputeClOptions();
   bool ComputeClOptions(std::string const& configName);
@@ -92,6 +99,8 @@ private:
                         std::vector<std::string> const& includes);
   bool ComputeLinkOptions();
   bool ComputeLinkOptions(std::string const& config);
+  bool ComputeLibOptions();
+  bool ComputeLibOptions(std::string const& config);
   void WriteLinkOptions(std::string const& config);
   void WriteMidlOptions(std::string const& config,
                         std::vector<std::string> const& includes);
@@ -106,7 +115,10 @@ private:
   void WriteApplicationTypeSettings();
   bool OutputSourceSpecificFlags(cmSourceFile const* source);
   void AddLibraries(cmComputeLinkInformation& cli,
-                    std::vector<std::string>& libVec);
+                    std::vector<std::string>& libVec,
+                    std::vector<std::string>& vsTargetVec);
+  void AddTargetsFileAndConfigPair(std::string const& targetsFile,
+                                   std::string const& config);
   void WriteLibOptions(std::string const& config);
   void WriteManifestOptions(std::string const& config);
   void WriteEvents(std::string const& configName);
@@ -138,6 +150,7 @@ private:
   OptionsMap LinkOptions;
   std::string PathToVcxproj;
   std::vector<std::string> Configurations;
+  std::vector<TargetsFileAndConfigs> TargetsFileAndConfigsVec;
   cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;
   std::string Platform;
