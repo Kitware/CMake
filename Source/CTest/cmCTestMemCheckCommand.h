@@ -20,7 +20,7 @@ class cmCommand;
 class cmCTestMemCheckCommand : public cmCTestTestCommand
 {
 public:
-  cmCTestMemCheckCommand() {}
+  cmCTestMemCheckCommand();
 
   /**
    * This is a virtual constructor for the command.
@@ -40,6 +40,14 @@ public:
 
 protected:
   cmCTestGenericHandler* InitializeActualHandler() CM_OVERRIDE;
+
+  void ProcessAdditionalValues(cmCTestGenericHandler* handler) CM_OVERRIDE;
+
+  enum
+  {
+    ctm_DEFECT_COUNT = ctt_LAST,
+    ctm_LAST
+  };
 };
 
 #endif

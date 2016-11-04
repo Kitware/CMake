@@ -45,6 +45,8 @@ public:
 protected:
   virtual cmCTestGenericHandler* InitializeHandler() = 0;
 
+  virtual void ProcessAdditionalValues(cmCTestGenericHandler* handler);
+
   // Command argument handling.
   virtual bool CheckArgumentKeyword(std::string const& arg);
   virtual bool CheckArgumentValue(std::string const& arg);

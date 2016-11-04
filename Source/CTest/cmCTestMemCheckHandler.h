@@ -30,6 +30,8 @@ public:
 
   void Initialize() CM_OVERRIDE;
 
+  int GetDefectCount();
+
 protected:
   int PreProcessHandler() CM_OVERRIDE;
   int PostProcessHandler() CM_OVERRIDE;
@@ -105,6 +107,7 @@ private:
   std::vector<std::string> ResultStringsLong;
   std::vector<int> GlobalResults;
   bool LogWithPID; // does log file add pid
+  int DefectCount;
 
   std::vector<int>::size_type FindOrAddWarning(const std::string& warning);
   // initialize the ResultStrings and ResultStringsLong for
