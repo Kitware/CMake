@@ -1868,7 +1868,11 @@ function(cpack_rpm_generate_package)
     if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
       cmake_policy(PUSH)
         cmake_policy(SET CMP0057 NEW)
-        if(NOT _RPM_SPEC_HEADER IN_LIST RPMBUILD_TAG_LIST)
+        # Prefix can be replaced by Prefixes but the old version stil works so we'll ignore it for now
+        # Requires* is a special case because it gets transformed to Requires(pre/post/preun/postun)
+        # Auto* is a special case because the tags can not be queried by querytags rpmbuild flag
+        set(special_case_tags_ PREFIX REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN AUTOPROV AUTOREQ AUTOREQPROV)
+        if(NOT _RPM_SPEC_HEADER IN_LIST RPMBUILD_TAG_LIST AND NOT _RPM_SPEC_HEADER IN_LIST special_case_tags_)
           cmake_policy(POP)
           message(AUTHOR_WARNING "CPackRPM:Warning: ${_RPM_SPEC_HEADER} not "
               "supported in provided rpmbuild. Tag will not be used.")
