@@ -926,7 +926,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
       return false;
     }
     size_t fileSize = static_cast<size_t>(st.st_size);
-    FILE* fp = cmsys::SystemTools::Fopen(local_file.c_str(), "rb");
+    FILE* fp = cmsys::SystemTools::Fopen(local_file, "rb");
     if (!fp) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "  Cannot open file: " << local_file << std::endl);
