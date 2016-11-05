@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFunctionCommand.h"
 
-#include <algorithm>
 #include <sstream>
 
 #include "cmAlgorithms.h"

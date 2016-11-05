@@ -2,15 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTimestamp.h"
 
-#include "cmSystemTools.h"
-
-#include <cstdlib>
+#include <cmConfigure.h>
 #include <cstring>
 #include <sstream>
 
-#include <sys/types.h>
-// include sys/stat.h after sys/types.h
-#include <sys/stat.h>
+#include "cmSystemTools.h"
 
 std::string cmTimestamp::CurrentTime(const std::string& formatString,
                                      bool utcFlag)

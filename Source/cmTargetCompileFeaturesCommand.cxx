@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetCompileFeaturesCommand.h"
 
-#include <algorithm>
 #include <sstream>
 
 #include "cmAlgorithms.h"

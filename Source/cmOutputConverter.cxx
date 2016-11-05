@@ -2,16 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOutputConverter.h"
 
-#include "cmAlgorithms.h"
-#include "cmState.h"
-#include "cmStateDirectory.h"
-#include "cmSystemTools.h"
-
 #include <algorithm>
 #include <assert.h>
 #include <ctype.h>
 #include <set>
 #include <sstream>
+#include <vector>
+
+#include "cmAlgorithms.h"
+#include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmSystemTools.h"
 
 cmOutputConverter::cmOutputConverter(cmStateSnapshot snapshot)
   : StateSnapshot(snapshot)

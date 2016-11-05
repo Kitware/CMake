@@ -2,8 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmStateDirectory.h"
+
+#include <algorithm>
+#include <assert.h>
+#include <iterator>
+#include <map>
+#include <utility>
+
+#include "cmProperty.h"
+#include "cmPropertyMap.h"
 #include "cmState.h"
 #include "cmStatePrivate.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 
 static std::string const kBINARY_DIR = "BINARY_DIR";

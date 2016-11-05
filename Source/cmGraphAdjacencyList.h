@@ -3,9 +3,9 @@
 #ifndef cmGraphAdjacencyList_h
 #define cmGraphAdjacencyList_h
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmStandardIncludes.h"
+#include <vector>
 
 /**
  * Graph edge representation.  Most use cases just need the

@@ -5,6 +5,7 @@
 #include "CMakeSetupDialog.h"
 #include "cmAlgorithms.h"
 #include "cmDocumentation.h"
+#include "cmDocumentationEntry.h"
 #include "cmVersion.h"
 #include "cmake.h"
 #include <QApplication>
@@ -17,6 +18,7 @@
 #include <cmsys/CommandLineArguments.hxx>
 #include <cmsys/Encoding.hxx>
 #include <cmsys/SystemTools.hxx>
+#include <iostream>
 
 #include "cmSystemTools.h" // IWYU pragma: keep
 

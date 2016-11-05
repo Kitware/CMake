@@ -13,7 +13,6 @@
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmState.h"
-#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
@@ -27,7 +26,6 @@
 #include <cmConfigure.h>
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
-#include <iostream>
 #include <map>
 #include <set>
 #include <sstream>

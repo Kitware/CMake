@@ -3,6 +3,7 @@
 #include "cmDefinitions.h"
 
 #include <assert.h>
+#include <cmConfigure.h>
 #include <set>
 #include <utility>
 

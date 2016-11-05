@@ -9,7 +9,6 @@
 #include <map>
 #include <string>
 
-class cmGeneratorTarget;
 class cmOutputConverter;
 
 class cmRulePlaceholderExpander

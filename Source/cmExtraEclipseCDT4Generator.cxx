@@ -2,21 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExtraEclipseCDT4Generator.h"
 
-#include "cmGeneratedFileStream.h"
-#include "cmGeneratorExpression.h"
-#include "cmGeneratorTarget.h"
-#include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
-#include "cmMakefile.h"
-#include "cmOutputConverter.h"
-#include "cmSourceFile.h"
-#include "cmSourceGroup.h"
-#include "cmState.h"
-#include "cmStateTypes.h"
-#include "cmSystemTools.h"
-#include "cmXMLWriter.h"
-#include "cmake.h"
-
 #include <algorithm>
 #include <assert.h>
 #include <cmsys/RegularExpression.hxx>
@@ -24,6 +9,20 @@
 #include <sstream>
 #include <stdio.h>
 #include <utility>
+
+#include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmSourceFile.h"
+#include "cmSourceGroup.h"
+#include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmXMLWriter.h"
+#include "cmake.h"
 
 static void AppendAttribute(cmXMLWriter& xml, const char* keyval)
 {

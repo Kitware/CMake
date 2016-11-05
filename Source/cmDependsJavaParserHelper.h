@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+class cmDependsJavaParserHelper;
+
 #define YYSTYPE cmDependsJavaParserHelper::ParserType
 #define YYSTYPE_IS_DECLARED
 #define YY_EXTRA_TYPE cmDependsJavaParserHelper*

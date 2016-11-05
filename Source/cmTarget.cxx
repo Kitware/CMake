@@ -2,6 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTarget.h"
 
+#include <algorithm>
+#include <assert.h>
+#include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <set>
+#include <sstream>
+#include <string.h>
+
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -14,18 +22,12 @@
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmTargetPropertyComputer.h"
 #include "cm_unordered_set.hxx"
 #include "cmake.h"
-
-#include <algorithm>
-#include <assert.h>
-#include <cmsys/RegularExpression.hxx>
-#include <map>
-#include <set>
-#include <sstream>
-#include <string.h>
 
 template <>
 const char* cmTargetPropertyComputer::ComputeLocationForBuild<cmTarget>(

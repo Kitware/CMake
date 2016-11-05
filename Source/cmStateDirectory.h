@@ -10,9 +10,10 @@
 #include <vector>
 
 #include "cmAlgorithms.h"
+#include "cmLinkedTree.h"
 #include "cmListFileCache.h"
+#include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
-#include "cmStateTypes.h"
 
 class cmStateDirectory
 {

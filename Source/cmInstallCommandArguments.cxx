@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallCommandArguments.h"
 
+#include <cmConfigure.h>
+
 #include "cmSystemTools.h"
 
 // Table of valid permissions.

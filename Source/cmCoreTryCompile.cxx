@@ -2,16 +2,24 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCoreTryCompile.h"
 
+#include <cmConfigure.h>
+#include <cmsys/Directory.hxx>
+#include <set>
+#include <sstream>
+#include <stdio.h>
+#include <string.h>
+
 #include "cmAlgorithms.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
 #include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmVersion.h"
 #include "cmake.h"
-#include <cmsys/Directory.hxx>
-
-#include <assert.h>
 
 static std::string const kCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN =
   "CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN";

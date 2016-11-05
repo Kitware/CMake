@@ -4,6 +4,9 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmStateTypes.h"
+#include "cmTarget.h"
+#include "cmake.h"
 
 bool cmTargetPropCommandBase::HandleArguments(
   std::vector<std::string> const& args, const std::string& prop,

@@ -20,6 +20,7 @@
 
 #undef GetCurrentDirectory
 #include <assert.h>
+#include <stdlib.h>
 
 #include <sys/types.h>
 // include sys/stat.h after sys/types.h

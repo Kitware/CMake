@@ -4,19 +4,16 @@
 #define cmCommonTargetGenerator_h
 
 #include <cmConfigure.h> // IWYU pragma: keep
-
-#include "cmOutputConverter.h"
-
 #include <map>
 #include <string>
 #include <vector>
 
 class cmGeneratorTarget;
 class cmGlobalCommonGenerator;
+class cmLinkLineComputer;
 class cmLocalCommonGenerator;
 class cmMakefile;
 class cmSourceFile;
-class cmLinkLineComputer;
 
 /** \class cmCommonTargetGenerator
  * \brief Common infrastructure for Makefile and Ninja per-target generators

@@ -2,10 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalCommonGenerator.h"
 
+#include <vector>
+
 #include "cmGeneratorTarget.h"
 #include "cmMakefile.h"
-
-#include <vector>
+#include "cmOutputConverter.h"
 
 class cmGlobalGenerator;
 

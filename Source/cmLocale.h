@@ -5,8 +5,6 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
 #include <locale.h>
 
 class cmLocaleRAII

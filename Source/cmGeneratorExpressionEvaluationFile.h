@@ -5,13 +5,18 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmGeneratorExpression.h"
-
-#include <cm_auto_ptr.hxx>
 #include <map>
 #include <string>
-#include <sys/types.h>
 #include <vector>
+
+#include "cmGeneratorExpression.h"
+#include "cm_auto_ptr.hxx"
+
+#if defined(_MSC_VER)
+typedef unsigned short mode_t;
+#else
+#include <sys/types.h>
+#endif
 
 class cmLocalGenerator;
 

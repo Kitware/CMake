@@ -5,7 +5,9 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
+#include <set>
+#include <string>
+#include <vector>
 
 class cmFindCommon;
 

@@ -3,9 +3,9 @@
 #ifndef cmPathLabel_h
 #define cmPathLabel_h
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmStandardIncludes.h"
+#include <string>
 
 /** \class cmPathLabel
  * \brief Helper class for text based labels

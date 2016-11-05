@@ -2,11 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmConditionEvaluator.h"
 
+#include <algorithm>
+#include <cmConfigure.h>
+#include <cmsys/RegularExpression.hxx>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
-#include "cmOutputConverter.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
+
+class cmCommand;
+class cmTest;
 
 static std::string const keyAND = "AND";
 static std::string const keyCOMMAND = "COMMAND";

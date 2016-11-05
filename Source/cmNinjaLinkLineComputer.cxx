@@ -2,7 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmNinjaLinkLineComputer.h"
+
 #include "cmGlobalNinjaGenerator.h"
+#include "cmStateDirectory.h"
+
+class cmOutputConverter;
 
 cmNinjaLinkLineComputer::cmNinjaLinkLineComputer(
   cmOutputConverter* outputConverter, cmStateDirectory stateDir,

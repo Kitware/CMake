@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalUnixMakefileGenerator3.h"
 
+#include <algorithm>
+#include <functional>
+#include <sstream>
+#include <utility>
+
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
@@ -14,15 +19,11 @@
 #include "cmOutputConverter.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <functional>
-#include <sstream>
-#include <utility>
 
 cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3(cmake* cm)
   : cmGlobalCommonGenerator(cm)

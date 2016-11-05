@@ -5,12 +5,6 @@
 
 #include <cmConfigure.h>
 
-#include "cmGlobalCommonGenerator.h"
-#include "cmGlobalGenerator.h"
-#include "cmGlobalGeneratorFactory.h"
-#include "cmNinjaTypes.h"
-#include "cmPolicies.h"
-
 #include <iosfwd>
 #include <map>
 #include <set>
@@ -18,13 +12,23 @@
 #include <utility>
 #include <vector>
 
+#include "cmGlobalCommonGenerator.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
+#include "cmNinjaTypes.h"
+#include "cmPolicies.h"
+#include "cm_codecvt.hxx"
+
 class cmCustomCommand;
-class cmMakefile;
-class cmake;
-struct cmDocumentationEntry;
 class cmGeneratedFileStream;
 class cmGeneratorTarget;
+class cmLinkLineComputer;
 class cmLocalGenerator;
+class cmMakefile;
+class cmOutputConverter;
+class cmStateDirectory;
+class cmake;
+struct cmDocumentationEntry;
 
 /**
  * \class cmGlobalNinjaGenerator

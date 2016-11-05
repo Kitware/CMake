@@ -3,9 +3,9 @@
 #ifndef cmExpandedCommandArgument_h
 #define cmExpandedCommandArgument_h
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmStandardIncludes.h"
+#include <string>
 
 /** \class cmExpandedCommandArgument
  * \brief Represents an expanded command argument

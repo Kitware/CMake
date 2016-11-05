@@ -3,12 +3,9 @@
 #ifndef cmFunctionBlocker_h
 #define cmFunctionBlocker_h
 
-#include <cmConfigure.h>
-
-#include "cmStandardIncludes.h"
-
-#include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
+
+class cmExecutionStatus;
 class cmMakefile;
 
 class cmFunctionBlocker

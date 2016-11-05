@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpression.h"
 
+#include <cmsys/RegularExpression.hxx>
+#include <utility>
+
 #include "assert.h"
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpressionContext.h"
@@ -9,9 +12,7 @@
 #include "cmGeneratorExpressionLexer.h"
 #include "cmGeneratorExpressionParser.h"
 #include "cmSystemTools.h"
-
-#include <cmsys/RegularExpression.hxx>
-#include <utility>
+#include "cm_auto_ptr.hxx"
 
 cmGeneratorExpression::cmGeneratorExpression(
   const cmListFileBacktrace& backtrace)

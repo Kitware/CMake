@@ -12,8 +12,15 @@
 #include "cmDefinitions.h"
 #include "cmLinkedTree.h"
 #include "cmListFileCache.h"
+#include "cmPolicies.h"
 #include "cmPropertyMap.h"
+#include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+
+namespace cmStateDetail {
+struct BuildsystemDirectoryStateType;
+struct PolicyStackEntry;
+} // namespace cmStateDetail
 
 static const std::string cmPropertySentinal = std::string();
 

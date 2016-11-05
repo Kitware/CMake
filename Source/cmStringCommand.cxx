@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmStringCommand.h"
 
-#include <algorithm>
 #include <cmsys/RegularExpression.hxx>
 #include <ctype.h>
 #include <sstream>

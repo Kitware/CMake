@@ -5,10 +5,9 @@
 
 #include <cmConfigure.h>
 
-#include "cmLocalGenerator.h"
-#include "cmOutputConverter.h"
-
 #include <string>
+
+#include "cmLocalGenerator.h"
 
 class cmGeneratorTarget;
 class cmGlobalGenerator;

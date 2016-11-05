@@ -8,6 +8,7 @@
 #include "cmMakefile.h"
 #include "cmQtAutoGenerators.h"
 #include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmUtils.hxx"
 #include "cmVersion.h"

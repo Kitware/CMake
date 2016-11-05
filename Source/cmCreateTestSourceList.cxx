@@ -2,9 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCreateTestSourceList.h"
 
+#include <algorithm>
+
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmCreateTestSourceList
 bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,

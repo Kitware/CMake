@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmPathLabel.h"
 
+#include <stddef.h>
+
 cmPathLabel::cmPathLabel(const std::string& label)
   : Label(label)
   , Hash(0)

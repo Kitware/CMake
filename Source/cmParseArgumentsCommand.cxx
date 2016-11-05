@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmParseArgumentsCommand.h"
 
-#include <algorithm>
 #include <map>
 #include <set>
 #include <sstream>

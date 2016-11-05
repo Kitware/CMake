@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileTimeComparison.h"
 
-#include <cmConfigure.h>
 #include <string>
 #include <time.h>
 #include <utility>

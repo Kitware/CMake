@@ -5,6 +5,13 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmListFileCache.h"
@@ -14,16 +21,10 @@
 #include "cmTargetLinkLibraryType.h"
 #include "cm_unordered_map.hxx"
 
-#include <iosfwd>
-#include <map>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
-
-class cmMakefile;
-class cmSourceFile;
 class cmGlobalGenerator;
+class cmMakefile;
+class cmMessenger;
+class cmSourceFile;
 class cmTargetInternals;
 
 class cmTargetInternalPointer

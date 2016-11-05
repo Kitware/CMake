@@ -22,6 +22,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
