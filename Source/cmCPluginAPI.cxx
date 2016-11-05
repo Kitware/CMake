@@ -408,7 +408,7 @@ char CCONV* cmExpandVariablesInString(void* arg, const char* source,
   std::string result = mf->ExpandVariablesInString(
     barf, (escapeQuotes ? true : false), (atOnly ? true : false));
   char* res = static_cast<char*>(malloc(result.size() + 1));
-  if (result.size()) {
+  if (!result.empty()) {
     strcpy(res, result.c_str());
   }
   res[result.size()] = '\0';
@@ -570,7 +570,7 @@ void* CCONV cmAddSource(void* arg, void* arg2)
   rsf->GetProperties() = osf->Properties;
   for (std::vector<std::string>::iterator i = osf->Depends.begin();
        i != osf->Depends.end(); ++i) {
-    rsf->AddDepend(i->c_str());
+    rsf->AddDepend(*i);
   }
 
   // Create the proxy for the real source file.
@@ -676,7 +676,7 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
   std::string hname = pathname;
   if (cmSystemTools::FileExists(hname.c_str())) {
     sf->SourceName = cmSystemTools::GetFilenamePath(name);
-    if (sf->SourceName.size() > 0) {
+    if (!sf->SourceName.empty()) {
       sf->SourceName += "/";
     }
     sf->SourceName += cmSystemTools::GetFilenameWithoutLastExtension(name);
@@ -756,7 +756,7 @@ void CCONV cmSourceFileSetName2(void* arg, const char* name, const char* dir,
     fname += ".";
     fname += ext;
   }
-  sf->FullPath = cmSystemTools::CollapseFullPath(fname.c_str(), dir);
+  sf->FullPath = cmSystemTools::CollapseFullPath(fname, dir);
   cmSystemTools::ConvertToUnixSlashes(sf->FullPath);
   sf->SourceExtension = ext;
 }
