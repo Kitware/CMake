@@ -19,8 +19,7 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source)
       include("${RunCMake_SOURCE_DIR}/${TEST_TYPE}/${TEST_NAME}-Prerequirements.cmake")
 
       set(FOUND_PREREQUIREMENTS false)
-      get_test_prerequirements("FOUND_PREREQUIREMENTS"
-          "${TEST_CONFIG_DIR}/${type}_config.cmake")
+      get_test_prerequirements("FOUND_PREREQUIREMENTS" "${config_file}")
 
       # skip the test if prerequirements are not met
       if(NOT FOUND_PREREQUIREMENTS)
