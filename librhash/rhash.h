@@ -128,7 +128,7 @@ typedef struct rhash_info
 /* information functions */
 RHASH_API int  rhash_count(void); /* number of supported hashes */
 RHASH_API int  rhash_get_digest_size(unsigned hash_id); /* size of binary message digest */
-RHASH_API int  rhash_get_hash_length(unsigned hash_id); /* length of formated hash string */
+RHASH_API int  rhash_get_hash_length(unsigned hash_id); /* length of formatted hash string */
 RHASH_API int  rhash_is_base32(unsigned hash_id); /* default digest output format */
 RHASH_API const char* rhash_get_name(unsigned hash_id); /* get hash function name */
 RHASH_API const char* rhash_get_magnet_name(unsigned hash_id); /* get name part of magnet urn */
