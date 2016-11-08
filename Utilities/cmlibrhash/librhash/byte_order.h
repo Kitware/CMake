@@ -120,8 +120,8 @@ static inline uint32_t bswap_32(uint32_t x) {
 # define bswap_64(x) __builtin_bswap64(x)
 #elif (_MSC_VER > 1300) && (defined(CPU_IA32) || defined(CPU_X64)) /* MS VC */
 # define bswap_64(x) _byteswap_uint64((__int64)x)
-#elif !defined(__STRICT_ANSI__)
-static inline uint64_t bswap_64(uint64_t x) {
+#else
+static uint64_t bswap_64(uint64_t x) {
 	union {
 		uint64_t ll;
 		uint32_t l[2];
@@ -131,8 +131,6 @@ static inline uint64_t bswap_64(uint64_t x) {
 	r.l[1] = bswap_32(w.l[0]);
 	return r.ll;
 }
-#else
-#error "bswap_64 unsupported"
 #endif
 
 #ifdef CPU_BIG_ENDIAN
