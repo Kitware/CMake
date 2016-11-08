@@ -232,10 +232,7 @@ public:
   bool ShouldPrintLabels() { return this->PrintLabels; }
 
   bool ShouldCompressTestOutput();
-  bool ShouldCompressMemCheckOutput();
   bool CompressString(std::string& str);
-
-  std::string GetCDashVersion();
 
   std::string GetStopTime() { return this->StopTime; }
   void SetStopTime(std::string const& time);
@@ -487,10 +484,6 @@ private:
 
   bool RunConfigurationScript;
 
-  // flag for lazy getter (optimization)
-  bool ComputedCompressTestOutput;
-  bool ComputedCompressMemCheckOutput;
-
   int GenerateNotesFile(const char* files);
 
   void DetermineNextDayStop();
@@ -547,7 +540,6 @@ private:
 
   bool CompressXMLFiles;
   bool CompressTestOutput;
-  bool CompressMemCheckOutput;
 
   void InitStreams();
   std::ostream* StreamOut;

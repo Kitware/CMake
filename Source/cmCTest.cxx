@@ -271,7 +271,6 @@ cmCTest::cmCTest()
   this->UseHTTP10 = false;
   this->PrintLabels = false;
   this->CompressTestOutput = true;
-  this->CompressMemCheckOutput = true;
   this->TestModel = cmCTest::EXPERIMENTAL;
   this->MaxTestNameWidth = 30;
   this->InteractiveDebugMode = true;
@@ -289,8 +288,6 @@ cmCTest::cmCTest()
   this->DartVersion = 1;
   this->DropSiteCDash = false;
   this->OutputTestOutputOnTestFailure = false;
-  this->ComputedCompressTestOutput = false;
-  this->ComputedCompressMemCheckOutput = false;
   this->RepeatTests = 1; // default to run each test once
   this->RepeatUntilFail = false;
   std::string outOnFail;
@@ -358,51 +355,7 @@ void cmCTest::SetTestLoad(unsigned long load)
 
 bool cmCTest::ShouldCompressTestOutput()
 {
-  if (!this->ComputedCompressTestOutput) {
-    std::string cdashVersion = this->GetCDashVersion();
-    // version >= 1.6?
-    bool cdashSupportsGzip = cmSystemTools::VersionCompare(
-      cmSystemTools::OP_GREATER_EQUAL, cdashVersion.c_str(), "1.6");
-    this->CompressTestOutput &= cdashSupportsGzip;
-    this->ComputedCompressTestOutput = true;
-  }
   return this->CompressTestOutput;
-}
-
-bool cmCTest::ShouldCompressMemCheckOutput()
-{
-  if (!this->ComputedCompressMemCheckOutput) {
-    std::string cdashVersion = this->GetCDashVersion();
-
-    bool compressionSupported = cmSystemTools::VersionCompare(
-      cmSystemTools::OP_GREATER, cdashVersion.c_str(), "1.9.0");
-    this->CompressMemCheckOutput &= compressionSupported;
-    this->ComputedCompressMemCheckOutput = true;
-  }
-  return this->CompressMemCheckOutput;
-}
-
-std::string cmCTest::GetCDashVersion()
-{
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  // First query the server.  If that fails, fall back to the local setting
-  std::string response;
-  std::string url = "http://";
-  url += this->GetCTestConfiguration("DropSite");
-
-  std::string cdashUri = this->GetCTestConfiguration("DropLocation");
-  cdashUri = cdashUri.substr(0, cdashUri.find("/submit.php"));
-
-  int res = 1;
-  if (!cdashUri.empty()) {
-    url += cdashUri + "/api/getversion.php";
-    res = cmCTest::HTTPRequest(url, cmCTest::HTTP_GET, response, "", "", 3);
-  }
-
-  return res ? this->GetCTestConfiguration("CDashVersion") : response;
-#else
-  return this->GetCTestConfiguration("CDashVersion");
-#endif
 }
 
 cmCTest::Part cmCTest::GetPartFromName(const char* name)
@@ -1746,7 +1699,6 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
 
   if (this->CheckArgument(arg, "--no-compress-output")) {
     this->CompressTestOutput = false;
-    this->CompressMemCheckOutput = false;
   }
 
   if (this->CheckArgument(arg, "--print-labels")) {
