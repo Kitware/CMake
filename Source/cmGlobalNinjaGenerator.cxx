@@ -130,7 +130,7 @@ std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string& lit)
 
 std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
 {
-  std::string result = path;
+  std::string result = path; // NOLINT(clang-tidy)
 #ifdef _WIN32
   if (this->IsGCCOnWindows())
     std::replace(result.begin(), result.end(), '\\', '/');
@@ -283,7 +283,7 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
   bool restat, const cmNinjaDeps& outputs, const cmNinjaDeps& deps,
   const cmNinjaDeps& orderOnly)
 {
-  std::string cmd = command;
+  std::string cmd = command; // NOLINT(clang-tidy)
 #ifdef _WIN32
   if (cmd.empty())
     // TODO Shouldn't an empty command be handled by ninja?

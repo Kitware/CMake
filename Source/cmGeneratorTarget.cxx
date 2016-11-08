@@ -3945,9 +3945,9 @@ std::string cmGeneratorTarget::GetFortranModuleDirectory(
   std::string const& working_dir) const
 {
   if (!this->FortranModuleDirectoryCreated) {
-    this->FortranModuleDirectory = true;
     this->FortranModuleDirectory =
       this->CreateFortranModuleDirectory(working_dir);
+    this->FortranModuleDirectoryCreated = true;
   }
 
   return this->FortranModuleDirectory;
