@@ -1844,6 +1844,12 @@ function(cpack_rpm_generate_package)
     set(CPACK_RPM_PACKAGE_RELOCATABLE FALSE) # disable relocatable option if building source RPM
   endif()
 
+  execute_process(
+    COMMAND "${RPMBUILD_EXECUTABLE}" --querytags
+    OUTPUT_VARIABLE RPMBUILD_TAG_LIST
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  string(REPLACE "\n" ";" RPMBUILD_TAG_LIST "${RPMBUILD_TAG_LIST}")
+
   # Check if additional fields for RPM spec header are given
   # There may be some COMPONENT specific variables as well
   # If component specific var is not provided we use the global one
@@ -1852,6 +1858,7 @@ function(cpack_rpm_generate_package)
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: processing ${_RPM_SPEC_HEADER}")
     endif()
+
     if(CPACK_RPM_PACKAGE_COMPONENT)
       cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}"
         "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}"
@@ -1859,9 +1866,24 @@ function(cpack_rpm_generate_package)
     endif()
 
     if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
+      cmake_policy(PUSH)
+        cmake_policy(SET CMP0057 NEW)
+        # Prefix can be replaced by Prefixes but the old version stil works so we'll ignore it for now
+        # Requires* is a special case because it gets transformed to Requires(pre/post/preun/postun)
+        # Auto* is a special case because the tags can not be queried by querytags rpmbuild flag
+        set(special_case_tags_ PREFIX REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN AUTOPROV AUTOREQ AUTOREQPROV)
+        if(NOT _RPM_SPEC_HEADER IN_LIST RPMBUILD_TAG_LIST AND NOT _RPM_SPEC_HEADER IN_LIST special_case_tags_)
+          cmake_policy(POP)
+          message(AUTHOR_WARNING "CPackRPM:Warning: ${_RPM_SPEC_HEADER} not "
+              "supported in provided rpmbuild. Tag will not be used.")
+          continue()
+        endif()
+      cmake_policy(POP)
+
       if(CPACK_RPM_PACKAGE_DEBUG)
         message("CPackRPM:Debug: using CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}")
       endif()
+
       set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}})
     endif()
 
@@ -2416,6 +2438,7 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@TMP_RPM_PROVIDES\@
 \@TMP_RPM_OBSOLETES\@
 \@TMP_RPM_CONFLICTS\@
+\@TMP_RPM_SUGGESTS\@
 \@TMP_RPM_AUTOPROV\@
 \@TMP_RPM_AUTOREQ\@
 \@TMP_RPM_AUTOREQPROV\@
@@ -2470,6 +2493,7 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@TMP_RPM_PROVIDES\@
 \@TMP_RPM_OBSOLETES\@
 \@TMP_RPM_CONFLICTS\@
+\@TMP_RPM_SUGGESTS\@
 \@TMP_RPM_AUTOPROV\@
 \@TMP_RPM_AUTOREQ\@
 \@TMP_RPM_AUTOREQPROV\@
