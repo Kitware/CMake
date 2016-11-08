@@ -1,7 +1,7 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-subdirs(Doxygen KWStyle)
+subdirs(Doxygen)
 
 if(CMAKE_DOC_TARBALL)
   # Undocumented option to extract and install pre-built documentation.
