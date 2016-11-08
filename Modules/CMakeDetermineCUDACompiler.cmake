@@ -12,6 +12,17 @@ endif()
 if(NOT CMAKE_CUDA_COMPILER)
   set(CMAKE_CUDA_COMPILER_INIT NOTFOUND)
 
+    # prefer the environment variable CUDACXX
+    if(NOT $ENV{CUDACXX} STREQUAL "")
+      get_filename_component(CMAKE_CUDA_COMPILER_INIT $ENV{CUDACXX} PROGRAM PROGRAM_ARGS CMAKE_CUDA_FLAGS_ENV_INIT)
+      if(CMAKE_CUDA_FLAGS_ENV_INIT)
+        set(CMAKE_CUDA_COMPILER_ARG1 "${CMAKE_CUDA_FLAGS_ENV_INIT}" CACHE STRING "First argument to CXX compiler")
+      endif()
+      if(NOT EXISTS ${CMAKE_CUDA_COMPILER_INIT})
+        message(FATAL_ERROR "Could not find compiler set in environment variable CUDACXX:\n$ENV{CUDACXX}.\n${CMAKE_CUDA_COMPILER_INIT}")
+      endif()
+    endif()
+
   # finally list compilers to try
   if(NOT CMAKE_CUDA_COMPILER_INIT)
     set(CMAKE_CUDA_COMPILER_LIST nvcc)
@@ -25,8 +36,13 @@ endif()
 mark_as_advanced(CMAKE_CUDA_COMPILER)
 
 #Allow the user to specify a host compiler
-#todo: need to specify this to compiler test passes
 set(CMAKE_CUDA_HOST_COMPILER "" CACHE FILEPATH "Host compiler to be used by nvcc")
+if(NOT $ENV{CUDAHOSTCXX} STREQUAL "")
+  get_filename_component(CMAKE_CUDA_HOST_COMPILER $ENV{CUDAHOSTCXX} PROGRAM)
+  if(NOT EXISTS ${CMAKE_CUDA_HOST_COMPILER})
+    message(FATAL_ERROR "Could not find compiler set in environment variable CUDAHOSTCXX:\n$ENV{CUDAHOSTCXX}.\n${CMAKE_CUDA_HOST_COMPILER}")
+  endif()
+endif()
 
 # Build a small source file to identify the compiler.
 if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
@@ -96,3 +112,4 @@ configure_file(${CMAKE_ROOT}/Modules/CMakeCUDACompiler.cmake.in
   )
 
 set(CMAKE_CUDA_COMPILER_ENV_VAR "CUDACXX")
+set(CMAKE_CUDA_HOST_COMPILER_ENV_VAR "CUDAHOSTCXX")
