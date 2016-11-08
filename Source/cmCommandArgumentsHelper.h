@@ -5,10 +5,12 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
+#include <set>
+#include <string>
+#include <vector>
 
-class cmCommandArgumentsHelper;
 class cmCommandArgumentGroup;
+class cmCommandArgumentsHelper;
 
 /* cmCommandArgumentsHelper, cmCommandArgumentGroup and cmCommandArgument (i.e.
 its derived classes cmCAXXX can be used to simplify the processing of

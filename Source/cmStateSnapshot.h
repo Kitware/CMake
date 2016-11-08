@@ -6,10 +6,10 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
-#include <map>
 #include <string>
 #include <vector>
 
+#include "cmLinkedTree.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 

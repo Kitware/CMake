@@ -3,12 +3,24 @@
 
 #include "cmStateSnapshot.h"
 
+#include <algorithm>
+#include <assert.h>
+#include <iterator>
+#include <stdio.h>
+
+#include "cmAlgorithms.h"
+#include "cmDefinitions.h"
+#include "cmListFileCache.h"
+#include "cmPropertyMap.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStatePrivate.h"
-#include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmake.h"
+
+#if defined(__CYGWIN__)
+#include "cmSystemTools.h"
+#endif
 
 cmStateSnapshot::cmStateSnapshot(cmState* state)
   : State(state)

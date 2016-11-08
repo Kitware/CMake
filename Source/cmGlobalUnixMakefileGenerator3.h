@@ -5,17 +5,17 @@
 
 #include <cmConfigure.h>
 
-#include "cmGeneratorTarget.h"
-#include "cmGlobalCommonGenerator.h"
-#include "cmGlobalGeneratorFactory.h"
-#include "cmStateTypes.h"
-
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <stddef.h>
 #include <string>
 #include <vector>
+
+#include "cmGeneratorTarget.h"
+#include "cmGlobalCommonGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
+#include "cmStateSnapshot.h"
 
 class cmGeneratedFileStream;
 class cmLocalGenerator;

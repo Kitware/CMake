@@ -2,15 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDependsC.h"
 
+#include <cmsys/FStream.hxx>
+#include <utility>
+
 #include "cmAlgorithms.h"
 #include "cmFileTimeComparison.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmOutputConverter.h"
 #include "cmSystemTools.h"
-
-#include <cmsys/FStream.hxx>
-#include <utility>
 
 #define INCLUDE_REGEX_LINE                                                    \
   "^[ \t]*#[ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"

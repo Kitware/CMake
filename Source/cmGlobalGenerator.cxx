@@ -9,6 +9,16 @@
 
 #include "cmGlobalGenerator.h"
 
+#include <algorithm>
+#include <assert.h>
+#include <cmsys/Directory.hxx>
+#include <cmsys/FStream.hxx>
+#include <iterator>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "cmAlgorithms.h"
 #include "cmCPackPropertiesGenerator.h"
 #include "cmComputeTargetDepends.h"
@@ -29,19 +39,10 @@
 #include "cmQtAutoGeneratorInitializer.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmVersion.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <assert.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
-#include <iterator>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include <cm_jsoncpp_value.h>

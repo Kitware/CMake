@@ -5,12 +5,11 @@
 
 #include <cmConfigure.h>
 
-#include <cmConfigure.h>
+#include <string>
+#include <vector>
 
-#include "cmStandardIncludes.h"
-
-class cmake;
 class cmGlobalGenerator;
+class cmake;
 struct cmDocumentationEntry;
 
 /** \class cmGlobalGeneratorFactory

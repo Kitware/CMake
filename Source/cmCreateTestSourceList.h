@@ -3,7 +3,14 @@
 #ifndef cmCreateTestSourceList_h
 #define cmCreateTestSourceList_h
 
+#include <cmConfigure.h>
+
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmCreateTestSourceList
  * \brief Test driver generation command

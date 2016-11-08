@@ -2,11 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalMSYSMakefileGenerator.h"
 
+#include <cmsys/FStream.hxx>
+
+#include "cmDocumentationEntry.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmake.h"
-#include <cmsys/FStream.hxx>
 
 cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator(cmake* cm)
   : cmGlobalUnixMakefileGenerator3(cm)

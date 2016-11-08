@@ -3,8 +3,16 @@
 #ifndef cmLinkItem_h
 #define cmLinkItem_h
 
+#include <cmConfigure.h>
+
+#include <algorithm>
+#include <map>
+#include <string>
+#include <vector>
+
 #include "cmListFileCache.h"
 #include "cmSystemTools.h"
+#include "cmTargetLinkLibraryType.h"
 
 class cmGeneratorTarget;
 

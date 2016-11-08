@@ -3,13 +3,13 @@
 #ifndef cmDefinitions_h
 #define cmDefinitions_h
 
-#include <cmConfigure.h>
-
-#include "cmLinkedTree.h"
-#include "cm_unordered_map.hxx"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <string>
 #include <vector>
+
+#include "cmLinkedTree.h"
+#include "cm_unordered_map.hxx"
 
 /** \class cmDefinitions
  * \brief Store a scope of variable definitions for CMake language.

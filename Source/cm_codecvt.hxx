@@ -3,10 +3,11 @@
 #ifndef cm_codecvt_hxx
 #define cm_codecvt_hxx
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include <cmConfigure.h>
 
 #include <locale>
 #include <vector>
+#include <wchar.h>
 
 class codecvt : public std::codecvt<char, char, mbstate_t>
 {

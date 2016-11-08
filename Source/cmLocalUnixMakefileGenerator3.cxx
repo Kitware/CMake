@@ -2,6 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalUnixMakefileGenerator3.h"
 
+#include <algorithm>
+#include <cmsys/FStream.hxx>
+#include <cmsys/Terminal.h>
+#include <functional>
+#include <sstream>
+#include <stdio.h>
+#include <utility>
+
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
@@ -18,9 +26,11 @@
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
+#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 // Include dependency scanners for supported languages.  Only the
@@ -30,15 +40,6 @@
 #include "cmDependsFortran.h"
 #include "cmDependsJava.h"
 #endif
-
-#include <algorithm>
-#include <cm_auto_ptr.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Terminal.h>
-#include <functional>
-#include <sstream>
-#include <stdio.h>
-#include <utility>
 
 // Escape special characters in Makefile dependency lines
 class cmMakeSafe

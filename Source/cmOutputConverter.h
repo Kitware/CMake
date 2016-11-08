@@ -5,10 +5,12 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
+#include <string>
+
 #include "cmStateSnapshot.h"
 
-#include <string>
-#include <vector>
+class cmState;
+class cmStateDirectory;
 
 class cmOutputConverter
 {

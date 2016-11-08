@@ -5,25 +5,22 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmAlgorithms.h"
-#include "cmDefinitions.h"
-#include "cmLinkedTree.h"
-#include "cmProperty.h"
-#include "cmPropertyDefinitionMap.h"
-#include "cmPropertyMap.h"
-#include "cmStateTypes.h"
-
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
 
+#include "cmDefinitions.h"
+#include "cmLinkedTree.h"
+#include "cmProperty.h"
+#include "cmPropertyDefinitionMap.h"
+#include "cmPropertyMap.h"
+#include "cmStatePrivate.h"
+#include "cmStateTypes.h"
+
 class cmCacheManager;
 class cmCommand;
-class cmListFileBacktrace;
 class cmPropertyDefinition;
-
-class cmStateDirectory;
 class cmStateSnapshot;
 
 class cmState

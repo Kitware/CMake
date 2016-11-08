@@ -3,7 +3,13 @@
 #ifndef cmCMakeMinimumRequired_h
 #define cmCMakeMinimumRequired_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmCMakeMinimumRequired
  * \brief cmake_minimum_required command

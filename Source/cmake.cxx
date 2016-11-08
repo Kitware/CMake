@@ -17,6 +17,7 @@
 #include "cmMakefile.h"
 #include "cmMessenger.h"
 #include "cmState.h"
+#include "cmStateDirectory.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
@@ -25,11 +26,11 @@
 #include "cm_auto_ptr.hxx"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+#include <cm_jsoncpp_writer.h>
+
 #include "cmGraphVizWriter.h"
 #include "cmVariableWatch.h"
 #include "cm_unordered_map.hxx"
-
-#include <cm_jsoncpp_writer.h>
 #endif
 
 // only build kdevelop generator on non-windows platforms

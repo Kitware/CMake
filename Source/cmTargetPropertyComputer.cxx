@@ -3,14 +3,13 @@
 
 #include "cmTargetPropertyComputer.h"
 
-#include "cmGeneratorTarget.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
+#include <sstream>
+
 #include "cmMessenger.h"
-#include "cmSourceFile.h"
-#include "cmSourceFileLocation.h"
-#include "cmTarget.h"
+#include "cmPolicies.h"
+#include "cmStateSnapshot.h"
 #include "cm_unordered_set.hxx"
+#include "cmake.h"
 
 bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
   std::string const& tgtName, cmMessenger* messenger,

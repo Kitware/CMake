@@ -2,6 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefile.h"
 
+#include <algorithm>
+#include <assert.h>
+#include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
+#include <ctype.h>
+#include <sstream>
+#include <stdlib.h>
+#include <string.h>
+#include <utility>
+
 #include "cmAlgorithms.h"
 #include "cmCommand.h"
 #include "cmCommandArgumentParserHelper.h"
@@ -14,6 +24,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstallGenerator.h" // IWYU pragma: keep
 #include "cmListFileCache.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
@@ -21,27 +32,16 @@
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cmTargetLinkLibraryType.h"
 #include "cmTest.h"
+#include "cmTestGenerator.h" // IWYU pragma: keep
 #include "cmVersion.h"
+#include "cm_auto_ptr.hxx"
 #include "cmake.h"
-
-#include "cmInstallGenerator.h" // IWYU pragma: keep
-#include "cmTestGenerator.h"    // IWYU pragma: keep
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #include "cmVariableWatch.h"
 #endif
-
-#include <algorithm>
-#include <assert.h>
-#include <cm_auto_ptr.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <ctype.h>
-#include <sstream>
-#include <stdlib.h>
-#include <string.h>
-#include <utility>
 
 class cmMessenger;
 

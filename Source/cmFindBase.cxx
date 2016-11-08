@@ -2,8 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindBase.h"
 
+#include <cmConfigure.h>
+#include <iostream>
+#include <map>
+#include <stddef.h>
+
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"

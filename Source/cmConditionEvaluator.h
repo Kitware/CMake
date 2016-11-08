@@ -3,12 +3,18 @@
 #ifndef cmConditionEvaluator_h
 #define cmConditionEvaluator_h
 
-#include "cmCommand.h"
-#include "cmExpandedCommandArgument.h"
-#include "cmListFileCache.h"
-#include "cmake.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <list>
+#include <string>
+#include <vector>
+
+#include "cmExpandedCommandArgument.h"
+#include "cmListFileCache.h"
+#include "cmPolicies.h"
+#include "cmake.h"
+
+class cmMakefile;
 
 class cmConditionEvaluator
 {

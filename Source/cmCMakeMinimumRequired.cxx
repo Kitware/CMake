@@ -2,9 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakeMinimumRequired.h"
 
+#include <sstream>
+#include <stdio.h>
+
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmCMakeMinimumRequired
 bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,

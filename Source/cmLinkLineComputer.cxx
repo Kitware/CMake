@@ -2,10 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmLinkLineComputer.h"
+
+#include <sstream>
+#include <vector>
+
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmOutputConverter.h"
 #include "cmStateDirectory.h"
+#include "cmStateTypes.h"
 
 cmLinkLineComputer::cmLinkLineComputer(cmOutputConverter* outputConverter,
                                        cmStateDirectory stateDir)

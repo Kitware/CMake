@@ -3,6 +3,11 @@
 #ifndef cmFindBase_h
 #define cmFindBase_h
 
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
+#include <vector>
+
 #include "cmFindCommon.h"
 
 /** \class cmFindBase

@@ -2,18 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenerators.h"
 
-#include "cmAlgorithms.h"
-#include "cmFilePathUuid.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmOutputConverter.h"
-#include "cmState.h"
-#include "cmStateDirectory.h"
-#include "cmStateTypes.h"
-#include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
-#include "cmake.h"
-
 #include <algorithm>
 #include <assert.h>
 #include <cmConfigure.h>
@@ -25,6 +13,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <utility>
+
+#include "cmAlgorithms.h"
+#include "cmFilePathUuid.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmOutputConverter.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
+#include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 #if defined(__APPLE__)
 #include <unistd.h>

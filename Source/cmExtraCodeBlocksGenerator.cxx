@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExtraCodeBlocksGenerator.h"
 
+#include <map>
+#include <ostream>
+#include <string.h>
+#include <utility>
+
 #include "cmAlgorithms.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -13,12 +18,6 @@
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <map>
-#include <ostream>
-#include <string.h>
-#include <utility>
 
 /* Some useful URLs:
 Homepage:

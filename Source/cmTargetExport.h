@@ -3,13 +3,13 @@
 #ifndef cmTargetExport_h
 #define cmTargetExport_h
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmStandardIncludes.h"
+#include <string>
 
 class cmGeneratorTarget;
-class cmInstallTargetGenerator;
 class cmInstallFilesGenerator;
+class cmInstallTargetGenerator;
 
 /** \brief A member of an ExportSet
  *

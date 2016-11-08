@@ -3,9 +3,18 @@
 #ifndef cmFindCommon_h
 #define cmFindCommon_h
 
+#include <cmConfigure.h>
+
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
 #include "cmPathLabel.h"
 #include "cmSearchPath.h"
+
+class cmMakefile;
 
 /** \class cmFindCommon
  * \brief Base class for FIND_XXX implementations.

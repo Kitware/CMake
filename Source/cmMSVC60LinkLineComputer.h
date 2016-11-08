@@ -4,7 +4,14 @@
 #ifndef cmMSVC60LinkLineComputer_h
 #define cmMSVC60LinkLineComputer_h
 
+#include <cmConfigure.h>
+
+#include <string>
+
 #include "cmLinkLineComputer.h"
+
+class cmOutputConverter;
+class cmStateDirectory;
 
 class cmMSVC60LinkLineComputer : public cmLinkLineComputer
 {

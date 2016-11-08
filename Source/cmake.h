@@ -5,17 +5,18 @@
 
 #include <cmConfigure.h>
 
-#include "cmInstalledFile.h"
-#include "cmListFileCache.h"
-#include "cmStateSnapshot.h"
-
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
 
+#include "cmInstalledFile.h"
+#include "cmListFileCache.h"
+#include "cmStateSnapshot.h"
+#include "cmStateTypes.h"
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cm_jsoncpp_value.h"
+#include <cm_jsoncpp_value.h>
 #endif
 
 class cmExternalMakefileProjectGeneratorFactory;
@@ -24,6 +25,7 @@ class cmGlobalGenerator;
 class cmGlobalGeneratorFactory;
 class cmMakefile;
 class cmMessenger;
+class cmState;
 class cmVariableWatch;
 struct cmDocumentationEntry;
 

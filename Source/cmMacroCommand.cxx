@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMacroCommand.h"
 
-#include <algorithm>
 #include <sstream>
 #include <stdio.h>
 

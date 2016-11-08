@@ -5,16 +5,15 @@
 
 #include <cmConfigure.h>
 
-#include "cmLocalCommonGenerator.h"
-#include "cmLocalGenerator.h"
-#include "cmNinjaTypes.h"
-#include "cmOutputConverter.h"
-
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmLocalCommonGenerator.h"
+#include "cmNinjaTypes.h"
+#include "cmOutputConverter.h"
 
 class cmCustomCommand;
 class cmCustomCommandGenerator;
@@ -23,6 +22,7 @@ class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmGlobalNinjaGenerator;
 class cmMakefile;
+class cmRulePlaceholderExpander;
 class cmSourceFile;
 class cmake;
 

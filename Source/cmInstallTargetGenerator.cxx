@@ -2,6 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallTargetGenerator.h"
 
+#include <assert.h>
+#include <map>
+#include <set>
+#include <sstream>
+#include <utility>
+
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -12,14 +18,7 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
-
-#include <assert.h>
-#include <map>
-#include <set>
-#include <sstream>
-#include <utility>
 
 cmInstallTargetGenerator::cmInstallTargetGenerator(
   const std::string& targetName, const char* dest, bool implib,

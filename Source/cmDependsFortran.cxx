@@ -2,14 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDependsFortran.h"
 
-#include "cmFortranParser.h" /* Interface to parser object.  */
-#include "cmGeneratedFileStream.h"
-#include "cmLocalGenerator.h"
-#include "cmMakefile.h"
-#include "cmOutputConverter.h"
-#include "cmStateDirectory.h"
-#include "cmSystemTools.h"
-
 #include <assert.h>
 #include <cmsys/FStream.hxx>
 #include <iostream>
@@ -17,6 +9,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <utility>
+
+#include "cmFortranParser.h" /* Interface to parser object.  */
+#include "cmGeneratedFileStream.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmOutputConverter.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
+#include "cmSystemTools.h"
 
 // TODO: Test compiler for the case of the mod file.  Some always
 // use lower case and some always use upper case.  I do not know if any

@@ -14,6 +14,7 @@
 #include "cm_jsoncpp_value.h"
 #endif
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <memory>

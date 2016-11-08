@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOptionCommand.h"
 
-#include <algorithm>
-
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmState.h"

@@ -2,10 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmNinjaTargetGenerator.h"
 
+#include <algorithm>
+#include <assert.h>
+#include <cm_jsoncpp_value.h>
+#include <cm_jsoncpp_writer.h>
+#include <iterator>
+#include <map>
+#include <sstream>
+#include <string.h>
+
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmLocalGenerator.h"
@@ -19,15 +29,8 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
 #include "cmake.h"
-
-#include "cm_jsoncpp_writer.h"
-
-#include <algorithm>
-#include <iterator>
-#include <map>
-#include <sstream>
-#include <string.h>
 
 cmNinjaTargetGenerator* cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
 {

@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallCommand.h"
 
-#include <algorithm>
 #include <cmsys/Glob.hxx>
 #include <sstream>
 #include <stddef.h>

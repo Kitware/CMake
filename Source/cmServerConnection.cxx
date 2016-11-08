@@ -8,6 +8,7 @@
 #include "cmServer.h"
 
 #include <assert.h>
+#include <string.h>
 
 namespace {
 

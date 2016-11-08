@@ -3,10 +3,16 @@
 #ifndef cmExportBuildAndroidMKGenerator_h
 #define cmExportBuildAndroidMKGenerator_h
 
-#include "cmExportBuildFileGenerator.h"
-#include "cmListFileCache.h"
+#include <cmConfigure.h>
 
-class cmExportSet;
+#include <iosfwd>
+#include <string>
+#include <vector>
+
+#include "cmExportBuildFileGenerator.h"
+#include "cmExportFileGenerator.h"
+
+class cmGeneratorTarget;
 
 /** \class cmExportBuildAndroidMKGenerator
  * \brief Generate a file exporting targets from a build tree.

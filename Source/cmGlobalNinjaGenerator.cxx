@@ -2,6 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalNinjaGenerator.h"
 
+#include <algorithm>
+#include <cm_jsoncpp_reader.h>
+#include <cm_jsoncpp_value.h>
+#include <cm_jsoncpp_writer.h>
+#include <cmsys/FStream.hxx>
+#include <ctype.h>
+#include <functional>
+#include <iterator>
+#include <sstream>
+#include <stdio.h>
+
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmFortranParser.h"
@@ -13,6 +24,9 @@
 #include "cmMakefile.h"
 #include "cmNinjaLinkLineComputer.h"
 #include "cmOutputConverter.h"
+#include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -21,15 +35,7 @@
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
-#include "cm_jsoncpp_reader.h"
-#include "cm_jsoncpp_writer.h"
-
-#include <algorithm>
-#include <ctype.h>
-#include <functional>
-#include <iterator>
-#include <sstream>
-#include <stdio.h>
+class cmLinkLineComputer;
 
 const char* cmGlobalNinjaGenerator::NINJA_BUILD_FILE = "build.ninja";
 const char* cmGlobalNinjaGenerator::NINJA_RULES_FILE = "rules.ninja";

@@ -2,16 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportInstallAndroidMKGenerator.h"
 
-#include "cmAlgorithms.h"
+#include <ostream>
+#include <stddef.h>
+
 #include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportSet.h"
-#include "cmExportSetMap.h"
-#include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
-#include "cmGlobalGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
-#include "cmLocalGenerator.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTargetExport.h"
 
 cmExportInstallAndroidMKGenerator::cmExportInstallAndroidMKGenerator(

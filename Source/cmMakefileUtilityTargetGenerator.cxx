@@ -2,17 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefileUtilityTargetGenerator.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmOSXBundleGenerator.h"
-#include "cmOutputConverter.h"
-
-#include <ostream>
-#include <string>
-#include <vector>
+#include "cmSystemTools.h"
 
 cmMakefileUtilityTargetGenerator::cmMakefileUtilityTargetGenerator(
   cmGeneratorTarget* target)

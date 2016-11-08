@@ -3,9 +3,11 @@
 #ifndef cmNinjaTypes_h
 #define cmNinjaTypes_h
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmStandardIncludes.h"
+#include <map>
+#include <string>
+#include <vector>
 
 typedef std::vector<std::string> cmNinjaDeps;
 typedef std::map<std::string, std::string> cmNinjaVars;

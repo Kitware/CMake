@@ -5,22 +5,24 @@
 
 #include <cmConfigure.h>
 
-#include "cmCommonTargetGenerator.h"
-#include "cmLocalUnixMakefileGenerator3.h"
-#include "cmOSXBundleGenerator.h"
-
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
 
+#include "cmCommonTargetGenerator.h"
+#include "cmLocalUnixMakefileGenerator3.h"
+#include "cmOSXBundleGenerator.h"
+
 class cmCustomCommandGenerator;
 class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmGlobalUnixMakefileGenerator3;
-class cmSourceFile;
 class cmLinkLineComputer;
+class cmOutputConverter;
+class cmSourceFile;
+class cmStateDirectory;
 
 /** \class cmMakefileTargetGenerator
  * \brief Support Routines for writing makefiles

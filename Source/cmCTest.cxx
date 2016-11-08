@@ -2,33 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTest.h"
 
-#include "cmAlgorithms.h"
-#include "cmCTestBuildAndTestHandler.h"
-#include "cmCTestBuildHandler.h"
-#include "cmCTestConfigureHandler.h"
-#include "cmCTestCoverageHandler.h"
-#include "cmCTestGenericHandler.h"
-#include "cmCTestMemCheckHandler.h"
-#include "cmCTestScriptHandler.h"
-#include "cmCTestStartCommand.h"
-#include "cmCTestSubmitHandler.h"
-#include "cmCTestTestHandler.h"
-#include "cmCTestUpdateHandler.h"
-#include "cmCTestUploadHandler.h"
-#include "cmCurl.h"
-#include "cmDynamicLoader.h"
-#include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmState.h"
-#include "cmStateTypes.h"
-#include "cmSystemTools.h"
-#include "cmVersion.h"
-#include "cmVersionConfig.h"
-#include "cmXMLWriter.h"
-#include "cmake.h"
-
-#include <cm_auto_ptr.hxx>
 #include <cm_curl.h>
 #include <cm_zlib.h>
 #include <cmsys/Base64.h>
@@ -49,6 +22,34 @@
 #include <time.h>
 #include <utility>
 #include <vector>
+
+#include "cmAlgorithms.h"
+#include "cmCTestBuildAndTestHandler.h"
+#include "cmCTestBuildHandler.h"
+#include "cmCTestConfigureHandler.h"
+#include "cmCTestCoverageHandler.h"
+#include "cmCTestGenericHandler.h"
+#include "cmCTestMemCheckHandler.h"
+#include "cmCTestScriptHandler.h"
+#include "cmCTestStartCommand.h"
+#include "cmCTestSubmitHandler.h"
+#include "cmCTestTestHandler.h"
+#include "cmCTestUpdateHandler.h"
+#include "cmCTestUploadHandler.h"
+#include "cmCurl.h"
+#include "cmDynamicLoader.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmStateSnapshot.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmVersion.h"
+#include "cmVersionConfig.h"
+#include "cmXMLWriter.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 #if defined(__BEOS__) || defined(__HAIKU__)
 #include <be/kernel/OS.h> /* disable_debugger() API. */

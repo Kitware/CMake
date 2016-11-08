@@ -4,10 +4,15 @@
 #ifndef cmNinjaLinkLineComputer_h
 #define cmNinjaLinkLineComputer_h
 
+#include <cmConfigure.h>
+
+#include <string>
+
 #include "cmLinkLineComputer.h"
-#include "cmState.h"
 
 class cmGlobalNinjaGenerator;
+class cmOutputConverter;
+class cmStateDirectory;
 
 class cmNinjaLinkLineComputer : public cmLinkLineComputer
 {

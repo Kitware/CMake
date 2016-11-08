@@ -5,28 +5,27 @@
 
 #include <cmConfigure.h>
 
+#include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <set>
+#include <stack>
+#include <string>
+#include <vector>
+
 #include "cmAlgorithms.h"
 #include "cmListFileCache.h"
 #include "cmNewLineStyle.h"
 #include "cmPolicies.h"
 #include "cmStateSnapshot.h"
+#include "cmStateTypes.h"
 #include "cmTarget.h"
-#include "cmTargetLinkLibraryType.h"
+#include "cm_auto_ptr.hxx"
 #include "cm_unordered_map.hxx"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmSourceGroup.h"
 #endif
-
-#include <cm_auto_ptr.hxx>
-#include <cmsys/RegularExpression.hxx>
-
-#include <map>
-#include <set>
-#include <stack>
-#include <string>
-#include <vector>
 
 class cmCommand;
 class cmCompiledGeneratorExpression;
@@ -40,6 +39,7 @@ class cmGlobalGenerator;
 class cmInstallGenerator;
 class cmMessenger;
 class cmSourceFile;
+class cmState;
 class cmTest;
 class cmTestGenerator;
 class cmVariableWatch;

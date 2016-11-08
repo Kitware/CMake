@@ -18,6 +18,7 @@
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTestGenerator.h"
@@ -32,10 +33,10 @@
 #include <algorithm>
 #include <assert.h>
 #include <cmsys/RegularExpression.hxx>
-#include <ctype.h>
 #include <iterator>
 #include <sstream>
 #include <stdio.h>
+#include <string.h>
 #include <utility>
 
 #if defined(__HAIKU__)

@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetCMakePropertyCommand.h"
 
-#include <algorithm>
 #include <set>
 
 #include "cmAlgorithms.h"

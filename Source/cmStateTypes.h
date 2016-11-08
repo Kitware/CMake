@@ -4,12 +4,12 @@
 #ifndef cmStateTypes_h
 #define cmStateTypes_h
 
+#include <cmConfigure.h> // IWYU pragma: keep
+
 #include "cmLinkedTree.h"
 
 namespace cmStateDetail {
-struct BuildsystemDirectoryStateType;
 struct SnapshotDataType;
-struct PolicyStackEntry;
 typedef cmLinkedTree<cmStateDetail::SnapshotDataType>::iterator PositionType;
 }
 

@@ -3,9 +3,17 @@
 #ifndef cmAlgorithms_h
 #define cmAlgorithms_h
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmStandardIncludes.h"
+#include <algorithm>
+#include <cm_kwiml.h>
+#include <functional>
+#include <iterator>
+#include <sstream>
+#include <string.h>
+#include <string>
+#include <utility>
+#include <vector>
 
 inline bool cmHasLiteralPrefixImpl(const std::string& str1, const char* str2,
                                    size_t N)

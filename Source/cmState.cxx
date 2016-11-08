@@ -2,23 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmState.h"
 
-#include "cmStatePrivate.h"
+#include <algorithm>
+#include <assert.h>
+#include <cmsys/RegularExpression.hxx>
+#include <string.h>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmCacheManager.h"
 #include "cmCommand.h"
 #include "cmDefinitions.h"
 #include "cmListFileCache.h"
+#include "cmStatePrivate.h"
+#include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <assert.h>
-#include <cmsys/RegularExpression.hxx>
-#include <iterator>
-#include <stdio.h>
-#include <string.h>
-#include <utility>
 
 cmState::cmState()
   : IsInTryCompile(false)

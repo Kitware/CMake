@@ -2,6 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorTarget.h"
 
+#include <algorithm>
+#include <assert.h>
+#include <cmsys/RegularExpression.hxx>
+#include <errno.h>
+#include <iterator>
+#include <queue>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
@@ -24,16 +35,7 @@
 #include "cm_unordered_set.hxx"
 #include "cmake.h"
 
-#include <algorithm>
-#include <assert.h>
-#include <cmsys/RegularExpression.hxx>
-#include <errno.h>
-#include <iterator>
-#include <queue>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+class cmMessenger;
 
 template <>
 const char* cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(

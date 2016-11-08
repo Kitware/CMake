@@ -5,14 +5,13 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmAlgorithms.h"
-#include "cmListFileCache.h"
-#include "cmSystemTools.h"
-
-#include <map>
 #include <string>
 
-class cmTarget;
+#include "cmAlgorithms.h"
+#include "cmListFileCache.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+
 class cmMessenger;
 
 class cmTargetPropertyComputer

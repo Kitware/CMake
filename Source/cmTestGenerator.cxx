@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTestGenerator.h"
 
+#include <map>
+#include <ostream>
+#include <utility>
+
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
@@ -11,11 +15,6 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
-#include "cm_auto_ptr.hxx"
-
-#include <map>
-#include <ostream>
-#include <utility>
 
 cmTestGenerator::cmTestGenerator(
   cmTest* test, std::vector<std::string> const& configurations)

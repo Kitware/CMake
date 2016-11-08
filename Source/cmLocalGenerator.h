@@ -5,29 +5,28 @@
 
 #include <cmConfigure.h>
 
-#include "cmListFileCache.h"
-#include "cmOutputConverter.h"
-#include "cmPolicies.h"
-#include "cmRulePlaceholderExpander.h"
-#include "cmStateTypes.h"
-#include "cmake.h"
-
 #include <cm_kwiml.h>
 #include <iosfwd>
 #include <map>
 #include <set>
-#include <string.h>
 #include <string>
 #include <vector>
+
+#include "cmListFileCache.h"
+#include "cmOutputConverter.h"
+#include "cmPolicies.h"
+#include "cmStateSnapshot.h"
+#include "cmake.h"
 
 class cmComputeLinkInformation;
 class cmCustomCommandGenerator;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
-class cmRulePlaceholderExpander;
-class cmMakefile;
-class cmSourceFile;
 class cmLinkLineComputer;
+class cmMakefile;
+class cmRulePlaceholderExpander;
+class cmSourceFile;
+class cmState;
 
 /** \class cmLocalGenerator
  * \brief Create required build files for a directory.

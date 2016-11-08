@@ -2,17 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCacheManager.h"
 
-#include "cmGeneratedFileStream.h"
-#include "cmSystemTools.h"
-#include "cmVersion.h"
-#include "cmake.h"
-
 #include <algorithm>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
+
+#include "cmGeneratedFileStream.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmVersion.h"
+#include "cmake.h"
 
 cmCacheManager::cmCacheManager()
 {

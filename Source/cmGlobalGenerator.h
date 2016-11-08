@@ -5,15 +5,6 @@
 
 #include <cmConfigure.h>
 
-#include "cmExportSetMap.h"
-#include "cmStateDirectory.h"
-#include "cmStateSnapshot.h"
-#include "cmSystemTools.h"
-#include "cmTarget.h"
-#include "cmTargetDepend.h"
-#include "cm_codecvt.hxx"
-#include "cm_unordered_map.hxx"
-
 #include <iosfwd>
 #include <map>
 #include <set>
@@ -21,19 +12,28 @@
 #include <utility>
 #include <vector>
 
+#include "cmCustomCommandLines.h"
+#include "cmExportSetMap.h"
+#include "cmStateSnapshot.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmTargetDepend.h"
+#include "cm_codecvt.hxx"
+#include "cm_unordered_map.hxx"
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmFileLockPool.h"
 #endif
 
-class cmCustomCommandLines;
-class cmSourceFile;
 class cmExportBuildFileGenerator;
 class cmExternalMakefileProjectGenerator;
 class cmGeneratorTarget;
-class cmLocalGenerator;
 class cmLinkLineComputer;
+class cmLocalGenerator;
 class cmMakefile;
 class cmOutputConverter;
+class cmSourceFile;
+class cmStateDirectory;
 class cmake;
 
 /** \class cmGlobalGenerator

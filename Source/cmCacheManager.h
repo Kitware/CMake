@@ -5,15 +5,15 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmPropertyMap.h"
-#include "cmState.h"
-
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmPropertyMap.h"
+#include "cmStateTypes.h"
 
 class cmake;
 

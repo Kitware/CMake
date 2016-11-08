@@ -2,11 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindCommon.h"
 
+#include <algorithm>
+#include <string.h>
+#include <utility>
+
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-
-#include <algorithm>
-#include <functional>
 
 cmFindCommon::PathGroup cmFindCommon::PathGroup::All("ALL");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMake("CMAKE");

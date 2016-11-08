@@ -3,10 +3,18 @@
 #ifndef cmExportInstallAndroidMKGenerator_h
 #define cmExportInstallAndroidMKGenerator_h
 
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <vector>
+
+#include "cmExportFileGenerator.h"
 #include "cmExportInstallFileGenerator.h"
 
+class cmGeneratorTarget;
 class cmInstallExportGenerator;
-class cmInstallTargetGenerator;
 
 /** \class cmExportInstallAndroidMKGenerator
  * \brief Generate a file exporting targets from an install tree.
