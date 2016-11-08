@@ -12,6 +12,7 @@ function(run_ctest CASE_NAME)
     -S ${RunCMake_BINARY_DIR}/${CASE_NAME}/test.cmake
     -V
     --output-log ${RunCMake_BINARY_DIR}/${CASE_NAME}-build/testOutput.log
+    --no-compress-output
     ${ARGN}
     )
 endfunction()
