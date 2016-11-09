@@ -2798,6 +2798,16 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
   }
 }
 
+std::string cmGeneratorTarget::GetImportedLibName(
+  std::string const& config) const
+{
+  if (cmGeneratorTarget::ImportInfo const* info =
+        this->GetImportInfo(config)) {
+    return info->LibName;
+  }
+  return std::string();
+}
+
 std::string cmGeneratorTarget::GetFullPath(const std::string& config,
                                            bool implib, bool realname) const
 {
@@ -4713,6 +4723,9 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
     }
   }
   if (this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (loc) {
+      info.LibName = loc;
+    }
     return;
   }
 

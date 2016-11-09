@@ -147,6 +147,9 @@ public:
                                      const cmGeneratorTarget* head,
                                      bool usage_requirements_only) const;
 
+  /** Get the library name for an imported interface library.  */
+  std::string GetImportedLibName(std::string const& config) const;
+
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
   std::string GetFullPath(const std::string& config = "", bool implib = false,
@@ -643,6 +646,7 @@ private:
     std::string Location;
     std::string SOName;
     std::string ImportLibrary;
+    std::string LibName;
     std::string Languages;
     std::string Libraries;
     std::string LibrariesProp;

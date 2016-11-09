@@ -65,7 +65,9 @@ bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
     return true;
   }
 
-  if (cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_")) {
+  if (prop == "IMPORTED_CONFIGURATIONS" || prop == "IMPORTED_LIBNAME" ||
+      cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME_") ||
+      cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_")) {
     return true;
   }
 
