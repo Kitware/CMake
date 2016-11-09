@@ -143,6 +143,7 @@ Properties on Targets
    /prop_tgt/CONFIG_OUTPUT_NAME
    /prop_tgt/CONFIG_POSTFIX
    /prop_tgt/CROSSCOMPILING_EMULATOR
+   /prop_tgt/CUDA_SEPARABLE_COMPILATION
    /prop_tgt/CXX_EXTENSIONS
    /prop_tgt/CXX_STANDARD
    /prop_tgt/CXX_STANDARD_REQUIRED

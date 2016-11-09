@@ -596,13 +596,22 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
 
   // Construct the compile rules.
   {
-    std::string compileRuleVar = "CMAKE_";
-    compileRuleVar += lang;
-    compileRuleVar += "_COMPILE_OBJECT";
-    std::string compileRule =
-      this->Makefile->GetRequiredDefinition(compileRuleVar);
     std::vector<std::string> compileCommands;
-    cmSystemTools::ExpandListArgument(compileRule, compileCommands);
+    if (lang == "CUDA") {
+      std::string cmdVar;
+      if (this->GeneratorTarget->GetProperty("CUDA_SEPARABLE_COMPILATION")) {
+        cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+      } else {
+        cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
+      }
+      std::string compileRule = this->Makefile->GetRequiredDefinition(cmdVar);
+      cmSystemTools::ExpandListArgument(compileRule, compileCommands);
+    } else {
+      const std::string cmdVar =
+        std::string("CMAKE_") + lang + "_COMPILE_OBJECT";
+      std::string compileRule = this->Makefile->GetRequiredDefinition(cmdVar);
+      cmSystemTools::ExpandListArgument(compileRule, compileCommands);
+    }
 
     if (this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS") &&
         lang_can_export_cmds && compileCommands.size() == 1) {

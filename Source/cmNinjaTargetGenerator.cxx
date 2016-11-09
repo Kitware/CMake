@@ -583,10 +583,22 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   }
 
   // Rule for compiling object file.
-  const std::string cmdVar = std::string("CMAKE_") + lang + "_COMPILE_OBJECT";
-  std::string compileCmd = mf->GetRequiredDefinition(cmdVar);
   std::vector<std::string> compileCmds;
-  cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+  if (lang == "CUDA") {
+    std::string cmdVar;
+    if (this->GeneratorTarget->GetProperty("CUDA_SEPARABLE_COMPILATION")) {
+      cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+    } else {
+      cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
+    }
+    std::string compileCmd = mf->GetRequiredDefinition(cmdVar);
+    cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+  } else {
+    const std::string cmdVar =
+      std::string("CMAKE_") + lang + "_COMPILE_OBJECT";
+    std::string compileCmd = mf->GetRequiredDefinition(cmdVar);
+    cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+  }
 
   // Maybe insert an include-what-you-use runner.
   if (!compileCmds.empty() && (lang == "C" || lang == "CXX")) {
