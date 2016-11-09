@@ -1,27 +1,18 @@
-/*============================================================================
-  KWSys - Kitware System Library
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(System.h)
 
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
-# include "System.h.in"
+#include "System.h.in"
 #endif
 
+#include <ctype.h>  /* isspace */
 #include <stddef.h> /* ptrdiff_t */
 #include <stdlib.h> /* malloc, free */
 #include <string.h> /* memcpy */
-#include <ctype.h>  /* isspace */
 
 #include <stdio.h>
 
@@ -32,28 +23,24 @@ typedef int kwsysSystem_ptrdiff_t;
 #endif
 
 /*--------------------------------------------------------------------------*/
-static int kwsysSystem__AppendByte(char* local,
-                                   char** begin, char** end,
+static int kwsysSystem__AppendByte(char* local, char** begin, char** end,
                                    int* size, char c)
 {
   /* Allocate space for the character.  */
-  if((*end - *begin) >= *size)
-    {
+  if ((*end - *begin) >= *size) {
     kwsysSystem_ptrdiff_t length = *end - *begin;
-    char* newBuffer = (char*)malloc((size_t)(*size*2));
-    if(!newBuffer)
-      {
+    char* newBuffer = (char*)malloc((size_t)(*size * 2));
+    if (!newBuffer) {
       return 0;
-      }
-    memcpy(newBuffer, *begin, (size_t)(length)*sizeof(char));
-    if(*begin != local)
-      {
+    }
+    memcpy(newBuffer, *begin, (size_t)(length) * sizeof(char));
+    if (*begin != local) {
       free(*begin);
-      }
+    }
     *begin = newBuffer;
     *end = *begin + length;
     *size *= 2;
-    }
+  }
 
   /* Store the character.  */
   *(*end)++ = c;
@@ -61,47 +48,41 @@ static int kwsysSystem__AppendByte(char* local,
 }
 
 /*--------------------------------------------------------------------------*/
-static int kwsysSystem__AppendArgument(char** local,
-                                       char*** begin, char*** end,
-                                       int* size,
-                                       char* arg_local,
+static int kwsysSystem__AppendArgument(char** local, char*** begin,
+                                       char*** end, int* size, char* arg_local,
                                        char** arg_begin, char** arg_end,
                                        int* arg_size)
 {
   /* Append a null-terminator to the argument string.  */
-  if(!kwsysSystem__AppendByte(arg_local, arg_begin, arg_end, arg_size, '\0'))
-    {
+  if (!kwsysSystem__AppendByte(arg_local, arg_begin, arg_end, arg_size,
+                               '\0')) {
     return 0;
-    }
+  }
 
   /* Allocate space for the argument pointer.  */
-  if((*end - *begin) >= *size)
-    {
+  if ((*end - *begin) >= *size) {
     kwsysSystem_ptrdiff_t length = *end - *begin;
-    char** newPointers = (char**)malloc((size_t)(*size)*2*sizeof(char*));
-    if(!newPointers)
-      {
+    char** newPointers = (char**)malloc((size_t)(*size) * 2 * sizeof(char*));
+    if (!newPointers) {
       return 0;
-      }
-    memcpy(newPointers, *begin, (size_t)(length)*sizeof(char*));
-    if(*begin != local)
-      {
+    }
+    memcpy(newPointers, *begin, (size_t)(length) * sizeof(char*));
+    if (*begin != local) {
       free(*begin);
-      }
+    }
     *begin = newPointers;
     *end = *begin + length;
     *size *= 2;
-    }
+  }
 
   /* Allocate space for the argument string.  */
   **end = (char*)malloc((size_t)(*arg_end - *arg_begin));
-  if(!**end)
-    {
+  if (!**end) {
     return 0;
-    }
+  }
 
   /* Store the argument in the command array.  */
-  memcpy(**end, *arg_begin,(size_t)(*arg_end - *arg_begin));
+  memcpy(**end, *arg_begin, (size_t)(*arg_end - *arg_begin));
   ++(*end);
 
   /* Reset the argument to be empty.  */
@@ -135,150 +116,109 @@ static char** kwsysSystem__ParseUnixCommand(const char* command, int flags)
   int in_single = 0;
   int in_double = 0;
   int failed = 0;
-  for(;*c; ++c)
-    {
-    if(in_escape)
-      {
+  for (; *c; ++c) {
+    if (in_escape) {
       /* This character is escaped so do no special handling.  */
-      if(!in_argument)
-        {
+      if (!in_argument) {
         in_argument = 1;
-        }
-      if(!kwsysSystem__AppendByte(local_buffer, &buffer_begin,
-                                  &buffer_end, &buffer_size, *c))
-        {
+      }
+      if (!kwsysSystem__AppendByte(local_buffer, &buffer_begin, &buffer_end,
+                                   &buffer_size, *c)) {
         failed = 1;
         break;
-        }
-      in_escape = 0;
       }
-    else if(*c == '\\')
-      {
+      in_escape = 0;
+    } else if (*c == '\\') {
       /* The next character should be escaped.  */
       in_escape = 1;
-      }
-    else if(*c == '\'' && !in_double)
-      {
+    } else if (*c == '\'' && !in_double) {
       /* Enter or exit single-quote state.  */
-      if(in_single)
-        {
+      if (in_single) {
         in_single = 0;
-        }
-      else
-        {
+      } else {
         in_single = 1;
-        if(!in_argument)
-          {
+        if (!in_argument) {
           in_argument = 1;
-          }
         }
       }
-    else if(*c == '"' && !in_single)
-      {
+    } else if (*c == '"' && !in_single) {
       /* Enter or exit double-quote state.  */
-      if(in_double)
-        {
+      if (in_double) {
         in_double = 0;
-        }
-      else
-        {
+      } else {
         in_double = 1;
-        if(!in_argument)
-          {
+        if (!in_argument) {
           in_argument = 1;
-          }
         }
       }
-    else if(isspace((unsigned char) *c))
-      {
-      if(in_argument)
-        {
-        if(in_single || in_double)
-          {
+    } else if (isspace((unsigned char)*c)) {
+      if (in_argument) {
+        if (in_single || in_double) {
           /* This space belongs to a quoted argument.  */
-          if(!kwsysSystem__AppendByte(local_buffer, &buffer_begin,
-                                      &buffer_end, &buffer_size, *c))
-            {
+          if (!kwsysSystem__AppendByte(local_buffer, &buffer_begin,
+                                       &buffer_end, &buffer_size, *c)) {
             failed = 1;
             break;
-            }
           }
-        else
-          {
+        } else {
           /* This argument has been terminated by whitespace.  */
-          if(!kwsysSystem__AppendArgument(local_pointers, &pointer_begin,
-                                          &pointer_end, &pointers_size,
-                                          local_buffer, &buffer_begin,
-                                          &buffer_end, &buffer_size))
-            {
+          if (!kwsysSystem__AppendArgument(
+                local_pointers, &pointer_begin, &pointer_end, &pointers_size,
+                local_buffer, &buffer_begin, &buffer_end, &buffer_size)) {
             failed = 1;
             break;
-            }
-          in_argument = 0;
           }
+          in_argument = 0;
         }
       }
-    else
-      {
+    } else {
       /* This character belong to an argument.  */
-      if(!in_argument)
-        {
+      if (!in_argument) {
         in_argument = 1;
-        }
-      if(!kwsysSystem__AppendByte(local_buffer, &buffer_begin,
-                                  &buffer_end, &buffer_size, *c))
-        {
+      }
+      if (!kwsysSystem__AppendByte(local_buffer, &buffer_begin, &buffer_end,
+                                   &buffer_size, *c)) {
         failed = 1;
         break;
-        }
       }
     }
+  }
 
   /* Finish the last argument.  */
-  if(in_argument)
-    {
-    if(!kwsysSystem__AppendArgument(local_pointers, &pointer_begin,
-                                    &pointer_end, &pointers_size,
-                                    local_buffer, &buffer_begin,
-                                    &buffer_end, &buffer_size))
-      {
+  if (in_argument) {
+    if (!kwsysSystem__AppendArgument(
+          local_pointers, &pointer_begin, &pointer_end, &pointers_size,
+          local_buffer, &buffer_begin, &buffer_end, &buffer_size)) {
       failed = 1;
-      }
     }
+  }
 
   /* If we still have memory allocate space for the new command
      buffer.  */
-  if(!failed)
-    {
+  if (!failed) {
     kwsysSystem_ptrdiff_t n = pointer_end - pointer_begin;
-    newCommand = (char**)malloc((size_t)(n+1)*sizeof(char*));
-    }
+    newCommand = (char**)malloc((size_t)(n + 1) * sizeof(char*));
+  }
 
-  if(newCommand)
-    {
+  if (newCommand) {
     /* Copy the arguments into the new command buffer.  */
     kwsysSystem_ptrdiff_t n = pointer_end - pointer_begin;
-    memcpy(newCommand, pointer_begin, sizeof(char*)*(size_t)(n));
+    memcpy(newCommand, pointer_begin, sizeof(char*) * (size_t)(n));
     newCommand[n] = 0;
-    }
-  else
-    {
+  } else {
     /* Free arguments already allocated.  */
-    while(pointer_end != pointer_begin)
-      {
+    while (pointer_end != pointer_begin) {
       free(*(--pointer_end));
-      }
     }
+  }
 
   /* Free temporary buffers.  */
-  if(pointer_begin != local_pointers)
-    {
+  if (pointer_begin != local_pointers) {
     free(pointer_begin);
-    }
-  if(buffer_begin != local_buffer)
-    {
+  }
+  if (buffer_begin != local_buffer) {
     free(buffer_begin);
-    }
+  }
 
   /* The flags argument is currently unused.  */
   (void)flags;
@@ -291,10 +231,9 @@ static char** kwsysSystem__ParseUnixCommand(const char* command, int flags)
 char** kwsysSystem_Parse_CommandForUnix(const char* command, int flags)
 {
   /* Validate the flags.  */
-  if(flags != 0)
-    {
+  if (flags != 0) {
     return 0;
-    }
+  }
 
   /* Forward to our internal implementation.  */
   return kwsysSystem__ParseUnixCommand(command, flags);

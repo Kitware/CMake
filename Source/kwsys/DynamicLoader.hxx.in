@@ -1,35 +1,26 @@
-/*============================================================================
-  KWSys - Kitware System Library
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 #ifndef @KWSYS_NAMESPACE@_DynamicLoader_hxx
 #define @KWSYS_NAMESPACE@_DynamicLoader_hxx
 
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
+
 #include <string>
 
 #if defined(__hpux)
-  #include <dl.h>
+#include <dl.h>
 #elif defined(_WIN32) && !defined(__CYGWIN__)
-  #include <windows.h>
+#include <windows.h>
 #elif defined(__APPLE__)
-  #include <AvailabilityMacros.h>
-  #if MAC_OS_X_VERSION_MAX_ALLOWED < 1030
-    #include <mach-o/dyld.h>
-  #endif
+#include <AvailabilityMacros.h>
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 1030
+#include <mach-o/dyld.h>
+#endif
 #elif defined(__BEOS__)
-  #include <be/kernel/image.h>
+#include <be/kernel/image.h>
 #endif
 
-namespace @KWSYS_NAMESPACE@
-{
+namespace @KWSYS_NAMESPACE@ {
 /** \class DynamicLoader
  * \brief Portable loading of dynamic libraries or dll's.
  *
@@ -61,14 +52,14 @@ public:
 #elif defined(_WIN32) && !defined(__CYGWIN__)
   typedef HMODULE LibraryHandle;
 #elif defined(__APPLE__)
-  #if MAC_OS_X_VERSION_MAX_ALLOWED < 1030
-    typedef NSModule LibraryHandle;
-  #else
-    typedef void* LibraryHandle;
-  #endif
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 1030
+  typedef NSModule LibraryHandle;
+#else
+  typedef void* LibraryHandle;
+#endif
 #elif defined(__BEOS__)
   typedef image_id LibraryHandle;
-#else  // POSIX
+#else // POSIX
   typedef void* LibraryHandle;
 #endif
 

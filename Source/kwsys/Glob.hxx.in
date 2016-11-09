@@ -1,14 +1,5 @@
-/*============================================================================
-  KWSys - Kitware System Library
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 #ifndef @KWSYS_NAMESPACE@_Glob_hxx
 #define @KWSYS_NAMESPACE@_Glob_hxx
 
@@ -18,8 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace @KWSYS_NAMESPACE@
-{
+namespace @KWSYS_NAMESPACE@ {
 
 class GlobInternals;
 
@@ -46,31 +36,33 @@ public:
     MessageType type;
     std::string content;
 
-    Message(MessageType t, const std::string& c) :
-      type(t),
-      content(c)
-    {}
-    Message(const Message& msg) :
-      type(msg.type),
-      content(msg.content)
-    {}
+    Message(MessageType t, const std::string& c)
+      : type(t)
+      , content(c)
+    {
+    }
+    Message(const Message& msg)
+      : type(msg.type)
+      , content(msg.content)
+    {
+    }
     Message& operator=(Message const& msg)
-      {
+    {
       this->type = msg.type;
       this->content = msg.content;
       return *this;
-      }
+    }
   };
 
   typedef std::vector<Message> GlobMessages;
   typedef std::vector<Message>::iterator GlobMessagesIterator;
+
 public:
   Glob();
   ~Glob();
 
   //! Find all files that match the pattern.
-  bool FindFiles(const std::string& inexpr,
-    GlobMessages* messages = 0);
+  bool FindFiles(const std::string& inexpr, GlobMessages* messages = 0);
 
   //! Return the list of files that matched.
   std::vector<std::string>& GetFiles();
@@ -103,29 +95,27 @@ public:
       whole strings, but may be disabled to support concatenating
       expressions more easily (regex1|regex2|etc).  */
   static std::string PatternToRegex(const std::string& pattern,
-                                          bool require_whole_string = true,
-                                          bool preserve_case = false);
+                                    bool require_whole_string = true,
+                                    bool preserve_case = false);
 
   /** Getters and setters for enabling and disabling directory
       listing in recursive and non recursive globbing mode.
       If listing is enabled in recursive mode it also lists
       directory symbolic links even if follow symlinks is enabled. */
-  void SetListDirs(bool list) { this->ListDirs=list; }
+  void SetListDirs(bool list) { this->ListDirs = list; }
   bool GetListDirs() const { return this->ListDirs; }
-  void SetRecurseListDirs(bool list) { this->RecurseListDirs=list; }
+  void SetRecurseListDirs(bool list) { this->RecurseListDirs = list; }
   bool GetRecurseListDirs() const { return this->RecurseListDirs; }
 
 protected:
   //! Process directory
-  void ProcessDirectory(std::string::size_type start,
-    const std::string& dir,
-    GlobMessages* messages);
+  void ProcessDirectory(std::string::size_type start, const std::string& dir,
+                        GlobMessages* messages);
 
   //! Process last directory, but only when recurse flags is on. That is
   // effectively like saying: /path/to/file/**/file
-  bool RecurseDirectory(std::string::size_type start,
-    const std::string& dir,
-    GlobMessages* messages);
+  bool RecurseDirectory(std::string::size_type start, const std::string& dir,
+                        GlobMessages* messages);
 
   //! Add regular expression
   void AddExpression(const std::string& expr);
@@ -143,8 +133,8 @@ protected:
   bool RecurseListDirs;
 
 private:
-  Glob(const Glob&);  // Not implemented.
-  void operator=(const Glob&);  // Not implemented.
+  Glob(const Glob&);           // Not implemented.
+  void operator=(const Glob&); // Not implemented.
 };
 
 } // namespace @KWSYS_NAMESPACE@
