@@ -455,8 +455,8 @@ static std::string ReadAll(const std::string& filename)
 
 bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 {
-  if (!cmsys::SystemTools::FileExists(this->OutMocCppFilenameAbs.c_str()) ||
-      (this->OldCompileSettingsStr != this->CurrentCompileSettingsStr)) {
+  // If settings changed everything needs to be re-generated.
+  if (this->OldCompileSettingsStr != this->CurrentCompileSettingsStr) {
     this->GenerateAll = true;
   }
 
