@@ -3,6 +3,8 @@
 
 /GitSetup        export-ignore
 /SetupForDevelopment.sh  export-ignore  eol=lf
+/clang-format.bash export-ignore eol=lf
+/.clang-format   export-ignore
 
 /CONTRIBUTING.rst conflict-marker-size=78
 

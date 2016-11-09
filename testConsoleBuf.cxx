@@ -1,14 +1,5 @@
-/*============================================================================
-  KWSys - Kitware System Library
-  Copyright 2000-2016 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 #include "kwsysPrivate.h"
 
 // Ignore Windows version levels defined by command-line flags.  This
@@ -22,24 +13,26 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-# include "Encoding.hxx.in"
+#include "Encoding.hxx.in"
 #endif
 
 #if defined(_WIN32)
 
-#include <windows.h>
+#include <iomanip>
+#include <iostream>
+#include <stdexcept>
 #include <string.h>
 #include <wchar.h>
-#include <iostream>
-#include <iomanip>
-#include <stdexcept>
+#include <windows.h>
+
 #include "testConsoleBuf.hxx"
 
 #if defined(_MSC_VER) && _MSC_VER >= 1800
-# define KWSYS_WINDOWS_DEPRECATED_GetVersion
+#define KWSYS_WINDOWS_DEPRECATED_GetVersion
 #endif
 // يونيكود
-static const WCHAR UnicodeInputTestString[] = L"\u064A\u0648\u0646\u064A\u0643\u0648\u062F!";
+static const WCHAR UnicodeInputTestString[] =
+  L"\u064A\u0648\u0646\u064A\u0643\u0648\u062F!";
 static UINT TestCodepage = KWSYS_ENCODING_DEFAULT_CODEPAGE;
 
 static const DWORD waitTimeout = 10 * 1000;
@@ -50,55 +43,62 @@ static HANDLE afterOutputEvent;
 static std::string encodedInputTestString;
 static std::string encodedTestString;
 
-static void displayError(DWORD errorCode) {
+static void displayError(DWORD errorCode)
+{
   std::cerr.setf(std::ios::hex, std::ios::basefield);
   std::cerr << "Failed with error: 0x" << errorCode << "!" << std::endl;
   LPWSTR message;
-  if (FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                     NULL,
-                     errorCode,
-                     0,
-                     (LPWSTR)&message, 0,
-                     NULL)
-  ) {
-    std::cerr << "Error message: " << kwsys::Encoding::ToNarrow(message) << std::endl;
+  if (FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                       FORMAT_MESSAGE_FROM_SYSTEM,
+                     NULL, errorCode, 0, (LPWSTR)&message, 0, NULL)) {
+    std::cerr << "Error message: " << kwsys::Encoding::ToNarrow(message)
+              << std::endl;
     HeapFree(GetProcessHeap(), 0, message);
   } else {
-    std::cerr << "FormatMessage() failed with error: 0x" << GetLastError() << "!" << std::endl;
+    std::cerr << "FormatMessage() failed with error: 0x" << GetLastError()
+              << "!" << std::endl;
   }
   std::cerr.unsetf(std::ios::hex);
 }
 
-std::basic_streambuf<char> *errstream(const char *unused) {
+std::basic_streambuf<char>* errstream(const char* unused)
+{
   static_cast<void>(unused);
   return std::cerr.rdbuf();
 }
 
-std::basic_streambuf<wchar_t> *errstream(const wchar_t *unused) {
+std::basic_streambuf<wchar_t>* errstream(const wchar_t* unused)
+{
   static_cast<void>(unused);
   return std::wcerr.rdbuf();
 }
 
 //----------------------------------------------------------------------------
-template<typename T>
-static void dumpBuffers(const T *expected, const T *received, size_t size) {
+template <typename T>
+static void dumpBuffers(const T* expected, const T* received, size_t size)
+{
   std::basic_ostream<T> err(errstream(expected));
-  err << "Expected output: '" << std::basic_string<T>(expected, size) << "'" << std::endl;
+  err << "Expected output: '" << std::basic_string<T>(expected, size) << "'"
+      << std::endl;
   if (err.fail()) {
     err.clear();
     err << "--- Error while outputting ---" << std::endl;
   }
-  err << "Received output: '" << std::basic_string<T>(received, size) << "'" << std::endl;
+  err << "Received output: '" << std::basic_string<T>(received, size) << "'"
+      << std::endl;
   if (err.fail()) {
     err.clear();
     err << "--- Error while outputting ---" << std::endl;
   }
   std::cerr << "Expected output | Received output" << std::endl;
   for (size_t i = 0; i < size; i++) {
-    std::cerr << std::setbase(16) << std::setfill('0') << "     " <<
-    "0x" << std::setw(8) << static_cast<unsigned int>(expected[i]) << " | " <<
-    "0x" << std::setw(8) << static_cast<unsigned int>(received[i]);
-    if (static_cast<unsigned int>(expected[i]) != static_cast<unsigned int>(received[i])) {
+    std::cerr << std::setbase(16) << std::setfill('0') << "     "
+              << "0x" << std::setw(8) << static_cast<unsigned int>(expected[i])
+              << " | "
+              << "0x" << std::setw(8)
+              << static_cast<unsigned int>(received[i]);
+    if (static_cast<unsigned int>(expected[i]) !=
+        static_cast<unsigned int>(received[i])) {
       std::cerr << "   MISMATCH!";
     }
     std::cerr << std::endl;
@@ -129,25 +129,29 @@ static bool createProcess(HANDLE hIn, HANDLE hOut, HANDLE hErr)
     std::cerr << "GetModuleFileName failed!" << std::endl;
     return false;
   }
-  WCHAR *p = cmd + wcslen(cmd);
-  while (p > cmd && *p != L'\\') p--;
-  *(p+1) = 0;
+  WCHAR* p = cmd + wcslen(cmd);
+  while (p > cmd && *p != L'\\')
+    p--;
+  *(p + 1) = 0;
   wcscat(cmd, cmdConsoleBufChild);
   wcscat(cmd, L".exe");
 
-  bool success = CreateProcessW(NULL,             // No module name (use command line)
-                                cmd,              // Command line
-                                NULL,             // Process handle not inheritable
-                                NULL,             // Thread handle not inheritable
-                                bInheritHandles,  // Set handle inheritance
-                                dwCreationFlags,
-                                NULL,             // Use parent's environment block
-                                NULL,             // Use parent's starting directory
-                                &startupInfo,     // Pointer to STARTUPINFO structure
-                                &processInfo) != 0; // Pointer to PROCESS_INFORMATION structure
+  bool success =
+    CreateProcessW(NULL,            // No module name (use command line)
+                   cmd,             // Command line
+                   NULL,            // Process handle not inheritable
+                   NULL,            // Thread handle not inheritable
+                   bInheritHandles, // Set handle inheritance
+                   dwCreationFlags,
+                   NULL,         // Use parent's environment block
+                   NULL,         // Use parent's starting directory
+                   &startupInfo, // Pointer to STARTUPINFO structure
+                   &processInfo) !=
+    0; // Pointer to PROCESS_INFORMATION structure
   if (!success) {
     DWORD lastError = GetLastError();
-    std::cerr << "CreateProcess(" << kwsys::Encoding::ToNarrow(cmd) << ")" << std::endl;
+    std::cerr << "CreateProcess(" << kwsys::Encoding::ToNarrow(cmd) << ")"
+              << std::endl;
     displayError(lastError);
   }
   return success;
@@ -157,8 +161,8 @@ static bool createProcess(HANDLE hIn, HANDLE hOut, HANDLE hErr)
 static void finishProcess(bool success)
 {
   if (success) {
-    success = WaitForSingleObject(processInfo.hProcess, waitTimeout)
-              == WAIT_OBJECT_0;
+    success =
+      WaitForSingleObject(processInfo.hProcess, waitTimeout) == WAIT_OBJECT_0;
   };
   if (!success) {
     TerminateProcess(processInfo.hProcess, 1);
@@ -174,8 +178,8 @@ static bool createPipe(PHANDLE readPipe, PHANDLE writePipe)
   securityAttributes.nLength = sizeof(SECURITY_ATTRIBUTES);
   securityAttributes.bInheritHandle = TRUE;
   securityAttributes.lpSecurityDescriptor = NULL;
-  return CreatePipe(readPipe, writePipe, &securityAttributes, 0) == 0
-         ? false : true;
+  return CreatePipe(readPipe, writePipe, &securityAttributes, 0) == 0 ? false
+                                                                      : true;
 }
 
 //----------------------------------------------------------------------------
@@ -197,16 +201,17 @@ static HANDLE createFile(LPCWSTR fileName)
   securityAttributes.bInheritHandle = TRUE;
   securityAttributes.lpSecurityDescriptor = NULL;
 
-  HANDLE file = CreateFileW(fileName,
-                            GENERIC_READ | GENERIC_WRITE,
-                            0,                    // do not share
-                            &securityAttributes,
-                            CREATE_ALWAYS,        // overwrite existing
-                            FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE,
-                            NULL);                // no template
+  HANDLE file =
+    CreateFileW(fileName, GENERIC_READ | GENERIC_WRITE,
+                0, // do not share
+                &securityAttributes,
+                CREATE_ALWAYS, // overwrite existing
+                FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE,
+                NULL); // no template
   if (file == INVALID_HANDLE_VALUE) {
     DWORD lastError = GetLastError();
-    std::cerr << "CreateFile(" << kwsys::Encoding::ToNarrow(fileName) << ")" << std::endl;
+    std::cerr << "CreateFile(" << kwsys::Encoding::ToNarrow(fileName) << ")"
+              << std::endl;
     displayError(lastError);
   }
   return file;
@@ -223,7 +228,7 @@ static void finishFile(HANDLE file)
 //----------------------------------------------------------------------------
 
 #ifndef MAPVK_VK_TO_VSC
-#  define MAPVK_VK_TO_VSC  (0)
+#define MAPVK_VK_TO_VSC (0)
 #endif
 
 static void writeInputKeyEvent(INPUT_RECORD inputBuffer[], WCHAR chr)
@@ -238,9 +243,8 @@ static void writeInputKeyEvent(INPUT_RECORD inputBuffer[], WCHAR chr)
     keyCode = 'K';
   }
   inputBuffer[0].Event.KeyEvent.wVirtualKeyCode = LOBYTE(keyCode);
-  inputBuffer[0].Event.KeyEvent.wVirtualScanCode =
-      MapVirtualKey(inputBuffer[0].Event.KeyEvent.wVirtualKeyCode,
-                    MAPVK_VK_TO_VSC);
+  inputBuffer[0].Event.KeyEvent.wVirtualScanCode = MapVirtualKey(
+    inputBuffer[0].Event.KeyEvent.wVirtualKeyCode, MAPVK_VK_TO_VSC);
   inputBuffer[0].Event.KeyEvent.uChar.UnicodeChar = chr;
   inputBuffer[0].Event.KeyEvent.dwControlKeyState = 0;
   if ((HIBYTE(keyCode) & 1) == 1) {
@@ -255,12 +259,12 @@ static void writeInputKeyEvent(INPUT_RECORD inputBuffer[], WCHAR chr)
   inputBuffer[1].EventType = inputBuffer[0].EventType;
   inputBuffer[1].Event.KeyEvent.bKeyDown = FALSE;
   inputBuffer[1].Event.KeyEvent.wRepeatCount = 1;
-  inputBuffer[1].Event.KeyEvent.wVirtualKeyCode   = inputBuffer[0].Event.
-                                                      KeyEvent.wVirtualKeyCode;
-  inputBuffer[1].Event.KeyEvent.wVirtualScanCode  = inputBuffer[0].Event.
-                                                      KeyEvent.wVirtualScanCode;
-  inputBuffer[1].Event.KeyEvent.uChar.UnicodeChar = inputBuffer[0].Event.
-                                                      KeyEvent.uChar.UnicodeChar;
+  inputBuffer[1].Event.KeyEvent.wVirtualKeyCode =
+    inputBuffer[0].Event.KeyEvent.wVirtualKeyCode;
+  inputBuffer[1].Event.KeyEvent.wVirtualScanCode =
+    inputBuffer[0].Event.KeyEvent.wVirtualScanCode;
+  inputBuffer[1].Event.KeyEvent.uChar.UnicodeChar =
+    inputBuffer[0].Event.KeyEvent.uChar.UnicodeChar;
   inputBuffer[1].Event.KeyEvent.dwControlKeyState = 0;
 }
 
@@ -292,29 +296,33 @@ static int testPipe()
 
     DWORD bytesWritten = 0;
     if (!WriteFile(inPipeWrite, encodedInputTestString.c_str(),
-                   (DWORD)encodedInputTestString.size(), &bytesWritten, NULL)
-        || bytesWritten == 0) {
+                   (DWORD)encodedInputTestString.size(), &bytesWritten,
+                   NULL) ||
+        bytesWritten == 0) {
       throw std::runtime_error("WriteFile failed!");
     }
 
     if (createProcess(inPipeRead, outPipeWrite, errPipeWrite)) {
       try {
         DWORD status;
-        if ((status = WaitForSingleObject(afterOutputEvent, waitTimeout)) != WAIT_OBJECT_0) {
+        if ((status = WaitForSingleObject(afterOutputEvent, waitTimeout)) !=
+            WAIT_OBJECT_0) {
           std::cerr.setf(std::ios::hex, std::ios::basefield);
-          std::cerr << "WaitForSingleObject returned unexpected status 0x" << status << std::endl;
+          std::cerr << "WaitForSingleObject returned unexpected status 0x"
+                    << status << std::endl;
           std::cerr.unsetf(std::ios::hex);
           throw std::runtime_error("WaitForSingleObject failed!");
         }
         DWORD bytesRead = 0;
-        if (!ReadFile(outPipeRead, buffer, sizeof(buffer), &bytesRead, NULL)
-            || bytesRead == 0) {
+        if (!ReadFile(outPipeRead, buffer, sizeof(buffer), &bytesRead, NULL) ||
+            bytesRead == 0) {
           throw std::runtime_error("ReadFile#1 failed!");
         }
-        if ((bytesRead < encodedTestString.size() + 1 + encodedInputTestString.size()
-             && !ReadFile(outPipeRead, buffer + bytesRead,
-                          sizeof(buffer) - bytesRead, &bytesRead, NULL))
-            || bytesRead == 0) {
+        if ((bytesRead <
+               encodedTestString.size() + 1 + encodedInputTestString.size() &&
+             !ReadFile(outPipeRead, buffer + bytesRead,
+                       sizeof(buffer) - bytesRead, &bytesRead, NULL)) ||
+            bytesRead == 0) {
           throw std::runtime_error("ReadFile#2 failed!");
         }
         if (memcmp(buffer, encodedTestString.c_str(),
@@ -323,31 +331,37 @@ static int testPipe()
                    encodedInputTestString.c_str(),
                    encodedInputTestString.size()) == 0) {
           bytesRead = 0;
-          if (!ReadFile(errPipeRead, buffer2, sizeof(buffer2), &bytesRead, NULL)
-              || bytesRead == 0) {
+          if (!ReadFile(errPipeRead, buffer2, sizeof(buffer2), &bytesRead,
+                        NULL) ||
+              bytesRead == 0) {
             throw std::runtime_error("ReadFile#3 failed!");
           }
           buffer2[bytesRead - 1] = 0;
           didFail = encodedTestString.compare(buffer2) == 0 ? 0 : 1;
         }
         if (didFail != 0) {
-          std::cerr << "Pipe's output didn't match expected output!" << std::endl;
-          dumpBuffers<char>(encodedTestString.c_str(), buffer, encodedTestString.size());
-          dumpBuffers<char>(encodedInputTestString.c_str(), buffer + encodedTestString.size() + 1, encodedInputTestString.size());
-          dumpBuffers<char>(encodedTestString.c_str(), buffer2, encodedTestString.size());
+          std::cerr << "Pipe's output didn't match expected output!"
+                    << std::endl;
+          dumpBuffers<char>(encodedTestString.c_str(), buffer,
+                            encodedTestString.size());
+          dumpBuffers<char>(encodedInputTestString.c_str(),
+                            buffer + encodedTestString.size() + 1,
+                            encodedInputTestString.size());
+          dumpBuffers<char>(encodedTestString.c_str(), buffer2,
+                            encodedTestString.size());
         }
-      } catch (const std::runtime_error &ex) {
+      } catch (const std::runtime_error& ex) {
         DWORD lastError = GetLastError();
-        std::cerr << "In function testPipe, line " <<  __LINE__ << ": "
+        std::cerr << "In function testPipe, line " << __LINE__ << ": "
                   << ex.what() << std::endl;
         displayError(lastError);
       }
       finishProcess(didFail == 0);
     }
-  } catch (const std::runtime_error &ex) {
+  } catch (const std::runtime_error& ex) {
     DWORD lastError = GetLastError();
-    std::cerr << "In function testPipe, line " <<  __LINE__ << ": "
-              << ex.what() << std::endl;
+    std::cerr << "In function testPipe, line " << __LINE__ << ": " << ex.what()
+              << std::endl;
     displayError(lastError);
   }
   finishPipe(inPipeRead, inPipeWrite);
@@ -375,14 +389,14 @@ static int testFile()
     char buffer2[200];
 
     int length;
-    if ((length = WideCharToMultiByte(TestCodepage, 0, UnicodeInputTestString, -1,
-                                      buffer, sizeof(buffer),
-                                      NULL, NULL)) == 0) {
+    if ((length =
+           WideCharToMultiByte(TestCodepage, 0, UnicodeInputTestString, -1,
+                               buffer, sizeof(buffer), NULL, NULL)) == 0) {
       throw std::runtime_error("WideCharToMultiByte failed!");
     }
     buffer[length - 1] = '\n';
-    if (!WriteFile(inFile, buffer, length, &bytesWritten, NULL)
-        || bytesWritten == 0) {
+    if (!WriteFile(inFile, buffer, length, &bytesWritten, NULL) ||
+        bytesWritten == 0) {
       throw std::runtime_error("WriteFile failed!");
     }
     if (SetFilePointer(inFile, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
@@ -393,18 +407,20 @@ static int testFile()
       DWORD bytesRead = 0;
       try {
         DWORD status;
-        if ((status = WaitForSingleObject(afterOutputEvent, waitTimeout)) != WAIT_OBJECT_0) {
+        if ((status = WaitForSingleObject(afterOutputEvent, waitTimeout)) !=
+            WAIT_OBJECT_0) {
           std::cerr.setf(std::ios::hex, std::ios::basefield);
-          std::cerr << "WaitForSingleObject returned unexpected status 0x" << status << std::endl;
+          std::cerr << "WaitForSingleObject returned unexpected status 0x"
+                    << status << std::endl;
           std::cerr.unsetf(std::ios::hex);
           throw std::runtime_error("WaitForSingleObject failed!");
         }
-        if (SetFilePointer(outFile, 0, 0, FILE_BEGIN)
-            == INVALID_SET_FILE_POINTER) {
+        if (SetFilePointer(outFile, 0, 0, FILE_BEGIN) ==
+            INVALID_SET_FILE_POINTER) {
           throw std::runtime_error("SetFilePointer#1 failed!");
         }
-        if (!ReadFile(outFile, buffer, sizeof(buffer), &bytesRead, NULL)
-            || bytesRead == 0) {
+        if (!ReadFile(outFile, buffer, sizeof(buffer), &bytesRead, NULL) ||
+            bytesRead == 0) {
           throw std::runtime_error("ReadFile#1 failed!");
         }
         buffer[bytesRead - 1] = 0;
@@ -414,35 +430,40 @@ static int testFile()
                    encodedInputTestString.c_str(),
                    encodedInputTestString.size() - 1) == 0) {
           bytesRead = 0;
-          if (SetFilePointer(errFile, 0, 0, FILE_BEGIN)
-              == INVALID_SET_FILE_POINTER) {
+          if (SetFilePointer(errFile, 0, 0, FILE_BEGIN) ==
+              INVALID_SET_FILE_POINTER) {
             throw std::runtime_error("SetFilePointer#2 failed!");
           }
-          if (!ReadFile(errFile, buffer2, sizeof(buffer2), &bytesRead, NULL)
-              || bytesRead == 0) {
+          if (!ReadFile(errFile, buffer2, sizeof(buffer2), &bytesRead, NULL) ||
+              bytesRead == 0) {
             throw std::runtime_error("ReadFile#2 failed!");
           }
           buffer2[bytesRead - 1] = 0;
           didFail = encodedTestString.compare(buffer2) == 0 ? 0 : 1;
         }
         if (didFail != 0) {
-          std::cerr << "File's output didn't match expected output!" << std::endl;
-          dumpBuffers<char>(encodedTestString.c_str(), buffer, encodedTestString.size());
-          dumpBuffers<char>(encodedInputTestString.c_str(), buffer + encodedTestString.size() + 1, encodedInputTestString.size() - 1);
-          dumpBuffers<char>(encodedTestString.c_str(), buffer2, encodedTestString.size());
+          std::cerr << "File's output didn't match expected output!"
+                    << std::endl;
+          dumpBuffers<char>(encodedTestString.c_str(), buffer,
+                            encodedTestString.size());
+          dumpBuffers<char>(encodedInputTestString.c_str(),
+                            buffer + encodedTestString.size() + 1,
+                            encodedInputTestString.size() - 1);
+          dumpBuffers<char>(encodedTestString.c_str(), buffer2,
+                            encodedTestString.size());
         }
-      } catch (const std::runtime_error &ex) {
+      } catch (const std::runtime_error& ex) {
         DWORD lastError = GetLastError();
-        std::cerr << "In function testFile, line " <<  __LINE__ << ": "
+        std::cerr << "In function testFile, line " << __LINE__ << ": "
                   << ex.what() << std::endl;
         displayError(lastError);
       }
       finishProcess(didFail == 0);
     }
-  } catch (const std::runtime_error &ex) {
+  } catch (const std::runtime_error& ex) {
     DWORD lastError = GetLastError();
-    std::cerr << "In function testFile, line " <<  __LINE__ << ": "
-              << ex.what() << std::endl;
+    std::cerr << "In function testFile, line " << __LINE__ << ": " << ex.what()
+              << std::endl;
     displayError(lastError);
   }
   finishFile(inFile);
@@ -452,7 +473,7 @@ static int testFile()
 }
 
 #ifndef _WIN32_WINNT_VISTA
-# define _WIN32_WINNT_VISTA 0x0600
+#define _WIN32_WINNT_VISTA 0x0600
 #endif
 
 //----------------------------------------------------------------------------
@@ -478,16 +499,17 @@ static int testConsole()
   DWORD FontFamily = TestFontFamily;
   DWORD FontSize = TestFontSize;
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersion
-# pragma warning (push)
-# ifdef __INTEL_COMPILER
-#  pragma warning (disable:1478)
-# else
-#  pragma warning (disable:4996)
-# endif
+#pragma warning(push)
+#ifdef __INTEL_COMPILER
+#pragma warning(disable : 1478)
+#else
+#pragma warning(disable : 4996)
 #endif
-  const bool isVistaOrGreater = LOBYTE(LOWORD(GetVersion())) >= HIBYTE(_WIN32_WINNT_VISTA);
+#endif
+  const bool isVistaOrGreater =
+    LOBYTE(LOWORD(GetVersion())) >= HIBYTE(_WIN32_WINNT_VISTA);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersion
-# pragma warning (pop)
+#pragma warning(pop)
 #endif
   if (!isVistaOrGreater) {
     if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Console", 0, KEY_READ | KEY_WRITE,
@@ -502,11 +524,12 @@ static int testConsole()
                            (LPBYTE)&FontSize, &dwordSize);
 
           RegSetValueExW(hConsoleKey, L"FontFamily", 0, REG_DWORD,
-                         (BYTE *)&TestFontFamily, sizeof(TestFontFamily));
+                         (BYTE*)&TestFontFamily, sizeof(TestFontFamily));
           RegSetValueExW(hConsoleKey, L"FaceName", 0, REG_SZ,
-                         (BYTE *)TestFaceName, (DWORD)((wcslen(TestFaceName) + 1) * sizeof(WCHAR)));
+                         (BYTE*)TestFaceName,
+                         (DWORD)((wcslen(TestFaceName) + 1) * sizeof(WCHAR)));
           RegSetValueExW(hConsoleKey, L"FontSize", 0, REG_DWORD,
-                         (BYTE *)&TestFontSize, sizeof(TestFontSize));
+                         (BYTE*)&TestFontSize, sizeof(TestFontSize));
 
           restoreConsole = true;
           forceNewConsole = true;
@@ -516,7 +539,8 @@ static int testConsole()
       }
       RegCloseKey(hConsoleKey);
     } else {
-      std::cerr << "RegOpenKeyExW(HKEY_CURRENT_USER\\Console) failed!" << std::endl;
+      std::cerr << "RegOpenKeyExW(HKEY_CURRENT_USER\\Console) failed!"
+                << std::endl;
     }
   }
   if (forceNewConsole || GetConsoleMode(parentOut, &consoleMode) == 0) {
@@ -530,15 +554,17 @@ static int testConsole()
     securityAttributes.nLength = sizeof(SECURITY_ATTRIBUTES);
     securityAttributes.bInheritHandle = TRUE;
     securityAttributes.lpSecurityDescriptor = NULL;
-    hIn = CreateFileW(L"CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-                       &securityAttributes, OPEN_EXISTING, 0, NULL);
+    hIn = CreateFileW(L"CONIN$", GENERIC_READ | GENERIC_WRITE,
+                      FILE_SHARE_READ | FILE_SHARE_WRITE, &securityAttributes,
+                      OPEN_EXISTING, 0, NULL);
     if (hIn == INVALID_HANDLE_VALUE) {
       DWORD lastError = GetLastError();
       std::cerr << "CreateFile(CONIN$)" << std::endl;
       displayError(lastError);
     }
-    hOut = CreateFileW(L"CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-                       &securityAttributes, OPEN_EXISTING, 0, NULL);
+    hOut = CreateFileW(L"CONOUT$", GENERIC_READ | GENERIC_WRITE,
+                       FILE_SHARE_READ | FILE_SHARE_WRITE, &securityAttributes,
+                       OPEN_EXISTING, 0, NULL);
     if (hOut == INVALID_HANDLE_VALUE) {
       DWORD lastError = GetLastError();
       std::cerr << "CreateFile(CONOUT$)" << std::endl;
@@ -556,10 +582,18 @@ static int testConsole()
     memset(&consoleFont, 0, sizeof(consoleFont));
     consoleFont.cbSize = sizeof(consoleFont);
     HMODULE kernel32 = LoadLibraryW(L"kernel32.dll");
-    typedef BOOL (WINAPI *GetCurrentConsoleFontExFunc)(HANDLE hConsoleOutput, BOOL bMaximumWindow, PCONSOLE_FONT_INFOEX lpConsoleCurrentFontEx);
-    typedef BOOL (WINAPI *SetCurrentConsoleFontExFunc)(HANDLE hConsoleOutput, BOOL bMaximumWindow, PCONSOLE_FONT_INFOEX lpConsoleCurrentFontEx);
-    GetCurrentConsoleFontExFunc getConsoleFont = (GetCurrentConsoleFontExFunc)GetProcAddress(kernel32, "GetCurrentConsoleFontEx");
-    SetCurrentConsoleFontExFunc setConsoleFont = (SetCurrentConsoleFontExFunc)GetProcAddress(kernel32, "SetCurrentConsoleFontEx");
+    typedef BOOL(WINAPI * GetCurrentConsoleFontExFunc)(
+      HANDLE hConsoleOutput, BOOL bMaximumWindow,
+      PCONSOLE_FONT_INFOEX lpConsoleCurrentFontEx);
+    typedef BOOL(WINAPI * SetCurrentConsoleFontExFunc)(
+      HANDLE hConsoleOutput, BOOL bMaximumWindow,
+      PCONSOLE_FONT_INFOEX lpConsoleCurrentFontEx);
+    GetCurrentConsoleFontExFunc getConsoleFont =
+      (GetCurrentConsoleFontExFunc)GetProcAddress(kernel32,
+                                                  "GetCurrentConsoleFontEx");
+    SetCurrentConsoleFontExFunc setConsoleFont =
+      (SetCurrentConsoleFontExFunc)GetProcAddress(kernel32,
+                                                  "SetCurrentConsoleFontEx");
     if (getConsoleFont(hOut, FALSE, &consoleFont)) {
       if (consoleFont.FontFamily != TestFontFamily) {
         consoleFont.FontFamily = TestFontFamily;
@@ -573,18 +607,19 @@ static int testConsole()
     }
   } else {
 #endif
-    if (restoreConsole && RegOpenKeyExW(HKEY_CURRENT_USER, L"Console", 0,
-                                        KEY_WRITE, &hConsoleKey) == ERROR_SUCCESS) {
+    if (restoreConsole &&
+        RegOpenKeyExW(HKEY_CURRENT_USER, L"Console", 0, KEY_WRITE,
+                      &hConsoleKey) == ERROR_SUCCESS) {
       RegSetValueExW(hConsoleKey, L"FontFamily", 0, REG_DWORD,
-                     (BYTE *)&FontFamily, sizeof(FontFamily));
+                     (BYTE*)&FontFamily, sizeof(FontFamily));
       if (FaceName[0] != 0) {
-        RegSetValueExW(hConsoleKey, L"FaceName", 0, REG_SZ,
-                       (BYTE *)FaceName, FaceNameSize);
+        RegSetValueExW(hConsoleKey, L"FaceName", 0, REG_SZ, (BYTE*)FaceName,
+                       FaceNameSize);
       } else {
         RegDeleteValueW(hConsoleKey, L"FaceName");
       }
-      RegSetValueExW(hConsoleKey, L"FontSize", 0, REG_DWORD,
-                     (BYTE *)&FontSize, sizeof(FontSize));
+      RegSetValueExW(hConsoleKey, L"FontSize", 0, REG_DWORD, (BYTE*)&FontSize,
+                     sizeof(FontSize));
       RegCloseKey(hConsoleKey);
     }
 #if _WIN32_WINNT >= _WIN32_WINNT_VISTA
@@ -594,32 +629,41 @@ static int testConsole()
   if (createProcess(NULL, NULL, NULL)) {
     try {
       DWORD status;
-      if ((status = WaitForSingleObject(beforeInputEvent, waitTimeout)) != WAIT_OBJECT_0) {
+      if ((status = WaitForSingleObject(beforeInputEvent, waitTimeout)) !=
+          WAIT_OBJECT_0) {
         std::cerr.setf(std::ios::hex, std::ios::basefield);
-        std::cerr << "WaitForSingleObject returned unexpected status 0x" << status << std::endl;
+        std::cerr << "WaitForSingleObject returned unexpected status 0x"
+                  << status << std::endl;
         std::cerr.unsetf(std::ios::hex);
         throw std::runtime_error("WaitForSingleObject#1 failed!");
       }
       INPUT_RECORD inputBuffer[(sizeof(UnicodeInputTestString) /
-                                sizeof(UnicodeInputTestString[0])) * 2];
+                                sizeof(UnicodeInputTestString[0])) *
+                               2];
       memset(&inputBuffer, 0, sizeof(inputBuffer));
       unsigned int i;
       for (i = 0; i < (sizeof(UnicodeInputTestString) /
-                       sizeof(UnicodeInputTestString[0]) - 1); i++) {
-        writeInputKeyEvent(&inputBuffer[i*2], UnicodeInputTestString[i]);
+                         sizeof(UnicodeInputTestString[0]) -
+                       1);
+           i++) {
+        writeInputKeyEvent(&inputBuffer[i * 2], UnicodeInputTestString[i]);
       }
-      writeInputKeyEvent(&inputBuffer[i*2], VK_RETURN);
+      writeInputKeyEvent(&inputBuffer[i * 2], VK_RETURN);
       DWORD eventsWritten = 0;
-      // We need to wait a bit before writing to console so child process have started waiting for input on stdin.
+      // We need to wait a bit before writing to console so child process have
+      // started waiting for input on stdin.
       Sleep(300);
-      if (!WriteConsoleInputW(hIn, inputBuffer, sizeof(inputBuffer) /
-                                                sizeof(inputBuffer[0]),
-                              &eventsWritten) || eventsWritten == 0) {
+      if (!WriteConsoleInputW(hIn, inputBuffer,
+                              sizeof(inputBuffer) / sizeof(inputBuffer[0]),
+                              &eventsWritten) ||
+          eventsWritten == 0) {
         throw std::runtime_error("WriteConsoleInput failed!");
       }
-      if ((status = WaitForSingleObject(afterOutputEvent, waitTimeout)) != WAIT_OBJECT_0) {
+      if ((status = WaitForSingleObject(afterOutputEvent, waitTimeout)) !=
+          WAIT_OBJECT_0) {
         std::cerr.setf(std::ios::hex, std::ios::basefield);
-        std::cerr << "WaitForSingleObject returned unexpected status 0x" << status << std::endl;
+        std::cerr << "WaitForSingleObject returned unexpected status 0x"
+                  << status << std::endl;
         std::cerr.unsetf(std::ios::hex);
         throw std::runtime_error("WaitForSingleObject#2 failed!");
       }
@@ -632,38 +676,48 @@ static int testConsole()
       DWORD charsRead = 0;
       coord.X = 0;
       coord.Y = screenBufferInfo.dwCursorPosition.Y - 4;
-      WCHAR *outputBuffer = new WCHAR[screenBufferInfo.dwSize.X * 4];
+      WCHAR* outputBuffer = new WCHAR[screenBufferInfo.dwSize.X * 4];
       if (!ReadConsoleOutputCharacterW(hOut, outputBuffer,
-          screenBufferInfo.dwSize.X * 4, coord, &charsRead)
-          || charsRead == 0) {
+                                       screenBufferInfo.dwSize.X * 4, coord,
+                                       &charsRead) ||
+          charsRead == 0) {
         delete[] outputBuffer;
         throw std::runtime_error("ReadConsoleOutputCharacter failed!");
       }
       std::wstring wideTestString = kwsys::Encoding::ToWide(encodedTestString);
-      std::wstring wideInputTestString = kwsys::Encoding::ToWide(encodedInputTestString);
+      std::wstring wideInputTestString =
+        kwsys::Encoding::ToWide(encodedInputTestString);
       if (memcmp(outputBuffer, wideTestString.c_str(),
                  wideTestString.size() * sizeof(wchar_t)) == 0 &&
           memcmp(outputBuffer + screenBufferInfo.dwSize.X * 1,
-                 wideTestString.c_str(), wideTestString.size() * sizeof(wchar_t)) == 0 &&
+                 wideTestString.c_str(),
+                 wideTestString.size() * sizeof(wchar_t)) == 0 &&
           memcmp(outputBuffer + screenBufferInfo.dwSize.X * 2,
-                 UnicodeInputTestString, sizeof(UnicodeInputTestString) -
-                                         sizeof(WCHAR)) == 0 &&
+                 UnicodeInputTestString,
+                 sizeof(UnicodeInputTestString) - sizeof(WCHAR)) == 0 &&
           memcmp(outputBuffer + screenBufferInfo.dwSize.X * 3,
                  wideInputTestString.c_str(),
-                 (wideInputTestString.size() - 1) * sizeof(wchar_t)) == 0
-      ) {
+                 (wideInputTestString.size() - 1) * sizeof(wchar_t)) == 0) {
         didFail = 0;
       } else {
-        std::cerr << "Console's output didn't match expected output!" << std::endl;
-        dumpBuffers<wchar_t>(wideTestString.c_str(), outputBuffer, wideTestString.size());
-        dumpBuffers<wchar_t>(wideTestString.c_str(), outputBuffer + screenBufferInfo.dwSize.X * 1, wideTestString.size());
-        dumpBuffers<wchar_t>(UnicodeInputTestString, outputBuffer + screenBufferInfo.dwSize.X * 2, (sizeof(UnicodeInputTestString) - 1) / sizeof(WCHAR));
-        dumpBuffers<wchar_t>(wideInputTestString.c_str(), outputBuffer + screenBufferInfo.dwSize.X * 3, wideInputTestString.size() - 1);
+        std::cerr << "Console's output didn't match expected output!"
+                  << std::endl;
+        dumpBuffers<wchar_t>(wideTestString.c_str(), outputBuffer,
+                             wideTestString.size());
+        dumpBuffers<wchar_t>(wideTestString.c_str(),
+                             outputBuffer + screenBufferInfo.dwSize.X * 1,
+                             wideTestString.size());
+        dumpBuffers<wchar_t>(
+          UnicodeInputTestString, outputBuffer + screenBufferInfo.dwSize.X * 2,
+          (sizeof(UnicodeInputTestString) - 1) / sizeof(WCHAR));
+        dumpBuffers<wchar_t>(wideInputTestString.c_str(),
+                             outputBuffer + screenBufferInfo.dwSize.X * 3,
+                             wideInputTestString.size() - 1);
       }
       delete[] outputBuffer;
-    } catch (const std::runtime_error &ex) {
+    } catch (const std::runtime_error& ex) {
       DWORD lastError = GetLastError();
-      std::cerr << "In function testConsole, line " <<  __LINE__ << ": "
+      std::cerr << "In function testConsole, line " << __LINE__ << ": "
                 << ex.what() << std::endl;
       displayError(lastError);
     }
@@ -683,15 +737,15 @@ static int testConsole()
 #endif
 
 //----------------------------------------------------------------------------
-int testConsoleBuf(int, char*[])
+int testConsoleBuf(int, char* [])
 {
   int ret = 0;
 
 #if defined(_WIN32)
   beforeInputEvent = CreateEventW(NULL,
-                       FALSE,  // auto-reset event
-                       FALSE,  // initial state is nonsignaled
-                       BeforeInputEventName);  // object name
+                                  FALSE, // auto-reset event
+                                  FALSE, // initial state is nonsignaled
+                                  BeforeInputEventName); // object name
   if (!beforeInputEvent) {
     std::cerr << "CreateEvent#1 failed " << GetLastError() << std::endl;
     return 1;
