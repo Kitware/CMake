@@ -94,6 +94,11 @@ find_library(SDL_LIBRARY_TEMP
   PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
 )
 
+# Hide this cache variable from the user, it's an internal implementation
+# detail. The documented library variable for the user is SDL_LIBRARY
+# which is derived from SDL_LIBRARY_TEMP further below.
+set_property(CACHE SDL_LIBRARY_TEMP PROPERTY TYPE INTERNAL)
+
 if(NOT SDL_BUILDING_LIBRARY)
   if(NOT SDL_INCLUDE_DIR MATCHES ".framework")
     # Non-OS X framework versions expect you to also dynamically link to
@@ -162,8 +167,6 @@ if(SDL_LIBRARY_TEMP)
 
   # Set the final string here so the GUI reflects the final state.
   set(SDL_LIBRARY ${SDL_LIBRARY_TEMP} CACHE STRING "Where the SDL Library can be found")
-  # Set the temp variable to INTERNAL so it is not seen in the CMake GUI
-  set(SDL_LIBRARY_TEMP "${SDL_LIBRARY_TEMP}" CACHE INTERNAL "")
 endif()
 
 if(SDL_INCLUDE_DIR AND EXISTS "${SDL_INCLUDE_DIR}/SDL_version.h")
