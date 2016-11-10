@@ -27,6 +27,8 @@ readonly paths="
   librhash/sha1.h
   librhash/sha256.c
   librhash/sha256.h
+  librhash/sha3.c
+  librhash/sha3.h
   librhash/sha512.c
   librhash/sha512.h
   librhash/ustd.h
