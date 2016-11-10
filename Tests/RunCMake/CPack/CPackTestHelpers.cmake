@@ -42,7 +42,7 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source)
     if(source)
       set(pack_params_ -G ${TEST_TYPE} --config ./CPackSourceConfig.cmake)
       FILE(APPEND ${RunCMake_TEST_BINARY_DIR}/CPackSourceConfig.cmake
-        "\nset(CPACK_RPM_SOURCE_PKG_BUILD_PARAMS \"-DRunCMake_TEST:STRING=${full_test_name_}\ -DRunCMake_TEST_FILE_PREFIX:STRING=${TEST_NAME}\")")
+        "\nset(CPACK_RPM_SOURCE_PKG_BUILD_PARAMS \"-DRunCMake_TEST:STRING=${full_test_name_}\ -DRunCMake_TEST_FILE_PREFIX:STRING=${TEST_NAME} -DGENERATOR_TYPE=${TEST_TYPE}\")")
     else()
       unset(pack_params_)
     endif()
