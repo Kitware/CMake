@@ -230,6 +230,14 @@ The supported ``<HASH>`` algorithm names are:
   US Secure Hash Algorithms, RFC 4634.
 ``SHA512``
   US Secure Hash Algorithms, RFC 4634.
+``SHA3_224``
+  Keccak SHA-3.
+``SHA3_256``
+  Keccak SHA-3.
+``SHA3_384``
+  Keccak SHA-3.
+``SHA3_512``
+  Keccak SHA-3.
 
 Generation
 ^^^^^^^^^^
