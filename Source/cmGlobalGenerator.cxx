@@ -45,9 +45,9 @@
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+#include "cmCryptoHash.h"
 #include <cm_jsoncpp_value.h>
 #include <cm_jsoncpp_writer.h>
-#include <cmsys/MD5.h>
 #endif
 
 class cmInstalledFile;
@@ -2617,14 +2617,9 @@ void cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
   // Compute a hash of the rule.
   RuleHash hash;
   {
-    unsigned char const* data =
-      reinterpret_cast<unsigned char const*>(content.c_str());
-    int length = static_cast<int>(content.length());
-    cmsysMD5* sum = cmsysMD5_New();
-    cmsysMD5_Initialize(sum);
-    cmsysMD5_Append(sum, data, length);
-    cmsysMD5_FinalizeHex(sum, hash.Data);
-    cmsysMD5_Delete(sum);
+    cmCryptoHash md5(cmCryptoHash::AlgoMD5);
+    std::string const md5_hex = md5.HashString(content);
+    memcpy(hash.Data, md5_hex.c_str(), 32);
   }
 
   // Shorten the output name (in expected use case).

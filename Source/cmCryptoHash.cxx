@@ -2,31 +2,62 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCryptoHash.h"
 
-#include "cm_sha2.h"
-
+#include <cm_kwiml.h>
+#include <cm_rhash.h>
 #include <cmsys/FStream.hxx>
-#include <cmsys/MD5.h>
 #include <string.h>
+
+static unsigned int const cmCryptoHashAlgoToId[] = {
+  /* clang-format needs this comment to break after the opening brace */
+  RHASH_MD5,    //
+  RHASH_SHA1,   //
+  RHASH_SHA224, //
+  RHASH_SHA256, //
+  RHASH_SHA384, //
+  RHASH_SHA512
+};
+
+static int cmCryptoHash_rhash_library_initialized;
+
+static rhash cmCryptoHash_rhash_init(unsigned int id)
+{
+  if (!cmCryptoHash_rhash_library_initialized) {
+    cmCryptoHash_rhash_library_initialized = 1;
+    rhash_library_init();
+  }
+  return rhash_init(id);
+}
+
+cmCryptoHash::cmCryptoHash(Algo algo)
+  : Id(cmCryptoHashAlgoToId[algo])
+  , CTX(cmCryptoHash_rhash_init(Id))
+{
+}
+
+cmCryptoHash::~cmCryptoHash()
+{
+  rhash_free(this->CTX);
+}
 
 CM_AUTO_PTR<cmCryptoHash> cmCryptoHash::New(const char* algo)
 {
   if (strcmp(algo, "MD5") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashMD5);
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoMD5));
   }
   if (strcmp(algo, "SHA1") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA1);
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA1));
   }
   if (strcmp(algo, "SHA224") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA224);
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA224));
   }
   if (strcmp(algo, "SHA256") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA256);
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA256));
   }
   if (strcmp(algo, "SHA384") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA384);
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA384));
   }
   if (strcmp(algo, "SHA512") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA512);
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA512));
   }
   return CM_AUTO_PTR<cmCryptoHash>(CM_NULLPTR);
 }
@@ -80,7 +111,7 @@ std::vector<unsigned char> cmCryptoHash::ByteHashFile(const std::string& file)
     this->Initialize();
     {
       // Should be efficient enough on most system:
-      cm_sha2_uint64_t buffer[512];
+      KWIML_INT_uint64_t buffer[512];
       char* buffer_c = reinterpret_cast<char*>(buffer);
       unsigned char const* buffer_uc =
         reinterpret_cast<unsigned char const*>(buffer);
@@ -117,51 +148,29 @@ std::string cmCryptoHash::HashFile(const std::string& file)
   return ByteHashToString(this->ByteHashFile(file));
 }
 
-cmCryptoHashMD5::cmCryptoHashMD5()
-  : MD5(cmsysMD5_New())
+void cmCryptoHash::Initialize()
 {
+  rhash_reset(this->CTX);
 }
 
-cmCryptoHashMD5::~cmCryptoHashMD5()
+void cmCryptoHash::Append(void const* buf, size_t sz)
 {
-  cmsysMD5_Delete(this->MD5);
+  rhash_update(this->CTX, buf, sz);
 }
 
-void cmCryptoHashMD5::Initialize()
+void cmCryptoHash::Append(std::string const& str)
 {
-  cmsysMD5_Initialize(this->MD5);
+  this->Append(str.c_str(), str.size());
 }
 
-void cmCryptoHashMD5::Append(unsigned char const* buf, int sz)
+std::vector<unsigned char> cmCryptoHash::Finalize()
 {
-  cmsysMD5_Append(this->MD5, buf, sz);
-}
-
-std::vector<unsigned char> cmCryptoHashMD5::Finalize()
-{
-  std::vector<unsigned char> hash(16, 0);
-  cmsysMD5_Finalize(this->MD5, &hash[0]);
+  std::vector<unsigned char> hash(rhash_get_digest_size(this->Id), 0);
+  rhash_final(this->CTX, &hash[0]);
   return hash;
 }
 
-#define cmCryptoHash_SHA_CLASS_IMPL(SHA)                                      \
-  cmCryptoHash##SHA::cmCryptoHash##SHA()                                      \
-    : SHA(new SHA_CTX)                                                        \
-  {                                                                           \
-  }                                                                           \
-  cmCryptoHash##SHA::~cmCryptoHash##SHA() { delete this->SHA; }               \
-  void cmCryptoHash##SHA::Initialize() { SHA##_Init(this->SHA); }             \
-  void cmCryptoHash##SHA::Append(unsigned char const* buf, int sz)            \
-  {                                                                           \
-    SHA##_Update(this->SHA, buf, sz);                                         \
-  }                                                                           \
-  std::vector<unsigned char> cmCryptoHash##SHA::Finalize()                    \
-  {                                                                           \
-    std::vector<unsigned char> hash(SHA##_DIGEST_LENGTH, 0);                  \
-    SHA##_Final(&hash[0], this->SHA);                                         \
-    return hash;                                                              \
-  }
-
-cmCryptoHash_SHA_CLASS_IMPL(SHA1) cmCryptoHash_SHA_CLASS_IMPL(SHA224)
-  cmCryptoHash_SHA_CLASS_IMPL(SHA256) cmCryptoHash_SHA_CLASS_IMPL(SHA384)
-    cmCryptoHash_SHA_CLASS_IMPL(SHA512)
+std::string cmCryptoHash::FinalizeHex()
+{
+  return cmCryptoHash::ByteHashToString(this->Finalize());
+}
