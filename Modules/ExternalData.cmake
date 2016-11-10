@@ -279,6 +279,10 @@ The following hash algorithms are supported::
  SHA256      .sha256   US Secure Hash Algorithms, RFC 4634
  SHA384      .sha384   US Secure Hash Algorithms, RFC 4634
  SHA512      .sha512   US Secure Hash Algorithms, RFC 4634
+ SHA3_224    .sha3-224 Keccak SHA-3
+ SHA3_256    .sha3-256 Keccak SHA-3
+ SHA3_384    .sha3-384 Keccak SHA-3
+ SHA3_512    .sha3-512 Keccak SHA-3
 
 Note that the hashes are used only for unique data identification and
 download verification.
@@ -508,8 +512,8 @@ endfunction()
 #-----------------------------------------------------------------------------
 # Private helper interface
 
-set(_ExternalData_REGEX_ALGO "MD5|SHA1|SHA224|SHA256|SHA384|SHA512")
-set(_ExternalData_REGEX_EXT "md5|sha1|sha224|sha256|sha384|sha512")
+set(_ExternalData_REGEX_ALGO "MD5|SHA1|SHA224|SHA256|SHA384|SHA512|SHA3_224|SHA3_256|SHA3_384|SHA3_512")
+set(_ExternalData_REGEX_EXT "md5|sha1|sha224|sha256|sha384|sha512|sha3-224|sha3-256|sha3-384|sha3-512")
 set(_ExternalData_SELF "${CMAKE_CURRENT_LIST_FILE}")
 get_filename_component(_ExternalData_SELF_DIR "${_ExternalData_SELF}" PATH)
 
@@ -1082,6 +1086,7 @@ if("${ExternalData_ACTION}" STREQUAL "fetch")
 
     if("${ext}" MATCHES "^\\.(${_ExternalData_REGEX_EXT})$")
       string(TOUPPER "${CMAKE_MATCH_1}" algo)
+      string(REPLACE "-" "_" algo "${algo}")
     else()
       message(FATAL_ERROR "Unknown hash algorithm extension \"${ext}\"")
     endif()
