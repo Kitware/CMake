@@ -39,8 +39,8 @@
 #include "sha1.h"
 #include "sha256.h"
 #include "sha512.h"
-#if 0
 #include "sha3.h"
+#if 0
 #include "tiger.h"
 #include "tth.h"
 #include "whirlpool.h"
@@ -104,11 +104,11 @@ rhash_info info_sha512 = { RHASH_SHA512,     F_BE64, 64, "SHA-512", "sha512" };
 #if 0
 rhash_info info_edr256 = { RHASH_EDONR256,   F_LE32, 32, "EDON-R256", "edon-r256" };
 rhash_info info_edr512 = { RHASH_EDONR512,   F_LE64, 64, "EDON-R512", "edon-r512" };
+#endif
 rhash_info info_sha3_224 = { RHASH_SHA3_224, F_LE64, 28, "SHA3-224", "sha3-224" };
 rhash_info info_sha3_256 = { RHASH_SHA3_256, F_LE64, 32, "SHA3-256", "sha3-256" };
 rhash_info info_sha3_384 = { RHASH_SHA3_384, F_LE64, 48, "SHA3-384", "sha3-384" };
 rhash_info info_sha3_512 = { RHASH_SHA3_512, F_LE64, 64, "SHA3-512", "sha3-512" };
-#endif
 
 /* some helper macros */
 #define dgshft(name) (((char*)&((name##_ctx*)0)->hash) - (char*)0)
@@ -148,11 +148,11 @@ rhash_hash_info rhash_hash_info_default[RHASH_HASH_COUNT] =
 #if 0
 	{ &info_edr256, sizeof(edonr_ctx), dgshft2(edonr, u.data256.hash) + 32, iuf(rhash_edonr256), 0 },  /* 256 bit */
 	{ &info_edr512, sizeof(edonr_ctx), dgshft2(edonr, u.data512.hash) + 64, iuf(rhash_edonr512), 0 },  /* 512 bit */
+#endif
 	{ &info_sha3_224, sizeof(sha3_ctx), dgshft(sha3), ini(rhash_sha3_224), upd(rhash_sha3), fin(rhash_sha3), 0 }, /* 224 bit */
 	{ &info_sha3_256, sizeof(sha3_ctx), dgshft(sha3), ini(rhash_sha3_256), upd(rhash_sha3), fin(rhash_sha3), 0 }, /* 256 bit */
 	{ &info_sha3_384, sizeof(sha3_ctx), dgshft(sha3), ini(rhash_sha3_384), upd(rhash_sha3), fin(rhash_sha3), 0 }, /* 384 bit */
 	{ &info_sha3_512, sizeof(sha3_ctx), dgshft(sha3), ini(rhash_sha3_512), upd(rhash_sha3), fin(rhash_sha3), 0 }, /* 512 bit */
-#endif
 };
 
 /**
