@@ -423,7 +423,7 @@ if(_ep_func)
 endif()
 
 # Save regex matching supported hash algorithm names.
-set(_ep_hash_algos "MD5|SHA1|SHA224|SHA256|SHA384|SHA512")
+set(_ep_hash_algos "MD5|SHA1|SHA224|SHA256|SHA384|SHA512|SHA3_224|SHA3_256|SHA3_384|SHA3_512")
 set(_ep_hash_regex "^(${_ep_hash_algos})=([0-9A-Fa-f]+)$")
 
 set(_ExternalProject_SELF "${CMAKE_CURRENT_LIST_FILE}")
