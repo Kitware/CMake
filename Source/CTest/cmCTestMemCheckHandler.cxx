@@ -360,7 +360,7 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
     xml.EndElement(); // Results
 
     xml.StartElement("Log");
-    if (this->CTest->ShouldCompressMemCheckOutput()) {
+    if (this->CTest->ShouldCompressTestOutput()) {
       this->CTest->CompressString(memcheckstr);
       xml.Attribute("compression", "gzip");
       xml.Attribute("encoding", "base64");

@@ -153,7 +153,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   if ((!this->TestHandler->MemCheck &&
        this->CTest->ShouldCompressTestOutput()) ||
       (this->TestHandler->MemCheck &&
-       this->CTest->ShouldCompressMemCheckOutput())) {
+       this->CTest->ShouldCompressTestOutput())) {
     this->CompressOutput();
   }
 
