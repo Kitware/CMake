@@ -1074,6 +1074,24 @@ bool cmCPackGenerator::IsOn(const std::string& name) const
   return cmSystemTools::IsOn(GetOption(name));
 }
 
+bool cmCPackGenerator::IsSetToOff(const std::string& op) const
+{
+  const char* ret = this->MakefileMap->GetDefinition(op);
+  if (ret && *ret) {
+    return cmSystemTools::IsOff(ret);
+  }
+  return false;
+}
+
+bool cmCPackGenerator::IsSetToEmpty(const std::string& op) const
+{
+  const char* ret = this->MakefileMap->GetDefinition(op);
+  if (ret) {
+    return !*ret;
+  }
+  return false;
+}
+
 const char* cmCPackGenerator::GetOption(const std::string& op) const
 {
   const char* ret = this->MakefileMap->GetDefinition(op);

@@ -403,7 +403,11 @@ void cmCPackIFWInstaller::GeneratePackageFiles()
     // Check package group
     if (const char* option = GetOption("CPACK_IFW_PACKAGE_GROUP")) {
       package.ConfigureFromGroup(option);
-      package.ForcedInstallation = "true";
+      std::string forcedOption = "CPACK_IFW_COMPONENT_GROUP_" +
+        cmsys::SystemTools::UpperCase(option) + "_FORCED_INSTALLATION";
+      if (!GetOption(forcedOption)) {
+        package.ForcedInstallation = "true";
+      }
     } else {
       package.ConfigureFromOptions();
     }

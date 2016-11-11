@@ -109,6 +109,16 @@ bool cmCPackIFWPackage::IsOn(const std::string& op) const
   return Generator ? Generator->IsOn(op) : false;
 }
 
+bool cmCPackIFWPackage::IsSetToOff(const std::string& op) const
+{
+  return Generator ? Generator->IsSetToOff(op) : false;
+}
+
+bool cmCPackIFWPackage::IsSetToEmpty(const std::string& op) const
+{
+  return Generator ? Generator->IsSetToEmpty(op) : false;
+}
+
 bool cmCPackIFWPackage::IsVersionLess(const char* version)
 {
   return Generator ? Generator->IsVersionLess(version) : false;
@@ -286,7 +296,7 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
   // ForcedInstallation
   ForcedInstallation = component->IsRequired ? "true" : "false";
 
-  return 1;
+  return ConfigureFromPrefix(prefix);
 }
 
 int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
@@ -344,7 +354,7 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
     SortingPriority = option;
   }
 
-  return 1;
+  return ConfigureFromPrefix(prefix);
 }
 
 int cmCPackIFWPackage::ConfigureFromGroup(const std::string& groupName)
@@ -378,6 +388,74 @@ int cmCPackIFWPackage::ConfigureFromGroup(const std::string& groupName)
   }
 
   return ConfigureFromGroup(&group);
+}
+
+// Common options for components and groups
+int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
+{
+  // Temporary variable for full option name
+  std::string option;
+
+  // Display name
+  option = prefix + "DISPLAY_NAME";
+  if (IsSetToEmpty(option)) {
+    DisplayName.clear();
+  } else if (const char* value = GetOption(option)) {
+    DisplayName = value;
+  }
+
+  // Description
+  option = prefix + "DESCRIPTION";
+  if (IsSetToEmpty(option)) {
+    Description.clear();
+  } else if (const char* value = GetOption(option)) {
+    Description = value;
+  }
+
+  // Release date
+  option = prefix + "RELEASE_DATE";
+  if (IsSetToEmpty(option)) {
+    ReleaseDate.clear();
+  } else if (const char* value = GetOption(option)) {
+    ReleaseDate = value;
+  }
+
+  // Visibility
+  option = prefix + "VIRTUAL";
+  if (IsSetToEmpty(option)) {
+    Virtual.clear();
+  } else if (IsOn(option)) {
+    Virtual = "true";
+  }
+
+  // Default selection
+  option = prefix + "DEFAULT";
+  if (IsSetToEmpty(option)) {
+    Default.clear();
+  } else if (const char* value = GetOption(option)) {
+    std::string lowerValue = cmsys::SystemTools::LowerCase(value);
+    if (lowerValue.compare("true") == 0) {
+      Default = "true";
+    } else if (lowerValue.compare("false") == 0) {
+      Default = "false";
+    } else if (lowerValue.compare("script") == 0) {
+      Default = "script";
+    } else {
+      Default = value;
+    }
+  }
+
+  // Forsed installation
+  option = prefix + "FORCED_INSTALLATION";
+  if (IsSetToEmpty(option)) {
+    ForcedInstallation.clear();
+  } else if (IsOn(option)) {
+    ForcedInstallation = "true";
+  } else if (IsSetToOff(option)) {
+    ForcedInstallation = "false";
+  }
+
+  return 1;
 }
 
 void cmCPackIFWPackage::GeneratePackageFile()
