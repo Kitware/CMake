@@ -4,6 +4,15 @@
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
+#include "cmCTestMemCheckHandler.h"
+#include "cmMakefile.h"
+
+cmCTestMemCheckCommand::cmCTestMemCheckCommand()
+{
+  this->Arguments[ctm_DEFECT_COUNT] = "DEFECT_COUNT";
+  this->Arguments[ctm_LAST] = CM_NULLPTR;
+  this->Last = ctm_LAST;
+}
 
 cmCTestGenericHandler* cmCTestMemCheckCommand::InitializeActualHandler()
 {
@@ -27,4 +36,15 @@ cmCTestGenericHandler* cmCTestMemCheckCommand::InitializeActualHandler()
 
   handler->SetQuiet(this->Quiet);
   return handler;
+}
+
+void cmCTestMemCheckCommand::ProcessAdditionalValues(
+  cmCTestGenericHandler* handler)
+{
+  if (this->Values[ctm_DEFECT_COUNT] && *this->Values[ctm_DEFECT_COUNT]) {
+    std::ostringstream str;
+    str << static_cast<cmCTestMemCheckHandler*>(handler)->GetDefectCount();
+    this->Makefile->AddDefinition(this->Values[ctm_DEFECT_COUNT],
+                                  str.str().c_str());
+  }
 }

@@ -127,6 +127,7 @@ void cmCTestMemCheckHandler::Initialize()
   this->MemoryTesterOptions.clear();
   this->MemoryTesterStyle = UNKNOWN;
   this->MemoryTesterOutputFile = "";
+  this->DefectCount = 0;
 }
 
 int cmCTestMemCheckHandler::PreProcessHandler()
@@ -277,6 +278,11 @@ void cmCTestMemCheckHandler::PopulateCustomVectors(cmMakefile* mf)
   std::string cmake = cmSystemTools::GetCMakeCommand();
   this->CTest->SetCTestConfiguration("CMakeCommand", cmake.c_str(),
                                      this->Quiet);
+}
+
+int cmCTestMemCheckHandler::GetDefectCount()
+{
+  return this->DefectCount;
 }
 
 void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
@@ -702,6 +708,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
     ostr << *i << std::endl;
   }
   log = ostr.str();
+  this->DefectCount += defects;
   return defects == 0;
 }
 bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
@@ -743,6 +750,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
   }
 
   log = ostr.str();
+  this->DefectCount += defects;
   return defects == 0;
 }
 
@@ -878,6 +886,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
                        << (cmSystemTools::GetTime() - sttime) << std::endl,
                      this->Quiet);
   log = ostr.str();
+  this->DefectCount += defects;
   return defects == 0;
 }
 
@@ -923,9 +932,9 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
     // only put the output of Bounds Checker if there were
     // errors or leaks detected
     log = parser.Log;
-    return false;
   }
-  return true;
+  this->DefectCount += defects;
+  return defects == 0;
 }
 
 // PostProcessTest memcheck results

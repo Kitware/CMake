@@ -226,6 +226,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
     this->Makefile->AddDefinition(this->Values[ct_RETURN_VALUE],
                                   str.str().c_str());
   }
+  this->ProcessAdditionalValues(handler);
   // log the error message if there was an error
   if (capureCMakeError) {
     const char* returnString = "0";
@@ -244,6 +245,10 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   }
   cmSystemTools::ChangeDirectory(current_dir);
   return true;
+}
+
+void cmCTestHandlerCommand::ProcessAdditionalValues(cmCTestGenericHandler*)
+{
 }
 
 bool cmCTestHandlerCommand::CheckArgumentKeyword(std::string const& arg)
