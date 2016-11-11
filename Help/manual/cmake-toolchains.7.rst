@@ -387,7 +387,7 @@ Configure use of an Android NDK with the following variables:
 
 :variable:`CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION`
   Set to the version of the NDK toolchain to be selected as the compiler.
-  If not specified, the latest available GCC toolchain will be used.
+  If not specified, the default will be the latest available GCC toolchain.
 
 :variable:`CMAKE_ANDROID_STL_TYPE`
   Set to specify which C++ standard library to use.  If not specified,
