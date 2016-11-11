@@ -920,7 +920,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 //######################################################################
 //######################################################################
 
-void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
+void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
                                         size_t& tick, size_t tick_len,
                                         std::ostream& ofs,
                                         t_BuildProcessingQueueType* queue)

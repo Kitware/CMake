@@ -107,7 +107,7 @@ private:
 
   typedef std::deque<char> t_BuildProcessingQueueType;
 
-  void ProcessBuffer(const char* data, int length, size_t& tick,
+  void ProcessBuffer(const char* data, size_t length, size_t& tick,
                      size_t tick_len, std::ostream& ofs,
                      t_BuildProcessingQueueType* queue);
   int ProcessSingleLine(const char* data);
