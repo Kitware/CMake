@@ -32,6 +32,14 @@ if(CMAKE_ANDROID_NDK)
       "which does not appear in CMAKE_C_COMPILER:\n"
       "  ${CMAKE_C_COMPILER}")
   endif()
+  if(NOT CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG)
+    message(SEND_ERROR "CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG is not set!")
+  elseif(NOT "${CMAKE_C_COMPILER}" MATCHES "prebuilt/${CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG}/bin")
+    message(SEND_ERROR "CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG is\n"
+      "  ${CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG}\n"
+      "which does not appear in CMAKE_C_COMPILER:\n"
+      "  ${CMAKE_C_COMPILER}")
+  endif()
 elseif(CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
   execute_process(
     COMMAND ${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/bin/clang --version
