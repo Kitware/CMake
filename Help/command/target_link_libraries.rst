@@ -53,6 +53,11 @@ Each ``<item>`` may be:
   :ref:`usage requirement <Target Usage Requirements>`.  This has the same
   effect as passing the framework directory as an include directory.
 
+  On :ref:`Visual Studio Generators` for VS 2010 and above, library files
+  ending in ``.targets`` will be treated as MSBuild targets files and
+  imported into generated project files.  This is not supported by other
+  generators.
+
 * **A plain library name**: The generated link line will ask the linker
   to search for the library (e.g. ``foo`` becomes ``-lfoo`` or ``foo.lib``).
 

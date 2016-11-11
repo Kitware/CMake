@@ -53,6 +53,12 @@ static std::string cmVS10EscapeComment(std::string comment)
   return echoable;
 }
 
+static bool cmVS10IsTargetsFile(std::string const& path)
+{
+  std::string const ext = cmSystemTools::GetFilenameLastExtension(path);
+  return cmSystemTools::Strucmp(ext.c_str(), ".targets") == 0;
+}
+
 cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
   cmGeneratorTarget* target, cmGlobalVisualStudio10Generator* gg)
 {
@@ -158,6 +164,9 @@ void cmVisualStudio10TargetGenerator::Generate()
       return;
     }
     if (!this->ComputeLinkOptions()) {
+      return;
+    }
+    if (!this->ComputeLibOptions()) {
       return;
     }
   }
@@ -364,6 +373,7 @@ void cmVisualStudio10TargetGenerator::Generate()
     1);
   this->WriteTargetSpecificReferences();
   this->WriteString("<ImportGroup Label=\"ExtensionTargets\">\n", 1);
+  this->WriteTargetsFileReferences();
   if (this->GlobalGenerator->IsMasmEnabled()) {
     this->WriteString("<Import Project=\"$(VCTargetsPath)\\"
                       "BuildCustomizations\\masm.targets\" />\n",
@@ -476,6 +486,31 @@ void cmVisualStudio10TargetGenerator::WriteTargetSpecificReferences()
                         "$(TargetPlatformVersion).targets\" />\n",
                         1);
     }
+  }
+}
+
+void cmVisualStudio10TargetGenerator::WriteTargetsFileReferences()
+{
+  for (std::vector<TargetsFileAndConfigs>::iterator i =
+         this->TargetsFileAndConfigsVec.begin();
+       i != this->TargetsFileAndConfigsVec.end(); ++i) {
+    TargetsFileAndConfigs const& tac = *i;
+    this->WriteString("<Import Project=\"", 3);
+    (*this->BuildFileStream) << tac.File << "\" ";
+    (*this->BuildFileStream) << "Condition=\"";
+    (*this->BuildFileStream) << "Exists('" << tac.File << "')";
+    if (!tac.Configs.empty()) {
+      (*this->BuildFileStream) << " And (";
+      for (size_t j = 0; j < tac.Configs.size(); ++j) {
+        if (j > 0) {
+          (*this->BuildFileStream) << " Or ";
+        }
+        (*this->BuildFileStream) << "'$(Configuration)'=='" << tac.Configs[j]
+                                 << "'";
+      }
+      (*this->BuildFileStream) << ")";
+    }
+    (*this->BuildFileStream) << "\" />\n";
   }
 }
 
@@ -2148,8 +2183,15 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   }
   // add the libraries for the target to libs string
   cmComputeLinkInformation& cli = *pcli;
-  this->AddLibraries(cli, libVec);
+  std::vector<std::string> vsTargetVec;
+  this->AddLibraries(cli, libVec, vsTargetVec);
   linkOptions.AddFlag("AdditionalDependencies", libVec);
+
+  // Populate TargetsFileAndConfigsVec
+  for (std::vector<std::string>::iterator ti = vsTargetVec.begin();
+       ti != vsTargetVec.end(); ++ti) {
+    this->AddTargetsFileAndConfigPair(*ti, config);
+  }
 
   std::vector<std::string> const& ldirs = cli.GetDirectories();
   std::vector<std::string> linkDirs;
@@ -2305,6 +2347,49 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   return true;
 }
 
+bool cmVisualStudio10TargetGenerator::ComputeLibOptions()
+{
+  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
+    for (std::vector<std::string>::const_iterator i =
+           this->Configurations.begin();
+         i != this->Configurations.end(); ++i) {
+      if (!this->ComputeLibOptions(*i)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool cmVisualStudio10TargetGenerator::ComputeLibOptions(
+  std::string const& config)
+{
+  cmComputeLinkInformation* pcli =
+    this->GeneratorTarget->GetLinkInformation(config.c_str());
+  if (!pcli) {
+    cmSystemTools::Error(
+      "CMake can not compute cmComputeLinkInformation for target: ",
+      this->Name.c_str());
+    return false;
+  }
+
+  cmComputeLinkInformation& cli = *pcli;
+  typedef cmComputeLinkInformation::ItemVector ItemVector;
+  const ItemVector& libs = cli.GetItems();
+  std::string currentBinDir =
+    this->LocalGenerator->GetCurrentBinaryDirectory();
+  for (ItemVector::const_iterator l = libs.begin(); l != libs.end(); ++l) {
+    if (l->IsPath && cmVS10IsTargetsFile(l->Value)) {
+      std::string path = this->LocalGenerator->ConvertToRelativePath(
+        currentBinDir, l->Value.c_str());
+      this->ConvertToWindowsSlash(path);
+      this->AddTargetsFileAndConfigPair(path, config);
+    }
+  }
+
+  return true;
+}
+
 void cmVisualStudio10TargetGenerator::WriteLinkOptions(
   std::string const& config)
 {
@@ -2329,10 +2414,11 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(
 }
 
 void cmVisualStudio10TargetGenerator::AddLibraries(
-  cmComputeLinkInformation& cli, std::vector<std::string>& libVec)
+  cmComputeLinkInformation& cli, std::vector<std::string>& libVec,
+  std::vector<std::string>& vsTargetVec)
 {
   typedef cmComputeLinkInformation::ItemVector ItemVector;
-  ItemVector libs = cli.GetItems();
+  ItemVector const& libs = cli.GetItems();
   std::string currentBinDir =
     this->LocalGenerator->GetCurrentBinaryDirectory();
   for (ItemVector::const_iterator l = libs.begin(); l != libs.end(); ++l) {
@@ -2340,12 +2426,36 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
       std::string path = this->LocalGenerator->ConvertToRelativePath(
         currentBinDir, l->Value.c_str());
       this->ConvertToWindowsSlash(path);
-      libVec.push_back(path);
+      if (cmVS10IsTargetsFile(l->Value)) {
+        vsTargetVec.push_back(path);
+      } else {
+        libVec.push_back(path);
+      }
     } else if (!l->Target ||
                l->Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
       libVec.push_back(l->Value);
     }
   }
+}
+
+void cmVisualStudio10TargetGenerator::AddTargetsFileAndConfigPair(
+  std::string const& targetsFile, std::string const& config)
+{
+  for (std::vector<TargetsFileAndConfigs>::iterator i =
+         this->TargetsFileAndConfigsVec.begin();
+       i != this->TargetsFileAndConfigsVec.end(); ++i) {
+    if (cmSystemTools::ComparePath(targetsFile, i->File)) {
+      if (std::find(i->Configs.begin(), i->Configs.end(), config) ==
+          i->Configs.end()) {
+        i->Configs.push_back(config);
+      }
+      return;
+    }
+  }
+  TargetsFileAndConfigs entry;
+  entry.File = targetsFile;
+  entry.Configs.push_back(config);
+  this->TargetsFileAndConfigsVec.push_back(entry);
 }
 
 void cmVisualStudio10TargetGenerator::WriteMidlOptions(
