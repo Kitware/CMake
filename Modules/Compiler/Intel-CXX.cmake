@@ -10,19 +10,23 @@ set(CMAKE_DEPFILE_FLAGS_CXX "-MD -MT <OBJECT> -MF <DEPFILE>")
 if("x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
   set(_std -Qstd)
   set(_ext c++)
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.0)
+    set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "-Qstd=c++14")
+    # todo: there is no gnu++14 value supported; figure out what to do
+    set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION "-Qstd=c++14")
+  endif()
 else()
   set(_std -std)
   set(_ext gnu++)
-endif()
-
-if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0.2)
-  set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "${_std}=c++14")
-  # todo: there is no gnu++14 value supported; figure out what to do
-  set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION "${_std}=c++14")
-elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0.0)
-  set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "${_std}=c++1y")
-  # todo: there is no gnu++14 value supported; figure out what to do
-  set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION "${_std}=c++1y")
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0.2)
+    set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "-std=c++14")
+    # todo: there is no gnu++14 value supported; figure out what to do
+    set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION "-std=c++14")
+  elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0.0)
+    set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "-std=c++1y")
+    # todo: there is no gnu++14 value supported; figure out what to do
+    set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION "-std=c++1y")
+  endif()
 endif()
 
 if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 13.0)
@@ -62,7 +66,9 @@ unset(_ext)
 macro(cmake_record_cxx_compile_features)
   set(_result 0)
   if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.0
+        OR (NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC" AND
+            NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0))
       _record_compiler_features_cxx(14)
     endif()
     if (_result EQUAL 0)
