@@ -11,3 +11,6 @@ as the compiler.  The variable must be set to one of these forms:
 
 A toolchain of the requested version will be selected automatically to
 match the ABI named in the :variable:`CMAKE_ANDROID_ARCH_ABI` variable.
+
+If not specified, the default will be a value that selects the latest
+available GCC toolchain.

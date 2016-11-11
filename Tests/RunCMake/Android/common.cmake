@@ -22,8 +22,15 @@ string(APPEND CMAKE_CXX_FLAGS " -Werror -Wno-attributes")
 string(APPEND CMAKE_EXE_LINKER_FLAGS " -Wl,-no-undefined")
 
 if(CMAKE_ANDROID_NDK)
-  if(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION MATCHES "clang")
+  if(NOT CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION)
+    message(SEND_ERROR "CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION is not set!")
+  elseif(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION MATCHES "^clang")
     add_definitions(-DCOMPILER_IS_CLANG)
+  elseif(NOT "${CMAKE_C_COMPILER}" MATCHES "toolchains/[^/]+-${CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION}/prebuilt")
+    message(SEND_ERROR "CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION is\n"
+      "  ${CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION}\n"
+      "which does not appear in CMAKE_C_COMPILER:\n"
+      "  ${CMAKE_C_COMPILER}")
   endif()
 elseif(CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
   execute_process(
