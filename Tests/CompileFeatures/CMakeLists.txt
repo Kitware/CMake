@@ -170,6 +170,15 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
   endif()
 endif()
 
+if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
+  if (CMAKE_C_COMPILER_VERSION VERSION_LESS 15.0.2)
+    # This works on some pre-15.0.2 versions and not others.
+    list(REMOVE_ITEM C_non_features
+      c_static_assert
+      )
+  endif()
+endif()
+
 set(C_ext c)
 set(C_standard_flag 11)
 set(CXX_ext cpp)
