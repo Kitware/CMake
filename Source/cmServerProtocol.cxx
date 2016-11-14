@@ -381,25 +381,9 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
     return false;
   }
 
-  const std::string fullGeneratorName =
-    cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
-      generator, extraGenerator);
-
-  cm->SetGeneratorToolset(toolset);
-  cm->SetGeneratorPlatform(platform);
-
-  cmGlobalGenerator* gg = cm->CreateGlobalGenerator(fullGeneratorName);
-  if (!gg) {
-    setErrorMessage(
-      errorMessage,
-      std::string("Could not set up the requested combination of \"") +
-        kGENERATOR_KEY + "\" and \"" + kEXTRA_GENERATOR_KEY + "\"");
-    return false;
-  }
-
-  cm->SetGlobalGenerator(gg);
-  cm->SetHomeDirectory(sourceDirectory);
-  cm->SetHomeOutputDirectory(buildDirectory);
+  this->GeneratorInfo =
+    GeneratorInformation(generator, extraGenerator, toolset, platform,
+                         sourceDirectory, buildDirectory);
 
   this->m_State = STATE_ACTIVE;
   return true;
@@ -931,6 +915,13 @@ cmServerResponse cmServerProtocol1_0::ProcessConfigure(
 
   FileMonitor()->StopMonitoring();
 
+  std::string errorMessage;
+  cmake* cm = this->CMakeInstance();
+  this->GeneratorInfo.SetupGenerator(cm, &errorMessage);
+  if (!errorMessage.empty()) {
+    return request.ReportError(errorMessage);
+  }
+
   // Make sure the types of cacheArguments matches (if given):
   std::vector<std::string> cacheArgs;
   bool cacheArgumentsError = false;
@@ -955,15 +946,13 @@ cmServerResponse cmServerProtocol1_0::ProcessConfigure(
       "cacheArguments must be unset, a string or an array of strings.");
   }
 
-  cmake* cm = this->CMakeInstance();
   std::string sourceDir = cm->GetHomeDirectory();
   const std::string buildDir = cm->GetHomeOutputDirectory();
 
   cmGlobalGenerator* gg = cm->GetGlobalGenerator();
 
   if (buildDir.empty()) {
-    return request.ReportError(
-      "No build directory set via setGlobalSettings.");
+    return request.ReportError("No build directory set via Handshake.");
   }
 
   if (cm->LoadCache(buildDir)) {
@@ -1038,14 +1027,12 @@ cmServerResponse cmServerProtocol1_0::ProcessGlobalSettings(
   obj[kWARN_UNUSED_CLI_KEY] = cm->GetWarnUnusedCli();
   obj[kCHECK_SYSTEM_VARS_KEY] = cm->GetCheckSystemVars();
 
-  obj[kSOURCE_DIRECTORY_KEY] = cm->GetHomeDirectory();
-  obj[kBUILD_DIRECTORY_KEY] = cm->GetHomeOutputDirectory();
+  obj[kSOURCE_DIRECTORY_KEY] = this->GeneratorInfo.SourceDirectory;
+  obj[kBUILD_DIRECTORY_KEY] = this->GeneratorInfo.BuildDirectory;
 
   // Currently used generator:
-  cmGlobalGenerator* gen = cm->GetGlobalGenerator();
-  obj[kGENERATOR_KEY] = gen ? gen->GetName() : std::string();
-  obj[kEXTRA_GENERATOR_KEY] =
-    gen ? gen->GetExtraGeneratorName() : std::string();
+  obj[kGENERATOR_KEY] = this->GeneratorInfo.GeneratorName;
+  obj[kEXTRA_GENERATOR_KEY] = this->GeneratorInfo.ExtraGeneratorName;
 
   return request.Reply(obj);
 }
@@ -1108,4 +1095,42 @@ cmServerResponse cmServerProtocol1_0::ProcessFileSystemWatchers(
   result[kWATCHED_DIRECTORIES_KEY] = directories;
 
   return request.Reply(result);
+}
+
+cmServerProtocol1_0::GeneratorInformation::GeneratorInformation(
+  const std::string& generatorName, const std::string& extraGeneratorName,
+  const std::string& toolset, const std::string& platform,
+  const std::string& sourceDirectory, const std::string& buildDirectory)
+  : GeneratorName(generatorName)
+  , ExtraGeneratorName(extraGeneratorName)
+  , Toolset(toolset)
+  , Platform(platform)
+  , SourceDirectory(sourceDirectory)
+  , BuildDirectory(buildDirectory)
+{
+}
+
+void cmServerProtocol1_0::GeneratorInformation::SetupGenerator(
+  cmake* cm, std::string* errorMessage)
+{
+  const std::string fullGeneratorName =
+    cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
+      GeneratorName, ExtraGeneratorName);
+
+  cm->SetHomeDirectory(SourceDirectory);
+  cm->SetHomeOutputDirectory(BuildDirectory);
+
+  cmGlobalGenerator* gg = cm->CreateGlobalGenerator(fullGeneratorName);
+  if (!gg) {
+    setErrorMessage(
+      errorMessage,
+      std::string("Could not set up the requested combination of \"") +
+        kGENERATOR_KEY + "\" and \"" + kEXTRA_GENERATOR_KEY + "\"");
+    return;
+  }
+
+  cm->SetGlobalGenerator(gg);
+
+  cm->SetGeneratorToolset(Toolset);
+  cm->SetGeneratorPlatform(Platform);
 }

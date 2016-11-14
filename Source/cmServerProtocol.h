@@ -131,4 +131,28 @@ private:
   State m_State = STATE_INACTIVE;
 
   bool m_isDirty = false;
+
+  struct GeneratorInformation
+  {
+  public:
+    GeneratorInformation() = default;
+    GeneratorInformation(const std::string& generatorName,
+                         const std::string& extraGeneratorName,
+                         const std::string& toolset,
+                         const std::string& platform,
+                         const std::string& sourceDirectory,
+                         const std::string& buildDirectory);
+
+    void SetupGenerator(cmake* cm, std::string* errorMessage);
+
+    std::string GeneratorName;
+    std::string ExtraGeneratorName;
+    std::string Toolset;
+    std::string Platform;
+
+    std::string SourceDirectory;
+    std::string BuildDirectory;
+  };
+
+  GeneratorInformation GeneratorInfo;
 };
