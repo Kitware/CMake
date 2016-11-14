@@ -288,7 +288,7 @@ void on_directory_change(uv_fs_event_t* handle, const char* filename,
 {
   const cmIBaseWatcher* const watcher =
     static_cast<const cmIBaseWatcher*>(handle->data);
-  const std::string pathSegment(filename);
+  const std::string pathSegment(filename ? filename : "");
   watcher->Trigger(pathSegment, events, status);
 }
 
