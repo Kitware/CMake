@@ -2165,12 +2165,12 @@ Update to Mercurial >= 2.1.1.
     ${uses_terminal}
     )
 
-  if(always AND update_disconnected)
+  if(update_disconnected)
     _ep_get_step_stampfile(${name} skip-update skip-update_stamp_file)
     string(REPLACE "Performing" "Skipping" comment "${comment}")
     ExternalProject_Add_Step(${name} skip-update
       COMMENT ${comment}
-      ALWAYS 1
+      ALWAYS ${always}
       EXCLUDE_FROM_MAIN 1
       WORKING_DIRECTORY ${work_dir}
       DEPENDEES download
