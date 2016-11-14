@@ -332,6 +332,9 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
   std::vector<std::string> linkCmds;
   cmMakefile* mf = this->GetMakefile();
   {
+    // If we have a rule variable prefer it. In the case of static libraries
+    // this occurs when things like IPO is enabled, and we need to use the
+    // CMAKE_<lang>_CREATE_STATIC_LIBRARY_IPO define instead.
     std::string linkCmdVar = this->GetGeneratorTarget()->GetCreateRuleVariable(
       this->TargetLinkLanguage, this->GetConfigName());
     const char* linkCmd = mf->GetDefinition(linkCmdVar);
