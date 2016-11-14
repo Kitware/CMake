@@ -9,18 +9,22 @@
 #
 # ::
 #
-#    SWIG_ADD_MODULE(name language [ files ])
+#    SWIG_ADD_LIBRARY(<name>
+#                     [TYPE <SHARED|MODULE|STATIC>]
+#                     LANGUAGE <language>
+#                     SOURCES <file>...
+#                     )
 #      - Define swig module with given name and specified language
 #    SWIG_LINK_LIBRARIES(name [ libraries ])
 #      - Link libraries to swig module
 #
 # Source files properties on module files can be set before the invocation
-# of the SWIG_ADD_MODULE macro to specify special behavior of SWIG.
+# of the SWIG_ADD_LIBRARY macro to specify special behavior of SWIG.
 #
 # The source file property CPLUSPLUS calls SWIG in c++ mode, e.g.::
 #
 #    set_property(SOURCE mymod.i PROPERTY CPLUSPLUS ON)
-#    swig_add_module(mymod python mymod.i)
+#    swig_add_library(mymod LANGUAGE python SOURCES mymod.i)
 #
 # The source file property SWIG_FLAGS adds custom flags to the SWIG executable.
 #
@@ -217,10 +221,40 @@ endmacro()
 # Create Swig module
 #
 macro(SWIG_ADD_MODULE name language)
-  SWIG_MODULE_INITIALIZE(${name} ${language})
+  message(DEPRECATION "SWIG_ADD_MODULE is deprecated. Use SWIG_ADD_LIBRARY instead.")
+  swig_add_library(${name}
+                   LANGUAGE ${language}
+                   TYPE MODULE
+                   SOURCES ${ARGN})
+endmacro()
+
+
+macro(SWIG_ADD_LIBRARY name)
+
+  include(CMakeParseArguments)
+  set(options "")
+  set(oneValueArgs LANGUAGE
+                   TYPE)
+  set(multiValueArgs SOURCES)
+  cmake_parse_arguments(_SAM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  if(NOT DEFINED _SAM_LANGUAGE)
+    message(FATAL_ERROR "SWIG_ADD_LIBRARY: Missing LANGUAGE argument")
+  endif()
+
+  if(NOT DEFINED _SAM_SOURCES)
+    message(FATAL_ERROR "SWIG_ADD_LIBRARY: Missing SOURCES argument")
+  endif()
+
+  if(NOT DEFINED _SAM_TYPE)
+    set(_SAM_TYPE MODULE)
+  endif()
+
+  swig_module_initialize(${name} ${_SAM_LANGUAGE})
+
   set(swig_dot_i_sources)
   set(swig_other_sources)
-  foreach(it ${ARGN})
+  foreach(it ${_SAM_SOURCES})
     if(${it} MATCHES "\\.i$")
       set(swig_dot_i_sources ${swig_dot_i_sources} "${it}")
     else()
@@ -237,11 +271,13 @@ macro(SWIG_ADD_MODULE name language)
   set_directory_properties(PROPERTIES
     ADDITIONAL_MAKE_CLEAN_FILES "${swig_extra_clean_files};${swig_generated_sources}")
   add_library(${SWIG_MODULE_${name}_REAL_NAME}
-    MODULE
+    ${_SAM_TYPE}
     ${swig_generated_sources}
     ${swig_other_sources})
-  set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES NO_SONAME ON)
-  string(TOLOWER "${language}" swig_lowercase_language)
+  if("${_SAM_TYPE}" STREQUAL "MODULE")
+    set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES NO_SONAME ON)
+  endif()
+  string(TOLOWER "${_SAM_LANGUAGE}" swig_lowercase_language)
   if ("${swig_lowercase_language}" STREQUAL "octave")
     set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
     set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".oct")
@@ -258,7 +294,9 @@ macro(SWIG_ADD_MODULE name language)
         set_target_properties (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".jnilib")
       endif ()
   elseif ("${swig_lowercase_language}" STREQUAL "lua")
-    set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
+    if("${_SAM_TYPE}" STREQUAL "MODULE")
+      set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
+    endif()
   elseif ("${swig_lowercase_language}" STREQUAL "python")
     # this is only needed for the python case where a _modulename.so is generated
     set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
