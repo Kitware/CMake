@@ -52,6 +52,23 @@ elseif(CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
   endif()
 endif()
 
+execute_process(
+  COMMAND "${CMAKE_C_ANDROID_TOOLCHAIN_PREFIX}gcc${CMAKE_C_ANDROID_TOOLCHAIN_SUFFIX}" -dumpmachine
+  OUTPUT_VARIABLE _out OUTPUT_STRIP_TRAILING_WHITESPACE
+  ERROR_VARIABLE _err
+  RESULT_VARIABLE _res
+  )
+if(NOT _res EQUAL 0)
+  message(SEND_ERROR "Failed to run 'gcc -dumpmachine':\n ${_res}")
+endif()
+if(NOT _out STREQUAL "${CMAKE_C_ANDROID_TOOLCHAIN_MACHINE}")
+  message(SEND_ERROR "'gcc -dumpmachine' produced:\n"
+    " ${_out}\n"
+    "which is not equal to CMAKE_C_ANDROID_TOOLCHAIN_MACHINE:\n"
+    " ${CMAKE_C_ANDROID_TOOLCHAIN_MACHINE}"
+    )
+endif()
+
 if(CMAKE_ANDROID_STL_TYPE STREQUAL "none")
   add_definitions(-DSTL_NONE)
 elseif(CMAKE_ANDROID_STL_TYPE STREQUAL "system")
