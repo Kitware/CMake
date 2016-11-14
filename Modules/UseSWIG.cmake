@@ -10,7 +10,7 @@
 # ::
 #
 #    SWIG_ADD_LIBRARY(<name>
-#                     [TYPE <SHARED|MODULE|STATIC>]
+#                     [TYPE <SHARED|MODULE|STATIC|USE_BUILD_SHARED_LIBS>]
 #                     LANGUAGE <language>
 #                     SOURCES <file>...
 #                     )
@@ -248,6 +248,8 @@ macro(SWIG_ADD_LIBRARY name)
 
   if(NOT DEFINED _SAM_TYPE)
     set(_SAM_TYPE MODULE)
+  elseif("${_SAM_TYPE}" STREQUAL "USE_BUILD_SHARED_LIBS")
+    unset(_SAM_TYPE)
   endif()
 
   swig_module_initialize(${name} ${_SAM_LANGUAGE})
