@@ -22,7 +22,11 @@ public:
     AlgoSHA224,
     AlgoSHA256,
     AlgoSHA384,
-    AlgoSHA512
+    AlgoSHA512,
+    AlgoSHA3_224,
+    AlgoSHA3_256,
+    AlgoSHA3_384,
+    AlgoSHA3_512
   };
 
   cmCryptoHash(Algo algo);
@@ -30,7 +34,8 @@ public:
 
   /// @brief Returns a new hash generator of the requested type
   /// @arg algo Hash type name. Supported hash types are
-  ///      MD5, SHA1, SHA224, SHA256, SHA384, SHA512
+  ///      MD5, SHA1, SHA224, SHA256, SHA384, SHA512,
+  ///      SHA3_224, SHA3_256, SHA3_384, SHA3_512
   /// @return A valid auto pointer if algo is supported or
   ///         an invalid/NULL pointer otherwise
   static CM_AUTO_PTR<cmCryptoHash> New(const char* algo);

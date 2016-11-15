@@ -66,14 +66,22 @@ enum rhash_ids
 	RHASH_SHA256     = 0x08,
 	RHASH_SHA384     = 0x10,
 	RHASH_SHA512     = 0x20,
+	RHASH_SHA3_224   = 0x40,
+	RHASH_SHA3_256   = 0x80,
+	RHASH_SHA3_384   = 0x100,
+	RHASH_SHA3_512   = 0x200,
 	RHASH_ALL_HASHES =
 		RHASH_MD5 |
 		RHASH_SHA1 |
 		RHASH_SHA224 |
 		RHASH_SHA256 |
 		RHASH_SHA384 |
-		RHASH_SHA512,
-	RHASH_HASH_COUNT = 6
+		RHASH_SHA512 |
+		RHASH_SHA3_224 |
+		RHASH_SHA3_256 |
+		RHASH_SHA3_384 |
+		RHASH_SHA3_512,
+	RHASH_HASH_COUNT = 10
 #endif
 };
 
@@ -145,7 +153,7 @@ typedef struct rhash_info
 /* information functions */
 RHASH_API int  rhash_count(void); /* number of supported hashes */
 RHASH_API int  rhash_get_digest_size(unsigned hash_id); /* size of binary message digest */
-RHASH_API int  rhash_get_hash_length(unsigned hash_id); /* length of formated hash string */
+RHASH_API int  rhash_get_hash_length(unsigned hash_id); /* length of formatted hash string */
 RHASH_API int  rhash_is_base32(unsigned hash_id); /* default digest output format */
 RHASH_API const char* rhash_get_name(unsigned hash_id); /* get hash function name */
 RHASH_API const char* rhash_get_magnet_name(unsigned hash_id); /* get name part of magnet urn */

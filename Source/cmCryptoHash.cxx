@@ -9,12 +9,16 @@
 
 static unsigned int const cmCryptoHashAlgoToId[] = {
   /* clang-format needs this comment to break after the opening brace */
-  RHASH_MD5,    //
-  RHASH_SHA1,   //
-  RHASH_SHA224, //
-  RHASH_SHA256, //
-  RHASH_SHA384, //
-  RHASH_SHA512
+  RHASH_MD5,      //
+  RHASH_SHA1,     //
+  RHASH_SHA224,   //
+  RHASH_SHA256,   //
+  RHASH_SHA384,   //
+  RHASH_SHA512,   //
+  RHASH_SHA3_224, //
+  RHASH_SHA3_256, //
+  RHASH_SHA3_384, //
+  RHASH_SHA3_512
 };
 
 static int cmCryptoHash_rhash_library_initialized;
@@ -58,6 +62,18 @@ CM_AUTO_PTR<cmCryptoHash> cmCryptoHash::New(const char* algo)
   }
   if (strcmp(algo, "SHA512") == 0) {
     return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA512));
+  }
+  if (strcmp(algo, "SHA3_224") == 0) {
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA3_224));
+  }
+  if (strcmp(algo, "SHA3_256") == 0) {
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA3_256));
+  }
+  if (strcmp(algo, "SHA3_384") == 0) {
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA3_384));
+  }
+  if (strcmp(algo, "SHA3_512") == 0) {
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA3_512));
   }
   return CM_AUTO_PTR<cmCryptoHash>(CM_NULLPTR);
 }

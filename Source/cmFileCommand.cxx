@@ -111,7 +111,9 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
   }
   if (subCommand == "MD5" || subCommand == "SHA1" || subCommand == "SHA224" ||
       subCommand == "SHA256" || subCommand == "SHA384" ||
-      subCommand == "SHA512") {
+      subCommand == "SHA512" || subCommand == "SHA3_224" ||
+      subCommand == "SHA3_256" || subCommand == "SHA3_384" ||
+      subCommand == "SHA3_512") {
     return this->HandleHashCommand(args);
   }
   if (subCommand == "STRINGS") {

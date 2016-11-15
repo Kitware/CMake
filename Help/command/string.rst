@@ -206,15 +206,38 @@ Comparison
 
 Compare the strings and store true or false in the output variable.
 
+.. _`Supported Hash Algorithms`:
+
 Hashing
 ^^^^^^^
 
 ::
 
-  string(<MD5|SHA1|SHA224|SHA256|SHA384|SHA512>
-         <output variable> <input>)
+  string(<HASH> <output variable> <input>)
 
 Compute a cryptographic hash of the input string.
+The supported ``<HASH>`` algorithm names are:
+
+``MD5``
+  Message-Digest Algorithm 5, RFC 1321.
+``SHA1``
+  US Secure Hash Algorithm 1, RFC 3174.
+``SHA224``
+  US Secure Hash Algorithms, RFC 4634.
+``SHA256``
+  US Secure Hash Algorithms, RFC 4634.
+``SHA384``
+  US Secure Hash Algorithms, RFC 4634.
+``SHA512``
+  US Secure Hash Algorithms, RFC 4634.
+``SHA3_224``
+  Keccak SHA-3.
+``SHA3_256``
+  Keccak SHA-3.
+``SHA3_384``
+  Keccak SHA-3.
+``SHA3_512``
+  Keccak SHA-3.
 
 Generation
 ^^^^^^^^^^

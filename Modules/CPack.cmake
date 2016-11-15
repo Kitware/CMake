@@ -126,7 +126,9 @@
 #
 #     ${CPACK_PACKAGE_FILE_NAME}.${CPACK_PACKAGE_CHECKSUM}
 #
-#  Current supported alogorithms: MD5|SHA1|SHA224|SHA256|SHA384|SHA512.
+#  Supported algorithms are those listed by the
+#  :ref:`string(\<HASH\>) <Supported Hash Algorithms>`
+#  command.
 #
 # .. variable:: CPACK_PROJECT_CONFIG_FILE
 #

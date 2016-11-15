@@ -83,10 +83,12 @@ from the input file.
 
 ::
 
-  file(<MD5|SHA1|SHA224|SHA256|SHA384|SHA512> <filename> <variable>)
+  file(<HASH> <filename> <variable>)
 
 Compute a cryptographic hash of the content of ``<filename>`` and
-store it in a ``<variable>``.
+store it in a ``<variable>``.  The supported ``<HASH>`` algorithm names
+are those listed by the :ref:`string(\<HASH\>) <Supported Hash Algorithms>`
+command.
 
 ------------------------------------------------------------------------------
 
@@ -234,8 +236,8 @@ Additional options to ``DOWNLOAD`` are:
 ``EXPECTED_HASH ALGO=<value>``
 
   Verify that the downloaded content hash matches the expected value, where
-  ``ALGO`` is one of ``MD5``, ``SHA1``, ``SHA224``, ``SHA256``, ``SHA384``, or
-  ``SHA512``.  If it does not match, the operation fails with an error.
+  ``ALGO`` is one of the algorithms supported by ``file(<HASH>)``.
+  If it does not match, the operation fails with an error.
 
 ``EXPECTED_MD5 <value>``
   Historical short-hand for ``EXPECTED_HASH MD5=<value>``.
