@@ -347,61 +347,56 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
     cw = reinterpret_cast<cmCursesWidget*>(field_userptr(currentField));
   }
 
-  if (cw) {
-    cw->PrintKeys();
-  }
-
-  //    {
-  //    }
-  //  else
-  //    {
-  char firstLine[512] = "";
-  char secondLine[512] = "";
-  char thirdLine[512] = "";
-  if (process) {
-    const char* clearLine =
-      "                                                                    ";
-    strcpy(firstLine, clearLine);
-    strcpy(secondLine, clearLine);
-    strcpy(thirdLine, clearLine);
-  } else {
-    if (this->OkToGenerate) {
-      sprintf(firstLine,
-              "Press [c] to configure       Press [g] to generate and exit");
-    } else {
-      sprintf(firstLine,
-              "Press [c] to configure                                     ");
-    }
-    {
-      const char* toggleKeyInstruction =
-        "Press [t] to toggle advanced mode (Currently %s)";
-      sprintf(thirdLine, toggleKeyInstruction,
-              this->AdvancedMode ? "On" : "Off");
-    }
-    sprintf(secondLine, "Press [h] for help           "
-                        "Press [q] to quit without generating");
-  }
-
-  curses_move(y - 4, 0);
   char fmt_s[] = "%s";
-  char fmt[512] = "Press [enter] to edit option Press [d] to delete an entry";
-  if (process) {
-    strcpy(fmt, "                           ");
+  if (cw == CM_NULLPTR || !cw->PrintKeys()) {
+    char firstLine[512] = "";
+    char secondLine[512] = "";
+    char thirdLine[512] = "";
+    if (process) {
+      const char* clearLine =
+        "                                                                    ";
+      strcpy(firstLine, clearLine);
+      strcpy(secondLine, clearLine);
+      strcpy(thirdLine, clearLine);
+    } else {
+      if (this->OkToGenerate) {
+        sprintf(firstLine,
+                "Press [c] to configure       Press [g] to generate and exit");
+      } else {
+        sprintf(firstLine,
+                "Press [c] to configure                                     ");
+      }
+      {
+        const char* toggleKeyInstruction =
+          "Press [t] to toggle advanced mode (Currently %s)";
+        sprintf(thirdLine, toggleKeyInstruction,
+                this->AdvancedMode ? "On" : "Off");
+      }
+      sprintf(secondLine, "Press [h] for help           "
+                          "Press [q] to quit without generating");
+    }
+
+    curses_move(y - 4, 0);
+    char fmt[512] =
+      "Press [enter] to edit option Press [d] to delete an entry";
+    if (process) {
+      strcpy(fmt, "                           ");
+    }
+    printw(fmt_s, fmt);
+    curses_move(y - 3, 0);
+    printw(fmt_s, firstLine);
+    curses_move(y - 2, 0);
+    printw(fmt_s, secondLine);
+    curses_move(y - 1, 0);
+    printw(fmt_s, thirdLine);
   }
-  printw(fmt_s, fmt);
-  curses_move(y - 3, 0);
-  printw(fmt_s, firstLine);
-  curses_move(y - 2, 0);
-  printw(fmt_s, secondLine);
-  curses_move(y - 1, 0);
-  printw(fmt_s, thirdLine);
 
   if (cw) {
-    sprintf(firstLine, "Page %d of %d", cw->GetPage(), this->NumberOfPages);
-    curses_move(0, 65 - static_cast<unsigned int>(strlen(firstLine)) - 1);
-    printw(fmt_s, firstLine);
+    char pageLine[512] = "";
+    sprintf(pageLine, "Page %d of %d", cw->GetPage(), this->NumberOfPages);
+    curses_move(0, 65 - static_cast<unsigned int>(strlen(pageLine)) - 1);
+    printw(fmt_s, pageLine);
   }
-  //    }
 
   pos_form_cursor(this->Form);
 }

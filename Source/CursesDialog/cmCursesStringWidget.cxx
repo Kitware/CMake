@@ -202,7 +202,9 @@ bool cmCursesStringWidget::PrintKeys()
     printw(fmt_s, firstLine);
 
     curses_move(y - 3, 0);
-    printw(fmt_s, "Editing option, press [enter] to leave edit.");
+    printw(fmt_s, "Editing option, press [enter] to confirm");
+    curses_move(y - 2, 0);
+    printw(fmt_s, "                press [esc] to cancel");
     return true;
   }
   return false;
