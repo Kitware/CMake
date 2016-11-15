@@ -370,7 +370,7 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
               "Press [c] to configure       Press [g] to generate and exit");
     } else {
       sprintf(firstLine,
-              "Press [c] to configure                                   ");
+              "Press [c] to configure                                     ");
     }
     {
       const char* toggleKeyInstruction =
