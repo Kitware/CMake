@@ -285,13 +285,13 @@ macro(__windows_compiler_msvc lang)
       # note: MSVC 14 2015 Update 1 sets -fno-ms-compatibility by default, but this does not allow one to compile many projects
       # that include MS's own headers. CMake itself is affected project too.
       string(APPEND CMAKE_${lang}_FLAGS_INIT " ${_PLATFORM_DEFINES}${_PLATFORM_DEFINES_${lang}} -fms-extensions -fms-compatibility -D_WINDOWS -Wall${_FLAGS_${lang}}")
-      string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -D_DEBUG /MDd -gline-tables-only -fno-inline -O0 ${_RTC1}")
+      string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " /MDd -gline-tables-only -fno-inline -O0 ${_RTC1}")
       string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " /MD -O2 -DNDEBUG")
       string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " /MD -gline-tables-only -O2 -fno-inline -DNDEBUG")
       string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " /MD -DNDEBUG") # TODO: Add '-Os' once VS generator maps it properly for Clang
     else()
       string(APPEND CMAKE_${lang}_FLAGS_INIT " ${_PLATFORM_DEFINES}${_PLATFORM_DEFINES_${lang}} /D_WINDOWS /W3${_FLAGS_${lang}}")
-      string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " /D_DEBUG /MDd /Zi /Ob0 /Od ${_RTC1}")
+      string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " /MDd /Zi /Ob0 /Od ${_RTC1}")
       string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " /MD /O2 /Ob2 /DNDEBUG")
       string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " /MD /Zi /O2 /Ob1 /DNDEBUG")
       string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " /MD /O1 /Ob1 /DNDEBUG")
