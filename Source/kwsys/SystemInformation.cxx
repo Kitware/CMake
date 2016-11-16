@@ -79,6 +79,7 @@ typedef int siginfo_t;
 #include <sys/sysctl.h>
 #if defined(KWSYS_SYS_HAS_IFADDRS_H)
 #include <ifaddrs.h>
+#include <net/if.h>
 #define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
 #endif
 #endif
@@ -99,6 +100,7 @@ typedef int siginfo_t;
 #include <sys/sysctl.h>
 #if defined(KWSYS_SYS_HAS_IFADDRS_H)
 #include <ifaddrs.h>
+#include <net/if.h>
 #define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
 #endif
 #if !(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ - 0 >= 1050)
@@ -113,6 +115,7 @@ typedef int siginfo_t;
 #include <sys/socket.h>
 #if defined(KWSYS_SYS_HAS_IFADDRS_H)
 #include <ifaddrs.h>
+#include <net/if.h>
 #if !defined(__LSB_VERSION__) /* LSB has no getifaddrs */
 #define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
 #endif
@@ -1696,7 +1699,9 @@ int SystemInformationImplementation::GetFullyQualifiedDomainName(
 
   for (ifa = ifas; ifa != NULL; ifa = ifa->ifa_next) {
     int fam = ifa->ifa_addr ? ifa->ifa_addr->sa_family : -1;
-    if ((fam == AF_INET) || (fam == AF_INET6)) {
+    // Skip Loopback interfaces
+    if (((fam == AF_INET) || (fam == AF_INET6)) &&
+        !(ifa->ifa_flags & IFF_LOOPBACK)) {
       char host[NI_MAXHOST] = { '\0' };
 
       const size_t addrlen = (fam == AF_INET ? sizeof(struct sockaddr_in)
