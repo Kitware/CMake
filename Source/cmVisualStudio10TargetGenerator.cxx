@@ -314,6 +314,16 @@ void cmVisualStudio10TargetGenerator::Generate()
                              << "</TargetFrameworkVersion>\n";
   }
 
+  // Disable the project upgrade prompt that is displayed the first time a
+  // project using an older toolset version is opened in a newer version of
+  // the IDE (respected by VS 2013 and above).
+  if (this->GlobalGenerator->GetVersion() >=
+      cmGlobalVisualStudioGenerator::VS12) {
+    this->WriteString("<VCProjectUpgraderObjectName>NoUpgrade"
+                      "</VCProjectUpgraderObjectName>\n",
+                      2);
+  }
+
   std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
   for (std::vector<std::string>::const_iterator keyIt = keys.begin();
        keyIt != keys.end(); ++keyIt) {
