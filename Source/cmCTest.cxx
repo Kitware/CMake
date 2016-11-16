@@ -41,6 +41,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProcessOutput.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
@@ -960,7 +961,7 @@ int cmCTest::GetTestModelFromString(const char* str)
 
 int cmCTest::RunMakeCommand(const char* command, std::string& output,
                             int* retVal, const char* dir, int timeout,
-                            std::ostream& ofs)
+                            std::ostream& ofs, Encoding encoding)
 {
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
@@ -999,16 +1000,19 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
 
   char* data;
   int length;
+  cmProcessOutput processOutput(encoding);
+  std::string strdata;
   cmCTestLog(this, HANDLER_PROGRESS_OUTPUT, "   Each . represents "
                << tick_len << " bytes of output" << std::endl
                << "    " << std::flush);
   while (cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) {
-    for (int cc = 0; cc < length; ++cc) {
-      if (data[cc] == 0) {
-        data[cc] = '\n';
+    processOutput.DecodeText(data, length, strdata);
+    for (size_t cc = 0; cc < strdata.size(); ++cc) {
+      if (strdata[cc] == 0) {
+        strdata[cc] = '\n';
       }
     }
-    output.append(data, length);
+    output.append(strdata);
     while (output.size() > (tick * tick_len)) {
       tick++;
       cmCTestLog(this, HANDLER_PROGRESS_OUTPUT, "." << std::flush);
@@ -1019,9 +1023,19 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
                               << "    " << std::flush);
       }
     }
-    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, cmCTestLogWrite(data, length));
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
+               cmCTestLogWrite(strdata.c_str(), strdata.size()));
     if (ofs) {
-      ofs << cmCTestLogWrite(data, length);
+      ofs << cmCTestLogWrite(strdata.c_str(), strdata.size());
+    }
+  }
+  processOutput.DecodeText(std::string(), strdata);
+  if (!strdata.empty()) {
+    output.append(strdata);
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
+               cmCTestLogWrite(strdata.c_str(), strdata.size()));
+    if (ofs) {
+      ofs << cmCTestLogWrite(strdata.c_str(), strdata.size());
     }
   }
   cmCTestLog(this, HANDLER_PROGRESS_OUTPUT, " Size of output: "
@@ -1061,7 +1075,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
 
 int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
                      int* retVal, std::ostream* log, double testTimeOut,
-                     std::vector<std::string>* environment)
+                     std::vector<std::string>* environment, Encoding encoding)
 {
   bool modifyEnv = (environment && !environment->empty());
 
@@ -1156,17 +1170,30 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
 
   char* data;
   int length;
+  cmProcessOutput processOutput(encoding);
+  std::string strdata;
   while (cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) {
+    processOutput.DecodeText(data, length, strdata);
     if (output) {
       tempOutput.insert(tempOutput.end(), data, data + length);
     }
-    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, cmCTestLogWrite(data, length));
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
+               cmCTestLogWrite(strdata.c_str(), strdata.size()));
     if (log) {
-      log->write(data, length);
+      log->write(strdata.c_str(), strdata.size());
+    }
+  }
+  processOutput.DecodeText(std::string(), strdata);
+  if (!strdata.empty()) {
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
+               cmCTestLogWrite(strdata.c_str(), strdata.size()));
+    if (log) {
+      log->write(strdata.c_str(), strdata.size());
     }
   }
 
   cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+  processOutput.DecodeText(tempOutput, tempOutput);
   if (output && tempOutput.begin() != tempOutput.end()) {
     output->append(&*tempOutput.begin(), tempOutput.size());
   }
@@ -2496,7 +2523,7 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(
 
 bool cmCTest::RunCommand(const char* command, std::string* stdOut,
                          std::string* stdErr, int* retVal, const char* dir,
-                         double timeout)
+                         double timeout, Encoding encoding)
 {
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
 
@@ -2527,6 +2554,8 @@ bool cmCTest::RunCommand(const char* command, std::string* stdOut,
   std::vector<char> tempError;
   char* data;
   int length;
+  cmProcessOutput processOutput(encoding);
+  std::string strdata;
   int res;
   bool done = false;
   while (!done) {
@@ -2543,15 +2572,24 @@ bool cmCTest::RunCommand(const char* command, std::string* stdOut,
     }
     if ((res == cmsysProcess_Pipe_STDOUT || res == cmsysProcess_Pipe_STDERR) &&
         this->ExtraVerbose) {
-      cmSystemTools::Stdout(data, length);
+      processOutput.DecodeText(data, length, strdata);
+      cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+    }
+  }
+  if (this->ExtraVerbose) {
+    processOutput.DecodeText(std::string(), strdata);
+    if (!strdata.empty()) {
+      cmSystemTools::Stdout(strdata.c_str(), strdata.size());
     }
   }
 
   cmsysProcess_WaitForExit(cp, CM_NULLPTR);
   if (!tempOutput.empty()) {
+    processOutput.DecodeText(tempOutput, tempOutput);
     stdOut->append(&*tempOutput.begin(), tempOutput.size());
   }
   if (!tempError.empty()) {
+    processOutput.DecodeText(tempError, tempError);
     stdErr->append(&*tempError.begin(), tempError.size());
   }
 

@@ -372,6 +372,7 @@ CMAKE_CXX_SOURCES="\
   cmParseArgumentsCommand \
   cmPathLabel \
   cmPolicies \
+  cmProcessOutput \
   cmProjectCommand \
   cmProperty \
   cmPropertyDefinition \
@@ -1423,6 +1424,7 @@ fi
 cmake_c_flags_String="-DKWSYS_STRING_C"
 if ${cmake_system_mingw}; then
   cmake_c_flags_EncodingC="-DKWSYS_ENCODING_DEFAULT_CODEPAGE=CP_ACP"
+  cmake_cxx_flags_cmProcessOutput="${cmake_c_flags_EncodingC}"
 fi
 cmake_cxx_flags_SystemTools="
   -DKWSYS_CXX_HAS_SETENV=${KWSYS_CXX_HAS_SETENV}
@@ -1439,8 +1441,9 @@ echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
 echo "	${cmake_cxx_compiler} ${cmake_ld_flags} ${cmake_cxx_flags} ${objs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
 for a in ${CMAKE_CXX_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/${a}.cxx"`
+  src_flags=`eval echo \\${cmake_cxx_flags_\${a}}`
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
-  echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} ${src_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
 done
 echo "cmBootstrapCommands1.o : $cmBootstrapCommands1Deps" >> "${cmake_bootstrap_dir}/Makefile"
 echo "cmBootstrapCommands2.o : $cmBootstrapCommands2Deps" >> "${cmake_bootstrap_dir}/Makefile"

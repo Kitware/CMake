@@ -5,6 +5,7 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
+#include <cmProcessOutput.h>
 #include <cmsys/Process.h>
 #include <cmsys/SystemTools.hxx>
 #include <stddef.h>
@@ -29,6 +30,7 @@ class cmSystemTools : public cmsys::SystemTools
 {
 public:
   typedef cmsys::SystemTools Superclass;
+  typedef cmProcessOutput::Encoding Encoding;
 
   /** Expand out any arguments in the vector that have ; separated
    *  strings into multiple arguments.  A new vector is created
@@ -239,7 +241,8 @@ public:
                                int* retVal = CM_NULLPTR,
                                const char* dir = CM_NULLPTR,
                                OutputOption outputflag = OUTPUT_MERGE,
-                               double timeout = 0.0);
+                               double timeout = 0.0,
+                               Encoding encoding = cmProcessOutput::Auto);
 
   static std::string PrintSingleCommand(std::vector<std::string> const&);
 

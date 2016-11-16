@@ -7,6 +7,7 @@
 #include "cmFileTimeComparison.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
+#include "cmProcessOutput.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
@@ -765,7 +766,7 @@ void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
 
 int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
                                         const char* dir, int timeout,
-                                        std::ostream& ofs)
+                                        std::ostream& ofs, Encoding encoding)
 {
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
@@ -809,6 +810,8 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 
   char* data;
   int length;
+  cmProcessOutput processOutput(encoding);
+  std::string strdata;
   cmCTestOptionalLog(
     this->CTest, HANDLER_PROGRESS_OUTPUT, "   Each symbol represents "
       << tick_len << " bytes of output." << std::endl
@@ -842,12 +845,24 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 
     // Process the chunk of data
     if (res == cmsysProcess_Pipe_STDERR) {
-      this->ProcessBuffer(data, length, tick, tick_len, ofs,
+      processOutput.DecodeText(data, length, strdata, 1);
+      this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len, ofs,
                           &this->BuildProcessingErrorQueue);
     } else {
-      this->ProcessBuffer(data, length, tick, tick_len, ofs,
+      processOutput.DecodeText(data, length, strdata, 2);
+      this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len, ofs,
                           &this->BuildProcessingQueue);
     }
+  }
+  processOutput.DecodeText(std::string(), strdata, 1);
+  if (!strdata.empty()) {
+    this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len, ofs,
+                        &this->BuildProcessingErrorQueue);
+  }
+  processOutput.DecodeText(std::string(), strdata, 2);
+  if (!strdata.empty()) {
+    this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len, ofs,
+                        &this->BuildProcessingQueue);
   }
 
   this->ProcessBuffer(CM_NULLPTR, 0, tick, tick_len, ofs,
@@ -920,7 +935,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 //######################################################################
 //######################################################################
 
-void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
+void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
                                         size_t& tick, size_t tick_len,
                                         std::ostream& ofs,
                                         t_BuildProcessingQueueType* queue)
