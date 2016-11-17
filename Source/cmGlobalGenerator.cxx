@@ -50,6 +50,9 @@
 #include <cm_jsoncpp_writer.h>
 #endif
 
+const std::string kCMAKE_PLATFORM_INFO_INITIALIZED =
+  "CMAKE_PLATFORM_INFO_INITIALIZED";
+
 class cmInstalledFile;
 
 bool cmTarget::StrictTargetComparison::operator()(cmTarget const* t1,
@@ -427,6 +430,23 @@ void cmGlobalGenerator::EnableLanguage(
 
   // set the dir for parent files so they can be used by modules
   mf->AddDefinition("CMAKE_PLATFORM_INFO_DIR", rootBin.c_str());
+
+  if (!this->CMakeInstance->GetIsInTryCompile()) {
+    // Keep a mark in the cache to indicate that we've initialized the
+    // platform information directory.  If the platform information
+    // directory exists but the mark is missing then CMakeCache.txt
+    // has been removed or replaced without also removing the CMakeFiles/
+    // directory.  In this case remove the platform information directory
+    // so that it will be re-initialized and the relevant information
+    // restored in the cache.
+    if (cmSystemTools::FileIsDirectory(rootBin) &&
+        !mf->IsOn(kCMAKE_PLATFORM_INFO_INITIALIZED)) {
+      cmSystemTools::RemoveADirectory(rootBin);
+    }
+    this->GetCMakeInstance()->AddCacheEntry(
+      kCMAKE_PLATFORM_INFO_INITIALIZED, "1",
+      "Platform information initialized", cmStateEnums::INTERNAL);
+  }
 
   // find and make sure CMAKE_MAKE_PROGRAM is defined
   if (!this->FindMakeProgram(mf)) {
