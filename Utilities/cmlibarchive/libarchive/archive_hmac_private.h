@@ -72,7 +72,7 @@ typedef	struct hmac_sha1_ctx archive_hmac_sha1_ctx;
 #elif defined(HAVE_LIBCRYPTO)
 #include "archive_openssl_hmac_private.h"
 
-typedef	HMAC_CTX archive_hmac_sha1_ctx;
+typedef	HMAC_CTX* archive_hmac_sha1_ctx;
 
 #else
 

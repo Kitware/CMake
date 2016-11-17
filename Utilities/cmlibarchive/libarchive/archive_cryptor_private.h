@@ -104,7 +104,7 @@ typedef struct {
 #define AES_MAX_KEY_SIZE 32
 
 typedef struct {
-	EVP_CIPHER_CTX	ctx;
+	EVP_CIPHER_CTX	*ctx;
 	const EVP_CIPHER *type;
 	uint8_t		key[AES_MAX_KEY_SIZE];
 	unsigned	key_len;
