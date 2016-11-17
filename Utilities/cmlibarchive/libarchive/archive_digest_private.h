@@ -134,7 +134,7 @@
   defined(ARCHIVE_CRYPTO_SHA384_OPENSSL) ||\
   defined(ARCHIVE_CRYPTO_SHA512_OPENSSL)
 #define	ARCHIVE_CRYPTO_OPENSSL 1
-#include <openssl/evp.h>
+#include "archive_openssl_evp_private.h"
 #endif
 
 /* Windows crypto headers */

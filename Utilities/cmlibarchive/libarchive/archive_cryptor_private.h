@@ -99,7 +99,7 @@ typedef struct {
 } archive_crypto_ctx;
 
 #elif defined(HAVE_LIBCRYPTO)
-#include <openssl/evp.h>
+#include "archive_openssl_evp_private.h"
 #define AES_BLOCK_SIZE	16
 #define AES_MAX_KEY_SIZE 32
 
