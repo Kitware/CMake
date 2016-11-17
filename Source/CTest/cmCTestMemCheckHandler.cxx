@@ -329,10 +329,8 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
   }
   xml.EndElement(); // TestList
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     "-- Processing memory checking output: ", this->Quiet);
+                     "-- Processing memory checking output:\n", this->Quiet);
   size_t total = this->TestResults.size();
-  size_t step = total / 10;
-  size_t current = 0;
   for (cc = 0; cc < this->TestResults.size(); cc++) {
     cmCTestTestResult* result = &this->TestResults[cc];
     std::string memcheckstr;
@@ -347,18 +345,29 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
       static_cast<size_t>(this->CustomMaximumFailedTestOutputSize));
     this->WriteTestResultHeader(xml, result);
     xml.StartElement("Results");
+    int memoryErrors = 0;
     for (std::vector<int>::size_type kk = 0; kk < memcheckresults.size();
          ++kk) {
       if (memcheckresults[kk]) {
         xml.StartElement("Defect");
         xml.Attribute("type", this->ResultStringsLong[kk]);
         xml.Content(memcheckresults[kk]);
+        memoryErrors += memcheckresults[kk];
         xml.EndElement(); // Defect
       }
       this->GlobalResults[kk] += memcheckresults[kk];
     }
     xml.EndElement(); // Results
-
+    if (memoryErrors > 0) {
+      const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
+      std::string outname = result->Name + " ";
+      outname.resize(maxTestNameWidth + 4, '.');
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, cc + 1
+                           << "/" << total << " MemCheck: #"
+                           << result->TestCount << ": " << outname
+                           << "   Defects: " << memoryErrors << std::endl,
+                         this->Quiet);
+    }
     xml.StartElement("Log");
     if (this->CTest->ShouldCompressTestOutput()) {
       this->CTest->CompressString(memcheckstr);
@@ -369,13 +378,16 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
     xml.EndElement(); // Log
 
     this->WriteTestResultFooter(xml, result);
-    if (current < cc) {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "#" << std::flush,
-                         this->Quiet);
-      current += step;
-    }
   }
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl, this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                     "MemCheck log files can be found here: "
+                     "( * corresponds to test number)"
+                       << std::endl,
+                     this->Quiet);
+  std::string output = this->MemoryTesterOutputFile;
+  cmSystemTools::ReplaceString(output, "??", "*");
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, output << std::endl,
+                     this->Quiet);
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                      "Memory checking results:" << std::endl, this->Quiet);
   xml.StartElement("DefectList");
