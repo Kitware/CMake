@@ -378,11 +378,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
         // Run the ldd -u -r command line.
         // Capture its stdout and hide its stderr.
+        // Ignore its return code because the tool always returns non-zero
+        // if there are any warnings, but we just want to warn.
         std::string stdOut;
-        if (!cmSystemTools::RunSingleCommand(lwyu_cmd, &stdOut, CM_NULLPTR,
-                                             &ret, CM_NULLPTR,
+        std::string stdErr;
+        if (!cmSystemTools::RunSingleCommand(lwyu_cmd, &stdOut, &stdErr, &ret,
+                                             CM_NULLPTR,
                                              cmSystemTools::OUTPUT_NONE)) {
-          std::cerr << "Error running '" << lwyu_cmd[0] << "'\n";
+          std::cerr << "Error running '" << lwyu_cmd[0] << "': " << stdErr
+                    << "\n";
           return 1;
         }
 
