@@ -327,6 +327,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         iwyu_cmd.insert(iwyu_cmd.end(), orig_cmd.begin() + 1, orig_cmd.end());
 
         // Run the iwyu command line.  Capture its stderr and hide its stdout.
+        // Ignore its return code because the tool always returns non-zero.
         std::string stdErr;
         if (!cmSystemTools::RunSingleCommand(iwyu_cmd, CM_NULLPTR, &stdErr,
                                              &ret, CM_NULLPTR,
