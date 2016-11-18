@@ -48,6 +48,17 @@ public:
       };
     }
 
+    BasicConsoleBuf<CharT, Traits>* GetConsoleBuf() { return m_consolebuf; }
+
+    void SetUTF8Pipes()
+    {
+      if (m_consolebuf) {
+        m_consolebuf->input_pipe_codepage = CP_UTF8;
+        m_consolebuf->output_pipe_codepage = CP_UTF8;
+        m_consolebuf->activateCodepageChange();
+      }
+    }
+
     ~Manager()
     {
       if (m_consolebuf) {
