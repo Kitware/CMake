@@ -1245,87 +1245,84 @@ endfunction()
 
 
 function(_ep_get_build_command name step cmd_var)
-  set(cmd "${${cmd_var}}")
-  if(NOT cmd)
-    set(args)
-    _ep_get_configure_command_id(${name} cfg_cmd_id)
-    if(cfg_cmd_id STREQUAL "cmake")
-      # CMake project.  Select build command based on generator.
-      get_target_property(cmake_generator ${name} _EP_CMAKE_GENERATOR)
-      if("${CMAKE_GENERATOR}" MATCHES "Make" AND
-         ("${cmake_generator}" MATCHES "Make" OR NOT cmake_generator))
-        # The project uses the same Makefile generator.  Use recursive make.
-        set(cmd "$(MAKE)")
-        if(step STREQUAL "INSTALL")
-          set(args install)
-        endif()
-        if("x${step}x" STREQUAL "xTESTx")
-          set(args test)
-        endif()
-      else()
-        # Drive the project with "cmake --build".
-        get_target_property(cmake_command ${name} _EP_CMAKE_COMMAND)
-        if(cmake_command)
-          set(cmd "${cmake_command}")
-        else()
-          set(cmd "${CMAKE_COMMAND}")
-        endif()
-        set(args --build ".")
-        if(CMAKE_CONFIGURATION_TYPES)
-          if (CMAKE_CFG_INTDIR AND
-              NOT CMAKE_CFG_INTDIR STREQUAL "." AND
-              NOT CMAKE_CFG_INTDIR MATCHES "\\$")
-            # CMake 3.4 and below used the CMAKE_CFG_INTDIR placeholder value
-            # provided by multi-configuration generators.  Some projects were
-            # taking advantage of that undocumented implementation detail to
-            # specify a specific configuration here.  They should use
-            # BUILD_COMMAND to change the default command instead, but for
-            # compatibility honor the value.
-            set(config ${CMAKE_CFG_INTDIR})
-            message(AUTHOR_WARNING "CMAKE_CFG_INTDIR should not be set by project code.\n"
-              "To get a non-default build command, use the BUILD_COMMAND option.")
-          else()
-            set(config $<CONFIG>)
-          endif()
-          list(APPEND args --config ${config})
-        endif()
-        if(step STREQUAL "INSTALL")
-          list(APPEND args --target install)
-        endif()
-        # But for "TEST" drive the project with corresponding "ctest".
-        if("x${step}x" STREQUAL "xTESTx")
-          string(REGEX REPLACE "^(.*/)cmake([^/]*)$" "\\1ctest\\2" cmd "${cmd}")
-          set(args "")
-          if(CMAKE_CONFIGURATION_TYPES)
-            list(APPEND args -C ${config})
-          endif()
-        endif()
-      endif()
-    else()
-      # Non-CMake project.  Guess "make" and "make install" and "make test".
-      if("${CMAKE_GENERATOR}" MATCHES "Makefiles")
-        # Try to get the parallel arguments
-        set(cmd "$(MAKE)")
-      else()
-        set(cmd "make")
-      endif()
+  set(cmd "")
+  set(args)
+  _ep_get_configure_command_id(${name} cfg_cmd_id)
+  if(cfg_cmd_id STREQUAL "cmake")
+    # CMake project.  Select build command based on generator.
+    get_target_property(cmake_generator ${name} _EP_CMAKE_GENERATOR)
+    if("${CMAKE_GENERATOR}" MATCHES "Make" AND
+       ("${cmake_generator}" MATCHES "Make" OR NOT cmake_generator))
+      # The project uses the same Makefile generator.  Use recursive make.
+      set(cmd "$(MAKE)")
       if(step STREQUAL "INSTALL")
         set(args install)
       endif()
       if("x${step}x" STREQUAL "xTESTx")
         set(args test)
       endif()
+    else()
+      # Drive the project with "cmake --build".
+      get_target_property(cmake_command ${name} _EP_CMAKE_COMMAND)
+      if(cmake_command)
+        set(cmd "${cmake_command}")
+      else()
+        set(cmd "${CMAKE_COMMAND}")
+      endif()
+      set(args --build ".")
+      if(CMAKE_CONFIGURATION_TYPES)
+        if (CMAKE_CFG_INTDIR AND
+            NOT CMAKE_CFG_INTDIR STREQUAL "." AND
+            NOT CMAKE_CFG_INTDIR MATCHES "\\$")
+          # CMake 3.4 and below used the CMAKE_CFG_INTDIR placeholder value
+          # provided by multi-configuration generators.  Some projects were
+          # taking advantage of that undocumented implementation detail to
+          # specify a specific configuration here.  They should use
+          # BUILD_COMMAND to change the default command instead, but for
+          # compatibility honor the value.
+          set(config ${CMAKE_CFG_INTDIR})
+          message(AUTHOR_WARNING "CMAKE_CFG_INTDIR should not be set by project code.\n"
+            "To get a non-default build command, use the BUILD_COMMAND option.")
+        else()
+          set(config $<CONFIG>)
+        endif()
+        list(APPEND args --config ${config})
+      endif()
+      if(step STREQUAL "INSTALL")
+        list(APPEND args --target install)
+      endif()
+      # But for "TEST" drive the project with corresponding "ctest".
+      if("x${step}x" STREQUAL "xTESTx")
+        string(REGEX REPLACE "^(.*/)cmake([^/]*)$" "\\1ctest\\2" cmd "${cmd}")
+        set(args "")
+        if(CMAKE_CONFIGURATION_TYPES)
+          list(APPEND args -C ${config})
+        endif()
+      endif()
     endif()
-
-    # Use user-specified arguments instead of default arguments, if any.
-    get_property(have_args TARGET ${name} PROPERTY _EP_${step}_ARGS SET)
-    if(have_args)
-      get_target_property(args ${name} _EP_${step}_ARGS)
+  else()
+    # Non-CMake project.  Guess "make" and "make install" and "make test".
+    if("${CMAKE_GENERATOR}" MATCHES "Makefiles")
+      # Try to get the parallel arguments
+      set(cmd "$(MAKE)")
+    else()
+      set(cmd "make")
     endif()
-
-    list(APPEND cmd ${args})
+    if(step STREQUAL "INSTALL")
+      set(args install)
+    endif()
+    if("x${step}x" STREQUAL "xTESTx")
+      set(args test)
+    endif()
   endif()
 
+  # Use user-specified arguments instead of default arguments, if any.
+  get_property(have_args TARGET ${name} PROPERTY _EP_${step}_ARGS SET)
+  if(have_args)
+    get_target_property(args ${name} _EP_${step}_ARGS)
+  endif()
+
+  list(APPEND cmd ${args})
   set(${cmd_var} "${cmd}" PARENT_SCOPE)
 endfunction()
 
