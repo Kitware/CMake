@@ -407,6 +407,8 @@ static int do_build(int ac, char const* const* av)
   }
 
   cmake cm;
+  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, (void*)&cm);
+  cm.SetProgressCallback(cmakemainProgressCallback, (void*)&cm);
   return cm.Build(dir, target, config, nativeOptions, clean);
 #endif
 }
