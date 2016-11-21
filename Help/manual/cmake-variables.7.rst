@@ -148,6 +148,7 @@ Variables that Change Behavior
    /variable/CMAKE_INSTALL_DEFAULT_COMPONENT_NAME
    /variable/CMAKE_INSTALL_MESSAGE
    /variable/CMAKE_INSTALL_PREFIX
+   /variable/CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT
    /variable/CMAKE_LIBRARY_PATH
    /variable/CMAKE_MFC_FLAG
    /variable/CMAKE_MODULE_PATH
