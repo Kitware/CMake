@@ -964,6 +964,7 @@ are:
 * ``EXPORT_NAME``
 * ``IMPORTED``
 * ``NAME``
+* Properties matching ``IMPORTED_LIBNAME_*``
 * Properties matching ``MAP_IMPORTED_CONFIG_*``
 
 ``INTERFACE`` libraries may be installed and exported.  Any content they refer
