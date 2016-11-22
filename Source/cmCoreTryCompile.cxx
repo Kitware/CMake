@@ -44,6 +44,7 @@ static std::string const kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES =
   "CMAKE_TRY_COMPILE_OSX_ARCHITECTURES";
 static std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
   "CMAKE_TRY_COMPILE_PLATFORM_VARIABLES";
+static std::string const kCMAKE_WARN_DEPRECATED = "CMAKE_WARN_DEPRECATED";
 
 int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                                      bool isTryRun)
@@ -453,6 +454,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(kCMAKE_OSX_SYSROOT);
       vars.insert(kCMAKE_POSITION_INDEPENDENT_CODE);
       vars.insert(kCMAKE_SYSROOT);
+      vars.insert(kCMAKE_WARN_DEPRECATED);
 
       if (const char* varListStr = this->Makefile->GetDefinition(
             kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {

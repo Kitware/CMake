@@ -18,6 +18,7 @@ run_cmake(NonSourceCompileDefinitions)
 
 set(RunCMake_TEST_OPTIONS --debug-trycompile)
 run_cmake(PlatformVariables)
+run_cmake(WarnDeprecated)
 unset(RunCMake_TEST_OPTIONS)
 
 run_cmake(TargetTypeExe)
