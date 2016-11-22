@@ -253,7 +253,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("WIN32_EXECUTABLE", CM_NULLPTR);
     this->SetPropertyDefault("MACOSX_BUNDLE", CM_NULLPTR);
     this->SetPropertyDefault("MACOSX_RPATH", CM_NULLPTR);
-    this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", CM_NULLPTR);
     this->SetPropertyDefault("C_CLANG_TIDY", CM_NULLPTR);
     this->SetPropertyDefault("C_COMPILER_LAUNCHER", CM_NULLPTR);
     this->SetPropertyDefault("C_INCLUDE_WHAT_YOU_USE", CM_NULLPTR);
@@ -269,6 +268,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("CXX_EXTENSIONS", CM_NULLPTR);
     this->SetPropertyDefault("LINK_SEARCH_START_STATIC", CM_NULLPTR);
     this->SetPropertyDefault("LINK_SEARCH_END_STATIC", CM_NULLPTR);
+  }
+
+  if (this->GetType() != cmStateEnums::UTILITY) {
+    this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", CM_NULLPTR);
   }
 
   // Collect the set of configuration types.
