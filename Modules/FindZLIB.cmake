@@ -48,6 +48,8 @@
 #
 # A user may set ``ZLIB_ROOT`` to a zlib installation root to tell this
 # module where to look.
+# A user may set ``ZLIB_USE_STATIC`` to use static libraries (created by
+# the zlib cmake project)
 
 set(_ZLIB_SEARCHES)
 
@@ -64,8 +66,13 @@ set(_ZLIB_SEARCH_NORMAL
   )
 list(APPEND _ZLIB_SEARCHES _ZLIB_SEARCH_NORMAL)
 
-set(ZLIB_NAMES z zlib zdll zlib1)
-set(ZLIB_NAMES_DEBUG zlibd zlibd1)
+if (ZLIB_USE_STATIC)
+  set(ZLIB_NAMES zlibstatic)
+  set(ZLIB_NAMES_DEBUG zlibstaticd)
+else()
+  set(ZLIB_NAMES z zlib zdll zlib1)
+  set(ZLIB_NAMES_DEBUG zlibd zlibd1)
+endif()
 
 # Try each search configuration.
 foreach(search ${_ZLIB_SEARCHES})
