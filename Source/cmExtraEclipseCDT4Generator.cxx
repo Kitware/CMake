@@ -703,6 +703,14 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
    * Also on the cdt-dev list didn't bring any information:
    * http://web.archiveorange.com/archive/v/B4NlJDNIpYoOS1SbxFNy
    * Alex */
+  // include subprojects directory to the src pathentry
+  // eclipse cdt indexer uses this entries as reference to index source files
+  if (this->GenerateLinkedResources) {
+    xml.StartElement("pathentry");
+    xml.Attribute("kind", "src");
+    xml.Attribute("path", "[Subprojects]");
+    xml.EndElement();
+  }
 
   for (std::vector<std::string>::const_iterator it =
          this->SrcLinkedResources.begin();
