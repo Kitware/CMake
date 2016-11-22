@@ -145,8 +145,6 @@ if(PYTHON_EXECUTABLE)
     unset(_VERSION)
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set PYTHONINTERP_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonInterp REQUIRED_VARS PYTHON_EXECUTABLE VERSION_VAR PYTHON_VERSION_STRING)
 

@@ -26,8 +26,6 @@ find_path(JPEG_INCLUDE_DIR jpeglib.h)
 set(JPEG_NAMES ${JPEG_NAMES} jpeg libjpeg)
 find_library(JPEG_LIBRARY NAMES ${JPEG_NAMES} )
 
-# handle the QUIETLY and REQUIRED arguments and set JPEG_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(JPEG DEFAULT_MSG JPEG_LIBRARY JPEG_INCLUDE_DIR)
 

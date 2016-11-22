@@ -70,8 +70,6 @@ endif()
 # Deprecated settings for compatibility with CMake1.4
 set(PERL ${PERL_EXECUTABLE})
 
-# handle the QUIETLY and REQUIRED arguments and set PERL_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Perl
                                   REQUIRED_VARS PERL_EXECUTABLE

@@ -55,7 +55,6 @@
 #  GSL_LIBRARY_DEBUG       - Location of the debug GSL library (if any).
 #
 
-# Include these modules to handle the QUIETLY and REQUIRED arguments.
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 #=============================================================================

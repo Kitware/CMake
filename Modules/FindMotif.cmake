@@ -30,11 +30,8 @@ if(UNIX)
 
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set MOTIF_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Motif DEFAULT_MSG MOTIF_LIBRARIES MOTIF_INCLUDE_DIR)
-
 
 mark_as_advanced(
   MOTIF_INCLUDE_DIR

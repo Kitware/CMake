@@ -271,7 +271,6 @@ mark_as_advanced(
   HTLATEX_COMPILER
 )
 
-# handle variables for found Latex and its components
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(LATEX
   REQUIRED_VARS LATEX_COMPILER

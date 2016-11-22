@@ -70,11 +70,7 @@ else ()
 
 endif ()
 
-# handle the QUIETLY and REQUIRED arguments and set COIN3D_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Coin3D DEFAULT_MSG COIN3D_LIBRARIES COIN3D_INCLUDE_DIRS)
 
 mark_as_advanced(COIN3D_INCLUDE_DIRS COIN3D_LIBRARIES )
-
-

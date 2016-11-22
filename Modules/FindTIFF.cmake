@@ -65,8 +65,6 @@ if(TIFF_INCLUDE_DIR AND EXISTS "${TIFF_INCLUDE_DIR}/tiffvers.h")
     unset(tiff_version_str)
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(TIFF
                                   REQUIRED_VARS TIFF_LIBRARY TIFF_INCLUDE_DIR

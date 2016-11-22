@@ -90,8 +90,6 @@ if(HG_EXECUTABLE)
   endmacro(HG_WC_INFO)
 endif()
 
-# Handle the QUIETLY and REQUIRED arguments and set HG_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(Hg
                                   REQUIRED_VARS HG_EXECUTABLE

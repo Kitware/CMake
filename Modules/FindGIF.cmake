@@ -91,8 +91,6 @@ if(GIF_INCLUDE_DIR)
   CMAKE_POP_CHECK_STATE()
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set GIF_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GIF  REQUIRED_VARS  GIF_LIBRARY  GIF_INCLUDE_DIR
                                        VERSION_VAR GIF_VERSION )
