@@ -191,6 +191,12 @@
 #
 #  By default used QtIFW_ defaults (``maintenancetool``).
 #
+# .. variable:: CPACK_IFW_PACKAGE_REMOVE_TARGET_DIR
+#
+#  Set to ``OFF`` if the target directory should not be deleted when uninstalling.
+#
+#  Is ``ON`` by default
+#
 # .. variable:: CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_INI_FILE
 #
 #  Filename for the configuration of the generated maintenance tool.
