@@ -4,8 +4,11 @@
 
 #include "cmGeneratorTarget.h"
 #include "cmGlobalXCodeGenerator.h"
-#include "cmMakefile.h"
 #include "cmSourceFile.h"
+
+class cmGeneratorTarget;
+class cmGlobalGenerator;
+class cmMakefile;
 
 cmLocalXCodeGenerator::cmLocalXCodeGenerator(cmGlobalGenerator* gg,
                                              cmMakefile* mf)

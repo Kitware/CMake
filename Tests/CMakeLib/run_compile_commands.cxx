@@ -1,4 +1,4 @@
-#include "cmSystemTools.h"
+#include <cmConfigure.h>
 
 #include <cmsys/FStream.hxx>
 #include <iostream>
@@ -7,6 +7,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmSystemTools.h"
 
 class CompileCommandParser
 {

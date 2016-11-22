@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmXCode21Object.h"
 
+#include <ostream>
+#include <string>
+
 #include "cmSystemTools.h"
 
 cmXCode21Object::cmXCode21Object(PBXType ptype, Type type)

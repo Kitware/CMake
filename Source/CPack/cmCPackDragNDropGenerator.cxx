@@ -2,14 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackDragNDropGenerator.h"
 
+#include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
-
 #include <iomanip>
+#include <map>
+#include <stdlib.h>
 
 #include <CoreFoundation/CoreFoundation.h>
 

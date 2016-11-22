@@ -3,7 +3,16 @@
 #ifndef cmLocalXCodeGenerator_h
 #define cmLocalXCodeGenerator_h
 
+#include <cmConfigure.h> // IWYU pragma: keep
+#include <map>
+#include <string>
+
 #include "cmLocalGenerator.h"
+
+class cmGeneratorTarget;
+class cmGlobalGenerator;
+class cmMakefile;
+class cmSourceFile;
 
 /** \class cmLocalXCodeGenerator
  * \brief Write a local Xcode project

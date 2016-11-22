@@ -1,9 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmStandardIncludes.h"
+
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <cmsys/Process.h>
+#include <iostream>
+#include <string>
+#include <vector>
 
 #include "cmSystemTools.h"
-#include <cmsys/Process.h>
 
 // This is a wrapper program for xcodebuild
 // it calls xcodebuild, and does two things

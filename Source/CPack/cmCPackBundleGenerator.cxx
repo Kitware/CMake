@@ -2,10 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackBundleGenerator.h"
 
+#include <sstream>
+#include <vector>
+
 #include "cmCPackLog.h"
 #include "cmSystemTools.h"
-
-#include <cmsys/RegularExpression.hxx>
 
 cmCPackBundleGenerator::cmCPackBundleGenerator()
 {

@@ -3,6 +3,11 @@
 #ifndef cmMachO_h
 #define cmMachO_h
 
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <string>
+
 #if !defined(CMAKE_USE_MACH_PARSER)
 #error "This file may be included only if CMAKE_USE_MACH_PARSER is enabled."
 #endif

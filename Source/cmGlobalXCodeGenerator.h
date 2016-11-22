@@ -3,13 +3,25 @@
 #ifndef cmGlobalXCodeGenerator_h
 #define cmGlobalXCodeGenerator_h
 
-#include "cmGlobalGenerator.h"
+#include <cmConfigure.h>
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
-#include "cmCustomCommand.h"
+#include "cmGlobalGenerator.h"
 #include "cmXCodeObject.h"
+
+class cmCustomCommand;
+class cmGeneratorTarget;
 class cmGlobalGeneratorFactory;
+class cmLocalGenerator;
+class cmMakefile;
 class cmSourceFile;
 class cmSourceGroup;
+class cmake;
+struct cmDocumentationEntry;
 
 /** \class cmGlobalXCodeGenerator
  * \brief Write a Unix makefiles.

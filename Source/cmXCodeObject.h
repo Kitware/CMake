@@ -3,9 +3,14 @@
 #ifndef cmXCodeObject_h
 #define cmXCodeObject_h
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmStandardIncludes.h"
+#include <algorithm>
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
 
 class cmGeneratorTarget;
 
