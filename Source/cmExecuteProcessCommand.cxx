@@ -47,6 +47,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   std::string error_variable;
   std::string result_variable;
   std::string working_directory;
+  cmProcessOutput::Encoding encoding = cmProcessOutput::Auto;
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i] == "COMMAND") {
       doing_command = true;
@@ -128,6 +129,14 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
     } else if (args[i] == "ERROR_STRIP_TRAILING_WHITESPACE") {
       doing_command = false;
       error_strip_trailing_whitespace = true;
+    } else if (args[i] == "ENCODING") {
+      doing_command = false;
+      if (++i < args.size()) {
+        encoding = cmProcessOutput::FindEncoding(args[i]);
+      } else {
+        this->SetError(" called with no value for ENCODING.");
+        return false;
+      }
     } else if (doing_command) {
       cmds[command_index].push_back(args[i].c_str());
     } else {
@@ -223,7 +232,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   int length;
   char* data;
   int p;
-  cmProcessOutput processOutput;
+  cmProcessOutput processOutput(encoding);
   std::string strdata;
   while ((p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR), p)) {
     // Put the output in the right place.

@@ -27,6 +27,13 @@ public:
     OEM
   };
 
+  /**
+  * Find encoding enum value for given encoding \a name.
+  * \param name a encoding name.
+  * \return encoding enum value or Auto if \a name was not found.
+  */
+  static Encoding FindEncoding(std::string name);
+
   /// The code page that is used as internal encoding to which we will encode.
   static unsigned int defaultCodepage;
 
