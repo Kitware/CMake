@@ -44,10 +44,10 @@ else()
 
 endif()
 
-# -- RCC only
-add_executable(rcconly rcconly.cpp second_resource.qrc)
-set_property(TARGET rcconly PROPERTY AUTORCC ON)
-target_link_libraries(rcconly ${QT_QTCORE_TARGET})
+# -- Test: RCC only
+add_executable(rccOnly rccOnly.cpp rccOnlyRes.qrc)
+set_property(TARGET rccOnly PROPERTY AUTORCC ON)
+target_link_libraries(rccOnly ${QT_QTCORE_TARGET})
 
 # -- RCC empty
 add_executable(rcc_empty rcc_empty.cpp rcc_empty_resource.qrc)
