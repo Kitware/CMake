@@ -3,6 +3,7 @@
 #include "cmGlobalVisualStudio11Generator.h"
 
 #include "cmAlgorithms.h"
+#include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmVS11CLFlagTable.h"

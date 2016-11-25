@@ -3,6 +3,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudioGenerator.h"
 
+#include <cmsys/Encoding.hxx>
+#include <iostream>
+
 #include "cmAlgorithms.h"
 #include "cmCallVisualStudioMacro.h"
 #include "cmGeneratedFileStream.h"
@@ -12,7 +15,6 @@
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmTarget.h"
-#include <cmsys/Encoding.hxx>
 
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)
   : cmGlobalGenerator(cm)

@@ -5,7 +5,10 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
+#include <map>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 #include "cmXMLParser.h"
 

@@ -1,9 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "windows.h" // this must be first to define GetCurrentDirectory
-
 #include "cmGlobalVisualStudio9Generator.h"
 
+#include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmVisualStudioWCEPlatformParser.h"

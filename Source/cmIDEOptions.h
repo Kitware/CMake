@@ -5,9 +5,11 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
+#include <map>
+#include <string>
+#include <vector>
 
-#include "cmIDEFlagTable.h"
+struct cmIDEFlagTable;
 
 /** \class cmIDEOptions
  * \brief Superclass for IDE option processing

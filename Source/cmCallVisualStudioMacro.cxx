@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCallVisualStudioMacro.h"
 
+#include <sstream>
+
 #include "cmSystemTools.h"
 
 #if defined(_MSC_VER)

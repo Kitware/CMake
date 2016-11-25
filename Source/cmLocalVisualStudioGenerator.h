@@ -3,16 +3,22 @@
 #ifndef cmLocalVisualStudioGenerator_h
 #define cmLocalVisualStudioGenerator_h
 
-#include "cmLocalGenerator.h"
+#include <cmConfigure.h>
+
+#include <map>
+#include <memory>
+#include <string>
 
 #include "cmGlobalVisualStudioGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cm_auto_ptr.hxx"
 
-#include <cm_auto_ptr.hxx>
-
-class cmSourceFile;
-class cmSourceGroup;
 class cmCustomCommand;
 class cmCustomCommandGenerator;
+class cmGeneratorTarget;
+class cmGlobalGenerator;
+class cmMakefile;
+class cmSourceFile;
 
 /** \class cmLocalVisualStudioGenerator
  * \brief Base class for Visual Studio generators.

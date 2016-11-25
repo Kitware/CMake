@@ -3,7 +3,16 @@
 #ifndef cmGlobalVisualStudio14Generator_h
 #define cmGlobalVisualStudio14Generator_h
 
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <string>
+
 #include "cmGlobalVisualStudio12Generator.h"
+
+class cmGlobalGeneratorFactory;
+class cmMakefile;
+class cmake;
 
 /** \class cmGlobalVisualStudio14Generator  */
 class cmGlobalVisualStudio14Generator : public cmGlobalVisualStudio12Generator

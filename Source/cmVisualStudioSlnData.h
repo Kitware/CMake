@@ -5,7 +5,9 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
+#include <map>
+#include <string>
+#include <vector>
 
 class cmSlnProjectEntry
 {
