@@ -54,6 +54,12 @@ add_executable(rccEmpty rccEmpty.cpp rccEmptyRes.qrc)
 set_property(TARGET rccEmpty PROPERTY AUTORCC ON)
 target_link_libraries(rccEmpty ${QT_QTCORE_TARGET})
 
+# -- Test: UIC only
+qtx_wrap_cpp(uicOnlyMoc uicOnlySource/uiconly.h)
+add_executable(uicOnly uicOnlySource/uiconly.cpp ${uicOnlyMoc})
+set_property(TARGET uicOnly PROPERTY AUTOUIC ON)
+target_link_libraries(uicOnly ${QT_LIBRARIES})
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_definitions(-DFOO -DSomeDefine="Barx")
 
@@ -146,10 +152,6 @@ set_target_properties(empty PROPERTIES AUTOMOC TRUE)
 target_link_libraries(empty no_link_language)
 add_library(no_link_language STATIC empty.h)
 set_target_properties(no_link_language PROPERTIES AUTOMOC TRUE)
-
-qtx_wrap_cpp(uicOnlyMoc sub/uiconly.h)
-add_executable(uiconly sub/uiconly.cpp ${uicOnlyMoc})
-target_link_libraries(uiconly ${QT_LIBRARIES})
 
 try_compile(RCC_DEPENDS
   "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"
