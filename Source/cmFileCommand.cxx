@@ -2,15 +2,39 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileCommand.h"
 
+#include <algorithm>
+#include <assert.h>
+#include <cm_kwiml.h>
+#include <cmsys/Directory.hxx>
+#include <cmsys/FStream.hxx>
+#include <cmsys/Glob.hxx>
+#include <cmsys/RegularExpression.hxx>
+#include <cmsys/String.hxx>
+#include <list>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <sys/types.h>
+// include sys/stat.h after sys/types.h
+#include <sys/stat.h>
+
 #include "cmAlgorithms.h"
+#include "cmCommandArgumentsHelper.h"
 #include "cmCryptoHash.h"
-#include "cmCryptoHash.h"
+#include "cmFileLockPool.h"
 #include "cmFileTimeComparison.h"
+#include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmHexFileConverter.h"
 #include "cmInstallType.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmSystemTools.h"
 #include "cmTimestamp.h"
+#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -18,20 +42,7 @@
 #include "cmFileLockResult.h"
 #endif
 
-#undef GetCurrentDirectory
-#include <assert.h>
-#include <stdlib.h>
-
-#include <sys/types.h>
-// include sys/stat.h after sys/types.h
-#include <sys/stat.h>
-
-#include <cm_auto_ptr.hxx>
-#include <cmsys/Directory.hxx>
-#include <cmsys/Encoding.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
+class cmSystemToolsFileTime;
 
 // Table of permissions flags.
 #if defined(_WIN32) && !defined(__CYGWIN__)

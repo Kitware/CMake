@@ -5,10 +5,11 @@
 
 #include <cmConfigure.h>
 
-#include "cmProcessTools.h"
-
 #include <iosfwd>
 #include <string>
+
+#include "cmProcessOutput.h"
+#include "cmProcessTools.h"
 
 class cmCTest;
 class cmXMLWriter;

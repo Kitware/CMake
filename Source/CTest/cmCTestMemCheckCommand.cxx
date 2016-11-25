@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestMemCheckCommand.h"
 
+#include <sstream>
+#include <vector>
+
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestMemCheckHandler.h"

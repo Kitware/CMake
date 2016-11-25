@@ -5,6 +5,7 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
+#include <stddef.h>
 #include <string>
 #include <vector>
 

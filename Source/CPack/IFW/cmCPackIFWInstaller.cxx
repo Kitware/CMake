@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWInstaller.h"
 
+#include <cmConfigure.h>
+#include <sstream>
+#include <stddef.h>
+#include <utility>
+
 #include "CPack/cmCPackGenerator.h"
 #include "CPack/cmCPackLog.h"
 #include "cmCPackIFWGenerator.h"
@@ -11,9 +16,6 @@
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
-
-#include <cmConfigure.h>
-#include <utility>
 
 #ifdef cmCPackLogger
 #undef cmCPackLogger

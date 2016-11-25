@@ -2,18 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestSubmitHandler.h"
 
-#include "cmCTest.h"
-#include "cmCTestCurl.h"
-#include "cmCTestScriptHandler.h"
-#include "cmCurl.h"
-#include "cmGeneratedFileStream.h"
-#include "cmProcessOutput.h"
-#include "cmState.h"
-#include "cmStateTypes.h"
-#include "cmSystemTools.h"
-#include "cmXMLParser.h"
-#include "cmake.h"
-
 #include <cm_curl.h>
 #include <cm_jsoncpp_reader.h>
 #include <cm_jsoncpp_value.h>
@@ -21,6 +9,18 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "cmCTest.h"
+#include "cmCTestCurl.h"
+#include "cmCTestScriptHandler.h"
+#include "cmCurl.h"
+#include "cmGeneratedFileStream.h"
+#include "cmProcessOutput.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmThirdParty.h"
+#include "cmXMLParser.h"
+#include "cmake.h"
 
 #if defined(CTEST_USE_XMLRPC)
 #include "cmVersion.h"

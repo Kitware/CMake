@@ -2,9 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackGeneratorFactory.h"
 
+#include <cmConfigure.h>
+#include <ostream>
+#include <utility>
+
 #include "IFW/cmCPackIFWGenerator.h"
+#include "cmAlgorithms.h"
 #include "cmCPack7zGenerator.h"
 #include "cmCPackGenerator.h"
+#include "cmCPackLog.h"
 #include "cmCPackNSISGenerator.h"
 #include "cmCPackSTGZGenerator.h"
 #include "cmCPackTGZGenerator.h"
@@ -35,12 +41,6 @@
 #ifdef _WIN32
 #include "WiX/cmCPackWIXGenerator.h"
 #endif
-
-#include "cmAlgorithms.h"
-#include "cmCPackLog.h"
-
-#include <ostream>
-#include <utility>
 
 cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 {

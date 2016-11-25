@@ -2,21 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestTestHandler.h"
 
-#include "cmCTest.h"
-#include "cmCTestBatchTestHandler.h"
-#include "cmCTestMultiProcessHandler.h"
-#include "cmCommand.h"
-#include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmState.h"
-#include "cmStateTypes.h"
-#include "cmSystemTools.h"
-#include "cmXMLWriter.h"
-#include "cm_auto_ptr.hxx"
-#include "cm_utf8.h"
-#include "cmake.h"
-
 #include <algorithm>
 #include <cmsys/Base64.h>
 #include <cmsys/Directory.hxx>
@@ -31,6 +16,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#include "cmCTest.h"
+#include "cmCTestBatchTestHandler.h"
+#include "cmCTestMultiProcessHandler.h"
+#include "cmCommand.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmStateSnapshot.h"
+#include "cmSystemTools.h"
+#include "cmXMLWriter.h"
+#include "cm_auto_ptr.hxx"
+#include "cm_utf8.h"
+#include "cmake.h"
 
 class cmExecutionStatus;
 

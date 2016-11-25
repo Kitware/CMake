@@ -2,23 +2,23 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackGenerator.h"
 
-#include "cmCPackComponentGroup.h"
-#include "cmCPackLog.h"
-#include "cmCryptoHash.h"
-#include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmStateTypes.h"
-#include "cmXMLSafe.h"
-#include "cm_auto_ptr.hxx"
-#include "cmake.h"
-
 #include <algorithm>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/RegularExpression.hxx>
 #include <list>
 #include <utility>
+
+#include "cmCPackComponentGroup.h"
+#include "cmCPackLog.h"
+#include "cmCryptoHash.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmStateSnapshot.h"
+#include "cmXMLSafe.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 #if defined(__HAIKU__)
 #include <FindDirectory.h>

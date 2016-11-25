@@ -2,6 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include <cmConfigure.h>
 
+#include <cmsys/CommandLineArguments.hxx>
+#include <cmsys/Encoding.hxx>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <stddef.h>
+#include <string>
+#include <utility>
+#include <vector>
+
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+#include <cmsys/ConsoleBuf.hxx>
+#endif
+
 #include "cmCPackGenerator.h"
 #include "cmCPackGeneratorFactory.h"
 #include "cmCPackLog.h"
@@ -10,23 +24,10 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
-#include "cmStateTypes.h"
+#include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
-
-#include <cmsys/CommandLineArguments.hxx>
-#include <cmsys/Encoding.hxx>
-#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-#include <cmsys/ConsoleBuf.hxx>
-#endif
-#include <iostream>
-#include <map>
-#include <sstream>
-#include <stddef.h>
-#include <string>
-#include <utility>
-#include <vector>
 
 static const char* cmDocumentationName[][2] = {
   { CM_NULLPTR, "  cpack - Packaging driver provided by CMake." },

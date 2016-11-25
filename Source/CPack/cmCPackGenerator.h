@@ -5,14 +5,15 @@
 
 #include <cmConfigure.h>
 
-#include "cmCPackComponentGroup.h"
-#include "cmSystemTools.h"
-
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include "cmCPackComponentGroup.h"
+#include "cmSystemTools.h"
+
+class cmCPackGenerator;
 class cmCPackLog;
 class cmInstalledFile;
 class cmMakefile;
