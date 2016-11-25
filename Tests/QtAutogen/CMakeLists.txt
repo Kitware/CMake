@@ -44,26 +44,30 @@ else()
 
 endif()
 
-# -- Test: RCC only
+# -- Test: AUTORCC
+# RCC only
 add_executable(rccOnly rccOnly.cpp rccOnlyRes.qrc)
 set_property(TARGET rccOnly PROPERTY AUTORCC ON)
 target_link_libraries(rccOnly ${QT_QTCORE_TARGET})
 
-# -- Test: RCC empty
+# -- Test: AUTORCC
+# RCC empty
 add_executable(rccEmpty rccEmpty.cpp rccEmptyRes.qrc)
 set_property(TARGET rccEmpty PROPERTY AUTORCC ON)
 target_link_libraries(rccEmpty ${QT_QTCORE_TARGET})
 
-# -- Test: UIC only
+# -- Test: AUTOUIC
+# UIC only
 qtx_wrap_cpp(uicOnlyMoc uicOnlySource/uiconly.h)
 add_executable(uicOnly uicOnlySource/uiconly.cpp ${uicOnlyMoc})
 set_property(TARGET uicOnly PROPERTY AUTOUIC ON)
 target_link_libraries(uicOnly ${QT_LIBRARIES})
 
-# -- Test: AUTOMOC and AUTORCC on source files with the same name
-# but in different subdirectories
+# -- Test: AUTOMOC AUTORCC
+# Source files with the same basename in different subdirectories
 add_subdirectory(sameName)
 
+# -- Test: AUTOMOC AUTORCC AUTOUIC
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_definitions(-DFOO -DSomeDefine="Barx")
 
@@ -142,6 +146,7 @@ target_link_libraries(libC LINK_PUBLIC libB)
 
 target_link_libraries(QtAutogen codeeditorLib ${QT_LIBRARIES} libC)
 
+# -- Test: AUTOMOC, AUTORCC
 # Add not_generated_file.qrc to the source list to get the file-level
 # dependency, but don't generate a c++ file from it.  Disable the AUTORCC
 # feature for this target.  This tests that qrc files in the sources don't
@@ -154,6 +159,8 @@ target_link_libraries(empty no_link_language)
 add_library(no_link_language STATIC empty.h)
 set_target_properties(no_link_language PROPERTIES AUTOMOC TRUE)
 
+# -- Test: AUTORCC
+# When a file listed in a .qrc file changes the target must be rebuilt
 try_compile(RCC_DEPENDS
   "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"
   "${CMAKE_CURRENT_SOURCE_DIR}/autorcc_depends"
@@ -187,7 +194,8 @@ if (NOT file1_step1 GREATER file1_before)
   message(SEND_ERROR "file1 (${qrc_file1}) should have changed in the first step!")
 endif()
 
-#-----------------------------------------------------------------------------
+# -- Test: AUTOMOC
+# Ensure a repeated build succeeds when a header containing a QObject changes
 try_compile(MOC_RERUN
   "${CMAKE_CURRENT_BINARY_DIR}/automoc_rerun"
   "${CMAKE_CURRENT_SOURCE_DIR}/automoc_rerun"
