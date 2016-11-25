@@ -5,9 +5,8 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
 #include <cmsys/FStream.hxx>
+#include <string>
 
 /** \class cmWIXRichtTextFormatWriter
  * \brief Helper class to generate Rich Text Format (RTF) documents
