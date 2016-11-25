@@ -49,13 +49,12 @@ add_executable(rccOnly rccOnly.cpp rccOnlyRes.qrc)
 set_property(TARGET rccOnly PROPERTY AUTORCC ON)
 target_link_libraries(rccOnly ${QT_QTCORE_TARGET})
 
-# -- RCC empty
-add_executable(rcc_empty rcc_empty.cpp rcc_empty_resource.qrc)
-set_property(TARGET rcc_empty PROPERTY AUTORCC ON)
-target_link_libraries(rcc_empty ${QT_QTCORE_TARGET})
+# -- Test: RCC empty
+add_executable(rccEmpty rccEmpty.cpp rccEmptyRes.qrc)
+set_property(TARGET rccEmpty PROPERTY AUTORCC ON)
+target_link_libraries(rccEmpty ${QT_QTCORE_TARGET})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 add_definitions(-DFOO -DSomeDefine="Barx")
 
 # enable relaxed mode so automoc can handle all the special cases:
