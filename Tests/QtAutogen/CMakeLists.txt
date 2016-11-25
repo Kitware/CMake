@@ -60,6 +60,10 @@ add_executable(uicOnly uicOnlySource/uiconly.cpp ${uicOnlyMoc})
 set_property(TARGET uicOnly PROPERTY AUTOUIC ON)
 target_link_libraries(uicOnly ${QT_LIBRARIES})
 
+# -- Test: AUTOMOC and AUTORCC on source files with the same name
+# but in different subdirectories
+add_subdirectory(sameName)
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_definitions(-DFOO -DSomeDefine="Barx")
 
@@ -121,9 +125,6 @@ set_target_properties(
   AUTOMOC TRUE
 )
 
-# Test AUTOMOC and AUTORCC on source files with the same name
-# but in different subdirectories
-add_subdirectory(sameName)
 
 include(GenerateExportHeader)
 # The order is relevant here. B depends on A, and B headers depend on A
