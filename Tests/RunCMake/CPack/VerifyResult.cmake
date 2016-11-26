@@ -86,9 +86,7 @@ endif()
 # handle additional result verifications
 if(EXISTS "${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST_FILE_PREFIX}-VerifyResult.cmake")
   include("${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST_FILE_PREFIX}-VerifyResult.cmake")
-else()
-  # by default only print out output and error so that they can be compared by
-  # regex
-  message(STATUS "${output}")
-  message("${error}")
 endif()
+
+message(STATUS "${output}")
+message("${error}")
