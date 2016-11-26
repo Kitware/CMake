@@ -1,4 +1,4 @@
-set(shlibs_shlibs "^libtest_lib 0\\.8 generate_shlibs_ldconfig \\(>\\= 0\\.1\\.1\\)\n$")
+set(shlibs_shlibs "^libtest_lib 0\\.8 deb_generate_shlibs_ldconfig \\(>\\= 0\\.1\\.1\\)\n$")
 # NOTE: optional dot at the end of permissions regex is for SELinux enabled systems
 set(shlibs_shlibs_permissions_regex "-rw-r--r--\.? .*")
 set(shlibs_postinst ".*ldconfig.*")

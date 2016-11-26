@@ -15,5 +15,3 @@ add_library(test_lib SHARED "${CMAKE_CURRENT_BINARY_DIR}/test_lib.cpp")
 set_target_properties(test_lib PROPERTIES SOVERSION "0.8")
 
 install(TARGETS test_lib LIBRARY DESTINATION lib COMPONENT libs NAMELINK_SKIP)
-
-set(CPACK_PACKAGE_NAME "generate_shlibs_ldconfig")

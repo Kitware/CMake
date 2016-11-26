@@ -10,5 +10,3 @@ else()
   set(CPACK_RPM_MAIN_COMPONENT "applications")
   set(CPACK_RPM_APPLICATIONS_FILE_NAME "RPM-DEFAULT")
 endif()
-
-set(CPACK_PACKAGE_NAME "main_component")

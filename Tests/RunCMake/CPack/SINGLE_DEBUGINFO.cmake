@@ -52,5 +52,3 @@ if(RunCMake_SUBTEST_SUFFIX STREQUAL "valid"
 endif()
 
 set(CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX "/src")
-
-set(CPACK_PACKAGE_NAME "single_debuginfo")

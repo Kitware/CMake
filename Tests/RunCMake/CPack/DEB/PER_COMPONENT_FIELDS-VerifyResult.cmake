@@ -8,9 +8,9 @@ function(checkPackageInfo_ TYPE FILE REGEX)
 endfunction()
 
 # check package name
-checkPackageInfo_("name" "${FOUND_FILE_1}" ".*Package${whitespaces_}:${whitespaces_}per_component-pkg_1")
+checkPackageInfo_("name" "${FOUND_FILE_1}" ".*Package${whitespaces_}:${whitespaces_}per_component_fields-pkg_1")
 checkPackageInfo_("name" "${FOUND_FILE_2}" ".*Package${whitespaces_}:${whitespaces_}second")
-checkPackageInfo_("name" "${FOUND_FILE_3}" ".*Package${whitespaces_}:${whitespaces_}per_component-pkg_3")
+checkPackageInfo_("name" "${FOUND_FILE_3}" ".*Package${whitespaces_}:${whitespaces_}per_component_fields-pkg_3")
 
 # check package group
 checkPackageInfo_("group" "${FOUND_FILE_1}" ".*Section${whitespaces_}:${whitespaces_}default")

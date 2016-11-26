@@ -6,5 +6,3 @@ file(WRITE
   "long_filename_test")
 
 install(FILES ${LONG_FILENAME} DESTINATION foo)
-
-set(CPACK_PACKAGE_NAME "long_filenames")

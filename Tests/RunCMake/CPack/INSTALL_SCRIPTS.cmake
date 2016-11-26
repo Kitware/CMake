@@ -22,5 +22,3 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/post_uninstall_foo.sh"
 
 install(FILES CMakeLists.txt DESTINATION foo COMPONENT foo)
 install(FILES CMakeLists.txt DESTINATION bar COMPONENT bar)
-
-set(CPACK_PACKAGE_NAME "install_scripts")
