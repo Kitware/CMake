@@ -61,6 +61,8 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source)
         set(RunCMake-std${o}-file "${TEST_TYPE}/${TEST_NAME}-${SUBTEST_SUFFIX}-std${o}.txt")
       elseif(EXISTS ${RunCMake_SOURCE_DIR}/${TEST_TYPE}/${TEST_NAME}-std${o}.txt)
         set(RunCMake-std${o}-file "${TEST_TYPE}/${TEST_NAME}-std${o}.txt")
+      elseif(EXISTS ${RunCMake_SOURCE_DIR}/${TEST_TYPE}/default_expected_std${o}.txt)
+        set(RunCMake-std${o}-file "${TEST_TYPE}/default_expected_std${o}.txt")
       endif()
     endforeach()
 
