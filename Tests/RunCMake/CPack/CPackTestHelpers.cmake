@@ -15,8 +15,8 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source)
     file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
     file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
-    if(EXISTS "${RunCMake_SOURCE_DIR}/${TEST_TYPE}/${TEST_NAME}-Prerequirements.cmake")
-      include("${RunCMake_SOURCE_DIR}/${TEST_TYPE}/${TEST_NAME}-Prerequirements.cmake")
+    if(EXISTS "${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/${TEST_TYPE}-Prerequirements.cmake")
+      include("${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/${TEST_TYPE}-Prerequirements.cmake")
 
       set(FOUND_PREREQUIREMENTS false)
       get_test_prerequirements("FOUND_PREREQUIREMENTS" "${config_file}")
