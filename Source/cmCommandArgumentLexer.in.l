@@ -3,32 +3,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 /*
 
-This file must be translated to C and modified to build everywhere.
+This file must be translated to C++ and modified to build everywhere.
 
-Run flex like this:
+Run flex >= 2.6 like this:
 
-  flex --prefix=cmCommandArgument_yy --header-file=cmCommandArgumentLexer.h -ocmCommandArgumentLexer.cxx cmCommandArgumentLexer.in.l
+  flex --nounistd -DFLEXINT_H --prefix=cmCommandArgument_yy --header-file=cmCommandArgumentLexer.h -ocmCommandArgumentLexer.cxx cmCommandArgumentLexer.in.l
 
 Modify cmCommandArgumentLexer.cxx:
-  - add #include "cmStandardIncludes.h" to top of file
-  - put header block at top of file
-  - remove TABs
-  - remove use of the 'register' storage class specifier
-  - remove "yyscanner" argument from these methods:
-      yy_fatal_error, cmCommandArgument_yyalloc, cmCommandArgument_yyrealloc, cmCommandArgument_yyfree
-  - remove all YY_BREAK lines occurring right after return statements
-  - change while ( 1 ) to for(;;)
-  - add "return 0;" to end of cmCommandArgument_yylex
-
-Modify cmCommandArgumentLexer.h:
-  - remove TABs
-  - remove the yy_init_globals function
-  - remove the block that includes unistd.h
-  - remove #line directives (avoids bogus warning on old Sun)
+  - remove trailing whitespace: sed -i 's/\s*$//' cmCommandArgumentLexer.h cmCommandArgumentLexer.cxx
+  - remove blank lines at end of file
+  - #include "cmStandardLexer.h" at the top
+  - add cast in yy_scan_bytes for loop condition of _yybytes_len to size_t
 
 */
 
-#include "cmStandardLexer.h"
+/* IWYU pragma: no_forward_declare yyguts_t */
 
 #include "cmCommandArgumentParserHelper.h"
 
@@ -142,12 +131,9 @@ void cmCommandArgument_SetupEscapes(yyscan_t yyscanner, bool noEscapes)
 {
   /* Hack into the internal flex-generated scanner to set the state.  */
   struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-  if(noEscapes)
-    {
+  if(noEscapes) {
     BEGIN(NOESCAPES);
-    }
-  else
-    {
+  } else {
     BEGIN(ESCAPES);
-    }
+  }
 }

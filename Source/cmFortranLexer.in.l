@@ -13,22 +13,22 @@
 
 /*
 
-This file must be translated to C and modified to build everywhere.
+This file must be translated to C++ and modified to build everywhere.
 
 Run flex >= 2.6 like this:
 
-  flex -i --prefix=cmFortran_yy --header-file=cmFortranLexer.h -ocmFortranLexer.cxx cmFortranLexer.in.l
+  flex -i --nounistd -DFLEXINT_H --prefix=cmFortran_yy --header-file=cmFortranLexer.h -ocmFortranLexer.cxx cmFortranLexer.in.l
 
 Modify cmFortranLexer.cxx:
   - remove trailing whitespace: sed -i 's/\s*$//' cmFortranLexer.h cmFortranLexer.cxx
   - remove blank lines at end of file
-  - remove "yyscanner = NULL" from end of cmFortran_yylex_destroy
-  - remove all YY_BREAK lines occurring right after return statements
+  - #include "cmStandardLexer.h" at the top
   - add cast in yy_scan_bytes for loop condition of _yybytes_len to size_t
 
 */
 
-#include "cmStandardLexer.h"
+/* IWYU pragma: no_forward_declare yyguts_t */
+
 #undef YY_NO_UNPUT
 
 #define cmFortranLexer_cxx
