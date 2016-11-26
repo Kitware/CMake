@@ -1,3 +1,9 @@
+if(GENERATOR_TYPE STREQUAL "DEB")
+  set(CPACK_PACKAGE_CONTACT "someone")
+  set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
+  set(CPACK_DEBIAN_ARCHIVE_TYPE "gnutar")
+endif()
+
 set(LONG_FILENAME
   "${CMAKE_CURRENT_BINARY_DIR}/llllllllll_oooooooooo_nnnnnnnnnn_gggggggggg_ffffffffff_iiiiiiiiii_llllllllll_eeeeeeeeee_nnnnnnnnnn_aaaaaaaaaa_mmmmmmmmmm_eeeeeeeeee.txt")
 
