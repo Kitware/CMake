@@ -5,7 +5,7 @@ project(${RunCMake_TEST} CXX)
 # set default test name (can be overwritten in test.cmake or specifics.cmake)
 string(TOLOWER "${RunCMake_TEST_FILE_PREFIX}" CPACK_PACKAGE_NAME)
 
-include(${RunCMake_TEST_FILE_PREFIX}.cmake)
+include(tests/${RunCMake_TEST_FILE_PREFIX}/test.cmake)
 
 # include test generator specifics
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${GENERATOR_TYPE}/${RunCMake_TEST_FILE_PREFIX}-specifics.cmake")
