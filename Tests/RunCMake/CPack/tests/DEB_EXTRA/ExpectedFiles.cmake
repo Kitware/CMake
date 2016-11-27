@@ -1,10 +1,8 @@
-set(whitespaces_ "[\t\n\r ]*")
-
 set(EXPECTED_FILES_COUNT "3")
 set(EXPECTED_FILES_NAME_GENERATOR_SPECIFIC_FORMAT TRUE)
 set(EXPECTED_FILE_1_COMPONENT "foo")
-set(EXPECTED_FILE_CONTENT_1 "^.*/usr/${whitespaces_}.*/usr/foo/${whitespaces_}.*/usr/foo/CMakeLists.txt$")
+set(EXPECTED_FILE_CONTENT_1_LIST "/usr;/usr/foo;/usr/foo/CMakeLists.txt")
 set(EXPECTED_FILE_2_COMPONENT "bar")
-set(EXPECTED_FILE_CONTENT_2 "^.*/usr/${whitespaces_}.*/usr/bar/${whitespaces_}.*/usr/bar/CMakeLists.txt$")
+set(EXPECTED_FILE_CONTENT_2_LIST "/usr;/usr/bar;/usr/bar/CMakeLists.txt")
 set(EXPECTED_FILE_3_COMPONENT "bas")
-set(EXPECTED_FILE_CONTENT_3 "^.*/usr/${whitespaces_}.*/usr/bas/${whitespaces_}.*/usr/bas/CMakeLists.txt$")
+set(EXPECTED_FILE_CONTENT_3_LIST "/usr;/usr/bas;/usr/bas/CMakeLists.txt")

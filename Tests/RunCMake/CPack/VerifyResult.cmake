@@ -45,10 +45,26 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
 
     if(foundFilesCount_ EQUAL 1)
       unset(PACKAGE_CONTENT)
-      getPackageContent("${bin_dir}/${FOUND_FILE_${file_no_}}" "PACKAGE_CONTENT")
 
-      string(REGEX MATCH "${EXPECTED_FILE_CONTENT_${file_no_}}"
-          expected_content_list "${PACKAGE_CONTENT}")
+      if(DEFINED EXPECTED_FILE_CONTENT_${file_no_})
+        getPackageContent("${bin_dir}/${FOUND_FILE_${file_no_}}" "PACKAGE_CONTENT")
+
+        string(REGEX MATCH "${EXPECTED_FILE_CONTENT_${file_no_}}"
+            expected_content_list "${PACKAGE_CONTENT}")
+      else() # use content list
+        getPackageContentList("${bin_dir}/${FOUND_FILE_${file_no_}}" "PACKAGE_CONTENT")
+        set(EXPECTED_FILE_CONTENT_${file_no_} "${EXPECTED_FILE_CONTENT_${file_no_}_LIST}")
+        toExpectedContentList("${file_no_}" "EXPECTED_FILE_CONTENT_${file_no_}")
+
+        list(SORT PACKAGE_CONTENT)
+        list(SORT EXPECTED_FILE_CONTENT_${file_no_})
+
+        if(PACKAGE_CONTENT STREQUAL EXPECTED_FILE_CONTENT_${file_no_})
+          set(expected_content_list TRUE)
+        else()
+          set(expected_content_list FALSE)
+        endif()
+      endif()
 
       if(NOT expected_content_list)
         string(REPLACE "\n" "\n actual> " msg_actual "\n${PACKAGE_CONTENT}")

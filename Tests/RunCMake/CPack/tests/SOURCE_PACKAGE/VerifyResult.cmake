@@ -1,3 +1,5 @@
+set(whitespaces_ "[\t\n\r ]*")
+
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/test_rpm")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/test_rpm/BUILD")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/test_rpm/BUILDROOT")

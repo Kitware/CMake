@@ -1,19 +1,10 @@
-set(whitespaces_ "[\t\n\r ]*")
-
 set(EXPECTED_FILES_COUNT "3")
 set(EXPECTED_FILES_NAME_GENERATOR_SPECIFIC_FORMAT TRUE)
 set(EXPECTED_FILE_1_COMPONENT "pkg_1")
+set(EXPECTED_FILE_CONTENT_1_LIST "/usr;/usr/foo;/usr/foo/CMakeLists.txt")
 set(EXPECTED_FILE_2_NAME "second")
-
-if(GENERATOR_TYPE STREQUAL "DEB")
-  set(EXPECTED_FILE_CONTENT_1 "^.*/usr/foo${whitespaces_}.*/usr/foo/CMakeLists.txt$")
-  set(EXPECTED_FILE_CONTENT_2 "^.*/usr/foo${whitespaces_}.*/usr/foo/CMakeLists.txt$")
-  set(EXPECTED_FILE_CONTENT_3 "^.*/usr/foo${whitespaces_}.*/usr/foo/CMakeLists.txt$")
-elseif(GENERATOR_TYPE STREQUAL "RPM")
-  set(EXPECTED_FILE_CONTENT_1 "^/usr/foo${whitespaces_}/usr/foo/CMakeLists.txt$")
-  set(EXPECTED_FILE_CONTENT_2 "^/usr/foo${whitespaces_}/usr/foo/CMakeLists.txt$")
-  set(EXPECTED_FILE_CONTENT_3 "^/usr/foo${whitespaces_}/usr/foo/CMakeLists.txt$")
-endif()
+set(EXPECTED_FILE_CONTENT_2_LIST "/usr;/usr/foo;/usr/foo/CMakeLists.txt")
+set(EXPECTED_FILE_CONTENT_3_LIST "/usr;/usr/foo;/usr/foo/CMakeLists.txt")
 
 if(GENERATOR_TYPE STREQUAL "DEB" OR GENERATOR_TYPE STREQUAL "RPM")
   string(TOLOWER "${GENERATOR_TYPE}" file_extension_)

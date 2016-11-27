@@ -29,6 +29,27 @@ function(getPackageNameGlobexpr NAME COMPONENT VERSION REVISION FILE_NO RESULT_V
   endif()
 endfunction()
 
+function(getPackageContentList FILE RESULT_VAR)
+  execute_process(COMMAND ${DPKG_EXECUTABLE} -c "${FILE}"
+          OUTPUT_VARIABLE package_content_
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  unset(items_)
+  string(REPLACE "\n" ";" package_content_ "${package_content_}")
+  foreach(i_ IN LISTS package_content_)
+    string(REGEX REPLACE "^.* \.(/[^$]*)$" "\\1" result_ "${i_}")
+    string(REGEX REPLACE "/$" "" result_ "${result_}")
+    list(APPEND items_ "${result_}")
+  endforeach()
+
+  set(${RESULT_VAR} "${items_}" PARENT_SCOPE)
+endfunction()
+
+function(toExpectedContentList FILE_NO CONTENT_VAR)
+  # no need to do anything
+endfunction()
+
 function(getMissingShlibsErrorExtra FILE RESULT_VAR)
     execute_process(COMMAND ${DPKG_EXECUTABLE} -x "${FILE}" data_${PREFIX}
             ERROR_VARIABLE err_)
