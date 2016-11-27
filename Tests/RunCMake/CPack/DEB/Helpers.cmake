@@ -84,8 +84,6 @@ function(getMissingShlibsErrorExtra FILE RESULT_VAR)
         string(APPEND error_extra "; errors \"${deb_install_files_errors}\"")
       endif()
 
-      find_program(READELF_EXECUTABLE NAMES readelf)
-
       if(READELF_EXECUTABLE)
         string(APPEND error_extra "; readelf \"\n")
 
