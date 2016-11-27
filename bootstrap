@@ -277,14 +277,8 @@ CMAKE_CXX_SOURCES="\
   cmDepends \
   cmDependsC \
   cmDocumentationFormatter \
-  cmElseCommand \
   cmEnableLanguageCommand \
   cmEnableTestingCommand \
-  cmEndForEachCommand \
-  cmEndFunctionCommand \
-  cmEndIfCommand \
-  cmEndMacroCommand \
-  cmEndWhileCommand \
   cmExecProgramCommand \
   cmExecuteProcessCommand \
   cmExpandedCommandArgument \
@@ -406,6 +400,7 @@ CMAKE_CXX_SOURCES="\
   cmTimestamp \
   cmTryCompileCommand \
   cmTryRunCommand \
+  cmUnexpectedCommand \
   cmUnsetCommand \
   cmVersion \
   cmWhileCommand \

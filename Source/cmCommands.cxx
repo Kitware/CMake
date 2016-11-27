@@ -18,14 +18,8 @@
 #include "cmContinueCommand.h"
 #include "cmCreateTestSourceList.h"
 #include "cmDefinePropertyCommand.h"
-#include "cmElseCommand.h"
 #include "cmEnableLanguageCommand.h"
 #include "cmEnableTestingCommand.h"
-#include "cmEndForEachCommand.h"
-#include "cmEndFunctionCommand.h"
-#include "cmEndIfCommand.h"
-#include "cmEndMacroCommand.h"
-#include "cmEndWhileCommand.h"
 #include "cmExecProgramCommand.h"
 #include "cmExecuteProcessCommand.h"
 #include "cmFileCommand.h"
@@ -74,6 +68,7 @@
 #include "cmTargetLinkLibrariesCommand.h"
 #include "cmTryCompileCommand.h"
 #include "cmTryRunCommand.h"
+#include "cmUnexpectedCommand.h"
 #include "cmUnsetCommand.h"
 #include "cmWhileCommand.h"
 
@@ -82,7 +77,6 @@
 #include "cmAuxSourceDirectoryCommand.h"
 #include "cmBuildNameCommand.h"
 #include "cmCMakeHostSystemInformationCommand.h"
-#include "cmElseIfCommand.h"
 #include "cmExportCommand.h"
 #include "cmExportLibraryDependenciesCommand.h"
 #include "cmFLTKWrapUICommand.h"
@@ -130,14 +124,8 @@ std::vector<cmCommand*> GetPredefinedCommands()
   commands.push_back(new cmContinueCommand);
   commands.push_back(new cmCreateTestSourceList);
   commands.push_back(new cmDefinePropertyCommand);
-  commands.push_back(new cmElseCommand);
   commands.push_back(new cmEnableLanguageCommand);
   commands.push_back(new cmEnableTestingCommand);
-  commands.push_back(new cmEndForEachCommand);
-  commands.push_back(new cmEndFunctionCommand);
-  commands.push_back(new cmEndIfCommand);
-  commands.push_back(new cmEndMacroCommand);
-  commands.push_back(new cmEndWhileCommand);
   commands.push_back(new cmExecProgramCommand);
   commands.push_back(new cmExecuteProcessCommand);
   commands.push_back(new cmFileCommand);
@@ -189,12 +177,39 @@ std::vector<cmCommand*> GetPredefinedCommands()
   commands.push_back(new cmUnsetCommand);
   commands.push_back(new cmWhileCommand);
 
+  commands.push_back(new cmUnexpectedCommand(
+    "else", "An ELSE command was found outside of a proper "
+            "IF ENDIF structure. Or its arguments did not match "
+            "the opening IF command."));
+  commands.push_back(new cmUnexpectedCommand(
+    "elseif", "An ELSEIF command was found outside of a proper "
+              "IF ENDIF structure."));
+  commands.push_back(new cmUnexpectedCommand(
+    "endforeach", "An ENDFOREACH command was found outside of a proper "
+                  "FOREACH ENDFOREACH structure. Or its arguments did "
+                  "not match the opening FOREACH command."));
+  commands.push_back(new cmUnexpectedCommand(
+    "endfunction", "An ENDFUNCTION command was found outside of a proper "
+                   "FUNCTION ENDFUNCTION structure. Or its arguments did not "
+                   "match the opening FUNCTION command."));
+  commands.push_back(new cmUnexpectedCommand(
+    "endif", "An ENDIF command was found outside of a proper "
+             "IF ENDIF structure. Or its arguments did not match "
+             "the opening IF command."));
+  commands.push_back(new cmUnexpectedCommand(
+    "endmacro", "An ENDMACRO command was found outside of a proper "
+                "MACRO ENDMACRO structure. Or its arguments did not "
+                "match the opening MACRO command."));
+  commands.push_back(new cmUnexpectedCommand(
+    "endwhile", "An ENDWHILE command was found outside of a proper "
+                "WHILE ENDWHILE structure. Or its arguments did not "
+                "match the opening WHILE command."));
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   commands.push_back(new cmAddCompileOptionsCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmBuildNameCommand);
   commands.push_back(new cmCMakeHostSystemInformationCommand);
-  commands.push_back(new cmElseIfCommand);
   commands.push_back(new cmExportCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
