@@ -8,3 +8,11 @@ function(getPackageContent FILE RESULT_VAR)
 
   set(${RESULT_VAR} "${package_content_}" PARENT_SCOPE)
 endfunction()
+
+function(getPackageNameGlobexpr NAME COMPONENT VERSION REVISION FILE_NO RESULT_VAR)
+  if(COMPONENT)
+    set(COMPONENT "-${COMPONENT}")
+  endif()
+
+  set(${RESULT_VAR} "${NAME}-${VERSION}-*${COMPONENT}.tar.gz" PARENT_SCOPE)
+endfunction()

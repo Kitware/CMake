@@ -1,5 +1,28 @@
 cmake_minimum_required(VERSION ${CMAKE_VERSION} FATAL_ERROR)
 
+function(findExpectedFile FILE_NO RESULT_VAR)
+  if(NOT DEFINED EXPECTED_FILE_${FILE_NO}) # explicit file name regex was not provided - construct one from other data
+    # set defaults if parameters are not provided
+    if(NOT DEFINED EXPECTED_FILE_${FILE_NO}_NAME)
+      string(TOLOWER "${RunCMake_TEST_FILE_PREFIX}" EXPECTED_FILE_${FILE_NO}_NAME)
+    endif()
+    if(NOT DEFINED EXPECTED_FILE_${FILE_NO}_VERSION)
+      set(EXPECTED_FILE_${FILE_NO}_VERSION "0.1.1")
+    endif()
+    if(NOT DEFINED EXPECTED_FILE_${FILE_NO}_REVISION)
+      set(EXPECTED_FILE_${FILE_NO}_REVISION "1")
+    endif()
+
+    getPackageNameGlobexpr("${EXPECTED_FILE_${FILE_NO}_NAME}"
+      "${EXPECTED_FILE_${FILE_NO}_COMPONENT}" "${EXPECTED_FILE_${FILE_NO}_VERSION}"
+      "${EXPECTED_FILE_${FILE_NO}_REVISION}" "${FILE_NO}" "EXPECTED_FILE_${FILE_NO}")
+  endif()
+
+  file(GLOB found_file_ RELATIVE "${bin_dir}" "${EXPECTED_FILE_${FILE_NO}}")
+
+  set(${RESULT_VAR} "${found_file_}" PARENT_SCOPE)
+endfunction()
+
 include("${config_file}")
 include("${src_dir}/${GENERATOR_TYPE}/Helpers.cmake")
 
@@ -10,12 +33,13 @@ file(READ "${config_file}" config_file_content)
 set(output_error_message
     "\nCPack output: '${output}'\nCPack error: '${error}';\nCPack result: '${PACKAGING_RESULT}';\nconfig file: '${config_file_content}'")
 
-# check that expected generated files exist and contain expected content
+# generate default expected files data
 include("${src_dir}/tests/${RunCMake_TEST_FILE_PREFIX}/ExpectedFiles.cmake")
 
+# check that expected generated files exist and contain expected content
 if(NOT EXPECTED_FILES_COUNT EQUAL 0)
   foreach(file_no_ RANGE 1 ${EXPECTED_FILES_COUNT})
-    file(GLOB FOUND_FILE_${file_no_} RELATIVE "${bin_dir}" "${EXPECTED_FILE_${file_no_}}")
+    findExpectedFile("${file_no_}" "FOUND_FILE_${file_no_}")
     list(APPEND foundFiles_ "${FOUND_FILE_${file_no_}}")
     list(LENGTH FOUND_FILE_${file_no_} foundFilesCount_)
 
@@ -40,6 +64,7 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
         "Found more than one file for file No. '${file_no_}'!"
         " Found files count '${foundFilesCount_}'."
         " Files: '${FOUND_FILE_${file_no_}}'"
+        " Globbing expression: '${EXPECTED_FILE_${file_no_}}'"
         "${output_error_message}")
     endif()
   endforeach()

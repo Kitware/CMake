@@ -1,6 +1,5 @@
 if(GENERATOR_TYPE STREQUAL "DEB")
   set(CPACK_PACKAGE_CONTACT "someone")
-  set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
 endif()
 
 install(FILES CMakeLists.txt DESTINATION foo COMPONENT test)
