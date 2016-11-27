@@ -2,21 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmEndWhileCommand.h"
 
-#include "cmListFileCache.h"
-
 class cmExecutionStatus;
+struct cmListFileArgument;
 
 bool cmEndWhileCommand::InvokeInitialPass(
-  std::vector<cmListFileArgument> const& args, cmExecutionStatus&)
+  std::vector<cmListFileArgument> const&, cmExecutionStatus&)
 {
-  if (args.empty()) {
-    this->SetError("An ENDWHILE command was found outside of a proper "
-                   "WHILE ENDWHILE structure.");
-  } else {
-    this->SetError("An ENDWHILE command was found outside of a proper "
-                   "WHILE ENDWHILE structure. Or its arguments did not "
-                   "match the opening WHILE command.");
-  }
-
+  this->SetError("An ENDWHILE command was found outside of a proper "
+                 "WHILE ENDWHILE structure. Or its arguments did not "
+                 "match the opening WHILE command.");
   return false;
 }
