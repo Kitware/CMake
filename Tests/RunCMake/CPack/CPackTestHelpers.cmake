@@ -100,6 +100,6 @@ function(run_cpack_test_subtests TEST_NAME SUBTEST_SUFFIXES types build PACKAGIN
   endforeach()
 endfunction()
 
-function(run_cpack_source_test TEST_NAME types build)
-  run_cpack_test_common_("${TEST_NAME}" "${types}" "${build}" "" true "")
+function(run_cpack_source_test TEST_NAME types)
+  run_cpack_test_common_("${TEST_NAME}" "${types}" false "" true "")
 endfunction()

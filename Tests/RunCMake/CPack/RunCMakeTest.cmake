@@ -20,5 +20,5 @@ run_cpack_test_subtests(PACKAGE_CHECKSUM "invalid;MD5;SHA1;SHA224;SHA256;SHA384;
 run_cpack_test(PARTIALLY_RELOCATABLE_WARNING "RPM" false "COMPONENT")
 run_cpack_test(PER_COMPONENT_FIELDS "RPM;DEB" false "COMPONENT")
 run_cpack_test_subtests(SINGLE_DEBUGINFO "no_main_component;one_component;one_component_main;no_debuginfo;one_component_no_debuginfo;no_components;valid" "RPM" true "CUSTOM")
-run_cpack_source_test(SOURCE_PACKAGE "RPM" true)
+run_cpack_source_test(SOURCE_PACKAGE "RPM")
 run_cpack_test(SUGGESTS "RPM" false "MONOLITHIC")
