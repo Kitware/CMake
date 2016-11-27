@@ -3,10 +3,9 @@
 #include "cmEndFunctionCommand.h"
 
 class cmExecutionStatus;
-struct cmListFileArgument;
 
-bool cmEndFunctionCommand::InvokeInitialPass(
-  std::vector<cmListFileArgument> const&, cmExecutionStatus&)
+bool cmEndFunctionCommand::InitialPass(std::vector<std::string> const&,
+                                       cmExecutionStatus&)
 {
   this->SetError("An ENDFUNCTION command was found outside of a proper "
                  "FUNCTION ENDFUNCTION structure. Or its arguments did not "

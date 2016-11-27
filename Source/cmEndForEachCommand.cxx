@@ -3,10 +3,9 @@
 #include "cmEndForEachCommand.h"
 
 class cmExecutionStatus;
-struct cmListFileArgument;
 
-bool cmEndForEachCommand::InvokeInitialPass(
-  std::vector<cmListFileArgument> const&, cmExecutionStatus&)
+bool cmEndForEachCommand::InitialPass(std::vector<std::string> const&,
+                                      cmExecutionStatus&)
 {
   this->SetError("An ENDFOREACH command was found outside of a proper "
                  "FOREACH ENDFOREACH structure. Or its arguments did "

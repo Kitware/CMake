@@ -3,10 +3,9 @@
 #include "cmEndWhileCommand.h"
 
 class cmExecutionStatus;
-struct cmListFileArgument;
 
-bool cmEndWhileCommand::InvokeInitialPass(
-  std::vector<cmListFileArgument> const&, cmExecutionStatus&)
+bool cmEndWhileCommand::InitialPass(std::vector<std::string> const&,
+                                    cmExecutionStatus&)
 {
   this->SetError("An ENDWHILE command was found outside of a proper "
                  "WHILE ENDWHILE structure. Or its arguments did not "

@@ -10,7 +10,6 @@
 #include "cmCommand.h"
 
 class cmExecutionStatus;
-struct cmListFileArgument;
 
 /** \class cmEndMacroCommand
  * \brief ends an if block
@@ -26,21 +25,11 @@ public:
   cmCommand* Clone() CM_OVERRIDE { return new cmEndMacroCommand; }
 
   /**
-   * Override cmCommand::InvokeInitialPass to get arguments before
-   * expansion.
-   */
-  bool InvokeInitialPass(std::vector<cmListFileArgument> const&,
-                         cmExecutionStatus&) CM_OVERRIDE;
-
-  /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const&,
-                   cmExecutionStatus&) CM_OVERRIDE
-  {
-    return false;
-  }
+                   cmExecutionStatus&) CM_OVERRIDE;
 
   /**
    * This determines if the command is invoked when in script mode.
