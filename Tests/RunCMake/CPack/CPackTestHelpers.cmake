@@ -1,6 +1,6 @@
 cmake_policy(SET CMP0057 NEW)
 
-function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source)
+function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source PACKAGING_TYPE)
   if(TEST_TYPE IN_LIST types)
     set(RunCMake_TEST_NO_CLEAN TRUE)
     set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${TEST_NAME}-build")
@@ -10,6 +10,8 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source)
       set(RunCMake_TEST_BINARY_DIR "${RunCMake_TEST_BINARY_DIR}-${SUBTEST_SUFFIX}-subtest")
       set(full_test_name_ "${full_test_name_}-${SUBTEST_SUFFIX}-subtest")
     endif()
+
+    string(APPEND full_test_name_ "-${PACKAGING_TYPE}-type")
 
      # TODO this should be executed only once per ctest run (not per generator)
     file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
@@ -31,7 +33,8 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source)
     # execute cmake
     set(RunCMake_TEST_OPTIONS "-DGENERATOR_TYPE=${TEST_TYPE}"
       "-DRunCMake_TEST_FILE_PREFIX=${TEST_NAME}"
-      "-DRunCMake_SUBTEST_SUFFIX=${SUBTEST_SUFFIX}")
+      "-DRunCMake_SUBTEST_SUFFIX=${SUBTEST_SUFFIX}"
+      "-DPACKAGING_TYPE=${PACKAGING_TYPE}")
     run_cmake(${full_test_name_})
 
     # execute optional build step
@@ -42,7 +45,7 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source)
     if(source)
       set(pack_params_ -G ${TEST_TYPE} --config ./CPackSourceConfig.cmake)
       FILE(APPEND ${RunCMake_TEST_BINARY_DIR}/CPackSourceConfig.cmake
-        "\nset(CPACK_RPM_SOURCE_PKG_BUILD_PARAMS \"-DRunCMake_TEST:STRING=${full_test_name_}\ -DRunCMake_TEST_FILE_PREFIX:STRING=${TEST_NAME} -DGENERATOR_TYPE=${TEST_TYPE}\")")
+        "\nset(CPACK_RPM_SOURCE_PKG_BUILD_PARAMS \"-DRunCMake_TEST:STRING=${full_test_name_} -DRunCMake_TEST_FILE_PREFIX:STRING=${TEST_NAME} -DGENERATOR_TYPE:STRING=${TEST_TYPE}\")")
     else()
       unset(pack_params_)
     endif()
@@ -74,6 +77,7 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source)
         -DRunCMake_TEST_FILE_PREFIX=${TEST_NAME}
         -DRunCMake_SUBTEST_SUFFIX=${SUBTEST_SUFFIX}
         -DGENERATOR_TYPE=${TEST_TYPE}
+        -DPACKAGING_TYPE=${PACKAGING_TYPE}
         "-Dsrc_dir=${RunCMake_SOURCE_DIR}"
         "-Dbin_dir=${RunCMake_TEST_BINARY_DIR}"
         "-Dconfig_file=${config_file}"
@@ -82,16 +86,20 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source)
   endif()
 endfunction()
 
-function(run_cpack_test TEST_NAME types build)
-  run_cpack_test_common_("${TEST_NAME}" "${types}" "${build}" "" false)
+function(run_cpack_test TEST_NAME types build PACKAGING_TYPES)
+  foreach(packaging_type_ IN LISTS PACKAGING_TYPES)
+    run_cpack_test_common_("${TEST_NAME}" "${types}" "${build}" "" false "${packaging_type_}")
+  endforeach()
+endfunction()
+
+function(run_cpack_test_subtests TEST_NAME SUBTEST_SUFFIXES types build PACKAGING_TYPES)
+  foreach(suffix_ IN LISTS SUBTEST_SUFFIXES)
+    foreach(packaging_type_ IN LISTS PACKAGING_TYPES)
+      run_cpack_test_common_("${TEST_NAME}" "${types}" "${build}" "${suffix_}" false "${packaging_type_}")
+    endforeach()
+  endforeach()
 endfunction()
 
 function(run_cpack_source_test TEST_NAME types build)
-  run_cpack_test_common_("${TEST_NAME}" "${types}" "${build}" "" true)
-endfunction()
-
-function(run_cpack_test_subtests TEST_NAME SUBTEST_SUFFIXES types build)
-  foreach(suffix_ IN LISTS SUBTEST_SUFFIXES)
-    run_cpack_test_common_("${TEST_NAME}" "${types}" "${build}" "${suffix_}" false)
-  endforeach()
+  run_cpack_test_common_("${TEST_NAME}" "${types}" "${build}" "" true "")
 endfunction()

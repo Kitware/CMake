@@ -1,7 +1,3 @@
-if(GENERATOR_TYPE STREQUAL "DEB")
-  set(CPACK_PACKAGE_CONTACT "someone")
-endif()
-
 if(GENERATOR_TYPE STREQUAL "DEB" OR GENERATOR_TYPE STREQUAL "RPM")
   if(GENERATOR_TYPE STREQUAL "DEB")
     set(generator_type_suffix_ "IAN") # not entirely compatible...
@@ -12,3 +8,7 @@ endif()
 
 install(DIRECTORY DESTINATION empty
         COMPONENT test)
+
+if(PACKAGING_TYPE STREQUAL "COMPONENT")
+  set(CPACK_COMPONENTS_ALL test)
+endif()

@@ -35,9 +35,15 @@ endfunction()
 function(toExpectedContentList FILE_NO CONTENT_VAR)
   findExpectedFile("${FILE_NO}" "file_")
 
-  get_filename_component(prefix_ "${file_}" NAME)
-  # NAME_WE removes everything after the dot and dot is in version so use this instead
-  string(REPLACE ".tar.gz" "" prefix_ "${prefix_}")
+  # component and monolithic packages differ for some reason by either having
+  # package filename prefix in path or not
+  if(PACKAGING_TYPE STREQUAL "MONOLITHIC")
+    get_filename_component(prefix_ "${file_}" NAME)
+    # NAME_WE removes everything after the dot and dot is in version so replace instead
+    string(REPLACE ".tar.gz" "/" prefix_ "${prefix_}")
+  else()
+    unset(prefix_)
+  endif()
 
   if(NOT DEFINED TEST_MAIN_INSTALL_PREFIX_PATH)
     set(TEST_MAIN_INSTALL_PREFIX_PATH "/usr")
@@ -45,7 +51,7 @@ function(toExpectedContentList FILE_NO CONTENT_VAR)
 
   unset(filtered_)
   foreach(part_ IN LISTS ${CONTENT_VAR})
-    string(REPLACE "${TEST_MAIN_INSTALL_PREFIX_PATH}" "" part_ "${part_}")
+    string(REGEX REPLACE "^${TEST_MAIN_INSTALL_PREFIX_PATH}(/|$)" "" part_ "${part_}")
 
     if(part_)
       list(APPEND filtered_ "${prefix_}${part_}")
