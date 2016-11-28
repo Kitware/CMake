@@ -1894,40 +1894,24 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   BuildObjectListOrString dirs(this, this->XcodeVersion >= 30);
   BuildObjectListOrString fdirs(this, this->XcodeVersion >= 30);
+  std::vector<std::string> includes;
+  this->CurrentLocalGenerator->GetIncludeDirectories(includes, gtgt, "C",
+                                                     configName);
   std::set<std::string> emitted;
   emitted.insert("/System/Library/Frameworks");
 
-  if (this->XcodeVersion < 60) {
-    std::vector<std::string> includes;
-    this->CurrentLocalGenerator->GetIncludeDirectories(includes, gtgt, "C",
-                                                       configName);
-    for (std::vector<std::string>::iterator i = includes.begin();
-         i != includes.end(); ++i) {
-      if (this->NameResolvesToFramework(*i)) {
-        std::string frameworkDir = *i;
-        frameworkDir += "/../";
-        frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
-        if (emitted.insert(frameworkDir).second) {
-          fdirs.Add(this->XCodeEscapePath(frameworkDir));
-        }
-      } else {
-        std::string incpath = this->XCodeEscapePath(*i);
-        dirs.Add(incpath);
+  for (std::vector<std::string>::iterator i = includes.begin();
+       i != includes.end(); ++i) {
+    if (this->NameResolvesToFramework(*i)) {
+      std::string frameworkDir = *i;
+      frameworkDir += "/../";
+      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
+      if (emitted.insert(frameworkDir).second) {
+        fdirs.Add(this->XCodeEscapePath(frameworkDir));
       }
-    }
-  } else {
-    for (std::set<std::string>::iterator li = languages.begin();
-         li != languages.end(); ++li) {
-      std::vector<std::string> includes;
-      this->CurrentLocalGenerator->GetIncludeDirectories(includes, gtgt, *li,
-                                                         configName);
-      std::string includeFlags = this->CurrentLocalGenerator->GetIncludeFlags(
-        includes, gtgt, *li, true, false, configName);
-
-      std::string& flags = cflags[*li];
-      if (!includeFlags.empty()) {
-        flags += " " + includeFlags;
-      }
+    } else {
+      std::string incpath = this->XCodeEscapePath(*i);
+      dirs.Add(incpath);
     }
   }
   // Add framework search paths needed for linking.
