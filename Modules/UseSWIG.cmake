@@ -57,7 +57,8 @@
 set(SWIG_CXX_EXTENSION "cxx")
 set(SWIG_EXTRA_LIBRARIES "")
 
-set(SWIG_PYTHON_EXTRA_FILE_EXTENSION "py")
+set(SWIG_PYTHON_EXTRA_FILE_EXTENSIONS ".py")
+set(SWIG_JAVA_EXTRA_FILE_EXTENSIONS ".java" "JNI.java")
 
 #
 # For given swig module initialize variables associated with it
@@ -123,9 +124,9 @@ macro(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
     endif ()
 
   endif()
-  foreach(it ${SWIG_${language}_EXTRA_FILE_EXTENSION})
+  foreach(it ${SWIG_${language}_EXTRA_FILE_EXTENSIONS})
     set(${outfiles} ${${outfiles}}
-      "${generatedpath}/${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename}.${it}")
+      "${generatedpath}/${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename}${it}")
   endforeach()
 endmacro()
 
