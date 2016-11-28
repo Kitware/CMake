@@ -147,42 +147,47 @@ protected:
         return Traits::eof();
       }
       if (m_isConsoleInput) {
-        wchar_t wbuffer[128];
+        // ReadConsole doesn't tell if there's more input available
+        // don't support reading more characters than this
+        wchar_t wbuffer[8192];
         DWORD charsRead;
-        if (::ReadConsoleW(m_hInput, wbuffer,
-                           (sizeof(wbuffer) / sizeof(wbuffer[0])) - 1,
-                           &charsRead, NULL) == 0 ||
+        if (ReadConsoleW(m_hInput, wbuffer,
+                         (sizeof(wbuffer) / sizeof(wbuffer[0])), &charsRead,
+                         NULL) == 0 ||
             charsRead == 0) {
           _setg(true);
           return Traits::eof();
         }
-        wbuffer[charsRead] = L'\0';
-        setBuffer(wbuffer, m_ibuffer);
+        setBuffer(std::wstring(wbuffer, charsRead), m_ibuffer);
       } else {
-        std::wstring totalBuffer;
         std::wstring wbuffer;
-        char buffer[128];
+        std::string strbuffer;
         DWORD bytesRead;
-        while (::ReadFile(m_hInput, buffer,
-                          (sizeof(buffer) / sizeof(buffer[0])) - 1, &bytesRead,
-                          NULL) == 0) {
-          if (::GetLastError() == ERROR_MORE_DATA) {
-            buffer[bytesRead] = '\0';
-            if (decodeInputBuffer(buffer, wbuffer)) {
-              totalBuffer += wbuffer;
-              continue;
-            }
+        LARGE_INTEGER size;
+        if (GetFileSizeEx(m_hInput, &size) == 0) {
+          _setg(true);
+          return Traits::eof();
+        }
+        char* buffer = new char[size.LowPart];
+        while (ReadFile(m_hInput, buffer, size.LowPart, &bytesRead, NULL) ==
+               0) {
+          if (GetLastError() == ERROR_MORE_DATA) {
+            strbuffer += std::string(buffer, bytesRead);
+            continue;
           }
           _setg(true);
+          delete[] buffer;
           return Traits::eof();
         }
-        buffer[bytesRead] = '\0';
-        if (!decodeInputBuffer(buffer, wbuffer)) {
+        if (bytesRead > 0) {
+          strbuffer += std::string(buffer, bytesRead);
+        }
+        delete[] buffer;
+        if (!decodeInputBuffer(strbuffer, wbuffer)) {
           _setg(true);
           return Traits::eof();
         }
-        totalBuffer += wbuffer;
-        setBuffer(totalBuffer, m_ibuffer);
+        setBuffer(wbuffer, m_ibuffer);
       }
       _setg();
     }
@@ -315,6 +320,10 @@ private:
   }
   bool encodeOutputBuffer(const std::wstring wbuffer, std::string& buffer)
   {
+    if (wbuffer.size() == 0) {
+      buffer = std::string();
+      return true;
+    }
     const int length =
       WideCharToMultiByte(m_activeOutputCodepage, 0, wbuffer.c_str(),
                           (int)wbuffer.size(), NULL, 0, NULL, NULL);
@@ -329,23 +338,31 @@ private:
     delete[] buf;
     return success;
   }
-  bool decodeInputBuffer(const char* buffer, std::wstring& wbuffer)
+  bool decodeInputBuffer(const std::string buffer, std::wstring& wbuffer)
   {
+    int length = int(buffer.length());
+    if (length == 0) {
+      wbuffer = std::wstring();
+      return true;
+    }
     int actualCodepage = m_activeInputCodepage;
     const char BOM_UTF8[] = { char(0xEF), char(0xBB), char(0xBF) };
-    if (std::memcmp(buffer, BOM_UTF8, sizeof(BOM_UTF8)) == 0) {
+    const char* data = buffer.data();
+    const size_t BOMsize = sizeof(BOM_UTF8);
+    if (length >= BOMsize && std::memcmp(data, BOM_UTF8, BOMsize) == 0) {
       // PowerShell uses UTF-8 with BOM for pipes
       actualCodepage = CP_UTF8;
-      buffer += sizeof(BOM_UTF8);
+      data += BOMsize;
+      length -= BOMsize;
     }
     const int wlength =
-      MultiByteToWideChar(actualCodepage, 0, buffer, -1, NULL, 0);
+      MultiByteToWideChar(actualCodepage, 0, data, length, NULL, 0);
     wchar_t* wbuf = new wchar_t[wlength];
     const bool success =
-      MultiByteToWideChar(actualCodepage, 0, buffer, -1, wbuf, wlength) > 0
+      MultiByteToWideChar(actualCodepage, 0, data, length, wbuf, wlength) > 0
       ? true
       : false;
-    wbuffer = wbuf;
+    wbuffer = std::wstring(wbuf, wlength);
     delete[] wbuf;
     return success;
   }
