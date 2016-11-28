@@ -15,17 +15,10 @@ target_include_directories(upstream SYSTEM PUBLIC
 )
 
 add_library(config_specific INTERFACE)
-if(CMAKE_GENERATOR STREQUAL "Xcode")
-  # CMAKE_BUILD_TYPE does not work here for multi-config generators
-  target_include_directories(config_specific SYSTEM INTERFACE
-    "${CMAKE_CURRENT_SOURCE_DIR}/config_specific"
-  )
-else()
-  set(testConfig ${CMAKE_BUILD_TYPE})
-  target_include_directories(config_specific SYSTEM INTERFACE
-    "$<$<CONFIG:${testConfig}>:${CMAKE_CURRENT_SOURCE_DIR}/config_specific>"
-  )
-endif()
+set(testConfig ${CMAKE_BUILD_TYPE})
+target_include_directories(config_specific SYSTEM INTERFACE
+  "$<$<CONFIG:${testConfig}>:${CMAKE_CURRENT_SOURCE_DIR}/config_specific>"
+)
 
 add_library(consumer consumer.cpp)
 target_link_libraries(consumer upstream config_specific)
