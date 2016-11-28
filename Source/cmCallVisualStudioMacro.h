@@ -5,7 +5,7 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
+#include <string>
 
 /** \class cmCallVisualStudioMacro
  * \brief Control class for communicating with CMake's Visual Studio macros

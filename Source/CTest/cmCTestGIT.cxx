@@ -2,12 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestGIT.h"
 
-#include "cmAlgorithms.h"
-#include "cmCTest.h"
-#include "cmCTestVC.h"
-#include "cmProcessTools.h"
-#include "cmSystemTools.h"
-
 #include <cmsys/FStream.hxx>
 #include <cmsys/Process.h>
 #include <ctype.h>
@@ -15,6 +9,13 @@
 #include <stdlib.h>
 #include <time.h>
 #include <vector>
+
+#include "cmAlgorithms.h"
+#include "cmCTest.h"
+#include "cmCTestVC.h"
+#include "cmProcessOutput.h"
+#include "cmProcessTools.h"
+#include "cmSystemTools.h"
 
 static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,
                                       unsigned int minor, unsigned int fix)

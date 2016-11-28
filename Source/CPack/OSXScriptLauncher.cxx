@@ -3,8 +3,10 @@
 #include <cmsys/FStream.hxx>
 #include <cmsys/Process.h>
 #include <cmsys/SystemTools.hxx>
-
 #include <iostream>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 #include <CoreFoundation/CoreFoundation.h>
 

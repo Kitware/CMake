@@ -3,7 +3,18 @@
 #ifndef cmGlobalVisualStudio11Generator_h
 #define cmGlobalVisualStudio11Generator_h
 
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <set>
+#include <string>
+
 #include "cmGlobalVisualStudio10Generator.h"
+#include "cmStateTypes.h"
+
+class cmGlobalGeneratorFactory;
+class cmMakefile;
+class cmake;
 
 /** \class cmGlobalVisualStudio11Generator  */
 class cmGlobalVisualStudio11Generator : public cmGlobalVisualStudio10Generator

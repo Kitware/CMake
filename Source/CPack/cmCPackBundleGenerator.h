@@ -3,7 +3,11 @@
 #ifndef cmCPackBundleGenerator_h
 #define cmCPackBundleGenerator_h
 
+#include <cmConfigure.h>
+#include <string>
+
 #include "cmCPackDragNDropGenerator.h"
+#include "cmCPackGenerator.h"
 
 /** \class cmCPackBundleGenerator
  * \brief A generator for OSX bundles

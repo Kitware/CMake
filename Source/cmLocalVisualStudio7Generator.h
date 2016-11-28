@@ -3,17 +3,23 @@
 #ifndef cmLocalVisualStudio7Generator_h
 #define cmLocalVisualStudio7Generator_h
 
-#include "cmLocalVisualStudioGenerator.h"
+#include <cmConfigure.h>
 
+#include <iosfwd>
+#include <string>
+#include <vector>
+
+#include "cmLocalVisualStudioGenerator.h"
 #include "cmVisualStudioGeneratorOptions.h"
 
-class cmSourceFile;
 class cmCustomCommand;
-class cmSourceGroup;
-
-class cmLocalVisualStudio7GeneratorOptions;
+class cmGeneratorTarget;
+class cmGlobalGenerator;
 class cmLocalVisualStudio7GeneratorFCInfo;
 class cmLocalVisualStudio7GeneratorInternals;
+class cmMakefile;
+class cmSourceFile;
+class cmSourceGroup;
 
 /** \class cmLocalVisualStudio7Generator
  * \brief Write Visual Studio .NET project files.
@@ -119,6 +125,7 @@ private:
   friend class cmLocalVisualStudio7GeneratorInternals;
 
   class EventWriter;
+
   friend class EventWriter;
 
   std::string ModuleDefinitionFile;

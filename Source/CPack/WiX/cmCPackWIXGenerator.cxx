@@ -4,6 +4,7 @@
 
 #include <CPack/cmCPackComponentGroup.h>
 #include <CPack/cmCPackLog.h>
+#include <algorithm>
 #include <cmCryptoHash.h>
 #include <cmGeneratedFileStream.h>
 #include <cmInstalledFile.h>

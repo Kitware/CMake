@@ -3,6 +3,9 @@
 #ifndef cmCPackOSXX11Generator_h
 #define cmCPackOSXX11Generator_h
 
+#include <cmConfigure.h>
+#include <string>
+
 #include "cmCPackGenerator.h"
 
 /** \class cmCPackOSXX11Generator

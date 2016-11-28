@@ -2,9 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIDEOptions.h"
 
-#include "cmSystemTools.h"
-
 #include <cmsys/String.h>
+#include <iterator>
+#include <string.h>
+
+#include "cmIDEFlagTable.h"
+#include "cmSystemTools.h"
 
 cmIDEOptions::cmIDEOptions()
 {

@@ -1,9 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmSystemTools.h"
+
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <iostream>
+#include <stddef.h>
 #include <string>
+#include <vector>
+
+#include "cmSystemTools.h"
 
 #define cmPassed(m) std::cout << "Passed: " << (m) << "\n"
 #define cmFailed(m)                                                           \

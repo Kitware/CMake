@@ -2,16 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackRPMGenerator.h"
 
-#include "cmCPackComponentGroup.h"
-#include "cmCPackGenerator.h"
-#include "cmCPackLog.h"
-#include "cmSystemTools.h"
-
 #include <algorithm>
+#include <ctype.h>
 #include <map>
 #include <ostream>
 #include <utility>
 #include <vector>
+
+#include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
+#include "cmCPackLog.h"
+#include "cmSystemTools.h"
 
 cmCPackRPMGenerator::cmCPackRPMGenerator()
 {

@@ -3,7 +3,9 @@
 #ifndef cmVisualStudio10ToolsetOptions_h
 #define cmVisualStudio10ToolsetOptions_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
+
+#include <string>
 
 struct cmIDEFlagTable;
 

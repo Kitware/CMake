@@ -3,6 +3,7 @@
 #include "cmGlobalVisualStudio12Generator.h"
 
 #include "cmAlgorithms.h"
+#include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmVS12CLFlagTable.h"

@@ -3,6 +3,12 @@
 #ifndef cmCPackDragNDropGenerator_h
 #define cmCPackDragNDropGenerator_h
 
+#include <cmConfigure.h>
+#include <sstream>
+#include <stddef.h>
+#include <string>
+#include <vector>
+
 #include "cmCPackGenerator.h"
 
 class cmGeneratedFileStream;

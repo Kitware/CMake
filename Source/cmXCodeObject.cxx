@@ -2,9 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmXCodeObject.h"
 
-#include "cmSystemTools.h"
+#include <CoreFoundation/CoreFoundation.h>
+#include <ostream>
 
-#include <CoreFoundation/CoreFoundation.h> // CFUUIDCreate
+#include "cmSystemTools.h"
 
 const char* cmXCodeObject::PBXTypeNames[] = {
   /* clang-format needs this comment to break after the opening brace */

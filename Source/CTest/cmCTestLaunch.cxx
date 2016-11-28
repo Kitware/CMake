@@ -4,23 +4,23 @@
 
 #include <cmConfigure.h>
 
-#include "cmCryptoHash.h"
-#include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmProcessOutput.h"
-#include "cmStateTypes.h"
-#include "cmSystemTools.h"
-#include "cmXMLWriter.h"
-#include "cmake.h"
-
-#include <cm_auto_ptr.hxx>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
+
+#include "cmCryptoHash.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmProcessOutput.h"
+#include "cmStateSnapshot.h"
+#include "cmSystemTools.h"
+#include "cmXMLWriter.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 #ifdef _WIN32
 #include <fcntl.h> // for _O_BINARY

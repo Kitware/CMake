@@ -3,11 +3,13 @@
 #ifndef cmCryptoHash_h
 #define cmCryptoHash_h
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include <cm_auto_ptr.hxx>
+#include <stddef.h>
 #include <string>
 #include <vector>
+
+#include "cm_auto_ptr.hxx"
 
 /**
  * @brief Abstract base class for cryptographic hash generators

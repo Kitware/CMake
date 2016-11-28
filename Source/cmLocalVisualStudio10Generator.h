@@ -3,7 +3,14 @@
 #ifndef cmLocalVisualStudio10Generator_h
 #define cmLocalVisualStudio10Generator_h
 
+#include <cmConfigure.h>
+
+#include <string>
+
 #include "cmLocalVisualStudio7Generator.h"
+
+class cmGlobalGenerator;
+class cmMakefile;
 
 /** \class cmLocalVisualStudio10Generator
  * \brief Write Visual Studio 10 project files.

@@ -2,6 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestScriptHandler.h"
 
+#include <cmsys/Directory.hxx>
+#include <cmsys/Process.h>
+#include <map>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <utility>
+
 #include "cmCTest.h"
 #include "cmCTestBuildCommand.h"
 #include "cmCTestCommand.h"
@@ -23,18 +32,9 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
-#include "cmStateTypes.h"
+#include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include <cmsys/Directory.hxx>
-#include <cmsys/Process.h>
-#include <map>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <utility>
 
 #ifdef _WIN32
 #include <windows.h>

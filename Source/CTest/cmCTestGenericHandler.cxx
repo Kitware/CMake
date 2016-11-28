@@ -2,11 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestGenericHandler.h"
 
-#include "cmCTest.h"
-#include "cmSystemTools.h"
-
+#include <cmConfigure.h>
 #include <sstream>
 #include <utility>
+
+#include "cmCTest.h"
+#include "cmSystemTools.h"
 
 cmCTestGenericHandler::cmCTestGenericHandler()
 {

@@ -5,8 +5,6 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
 class cmGeneratedFileStream;
 
 class GhsMultiGpj

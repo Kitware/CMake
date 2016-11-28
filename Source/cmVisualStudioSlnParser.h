@@ -5,9 +5,10 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
 #include <bitset>
+#include <iosfwd>
+#include <stddef.h>
+#include <string>
 
 class cmSlnData;
 
@@ -65,6 +66,7 @@ public:
 
 protected:
   class State;
+
   friend class State;
   class ParsedLine;
 

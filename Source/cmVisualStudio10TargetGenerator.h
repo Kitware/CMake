@@ -5,19 +5,22 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
-class cmMakefile;
-class cmGeneratorTarget;
-class cmGeneratedFileStream;
-class cmGlobalVisualStudio10Generator;
-class cmSourceFile;
-class cmCustomCommand;
-class cmLocalVisualStudio7Generator;
 class cmComputeLinkInformation;
+class cmCustomCommand;
+class cmGeneratedFileStream;
+class cmGeneratorTarget;
+class cmGlobalVisualStudio10Generator;
+class cmLocalVisualStudio7Generator;
+class cmMakefile;
+class cmSourceFile;
+class cmSourceGroup;
 class cmVisualStudioGeneratorOptions;
-struct cmIDEFlagTable;
-#include "cmSourceGroup.h"
 
 class cmVisualStudio10TargetGenerator
 {

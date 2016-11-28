@@ -1,9 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmFindPackageCommand.h"
+
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <iostream>
 #include <string>
+#include <vector>
+
+#include "cmFindPackageCommand.h"
 
 #define cmPassed(m) std::cout << "Passed: " << (m) << "\n"
 #define cmFailed(m)                                                           \

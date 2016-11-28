@@ -2,20 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackPackageMakerGenerator.h"
 
+#include <assert.h>
+#include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
-#include "cmake.h"
-
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/SystemTools.hxx>
-
-#include <assert.h>
 
 static inline unsigned int getVersion(unsigned int major, unsigned int minor)
 {

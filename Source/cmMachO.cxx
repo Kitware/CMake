@@ -1,10 +1,12 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmStandardIncludes.h" // to get CMAKE_USE_MACH_PARSER first
-
 #include "cmMachO.h"
 
+#include <algorithm>
 #include <cmsys/FStream.hxx>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 // Include the Mach-O format information system header.
 #include <mach-o/fat.h>

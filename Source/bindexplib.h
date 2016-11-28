@@ -5,8 +5,9 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
+#include <set>
+#include <stdio.h>
+#include <string>
 
 class bindexplib
 {

@@ -2,18 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackPKGGenerator.h"
 
+#include <vector>
+
 #include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
-#include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
-#include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
-#include "cmake.h"
-
-#include <cmsys/Glob.hxx>
-#include <cmsys/SystemTools.hxx>
 
 cmCPackPKGGenerator::cmCPackPKGGenerator()
 {

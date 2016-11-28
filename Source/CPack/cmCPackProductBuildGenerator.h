@@ -3,6 +3,10 @@
 #ifndef cmCPackProductBuildGenerator_h
 #define cmCPackProductBuildGenerator_h
 
+#include <cmConfigure.h>
+#include <string>
+
+#include "cmCPackGenerator.h"
 #include "cmCPackPKGGenerator.h"
 
 class cmCPackComponent;

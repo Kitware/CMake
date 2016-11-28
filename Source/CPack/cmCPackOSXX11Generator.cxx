@@ -2,16 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackOSXX11Generator.h"
 
+#include <sstream>
+#include <sys/stat.h>
+
+#include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
-
-#include <cmsys/Glob.hxx>
-#include <cmsys/SystemTools.hxx>
-#include <sys/stat.h>
 
 cmCPackOSXX11Generator::cmCPackOSXX11Generator()
 {

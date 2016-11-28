@@ -5,10 +5,12 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
-#include <cmCTestTestHandler.h>
+#include <set>
 #include <stddef.h>
 #include <string>
 #include <vector>
+
+#include "cmCTestTestHandler.h"
 
 class cmCTest;
 class cmProcess;

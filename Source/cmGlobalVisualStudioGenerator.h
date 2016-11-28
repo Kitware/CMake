@@ -3,7 +3,22 @@
 #ifndef cmGlobalVisualStudioGenerator_h
 #define cmGlobalVisualStudioGenerator_h
 
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "cmGlobalGenerator.h"
+#include "cmTargetDepend.h"
+
+class cmCustomCommand;
+class cmGeneratorTarget;
+class cmLocalGenerator;
+class cmMakefile;
+class cmake;
 
 /** \class cmGlobalVisualStudioGenerator
  * \brief Base class for global Visual Studio generators.
