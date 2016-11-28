@@ -12,4 +12,11 @@ function(get_test_prerequirements found_var config_file)
     file(APPEND "${config_file}"
       "\nset(FAKEROOT_EXECUTABLE \"${FAKEROOT_EXECUTABLE}\")")
   endif()
+
+  # optional tool for some tests
+  find_program(READELF_EXECUTABLE NAMES readelf)
+  if(READELF_EXECUTABLE)
+    file(APPEND "${config_file}"
+      "\nset(READELF_EXECUTABLE \"${READELF_EXECUTABLE}\")")
+  endif()
 endfunction()
