@@ -381,8 +381,9 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       if (_pkg_check_modules_pkg_op)
         list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_ver}")
       else()
-        list(APPEND _pkg_check_modules_exist_query --exists --print-errors --short-errors)
+        list(APPEND _pkg_check_modules_exist_query --exists)
       endif()
+      list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors)
 
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_VERSION)
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_PREFIX)
