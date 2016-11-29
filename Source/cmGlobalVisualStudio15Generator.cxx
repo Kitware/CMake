@@ -8,16 +8,19 @@
 #include "cmMakefile.h"
 #include "cmVS141CLFlagTable.h"
 
-static const char vs15generatorName[] = "Visual Studio 15";
+static const char vs15generatorName[] = "Visual Studio 15 2017";
 
 // Map generator name without year to name with year.
 static const char* cmVS15GenName(const std::string& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs15generatorName,
-              sizeof(vs15generatorName) - 1) != 0) {
+              sizeof(vs15generatorName) - 6) != 0) {
     return 0;
   }
-  const char* p = name.c_str() + sizeof(vs15generatorName) - 1;
+  const char* p = name.c_str() + sizeof(vs15generatorName) - 6;
+  if (cmHasLiteralPrefix(p, " 2017")) {
+    p += 5;
+  }
   genName = std::string(vs15generatorName) + p;
   return p;
 }
@@ -52,7 +55,7 @@ public:
   virtual void GetDocumentation(cmDocumentationEntry& entry) const
   {
     entry.Name = std::string(vs15generatorName) + " [arch]";
-    entry.Brief = "Generates Visual Studio 15 project files.  "
+    entry.Brief = "Generates Visual Studio 2017 project files.  "
                   "Optional [arch] can be \"Win64\" or \"ARM\".";
   }
 

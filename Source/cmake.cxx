@@ -1457,7 +1457,7 @@ void cmake::CreateDefaultGlobalGenerator()
     const char* GeneratorName;
   };
   static VSVersionedGenerator const vsGenerators[] = {
-    { "15.0", "Visual Studio 15" },      //
+    { "15.0", "Visual Studio 15 2017" }, //
     { "14.0", "Visual Studio 14 2015" }, //
     { "12.0", "Visual Studio 12 2013" }, //
     { "11.0", "Visual Studio 11 2012" }, //
