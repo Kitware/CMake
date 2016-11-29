@@ -218,8 +218,8 @@ void rhash_sha256_final(sha256_ctx *ctx, unsigned char* result)
 	/* pad message and run for last block */
 
 	/* append the byte 0x80 to the message */
-	ctx->message[index]   &= le2me_32(~(0xFFFFFFFF << shift));
-	ctx->message[index++] ^= le2me_32(0x80 << shift);
+	ctx->message[index]   &= le2me_32(~(0xFFFFFFFFu << shift));
+	ctx->message[index++] ^= le2me_32(0x80u << shift);
 
 	/* if no room left in the message to store 64-bit message length */
 	if (index > 14) {
