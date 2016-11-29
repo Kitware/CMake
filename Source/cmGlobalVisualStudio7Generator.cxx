@@ -681,20 +681,27 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   // default build if another target depends on it
   int type = target->GetType();
   if (type == cmStateEnums::GLOBAL_TARGET) {
-    // check if INSTALL target is part of default build
-    if (target->GetName() == "INSTALL") {
-      // inspect CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD properties
-      for (std::vector<std::string>::const_iterator i = configs.begin();
-           i != configs.end(); ++i) {
-        const char* propertyValue =
-          target->Target->GetMakefile()->GetDefinition(
-            "CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD");
-        cmGeneratorExpression ge;
-        CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
-          ge.Parse(propertyValue);
-        if (cmSystemTools::IsOn(
-              cge->Evaluate(target->GetLocalGenerator(), *i))) {
-          activeConfigs.insert(*i);
+    std::list<std::string> targetNames;
+    targetNames.push_back("INSTALL");
+    targetNames.push_back("PACKAGE");
+    for (std::list<std::string>::const_iterator t = targetNames.begin();
+         t != targetNames.end(); ++t) {
+      // check if target <*t> is part of default build
+      if (target->GetName() == *t) {
+        const std::string propertyName =
+          "CMAKE_VS_INCLUDE_" + *t + "_TO_DEFAULT_BUILD";
+        // inspect CMAKE_VS_INCLUDE_<*t>_TO_DEFAULT_BUILD properties
+        for (std::vector<std::string>::const_iterator i = configs.begin();
+             i != configs.end(); ++i) {
+          const char* propertyValue =
+            target->Target->GetMakefile()->GetDefinition(propertyName);
+          cmGeneratorExpression ge;
+          CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
+            ge.Parse(propertyValue);
+          if (cmSystemTools::IsOn(
+                cge->Evaluate(target->GetLocalGenerator(), *i))) {
+            activeConfigs.insert(*i);
+          }
         }
       }
     }
