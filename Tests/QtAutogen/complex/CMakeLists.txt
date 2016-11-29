@@ -12,6 +12,9 @@ set(CMAKE_AUTORCC ON)
 # create an executable and two library targets, each requiring automoc:
 add_library(codeeditorLib STATIC codeeditor.cpp)
 add_library(privateSlot OBJECT private_slot.cpp)
+# Pass Qt compiler features to targets that don't link against Qt
+target_compile_features(codeeditorLib PRIVATE ${QT_COMPILE_FEATURES})
+target_compile_features(privateSlot PRIVATE ${QT_COMPILE_FEATURES})
 
 configure_file(generated_resource.qrc.in generated_resource.qrc @ONLY)
 add_custom_command(

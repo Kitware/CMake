@@ -44,6 +44,7 @@ else()
 
 endif()
 
+get_property(QT_COMPILE_FEATURES TARGET ${QT_QTCORE_TARGET} PROPERTY INTERFACE_COMPILE_FEATURES)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # -- Test: AUTORCC
@@ -72,11 +73,13 @@ target_link_libraries(uicOnly ${QT_LIBRARIES})
 # have an effect on generation if AUTORCC is off.
 add_library(empty STATIC empty.cpp not_generated_file.qrc)
 set_target_properties(empty PROPERTIES AUTORCC OFF)
-
 set_target_properties(empty PROPERTIES AUTOMOC TRUE)
 target_link_libraries(empty no_link_language)
 add_library(no_link_language STATIC empty.h)
 set_target_properties(no_link_language PROPERTIES AUTOMOC TRUE)
+# Pass Qt compiler features to targets that don't link against Qt
+target_compile_features(no_link_language PRIVATE ${QT_COMPILE_FEATURES})
+target_compile_features(empty PRIVATE ${QT_COMPILE_FEATURES})
 
 # -- Test: AUTORCC
 # When a file listed in a .qrc file changes the target must be rebuilt
