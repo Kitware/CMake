@@ -63,6 +63,8 @@ static const char* ruleReplaceVars[] = {
   "CMAKE_CURRENT_BINARY_DIR",
   "CMAKE_RANLIB",
   "CMAKE_LINKER",
+  "CMAKE_CUDA_HOST_COMPILER",
+  "CMAKE_CUDA_HOST_LINK_LAUNCHER",
   "CMAKE_CL_SHOWINCLUDES_PREFIX"
 };
 
@@ -1475,6 +1477,9 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     langStdMap["C"].push_back("11");
     langStdMap["C"].push_back("99");
     langStdMap["C"].push_back("90");
+
+    langStdMap["CUDA"].push_back("11");
+    langStdMap["CUDA"].push_back("98");
   }
 
   std::string standard(standardProp);

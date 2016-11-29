@@ -583,11 +583,11 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   std::string const includesString = "$(" + lang + "_INCLUDES)";
   vars.Includes = includesString.c_str();
 
-  // At the moment, it is assumed that C, C++, and Fortran have both
+  // At the moment, it is assumed that C, C++, Fortran, and CUDA have both
   // assembly and preprocessor capabilities. The same is true for the
   // ability to export compile commands
-  bool lang_has_preprocessor =
-    ((lang == "C") || (lang == "CXX") || (lang == "Fortran"));
+  bool lang_has_preprocessor = ((lang == "C") || (lang == "CXX") ||
+                                (lang == "Fortran") || (lang == "CUDA"));
   bool const lang_has_assembly = lang_has_preprocessor;
   bool const lang_can_export_cmds = lang_has_preprocessor;
 
@@ -596,13 +596,22 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
 
   // Construct the compile rules.
   {
-    std::string compileRuleVar = "CMAKE_";
-    compileRuleVar += lang;
-    compileRuleVar += "_COMPILE_OBJECT";
-    std::string compileRule =
-      this->Makefile->GetRequiredDefinition(compileRuleVar);
     std::vector<std::string> compileCommands;
-    cmSystemTools::ExpandListArgument(compileRule, compileCommands);
+    if (lang == "CUDA") {
+      std::string cmdVar;
+      if (this->GeneratorTarget->GetProperty("CUDA_SEPARABLE_COMPILATION")) {
+        cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+      } else {
+        cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
+      }
+      std::string compileRule = this->Makefile->GetRequiredDefinition(cmdVar);
+      cmSystemTools::ExpandListArgument(compileRule, compileCommands);
+    } else {
+      const std::string cmdVar =
+        std::string("CMAKE_") + lang + "_COMPILE_OBJECT";
+      std::string compileRule = this->Makefile->GetRequiredDefinition(cmdVar);
+      cmSystemTools::ExpandListArgument(compileRule, compileCommands);
+    }
 
     if (this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS") &&
         lang_can_export_cmds && compileCommands.size() == 1) {

@@ -101,6 +101,8 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   set(CMAKE_${lang}_SIMULATE_ID "${CMAKE_${lang}_SIMULATE_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_${lang}_SIMULATE_VERSION}" PARENT_SCOPE)
   set(CMAKE_${lang}_STANDARD_COMPUTED_DEFAULT "${CMAKE_${lang}_STANDARD_COMPUTED_DEFAULT}" PARENT_SCOPE)
+  set(CMAKE_${lang}_COMPILER_PRODUCED_OUTPUT "${COMPILER_${lang}_PRODUCED_OUTPUT}" PARENT_SCOPE)
+  set(CMAKE_${lang}_COMPILER_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
 endfunction()
 
 include(CMakeCompilerIdDetection)
@@ -135,7 +137,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags src)
   set(COMPILER_DESCRIPTION
     "Compiler: ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_COMPILER_ID_ARG1}
 Build flags: ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
-Id flags: ${testflags}
+Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
 ")
 
   # Compile the compiler identification source.
@@ -322,6 +324,7 @@ Id flags: ${testflags}
               ${CMAKE_${lang}_COMPILER_ID_ARG1}
               ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
               ${testflags}
+              ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
               "${src}"
       WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
       OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
@@ -400,6 +403,7 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
   # Return the files produced by the compilation.
   set(COMPILER_${lang}_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
   set(COMPILER_${lang}_PRODUCED_OUTPUT "${COMPILER_${lang}_PRODUCED_OUTPUT}" PARENT_SCOPE)
+
 endfunction()
 
 #-----------------------------------------------------------------------------

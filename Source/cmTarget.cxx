@@ -266,6 +266,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("CXX_STANDARD", CM_NULLPTR);
     this->SetPropertyDefault("CXX_STANDARD_REQUIRED", CM_NULLPTR);
     this->SetPropertyDefault("CXX_EXTENSIONS", CM_NULLPTR);
+    this->SetPropertyDefault("CUDA_STANDARD", CM_NULLPTR);
+    this->SetPropertyDefault("CUDA_STANDARD_REQUIRED", CM_NULLPTR);
+    this->SetPropertyDefault("CUDA_EXTENSIONS", CM_NULLPTR);
     this->SetPropertyDefault("LINK_SEARCH_START_STATIC", CM_NULLPTR);
     this->SetPropertyDefault("LINK_SEARCH_END_STATIC", CM_NULLPTR);
   }
@@ -360,6 +363,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       this->GetType() != cmStateEnums::UTILITY) {
     this->SetPropertyDefault("C_VISIBILITY_PRESET", CM_NULLPTR);
     this->SetPropertyDefault("CXX_VISIBILITY_PRESET", CM_NULLPTR);
+    this->SetPropertyDefault("CUDA_VISIBILITY_PRESET", CM_NULLPTR);
     this->SetPropertyDefault("VISIBILITY_INLINES_HIDDEN", CM_NULLPTR);
   }
 

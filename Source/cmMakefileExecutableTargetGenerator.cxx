@@ -10,6 +10,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h"
+#include "cmLinkLineDeviceComputer.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
@@ -56,6 +57,9 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
   // write in rules for object files and custom commands
   this->WriteTargetBuildRules();
 
+  // write the device link rules
+  this->WriteDeviceExecutableRule(false);
+
   // write the link rules
   this->WriteExecutableRule(false);
   if (this->GeneratorTarget->NeedRelinkBeforeInstall(this->ConfigName)) {
@@ -77,6 +81,218 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
   this->CloseFileStreams();
 }
 
+void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
+  bool relink)
+{
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  const std::string cuda_lang("CUDA");
+  cmGeneratorTarget::LinkClosure const* closure =
+    this->GeneratorTarget->GetLinkClosure(this->ConfigName);
+
+  const bool hasCUDA =
+    (std::find(closure->Languages.begin(), closure->Languages.end(),
+               cuda_lang) != closure->Languages.end());
+  if (!hasCUDA) {
+    return;
+  }
+
+  std::vector<std::string> commands;
+
+  // Build list of dependencies.
+  std::vector<std::string> depends;
+  this->AppendLinkDepends(depends);
+
+  // Get the language to use for linking this library.
+  std::string linkLanguage = "CUDA";
+
+  // Get the name of the device object to generate.
+  std::string const targetOutputReal =
+    this->GeneratorTarget->ObjectDirectory + "cmake_device_link.o";
+  this->DeviceLinkObject = targetOutputReal;
+
+  this->NumberOfProgressActions++;
+  if (!this->NoRuleMessages) {
+    cmLocalUnixMakefileGenerator3::EchoProgress progress;
+    this->MakeEchoProgress(progress);
+    // Add the link message.
+    std::string buildEcho = "Linking ";
+    buildEcho += linkLanguage;
+    buildEcho += " device code ";
+    buildEcho += targetOutputReal;
+    this->LocalGenerator->AppendEcho(
+      commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
+  }
+
+  // Build a list of compiler flags and linker flags.
+  std::string flags;
+  std::string linkFlags;
+
+  // Add flags to create an executable.
+  // Add symbol export flags if necessary.
+  if (this->GeneratorTarget->IsExecutableWithExports()) {
+    std::string export_flag_var = "CMAKE_EXE_EXPORTS_";
+    export_flag_var += linkLanguage;
+    export_flag_var += "_FLAG";
+    this->LocalGenerator->AppendFlags(
+      linkFlags, this->Makefile->GetDefinition(export_flag_var));
+  }
+
+  this->LocalGenerator->AppendFlags(linkFlags,
+                                    this->LocalGenerator->GetLinkLibsCMP0065(
+                                      linkLanguage, *this->GeneratorTarget));
+
+  // Add language feature flags.
+  this->AddFeatureFlags(flags, linkLanguage);
+
+  this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
+                                             linkLanguage, this->ConfigName);
+
+  // Add target-specific linker flags.
+  this->LocalGenerator->AppendFlags(
+    linkFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
+  std::string linkFlagsConfig = "LINK_FLAGS_";
+  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
+  this->LocalGenerator->AppendFlags(
+    linkFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
+
+  {
+    CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+      this->CreateLinkLineComputer(
+        this->LocalGenerator,
+        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+
+    this->AddModuleDefinitionFlag(linkLineComputer.get(), linkFlags);
+  }
+
+  // Construct a list of files associated with this executable that
+  // may need to be cleaned.
+  std::vector<std::string> exeCleanFiles;
+  exeCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+    this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutputReal));
+
+  // Determine whether a link script will be used.
+  bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
+
+  // Construct the main link rule.
+  std::vector<std::string> real_link_commands;
+  const std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_EXECUTABLE";
+  const std::string linkRule = this->GetLinkRule(linkRuleVar);
+  std::vector<std::string> commands1;
+  cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
+
+  bool useResponseFileForObjects =
+    this->CheckUseResponseFileForObjects(linkLanguage);
+  bool const useResponseFileForLibs =
+    this->CheckUseResponseFileForLibraries(linkLanguage);
+
+  // Expand the rule variables.
+  {
+    bool useWatcomQuote =
+      this->Makefile->IsOn(linkRuleVar + "_USE_WATCOM_QUOTE");
+
+    // Set path conversion for link script shells.
+    this->LocalGenerator->SetLinkScriptShell(useLinkScript);
+
+    CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+      new cmLinkLineDeviceComputer(
+        this->LocalGenerator,
+        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+    linkLineComputer->SetForResponse(useResponseFileForLibs);
+    linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
+    linkLineComputer->SetRelink(relink);
+
+    // Collect up flags to link in needed libraries.
+    std::string linkLibs;
+    this->CreateLinkLibs(linkLineComputer.get(), linkLibs,
+                         useResponseFileForLibs, depends);
+
+    // Construct object file lists that may be needed to expand the
+    // rule.
+    std::string buildObjs;
+    this->CreateObjectLists(useLinkScript, false, useResponseFileForObjects,
+                            buildObjs, depends, useWatcomQuote);
+
+    cmRulePlaceholderExpander::RuleVariables vars;
+    std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
+
+    objectDir = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->MaybeConvertToRelativePath(
+        this->LocalGenerator->GetCurrentBinaryDirectory(), objectDir),
+      cmOutputConverter::SHELL);
+
+    cmOutputConverter::OutputFormat output = (useWatcomQuote)
+      ? cmOutputConverter::WATCOMQUOTE
+      : cmOutputConverter::SHELL;
+    std::string target = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->MaybeConvertToRelativePath(
+        this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutputReal),
+      output);
+
+    vars.Language = linkLanguage.c_str();
+    vars.Objects = buildObjs.c_str();
+    vars.ObjectDir = objectDir.c_str();
+    vars.Target = target.c_str();
+    vars.LinkLibraries = linkLibs.c_str();
+    vars.Flags = flags.c_str();
+    vars.LinkFlags = linkFlags.c_str();
+
+    std::string launcher;
+
+    const char* val = this->LocalGenerator->GetRuleLauncher(
+      this->GeneratorTarget, "RULE_LAUNCH_LINK");
+    if (val && *val) {
+      launcher = val;
+      launcher += " ";
+    }
+
+    CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+      this->LocalGenerator->CreateRulePlaceholderExpander());
+
+    // Expand placeholders in the commands.
+    rulePlaceholderExpander->SetTargetImpLib(targetOutputReal);
+    for (std::vector<std::string>::iterator i = real_link_commands.begin();
+         i != real_link_commands.end(); ++i) {
+      *i = launcher + *i;
+      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, *i,
+                                                   vars);
+    }
+
+    // Restore path conversion to normal shells.
+    this->LocalGenerator->SetLinkScriptShell(false);
+  }
+
+  // Optionally convert the build rule to use a script to avoid long
+  // command lines in the make shell.
+  if (useLinkScript) {
+    // Use a link script.
+    const char* name = (relink ? "drelink.txt" : "dlink.txt");
+    this->CreateLinkScript(name, real_link_commands, commands1, depends);
+  } else {
+    // No link script.  Just use the link rule directly.
+    commands1 = real_link_commands;
+  }
+  this->LocalGenerator->CreateCDCommand(
+    commands1, this->Makefile->GetCurrentBinaryDirectory(),
+    this->LocalGenerator->GetBinaryDirectory());
+  commands.insert(commands.end(), commands1.begin(), commands1.end());
+  commands1.clear();
+
+  // Write the build rule.
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+                                      targetOutputReal, depends, commands,
+                                      false);
+
+  // Write the main driver rule to build everything in this target.
+  this->WriteTargetDriverRule(targetOutputReal, relink);
+
+  // Clean all the possible executable names and symlinks.
+  this->CleanFiles.insert(this->CleanFiles.end(), exeCleanFiles.begin(),
+                          exeCleanFiles.end());
+#else
+  static_cast<void>(relink);
+#endif
+}
+
 void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 {
   std::vector<std::string> commands;
@@ -84,6 +300,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Build list of dependencies.
   std::vector<std::string> depends;
   this->AppendLinkDepends(depends);
+  if (!this->DeviceLinkObject.empty()) {
+    depends.push_back(this->DeviceLinkObject);
+  }
 
   // Get the name of the executable to generate.
   std::string targetName;
@@ -327,6 +546,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     std::string buildObjs;
     this->CreateObjectLists(useLinkScript, false, useResponseFileForObjects,
                             buildObjs, depends, useWatcomQuote);
+    if (!this->DeviceLinkObject.empty()) {
+      buildObjs += " " +
+        this->LocalGenerator->ConvertToOutputFormat(
+          this->LocalGenerator->MaybeConvertToRelativePath(
+            this->LocalGenerator->GetCurrentBinaryDirectory(),
+            this->DeviceLinkObject),
+          cmOutputConverter::SHELL);
+    }
 
     // maybe create .def file from list of objects
     if (this->GeneratorTarget->IsExecutableWithExports() &&

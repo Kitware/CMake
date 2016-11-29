@@ -324,6 +324,8 @@ if(BUILD_TESTING)
       ADD_TEST_MACRO(VSGNUFortran ${CMAKE_COMMAND} -P runtest.cmake)
     endif()
   endif()
+
+
   ADD_TEST_MACRO(COnly COnly)
   ADD_TEST_MACRO(CxxOnly CxxOnly)
   ADD_TEST_MACRO(CxxSubdirC CxxSubdirC)
@@ -1351,6 +1353,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         )
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocReverse")
     endif()
+  endif()
+
+  if(CMake_TEST_CUDA)
+    add_subdirectory(Cuda)
+    add_subdirectory(CudaOnly)
   endif()
 
   if(CMake_TEST_FindBoost)

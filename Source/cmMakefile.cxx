@@ -4413,10 +4413,13 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
 
   if (setCxx14) {
     target->SetProperty("CXX_STANDARD", "14");
+    target->SetProperty("CUDA_STANDARD", "14");
   } else if (setCxx11) {
     target->SetProperty("CXX_STANDARD", "11");
+    target->SetProperty("CUDA_STANDARD", "11");
   } else if (setCxx98) {
     target->SetProperty("CXX_STANDARD", "98");
+    target->SetProperty("CUDA_STANDARD", "98");
   }
   return true;
 }
