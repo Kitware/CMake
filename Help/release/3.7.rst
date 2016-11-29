@@ -31,9 +31,9 @@ Generators
   This is equivalent to ``cd sub/dir; make {test,install,package}``
   with :ref:`Makefile Generators`.
 
-* The :generator:`Visual Studio 15` generator was added.  This is
-  experimental and based on Preview 5 because this version of VS
-  has not been released.
+* The :generator:`Visual Studio 15 2017` generator was added.  This is
+  experimental and based on "Visual Studio 2017 RC" because this version
+  of VS has not been released.
 
 * :ref:`Visual Studio Generators` for VS 2010 and above learned to
   place ``.natvis`` source files into VS project files properly.
