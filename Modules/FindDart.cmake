@@ -26,8 +26,6 @@ find_path(DART_ROOT README.INSTALL
     DOC "If you have Dart installed, where is it located?"
     )
 
-# handle the QUIETLY and REQUIRED arguments and set DART_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Dart DEFAULT_MSG DART_ROOT)
 

@@ -73,10 +73,6 @@ if(ARMADILLO_INCLUDE_DIR)
   set(ARMADILLO_VERSION_STRING "${ARMADILLO_VERSION_MAJOR}.${ARMADILLO_VERSION_MINOR}.${ARMADILLO_VERSION_PATCH}")
 endif ()
 
-#======================
-
-
-# Checks 'REQUIRED', 'QUIET' and versions.
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(Armadillo
   REQUIRED_VARS ARMADILLO_LIBRARY ARMADILLO_INCLUDE_DIR
@@ -88,10 +84,7 @@ if (ARMADILLO_FOUND)
   set(ARMADILLO_LIBRARIES ${ARMADILLO_LIBRARY})
 endif ()
 
-
 # Hide internal variables
 mark_as_advanced(
   ARMADILLO_INCLUDE_DIR
   ARMADILLO_LIBRARY)
-
-#======================

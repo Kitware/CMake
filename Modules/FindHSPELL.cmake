@@ -36,12 +36,9 @@ if (HSPELL_INCLUDE_DIR)
     unset(HSPELL_H)
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set HSPELL_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(HSPELL
                                   REQUIRED_VARS HSPELL_LIBRARIES HSPELL_INCLUDE_DIR
                                   VERSION_VAR HSPELL_VERSION_STRING)
 
 mark_as_advanced(HSPELL_INCLUDE_DIR HSPELL_LIBRARIES)
-

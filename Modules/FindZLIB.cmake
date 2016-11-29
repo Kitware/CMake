@@ -108,8 +108,6 @@ if(ZLIB_INCLUDE_DIR AND EXISTS "${ZLIB_INCLUDE_DIR}/zlib.h")
     set(ZLIB_PATCH_VERSION "${ZLIB_VERSION_PATCH}")
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set ZLIB_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(ZLIB REQUIRED_VARS ZLIB_LIBRARY ZLIB_INCLUDE_DIR
                                        VERSION_VAR ZLIB_VERSION_STRING)

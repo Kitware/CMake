@@ -140,8 +140,6 @@ if(ZLIB_FOUND)
   endif ()
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set PNG_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PNG
                                   REQUIRED_VARS PNG_LIBRARY PNG_PNG_INCLUDE_DIR

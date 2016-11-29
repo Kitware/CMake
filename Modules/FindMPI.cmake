@@ -91,7 +91,6 @@
 #
 # In new projects, please use the ``MPI_<lang>_XXX`` equivalents.
 
-# include this to handle the QUIETLY and REQUIRED arguments
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 #

@@ -205,8 +205,6 @@ find_path(TK_INCLUDE_PATH
   HINTS ${TCLTK_POSSIBLE_INCLUDE_PATHS}
   )
 
-# handle the QUIETLY and REQUIRED arguments and set TCL_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(TCL DEFAULT_MSG TCL_LIBRARY TCL_INCLUDE_PATH)

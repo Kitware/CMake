@@ -89,8 +89,6 @@ if(TCL_TCLSH)
                    OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Tclsh
                                   REQUIRED_VARS TCL_TCLSH

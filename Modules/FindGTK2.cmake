@@ -957,4 +957,3 @@ endif()
 if(GTK2_INCLUDE_DIRS)
    list(REMOVE_DUPLICATES GTK2_INCLUDE_DIRS)
 endif()
-

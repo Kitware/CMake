@@ -253,5 +253,3 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(BISON REQUIRED_VARS  BISON_EXECUTABLE
                                         VERSION_VAR BISON_VERSION)
-
-# FindBISON.cmake ends here

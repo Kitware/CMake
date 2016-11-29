@@ -65,9 +65,6 @@ if(GIT_EXECUTABLE)
   unset(git_version)
 endif()
 
-# Handle the QUIETLY and REQUIRED arguments and set Git_FOUND to TRUE if
-# all listed variables are TRUE
-
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(Git
                                   REQUIRED_VARS GIT_EXECUTABLE

@@ -43,8 +43,5 @@ find_library(PHYSFS_LIBRARY
   /opt
 )
 
-# handle the QUIETLY and REQUIRED arguments and set PHYSFS_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PhysFS DEFAULT_MSG PHYSFS_LIBRARY PHYSFS_INCLUDE_DIR)
-

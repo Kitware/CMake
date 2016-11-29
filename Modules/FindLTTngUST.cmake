@@ -90,8 +90,6 @@ if(LTTNGUST_INCLUDE_DIRS AND LTTNGUST_LIBRARIES)
   set(LTTNGUST_LIBRARIES ${LTTNGUST_LIBRARIES} ${CMAKE_DL_LIBS})
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set LTTNGUST_FOUND to
-# TRUE if all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(LTTngUST FOUND_VAR LTTNGUST_FOUND
                                   REQUIRED_VARS LTTNGUST_LIBRARIES

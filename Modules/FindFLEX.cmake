@@ -218,5 +218,3 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(FLEX REQUIRED_VARS FLEX_EXECUTABLE
                                        VERSION_VAR FLEX_VERSION)
-
-# FindFLEX.cmake ends here

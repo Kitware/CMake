@@ -46,17 +46,11 @@ if(LibArchive_INCLUDE_DIR AND EXISTS "${LibArchive_INCLUDE_DIR}/archive.h")
   unset(_LibArchive_VERSION_STRING)
 endif()
 
-# Handle the QUIETLY and REQUIRED arguments and set LIBARCHIVE_FOUND
-# to TRUE if all listed variables are TRUE.
-# (Use ${CMAKE_ROOT}/Modules instead of ${CMAKE_CURRENT_LIST_DIR} because CMake
-#  itself includes this FindLibArchive when built with an older CMake that does
-#  not provide it.  The older CMake also does not have CMAKE_CURRENT_LIST_DIR.)
-include(${CMAKE_ROOT}/Modules/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(LibArchive
                                   REQUIRED_VARS LibArchive_LIBRARY LibArchive_INCLUDE_DIR
                                   VERSION_VAR LibArchive_VERSION
   )
-set(LibArchive_FOUND ${LIBARCHIVE_FOUND})
 unset(LIBARCHIVE_FOUND)
 
 if(LibArchive_FOUND)

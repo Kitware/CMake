@@ -35,9 +35,6 @@ find_library( MPEG2_vo_LIBRARY vo
   /usr/local/livid/mpeg2dec/libvo/.libs
 )
 
-
-# handle the QUIETLY and REQUIRED arguments and set MPEG2_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(MPEG2 DEFAULT_MSG MPEG2_mpeg2_LIBRARY MPEG2_INCLUDE_DIR)
 

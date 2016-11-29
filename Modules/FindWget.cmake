@@ -21,8 +21,6 @@ find_program(WGET_EXECUTABLE
   ${CYGWIN_INSTALL_PATH}/bin
 )
 
-# handle the QUIETLY and REQUIRED arguments and set WGET_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Wget DEFAULT_MSG WGET_EXECUTABLE)
 
@@ -30,4 +28,4 @@ mark_as_advanced( WGET_EXECUTABLE )
 
 # WGET option is deprecated.
 # use WGET_EXECUTABLE instead.
-set (WGET ${WGET_EXECUTABLE} )
+set (WGET ${WGET_EXECUTABLE})
