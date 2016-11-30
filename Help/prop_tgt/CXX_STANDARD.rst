@@ -8,7 +8,7 @@ to build this target.  For some compilers, this results in adding a
 flag such as ``-std=gnu++11`` to the compile line.  For compilers that
 have no notion of a standard level, such as MSVC, this has no effect.
 
-Supported values are ``98``, ``11`` and ``14``.
+Supported values are ``98``, ``11``, ``14``, and ``17``.
 
 If the value requested does not result in a compile flag being added for
 the compiler in use, a previous standard flag will be added instead.  This

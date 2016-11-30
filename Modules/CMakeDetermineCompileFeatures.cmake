@@ -48,6 +48,7 @@ function(cmake_determine_compile_features lang)
     set(CMAKE_CXX98_COMPILE_FEATURES)
     set(CMAKE_CXX11_COMPILE_FEATURES)
     set(CMAKE_CXX14_COMPILE_FEATURES)
+    set(CMAKE_CXX17_COMPILE_FEATURES)
 
     include("${CMAKE_ROOT}/Modules/Internal/FeatureTesting.cmake")
 
@@ -58,6 +59,9 @@ function(cmake_determine_compile_features lang)
       return()
     endif()
 
+    if (CMAKE_CXX14_COMPILE_FEATURES AND CMAKE_CXX17_COMPILE_FEATURES)
+      list(REMOVE_ITEM CMAKE_CXX17_COMPILE_FEATURES ${CMAKE_CXX14_COMPILE_FEATURES})
+    endif()
     if (CMAKE_CXX11_COMPILE_FEATURES AND CMAKE_CXX14_COMPILE_FEATURES)
       list(REMOVE_ITEM CMAKE_CXX14_COMPILE_FEATURES ${CMAKE_CXX11_COMPILE_FEATURES})
     endif()
@@ -70,6 +74,7 @@ function(cmake_determine_compile_features lang)
         ${CMAKE_CXX98_COMPILE_FEATURES}
         ${CMAKE_CXX11_COMPILE_FEATURES}
         ${CMAKE_CXX14_COMPILE_FEATURES}
+        ${CMAKE_CXX17_COMPILE_FEATURES}
       )
     endif()
 
@@ -77,6 +82,7 @@ function(cmake_determine_compile_features lang)
     set(CMAKE_CXX98_COMPILE_FEATURES ${CMAKE_CXX98_COMPILE_FEATURES} PARENT_SCOPE)
     set(CMAKE_CXX11_COMPILE_FEATURES ${CMAKE_CXX11_COMPILE_FEATURES} PARENT_SCOPE)
     set(CMAKE_CXX14_COMPILE_FEATURES ${CMAKE_CXX14_COMPILE_FEATURES} PARENT_SCOPE)
+    set(CMAKE_CXX17_COMPILE_FEATURES ${CMAKE_CXX17_COMPILE_FEATURES} PARENT_SCOPE)
 
     message(STATUS "Detecting ${lang} compile features - done")
   endif()
