@@ -359,7 +359,14 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
       compilePdbPath =
         this->GeneratorTarget->GetCompilePDBPath(this->GetConfigName());
       if (compilePdbPath.empty()) {
+        // Match VS default: `$(IntDir)vc$(PlatformToolsetVersion).pdb`.
+        // A trailing slash tells the toolchain to add its default file name.
         compilePdbPath = this->GeneratorTarget->GetSupportDirectory() + "/";
+        if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
+          // Match VS default for static libs: `$(IntDir)$(ProjectName).pdb`.
+          compilePdbPath += this->GeneratorTarget->GetName();
+          compilePdbPath += ".pdb";
+        }
       }
     }
 
