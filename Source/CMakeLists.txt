@@ -440,24 +440,10 @@ set(SRCS
   cmCreateTestSourceList.h
   cmDefinePropertyCommand.cxx
   cmDefinePropertyCommand.h
-  cmElseCommand.cxx
-  cmElseCommand.h
-  cmElseIfCommand.cxx
-  cmElseIfCommand.h
   cmEnableLanguageCommand.cxx
   cmEnableLanguageCommand.h
   cmEnableTestingCommand.cxx
   cmEnableTestingCommand.h
-  cmEndForEachCommand.cxx
-  cmEndForEachCommand.h
-  cmEndFunctionCommand.cxx
-  cmEndFunctionCommand.h
-  cmEndIfCommand.cxx
-  cmEndIfCommand.h
-  cmEndMacroCommand.cxx
-  cmEndMacroCommand.h
-  cmEndWhileCommand.cxx
-  cmEndWhileCommand.h
   cmExecProgramCommand.cxx
   cmExecProgramCommand.h
   cmExecuteProcessCommand.cxx
@@ -612,6 +598,8 @@ set(SRCS
   cmTryCompileCommand.h
   cmTryRunCommand.cxx
   cmTryRunCommand.h
+  cmUnexpectedCommand.cxx
+  cmUnexpectedCommand.h
   cmUnsetCommand.cxx
   cmUnsetCommand.h
   cmUseMangledMesaCommand.cxx
