@@ -681,6 +681,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
   }
 
+  // Initialize autogen target dependencies
   std::vector<std::string> depends;
   if (const char* autogenDepends =
         target->GetProperty("AUTOGEN_TARGET_DEPENDS")) {
@@ -737,6 +738,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     //  https://connect.microsoft.com/VisualStudio/feedback/details/769495
     usePRE_BUILD = vsgg->GetVersion() >= cmGlobalVisualStudioGenerator::VS7;
     if (usePRE_BUILD) {
+      // If the autogen target depends on an other target
+      // don't use PRE_BUILD
       for (std::vector<std::string>::iterator it = depends.begin();
            it != depends.end(); ++it) {
         if (!makefile->FindTargetToUse(it->c_str())) {
