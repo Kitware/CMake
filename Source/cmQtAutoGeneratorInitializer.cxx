@@ -650,14 +650,10 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target)
 void cmQtAutoGeneratorInitializer::InitializeAutogenSources(
   cmGeneratorTarget* target)
 {
-  cmMakefile* makefile = target->Target->GetMakefile();
-
   if (target->GetPropertyAsBool("AUTOMOC")) {
-    std::string automocTargetName = GetAutogenTargetName(target);
-    std::string mocCppFile = makefile->GetCurrentBinaryDirectory();
-    mocCppFile += "/";
-    mocCppFile += automocTargetName;
-    mocCppFile += ".cpp";
+    cmMakefile* makefile = target->Target->GetMakefile();
+    std::string mocCppFile = GetAutogenTargetBuildDir(target);
+    mocCppFile += "moc_compilation.cpp";
     makefile->GetOrCreateSource(mocCppFile, true);
     makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES", mocCppFile.c_str(),
                              false);

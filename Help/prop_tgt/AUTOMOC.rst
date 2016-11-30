@@ -30,7 +30,7 @@ source files at build time and invoke moc accordingly.
   alternative extensions, such as ``hpp``, ``hxx`` etc when searching
   for headers.  The resulting moc files, which are not included as shown
   above in any of the source files are included in a generated
-  ``<targetname>_automoc.cpp`` file, which is compiled as part of the
+  ``moc_compilation.cpp`` file, which is compiled as part of the
   target.
 
 This property is initialized by the value of the :variable:`CMAKE_AUTOMOC`
