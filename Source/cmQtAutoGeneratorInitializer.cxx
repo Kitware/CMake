@@ -429,7 +429,7 @@ static void RccMergeOptions(std::vector<std::string>& opts,
 static bool RccListInputsQt5(cmSourceFile* sf, cmGeneratorTarget const* target,
                              std::vector<std::string>& depends)
 {
-  std::string rccCommand = RccGetExecutable(target);
+  const std::string rccCommand = RccGetExecutable(target);
 
   bool hasDashDashList = false;
   // Read rcc features
@@ -839,7 +839,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
   static_cast<void>(varScope);
 
   // create a custom target for running generators at buildtime:
-  std::string autogenTargetName = GetAutogenTargetName(target);
+  const std::string autogenTargetName = GetAutogenTargetName(target);
 
   makefile->AddDefinition(
     "_moc_target_name",
