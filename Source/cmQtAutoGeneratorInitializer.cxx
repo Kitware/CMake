@@ -634,8 +634,7 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target)
     }
   }
   makefile->AddDefinition(
-    "_qt_rcc_inputs_" + target->GetName(),
-    cmOutputConverter::EscapeForCMake(qrcInputs).c_str());
+    "_qt_rcc_inputs", cmOutputConverter::EscapeForCMake(qrcInputs).c_str());
 
   makefile->AddDefinition(
     "_rcc_files", cmOutputConverter::EscapeForCMake(_rcc_files).c_str());
@@ -897,9 +896,6 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
   inputFile += "/Modules/AutogenInfo.cmake.in";
   std::string outputFile = targetDir;
   outputFile += "/AutogenInfo.cmake";
-  makefile->AddDefinition(
-    "_qt_rcc_inputs",
-    makefile->GetDefinition("_qt_rcc_inputs_" + target->GetName()));
   makefile->ConfigureFile(inputFile.c_str(), outputFile.c_str(), false, true,
                           false);
 
