@@ -705,13 +705,13 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   {
     std::vector<std::string> toolNames;
     if (target->GetPropertyAsBool("AUTOMOC")) {
-      toolNames.push_back("moc");
+      toolNames.push_back("MOC");
     }
     if (target->GetPropertyAsBool("AUTOUIC")) {
-      toolNames.push_back("uic");
+      toolNames.push_back("UIC");
     }
     if (target->GetPropertyAsBool("AUTORCC")) {
-      toolNames.push_back("rcc");
+      toolNames.push_back("RCC");
     }
 
     std::string tools = toolNames[0];
