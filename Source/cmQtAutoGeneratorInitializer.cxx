@@ -671,54 +671,59 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 {
   cmMakefile* makefile = target->Target->GetMakefile();
 
+  // Create a custom target for running generators at buildtime
+  const std::string autogenTargetName = GetAutogenTargetName(target);
+  const std::string workingDirectory =
+    cmSystemTools::CollapseFullPath("", makefile->GetCurrentBinaryDirectory());
+
   std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
   if (qtMajorVersion == "") {
     qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
   }
-
-  // create a custom target for running generators at buildtime:
-  std::string autogenTargetName = GetAutogenTargetName(target);
-
-  cmCustomCommandLine currentLine;
-  currentLine.push_back(cmSystemTools::GetCMakeCommand());
-  currentLine.push_back("-E");
-  currentLine.push_back("cmake_autogen");
-  currentLine.push_back(GetAutogenTargetFilesDir(target));
-  currentLine.push_back("$<CONFIGURATION>");
-
-  cmCustomCommandLines commandLines;
-  commandLines.push_back(currentLine);
-
-  std::string workingDirectory =
-    cmSystemTools::CollapseFullPath("", makefile->GetCurrentBinaryDirectory());
 
   std::vector<std::string> depends;
   if (const char* autogenDepends =
         target->GetProperty("AUTOGEN_TARGET_DEPENDS")) {
     cmSystemTools::ExpandListArgument(autogenDepends, depends);
   }
-  std::vector<std::string> toolNames;
-  if (target->GetPropertyAsBool("AUTOMOC")) {
-    toolNames.push_back("moc");
-  }
-  if (target->GetPropertyAsBool("AUTOUIC")) {
-    toolNames.push_back("uic");
-  }
-  if (target->GetPropertyAsBool("AUTORCC")) {
-    toolNames.push_back("rcc");
+
+  // Compose command lines
+  cmCustomCommandLines commandLines;
+  {
+    cmCustomCommandLine currentLine;
+    currentLine.push_back(cmSystemTools::GetCMakeCommand());
+    currentLine.push_back("-E");
+    currentLine.push_back("cmake_autogen");
+    currentLine.push_back(GetAutogenTargetFilesDir(target));
+    currentLine.push_back("$<CONFIGURATION>");
+    commandLines.push_back(currentLine);
   }
 
-  std::string tools = toolNames[0];
-  toolNames.erase(toolNames.begin());
-  while (toolNames.size() > 1) {
-    tools += ", " + toolNames[0];
+  // Compose target comment
+  std::string autogenComment;
+  {
+    std::vector<std::string> toolNames;
+    if (target->GetPropertyAsBool("AUTOMOC")) {
+      toolNames.push_back("moc");
+    }
+    if (target->GetPropertyAsBool("AUTOUIC")) {
+      toolNames.push_back("uic");
+    }
+    if (target->GetPropertyAsBool("AUTORCC")) {
+      toolNames.push_back("rcc");
+    }
+
+    std::string tools = toolNames[0];
     toolNames.erase(toolNames.begin());
+    while (toolNames.size() > 1) {
+      tools += ", " + toolNames[0];
+      toolNames.erase(toolNames.begin());
+    }
+    if (toolNames.size() == 1) {
+      tools += " and " + toolNames[0];
+    }
+    autogenComment = "Automatic " + tools + " for target " + target->GetName();
   }
-  if (toolNames.size() == 1) {
-    tools += " and " + toolNames[0];
-  }
-  std::string autogenComment = "Automatic " + tools + " for target ";
-  autogenComment += target->GetName();
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool usePRE_BUILD = false;
