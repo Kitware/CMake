@@ -558,7 +558,7 @@ static bool ListQtRccInputs(const std::string& qtMajorVersion,
   return ListQt4RccInputs(sf, depends);
 }
 
-static void SetupAutoRccTarget(cmGeneratorTarget const* target)
+static void RccSetupAutoTarget(cmGeneratorTarget const* target)
 {
   std::string _rcc_files;
   const char* sepRccFiles = "";
@@ -890,7 +890,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     SetupAutoUicTarget(target, skipUic, configUicOptions);
   }
   if (target->GetPropertyAsBool("AUTORCC")) {
-    SetupAutoRccTarget(target);
+    RccSetupAutoTarget(target);
   }
 
   std::string inputFile = cmSystemTools::GetCMakeRoot();
