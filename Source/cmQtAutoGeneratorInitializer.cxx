@@ -755,20 +755,19 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
       || usePRE_BUILD
 #endif
       ) {
-    std::vector<cmSourceFile*> srcFiles;
-    target->GetConfigCommonSourceFiles(srcFiles);
-    cmFilePathUuid fpathUuid(makefile);
-    for (std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
-         fileIt != srcFiles.end(); ++fileIt) {
-      cmSourceFile* sf = *fileIt;
-      std::string absFile = cmsys::SystemTools::GetRealPath(sf->GetFullPath());
-
-      std::string ext = sf->GetExtension();
-
-      if (target->GetPropertyAsBool("AUTORCC")) {
-        if (ext == "qrc" &&
+    if (target->GetPropertyAsBool("AUTORCC")) {
+      std::vector<cmSourceFile*> srcFiles;
+      target->GetConfigCommonSourceFiles(srcFiles);
+      cmFilePathUuid fpathUuid(makefile);
+      for (std::vector<cmSourceFile*>::const_iterator fileIt =
+             srcFiles.begin();
+           fileIt != srcFiles.end(); ++fileIt) {
+        cmSourceFile* sf = *fileIt;
+        if (sf->GetExtension() == "qrc" &&
             !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"))) {
           {
+            const std::string absFile =
+              cmsys::SystemTools::GetRealPath(sf->GetFullPath());
             std::string rcc_output_file = GetAutogenTargetBuildDir(target);
             // Create output directory
             cmSystemTools::MakeDirectory(rcc_output_file.c_str());
