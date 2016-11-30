@@ -634,18 +634,15 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target)
     }
   }
   makefile->AddDefinition(
-    "_qt_rcc_inputs", cmOutputConverter::EscapeForCMake(qrcInputs).c_str());
-
+    "_rcc_inputs", cmOutputConverter::EscapeForCMake(qrcInputs).c_str());
   makefile->AddDefinition(
     "_rcc_files", cmOutputConverter::EscapeForCMake(_rcc_files).c_str());
-
   makefile->AddDefinition(
-    "_qt_rcc_options_files",
+    "_rcc_options_files",
     cmOutputConverter::EscapeForCMake(rccFileFiles).c_str());
   makefile->AddDefinition(
-    "_qt_rcc_options_options",
+    "_rcc_options_options",
     cmOutputConverter::EscapeForCMake(rccFileOptions).c_str());
-
   makefile->AddDefinition("_qt_rcc_executable",
                           RccGetExecutable(target).c_str());
 }
