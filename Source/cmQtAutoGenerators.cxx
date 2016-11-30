@@ -1077,11 +1077,9 @@ bool cmQtAutoGenerators::GenerateMocFiles(
 
   // actually write _automoc.cpp
   {
-    std::string msg = "Generating moc compilation ";
+    std::string msg = "Generating MOC compilation ";
     msg += this->OutMocCppFilenameRel;
-    cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
-                                       cmsysTerminal_Color_ForegroundBold,
-                                     msg.c_str(), true, this->ColorOutput);
+    this->LogBold(msg);
   }
   // Make sure the parent directory exists
   bool success = this->makeParentDirectory(this->OutMocCppFilenameAbs);
@@ -1119,11 +1117,9 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
                                                      &sourceNewerThanMoc);
   if (this->GenerateAll || !success || sourceNewerThanMoc >= 0) {
     {
-      std::string msg = "Generating moc source ";
+      std::string msg = "Generating MOC source ";
       msg += mocFileName;
-      cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
-                                         cmsysTerminal_Color_ForegroundBold,
-                                       msg.c_str(), true, this->ColorOutput);
+      this->LogBold(msg);
     }
 
     // Make sure the parent directory exists
@@ -1245,11 +1241,9 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
                                                      &sourceNewerThanUi);
   if (this->GenerateAll || !success || sourceNewerThanUi >= 0) {
     {
-      std::string msg = "Generating ui header ";
+      std::string msg = "Generating UIC header ";
       msg += uiOutputFile;
-      cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
-                                         cmsysTerminal_Color_ForegroundBold,
-                                       msg.c_str(), true, this->ColorOutput);
+      this->LogBold(msg);
     }
 
     // Make sure the parent directory exists
@@ -1395,11 +1389,9 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
 
   if (this->GenerateAll || generateQrc) {
     {
-      std::string msg = "Generating qrc source ";
+      std::string msg = "Generating QRC source ";
       msg += qrcOutputFile;
-      cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
-                                         cmsysTerminal_Color_ForegroundBold,
-                                       msg.c_str(), true, this->ColorOutput);
+      this->LogBold(msg);
     }
 
     // Make sure the parent directory exists
@@ -1491,6 +1483,13 @@ void cmQtAutoGenerators::LogErrorNameCollision(
     err << it->first << " : " << it->second << std::endl;
   }
   this->LogError(err.str());
+}
+
+void cmQtAutoGenerators::LogBold(const std::string& message)
+{
+  cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
+                                     cmsysTerminal_Color_ForegroundBold,
+                                   message.c_str(), true, this->ColorOutput);
 }
 
 void cmQtAutoGenerators::LogInfo(const std::string& message)

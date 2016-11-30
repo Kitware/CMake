@@ -80,6 +80,7 @@ private:
   void LogErrorNameCollision(
     const std::string& message,
     const std::multimap<std::string, std::string>& collisions);
+  void LogBold(const std::string& message);
   void LogInfo(const std::string& message);
   void LogWarning(const std::string& message);
   void LogError(const std::string& message);
