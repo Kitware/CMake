@@ -374,14 +374,13 @@ bool cmQtAutoGenerators::WriteOldMocDefinitionsFile(
   {
     cmsys::ofstream outfile;
     outfile.open(filename.c_str(), std::ios::trunc);
-    if (outfile.is_open()) {
+    success = outfile.is_open();
+    if (success) {
       outfile << "set(AM_OLD_COMPILE_SETTINGS "
               << cmOutputConverter::EscapeForCMake(
                    this->CurrentCompileSettingsStr)
               << ")\n";
       success = outfile.good();
-    } else {
-      success = false;
     }
   }
 
@@ -1084,14 +1083,28 @@ bool cmQtAutoGenerators::GenerateMocFiles(
                                        cmsysTerminal_Color_ForegroundBold,
                                      msg.c_str(), true, this->ColorOutput);
   }
-  {
+  // Make sure the parent directory exists
+  bool success = this->makeParentDirectory(this->OutMocCppFilenameAbs);
+  if (success) {
     cmsys::ofstream outfile;
     outfile.open(this->OutMocCppFilenameAbs.c_str(), std::ios::trunc);
-    outfile << automocSource;
-    outfile.close();
+    if (!outfile.is_open()) {
+      success = false;
+      std::ostringstream err;
+      err << "AUTOGEN: error opening " << this->OutMocCppFilenameAbs << "\n";
+      this->LogError(err.str());
+    } else {
+      outfile << automocSource;
+      // Check for write errors
+      if (!outfile.good()) {
+        success = false;
+        std::ostringstream err;
+        err << "AUTOGEN: error writing " << this->OutMocCppFilenameAbs << "\n";
+        this->LogError(err.str());
+      }
+    }
   }
-
-  return true;
+  return success;
 }
 
 /**
@@ -1105,17 +1118,19 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
   bool success = cmsys::SystemTools::FileTimeCompare(sourceFile, mocFilePath,
                                                      &sourceNewerThanMoc);
   if (this->GenerateAll || !success || sourceNewerThanMoc >= 0) {
-    // make sure the directory for the resulting moc file exists
-    std::string mocDir = mocFilePath.substr(0, mocFilePath.rfind('/'));
-    if (!cmsys::SystemTools::FileExists(mocDir.c_str(), false)) {
-      cmsys::SystemTools::MakeDirectory(mocDir.c_str());
+    {
+      std::string msg = "Generating moc source ";
+      msg += mocFileName;
+      cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
+                                         cmsysTerminal_Color_ForegroundBold,
+                                       msg.c_str(), true, this->ColorOutput);
     }
 
-    std::string msg = "Generating moc source ";
-    msg += mocFileName;
-    cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
-                                       cmsysTerminal_Color_ForegroundBold,
-                                     msg.c_str(), true, this->ColorOutput);
+    // Make sure the parent directory exists
+    if (!this->makeParentDirectory(mocFilePath)) {
+      this->RunMocFailed = true;
+      return false;
+    }
 
     std::vector<std::string> command;
     command.push_back(this->MocExecutable);
@@ -1223,21 +1238,25 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
                                     const std::string& uiInputFile,
                                     const std::string& uiOutputFile)
 {
-  if (!cmsys::SystemTools::FileExists(this->Builddir.c_str(), false)) {
-    cmsys::SystemTools::MakeDirectory(this->Builddir.c_str());
-  }
-
   const std::string uiBuildFile = this->Builddir + uiOutputFile;
 
   int sourceNewerThanUi = 0;
   bool success = cmsys::SystemTools::FileTimeCompare(uiInputFile, uiBuildFile,
                                                      &sourceNewerThanUi);
   if (this->GenerateAll || !success || sourceNewerThanUi >= 0) {
-    std::string msg = "Generating ui header ";
-    msg += uiOutputFile;
-    cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
-                                       cmsysTerminal_Color_ForegroundBold,
-                                     msg.c_str(), true, this->ColorOutput);
+    {
+      std::string msg = "Generating ui header ";
+      msg += uiOutputFile;
+      cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
+                                         cmsysTerminal_Color_ForegroundBold,
+                                       msg.c_str(), true, this->ColorOutput);
+    }
+
+    // Make sure the parent directory exists
+    if (!this->makeParentDirectory(uiBuildFile)) {
+      this->RunUicFailed = true;
+      return false;
+    }
 
     std::vector<std::string> command;
     command.push_back(this->UicExecutable);
@@ -1375,21 +1394,29 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
     generateQrc || this->InputFilesNewerThanQrc(qrcInputFile, qrcBuildFile);
 
   if (this->GenerateAll || generateQrc) {
-    std::string msg = "Generating qrc source ";
-    msg += qrcOutputFile;
-    cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
-                                       cmsysTerminal_Color_ForegroundBold,
-                                     msg.c_str(), true, this->ColorOutput);
+    {
+      std::string msg = "Generating qrc source ";
+      msg += qrcOutputFile;
+      cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
+                                         cmsysTerminal_Color_ForegroundBold,
+                                       msg.c_str(), true, this->ColorOutput);
+    }
+
+    // Make sure the parent directory exists
+    if (!this->makeParentDirectory(qrcOutputFile)) {
+      this->RunRccFailed = true;
+      return false;
+    }
 
     std::vector<std::string> command;
     command.push_back(this->RccExecutable);
-
-    std::map<std::string, std::string>::const_iterator optionIt =
-      this->RccOptions.find(qrcInputFile);
-    if (optionIt != this->RccOptions.end()) {
-      cmSystemTools::ExpandListArgument(optionIt->second, command);
+    {
+      std::map<std::string, std::string>::const_iterator optionIt =
+        this->RccOptions.find(qrcInputFile);
+      if (optionIt != this->RccOptions.end()) {
+        cmSystemTools::ExpandListArgument(optionIt->second, command);
+      }
     }
-
     command.push_back("-name");
     command.push_back(symbolName);
     command.push_back("-o");
@@ -1499,6 +1526,25 @@ void cmQtAutoGenerators::LogCommand(const std::vector<std::string>& command)
     sbuf << std::endl;
     this->LogInfo(sbuf.str());
   }
+}
+
+/**
+ * @brief Generates the parent directory of the given file on demand
+ * @return True on success
+ */
+bool cmQtAutoGenerators::makeParentDirectory(const std::string& filename)
+{
+  bool success = true;
+  const std::string dirName = cmSystemTools::GetFilenamePath(filename);
+  if (!dirName.empty()) {
+    success = cmsys::SystemTools::MakeDirectory(dirName);
+    if (!success) {
+      std::ostringstream err;
+      err << "AUTOGEN: Directory creation failed: " << dirName << std::endl;
+      this->LogError(err.str());
+    }
+  }
+  return success;
 }
 
 std::string cmQtAutoGenerators::JoinExts(const std::vector<std::string>& lst)

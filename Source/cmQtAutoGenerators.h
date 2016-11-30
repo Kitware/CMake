@@ -85,6 +85,8 @@ private:
   void LogError(const std::string& message);
   void LogCommand(const std::vector<std::string>& command);
 
+  bool makeParentDirectory(const std::string& filename);
+
   std::string JoinExts(const std::vector<std::string>& lst);
 
   static void MergeUicOptions(std::vector<std::string>& opts,
