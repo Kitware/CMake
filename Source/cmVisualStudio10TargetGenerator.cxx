@@ -139,7 +139,11 @@ void cmVisualStudio10TargetGenerator::WriteString(const char* line,
   (*this->BuildFileStream) << line;
 }
 
-#define VS10_USER_PROPS "$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props"
+#define VS10_CXX_DEFAULT_PROPS "$(VCTargetsPath)\\Microsoft.Cpp.Default.props"
+#define VS10_CXX_PROPS "$(VCTargetsPath)\\Microsoft.Cpp.props"
+#define VS10_CXX_USER_PROPS                                                   \
+  "$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props"
+#define VS10_CXX_TARGETS "$(VCTargetsPath)\\Microsoft.Cpp.targets"
 
 void cmVisualStudio10TargetGenerator::Generate()
 {
@@ -345,12 +349,9 @@ void cmVisualStudio10TargetGenerator::Generate()
   }
 
   this->WriteString("</PropertyGroup>\n", 1);
-  this->WriteString("<Import Project="
-                    "\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n",
-                    1);
+  this->WriteString("<Import Project=\"" VS10_CXX_DEFAULT_PROPS "\" />\n", 1);
   this->WriteProjectConfigurationValues();
-  this->WriteString(
-    "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n", 1);
+  this->WriteString("<Import Project=\"" VS10_CXX_PROPS "\" />\n", 1);
   this->WriteString("<ImportGroup Label=\"ExtensionSettings\">\n", 1);
   if (this->GlobalGenerator->IsMasmEnabled()) {
     this->WriteString("<Import Project=\"$(VCTargetsPath)\\"
@@ -359,10 +360,19 @@ void cmVisualStudio10TargetGenerator::Generate()
   }
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("<ImportGroup Label=\"PropertySheets\">\n", 1);
-  this->WriteString("<Import Project=\"" VS10_USER_PROPS "\""
-                    " Condition=\"exists('" VS10_USER_PROPS "')\""
-                    " Label=\"LocalAppDataPlatform\" />\n",
-                    2);
+  {
+    std::string props = VS10_CXX_USER_PROPS;
+    if (const char* p =
+          this->GeneratorTarget->GetProperty("VS_USER_PROPS_CXX")) {
+      props = p;
+      this->ConvertToWindowsSlash(props);
+    }
+    this->WriteString("", 2);
+    (*this->BuildFileStream)
+      << "<Import Project=\"" << cmVS10EscapeXML(props) << "\""
+      << " Condition=\"exists('" << cmVS10EscapeXML(props) << "')\""
+      << " Label=\"LocalAppDataPlatform\" />\n";
+  }
   this->WritePlatformExtensions();
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("<PropertyGroup Label=\"UserMacros\" />\n", 1);
@@ -377,10 +387,8 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteWinRTReferences();
   this->WriteProjectReferences();
   this->WriteSDKReferences();
-  this->WriteString(
-    "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\""
-    " />\n",
-    1);
+  this->WriteString("<Import Project=\"" VS10_CXX_TARGETS "\" />\n", 1);
+
   this->WriteTargetSpecificReferences();
   this->WriteString("<ImportGroup Label=\"ExtensionTargets\">\n", 1);
   this->WriteTargetsFileReferences();
