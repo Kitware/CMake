@@ -35,6 +35,26 @@
 #include <utility>
 #include <vector>
 
+static void utilCopyTargetProperty(cmTarget* destinationTarget,
+                                   cmTarget* sourceTarget,
+                                   const std::string& propertyName)
+{
+  const char* propertyValue = sourceTarget->GetProperty(propertyName);
+  if (propertyValue) {
+    destinationTarget->SetProperty(propertyName, propertyValue);
+  }
+}
+
+static std::string utilStripCR(std::string const& line)
+{
+  // Strip CR characters rcc may have printed (possibly more than one!).
+  std::string::size_type cr = line.find('\r');
+  if (cr != line.npos) {
+    return line.substr(0, cr);
+  }
+  return line;
+}
+
 static std::string GetAutogenTargetName(cmGeneratorTarget const* target)
 {
   std::string autogenTargetName = target->GetName();
@@ -402,26 +422,6 @@ static void RccMergeOptions(std::vector<std::string>& opts,
     }
   }
   opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
-}
-
-static void utilCopyTargetProperty(cmTarget* destinationTarget,
-                                   cmTarget* sourceTarget,
-                                   const std::string& propertyName)
-{
-  const char* propertyValue = sourceTarget->GetProperty(propertyName);
-  if (propertyValue) {
-    destinationTarget->SetProperty(propertyName, propertyValue);
-  }
-}
-
-static std::string utilStripCR(std::string const& line)
-{
-  // Strip CR characters rcc may have printed (possibly more than one!).
-  std::string::size_type cr = line.find('\r');
-  if (cr != line.npos) {
-    return line.substr(0, cr);
-  }
-  return line;
 }
 
 /// @brief Reads the resource files list from from a .qrc file - Qt5 version
