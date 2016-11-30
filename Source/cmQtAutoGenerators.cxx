@@ -549,32 +549,19 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   this->ParseHeaders(headerFiles, includedMocs, notIncludedMocs, includedUis);
 
   if (!this->MocExecutable.empty()) {
-    this->GenerateMocFiles(includedMocs, notIncludedMocs);
+    if (!this->GenerateMocFiles(includedMocs, notIncludedMocs)) {
+      return false;
+    }
   }
   if (!this->UicExecutable.empty()) {
-    this->GenerateUiFiles(includedUis);
+    if (!this->GenerateUiFiles(includedUis)) {
+      return false;
+    }
   }
   if (!this->RccExecutable.empty()) {
-    this->GenerateQrcFiles();
-  }
-
-  if (this->RunMocFailed) {
-    std::ostringstream err;
-    err << "moc failed..." << std::endl;
-    this->LogError(err.str());
-    return false;
-  }
-  if (this->RunUicFailed) {
-    std::ostringstream err;
-    err << "uic failed..." << std::endl;
-    this->LogError(err.str());
-    return false;
-  }
-  if (this->RunRccFailed) {
-    std::ostringstream err;
-    err << "rcc failed..." << std::endl;
-    this->LogError(err.str());
-    return false;
+    if (!this->GenerateQrcFiles()) {
+      return false;
+    }
   }
 
   return true;
@@ -1011,7 +998,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
           << "- rename the source files or" << std::endl
           << "- do not include the (moc_NAME.cpp|NAME.moc) file" << std::endl;
       this->NameCollisionLog(err.str(), collisions);
-      ::exit(EXIT_FAILURE);
+      return false;
     }
   }
 
@@ -1092,6 +1079,9 @@ bool cmQtAutoGenerators::GenerateMocFiles(
   return true;
 }
 
+/**
+ * @return True if a moc file was created. False may indicate an error.
+ */
 bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
                                      const std::string& mocFileName)
 {
@@ -1136,12 +1126,16 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
     bool result =
       cmSystemTools::RunSingleCommand(command, &output, &output, &retVal);
     if (!result || retVal) {
-      std::ostringstream err;
-      err << "AUTOGEN: error: process for " << mocFilePath << " failed:\n"
-          << output << std::endl;
-      this->LogError(err.str());
-      this->RunMocFailed = true;
+      {
+        std::ostringstream err;
+        err << "AUTOGEN: error: moc process for " << mocFilePath
+            << " failed:\n"
+            << output << std::endl;
+        this->LogError(err.str());
+      }
       cmSystemTools::RemoveFile(mocFilePath);
+      this->RunMocFailed = true;
+      return false;
     }
     return true;
   }
@@ -1183,7 +1177,7 @@ bool cmQtAutoGenerators::GenerateUiFiles(
           << std::endl
           << "To avoid this error rename the source files." << std::endl;
       this->NameCollisionLog(err.str(), collisions);
-      ::exit(EXIT_FAILURE);
+      return false;
     }
   }
   testMap.clear();
@@ -1207,6 +1201,9 @@ bool cmQtAutoGenerators::GenerateUiFiles(
   return true;
 }
 
+/**
+ * @return True if a uic file was created. False may indicate an error.
+ */
 bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
                                     const std::string& uiInputFile,
                                     const std::string& uiOutputFile)
@@ -1253,13 +1250,15 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
     bool result =
       cmSystemTools::RunSingleCommand(command, &output, &output, &retVal);
     if (!result || retVal) {
-      std::ostringstream err;
-      err << "AUTOUIC: error: process for " << uiOutputFile
-          << " needed by\n \"" << realName << "\"\nfailed:\n"
-          << output << std::endl;
-      this->LogError(err.str());
-      this->RunUicFailed = true;
+      {
+        std::ostringstream err;
+        err << "AUTOUIC: error: uic process for " << uiOutputFile
+            << " needed by\n \"" << realName << "\"\nfailed:\n"
+            << output << std::endl;
+        this->LogError(err.str());
+      }
       cmSystemTools::RemoveFile(uiOutputFile);
+      this->RunUicFailed = true;
       return false;
     }
     return true;
@@ -1312,7 +1311,7 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
           << std::endl
           << "To avoid this error rename the source .qrc files." << std::endl;
       this->NameCollisionLog(err.str(), collisions);
-      ::exit(EXIT_FAILURE);
+      return false;
     }
   }
 
@@ -1330,6 +1329,9 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
   return true;
 }
 
+/**
+ * @return True if a rcc file was created. False may indicate an error.
+ */
 bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
                                      const std::string& qrcOutputFile,
                                      bool unique_n)
@@ -1387,16 +1389,20 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
     bool result =
       cmSystemTools::RunSingleCommand(command, &output, &output, &retVal);
     if (!result || retVal) {
-      std::ostringstream err;
-      err << "AUTORCC: error: process for " << qrcOutputFile << " failed:\n"
-          << output << std::endl;
-      this->LogError(err.str());
-      this->RunRccFailed = true;
+      {
+        std::ostringstream err;
+        err << "AUTORCC: error: rcc process for " << qrcOutputFile
+            << " failed:\n"
+            << output << std::endl;
+        this->LogError(err.str());
+      }
       cmSystemTools::RemoveFile(qrcBuildFile);
+      this->RunRccFailed = true;
       return false;
     }
+    return true;
   }
-  return true;
+  return false;
 }
 
 /**
