@@ -414,7 +414,7 @@ static void utilCopyTargetProperty(cmTarget* destinationTarget,
   }
 }
 
-static std::string cmQtAutoGeneratorsStripCR(std::string const& line)
+static std::string utilStripCR(std::string const& line)
 {
   // Strip CR characters rcc may have printed (possibly more than one!).
   std::string::size_type cr = line.find('\r');
@@ -486,7 +486,7 @@ static bool ListQt5RccInputs(cmSourceFile* sf, cmGeneratorTarget const* target,
     std::istringstream ostr(rccStdOut);
     std::string oline;
     while (std::getline(ostr, oline)) {
-      oline = cmQtAutoGeneratorsStripCR(oline);
+      oline = utilStripCR(oline);
       if (!oline.empty()) {
         depends.push_back(oline);
       }
@@ -497,7 +497,7 @@ static bool ListQt5RccInputs(cmSourceFile* sf, cmGeneratorTarget const* target,
     std::istringstream estr(rccStdErr);
     std::string eline;
     while (std::getline(estr, eline)) {
-      eline = cmQtAutoGeneratorsStripCR(eline);
+      eline = utilStripCR(eline);
       if (cmHasLiteralPrefix(eline, "RCC: Error in")) {
         static std::string searchString = "Cannot find file '";
 
