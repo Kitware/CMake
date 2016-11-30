@@ -43,12 +43,12 @@ private:
   bool GenerateQrc(const std::string& qrcInputFile,
                    const std::string& qrcOutputFile, bool unique_n);
 
-  void ParseCppFile(
+  bool ParseCppFile(
     const std::string& absFilename,
     const std::vector<std::string>& headerExtensions,
     std::map<std::string, std::string>& includedMocs,
     std::map<std::string, std::vector<std::string> >& includedUis);
-  void StrictParseCppFile(
+  bool StrictParseCppFile(
     const std::string& absFilename,
     const std::vector<std::string>& headerExtensions,
     std::map<std::string, std::string>& includedMocs,

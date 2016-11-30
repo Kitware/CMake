@@ -515,10 +515,15 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
       this->LogInfo(err.str());
     }
     if (this->MocRelaxedMode) {
-      this->ParseCppFile(absFilename, headerExtensions, includedMocs, uiFiles);
+      if (!this->ParseCppFile(absFilename, headerExtensions, includedMocs,
+                              uiFiles)) {
+        return false;
+      }
     } else {
-      this->StrictParseCppFile(absFilename, headerExtensions, includedMocs,
-                               uiFiles);
+      if (!this->StrictParseCppFile(absFilename, headerExtensions,
+                                    includedMocs, uiFiles)) {
+        return false;
+      }
     }
     this->SearchHeadersForCppFile(absFilename, headerExtensions, headerFiles);
   }
@@ -568,7 +573,10 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   return true;
 }
 
-void cmQtAutoGenerators::ParseCppFile(
+/**
+ * @return True on success
+ */
+bool cmQtAutoGenerators::ParseCppFile(
   const std::string& absFilename,
   const std::vector<std::string>& headerExtensions,
   std::map<std::string, std::string>& includedMocs,
@@ -584,11 +592,11 @@ void cmQtAutoGenerators::ParseCppFile(
     err << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
         << std::endl;
     this->LogWarning(err.str());
-    return;
+    return true;
   }
   this->ParseForUic(absFilename, contentsString, includedUis);
   if (this->MocExecutable.empty()) {
-    return;
+    return true;
   }
 
   const std::string absPath = cmsys::SystemTools::GetFilenamePath(
@@ -652,7 +660,7 @@ void cmQtAutoGenerators::ParseCppFile(
                 << std::endl;
           }
           this->LogError(err.str());
-          ::exit(EXIT_FAILURE);
+          return false;
         }
       } else {
         std::string fileToMoc = absFilename;
@@ -700,7 +708,7 @@ void cmQtAutoGenerators::ParseCppFile(
                    "header.\n"
                 << std::endl;
             this->LogError(err.str());
-            ::exit(EXIT_FAILURE);
+            return false;
           }
         } else {
           dotMocIncluded = true;
@@ -744,13 +752,17 @@ void cmQtAutoGenerators::ParseCppFile(
           << "\"" << scannedFileBasename << ".moc\" !\n"
           << std::endl;
       this->LogError(err.str());
-
-      ::exit(EXIT_FAILURE);
+      return false;
     }
   }
+
+  return true;
 }
 
-void cmQtAutoGenerators::StrictParseCppFile(
+/**
+ * @return True on success
+ */
+bool cmQtAutoGenerators::StrictParseCppFile(
   const std::string& absFilename,
   const std::vector<std::string>& headerExtensions,
   std::map<std::string, std::string>& includedMocs,
@@ -766,11 +778,11 @@ void cmQtAutoGenerators::StrictParseCppFile(
     err << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
         << std::endl;
     this->LogWarning(err.str());
-    return;
+    return true;
   }
   this->ParseForUic(absFilename, contentsString, includedUis);
   if (this->MocExecutable.empty()) {
-    return;
+    return true;
   }
 
   const std::string absPath = cmsys::SystemTools::GetFilenamePath(
@@ -823,7 +835,7 @@ void cmQtAutoGenerators::StrictParseCppFile(
                 << std::endl;
           }
           this->LogError(err.str());
-          ::exit(EXIT_FAILURE);
+          return false;
         }
       } else {
         if (basename != scannedFileBasename) {
@@ -839,7 +851,7 @@ void cmQtAutoGenerators::StrictParseCppFile(
                                         "moc on this source file.\n"
               << std::endl;
           this->LogError(err.str());
-          ::exit(EXIT_FAILURE);
+          return false;
         }
         dotMocIncluded = true;
         includedMocs[absFilename] = currentMoc;
@@ -861,8 +873,10 @@ void cmQtAutoGenerators::StrictParseCppFile(
         << "\"" << scannedFileBasename << ".moc\" !\n"
         << std::endl;
     this->LogError(err.str());
-    ::exit(EXIT_FAILURE);
+    return false;
   }
+
+  return true;
 }
 
 void cmQtAutoGenerators::ParseForUic(
