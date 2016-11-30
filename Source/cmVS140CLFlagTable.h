@@ -164,6 +164,8 @@ static cmVS7FlagTable cmVS140CLFlagTable[] = {
   { "TreatWChar_tAsBuiltInType", "Zc:wchar_t", "", "true", 0 },
   { "ForceConformanceInForLoopScope", "Zc:forScope-", "", "false", 0 },
   { "ForceConformanceInForLoopScope", "Zc:forScope", "", "true", 0 },
+  { "RemoveUnreferencedCodeData", "Zc:inline-", "", "false", 0 },
+  { "RemoveUnreferencedCodeData", "Zc:inline", "", "true", 0 },
   { "RuntimeTypeInfo", "GR-", "", "false", 0 },
   { "RuntimeTypeInfo", "GR", "", "true", 0 },
   { "OpenMPSupport", "openmp-", "", "false", 0 },
