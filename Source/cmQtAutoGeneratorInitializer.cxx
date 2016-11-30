@@ -62,7 +62,7 @@ static std::string GetAutogenTargetName(cmGeneratorTarget const* target)
   return autogenTargetName;
 }
 
-static std::string GetAutogenTargetDir(cmGeneratorTarget const* target)
+static std::string GetAutogenTargetFilesDir(cmGeneratorTarget const* target)
 {
   cmMakefile* makefile = target->Target->GetMakefile();
   std::string targetDir = makefile->GetCurrentBinaryDirectory();
@@ -683,7 +683,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   // create a custom target for running generators at buildtime:
   std::string autogenTargetName = GetAutogenTargetName(target);
 
-  std::string targetDir = GetAutogenTargetDir(target);
+  std::string targetDir = GetAutogenTargetFilesDir(target);
 
   cmCustomCommandLine currentLine;
   currentLine.push_back(cmSystemTools::GetCMakeCommand());
@@ -851,7 +851,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     "_origin_target_name",
     cmOutputConverter::EscapeForCMake(target->GetName()).c_str());
 
-  std::string targetDir = GetAutogenTargetDir(target);
+  std::string targetDir = GetAutogenTargetFilesDir(target);
 
   const char* qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
   if (!qtVersion) {
