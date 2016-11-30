@@ -682,13 +682,11 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   // create a custom target for running generators at buildtime:
   std::string autogenTargetName = GetAutogenTargetName(target);
 
-  std::string targetDir = GetAutogenTargetFilesDir(target);
-
   cmCustomCommandLine currentLine;
   currentLine.push_back(cmSystemTools::GetCMakeCommand());
   currentLine.push_back("-E");
   currentLine.push_back("cmake_autogen");
-  currentLine.push_back(targetDir);
+  currentLine.push_back(GetAutogenTargetFilesDir(target));
   currentLine.push_back("$<CONFIGURATION>");
 
   cmCustomCommandLines commandLines;
@@ -850,8 +848,6 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     "_origin_target_name",
     cmOutputConverter::EscapeForCMake(target->GetName()).c_str());
 
-  std::string targetDir = GetAutogenTargetFilesDir(target);
-
   const char* qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
   if (!qtVersion) {
     qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
@@ -894,7 +890,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
 
   std::string inputFile = cmSystemTools::GetCMakeRoot();
   inputFile += "/Modules/AutogenInfo.cmake.in";
-  std::string outputFile = targetDir;
+  std::string outputFile = GetAutogenTargetFilesDir(target);
   outputFile += "/AutogenInfo.cmake";
   makefile->ConfigureFile(inputFile.c_str(), outputFile.c_str(), false, true,
                           false);
