@@ -8,7 +8,6 @@
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Terminal.h>
-#include <iostream>
 #include <sstream>
 #include <stdlib.h>
 #include <string.h>
@@ -159,7 +158,6 @@ void cmQtAutoGenerators::MergeUicOptions(
 bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
                              const std::string& config)
 {
-  bool success = true;
   cmake cm;
   cm.SetHomeOutputDirectory(targetDirectory);
   cm.SetHomeDirectory(targetDirectory);
@@ -173,18 +171,18 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(&gg, snapshot));
   gg.SetCurrentMakefile(mf.get());
 
-  this->ReadAutogenInfoFile(mf.get(), targetDirectory, config);
+  if (!this->ReadAutogenInfoFile(mf.get(), targetDirectory, config)) {
+    return false;
+  }
   this->ReadOldMocDefinitionsFile(mf.get(), targetDirectory);
-
   this->Init();
 
   if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5") {
-    success = this->RunAutogen(mf.get());
+    if (!this->RunAutogen(mf.get())) {
+      return false;
+    }
   }
-
-  this->WriteOldMocDefinitionsFile(targetDirectory);
-
-  return success;
+  return this->WriteOldMocDefinitionsFile(targetDirectory);
 }
 
 bool cmQtAutoGenerators::ReadAutogenInfoFile(
@@ -196,7 +194,9 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   filename += "/AutogenInfo.cmake";
 
   if (!makefile->ReadListFile(filename.c_str())) {
-    cmSystemTools::Error("Error processing file: ", filename.c_str());
+    std::ostringstream err;
+    err << "AUTOGEN: Error processing file: " << filename << std::endl;
+    this->LogError(err.str());
     return false;
   }
 
@@ -303,8 +303,15 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     std::vector<std::string> rccInputLists;
     cmSystemTools::ExpandListArgument(rccInputs, rccInputLists);
 
+    // qrc files in the end of the list may have been empty
+    if (rccInputLists.size() < this->RccSources.size()) {
+      rccInputLists.resize(this->RccSources.size());
+    }
     if (this->RccSources.size() != rccInputLists.size()) {
-      cmSystemTools::Error("Error processing file: ", filename.c_str());
+      std::ostringstream err;
+      err << "AUTOGEN: RCC sources lists size missmatch in: " << filename;
+      err << std::endl;
+      this->LogError(err.str());
       return false;
     }
 
@@ -341,7 +348,7 @@ std::string cmQtAutoGenerators::MakeCompileSettingsString(cmMakefile* makefile)
   return s;
 }
 
-bool cmQtAutoGenerators::ReadOldMocDefinitionsFile(
+void cmQtAutoGenerators::ReadOldMocDefinitionsFile(
   cmMakefile* makefile, const std::string& targetDirectory)
 {
   std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
@@ -352,23 +359,32 @@ bool cmQtAutoGenerators::ReadOldMocDefinitionsFile(
     this->OldCompileSettingsStr =
       makefile->GetSafeDefinition("AM_OLD_COMPILE_SETTINGS");
   }
-  return true;
 }
 
-void cmQtAutoGenerators::WriteOldMocDefinitionsFile(
+bool cmQtAutoGenerators::WriteOldMocDefinitionsFile(
   const std::string& targetDirectory)
 {
+  bool success = true;
+
   std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutomocOldMocDefinitions.cmake";
 
-  cmsys::ofstream outfile;
-  outfile.open(filename.c_str(), std::ios::trunc);
-  outfile << "set(AM_OLD_COMPILE_SETTINGS "
-          << cmOutputConverter::EscapeForCMake(this->CurrentCompileSettingsStr)
-          << ")\n";
+  {
+    cmsys::ofstream outfile;
+    outfile.open(filename.c_str(), std::ios::trunc);
+    if (outfile.is_open()) {
+      outfile << "set(AM_OLD_COMPILE_SETTINGS "
+              << cmOutputConverter::EscapeForCMake(
+                   this->CurrentCompileSettingsStr)
+              << ")\n";
+      success = outfile.good();
+    } else {
+      success = false;
+    }
+  }
 
-  outfile.close();
+  return success;
 }
 
 void cmQtAutoGenerators::Init()
@@ -1431,12 +1447,12 @@ void cmQtAutoGenerators::NameCollisionLog(
 
 void cmQtAutoGenerators::LogInfo(const std::string& message)
 {
-  std::cout << message;
+  cmSystemTools::Message(message.c_str());
 }
 
 void cmQtAutoGenerators::LogError(const std::string& message)
 {
-  std::cerr << message;
+  cmSystemTools::Error(message.c_str());
 }
 
 void cmQtAutoGenerators::LogCommand(const std::vector<std::string>& command)

@@ -23,9 +23,9 @@ private:
   bool ReadAutogenInfoFile(cmMakefile* makefile,
                            const std::string& targetDirectory,
                            const std::string& config);
-  bool ReadOldMocDefinitionsFile(cmMakefile* makefile,
+  void ReadOldMocDefinitionsFile(cmMakefile* makefile,
                                  const std::string& targetDirectory);
-  void WriteOldMocDefinitionsFile(const std::string& targetDirectory);
+  bool WriteOldMocDefinitionsFile(const std::string& targetDirectory);
 
   std::string MakeCompileSettingsString(cmMakefile* makefile);
 
