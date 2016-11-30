@@ -67,12 +67,15 @@
 # written.
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3 FATAL_ERROR)
-IF(POLICY CMP0025)
-  CMAKE_POLICY(SET CMP0025 NEW)
-ENDIF()
-IF(POLICY CMP0056)
-  CMAKE_POLICY(SET CMP0056 NEW)
-ENDIF()
+FOREACH(p
+    CMP0025 # CMake 3.0, Compiler id for Apple Clang is now AppleClang.
+    CMP0056 # CMake 3.2, Honor link flags in try_compile() source-file signature.
+    CMP0063 # CMake 3.3, Honor visibility properties for all target types.
+    )
+  IF(POLICY ${p})
+    CMAKE_POLICY(SET ${p} NEW)
+  ENDIF()
+ENDFOREACH()
 SET(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
 #-----------------------------------------------------------------------------
