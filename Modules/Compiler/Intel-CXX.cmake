@@ -66,9 +66,10 @@ unset(_ext)
 macro(cmake_record_cxx_compile_features)
   set(_result 0)
   if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.0
-        OR (NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC" AND
-            NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0))
+    if (_result EQUAL 0 AND
+        (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.0
+         OR (NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC" AND
+             NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0)))
       _record_compiler_features_cxx(14)
     endif()
     if (_result EQUAL 0)
