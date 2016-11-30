@@ -426,7 +426,7 @@ static std::string utilStripCR(std::string const& line)
 
 /// @brief Reads the resource files list from from a .qrc file - Qt5 version
 /// @return True if the .qrc file was successfully parsed
-static bool ListQt5RccInputs(cmSourceFile* sf, cmGeneratorTarget const* target,
+static bool RccListInputsQt5(cmSourceFile* sf, cmGeneratorTarget const* target,
                              std::vector<std::string>& depends)
 {
   std::string rccCommand = GetRccExecutable(target);
@@ -512,7 +512,7 @@ static bool ListQt5RccInputs(cmSourceFile* sf, cmGeneratorTarget const* target,
 
 /// @brief Reads the resource files list from from a .qrc file - Qt4 version
 /// @return True if the .qrc file was successfully parsed
-static bool ListQt4RccInputs(cmSourceFile* sf,
+static bool RccListInputsQt4(cmSourceFile* sf,
                              std::vector<std::string>& depends)
 {
   // Read file into string
@@ -548,14 +548,14 @@ static bool ListQt4RccInputs(cmSourceFile* sf,
 
 /// @brief Reads the resource files list from from a .qrc file
 /// @return True if the rcc file was successfully parsed
-static bool ListQtRccInputs(const std::string& qtMajorVersion,
-                            cmSourceFile* sf, cmGeneratorTarget const* target,
-                            std::vector<std::string>& depends)
+static bool RccListInputs(const std::string& qtMajorVersion, cmSourceFile* sf,
+                          cmGeneratorTarget const* target,
+                          std::vector<std::string>& depends)
 {
   if (qtMajorVersion == "5") {
-    return ListQt5RccInputs(sf, target, depends);
+    return RccListInputsQt5(sf, target, depends);
   }
-  return ListQt4RccInputs(sf, depends);
+  return RccListInputsQt4(sf, depends);
 }
 
 static void RccSetupAutoTarget(cmGeneratorTarget const* target)
@@ -621,7 +621,7 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target)
         std::string entriesList;
         if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
           std::vector<std::string> depends;
-          if (ListQtRccInputs(qtMajorVersion, sf, target, depends)) {
+          if (RccListInputs(qtMajorVersion, sf, target, depends)) {
             entriesList = cmJoin(depends, "@list_sep@");
           } else {
             return;
@@ -777,7 +777,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
             rcc_output.push_back(rcc_output_file);
           }
           if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
-            ListQtRccInputs(qtMajorVersion, sf, target, depends);
+            RccListInputs(qtMajorVersion, sf, target, depends);
 #if defined(_WIN32) && !defined(__CYGWIN__)
             // Cannot use PRE_BUILD because the resource files themselves
             // may not be sources within the target so VS may not know the
