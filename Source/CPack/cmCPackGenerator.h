@@ -92,6 +92,8 @@ public:
   std::vector<std::string> GetOptions() const;
   bool IsSet(const std::string& name) const;
   bool IsOn(const std::string& name) const;
+  bool IsSetToOff(const std::string& op) const;
+  bool IsSetToEmpty(const std::string& op) const;
 
   //! Set the logger
   void SetLogger(cmCPackLog* log) { this->Logger = log; }

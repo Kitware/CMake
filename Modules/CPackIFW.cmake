@@ -198,13 +198,18 @@
 #
 #   ::
 #
-#     cpack_ifw_configure_component(<compname> [COMMON] [ESSENTIAL]
+#     cpack_ifw_configure_component(<compname> [COMMON] [ESSENTIAL] [VIRTUAL]
+#                         [FORCED_INSTALLATION]
 #                         [NAME <name>]
+#                         [DISPLAY_NAME <display_name>]
+#                         [DESCRIPTION <description>]
 #                         [VERSION <version>]
+#                         [RELEASE_DATE <release_date>]
 #                         [SCRIPT <script>]
 #                         [PRIORITY <priority>]
 #                         [DEPENDS <com_id> ...]
 #                         [LICENSES <display_name> <file_path> ...]
+#                         [DEFAULT <value>]
 #                         [USER_INTERFACES <file_path> <file_path> ...])
 #
 #   This command should be called after :command:`cpack_add_component` command.
@@ -217,13 +222,34 @@
 #     if set, then the package manager stays disabled until that
 #     component is updated.
 #
+#   ``VIRTUAL``
+#     if set, then the component will be hidden from the installer.
+#     It is a equivalent of the ``HIDDEN`` option from the
+#     :command:`cpack_add_component` command.
+#
+#   ``FORCED_INSTALLATION``
+#     if set, then the component must always be installed.
+#     It is a equivalent of the ``REQUARED`` option from the
+#     :command:`cpack_add_component` command.
+#
 #   ``NAME``
 #     is used to create domain-like identification for this component.
 #     By default used origin component name.
 #
+#   ``DISPLAY_NAME``
+#     set to rewrite original name configured by
+#     :command:`cpack_add_component` command.
+#
+#   ``DESCRIPTION``
+#     set to rewrite original description configured by
+#     :command:`cpack_add_component` command.
+#
 #   ``VERSION``
 #     is version of component.
 #     By default used :variable:`CPACK_PACKAGE_VERSION`.
+#
+#   ``RELEASE_DATE``
+#     keep empty to auto generate.
 #
 #   ``SCRIPT``
 #     is a relative or absolute path to operations script
@@ -239,6 +265,12 @@
 #     pair of <display_name> and <file_path> of license text for this
 #     component. You can specify more then one license.
 #
+#   ``DEFAULT``
+#     Possible values are: TRUE, FALSE, and SCRIPT.
+#     Set to FALSE to disable the component in the installer or to SCRIPT
+#     to resolved during runtime (don't forget add the file of the script
+#     as a value of the ``SCRIPT`` option).
+#
 #   ``USER_INTERFACES``
 #     a list of <file_path> representing pages to load
 #
@@ -249,24 +281,47 @@
 #
 #   ::
 #
-#     cpack_ifw_configure_component_group(<groupname>
+#     cpack_ifw_configure_component_group(<groupname> [VIRTUAL]
+#                         [FORCED_INSTALLATION]
 #                         [NAME <name>]
+#                         [DISPLAY_NAME <display_name>]
+#                         [DESCRIPTION <description>]
 #                         [VERSION <version>]
+#                         [RELEASE_DATE <release_date>]
 #                         [SCRIPT <script>]
 #                         [PRIORITY <priority>]
 #                         [LICENSES <display_name> <file_path> ...]
+#                         [DEFAULT <value>]
 #                         [USER_INTERFACES <file_path> <file_path> ...])
 #
 #   This command should be called after :command:`cpack_add_component_group`
 #   command.
 #
+#   ``VIRTUAL``
+#     if set, then the group will be hidden from the installer.
+#     Note that setting this on a root component does not work.
+#
+#   ``FORCED_INSTALLATION``
+#     if set, then the group must always be installed.
+#
 #   ``NAME``
 #     is used to create domain-like identification for this component group.
 #     By default used origin component group name.
 #
+#   ``DISPLAY_NAME``
+#     set to rewrite original name configured by
+#     :command:`cpack_add_component_group` command.
+#
+#   ``DESCRIPTION``
+#     set to rewrite original description configured by
+#     :command:`cpack_add_component_group` command.
+#
 #   ``VERSION``
 #     is version of component group.
 #     By default used :variable:`CPACK_PACKAGE_VERSION`.
+#
+#   ``RELEASE_DATE``
+#     keep empty to auto generate.
 #
 #   ``SCRIPT``
 #     is a relative or absolute path to operations script
@@ -278,6 +333,13 @@
 #   ``LICENSES``
 #     pair of <display_name> and <file_path> of license text for this
 #     component group. You can specify more then one license.
+#
+#   ``DEFAULT``
+#     Possible values are: TRUE, FALSE, and SCRIPT.
+#     Set to TRUE to preselect the group in the installer
+#     (this takes effect only on groups that have no visible child components)
+#     or to SCRIPT to resolved during runtime (don't forget add the file of
+#     the script as a value of the ``SCRIPT`` option).
 #
 #   ``USER_INTERFACES``
 #     a list of <file_path> representing pages to load
@@ -625,8 +687,8 @@ macro(cpack_ifw_configure_component compname)
 
   string(TOUPPER ${compname} _CPACK_IFWCOMP_UNAME)
 
-  set(_IFW_OPT COMMON ESSENTIAL)
-  set(_IFW_ARGS NAME VERSION SCRIPT PRIORITY)
+  set(_IFW_OPT COMMON ESSENTIAL VIRTUAL FORCED_INSTALLATION)
+  set(_IFW_ARGS NAME DISPLAY_NAME DESCRIPTION VERSION RELEASE_DATE SCRIPT PRIORITY DEFAULT)
   set(_IFW_MULTI_ARGS DEPENDS LICENSES USER_INTERFACES)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
@@ -665,8 +727,8 @@ macro(cpack_ifw_configure_component_group grpname)
 
   string(TOUPPER ${grpname} _CPACK_IFWGRP_UNAME)
 
-  set(_IFW_OPT)
-  set(_IFW_ARGS NAME VERSION SCRIPT PRIORITY)
+  set(_IFW_OPT VIRTUAL FORCED_INSTALLATION)
+  set(_IFW_ARGS NAME DISPLAY_NAME DESCRIPTION VERSION RELEASE_DATE SCRIPT PRIORITY DEFAULT)
   set(_IFW_MULTI_ARGS LICENSES USER_INTERFACES)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
