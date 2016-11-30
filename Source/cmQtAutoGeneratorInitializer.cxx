@@ -237,7 +237,7 @@ static void GetUicOpts(cmGeneratorTarget const* target,
   optString = cmJoin(opts, ";");
 }
 
-static void SetupAutoUicTarget(
+static void UicSetupAutoTarget(
   cmGeneratorTarget const* target, std::vector<std::string> const& skipUic,
   std::map<std::string, std::string>& configUicOptions)
 {
@@ -887,7 +887,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
                        configIncludes, configDefines);
   }
   if (target->GetPropertyAsBool("AUTOUIC")) {
-    SetupAutoUicTarget(target, skipUic, configUicOptions);
+    UicSetupAutoTarget(target, skipUic, configUicOptions);
   }
   if (target->GetPropertyAsBool("AUTORCC")) {
     RccSetupAutoTarget(target);
