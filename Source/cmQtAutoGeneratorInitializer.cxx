@@ -146,7 +146,7 @@ static void GetCompileDefinitionsAndDirectories(
   defs += cmJoin(defines, ";");
 }
 
-static void SetupAutoMocTarget(
+static void MocSetupAutoTarget(
   cmGeneratorTarget const* target, const std::string& autogenTargetName,
   std::vector<std::string> const& skipMoc,
   std::vector<std::string> const& mocHeaders,
@@ -883,7 +883,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     "_cpp_files",
     cmOutputConverter::EscapeForCMake(cmJoin(mocSources, ";")).c_str());
   if (target->GetPropertyAsBool("AUTOMOC")) {
-    SetupAutoMocTarget(target, autogenTargetName, skipMoc, mocHeaders,
+    MocSetupAutoTarget(target, autogenTargetName, skipMoc, mocHeaders,
                        configIncludes, configDefines);
   }
   if (target->GetPropertyAsBool("AUTOUIC")) {
