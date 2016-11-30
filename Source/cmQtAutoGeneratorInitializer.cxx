@@ -870,7 +870,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
   std::vector<std::string> skipMoc;
   std::vector<std::string> mocSources;
   std::vector<std::string> mocHeaders;
-  std::map<std::string, std::string> configIncludes;
+  std::map<std::string, std::string> configMocIncludes;
   std::map<std::string, std::string> configDefines;
   std::map<std::string, std::string> configUicOptions;
 
@@ -884,7 +884,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     cmOutputConverter::EscapeForCMake(cmJoin(mocSources, ";")).c_str());
   if (target->GetPropertyAsBool("AUTOMOC")) {
     MocSetupAutoTarget(target, autogenTargetName, skipMoc, mocHeaders,
-                       configIncludes, configDefines);
+                       configMocIncludes, configDefines);
   }
   if (target->GetPropertyAsBool("AUTOUIC")) {
     UicSetupAutoTarget(target, skipUic, configUicOptions);
@@ -914,7 +914,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
   if (!(perm & mode_write)) {
     cmSystemTools::SetPermissions(outputFile, perm | mode_write);
   }
-  if (!configDefines.empty() || !configIncludes.empty() ||
+  if (!configDefines.empty() || !configMocIncludes.empty() ||
       !configUicOptions.empty()) {
     cmsys::ofstream infoFile(outputFile.c_str(), std::ios::app);
     if (!infoFile) {
@@ -933,10 +933,10 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
                  << it->second << ")\n";
       }
     }
-    if (!configIncludes.empty()) {
+    if (!configMocIncludes.empty()) {
       for (std::map<std::string, std::string>::iterator
-             it = configIncludes.begin(),
-             end = configIncludes.end();
+             it = configMocIncludes.begin(),
+             end = configMocIncludes.end();
            it != end; ++it) {
         infoFile << "set(AM_MOC_INCLUDES_" << it->first << " " << it->second
                  << ")\n";
