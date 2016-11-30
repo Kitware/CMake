@@ -132,7 +132,7 @@ private:
   bool RunUicFailed;
   bool RunRccFailed;
   bool GenerateAll;
-  bool RelaxedMode;
+  bool MocRelaxedMode;
 };
 
 #endif

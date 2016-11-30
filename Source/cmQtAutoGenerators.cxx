@@ -320,7 +320,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   }
   this->CurrentCompileSettingsStr = this->MakeCompileSettingsString(makefile);
 
-  this->RelaxedMode = makefile->IsOn("AM_RELAXED_MODE");
+  this->MocRelaxedMode = makefile->IsOn("AM_MOC_RELAXED_MODE");
 
   return true;
 }
@@ -497,7 +497,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
       err << "AUTOGEN: Checking " << absFilename << std::endl;
       this->LogInfo(err.str());
     }
-    if (this->RelaxedMode) {
+    if (this->MocRelaxedMode) {
       this->ParseCppFile(absFilename, headerExtensions, includedMocs, uiFiles);
     } else {
       this->StrictParseCppFile(absFilename, headerExtensions, includedMocs,
