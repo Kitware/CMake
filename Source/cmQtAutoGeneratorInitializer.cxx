@@ -372,7 +372,7 @@ static std::string GetRccExecutable(cmGeneratorTarget const* target)
   return std::string();
 }
 
-static void MergeRccOptions(std::vector<std::string>& opts,
+static void RccMergeOptions(std::vector<std::string>& opts,
                             const std::vector<std::string>& fileOpts,
                             bool isQt5)
 {
@@ -601,7 +601,7 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target)
         if (const char* prop = sf->GetProperty("AUTORCC_OPTIONS")) {
           std::vector<std::string> optsVec;
           cmSystemTools::ExpandListArgument(prop, optsVec);
-          MergeRccOptions(rccOptions, optsVec, strcmp(qtVersion, "5") == 0);
+          RccMergeOptions(rccOptions, optsVec, strcmp(qtVersion, "5") == 0);
         }
 
         if (!rccOptions.empty()) {
