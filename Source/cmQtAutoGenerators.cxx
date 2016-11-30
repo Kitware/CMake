@@ -8,6 +8,7 @@
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Terminal.h>
+#include <iostream>
 #include <sstream>
 #include <stdlib.h>
 #include <string.h>
@@ -195,7 +196,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
 
   if (!makefile->ReadListFile(filename.c_str())) {
     std::ostringstream err;
-    err << "AUTOGEN: Error processing file: " << filename << std::endl;
+    err << "AUTOGEN: error processing file: " << filename << std::endl;
     this->LogError(err.str());
     return false;
   }
@@ -582,7 +583,7 @@ void cmQtAutoGenerators::ParseCppFile(
     std::ostringstream err;
     err << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
         << std::endl;
-    this->LogError(err.str());
+    this->LogWarning(err.str());
     return;
   }
   this->ParseForUic(absFilename, contentsString, includedUis);
@@ -673,7 +674,7 @@ void cmQtAutoGenerators::ParseCppFile(
                   << ".cpp\" for a compatibility with "
                      "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
                   << std::endl;
-              this->LogError(err.str());
+              this->LogWarning(err.str());
             } else {
               std::ostringstream err;
               err << "AUTOGEN: warning: " << absFilename
@@ -686,7 +687,7 @@ void cmQtAutoGenerators::ParseCppFile(
                   << ".cpp\" for compatibility with "
                      "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
                   << std::endl;
-              this->LogError(err.str());
+              this->LogWarning(err.str());
             }
           } else {
             std::ostringstream err;
@@ -730,7 +731,7 @@ void cmQtAutoGenerators::ParseCppFile(
           << ".moc\" for compatibility with "
              "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
           << std::endl;
-      this->LogError(err.str());
+      this->LogWarning(err.str());
 
       includedMocs[absFilename] = ownMocUnderscoreFile;
       includedMocs.erase(ownMocHeaderFile);
@@ -764,7 +765,7 @@ void cmQtAutoGenerators::StrictParseCppFile(
     std::ostringstream err;
     err << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
         << std::endl;
-    this->LogError(err.str());
+    this->LogWarning(err.str());
     return;
   }
   this->ParseForUic(absFilename, contentsString, includedUis);
@@ -876,7 +877,7 @@ void cmQtAutoGenerators::ParseForUic(
     std::ostringstream err;
     err << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
         << std::endl;
-    this->LogError(err.str());
+    this->LogWarning(err.str());
     return;
   }
   this->ParseForUic(absFilename, contentsString, includedUis);
@@ -997,7 +998,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
           << "To avoid this error either" << std::endl
           << "- rename the source files or" << std::endl
           << "- do not include the (moc_NAME.cpp|NAME.moc) file" << std::endl;
-      this->NameCollisionLog(err.str(), collisions);
+      this->LogErrorNameCollision(err.str(), collisions);
       return false;
     }
   }
@@ -1176,7 +1177,7 @@ bool cmQtAutoGenerators::GenerateUiFiles(
              "from different sources."
           << std::endl
           << "To avoid this error rename the source files." << std::endl;
-      this->NameCollisionLog(err.str(), collisions);
+      this->LogErrorNameCollision(err.str(), collisions);
       return false;
     }
   }
@@ -1310,7 +1311,7 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
              " will be generated from different sources."
           << std::endl
           << "To avoid this error rename the source .qrc files." << std::endl;
-      this->NameCollisionLog(err.str(), collisions);
+      this->LogErrorNameCollision(err.str(), collisions);
       return false;
     }
   }
@@ -1435,7 +1436,7 @@ bool cmQtAutoGenerators::NameCollisionTest(
   return !collisions.empty();
 }
 
-void cmQtAutoGenerators::NameCollisionLog(
+void cmQtAutoGenerators::LogErrorNameCollision(
   const std::string& message,
   const std::multimap<std::string, std::string>& collisions)
 {
@@ -1453,12 +1454,21 @@ void cmQtAutoGenerators::NameCollisionLog(
 
 void cmQtAutoGenerators::LogInfo(const std::string& message)
 {
-  cmSystemTools::Message(message.c_str());
+  std::cout << message.c_str();
+}
+
+void cmQtAutoGenerators::LogWarning(const std::string& message)
+{
+  std::ostringstream ostr;
+  ostr << message << "\n";
+  std::cout << message.c_str();
 }
 
 void cmQtAutoGenerators::LogError(const std::string& message)
 {
-  cmSystemTools::Error(message.c_str());
+  std::ostringstream ostr;
+  ostr << message << "\n\n";
+  std::cerr << ostr.str();
 }
 
 void cmQtAutoGenerators::LogCommand(const std::vector<std::string>& command)
