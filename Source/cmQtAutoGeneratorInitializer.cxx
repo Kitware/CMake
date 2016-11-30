@@ -424,15 +424,6 @@ static std::string utilStripCR(std::string const& line)
   return line;
 }
 
-static std::string ReadAll(const std::string& filename)
-{
-  cmsys::ifstream file(filename.c_str());
-  std::ostringstream stream;
-  stream << file.rdbuf();
-  file.close();
-  return stream.str();
-}
-
 /// @brief Reads the resource files list from from a .qrc file - Qt5 version
 /// @return True if the .qrc file was successfully parsed
 static bool ListQt5RccInputs(cmSourceFile* sf, cmGeneratorTarget const* target,
@@ -524,7 +515,13 @@ static bool ListQt5RccInputs(cmSourceFile* sf, cmGeneratorTarget const* target,
 static bool ListQt4RccInputs(cmSourceFile* sf,
                              std::vector<std::string>& depends)
 {
-  const std::string qrcContents = ReadAll(sf->GetFullPath());
+  // Read file into string
+  std::string qrcContents;
+  {
+    std::ostringstream stream;
+    stream << cmsys::ifstream(sf->GetFullPath().c_str()).rdbuf();
+    qrcContents = stream.str();
+  }
 
   cmsys::RegularExpression fileMatchRegex("(<file[^<]+)");
 
