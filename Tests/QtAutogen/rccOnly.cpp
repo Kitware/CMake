@@ -1,9 +1,9 @@
 
-extern int qInitResources_rcc_empty_resource();
+extern int qInitResources_rccOnlyRes();
 
 int main(int, char**)
 {
   // Fails to link if the symbol is not present.
-  qInitResources_rcc_empty_resource();
+  qInitResources_rccOnlyRes();
   return 0;
 }

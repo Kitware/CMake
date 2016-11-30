@@ -1245,7 +1245,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     set(run_autogen_test ${CMAKE_CTEST_COMMAND} -V)
     set(run_autouic_test ${CMAKE_CTEST_COMMAND} -V)
   else()
-    set(run_autogen_test QtAutogen)
+    set(run_autogen_test complex/QtAutogen)
     set(run_autouic_test QtAutoUicInterface)
   endif()
   if(NOT CMAKE_CONFIGURATION_TYPES)
