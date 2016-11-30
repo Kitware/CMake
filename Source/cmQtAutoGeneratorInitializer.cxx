@@ -331,7 +331,7 @@ static void SetupAutoUicTarget(
   }
 }
 
-static std::string GetRccExecutable(cmGeneratorTarget const* target)
+static std::string RccGetExecutable(cmGeneratorTarget const* target)
 {
   cmLocalGenerator* lg = target->GetLocalGenerator();
   cmMakefile* makefile = target->Target->GetMakefile();
@@ -429,7 +429,7 @@ static std::string utilStripCR(std::string const& line)
 static bool RccListInputsQt5(cmSourceFile* sf, cmGeneratorTarget const* target,
                              std::vector<std::string>& depends)
 {
-  std::string rccCommand = GetRccExecutable(target);
+  std::string rccCommand = RccGetExecutable(target);
 
   bool hasDashDashList = false;
   // Read rcc features
@@ -648,7 +648,7 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target)
     cmOutputConverter::EscapeForCMake(rccFileOptions).c_str());
 
   makefile->AddDefinition("_qt_rcc_executable",
-                          GetRccExecutable(target).c_str());
+                          RccGetExecutable(target).c_str());
 }
 
 void cmQtAutoGeneratorInitializer::InitializeAutogenSources(
