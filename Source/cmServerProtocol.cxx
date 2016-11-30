@@ -923,7 +923,7 @@ cmServerResponse cmServerProtocol1_0::ProcessConfigure(
   }
 
   // Make sure the types of cacheArguments matches (if given):
-  std::vector<std::string> cacheArgs;
+  std::vector<std::string> cacheArgs = { "unused" };
   bool cacheArgumentsError = false;
   const Json::Value passedArgs = request.Data[kCACHE_ARGUMENTS_KEY];
   if (!passedArgs.isNull()) {
