@@ -229,7 +229,7 @@ static void SetupAutoMocTarget(
   }
 }
 
-static void GetUicOpts(cmGeneratorTarget const* target,
+static void UicGetOpts(cmGeneratorTarget const* target,
                        const std::string& config, std::string& optString)
 {
   std::vector<std::string> opts;
@@ -259,7 +259,7 @@ static void UicSetupAutoTarget(
   std::string _uic_opts;
   std::vector<std::string> configs;
   const std::string& config = makefile->GetConfigurations(configs);
-  GetUicOpts(target, config, _uic_opts);
+  UicGetOpts(target, config, _uic_opts);
 
   if (!_uic_opts.empty()) {
     _uic_opts = cmOutputConverter::EscapeForCMake(_uic_opts);
@@ -268,7 +268,7 @@ static void UicSetupAutoTarget(
   for (std::vector<std::string>::const_iterator li = configs.begin();
        li != configs.end(); ++li) {
     std::string config_uic_opts;
-    GetUicOpts(target, *li, config_uic_opts);
+    UicGetOpts(target, *li, config_uic_opts);
     if (config_uic_opts != _uic_opts) {
       configUicOptions[*li] =
         cmOutputConverter::EscapeForCMake(config_uic_opts);
