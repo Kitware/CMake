@@ -404,9 +404,9 @@ static void MergeRccOptions(std::vector<std::string>& opts,
   opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
 }
 
-static void copyTargetProperty(cmTarget* destinationTarget,
-                               cmTarget* sourceTarget,
-                               const std::string& propertyName)
+static void utilCopyTargetProperty(cmTarget* destinationTarget,
+                                   cmTarget* sourceTarget,
+                                   const std::string& propertyName)
 {
   const char* propertyValue = sourceTarget->GetProperty(propertyName);
   if (propertyValue) {
@@ -828,7 +828,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
       autogenTarget->SetProperty("FOLDER", autogenFolder);
     } else {
       // inherit FOLDER property from target (#13688)
-      copyTargetProperty(gt->Target, target->Target, "FOLDER");
+      utilCopyTargetProperty(gt->Target, target->Target, "FOLDER");
     }
 
     target->Target->AddUtility(autogenTargetName);
