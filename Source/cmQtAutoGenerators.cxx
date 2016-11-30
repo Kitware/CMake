@@ -390,7 +390,7 @@ bool cmQtAutoGenerators::WriteOldMocDefinitionsFile(
 void cmQtAutoGenerators::Init()
 {
   this->TargetBuildSubDir = this->TargetName;
-  this->TargetBuildSubDir += ".dir/";
+  this->TargetBuildSubDir += "/";
 
   this->OutMocCppFilenameRel = this->TargetBuildSubDir;
   this->OutMocCppFilenameRel += "moc_compilation.cpp";

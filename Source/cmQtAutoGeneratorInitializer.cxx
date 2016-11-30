@@ -79,7 +79,7 @@ static std::string GetAutogenTargetBuildDir(cmGeneratorTarget const* target)
   std::string targetDir = makefile->GetCurrentBinaryDirectory();
   targetDir += "/";
   targetDir += GetAutogenTargetName(target);
-  targetDir += ".dir/";
+  targetDir += "/";
   return targetDir;
 }
 
