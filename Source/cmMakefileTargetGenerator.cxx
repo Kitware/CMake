@@ -520,8 +520,15 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       targetFullPathCompilePDB =
         this->GeneratorTarget->GetCompilePDBPath(this->ConfigName);
       if (targetFullPathCompilePDB.empty()) {
+        // Match VS default: `$(IntDir)vc$(PlatformToolsetVersion).pdb`.
+        // A trailing slash tells the toolchain to add its default file name.
         targetFullPathCompilePDB =
           this->GeneratorTarget->GetSupportDirectory() + "/";
+        if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
+          // Match VS default for static libs: `$(IntDir)$(ProjectName).pdb`.
+          targetFullPathCompilePDB += this->GeneratorTarget->GetName();
+          targetFullPathCompilePDB += ".pdb";
+        }
       }
     }
 
