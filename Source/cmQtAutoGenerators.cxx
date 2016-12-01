@@ -15,7 +15,6 @@
 #include <utility>
 
 #include "cmAlgorithms.h"
-#include "cmFilePathUuid.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
@@ -396,6 +395,11 @@ void cmQtAutoGenerators::Init()
   this->OutMocCppFilenameRel += "moc_compilation.cpp";
 
   this->OutMocCppFilenameAbs = this->Builddir + this->OutMocCppFilenameRel;
+
+  // Init file path checksum generator
+  fpathCheckSum.setupParentDirs(this->Srcdir, this->Builddir,
+                                this->ProjectSourceDir,
+                                this->ProjectBinaryDir);
 
   std::vector<std::string> cdefList;
   cmSystemTools::ExpandListArgument(this->MocCompileDefinitionsStr, cdefList);
@@ -967,8 +971,6 @@ void cmQtAutoGenerators::ParseHeaders(
   std::map<std::string, std::string>& notIncludedMocs,
   std::map<std::string, std::vector<std::string> >& includedUis)
 {
-  cmFilePathUuid fpathUuid(this->Srcdir, this->Builddir,
-                           this->ProjectSourceDir, this->ProjectBinaryDir);
   for (std::set<std::string>::const_iterator hIt = absHeaders.begin();
        hIt != absHeaders.end(); ++hIt) {
     const std::string& headerName = *hIt;
@@ -984,8 +986,10 @@ void cmQtAutoGenerators::ParseHeaders(
 
       std::string macroName;
       if (requiresMocing(contents, macroName)) {
-        notIncludedMocs[headerName] =
-          this->TargetBuildSubDir + fpathUuid.get(headerName, "moc_", ".cpp");
+        notIncludedMocs[headerName] = this->TargetBuildSubDir +
+          fpathCheckSum.getPart(headerName) + "/moc_" +
+          cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName) +
+          ".cpp";
       }
     }
     this->ParseForUic(headerName, contents, includedUis);
@@ -1318,18 +1322,13 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
 {
   // generate single map with input / output names
   std::map<std::string, std::string> qrcGenMap;
-  {
-    cmFilePathUuid fpathUuid(this->Srcdir, this->Builddir,
-                             this->ProjectSourceDir, this->ProjectBinaryDir);
-    for (std::vector<std::string>::const_iterator si =
-           this->RccSources.begin();
-         si != this->RccSources.end(); ++si) {
-      const std::string ext =
-        cmsys::SystemTools::GetFilenameLastExtension(*si);
-      if (ext == ".qrc") {
-        qrcGenMap[*si] =
-          (this->TargetBuildSubDir + fpathUuid.get(*si, "qrc_", ".cpp"));
-      }
+  for (std::vector<std::string>::const_iterator si = this->RccSources.begin();
+       si != this->RccSources.end(); ++si) {
+    const std::string ext = cmsys::SystemTools::GetFilenameLastExtension(*si);
+    if (ext == ".qrc") {
+      qrcGenMap[*si] = this->TargetBuildSubDir + fpathCheckSum.getPart(*si) +
+        "/qrc_" + cmsys::SystemTools::GetFilenameWithoutLastExtension(*si) +
+        ".cpp";
     }
   }
 
@@ -1368,15 +1367,11 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
                                      const std::string& qrcOutputFile,
                                      bool unique_n)
 {
-  std::string symbolName;
-  if (unique_n) {
-    symbolName =
-      cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
-  } else {
-    symbolName =
-      cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcOutputFile);
-    // Remove "qrc_" at string begin
-    symbolName.erase(0, 4);
+  std::string symbolName =
+    cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
+  if (!unique_n) {
+    symbolName += "_";
+    symbolName += fpathCheckSum.getPart(qrcInputFile);
   }
   // Replace '-' with '_'. The former is valid for
   // file names but not for symbol names.

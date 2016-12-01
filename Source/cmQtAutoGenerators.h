@@ -4,6 +4,7 @@
 #define cmQtAutoGenerators_h
 
 #include <cmConfigure.h> // IWYU pragma: keep
+#include <cmFilePathChecksum.h>
 
 #include <list>
 #include <map>
@@ -129,6 +130,8 @@ private:
   std::map<std::string, std::string> UicOptions;
   std::map<std::string, std::string> RccOptions;
   std::map<std::string, std::vector<std::string> > RccInputs;
+
+  cmFilePathChecksum fpathCheckSum;
 
   bool IncludeProjectDirsBefore;
   bool Verbose;
