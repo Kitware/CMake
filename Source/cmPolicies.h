@@ -197,7 +197,10 @@ class cmMakefile;
          3, 4, 0, cmPolicies::WARN)                                           \
   SELECT(POLICY, CMP0066,                                                     \
          "Honor per-config flags in try_compile() source-file signature.", 3, \
-         7, 0, cmPolicies::WARN)
+         7, 0, cmPolicies::WARN)                                              \
+  SELECT(POLICY, CMP0067,                                                     \
+         "Honor language standard in try_compile() source-file signature.",   \
+         3, 8, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

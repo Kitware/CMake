@@ -54,6 +54,17 @@ static void writeProperty(FILE* fout, std::string const& targetName,
           cmOutputConverter::EscapeForCMake(value).c_str());
 }
 
+std::string cmCoreTryCompile::LookupStdVar(std::string const& var,
+                                           bool warnCMP0067)
+{
+  std::string value = this->Makefile->GetSafeDefinition(var);
+  if (warnCMP0067 && !value.empty()) {
+    value.clear();
+    this->WarnCMP0067.push_back(var);
+  }
+  return value;
+}
+
 int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                                      bool isTryRun)
 {
@@ -619,6 +630,74 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
 
     bool const testC = testLangs.find("C") != testLangs.end();
     bool const testCxx = testLangs.find("CXX") != testLangs.end();
+
+    bool warnCMP0067 = false;
+    bool honorStandard = true;
+
+    if (!didCStandard && !didCxxStandard && !didCStandardRequired &&
+        !didCxxStandardRequired && !didCExtensions && !didCxxExtensions) {
+      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0067)) {
+        case cmPolicies::WARN:
+          warnCMP0067 = this->Makefile->PolicyOptionalWarningEnabled(
+            "CMAKE_POLICY_WARNING_CMP0067");
+        case cmPolicies::OLD:
+          // OLD behavior is to not honor the language standard variables.
+          honorStandard = false;
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+          this->Makefile->IssueMessage(
+            cmake::FATAL_ERROR,
+            cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0067));
+        case cmPolicies::NEW:
+          // NEW behavior is to honor the language standard variables.
+          // We already initialized honorStandard to true.
+          break;
+      }
+    }
+
+    if (honorStandard || warnCMP0067) {
+      if (testC) {
+        if (!didCStandard) {
+          cStandard = this->LookupStdVar("CMAKE_C_STANDARD", warnCMP0067);
+        }
+        if (!didCStandardRequired) {
+          cStandardRequired =
+            this->LookupStdVar("CMAKE_C_STANDARD_REQUIRED", warnCMP0067);
+        }
+        if (!didCExtensions) {
+          cExtensions = this->LookupStdVar("CMAKE_C_EXTENSIONS", warnCMP0067);
+        }
+      }
+      if (testCxx) {
+        if (!didCxxStandard) {
+          cxxStandard = this->LookupStdVar("CMAKE_CXX_STANDARD", warnCMP0067);
+        }
+        if (!didCxxStandardRequired) {
+          cxxStandardRequired =
+            this->LookupStdVar("CMAKE_CXX_STANDARD_REQUIRED", warnCMP0067);
+        }
+        if (!didCxxExtensions) {
+          cxxExtensions =
+            this->LookupStdVar("CMAKE_CXX_EXTENSIONS", warnCMP0067);
+        }
+      }
+    }
+
+    if (!this->WarnCMP0067.empty()) {
+      std::ostringstream w;
+      /* clang-format off */
+      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0067) << "\n"
+        "For compatibility with older versions of CMake, try_compile "
+        "is not honoring language standard variables in the test project:\n"
+        ;
+      /* clang-format on */
+      for (std::vector<std::string>::iterator vi = this->WarnCMP0067.begin();
+           vi != this->WarnCMP0067.end(); ++vi) {
+        w << "  " << *vi << "\n";
+      }
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+    }
 
     if (testC) {
       if (!cStandard.empty()) {
