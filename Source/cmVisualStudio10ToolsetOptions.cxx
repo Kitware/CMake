@@ -7,22 +7,27 @@
 #include "cmVisualStudioGeneratorOptions.h"
 
 #include "cmVS10CLFlagTable.h"
+#include "cmVS10CSharpFlagTable.h"
 #include "cmVS10LibFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10MASMFlagTable.h"
 #include "cmVS10RCFlagTable.h"
 #include "cmVS11CLFlagTable.h"
+#include "cmVS11CSharpFlagTable.h"
 #include "cmVS11LibFlagTable.h"
 #include "cmVS11LinkFlagTable.h"
 #include "cmVS11MASMFlagTable.h"
 #include "cmVS11RCFlagTable.h"
 #include "cmVS12CLFlagTable.h"
+#include "cmVS12CSharpFlagTable.h"
 #include "cmVS12LibFlagTable.h"
 #include "cmVS12LinkFlagTable.h"
 #include "cmVS12MASMFlagTable.h"
 #include "cmVS12RCFlagTable.h"
 #include "cmVS140CLFlagTable.h"
+#include "cmVS140CSharpFlagTable.h"
 #include "cmVS141CLFlagTable.h"
+#include "cmVS141CSharpFlagTable.h"
 #include "cmVS14LibFlagTable.h"
 #include "cmVS14LinkFlagTable.h"
 #include "cmVS14MASMFlagTable.h"
@@ -43,6 +48,26 @@ cmIDEFlagTable const* cmVisualStudio10ToolsetOptions::GetClFlagTable(
     return cmVS11CLFlagTable;
   } else if (useToolset == "v100") {
     return cmVS10CLFlagTable;
+  } else {
+    return 0;
+  }
+}
+
+cmIDEFlagTable const* cmVisualStudio10ToolsetOptions::GetCSharpFlagTable(
+  std::string const& name, std::string const& toolset) const
+{
+  std::string const useToolset = this->GetToolsetName(name, toolset);
+
+  if ((useToolset == "v141")) {
+    return cmVS141CSharpFlagTable;
+  } else if (useToolset == "v140") {
+    return cmVS140CSharpFlagTable;
+  } else if (useToolset == "v120") {
+    return cmVS12CSharpFlagTable;
+  } else if (useToolset == "v110") {
+    return cmVS11CSharpFlagTable;
+  } else if (useToolset == "v100") {
+    return cmVS10CSharpFlagTable;
   } else {
     return 0;
   }

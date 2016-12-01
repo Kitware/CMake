@@ -7,6 +7,7 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmVS11CLFlagTable.h"
+#include "cmVS11CSharpFlagTable.h"
 #include "cmVS11LibFlagTable.h"
 #include "cmVS11LinkFlagTable.h"
 #include "cmVS11MASMFlagTable.h"
@@ -108,6 +109,7 @@ cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
     vc11Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v110";
   this->DefaultClFlagTable = cmVS11CLFlagTable;
+  this->DefaultCSharpFlagTable = cmVS11CSharpFlagTable;
   this->DefaultLibFlagTable = cmVS11LibFlagTable;
   this->DefaultLinkFlagTable = cmVS11LinkFlagTable;
   this->DefaultMasmFlagTable = cmVS11MASMFlagTable;

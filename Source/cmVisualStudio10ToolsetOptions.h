@@ -19,6 +19,8 @@ class cmVisualStudio10ToolsetOptions
 public:
   cmIDEFlagTable const* GetClFlagTable(std::string const& name,
                                        std::string const& toolset) const;
+  cmIDEFlagTable const* GetCSharpFlagTable(std::string const& name,
+                                           std::string const& toolset) const;
   cmIDEFlagTable const* GetRcFlagTable(std::string const& name,
                                        std::string const& toolset) const;
   cmIDEFlagTable const* GetLibFlagTable(std::string const& name,

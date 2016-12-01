@@ -7,6 +7,7 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmVS141CLFlagTable.h"
+#include "cmVS141CSharpFlagTable.h"
 
 static const char vs15generatorName[] = "Visual Studio 15 2017";
 
@@ -86,6 +87,7 @@ cmGlobalVisualStudio15Generator::cmGlobalVisualStudio15Generator(
     vc15Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v141";
   this->DefaultClFlagTable = cmVS141CLFlagTable;
+  this->DefaultCSharpFlagTable = cmVS141CSharpFlagTable;
   this->Version = VS15;
 }
 
