@@ -533,6 +533,21 @@ void cmGeneratorTarget::AddTracedSources(std::vector<std::string> const& srcs)
   }
 }
 
+void cmGeneratorTarget::AddIncludeDirectory(const std::string& src,
+                                            bool before)
+{
+  this->Target->InsertInclude(src, this->Makefile->GetBacktrace(), before);
+  cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+  cmGeneratorExpression ge(lfbt);
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(src);
+  cge->SetEvaluateForBuildsystem(true);
+  // Insert before begin/end
+  std::vector<TargetPropertyEntry*>::iterator pos = before
+    ? this->IncludeDirectoriesEntries.begin()
+    : this->IncludeDirectoriesEntries.end();
+  this->IncludeDirectoriesEntries.insert(pos, new TargetPropertyEntry(cge));
+}
+
 std::vector<cmSourceFile*> const* cmGeneratorTarget::GetSourceDepends(
   cmSourceFile const* sf) const
 {

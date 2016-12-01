@@ -396,6 +396,12 @@ public:
   void AddTracedSources(std::vector<std::string> const& srcs);
 
   /**
+   * Adds an entry to the INCLUDE_DIRECTORIES list.
+   * If before is true the entry is pushed at the front.
+   */
+  void AddIncludeDirectory(const std::string& src, bool before = false);
+
+  /**
    * Flags for a given source file as used in this target. Typically assigned
    * via SET_TARGET_PROPERTIES when the property is a list of source files.
    */
