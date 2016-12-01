@@ -54,6 +54,47 @@ if(${CPACK_SYSTEM_NAME} MATCHES Windows)
   endif()
 endif()
 
+# Advanced IFW configuration
+set(_cpifwrc CPACK_IFW_COMPONENT_GROUP_CMAKE_)
+set(_cpifwrcconf _CPACK_IFW_COMPONENT_GROUP_CMAKE)
+set(${_cpifwrcconf} "# CMake IFW configuration\n")
+macro(_cmifwarg DESCRIPTION TYPE NAME DEFAULT)
+  set(_var CMake_IFW_ROOT_COMPONENT_${NAME})
+  if(DEFINED ${_var})
+    set(${_var} ${${_var}} CACHE ${TYPE} ${DESCRIPTION})
+    mark_as_advanced(${_var})
+  elseif(NOT "${DEFAULT}" STREQUAL "")
+    set(${_var} ${DEFAULT})
+  endif()
+  if(DEFINED ${_var})
+    set(${_cpifwrcconf}
+      "${${_cpifwrcconf}}  set(${_cpifwrc}${NAME}\n    \"${${_var}}\")\n")
+  endif()
+endmacro()
+
+_cmifwarg("Package <Name> tag (domen-like)"
+  STRING NAME "")
+_cmifwarg("Package <DisplayName> tag"
+  STRING DISPLAY_NAME "")
+_cmifwarg("Package <Description> tag"
+  STRING DESCRIPTION "")
+_cmifwarg("Package <ReleaseDate> tag (keep empty to auto generate)"
+  STRING RELEASE_DATE "")
+_cmifwarg("Package <Default> tag (values: TRUE, FALSE, SCRIPT)"
+  STRING DEFAULT "")
+_cmifwarg("Package <Version> tag"
+  STRING VERSION
+  "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
+_cmifwarg("Package <Script> tag"
+  FILEPATH SCRIPT "${CMake_BINARY_DIR}/installscript.qs")
+_cmifwarg("Package <SortingPriority> tag"
+  STRING PRIORITY "100")
+_cmifwarg("Package <ForsedInstallation> tag"
+  STRING FORCED_INSTALLATION "")
+
+set(${_cpifwrc}LICENSES_DEFAULT
+  "${CPACK_PACKAGE_NAME} Copyright;${CPACK_RESOURCE_FILE_LICENSE}")
+
 # Components
 if(CMake_INSTALL_COMPONENTS)
   set(_CPACK_IFW_COMPONENTS_ALL cmake ctest cpack)
@@ -103,20 +144,31 @@ if(CMake_INSTALL_COMPONENTS)
     endif()
   endif()
   set(_CPACK_IFW_COMPONENTS_CONFIGURATION "
-# Components
-set(CPACK_COMPONENTS_ALL \"${_CPACK_IFW_COMPONENTS_ALL}\")
-set(CPACK_COMPONENTS_GROUPING IGNORE)
-")
+  # Components
+  set(CPACK_COMPONENTS_ALL \"${_CPACK_IFW_COMPONENTS_ALL}\")
+  set(CPACK_COMPONENTS_GROUPING IGNORE)
+  ")
 else()
   if(BUILD_QtDialog AND USE_LGPL)
-    set(_CPACK_IFW_ADDITIONAL_LICENSES
-      "\"LGPLv${USE_LGPL}\" \"${CMake_SOURCE_DIR}/Licenses/LGPLv${USE_LGPL}.txt\"")
+    set(${_cpifwrc}LICENSES_DEFAULT
+      "${${_cpifwrc}LICENSES_DEFAULT};LGPLv${USE_LGPL};${CMake_SOURCE_DIR}/Licenses/LGPLv${USE_LGPL}.txt")
   endif()
 endif()
 
+_cmifwarg("Package <Licenses> tag (pairs of <display_name> <file_path>)"
+  STRING LICENSES "${${_cpifwrc}LICENSES_DEFAULT}")
+
 # Components scripts configuration
+if(CMake_INSTALL_COMPONENTS)
+  configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/CMake.qs.in"
+    "${CMake_BINARY_DIR}/installscript.qs" @ONLY
+  )
+else()
+  configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/installscript.qs.in"
+    "${CMake_BINARY_DIR}/installscript.qs" @ONLY
+  )
+endif()
 foreach(_script
-  CMake
   CMake.Documentation.SphinxHTML
   CMake.DeveloperReference.HTML)
   configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/${_script}.qs.in"
@@ -137,25 +189,15 @@ if(${CMAKE_SYSTEM_NAME} MATCHES Windows)
     set(_CPACK_IFW_SHORTCUT_OPTIONAL "${_CPACK_IFW_SHORTCUT_OPTIONAL}component.addOperation(\"CreateShortcut\", \"@TargetDir@/doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/developer-reference/html/index.html\", \"@StartMenuDir@/CMake Developer Reference.lnk\");\n")
     endif()
   endif()
-  configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/installscript.qs.in"
-    "${CMake_BINARY_DIR}/installscript.qs" @ONLY
-  )
   install(FILES "${CMake_SOURCE_DIR}/Source/QtIFW/cmake.org.html"
     DESTINATION "${CMAKE_DOC_DIR}"
   )
-  if(CMake_INSTALL_COMPONENTS)
-    set(_CPACK_IFW_PACKAGE_SCRIPT "${CMake_BINARY_DIR}/CMake.qs")
-  else()
-    set(_CPACK_IFW_PACKAGE_SCRIPT "${CMake_BINARY_DIR}/installscript.qs")
-  endif()
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES Linux)
   set(CPACK_IFW_TARGET_DIRECTORY "@HomeDir@/${CMAKE_PROJECT_NAME}")
   set(CPACK_IFW_ADMIN_TARGET_DIRECTORY "@ApplicationsDir@/${CMAKE_PROJECT_NAME}")
 endif()
-
-set(_CPACK_IFW_PACKAGE_VERSION ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH})
 
 if(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
   # if the CPACK_PACKAGE_FILE_NAME is not defined by the cache
