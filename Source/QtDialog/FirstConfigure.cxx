@@ -56,7 +56,7 @@ QFrame* StartCompilerSetup::CreateToolsetWidgets()
   QVBoxLayout* l = new QVBoxLayout(frame);
   l->setContentsMargins(0, 0, 0, 0);
 
-  ToolsetLabel = new QLabel(tr("Optional toolset to use (-T parameter)"));
+  ToolsetLabel = new QLabel(tr("Optional toolset to use (argument to -T)"));
   l->addWidget(ToolsetLabel);
 
   Toolset = new QLineEdit(frame);
