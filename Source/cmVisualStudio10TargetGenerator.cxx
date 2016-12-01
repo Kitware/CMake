@@ -1569,6 +1569,14 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
       *this->BuildFileStream << cmVS10EscapeXML(intermediateDir)
                              << "</IntDir>\n";
 
+      if (const char* workingDir = this->GeneratorTarget->GetProperty(
+            "VS_DEBUGGER_WORKING_DIRECTORY")) {
+        this->WritePlatformConfigTag("LocalDebuggerWorkingDirectory",
+                                     config->c_str(), 3);
+        *this->BuildFileStream << cmVS10EscapeXML(workingDir)
+                               << "</LocalDebuggerWorkingDirectory>\n";
+      }
+
       std::string name =
         cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
       this->WritePlatformConfigTag("TargetName", config->c_str(), 3);
