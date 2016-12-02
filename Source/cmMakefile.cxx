@@ -3158,8 +3158,10 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   cmGlobalGenerator* gg =
     cm.CreateGlobalGenerator(this->GetGlobalGenerator()->GetName());
   if (!gg) {
-    cmSystemTools::Error(
-      "Internal CMake error, TryCompile bad GlobalGenerator");
+    this->IssueMessage(cmake::INTERNAL_ERROR, "Global generator '" +
+                         this->GetGlobalGenerator()->GetName() +
+                         "' could not be created.");
+    cmSystemTools::SetFatalErrorOccured();
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd);
     this->IsSourceFileTryCompile = false;
@@ -3222,8 +3224,9 @@ int cmMakefile::TryCompile(const std::string& srcdir,
                      cmStateEnums::INTERNAL);
   }
   if (cm.Configure() != 0) {
-    cmSystemTools::Error(
-      "Internal CMake error, TryCompile configure of cmake failed");
+    this->IssueMessage(cmake::FATAL_ERROR,
+                       "Failed to configure test project build system.");
+    cmSystemTools::SetFatalErrorOccured();
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd);
     this->IsSourceFileTryCompile = false;
@@ -3231,8 +3234,9 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   }
 
   if (cm.Generate() != 0) {
-    cmSystemTools::Error(
-      "Internal CMake error, TryCompile generation of cmake failed");
+    this->IssueMessage(cmake::FATAL_ERROR,
+                       "Failed to generate test project build system.");
+    cmSystemTools::SetFatalErrorOccured();
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd);
     this->IsSourceFileTryCompile = false;
