@@ -145,7 +145,14 @@ private:
   OptionsMap RcOptions;
   OptionsMap MasmOptions;
   OptionsMap LinkOptions;
-  std::string PathToVcxproj;
+  std::string PathToProjectFile;
+  std::string ProjectFileExtension;
+  enum VsProjectType
+  {
+    vcxproj,
+    csproj
+  } ProjectType;
+  bool InSourceBuild;
   std::vector<std::string> Configurations;
   std::vector<TargetsFileAndConfigs> TargetsFileAndConfigsVec;
   cmGeneratorTarget* GeneratorTarget;
@@ -154,6 +161,7 @@ private:
   std::string GUID;
   std::string Name;
   bool MSTools;
+  bool Managed;
   bool NsightTegra;
   int NsightTegraVersion[4];
   bool TargetCompileAsWinRT;
