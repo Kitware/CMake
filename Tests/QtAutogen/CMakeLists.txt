@@ -45,7 +45,6 @@ else()
 endif()
 
 get_property(QT_COMPILE_FEATURES TARGET ${QT_QTCORE_TARGET} PROPERTY INTERFACE_COMPILE_FEATURES)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # -- Test: AUTORCC
 # RCC only

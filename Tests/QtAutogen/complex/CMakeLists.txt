@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
 # -- Test: AUTOMOC AUTORCC AUTOUIC
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_definitions(-DFOO -DSomeDefine="Barx")
 
 # enable relaxed mode so automoc can handle all the special cases:
@@ -77,5 +76,7 @@ add_library(libC SHARED libC.cpp)
 set_target_properties(libC PROPERTIES AUTOMOC TRUE)
 generate_export_header(libC)
 target_link_libraries(libC LINK_PUBLIC libB)
+target_include_directories(libC PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+set_property(TARGET libC APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_BINARY_DIR} )
 
 target_link_libraries(QtAutogen codeeditorLib ${QT_LIBRARIES} libC)
