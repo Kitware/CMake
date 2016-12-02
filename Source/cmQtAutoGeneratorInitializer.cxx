@@ -83,6 +83,21 @@ static std::string GetAutogenTargetBuildDir(cmGeneratorTarget const* target)
   return targetDir;
 }
 
+static std::string GetQtMajorVersion(cmGeneratorTarget const* target)
+{
+  cmMakefile* makefile = target->Target->GetMakefile();
+  std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
+  if (qtMajorVersion.empty()) {
+    qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
+  }
+  const char* targetQtVersion =
+    target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", "");
+  if (targetQtVersion != CM_NULLPTR) {
+    qtMajorVersion = targetQtVersion;
+  }
+  return qtMajorVersion;
+}
+
 static void SetupSourceFiles(cmGeneratorTarget const* target,
                              std::vector<std::string>& skipMoc,
                              std::vector<std::string>& mocSources,
@@ -355,25 +370,13 @@ static void UicSetupAutoTarget(
   }
 }
 
-static std::string RccGetExecutable(cmGeneratorTarget const* target)
+static std::string RccGetExecutable(cmGeneratorTarget const* target,
+                                    const std::string& qtMajorVersion)
 {
   cmLocalGenerator* lg = target->GetLocalGenerator();
-  cmMakefile* makefile = target->Target->GetMakefile();
-  const char* qtVersion = makefile->GetDefinition("_target_qt_version");
-  if (!qtVersion) {
-    qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
-    if (!qtVersion) {
-      qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
-    }
-    if (const char* targetQtVersion =
-          target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION",
-                                                          "")) {
-      qtVersion = targetQtVersion;
-    }
-  }
 
-  std::string targetName = target->GetName();
-  if (strcmp(qtVersion, "5") == 0) {
+  std::string const& targetName = target->GetName();
+  if (qtMajorVersion == "5") {
     cmGeneratorTarget* qt5Rcc = lg->FindGeneratorTargetToUse("Qt5::rcc");
     if (!qt5Rcc) {
       cmSystemTools::Error("Qt5::rcc target not found ", targetName.c_str());
@@ -381,7 +384,7 @@ static std::string RccGetExecutable(cmGeneratorTarget const* target)
     }
     return qt5Rcc->ImportedGetLocation("");
   }
-  if (strcmp(qtVersion, "4") == 0) {
+  if (qtMajorVersion == "4") {
     cmGeneratorTarget* qt4Rcc = lg->FindGeneratorTargetToUse("Qt4::rcc");
     if (!qt4Rcc) {
       cmSystemTools::Error("Qt4::rcc target not found ", targetName.c_str());
@@ -433,7 +436,11 @@ static void RccMergeOptions(std::vector<std::string>& opts,
 static bool RccListInputsQt5(cmSourceFile* sf, cmGeneratorTarget const* target,
                              std::vector<std::string>& depends)
 {
-  const std::string rccCommand = RccGetExecutable(target);
+  const std::string rccCommand = RccGetExecutable(target, "5");
+  if (rccCommand.empty()) {
+    cmSystemTools::Error("AUTOGEN: error: rcc executable not available\n");
+    return false;
+  }
 
   bool hasDashDashList = false;
   // Read rcc features
@@ -562,7 +569,8 @@ static bool RccListInputs(const std::string& qtMajorVersion, cmSourceFile* sf,
   return RccListInputsQt4(sf, depends);
 }
 
-static void RccSetupAutoTarget(cmGeneratorTarget const* target)
+static void RccSetupAutoTarget(cmGeneratorTarget const* target,
+                               const std::string& qtMajorVersion)
 {
   std::string _rcc_files;
   const char* sepRccFiles = "";
@@ -578,15 +586,11 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target)
   std::string rccFileOptions;
   const char* optionSep = "";
 
-  const char* qtVersion = makefile->GetDefinition("_target_qt_version");
+  const bool qtMajorVersion5 = (qtMajorVersion == "5");
 
   std::vector<std::string> rccOptions;
   if (const char* opts = target->GetProperty("AUTORCC_OPTIONS")) {
     cmSystemTools::ExpandListArgument(opts, rccOptions);
-  }
-  std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
-  if (qtMajorVersion == "") {
-    qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
   }
 
   for (std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
@@ -605,7 +609,7 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target)
         if (const char* prop = sf->GetProperty("AUTORCC_OPTIONS")) {
           std::vector<std::string> optsVec;
           cmSystemTools::ExpandListArgument(prop, optsVec);
-          RccMergeOptions(rccOptions, optsVec, strcmp(qtVersion, "5") == 0);
+          RccMergeOptions(rccOptions, optsVec, qtMajorVersion5);
         }
 
         if (!rccOptions.empty()) {
@@ -648,7 +652,7 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target)
     "_rcc_options_options",
     cmOutputConverter::EscapeForCMake(rccFileOptions).c_str());
   makefile->AddDefinition("_qt_rcc_executable",
-                          RccGetExecutable(target).c_str());
+                          RccGetExecutable(target, qtMajorVersion).c_str());
 }
 
 void cmQtAutoGeneratorInitializer::InitializeAutogenSources(
@@ -673,11 +677,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   const std::string autogenBuildDir = GetAutogenTargetBuildDir(target);
   const std::string workingDirectory =
     cmSystemTools::CollapseFullPath("", makefile->GetCurrentBinaryDirectory());
-
-  std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
-  if (qtMajorVersion == "") {
-    qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
-  }
+  const std::string qtMajorVersion = GetQtMajorVersion(target);
 
   // Create autogen target build directory
   cmSystemTools::MakeDirectory(autogenBuildDir);
@@ -863,6 +863,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
 
   // create a custom target for running generators at buildtime:
   const std::string autogenTargetName = GetAutogenTargetName(target);
+  const std::string qtMajorVersion = GetQtMajorVersion(target);
 
   makefile->AddDefinition(
     "_moc_target_name",
@@ -870,19 +871,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
   makefile->AddDefinition(
     "_origin_target_name",
     cmOutputConverter::EscapeForCMake(target->GetName()).c_str());
-
-  const char* qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
-  if (!qtVersion) {
-    qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
-  }
-  if (const char* targetQtVersion =
-        target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION",
-                                                        "")) {
-    qtVersion = targetQtVersion;
-  }
-  if (qtVersion) {
-    makefile->AddDefinition("_target_qt_version", qtVersion);
-  }
+  makefile->AddDefinition("_target_qt_version", qtMajorVersion.c_str());
 
   std::vector<std::string> skipUic;
   std::vector<std::string> skipMoc;
@@ -908,7 +897,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     UicSetupAutoTarget(target, skipUic, configUicOptions);
   }
   if (target->GetPropertyAsBool("AUTORCC")) {
-    RccSetupAutoTarget(target);
+    RccSetupAutoTarget(target, qtMajorVersion);
   }
 
   // Generate config file
