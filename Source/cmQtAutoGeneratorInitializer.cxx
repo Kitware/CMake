@@ -58,7 +58,7 @@ static std::string utilStripCR(std::string const& line)
 static std::string GetAutogenTargetName(cmGeneratorTarget const* target)
 {
   std::string autogenTargetName = target->GetName();
-  autogenTargetName += "_automoc";
+  autogenTargetName += "_autogen";
   return autogenTargetName;
 }
 
