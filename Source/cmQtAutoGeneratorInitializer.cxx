@@ -122,8 +122,6 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
           cmsys::SystemTools::GetFilenameWithoutLastExtension(absFile);
         rccOutputFile += ".cpp";
 
-        makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
-                                 rccOutputFile.c_str(), false);
         makefile->GetOrCreateSource(rccOutputFile, true);
         newRccFiles.push_back(rccOutputFile);
 
@@ -661,9 +659,6 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenSources(
     const std::string mocCppFile =
       GetAutogenTargetBuildDir(target) + "moc_compilation.cpp";
     makefile->GetOrCreateSource(mocCppFile, true);
-    makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES", mocCppFile.c_str(),
-                             false);
-
     target->AddSource(mocCppFile);
   }
 }
@@ -686,6 +681,9 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 
   // Create autogen target build directory
   cmSystemTools::MakeDirectory(autogenBuildDir);
+  // Remove entire autogen build directory on clean
+  makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
+                           autogenBuildDir.c_str(), false);
 
   // Create autogen target includes directory and
   // add it to the origin target INCLUDE_DIRECTORIES
