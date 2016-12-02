@@ -679,20 +679,25 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   const std::string workingDirectory =
     cmSystemTools::CollapseFullPath("", makefile->GetCurrentBinaryDirectory());
   const std::string qtMajorVersion = GetQtMajorVersion(target);
+  std::vector<std::string> autogenOutputFiles;
 
-  // Create autogen target build directory
+  // Create autogen target build directory and add it to the clean files
   cmSystemTools::MakeDirectory(autogenBuildDir);
-  // Remove entire autogen build directory on clean
   makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
                            autogenBuildDir.c_str(), false);
 
-  // Create autogen target includes directory and
-  // add it to the origin target INCLUDE_DIRECTORIES
   if (target->GetPropertyAsBool("AUTOMOC") ||
       target->GetPropertyAsBool("AUTOUIC")) {
+    // Create autogen target includes directory and
+    // add it to the origin target INCLUDE_DIRECTORIES
     const std::string incsDir = autogenBuildDir + "include";
     cmSystemTools::MakeDirectory(incsDir);
     target->AddIncludeDirectory(incsDir, true);
+  }
+
+  if (target->GetPropertyAsBool("AUTOMOC")) {
+    // Register moc compilation file as generated
+    autogenOutputFiles.push_back ( autogenBuildDir + "moc_compilation.cpp" );
   }
 
   // Initialize autogen target dependencies
@@ -765,7 +770,6 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   }
 #endif
 
-  std::vector<std::string> rcc_output;
   bool const isNinja = lg->GetGlobalGenerator()->GetName() == "Ninja";
   if (isNinja
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -792,10 +796,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
             rccOutputFile +=
               cmsys::SystemTools::GetFilenameWithoutLastExtension(absFile);
             rccOutputFile += ".cpp";
-            rcc_output.push_back(rccOutputFile);
-            // Create output directory
-            cmSystemTools::MakeDirectory(
-              cmsys::SystemTools::GetFilenamePath(rccOutputFile));
+            // Register rcc output file as generated
+            autogenOutputFiles.push_back(rccOutputFile);
           }
           if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
             RccListInputs(qtMajorVersion, sf, target, depends);
@@ -829,7 +831,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   {
     cmTarget* autogenTarget = makefile->AddUtilityCommand(
       autogenTargetName, true, workingDirectory.c_str(),
-      /*byproducts=*/rcc_output, depends, commandLines, false,
+      /*byproducts=*/autogenOutputFiles, depends, commandLines, false,
       autogenComment.c_str());
 
     cmGeneratorTarget* gt = new cmGeneratorTarget(autogenTarget, lg);
