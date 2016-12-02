@@ -109,8 +109,6 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
   std::vector<cmSourceFile*> srcFiles;
   target->GetConfigCommonSourceFiles(srcFiles);
 
-  std::vector<std::string> rccOutput;
-
   cmFilePathChecksum fpathCheckSum(makefile);
   for (std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
        fileIt != srcFiles.end(); ++fileIt) {
@@ -121,23 +119,6 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
 
     if (cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC"))) {
       skipUic.push_back(absFile);
-    }
-
-    if (target->GetPropertyAsBool("AUTORCC")) {
-      if (ext == "qrc" &&
-          !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"))) {
-
-        // Run cmake again when .qrc file changes
-        makefile->AddCMakeDependFile(absFile);
-
-        std::string rccOutputFile = GetAutogenTargetBuildDir(target);
-        rccOutputFile += fpathCheckSum.getPart(absFile);
-        rccOutputFile += "/qrc_";
-        rccOutputFile +=
-          cmsys::SystemTools::GetFilenameWithoutLastExtension(absFile);
-        rccOutputFile += ".cpp";
-        rccOutput.push_back(rccOutputFile);
-      }
     }
 
     if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
@@ -153,18 +134,6 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
         }
       }
     }
-  }
-
-  // Add rcc output files as sources
-  for (std::vector<std::string>::const_iterator fileIt = rccOutput.begin();
-       fileIt != rccOutput.end(); ++fileIt) {
-    const std::string& rccOutputFile = *fileIt;
-    // Add source
-    makefile->GetOrCreateSource(rccOutputFile, true);
-    const_cast<cmGeneratorTarget*>(target)->AddSource(rccOutputFile);
-    // Create output directory
-    cmSystemTools::MakeDirectory(
-      cmsys::SystemTools::GetFilenamePath(rccOutputFile));
   }
 }
 
@@ -783,12 +752,19 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
           const std::string absFile =
             cmsys::SystemTools::GetRealPath(sf->GetFullPath());
 
+          // Run cmake again when .qrc file changes
+          makefile->AddCMakeDependFile(absFile);
+
           std::string rccOutputFile = autogenBuildDir;
           rccOutputFile += fpathCheckSum.getPart(absFile);
           rccOutputFile += "/qrc_";
           rccOutputFile +=
             cmsys::SystemTools::GetFilenameWithoutLastExtension(absFile);
           rccOutputFile += ".cpp";
+
+          // Add rcc output file to origin target sources
+          makefile->GetOrCreateSource(rccOutputFile, true);
+          target->AddSource(rccOutputFile);
           // Register rcc output file as generated
           autogenOutputFiles.push_back(rccOutputFile);
         }
