@@ -658,8 +658,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenSources(
 {
   if (target->GetPropertyAsBool("AUTOMOC")) {
     cmMakefile* makefile = target->Target->GetMakefile();
-    std::string mocCppFile = GetAutogenTargetBuildDir(target);
-    mocCppFile += "moc_compilation.cpp";
+    const std::string mocCppFile =
+      GetAutogenTargetBuildDir(target) + "moc_compilation.cpp";
     makefile->GetOrCreateSource(mocCppFile, true);
     makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES", mocCppFile.c_str(),
                              false);
@@ -675,12 +675,25 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 
   // Create a custom target for running generators at buildtime
   const std::string autogenTargetName = GetAutogenTargetName(target);
+  const std::string autogenBuildDir = GetAutogenTargetBuildDir(target);
   const std::string workingDirectory =
     cmSystemTools::CollapseFullPath("", makefile->GetCurrentBinaryDirectory());
 
   std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
   if (qtMajorVersion == "") {
     qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
+  }
+
+  // Create autogen target build directory
+  cmSystemTools::MakeDirectory(autogenBuildDir);
+
+  // Create autogen target includes directory and
+  // add it to the origin target INCLUDE_DIRECTORIES
+  if (target->GetPropertyAsBool("AUTOMOC") ||
+      target->GetPropertyAsBool("AUTOUIC")) {
+    const std::string incsDir = autogenBuildDir + "include";
+    cmSystemTools::MakeDirectory(incsDir);
+    target->AddIncludeDirectory(incsDir, true);
   }
 
   // Initialize autogen target dependencies

@@ -31,15 +31,19 @@ private:
   std::string MakeCompileSettingsString(cmMakefile* makefile);
 
   bool RunAutogen(cmMakefile* makefile);
+
   bool GenerateMocFiles(
     const std::map<std::string, std::string>& includedMocs,
     const std::map<std::string, std::string>& notIncludedMocs);
   bool GenerateMoc(const std::string& sourceFile,
-                   const std::string& mocFileName);
+                   const std::string& mocFileName,
+                   const std::string& subDirPrefix);
+
   bool GenerateUiFiles(
     const std::map<std::string, std::vector<std::string> >& includedUis);
   bool GenerateUi(const std::string& realName, const std::string& uiInputFile,
                   const std::string& uiOutputFile);
+
   bool GenerateQrcFiles();
   bool GenerateQrc(const std::string& qrcInputFile,
                    const std::string& qrcOutputFile, bool unique_n);
