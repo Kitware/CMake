@@ -115,16 +115,13 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
   for (std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
        fileIt != srcFiles.end(); ++fileIt) {
     cmSourceFile* sf = *fileIt;
-    std::string absFile = cmsys::SystemTools::GetRealPath(sf->GetFullPath());
-    bool skipFileForMoc =
-      cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
-    bool generated = cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"));
+    const std::string absFile =
+      cmsys::SystemTools::GetRealPath(sf->GetFullPath());
+    const std::string ext = sf->GetExtension();
 
     if (cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC"))) {
       skipUic.push_back(absFile);
     }
-
-    std::string ext = sf->GetExtension();
 
     if (target->GetPropertyAsBool("AUTORCC")) {
       if (ext == "qrc" &&
@@ -146,8 +143,8 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
       }
     }
 
-    if (!generated) {
-      if (skipFileForMoc) {
+    if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
+      if (cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"))) {
         skipMoc.push_back(absFile);
       } else {
         cmSystemTools::FileFormat fileType =
