@@ -28,7 +28,8 @@ int main(int argc, const char* argv[])
     std::cout << argv[1] << std::endl;
     std::cerr << argv[1] << std::endl;
   } else {
-    std::string str = kwsys::Encoding::ToNarrow(UnicodeTestString);
+    std::string str = kwsys::Encoding::ToNarrow(std::wstring(
+      UnicodeTestString, sizeof(UnicodeTestString) / sizeof(wchar_t) - 1));
     std::cout << str << std::endl;
     std::cerr << str << std::endl;
   }
