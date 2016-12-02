@@ -7,6 +7,11 @@ UicOnly::UicOnly(QWidget* parent)
 {
 }
 
+UicOnly::~UicOnly()
+{
+  delete ui;
+}
+
 int main()
 {
   return 0;
