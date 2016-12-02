@@ -109,7 +109,7 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
   std::vector<cmSourceFile*> srcFiles;
   target->GetConfigCommonSourceFiles(srcFiles);
 
-  std::vector<std::string> newRccFiles;
+  std::vector<std::string> rccOutput;
 
   cmFilePathChecksum fpathCheckSum(makefile);
   for (std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
@@ -127,19 +127,16 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
       if (ext == "qrc" &&
           !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"))) {
 
+        // Run cmake again when .qrc file changes
+        makefile->AddCMakeDependFile ( absFile );
+
         std::string rccOutputFile = GetAutogenTargetBuildDir(target);
         rccOutputFile += fpathCheckSum.getPart(absFile);
         rccOutputFile += "/qrc_";
         rccOutputFile +=
           cmsys::SystemTools::GetFilenameWithoutLastExtension(absFile);
         rccOutputFile += ".cpp";
-
-        makefile->GetOrCreateSource(rccOutputFile, true);
-        newRccFiles.push_back(rccOutputFile);
-
-        // Create output directory
-        cmSystemTools::MakeDirectory(
-          cmsys::SystemTools::GetFilenamePath(rccOutputFile));
+        rccOutput.push_back(rccOutputFile);
       }
     }
 
@@ -158,9 +155,16 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
     }
   }
 
-  for (std::vector<std::string>::const_iterator fileIt = newRccFiles.begin();
-       fileIt != newRccFiles.end(); ++fileIt) {
-    const_cast<cmGeneratorTarget*>(target)->AddSource(*fileIt);
+  // Add rcc output files as sources
+  for (std::vector<std::string>::const_iterator fileIt = rccOutput.begin();
+       fileIt != rccOutput.end(); ++fileIt) {
+    const std::string& rccOutputFile = *fileIt;
+    // Add source
+    makefile->GetOrCreateSource(rccOutputFile, true);
+    const_cast<cmGeneratorTarget*>(target)->AddSource(rccOutputFile);
+    // Create output directory
+    cmSystemTools::MakeDirectory(
+      cmsys::SystemTools::GetFilenamePath(rccOutputFile));
   }
 }
 
