@@ -128,7 +128,7 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
           !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"))) {
 
         // Run cmake again when .qrc file changes
-        makefile->AddCMakeDependFile ( absFile );
+        makefile->AddCMakeDependFile(absFile);
 
         std::string rccOutputFile = GetAutogenTargetBuildDir(target);
         rccOutputFile += fpathCheckSum.getPart(absFile);
@@ -697,7 +697,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 
   if (target->GetPropertyAsBool("AUTOMOC")) {
     // Register moc compilation file as generated
-    autogenOutputFiles.push_back ( autogenBuildDir + "moc_compilation.cpp" );
+    autogenOutputFiles.push_back(autogenBuildDir + "moc_compilation.cpp");
   }
 
   // Initialize autogen target dependencies
@@ -770,35 +770,33 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   }
 #endif
 
-  bool const isNinja = lg->GetGlobalGenerator()->GetName() == "Ninja";
-  if (isNinja
-#if defined(_WIN32) && !defined(__CYGWIN__)
-      || usePRE_BUILD
-#endif
-      ) {
-    if (target->GetPropertyAsBool("AUTORCC")) {
-      cmFilePathChecksum fpathCheckSum(makefile);
-      std::vector<cmSourceFile*> srcFiles;
-      target->GetConfigCommonSourceFiles(srcFiles);
-      for (std::vector<cmSourceFile*>::const_iterator fileIt =
-             srcFiles.begin();
-           fileIt != srcFiles.end(); ++fileIt) {
-        cmSourceFile* sf = *fileIt;
-        if (sf->GetExtension() == "qrc" &&
-            !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"))) {
-          {
-            const std::string absFile =
-              cmsys::SystemTools::GetRealPath(sf->GetFullPath());
+  if (target->GetPropertyAsBool("AUTORCC")) {
+    cmFilePathChecksum fpathCheckSum(makefile);
+    std::vector<cmSourceFile*> srcFiles;
+    target->GetConfigCommonSourceFiles(srcFiles);
+    for (std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
+         fileIt != srcFiles.end(); ++fileIt) {
+      cmSourceFile* sf = *fileIt;
+      if (sf->GetExtension() == "qrc" &&
+          !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"))) {
+        {
+          const std::string absFile =
+            cmsys::SystemTools::GetRealPath(sf->GetFullPath());
 
-            std::string rccOutputFile = GetAutogenTargetBuildDir(target);
-            rccOutputFile += fpathCheckSum.getPart(absFile);
-            rccOutputFile += "/qrc_";
-            rccOutputFile +=
-              cmsys::SystemTools::GetFilenameWithoutLastExtension(absFile);
-            rccOutputFile += ".cpp";
-            // Register rcc output file as generated
-            autogenOutputFiles.push_back(rccOutputFile);
-          }
+          std::string rccOutputFile = autogenBuildDir;
+          rccOutputFile += fpathCheckSum.getPart(absFile);
+          rccOutputFile += "/qrc_";
+          rccOutputFile +=
+            cmsys::SystemTools::GetFilenameWithoutLastExtension(absFile);
+          rccOutputFile += ".cpp";
+          // Register rcc output file as generated
+          autogenOutputFiles.push_back(rccOutputFile);
+        }
+        if (lg->GetGlobalGenerator()->GetName() == "Ninja"
+#if defined(_WIN32) && !defined(__CYGWIN__)
+            || usePRE_BUILD
+#endif
+            ) {
           if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
             RccListInputs(qtMajorVersion, sf, target, depends);
 #if defined(_WIN32) && !defined(__CYGWIN__)
