@@ -105,7 +105,7 @@ bool cmProcess::Buffer::GetLast(std::string& line)
 
 int cmProcess::GetNextOutputLine(std::string& line, double timeout)
 {
-  cmProcessOutput processOutput;
+  cmProcessOutput processOutput(cmProcessOutput::UTF8);
   std::string strdata;
   for (;;) {
     // Look for lines already buffered.
