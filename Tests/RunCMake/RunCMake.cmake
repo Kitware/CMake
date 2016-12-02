@@ -75,6 +75,7 @@ function(run_cmake test)
       OUTPUT_VARIABLE actual_stdout
       ERROR_VARIABLE ${actual_stderr_var}
       RESULT_VARIABLE actual_result
+      ENCODING UTF8
       ${maybe_timeout}
       )
   else()
@@ -90,6 +91,7 @@ function(run_cmake test)
       OUTPUT_VARIABLE actual_stdout
       ERROR_VARIABLE ${actual_stderr_var}
       RESULT_VARIABLE actual_result
+      ENCODING UTF8
       ${maybe_timeout}
       )
   endif()

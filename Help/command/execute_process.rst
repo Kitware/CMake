@@ -18,7 +18,8 @@ Execute one or more child processes.
                   [OUTPUT_QUIET]
                   [ERROR_QUIET]
                   [OUTPUT_STRIP_TRAILING_WHITESPACE]
-                  [ERROR_STRIP_TRAILING_WHITESPACE])
+                  [ERROR_STRIP_TRAILING_WHITESPACE]
+                  [ENCODING <name>])
 
 Runs the given sequence of one or more commands in parallel with the standard
 output of each process piped to the standard input of the next.
@@ -65,6 +66,14 @@ Options:
 
 ``OUTPUT_QUIET``, ``ERROR_QUIET``
  The standard output or standard error results will be quietly ignored.
+
+``ENCODING <name>``
+ On Windows, the encoding that is used to decode output from the process.
+ Ignored on other platforms.
+ Valid encoding names are: ``AUTO`` (the default), ``NONE``, ``UTF8``,
+ ``ANSI`` and ``OEM``.
+ ``AUTO`` encoding means current active console's codepage will be used
+ or if that isn't available then ``ANSI`` codepage will be used.
 
 If more than one ``OUTPUT_*`` or ``ERROR_*`` option is given for the
 same pipe the precedence is not specified.

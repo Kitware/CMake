@@ -9,6 +9,21 @@ unsigned int cmProcessOutput::defaultCodepage =
   KWSYS_ENCODING_DEFAULT_CODEPAGE;
 #endif
 
+cmProcessOutput::Encoding cmProcessOutput::FindEncoding(std::string name)
+{
+  Encoding encoding = Auto;
+  if (name == "UTF8") {
+    encoding = UTF8;
+  } else if (name == "NONE") {
+    encoding = None;
+  } else if (name == "ANSI") {
+    encoding = ANSI;
+  } else if (name == "OEM") {
+    encoding = OEM;
+  }
+  return encoding;
+}
+
 cmProcessOutput::cmProcessOutput(Encoding encoding, unsigned int maxSize)
 {
 #if defined(_WIN32)
