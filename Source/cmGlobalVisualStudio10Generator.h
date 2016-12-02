@@ -91,6 +91,7 @@ public:
   static std::string GetInstalledNsightTegraVersion();
 
   cmIDEFlagTable const* GetClFlagTable() const;
+  cmIDEFlagTable const* GetCSharpFlagTable() const;
   cmIDEFlagTable const* GetRcFlagTable() const;
   cmIDEFlagTable const* GetLibFlagTable() const;
   cmIDEFlagTable const* GetLinkFlagTable() const;
@@ -120,6 +121,7 @@ protected:
   std::string SystemVersion;
   std::string NsightTegraVersion;
   cmIDEFlagTable const* DefaultClFlagTable;
+  cmIDEFlagTable const* DefaultCSharpFlagTable;
   cmIDEFlagTable const* DefaultLibFlagTable;
   cmIDEFlagTable const* DefaultLinkFlagTable;
   cmIDEFlagTable const* DefaultMasmFlagTable;

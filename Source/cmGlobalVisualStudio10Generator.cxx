@@ -9,6 +9,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmVS10CLFlagTable.h"
+#include "cmVS10CSharpFlagTable.h"
 #include "cmVS10LibFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10MASMFlagTable.h"
@@ -99,6 +100,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->MSBuildCommandInitialized = false;
   this->DefaultPlatformToolset = "v100";
   this->DefaultClFlagTable = cmVS10CLFlagTable;
+  this->DefaultCSharpFlagTable = cmVS10CSharpFlagTable;
   this->DefaultLibFlagTable = cmVS10LibFlagTable;
   this->DefaultLinkFlagTable = cmVS10LinkFlagTable;
   this->DefaultMasmFlagTable = cmVS10MASMFlagTable;
@@ -624,6 +626,15 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetClFlagTable() const
     this->GetPlatformName(), this->GetPlatformToolsetString());
 
   return (table != CM_NULLPTR) ? table : this->DefaultClFlagTable;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCSharpFlagTable()
+  const
+{
+  cmIDEFlagTable const* table = this->ToolsetOptions.GetCSharpFlagTable(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+
+  return (table != CM_NULLPTR) ? table : this->DefaultCSharpFlagTable;
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetRcFlagTable() const
