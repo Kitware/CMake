@@ -7,6 +7,16 @@
 #
 # FindModule for OpenGL and GLU.
 #
+# IMPORTED Targets
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines the :prop_tgt:`IMPORTED` targets:
+#
+# ``OpenGL::GL``
+#  Defined if the system has OpenGL.
+# ``OpenGL::GLU``
+#  Defined if the system has GLU.
+#
 # Result Variables
 # ^^^^^^^^^^^^^^^^
 #
@@ -159,6 +169,55 @@ set(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL REQUIRED_VARS ${_OpenGL_REQUIRED_VARS})
 unset(_OpenGL_REQUIRED_VARS)
+
+# OpenGL:: targets
+if(OPENGL_FOUND)
+  if(NOT TARGET OpenGL::GL)
+    if(IS_ABSOLUTE "${OPENGL_gl_LIBRARY}")
+      add_library(OpenGL::GL UNKNOWN IMPORTED)
+      if(OPENGL_gl_LIBRARY MATCHES "/([^/]+)\\.framework$")
+        set(_gl_fw "${OPENGL_gl_LIBRARY}/${CMAKE_MATCH_1}")
+        if(EXISTS "${_gl_fw}.tbd")
+          set(_gl_fw "${_gl_fw}.tbd")
+        endif()
+        set_target_properties(OpenGL::GL PROPERTIES
+          IMPORTED_LOCATION "${_gl_fw}")
+      else()
+        set_target_properties(OpenGL::GL PROPERTIES
+          IMPORTED_LOCATION "${OPENGL_gl_LIBRARY}")
+      endif()
+    else()
+      add_library(OpenGL::GL INTERFACE IMPORTED)
+      set_target_properties(OpenGL::GL PROPERTIES
+        IMPORTED_LIBNAME "${OPENGL_gl_LIBRARY}")
+    endif()
+    set_target_properties(OpenGL::GL PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENGL_INCLUDE_DIR}")
+  endif()
+
+  if(OPENGL_GLU_FOUND AND NOT TARGET OpenGL::GLU)
+    if(IS_ABSOLUTE "${OPENGL_glu_LIBRARY}")
+      add_library(OpenGL::GLU UNKNOWN IMPORTED)
+      if(OPENGL_glu_LIBRARY MATCHES "/([^/]+)\\.framework$")
+        set(_glu_fw "${OPENGL_glu_LIBRARY}/${CMAKE_MATCH_1}")
+        if(EXISTS "${_glu_fw}.tbd")
+          set(_glu_fw "${_glu_fw}.tbd")
+        endif()
+        set_target_properties(OpenGL::GLU PROPERTIES
+          IMPORTED_LOCATION "${_glu_fw}")
+      else()
+        set_target_properties(OpenGL::GLU PROPERTIES
+          IMPORTED_LOCATION "${OPENGL_glu_LIBRARY}")
+      endif()
+    else()
+      add_library(OpenGL::GLU INTERFACE IMPORTED)
+      set_target_properties(OpenGL::GLU PROPERTIES
+        IMPORTED_LIBNAME "${OPENGL_glu_LIBRARY}")
+    endif()
+    set_target_properties(OpenGL::GLU PROPERTIES
+      INTERFACE_LINK_LIBRARIES OpenGL::GL)
+  endif()
+endif()
 
 mark_as_advanced(
   OPENGL_INCLUDE_DIR

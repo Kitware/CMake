@@ -1400,6 +1400,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindOpenCL)
   endif()
 
+  if(CMake_TEST_FindOpenGL)
+    add_subdirectory(FindOpenGL)
+  endif()
+
   if(CMake_TEST_FindOpenSSL)
     add_subdirectory(FindOpenSSL)
   endif()
