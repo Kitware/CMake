@@ -222,6 +222,7 @@ foreach(var
     CMAKE_CXX_COMPILER_ID
     CMAKE_CXX_COMPILER_VERSION
     CMAKE_CXX_STANDARD_DEFAULT
+    CMake_TEST_CUDA
     )
   if(DEFINED ${var})
     list(APPEND try_compile_ARGS -D${var}=${${var}})
