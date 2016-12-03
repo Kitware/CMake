@@ -2313,6 +2313,10 @@ const char* cmGlobalXCodeGenerator::GetTargetLinkFlagsVar(
 const char* cmGlobalXCodeGenerator::GetTargetFileType(
   cmGeneratorTarget* target)
 {
+  if (const char* e = target->GetProperty("XCODE_EXPLICIT_FILE_TYPE")) {
+    return e;
+  }
+
   switch (target->GetType()) {
     case cmStateEnums::OBJECT_LIBRARY:
     case cmStateEnums::STATIC_LIBRARY:
