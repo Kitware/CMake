@@ -507,10 +507,12 @@
 #
 #  May be used to explicitly specify ``%(<directive>)`` file line
 #  in the spec file. Like ``%config(noreplace)`` or any other directive
-#  that be found in the ``%files`` section. Since CPackRPM is generating
-#  the list of files (and directories) the user specified files of
-#  the ``CPACK_RPM_<COMPONENT>_USER_FILELIST`` list will be removed from
-#  the generated list.
+#  that be found in the ``%files`` section. You can have multiple directives
+#  per line, as in ``%attr(600,root,root) %config(noreplace)``. Since
+#  CPackRPM is generating the list of files (and directories) the user
+#  specified files of the ``CPACK_RPM_<COMPONENT>_USER_FILELIST`` list will
+#  be removed from the generated list. If referring to directories do
+#  not add a trailing slash.
 #
 # .. variable:: CPACK_RPM_CHANGELOG_FILE
 #
@@ -2055,7 +2057,8 @@ function(cpack_rpm_generate_package)
     set(CPACK_RPM_USER_INSTALL_FILES "")
     foreach(F IN LISTS CPACK_RPM_USER_FILELIST_INTERNAL)
       string(REGEX REPLACE "%[A-Za-z]+(\\([^()]*\\))? " "" F_PATH ${F})
-      string(REGEX MATCH "%[A-Za-z]+(\\([^()]*\\))?" F_PREFIX ${F})
+      string(REGEX MATCH "(%[A-Za-z]+(\\([^()]*\\))? )*" F_PREFIX ${F})
+      string(STRIP ${F_PREFIX} F_PREFIX)
 
       if(CPACK_RPM_PACKAGE_DEBUG)
         message("CPackRPM:Debug: F_PREFIX=<${F_PREFIX}>, F_PATH=<${F_PATH}>")
