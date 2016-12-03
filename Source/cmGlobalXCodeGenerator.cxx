@@ -2340,6 +2340,10 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(
 const char* cmGlobalXCodeGenerator::GetTargetProductType(
   cmGeneratorTarget* target)
 {
+  if (const char* e = target->GetProperty("XCODE_PRODUCT_TYPE")) {
+    return e;
+  }
+
   switch (target->GetType()) {
     case cmStateEnums::OBJECT_LIBRARY:
     case cmStateEnums::STATIC_LIBRARY:

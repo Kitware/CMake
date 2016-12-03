@@ -294,6 +294,7 @@ Properties on Targets
    /prop_tgt/WIN32_EXECUTABLE
    /prop_tgt/WINDOWS_EXPORT_ALL_SYMBOLS
    /prop_tgt/XCODE_ATTRIBUTE_an-attribute
+   /prop_tgt/XCODE_PRODUCT_TYPE
    /prop_tgt/XCTEST
 
 .. _`Test Properties`:
