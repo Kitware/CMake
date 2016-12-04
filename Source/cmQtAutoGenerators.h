@@ -102,41 +102,47 @@ private:
   bool InputFilesNewerThanQrc(const std::string& qrcFile,
                               const std::string& rccOutput);
 
+  // - Target names
+  std::string OriginTargetName;
+  std::string AutogenTargetName;
+  // - Directories
+  std::string ProjectSourceDir;
+  std::string ProjectBinaryDir;
+  std::string CurrentSourceDir;
+  std::string CurrentBinaryDir;
+  std::string AutogenBuildSubDir;
+  // - Qt environment
   std::string QtMajorVersion;
-  std::string Sources;
-  std::vector<std::string> RccSources;
-  std::string SkipMoc;
-  std::string SkipUic;
-  std::string Headers;
-  std::string Srcdir;
-  std::string Builddir;
   std::string MocExecutable;
   std::string UicExecutable;
   std::string RccExecutable;
+  // - File lists
+  std::string Sources;
+  std::string Headers;
+  // - Moc
+  std::string SkipMoc;
   std::string MocCompileDefinitionsStr;
   std::string MocIncludesStr;
   std::string MocOptionsStr;
-  std::string ProjectBinaryDir;
-  std::string ProjectSourceDir;
-  std::string TargetName;
-  std::string OriginTargetName;
-
-  std::string CurrentCompileSettingsStr;
-  std::string OldCompileSettingsStr;
-
-  std::string TargetBuildSubDir;
   std::string OutMocCppFilenameRel;
   std::string OutMocCppFilenameAbs;
   std::list<std::string> MocIncludes;
   std::list<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
+  // - Uic
+  std::string SkipUic;
   std::vector<std::string> UicTargetOptions;
   std::map<std::string, std::string> UicOptions;
+  // - Rcc
+  std::vector<std::string> RccSources;
   std::map<std::string, std::string> RccOptions;
   std::map<std::string, std::vector<std::string> > RccInputs;
-
+  // - Settings
+  std::string CurrentCompileSettingsStr;
+  std::string OldCompileSettingsStr;
+  // - Utility
   cmFilePathChecksum fpathCheckSum;
-
+  // - Flags
   bool IncludeProjectDirsBefore;
   bool Verbose;
   bool ColorOutput;

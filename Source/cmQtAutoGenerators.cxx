@@ -200,26 +200,35 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     return false;
   }
 
+  // - Target names
+  this->OriginTargetName =
+    makefile->GetSafeDefinition("AM_ORIGIN_TARGET_NAME");
+  this->AutogenTargetName = makefile->GetSafeDefinition("AM_TARGET_NAME");
+
+  // - Directories
+  this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
+  this->ProjectBinaryDir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
+  this->CurrentSourceDir =
+    makefile->GetSafeDefinition("AM_CMAKE_CURRENT_SOURCE_DIR");
+  this->CurrentBinaryDir =
+    makefile->GetSafeDefinition("AM_CMAKE_CURRENT_BINARY_DIR");
+
+  // - Qt environment
   this->QtMajorVersion = makefile->GetSafeDefinition("AM_QT_VERSION_MAJOR");
   if (this->QtMajorVersion == "") {
     this->QtMajorVersion =
       makefile->GetSafeDefinition("AM_Qt5Core_VERSION_MAJOR");
   }
-  this->Sources = makefile->GetSafeDefinition("AM_SOURCES");
-  {
-    std::string rccSources = makefile->GetSafeDefinition("AM_RCC_SOURCES");
-    cmSystemTools::ExpandListArgument(rccSources, this->RccSources);
-  }
-  this->SkipMoc = makefile->GetSafeDefinition("AM_SKIP_MOC");
-  this->SkipUic = makefile->GetSafeDefinition("AM_SKIP_UIC");
-  this->Headers = makefile->GetSafeDefinition("AM_HEADERS");
-  this->IncludeProjectDirsBefore =
-    makefile->IsOn("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE");
-  this->Srcdir = makefile->GetSafeDefinition("AM_CMAKE_CURRENT_SOURCE_DIR");
-  this->Builddir = makefile->GetSafeDefinition("AM_CMAKE_CURRENT_BINARY_DIR");
   this->MocExecutable = makefile->GetSafeDefinition("AM_QT_MOC_EXECUTABLE");
   this->UicExecutable = makefile->GetSafeDefinition("AM_QT_UIC_EXECUTABLE");
   this->RccExecutable = makefile->GetSafeDefinition("AM_QT_RCC_EXECUTABLE");
+
+  // - File Lists
+  this->Sources = makefile->GetSafeDefinition("AM_SOURCES");
+  this->Headers = makefile->GetSafeDefinition("AM_HEADERS");
+
+  // - Moc
+  this->SkipMoc = makefile->GetSafeDefinition("AM_SKIP_MOC");
   {
     std::string compileDefsPropOrig = "AM_MOC_COMPILE_DEFINITIONS";
     std::string compileDefsProp = compileDefsPropOrig;
@@ -244,12 +253,9 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
       includes ? includes : makefile->GetSafeDefinition(includesPropOrig);
   }
   this->MocOptionsStr = makefile->GetSafeDefinition("AM_MOC_OPTIONS");
-  this->ProjectBinaryDir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
-  this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
-  this->TargetName = makefile->GetSafeDefinition("AM_TARGET_NAME");
-  this->OriginTargetName =
-    makefile->GetSafeDefinition("AM_ORIGIN_TARGET_NAME");
 
+  // - Uic
+  this->SkipUic = makefile->GetSafeDefinition("AM_SKIP_UIC");
   {
     const char* uicOptionsFiles =
       makefile->GetSafeDefinition("AM_UIC_OPTIONS_FILES");
@@ -279,6 +285,12 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
       cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
       this->UicOptions[*fileIt] = *optionIt;
     }
+  }
+
+  // - Rcc
+  {
+    std::string rccSources = makefile->GetSafeDefinition("AM_RCC_SOURCES");
+    cmSystemTools::ExpandListArgument(rccSources, this->RccSources);
   }
   {
     const char* rccOptionsFiles =
@@ -325,8 +337,13 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
       this->RccInputs[*fileIt] = rccInputFiles;
     }
   }
+
+  // - Settings
   this->CurrentCompileSettingsStr = this->MakeCompileSettingsString(makefile);
 
+  // - Flags
+  this->IncludeProjectDirsBefore =
+    makefile->IsOn("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE");
   this->MocRelaxedMode = makefile->IsOn("AM_MOC_RELAXED_MODE");
 
   return true;
@@ -388,16 +405,17 @@ bool cmQtAutoGenerators::WriteOldMocDefinitionsFile(
 
 void cmQtAutoGenerators::Init()
 {
-  this->TargetBuildSubDir = this->TargetName;
-  this->TargetBuildSubDir += "/";
+  this->AutogenBuildSubDir = this->AutogenTargetName;
+  this->AutogenBuildSubDir += "/";
 
-  this->OutMocCppFilenameRel = this->TargetBuildSubDir;
+  this->OutMocCppFilenameRel = this->AutogenBuildSubDir;
   this->OutMocCppFilenameRel += "moc_compilation.cpp";
 
-  this->OutMocCppFilenameAbs = this->Builddir + this->OutMocCppFilenameRel;
+  this->OutMocCppFilenameAbs =
+    this->CurrentBinaryDir + this->OutMocCppFilenameRel;
 
   // Init file path checksum generator
-  fpathCheckSum.setupParentDirs(this->Srcdir, this->Builddir,
+  fpathCheckSum.setupParentDirs(this->CurrentSourceDir, this->CurrentBinaryDir,
                                 this->ProjectSourceDir,
                                 this->ProjectBinaryDir);
 
@@ -1125,8 +1143,8 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
                                      const std::string& subDirPrefix)
 {
   const std::string mocFileRel =
-    this->TargetBuildSubDir + subDirPrefix + mocFileName;
-  const std::string mocFileAbs = this->Builddir + mocFileRel;
+    this->AutogenBuildSubDir + subDirPrefix + mocFileName;
+  const std::string mocFileAbs = this->CurrentBinaryDir + mocFileRel;
   int sourceNewerThanMoc = 0;
   bool success = cmsys::SystemTools::FileTimeCompare(sourceFile, mocFileAbs,
                                                      &sourceNewerThanMoc);
@@ -1246,8 +1264,8 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
                                     const std::string& uiOutputFile)
 {
   const std::string uicFileRel =
-    this->TargetBuildSubDir + "include/" + uiOutputFile;
-  const std::string uicFileAbs = this->Builddir + uicFileRel;
+    this->AutogenBuildSubDir + "include/" + uiOutputFile;
+  const std::string uicFileAbs = this->CurrentBinaryDir + uicFileRel;
 
   int sourceNewerThanUi = 0;
   bool success = cmsys::SystemTools::FileTimeCompare(uiInputFile, uicFileAbs,
@@ -1328,7 +1346,7 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
        si != this->RccSources.end(); ++si) {
     const std::string ext = cmsys::SystemTools::GetFilenameLastExtension(*si);
     if (ext == ".qrc") {
-      qrcGenMap[*si] = this->TargetBuildSubDir + fpathCheckSum.getPart(*si) +
+      qrcGenMap[*si] = this->AutogenBuildSubDir + fpathCheckSum.getPart(*si) +
         "/qrc_" + cmsys::SystemTools::GetFilenameWithoutLastExtension(*si) +
         ".cpp";
     }
@@ -1379,7 +1397,7 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
   // file names but not for symbol names.
   std::replace(symbolName.begin(), symbolName.end(), '-', '_');
 
-  const std::string qrcBuildFile = this->Builddir + qrcOutputFile;
+  const std::string qrcBuildFile = this->CurrentBinaryDir + qrcOutputFile;
 
   int sourceNewerThanQrc = 0;
   bool generateQrc = !cmsys::SystemTools::FileTimeCompare(
