@@ -22,12 +22,11 @@ Qt 4 and Qt 5 may be used together in the same
 
 .. code-block:: cmake
 
-  cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
+  cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
 
   project(Qt4And5)
 
   set(CMAKE_AUTOMOC ON)
-  set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
   find_package(Qt5 COMPONENTS Widgets DBus REQUIRED)
   add_executable(publisher publisher.cpp)
@@ -73,9 +72,12 @@ The ``moc`` command line will consume the :prop_tgt:`COMPILE_DEFINITIONS` and
 :prop_tgt:`INCLUDE_DIRECTORIES` target properties from the target it is being
 invoked for, and for the appropriate build configuration.
 
-Generated ``moc_*.cpp`` and ``*.moc`` files are placed in the build directory
-so it is convenient to set the :variable:`CMAKE_INCLUDE_CURRENT_DIR`
-variable.  The :prop_tgt:`AUTOMOC` target property may be pre-set for all
+The generated ``moc_*.cpp`` and ``*.moc`` files are placed in the
+``<CMAKE_CURRENT_BINARY_DIR>/<TARGETNAME>_autogen/include`` directory which is
+automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
+(This differs from CMake 3.7 and below; see their documentation for details.)
+
+The :prop_tgt:`AUTOMOC` target property may be pre-set for all
 following targets by setting the :variable:`CMAKE_AUTOMOC` variable.  The
 :prop_tgt:`AUTOMOC_MOC_OPTIONS` target property may be populated to set
 options to pass to ``moc``. The :variable:`CMAKE_AUTOMOC_MOC_OPTIONS`
@@ -94,10 +96,13 @@ If a preprocessor ``#include`` directive is found which matches
 ``ui_<basename>.h``, and a ``<basename>.ui`` file exists, then ``uic`` will
 be executed to generate the appropriate file.
 
-Generated ``ui_*.h`` files are placed in the build directory so it is
-convenient to set the :variable:`CMAKE_INCLUDE_CURRENT_DIR` variable.  The
-:prop_tgt:`AUTOUIC` target property may be pre-set for all following targets
-by setting the :variable:`CMAKE_AUTOUIC` variable.  The
+The generated generated ``ui_*.h`` files are placed in the
+``<CMAKE_CURRENT_BINARY_DIR>/<TARGETNAME>_autogen/include`` directory which is
+automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
+(This differs from CMake 3.7 and below; see their documentation for details.)
+
+The :prop_tgt:`AUTOUIC` target property may be pre-set for all following
+targets by setting the :variable:`CMAKE_AUTOUIC` variable.  The
 :prop_tgt:`AUTOUIC_OPTIONS` target property may be populated to set options
 to pass to ``uic``.  The :variable:`CMAKE_AUTOUIC_OPTIONS` variable may be
 populated to pre-set the options for all following targets.  The
