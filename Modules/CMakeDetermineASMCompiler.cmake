@@ -9,7 +9,13 @@ include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
   # prefer the environment variable ASM
   if(NOT $ENV{ASM${ASM_DIALECT}} STREQUAL "")
-    set(CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT "$ENV{ASM${ASM_DIALECT}}")
+    get_filename_component(CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT $ENV{ASM${ASM_DIALECT}} PROGRAM PROGRAM_ARGS CMAKE_ASM${ASM_DIALECT}_FLAGS_ENV_INIT)
+    if(CMAKE_ASM${ASM_DIALECT}_FLAGS_ENV_INIT)
+      set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ARG1 "${CMAKE_ASM${ASM_DIALECT}_FLAGS_ENV_INIT}" CACHE STRING "First argument to ASM${ASM_DIALECT} compiler")
+    endif()
+    if(NOT EXISTS ${CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT})
+      message(FATAL_ERROR "Could not find compiler set in environment variable ASM${ASM_DIALECT}:\n$ENV{ASM${ASM_DIALECT}}.")
+    endif()
   endif()
 
   # finally list compilers to try
