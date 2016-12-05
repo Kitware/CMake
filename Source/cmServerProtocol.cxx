@@ -672,8 +672,9 @@ static Json::Value DumpSourceFilesList(
       std::string compileFlags = ld.Flags;
       if (const char* cflags = file->GetProperty("COMPILE_FLAGS")) {
         cmGeneratorExpression ge;
+        auto cge = ge.Parse(cflags);
         const char* processed =
-          ge.Parse(cflags)->Evaluate(target->GetLocalGenerator(), config);
+          cge->Evaluate(target->GetLocalGenerator(), config);
         lg->AppendFlags(compileFlags, processed);
       }
       fileData.Flags = compileFlags;
