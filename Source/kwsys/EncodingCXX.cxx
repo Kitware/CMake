@@ -125,12 +125,68 @@ char const* const* Encoding::CommandLineArguments::argv() const
 
 std::wstring Encoding::ToWide(const std::string& str)
 {
-  return ToWide(str.c_str());
+  std::wstring wstr;
+#if defined(_WIN32)
+  const int wlength = MultiByteToWideChar(
+    KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(), int(str.size()), NULL, 0);
+  if (wlength > 0) {
+    wchar_t* wdata = new wchar_t[wlength];
+    int r = MultiByteToWideChar(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(),
+                                int(str.size()), wdata, wlength);
+    if (r > 0) {
+      wstr = std::wstring(wdata, wlength);
+    }
+    delete[] wdata;
+  }
+#else
+  size_t pos = 0;
+  size_t nullPos = 0;
+  do {
+    if (pos < str.size() && str.at(pos) != '\0') {
+      wstr += ToWide(str.c_str() + pos);
+    }
+    nullPos = str.find('\0', pos);
+    if (nullPos != str.npos) {
+      pos = nullPos + 1;
+      wstr += wchar_t('\0');
+    }
+  } while (nullPos != str.npos);
+#endif
+  return wstr;
 }
 
 std::string Encoding::ToNarrow(const std::wstring& str)
 {
-  return ToNarrow(str.c_str());
+  std::string nstr;
+#if defined(_WIN32)
+  int length =
+    WideCharToMultiByte(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.c_str(),
+                        int(str.size()), NULL, 0, NULL, NULL);
+  if (length > 0) {
+    char* data = new char[length];
+    int r =
+      WideCharToMultiByte(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.c_str(),
+                          int(str.size()), data, length, NULL, NULL);
+    if (r > 0) {
+      nstr = std::string(data, length);
+    }
+    delete[] data;
+  }
+#else
+  size_t pos = 0;
+  size_t nullPos = 0;
+  do {
+    if (pos < str.size() && str.at(pos) != '\0') {
+      nstr += ToNarrow(str.c_str() + pos);
+    }
+    nullPos = str.find(wchar_t('\0'), pos);
+    if (nullPos != str.npos) {
+      pos = nullPos + 1;
+      nstr += '\0';
+    }
+  } while (nullPos != str.npos);
+#endif
+  return nstr;
 }
 
 std::wstring Encoding::ToWide(const char* cstr)

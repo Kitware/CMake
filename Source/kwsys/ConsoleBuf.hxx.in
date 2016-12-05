@@ -327,14 +327,13 @@ private:
     const int length =
       WideCharToMultiByte(m_activeOutputCodepage, 0, wbuffer.c_str(),
                           (int)wbuffer.size(), NULL, 0, NULL, NULL);
-    char* buf = new char[length + 1];
+    char* buf = new char[length];
     const bool success =
       WideCharToMultiByte(m_activeOutputCodepage, 0, wbuffer.c_str(),
                           (int)wbuffer.size(), buf, length, NULL, NULL) > 0
       ? true
       : false;
-    buf[length] = '\0';
-    buffer = buf;
+    buffer = std::string(buf, length);
     delete[] buf;
     return success;
   }

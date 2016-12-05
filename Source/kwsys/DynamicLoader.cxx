@@ -12,20 +12,63 @@
 #include "DynamicLoader.hxx.in"
 #endif
 
-// This file is actually 3 different implementations.
-// 1. HP machines which uses shl_load
-// 2. Mac OS X 10.2.x and earlier which uses NSLinkModule
-// 3. Windows which uses LoadLibrary
-// 4. Most unix systems (including Mac OS X 10.3 and later) which use dlopen
-// (default) Each part of the ifdef contains a complete implementation for
+// This file actually contains several different implementations:
+// * NOOP for environments without dynamic libs
+// * HP machines which uses shl_load
+// * Mac OS X 10.2.x and earlier which uses NSLinkModule
+// * Windows which uses LoadLibrary
+// * BeOS / Haiku
+// * FreeMiNT for Atari
+// * Default implementation for *NIX systems (including Mac OS X 10.3 and
+//   later) which use dlopen
+//
+// Each part of the ifdef contains a complete implementation for
 // the static methods of DynamicLoader.
 
-// ---------------------------------------------------------------
-// 1. Implementation for HPUX  machines
-#ifdef __hpux
+#if !KWSYS_SUPPORTS_SHARED_LIBS
+//----------------------------------------------------------------------------
+// Implementation for environments without dynamic libs
+#include <string.h> // for strerror()
+
+namespace KWSYS_NAMESPACE {
+
+//----------------------------------------------------------------------------
+DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
+  const std::string& libname)
+{
+  return 0;
+}
+
+//----------------------------------------------------------------------------
+int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
+{
+  if (!lib) {
+    return 0;
+  }
+
+  return 1;
+}
+
+//----------------------------------------------------------------------------
+DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
+  DynamicLoader::LibraryHandle lib, const std::string& sym)
+{
+  return 0;
+}
+
+//----------------------------------------------------------------------------
+const char* DynamicLoader::LastError()
+{
+  return "General error";
+}
+
+} // namespace KWSYS_NAMESPACE
+
+#elif defined(__hpux)
+//----------------------------------------------------------------------------
+// Implementation for HPUX  machines
 #include <dl.h>
 #include <errno.h>
-#define DYNAMICLOADER_DEFINED 1
 
 namespace KWSYS_NAMESPACE {
 
@@ -88,15 +131,11 @@ const char* DynamicLoader::LastError()
 
 } // namespace KWSYS_NAMESPACE
 
-#endif //__hpux
-
-// ---------------------------------------------------------------
-// 2. Implementation for Mac OS X 10.2.x and earlier
-#ifdef __APPLE__
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 1030
+#elif defined(__APPLE__) && (MAC_OS_X_VERSION_MAX_ALLOWED < 1030)
+//----------------------------------------------------------------------------
+// Implementation for Mac OS X 10.2.x and earlier
 #include <mach-o/dyld.h>
 #include <string.h> // for strlen
-#define DYNAMICLOADER_DEFINED 1
 
 namespace KWSYS_NAMESPACE {
 
@@ -160,14 +199,10 @@ const char* DynamicLoader::LastError()
 
 } // namespace KWSYS_NAMESPACE
 
-#endif // MAC_OS_X_VERSION_MAX_ALLOWED < 1030
-#endif // __APPLE__
-
-// ---------------------------------------------------------------
-// 3. Implementation for Windows win32 code but not cygwin
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#elif defined(_WIN32) && !defined(__CYGWIN__)
+//----------------------------------------------------------------------------
+// Implementation for Windows win32 code but not cygwin
 #include <windows.h>
-#define DYNAMICLOADER_DEFINED 1
 
 namespace KWSYS_NAMESPACE {
 
@@ -263,18 +298,13 @@ const char* DynamicLoader::LastError()
 
 } // namespace KWSYS_NAMESPACE
 
-#endif //_WIN32
-
-// ---------------------------------------------------------------
-// 4. Implementation for BeOS
-#if defined __BEOS__
-
+#elif defined(__BEOS__)
+//----------------------------------------------------------------------------
+// Implementation for BeOS / Haiku
 #include <string.h> // for strerror()
 
 #include <be/kernel/image.h>
 #include <be/support/Errors.h>
-
-#define DYNAMICLOADER_DEFINED 1
 
 namespace KWSYS_NAMESPACE {
 
@@ -351,54 +381,10 @@ const char* DynamicLoader::LastError()
 }
 
 } // namespace KWSYS_NAMESPACE
-#endif
 
-// ---------------------------------------------------------------
-// 5. Implementation for systems without dynamic libs
-// __gnu_blrts__ is IBM BlueGene/L
-// __LIBCATAMOUNT__ is defined on Catamount on Cray compute nodes
-#if defined(__gnu_blrts__) || defined(__LIBCATAMOUNT__) ||                    \
-  defined(__CRAYXT_COMPUTE_LINUX_TARGET)
-#include <string.h> // for strerror()
-#define DYNAMICLOADER_DEFINED 1
-
-namespace KWSYS_NAMESPACE {
-
+#elif defined(__MINT__)
 //----------------------------------------------------------------------------
-DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
-{
-  return 0;
-}
-
-//----------------------------------------------------------------------------
-int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
-{
-  if (!lib) {
-    return 0;
-  }
-
-  return 1;
-}
-
-//----------------------------------------------------------------------------
-DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-  DynamicLoader::LibraryHandle lib, const std::string& sym)
-{
-  return 0;
-}
-
-//----------------------------------------------------------------------------
-const char* DynamicLoader::LastError()
-{
-  return "General error";
-}
-
-} // namespace KWSYS_NAMESPACE
-#endif
-
-#ifdef __MINT__
-#define DYNAMICLOADER_DEFINED 1
+// Implementation for FreeMiNT on Atari
 #define _GNU_SOURCE /* for program_invocation_name */
 #include <dld.h>
 #include <errno.h>
@@ -447,14 +433,11 @@ const char* DynamicLoader::LastError()
 }
 
 } // namespace KWSYS_NAMESPACE
-#endif
 
-// ---------------------------------------------------------------
-// 6. Implementation for default UNIX machines.
-// if nothing has been defined then use this
-#ifndef DYNAMICLOADER_DEFINED
-#define DYNAMICLOADER_DEFINED 1
-// Setup for most unix machines
+#else
+//----------------------------------------------------------------------------
+// Default implementation for *NIX systems (including Mac OS X 10.3 and
+// later) which use dlopen
 #include <dlfcn.h>
 
 namespace KWSYS_NAMESPACE {
@@ -498,5 +481,4 @@ const char* DynamicLoader::LastError()
 }
 
 } // namespace KWSYS_NAMESPACE
-
 #endif
