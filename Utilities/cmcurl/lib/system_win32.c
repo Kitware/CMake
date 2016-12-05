@@ -83,7 +83,39 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
 {
   bool matched = FALSE;
 
-#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_WIN2K) || \
+#if defined(CURL_WINDOWS_APP)
+  /* We have no way to determine the Windows version from Windows apps,
+     so let's assume we're running on the target Windows version. */
+  const WORD fullVersion = MAKEWORD(minorVersion, majorVersion);
+  const WORD targetVersion = (WORD)_WIN32_WINNT;
+
+  switch(condition) {
+  case VERSION_LESS_THAN:
+    matched = targetVersion < fullVersion;
+    break;
+
+  case VERSION_LESS_THAN_EQUAL:
+    matched = targetVersion <= fullVersion;
+    break;
+
+  case VERSION_EQUAL:
+    matched = targetVersion == fullVersion;
+    break;
+
+  case VERSION_GREATER_THAN_EQUAL:
+    matched = targetVersion >= fullVersion;
+    break;
+
+  case VERSION_GREATER_THAN:
+    matched = targetVersion > fullVersion;
+    break;
+  }
+
+  if(matched && (platform == PLATFORM_WINDOWS)) {
+    /* we're always running on PLATFORM_WINNT */
+    matched = FALSE;
+  }
+#elif !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_WIN2K) || \
     (_WIN32_WINNT < _WIN32_WINNT_WIN2K)
   OSVERSIONINFO osver;
 
@@ -128,7 +160,7 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
     }
 
     /* Verify the platform identifier (if necessary) */
-    if(matched && platform != PLATFORM_DONT_CARE) {
+    if(matched) {
       switch(platform) {
       case PLATFORM_WINDOWS:
         if(osver.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS)
@@ -138,6 +170,9 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
       case PLATFORM_WINNT:
         if(osver.dwPlatformId != VER_PLATFORM_WIN32_NT)
           matched = FALSE;
+
+      default: /* like platform == PLATFORM_DONT_CARE */
+        break;
       }
     }
   }

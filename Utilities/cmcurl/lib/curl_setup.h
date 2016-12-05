@@ -614,10 +614,9 @@ int netware_init(void);
 #endif
 #endif
 
-#if defined(HAVE_LIBIDN) && defined(HAVE_TLD_H)
-/* The lib was present and the tld.h header (which is missing in libidn 0.3.X
-   but we only work with libidn 0.4.1 or later) */
-#define USE_LIBIDN
+#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H)
+/* The lib and header are present */
+#define USE_LIBIDN2
 #endif
 
 #ifndef SIZEOF_TIME_T
@@ -653,6 +652,13 @@ int netware_init(void);
     defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
 
 #define USE_NTLM
+
+#elif defined(USE_MBEDTLS)
+#  include <mbedtls/md4.h>
+#  if defined(MBEDTLS_MD4_C)
+#define USE_NTLM
+#  endif
+
 #endif
 #endif
 
@@ -760,5 +766,15 @@ endings either CRLF or LF so 't' is appropriate.
 #    undef USE_RECV_BEFORE_SEND_WORKAROUND
 #  endif
 #endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUNDS */
+
+/* Detect Windows App environment which has a restricted access
+ * to the Win32 APIs. */
+# if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
+#  include <winapifamily.h>
+#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) && \
+     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#    define CURL_WINDOWS_APP
+#  endif
+# endif
 
 #endif /* HEADER_CURL_SETUP_H */
