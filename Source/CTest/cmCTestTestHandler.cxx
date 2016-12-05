@@ -797,8 +797,9 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
 
   // Prepare some maps to help us find setup and cleanup tests for
   // any given fixture
-  typedef std::set<ListOfTests::const_iterator> TestIteratorSet;
-  typedef std::map<std::string, TestIteratorSet> FixtureDependencies;
+  typedef ListOfTests::const_iterator TestIterator;
+  typedef std::multimap<std::string, TestIterator> FixtureDependencies;
+  typedef FixtureDependencies::const_iterator FixtureDepsIterator;
   FixtureDependencies fixtureSetups;
   FixtureDependencies fixtureDeps;
 
@@ -809,14 +810,14 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
     const std::set<std::string>& setups = p.FixturesSetup;
     for (std::set<std::string>::const_iterator depsIt = setups.begin();
          depsIt != setups.end(); ++depsIt) {
-      fixtureSetups[*depsIt].insert(it);
-      fixtureDeps[*depsIt].insert(it);
+      fixtureSetups.insert(std::make_pair(*depsIt, it));
+      fixtureDeps.insert(std::make_pair(*depsIt, it));
     }
 
     const std::set<std::string>& cleanups = p.FixturesCleanup;
     for (std::set<std::string>::const_iterator depsIt = cleanups.begin();
          depsIt != cleanups.end(); ++depsIt) {
-      fixtureDeps[*depsIt].insert(it);
+      fixtureDeps.insert(std::make_pair(*depsIt, it));
     }
   }
 
@@ -859,17 +860,15 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
       // associated with the required fixture. If any of those setup
       // tests fail, this test should not run. We make the fixture's
       // cleanup tests depend on this test case later.
-      FixtureDependencies::const_iterator setupIt =
-        fixtureSetups.find(requiredFixtureName);
-      if (setupIt != fixtureSetups.end()) {
-        for (TestIteratorSet::const_iterator sIt = setupIt->second.begin();
-             sIt != setupIt->second.end(); ++sIt) {
-          const std::string& setupTestName = (**sIt).Name;
-          tests[i].RequireSuccessDepends.insert(setupTestName);
-          if (std::find(tests[i].Depends.begin(), tests[i].Depends.end(),
-                        setupTestName) == tests[i].Depends.end()) {
-            tests[i].Depends.push_back(setupTestName);
-          }
+      std::pair<FixtureDepsIterator, FixtureDepsIterator> setupRange =
+        fixtureSetups.equal_range(requiredFixtureName);
+      for (FixtureDepsIterator sIt = setupRange.first;
+           sIt != setupRange.second; ++sIt) {
+        const std::string& setupTestName = sIt->second->Name;
+        tests[i].RequireSuccessDepends.insert(setupTestName);
+        if (std::find(tests[i].Depends.begin(), tests[i].Depends.end(),
+                      setupTestName) == tests[i].Depends.end()) {
+          tests[i].Depends.push_back(setupTestName);
         }
       }
 
@@ -882,17 +881,11 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
         // Already added this fixture
         continue;
       }
-      FixtureDependencies::const_iterator fixtureIt =
-        fixtureDeps.find(requiredFixtureName);
-      if (fixtureIt == fixtureDeps.end()) {
-        // No setup or cleanup tests for this fixture
-        continue;
-      }
-
-      const TestIteratorSet& testIters = fixtureIt->second;
-      for (TestIteratorSet::const_iterator depsIt = testIters.begin();
-           depsIt != testIters.end(); ++depsIt) {
-        ListOfTests::const_iterator lotIt = *depsIt;
+      std::pair<FixtureDepsIterator, FixtureDepsIterator> fixtureRange =
+        fixtureDeps.equal_range(requiredFixtureName);
+      for (FixtureDepsIterator it = fixtureRange.first;
+           it != fixtureRange.second; ++it) {
+        ListOfTests::const_iterator lotIt = it->second;
         const cmCTestTestProperties& p = *lotIt;
 
         if (!addedTests.insert(p.Name).second) {
