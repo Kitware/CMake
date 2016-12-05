@@ -28,7 +28,7 @@ foreach(feature ${c_features})
   run_test(${feature} C)
 endforeach()
 get_property(cxx_features GLOBAL PROPERTY CMAKE_CXX_KNOWN_FEATURES)
-list(REMOVE_ITEM cxx_features cxx_std_98 cxx_std_11 cxx_std_14)
+list(REMOVE_ITEM cxx_features cxx_std_98 cxx_std_11 cxx_std_14 cxx_std_17)
 foreach(feature ${cxx_features})
   run_test(${feature} CXX)
 endforeach()
@@ -268,6 +268,7 @@ if (CMAKE_CXX_COMPILE_FEATURES)
     if (std_flag_idx EQUAL -1)
       add_executable(default_dialect default_dialect.cpp)
       target_compile_definitions(default_dialect PRIVATE
+        DEFAULT_CXX17=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},17>
         DEFAULT_CXX14=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},14>
         DEFAULT_CXX11=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},11>
         DEFAULT_CXX98=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},98>

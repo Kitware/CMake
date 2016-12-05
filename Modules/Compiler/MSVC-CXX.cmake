@@ -10,6 +10,7 @@ macro(cmake_record_cxx_compile_features)
       cxx_std_98
       cxx_std_11
       cxx_std_14
+      cxx_std_17
       )
     _record_compiler_features(CXX "" CMAKE_CXX_COMPILE_FEATURES)
   endif()

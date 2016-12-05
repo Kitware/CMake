@@ -4064,7 +4064,7 @@ static const char* const CXX_FEATURES[] = { CM_NULLPTR FOR_EACH_CXX_FEATURE(
 #undef FEATURE_STRING
 
 static const char* const C_STANDARDS[] = { "90", "99", "11" };
-static const char* const CXX_STANDARDS[] = { "98", "11", "14" };
+static const char* const CXX_STANDARDS[] = { "98", "11", "14", "17" };
 
 bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
                                           const std::string& feature,
@@ -4297,7 +4297,9 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
   bool needCxx98 = false;
   bool needCxx11 = false;
   bool needCxx14 = false;
-  this->CheckNeededCxxLanguage(feature, needCxx98, needCxx11, needCxx14);
+  bool needCxx17 = false;
+  this->CheckNeededCxxLanguage(feature, needCxx98, needCxx11, needCxx14,
+                               needCxx17);
 
   const char* existingCxxStandard = target->GetProperty("CXX_STANDARD");
   if (!existingCxxStandard) {
@@ -4336,7 +4338,7 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
 
 void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
                                         bool& needCxx98, bool& needCxx11,
-                                        bool& needCxx14) const
+                                        bool& needCxx14, bool& needCxx17) const
 {
   if (const char* propCxx98 =
         this->GetDefinition("CMAKE_CXX98_COMPILE_FEATURES")) {
@@ -4356,6 +4358,12 @@ void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
     cmSystemTools::ExpandListArgument(propCxx14, props);
     needCxx14 = std::find(props.begin(), props.end(), feature) != props.end();
   }
+  if (const char* propCxx17 =
+        this->GetDefinition("CMAKE_CXX17_COMPILE_FEATURES")) {
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(propCxx17, props);
+    needCxx17 = std::find(props.begin(), props.end(), feature) != props.end();
+  }
 }
 
 bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
@@ -4365,8 +4373,10 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
   bool needCxx98 = false;
   bool needCxx11 = false;
   bool needCxx14 = false;
+  bool needCxx17 = false;
 
-  this->CheckNeededCxxLanguage(feature, needCxx98, needCxx11, needCxx14);
+  this->CheckNeededCxxLanguage(feature, needCxx98, needCxx11, needCxx14,
+                               needCxx17);
 
   const char* existingCxxStandard = target->GetProperty("CXX_STANDARD");
   if (existingCxxStandard) {
@@ -4393,11 +4403,17 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
   bool setCxx98 = needCxx98 && !existingCxxStandard;
   bool setCxx11 = needCxx11 && !existingCxxStandard;
   bool setCxx14 = needCxx14 && !existingCxxStandard;
+  bool setCxx17 = needCxx17 && !existingCxxStandard;
 
-  if (needCxx14 && existingCxxStandard &&
+  if (needCxx17 && existingCxxStandard &&
       existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
                                    cmArrayEnd(CXX_STANDARDS),
-                                   cmStrCmp("14"))) {
+                                   cmStrCmp("17"))) {
+    setCxx17 = true;
+  } else if (needCxx14 && existingCxxStandard &&
+             existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
+                                          cmArrayEnd(CXX_STANDARDS),
+                                          cmStrCmp("14"))) {
     setCxx14 = true;
   } else if (needCxx11 && existingCxxStandard &&
              existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
@@ -4411,7 +4427,10 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
     setCxx98 = true;
   }
 
-  if (setCxx14) {
+  if (setCxx17) {
+    target->SetProperty("CXX_STANDARD", "17");
+    target->SetProperty("CUDA_STANDARD", "17");
+  } else if (setCxx14) {
     target->SetProperty("CXX_STANDARD", "14");
     target->SetProperty("CUDA_STANDARD", "14");
   } else if (setCxx11) {
