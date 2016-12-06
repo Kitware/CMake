@@ -390,13 +390,14 @@ bool cmQtAutoGenerators::WriteOldMocDefinitionsFile(
   {
     cmsys::ofstream outfile;
     outfile.open(filename.c_str(), std::ios::trunc);
-    success = outfile.is_open();
-    if (success) {
+    if (outfile) {
       outfile << "set(AM_OLD_COMPILE_SETTINGS "
               << cmOutputConverter::EscapeForCMake(
                    this->CurrentCompileSettingsStr)
               << ")\n";
       success = outfile.good();
+    } else {
+      success = false;
     }
   }
 
@@ -1116,7 +1117,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
   if (success) {
     cmsys::ofstream outfile;
     outfile.open(this->OutMocCppFilenameAbs.c_str(), std::ios::trunc);
-    if (!outfile.is_open()) {
+    if (!outfile) {
       success = false;
       std::ostringstream err;
       err << "AUTOGEN: error opening " << this->OutMocCppFilenameAbs << "\n";
