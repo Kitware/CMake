@@ -42,8 +42,6 @@
 #include "curl_sasl.h"
 #include "warnless.h"
 #include "strtok.h"
-#include "strequal.h"
-#include "rawstr.h"
 #include "sendf.h"
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
 /* The last 3 #include files should be in this order */
@@ -159,7 +157,7 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
     sasl->prefmech = SASL_AUTH_NONE;
   }
 
-  if(strnequal(value, "*", len))
+  if(!strncmp(value, "*", len))
     sasl->prefmech = SASL_AUTH_DEFAULT;
   else {
     mechbit = Curl_sasl_decode_mech(value, len, &mechlen);
@@ -288,7 +286,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   }
   else if(conn->bits.user_passwd) {
 #if defined(USE_KERBEROS5)
-    if(enabledmechs & SASL_MECH_GSSAPI) {
+    if((enabledmechs & SASL_MECH_GSSAPI) && Curl_auth_is_gssapi_supported() &&
+       Curl_auth_user_contains_domain(conn->user)) {
       sasl->mutual_auth = FALSE; /* TODO: Calculate mutual authentication */
       mech = SASL_MECH_STRING_GSSAPI;
       state1 = SASL_GSSAPI;
@@ -308,7 +307,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
     else
 #endif
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-    if(enabledmechs & SASL_MECH_DIGEST_MD5) {
+    if((enabledmechs & SASL_MECH_DIGEST_MD5) &&
+       Curl_auth_is_digest_supported()) {
       mech = SASL_MECH_STRING_DIGEST_MD5;
       state1 = SASL_DIGESTMD5;
       sasl->authused = SASL_MECH_DIGEST_MD5;
@@ -321,7 +321,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
     else
 #endif
 #ifdef USE_NTLM
-    if(enabledmechs & SASL_MECH_NTLM) {
+    if((enabledmechs & SASL_MECH_NTLM) && Curl_auth_is_ntlm_supported()) {
       mech = SASL_MECH_STRING_NTLM;
       state1 = SASL_NTLM;
       state2 = SASL_NTLM_TYPE2MSG;
