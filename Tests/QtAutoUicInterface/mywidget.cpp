@@ -7,3 +7,8 @@ MyWidget::MyWidget(QWidget* parent)
 {
   ui->setupUi(this);
 }
+
+MyWidget::~MyWidget()
+{
+  delete ui;
+}
