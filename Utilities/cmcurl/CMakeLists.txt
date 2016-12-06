@@ -183,7 +183,9 @@ if(MSVC)
   mark_as_advanced(BUILD_RELEASE_DEBUG_DIRS)
 endif()
 
+if(0) # This code not needed for building within CMake.
 include(CurlSymbolHiding)
+endif()
 
 option(HTTP_ONLY "disables all protocols except HTTP (This overrides all CURL_DISABLE_* options)" OFF)
 mark_as_advanced(HTTP_ONLY)
