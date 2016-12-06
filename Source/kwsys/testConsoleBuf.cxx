@@ -18,6 +18,7 @@
 
 #if defined(_WIN32)
 
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
@@ -318,6 +319,7 @@ static int testPipe()
             bytesRead == 0) {
           throw std::runtime_error("ReadFile#1 failed!");
         }
+        buffer[bytesRead] = 0;
         if ((bytesRead <
                encodedTestString.size() + 1 + encodedInputTestString.size() &&
              !ReadFile(outPipeRead, buffer + bytesRead,
@@ -336,8 +338,12 @@ static int testPipe()
               bytesRead == 0) {
             throw std::runtime_error("ReadFile#3 failed!");
           }
-          buffer2[bytesRead - 1] = 0;
-          didFail = encodedTestString.compare(buffer2) == 0 ? 0 : 1;
+          buffer2[bytesRead] = 0;
+          didFail =
+            encodedTestString.compare(0, encodedTestString.npos, buffer2,
+                                      encodedTestString.size()) == 0
+            ? 0
+            : 1;
         }
         if (didFail != 0) {
           std::cerr << "Pipe's output didn't match expected output!"
@@ -423,23 +429,28 @@ static int testFile()
             bytesRead == 0) {
           throw std::runtime_error("ReadFile#1 failed!");
         }
-        buffer[bytesRead - 1] = 0;
+        buffer[bytesRead] = 0;
         if (memcmp(buffer, encodedTestString.c_str(),
                    encodedTestString.size()) == 0 &&
             memcmp(buffer + encodedTestString.size() + 1,
                    encodedInputTestString.c_str(),
-                   encodedInputTestString.size() - 1) == 0) {
+                   encodedInputTestString.size()) == 0) {
           bytesRead = 0;
           if (SetFilePointer(errFile, 0, 0, FILE_BEGIN) ==
               INVALID_SET_FILE_POINTER) {
             throw std::runtime_error("SetFilePointer#2 failed!");
           }
+
           if (!ReadFile(errFile, buffer2, sizeof(buffer2), &bytesRead, NULL) ||
               bytesRead == 0) {
             throw std::runtime_error("ReadFile#2 failed!");
           }
-          buffer2[bytesRead - 1] = 0;
-          didFail = encodedTestString.compare(buffer2) == 0 ? 0 : 1;
+          buffer2[bytesRead] = 0;
+          didFail =
+            encodedTestString.compare(0, encodedTestString.npos, buffer2,
+                                      encodedTestString.size()) == 0
+            ? 0
+            : 1;
         }
         if (didFail != 0) {
           std::cerr << "File's output didn't match expected output!"
@@ -448,7 +459,7 @@ static int testFile()
                             encodedTestString.size());
           dumpBuffers<char>(encodedInputTestString.c_str(),
                             buffer + encodedTestString.size() + 1,
-                            encodedInputTestString.size() - 1);
+                            encodedInputTestString.size());
           dumpBuffers<char>(encodedTestString.c_str(), buffer2,
                             encodedTestString.size());
         }
@@ -685,6 +696,7 @@ static int testConsole()
         throw std::runtime_error("ReadConsoleOutputCharacter failed!");
       }
       std::wstring wideTestString = kwsys::Encoding::ToWide(encodedTestString);
+      std::replace(wideTestString.begin(), wideTestString.end(), '\0', ' ');
       std::wstring wideInputTestString =
         kwsys::Encoding::ToWide(encodedInputTestString);
       if (memcmp(outputBuffer, wideTestString.c_str(),
@@ -757,8 +769,11 @@ int testConsoleBuf(int, char* [])
     return 1;
   }
 
-  encodedTestString = kwsys::Encoding::ToNarrow(UnicodeTestString);
-  encodedInputTestString = kwsys::Encoding::ToNarrow(UnicodeInputTestString);
+  encodedTestString = kwsys::Encoding::ToNarrow(std::wstring(
+    UnicodeTestString, sizeof(UnicodeTestString) / sizeof(wchar_t) - 1));
+  encodedInputTestString = kwsys::Encoding::ToNarrow(
+    std::wstring(UnicodeInputTestString,
+                 sizeof(UnicodeInputTestString) / sizeof(wchar_t) - 1));
   encodedInputTestString += "\n";
 
   ret |= testPipe();

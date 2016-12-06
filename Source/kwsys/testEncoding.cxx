@@ -9,6 +9,7 @@
 #include KWSYS_HEADER(Encoding.hxx)
 #include KWSYS_HEADER(Encoding.h)
 
+#include <algorithm>
 #include <iostream>
 #include <locale.h>
 #include <stdlib.h>
@@ -124,6 +125,35 @@ static int testRobustEncoding()
   return ret;
 }
 
+static int testWithNulls()
+{
+  int ret = 0;
+  std::vector<std::string> strings;
+  strings.push_back(std::string("ab") + '\0' + 'c');
+  strings.push_back(std::string("d") + '\0' + '\0' + 'e');
+  strings.push_back(std::string() + '\0' + 'f');
+  strings.push_back(std::string() + '\0' + '\0' + "gh");
+  strings.push_back(std::string("ij") + '\0');
+  strings.push_back(std::string("k") + '\0' + '\0');
+  strings.push_back(std::string("\0\0\0\0", 4) + "lmn" +
+                    std::string("\0\0\0\0", 4));
+  for (std::vector<std::string>::iterator it = strings.begin();
+       it != strings.end(); ++it) {
+    std::wstring wstr = kwsys::Encoding::ToWide(*it);
+    std::string str = kwsys::Encoding::ToNarrow(wstr);
+    std::string s(*it);
+    std::replace(s.begin(), s.end(), '\0', ' ');
+    std::cout << "'" << s << "' (" << it->size() << ")" << std::endl;
+    if (str != *it) {
+      std::replace(str.begin(), str.end(), '\0', ' ');
+      std::cout << "string with null was different: '" << str << "' ("
+                << str.size() << ")" << std::endl;
+      ret++;
+    }
+  }
+  return ret;
+}
+
 static int testCommandLineArguments()
 {
   int status = 0;
@@ -165,6 +195,7 @@ int testEncoding(int, char* [])
   ret |= testHelloWorldEncoding();
   ret |= testRobustEncoding();
   ret |= testCommandLineArguments();
+  ret |= testWithNulls();
 
   return ret;
 }
