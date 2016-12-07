@@ -46,6 +46,25 @@ static std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
   "CMAKE_TRY_COMPILE_PLATFORM_VARIABLES";
 static std::string const kCMAKE_WARN_DEPRECATED = "CMAKE_WARN_DEPRECATED";
 
+static void writeProperty(FILE* fout, std::string const& targetName,
+                          std::string const& prop, std::string const& value)
+{
+  fprintf(fout, "set_property(TARGET %s PROPERTY %s %s)\n", targetName.c_str(),
+          cmOutputConverter::EscapeForCMake(prop).c_str(),
+          cmOutputConverter::EscapeForCMake(value).c_str());
+}
+
+std::string cmCoreTryCompile::LookupStdVar(std::string const& var,
+                                           bool warnCMP0067)
+{
+  std::string value = this->Makefile->GetSafeDefinition(var);
+  if (warnCMP0067 && !value.empty()) {
+    value.clear();
+    this->WarnCMP0067.push_back(var);
+  }
+  return value;
+}
+
 int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                                      bool isTryRun)
 {
@@ -87,6 +106,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   std::string outputVariable;
   std::string copyFile;
   std::string copyFileError;
+  std::string cStandard;
+  std::string cxxStandard;
+  std::string cStandardRequired;
+  std::string cxxStandardRequired;
+  std::string cExtensions;
+  std::string cxxExtensions;
   std::vector<std::string> targets;
   std::string libsToLink = " ";
   bool useOldLinkLibs = true;
@@ -94,6 +119,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   bool didOutputVariable = false;
   bool didCopyFile = false;
   bool didCopyFileError = false;
+  bool didCStandard = false;
+  bool didCxxStandard = false;
+  bool didCStandardRequired = false;
+  bool didCxxStandardRequired = false;
+  bool didCExtensions = false;
+  bool didCxxExtensions = false;
   bool useSources = argv[2] == "SOURCES";
   std::vector<std::string> sources;
 
@@ -106,6 +137,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     DoingOutputVariable,
     DoingCopyFile,
     DoingCopyFileError,
+    DoingCStandard,
+    DoingCxxStandard,
+    DoingCStandardRequired,
+    DoingCxxStandardRequired,
+    DoingCExtensions,
+    DoingCxxExtensions,
     DoingSources
   };
   Doing doing = useSources ? DoingSources : DoingNone;
@@ -126,6 +163,24 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (argv[i] == "COPY_FILE_ERROR") {
       doing = DoingCopyFileError;
       didCopyFileError = true;
+    } else if (argv[i] == "C_STANDARD") {
+      doing = DoingCStandard;
+      didCStandard = true;
+    } else if (argv[i] == "CXX_STANDARD") {
+      doing = DoingCxxStandard;
+      didCxxStandard = true;
+    } else if (argv[i] == "C_STANDARD_REQUIRED") {
+      doing = DoingCStandardRequired;
+      didCStandardRequired = true;
+    } else if (argv[i] == "CXX_STANDARD_REQUIRED") {
+      doing = DoingCxxStandardRequired;
+      didCxxStandardRequired = true;
+    } else if (argv[i] == "C_EXTENSIONS") {
+      doing = DoingCExtensions;
+      didCExtensions = true;
+    } else if (argv[i] == "CXX_EXTENSIONS") {
+      doing = DoingCxxExtensions;
+      didCxxExtensions = true;
     } else if (doing == DoingCMakeFlags) {
       cmakeFlags.push_back(argv[i]);
     } else if (doing == DoingCompileDefinitions) {
@@ -165,6 +220,24 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       doing = DoingNone;
     } else if (doing == DoingCopyFileError) {
       copyFileError = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCStandard) {
+      cStandard = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCxxStandard) {
+      cxxStandard = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCStandardRequired) {
+      cStandardRequired = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCxxStandardRequired) {
+      cxxStandardRequired = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCExtensions) {
+      cExtensions = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCxxExtensions) {
+      cxxExtensions = argv[i];
       doing = DoingNone;
     } else if (doing == DoingSources) {
       sources.push_back(argv[i]);
@@ -210,6 +283,42 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     this->Makefile->IssueMessage(
       cmake::FATAL_ERROR,
       "SOURCES must be followed by at least one source file");
+    return -1;
+  }
+
+  if (didCStandard && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR, "C_STANDARD allowed only in source file signature.");
+    return -1;
+  }
+  if (didCxxStandard && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "CXX_STANDARD allowed only in source file signature.");
+    return -1;
+  }
+  if (didCStandardRequired && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "C_STANDARD_REQUIRED allowed only in source file signature.");
+    return -1;
+  }
+  if (didCxxStandardRequired && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "CXX_STANDARD_REQUIRED allowed only in source file signature.");
+    return -1;
+  }
+  if (didCExtensions && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "C_EXTENSIONS allowed only in source file signature.");
+    return -1;
+  }
+  if (didCxxExtensions && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "CXX_EXTENSIONS allowed only in source file signature.");
     return -1;
   }
 
@@ -518,6 +627,104 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       }
     }
     fprintf(fout, ")\n");
+
+    bool const testC = testLangs.find("C") != testLangs.end();
+    bool const testCxx = testLangs.find("CXX") != testLangs.end();
+
+    bool warnCMP0067 = false;
+    bool honorStandard = true;
+
+    if (!didCStandard && !didCxxStandard && !didCStandardRequired &&
+        !didCxxStandardRequired && !didCExtensions && !didCxxExtensions) {
+      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0067)) {
+        case cmPolicies::WARN:
+          warnCMP0067 = this->Makefile->PolicyOptionalWarningEnabled(
+            "CMAKE_POLICY_WARNING_CMP0067");
+        case cmPolicies::OLD:
+          // OLD behavior is to not honor the language standard variables.
+          honorStandard = false;
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+          this->Makefile->IssueMessage(
+            cmake::FATAL_ERROR,
+            cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0067));
+        case cmPolicies::NEW:
+          // NEW behavior is to honor the language standard variables.
+          // We already initialized honorStandard to true.
+          break;
+      }
+    }
+
+    if (honorStandard || warnCMP0067) {
+      if (testC) {
+        if (!didCStandard) {
+          cStandard = this->LookupStdVar("CMAKE_C_STANDARD", warnCMP0067);
+        }
+        if (!didCStandardRequired) {
+          cStandardRequired =
+            this->LookupStdVar("CMAKE_C_STANDARD_REQUIRED", warnCMP0067);
+        }
+        if (!didCExtensions) {
+          cExtensions = this->LookupStdVar("CMAKE_C_EXTENSIONS", warnCMP0067);
+        }
+      }
+      if (testCxx) {
+        if (!didCxxStandard) {
+          cxxStandard = this->LookupStdVar("CMAKE_CXX_STANDARD", warnCMP0067);
+        }
+        if (!didCxxStandardRequired) {
+          cxxStandardRequired =
+            this->LookupStdVar("CMAKE_CXX_STANDARD_REQUIRED", warnCMP0067);
+        }
+        if (!didCxxExtensions) {
+          cxxExtensions =
+            this->LookupStdVar("CMAKE_CXX_EXTENSIONS", warnCMP0067);
+        }
+      }
+    }
+
+    if (!this->WarnCMP0067.empty()) {
+      std::ostringstream w;
+      /* clang-format off */
+      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0067) << "\n"
+        "For compatibility with older versions of CMake, try_compile "
+        "is not honoring language standard variables in the test project:\n"
+        ;
+      /* clang-format on */
+      for (std::vector<std::string>::iterator vi = this->WarnCMP0067.begin();
+           vi != this->WarnCMP0067.end(); ++vi) {
+        w << "  " << *vi << "\n";
+      }
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+    }
+
+    if (testC) {
+      if (!cStandard.empty()) {
+        writeProperty(fout, targetName, "C_STANDARD", cStandard);
+      }
+      if (!cStandardRequired.empty()) {
+        writeProperty(fout, targetName, "C_STANDARD_REQUIRED",
+                      cStandardRequired);
+      }
+      if (!cExtensions.empty()) {
+        writeProperty(fout, targetName, "C_EXTENSIONS", cExtensions);
+      }
+    }
+
+    if (testCxx) {
+      if (!cxxStandard.empty()) {
+        writeProperty(fout, targetName, "CXX_STANDARD", cxxStandard);
+      }
+      if (!cxxStandardRequired.empty()) {
+        writeProperty(fout, targetName, "CXX_STANDARD_REQUIRED",
+                      cxxStandardRequired);
+      }
+      if (!cxxExtensions.empty()) {
+        writeProperty(fout, targetName, "CXX_EXTENSIONS", cxxExtensions);
+      }
+    }
+
     if (useOldLinkLibs) {
       fprintf(fout, "target_link_libraries(%s ${LINK_LIBRARIES})\n",
               targetName.c_str());

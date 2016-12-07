@@ -215,6 +215,18 @@ add_RunCMake_test(project -DCMake_TEST_RESOURCES=${CMake_TEST_RESOURCES})
 add_RunCMake_test(return)
 add_RunCMake_test(set_property)
 add_RunCMake_test(string)
+foreach(var
+    CMAKE_C_COMPILER_ID
+    CMAKE_C_COMPILER_VERSION
+    CMAKE_C_STANDARD_DEFAULT
+    CMAKE_CXX_COMPILER_ID
+    CMAKE_CXX_COMPILER_VERSION
+    CMAKE_CXX_STANDARD_DEFAULT
+    )
+  if(DEFINED ${var})
+    list(APPEND try_compile_ARGS -D${var}=${${var}})
+  endif()
+endforeach()
 add_RunCMake_test(try_compile)
 add_RunCMake_test(try_run)
 add_RunCMake_test(set)
