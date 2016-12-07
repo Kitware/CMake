@@ -93,7 +93,16 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->SystemIsWindowsPhone = false;
   this->SystemIsWindowsStore = false;
   this->MSBuildCommandInitialized = false;
-  this->DefaultPlatformToolset = "v100";
+  {
+    std::string envPlatformToolset;
+    if (cmSystemTools::GetEnv("PlatformToolset", envPlatformToolset) &&
+        envPlatformToolset == "Windows7.1SDK") {
+      // We are running from a Windows7.1SDK command prompt.
+      this->DefaultPlatformToolset = "Windows7.1SDK";
+    } else {
+      this->DefaultPlatformToolset = "v100";
+    }
+  }
   this->Version = VS10;
 }
 
