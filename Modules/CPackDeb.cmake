@@ -587,12 +587,21 @@ function(cpack_deb_prepare_package_vars)
       file(GLOB_RECURSE FILE_PATHS_ LIST_DIRECTORIES false RELATIVE "${WDIR}" "${WDIR}/*")
     cmake_policy(POP)
 
+    find_program(FILE_EXECUTABLE file)
+    if(NOT FILE_EXECUTABLE)
+      message(FATAL_ERROR "CPackDeb: file utility is not available. CPACK_DEBIAN_PACKAGE_SHLIBDEPS and CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS options are not available.")
+    endif()
+
     # get file info so that we can determine if file is executable or not
     unset(CPACK_DEB_INSTALL_FILES)
     foreach(FILE_ IN LISTS FILE_PATHS_)
-      execute_process(COMMAND file "./${FILE_}"
+      execute_process(COMMAND env LC_ALL=C ${FILE_EXECUTABLE} "./${FILE_}"
         WORKING_DIRECTORY "${WDIR}"
+        RESULT_VARIABLE FILE_RESULT_
         OUTPUT_VARIABLE INSTALL_FILE_)
+      if(NOT FILE_RESULT_ EQUAL 0)
+        message (FATAL_ERROR "CPackDeb: execution of command: '${FILE_EXECUTABLE} ./${FILE_}' failed with exit code: ${FILE_RESULT_}")
+      endif()
       list(APPEND CPACK_DEB_INSTALL_FILES "${INSTALL_FILE_}")
     endforeach()
 
