@@ -243,8 +243,8 @@ set(SRCS
   cmFileLockPool.h
   cmFileLockResult.cxx
   cmFileLockResult.h
-  cmFilePathUuid.cxx
-  cmFilePathUuid.h
+  cmFilePathChecksum.cxx
+  cmFilePathChecksum.h
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmFortranLexer.cxx

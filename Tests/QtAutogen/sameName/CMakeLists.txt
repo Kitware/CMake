@@ -16,6 +16,5 @@ add_executable(sameName
   data.qrc
   main.cpp
 )
-target_include_directories(sameName PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(sameName ${QT_LIBRARIES})
-set_target_properties( sameName PROPERTIES AUTOMOC TRUE AUTORCC TRUE )
+set_target_properties(sameName PROPERTIES AUTOMOC TRUE AUTORCC TRUE)

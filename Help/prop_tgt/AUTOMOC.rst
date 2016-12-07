@@ -15,11 +15,12 @@ source files at build time and invoke moc accordingly.
   the ``Q_OBJECT`` class declaration is expected in the header, and
   ``moc`` is run on the header file.  A ``moc_foo.cpp`` file will be
   generated from the source's header into the
-  :variable:`CMAKE_CURRENT_BINARY_DIR` directory.  This allows the
-  compiler to find the included ``moc_foo.cpp`` file regardless of the
-  location the original source.  However, if multiple source files
-  in different directories do this then their generated moc files would
-  collide.  In this case a diagnostic will be issued.
+  ``<CMAKE_CURRENT_BINARY_DIR>/<TARGETNAME>_autogen/include``
+  directory which is automatically added to the target's
+  :prop_tgt:`INCLUDE_DIRECTORIES`.  This allows the compiler to find the
+  included ``moc_foo.cpp`` file regardless of the location the original source.
+  However, if multiple source files in different directories do this then their
+  generated moc files would collide.  In this case a diagnostic will be issued.
 
 * If an ``#include`` statement like ``#include "foo.moc"`` is found,
   then a ``Q_OBJECT`` is expected in the current source file and ``moc``
@@ -30,7 +31,7 @@ source files at build time and invoke moc accordingly.
   alternative extensions, such as ``hpp``, ``hxx`` etc when searching
   for headers.  The resulting moc files, which are not included as shown
   above in any of the source files are included in a generated
-  ``<targetname>_automoc.cpp`` file, which is compiled as part of the
+  ``moc_compilation.cpp`` file, which is compiled as part of the
   target.
 
 This property is initialized by the value of the :variable:`CMAKE_AUTOMOC`

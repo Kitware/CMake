@@ -4,6 +4,7 @@
 #define cmQtAutoGenerators_h
 
 #include <cmConfigure.h> // IWYU pragma: keep
+#include <cmFilePathChecksum.h>
 
 #include <list>
 #include <map>
@@ -23,32 +24,36 @@ private:
   bool ReadAutogenInfoFile(cmMakefile* makefile,
                            const std::string& targetDirectory,
                            const std::string& config);
-  bool ReadOldMocDefinitionsFile(cmMakefile* makefile,
+  void ReadOldMocDefinitionsFile(cmMakefile* makefile,
                                  const std::string& targetDirectory);
-  void WriteOldMocDefinitionsFile(const std::string& targetDirectory);
+  bool WriteOldMocDefinitionsFile(const std::string& targetDirectory);
 
   std::string MakeCompileSettingsString(cmMakefile* makefile);
 
   bool RunAutogen(cmMakefile* makefile);
+
   bool GenerateMocFiles(
     const std::map<std::string, std::string>& includedMocs,
     const std::map<std::string, std::string>& notIncludedMocs);
   bool GenerateMoc(const std::string& sourceFile,
-                   const std::string& mocFileName);
+                   const std::string& mocFileName,
+                   const std::string& subDirPrefix);
+
   bool GenerateUiFiles(
     const std::map<std::string, std::vector<std::string> >& includedUis);
   bool GenerateUi(const std::string& realName, const std::string& uiInputFile,
                   const std::string& uiOutputFile);
+
   bool GenerateQrcFiles();
   bool GenerateQrc(const std::string& qrcInputFile,
                    const std::string& qrcOutputFile, bool unique_n);
 
-  void ParseCppFile(
+  bool ParseCppFile(
     const std::string& absFilename,
     const std::vector<std::string>& headerExtensions,
     std::map<std::string, std::string>& includedMocs,
     std::map<std::string, std::vector<std::string> >& includedUis);
-  void StrictParseCppFile(
+  bool StrictParseCppFile(
     const std::string& absFilename,
     const std::vector<std::string>& headerExtensions,
     std::map<std::string, std::string>& includedMocs,
@@ -76,13 +81,18 @@ private:
 
   bool NameCollisionTest(const std::map<std::string, std::string>& genFiles,
                          std::multimap<std::string, std::string>& collisions);
-  void NameCollisionLog(
+
+  void LogErrorNameCollision(
     const std::string& message,
     const std::multimap<std::string, std::string>& collisions);
-
+  void LogBold(const std::string& message);
   void LogInfo(const std::string& message);
+  void LogWarning(const std::string& message);
   void LogError(const std::string& message);
   void LogCommand(const std::vector<std::string>& command);
+
+  bool makeParentDirectory(const std::string& filename);
+
   std::string JoinExts(const std::vector<std::string>& lst);
 
   static void MergeUicOptions(std::vector<std::string>& opts,
@@ -92,39 +102,47 @@ private:
   bool InputFilesNewerThanQrc(const std::string& qrcFile,
                               const std::string& rccOutput);
 
+  // - Target names
+  std::string OriginTargetName;
+  std::string AutogenTargetName;
+  // - Directories
+  std::string ProjectSourceDir;
+  std::string ProjectBinaryDir;
+  std::string CurrentSourceDir;
+  std::string CurrentBinaryDir;
+  std::string AutogenBuildSubDir;
+  // - Qt environment
   std::string QtMajorVersion;
-  std::string Sources;
-  std::vector<std::string> RccSources;
-  std::string SkipMoc;
-  std::string SkipUic;
-  std::string Headers;
-  std::string Srcdir;
-  std::string Builddir;
   std::string MocExecutable;
   std::string UicExecutable;
   std::string RccExecutable;
+  // - File lists
+  std::string Sources;
+  std::string Headers;
+  // - Moc
+  std::string SkipMoc;
   std::string MocCompileDefinitionsStr;
   std::string MocIncludesStr;
   std::string MocOptionsStr;
-  std::string ProjectBinaryDir;
-  std::string ProjectSourceDir;
-  std::string TargetName;
-  std::string OriginTargetName;
-
-  std::string CurrentCompileSettingsStr;
-  std::string OldCompileSettingsStr;
-
-  std::string TargetBuildSubDir;
   std::string OutMocCppFilenameRel;
   std::string OutMocCppFilenameAbs;
   std::list<std::string> MocIncludes;
   std::list<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
+  // - Uic
+  std::string SkipUic;
   std::vector<std::string> UicTargetOptions;
   std::map<std::string, std::string> UicOptions;
+  // - Rcc
+  std::vector<std::string> RccSources;
   std::map<std::string, std::string> RccOptions;
   std::map<std::string, std::vector<std::string> > RccInputs;
-
+  // - Settings
+  std::string CurrentCompileSettingsStr;
+  std::string OldCompileSettingsStr;
+  // - Utility
+  cmFilePathChecksum fpathCheckSum;
+  // - Flags
   bool IncludeProjectDirsBefore;
   bool Verbose;
   bool ColorOutput;
@@ -132,7 +150,7 @@ private:
   bool RunUicFailed;
   bool RunRccFailed;
   bool GenerateAll;
-  bool RelaxedMode;
+  bool MocRelaxedMode;
 };
 
 #endif
