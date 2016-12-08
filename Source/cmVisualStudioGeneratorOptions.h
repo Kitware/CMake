@@ -28,7 +28,8 @@ public:
     ResourceCompiler,
     MasmCompiler,
     Linker,
-    FortranCompiler
+    FortranCompiler,
+    CSharpCompiler
   };
   cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg, Tool tool,
                                  cmVS7FlagTable const* table,

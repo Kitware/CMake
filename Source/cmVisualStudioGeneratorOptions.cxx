@@ -130,7 +130,17 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
 
 bool cmVisualStudioGeneratorOptions::IsDebug() const
 {
-  return this->FlagMap.find("DebugInformationFormat") != this->FlagMap.end();
+  if (this->CurrentTool != CSharpCompiler) {
+    return this->FlagMap.find("DebugInformationFormat") != this->FlagMap.end();
+  }
+  std::map<std::string, FlagValue>::const_iterator i =
+    this->FlagMap.find("DebugType");
+  if (i != this->FlagMap.end()) {
+    if (i->second.size() == 1) {
+      return i->second[0] != "none";
+    }
+  }
+  return false;
 }
 
 bool cmVisualStudioGeneratorOptions::IsWinRt() const
