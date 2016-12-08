@@ -349,6 +349,9 @@ Variables for Languages
    /variable/CMAKE_C_EXTENSIONS
    /variable/CMAKE_C_STANDARD
    /variable/CMAKE_C_STANDARD_REQUIRED
+   /variable/CMAKE_CUDA_EXTENSIONS
+   /variable/CMAKE_CUDA_STANDARD
+   /variable/CMAKE_CUDA_STANDARD_REQUIRED
    /variable/CMAKE_CXX_COMPILE_FEATURES
    /variable/CMAKE_CXX_EXTENSIONS
    /variable/CMAKE_CXX_STANDARD
