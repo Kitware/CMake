@@ -606,6 +606,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         lang_can_export_cmds && compileCommands.size() == 1) {
       std::string compileCommand = compileCommands[0];
 
+      // no launcher for CMAKE_EXPORT_COMPILE_COMMANDS
       rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                    compileCommand, vars);
       std::string workingDirectory = cmSystemTools::CollapseFullPath(
@@ -741,6 +742,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         // Expand placeholders in the commands.
         for (std::vector<std::string>::iterator i = preprocessCommands.begin();
              i != preprocessCommands.end(); ++i) {
+          // no launcher for preprocessor commands
           rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                        *i, vars);
         }
@@ -789,6 +791,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         // Expand placeholders in the commands.
         for (std::vector<std::string>::iterator i = assemblyCommands.begin();
              i != assemblyCommands.end(); ++i) {
+          // no launcher for assembly commands
           rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                        *i, vars);
         }

@@ -1015,6 +1015,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
 
   for (std::vector<std::string>::iterator i = compileCmds.begin();
        i != compileCmds.end(); ++i) {
+    // no launcher for CMAKE_EXPORT_COMPILE_COMMANDS
     rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(), *i,
                                                  compileObjectVars);
   }
