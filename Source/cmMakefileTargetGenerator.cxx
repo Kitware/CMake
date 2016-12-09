@@ -545,7 +545,6 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     }
   }
   cmRulePlaceholderExpander::RuleVariables vars;
-  vars.RuleLauncher = "RULE_LAUNCH_COMPILE";
   vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
   vars.CMTargetType =
     cmState::GetTargetTypeName(this->GeneratorTarget->GetType());
@@ -664,9 +663,20 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       }
     }
 
+    std::string launcher;
+    {
+      const char* val = this->LocalGenerator->GetRuleLauncher(
+        this->GeneratorTarget, "RULE_LAUNCH_COMPILE");
+      if (val && *val) {
+        launcher = val;
+        launcher += " ";
+      }
+    }
+
     // Expand placeholders in the commands.
     for (std::vector<std::string>::iterator i = compileCommands.begin();
          i != compileCommands.end(); ++i) {
+      *i = launcher + *i;
       rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, *i,
                                                    vars);
     }
