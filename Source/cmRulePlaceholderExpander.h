@@ -57,7 +57,6 @@ public:
     const char* LanguageCompileFlags;
     const char* Defines;
     const char* Includes;
-    const char* RuleLauncher;
     const char* DependencyFile;
     const char* FilterPrefix;
   };
