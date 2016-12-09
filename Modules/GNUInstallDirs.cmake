@@ -120,11 +120,26 @@
 #   allow users who create additional path variables to also compute
 #   absolute paths where necessary, using the same logic.
 
+# Convert a cache variable to PATH type
+
+macro(_GNUInstallDirs_cache_convert_to_path var description)
+  get_property(_GNUInstallDirs_cache_type CACHE ${var} PROPERTY TYPE)
+  if(_GNUInstallDirs_cache_type STREQUAL "UNINITIALIZED")
+    file(TO_CMAKE_PATH "${${var}}" _GNUInstallDirs_cmakepath)
+    set_property(CACHE ${var} PROPERTY TYPE PATH)
+    set_property(CACHE ${var} PROPERTY VALUE "${_GNUInstallDirs_cmakepath}")
+    set_property(CACHE ${var} PROPERTY HELPSTRING "${description}")
+    unset(_GNUInstallDirs_cmakepath)
+  endif()
+  unset(_GNUInstallDirs_cache_type)
+endmacro()
+
 # Create a cache variable with default for a path.
 macro(_GNUInstallDirs_cache_path var default description)
   if(NOT DEFINED ${var})
     set(${var} "${default}" CACHE PATH "${description}")
   endif()
+  _GNUInstallDirs_cache_convert_to_path("${var}" "${description}")
 endmacro()
 
 # Create a cache variable with not default for a path, with a fallback
@@ -135,6 +150,7 @@ macro(_GNUInstallDirs_cache_path_fallback var default description)
     set(${var} "" CACHE PATH "${description}")
     set(${var} "${default}")
   endif()
+  _GNUInstallDirs_cache_convert_to_path("${var}" "${description}")
 endmacro()
 
 # Installation directories
@@ -232,6 +248,7 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
     set_property(CACHE CMAKE_INSTALL_LIBDIR PROPERTY VALUE "${_LIBDIR_DEFAULT}")
   endif()
 endif()
+_GNUInstallDirs_cache_convert_to_path(CMAKE_INSTALL_LIBDIR "Object code libraries (lib)")
 
 # Save for next run
 set(_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE INTERNAL "CMAKE_INSTALL_PREFIX during last run")
