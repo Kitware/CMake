@@ -242,7 +242,7 @@ public:
 
   /** Used for parallel ctest job scheduling */
   std::string GetScheduleType() { return this->ScheduleType; }
-  void SetScheduleType(std::string type) { this->ScheduleType = type; }
+  void SetScheduleType(std::string const& type) { this->ScheduleType = type; }
 
   /** The max output width */
   int GetMaxTestNameWidth() const;

@@ -148,7 +148,7 @@ public:
   void AppendDefines(std::set<std::string>& defines,
                      const char* defines_list) const;
   void AppendDefines(std::set<std::string>& defines,
-                     std::string defines_list) const
+                     std::string const& defines_list) const
   {
     this->AppendDefines(defines, defines_list.c_str());
   }
