@@ -72,7 +72,7 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
 {
   std::string fileName = file;
   std::string frameWorkName;
-  std::string::size_type pos = fileName.find("/");
+  std::string::size_type pos = fileName.find('/');
   // if there is a / in the name try to find the header as a framework
   // For example bar/foo.h would look for:
   // bar.framework/Headers/foo.h
@@ -83,7 +83,7 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
     frameWorkName =
       frameWorkName.substr(0, frameWorkName.size() - fileName.size() - 1);
     // if the framework has a path in it then just use the filename
-    if (frameWorkName.find("/") != frameWorkName.npos) {
+    if (frameWorkName.find('/') != frameWorkName.npos) {
       fileName = file;
       frameWorkName = "";
     }

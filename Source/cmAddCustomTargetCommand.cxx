@@ -154,7 +154,7 @@ bool cmAddCustomTargetCommand::InitialPass(
   bool nameOk = cmGeneratorExpression::IsValidTargetName(targetName) &&
     !cmGlobalGenerator::IsReservedTarget(targetName);
   if (nameOk) {
-    nameOk = targetName.find(":") == std::string::npos;
+    nameOk = targetName.find(':') == std::string::npos;
   }
   if (!nameOk) {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;

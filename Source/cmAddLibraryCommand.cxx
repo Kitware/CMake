@@ -173,7 +173,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
     !cmGlobalGenerator::IsReservedTarget(libName);
 
   if (nameOk && !importTarget && !isAlias) {
-    nameOk = libName.find(":") == std::string::npos;
+    nameOk = libName.find(':') == std::string::npos;
   }
   if (!nameOk) {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
