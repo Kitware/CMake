@@ -576,8 +576,7 @@ int cmCursesMainForm::Configure(int noconfigure)
   }
   this->CMakeInstance->SetProgressCallback(CM_NULLPTR, CM_NULLPTR);
 
-  keypad(stdscr, TRUE); /* Use key symbols as
-                           KEY_DOWN*/
+  keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
 
   if (retVal != 0 || !this->Errors.empty()) {
     // see if there was an error
@@ -630,8 +629,7 @@ int cmCursesMainForm::Generate()
   int retVal = this->CMakeInstance->Generate();
 
   this->CMakeInstance->SetProgressCallback(CM_NULLPTR, CM_NULLPTR);
-  keypad(stdscr, TRUE); /* Use key symbols as
-                           KEY_DOWN*/
+  keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
 
   if (retVal != 0 || !this->Errors.empty()) {
     // see if there was an error

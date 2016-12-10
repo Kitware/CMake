@@ -52,7 +52,7 @@ cmFortranParser_s::cmFortranParser_s(std::vector<std::string> const& includes,
   , PPDefinitions(defines)
   , Info(info)
 {
-  this->InInterface = 0;
+  this->InInterface = false;
   this->InPPFalseBranch = 0;
 
   // Initialize the lexical scanner.
@@ -83,9 +83,9 @@ bool cmFortranParser_FilePush(cmFortranParser* parser, const char* fname)
       cmFortran_yy_create_buffer(CM_NULLPTR, 16384, parser->Scanner);
     cmFortran_yy_switch_to_buffer(buffer, parser->Scanner);
     parser->FileStack.push(f);
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }
 
 bool cmFortranParser_FilePop(cmFortranParser* parser)
@@ -93,7 +93,7 @@ bool cmFortranParser_FilePop(cmFortranParser* parser)
   // Pop one file off the stack and close it.  Switch the lexer back
   // to the next one on the stack.
   if (parser->FileStack.empty()) {
-    return 0;
+    return false;
   }
   cmFortranFile f = parser->FileStack.top();
   parser->FileStack.pop();
@@ -101,7 +101,7 @@ bool cmFortranParser_FilePop(cmFortranParser* parser)
   YY_BUFFER_STATE current = cmFortranLexer_GetCurrentBuffer(parser->Scanner);
   cmFortran_yy_delete_buffer(current, parser->Scanner);
   cmFortran_yy_switch_to_buffer(f.Buffer, parser->Scanner);
-  return 1;
+  return true;
 }
 
 int cmFortranParser_Input(cmFortranParser* parser, char* buffer,

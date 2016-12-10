@@ -242,11 +242,11 @@ void cmGeneratorExpressionParser::ParseContent(
       if (this->NestingLevel == 0) {
         extendText(result, this->it);
       } else {
-        assert(0 && "Got unexpected syntax token.");
+        assert(false && "Got unexpected syntax token.");
       }
       assert(this->it != this->Tokens.end());
       ++this->it;
       return;
   }
-  assert(0 && "Unhandled token in generator expression.");
+  assert(false && "Unhandled token in generator expression.");
 }

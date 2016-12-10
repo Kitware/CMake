@@ -748,7 +748,7 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
 {
   if (scp_command.empty() || localprefix.empty() || files.empty() ||
       remoteprefix.empty() || url.empty()) {
-    return 0;
+    return false;
   }
 
   std::vector<const char*> argv;
@@ -852,7 +852,7 @@ bool cmCTestSubmitHandler::SubmitUsingCP(const std::string& localprefix,
                << "\tremoteprefix: " << remoteprefix << "\n"
                << "\tdestination: " << destination << std::endl);
     /* clang-format on */
-    return 0;
+    return false;
   }
 
   cmCTest::SetOfStrings::const_iterator file;

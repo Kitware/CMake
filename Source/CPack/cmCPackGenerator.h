@@ -30,7 +30,7 @@ class cmMakefile;
     cmCPackLog_msg << msg;                                                    \
     this->Logger->Log(logType, __FILE__, __LINE__,                            \
                       cmCPackLog_msg.str().c_str());                          \
-  } while (0)
+  } while (false)
 
 /** \class cmCPackGenerator
  * \brief A superclass of all CPack Generators

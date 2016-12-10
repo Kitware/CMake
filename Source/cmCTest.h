@@ -27,7 +27,7 @@ class cmXMLWriter;
     cmCTestLog_msg << msg;                                                    \
     (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,                       \
                   cmCTestLog_msg.str().c_str());                              \
-  } while (0)
+  } while (false)
 
 #define cmCTestOptionalLog(ctSelf, logType, msg, suppress)                    \
   do {                                                                        \
@@ -35,7 +35,7 @@ class cmXMLWriter;
     cmCTestLog_msg << msg;                                                    \
     (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,                       \
                   cmCTestLog_msg.str().c_str(), suppress);                    \
-  } while (0)
+  } while (false)
 
 /** \class cmCTest
  * \brief Represents a ctest invocation.

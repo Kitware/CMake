@@ -1509,7 +1509,7 @@ bool cmCTest::SubmitExtraFiles(const VectorOfStrings& files)
 bool cmCTest::SubmitExtraFiles(const char* cfiles)
 {
   if (!cfiles) {
-    return 1;
+    return true;
   }
 
   VectorOfStrings files;
@@ -1518,7 +1518,7 @@ bool cmCTest::SubmitExtraFiles(const char* cfiles)
 
   files = cmSystemTools::SplitString(cfiles, ';');
   if (files.empty()) {
-    return 1;
+    return true;
   }
 
   return this->SubmitExtraFiles(files);

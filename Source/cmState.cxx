@@ -58,7 +58,7 @@ const char* cmState::GetTargetTypeName(cmStateEnums::TargetType targetType)
     case cmStateEnums::UNKNOWN_LIBRARY:
       return "UNKNOWN_LIBRARY";
   }
-  assert(0 && "Unexpected target type");
+  assert(false && "Unexpected target type");
   return CM_NULLPTR;
 }
 
