@@ -32,7 +32,7 @@
 
 namespace {
 
-static std::vector<std::string> getConfigurations(const cmake* cm)
+std::vector<std::string> getConfigurations(const cmake* cm)
 {
   std::vector<std::string> configurations;
   auto makefiles = cm->GetGlobalGenerator()->GetMakefiles();
@@ -47,7 +47,7 @@ static std::vector<std::string> getConfigurations(const cmake* cm)
   return configurations;
 }
 
-static bool hasString(const Json::Value& v, const std::string& s)
+bool hasString(const Json::Value& v, const std::string& s)
 {
   return !v.isNull() &&
     std::find_if(v.begin(), v.end(), [s](const Json::Value& i) {
@@ -56,7 +56,7 @@ static bool hasString(const Json::Value& v, const std::string& s)
 }
 
 template <class T>
-static Json::Value fromStringList(const T& in)
+Json::Value fromStringList(const T& in)
 {
   Json::Value result = Json::arrayValue;
   for (const std::string& i : in) {
@@ -65,7 +65,7 @@ static Json::Value fromStringList(const T& in)
   return result;
 }
 
-static std::vector<std::string> toStringList(const Json::Value& in)
+std::vector<std::string> toStringList(const Json::Value& in)
 {
   std::vector<std::string> result;
   for (const auto& it : in) {
@@ -74,12 +74,11 @@ static std::vector<std::string> toStringList(const Json::Value& in)
   return result;
 }
 
-static void getCMakeInputs(const cmGlobalGenerator* gg,
-                           const std::string& sourceDir,
-                           const std::string& buildDir,
-                           std::vector<std::string>* internalFiles,
-                           std::vector<std::string>* explicitFiles,
-                           std::vector<std::string>* tmpFiles)
+void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
+                    const std::string& buildDir,
+                    std::vector<std::string>* internalFiles,
+                    std::vector<std::string>* explicitFiles,
+                    std::vector<std::string>* tmpFiles)
 {
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
   std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();

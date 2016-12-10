@@ -2343,9 +2343,8 @@ size_t cmWriteToMemoryCallback(void* ptr, size_t size, size_t nmemb,
   return realsize;
 }
 
-static size_t cmFileCommandCurlDebugCallback(CURL*, curl_infotype type,
-                                             char* chPtr, size_t size,
-                                             void* data)
+size_t cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
+                                      size_t size, void* data)
 {
   cmFileCommandVectorOfChar* vec =
     static_cast<cmFileCommandVectorOfChar*>(data);
@@ -2414,9 +2413,8 @@ private:
   std::string Text;
 };
 
-static int cmFileDownloadProgressCallback(void* clientp, double dltotal,
-                                          double dlnow, double ultotal,
-                                          double ulnow)
+int cmFileDownloadProgressCallback(void* clientp, double dltotal, double dlnow,
+                                   double ultotal, double ulnow)
 {
   cURLProgressHelper* helper = reinterpret_cast<cURLProgressHelper*>(clientp);
 
@@ -2433,9 +2431,8 @@ static int cmFileDownloadProgressCallback(void* clientp, double dltotal,
   return 0;
 }
 
-static int cmFileUploadProgressCallback(void* clientp, double dltotal,
-                                        double dlnow, double ultotal,
-                                        double ulnow)
+int cmFileUploadProgressCallback(void* clientp, double dltotal, double dlnow,
+                                 double ultotal, double ulnow)
 {
   cURLProgressHelper* helper = reinterpret_cast<cURLProgressHelper*>(clientp);
 
