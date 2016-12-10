@@ -718,7 +718,7 @@ void cmCTestTestHandler::ComputeTestList()
   // Now create a final list of tests to run
   int cnt = 0;
   inREcnt = 0;
-  std::string last_directory = "";
+  std::string last_directory;
   ListOfTests finalList;
   for (it = this->TestList.begin(); it != this->TestList.end(); it++) {
     cnt++;
@@ -1649,7 +1649,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   int numFiles =
     static_cast<int>(cmsys::Directory::GetNumberOfFilesInDirectory(dirName));
   std::string pattern = "LastTestsFailed";
-  std::string logName = "";
+  std::string logName;
 
   for (int i = 0; i < numFiles; ++i) {
     std::string fileName = directory.GetFile(i);

@@ -172,7 +172,7 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
   cmGeneratedFileStream& fout, MapSourceFileFlags& sourceFileFlags)
 {
   std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  std::string compiler = "";
+  std::string compiler;
   if (!lgs.empty()) {
     this->AppendTarget(fout, "all", lgs[0], CM_NULLPTR, make.c_str(), mf,
                        compiler.c_str(), sourceFileFlags, true);

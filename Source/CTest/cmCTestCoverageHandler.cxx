@@ -977,7 +977,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
   std::set<std::string> missingFiles;
 
-  std::string actualSourceFile = "";
+  std::string actualSourceFile;
   cmCTestOptionalLog(
     this->CTest, HANDLER_OUTPUT,
     "   Processing coverage (each . represents one file):" << std::endl,
@@ -1006,8 +1006,8 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        command << std::endl, this->Quiet);
 
-    std::string output = "";
-    std::string errors = "";
+    std::string output;
+    std::string errors;
     int retVal = 0;
     *cont->OFS << "* Run coverage for: " << fileDir << std::endl;
     *cont->OFS << "  Command: " << command << std::endl;
@@ -1344,7 +1344,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
 
   std::set<std::string> missingFiles;
 
-  std::string actualSourceFile = "";
+  std::string actualSourceFile;
   cmCTestOptionalLog(
     this->CTest, HANDLER_OUTPUT,
     "   Processing coverage (each . represents one file):" << std::endl,
@@ -1371,8 +1371,8 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        command << std::endl, this->Quiet);
 
-    std::string output = "";
-    std::string errors = "";
+    std::string output;
+    std::string errors;
     int retVal = 0;
     *cont->OFS << "* Run coverage for: " << fileDir << std::endl;
     *cont->OFS << "  Command: " << command << std::endl;

@@ -495,7 +495,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
       this->GetMakefile()->GetRequiredDefinition(ppVar);
 
     // Explicit preprocessing always uses a depfile.
-    std::string const ppDeptype = ""; // no deps= for multiple outputs
+    std::string const ppDeptype; // no deps= for multiple outputs
     std::string const ppDepfile = "$DEP_FILE";
 
     cmRulePlaceholderExpander::RuleVariables ppVars;

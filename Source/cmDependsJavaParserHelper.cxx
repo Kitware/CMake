@@ -35,7 +35,7 @@ cmDependsJavaParserHelper::~cmDependsJavaParserHelper()
 void cmDependsJavaParserHelper::CurrentClass::AddFileNamesForPrinting(
   std::vector<std::string>* files, const char* prefix, const char* sep) const
 {
-  std::string rname = "";
+  std::string rname;
   if (prefix) {
     rname += prefix;
     rname += sep;
@@ -341,7 +341,7 @@ int cmDependsJavaParserHelper::ParseFile(const char* file)
     return 0;
   }
 
-  std::string fullfile = "";
+  std::string fullfile;
   std::string line;
   while (cmSystemTools::GetLineFromStream(ifs, line)) {
     fullfile += line + "\n";

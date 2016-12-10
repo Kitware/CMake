@@ -116,7 +116,7 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn,
 
 std::string cmFindProgramCommand::FindProgram()
 {
-  std::string program = "";
+  std::string program;
 
   if (this->SearchAppBundleFirst || this->SearchAppBundleOnly) {
     program = FindAppBundle();
@@ -214,7 +214,7 @@ std::string cmFindProgramCommand::FindAppBundle()
 
 std::string cmFindProgramCommand::GetBundleExecutable(std::string bundlePath)
 {
-  std::string executable = "";
+  std::string executable;
   (void)bundlePath;
 #if defined(__APPLE__)
   // Started with an example on developer.apple.com about finding bundles

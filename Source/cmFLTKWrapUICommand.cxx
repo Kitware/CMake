@@ -71,7 +71,7 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
       commandLines.push_back(commandLine);
 
       // Add command for generating the .h and .cxx files
-      std::string no_main_dependency = "";
+      std::string no_main_dependency;
       const char* no_comment = CM_NULLPTR;
       const char* no_working_dir = CM_NULLPTR;
       this->Makefile->AddCustomCommandToOutput(

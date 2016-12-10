@@ -768,7 +768,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     }
   }
 
-  std::string output = "";
+  std::string output;
   bool first = true;
   for (; i != args.end(); ++i) {
     if (*i == "LIST_DIRECTORIES") {

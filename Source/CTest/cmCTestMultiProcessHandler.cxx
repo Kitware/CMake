@@ -256,7 +256,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
   bool allTestsFailedTestLoadCheck = false;
   bool usedFakeLoadForTesting = false;
   size_t minProcessorsRequired = this->ParallelLevel;
-  std::string testWithMinProcessors = "";
+  std::string testWithMinProcessors;
 
   cmsys::SystemInformation info;
 

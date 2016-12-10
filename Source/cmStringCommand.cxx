@@ -150,7 +150,7 @@ bool cmStringCommand::HandleAsciiCommand(std::vector<std::string> const& args)
   }
   std::string::size_type cc;
   std::string outvar = args[args.size() - 1];
-  std::string output = "";
+  std::string output;
   for (cc = 1; cc < args.size() - 1; cc++) {
     int ch = atoi(args[cc].c_str());
     if (ch > 0 && ch < 256) {
