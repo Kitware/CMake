@@ -137,7 +137,6 @@ void Tree::InsertPath(const std::vector<std::string>& splitted,
   // last part of splitted
   newFolder.files.push_back(fileName);
   folders.push_back(newFolder);
-  return;
 }
 
 void Tree::BuildVirtualFolder(cmXMLWriter& xml) const

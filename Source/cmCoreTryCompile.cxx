@@ -901,5 +901,4 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   emsg << cmWrap("  " + this->BinaryDirectory, searchDirs, tmpOutputFile, "\n")
        << "\n";
   this->FindErrorMessage = emsg.str();
-  return;
 }
