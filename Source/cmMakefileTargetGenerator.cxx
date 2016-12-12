@@ -553,7 +553,6 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     }
   }
   cmRulePlaceholderExpander::RuleVariables vars;
-  vars.RuleLauncher = "RULE_LAUNCH_COMPILE";
   vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
   vars.CMTargetType =
     cmState::GetTargetTypeName(this->GeneratorTarget->GetType());
@@ -624,6 +623,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         lang_can_export_cmds && compileCommands.size() == 1) {
       std::string compileCommand = compileCommands[0];
 
+      // no launcher for CMAKE_EXPORT_COMPILE_COMMANDS
       rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                    compileCommand, vars);
       std::string workingDirectory = cmSystemTools::CollapseFullPath(
@@ -681,9 +681,20 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       }
     }
 
+    std::string launcher;
+    {
+      const char* val = this->LocalGenerator->GetRuleLauncher(
+        this->GeneratorTarget, "RULE_LAUNCH_COMPILE");
+      if (val && *val) {
+        launcher = val;
+        launcher += " ";
+      }
+    }
+
     // Expand placeholders in the commands.
     for (std::vector<std::string>::iterator i = compileCommands.begin();
          i != compileCommands.end(); ++i) {
+      *i = launcher + *i;
       rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, *i,
                                                    vars);
     }
@@ -748,6 +759,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         // Expand placeholders in the commands.
         for (std::vector<std::string>::iterator i = preprocessCommands.begin();
              i != preprocessCommands.end(); ++i) {
+          // no launcher for preprocessor commands
           rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                        *i, vars);
         }
@@ -796,6 +808,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         // Expand placeholders in the commands.
         for (std::vector<std::string>::iterator i = assemblyCommands.begin();
              i != assemblyCommands.end(); ++i) {
+          // no launcher for assembly commands
           rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                        *i, vars);
         }
