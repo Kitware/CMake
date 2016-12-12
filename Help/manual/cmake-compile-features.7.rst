@@ -337,3 +337,9 @@ versions specified for each:
 * ``MSVC``: Microsoft Visual Studio versions 2010 through 2015.
 * ``SunPro``: Oracle SolarisStudio version 12.4.
 * ``Intel``: Intel compiler versions 12.1 through 17.0.
+
+CMake is currently aware of the :prop_tgt:`language standards <CUDA_STANDARD>`
+from the following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>` as of the
+versions specified for each:
+
+* ``NVIDIA``: NVIDIA nvcc compiler 7.5 though 8.0.
