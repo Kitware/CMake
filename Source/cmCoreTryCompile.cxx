@@ -806,18 +806,13 @@ void cmCoreTryCompile::CleanupFiles(const char* binDir)
 
   cmsys::Directory dir;
   dir.Load(binDir);
-  size_t fileNum;
   std::set<std::string> deletedFiles;
-  for (fileNum = 0; fileNum < dir.GetNumberOfFiles(); ++fileNum) {
-    if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)), ".") &&
-        strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)), "..")) {
-
-      if (deletedFiles.find(dir.GetFile(
-            static_cast<unsigned long>(fileNum))) == deletedFiles.end()) {
-        deletedFiles.insert(dir.GetFile(static_cast<unsigned long>(fileNum)));
-        std::string fullPath = binDir;
-        fullPath += "/";
-        fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
+  for (unsigned long i = 0; i < dir.GetNumberOfFiles(); ++i) {
+    const char* fileName = dir.GetFile(i);
+    if (strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0) {
+      if (deletedFiles.insert(fileName).second) {
+        std::string const fullPath =
+          std::string(binDir).append("/").append(fileName);
         if (cmSystemTools::FileIsDirectory(fullPath)) {
           this->CleanupFiles(fullPath.c_str());
           cmSystemTools::RemoveADirectory(fullPath);
@@ -901,5 +896,4 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   emsg << cmWrap("  " + this->BinaryDirectory, searchDirs, tmpOutputFile, "\n")
        << "\n";
   this->FindErrorMessage = emsg.str();
-  return;
 }

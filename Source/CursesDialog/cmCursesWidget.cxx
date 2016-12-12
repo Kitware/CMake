@@ -28,9 +28,9 @@ void cmCursesWidget::Move(int x, int y, bool isNewPage)
 
   move_field(this->Field, y, x);
   if (isNewPage) {
-    set_new_page(this->Field, TRUE);
+    set_new_page(this->Field, true);
   } else {
-    set_new_page(this->Field, FALSE);
+    set_new_page(this->Field, false);
   }
 }
 

@@ -97,7 +97,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
     case cmStateEnums::INTERFACE_LIBRARY:
       // Not reachable. We never create a cmInstallTargetGenerator for
       // an INTERFACE_LIBRARY.
-      assert(0 && "INTERFACE_LIBRARY targets have no installable outputs.");
+      assert(false &&
+             "INTERFACE_LIBRARY targets have no installable outputs.");
       break;
     case cmStateEnums::OBJECT_LIBRARY:
     case cmStateEnums::UTILITY:

@@ -1509,7 +1509,7 @@ bool cmCTest::SubmitExtraFiles(const VectorOfStrings& files)
 bool cmCTest::SubmitExtraFiles(const char* cfiles)
 {
   if (!cfiles) {
-    return 1;
+    return true;
   }
 
   VectorOfStrings files;
@@ -1518,7 +1518,7 @@ bool cmCTest::SubmitExtraFiles(const char* cfiles)
 
   files = cmSystemTools::SplitString(cfiles, ';');
   if (files.empty()) {
-    return 1;
+    return true;
   }
 
   return this->SubmitExtraFiles(files);
@@ -2787,7 +2787,7 @@ bool cmCTest::CompressString(std::string& str)
   strm.next_out = &out[0];
   ret = deflate(&strm, Z_FINISH);
 
-  if (ret == Z_STREAM_ERROR || ret != Z_STREAM_END) {
+  if (ret != Z_STREAM_END) {
     cmCTestLog(this, ERROR_MESSAGE, "Error during gzip compression."
                  << std::endl);
     return false;

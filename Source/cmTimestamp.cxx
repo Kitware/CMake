@@ -82,7 +82,7 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm& tm) const
 #else
   // From Linux timegm() manpage.
 
-  std::string tz_old = "";
+  std::string tz_old;
   cmSystemTools::GetEnv("TZ", tz_old);
   tz_old = "TZ=" + tz_old;
 

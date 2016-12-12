@@ -61,7 +61,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
     !cmGlobalGenerator::IsReservedTarget(exename);
 
   if (nameOk && !importTarget && !isAlias) {
-    nameOk = exename.find(":") == std::string::npos;
+    nameOk = exename.find(':') == std::string::npos;
   }
   if (!nameOk) {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;

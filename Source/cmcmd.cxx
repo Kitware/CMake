@@ -169,13 +169,13 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         return 1;
       }
       // If error occurs we want to continue copying next files.
-      bool return_value = 0;
+      bool return_value = false;
       for (std::string::size_type cc = 2; cc < args.size() - 1; cc++) {
         if (!cmSystemTools::cmCopyFile(args[cc].c_str(),
                                        args[args.size() - 1].c_str())) {
           std::cerr << "Error copying file \"" << args[cc] << "\" to \""
                     << args[args.size() - 1] << "\".\n";
-          return_value = 1;
+          return_value = true;
         }
       }
       return return_value;
@@ -192,13 +192,13 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         return 1;
       }
       // If error occurs we want to continue copying next files.
-      bool return_value = 0;
+      bool return_value = false;
       for (std::string::size_type cc = 2; cc < args.size() - 1; cc++) {
         if (!cmSystemTools::CopyFileIfDifferent(
               args[cc].c_str(), args[args.size() - 1].c_str())) {
           std::cerr << "Error copying file (if different) from \"" << args[cc]
                     << "\" to \"" << args[args.size() - 1] << "\".\n";
-          return_value = 1;
+          return_value = true;
         }
       }
       return return_value;
@@ -207,12 +207,12 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Copy directory content
     if (args[1] == "copy_directory" && args.size() > 3) {
       // If error occurs we want to continue copying next files.
-      bool return_value = 0;
+      bool return_value = false;
       for (std::string::size_type cc = 2; cc < args.size() - 1; cc++) {
         if (!cmSystemTools::CopyADirectory(args[cc], args[args.size() - 1])) {
           std::cerr << "Error copying directory from \"" << args[cc]
                     << "\" to \"" << args[args.size() - 1] << "\".\n";
-          return_value = 1;
+          return_value = true;
         }
       }
       return return_value;
@@ -479,11 +479,11 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
     if (args[1] == "make_directory" && args.size() > 2) {
       // If error occurs we want to continue copying next files.
-      bool return_value = 0;
+      bool return_value = false;
       for (std::string::size_type cc = 2; cc < args.size(); cc++) {
         if (!cmSystemTools::MakeDirectory(args[cc].c_str())) {
           std::cerr << "Error creating directory \"" << args[cc] << "\".\n";
-          return_value = 1;
+          return_value = true;
         }
       }
       return return_value;

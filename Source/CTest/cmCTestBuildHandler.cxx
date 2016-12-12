@@ -948,7 +948,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
   this->BuildOutputLogSize += length;
 
   // until there are any lines left in the buffer
-  while (1) {
+  while (true) {
     // Find the end of line
     t_BuildProcessingQueueType::iterator it;
     for (it = queue->begin(); it != queue->end(); ++it) {

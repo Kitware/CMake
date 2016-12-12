@@ -54,7 +54,7 @@ protected:
   void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
   {
     std::string FoundSource;
-    std::string finalpath = "";
+    std::string finalpath;
     if (name == "source") {
       this->InSource = true;
     } else if (name == "sources") {

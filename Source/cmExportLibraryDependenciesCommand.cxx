@@ -180,5 +180,4 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
     }
   }
   fout << "endif()\n";
-  return;
 }

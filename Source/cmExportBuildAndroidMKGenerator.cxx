@@ -69,7 +69,7 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
   const cmGeneratorTarget* target, std::ostream& os,
   const ImportPropertyMap& properties)
 {
-  std::string config = "";
+  std::string config;
   if (!this->Configurations.empty()) {
     config = this->Configurations[0];
   }

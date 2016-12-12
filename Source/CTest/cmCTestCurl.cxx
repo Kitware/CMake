@@ -38,8 +38,8 @@ std::string cmCTestCurl::Escape(std::string const& source)
 }
 
 namespace {
-static size_t curlWriteMemoryCallback(void* ptr, size_t size, size_t nmemb,
-                                      void* data)
+size_t curlWriteMemoryCallback(void* ptr, size_t size, size_t nmemb,
+                               void* data)
 {
   int realsize = (int)(size * nmemb);
 
@@ -49,8 +49,8 @@ static size_t curlWriteMemoryCallback(void* ptr, size_t size, size_t nmemb,
   return realsize;
 }
 
-static size_t curlDebugCallback(CURL* /*unused*/, curl_infotype /*unused*/,
-                                char* chPtr, size_t size, void* data)
+size_t curlDebugCallback(CURL* /*unused*/, curl_infotype /*unused*/,
+                         char* chPtr, size_t size, void* data)
 {
   std::vector<char>* vec = static_cast<std::vector<char>*>(data);
   vec->insert(vec->end(), chPtr, chPtr + size);

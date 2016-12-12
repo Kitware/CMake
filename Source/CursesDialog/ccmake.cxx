@@ -52,8 +52,7 @@ void onsig(int /*unused*/)
     initscr();            /* Initialization */
     noecho();             /* Echo off */
     cbreak();             /* nl- or cr not needed */
-    keypad(stdscr, TRUE); /* Use key symbols as
-                             KEY_DOWN*/
+    keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
     refresh();
     int x, y;
     getmaxyx(stdscr, y, x);
@@ -128,8 +127,7 @@ int main(int argc, char const* const* argv)
   initscr();            /* Initialization */
   noecho();             /* Echo off */
   cbreak();             /* nl- or cr not needed */
-  keypad(stdscr, TRUE); /* Use key symbols as
-                           KEY_DOWN*/
+  keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
 
   signal(SIGWINCH, onsig);
 

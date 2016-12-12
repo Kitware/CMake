@@ -961,7 +961,7 @@ void cmMakefile::AddCustomCommandOldStyle(
                                           commandLines, comment, CM_NULLPTR);
     } else {
       // The source may not be a real file.  Do not use a main dependency.
-      std::string no_main_dependency = "";
+      std::string no_main_dependency;
       std::vector<std::string> depends2 = depends;
       depends2.push_back(source);
       sf = this->AddCustomCommandToOutput(output, depends2, no_main_dependency,
@@ -1051,7 +1051,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
     force += utilityName;
     std::vector<std::string> forced;
     forced.push_back(force);
-    std::string no_main_dependency = "";
+    std::string no_main_dependency;
     bool no_replace = false;
     this->AddCustomCommandToOutput(
       forced, byproducts, depends, no_main_dependency, commandLines, comment,

@@ -388,7 +388,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       *this->LogFile << "\tUpload file: " << local_file << " to "
                      << remote_file << std::endl;
 
-      std::string ofile = "";
+      std::string ofile;
       for (kk = 0; kk < remote_file.size(); kk++) {
         char c = remote_file[kk];
         char hexCh[4] = { 0, 0, 0, 0 };
@@ -582,7 +582,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
 void cmCTestSubmitHandler::ParseResponse(
   cmCTestSubmitHandlerVectorOfChar chunk)
 {
-  std::string output = "";
+  std::string output;
   output.append(chunk.begin(), chunk.end());
 
   if (output.find("<cdash") != output.npos) {
@@ -662,7 +662,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<std::string>& files,
       ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void*)&chunkDebug);
 
       std::string rfile = remoteprefix + cmSystemTools::GetFilenameName(*file);
-      std::string ofile = "";
+      std::string ofile;
       std::string::iterator kk;
       for (kk = rfile.begin(); kk < rfile.end(); ++kk) {
         char c = *kk;
@@ -748,7 +748,7 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
 {
   if (scp_command.empty() || localprefix.empty() || files.empty() ||
       remoteprefix.empty() || url.empty()) {
-    return 0;
+    return false;
   }
 
   std::vector<const char*> argv;
@@ -852,7 +852,7 @@ bool cmCTestSubmitHandler::SubmitUsingCP(const std::string& localprefix,
                << "\tremoteprefix: " << remoteprefix << "\n"
                << "\tdestination: " << destination << std::endl);
     /* clang-format on */
-    return 0;
+    return false;
   }
 
   cmCTest::SetOfStrings::const_iterator file;

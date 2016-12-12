@@ -110,7 +110,7 @@ cmQtAutoGenerators::cmQtAutoGenerators()
   , GenerateAll(false)
 {
 
-  std::string colorEnv = "";
+  std::string colorEnv;
   cmsys::SystemTools::GetEnv("COLOR", colorEnv);
   if (!colorEnv.empty()) {
     if (cmSystemTools::IsOn(colorEnv.c_str())) {

@@ -1664,7 +1664,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
   std::vector<char>::iterator erriter = err.begin();
   cmProcessOutput processOutput;
   std::string strdata;
-  while (1) {
+  while (true) {
     // Check for a newline in stdout.
     for (; outiter != out.end(); ++outiter) {
       if ((*outiter == '\r') && ((outiter + 1) == out.end())) {

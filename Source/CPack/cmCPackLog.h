@@ -14,7 +14,7 @@
     std::ostringstream cmCPackLog_msg;                                        \
     cmCPackLog_msg << msg;                                                    \
     (ctSelf)->Log(logType, __FILE__, __LINE__, cmCPackLog_msg.str().c_str()); \
-  } while (0)
+  } while (false)
 
 /** \class cmCPackLog
  * \brief A container for CPack generators

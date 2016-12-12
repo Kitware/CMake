@@ -156,7 +156,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
 
     // Move to beginning of next word.  Skip over whitespace.
     l = r;
-    while (*l && (*l == ' ')) {
+    while (*l == ' ') {
       ++l;
     }
   }

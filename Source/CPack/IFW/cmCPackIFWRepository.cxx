@@ -23,7 +23,7 @@
       Generator->Logger->Log(logType, __FILE__, __LINE__,                     \
                              cmCPackLog_msg.str().c_str());                   \
     }                                                                         \
-  } while (0)
+  } while (false)
 
 cmCPackIFWRepository::cmCPackIFWRepository()
   : Update(None)

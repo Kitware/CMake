@@ -65,13 +65,15 @@ private:
 struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
 {
   GeneratorExpressionContent(const char* startContent, size_t length);
-  void SetIdentifier(std::vector<cmGeneratorExpressionEvaluator*> identifier)
+  void SetIdentifier(
+    std::vector<cmGeneratorExpressionEvaluator*> const& identifier)
   {
     this->IdentifierChildren = identifier;
   }
 
   void SetParameters(
-    std::vector<std::vector<cmGeneratorExpressionEvaluator*> > parameters)
+    std::vector<std::vector<cmGeneratorExpressionEvaluator*> > const&
+      parameters)
   {
     this->ParamChildren = parameters;
   }

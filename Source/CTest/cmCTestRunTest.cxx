@@ -119,10 +119,9 @@ void cmCTestRunTest::CompressOutput()
   strm.next_out = out;
   ret = deflate(&strm, Z_FINISH);
 
-  if (ret == Z_STREAM_ERROR || ret != Z_STREAM_END) {
+  if (ret != Z_STREAM_END) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Error during output "
-               "compression. Sending uncompressed output."
+               "Error during output compression. Sending uncompressed output."
                  << std::endl);
     delete[] out;
     return;

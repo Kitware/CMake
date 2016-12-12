@@ -733,7 +733,6 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
     e << " ." << *ext;
   }
   cmSystemTools::Error(e.str().c_str());
-  return;
 }
 
 void CCONV cmSourceFileSetName2(void* arg, const char* name, const char* dir,
