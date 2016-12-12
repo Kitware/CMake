@@ -59,6 +59,7 @@ All Modules
    /module/CPackDeb
    /module/CPackDMG
    /module/CPackIFW
+   /module/CPackIFWConfigureFile
    /module/CPackNSIS
    /module/CPackPackageMaker
    /module/CPackProductBuild
