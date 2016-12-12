@@ -164,6 +164,10 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       set(v Intel)
       set(ext vfproj)
       set(id_cl ifort.exe)
+    elseif(lang STREQUAL CSharp)
+      set(v 10)
+      set(ext csproj)
+      set(id_cl csc.exe)
     elseif(NOT "${vs_version}" VERSION_LESS 10)
       set(v 10)
       set(ext vcxproj)
@@ -447,8 +451,12 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     set(SIMULATE_ID)
     set(SIMULATE_VERSION)
     file(STRINGS ${file}
-      CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 38 REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
+      CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 38
+      ${CMAKE_${lang}_COMPILER_ID_STRINGS_PARAMETERS}
+      REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
     set(COMPILER_ID_TWICE)
+    # In C# binaries, some strings are found more than once.
+    list(REMOVE_DUPLICATES CMAKE_${lang}_COMPILER_ID_STRINGS)
     foreach(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
       if("${info}" MATCHES "INFO:compiler\\[([^]\"]*)\\]")
         if(COMPILER_ID)

@@ -15,7 +15,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
 
 function(compiler_id_detection outvar lang)
 
-  if (NOT lang STREQUAL Fortran)
+  if (NOT lang STREQUAL Fortran AND NOT lang STREQUAL CSharp)
     file(GLOB lang_files
       "${CMAKE_ROOT}/Modules/Compiler/*-DetermineCompiler.cmake")
     set(nonlang CXX)
