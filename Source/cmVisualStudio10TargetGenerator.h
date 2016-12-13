@@ -65,6 +65,7 @@ private:
                     std::vector<cmSourceFile const*> const&);
   void WriteAllSources();
   void WriteDotNetReferences();
+  void WriteDotNetReference(std::string const& ref, std::string const& hint);
   void WriteEmbeddedResourceGroup();
   void WriteWinRTReferences();
   void WriteWinRTPackageCertificateKeyFile();
