@@ -58,6 +58,11 @@ else()
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
   CMAKE_DETERMINE_COMPILER_ABI(CUDA ${CMAKE_ROOT}/Modules/CMakeCUDACompilerABI.cu)
 
+  if("x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC")
+    set(CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES "${CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES}")
+    set(CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES "${CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES}")
+  endif()
+
   # Re-configure to save learned information.
   configure_file(
     ${CMAKE_ROOT}/Modules/CMakeCUDACompiler.cmake.in
