@@ -28,6 +28,7 @@
 #    gerrit.pushurl = Review site push URL with "$username" placeholder
 #    gerrit.remote = Gerrit remote name, if not "gerrit"
 #    gerrit.url = Gerrit project URL, if not "$site/p/$project"
+#                 optionally with "$username" placeholder
 
 die() {
 	echo 1>&2 "$@" ; exit 1
@@ -39,11 +40,12 @@ cd "${BASH_SOURCE%/*}" &&
 # Load the project configuration.
 site=$(git config -f config --get gerrit.site) &&
 project=$(git config -f config --get gerrit.project) &&
-pushurl_=$(git config -f config --get gerrit.pushurl) &&
 remote=$(git config -f config --get gerrit.remote ||
 	 echo "gerrit") &&
-fetchurl=$(git config -f config --get gerrit.url ||
-	   echo "$site/p/$project") ||
+fetchurl_=$(git config -f config --get gerrit.url ||
+	    echo "$site/p/$project") &&
+pushurl_=$(git config -f config --get gerrit.pushurl ||
+	   git config -f config --get gerrit.url) ||
 die 'This project is not configured to use Gerrit.'
 
 # Get current gerrit push URL.
@@ -67,7 +69,7 @@ else
 
 '"$project"' changes must be pushed to our Gerrit Code Review site:
 
-  '"$fetchurl"'
+  '"$site/p/$project"'
 
 Register a Gerrit account and select a username (used below).
 You will need an OpenID:
@@ -96,13 +98,16 @@ Add your SSH public keys at
 	if test -z "$gu"; then
 		gu="$USER"
 	fi &&
+	fetchurl="${fetchurl_/\$username/$gu}" &&
 	if test -z "$pushurl"; then
 		git remote add "$remote" "$fetchurl"
 	else
 		git config remote."$remote".url "$fetchurl"
 	fi &&
 	pushurl="${pushurl_/\$username/$gu}" &&
-	git config remote."$remote".pushurl "$pushurl" &&
+	if test "$pushurl" != "$fetchurl"; then
+		git config remote."$remote".pushurl "$pushurl"
+	fi &&
 	echo 'Remote "'"$remote"'" is now configured to push to
 
   '"$pushurl"'
