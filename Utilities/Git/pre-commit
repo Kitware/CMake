@@ -41,7 +41,7 @@ if test -z "$HOOKS_ALLOW_KWSYS"; then
 should not be made directly in CMake.  KWSys is kept in its own Git
 repository and shared by several projects.  Please visit
 
-  http://public.kitware.com/Wiki/KWSys/Git
+  https://gitlab.kitware.com/utils/kwsys
 
 to contribute changes directly to KWSys.  Run
 
