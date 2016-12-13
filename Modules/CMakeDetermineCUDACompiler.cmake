@@ -70,6 +70,10 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 endif()
 
 include(CMakeFindBinUtils)
+if(MSVC_CUDA_ARCHITECTURE_ID)
+  set(SET_MSVC_CUDA_ARCHITECTURE_ID
+    "set(MSVC_CUDA_ARCHITECTURE_ID ${MSVC_CUDA_ARCHITECTURE_ID})")
+endif()
 
 #if this compiler vendor is matches NVIDIA we can determine
 #what the host compiler is. This only needs to be done if the CMAKE_CUDA_HOST_COMPILER
