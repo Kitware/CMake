@@ -281,6 +281,8 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
 
   // Get the language to use for linking this library.
   std::string linkLanguage = "CUDA";
+  std::string const objExt =
+    this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
 
   // Create set of linking flags.
   std::string linkFlags;
@@ -288,7 +290,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
 
   // Get the name of the device object to generate.
   std::string const targetOutputReal =
-    this->GeneratorTarget->ObjectDirectory + "cmake_device_link.o";
+    this->GeneratorTarget->ObjectDirectory + "cmake_device_link" + objExt;
   this->DeviceLinkObject = targetOutputReal;
 
   this->NumberOfProgressActions++;
