@@ -116,9 +116,13 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
   endif()
 
   if(_nvcc_link_line)
-    #extract the compiler that is being used for linking
-    separate_arguments(_nvcc_link_line_args UNIX_COMMAND "${_nvcc_link_line}")
-    list(GET _nvcc_link_line_args 0 CMAKE_CUDA_HOST_LINK_LAUNCHER)
+    if("x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC")
+      set(CMAKE_CUDA_HOST_LINK_LAUNCHER "${CMAKE_LINKER}")
+    else()
+      #extract the compiler that is being used for linking
+      separate_arguments(_nvcc_link_line_args UNIX_COMMAND "${_nvcc_link_line}")
+      list(GET _nvcc_link_line_args 0 CMAKE_CUDA_HOST_LINK_LAUNCHER)
+    endif()
 
     #prefix the line with cuda-fake-ld so that implicit link info believes it is
     #a link line
