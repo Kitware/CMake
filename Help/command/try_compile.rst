@@ -87,16 +87,17 @@ The options are:
   Store the output from the build process the given variable.
 
 ``<LANG>_STANDARD <std>``
-  Specify the :prop_tgt:`C_STANDARD` or :prop_tgt:`CXX_STANDARD`
-  target property of the generated project.
+  Specify the :prop_tgt:`C_STANDARD`, :prop_tgt:`CXX_STANDARD`,
+  or :prop_tgt:`CUDA_STANDARD` target property of the generated project.
 
 ``<LANG>_STANDARD_REQUIRED <bool>``
-  Specify the :prop_tgt:`C_STANDARD_REQUIRED` or
-  :prop_tgt:`CXX_STANDARD_REQUIRED` target property of the generated project.
+  Specify the :prop_tgt:`C_STANDARD_REQUIRED`,
+  :prop_tgt:`CXX_STANDARD_REQUIRED`, or :prop_tgt:`CUDA_STANDARD_REQUIRED`
+  target property of the generated project.
 
 ``<LANG>_EXTENSIONS <bool>``
-  Specify the :prop_tgt:`C_EXTENSIONS` or :prop_tgt:`CXX_EXTENSIONS`
-  target property of the generated project.
+  Specify the :prop_tgt:`C_EXTENSIONS`, :prop_tgt:`CXX_EXTENSIONS`,
+  or :prop_tgt:`CUDA_EXTENSIONS` target property of the generated project.
 
 In this version all files in ``<bindir>/CMakeFiles/CMakeTmp`` will be
 cleaned automatically.  For debugging, ``--debug-trycompile`` can be
@@ -146,6 +147,9 @@ then the language standard variables are honored:
 * :variable:`CMAKE_CXX_STANDARD`
 * :variable:`CMAKE_CXX_STANDARD_REQUIRED`
 * :variable:`CMAKE_CXX_EXTENSIONS`
+* :variable:`CMAKE_CUDA_STANDARD`
+* :variable:`CMAKE_CUDA_STANDARD_REQUIRED`
+* :variable:`CMAKE_CUDA_EXTENSIONS`
 
 Their values are used to set the corresponding target properties in
 the generated project (unless overridden by an explicit option).

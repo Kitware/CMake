@@ -8,7 +8,7 @@ callers to check whether they will be able to compile a given source file
 with the current toolchain.  In order to match compiler behavior, any
 language standard mode should match.  However, CMake 3.7 and below did not
 do this.  CMake 3.8 and above prefer to honor the language standard settings
-for ``C`` and ``CXX`` (C++) using the values of the variables:
+for ``C``, ``CXX`` (C++), and ``CUDA`` using the values of the variables:
 
 * :variable:`CMAKE_C_STANDARD`
 * :variable:`CMAKE_C_STANDARD_REQUIRED`
@@ -16,6 +16,9 @@ for ``C`` and ``CXX`` (C++) using the values of the variables:
 * :variable:`CMAKE_CXX_STANDARD`
 * :variable:`CMAKE_CXX_STANDARD_REQUIRED`
 * :variable:`CMAKE_CXX_EXTENSIONS`
+* :variable:`CMAKE_CUDA_STANDARD`
+* :variable:`CMAKE_CUDA_STANDARD_REQUIRED`
+* :variable:`CMAKE_CUDA_EXTENSIONS`
 
 This policy provides compatibility for projects that do not expect
 the language standard settings to be used automatically.
