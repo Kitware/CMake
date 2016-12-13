@@ -230,6 +230,11 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
         this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutputReal),
       output);
 
+    std::string targetFullPathCompilePDB = this->ComputeTargetCompilePDB();
+    std::string targetOutPathCompilePDB =
+      this->LocalGenerator->ConvertToOutputFormat(targetFullPathCompilePDB,
+                                                  cmOutputConverter::SHELL);
+
     vars.Language = linkLanguage.c_str();
     vars.Objects = buildObjs.c_str();
     vars.ObjectDir = objectDir.c_str();
@@ -237,6 +242,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     vars.LinkLibraries = linkLibs.c_str();
     vars.Flags = flags.c_str();
     vars.LinkFlags = linkFlags.c_str();
+    vars.TargetCompilePDB = targetOutPathCompilePDB.c_str();
 
     std::string launcher;
 

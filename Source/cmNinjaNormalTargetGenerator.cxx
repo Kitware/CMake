@@ -229,6 +229,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
     vars.SONameFlag = "$SONAME_FLAG";
     vars.TargetSOName = "$SONAME";
     vars.TargetPDB = "$TARGET_PDB";
+    vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
 
     vars.Flags = "$FLAGS";
     vars.LinkFlags = "$LINK_FLAGS";
@@ -715,6 +716,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     this->ConvertToNinjaPath(objPath), cmOutputConverter::SHELL);
   EnsureDirectoryExists(objPath);
+
+  this->SetMsvcTargetPdbVariable(vars);
 
   if (this->GetGlobalGenerator()->IsGCCOnWindows()) {
     // ar.exe can't handle backslashes in rsp files (implicitly used by gcc)
