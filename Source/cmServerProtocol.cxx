@@ -1311,109 +1311,111 @@ void cmServerProtocol::ProcessContextWriters(std::string filePath,
 template <class T>
 static Json::Value fromStringList(const T& in)
 {
-    Json::Value result = Json::arrayValue;
-    for (const std::string& i : in) {
-        result.append(i);
-    }
-    return result;
+  Json::Value result = Json::arrayValue;
+  for (const std::string& i : in) {
+    result.append(i);
+  }
+  return result;
 }
 
 static void getCMakeInputs(const cmGlobalGenerator* gg,
-    const std::string& sourceDir,
-    const std::string& buildDir,
-    std::vector<std::string>* internalFiles,
-    std::vector<std::string>* explicitFiles,
-    std::vector<std::string>* tmpFiles)
+  const std::string& sourceDir,
+  const std::string& buildDir,
+  std::vector<std::string>* internalFiles,
+  std::vector<std::string>* explicitFiles,
+  std::vector<std::string>* tmpFiles)
 {
-    const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
-    std::string lcCMakeRootDir = cmakeRootDir;
-    std::transform(lcCMakeRootDir.begin(), lcCMakeRootDir.end(), lcCMakeRootDir.begin(), ::tolower);
-    std::string lcSourceDir = sourceDir;
-    std::transform(lcSourceDir.begin(), lcSourceDir.end(), lcSourceDir.begin(), ::tolower);
-    std::string lcBuildDir = buildDir;
-    std::transform(lcBuildDir.begin(), lcBuildDir.end(), lcBuildDir.begin(), ::tolower);
+  const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
+  std::string lcCMakeRootDir = cmakeRootDir;
+  std::transform(lcCMakeRootDir.begin(), lcCMakeRootDir.end(), 
+       lcCMakeRootDir.begin(), ::tolower);
+  std::string lcSourceDir = sourceDir;
+  std::transform(lcSourceDir.begin(), lcSourceDir.end(),
+      lcSourceDir.begin(), ::tolower);
+  std::string lcBuildDir = buildDir;
+  std::transform(lcBuildDir.begin(), lcBuildDir.end(), 
+      lcBuildDir.begin(), ::tolower);
 
-    std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();
-    for (auto it = makefiles.begin(); it != makefiles.end(); ++it) {
-        const std::vector<std::string> listFiles = (*it)->GetListFiles();
+  std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();
+  for (auto it = makefiles.begin(); it != makefiles.end(); ++it) {
+    const std::vector<std::string> listFiles = (*it)->GetListFiles();
 
-        for (auto jstr = listFiles.begin(); jstr != listFiles.end(); ++jstr) {
-            auto jt = *jstr;
-            std::transform(jt.begin(), jt.end(), jt.begin(), ::tolower);
-            const std::string startOfFile = jt.substr(0, lcCMakeRootDir.size());
-            const bool isInternal = (startOfFile == lcCMakeRootDir);
-            const bool isTemporary = !isInternal && (jt.find(lcBuildDir + '/') == 0);
-
-            std::string toAdd = jt;
-            if (!lcSourceDir.empty()) {
-                const std::string& relative =
-                    cmSystemTools::RelativePath(lcSourceDir.c_str(), jt.c_str());
-                if (toAdd.size() > relative.size()) {
-                    toAdd = relative;
-                }
-            }
-
-            if (isInternal) {
-                if (internalFiles) {
-                    internalFiles->push_back(toAdd);
-                }
-            }
-            else {
-                if (isTemporary) {
-                    if (tmpFiles) {
-                        tmpFiles->push_back(toAdd);
-                    }
-                }
-                else {
-                    if (explicitFiles) {
-                        explicitFiles->push_back(toAdd);
-                    }
-                }
-            }
+    for (auto jstr = listFiles.begin(); jstr != listFiles.end(); ++jstr) {
+      auto jt = *jstr;
+      std::transform(jt.begin(), jt.end(), jt.begin(), ::tolower);
+      const std::string startOfFile = jt.substr(0, lcCMakeRootDir.size());
+      const bool isInternal = (startOfFile == lcCMakeRootDir);
+      const bool isTemporary = !isInternal && (jt.find(lcBuildDir + '/') == 0);
+      std::string toAdd = jt;
+      if (!lcSourceDir.empty()) {
+        const std::string& relative =
+              cmSystemTools::RelativePath(lcSourceDir.c_str(), jt.c_str());
+        if (toAdd.size() > relative.size()) {
+          toAdd = relative;
         }
+      }
+
+      if (isInternal) {
+        if (internalFiles) {
+          internalFiles->push_back(toAdd);
+        }
+      }
+      else {
+        if (isTemporary) {
+          if (tmpFiles) {
+            tmpFiles->push_back(toAdd);
+          }
+        }
+        else {
+          if (explicitFiles) {
+            explicitFiles->push_back(toAdd);
+          }
+        }
+      }
     }
+  }
 }
 
 void cmServerProtocol::ProcessCMakeInputs()
 {
-    const cmake* cm = this->CMakeInstance;
+  const cmake* cm = this->CMakeInstance;
 
-    const cmGlobalGenerator* gg = cm->GetGlobalGenerator();
-    const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot();
-    const std::string buildDir = cm->GetHomeOutputDirectory();
-    const std::string sourceDir = cm->GetHomeDirectory();
+  const cmGlobalGenerator* gg = cm->GetGlobalGenerator();
+  const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot();
+  const std::string buildDir = cm->GetHomeOutputDirectory();
+  const std::string sourceDir = cm->GetHomeDirectory();
 
-    Json::Value result = Json::objectValue;
-    result["sourceDirectory"] = sourceDir;
-    result["cmakeRootDirectory"] = cmakeRootDir;
+  Json::Value result = Json::objectValue;
+  result["sourceDirectory"] = sourceDir;
+  result["cmakeRootDirectory"] = cmakeRootDir;
 
-    std::vector<std::string> internalFiles;
-    std::vector<std::string> explicitFiles;
-    std::vector<std::string> tmpFiles;
-    getCMakeInputs(gg, sourceDir, buildDir, &internalFiles, &explicitFiles,
-        &tmpFiles);
+  std::vector<std::string> internalFiles;
+  std::vector<std::string> explicitFiles;
+  std::vector<std::string> tmpFiles;
+  getCMakeInputs(gg, sourceDir, buildDir, &internalFiles, &explicitFiles,
+      &tmpFiles);
 
 
-    Json::Value array = Json::arrayValue;
+  Json::Value array = Json::arrayValue;
 
-    Json::Value tmp = Json::objectValue;
-    tmp["isCMake"] = true;
-    tmp["isTemporary"] = false;
-    tmp["sources"] = fromStringList(internalFiles);
-    array.append(tmp);
+  Json::Value tmp = Json::objectValue;
+  tmp["isCMake"] = true;
+  tmp["isTemporary"] = false;
+  tmp["sources"] = fromStringList(internalFiles);
+  array.append(tmp);
 
-    tmp = Json::objectValue;
-    tmp["isCMake"] = false;
-    tmp["isTemporary"] = false;
-    tmp["sources"] = fromStringList(explicitFiles);
-    array.append(tmp);
+  tmp = Json::objectValue;
+  tmp["isCMake"] = false;
+  tmp["isTemporary"] = false;
+  tmp["sources"] = fromStringList(explicitFiles);
+  array.append(tmp);
 
-    tmp = Json::objectValue;
-    tmp["isCMake"] = false;
-    tmp["isTemporary"] = true;
-    tmp["sources"] = fromStringList(tmpFiles);
-    array.append(tmp);
+  tmp = Json::objectValue;
+  tmp["isCMake"] = false;
+  tmp["isTemporary"] = true;
+  tmp["sources"] = fromStringList(tmpFiles);
+  array.append(tmp);
 
-    result["buildFiles"] = array;
-    this->Server->WriteResponse(result);
+  result["buildFiles"] = array;
+  this->Server->WriteResponse(result);
 }
