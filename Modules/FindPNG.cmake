@@ -25,7 +25,7 @@
 # ``PNG_LIBRARIES``
 #   the libraries to link against to use PNG.
 # ``PNG_DEFINITIONS``
-#   You should add_definitons(${PNG_DEFINITIONS}) before compiling code
+#   You should add_definitions(${PNG_DEFINITIONS}) before compiling code
 #   that includes png library files.
 # ``PNG_FOUND``
 #   If false, do not try to use PNG.
