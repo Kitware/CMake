@@ -426,24 +426,18 @@ DumpFile(const char* filename,
 
 bool bindexplib::AddObjectFile(const char* filename)
 {
-  if(!DumpFile(filename, this->Symbols, this->DataSymbols))
-    {
-    return false;
-    }
-  return true;
+  return DumpFile(filename, this->Symbols, this->DataSymbols);
 }
 
 void bindexplib::WriteFile(FILE* file)
 {
   fprintf(file,"EXPORTS \n");
-  for(std::set<std::string>::const_iterator i = this->DataSymbols.begin();
-      i!= this->DataSymbols.end(); ++i)
-    {
+  for (std::set<std::string>::const_iterator i = this->DataSymbols.begin();
+       i != this->DataSymbols.end(); ++i) {
     fprintf(file, "\t%s \t DATA\n", i->c_str());
-    }
-  for(std::set<std::string>::const_iterator i = this->Symbols.begin();
-      i!= this->Symbols.end(); ++i)
-    {
+  }
+  for (std::set<std::string>::const_iterator i = this->Symbols.begin();
+       i != this->Symbols.end(); ++i) {
     fprintf(file, "\t%s\n", i->c_str());
-    }
+  }
 }
