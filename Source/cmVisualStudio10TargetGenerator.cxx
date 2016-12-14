@@ -429,26 +429,79 @@ void cmVisualStudio10TargetGenerator::Generate()
 void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
 {
   std::vector<std::string> references;
+  typedef std::pair<std::string, std::string> HintReference;
+  std::vector<HintReference> hintReferences;
   if (const char* vsDotNetReferences =
         this->GeneratorTarget->GetProperty("VS_DOTNET_REFERENCES")) {
     cmSystemTools::ExpandListArgument(vsDotNetReferences, references);
   }
-  if (!references.empty()) {
+  cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
+  for (cmPropertyMap::const_iterator i = props.begin(); i != props.end();
+       ++i) {
+    if (i->first.find("VS_DOTNET_REFERENCE_") == 0) {
+      std::string name = i->first.substr(20);
+      if (name != "") {
+        std::string path = i->second.GetValue();
+        if (!cmsys::SystemTools::FileIsFullPath(path)) {
+          path = std::string(this->GeneratorTarget->Target->GetMakefile()
+                               ->GetCurrentSourceDirectory()) +
+            "/" + path;
+        }
+        this->ConvertToWindowsSlash(path);
+        hintReferences.push_back(HintReference(name, path));
+      }
+    }
+  }
+  if (!references.empty() || !hintReferences.empty()) {
     this->WriteString("<ItemGroup>\n", 1);
     for (std::vector<std::string>::iterator ri = references.begin();
          ri != references.end(); ++ri) {
-      this->WriteString("<Reference Include=\"", 2);
-      (*this->BuildFileStream) << cmVS10EscapeXML(*ri) << "\">\n";
-      this->WriteString("<CopyLocalSatelliteAssemblies>true"
-                        "</CopyLocalSatelliteAssemblies>\n",
-                        3);
-      this->WriteString("<ReferenceOutputAssembly>true"
-                        "</ReferenceOutputAssembly>\n",
-                        3);
-      this->WriteString("</Reference>\n", 2);
+      // if the entry from VS_DOTNET_REFERENCES is an existing file, generate
+      // a new hint-reference and name it from the filename
+      if (cmsys::SystemTools::FileExists(*ri, true)) {
+        std::string name =
+          cmsys::SystemTools::GetFilenameWithoutExtension(*ri);
+        std::string path = *ri;
+        this->ConvertToWindowsSlash(path);
+        hintReferences.push_back(HintReference(name, path));
+      } else {
+        this->WriteDotNetReference(*ri, "");
+      }
+    }
+    for (std::vector<std::pair<std::string, std::string> >::const_iterator i =
+           hintReferences.begin();
+         i != hintReferences.end(); ++i) {
+      this->WriteDotNetReference(i->first, i->second);
     }
     this->WriteString("</ItemGroup>\n", 1);
   }
+}
+
+void cmVisualStudio10TargetGenerator::WriteDotNetReference(
+  std::string const& ref, std::string const& hint)
+{
+  this->WriteString("<Reference Include=\"", 2);
+  (*this->BuildFileStream) << cmVS10EscapeXML(ref) << "\">\n";
+  this->WriteString("<CopyLocalSatelliteAssemblies>true"
+                    "</CopyLocalSatelliteAssemblies>\n",
+                    3);
+  this->WriteString("<ReferenceOutputAssembly>true"
+                    "</ReferenceOutputAssembly>\n",
+                    3);
+  if (!hint.empty()) {
+    const char* privateReference = "True";
+    if (const char* value = this->GeneratorTarget->GetProperty(
+          "VS_DOTNET_REFERENCES_COPY_LOCAL")) {
+      if (cmSystemTools::IsOff(value)) {
+        privateReference = "False";
+      }
+    }
+    this->WriteString("<Private>", 3);
+    (*this->BuildFileStream) << privateReference << "</Private>\n";
+    this->WriteString("<HintPath>", 3);
+    (*this->BuildFileStream) << hint << "</HintPath>\n";
+  }
+  this->WriteString("</Reference>\n", 2);
 }
 
 void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
