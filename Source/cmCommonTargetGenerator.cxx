@@ -184,6 +184,28 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories()
   return dirs;
 }
 
+std::string cmCommonTargetGenerator::ComputeTargetCompilePDB() const
+{
+  std::string compilePdbPath;
+  if (this->GeneratorTarget->GetType() > cmStateEnums::OBJECT_LIBRARY) {
+    return compilePdbPath;
+  }
+  compilePdbPath =
+    this->GeneratorTarget->GetCompilePDBPath(this->GetConfigName());
+  if (compilePdbPath.empty()) {
+    // Match VS default: `$(IntDir)vc$(PlatformToolsetVersion).pdb`.
+    // A trailing slash tells the toolchain to add its default file name.
+    compilePdbPath = this->GeneratorTarget->GetSupportDirectory() + "/";
+    if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
+      // Match VS default for static libs: `$(IntDir)$(ProjectName).pdb`.
+      compilePdbPath += this->GeneratorTarget->GetName();
+      compilePdbPath += ".pdb";
+    }
+  }
+
+  return compilePdbPath;
+}
+
 std::string cmCommonTargetGenerator::GetManifests()
 {
   std::vector<cmSourceFile const*> manifest_srcs;

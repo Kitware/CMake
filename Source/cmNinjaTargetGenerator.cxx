@@ -346,7 +346,7 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
   if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
       mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID")) {
     std::string pdbPath;
-    std::string compilePdbPath;
+    std::string compilePdbPath = this->ComputeTargetCompilePDB();
     if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE ||
         this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
         this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
@@ -354,20 +354,6 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
       pdbPath = this->GeneratorTarget->GetPDBDirectory(this->GetConfigName());
       pdbPath += "/";
       pdbPath += this->GeneratorTarget->GetPDBName(this->GetConfigName());
-    }
-    if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
-      compilePdbPath =
-        this->GeneratorTarget->GetCompilePDBPath(this->GetConfigName());
-      if (compilePdbPath.empty()) {
-        // Match VS default: `$(IntDir)vc$(PlatformToolsetVersion).pdb`.
-        // A trailing slash tells the toolchain to add its default file name.
-        compilePdbPath = this->GeneratorTarget->GetSupportDirectory() + "/";
-        if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
-          // Match VS default for static libs: `$(IntDir)$(ProjectName).pdb`.
-          compilePdbPath += this->GeneratorTarget->GetName();
-          compilePdbPath += ".pdb";
-        }
-      }
     }
 
     vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
