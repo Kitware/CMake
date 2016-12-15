@@ -45,6 +45,11 @@ set(files
 
 set(CMAKE_MFC_FLAG "@CMAKE_MFC_FLAG_VALUE@")
 
+FIND_PACKAGE(MFC)
+IF (NOT MFC_FOUND)
+  MESSAGE(FATAL_ERROR "MFC Could not be found during the MFC test")
+ENDIF()
+
 if("${CMAKE_MFC_FLAG}" STREQUAL "1")
   msvc_link_to_static_crt()
 else()
