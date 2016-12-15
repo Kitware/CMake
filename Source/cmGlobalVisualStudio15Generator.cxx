@@ -80,11 +80,7 @@ cmGlobalVisualStudio15Generator::cmGlobalVisualStudio15Generator(
   cmake* cm, const std::string& name, const std::string& platformName)
   : cmGlobalVisualStudio14Generator(cm, name, platformName)
 {
-  std::string vc15Express;
-  this->ExpressEdition = cmSystemTools::ReadRegistryValue(
-    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\15.0\\Setup\\VC;"
-    "ProductDir",
-    vc15Express, cmSystemTools::KeyWOW64_32);
+  this->ExpressEdition = false;
   this->DefaultPlatformToolset = "v141";
   this->DefaultClFlagTable = cmVS141CLFlagTable;
   this->DefaultCSharpFlagTable = cmVS141CSharpFlagTable;
