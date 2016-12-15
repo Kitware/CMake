@@ -6,6 +6,11 @@ set(files
   stdafx.h
 )
 
+FIND_PACKAGE(MFC)
+IF (NOT MFC_FOUND)
+  MESSAGE(FATAL_ERROR "MFC Could not be found")
+ENDIF()
+
 set(CMAKE_MFC_FLAG "2")
 
 # VS generators add this automatically based on the CMAKE_MFC_FLAG value,
