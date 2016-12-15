@@ -28,9 +28,12 @@ protected:
 protected:
   std::string GetCodeLiteCompilerName(const cmMakefile* mf) const;
   std::string GetConfigurationName(const cmMakefile* mf) const;
-  std::string GetBuildCommand(const cmMakefile* mf) const;
-  std::string GetCleanCommand(const cmMakefile* mf) const;
-  std::string GetRebuildCommand(const cmMakefile* mf) const;
+  std::string GetBuildCommand(const cmMakefile* mf,
+                              const std::string& targetName) const;
+  std::string GetCleanCommand(const cmMakefile* mf,
+                              const std::string& targetName) const;
+  std::string GetRebuildCommand(const cmMakefile* mf,
+                                const std::string& targetName) const;
   std::string GetSingleFileBuildCommand(const cmMakefile* mf) const;
   std::vector<std::string> CreateProjectsByTarget(cmXMLWriter* xml);
   std::vector<std::string> CreateProjectsByProjectMaps(cmXMLWriter* xml);
@@ -45,7 +48,8 @@ protected:
                                   cmXMLWriter* xml,
                                   const std::string& projectPath,
                                   const cmMakefile* mf,
-                                  const std::string& projectType);
+                                  const std::string& projectType,
+                                  const std::string& targetName);
 
 public:
   cmExtraCodeLiteGenerator();
