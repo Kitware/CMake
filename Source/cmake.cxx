@@ -64,6 +64,7 @@
 #include "cmGlobalVisualStudio71Generator.h"
 #include "cmGlobalVisualStudio8Generator.h"
 #include "cmGlobalVisualStudio9Generator.h"
+#include "cmVSSetupHelper.h"
 
 #define CMAKE_HAVE_VS_GENERATORS
 #endif
@@ -1470,18 +1471,23 @@ void cmake::CreateDefaultGlobalGenerator()
     "\\Setup\\VC;ProductDir", //
     ";InstallDir"             //
   };
-  for (VSVersionedGenerator const* g = cmArrayBegin(vsGenerators);
-       found.empty() && g != cmArrayEnd(vsGenerators); ++g) {
-    for (const char* const* v = cmArrayBegin(vsVariants);
-         found.empty() && v != cmArrayEnd(vsVariants); ++v) {
-      for (const char* const* e = cmArrayBegin(vsEntries);
-           found.empty() && e != cmArrayEnd(vsEntries); ++e) {
-        std::string const reg = vsregBase + *v + g->MSVersion + *e;
-        std::string dir;
-        if (cmSystemTools::ReadRegistryValue(reg, dir,
-                                             cmSystemTools::KeyWOW64_32) &&
-            cmSystemTools::PathExists(dir)) {
-          found = g->GeneratorName;
+  cmVSSetupAPIHelper vsSetupAPIHelper;
+  if (vsSetupAPIHelper.IsVS2017Installed()) {
+    found = "Visual Studio 15 2017";
+  } else {
+    for (VSVersionedGenerator const* g = cmArrayBegin(vsGenerators);
+         found.empty() && g != cmArrayEnd(vsGenerators); ++g) {
+      for (const char* const* v = cmArrayBegin(vsVariants);
+           found.empty() && v != cmArrayEnd(vsVariants); ++v) {
+        for (const char* const* e = cmArrayBegin(vsEntries);
+             found.empty() && e != cmArrayEnd(vsEntries); ++e) {
+          std::string const reg = vsregBase + *v + g->MSVersion + *e;
+          std::string dir;
+          if (cmSystemTools::ReadRegistryValue(reg, dir,
+                                               cmSystemTools::KeyWOW64_32) &&
+              cmSystemTools::PathExists(dir)) {
+            found = g->GeneratorName;
+          }
         }
       }
     }

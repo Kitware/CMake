@@ -9,6 +9,7 @@
 #include <string>
 
 #include "cmGlobalVisualStudio14Generator.h"
+#include "cmVSSetupHelper.h"
 
 class cmGlobalGeneratorFactory;
 class cmake;
@@ -39,7 +40,11 @@ protected:
   // of the toolset is installed
   bool IsWindowsStoreToolsetInstalled() const;
 
+  std::string FindMSBuildCommand() CM_OVERRIDE;
+  std::string FindDevEnvCommand() CM_OVERRIDE;
+
 private:
   class Factory;
+  mutable cmVSSetupAPIHelper vsSetupAPIHelper;
 };
 #endif
