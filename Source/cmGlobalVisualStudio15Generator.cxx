@@ -114,7 +114,7 @@ bool cmGlobalVisualStudio15Generator::SelectWindowsStoreToolset(
   if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
     if (this->IsWindowsStoreToolsetInstalled() &&
         this->IsWindowsDesktopToolsetInstalled()) {
-      toolset = "v140"; // VS 15 uses v140 toolset
+      toolset = "v141"; // VS 15 uses v141 toolset
       return true;
     } else {
       return false;
