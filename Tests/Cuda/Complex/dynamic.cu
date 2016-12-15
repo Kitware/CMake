@@ -1,6 +1,7 @@
 
 #include <string>
 #include <cuda.h>
+#include <iostream>
 
 int dynamic_base_func(int);
 
@@ -15,15 +16,12 @@ void DetermineIfValidCudaDevice()
 {
 }
 
-void cuda_dynamic_lib_func(std::string& contents )
+void cuda_dynamic_lib_func()
 {
   DetermineIfValidCudaDevice <<<1,1>>> ();
-  if(cudaSuccess == cudaGetLastError())
+  cudaError_t err = cudaGetLastError();
+  if(err == cudaSuccess)
     {
-    contents = "ran a cuda kernel";
-    }
-  else
-    {
-    contents = "cant run a cuda kernel";
+    std::cerr << cudaGetErrorString(err) << std::endl;
     }
 }
