@@ -504,7 +504,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   {
     std::string targetFullPathReal;
     std::string targetFullPathPDB;
-    std::string targetFullPathCompilePDB;
+    std::string targetFullPathCompilePDB = this->ComputeTargetCompilePDB();
     if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE ||
         this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
         this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
@@ -515,21 +515,6 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         this->GeneratorTarget->GetPDBDirectory(this->ConfigName);
       targetFullPathPDB += "/";
       targetFullPathPDB += this->GeneratorTarget->GetPDBName(this->ConfigName);
-    }
-    if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
-      targetFullPathCompilePDB =
-        this->GeneratorTarget->GetCompilePDBPath(this->ConfigName);
-      if (targetFullPathCompilePDB.empty()) {
-        // Match VS default: `$(IntDir)vc$(PlatformToolsetVersion).pdb`.
-        // A trailing slash tells the toolchain to add its default file name.
-        targetFullPathCompilePDB =
-          this->GeneratorTarget->GetSupportDirectory() + "/";
-        if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
-          // Match VS default for static libs: `$(IntDir)$(ProjectName).pdb`.
-          targetFullPathCompilePDB += this->GeneratorTarget->GetName();
-          targetFullPathCompilePDB += ".pdb";
-        }
-      }
     }
 
     targetOutPathReal = this->LocalGenerator->ConvertToOutputFormat(

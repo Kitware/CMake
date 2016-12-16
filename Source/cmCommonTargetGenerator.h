@@ -66,6 +66,7 @@ protected:
   std::string GetManifests();
 
   std::vector<std::string> GetLinkedTargetDirectories() const;
+  std::string ComputeTargetCompilePDB() const;
 };
 
 #endif
