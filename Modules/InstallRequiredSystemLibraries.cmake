@@ -182,7 +182,10 @@ if(MSVC)
         "${MSVC${v}_CRT_DIR}/msvcp${v}0.dll"
         )
       if(NOT v VERSION_LESS 14)
-        list(APPEND __install__libs "${MSVC${v}_CRT_DIR}/vcruntime${v}0.dll")
+        list(APPEND __install__libs
+            "${MSVC${v}_CRT_DIR}/vcruntime${v}0.dll"
+            "${MSVC${v}_CRT_DIR}/concrt${v}0.dll"
+            )
       else()
         list(APPEND __install__libs "${MSVC${v}_CRT_DIR}/msvcr${v}0.dll")
       endif()
@@ -197,7 +200,10 @@ if(MSVC)
         "${MSVC${v}_CRT_DIR}/msvcp${v}0d.dll"
         )
       if(NOT v VERSION_LESS 14)
-        list(APPEND __install__libs "${MSVC${v}_CRT_DIR}/vcruntime${v}0d.dll")
+        list(APPEND __install__libs
+            "${MSVC${v}_CRT_DIR}/vcruntime${v}0d.dll"
+            "${MSVC${v}_CRT_DIR}/concrt${v}0d.dll"
+            )
       else()
         list(APPEND __install__libs "${MSVC${v}_CRT_DIR}/msvcr${v}0d.dll")
       endif()
