@@ -1,5 +1,7 @@
-﻿#=============================================================================
-# Copyright 2005-2009 Kitware, Inc.
+﻿#.rst:
+
+#=============================================================================
+# Copyright 2002-2009 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -10,6 +12,7 @@
 #=============================================================================
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
+
 ENABLE_LANGUAGE(CXX)
 file(WRITE
      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/vc_system_include_paths.cxx
