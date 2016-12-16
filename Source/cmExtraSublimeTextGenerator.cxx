@@ -323,16 +323,12 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     command += ", \"/NOLOGO\", \"/f\", \"";
     command += makefileName + "\"";
-    command += ", \"VERBOSE=1\", \"";
-    command += target;
-    command += "\"";
+    command += ", \"" + target + "\"";
   } else if (generator == "Ninja") {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     command += ", \"-f\", \"";
     command += makefileName + "\"";
-    command += ", \"-v\", \"";
-    command += target;
-    command += "\"";
+    command += ", \"" + target + "\"";
   } else {
     std::string makefileName;
     if (generator == "MinGW Makefiles") {
@@ -344,9 +340,7 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
     }
     command += ", \"-f\", \"";
     command += makefileName + "\"";
-    command += ", \"VERBOSE=1\", \"";
-    command += target;
-    command += "\"";
+    command += ", \"" + target + "\"";
   }
   return command;
 }
