@@ -26,6 +26,9 @@ add_CMakeOnly_test(CompilerIdCXX)
 if(CMAKE_Fortran_COMPILER)
   add_CMakeOnly_test(CompilerIdFortran)
 endif()
+if(CMAKE_GENERATOR MATCHES "Visual Studio ([^789]|[789][0-9])")
+  add_CMakeOnly_test(CompilerIdCSharp)
+endif()
 
 add_CMakeOnly_test(AllFindModules)
 
