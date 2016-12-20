@@ -23,3 +23,4 @@ run_cpack_test_subtests(SINGLE_DEBUGINFO "no_main_component;one_component;one_co
 run_cpack_source_test(SOURCE_PACKAGE "RPM")
 run_cpack_test(SUGGESTS "RPM" false "MONOLITHIC")
 run_cpack_test(USER_FILELIST "RPM" false "MONOLITHIC")
+run_cpack_test(MD5SUMS "DEB" false "MONOLITHIC;COMPONENT")
