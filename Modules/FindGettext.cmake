@@ -77,8 +77,6 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Gettext
                                   REQUIRED_VARS GETTEXT_MSGMERGE_EXECUTABLE GETTEXT_MSGFMT_EXECUTABLE
                                   VERSION_VAR GETTEXT_VERSION_STRING)
 
-include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
-
 function(_GETTEXT_GET_UNIQUE_TARGET_NAME _name _unique_name)
    set(propertyName "_GETTEXT_UNIQUE_COUNTER_${_name}")
    get_property(currentCounter GLOBAL PROPERTY "${propertyName}")

@@ -216,7 +216,6 @@
 #       CompatSupport_DEPRECATED=
 #   )
 
-include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeCompilerIdDetection.cmake)
 
 function(_load_compiler_variables CompilerId lang)

@@ -65,7 +65,6 @@
 #     Suppress non-error messages that otherwise would have been
 #     printed out by this function.
 
-include(CMakeParseArguments)
 function(ctest_coverage_collect_gcov)
   set(options QUIET GLOB DELETE)
   set(oneValueArgs TARBALL SOURCE BUILD GCOV_COMMAND)

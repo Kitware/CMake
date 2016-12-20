@@ -26,9 +26,6 @@ Functions
 
 #]=======================================================================]
 
-include("${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake")
-
-
 function(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
 
   set(_type "ANY")

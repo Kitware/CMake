@@ -11,8 +11,6 @@ function(_readFile file)
   set(_compiler_id_pp_test_${CompilerId} ${_compiler_id_pp_test} PARENT_SCOPE)
 endfunction()
 
-include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
-
 function(compiler_id_detection outvar lang)
 
   if (NOT lang STREQUAL Fortran AND NOT lang STREQUAL CSharp)
