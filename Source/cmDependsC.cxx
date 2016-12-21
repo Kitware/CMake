@@ -12,7 +12,7 @@
 #include "cmSystemTools.h"
 
 #define INCLUDE_REGEX_LINE                                                    \
-  "^[ \t]*#[ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"
+  "^[ \t]*[#%][ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"
 
 #define INCLUDE_REGEX_LINE_MARKER "#IncludeRegexLine: "
 #define INCLUDE_REGEX_SCAN_MARKER "#IncludeRegexScan: "
@@ -420,7 +420,7 @@ void cmDependsC::SetupTransforms()
   if (!this->TransformRules.empty()) {
     // Construct the regular expression to match lines to be
     // transformed.
-    std::string xform = "^([ \t]*#[ \t]*(include|import)[ \t]*)(";
+    std::string xform = "^([ \t]*[#%][ \t]*(include|import)[ \t]*)(";
     const char* sep = "";
     for (TransformRulesType::const_iterator tri = this->TransformRules.begin();
          tri != this->TransformRules.end(); ++tri) {
