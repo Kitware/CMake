@@ -218,8 +218,16 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
     )
   list(APPEND uv_defines
     __EXTENSIONS__
-    _XOPEN_SOURCE=500
     )
+  if(CMAKE_SYSTEM_VERSION STREQUAL "5.10")
+    list(APPEND uv_defines
+      _XOPEN_SOURCE=500
+      )
+  else()
+    list(APPEND uv_defines
+      _XOPEN_SOURCE=600
+      )
+  endif()
   list(APPEND uv_sources
     src/unix/sunos.c
     )
