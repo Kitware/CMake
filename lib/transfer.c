@@ -741,8 +741,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
              Make sure that ALL_CONTENT_ENCODINGS contains all the
              encodings handled here. */
 #ifdef HAVE_LIBZ
-          switch (conn->data->set.http_ce_skip ?
-                  IDENTITY : k->auto_decoding) {
+          switch(conn->data->set.http_ce_skip ?
+                 IDENTITY : k->auto_decoding) {
           case IDENTITY:
 #endif
             /* This is the default when the server sends no
@@ -775,9 +775,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
             break;
 
           default:
-            failf (data, "Unrecognized content encoding type. "
-                   "libcurl understands `identity', `deflate' and `gzip' "
-                   "content encodings.");
+            failf(data, "Unrecognized content encoding type. "
+                  "libcurl understands `identity', `deflate' and `gzip' "
+                  "content encodings.");
             result = CURLE_BAD_CONTENT_ENCODING;
             break;
           }
@@ -1137,7 +1137,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
       */
 
-      long ms = Curl_tvdiff(k->now, k->start100);
+      time_t ms = Curl_tvdiff(k->now, k->start100);
       if(ms >= data->set.expect_100_timeout) {
         /* we've waited long enough, continue anyway */
         k->exp100 = EXP100_SEND_DATA;
@@ -1296,7 +1296,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   /* Init the SSL session ID cache here. We do it here since we want to do it
      after the *_setopt() calls (that could specify the size of the cache) but
      before any transfer takes place. */
-  result = Curl_ssl_initsessions(data, data->set.ssl.max_ssl_sessions);
+  result = Curl_ssl_initsessions(data, data->set.general_ssl.max_ssl_sessions);
   if(result)
     return result;
 

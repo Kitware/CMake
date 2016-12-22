@@ -67,6 +67,8 @@ void Curl_getoff_all_pipelines(struct Curl_easy *data,
 void Curl_close_connections(struct Curl_easy *data);
 
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
+#define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
+                                             specified */
 
 CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex);
 
@@ -76,5 +78,16 @@ CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex);
 void Curl_verboseconnect(struct connectdata *conn);
 #endif
 
+#define CONNECT_PROXY_SSL()\
+  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
+  !conn->bits.proxy_ssl_connected[sockindex])
+
+#define CONNECT_FIRSTSOCKET_PROXY_SSL()\
+  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
+  !conn->bits.proxy_ssl_connected[FIRSTSOCKET])
+
+#define CONNECT_SECONDARYSOCKET_PROXY_SSL()\
+  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
+  !conn->bits.proxy_ssl_connected[SECONDARYSOCKET])
 
 #endif /* HEADER_CURL_URL_H */

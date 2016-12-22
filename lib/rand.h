@@ -1,5 +1,5 @@
-#ifndef __STDC_HEADERS_H
-#define __STDC_HEADERS_H
+#ifndef HEADER_CURL_RAND_H
+#define HEADER_CURL_RAND_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,12 +22,22 @@
  *
  ***************************************************************************/
 
-#include <sys/types.h>
+/*
+ * Curl_rand() stores 'num' number of random unsigned integers in the buffer
+ * 'rnd' points to.
+ *
+ * If libcurl is built without TLS support or with a TLS backend that lacks a
+ * proper random API (Gskit, PolarSSL or mbedTLS), this function will use
+ * "weak" random.
+ *
+ * When built *with* TLS support and a backend that offers strong random, it
+ * will return error if it cannot provide strong random values.
+ *
+ * NOTE: 'data' may be passed in as NULL when coming from external API without
+ * easy handle!
+ *
+ */
+CURLcode Curl_rand(struct Curl_easy *data, unsigned int *rnd,
+                   unsigned int num);
 
-size_t fread(void *, size_t, size_t, FILE *);
-size_t fwrite(const void *, size_t, size_t, FILE *);
-
-int strcasecmp(const char *, const char *);
-int strncasecmp(const char *, const char *, size_t);
-
-#endif /* __STDC_HEADERS_H */
+#endif /* HEADER_CURL_RAND_H */
