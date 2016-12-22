@@ -810,6 +810,20 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     OUTPUT_VARIABLE gp_cmd_ov
     ERROR_VARIABLE gp_ev
     )
+
+  if(gp_tool STREQUAL "dumpbin")
+    # Exclude delay load dependencies under windows (they are listed in dumpbin output after the message below)
+    string(FIND "${gp_cmd_ov}" "Image has the following delay load dependencies" gp_delayload_pos)
+    if (${gp_delayload_pos} GREATER -1)
+      string(SUBSTRING "${gp_cmd_ov}" 0 ${gp_delayload_pos} gp_cmd_ov_no_delayload_deps)
+      string(SUBSTRING "${gp_cmd_ov}" ${gp_delayload_pos} -1 gp_cmd_ov_delayload_deps)
+      if (verbose)
+        message(STATUS "GetPrequisites(${target}) : ignoring the following delay load dependencies :\n ${gp_cmd_ov_delayload_deps}")
+      endif()
+      set(gp_cmd_ov ${gp_cmd_ov_no_delayload_deps})
+    endif()
+  endif()
+
   if(NOT gp_rv STREQUAL "0")
     if(gp_tool STREQUAL "dumpbin")
       # dumpbin error messages seem to go to stdout
