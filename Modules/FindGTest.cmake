@@ -49,8 +49,8 @@
 #   The root directory of the Google Test installation (may also be
 #   set as an environment variable)
 # ``GTEST_MSVC_SEARCH``
-#   If compiling with MSVC, this variable can be set to ``MD`` or
-#   ``MT`` (the default) to enable searching a GTest build tree
+#   If compiling with MSVC, this variable can be set to ``MT`` or
+#   ``MD`` (the default) to enable searching a GTest build tree
 #
 #
 # Example usage
