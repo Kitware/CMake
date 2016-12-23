@@ -160,11 +160,17 @@ if(MSVC)
     if(GTEST_MSVC_SEARCH STREQUAL "MD")
         list(APPEND _gtest_libpath_suffixes
             msvc/gtest-md/Debug
-            msvc/gtest-md/Release)
+            msvc/gtest-md/Release
+            msvc/x64/Debug
+            msvc/x64/Release
+            )
     elseif(GTEST_MSVC_SEARCH STREQUAL "MT")
         list(APPEND _gtest_libpath_suffixes
             msvc/gtest/Debug
-            msvc/gtest/Release)
+            msvc/gtest/Release
+            msvc/x64/Debug
+            msvc/x64/Release
+            )
     endif()
 endif()
 
