@@ -91,7 +91,7 @@ private:
   void LogError(const std::string& message);
   void LogCommand(const std::vector<std::string>& command);
 
-  bool makeParentDirectory(const std::string& filename);
+  bool MakeParentDirectory(const std::string& filename);
 
   std::string JoinExts(const std::vector<std::string>& lst);
 

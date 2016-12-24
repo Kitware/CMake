@@ -1113,7 +1113,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
     this->LogBold(msg);
   }
   // Make sure the parent directory exists
-  bool success = this->makeParentDirectory(this->OutMocCppFilenameAbs);
+  bool success = this->MakeParentDirectory(this->OutMocCppFilenameAbs);
   if (success) {
     cmsys::ofstream outfile;
     outfile.open(this->OutMocCppFilenameAbs.c_str(), std::ios::trunc);
@@ -1154,7 +1154,7 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
     this->LogBold("Generating MOC source " + mocFileRel);
 
     // Make sure the parent directory exists
-    if (!this->makeParentDirectory(mocFileAbs)) {
+    if (!this->MakeParentDirectory(mocFileAbs)) {
       this->RunMocFailed = true;
       return false;
     }
@@ -1276,7 +1276,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
     this->LogBold("Generating UIC header " + uicFileRel);
 
     // Make sure the parent directory exists
-    if (!this->makeParentDirectory(uicFileAbs)) {
+    if (!this->MakeParentDirectory(uicFileAbs)) {
       this->RunUicFailed = true;
       return false;
     }
@@ -1415,7 +1415,7 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
     }
 
     // Make sure the parent directory exists
-    if (!this->makeParentDirectory(qrcOutputFile)) {
+    if (!this->MakeParentDirectory(qrcOutputFile)) {
       this->RunRccFailed = true;
       return false;
     }
@@ -1551,7 +1551,7 @@ void cmQtAutoGenerators::LogCommand(const std::vector<std::string>& command)
  * @brief Generates the parent directory of the given file on demand
  * @return True on success
  */
-bool cmQtAutoGenerators::makeParentDirectory(const std::string& filename)
+bool cmQtAutoGenerators::MakeParentDirectory(const std::string& filename)
 {
   bool success = true;
   const std::string dirName = cmSystemTools::GetFilenamePath(filename);
