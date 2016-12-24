@@ -931,23 +931,17 @@ void cmQtAutoGenerators::ParseForUic(
     "[\n][ \t]*#[ \t]*include[ \t]+"
     "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
 
-  std::string::size_type matchOffset = 0;
-  if ((strstr(contentsString.c_str(), "ui_") != CM_NULLPTR) &&
-      (uiIncludeRegExp.find(contentsString))) {
-    do {
+  const char* contentChars = contentsString.c_str();
+  if (strstr(contentChars, "ui_") != CM_NULLPTR) {
+    while (uiIncludeRegExp.find(contentChars)) {
       const std::string currentUi = uiIncludeRegExp.match(1);
-
-      std::string basename =
+      const std::string basename =
         cmsys::SystemTools::GetFilenameWithoutLastExtension(currentUi);
-
       // basename should be the part of the ui filename used for
       // finding the correct header, so we need to remove the ui_ part
-      basename = basename.substr(3);
-
-      includedUis[realName].push_back(basename);
-
-      matchOffset += uiIncludeRegExp.end();
-    } while (uiIncludeRegExp.find(contentsString.c_str() + matchOffset));
+      includedUis[realName].push_back(basename.substr(3));
+      contentChars += uiIncludeRegExp.end();
+    }
   }
 }
 
