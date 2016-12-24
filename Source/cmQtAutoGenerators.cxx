@@ -926,15 +926,12 @@ void cmQtAutoGenerators::ParseForUic(
   if (this->UicExecutable.empty()) {
     return;
   }
+  const std::string realName = cmsys::SystemTools::GetRealPath(absFilename);
   cmsys::RegularExpression uiIncludeRegExp(
     "[\n][ \t]*#[ \t]*include[ \t]+"
     "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
 
   std::string::size_type matchOffset = 0;
-
-  const std::string realName = cmsys::SystemTools::GetRealPath(absFilename);
-
-  matchOffset = 0;
   if ((strstr(contentsString.c_str(), "ui_") != CM_NULLPTR) &&
       (uiIncludeRegExp.find(contentsString))) {
     do {
