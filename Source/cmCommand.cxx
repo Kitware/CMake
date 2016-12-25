@@ -3,7 +3,6 @@
 #include "cmCommand.h"
 
 #include "cmMakefile.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 struct cmListFileArgument;
@@ -31,21 +30,4 @@ const char* cmCommand::GetError()
 void cmCommand::SetError(const std::string& e)
 {
   this->Error = e;
-}
-
-bool cmCommand::Disallowed(cmPolicies::PolicyID pol, const char* e)
-{
-  switch (this->Makefile->GetPolicyStatus(pol)) {
-    case cmPolicies::WARN:
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
-                                   cmPolicies::GetPolicyWarning(pol));
-    case cmPolicies::OLD:
-      return false;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
-    case cmPolicies::NEW:
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e);
-      break;
-  }
-  return true;
 }

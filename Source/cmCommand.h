@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-#include "cmPolicies.h"
-
 class cmExecutionStatus;
 class cmMakefile;
 struct cmListFileArgument;
@@ -103,9 +101,6 @@ public:
    * Set the error message
    */
   void SetError(const std::string& e);
-
-  /** Check if the command is disallowed by a policy.  */
-  bool Disallowed(cmPolicies::PolicyID pol, const char* e);
 
 private:
   cmCommand(cmCommand const&);            // = delete;
