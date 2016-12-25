@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 
-#include "cmCommandArgumentsHelper.h"
 #include "cmPolicies.h"
 
 class cmExecutionStatus;
@@ -110,7 +109,6 @@ public:
 
 protected:
   cmMakefile* Makefile;
-  cmCommandArgumentsHelper Helper;
 
 private:
   std::string Error;
