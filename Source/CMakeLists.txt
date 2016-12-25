@@ -440,6 +440,8 @@ set(SRCS
   cmCreateTestSourceList.h
   cmDefinePropertyCommand.cxx
   cmDefinePropertyCommand.h
+  cmDeprecatedCommand.cxx
+  cmDeprecatedCommand.h
   cmEnableLanguageCommand.cxx
   cmEnableLanguageCommand.h
   cmEnableTestingCommand.cxx

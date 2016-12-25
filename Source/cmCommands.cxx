@@ -77,6 +77,7 @@
 #include "cmAuxSourceDirectoryCommand.h"
 #include "cmBuildNameCommand.h"
 #include "cmCMakeHostSystemInformationCommand.h"
+#include "cmDeprecatedCommand.h"
 #include "cmExportCommand.h"
 #include "cmExportLibraryDependenciesCommand.h"
 #include "cmFLTKWrapUICommand.h"
@@ -208,33 +209,52 @@ std::vector<cmCommand*> GetPredefinedCommands()
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   commands.push_back(new cmAddCompileOptionsCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
-  commands.push_back(new cmBuildNameCommand);
   commands.push_back(new cmCMakeHostSystemInformationCommand);
   commands.push_back(new cmExportCommand);
-  commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmIncludeExternalMSProjectCommand);
   commands.push_back(new cmInstallProgramsCommand);
   commands.push_back(new cmLinkLibrariesCommand);
   commands.push_back(new cmLoadCacheCommand);
-  commands.push_back(new cmLoadCommandCommand);
-  commands.push_back(new cmOutputRequiredFilesCommand);
   commands.push_back(new cmQTWrapCPPCommand);
   commands.push_back(new cmQTWrapUICommand);
   commands.push_back(new cmRemoveCommand);
   commands.push_back(new cmRemoveDefinitionsCommand);
   commands.push_back(new cmSourceGroupCommand);
-  commands.push_back(new cmSubdirDependsCommand);
   commands.push_back(new cmTargetCompileDefinitionsCommand);
   commands.push_back(new cmTargetCompileFeaturesCommand);
   commands.push_back(new cmTargetCompileOptionsCommand);
   commands.push_back(new cmTargetIncludeDirectoriesCommand);
   commands.push_back(new cmTargetSourcesCommand);
-  commands.push_back(new cmUseMangledMesaCommand);
-  commands.push_back(new cmUtilitySourceCommand);
-  commands.push_back(new cmVariableRequiresCommand);
   commands.push_back(new cmVariableWatchCommand);
   commands.push_back(new cmWriteFileCommand);
+
+  commands.push_back(new cmDeprecatedCommand(
+    new cmBuildNameCommand, cmPolicies::CMP0036,
+    "The build_name command should not be called; see CMP0036."));
+  commands.push_back(new cmDeprecatedCommand(
+    new cmExportLibraryDependenciesCommand, cmPolicies::CMP0033,
+    "The export_library_dependencies command should not be called; "
+    "see CMP0033."));
+  commands.push_back(new cmDeprecatedCommand(
+    new cmLoadCommandCommand, cmPolicies::CMP0031,
+    "The load_command command should not be called; see CMP0031."));
+  commands.push_back(new cmDeprecatedCommand(
+    new cmOutputRequiredFilesCommand, cmPolicies::CMP0032,
+    "The output_required_files command should not be called; "
+    "see CMP0032."));
+  commands.push_back(new cmDeprecatedCommand(
+    new cmSubdirDependsCommand, cmPolicies::CMP0029,
+    "The subdir_depends command should not be called; see CMP0029."));
+  commands.push_back(new cmDeprecatedCommand(
+    new cmUseMangledMesaCommand, cmPolicies::CMP0030,
+    "The use_mangled_mesa command should not be called; see CMP0030."));
+  commands.push_back(new cmDeprecatedCommand(
+    new cmUtilitySourceCommand, cmPolicies::CMP0034,
+    "The utility_source command should not be called; see CMP0034."));
+  commands.push_back(new cmDeprecatedCommand(
+    new cmVariableRequiresCommand, cmPolicies::CMP0035,
+    "The variable_requires command should not be called; see CMP0035."));
 #endif
 
   return commands;
