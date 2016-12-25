@@ -107,6 +107,10 @@ public:
   /** Check if the command is disallowed by a policy.  */
   bool Disallowed(cmPolicies::PolicyID pol, const char* e);
 
+private:
+  cmCommand(cmCommand const&);            // = delete;
+  cmCommand& operator=(cmCommand const&); // = delete;
+
 protected:
   cmMakefile* Makefile;
 
