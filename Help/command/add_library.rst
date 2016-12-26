@@ -33,7 +33,7 @@ type is ``STATIC`` or ``SHARED`` based on whether the current value of the
 variable :variable:`BUILD_SHARED_LIBS` is ``ON``.  For ``SHARED`` and
 ``MODULE`` libraries the :prop_tgt:`POSITION_INDEPENDENT_CODE` target
 property is set to ``ON`` automatically.
-A ``SHARED`` library may be marked with the :prop_tgt:`FRAMEWORK`
+A ``SHARED`` or ``STATIC`` library may be marked with the :prop_tgt:`FRAMEWORK`
 target property to create an OS X Framework.
 
 If a library does not export any symbols, it must not be declared as a

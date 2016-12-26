@@ -1816,8 +1816,34 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   // Handle settings for each target type.
   switch (gtgt->GetType()) {
-    case cmStateEnums::OBJECT_LIBRARY:
-    case cmStateEnums::STATIC_LIBRARY: {
+    case cmStateEnums::STATIC_LIBRARY:
+      if (gtgt->GetPropertyAsBool("FRAMEWORK")) {
+        std::string fw_version = gtgt->GetFrameworkVersion();
+        buildSettings->AddAttribute("FRAMEWORK_VERSION",
+                                    this->CreateString(fw_version));
+        const char* ext = gtgt->GetProperty("BUNDLE_EXTENSION");
+        if (ext) {
+          buildSettings->AddAttribute("WRAPPER_EXTENSION",
+                                      this->CreateString(ext));
+        }
+
+        std::string plist = this->ComputeInfoPListLocation(gtgt);
+        // Xcode will create the final version of Info.plist at build time,
+        // so let it replace the framework name. This avoids creating
+        // a per-configuration Info.plist file.
+        this->CurrentLocalGenerator->GenerateFrameworkInfoPList(
+          gtgt, "$(EXECUTABLE_NAME)", plist.c_str());
+        buildSettings->AddAttribute("INFOPLIST_FILE",
+                                    this->CreateString(plist));
+        buildSettings->AddAttribute("MACH_O_TYPE",
+                                    this->CreateString("staticlib"));
+      } else {
+        buildSettings->AddAttribute("LIBRARY_STYLE",
+                                    this->CreateString("STATIC"));
+      }
+      break;
+
+    case cmStateEnums::OBJECT_LIBRARY: {
       buildSettings->AddAttribute("LIBRARY_STYLE",
                                   this->CreateString("STATIC"));
       break;
@@ -2336,8 +2362,10 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(
 
   switch (target->GetType()) {
     case cmStateEnums::OBJECT_LIBRARY:
-    case cmStateEnums::STATIC_LIBRARY:
       return "archive.ar";
+    case cmStateEnums::STATIC_LIBRARY:
+      return (target->GetPropertyAsBool("FRAMEWORK") ? "wrapper.framework"
+                                                     : "archive.ar");
     case cmStateEnums::MODULE_LIBRARY:
       if (target->IsXCTestOnApple())
         return "wrapper.cfbundle";
@@ -2367,8 +2395,11 @@ const char* cmGlobalXCodeGenerator::GetTargetProductType(
 
   switch (target->GetType()) {
     case cmStateEnums::OBJECT_LIBRARY:
-    case cmStateEnums::STATIC_LIBRARY:
       return "com.apple.product-type.library.static";
+    case cmStateEnums::STATIC_LIBRARY:
+      return (target->GetPropertyAsBool("FRAMEWORK")
+                ? "com.apple.product-type.framework"
+                : "com.apple.product-type.library.static");
     case cmStateEnums::MODULE_LIBRARY:
       if (target->IsXCTestOnApple())
         return "com.apple.product-type.bundle.unit-test";
