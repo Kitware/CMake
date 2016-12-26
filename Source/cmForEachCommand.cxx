@@ -58,7 +58,7 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
           status.Clear();
           mf.ExecuteCommand(this->Functions[c], status);
           if (status.GetReturnInvoked()) {
-            inStatus.SetReturnInvoked(true);
+            inStatus.SetReturnInvoked();
             // restore the variable to its prior value
             mf.AddDefinition(this->Args[0], oldDef.c_str());
             return true;

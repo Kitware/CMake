@@ -137,15 +137,15 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
           status.Clear();
           mf.ExecuteCommand(this->Functions[c], status);
           if (status.GetReturnInvoked()) {
-            inStatus.SetReturnInvoked(true);
+            inStatus.SetReturnInvoked();
             return true;
           }
           if (status.GetBreakInvoked()) {
-            inStatus.SetBreakInvoked(true);
+            inStatus.SetBreakInvoked();
             return true;
           }
           if (status.GetContinueInvoked()) {
-            inStatus.SetContinueInvoked(true);
+            inStatus.SetContinueInvoked();
             return true;
           }
         }

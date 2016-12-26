@@ -41,7 +41,7 @@ bool cmBreakCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
 
-  status.SetBreakInvoked(true);
+  status.SetBreakInvoked();
 
   if (!args.empty()) {
     bool issueMessage = true;
