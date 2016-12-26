@@ -103,7 +103,7 @@ bool cmFunctionHelperCommand::InvokeInitialPass(
   // Invoke all the functions that were collected in the block.
   // for each function
   for (cmListFileFunction const& func : this->Functions) {
-    cmExecutionStatus status;
+    cmExecutionStatus status(*this->GetMakefile());
     if (!this->Makefile->ExecuteCommand(func, status) ||
         status.GetNestedError()) {
       // The error message should have already included the call stack

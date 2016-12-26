@@ -392,7 +392,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         this->GetState()->GetCommandByExactName(lff.Name.Lower)) {
     // Clone the prototype.
     std::unique_ptr<cmCommand> pcmd(proto->Clone());
-    pcmd->SetMakefile(this);
+    pcmd->SetExecutionStatus(&status);
 
     // Decide whether to invoke the command.
     if (!cmSystemTools::GetFatalErrorOccured()) {
@@ -407,7 +407,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         if (!hadNestedError) {
           // The command invocation requested that we report an error.
           std::string const error =
-            std::string(lff.Name.Original) + " " + pcmd->GetError();
+            std::string(lff.Name.Original) + " " + status.GetError();
           this->IssueMessage(MessageType::FATAL_ERROR, error);
         }
         result = false;
@@ -657,7 +657,7 @@ void cmMakefile::ReadListFile(cmListFile const& listFile,
   // Run the parsed commands.
   const size_t numberFunctions = listFile.Functions.size();
   for (size_t i = 0; i < numberFunctions; ++i) {
-    cmExecutionStatus status;
+    cmExecutionStatus status(*this);
     this->ExecuteCommand(listFile.Functions[i], status);
     if (cmSystemTools::GetFatalErrorOccured()) {
       break;

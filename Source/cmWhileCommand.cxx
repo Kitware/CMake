@@ -82,7 +82,7 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
 
         // Invoke all the functions that were collected in the block.
         for (cmListFileFunction const& fn : this->Functions) {
-          cmExecutionStatus status;
+          cmExecutionStatus status(mf);
           mf.ExecuteCommand(fn, status);
           if (status.GetReturnInvoked()) {
             inStatus.SetReturnInvoked();

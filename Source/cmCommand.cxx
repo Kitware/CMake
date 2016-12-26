@@ -2,10 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
-class cmExecutionStatus;
 struct cmListFileArgument;
+
+void cmCommand::SetExecutionStatus(cmExecutionStatus* status)
+{
+  this->Status = status;
+  this->Makefile = &status->GetMakefile();
+}
 
 bool cmCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args,
                                   cmExecutionStatus& status)
@@ -19,15 +25,7 @@ bool cmCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args,
   return this->InitialPass(expandedArguments, status);
 }
 
-const char* cmCommand::GetError()
-{
-  if (this->Error.empty()) {
-    return "unknown error.";
-  }
-  return this->Error.c_str();
-}
-
 void cmCommand::SetError(const std::string& e)
 {
-  this->Error = e;
+  this->Status->SetError(e);
 }

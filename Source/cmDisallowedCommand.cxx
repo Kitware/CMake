@@ -24,8 +24,6 @@ bool cmDisallowedCommand::InitialPass(std::vector<std::string> const& args,
       return true;
   }
 
-  this->Command->SetMakefile(this->GetMakefile());
-  bool const ret = this->Command->InitialPass(args, status);
-  this->SetError(this->Command->GetError());
-  return ret;
+  this->Command->SetExecutionStatus(this->GetExecutionStatus());
+  return this->Command->InitialPass(args, status);
 }

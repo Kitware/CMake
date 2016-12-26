@@ -55,7 +55,7 @@ static void cmVariableWatchCommandVariableAccessed(const std::string& variable,
     newLFF.Arguments.emplace_back(stack, cmListFileArgument::Quoted, 9999);
     newLFF.Name = data->Command;
     newLFF.Line = 9999;
-    cmExecutionStatus status;
+    cmExecutionStatus status(*makefile);
     if (!makefile->ExecuteCommand(newLFF, status)) {
       std::ostringstream error;
       error << "Error in cmake code at\nUnknown:0:\n"

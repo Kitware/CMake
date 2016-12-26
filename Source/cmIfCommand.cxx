@@ -47,7 +47,7 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       }
 
       // execute the functions for the true parts of the if statement
-      cmExecutionStatus status;
+      cmExecutionStatus status(mf);
       int scopeDepth = 0;
       for (cmListFileFunction const& func : this->Functions) {
         // keep track of scope depth

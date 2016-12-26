@@ -421,7 +421,7 @@ int CCONV cmExecuteCommand(void* arg, const char* name, int numArgs,
     // Assume all arguments are quoted.
     lff.Arguments.emplace_back(args[i], cmListFileArgument::Quoted, 0);
   }
-  cmExecutionStatus status;
+  cmExecutionStatus status(*mf);
   return mf->ExecuteCommand(lff, status);
 }
 

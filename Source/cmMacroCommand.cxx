@@ -132,7 +132,7 @@ bool cmMacroHelperCommand::InvokeInitialPass(
       arg.Line = k.Line;
       newLFF.Arguments.push_back(std::move(arg));
     }
-    cmExecutionStatus status;
+    cmExecutionStatus status(*this->GetMakefile());
     if (!this->Makefile->ExecuteCommand(newLFF, status) ||
         status.GetNestedError()) {
       // The error message should have already included the call stack

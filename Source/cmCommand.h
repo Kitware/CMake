@@ -42,8 +42,10 @@ public:
   /**
    * Specify the makefile.
    */
-  void SetMakefile(cmMakefile* m) { this->Makefile = m; }
   cmMakefile* GetMakefile() { return this->Makefile; }
+
+  void SetExecutionStatus(cmExecutionStatus* s);
+  cmExecutionStatus* GetExecutionStatus() { return this->Status; };
 
   /**
    * This is called by the cmMakefile when the command is first
@@ -66,11 +68,6 @@ public:
   virtual std::unique_ptr<cmCommand> Clone() = 0;
 
   /**
-   * Return the last error string.
-   */
-  const char* GetError();
-
-  /**
    * Set the error message
    */
   void SetError(const std::string& e);
@@ -79,7 +76,7 @@ protected:
   cmMakefile* Makefile = nullptr;
 
 private:
-  std::string Error;
+  cmExecutionStatus* Status = nullptr;
 };
 
 #endif
