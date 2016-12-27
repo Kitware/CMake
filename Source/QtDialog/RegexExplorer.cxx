@@ -64,10 +64,32 @@ void RegexExplorer::on_inputText_textChanged()
     return;
   }
 
+  std::string matchingText;
+
+  if (matchAll->isChecked()) {
+    const char* p = m_text.c_str();
+    while (m_regexParser.find(p)) {
+      std::string::size_type l = m_regexParser.start();
+      std::string::size_type r = m_regexParser.end();
+      if (r - l == 0) {
+        // matched empty string
+        clearMatch();
+        return;
+      }
+      if (!matchingText.empty()) {
+        matchingText += ";";
+      }
+      matchingText += std::string(p + l, r - l);
+      p += r;
+    }
+  } else {
+    matchingText = m_regexParser.match(0);
+  }
+
 #ifdef QT_NO_STL
-  QString matchText = m_regexParser.match(0).c_str();
+  QString matchText = matchingText.c_str();
 #else
-  QString matchText = QString::fromStdString(m_regexParser.match(0));
+  QString matchText = QString::fromStdString(matchingText);
 #endif
   match0->setPlainText(matchText);
 
@@ -95,8 +117,16 @@ void RegexExplorer::on_matchNumber_currentIndexChanged(int index)
   matchN->setPlainText(match);
 }
 
+void RegexExplorer::on_matchAll_toggled(bool checked)
+{
+  Q_UNUSED(checked);
+
+  on_inputText_textChanged();
+}
+
 void RegexExplorer::clearMatch()
 {
+  m_matched = false;
   match0->clear();
   matchN->clear();
 }
