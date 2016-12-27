@@ -221,8 +221,10 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   this->RccExecutable = makefile->GetSafeDefinition("AM_QT_RCC_EXECUTABLE");
 
   // - File Lists
-  this->Sources = makefile->GetSafeDefinition("AM_SOURCES");
-  this->Headers = makefile->GetSafeDefinition("AM_HEADERS");
+  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SOURCES"),
+                                    this->Sources);
+  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_HEADERS"),
+                                    this->Headers);
 
   // - Moc
   this->SkipMoc = makefile->GetSafeDefinition("AM_SKIP_MOC");
@@ -501,9 +503,6 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   // collect all headers which may need to be mocced
   std::set<std::string> headerFiles;
 
-  std::vector<std::string> sourceFiles;
-  cmSystemTools::ExpandListArgument(this->Sources, sourceFiles);
-
   const std::vector<std::string>& headerExtensions =
     makefile->GetCMakeInstance()->GetHeaderExtensions();
 
@@ -512,13 +511,13 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   std::vector<std::string> uicSkipped;
   cmSystemTools::ExpandListArgument(this->SkipUic, uicSkipped);
 
-  for (std::vector<std::string>::const_iterator it = sourceFiles.begin();
-       it != sourceFiles.end(); ++it) {
-    const bool skipUic =
-      std::find(uicSkipped.begin(), uicSkipped.end(), *it) != uicSkipped.end();
+  for (std::vector<std::string>::const_iterator it = this->Sources.begin();
+       it != this->Sources.end(); ++it) {
+    const std::string& absFilename = *it;
+    const bool skipUic = std::find(uicSkipped.begin(), uicSkipped.end(),
+                                   absFilename) != uicSkipped.end();
     std::map<std::string, std::vector<std::string> >& uiFiles =
       skipUic ? skippedUis : includedUis;
-    const std::string& absFilename = *it;
     if (this->Verbose) {
       std::ostringstream err;
       err << "AUTOGEN: Checking " << absFilename << std::endl;
@@ -551,9 +550,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
     }
   }
 
-  std::vector<std::string> headerFilesVec;
-  cmSystemTools::ExpandListArgument(this->Headers, headerFilesVec);
-  headerFiles.insert(headerFilesVec.begin(), headerFilesVec.end());
+  headerFiles.insert(this->Headers.begin(), this->Headers.end());
 
   // key = moc source filepath, value = moc output filename
   std::map<std::string, std::string> notIncludedMocs;

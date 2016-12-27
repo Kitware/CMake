@@ -116,8 +116,8 @@ private:
   std::string UicExecutable;
   std::string RccExecutable;
   // - File lists
-  std::string Sources;
-  std::string Headers;
+  std::vector<std::string> Sources;
+  std::vector<std::string> Headers;
   // - Moc
   std::string SkipMoc;
   std::string MocCompileDefinitionsStr;
