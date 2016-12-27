@@ -80,6 +80,15 @@ static bool FileNameIsUnique(const std::string& filePath,
   return true;
 }
 
+static std::string ReadAll(const std::string& filename)
+{
+  cmsys::ifstream file(filename.c_str());
+  std::ostringstream stream;
+  stream << file.rdbuf();
+  file.close();
+  return stream.str();
+}
+
 cmQtAutoGenerators::cmQtAutoGenerators()
   : Verbose(cmsys::SystemTools::HasEnv("VERBOSE"))
   , ColorOutput(true)
@@ -470,15 +479,6 @@ void cmQtAutoGenerators::Init()
                              this->MocIncludes.end());
     this->MocIncludes = sortedMocIncludes;
   }
-}
-
-static std::string ReadAll(const std::string& filename)
-{
-  cmsys::ifstream file(filename.c_str());
-  std::ostringstream stream;
-  stream << file.rdbuf();
-  file.close();
-  return stream.str();
 }
 
 bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
