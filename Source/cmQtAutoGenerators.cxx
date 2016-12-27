@@ -597,7 +597,7 @@ bool cmQtAutoGenerators::ParseSourceFile(
   }
 
   // Parse source contents for UIC
-  this->ParseForUic(absFilename, contentsString, includedUis);
+  this->ParseContentForUic(absFilename, contentsString, includedUis);
 
   // Continue with moc parsing on demand
   if (this->MocExecutable.empty()) {
@@ -816,10 +816,10 @@ void cmQtAutoGenerators::ParseForUic(
     this->LogWarning(err.str());
     return;
   }
-  this->ParseForUic(absFilename, contentsString, includedUis);
+  this->ParseContentForUic(absFilename, contentsString, includedUis);
 }
 
-void cmQtAutoGenerators::ParseForUic(
+void cmQtAutoGenerators::ParseContentForUic(
   const std::string& absFilename, const std::string& contentsString,
   std::map<std::string, std::vector<std::string> >& includedUis)
 {
@@ -898,7 +898,7 @@ void cmQtAutoGenerators::ParseHeaders(
           ".cpp";
       }
     }
-    this->ParseForUic(headerName, contents, includedUis);
+    this->ParseContentForUic(headerName, contents, includedUis);
   }
 }
 

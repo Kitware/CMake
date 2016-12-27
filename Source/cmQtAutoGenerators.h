@@ -68,7 +68,7 @@ private:
 
   bool requiresMocing(const std::string& text, std::string& macroName);
 
-  void ParseForUic(
+  void ParseContentForUic(
     const std::string& fileName, const std::string& contentsString,
     std::map<std::string, std::vector<std::string> >& includedUis);
 
