@@ -119,7 +119,7 @@ private:
   std::vector<std::string> Sources;
   std::vector<std::string> Headers;
   // - Moc
-  std::string SkipMoc;
+  std::vector<std::string> SkipMoc;
   std::string MocCompileDefinitionsStr;
   std::string MocIncludesStr;
   std::string MocOptionsStr;
@@ -129,7 +129,7 @@ private:
   std::list<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
   // - Uic
-  std::string SkipUic;
+  std::vector<std::string> SkipUic;
   std::vector<std::string> UicTargetOptions;
   std::map<std::string, std::string> UicOptions;
   // - Rcc

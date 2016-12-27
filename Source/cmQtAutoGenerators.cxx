@@ -227,7 +227,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
                                     this->Headers);
 
   // - Moc
-  this->SkipMoc = makefile->GetSafeDefinition("AM_SKIP_MOC");
+  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SKIP_MOC"),
+                                    this->SkipMoc);
   {
     std::string compileDefsPropOrig = "AM_MOC_COMPILE_DEFINITIONS";
     std::string compileDefsProp = compileDefsPropOrig;
@@ -254,7 +255,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   this->MocOptionsStr = makefile->GetSafeDefinition("AM_MOC_OPTIONS");
 
   // - Uic
-  this->SkipUic = makefile->GetSafeDefinition("AM_SKIP_UIC");
+  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SKIP_UIC"),
+                                    this->SkipUic);
   {
     const char* uicOptionsFiles =
       makefile->GetSafeDefinition("AM_UIC_OPTIONS_FILES");
@@ -508,14 +510,12 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 
   std::map<std::string, std::vector<std::string> > includedUis;
   std::map<std::string, std::vector<std::string> > skippedUis;
-  std::vector<std::string> uicSkipped;
-  cmSystemTools::ExpandListArgument(this->SkipUic, uicSkipped);
 
   for (std::vector<std::string>::const_iterator it = this->Sources.begin();
        it != this->Sources.end(); ++it) {
     const std::string& absFilename = *it;
-    const bool skipUic = std::find(uicSkipped.begin(), uicSkipped.end(),
-                                   absFilename) != uicSkipped.end();
+    const bool skipUic = std::find(this->SkipUic.begin(), this->SkipUic.end(),
+                                   absFilename) != this->SkipUic.end();
     std::map<std::string, std::vector<std::string> >& uiFiles =
       skipUic ? skippedUis : includedUis;
     if (this->Verbose) {
@@ -532,21 +532,17 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
     this->SearchHeadersForCppFile(absFilename, headerExtensions, headerFiles);
   }
 
-  {
-    std::vector<std::string> mocSkipped;
-    cmSystemTools::ExpandListArgument(this->SkipMoc, mocSkipped);
-    for (std::vector<std::string>::const_iterator it = mocSkipped.begin();
-         it != mocSkipped.end(); ++it) {
-      if (std::find(uicSkipped.begin(), uicSkipped.end(), *it) !=
-          uicSkipped.end()) {
-        const std::string& absFilename = *it;
-        if (this->Verbose) {
-          std::ostringstream err;
-          err << "AUTOGEN: Checking " << absFilename << std::endl;
-          this->LogInfo(err.str());
-        }
-        this->ParseForUic(absFilename, includedUis);
+  for (std::vector<std::string>::const_iterator it = this->SkipMoc.begin();
+       it != this->SkipMoc.end(); ++it) {
+    if (std::find(this->SkipUic.begin(), this->SkipUic.end(), *it) !=
+        this->SkipUic.end()) {
+      const std::string& absFilename = *it;
+      if (this->Verbose) {
+        std::ostringstream err;
+        err << "AUTOGEN: Checking " << absFilename << std::endl;
+        this->LogInfo(err.str());
       }
+      this->ParseForUic(absFilename, includedUis);
     }
   }
 
