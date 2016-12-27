@@ -646,7 +646,7 @@ bool cmQtAutoGenerators::ParseCppFile(
 
       std::string basename =
         cmsys::SystemTools::GetFilenameWithoutLastExtension(currentMoc);
-      const bool moc_style = cmHasLiteralPrefix(basename, "moc_");
+      const bool mocUnderscoreStyle = cmHasLiteralPrefix(basename, "moc_");
 
       // If the moc include is of the moc_foo.cpp style we expect
       // the Q_OBJECT class declaration in a header file.
@@ -654,7 +654,7 @@ bool cmQtAutoGenerators::ParseCppFile(
       // a Q_OBJECT macro in the current source file, if it contains the
       // macro we generate the moc file from the source file.
       // Q_OBJECT
-      if (moc_style) {
+      if (mocUnderscoreStyle) {
         // basename should be the part of the moc filename used for
         // finding the correct header, so we need to remove the moc_ part
         basename = basename.substr(4);
