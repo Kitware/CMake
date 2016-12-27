@@ -6,7 +6,6 @@
 #include <assert.h>
 #include <cmConfigure.h>
 #include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Terminal.h>
 #include <iostream>
 #include <sstream>
@@ -27,27 +26,6 @@
 #if defined(__APPLE__)
 #include <unistd.h>
 #endif
-
-static bool requiresMocing(const std::string& text, std::string& macroName)
-{
-  // this simple check is much much faster than the regexp
-  if (strstr(text.c_str(), "Q_OBJECT") == CM_NULLPTR &&
-      strstr(text.c_str(), "Q_GADGET") == CM_NULLPTR) {
-    return false;
-  }
-
-  cmsys::RegularExpression qObjectRegExp("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
-  if (qObjectRegExp.find(text)) {
-    macroName = "Q_OBJECT";
-    return true;
-  }
-  cmsys::RegularExpression qGadgetRegExp("[\n][ \t]*Q_GADGET[^a-zA-Z0-9_]");
-  if (qGadgetRegExp.find(text)) {
-    macroName = "Q_GADGET";
-    return true;
-  }
-  return false;
-}
 
 static std::string findMatchingHeader(
   const std::string& absPath, const std::string& mocSubDir,
@@ -120,6 +98,15 @@ cmQtAutoGenerators::cmQtAutoGenerators()
       this->ColorOutput = false;
     }
   }
+
+  // Precompile regular expressions
+  this->RegExpQObject.compile("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
+  this->RegExpQGadget.compile("[\n][ \t]*Q_GADGET[^a-zA-Z0-9_]");
+  this->RegExpMocInclude.compile(
+    "[\n][ \t]*#[ \t]*include[ \t]+"
+    "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
+  this->RegExpUicInclude.compile("[\n][ \t]*#[ \t]*include[ \t]+"
+                                 "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
 }
 
 void cmQtAutoGenerators::MergeUicOptions(
@@ -600,10 +587,6 @@ bool cmQtAutoGenerators::ParseSourceFile(
   std::map<std::string, std::string>& includedMocs,
   std::map<std::string, std::vector<std::string> >& includedUis, bool relaxed)
 {
-  cmsys::RegularExpression mocIncludeRegExp(
-    "[\n][ \t]*#[ \t]*include[ \t]+"
-    "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
-
   const std::string contentsString = ReadAll(absFilename);
   if (contentsString.empty()) {
     std::ostringstream err;
@@ -629,7 +612,7 @@ bool cmQtAutoGenerators::ParseSourceFile(
     cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
 
   std::string macroName;
-  const bool requiresMoc = requiresMocing(contentsString, macroName);
+  const bool requiresMoc = this->requiresMocing(contentsString, macroName);
   bool ownDotMocIncluded = false;
   bool ownMocUnderscoreIncluded = false;
   std::string ownMocUnderscoreFile;
@@ -642,8 +625,8 @@ bool cmQtAutoGenerators::ParseSourceFile(
   if (strstr(contentsString.c_str(), "moc") != CM_NULLPTR) {
     // Iterate over all included moc files
     const char* contentChars = contentsString.c_str();
-    while (mocIncludeRegExp.find(contentChars)) {
-      const std::string currentMoc = mocIncludeRegExp.match(1);
+    while (this->RegExpMocInclude.find(contentChars)) {
+      const std::string currentMoc = this->RegExpMocInclude.match(1);
       // Basename of the current moc include
       std::string basename =
         cmsys::SystemTools::GetFilenameWithoutLastExtension(currentMoc);
@@ -758,7 +741,7 @@ bool cmQtAutoGenerators::ParseSourceFile(
         }
       }
       // Forward content pointer
-      contentChars += mocIncludeRegExp.end();
+      contentChars += this->RegExpMocInclude.end();
     }
   }
 
@@ -799,6 +782,25 @@ bool cmQtAutoGenerators::ParseSourceFile(
   return true;
 }
 
+bool cmQtAutoGenerators::requiresMocing(const std::string& text,
+                                        std::string& macroName)
+{
+  // Run a simple check before an expensive regular expression check
+  if (strstr(text.c_str(), "Q_OBJECT") != CM_NULLPTR) {
+    if (this->RegExpQObject.find(text)) {
+      macroName = "Q_OBJECT";
+      return true;
+    }
+  }
+  if (strstr(text.c_str(), "Q_GADGET") != CM_NULLPTR) {
+    if (this->RegExpQGadget.find(text)) {
+      macroName = "Q_GADGET";
+      return true;
+    }
+  }
+  return false;
+}
+
 void cmQtAutoGenerators::ParseForUic(
   const std::string& absFilename,
   std::map<std::string, std::vector<std::string> >& includedUis)
@@ -825,20 +827,16 @@ void cmQtAutoGenerators::ParseForUic(
     return;
   }
   const std::string realName = cmsys::SystemTools::GetRealPath(absFilename);
-  cmsys::RegularExpression uiIncludeRegExp(
-    "[\n][ \t]*#[ \t]*include[ \t]+"
-    "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
-
   const char* contentChars = contentsString.c_str();
   if (strstr(contentChars, "ui_") != CM_NULLPTR) {
-    while (uiIncludeRegExp.find(contentChars)) {
-      const std::string currentUi = uiIncludeRegExp.match(1);
+    while (this->RegExpUicInclude.find(contentChars)) {
+      const std::string currentUi = this->RegExpUicInclude.match(1);
       const std::string basename =
         cmsys::SystemTools::GetFilenameWithoutLastExtension(currentUi);
       // basename should be the part of the ui filename used for
       // finding the correct header, so we need to remove the ui_ part
       includedUis[realName].push_back(basename.substr(3));
-      contentChars += uiIncludeRegExp.end();
+      contentChars += this->RegExpUicInclude.end();
     }
   }
 }
@@ -893,7 +891,7 @@ void cmQtAutoGenerators::ParseHeaders(
       }
 
       std::string macroName;
-      if (requiresMocing(contents, macroName)) {
+      if (this->requiresMocing(contents, macroName)) {
         notIncludedMocs[headerName] = fpathCheckSum.getPart(headerName) +
           "/moc_" +
           cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName) +

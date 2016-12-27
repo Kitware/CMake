@@ -5,6 +5,7 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 #include <cmFilePathChecksum.h>
+#include <cmsys/RegularExpression.hxx>
 
 #include <list>
 #include <map>
@@ -64,6 +65,8 @@ private:
     const std::map<std::string, std::string>& includedMocs,
     std::map<std::string, std::string>& notIncludedMocs,
     std::map<std::string, std::vector<std::string> >& includedUis);
+
+  bool requiresMocing(const std::string& text, std::string& macroName);
 
   void ParseForUic(
     const std::string& fileName, const std::string& contentsString,
@@ -138,6 +141,10 @@ private:
   std::string OldCompileSettingsStr;
   // - Utility
   cmFilePathChecksum fpathCheckSum;
+  cmsys::RegularExpression RegExpQObject;
+  cmsys::RegularExpression RegExpQGadget;
+  cmsys::RegularExpression RegExpMocInclude;
+  cmsys::RegularExpression RegExpUicInclude;
   // - Flags
   bool IncludeProjectDirsBefore;
   bool Verbose;
