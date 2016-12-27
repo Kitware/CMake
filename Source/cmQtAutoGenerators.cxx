@@ -62,6 +62,7 @@ static std::string findMatchingHeader(
       header = sourceFilePath;
       break;
     }
+    // Try subdirectory instead
     if (!mocSubDir.empty()) {
       sourceFilePath = mocSubDir + basename + "." + (*ext);
       if (cmsys::SystemTools::FileExists(sourceFilePath.c_str())) {
@@ -653,7 +654,6 @@ bool cmQtAutoGenerators::ParseCppFile(
       // If the moc include is of the foo.moc style we need to look for
       // a Q_OBJECT macro in the current source file, if it contains the
       // macro we generate the moc file from the source file.
-      // Q_OBJECT
       if (mocUnderscoreStyle) {
         // basename should be the part of the moc filename used for
         // finding the correct header, so we need to remove the moc_ part
