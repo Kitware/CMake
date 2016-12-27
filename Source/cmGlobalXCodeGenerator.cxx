@@ -1977,6 +1977,22 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     buildSettings->AddAttribute("HEADER_SEARCH_PATHS", dirs.CreateList());
   }
 
+  if (this->XcodeVersion >= 60) {
+    // Add those per-language flags in addition to HEADER_SEARCH_PATHS to gain
+    // system include directory awareness. We need to also keep on setting
+    // HEADER_SEARCH_PATHS to work around a missing compile options flag for
+    // GNU assembly files (#16449)
+    for (std::set<std::string>::iterator li = languages.begin();
+         li != languages.end(); ++li) {
+      std::string includeFlags = this->CurrentLocalGenerator->GetIncludeFlags(
+        includes, gtgt, *li, true, false, configName);
+
+      if (!includeFlags.empty()) {
+        cflags[*li] += " " + includeFlags;
+      }
+    }
+  }
+
   bool same_gflags = true;
   std::map<std::string, std::string> gflags;
   std::string const* last_gflag = 0;
