@@ -901,6 +901,214 @@ bool cmQtAutoGenerators::StrictParseCppFile(
   return true;
 }
 
+/**
+ * @return True on success
+ */
+bool cmQtAutoGenerators::ParseSourceFile(
+  const std::string& absFilename,
+  const std::vector<std::string>& headerExtensions,
+  std::map<std::string, std::string>& includedMocs,
+  std::map<std::string, std::vector<std::string> >& includedUis, bool relaxed)
+{
+  cmsys::RegularExpression mocIncludeRegExp(
+    "[\n][ \t]*#[ \t]*include[ \t]+"
+    "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
+
+  const std::string contentsString = ReadAll(absFilename);
+  if (contentsString.empty()) {
+    std::ostringstream err;
+    err << "AUTOGEN: warning: " << absFilename << "\n"
+        << "The file is empty\n";
+    this->LogWarning(err.str());
+    return true;
+  }
+
+  // Parse source contents for UIC
+  this->ParseForUic(absFilename, contentsString, includedUis);
+
+  // Continue with moc parsing on demand
+  if (this->MocExecutable.empty()) {
+    return true;
+  }
+
+  const std::string scannedFileAbsPath =
+    cmsys::SystemTools::GetFilenamePath(
+      cmsys::SystemTools::GetRealPath(absFilename)) +
+    '/';
+  const std::string scannedFileBasename =
+    cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
+
+  std::string macroName;
+  const bool requiresMoc = requiresMocing(contentsString, macroName);
+  bool ownDotMocIncluded = false;
+  bool ownMocUnderscoreIncluded = false;
+  std::string ownMocUnderscoreFile;
+  std::string ownMocHeaderFile;
+
+  std::string::size_type matchOffset = 0;
+  // first a simple string check for "moc" is *much* faster than the regexp,
+  // and if the string search already fails, we don't have to try the
+  // expensive regexp
+  if (strstr(contentsString.c_str(), "moc") != CM_NULLPTR) {
+    // Iterate over all included moc files
+    const char* contentChars = contentsString.c_str();
+    while (mocIncludeRegExp.find(contentChars)) {
+      const std::string currentMoc = mocIncludeRegExp.match(1);
+      // Basename of the current moc include
+      std::string basename =
+        cmsys::SystemTools::GetFilenameWithoutLastExtension(currentMoc);
+
+      // If the moc include is of the moc_foo.cpp style we expect
+      // the Q_OBJECT class declaration in a header file.
+      // If the moc include is of the foo.moc style we need to look for
+      // a Q_OBJECT macro in the current source file, if it contains the
+      // macro we generate the moc file from the source file.
+      if (cmHasLiteralPrefix(basename, "moc_")) {
+        // Include: moc_FOO.cxx
+        // basename should be the part of the moc filename used for
+        // finding the correct header, so we need to remove the moc_ part
+        basename = basename.substr(4);
+        const std::string mocSubDir =
+          extractSubDir(scannedFileAbsPath, currentMoc);
+        const std::string headerToMoc = findMatchingHeader(
+          scannedFileAbsPath, mocSubDir, basename, headerExtensions);
+
+        if (!headerToMoc.empty()) {
+          includedMocs[headerToMoc] = currentMoc;
+          if (relaxed && (basename == scannedFileBasename)) {
+            ownMocUnderscoreIncluded = true;
+            ownMocUnderscoreFile = currentMoc;
+            ownMocHeaderFile = headerToMoc;
+          }
+        } else {
+          std::ostringstream err;
+          err << "AUTOGEN: error: " << absFilename << "\n"
+              << "The file includes the moc file \"" << currentMoc
+              << "\", but could not find header \"" << basename << '{'
+              << this->JoinExts(headerExtensions) << "}\" ";
+          if (mocSubDir.empty()) {
+            err << "in " << scannedFileAbsPath << "\n";
+          } else {
+            err << "neither in " << scannedFileAbsPath << " nor in "
+                << mocSubDir << "\n";
+          }
+          this->LogError(err.str());
+          return false;
+        }
+      } else {
+        // Include: FOO.moc
+        std::string fileToMoc;
+        if (relaxed) {
+          // Mode: Relaxed
+          if (!requiresMoc || basename != scannedFileBasename) {
+            const std::string mocSubDir =
+              extractSubDir(scannedFileAbsPath, currentMoc);
+            const std::string headerToMoc = findMatchingHeader(
+              scannedFileAbsPath, mocSubDir, basename, headerExtensions);
+            if (!headerToMoc.empty()) {
+              // This is for KDE4 compatibility:
+              fileToMoc = headerToMoc;
+              if (!requiresMoc && basename == scannedFileBasename) {
+                std::ostringstream err;
+                err << "AUTOMOC: warning: " << absFilename << "\n"
+                    << "The file includes the moc file \"" << currentMoc
+                    << "\", but does not contain a " << macroName
+                    << " macro. Running moc on "
+                    << "\"" << headerToMoc << "\" ! Include \"moc_" << basename
+                    << ".cpp\" for a compatibility with "
+                       "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n";
+                this->LogWarning(err.str());
+              } else {
+                std::ostringstream err;
+                err << "AUTOMOC: warning: " << absFilename << "\n"
+                    << "The file includes the moc file \"" << currentMoc
+                    << "\" instead of \"moc_" << basename
+                    << ".cpp\". Running moc on "
+                    << "\"" << headerToMoc << "\" ! Include \"moc_" << basename
+                    << ".cpp\" for compatibility with "
+                       "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n";
+                this->LogWarning(err.str());
+              }
+            } else {
+              std::ostringstream err;
+              err << "AUTOMOC: error: " << absFilename << "\n"
+                  << "The file includes the moc file \"" << currentMoc
+                  << "\", which seems to be the moc file from a different "
+                     "source file. CMake also could not find a matching "
+                     "header.\n";
+              this->LogError(err.str());
+              return false;
+            }
+          } else {
+            // Include self
+            fileToMoc = absFilename;
+            ownDotMocIncluded = true;
+          }
+        } else {
+          // Mode: Strict
+          if (basename != scannedFileBasename) {
+            // Don't allow FOO.moc include other than self in strict mode
+            std::ostringstream err;
+            err << "AUTOMOC: error: " << absFilename << "\n"
+                << "The file includes the moc file \"" << currentMoc
+                << "\", which seems to be the moc file from a different "
+                   "source file. This is not supported. Include \""
+                << scannedFileBasename
+                << ".moc\" to run moc on this source file.\n";
+            this->LogError(err.str());
+            return false;
+          } else {
+            // Include self
+            fileToMoc = absFilename;
+            ownDotMocIncluded = true;
+          }
+        }
+        if (!fileToMoc.empty()) {
+          includedMocs[fileToMoc] = currentMoc;
+        }
+      }
+      // Forward content pointer
+      contentChars += mocIncludeRegExp.end();
+    }
+  }
+
+  // In this case, check whether the scanned file itself contains a Q_OBJECT.
+  // If this is the case, the moc_foo.cpp should probably be generated from
+  // foo.cpp instead of foo.h, because otherwise it won't build.
+  // But warn, since this is not how it is supposed to be used.
+  if (requiresMoc && !ownDotMocIncluded) {
+    if (relaxed && ownMocUnderscoreIncluded) {
+      // This is for KDE4 compatibility:
+      std::ostringstream err;
+      err << "AUTOMOC: warning: " << absFilename << "\n"
+          << "The file contains a " << macroName
+          << " macro, but does not include "
+          << "\"" << scannedFileBasename << ".moc\", but instead includes "
+          << "\"" << ownMocUnderscoreFile << "\". Running moc on "
+          << "\"" << absFilename << "\" ! Better include \""
+          << scannedFileBasename
+          << ".moc\" for compatibility with "
+             "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n";
+      this->LogWarning(err.str());
+
+      // Use scanned source file instead of scanned header file as moc source
+      includedMocs[absFilename] = ownMocUnderscoreFile;
+      includedMocs.erase(ownMocHeaderFile);
+    } else {
+      // Otherwise always error out since it will not compile:
+      std::ostringstream err;
+      err << "AUTOMOC: error: " << absFilename << "\n"
+          << "The file contains a " << macroName
+          << " macro, but does not include "
+          << "\"" << scannedFileBasename << ".moc\" !\n";
+      this->LogError(err.str());
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void cmQtAutoGenerators::ParseForUic(
   const std::string& absFilename,
   std::map<std::string, std::vector<std::string> >& includedUis)

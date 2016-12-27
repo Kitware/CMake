@@ -58,6 +58,12 @@ private:
     const std::vector<std::string>& headerExtensions,
     std::map<std::string, std::string>& includedMocs,
     std::map<std::string, std::vector<std::string> >& includedUis);
+  bool ParseSourceFile(
+    const std::string& absFilename,
+    const std::vector<std::string>& headerExtensions,
+    std::map<std::string, std::string>& includedMocs,
+    std::map<std::string, std::vector<std::string> >& includedUis,
+    bool relaxed);
   void SearchHeadersForCppFile(
     const std::string& absFilename,
     const std::vector<std::string>& headerExtensions,
