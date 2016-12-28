@@ -99,9 +99,9 @@ static std::string GetQtMajorVersion(cmGeneratorTarget const* target)
 }
 
 static void SetupSourceFiles(cmGeneratorTarget const* target,
+                             std::vector<std::string>& mocUicSources,
+                             std::vector<std::string>& mocUicHeaders,
                              std::vector<std::string>& skipMoc,
-                             std::vector<std::string>& sources,
-                             std::vector<std::string>& headers,
                              std::vector<std::string>& skipUic)
 {
   cmMakefile* makefile = target->Target->GetMakefile();
@@ -136,9 +136,9 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
       cmsys::SystemTools::GetRealPath(sf->GetFullPath());
     // Add file name to sources or headers list
     if (fileType == cmSystemTools::CXX_FILE_FORMAT) {
-      sources.push_back(absFile);
+      mocUicSources.push_back(absFile);
     } else if (fileType == cmSystemTools::HEADER_FILE_FORMAT) {
-      headers.push_back(absFile);
+      mocUicHeaders.push_back(absFile);
     }
     // Add file name to skip lists on demand
     if (fileSkipUic) {
@@ -171,7 +171,6 @@ static void GetCompileDefinitionsAndDirectories(
 static void MocSetupAutoTarget(
   cmGeneratorTarget const* target, const std::string& autogenTargetName,
   std::vector<std::string> const& skipMoc,
-  std::vector<std::string> const& mocHeaders,
   std::map<std::string, std::string>& configIncludes,
   std::map<std::string, std::string>& configDefines)
 {
@@ -185,9 +184,6 @@ static void MocSetupAutoTarget(
   makefile->AddDefinition(
     "_skip_moc",
     cmOutputConverter::EscapeForCMake(cmJoin(skipMoc, ";")).c_str());
-  makefile->AddDefinition(
-    "_moc_headers",
-    cmOutputConverter::EscapeForCMake(cmJoin(mocHeaders, ";")).c_str());
   bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
   makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
 
@@ -863,10 +859,10 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     cmOutputConverter::EscapeForCMake(target->GetName()).c_str());
   makefile->AddDefinition("_target_qt_version", qtMajorVersion.c_str());
 
-  std::vector<std::string> skipUic;
+  std::vector<std::string> mocUicSources;
+  std::vector<std::string> mocUicHeaders;
   std::vector<std::string> skipMoc;
-  std::vector<std::string> mocSources;
-  std::vector<std::string> mocHeaders;
+  std::vector<std::string> skipUic;
   std::map<std::string, std::string> configMocIncludes;
   std::map<std::string, std::string> configMocDefines;
   std::map<std::string, std::string> configUicOptions;
@@ -874,14 +870,18 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
   if (target->GetPropertyAsBool("AUTOMOC") ||
       target->GetPropertyAsBool("AUTOUIC") ||
       target->GetPropertyAsBool("AUTORCC")) {
-    SetupSourceFiles(target, skipMoc, mocSources, mocHeaders, skipUic);
+    SetupSourceFiles(target, mocUicSources, mocUicHeaders, skipMoc, skipUic);
   }
   makefile->AddDefinition(
-    "_cpp_files",
-    cmOutputConverter::EscapeForCMake(cmJoin(mocSources, ";")).c_str());
+    "_moc_uic_sources",
+    cmOutputConverter::EscapeForCMake(cmJoin(mocUicSources, ";")).c_str());
+  makefile->AddDefinition(
+    "_moc_uic_headers",
+    cmOutputConverter::EscapeForCMake(cmJoin(mocUicHeaders, ";")).c_str());
+
   if (target->GetPropertyAsBool("AUTOMOC")) {
-    MocSetupAutoTarget(target, autogenTargetName, skipMoc, mocHeaders,
-                       configMocIncludes, configMocDefines);
+    MocSetupAutoTarget(target, autogenTargetName, skipMoc, configMocIncludes,
+                       configMocDefines);
   }
   if (target->GetPropertyAsBool("AUTOUIC")) {
     UicSetupAutoTarget(target, skipUic, configUicOptions);
