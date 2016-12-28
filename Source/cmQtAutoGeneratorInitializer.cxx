@@ -646,7 +646,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenSources(
     cmMakefile* makefile = target->Target->GetMakefile();
     const std::string mocCppFile =
       GetAutogenTargetBuildDir(target) + "moc_compilation.cpp";
-    makefile->GetOrCreateSource(mocCppFile, true);
+    cmSourceFile* gf = makefile->GetOrCreateSource(mocCppFile, true);
+    gf->SetProperty("SKIP_AUTOGEN", "On");
     target->AddSource(mocCppFile);
   }
 }
@@ -778,7 +779,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
           rccOutputFile += ".cpp";
 
           // Add rcc output file to origin target sources
-          makefile->GetOrCreateSource(rccOutputFile, true);
+          cmSourceFile* gf = makefile->GetOrCreateSource(rccOutputFile, true);
+          gf->SetProperty("SKIP_AUTOGEN", "On");
           target->AddSource(rccOutputFile);
           // Register rcc output file as generated
           autogenOutputFiles.push_back(rccOutputFile);
