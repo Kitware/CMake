@@ -123,6 +123,9 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
     if (cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
       continue;
     }
+    if (cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOGEN"))) {
+      continue;
+    }
     const bool fileSkipUic =
       cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC"));
     const bool fileSkipMoc =
@@ -578,7 +581,9 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target,
     std::string ext = sf->GetExtension();
     if (ext == "qrc") {
       std::string absFile = cmsys::SystemTools::GetRealPath(sf->GetFullPath());
-      bool skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"));
+      const bool skip =
+        cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOGEN")) ||
+        cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"));
 
       if (!skip) {
         _rcc_files += sepRccFiles;
@@ -756,6 +761,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
          fileIt != srcFiles.end(); ++fileIt) {
       cmSourceFile* sf = *fileIt;
       if (sf->GetExtension() == "qrc" &&
+          !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOGEN")) &&
           !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"))) {
         {
           const std::string absFile =
