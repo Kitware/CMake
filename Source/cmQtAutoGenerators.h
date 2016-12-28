@@ -72,6 +72,12 @@ private:
     const std::string& fileName, const std::string& contentsString,
     std::map<std::string, std::vector<std::string> >& includedUis);
 
+  bool ParseContentForMoc(const std::string& absFilename,
+                          const std::string& contentsString,
+                          const std::vector<std::string>& headerExtensions,
+                          std::map<std::string, std::string>& includedMocs,
+                          bool relaxed);
+
   void ParseForUic(
     const std::string& fileName,
     std::map<std::string, std::vector<std::string> >& includedUis);

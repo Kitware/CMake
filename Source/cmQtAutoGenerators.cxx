@@ -580,19 +580,90 @@ bool cmQtAutoGenerators::ParseSourceFile(
   std::map<std::string, std::string>& includedMocs,
   std::map<std::string, std::vector<std::string> >& includedUis, bool relaxed)
 {
+  bool success = true;
   const std::string contentsString = ReadAll(absFilename);
   if (contentsString.empty()) {
     std::ostringstream err;
     err << "AUTOGEN: warning: " << absFilename << "\n"
         << "The file is empty\n";
     this->LogWarning(err.str());
-    return true;
+  } else {
+    // Parse source contents for UIC
+    this->ParseContentForUic(absFilename, contentsString, includedUis);
+    // Parse source contents for MOC
+    success = this->ParseContentForMoc(
+      absFilename, contentsString, headerExtensions, includedMocs, relaxed);
   }
+  return success;
+}
 
-  // Parse source contents for UIC
+bool cmQtAutoGenerators::requiresMocing(const std::string& text,
+                                        std::string& macroName)
+{
+  // Run a simple check before an expensive regular expression check
+  if (strstr(text.c_str(), "Q_OBJECT") != CM_NULLPTR) {
+    if (this->RegExpQObject.find(text)) {
+      macroName = "Q_OBJECT";
+      return true;
+    }
+  }
+  if (strstr(text.c_str(), "Q_GADGET") != CM_NULLPTR) {
+    if (this->RegExpQGadget.find(text)) {
+      macroName = "Q_GADGET";
+      return true;
+    }
+  }
+  return false;
+}
+
+void cmQtAutoGenerators::ParseForUic(
+  const std::string& absFilename,
+  std::map<std::string, std::vector<std::string> >& includedUis)
+{
+  if (this->UicExecutable.empty()) {
+    return;
+  }
+  const std::string contentsString = ReadAll(absFilename);
+  if (contentsString.empty()) {
+    std::ostringstream err;
+    err << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
+        << std::endl;
+    this->LogWarning(err.str());
+    return;
+  }
   this->ParseContentForUic(absFilename, contentsString, includedUis);
+}
 
-  // Continue with moc parsing on demand
+void cmQtAutoGenerators::ParseContentForUic(
+  const std::string& absFilename, const std::string& contentsString,
+  std::map<std::string, std::vector<std::string> >& includedUis)
+{
+  if (this->UicExecutable.empty()) {
+    return;
+  }
+  const std::string realName = cmsys::SystemTools::GetRealPath(absFilename);
+  const char* contentChars = contentsString.c_str();
+  if (strstr(contentChars, "ui_") != CM_NULLPTR) {
+    while (this->RegExpUicInclude.find(contentChars)) {
+      const std::string currentUi = this->RegExpUicInclude.match(1);
+      const std::string basename =
+        cmsys::SystemTools::GetFilenameWithoutLastExtension(currentUi);
+      // basename should be the part of the ui filename used for
+      // finding the correct header, so we need to remove the ui_ part
+      includedUis[realName].push_back(basename.substr(3));
+      contentChars += this->RegExpUicInclude.end();
+    }
+  }
+}
+
+/**
+ * @return True on success
+ */
+bool cmQtAutoGenerators::ParseContentForMoc(
+  const std::string& absFilename, const std::string& contentsString,
+  const std::vector<std::string>& headerExtensions,
+  std::map<std::string, std::string>& includedMocs, bool relaxed)
+{
   if (this->MocExecutable.empty()) {
     return true;
   }
@@ -773,65 +844,6 @@ bool cmQtAutoGenerators::ParseSourceFile(
   }
 
   return true;
-}
-
-bool cmQtAutoGenerators::requiresMocing(const std::string& text,
-                                        std::string& macroName)
-{
-  // Run a simple check before an expensive regular expression check
-  if (strstr(text.c_str(), "Q_OBJECT") != CM_NULLPTR) {
-    if (this->RegExpQObject.find(text)) {
-      macroName = "Q_OBJECT";
-      return true;
-    }
-  }
-  if (strstr(text.c_str(), "Q_GADGET") != CM_NULLPTR) {
-    if (this->RegExpQGadget.find(text)) {
-      macroName = "Q_GADGET";
-      return true;
-    }
-  }
-  return false;
-}
-
-void cmQtAutoGenerators::ParseForUic(
-  const std::string& absFilename,
-  std::map<std::string, std::vector<std::string> >& includedUis)
-{
-  if (this->UicExecutable.empty()) {
-    return;
-  }
-  const std::string contentsString = ReadAll(absFilename);
-  if (contentsString.empty()) {
-    std::ostringstream err;
-    err << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
-        << std::endl;
-    this->LogWarning(err.str());
-    return;
-  }
-  this->ParseContentForUic(absFilename, contentsString, includedUis);
-}
-
-void cmQtAutoGenerators::ParseContentForUic(
-  const std::string& absFilename, const std::string& contentsString,
-  std::map<std::string, std::vector<std::string> >& includedUis)
-{
-  if (this->UicExecutable.empty()) {
-    return;
-  }
-  const std::string realName = cmsys::SystemTools::GetRealPath(absFilename);
-  const char* contentChars = contentsString.c_str();
-  if (strstr(contentChars, "ui_") != CM_NULLPTR) {
-    while (this->RegExpUicInclude.find(contentChars)) {
-      const std::string currentUi = this->RegExpUicInclude.match(1);
-      const std::string basename =
-        cmsys::SystemTools::GetFilenameWithoutLastExtension(currentUi);
-      // basename should be the part of the ui filename used for
-      // finding the correct header, so we need to remove the ui_ part
-      includedUis[realName].push_back(basename.substr(3));
-      contentChars += this->RegExpUicInclude.end();
-    }
-  }
 }
 
 void cmQtAutoGenerators::SearchHeadersForCppFile(
