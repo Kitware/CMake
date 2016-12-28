@@ -13,6 +13,23 @@
 class cmExecutionStatus;
 class cmTarget;
 
+static void FinalAction(cmMakefile& makefile, std::string const& name)
+{
+  // people should add the srcs to the target themselves, but the old command
+  // didn't support that, so check and see if they added the files in and if
+  // they didn;t then print a warning and add then anyhow
+  cmTarget* target = makefile.FindLocalNonAliasTarget(name);
+  if (!target) {
+    std::string msg =
+      "FLTK_WRAP_UI was called with a target that was never created: ";
+    msg += name;
+    msg += ".  The problem was found while processing the source directory: ";
+    msg += makefile.GetCurrentSourceDirectory();
+    msg += ".  This FLTK_WRAP_UI call will be ignored.";
+    cmSystemTools::Message(msg, "Warning");
+  }
+}
+
 // cmFLTKWrapUICommand
 bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
                                       cmExecutionStatus&)
@@ -27,8 +44,8 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
   std::string const& fluid_exe =
     this->Makefile->GetRequiredDefinition("FLTK_FLUID_EXECUTABLE");
 
-  // get parameter for the command
-  this->Target = args[0]; // Target that will use the generated files
+  // Target that will use the generated files
+  std::string const& target = args[0];
 
   // get the list of GUI files from which .cxx and .h will be generated
   std::string outputDirectory = this->Makefile->GetCurrentBinaryDirectory();
@@ -40,6 +57,9 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
     outputDirectories.push_back(outputDirectory);
     this->Makefile->AddIncludeDirectories(outputDirectories);
   }
+
+  // List of produced files.
+  std::vector<cmSourceFile*> generatedSourcesClasses;
 
   for (std::string const& arg : cmMakeRange(args).advance(1)) {
     cmSourceFile* curr = this->Makefile->GetSource(arg);
@@ -84,40 +104,23 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
       cmSourceFile* sf = this->Makefile->GetSource(cxxres);
       sf->AddDepend(hname);
       sf->AddDepend(origname);
-      this->GeneratedSourcesClasses.push_back(sf);
+      generatedSourcesClasses.push_back(sf);
     }
   }
 
   // create the variable with the list of sources in it
-  size_t lastHeadersClass = this->GeneratedSourcesClasses.size();
+  size_t lastHeadersClass = generatedSourcesClasses.size();
   std::string sourceListValue;
   for (size_t classNum = 0; classNum < lastHeadersClass; classNum++) {
     if (classNum) {
       sourceListValue += ";";
     }
-    sourceListValue += this->GeneratedSourcesClasses[classNum]->GetFullPath();
+    sourceListValue += generatedSourcesClasses[classNum]->GetFullPath();
   }
-  std::string varName = this->Target;
-  varName += "_FLTK_UI_SRCS";
+  std::string const varName = target + "_FLTK_UI_SRCS";
   this->Makefile->AddDefinition(varName, sourceListValue.c_str());
 
+  this->Makefile->AddFinalAction(
+    [target](cmMakefile& makefile) { FinalAction(makefile, target); });
   return true;
-}
-
-void cmFLTKWrapUICommand::FinalPass()
-{
-  // people should add the srcs to the target themselves, but the old command
-  // didn't support that, so check and see if they added the files in and if
-  // they didn;t then print a warning and add then anyhow
-  cmTarget* target = this->Makefile->FindLocalNonAliasTarget(this->Target);
-  if (!target) {
-    std::string msg =
-      "FLTK_WRAP_UI was called with a target that was never created: ";
-    msg += this->Target;
-    msg += ".  The problem was found while processing the source directory: ";
-    msg += this->Makefile->GetCurrentSourceDirectory();
-    msg += ".  This FLTK_WRAP_UI call will be ignored.";
-    cmSystemTools::Message(msg, "Warning");
-    return;
-  }
 }
