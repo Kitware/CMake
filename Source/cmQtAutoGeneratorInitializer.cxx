@@ -100,8 +100,8 @@ static std::string GetQtMajorVersion(cmGeneratorTarget const* target)
 
 static void SetupSourceFiles(cmGeneratorTarget const* target,
                              std::vector<std::string>& skipMoc,
-                             std::vector<std::string>& mocSources,
-                             std::vector<std::string>& mocHeaders,
+                             std::vector<std::string>& sources,
+                             std::vector<std::string>& headers,
                              std::vector<std::string>& skipUic)
 {
   cmMakefile* makefile = target->Target->GetMakefile();
@@ -113,26 +113,39 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
   for (std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
        fileIt != srcFiles.end(); ++fileIt) {
     cmSourceFile* sf = *fileIt;
-    const std::string absFile =
-      cmsys::SystemTools::GetRealPath(sf->GetFullPath());
-    const std::string ext = sf->GetExtension();
+    const cmSystemTools::FileFormat fileType =
+      cmSystemTools::GetFileFormat(sf->GetExtension().c_str());
 
-    if (cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC"))) {
-      skipUic.push_back(absFile);
+    if (!(fileType == cmSystemTools::CXX_FILE_FORMAT) &&
+        !(fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
+      continue;
+    }
+    if (cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
+      continue;
+    }
+    const bool fileSkipUic =
+      cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC"));
+    const bool fileSkipMoc =
+      cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
+    if (fileSkipUic && fileSkipMoc) {
+      continue;
     }
 
-    if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
-      if (cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"))) {
-        skipMoc.push_back(absFile);
-      } else {
-        cmSystemTools::FileFormat fileType =
-          cmSystemTools::GetFileFormat(ext.c_str());
-        if (fileType == cmSystemTools::CXX_FILE_FORMAT) {
-          mocSources.push_back(absFile);
-        } else if (fileType == cmSystemTools::HEADER_FILE_FORMAT) {
-          mocHeaders.push_back(absFile);
-        }
-      }
+    // Use file
+    const std::string absFile =
+      cmsys::SystemTools::GetRealPath(sf->GetFullPath());
+    // Add file name to sources or headers list
+    if (fileType == cmSystemTools::CXX_FILE_FORMAT) {
+      sources.push_back(absFile);
+    } else if (fileType == cmSystemTools::HEADER_FILE_FORMAT) {
+      headers.push_back(absFile);
+    }
+    // Add file name to skip lists on demand
+    if (fileSkipUic) {
+      skipUic.push_back(absFile);
+    }
+    if (fileSkipMoc) {
+      skipMoc.push_back(absFile);
     }
   }
 }

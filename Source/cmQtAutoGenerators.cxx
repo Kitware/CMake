@@ -89,6 +89,12 @@ static std::string ReadAll(const std::string& filename)
   return stream.str();
 }
 
+static bool ListContains(const std::vector<std::string>& list,
+                         const std::string& entry)
+{
+  return (std::find(list.begin(), list.end(), entry) != list.end());
+}
+
 cmQtAutoGenerators::cmQtAutoGenerators()
   : Verbose(cmsys::SystemTools::HasEnv("VERBOSE"))
   , ColorOutput(true)
@@ -502,56 +508,35 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 
   // key = moc source filepath, value = moc output filepath
   std::map<std::string, std::string> includedMocs;
-  // collect all headers which may need to be mocced
+  std::map<std::string, std::string> notIncludedMocs;
+  std::map<std::string, std::vector<std::string> > includedUis;
+  // collects all headers which may need to be mocced
   std::set<std::string> headerFiles;
 
-  const std::vector<std::string>& headerExtensions =
-    makefile->GetCMakeInstance()->GetHeaderExtensions();
+  // Parse sources
+  {
+    const std::vector<std::string>& headerExtensions =
+      makefile->GetCMakeInstance()->GetHeaderExtensions();
 
-  std::map<std::string, std::vector<std::string> > includedUis;
-  std::map<std::string, std::vector<std::string> > skippedUis;
-
-  for (std::vector<std::string>::const_iterator it = this->Sources.begin();
-       it != this->Sources.end(); ++it) {
-    const std::string& absFilename = *it;
-    const bool skipUic = std::find(this->SkipUic.begin(), this->SkipUic.end(),
-                                   absFilename) != this->SkipUic.end();
-    std::map<std::string, std::vector<std::string> >& uiFiles =
-      skipUic ? skippedUis : includedUis;
-    if (this->Verbose) {
-      std::ostringstream err;
-      err << "AUTOGEN: Checking " << absFilename << std::endl;
-      this->LogInfo(err.str());
-    }
-    // Parse source file for MOC/UIC
-    if (!this->ParseSourceFile(absFilename, headerExtensions, includedMocs,
-                               uiFiles, this->MocRelaxedMode)) {
-      return false;
-    }
-    // Find additional headers
-    this->SearchHeadersForCppFile(absFilename, headerExtensions, headerFiles);
-  }
-
-  for (std::vector<std::string>::const_iterator it = this->SkipMoc.begin();
-       it != this->SkipMoc.end(); ++it) {
-    if (std::find(this->SkipUic.begin(), this->SkipUic.end(), *it) !=
-        this->SkipUic.end()) {
+    for (std::vector<std::string>::const_iterator it = this->Sources.begin();
+         it != this->Sources.end(); ++it) {
       const std::string& absFilename = *it;
-      if (this->Verbose) {
-        std::ostringstream err;
-        err << "AUTOGEN: Checking " << absFilename << std::endl;
-        this->LogInfo(err.str());
+      // Parse source file for MOC/UIC
+      if (!this->ParseSourceFile(absFilename, headerExtensions, includedMocs,
+                                 includedUis, this->MocRelaxedMode)) {
+        return false;
       }
-      this->ParseForUic(absFilename, includedUis);
+      // Find additional headers
+      this->SearchHeadersForCppFile(absFilename, headerExtensions,
+                                    headerFiles);
     }
   }
 
+  // Parse headers
   headerFiles.insert(this->Headers.begin(), this->Headers.end());
-
-  // key = moc source filepath, value = moc output filename
-  std::map<std::string, std::string> notIncludedMocs;
   this->ParseHeaders(headerFiles, includedMocs, notIncludedMocs, includedUis);
 
+  // Generate files
   if (!this->MocExecutable.empty()) {
     if (!this->GenerateMocFiles(includedMocs, notIncludedMocs)) {
       return false;
@@ -588,11 +573,13 @@ bool cmQtAutoGenerators::ParseSourceFile(
         << "The file is empty\n";
     this->LogWarning(err.str());
   } else {
-    // Parse source contents for UIC
-    this->ParseContentForUic(absFilename, contentsString, includedUis);
     // Parse source contents for MOC
     success = this->ParseContentForMoc(
       absFilename, contentsString, headerExtensions, includedMocs, relaxed);
+    // Parse source contents for UIC
+    if (success) {
+      this->ParseContentForUic(absFilename, contentsString, includedUis);
+    }
   }
   return success;
 }
@@ -616,31 +603,21 @@ bool cmQtAutoGenerators::requiresMocing(const std::string& text,
   return false;
 }
 
-void cmQtAutoGenerators::ParseForUic(
-  const std::string& absFilename,
-  std::map<std::string, std::vector<std::string> >& includedUis)
-{
-  if (this->UicExecutable.empty()) {
-    return;
-  }
-  const std::string contentsString = ReadAll(absFilename);
-  if (contentsString.empty()) {
-    std::ostringstream err;
-    err << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
-        << std::endl;
-    this->LogWarning(err.str());
-    return;
-  }
-  this->ParseContentForUic(absFilename, contentsString, includedUis);
-}
-
 void cmQtAutoGenerators::ParseContentForUic(
   const std::string& absFilename, const std::string& contentsString,
   std::map<std::string, std::vector<std::string> >& includedUis)
 {
-  if (this->UicExecutable.empty()) {
+  if (this->UicExecutable.empty() ||
+      ListContains(this->SkipUic, absFilename)) {
     return;
   }
+
+  if (this->Verbose) {
+    std::ostringstream err;
+    err << "AUTOUIC: Checking " << absFilename << "\n";
+    this->LogInfo(err.str());
+  }
+
   const std::string realName = cmsys::SystemTools::GetRealPath(absFilename);
   const char* contentChars = contentsString.c_str();
   if (strstr(contentChars, "ui_") != CM_NULLPTR) {
@@ -664,8 +641,15 @@ bool cmQtAutoGenerators::ParseContentForMoc(
   const std::vector<std::string>& headerExtensions,
   std::map<std::string, std::string>& includedMocs, bool relaxed)
 {
-  if (this->MocExecutable.empty()) {
+  if (this->MocExecutable.empty() ||
+      ListContains(this->SkipMoc, absFilename)) {
     return true;
+  }
+
+  if (this->Verbose) {
+    std::ostringstream err;
+    err << "AUTOMOC: Checking " << absFilename << "\n";
+    this->LogInfo(err.str());
   }
 
   const std::string scannedFileAbsPath =
@@ -887,11 +871,14 @@ void cmQtAutoGenerators::ParseHeaders(
     const std::string& headerName = *hIt;
     const std::string contents = ReadAll(headerName);
 
+    // Parse header content for MOC
     if (!this->MocExecutable.empty() &&
-        includedMocs.find(headerName) == includedMocs.end()) {
+        !ListContains(this->SkipMoc, headerName) &&
+        (includedMocs.find(headerName) == includedMocs.end())) {
+
       if (this->Verbose) {
         std::ostringstream err;
-        err << "AUTOGEN: Checking " << headerName << std::endl;
+        err << "AUTOMOC: Checking " << headerName << "\n";
         this->LogInfo(err.str());
       }
 
@@ -903,6 +890,8 @@ void cmQtAutoGenerators::ParseHeaders(
           ".cpp";
       }
     }
+
+    // Parse header content for UIC
     this->ParseContentForUic(headerName, contents, includedUis);
   }
 }
