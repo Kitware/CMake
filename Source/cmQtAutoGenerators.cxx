@@ -666,13 +666,12 @@ bool cmQtAutoGenerators::ParseContentForMoc(
   std::string ownMocUnderscoreFile;
   std::string ownMocHeaderFile;
 
-  std::string::size_type matchOffset = 0;
   // first a simple string check for "moc" is *much* faster than the regexp,
   // and if the string search already fails, we don't have to try the
   // expensive regexp
-  if (strstr(contentsString.c_str(), "moc") != CM_NULLPTR) {
+  const char* contentChars = contentsString.c_str();
+  if (strstr(contentChars, "moc") != CM_NULLPTR) {
     // Iterate over all included moc files
-    const char* contentChars = contentsString.c_str();
     while (this->RegExpMocInclude.find(contentChars)) {
       const std::string currentMoc = this->RegExpMocInclude.match(1);
       // Basename of the current moc include
