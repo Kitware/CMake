@@ -858,6 +858,12 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
+  if (prop == "TYPE") {
+    std::ostringstream e;
+    e << "TYPE property is read-only\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  }
   if (prop == "EXPORT_NAME" && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
