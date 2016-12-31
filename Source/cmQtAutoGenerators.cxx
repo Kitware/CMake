@@ -511,7 +511,8 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   std::map<std::string, std::string> notIncludedMocs;
   std::map<std::string, std::vector<std::string> > includedUis;
   // collects all headers which may need to be mocced
-  std::set<std::string> headerFiles;
+  std::set<std::string> headerFilesMoc;
+  std::set<std::string> headerFilesUic;
 
   // Parse sources
   {
@@ -527,14 +528,16 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
         return false;
       }
       // Find additional headers
-      this->SearchHeadersForCppFile(absFilename, headerExtensions,
-                                    headerFiles);
+      this->SearchHeadersForSourceFile(absFilename, headerExtensions,
+                                       headerFilesMoc, headerFilesUic);
     }
   }
 
   // Parse headers
-  headerFiles.insert(this->Headers.begin(), this->Headers.end());
-  this->ParseHeaders(headerFiles, includedMocs, notIncludedMocs, includedUis);
+  headerFilesMoc.insert(this->Headers.begin(), this->Headers.end());
+  headerFilesUic.insert(this->Headers.begin(), this->Headers.end());
+  this->ParseHeaders(headerFilesMoc, headerFilesUic, includedMocs,
+                     notIncludedMocs, includedUis);
 
   // Generate files
   if (!this->MocExecutable.empty()) {
@@ -847,10 +850,10 @@ bool cmQtAutoGenerators::ParseContentForMoc(
   return true;
 }
 
-void cmQtAutoGenerators::SearchHeadersForCppFile(
+void cmQtAutoGenerators::SearchHeadersForSourceFile(
   const std::string& absFilename,
   const std::vector<std::string>& headerExtensions,
-  std::set<std::string>& absHeaders)
+  std::set<std::string>& absHeadersMoc, std::set<std::string>& absHeadersUic)
 {
   // search for header files and private header files we may need to moc:
   const std::string basename =
@@ -859,37 +862,64 @@ void cmQtAutoGenerators::SearchHeadersForCppFile(
                                 cmsys::SystemTools::GetRealPath(absFilename)) +
     '/';
 
+  // Search for regular header
   for (std::vector<std::string>::const_iterator ext = headerExtensions.begin();
        ext != headerExtensions.end(); ++ext) {
     const std::string headerName = absPath + basename + "." + (*ext);
     if (cmsys::SystemTools::FileExists(headerName.c_str())) {
-      absHeaders.insert(headerName);
+      // Moc headers
+      if (!this->MocExecutable.empty() &&
+          !ListContains(this->SkipMoc, absFilename)) {
+        absHeadersMoc.insert(headerName);
+      }
+      // Uic headers
+      if (!this->UicExecutable.empty() &&
+          !ListContains(this->SkipUic, absFilename)) {
+        absHeadersUic.insert(headerName);
+      }
       break;
     }
   }
+  // Search for private header
   for (std::vector<std::string>::const_iterator ext = headerExtensions.begin();
        ext != headerExtensions.end(); ++ext) {
     const std::string privateHeaderName = absPath + basename + "_p." + (*ext);
     if (cmsys::SystemTools::FileExists(privateHeaderName.c_str())) {
-      absHeaders.insert(privateHeaderName);
+      // Moc headers
+      if (!this->MocExecutable.empty() &&
+          !ListContains(this->SkipMoc, absFilename)) {
+        absHeadersMoc.insert(privateHeaderName);
+      }
+      // Uic headers
+      if (!this->UicExecutable.empty() &&
+          !ListContains(this->SkipUic, absFilename)) {
+        absHeadersUic.insert(privateHeaderName);
+      }
       break;
     }
   }
 }
 
 void cmQtAutoGenerators::ParseHeaders(
-  const std::set<std::string>& absHeaders,
+  const std::set<std::string>& absHeadersMoc,
+  const std::set<std::string>& absHeadersUic,
   const std::map<std::string, std::string>& includedMocs,
   std::map<std::string, std::string>& notIncludedMocs,
   std::map<std::string, std::vector<std::string> >& includedUis)
 {
-  for (std::set<std::string>::const_iterator hIt = absHeaders.begin();
-       hIt != absHeaders.end(); ++hIt) {
+  // Merged header files list to read files only once
+  std::set<std::string> headerFiles;
+  headerFiles.insert(absHeadersMoc.begin(), absHeadersMoc.end());
+  headerFiles.insert(absHeadersUic.begin(), absHeadersUic.end());
+
+  for (std::set<std::string>::const_iterator hIt = headerFiles.begin();
+       hIt != headerFiles.end(); ++hIt) {
     const std::string& headerName = *hIt;
     const std::string contents = ReadAll(headerName);
 
     // Parse header content for MOC
     if (!this->MocExecutable.empty() &&
+        (absHeadersMoc.find(headerName) != absHeadersMoc.end()) &&
         (includedMocs.find(headerName) == includedMocs.end())) {
       if (ListContains(this->SkipMoc, headerName)) {
         // Skip
@@ -916,7 +946,9 @@ void cmQtAutoGenerators::ParseHeaders(
     }
 
     // Parse header content for UIC
-    this->ParseContentForUic(headerName, contents, includedUis);
+    if (absHeadersUic.find(headerName) != absHeadersUic.end()) {
+      this->ParseContentForUic(headerName, contents, includedUis);
+    }
   }
 }
 

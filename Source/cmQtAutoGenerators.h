@@ -55,13 +55,15 @@ private:
     std::map<std::string, std::string>& includedMocs,
     std::map<std::string, std::vector<std::string> >& includedUis,
     bool relaxed);
-  void SearchHeadersForCppFile(
+  void SearchHeadersForSourceFile(
     const std::string& absFilename,
     const std::vector<std::string>& headerExtensions,
-    std::set<std::string>& absHeaders);
+    std::set<std::string>& absHeadersMoc,
+    std::set<std::string>& absHeadersUic);
 
   void ParseHeaders(
-    const std::set<std::string>& absHeaders,
+    const std::set<std::string>& absHeadersMoc,
+    const std::set<std::string>& absHeadersUic,
     const std::map<std::string, std::string>& includedMocs,
     std::map<std::string, std::string>& notIncludedMocs,
     std::map<std::string, std::vector<std::string> >& includedUis);
