@@ -607,11 +607,20 @@ void cmQtAutoGenerators::ParseContentForUic(
   const std::string& absFilename, const std::string& contentsString,
   std::map<std::string, std::vector<std::string> >& includedUis)
 {
-  if (this->UicExecutable.empty() ||
-      ListContains(this->SkipUic, absFilename)) {
+  if (this->UicExecutable.empty()) {
+    return;
+  }
+  // Check skip list
+  if (ListContains(this->SkipUic, absFilename)) {
+    if (this->Verbose) {
+      std::ostringstream err;
+      err << "AUTOUIC: Skipping " << absFilename << "\n";
+      this->LogInfo(err.str());
+    }
     return;
   }
 
+  // Process
   if (this->Verbose) {
     std::ostringstream err;
     err << "AUTOUIC: Checking " << absFilename << "\n";
@@ -641,11 +650,20 @@ bool cmQtAutoGenerators::ParseContentForMoc(
   const std::vector<std::string>& headerExtensions,
   std::map<std::string, std::string>& includedMocs, bool relaxed)
 {
-  if (this->MocExecutable.empty() ||
-      ListContains(this->SkipMoc, absFilename)) {
+  if (this->MocExecutable.empty()) {
+    return true;
+  }
+  // Check skip list
+  if (ListContains(this->SkipMoc, absFilename)) {
+    if (this->Verbose) {
+      std::ostringstream err;
+      err << "AUTOMOC: Skipping " << absFilename << "\n";
+      this->LogInfo(err.str());
+    }
     return true;
   }
 
+  // Process
   if (this->Verbose) {
     std::ostringstream err;
     err << "AUTOMOC: Checking " << absFilename << "\n";
@@ -872,21 +890,28 @@ void cmQtAutoGenerators::ParseHeaders(
 
     // Parse header content for MOC
     if (!this->MocExecutable.empty() &&
-        !ListContains(this->SkipMoc, headerName) &&
         (includedMocs.find(headerName) == includedMocs.end())) {
-
-      if (this->Verbose) {
-        std::ostringstream err;
-        err << "AUTOMOC: Checking " << headerName << "\n";
-        this->LogInfo(err.str());
-      }
-
-      std::string macroName;
-      if (this->requiresMocing(contents, macroName)) {
-        notIncludedMocs[headerName] = fpathCheckSum.getPart(headerName) +
-          "/moc_" +
-          cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName) +
-          ".cpp";
+      if (ListContains(this->SkipMoc, headerName)) {
+        // Skip
+        if (this->Verbose) {
+          std::ostringstream err;
+          err << "AUTOMOC: Skipping " << headerName << "\n";
+          this->LogInfo(err.str());
+        }
+      } else {
+        // Process
+        if (this->Verbose) {
+          std::ostringstream err;
+          err << "AUTOMOC: Checking " << headerName << "\n";
+          this->LogInfo(err.str());
+        }
+        std::string macroName;
+        if (this->requiresMocing(contents, macroName)) {
+          notIncludedMocs[headerName] = fpathCheckSum.getPart(headerName) +
+            "/moc_" +
+            cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName) +
+            ".cpp";
+        }
       }
     }
 
