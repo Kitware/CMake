@@ -139,6 +139,28 @@ if (automoc_rerun_result)
   message(SEND_ERROR "Second build of automoc_rerun failed.")
 endif()
 
+# -- Test: AUTOMOC, SKIP_AUTOMOC
+# Test for SKIP_AUTOMOC and SKIP_AUTOGEN on an AUTOMOC enabled target
+qtx_wrap_cpp(skipMocWrapMoc
+  skipSource/qItemA.hpp
+  skipSource/qItemB.hpp)
+set(skipMocSources
+  skipMoc.cpp
+  skipSource/qItemA.cpp
+  skipSource/qItemB.cpp
+  skipSource/qItemC.cpp)
+set_property(SOURCE skipSource/qItemA.cpp PROPERTY SKIP_AUTOMOC ON)
+set_property(SOURCE skipSource/qItemB.cpp PROPERTY SKIP_AUTOGEN ON)
+# AUTOMOC enabled only
+add_executable(skipMocA ${skipMocSources} ${skipMocWrapMoc})
+set_property(TARGET skipMocA PROPERTY AUTOMOC ON)
+target_link_libraries(skipMocA ${QT_LIBRARIES})
+# AUTOMOC and AUTOUIC enabled
+add_executable(skipMocB ${skipMocSources} ${skipMocWrapMoc})
+set_property(TARGET skipMocB PROPERTY AUTOMOC ON)
+set_property(TARGET skipMocB PROPERTY AUTOUIC ON)
+target_link_libraries(skipMocB ${QT_LIBRARIES})
+
 # -- Test: AUTOMOC AUTORCC
 # Source files with the same basename in different subdirectories
 add_subdirectory(sameName)
