@@ -101,13 +101,16 @@ static std::string GetQtMajorVersion(cmGeneratorTarget const* target)
 static void SetupSourceFiles(cmGeneratorTarget const* target,
                              std::vector<std::string>& mocUicSources,
                              std::vector<std::string>& mocUicHeaders,
-                             std::vector<std::string>& skipMoc,
-                             std::vector<std::string>& skipUic)
+                             std::vector<std::string>& skipMocList,
+                             std::vector<std::string>& skipUicList)
 {
   cmMakefile* makefile = target->Target->GetMakefile();
 
   std::vector<cmSourceFile*> srcFiles;
   target->GetConfigCommonSourceFiles(srcFiles);
+
+  const bool targetMoc = target->GetPropertyAsBool("AUTOMOC");
+  const bool targetUic = target->GetPropertyAsBool("AUTOUIC");
 
   cmFilePathChecksum fpathCheckSum(makefile);
   for (std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
@@ -123,32 +126,38 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
     if (cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
       continue;
     }
-    if (cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOGEN"))) {
-      continue;
-    }
-    const bool fileSkipUic =
-      cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC"));
-    const bool fileSkipMoc =
-      cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
-    if (fileSkipUic && fileSkipMoc) {
-      continue;
-    }
-
-    // Use file
     const std::string absFile =
       cmsys::SystemTools::GetRealPath(sf->GetFullPath());
-    // Add file name to sources or headers list
-    if (fileType == cmSystemTools::CXX_FILE_FORMAT) {
-      mocUicSources.push_back(absFile);
-    } else if (fileType == cmSystemTools::HEADER_FILE_FORMAT) {
-      mocUicHeaders.push_back(absFile);
+    // Skip flags
+    const bool skipAll =
+      cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOGEN"));
+    const bool skipMoc =
+      skipAll || cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
+    const bool skipUic =
+      skipAll || cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC"));
+    // Add file name to skip lists.
+    // Do this even when the file is not added to the sources/headers lists
+    // because the file name may be extracted from an other file when
+    // processing
+    if (skipMoc) {
+      skipMocList.push_back(absFile);
     }
-    // Add file name to skip lists on demand
-    if (fileSkipUic) {
-      skipUic.push_back(absFile);
+    if (skipUic) {
+      skipUicList.push_back(absFile);
     }
-    if (fileSkipMoc) {
-      skipMoc.push_back(absFile);
+
+    if ((targetMoc && !skipMoc) || (targetUic && !skipUic)) {
+      // Add file name to sources or headers list
+      switch (fileType) {
+        case cmSystemTools::CXX_FILE_FORMAT:
+          mocUicSources.push_back(absFile);
+          break;
+        case cmSystemTools::HEADER_FILE_FORMAT:
+          mocUicHeaders.push_back(absFile);
+          break;
+        default:
+          break;
+      }
     }
   }
 }
