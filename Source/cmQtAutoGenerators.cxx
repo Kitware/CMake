@@ -610,16 +610,7 @@ void cmQtAutoGenerators::ParseContentForUic(
   const std::string& absFilename, const std::string& contentsString,
   std::map<std::string, std::vector<std::string> >& includedUis)
 {
-  if (this->UicExecutable.empty()) {
-    return;
-  }
-  // Check skip list
-  if (ListContains(this->SkipUic, absFilename)) {
-    if (this->Verbose) {
-      std::ostringstream err;
-      err << "AUTOUIC: Skipping " << absFilename << "\n";
-      this->LogInfo(err.str());
-    }
+  if (this->UicExecutable.empty() || this->UicSkipTest(absFilename)) {
     return;
   }
 
@@ -653,16 +644,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
   const std::vector<std::string>& headerExtensions,
   std::map<std::string, std::string>& includedMocs, bool relaxed)
 {
-  if (this->MocExecutable.empty()) {
-    return true;
-  }
-  // Check skip list
-  if (ListContains(this->SkipMoc, absFilename)) {
-    if (this->Verbose) {
-      std::ostringstream err;
-      err << "AUTOMOC: Skipping " << absFilename << "\n";
-      this->LogInfo(err.str());
-    }
+  if (this->MocExecutable.empty() || this->MocSkipTest(absFilename)) {
     return true;
   }
 
@@ -921,14 +903,7 @@ void cmQtAutoGenerators::ParseHeaders(
     if (!this->MocExecutable.empty() &&
         (absHeadersMoc.find(headerName) != absHeadersMoc.end()) &&
         (includedMocs.find(headerName) == includedMocs.end())) {
-      if (ListContains(this->SkipMoc, headerName)) {
-        // Skip
-        if (this->Verbose) {
-          std::ostringstream err;
-          err << "AUTOMOC: Skipping " << headerName << "\n";
-          this->LogInfo(err.str());
-        }
-      } else {
+      if (!this->MocSkipTest(headerName)) {
         // Process
         if (this->Verbose) {
           std::ostringstream err;
@@ -1390,6 +1365,38 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
       cmSystemTools::RemoveFile(qrcBuildFile);
       this->RunRccFailed = true;
       return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+/**
+ * @brief Tests if the file name is in the skip list
+ */
+bool cmQtAutoGenerators::MocSkipTest(const std::string& absFilename)
+{
+  if (ListContains(this->SkipMoc, absFilename)) {
+    if (this->Verbose) {
+      std::ostringstream msg;
+      msg << "AUTOMOC: Skipping " << absFilename << "\n";
+      this->LogInfo(msg.str());
+    }
+    return true;
+  }
+  return false;
+}
+
+/**
+ * @brief Tests if the file name is in the skip list
+ */
+bool cmQtAutoGenerators::UicSkipTest(const std::string& absFilename)
+{
+  if (ListContains(this->SkipUic, absFilename)) {
+    if (this->Verbose) {
+      std::ostringstream msg;
+      msg << "AUTOUIC: Skipping " << absFilename << "\n";
+      this->LogInfo(msg.str());
     }
     return true;
   }

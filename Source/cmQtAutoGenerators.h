@@ -86,6 +86,9 @@ private:
 
   void Init();
 
+  bool MocSkipTest(const std::string& absFilename);
+  bool UicSkipTest(const std::string& absFilename);
+
   bool NameCollisionTest(const std::map<std::string, std::string>& genFiles,
                          std::multimap<std::string, std::string>& collisions);
 
