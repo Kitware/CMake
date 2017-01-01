@@ -161,6 +161,26 @@ set_property(TARGET skipMocB PROPERTY AUTOMOC ON)
 set_property(TARGET skipMocB PROPERTY AUTOUIC ON)
 target_link_libraries(skipMocB ${QT_LIBRARIES})
 
+# -- Test: AUTOUIC, SKIP_AUTOUIC
+# Test for SKIP_AUTOUIC and SKIP_AUTOGEN on an AUTOUIC enabled target
+set(skipUicSources
+  skipUic.cpp
+  skipSource/skipUicGen.cpp
+  skipSource/skipUicNoGen1.cpp
+  skipSource/skipUicNoGen2.cpp
+)
+set_property(SOURCE skipSource/skipUicNoGen1.cpp PROPERTY SKIP_AUTOUIC ON)
+set_property(SOURCE skipSource/skipUicNoGen2.cpp PROPERTY SKIP_AUTOGEN ON)
+# AUTOUIC enabled
+add_executable(skipUicA ${skipUicSources})
+set_property(TARGET skipUicA PROPERTY AUTOUIC ON)
+target_link_libraries(skipUicA ${QT_LIBRARIES})
+# AUTOUIC and AUTOMOC enabled
+add_executable(skipUicB ${skipUicSources})
+set_property(TARGET skipUicB PROPERTY AUTOUIC ON)
+set_property(TARGET skipUicB PROPERTY AUTOMOC ON)
+target_link_libraries(skipUicB ${QT_LIBRARIES})
+
 # -- Test: AUTOMOC AUTORCC
 # Source files with the same basename in different subdirectories
 add_subdirectory(sameName)
