@@ -181,6 +181,27 @@ set_property(TARGET skipUicB PROPERTY AUTOUIC ON)
 set_property(TARGET skipUicB PROPERTY AUTOMOC ON)
 target_link_libraries(skipUicB ${QT_LIBRARIES})
 
+# -- Test: AUTORCC, SKIP_AUTORCC
+# Test for SKIP_AUTORCC and SKIP_AUTOGEN on an AUTORCC enabled target
+set(skipRccSources
+  skipRcc.cpp
+  skipSource/skipRccBad1.qrc
+  skipSource/skipRccBad2.qrc
+  skipSource/skipRccGood.qrc
+)
+set_property(SOURCE skipSource/skipRccBad1.qrc PROPERTY SKIP_AUTORCC ON)
+set_property(SOURCE skipSource/skipRccBad2.qrc PROPERTY SKIP_AUTOGEN ON)
+# AUTORCC enabled
+add_executable(skipRccA ${skipRccSources})
+set_property(TARGET skipRccA PROPERTY AUTORCC ON)
+target_link_libraries(skipRccA ${QT_LIBRARIES})
+# AUTORCC, AUTOUIC and AUTOMOC enabled
+add_executable(skipRccB ${skipRccSources})
+set_property(TARGET skipRccB PROPERTY AUTORCC ON)
+set_property(TARGET skipRccB PROPERTY AUTOUIC ON)
+set_property(TARGET skipRccB PROPERTY AUTOMOC ON)
+target_link_libraries(skipRccB ${QT_LIBRARIES})
+
 # -- Test: AUTOMOC AUTORCC
 # Source files with the same basename in different subdirectories
 add_subdirectory(sameName)
