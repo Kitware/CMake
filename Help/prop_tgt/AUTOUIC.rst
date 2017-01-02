@@ -20,5 +20,8 @@ Additional command line options for ``uic`` can be set via the
 The global property :prop_gbl:`AUTOGEN_TARGETS_FOLDER` can be used to group the
 autouic targets together in an IDE, e.g. in MSVS.
 
+Source files can be excluded from :prop_tgt:`AUTOUIC` processing by
+enabling :prop_sf:`SKIP_AUTOUIC` or the broader :prop_sf:`SKIP_AUTOGEN`.
+
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
