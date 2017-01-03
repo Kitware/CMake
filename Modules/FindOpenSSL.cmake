@@ -204,7 +204,6 @@ if(WIN32 AND NOT CYGWIN)
                      SSL_EAY_LIBRARY_DEBUG SSL_EAY_LIBRARY_RELEASE)
     set(OPENSSL_SSL_LIBRARY ${SSL_EAY_LIBRARY} )
     set(OPENSSL_CRYPTO_LIBRARY ${LIB_EAY_LIBRARY} )
-    set(OPENSSL_LIBRARIES ${SSL_EAY_LIBRARY} ${LIB_EAY_LIBRARY} )
   elseif(MINGW)
     # same player, for MinGW
     set(LIB_EAY_NAMES crypto libeay32)
@@ -232,7 +231,6 @@ if(WIN32 AND NOT CYGWIN)
     mark_as_advanced(SSL_EAY LIB_EAY)
     set(OPENSSL_SSL_LIBRARY ${SSL_EAY} )
     set(OPENSSL_CRYPTO_LIBRARY ${LIB_EAY} )
-    set(OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
     unset(LIB_EAY_NAMES)
     unset(SSL_EAY_NAMES)
   else()
@@ -264,7 +262,6 @@ if(WIN32 AND NOT CYGWIN)
     mark_as_advanced(SSL_EAY LIB_EAY)
     set(OPENSSL_SSL_LIBRARY ${SSL_EAY} )
     set(OPENSSL_CRYPTO_LIBRARY ${LIB_EAY} )
-    set(OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
   endif()
 else()
 
@@ -297,8 +294,6 @@ else()
   # compat defines
   set(OPENSSL_SSL_LIBRARIES ${OPENSSL_SSL_LIBRARY})
   set(OPENSSL_CRYPTO_LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
-
-  set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
 
 endif()
 
@@ -371,10 +366,13 @@ endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
+set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} )
+
 if (OPENSSL_VERSION)
   find_package_handle_standard_args(OpenSSL
     REQUIRED_VARS
-      OPENSSL_LIBRARIES
+      OPENSSL_SSL_LIBRARY
+      OPENSSL_CRYPTO_LIBRARY
       OPENSSL_INCLUDE_DIR
     VERSION_VAR
       OPENSSL_VERSION
@@ -383,7 +381,8 @@ if (OPENSSL_VERSION)
   )
 else ()
   find_package_handle_standard_args(OpenSSL "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
-    OPENSSL_LIBRARIES
+    OPENSSL_SSL_LIBRARY
+    OPENSSL_CRYPTO_LIBRARY
     OPENSSL_INCLUDE_DIR
   )
 endif ()
