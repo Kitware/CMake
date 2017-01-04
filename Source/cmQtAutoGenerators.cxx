@@ -534,8 +534,16 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   }
 
   // Parse headers
-  headerFilesMoc.insert(this->Headers.begin(), this->Headers.end());
-  headerFilesUic.insert(this->Headers.begin(), this->Headers.end());
+  for (std::vector<std::string>::const_iterator it = this->Headers.begin();
+       it != this->Headers.end(); ++it) {
+    const std::string& headerName = *it;
+    if (!this->MocSkipTest(headerName)) {
+      headerFilesMoc.insert(this->Headers.begin(), this->Headers.end());
+    }
+    if (!this->UicSkipTest(headerName)) {
+      headerFilesUic.insert(this->Headers.begin(), this->Headers.end());
+    }
+  }
   this->ParseHeaders(headerFilesMoc, headerFilesUic, includedMocs,
                      notIncludedMocs, includedUis);
 
@@ -577,10 +585,12 @@ bool cmQtAutoGenerators::ParseSourceFile(
     this->LogWarning(err.str());
   } else {
     // Parse source contents for MOC
-    success = this->ParseContentForMoc(
-      absFilename, contentsString, headerExtensions, includedMocs, relaxed);
+    if (success && !this->MocSkipTest(absFilename)) {
+      success = this->ParseContentForMoc(
+        absFilename, contentsString, headerExtensions, includedMocs, relaxed);
+    }
     // Parse source contents for UIC
-    if (success) {
+    if (success && !this->UicSkipTest(absFilename)) {
       this->ParseContentForUic(absFilename, contentsString, includedUis);
     }
   }
@@ -610,10 +620,6 @@ void cmQtAutoGenerators::ParseContentForUic(
   const std::string& absFilename, const std::string& contentsString,
   std::map<std::string, std::vector<std::string> >& includedUis)
 {
-  if (this->UicSkipTest(absFilename)) {
-    return;
-  }
-
   // Process
   if (this->Verbose) {
     std::ostringstream err;
@@ -644,10 +650,6 @@ bool cmQtAutoGenerators::ParseContentForMoc(
   const std::vector<std::string>& headerExtensions,
   std::map<std::string, std::string>& includedMocs, bool relaxed)
 {
-  if (this->MocSkipTest(absFilename)) {
-    return true;
-  }
-
   // Process
   if (this->Verbose) {
     std::ostringstream err;
@@ -895,8 +897,7 @@ void cmQtAutoGenerators::ParseHeaders(
     const std::string contents = ReadAll(headerName);
 
     // Parse header content for MOC
-    if (!this->MocSkipTest(headerName) &&
-        (absHeadersMoc.find(headerName) != absHeadersMoc.end()) &&
+    if ((absHeadersMoc.find(headerName) != absHeadersMoc.end()) &&
         (includedMocs.find(headerName) == includedMocs.end())) {
       // Process
       if (this->Verbose) {
