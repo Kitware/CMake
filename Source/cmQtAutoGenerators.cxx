@@ -610,7 +610,7 @@ void cmQtAutoGenerators::ParseContentForUic(
   const std::string& absFilename, const std::string& contentsString,
   std::map<std::string, std::vector<std::string> >& includedUis)
 {
-  if (this->UicExecutable.empty() || this->UicSkipTest(absFilename)) {
+  if (this->UicSkipTest(absFilename)) {
     return;
   }
 
@@ -644,7 +644,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
   const std::vector<std::string>& headerExtensions,
   std::map<std::string, std::string>& includedMocs, bool relaxed)
 {
-  if (this->MocExecutable.empty() || this->MocSkipTest(absFilename)) {
+  if (this->MocSkipTest(absFilename)) {
     return true;
   }
 
@@ -838,25 +838,22 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
   std::set<std::string>& absHeadersMoc, std::set<std::string>& absHeadersUic)
 {
   // search for header files and private header files we may need to moc:
-  const std::string basename =
-    cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
-  const std::string absPath = cmsys::SystemTools::GetFilenamePath(
-                                cmsys::SystemTools::GetRealPath(absFilename)) +
-    '/';
+  std::string basepath = cmsys::SystemTools::GetFilenamePath(
+    cmsys::SystemTools::GetRealPath(absFilename));
+  basepath += '/';
+  basepath += cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
 
   // Search for regular header
   for (std::vector<std::string>::const_iterator ext = headerExtensions.begin();
        ext != headerExtensions.end(); ++ext) {
-    const std::string headerName = absPath + basename + "." + (*ext);
+    const std::string headerName = basepath + "." + (*ext);
     if (cmsys::SystemTools::FileExists(headerName.c_str())) {
       // Moc headers
-      if (!this->MocExecutable.empty() &&
-          !ListContains(this->SkipMoc, absFilename)) {
+      if (!this->MocSkipTest(absFilename) && !this->MocSkipTest(headerName)) {
         absHeadersMoc.insert(headerName);
       }
       // Uic headers
-      if (!this->UicExecutable.empty() &&
-          !ListContains(this->SkipUic, absFilename)) {
+      if (!this->UicSkipTest(absFilename) && !this->UicSkipTest(headerName)) {
         absHeadersUic.insert(headerName);
       }
       break;
@@ -865,17 +862,15 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
   // Search for private header
   for (std::vector<std::string>::const_iterator ext = headerExtensions.begin();
        ext != headerExtensions.end(); ++ext) {
-    const std::string privateHeaderName = absPath + basename + "_p." + (*ext);
-    if (cmsys::SystemTools::FileExists(privateHeaderName.c_str())) {
+    const std::string headerName = basepath + "_p." + (*ext);
+    if (cmsys::SystemTools::FileExists(headerName.c_str())) {
       // Moc headers
-      if (!this->MocExecutable.empty() &&
-          !ListContains(this->SkipMoc, absFilename)) {
-        absHeadersMoc.insert(privateHeaderName);
+      if (!this->MocSkipTest(absFilename) && !this->MocSkipTest(headerName)) {
+        absHeadersMoc.insert(headerName);
       }
       // Uic headers
-      if (!this->UicExecutable.empty() &&
-          !ListContains(this->SkipUic, absFilename)) {
-        absHeadersUic.insert(privateHeaderName);
+      if (!this->UicSkipTest(absFilename) && !this->UicSkipTest(headerName)) {
+        absHeadersUic.insert(headerName);
       }
       break;
     }
@@ -900,23 +895,21 @@ void cmQtAutoGenerators::ParseHeaders(
     const std::string contents = ReadAll(headerName);
 
     // Parse header content for MOC
-    if (!this->MocExecutable.empty() &&
+    if (!this->MocSkipTest(headerName) &&
         (absHeadersMoc.find(headerName) != absHeadersMoc.end()) &&
         (includedMocs.find(headerName) == includedMocs.end())) {
-      if (!this->MocSkipTest(headerName)) {
-        // Process
-        if (this->Verbose) {
-          std::ostringstream err;
-          err << "AUTOMOC: Checking " << headerName << "\n";
-          this->LogInfo(err.str());
-        }
-        std::string macroName;
-        if (this->requiresMocing(contents, macroName)) {
-          notIncludedMocs[headerName] = fpathCheckSum.getPart(headerName) +
-            "/moc_" +
-            cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName) +
-            ".cpp";
-        }
+      // Process
+      if (this->Verbose) {
+        std::ostringstream err;
+        err << "AUTOMOC: Checking " << headerName << "\n";
+        this->LogInfo(err.str());
+      }
+      std::string macroName;
+      if (this->requiresMocing(contents, macroName)) {
+        notIncludedMocs[headerName] = fpathCheckSum.getPart(headerName) +
+          "/moc_" +
+          cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName) +
+          ".cpp";
       }
     }
 
@@ -1372,19 +1365,19 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
 }
 
 /**
- * @brief Tests if the file name is in the skip list
+ * @brief Tests if the file should be ignored for moc scanning
+ * @return True if the file should be ignored
  */
 bool cmQtAutoGenerators::MocSkipTest(const std::string& absFilename)
 {
-  if (ListContains(this->SkipMoc, absFilename)) {
-    if (this->Verbose) {
-      std::ostringstream msg;
-      msg << "AUTOMOC: Skipping " << absFilename << "\n";
-      this->LogInfo(msg.str());
+  // Test if moc scanning is enabled
+  if (!this->MocExecutable.empty()) {
+    // Test if the file name is on the skip list
+    if (!ListContains(this->SkipMoc, absFilename)) {
+      return false;
     }
-    return true;
   }
-  return false;
+  return true;
 }
 
 /**
@@ -1392,15 +1385,14 @@ bool cmQtAutoGenerators::MocSkipTest(const std::string& absFilename)
  */
 bool cmQtAutoGenerators::UicSkipTest(const std::string& absFilename)
 {
-  if (ListContains(this->SkipUic, absFilename)) {
-    if (this->Verbose) {
-      std::ostringstream msg;
-      msg << "AUTOUIC: Skipping " << absFilename << "\n";
-      this->LogInfo(msg.str());
+  // Test if uic scanning is enabled
+  if (!this->UicExecutable.empty()) {
+    // Test if the file name is on the skip list
+    if (!ListContains(this->SkipUic, absFilename)) {
+      return false;
     }
-    return true;
   }
-  return false;
+  return true;
 }
 
 /**
