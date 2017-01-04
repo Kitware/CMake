@@ -157,6 +157,7 @@ bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
 bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
 {
   if (this->CDashUpload) {
+    // Arguments specific to the CDASH_UPLOAD signature.
     if (arg == "CDASH_UPLOAD") {
       this->ArgumentDoing = ArgumentDoingCDashUpload;
       return true;
@@ -167,7 +168,7 @@ bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
       return true;
     }
   } else {
-    // Look for arguments specific to this command.
+    // Arguments that cannot be used with CDASH_UPLOAD.
     if (arg == "PARTS") {
       this->ArgumentDoing = ArgumentDoingParts;
       this->PartsMentioned = true;
@@ -179,21 +180,21 @@ bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
       this->FilesMentioned = true;
       return true;
     }
+  }
+  // Arguments used by both modes.
+  if (arg == "RETRY_COUNT") {
+    this->ArgumentDoing = ArgumentDoingRetryCount;
+    return true;
+  }
 
-    if (arg == "RETRY_COUNT") {
-      this->ArgumentDoing = ArgumentDoingRetryCount;
-      return true;
-    }
+  if (arg == "RETRY_DELAY") {
+    this->ArgumentDoing = ArgumentDoingRetryDelay;
+    return true;
+  }
 
-    if (arg == "RETRY_DELAY") {
-      this->ArgumentDoing = ArgumentDoingRetryDelay;
-      return true;
-    }
-
-    if (arg == "INTERNAL_TEST_CHECKSUM") {
-      this->InternalTest = true;
-      return true;
-    }
+  if (arg == "INTERNAL_TEST_CHECKSUM") {
+    this->InternalTest = true;
+    return true;
   }
 
   // Look for other arguments.

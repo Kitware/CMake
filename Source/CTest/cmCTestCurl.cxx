@@ -96,6 +96,13 @@ bool cmCTestCurl::InitCurl()
   }
   // enable HTTP ERROR parsing
   curl_easy_setopt(this->Curl, CURLOPT_FAILONERROR, 1);
+
+  // if there is little to no activity for too long stop submitting
+  if (this->TimeOutSeconds) {
+    curl_easy_setopt(this->Curl, CURLOPT_LOW_SPEED_LIMIT, 1);
+    curl_easy_setopt(this->Curl, CURLOPT_LOW_SPEED_TIME, this->TimeOutSeconds);
+  }
+
   return true;
 }
 
@@ -110,12 +117,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
   }
   /* enable uploading */
   curl_easy_setopt(this->Curl, CURLOPT_UPLOAD, 1);
-  // if there is little to no activity for too long stop submitting
-  if (this->TimeOutSeconds) {
-    ::curl_easy_setopt(this->Curl, CURLOPT_LOW_SPEED_LIMIT, 1);
-    ::curl_easy_setopt(this->Curl, CURLOPT_LOW_SPEED_TIME,
-                       this->TimeOutSeconds);
-  }
+
   /* HTTP PUT please */
   ::curl_easy_setopt(this->Curl, CURLOPT_PUT, 1);
   ::curl_easy_setopt(this->Curl, CURLOPT_VERBOSE, 1);

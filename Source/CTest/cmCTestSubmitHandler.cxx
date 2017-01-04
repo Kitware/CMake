@@ -1022,6 +1022,30 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
                "Only http and https are supported for CDASH_UPLOAD\n");
     return -1;
   }
+  bool internalTest = cmSystemTools::IsOn(this->GetOption("InternalTest"));
+
+  // Get RETRY_COUNT and RETRY_DELAY values if they were set.
+  std::string retryDelayString = this->GetOption("RetryDelay") == CM_NULLPTR
+    ? ""
+    : this->GetOption("RetryDelay");
+  std::string retryCountString = this->GetOption("RetryCount") == CM_NULLPTR
+    ? ""
+    : this->GetOption("RetryCount");
+  unsigned long retryDelay = 0;
+  if (retryDelayString != "") {
+    if (!cmSystemTools::StringToULong(retryDelayString.c_str(), &retryDelay)) {
+      cmCTestLog(this->CTest, WARNING, "Invalid value for 'RETRY_DELAY' : "
+                   << retryDelayString << std::endl);
+    }
+  }
+  unsigned long retryCount = 0;
+  if (retryCountString != "") {
+    if (!cmSystemTools::StringToULong(retryCountString.c_str(), &retryCount)) {
+      cmCTestLog(this->CTest, WARNING, "Invalid value for 'RETRY_DELAY' : "
+                   << retryCountString << std::endl);
+    }
+  }
+
   char md5sum[33];
   md5sum[32] = 0;
   cmSystemTools::ComputeFileMD5(file, md5sum);
@@ -1058,7 +1082,33 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
                                 << "\nfile: " << file << "\n",
                      this->Quiet);
   std::string response;
-  if (!curl.HttpRequest(url, fields, response)) {
+
+  bool requestSucceeded = curl.HttpRequest(url, fields, response);
+  if (!internalTest && !requestSucceeded) {
+    // If request failed, wait and retry.
+    for (unsigned long i = 0; i < retryCount; i++) {
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                         "   Request failed, waiting " << retryDelay
+                                                       << " seconds...\n",
+                         this->Quiet);
+
+      double stop = cmSystemTools::GetTime() + static_cast<double>(retryDelay);
+      while (cmSystemTools::GetTime() < stop) {
+        cmSystemTools::Delay(100);
+      }
+
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                         "   Retry request: Attempt "
+                           << (i + 1) << " of " << retryCount << std::endl,
+                         this->Quiet);
+
+      requestSucceeded = curl.HttpRequest(url, fields, response);
+      if (requestSucceeded) {
+        break;
+      }
+    }
+  }
+  if (!internalTest && !requestSucceeded) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in HttpRequest\n"
                  << response);
     return -1;
@@ -1068,30 +1118,32 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
                      this->Quiet);
   Json::Value json;
   Json::Reader reader;
-  if (!reader.parse(response, json)) {
+  if (!internalTest && !reader.parse(response, json)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "error parsing json string ["
                  << response << "]\n"
                  << reader.getFormattedErrorMessages() << "\n");
     return -1;
   }
-  if (json["status"].asInt() != 0) {
+  if (!internalTest && json["status"].asInt() != 0) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Bad status returned from CDash: " << json["status"].asInt());
     return -1;
   }
-  if (json["datafilesmd5"].isArray()) {
-    int datares = json["datafilesmd5"][0].asInt();
-    if (datares == 1) {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         "File already exists on CDash, skip upload " << file
-                                                                      << "\n",
-                         this->Quiet);
-      return 0;
+  if (!internalTest) {
+    if (json["datafilesmd5"].isArray()) {
+      int datares = json["datafilesmd5"][0].asInt();
+      if (datares == 1) {
+        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                           "File already exists on CDash, skip upload "
+                             << file << "\n",
+                           this->Quiet);
+        return 0;
+      }
+    } else {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "bad datafilesmd5 value in response " << response << "\n");
+      return -1;
     }
-  } else {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "bad datafilesmd5 value in response " << response << "\n");
-    return -1;
   }
 
   std::string upload_as = cmSystemTools::GetFilenameName(file);
@@ -1100,7 +1152,40 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
        << "md5=" << md5sum << "&"
        << "filename=" << curl.Escape(upload_as) << "&"
        << "buildid=" << json["buildid"].asString();
-  if (!curl.UploadFile(file, url, fstr.str(), response)) {
+
+  bool uploadSucceeded = false;
+  if (!internalTest) {
+    uploadSucceeded = curl.UploadFile(file, url, fstr.str(), response);
+  }
+
+  if (!uploadSucceeded) {
+    // If upload failed, wait and retry.
+    for (unsigned long i = 0; i < retryCount; i++) {
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                         "   Upload failed, waiting " << retryDelay
+                                                      << " seconds...\n",
+                         this->Quiet);
+
+      double stop = cmSystemTools::GetTime() + static_cast<double>(retryDelay);
+      while (cmSystemTools::GetTime() < stop) {
+        cmSystemTools::Delay(100);
+      }
+
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                         "   Retry upload: Attempt "
+                           << (i + 1) << " of " << retryCount << std::endl,
+                         this->Quiet);
+
+      if (!internalTest) {
+        uploadSucceeded = curl.UploadFile(file, url, fstr.str(), response);
+      }
+      if (uploadSucceeded) {
+        break;
+      }
+    }
+  }
+
+  if (!uploadSucceeded) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "error uploading to CDash. "
                  << file << " " << url << " " << fstr.str());
     return -1;
