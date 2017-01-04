@@ -1007,6 +1007,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
     return -1;
   }
   cmCTestCurl curl(this->CTest);
+  curl.SetQuiet(this->Quiet);
   std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
   std::vector<std::string> args;
   cmSystemTools::ExpandListArgument(curlopt, args);
