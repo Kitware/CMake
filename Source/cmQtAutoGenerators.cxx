@@ -198,7 +198,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
 
   if (!makefile->ReadListFile(filename.c_str())) {
     std::ostringstream err;
-    err << "AUTOGEN: error processing file: " << filename << std::endl;
+    err << "AutoGen: error processing file: " << filename << std::endl;
     this->LogError(err.str());
     return false;
   }
@@ -328,7 +328,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     }
     if (this->RccSources.size() != rccInputLists.size()) {
       std::ostringstream err;
-      err << "AUTOGEN: RCC sources lists size missmatch in: " << filename;
+      err << "AutoGen: RCC sources lists size missmatch in: " << filename;
       err << std::endl;
       this->LogError(err.str());
       return false;
@@ -572,7 +572,7 @@ bool cmQtAutoGenerators::ParseSourceFile(
   const std::string contentsString = ReadAll(absFilename);
   if (contentsString.empty()) {
     std::ostringstream err;
-    err << "AUTOGEN: warning: " << absFilename << "\n"
+    err << "AutoGen: Warning: " << absFilename << "\n"
         << "The file is empty\n";
     this->LogWarning(err.str());
   } else {
@@ -617,7 +617,7 @@ void cmQtAutoGenerators::ParseContentForUic(
   // Process
   if (this->Verbose) {
     std::ostringstream err;
-    err << "AUTOUIC: Checking " << absFilename << "\n";
+    err << "AutoUic: Checking " << absFilename << "\n";
     this->LogInfo(err.str());
   }
 
@@ -651,7 +651,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
   // Process
   if (this->Verbose) {
     std::ostringstream err;
-    err << "AUTOMOC: Checking " << absFilename << "\n";
+    err << "AutoMoc: Checking " << absFilename << "\n";
     this->LogInfo(err.str());
   }
 
@@ -705,7 +705,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
           }
         } else {
           std::ostringstream err;
-          err << "AUTOMOC: error: " << absFilename << "\n"
+          err << "AutoMoc: Error: " << absFilename << "\n"
               << "The file includes the moc file \"" << currentMoc
               << "\", but could not find header \"" << basename << '{'
               << this->JoinExts(headerExtensions) << "}\" ";
@@ -733,7 +733,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
               fileToMoc = headerToMoc;
               if (!requiresMoc && basename == scannedFileBasename) {
                 std::ostringstream err;
-                err << "AUTOMOC: warning: " << absFilename << "\n"
+                err << "AutoMoc: Warning: " << absFilename << "\n"
                     << "The file includes the moc file \"" << currentMoc
                     << "\", but does not contain a " << macroName
                     << " macro. Running moc on "
@@ -743,7 +743,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
                 this->LogWarning(err.str());
               } else {
                 std::ostringstream err;
-                err << "AUTOMOC: warning: " << absFilename << "\n"
+                err << "AutoMoc: Warning: " << absFilename << "\n"
                     << "The file includes the moc file \"" << currentMoc
                     << "\" instead of \"moc_" << basename
                     << ".cpp\". Running moc on "
@@ -754,7 +754,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
               }
             } else {
               std::ostringstream err;
-              err << "AUTOMOC: error: " << absFilename << "\n"
+              err << "AutoMoc: Error: " << absFilename << "\n"
                   << "The file includes the moc file \"" << currentMoc
                   << "\", which seems to be the moc file from a different "
                      "source file. CMake also could not find a matching "
@@ -772,7 +772,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
           if (basename != scannedFileBasename) {
             // Don't allow FOO.moc include other than self in strict mode
             std::ostringstream err;
-            err << "AUTOMOC: error: " << absFilename << "\n"
+            err << "AutoMoc: Error: " << absFilename << "\n"
                 << "The file includes the moc file \"" << currentMoc
                 << "\", which seems to be the moc file from a different "
                    "source file. This is not supported. Include \""
@@ -803,7 +803,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
     if (relaxed && ownMocUnderscoreIncluded) {
       // This is for KDE4 compatibility:
       std::ostringstream err;
-      err << "AUTOMOC: warning: " << absFilename << "\n"
+      err << "AutoMoc: Warning: " << absFilename << "\n"
           << "The file contains a " << macroName
           << " macro, but does not include "
           << "\"" << scannedFileBasename << ".moc\", but instead includes "
@@ -820,7 +820,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
     } else {
       // Otherwise always error out since it will not compile:
       std::ostringstream err;
-      err << "AUTOMOC: error: " << absFilename << "\n"
+      err << "AutoMoc: Error: " << absFilename << "\n"
           << "The file contains a " << macroName
           << " macro, but does not include "
           << "\"" << scannedFileBasename << ".moc\" !\n";
@@ -901,7 +901,7 @@ void cmQtAutoGenerators::ParseHeaders(
       // Process
       if (this->Verbose) {
         std::ostringstream err;
-        err << "AUTOMOC: Checking " << headerName << "\n";
+        err << "AutoMoc: Checking " << headerName << "\n";
         this->LogInfo(err.str());
       }
       std::string macroName;
@@ -932,7 +932,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
     mergedMocs.insert(notIncludedMocs.begin(), notIncludedMocs.end());
     if (this->NameCollisionTest(mergedMocs, collisions)) {
       std::ostringstream err;
-      err << "AUTOMOC: error: "
+      err << "AutoMoc: Error: "
              "The same moc file will be generated "
              "from different sources."
           << std::endl
@@ -1003,7 +1003,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
       // nothing changed: don't touch the moc_compilation.cpp file
       if (this->Verbose) {
         std::ostringstream err;
-        err << "AUTOMOC: " << this->OutMocCppFilenameRel << " still up to date"
+        err << "AutoMoc: " << this->OutMocCppFilenameRel << " still up to date"
             << std::endl;
         this->LogInfo(err.str());
       }
@@ -1025,7 +1025,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
     if (!outfile) {
       success = false;
       std::ostringstream err;
-      err << "AUTOMOC: error opening " << this->OutMocCppFilenameAbs << "\n";
+      err << "AutoMoc: error opening " << this->OutMocCppFilenameAbs << "\n";
       this->LogError(err.str());
     } else {
       outfile << automocSource;
@@ -1033,7 +1033,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
       if (!outfile.good()) {
         success = false;
         std::ostringstream err;
-        err << "AUTOMOC: error writing " << this->OutMocCppFilenameAbs << "\n";
+        err << "AutoMoc: error writing " << this->OutMocCppFilenameAbs << "\n";
         this->LogError(err.str());
       }
     }
@@ -1090,7 +1090,7 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
     if (!result || retVal) {
       {
         std::ostringstream err;
-        err << "AUTOMOC: error: moc process for " << mocFileRel << " failed:\n"
+        err << "AutoMoc: Error: moc process for " << mocFileRel << " failed:\n"
             << output << std::endl;
         this->LogError(err.str());
       }
@@ -1133,7 +1133,7 @@ bool cmQtAutoGenerators::GenerateUiFiles(
     std::multimap<std::string, std::string> collisions;
     if (this->NameCollisionTest(testMap, collisions)) {
       std::ostringstream err;
-      err << "AUTOUIC: error: The same ui_NAME.h file will be generated "
+      err << "AutoUic: Error: The same ui_NAME.h file will be generated "
              "from different sources."
           << std::endl
           << "To avoid this error rename the source files." << std::endl;
@@ -1214,7 +1214,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
     if (!result || retVal) {
       {
         std::ostringstream err;
-        err << "AUTOUIC: error: uic process for " << uicFileRel
+        err << "AutoUic: Error: uic process for " << uicFileRel
             << " needed by\n \"" << realName << "\"\nfailed:\n"
             << output << std::endl;
         this->LogError(err.str());
@@ -1263,7 +1263,7 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
     std::multimap<std::string, std::string> collisions;
     if (this->NameCollisionTest(qrcGenMap, collisions)) {
       std::ostringstream err;
-      err << "AUTORCC: error: The same qrc_NAME.cpp file"
+      err << "AutoRcc: Error: The same qrc_NAME.cpp file"
              " will be generated from different sources."
           << std::endl
           << "To avoid this error rename the source .qrc files." << std::endl;
@@ -1350,7 +1350,7 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
     if (!result || retVal) {
       {
         std::ostringstream err;
-        err << "AUTORCC: error: rcc process for " << qrcOutputFile
+        err << "AutoRcc: Error: rcc process for " << qrcOutputFile
             << " failed:\n"
             << output << std::endl;
         this->LogError(err.str());
@@ -1495,7 +1495,7 @@ bool cmQtAutoGenerators::MakeParentDirectory(const std::string& filename)
     success = cmsys::SystemTools::MakeDirectory(dirName);
     if (!success) {
       std::ostringstream err;
-      err << "AUTOGEN: Directory creation failed: " << dirName << std::endl;
+      err << "AutoGen: Directory creation failed: " << dirName << std::endl;
       this->LogError(err.str());
     }
   }
