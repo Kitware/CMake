@@ -11,6 +11,7 @@
 #include "cmStateDirectory.h"
 
 class cmComputeLinkInformation;
+class cmGeneratorTarget;
 class cmOutputConverter;
 
 class cmLinkLineComputer
@@ -35,6 +36,9 @@ public:
 
   virtual std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
                                            std::string const& stdLibString);
+
+  virtual std::string GetLinkerLanguage(cmGeneratorTarget* target,
+                                        std::string const& config);
 
 protected:
   std::string ComputeLinkLibs(cmComputeLinkInformation& cli);
