@@ -126,18 +126,6 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus&) override;
 
-  /**
-   * This is called at the end after all the information
-   * specified by the command is accumulated. Most commands do
-   * not implement this method.  At this point, reading and
-   * writing to the cache can be done.
-   */
-  void FinalPass() override;
-  bool HasFinalPass() const override
-  {
-    return this->Impl->FinalPass != nullptr;
-  }
-
 private:
   std::shared_ptr<LoadedCommandImpl> Impl;
 };
@@ -168,6 +156,11 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
   cmFreeArguments(argc, argv);
 
   if (result) {
+    if (this->Impl->FinalPass) {
+      auto impl = this->Impl;
+      this->Makefile->AddFinalAction(
+        [impl](cmMakefile& makefile) { impl->DoFinalPass(&makefile); });
+    }
     return true;
   }
 
@@ -176,13 +169,6 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError(this->Impl->Error);
   }
   return false;
-}
-
-void cmLoadedCommand::FinalPass()
-{
-  if (this->Impl->FinalPass) {
-    this->Impl->DoFinalPass(this->Makefile);
-  }
 }
 
 } // namespace
