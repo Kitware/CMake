@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallProgramsCommand.h"
 
-#include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallFilesGenerator.h"
@@ -11,6 +10,10 @@
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
+
+static void FinalAction(cmMakefile& makefile, std::string const& dest,
+                        std::vector<std::string> const& args);
+static std::string FindInstallSource(cmMakefile& makefile, const char* name);
 
 // cmExecutableCommand
 bool cmInstallProgramsCommand::InitialPass(
@@ -24,51 +27,55 @@ bool cmInstallProgramsCommand::InitialPass(
   // Enable the install target.
   this->Makefile->GetGlobalGenerator()->EnableInstallTarget();
 
-  this->Destination = args[0];
-
-  cmAppend(this->FinalArgs, args.begin() + 1, args.end());
-
   this->Makefile->GetGlobalGenerator()->AddInstallComponent(
     this->Makefile->GetSafeDefinition("CMAKE_INSTALL_DEFAULT_COMPONENT_NAME"));
 
+  std::string const& dest = args[0];
+  std::vector<std::string> const finalArgs(args.begin() + 1, args.end());
+  this->Makefile->AddFinalAction([dest, finalArgs](cmMakefile& makefile) {
+    FinalAction(makefile, dest, finalArgs);
+  });
   return true;
 }
 
-void cmInstallProgramsCommand::FinalPass()
+static void FinalAction(cmMakefile& makefile, std::string const& dest,
+                        std::vector<std::string> const& args)
 {
   bool files_mode = false;
-  if (!this->FinalArgs.empty() && this->FinalArgs[0] == "FILES") {
+  if (!args.empty() && args[0] == "FILES") {
     files_mode = true;
   }
 
+  std::vector<std::string> files;
+
   // two different options
-  if (this->FinalArgs.size() > 1 || files_mode) {
+  if (args.size() > 1 || files_mode) {
     // for each argument, get the programs
-    std::vector<std::string>::iterator s = this->FinalArgs.begin();
+    std::vector<std::string>::const_iterator s = args.begin();
     if (files_mode) {
       // Skip the FILES argument in files mode.
       ++s;
     }
-    for (; s != this->FinalArgs.end(); ++s) {
+    for (; s != args.end(); ++s) {
       // add to the result
-      this->Files.push_back(this->FindInstallSource(s->c_str()));
+      files.push_back(FindInstallSource(makefile, s->c_str()));
     }
   } else // reg exp list
   {
     std::vector<std::string> programs;
-    cmSystemTools::Glob(this->Makefile->GetCurrentSourceDirectory(),
-                        this->FinalArgs[0], programs);
+    cmSystemTools::Glob(makefile.GetCurrentSourceDirectory(), args[0],
+                        programs);
 
     std::vector<std::string>::iterator s = programs.begin();
     // for each argument, get the programs
     for (; s != programs.end(); ++s) {
-      this->Files.push_back(this->FindInstallSource(s->c_str()));
+      files.push_back(FindInstallSource(makefile, s->c_str()));
     }
   }
 
   // Construct the destination.  This command always installs under
   // the prefix.  We skip the leading slash given by the user.
-  std::string destination = this->Destination.substr(1);
+  std::string destination = dest.substr(1);
   cmSystemTools::ConvertToUnixSlashes(destination);
   if (destination.empty()) {
     destination = ".";
@@ -79,12 +86,12 @@ void cmInstallProgramsCommand::FinalPass()
   const char* no_rename = "";
   bool no_exclude_from_all = false;
   std::string no_component =
-    this->Makefile->GetSafeDefinition("CMAKE_INSTALL_DEFAULT_COMPONENT_NAME");
+    makefile.GetSafeDefinition("CMAKE_INSTALL_DEFAULT_COMPONENT_NAME");
   std::vector<std::string> no_configurations;
   cmInstallGenerator::MessageLevel message =
-    cmInstallGenerator::SelectMessageLevel(this->Makefile);
-  this->Makefile->AddInstallGenerator(new cmInstallFilesGenerator(
-    this->Files, destination.c_str(), true, no_permissions, no_configurations,
+    cmInstallGenerator::SelectMessageLevel(&makefile);
+  makefile.AddInstallGenerator(new cmInstallFilesGenerator(
+    files, destination.c_str(), true, no_permissions, no_configurations,
     no_component.c_str(), message, no_exclude_from_all, no_rename));
 }
 
@@ -94,7 +101,7 @@ void cmInstallProgramsCommand::FinalPass()
  * present in the build tree.  If a full path is given, it is just
  * returned.
  */
-std::string cmInstallProgramsCommand::FindInstallSource(const char* name) const
+static std::string FindInstallSource(cmMakefile& makefile, const char* name)
 {
   if (cmSystemTools::FileIsFullPath(name) ||
       cmGeneratorExpression::Find(name) == 0) {
@@ -103,10 +110,10 @@ std::string cmInstallProgramsCommand::FindInstallSource(const char* name) const
   }
 
   // This is a relative path.
-  std::string tb = this->Makefile->GetCurrentBinaryDirectory();
+  std::string tb = makefile.GetCurrentBinaryDirectory();
   tb += "/";
   tb += name;
-  std::string ts = this->Makefile->GetCurrentSourceDirectory();
+  std::string ts = makefile.GetCurrentSourceDirectory();
   ts += "/";
   ts += name;
 
