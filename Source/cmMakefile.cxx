@@ -355,20 +355,6 @@ private:
   cmMakefile* Makefile;
 };
 
-class cmFinalPassAction
-{
-public:
-  cmFinalPassAction(std::unique_ptr<cmCommand> command)
-    : Command(std::move(command))
-  {
-  }
-
-  void operator()(cmMakefile&) { this->Command->FinalPass(); }
-
-private:
-  std::shared_ptr<cmCommand> Command;
-};
-
 bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
                                 cmExecutionStatus& status)
 {
@@ -429,9 +415,6 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         if (this->GetCMakeInstance()->GetWorkingMode() != cmake::NORMAL_MODE) {
           cmSystemTools::SetFatalErrorOccured();
         }
-      } else if (pcmd->HasFinalPass()) {
-        // use the command
-        this->AddFinalAction(cmFinalPassAction(std::move(pcmd)));
       }
     }
   } else {

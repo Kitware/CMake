@@ -38,10 +38,6 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;
 
-  void FinalPass() override { this->Command->FinalPass(); }
-
-  bool HasFinalPass() const override { return this->Command->HasFinalPass(); }
-
 private:
   std::unique_ptr<cmCommand> Command;
   cmPolicies::PolicyID Policy;
