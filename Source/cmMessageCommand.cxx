@@ -1,21 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMessageCommand.h"
+
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmMessenger.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmLibraryCommand
 bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
                                    cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
@@ -24,7 +23,6 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
   cmake::MessageType type = cmake::MESSAGE;
   bool status = false;
   bool fatal = false;
-  cmake* cm = this->Makefile->GetCMakeInstance();
   if (*i == "SEND_ERROR") {
     type = cmake::FATAL_ERROR;
     ++i;
@@ -36,10 +34,11 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
     type = cmake::WARNING;
     ++i;
   } else if (*i == "AUTHOR_WARNING") {
-    if (cm->GetDevWarningsAsErrors(this->Makefile)) {
+    if (this->Makefile->IsSet("CMAKE_SUPPRESS_DEVELOPER_ERRORS") &&
+        !this->Makefile->IsOn("CMAKE_SUPPRESS_DEVELOPER_ERRORS")) {
       fatal = true;
       type = cmake::AUTHOR_ERROR;
-    } else if (!cm->GetSuppressDevWarnings(this->Makefile)) {
+    } else if (!this->Makefile->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS")) {
       type = cmake::AUTHOR_WARNING;
     } else {
       return true;
@@ -49,10 +48,11 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
     status = true;
     ++i;
   } else if (*i == "DEPRECATION") {
-    if (cm->GetDeprecatedWarningsAsErrors(this->Makefile)) {
+    if (this->Makefile->IsOn("CMAKE_ERROR_DEPRECATED")) {
       fatal = true;
       type = cmake::DEPRECATION_ERROR;
-    } else if (!cm->GetSuppressDeprecatedWarnings(this->Makefile)) {
+    } else if ((!this->Makefile->IsSet("CMAKE_WARN_DEPRECATED") ||
+                this->Makefile->IsOn("CMAKE_WARN_DEPRECATED"))) {
       type = cmake::DEPRECATION_WARNING;
     } else {
       return true;
@@ -63,8 +63,9 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
   std::string message = cmJoin(cmMakeRange(i, args.end()), std::string());
 
   if (type != cmake::MESSAGE) {
-    // we've overriden the message type, above, so force IssueMessage to use it
-    this->Makefile->IssueMessage(type, message, true);
+    // we've overriden the message type, above, so display it directly
+    cmMessenger* m = this->Makefile->GetMessenger();
+    m->DisplayMessage(type, message, this->Makefile->GetBacktrace());
   } else {
     if (status) {
       this->Makefile->DisplayStatus(message.c_str(), -1);

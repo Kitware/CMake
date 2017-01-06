@@ -1,20 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesLongMessageForm.h"
 
-#include "../cmSystemTools.h"
-#include "../cmVersion.h"
-#include "../cmake.h"
+#include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
+#include "cmCursesStandardIncludes.h"
+#include "cmVersion.h"
+
+#include <stdio.h>
+#include <string.h>
 
 inline int ctrl(int z)
 {
@@ -32,8 +26,8 @@ cmCursesLongMessageForm::cmCursesLongMessageForm(
     this->Messages += "\n\n";
   }
   this->Title = title;
-  this->Fields[0] = 0;
-  this->Fields[1] = 0;
+  this->Fields[0] = CM_NULLPTR;
+  this->Fields[1] = CM_NULLPTR;
 }
 
 cmCursesLongMessageForm::~cmCursesLongMessageForm()
@@ -54,9 +48,9 @@ void cmCursesLongMessageForm::UpdateStatusBar()
     size = cmCursesMainForm::MAX_WIDTH - 1;
   }
   strncpy(bar, this->Title.c_str(), size);
-  for (size_t i = size - 1; i < cmCursesMainForm::MAX_WIDTH; i++)
+  for (size_t i = size - 1; i < cmCursesMainForm::MAX_WIDTH; i++) {
     bar[i] = ' ';
-
+  }
   int width;
   if (x < cmCursesMainForm::MAX_WIDTH) {
     width = x;
@@ -102,7 +96,8 @@ void cmCursesLongMessageForm::PrintKeys()
   pos_form_cursor(this->Form);
 }
 
-void cmCursesLongMessageForm::Render(int, int, int, int)
+void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
+                                     int /*height*/)
 {
   int x, y;
   getmaxyx(stdscr, y, x);
@@ -110,7 +105,7 @@ void cmCursesLongMessageForm::Render(int, int, int, int)
   if (this->Form) {
     unpost_form(this->Form);
     free_form(this->Form);
-    this->Form = 0;
+    this->Form = CM_NULLPTR;
   }
 
   const char* msg = this->Messages.c_str();
@@ -119,7 +114,7 @@ void cmCursesLongMessageForm::Render(int, int, int, int)
 
   if (this->Fields[0]) {
     free_field(this->Fields[0]);
-    this->Fields[0] = 0;
+    this->Fields[0] = CM_NULLPTR;
   }
 
   this->Fields[0] = new_field(y - 6, x - 2, 1, 1, 0, 0);

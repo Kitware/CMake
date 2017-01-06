@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindLTTngUST
 # ------------
@@ -29,20 +32,6 @@
 #   ``TRUE`` if the ``tracef()`` API is available in the system's LTTng-UST
 # ``LTTNGUST_HAS_TRACELOG``
 #   ``TRUE`` if the ``tracelog()`` API is available in the system's LTTng-UST
-
-#=============================================================================
-# Copyright 2016 Kitware, Inc.
-# Copyright 2016 Philippe Proulx <pproulx@efficios.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 find_path(LTTNGUST_INCLUDE_DIRS NAMES lttng/tracepoint.h)
 find_library(LTTNGUST_LIBRARIES NAMES lttng-ust)
@@ -101,8 +90,6 @@ if(LTTNGUST_INCLUDE_DIRS AND LTTNGUST_LIBRARIES)
   set(LTTNGUST_LIBRARIES ${LTTNGUST_LIBRARIES} ${CMAKE_DL_LIBS})
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set LTTNGUST_FOUND to
-# TRUE if all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(LTTngUST FOUND_VAR LTTNGUST_FOUND
                                   REQUIRED_VARS LTTNGUST_LIBRARIES

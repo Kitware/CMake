@@ -1,27 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackPKGGenerator.h"
 
-#include "cmake.h"
-#include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
-#include "cmSystemTools.h"
-#include "cmMakefile.h"
-#include "cmGeneratedFileStream.h"
-#include "cmCPackComponentGroup.h"
-#include "cmCPackLog.h"
+#include <vector>
 
-#include <cmsys/SystemTools.hxx>
-#include <cmsys/Glob.hxx>
+#include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
+#include "cmCPackLog.h"
+#include "cmSystemTools.h"
+#include "cmXMLWriter.h"
 
 cmCPackPKGGenerator::cmCPackPKGGenerator()
 {
@@ -39,12 +26,11 @@ bool cmCPackPKGGenerator::SupportsComponentInstallation() const
 
 int cmCPackPKGGenerator::InitializeInternal()
 {
-  cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                "cmCPackPKGGenerator::Initialize()" << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "cmCPackPKGGenerator::Initialize()"
+                  << std::endl);
 
   return this->Superclass::InitializeInternal();
 }
-
 
 std::string cmCPackPKGGenerator::GetPackageName(
   const cmCPackComponent& component)
@@ -53,16 +39,15 @@ std::string cmCPackPKGGenerator::GetPackageName(
     std::string packagesDir = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
     packagesDir += ".dummy";
     std::ostringstream out;
-    out << cmSystemTools::GetFilenameWithoutLastExtension(packagesDir)
-        << "-" << component.Name << ".pkg";
+    out << cmSystemTools::GetFilenameWithoutLastExtension(packagesDir) << "-"
+        << component.Name << ".pkg";
     return out.str();
   } else {
     return component.ArchiveFile + ".pkg";
   }
 }
 
-void cmCPackPKGGenerator::WriteDistributionFile(
-  const char* metapackageFile)
+void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
 {
   std::string distributionTemplate =
     this->FindTemplate("CPack.distribution.dist.in");
@@ -78,14 +63,15 @@ void cmCPackPKGGenerator::WriteDistributionFile(
   // Create the choice outline, which provides a tree-based view of
   // the components in their groups.
   std::ostringstream choiceOut;
-  choiceOut << "<choices-outline>" << std::endl;
+  cmXMLWriter xout(choiceOut, 1);
+  xout.StartElement("choices-outline");
 
   // Emit the outline for the groups
   std::map<std::string, cmCPackComponentGroup>::iterator groupIt;
   for (groupIt = this->ComponentGroups.begin();
        groupIt != this->ComponentGroups.end(); ++groupIt) {
     if (groupIt->second.ParentGroup == 0) {
-      CreateChoiceOutline(groupIt->second, choiceOut);
+      CreateChoiceOutline(groupIt->second, xout);
     }
   }
 
@@ -94,28 +80,32 @@ void cmCPackPKGGenerator::WriteDistributionFile(
   for (compIt = this->Components.begin(); compIt != this->Components.end();
        ++compIt) {
     if (!compIt->second.Group) {
-      choiceOut << "<line choice=\"" << compIt->first << "Choice\"></line>"
-                << std::endl;
+      xout.StartElement("line");
+      xout.Attribute("choice", compIt->first + "Choice");
+      xout.Content(""); // Avoid self-closing tag.
+      xout.EndElement();
     }
   }
   if (!this->PostFlightComponent.Name.empty()) {
-    choiceOut << "<line choice=\"" << PostFlightComponent.Name
-              << "Choice\"></line>" << std::endl;
+    xout.StartElement("line");
+    xout.Attribute("choice", PostFlightComponent.Name + "Choice");
+    xout.Content(""); // Avoid self-closing tag.
+    xout.EndElement();
   }
-  choiceOut << "</choices-outline>" << std::endl;
+  xout.EndElement(); // choices-outline>
 
   // Create the actual choices
   for (groupIt = this->ComponentGroups.begin();
        groupIt != this->ComponentGroups.end(); ++groupIt) {
-    CreateChoice(groupIt->second, choiceOut);
+    CreateChoice(groupIt->second, xout);
   }
   for (compIt = this->Components.begin(); compIt != this->Components.end();
        ++compIt) {
-    CreateChoice(compIt->second, choiceOut);
+    CreateChoice(compIt->second, xout);
   }
 
   if (!this->PostFlightComponent.Name.empty()) {
-    CreateChoice(PostFlightComponent, choiceOut);
+    CreateChoice(PostFlightComponent, xout);
   }
 
   this->SetOption("CPACK_PACKAGEMAKER_CHOICES", choiceOut.str().c_str());
@@ -126,40 +116,44 @@ void cmCPackPKGGenerator::WriteDistributionFile(
 }
 
 void cmCPackPKGGenerator::CreateChoiceOutline(
-  const cmCPackComponentGroup& group, std::ostringstream& out)
+  const cmCPackComponentGroup& group, cmXMLWriter& xout)
 {
-  out << "<line choice=\"" << group.Name << "Choice\">" << std::endl;
+  xout.StartElement("line");
+  xout.Attribute("choice", group.Name + "Choice");
   std::vector<cmCPackComponentGroup*>::const_iterator groupIt;
   for (groupIt = group.Subgroups.begin(); groupIt != group.Subgroups.end();
        ++groupIt) {
-    CreateChoiceOutline(**groupIt, out);
+    CreateChoiceOutline(**groupIt, xout);
   }
 
   std::vector<cmCPackComponent*>::const_iterator compIt;
   for (compIt = group.Components.begin(); compIt != group.Components.end();
        ++compIt) {
-    out << "  <line choice=\"" << (*compIt)->Name << "Choice\"></line>"
-        << std::endl;
+    xout.StartElement("line");
+    xout.Attribute("choice", (*compIt)->Name + "Choice");
+    xout.Content(""); // Avoid self-closing tag.
+    xout.EndElement();
   }
-  out << "</line>" << std::endl;
+  xout.EndElement();
 }
 
-void cmCPackPKGGenerator::CreateChoice(
-  const cmCPackComponentGroup& group, std::ostringstream& out)
+void cmCPackPKGGenerator::CreateChoice(const cmCPackComponentGroup& group,
+                                       cmXMLWriter& xout)
 {
-  out << "<choice id=\"" << group.Name << "Choice\" "
-      << "title=\"" << group.DisplayName << "\" "
-      << "start_selected=\"true\" "
-      << "start_enabled=\"true\" "
-      << "start_visible=\"true\" ";
+  xout.StartElement("choice");
+  xout.Attribute("id", group.Name + "Choice");
+  xout.Attribute("title", group.DisplayName);
+  xout.Attribute("start_selected", "true");
+  xout.Attribute("start_enabled", "true");
+  xout.Attribute("start_visible", "true");
   if (!group.Description.empty()) {
-    out << "description=\"" << EscapeForXML(group.Description) << "\"";
+    xout.Attribute("description", group.Description);
   }
-  out << "></choice>" << std::endl;
+  xout.EndElement();
 }
 
-void cmCPackPKGGenerator::CreateChoice(
-  const cmCPackComponent& component, std::ostringstream& out)
+void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
+                                       cmXMLWriter& xout)
 {
   std::string packageId = "com.";
   packageId += this->GetOption("CPACK_PACKAGE_VENDOR");
@@ -168,18 +162,16 @@ void cmCPackPKGGenerator::CreateChoice(
   packageId += '.';
   packageId += component.Name;
 
-  out << "<choice id=\"" << component.Name << "Choice\" "
-      << "title=\"" << component.DisplayName << "\" "
-      << "start_selected=\""
-      << (component.IsDisabledByDefault && !component.IsRequired ? "false"
-                                                                 : "true")
-      << "\" "
-      << "start_enabled=\"" << (component.IsRequired ? "false" : "true")
-      << "\" "
-      << "start_visible=\"" << (component.IsHidden ? "false" : "true")
-      << "\" ";
+  xout.StartElement("choice");
+  xout.Attribute("id", component.Name + "Choice");
+  xout.Attribute("title", component.DisplayName);
+  xout.Attribute(
+    "start_selected",
+    component.IsDisabledByDefault && !component.IsRequired ? "false" : "true");
+  xout.Attribute("start_enabled", component.IsRequired ? "false" : "true");
+  xout.Attribute("start_visible", component.IsHidden ? "false" : "true");
   if (!component.Description.empty()) {
-    out << "description=\"" << EscapeForXML(component.Description) << "\" ";
+    xout.Attribute("description", component.Description);
   }
   if (!component.Dependencies.empty() ||
       !component.ReverseDependencies.empty()) {
@@ -197,16 +189,17 @@ void cmCPackPKGGenerator::CreateChoice(
     // This way, selecting C will automatically select everything it depends
     // on (B and A), while selecting something that depends on C--either D
     // or E--will automatically cause C to get selected.
-    out << "selected=\"my.choice.selected";
+    std::ostringstream selected("my.choice.selected");
     std::set<const cmCPackComponent*> visited;
-    AddDependencyAttributes(component, visited, out);
+    AddDependencyAttributes(component, visited, selected);
     visited.clear();
-    AddReverseDependencyAttributes(component, visited, out);
-    out << "\"";
+    AddReverseDependencyAttributes(component, visited, selected);
+    xout.Attribute("selected", selected.str());
   }
-  out << ">" << std::endl;
-  out << "  <pkg-ref id=\"" << packageId << "\"></pkg-ref>" << std::endl;
-  out << "</choice>" << std::endl;
+  xout.StartElement("pkg-ref");
+  xout.Attribute("id", packageId);
+  xout.EndElement(); // pkg-ref
+  xout.EndElement(); // choice
 
   // Create a description of the package associated with this
   // component.
@@ -218,20 +211,22 @@ void cmCPackPKGGenerator::CreateChoice(
   dirName += '/';
   dirName += component.Name;
   dirName += this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
-  unsigned long installedSize =
-    component.GetInstalledSizeInKbytes(dirName.c_str());
+  unsigned long installedSize = component.GetInstalledSizeInKbytes(dirName);
 
-  out << "<pkg-ref id=\"" << packageId << "\" "
-      << "version=\"" << this->GetOption("CPACK_PACKAGE_VERSION") << "\" "
-      << "installKBytes=\"" << installedSize << "\" "
-      << ">";
+  xout.StartElement("pkg-ref");
+  xout.Attribute("id", packageId);
+  xout.Attribute("version", this->GetOption("CPACK_PACKAGE_VERSION"));
+  xout.Attribute("installKBytes", installedSize);
+  xout.Attribute("auth", "Admin");
+  xout.Attribute("onConclusion", "None");
   if (component.IsDownloaded) {
-    out << this->GetOption("CPACK_DOWNLOAD_SITE")
-        << this->GetPackageName(component);
+    xout.Content(this->GetOption("CPACK_DOWNLOAD_SITE"));
+    xout.Content(this->GetPackageName(component));
   } else {
-    out << "file:./" << relativePackageLocation;
+    xout.Content("file:./");
+    xout.Content(relativePackageLocation);
   }
-  out << "</pkg-ref>" << std::endl;
+  xout.EndElement(); // pkg-ref
 }
 
 void cmCPackPKGGenerator::AddDependencyAttributes(
@@ -246,7 +241,7 @@ void cmCPackPKGGenerator::AddDependencyAttributes(
   std::vector<cmCPackComponent*>::const_iterator dependIt;
   for (dependIt = component.Dependencies.begin();
        dependIt != component.Dependencies.end(); ++dependIt) {
-    out << " &amp;&amp; choices['" << (*dependIt)->Name << "Choice'].selected";
+    out << " && choices['" << (*dependIt)->Name << "Choice'].selected";
     AddDependencyAttributes(**dependIt, visited, out);
   }
 }
@@ -268,21 +263,12 @@ void cmCPackPKGGenerator::AddReverseDependencyAttributes(
   }
 }
 
-std::string cmCPackPKGGenerator::EscapeForXML(std::string str)
-{
-  cmSystemTools::ReplaceString(str, "&", "&amp;");
-  cmSystemTools::ReplaceString(str, "<", "&lt;");
-  cmSystemTools::ReplaceString(str, ">", "&gt;");
-  cmSystemTools::ReplaceString(str, "\"", "&quot;");
-  return str;
-}
-
-bool cmCPackPKGGenerator::CopyCreateResourceFile(
-  const std::string& name, const std::string& dirName)
+bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
+                                                 const std::string& dirName)
 {
   std::string uname = cmSystemTools::UpperCase(name);
   std::string cpackVar = "CPACK_RESOURCE_FILE_" + uname;
-  const char* inFileName = this->GetOption(cpackVar.c_str());
+  const char* inFileName = this->GetOption(cpackVar);
   if (!inFileName) {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack option: "
                     << cpackVar.c_str()
@@ -313,18 +299,18 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(
 
   // Set this so that distribution.dist gets the right name (without
   // the path).
-  this->SetOption(("CPACK_RESOURCE_FILE_" + uname + "_NOPATH").c_str(),
+  this->SetOption("CPACK_RESOURCE_FILE_" + uname + "_NOPATH",
                   (name + ext).c_str());
 
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: "
-                  << (inFileName ? inFileName : "(NULL)") << " to "
-                  << destFileName.c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                "Configure file: " << (inFileName ? inFileName : "(NULL)")
+                                   << " to " << destFileName << std::endl);
   this->ConfigureFile(inFileName, destFileName.c_str());
   return true;
 }
 
-bool cmCPackPKGGenerator::CopyResourcePlistFile(
-  const std::string& name, const char* outName)
+bool cmCPackPKGGenerator::CopyResourcePlistFile(const std::string& name,
+                                                const char* outName)
 {
   if (!outName) {
     outName = name.c_str();
@@ -344,9 +330,8 @@ bool cmCPackPKGGenerator::CopyResourcePlistFile(
   destFileName += "/";
   destFileName += outName;
 
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-                "Configure file: " << inFileName.c_str() << " to "
-                                   << destFileName.c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: "
+                  << inFileName << " to " << destFileName << std::endl);
   this->ConfigureFile(inFileName.c_str(), destFileName.c_str());
   return true;
 }
@@ -358,10 +343,10 @@ int cmCPackPKGGenerator::CopyInstallScript(const std::string& resdir,
   std::string dst = resdir;
   dst += "/";
   dst += name;
-  cmSystemTools::CopyFileAlways(script.c_str(), dst.c_str());
+  cmSystemTools::CopyFileAlways(script, dst);
   cmSystemTools::SetPermissions(dst.c_str(), 0777);
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "copy script : "
-                  << script << "\ninto " << dst.c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                "copy script : " << script << "\ninto " << dst << std::endl);
 
   return 1;
 }

@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CheckIncludeFile
 # ----------------
@@ -31,19 +34,6 @@
 # at once.  See the :module:`CheckIncludeFileCXX` module to check for headers
 # using the ``CXX`` language.
 
-#=============================================================================
-# Copyright 2002-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 macro(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
   if(NOT DEFINED "${VARIABLE}")
     if(CMAKE_REQUIRED_INCLUDES)
@@ -60,7 +50,7 @@ macro(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
     endif()
     if(${ARGC} EQUAL 3)
       set(CMAKE_C_FLAGS_SAVE ${CMAKE_C_FLAGS})
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARGV2}")
+      string(APPEND CMAKE_C_FLAGS " ${ARGV2}")
     endif()
 
     try_compile(${VARIABLE}

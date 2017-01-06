@@ -1,19 +1,12 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVariableWatch.h"
 
 #include "cmAlgorithms.h"
 
-#include <cmsys/auto_ptr.hxx>
+#include <algorithm>
+#include <cm_auto_ptr.hxx>
+#include <utility>
 
 static const char* const cmVariableWatchAccessStrings[] = {
   "READ_ACCESS",     "UNKNOWN_READ_ACCESS", "UNKNOWN_DEFINED_ACCESS",
@@ -48,7 +41,7 @@ bool cmVariableWatch::AddWatch(const std::string& variable, WatchMethod method,
                                void* client_data /*=0*/,
                                DeleteData delete_data /*=0*/)
 {
-  cmsys::auto_ptr<cmVariableWatch::Pair> p(new cmVariableWatch::Pair);
+  CM_AUTO_PTR<cmVariableWatch::Pair> p(new cmVariableWatch::Pair);
   p->Method = method;
   p->ClientData = client_data;
   p->DeleteDataCall = delete_data;

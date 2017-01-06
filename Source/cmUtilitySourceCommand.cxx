@@ -1,15 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmUtilitySourceCommand.h"
+
+#include <string.h>
+
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmUtilitySourceCommand
 bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
@@ -38,7 +39,7 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
 
   bool haveCacheValue = false;
   if (this->Makefile->IsOn("CMAKE_CROSSCOMPILING")) {
-    haveCacheValue = (cacheValue != 0);
+    haveCacheValue = (cacheValue != CM_NULLPTR);
     if (!haveCacheValue) {
       std::string msg = "UTILITY_SOURCE is used in cross compiling mode for ";
       msg += cacheEntry;
@@ -50,7 +51,7 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
   } else {
     cmState* state = this->Makefile->GetState();
     haveCacheValue =
-      (cacheValue && (strstr(cacheValue, "(IntDir)") == 0 ||
+      (cacheValue && (strstr(cacheValue, "(IntDir)") == CM_NULLPTR ||
                       (intDir && strcmp(intDir, "$(IntDir)") == 0)) &&
        (state->GetCacheMajorVersion() != 0 &&
         state->GetCacheMinorVersion() != 0));
@@ -107,13 +108,13 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
   // Enter the value into the cache.
   this->Makefile->AddCacheDefinition(cacheEntry, utilityExecutable.c_str(),
                                      "Path to an internal program.",
-                                     cmState::FILEPATH);
+                                     cmStateEnums::FILEPATH);
   // add a value into the cache that maps from the
   // full path to the name of the project
   cmSystemTools::ConvertToUnixSlashes(utilityExecutable);
   this->Makefile->AddCacheDefinition(utilityExecutable, utilityName.c_str(),
                                      "Executable to project name.",
-                                     cmState::INTERNAL);
+                                     cmStateEnums::INTERNAL);
 
   return true;
 }

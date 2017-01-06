@@ -1,19 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2014 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio15Generator.h"
 
 #include "cmAlgorithms.h"
+#include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
+#include "cmVS141CLFlagTable.h"
+#include "cmVS141CSharpFlagTable.h"
+#include "cmVSSetupHelper.h"
 
 static const char vs15generatorName[] = "Visual Studio 15 2017";
 
@@ -62,7 +57,7 @@ public:
   virtual void GetDocumentation(cmDocumentationEntry& entry) const
   {
     entry.Name = std::string(vs15generatorName) + " [arch]";
-    entry.Brief = "Generates Visual Studio 2016 project files.  "
+    entry.Brief = "Generates Visual Studio 2017 project files.  "
                   "Optional [arch] can be \"Win64\" or \"ARM\".";
   }
 
@@ -73,7 +68,8 @@ public:
     names.push_back(vs15generatorName + std::string(" Win64"));
   }
 
-  virtual bool SupportsToolset() const { return true; }
+  bool SupportsToolset() const CM_OVERRIDE { return true; }
+  bool SupportsPlatform() const CM_OVERRIDE { return true; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio15Generator::NewFactory()
@@ -88,6 +84,8 @@ cmGlobalVisualStudio15Generator::cmGlobalVisualStudio15Generator(
   std::string vc15Express;
   this->ExpressEdition = false;
   this->DefaultPlatformToolset = "v141";
+  this->DefaultClFlagTable = cmVS141CLFlagTable;
+  this->DefaultCSharpFlagTable = cmVS141CSharpFlagTable;
   this->Version = VS15;
   this->MSBuildCommandInitialized = false;
 }
@@ -102,39 +100,6 @@ bool cmGlobalVisualStudio15Generator::MatchesGeneratorName(
   return false;
 }
 
-bool cmGlobalVisualStudio15Generator::SelectWindows10SDK(cmMakefile* mf,
-                                                         bool required)
-{
-  // Find the default version of the Windows 10 SDK.
-  this->WindowsTargetPlatformVersion = this->GetWindows10SDKVersion();
-  if (required && this->WindowsTargetPlatformVersion.empty()) {
-    std::ostringstream e;
-    e << "Could not find an appropriate version of the Windows 10 SDK"
-      << " installed on this machine";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return false;
-  }
-  mf->AddDefinition("CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION",
-                    this->WindowsTargetPlatformVersion.c_str());
-  return true;
-}
-
-bool cmGlobalVisualStudio15Generator::SelectWindowsStoreToolset(
-  std::string& toolset) const
-{
-  if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
-    if (this->IsWindowsStoreToolsetInstalled() &&
-        this->IsWindowsDesktopToolsetInstalled()) {
-      toolset = "v141";
-      return true;
-    } else {
-      return false;
-    }
-  }
-  return this->cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(
-    toolset);
-}
-
 void cmGlobalVisualStudio15Generator::WriteSLNHeader(std::ostream& fout)
 {
   // Visual Studio 15 writes .sln format 12.00
@@ -146,140 +111,80 @@ void cmGlobalVisualStudio15Generator::WriteSLNHeader(std::ostream& fout)
   }
 }
 
+bool cmGlobalVisualStudio15Generator::SelectWindowsStoreToolset(
+  std::string& toolset) const
+{
+  if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
+    if (this->IsWindowsStoreToolsetInstalled() &&
+        this->IsWindowsDesktopToolsetInstalled()) {
+      toolset = "v141"; // VS 15 uses v141 toolset
+      return true;
+    } else {
+      return false;
+    }
+  }
+  return this->cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(
+    toolset);
+}
+
 bool cmGlobalVisualStudio15Generator::IsWindowsDesktopToolsetInstalled() const
 {
-  return true;
+  return vsSetupAPIHelper.IsVS2017Installed();
 }
 
 bool cmGlobalVisualStudio15Generator::IsWindowsStoreToolsetInstalled() const
 {
-  return true;
+  return vsSetupAPIHelper.IsWin10SDKInstalled();
 }
 
 std::string const& cmGlobalVisualStudio15Generator::GetMSBuildCommand()
 {
-    if (!this->MSBuildCommandInitialized) {
-        this->MSBuildCommandInitialized = true;
-        this->MSBuildCommand = this->FindMSBuildCommand();
-    }
-    return this->MSBuildCommand;
+  if (!this->MSBuildCommandInitialized) {
+    this->MSBuildCommandInitialized = true;
+    this->MSBuildCommand = this->FindMSBuildCommand();
+  }
+
+  return this->MSBuildCommand;
 }
 
 std::string cmGlobalVisualStudio15Generator::FindMSBuildCommand()
 {
-    std::string MSBuildLocation = "";
-    std::string cmakeCommandLocation = cmSystemTools::GetCMakeCommand();
-    // For VS2017, cmake is deployed at <VSRoot>\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin
-    // Use relative path to find the MSBuild location
-    std::transform(cmakeCommandLocation.begin(), cmakeCommandLocation.end(), cmakeCommandLocation.begin(), ::tolower);
-    std::size_t found = cmakeCommandLocation.find("/common7/ide/commonextensions/microsoft/cmake/cmake/bin");
-    if ( found == std::string::npos)
-    {
-        return MSBuildLocation;
-    }
+  std::string VSLocation = "";
+  if (!vsSetupAPIHelper.GetVSInstanceInfo(VSLocation)) {
+    return VSLocation;
+  }
 
-    std::string VSLocation = cmakeCommandLocation.substr(0, found);
-    VSLocation += "/MSBuild/15.0/Bin/MSBuild.exe";
+  std::string MSBuildLocation =
+    VSLocation + "\\MSBuild\\15.0\\Bin\\MSBuild.exe";
+  if (cmSystemTools::FileExists(MSBuildLocation.c_str()) != true) {
+    return "";
+  }
 
-    if (cmSystemTools::FileExists(VSLocation.c_str()) != true)
-    {
-        return MSBuildLocation;
-    }
-
-    MSBuildLocation = VSLocation;
-    return MSBuildLocation;
+  return MSBuildLocation;
 }
 
 std::string cmGlobalVisualStudio15Generator::FindDevEnvCommand()
 {
-    std::string DevEnvLocation = "";
-    std::string cmakeCommandLocation = cmSystemTools::GetCMakeCommand();
-    // For VS2017, cmake is deployed at <VSRoot>\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin
-    // Use relative path to find the Devenv location
-    std::transform(cmakeCommandLocation.begin(), cmakeCommandLocation.end(), cmakeCommandLocation.begin(), ::tolower);
-    std::size_t found = cmakeCommandLocation.find("/common7/ide/commonextensions/microsoft/cmake/cmake/bin");
-    if (found == std::string::npos)
-    {
-        return DevEnvLocation;
-    }
+  std::string VSLocation = "";
+  if (!vsSetupAPIHelper.GetVSInstanceInfo(VSLocation)) {
+    return VSLocation;
+  }
 
-    std::string VSLocation = cmakeCommandLocation.substr(0, found);
-    VSLocation += "/Common7/IDE/devenv.exe";
+  std::string DevEnvLocation = VSLocation + "\\Common7\\IDE\\devenv.exe";
+  if (cmSystemTools::FileExists(DevEnvLocation.c_str()) != true) {
+    return "";
+  }
 
-    if (cmSystemTools::FileExists(VSLocation.c_str()) != true)
-    {
-        return DevEnvLocation;
-    }
-
-    DevEnvLocation = VSLocation;
-    return DevEnvLocation;
+  return DevEnvLocation;
 }
 
-void cmGlobalVisualStudio15Generator::FindMakeProgram(cmMakefile* mf)
+bool cmGlobalVisualStudio15Generator::FindMakeProgram(cmMakefile* mf)
 {
-    mf->AddDefinition("CMAKE_VS_MSBUILD_COMMAND",
-        this->GetVSMakeProgram().c_str());
-}
+  std::string makeProgram = this->GetVSMakeProgram();
+  mf->AddDefinition("CMAKE_VS_MSBUILD_COMMAND", makeProgram.c_str());
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-struct NoWindowsH
-{
-  bool operator()(std::string const& p)
-  {
-    return !cmSystemTools::FileExists(p + "/um/windows.h", true);
-  }
-};
-#endif
+  if (makeProgram.empty())
+    return false;
 
-std::string cmGlobalVisualStudio15Generator::GetWindows10SDKVersion()
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  // This logic is taken from the vcvarsqueryregistry.bat file from VS2015
-  // Try HKLM and then HKCU.
-  std::string win10Root;
-  if (!cmSystemTools::ReadRegistryValue(
-        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
-        "Windows Kits\\Installed Roots;KitsRoot10",
-        win10Root, cmSystemTools::KeyWOW64_32) &&
-      !cmSystemTools::ReadRegistryValue(
-        "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\"
-        "Windows Kits\\Installed Roots;KitsRoot10",
-        win10Root, cmSystemTools::KeyWOW64_32)) {
-    return std::string();
-  }
-
-  std::vector<std::string> sdks;
-  std::string path = win10Root + "Include/*";
-  // Grab the paths of the different SDKs that are installed
-  cmSystemTools::GlobDirs(path, sdks);
-
-  // Skip SDKs that do not contain <um/windows.h> because that indicates that
-  // only the UCRT MSIs were installed for them.
-  sdks.erase(std::remove_if(sdks.begin(), sdks.end(), NoWindowsH()),
-             sdks.end());
-
-  if (!sdks.empty()) {
-    // Only use the filename, which will be the SDK version.
-    for (std::vector<std::string>::iterator i = sdks.begin(); i != sdks.end();
-         ++i) {
-      *i = cmSystemTools::GetFilenameName(*i);
-    }
-
-    // Sort the results to make sure we select the most recent one.
-    std::sort(sdks.begin(), sdks.end(), cmSystemTools::VersionCompareGreater);
-
-    // Look for a SDK exactly matching the requested target version.
-    for (std::vector<std::string>::iterator i = sdks.begin(); i != sdks.end();
-         ++i) {
-      if (cmSystemTools::VersionCompareEqual(*i, this->SystemVersion)) {
-        return *i;
-      }
-    }
-
-    // Use the latest Windows 10 SDK since the exact version is not available.
-    return sdks.at(0);
-  }
-#endif
-  // Return an empty string
-  return std::string();
+  return true;
 }

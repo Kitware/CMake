@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CheckTypeSize
 # -------------
@@ -65,19 +68,6 @@
 #   CMAKE_REQUIRED_QUIET = execute quietly without messages
 #   CMAKE_EXTRA_INCLUDE_FILES = list of extra headers to include
 
-#=============================================================================
-# Copyright 2002-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 
@@ -97,17 +87,17 @@ function(__check_type_size_impl type var map builtin language)
   set(headers)
   if(builtin)
     if(HAVE_SYS_TYPES_H)
-      set(headers "${headers}#include <sys/types.h>\n")
+      string(APPEND headers "#include <sys/types.h>\n")
     endif()
     if(HAVE_STDINT_H)
-      set(headers "${headers}#include <stdint.h>\n")
+      string(APPEND headers "#include <stdint.h>\n")
     endif()
     if(HAVE_STDDEF_H)
-      set(headers "${headers}#include <stddef.h>\n")
+      string(APPEND headers "#include <stddef.h>\n")
     endif()
   endif()
   foreach(h ${CMAKE_EXTRA_INCLUDE_FILES})
-    set(headers "${headers}#include \"${h}\"\n")
+    string(APPEND headers "#include \"${h}\"\n")
   endforeach()
 
   # Perform the check.
@@ -157,7 +147,7 @@ function(__check_type_size_impl type var map builtin language)
         string(REGEX MATCH   "${regex_key}"       key "${info}")
         string(REGEX REPLACE "${regex_key}" "\\1" key "${key}")
         if(key)
-          set(code "${code}\nset(${var}-${key} \"${size}\")")
+          string(APPEND code "\nset(${var}-${key} \"${size}\")")
           list(APPEND keys ${key})
         endif()
       endif()

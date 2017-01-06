@@ -18,6 +18,7 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [SCHEDULE_RANDOM <ON|OFF>]
              [STOP_TIME <time-of-day>]
              [RETURN_VALUE <result-var>]
+             [CAPTURE_CMAKE_ERROR <result-var>]
              [QUIET]
              )
 
@@ -31,9 +32,11 @@ The options are:
   :variable:`CTEST_BINARY_DIRECTORY` variable is used.
 
 ``APPEND``
-  Mark results for append to those previously submitted to a
+  Mark ``Test.xml`` for append to results previously submitted to a
   dashboard server since the last :command:`ctest_start` call.
   Append semantics are defined by the dashboard server in use.
+  This does *not* cause results to be appended to a ``.xml`` file
+  produced by a previous call to this command.
 
 ``START <start-number>``
   Specify the beginning of a range of test numbers.
@@ -79,6 +82,10 @@ The options are:
 ``RETURN_VALUE <result-var>``
   Store in the ``<result-var>`` variable ``0`` if all tests passed.
   Store non-zero if anything went wrong.
+
+``CAPTURE_CMAKE_ERROR <result-var>``
+  Store in the ``<result-var>`` variable -1 if there are any errors running
+  the command and prevent ctest from returning non-zero if an error occurs.
 
 ``QUIET``
   Suppress any CTest-specific non-error messages that would have otherwise

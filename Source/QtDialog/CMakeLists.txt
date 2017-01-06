@@ -1,14 +1,5 @@
-#=============================================================================
-# CMake - Cross Platform Makefile Generator
-# Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
 project(QtDialog)
 if(POLICY CMP0020)
@@ -35,6 +26,12 @@ if (Qt5Widgets_FOUND)
   add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
+
+  if(CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES)
+    list(APPEND CMake_QT_LIBRARIES ${CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES})
+    set_property(SOURCE CMakeSetup.cxx
+      PROPERTY COMPILE_DEFINITIONS USE_QXcbIntegrationPlugin)
+  endif()
 
   # We need to install platform plugin and add qt.conf for Qt5 on Mac and Windows.
   # FIXME: This should be part of Qt5 CMake scripts, but unfortunatelly
@@ -150,12 +147,12 @@ if(APPLE)
     MACOSX_PACKAGE_LOCATION Resources)
 endif()
 
-if(CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
-  install(FILES ${CMake_SOURCE_DIR}/Licenses/LGPLv2.1.txt
+if(USE_LGPL)
+  install(FILES ${CMake_SOURCE_DIR}/Licenses/LGPLv${USE_LGPL}.txt
     DESTINATION ${CMAKE_DATA_DIR}/Licenses
     ${COMPONENT})
   set_property(SOURCE CMakeSetupDialog.cxx
-    PROPERTY COMPILE_DEFINITIONS CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
+    PROPERTY COMPILE_DEFINITIONS USE_LGPL="${USE_LGPL}")
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

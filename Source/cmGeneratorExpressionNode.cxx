@@ -1,21 +1,38 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2012 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionNode.h"
 
 #include "cmAlgorithms.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionContext.h"
+#include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorExpressionEvaluator.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmLinkItem.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
+#include "cmSourceFile.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
+
+#include <algorithm>
+#include <assert.h>
+#include <cmConfigure.h>
+#include <cmsys/RegularExpression.hxx>
+#include <cmsys/String.h>
+#include <errno.h>
+#include <map>
+#include <set>
+#include <sstream>
+#include <stdlib.h>
+#include <string.h>
+#include <utility>
 
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   std::string const& prop, cmLocalGenerator* lg,
@@ -24,7 +41,7 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   cmGeneratorExpressionDAGChecker* dagChecker)
 {
   cmGeneratorExpression ge(context->Backtrace);
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
   cge->SetEvaluateForBuildsystem(context->EvaluateForBuildsystem);
   std::string result =
     cge->Evaluate(lg, context->Config, context->Quiet, headTarget,
@@ -42,14 +59,15 @@ static const struct ZeroNode : public cmGeneratorExpressionNode
 {
   ZeroNode() {}
 
-  virtual bool GeneratesContent() const { return false; }
+  bool GeneratesContent() const CM_OVERRIDE { return false; }
 
-  virtual bool AcceptsArbitraryContentParameter() const { return true; }
+  bool AcceptsArbitraryContentParameter() const CM_OVERRIDE { return true; }
 
-  std::string Evaluate(const std::vector<std::string>&,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+  std::string Evaluate(const std::vector<std::string>& /*parameters*/,
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return std::string();
   }
@@ -59,12 +77,13 @@ static const struct OneNode : public cmGeneratorExpressionNode
 {
   OneNode() {}
 
-  virtual bool AcceptsArbitraryContentParameter() const { return true; }
+  bool AcceptsArbitraryContentParameter() const CM_OVERRIDE { return true; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return parameters.front();
   }
@@ -90,7 +109,8 @@ static const struct ZeroNode installInterfaceNode;
       for (; it != end; ++it) {                                               \
         if (*it == #FAILURE_VALUE) {                                          \
           return #FAILURE_VALUE;                                              \
-        } else if (*it != #SUCCESS_VALUE) {                                   \
+        }                                                                     \
+        if (*it != #SUCCESS_VALUE) {                                          \
           reportError(context, content->GetOriginalExpression(),              \
                       "Parameters to $<" #OP                                  \
                       "> must resolve to either '0' or '1'.");                \
@@ -113,7 +133,8 @@ static const struct NotNode : public cmGeneratorExpressionNode
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     if (*parameters.begin() != "0" && *parameters.begin() != "1") {
       reportError(
@@ -129,12 +150,13 @@ static const struct BoolNode : public cmGeneratorExpressionNode
 {
   BoolNode() {}
 
-  virtual int NumExpectedParameters() const { return 1; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 1; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return !cmSystemTools::IsOff(parameters.begin()->c_str()) ? "1" : "0";
   }
@@ -144,12 +166,13 @@ static const struct StrEqualNode : public cmGeneratorExpressionNode
 {
   StrEqualNode() {}
 
-  virtual int NumExpectedParameters() const { return 2; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 2; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return *parameters.begin() == parameters[1] ? "1" : "0";
   }
@@ -159,12 +182,13 @@ static const struct EqualNode : public cmGeneratorExpressionNode
 {
   EqualNode() {}
 
-  virtual int NumExpectedParameters() const { return 2; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 2; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     char* pEnd;
 
@@ -236,12 +260,13 @@ static const struct LowerCaseNode : public cmGeneratorExpressionNode
 {
   LowerCaseNode() {}
 
-  bool AcceptsArbitraryContentParameter() const { return true; }
+  bool AcceptsArbitraryContentParameter() const CM_OVERRIDE { return true; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return cmSystemTools::LowerCase(parameters.front());
   }
@@ -251,12 +276,13 @@ static const struct UpperCaseNode : public cmGeneratorExpressionNode
 {
   UpperCaseNode() {}
 
-  bool AcceptsArbitraryContentParameter() const { return true; }
+  bool AcceptsArbitraryContentParameter() const CM_OVERRIDE { return true; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return cmSystemTools::UpperCase(parameters.front());
   }
@@ -266,12 +292,13 @@ static const struct MakeCIdentifierNode : public cmGeneratorExpressionNode
 {
   MakeCIdentifierNode() {}
 
-  bool AcceptsArbitraryContentParameter() const { return true; }
+  bool AcceptsArbitraryContentParameter() const CM_OVERRIDE { return true; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return cmSystemTools::MakeCidentifier(parameters.front());
   }
@@ -281,12 +308,13 @@ static const struct Angle_RNode : public cmGeneratorExpressionNode
 {
   Angle_RNode() {}
 
-  virtual int NumExpectedParameters() const { return 0; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 0; }
 
-  std::string Evaluate(const std::vector<std::string>&,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+  std::string Evaluate(const std::vector<std::string>& /*parameters*/,
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return ">";
   }
@@ -296,12 +324,13 @@ static const struct CommaNode : public cmGeneratorExpressionNode
 {
   CommaNode() {}
 
-  virtual int NumExpectedParameters() const { return 0; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 0; }
 
-  std::string Evaluate(const std::vector<std::string>&,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+  std::string Evaluate(const std::vector<std::string>& /*parameters*/,
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return ",";
   }
@@ -311,12 +340,13 @@ static const struct SemicolonNode : public cmGeneratorExpressionNode
 {
   SemicolonNode() {}
 
-  virtual int NumExpectedParameters() const { return 0; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 0; }
 
-  std::string Evaluate(const std::vector<std::string>&,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+  std::string Evaluate(const std::vector<std::string>& /*parameters*/,
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return ";";
   }
@@ -326,12 +356,12 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
 {
   CompilerIdNode() {}
 
-  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
+  int NumExpectedParameters() const CM_OVERRIDE { return OneOrZeroParameters; }
 
   std::string EvaluateWithLanguage(const std::vector<std::string>& parameters,
                                    cmGeneratorExpressionContext* context,
                                    const GeneratorExpressionContent* content,
-                                   cmGeneratorExpressionDAGChecker*,
+                                   cmGeneratorExpressionDAGChecker* /*unused*/,
                                    const std::string& lang) const
   {
     const char* compilerId = context->LG->GetMakefile()->GetSafeDefinition(
@@ -381,6 +411,7 @@ static const struct CCompilerIdNode : public CompilerIdNode
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
                        cmGeneratorExpressionDAGChecker* dagChecker) const
+    CM_OVERRIDE
   {
     if (!context->HeadTarget) {
       reportError(
@@ -402,6 +433,7 @@ static const struct CXXCompilerIdNode : public CompilerIdNode
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
                        cmGeneratorExpressionDAGChecker* dagChecker) const
+    CM_OVERRIDE
   {
     if (!context->HeadTarget) {
       reportError(
@@ -419,12 +451,12 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
   CompilerVersionNode() {}
 
-  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
+  int NumExpectedParameters() const CM_OVERRIDE { return OneOrZeroParameters; }
 
   std::string EvaluateWithLanguage(const std::vector<std::string>& parameters,
                                    cmGeneratorExpressionContext* context,
                                    const GeneratorExpressionContent* content,
-                                   cmGeneratorExpressionDAGChecker*,
+                                   cmGeneratorExpressionDAGChecker* /*unused*/,
                                    const std::string& lang) const
   {
     const char* compilerVersion =
@@ -460,6 +492,7 @@ static const struct CCompilerVersionNode : public CompilerVersionNode
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
                        cmGeneratorExpressionDAGChecker* dagChecker) const
+    CM_OVERRIDE
   {
     if (!context->HeadTarget) {
       reportError(
@@ -481,6 +514,7 @@ static const struct CxxCompilerVersionNode : public CompilerVersionNode
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
                        cmGeneratorExpressionDAGChecker* dagChecker) const
+    CM_OVERRIDE
   {
     if (!context->HeadTarget) {
       reportError(
@@ -498,12 +532,13 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
 {
   PlatformIdNode() {}
 
-  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
+  int NumExpectedParameters() const CM_OVERRIDE { return OneOrZeroParameters; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     const char* platformId =
       context->LG->GetMakefile()->GetSafeDefinition("CMAKE_SYSTEM_NAME");
@@ -526,12 +561,13 @@ static const struct VersionGreaterNode : public cmGeneratorExpressionNode
 {
   VersionGreaterNode() {}
 
-  virtual int NumExpectedParameters() const { return 2; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 2; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER,
                                          parameters.front().c_str(),
@@ -541,16 +577,37 @@ static const struct VersionGreaterNode : public cmGeneratorExpressionNode
   }
 } versionGreaterNode;
 
+static const struct VersionGreaterEqNode : public cmGeneratorExpressionNode
+{
+  VersionGreaterEqNode() {}
+
+  int NumExpectedParameters() const CM_OVERRIDE { return 2; }
+
+  std::string Evaluate(const std::vector<std::string>& parameters,
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
+  {
+    return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
+                                         parameters.front().c_str(),
+                                         parameters[1].c_str())
+      ? "1"
+      : "0";
+  }
+} versionGreaterEqNode;
+
 static const struct VersionLessNode : public cmGeneratorExpressionNode
 {
   VersionLessNode() {}
 
-  virtual int NumExpectedParameters() const { return 2; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 2; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
                                          parameters.front().c_str(),
@@ -560,16 +617,37 @@ static const struct VersionLessNode : public cmGeneratorExpressionNode
   }
 } versionLessNode;
 
+static const struct VersionLessEqNode : public cmGeneratorExpressionNode
+{
+  VersionLessEqNode() {}
+
+  int NumExpectedParameters() const CM_OVERRIDE { return 2; }
+
+  std::string Evaluate(const std::vector<std::string>& parameters,
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
+  {
+    return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS_EQUAL,
+                                         parameters.front().c_str(),
+                                         parameters[1].c_str())
+      ? "1"
+      : "0";
+  }
+} versionLessEqNode;
+
 static const struct VersionEqualNode : public cmGeneratorExpressionNode
 {
   VersionEqualNode() {}
 
-  virtual int NumExpectedParameters() const { return 2; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 2; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
                                          parameters.front().c_str(),
@@ -584,14 +662,20 @@ static const struct LinkOnlyNode : public cmGeneratorExpressionNode
   LinkOnlyNode() {}
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
+                       cmGeneratorExpressionContext* context,
+                       const GeneratorExpressionContent* content,
                        cmGeneratorExpressionDAGChecker* dagChecker) const
+    CM_OVERRIDE
   {
+    if (!dagChecker) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<LINK_ONLY:...> may only be used for linking");
+      return std::string();
+    }
     if (!dagChecker->GetTransitivePropertiesOnly()) {
       return parameters.front();
     }
-    return "";
+    return std::string();
   }
 } linkOnlyNode;
 
@@ -599,12 +683,13 @@ static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   ConfigurationNode() {}
 
-  virtual int NumExpectedParameters() const { return 0; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 0; }
 
-  std::string Evaluate(const std::vector<std::string>&,
+  std::string Evaluate(const std::vector<std::string>& /*parameters*/,
                        cmGeneratorExpressionContext* context,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     context->HadContextSensitiveCondition = true;
     return context->Config;
@@ -615,15 +700,17 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 {
   ConfigurationTestNode() {}
 
-  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
+  int NumExpectedParameters() const CM_OVERRIDE { return OneOrZeroParameters; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     if (parameters.empty()) {
-      return configurationNode.Evaluate(parameters, context, content, 0);
+      return configurationNode.Evaluate(parameters, context, content,
+                                        CM_NULLPTR);
     }
     static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
     if (!configValidator.find(*parameters.begin())) {
@@ -642,8 +729,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
     }
 
     if (context->CurrentTarget && context->CurrentTarget->IsImported()) {
-      const char* loc = 0;
-      const char* imp = 0;
+      const char* loc = CM_NULLPTR;
+      const char* imp = CM_NULLPTR;
       std::string suffix;
       if (context->CurrentTarget->Target->GetMappedConfig(
             context->Config, &loc, &imp, suffix)) {
@@ -673,14 +760,15 @@ static const struct JoinNode : public cmGeneratorExpressionNode
 {
   JoinNode() {}
 
-  virtual int NumExpectedParameters() const { return 2; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 2; }
 
-  virtual bool AcceptsArbitraryContentParameter() const { return true; }
+  bool AcceptsArbitraryContentParameter() const CM_OVERRIDE { return true; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     std::vector<std::string> list;
     cmSystemTools::ExpandListArgument(parameters.front(), list);
@@ -692,12 +780,13 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
 {
   CompileLanguageNode() {}
 
-  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
+  int NumExpectedParameters() const CM_OVERRIDE { return OneOrZeroParameters; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
                        cmGeneratorExpressionDAGChecker* dagChecker) const
+    CM_OVERRIDE
   {
     if (context->Language.empty()) {
       reportError(
@@ -724,7 +813,8 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
                   "$<COMPILE_LANGUAGE:...> may not be used with Visual Studio "
                   "generators.");
       return std::string();
-    } else if (genName.find("Xcode") != std::string::npos) {
+    }
+    if (genName.find("Xcode") != std::string::npos) {
       if (dagChecker && (dagChecker->EvaluatingCompileDefinitions() ||
                          dagChecker->EvaluatingIncludeDirectories())) {
         reportError(
@@ -753,7 +843,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
 #define TRANSITIVE_PROPERTY_NAME(PROPERTY) , "INTERFACE_" #PROPERTY
 
 static const char* targetPropertyTransitiveWhitelist[] = {
-  0 CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_NAME)
+  CM_NULLPTR CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_NAME)
 };
 
 #undef TRANSITIVE_PROPERTY_NAME
@@ -795,12 +885,13 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
   TargetPropertyNode() {}
 
   // This node handles errors on parameter count itself.
-  virtual int NumExpectedParameters() const { return OneOrMoreParameters; }
+  int NumExpectedParameters() const CM_OVERRIDE { return OneOrMoreParameters; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
                        cmGeneratorExpressionDAGChecker* dagCheckerParent) const
+    CM_OVERRIDE
   {
     if (parameters.size() != 1 && parameters.size() != 2) {
       reportError(
@@ -944,7 +1035,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 #define TRANSITIVE_PROPERTY_COMPARE(PROPERTY)                                 \
   (#PROPERTY == propertyName || "INTERFACE_" #PROPERTY == propertyName) ||
         if (CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(
-              TRANSITIVE_PROPERTY_COMPARE) false) {
+              TRANSITIVE_PROPERTY_COMPARE) false) { // NOLINT(clang-tidy)
           reportError(
             context, content->GetOriginalExpression(),
             "$<TARGET_PROPERTY:...> expression in link libraries "
@@ -961,7 +1052,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 #define ASSERT_TRANSITIVE_PROPERTY_METHOD(METHOD) dagCheckerParent->METHOD() ||
 
         assert(CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
-          ASSERT_TRANSITIVE_PROPERTY_METHOD) false);
+          ASSERT_TRANSITIVE_PROPERTY_METHOD) false); // NOLINT(clang-tidy)
 #undef ASSERT_TRANSITIVE_PROPERTY_METHOD
       }
     }
@@ -1013,7 +1104,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (!prop) {
       if (target->IsImported() ||
-          target->GetType() == cmState::INTERFACE_LIBRARY) {
+          target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         return linkedTargetsContent;
       }
       if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
@@ -1087,20 +1178,21 @@ static const struct TargetNameNode : public cmGeneratorExpressionNode
 {
   TargetNameNode() {}
 
-  virtual bool GeneratesContent() const { return true; }
+  bool GeneratesContent() const CM_OVERRIDE { return true; }
 
-  virtual bool AcceptsArbitraryContentParameter() const { return true; }
-  virtual bool RequiresLiteralInput() const { return true; }
+  bool AcceptsArbitraryContentParameter() const CM_OVERRIDE { return true; }
+  bool RequiresLiteralInput() const CM_OVERRIDE { return true; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext*,
-                       const GeneratorExpressionContent*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionContext* /*context*/,
+                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     return parameters.front();
   }
 
-  virtual int NumExpectedParameters() const { return 1; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 1; }
 
 } targetNameNode;
 
@@ -1111,7 +1203,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     if (!context->EvaluateForBuildsystem) {
       std::ostringstream e;
@@ -1131,7 +1224,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       reportError(context, content->GetOriginalExpression(), e.str());
       return std::string();
     }
-    if (gt->GetType() != cmState::OBJECT_LIBRARY) {
+    if (gt->GetType() != cmStateEnums::OBJECT_LIBRARY) {
       std::ostringstream e;
       e << "Objects of target \"" << tgtName
         << "\" referenced but is not an OBJECT library.";
@@ -1179,12 +1272,13 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
 {
   CompileFeaturesNode() {}
 
-  virtual int NumExpectedParameters() const { return OneOrMoreParameters; }
+  int NumExpectedParameters() const CM_OVERRIDE { return OneOrMoreParameters; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
                        cmGeneratorExpressionDAGChecker* dagChecker) const
+    CM_OVERRIDE
   {
     cmGeneratorTarget const* target = context->HeadTarget;
     if (!target) {
@@ -1263,10 +1357,10 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
 } compileFeaturesNode;
 
 static const char* targetPolicyWhitelist[] = {
-  0
+  CM_NULLPTR
 #define TARGET_POLICY_STRING(POLICY) , #POLICY
 
-  CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_STRING)
+    CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_STRING)
 
 #undef TARGET_POLICY_STRING
 };
@@ -1283,7 +1377,7 @@ cmPolicies::PolicyStatus statusForTarget(cmGeneratorTarget const* tgt,
 
 #undef RETURN_POLICY
 
-  assert(0 && "Unreachable code. Not a valid policy");
+  assert(false && "Unreachable code. Not a valid policy");
   return cmPolicies::WARN;
 }
 
@@ -1298,7 +1392,7 @@ cmPolicies::PolicyID policyForString(const char* policy_id)
 
 #undef RETURN_POLICY_ID
 
-  assert(0 && "Unreachable code. Not a valid policy");
+  assert(false && "Unreachable code. Not a valid policy");
   return cmPolicies::CMP0002;
 }
 
@@ -1306,12 +1400,13 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
 {
   TargetPolicyNode() {}
 
-  virtual int NumExpectedParameters() const { return 1; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 1; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     if (!context->HeadTarget) {
       reportError(
@@ -1365,13 +1460,14 @@ static const struct InstallPrefixNode : public cmGeneratorExpressionNode
 {
   InstallPrefixNode() {}
 
-  virtual bool GeneratesContent() const { return true; }
-  virtual int NumExpectedParameters() const { return 0; }
+  bool GeneratesContent() const CM_OVERRIDE { return true; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 0; }
 
-  std::string Evaluate(const std::vector<std::string>&,
+  std::string Evaluate(const std::vector<std::string>& /*parameters*/,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     reportError(context, content->GetOriginalExpression(),
                 "INSTALL_PREFIX is a marker for install(EXPORT) only.  It "
@@ -1381,13 +1477,12 @@ static const struct InstallPrefixNode : public cmGeneratorExpressionNode
 
 } installPrefixNode;
 
-class ArtifactNameTag;
-class ArtifactLinkerTag;
-class ArtifactSonameTag;
-class ArtifactPdbTag;
-
-class ArtifactPathTag;
 class ArtifactDirTag;
+class ArtifactLinkerTag;
+class ArtifactNameTag;
+class ArtifactPathTag;
+class ArtifactPdbTag;
+class ArtifactSonameTag;
 
 template <typename ArtifactT>
 struct TargetFilesystemArtifactResultCreator
@@ -1411,7 +1506,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
                     "for DLL target platforms.");
       return std::string();
     }
-    if (target->GetType() != cmState::SHARED_LIBRARY) {
+    if (target->GetType() != cmStateEnums::SHARED_LIBRARY) {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_SONAME_FILE is allowed only for "
                     "SHARED libraries.");
@@ -1447,11 +1542,11 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
       return std::string();
     }
 
-    cmState::TargetType targetType = target->GetType();
+    cmStateEnums::TargetType targetType = target->GetType();
 
-    if (targetType != cmState::SHARED_LIBRARY &&
-        targetType != cmState::MODULE_LIBRARY &&
-        targetType != cmState::EXECUTABLE) {
+    if (targetType != cmStateEnums::SHARED_LIBRARY &&
+        targetType != cmStateEnums::MODULE_LIBRARY &&
+        targetType != cmStateEnums::EXECUTABLE) {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_PDB_FILE is allowed only for "
                     "targets with linker created artifacts.");
@@ -1488,7 +1583,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactNameTag>
 {
   static std::string Create(cmGeneratorTarget* target,
                             cmGeneratorExpressionContext* context,
-                            const GeneratorExpressionContent*)
+                            const GeneratorExpressionContent* /*unused*/)
   {
     return target->GetFullPath(context->Config, false, true);
   }
@@ -1529,12 +1624,13 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
 {
   TargetFilesystemArtifact() {}
 
-  virtual int NumExpectedParameters() const { return 1; }
+  int NumExpectedParameters() const CM_OVERRIDE { return 1; }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
                        cmGeneratorExpressionDAGChecker* dagChecker) const
+    CM_OVERRIDE
   {
     // Lookup the referenced target.
     std::string name = *parameters.begin();
@@ -1550,8 +1646,8 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                     "No target \"" + name + "\"");
       return std::string();
     }
-    if (target->GetType() >= cmState::OBJECT_LIBRARY &&
-        target->GetType() != cmState::UNKNOWN_LIBRARY) {
+    if (target->GetType() >= cmStateEnums::OBJECT_LIBRARY &&
+        target->GetType() != cmStateEnums::UNKNOWN_LIBRARY) {
       ::reportError(context, content->GetOriginalExpression(), "Target \"" +
                       name + "\" is not an executable or library.");
       return std::string();
@@ -1606,7 +1702,8 @@ static const struct ShellPathNode : public cmGeneratorExpressionNode
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
+    CM_OVERRIDE
   {
     if (!cmSystemTools::FileIsFullPath(parameters.front())) {
       reportError(context, content->GetOriginalExpression(),
@@ -1632,7 +1729,9 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     nodeMap["C_COMPILER_ID"] = &cCompilerIdNode;
     nodeMap["CXX_COMPILER_ID"] = &cxxCompilerIdNode;
     nodeMap["VERSION_GREATER"] = &versionGreaterNode;
+    nodeMap["VERSION_GREATER_EQUAL"] = &versionGreaterEqNode;
     nodeMap["VERSION_LESS"] = &versionLessNode;
+    nodeMap["VERSION_LESS_EQUAL"] = &versionLessEqNode;
     nodeMap["VERSION_EQUAL"] = &versionEqualNode;
     nodeMap["C_COMPILER_VERSION"] = &cCompilerVersionNode;
     nodeMap["CXX_COMPILER_VERSION"] = &cxxCompilerVersionNode;
@@ -1675,7 +1774,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
   }
   NodeMap::const_iterator i = nodeMap.find(identifier);
   if (i == nodeMap.end()) {
-    return 0;
+    return CM_NULLPTR;
   }
   return i->second;
 }

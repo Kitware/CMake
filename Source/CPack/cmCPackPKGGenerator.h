@@ -1,22 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCPackPKGGenerator_h
 #define cmCPackPKGGenerator_h
 
+#include <cmConfigure.h>
+#include <set>
+#include <sstream>
+#include <string>
 
+#include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 
-class cmCPackComponent;
+class cmXMLWriter;
 
 /** \class cmCPackPKGGenerator
  * \brief A generator for pkg files
@@ -33,11 +28,11 @@ public:
   cmCPackPKGGenerator();
   virtual ~cmCPackPKGGenerator();
 
-  virtual bool SupportsComponentInstallation() const;
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
 
 protected:
-  virtual int InitializeInternal();
-  virtual const char* GetOutputPostfix() { return "darwin"; }
+  int InitializeInternal() CM_OVERRIDE;
+  const char* GetOutputPostfix() CM_OVERRIDE { return "darwin"; }
 
   // Copies or creates the resource file with the given name to the
   // package or package staging directory dirName. The variable
@@ -79,25 +74,18 @@ protected:
   // their components in a form that can be used by distribution
   // metapackages.
   void CreateChoiceOutline(const cmCPackComponentGroup& group,
-                           std::ostringstream& out);
+                           cmXMLWriter& xout);
 
   /// Create the "choice" XML element to describe a component group
   /// for the installer GUI.
-  void CreateChoice(const cmCPackComponentGroup& group,
-                    std::ostringstream& out);
+  void CreateChoice(const cmCPackComponentGroup& group, cmXMLWriter& xout);
 
   /// Create the "choice" XML element to describe a component for the
   /// installer GUI.
-  void CreateChoice(const cmCPackComponent& component,
-                    std::ostringstream& out);
-
-  // Escape the given string to make it usable as an XML attribute
-  // value.
-  std::string EscapeForXML(std::string str);
+  void CreateChoice(const cmCPackComponent& component, cmXMLWriter& xout);
 
   // The PostFlight component when creating a metapackage
   cmCPackComponent PostFlightComponent;
-
 };
 
 #endif

@@ -1,17 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindPathCommand.h"
 
 #include <cmsys/Glob.hxx>
+
+#include "cmMakefile.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 cmFindPathCommand::cmFindPathCommand()
 {
@@ -35,7 +32,8 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn,
     if (this->AlreadyInCacheWithoutMetaInfo) {
       this->Makefile->AddCacheDefinition(
         this->VariableName, "", this->VariableDocumentation.c_str(),
-        (this->IncludeFileInPath ? cmState::FILEPATH : cmState::PATH));
+        (this->IncludeFileInPath ? cmStateEnums::FILEPATH
+                                 : cmStateEnums::PATH));
     }
     return true;
   }
@@ -44,13 +42,13 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn,
   if (!result.empty()) {
     this->Makefile->AddCacheDefinition(
       this->VariableName, result.c_str(), this->VariableDocumentation.c_str(),
-      (this->IncludeFileInPath) ? cmState::FILEPATH : cmState::PATH);
+      (this->IncludeFileInPath) ? cmStateEnums::FILEPATH : cmStateEnums::PATH);
     return true;
   }
   this->Makefile->AddCacheDefinition(
     this->VariableName, (this->VariableName + "-NOTFOUND").c_str(),
     this->VariableDocumentation.c_str(),
-    (this->IncludeFileInPath) ? cmState::FILEPATH : cmState::PATH);
+    (this->IncludeFileInPath) ? cmStateEnums::FILEPATH : cmStateEnums::PATH);
   return true;
 }
 
@@ -74,7 +72,7 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
 {
   std::string fileName = file;
   std::string frameWorkName;
-  std::string::size_type pos = fileName.find("/");
+  std::string::size_type pos = fileName.find('/');
   // if there is a / in the name try to find the header as a framework
   // For example bar/foo.h would look for:
   // bar.framework/Headers/foo.h
@@ -85,7 +83,7 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
     frameWorkName =
       frameWorkName.substr(0, frameWorkName.size() - fileName.size() - 1);
     // if the framework has a path in it then just use the filename
-    if (frameWorkName.find("/") != frameWorkName.npos) {
+    if (frameWorkName.find('/') != frameWorkName.npos) {
       fileName = file;
       frameWorkName = "";
     }
@@ -117,7 +115,7 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
     if (this->IncludeFileInPath) {
       return fheader;
     }
-    fheader = cmSystemTools::GetFilenamePath(fheader);
+    fheader.resize(fheader.size() - file.size());
     return fheader;
   }
   return "";
@@ -136,9 +134,8 @@ std::string cmFindPathCommand::FindNormalHeader()
       if (cmSystemTools::FileExists(tryPath.c_str())) {
         if (this->IncludeFileInPath) {
           return tryPath;
-        } else {
-          return *p;
         }
+        return *p;
       }
     }
   }

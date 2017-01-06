@@ -1,19 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2004-2009 Kitware, Inc.
-  Copyright 2004 Alexander Neundorf (neundorf@kde.org)
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmGlobalKdevelopGenerator_h
 #define cmGlobalKdevelopGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmExternalMakefileProjectGenerator.h"
+
+#include <string>
+#include <vector>
 
 class cmLocalGenerator;
 
@@ -33,20 +28,9 @@ class cmGlobalKdevelopGenerator : public cmExternalMakefileProjectGenerator
 public:
   cmGlobalKdevelopGenerator();
 
-  virtual std::string GetName() const
-  {
-    return cmGlobalKdevelopGenerator::GetActualName();
-  }
-  static std::string GetActualName() { return "KDevelop3"; }
-  static cmExternalMakefileProjectGenerator* New()
-  {
-    return new cmGlobalKdevelopGenerator;
-  }
-  /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const std::string& fullName) const;
+  static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
 
 private:
   /*** Create the foo.kdevelop.filelist file, return false if it doesn't

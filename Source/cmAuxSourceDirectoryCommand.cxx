@@ -1,19 +1,18 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAuxSourceDirectoryCommand.h"
 
-#include "cmSourceFile.h"
-
+#include <algorithm>
 #include <cmsys/Directory.hxx>
+#include <stddef.h>
+
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmSourceFile.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmAuxSourceDirectoryCommand
 bool cmAuxSourceDirectoryCommand::InitialPass(
@@ -41,14 +40,16 @@ bool cmAuxSourceDirectoryCommand::InitialPass(
     sourceListValue = def;
   }
 
+  std::vector<std::string> files;
+
   // Load all the files in the directory
   cmsys::Directory dir;
-  if (dir.Load(tdir.c_str())) {
+  if (dir.Load(tdir)) {
     size_t numfiles = dir.GetNumberOfFiles();
     for (size_t i = 0; i < numfiles; ++i) {
       std::string file = dir.GetFile(static_cast<unsigned long>(i));
       // Split the filename into base and extension
-      std::string::size_type dotpos = file.rfind(".");
+      std::string::size_type dotpos = file.rfind('.');
       if (dotpos != std::string::npos) {
         std::string ext = file.substr(dotpos + 1);
         std::string base = file.substr(0, dotpos);
@@ -64,14 +65,16 @@ bool cmAuxSourceDirectoryCommand::InitialPass(
           // depends can be done
           cmSourceFile* sf = this->Makefile->GetOrCreateSource(fullname);
           sf->SetProperty("ABSTRACT", "0");
-          if (!sourceListValue.empty()) {
-            sourceListValue += ";";
-          }
-          sourceListValue += fullname;
+          files.push_back(fullname);
         }
       }
     }
   }
+  std::sort(files.begin(), files.end());
+  if (!sourceListValue.empty()) {
+    sourceListValue += ";";
+  }
+  sourceListValue += cmJoin(files, ";");
   this->Makefile->AddDefinition(args[1], sourceListValue.c_str());
   return true;
 }

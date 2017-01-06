@@ -1,28 +1,24 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestMultiProcessHandler.h"
 
 #include "cmCTest.h"
+#include "cmCTestRunTest.h"
 #include "cmCTestScriptHandler.h"
-#include "cmProcess.h"
-#include "cmStandardIncludes.h"
+#include "cmCTestTestHandler.h"
 #include "cmSystemTools.h"
+
+#include <algorithm>
 #include <cmsys/FStream.hxx>
+#include <cmsys/String.hxx>
 #include <cmsys/SystemInformation.hxx>
-#include <float.h>
+#include <iomanip>
 #include <list>
 #include <math.h>
+#include <sstream>
 #include <stack>
 #include <stdlib.h>
+#include <utility>
 
 class TestComparator
 {
@@ -131,6 +127,16 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   }
   testRun->SetIndex(test);
   testRun->SetTestProperties(this->Properties[test]);
+
+  // Find any failed dependencies for this test. We assume the more common
+  // scenario has no failed tests, so make it the outer loop.
+  for (std::vector<std::string>::const_iterator it = this->Failed->begin();
+       it != this->Failed->end(); ++it) {
+    if (this->Properties[test]->RequireSuccessDepends.find(*it) !=
+        this->Properties[test]->RequireSuccessDepends.end()) {
+      testRun->AddFailedDependency(*it);
+    }
+  }
 
   std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(this->Properties[test]->Directory);
@@ -250,7 +256,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
   bool allTestsFailedTestLoadCheck = false;
   bool usedFakeLoadForTesting = false;
   size_t minProcessorsRequired = this->ParallelLevel;
-  std::string testWithMinProcessors = "";
+  std::string testWithMinProcessors;
 
   cmsys::SystemInformation info;
 
@@ -261,12 +267,14 @@ void cmCTestMultiProcessHandler::StartNextTests()
     allTestsFailedTestLoadCheck = true;
 
     // Check for a fake load average value used in testing.
-    if (const char* fake_load_value =
-          cmSystemTools::GetEnv("__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING")) {
+    std::string fake_load_value;
+    if (cmSystemTools::GetEnv("__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING",
+                              fake_load_value)) {
       usedFakeLoadForTesting = true;
-      if (!cmSystemTools::StringToULong(fake_load_value, &systemLoad)) {
+      if (!cmSystemTools::StringToULong(fake_load_value.c_str(),
+                                        &systemLoad)) {
         cmSystemTools::Error("Failed to parse fake load value: ",
-                             fake_load_value);
+                             fake_load_value.c_str());
       }
     }
     // If it's not set, look up the true load average.
@@ -413,12 +421,14 @@ void cmCTestMultiProcessHandler::UpdateCostData()
 
     std::string line;
     while (std::getline(fin, line)) {
-      if (line == "---")
+      if (line == "---") {
         break;
+      }
       std::vector<cmsys::String> parts = cmSystemTools::SplitString(line, ' ');
       // Format: <name> <previous_runs> <avg_cost>
-      if (parts.size() < 3)
+      if (parts.size() < 3) {
         break;
+      }
 
       std::string name = parts[0];
       int prev = atoi(parts[1].c_str());
@@ -449,7 +459,7 @@ void cmCTestMultiProcessHandler::UpdateCostData()
   fout << "---\n";
   for (std::vector<std::string>::iterator i = this->Failed->begin();
        i != this->Failed->end(); ++i) {
-    fout << i->c_str() << "\n";
+    fout << *i << "\n";
   }
   fout.close();
   cmSystemTools::RenameFile(tmpout.c_str(), fname.c_str());
@@ -464,8 +474,9 @@ void cmCTestMultiProcessHandler::ReadCostData()
     fin.open(fname.c_str());
     std::string line;
     while (std::getline(fin, line)) {
-      if (line == "---")
+      if (line == "---") {
         break;
+      }
 
       std::vector<cmsys::String> parts = cmSystemTools::SplitString(line, ' ');
 
@@ -480,8 +491,9 @@ void cmCTestMultiProcessHandler::ReadCostData()
       float cost = static_cast<float>(atof(parts[2].c_str()));
 
       int index = this->SearchByName(name);
-      if (index == -1)
+      if (index == -1) {
         continue;
+      }
 
       this->Properties[index]->PreviousRuns = prev;
       // When not running in parallel mode, don't use cost data
@@ -710,8 +722,8 @@ void cmCTestMultiProcessHandler::PrintTestList()
         << indexStr.str(),
       this->Quiet);
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, " ", this->Quiet);
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       p.Name.c_str() << std::endl, this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, p.Name << std::endl,
+                       this->Quiet);
     // pop working dir
     cmSystemTools::ChangeDirectory(current_dir);
   }
@@ -818,9 +830,8 @@ bool cmCTestMultiProcessHandler::CheckCycles()
                 << this->Properties[root]->Name
                 << "\".\nPlease fix the cycle and run ctest again.\n");
             return false;
-          } else {
-            s.push(*d);
           }
+          s.push(*d);
         }
       }
     }

@@ -1,25 +1,26 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportInstallFileGenerator.h"
 
 #include "cmAlgorithms.h"
 #include "cmExportSet.h"
 #include "cmExportSetMap.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTargetExport.h"
+
+#include <sstream>
+#include <utility>
 
 cmExportInstallFileGenerator::cmExportInstallFileGenerator(
   cmInstallExportGenerator* iegen)
@@ -65,6 +66,110 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     this->GenerateExpectedTargetsCode(os, expectedTargets);
   }
 
+  // Compute the relative import prefix for the file
+  this->GenerateImportPrefix(os);
+
+  std::vector<std::string> missingTargets;
+
+  bool require2_8_12 = false;
+  bool require3_0_0 = false;
+  bool require3_1_0 = false;
+  bool requiresConfigFiles = false;
+  // Create all the imported targets.
+  for (std::vector<cmTargetExport*>::const_iterator tei = allTargets.begin();
+       tei != allTargets.end(); ++tei) {
+    cmGeneratorTarget* gt = (*tei)->Target;
+
+    requiresConfigFiles =
+      requiresConfigFiles || gt->GetType() != cmStateEnums::INTERFACE_LIBRARY;
+
+    this->GenerateImportTargetCode(os, gt);
+
+    ImportPropertyMap properties;
+
+    this->PopulateIncludeDirectoriesInterface(
+      *tei, cmGeneratorExpression::InstallInterface, properties,
+      missingTargets);
+    this->PopulateSourcesInterface(*tei,
+                                   cmGeneratorExpression::InstallInterface,
+                                   properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", gt,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", gt,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_OPTIONS", gt,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_AUTOUIC_OPTIONS", gt,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_FEATURES", gt,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties, missingTargets);
+
+    const bool newCMP0022Behavior =
+      gt->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
+      gt->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+    if (newCMP0022Behavior) {
+      if (this->PopulateInterfaceLinkLibrariesProperty(
+            gt, cmGeneratorExpression::InstallInterface, properties,
+            missingTargets) &&
+          !this->ExportOld) {
+        require2_8_12 = true;
+      }
+    }
+    if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      require3_0_0 = true;
+    }
+    if (gt->GetProperty("INTERFACE_SOURCES")) {
+      // We can only generate INTERFACE_SOURCES in CMake 3.3, but CMake 3.1
+      // can consume them.
+      require3_1_0 = true;
+    }
+
+    this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE", gt,
+                                    properties);
+
+    this->PopulateCompatibleInterfaceProperties(gt, properties);
+
+    this->GenerateInterfaceProperties(gt, os, properties);
+  }
+
+  if (require3_1_0) {
+    this->GenerateRequiredCMakeVersion(os, "3.1.0");
+  } else if (require3_0_0) {
+    this->GenerateRequiredCMakeVersion(os, "3.0.0");
+  } else if (require2_8_12) {
+    this->GenerateRequiredCMakeVersion(os, "2.8.12");
+  }
+
+  this->LoadConfigFiles(os);
+
+  this->CleanupTemporaryVariables(os);
+  this->GenerateImportedFileCheckLoop(os);
+
+  bool result = true;
+  // Generate an import file for each configuration.
+  // Don't do this if we only export INTERFACE_LIBRARY targets.
+  if (requiresConfigFiles) {
+    for (std::vector<std::string>::const_iterator ci =
+           this->Configurations.begin();
+         ci != this->Configurations.end(); ++ci) {
+      if (!this->GenerateImportFileConfig(*ci, missingTargets)) {
+        result = false;
+      }
+    }
+  }
+
+  this->GenerateMissingTargetsCheckCode(os, missingTargets);
+
+  return result;
+}
+
+void cmExportInstallFileGenerator::GenerateImportPrefix(std::ostream& os)
+{
   // Set an _IMPORT_PREFIX variable for import location properties
   // to reference if they are relative to the install prefix.
   std::string installPrefix =
@@ -112,85 +217,24 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
             "PATH)\n";
       dest = cmSystemTools::GetFilenamePath(dest);
     }
-    os << "\n";
+    os << "if(_IMPORT_PREFIX STREQUAL \"/\")\n"
+       << "  set(_IMPORT_PREFIX \"\")\n"
+       << "endif()\n"
+       << "\n";
   }
+}
 
-  std::vector<std::string> missingTargets;
+void cmExportInstallFileGenerator::CleanupTemporaryVariables(std::ostream& os)
+{
+  /* clang-format off */
+  os << "# Cleanup temporary variables.\n"
+     << "set(_IMPORT_PREFIX)\n"
+     << "\n";
+  /* clang-format on */
+}
 
-  bool require2_8_12 = false;
-  bool require3_0_0 = false;
-  bool require3_1_0 = false;
-  bool requiresConfigFiles = false;
-  // Create all the imported targets.
-  for (std::vector<cmTargetExport*>::const_iterator tei = allTargets.begin();
-       tei != allTargets.end(); ++tei) {
-    cmGeneratorTarget* gt = (*tei)->Target;
-
-    requiresConfigFiles =
-      requiresConfigFiles || gt->GetType() != cmState::INTERFACE_LIBRARY;
-
-    this->GenerateImportTargetCode(os, gt);
-
-    ImportPropertyMap properties;
-
-    this->PopulateIncludeDirectoriesInterface(
-      *tei, cmGeneratorExpression::InstallInterface, properties,
-      missingTargets);
-    this->PopulateSourcesInterface(*tei,
-                                   cmGeneratorExpression::InstallInterface,
-                                   properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", gt,
-                                    cmGeneratorExpression::InstallInterface,
-                                    properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", gt,
-                                    cmGeneratorExpression::InstallInterface,
-                                    properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_COMPILE_OPTIONS", gt,
-                                    cmGeneratorExpression::InstallInterface,
-                                    properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_AUTOUIC_OPTIONS", gt,
-                                    cmGeneratorExpression::InstallInterface,
-                                    properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_COMPILE_FEATURES", gt,
-                                    cmGeneratorExpression::InstallInterface,
-                                    properties, missingTargets);
-
-    const bool newCMP0022Behavior =
-      gt->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
-      gt->GetPolicyStatusCMP0022() != cmPolicies::OLD;
-    if (newCMP0022Behavior) {
-      if (this->PopulateInterfaceLinkLibrariesProperty(
-            gt, cmGeneratorExpression::InstallInterface, properties,
-            missingTargets) &&
-          !this->ExportOld) {
-        require2_8_12 = true;
-      }
-    }
-    if (gt->GetType() == cmState::INTERFACE_LIBRARY) {
-      require3_0_0 = true;
-    }
-    if (gt->GetProperty("INTERFACE_SOURCES")) {
-      // We can only generate INTERFACE_SOURCES in CMake 3.3, but CMake 3.1
-      // can consume them.
-      require3_1_0 = true;
-    }
-
-    this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE", gt,
-                                    properties);
-
-    this->PopulateCompatibleInterfaceProperties(gt, properties);
-
-    this->GenerateInterfaceProperties(gt, os, properties);
-  }
-
-  if (require3_1_0) {
-    this->GenerateRequiredCMakeVersion(os, "3.1.0");
-  } else if (require3_0_0) {
-    this->GenerateRequiredCMakeVersion(os, "3.0.0");
-  } else if (require2_8_12) {
-    this->GenerateRequiredCMakeVersion(os, "2.8.12");
-  }
-
+void cmExportInstallFileGenerator::LoadConfigFiles(std::ostream& os)
+{
   // Now load per-configuration properties for them.
   /* clang-format off */
   os << "# Load information for each installed configuration.\n"
@@ -202,31 +246,6 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
      << "endforeach()\n"
      << "\n";
   /* clang-format on */
-
-  // Cleanup the import prefix variable.
-  /* clang-format off */
-  os << "# Cleanup temporary variables.\n"
-     << "set(_IMPORT_PREFIX)\n"
-     << "\n";
-  /* clang-format on */
-  this->GenerateImportedFileCheckLoop(os);
-
-  bool result = true;
-  // Generate an import file for each configuration.
-  // Don't do this if we only export INTERFACE_LIBRARY targets.
-  if (requiresConfigFiles) {
-    for (std::vector<std::string>::const_iterator ci =
-           this->Configurations.begin();
-         ci != this->Configurations.end(); ++ci) {
-      if (!this->GenerateImportFileConfig(*ci, missingTargets)) {
-        result = false;
-      }
-    }
-  }
-
-  this->GenerateMissingTargetsCheckCode(os, missingTargets);
-
-  return result;
 }
 
 void cmExportInstallFileGenerator::ReplaceInstallPrefix(std::string& input)
@@ -297,7 +316,7 @@ void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
        tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei) {
     // Collect import properties for this target.
     cmTargetExport const* te = *tei;
-    if (te->Target->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (te->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
 
@@ -468,7 +487,7 @@ void cmExportInstallFileGenerator::ComplainAboutMissingTarget(
 }
 
 std::string cmExportInstallFileGenerator::InstallNameDir(
-  cmGeneratorTarget* target, const std::string&)
+  cmGeneratorTarget* target, const std::string& /*config*/)
 {
   std::string install_name_dir;
 

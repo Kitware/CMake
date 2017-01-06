@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindIce
 # -------
@@ -121,19 +124,6 @@
 
 # Written by Roger Leigh <rleigh@codelibre.net>
 
-#=============================================================================
-# Copyright 2014-2015 University of Dundee
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 # The Ice checks are contained in a function due to the large number
 # of temporary variables needed.
 function(_Ice_FIND)
@@ -141,6 +131,9 @@ function(_Ice_FIND)
   set(ice_versions
       3
       3.6
+      3.6.3
+      3.6.2
+      3.6.1
       3.6.0
       3.5
       3.5.1
@@ -360,12 +353,20 @@ function(_Ice_FIND)
   foreach(component ${Ice_FIND_COMPONENTS})
     string(TOUPPER "${component}" component_upcase)
     set(component_cache "Ice_${component_upcase}_LIBRARY")
+    set(component_cache_release "${component_cache}_RELEASE")
+    set(component_cache_debug "${component_cache}_DEBUG")
     set(component_found "${component_upcase}_FOUND")
-    find_library("${component_cache}" "${component}"
+    find_library("${component_cache_release}" "${component}"
       HINTS ${ice_roots}
       PATH_SUFFIXES ${ice_library_suffixes}
-      DOC "Ice ${component} library")
-    mark_as_advanced("${component_cache}")
+      DOC "Ice ${component} library (release)")
+    find_library("${component_cache_debug}" "${component}d"
+      HINTS ${ice_roots}
+      PATH_SUFFIXES ${ice_library_suffixes}
+      DOC "Ice ${component} library (debug)")
+    include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+    select_library_configurations(Ice_${component_upcase})
+    mark_as_advanced("${component_cache_release}" "${component_cache_debug}")
     if(${component_cache})
       set("${component_found}" ON)
       list(APPEND Ice_LIBRARY "${${component_cache}}")
@@ -438,6 +439,8 @@ if(Ice_FOUND)
   foreach(_Ice_component ${Ice_FIND_COMPONENTS})
     string(TOUPPER "${_Ice_component}" _Ice_component_upcase)
     set(_Ice_component_cache "Ice_${_Ice_component_upcase}_LIBRARY")
+    set(_Ice_component_cache_release "Ice_${_Ice_component_upcase}_LIBRARY_RELEASE")
+    set(_Ice_component_cache_debug "Ice_${_Ice_component_upcase}_LIBRARY_DEBUG")
     set(_Ice_component_lib "Ice_${_Ice_component_upcase}_LIBRARIES")
     set(_Ice_component_found "${_Ice_component_upcase}_FOUND")
     set(_Ice_imported_target "Ice::${_Ice_component}")
@@ -445,9 +448,29 @@ if(Ice_FOUND)
       set("${_Ice_component_lib}" "${${_Ice_component_cache}}")
       if(NOT TARGET ${_Ice_imported_target})
         add_library(${_Ice_imported_target} UNKNOWN IMPORTED)
-        set_target_properties(${_Ice_imported_target} PROPERTIES
-          IMPORTED_LOCATION "${${_Ice_component_cache}}"
-          INTERFACE_INCLUDE_DIRECTORIES "${Ice_INCLUDE_DIR}")
+        if()
+          set_target_properties(${_Ice_imported_target} PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${Ice_INCLUDE_DIR}")
+        endif()
+        if(EXISTS "${${_Ice_component_cache}}")
+          set_target_properties(${_Ice_imported_target} PROPERTIES
+            IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+            IMPORTED_LOCATION "${${_Ice_component_cache}}")
+        endif()
+        if(EXISTS "${${_Ice_component_cache_release}}")
+          set_property(TARGET ${_Ice_imported_target} APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS RELEASE)
+          set_target_properties(${_Ice_imported_target} PROPERTIES
+            IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+            IMPORTED_LOCATION_RELEASE "${${_Ice_component_cache_release}}")
+        endif()
+        if(EXISTS "${${_Ice_component_cache_debug}}")
+          set_property(TARGET ${_Ice_imported_target} APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS DEBUG)
+          set_target_properties(${_Ice_imported_target} PROPERTIES
+            IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+            IMPORTED_LOCATION_DEBUG "${${_Ice_component_cache_debug}}")
+        endif()
       endif()
     endif()
     unset(_Ice_component_upcase)

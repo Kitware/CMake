@@ -1,23 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2015 Geoffrey Viola <geoffrey.viola@asirobots.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalGhsMultiGenerator.h"
 
+#include <cmsys/SystemTools.hxx>
+
+#include "cmAlgorithms.h"
+#include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmGhsMultiTargetGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
 #include "cmVersion.h"
-#include <cmAlgorithms.h>
-#include <cmsys/SystemTools.hxx>
 
 const char* cmGlobalGhsMultiGenerator::FILE_EXTENSION = ".gpj";
 const char* cmGlobalGhsMultiGenerator::DEFAULT_MAKE_PROGRAM = "gbuild";
@@ -81,7 +75,7 @@ void cmGlobalGhsMultiGenerator::EnableLanguage(
   this->cmGlobalGenerator::EnableLanguage(l, mf, optional);
 }
 
-void cmGlobalGhsMultiGenerator::FindMakeProgram(cmMakefile* mf)
+bool cmGlobalGhsMultiGenerator::FindMakeProgram(cmMakefile* mf)
 {
   // The GHS generator knows how to lookup its build tool
   // directly instead of needing a helper module to do it, so we
@@ -90,6 +84,7 @@ void cmGlobalGhsMultiGenerator::FindMakeProgram(cmMakefile* mf)
     mf->AddDefinition("CMAKE_MAKE_PROGRAM",
                       this->GetGhsBuildCommand().c_str());
   }
+  return true;
 }
 
 std::string const& cmGlobalGhsMultiGenerator::GetGhsBuildCommand()
@@ -447,11 +442,7 @@ void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
        tgtsI != tgts.end(); ++tgtsI) {
     const cmGeneratorTarget* tgt = *tgtsI;
     if (IsTgtForBuild(tgt)) {
-      char const* rawFolderName = tgt->GetProperty("FOLDER");
-      if (NULL == rawFolderName) {
-        rawFolderName = "";
-      }
-      std::string folderName(rawFolderName);
+      std::string folderName = tgt->GetEffectiveFolderName();
       if (this->TargetFolderBuildStreams.end() ==
           this->TargetFolderBuildStreams.find(folderName)) {
         this->AddFilesUpToPath(

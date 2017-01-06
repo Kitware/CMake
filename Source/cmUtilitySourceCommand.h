@@ -1,27 +1,23 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmUtilitySourceCommand_h
 #define cmUtilitySourceCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 class cmUtilitySourceCommand : public cmCommand
 {
 public:
-  cmTypeMacro(cmUtilitySourceCommand, cmCommand);
-  virtual cmCommand* Clone() { return new cmUtilitySourceCommand; }
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
-  virtual std::string GetName() const { return "utility_source"; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmUtilitySourceCommand; }
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
+  std::string GetName() const CM_OVERRIDE { return "utility_source"; }
 };
 
 #endif

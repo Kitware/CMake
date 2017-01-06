@@ -4,7 +4,7 @@
 #-----------------------------------------------------------------------------
 # Test in a directory next to this script.
 get_filename_component(TOP "${CMAKE_CURRENT_LIST_FILE}" PATH)
-set(TOP "${TOP}/@CTestUpdateCVS_DIR@")
+string(APPEND TOP "/@CTestUpdateCVS_DIR@")
 set(UPDATE_NOT_GLOBAL 1)
 set(UPDATE_MAYBE Updated{CTestConfig.cmake})
 

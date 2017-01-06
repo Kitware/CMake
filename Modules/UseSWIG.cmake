@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # UseSWIG
 # -------
@@ -6,18 +9,22 @@
 #
 # ::
 #
-#    SWIG_ADD_MODULE(name language [ files ])
+#    SWIG_ADD_LIBRARY(<name>
+#                     [TYPE <SHARED|MODULE|STATIC|USE_BUILD_SHARED_LIBS>]
+#                     LANGUAGE <language>
+#                     SOURCES <file>...
+#                     )
 #      - Define swig module with given name and specified language
 #    SWIG_LINK_LIBRARIES(name [ libraries ])
 #      - Link libraries to swig module
 #
 # Source files properties on module files can be set before the invocation
-# of the SWIG_ADD_MODULE macro to specify special behavior of SWIG.
+# of the SWIG_ADD_LIBRARY macro to specify special behavior of SWIG.
 #
 # The source file property CPLUSPLUS calls SWIG in c++ mode, e.g.::
 #
 #    set_property(SOURCE mymod.i PROPERTY CPLUSPLUS ON)
-#    swig_add_module(mymod python mymod.i)
+#    swig_add_library(mymod LANGUAGE python SOURCES mymod.i)
 #
 # The source file property SWIG_FLAGS adds custom flags to the SWIG executable.
 #
@@ -33,8 +40,11 @@
 #
 # CMAKE_SWIG_FLAGS can be used to add special flags to all swig calls.
 #
-# Another special variable is CMAKE_SWIG_OUTDIR, it allows one to specify
-# where to write all the swig generated module (swig -outdir option)
+# CMAKE_SWIG_OUTDIR allows one to specify where to write
+# the language specific files (swig -outdir option).
+#
+# SWIG_OUTFILE_DIR allows one to specify where to write the output file
+# (swig -o option).  If not specified, CMAKE_SWIG_OUTDIR is used.
 #
 # The name-specific variable SWIG_MODULE_<name>_EXTRA_DEPS may be used to specify extra
 # dependencies for the generated modules.
@@ -44,24 +54,11 @@
 #    set_source_files_properties( ${swig_generated_file_fullname}
 #                                 PROPERTIES COMPILE_FLAGS "-bla")
 
-#=============================================================================
-# Copyright 2004-2009 Kitware, Inc.
-# Copyright 2009 Mathieu Malaterre <mathieu.malaterre@gmail.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 set(SWIG_CXX_EXTENSION "cxx")
 set(SWIG_EXTRA_LIBRARIES "")
 
-set(SWIG_PYTHON_EXTRA_FILE_EXTENSION "py")
+set(SWIG_PYTHON_EXTRA_FILE_EXTENSIONS ".py")
+set(SWIG_JAVA_EXTRA_FILE_EXTENSIONS ".java" "JNI.java")
 
 #
 # For given swig module initialize variables associated with it
@@ -127,9 +124,9 @@ macro(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
     endif ()
 
   endif()
-  foreach(it ${SWIG_${language}_EXTRA_FILE_EXTENSION})
+  foreach(it ${SWIG_${language}_EXTRA_FILE_EXTENSIONS})
     set(${outfiles} ${${outfiles}}
-      "${generatedpath}/${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename}.${it}")
+      "${generatedpath}/${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename}${it}")
   endforeach()
 endmacro()
 
@@ -153,6 +150,13 @@ macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   else()
     set(swig_outdir ${CMAKE_CURRENT_BINARY_DIR})
   endif()
+
+  if(SWIG_OUTFILE_DIR)
+    set(swig_outfile_dir ${SWIG_OUTFILE_DIR})
+  else()
+    set(swig_outfile_dir ${swig_outdir})
+  endif()
+
   if (NOT SWIG_MODULE_${name}_NOPROXY)
     SWIG_GET_EXTRA_OUTPUT_FILES(${SWIG_MODULE_${name}_LANGUAGE}
       swig_extra_generated_files
@@ -160,18 +164,18 @@ macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
       "${swig_source_file_fullname}")
   endif()
   set(swig_generated_file_fullname
-    "${swig_outdir}/${swig_source_file_name_we}")
+    "${swig_outfile_dir}/${swig_source_file_name_we}")
   # add the language into the name of the file (i.e. TCL_wrap)
   # this allows for the same .i file to be wrapped into different languages
-  set(swig_generated_file_fullname
-    "${swig_generated_file_fullname}${SWIG_MODULE_${name}_LANGUAGE}_wrap")
+  string(APPEND swig_generated_file_fullname
+    "${SWIG_MODULE_${name}_LANGUAGE}_wrap")
 
   if(swig_source_file_cplusplus)
-    set(swig_generated_file_fullname
-      "${swig_generated_file_fullname}.${SWIG_CXX_EXTENSION}")
+    string(APPEND swig_generated_file_fullname
+      ".${SWIG_CXX_EXTENSION}")
   else()
-    set(swig_generated_file_fullname
-      "${swig_generated_file_fullname}.c")
+    string(APPEND swig_generated_file_fullname
+      ".c")
   endif()
 
   #message("Full path to source file: ${swig_source_file_fullname}")
@@ -218,10 +222,42 @@ endmacro()
 # Create Swig module
 #
 macro(SWIG_ADD_MODULE name language)
-  SWIG_MODULE_INITIALIZE(${name} ${language})
+  message(DEPRECATION "SWIG_ADD_MODULE is deprecated. Use SWIG_ADD_LIBRARY instead.")
+  swig_add_library(${name}
+                   LANGUAGE ${language}
+                   TYPE MODULE
+                   SOURCES ${ARGN})
+endmacro()
+
+
+macro(SWIG_ADD_LIBRARY name)
+
+  include(CMakeParseArguments)
+  set(options "")
+  set(oneValueArgs LANGUAGE
+                   TYPE)
+  set(multiValueArgs SOURCES)
+  cmake_parse_arguments(_SAM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  if(NOT DEFINED _SAM_LANGUAGE)
+    message(FATAL_ERROR "SWIG_ADD_LIBRARY: Missing LANGUAGE argument")
+  endif()
+
+  if(NOT DEFINED _SAM_SOURCES)
+    message(FATAL_ERROR "SWIG_ADD_LIBRARY: Missing SOURCES argument")
+  endif()
+
+  if(NOT DEFINED _SAM_TYPE)
+    set(_SAM_TYPE MODULE)
+  elseif("${_SAM_TYPE}" STREQUAL "USE_BUILD_SHARED_LIBS")
+    unset(_SAM_TYPE)
+  endif()
+
+  swig_module_initialize(${name} ${_SAM_LANGUAGE})
+
   set(swig_dot_i_sources)
   set(swig_other_sources)
-  foreach(it ${ARGN})
+  foreach(it ${_SAM_SOURCES})
     if(${it} MATCHES "\\.i$")
       set(swig_dot_i_sources ${swig_dot_i_sources} "${it}")
     else()
@@ -238,11 +274,13 @@ macro(SWIG_ADD_MODULE name language)
   set_directory_properties(PROPERTIES
     ADDITIONAL_MAKE_CLEAN_FILES "${swig_extra_clean_files};${swig_generated_sources}")
   add_library(${SWIG_MODULE_${name}_REAL_NAME}
-    MODULE
+    ${_SAM_TYPE}
     ${swig_generated_sources}
     ${swig_other_sources})
-  set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES NO_SONAME ON)
-  string(TOLOWER "${language}" swig_lowercase_language)
+  if("${_SAM_TYPE}" STREQUAL "MODULE")
+    set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES NO_SONAME ON)
+  endif()
+  string(TOLOWER "${_SAM_LANGUAGE}" swig_lowercase_language)
   if ("${swig_lowercase_language}" STREQUAL "octave")
     set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
     set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".oct")
@@ -259,7 +297,9 @@ macro(SWIG_ADD_MODULE name language)
         set_target_properties (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".jnilib")
       endif ()
   elseif ("${swig_lowercase_language}" STREQUAL "lua")
-    set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
+    if("${_SAM_TYPE}" STREQUAL "MODULE")
+      set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
+    endif()
   elseif ("${swig_lowercase_language}" STREQUAL "python")
     # this is only needed for the python case where a _modulename.so is generated
     set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")

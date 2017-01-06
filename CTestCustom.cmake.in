@@ -17,7 +17,6 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "Utilities.cmbzip2."
   "Source.CTest.Curl"
   "Source.CursesDialog.form"
-  "Source.cm_sha2.*warning.*cast increases required alignment of target type"
   "Utilities.cmcurl"
   "Utilities.cmexpat."
   "Utilities.cmlibarchive"
@@ -49,6 +48,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "stl_deque.h:1051"
   "(Lexer|Parser).*warning.*conversion.*may (alter its value|change the sign)"
   "(Lexer|Parser).*warning.*(statement is unreachable|will never be executed)"
+  "(Lexer|Parser).*warning.*variable.*was set but never used"
   "PGC-W-0095-Type cast required for this conversion.*ProcessUNIX.c"
   "[Qq]t([Cc]ore|[Gg]ui|[Ww]idgets).*warning.*conversion.*may alter its value"
   "warning:.*is.*very unsafe.*consider using.*"
@@ -62,13 +62,17 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "warning.*This version of Mac OS X is unsupported"
   "clang.*: warning: argument unused during compilation: .-g"
   "note: in expansion of macro" # diagnostic context note
+  "note: expanded from macro" # diagnostic context note
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*rand.*may return deterministic values"
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*rand.*isn.*t random" # we do not do crypto
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*srand.*seed choices are.*poor" # we do not do crypto
+  "IPA warning: function.*multiply defined in"
 
   # Ignore clang's summary warning, assuming prior text has matched some
   # other warning expression:
   "[0-9,]+ warnings? generated."
+  # similarly for PGI
+  "compilation completed with warnings"
 
 # scanbuild exceptions
   "char_traits.h:.*: warning: Null pointer argument in call to string length function"
@@ -79,9 +83,15 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "warning: Value stored to 'yytoken' is never read"
   "index_encoder.c.241.2. warning: Value stored to .out_start. is never read"
   "index.c.*warning: Access to field.*results in a dereference of a null pointer.*loaded from variable.*"
-  "cm_sha2.*warning: Value stored to.*is never read"
+  "cmCommandArgumentLexer.cxx:[0-9]+:[0-9]+: warning: Call to 'realloc' has an allocation size of 0 bytes"
+  "cmDependsJavaLexer.cxx:[0-9]+:[0-9]+: warning: Call to 'realloc' has an allocation size of 0 bytes"
+  "cmExprLexer.cxx:[0-9]+:[0-9]+: warning: Call to 'realloc' has an allocation size of 0 bytes"
+  "cmListFileLexer.c:[0-9]+:[0-9]+: warning: Call to 'realloc' has an allocation size of 0 bytes"
+  "cmFortranLexer.cxx:[0-9]+:[0-9]+: warning: Call to 'realloc' has an allocation size of 0 bytes"
   "testProcess.*warning: Dereference of null pointer .loaded from variable .invalidAddress.."
   "liblzma/simple/x86.c:[0-9]+:[0-9]+: warning: The result of the '<<' expression is undefined"
+  "libuv/src/.*:[0-9]+:[0-9]+: warning: Dereference of null pointer"
+  "libuv/src/.*:[0-9]+:[0-9]+: warning: The left operand of '==' is a garbage value"
   )
 
 if(NOT "@CMAKE_GENERATOR@" MATCHES "Xcode")

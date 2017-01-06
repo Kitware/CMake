@@ -1,21 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmUnsetCommand.h"
+
+#include <string.h>
+
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmUnsetCommand
 bool cmUnsetCommand::InitialPass(std::vector<std::string> const& args,
                                  cmExecutionStatus&)
 {
-  if (args.size() < 1 || args.size() > 2) {
+  if (args.empty() || args.size() > 2) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
@@ -36,47 +35,21 @@ bool cmUnsetCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
   // unset(VAR)
-  else if (args.size() == 1) {
+  if (args.size() == 1) {
     this->Makefile->RemoveDefinition(variable);
     return true;
   }
   // unset(VAR CACHE)
-  else if ((args.size() == 2) && (args[1] == "CACHE")) {
+  if ((args.size() == 2) && (args[1] == "CACHE")) {
     this->Makefile->RemoveCacheDefinition(variable);
     return true;
   }
   // unset(VAR PARENT_SCOPE)
-  else if ((args.size() == 2) && (args[1] == "PARENT_SCOPE")) {
-    this->Makefile->RaiseScope(variable, 0);
+  if ((args.size() == 2) && (args[1] == "PARENT_SCOPE")) {
+    this->Makefile->RaiseScope(variable, CM_NULLPTR);
     return true;
   }
   // ERROR: second argument isn't CACHE or PARENT_SCOPE
-  else {
-    this->SetError("called with an invalid second argument");
-    return false;
-  }
-}
-
-cmCommand::ParameterContext cmUnsetCommand::GetContextForParameter(
-  std::vector<std::string> const&, size_t index)
-{
-  if (index == 0)
-    return VariableIdentifierParameter;
-  if (index == 1)
-    return KeywordParameter;
-  return NoContext;
-}
-
-std::vector<std::string> cmUnsetCommand::GetKeywords(
-  std::vector<std::string> const& args, size_t index)
-{
-  (void)args;
-  std::vector<std::string> result;
-
-  if (index == 1) {
-    result.push_back("CACHE");
-    result.push_back("PARENT_SCOPE");
-  }
-
-  return result;
+  this->SetError("called with an invalid second argument");
+  return false;
 }

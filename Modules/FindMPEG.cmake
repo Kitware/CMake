@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindMPEG
 # --------
@@ -19,19 +22,6 @@
 #   MPEG_mpeg2_LIBRARY, where to find the MPEG library.
 #   MPEG_vo_LIBRARY, where to find the vo library.
 
-#=============================================================================
-# Copyright 2002-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 find_path(MPEG_INCLUDE_DIR mpeg2dec/include/video_out.h
   /usr/local/livid
 )
@@ -44,8 +34,6 @@ find_library( MPEG_vo_LIBRARY vo
   /usr/local/livid/mpeg2dec/libvo/.libs
 )
 
-# handle the QUIETLY and REQUIRED arguments and set MPEG2_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(MPEG DEFAULT_MSG MPEG_INCLUDE_DIR MPEG_mpeg2_LIBRARY MPEG_vo_LIBRARY)
 

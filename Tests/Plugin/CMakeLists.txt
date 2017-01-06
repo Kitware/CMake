@@ -32,7 +32,7 @@ set(CMAKE_CXX_STANDARD 98)
 # template support also need a flag to use the newer C++ library.
 if (CMAKE_CXX_COMPILER_ID STREQUAL HP AND
     CMAKE_CXX98_STANDARD_COMPILE_OPTION STREQUAL "+hpxstd98")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AA")
+  string(APPEND CMAKE_CXX_FLAGS " -AA")
 endif ()
 
 # Clang/C2 in C++98 mode cannot properly handle some of MSVC headers

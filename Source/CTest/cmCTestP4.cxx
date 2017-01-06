@@ -1,25 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2013 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestP4.h"
 
 #include "cmCTest.h"
+#include "cmCTestVC.h"
+#include "cmProcessTools.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/Process.h>
+#include <algorithm>
 #include <cmsys/RegularExpression.hxx>
-
-#include <ctype.h>
-#include <sys/types.h>
+#include <ostream>
 #include <time.h>
+#include <utility>
 
 cmCTestP4::cmCTestP4(cmCTest* ct, std::ostream& log)
   : cmCTestGlobalVC(ct, log)
@@ -45,7 +37,7 @@ private:
   std::string& Rev;
   cmsys::RegularExpression RegexIdentify;
 
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexIdentify.find(this->Line)) {
       this->Rev = this->RegexIdentify.match(1);
@@ -69,7 +61,7 @@ private:
   cmsys::RegularExpression RegexIdentify;
   cmCTestP4* P4;
 
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexIdentify.find(this->Line)) {
       P4->ChangeLists.push_back(this->RegexIdentify.match(1));
@@ -92,7 +84,7 @@ private:
   cmsys::RegularExpression RegexUser;
   cmCTestP4* P4;
 
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexUser.find(this->Line)) {
       User NewUser;
@@ -135,7 +127,7 @@ private:
   std::string CurrentPath;
   cmsys::RegularExpression RegexDiff;
 
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (!this->Line.empty() && this->Line[0] == '=' &&
         this->RegexDiff.find(this->Line)) {
@@ -163,7 +155,7 @@ cmCTestP4::User cmCTestP4::GetUserData(const std::string& username)
     p4_users.push_back("-m");
     p4_users.push_back("1");
     p4_users.push_back(username.c_str());
-    p4_users.push_back(0);
+    p4_users.push_back(CM_NULLPTR);
 
     UserParser out(this, "users-out> ");
     OutputLogger err(this->Log, "users-err> ");
@@ -225,7 +217,7 @@ private:
   SectionType Section;
   Revision Rev;
 
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->Line.empty()) {
       this->NextSection();
@@ -358,7 +350,7 @@ std::string cmCTestP4::GetWorkingRevision()
 
   std::string source = this->SourceDirectory + "/...#have";
   p4_identify.push_back(source.c_str());
-  p4_identify.push_back(0);
+  p4_identify.push_back(CM_NULLPTR);
 
   std::string rev;
   IdentifyParser out(this, "p4_changes-out> ", rev);
@@ -373,9 +365,8 @@ std::string cmCTestP4::GetWorkingRevision()
 
   if (rev.empty()) {
     return "0";
-  } else {
-    return rev;
   }
+  return rev;
 }
 
 void cmCTestP4::NoteOldRevision()
@@ -418,7 +409,7 @@ void cmCTestP4::LoadRevisions()
 
   p4_changes.push_back("changes");
   p4_changes.push_back(range.c_str());
-  p4_changes.push_back(0);
+  p4_changes.push_back(CM_NULLPTR);
 
   ChangesParser out(this, "p4_changes-out> ");
   OutputLogger err(this->Log, "p4_changes-err> ");
@@ -426,8 +417,9 @@ void cmCTestP4::LoadRevisions()
   ChangeLists.clear();
   this->RunChild(&p4_changes[0], &out, &err);
 
-  if (ChangeLists.empty())
+  if (ChangeLists.empty()) {
     return;
+  }
 
   // p4 describe -s ...@1111111,2222222
   std::vector<char const*> p4_describe;
@@ -437,7 +429,7 @@ void cmCTestP4::LoadRevisions()
     p4_describe.push_back("describe");
     p4_describe.push_back("-s");
     p4_describe.push_back(i->c_str());
-    p4_describe.push_back(0);
+    p4_describe.push_back(CM_NULLPTR);
 
     DescribeParser outDescribe(this, "p4_describe-out> ");
     OutputLogger errDescribe(this->Log, "p4_describe-err> ");
@@ -456,7 +448,7 @@ void cmCTestP4::LoadModifications()
   p4_diff.push_back("-dn");
   std::string source = this->SourceDirectory + "/...";
   p4_diff.push_back(source.c_str());
-  p4_diff.push_back(0);
+  p4_diff.push_back(CM_NULLPTR);
 
   DiffParser out(this, "p4_diff-out> ");
   OutputLogger err(this->Log, "p4_diff-err> ");
@@ -473,7 +465,7 @@ bool cmCTestP4::UpdateCustom(const std::string& custom)
        i != p4_custom_command.end(); ++i) {
     p4_custom.push_back(i->c_str());
   }
-  p4_custom.push_back(0);
+  p4_custom.push_back(CM_NULLPTR);
 
   OutputLogger custom_out(this->Log, "p4_customsync-out> ");
   OutputLogger custom_err(this->Log, "p4_customsync-err> ");
@@ -524,7 +516,7 @@ bool cmCTestP4::UpdateImpl()
   }
 
   p4_sync.push_back(source.c_str());
-  p4_sync.push_back(0);
+  p4_sync.push_back(CM_NULLPTR);
 
   OutputLogger out(this->Log, "p4_sync-out> ");
   OutputLogger err(this->Log, "p4_sync-err> ");

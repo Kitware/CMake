@@ -1,20 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestEmptyBinaryDirectoryCommand.h"
 
 #include "cmCTestScriptHandler.h"
 
+#include <sstream>
+
+class cmExecutionStatus;
+
 bool cmCTestEmptyBinaryDirectoryCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+  std::vector<std::string> const& args, cmExecutionStatus& /*unused*/)
 {
   if (args.size() != 1) {
     this->SetError("called with incorrect number of arguments");

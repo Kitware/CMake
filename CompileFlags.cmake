@@ -1,14 +1,5 @@
-#=============================================================================
-# CMake - Cross Platform Makefile Generator
-# Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
 #-----------------------------------------------------------------------------
 # set some special flags for different compilers
@@ -64,7 +55,7 @@ endif()
 
 # Workaround for short jump tables on PA-RISC
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "^parisc")
-  if(CMAKE_COMPILER_IS_GNUC)
+  if(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mlong-calls")
   endif()
   if(CMAKE_COMPILER_IS_GNUCXX)
@@ -79,6 +70,13 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -library=stlport4")
   endif()
 endif()
+
+foreach(lang C CXX)
+  # Suppress warnings from PGI compiler.
+  if (CMAKE_${lang}_COMPILER_ID STREQUAL "PGI")
+    set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} -w")
+  endif()
+endforeach()
 
 # use the ansi CXX compile flag for building cmake
 if (CMAKE_ANSI_CXXFLAGS)

@@ -1,34 +1,24 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmGeneratorExpression_h
 #define cmGeneratorExpression_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
 #include "cmListFileCache.h"
 
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/auto_ptr.hxx>
-
-class cmGeneratorTarget;
-class cmLocalGenerator;
-class cmListFileBacktrace;
-
-struct cmGeneratorExpressionEvaluator;
-struct cmGeneratorExpressionContext;
-struct cmGeneratorExpressionDAGChecker;
+#include <cm_auto_ptr.hxx>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 class cmCompiledGeneratorExpression;
+class cmGeneratorTarget;
+class cmLocalGenerator;
+struct cmGeneratorExpressionContext;
+struct cmGeneratorExpressionDAGChecker;
+struct cmGeneratorExpressionEvaluator;
 
 /** \class cmGeneratorExpression
  * \brief Evaluate generate-time query expression syntax.
@@ -47,9 +37,8 @@ public:
     cmListFileBacktrace const& backtrace = cmListFileBacktrace());
   ~cmGeneratorExpression();
 
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> Parse(
-    std::string const& input);
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> Parse(const char* input);
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> Parse(std::string const& input);
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> Parse(const char* input);
 
   enum PreprocessContext
   {
@@ -81,12 +70,12 @@ private:
 class cmCompiledGeneratorExpression
 {
 public:
-  const char* Evaluate(cmLocalGenerator* lg, const std::string& config,
-                       bool quiet = false,
-                       cmGeneratorTarget const* headTarget = 0,
-                       cmGeneratorTarget const* currentTarget = 0,
-                       cmGeneratorExpressionDAGChecker* dagChecker = 0,
-                       std::string const& language = std::string()) const;
+  const char* Evaluate(
+    cmLocalGenerator* lg, const std::string& config, bool quiet = false,
+    cmGeneratorTarget const* headTarget = CM_NULLPTR,
+    cmGeneratorTarget const* currentTarget = CM_NULLPTR,
+    cmGeneratorExpressionDAGChecker* dagChecker = CM_NULLPTR,
+    std::string const& language = std::string()) const;
   const char* Evaluate(cmLocalGenerator* lg, const std::string& config,
                        bool quiet, cmGeneratorTarget const* headTarget,
                        cmGeneratorExpressionDAGChecker* dagChecker,

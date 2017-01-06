@@ -1730,7 +1730,8 @@ XML_GetBuffer(XML_Parser parser, int len)
 #ifdef XML_CONTEXT_BYTES
     int keep;
 #endif  /* defined XML_CONTEXT_BYTES */
-    int neededSize = len + (int)(bufferEnd - bufferPtr);
+    /* Do not invoke signed arithmetic overflow: */
+    int neededSize = (int) ((unsigned)len + (unsigned)(bufferEnd - bufferPtr));
     if (neededSize < 0) {
       errorCode = XML_ERROR_NO_MEMORY;
       return NULL;
@@ -1761,7 +1762,8 @@ XML_GetBuffer(XML_Parser parser, int len)
       if (bufferSize == 0)
         bufferSize = INIT_BUFFER_SIZE;
       do {
-        bufferSize *= 2;
+        /* Do not invoke signed arithmetic overflow: */
+        bufferSize = (int) (2U * (unsigned) bufferSize);
       } while (bufferSize < neededSize && bufferSize > 0);
       if (bufferSize <= 0) {
         errorCode = XML_ERROR_NO_MEMORY;
@@ -2462,11 +2464,11 @@ doContent(XML_Parser parser,
           for (;;) {
             int bufSize;
             int convLen;
-            XmlConvert(enc,
+            const enum XML_Convert_Result convert_res = XmlConvert(enc,
                        &fromPtr, rawNameEnd,
                        (ICHAR **)&toPtr, (ICHAR *)tag->bufEnd - 1);
             convLen = (int)(toPtr - (XML_Char *)tag->buf);
-            if (fromPtr == rawNameEnd) {
+            if ((convert_res == XML_CONVERT_COMPLETED) || (convert_res == XML_CONVERT_INPUT_INCOMPLETE)) {
               tag->name.strLen = convLen;
               break;
             }
@@ -2687,11 +2689,11 @@ doContent(XML_Parser parser,
           if (MUST_CONVERT(enc, s)) {
             for (;;) {
               ICHAR *dataPtr = (ICHAR *)dataBuf;
-              XmlConvert(enc, &s, next, &dataPtr, (ICHAR *)dataBufEnd);
+              const enum XML_Convert_Result convert_res = XmlConvert(enc, &s, next, &dataPtr, (ICHAR *)dataBufEnd);
               *eventEndPP = s;
               charDataHandler(handlerArg, dataBuf,
                               (int)(dataPtr - (ICHAR *)dataBuf));
-              if (s == next)
+              if ((convert_res == XML_CONVERT_COMPLETED) || (convert_res == XML_CONVERT_INPUT_INCOMPLETE))
                 break;
               *eventPP = s;
             }
@@ -3297,11 +3299,11 @@ doCdataSection(XML_Parser parser,
           if (MUST_CONVERT(enc, s)) {
             for (;;) {
               ICHAR *dataPtr = (ICHAR *)dataBuf;
-              XmlConvert(enc, &s, next, &dataPtr, (ICHAR *)dataBufEnd);
+              const enum XML_Convert_Result convert_res = XmlConvert(enc, &s, next, &dataPtr, (ICHAR *)dataBufEnd);
               *eventEndPP = next;
               charDataHandler(handlerArg, dataBuf,
                               (int)(dataPtr - (ICHAR *)dataBuf));
-              if (s == next)
+              if ((convert_res == XML_CONVERT_COMPLETED) || (convert_res == XML_CONVERT_INPUT_INCOMPLETE))
                 break;
               *eventPP = s;
             }
@@ -4960,9 +4962,9 @@ internalEntityProcessor(XML_Parser parser,
 
 static enum XML_Error PTRCALL
 errorProcessor(XML_Parser parser,
-               const char *s,
-               const char *end,
-               const char **nextPtr)
+               const char *UNUSED_P(s),
+               const char *UNUSED_P(end),
+               const char **UNUSED_P(nextPtr))
 {
   return errorCode;
 }
@@ -5378,6 +5380,7 @@ reportDefault(XML_Parser parser, const ENCODING *enc,
               const char *s, const char *end)
 {
   if (MUST_CONVERT(enc, s)) {
+    enum XML_Convert_Result convert_res;
     const char **eventPP;
     const char **eventEndPP;
     if (enc == encoding) {
@@ -5390,11 +5393,11 @@ reportDefault(XML_Parser parser, const ENCODING *enc,
     }
     do {
       ICHAR *dataPtr = (ICHAR *)dataBuf;
-      XmlConvert(enc, &s, end, &dataPtr, (ICHAR *)dataBufEnd);
+      convert_res = XmlConvert(enc, &s, end, &dataPtr, (ICHAR *)dataBufEnd);
       *eventEndPP = s;
       defaultHandler(handlerArg, dataBuf, (int)(dataPtr - (ICHAR *)dataBuf));
       *eventPP = s;
-    } while (s != end);
+    } while ((convert_res != XML_CONVERT_COMPLETED) && (convert_res != XML_CONVERT_INPUT_INCOMPLETE));
   }
   else
     defaultHandler(handlerArg, (XML_Char *)s, (int)((XML_Char *)end - (XML_Char *)s));
@@ -6199,8 +6202,8 @@ poolAppend(STRING_POOL *pool, const ENCODING *enc,
   if (!pool->ptr && !poolGrow(pool))
     return NULL;
   for (;;) {
-    XmlConvert(enc, &ptr, end, (ICHAR **)&(pool->ptr), (ICHAR *)pool->end);
-    if (ptr == end)
+    const enum XML_Convert_Result convert_res = XmlConvert(enc, &ptr, end, (ICHAR **)&(pool->ptr), (ICHAR *)pool->end);
+    if ((convert_res == XML_CONVERT_COMPLETED) || (convert_res == XML_CONVERT_INPUT_INCOMPLETE))
       break;
     if (!poolGrow(pool))
       return NULL;
@@ -6284,8 +6287,13 @@ poolGrow(STRING_POOL *pool)
     }
   }
   if (pool->blocks && pool->start == pool->blocks->s) {
-    int blockSize = (int)(pool->end - pool->start)*2;
-    BLOCK *temp = (BLOCK *)
+    BLOCK *temp;
+    int blockSize = (int)((unsigned)(pool->end - pool->start)*2U);
+
+    if (blockSize < 0)
+      return XML_FALSE;
+
+    temp = (BLOCK *)
       pool->mem->realloc_fcn(pool->blocks,
                              (offsetof(BLOCK, s)
                               + blockSize * sizeof(XML_Char)));
@@ -6300,6 +6308,10 @@ poolGrow(STRING_POOL *pool)
   else {
     BLOCK *tem;
     int blockSize = (int)(pool->end - pool->start);
+
+    if (blockSize < 0)
+      return XML_FALSE;
+
     if (blockSize < INIT_BLOCK_SIZE)
       blockSize = INIT_BLOCK_SIZE;
     else

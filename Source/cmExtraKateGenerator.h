@@ -1,22 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2004-2009 Kitware, Inc.
-  Copyright 2013 Alexander Neundorf (neundorf@kde.org)
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmExtraKateGenerator_h
 #define cmExtraKateGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmExternalMakefileProjectGenerator.h"
 
-class cmLocalGenerator;
+#include <string>
+
 class cmGeneratedFileStream;
+class cmLocalGenerator;
 
 /** \class cmExtraKateGenerator
  * \brief Write Kate project files for Makefile or ninja based projects
@@ -26,20 +20,9 @@ class cmExtraKateGenerator : public cmExternalMakefileProjectGenerator
 public:
   cmExtraKateGenerator();
 
-  virtual std::string GetName() const
-  {
-    return cmExtraKateGenerator::GetActualName();
-  }
-  static std::string GetActualName() { return "Kate"; }
-  static cmExternalMakefileProjectGenerator* New()
-  {
-    return new cmExtraKateGenerator;
-  }
-  /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const std::string& fullName) const;
+  static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
 
 private:
   void CreateKateProjectFile(const cmLocalGenerator* lg) const;

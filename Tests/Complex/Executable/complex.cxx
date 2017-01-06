@@ -455,7 +455,7 @@ int main()
 #endif
 
 #ifndef SHOULD_BE_DEFINED_LESS
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_LESS is not defined.\n");
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_LESS is not defined.");
 #else
   cmPassed("SHOULD_BE_DEFINED_LESS is defined.");
 #endif
@@ -467,7 +467,7 @@ int main()
 #endif
 
 #ifndef SHOULD_BE_DEFINED_LESS2
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_LESS2 is not defined.\n");
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_LESS2 is not defined.");
 #else
   cmPassed("SHOULD_BE_DEFINED_LESS2 is defined.");
 #endif
@@ -478,20 +478,8 @@ int main()
   cmPassed("SHOULD_NOT_BE_DEFINED_GREATER is not defined.");
 #endif
 
-#ifdef SHOULD_NOT_BE_DEFINED_EQUAL
-  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_EQUAL is defined.");
-#else
-  cmPassed("SHOULD_NOT_BE_DEFINED_EQUAL is not defined.");
-#endif
-
-#ifndef SHOULD_BE_DEFINED_EQUAL
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_EQUAL is not defined.\n");
-#else
-  cmPassed("SHOULD_BE_DEFINED_EQUAL is defined.");
-#endif
-
 #ifndef SHOULD_BE_DEFINED_GREATER
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_GREATER is not defined.\n");
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_GREATER is not defined.");
 #else
   cmPassed("SHOULD_BE_DEFINED_GREATER is defined.");
 #endif
@@ -503,10 +491,105 @@ int main()
 #endif
 
 #ifndef SHOULD_BE_DEFINED_GREATER2
-  cmFailed(
-    "IF or SET is broken, SHOULD_BE_DEFINED_GREATER2 is not defined.\n");
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_GREATER2 is not defined.");
 #else
   cmPassed("SHOULD_BE_DEFINED_GREATER2 is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_EQUAL
+  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_EQUAL is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_EQUAL is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_EQUAL
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_EQUAL is not defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_EQUAL is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_LESS_EQUAL
+  cmFailed(
+    "IF or SET is broken, SHOULD_NOT_BE_DEFINED_LESS_EQUAL is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_LESS_EQUAL is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_LESS_EQUAL
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_LESS_EQUAL is not defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_LESS_EQUAL is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_LESS_EQUAL2
+  cmFailed(
+    "IF or SET is broken, SHOULD_NOT_BE_DEFINED_LESS_EQUAL2 is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_LESS_EQUAL2 is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_LESS_EQUAL2
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_LESS_EQUAL2 is not defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_LESS_EQUAL2 is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_LESS_EQUAL3
+  cmFailed(
+    "IF or SET is broken, SHOULD_NOT_BE_DEFINED_LESS_EQUAL3 is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_LESS_EQUAL3 is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_LESS_EQUAL3
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_LESS_EQUAL3 is not defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_LESS_EQUAL3 is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_GREATER_EQUAL
+  cmFailed(
+    "IF or SET is broken, SHOULD_NOT_BE_DEFINED_GREATER_EQUAL is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_GREATER_EQUAL is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_GREATER_EQUAL
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_GREATER_EQUAL is not defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_GREATER_EQUAL is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_GREATER_EQUAL2
+  cmFailed(
+    "IF or SET is broken, SHOULD_NOT_BE_DEFINED_GREATER_EQUAL2 is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_GREATER_EQUAL2 is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_GREATER_EQUAL2
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_GREATER_EQUAL2 is not defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_GREATER_EQUAL2 is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_GREATER_EQUAL3
+  cmFailed(
+    "IF or SET is broken, SHOULD_NOT_BE_DEFINED_GREATER_EQUAL3 is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_GREATER_EQUAL3 is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_GREATER_EQUAL3
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_GREATER_EQUAL3 is not defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_GREATER_EQUAL3 is defined.");
 #endif
 
 #ifdef SHOULD_NOT_BE_DEFINED_STRLESS
@@ -516,7 +599,7 @@ int main()
 #endif
 
 #ifndef SHOULD_BE_DEFINED_STRLESS
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_STRLESS is not defined.\n");
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_STRLESS is not defined.");
 #else
   cmPassed("SHOULD_BE_DEFINED_STRLESS is defined.");
 #endif
@@ -528,8 +611,7 @@ int main()
 #endif
 
 #ifndef SHOULD_BE_DEFINED_STRLESS2
-  cmFailed(
-    "IF or SET is broken, SHOULD_BE_DEFINED_STRLESS2 is not defined.\n");
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_STRLESS2 is not defined.");
 #else
   cmPassed("SHOULD_BE_DEFINED_STRLESS2 is defined.");
 #endif
@@ -543,7 +625,7 @@ int main()
 
 #ifndef SHOULD_BE_DEFINED_STRGREATER
   cmFailed(
-    "IF or SET is broken, SHOULD_BE_DEFINED_STRGREATER is not defined.\n");
+    "IF or SET is broken, SHOULD_BE_DEFINED_STRGREATER is not defined.");
 #else
   cmPassed("SHOULD_BE_DEFINED_STRGREATER is defined.");
 #endif
@@ -557,9 +639,93 @@ int main()
 
 #ifndef SHOULD_BE_DEFINED_STRGREATER2
   cmFailed(
-    "IF or SET is broken, SHOULD_BE_DEFINED_STRGREATER2 is not defined.\n");
+    "IF or SET is broken, SHOULD_BE_DEFINED_STRGREATER2 is not defined.");
 #else
   cmPassed("SHOULD_BE_DEFINED_STRGREATER2 is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_STRLESS_EQUAL
+  cmFailed(
+    "IF or SET is broken, SHOULD_NOT_BE_DEFINED_STRLESS_EQUAL is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_STRLESS_EQUAL is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_STRLESS_EQUAL
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_STRLESS_EQUAL is not defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_STRLESS_EQUAL is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_STRLESS_EQUAL2
+  cmFailed(
+    "IF or SET is broken, SHOULD_NOT_BE_DEFINED_STRLESS_EQUAL2 is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_STRLESS_EQUAL2 is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_STRLESS_EQUAL2
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_STRLESS_EQUAL2 is not defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_STRLESS_EQUAL2 is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_STRLESS_EQUAL3
+  cmFailed(
+    "IF or SET is broken, SHOULD_NOT_BE_DEFINED_STRLESS_EQUAL3 is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_STRLESS_EQUAL3 is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_STRLESS_EQUAL3
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_STRLESS_EQUAL3 is not defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_STRLESS_EQUAL3 is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_STRGREATER_EQUAL
+  cmFailed(
+    "IF or SET is broken, SHOULD_NOT_BE_DEFINED_STRGREATER_EQUAL is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_STRGREATER_EQUAL is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_STRGREATER_EQUAL
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_STRGREATER_EQUAL is not defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_STRGREATER_EQUAL is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_STRGREATER_EQUAL2
+  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_STRGREATER_EQUAL2 is "
+           "defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_STRGREATER_EQUAL2 is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_STRGREATER_EQUAL2
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_STRGREATER_EQUAL2 is not "
+           "defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_STRGREATER_EQUAL2 is defined.");
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED_STRGREATER_EQUAL3
+  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_STRGREATER_EQUAL3 is "
+           "defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_STRGREATER_EQUAL3 is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_STRGREATER_EQUAL3
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_STRGREATER_EQUAL3 is not "
+           "defined.");
+#else
+  cmPassed("SHOULD_BE_DEFINED_STRGREATER_EQUAL3 is defined.");
 #endif
 
 // ----------------------------------------------------------------------

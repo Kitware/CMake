@@ -56,6 +56,8 @@ macro(__CrayPrgEnv_setup lang test_src compiler_cmd link_cmd)
     message(STATUS "Cray Programming Environment $ENV{CRAYPE_VERSION} ${lang}")
   elseif(DEFINED ENV{ASYNCPE_VERSION})
     message(STATUS "Cray XT Programming Environment $ENV{ASYNCPE_VERSION} ${lang}")
+  else()
+    message(STATUS "Cray Programming Environment (unknown version) ${lang}")
   endif()
 
   # Flags for the Cray wrappers

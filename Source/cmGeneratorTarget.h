@@ -1,26 +1,28 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2012 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmGeneratorTarget_h
 #define cmGeneratorTarget_h
 
-#include "cmLinkItem.h"
+#include <cmConfigure.h>
 
+#include "cmLinkItem.h"
+#include "cmListFileCache.h"
+#include "cmPolicies.h"
+#include "cmStateTypes.h"
+
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
+class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
 class cmSourceFile;
 class cmTarget;
-class cmComputeLinkInformation;
 
 class cmGeneratorTarget
 {
@@ -29,6 +31,8 @@ public:
   ~cmGeneratorTarget();
 
   cmLocalGenerator* GetLocalGenerator() const;
+
+  cmGlobalGenerator* GetGlobalGenerator() const;
 
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
@@ -56,7 +60,7 @@ public:
   cmComputeLinkInformation* GetLinkInformation(
     const std::string& config) const;
 
-  cmState::TargetType GetType() const;
+  cmStateEnums::TargetType GetType() const;
   const std::string& GetName() const;
   std::string GetExportName() const;
 
@@ -143,6 +147,9 @@ public:
                                      const cmGeneratorTarget* head,
                                      bool usage_requirements_only) const;
 
+  /** Get the library name for an imported interface library.  */
+  std::string GetImportedLibName(std::string const& config) const;
+
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
   std::string GetFullPath(const std::string& config = "", bool implib = false,
@@ -194,7 +201,7 @@ public:
 
   bool LinkLanguagePropagatesToDependents() const
   {
-    return this->GetType() == cmState::STATIC_LIBRARY;
+    return this->GetType() == cmStateEnums::STATIC_LIBRARY;
   }
 
   /** Get the macro to define when building sources in this target.
@@ -215,8 +222,11 @@ public:
                                        bool contentOnly = true) const;
 
   /** @return the mac content directory for this target. */
-  std::string GetMacContentDirectory(const std::string& config = 0,
+  std::string GetMacContentDirectory(const std::string& config = CM_NULLPTR,
                                      bool implib = false) const;
+
+  /** @return folder prefix for IDEs. */
+  std::string GetEffectiveFolderName() const;
 
   cmTarget* Target;
   cmMakefile* Makefile;
@@ -386,6 +396,12 @@ public:
   void AddTracedSources(std::vector<std::string> const& srcs);
 
   /**
+   * Adds an entry to the INCLUDE_DIRECTORIES list.
+   * If before is true the entry is pushed at the front.
+   */
+  void AddIncludeDirectory(const std::string& src, bool before = false);
+
+  /**
    * Flags for a given source file as used in this target. Typically assigned
    * via SET_TARGET_PROPERTIES when the property is a list of source files.
    */
@@ -402,7 +418,7 @@ public:
   {
     SourceFileFlags()
       : Type(SourceFileTypeNormal)
-      , MacFolder(0)
+      , MacFolder(CM_NULLPTR)
     {
     }
     SourceFileFlags(SourceFileFlags const& r)
@@ -453,7 +469,7 @@ public:
   /** Convert the given GNU import library name (.dll.a) to a name with a new
       extension (.lib or ${CMAKE_IMPORT_LIBRARY_SUFFIX}).  */
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
-                        const char* newExt = 0) const;
+                        const char* newExt = CM_NULLPTR) const;
 
   bool IsExecutableWithExports() const;
 
@@ -526,7 +542,18 @@ public:
   void GetTargetVersion(bool soversion, int& major, int& minor,
                         int& patch) const;
 
+  std::string GetFortranModuleDirectory(std::string const& working_dir) const;
+
+  const char* GetSourcesProperty() const;
+
 private:
+  void AddSourceCommon(const std::string& src);
+
+  std::string CreateFortranModuleDirectory(
+    std::string const& working_dir) const;
+  mutable bool FortranModuleDirectoryCreated;
+  mutable std::string FortranModuleDirectory;
+
   friend class cmTargetTraceDependencies;
   struct SourceEntry
   {
@@ -625,6 +652,7 @@ private:
     std::string Location;
     std::string SOName;
     std::string ImportLibrary;
+    std::string LibName;
     std::string Languages;
     std::string Libraries;
     std::string LibrariesProp;

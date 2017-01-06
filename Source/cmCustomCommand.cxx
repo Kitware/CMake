@@ -1,19 +1,10 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCustomCommand.h"
 
 #include "cmMakefile.h"
 
-#include <cmsys/auto_ptr.hxx>
+#include <cmConfigure.h>
 
 cmCustomCommand::cmCustomCommand()
   : Backtrace()
@@ -38,7 +29,7 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
   , Backtrace()
   , Comment(comment ? comment : "")
   , WorkingDirectory(workingDirectory ? workingDirectory : "")
-  , HaveComment(comment != NULL)
+  , HaveComment(comment != CM_NULLPTR)
   , EscapeAllowMakeVars(false)
   , EscapeOldStyle(true)
 {
@@ -69,7 +60,7 @@ const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
 
 const char* cmCustomCommand::GetComment() const
 {
-  const char* no_comment = 0;
+  const char* no_comment = CM_NULLPTR;
   return this->HaveComment ? this->Comment.c_str() : no_comment;
 }
 
@@ -134,4 +125,14 @@ bool cmCustomCommand::GetUsesTerminal() const
 void cmCustomCommand::SetUsesTerminal(bool b)
 {
   this->UsesTerminal = b;
+}
+
+const std::string& cmCustomCommand::GetDepfile() const
+{
+  return this->Depfile;
+}
+
+void cmCustomCommand::SetDepfile(const std::string& depfile)
+{
+  this->Depfile = depfile;
 }

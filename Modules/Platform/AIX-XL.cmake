@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2002-2011 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # This module is shared by multiple languages; use include blocker.
 if(__AIX_COMPILER_XL)
@@ -21,9 +11,9 @@ set(__AIX_COMPILER_XL 1)
 #
 # By default, runtime linking is enabled. All shared objects specified on the command line
 # will be listed, even if there are no symbols referenced, in the output file.
-set(CMAKE_SHARED_LINKER_FLAGS_INIT "-Wl,-brtl")
-set(CMAKE_MODULE_LINKER_FLAGS_INIT "-Wl,-brtl")
-set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,-brtl")
+string(APPEND CMAKE_SHARED_LINKER_FLAGS_INIT " -Wl,-brtl")
+string(APPEND CMAKE_MODULE_LINKER_FLAGS_INIT " -Wl,-brtl")
+string(APPEND CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,-brtl")
 
 
 macro(__aix_compiler_xl lang)

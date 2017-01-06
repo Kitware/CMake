@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # UsewxWidgets
 # ------------
@@ -33,20 +36,6 @@
 # ::
 #
 #   Jan Woetzel <jw -at- mip.informatik.uni-kiel.de>
-
-#=============================================================================
-# Copyright 2004-2009 Kitware, Inc.
-# Copyright 2006      Jan Woetzel
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # debug message and logging.
 # comment these out for distribution
@@ -90,7 +79,7 @@ if   (wxWidgets_FOUND)
   if   (wxWidgets_CXX_FLAGS)
     # Flags are expected to be a string here, not a list.
     string(REPLACE ";" " " wxWidgets_CXX_FLAGS_str "${wxWidgets_CXX_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${wxWidgets_CXX_FLAGS_str}")
+    string(APPEND CMAKE_CXX_FLAGS " ${wxWidgets_CXX_FLAGS_str}")
     MSG("wxWidgets_CXX_FLAGS=${wxWidgets_CXX_FLAGS_str}")
     unset(wxWidgets_CXX_FLAGS_str)
   endif()

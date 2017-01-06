@@ -1,21 +1,24 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProjectCommand.h"
+
+#include <cmsys/RegularExpression.hxx>
+#include <sstream>
+#include <stdio.h>
+
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmProjectCommand
 bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
                                    cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("PROJECT called with incorrect number of arguments");
     return false;
   }
@@ -28,10 +31,10 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
 
   this->Makefile->AddCacheDefinition(
     bindir, this->Makefile->GetCurrentBinaryDirectory(),
-    "Value Computed by CMake", cmState::STATIC);
+    "Value Computed by CMake", cmStateEnums::STATIC);
   this->Makefile->AddCacheDefinition(
     srcdir, this->Makefile->GetCurrentSourceDirectory(),
-    "Value Computed by CMake", cmState::STATIC);
+    "Value Computed by CMake", cmStateEnums::STATIC);
 
   bindir = "PROJECT_BINARY_DIR";
   srcdir = "PROJECT_SOURCE_DIR";
@@ -54,7 +57,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     this->Makefile->AddDefinition("CMAKE_PROJECT_NAME", args[0].c_str());
     this->Makefile->AddCacheDefinition("CMAKE_PROJECT_NAME", args[0].c_str(),
                                        "Value Computed by CMake",
-                                       cmState::STATIC);
+                                       cmStateEnums::STATIC);
   }
 
   bool haveVersion = false;
@@ -212,8 +215,5 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
       return false;
     }
   }
-  auto lfc = this->Makefile->GetExecutionContext();
-  lfc.Line = lfc.CloseParenLine + 1;
-  this->Makefile->CreateArbitrarySnapshot(lfc);
   return true;
 }

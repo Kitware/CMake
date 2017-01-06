@@ -1,21 +1,22 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmSystemTools_h
 #define cmSystemTools_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
+#include <cmProcessOutput.h>
 #include <cmsys/Process.h>
 #include <cmsys/SystemTools.hxx>
+#include <stddef.h>
+#include <string>
+#include <vector>
+
+#if defined(_MSC_VER)
+typedef unsigned short mode_t;
+#else
+#include <sys/types.h>
+#endif
 
 class cmSystemToolsFileTime;
 
@@ -29,6 +30,7 @@ class cmSystemTools : public cmsys::SystemTools
 {
 public:
   typedef cmsys::SystemTools Superclass;
+  typedef cmProcessOutput::Encoding Encoding;
 
   /** Expand out any arguments in the vector that have ; separated
    *  strings into multiple arguments.  A new vector is created
@@ -64,33 +66,35 @@ public:
    *  title as a const char*, and a reference to bool that when
    *  set to false, will disable furthur messages (cancel).
    */
-  static void SetMessageCallback(MessageCallback f, void* clientData = 0);
+  static void SetMessageCallback(MessageCallback f,
+                                 void* clientData = CM_NULLPTR);
 
   /**
    * Display an error message.
    */
-  static void Error(const char* m, const char* m2 = 0, const char* m3 = 0,
-                    const char* m4 = 0);
+  static void Error(const char* m, const char* m2 = CM_NULLPTR,
+                    const char* m3 = CM_NULLPTR, const char* m4 = CM_NULLPTR);
 
   /**
    * Display a message.
    */
-  static void Message(const char* m, const char* title = 0);
+  static void Message(const char* m, const char* title = CM_NULLPTR);
 
   typedef void (*OutputCallback)(const char*, size_t length, void*);
 
   ///! Send a string to stdout
   static void Stdout(const char* s);
   static void Stdout(const char* s, size_t length);
-  static void SetStdoutCallback(OutputCallback, void* clientData = 0);
+  static void SetStdoutCallback(OutputCallback, void* clientData = CM_NULLPTR);
 
   ///! Send a string to stderr
   static void Stderr(const char* s);
   static void Stderr(const char* s, size_t length);
-  static void SetStderrCallback(OutputCallback, void* clientData = 0);
+  static void SetStderrCallback(OutputCallback, void* clientData = CM_NULLPTR);
 
   typedef bool (*InterruptCallback)(void*);
-  static void SetInterruptCallback(InterruptCallback f, void* clientData = 0);
+  static void SetInterruptCallback(InterruptCallback f,
+                                   void* clientData = CM_NULLPTR);
   static bool GetInterruptFlag();
 
   ///! Return true if there was an error at any point.
@@ -220,9 +224,10 @@ public:
     OUTPUT_PASSTHROUGH
   };
   static bool RunSingleCommand(const char* command,
-                               std::string* captureStdOut = 0,
-                               std::string* captureStdErr = 0, int* retVal = 0,
-                               const char* dir = 0,
+                               std::string* captureStdOut = CM_NULLPTR,
+                               std::string* captureStdErr = CM_NULLPTR,
+                               int* retVal = CM_NULLPTR,
+                               const char* dir = CM_NULLPTR,
                                OutputOption outputflag = OUTPUT_MERGE,
                                double timeout = 0.0);
   /**
@@ -231,11 +236,13 @@ public:
    * be in comand[1]...command[command.size()]
    */
   static bool RunSingleCommand(std::vector<std::string> const& command,
-                               std::string* captureStdOut = 0,
-                               std::string* captureStdErr = 0, int* retVal = 0,
-                               const char* dir = 0,
+                               std::string* captureStdOut = CM_NULLPTR,
+                               std::string* captureStdErr = CM_NULLPTR,
+                               int* retVal = CM_NULLPTR,
+                               const char* dir = CM_NULLPTR,
                                OutputOption outputflag = OUTPUT_MERGE,
-                               double timeout = 0.0);
+                               double timeout = 0.0,
+                               Encoding encoding = cmProcessOutput::Auto);
 
   static std::string PrintSingleCommand(std::vector<std::string> const&);
 
@@ -280,9 +287,11 @@ public:
 
   enum CompareOp
   {
-    OP_LESS,
-    OP_GREATER,
-    OP_EQUAL
+    OP_EQUAL = 1,
+    OP_LESS = 2,
+    OP_GREATER = 4,
+    OP_LESS_EQUAL = OP_LESS | OP_EQUAL,
+    OP_GREATER_EQUAL = OP_GREATER | OP_EQUAL
   };
 
   /**
@@ -293,6 +302,18 @@ public:
                                   std::string const& rhs);
   static bool VersionCompareGreater(std::string const& lhs,
                                     std::string const& rhs);
+  static bool VersionCompareGreaterEq(std::string const& lhs,
+                                      std::string const& rhs);
+
+  /**
+   * Compare two ASCII strings using natural versioning order.
+   * Non-numerical characters are compared directly.
+   * Numerical characters are first globbed such that, e.g.
+   * `test000 < test01 < test0 < test1 < test10`.
+   * Return a value less than, equal to, or greater than zero if lhs
+   * precedes, equals, or succeeds rhs in the defined ordering.
+   */
+  static int strverscmp(std::string const& lhs, std::string const& rhs);
 
   /**
    * Determine the file type based on the extension
@@ -435,12 +456,14 @@ public:
 
   /** Try to set the RPATH in an ELF binary.  */
   static bool ChangeRPath(std::string const& file, std::string const& oldRPath,
-                          std::string const& newRPath, std::string* emsg = 0,
-                          bool* changed = 0);
+                          std::string const& newRPath,
+                          std::string* emsg = CM_NULLPTR,
+                          bool* changed = CM_NULLPTR);
 
   /** Try to remove the RPATH from an ELF binary.  */
-  static bool RemoveRPath(std::string const& file, std::string* emsg = 0,
-                          bool* removed = 0);
+  static bool RemoveRPath(std::string const& file,
+                          std::string* emsg = CM_NULLPTR,
+                          bool* removed = CM_NULLPTR);
 
   /** Check whether the RPATH in an ELF binary contains the path
       given.  */

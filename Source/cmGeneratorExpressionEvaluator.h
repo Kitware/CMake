@@ -1,24 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2012 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmGeneratorExpressionEvaluator_h
 #define cmGeneratorExpressionEvaluator_h
 
-#include "cmGeneratorExpressionContext.h"
+#include <cmConfigure.h>
 
-#include "cmListFileCache.h"
-
+#include <stddef.h>
 #include <string>
 #include <vector>
 
+struct cmGeneratorExpressionContext;
 struct cmGeneratorExpressionDAGChecker;
 struct cmGeneratorExpressionNode;
 
@@ -52,12 +43,15 @@ struct TextContent : public cmGeneratorExpressionEvaluator
   }
 
   std::string Evaluate(cmGeneratorExpressionContext*,
-                       cmGeneratorExpressionDAGChecker*) const
+                       cmGeneratorExpressionDAGChecker*) const CM_OVERRIDE
   {
     return std::string(this->Content, this->Length);
   }
 
-  Type GetType() const { return cmGeneratorExpressionEvaluator::Text; }
+  Type GetType() const CM_OVERRIDE
+  {
+    return cmGeneratorExpressionEvaluator::Text;
+  }
 
   void Extend(size_t length) { this->Length += length; }
 
@@ -71,25 +65,30 @@ private:
 struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
 {
   GeneratorExpressionContent(const char* startContent, size_t length);
-  void SetIdentifier(std::vector<cmGeneratorExpressionEvaluator*> identifier)
+  void SetIdentifier(
+    std::vector<cmGeneratorExpressionEvaluator*> const& identifier)
   {
     this->IdentifierChildren = identifier;
   }
 
   void SetParameters(
-    std::vector<std::vector<cmGeneratorExpressionEvaluator*> > parameters)
+    std::vector<std::vector<cmGeneratorExpressionEvaluator*> > const&
+      parameters)
   {
     this->ParamChildren = parameters;
   }
 
-  Type GetType() const { return cmGeneratorExpressionEvaluator::Generator; }
+  Type GetType() const CM_OVERRIDE
+  {
+    return cmGeneratorExpressionEvaluator::Generator;
+  }
 
   std::string Evaluate(cmGeneratorExpressionContext* context,
-                       cmGeneratorExpressionDAGChecker*) const;
+                       cmGeneratorExpressionDAGChecker*) const CM_OVERRIDE;
 
   std::string GetOriginalExpression() const;
 
-  ~GeneratorExpressionContent();
+  ~GeneratorExpressionContent() CM_OVERRIDE;
 
 private:
   std::string EvaluateParameters(const cmGeneratorExpressionNode* node,

@@ -1,15 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOptionCommand.h"
+
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmOptionCommand
 bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
@@ -41,7 +40,7 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
   cmState* state = this->Makefile->GetState();
   const char* existingValue = state->GetCacheEntryValue(args[0]);
   if (existingValue) {
-    if (state->GetCacheEntryType(args[0]) != cmState::UNINITIALIZED) {
+    if (state->GetCacheEntryType(args[0]) != cmStateEnums::UNINITIALIZED) {
       state->SetCacheEntryProperty(args[0], "HELPSTRING", args[1]);
       return true;
     }
@@ -52,6 +51,6 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
   }
   bool init = cmSystemTools::IsOn(initialValue.c_str());
   this->Makefile->AddCacheDefinition(args[0], init ? "ON" : "OFF",
-                                     args[1].c_str(), cmState::BOOL);
+                                     args[1].c_str(), cmStateEnums::BOOL);
   return true;
 }

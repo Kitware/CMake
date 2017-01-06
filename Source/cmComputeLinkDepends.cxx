@@ -1,25 +1,25 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmComputeLinkDepends.h"
 
 #include "cmAlgorithms.h"
 #include "cmComputeComponentGraph.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
 
+#include <algorithm>
 #include <assert.h>
+#include <iterator>
+#include <sstream>
+#include <stdio.h>
+#include <string.h>
+#include <utility>
 
 /*
 
@@ -194,7 +194,7 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
   this->OldLinkDirMode = false;
 
   // No computation has been done.
-  this->CCG = 0;
+  this->CCG = CM_NULLPTR;
 }
 
 cmComputeLinkDepends::~cmComputeLinkDepends()
@@ -262,7 +262,7 @@ cmComputeLinkDepends::Compute()
     LinkEntry const& e = this->EntryList[i];
     cmGeneratorTarget const* t = e.Target;
     // Entries that we know the linker will re-use do not need to be repeated.
-    bool uniquify = t && t->GetType() == cmState::SHARED_LIBRARY;
+    bool uniquify = t && t->GetType() == cmStateEnums::SHARED_LIBRARY;
     if (!uniquify || emmitted.insert(i).second) {
       this->FinalLinkEntries.push_back(e);
     }
@@ -286,7 +286,7 @@ std::map<std::string, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
   std::map<std::string, int>::iterator lei =
     this->LinkEntryIndex.insert(index_entry).first;
   this->EntryList.push_back(LinkEntry());
-  this->InferredDependSets.push_back(0);
+  this->InferredDependSets.push_back(CM_NULLPTR);
   this->EntryConstraintGraph.push_back(EdgeList());
   return lei;
 }
@@ -314,7 +314,7 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
   // If the item has dependencies queue it to follow them.
   if (entry.Target) {
     // Target dependencies are always known.  Follow them.
-    BFSEntry qe = { index, 0 };
+    BFSEntry qe = { index, CM_NULLPTR };
     this->BFSQueue.push(qe);
   } else {
     // Look for an old-style <item>_LIB_DEPENDS variable.
@@ -345,7 +345,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
     if (cmLinkInterface const* iface =
           entry.Target->GetLinkInterface(this->Config, this->Target)) {
       const bool isIface =
-        entry.Target->GetType() == cmState::INTERFACE_LIBRARY;
+        entry.Target->GetType() == cmStateEnums::INTERFACE_LIBRARY;
       // This target provides its own link interface information.
       this->AddLinkEntries(depender_index, iface->Libraries);
 

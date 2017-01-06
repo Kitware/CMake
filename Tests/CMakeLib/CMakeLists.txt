@@ -11,6 +11,7 @@ set(CMakeLib_TESTS
   testUTF8
   testXMLParser
   testXMLSafe
+  testFindPackageCommand
   )
 
 set(testRST_ARGS ${CMAKE_CURRENT_SOURCE_DIR})
@@ -29,6 +30,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testXMLParser.h.in
 create_test_sourcelist(CMakeLib_TEST_SRCS CMakeLibTests.cxx ${CMakeLib_TESTS})
 add_executable(CMakeLibTests ${CMakeLib_TEST_SRCS})
 target_link_libraries(CMakeLibTests CMakeLib)
+
+add_executable(testEncoding testEncoding.cxx)
+target_link_libraries(testEncoding cmsys)
 
 # Xcode 2.x forgets to create the output directory before linking
 # the individual architectures.

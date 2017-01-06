@@ -1,32 +1,31 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-#include "cmCTest.h"
-#include "cmSystemTools.h"
-
-// Need these for documentation support.
-#include "cmDocumentation.h"
-#include "cmake.h"
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#include <cmConfigure.h>
 
 #include "CTest/cmCTestLaunch.h"
 #include "CTest/cmCTestScriptHandler.h"
-#include "cmsys/Encoding.hxx"
+#include "cmCTest.h"
+#include "cmDocumentation.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+#include <cmsys/Encoding.hxx>
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+#include <cmsys/ConsoleBuf.hxx>
+#endif
+#include <iostream>
+#include <string.h>
+#include <string>
+#include <vector>
 
 static const char* cmDocumentationName[][2] = {
-  { 0, "  ctest - Testing driver provided by CMake." },
-  { 0, 0 }
+  { CM_NULLPTR, "  ctest - Testing driver provided by CMake." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
-static const char* cmDocumentationUsage[][2] = { { 0, "  ctest [options]" },
-                                                 { 0, 0 } };
+static const char* cmDocumentationUsage[][2] = { { CM_NULLPTR,
+                                                   "  ctest [options]" },
+                                                 { CM_NULLPTR, CM_NULLPTR } };
 
 static const char* cmDocumentationOptions[][2] = {
   { "-C <cfg>, --build-config <cfg>", "Choose configuration to test." },
@@ -108,12 +107,19 @@ static const char* cmDocumentationOptions[][2] = {
   { "--http1.0", "Submit using HTTP 1.0." },
   { "--no-compress-output", "Do not compress test output when submitting." },
   { "--print-labels", "Print all available test labels." },
-  { 0, 0 }
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 // this is a test driver program for cmCTest.
 int main(int argc, char const* const* argv)
 {
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+  // Replace streambuf so we can output Unicode to console
+  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
+  consoleOut.SetUTF8Pipes();
+  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
+  consoleErr.SetUTF8Pipes();
+#endif
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   argc = encoding_args.argc();
@@ -167,11 +173,7 @@ int main(int argc, char const* const* argv)
       doc.SetSection("Name", cmDocumentationName);
       doc.SetSection("Usage", cmDocumentationUsage);
       doc.PrependSection("Options", cmDocumentationOptions);
-#ifdef cout
-#undef cout
-#endif
       return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
-#define cout no_cout_use_cmCTestLog
     }
   }
 

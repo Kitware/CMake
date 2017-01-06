@@ -1,17 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindLibraryCommand.h"
 
-#include <cmsys/Directory.hxx>
+#include <algorithm>
+#include <cmsys/RegularExpression.hxx>
+#include <set>
+#include <stdio.h>
+#include <string.h>
+
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 cmFindLibraryCommand::cmFindLibraryCommand()
 {
@@ -35,16 +38,15 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn,
     if (this->AlreadyInCacheWithoutMetaInfo) {
       this->Makefile->AddCacheDefinition(this->VariableName, "",
                                          this->VariableDocumentation.c_str(),
-                                         cmState::FILEPATH);
+                                         cmStateEnums::FILEPATH);
     }
     return true;
   }
 
-  if (const char* abi_name =
-        this->Makefile->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
-    std::string abi = abi_name;
-    if (abi.find("ELF N32") != abi.npos) {
-      // Convert lib to lib32.
+  if (this->Makefile->GetState()->GetGlobalPropertyAsBool(
+        "FIND_LIBRARY_USE_LIB32_PATHS")) {
+    // add special 32 bit paths if this is a 32 bit compile.
+    if (this->Makefile->PlatformIs32Bit()) {
       this->AddArchitecturePaths("32");
     }
   }
@@ -62,13 +64,13 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn,
     // Save the value in the cache
     this->Makefile->AddCacheDefinition(this->VariableName, library.c_str(),
                                        this->VariableDocumentation.c_str(),
-                                       cmState::FILEPATH);
+                                       cmStateEnums::FILEPATH);
     return true;
   }
   std::string notfound = this->VariableName + "-NOTFOUND";
   this->Makefile->AddCacheDefinition(this->VariableName, notfound.c_str(),
                                      this->VariableDocumentation.c_str(),
-                                     cmState::FILEPATH);
+                                     cmStateEnums::FILEPATH);
   return true;
 }
 
@@ -379,9 +381,8 @@ std::string cmFindLibraryCommand::FindNormalLibrary()
 {
   if (this->NamesPerDir) {
     return this->FindNormalLibraryNamesPerDir();
-  } else {
-    return this->FindNormalLibraryDirsPerName();
   }
+  return this->FindNormalLibraryDirsPerName();
 }
 
 std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
@@ -429,9 +430,8 @@ std::string cmFindLibraryCommand::FindFrameworkLibrary()
 {
   if (this->NamesPerDir) {
     return this->FindFrameworkLibraryNamesPerDir();
-  } else {
-    return this->FindFrameworkLibraryDirsPerName();
   }
+  return this->FindFrameworkLibraryDirsPerName();
 }
 
 std::string cmFindLibraryCommand::FindFrameworkLibraryNamesPerDir()

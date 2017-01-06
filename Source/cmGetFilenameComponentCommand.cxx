@@ -1,17 +1,12 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetFilenameComponentCommand.h"
 
+#include "cmMakefile.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmGetFilenameComponentCommand
 bool cmGetFilenameComponentCommand::InitialPass(
@@ -97,13 +92,13 @@ bool cmGetFilenameComponentCommand::InitialPass(
 
   if (args.size() >= 4 && args[args.size() - 1] == "CACHE") {
     if (!programArgs.empty() && !storeArgs.empty()) {
-      this->Makefile->AddCacheDefinition(storeArgs, programArgs.c_str(), "",
-                                         args[2] == "PATH" ? cmState::FILEPATH
-                                                           : cmState::STRING);
+      this->Makefile->AddCacheDefinition(
+        storeArgs, programArgs.c_str(), "",
+        args[2] == "PATH" ? cmStateEnums::FILEPATH : cmStateEnums::STRING);
     }
-    this->Makefile->AddCacheDefinition(args[0], result.c_str(), "",
-                                       args[2] == "PATH" ? cmState::FILEPATH
-                                                         : cmState::STRING);
+    this->Makefile->AddCacheDefinition(
+      args[0], result.c_str(), "",
+      args[2] == "PATH" ? cmStateEnums::FILEPATH : cmStateEnums::STRING);
   } else {
     if (!programArgs.empty() && !storeArgs.empty()) {
       this->Makefile->AddDefinition(storeArgs, programArgs.c_str());

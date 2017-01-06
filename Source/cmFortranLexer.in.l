@@ -1,15 +1,6 @@
 %{
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2015 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 /*-------------------------------------------------------------------------
   Portions of this source have been derived from makedepf90 version 2.8.8,
 
@@ -22,30 +13,23 @@
 
 /*
 
-This file must be translated to C and modified to build everywhere.
+This file must be translated to C++ and modified to build everywhere.
 
-Run flex like this:
+Run flex >= 2.6 like this:
 
-  flex -i --prefix=cmFortran_yy --header-file=cmFortranLexer.h -ocmFortranLexer.cxx cmFortranLexer.in.l
+  flex -i --nounistd -DFLEXINT_H --prefix=cmFortran_yy --header-file=cmFortranLexer.h -ocmFortranLexer.cxx cmFortranLexer.in.l
 
 Modify cmFortranLexer.cxx:
-  - remove TABs
-  - remove use of the 'register' storage class specifier
-  - remove "yyscanner" argument from these methods:
-      yy_fatal_error, cmFortran_yyalloc, cmFortran_yyrealloc, cmFortran_yyfree
-  - remove "yyscanner = NULL" from end of cmFortran_yylex_destroy
-  - remove all YY_BREAK lines occurring right after return statements
-  - change while ( 1 ) to for(;;)
-
-Modify cmFortranLexer.h:
-  - remove TABs
-  - remove the yy_init_globals function
-  - remove the block that includes unistd.h
-  - remove #line directives (avoids bogus warning on old Sun)
+  - remove trailing whitespace: sed -i 's/\s*$//' cmFortranLexer.h cmFortranLexer.cxx
+  - remove blank lines at end of file
+  - #include "cmStandardLexer.h" at the top
+  - add cast in yy_scan_bytes for loop condition of _yybytes_len to size_t
 
 */
 
-#include "cmStandardLexer.h"
+/* IWYU pragma: no_forward_declare yyguts_t */
+
+#undef YY_NO_UNPUT
 
 #define cmFortranLexer_cxx
 #include "cmFortranParser.h" /* Interface to parser object.  */
@@ -153,17 +137,28 @@ $[ \t]*endif    { return F90PPR_ENDIF; }
 , { return COMMA; }
 
 :: { return DCOLON; }
+: { return COLON; }
 
 <fixed_fmt>\n[ ]{5}[^ ]  { return GARBAGE; }
 
 =|=>                     { return ASSIGNMENT_OP; }
+
+[Ee][Nn][Dd] { return END; }
+[Ii][Nn][Cc][Ll][Uu][Dd][Ee] { return INCLUDE; }
+[Ii][Nn][Tt][Ee][Rr][Ff][Aa][Cc][Ee] { return INTERFACE; }
+[Mm][Oo][Dd][Uu][Ll][Ee] { return MODULE; }
+[Ss][Uu][bb][Mm][Oo][Dd][Uu][Ll][Ee] { return SUBMODULE; }
+[Uu][Ss][Ee] { return USE; }
 
 [a-zA-Z_][a-zA-Z_0-9]* {
   yylvalp->string = strdup(yytext);
   return WORD;
 }
 
-[^ \t\n\r;,!'"a-zA-Z=&]+ { return GARBAGE; }
+\( { return LPAREN; }
+\) { return RPAREN; }
+
+[^ \t\n\r:;,!'"a-zA-Z=&()]+ { return GARBAGE; }
 
 ;|\n { return EOSTMT; }
 

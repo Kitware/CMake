@@ -1,28 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDocumentation.h"
 
 #include "cmAlgorithms.h"
+#include "cmDocumentationEntry.h"
+#include "cmDocumentationSection.h"
 #include "cmRST.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
-#include <cmsys/Directory.hxx>
+#include <algorithm>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
-
 #include <ctype.h>
-
-#include <algorithm>
+#include <string.h>
+#include <utility>
 
 static const char* cmDocumentationStandardOptions[][2] = {
   { "--help,-help,-usage,-h,-H,/?", "Print usage information and exit." },
@@ -49,12 +41,12 @@ static const char* cmDocumentationStandardOptions[][2] = {
   { "--help-variable-list [<f>]",
     "List variables with help available and exit." },
   { "--help-variables [<f>]", "Print cmake-variables manual and exit." },
-  { 0, 0 }
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationGeneratorsHeader[][2] = {
-  { 0, "The following generators are available on this platform:" },
-  { 0, 0 }
+  { CM_NULLPTR, "The following generators are available on this platform:" },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 cmDocumentation::cmDocumentation()
@@ -137,10 +129,10 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
     this->CurrentArgument = i->Argument;
     // If a file name was given, use it.  Otherwise, default to the
     // given stream.
-    cmsys::ofstream* fout = 0;
+    cmsys::ofstream* fout = CM_NULLPTR;
     std::ostream* s = &os;
     if (!i->Filename.empty()) {
-      fout = new cmsys::ofstream(i->Filename.c_str(), std::ios::out);
+      fout = new cmsys::ofstream(i->Filename.c_str());
       if (fout) {
         s = fout;
       } else {
@@ -165,7 +157,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
 
 #define GET_OPT_ARGUMENT(target)                                              \
   if ((i + 1 < argc) && !this->IsOption(argv[i + 1])) {                       \
-    target = argv[i + 1];                                                     \
+    (target) = argv[i + 1];                                                   \
     i = i + 1;                                                                \
   };
 
@@ -420,7 +412,7 @@ void cmDocumentation::SetSections(
 
 void cmDocumentation::PrependSection(const char* name, const char* docs[][2])
 {
-  cmDocumentationSection* sec = 0;
+  cmDocumentationSection* sec = CM_NULLPTR;
   if (this->AllSections.find(name) == this->AllSections.end()) {
     sec =
       new cmDocumentationSection(name, cmSystemTools::UpperCase(name).c_str());
@@ -434,7 +426,7 @@ void cmDocumentation::PrependSection(const char* name, const char* docs[][2])
 void cmDocumentation::PrependSection(const char* name,
                                      std::vector<cmDocumentationEntry>& docs)
 {
-  cmDocumentationSection* sec = 0;
+  cmDocumentationSection* sec = CM_NULLPTR;
   if (this->AllSections.find(name) == this->AllSections.end()) {
     sec =
       new cmDocumentationSection(name, cmSystemTools::UpperCase(name).c_str());
@@ -447,7 +439,7 @@ void cmDocumentation::PrependSection(const char* name,
 
 void cmDocumentation::AppendSection(const char* name, const char* docs[][2])
 {
-  cmDocumentationSection* sec = 0;
+  cmDocumentationSection* sec = CM_NULLPTR;
   if (this->AllSections.find(name) == this->AllSections.end()) {
     sec =
       new cmDocumentationSection(name, cmSystemTools::UpperCase(name).c_str());
@@ -461,7 +453,7 @@ void cmDocumentation::AppendSection(const char* name, const char* docs[][2])
 void cmDocumentation::AppendSection(const char* name,
                                     std::vector<cmDocumentationEntry>& docs)
 {
-  cmDocumentationSection* sec = 0;
+  cmDocumentationSection* sec = CM_NULLPTR;
   if (this->AllSections.find(name) == this->AllSections.end()) {
     sec =
       new cmDocumentationSection(name, cmSystemTools::UpperCase(name).c_str());
@@ -719,9 +711,8 @@ const char* cmDocumentation::GetNameString() const
 {
   if (!this->NameString.empty()) {
     return this->NameString.c_str();
-  } else {
-    return "CMake";
   }
+  return "CMake";
 }
 
 bool cmDocumentation::IsOption(const char* arg) const

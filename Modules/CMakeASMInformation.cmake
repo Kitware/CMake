@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 if(UNIX)
   set(CMAKE_ASM${ASM_DIALECT}_OUTPUT_EXTENSION .o)
@@ -76,10 +66,11 @@ endif()
 
 # Support for CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT and friends:
 set(CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT "$ENV{ASM${ASM_DIALECT}FLAGS} ${CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT}")
-# avoid just having a space as the initial value for the cache
-if(CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT STREQUAL " ")
-  set(CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT)
-endif()
+
+foreach(c "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
+  string(STRIP "${CMAKE_ASM${ASM_DIALECT}_FLAGS${c}_INIT}" CMAKE_ASM${ASM_DIALECT}_FLAGS${c}_INIT)
+endforeach()
+
 set (CMAKE_ASM${ASM_DIALECT}_FLAGS "${CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT}" CACHE STRING
      "Flags used by the assembler during all build types.")
 

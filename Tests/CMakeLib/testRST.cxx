@@ -1,17 +1,11 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2013 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmRST.h"
-
 #include "cmSystemTools.h"
+
+#include <cmsys/FStream.hxx>
+#include <iostream>
+#include <string>
 
 void reportLine(std::ostream& os, bool ret, std::string const& line, bool eol)
 {
@@ -52,8 +46,8 @@ int testRST(int argc, char* argv[])
   }
 
   // Compare expected and actual outputs.
-  std::ifstream e_fin(e_name.c_str());
-  std::ifstream a_fin(a_name.c_str());
+  cmsys::ifstream e_fin(e_name.c_str());
+  cmsys::ifstream a_fin(a_name.c_str());
   if (!e_fin) {
     std::cerr << "Could not open input " << e_name << std::endl;
     return 1;

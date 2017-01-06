@@ -1,24 +1,23 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmListCommand.h"
-
-#include "cmAlgorithms.h"
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/SystemTools.hxx>
 
 #include <algorithm>
 #include <assert.h>
-#include <ctype.h>
+#include <cmsys/RegularExpression.hxx>
+#include <iterator>
+#include <sstream>
+#include <stdio.h>
 #include <stdlib.h> // required for atoi
+
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
+
 bool cmListCommand::InitialPass(std::vector<std::string> const& args,
                                 cmExecutionStatus&)
 {
@@ -65,50 +64,6 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args,
   std::string e = "does not recognize sub-command " + subCommand;
   this->SetError(e);
   return false;
-}
-
-cmCommand::ParameterContext cmListCommand::GetContextForParameter(
-  std::vector<std::string> const& args, size_t index)
-{
-  if (index == 0 &&
-      ((args.size() > 0 &&
-        (args[0] == "LENGTH" || args[0] == "GET" || args[0] == "APPEND" ||
-         args[0] == "FIND" || args[0] == "INSERT" || args[0] == "REMOVE_AT" ||
-         args[0] == "REMOVE_ITEM" || args[0] == "REMOVE_DUPLICATES" ||
-         args[0] == "SORT" || args[0] == "REVERSE")) ||
-       args.empty()))
-    return KeywordParameter;
-  if (index == 1)
-    return VariableIdentifierParameter;
-  if (args.size() > 1 && args[0] == "GET" && index < args.size() - 1)
-    return NumberParameter;
-  if (args.size() > 2 && args[0] == "INSERT" && index == 2)
-    return NumberParameter;
-  if (args.size() > 2 && args[0] == "REMOVE_AT" && index == 2)
-    return NumberParameter;
-  return NoContext;
-}
-
-std::vector<std::string> cmListCommand::GetKeywords(
-  std::vector<std::string> const& args, size_t index)
-{
-  (void)args;
-  std::vector<std::string> result;
-
-  if (index == 0) {
-    result.push_back("LENGTH");
-    result.push_back("GET");
-    result.push_back("APPEND");
-    result.push_back("FIND");
-    result.push_back("INSERT");
-    result.push_back("REMOVE_ITEM");
-    result.push_back("REMOVE_AT");
-    result.push_back("REMOVE_DUPLICATES");
-    result.push_back("REVERSE");
-    result.push_back("SORT");
-  }
-
-  return result;
 }
 
 bool cmListCommand::GetListString(std::string& listString,

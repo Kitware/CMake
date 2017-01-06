@@ -131,6 +131,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     )
 endif()
 
+add_RunCMake_test(AndroidTestUtilities)
 add_RunCMake_test(BuildDepends)
 if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
   add_RunCMake_test(CompilerChange)
@@ -141,6 +142,9 @@ add_RunCMake_test(DisallowedCommands)
 add_RunCMake_test(ExternalData)
 add_RunCMake_test(FeatureSummary)
 add_RunCMake_test(FPHSA)
+if(NOT CMAKE_C_COMPILER_ID MATCHES "Watcom")
+  add_RunCMake_test(GenerateExportHeader)
+endif()
 add_RunCMake_test(GeneratorExpression)
 add_RunCMake_test(GeneratorPlatform)
 add_RunCMake_test(GeneratorToolset)
@@ -175,12 +179,16 @@ add_RunCMake_test(add_custom_target)
 add_RunCMake_test(add_dependencies)
 add_RunCMake_test(add_subdirectory)
 add_RunCMake_test(build_command)
+if(NOT CMake_TEST_EXTERNAL_CMAKE)
+  set(execute_process_ARGS -DTEST_ENCODING_EXE=$<TARGET_FILE:testEncoding>)
+endif()
 add_RunCMake_test(execute_process)
 add_RunCMake_test(export)
 add_RunCMake_test(cmake_minimum_required)
 add_RunCMake_test(cmake_parse_arguments)
 add_RunCMake_test(continue)
 add_RunCMake_test(ctest_build)
+add_RunCMake_test(ctest_cmake_error)
 add_RunCMake_test(ctest_configure)
 if(COVERAGE_COMMAND)
   add_RunCMake_test(ctest_coverage -DCOVERAGE_COMMAND=${COVERAGE_COMMAND})
@@ -189,6 +197,7 @@ add_RunCMake_test(ctest_start)
 add_RunCMake_test(ctest_submit)
 add_RunCMake_test(ctest_test)
 add_RunCMake_test(ctest_upload)
+add_RunCMake_test(ctest_fixtures)
 add_RunCMake_test(file)
 add_RunCMake_test(find_file)
 add_RunCMake_test(find_library)
@@ -202,10 +211,23 @@ add_RunCMake_test(include)
 add_RunCMake_test(include_directories)
 add_RunCMake_test(list)
 add_RunCMake_test(message)
-add_RunCMake_test(project)
+add_RunCMake_test(project -DCMake_TEST_RESOURCES=${CMake_TEST_RESOURCES})
 add_RunCMake_test(return)
 add_RunCMake_test(set_property)
 add_RunCMake_test(string)
+foreach(var
+    CMAKE_C_COMPILER_ID
+    CMAKE_C_COMPILER_VERSION
+    CMAKE_C_STANDARD_DEFAULT
+    CMAKE_CXX_COMPILER_ID
+    CMAKE_CXX_COMPILER_VERSION
+    CMAKE_CXX_STANDARD_DEFAULT
+    CMake_TEST_CUDA
+    )
+  if(DEFINED ${var})
+    list(APPEND try_compile_ARGS -D${var}=${${var}})
+  endif()
+endforeach()
 add_RunCMake_test(try_compile)
 add_RunCMake_test(try_run)
 add_RunCMake_test(set)
@@ -307,6 +329,15 @@ if(CMAKE_OSX_ARCHITECTURES AND XCODE AND NOT "${XCODE_VERSION}" MATCHES "^[^12]"
 endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
+  if(UNIX AND NOT CYGWIN)
+    execute_process(COMMAND ldd --help
+      OUTPUT_VARIABLE LDD_HELP
+      ERROR_VARIABLE LDD_ERR)
+    if("${LDD_HELP}" MATCHES
+        "(-r, --function-relocs.*process data and function relocations.*-u, --unused.*print unused direct dependencies)")
+      add_RunCMake_test(LinkWhatYouUse)
+    endif()
+  endif()
   add_executable(pseudo_tidy pseudo_tidy.c)
   add_executable(pseudo_iwyu pseudo_iwyu.c)
   add_RunCMake_test(ClangTidy -DPSEUDO_TIDY=$<TARGET_FILE:pseudo_tidy>)
@@ -318,3 +349,26 @@ add_RunCMake_test_group(CPack "DEB;RPM;TGZ")
 # add a test to make sure symbols are exported from a shared library
 # for MSVC compilers CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS property is used
 add_RunCMake_test(AutoExportDll)
+
+add_RunCMake_test(AndroidMK)
+
+if(CMake_TEST_ANDROID_NDK OR CMake_TEST_ANDROID_STANDALONE_TOOLCHAIN)
+  if(NOT "${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
+    message(FATAL_ERROR "Android tests supported only by Makefile and Ninja generators")
+  endif()
+  foreach(v TEST_ANDROID_NDK TEST_ANDROID_STANDALONE_TOOLCHAIN)
+    if(CMake_${v})
+      string(REPLACE ";" "|" ${v} "${CMake_${v}}")
+      list(APPEND Android_ARGS "-D${v}=${${v}}")
+    endif()
+  endforeach()
+
+  add_RunCMake_test(Android)
+
+  # This test can take a very long time due to lots of combinations.
+  # Use a long default timeout and provide an option to customize it.
+  if(NOT DEFINED CMake_TEST_ANDROID_TIMEOUT)
+    set(CMake_TEST_ANDROID_TIMEOUT 3000)
+  endif()
+  set_property(TEST RunCMake.Android PROPERTY TIMEOUT ${CMake_TEST_ANDROID_TIMEOUT})
+endif()

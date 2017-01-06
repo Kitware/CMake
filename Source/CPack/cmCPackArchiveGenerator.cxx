@@ -1,28 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackArchiveGenerator.h"
 
+#include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
-#include <errno.h>
 
-#include <cm_libarchive.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/SystemTools.hxx>
+#include <map>
+#include <ostream>
+#include <utility>
+#include <vector>
 
 cmCPackArchiveGenerator::cmCPackArchiveGenerator(cmArchiveWrite::Compress t,
                                                  std::string const& format)
@@ -68,7 +57,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
        ++fileIt) {
     std::string rp = filePrefix + *fileIt;
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file: " << rp << std::endl);
-    archive.Add(rp, 0, 0, false);
+    archive.Add(rp, 0, CM_NULLPTR, false);
     if (!archive) {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "ERROR while packaging files: "
                       << archive.GetError() << std::endl);
@@ -87,17 +76,17 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
  */
 #define DECLARE_AND_OPEN_ARCHIVE(filename, archive)                           \
   cmGeneratedFileStream gf;                                                   \
-  gf.Open(filename.c_str(), false, true);                                     \
+  gf.Open((filename).c_str(), false, true);                                   \
   if (!GenerateHeader(&gf)) {                                                 \
     cmCPackLogger(cmCPackLog::LOG_ERROR,                                      \
                   "Problem to generate Header for archive < "                 \
-                    << filename << ">." << std::endl);                        \
+                    << (filename) << ">." << std::endl);                      \
     return 0;                                                                 \
   }                                                                           \
   cmArchiveWrite archive(gf, this->Compress, this->ArchiveFormat);            \
-  if (!archive) {                                                             \
+  if (!(archive)) {                                                           \
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem to create archive < "       \
-                    << filename << ">. ERROR =" << archive.GetError()         \
+                    << (filename) << ">. ERROR =" << (archive).GetError()     \
                     << std::endl);                                            \
     return 0;                                                                 \
   }
@@ -139,7 +128,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
     for (compIt = this->Components.begin(); compIt != this->Components.end();
          ++compIt) {
       // Does the component belong to a group?
-      if (compIt->second.Group == NULL) {
+      if (compIt->second.Group == CM_NULLPTR) {
         cmCPackLogger(
           cmCPackLog::LOG_VERBOSE, "Component <"
             << compIt->second.Name
@@ -231,10 +220,8 @@ int cmCPackArchiveGenerator::PackageFiles()
     // There will be 1 package for each component group
     // however one may require to ignore component group and
     // in this case you'll get 1 package for each component.
-    else {
-      return PackageComponents(componentPackageMethod ==
-                               ONE_PACKAGE_PER_COMPONENT);
-    }
+    return PackageComponents(componentPackageMethod ==
+                             ONE_PACKAGE_PER_COMPONENT);
   }
 
   // CASE 3 : NON COMPONENT package.
@@ -246,7 +233,7 @@ int cmCPackArchiveGenerator::PackageFiles()
     // Get the relative path to the file
     std::string rp =
       cmSystemTools::RelativePath(toplevel.c_str(), fileIt->c_str());
-    archive.Add(rp, 0, 0, false);
+    archive.Add(rp, 0, CM_NULLPTR, false);
     if (!archive) {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem while adding file< "
                       << *fileIt << "> to archive <" << packageFileNames[0]
@@ -259,7 +246,7 @@ int cmCPackArchiveGenerator::PackageFiles()
   return 1;
 }
 
-int cmCPackArchiveGenerator::GenerateHeader(std::ostream*)
+int cmCPackArchiveGenerator::GenerateHeader(std::ostream* /*unused*/)
 {
   return 1;
 }

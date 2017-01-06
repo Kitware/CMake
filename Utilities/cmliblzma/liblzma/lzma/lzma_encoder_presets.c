@@ -16,8 +16,9 @@
 extern LZMA_API(lzma_bool)
 lzma_lzma_preset(lzma_options_lzma *options, uint32_t preset)
 {
-	static const uint8_t dict_size_values[] = { 18, 20, 21, 22, 22, 23, 23, 24, 25, 26 };
-	static const uint8_t depth_values[] = { 4, 8, 24, 48 };
+	static const uint8_t dict_pow2[]
+			= { 18, 20, 21, 22, 22, 23, 23, 24, 25, 26 };
+	static const uint8_t depths[] = { 4, 8, 24, 48 };
 
 	const uint32_t level = preset & LZMA_PRESET_LEVEL_MASK;
 	const uint32_t flags = preset & ~LZMA_PRESET_LEVEL_MASK;
@@ -33,13 +34,13 @@ lzma_lzma_preset(lzma_options_lzma *options, uint32_t preset)
 	options->lp = LZMA_LP_DEFAULT;
 	options->pb = LZMA_PB_DEFAULT;
 
-	options->dict_size = UINT32_C(1) << dict_size_values[level];
+	options->dict_size = UINT32_C(1) << dict_pow2[level];
 
 	if (level <= 3) {
 		options->mode = LZMA_MODE_FAST;
 		options->mf = level == 0 ? LZMA_MF_HC3 : LZMA_MF_HC4;
 		options->nice_len = level <= 1 ? 128 : 273;
-		options->depth = depth_values[level];
+		options->depth = depths[level];
 	} else {
 		options->mode = LZMA_MODE_NORMAL;
 		options->mf = LZMA_MF_BT4;

@@ -1,35 +1,35 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestRunTest.h"
 
 #include "cmCTest.h"
 #include "cmCTestMemCheckHandler.h"
+#include "cmCTestTestHandler.h"
+#include "cmProcess.h"
 #include "cmSystemTools.h"
-#include "cm_curl.h"
 
+#include <cmConfigure.h>
+#include <cm_curl.h>
 #include <cm_zlib.h>
 #include <cmsys/Base64.h>
+#include <cmsys/Process.h>
+#include <cmsys/RegularExpression.hxx>
+#include <iomanip>
+#include <sstream>
+#include <stdio.h>
+#include <time.h>
+#include <utility>
 
 cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
 {
   this->CTest = handler->CTest;
   this->TestHandler = handler;
-  this->TestProcess = 0;
+  this->TestProcess = CM_NULLPTR;
   this->TestResult.ExecutionTime = 0;
   this->TestResult.ReturnValue = 0;
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = 0;
-  this->TestResult.Properties = 0;
+  this->TestResult.Properties = CM_NULLPTR;
   this->ProcessOutput = "";
   this->CompressedOutput = "";
   this->CompressionRatio = 2;
@@ -54,7 +54,8 @@ bool cmCTestRunTest::CheckOutput()
     if (p == cmsysProcess_Pipe_None) {
       // Process has terminated and all output read.
       return false;
-    } else if (p == cmsysProcess_Pipe_STDOUT) {
+    }
+    if (p == cmsysProcess_Pipe_STDOUT) {
       // Store this line of output.
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex()
                    << ": " << line << std::endl);
@@ -82,8 +83,7 @@ bool cmCTestRunTest::CheckOutput()
           }
         }
       }
-    } else // if(p == cmsysProcess_Pipe_Timeout)
-    {
+    } else { // if(p == cmsysProcess_Pipe_Timeout)
       break;
     }
   }
@@ -119,10 +119,9 @@ void cmCTestRunTest::CompressOutput()
   strm.next_out = out;
   ret = deflate(&strm, Z_FINISH);
 
-  if (ret == Z_STREAM_ERROR || ret != Z_STREAM_END) {
+  if (ret != Z_STREAM_END) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Error during output "
-               "compression. Sending uncompressed output."
+               "Error during output compression. Sending uncompressed output."
                  << std::endl);
     delete[] out;
     return;
@@ -153,7 +152,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   if ((!this->TestHandler->MemCheck &&
        this->CTest->ShouldCompressTestOutput()) ||
       (this->TestHandler->MemCheck &&
-       this->CTest->ShouldCompressMemCheckOutput())) {
+       this->CTest->ShouldCompressTestOutput())) {
     this->CompressOutput();
   }
 
@@ -167,7 +166,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     passIt;
   bool forceFail = false;
   bool outputTestErrorsToConsole = false;
-  if (!this->TestProperties->RequiredRegularExpressions.empty()) {
+  if (!this->TestProperties->RequiredRegularExpressions.empty() &&
+      this->FailedDependencies.empty()) {
     bool found = false;
     for (passIt = this->TestProperties->RequiredRegularExpressions.begin();
          passIt != this->TestProperties->RequiredRegularExpressions.end();
@@ -191,7 +191,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     }
     reason += "]";
   }
-  if (!this->TestProperties->ErrorRegularExpressions.empty()) {
+  if (!this->TestProperties->ErrorRegularExpressions.empty() &&
+      this->FailedDependencies.empty()) {
     for (passIt = this->TestProperties->ErrorRegularExpressions.begin();
          passIt != this->TestProperties->ErrorRegularExpressions.end();
          ++passIt) {
@@ -427,6 +428,23 @@ bool cmCTestRunTest::StartTest(size_t total)
   this->TestResult.Name = this->TestProperties->Name;
   this->TestResult.Path = this->TestProperties->Directory;
 
+  if (!this->FailedDependencies.empty()) {
+    this->TestProcess = new cmProcess;
+    std::string msg = "Failed test dependencies:";
+    for (std::set<std::string>::const_iterator it =
+           this->FailedDependencies.begin();
+         it != this->FailedDependencies.end(); ++it) {
+      msg += " " + *it;
+    }
+    *this->TestHandler->LogFile << msg << std::endl;
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, msg << std::endl);
+    this->TestResult.Output = msg;
+    this->TestResult.FullCommandLine = "";
+    this->TestResult.CompletionStatus = "Not Run";
+    this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+    return false;
+  }
+
   if (args.size() >= 2 && args[1] == "NOT_AVAILABLE") {
     this->TestProcess = new cmProcess;
     std::string msg;
@@ -577,7 +595,7 @@ double cmCTestRunTest::ResolveTimeout()
     return timeout;
   }
   struct tm* lctime;
-  time_t current_time = time(0);
+  time_t current_time = time(CM_NULLPTR);
   lctime = gmtime(&current_time);
   int gm_hour = lctime->tm_hour;
   time_t gm_time = mktime(lctime);

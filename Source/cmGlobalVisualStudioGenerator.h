@@ -1,18 +1,24 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmGlobalVisualStudioGenerator_h
 #define cmGlobalVisualStudioGenerator_h
 
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "cmGlobalGenerator.h"
+#include "cmTargetDepend.h"
+
+class cmCustomCommand;
+class cmGeneratorTarget;
+class cmLocalGenerator;
+class cmMakefile;
+class cmake;
 
 /** \class cmGlobalVisualStudioGenerator
  * \brief Base class for global Visual Studio generators.
@@ -78,6 +84,9 @@ public:
   // return true if target is fortran only
   bool TargetIsFortranOnly(const cmGeneratorTarget* gt);
 
+  // return true if target is C# only
+  static bool TargetIsCSharpOnly(cmGeneratorTarget const* gt);
+
   /** Get the top-level registry key for this VS version.  */
   std::string GetRegistryBase();
 
@@ -108,7 +117,7 @@ public:
   };
   class OrderedTargetDependSet;
 
-  virtual void FindMakeProgram(cmMakefile*);
+  bool FindMakeProgram(cmMakefile*) CM_OVERRIDE;
 
   virtual std::string ExpandCFGIntDir(const std::string& str,
                                       const std::string& config) const;

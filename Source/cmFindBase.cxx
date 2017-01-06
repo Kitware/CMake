@@ -1,18 +1,18 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindBase.h"
 
+#include <cmConfigure.h>
+#include <iostream>
+#include <map>
+#include <stddef.h>
+
 #include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmSearchPath.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
 
 cmFindBase::cmFindBase()
 {
@@ -226,12 +226,10 @@ void cmFindBase::FillSystemEnvironmentPath()
     paths.AddEnvPath(this->EnvironmentPath);
 #if defined(_WIN32) || defined(__CYGWIN__)
     paths.AddEnvPrefixPath("PATH", true);
-    paths.AddEnvPath("PATH");
 #endif
-  } else {
-    // Add PATH
-    paths.AddEnvPath("PATH");
   }
+  // Add PATH
+  paths.AddEnvPath("PATH");
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
@@ -311,7 +309,7 @@ bool cmFindBase::CheckForVariableInCache()
     cmState* state = this->Makefile->GetState();
     const char* cacheEntry = state->GetCacheEntryValue(this->VariableName);
     bool found = !cmSystemTools::IsNOTFOUND(cacheValue);
-    bool cached = cacheEntry ? true : false;
+    bool cached = cacheEntry != CM_NULLPTR;
     if (found) {
       // If the user specifies the entry on the command line without a
       // type we should add the type and docstring but keep the
@@ -319,11 +317,12 @@ bool cmFindBase::CheckForVariableInCache()
       // this.
       if (cached &&
           state->GetCacheEntryType(this->VariableName) ==
-            cmState::UNINITIALIZED) {
+            cmStateEnums::UNINITIALIZED) {
         this->AlreadyInCacheWithoutMetaInfo = true;
       }
       return true;
-    } else if (cached) {
+    }
+    if (cached) {
       const char* hs =
         state->GetCacheEntryProperty(this->VariableName, "HELPSTRING");
       this->VariableDocumentation = hs ? hs : "(none)";

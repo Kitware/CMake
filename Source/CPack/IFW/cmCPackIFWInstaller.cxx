@@ -1,23 +1,21 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWInstaller.h"
 
+#include <cmConfigure.h>
+#include <sstream>
+#include <stddef.h>
+#include <utility>
+
+#include "CPack/cmCPackGenerator.h"
+#include "CPack/cmCPackLog.h"
 #include "cmCPackIFWGenerator.h"
-
-#include <CPack/cmCPackLog.h>
-
-#include <cmGeneratedFileStream.h>
-#include <cmXMLWriter.h>
+#include "cmCPackIFWPackage.h"
+#include "cmCPackIFWRepository.h"
+#include "cmGeneratedFileStream.h"
+#include "cmSystemTools.h"
+#include "cmXMLParser.h"
+#include "cmXMLWriter.h"
 
 #ifdef cmCPackLogger
 #undef cmCPackLogger
@@ -30,16 +28,16 @@
       Generator->Logger->Log(logType, __FILE__, __LINE__,                     \
                              cmCPackLog_msg.str().c_str());                   \
     }                                                                         \
-  } while (0)
+  } while (false)
 
 cmCPackIFWInstaller::cmCPackIFWInstaller()
-  : Generator(0)
+  : Generator(CM_NULLPTR)
 {
 }
 
 const char* cmCPackIFWInstaller::GetOption(const std::string& op) const
 {
-  return Generator ? Generator->GetOption(op) : 0;
+  return Generator ? Generator->GetOption(op) : CM_NULLPTR;
 }
 
 bool cmCPackIFWInstaller::IsOn(const std::string& op) const
@@ -194,7 +192,69 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
         this->GetOption("CPACK_IFW_PACKAGE_CONTROL_SCRIPT")) {
     ControlScript = optIFW_CONTROL_SCRIPT;
   }
+
+  // Resources
+  if (const char* optIFW_PACKAGE_RESOURCES =
+        this->GetOption("CPACK_IFW_PACKAGE_RESOURCES")) {
+    Resources.clear();
+    cmSystemTools::ExpandListArgument(optIFW_PACKAGE_RESOURCES, Resources);
+  }
 }
+
+/** \class cmCPackIFWResourcesParser
+ * \brief Helper class that parse resources form .qrc (Qt)
+ */
+class cmCPackIFWResourcesParser : public cmXMLParser
+{
+public:
+  cmCPackIFWResourcesParser(cmCPackIFWInstaller* i)
+    : installer(i)
+    , file(false)
+  {
+    path = i->Directory + "/resources";
+  }
+
+  bool ParseResource(size_t r)
+  {
+    hasFiles = false;
+    hasErrors = false;
+
+    basePath = cmSystemTools::GetFilenamePath(installer->Resources[r].data());
+
+    ParseFile(installer->Resources[r].data());
+
+    return hasFiles && !hasErrors;
+  }
+
+  cmCPackIFWInstaller* installer;
+  bool file, hasFiles, hasErrors;
+  std::string path, basePath;
+
+protected:
+  void StartElement(const std::string& name, const char** /*atts*/) CM_OVERRIDE
+  {
+    file = name == "file";
+    if (file) {
+      hasFiles = true;
+    }
+  }
+
+  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
+  {
+    if (file) {
+      std::string content(data, data + length);
+      content = cmSystemTools::TrimWhitespace(content);
+      std::string source = basePath + "/" + content;
+      std::string destination = path + "/" + content;
+      if (!cmSystemTools::CopyFileIfDifferent(source.data(),
+                                              destination.data())) {
+        hasErrors = true;
+      }
+    }
+  }
+
+  void EndElement(const std::string& /*name*/) CM_OVERRIDE {}
+};
 
 void cmCPackIFWInstaller::GenerateInstallerFile()
 {
@@ -311,6 +371,26 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     xout.Element("ControlScript", name);
   }
 
+  // Resources (copy to resources dir)
+  if (!Resources.empty()) {
+    std::vector<std::string> resources;
+    cmCPackIFWResourcesParser parser(this);
+    for (size_t i = 0; i < Resources.size(); i++) {
+      if (parser.ParseResource(i)) {
+        std::string name = cmSystemTools::GetFilenameName(Resources[i]);
+        std::string path = Directory + "/resources/" + name;
+        cmsys::SystemTools::CopyFileIfDifferent(Resources[i].data(),
+                                                path.data());
+        resources.push_back(name);
+      } else {
+        cmCPackLogger(cmCPackLog::LOG_WARNING, "Can't copy resources from \""
+                        << Resources[i] << "\". Resource will be skipped."
+                        << std::endl);
+      }
+    }
+    Resources = resources;
+  }
+
   xout.EndElement();
   xout.EndDocument();
 }
@@ -325,7 +405,11 @@ void cmCPackIFWInstaller::GeneratePackageFiles()
     // Check package group
     if (const char* option = GetOption("CPACK_IFW_PACKAGE_GROUP")) {
       package.ConfigureFromGroup(option);
-      package.ForcedInstallation = "true";
+      std::string forcedOption = "CPACK_IFW_COMPONENT_GROUP_" +
+        cmsys::SystemTools::UpperCase(option) + "_FORCED_INSTALLATION";
+      if (!GetOption(forcedOption)) {
+        package.ForcedInstallation = "true";
+      }
     } else {
       package.ConfigureFromOptions();
     }
@@ -343,6 +427,7 @@ void cmCPackIFWInstaller::GeneratePackageFiles()
 
 void cmCPackIFWInstaller::WriteGeneratedByToStrim(cmXMLWriter& xout)
 {
-  if (Generator)
+  if (Generator) {
     Generator->WriteGeneratedByToStrim(xout);
+  }
 }

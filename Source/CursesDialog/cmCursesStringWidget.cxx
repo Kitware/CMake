@@ -1,17 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesStringWidget.h"
 
+#include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
+#include "cmCursesStandardIncludes.h"
+#include "cmCursesWidget.h"
+#include "cmStateTypes.h"
+
+#include <stdio.h>
+#include <string.h>
 
 inline int ctrl(int z)
 {
@@ -23,18 +21,19 @@ cmCursesStringWidget::cmCursesStringWidget(int width, int height, int left,
   : cmCursesWidget(width, height, left, top)
 {
   this->InEdit = false;
-  this->Type = cmState::STRING;
+  this->Type = cmStateEnums::STRING;
   set_field_fore(this->Field, A_NORMAL);
   set_field_back(this->Field, A_STANDOUT);
   field_opts_off(this->Field, O_STATIC);
 }
 
-void cmCursesStringWidget::OnTab(cmCursesMainForm*, WINDOW*)
+void cmCursesStringWidget::OnTab(cmCursesMainForm* /*unused*/,
+                                 WINDOW* /*unused*/)
 {
   // FORM* form = fm->GetForm();
 }
 
-void cmCursesStringWidget::OnReturn(cmCursesMainForm* fm, WINDOW*)
+void cmCursesStringWidget::OnReturn(cmCursesMainForm* fm, WINDOW* /*unused*/)
 {
   FORM* form = fm->GetForm();
   if (this->InEdit) {
@@ -56,7 +55,8 @@ void cmCursesStringWidget::OnReturn(cmCursesMainForm* fm, WINDOW*)
   }
 }
 
-void cmCursesStringWidget::OnType(int& key, cmCursesMainForm* fm, WINDOW*)
+void cmCursesStringWidget::OnType(int& key, cmCursesMainForm* fm,
+                                  WINDOW* /*unused*/)
 {
   form_driver(fm->GetForm(), key);
 }
@@ -67,12 +67,14 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
   int x, y;
 
   FORM* form = fm->GetForm();
+  // when not in edit mode, edit mode is entered by pressing enter or i (vim
+  // binding)
   // 10 == enter
-  if (!this->InEdit && (key != 10 && key != KEY_ENTER)) {
+  if (!this->InEdit && (key != 10 && key != KEY_ENTER && key != 'i')) {
     return false;
   }
 
-  this->OriginalString = 0;
+  this->OriginalString = CM_NULLPTR;
   this->Done = false;
 
   char debugMessage[128];
@@ -90,18 +92,21 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
       // quit
       if (key == 'q') {
         return false;
-      } else {
-        key = getch();
-        continue;
       }
+      key = getch();
+      continue;
     }
 
     // If resize occurred during edit, move out of edit mode
-    if (!this->InEdit && (key != 10 && key != KEY_ENTER)) {
+    if (!this->InEdit && (key != 10 && key != KEY_ENTER && key != 'i')) {
       return false;
     }
-    // 10 == enter
-    if (key == 10 || key == KEY_ENTER) {
+    // enter edit with return and i (vim binding)
+    if (!this->InEdit && (key == 10 || key == KEY_ENTER || key == 'i')) {
+      this->OnReturn(fm, w);
+    }
+    // leave edit with return (but not i -- not a toggle)
+    else if (this->InEdit && (key == 10 || key == KEY_ENTER)) {
       this->OnReturn(fm, w);
     } else if (key == KEY_DOWN || key == ctrl('n') || key == KEY_UP ||
                key == ctrl('p') || key == KEY_NPAGE || key == ctrl('d') ||
@@ -197,9 +202,10 @@ bool cmCursesStringWidget::PrintKeys()
     printw(fmt_s, firstLine);
 
     curses_move(y - 3, 0);
-    printw(fmt_s, "Editing option, press [enter] to leave edit.");
+    printw(fmt_s, "Editing option, press [enter] to confirm");
+    curses_move(y - 2, 0);
+    printw(fmt_s, "                press [esc] to cancel");
     return true;
-  } else {
-    return false;
   }
+  return false;
 }

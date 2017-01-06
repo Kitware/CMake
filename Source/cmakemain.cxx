@@ -1,14 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 // include these first, otherwise there will be problems on Windows
 // with GetCurrentDirectory() being redefined
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -17,34 +8,48 @@
 #endif
 
 #include "cmAlgorithms.h"
+#include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
-#include "cmListFileCache.h"
-#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
 #include "cmcmd.h"
+
+#include <cmConfigure.h>
 #include <cmsys/Encoding.hxx>
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+#include <cmsys/ConsoleBuf.hxx>
+#endif
+#include <iostream>
+#include <string.h>
+#include <string>
+#include <vector>
+
+#ifdef CMAKE_USE_LIBUV
+#include <cm_uv.h>
+#endif
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 static const char* cmDocumentationName[][2] = {
-  { 0, "  cmake - Cross-Platform Makefile Generator." },
-  { 0, 0 }
+  { CM_NULLPTR, "  cmake - Cross-Platform Makefile Generator." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationUsage[][2] = {
-  { 0, "  cmake [options] <path-to-source>\n"
-       "  cmake [options] <path-to-existing-build>" },
-  { 0, "Specify a source directory to (re-)generate a build system for "
-       "it in the current working directory.  Specify an existing build "
-       "directory to re-generate its build system." },
-  { 0, 0 }
+  { CM_NULLPTR, "  cmake [options] <path-to-source>\n"
+                "  cmake [options] <path-to-existing-build>" },
+  { CM_NULLPTR,
+    "Specify a source directory to (re-)generate a build system for "
+    "it in the current working directory.  Specify an existing build "
+    "directory to re-generate its build system." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationUsageNote[][2] = {
-  { 0, "Run 'cmake --help' for more information." },
-  { 0, 0 }
+  { CM_NULLPTR, "Run 'cmake --help' for more information." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 #define CMAKE_BUILD_OPTIONS                                                   \
@@ -73,12 +78,14 @@ static const char* cmDocumentationOptions[][2] = {
   { "--debug-output", "Put cmake in a debug mode." },
   { "--trace", "Put cmake in trace mode." },
   { "--trace-expand", "Put cmake in trace mode with variable expansion." },
+  { "--trace-source=<file>",
+    "Trace only this CMake file/module. Multiple options allowed." },
   { "--warn-uninitialized", "Warn about uninitialized values." },
   { "--warn-unused-vars", "Warn about unused variables." },
   { "--no-warn-unused-cli", "Don't warn about command line options." },
   { "--check-system-vars", "Find problems with variable usage in system "
                            "files." },
-  { 0, 0 }
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 #endif
@@ -104,7 +111,7 @@ static cmMakefile* cmakemainGetMakefile(void* clientdata)
       return gg->GetCurrentMakefile();
     }
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 static std::string cmakemainGetStack(void* clientdata)
@@ -121,8 +128,8 @@ static std::string cmakemainGetStack(void* clientdata)
   return msg;
 }
 
-static void cmakemainMessageCallback(const char* m, const char*, bool&,
-                                     void* clientdata)
+static void cmakemainMessageCallback(const char* m, const char* /*unused*/,
+                                     bool& /*unused*/, void* clientdata)
 {
   std::cerr << m << cmakemainGetStack(clientdata) << std::endl << std::flush;
 }
@@ -150,6 +157,13 @@ static void cmakemainProgressCallback(const char* m, float prog,
 
 int main(int ac, char const* const* av)
 {
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+  // Replace streambuf so we can output Unicode to console
+  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
+  consoleOut.SetUTF8Pipes();
+  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
+  consoleErr.SetUTF8Pipes();
+#endif
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);
   ac = args.argc();
@@ -160,13 +174,17 @@ int main(int ac, char const* const* av)
   if (ac > 1) {
     if (strcmp(av[1], "--build") == 0) {
       return do_build(ac, av);
-    } else if (strcmp(av[1], "-E") == 0) {
+    }
+    if (strcmp(av[1], "-E") == 0) {
       return do_command(ac, av);
     }
   }
   int ret = do_cmake(ac, av);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDynamicLoader::FlushCache();
+#endif
+#ifdef CMAKE_USE_LIBUV
+  uv_loop_close(uv_default_loop());
 #endif
   return ret;
 }
@@ -234,7 +252,8 @@ int do_cmake(int ac, char const* const* av)
         "Use cmake-gui or ccmake for an interactive dialog.\n";
       /* clang-format on */
       return 1;
-    } else if (strcmp(av[i], "--system-information") == 0) {
+    }
+    if (strcmp(av[i], "--system-information") == 0) {
       sysinfo = true;
     } else if (strcmp(av[i], "-N") == 0) {
       view_only = true;
@@ -284,9 +303,9 @@ int do_cmake(int ac, char const* const* av)
     std::vector<std::string> keys = cm.GetState()->GetCacheEntryKeys();
     for (std::vector<std::string>::const_iterator it = keys.begin();
          it != keys.end(); ++it) {
-      cmState::CacheEntryType t = cm.GetState()->GetCacheEntryType(*it);
-      if (t != cmState::INTERNAL && t != cmState::STATIC &&
-          t != cmState::UNINITIALIZED) {
+      cmStateEnums::CacheEntryType t = cm.GetState()->GetCacheEntryType(*it);
+      if (t != cmStateEnums::INTERNAL && t != cmStateEnums::STATIC &&
+          t != cmStateEnums::UNINITIALIZED) {
         const char* advancedProp =
           cm.GetState()->GetCacheEntryProperty(*it, "ADVANCED");
         if (list_all_cached || !advancedProp) {
@@ -310,9 +329,8 @@ int do_cmake(int ac, char const* const* av)
   // interpret negative return values as errors.
   if (res != 0) {
     return 1;
-  } else {
-    return 0;
   }
+  return 0;
 }
 
 static int do_build(int ac, char const* const* av)
@@ -391,6 +409,8 @@ static int do_build(int ac, char const* const* av)
   }
 
   cmake cm;
+  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, (void*)&cm);
+  cm.SetProgressCallback(cmakemainProgressCallback, (void*)&cm);
   return cm.Build(dir, target, config, nativeOptions, clean);
 #endif
 }

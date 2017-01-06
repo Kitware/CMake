@@ -21,6 +21,7 @@
 #include <cmSystemTools.h>
 #include <cmsys/Encoding.hxx>
 
+#include <algorithm>
 #include <sstream>
 #include <windows.h>
 
@@ -204,7 +205,7 @@ static int process(const std::string& srcfilename, const std::string& dfile,
   std::vector<std::string> command;
   for (std::vector<std::string>::iterator i = args.begin(); i != args.end();
        ++i) {
-    command.push_back(i->c_str());
+    command.push_back(*i);
   }
   // run the command
   int exit_code = 0;
@@ -213,7 +214,7 @@ static int process(const std::string& srcfilename, const std::string& dfile,
                                     dir.c_str(), cmSystemTools::OUTPUT_NONE);
 
   // process the include directives and output everything else
-  std::stringstream ss(output);
+  std::istringstream ss(output);
   std::string line;
   std::vector<std::string> includes;
   bool isFirstLine = true; // cl prints always first the source filename
@@ -257,7 +258,7 @@ int main()
   // needed to suppress filename output of msvc tools
   std::string srcfilename;
   {
-    std::string::size_type pos = srcfile.rfind("\\");
+    std::string::size_type pos = srcfile.rfind('\\');
     if (pos == std::string::npos) {
       srcfilename = srcfile;
     } else {
@@ -278,12 +279,7 @@ int main()
     clrest = replace(clrest, "/fo", "/out:");
     clrest = replace(clrest, objfile, objfile + ".dep.obj ");
 
-    // rc: src\x\x.rc  ->  cl: /Tc src\x\x.rc
-    if (srcfile.find(" ") != std::string::npos)
-      srcfile = "\"" + srcfile + "\"";
-    clrest = replace(clrest, srcfile, "/Tc " + srcfile);
-
-    cl = "\"" + cl + "\" /P /DRC_INVOKED ";
+    cl = "\"" + cl + "\" /P /DRC_INVOKED /TC ";
 
     // call cl in object dir so the .i is generated there
     std::string objdir;

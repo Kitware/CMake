@@ -1,20 +1,22 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGraphVizWriter.h"
 
+#include <cmConfigure.h>
+#include <iostream>
+#include <sstream>
+#include <utility>
+
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmStateSnapshot.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 static const char* getShapeForTarget(const cmGeneratorTarget* target)
 {
@@ -23,13 +25,13 @@ static const char* getShapeForTarget(const cmGeneratorTarget* target)
   }
 
   switch (target->GetType()) {
-    case cmState::EXECUTABLE:
+    case cmStateEnums::EXECUTABLE:
       return "house";
-    case cmState::STATIC_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
       return "diamond";
-    case cmState::SHARED_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
       return "polygon";
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       return "octagon";
     default:
       break;
@@ -64,9 +66,8 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator ggi(&cm);
-  cmsys::auto_ptr<cmMakefile> mf(
-    new cmMakefile(&ggi, cm.GetCurrentSnapshot()));
-  cmsys::auto_ptr<cmLocalGenerator> lg(ggi.CreateLocalGenerator(mf.get()));
+  CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(&ggi, cm.GetCurrentSnapshot()));
+  CM_AUTO_PTR<cmLocalGenerator> lg(ggi.CreateLocalGenerator(mf.get()));
 
   const char* inFileName = settingsFileName;
 
@@ -89,7 +90,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   {                                                                           \
     const char* value = mf->GetDefinition(cmakeDefinition);                   \
     if (value) {                                                              \
-      var = value;                                                            \
+      (var) = value;                                                          \
     }                                                                         \
   }
 
@@ -102,7 +103,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   {                                                                           \
     const char* value = mf->GetDefinition(cmakeDefinition);                   \
     if (value) {                                                              \
-      var = mf->IsOn(cmakeDefinition);                                        \
+      (var) = mf->IsOn(cmakeDefinition);                                      \
     }                                                                         \
   }
 
@@ -149,7 +150,7 @@ void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
   for (std::map<std::string, const cmGeneratorTarget*>::const_iterator ptrIt =
          this->TargetPtrs.begin();
        ptrIt != this->TargetPtrs.end(); ++ptrIt) {
-    if (ptrIt->second == NULL) {
+    if (ptrIt->second == CM_NULLPTR) {
       continue;
     }
 
@@ -193,7 +194,7 @@ void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
   for (std::map<std::string, const cmGeneratorTarget*>::const_iterator ptrIt =
          this->TargetPtrs.begin();
        ptrIt != this->TargetPtrs.end(); ++ptrIt) {
-    if (ptrIt->second == NULL) {
+    if (ptrIt->second == CM_NULLPTR) {
       continue;
     }
 
@@ -239,7 +240,7 @@ void cmGraphVizWriter::WriteGlobalFile(const char* fileName)
   for (std::map<std::string, const cmGeneratorTarget*>::const_iterator ptrIt =
          this->TargetPtrs.begin();
        ptrIt != this->TargetPtrs.end(); ++ptrIt) {
-    if (ptrIt->second == NULL) {
+    if (ptrIt->second == CM_NULLPTR) {
       continue;
     }
 
@@ -278,7 +279,7 @@ void cmGraphVizWriter::WriteConnections(
 
   this->WriteNode(targetName, targetPtrIt->second, insertedNodes, str);
 
-  if (targetPtrIt->second == NULL) // it's an external library
+  if (targetPtrIt->second == CM_NULLPTR) // it's an external library
   {
     return;
   }
@@ -329,7 +330,7 @@ void cmGraphVizWriter::WriteDependerConnections(
 
   this->WriteNode(targetName, targetPtrIt->second, insertedNodes, str);
 
-  if (targetPtrIt->second == NULL) // it's an external library
+  if (targetPtrIt->second == CM_NULLPTR) // it's an external library
   {
     return;
   }
@@ -340,7 +341,7 @@ void cmGraphVizWriter::WriteDependerConnections(
   for (std::map<std::string, const cmGeneratorTarget*>::const_iterator
          dependerIt = this->TargetPtrs.begin();
        dependerIt != this->TargetPtrs.end(); ++dependerIt) {
-    if (dependerIt->second == NULL) {
+    if (dependerIt->second == CM_NULLPTR) {
       continue;
     }
 
@@ -427,7 +428,7 @@ int cmGraphVizWriter::CollectAllTargets()
         // Skip ignored targets
         continue;
       }
-      // std::cout << "Found target: " << tit->first.c_str() << std::endl;
+      // std::cout << "Found target: " << tit->first << std::endl;
       std::ostringstream ostr;
       ostr << this->GraphNodePrefix << cnt++;
       this->TargetNamesNodes[realTargetName] = ostr.str();
@@ -468,8 +469,8 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
           std::ostringstream ostr;
           ostr << this->GraphNodePrefix << cnt++;
           this->TargetNamesNodes[libName] = ostr.str();
-          this->TargetPtrs[libName] = NULL;
-          // str << "    \"" << ostr.c_str() << "\" [ label=\"" << libName
+          this->TargetPtrs[libName] = CM_NULLPTR;
+          // str << "    \"" << ostr << "\" [ label=\"" << libName
           // <<  "\" shape=\"ellipse\"];" << std::endl;
         }
       }
@@ -495,16 +496,16 @@ bool cmGraphVizWriter::IgnoreThisTarget(const std::string& name)
 }
 
 bool cmGraphVizWriter::GenerateForTargetType(
-  cmState::TargetType targetType) const
+  cmStateEnums::TargetType targetType) const
 {
   switch (targetType) {
-    case cmState::EXECUTABLE:
+    case cmStateEnums::EXECUTABLE:
       return this->GenerateForExecutables;
-    case cmState::STATIC_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
       return this->GenerateForStaticLibs;
-    case cmState::SHARED_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
       return this->GenerateForSharedLibs;
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       return this->GenerateForModuleLibs;
     default:
       break;

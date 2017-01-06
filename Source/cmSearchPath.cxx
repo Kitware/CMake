@@ -1,18 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSearchPath.h"
+
+#include <algorithm>
+#include <cassert>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmFindCommon.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
 
 cmSearchPath::cmSearchPath(cmFindCommon* findCmd)
   : FC(findCmd)
@@ -45,7 +42,7 @@ void cmSearchPath::AddPath(const std::string& path)
 
 void cmSearchPath::AddUserPath(const std::string& path)
 {
-  assert(this->FC != NULL);
+  assert(this->FC != CM_NULLPTR);
 
   std::vector<std::string> outPaths;
 
@@ -80,7 +77,7 @@ void cmSearchPath::AddUserPath(const std::string& path)
 
 void cmSearchPath::AddCMakePath(const std::string& variable)
 {
-  assert(this->FC != NULL);
+  assert(this->FC != CM_NULLPTR);
 
   // Get a path from a CMake variable.
   if (const char* value = this->FC->Makefile->GetDefinition(variable)) {
@@ -107,7 +104,7 @@ void cmSearchPath::AddEnvPath(const std::string& variable)
 
 void cmSearchPath::AddCMakePrefixPath(const std::string& variable)
 {
-  assert(this->FC != NULL);
+  assert(this->FC != CM_NULLPTR);
 
   // Get a path from a CMake variable.
   if (const char* value = this->FC->Makefile->GetDefinition(variable)) {
@@ -124,9 +121,8 @@ static std::string cmSearchPathStripBin(std::string const& s)
   // If the path is a PREFIX/bin case then add its parent instead.
   if ((cmHasLiteralSuffix(s, "/bin")) || (cmHasLiteralSuffix(s, "/sbin"))) {
     return cmSystemTools::GetFilenamePath(s);
-  } else {
-    return s;
   }
+  return s;
 }
 
 void cmSearchPath::AddEnvPrefixPath(const std::string& variable, bool stripBin)
@@ -172,7 +168,7 @@ void cmSearchPath::AddSuffixes(const std::vector<std::string>& suffixes)
 void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
                                   const char* base)
 {
-  assert(this->FC != NULL);
+  assert(this->FC != CM_NULLPTR);
 
   // default for programs
   std::string subdir = "bin";
@@ -213,7 +209,7 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
 
 void cmSearchPath::AddPathInternal(const std::string& path, const char* base)
 {
-  assert(this->FC != NULL);
+  assert(this->FC != CM_NULLPTR);
 
   std::string collapsed = cmSystemTools::CollapseFullPath(path, base);
 

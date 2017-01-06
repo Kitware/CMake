@@ -1,18 +1,13 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallDirectoryGenerator.h"
 
 #include "cmGeneratorExpression.h"
+#include "cmInstallType.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
 
 cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   std::vector<std::string> const& dirs, const char* dest,
@@ -22,7 +17,7 @@ cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   bool optional)
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all)
-  , LocalGenerator(0)
+  , LocalGenerator(CM_NULLPTR)
   , Directories(dirs)
   , FilePermissions(file_permissions)
   , DirPermissions(dir_permissions)
@@ -69,10 +64,20 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
   cmGeneratorExpression ge;
   for (std::vector<std::string>::const_iterator i = this->Directories.begin();
        i != this->Directories.end(); ++i) {
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*i);
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(*i);
     cmSystemTools::ExpandListArgument(
       cge->Evaluate(this->LocalGenerator, config), dirs);
   }
+
+  // Make sure all dirs have absolute paths.
+  cmMakefile const& mf = *this->LocalGenerator->GetMakefile();
+  for (std::vector<std::string>::iterator i = dirs.begin(); i != dirs.end();
+       ++i) {
+    if (!cmSystemTools::FileIsFullPath(i->c_str())) {
+      *i = std::string(mf.GetCurrentSourceDirectory()) + "/" + *i;
+    }
+  }
+
   this->AddDirectoryInstallRule(os, config, indent, dirs);
 }
 
@@ -81,7 +86,7 @@ void cmInstallDirectoryGenerator::AddDirectoryInstallRule(
   std::vector<std::string> const& dirs)
 {
   // Write code to install the directories.
-  const char* no_rename = 0;
+  const char* no_rename = CM_NULLPTR;
   this->AddInstallRule(os, this->GetDestination(config),
                        cmInstallType_DIRECTORY, dirs, this->Optional,
                        this->FilePermissions.c_str(),

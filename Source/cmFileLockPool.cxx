@@ -1,15 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2014 Ruslan Baratov
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileLockPool.h"
 
 #include <assert.h>
@@ -140,10 +130,9 @@ cmFileLockResult cmFileLockPool::ScopePool::Lock(const std::string& filename,
   if (result.IsOk()) {
     this->Locks.push_back(lock);
     return cmFileLockResult::MakeOk();
-  } else {
-    delete lock;
-    return result;
   }
+  delete lock;
+  return result;
 }
 
 cmFileLockResult cmFileLockPool::ScopePool::Release(

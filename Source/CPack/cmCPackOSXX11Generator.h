@@ -1,17 +1,10 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCPackOSXX11Generator_h
 #define cmCPackOSXX11Generator_h
+
+#include <cmConfigure.h>
+#include <string>
 
 #include "cmCPackGenerator.h"
 
@@ -32,10 +25,10 @@ public:
   virtual ~cmCPackOSXX11Generator();
 
 protected:
-  virtual int InitializeInternal();
-  int PackageFiles();
-  virtual const char* GetPackagingInstallPrefix();
-  virtual const char* GetOutputExtension() { return ".dmg"; }
+  virtual int InitializeInternal() CM_OVERRIDE;
+  int PackageFiles() CM_OVERRIDE;
+  const char* GetPackagingInstallPrefix() CM_OVERRIDE;
+  const char* GetOutputExtension() CM_OVERRIDE { return ".dmg"; }
 
   // bool CopyCreateResourceFile(const std::string& name,
   //                            const std::string& dir);

@@ -1,17 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmForEachCommand.h"
 
-#include <cmsys/auto_ptr.hxx>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "cmExecutionStatus.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)
@@ -36,8 +35,7 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
     // if this is the endofreach for this statement
     if (!this->Depth) {
       // Remove the function blocker for this scope or bail.
-      cmsys::auto_ptr<cmFunctionBlocker> fb(
-        mf.RemoveFunctionBlocker(this, lff));
+      CM_AUTO_PTR<cmFunctionBlocker> fb(mf.RemoveFunctionBlocker(this, lff));
       if (!fb.get()) {
         return false;
       }
@@ -50,11 +48,6 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       }
       std::vector<std::string>::const_iterator j = this->Args.begin();
       ++j;
-
-      if (j == this->Args.end()) {
-        mf.GetStateSnapshot().MarkNotExecuted(
-          this->GetStartingContext().CloseParenLine + 1, lff.Line);
-      }
 
       for (; j != this->Args.end(); ++j) {
         // set the variable to the loop value
@@ -87,10 +80,9 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       // restore the variable to its prior value
       mf.AddDefinition(this->Args[0], oldDef.c_str());
       return true;
-    } else {
-      // close out a nested foreach
-      this->Depth--;
     }
+    // close out a nested foreach
+    this->Depth--;
   }
 
   // record the command
@@ -119,7 +111,7 @@ bool cmForEachFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
 bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
                                    cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
@@ -189,7 +181,7 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
 
 bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
 {
-  cmsys::auto_ptr<cmForEachFunctionBlocker> f(
+  CM_AUTO_PTR<cmForEachFunctionBlocker> f(
     new cmForEachFunctionBlocker(this->Makefile));
   f->Args.push_back(args[0]);
 

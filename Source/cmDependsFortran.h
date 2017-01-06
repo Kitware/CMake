@@ -1,21 +1,19 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmFortran_h
 #define cmFortran_h
+
+#include <cmConfigure.h>
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <vector>
 
 #include "cmDepends.h"
 
 class cmDependsFortranInternals;
 class cmFortranSourceInfo;
+class cmLocalGenerator;
 
 /** \class cmDependsFortran
  * \brief Dependency scanner for Fortran object files.
@@ -34,7 +32,7 @@ public:
   cmDependsFortran(cmLocalGenerator* lg);
 
   /** Virtual destructor to cleanup subclasses properly.  */
-  virtual ~cmDependsFortran();
+  ~cmDependsFortran() CM_OVERRIDE;
 
   /** Callback from build system after a .mod file has been generated
       by a Fortran90 compiler to copy the .mod file to the
@@ -48,8 +46,8 @@ public:
 
 protected:
   // Finalize the dependency information for the target.
-  virtual bool Finalize(std::ostream& makeDepends,
-                        std::ostream& internalDepends);
+  bool Finalize(std::ostream& makeDepends,
+                std::ostream& internalDepends) CM_OVERRIDE;
 
   // Find all the modules required by the target.
   void LocateModules();
@@ -59,10 +57,9 @@ protected:
   bool FindModule(std::string const& name, std::string& module);
 
   // Implement writing/checking methods required by superclass.
-  virtual bool WriteDependencies(const std::set<std::string>& sources,
-                                 const std::string& file,
-                                 std::ostream& makeDepends,
-                                 std::ostream& internalDepends);
+  bool WriteDependencies(const std::set<std::string>& sources,
+                         const std::string& file, std::ostream& makeDepends,
+                         std::ostream& internalDepends) CM_OVERRIDE;
 
   // Actually write the depenencies to the streams.
   bool WriteDependenciesReal(const char* obj, cmFortranSourceInfo const& info,
@@ -81,6 +78,9 @@ protected:
 private:
   cmDependsFortran(cmDependsFortran const&); // Purposely not implemented.
   void operator=(cmDependsFortran const&);   // Purposely not implemented.
+
+  std::string MaybeConvertToRelativePath(std::string const& base,
+                                         std::string const& path);
 };
 
 #endif

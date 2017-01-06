@@ -1,35 +1,21 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileTimeComparison.h"
 
-// Use a hash table to avoid duplicate file time checks from disk.
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
-#include <unordered_map>
-#else
-#include <cmsys/hash_map.hxx>
-#endif
-#endif
+#include <string>
+#include <time.h>
+#include <utility>
 
-#include <cmsys/Encoding.hxx>
+#include "cm_unordered_map.hxx"
 
 // Use a platform-specific API to get file times efficiently.
 #if !defined(_WIN32) || defined(__CYGWIN__)
-#define cmFileTimeComparison_Type struct stat
-#include <ctype.h>
 #include <sys/stat.h>
+#define cmFileTimeComparison_Type struct stat
 #else
-#define cmFileTimeComparison_Type FILETIME
+#include <cmsys/Encoding.hxx>
 #include <windows.h>
+#define cmFileTimeComparison_Type FILETIME
 #endif
 
 class cmFileTimeComparisonInternal
@@ -41,27 +27,9 @@ public:
   bool FileTimesDiffer(const char* f1, const char* f2);
 
 private:
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-  // Use a hash table to efficiently map from file name to modification time.
-  class HashString
-  {
-  public:
-    size_t operator()(const std::string& s) const { return h(s.c_str()); }
-#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
-    std::hash<const char*> h;
-#else
-    cmsys::hash<const char*> h;
-#endif
-  };
-#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
-  typedef std::unordered_map<std::string,
-#else
-  typedef cmsys::hash_map<std::string,
-#endif
-                             cmFileTimeComparison_Type, HashString>
+  typedef CM_UNORDERED_MAP<std::string, cmFileTimeComparison_Type>
     FileStatsMap;
   FileStatsMap Files;
-#endif
 
   // Internal methods to lookup and compare modification times.
   inline bool Stat(const char* fname, cmFileTimeComparison_Type* st);
@@ -74,7 +42,6 @@ private:
 bool cmFileTimeComparisonInternal::Stat(const char* fname,
                                         cmFileTimeComparison_Type* st)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
   // Use the stored time if available.
   cmFileTimeComparisonInternal::FileStatsMap::iterator fit =
     this->Files.find(fname);
@@ -82,7 +49,6 @@ bool cmFileTimeComparisonInternal::Stat(const char* fname,
     *st = fit->second;
     return true;
   }
-#endif
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
   // POSIX version.  Use the stat function.
@@ -103,11 +69,8 @@ bool cmFileTimeComparisonInternal::Stat(const char* fname,
   *st = fdata.ftLastWriteTime;
 #endif
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
   // Store the time for future use.
   this->Files[fname] = *st;
-#endif
-
   return true;
 }
 
@@ -140,11 +103,14 @@ int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1,
   // Compare using nanosecond resolution.
   if (s1->st_mtim.tv_sec < s2->st_mtim.tv_sec) {
     return -1;
-  } else if (s1->st_mtim.tv_sec > s2->st_mtim.tv_sec) {
+  }
+  if (s1->st_mtim.tv_sec > s2->st_mtim.tv_sec) {
     return 1;
-  } else if (s1->st_mtim.tv_nsec < s2->st_mtim.tv_nsec) {
+  }
+  if (s1->st_mtim.tv_nsec < s2->st_mtim.tv_nsec) {
     return -1;
-  } else if (s1->st_mtim.tv_nsec > s2->st_mtim.tv_nsec) {
+  }
+  if (s1->st_mtim.tv_nsec > s2->st_mtim.tv_nsec) {
     return 1;
   }
 #elif CMake_STAT_HAS_ST_MTIMESPEC
@@ -185,11 +151,11 @@ bool cmFileTimeComparisonInternal::TimesDiffer(cmFileTimeComparison_Type* s1,
   long long t2 = s2->st_mtim.tv_sec * bil + s2->st_mtim.tv_nsec;
   if (t1 < t2) {
     return (t2 - t1) >= bil;
-  } else if (t2 < t1) {
-    return (t1 - t2) >= bil;
-  } else {
-    return false;
   }
+  if (t2 < t1) {
+    return (t1 - t2) >= bil;
+  }
+  return false;
 #elif CMake_STAT_HAS_ST_MTIMESPEC
   // Times are integers in units of 1ns.
   long long bil = 1000000000;
@@ -240,11 +206,10 @@ bool cmFileTimeComparisonInternal::FileTimeCompare(const char* f1,
     // Compare the two modification times.
     *result = this->Compare(&s1, &s2);
     return true;
-  } else {
-    // No comparison available.  Default to the same time.
-    *result = 0;
-    return false;
   }
+  // No comparison available.  Default to the same time.
+  *result = 0;
+  return false;
 }
 
 bool cmFileTimeComparisonInternal::FileTimesDiffer(const char* f1,
@@ -256,8 +221,7 @@ bool cmFileTimeComparisonInternal::FileTimesDiffer(const char* f1,
   if (this->Stat(f1, &s1) && this->Stat(f2, &s2)) {
     // Compare the two modification times.
     return this->TimesDiffer(&s1, &s2);
-  } else {
-    // No comparison available.  Default to different times.
-    return true;
   }
+  // No comparison available.  Default to different times.
+  return true;
 }

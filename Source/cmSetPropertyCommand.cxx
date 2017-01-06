@@ -1,19 +1,21 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSetPropertyCommand.h"
 
-#include "cmSetSourceFilesPropertiesCommand.h"
-#include "cmSetTargetPropertiesCommand.h"
-#include "cmSetTestsPropertiesCommand.h"
+#include <sstream>
+
+#include "cmGlobalGenerator.h"
+#include "cmInstalledFile.h"
+#include "cmMakefile.h"
+#include "cmProperty.h"
+#include "cmSourceFile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmTest.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 cmSetPropertyCommand::cmSetPropertyCommand()
 {
@@ -139,7 +141,7 @@ bool cmSetPropertyCommand::HandleGlobalMode()
   const char* name = this->PropertyName.c_str();
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
-    value = 0;
+    value = CM_NULLPTR;
   }
   if (this->AppendMode) {
     cm->AppendProperty(name, value ? value : "", this->AppendAsString);
@@ -189,7 +191,7 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
   const char* name = this->PropertyName.c_str();
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
-    value = 0;
+    value = CM_NULLPTR;
   }
   if (this->AppendMode) {
     mf->AppendProperty(name, value ? value : "", this->AppendAsString);
@@ -230,7 +232,7 @@ bool cmSetPropertyCommand::HandleTarget(cmTarget* target)
   const char* name = this->PropertyName.c_str();
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
-    value = 0;
+    value = CM_NULLPTR;
   }
   if (this->AppendMode) {
     target->AppendProperty(name, value, this->AppendAsString);
@@ -269,7 +271,7 @@ bool cmSetPropertyCommand::HandleSource(cmSourceFile* sf)
   const char* name = this->PropertyName.c_str();
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
-    value = 0;
+    value = CM_NULLPTR;
   }
 
   if (this->AppendMode) {
@@ -317,7 +319,7 @@ bool cmSetPropertyCommand::HandleTest(cmTest* test)
   const char* name = this->PropertyName.c_str();
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
-    value = 0;
+    value = CM_NULLPTR;
   }
   if (this->AppendMode) {
     test->AppendProperty(name, value, this->AppendAsString);
@@ -340,7 +342,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
       return false;
     }
   } else if (this->PropertyName == "TYPE") {
-    if (!cmState::IsCacheEntryType(this->PropertyValue.c_str())) {
+    if (!cmState::IsCacheEntryType(this->PropertyValue)) {
       std::ostringstream e;
       e << "given invalid CACHE entry TYPE \"" << this->PropertyValue << "\"";
       this->SetError(e.str());

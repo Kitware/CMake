@@ -1,21 +1,11 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmPropertyMap.h"
 
-#include "cmState.h"
-#include "cmSystemTools.h"
-#include "cmake.h"
-
+#include <algorithm>
 #include <assert.h>
+#include <cmConfigure.h>
+#include <utility>
 
 cmProperty* cmPropertyMap::GetOrCreateProperty(const std::string& name)
 {
@@ -27,6 +17,17 @@ cmProperty* cmPropertyMap::GetOrCreateProperty(const std::string& name)
     prop = &(it->second);
   }
   return prop;
+}
+
+std::vector<std::string> cmPropertyMap::GetPropertyList() const
+{
+  std::vector<std::string> keyList;
+  for (cmPropertyMap::const_iterator i = this->begin(), e = this->end();
+       i != e; ++i) {
+    keyList.push_back(i->first);
+  }
+  std::sort(keyList.begin(), keyList.end());
+  return keyList;
 }
 
 void cmPropertyMap::SetProperty(const std::string& name, const char* value)
@@ -58,7 +59,7 @@ const char* cmPropertyMap::GetPropertyValue(const std::string& name) const
 
   cmPropertyMap::const_iterator it = this->find(name);
   if (it == this->end()) {
-    return 0;
+    return CM_NULLPTR;
   }
   return it->second.GetValue();
 }

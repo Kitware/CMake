@@ -1,19 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmInstallGenerator_h
 #define cmInstallGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmInstallType.h"
 #include "cmScriptGenerator.h"
+
+#include <iosfwd>
+#include <string>
+#include <vector>
 
 class cmLocalGenerator;
 class cmMakefile;
@@ -37,15 +34,14 @@ public:
                      std::vector<std::string> const& configurations,
                      const char* component, MessageLevel message,
                      bool exclude_from_all);
-  virtual ~cmInstallGenerator();
+  ~cmInstallGenerator() CM_OVERRIDE;
 
-  void AddInstallRule(std::ostream& os, std::string const& dest,
-                      cmInstallType type,
-                      std::vector<std::string> const& files,
-                      bool optional = false, const char* permissions_file = 0,
-                      const char* permissions_dir = 0, const char* rename = 0,
-                      const char* literal_args = 0,
-                      Indent const& indent = Indent());
+  void AddInstallRule(
+    std::ostream& os, std::string const& dest, cmInstallType type,
+    std::vector<std::string> const& files, bool optional = false,
+    const char* permissions_file = CM_NULLPTR,
+    const char* permissions_dir = CM_NULLPTR, const char* rename = CM_NULLPTR,
+    const char* literal_args = CM_NULLPTR, Indent const& indent = Indent());
 
   /** Get the install destination as it should appear in the
       installation script.  */
@@ -60,7 +56,7 @@ public:
   virtual void Compute(cmLocalGenerator*) {}
 
 protected:
-  virtual void GenerateScript(std::ostream& os);
+  void GenerateScript(std::ostream& os) CM_OVERRIDE;
 
   std::string CreateComponentTest(const char* component,
                                   bool exclude_from_all);

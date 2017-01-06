@@ -1,8 +1,6 @@
-CMake Error: Error in cmake code at
-.*/Tests/RunCMake/Syntax/CommandError0.cmake:2:
-Parse error.  Expected "\(", got newline with text "
-".
-CMake Error at CMakeLists.txt:3 \(include\):
-  include could not find load file:
+CMake Error at CommandError0.cmake:2:
+  Parse error.  Expected "\(", got newline with text "
 
-    CommandError0.cmake
+  ".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

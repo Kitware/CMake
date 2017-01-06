@@ -8,8 +8,12 @@ run_cmake_command(lists-no-file ${CMAKE_COMMAND} nosuchsubdir/CMakeLists.txt)
 run_cmake_command(D-no-arg ${CMAKE_COMMAND} -D)
 run_cmake_command(U-no-arg ${CMAKE_COMMAND} -U)
 run_cmake_command(E-no-arg ${CMAKE_COMMAND} -E)
+run_cmake_command(E_capabilities ${CMAKE_COMMAND} -E capabilities)
+run_cmake_command(E_capabilities-arg ${CMAKE_COMMAND} -E capabilities --extra-arg)
 run_cmake_command(E_echo_append ${CMAKE_COMMAND} -E echo_append)
 run_cmake_command(E_rename-no-arg ${CMAKE_COMMAND} -E rename)
+run_cmake_command(E_server-arg ${CMAKE_COMMAND} -E server --extra-arg)
+run_cmake_command(E_server-pipe ${CMAKE_COMMAND} -E server --pipe=)
 run_cmake_command(E_touch_nocreate-no-arg ${CMAKE_COMMAND} -E touch_nocreate)
 
 run_cmake_command(E_time ${CMAKE_COMMAND} -E time ${CMAKE_COMMAND} -E echo "hello  world")
@@ -262,6 +266,10 @@ unset(RunCMake_TEST_OPTIONS)
 
 set(RunCMake_TEST_OPTIONS --trace-expand)
 run_cmake(trace-expand)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --trace-source=trace-only-this-file.cmake)
+run_cmake(trace-source)
 unset(RunCMake_TEST_OPTIONS)
 
 set(RunCMake_TEST_OPTIONS --debug-trycompile)

@@ -1,28 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesOptionsWidget.h"
 
-#include "cmCursesMainForm.h"
+#include "cmCursesWidget.h"
+#include "cmStateTypes.h"
 
-inline int ctrl(int z)
-{
-  return (z & 037);
-}
+#define ctrl(z) ((z)&037)
 
 cmCursesOptionsWidget::cmCursesOptionsWidget(int width, int height, int left,
                                              int top)
   : cmCursesWidget(width, height, left, top)
 {
-  this->Type = cmState::BOOL; // this is a bit of a hack
+  this->Type = cmStateEnums::BOOL; // this is a bit of a hack
   // there is no option type, and string type causes ccmake to cast
   // the widget into a string widget at some point.  BOOL is safe for
   // now.
@@ -31,27 +20,30 @@ cmCursesOptionsWidget::cmCursesOptionsWidget(int width, int height, int left,
   field_opts_off(this->Field, O_STATIC);
 }
 
-bool cmCursesOptionsWidget::HandleInput(int& key, cmCursesMainForm*, WINDOW* w)
+bool cmCursesOptionsWidget::HandleInput(int& key, cmCursesMainForm* /*fm*/,
+                                        WINDOW* w)
 {
-
-  // 10 == enter
-  if (key == 10 || key == KEY_ENTER) {
-    this->NextOption();
-    touchwin(w);
-    wrefresh(w);
-    return true;
-  } else if (key == KEY_LEFT || key == ctrl('b')) {
-    touchwin(w);
-    wrefresh(w);
-    this->PreviousOption();
-    return true;
-  } else if (key == KEY_RIGHT || key == ctrl('f')) {
-    this->NextOption();
-    touchwin(w);
-    wrefresh(w);
-    return true;
-  } else {
-    return false;
+  switch (key) {
+    case 10: // 10 == enter
+    case KEY_ENTER:
+      this->NextOption();
+      touchwin(w);
+      wrefresh(w);
+      return true;
+    case KEY_LEFT:
+    case ctrl('b'):
+      touchwin(w);
+      wrefresh(w);
+      this->PreviousOption();
+      return true;
+    case KEY_RIGHT:
+    case ctrl('f'):
+      this->NextOption();
+      touchwin(w);
+      wrefresh(w);
+      return true;
+    default:
+      return false;
   }
 }
 

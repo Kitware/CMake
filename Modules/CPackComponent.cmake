@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CPackComponent
 # --------------
@@ -75,9 +78,17 @@
 #
 #  The dependencies (list of components) on which this component depends.
 #
+# .. variable:: CPACK_COMPONENT_<compName>_HIDDEN
+#
+#  True if this component is hidden from the user.
+#
 # .. variable:: CPACK_COMPONENT_<compName>_REQUIRED
 #
-#  True is this component is required.
+#  True if this component is required.
+#
+# .. variable:: CPACK_COMPONENT_<compName>_DISABLED
+#
+#  True if this component is not selected to be installed by default.
 #
 # .. command:: cpack_add_component
 #
@@ -284,19 +295,6 @@
 # NO_ADD_REMOVE turns off this behavior.  This option is ignored on Mac
 # OS X.
 
-#=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 # Define var in order to avoid multiple inclusion
 if(NOT CPackComponent_CMake_INCLUDED)
 set(CPackComponent_CMake_INCLUDED 1)
@@ -360,6 +358,20 @@ macro(cpack_append_string_variable_set_command var strvar)
   endif ()
 endmacro()
 
+# Macro that appends a SET command for the given list variable name (var)
+# to the macro named strvar, but only if the variable named "var"
+# has been defined. It's like add variable, but wrap each item to quotes.
+# The string will eventually be appended to a CPack configuration file.
+macro(cpack_append_list_variable_set_command var strvar)
+  if (DEFINED ${var})
+    string(APPEND ${strvar} "set(${var}")
+    foreach(_val IN LISTS ${var})
+      string(APPEND ${strvar} "\n  \"${_val}\"")
+    endforeach()
+    string(APPEND ${strvar} ")\n")
+  endif ()
+endmacro()
+
 # Macro that appends a SET command for the given variable name (var)
 # to the macro named strvar, but only if the variable named "var"
 # has been set to true. The string will eventually be
@@ -395,11 +407,11 @@ macro(cpack_add_component compname)
     # moduled was included.
     if(NOT CPACK_COMPONENTS_ALL_SET_BY_USER)
       get_cmake_property(_CPACK_ADDCOMP_COMPONENTS COMPONENTS)
-      set(_CPACK_ADDCOMP_STR "${_CPACK_ADDCOMP_STR}\nSET(CPACK_COMPONENTS_ALL")
+      string(APPEND _CPACK_ADDCOMP_STR "\nSET(CPACK_COMPONENTS_ALL")
       foreach(COMP ${_CPACK_ADDCOMP_COMPONENTS})
-       set(_CPACK_ADDCOMP_STR "${_CPACK_ADDCOMP_STR} ${COMP}")
+       string(APPEND _CPACK_ADDCOMP_STR " ${COMP}")
       endforeach()
-      set(_CPACK_ADDCOMP_STR "${_CPACK_ADDCOMP_STR})\n")
+      string(APPEND _CPACK_ADDCOMP_STR ")\n")
     endif()
   endif()
 
@@ -487,8 +499,8 @@ macro(cpack_add_install_type insttype)
 
   set(_CPACK_INSTTYPE_STR
     "\n# Configuration for installation type \"${insttype}\"\n")
-  set(_CPACK_INSTTYPE_STR
-    "${_CPACK_INSTTYPE_STR}list(APPEND CPACK_ALL_INSTALL_TYPES ${insttype})\n")
+  string(APPEND _CPACK_INSTTYPE_STR
+    "list(APPEND CPACK_ALL_INSTALL_TYPES ${insttype})\n")
   cpack_append_string_variable_set_command(
     CPACK_INSTALL_TYPE_${_CPACK_INSTTYPE_UNAME}_DISPLAY_NAME
     _CPACK_INSTTYPE_STR)

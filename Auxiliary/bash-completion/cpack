@@ -48,6 +48,26 @@ _cpack()
                 grep -v "^cpack version " )' -- "$cur" ) )
             return
             ;;
+        --help-manual)
+            COMPREPLY=( $( compgen -W '$( cpack --help-manual-list 2>/dev/null|
+                grep -v "^cpack version " | sed -e "s/([0-9])$//" )' -- "$cur" ) )
+            return
+            ;;
+        --help-module)
+            COMPREPLY=( $( compgen -W '$( cpack --help-module-list 2>/dev/null|
+                grep -v "^cpack version " )' -- "$cur" ) )
+            return
+            ;;
+        --help-policy)
+            COMPREPLY=( $( compgen -W '$( cpack --help-policy-list 2>/dev/null |
+                grep -v "^cpack version " )' -- "$cur" ) )
+            return
+            ;;
+        --help-property)
+            COMPREPLY=( $( compgen -W '$( cpack --help-property-list \
+                2>/dev/null | grep -v "^cpack version " )' -- "$cur" ) )
+            return
+            ;;
         --help-variable)
             COMPREPLY=( $( compgen -W '$( cpack --help-variable-list \
                 2>/dev/null | grep -v "^cpack version " )' -- "$cur" ) )

@@ -1,26 +1,24 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallTargetGenerator.h"
+
+#include <assert.h>
+#include <map>
+#include <set>
+#include <sstream>
+#include <utility>
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
-#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstallType.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmake.h"
-
-#include <assert.h>
 
 cmInstallTargetGenerator::cmInstallTargetGenerator(
   const std::string& targetName, const char* dest, bool implib,
@@ -30,7 +28,7 @@ cmInstallTargetGenerator::cmInstallTargetGenerator(
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all)
   , TargetName(targetName)
-  , Target(0)
+  , Target(CM_NULLPTR)
   , FilePermissions(file_permissions)
   , ImportLibrary(implib)
   , Optional(optional)
@@ -81,36 +79,37 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   std::vector<std::string> filesFrom;
   std::vector<std::string> filesTo;
   std::string literal_args;
-  cmState::TargetType targetType = this->Target->GetType();
+  cmStateEnums::TargetType targetType = this->Target->GetType();
   cmInstallType type = cmInstallType();
   switch (targetType) {
-    case cmState::EXECUTABLE:
+    case cmStateEnums::EXECUTABLE:
       type = cmInstallType_EXECUTABLE;
       break;
-    case cmState::STATIC_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
       type = cmInstallType_STATIC_LIBRARY;
       break;
-    case cmState::SHARED_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
       type = cmInstallType_SHARED_LIBRARY;
       break;
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       type = cmInstallType_MODULE_LIBRARY;
       break;
-    case cmState::INTERFACE_LIBRARY:
+    case cmStateEnums::INTERFACE_LIBRARY:
       // Not reachable. We never create a cmInstallTargetGenerator for
       // an INTERFACE_LIBRARY.
-      assert(0 && "INTERFACE_LIBRARY targets have no installable outputs.");
+      assert(false &&
+             "INTERFACE_LIBRARY targets have no installable outputs.");
       break;
-    case cmState::OBJECT_LIBRARY:
-    case cmState::UTILITY:
-    case cmState::GLOBAL_TARGET:
-    case cmState::UNKNOWN_LIBRARY:
+    case cmStateEnums::OBJECT_LIBRARY:
+    case cmStateEnums::UTILITY:
+    case cmStateEnums::GLOBAL_TARGET:
+    case cmStateEnums::UNKNOWN_LIBRARY:
       this->Target->GetLocalGenerator()->IssueMessage(
         cmake::INTERNAL_ERROR,
         "cmInstallTargetGenerator created with non-installable target.");
       return;
   }
-  if (targetType == cmState::EXECUTABLE) {
+  if (targetType == cmStateEnums::EXECUTABLE) {
     // There is a bug in cmInstallCommand if this fails.
     assert(this->NamelinkMode == NamelinkModeNone);
 
@@ -142,13 +141,22 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       if (this->Target->IsAppBundleOnApple()) {
         cmMakefile const* mf = this->Target->Target->GetMakefile();
 
+        // Get App Bundle Extension
+        const char* ext = this->Target->GetProperty("BUNDLE_EXTENSION");
+        if (!ext) {
+          ext = "app";
+        }
+
         // Install the whole app bundle directory.
         type = cmInstallType_DIRECTORY;
         literal_args += " USE_SOURCE_PERMISSIONS";
-        from1 += ".app";
+        from1 += ".";
+        from1 += ext;
 
         // Tweaks apply to the binary inside the bundle.
-        to1 += ".app/";
+        to1 += ".";
+        to1 += ext;
+        to1 += "/";
         if (!mf->PlatformIsAppleIos()) {
           to1 += "Contents/MacOS/";
         }
@@ -294,8 +302,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
                  &cmInstallTargetGenerator::PreReplacementTweaks);
 
   // Write code to install the target file.
-  const char* no_dir_permissions = 0;
-  const char* no_rename = 0;
+  const char* no_dir_permissions = CM_NULLPTR;
+  const char* no_rename = CM_NULLPTR;
   bool optional = this->Optional || this->ImportLibrary;
   this->AddInstallRule(os, this->GetDestination(config), type, filesFrom,
                        optional, this->FilePermissions.c_str(),
@@ -329,7 +337,7 @@ std::string cmInstallTargetGenerator::GetInstallFilename(
 {
   std::string fname;
   // Compute the name of the library.
-  if (target->GetType() == cmState::EXECUTABLE) {
+  if (target->GetType() == cmStateEnums::EXECUTABLE) {
     std::string targetName;
     std::string targetNameReal;
     std::string targetNameImport;
@@ -463,9 +471,9 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(
   std::string const& toDestDirPath)
 {
   if (this->ImportLibrary ||
-      !(this->Target->GetType() == cmState::SHARED_LIBRARY ||
-        this->Target->GetType() == cmState::MODULE_LIBRARY ||
-        this->Target->GetType() == cmState::EXECUTABLE)) {
+      !(this->Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
+        this->Target->GetType() == cmStateEnums::MODULE_LIBRARY ||
+        this->Target->GetType() == cmStateEnums::EXECUTABLE)) {
     return;
   }
 
@@ -519,7 +527,7 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(
 
   // Edit the install_name of the target itself if necessary.
   std::string new_id;
-  if (this->Target->GetType() == cmState::SHARED_LIBRARY) {
+  if (this->Target->GetType() == cmStateEnums::SHARED_LIBRARY) {
     std::string for_build =
       this->Target->GetInstallNameDirForBuildTree(config);
     std::string for_install = this->Target->GetInstallNameDirForInstallTree();
@@ -623,7 +631,7 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
     std::string darwin_major_version_s =
       mf->GetSafeDefinition("DARWIN_MAJOR_VERSION");
 
-    std::stringstream ss(darwin_major_version_s);
+    std::istringstream ss(darwin_major_version_s);
     int darwin_major_version;
     ss >> darwin_major_version;
     if (!ss.fail() && darwin_major_version <= 9 &&
@@ -696,7 +704,7 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os,
 
   // don't strip static and import libraries, because it removes the only
   // symbol table they have so you can't link to them anymore
-  if (this->Target->GetType() == cmState::STATIC_LIBRARY ||
+  if (this->Target->GetType() == cmStateEnums::STATIC_LIBRARY ||
       this->ImportLibrary) {
     return;
   }
@@ -723,7 +731,7 @@ void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
                                              const std::string& toDestDirPath)
 {
   // Static libraries need ranlib on this platform.
-  if (this->Target->GetType() != cmState::STATIC_LIBRARY) {
+  if (this->Target->GetType() != cmStateEnums::STATIC_LIBRARY) {
     return;
   }
 
@@ -759,10 +767,10 @@ void cmInstallTargetGenerator::AddUniversalInstallRule(
   }
 
   switch (this->Target->GetType()) {
-    case cmState::EXECUTABLE:
-    case cmState::STATIC_LIBRARY:
-    case cmState::SHARED_LIBRARY:
-    case cmState::MODULE_LIBRARY:
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
       break;
 
     default:

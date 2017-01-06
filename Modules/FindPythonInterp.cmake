@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindPythonInterp
 # ----------------
@@ -33,26 +36,11 @@
 # get the currently active Python version by default with a consistent version
 # of PYTHON_LIBRARIES.
 
-#=============================================================================
-# Copyright 2005-2010 Kitware, Inc.
-# Copyright 2011 Bjoern Ricks <bjoern.ricks@gmail.com>
-# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 unset(_Python_NAMES)
 
 set(_PYTHON1_VERSIONS 1.6 1.5)
 set(_PYTHON2_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
-set(_PYTHON3_VERSIONS 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
+set(_PYTHON3_VERSIONS 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
 
 if(PythonInterp_FIND_VERSION)
     if(PythonInterp_FIND_VERSION_COUNT GREATER 1)
@@ -157,8 +145,6 @@ if(PYTHON_EXECUTABLE)
     unset(_VERSION)
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set PYTHONINTERP_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonInterp REQUIRED_VARS PYTHON_EXECUTABLE VERSION_VAR PYTHON_VERSION_STRING)
 

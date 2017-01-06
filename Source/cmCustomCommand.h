@@ -1,20 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCustomCommand_h
 #define cmCustomCommand_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
+#include "cmCustomCommandLines.h"
 #include "cmListFileCache.h"
+
+#include <string>
+#include <utility>
+#include <vector>
+
 class cmMakefile;
 
 /** \class cmCustomCommand
@@ -88,6 +85,10 @@ public:
   bool GetUsesTerminal() const;
   void SetUsesTerminal(bool b);
 
+  /** Set/Get the depfile (used by the Ninja generator) */
+  const std::string& GetDepfile() const;
+  void SetDepfile(const std::string& depfile);
+
 private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Byproducts;
@@ -97,6 +98,7 @@ private:
   ImplicitDependsList ImplicitDepends;
   std::string Comment;
   std::string WorkingDirectory;
+  std::string Depfile;
   bool HaveComment;
   bool EscapeAllowMakeVars;
   bool EscapeOldStyle;

@@ -1,18 +1,11 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2015 Geoffrey Viola <geoffrey.viola@asirobots.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGhsMultiTargetGenerator.h"
 
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGhsMultiGenerator.h"
+#include "cmLinkLineComputer.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
@@ -51,9 +44,7 @@ cmGhsMultiTargetGenerator::~cmGhsMultiTargetGenerator()
 std::string cmGhsMultiTargetGenerator::GetRelBuildFilePath(
   const cmGeneratorTarget* target)
 {
-  std::string output;
-  char const* folderProp = target->GetProperty("FOLDER");
-  output = NULL == folderProp ? "" : folderProp;
+  std::string output = target->GetEffectiveFolderName();
   cmSystemTools::ConvertToUnixSlashes(output);
   if (!output.empty()) {
     output += "/";
@@ -139,7 +130,7 @@ void cmGhsMultiTargetGenerator::Generate()
     this->WriteCompilerFlags(config, language);
     this->WriteCompilerDefinitions(config, language);
     this->WriteIncludes(config, language);
-    if (this->GeneratorTarget->GetType() == cmState::EXECUTABLE) {
+    if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
       this->WriteTargetLinkLibraries(config, language);
     }
     this->WriteCustomCommands();
@@ -183,7 +174,7 @@ GhsMultiGpj::Types cmGhsMultiTargetGenerator::GetGpjTag(
   GhsMultiGpj::Types output;
   if (cmGhsMultiTargetGenerator::DetermineIfTargetGroup(target)) {
     output = GhsMultiGpj::INTERGRITY_APPLICATION;
-  } else if (target->GetType() == cmState::STATIC_LIBRARY) {
+  } else if (target->GetType() == cmStateEnums::STATIC_LIBRARY) {
     output = GhsMultiGpj::LIBRARY;
   } else {
     output = GhsMultiGpj::PROGRAM;
@@ -204,13 +195,13 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string& config,
   std::string outputDir(this->GetOutputDirectory(config));
   std::string outputFilename(this->GetOutputFilename(config));
 
-  if (this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY) {
+  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
     std::string const static_library_suffix =
       this->Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
     *this->GetFolderBuildStreams() << "    -o \"" << outputDir
                                    << outputFilename << static_library_suffix
                                    << "\"" << std::endl;
-  } else if (this->GeneratorTarget->GetType() == cmState::EXECUTABLE) {
+  } else if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
     if (notKernel && !this->IsTargetGroup()) {
       *this->GetFolderBuildStreams() << "    -relprog" << std::endl;
     }
@@ -252,7 +243,7 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
       flags, this->GeneratorTarget, lang);
 
     // Append old-style preprocessor definition flags.
-    if (std::string(" ") != std::string(this->Makefile->GetDefineFlags())) {
+    if (this->Makefile->GetDefineFlags() != " ") {
       this->LocalGenerator->AppendFlags(flags,
                                         this->Makefile->GetDefineFlags());
     }
@@ -370,9 +361,15 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries(
       this->GeneratorTarget->GetCreateRuleVariable(language, config);
     bool useWatcomQuote =
       this->Makefile->IsOn(createRule + "_USE_WATCOM_QUOTE");
+    CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+      this->GetGlobalGenerator()->CreateLinkLineComputer(
+        this->LocalGenerator,
+        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+    linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
+
     this->LocalGenerator->GetTargetFlags(
-      linkLibraries, flags, linkFlags, frameworkPath, linkPath,
-      this->GeneratorTarget, useWatcomQuote);
+      linkLineComputer.get(), config, linkLibraries, flags, linkFlags,
+      frameworkPath, linkPath, this->GeneratorTarget);
     linkFlags = cmSystemTools::TrimWhitespace(linkFlags);
 
     if (!linkPath.empty()) {

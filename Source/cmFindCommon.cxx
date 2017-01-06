@@ -1,18 +1,13 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindCommon.h"
 
 #include <algorithm>
-#include <functional>
+#include <string.h>
+#include <utility>
+
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
 
 cmFindCommon::PathGroup cmFindCommon::PathGroup::All("ALL");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMake("CMAKE");
@@ -234,13 +229,13 @@ void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
 {
   // null-terminated list of paths.
   static const char* paths[] = { "CMAKE_SYSTEM_IGNORE_PATH",
-                                 "CMAKE_IGNORE_PATH", 0 };
+                                 "CMAKE_IGNORE_PATH", CM_NULLPTR };
 
   // Construct the list of path roots with no trailing slashes.
   for (const char** pathName = paths; *pathName; ++pathName) {
     // Get the list of paths to ignore from the variable.
     const char* ignorePath = this->Makefile->GetDefinition(*pathName);
-    if ((ignorePath == 0) || (strlen(ignorePath) == 0)) {
+    if ((ignorePath == CM_NULLPTR) || (strlen(ignorePath) == 0)) {
       continue;
     }
 

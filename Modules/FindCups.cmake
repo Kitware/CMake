@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindCups
 # --------
@@ -14,21 +17,6 @@
 #   CUPS_VERSION_STRING - version of Cups found (since CMake 2.8.8)
 #   Set CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE to TRUE if you need a version which
 #   features this function (i.e. at least 1.1.19)
-
-#=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-# Copyright 2006 Alexander Neundorf <neundorf@kde.org>
-# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 find_path(CUPS_INCLUDE_DIR cups/cups.h )
 
@@ -55,7 +43,7 @@ if (CUPS_INCLUDE_DIR AND EXISTS "${CUPS_INCLUDE_DIR}/cups/cups.h")
             if(VLINE MATCHES "^#[\t ]*define[\t ]+CUPS_VERSION_${VPART}[\t ]+([0-9]+)$")
                 set(CUPS_VERSION_PART "${CMAKE_MATCH_1}")
                 if(CUPS_VERSION_STRING)
-                    set(CUPS_VERSION_STRING "${CUPS_VERSION_STRING}.${CUPS_VERSION_PART}")
+                    string(APPEND CUPS_VERSION_STRING ".${CUPS_VERSION_PART}")
                 else()
                     set(CUPS_VERSION_STRING "${CUPS_VERSION_PART}")
                 endif()

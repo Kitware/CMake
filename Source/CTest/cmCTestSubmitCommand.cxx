@@ -1,19 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestSubmitCommand.h"
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestSubmitHandler.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+#include <sstream>
+
+class cmExecutionStatus;
 
 cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 {
@@ -88,7 +86,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
                          extraFiles.end());
     if (!this->CTest->SubmitExtraFiles(newExtraFiles)) {
       this->SetError("problem submitting extra files.");
-      return 0;
+      return CM_NULLPTR;
     }
   }
 
@@ -96,7 +94,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     this->CTest->GetInitializedHandler("submit");
   if (!handler) {
     this->SetError("internal CTest error. Cannot instantiate submit handler");
-    return 0;
+    return CM_NULLPTR;
   }
 
   // If no FILES or PARTS given, *all* PARTS are submitted by default.

@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindBoost
 # ---------
@@ -201,26 +204,6 @@
 # the Boost CMake package configuration for details on what it provides.
 #
 # Set Boost_NO_BOOST_CMAKE to ON to disable the search for boost-cmake.
-
-#=============================================================================
-# Copyright 2006-2012 Kitware, Inc.
-# Copyright 2006-2008 Andreas Schneider <mail@cynapses.org>
-# Copyright 2007      Wengo
-# Copyright 2007      Mike Jackson
-# Copyright 2008      Andreas Pakulat <apaku@gmx.de>
-# Copyright 2008-2012 Philip Lowman <philip@yhbt.com>
-# Copyright 2016      Alex Turbov <i.zaufi@gmail.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 
 #-------------------------------------------------------------------------------
 # Before we go searching, check whether boost-cmake is available, unless the
@@ -444,7 +427,9 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
   elseif (GHSMULTI)
     set(_boost_COMPILER "-ghs")
   elseif("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC")
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10)
+      set(_boost_COMPILER "-vc150")
+    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
       set(_boost_COMPILER "-vc140")
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18)
       set(_boost_COMPILER "-vc120")
@@ -742,6 +727,21 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
     set(_Boost_THREAD_DEPENDENCIES chrono system date_time atomic)
     set(_Boost_WAVE_DEPENDENCIES filesystem system serialization thread chrono date_time atomic)
     set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
+  elseif(NOT Boost_VERSION VERSION_LESS 106200 AND Boost_VERSION VERSION_LESS 106300)
+    set(_Boost_CHRONO_DEPENDENCIES system)
+    set(_Boost_CONTEXT_DEPENDENCIES thread chrono system date_time)
+    set(_Boost_COROUTINE_DEPENDENCIES context system)
+    set(_Boost_FIBER_DEPENDENCIES context thread chrono system date_time)
+    set(_Boost_FILESYSTEM_DEPENDENCIES system)
+    set(_Boost_IOSTREAMS_DEPENDENCIES regex)
+    set(_Boost_LOG_DEPENDENCIES date_time log_setup system filesystem thread regex chrono atomic)
+    set(_Boost_MATH_DEPENDENCIES math_c99 math_c99f math_c99l math_tr1 math_tr1f math_tr1l atomic)
+    set(_Boost_MPI_DEPENDENCIES serialization)
+    set(_Boost_MPI_PYTHON_DEPENDENCIES python mpi serialization)
+    set(_Boost_RANDOM_DEPENDENCIES system)
+    set(_Boost_THREAD_DEPENDENCIES chrono system date_time atomic)
+    set(_Boost_WAVE_DEPENDENCIES filesystem system serialization thread chrono date_time atomic)
+    set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
   else()
     message(WARNING "Imported targets not available for Boost version ${Boost_VERSION}")
     set(_Boost_IMPORTED_TARGETS FALSE)
@@ -777,6 +777,7 @@ function(_Boost_COMPONENT_HEADERS component _hdrs)
   set(_Boost_COROUTINE_HEADERS           "boost/coroutine/all.hpp")
   set(_Boost_EXCEPTION_HEADERS           "boost/exception/exception.hpp")
   set(_Boost_DATE_TIME_HEADERS           "boost/date_time/date.hpp")
+  set(_Boost_FIBER_HEADERS               "boost/fiber/all.hpp")
   set(_Boost_FILESYSTEM_HEADERS          "boost/filesystem/path.hpp")
   set(_Boost_GRAPH_HEADERS               "boost/graph/adjacency_list.hpp")
   set(_Boost_GRAPH_PARALLEL_HEADERS      "boost/graph/adjacency_list.hpp")
@@ -808,6 +809,10 @@ function(_Boost_COMPONENT_HEADERS component _hdrs)
   set(_Boost_UNIT_TEST_FRAMEWORK_HEADERS "boost/test/framework.hpp")
   set(_Boost_WAVE_HEADERS                "boost/wave.hpp")
   set(_Boost_WSERIALIZATION_HEADERS      "boost/archive/text_wiarchive.hpp")
+  if(WIN32)
+    set(_Boost_BZIP2_HEADERS             "boost/iostreams/filter/bzip2.hpp")
+    set(_Boost_ZLIB_HEADERS              "boost/iostreams/filter/zlib.hpp")
+  endif()
 
   string(TOUPPER ${component} uppercomponent)
   set(${_hdrs} ${_Boost_${uppercomponent}_HEADERS} PARENT_SCOPE)
@@ -879,7 +884,9 @@ macro(_Boost_UPDATE_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS componentlibvar base
     else()
       set(_arch_suffix 32)
     endif()
-    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
+    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10)
+      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-15.0)
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
       list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-14.0)
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18)
       list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-12.0)
@@ -941,7 +948,7 @@ else()
   # _Boost_COMPONENT_HEADERS.  See the instructions at the top of
   # _Boost_COMPONENT_DEPENDENCIES.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
-    "1.61.0" "1.61" "1.60.0" "1.60"
+    "1.62.0" "1.62" "1.61.0" "1.61" "1.60.0" "1.60"
     "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57" "1.56.0" "1.56" "1.55.0" "1.55"
     "1.54.0" "1.54" "1.53.0" "1.53" "1.52.0" "1.52" "1.51.0" "1.51"
     "1.50.0" "1.50" "1.49.0" "1.49" "1.48.0" "1.48" "1.47.0" "1.47" "1.46.1"
@@ -1177,8 +1184,8 @@ if(Boost_INCLUDE_DIR)
   math(EXPR Boost_MINOR_VERSION "${Boost_VERSION} / 100 % 1000")
   math(EXPR Boost_SUBMINOR_VERSION "${Boost_VERSION} % 100")
 
-  set(Boost_ERROR_REASON
-    "${Boost_ERROR_REASON}Boost version: ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}\nBoost include path: ${Boost_INCLUDE_DIR}")
+  string(APPEND Boost_ERROR_REASON
+    "Boost version: ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}\nBoost include path: ${Boost_INCLUDE_DIR}")
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                    "version.hpp reveals boost "
@@ -1200,16 +1207,16 @@ if(Boost_INCLUDE_DIR)
     endif()
     if(NOT Boost_FOUND)
       # State that we found a version of Boost that is too new or too old.
-      set(Boost_ERROR_REASON
-        "${Boost_ERROR_REASON}\nDetected version of Boost is too ${_Boost_VERSION_AGE}. Requested version was ${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}")
+      string(APPEND Boost_ERROR_REASON
+        "\nDetected version of Boost is too ${_Boost_VERSION_AGE}. Requested version was ${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}")
       if (Boost_FIND_VERSION_PATCH)
-        set(Boost_ERROR_REASON
-          "${Boost_ERROR_REASON}.${Boost_FIND_VERSION_PATCH}")
+        string(APPEND Boost_ERROR_REASON
+          ".${Boost_FIND_VERSION_PATCH}")
       endif ()
       if (NOT Boost_FIND_VERSION_EXACT)
-        set(Boost_ERROR_REASON "${Boost_ERROR_REASON} (or newer)")
+        string(APPEND Boost_ERROR_REASON " (or newer)")
       endif ()
-      set(Boost_ERROR_REASON "${Boost_ERROR_REASON}.")
+      string(APPEND Boost_ERROR_REASON ".")
     endif ()
   else()
     # Caller will accept any Boost version.
@@ -1217,8 +1224,8 @@ if(Boost_INCLUDE_DIR)
   endif()
 else()
   set(Boost_FOUND 0)
-  set(Boost_ERROR_REASON
-    "${Boost_ERROR_REASON}Unable to find the Boost header files. Please set BOOST_ROOT to the root directory containing Boost or BOOST_INCLUDEDIR to the directory containing Boost's headers.")
+  string(APPEND Boost_ERROR_REASON
+    "Unable to find the Boost header files. Please set BOOST_ROOT to the root directory containing Boost or BOOST_INCLUDEDIR to the directory containing Boost's headers.")
 endif()
 
 # ------------------------------------------------------------------------
@@ -1298,25 +1305,25 @@ if(WIN32 AND Boost_USE_DEBUG_RUNTIME)
   if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC"
           OR "${CMAKE_CXX_COMPILER}" MATCHES "icl"
           OR "${CMAKE_CXX_COMPILER}" MATCHES "icpc")
-    set(_boost_DEBUG_ABI_TAG "${_boost_DEBUG_ABI_TAG}g")
+    string(APPEND _boost_DEBUG_ABI_TAG "g")
   endif()
 endif()
 #  y        using special debug build of python
 if(Boost_USE_DEBUG_PYTHON)
-  set(_boost_DEBUG_ABI_TAG "${_boost_DEBUG_ABI_TAG}y")
+  string(APPEND _boost_DEBUG_ABI_TAG "y")
 endif()
 #  d        using a debug version of your code
-set(_boost_DEBUG_ABI_TAG "${_boost_DEBUG_ABI_TAG}d")
+string(APPEND _boost_DEBUG_ABI_TAG "d")
 #  p        using the STLport standard library rather than the
 #           default one supplied with your compiler
 if(Boost_USE_STLPORT)
-  set( _boost_RELEASE_ABI_TAG "${_boost_RELEASE_ABI_TAG}p")
-  set( _boost_DEBUG_ABI_TAG   "${_boost_DEBUG_ABI_TAG}p")
+  string(APPEND _boost_RELEASE_ABI_TAG "p")
+  string(APPEND _boost_DEBUG_ABI_TAG "p")
 endif()
 #  n        using the STLport deprecated "native iostreams" feature
 if(Boost_USE_STLPORT_DEPRECATED_NATIVE_IOSTREAMS)
-  set( _boost_RELEASE_ABI_TAG "${_boost_RELEASE_ABI_TAG}n")
-  set( _boost_DEBUG_ABI_TAG   "${_boost_DEBUG_ABI_TAG}n")
+  string(APPEND _boost_RELEASE_ABI_TAG "n")
+  string(APPEND _boost_DEBUG_ABI_TAG "n")
 endif()
 
 if(Boost_DEBUG)
@@ -1387,9 +1394,9 @@ endif()
 if( Boost_USE_STATIC_LIBS )
   set( _boost_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
   if(WIN32)
-    set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    list(INSERT CMAKE_FIND_LIBRARY_SUFFIXES 0 .lib .a)
   else()
-    set(CMAKE_FIND_LIBRARY_SUFFIXES .a )
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
   endif()
 endif()
 
@@ -1415,7 +1422,7 @@ endif()
 set(_boost_STATIC_RUNTIME_WORKAROUND false)
 if(WIN32 AND Boost_USE_STATIC_LIBS)
   if(NOT DEFINED Boost_USE_STATIC_RUNTIME)
-    set(_boost_STATIC_RUNTIME_WORKAROUND true)
+    set(_boost_STATIC_RUNTIME_WORKAROUND TRUE)
   endif()
 endif()
 
@@ -1636,26 +1643,26 @@ if(Boost_FOUND)
     set(Boost_FOUND 0)
     # We were unable to find some libraries, so generate a sensible
     # error message that lists the libraries we were unable to find.
-    set(Boost_ERROR_REASON
-      "${Boost_ERROR_REASON}\nCould not find the following")
+    string(APPEND Boost_ERROR_REASON
+      "\nCould not find the following")
     if(Boost_USE_STATIC_LIBS)
-      set(Boost_ERROR_REASON "${Boost_ERROR_REASON} static")
+      string(APPEND Boost_ERROR_REASON " static")
     endif()
-    set(Boost_ERROR_REASON
-      "${Boost_ERROR_REASON} Boost libraries:\n")
+    string(APPEND Boost_ERROR_REASON
+      " Boost libraries:\n")
     foreach(COMPONENT ${_Boost_MISSING_COMPONENTS})
-      set(Boost_ERROR_REASON
-        "${Boost_ERROR_REASON}        ${Boost_NAMESPACE}_${COMPONENT}\n")
+      string(APPEND Boost_ERROR_REASON
+        "        ${Boost_NAMESPACE}_${COMPONENT}\n")
     endforeach()
 
     list(LENGTH Boost_FIND_COMPONENTS Boost_NUM_COMPONENTS_WANTED)
     list(LENGTH _Boost_MISSING_COMPONENTS Boost_NUM_MISSING_COMPONENTS)
     if (${Boost_NUM_COMPONENTS_WANTED} EQUAL ${Boost_NUM_MISSING_COMPONENTS})
-      set(Boost_ERROR_REASON
-        "${Boost_ERROR_REASON}No Boost libraries were found. You may need to set BOOST_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
+      string(APPEND Boost_ERROR_REASON
+        "No Boost libraries were found. You may need to set BOOST_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
     else ()
-      set(Boost_ERROR_REASON
-        "${Boost_ERROR_REASON}Some (but not all) of the required Boost libraries were found. You may need to install these additional Boost libraries. Alternatively, set BOOST_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
+      string(APPEND Boost_ERROR_REASON
+        "Some (but not all) of the required Boost libraries were found. You may need to install these additional Boost libraries. Alternatively, set BOOST_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
     endif ()
   endif ()
 
@@ -1678,13 +1685,11 @@ if(Boost_FOUND)
     endif()
 
     if(EXISTS "${_boost_LIB_DIR}/lib")
-      set(_boost_LIB_DIR ${_boost_LIB_DIR}/lib)
+      string(APPEND _boost_LIB_DIR /lib)
+    elseif(EXISTS "${_boost_LIB_DIR}/stage/lib")
+      string(APPEND _boost_LIB_DIR "/stage/lib")
     else()
-      if(EXISTS "${_boost_LIB_DIR}/stage/lib")
-        set(_boost_LIB_DIR ${_boost_LIB_DIR}/stage/lib)
-      else()
-        set(_boost_LIB_DIR "")
-      endif()
+      set(_boost_LIB_DIR "")
     endif()
 
     if(_boost_LIB_DIR AND EXISTS "${_boost_LIB_DIR}")
@@ -1734,19 +1739,19 @@ if(Boost_FOUND)
             IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
             IMPORTED_LOCATION "${Boost_${UPPERCOMPONENT}_LIBRARY}")
         endif()
-        if(EXISTS "${Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG}")
-          set_property(TARGET Boost::${COMPONENT} APPEND PROPERTY
-            IMPORTED_CONFIGURATIONS DEBUG)
-          set_target_properties(Boost::${COMPONENT} PROPERTIES
-            IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
-            IMPORTED_LOCATION_DEBUG "${Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG}")
-        endif()
         if(EXISTS "${Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE}")
           set_property(TARGET Boost::${COMPONENT} APPEND PROPERTY
             IMPORTED_CONFIGURATIONS RELEASE)
           set_target_properties(Boost::${COMPONENT} PROPERTIES
             IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
             IMPORTED_LOCATION_RELEASE "${Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE}")
+        endif()
+        if(EXISTS "${Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG}")
+          set_property(TARGET Boost::${COMPONENT} APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS DEBUG)
+          set_target_properties(Boost::${COMPONENT} PROPERTIES
+            IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+            IMPORTED_LOCATION_DEBUG "${Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG}")
         endif()
         if(_Boost_${UPPERCOMPONENT}_DEPENDENCIES)
           unset(_Boost_${UPPERCOMPONENT}_TARGET_DEPENDENCIES)

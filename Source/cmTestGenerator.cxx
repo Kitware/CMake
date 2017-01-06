@@ -1,19 +1,18 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTestGenerator.h"
 
+#include <map>
+#include <ostream>
+#include <utility>
+
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmProperty.h"
+#include "cmPropertyMap.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
 
@@ -24,7 +23,7 @@ cmTestGenerator::cmTestGenerator(
 {
   this->ActionsPerConfig = !test->GetOldStyle();
   this->TestGenerated = false;
-  this->LG = 0;
+  this->LG = CM_NULLPTR;
 }
 
 cmTestGenerator::~cmTestGenerator()
@@ -77,13 +76,13 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   // be translated.
   std::string exe = command[0];
   cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(exe);
-  if (target && target->GetType() == cmState::EXECUTABLE) {
+  if (target && target->GetType() == cmStateEnums::EXECUTABLE) {
     // Use the target file on disk.
     exe = target->GetFullPath(config);
 
     // Prepend with the emulator when cross compiling if required.
     const char* emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
-    if (emulator != 0) {
+    if (emulator != CM_NULLPTR) {
       std::vector<std::string> emulatorWithArgs;
       cmSystemTools::ExpandListArgument(emulator, emulatorWithArgs);
       std::string emulatorExe(emulatorWithArgs[0]);

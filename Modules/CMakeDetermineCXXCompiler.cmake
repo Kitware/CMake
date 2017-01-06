@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2002-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # determine the compiler to use for C++ programs
 # NOTE, a generator may set CMAKE_CXX_COMPILER before
@@ -97,7 +87,7 @@ if(NOT CMAKE_CXX_COMPILER_ID_RUN)
     CMAKE_CXX_COMPILER_ID_PLATFORM_CONTENT)
 
   # The IAR compiler produces weird output.
-  # See https://cmake.org/Bug/view.php?id=10176#c19598
+  # See https://gitlab.kitware.com/cmake/cmake/issues/10176#note_153591
   list(APPEND CMAKE_CXX_COMPILER_ID_VENDORS IAR)
   set(CMAKE_CXX_COMPILER_ID_VENDOR_FLAGS_IAR )
   set(CMAKE_CXX_COMPILER_ID_VENDOR_REGEX_IAR "IAR .+ Compiler")
@@ -112,8 +102,6 @@ if(NOT CMAKE_CXX_COMPILER_ID_RUN)
 
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(CXX CXXFLAGS CMakeCXXCompilerId.cpp)
-
-  unset(CMAKE_CXX_COMPILER_ID_PLATFORM_CONTENT)
 
   # Set old compiler and platform id variables.
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

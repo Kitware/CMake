@@ -1,18 +1,9 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-#include "windows.h" // this must be first to define GetCurrentDirectory
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio71Generator.h"
 
+#include "cmDocumentationEntry.h"
+#include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmake.h"
@@ -167,6 +158,10 @@ void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
     ext = ".vfproj";
     project = "Project(\"{6989167D-11E4-40FE-8C1A-2192A86A7E90}\") = \"";
   }
+  if (this->TargetIsCSharpOnly(t)) {
+    ext = ".csproj";
+    project = "Project(\"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}\") = \"";
+  }
   const char* targetExt = t->GetProperty("GENERATOR_FILE_NAME_EXT");
   if (targetExt) {
     ext = targetExt;
@@ -254,7 +249,7 @@ void cmGlobalVisualStudio71Generator::WriteExternalProject(
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
-  std::ostream& fout, const std::string& name, cmState::TargetType,
+  std::ostream& fout, const std::string& name, cmStateEnums::TargetType,
   std::vector<std::string> const& configs,
   const std::set<std::string>& configsPartOfDefaultBuild,
   std::string const& platformMapping)

@@ -7,3 +7,8 @@ LibWidget::LibWidget(QWidget* parent)
 {
   ui->setupUi(this);
 }
+
+LibWidget::~LibWidget()
+{
+  delete ui;
+}

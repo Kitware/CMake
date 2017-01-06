@@ -1,15 +1,6 @@
 %{
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2015 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 /*-------------------------------------------------------------------------
   Portions of this source have been derived from makedepf90 version 2.8.8,
 
@@ -52,12 +43,6 @@ static void cmFortran_yyerror(yyscan_t yyscanner, const char* message)
   cmFortranParser_Error(parser, message);
 }
 
-static bool cmFortranParserIsKeyword(const char* word,
-                                            const char* keyword)
-{
-  return cmsysString_strcasecmp(word, keyword) == 0;
-}
-
 /* Disable some warnings in the generated code.  */
 #ifdef _MSC_VER
 # pragma warning (disable: 4102) /* Unused goto label.  */
@@ -91,11 +76,16 @@ static bool cmFortranParserIsKeyword(const char* word,
 %token CPP_IFDEF CPP_IFNDEF CPP_IF CPP_ELSE CPP_ELIF CPP_ENDIF
 %token F90PPR_IFDEF F90PPR_IFNDEF F90PPR_IF
 %token F90PPR_ELSE F90PPR_ELIF F90PPR_ENDIF
-%token COMMA DCOLON
-%token <string> CPP_TOENDL
+%token COMMA COLON DCOLON LPAREN RPAREN
 %token <number> UNTERMINATED_STRING
 %token <string> STRING WORD
 %token <string> CPP_INCLUDE_ANGLE
+%token END
+%token INCLUDE
+%token INTERFACE
+%token MODULE
+%token SUBMODULE
+%token USE
 
 /*-------------------------------------------------------------------------*/
 /* grammar */
@@ -103,161 +93,118 @@ static bool cmFortranParserIsKeyword(const char* word,
 
 code: /* empty */ | code stmt;
 
-stmt: keyword_stmt | assignment_stmt;
-
-assignment_stmt: WORD ASSIGNMENT_OP other EOSTMT    /* Ignore */
-    {
-    free($1);
-    }
-
-keyword_stmt:
-  WORD EOSTMT
-    {
-    if (cmFortranParserIsKeyword($1, "interface"))
-      {
-      cmFortranParser* parser =
-        cmFortran_yyget_extra(yyscanner);
-      cmFortranParser_SetInInterface(parser, true);
-      }
-    free($1);
-    }
-| WORD WORD other EOSTMT
-    {
-    if (cmFortranParserIsKeyword($1, "use"))
-      {
-      cmFortranParser* parser =
-        cmFortran_yyget_extra(yyscanner);
-      cmFortranParser_RuleUse(parser, $2);
-      }
-    else if (cmFortranParserIsKeyword($1, "module"))
-      {
-      cmFortranParser* parser =
-        cmFortran_yyget_extra(yyscanner);
-      cmFortranParser_RuleModule(parser, $2);
-      }
-    else if (cmFortranParserIsKeyword($1, "interface"))
-      {
-      cmFortranParser* parser =
-        cmFortran_yyget_extra(yyscanner);
-      cmFortranParser_SetInInterface(parser, true);
-      }
-    else if (cmFortranParserIsKeyword($2, "interface") &&
-             cmFortranParserIsKeyword($1, "end"))
-      {
-      cmFortranParser* parser =
-        cmFortran_yyget_extra(yyscanner);
-      cmFortranParser_SetInInterface(parser, false);
-      }
-    free($1);
+stmt:
+  INTERFACE EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_SetInInterface(parser, true);
+  }
+| USE WORD other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleUse(parser, $2);
     free($2);
+  }
+| MODULE WORD other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    if (cmsysString_strcasecmp($2, "function") != 0 &&
+        cmsysString_strcasecmp($2, "procedure") != 0 &&
+        cmsysString_strcasecmp($2, "subroutine") != 0) {
+      cmFortranParser_RuleModule(parser, $2);
     }
-| WORD DCOLON WORD other EOSTMT
-    {
-    if (cmFortranParserIsKeyword($1, "use"))
-      {
-      cmFortranParser* parser =
-        cmFortran_yyget_extra(yyscanner);
-      cmFortranParser_RuleUse(parser, $3);
-      }
-    free($1);
-    free($3);
-    }
-| WORD COMMA WORD DCOLON WORD other EOSTMT
-    {
-    if (cmFortranParserIsKeyword($1, "use") &&
-        cmFortranParserIsKeyword($3, "non_intrinsic") )
-      {
-      cmFortranParser* parser =
-        cmFortran_yyget_extra(yyscanner);
-      cmFortranParser_RuleUse(parser, $5);
-      }
-    free($1);
+    free($2);
+  }
+| SUBMODULE LPAREN WORD RPAREN WORD other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleUse(parser, $3);
     free($3);
     free($5);
-    }
-| WORD STRING other EOSTMT /* Ignore */
-    {
-    if (cmFortranParserIsKeyword($1, "include"))
-      {
-      cmFortranParser* parser =
-        cmFortran_yyget_extra(yyscanner);
-      cmFortranParser_RuleInclude(parser, $2);
-      }
-    free($1);
+  }
+| SUBMODULE LPAREN WORD COLON WORD RPAREN WORD other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleUse(parser, $3);
+    free($3);
+    free($5);
+    free($7);
+  }
+| INTERFACE WORD other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_SetInInterface(parser, true);
     free($2);
+  }
+| END INTERFACE other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_SetInInterface(parser, false);
+  }
+| USE DCOLON WORD other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleUse(parser, $3);
+    free($3);
+  }
+| USE COMMA WORD DCOLON WORD other EOSTMT {
+    if (cmsysString_strcasecmp($3, "non_intrinsic") == 0) {
+      cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+      cmFortranParser_RuleUse(parser, $5);
     }
-| CPP_LINE_DIRECTIVE STRING other EOSTMT
-    {
-    cmFortranParser* parser =
-      cmFortran_yyget_extra(yyscanner);
-    cmFortranParser_RuleLineDirective(parser, $2);
-    free($2);
-    }
-| CPP_INCLUDE_ANGLE other EOSTMT
-    {
-    cmFortranParser* parser =
-      cmFortran_yyget_extra(yyscanner);
-    cmFortranParser_RuleInclude(parser, $1);
-    free($1);
-    }
-| include STRING other EOSTMT
-    {
-    cmFortranParser* parser =
-      cmFortran_yyget_extra(yyscanner);
+    free($3);
+    free($5);
+  }
+| INCLUDE STRING other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleInclude(parser, $2);
     free($2);
-    }
-| define WORD other EOSTMT
-    {
+  }
+| CPP_LINE_DIRECTIVE STRING other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleLineDirective(parser, $2);
+    free($2);
+  }
+| CPP_INCLUDE_ANGLE other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleInclude(parser, $1);
+    free($1);
+  }
+| include STRING other EOSTMT {
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleInclude(parser, $2);
+    free($2);
+  }
+| define WORD other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleDefine(parser, $2);
     free($2);
-    }
-| undef WORD other EOSTMT
-    {
+  }
+| undef WORD other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleUndef(parser, $2);
     free($2);
-    }
-| ifdef WORD other EOSTMT
-    {
+  }
+| ifdef WORD other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleIfdef(parser, $2);
     free($2);
-    }
-| ifndef WORD other EOSTMT
-    {
+  }
+| ifndef WORD other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleIfndef(parser, $2);
     free($2);
-    }
-| if other EOSTMT
-    {
+  }
+| if other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleIf(parser);
-    }
-| elif other EOSTMT
-    {
+  }
+| elif other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleElif(parser);
-    }
-| else other EOSTMT
-    {
+  }
+| else other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleElse(parser);
-    }
-| endif other EOSTMT
-    {
+  }
+| endif other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleEndif(parser);
-    }
-| WORD GARBAGE other EOSTMT             /* Ignore */
-    {
-    free($1);
-    }
-| GARBAGE other EOSTMT
+  }
 | EOSTMT
-| error
+| error EOSTMT /* tolerate unknown statements until their end */
 ;
 
 
@@ -275,10 +222,19 @@ other: /* empty */ | other misc_code ;
 
 misc_code:
   WORD                { free ($1); }
+| END
+| INCLUDE
+| INTERFACE
+| MODULE
+| SUBMODULE
+| USE
 | STRING              { free ($1); }
 | GARBAGE
 | ASSIGNMENT_OP
+| COLON
 | DCOLON
+| LPAREN
+| RPAREN
 | COMMA
 | UNTERMINATED_STRING
 ;

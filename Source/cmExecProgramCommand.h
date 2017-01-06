@@ -1,18 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmExecProgramCommand_h
 #define cmExecProgramCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+#include "cmProcessOutput.h"
+
+class cmExecutionStatus;
 
 /** \class cmExecProgramCommand
  * \brief Command that adds a target to the build system.
@@ -24,33 +22,34 @@
 class cmExecProgramCommand : public cmCommand
 {
 public:
+  typedef cmProcessOutput::Encoding Encoding;
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() { return new cmExecProgramCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmExecProgramCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "exec_program"; }
+  std::string GetName() const CM_OVERRIDE { return "exec_program"; }
 
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() const { return true; }
-
-  cmTypeMacro(cmExecProgramCommand, cmCommand);
+  bool IsScriptable() const CM_OVERRIDE { return true; }
 
 private:
   static bool RunCommand(const char* command, std::string& output, int& retVal,
-                         const char* directory = 0, bool verbose = true);
+                         const char* directory = CM_NULLPTR,
+                         bool verbose = true,
+                         Encoding encoding = cmProcessOutput::Auto);
 };
 
 #endif

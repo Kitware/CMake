@@ -1,25 +1,21 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceFile.h"
 
+#include <sstream>
+
+#include "cmCustomCommand.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
 cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name)
   : Location(mf, name)
 {
-  this->CustomCommand = 0;
+  this->CustomCommand = CM_NULLPTR;
   this->FindFullPathFailed = false;
   this->IsUiFile = (".ui" == cmSystemTools::GetFilenameLastExtension(
                                this->Location.GetName()));
@@ -27,7 +23,7 @@ cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name)
 
 cmSourceFile::~cmSourceFile()
 {
-  this->SetCustomCommand(0);
+  this->SetCustomCommand(CM_NULLPTR);
 }
 
 std::string const& cmSourceFile::GetExtension() const
@@ -135,7 +131,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
 
   // The file is not generated.  It must exist on disk.
   cmMakefile const* mf = this->Location.GetMakefile();
-  const char* tryDirs[3] = { 0, 0, 0 };
+  const char* tryDirs[3] = { CM_NULLPTR, CM_NULLPTR, CM_NULLPTR };
   if (this->Location.DirectoryIsAmbiguous()) {
     tryDirs[0] = mf->GetCurrentSourceDirectory();
     tryDirs[1] = mf->GetCurrentBinaryDirectory();
@@ -294,10 +290,9 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
   // Check for computed properties.
   if (prop == "LOCATION") {
     if (this->FullPath.empty()) {
-      return 0;
-    } else {
-      return this->FullPath.c_str();
+      return CM_NULLPTR;
     }
+    return this->FullPath.c_str();
   }
 
   const char* retVal = this->Properties.GetPropertyValue(prop);

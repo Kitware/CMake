@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindwxWidgets
 # -------------
@@ -103,20 +106,6 @@
 #    include(${wxWidgets_USE_FILE})
 #    # and for each of your dependent executable/library targets:
 #    target_link_libraries(<YourTarget> ${wxWidgets_LIBRARIES})
-
-#=============================================================================
-# Copyright 2004-2009 Kitware, Inc.
-# Copyright 2007-2009 Miguel A. Figueroa-Villanueva <miguelf at ieee dot org>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 #
 # FIXME: check this and provide a correct sample usage...
@@ -452,6 +441,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       D:/
       ENV ProgramFiles
     PATH_SUFFIXES
+      wxWidgets-3.1.0
       wxWidgets-3.0.2
       wxWidgets-3.0.1
       wxWidgets-3.0.0
@@ -501,12 +491,27 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     # Select one default tree inside the already determined wx tree.
     # Prefer static/shared order usually consistent with build
     # settings.
+    set(_WX_TOOL "")
+    set(_WX_TOOLVER "")
+    set(_WX_ARCH "")
     if(MINGW)
-      set(WX_LIB_DIR_PREFIX gcc)
-    elseif(CMAKE_CL_64)
-      set(WX_LIB_DIR_PREFIX vc_x64)
-    else()
-      set(WX_LIB_DIR_PREFIX vc)
+      set(_WX_TOOL gcc)
+    elseif(MSVC)
+      set(_WX_TOOL vc)
+      if(MSVC14)
+        set(_WX_TOOLVER 140)
+      elseif(MSVC12)
+        set(_WX_TOOLVER 120)
+      elseif(MSVC11)
+        set(_WX_TOOLVER 110)
+      elseif(MSVC10)
+        set(_WX_TOOLVER 100)
+      elseif(MSVC90)
+        set(_WX_TOOLVER 90)
+      endif()
+      if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(_WX_ARCH _x64)
+      endif()
     endif()
     if(BUILD_SHARED_LIBS)
       find_path(wxWidgets_LIB_DIR
@@ -520,8 +525,10 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
           mswunivu/wx/setup.h
           mswunivud/wx/setup.h
         PATHS
-        ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_dll   # prefer shared
-        ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_lib
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}${_WX_ARCH}_dll   # prefer shared
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_ARCH}_dll                 # prefer shared
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}${_WX_ARCH}_lib
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_ARCH}_lib
         DOC "Path to wxWidgets libraries"
         NO_DEFAULT_PATH
         )
@@ -537,12 +544,17 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
           mswunivu/wx/setup.h
           mswunivud/wx/setup.h
         PATHS
-        ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_lib   # prefer static
-        ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_dll
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}${_WX_ARCH}_lib   # prefer static
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_ARCH}_lib                 # prefer static
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}${_WX_ARCH}_dll
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_ARCH}_dll
         DOC "Path to wxWidgets libraries"
         NO_DEFAULT_PATH
         )
     endif()
+    unset(_WX_TOOL)
+    unset(_WX_TOOLVER)
+    unset(_WX_ARCH)
 
     # If wxWidgets_LIB_DIR changed, clear all libraries.
     if(NOT WX_LIB_DIR STREQUAL wxWidgets_LIB_DIR)
@@ -854,7 +866,7 @@ else()
           if(_retv EQUAL 0)
             file(TO_CMAKE_PATH ${_native_path} _native_path)
             DBG_MSG_V("Path ${_path} converted to ${_native_path}")
-            set(_tmp_path "${_tmp_path} ${_native_path}")
+            string(APPEND _tmp_path " ${_native_path}")
           endif()
         endforeach()
         DBG_MSG("Setting wxWidgets_INCLUDE_DIRS = ${_tmp_path}")

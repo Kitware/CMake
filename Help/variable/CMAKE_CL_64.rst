@@ -1,6 +1,7 @@
 CMAKE_CL_64
 -----------
 
-Using the 64-bit compiler from Microsoft
+Discouraged.  Use :variable:`CMAKE_SIZEOF_VOID_P` instead.
 
-Set to ``true`` when using the 64-bit ``cl`` compiler from Microsoft.
+Set to a true value when using a Microsoft Visual Studio ``cl`` compiler that
+*targets* a 64-bit architecture.

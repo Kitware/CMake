@@ -1,32 +1,26 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2012 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXSourceWriter.h"
 
 #include <CPack/cmCPackGenerator.h>
+
+#include <cmUuid.h>
 
 #include <windows.h>
 
 cmWIXSourceWriter::cmWIXSourceWriter(cmCPackLog* logger,
                                      std::string const& filename,
-                                     bool isIncludeFile)
+                                     GuidType componentGuidType,
+                                     RootElementType rootElementType)
   : Logger(logger)
   , File(filename.c_str())
   , State(DEFAULT)
   , SourceFilename(filename)
+  , ComponentGuidType(componentGuidType)
 {
   WriteXMLDeclaration();
 
-  if (isIncludeFile) {
+  if (rootElementType == INCLUDE_ELEMENT_ROOT) {
     BeginElement("Include");
   } else {
     BeginElement("Wix");
@@ -123,9 +117,7 @@ void cmWIXSourceWriter::AddProcessingInstruction(std::string const& target,
 void cmWIXSourceWriter::AddAttribute(std::string const& key,
                                      std::string const& value)
 {
-  std::string utf8 = CMakeEncodingToUtf8(value);
-
-  File << " " << key << "=\"" << EscapeAttributeValue(utf8) << '"';
+  File << " " << key << "=\"" << EscapeAttributeValue(value) << '"';
 }
 
 void cmWIXSourceWriter::AddAttributeUnlessEmpty(std::string const& key,
@@ -136,41 +128,17 @@ void cmWIXSourceWriter::AddAttributeUnlessEmpty(std::string const& key,
   }
 }
 
-std::string cmWIXSourceWriter::CMakeEncodingToUtf8(std::string const& value)
+std::string cmWIXSourceWriter::CreateGuidFromComponentId(
+  std::string const& componentId)
 {
-#ifdef CMAKE_ENCODING_UTF8
-  return value;
-#else
-  if (value.empty()) {
-    return std::string();
+  std::string guid = "*";
+  if (this->ComponentGuidType == CMAKE_GENERATED_GUID) {
+    std::string md5 = cmSystemTools::ComputeStringMD5(componentId);
+    cmUuid uuid;
+    std::vector<unsigned char> ns;
+    guid = uuid.FromMd5(ns, md5);
   }
-
-  int characterCount = MultiByteToWideChar(
-    CP_ACP, 0, value.c_str(), static_cast<int>(value.size()), 0, 0);
-
-  if (characterCount == 0) {
-    return std::string();
-  }
-
-  std::vector<wchar_t> utf16(characterCount);
-
-  MultiByteToWideChar(CP_ACP, 0, value.c_str(), static_cast<int>(value.size()),
-                      &utf16[0], static_cast<int>(utf16.size()));
-
-  int utf8ByteCount = WideCharToMultiByte(
-    CP_UTF8, 0, &utf16[0], static_cast<int>(utf16.size()), 0, 0, 0, 0);
-
-  if (utf8ByteCount == 0) {
-    return std::string();
-  }
-
-  std::vector<char> utf8(utf8ByteCount);
-
-  WideCharToMultiByte(CP_UTF8, 0, &utf16[0], static_cast<int>(utf16.size()),
-                      &utf8[0], static_cast<int>(utf8.size()), 0, 0);
-
-  return std::string(&utf8[0], utf8.size());
-#endif
+  return guid;
 }
 
 void cmWIXSourceWriter::WriteXMLDeclaration()

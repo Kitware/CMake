@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CMakeGraphVizOptions
 # --------------------
@@ -10,8 +13,8 @@
 # CMake
 # can generate graphviz files, showing the dependencies between the
 # targets in a project and also external libraries which are linked
-# against.  When CMake is run with the --graphviz=foo option, it will
-# produce
+# against.  When CMake is run with the --graphviz=foo.dot option, it will
+# produce:
 #
 # * a foo.dot file showing all dependencies in the project
 # * a foo.dot.<target> file for each target, file showing on which other targets the respective target depends
@@ -26,10 +29,17 @@
 #
 # .. variable:: GRAPHVIZ_GRAPH_TYPE
 #
-#  The graph type
+#  The graph type.
 #
 #  * Mandatory : NO
 #  * Default   : "digraph"
+#
+#  Valid graph types are:
+#
+#  * "graph" : Nodes are joined with lines
+#  * "digraph" : Nodes are joined with arrows showing direction
+#  * "strict graph" : Like "graph" but max one line between each node
+#  * "strict digraph" : Like "graph" but max one line between each node in each direction
 #
 # .. variable:: GRAPHVIZ_GRAPH_NAME
 #
@@ -107,17 +117,3 @@
 #
 #  * Mandatory : NO
 #  * Default   : TRUE
-
-#=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
-# Copyright 2013 Alexander Neundorf <neundorf@kde.org>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)

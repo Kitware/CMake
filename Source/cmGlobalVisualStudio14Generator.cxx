@@ -1,19 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2014 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio14Generator.h"
 
 #include "cmAlgorithms.h"
+#include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
+#include "cmVS140CLFlagTable.h"
+#include "cmVS140CSharpFlagTable.h"
+#include "cmVS14LibFlagTable.h"
+#include "cmVS14LinkFlagTable.h"
+#include "cmVS14MASMFlagTable.h"
+#include "cmVS14RCFlagTable.h"
 
 static const char vs14generatorName[] = "Visual Studio 14 2015";
 
@@ -36,8 +34,8 @@ class cmGlobalVisualStudio14Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                                   cmake* cm) const
+  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
+                                           cmake* cm) const CM_OVERRIDE
   {
     std::string genName;
     const char* p = cmVS14GenName(name, genName);
@@ -59,21 +57,22 @@ public:
     return 0;
   }
 
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const
+  void GetDocumentation(cmDocumentationEntry& entry) const CM_OVERRIDE
   {
     entry.Name = std::string(vs14generatorName) + " [arch]";
     entry.Brief = "Generates Visual Studio 2015 project files.  "
                   "Optional [arch] can be \"Win64\" or \"ARM\".";
   }
 
-  virtual void GetGenerators(std::vector<std::string>& names) const
+  void GetGenerators(std::vector<std::string>& names) const CM_OVERRIDE
   {
     names.push_back(vs14generatorName);
     names.push_back(vs14generatorName + std::string(" ARM"));
     names.push_back(vs14generatorName + std::string(" Win64"));
   }
 
-  virtual bool SupportsToolset() const { return true; }
+  bool SupportsToolset() const CM_OVERRIDE { return true; }
+  bool SupportsPlatform() const CM_OVERRIDE { return true; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio14Generator::NewFactory()
@@ -91,6 +90,12 @@ cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
     "ProductDir",
     vc14Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v140";
+  this->DefaultClFlagTable = cmVS140CLFlagTable;
+  this->DefaultCSharpFlagTable = cmVS140CSharpFlagTable;
+  this->DefaultLibFlagTable = cmVS14LibFlagTable;
+  this->DefaultLinkFlagTable = cmVS14LinkFlagTable;
+  this->DefaultMasmFlagTable = cmVS14MASMFlagTable;
+  this->DefaultRcFlagTable = cmVS14RCFlagTable;
   this->Version = VS14;
 }
 

@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindGTest
 # ---------
@@ -90,20 +93,6 @@
 #      add_executable(FooTest FooUnitTest.cc)
 #      GTEST_ADD_TESTS(FooTest "${FooTestArgs}" AUTO)
 
-#=============================================================================
-# Copyright 2009 Kitware, Inc.
-# Copyright 2009 Philip Lowman <philip@yhbt.com>
-# Copyright 2009 Daniel Blezek <blezek@gmail.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 #
 # Thanks to Daniel Blezek <blezek@gmail.com> for the GTEST_ADD_TESTS code
 
@@ -226,19 +215,19 @@ if(GTEST_FOUND)
                 IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
                 IMPORTED_LOCATION "${GTEST_LIBRARY}")
         endif()
-        if(EXISTS "${GTEST_LIBRARY_DEBUG}")
-            set_property(TARGET GTest::GTest APPEND PROPERTY
-                IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(GTest::GTest PROPERTIES
-                IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
-                IMPORTED_LOCATION_DEBUG "${GTEST_LIBRARY_DEBUG}")
-        endif()
         if(EXISTS "${GTEST_LIBRARY_RELEASE}")
             set_property(TARGET GTest::GTest APPEND PROPERTY
                 IMPORTED_CONFIGURATIONS RELEASE)
             set_target_properties(GTest::GTest PROPERTIES
                 IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
                 IMPORTED_LOCATION_RELEASE "${GTEST_LIBRARY_RELEASE}")
+        endif()
+        if(EXISTS "${GTEST_LIBRARY_DEBUG}")
+            set_property(TARGET GTest::GTest APPEND PROPERTY
+                IMPORTED_CONFIGURATIONS DEBUG)
+            set_target_properties(GTest::GTest PROPERTIES
+                IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+                IMPORTED_LOCATION_DEBUG "${GTEST_LIBRARY_DEBUG}")
         endif()
       endif()
       if(NOT TARGET GTest::Main)
@@ -250,19 +239,19 @@ if(GTEST_FOUND)
                   IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
                   IMPORTED_LOCATION "${GTEST_MAIN_LIBRARY}")
           endif()
-          if(EXISTS "${GTEST_MAIN_LIBRARY_DEBUG}")
-            set_property(TARGET GTest::Main APPEND PROPERTY
-                IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(GTest::Main PROPERTIES
-                IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
-                IMPORTED_LOCATION_DEBUG "${GTEST_MAIN_LIBRARY_DEBUG}")
-          endif()
           if(EXISTS "${GTEST_MAIN_LIBRARY_RELEASE}")
             set_property(TARGET GTest::Main APPEND PROPERTY
                 IMPORTED_CONFIGURATIONS RELEASE)
             set_target_properties(GTest::Main PROPERTIES
                 IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
                 IMPORTED_LOCATION_RELEASE "${GTEST_MAIN_LIBRARY_RELEASE}")
+          endif()
+          if(EXISTS "${GTEST_MAIN_LIBRARY_DEBUG}")
+            set_property(TARGET GTest::Main APPEND PROPERTY
+                IMPORTED_CONFIGURATIONS DEBUG)
+            set_target_properties(GTest::Main PROPERTIES
+                IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+                IMPORTED_LOCATION_DEBUG "${GTEST_MAIN_LIBRARY_DEBUG}")
           endif()
     endif()
 endif()

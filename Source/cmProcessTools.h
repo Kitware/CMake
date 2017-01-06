@@ -1,18 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmProcessTools_h
 #define cmProcessTools_h
 
-#include "cmStandardIncludes.h"
+#include "cmProcessOutput.h"
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <string.h>
+#include <string>
 
 /** \class cmProcessTools
  * \brief Helper classes for process output parsing
@@ -21,6 +17,7 @@
 class cmProcessTools
 {
 public:
+  typedef cmProcessOutput::Encoding Encoding;
   /** Abstract interface for process output parsers.  */
   class OutputParser
   {
@@ -62,7 +59,7 @@ public:
     char Separator;
     char LineEnd;
     bool IgnoreCR;
-    virtual bool ProcessChunk(const char* data, int length);
+    bool ProcessChunk(const char* data, int length) CM_OVERRIDE;
 
     /** Implement in a subclass to process one line of input.  It
         should return true only if it is interested in more data.  */
@@ -73,18 +70,19 @@ public:
   class OutputLogger : public LineParser
   {
   public:
-    OutputLogger(std::ostream& log, const char* prefix = 0)
+    OutputLogger(std::ostream& log, const char* prefix = CM_NULLPTR)
     {
       this->SetLog(&log, prefix);
     }
 
   private:
-    virtual bool ProcessLine() { return true; }
+    bool ProcessLine() CM_OVERRIDE { return true; }
   };
 
   /** Run a process and send output to given parsers.  */
   static void RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
-                         OutputParser* err = 0);
+                         OutputParser* err = CM_NULLPTR,
+                         Encoding encoding = cmProcessOutput::Auto);
 };
 
 #endif

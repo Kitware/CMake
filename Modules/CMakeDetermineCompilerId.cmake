@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # Function to compile a source file to identify the compiler.  This is
 # used internally by CMake and should not be included by user code.
@@ -111,6 +101,8 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   set(CMAKE_${lang}_SIMULATE_ID "${CMAKE_${lang}_SIMULATE_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_${lang}_SIMULATE_VERSION}" PARENT_SCOPE)
   set(CMAKE_${lang}_STANDARD_COMPUTED_DEFAULT "${CMAKE_${lang}_STANDARD_COMPUTED_DEFAULT}" PARENT_SCOPE)
+  set(CMAKE_${lang}_COMPILER_PRODUCED_OUTPUT "${COMPILER_${lang}_PRODUCED_OUTPUT}" PARENT_SCOPE)
+  set(CMAKE_${lang}_COMPILER_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
 endfunction()
 
 include(CMakeCompilerIdDetection)
@@ -145,7 +137,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags src)
   set(COMPILER_DESCRIPTION
     "Compiler: ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_COMPILER_ID_ARG1}
 Build flags: ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
-Id flags: ${testflags}
+Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
 ")
 
   # Compile the compiler identification source.
@@ -172,6 +164,10 @@ Id flags: ${testflags}
       set(v Intel)
       set(ext vfproj)
       set(id_cl ifort.exe)
+    elseif(lang STREQUAL CSharp)
+      set(v 10)
+      set(ext csproj)
+      set(id_cl csc.exe)
     elseif(NOT "${vs_version}" VERSION_LESS 10)
       set(v 10)
       set(ext vcxproj)
@@ -191,6 +187,11 @@ Id flags: ${testflags}
       endif()
     else()
       set(id_toolset "")
+    endif()
+    if(CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE)
+      set(id_PreferredToolArchitecture "<PreferredToolArchitecture>${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}</PreferredToolArchitecture>")
+    else()
+      set(id_PreferredToolArchitecture "")
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "WindowsPhone")
       set(id_system "<ApplicationType>Windows Phone</ApplicationType>")
@@ -266,6 +267,11 @@ Id flags: ${testflags}
     else()
       set(id_toolset "")
     endif()
+    if("${lang}" STREQUAL "Swift")
+      set(id_lang_version "SWIFT_VERSION = 2.3;")
+    else()
+      set(id_lang_version "")
+    endif()
     if(CMAKE_OSX_DEPLOYMENT_TARGET)
       set(id_deployment_target
         "MACOSX_DEPLOYMENT_TARGET = \"${CMAKE_OSX_DEPLOYMENT_TARGET}\";")
@@ -322,6 +328,7 @@ Id flags: ${testflags}
               ${CMAKE_${lang}_COMPILER_ID_ARG1}
               ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
               ${testflags}
+              ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
               "${src}"
       WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
       OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
@@ -400,6 +407,7 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
   # Return the files produced by the compilation.
   set(COMPILER_${lang}_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
   set(COMPILER_${lang}_PRODUCED_OUTPUT "${COMPILER_${lang}_PRODUCED_OUTPUT}" PARENT_SCOPE)
+
 endfunction()
 
 #-----------------------------------------------------------------------------
@@ -443,8 +451,12 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     set(SIMULATE_ID)
     set(SIMULATE_VERSION)
     file(STRINGS ${file}
-      CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 38 REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
+      CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 38
+      ${CMAKE_${lang}_COMPILER_ID_STRINGS_PARAMETERS}
+      REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
     set(COMPILER_ID_TWICE)
+    # In C# binaries, some strings are found more than once.
+    list(REMOVE_DUPLICATES CMAKE_${lang}_COMPILER_ID_STRINGS)
     foreach(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
       if("${info}" MATCHES "INFO:compiler\\[([^]\"]*)\\]")
         if(COMPILER_ID)
@@ -493,11 +505,11 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     if(NOT DEFINED COMPILER_VERSION AND HAVE_COMPILER_VERSION_MAJOR)
       set(COMPILER_VERSION "${COMPILER_VERSION_MAJOR}")
       if(HAVE_COMPILER_VERSION_MINOR)
-        set(COMPILER_VERSION "${COMPILER_VERSION}.${COMPILER_VERSION_MINOR}")
+        string(APPEND COMPILER_VERSION ".${COMPILER_VERSION_MINOR}")
         if(HAVE_COMPILER_VERSION_PATCH)
-          set(COMPILER_VERSION "${COMPILER_VERSION}.${COMPILER_VERSION_PATCH}")
+          string(APPEND COMPILER_VERSION ".${COMPILER_VERSION_PATCH}")
           if(HAVE_COMPILER_VERSION_TWEAK)
-            set(COMPILER_VERSION "${COMPILER_VERSION}.${COMPILER_VERSION_TWEAK}")
+            string(APPEND COMPILER_VERSION ".${COMPILER_VERSION_TWEAK}")
           endif()
         endif()
       endif()

@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2013 Stephen Kelly <steveire@gmail.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 function(cmake_determine_compile_features lang)
 
@@ -58,6 +48,7 @@ function(cmake_determine_compile_features lang)
     set(CMAKE_CXX98_COMPILE_FEATURES)
     set(CMAKE_CXX11_COMPILE_FEATURES)
     set(CMAKE_CXX14_COMPILE_FEATURES)
+    set(CMAKE_CXX17_COMPILE_FEATURES)
 
     include("${CMAKE_ROOT}/Modules/Internal/FeatureTesting.cmake")
 
@@ -68,6 +59,9 @@ function(cmake_determine_compile_features lang)
       return()
     endif()
 
+    if (CMAKE_CXX14_COMPILE_FEATURES AND CMAKE_CXX17_COMPILE_FEATURES)
+      list(REMOVE_ITEM CMAKE_CXX17_COMPILE_FEATURES ${CMAKE_CXX14_COMPILE_FEATURES})
+    endif()
     if (CMAKE_CXX11_COMPILE_FEATURES AND CMAKE_CXX14_COMPILE_FEATURES)
       list(REMOVE_ITEM CMAKE_CXX14_COMPILE_FEATURES ${CMAKE_CXX11_COMPILE_FEATURES})
     endif()
@@ -80,6 +74,7 @@ function(cmake_determine_compile_features lang)
         ${CMAKE_CXX98_COMPILE_FEATURES}
         ${CMAKE_CXX11_COMPILE_FEATURES}
         ${CMAKE_CXX14_COMPILE_FEATURES}
+        ${CMAKE_CXX17_COMPILE_FEATURES}
       )
     endif()
 
@@ -87,6 +82,7 @@ function(cmake_determine_compile_features lang)
     set(CMAKE_CXX98_COMPILE_FEATURES ${CMAKE_CXX98_COMPILE_FEATURES} PARENT_SCOPE)
     set(CMAKE_CXX11_COMPILE_FEATURES ${CMAKE_CXX11_COMPILE_FEATURES} PARENT_SCOPE)
     set(CMAKE_CXX14_COMPILE_FEATURES ${CMAKE_CXX14_COMPILE_FEATURES} PARENT_SCOPE)
+    set(CMAKE_CXX17_COMPILE_FEATURES ${CMAKE_CXX17_COMPILE_FEATURES} PARENT_SCOPE)
 
     message(STATUS "Detecting ${lang} compile features - done")
   endif()

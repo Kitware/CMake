@@ -1,25 +1,30 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportBuildFileGenerator.h"
 
 #include "cmExportSet.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTargetExport.h"
+#include "cmake.h"
+
+#include <algorithm>
+#include <map>
+#include <set>
+#include <sstream>
+#include <utility>
 
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 {
-  this->LG = 0;
-  this->ExportSet = 0;
+  this->LG = CM_NULLPTR;
+  this->ExportSet = CM_NULLPTR;
 }
 
 void cmExportBuildFileGenerator::Compute(cmLocalGenerator* lg)
@@ -52,7 +57,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
           this->LG->GetMakefile()->GetBacktrace());
         return false;
       }
-      if (te->GetType() == cmState::INTERFACE_LIBRARY) {
+      if (te->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         this->GenerateRequiredCMakeVersion(os, "3.0.0");
       }
     }
@@ -129,12 +134,12 @@ void cmExportBuildFileGenerator::GenerateImportTargetsConfig(
     cmGeneratorTarget* target = *tei;
     ImportPropertyMap properties;
 
-    if (target->GetType() != cmState::INTERFACE_LIBRARY) {
+    if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
       this->SetImportLocationProperty(config, suffix, target, properties);
     }
     if (!properties.empty()) {
       // Get the rest of the target details.
-      if (target->GetType() != cmState::INTERFACE_LIBRARY) {
+      if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
         this->SetImportDetailProperties(config, suffix, target, properties,
                                         missingTargets);
         this->SetImportLinkInterface(config, suffix,
@@ -181,7 +186,7 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
 
   // Add the import library for windows DLLs.
   if (target->IsDLLPlatform() &&
-      (target->GetType() == cmState::SHARED_LIBRARY ||
+      (target->GetType() == cmStateEnums::SHARED_LIBRARY ||
        target->IsExecutableWithExports()) &&
       mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
     std::string prop = "IMPORTED_IMPLIB";
@@ -211,11 +216,10 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
       link_libs += missingTarget;
       missingTargets.push_back(missingTarget);
       return;
-    } else {
-      // We are not appending, so all exported targets should be
-      // known here.  This is probably user-error.
-      this->ComplainAboutMissingTarget(depender, dependee, targetOccurrences);
     }
+    // We are not appending, so all exported targets should be
+    // known here.  This is probably user-error.
+    this->ComplainAboutMissingTarget(depender, dependee, targetOccurrences);
   }
   // Assume the target will be exported by another command.
   // Append it with the export namespace.

@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-int testXMLParser(int, char* [])
+int testXMLParser(int /*unused*/, char* /*unused*/ [])
 {
   // TODO: Derive from parser and check attributes.
   cmXMLParser parser;

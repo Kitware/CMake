@@ -11,12 +11,21 @@ extern "C" {
 int WINAPI foo();
 // test regular C
 int bar();
+int objlib();
 }
 
 // test c++ functions
 // forward declare hello and world
 void hello();
 void world();
+
+// test exports for executable target
+extern "C" {
+int own_auto_export_function(int i)
+{
+  return i + 1;
+}
+}
 
 int main()
 {
@@ -31,6 +40,7 @@ int main()
   foo();
   printf("\n");
   bar();
+  objlib();
   printf("\n");
   return 0;
 }

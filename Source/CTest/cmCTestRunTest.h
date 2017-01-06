@@ -1,20 +1,19 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestRunTest_h
 #define cmCTestRunTest_h
 
-#include <cmCTestTestHandler.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include <cmProcess.h>
+#include <set>
+#include <stddef.h>
+#include <string>
+#include <vector>
+
+#include "cmCTestTestHandler.h"
+
+class cmCTest;
+class cmProcess;
 
 /** \class cmRunTest
  * \brief represents a single test to be run
@@ -42,6 +41,11 @@ public:
   void SetIndex(int i) { this->Index = i; }
 
   int GetIndex() { return this->Index; }
+
+  void AddFailedDependency(const std::string& failedTest)
+  {
+    this->FailedDependencies.insert(failedTest);
+  }
 
   std::string GetProcessOutput() { return this->ProcessOutput; }
 
@@ -100,6 +104,7 @@ private:
   // The test results
   cmCTestTestHandler::cmCTestTestResult TestResult;
   int Index;
+  std::set<std::string> FailedDependencies;
   std::string StartTime;
   std::string ActualCommand;
   std::vector<std::string> Arguments;

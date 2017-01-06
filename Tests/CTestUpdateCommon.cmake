@@ -84,9 +84,9 @@ function(check_updates build)
   set(MSG "")
   if(MISSING)
     # List the missing entries
-    set(MSG "${MSG}Update.xml is missing expected entries:\n")
+    string(APPEND MSG "Update.xml is missing expected entries:\n")
     foreach(f ${MISSING})
-      set(MSG "${MSG}  ${f}\n")
+      string(APPEND MSG "  ${f}\n")
     endforeach()
   else()
     # Success
@@ -96,9 +96,9 @@ function(check_updates build)
   # Report the result
   if(EXTRA)
     # List the extra entries
-    set(MSG "${MSG}Update.xml has extra unexpected entries:\n")
+    string(APPEND MSG "Update.xml has extra unexpected entries:\n")
     foreach(f ${EXTRA})
-      set(MSG "${MSG}  ${f}\n")
+      string(APPEND MSG "  ${f}\n")
     endforeach()
   else()
     # Success
@@ -112,9 +112,9 @@ function(check_updates build)
     if(UPDATE_LOG_FILE)
       file(READ ${UPDATE_LOG_FILE} UPDATE_LOG LIMIT ${max_update_xml_size})
       string(REPLACE "\n" "\n  " UPDATE_LOG "${UPDATE_LOG}")
-      set(MSG "${MSG}Update log:\n  ${UPDATE_LOG}")
+      string(APPEND MSG "Update log:\n  ${UPDATE_LOG}")
     else()
-      set(MSG "${MSG}No update log found!")
+      string(APPEND MSG "No update log found!")
     endif()
 
     # Display the error message

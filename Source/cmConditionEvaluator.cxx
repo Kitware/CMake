@@ -1,19 +1,22 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2014 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmConditionEvaluator.h"
 
+#include <algorithm>
+#include <cmConfigure.h>
+#include <cmsys/RegularExpression.hxx>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "cmAlgorithms.h"
-#include "cmOutputConverter.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+
+class cmCommand;
+class cmTest;
 
 static std::string const keyAND = "AND";
 static std::string const keyCOMMAND = "COMMAND";
@@ -21,12 +24,14 @@ static std::string const keyDEFINED = "DEFINED";
 static std::string const keyEQUAL = "EQUAL";
 static std::string const keyEXISTS = "EXISTS";
 static std::string const keyGREATER = "GREATER";
+static std::string const keyGREATER_EQUAL = "GREATER_EQUAL";
 static std::string const keyIN_LIST = "IN_LIST";
 static std::string const keyIS_ABSOLUTE = "IS_ABSOLUTE";
 static std::string const keyIS_DIRECTORY = "IS_DIRECTORY";
 static std::string const keyIS_NEWER_THAN = "IS_NEWER_THAN";
 static std::string const keyIS_SYMLINK = "IS_SYMLINK";
 static std::string const keyLESS = "LESS";
+static std::string const keyLESS_EQUAL = "LESS_EQUAL";
 static std::string const keyMATCHES = "MATCHES";
 static std::string const keyNOT = "NOT";
 static std::string const keyOR = "OR";
@@ -35,12 +40,16 @@ static std::string const keyParenR = ")";
 static std::string const keyPOLICY = "POLICY";
 static std::string const keySTREQUAL = "STREQUAL";
 static std::string const keySTRGREATER = "STRGREATER";
+static std::string const keySTRGREATER_EQUAL = "STRGREATER_EQUAL";
 static std::string const keySTRLESS = "STRLESS";
+static std::string const keySTRLESS_EQUAL = "STRLESS_EQUAL";
 static std::string const keyTARGET = "TARGET";
 static std::string const keyTEST = "TEST";
 static std::string const keyVERSION_EQUAL = "VERSION_EQUAL";
 static std::string const keyVERSION_GREATER = "VERSION_GREATER";
+static std::string const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL";
 static std::string const keyVERSION_LESS = "VERSION_LESS";
+static std::string const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL";
 
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
                                            const cmListFileContext& context,
@@ -78,7 +87,7 @@ bool cmConditionEvaluator::IsTrue(
   errorString = "";
 
   // handle empty invocation
-  if (args.size() < 1) {
+  if (args.empty()) {
     return false;
   }
 
@@ -130,7 +139,7 @@ const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
   if ((this->Policy54Status != cmPolicies::WARN &&
        this->Policy54Status != cmPolicies::OLD) &&
       argument.WasQuoted()) {
-    return 0;
+    return CM_NULLPTR;
   }
 
   const char* def = this->Makefile.GetDefinition(argument.GetValue());
@@ -224,7 +233,7 @@ bool cmConditionEvaluator::GetBooleanValue(
     double d = strtod(arg.c_str(), &end);
     if (*end == '\0') {
       // The whole string is a number.  Use C conversion to bool.
-      return d ? true : false;
+      return static_cast<bool>(d);
     }
   }
 
@@ -242,20 +251,19 @@ bool cmConditionEvaluator::GetBooleanValueOld(
     // Old IsTrue behavior for single argument.
     if (arg == "0") {
       return false;
-    } else if (arg == "1") {
+    }
+    if (arg == "1") {
       return true;
-    } else {
-      const char* def = this->GetDefinitionIfUnquoted(arg);
-      return !cmSystemTools::IsOff(def);
     }
-  } else {
-    // Old GetVariableOrNumber behavior.
     const char* def = this->GetDefinitionIfUnquoted(arg);
-    if (!def && atoi(arg.c_str())) {
-      def = arg.c_str();
-    }
     return !cmSystemTools::IsOff(def);
   }
+  // Old GetVariableOrNumber behavior.
+  const char* def = this->GetDefinitionIfUnquoted(arg);
+  if (!def && atoi(arg.c_str())) {
+    def = arg.c_str();
+  }
+  return !cmSystemTools::IsOff(def);
 }
 
 //=========================================================================
@@ -267,7 +275,8 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
   // Use the policy if it is set.
   if (this->Policy12Status == cmPolicies::NEW) {
     return GetBooleanValue(newArg);
-  } else if (this->Policy12Status == cmPolicies::OLD) {
+  }
+  if (this->Policy12Status == cmPolicies::OLD) {
     return GetBooleanValueOld(newArg, oneArg);
   }
 
@@ -446,7 +455,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
       if (this->IsKeyword(keyCOMMAND, *arg) && argP1 != newArgs.end()) {
         cmCommand* command =
           this->Makefile.GetState()->GetCommand(argP1->c_str());
-        this->HandlePredicate(command ? true : false, reducible, arg, newArgs,
+        this->HandlePredicate(command != CM_NULLPTR, reducible, arg, newArgs,
                               argP1, argP2);
       }
       // does a policy exist
@@ -458,7 +467,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
       // does a target exist
       if (this->IsKeyword(keyTARGET, *arg) && argP1 != newArgs.end()) {
         this->HandlePredicate(
-          this->Makefile.FindTargetToUse(argP1->GetValue()) ? true : false,
+          this->Makefile.FindTargetToUse(argP1->GetValue()) != CM_NULLPTR,
           reducible, arg, newArgs, argP1, argP2);
       }
       // does a test exist
@@ -466,7 +475,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
           this->Policy64Status != cmPolicies::WARN) {
         if (this->IsKeyword(keyTEST, *arg) && argP1 != newArgs.end()) {
           const cmTest* haveTest = this->Makefile.GetTest(argP1->c_str());
-          this->HandlePredicate(haveTest ? true : false, reducible, arg,
+          this->HandlePredicate(haveTest != CM_NULLPTR, reducible, arg,
                                 newArgs, argP1, argP2);
         }
       } else if (this->Policy64Status == cmPolicies::WARN &&
@@ -486,7 +495,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
         if (argP1len > 4 && argP1->GetValue().substr(0, 4) == "ENV{" &&
             argP1->GetValue().operator[](argP1len - 1) == '}') {
           std::string env = argP1->GetValue().substr(4, argP1len - 5);
-          bdef = cmSystemTools::GetEnv(env.c_str()) ? true : false;
+          bdef = cmSystemTools::HasEnv(env.c_str());
         } else {
           bdef = this->Makefile.IsDefinitionSet(argP1->GetValue());
         }
@@ -559,7 +568,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           (this->IsKeyword(keyLESS, *argP1) ||
+           this->IsKeyword(keyLESS_EQUAL, *argP1) ||
            this->IsKeyword(keyGREATER, *argP1) ||
+           this->IsKeyword(keyGREATER_EQUAL, *argP1) ||
            this->IsKeyword(keyEQUAL, *argP1))) {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
@@ -570,8 +581,12 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
           result = false;
         } else if (*(argP1) == keyLESS) {
           result = (lhs < rhs);
+        } else if (*(argP1) == keyLESS_EQUAL) {
+          result = (lhs <= rhs);
         } else if (*(argP1) == keyGREATER) {
           result = (lhs > rhs);
+        } else if (*(argP1) == keyGREATER_EQUAL) {
+          result = (lhs >= rhs);
         } else {
           result = (lhs == rhs);
         }
@@ -580,16 +595,22 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           (this->IsKeyword(keySTRLESS, *argP1) ||
-           this->IsKeyword(keySTREQUAL, *argP1) ||
-           this->IsKeyword(keySTRGREATER, *argP1))) {
+           this->IsKeyword(keySTRLESS_EQUAL, *argP1) ||
+           this->IsKeyword(keySTRGREATER, *argP1) ||
+           this->IsKeyword(keySTRGREATER_EQUAL, *argP1) ||
+           this->IsKeyword(keySTREQUAL, *argP1))) {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
         int val = strcmp(def, def2);
         bool result;
         if (*(argP1) == keySTRLESS) {
           result = (val < 0);
+        } else if (*(argP1) == keySTRLESS_EQUAL) {
+          result = (val <= 0);
         } else if (*(argP1) == keySTRGREATER) {
           result = (val > 0);
+        } else if (*(argP1) == keySTRGREATER_EQUAL) {
+          result = (val >= 0);
         } else // strequal
         {
           result = (val == 0);
@@ -599,15 +620,23 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           (this->IsKeyword(keyVERSION_LESS, *argP1) ||
+           this->IsKeyword(keyVERSION_LESS_EQUAL, *argP1) ||
            this->IsKeyword(keyVERSION_GREATER, *argP1) ||
+           this->IsKeyword(keyVERSION_GREATER_EQUAL, *argP1) ||
            this->IsKeyword(keyVERSION_EQUAL, *argP1))) {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
-        cmSystemTools::CompareOp op = cmSystemTools::OP_EQUAL;
+        cmSystemTools::CompareOp op;
         if (*argP1 == keyVERSION_LESS) {
           op = cmSystemTools::OP_LESS;
+        } else if (*argP1 == keyVERSION_LESS_EQUAL) {
+          op = cmSystemTools::OP_LESS_EQUAL;
         } else if (*argP1 == keyVERSION_GREATER) {
           op = cmSystemTools::OP_GREATER;
+        } else if (*argP1 == keyVERSION_GREATER_EQUAL) {
+          op = cmSystemTools::OP_GREATER_EQUAL;
+        } else { // version_equal
+          op = cmSystemTools::OP_EQUAL;
         }
         bool result = cmSystemTools::VersionCompare(op, def, def2);
         this->HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
@@ -620,8 +649,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         bool success = cmSystemTools::FileTimeCompare(
           arg->GetValue(), (argP2)->GetValue(), &fileIsNewer);
         this->HandleBinaryOp(
-          (success == false || fileIsNewer == 1 || fileIsNewer == 0),
-          reducible, arg, newArgs, argP1, argP2);
+          (!success || fileIsNewer == 1 || fileIsNewer == 0), reducible, arg,
+          newArgs, argP1, argP2);
       }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&

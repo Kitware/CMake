@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2002-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # This module is shared by multiple languages; use include blocker.
 if(__COMPILER_GNU)
@@ -25,7 +15,7 @@ macro(__compiler_gnu lang)
   if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.4)
     set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "-fPIE")
   endif()
-  if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.2)
+  if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.0)
     set(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
   endif()
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-fPIC")
@@ -45,11 +35,11 @@ macro(__compiler_gnu lang)
   endif()
 
   # Initial configuration flags.
-  set(CMAKE_${lang}_FLAGS_INIT "")
-  set(CMAKE_${lang}_FLAGS_DEBUG_INIT "-g")
-  set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "-Os -DNDEBUG")
-  set(CMAKE_${lang}_FLAGS_RELEASE_INIT "-O3 -DNDEBUG")
-  set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "-O2 -g -DNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
+  string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -g")
+  string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Os -DNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3 -DNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -g -DNDEBUG")
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
   set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
   if(NOT APPLE OR NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4) # work around #4462

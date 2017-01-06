@@ -1,18 +1,11 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmFortranParser_h
 #define cmFortranParser_h
 
 #if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 #endif
 
@@ -71,6 +64,7 @@ union cmFortran_yystype_u
 #define YYSTYPE cmFortran_yystype
 #define YYSTYPE_IS_DECLARED 1
 #if !defined(cmFortranLexer_cxx)
+#define YY_NO_UNISTD_H
 #include "cmFortranLexer.h"
 #endif
 #if !defined(cmFortranLexer_cxx)
@@ -115,11 +109,13 @@ struct cmFortranFile
     : File(file)
     , Buffer(buffer)
     , Directory(dir)
+    , LastCharWasNewline(false)
   {
   }
   FILE* File;
   YY_BUFFER_STATE Buffer;
   std::string Directory;
+  bool LastCharWasNewline;
 };
 
 struct cmFortranParser_s
@@ -143,6 +139,9 @@ struct cmFortranParser_s
 
   // Buffer for string literals.
   std::string TokenString;
+
+  // Error message text if a parser error occurs.
+  std::string Error;
 
   // Flag for whether lexer is reading from inside an interface.
   bool InInterface;

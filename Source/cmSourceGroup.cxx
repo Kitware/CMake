@@ -1,14 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceGroup.h"
 
 class cmSourceGroupInternals
@@ -123,7 +114,7 @@ cmSourceGroup* cmSourceGroup::LookupChild(const char* name) const
   }
 
   // if no child with this name was found return NULL
-  return NULL;
+  return CM_NULLPTR;
 }
 
 cmSourceGroup* cmSourceGroup::MatchChildrenFiles(const char* name)
@@ -143,7 +134,7 @@ cmSourceGroup* cmSourceGroup::MatchChildrenFiles(const char* name)
       return result;
     }
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 cmSourceGroup* cmSourceGroup::MatchChildrenRegex(const char* name)
@@ -164,7 +155,7 @@ cmSourceGroup* cmSourceGroup::MatchChildrenRegex(const char* name)
     return this;
   }
 
-  return 0;
+  return CM_NULLPTR;
 }
 
 std::vector<cmSourceGroup> const& cmSourceGroup::GetGroupChildren() const

@@ -13,6 +13,7 @@ Perform the :ref:`CTest Build Step` as a :ref:`Dashboard Client`.
               [NUMBER_ERRORS <num-err-var>]
               [NUMBER_WARNINGS <num-warn-var>]
               [RETURN_VALUE <result-var>]
+              [CAPTURE_CMAKE_ERROR <result-var>]
               )
 
 Build the project and store results in ``Build.xml``
@@ -29,9 +30,11 @@ The options are:
   :variable:`CTEST_BINARY_DIRECTORY` variable is used.
 
 ``APPEND``
-  Mark results for append to those previously submitted to a
+  Mark ``Build.xml`` for append to results previously submitted to a
   dashboard server since the last :command:`ctest_start` call.
   Append semantics are defined by the dashboard server in use.
+  This does *not* cause results to be appended to a ``.xml`` file
+  produced by a previous call to this command.
 
 ``CONFIGURATION <config>``
   Specify the build configuration (e.g. ``Debug``).  If not
@@ -65,6 +68,10 @@ The options are:
 
 ``RETURN_VALUE <result-var>``
   Store the return value of the native build tool in the given variable.
+
+``CAPTURE_CMAKE_ERROR <result-var>``
+  Store in the ``<result-var>`` variable -1 if there are any errors running
+  the command and prevent ctest from returning non-zero if an error occurs.
 
 ``QUIET``
   Suppress any CTest-specific non-error output that would have been

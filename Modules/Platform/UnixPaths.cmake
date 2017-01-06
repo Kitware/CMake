@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # Block multiple inclusion because "CMakeCInformation.cmake" includes
 # "Platform/${CMAKE_SYSTEM_NAME}" even though the generic module
@@ -93,5 +83,6 @@ list(APPEND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES
   /usr/include
   )
 
-# Enable use of lib64 search path variants by default.
+# Enable use of lib32 and lib64 search path variants by default.
+set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS TRUE)
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)

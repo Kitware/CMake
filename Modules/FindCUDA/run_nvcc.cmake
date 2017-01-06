@@ -73,9 +73,24 @@ set(CUDA_NVCC_EXECUTABLE "@CUDA_NVCC_EXECUTABLE@") # path
 set(CUDA_NVCC_FLAGS @CUDA_NVCC_FLAGS@ ;; @CUDA_WRAP_OPTION_NVCC_FLAGS@) # list
 @CUDA_NVCC_FLAGS_CONFIG@
 set(nvcc_flags @nvcc_flags@) # list
-set(CUDA_NVCC_INCLUDE_ARGS "@CUDA_NVCC_INCLUDE_ARGS@") # list (needs to be in quotes to handle spaces properly).
+set(CUDA_NVCC_INCLUDE_DIRS "@CUDA_NVCC_INCLUDE_DIRS@") # list (needs to be in quotes to handle spaces properly).
+set(CUDA_NVCC_COMPILE_DEFINITIONS "@CUDA_NVCC_COMPILE_DEFINITIONS@") # list (needs to be in quotes to handle spaces properly).
 set(format_flag "@format_flag@") # string
 set(cuda_language_flag @cuda_language_flag@) # list
+
+# Clean up list of include directories and add -I flags
+list(REMOVE_DUPLICATES CUDA_NVCC_INCLUDE_DIRS)
+set(CUDA_NVCC_INCLUDE_ARGS)
+foreach(dir ${CUDA_NVCC_INCLUDE_DIRS})
+  # Extra quotes are added around each flag to help nvcc parse out flags with spaces.
+  list(APPEND CUDA_NVCC_INCLUDE_ARGS "-I${dir}")
+endforeach()
+
+# Clean up list of compile definitions, add -D flags, and append to nvcc_flags
+list(REMOVE_DUPLICATES CUDA_NVCC_COMPILE_DEFINITIONS)
+foreach(def ${CUDA_NVCC_COMPILE_DEFINITIONS})
+  list(APPEND nvcc_flags "-D${def}")
+endforeach()
 
 if(build_cubin AND NOT generated_cubin_file)
   message(FATAL_ERROR "You must specify generated_cubin_file on the command line")
@@ -95,7 +110,7 @@ string(TOUPPER "${build_configuration}" build_configuration)
 #message("CUDA_NVCC_HOST_COMPILER_FLAGS = ${CUDA_NVCC_HOST_COMPILER_FLAGS}")
 foreach(flag ${CMAKE_HOST_FLAGS} ${CMAKE_HOST_FLAGS_${build_configuration}})
   # Extra quotes are added around each flag to help nvcc parse out flags with spaces.
-  set(nvcc_host_compiler_flags "${nvcc_host_compiler_flags},\"${flag}\"")
+  string(APPEND nvcc_host_compiler_flags ",\"${flag}\"")
 endforeach()
 if (nvcc_host_compiler_flags)
   set(nvcc_host_compiler_flags "-Xcompiler" ${nvcc_host_compiler_flags})

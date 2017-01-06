@@ -1,32 +1,28 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmStringCommand.h"
 
-#include "cmCryptoHash.h"
-
 #include <cmsys/RegularExpression.hxx>
-#include <cmsys/SystemTools.hxx>
-
 #include <ctype.h>
-#include <stdlib.h> // required for atoi
-#include <time.h>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <cmTimestamp.h>
-#include <cmUuid.h>
+#include "cmAlgorithms.h"
+#include "cmCryptoHash.h"
+#include "cmGeneratorExpression.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cmTimestamp.h"
+#include "cmUuid.h"
+#include "cm_auto_ptr.hxx"
+
+class cmExecutionStatus;
 
 bool cmStringCommand::InitialPass(std::vector<std::string> const& args,
                                   cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("must be called with at least one argument.");
     return false;
   }
@@ -34,43 +30,63 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args,
   const std::string& subCommand = args[0];
   if (subCommand == "REGEX") {
     return this->HandleRegexCommand(args);
-  } else if (subCommand == "REPLACE") {
+  }
+  if (subCommand == "REPLACE") {
     return this->HandleReplaceCommand(args);
-  } else if (subCommand == "MD5" || subCommand == "SHA1" ||
-             subCommand == "SHA224" || subCommand == "SHA256" ||
-             subCommand == "SHA384" || subCommand == "SHA512") {
+  }
+  if (subCommand == "MD5" || subCommand == "SHA1" || subCommand == "SHA224" ||
+      subCommand == "SHA256" || subCommand == "SHA384" ||
+      subCommand == "SHA512" || subCommand == "SHA3_224" ||
+      subCommand == "SHA3_256" || subCommand == "SHA3_384" ||
+      subCommand == "SHA3_512") {
     return this->HandleHashCommand(args);
-  } else if (subCommand == "TOLOWER") {
+  }
+  if (subCommand == "TOLOWER") {
     return this->HandleToUpperLowerCommand(args, false);
-  } else if (subCommand == "TOUPPER") {
+  }
+  if (subCommand == "TOUPPER") {
     return this->HandleToUpperLowerCommand(args, true);
-  } else if (subCommand == "COMPARE") {
+  }
+  if (subCommand == "COMPARE") {
     return this->HandleCompareCommand(args);
-  } else if (subCommand == "ASCII") {
+  }
+  if (subCommand == "ASCII") {
     return this->HandleAsciiCommand(args);
-  } else if (subCommand == "CONFIGURE") {
+  }
+  if (subCommand == "CONFIGURE") {
     return this->HandleConfigureCommand(args);
-  } else if (subCommand == "LENGTH") {
+  }
+  if (subCommand == "LENGTH") {
     return this->HandleLengthCommand(args);
-  } else if (subCommand == "APPEND") {
+  }
+  if (subCommand == "APPEND") {
     return this->HandleAppendCommand(args);
-  } else if (subCommand == "CONCAT") {
+  }
+  if (subCommand == "CONCAT") {
     return this->HandleConcatCommand(args);
-  } else if (subCommand == "SUBSTRING") {
+  }
+  if (subCommand == "SUBSTRING") {
     return this->HandleSubstringCommand(args);
-  } else if (subCommand == "STRIP") {
+  }
+  if (subCommand == "STRIP") {
     return this->HandleStripCommand(args);
-  } else if (subCommand == "RANDOM") {
+  }
+  if (subCommand == "RANDOM") {
     return this->HandleRandomCommand(args);
-  } else if (subCommand == "FIND") {
+  }
+  if (subCommand == "FIND") {
     return this->HandleFindCommand(args);
-  } else if (subCommand == "TIMESTAMP") {
+  }
+  if (subCommand == "TIMESTAMP") {
     return this->HandleTimestampCommand(args);
-  } else if (subCommand == "MAKE_C_IDENTIFIER") {
+  }
+  if (subCommand == "MAKE_C_IDENTIFIER") {
     return this->HandleMakeCIdentifierCommand(args);
-  } else if (subCommand == "GENEX_STRIP") {
+  }
+  if (subCommand == "GENEX_STRIP") {
     return this->HandleGenexStripCommand(args);
-  } else if (subCommand == "UUID") {
+  }
+  if (subCommand == "UUID") {
     return this->HandleUuidCommand(args);
   }
 
@@ -89,7 +105,7 @@ bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  cmsys::auto_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
+  CM_AUTO_PTR<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
   if (hash.get()) {
     std::string out = hash->HashString(args[2]);
     this->Makefile->AddDefinition(args[1], out.c_str());
@@ -134,7 +150,7 @@ bool cmStringCommand::HandleAsciiCommand(std::vector<std::string> const& args)
   }
   std::string::size_type cc;
   std::string outvar = args[args.size() - 1];
-  std::string output = "";
+  std::string output;
   for (cc = 1; cc < args.size() - 1; cc++) {
     int ch = atoi(args[cc].c_str());
     if (ch > 0 && ch < 256) {
@@ -158,7 +174,8 @@ bool cmStringCommand::HandleConfigureCommand(
   if (args.size() < 2) {
     this->SetError("No input string specified.");
     return false;
-  } else if (args.size() < 3) {
+  }
+  if (args.size() < 3) {
     this->SetError("No output variable specified.");
     return false;
   }
@@ -203,14 +220,16 @@ bool cmStringCommand::HandleRegexCommand(std::vector<std::string> const& args)
       return false;
     }
     return this->RegexMatch(args);
-  } else if (mode == "MATCHALL") {
+  }
+  if (mode == "MATCHALL") {
     if (args.size() < 5) {
       this->SetError("sub-command REGEX, mode MATCHALL needs "
                      "at least 5 arguments total to command.");
       return false;
     }
     return this->RegexMatchAll(args);
-  } else if (mode == "REPLACE") {
+  }
+  if (mode == "REPLACE") {
     if (args.size() < 6) {
       this->SetError("sub-command REGEX, mode REPLACE needs "
                      "at least 6 arguments total to command.");
@@ -323,7 +342,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   std::vector<RegexReplacement> replacement;
   std::string::size_type l = 0;
   while (l < replace.length()) {
-    std::string::size_type r = replace.find("\\", l);
+    std::string::size_type r = replace.find('\\', l);
     if (r == std::string::npos) {
       r = replace.length();
       replacement.push_back(replace.substr(l, r - l));
@@ -485,7 +504,8 @@ bool cmStringCommand::HandleCompareCommand(
   }
   std::string mode = args[1];
   if ((mode == "EQUAL") || (mode == "NOTEQUAL") || (mode == "LESS") ||
-      (mode == "GREATER")) {
+      (mode == "LESS_EQUAL") || (mode == "GREATER") ||
+      (mode == "GREATER_EQUAL")) {
     if (args.size() < 5) {
       std::string e = "sub-command COMPARE, mode ";
       e += mode;
@@ -500,8 +520,12 @@ bool cmStringCommand::HandleCompareCommand(
     bool result;
     if (mode == "LESS") {
       result = (left < right);
+    } else if (mode == "LESS_EQUAL") {
+      result = (left <= right);
     } else if (mode == "GREATER") {
       result = (left > right);
+    } else if (mode == "GREATER_EQUAL") {
+      result = (left >= right);
     } else if (mode == "EQUAL") {
       result = (left == right);
     } else // if(mode == "NOTEQUAL")
@@ -780,7 +804,8 @@ bool cmStringCommand::HandleTimestampCommand(
   if (args.size() < 2) {
     this->SetError("sub-command TIMESTAMP requires at least one argument.");
     return false;
-  } else if (args.size() > 4) {
+  }
+  if (args.size() > 4) {
     this->SetError("sub-command TIMESTAMP takes at most three arguments.");
     return false;
   }

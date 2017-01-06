@@ -1,30 +1,26 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCPackGenerator_h
 #define cmCPackGenerator_h
 
-#include "cmObject.h"
+#include <cmConfigure.h>
 
-#include "cmSystemTools.h"
 #include <map>
+#include <sstream>
+#include <string>
 #include <vector>
 
-#include "cmCPackComponentGroup.h" // cmCPackComponent and friends
-// Forward declarations are insufficient since we use them in
-// std::map data members below...
+#include "cmCPackComponentGroup.h"
+#include "cmSystemTools.h"
+
+class cmCPackGenerator;
+class cmCPackLog;
+class cmInstalledFile;
+class cmMakefile;
 
 #define cmCPackTypeMacro(klass, superclass)                                   \
-  cmTypeMacro(klass, superclass);                                             \
+  typedef superclass Superclass;                                              \
+  const char* GetNameOfClass() CM_OVERRIDE { return #klass; }                 \
   static cmCPackGenerator* CreateGenerator() { return new klass; }            \
   class cmCPackTypeMacro_UseTrailingSemicolon
 
@@ -34,30 +30,16 @@
     cmCPackLog_msg << msg;                                                    \
     this->Logger->Log(logType, __FILE__, __LINE__,                            \
                       cmCPackLog_msg.str().c_str());                          \
-  } while (0)
-
-#ifdef cerr
-#undef cerr
-#endif
-#define cerr no_cerr_use_cmCPack_Log
-
-#ifdef cout
-#undef cout
-#endif
-#define cout no_cout_use_cmCPack_Log
-
-class cmMakefile;
-class cmCPackLog;
-class cmInstalledFile;
+  } while (false)
 
 /** \class cmCPackGenerator
  * \brief A superclass of all CPack Generators
  *
  */
-class cmCPackGenerator : public cmObject
+class cmCPackGenerator
 {
 public:
-  cmTypeMacro(cmCPackGenerator, cmObject);
+  virtual const char* GetNameOfClass() = 0;
   /**
    * If verbose then more information is printed out
    */
@@ -110,6 +92,8 @@ public:
   std::vector<std::string> GetOptions() const;
   bool IsSet(const std::string& name) const;
   bool IsOn(const std::string& name) const;
+  bool IsSetToOff(const std::string& op) const;
+  bool IsSetToEmpty(const std::string& op) const;
 
   //! Set the logger
   void SetLogger(cmCPackLog* log) { this->Logger = log; }
@@ -136,7 +120,7 @@ protected:
   cmInstalledFile const* GetInstalledFile(std::string const& name) const;
 
   virtual const char* GetOutputExtension() { return ".cpack"; }
-  virtual const char* GetOutputPostfix() { return 0; }
+  virtual const char* GetOutputPostfix() { return CM_NULLPTR; }
 
   /**
    * Prepare requested grouping kind from CPACK_xxx vars

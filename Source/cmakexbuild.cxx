@@ -1,18 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
+#include <cmConfigure.h> // IWYU pragma: keep
 
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-#include "cmStandardIncludes.h"
+#include <cmsys/Process.h>
+#include <iostream>
+#include <string>
+#include <vector>
 
 #include "cmSystemTools.h"
-#include <cmsys/Process.h>
 
 // This is a wrapper program for xcodebuild
 // it calls xcodebuild, and does two things

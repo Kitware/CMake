@@ -1,8 +1,21 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindOpenGL
 # ----------
 #
 # FindModule for OpenGL and GLU.
+#
+# IMPORTED Targets
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines the :prop_tgt:`IMPORTED` targets:
+#
+# ``OpenGL::GL``
+#  Defined if the system has OpenGL.
+# ``OpenGL::GLU``
+#  Defined if the system has GLU.
 #
 # Result Variables
 # ^^^^^^^^^^^^^^^^
@@ -34,19 +47,6 @@
 # have to change the cache values of OPENGL_glu_LIBRARY and
 # OPENGL_gl_LIBRARY to use OpenGL with X11 on OSX.
 
-
-#=============================================================================
-# Copyright 2001-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 set(_OpenGL_REQUIRED_VARS OPENGL_gl_LIBRARY)
 
@@ -166,11 +166,58 @@ endif()
 # This deprecated setting is for backward compatibility with CMake1.4
 set(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 
-# handle the QUIETLY and REQUIRED arguments and set OPENGL_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL REQUIRED_VARS ${_OpenGL_REQUIRED_VARS})
 unset(_OpenGL_REQUIRED_VARS)
+
+# OpenGL:: targets
+if(OPENGL_FOUND)
+  if(NOT TARGET OpenGL::GL)
+    if(IS_ABSOLUTE "${OPENGL_gl_LIBRARY}")
+      add_library(OpenGL::GL UNKNOWN IMPORTED)
+      if(OPENGL_gl_LIBRARY MATCHES "/([^/]+)\\.framework$")
+        set(_gl_fw "${OPENGL_gl_LIBRARY}/${CMAKE_MATCH_1}")
+        if(EXISTS "${_gl_fw}.tbd")
+          set(_gl_fw "${_gl_fw}.tbd")
+        endif()
+        set_target_properties(OpenGL::GL PROPERTIES
+          IMPORTED_LOCATION "${_gl_fw}")
+      else()
+        set_target_properties(OpenGL::GL PROPERTIES
+          IMPORTED_LOCATION "${OPENGL_gl_LIBRARY}")
+      endif()
+    else()
+      add_library(OpenGL::GL INTERFACE IMPORTED)
+      set_target_properties(OpenGL::GL PROPERTIES
+        IMPORTED_LIBNAME "${OPENGL_gl_LIBRARY}")
+    endif()
+    set_target_properties(OpenGL::GL PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENGL_INCLUDE_DIR}")
+  endif()
+
+  if(OPENGL_GLU_FOUND AND NOT TARGET OpenGL::GLU)
+    if(IS_ABSOLUTE "${OPENGL_glu_LIBRARY}")
+      add_library(OpenGL::GLU UNKNOWN IMPORTED)
+      if(OPENGL_glu_LIBRARY MATCHES "/([^/]+)\\.framework$")
+        set(_glu_fw "${OPENGL_glu_LIBRARY}/${CMAKE_MATCH_1}")
+        if(EXISTS "${_glu_fw}.tbd")
+          set(_glu_fw "${_glu_fw}.tbd")
+        endif()
+        set_target_properties(OpenGL::GLU PROPERTIES
+          IMPORTED_LOCATION "${_glu_fw}")
+      else()
+        set_target_properties(OpenGL::GLU PROPERTIES
+          IMPORTED_LOCATION "${OPENGL_glu_LIBRARY}")
+      endif()
+    else()
+      add_library(OpenGL::GLU INTERFACE IMPORTED)
+      set_target_properties(OpenGL::GLU PROPERTIES
+        IMPORTED_LIBNAME "${OPENGL_glu_LIBRARY}")
+    endif()
+    set_target_properties(OpenGL::GLU PROPERTIES
+      INTERFACE_LINK_LIBRARIES OpenGL::GL)
+  endif()
+endif()
 
 mark_as_advanced(
   OPENGL_INCLUDE_DIR

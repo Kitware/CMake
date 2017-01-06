@@ -1,20 +1,10 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2014 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmUuid.h"
 
-#include <string.h>
+#include "cmCryptoHash.h"
 
-#include "cm_sha2.h"
-#include <cmsys/MD5.h>
+#include <string.h>
 
 cmUuid::cmUuid()
 {
@@ -31,16 +21,12 @@ std::string cmUuid::FromMd5(std::vector<unsigned char> const& uuidNamespace,
   std::vector<unsigned char> hashInput;
   this->CreateHashInput(uuidNamespace, name, hashInput);
 
-  cmsysMD5_s* md5 = cmsysMD5_New();
-  cmsysMD5_Initialize(md5);
-  cmsysMD5_Append(md5, &hashInput[0], int(hashInput.size()));
+  cmCryptoHash md5(cmCryptoHash::AlgoMD5);
+  md5.Initialize();
+  md5.Append(&hashInput[0], hashInput.size());
+  std::vector<unsigned char> digest = md5.Finalize();
 
-  unsigned char digest[16] = { 0 };
-  cmsysMD5_Finalize(md5, digest);
-
-  cmsysMD5_Delete(md5);
-
-  return this->FromDigest(digest, 3);
+  return this->FromDigest(&digest[0], 3);
 }
 
 std::string cmUuid::FromSha1(std::vector<unsigned char> const& uuidNamespace,
@@ -49,16 +35,12 @@ std::string cmUuid::FromSha1(std::vector<unsigned char> const& uuidNamespace,
   std::vector<unsigned char> hashInput;
   this->CreateHashInput(uuidNamespace, name, hashInput);
 
-  SHA_CTX* sha = new SHA_CTX;
-  SHA1_Init(sha);
-  SHA1_Update(sha, &hashInput[0], hashInput.size());
+  cmCryptoHash sha1(cmCryptoHash::AlgoSHA1);
+  sha1.Initialize();
+  sha1.Append(&hashInput[0], hashInput.size());
+  std::vector<unsigned char> digest = sha1.Finalize();
 
-  unsigned char digest[SHA1_DIGEST_LENGTH] = { 0 };
-  SHA1_Final(digest, sha);
-
-  delete sha;
-
-  return this->FromDigest(digest, 5);
+  return this->FromDigest(&digest[0], 5);
 }
 
 void cmUuid::CreateHashInput(std::vector<unsigned char> const& uuidNamespace,
@@ -180,13 +162,14 @@ bool cmUuid::IntFromHexDigit(char input, char& output) const
   if (input >= '0' && input <= '9') {
     output = char(input - '0');
     return true;
-  } else if (input >= 'a' && input <= 'f') {
+  }
+  if (input >= 'a' && input <= 'f') {
     output = char(input - 'a' + 0xA);
     return true;
-  } else if (input >= 'A' && input <= 'F') {
+  }
+  if (input >= 'A' && input <= 'F') {
     output = char(input - 'A' + 0xA);
     return true;
-  } else {
-    return false;
   }
+  return false;
 }

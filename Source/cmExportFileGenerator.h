@@ -1,22 +1,21 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmExportFileGenerator_h
 #define cmExportFileGenerator_h
 
-#include "cmCommand.h"
-#include "cmGeneratorExpression.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
+#include "cmGeneratorExpression.h"
 #include "cmVersion.h"
-#include "cmVersionMacros.h"
+#include "cmVersionConfig.h"
+
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
+class cmGeneratorTarget;
 
 #define STRINGIFY_HELPER(X) #X
 #define STRINGIFY(X) STRINGIFY_HELPER(X)
@@ -70,25 +69,28 @@ protected:
                             std::vector<std::string>& missingTargets);
 
   // Methods to implement export file code generation.
-  void GenerateImportHeaderCode(std::ostream& os,
-                                const std::string& config = "");
-  void GenerateImportFooterCode(std::ostream& os);
+  virtual void GeneratePolicyHeaderCode(std::ostream& os);
+  virtual void GeneratePolicyFooterCode(std::ostream& os);
+  virtual void GenerateImportHeaderCode(std::ostream& os,
+                                        const std::string& config = "");
+  virtual void GenerateImportFooterCode(std::ostream& os);
   void GenerateImportVersionCode(std::ostream& os);
-  void GenerateImportTargetCode(std::ostream& os,
-                                cmGeneratorTarget const* target);
-  void GenerateImportPropertyCode(std::ostream& os, const std::string& config,
-                                  cmGeneratorTarget const* target,
-                                  ImportPropertyMap const& properties);
-  void GenerateImportedFileChecksCode(
+  virtual void GenerateImportTargetCode(std::ostream& os,
+                                        cmGeneratorTarget const* target);
+  virtual void GenerateImportPropertyCode(std::ostream& os,
+                                          const std::string& config,
+                                          cmGeneratorTarget const* target,
+                                          ImportPropertyMap const& properties);
+  virtual void GenerateImportedFileChecksCode(
     std::ostream& os, cmGeneratorTarget* target,
     ImportPropertyMap const& properties,
     const std::set<std::string>& importedLocations);
-  void GenerateImportedFileCheckLoop(std::ostream& os);
-  void GenerateMissingTargetsCheckCode(
+  virtual void GenerateImportedFileCheckLoop(std::ostream& os);
+  virtual void GenerateMissingTargetsCheckCode(
     std::ostream& os, const std::vector<std::string>& missingTargets);
 
-  void GenerateExpectedTargetsCode(std::ostream& os,
-                                   const std::string& expectedTargets);
+  virtual void GenerateExpectedTargetsCode(std::ostream& os,
+                                           const std::string& expectedTargets);
 
   // Collect properties with detailed information about targets beyond
   // their location on disk.
@@ -132,9 +134,9 @@ protected:
                                  ImportPropertyMap& properties);
   void PopulateCompatibleInterfaceProperties(cmGeneratorTarget* target,
                                              ImportPropertyMap& properties);
-  void GenerateInterfaceProperties(cmGeneratorTarget const* target,
-                                   std::ostream& os,
-                                   const ImportPropertyMap& properties);
+  virtual void GenerateInterfaceProperties(
+    cmGeneratorTarget const* target, std::ostream& os,
+    const ImportPropertyMap& properties);
   void PopulateIncludeDirectoriesInterface(
     cmTargetExport* target,
     cmGeneratorExpression::PreprocessContext preprocessRule,
@@ -161,8 +163,8 @@ protected:
     std::vector<std::string>& missingTargets,
     FreeTargetsReplace replace = NoReplaceFreeTargets);
 
-  void GenerateRequiredCMakeVersion(std::ostream& os,
-                                    const char* versionString);
+  virtual void GenerateRequiredCMakeVersion(std::ostream& os,
+                                            const char* versionString);
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;

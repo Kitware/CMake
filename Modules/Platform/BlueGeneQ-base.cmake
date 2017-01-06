@@ -1,17 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2010 Kitware, Inc.
-# Copyright 2010 Todd Gamblin <tgamblin@llnl.gov>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 #
 # Blue Gene/Q base platform file.
@@ -110,7 +99,7 @@ macro(__BlueGeneQ_common_setup compiler_id lang)
   # to do the same thing as the MPI compilers, which add these flags.
   set(BGQ_SYSTEM_INCLUDES "")
   foreach(dir ${CMAKE_SYSTEM_INCLUDE_PATH})
-    set(BGQ_SYSTEM_INCLUDES "${BGQ_SYSTEM_INCLUDES} -I${dir}")
+    string(APPEND BGQ_SYSTEM_INCLUDES " -I${dir}")
   endforeach()
   set(CMAKE_C_COMPILE_OBJECT   "<CMAKE_C_COMPILER>   <DEFINES> ${BGQ_SYSTEM_INCLUDES} <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")
   set(CMAKE_CXX_COMPILE_OBJECT "<CMAKE_CXX_COMPILER> <DEFINES> ${BGQ_SYSTEM_INCLUDES} <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")

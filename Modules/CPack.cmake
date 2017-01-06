@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CPack
 # -----
@@ -115,6 +118,17 @@
 #
 #  A branding image that will be displayed inside the installer (used by GUI
 #  installers).
+#
+# .. variable:: CPACK_PACKAGE_CHECKSUM
+#
+#  An algorithm that will be used to generate additional file with checksum
+#  of the package. Output file name will be::
+#
+#     ${CPACK_PACKAGE_FILE_NAME}.${CPACK_PACKAGE_CHECKSUM}
+#
+#  Supported algorithms are those listed by the
+#  :ref:`string(\<HASH\>) <Supported Hash Algorithms>`
+#  command.
 #
 # .. variable:: CPACK_PROJECT_CONFIG_FILE
 #
@@ -275,19 +289,6 @@
 #  Each desktop link requires a corresponding start menu shortcut
 #  as created by :variable:`CPACK_PACKAGE_EXECUTABLES`.
 
-#=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 # Define this var in order to avoid (or warn) concerning multiple inclusion
 if(CPack_CMake_INCLUDED)
   message(WARNING "CPack.cmake has already been included!!")
@@ -332,7 +333,7 @@ function(cpack_encode_variables)
         set(value "${${var}}")
       endif()
 
-      set(commands "${commands}\nSET(${var} \"${value}\")")
+      string(APPEND commands "\nSET(${var} \"${value}\")")
     endif()
   endforeach()
 
@@ -502,6 +503,7 @@ if(NOT CPACK_SOURCE_GENERATOR)
     if(CYGWIN)
       option(CPACK_SOURCE_CYGWIN "Enable to build Cygwin source packages" ON)
     else()
+      option(CPACK_SOURCE_RPM  "Enable to build RPM source packages"  OFF)
       option(CPACK_SOURCE_TBZ2 "Enable to build TBZ2 source packages" ON)
       option(CPACK_SOURCE_TGZ  "Enable to build TGZ source packages"  ON)
       option(CPACK_SOURCE_TXZ  "Enable to build TXZ source packages"  ON)
@@ -515,6 +517,7 @@ if(NOT CPACK_SOURCE_GENERATOR)
 
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_7Z      7Z)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_CYGWIN  CygwinSource)
+  cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_RPM     RPM)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TBZ2    TBZ2)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TGZ     TGZ)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TXZ     TXZ)
@@ -544,6 +547,7 @@ mark_as_advanced(
   CPACK_BINARY_ZIP
   CPACK_SOURCE_7Z
   CPACK_SOURCE_CYGWIN
+  CPACK_SOURCE_RPM
   CPACK_SOURCE_TBZ2
   CPACK_SOURCE_TGZ
   CPACK_SOURCE_TXZ
@@ -591,6 +595,8 @@ _cpack_set_default(CPACK_WIX_SIZEOF_VOID_P "${CMAKE_SIZEOF_VOID_P}")
 if(CMAKE_OSX_SYSROOT)
   _cpack_set_default(CPACK_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_PATH}")
 endif()
+
+_cpack_set_default(CPACK_BUILD_SOURCE_DIRS "${CMAKE_SOURCE_DIR};${CMAKE_BINARY_DIR}")
 
 if(DEFINED CPACK_COMPONENTS_ALL)
   if(CPACK_MONOLITHIC_INSTALL)
@@ -650,6 +656,8 @@ set(CPACK_TOPLEVEL_TAG "${CPACK_SOURCE_TOPLEVEL_TAG}")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_SOURCE_PACKAGE_FILE_NAME}")
 set(CPACK_IGNORE_FILES "${CPACK_SOURCE_IGNORE_FILES}")
 set(CPACK_STRIP_FILES "${CPACK_SOURCE_STRIP_FILES}")
+
+set(CPACK_RPM_PACKAGE_SOURCES "ON")
 
 cpack_encode_variables()
 configure_file("${cpack_source_input_file}"

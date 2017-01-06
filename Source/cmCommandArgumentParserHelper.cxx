@@ -1,22 +1,19 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCommandArgumentParserHelper.h"
 
-#include "cmMakefile.h"
-#include "cmOutputConverter.h"
-#include "cmState.h"
-#include "cmSystemTools.h"
+#include <cm_kwiml.h>
 
 #include "cmCommandArgumentLexer.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+#include <cmConfigure.h>
+#include <iostream>
+#include <sstream>
+#include <string.h>
 
 int cmCommandArgument_yyparse(yyscan_t yyscanner);
 //
@@ -25,7 +22,7 @@ cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
   this->WarnUninitialized = false;
   this->CheckSystemVars = false;
   this->FileLine = -1;
-  this->FileName = 0;
+  this->FileName = CM_NULLPTR;
   this->RemoveEmpty = true;
   this->EmptyVariable[0] = 0;
   strcpy(this->DCURLYVariable, "${");
@@ -71,13 +68,12 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
     return this->EmptyVariable;
   }
   if (strcmp(key, "ENV") == 0) {
-    char* ptr = getenv(var);
-    if (ptr) {
+    std::string str;
+    if (cmSystemTools::GetEnv(var, str)) {
       if (this->EscapeQuotes) {
-        return this->AddString(cmSystemTools::EscapeQuotes(ptr));
-      } else {
-        return ptr;
+        return this->AddString(cmSystemTools::EscapeQuotes(str));
       }
+      return this->AddString(str);
     }
     return this->EmptyVariable;
   }
@@ -86,9 +82,8 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
           this->Makefile->GetState()->GetInitializedCacheValue(var)) {
       if (this->EscapeQuotes) {
         return this->AddString(cmSystemTools::EscapeQuotes(c));
-      } else {
-        return this->AddString(c);
       }
+      return this->AddString(c);
     }
     return this->EmptyVariable;
   }
@@ -96,13 +91,13 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
   e << "Syntax $" << key << "{} is not supported.  "
     << "Only ${}, $ENV{}, and $CACHE{} are allowed.";
   this->SetError(e.str());
-  return 0;
+  return CM_NULLPTR;
 }
 
 char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
 {
   if (!var) {
-    return 0;
+    return CM_NULLPTR;
   }
   if (this->FileLine >= 0 && strcmp(var, "CMAKE_CURRENT_LIST_LINE") == 0) {
     std::ostringstream ostr;
@@ -125,7 +120,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
         this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
       }
     }
-    return 0;
+    return CM_NULLPTR;
   }
   if (this->EscapeQuotes && value) {
     return this->AddString(cmSystemTools::EscapeQuotes(value));
@@ -162,7 +157,8 @@ char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)
 {
   if (!in1) {
     return in2;
-  } else if (!in2) {
+  }
+  if (!in2) {
     return in1;
   }
   size_t len = strlen(in1) + strlen(in2) + 1;
@@ -176,7 +172,7 @@ char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)
 void cmCommandArgumentParserHelper::AllocateParserType(
   cmCommandArgumentParserHelper::ParserType* pt, const char* str, int len)
 {
-  pt->str = 0;
+  pt->str = CM_NULLPTR;
   if (len == 0) {
     len = static_cast<int>(strlen(str));
   }
@@ -282,10 +278,9 @@ int cmCommandArgumentParserHelper::LexInput(char* buf, int maxlen)
       this->CurrentLine++;
     }
     return (1);
-  } else {
-    buf[0] = '\n';
-    return (0);
   }
+  buf[0] = '\n';
+  return (0);
 }
 
 void cmCommandArgumentParserHelper::Error(const char* str)

@@ -1,22 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmExternalMakefileProjectGenerator_h
 #define cmExternalMakefileProjectGenerator_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmDocumentation.h"
+#include <string>
+#include <vector>
 
 class cmGlobalGenerator;
+class cmMakefile;
 
 /** \class cmExternalMakefileProjectGenerator
  * \brief Base class for generators for "External Makefile based IDE projects".
@@ -35,11 +28,6 @@ class cmExternalMakefileProjectGenerator
 public:
   virtual ~cmExternalMakefileProjectGenerator() {}
 
-  ///! Get the name for this generator.
-  virtual std::string GetName() const = 0;
-  /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const std::string& fullName) const = 0;
   virtual void EnableLanguage(std::vector<std::string> const& languages,
                               cmMakefile*, bool optional);
 
@@ -55,8 +43,6 @@ public:
     return this->SupportedGlobalGenerators;
   }
 
-  ///! Get the name of the global generator for the given full name
-  std::string GetGlobalGeneratorName(const std::string& fullName);
   /** Create a full name from the given global generator name and the
    * extra generator name
    */
@@ -66,11 +52,59 @@ public:
   ///! Generate the project files, the Makefiles have already been generated
   virtual void Generate() = 0;
 
+  void SetName(const std::string& n) { Name = n; }
+  std::string GetName() const { return Name; }
+
 protected:
   ///! Contains the names of the global generators support by this generator.
   std::vector<std::string> SupportedGlobalGenerators;
   ///! the global generator which creates the makefiles
   const cmGlobalGenerator* GlobalGenerator;
+
+  std::string Name;
+};
+
+class cmExternalMakefileProjectGeneratorFactory
+{
+public:
+  cmExternalMakefileProjectGeneratorFactory(const std::string& n,
+                                            const std::string& doc);
+  virtual ~cmExternalMakefileProjectGeneratorFactory();
+
+  std::string GetName() const;
+  std::string GetDocumentation() const;
+  std::vector<std::string> GetSupportedGlobalGenerators() const;
+  std::vector<std::string> Aliases;
+
+  virtual cmExternalMakefileProjectGenerator*
+  CreateExternalMakefileProjectGenerator() const = 0;
+
+  void AddSupportedGlobalGenerator(const std::string& base);
+
+private:
+  std::string Name;
+  std::string Documentation;
+  std::vector<std::string> SupportedGlobalGenerators;
+};
+
+template <class T>
+class cmExternalMakefileProjectGeneratorSimpleFactory
+  : public cmExternalMakefileProjectGeneratorFactory
+{
+public:
+  cmExternalMakefileProjectGeneratorSimpleFactory(const std::string& n,
+                                                  const std::string& doc)
+    : cmExternalMakefileProjectGeneratorFactory(n, doc)
+  {
+  }
+
+  cmExternalMakefileProjectGenerator* CreateExternalMakefileProjectGenerator()
+    const CM_OVERRIDE
+  {
+    T* p = new T;
+    p->SetName(GetName());
+    return p;
+  }
 };
 
 #endif

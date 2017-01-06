@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindPerlLibs
 # ------------
@@ -36,20 +39,6 @@
 #   PERL_ARCHLIB       = path to the arch lib install directory
 #   PERL_PRIVLIB       = path to the priv lib install directory
 #   PERL_EXTRA_C_FLAGS = Compilation flags used to build perl
-
-#=============================================================================
-# Copyright 2004-2009 Kitware, Inc.
-# Copyright 2008      Andreas Schneider <asn@cryptomilk.org>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # find the perl executable
 include(${CMAKE_CURRENT_LIST_DIR}/FindPerl.cmake)
@@ -250,8 +239,6 @@ if (PERL_EXECUTABLE)
 
 endif ()
 
-# handle the QUIETLY and REQUIRED arguments and set PERLLIBS_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PerlLibs REQUIRED_VARS PERL_LIBRARY PERL_INCLUDE_PATH
                                            VERSION_VAR PERL_VERSION_STRING)

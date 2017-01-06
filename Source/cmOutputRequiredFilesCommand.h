@@ -1,29 +1,26 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmOutputRequiredFilesCommand_h
 #define cmOutputRequiredFilesCommand_h
+
+#include <cmConfigure.h>
+#include <set>
+#include <stdio.h>
+#include <string>
+#include <vector>
 
 #include "cmCommand.h"
 
 class cmDependInformation;
+class cmExecutionStatus;
 
 class cmOutputRequiredFilesCommand : public cmCommand
 {
 public:
-  cmTypeMacro(cmOutputRequiredFilesCommand, cmCommand);
-  virtual cmCommand* Clone() { return new cmOutputRequiredFilesCommand; }
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
-  virtual std::string GetName() const { return "output_required_files"; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmOutputRequiredFilesCommand; }
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
+  std::string GetName() const CM_OVERRIDE { return "output_required_files"; }
 
   void ListDependencies(cmDependInformation const* info, FILE* fout,
                         std::set<cmDependInformation const*>* visited);

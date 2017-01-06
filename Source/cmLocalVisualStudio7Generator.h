@@ -1,28 +1,25 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmLocalVisualStudio7Generator_h
 #define cmLocalVisualStudio7Generator_h
 
-#include "cmLocalVisualStudioGenerator.h"
+#include <cmConfigure.h>
 
+#include <iosfwd>
+#include <string>
+#include <vector>
+
+#include "cmLocalVisualStudioGenerator.h"
 #include "cmVisualStudioGeneratorOptions.h"
 
-class cmSourceFile;
 class cmCustomCommand;
-class cmSourceGroup;
-
-class cmLocalVisualStudio7GeneratorOptions;
+class cmGeneratorTarget;
+class cmGlobalGenerator;
 class cmLocalVisualStudio7GeneratorFCInfo;
 class cmLocalVisualStudio7GeneratorInternals;
+class cmMakefile;
+class cmSourceFile;
+class cmSourceGroup;
 
 /** \class cmLocalVisualStudio7Generator
  * \brief Write Visual Studio .NET project files.
@@ -128,6 +125,7 @@ private:
   friend class cmLocalVisualStudio7GeneratorInternals;
 
   class EventWriter;
+
   friend class EventWriter;
 
   std::string ModuleDefinitionFile;

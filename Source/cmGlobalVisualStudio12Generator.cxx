@@ -1,19 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2011 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio12Generator.h"
 
 #include "cmAlgorithms.h"
+#include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
+#include "cmVS12CLFlagTable.h"
+#include "cmVS12CSharpFlagTable.h"
+#include "cmVS12LibFlagTable.h"
+#include "cmVS12LinkFlagTable.h"
+#include "cmVS12MASMFlagTable.h"
+#include "cmVS12RCFlagTable.h"
 
 static const char vs12generatorName[] = "Visual Studio 12 2013";
 
@@ -36,8 +34,8 @@ class cmGlobalVisualStudio12Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                                   cmake* cm) const
+  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
+                                           cmake* cm) const CM_OVERRIDE
   {
     std::string genName;
     const char* p = cmVS12GenName(name, genName);
@@ -59,21 +57,22 @@ public:
     return 0;
   }
 
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const
+  void GetDocumentation(cmDocumentationEntry& entry) const CM_OVERRIDE
   {
     entry.Name = std::string(vs12generatorName) + " [arch]";
     entry.Brief = "Generates Visual Studio 2013 project files.  "
                   "Optional [arch] can be \"Win64\" or \"ARM\".";
   }
 
-  virtual void GetGenerators(std::vector<std::string>& names) const
+  void GetGenerators(std::vector<std::string>& names) const CM_OVERRIDE
   {
     names.push_back(vs12generatorName);
     names.push_back(vs12generatorName + std::string(" ARM"));
     names.push_back(vs12generatorName + std::string(" Win64"));
   }
 
-  virtual bool SupportsToolset() const { return true; }
+  bool SupportsToolset() const CM_OVERRIDE { return true; }
+  bool SupportsPlatform() const CM_OVERRIDE { return true; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio12Generator::NewFactory()
@@ -91,6 +90,12 @@ cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(
     "ProductDir",
     vc12Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v120";
+  this->DefaultClFlagTable = cmVS12CLFlagTable;
+  this->DefaultCSharpFlagTable = cmVS12CSharpFlagTable;
+  this->DefaultLibFlagTable = cmVS12LibFlagTable;
+  this->DefaultLinkFlagTable = cmVS12LinkFlagTable;
+  this->DefaultMasmFlagTable = cmVS12MASMFlagTable;
+  this->DefaultRcFlagTable = cmVS12RCFlagTable;
   this->Version = VS12;
 }
 
@@ -102,6 +107,21 @@ bool cmGlobalVisualStudio12Generator::MatchesGeneratorName(
     return genName == this->GetName();
   }
   return false;
+}
+
+bool cmGlobalVisualStudio12Generator::ParseGeneratorToolset(
+  std::string const& ts, cmMakefile* mf)
+{
+  std::string::size_type ts_end = ts.size();
+  if (cmHasLiteralSuffix(ts, ",host=x64")) {
+    this->GeneratorToolsetHostArchitecture = "x64";
+    ts_end -= 9;
+  } else if (ts == "host=x64") {
+    this->GeneratorToolsetHostArchitecture = "x64";
+    ts_end = 0;
+  }
+  return this->cmGlobalVisualStudio11Generator::ParseGeneratorToolset(
+    ts.substr(0, ts_end), mf);
 }
 
 bool cmGlobalVisualStudio12Generator::InitializeWindowsPhone(cmMakefile* mf)

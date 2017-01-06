@@ -1,17 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestVC_h
 #define cmCTestVC_h
 
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <string>
+
+#include "cmProcessOutput.h"
 #include "cmProcessTools.h"
 
 class cmCTest;
@@ -93,7 +90,6 @@ public:
   };
 
 protected:
-  struct File;
   friend struct File;
 
   /** Represent change to one file.  */
@@ -104,8 +100,8 @@ protected:
     Revision const* PriorRev;
     File()
       : Status(PathUpdated)
-      , Rev(0)
-      , PriorRev(0)
+      , Rev(CM_NULLPTR)
+      , PriorRev(CM_NULLPTR)
     {
     }
     File(PathStatus status, Revision const* rev, Revision const* priorRev)
@@ -121,11 +117,13 @@ protected:
 
   /** Run a command line and send output to given parsers.  */
   bool RunChild(char const* const* cmd, OutputParser* out, OutputParser* err,
-                const char* workDir = 0);
+                const char* workDir = CM_NULLPTR,
+                Encoding encoding = cmProcessOutput::Auto);
 
   /** Run VC update command line and send output to given parsers.  */
   bool RunUpdateCommand(char const* const* cmd, OutputParser* out,
-                        OutputParser* err = 0);
+                        OutputParser* err = CM_NULLPTR,
+                        Encoding encoding = cmProcessOutput::Auto);
 
   /** Write xml element for one file.  */
   void WriteXMLEntry(cmXMLWriter& xml, std::string const& path,

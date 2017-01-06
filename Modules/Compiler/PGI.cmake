@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2002-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # This module is shared by multiple languages; use include blocker.
 if(__COMPILER_PGI)
@@ -23,11 +13,11 @@ macro(__compiler_pgi lang)
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
 
   # Initial configuration flags.
-  set(CMAKE_${lang}_FLAGS_INIT "")
-  set(CMAKE_${lang}_FLAGS_DEBUG_INIT "-g -O0")
-  set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "-O2 -s")
-  set(CMAKE_${lang}_FLAGS_RELEASE_INIT "-fast -O3 -Mipa=fast")
-  set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "-O2 -gopt")
+  string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
+  string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -g -O0")
+  string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -O2 -s")
+  string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -fast -O3 -Mipa=fast")
+  string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -gopt")
 
   # Preprocessing and assembly rules.
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")

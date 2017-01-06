@@ -1,17 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmBuildCommand.h"
 
+#include <sstream>
+
 #include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 bool cmBuildCommand::InitialPass(std::vector<std::string> const& args,
                                  cmExecutionStatus&)
@@ -27,7 +26,7 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args,
 
 bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("requires at least one argument naming a CMake variable");
     return false;
   }
@@ -36,8 +35,8 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
   const char* variable = args[0].c_str();
 
   // Parse remaining arguments.
-  const char* configuration = 0;
-  const char* project_name = 0;
+  std::string configuration;
+  std::string project_name;
   std::string target;
   enum Doing
   {
@@ -56,10 +55,10 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
       doing = DoingTarget;
     } else if (doing == DoingConfiguration) {
       doing = DoingNone;
-      configuration = args[i].c_str();
+      configuration = args[i];
     } else if (doing == DoingProjectName) {
       doing = DoingNone;
-      project_name = args[i].c_str();
+      project_name = args[i];
     } else if (doing == DoingTarget) {
       doing = DoingNone;
       target = args[i];
@@ -76,14 +75,14 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
   // so we put this code here to end up with the same default configuration
   // as the original 2-arg build_command signature:
   //
-  if (!configuration || !*configuration) {
-    configuration = getenv("CMAKE_CONFIG_TYPE");
+  if (configuration.empty()) {
+    cmSystemTools::GetEnv("CMAKE_CONFIG_TYPE", configuration);
   }
-  if (!configuration || !*configuration) {
+  if (configuration.empty()) {
     configuration = "Release";
   }
 
-  if (project_name && *project_name) {
+  if (!project_name.empty()) {
     this->Makefile->IssueMessage(
       cmake::AUTHOR_WARNING,
       "Ignoring PROJECT_NAME option because it has no effect.");
@@ -108,10 +107,10 @@ bool cmBuildCommand::TwoArgsSignature(std::vector<std::string> const& args)
   const char* define = args[0].c_str();
   const char* cacheValue = this->Makefile->GetDefinition(define);
 
-  std::string configType = "Release";
-  const char* cfg = getenv("CMAKE_CONFIG_TYPE");
-  if (cfg && *cfg) {
-    configType = cfg;
+  std::string configType;
+  if (!cmSystemTools::GetEnv("CMAKE_CONFIG_TYPE", configType) ||
+      configType.empty()) {
+    configType = "Release";
   }
 
   std::string makecommand =
@@ -124,6 +123,6 @@ bool cmBuildCommand::TwoArgsSignature(std::vector<std::string> const& args)
   this->Makefile->AddCacheDefinition(define, makecommand.c_str(),
                                      "Command used to build entire project "
                                      "from the command line.",
-                                     cmState::STRING);
+                                     cmStateEnums::STRING);
   return true;
 }

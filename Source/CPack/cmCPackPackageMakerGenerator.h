@@ -1,18 +1,11 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCPackPackageMakerGenerator_h
 #define cmCPackPackageMakerGenerator_h
 
+#include <cmConfigure.h>
+
+#include "cmCPackGenerator.h"
 #include "cmCPackPKGGenerator.h"
 
 class cmCPackComponent;
@@ -33,12 +26,12 @@ public:
    */
   cmCPackPackageMakerGenerator();
   virtual ~cmCPackPackageMakerGenerator();
-  bool SupportsComponentInstallation() const;
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
 
 protected:
-  virtual int InitializeInternal();
-  int PackageFiles();
-  virtual const char* GetOutputExtension() { return ".dmg"; }
+  int InitializeInternal() CM_OVERRIDE;
+  int PackageFiles() CM_OVERRIDE;
+  const char* GetOutputExtension() CM_OVERRIDE { return ".dmg"; }
 
   // Run PackageMaker with the given command line, which will (if
   // successful) produce the given package file. Returns true if

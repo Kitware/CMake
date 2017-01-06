@@ -1,24 +1,18 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCPackIFWPackage_h
 #define cmCPackIFWPackage_h
 
-#include <cmStandardIncludes.h>
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <set>
+#include <string>
+#include <vector>
 
 class cmCPackComponent;
 class cmCPackComponentGroup;
-class cmCPackIFWInstaller;
 class cmCPackIFWGenerator;
+class cmCPackIFWInstaller;
 class cmXMLWriter;
 
 /** \class cmCPackIFWPackage
@@ -95,6 +89,9 @@ public:
   /// List of license agreements to be accepted by the installing user
   std::vector<std::string> Licenses;
 
+  /// List of pages to load
+  std::vector<std::string> UserInterfaces;
+
   /// Priority of the component in the tree
   std::string SortingPriority;
 
@@ -115,6 +112,8 @@ public:
 
   const char* GetOption(const std::string& op) const;
   bool IsOn(const std::string& op) const;
+  bool IsSetToOff(const std::string& op) const;
+  bool IsSetToEmpty(const std::string& op) const;
 
   bool IsVersionLess(const char* version);
   bool IsVersionGreater(const char* version);
@@ -128,6 +127,7 @@ public:
   int ConfigureFromComponent(cmCPackComponent* component);
   int ConfigureFromGroup(cmCPackComponentGroup* group);
   int ConfigureFromGroup(const std::string& groupName);
+  int ConfigureFromPrefix(const std::string& prefix);
 
   void GeneratePackageFile();
 

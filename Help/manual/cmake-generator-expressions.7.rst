@@ -66,12 +66,16 @@ Available logical expressions are:
   ``1`` if the CMake-id of the C compiler matches ``comp``, otherwise ``0``.
 ``$<CXX_COMPILER_ID:comp>``
   ``1`` if the CMake-id of the CXX compiler matches ``comp``, otherwise ``0``.
-``$<VERSION_GREATER:v1,v2>``
-  ``1`` if ``v1`` is a version greater than ``v2``, else ``0``.
 ``$<VERSION_LESS:v1,v2>``
   ``1`` if ``v1`` is a version less than ``v2``, else ``0``.
+``$<VERSION_GREATER:v1,v2>``
+  ``1`` if ``v1`` is a version greater than ``v2``, else ``0``.
 ``$<VERSION_EQUAL:v1,v2>``
   ``1`` if ``v1`` is the same version as ``v2``, else ``0``.
+``$<VERSION_LESS_EQUAL:v1,v2>``
+  ``1`` if ``v1`` is a version less than or equal to ``v2``, else ``0``.
+``$<VERSION_GREATER_EQUAL:v1,v2>``
+  ``1`` if ``v1`` is a version greater than or equal to ``v2``, else ``0``.
 ``$<C_COMPILER_VERSION:ver>``
   ``1`` if the version of the C compiler matches ``ver``, otherwise ``0``.
 ``$<CXX_COMPILER_VERSION:ver>``

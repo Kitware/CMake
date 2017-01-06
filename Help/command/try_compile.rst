@@ -35,7 +35,11 @@ Try Compiling Source Files
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_LIBRARIES <libs>...]
               [OUTPUT_VARIABLE <var>]
-              [COPY_FILE <fileName> [COPY_FILE_ERROR <var>]])
+              [COPY_FILE <fileName> [COPY_FILE_ERROR <var>]]
+              [<LANG>_STANDARD <std>]
+              [<LANG>_STANDARD_REQUIRED <bool>]
+              [<LANG>_EXTENSIONS <bool>]
+              )
 
 Try building an executable from one or more source files.  The success or
 failure of the ``try_compile``, i.e. ``TRUE`` or ``FALSE`` respectively, is
@@ -82,6 +86,19 @@ The options are:
 ``OUTPUT_VARIABLE <var>``
   Store the output from the build process the given variable.
 
+``<LANG>_STANDARD <std>``
+  Specify the :prop_tgt:`C_STANDARD`, :prop_tgt:`CXX_STANDARD`,
+  or :prop_tgt:`CUDA_STANDARD` target property of the generated project.
+
+``<LANG>_STANDARD_REQUIRED <bool>``
+  Specify the :prop_tgt:`C_STANDARD_REQUIRED`,
+  :prop_tgt:`CXX_STANDARD_REQUIRED`, or :prop_tgt:`CUDA_STANDARD_REQUIRED`
+  target property of the generated project.
+
+``<LANG>_EXTENSIONS <bool>``
+  Specify the :prop_tgt:`C_EXTENSIONS`, :prop_tgt:`CXX_EXTENSIONS`,
+  or :prop_tgt:`CUDA_EXTENSIONS` target property of the generated project.
+
 In this version all files in ``<bindir>/CMakeFiles/CMakeTmp`` will be
 cleaned automatically.  For debugging, ``--debug-trycompile`` can be
 passed to ``cmake`` to avoid this clean.  However, multiple sequential
@@ -119,3 +136,20 @@ the type of target used for the source file signature.
 Set the :variable:`CMAKE_TRY_COMPILE_PLATFORM_VARIABLES` variable to specify
 variables that must be propagated into the test project.  This variable is
 meant for use only in toolchain files.
+
+If :policy:`CMP0067` is set to ``NEW``, or any of the ``<LANG>_STANDARD``,
+``<LANG>_STANDARD_REQUIRED``, or ``<LANG>_EXTENSIONS`` options are used,
+then the language standard variables are honored:
+
+* :variable:`CMAKE_C_STANDARD`
+* :variable:`CMAKE_C_STANDARD_REQUIRED`
+* :variable:`CMAKE_C_EXTENSIONS`
+* :variable:`CMAKE_CXX_STANDARD`
+* :variable:`CMAKE_CXX_STANDARD_REQUIRED`
+* :variable:`CMAKE_CXX_EXTENSIONS`
+* :variable:`CMAKE_CUDA_STANDARD`
+* :variable:`CMAKE_CUDA_STANDARD_REQUIRED`
+* :variable:`CMAKE_CUDA_EXTENSIONS`
+
+Their values are used to set the corresponding target properties in
+the generated project (unless overridden by an explicit option).

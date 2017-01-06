@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindThreads
 # -----------
@@ -36,20 +39,6 @@
 # Please note that the compiler flag can only be used with the imported
 # target. Use of both the imported target as well as this switch is highly
 # recommended for new code.
-
-#=============================================================================
-# Copyright 2002-2009 Kitware, Inc.
-# Copyright 2011-2015 Rolf Eike Beer <eike@sf-mail.de>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 include (CheckLibraryExists)
 include (CheckSymbolExists)

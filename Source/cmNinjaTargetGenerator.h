@@ -1,31 +1,25 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2011 Peter Collingbourne <peter@pcc.me.uk>
-  Copyright 2011 Nicolas Despres <nicolas.despres@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmNinjaTargetGenerator_h
 #define cmNinjaTargetGenerator_h
 
-#include "cmCommonTargetGenerator.h"
+#include <cmConfigure.h>
 
+#include "cmCommonTargetGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
-#include "cmLocalNinjaGenerator.h"
 #include "cmNinjaTypes.h"
 #include "cmOSXBundleGenerator.h"
 
-class cmTarget;
+#include <set>
+#include <string>
+#include <vector>
+
+class cmCustomCommand;
 class cmGeneratedFileStream;
 class cmGeneratorTarget;
+class cmLocalNinjaGenerator;
 class cmMakefile;
 class cmSourceFile;
-class cmCustomCommand;
 
 class cmNinjaTargetGenerator : public cmCommonTargetGenerator
 {
@@ -37,7 +31,7 @@ public:
   cmNinjaTargetGenerator(cmGeneratorTarget* target);
 
   /// Destructor.
-  virtual ~cmNinjaTargetGenerator();
+  ~cmNinjaTargetGenerator() CM_OVERRIDE;
 
   virtual void Generate() = 0;
 
@@ -66,6 +60,10 @@ protected:
   cmMakefile* GetMakefile() const { return this->Makefile; }
 
   std::string LanguageCompilerRule(const std::string& lang) const;
+  std::string LanguagePreprocessRule(std::string const& lang) const;
+  bool NeedExplicitPreprocessing(std::string const& lang) const;
+  std::string LanguageDyndepRule(std::string const& lang) const;
+  bool NeedDyndep(std::string const& lang) const;
 
   std::string OrderDependsTargetForTarget();
 
@@ -79,7 +77,8 @@ protected:
   std::string ComputeFlagsForObject(cmSourceFile const* source,
                                     const std::string& language);
 
-  void AddIncludeFlags(std::string& flags, std::string const& lang);
+  void AddIncludeFlags(std::string& flags,
+                       std::string const& lang) CM_OVERRIDE;
 
   std::string ComputeDefines(cmSourceFile const* source,
                              const std::string& language);
@@ -102,6 +101,15 @@ protected:
   /// @return the object file path for the given @a source.
   std::string GetObjectFilePath(cmSourceFile const* source) const;
 
+  /// @return the preprocessed source file path for the given @a source.
+  std::string GetPreprocessedFilePath(cmSourceFile const* source) const;
+
+  /// @return the dyndep file path for this target.
+  std::string GetDyndepFilePath(std::string const& lang) const;
+
+  /// @return the target dependency scanner info file path
+  std::string GetTargetDependInfoPath(std::string const& lang) const;
+
   /// @return the file path where the target named @a name is generated.
   std::string GetTargetFilePath(const std::string& name) const;
 
@@ -113,6 +121,7 @@ protected:
   void WriteObjectBuildStatements();
   void WriteObjectBuildStatement(cmSourceFile const* source,
                                  bool writeOrderDependsTargetForTarget);
+  void WriteTargetDependInfo(std::string const& lang);
 
   void ExportObjectCompileCommand(
     std::string const& language, std::string const& sourceFileName,
@@ -134,7 +143,8 @@ protected:
     {
     }
 
-    void operator()(cmSourceFile const& source, const char* pkgloc);
+    void operator()(cmSourceFile const& source,
+                    const char* pkgloc) CM_OVERRIDE;
 
   private:
     cmNinjaTargetGenerator* Generator;
@@ -155,7 +165,9 @@ private:
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
   cmNinjaDeps Objects;
+  cmNinjaDeps DDIFiles; // TODO: Make per-language.
   std::vector<cmCustomCommand const*> CustomCommands;
+  cmNinjaDeps ExtraFiles;
 };
 
 #endif // ! cmNinjaTargetGenerator_h

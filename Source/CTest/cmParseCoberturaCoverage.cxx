@@ -1,9 +1,14 @@
 #include "cmParseCoberturaCoverage.h"
 
+#include "cmCTest.h"
+#include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
-#include <cmsys/Directory.hxx>
+
+#include <cmConfigure.h>
 #include <cmsys/FStream.hxx>
+#include <stdlib.h>
+#include <string.h>
 
 class cmParseCoberturaCoverage::XMLParser : public cmXMLParser
 {
@@ -20,10 +25,10 @@ public:
     this->CurFileName = "";
   }
 
-  virtual ~XMLParser() {}
+  ~XMLParser() CM_OVERRIDE {}
 
 protected:
-  virtual void EndElement(const std::string& name)
+  void EndElement(const std::string& name) CM_OVERRIDE
   {
     if (name == "source") {
       this->InSource = false;
@@ -34,7 +39,7 @@ protected:
     }
   }
 
-  virtual void CharacterDataHandler(const char* data, int length)
+  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
   {
     std::string tmp;
     tmp.insert(0, data, length);
@@ -46,10 +51,10 @@ protected:
     }
   }
 
-  virtual void StartElement(const std::string& name, const char** atts)
+  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
   {
     std::string FoundSource;
-    std::string finalpath = "";
+    std::string finalpath;
     if (name == "source") {
       this->InSource = true;
     } else if (name == "sources") {

@@ -1,25 +1,21 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExecProgramCommand.h"
 
+#include <cmsys/Process.h>
+#include <stdio.h>
+
+#include "cmMakefile.h"
+#include "cmProcessOutput.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/Process.h>
+class cmExecutionStatus;
 
 // cmExecProgramCommand
 bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
@@ -90,7 +86,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
                                               args[1].c_str(), verbose);
   } else {
     result = cmExecProgramCommand::RunCommand(command.c_str(), output, retVal,
-                                              0, verbose);
+                                              CM_NULLPTR, verbose);
   }
   if (!result) {
     retVal = -1;
@@ -121,7 +117,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
 
 bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
                                       int& retVal, const char* dir,
-                                      bool verbose)
+                                      bool verbose, Encoding encoding)
 {
   if (cmSystemTools::GetRunCommandOutput()) {
     verbose = false;
@@ -209,7 +205,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   }
   fflush(stdout);
   fflush(stderr);
-  const char* cmd[] = { "/bin/sh", "-c", command, 0 };
+  const char* cmd[] = { "/bin/sh", "-c", command, CM_NULLPTR };
   cmsysProcess_SetCommand(cp, cmd);
 #endif
 
@@ -219,17 +215,28 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   int length;
   char* data;
   int p;
-  while ((p = cmsysProcess_WaitForData(cp, &data, &length, 0), p)) {
+  cmProcessOutput processOutput(encoding);
+  std::string strdata;
+  while ((p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR), p)) {
     if (p == cmsysProcess_Pipe_STDOUT || p == cmsysProcess_Pipe_STDERR) {
       if (verbose) {
-        cmSystemTools::Stdout(data, length);
+        processOutput.DecodeText(data, length, strdata);
+        cmSystemTools::Stdout(strdata.c_str(), strdata.size());
       }
       output.append(data, length);
     }
   }
 
+  if (verbose) {
+    processOutput.DecodeText(std::string(), strdata);
+    if (!strdata.empty()) {
+      cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+    }
+  }
+
   // All output has been read.  Wait for the process to exit.
-  cmsysProcess_WaitForExit(cp, 0);
+  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+  processOutput.DecodeText(output, output);
 
   // Check the result of running the process.
   std::string msg;

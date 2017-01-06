@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CheckPrototypeDefinition
 # ------------------------
@@ -36,19 +39,6 @@
 #   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 #   CMAKE_REQUIRED_QUIET = execute quietly without messages
 
-#=============================================================================
-# Copyright 2005-2009 Kitware, Inc.
-# Copyright 2010-2011 Andreas Schneider <asn@cryptomilk.org>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 #
 
 
@@ -75,8 +65,8 @@ function(CHECK_PROTOTYPE_DEFINITION _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIAB
     endif()
 
     foreach(_FILE ${_HEADER})
-      set(CHECK_PROTOTYPE_DEFINITION_HEADER
-        "${CHECK_PROTOTYPE_DEFINITION_HEADER}#include <${_FILE}>\n")
+      string(APPEND CHECK_PROTOTYPE_DEFINITION_HEADER
+        "#include <${_FILE}>\n")
     endforeach()
 
     set(CHECK_PROTOTYPE_DEFINITION_SYMBOL ${_FUNCTION})

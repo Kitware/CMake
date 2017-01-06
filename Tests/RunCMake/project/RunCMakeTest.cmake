@@ -1,5 +1,8 @@
 include(RunCMake)
 
+if(CMake_TEST_RESOURCES)
+  run_cmake(ExplicitRC)
+endif()
 run_cmake(LanguagesImplicit)
 run_cmake(LanguagesEmpty)
 run_cmake(LanguagesNONE)

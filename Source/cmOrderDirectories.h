@@ -1,25 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmOrderDirectories_h
 #define cmOrderDirectories_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
 #include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
+class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmOrderDirectoriesConstraint;
-class cmOrderDirectoriesConstraintLibrary;
-class cmGeneratorTarget;
 
 /** \class cmOrderDirectories
  * \brief Compute a safe runtime path order for a set of shared libraries.
@@ -30,7 +25,8 @@ public:
   cmOrderDirectories(cmGlobalGenerator* gg, cmGeneratorTarget const* target,
                      const char* purpose);
   ~cmOrderDirectories();
-  void AddRuntimeLibrary(std::string const& fullPath, const char* soname = 0);
+  void AddRuntimeLibrary(std::string const& fullPath,
+                         const char* soname = CM_NULLPTR);
   void AddLinkLibrary(std::string const& fullPath);
   void AddUserDirectories(std::vector<std::string> const& extra);
   void AddLanguageDirectories(std::vector<std::string> const& dirs);

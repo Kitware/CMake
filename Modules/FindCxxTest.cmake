@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindCxxTest
 # -----------
@@ -55,7 +58,8 @@
 #        The test generator that is actually used (chosen using user preferences
 #        and interpreters found in the system)
 #    CXXTEST_TESTGEN_INTERPRETER (since CMake 2.8.3)
-#        The full path to the Perl or Python executable on the system
+#        The full path to the Perl or Python executable on the system, on
+#        platforms where the script cannot be executed using its shebang line.
 #
 #
 #
@@ -134,20 +138,6 @@
 #              }
 #           };
 
-#=============================================================================
-# Copyright 2008-2010 Kitware, Inc.
-# Copyright 2008-2010 Philip Lowman <philip@yhbt.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 # Version 1.4 (11/18/10) (CMake 2.8.4)
 #     Issue 11384: Added support to the CXX_ADD_TEST macro so header
 #                  files (containing the tests themselves) show up in
@@ -221,7 +211,13 @@ if(PYTHONINTERP_FOUND OR PERL_FOUND)
 
    if(PYTHONINTERP_FOUND AND (CXXTEST_USE_PYTHON OR NOT PERL_FOUND OR NOT DEFINED CXXTEST_USE_PYTHON))
       set(CXXTEST_TESTGEN_EXECUTABLE ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE})
-      set(CXXTEST_TESTGEN_INTERPRETER ${PYTHON_EXECUTABLE})
+      execute_process(COMMAND ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE} --version
+        OUTPUT_VARIABLE _CXXTEST_OUT ERROR_VARIABLE _CXXTEST_OUT RESULT_VARIABLE _CXXTEST_RESULT)
+      if(_CXXTEST_RESULT EQUAL 0)
+        set(CXXTEST_TESTGEN_INTERPRETER "")
+      else()
+        set(CXXTEST_TESTGEN_INTERPRETER ${PYTHON_EXECUTABLE})
+      endif()
       FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG
           CXXTEST_INCLUDE_DIR CXXTEST_PYTHON_TESTGEN_EXECUTABLE)
 

@@ -1,25 +1,26 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestLaunch.h"
 
-#include "cmGeneratedFileStream.h"
-#include "cmSystemTools.h"
-#include "cmXMLWriter.h"
-#include "cmake.h"
+#include <cmConfigure.h>
 
 #include <cmsys/FStream.hxx>
-#include <cmsys/MD5.h>
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
+#include <iostream>
+#include <stdlib.h>
+#include <string.h>
+
+#include "cmCryptoHash.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmProcessOutput.h"
+#include "cmStateSnapshot.h"
+#include "cmSystemTools.h"
+#include "cmXMLWriter.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 #ifdef _WIN32
 #include <fcntl.h> // for _O_BINARY
@@ -30,7 +31,7 @@
 cmCTestLaunch::cmCTestLaunch(int argc, const char* const* argv)
 {
   this->Passthru = true;
-  this->Process = 0;
+  this->Process = CM_NULLPTR;
   this->ExitCode = 1;
   this->CWD = cmSystemTools::GetCurrentWorkingDirectory();
 
@@ -126,12 +127,11 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
       this->HandleRealArg(this->RealArgV[i]);
     }
     return true;
-  } else {
-    this->RealArgC = 0;
-    this->RealArgV = 0;
-    std::cerr << "No launch/command separator ('--') found!\n";
-    return false;
   }
+  this->RealArgC = 0;
+  this->RealArgV = CM_NULLPTR;
+  std::cerr << "No launch/command separator ('--') found!\n";
+  return false;
 }
 
 void cmCTestLaunch::HandleRealArg(const char* arg)
@@ -168,17 +168,14 @@ void cmCTestLaunch::ComputeFileNames()
 
   // We hash the input command working dir and command line to obtain
   // a repeatable and (probably) unique name for log files.
-  char hash[32];
-  cmsysMD5* md5 = cmsysMD5_New();
-  cmsysMD5_Initialize(md5);
-  cmsysMD5_Append(md5, (unsigned char const*)(this->CWD.c_str()), -1);
+  cmCryptoHash md5(cmCryptoHash::AlgoMD5);
+  md5.Initialize();
+  md5.Append(this->CWD);
   for (std::vector<std::string>::const_iterator ai = this->RealArgs.begin();
        ai != this->RealArgs.end(); ++ai) {
-    cmsysMD5_Append(md5, (unsigned char const*)ai->c_str(), -1);
+    md5.Append(*ai);
   }
-  cmsysMD5_FinalizeHex(md5, hash);
-  cmsysMD5_Delete(md5);
-  this->LogHash.assign(hash, 32);
+  this->LogHash = md5.FinalizeHex();
 
   // We store stdout and stderr in temporary log files.
   this->LogOut = this->LogDir;
@@ -227,23 +224,37 @@ void cmCTestLaunch::RunChild()
 
   // Record child stdout and stderr if necessary.
   if (!this->Passthru) {
-    char* data = 0;
+    char* data = CM_NULLPTR;
     int length = 0;
-    while (int p = cmsysProcess_WaitForData(cp, &data, &length, 0)) {
+    cmProcessOutput processOutput;
+    std::string strdata;
+    while (int p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) {
       if (p == cmsysProcess_Pipe_STDOUT) {
-        fout.write(data, length);
-        std::cout.write(data, length);
+        processOutput.DecodeText(data, length, strdata, 1);
+        fout.write(strdata.c_str(), strdata.size());
+        std::cout.write(strdata.c_str(), strdata.size());
         this->HaveOut = true;
       } else if (p == cmsysProcess_Pipe_STDERR) {
-        ferr.write(data, length);
-        std::cerr.write(data, length);
+        processOutput.DecodeText(data, length, strdata, 2);
+        ferr.write(strdata.c_str(), strdata.size());
+        std::cerr.write(strdata.c_str(), strdata.size());
         this->HaveErr = true;
       }
+    }
+    processOutput.DecodeText(std::string(), strdata, 1);
+    if (!strdata.empty()) {
+      fout.write(strdata.c_str(), strdata.size());
+      std::cout.write(strdata.c_str(), strdata.size());
+    }
+    processOutput.DecodeText(std::string(), strdata, 2);
+    if (!strdata.empty()) {
+      ferr.write(strdata.c_str(), strdata.size());
+      std::cerr.write(strdata.c_str(), strdata.size());
     }
   }
 
   // Wait for the real command to finish.
-  cmsysProcess_WaitForExit(cp, 0);
+  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
   this->ExitCode = cmsysProcess_GetExitValue(cp);
 }
 
@@ -384,7 +395,7 @@ void cmCTestLaunch::WriteXMLAction(cmXMLWriter& xml)
   }
 
   // OutputType
-  const char* outputType = 0;
+  const char* outputType = CM_NULLPTR;
   if (!this->OptionTargetType.empty()) {
     if (this->OptionTargetType == "EXECUTABLE") {
       outputType = "executable";
@@ -609,10 +620,6 @@ int cmCTestLaunch::Main(int argc, const char* const argv[])
   return self.Run();
 }
 
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmake.h"
-#include <cmsys/auto_ptr.hxx>
 void cmCTestLaunch::LoadConfig()
 {
   cmake cm;
@@ -620,7 +627,7 @@ void cmCTestLaunch::LoadConfig()
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
-  cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
+  CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
   std::string fname = this->LogDir;
   fname += "CTestLaunchConfig.cmake";
   if (cmSystemTools::FileExists(fname.c_str()) &&

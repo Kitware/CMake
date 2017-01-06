@@ -1,37 +1,32 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestSubmitHandler.h"
 
+#include <cm_curl.h>
+#include <cm_jsoncpp_reader.h>
+#include <cm_jsoncpp_value.h>
+#include <cmsys/Process.h>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "cmCTest.h"
+#include "cmCTestCurl.h"
 #include "cmCTestScriptHandler.h"
+#include "cmCurl.h"
 #include "cmGeneratedFileStream.h"
+#include "cmProcessOutput.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
-#include "cmVersion.h"
+#include "cmThirdParty.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
 
-#include <cmsys/Base64.h>
-#include <cmsys/Process.h>
-
-// For XML-RPC submission
-#include "cm_xmlrpc.h"
-
-#include <cm_jsoncpp_reader.h>
-// For curl submission
-#include "cmCTestCurl.h"
-#include "cmCurl.h"
-
+#if defined(CTEST_USE_XMLRPC)
+#include "cmVersion.h"
+#include <cm_xmlrpc.h>
 #include <sys/stat.h>
+#endif
 
 #define SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT 120
 
@@ -41,7 +36,7 @@ class cmCTestSubmitHandler::ResponseParser : public cmXMLParser
 {
 public:
   ResponseParser() { this->Status = STATUS_OK; }
-  ~ResponseParser() {}
+  ~ResponseParser() CM_OVERRIDE {}
 
 public:
   enum StatusType
@@ -52,7 +47,6 @@ public:
   };
 
   StatusType Status;
-  std::string CDashVersion;
   std::string Filename;
   std::string MD5;
   std::string Message;
@@ -69,20 +63,18 @@ private:
     return val;
   }
 
-  virtual void StartElement(const std::string& name, const char** atts)
+  void StartElement(const std::string& /*name*/,
+                    const char** /*atts*/) CM_OVERRIDE
   {
     this->CurrentValue.clear();
-    if (name == "cdash") {
-      this->CDashVersion = this->FindAttribute(atts, "version");
-    }
   }
 
-  virtual void CharacterDataHandler(const char* data, int length)
+  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
   {
     this->CurrentValue.insert(this->CurrentValue.end(), data, data + length);
   }
 
-  virtual void EndElement(const std::string& name)
+  void EndElement(const std::string& name) CM_OVERRIDE
   {
     if (name == "status") {
       std::string status = cmSystemTools::UpperCase(this->GetCurrentValue());
@@ -116,7 +108,8 @@ static size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
   return realsize;
 }
 
-static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL*, curl_infotype,
+static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
+                                                    curl_infotype /*unused*/,
                                                     char* chPtr, size_t size,
                                                     void* data)
 {
@@ -150,7 +143,7 @@ void cmCTestSubmitHandler::Initialize()
   this->HTTPProxyAuth = "";
   this->FTPProxy = "";
   this->FTPProxyType = 0;
-  this->LogFile = 0;
+  this->LogFile = CM_NULLPTR;
   this->Files.clear();
 }
 
@@ -308,7 +301,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
   FILE* ftpfile;
   char error_buffer[1024];
   struct curl_slist* headers =
-    ::curl_slist_append(NULL, "Content-Type: text/xml");
+    ::curl_slist_append(CM_NULLPTR, "Content-Type: text/xml");
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
@@ -395,7 +388,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       *this->LogFile << "\tUpload file: " << local_file << " to "
                      << remote_file << std::endl;
 
-      std::string ofile = "";
+      std::string ofile;
       for (kk = 0; kk < remote_file.size(); kk++) {
         char c = remote_file[kk];
         char hexCh[4] = { 0, 0, 0, 0 };
@@ -475,20 +468,6 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
 
-      if (cmSystemTools::IsOn(this->GetOption("InternalTest")) &&
-          cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                        this->CTest->GetCDashVersion().c_str(),
-                                        "1.7")) {
-        // mock failure output for internal test case
-        std::string mock_output =
-          "<cdash version=\"1.7.0\">\n"
-          "  <status>ERROR</status>\n"
-          "  <message>Checksum failed for file.</message>\n"
-          "</cdash>\n";
-        chunk.clear();
-        chunk.assign(mock_output.begin(), mock_output.end());
-      }
-
       if (!chunk.empty()) {
         cmCTestOptionalLog(this->CTest, DEBUG, "CURL output: ["
                              << cmCTestLogWrite(&*chunk.begin(), chunk.size())
@@ -507,10 +486,10 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       // If curl failed for any reason, or checksum fails, wait and retry
       //
       if (res != CURLE_OK || this->HasErrors) {
-        std::string retryDelay = this->GetOption("RetryDelay") == NULL
+        std::string retryDelay = this->GetOption("RetryDelay") == CM_NULLPTR
           ? ""
           : this->GetOption("RetryDelay");
-        std::string retryCount = this->GetOption("RetryCount") == NULL
+        std::string retryCount = this->GetOption("RetryCount") == CM_NULLPTR
           ? ""
           : this->GetOption("RetryCount");
 
@@ -603,7 +582,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
 void cmCTestSubmitHandler::ParseResponse(
   cmCTestSubmitHandlerVectorOfChar chunk)
 {
-  std::string output = "";
+  std::string output;
   output.append(chunk.begin(), chunk.end());
 
   if (output.find("<cdash") != output.npos) {
@@ -683,7 +662,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<std::string>& files,
       ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void*)&chunkDebug);
 
       std::string rfile = remoteprefix + cmSystemTools::GetFilenameName(*file);
-      std::string ofile = "";
+      std::string ofile;
       std::string::iterator kk;
       for (kk = rfile.begin(); kk < rfile.end(); ++kk) {
         char c = *kk;
@@ -769,14 +748,14 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
 {
   if (scp_command.empty() || localprefix.empty() || files.empty() ||
       remoteprefix.empty() || url.empty()) {
-    return 0;
+    return false;
   }
 
   std::vector<const char*> argv;
   argv.push_back(scp_command.c_str()); // Scp command
   argv.push_back(scp_command.c_str()); // Dummy string for file
   argv.push_back(scp_command.c_str()); // Dummy string for remote url
-  argv.push_back(0);
+  argv.push_back(CM_NULLPTR);
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
@@ -806,13 +785,23 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
     cmsysProcess_Execute(cp);
     char* data;
     int length;
+    cmProcessOutput processOutput;
+    std::string strdata;
 
-    while (cmsysProcess_WaitForData(cp, &data, &length, 0)) {
+    while (cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) {
+      processOutput.DecodeText(data, length, strdata);
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         cmCTestLogWrite(data, length), this->Quiet);
+                         cmCTestLogWrite(strdata.c_str(), strdata.size()),
+                         this->Quiet);
+    }
+    processOutput.DecodeText(std::string(), strdata);
+    if (!strdata.empty()) {
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                         cmCTestLogWrite(strdata.c_str(), strdata.size()),
+                         this->Quiet);
     }
 
-    cmsysProcess_WaitForExit(cp, 0);
+    cmsysProcess_WaitForExit(cp, CM_NULLPTR);
 
     int result = cmsysProcess_GetState(cp);
 
@@ -863,7 +852,7 @@ bool cmCTestSubmitHandler::SubmitUsingCP(const std::string& localprefix,
                << "\tremoteprefix: " << remoteprefix << "\n"
                << "\tdestination: " << destination << std::endl);
     /* clang-format on */
-    return 0;
+    return false;
   }
 
   cmCTest::SetOfStrings::const_iterator file;
@@ -902,8 +891,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
 
   /* Call the famous server at UserLand. */
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "   Submitting to: "
-                       << realURL.c_str() << " (" << remoteprefix.c_str()
-                       << ")" << std::endl,
+                       << realURL << " (" << remoteprefix << ")" << std::endl,
                      this->Quiet);
   cmCTest::SetOfStrings::const_iterator file;
   for (file = files.begin(); file != files.end(); ++file) {
@@ -914,12 +902,12 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
       local_file = localprefix + "/" + *file;
     }
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Submit file: " << local_file.c_str() << std::endl,
+                       "   Submit file: " << local_file << std::endl,
                        this->Quiet);
     struct stat st;
     if (::stat(local_file.c_str(), &st)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  Cannot find file: " << local_file.c_str() << std::endl);
+                 "  Cannot find file: " << local_file << std::endl);
       return false;
     }
 
@@ -927,15 +915,15 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
     // make sure the file is not too big.
     if (static_cast<off_t>(static_cast<size_t>(st.st_size)) !=
         static_cast<off_t>(st.st_size)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  File too big: " << local_file.c_str() << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "  File too big: " << local_file
+                                                                << std::endl);
       return false;
     }
     size_t fileSize = static_cast<size_t>(st.st_size);
-    FILE* fp = cmsys::SystemTools::Fopen(local_file.c_str(), "rb");
+    FILE* fp = cmsys::SystemTools::Fopen(local_file, "rb");
     if (!fp) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  Cannot open file: " << local_file.c_str() << std::endl);
+                 "  Cannot open file: " << local_file << std::endl);
       return false;
     }
 
@@ -944,7 +932,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
       delete[] fileBuffer;
       fclose(fp);
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  Cannot read file: " << local_file.c_str() << std::endl);
+                 "  Cannot read file: " << local_file << std::endl);
       return false;
     }
     fclose(fp);
@@ -977,10 +965,9 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
   return true;
 }
 #else
-bool cmCTestSubmitHandler::SubmitUsingXMLRPC(std::string const&,
-                                             std::set<std::string> const&,
-                                             std::string const&,
-                                             std::string const&)
+bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
+  std::string const& /*unused*/, std::set<std::string> const& /*unused*/,
+  std::string const& /*unused*/, std::string const& /*unused*/)
 {
   return false;
 }

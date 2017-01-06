@@ -1,18 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestSleepCommand_h
 #define cmCTestSleepCommand_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestCommand.h"
+
+#include <string>
+#include <vector>
+
+class cmCommand;
+class cmExecutionStatus;
 
 /** \class cmCTestSleep
  * \brief Run a ctest script
@@ -28,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestSleepCommand* ni = new cmCTestSleepCommand;
     ni->CTest = this->CTest;
@@ -40,15 +39,13 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_sleep"; }
-
-  cmTypeMacro(cmCTestSleepCommand, cmCTestCommand);
+  std::string GetName() const CM_OVERRIDE { return "ctest_sleep"; }
 };
 
 #endif

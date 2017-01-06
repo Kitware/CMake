@@ -1,19 +1,10 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "CMakeSetupDialog.h"
 
 #include <QCloseEvent>
 #include <QCoreApplication>
+#include <QDesktopServices>
 #include <QDialogButtonBox>
 #include <QDragEnterEvent>
 #include <QFileDialog>
@@ -41,7 +32,7 @@
 
 QCMakeThread::QCMakeThread(QObject* p)
   : QThread(p)
-  , CMakeInstance(NULL)
+  , CMakeInstance(CM_NULLPTR)
 {
 }
 
@@ -57,7 +48,7 @@ void QCMakeThread::run()
   emit this->cmakeInitialized();
   this->exec();
   delete this->CMakeInstance;
-  this->CMakeInstance = NULL;
+  this->CMakeInstance = CM_NULLPTR;
 }
 
 CMakeSetupDialog::CMakeSetupDialog()
@@ -227,6 +218,8 @@ void CMakeSetupDialog::initialize()
 
   QObject::connect(this->GenerateButton, SIGNAL(clicked(bool)), this,
                    SLOT(doGenerate()));
+  QObject::connect(this->OpenProjectButton, SIGNAL(clicked(bool)), this,
+                   SLOT(doOpenProject()));
 
   QObject::connect(this->BrowseSourceDirectoryButton, SIGNAL(clicked(bool)),
                    this, SLOT(doSourceBrowse()));
@@ -499,6 +492,26 @@ void CMakeSetupDialog::doGenerate()
   this->ConfigureNeeded = true;
 }
 
+QString CMakeSetupDialog::getProjectFilename()
+{
+  QStringList nameFilter;
+  nameFilter << "*.sln"
+             << "*.xcodeproj";
+  QDir directory(this->BinaryDirectory->currentText());
+  QStringList nlnFile = directory.entryList(nameFilter);
+
+  if (nlnFile.count() == 1) {
+    return this->BinaryDirectory->currentText() + "/" + nlnFile.at(0);
+  }
+
+  return QString();
+}
+
+void CMakeSetupDialog::doOpenProject()
+{
+  QDesktopServices::openUrl(QUrl::fromLocalFile(this->getProjectFilename()));
+}
+
 void CMakeSetupDialog::closeEvent(QCloseEvent* e)
 {
   // prompt for close if there are unsaved changes, and we're not busy
@@ -616,6 +629,11 @@ void CMakeSetupDialog::updateBinaryDirectory(const QString& dir)
     this->BinaryDirectory->blockSignals(true);
     this->BinaryDirectory->setEditText(dir);
     this->BinaryDirectory->blockSignals(false);
+  }
+  if (!this->getProjectFilename().isEmpty()) {
+    this->OpenProjectButton->setEnabled(true);
+  } else {
+    this->OpenProjectButton->setEnabled(false);
   }
 }
 
@@ -830,17 +848,18 @@ void CMakeSetupDialog::doAbout()
     "\n"
     "CMake GUI maintained by csimsoft,\n"
     "built using Qt %2 (qt-project.org).\n"
-#ifdef CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL
+#ifdef USE_LGPL
     "\n"
     "The Qt Toolkit is Copyright (C) Digia Plc and/or its subsidiary(-ies).\n"
-    "Qt is licensed under terms of the GNU LGPLv2.1, available at:\n"
+    "Qt is licensed under terms of the GNU LGPLv" USE_LGPL ", available at:\n"
     " \"%3\""
 #endif
     );
   msg = msg.arg(cmVersion::GetCMakeVersion());
   msg = msg.arg(qVersion());
-#ifdef CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL
-  std::string lgpl = cmSystemTools::GetCMakeRoot() + "/Licenses/LGPLv2.1.txt";
+#ifdef USE_LGPL
+  std::string lgpl =
+    cmSystemTools::GetCMakeRoot() + "/Licenses/LGPLv" USE_LGPL ".txt";
   msg = msg.arg(lgpl.c_str());
 #endif
 
@@ -1001,22 +1020,28 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
   if (s == Interrupting) {
     this->ConfigureButton->setEnabled(false);
     this->GenerateButton->setEnabled(false);
+    this->OpenProjectButton->setEnabled(false);
   } else if (s == Configuring) {
     this->setEnabledState(false);
     this->GenerateButton->setEnabled(false);
     this->GenerateAction->setEnabled(false);
+    this->OpenProjectButton->setEnabled(false);
     this->ConfigureButton->setText(tr("&Stop"));
   } else if (s == Generating) {
     this->CacheModified = false;
     this->setEnabledState(false);
     this->ConfigureButton->setEnabled(false);
     this->GenerateAction->setEnabled(false);
+    this->OpenProjectButton->setEnabled(false);
     this->GenerateButton->setText(tr("&Stop"));
   } else if (s == ReadyConfigure) {
     this->setEnabledState(true);
     this->GenerateButton->setEnabled(true);
     this->GenerateAction->setEnabled(true);
     this->ConfigureButton->setEnabled(true);
+    if (!this->getProjectFilename().isEmpty()) {
+      this->OpenProjectButton->setEnabled(true);
+    }
     this->ConfigureButton->setText(tr("&Configure"));
     this->GenerateButton->setText(tr("&Generate"));
   } else if (s == ReadyGenerate) {
@@ -1024,6 +1049,9 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     this->GenerateButton->setEnabled(true);
     this->GenerateAction->setEnabled(true);
     this->ConfigureButton->setEnabled(true);
+    if (!this->getProjectFilename().isEmpty()) {
+      this->OpenProjectButton->setEnabled(true);
+    }
     this->ConfigureButton->setText(tr("&Configure"));
     this->GenerateButton->setText(tr("&Generate"));
   }

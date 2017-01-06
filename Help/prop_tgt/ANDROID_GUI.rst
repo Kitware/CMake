@@ -1,7 +1,9 @@
 ANDROID_GUI
 -----------
 
-Build an executable as an application package on Android.
+When :ref:`Cross Compiling for Android with NVIDIA Nsight Tegra Visual Studio
+Edition`, this property specifies whether to build an executable as an
+application package on Android.
 
 When this property is set to true the executable when built for Android
 will be created as an application package.  This property is initialized

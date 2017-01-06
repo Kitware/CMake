@@ -202,7 +202,7 @@ static int	archive_read_format_tar_read_header(struct archive_read *,
 		    struct archive_entry *);
 static int	checksum(struct archive_read *, const void *);
 static int 	pax_attribute(struct archive_read *, struct tar *,
-		    struct archive_entry *, char *key, char *value);
+		    struct archive_entry *, const char *key, const char *value);
 static int 	pax_header(struct archive_read *, struct tar *,
 		    struct archive_entry *, char *attr);
 static void	pax_time(const char *, int64_t *sec, long *nanos);
@@ -1664,7 +1664,7 @@ pax_header(struct archive_read *a, struct tar *tar,
 
 static int
 pax_attribute_xattr(struct archive_entry *entry,
-	char *name, char *value)
+	const char *name, const char *value)
 {
 	char *name_decoded;
 	void *value_decoded;
@@ -1710,7 +1710,7 @@ pax_attribute_xattr(struct archive_entry *entry,
  */
 static int
 pax_attribute(struct archive_read *a, struct tar *tar,
-    struct archive_entry *entry, char *key, char *value)
+    struct archive_entry *entry, const char *key, const char *value)
 {
 	int64_t s;
 	long n;

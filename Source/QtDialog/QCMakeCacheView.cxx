@@ -1,15 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "QCMakeCacheView.h"
 
 #include <QApplication>
@@ -33,7 +23,7 @@ public:
   }
 
 protected:
-  bool filterAcceptsRow(int row, const QModelIndex& p) const
+  bool filterAcceptsRow(int row, const QModelIndex& p) const CM_OVERRIDE
   {
     QStringList strs;
     const QAbstractItemModel* m = this->sourceModel();
@@ -87,7 +77,7 @@ public:
 protected:
   bool ShowAdvanced;
 
-  bool filterAcceptsRow(int row, const QModelIndex& p) const
+  bool filterAcceptsRow(int row, const QModelIndex& p) const CM_OVERRIDE
   {
     const QAbstractItemModel* m = this->sourceModel();
     QModelIndex idx = m->index(row, 0, p);
@@ -95,10 +85,7 @@ protected:
     // if there are no children
     if (!m->hasChildren(idx)) {
       bool adv = m->data(idx, QCMakeCacheModel::AdvancedRole).toBool();
-      if (!adv || (adv && this->ShowAdvanced)) {
-        return true;
-      }
-      return false;
+      return !adv || this->ShowAdvanced;
     }
 
     // check children
@@ -160,7 +147,8 @@ QModelIndex QCMakeCacheView::moveCursor(CursorAction act,
   // want home/end to go to begin/end of rows, not columns
   if (act == MoveHome) {
     return this->model()->index(0, 1);
-  } else if (act == MoveEnd) {
+  }
+  if (act == MoveEnd) {
     return this->model()->index(this->model()->rowCount() - 1, 1);
   }
   return QTreeView::moveCursor(act, mod);
@@ -538,28 +526,31 @@ void QCMakeCacheModelDelegate::setFileDialogFlag(bool f)
   this->FileDialogFlag = f;
 }
 
-QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
-                                                const QStyleOptionViewItem&,
-                                                const QModelIndex& idx) const
+QWidget* QCMakeCacheModelDelegate::createEditor(
+  QWidget* p, const QStyleOptionViewItem& /*option*/,
+  const QModelIndex& idx) const
 {
   QModelIndex var = idx.sibling(idx.row(), 0);
   int type = var.data(QCMakeCacheModel::TypeRole).toInt();
   if (type == QCMakeProperty::BOOL) {
-    return NULL;
-  } else if (type == QCMakeProperty::PATH) {
+    return CM_NULLPTR;
+  }
+  if (type == QCMakeProperty::PATH) {
     QCMakePathEditor* editor =
       new QCMakePathEditor(p, var.data(Qt::DisplayRole).toString());
     QObject::connect(editor, SIGNAL(fileDialogExists(bool)), this,
                      SLOT(setFileDialogFlag(bool)));
     return editor;
-  } else if (type == QCMakeProperty::FILEPATH) {
+  }
+  if (type == QCMakeProperty::FILEPATH) {
     QCMakeFilePathEditor* editor =
       new QCMakeFilePathEditor(p, var.data(Qt::DisplayRole).toString());
     QObject::connect(editor, SIGNAL(fileDialogExists(bool)), this,
                      SLOT(setFileDialogFlag(bool)));
     return editor;
-  } else if (type == QCMakeProperty::STRING &&
-             var.data(QCMakeCacheModel::StringsRole).isValid()) {
+  }
+  if (type == QCMakeProperty::STRING &&
+      var.data(QCMakeCacheModel::StringsRole).isValid()) {
     QCMakeComboBox* editor = new QCMakeComboBox(
       p, var.data(QCMakeCacheModel::StringsRole).toStringList());
     editor->setFrame(false);
@@ -645,7 +636,7 @@ QSize QCMakeCacheModelDelegate::sizeHint(const QStyleOptionViewItem& option,
   QStyleOptionButton opt;
   opt.QStyleOption::operator=(option);
   sz = sz.expandedTo(
-    style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, NULL)
+    style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, CM_NULLPTR)
       .size());
 
   return sz;

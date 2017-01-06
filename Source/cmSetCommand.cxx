@@ -1,21 +1,22 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSetCommand.h"
+
+#include <string.h>
+
+#include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmSetCommand
 bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
                                cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
@@ -31,13 +32,14 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
     putEnvArg += "=";
 
     // what is the current value if any
-    const char* currValue = getenv(varName);
+    std::string currValue;
+    const bool currValueSet = cmSystemTools::GetEnv(varName, currValue);
     delete[] varName;
 
     // will it be set to something, then set it
     if (args.size() > 1 && !args[1].empty()) {
       // but only if it is different from current value
-      if (!currValue || strcmp(currValue, args[1].c_str())) {
+      if (!currValueSet || currValue != args[1]) {
         putEnvArg += args[1];
         cmSystemTools::PutEnv(putEnvArg);
       }
@@ -45,7 +47,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
     }
 
     // if it will be cleared, then clear it if it isn't already clear
-    if (currValue) {
+    if (currValueSet) {
       cmSystemTools::PutEnv(putEnvArg);
     }
     return true;
@@ -58,8 +60,8 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   }
   // SET (VAR PARENT_SCOPE) // Removes the definition of VAR
   // in the parent scope.
-  else if (args.size() == 2 && args[args.size() - 1] == "PARENT_SCOPE") {
-    this->Makefile->RaiseScope(variable, 0);
+  if (args.size() == 2 && args[args.size() - 1] == "PARENT_SCOPE") {
+    this->Makefile->RaiseScope(variable, CM_NULLPTR);
     return true;
   }
 
@@ -72,8 +74,9 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   bool cache = false; // optional
   bool force = false; // optional
   bool parentScope = false;
-  cmState::CacheEntryType type = cmState::STRING; // required if cache
-  const char* docstring = 0;                      // required if cache
+  cmStateEnums::CacheEntryType type =
+    cmStateEnums::STRING;             // required if cache
+  const char* docstring = CM_NULLPTR; // required if cache
 
   unsigned int ignoreLastArgs = 0;
   // look for PARENT_SCOPE argument
@@ -123,12 +126,12 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   cmState* state = this->Makefile->GetState();
   const char* existingValue = state->GetCacheEntryValue(variable);
   if (existingValue &&
-      (state->GetCacheEntryType(variable) != cmState::UNINITIALIZED)) {
+      (state->GetCacheEntryType(variable) != cmStateEnums::UNINITIALIZED)) {
     // if the set is trying to CACHE the value but the value
     // is already in the cache and the type is not internal
     // then leave now without setting any definitions in the cache
     // or the makefile
-    if (cache && type != cmState::INTERNAL && !force) {
+    if (cache && type != cmStateEnums::INTERNAL && !force) {
       return true;
     }
   }
@@ -142,15 +145,4 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
     this->Makefile->AddDefinition(variable, value.c_str());
   }
   return true;
-}
-
-cmCommand::ParameterContext cmSetCommand::GetContextForParameter(
-  std::vector<std::string> const& args, size_t index)
-{
-  if (index == 0)
-    return VariableIdentifierParameter;
-  if (index == 2 &&
-      ((args.size() >= 3 && args[index] == "PARENT_SCOPE") || args.empty()))
-    return KeywordParameter;
-  return NoContext;
 }

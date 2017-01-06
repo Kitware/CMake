@@ -1,20 +1,18 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2012 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmGeneratorExpressionDAGChecker_h
 #define cmGeneratorExpressionDAGChecker_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
-#include "cmGeneratorExpressionEvaluator.h"
+#include "cmListFileCache.h"
+
+#include <map>
+#include <set>
+#include <string>
+
+struct GeneratorExpressionContent;
+struct cmGeneratorExpressionContext;
 
 #define CM_SELECT_BOTH(F, A1, A2) F(A1, A2)
 #define CM_SELECT_FIRST(F, A1, A2) F(A1)
@@ -63,7 +61,7 @@ struct cmGeneratorExpressionDAGChecker
   void ReportError(cmGeneratorExpressionContext* context,
                    const std::string& expr);
 
-  bool EvaluatingLinkLibraries(const char* tgt = 0);
+  bool EvaluatingLinkLibraries(const char* tgt = CM_NULLPTR);
 
 #define DECLARE_TRANSITIVE_PROPERTY_METHOD(METHOD) bool METHOD() const;
 

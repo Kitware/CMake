@@ -1,24 +1,19 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesPathWidget.h"
 
 #include "cmCursesMainForm.h"
+#include "cmCursesStringWidget.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
+
+#include <vector>
 
 cmCursesPathWidget::cmCursesPathWidget(int width, int height, int left,
                                        int top)
   : cmCursesStringWidget(width, height, left, top)
 {
-  this->Type = cmState::PATH;
+  this->Type = cmStateEnums::PATH;
   this->Cycle = false;
   this->CurrentIndex = 0;
 }
@@ -55,7 +50,7 @@ void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
   std::vector<std::string> dirs;
 
   cmSystemTools::SimpleGlob(glob, dirs,
-                            (this->Type == cmState::PATH ? -1 : 0));
+                            (this->Type == cmStateEnums::PATH ? -1 : 0));
   if (this->CurrentIndex < dirs.size()) {
     cstr = dirs[this->CurrentIndex];
   }

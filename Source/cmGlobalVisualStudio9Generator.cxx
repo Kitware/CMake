@@ -1,18 +1,8 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-#include "windows.h" // this must be first to define GetCurrentDirectory
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio9Generator.h"
 
+#include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmVisualStudioWCEPlatformParser.h"
@@ -23,8 +13,8 @@ static const char vs9generatorName[] = "Visual Studio 9 2008";
 class cmGlobalVisualStudio9Generator::Factory : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                                   cmake* cm) const
+  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
+                                           cmake* cm) const CM_OVERRIDE
   {
     if (strncmp(name.c_str(), vs9generatorName,
                 sizeof(vs9generatorName) - 1) != 0) {
@@ -62,14 +52,14 @@ public:
     return ret;
   }
 
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const
+  void GetDocumentation(cmDocumentationEntry& entry) const CM_OVERRIDE
   {
     entry.Name = std::string(vs9generatorName) + " [arch]";
     entry.Brief = "Generates Visual Studio 2008 project files.  "
                   "Optional [arch] can be \"Win64\" or \"IA64\".";
   }
 
-  virtual void GetGenerators(std::vector<std::string>& names) const
+  void GetGenerators(std::vector<std::string>& names) const CM_OVERRIDE
   {
     names.push_back(vs9generatorName);
     names.push_back(vs9generatorName + std::string(" Win64"));
@@ -85,7 +75,8 @@ public:
     }
   }
 
-  virtual bool SupportsToolset() const { return false; }
+  bool SupportsToolset() const CM_OVERRIDE { return false; }
+  bool SupportsPlatform() const CM_OVERRIDE { return true; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio9Generator::NewFactory()

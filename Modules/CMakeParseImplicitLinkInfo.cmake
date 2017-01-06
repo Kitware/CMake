@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # Function parse implicit linker options.
 # This is used internally by CMake and should not be included by user
@@ -32,7 +22,7 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
   # whole line and just the command (argv[0]).
   set(linker_regex "^( *|.*[/\\])(${linker}|([^/\\]+-)?ld|collect2)[^/\\]*( |$)")
   set(linker_exclude_regex "collect2 version |^[A-Za-z0-9_]+=|/ldfe ")
-  set(log "${log}  link line regex: [${linker_regex}]\n")
+  string(APPEND log "  link line regex: [${linker_regex}]\n")
   string(REGEX REPLACE "\r?\n" ";" output_lines "${text}")
   foreach(line IN LISTS output_lines)
     set(cmd)
@@ -44,7 +34,7 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
         string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" _dir_regex "${CMAKE_BINARY_DIR}")
         string(REGEX REPLACE " -[FL]${_dir_regex}/([^ ]| [^-])+( |$)" " " xline "${line}")
         if(NOT "x${xline}" STREQUAL "x${line}")
-          set(log "${log}  reduced line: [${line}]\n            to: [${xline}]\n")
+          string(APPEND log "  reduced line: [${line}]\n            to: [${xline}]\n")
           set(line "${xline}")
         endif()
       endif()
@@ -56,67 +46,67 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
       list(GET args 0 cmd)
     endif()
     if("${cmd}" MATCHES "${linker_regex}")
-      set(log "${log}  link line: [${line}]\n")
+      string(APPEND log "  link line: [${line}]\n")
       string(REGEX REPLACE ";-([LYz]);" ";-\\1" args "${args}")
       foreach(arg IN LISTS args)
         if("${arg}" MATCHES "^-L(.:)?[/\\]")
           # Unix search path.
           string(REGEX REPLACE "^-L" "" dir "${arg}")
           list(APPEND implicit_dirs_tmp ${dir})
-          set(log "${log}    arg [${arg}] ==> dir [${dir}]\n")
+          string(APPEND log "    arg [${arg}] ==> dir [${dir}]\n")
         elseif("${arg}" MATCHES "^-l([^:].*)$")
           # Unix library.
           set(lib "${CMAKE_MATCH_1}")
           list(APPEND implicit_libs_tmp ${lib})
-          set(log "${log}    arg [${arg}] ==> lib [${lib}]\n")
+          string(APPEND log "    arg [${arg}] ==> lib [${lib}]\n")
         elseif("${arg}" MATCHES "^(.:)?[/\\].*\\.a$")
           # Unix library full path.
           list(APPEND implicit_libs_tmp ${arg})
-          set(log "${log}    arg [${arg}] ==> lib [${arg}]\n")
+          string(APPEND log "    arg [${arg}] ==> lib [${arg}]\n")
         elseif("${arg}" MATCHES "^(.:)?[/\\].*\\.o$"
             AND obj_regex AND "${arg}" MATCHES "${obj_regex}")
           # Object file full path.
           list(APPEND implicit_libs_tmp ${arg})
-          set(log "${log}    arg [${arg}] ==> obj [${arg}]\n")
+          string(APPEND log "    arg [${arg}] ==> obj [${arg}]\n")
         elseif("${arg}" MATCHES "^-Y(P,)?[^0-9]")
           # Sun search path ([^0-9] avoids conflict with Mac -Y<num>).
           string(REGEX REPLACE "^-Y(P,)?" "" dirs "${arg}")
           string(REPLACE ":" ";" dirs "${dirs}")
           list(APPEND implicit_dirs_tmp ${dirs})
-          set(log "${log}    arg [${arg}] ==> dirs [${dirs}]\n")
+          string(APPEND log "    arg [${arg}] ==> dirs [${dirs}]\n")
         elseif("${arg}" MATCHES "^-l:")
           # HP named library.
           list(APPEND implicit_libs_tmp ${arg})
-          set(log "${log}    arg [${arg}] ==> lib [${arg}]\n")
+          string(APPEND log "    arg [${arg}] ==> lib [${arg}]\n")
         elseif("${arg}" MATCHES "^-z(all|default|weak)extract")
           # Link editor option.
           list(APPEND implicit_libs_tmp ${arg})
-          set(log "${log}    arg [${arg}] ==> opt [${arg}]\n")
+          string(APPEND log "    arg [${arg}] ==> opt [${arg}]\n")
         else()
-          set(log "${log}    arg [${arg}] ==> ignore\n")
+          string(APPEND log "    arg [${arg}] ==> ignore\n")
         endif()
       endforeach()
       break()
     elseif("${line}" MATCHES "LPATH(=| is:? *)(.*)$")
-      set(log "${log}  LPATH line: [${line}]\n")
+      string(APPEND log "  LPATH line: [${line}]\n")
       # HP search path.
       string(REPLACE ":" ";" paths "${CMAKE_MATCH_2}")
       list(APPEND implicit_dirs_tmp ${paths})
-      set(log "${log}    dirs [${paths}]\n")
+      string(APPEND log "    dirs [${paths}]\n")
     else()
-      set(log "${log}  ignore line: [${line}]\n")
+      string(APPEND log "  ignore line: [${line}]\n")
     endif()
   endforeach()
 
   # Look for library search paths reported by linker.
   if("${output_lines}" MATCHES ";Library search paths:((;\t[^;]+)+)")
     string(REPLACE ";\t" ";" implicit_dirs_match "${CMAKE_MATCH_1}")
-    set(log "${log}  Library search paths: [${implicit_dirs_match}]\n")
+    string(APPEND log "  Library search paths: [${implicit_dirs_match}]\n")
     list(APPEND implicit_dirs_tmp ${implicit_dirs_match})
   endif()
   if("${output_lines}" MATCHES ";Framework search paths:((;\t[^;]+)+)")
     string(REPLACE ";\t" ";" implicit_fwks_match "${CMAKE_MATCH_1}")
-    set(log "${log}  Framework search paths: [${implicit_fwks_match}]\n")
+    string(APPEND log "  Framework search paths: [${implicit_fwks_match}]\n")
     list(APPEND implicit_fwks_tmp ${implicit_fwks_match})
   endif()
 
@@ -124,12 +114,12 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
   # We remove items that are not language-specific.
   set(implicit_libs "")
   foreach(lib IN LISTS implicit_libs_tmp)
-    if("x${lib}" MATCHES "^x(crt.*\\.o|gcc.*|System.*)$")
-      set(log "${log}  remove lib [${lib}]\n")
+    if("x${lib}" MATCHES "^x(crt.*\\.o|gcc.*|System.*|.*libclang_rt.*)$")
+      string(APPEND log "  remove lib [${lib}]\n")
     elseif(IS_ABSOLUTE "${lib}")
       get_filename_component(abs "${lib}" ABSOLUTE)
       if(NOT "x${lib}" STREQUAL "x${abs}")
-        set(log "${log}  collapse lib [${lib}] ==> [${abs}]\n")
+        string(APPEND log "  collapse lib [${lib}] ==> [${abs}]\n")
       endif()
       list(APPEND implicit_libs "${abs}")
     else()
@@ -151,15 +141,15 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
         set(msg "")
         list(APPEND implicit_${t} "${dir}")
       endif()
-      set(log "${log}  collapse ${desc_${t}} dir [${d}] ==> [${dir}]${msg}\n")
+      string(APPEND log "  collapse ${desc_${t}} dir [${d}] ==> [${dir}]${msg}\n")
     endforeach()
     list(REMOVE_DUPLICATES implicit_${t})
   endforeach()
 
   # Log results.
-  set(log "${log}  implicit libs: [${implicit_libs}]\n")
-  set(log "${log}  implicit dirs: [${implicit_dirs}]\n")
-  set(log "${log}  implicit fwks: [${implicit_fwks}]\n")
+  string(APPEND log "  implicit libs: [${implicit_libs}]\n")
+  string(APPEND log "  implicit dirs: [${implicit_dirs}]\n")
+  string(APPEND log "  implicit fwks: [${implicit_fwks}]\n")
 
   # Return results.
   set(${lib_var} "${implicit_libs}" PARENT_SCOPE)

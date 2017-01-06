@@ -1,27 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackOSXX11Generator.h"
 
+#include <sstream>
+#include <sys/stat.h>
+
+#include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
-
-#include <cmsys/Glob.hxx>
-#include <cmsys/SystemTools.hxx>
-#include <sys/stat.h>
 
 cmCPackOSXX11Generator::cmCPackOSXX11Generator()
 {
@@ -102,15 +89,14 @@ int cmCPackOSXX11Generator::PackageFiles()
   }
 
   std::string applicationsLinkName = diskImageDirectory + "/Applications";
-  cmSystemTools::CreateSymlink("/Applications", applicationsLinkName.c_str());
+  cmSystemTools::CreateSymlink("/Applications", applicationsLinkName);
 
-  if (!this->CopyResourcePlistFile("VolumeIcon.icns",
-                                   diskImageDirectory.c_str(),
+  if (!this->CopyResourcePlistFile("VolumeIcon.icns", diskImageDirectory,
                                    ".VolumeIcon.icns", true) ||
-      !this->CopyResourcePlistFile("DS_Store", diskImageDirectory.c_str(),
-                                   ".DS_Store", true) ||
+      !this->CopyResourcePlistFile("DS_Store", diskImageDirectory, ".DS_Store",
+                                   true) ||
       !this->CopyResourcePlistFile("background.png",
-                                   diskImageBackgroundImageDir.c_str(),
+                                   diskImageBackgroundImageDir,
                                    "background.png", true) ||
       !this->CopyResourcePlistFile("RuntimeScript", dir) ||
       !this->CopyResourcePlistFile("OSXX11.Info.plist", contDir,
@@ -158,11 +144,10 @@ int cmCPackOSXX11Generator::PackageFiles()
   tmpFile += "/hdiutilOutput.log";
   std::ostringstream dmgCmd;
   dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM_DISK_IMAGE")
-         << "\" create -ov -format UDZO -srcfolder \""
-         << diskImageDirectory.c_str() << "\" \"" << packageFileNames[0]
-         << "\"";
+         << "\" create -ov -format UDZO -srcfolder \"" << diskImageDirectory
+         << "\" \"" << packageFileNames[0] << "\"";
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Compress disk image using command: "
-                  << dmgCmd.str().c_str() << std::endl);
+                  << dmgCmd.str() << std::endl);
   // since we get random dashboard failures with this one
   // try running it more than once
   int retVal = 1;
@@ -181,12 +166,12 @@ int cmCPackOSXX11Generator::PackageFiles()
   }
   if (!res || retVal) {
     cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Run command: " << dmgCmd.str().c_str() << std::endl
+    ofs << "# Run command: " << dmgCmd.str() << std::endl
         << "# Output:" << std::endl
-        << output.c_str() << std::endl;
+        << output << std::endl;
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running hdiutil command: "
-                    << dmgCmd.str().c_str() << std::endl
-                    << "Please check " << tmpFile.c_str() << " for errors"
+                    << dmgCmd.str() << std::endl
+                    << "Please check " << tmpFile << " for errors"
                     << std::endl);
     return 0;
   }
@@ -249,7 +234,7 @@ bool cmCPackOSXX11Generator::CopyCreateResourceFile(const std::string& name)
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: "
                 << (inFileName ? inFileName : "(NULL)")
-                << " to " << destFileName.c_str() << std::endl);
+                << " to " << destFileName << std::endl);
   this->ConfigureFile(inFileName, destFileName.c_str());
   return true;
 }
@@ -277,9 +262,8 @@ bool cmCPackOSXX11Generator::CopyResourcePlistFile(
   destFileName += "/";
   destFileName += outputFileName;
 
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-                "Configure file: " << inFileName.c_str() << " to "
-                                   << destFileName.c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: "
+                  << inFileName << " to " << destFileName << std::endl);
   this->ConfigureFile(inFileName.c_str(), destFileName.c_str(), copyOnly);
   return true;
 }

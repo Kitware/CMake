@@ -1,18 +1,19 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2015 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmAlgorithms_h
 #define cmAlgorithms_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <algorithm>
+#include <cm_kwiml.h>
+#include <functional>
+#include <iterator>
+#include <sstream>
+#include <string.h>
+#include <string>
+#include <utility>
+#include <vector>
 
 inline bool cmHasLiteralPrefixImpl(const std::string& str1, const char* str2,
                                    size_t N)
@@ -241,7 +242,7 @@ std::string cmJoin(Range const& r, const char* delimiter)
 }
 
 template <typename Range>
-std::string cmJoin(Range const& r, std::string delimiter)
+std::string cmJoin(Range const& r, std::string const& delimiter)
 {
   return cmJoin(r, delimiter.c_str());
 }
@@ -343,13 +344,13 @@ typename Range::const_iterator cmRemoveDuplicates(Range& r)
 }
 
 template <typename Range>
-std::string cmWrap(std::string prefix, Range const& r, std::string suffix,
-                   std::string sep)
+std::string cmWrap(std::string const& prefix, Range const& r,
+                   std::string const& suffix, std::string const& sep)
 {
   if (r.empty()) {
     return std::string();
   }
-  return prefix + cmJoin(r, (suffix + sep + prefix).c_str()) + suffix;
+  return prefix + cmJoin(r, suffix + sep + prefix) + suffix;
 }
 
 template <typename Range>

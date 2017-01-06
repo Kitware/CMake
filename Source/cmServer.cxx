@@ -1,249 +1,380 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2015 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServer.h"
 
+#include "cmServerConnection.h"
+#include "cmServerDictionary.h"
 #include "cmServerProtocol.h"
-#include <cmsys/Encoding.hxx>
-#include <cmsys/FStream.hxx>
-
-#ifndef _WIN32
-#include <unistd.h>
-#define CM_O_CREAT O_CREAT
-#define CM_O_RDWR O_RDWR
-#else
-#include <fcntl.h>
-#define CM_O_CREAT _O_CREAT
-#define CM_O_RDWR _O_RDWR
-#endif
-
+#include "cmSystemTools.h"
 #include "cmVersionMacros.h"
+#include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cm_jsoncpp_writer.h"
+#include "cm_jsoncpp_reader.h"
+#include "cm_jsoncpp_value.h"
 #endif
 
-typedef struct
-{
-  uv_write_t req;
-  uv_buf_t buf;
-} write_req_t;
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <memory>
 
-void alloc_buffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
+class cmServer::DebugInfo
 {
-  (void)handle;
-  *buf = uv_buf_init((char*)malloc(suggested_size), suggested_size);
-}
-
-void free_write_req(uv_write_t* req)
-{
-  write_req_t* wr = (write_req_t*)req;
-  free(wr->buf.base);
-  free(wr);
-}
-
-void on_stdout_write(uv_write_t* req, int status)
-{
-  (void)status;
-  auto server = reinterpret_cast<cmMetadataServer*>(req->data);
-  free_write_req(req);
-  server->PopOne();
-}
-
-void on_logfile_write(uv_write_t* req, int status)
-{
-  (void)req;
-  (void)status;
-}
-
-void write_data(uv_stream_t* dest, std::string content, uv_write_cb cb)
-{
-  write_req_t* req = (write_req_t*)malloc(sizeof(write_req_t));
-  req->req.data = dest->data;
-  req->buf = uv_buf_init((char*)malloc(content.size()), content.size());
-  memcpy(req->buf.base, content.c_str(), content.size());
-  uv_write((uv_write_t*)req, (uv_stream_t*)dest, &req->buf, 1, cb);
-}
-
-void read_stdin(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf)
-{
-  if (nread > 0) {
-    auto server = reinterpret_cast<cmMetadataServer*>(stream->data);
-    std::string result = std::string(buf->base, buf->base + nread);
-    server->handleData(result);
+public:
+  DebugInfo()
+    : StartTime(uv_hrtime())
+  {
   }
 
-  if (buf->base)
-    free(buf->base);
+  bool PrintStatistics = false;
+
+  std::string OutputFile;
+  uint64_t StartTime;
+};
+
+cmServer::cmServer(cmServerConnection* conn, bool supportExperimental)
+  : Connection(conn)
+  , SupportExperimental(supportExperimental)
+{
+  this->Connection->SetServer(this);
+  // Register supported protocols:
+  this->RegisterProtocol(new cmServerProtocol1_0);
 }
 
-cmMetadataServer::cmMetadataServer()
-  : Protocol(0)
+cmServer::~cmServer()
 {
-  mLoop = uv_default_loop();
+  if (!this->Protocol) { // Server was never fully started!
+    return;
+  }
 
-  if (uv_guess_handle(1) == UV_TTY) {
-    uv_tty_init(mLoop, &mStdin_tty, 0, 1);
-    uv_tty_set_mode(&mStdin_tty, UV_TTY_MODE_NORMAL);
-    mStdin_tty.data = this;
+  for (cmServerProtocol* p : this->SupportedProtocols) {
+    delete p;
+  }
 
-    uv_tty_init(mLoop, &mStdout_tty, 1, 0);
-    uv_tty_set_mode(&mStdout_tty, UV_TTY_MODE_NORMAL);
-    mStdout_tty.data = this;
+  delete this->Connection;
+}
+
+void cmServer::PopOne()
+{
+  if (this->Queue.empty()) {
+    return;
+  }
+
+  Json::Reader reader;
+  Json::Value value;
+  const std::string input = this->Queue.front();
+  this->Queue.erase(this->Queue.begin());
+
+  if (!reader.parse(input, value)) {
+    this->WriteParseError("Failed to parse JSON input.");
+    return;
+  }
+
+  std::unique_ptr<DebugInfo> debug;
+  Json::Value debugValue = value["debug"];
+  if (!debugValue.isNull()) {
+    debug = std::make_unique<DebugInfo>();
+    debug->OutputFile = debugValue["dumpToFile"].asString();
+    debug->PrintStatistics = debugValue["showStats"].asBool();
+  }
+
+  const cmServerRequest request(this, value[kTYPE_KEY].asString(),
+                                value[kCOOKIE_KEY].asString(), value);
+
+  if (request.Type == "") {
+    cmServerResponse response(request);
+    response.SetError("No type given in request.");
+    this->WriteResponse(response, nullptr);
+    return;
+  }
+
+  cmSystemTools::SetMessageCallback(reportMessage,
+                                    const_cast<cmServerRequest*>(&request));
+  if (this->Protocol) {
+    this->Protocol->CMakeInstance()->SetProgressCallback(
+      reportProgress, const_cast<cmServerRequest*>(&request));
+    this->WriteResponse(this->Protocol->Process(request), debug.get());
   } else {
-    uv_pipe_init(mLoop, &mStdin_pipe, 0);
-    uv_pipe_open(&mStdin_pipe, 0);
-    mStdin_pipe.data = this;
+    this->WriteResponse(this->SetProtocolVersion(request), debug.get());
+  }
+}
 
-    uv_pipe_init(mLoop, &mStdout_pipe, 0);
-    uv_pipe_open(&mStdout_pipe, 1);
-    mStdout_pipe.data = this;
+void cmServer::RegisterProtocol(cmServerProtocol* protocol)
+{
+  if (protocol->IsExperimental() && !this->SupportExperimental) {
+    return;
+  }
+  auto version = protocol->ProtocolVersion();
+  assert(version.first >= 0);
+  assert(version.second >= 0);
+  auto it = std::find_if(this->SupportedProtocols.begin(),
+                         this->SupportedProtocols.end(),
+                         [version](cmServerProtocol* p) {
+                           return p->ProtocolVersion() == version;
+                         });
+  if (it == this->SupportedProtocols.end()) {
+    this->SupportedProtocols.push_back(protocol);
+  }
+}
+
+void cmServer::PrintHello() const
+{
+  Json::Value hello = Json::objectValue;
+  hello[kTYPE_KEY] = "hello";
+
+  Json::Value& protocolVersions = hello[kSUPPORTED_PROTOCOL_VERSIONS] =
+    Json::arrayValue;
+
+  for (auto const& proto : this->SupportedProtocols) {
+    auto version = proto->ProtocolVersion();
+    Json::Value tmp = Json::objectValue;
+    tmp[kMAJOR_KEY] = version.first;
+    tmp[kMINOR_KEY] = version.second;
+    if (proto->IsExperimental()) {
+      tmp[kIS_EXPERIMENTAL_KEY] = true;
+    }
+    protocolVersions.append(tmp);
   }
 
-  this->State = Uninitialized;
-  this->Writing = false;
+  this->WriteJsonObject(hello, nullptr);
 }
 
-cmMetadataServer::~cmMetadataServer()
+void cmServer::QueueRequest(const std::string& request)
 {
-  uv_close((uv_handle_t*)&mStdin_pipe, NULL);
-  uv_close((uv_handle_t*)&mStdout_pipe, NULL);
-  uv_loop_close(mLoop);
-  delete this->Protocol;
+  this->Queue.push_back(request);
+  this->PopOne();
 }
 
-// return true if server should quit, false otherwise.
-bool cmMetadataServer::PopOne()
+void cmServer::reportProgress(const char* msg, float progress, void* data)
 {
-  this->Writing = false;
-  if (mQueue.empty()) {
+  const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
+  assert(request);
+  if (progress < 0.0 || progress > 1.0) {
+    request->ReportMessage(msg, "");
+  } else {
+    request->ReportProgress(0, static_cast<int>(progress * 1000), 1000, msg);
+  }
+}
+
+void cmServer::reportMessage(const char* msg, const char* title,
+                             bool& /* cancel */, void* data)
+{
+  const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
+  assert(request);
+  assert(msg);
+  std::string titleString;
+  if (title) {
+    titleString = title;
+  }
+  request->ReportMessage(std::string(msg), titleString);
+}
+
+cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
+{
+  if (request.Type != kHANDSHAKE_TYPE) {
+    return request.ReportError("Waiting for type \"" + kHANDSHAKE_TYPE +
+                               "\".");
+  }
+
+  Json::Value requestedProtocolVersion = request.Data[kPROTOCOL_VERSION_KEY];
+  if (requestedProtocolVersion.isNull()) {
+    return request.ReportError("\"" + kPROTOCOL_VERSION_KEY +
+                               "\" is required for \"" + kHANDSHAKE_TYPE +
+                               "\".");
+  }
+
+  if (!requestedProtocolVersion.isObject()) {
+    return request.ReportError("\"" + kPROTOCOL_VERSION_KEY +
+                               "\" must be a JSON object.");
+  }
+
+  Json::Value majorValue = requestedProtocolVersion[kMAJOR_KEY];
+  if (!majorValue.isInt()) {
+    return request.ReportError("\"" + kMAJOR_KEY +
+                               "\" must be set and an integer.");
+  }
+
+  Json::Value minorValue = requestedProtocolVersion[kMINOR_KEY];
+  if (!minorValue.isNull() && !minorValue.isInt()) {
+    return request.ReportError("\"" + kMINOR_KEY +
+                               "\" must be unset or an integer.");
+  }
+
+  const int major = majorValue.asInt();
+  const int minor = minorValue.isNull() ? -1 : minorValue.asInt();
+  if (major < 0) {
+    return request.ReportError("\"" + kMAJOR_KEY + "\" must be >= 0.");
+  }
+  if (!minorValue.isNull() && minor < 0) {
+    return request.ReportError("\"" + kMINOR_KEY +
+                               "\" must be >= 0 when set.");
+  }
+
+  this->Protocol =
+    this->FindMatchingProtocol(this->SupportedProtocols, major, minor);
+  if (!this->Protocol) {
+    return request.ReportError("Protocol version not supported.");
+  }
+
+  std::string errorMessage;
+  if (!this->Protocol->Activate(this, request, &errorMessage)) {
+    this->Protocol = CM_NULLPTR;
+    return request.ReportError("Failed to activate protocol version: " +
+                               errorMessage);
+  }
+  return request.Reply(Json::objectValue);
+}
+
+bool cmServer::Serve(std::string* errorMessage)
+{
+  if (this->SupportedProtocols.empty()) {
+    *errorMessage =
+      "No protocol versions defined. Maybe you need --experimental?";
     return false;
   }
+  assert(!this->Protocol);
 
-  auto fname = mBuildDir + "/cmake-daemon-" + std::to_string(getpid());
-
-  uv_fs_t file_req;
-  int fd = uv_fs_open(mLoop, &file_req, fname.c_str(), O_RDWR, 0644, NULL);
-  uv_pipe_open(&mLogFile_pipe, fd);
-
-  auto request = mQueue.front();
-  request = "<<< " + request;
-  write_data((uv_stream_t*)&mLogFile_pipe, request, on_logfile_write);
-
-  auto const quit = this->Protocol->processRequest(mQueue.front());
-  mQueue.erase(mQueue.begin());
-  return quit;
+  return Connection->ProcessEvents(errorMessage);
 }
 
-void cmMetadataServer::handleData(const std::string& data)
+cmFileMonitor* cmServer::FileMonitor() const
 {
-#ifdef _WIN32
-#define LINE_SEP "\r\n"
-#else
-#define LINE_SEP "\n"
-#endif
-
-  mDataBuffer += data;
-
-  for (;;) {
-    auto needle = mDataBuffer.find(LINE_SEP);
-
-    auto skip = sizeof(LINE_SEP);
-#ifdef _WIN32
-    if (needle == std::string::npos) {
-      needle = mDataBuffer.find("\n");
-      skip = sizeof("\n");
-    }
-#endif
-
-    if (needle == std::string::npos) {
-      return;
-    }
-    std::string line = mDataBuffer.substr(0, needle);
-    mDataBuffer.erase(0, needle + skip - 1);
-    if (line == "[== CMake MetaMagic ==[") {
-      mJsonData.clear();
-      continue;
-    }
-    if (line == "]== CMake MetaMagic ==]") {
-      mQueue.push_back(mJsonData);
-      mJsonData.clear();
-      if (!this->Writing) {
-        if (this->PopOne()) {
-          uv_stop(mLoop);
-          return;
-        }
-      }
-    } else {
-      mJsonData += line;
-      mJsonData += "\n";
-    }
-  }
+  return Connection->FileMonitor();
 }
 
-void cmMetadataServer::ServeMetadata(const std::string& buildDir)
-{
-  auto fname = buildDir + "/cmake-daemon-" + std::to_string(getpid());
-
-  uv_fs_t file_req;
-  int fd = uv_fs_open(mLoop, &file_req, fname.c_str(), CM_O_CREAT | CM_O_RDWR,
-                      0644, NULL);
-  uv_pipe_init(mLoop, &mLogFile_pipe, 0);
-  uv_pipe_open(&mLogFile_pipe, fd);
-
-  write_data((uv_stream_t*)&mLogFile_pipe, "Log file\n", on_logfile_write);
-
-  mBuildDir = buildDir;
-  this->State = Started;
-
-  Json::Value obj = Json::objectValue;
-  obj["progress"] = "process-started";
-  this->WriteResponse(obj);
-
-  this->Protocol = new cmServerProtocol(this, buildDir);
-
-  if (uv_guess_handle(1) == UV_TTY) {
-    uv_read_start((uv_stream_t*)&mStdin_tty, alloc_buffer, read_stdin);
-  } else {
-    uv_read_start((uv_stream_t*)&mStdin_pipe, alloc_buffer, read_stdin);
-  }
-
-  uv_run(mLoop, UV_RUN_DEFAULT);
-}
-
-void cmMetadataServer::WriteResponse(const Json::Value& jsonValue)
+void cmServer::WriteJsonObject(const Json::Value& jsonValue,
+                               const DebugInfo* debug) const
 {
   Json::FastWriter writer;
-  auto decoded = writer.write(jsonValue);
 
-  auto fname = mBuildDir + "/cmake-daemon-" + std::to_string(getpid());
+  auto beforeJson = uv_hrtime();
+  std::string result = writer.write(jsonValue);
 
-  uv_fs_t file_req;
-  int fd = uv_fs_open(mLoop, &file_req, fname.c_str(), O_RDWR, 0644, NULL);
-  uv_pipe_open(&mLogFile_pipe, fd);
+  if (debug) {
+    Json::Value copy = jsonValue;
+    if (debug->PrintStatistics) {
+      Json::Value stats = Json::objectValue;
+      auto endTime = uv_hrtime();
 
-  auto response = decoded;
-  response = ">>> " + response;
+      stats["jsonSerialization"] = double(endTime - beforeJson) / 1000000.0;
+      stats["totalTime"] = double(endTime - debug->StartTime) / 1000000.0;
+      stats["size"] = static_cast<int>(result.size());
+      if (!debug->OutputFile.empty()) {
+        stats["dumpFile"] = debug->OutputFile;
+      }
 
-  write_data((uv_stream_t*)&mLogFile_pipe, response, on_logfile_write);
+      copy["zzzDebug"] = stats;
 
-  std::string result = "\n[== CMake MetaMagic ==[\n";
-  result += decoded;
-  result += "]== CMake MetaMagic ==]\n";
+      result = writer.write(copy); // Update result to include debug info
+    }
 
-  this->Writing = true;
-  if (uv_guess_handle(1) == UV_TTY) {
-    write_data((uv_stream_t*)&mStdout_tty, result, on_stdout_write);
-  } else {
-    write_data((uv_stream_t*)&mStdout_pipe, result, on_stdout_write);
+    if (!debug->OutputFile.empty()) {
+      std::ofstream myfile;
+      myfile.open(debug->OutputFile);
+      myfile << result;
+      myfile.close();
+    }
   }
+
+  Connection->WriteData(std::string("\n") + kSTART_MAGIC + std::string("\n") +
+                        result + kEND_MAGIC + std::string("\n"));
+}
+
+cmServerProtocol* cmServer::FindMatchingProtocol(
+  const std::vector<cmServerProtocol*>& protocols, int major, int minor)
+{
+  cmServerProtocol* bestMatch = nullptr;
+  for (auto protocol : protocols) {
+    auto version = protocol->ProtocolVersion();
+    if (major != version.first) {
+      continue;
+    }
+    if (minor == version.second) {
+      return protocol;
+    }
+    if (!bestMatch || bestMatch->ProtocolVersion().second < version.second) {
+      bestMatch = protocol;
+    }
+  }
+  return minor < 0 ? bestMatch : nullptr;
+}
+
+void cmServer::WriteProgress(const cmServerRequest& request, int min,
+                             int current, int max,
+                             const std::string& message) const
+{
+  assert(min <= current && current <= max);
+  assert(message.length() != 0);
+
+  Json::Value obj = Json::objectValue;
+  obj[kTYPE_KEY] = kPROGRESS_TYPE;
+  obj[kREPLY_TO_KEY] = request.Type;
+  obj[kCOOKIE_KEY] = request.Cookie;
+  obj[kPROGRESS_MESSAGE_KEY] = message;
+  obj[kPROGRESS_MINIMUM_KEY] = min;
+  obj[kPROGRESS_MAXIMUM_KEY] = max;
+  obj[kPROGRESS_CURRENT_KEY] = current;
+
+  this->WriteJsonObject(obj, nullptr);
+}
+
+void cmServer::WriteMessage(const cmServerRequest& request,
+                            const std::string& message,
+                            const std::string& title) const
+{
+  if (message.empty()) {
+    return;
+  }
+
+  Json::Value obj = Json::objectValue;
+  obj[kTYPE_KEY] = kMESSAGE_TYPE;
+  obj[kREPLY_TO_KEY] = request.Type;
+  obj[kCOOKIE_KEY] = request.Cookie;
+  obj[kMESSAGE_KEY] = message;
+  if (!title.empty()) {
+    obj[kTITLE_KEY] = title;
+  }
+
+  WriteJsonObject(obj, nullptr);
+}
+
+void cmServer::WriteParseError(const std::string& message) const
+{
+  Json::Value obj = Json::objectValue;
+  obj[kTYPE_KEY] = kERROR_TYPE;
+  obj[kERROR_MESSAGE_KEY] = message;
+  obj[kREPLY_TO_KEY] = "";
+  obj[kCOOKIE_KEY] = "";
+
+  this->WriteJsonObject(obj, nullptr);
+}
+
+void cmServer::WriteSignal(const std::string& name,
+                           const Json::Value& data) const
+{
+  assert(data.isObject());
+  Json::Value obj = data;
+  obj[kTYPE_KEY] = kSIGNAL_TYPE;
+  obj[kREPLY_TO_KEY] = "";
+  obj[kCOOKIE_KEY] = "";
+  obj[kNAME_KEY] = name;
+
+  WriteJsonObject(obj, nullptr);
+}
+
+void cmServer::WriteResponse(const cmServerResponse& response,
+                             const DebugInfo* debug) const
+{
+  assert(response.IsComplete());
+
+  Json::Value obj = response.Data();
+  obj[kCOOKIE_KEY] = response.Cookie;
+  obj[kTYPE_KEY] = response.IsError() ? kERROR_TYPE : kREPLY_TYPE;
+  obj[kREPLY_TO_KEY] = response.Type;
+  if (response.IsError()) {
+    obj[kERROR_MESSAGE_KEY] = response.ErrorMessage();
+  }
+
+  this->WriteJsonObject(obj, debug);
 }

@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindSDL_sound
 # -------------
@@ -16,7 +19,7 @@
 #   SDL_SOUND_INCLUDE_DIR, where to find SDL_sound.h
 #   SDL_SOUND_FOUND, if false, do not try to link to SDL_sound
 #   SDL_SOUND_LIBRARIES, this contains the list of libraries that you need
-#     to link against. This is a read-only variable and is marked INTERNAL.
+#     to link against.
 #   SDL_SOUND_EXTRAS, this is an optional variable for you to add your own
 #     flags to SDL_SOUND_LIBRARIES. This is prepended to SDL_SOUND_LIBRARIES.
 #     This is available mostly for cases this module failed to anticipate for
@@ -77,20 +80,6 @@
 # override this selectionor set the CMake environment CMAKE_INCLUDE_PATH
 # to modify the search paths.
 
-#=============================================================================
-# Copyright 2005-2009 Kitware, Inc.
-# Copyright 2012 Benjamin Eikel
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 set(SDL_SOUND_EXTRAS "" CACHE STRING "SDL_sound extra flags")
 mark_as_advanced(SDL_SOUND_EXTRAS)
 
@@ -123,7 +112,7 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
   # To get multiple single variables to work, I must separate them with a "\;"
   # I could go back and modify the FindSDL.cmake module, but that's kind of painful.
   # The solution would be to try something like:
-  # set(SDL_TRY_COMPILE_LIBRARY_LIST "${SDL_TRY_COMPILE_LIBRARY_LIST}\;${CMAKE_THREAD_LIBS_INIT}")
+  # string(APPEND SDL_TRY_COMPILE_LIBRARY_LIST "\;${CMAKE_THREAD_LIBS_INIT}")
   # Instead, it was suggested on the mailing list to write a temporary CMakeLists.txt
   # with a temporary test project and invoke that with TRY_COMPILE.
   # See message thread "Figuring out dependencies for a library in order to build"
@@ -173,7 +162,7 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
    # would fix the problem.
    set(TMP_TRY_LIBS)
    foreach(lib ${SDL_SOUND_LIBRARY} ${SDL_LIBRARY})
-     set(TMP_TRY_LIBS "${TMP_TRY_LIBS} \"${lib}\"")
+     string(APPEND TMP_TRY_LIBS " \"${lib}\"")
    endforeach()
 
    # message("TMP_TRY_LIBS ${TMP_TRY_LIBS}")
@@ -378,11 +367,10 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
        endif()
      endif()
 
+     set(SDL_SOUND_LIBRARIES ${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARIES_TMP})
    else()
-     set(SDL_SOUND_LIBRARIES "${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARY}" CACHE INTERNAL "SDL_sound and dependent libraries")
+     set(SDL_SOUND_LIBRARIES ${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARY})
    endif()
-
-   set(SDL_SOUND_LIBRARIES "${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARIES_TMP}" CACHE INTERNAL "SDL_sound and dependent libraries")
  endif()
 
 if(SDL_SOUND_INCLUDE_DIR AND EXISTS "${SDL_SOUND_INCLUDE_DIR}/SDL_sound.h")

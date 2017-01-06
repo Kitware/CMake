@@ -1,20 +1,19 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestSVN_h
 #define cmCTestSVN_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestGlobalVC.h"
 
+#include <iosfwd>
 #include <list>
+#include <string>
+#include <vector>
+
+class cmCTest;
+class cmXMLWriter;
 
 /** \class cmCTestSVN
  * \brief Interaction with subversion command-line tool
@@ -26,14 +25,14 @@ public:
   /** Construct with a CTest instance and update log stream.  */
   cmCTestSVN(cmCTest* ctest, std::ostream& log);
 
-  virtual ~cmCTestSVN();
+  ~cmCTestSVN() CM_OVERRIDE;
 
 private:
   // Implement cmCTestVC internal API.
-  virtual void CleanupImpl();
-  virtual void NoteOldRevision();
-  virtual void NoteNewRevision();
-  virtual bool UpdateImpl();
+  void CleanupImpl() CM_OVERRIDE;
+  void NoteOldRevision() CM_OVERRIDE;
+  void NoteNewRevision() CM_OVERRIDE;
+  bool UpdateImpl() CM_OVERRIDE;
 
   bool RunSVNCommand(std::vector<char const*> const& parameters,
                      OutputParser* out, OutputParser* err);
@@ -68,6 +67,7 @@ private:
 
   // Extended revision structure to include info about external it refers to.
   struct Revision;
+
   friend struct Revision;
 
   // Info of all the repositories (root, externals and nested ones).
@@ -77,9 +77,9 @@ private:
   SVNInfo* RootInfo;
 
   std::string LoadInfo(SVNInfo& svninfo);
-  void LoadExternals();
-  void LoadModifications();
-  void LoadRevisions();
+  void LoadRepositories();
+  void LoadModifications() CM_OVERRIDE;
+  void LoadRevisions() CM_OVERRIDE;
   void LoadRevisions(SVNInfo& svninfo);
 
   void GuessBase(SVNInfo& svninfo, std::vector<Change> const& changes);
@@ -87,14 +87,15 @@ private:
   void DoRevisionSVN(Revision const& revision,
                      std::vector<Change> const& changes);
 
-  void WriteXMLGlobal(cmXMLWriter& xml);
+  void WriteXMLGlobal(cmXMLWriter& xml) CM_OVERRIDE;
 
+  class ExternalParser;
   // Parsing helper classes.
   class InfoParser;
   class LogParser;
   class StatusParser;
   class UpdateParser;
-  class ExternalParser;
+
   friend class InfoParser;
   friend class LogParser;
   friend class StatusParser;

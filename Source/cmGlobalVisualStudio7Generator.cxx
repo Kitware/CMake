@@ -1,21 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "windows.h" // this must be first to define GetCurrentDirectory
 
 #include "cmGlobalVisualStudio7Generator.h"
 
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmUuid.h"
 #include "cmake.h"
 #include <cmsys/Encoding.hxx>
@@ -109,7 +102,7 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(
       "Semicolon separated list of supported configuration types, "
       "only supports Debug, Release, MinSizeRel, and RelWithDebInfo, "
       "anything else will be ignored.",
-      cmState::STRING);
+      cmStateEnums::STRING);
   }
 
   // Create list of configurations requested by user's cache, if any.
@@ -122,19 +115,22 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(
   // does not use the environment it is run in, and this allows
   // for running commands and using dll's that the IDE environment
   // does not know about.
-  const char* extraPath = cmSystemTools::GetEnv("CMAKE_MSVCIDE_RUN_PATH");
-  if (extraPath) {
-    mf->AddCacheDefinition("CMAKE_MSVCIDE_RUN_PATH", extraPath,
+  std::string extraPath;
+  if (cmSystemTools::GetEnv("CMAKE_MSVCIDE_RUN_PATH", extraPath)) {
+    mf->AddCacheDefinition("CMAKE_MSVCIDE_RUN_PATH", extraPath.c_str(),
                            "Saved environment variable CMAKE_MSVCIDE_RUN_PATH",
-                           cmState::STATIC);
+                           cmStateEnums::STATIC);
   }
 }
 
-void cmGlobalVisualStudio7Generator::FindMakeProgram(cmMakefile* mf)
+bool cmGlobalVisualStudio7Generator::FindMakeProgram(cmMakefile* mf)
 {
-  this->cmGlobalVisualStudioGenerator::FindMakeProgram(mf); 
+  if (!this->cmGlobalVisualStudioGenerator::FindMakeProgram(mf)) {
+    return false;
+  }
   mf->AddDefinition("CMAKE_VS_DEVENV_COMMAND",
                     this->GetDevEnvCommand().c_str());
+  return true;
 }
 
 std::string const& cmGlobalVisualStudio7Generator::GetDevEnvCommand()
@@ -149,13 +145,32 @@ std::string const& cmGlobalVisualStudio7Generator::GetDevEnvCommand()
 std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
 {
   std::string vscmd;
-  std::string vskey = this->GetRegistryBase() + ";InstallDir";
+  std::string vskey;
+
+  // Search in standard location.
+  vskey = this->GetRegistryBase() + ";InstallDir";
   if (cmSystemTools::ReadRegistryValue(vskey.c_str(), vscmd,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(vscmd);
-    vscmd += "/";
+    vscmd += "/devenv.com";
+    if (cmSystemTools::FileExists(vscmd, true)) {
+      return vscmd;
+    }
   }
-  vscmd += "devenv.com";
+
+  // Search where VS15Preview places it.
+  vskey = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VS7;";
+  vskey += this->GetIDEVersion();
+  if (cmSystemTools::ReadRegistryValue(vskey.c_str(), vscmd,
+                                       cmSystemTools::KeyWOW64_32)) {
+    cmSystemTools::ConvertToUnixSlashes(vscmd);
+    vscmd += "/Common7/IDE/devenv.com";
+    if (cmSystemTools::FileExists(vscmd, true)) {
+      return vscmd;
+    }
+  }
+
+  vscmd = "devenv.com";
   return vscmd;
 }
 
@@ -334,7 +349,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   for (OrderedTargetDependSet::const_iterator tt = projectTargets.begin();
        tt != projectTargets.end(); ++tt) {
     cmGeneratorTarget const* target = *tt;
-    if (target->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
@@ -362,10 +377,11 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
 {
   VisualStudioFolders.clear();
 
+  std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
   for (OrderedTargetDependSet::const_iterator tt = projectTargets.begin();
        tt != projectTargets.end(); ++tt) {
     cmGeneratorTarget const* target = *tt;
-    if (target->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     bool written = false;
@@ -385,7 +401,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       if (vcprojName) {
         cmLocalGenerator* lg = target->GetLocalGenerator();
         std::string dir = lg->GetCurrentBinaryDirectory();
-        dir = root->Convert(dir.c_str(), cmOutputConverter::START_OUTPUT);
+        dir = root->ConvertToRelativePath(rootBinaryDir, dir.c_str());
         if (dir == ".") {
           dir = ""; // msbuild cannot handle ".\" prefix
         }
@@ -397,8 +413,8 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     // Create "solution folder" information from FOLDER target property
     //
     if (written && this->UseFolderProperty()) {
-      const char* targetFolder = target->GetProperty("FOLDER");
-      if (targetFolder) {
+      const std::string targetFolder = target->GetEffectiveFolderName();
+      if (!targetFolder.empty()) {
         std::vector<cmsys::String> tokens =
           cmSystemTools::SplitString(targetFolder, '/', false);
 
@@ -434,7 +450,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
   for (OrderedTargetDependSet::const_iterator tt = projectTargets.begin();
        tt != projectTargets.end(); ++tt) {
     cmGeneratorTarget const* target = *tt;
-    if (target->GetType() == cmState::INTERFACE_LIBRARY) {
+    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     const char* vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
@@ -664,27 +680,34 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   // if it is a utilitiy target then only make it part of the
   // default build if another target depends on it
   int type = target->GetType();
-  if (type == cmState::GLOBAL_TARGET) {
-    // check if INSTALL target is part of default build
-    if (target->GetName() == "INSTALL") {
-      // inspect CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD properties
-      for (std::vector<std::string>::const_iterator i = configs.begin();
-           i != configs.end(); ++i) {
-        const char* propertyValue =
-          target->Target->GetMakefile()->GetDefinition(
-            "CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD");
-        cmGeneratorExpression ge;
-        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-          ge.Parse(propertyValue);
-        if (cmSystemTools::IsOn(
-              cge->Evaluate(target->GetLocalGenerator(), *i))) {
-          activeConfigs.insert(*i);
+  if (type == cmStateEnums::GLOBAL_TARGET) {
+    std::list<std::string> targetNames;
+    targetNames.push_back("INSTALL");
+    targetNames.push_back("PACKAGE");
+    for (std::list<std::string>::const_iterator t = targetNames.begin();
+         t != targetNames.end(); ++t) {
+      // check if target <*t> is part of default build
+      if (target->GetName() == *t) {
+        const std::string propertyName =
+          "CMAKE_VS_INCLUDE_" + *t + "_TO_DEFAULT_BUILD";
+        // inspect CMAKE_VS_INCLUDE_<*t>_TO_DEFAULT_BUILD properties
+        for (std::vector<std::string>::const_iterator i = configs.begin();
+             i != configs.end(); ++i) {
+          const char* propertyValue =
+            target->Target->GetMakefile()->GetDefinition(propertyName);
+          cmGeneratorExpression ge;
+          CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
+            ge.Parse(propertyValue);
+          if (cmSystemTools::IsOn(
+                cge->Evaluate(target->GetLocalGenerator(), *i))) {
+            activeConfigs.insert(*i);
+          }
         }
       }
     }
     return activeConfigs;
   }
-  if (type == cmState::UTILITY &&
+  if (type == cmStateEnums::UTILITY &&
       !this->IsDependedOn(projectTargets, target)) {
     return activeConfigs;
   }
@@ -715,11 +738,5 @@ bool cmGlobalVisualStudio7Generator::IsDependedOn(
 
 std::string cmGlobalVisualStudio7Generator::Encoding()
 {
-  std::ostringstream encoding;
-#ifdef CMAKE_ENCODING_UTF8
-  encoding << "UTF-8";
-#else
-  encoding << "Windows-1252";
-#endif
-  return encoding.str();
+  return "UTF-8";
 }

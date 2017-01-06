@@ -1,27 +1,9 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestUpdateHandler.h"
 
 #include "cmCLocaleEnvironmentScope.h"
 #include "cmCTest.h"
-#include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmVersion.h"
-#include "cmXMLParser.h"
-#include "cmXMLWriter.h"
-#include "cmake.h"
-
 #include "cmCTestBZR.h"
 #include "cmCTestCVS.h"
 #include "cmCTestGIT.h"
@@ -29,20 +11,13 @@
 #include "cmCTestP4.h"
 #include "cmCTestSVN.h"
 #include "cmCTestVC.h"
+#include "cmGeneratedFileStream.h"
+#include "cmSystemTools.h"
+#include "cmVersion.h"
+#include "cmXMLWriter.h"
 
-#include <cmsys/auto_ptr.hxx>
-
-//#include <cmsys/RegularExpression.hxx>
-#include <cmsys/Process.h>
-
-// used for sleep
-#ifdef _WIN32
-#include "windows.h"
-#endif
-
-#include <float.h>
-#include <math.h>
-#include <stdlib.h>
+#include <cm_auto_ptr.hxx>
+#include <sstream>
 
 static const char* cmCTestUpdateHandlerUpdateStrings[] = {
   "Unknown", "CVS", "SVN", "BZR", "GIT", "HG", "P4"
@@ -159,7 +134,7 @@ int cmCTestUpdateHandler::ProcessHandler()
                      , this->Quiet);
 
   // Create an object to interact with the VCS tool.
-  cmsys::auto_ptr<cmCTestVC> vc;
+  CM_AUTO_PTR<cmCTestVC> vc;
   switch (this->UpdateType) {
     case e_CVS:
       vc.reset(new cmCTestCVS(this->CTest, ofs));
@@ -334,7 +309,7 @@ bool cmCTestUpdateHandler::SelectVCS()
 
   // If no update command was specified, lookup one for this VCS tool.
   if (this->UpdateCommand.empty()) {
-    const char* key = 0;
+    const char* key = CM_NULLPTR;
     switch (this->UpdateType) {
       case e_CVS:
         key = "CVSCommand";

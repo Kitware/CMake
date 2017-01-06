@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindLATEX
 # ---------
@@ -48,20 +51,6 @@
 #   find_package(LATEX)
 #   find_package(LATEX COMPONENTS PDFLATEX)
 #   find_package(LATEX COMPONENTS BIBTEX PS2PDF)
-
-#=============================================================================
-# Copyright 2002-2015 Kitware, Inc.
-# Copyright 2014-2015 Christoph Grüninger <foss@grueninger.de>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 if (WIN32)
   # Try to find the MikTex binary path (look for its package manager).
@@ -282,7 +271,6 @@ mark_as_advanced(
   HTLATEX_COMPILER
 )
 
-# handle variables for found Latex and its components
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(LATEX
   REQUIRED_VARS LATEX_COMPILER

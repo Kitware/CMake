@@ -1,14 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDepends.h"
 
 #include "cmFileTimeComparison.h"
@@ -16,14 +7,17 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+
 #include <cmsys/FStream.hxx>
+#include <sstream>
 #include <string.h>
+#include <utility>
 
 cmDepends::cmDepends(cmLocalGenerator* lg, const char* targetDir)
   : CompileDirectory()
   , LocalGenerator(lg)
   , Verbose(false)
-  , FileComparison(0)
+  , FileComparison(CM_NULLPTR)
   , TargetDirectory(targetDir)
   , MaxPath(16384)
   , Dependee(new char[MaxPath])
@@ -72,7 +66,7 @@ bool cmDepends::Write(std::ostream& makeDepends, std::ostream& internalDepends)
   return this->Finalize(makeDepends, internalDepends);
 }
 
-bool cmDepends::Finalize(std::ostream&, std::ostream&)
+bool cmDepends::Finalize(std::ostream& /*unused*/, std::ostream& /*unused*/)
 {
   return true;
 }
@@ -123,9 +117,10 @@ void cmDepends::Clear(const char* file)
                 << std::endl;
 }
 
-bool cmDepends::WriteDependencies(const std::set<std::string>&,
-                                  const std::string&, std::ostream&,
-                                  std::ostream&)
+bool cmDepends::WriteDependencies(const std::set<std::string>& /*unused*/,
+                                  const std::string& /*unused*/,
+                                  std::ostream& /*unused*/,
+                                  std::ostream& /*unused*/)
 {
   // This should be implemented by the subclass.
   return false;
@@ -140,7 +135,7 @@ bool cmDepends::CheckDependencies(
   // regenerated.
   bool okay = true;
   bool dependerExists = false;
-  DependencyVector* currentDependencies = 0;
+  DependencyVector* currentDependencies = CM_NULLPTR;
 
   while (internalDepends.getline(this->Dependee, this->MaxPath)) {
     if (this->Dependee[0] == 0 || this->Dependee[0] == '#' ||
@@ -182,7 +177,7 @@ bool cmDepends::CheckDependencies(
     bool regenerate = false;
     const char* dependee = this->Dependee + 1;
     const char* depender = this->Depender;
-    if (currentDependencies != 0) {
+    if (currentDependencies != CM_NULLPTR) {
       currentDependencies->push_back(dependee);
     }
 
@@ -242,9 +237,9 @@ bool cmDepends::CheckDependencies(
 
       // Remove the information of this depender from the map, it needs
       // to be rescanned
-      if (currentDependencies != 0) {
+      if (currentDependencies != CM_NULLPTR) {
         validDeps.erase(this->Depender);
-        currentDependencies = 0;
+        currentDependencies = CM_NULLPTR;
       }
 
       // Remove the depender to be sure it is rebuilt.
@@ -261,7 +256,7 @@ bool cmDepends::CheckDependencies(
 void cmDepends::SetIncludePathFromLanguage(const std::string& lang)
 {
   // Look for the new per "TARGET_" variant first:
-  const char* includePath = 0;
+  const char* includePath = CM_NULLPTR;
   std::string includePathVar = "CMAKE_";
   includePathVar += lang;
   includePathVar += "_TARGET_INCLUDE_PATH";

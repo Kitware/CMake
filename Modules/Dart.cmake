@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # Dart
 # ----
@@ -28,19 +31,6 @@
 #  Section #3: Custom targets for performing dashboard builds.
 #
 #
-
-#=============================================================================
-# Copyright 2001-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 option(BUILD_TESTING "Build the testing tree." ON)
 
@@ -119,7 +109,7 @@ if(BUILD_TESTING)
     # add testing targets
     set(DART_EXPERIMENTAL_NAME Experimental)
     if(DART_EXPERIMENTAL_USE_PROJECT_NAME)
-      set(DART_EXPERIMENTAL_NAME "${DART_EXPERIMENTAL_NAME}${PROJECT_NAME}")
+      string(APPEND DART_EXPERIMENTAL_NAME "${PROJECT_NAME}")
     endif()
   endif ()
 

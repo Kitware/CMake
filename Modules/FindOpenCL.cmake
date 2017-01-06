@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindOpenCL
 # ----------
@@ -28,19 +31,6 @@
 #   OpenCL_LIBRARY        - the path to the OpenCL library
 #
 
-#=============================================================================
-# Copyright 2014-2016 Matthaeus G. Chajdas
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 function(_FIND_OPENCL_VERSION)
   include(CheckSymbolExists)
   include(CMakePushCheckState)
@@ -53,7 +43,7 @@ function(_FIND_OPENCL_VERSION)
     if(APPLE)
       CHECK_SYMBOL_EXISTS(
         CL_VERSION_${VERSION}
-        "${OpenCL_INCLUDE_DIR}/OpenCL/cl.h"
+        "${OpenCL_INCLUDE_DIR}/Headers/cl.h"
         OPENCL_VERSION_${VERSION})
     else()
       CHECK_SYMBOL_EXISTS(
@@ -145,8 +135,15 @@ mark_as_advanced(
   OpenCL_LIBRARY)
 
 if(OpenCL_FOUND AND NOT TARGET OpenCL::OpenCL)
-  add_library(OpenCL::OpenCL UNKNOWN IMPORTED)
+  if(OpenCL_LIBRARY MATCHES "/([^/]+)\\.framework$")
+    add_library(OpenCL::OpenCL INTERFACE IMPORTED)
+    set_target_properties(OpenCL::OpenCL PROPERTIES
+      INTERFACE_LINK_LIBRARIES "${OpenCL_LIBRARY}")
+  else()
+    add_library(OpenCL::OpenCL UNKNOWN IMPORTED)
+    set_target_properties(OpenCL::OpenCL PROPERTIES
+      IMPORTED_LOCATION "${OpenCL_LIBRARY}")
+  endif()
   set_target_properties(OpenCL::OpenCL PROPERTIES
-    IMPORTED_LOCATION "${OpenCL_LIBRARY}"
     INTERFACE_INCLUDE_DIRECTORIES "${OpenCL_INCLUDE_DIRS}")
 endif()

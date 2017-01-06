@@ -1,20 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestGlobalVC_h
 #define cmCTestGlobalVC_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestVC.h"
 
+#include <iosfwd>
 #include <list>
+#include <map>
+#include <string>
+#include <vector>
+
+class cmCTest;
+class cmXMLWriter;
 
 /** \class cmCTestGlobalVC
  * \brief Base class for handling globally-versioned trees
@@ -26,11 +26,11 @@ public:
   /** Construct with a CTest instance and update log stream.  */
   cmCTestGlobalVC(cmCTest* ctest, std::ostream& log);
 
-  virtual ~cmCTestGlobalVC();
+  ~cmCTestGlobalVC() CM_OVERRIDE;
 
 protected:
   // Implement cmCTestVC internal API.
-  virtual bool WriteXMLUpdates(cmXMLWriter& xml);
+  bool WriteXMLUpdates(cmXMLWriter& xml) CM_OVERRIDE;
 
   /** Represent a vcs-reported action for one path in a revision.  */
   struct Change

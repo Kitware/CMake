@@ -1,88 +1,49 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakePolicyCommand.h"
 
-#include "cmVersion.h"
+#include <sstream>
+
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmCMakePolicyCommand
-cmCommand::ParameterContext cmCMakePolicyCommand::GetContextForParameter(
-  const std::vector<std::string>& args, size_t index)
-{
-  if (index == 0) {
-    return cmCommand::KeywordParameter;
-  }
-  if (index == 1) {
-    if (args[0] == "GET" || args[0] == "SET") {
-      return cmCommand::PolicyParameter;
-    }
-    if (args[0] == "VERSION") {
-      return cmCommand::VersionParameter;
-    }
-  }
-  if (index == 2) {
-    if (args[0] == "SET") {
-      return cmCommand::KeywordParameter;
-    }
-  }
-  return NoContext;
-}
-
-std::vector<std::string> cmCMakePolicyCommand::GetKeywords(
-  const std::vector<std::string>&, size_t index)
-{
-  std::vector<std::string> result;
-  if (index == 0) {
-    result.push_back("VERSION");
-    result.push_back("PUSH");
-    result.push_back("POP");
-    result.push_back("GET");
-    result.push_back("SET");
-  }
-
-  if (index == 2) {
-    result.push_back("OLD");
-    result.push_back("NEW");
-  }
-
-  return result;
-}
-
 bool cmCMakePolicyCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("requires at least one argument.");
     return false;
   }
 
   if (args[0] == "SET") {
     return this->HandleSetMode(args);
-  } else if (args[0] == "GET") {
+  }
+  if (args[0] == "GET") {
     return this->HandleGetMode(args);
-  } else if (args[0] == "PUSH") {
+  }
+  if (args[0] == "PUSH") {
     if (args.size() > 1) {
       this->SetError("PUSH may not be given additional arguments.");
       return false;
     }
     this->Makefile->PushPolicy();
     return true;
-  } else if (args[0] == "POP") {
+  }
+  if (args[0] == "POP") {
     if (args.size() > 1) {
       this->SetError("POP may not be given additional arguments.");
       return false;
     }
     this->Makefile->PopPolicy();
     return true;
-  } else if (args[0] == "VERSION") {
+  }
+  if (args[0] == "VERSION") {
     return this->HandleVersionMode(args);
   }
 
@@ -126,7 +87,7 @@ bool cmCMakePolicyCommand::HandleSetMode(std::vector<std::string> const& args)
         "For backwards compatibility, what version of CMake "
         "commands and "
         "syntax should this version of CMake try to support.",
-        cmState::STRING);
+        cmStateEnums::STRING);
     }
   }
   return true;
@@ -190,7 +151,8 @@ bool cmCMakePolicyCommand::HandleVersionMode(
   if (args.size() <= 1) {
     this->SetError("VERSION not given an argument");
     return false;
-  } else if (args.size() >= 3) {
+  }
+  if (args.size() >= 3) {
     this->SetError("VERSION given too many arguments");
     return false;
   }

@@ -1,15 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallTargetsCommand.h"
+
+#include <utility>
+
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmTarget.h"
+#include "cm_unordered_map.hxx"
+
+class cmExecutionStatus;
 
 // cmExecutableCommand
 bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& args,
@@ -37,14 +37,17 @@ bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& args,
       }
 
       runtime_dir = *s;
-    } else if (tgts.find(*s) != tgts.end()) {
-      tgts[*s].SetInstallPath(args[0].c_str());
-      tgts[*s].SetRuntimeInstallPath(runtime_dir.c_str());
-      tgts[*s].SetHaveInstallRule(true);
     } else {
-      std::string str = "Cannot find target: \"" + *s + "\" to install.";
-      this->SetError(str);
-      return false;
+      cmTargets::iterator ti = tgts.find(*s);
+      if (ti != tgts.end()) {
+        ti->second.SetInstallPath(args[0].c_str());
+        ti->second.SetRuntimeInstallPath(runtime_dir.c_str());
+        ti->second.SetHaveInstallRule(true);
+      } else {
+        std::string str = "Cannot find target: \"" + *s + "\" to install.";
+        this->SetError(str);
+        return false;
+      }
     }
   }
 

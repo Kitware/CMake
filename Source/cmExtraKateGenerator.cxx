@@ -1,45 +1,43 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2004-2009 Kitware, Inc.
-  Copyright 2004 Alexander Neundorf (neundorf@kde.org)
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExtraKateGenerator.h"
 
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalUnixMakefileGenerator3.h"
-#include "cmLocalUnixMakefileGenerator3.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
-#include <cmsys/SystemTools.hxx>
-
-void cmExtraKateGenerator::GetDocumentation(cmDocumentationEntry& entry,
-                                            const std::string&) const
-{
-  entry.Name = this->GetName();
-  entry.Brief = "Generates Kate project files.";
-}
+#include <ostream>
+#include <set>
+#include <string.h>
+#include <vector>
 
 cmExtraKateGenerator::cmExtraKateGenerator()
   : cmExternalMakefileProjectGenerator()
 {
+}
+
+cmExternalMakefileProjectGeneratorFactory* cmExtraKateGenerator::GetFactory()
+{
+  static cmExternalMakefileProjectGeneratorSimpleFactory<cmExtraKateGenerator>
+    factory("Kate", "Generates Kate project files.");
+
+  if (factory.GetSupportedGlobalGenerators().empty()) {
 #if defined(_WIN32)
-  this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
-  this->SupportedGlobalGenerators.push_back("NMake Makefiles");
+    factory.AddSupportedGlobalGenerator("MinGW Makefiles");
+    factory.AddSupportedGlobalGenerator("NMake Makefiles");
 // disable until somebody actually tests it:
-//  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
+// factory.AddSupportedGlobalGenerator("MSYS Makefiles");
 #endif
-  this->SupportedGlobalGenerators.push_back("Ninja");
-  this->SupportedGlobalGenerators.push_back("Unix Makefiles");
+    factory.AddSupportedGlobalGenerator("Ninja");
+    factory.AddSupportedGlobalGenerator("Unix Makefiles");
+  }
+
+  return &factory;
 }
 
 void cmExtraKateGenerator::Generate()
@@ -126,7 +124,7 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
          ti != targets.end(); ++ti) {
       std::string targetName = (*ti)->GetName();
       switch ((*ti)->GetType()) {
-        case cmState::GLOBAL_TARGET: {
+        case cmStateEnums::GLOBAL_TARGET: {
           bool insertTarget = false;
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
@@ -137,9 +135,9 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
             if (targetName == "edit_cache") {
               const char* editCommand =
                 (*it)->GetMakefile()->GetDefinition("CMAKE_EDIT_COMMAND");
-              if (editCommand == 0) {
+              if (editCommand == CM_NULLPTR) {
                 insertTarget = false;
-              } else if (strstr(editCommand, "ccmake") != NULL) {
+              } else if (strstr(editCommand, "ccmake") != CM_NULLPTR) {
                 insertTarget = false;
               }
             }
@@ -149,7 +147,7 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
                                homeOutputDir);
           }
         } break;
-        case cmState::UTILITY:
+        case cmStateEnums::UTILITY:
           // Add all utility targets, except the Nightly/Continuous/
           // Experimental-"sub"targets as e.g. NightlyStart
           if (((targetName.find("Nightly") == 0) &&
@@ -164,11 +162,11 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
           this->AppendTarget(fout, targetName, make, makeArgs, currentDir,
                              homeOutputDir);
           break;
-        case cmState::EXECUTABLE:
-        case cmState::STATIC_LIBRARY:
-        case cmState::SHARED_LIBRARY:
-        case cmState::MODULE_LIBRARY:
-        case cmState::OBJECT_LIBRARY: {
+        case cmStateEnums::EXECUTABLE:
+        case cmStateEnums::STATIC_LIBRARY:
+        case cmStateEnums::SHARED_LIBRARY:
+        case cmStateEnums::MODULE_LIBRARY:
+        case cmStateEnums::OBJECT_LIBRARY: {
           this->AppendTarget(fout, targetName, make, makeArgs, currentDir,
                              homeOutputDir);
           std::string fastTarget = targetName;

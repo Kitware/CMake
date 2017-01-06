@@ -7,3 +7,5 @@ endfunction()
 
 run_cmake_toolchain(CallEnableLanguage)
 run_cmake_toolchain(CallProject)
+run_cmake_toolchain(FlagsInit)
+run_cmake_toolchain(LinkFlagsInit)

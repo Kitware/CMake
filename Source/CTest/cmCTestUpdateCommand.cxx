@@ -1,18 +1,13 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestUpdateCommand.h"
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+
+#include <vector>
 
 cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
 {
@@ -83,12 +78,12 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
     this->CTest->GetInitializedHandler("update");
   if (!handler) {
     this->SetError("internal CTest error. Cannot instantiate update handler");
-    return 0;
+    return CM_NULLPTR;
   }
   handler->SetCommand(this);
   if (source_dir.empty()) {
     this->SetError("source directory not specified. Please use SOURCE tag");
-    return 0;
+    return CM_NULLPTR;
   }
   handler->SetOption("SourceDirectory", source_dir.c_str());
   handler->SetQuiet(this->Quiet);

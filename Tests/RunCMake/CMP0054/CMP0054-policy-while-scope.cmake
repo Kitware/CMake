@@ -25,7 +25,7 @@ while(NOT LOOP_VAR STREQUAL "xx")
 
   cmake_policy(SET CMP0054 NEW)
 
-  set(LOOP_VAR "${LOOP_VAR}x")
+  string(APPEND LOOP_VAR "x")
 endwhile()
 
 while("FOO" STREQUAL BAR)
@@ -57,7 +57,7 @@ while(NOT LOOP_VAR STREQUAL "xx")
 
   cmake_policy(SET CMP0054 OLD)
 
-  set(LOOP_VAR "${LOOP_VAR}x")
+  string(APPEND LOOP_VAR "x")
 endwhile()
 
 if(NOT "FOO" STREQUAL BAR)

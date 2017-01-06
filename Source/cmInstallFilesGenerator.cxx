@@ -1,20 +1,13 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallFilesGenerator.h"
 
 #include "cmGeneratorExpression.h"
-#include "cmLocalGenerator.h"
-#include "cmMakefile.h"
+#include "cmInstallType.h"
 #include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
+
+class cmLocalGenerator;
 
 cmInstallFilesGenerator::cmInstallFilesGenerator(
   std::vector<std::string> const& files, const char* dest, bool programs,
@@ -23,7 +16,7 @@ cmInstallFilesGenerator::cmInstallFilesGenerator(
   const char* rename, bool optional)
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all)
-  , LocalGenerator(0)
+  , LocalGenerator(CM_NULLPTR)
   , Files(files)
   , FilePermissions(file_permissions)
   , Rename(rename)
@@ -65,12 +58,12 @@ void cmInstallFilesGenerator::AddFilesInstallRule(
   std::vector<std::string> const& files)
 {
   // Write code to install the files.
-  const char* no_dir_permissions = 0;
+  const char* no_dir_permissions = CM_NULLPTR;
   this->AddInstallRule(
     os, this->GetDestination(config),
     (this->Programs ? cmInstallType_PROGRAMS : cmInstallType_FILES), files,
     this->Optional, this->FilePermissions.c_str(), no_dir_permissions,
-    this->Rename.c_str(), 0, indent);
+    this->Rename.c_str(), CM_NULLPTR, indent);
 }
 
 void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
@@ -90,7 +83,7 @@ void cmInstallFilesGenerator::GenerateScriptForConfig(
   cmGeneratorExpression ge;
   for (std::vector<std::string>::const_iterator i = this->Files.begin();
        i != this->Files.end(); ++i) {
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*i);
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(*i);
     cmSystemTools::ExpandListArgument(
       cge->Evaluate(this->LocalGenerator, config), files);
   }

@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2002-2012 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # This module is shared by multiple languages; use include blocker.
 if(__WINDOWS_EMBARCADERO)
@@ -64,15 +54,11 @@ set(CMAKE_CREATE_CONSOLE_EXE "${_tC}" )
 set (CMAKE_BUILD_TYPE Debug CACHE STRING
      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel.")
 
-set (CMAKE_EXE_LINKER_FLAGS_INIT "${_tM} -lS:1048576 -lSc:4098 -lH:1048576 -lHc:8192 ")
-set (CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT "-v")
-set (CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO_INIT "-v")
-set (CMAKE_SHARED_LINKER_FLAGS_INIT ${CMAKE_EXE_LINKER_FLAGS_INIT})
-set (CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT ${CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT})
-set (CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO_INIT})
-set (CMAKE_MODULE_LINKER_FLAGS_INIT ${CMAKE_SHARED_LINKER_FLAGS_INIT})
-set (CMAKE_MODULE_LINKER_FLAGS_DEBUG_INIT ${CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT})
-set (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO_INIT})
+foreach(t EXE SHARED MODULE)
+  string(APPEND CMAKE_${t}_LINKER_FLAGS_INIT " ${_tM} -lS:1048576 -lSc:4098 -lH:1048576 -lHc:8192 ")
+  string(APPEND CMAKE_${t}_LINKER_FLAGS_DEBUG_INIT " -v")
+  string(APPEND CMAKE_${t}_LINKER_FLAGS_RELWITHDEBINFO_INIT " -v")
+endforeach()
 
 # The Borland link tool does not support multiple concurrent
 # invocations within a single working directory.
@@ -132,10 +118,10 @@ macro(__embarcadero_language lang)
     )
 
   # Initial configuration flags.
-  set(CMAKE_${lang}_FLAGS_INIT "${_tM}")
-  set(CMAKE_${lang}_FLAGS_DEBUG_INIT "-Od -v")
-  set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "-O1 -DNDEBUG")
-  set(CMAKE_${lang}_FLAGS_RELEASE_INIT "-O2 -DNDEBUG")
-  set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "-Od")
+  string(APPEND CMAKE_${lang}_FLAGS_INIT " ${_tM}")
+  string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -Od -v")
+  string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -O1 -DNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O2 -DNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -Od")
   set(CMAKE_${lang}_STANDARD_LIBRARIES_INIT "import32.lib")
 endmacro()

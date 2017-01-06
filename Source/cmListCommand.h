@@ -1,18 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmListCommand_h
 #define cmListCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmListCommand
  * \brief Common list operations
@@ -24,32 +21,24 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() { return new cmListCommand; }
-
-  cmCommand::ParameterContext GetContextForParameter(
-    std::vector<std::string> const& args, size_t index);
-
-  std::vector<std::string> GetKeywords(std::vector<std::string> const& args,
-                                       size_t index);
+  cmCommand* Clone() CM_OVERRIDE { return new cmListCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() const { return true; }
+  bool IsScriptable() const CM_OVERRIDE { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "list"; }
-
-  cmTypeMacro(cmListCommand, cmCommand);
+  std::string GetName() const CM_OVERRIDE { return "list"; }
 
 protected:
   bool HandleLengthCommand(std::vector<std::string> const& args);

@@ -20,16 +20,9 @@ if(UNIX  AND  "${CMAKE_GENERATOR}" MATCHES "Makefile" AND
     configure_file(FindFoo.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/FindFoo.cmake @ONLY)
 
     # now set up the test:
-    if (NOT CMAKE_VERSION VERSION_LESS 2.8.12)
-      file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/cmakeExecutable.mk"
-        CONTENT "CMAKE = \"$<TARGET_FILE:cmake>\"\n"
-      )
-    else()
-      get_target_property(cmakeLocation cmake LOCATION)
-      file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/cmakeExecutable.mk"
-        "CMAKE = \"${cmakeLocation}\"\n"
-      )
-    endif()
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/cmakeExecutable.mk"
+      CONTENT "CMAKE = \"$<TARGET_FILE:cmake>\"\n"
+    )
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.in ${CMAKE_CURRENT_BINARY_DIR}/ConfMakefile @ONLY)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${CMAKE_CURRENT_BINARY_DIR}/main.cpp COPYONLY)
 

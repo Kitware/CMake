@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindwxWindows
 # -------------
@@ -76,20 +79,6 @@
 #
 # AUTHOR Jan Woetzel <http://www.mip.informatik.uni-kiel.de/~jw>
 # (07/2003-01/2006)
-
-#=============================================================================
-# Copyright 2000-2009 Kitware, Inc.
-# Copyright 2003-2006 Jan Woetzel
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # ------------------------------------------------------------------
 #
@@ -650,7 +639,7 @@ else()
 
       # do we need additionial wx GL stuff like GLCanvas ?
       if(WXWINDOWS_USE_GL)
-        set(WX_CONFIG_ARGS_LIBS "${WX_CONFIG_ARGS_LIBS} --gl-libs" )
+        string(APPEND WX_CONFIG_ARGS_LIBS " --gl-libs" )
       endif()
       ##message("DBG: WX_CONFIG_ARGS_LIBS=${WX_CONFIG_ARGS_LIBS}===")
 

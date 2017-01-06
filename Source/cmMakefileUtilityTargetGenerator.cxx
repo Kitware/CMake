@@ -1,21 +1,18 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefileUtilityTargetGenerator.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
-#include "cmSourceFile.h"
+#include "cmOSXBundleGenerator.h"
+#include "cmSystemTools.h"
 
 cmMakefileUtilityTargetGenerator::cmMakefileUtilityTargetGenerator(
   cmGeneratorTarget* target)
@@ -47,9 +44,12 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
     *this->BuildFileStream
       << "# Include the progress variables for this target.\n"
       << this->GlobalGenerator->IncludeDirective << " " << root
-      << this->Convert(this->ProgressFileNameFull,
-                       cmOutputConverter::HOME_OUTPUT,
-                       cmOutputConverter::MAKERULE)
+      << cmSystemTools::ConvertToOutputPath(
+           this->LocalGenerator
+             ->MaybeConvertToRelativePath(
+               this->LocalGenerator->GetBinaryDirectory(),
+               this->ProgressFileNameFull)
+             .c_str())
       << "\n\n";
   }
 
@@ -69,14 +69,14 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
 
   this->LocalGenerator->AppendCustomCommands(
     commands, this->GeneratorTarget->GetPreBuildCommands(),
-    this->GeneratorTarget);
+    this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
 
   // Depend on all custom command outputs for sources
   this->DriveCustomCommands(depends);
 
   this->LocalGenerator->AppendCustomCommands(
     commands, this->GeneratorTarget->GetPostBuildCommands(),
-    this->GeneratorTarget);
+    this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
 
   // Add dependencies on targets that must be built first.
   this->AppendTargetDepends(depends);
@@ -95,7 +95,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
   }
 
   // Write the rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
                                       this->GeneratorTarget->GetName(),
                                       depends, commands, true);
 

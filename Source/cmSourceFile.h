@@ -1,23 +1,18 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmSourceFile_h
 #define cmSourceFile_h
 
+#include <cmConfigure.h>
+
+#include "cmPropertyMap.h"
 #include "cmSourceFileLocation.h"
 
-#include "cmCustomCommand.h"
-#include "cmPropertyMap.h"
+#include <string>
+#include <vector>
 
-class cmake;
+class cmCustomCommand;
+class cmMakefile;
 
 /** \class cmSourceFile
  * \brief Represent a class loaded from a makefile.
@@ -62,7 +57,7 @@ public:
    * horrible interface, but is necessary for backwards
    * compatibility).
    */
-  std::string const& GetFullPath(std::string* error = 0);
+  std::string const& GetFullPath(std::string* error = CM_NULLPTR);
   std::string const& GetFullPath() const;
 
   /**

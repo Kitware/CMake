@@ -1,15 +1,8 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesWidget.h"
+
+#include <cmConfigure.h>
 
 cmCursesWidget::cmCursesWidget(int width, int height, int left, int top)
 {
@@ -23,7 +16,7 @@ cmCursesWidget::~cmCursesWidget()
 {
   if (this->Field) {
     free_field(this->Field);
-    this->Field = 0;
+    this->Field = CM_NULLPTR;
   }
 }
 
@@ -35,9 +28,9 @@ void cmCursesWidget::Move(int x, int y, bool isNewPage)
 
   move_field(this->Field, y, x);
   if (isNewPage) {
-    set_new_page(this->Field, TRUE);
+    set_new_page(this->Field, true);
   } else {
-    set_new_page(this->Field, FALSE);
+    set_new_page(this->Field, false);
   }
 }
 

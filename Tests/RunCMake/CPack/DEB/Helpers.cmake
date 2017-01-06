@@ -9,6 +9,47 @@ function(getPackageContent FILE RESULT_VAR)
   set(${RESULT_VAR} "${package_content_}" PARENT_SCOPE)
 endfunction()
 
+function(getPackageNameGlobexpr NAME COMPONENT VERSION REVISION FILE_NO RESULT_VAR)
+  if(COMPONENT)
+    set(COMPONENT "-${COMPONENT}")
+  endif()
+
+  if(DEFINED EXPECTED_FILE_${FILE_NO}_FILENAME_GENERATOR_SPECIFIC_FORMAT)
+    set(GENERATOR_SPECIFIC_FORMAT "${EXPECTED_FILE_${FILE_NO}_FILENAME_GENERATOR_SPECIFIC_FORMAT}")
+  elseif(DEFINED EXPECTED_FILES_NAME_GENERATOR_SPECIFIC_FORMAT)
+    set(GENERATOR_SPECIFIC_FORMAT "${EXPECTED_FILES_NAME_GENERATOR_SPECIFIC_FORMAT}")
+  else()
+    set(GENERATOR_SPECIFIC_FORMAT FALSE)
+  endif()
+
+  if(GENERATOR_SPECIFIC_FORMAT)
+    set(${RESULT_VAR} "${NAME}${COMPONENT}_${VERSION}-${REVISION}_*.deb" PARENT_SCOPE)
+  else()
+    set(${RESULT_VAR} "${NAME}-${VERSION}-*${COMPONENT}.deb" PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(getPackageContentList FILE RESULT_VAR)
+  execute_process(COMMAND ${DPKG_EXECUTABLE} -c "${FILE}"
+          OUTPUT_VARIABLE package_content_
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  unset(items_)
+  string(REPLACE "\n" ";" package_content_ "${package_content_}")
+  foreach(i_ IN LISTS package_content_)
+    string(REGEX REPLACE "^.* \.(/[^$]*)$" "\\1" result_ "${i_}")
+    string(REGEX REPLACE "/$" "" result_ "${result_}")
+    list(APPEND items_ "${result_}")
+  endforeach()
+
+  set(${RESULT_VAR} "${items_}" PARENT_SCOPE)
+endfunction()
+
+function(toExpectedContentList FILE_NO CONTENT_VAR)
+  # no need to do anything
+endfunction()
+
 function(getMissingShlibsErrorExtra FILE RESULT_VAR)
     execute_process(COMMAND ${DPKG_EXECUTABLE} -x "${FILE}" data_${PREFIX}
             ERROR_VARIABLE err_)
@@ -40,13 +81,11 @@ function(getMissingShlibsErrorExtra FILE RESULT_VAR)
       set(error_extra " Extra: install files '${deb_install_files}'")
 
       if(deb_install_files_errors)
-        set(error_extra "${error_extra}; errors \"${deb_install_files_errors}\"")
+        string(APPEND error_extra "; errors \"${deb_install_files_errors}\"")
       endif()
 
-      find_program(READELF_EXECUTABLE NAMES readelf)
-
       if(READELF_EXECUTABLE)
-        set(error_extra "${error_extra}; readelf \"\n")
+        string(APPEND error_extra "; readelf \"\n")
 
         # Only dynamically linked ELF files are included
         # Extract only file name infront of ":"
@@ -61,13 +100,13 @@ function(getMissingShlibsErrorExtra FILE RESULT_VAR)
               ERROR_VARIABLE err_
               OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-            set(error_extra "${error_extra} name '${CMAKE_MATCH_1}'\n result '${result}'\n output '${output}'\n error '${err_}'\n")
+            string(APPEND error_extra " name '${CMAKE_MATCH_1}'\n result '${result}'\n output '${output}'\n error '${err_}'\n")
           endif()
         endforeach()
 
-        set(error_extra "${error_extra}\"")
+        string(APPEND error_extra "\"")
       else()
-        set(error_extra "${error_extra}; error readelf missing")
+        string(APPEND error_extra "; error readelf missing")
       endif()
     endif()
 

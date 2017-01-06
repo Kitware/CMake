@@ -1,37 +1,56 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2011 Peter Collingbourne <peter@pcc.me.uk>
-  Copyright 2011 Nicolas Despres <nicolas.despres@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalNinjaGenerator.h"
 
+#include <algorithm>
+#include <cm_jsoncpp_reader.h>
+#include <cm_jsoncpp_value.h>
+#include <cm_jsoncpp_writer.h>
+#include <cmsys/FStream.hxx>
+#include <ctype.h>
+#include <functional>
+#include <iterator>
+#include <sstream>
+#include <stdio.h>
+
 #include "cmAlgorithms.h"
+#include "cmDocumentationEntry.h"
+#include "cmFortranParser.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGeneratorTarget.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
+#include "cmNinjaLinkLineComputer.h"
+#include "cmOutputConverter.h"
+#include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmTargetDepend.h"
 #include "cmVersion.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
-#include <algorithm>
-#include <assert.h>
-#include <ctype.h>
+class cmLinkLineComputer;
 
 const char* cmGlobalNinjaGenerator::NINJA_BUILD_FILE = "build.ninja";
 const char* cmGlobalNinjaGenerator::NINJA_RULES_FILE = "rules.ninja";
 const char* cmGlobalNinjaGenerator::INDENT = "  ";
+#ifdef _WIN32
+std::string const cmGlobalNinjaGenerator::SHELL_NOOP = "cd .";
+#else
+std::string const cmGlobalNinjaGenerator::SHELL_NOOP = ":";
+#endif
 
 void cmGlobalNinjaGenerator::Indent(std::ostream& os, int count)
 {
-  for (int i = 0; i < count; ++i)
+  for (int i = 0; i < count; ++i) {
     os << cmGlobalNinjaGenerator::INDENT;
+  }
 }
 
 void cmGlobalNinjaGenerator::WriteDivider(std::ostream& os)
@@ -43,8 +62,9 @@ void cmGlobalNinjaGenerator::WriteDivider(std::ostream& os)
 void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
                                           const std::string& comment)
 {
-  if (comment.empty())
+  if (comment.empty()) {
     return;
+  }
 
   std::string::size_type lpos = 0;
   std::string::size_type rpos;
@@ -54,6 +74,14 @@ void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
     lpos = rpos + 1;
   }
   os << "# " << comment.substr(lpos) << "\n\n";
+}
+
+cmLinkLineComputer* cmGlobalNinjaGenerator::CreateLinkLineComputer(
+  cmOutputConverter* outputConverter, cmStateDirectory /* stateDir */) const
+{
+  return new cmNinjaLinkLineComputer(
+    outputConverter,
+    this->LocalGenerators[0]->GetStateSnapshot().GetDirectory(), this);
 }
 
 std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
@@ -91,12 +119,11 @@ std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string& ident,
     names << "ident" << VarNum++;
     vars << names.str() << " = " << ident << "\n";
     return "$" + names.str();
-  } else {
-    std::string result = ident;
-    cmSystemTools::ReplaceString(result, " ", "$ ");
-    cmSystemTools::ReplaceString(result, ":", "$:");
-    return result;
   }
+  std::string result = ident;
+  cmSystemTools::ReplaceString(result, " ", "$ ");
+  cmSystemTools::ReplaceString(result, ":", "$:");
+  return result;
 }
 
 std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string& lit)
@@ -109,7 +136,7 @@ std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string& lit)
 
 std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
 {
-  std::string result = path;
+  std::string result = path; // NOLINT(clang-tidy)
 #ifdef _WIN32
   if (this->IsGCCOnWindows())
     std::replace(result.begin(), result.end(), '\\', '/');
@@ -128,10 +155,10 @@ std::string cmGlobalNinjaGenerator::EncodeDepfileSpace(const std::string& path)
 
 void cmGlobalNinjaGenerator::WriteBuild(
   std::ostream& os, const std::string& comment, const std::string& rule,
-  const cmNinjaDeps& outputs, const cmNinjaDeps& explicitDeps,
-  const cmNinjaDeps& implicitDeps, const cmNinjaDeps& orderOnlyDeps,
-  const cmNinjaVars& variables, const std::string& rspfile, int cmdLineLimit,
-  bool* usedResponseFile)
+  const cmNinjaDeps& outputs, const cmNinjaDeps& implicitOuts,
+  const cmNinjaDeps& explicitDeps, const cmNinjaDeps& implicitDeps,
+  const cmNinjaDeps& orderOnlyDeps, const cmNinjaVars& variables,
+  const std::string& rspfile, int cmdLineLimit, bool* usedResponseFile)
 {
   // Make sure there is a rule.
   if (rule.empty()) {
@@ -165,16 +192,18 @@ void cmGlobalNinjaGenerator::WriteBuild(
   if (!implicitDeps.empty()) {
     arguments += " |";
     for (cmNinjaDeps::const_iterator i = implicitDeps.begin();
-         i != implicitDeps.end(); ++i)
+         i != implicitDeps.end(); ++i) {
       arguments += " " + EncodeIdent(EncodePath(*i), os);
+    }
   }
 
   // Write order-only dependencies.
   if (!orderOnlyDeps.empty()) {
     arguments += " ||";
     for (cmNinjaDeps::const_iterator i = orderOnlyDeps.begin();
-         i != orderOnlyDeps.end(); ++i)
+         i != orderOnlyDeps.end(); ++i) {
       arguments += " " + EncodeIdent(EncodePath(*i), os);
+    }
   }
 
   arguments += "\n";
@@ -190,6 +219,13 @@ void cmGlobalNinjaGenerator::WriteBuild(
       this->CombinedBuildOutputs.insert(EncodePath(*i));
     }
   }
+  if (!implicitOuts.empty()) {
+    build += " |";
+    for (cmNinjaDeps::const_iterator i = implicitOuts.begin();
+         i != implicitOuts.end(); ++i) {
+      build += " " + EncodeIdent(EncodePath(*i), os);
+    }
+  }
   build += ":";
 
   // Write the rule.
@@ -198,9 +234,10 @@ void cmGlobalNinjaGenerator::WriteBuild(
   // Write the variables bound to this build statement.
   std::ostringstream variable_assignments;
   for (cmNinjaVars::const_iterator i = variables.begin(); i != variables.end();
-       ++i)
+       ++i) {
     cmGlobalNinjaGenerator::WriteVariable(variable_assignments, i->first,
                                           i->second, "", 1);
+  }
 
   // check if a response file rule should be used
   std::string buildstr = build;
@@ -229,7 +266,8 @@ void cmGlobalNinjaGenerator::WritePhonyBuild(
   const cmNinjaDeps& explicitDeps, const cmNinjaDeps& implicitDeps,
   const cmNinjaDeps& orderOnlyDeps, const cmNinjaVars& variables)
 {
-  this->WriteBuild(os, comment, "phony", outputs, explicitDeps, implicitDeps,
+  this->WriteBuild(os, comment, "phony", outputs,
+                   /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps,
                    orderOnlyDeps, variables);
 }
 
@@ -247,11 +285,11 @@ void cmGlobalNinjaGenerator::AddCustomCommandRule()
 
 void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
   const std::string& command, const std::string& description,
-  const std::string& comment, bool uses_terminal, bool restat,
-  const cmNinjaDeps& outputs, const cmNinjaDeps& deps,
+  const std::string& comment, const std::string& depfile, bool uses_terminal,
+  bool restat, const cmNinjaDeps& outputs, const cmNinjaDeps& deps,
   const cmNinjaDeps& orderOnly)
 {
-  std::string cmd = command;
+  std::string cmd = command; // NOLINT(clang-tidy)
 #ifdef _WIN32
   if (cmd.empty())
     // TODO Shouldn't an empty command be handled by ninja?
@@ -269,9 +307,12 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
   if (uses_terminal && SupportsConsolePool()) {
     vars["pool"] = "console";
   }
-
+  if (!depfile.empty()) {
+    vars["depfile"] = depfile;
+  }
   this->WriteBuild(*this->BuildFileStream, comment, "CUSTOM_COMMAND", outputs,
-                   deps, cmNinjaDeps(), orderOnly, vars);
+                   /*implicitOuts=*/cmNinjaDeps(), deps, cmNinjaDeps(),
+                   orderOnly, vars);
 
   if (this->ComputingUnknownDependencies) {
     // we need to track every dependency that comes in, since we are trying
@@ -313,7 +354,8 @@ void cmGlobalNinjaGenerator::WriteMacOSXContentBuild(const std::string& input,
   cmNinjaVars vars;
 
   this->WriteBuild(*this->BuildFileStream, "", "COPY_OSX_CONTENT", outputs,
-                   deps, cmNinjaDeps(), cmNinjaDeps(), cmNinjaVars());
+                   /*implicitOuts=*/cmNinjaDeps(), deps, cmNinjaDeps(),
+                   cmNinjaDeps(), cmNinjaVars());
 }
 
 void cmGlobalNinjaGenerator::WriteRule(
@@ -430,21 +472,25 @@ void cmGlobalNinjaGenerator::WriteDefault(std::ostream& os,
   cmGlobalNinjaGenerator::WriteComment(os, comment);
   os << "default";
   for (cmNinjaDeps::const_iterator i = targets.begin(); i != targets.end();
-       ++i)
+       ++i) {
     os << " " << *i;
+  }
   os << "\n";
 }
 
 cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
   : cmGlobalCommonGenerator(cm)
-  , BuildFileStream(0)
-  , RulesFileStream(0)
-  , CompileCommandsStream(0)
+  , BuildFileStream(CM_NULLPTR)
+  , RulesFileStream(CM_NULLPTR)
+  , CompileCommandsStream(CM_NULLPTR)
   , Rules()
   , AllDependencies()
   , UsingGCCOnWindows(false)
   , ComputingUnknownDependencies(false)
   , PolicyCMP0058(cmPolicies::WARN)
+  , NinjaSupportsConsolePool(false)
+  , NinjaSupportsImplicitOuts(false)
+  , NinjaSupportsDyndeps(0)
 {
 #ifdef _WIN32
   cm->GetState()->SetWindowsShell(true);
@@ -459,6 +505,18 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
 cmLocalGenerator* cmGlobalNinjaGenerator::CreateLocalGenerator(cmMakefile* mf)
 {
   return new cmLocalNinjaGenerator(this, mf);
+}
+
+codecvt::Encoding cmGlobalNinjaGenerator::GetMakefileEncoding() const
+{
+#ifdef _WIN32
+  // Ninja on Windows does not support non-ANSI characters.
+  // https://github.com/ninja-build/ninja/issues/1195
+  return codecvt::ANSI;
+#else
+  // No encoding conversion needed on other platforms.
+  return codecvt::None;
+#endif
 }
 
 void cmGlobalNinjaGenerator::GetDocumentation(cmDocumentationEntry& entry)
@@ -487,6 +545,8 @@ void cmGlobalNinjaGenerator::Generate()
   this->OpenBuildFileStream();
   this->OpenRulesFileStream();
 
+  this->TargetDependsClosures.clear();
+
   this->InitOutputPathPrefix();
   this->TargetAll = this->NinjaOutputPath("all");
   this->CMakeCacheFile = this->NinjaOutputPath("CMakeCache.txt");
@@ -507,8 +567,8 @@ void cmGlobalNinjaGenerator::Generate()
   this->WriteBuiltinTargets(*this->BuildFileStream);
 
   if (cmSystemTools::GetErrorOccuredFlag()) {
-    this->RulesFileStream->setstate(std::ios_base::failbit);
-    this->BuildFileStream->setstate(std::ios_base::failbit);
+    this->RulesFileStream->setstate(std::ios::failbit);
+    this->BuildFileStream->setstate(std::ios::failbit);
   }
 
   this->CloseCompileCommandsStream();
@@ -516,27 +576,105 @@ void cmGlobalNinjaGenerator::Generate()
   this->CloseBuildFileStream();
 }
 
-void cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
+bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
 {
-  this->cmGlobalGenerator::FindMakeProgram(mf);
+  if (!this->cmGlobalGenerator::FindMakeProgram(mf)) {
+    return false;
+  }
   if (const char* ninjaCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
     this->NinjaCommand = ninjaCommand;
     std::vector<std::string> command;
     command.push_back(this->NinjaCommand);
     command.push_back("--version");
     std::string version;
-    cmSystemTools::RunSingleCommand(command, &version, 0, 0, 0,
-                                    cmSystemTools::OUTPUT_NONE);
+    std::string error;
+    if (!cmSystemTools::RunSingleCommand(command, &version, &error, CM_NULLPTR,
+                                         CM_NULLPTR,
+                                         cmSystemTools::OUTPUT_NONE)) {
+      mf->IssueMessage(cmake::FATAL_ERROR, "Running\n '" +
+                         cmJoin(command, "' '") + "'\n"
+                                                  "failed with:\n " +
+                         error);
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
     this->NinjaVersion = cmSystemTools::TrimWhitespace(version);
+    this->CheckNinjaFeatures();
   }
+  return true;
+}
+
+void cmGlobalNinjaGenerator::CheckNinjaFeatures()
+{
+  this->NinjaSupportsConsolePool = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    RequiredNinjaVersionForConsolePool().c_str());
+  this->NinjaSupportsImplicitOuts = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    this->RequiredNinjaVersionForImplicitOuts().c_str());
+  {
+    // Our ninja branch adds ".dyndep-#" to its version number,
+    // where '#' is a feature-specific version number.  Extract it.
+    static std::string const k_DYNDEP_ = ".dyndep-";
+    std::string::size_type pos = this->NinjaVersion.find(k_DYNDEP_);
+    if (pos != std::string::npos) {
+      const char* fv = this->NinjaVersion.c_str() + pos + k_DYNDEP_.size();
+      cmSystemTools::StringToULong(fv, &this->NinjaSupportsDyndeps);
+    }
+  }
+}
+
+bool cmGlobalNinjaGenerator::CheckLanguages(
+  std::vector<std::string> const& languages, cmMakefile* mf) const
+{
+  if (std::find(languages.begin(), languages.end(), "Fortran") !=
+      languages.end()) {
+    return this->CheckFortran(mf);
+  }
+  return true;
+}
+
+bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
+{
+  if (this->NinjaSupportsDyndeps == 1) {
+    return true;
+  }
+
+  std::ostringstream e;
+  if (this->NinjaSupportsDyndeps == 0) {
+    /* clang-format off */
+    e <<
+      "The Ninja generator does not support Fortran using Ninja version\n"
+      "  " + this->NinjaVersion + "\n"
+      "due to lack of required features.  "
+      "Kitware has implemented the required features but as of this version "
+      "of CMake they have not been integrated to upstream ninja.  "
+      "Pending integration, Kitware maintains a branch at:\n"
+      "  https://github.com/Kitware/ninja/tree/features-for-fortran#readme\n"
+      "with the required features.  "
+      "One may build ninja from that branch to get support for Fortran."
+      ;
+    /* clang-format on */
+  } else {
+    /* clang-format off */
+    e <<
+      "The Ninja generator in this version of CMake does not support Fortran "
+      "using Ninja version\n"
+      "  " + this->NinjaVersion + "\n"
+      "because its 'dyndep' feature version is " <<
+      this->NinjaSupportsDyndeps << ".  "
+      "This version of CMake is aware only of 'dyndep' feature version 1."
+      ;
+    /* clang-format on */
+  }
+  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  cmSystemTools::SetFatalErrorOccured();
+  return false;
 }
 
 void cmGlobalNinjaGenerator::EnableLanguage(
   std::vector<std::string> const& langs, cmMakefile* mf, bool optional)
 {
-  if (std::find(langs.begin(), langs.end(), "Fortran") != langs.end()) {
-    cmSystemTools::Error("The Ninja generator does not support Fortran yet.");
-  }
   this->cmGlobalGenerator::EnableLanguage(langs, mf, optional);
   for (std::vector<std::string>::const_iterator l = langs.begin();
        l != langs.end(); ++l) {
@@ -546,11 +684,13 @@ void cmGlobalNinjaGenerator::EnableLanguage(
     this->ResolveLanguageCompiler(*l, mf, optional);
   }
 #ifdef _WIN32
-  if (mf->IsOn("CMAKE_COMPILER_IS_MINGW") ||
-      strcmp(mf->GetSafeDefinition("CMAKE_C_COMPILER_ID"), "GNU") == 0 ||
-      strcmp(mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID"), "GNU") == 0 ||
-      strcmp(mf->GetSafeDefinition("CMAKE_C_SIMULATE_ID"), "GNU") == 0 ||
-      strcmp(mf->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID"), "GNU") == 0) {
+  if (strcmp(mf->GetSafeDefinition("CMAKE_C_SIMULATE_ID"), "MSVC") != 0 &&
+      strcmp(mf->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID"), "MSVC") != 0 &&
+      (mf->IsOn("CMAKE_COMPILER_IS_MINGW") ||
+       strcmp(mf->GetSafeDefinition("CMAKE_C_COMPILER_ID"), "GNU") == 0 ||
+       strcmp(mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID"), "GNU") == 0 ||
+       strcmp(mf->GetSafeDefinition("CMAKE_C_COMPILER_ID"), "Clang") == 0 ||
+       strcmp(mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID"), "Clang") == 0)) {
     this->UsingGCCOnWindows = true;
   }
 #endif
@@ -649,7 +789,8 @@ void cmGlobalNinjaGenerator::OpenBuildFileStream()
 
   // Get a stream where to generate things.
   if (!this->BuildFileStream) {
-    this->BuildFileStream = new cmGeneratedFileStream(buildFilePath.c_str());
+    this->BuildFileStream = new cmGeneratedFileStream(
+      buildFilePath.c_str(), false, this->GetMakefileEncoding());
     if (!this->BuildFileStream) {
       // An error message is generated by the constructor if it cannot
       // open the file.
@@ -670,7 +811,7 @@ void cmGlobalNinjaGenerator::CloseBuildFileStream()
 {
   if (this->BuildFileStream) {
     delete this->BuildFileStream;
-    this->BuildFileStream = 0;
+    this->BuildFileStream = CM_NULLPTR;
   } else {
     cmSystemTools::Error("Build file stream was not open.");
   }
@@ -686,7 +827,8 @@ void cmGlobalNinjaGenerator::OpenRulesFileStream()
 
   // Get a stream where to generate things.
   if (!this->RulesFileStream) {
-    this->RulesFileStream = new cmGeneratedFileStream(rulesFilePath.c_str());
+    this->RulesFileStream = new cmGeneratedFileStream(
+      rulesFilePath.c_str(), false, this->GetMakefileEncoding());
     if (!this->RulesFileStream) {
       // An error message is generated by the constructor if it cannot
       // open the file.
@@ -711,7 +853,7 @@ void cmGlobalNinjaGenerator::CloseRulesFileStream()
 {
   if (this->RulesFileStream) {
     delete this->RulesFileStream;
-    this->RulesFileStream = 0;
+    this->RulesFileStream = CM_NULLPTR;
   } else {
     cmSystemTools::Error("Rules file stream was not open.");
   }
@@ -734,24 +876,13 @@ static void EnsureTrailingSlash(std::string& path)
 #endif
 }
 
-std::string cmGlobalNinjaGenerator::ConvertToNinjaPath(const std::string& path)
+std::string cmGlobalNinjaGenerator::ConvertToNinjaPath(
+  const std::string& path) const
 {
   cmLocalNinjaGenerator* ng =
     static_cast<cmLocalNinjaGenerator*>(this->LocalGenerators[0]);
-  std::string convPath = ng->Convert(path, cmOutputConverter::HOME_OUTPUT);
-  convPath = this->NinjaOutputPath(convPath);
-#ifdef _WIN32
-  std::replace(convPath.begin(), convPath.end(), '/', '\\');
-#endif
-  return convPath;
-}
-
-std::string cmGlobalNinjaGenerator::ConvertToNinjaFolderRule(
-  const std::string& path)
-{
-  cmLocalNinjaGenerator* ng =
-    static_cast<cmLocalNinjaGenerator*>(this->LocalGenerators[0]);
-  std::string convPath = ng->Convert(path + "/all", cmOutputConverter::HOME);
+  std::string convPath = ng->ConvertToRelativePath(
+    this->LocalGenerators[0]->GetState()->GetBinaryDirectory(), path);
   convPath = this->NinjaOutputPath(convPath);
 #ifdef _WIN32
   std::replace(convPath.begin(), convPath.end(), '/', '\\');
@@ -799,7 +930,7 @@ void cmGlobalNinjaGenerator::CloseCompileCommandsStream()
   if (this->CompileCommandsStream) {
     *this->CompileCommandsStream << "\n]";
     delete this->CompileCommandsStream;
-    this->CompileCommandsStream = 0;
+    this->CompileCommandsStream = CM_NULLPTR;
   }
 }
 
@@ -830,7 +961,7 @@ void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
     std::copy(i->second.begin(), i->second.end(), std::back_inserter(deps));
     WriteCustomCommandBuild(/*command=*/"", /*description=*/"",
                             "Assume dependencies for generated source file.",
-                            /*uses_terminal*/ false,
+                            /*depfile*/ "", /*uses_terminal*/ false,
                             /*restat*/ true, cmNinjaDeps(1, i->first), deps);
   }
 }
@@ -848,28 +979,23 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
   bool realname = target->IsFrameworkOnApple();
 
   switch (target->GetType()) {
-    case cmState::EXECUTABLE:
-    case cmState::SHARED_LIBRARY:
-    case cmState::STATIC_LIBRARY:
-    case cmState::MODULE_LIBRARY: {
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY: {
       outputs.push_back(this->ConvertToNinjaPath(
         target->GetFullPath(configName, false, realname)));
       break;
     }
-    case cmState::OBJECT_LIBRARY:
-    case cmState::UTILITY: {
+    case cmStateEnums::OBJECT_LIBRARY:
+    case cmStateEnums::GLOBAL_TARGET:
+    case cmStateEnums::UTILITY: {
       std::string path =
         target->GetLocalGenerator()->GetCurrentBinaryDirectory() +
         std::string("/") + target->GetName();
       outputs.push_back(this->ConvertToNinjaPath(path));
       break;
     }
-
-    case cmState::GLOBAL_TARGET:
-      // Always use the target in HOME instead of an unused duplicate in a
-      // subdirectory.
-      outputs.push_back(this->NinjaOutputPath(target->GetName()));
-      break;
 
     default:
       return;
@@ -879,23 +1005,64 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
 void cmGlobalNinjaGenerator::AppendTargetDepends(
   cmGeneratorTarget const* target, cmNinjaDeps& outputs)
 {
-  if (target->GetType() == cmState::GLOBAL_TARGET) {
-    // Global targets only depend on other utilities, which may not appear in
-    // the TargetDepends set (e.g. "all").
+  if (target->GetType() == cmStateEnums::GLOBAL_TARGET) {
+    // These depend only on other CMake-provided targets, e.g. "all".
     std::set<std::string> const& utils = target->GetUtilities();
-    std::copy(utils.begin(), utils.end(), std::back_inserter(outputs));
+    for (std::set<std::string>::const_iterator i = utils.begin();
+         i != utils.end(); ++i) {
+      std::string d =
+        target->GetLocalGenerator()->GetCurrentBinaryDirectory() +
+        std::string("/") + *i;
+      outputs.push_back(this->ConvertToNinjaPath(d));
+    }
   } else {
     cmNinjaDeps outs;
     cmTargetDependSet const& targetDeps = this->GetTargetDirectDepends(target);
     for (cmTargetDependSet::const_iterator i = targetDeps.begin();
          i != targetDeps.end(); ++i) {
-      if ((*i)->GetType() == cmState::INTERFACE_LIBRARY) {
+      if ((*i)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
       this->AppendTargetOutputs(*i, outs);
     }
     std::sort(outs.begin(), outs.end());
     outputs.insert(outputs.end(), outs.begin(), outs.end());
+  }
+}
+
+void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
+  cmGeneratorTarget const* target, cmNinjaDeps& outputs)
+{
+  TargetDependsClosureMap::iterator i =
+    this->TargetDependsClosures.find(target);
+  if (i == this->TargetDependsClosures.end()) {
+    TargetDependsClosureMap::value_type e(
+      target, std::set<cmGeneratorTarget const*>());
+    i = this->TargetDependsClosures.insert(e).first;
+    this->ComputeTargetDependsClosure(target, i->second);
+  }
+  std::set<cmGeneratorTarget const*> const& targets = i->second;
+  cmNinjaDeps outs;
+  for (std::set<cmGeneratorTarget const*>::const_iterator ti = targets.begin();
+       ti != targets.end(); ++ti) {
+    this->AppendTargetOutputs(*ti, outs);
+  }
+  std::sort(outs.begin(), outs.end());
+  outputs.insert(outputs.end(), outs.begin(), outs.end());
+}
+
+void cmGlobalNinjaGenerator::ComputeTargetDependsClosure(
+  cmGeneratorTarget const* target, std::set<cmGeneratorTarget const*>& depends)
+{
+  cmTargetDependSet const& targetDeps = this->GetTargetDirectDepends(target);
+  for (cmTargetDependSet::const_iterator i = targetDeps.begin();
+       i != targetDeps.end(); ++i) {
+    if ((*i)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      continue;
+    }
+    if (depends.insert(*i).second) {
+      this->ComputeTargetDependsClosure(*i, depends);
+    }
   }
 }
 
@@ -907,15 +1074,17 @@ void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
   this->AppendTargetOutputs(target, outputs);
   // Mark the target's outputs as ambiguous to ensure that no other target uses
   // the output as an alias.
-  for (cmNinjaDeps::iterator i = outputs.begin(); i != outputs.end(); ++i)
-    TargetAliases[*i] = 0;
+  for (cmNinjaDeps::iterator i = outputs.begin(); i != outputs.end(); ++i) {
+    TargetAliases[*i] = CM_NULLPTR;
+  }
 
   // Insert the alias into the map.  If the alias was already present in the
   // map and referred to another target, mark it as ambiguous.
   std::pair<TargetAliasMap::iterator, bool> newAlias =
     TargetAliases.insert(std::make_pair(buildAlias, target));
-  if (newAlias.second && newAlias.first->second != target)
-    newAlias.first->second = 0;
+  if (newAlias.second && newAlias.first->second != target) {
+    newAlias.first->second = CM_NULLPTR;
+  }
 }
 
 void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
@@ -926,8 +1095,9 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
   for (TargetAliasMap::const_iterator i = TargetAliases.begin();
        i != TargetAliases.end(); ++i) {
     // Don't write ambiguous aliases.
-    if (!i->second)
+    if (!i->second) {
       continue;
+    }
 
     cmNinjaDeps deps;
     this->AppendTargetOutputs(i->second, deps);
@@ -946,54 +1116,58 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
          this->LocalGenerators.begin();
        lgi != this->LocalGenerators.end(); ++lgi) {
     cmLocalGenerator const* lg = *lgi;
-    const std::string currentSourceFolder(
-      lg->GetStateSnapshot().GetDirectory().GetCurrentSource());
+    const std::string currentBinaryFolder(
+      lg->GetStateSnapshot().GetDirectory().GetCurrentBinary());
     // The directory-level rule should depend on the target-level rules
     // for all targets in the directory.
-    targetsPerFolder[currentSourceFolder] = cmNinjaDeps();
+    targetsPerFolder[currentBinaryFolder] = cmNinjaDeps();
     for (std::vector<cmGeneratorTarget*>::const_iterator ti =
            lg->GetGeneratorTargets().begin();
          ti != lg->GetGeneratorTargets().end(); ++ti) {
       cmGeneratorTarget const* gt = *ti;
-      cmState::TargetType const type = gt->GetType();
-      if ((type == cmState::EXECUTABLE || type == cmState::STATIC_LIBRARY ||
-           type == cmState::SHARED_LIBRARY ||
-           type == cmState::MODULE_LIBRARY ||
-           type == cmState::OBJECT_LIBRARY || type == cmState::UTILITY) &&
+      cmStateEnums::TargetType const type = gt->GetType();
+      if ((type == cmStateEnums::EXECUTABLE ||
+           type == cmStateEnums::STATIC_LIBRARY ||
+           type == cmStateEnums::SHARED_LIBRARY ||
+           type == cmStateEnums::MODULE_LIBRARY ||
+           type == cmStateEnums::OBJECT_LIBRARY ||
+           type == cmStateEnums::UTILITY) &&
           !gt->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
-        targetsPerFolder[currentSourceFolder].push_back(gt->GetName());
+        targetsPerFolder[currentBinaryFolder].push_back(gt->GetName());
       }
     }
 
     // The directory-level rule should depend on the directory-level
     // rules of the subdirectories.
-    std::vector<cmState::Snapshot> const& children =
+    std::vector<cmStateSnapshot> const& children =
       lg->GetStateSnapshot().GetChildren();
-    for (std::vector<cmState::Snapshot>::const_iterator stateIt =
+    for (std::vector<cmStateSnapshot>::const_iterator stateIt =
            children.begin();
          stateIt != children.end(); ++stateIt) {
-      targetsPerFolder[currentSourceFolder].push_back(
-        this->ConvertToNinjaFolderRule(
-          stateIt->GetDirectory().GetCurrentSource()));
+      std::string const currentBinaryDir =
+        stateIt->GetDirectory().GetCurrentBinary();
+
+      targetsPerFolder[currentBinaryFolder].push_back(
+        this->ConvertToNinjaPath(currentBinaryDir + "/all"));
     }
   }
 
-  std::string const rootSourceDir =
-    this->LocalGenerators[0]->GetSourceDirectory();
+  std::string const rootBinaryDir =
+    this->LocalGenerators[0]->GetBinaryDirectory();
   for (std::map<std::string, cmNinjaDeps>::const_iterator it =
          targetsPerFolder.begin();
        it != targetsPerFolder.end(); ++it) {
     cmGlobalNinjaGenerator::WriteDivider(os);
-    std::string const& currentSourceDir = it->first;
+    std::string const& currentBinaryDir = it->first;
 
-    // Do not generate a rule for the root source dir.
-    if (rootSourceDir.length() >= currentSourceDir.length()) {
+    // Do not generate a rule for the root binary dir.
+    if (rootBinaryDir.length() >= currentBinaryDir.length()) {
       continue;
     }
 
-    std::string const comment = "Folder: " + currentSourceDir;
+    std::string const comment = "Folder: " + currentBinaryDir;
     cmNinjaDeps output(1);
-    output.push_back(this->ConvertToNinjaFolderRule(currentSourceDir));
+    output.push_back(this->ConvertToNinjaPath(currentBinaryDir + "/all"));
 
     this->WritePhonyBuild(os, comment, output, it->second);
   }
@@ -1208,6 +1382,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   this->WriteBuild(os, "Re-run CMake if any of its inputs changed.",
                    "RERUN_CMAKE",
                    /*outputs=*/cmNinjaDeps(1, ninjaBuildFile),
+                   /*implicitOuts=*/cmNinjaDeps(),
                    /*explicitDeps=*/cmNinjaDeps(), implicitDeps,
                    /*orderOnlyDeps=*/cmNinjaDeps(), variables);
 
@@ -1227,9 +1402,12 @@ std::string cmGlobalNinjaGenerator::ninjaCmd() const
 
 bool cmGlobalNinjaGenerator::SupportsConsolePool() const
 {
-  return !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForConsolePool().c_str());
+  return this->NinjaSupportsConsolePool;
+}
+
+bool cmGlobalNinjaGenerator::SupportsImplicitOuts() const
+{
+  return this->NinjaSupportsImplicitOuts;
 }
 
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
@@ -1245,6 +1423,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
             /*generator=*/false);
   WriteBuild(os, "Clean all the built files.", "CLEAN",
              /*outputs=*/cmNinjaDeps(1, this->NinjaOutputPath("clean")),
+             /*implicitOuts=*/cmNinjaDeps(),
              /*explicitDeps=*/cmNinjaDeps(),
              /*implicitDeps=*/cmNinjaDeps(),
              /*orderOnlyDeps=*/cmNinjaDeps(),
@@ -1264,6 +1443,7 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
             /*generator=*/false);
   WriteBuild(os, "Print all primary targets available.", "HELP",
              /*outputs=*/cmNinjaDeps(1, this->NinjaOutputPath("help")),
+             /*implicitOuts=*/cmNinjaDeps(),
              /*explicitDeps=*/cmNinjaDeps(),
              /*implicitDeps=*/cmNinjaDeps(),
              /*orderOnlyDeps=*/cmNinjaDeps(),
@@ -1278,7 +1458,8 @@ void cmGlobalNinjaGenerator::InitOutputPathPrefix()
   EnsureTrailingSlash(this->OutputPathPrefix);
 }
 
-std::string cmGlobalNinjaGenerator::NinjaOutputPath(std::string const& path)
+std::string cmGlobalNinjaGenerator::NinjaOutputPath(
+  std::string const& path) const
 {
   if (!this->HasOutputPathPrefix() || cmSystemTools::FileIsFullPath(path)) {
     return path;
@@ -1294,4 +1475,421 @@ void cmGlobalNinjaGenerator::StripNinjaOutputPathPrefixAsSuffix(
   }
   EnsureTrailingSlash(path);
   cmStripSuffixIfExists(path, this->OutputPathPrefix);
+}
+
+/*
+
+We use the following approach to support Fortran.  Each target already
+has a <target>.dir/ directory used to hold intermediate files for CMake.
+For each target, a FortranDependInfo.json file is generated by CMake with
+information about include directories, module directories, and the locations
+the per-target directories for target dependencies.
+
+Compilation of source files within a target is split into the following steps:
+
+1. Preprocess all sources, scan preprocessed output for module dependencies.
+   This step is done with independent build statements for each source,
+   and can therefore be done in parallel.
+
+    rule Fortran_PREPROCESS
+      depfile = $DEP_FILE
+      command = gfortran -cpp $DEFINES $INCLUDES $FLAGS -E $in -o $out &&
+                cmake -E cmake_ninja_depends \
+                  --tdi=FortranDependInfo.json --pp=$out --dep=$DEP_FILE \
+                  --obj=$OBJ_FILE --ddi=$DYNDEP_INTERMEDIATE_FILE
+
+    build src.f90-pp.f90 | src.f90-pp.f90.ddi: Fortran_PREPROCESS src.f90
+      OBJ_FILE = src.f90.o
+      DEP_FILE = src.f90-pp.f90.d
+      DYNDEP_INTERMEDIATE_FILE = src.f90-pp.f90.ddi
+
+   The ``cmake -E cmake_ninja_depends`` tool reads the preprocessed output
+   and generates the ninja depfile for preprocessor dependencies.  It also
+   generates a "ddi" file (in a format private to CMake) that lists the
+   object file that compilation will produce along with the module names
+   it provides and/or requires.  The "ddi" file is an implicit output
+   because it should not appear in "$out" but is generated by the rule.
+
+2. Consolidate the per-source module dependencies saved in the "ddi"
+   files from all sources to produce a ninja "dyndep" file, ``Fortran.dd``.
+
+    rule Fortran_DYNDEP
+      command = cmake -E cmake_ninja_dyndep \
+                  --tdi=FortranDependInfo.json --dd=$out $in
+
+    build Fortran.dd: Fortran_DYNDEP src1.f90-pp.f90.ddi src2.f90-pp.f90.ddi
+
+   The ``cmake -E cmake_ninja_dyndep`` tool reads the "ddi" files from all
+   sources in the target and the ``FortranModules.json`` files from targets
+   on which the target depends.  It computes dependency edges on compilations
+   that require modules to those that provide the modules.  This information
+   is placed in the ``Fortran.dd`` file for ninja to load later.  It also
+   writes the expected location of modules provided by this target into
+   ``FortranModules.json`` for use by dependent targets.
+
+3. Compile all sources after loading dynamically discovered dependencies
+   of the compilation build statements from their ``dyndep`` bindings.
+
+    rule Fortran_COMPILE
+      command = gfortran $INCLUDES $FLAGS -c $in -o $out
+
+    build src1.f90.o: Fortran_COMPILE src1.f90-pp.f90 || Fortran.dd
+      dyndep = Fortran.dd
+
+   The "dyndep" binding tells ninja to load dynamically discovered
+   dependency information from ``Fortran.dd``.  This adds information
+   such as:
+
+    build src1.f90.o | mod1.mod: dyndep
+      restat = 1
+
+   This tells ninja that ``mod1.mod`` is an implicit output of compiling
+   the object file ``src1.f90.o``.  The ``restat`` binding tells it that
+   the timestamp of the output may not always change.  Additionally:
+
+    build src2.f90.o: dyndep | mod1.mod
+
+   This tells ninja that ``mod1.mod`` is a dependency of compiling the
+   object file ``src2.f90.o``.  This ensures that ``src1.f90.o`` and
+   ``mod1.mod`` will always be up to date before ``src2.f90.o`` is built
+   (because the latter consumes the module).
+*/
+
+int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
+                              std::vector<std::string>::const_iterator argEnd)
+{
+  std::string arg_tdi;
+  std::string arg_pp;
+  std::string arg_dep;
+  std::string arg_obj;
+  std::string arg_ddi;
+  for (std::vector<std::string>::const_iterator a = argBeg; a != argEnd; ++a) {
+    std::string const& arg = *a;
+    if (cmHasLiteralPrefix(arg, "--tdi=")) {
+      arg_tdi = arg.substr(6);
+    } else if (cmHasLiteralPrefix(arg, "--pp=")) {
+      arg_pp = arg.substr(5);
+    } else if (cmHasLiteralPrefix(arg, "--dep=")) {
+      arg_dep = arg.substr(6);
+    } else if (cmHasLiteralPrefix(arg, "--obj=")) {
+      arg_obj = arg.substr(6);
+    } else if (cmHasLiteralPrefix(arg, "--ddi=")) {
+      arg_ddi = arg.substr(6);
+    } else {
+      cmSystemTools::Error("-E cmake_ninja_depends unknown argument: ",
+                           arg.c_str());
+      return 1;
+    }
+  }
+  if (arg_tdi.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_depends requires value for --tdi=");
+    return 1;
+  }
+  if (arg_pp.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_depends requires value for --pp=");
+    return 1;
+  }
+  if (arg_dep.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_depends requires value for --dep=");
+    return 1;
+  }
+  if (arg_obj.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_depends requires value for --obj=");
+    return 1;
+  }
+  if (arg_ddi.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_depends requires value for --ddi=");
+    return 1;
+  }
+
+  std::vector<std::string> includes;
+  {
+    Json::Value tdio;
+    Json::Value const& tdi = tdio;
+    {
+      cmsys::ifstream tdif(arg_tdi.c_str(), std::ios::in | std::ios::binary);
+      Json::Reader reader;
+      if (!reader.parse(tdif, tdio, false)) {
+        cmSystemTools::Error("-E cmake_ninja_depends failed to parse ",
+                             arg_tdi.c_str(),
+                             reader.getFormattedErrorMessages().c_str());
+        return 1;
+      }
+    }
+
+    Json::Value const& tdi_include_dirs = tdi["include-dirs"];
+    if (tdi_include_dirs.isArray()) {
+      for (Json::Value::const_iterator i = tdi_include_dirs.begin();
+           i != tdi_include_dirs.end(); ++i) {
+        includes.push_back(i->asString());
+      }
+    }
+  }
+
+  cmFortranSourceInfo info;
+  std::set<std::string> defines;
+  cmFortranParser parser(includes, defines, info);
+  if (!cmFortranParser_FilePush(&parser, arg_pp.c_str())) {
+    cmSystemTools::Error("-E cmake_ninja_depends failed to open ",
+                         arg_pp.c_str());
+    return 1;
+  }
+  if (cmFortran_yyparse(parser.Scanner) != 0) {
+    // Failed to parse the file.
+    return 1;
+  }
+
+  {
+    cmGeneratedFileStream depfile(arg_dep.c_str());
+    depfile << cmSystemTools::ConvertToUnixOutputPath(arg_pp) << ":";
+    for (std::set<std::string>::iterator i = info.Includes.begin();
+         i != info.Includes.end(); ++i) {
+      depfile << " \\\n " << cmSystemTools::ConvertToUnixOutputPath(*i);
+    }
+    depfile << "\n";
+  }
+
+  Json::Value ddi(Json::objectValue);
+  ddi["object"] = arg_obj;
+
+  Json::Value& ddi_provides = ddi["provides"] = Json::arrayValue;
+  for (std::set<std::string>::iterator i = info.Provides.begin();
+       i != info.Provides.end(); ++i) {
+    ddi_provides.append(*i);
+  }
+  Json::Value& ddi_requires = ddi["requires"] = Json::arrayValue;
+  for (std::set<std::string>::iterator i = info.Requires.begin();
+       i != info.Requires.end(); ++i) {
+    // Require modules not provided in the same source.
+    if (!info.Provides.count(*i)) {
+      ddi_requires.append(*i);
+    }
+  }
+
+  cmGeneratedFileStream ddif(arg_ddi.c_str());
+  ddif << ddi;
+  if (!ddif) {
+    cmSystemTools::Error("-E cmake_ninja_depends failed to write ",
+                         arg_ddi.c_str());
+    return 1;
+  }
+  return 0;
+}
+
+struct cmFortranObjectInfo
+{
+  std::string Object;
+  std::vector<std::string> Provides;
+  std::vector<std::string> Requires;
+};
+
+bool cmGlobalNinjaGenerator::WriteDyndepFile(
+  std::string const& dir_top_src, std::string const& dir_top_bld,
+  std::string const& dir_cur_src, std::string const& dir_cur_bld,
+  std::string const& arg_dd, std::vector<std::string> const& arg_ddis,
+  std::string const& module_dir,
+  std::vector<std::string> const& linked_target_dirs)
+{
+  // Setup path conversions.
+  {
+    cmStateSnapshot snapshot = this->GetCMakeInstance()->GetCurrentSnapshot();
+    snapshot.GetDirectory().SetCurrentSource(dir_cur_src);
+    snapshot.GetDirectory().SetCurrentBinary(dir_cur_bld);
+    snapshot.GetDirectory().SetRelativePathTopSource(dir_top_src.c_str());
+    snapshot.GetDirectory().SetRelativePathTopBinary(dir_top_bld.c_str());
+    CM_AUTO_PTR<cmMakefile> mfd(new cmMakefile(this, snapshot));
+    CM_AUTO_PTR<cmLocalNinjaGenerator> lgd(static_cast<cmLocalNinjaGenerator*>(
+      this->CreateLocalGenerator(mfd.get())));
+    this->Makefiles.push_back(mfd.release());
+    this->LocalGenerators.push_back(lgd.release());
+  }
+
+  std::vector<cmFortranObjectInfo> objects;
+  for (std::vector<std::string>::const_iterator ddii = arg_ddis.begin();
+       ddii != arg_ddis.end(); ++ddii) {
+    // Load the ddi file and compute the module file paths it provides.
+    Json::Value ddio;
+    Json::Value const& ddi = ddio;
+    cmsys::ifstream ddif(ddii->c_str(), std::ios::in | std::ios::binary);
+    Json::Reader reader;
+    if (!reader.parse(ddif, ddio, false)) {
+      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse ",
+                           ddii->c_str(),
+                           reader.getFormattedErrorMessages().c_str());
+      return false;
+    }
+
+    cmFortranObjectInfo info;
+    info.Object = ddi["object"].asString();
+    Json::Value const& ddi_provides = ddi["provides"];
+    if (ddi_provides.isArray()) {
+      for (Json::Value::const_iterator i = ddi_provides.begin();
+           i != ddi_provides.end(); ++i) {
+        info.Provides.push_back(i->asString());
+      }
+    }
+    Json::Value const& ddi_requires = ddi["requires"];
+    if (ddi_requires.isArray()) {
+      for (Json::Value::const_iterator i = ddi_requires.begin();
+           i != ddi_requires.end(); ++i) {
+        info.Requires.push_back(i->asString());
+      }
+    }
+    objects.push_back(info);
+  }
+
+  // Map from module name to module file path, if known.
+  std::map<std::string, std::string> mod_files;
+
+  // Populate the module map with those provided by linked targets first.
+  for (std::vector<std::string>::const_iterator di =
+         linked_target_dirs.begin();
+       di != linked_target_dirs.end(); ++di) {
+    std::string const ltmn = *di + "/FortranModules.json";
+    Json::Value ltm;
+    cmsys::ifstream ltmf(ltmn.c_str(), std::ios::in | std::ios::binary);
+    Json::Reader reader;
+    if (ltmf && !reader.parse(ltmf, ltm, false)) {
+      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse ",
+                           di->c_str(),
+                           reader.getFormattedErrorMessages().c_str());
+      return false;
+    }
+    if (ltm.isObject()) {
+      for (Json::Value::iterator i = ltm.begin(); i != ltm.end(); ++i) {
+        mod_files[i.key().asString()] = i->asString();
+      }
+    }
+  }
+
+  // Extend the module map with those provided by this target.
+  // We do this after loading the modules provided by linked targets
+  // in case we have one of the same name that must be preferred.
+  Json::Value tm = Json::objectValue;
+  for (std::vector<cmFortranObjectInfo>::iterator oi = objects.begin();
+       oi != objects.end(); ++oi) {
+    for (std::vector<std::string>::iterator i = oi->Provides.begin();
+         i != oi->Provides.end(); ++i) {
+      std::string const mod = module_dir + *i + ".mod";
+      mod_files[*i] = mod;
+      tm[*i] = mod;
+    }
+  }
+
+  cmGeneratedFileStream ddf(arg_dd.c_str());
+  ddf << "ninja_dyndep_version = 1.0\n";
+
+  for (std::vector<cmFortranObjectInfo>::iterator oi = objects.begin();
+       oi != objects.end(); ++oi) {
+    std::string const ddComment;
+    std::string const ddRule = "dyndep";
+    cmNinjaDeps ddOutputs;
+    cmNinjaDeps ddImplicitOuts;
+    cmNinjaDeps ddExplicitDeps;
+    cmNinjaDeps ddImplicitDeps;
+    cmNinjaDeps ddOrderOnlyDeps;
+    cmNinjaVars ddVars;
+
+    ddOutputs.push_back(oi->Object);
+    for (std::vector<std::string>::iterator i = oi->Provides.begin();
+         i != oi->Provides.end(); ++i) {
+      ddImplicitOuts.push_back(this->ConvertToNinjaPath(mod_files[*i]));
+    }
+    for (std::vector<std::string>::iterator i = oi->Requires.begin();
+         i != oi->Requires.end(); ++i) {
+      std::map<std::string, std::string>::iterator m = mod_files.find(*i);
+      if (m != mod_files.end()) {
+        ddImplicitDeps.push_back(this->ConvertToNinjaPath(m->second));
+      }
+    }
+    if (!oi->Provides.empty()) {
+      ddVars["restat"] = "1";
+    }
+
+    this->WriteBuild(ddf, ddComment, ddRule, ddOutputs, ddImplicitOuts,
+                     ddExplicitDeps, ddImplicitDeps, ddOrderOnlyDeps, ddVars);
+  }
+
+  // Store the map of modules provided by this target in a file for
+  // use by dependents that reference this target in linked-target-dirs.
+  std::string const target_mods_file =
+    cmSystemTools::GetFilenamePath(arg_dd) + "/FortranModules.json";
+  cmGeneratedFileStream tmf(target_mods_file.c_str());
+  tmf << tm;
+
+  return true;
+}
+
+int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
+                             std::vector<std::string>::const_iterator argEnd)
+{
+  std::string arg_dd;
+  std::string arg_tdi;
+  std::vector<std::string> arg_ddis;
+  for (std::vector<std::string>::const_iterator a = argBeg; a != argEnd; ++a) {
+    std::string const& arg = *a;
+    if (cmHasLiteralPrefix(arg, "--tdi=")) {
+      arg_tdi = arg.substr(6);
+    } else if (cmHasLiteralPrefix(arg, "--dd=")) {
+      arg_dd = arg.substr(5);
+    } else if (!cmHasLiteralPrefix(arg, "--") &&
+               cmHasLiteralSuffix(arg, ".ddi")) {
+      arg_ddis.push_back(arg);
+    } else {
+      cmSystemTools::Error("-E cmake_ninja_dyndep unknown argument: ",
+                           arg.c_str());
+      return 1;
+    }
+  }
+  if (arg_tdi.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_dyndep requires value for --tdi=");
+    return 1;
+  }
+  if (arg_dd.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_dyndep requires value for --dd=");
+    return 1;
+  }
+
+  Json::Value tdio;
+  Json::Value const& tdi = tdio;
+  {
+    cmsys::ifstream tdif(arg_tdi.c_str(), std::ios::in | std::ios::binary);
+    Json::Reader reader;
+    if (!reader.parse(tdif, tdio, false)) {
+      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse ",
+                           arg_tdi.c_str(),
+                           reader.getFormattedErrorMessages().c_str());
+      return 1;
+    }
+  }
+
+  std::string const dir_cur_bld = tdi["dir-cur-bld"].asString();
+  std::string const dir_cur_src = tdi["dir-cur-src"].asString();
+  std::string const dir_top_bld = tdi["dir-top-bld"].asString();
+  std::string const dir_top_src = tdi["dir-top-src"].asString();
+  std::string module_dir = tdi["module-dir"].asString();
+  if (!module_dir.empty()) {
+    module_dir += "/";
+  }
+  std::vector<std::string> linked_target_dirs;
+  Json::Value const& tdi_linked_target_dirs = tdi["linked-target-dirs"];
+  if (tdi_linked_target_dirs.isArray()) {
+    for (Json::Value::const_iterator i = tdi_linked_target_dirs.begin();
+         i != tdi_linked_target_dirs.end(); ++i) {
+      linked_target_dirs.push_back(i->asString());
+    }
+  }
+
+  cmake cm;
+  cm.SetHomeDirectory(dir_top_src);
+  cm.SetHomeOutputDirectory(dir_top_bld);
+  CM_AUTO_PTR<cmGlobalNinjaGenerator> ggd(
+    static_cast<cmGlobalNinjaGenerator*>(cm.CreateGlobalGenerator("Ninja")));
+  if (!ggd.get() ||
+      !ggd->WriteDyndepFile(dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld,
+                            arg_dd, arg_ddis, module_dir,
+                            linked_target_dirs)) {
+    return 1;
+  }
+  return 0;
 }

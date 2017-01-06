@@ -1,15 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2012 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmWIXSourceWriter_h
 #define cmWIXSourceWriter_h
 
@@ -26,8 +16,21 @@
 class cmWIXSourceWriter
 {
 public:
+  enum GuidType
+  {
+    WIX_GENERATED_GUID,
+    CMAKE_GENERATED_GUID
+  };
+
+  enum RootElementType
+  {
+    WIX_ELEMENT_ROOT,
+    INCLUDE_ELEMENT_ROOT
+  };
+
   cmWIXSourceWriter(cmCPackLog* logger, std::string const& filename,
-                    bool isIncludeFile = false);
+                    GuidType componentGuidType,
+                    RootElementType rootElementType = WIX_ELEMENT_ROOT);
 
   ~cmWIXSourceWriter();
 
@@ -45,7 +48,7 @@ public:
   void AddAttributeUnlessEmpty(std::string const& key,
                                std::string const& value);
 
-  static std::string CMakeEncodingToUtf8(std::string const& value);
+  std::string CreateGuidFromComponentId(std::string const& componentId);
 
 protected:
   cmCPackLog* Logger;
@@ -70,6 +73,8 @@ private:
   std::vector<std::string> Elements;
 
   std::string SourceFilename;
+
+  GuidType ComponentGuidType;
 };
 
 #endif

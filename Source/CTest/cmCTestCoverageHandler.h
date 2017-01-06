@@ -1,26 +1,23 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestCoverageHandler_h
 #define cmCTestCoverageHandler_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestGenericHandler.h"
 
-#include "cmListFileCache.h"
-
 #include <cmsys/RegularExpression.hxx>
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 class cmGeneratedFileStream;
+class cmMakefile;
 class cmXMLWriter;
+
 class cmCTestCoverageHandlerContainer
 {
 public:
@@ -40,21 +37,21 @@ public:
 class cmCTestCoverageHandler : public cmCTestGenericHandler
 {
 public:
-  cmTypeMacro(cmCTestCoverageHandler, cmCTestGenericHandler);
+  typedef cmCTestGenericHandler Superclass;
 
   /*
    * The main entry point for this class
    */
-  int ProcessHandler();
+  int ProcessHandler() CM_OVERRIDE;
 
   cmCTestCoverageHandler();
 
-  virtual void Initialize();
+  void Initialize() CM_OVERRIDE;
 
   /**
    * This method is called when reading CTest custom file
    */
-  void PopulateCustomVectors(cmMakefile* mf);
+  void PopulateCustomVectors(cmMakefile* mf) CM_OVERRIDE;
 
   /** Report coverage only for sources with these labels.  */
   void SetLabelFilter(std::set<std::string> const& labels);

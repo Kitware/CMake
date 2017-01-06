@@ -1,25 +1,22 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestBZR.h"
 
 #include "cmCTest.h"
+#include "cmCTestVC.h"
+#include "cmProcessTools.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
-#include <cmsys/RegularExpression.hxx>
-
 #include <cm_expat.h>
+#include <cmsys/RegularExpression.hxx>
+#include <list>
+#include <map>
+#include <ostream>
+#include <stdlib.h>
+#include <vector>
 
-extern "C" int cmBZRXMLParserUnknownEncodingHandler(void*,
+extern "C" int cmBZRXMLParserUnknownEncodingHandler(void* /*unused*/,
                                                     const XML_Char* name,
                                                     XML_Encoding* info)
 {
@@ -61,8 +58,9 @@ extern "C" int cmBZRXMLParserUnknownEncodingHandler(void*,
   // workaround for these unknown encodings.
   if (name == std::string("ascii") || name == std::string("cp1252") ||
       name == std::string("ANSI_X3.4-1968")) {
-    for (unsigned int i = 0; i < 256; ++i)
+    for (unsigned int i = 0; i < 256; ++i) {
       info->map[i] = latin1[i];
+    }
     return 1;
   }
 
@@ -100,7 +98,7 @@ private:
   bool CheckOutFound;
   cmsys::RegularExpression RegexCheckOut;
   cmsys::RegularExpression RegexParent;
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexCheckOut.find(this->Line)) {
       this->BZR->URL = this->RegexCheckOut.match(1);
@@ -125,7 +123,7 @@ public:
 private:
   std::string& Rev;
   cmsys::RegularExpression RegexRevno;
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexRevno.find(this->Line)) {
       this->Rev = this->RegexRevno.match(1);
@@ -138,13 +136,13 @@ std::string cmCTestBZR::LoadInfo()
 {
   // Run "bzr info" to get the repository info from the work tree.
   const char* bzr = this->CommandLineTool.c_str();
-  const char* bzr_info[] = { bzr, "info", 0 };
+  const char* bzr_info[] = { bzr, "info", CM_NULLPTR };
   InfoParser iout(this, "info-out> ");
   OutputLogger ierr(this->Log, "info-err> ");
   this->RunChild(bzr_info, &iout, &ierr);
 
   // Run "bzr revno" to get the repository revision number from the work tree.
-  const char* bzr_revno[] = { bzr, "revno", 0 };
+  const char* bzr_revno[] = { bzr, "revno", CM_NULLPTR };
   std::string rev;
   RevnoParser rout(this, "revno-out> ", rev);
   OutputLogger rerr(this->Log, "revno-err> ");
@@ -182,14 +180,15 @@ public:
   {
     this->InitializeParser();
   }
-  ~LogParser() { this->CleanupParser(); }
+  ~LogParser() CM_OVERRIDE { this->CleanupParser(); }
 
-  virtual int InitializeParser()
+  int InitializeParser() CM_OVERRIDE
   {
     int res = cmXMLParser::InitializeParser();
     if (res) {
       XML_SetUnknownEncodingHandler(static_cast<XML_Parser>(this->Parser),
-                                    cmBZRXMLParserUnknownEncodingHandler, 0);
+                                    cmBZRXMLParserUnknownEncodingHandler,
+                                    CM_NULLPTR);
     }
     return res;
   }
@@ -206,14 +205,14 @@ private:
 
   cmsys::RegularExpression EmailRegex;
 
-  virtual bool ProcessChunk(const char* data, int length)
+  bool ProcessChunk(const char* data, int length) CM_OVERRIDE
   {
     this->OutputLogger::ProcessChunk(data, length);
     this->ParseChunk(data, length);
     return true;
   }
 
-  virtual void StartElement(const std::string& name, const char**)
+  void StartElement(const std::string& name, const char** /*atts*/) CM_OVERRIDE
   {
     this->CData.clear();
     if (name == "log") {
@@ -238,12 +237,12 @@ private:
     }
   }
 
-  virtual void CharacterDataHandler(const char* data, int length)
+  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
   {
     this->CData.insert(this->CData.end(), data, data + length);
   }
 
-  virtual void EndElement(const std::string& name)
+  void EndElement(const std::string& name) CM_OVERRIDE
   {
     if (name == "log") {
       this->BZR->DoRevision(this->Rev, this->Changes);
@@ -273,7 +272,7 @@ private:
     this->CData.clear();
   }
 
-  virtual void ReportError(int, int, const char* msg)
+  void ReportError(int /*line*/, int /*column*/, const char* msg) CM_OVERRIDE
   {
     this->BZR->Log << "Error parsing bzr log xml: " << msg << "\n";
   }
@@ -293,7 +292,7 @@ private:
   cmCTestBZR* BZR;
   cmsys::RegularExpression RegexUpdate;
 
-  virtual bool ProcessChunk(const char* first, int length)
+  bool ProcessChunk(const char* first, int length) CM_OVERRIDE
   {
     bool last_is_new_line = (*first == '\r' || *first == '\n');
 
@@ -324,7 +323,7 @@ private:
     return true;
   }
 
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexUpdate.find(this->Line)) {
       this->DoPath(this->RegexUpdate.match(1)[0],
@@ -336,8 +335,9 @@ private:
 
   void DoPath(char c0, char c1, char c2, std::string path)
   {
-    if (path.empty())
+    if (path.empty()) {
       return;
+    }
     cmSystemTools::ConvertToUnixSlashes(path);
 
     const std::string dir = cmSystemTools::GetFilenamePath(path);
@@ -378,7 +378,7 @@ bool cmCTestBZR::UpdateImpl()
 
   bzr_update.push_back(this->URL.c_str());
 
-  bzr_update.push_back(0);
+  bzr_update.push_back(CM_NULLPTR);
 
   // For some reason bzr uses stderr to display the update status.
   OutputLogger out(this->Log, "pull-out> ");
@@ -406,7 +406,8 @@ void cmCTestBZR::LoadRevisions()
   // Run "bzr log" to get all global revisions of interest.
   const char* bzr = this->CommandLineTool.c_str();
   const char* bzr_log[] = {
-    bzr, "log", "-v", "-r", revs.c_str(), "--xml", this->URL.c_str(), 0
+    bzr,       "log", "-v", "-r", revs.c_str(), "--xml", this->URL.c_str(),
+    CM_NULLPTR
   };
   {
     LogParser out(this, "log-out> ");
@@ -429,7 +430,7 @@ public:
 private:
   cmCTestBZR* BZR;
   cmsys::RegularExpression RegexStatus;
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexStatus.find(this->Line)) {
       this->DoPath(this->RegexStatus.match(1)[0],
@@ -441,8 +442,9 @@ private:
 
   void DoPath(char c0, char c1, char c2, std::string path)
   {
-    if (path.empty())
+    if (path.empty()) {
       return;
+    }
     cmSystemTools::ConvertToUnixSlashes(path);
 
     if (c0 == 'C') {
@@ -462,7 +464,7 @@ void cmCTestBZR::LoadModifications()
 {
   // Run "bzr status" which reports local modifications.
   const char* bzr = this->CommandLineTool.c_str();
-  const char* bzr_status[] = { bzr, "status", "-SV", 0 };
+  const char* bzr_status[] = { bzr, "status", "-SV", CM_NULLPTR };
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
   this->RunChild(bzr_status, &out, &err);

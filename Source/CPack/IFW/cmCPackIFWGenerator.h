@@ -1,23 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCPackIFWGenerator_h
 #define cmCPackIFWGenerator_h
 
-#include <CPack/cmCPackGenerator.h>
+#include <cmConfigure.h>
 
+#include "CPack/cmCPackComponentGroup.h"
+#include "CPack/cmCPackGenerator.h"
 #include "cmCPackIFWInstaller.h"
 #include "cmCPackIFWPackage.h"
 #include "cmCPackIFWRepository.h"
+
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 class cmXMLWriter;
 
@@ -46,7 +43,7 @@ public:
   /**
    * Destruct IFW generator
    */
-  virtual ~cmCPackIFWGenerator();
+  ~cmCPackIFWGenerator() CM_OVERRIDE;
 
   /**
    * Compare \a version with QtIFW framework version
@@ -70,18 +67,18 @@ protected:
    * @brief Initialize generator
    * @return 0 on failure
    */
-  virtual int InitializeInternal();
-  virtual int PackageFiles();
-  virtual const char* GetPackagingInstallPrefix();
+  int InitializeInternal() CM_OVERRIDE;
+  int PackageFiles() CM_OVERRIDE;
+  const char* GetPackagingInstallPrefix() CM_OVERRIDE;
 
   /**
    * @brief Extension of binary installer
    * @return Executable suffix or value from default implementation
    */
-  virtual const char* GetOutputExtension();
+  const char* GetOutputExtension() CM_OVERRIDE;
 
-  virtual std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName);
+  std::string GetComponentInstallDirNameSuffix(
+    const std::string& componentName) CM_OVERRIDE;
 
   /**
    * @brief Get Component
@@ -92,8 +89,8 @@ protected:
    *
    * @return Pointer to component
    */
-  virtual cmCPackComponent* GetComponent(const std::string& projectName,
-                                         const std::string& componentName);
+  cmCPackComponent* GetComponent(const std::string& projectName,
+                                 const std::string& componentName) CM_OVERRIDE;
 
   /**
    * @brief Get group of component
@@ -104,12 +101,13 @@ protected:
    *
    * @return Pointer to component group
    */
-  virtual cmCPackComponentGroup* GetComponentGroup(
-    const std::string& projectName, const std::string& groupName);
+  cmCPackComponentGroup* GetComponentGroup(
+    const std::string& projectName, const std::string& groupName) CM_OVERRIDE;
 
-  enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir() const;
-  virtual bool SupportsAbsoluteDestination() const;
-  virtual bool SupportsComponentInstallation() const;
+  enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir() const
+    CM_OVERRIDE;
+  bool SupportsAbsoluteDestination() const CM_OVERRIDE;
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
 
 protected:
   // Methods

@@ -1,16 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmELF_h
 #define cmELF_h
+
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <string>
+#include <utility>
+#include <vector>
 
 #if !defined(CMAKE_USE_ELF_PARSER)
 #error "This file may be included only if CMAKE_USE_ELF_PARSER is enabled."
@@ -65,22 +63,27 @@ public:
     int IndexInSection;
   };
 
+  /** Represent entire dynamic section header */
+  typedef std::vector<std::pair<long, unsigned long> > DynamicEntryList;
+
   /** Get the type of the file opened.  */
   FileType GetFileType() const;
 
   /** Get the number of ELF sections present.  */
   unsigned int GetNumberOfSections() const;
 
-  /** Get the number of DYNAMIC section entries before the first
-      DT_NULL.  Returns zero on error.  */
-  unsigned int GetDynamicEntryCount() const;
-
   /** Get the position of a DYNAMIC section header entry.  Returns
       zero on error.  */
   unsigned long GetDynamicEntryPosition(int index) const;
 
-  /** Read bytes from the file.  */
-  bool ReadBytes(unsigned long pos, unsigned long size, char* buf) const;
+  /** Get a copy of all the DYNAMIC section header entries.
+      Returns an empty vector on error */
+  DynamicEntryList GetDynamicEntries() const;
+
+  /** Encodes a DYNAMIC section header entry list into a char vector according
+      to the type of ELF file this is */
+  std::vector<char> EncodeDynamicEntries(
+    const DynamicEntryList& entries) const;
 
   /** Get the SONAME field if any.  */
   bool GetSOName(std::string& soname);
@@ -94,6 +97,10 @@ public:
 
   /** Print human-readable information about the ELF file.  */
   void PrintInfo(std::ostream& os) const;
+
+  /** Interesting dynamic tags.
+      If the tag is 0, it does not exist in the host ELF implementation */
+  static const long TagRPath, TagRunPath, TagMipsRldMapRel;
 
 private:
   friend class cmELFInternal;

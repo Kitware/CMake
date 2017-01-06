@@ -1,14 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmGlobalNMakeMakefileGenerator_h
 #define cmGlobalNMakeMakefileGenerator_h
 
@@ -34,6 +25,12 @@ public:
     return cmGlobalNMakeMakefileGenerator::GetActualName();
   }
   static std::string GetActualName() { return "NMake Makefiles"; }
+
+  /** Get encoding used by generator for makefile files */
+  codecvt::Encoding GetMakefileEncoding() const CM_OVERRIDE
+  {
+    return codecvt::ANSI;
+  }
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);

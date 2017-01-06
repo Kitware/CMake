@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindPNG
 # -------
@@ -22,7 +25,7 @@
 # ``PNG_LIBRARIES``
 #   the libraries to link against to use PNG.
 # ``PNG_DEFINITIONS``
-#   You should add_definitons(${PNG_DEFINITIONS}) before compiling code
+#   You should add_definitions(${PNG_DEFINITIONS}) before compiling code
 #   that includes png library files.
 # ``PNG_FOUND``
 #   If false, do not try to use PNG.
@@ -41,20 +44,6 @@
 #
 # Since PNG depends on the ZLib compression library, none of the above
 # will be defined unless ZLib can be found.
-
-#=============================================================================
-# Copyright 2002-2009 Kitware, Inc.
-# Copyright 2016 Raumfeld
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 if(PNG_FIND_QUIETLY)
   set(_FIND_ZLIB_ARG QUIET)
@@ -126,19 +115,19 @@ if(ZLIB_FOUND)
             IMPORTED_LINK_INTERFACE_LANGUAGES "C"
             IMPORTED_LOCATION "${PNG_LIBRARY}")
         endif()
-        if(EXISTS "${PNG_LIBRARY_DEBUG}")
-          set_property(TARGET PNG::PNG APPEND PROPERTY
-            IMPORTED_CONFIGURATIONS DEBUG)
-          set_target_properties(PNG::PNG PROPERTIES
-            IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
-            IMPORTED_LOCATION_DEBUG "${PNG_LIBRARY_DEBUG}")
-        endif()
         if(EXISTS "${PNG_LIBRARY_RELEASE}")
           set_property(TARGET PNG::PNG APPEND PROPERTY
             IMPORTED_CONFIGURATIONS RELEASE)
           set_target_properties(PNG::PNG PROPERTIES
             IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
             IMPORTED_LOCATION_RELEASE "${PNG_LIBRARY_RELEASE}")
+        endif()
+        if(EXISTS "${PNG_LIBRARY_DEBUG}")
+          set_property(TARGET PNG::PNG APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS DEBUG)
+          set_target_properties(PNG::PNG PROPERTIES
+            IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
+            IMPORTED_LOCATION_DEBUG "${PNG_LIBRARY_DEBUG}")
         endif()
       endif()
   endif ()
@@ -151,8 +140,6 @@ if(ZLIB_FOUND)
   endif ()
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set PNG_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PNG
                                   REQUIRED_VARS PNG_LIBRARY PNG_PNG_INCLUDE_DIR

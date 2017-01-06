@@ -12,6 +12,8 @@ endfunction()
 
 unset(CTEST_EXTRA_CONFIG)
 unset(CTEST_EXTRA_CODE)
+unset(CTEST_SUFFIX_CODE)
+unset(CTEST_MEMCHECK_ARGS)
 unset(CMAKELISTS_EXTRA_CODE)
 
 #-----------------------------------------------------------------------------
@@ -132,4 +134,31 @@ run_mc_test(DummyValgrindNoLogFile "${PSEUDO_VALGRIND_NOLOG}")
 run_mc_test(DummyBCNoLogFile "${PSEUDO_BC_NOLOG}")
 run_mc_test(NotExist "\${CTEST_BINARY_DIRECTORY}/no-memcheck-exe")
 run_mc_test(Unknown "\${CMAKE_COMMAND}")
-run_mc_test(DummyQuiet "${PSEUDO_VALGRIND}" -DMEMCHECK_ARGS=QUIET)
+
+#----------------------------------------------------------------------------
+set(CTEST_MEMCHECK_ARGS QUIET)
+run_mc_test(DummyQuiet "${PSEUDO_VALGRIND}")
+unset(CTEST_MEMCHECK_ARGS)
+
+#-----------------------------------------------------------------------------
+set(CTEST_SUFFIX_CODE "message(\"Defect count: \${defect_count}\")")
+set(CTEST_MEMCHECK_ARGS "DEFECT_COUNT defect_count")
+run_mc_test(DummyValgrindNoDefects "${PSEUDO_VALGRIND}")
+unset(CTEST_MEMCHECK_ARGS)
+unset(CTEST_SUFFIX_CODE)
+
+#-----------------------------------------------------------------------------
+set(CTEST_SUFFIX_CODE "message(\"Defect count: \${defect_count}\")")
+set(CTEST_MEMCHECK_ARGS "DEFECT_COUNT defect_count")
+set(CTEST_EXTRA_CODE
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
+")
+set(CMAKELISTS_EXTRA_CODE
+"add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
+-P \"${RunCMake_SOURCE_DIR}/testLeakSanitizer.cmake\")
+")
+run_mc_test(DummyLeakSanitizerPrintDefects "" -DMEMCHECK_TYPE=AddressSanitizer)
+unset(CMAKELISTS_EXTRA_CODE)
+unset(CTEST_EXTRA_CODE)
+unset(CTEST_MEMCHECK_ARGS)
+unset(CTEST_SUFFIX_CODE)

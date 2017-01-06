@@ -1,19 +1,45 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#ifndef cmConfigure_h
+#define cmConfigure_h
 
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
+#include <cmsys/Configure.hxx> // IWYU pragma: keep
 
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+#ifdef _MSC_VER
+#pragma warning(disable : 4786)
+#pragma warning(disable : 4503)
+#endif
+
+#ifdef __ICL
+#pragma warning(disable : 985)
+#pragma warning(disable : 1572) /* floating-point equality test */
+#endif
+
 #cmakedefine HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE
 #cmakedefine HAVE_UNSETENV
 #cmakedefine CMAKE_USE_ELF_PARSER
 #cmakedefine CMAKE_USE_MACH_PARSER
-#cmakedefine CMAKE_ENCODING_UTF8
-#cmakedefine CMake_HAVE_CXX11_UNORDERED_MAP
+#cmakedefine CMAKE_USE_LIBUV
+#cmakedefine CMake_HAVE_CXX_AUTO_PTR
+#cmakedefine CMake_HAVE_CXX_MAKE_UNIQUE
+#cmakedefine CMake_HAVE_CXX_NULLPTR
+#cmakedefine CMake_HAVE_CXX_OVERRIDE
+#cmakedefine CMake_HAVE_CXX_UNIQUE_PTR
+#cmakedefine CMake_HAVE_CXX_UNORDERED_MAP
+#cmakedefine CMake_HAVE_CXX_UNORDERED_SET
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
 #define CMAKE_DATA_DIR "/@CMAKE_DATA_DIR@"
+
+#ifdef CMake_HAVE_CXX_NULLPTR
+#define CM_NULLPTR nullptr
+#else
+#define CM_NULLPTR 0
+#endif
+
+#ifdef CMake_HAVE_CXX_OVERRIDE
+#define CM_OVERRIDE override
+#else
+#define CM_OVERRIDE
+#endif
+
+#endif

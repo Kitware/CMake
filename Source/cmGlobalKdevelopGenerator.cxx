@@ -1,44 +1,48 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2004-2009 Kitware, Inc.
-  Copyright 2004 Alexander Neundorf (neundorf@kde.org)
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalKdevelopGenerator.h"
 
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalUnixMakefileGenerator3.h"
-#include "cmLocalUnixMakefileGenerator3.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
-#include <cmsys/SystemTools.hxx>
-
-void cmGlobalKdevelopGenerator::GetDocumentation(cmDocumentationEntry& entry,
-                                                 const std::string&) const
-{
-  entry.Name = this->GetName();
-  entry.Brief = "Generates KDevelop 3 project files.";
-}
+#include <map>
+#include <set>
+#include <string.h>
+#include <utility>
 
 cmGlobalKdevelopGenerator::cmGlobalKdevelopGenerator()
   : cmExternalMakefileProjectGenerator()
 {
-  this->SupportedGlobalGenerators.push_back("Unix Makefiles");
+}
+
+cmExternalMakefileProjectGeneratorFactory*
+cmGlobalKdevelopGenerator::GetFactory()
+{
+  static cmExternalMakefileProjectGeneratorSimpleFactory<
+    cmGlobalKdevelopGenerator>
+    factory("KDevelop3", "Generates KDevelop 3 project files.");
+
+  if (factory.GetSupportedGlobalGenerators().empty()) {
+    factory.AddSupportedGlobalGenerator("Unix Makefiles");
 #ifdef CMAKE_USE_NINJA
-  this->SupportedGlobalGenerators.push_back("Ninja");
+    factory.AddSupportedGlobalGenerator("Ninja");
 #endif
+
+    factory.Aliases.push_back("KDevelop3");
+  }
+
+  return &factory;
 }
 
 void cmGlobalKdevelopGenerator::Generate()
@@ -70,7 +74,7 @@ void cmGlobalKdevelopGenerator::Generate()
       for (std::vector<cmGeneratorTarget*>::const_iterator ti =
              targets.begin();
            ti != targets.end(); ti++) {
-        if ((*ti)->GetType() == cmState::EXECUTABLE) {
+        if ((*ti)->GetType() == cmStateEnums::EXECUTABLE) {
           executable = (*ti)->GetLocation("");
           break;
         }
@@ -111,13 +115,13 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
       // make sure the file is part of this source tree
       if ((tmp[0] != '/') &&
           (strstr(tmp.c_str(), cmake::GetCMakeFilesDirectoryPostSlash()) ==
-           0)) {
+           CM_NULLPTR)) {
         files.insert(tmp);
         tmp = cmSystemTools::GetFilenameName(tmp);
         // add all files which dont match the default
         // */CMakeLists.txt;*cmake; to the file pattern
         if ((tmp != "CMakeLists.txt") &&
-            (strstr(tmp.c_str(), ".cmake") == 0)) {
+            (strstr(tmp.c_str(), ".cmake") == CM_NULLPTR)) {
           cmakeFilePattern += tmp + ";";
         }
       }
@@ -142,7 +146,7 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
 
         if ((tmp[0] != '/') &&
             (strstr(tmp.c_str(), cmake::GetCMakeFilesDirectoryPostSlash()) ==
-             0) &&
+             CM_NULLPTR) &&
             (cmSystemTools::GetFilenameExtension(tmp) != ".moc")) {
           files.insert(tmp);
 
@@ -166,7 +170,7 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
         cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
         if ((tmp[0] != '/') &&
             (strstr(tmp.c_str(), cmake::GetCMakeFilesDirectoryPostSlash()) ==
-             0)) {
+             CM_NULLPTR)) {
           files.insert(tmp);
         }
       }
@@ -213,7 +217,7 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
     cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
     // only put relative paths
     if (!tmp.empty() && tmp[0] != '/') {
-      fout << tmp.c_str() << "\n";
+      fout << tmp << "\n";
     }
   }
   return true;
@@ -296,12 +300,12 @@ void cmGlobalKdevelopGenerator::MergeProjectFiles(
        it != lines.end(); it++) {
     const char* line = (*it).c_str();
     // skip these tags as they are always replaced
-    if ((strstr(line, "<projectdirectory>") != 0) ||
-        (strstr(line, "<projectmanagement>") != 0) ||
-        (strstr(line, "<absoluteprojectpath>") != 0) ||
-        (strstr(line, "<filelistdirectory>") != 0) ||
-        (strstr(line, "<buildtool>") != 0) ||
-        (strstr(line, "<builddir>") != 0)) {
+    if ((strstr(line, "<projectdirectory>") != CM_NULLPTR) ||
+        (strstr(line, "<projectmanagement>") != CM_NULLPTR) ||
+        (strstr(line, "<absoluteprojectpath>") != CM_NULLPTR) ||
+        (strstr(line, "<filelistdirectory>") != CM_NULLPTR) ||
+        (strstr(line, "<buildtool>") != CM_NULLPTR) ||
+        (strstr(line, "<builddir>") != CM_NULLPTR)) {
       continue;
     }
 

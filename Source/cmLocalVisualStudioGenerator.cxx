@@ -1,17 +1,9 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudioGenerator.h"
 
 #include "cmCustomCommandGenerator.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
@@ -74,18 +66,18 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
   }
 }
 
-cmsys::auto_ptr<cmCustomCommand>
+CM_AUTO_PTR<cmCustomCommand>
 cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
                                                    const std::string& config,
                                                    bool isFortran)
 {
-  cmsys::auto_ptr<cmCustomCommand> pcc;
+  CM_AUTO_PTR<cmCustomCommand> pcc;
 
   // If an executable exports symbols then VS wants to create an
   // import library but forgets to create the output directory.
   // The Intel Fortran plugin always forgets to the directory.
-  if (target->GetType() != cmState::EXECUTABLE &&
-      !(isFortran && target->GetType() == cmState::SHARED_LIBRARY)) {
+  if (target->GetType() != cmStateEnums::EXECUTABLE &&
+      !(isFortran && target->GetType() == cmStateEnums::SHARED_LIBRARY)) {
     return pcc;
   }
   std::string outDir = target->GetDirectory(config, false);
@@ -127,7 +119,6 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
 {
   bool useLocal = this->CustomCommandUseLocal();
   std::string workingDirectory = ccg.GetWorkingDirectory();
-  RelativeRoot relativeRoot = workingDirectory.empty() ? START_OUTPUT : NONE;
 
   // Avoid leading or trailing newlines.
   std::string newline = "";
@@ -156,7 +147,8 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
     script += newline;
     newline = newline_text;
     script += "cd ";
-    script += this->Convert(workingDirectory, FULL, SHELL);
+    script += this->ConvertToOutputFormat(
+      cmSystemTools::CollapseFullPath(workingDirectory), SHELL);
     script += check_error;
 
     // Change the working drive.
@@ -203,7 +195,13 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
       }
     }
 
-    script += this->Convert(cmd.c_str(), relativeRoot, SHELL);
+    if (workingDirectory.empty()) {
+      script += this->ConvertToOutputFormat(
+        this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), cmd),
+        cmOutputConverter::SHELL);
+    } else {
+      script += this->ConvertToOutputFormat(cmd.c_str(), SHELL);
+    }
     ccg.AppendArguments(c, script);
 
     // After each custom command, check for an error result.

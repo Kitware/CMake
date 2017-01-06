@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindProtobuf
 # ------------
@@ -94,21 +97,6 @@
 #   ``ARGN``
 #     ``.proto`` filess
 
-#=============================================================================
-# Copyright 2009 Kitware, Inc.
-# Copyright 2009-2011 Philip Lowman <philip@yhbt.com>
-# Copyright 2008 Esben Mose Hansen, Ange Optimization ApS
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 function(PROTOBUF_GENERATE_CPP SRCS HDRS)
   if(NOT ARGN)
     message(SEND_ERROR "Error: PROTOBUF_GENERATE_CPP() called without any proto files")
@@ -129,6 +117,10 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
     set(_protobuf_include_path -I ${CMAKE_CURRENT_SOURCE_DIR})
   endif()
 
+  if(DEFINED PROTOBUF_IMPORT_DIRS AND NOT DEFINED Protobuf_IMPORT_DIRS)
+    set(Protobuf_IMPORT_DIRS "${PROTOBUF_IMPORT_DIRS}")
+  endif()
+
   if(DEFINED Protobuf_IMPORT_DIRS)
     foreach(DIR ${Protobuf_IMPORT_DIRS})
       get_filename_component(ABS_PATH ${DIR} ABSOLUTE)
@@ -144,6 +136,12 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
   foreach(FIL ${ARGN})
     get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
     get_filename_component(FIL_WE ${FIL} NAME_WE)
+    if(NOT PROTOBUF_GENERATE_CPP_APPEND_PATH)
+      get_filename_component(FIL_DIR ${FIL} DIRECTORY)
+      if(FIL_DIR)
+        set(FIL_WE "${FIL_DIR}/${FIL_WE}")
+      endif()
+    endif()
 
     list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc")
     list(APPEND ${HDRS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h")
@@ -183,6 +181,10 @@ function(PROTOBUF_GENERATE_PYTHON SRCS)
     set(_protobuf_include_path -I ${CMAKE_CURRENT_SOURCE_DIR})
   endif()
 
+  if(DEFINED PROTOBUF_IMPORT_DIRS AND NOT DEFINED Protobuf_IMPORT_DIRS)
+    set(Protobuf_IMPORT_DIRS "${PROTOBUF_IMPORT_DIRS}")
+  endif()
+
   if(DEFINED Protobuf_IMPORT_DIRS)
     foreach(DIR ${Protobuf_IMPORT_DIRS})
       get_filename_component(ABS_PATH ${DIR} ABSOLUTE)
@@ -197,6 +199,12 @@ function(PROTOBUF_GENERATE_PYTHON SRCS)
   foreach(FIL ${ARGN})
     get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
     get_filename_component(FIL_WE ${FIL} NAME_WE)
+    if(NOT PROTOBUF_GENERATE_CPP_APPEND_PATH)
+      get_filename_component(FIL_DIR ${FIL} DIRECTORY)
+      if(FIL_DIR)
+        set(FIL_WE "${FIL_DIR}/${FIL_WE}")
+      endif()
+    endif()
 
     list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}_pb2.py")
     add_custom_command(
@@ -256,7 +264,7 @@ function(_protobuf_find_libraries name filename)
     mark_as_advanced(${name}_LIBRARY_RELEASE)
 
     find_library(${name}_LIBRARY_DEBUG
-      NAMES ${filename}
+      NAMES ${filename}d ${filename}
       PATHS ${Protobuf_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Debug)
     mark_as_advanced(${name}_LIBRARY_DEBUG)
 

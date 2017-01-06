@@ -1,12 +1,17 @@
 #include "cmParseJacocoCoverage.h"
 
+#include <cmConfigure.h>
+
+#include "cmCTest.h"
+#include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
+
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
-#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 class cmParseJacocoCoverage::XMLParser : public cmXMLParser
 {
@@ -20,12 +25,12 @@ public:
     this->PackageName = "";
   }
 
-  virtual ~XMLParser() {}
+  ~XMLParser() CM_OVERRIDE {}
 
 protected:
-  virtual void EndElement(const std::string&) {}
+  void EndElement(const std::string& /*name*/) CM_OVERRIDE {}
 
-  virtual void StartElement(const std::string& name, const char** atts)
+  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
   {
     if (name == "package") {
       this->PackageName = atts[1];

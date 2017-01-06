@@ -1,22 +1,19 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestSVN.h"
 
 #include "cmCTest.h"
+#include "cmCTestVC.h"
+#include "cmProcessTools.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 
 #include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <ostream>
+#include <stdlib.h>
+#include <string.h>
 
 struct cmCTestSVN::Revision : public cmCTestVC::Revision
 {
@@ -62,7 +59,7 @@ private:
   cmsys::RegularExpression RegexRev;
   cmsys::RegularExpression RegexURL;
   cmsys::RegularExpression RegexRoot;
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexRev.find(this->Line)) {
       this->Rev = this->RegexRev.match(1);
@@ -80,11 +77,11 @@ static bool cmCTestSVNPathStarts(std::string const& p1, std::string const& p2)
   // Does path p1 start with path p2?
   if (p1.size() == p2.size()) {
     return p1 == p2;
-  } else if (p1.size() > p2.size() && p1[p2.size()] == '/') {
-    return strncmp(p1.c_str(), p2.c_str(), p2.size()) == 0;
-  } else {
-    return false;
   }
+  if (p1.size() > p2.size() && p1[p2.size()] == '/') {
+    return strncmp(p1.c_str(), p2.c_str(), p2.size()) == 0;
+  }
+  return false;
 }
 
 std::string cmCTestSVN::LoadInfo(SVNInfo& svninfo)
@@ -102,13 +99,8 @@ std::string cmCTestSVN::LoadInfo(SVNInfo& svninfo)
 
 void cmCTestSVN::NoteOldRevision()
 {
-  // Info for root repository
-  this->Repositories.push_back(SVNInfo(""));
-  this->RootInfo = &(this->Repositories.back());
-  // Info for the external repositories
-  this->LoadExternals();
+  this->LoadRepositories();
 
-  // Get info for all the repositories
   std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
   std::list<SVNInfo>::iterator itend = this->Repositories.end();
   for (; itbeg != itend; itbeg++) {
@@ -128,7 +120,8 @@ void cmCTestSVN::NoteOldRevision()
 
 void cmCTestSVN::NoteNewRevision()
 {
-  // Get info for the external repositories
+  this->LoadRepositories();
+
   std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
   std::list<SVNInfo>::iterator itend = this->Repositories.end();
   for (; itbeg != itend; itbeg++) {
@@ -206,7 +199,7 @@ private:
   cmCTestSVN* SVN;
   cmsys::RegularExpression RegexUpdate;
 
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexUpdate.find(this->Line)) {
       this->DoPath(this->RegexUpdate.match(1)[0],
@@ -271,8 +264,9 @@ bool cmCTestSVN::UpdateImpl()
 bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
                                OutputParser* out, OutputParser* err)
 {
-  if (parameters.empty())
+  if (parameters.empty()) {
     return false;
+  }
 
   std::vector<char const*> args;
   args.push_back(this->CommandLineTool.c_str());
@@ -290,13 +284,12 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
     args.push_back(i->c_str());
   }
 
-  args.push_back(0);
+  args.push_back(CM_NULLPTR);
 
   if (strcmp(parameters[0], "update") == 0) {
     return RunUpdateCommand(&args[0], out, err);
-  } else {
-    return RunChild(&args[0], out, err);
   }
+  return RunChild(&args[0], out, err);
 }
 
 class cmCTestSVN::LogParser : public cmCTestVC::OutputLogger,
@@ -310,7 +303,7 @@ public:
   {
     this->InitializeParser();
   }
-  ~LogParser() { this->CleanupParser(); }
+  ~LogParser() CM_OVERRIDE { this->CleanupParser(); }
 private:
   cmCTestSVN* SVN;
   cmCTestSVN::SVNInfo& SVNRepo;
@@ -322,14 +315,14 @@ private:
   Change CurChange;
   std::vector<char> CData;
 
-  virtual bool ProcessChunk(const char* data, int length)
+  bool ProcessChunk(const char* data, int length) CM_OVERRIDE
   {
     this->OutputLogger::ProcessChunk(data, length);
     this->ParseChunk(data, length);
     return true;
   }
 
-  virtual void StartElement(const std::string& name, const char** atts)
+  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
   {
     this->CData.clear();
     if (name == "logentry") {
@@ -347,12 +340,12 @@ private:
     }
   }
 
-  virtual void CharacterDataHandler(const char* data, int length)
+  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
   {
     this->CData.insert(this->CData.end(), data, data + length);
   }
 
-  virtual void EndElement(const std::string& name)
+  void EndElement(const std::string& name) CM_OVERRIDE
   {
     if (name == "logentry") {
       this->SVN->DoRevisionSVN(this->Rev, this->Changes);
@@ -371,7 +364,7 @@ private:
     this->CData.clear();
   }
 
-  virtual void ReportError(int, int, const char* msg)
+  void ReportError(int /*line*/, int /*column*/, const char* msg) CM_OVERRIDE
   {
     this->SVN->Log << "Error parsing svn log xml: " << msg << "\n";
   }
@@ -440,7 +433,7 @@ public:
 private:
   cmCTestSVN* SVN;
   cmsys::RegularExpression RegexStatus;
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexStatus.find(this->Line)) {
       this->DoPath(this->RegexStatus.match(1)[0],
@@ -505,7 +498,7 @@ public:
 private:
   cmCTestSVN* SVN;
   cmsys::RegularExpression RegexExternal;
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexExternal.find(this->Line)) {
       this->DoPath(this->RegexExternal.match(1));
@@ -528,8 +521,13 @@ private:
   }
 };
 
-void cmCTestSVN::LoadExternals()
+void cmCTestSVN::LoadRepositories()
 {
+  // Info for root repository
+  this->Repositories.clear();
+  this->Repositories.push_back(SVNInfo(""));
+  this->RootInfo = &(this->Repositories.back());
+
   // Run "svn status" to get the list of external repositories
   std::vector<const char*> svn_status;
   svn_status.push_back("status");

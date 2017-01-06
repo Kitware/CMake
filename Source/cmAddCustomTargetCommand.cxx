@@ -1,24 +1,25 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddCustomTargetCommand.h"
 
+#include <sstream>
+
+#include "cmCustomCommandLines.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmAddCustomTargetCommand
 bool cmAddCustomTargetCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
@@ -47,7 +48,7 @@ bool cmAddCustomTargetCommand::InitialPass(
   bool verbatim = false;
   bool uses_terminal = false;
   std::string comment_buffer;
-  const char* comment = 0;
+  const char* comment = CM_NULLPTR;
   std::vector<std::string> sources;
 
   // Keep track of parser state.
@@ -153,7 +154,7 @@ bool cmAddCustomTargetCommand::InitialPass(
   bool nameOk = cmGeneratorExpression::IsValidTargetName(targetName) &&
     !cmGlobalGenerator::IsReservedTarget(targetName);
   if (nameOk) {
-    nameOk = targetName.find(":") == std::string::npos;
+    nameOk = targetName.find(':') == std::string::npos;
   }
   if (!nameOk) {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;

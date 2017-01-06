@@ -1,20 +1,11 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2012 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionParser.h"
 
 #include "cmGeneratorExpressionEvaluator.h"
 
-#include "assert.h"
+#include <assert.h>
+#include <stddef.h>
 
 cmGeneratorExpressionParser::cmGeneratorExpressionParser(
   const std::vector<cmGeneratorExpressionToken>& tokens)
@@ -251,11 +242,11 @@ void cmGeneratorExpressionParser::ParseContent(
       if (this->NestingLevel == 0) {
         extendText(result, this->it);
       } else {
-        assert(0 && "Got unexpected syntax token.");
+        assert(false && "Got unexpected syntax token.");
       }
       assert(this->it != this->Tokens.end());
       ++this->it;
       return;
   }
-  assert(0 && "Unhandled token in generator expression.");
+  assert(false && "Unhandled token in generator expression.");
 }

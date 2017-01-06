@@ -1,22 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestBatchTestHandler.h"
 
 #include "cmCTest.h"
+#include "cmCTestMultiProcessHandler.h"
+#include "cmCTestTestHandler.h"
 #include "cmProcess.h"
-#include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-#include <stdlib.h>
+
+#include <map>
+#include <utility>
+#include <vector>
 
 cmCTestBatchTestHandler::~cmCTestBatchTestHandler()
 {
@@ -45,7 +39,7 @@ void cmCTestBatchTestHandler::WriteBatchScript()
   fout.close();
 }
 
-void cmCTestBatchTestHandler::WriteSrunArgs(int test, cmsys::ofstream& fout)
+void cmCTestBatchTestHandler::WriteSrunArgs(int test, std::ostream& fout)
 {
   cmCTestTestHandler::cmCTestTestProperties* properties =
     this->Properties[test];
@@ -73,7 +67,7 @@ void cmCTestBatchTestHandler::WriteSrunArgs(int test, cmsys::ofstream& fout)
   }
 }
 
-void cmCTestBatchTestHandler::WriteTestCommand(int test, cmsys::ofstream& fout)
+void cmCTestBatchTestHandler::WriteTestCommand(int test, std::ostream& fout)
 {
   std::vector<std::string> args = this->Properties[test]->Args;
   std::vector<std::string> processArgs;

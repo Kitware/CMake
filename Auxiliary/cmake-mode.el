@@ -1,16 +1,7 @@
 ;;; cmake-mode.el --- major-mode for editing CMake sources
 
-;=============================================================================
-; CMake - Cross Platform Makefile Generator
-; Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-;
-; Distributed under the OSI-approved BSD License (the "License");
-; see accompanying file Copyright.txt for details.
-;
-; This software is distributed WITHOUT ANY WARRANTY; without even the
-; implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-; See the License for more information.
-;=============================================================================
+; Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+; file Copyright.txt or https://cmake.org/licensing for details.
 
 ;------------------------------------------------------------------------------
 
@@ -112,6 +103,14 @@ set the path with these commands:
   )
 
 ;------------------------------------------------------------------------------
+
+;;
+;; Indentation increment.
+;;
+(defcustom cmake-tab-width 2
+  "Number of columns to indent cmake blocks"
+  :type 'integer
+  :group 'cmake)
 
 ;;
 ;; Line indentation function.
@@ -225,13 +224,6 @@ the indentation.  Otherwise it retains the same position on the line"
 ;;
 (defvar cmake-mode-hook nil)
 
-;;
-;; Indentation increment.
-;;
-(defcustom cmake-tab-width 2
-  "Number of columns to indent cmake blocks"
-  :type 'integer)
-
 ;------------------------------------------------------------------------------
 
 ;; For compatibility with Emacs < 24
@@ -270,7 +262,7 @@ optional argument topic will be appended to the argument list."
     (save-selected-window
       (select-window (display-buffer buffer 'not-this-window))
       (cmake-mode)
-      (toggle-read-only t))
+      (read-only-mode 1))
     )
   )
 

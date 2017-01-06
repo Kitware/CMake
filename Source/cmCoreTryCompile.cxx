@@ -1,24 +1,25 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2011 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCoreTryCompile.h"
+
+#include <cmConfigure.h>
+#include <cmsys/Directory.hxx>
+#include <set>
+#include <sstream>
+#include <stdio.h>
+#include <string.h>
 
 #include "cmAlgorithms.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmVersion.h"
 #include "cmake.h"
-#include <cmsys/Directory.hxx>
-
-#include <assert.h>
 
 static std::string const kCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN =
   "CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN";
@@ -43,33 +44,54 @@ static std::string const kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES =
   "CMAKE_TRY_COMPILE_OSX_ARCHITECTURES";
 static std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
   "CMAKE_TRY_COMPILE_PLATFORM_VARIABLES";
+static std::string const kCMAKE_WARN_DEPRECATED = "CMAKE_WARN_DEPRECATED";
+
+static void writeProperty(FILE* fout, std::string const& targetName,
+                          std::string const& prop, std::string const& value)
+{
+  fprintf(fout, "set_property(TARGET %s PROPERTY %s %s)\n", targetName.c_str(),
+          cmOutputConverter::EscapeForCMake(prop).c_str(),
+          cmOutputConverter::EscapeForCMake(value).c_str());
+}
+
+std::string cmCoreTryCompile::LookupStdVar(std::string const& var,
+                                           bool warnCMP0067)
+{
+  std::string value = this->Makefile->GetSafeDefinition(var);
+  if (warnCMP0067 && !value.empty()) {
+    value.clear();
+    this->WarnCMP0067.push_back(var);
+  }
+  return value;
+}
 
 int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                                      bool isTryRun)
 {
-  this->BinaryDirectory = argv[1].c_str();
+  this->BinaryDirectory = argv[1];
   this->OutputFile = "";
   // which signature were we called with ?
   this->SrcFileSignature = true;
 
-  cmState::TargetType targetType = cmState::EXECUTABLE;
+  cmStateEnums::TargetType targetType = cmStateEnums::EXECUTABLE;
   const char* tt =
     this->Makefile->GetDefinition("CMAKE_TRY_COMPILE_TARGET_TYPE");
   if (!isTryRun && tt && *tt) {
-    if (strcmp(tt, cmState::GetTargetTypeName(cmState::EXECUTABLE)) == 0) {
-      targetType = cmState::EXECUTABLE;
+    if (strcmp(tt, cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE)) ==
+        0) {
+      targetType = cmStateEnums::EXECUTABLE;
     } else if (strcmp(tt, cmState::GetTargetTypeName(
-                            cmState::STATIC_LIBRARY)) == 0) {
-      targetType = cmState::STATIC_LIBRARY;
+                            cmStateEnums::STATIC_LIBRARY)) == 0) {
+      targetType = cmStateEnums::STATIC_LIBRARY;
     } else {
       this->Makefile->IssueMessage(
         cmake::FATAL_ERROR, std::string("Invalid value '") + tt +
           "' for "
           "CMAKE_TRY_COMPILE_TARGET_TYPE.  Only "
           "'" +
-          cmState::GetTargetTypeName(cmState::EXECUTABLE) + "' and "
-                                                            "'" +
-          cmState::GetTargetTypeName(cmState::STATIC_LIBRARY) +
+          cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE) + "' and "
+                                                                 "'" +
+          cmState::GetTargetTypeName(cmStateEnums::STATIC_LIBRARY) +
           "' "
           "are allowed.");
       return -1;
@@ -77,13 +99,22 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   }
 
   const char* sourceDirectory = argv[2].c_str();
-  const char* projectName = 0;
+  const char* projectName = CM_NULLPTR;
   std::string targetName;
   std::vector<std::string> cmakeFlags(1, "CMAKE_FLAGS"); // fake argv[0]
   std::vector<std::string> compileDefs;
   std::string outputVariable;
   std::string copyFile;
   std::string copyFileError;
+  std::string cStandard;
+  std::string cxxStandard;
+  std::string cudaStandard;
+  std::string cStandardRequired;
+  std::string cxxStandardRequired;
+  std::string cudaStandardRequired;
+  std::string cExtensions;
+  std::string cxxExtensions;
+  std::string cudaExtensions;
   std::vector<std::string> targets;
   std::string libsToLink = " ";
   bool useOldLinkLibs = true;
@@ -91,6 +122,15 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   bool didOutputVariable = false;
   bool didCopyFile = false;
   bool didCopyFileError = false;
+  bool didCStandard = false;
+  bool didCxxStandard = false;
+  bool didCudaStandard = false;
+  bool didCStandardRequired = false;
+  bool didCxxStandardRequired = false;
+  bool didCudaStandardRequired = false;
+  bool didCExtensions = false;
+  bool didCxxExtensions = false;
+  bool didCudaExtensions = false;
   bool useSources = argv[2] == "SOURCES";
   std::vector<std::string> sources;
 
@@ -103,6 +143,15 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     DoingOutputVariable,
     DoingCopyFile,
     DoingCopyFileError,
+    DoingCStandard,
+    DoingCxxStandard,
+    DoingCudaStandard,
+    DoingCStandardRequired,
+    DoingCxxStandardRequired,
+    DoingCudaStandardRequired,
+    DoingCExtensions,
+    DoingCxxExtensions,
+    DoingCudaExtensions,
     DoingSources
   };
   Doing doing = useSources ? DoingSources : DoingNone;
@@ -123,6 +172,33 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (argv[i] == "COPY_FILE_ERROR") {
       doing = DoingCopyFileError;
       didCopyFileError = true;
+    } else if (argv[i] == "C_STANDARD") {
+      doing = DoingCStandard;
+      didCStandard = true;
+    } else if (argv[i] == "CXX_STANDARD") {
+      doing = DoingCxxStandard;
+      didCxxStandard = true;
+    } else if (argv[i] == "CUDA_STANDARD") {
+      doing = DoingCudaStandard;
+      didCudaStandard = true;
+    } else if (argv[i] == "C_STANDARD_REQUIRED") {
+      doing = DoingCStandardRequired;
+      didCStandardRequired = true;
+    } else if (argv[i] == "CXX_STANDARD_REQUIRED") {
+      doing = DoingCxxStandardRequired;
+      didCxxStandardRequired = true;
+    } else if (argv[i] == "CUDA_STANDARD_REQUIRED") {
+      doing = DoingCudaStandardRequired;
+      didCudaStandardRequired = true;
+    } else if (argv[i] == "C_EXTENSIONS") {
+      doing = DoingCExtensions;
+      didCExtensions = true;
+    } else if (argv[i] == "CXX_EXTENSIONS") {
+      doing = DoingCxxExtensions;
+      didCxxExtensions = true;
+    } else if (argv[i] == "CUDA_EXTENSIONS") {
+      doing = DoingCudaExtensions;
+      didCudaExtensions = true;
     } else if (doing == DoingCMakeFlags) {
       cmakeFlags.push_back(argv[i]);
     } else if (doing == DoingCompileDefinitions) {
@@ -131,12 +207,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       libsToLink += "\"" + cmSystemTools::TrimWhitespace(argv[i]) + "\" ";
       if (cmTarget* tgt = this->Makefile->FindTargetToUse(argv[i])) {
         switch (tgt->GetType()) {
-          case cmState::SHARED_LIBRARY:
-          case cmState::STATIC_LIBRARY:
-          case cmState::INTERFACE_LIBRARY:
-          case cmState::UNKNOWN_LIBRARY:
+          case cmStateEnums::SHARED_LIBRARY:
+          case cmStateEnums::STATIC_LIBRARY:
+          case cmStateEnums::INTERFACE_LIBRARY:
+          case cmStateEnums::UNKNOWN_LIBRARY:
             break;
-          case cmState::EXECUTABLE:
+          case cmStateEnums::EXECUTABLE:
             if (tgt->IsExecutableWithExports()) {
               break;
             }
@@ -155,13 +231,40 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         }
       }
     } else if (doing == DoingOutputVariable) {
-      outputVariable = argv[i].c_str();
+      outputVariable = argv[i];
       doing = DoingNone;
     } else if (doing == DoingCopyFile) {
-      copyFile = argv[i].c_str();
+      copyFile = argv[i];
       doing = DoingNone;
     } else if (doing == DoingCopyFileError) {
-      copyFileError = argv[i].c_str();
+      copyFileError = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCStandard) {
+      cStandard = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCxxStandard) {
+      cxxStandard = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCudaStandard) {
+      cudaStandard = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCStandardRequired) {
+      cStandardRequired = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCxxStandardRequired) {
+      cxxStandardRequired = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCudaStandardRequired) {
+      cudaStandardRequired = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCExtensions) {
+      cExtensions = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCxxExtensions) {
+      cxxExtensions = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingCudaExtensions) {
+      cudaExtensions = argv[i];
       doing = DoingNone;
     } else if (doing == DoingSources) {
       sources.push_back(argv[i]);
@@ -169,7 +272,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       this->SrcFileSignature = false;
       projectName = argv[i].c_str();
     } else if (i == 4 && !this->SrcFileSignature) {
-      targetName = argv[i].c_str();
+      targetName = argv[i];
     } else {
       std::ostringstream m;
       m << "try_compile given unknown argument \"" << argv[i] << "\".";
@@ -207,6 +310,60 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     this->Makefile->IssueMessage(
       cmake::FATAL_ERROR,
       "SOURCES must be followed by at least one source file");
+    return -1;
+  }
+
+  if (didCStandard && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR, "C_STANDARD allowed only in source file signature.");
+    return -1;
+  }
+  if (didCxxStandard && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "CXX_STANDARD allowed only in source file signature.");
+    return -1;
+  }
+  if (didCudaStandard && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "CUDA_STANDARD allowed only in source file signature.");
+    return -1;
+  }
+  if (didCStandardRequired && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "C_STANDARD_REQUIRED allowed only in source file signature.");
+    return -1;
+  }
+  if (didCxxStandardRequired && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "CXX_STANDARD_REQUIRED allowed only in source file signature.");
+    return -1;
+  }
+  if (didCudaStandardRequired && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "CUDA_STANDARD_REQUIRED allowed only in source file signature.");
+    return -1;
+  }
+  if (didCExtensions && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "C_EXTENSIONS allowed only in source file signature.");
+    return -1;
+  }
+  if (didCxxExtensions && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "CXX_EXTENSIONS allowed only in source file signature.");
+    return -1;
+  }
+  if (didCudaExtensions && !this->SrcFileSignature) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "CUDA_EXTENSIONS allowed only in source file signature.");
     return -1;
   }
 
@@ -333,14 +490,43 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       fprintf(fout, "set(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
                     " ${COMPILE_DEFINITIONS}\")\n",
               li->c_str(), li->c_str());
-      static std::string const cfgDefault = "DEBUG";
-      std::string const cfg =
-        !tcConfig.empty() ? cmSystemTools::UpperCase(tcConfig) : cfgDefault;
-      std::string const langFlagsCfg = "CMAKE_" + *li + "_FLAGS_" + cfg;
-      const char* flagsCfg = this->Makefile->GetDefinition(langFlagsCfg);
-      fprintf(
-        fout, "set(%s %s)\n", langFlagsCfg.c_str(),
-        cmOutputConverter::EscapeForCMake(flagsCfg ? flagsCfg : "").c_str());
+    }
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0066)) {
+      case cmPolicies::WARN:
+        if (this->Makefile->PolicyOptionalWarningEnabled(
+              "CMAKE_POLICY_WARNING_CMP0066")) {
+          std::ostringstream w;
+          /* clang-format off */
+          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0066) << "\n"
+            "For compatibility with older versions of CMake, try_compile "
+            "is not honoring caller config-specific compiler flags "
+            "(e.g. CMAKE_C_FLAGS_DEBUG) in the test project."
+            ;
+          /* clang-format on */
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        }
+      case cmPolicies::OLD:
+        // OLD behavior is to do nothing.
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR,
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0066));
+      case cmPolicies::NEW: {
+        // NEW behavior is to pass config-specific compiler flags.
+        static std::string const cfgDefault = "DEBUG";
+        std::string const cfg =
+          !tcConfig.empty() ? cmSystemTools::UpperCase(tcConfig) : cfgDefault;
+        for (std::set<std::string>::iterator li = testLangs.begin();
+             li != testLangs.end(); ++li) {
+          std::string const langFlagsCfg = "CMAKE_" + *li + "_FLAGS_" + cfg;
+          const char* flagsCfg = this->Makefile->GetDefinition(langFlagsCfg);
+          fprintf(fout, "set(%s %s)\n", langFlagsCfg.c_str(),
+                  cmOutputConverter::EscapeForCMake(flagsCfg ? flagsCfg : "")
+                    .c_str());
+        }
+      } break;
     }
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0056)) {
       case cmPolicies::WARN:
@@ -422,6 +608,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(kCMAKE_OSX_SYSROOT);
       vars.insert(kCMAKE_POSITION_INDEPENDENT_CODE);
       vars.insert(kCMAKE_SYSROOT);
+      vars.insert(kCMAKE_WARN_DEPRECATED);
 
       if (const char* varListStr = this->Makefile->GetDefinition(
             kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
@@ -461,13 +648,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
               ? "NEW"
               : "OLD");
 
-    if (targetType == cmState::EXECUTABLE) {
+    if (targetType == cmStateEnums::EXECUTABLE) {
       /* Put the executable at a known location (for COPY_FILE).  */
       fprintf(fout, "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \"%s\")\n",
               this->BinaryDirectory.c_str());
       /* Create the actual executable.  */
       fprintf(fout, "add_executable(%s", targetName.c_str());
-    } else // if (targetType == cmState::STATIC_LIBRARY)
+    } else // if (targetType == cmStateEnums::STATIC_LIBRARY)
     {
       /* Put the static library at a known location (for COPY_FILE).  */
       fprintf(fout, "set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY \"%s\")\n",
@@ -485,6 +672,134 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       }
     }
     fprintf(fout, ")\n");
+
+    bool const testC = testLangs.find("C") != testLangs.end();
+    bool const testCxx = testLangs.find("CXX") != testLangs.end();
+    bool const testCuda = testLangs.find("CUDA") != testLangs.end();
+
+    bool warnCMP0067 = false;
+    bool honorStandard = true;
+
+    if (!didCStandard && !didCxxStandard && !didCudaStandard &&
+        !didCStandardRequired && !didCxxStandardRequired &&
+        !didCudaStandardRequired && !didCExtensions && !didCxxExtensions &&
+        !didCudaExtensions) {
+      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0067)) {
+        case cmPolicies::WARN:
+          warnCMP0067 = this->Makefile->PolicyOptionalWarningEnabled(
+            "CMAKE_POLICY_WARNING_CMP0067");
+        case cmPolicies::OLD:
+          // OLD behavior is to not honor the language standard variables.
+          honorStandard = false;
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+          this->Makefile->IssueMessage(
+            cmake::FATAL_ERROR,
+            cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0067));
+        case cmPolicies::NEW:
+          // NEW behavior is to honor the language standard variables.
+          // We already initialized honorStandard to true.
+          break;
+      }
+    }
+
+    if (honorStandard || warnCMP0067) {
+      if (testC) {
+        if (!didCStandard) {
+          cStandard = this->LookupStdVar("CMAKE_C_STANDARD", warnCMP0067);
+        }
+        if (!didCStandardRequired) {
+          cStandardRequired =
+            this->LookupStdVar("CMAKE_C_STANDARD_REQUIRED", warnCMP0067);
+        }
+        if (!didCExtensions) {
+          cExtensions = this->LookupStdVar("CMAKE_C_EXTENSIONS", warnCMP0067);
+        }
+      }
+      if (testCxx) {
+        if (!didCxxStandard) {
+          cxxStandard = this->LookupStdVar("CMAKE_CXX_STANDARD", warnCMP0067);
+        }
+        if (!didCxxStandardRequired) {
+          cxxStandardRequired =
+            this->LookupStdVar("CMAKE_CXX_STANDARD_REQUIRED", warnCMP0067);
+        }
+        if (!didCxxExtensions) {
+          cxxExtensions =
+            this->LookupStdVar("CMAKE_CXX_EXTENSIONS", warnCMP0067);
+        }
+      }
+      if (testCuda) {
+        if (!didCudaStandard) {
+          cudaStandard =
+            this->LookupStdVar("CMAKE_CUDA_STANDARD", warnCMP0067);
+        }
+        if (!didCudaStandardRequired) {
+          cudaStandardRequired =
+            this->LookupStdVar("CMAKE_CUDA_STANDARD_REQUIRED", warnCMP0067);
+        }
+        if (!didCudaExtensions) {
+          cudaExtensions =
+            this->LookupStdVar("CMAKE_CUDA_EXTENSIONS", warnCMP0067);
+        }
+      }
+    }
+
+    if (!this->WarnCMP0067.empty()) {
+      std::ostringstream w;
+      /* clang-format off */
+      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0067) << "\n"
+        "For compatibility with older versions of CMake, try_compile "
+        "is not honoring language standard variables in the test project:\n"
+        ;
+      /* clang-format on */
+      for (std::vector<std::string>::iterator vi = this->WarnCMP0067.begin();
+           vi != this->WarnCMP0067.end(); ++vi) {
+        w << "  " << *vi << "\n";
+      }
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+    }
+
+    if (testC) {
+      if (!cStandard.empty()) {
+        writeProperty(fout, targetName, "C_STANDARD", cStandard);
+      }
+      if (!cStandardRequired.empty()) {
+        writeProperty(fout, targetName, "C_STANDARD_REQUIRED",
+                      cStandardRequired);
+      }
+      if (!cExtensions.empty()) {
+        writeProperty(fout, targetName, "C_EXTENSIONS", cExtensions);
+      }
+    }
+
+    if (testCxx) {
+      if (!cxxStandard.empty()) {
+        writeProperty(fout, targetName, "CXX_STANDARD", cxxStandard);
+      }
+      if (!cxxStandardRequired.empty()) {
+        writeProperty(fout, targetName, "CXX_STANDARD_REQUIRED",
+                      cxxStandardRequired);
+      }
+      if (!cxxExtensions.empty()) {
+        writeProperty(fout, targetName, "CXX_EXTENSIONS", cxxExtensions);
+      }
+    }
+
+    if (testCuda) {
+      if (!cudaStandard.empty()) {
+        writeProperty(fout, targetName, "CUDA_STANDARD", cudaStandard);
+      }
+      if (!cudaStandardRequired.empty()) {
+        writeProperty(fout, targetName, "CUDA_STANDARD_REQUIRED",
+                      cudaStandardRequired);
+      }
+      if (!cudaExtensions.empty()) {
+        writeProperty(fout, targetName, "CUDA_EXTENSIONS", cudaExtensions);
+      }
+    }
+
     if (useOldLinkLibs) {
       fprintf(fout, "target_link_libraries(%s ${LINK_LIBRARIES})\n",
               targetName.c_str());
@@ -510,7 +825,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   // set the result var to the return value to indicate success or failure
   this->Makefile->AddCacheDefinition(argv[0], (res == 0 ? "TRUE" : "FALSE"),
                                      "Result of TRY_COMPILE",
-                                     cmState::INTERNAL);
+                                     cmStateEnums::INTERNAL);
 
   if (!outputVariable.empty()) {
     this->Makefile->AddDefinition(outputVariable, output.c_str());
@@ -536,9 +851,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         if (copyFileError.empty()) {
           this->Makefile->IssueMessage(cmake::FATAL_ERROR, emsg.str());
           return -1;
-        } else {
-          copyFileErrorMessage = emsg.str();
         }
+        copyFileErrorMessage = emsg.str();
       }
     }
 
@@ -567,18 +881,13 @@ void cmCoreTryCompile::CleanupFiles(const char* binDir)
 
   cmsys::Directory dir;
   dir.Load(binDir);
-  size_t fileNum;
   std::set<std::string> deletedFiles;
-  for (fileNum = 0; fileNum < dir.GetNumberOfFiles(); ++fileNum) {
-    if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)), ".") &&
-        strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)), "..")) {
-
-      if (deletedFiles.find(dir.GetFile(
-            static_cast<unsigned long>(fileNum))) == deletedFiles.end()) {
-        deletedFiles.insert(dir.GetFile(static_cast<unsigned long>(fileNum)));
-        std::string fullPath = binDir;
-        fullPath += "/";
-        fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
+  for (unsigned long i = 0; i < dir.GetNumberOfFiles(); ++i) {
+    const char* fileName = dir.GetFile(i);
+    if (strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0) {
+      if (deletedFiles.insert(fileName).second) {
+        std::string const fullPath =
+          std::string(binDir).append("/").append(fileName);
         if (cmSystemTools::FileIsDirectory(fullPath)) {
           this->CleanupFiles(fullPath.c_str());
           cmSystemTools::RemoveADirectory(fullPath);
@@ -608,16 +917,16 @@ void cmCoreTryCompile::CleanupFiles(const char* binDir)
 }
 
 void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
-                                      cmState::TargetType targetType)
+                                      cmStateEnums::TargetType targetType)
 {
   this->FindErrorMessage = "";
   this->OutputFile = "";
   std::string tmpOutputFile = "/";
-  if (targetType == cmState::EXECUTABLE) {
+  if (targetType == cmStateEnums::EXECUTABLE) {
     tmpOutputFile += targetName;
     tmpOutputFile +=
       this->Makefile->GetSafeDefinition("CMAKE_EXECUTABLE_SUFFIX");
-  } else // if (targetType == cmState::STATIC_LIBRARY)
+  } else // if (targetType == cmStateEnums::STATIC_LIBRARY)
   {
     tmpOutputFile +=
       this->Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
@@ -662,5 +971,4 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   emsg << cmWrap("  " + this->BinaryDirectory, searchDirs, tmpOutputFile, "\n")
        << "\n";
   this->FindErrorMessage = emsg.str();
-  return;
 }

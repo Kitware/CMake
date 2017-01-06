@@ -1,44 +1,19 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestScriptHandler.h"
 
-#include "cmCTest.h"
-#include "cmFunctionBlocker.h"
-#include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmake.h"
-
-//#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Process.h>
-
-// used for sleep
-#ifdef _WIN32
-#include "windows.h"
-#endif
-
-#include <float.h>
-#include <math.h>
+#include <map>
+#include <sstream>
+#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <string.h>
+#include <utility>
 
-// needed for sleep
-#if !defined(_WIN32)
-#include <unistd.h>
-#endif
-
+#include "cmCTest.h"
 #include "cmCTestBuildCommand.h"
+#include "cmCTestCommand.h"
 #include "cmCTestConfigureCommand.h"
 #include "cmCTestCoverageCommand.h"
 #include "cmCTestEmptyBinaryDirectoryCommand.h"
@@ -51,6 +26,24 @@
 #include "cmCTestTestCommand.h"
 #include "cmCTestUpdateCommand.h"
 #include "cmCTestUploadCommand.h"
+#include "cmFunctionBlocker.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
+class cmExecutionStatus;
+struct cmListFileFunction;
 
 #define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
 
@@ -59,9 +52,9 @@ class cmCTestScriptFunctionBlocker : public cmFunctionBlocker
 {
 public:
   cmCTestScriptFunctionBlocker() {}
-  virtual ~cmCTestScriptFunctionBlocker() {}
-  virtual bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                                 cmExecutionStatus&);
+  ~cmCTestScriptFunctionBlocker() CM_OVERRIDE {}
+  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
+                         cmExecutionStatus& /*status*/) CM_OVERRIDE;
   // virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
   // virtual void ScopeEnded(cmMakefile &mf);
 
@@ -69,9 +62,9 @@ public:
 };
 
 // simply update the time and don't block anything
-bool cmCTestScriptFunctionBlocker::IsFunctionBlocked(const cmListFileFunction&,
-                                                     cmMakefile&,
-                                                     cmExecutionStatus&)
+bool cmCTestScriptFunctionBlocker::IsFunctionBlocked(
+  const cmListFileFunction& /*lff*/, cmMakefile& /*mf*/,
+  cmExecutionStatus& /*status*/)
 {
   this->CTestScriptHandler->UpdateElapsedTime();
   return false;
@@ -82,9 +75,9 @@ cmCTestScriptHandler::cmCTestScriptHandler()
   this->Backup = false;
   this->EmptyBinDir = false;
   this->EmptyBinDirOnce = false;
-  this->Makefile = 0;
-  this->CMake = 0;
-  this->GlobalGenerator = 0;
+  this->Makefile = CM_NULLPTR;
+  this->CMake = CM_NULLPTR;
+  this->GlobalGenerator = CM_NULLPTR;
 
   this->ScriptStartTime = 0;
 
@@ -121,10 +114,10 @@ void cmCTestScriptHandler::Initialize()
   this->ScriptStartTime = 0;
 
   delete this->Makefile;
-  this->Makefile = 0;
+  this->Makefile = CM_NULLPTR;
 
   delete this->GlobalGenerator;
-  this->GlobalGenerator = 0;
+  this->GlobalGenerator = CM_NULLPTR;
 
   delete this->CMake;
 }
@@ -200,7 +193,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   for (size_t i = 1; i < initArgs.size(); ++i) {
     argv.push_back(initArgs[i].c_str());
   }
-  argv.push_back(0);
+  argv.push_back(CM_NULLPTR);
 
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
@@ -226,7 +219,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   }
 
   // Properly handle output of the build command
-  cmsysProcess_WaitForExit(cp, 0);
+  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
   int result = cmsysProcess_GetState(cp);
   int retVal = 0;
   bool failed = false;
@@ -265,7 +258,8 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   return retVal;
 }
 
-static void ctestScriptProgressCallback(const char* m, float, void* cd)
+static void ctestScriptProgressCallback(const char* m, float /*unused*/,
+                                        void* cd)
 {
   cmCTest* ctest = static_cast<cmCTest*>(cd);
   if (m && *m) {
@@ -288,7 +282,7 @@ void cmCTestScriptHandler::CreateCMake()
   this->CMake->AddCMakePaths();
   this->GlobalGenerator = new cmGlobalGenerator(this->CMake);
 
-  cmState::Snapshot snapshot = this->CMake->GetCurrentSnapshot();
+  cmStateSnapshot snapshot = this->CMake->GetCurrentSnapshot();
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   snapshot.GetDirectory().SetCurrentSource(cwd);
   snapshot.GetDirectory().SetCurrentBinary(cwd);
@@ -863,7 +857,7 @@ bool cmCTestScriptHandler::WriteInitialCache(const char* directory,
     return false;
   }
 
-  if (text != 0) {
+  if (text != CM_NULLPTR) {
     fout.write(text, strlen(text));
   }
 

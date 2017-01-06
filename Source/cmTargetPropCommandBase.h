@@ -1,17 +1,12 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2013 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmTargetPropCommandBase_h
 #define cmTargetPropCommandBase_h
+
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
+#include <vector>
 
 #include "cmCommand.h"
 
@@ -23,7 +18,6 @@ public:
   enum ArgumentFlags
   {
     NO_FLAGS = 0,
-    // Note these... Need to refactor
     PROCESS_BEFORE = 1,
     PROCESS_SYSTEM = 2
   };
@@ -31,14 +25,6 @@ public:
   bool HandleArguments(std::vector<std::string> const& args,
                        const std::string& prop,
                        ArgumentFlags flags = NO_FLAGS);
-
-  ParameterContext GetContextForParameter(std::vector<std::string> const& args,
-                                          size_t index);
-
-  std::vector<std::string> GetKeywords(std::vector<std::string> const& args,
-                                       size_t index);
-
-  cmTypeMacro(cmTargetPropCommandBase, cmCommand);
 
 protected:
   std::string Property;

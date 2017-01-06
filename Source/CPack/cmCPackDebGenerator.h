@@ -1,19 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCPackDebGenerator_h
 #define cmCPackDebGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmCPackGenerator.h"
+
+#include <string>
+#include <vector>
 
 /** \class cmCPackDebGenerator
  * \brief A generator for Debian packages
@@ -28,7 +23,7 @@ public:
    * Construct generator
    */
   cmCPackDebGenerator();
-  virtual ~cmCPackDebGenerator();
+  ~cmCPackDebGenerator() CM_OVERRIDE;
 
   static bool CanGenerate()
   {
@@ -45,7 +40,7 @@ public:
   }
 
 protected:
-  virtual int InitializeInternal();
+  int InitializeInternal() CM_OVERRIDE;
   /**
    * This method factors out the work done in component packaging case.
    */
@@ -62,11 +57,11 @@ protected:
    * components will be put in a single installer.
    */
   int PackageComponentsAllInOne(const std::string& compInstDirName);
-  virtual int PackageFiles();
-  virtual const char* GetOutputExtension() { return ".deb"; }
-  virtual bool SupportsComponentInstallation() const;
-  virtual std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName);
+  int PackageFiles() CM_OVERRIDE;
+  const char* GetOutputExtension() CM_OVERRIDE { return ".deb"; }
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
+  std::string GetComponentInstallDirNameSuffix(
+    const std::string& componentName) CM_OVERRIDE;
 
 private:
   int createDeb();

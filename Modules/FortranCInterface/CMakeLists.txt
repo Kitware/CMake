@@ -1,13 +1,5 @@
-#=============================================================================
-# Copyright 2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
 cmake_minimum_required(VERSION ${CMAKE_VERSION})
 project(FortranCInterface C Fortran)
@@ -102,6 +94,9 @@ add_library(myfort STATIC mysub.f my_sub.f ${myfort_modules})
 # Provide symbols through C but fall back to Fortran.
 add_library(symbols STATIC ${symbol_sources})
 target_link_libraries(symbols myfort)
+# In case the Fortran compiler produces PIC by default make sure
+# the C compiler produces PIC even if it is not its default.
+set_property(TARGET symbols PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 # Require symbols through Fortran.
 add_executable(FortranCInterface main.F call_sub.f ${call_mod})

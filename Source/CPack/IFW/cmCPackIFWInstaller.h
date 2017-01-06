@@ -1,22 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCPackIFWInstaller_h
 #define cmCPackIFWInstaller_h
 
-#include <cmStandardIncludes.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-class cmCPackIFWPackage;
+#include <map>
+#include <string>
+#include <vector>
+
 class cmCPackIFWGenerator;
+class cmCPackIFWPackage;
 class cmCPackIFWRepository;
 class cmXMLWriter;
 
@@ -89,6 +83,9 @@ public:
 
   /// Filename for a custom installer control script
   std::string ControlScript;
+
+  /// List of resources to include in the installer binary
+  std::vector<std::string> Resources;
 
 public:
   // Internal implementation

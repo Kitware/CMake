@@ -1,24 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOrderDirectories.h"
 
 #include "cmAlgorithms.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include <assert.h>
-
 #include <algorithm>
+#include <assert.h>
+#include <functional>
+#include <sstream>
 
 /*
 Directory ordering computation.
@@ -157,7 +150,7 @@ public:
     }
   }
 
-  virtual void Report(std::ostream& e)
+  void Report(std::ostream& e) CM_OVERRIDE
   {
     e << "runtime library [";
     if (this->SOName.empty()) {
@@ -168,7 +161,7 @@ public:
     e << "]";
   }
 
-  virtual bool FindConflict(std::string const& dir);
+  bool FindConflict(std::string const& dir) CM_OVERRIDE;
 
 private:
   // The soname of the shared library if it is known.
@@ -212,12 +205,12 @@ public:
   {
   }
 
-  virtual void Report(std::ostream& e)
+  void Report(std::ostream& e) CM_OVERRIDE
   {
     e << "link library [" << this->FileName << "]";
   }
 
-  virtual bool FindConflict(std::string const& dir);
+  bool FindConflict(std::string const& dir) CM_OVERRIDE;
 };
 
 bool cmOrderDirectoriesConstraintLibrary::FindConflict(std::string const& dir)

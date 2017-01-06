@@ -1,31 +1,18 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2012 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmGeneratorExpressionNode_h
 #define cmGeneratorExpressionNode_h
 
-#include "cmGeneratorExpression.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmGeneratorExpressionDAGChecker.h"
-#include "cmGeneratorExpressionEvaluator.h"
-#include "cmGeneratorExpressionParser.h"
-#include "cmLocalGenerator.h"
-#include "cmSourceFile.h"
+#include <string>
+#include <vector>
 
-#include <cmsys/String.h>
-
-#include <assert.h>
-#include <errno.h>
-
-#include "cmListFileCache.h"
+class cmGeneratorTarget;
+class cmLocalGenerator;
+struct GeneratorExpressionContent;
+struct cmGeneratorExpressionContext;
+struct cmGeneratorExpressionDAGChecker;
 
 struct cmGeneratorExpressionNode
 {

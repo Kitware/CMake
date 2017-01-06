@@ -1,20 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmListFileCache_h
 #define cmListFileCache_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmState.h"
+#include <iosfwd>
+#include <string>
+#include <vector>
+
+#include "cmStateSnapshot.h"
 
 /** \class cmListFileCache
  * \brief A class to cache list file contents.
@@ -23,23 +18,15 @@
  * cmake list files.
  */
 
-class cmMakefile;
+class cmMessenger;
 
 struct cmCommandContext
 {
   std::string Name;
   long Line;
-  long Column;
-  long OpenParenColumn;
-  long CloseParenLine;
-  long CloseParenColumn;
   cmCommandContext()
     : Name()
     , Line(0)
-    , Column(0)
-    , OpenParenColumn(0)
-    , CloseParenLine(0)
-    , CloseParenColumn(0)
   {
   }
 };
@@ -56,21 +43,18 @@ struct cmListFileArgument
     : Value()
     , Delim(Unquoted)
     , Line(0)
-    , Column(0)
   {
   }
   cmListFileArgument(const cmListFileArgument& r)
     : Value(r.Value)
     , Delim(r.Delim)
     , Line(r.Line)
-    , Column(r.Column)
   {
   }
-  cmListFileArgument(const std::string& v, Delimiter d, long line, long column)
+  cmListFileArgument(const std::string& v, Delimiter d, long line)
     : Value(v)
     , Delim(d)
     , Line(line)
-    , Column(column)
   {
   }
   bool operator==(const cmListFileArgument& r) const
@@ -81,7 +65,6 @@ struct cmListFileArgument
   std::string Value;
   Delimiter Delim;
   long Line;
-  long Column;
 };
 
 class cmListFileContext
@@ -90,18 +73,10 @@ public:
   std::string Name;
   std::string FilePath;
   long Line;
-  long Column;
-  long OpenParenColumn;
-  long CloseParenLine;
-  long CloseParenColumn;
   cmListFileContext()
     : Name()
     , FilePath()
     , Line(0)
-    , Column(0)
-    , OpenParenColumn(0)
-    , CloseParenLine(0)
-    , CloseParenColumn(0)
   {
   }
 
@@ -111,10 +86,6 @@ public:
     cmListFileContext lfc;
     lfc.FilePath = fileName;
     lfc.Line = lfcc.Line;
-    lfc.Column = lfcc.Column;
-    lfc.OpenParenColumn = lfcc.OpenParenColumn;
-    lfc.CloseParenLine = lfcc.CloseParenLine;
-    lfc.CloseParenColumn = lfcc.CloseParenColumn;
     lfc.Name = lfcc.Name;
     return lfc;
   }
@@ -128,12 +99,6 @@ bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
 struct cmListFileFunction : public cmCommandContext
 {
   std::vector<cmListFileArgument> Arguments;
-  long Column;
-  cmListFileFunction()
-    : cmCommandContext()
-    , Column(0)
-  {
-  }
 };
 
 // Represent a backtrace (call stack).  Provide value semantics
@@ -148,12 +113,14 @@ public:
 
   // Construct an empty backtrace whose bottom sits in the directory
   // indicated by the given valid snapshot.
-  cmListFileBacktrace(cmState::Snapshot snapshot);
+  cmListFileBacktrace(cmStateSnapshot snapshot);
 
   // Backtraces may be copied and assigned as values.
   cmListFileBacktrace(cmListFileBacktrace const& r);
   cmListFileBacktrace& operator=(cmListFileBacktrace const& r);
   ~cmListFileBacktrace();
+
+  cmStateSnapshot GetBottom() const { return this->Bottom; }
 
   // Get a backtrace with the given file scope added to the top.
   // May not be called until after construction with a valid snapshot.
@@ -177,22 +144,20 @@ public:
   // Print the call stack below the top of the backtrace.
   void PrintCallStack(std::ostream& out) const;
 
-  std::vector<cmListFileContext> FrameContexts() const;
-
 private:
   struct Entry;
-  cmState::Snapshot Bottom;
+
+  cmStateSnapshot Bottom;
   Entry* Cur;
-  cmListFileBacktrace(cmState::Snapshot bottom, Entry* up,
+  cmListFileBacktrace(cmStateSnapshot bottom, Entry* up,
                       cmListFileContext const& lfc);
-  cmListFileBacktrace(cmState::Snapshot bottom, Entry* cur);
+  cmListFileBacktrace(cmStateSnapshot bottom, Entry* cur);
 };
 
 struct cmListFile
 {
-  bool ParseFile(const char* path, bool topLevel, cmMakefile* mf);
-
-  bool ParseString(const char* content, const char* filename, cmMakefile* mf);
+  bool ParseFile(const char* path, cmMessenger* messenger,
+                 cmListFileBacktrace const& lfbt);
 
   std::vector<cmListFileFunction> Functions;
 };

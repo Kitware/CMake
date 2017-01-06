@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindGnuTLS
 # ----------
@@ -14,22 +17,6 @@
 #   GNUTLS_INCLUDE_DIR - The gnutls include directory
 #   GNUTLS_LIBRARIES - The libraries needed to use gnutls
 #   GNUTLS_DEFINITIONS - Compiler switches required for using gnutls
-
-#=============================================================================
-# Copyright 2009 Kitware, Inc.
-# Copyright 2009 Philip Lowman <philip@yhbt.com>
-# Copyright 2009 Brad Hards <bradh@kde.org>
-# Copyright 2006 Alexander Neundorf <neundorf@kde.org>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # Note that this doesn't try to find the gnutls-extra package.
 
@@ -63,8 +50,6 @@ find_library(GNUTLS_LIBRARY NAMES gnutls libgnutls
 
 mark_as_advanced(GNUTLS_INCLUDE_DIR GNUTLS_LIBRARY)
 
-# handle the QUIETLY and REQUIRED arguments and set GNUTLS_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GnuTLS
                                   REQUIRED_VARS GNUTLS_LIBRARY GNUTLS_INCLUDE_DIR
@@ -74,4 +59,3 @@ if(GNUTLS_FOUND)
     set(GNUTLS_LIBRARIES    ${GNUTLS_LIBRARY})
     set(GNUTLS_INCLUDE_DIRS ${GNUTLS_INCLUDE_DIR})
 endif()
-

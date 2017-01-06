@@ -1,18 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmEnableTestingCommand_h
 #define cmEnableTestingCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmEnableTestingCommand
  * \brief Enable testing for this directory and below.
@@ -33,21 +30,19 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() { return new cmEnableTestingCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmEnableTestingCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const&,
-                           cmExecutionStatus&);
+  bool InitialPass(std::vector<std::string> const&,
+                   cmExecutionStatus&) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "enable_testing"; }
-
-  cmTypeMacro(cmEnableTestingCommand, cmCommand);
+  std::string GetName() const CM_OVERRIDE { return "enable_testing"; }
 };
 
 #endif

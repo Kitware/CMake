@@ -1,24 +1,18 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpression.h"
+
+#include <cmsys/RegularExpression.hxx>
+#include <utility>
 
 #include "assert.h"
 #include "cmAlgorithms.h"
-#include "cmSystemTools.h"
-
-#include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
 #include "cmGeneratorExpressionParser.h"
+#include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
 
 cmGeneratorExpression::cmGeneratorExpression(
   const cmListFileBacktrace& backtrace)
@@ -26,14 +20,14 @@ cmGeneratorExpression::cmGeneratorExpression(
 {
 }
 
-cmsys::auto_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
+CM_AUTO_PTR<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
   std::string const& input)
 {
-  return cmsys::auto_ptr<cmCompiledGeneratorExpression>(
+  return CM_AUTO_PTR<cmCompiledGeneratorExpression>(
     new cmCompiledGeneratorExpression(this->Backtrace, input));
 }
 
-cmsys::auto_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
+CM_AUTO_PTR<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
   const char* input)
 {
   return this->Parse(std::string(input ? input : ""));
@@ -352,11 +346,13 @@ std::string cmGeneratorExpression::Preprocess(const std::string& input,
 {
   if (context == StripAllGeneratorExpressions) {
     return stripAllGeneratorExpressions(input);
-  } else if (context == BuildInterface || context == InstallInterface) {
+  }
+  if (context == BuildInterface || context == InstallInterface) {
     return stripExportInterface(input, context, resolveRelative);
   }
 
-  assert(0 && "cmGeneratorExpression::Preprocess called with invalid args");
+  assert(false &&
+         "cmGeneratorExpression::Preprocess called with invalid args");
   return std::string();
 }
 

@@ -1,30 +1,24 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackGenerator.h"
-
-#include "cmCPackComponentGroup.h"
-#include "cmCPackLog.h"
-#include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmXMLSafe.h"
-#include "cmake.h"
 
 #include <algorithm>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
-#include <cmsys/SystemTools.hxx>
+#include <cmsys/RegularExpression.hxx>
 #include <list>
+#include <utility>
+
+#include "cmCPackComponentGroup.h"
+#include "cmCPackLog.h"
+#include "cmCryptoHash.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmStateSnapshot.h"
+#include "cmXMLSafe.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 #if defined(__HAIKU__)
 #include <FindDirectory.h>
@@ -34,14 +28,14 @@
 cmCPackGenerator::cmCPackGenerator()
 {
   this->GeneratorVerbose = cmSystemTools::OUTPUT_NONE;
-  this->MakefileMap = 0;
-  this->Logger = 0;
+  this->MakefileMap = CM_NULLPTR;
+  this->Logger = CM_NULLPTR;
   this->componentPackageMethod = ONE_PACKAGE_PER_GROUP;
 }
 
 cmCPackGenerator::~cmCPackGenerator()
 {
-  this->MakefileMap = 0;
+  this->MakefileMap = CM_NULLPTR;
 }
 
 void cmCPackGeneratorProgress(const char* msg, float prog, void* ptr)
@@ -67,7 +61,8 @@ int cmCPackGenerator::PrepareNames()
         cmCPackLog::LOG_ERROR, "CPACK_SET_DESTDIR is set to ON but the '"
           << Name << "' generator does NOT support it." << std::endl);
       return 0;
-    } else if (SETDESTDIR_SHOULD_NOT_BE_USED == SupportsSetDestdir()) {
+    }
+    if (SETDESTDIR_SHOULD_NOT_BE_USED == SupportsSetDestdir()) {
       cmCPackLogger(cmCPackLog::LOG_WARNING,
                     "CPACK_SET_DESTDIR is set to ON but it is "
                       << "usually a bad idea to do that with '" << Name
@@ -158,6 +153,14 @@ int cmCPackGenerator::PrepareNames()
       "CPACK_PACKAGE_DESCRIPTION or CPACK_PACKAGE_DESCRIPTION_FILE."
         << std::endl);
     return 0;
+  }
+  const char* algoSignature = this->GetOption("CPACK_PACKAGE_CHECKSUM");
+  if (algoSignature) {
+    if (cmCryptoHash::New(algoSignature).get() == CM_NULLPTR) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot recognize algorithm: "
+                      << algoSignature << std::endl);
+      return 0;
+    }
   }
 
   this->SetOptionIfNotSet("CPACK_REMOVE_TOPLEVEL_DIRECTORY", "1");
@@ -251,8 +254,9 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << *it << std::endl);
       std::string output;
       int retVal = 1;
-      bool resB = cmSystemTools::RunSingleCommand(
-        it->c_str(), &output, &output, &retVal, 0, this->GeneratorVerbose, 0);
+      bool resB =
+        cmSystemTools::RunSingleCommand(it->c_str(), &output, &output, &retVal,
+                                        CM_NULLPTR, this->GeneratorVerbose, 0);
       if (!resB || retVal) {
         std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
         tmpFile += "/InstallOutput.log";
@@ -623,9 +627,10 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         cm.AddCMakePaths();
         cm.SetProgressCallback(cmCPackGeneratorProgress, this);
         cmGlobalGenerator gg(&cm);
-        cmsys::auto_ptr<cmMakefile> mf(
+        CM_AUTO_PTR<cmMakefile> mf(
           new cmMakefile(&gg, cm.GetCurrentSnapshot()));
-        if (!installSubDirectory.empty() && installSubDirectory != "/") {
+        if (!installSubDirectory.empty() && installSubDirectory != "/" &&
+            installSubDirectory != ".") {
           tempInstallDirectory += installSubDirectory;
         }
         if (componentInstall) {
@@ -814,7 +819,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           }
         }
 
-        if (NULL != mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
+        if (CM_NULLPTR !=
+            mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
           if (!absoluteDestFiles.empty()) {
             absoluteDestFiles += ";";
           }
@@ -828,7 +834,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
             std::string absoluteDestFileComponent =
               std::string("CPACK_ABSOLUTE_DESTINATION_FILES") + "_" +
               GetComponentInstallDirNameSuffix(installComponent);
-            if (NULL != this->GetOption(absoluteDestFileComponent)) {
+            if (CM_NULLPTR != this->GetOption(absoluteDestFileComponent)) {
               std::string absoluteDestFilesListComponent =
                 this->GetOption(absoluteDestFileComponent);
               absoluteDestFilesListComponent += ";";
@@ -973,6 +979,10 @@ int cmCPackGenerator::DoPackage()
     return 0;
   }
 
+  /* Prepare checksum algorithm*/
+  const char* algo = this->GetOption("CPACK_PACKAGE_CHECKSUM");
+  CM_AUTO_PTR<cmCryptoHash> crypto = cmCryptoHash::New(algo ? algo : "");
+
   /*
    * Copy the generated packages to final destination
    *  - there may be several of them
@@ -985,8 +995,9 @@ int cmCPackGenerator::DoPackage()
   /* now copy package one by one */
   for (it = packageFileNames.begin(); it != packageFileNames.end(); ++it) {
     std::string tmpPF(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"));
+    std::string filename(cmSystemTools::GetFilenameName(*it));
     tempPackageFileName = it->c_str();
-    tmpPF += "/" + cmSystemTools::GetFilenameName(*it);
+    tmpPF += "/" + filename;
     const char* packageFileName = tmpPF.c_str();
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy final package(s): "
                     << (tempPackageFileName ? tempPackageFileName : "(NULL)")
@@ -1002,6 +1013,23 @@ int cmCPackGenerator::DoPackage()
     }
     cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- package: "
                     << packageFileName << " generated." << std::endl);
+
+    /* Generate checksum file */
+    if (crypto.get() != CM_NULLPTR) {
+      std::string hashFile(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"));
+      hashFile +=
+        "/" + filename.substr(0, filename.rfind(this->GetOutputExtension()));
+      hashFile += "." + cmSystemTools::LowerCase(algo);
+      cmsys::ofstream outF(hashFile.c_str());
+      if (!outF) {
+        cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot create checksum file: "
+                        << hashFile << std::endl);
+        return 0;
+      }
+      outF << crypto->HashFile(packageFileName) << "  " << filename << "\n";
+      cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- checksum file: "
+                      << hashFile << " generated." << std::endl);
+    }
   }
 
   return 1;
@@ -1046,6 +1074,24 @@ bool cmCPackGenerator::IsOn(const std::string& name) const
   return cmSystemTools::IsOn(GetOption(name));
 }
 
+bool cmCPackGenerator::IsSetToOff(const std::string& op) const
+{
+  const char* ret = this->MakefileMap->GetDefinition(op);
+  if (ret && *ret) {
+    return cmSystemTools::IsOff(ret);
+  }
+  return false;
+}
+
+bool cmCPackGenerator::IsSetToEmpty(const std::string& op) const
+{
+  const char* ret = this->MakefileMap->GetDefinition(op);
+  if (ret) {
+    return !*ret;
+  }
+  return false;
+}
+
 const char* cmCPackGenerator::GetOption(const std::string& op) const
 {
   const char* ret = this->MakefileMap->GetDefinition(op);
@@ -1072,11 +1118,11 @@ const char* cmCPackGenerator::GetInstallPath()
     return this->InstallPath.c_str();
   }
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  const char* prgfiles = cmsys::SystemTools::GetEnv("ProgramFiles");
-  const char* sysDrive = cmsys::SystemTools::GetEnv("SystemDrive");
-  if (prgfiles) {
+  std::string prgfiles;
+  std::string sysDrive;
+  if (cmsys::SystemTools::GetEnv("ProgramFiles", prgfiles)) {
     this->InstallPath = prgfiles;
-  } else if (sysDrive) {
+  } else if (cmsys::SystemTools::GetEnv("SystemDrive", sysDrive)) {
     this->InstallPath = sysDrive;
     this->InstallPath += "/Program Files";
   } else {
@@ -1178,7 +1224,7 @@ int cmCPackGenerator::PrepareGroupingKind()
   std::string groupingType;
 
   // Second way to specify grouping
-  if (NULL != this->GetOption("CPACK_COMPONENTS_GROUPING")) {
+  if (CM_NULLPTR != this->GetOption("CPACK_COMPONENTS_GROUPING")) {
     groupingType = this->GetOption("CPACK_COMPONENTS_GROUPING");
   }
 
@@ -1355,7 +1401,7 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
       component->Group = GetComponentGroup(projectName, groupName);
       component->Group->Components.push_back(component);
     } else {
-      component->Group = 0;
+      component->Group = CM_NULLPTR;
     }
 
     const char* description = this->GetOption(macroPrefix + "_DESCRIPTION");
@@ -1423,7 +1469,7 @@ cmCPackComponentGroup* cmCPackGenerator::GetComponentGroup(
       group->ParentGroup = GetComponentGroup(projectName, parentGroupName);
       group->ParentGroup->Subgroups.push_back(group);
     } else {
-      group->ParentGroup = 0;
+      group->ParentGroup = CM_NULLPTR;
     }
   }
   return group;

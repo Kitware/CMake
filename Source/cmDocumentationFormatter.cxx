@@ -1,17 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDocumentationFormatter.h"
 
+#include "cmDocumentationEntry.h"
 #include "cmDocumentationSection.h"
+
+#include <ostream>
+#include <string.h>
+#include <string>
+#include <vector>
 
 cmDocumentationFormatter::cmDocumentationFormatter()
   : TextWidth(77)
@@ -159,7 +156,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
 
     // Move to beginning of next word.  Skip over whitespace.
     l = r;
-    while (*l && (*l == ' ')) {
+    while (*l == ' ') {
       ++l;
     }
   }

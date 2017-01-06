@@ -1,15 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIncludeExternalMSProjectCommand.h"
+
+#ifdef _WIN32
+#include "cmMakefile.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#endif
+
+class cmExecutionStatus;
 
 // cmIncludeExternalMSProjectCommand
 bool cmIncludeExternalMSProjectCommand::InitialPass(
@@ -75,12 +75,12 @@ bool cmIncludeExternalMSProjectCommand::InitialPass(
       std::string guidVariable = utility_name + "_GUID_CMAKE";
       this->Makefile->GetCMakeInstance()->AddCacheEntry(
         guidVariable.c_str(), customGuid.c_str(), "Stored GUID",
-        cmState::INTERNAL);
+        cmStateEnums::INTERNAL);
     }
 
     // Create a target instance for this utility.
-    cmTarget* target =
-      this->Makefile->AddNewTarget(cmState::UTILITY, utility_name.c_str());
+    cmTarget* target = this->Makefile->AddNewTarget(cmStateEnums::UTILITY,
+                                                    utility_name.c_str());
 
     target->SetProperty("GENERATOR_FILE_NAME", utility_name.c_str());
     target->SetProperty("EXTERNAL_MSPROJECT", path.c_str());

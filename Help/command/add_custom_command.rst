@@ -20,6 +20,7 @@ The first signature is for adding a custom command to produce an output::
                                       [<lang2> depend2] ...]
                      [WORKING_DIRECTORY dir]
                      [COMMENT comment]
+                     [DEPFILE depfile]
                      [VERBATIM] [APPEND] [USES_TERMINAL])
 
 This defines a command to generate specified ``OUTPUT`` file(s).
@@ -169,6 +170,12 @@ The options are:
   Execute the command with the given current working directory.
   If it is a relative path it will be interpreted relative to the
   build tree directory corresponding to the current source directory.
+
+``DEPFILE``
+  Specify a ``.d`` depfile for the :generator:`Ninja` generator.
+  A ``.d`` file holds dependencies usually emitted by the custom
+  command itself.
+  Using ``DEPFILE`` with other generators than Ninja is an error.
 
 Build Events
 ^^^^^^^^^^^^

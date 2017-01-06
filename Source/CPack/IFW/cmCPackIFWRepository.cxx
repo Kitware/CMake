@@ -1,24 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWRepository.h"
 
+#include "CPack/cmCPackGenerator.h"
 #include "cmCPackIFWGenerator.h"
+#include "cmGeneratedFileStream.h"
+#include "cmSystemTools.h"
+#include "cmXMLParser.h"
+#include "cmXMLWriter.h"
 
-#include <CPack/cmCPackLog.h>
-
-#include <cmGeneratedFileStream.h>
-#include <cmXMLParser.h>
-#include <cmXMLWriter.h>
+#include <cmConfigure.h>
+#include <stddef.h>
 
 #ifdef cmCPackLogger
 #undef cmCPackLogger
@@ -31,11 +23,11 @@
       Generator->Logger->Log(logType, __FILE__, __LINE__,                     \
                              cmCPackLog_msg.str().c_str());                   \
     }                                                                         \
-  } while (0)
+  } while (false)
 
 cmCPackIFWRepository::cmCPackIFWRepository()
   : Update(None)
-  , Generator(0)
+  , Generator(CM_NULLPTR)
 {
 }
 
@@ -63,7 +55,7 @@ bool cmCPackIFWRepository::IsValid() const
 
 const char* cmCPackIFWRepository::GetOption(const std::string& op) const
 {
-  return Generator ? Generator->GetOption(op) : 0;
+  return Generator ? Generator->GetOption(op) : CM_NULLPTR;
 }
 
 bool cmCPackIFWRepository::IsOn(const std::string& op) const
@@ -89,8 +81,9 @@ bool cmCPackIFWRepository::IsVersionEqual(const char* version)
 bool cmCPackIFWRepository::ConfigureFromOptions()
 {
   // Name;
-  if (Name.empty())
+  if (Name.empty()) {
     return false;
+  }
 
   std::string prefix =
     "CPACK_IFW_REPOSITORY_" + cmsys::SystemTools::UpperCase(Name) + "_";
@@ -176,7 +169,7 @@ public:
   bool patched;
 
 protected:
-  virtual void StartElement(const std::string& name, const char** atts)
+  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
   {
     xout.StartElement(name);
     StartFragment(atts);
@@ -191,26 +184,29 @@ protected:
     }
   }
 
-  virtual void EndElement(const std::string& name)
+  void EndElement(const std::string& name) CM_OVERRIDE
   {
     if (name == "Updates" && !patched) {
       repository->WriteRepositoryUpdates(xout);
       patched = true;
     }
     xout.EndElement();
-    if (patched)
+    if (patched) {
       return;
+    }
     if (name == "Checksum") {
       repository->WriteRepositoryUpdates(xout);
       patched = true;
     }
   }
 
-  virtual void CharacterDataHandler(const char* data, int length)
+  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
   {
     std::string content(data, data + length);
-    if (content == "" || content == " " || content == "  " || content == "\n")
+    if (content == "" || content == " " || content == "  " ||
+        content == "\n") {
       return;
+    }
     xout.Content(content);
   }
 };
@@ -295,8 +291,8 @@ void cmCPackIFWRepository::WriteRepositoryUpdate(cmXMLWriter& xout)
   if (Update == Add || Update == Remove) {
     xout.Attribute("url", Url);
   } else if (Update == Replace) {
-    xout.Attribute("oldurl", OldUrl);
-    xout.Attribute("newurl", NewUrl);
+    xout.Attribute("oldUrl", OldUrl);
+    xout.Attribute("newUrl", NewUrl);
   }
   // Enabled
   if (!Enabled.empty()) {
@@ -332,6 +328,7 @@ void cmCPackIFWRepository::WriteRepositoryUpdates(cmXMLWriter& xout)
 
 void cmCPackIFWRepository::WriteGeneratedByToStrim(cmXMLWriter& xout)
 {
-  if (Generator)
+  if (Generator) {
     Generator->WriteGeneratedByToStrim(xout);
+  }
 }

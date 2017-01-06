@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #[=======================================================================[.rst:
 FindPackageHandleStandardArgs
 -----------------------------
@@ -126,19 +129,6 @@ directory for ``automoc4``.  Then the call to
 message.
 #]=======================================================================]
 
-#=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageMessage.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
 
@@ -169,10 +159,10 @@ macro(_FPHSA_HANDLE_FAILURE_CONFIG_MODE)
       foreach(currentConfigIndex RANGE ${configsCount})
         list(GET ${_NAME}_CONSIDERED_CONFIGS ${currentConfigIndex} filename)
         list(GET ${_NAME}_CONSIDERED_VERSIONS ${currentConfigIndex} version)
-        set(configsText "${configsText}    ${filename} (version ${version})\n")
+        string(APPEND configsText "    ${filename} (version ${version})\n")
       endforeach()
       if (${_NAME}_NOT_FOUND_MESSAGE)
-        set(configsText "${configsText}    Reason given by package: ${${_NAME}_NOT_FOUND_MESSAGE}\n")
+        string(APPEND configsText "    Reason given by package: ${${_NAME}_NOT_FOUND_MESSAGE}\n")
       endif()
       _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE} ${VERSION_MSG}, checked the following files:\n${configsText}")
 
@@ -253,9 +243,9 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   foreach(_CURRENT_VAR ${FPHSA_REQUIRED_VARS})
     if(NOT ${_CURRENT_VAR})
       set(FPHSA_FOUND_${_NAME} FALSE)
-      set(MISSING_VARS "${MISSING_VARS} ${_CURRENT_VAR}")
+      string(APPEND MISSING_VARS " ${_CURRENT_VAR}")
     else()
-      set(DETAILS "${DETAILS}[${${_CURRENT_VAR}}]")
+      string(APPEND DETAILS "[${${_CURRENT_VAR}}]")
     endif()
   endforeach()
   if(FPHSA_FOUND_${_NAME})
@@ -277,24 +267,24 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
         if(NOT DEFINED FOUND_COMPONENTS_MSG)
           set(FOUND_COMPONENTS_MSG "found components: ")
         endif()
-        set(FOUND_COMPONENTS_MSG "${FOUND_COMPONENTS_MSG} ${comp}")
+        string(APPEND FOUND_COMPONENTS_MSG " ${comp}")
 
       else()
 
         if(NOT DEFINED MISSING_COMPONENTS_MSG)
           set(MISSING_COMPONENTS_MSG "missing components: ")
         endif()
-        set(MISSING_COMPONENTS_MSG "${MISSING_COMPONENTS_MSG} ${comp}")
+        string(APPEND MISSING_COMPONENTS_MSG " ${comp}")
 
         if(${_NAME}_FIND_REQUIRED_${comp})
           set(${_NAME}_FOUND FALSE)
-          set(MISSING_VARS "${MISSING_VARS} ${comp}")
+          string(APPEND MISSING_VARS " ${comp}")
         endif()
 
       endif()
     endforeach()
     set(COMPONENT_MSG "${FOUND_COMPONENTS_MSG} ${MISSING_COMPONENTS_MSG}")
-    set(DETAILS "${DETAILS}[c${COMPONENT_MSG}]")
+    string(APPEND DETAILS "[c${COMPONENT_MSG}]")
   endif()
 
   # version handling:
@@ -368,7 +358,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   endif ()
 
   if(VERSION_OK)
-    set(DETAILS "${DETAILS}[v${VERSION}(${${_NAME}_FIND_VERSION})]")
+    string(APPEND DETAILS "[v${VERSION}(${${_NAME}_FIND_VERSION})]")
   else()
     set(${_NAME}_FOUND FALSE)
   endif()

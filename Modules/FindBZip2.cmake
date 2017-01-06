@@ -1,10 +1,22 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindBZip2
 # ---------
 #
 # Try to find BZip2
 #
-# Once done this will define
+# IMPORTED Targets
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines :prop_tgt:`IMPORTED` target ``BZip2::BZip2``, if
+# BZip2 has been found.
+#
+# Result Variables
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines the following variables:
 #
 # ::
 #
@@ -14,21 +26,6 @@
 #   BZIP2_NEED_PREFIX - this is set if the functions are prefixed with BZ2_
 #   BZIP2_VERSION_STRING - the version of BZip2 found (since CMake 2.8.8)
 
-#=============================================================================
-# Copyright 2006-2012 Kitware, Inc.
-# Copyright 2006 Alexander Neundorf <neundorf@kde.org>
-# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 set(_BZIP2_PATHS PATHS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Bzip2;InstallPath]"
   )
@@ -37,7 +34,7 @@ find_path(BZIP2_INCLUDE_DIR bzlib.h ${_BZIP2_PATHS} PATH_SUFFIXES include)
 
 if (NOT BZIP2_LIBRARIES)
     find_library(BZIP2_LIBRARY_RELEASE NAMES bz2 bzip2 ${_BZIP2_PATHS} PATH_SUFFIXES lib)
-    find_library(BZIP2_LIBRARY_DEBUG NAMES bzip2d ${_BZIP2_PATHS} PATH_SUFFIXES lib)
+    find_library(BZIP2_LIBRARY_DEBUG NAMES bz2d bzip2d ${_BZIP2_PATHS} PATH_SUFFIXES lib)
 
     include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
     SELECT_LIBRARY_CONFIGURATIONS(BZIP2)
@@ -48,8 +45,6 @@ if (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
     string(REGEX REPLACE ".* bzip2/libbzip2 version ([0-9]+\\.[^ ]+) of [0-9]+ .*" "\\1" BZIP2_VERSION_STRING "${BZLIB_H}")
 endif ()
 
-# handle the QUIETLY and REQUIRED arguments and set BZip2_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2
                                   REQUIRED_VARS BZIP2_LIBRARIES BZIP2_INCLUDE_DIR
@@ -64,6 +59,31 @@ if (BZIP2_FOUND)
    set(CMAKE_REQUIRED_LIBRARIES ${BZIP2_LIBRARIES})
    CHECK_SYMBOL_EXISTS(BZ2_bzCompressInit "bzlib.h" BZIP2_NEED_PREFIX)
    cmake_pop_check_state()
+
+    if(NOT TARGET BZip2::BZip2)
+      add_library(BZip2::BZip2 UNKNOWN IMPORTED)
+      set_target_properties(BZip2::BZip2 PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${BZIP2_INCLUDE_DIRS}")
+
+      if(BZIP2_LIBRARY_RELEASE)
+        set_property(TARGET BZip2::BZip2 APPEND PROPERTY
+          IMPORTED_CONFIGURATIONS RELEASE)
+        set_target_properties(BZip2::BZip2 PROPERTIES
+          IMPORTED_LOCATION_RELEASE "${BZIP2_LIBRARY_RELEASE}")
+      endif()
+
+      if(BZIP2_LIBRARY_DEBUG)
+        set_property(TARGET BZip2::BZip2 APPEND PROPERTY
+          IMPORTED_CONFIGURATIONS DEBUG)
+        set_target_properties(BZip2::BZip2 PROPERTIES
+          IMPORTED_LOCATION_DEBUG "${BZIP2_LIBRARY_DEBUG}")
+      endif()
+
+      if(NOT BZIP2_LIBRARY_RELEASE AND NOT BZIP2_LIBRARY_DEBUG)
+        set_property(TARGET BZip2::BZip2 APPEND PROPERTY
+          IMPORTED_LOCATION "${BZIP2_LIBRARY}")
+      endif()
+    endif()
 endif ()
 
 mark_as_advanced(BZIP2_INCLUDE_DIR)

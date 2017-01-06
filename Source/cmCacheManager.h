@@ -1,23 +1,21 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCacheManager_h
 #define cmCacheManager_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "cmPropertyMap.h"
-#include "cmState.h"
+#include "cmStateTypes.h"
 
-class cmMarkAsAdvancedCommand;
+class cmake;
 
 /** \class cmCacheManager
  * \brief Control class for cmake's cache
@@ -36,8 +34,9 @@ private:
   struct CacheEntry
   {
     std::string Value;
-    cmState::CacheEntryType Type;
+    cmStateEnums::CacheEntryType Type;
     cmPropertyMap Properties;
+    std::vector<std::string> GetPropertyList() const;
     const char* GetProperty(const std::string&) const;
     void SetProperty(const std::string& property, const char* value);
     void AppendProperty(const std::string& property, const char* value,
@@ -45,7 +44,7 @@ private:
     bool Initialized;
     CacheEntry()
       : Value("")
-      , Type(cmState::UNINITIALIZED)
+      , Type(cmStateEnums::UNINITIALIZED)
       , Initialized(false)
     {
     }
@@ -60,6 +59,7 @@ public:
     bool IsAtEnd() const;
     void Next();
     std::string GetName() const { return this->Position->first; }
+    std::vector<std::string> GetPropertyList() const;
     const char* GetProperty(const std::string&) const;
     bool GetPropertyAsBool(const std::string&) const;
     bool PropertyExists(const std::string&) const;
@@ -70,8 +70,14 @@ public:
     const char* GetValue() const { return this->GetEntry().Value.c_str(); }
     bool GetValueAsBool() const;
     void SetValue(const char*);
-    cmState::CacheEntryType GetType() const { return this->GetEntry().Type; }
-    void SetType(cmState::CacheEntryType ty) { this->GetEntry().Type = ty; }
+    cmStateEnums::CacheEntryType GetType() const
+    {
+      return this->GetEntry().Type;
+    }
+    void SetType(cmStateEnums::CacheEntryType ty)
+    {
+      this->GetEntry().Type = ty;
+    }
     bool Initialized() { return this->GetEntry().Initialized; }
     cmCacheManager& Container;
     std::map<std::string, CacheEntry>::iterator Position;
@@ -111,7 +117,7 @@ public:
   void PrintCache(std::ostream&) const;
 
   ///! Get the iterator for an entry with a given key.
-  cmCacheManager::CacheIterator GetCacheIterator(const char* key = 0);
+  cmCacheManager::CacheIterator GetCacheIterator(const char* key = CM_NULLPTR);
 
   ///! Remove an entry from the cache
   void RemoveCacheEntry(const std::string& key);
@@ -126,7 +132,7 @@ public:
   {
     cmCacheManager::CacheIterator it = this->GetCacheIterator(key.c_str());
     if (it.IsAtEnd()) {
-      return 0;
+      return CM_NULLPTR;
     }
     return it.GetValue();
   }
@@ -137,7 +143,7 @@ public:
     return this->GetCacheIterator(key.c_str()).GetProperty(propName);
   }
 
-  cmState::CacheEntryType GetCacheEntryType(std::string const& key)
+  cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key)
   {
     return this->GetCacheIterator(key.c_str()).GetType();
   }
@@ -169,7 +175,8 @@ public:
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propName)
   {
-    this->GetCacheIterator(key.c_str()).SetProperty(propName, (void*)0);
+    this->GetCacheIterator(key.c_str())
+      .SetProperty(propName, (void*)CM_NULLPTR);
   }
 
   void AppendCacheEntryProperty(std::string const& key,
@@ -199,7 +206,8 @@ public:
 protected:
   ///! Add an entry into the cache
   void AddCacheEntry(const std::string& key, const char* value,
-                     const char* helpString, cmState::CacheEntryType type);
+                     const char* helpString,
+                     cmStateEnums::CacheEntryType type);
 
   ///! Get a cache entry object for a key
   CacheEntry* GetCacheEntry(const std::string& key);

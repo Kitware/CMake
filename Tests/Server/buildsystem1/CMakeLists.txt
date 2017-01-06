@@ -1,13 +1,22 @@
 cmake_minimum_required(VERSION 3.4)
 
-project(buildsystem1)
+project(buildsystem2)
 
 set(var1 123)
 
 set(var2 345)
 
-set(var3 567)
+add_executable(main main.cpp)
 
-set(var4 987)
+add_executable(m_other main.cpp)
 
-set(var5 987)
+add_library(foo foo.cpp)
+
+function(f1)
+endfunction()
+
+set(var3 345)
+
+add_library(someImportedLib UNKNOWN IMPORTED)
+
+add_subdirectory(subdir)

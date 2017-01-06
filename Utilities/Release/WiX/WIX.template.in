@@ -36,7 +36,18 @@
         <WixVariable Id="WixUIDialogBmp" Value="$(var.CPACK_WIX_UI_DIALOG)"/>
         <?endif?>
 
-        <FeatureRef Id="ProductFeature"/>
+        <DirectoryRef Id="TARGETDIR">
+            <Component Id="CMakeRegistry">
+                <RegistryKey Root="HKLM" Key="Software\Kitware\CMake">
+                    <RegistryValue Type="string" Name="InstallDir"
+                        Value="[INSTALL_ROOT]" KeyPath="yes"/>
+                 </RegistryKey>
+            </Component>
+        </DirectoryRef>
+
+        <FeatureRef Id="ProductFeature">
+            <ComponentRef Id="CMakeRegistry"/>
+        </FeatureRef>
 
         <UIRef Id="$(var.CPACK_WIX_UI_REF)" />
 

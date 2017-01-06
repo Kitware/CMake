@@ -2,14 +2,19 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
 #include "cmVersion.h"
-#include "cmVersionMacros.h"
 #include "cmake.h"
+
 #include <assert.h>
+#include <cmConfigure.h>
 #include <ctype.h>
-#include <map>
-#include <queue>
-#include <set>
+#include <sstream>
+#include <stdio.h>
+#include <string.h>
+#include <vector>
 
 static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
 {
@@ -57,9 +62,9 @@ static const char* idToString(cmPolicies::PolicyID id)
     CM_FOR_EACH_POLICY_ID(POLICY_CASE)
 #undef POLICY_CASE
     case cmPolicies::CMPCOUNT:
-      return 0;
+      return CM_NULLPTR;
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 static const char* idToVersion(cmPolicies::PolicyID id)
@@ -71,9 +76,9 @@ static const char* idToVersion(cmPolicies::PolicyID id)
     CM_FOR_EACH_POLICY_ID_VERSION(POLICY_CASE)
 #undef POLICY_CASE
     case cmPolicies::CMPCOUNT:
-      return 0;
+      return CM_NULLPTR;
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 static bool isPolicyNewerThan(cmPolicies::PolicyID id, unsigned int majorV,
@@ -82,9 +87,10 @@ static bool isPolicyNewerThan(cmPolicies::PolicyID id, unsigned int majorV,
   switch (id) {
 #define POLICY_CASE(ID, V_MAJOR, V_MINOR, V_PATCH)                            \
   case cmPolicies::ID:                                                        \
-    return (                                                                  \
-      majorV < V_MAJOR || (majorV == V_MAJOR && minorV + 1 < V_MINOR + 1) ||  \
-      (majorV == V_MAJOR && minorV == V_MINOR && patchV + 1 < V_PATCH + 1));
+    return (majorV < (V_MAJOR) ||                                             \
+            (majorV == (V_MAJOR) && minorV + 1 < (V_MINOR) + 1) ||            \
+            (majorV == (V_MAJOR) && minorV == (V_MINOR) &&                    \
+             patchV + 1 < (V_PATCH) + 1));
     CM_FOR_EACH_POLICY_ID_VERSION(POLICY_CASE)
 #undef POLICY_CASE
     case cmPolicies::CMPCOUNT:
@@ -102,9 +108,9 @@ const char* idToShortDescription(cmPolicies::PolicyID id)
     CM_FOR_EACH_POLICY_ID_DOC(POLICY_CASE)
 #undef POLICY_CASE
     case cmPolicies::CMPCOUNT:
-      return 0;
+      return CM_NULLPTR;
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 static void DiagnoseAncientPolicies(
@@ -228,7 +234,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, const char* version)
               "For backwards compatibility, what version of CMake "
               "commands and "
               "syntax should this version of CMake try to support.",
-              cmState::STRING);
+              cmStateEnums::STRING);
           }
         }
       }
@@ -293,7 +299,8 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 }
 
 ///! Get the default status for a policy
-cmPolicies::PolicyStatus cmPolicies::GetPolicyStatus(cmPolicies::PolicyID)
+cmPolicies::PolicyStatus cmPolicies::GetPolicyStatus(
+  cmPolicies::PolicyID /*unused*/)
 {
   return cmPolicies::WARN;
 }

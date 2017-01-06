@@ -1,20 +1,11 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2015 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCLocaleEnvironmentScope.h"
 
 #include "cmSystemTools.h"
 
 #include <sstream>
+#include <utility>
 
 cmCLocaleEnvironmentScope::cmCLocaleEnvironmentScope()
 {
@@ -31,8 +22,9 @@ cmCLocaleEnvironmentScope::cmCLocaleEnvironmentScope()
 
 std::string cmCLocaleEnvironmentScope::GetEnv(std::string const& key)
 {
-  const char* value = cmSystemTools::GetEnv(key);
-  return value ? value : std::string();
+  std::string value;
+  cmSystemTools::GetEnv(key, value);
+  return value;
 }
 
 void cmCLocaleEnvironmentScope::SetEnv(std::string const& key,
@@ -45,7 +37,7 @@ void cmCLocaleEnvironmentScope::SetEnv(std::string const& key,
   if (value.empty()) {
     cmSystemTools::UnsetEnv(key.c_str());
   } else {
-    std::stringstream tmp;
+    std::ostringstream tmp;
     tmp << key << "=" << value;
     cmSystemTools::PutEnv(tmp.str());
   }
@@ -55,7 +47,7 @@ cmCLocaleEnvironmentScope::~cmCLocaleEnvironmentScope()
 {
   for (backup_map_t::const_iterator i = this->EnvironmentBackup.begin();
        i != this->EnvironmentBackup.end(); ++i) {
-    std::stringstream tmp;
+    std::ostringstream tmp;
     tmp << i->first << "=" << i->second;
     cmSystemTools::PutEnv(tmp.str());
   }

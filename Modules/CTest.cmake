@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #[=======================================================================[.rst:
 CTest
 -----
@@ -47,19 +50,6 @@ the :variable:`CTEST_USE_LAUNCHERS` variable::
 
 in the ``CTestConfig.cmake`` file.
 #]=======================================================================]
-
-#=============================================================================
-# Copyright 2005-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 option(BUILD_TESTING "Build the testing tree." ON)
 
@@ -224,16 +214,16 @@ if(BUILD_TESTING)
       set(BUILD_NAME_SYSTEM_NAME "Win32")
     endif()
     if(UNIX OR BORLAND)
-      get_filename_component(DART_CXX_NAME
-        "${CMAKE_CXX_COMPILER}" ${DART_NAME_COMPONENT})
+      get_filename_component(DART_COMPILER_NAME
+        "${DART_COMPILER}" ${DART_NAME_COMPONENT})
     else()
-      get_filename_component(DART_CXX_NAME
+      get_filename_component(DART_COMPILER_NAME
         "${CMAKE_MAKE_PROGRAM}" ${DART_NAME_COMPONENT})
     endif()
-    if(DART_CXX_NAME MATCHES "devenv")
-      GET_VS_VERSION_STRING("${CMAKE_GENERATOR}" DART_CXX_NAME)
+    if(DART_COMPILER_NAME MATCHES "devenv")
+      GET_VS_VERSION_STRING("${CMAKE_GENERATOR}" DART_COMPILER_NAME)
     endif()
-    set(BUILDNAME "${BUILD_NAME_SYSTEM_NAME}-${DART_CXX_NAME}")
+    set(BUILDNAME "${BUILD_NAME_SYSTEM_NAME}-${DART_COMPILER_NAME}")
   endif()
 
   # the build command

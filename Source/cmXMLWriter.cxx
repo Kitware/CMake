@@ -1,20 +1,9 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2015 Daniel Pfeifer <daniel@pfeifer-mail.de>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmXMLWriter.h"
 
-#include "cmXMLSafe.h"
-
 #include <cassert>
-#include <fstream>
+#include <cmsys/FStream.hxx>
 
 cmXMLWriter::cmXMLWriter(std::ostream& output, std::size_t level)
   : Output(output)
@@ -107,7 +96,7 @@ void cmXMLWriter::ProcessingInstruction(const char* target, const char* data)
 void cmXMLWriter::FragmentFile(const char* fname)
 {
   this->CloseStartElement();
-  std::ifstream fin(fname, std::ios::in | std::ios::binary);
+  cmsys::ifstream fin(fname, std::ios::in | std::ios::binary);
   this->Output << fin.rdbuf();
 }
 

@@ -1,6 +1,6 @@
 set(d "/long/path/to/directory")
 foreach(i RANGE 11)
-  set(d "${d}${d}")
+  string(APPEND d "${d}")
 endforeach()
 string(LENGTH "${d}" dl)
 if(IS_DIRECTORY "${d}/")

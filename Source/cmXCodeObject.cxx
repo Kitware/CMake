@@ -1,19 +1,11 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmXCodeObject.h"
 
-#include "cmSystemTools.h"
+#include <CoreFoundation/CoreFoundation.h>
+#include <ostream>
 
-#include <CoreFoundation/CoreFoundation.h> // CFUUIDCreate
+#include "cmSystemTools.h"
 
 const char* cmXCodeObject::PBXTypeNames[] = {
   /* clang-format needs this comment to break after the opening brace */
@@ -81,6 +73,22 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
   if (this->TypeValue == OBJECT) {
     this->AddAttribute("isa", 0);
   }
+}
+
+bool cmXCodeObject::IsEmpty() const
+{
+  switch (this->TypeValue) {
+    case OBJECT_LIST:
+      return this->List.empty();
+    case STRING:
+      return this->String.empty();
+    case ATTRIBUTE_GROUP:
+      return this->ObjectAttributes.empty();
+    case OBJECT_REF:
+    case OBJECT:
+      return this->Object == 0;
+  }
+  return true; // unreachable, but quiets warnings
 }
 
 void cmXCodeObject::Indent(int level, std::ostream& out)

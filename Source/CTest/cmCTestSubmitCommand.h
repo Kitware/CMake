@@ -1,20 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestSubmitCommand_h
 #define cmCTestSubmitCommand_h
 
-#include "cmCTestHandlerCommand.h"
+#include <cmConfigure.h>
 
 #include "cmCTest.h"
+#include "cmCTestHandlerCommand.h"
+
+#include <set>
+#include <string>
+#include <vector>
+
+class cmCTestGenericHandler;
+class cmCommand;
+class cmExecutionStatus;
 
 /** \class cmCTestSubmit
  * \brief Run a ctest script
@@ -38,7 +38,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestSubmitCommand* ni = new cmCTestSubmitCommand;
     ni->CTest = this->CTest;
@@ -46,21 +46,21 @@ public:
     return ni;
   }
 
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_submit"; }
+  std::string GetName() const CM_OVERRIDE { return "ctest_submit"; }
 
-  cmTypeMacro(cmCTestSubmitCommand, cmCTestHandlerCommand);
+  typedef cmCTestHandlerCommand Superclass;
 
 protected:
-  cmCTestGenericHandler* InitializeHandler();
+  cmCTestGenericHandler* InitializeHandler() CM_OVERRIDE;
 
-  virtual bool CheckArgumentKeyword(std::string const& arg);
-  virtual bool CheckArgumentValue(std::string const& arg);
+  bool CheckArgumentKeyword(std::string const& arg) CM_OVERRIDE;
+  bool CheckArgumentValue(std::string const& arg) CM_OVERRIDE;
 
   enum
   {

@@ -1,31 +1,13 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2012 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionEvaluator.h"
 
 #include "cmAlgorithms.h"
-#include "cmGeneratorExpression.h"
-#include "cmGeneratorExpressionDAGChecker.h"
-#include "cmGeneratorExpressionParser.h"
-#include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
-#include "cmMakefile.h"
-#include "cmSourceFile.h"
-
-#include <cmsys/String.h>
-
-#include <assert.h>
-#include <errno.h>
-
+#include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionNode.h"
+
+#include <algorithm>
+#include <sstream>
 
 GeneratorExpressionContent::GeneratorExpressionContent(
   const char* startContent, size_t length)
@@ -154,20 +136,19 @@ std::string GeneratorExpressionContent::EvaluateParameters(
           node, identifier, context, dagChecker, pit);
         parameters.push_back(lastParam);
         return std::string();
-      } else {
-        std::string parameter;
-        std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it =
-          pit->begin();
-        const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator
-          end = pit->end();
-        for (; it != end; ++it) {
-          parameter += (*it)->Evaluate(context, dagChecker);
-          if (context->HadError) {
-            return std::string();
-          }
-        }
-        parameters.push_back(parameter);
       }
+      std::string parameter;
+      std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it =
+        pit->begin();
+      const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end =
+        pit->end();
+      for (; it != end; ++it) {
+        parameter += (*it)->Evaluate(context, dagChecker);
+        if (context->HadError) {
+          return std::string();
+        }
+      }
+      parameters.push_back(parameter);
     }
   }
 

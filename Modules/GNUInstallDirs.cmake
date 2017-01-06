@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # GNUInstallDirs
 # --------------
@@ -99,47 +102,72 @@
 #   `Filesystem Hierarchy Standard`_.
 #
 # .. _`Filesystem Hierarchy Standard`: https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html
+#
+# Macros
+# ^^^^^^
+#
+# .. command:: GNUInstallDirs_get_absolute_install_dir
+#
+#   ::
+#
+#     GNUInstallDirs_get_absolute_install_dir(absvar var)
+#
+#   Set the given variable ``absvar`` to the absolute path contained
+#   within the variable ``var``.  This is to allow the computation of an
+#   absolute path, accounting for all the special cases documented
+#   above.  While this macro is used to compute the various
+#   ``CMAKE_INSTALL_FULL_<dir>`` variables, it is exposed publicly to
+#   allow users who create additional path variables to also compute
+#   absolute paths where necessary, using the same logic.
 
-#=============================================================================
-# Copyright 2015 Alex Turbov <i.zaufi@gmail.com>
-# Copyright 2011 Nikita Krupen'ko <krnekit@gmail.com>
-# Copyright 2011 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
+# Convert a cache variable to PATH type
+
+macro(_GNUInstallDirs_cache_convert_to_path var description)
+  get_property(_GNUInstallDirs_cache_type CACHE ${var} PROPERTY TYPE)
+  if(_GNUInstallDirs_cache_type STREQUAL "UNINITIALIZED")
+    file(TO_CMAKE_PATH "${${var}}" _GNUInstallDirs_cmakepath)
+    set_property(CACHE ${var} PROPERTY TYPE PATH)
+    set_property(CACHE ${var} PROPERTY VALUE "${_GNUInstallDirs_cmakepath}")
+    set_property(CACHE ${var} PROPERTY HELPSTRING "${description}")
+    unset(_GNUInstallDirs_cmakepath)
+  endif()
+  unset(_GNUInstallDirs_cache_type)
+endmacro()
+
+# Create a cache variable with default for a path.
+macro(_GNUInstallDirs_cache_path var default description)
+  if(NOT DEFINED ${var})
+    set(${var} "${default}" CACHE PATH "${description}")
+  endif()
+  _GNUInstallDirs_cache_convert_to_path("${var}" "${description}")
+endmacro()
+
+# Create a cache variable with not default for a path, with a fallback
+# when unset; used for entries slaved to other entries such as
+# DATAROOTDIR.
+macro(_GNUInstallDirs_cache_path_fallback var default description)
+  if(NOT ${var})
+    set(${var} "" CACHE PATH "${description}")
+    set(${var} "${default}")
+  endif()
+  _GNUInstallDirs_cache_convert_to_path("${var}" "${description}")
+endmacro()
 
 # Installation directories
 #
-if(NOT DEFINED CMAKE_INSTALL_BINDIR)
-  set(CMAKE_INSTALL_BINDIR "bin" CACHE PATH "user executables (bin)")
-endif()
 
-if(NOT DEFINED CMAKE_INSTALL_SBINDIR)
-  set(CMAKE_INSTALL_SBINDIR "sbin" CACHE PATH "system admin executables (sbin)")
-endif()
-
-if(NOT DEFINED CMAKE_INSTALL_LIBEXECDIR)
-  set(CMAKE_INSTALL_LIBEXECDIR "libexec" CACHE PATH "program executables (libexec)")
-endif()
-
-if(NOT DEFINED CMAKE_INSTALL_SYSCONFDIR)
-  set(CMAKE_INSTALL_SYSCONFDIR "etc" CACHE PATH "read-only single-machine data (etc)")
-endif()
-
-if(NOT DEFINED CMAKE_INSTALL_SHAREDSTATEDIR)
-  set(CMAKE_INSTALL_SHAREDSTATEDIR "com" CACHE PATH "modifiable architecture-independent data (com)")
-endif()
-
-if(NOT DEFINED CMAKE_INSTALL_LOCALSTATEDIR)
-  set(CMAKE_INSTALL_LOCALSTATEDIR "var" CACHE PATH "modifiable single-machine data (var)")
-endif()
+_GNUInstallDirs_cache_path(CMAKE_INSTALL_BINDIR "bin"
+  "User executables (bin)")
+_GNUInstallDirs_cache_path(CMAKE_INSTALL_SBINDIR "sbin"
+  "System admin executables (sbin)")
+_GNUInstallDirs_cache_path(CMAKE_INSTALL_LIBEXECDIR "libexec"
+  "Program executables (libexec)")
+_GNUInstallDirs_cache_path(CMAKE_INSTALL_SYSCONFDIR "etc"
+  "Read-only single-machine data (etc)")
+_GNUInstallDirs_cache_path(CMAKE_INSTALL_SHAREDSTATEDIR "com"
+  "Modifiable architecture-independent data (com)")
+_GNUInstallDirs_cache_path(CMAKE_INSTALL_LOCALSTATEDIR "var"
+  "Modifiable single-machine data (var)")
 
 # We check if the variable was manually set and not cached, in order to
 # allow projects to set the values as normal variables before including
@@ -214,71 +242,50 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
     endif()
   endif()
   if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
-    set(CMAKE_INSTALL_LIBDIR "${_LIBDIR_DEFAULT}" CACHE PATH "object code libraries (${_LIBDIR_DEFAULT})")
+    set(CMAKE_INSTALL_LIBDIR "${_LIBDIR_DEFAULT}" CACHE PATH "Object code libraries (${_LIBDIR_DEFAULT})")
   elseif(DEFINED __LAST_LIBDIR_DEFAULT
       AND "${__LAST_LIBDIR_DEFAULT}" STREQUAL "${CMAKE_INSTALL_LIBDIR}")
     set_property(CACHE CMAKE_INSTALL_LIBDIR PROPERTY VALUE "${_LIBDIR_DEFAULT}")
   endif()
 endif()
+_GNUInstallDirs_cache_convert_to_path(CMAKE_INSTALL_LIBDIR "Object code libraries (lib)")
+
 # Save for next run
 set(_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE INTERNAL "CMAKE_INSTALL_PREFIX during last run")
 unset(_libdir_set)
 unset(__LAST_LIBDIR_DEFAULT)
 
-
-if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
-  set(CMAKE_INSTALL_INCLUDEDIR "include" CACHE PATH "C header files (include)")
-endif()
-
-if(NOT DEFINED CMAKE_INSTALL_OLDINCLUDEDIR)
-  set(CMAKE_INSTALL_OLDINCLUDEDIR "/usr/include" CACHE PATH "C header files for non-gcc (/usr/include)")
-endif()
-
-if(NOT DEFINED CMAKE_INSTALL_DATAROOTDIR)
-  set(CMAKE_INSTALL_DATAROOTDIR "share" CACHE PATH "read-only architecture-independent data root (share)")
-endif()
+_GNUInstallDirs_cache_path(CMAKE_INSTALL_INCLUDEDIR "include"
+  "C header files (include)")
+_GNUInstallDirs_cache_path(CMAKE_INSTALL_OLDINCLUDEDIR "/usr/include"
+  "C header files for non-gcc (/usr/include)")
+_GNUInstallDirs_cache_path(CMAKE_INSTALL_DATAROOTDIR "share"
+  "Read-only architecture-independent data root (share)")
 
 #-----------------------------------------------------------------------------
 # Values whose defaults are relative to DATAROOTDIR.  Store empty values in
 # the cache and store the defaults in local variables if the cache values are
 # not set explicitly.  This auto-updates the defaults as DATAROOTDIR changes.
 
-if(NOT CMAKE_INSTALL_DATADIR)
-  set(CMAKE_INSTALL_DATADIR "" CACHE PATH "read-only architecture-independent data (DATAROOTDIR)")
-  set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATAROOTDIR}")
-endif()
+_GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATAROOTDIR}"
+  "Read-only architecture-independent data (DATAROOTDIR)")
 
-if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
-  if(NOT CMAKE_INSTALL_INFODIR)
-    set(CMAKE_INSTALL_INFODIR "" CACHE PATH "info documentation (info)")
-    set(CMAKE_INSTALL_INFODIR "info")
-  endif()
-
-  if(NOT CMAKE_INSTALL_MANDIR)
-    set(CMAKE_INSTALL_MANDIR "" CACHE PATH "man documentation (man)")
-    set(CMAKE_INSTALL_MANDIR "man")
-  endif()
+if(CMAKE_SYSTEM_NAME MATCHES "^(.*BSD|DragonFly)$")
+  _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_INFODIR "info"
+    "Info documentation (info)")
+  _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_MANDIR "man"
+    "Man documentation (man)")
 else()
-  if(NOT CMAKE_INSTALL_INFODIR)
-    set(CMAKE_INSTALL_INFODIR "" CACHE PATH "info documentation (DATAROOTDIR/info)")
-    set(CMAKE_INSTALL_INFODIR "${CMAKE_INSTALL_DATAROOTDIR}/info")
-  endif()
-
-  if(NOT CMAKE_INSTALL_MANDIR)
-    set(CMAKE_INSTALL_MANDIR "" CACHE PATH "man documentation (DATAROOTDIR/man)")
-    set(CMAKE_INSTALL_MANDIR "${CMAKE_INSTALL_DATAROOTDIR}/man")
-  endif()
+  _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_INFODIR "${CMAKE_INSTALL_DATAROOTDIR}/info"
+    "Info documentation (DATAROOTDIR/info)")
+  _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_MANDIR "${CMAKE_INSTALL_DATAROOTDIR}/man"
+    "Man documentation (DATAROOTDIR/man)")
 endif()
 
-if(NOT CMAKE_INSTALL_LOCALEDIR)
-  set(CMAKE_INSTALL_LOCALEDIR "" CACHE PATH "locale-dependent data (DATAROOTDIR/locale)")
-  set(CMAKE_INSTALL_LOCALEDIR "${CMAKE_INSTALL_DATAROOTDIR}/locale")
-endif()
-
-if(NOT CMAKE_INSTALL_DOCDIR)
-  set(CMAKE_INSTALL_DOCDIR "" CACHE PATH "documentation root (DATAROOTDIR/doc/PROJECT_NAME)")
-  set(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME}")
-endif()
+_GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_LOCALEDIR "${CMAKE_INSTALL_DATAROOTDIR}/locale"
+  "Locale-dependent data (DATAROOTDIR/locale)")
+_GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME}"
+  "Documentation root (DATAROOTDIR/doc/PROJECT_NAME)")
 
 #-----------------------------------------------------------------------------
 
@@ -300,6 +307,41 @@ mark_as_advanced(
   CMAKE_INSTALL_DOCDIR
   )
 
+macro(GNUInstallDirs_get_absolute_install_dir absvar var)
+  if(NOT IS_ABSOLUTE "${${var}}")
+    # Handle special cases:
+    # - CMAKE_INSTALL_PREFIX == /
+    # - CMAKE_INSTALL_PREFIX == /usr
+    # - CMAKE_INSTALL_PREFIX == /opt/...
+    if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
+      if("${dir}" STREQUAL "SYSCONFDIR" OR "${dir}" STREQUAL "LOCALSTATEDIR")
+        set(${absvar} "/${${var}}")
+      else()
+        if (NOT "${${var}}" MATCHES "^usr/")
+          set(${var} "usr/${${var}}")
+        endif()
+        set(${absvar} "/${${var}}")
+      endif()
+    elseif("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$")
+      if("${dir}" STREQUAL "SYSCONFDIR" OR "${dir}" STREQUAL "LOCALSTATEDIR")
+        set(${absvar} "/${${var}}")
+      else()
+        set(${absvar} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+      endif()
+    elseif("${CMAKE_INSTALL_PREFIX}" MATCHES "^/opt/.*")
+      if("${dir}" STREQUAL "SYSCONFDIR" OR "${dir}" STREQUAL "LOCALSTATEDIR")
+        set(${absvar} "/${${var}}${CMAKE_INSTALL_PREFIX}")
+      else()
+        set(${absvar} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+      endif()
+    else()
+      set(${absvar} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+    endif()
+  else()
+    set(${absvar} "${${var}}")
+  endif()
+endmacro()
+
 # Result directories
 #
 foreach(dir
@@ -319,36 +361,5 @@ foreach(dir
     MANDIR
     DOCDIR
     )
-  if(NOT IS_ABSOLUTE "${CMAKE_INSTALL_${dir}}")
-    # Handle special cases:
-    # - CMAKE_INSTALL_PREFIX == /
-    # - CMAKE_INSTALL_PREFIX == /usr
-    # - CMAKE_INSTALL_PREFIX == /opt/...
-    if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
-      if("${dir}" STREQUAL "SYSCONFDIR" OR "${dir}" STREQUAL "LOCALSTATEDIR")
-        set(CMAKE_INSTALL_FULL_${dir} "/${CMAKE_INSTALL_${dir}}")
-      else()
-        if (NOT "${CMAKE_INSTALL_${dir}}" MATCHES "^usr/")
-          set(CMAKE_INSTALL_${dir} "usr/${CMAKE_INSTALL_${dir}}")
-        endif()
-        set(CMAKE_INSTALL_FULL_${dir} "/${CMAKE_INSTALL_${dir}}")
-      endif()
-    elseif("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$")
-      if("${dir}" STREQUAL "SYSCONFDIR" OR "${dir}" STREQUAL "LOCALSTATEDIR")
-        set(CMAKE_INSTALL_FULL_${dir} "/${CMAKE_INSTALL_${dir}}")
-      else()
-        set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_${dir}}")
-      endif()
-    elseif("${CMAKE_INSTALL_PREFIX}" MATCHES "^/opt/.*")
-      if("${dir}" STREQUAL "SYSCONFDIR" OR "${dir}" STREQUAL "LOCALSTATEDIR")
-        set(CMAKE_INSTALL_FULL_${dir} "/${CMAKE_INSTALL_${dir}}${CMAKE_INSTALL_PREFIX}")
-      else()
-        set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_${dir}}")
-      endif()
-    else()
-      set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_${dir}}")
-    endif()
-  else()
-    set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_${dir}}")
-  endif()
+  GNUInstallDirs_get_absolute_install_dir(CMAKE_INSTALL_FULL_${dir} CMAKE_INSTALL_${dir})
 endforeach()

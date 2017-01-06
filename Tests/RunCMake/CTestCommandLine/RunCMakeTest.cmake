@@ -135,6 +135,7 @@ function(run_TestOutputSize)
 ")
   run_cmake_command(TestOutputSize
     ${CMAKE_CTEST_COMMAND} -M Experimental -T Test
+                           --no-compress-output
                            --test-output-size-passed 10
                            --test-output-size-failed 12
     )

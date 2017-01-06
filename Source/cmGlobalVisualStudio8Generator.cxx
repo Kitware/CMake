@@ -1,19 +1,10 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-#include "windows.h" // this must be first to define GetCurrentDirectory
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio8Generator.h"
 
+#include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
@@ -25,8 +16,8 @@ static const char vs8generatorName[] = "Visual Studio 8 2005";
 class cmGlobalVisualStudio8Generator::Factory : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                                   cmake* cm) const
+  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
+                                           cmake* cm) const CM_OVERRIDE
   {
     if (strncmp(name.c_str(), vs8generatorName,
                 sizeof(vs8generatorName) - 1) != 0) {
@@ -60,14 +51,14 @@ public:
     return ret;
   }
 
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const
+  void GetDocumentation(cmDocumentationEntry& entry) const CM_OVERRIDE
   {
     entry.Name = std::string(vs8generatorName) + " [arch]";
     entry.Brief = "Generates Visual Studio 2005 project files.  "
                   "Optional [arch] can be \"Win64\".";
   }
 
-  virtual void GetGenerators(std::vector<std::string>& names) const
+  void GetGenerators(std::vector<std::string>& names) const CM_OVERRIDE
   {
     names.push_back(vs8generatorName);
     names.push_back(vs8generatorName + std::string(" Win64"));
@@ -82,7 +73,8 @@ public:
     }
   }
 
-  virtual bool SupportsToolset() const { return false; }
+  bool SupportsToolset() const CM_OVERRIDE { return false; }
+  bool SupportsPlatform() const CM_OVERRIDE { return true; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio8Generator::NewFactory()
@@ -168,6 +160,11 @@ void cmGlobalVisualStudio8Generator::GetDocumentation(
   entry.Brief = "Generates Visual Studio 8 2005 project files.";
 }
 
+std::string cmGlobalVisualStudio8Generator::GetGenerateStampList()
+{
+  return "generate.stamp.list";
+}
+
 void cmGlobalVisualStudio8Generator::Configure()
 {
   this->cmGlobalVisualStudio7Generator::Configure();
@@ -251,7 +248,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   // Create a list of all stamp files for this project.
   std::vector<std::string> stamps;
   std::string stampList = cmake::GetCMakeFilesDirectoryPostSlash();
-  stampList += "generate.stamp.list";
+  stampList += cmGlobalVisualStudio8Generator::GetGenerateStampList();
   {
     std::string stampListFile =
       generators[0]->GetMakefile()->GetCurrentBinaryDirectory();
@@ -354,7 +351,7 @@ void cmGlobalVisualStudio8Generator::WriteSolutionConfigurations(
 }
 
 void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
-  std::ostream& fout, const std::string& name, cmState::TargetType type,
+  std::ostream& fout, const std::string& name, cmStateEnums::TargetType type,
   std::vector<std::string> const& configs,
   const std::set<std::string>& configsPartOfDefaultBuild,
   std::string const& platformMapping)
@@ -387,10 +384,10 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
 }
 
 bool cmGlobalVisualStudio8Generator::NeedsDeploy(
-  cmState::TargetType type) const
+  cmStateEnums::TargetType type) const
 {
   bool needsDeploy =
-    (type == cmState::EXECUTABLE || type == cmState::SHARED_LIBRARY);
+    (type == cmStateEnums::EXECUTABLE || type == cmStateEnums::SHARED_LIBRARY);
   return this->TargetsWindowsCE() && needsDeploy;
 }
 
@@ -409,7 +406,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectDepends(
   OrderedTargetDependSet depends(unordered, std::string());
   for (OrderedTargetDependSet::const_iterator i = depends.begin();
        i != depends.end(); ++i) {
-    if ((*i)->GetType() == cmState::INTERFACE_LIBRARY) {
+    if ((*i)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     std::string guid = this->GetGUID((*i)->GetName().c_str());
@@ -426,7 +423,7 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
        ui != target->GetUtilities().end(); ++ui) {
     if (cmGeneratorTarget* depTarget =
           target->GetLocalGenerator()->FindGeneratorTargetToUse(ui->c_str())) {
-      if (depTarget->GetType() != cmState::INTERFACE_LIBRARY &&
+      if (depTarget->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
           depTarget->GetProperty("EXTERNAL_MSPROJECT")) {
         // This utility dependency names an external .vcproj target.
         // We use LinkLibraryDependencies="true" to link to it without

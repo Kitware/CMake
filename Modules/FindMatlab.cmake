@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindMatlab
 # ----------
@@ -15,9 +18,11 @@
 #
 # The module supports the following components:
 #
-# * ``MX_LIBRARY`` and ``ENG_LIBRARY`` respectively the MX and ENG libraries of
-#   Matlab
+# * ``MX_LIBRARY``, ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the MX,
+#   ENG and MAT libraries of Matlab
 # * ``MAIN_PROGRAM`` the Matlab binary program.
+# * ``MEX_COMPILER`` the MEX compiler.
+# * ``SIMULINK`` the Simulink environment.
 #
 # .. note::
 #
@@ -92,6 +97,9 @@
 #   ``MX_LIBRARY`` has been requested.
 # ``Matlab_ENG_LIBRARY``
 #   Matlab engine library. Available only if the component ``ENG_LIBRARY``
+#   is requested.
+# ``Matlab_MAT_LIBRARY``
+#   Matlab matrix library. Available only if the component ``MAT_LIBRARY``
 #   is requested.
 # ``Matlab_LIBRARIES``
 #   the whole set of libraries of Matlab
@@ -203,23 +211,11 @@
 #   Matlab are installed. The priority is set according to the ordering in
 #   this list.
 
-#=============================================================================
-# Copyright 2014-2015 Raffi Enficiaud, Max Planck Society
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 set(_FindMatlab_SELF_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 include(FindPackageHandleStandardArgs)
 include(CheckCXXCompilerFlag)
+include(CheckCCompilerFlag)
 
 
 # The currently supported versions. Other version can be added by the user by
@@ -229,6 +225,7 @@ if(NOT MATLAB_ADDITIONAL_VERSIONS)
 endif()
 
 set(MATLAB_VERSIONS_MAPPING
+  "R2016b=9.1"
   "R2016a=9.0"
   "R2015b=8.6"
   "R2015a=8.5"
@@ -632,7 +629,7 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
     set(devnull INPUT_FILE NUL)
   endif()
 
-  # timeout set to 30 seconds, in case it does not start
+  # timeout set to 120 seconds, in case it does not start
   # note as said before OUTPUT_VARIABLE cannot be used in a platform
   # independent manner however, not setting it would flush the output of Matlab
   # in the current console (unix variant)
@@ -641,11 +638,18 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
     OUTPUT_VARIABLE _matlab_version_from_cmd_dummy
     RESULT_VARIABLE _matlab_result_version_call
     ERROR_VARIABLE _matlab_result_version_call_error
-    TIMEOUT 30
+    TIMEOUT 120
     WORKING_DIRECTORY "${_matlab_temporary_folder}"
     ${devnull}
     )
 
+  if("${_matlab_result_version_call}" MATCHES "timeout")
+    if(MATLAB_FIND_DEBUG)
+      message(WARNING "[MATLAB] Unable to determine the version of Matlab."
+        " Matlab call timed out after 120 seconds.")
+    endif()
+    return()
+  endif()
 
   if(${_matlab_result_version_call})
     if(MATLAB_FIND_DEBUG)
@@ -695,7 +699,6 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
 
 endfunction()
 
-
 #.rst:
 # .. command:: matlab_add_unit_test
 #
@@ -717,6 +720,7 @@ endfunction()
 #     matlab_add_unit_test(
 #         NAME <name>
 #         UNITTEST_FILE matlab_file_containing_unittest.m
+#         [CUSTOM_MATLAB_COMMAND matlab_command_to_run_as_test]
 #         [UNITTEST_PRECOMMAND matlab_command_to_run]
 #         [TIMEOUT timeout]
 #         [ADDITIONAL_PATH path1 [path2 ...]]
@@ -732,6 +736,11 @@ endfunction()
 #   ``UNITTEST_FILE``
 #     the matlab unittest file. Its path will be automatically
 #     added to the Matlab path.
+#   ``CUSTOM_MATLAB_COMMAND``
+#     Matlab script command to run as the test.
+#     If this is not set, then the following is run:
+#     ``runtests('matlab_file_name'), exit(max([ans(1,:).Failed]))``
+#     where ``matlab_file_name`` is the ``UNITTEST_FILE`` without the extension.
 #   ``UNITTEST_PRECOMMAND``
 #     Matlab script command to be ran before the file
 #     containing the test (eg. GPU device initialisation based on CMake
@@ -745,12 +754,18 @@ endfunction()
 #   ``MATLAB_ADDITIONAL_STARTUP_OPTIONS``
 #     a list of additional option in order
 #     to run Matlab from the command line.
+#     ``-nosplash -nodesktop -nodisplay`` are always added.
 #   ``TEST_ARGS``
 #     Additional options provided to the add_test command. These
 #     options are added to the default options (eg. "CONFIGURATIONS Release")
 #   ``NO_UNITTEST_FRAMEWORK``
 #     when set, indicates that the test should not
 #     use the unittest framework of Matlab (available for versions >= R2013a).
+#   ``WORKING_DIRECTORY``
+#     This will be the working directory for the test. If specified it will
+#     also be the output directory used for the log file of the test run.
+#     If not specifed the temporary directory ``${CMAKE_BINARY_DIR}/Matlab`` will
+#     be used as the working directory and the log location.
 #
 function(matlab_add_unit_test)
 
@@ -759,11 +774,12 @@ function(matlab_add_unit_test)
   endif()
 
   set(options NO_UNITTEST_FRAMEWORK)
-  set(oneValueArgs NAME UNITTEST_PRECOMMAND UNITTEST_FILE TIMEOUT)
+  set(oneValueArgs NAME UNITTEST_FILE TIMEOUT WORKING_DIRECTORY
+    UNITTEST_PRECOMMAND CUSTOM_TEST_COMMAND)
   set(multiValueArgs ADDITIONAL_PATH MATLAB_ADDITIONAL_STARTUP_OPTIONS TEST_ARGS)
 
   set(prefix _matlab_unittest_prefix)
-  cmake_parse_arguments(${prefix} "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(PARSE_ARGV 0 ${prefix} "${options}" "${oneValueArgs}" "${multiValueArgs}" )
 
   if(NOT ${prefix}_NAME)
     message(FATAL_ERROR "[MATLAB] The Matlab test name cannot be empty")
@@ -771,15 +787,17 @@ function(matlab_add_unit_test)
 
   add_test(NAME ${${prefix}_NAME}
            COMMAND ${CMAKE_COMMAND}
-            -Dtest_name=${${prefix}_NAME}
-            -Dadditional_paths=${${prefix}_ADDITIONAL_PATH}
-            -Dtest_timeout=${${prefix}_TIMEOUT}
-            -Doutput_directory=${_matlab_temporary_folder}
-            -DMatlab_PROGRAM=${Matlab_MAIN_PROGRAM}
-            -Dno_unittest_framework=${${prefix}_NO_UNITTEST_FRAMEWORK}
-            -DMatlab_ADDITIONNAL_STARTUP_OPTIONS=${${prefix}_MATLAB_ADDITIONAL_STARTUP_OPTIONS}
-            -Dunittest_file_to_run=${${prefix}_UNITTEST_FILE}
-            -Dcmd_to_run_before_test=${${prefix}_UNITTEST_PRECOMMAND}
+            "-Dtest_name=${${prefix}_NAME}"
+            "-Dadditional_paths=${${prefix}_ADDITIONAL_PATH}"
+            "-Dtest_timeout=${${prefix}_TIMEOUT}"
+            "-Doutput_directory=${_matlab_temporary_folder}"
+            "-Dworking_directory=${${prefix}_WORKING_DIRECTORY}"
+            "-DMatlab_PROGRAM=${Matlab_MAIN_PROGRAM}"
+            "-Dno_unittest_framework=${${prefix}_NO_UNITTEST_FRAMEWORK}"
+            "-DMatlab_ADDITIONAL_STARTUP_OPTIONS=${${prefix}_MATLAB_ADDITIONAL_STARTUP_OPTIONS}"
+            "-Dunittest_file_to_run=${${prefix}_UNITTEST_FILE}"
+            "-Dcustom_Matlab_test_command=${${prefix}_CUSTOM_TEST_COMMAND}"
+            "-Dcmd_to_run_before_test=${${prefix}_UNITTEST_PRECOMMAND}"
             -P ${_FindMatlab_SELF_DIR}/MatlabTestsRedirect.cmake
            ${${prefix}_TEST_ARGS}
            ${${prefix}_UNPARSED_ARGUMENTS}
@@ -795,12 +813,13 @@ endfunction()
 #   order to produce a MEX file. The final name of the produced output may be
 #   specified, as well as additional link libraries, and a documentation entry
 #   for the MEX file. Remaining arguments of the call are passed to the
-#   :command:`add_library` command.
+#   :command:`add_library` or :command:`add_executable` command.
 #
 #   ::
 #
 #      matlab_add_mex(
 #          NAME <name>
+#          [EXECUTABLE | MODULE | SHARED]
 #          SRC src1 [src2 ...]
 #          [OUTPUT_NAME output_name]
 #          [DOCUMENTATION file.txt]
@@ -811,7 +830,7 @@ endfunction()
 #   ``NAME``
 #     name of the target.
 #   ``SRC``
-#     list of tje source files.
+#     list of source files.
 #   ``LINK_TO``
 #     a list of additional link dependencies.  The target links to ``libmex``
 #     by default. If ``Matlab_MX_LIBRARY`` is defined, it also
@@ -826,6 +845,9 @@ endfunction()
 #     the same folder without any processing, with the same name as the final
 #     mex file, and with extension `.m`. In that case, typing ``help <name>``
 #     in Matlab prints the documentation contained in this file.
+#   ``MODULE`` or ``SHARED`` may be given to specify the type of library to be
+#     created. ``EXECUTABLE`` may be given to create an executable instead of
+#     a library. If no type is given explicitly, the type is ``SHARED``.
 #
 #   The documentation file is not processed and should be in the following
 #   format:
@@ -835,18 +857,23 @@ endfunction()
 #     % This is the documentation
 #     function ret = mex_target_output_name(input1)
 #
-function(matlab_add_mex )
+function(matlab_add_mex)
 
   if(NOT WIN32)
     # we do not need all this on Windows
     # pthread options
-    check_cxx_compiler_flag(-pthread                    HAS_MINUS_PTHREAD)
+    if(CMAKE_CXX_COMPILER_LOADED)
+      check_cxx_compiler_flag(-pthread HAS_MINUS_PTHREAD)
+    elseif(CMAKE_C_COMPILER_LOADED)
+      check_c_compiler_flag(-pthread HAS_MINUS_PTHREAD)
+    endif()
     # we should use try_compile instead, the link flags are discarded from
     # this compiler_flag function.
     #check_cxx_compiler_flag(-Wl,--exclude-libs,ALL HAS_SYMBOL_HIDING_CAPABILITY)
 
   endif()
 
+  set(options EXECUTABLE MODULE SHARED)
   set(oneValueArgs NAME DOCUMENTATION OUTPUT_NAME)
   set(multiValueArgs LINK_TO SRC)
 
@@ -861,11 +888,25 @@ function(matlab_add_mex )
     set(${prefix}_OUTPUT_NAME ${${prefix}_NAME})
   endif()
 
-  add_library(${${prefix}_NAME}
-    SHARED
+  if(${prefix}_EXECUTABLE)
+    add_executable(${${prefix}_NAME}
       ${${prefix}_SRC}
       ${${prefix}_DOCUMENTATION}
       ${${prefix}_UNPARSED_ARGUMENTS})
+  else()
+    if(${prefix}_MODULE)
+      set(type MODULE)
+    else()
+      set(type SHARED)
+    endif()
+
+    add_library(${${prefix}_NAME}
+      ${type}
+      ${${prefix}_SRC}
+      ${${prefix}_DOCUMENTATION}
+      ${${prefix}_UNPARSED_ARGUMENTS})
+  endif()
+
   target_include_directories(${${prefix}_NAME} PRIVATE ${Matlab_INCLUDE_DIRS})
 
   if(DEFINED Matlab_MX_LIBRARY)
@@ -1027,13 +1068,17 @@ function(_Matlab_get_version_from_root matlab_root matlab_known_version matlab_f
   set(matlab_list_of_all_versions)
   matlab_get_version_from_matlab_run("${Matlab_PROG_VERSION_STRING_AUTO_DETECT}" matlab_list_of_all_versions)
 
-  list(GET matlab_list_of_all_versions 0 _matlab_version_tmp)
+  list(LENGTH matlab_list_of_all_versions list_of_all_versions_length)
+  if(${list_of_all_versions_length} GREATER 0)
+    list(GET matlab_list_of_all_versions 0 _matlab_version_tmp)
+  else()
+    set(_matlab_version_tmp "unknown")
+  endif()
 
   # set the version into the cache
   set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)" FORCE)
 
   # warning, just in case several versions found (should not happen)
-  list(LENGTH matlab_list_of_all_versions list_of_all_versions_length)
   if((${list_of_all_versions_length} GREATER 1) AND MATLAB_FIND_DEBUG)
     message(WARNING "[MATLAB] Found several versions, taking the first one (versions found ${matlab_list_of_all_versions})")
   endif()
@@ -1201,8 +1246,8 @@ if(_numbers_of_matlab_roots GREATER 0)
 endif()
 
 
-# check if the root changed against the previous defined one, if so
-# clear all the cached variables
+# check if the root changed wrt. the previous defined one, if so
+# clear all the cached variables for being able to reconfigure properly
 if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
 
   if(NOT Matlab_ROOT_DIR_LAST_CACHED STREQUAL Matlab_ROOT_DIR)
@@ -1213,7 +1258,9 @@ if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
         Matlab_MAIN_PROGRAM
         Matlab_MX_LIBRARY
         Matlab_ENG_LIBRARY
+        Matlab_MAT_LIBRARY
         Matlab_MEX_EXTENSION
+        Matlab_SIMULINK_INCLUDE_DIR
 
         # internal
         Matlab_MEXEXTENSIONS_PROG
@@ -1287,7 +1334,11 @@ set(Matlab_EXTERN_LIBRARY_DIR
     ${Matlab_ROOT_DIR}/extern/lib/${_matlab_bin_prefix}${_matlab_current_suffix})
 
 if(WIN32)
-  set(_matlab_lib_dir_for_search ${Matlab_EXTERN_LIBRARY_DIR}/microsoft)
+  if(MINGW)
+    set(_matlab_lib_dir_for_search ${Matlab_EXTERN_LIBRARY_DIR}/mingw64)
+  else()
+    set(_matlab_lib_dir_for_search ${Matlab_EXTERN_LIBRARY_DIR}/microsoft)
+  endif()
   set(_matlab_lib_prefix_for_search "lib")
 else()
   set(_matlab_lib_dir_for_search ${Matlab_BINARIES_DIR})
@@ -1342,7 +1393,6 @@ _Matlab_find_library(
   NO_DEFAULT_PATH
 )
 
-
 list(APPEND _matlab_required_variables Matlab_MEX_LIBRARY)
 
 # the MEX extension is required
@@ -1350,7 +1400,6 @@ list(APPEND _matlab_required_variables Matlab_MEX_EXTENSION)
 
 # the matlab root is required
 list(APPEND _matlab_required_variables Matlab_ROOT_DIR)
-
 
 # component Mex Compiler
 list(FIND Matlab_FIND_COMPONENTS MEX_COMPILER _matlab_find_mex_compiler)
@@ -1362,7 +1411,6 @@ if(_matlab_find_mex_compiler GREATER -1)
     DOC "Matlab MEX compiler"
     NO_DEFAULT_PATH
   )
-
   if(Matlab_MEX_COMPILER)
     set(Matlab_MEX_COMPILER_FOUND TRUE)
   endif()
@@ -1372,7 +1420,6 @@ unset(_matlab_find_mex_compiler)
 # component Matlab program
 list(FIND Matlab_FIND_COMPONENTS MAIN_PROGRAM _matlab_find_matlab_program)
 if(_matlab_find_matlab_program GREATER -1)
-
   find_program(
     Matlab_MAIN_PROGRAM
     matlab
@@ -1380,11 +1427,9 @@ if(_matlab_find_matlab_program GREATER -1)
     DOC "Matlab main program"
     NO_DEFAULT_PATH
   )
-
   if(Matlab_MAIN_PROGRAM)
     set(Matlab_MAIN_PROGRAM_FOUND TRUE)
   endif()
-
 endif()
 unset(_matlab_find_matlab_program)
 
@@ -1398,13 +1443,11 @@ if(_matlab_find_mx GREATER -1)
     PATHS ${_matlab_lib_dir_for_search}
     NO_DEFAULT_PATH
   )
-
   if(Matlab_MX_LIBRARY)
     set(Matlab_MX_LIBRARY_FOUND TRUE)
   endif()
 endif()
 unset(_matlab_find_mx)
-
 
 # Component ENG library
 list(FIND Matlab_FIND_COMPONENTS ENG_LIBRARY _matlab_find_eng)
@@ -1422,15 +1465,41 @@ if(_matlab_find_eng GREATER -1)
 endif()
 unset(_matlab_find_eng)
 
+# Component MAT library
+list(FIND Matlab_FIND_COMPONENTS MAT_LIBRARY _matlab_find_mat)
+if(_matlab_find_mat GREATER -1)
+  _Matlab_find_library(
+    ${_matlab_lib_prefix_for_search}
+    Matlab_MAT_LIBRARY
+    mat
+    PATHS ${_matlab_lib_dir_for_search}
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_MAT_LIBRARY)
+    set(Matlab_MAT_LIBRARY_FOUND TRUE)
+  endif()
+endif()
+unset(_matlab_find_mat)
 
-
-
+# Component Simulink
+list(FIND Matlab_FIND_COMPONENTS SIMULINK _matlab_find_simulink)
+if(_matlab_find_simulink GREATER -1)
+  find_path(
+    Matlab_SIMULINK_INCLUDE_DIR
+    simstruc.h
+    PATHS "${Matlab_ROOT_DIR}/simulink/include"
+    NO_DEFAULT_PATH
+    )
+  if(Matlab_SIMULINK_INCLUDE_DIR)
+    set(Matlab_SIMULINK_FOUND TRUE)
+    list(APPEND Matlab_INCLUDE_DIRS "${Matlab_SIMULINK_INCLUDE_DIR}")
+  endif()
+endif()
+unset(_matlab_find_simulink)
 
 unset(_matlab_lib_dir_for_search)
 
-
-set(Matlab_LIBRARIES ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${Matlab_ENG_LIBRARY})
-
+set(Matlab_LIBRARIES ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY})
 
 find_package_handle_standard_args(
   Matlab
@@ -1449,18 +1518,14 @@ unset(_matlab_lib_prefix_for_search)
 
 if(Matlab_INCLUDE_DIRS AND Matlab_LIBRARIES)
   mark_as_advanced(
-    #Matlab_LIBRARIES
     Matlab_MEX_LIBRARY
     Matlab_MX_LIBRARY
     Matlab_ENG_LIBRARY
+    Matlab_MAT_LIBRARY
     Matlab_INCLUDE_DIRS
     Matlab_FOUND
-    #Matlab_ROOT_DIR
-    #Matlab_VERSION_STRING
     Matlab_MAIN_PROGRAM
-    #Matlab_MEX_EXTENSION
     Matlab_MEXEXTENSIONS_PROG
     Matlab_MEX_EXTENSION
-    #Matlab_BINARIES_DIR
   )
 endif()

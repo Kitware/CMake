@@ -314,7 +314,8 @@ Installing Exports
 ::
 
   install(EXPORT <export-name> DESTINATION <dir>
-          [NAMESPACE <namespace>] [FILE <name>.cmake]
+          [NAMESPACE <namespace>] [[FILE <name>.cmake]|
+          [EXPORT_ANDROID_MK <name>.mk]]
           [PERMISSIONS permissions...]
           [CONFIGURATIONS [Debug|Release|...]]
           [EXPORT_LINK_INTERFACE_LIBRARIES]
@@ -342,6 +343,13 @@ specified that does not match that given to the targets associated with
 included in the export but a target to which it links is not included
 the behavior is unspecified.
 
+In additon to cmake language files, the ``EXPORT_ANDROID_MK`` option maybe
+used to specifiy an export to the android ndk build system.  The Android
+NDK supports the use of prebuilt libraries, both static and shared. This
+allows cmake to build the libraries of a project and make them available
+to an ndk build system complete with transitive dependencies, include flags
+and defines required to use the libraries.
+
 The ``EXPORT`` form is useful to help outside projects use targets built
 and installed by the current project.  For example, the code
 
@@ -349,9 +357,11 @@ and installed by the current project.  For example, the code
 
   install(TARGETS myexe EXPORT myproj DESTINATION bin)
   install(EXPORT myproj NAMESPACE mp_ DESTINATION lib/myproj)
+  install(EXPORT_ANDROID_MK myexp DESTINATION share/ndk-modules)
 
 will install the executable myexe to ``<prefix>/bin`` and code to import
-it in the file ``<prefix>/lib/myproj/myproj.cmake``.  An outside project
+it in the file ``<prefix>/lib/myproj/myproj.cmake`` and
+``<prefix>/lib/share/ndk-modules/Android.mk``.  An outside project
 may load this file with the include command and reference the ``myexe``
 executable from the installation tree using the imported target name
 ``mp_myexe`` as if the target were built in its own tree.

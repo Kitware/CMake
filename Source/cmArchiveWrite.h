@@ -1,18 +1,13 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2010 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmArchiveWrite_h
 #define cmArchiveWrite_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <iosfwd>
+#include <stddef.h>
+#include <string>
 
 #if !defined(CMAKE_BUILD_WITH_CMAKE)
 #error "cmArchiveWrite not allowed during bootstrap build!"
@@ -72,13 +67,13 @@ public:
    * skip.  The remaining part of the input path is appended to the
    * "prefix" value to construct the final name in the archive.
    */
-  bool Add(std::string path, size_t skip = 0, const char* prefix = 0,
+  bool Add(std::string path, size_t skip = 0, const char* prefix = CM_NULLPTR,
            bool recursive = true);
 
   /** Returns true if there has been no error.  */
   operator safe_bool() const
   {
-    return this->Okay() ? &cmArchiveWrite::safe_bool_true : 0;
+    return this->Okay() ? &cmArchiveWrite::safe_bool_true : CM_NULLPTR;
   }
 
   /** Returns true if there has been an error.  */
@@ -94,7 +89,7 @@ public:
   void SetMTime(std::string const& t) { this->MTime = t; }
 
   //! Sets the permissions of the added files/folders
-  void SetPermissions(mode_t permissions_)
+  void SetPermissions(int permissions_)
   {
     this->Permissions.Set(permissions_);
   }
@@ -107,7 +102,7 @@ public:
   //! The permissions will be copied from the existing file
   //! or folder. The mask will then be applied to unset
   //! some of them
-  void SetPermissionsMask(mode_t permissionsMask_)
+  void SetPermissionsMask(int permissionsMask_)
   {
     this->PermissionsMask.Set(permissionsMask_);
   }
@@ -177,8 +172,8 @@ private:
   //!@}
 
   //! Permissions on files/folders
-  cmArchiveWriteOptional<mode_t> Permissions;
-  cmArchiveWriteOptional<mode_t> PermissionsMask;
+  cmArchiveWriteOptional<int> Permissions;
+  cmArchiveWriteOptional<int> PermissionsMask;
 };
 
 #endif

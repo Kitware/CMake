@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindLibArchive
 # --------------
@@ -12,19 +15,6 @@
 #   LibArchive_INCLUDE_DIRS - include search path
 #   LibArchive_LIBRARIES    - libraries to link
 #   LibArchive_VERSION      - libarchive 3-component version number
-
-#=============================================================================
-# Copyright 2010 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 find_path(LibArchive_INCLUDE_DIR
   NAMES archive.h
@@ -56,17 +46,11 @@ if(LibArchive_INCLUDE_DIR AND EXISTS "${LibArchive_INCLUDE_DIR}/archive.h")
   unset(_LibArchive_VERSION_STRING)
 endif()
 
-# Handle the QUIETLY and REQUIRED arguments and set LIBARCHIVE_FOUND
-# to TRUE if all listed variables are TRUE.
-# (Use ${CMAKE_ROOT}/Modules instead of ${CMAKE_CURRENT_LIST_DIR} because CMake
-#  itself includes this FindLibArchive when built with an older CMake that does
-#  not provide it.  The older CMake also does not have CMAKE_CURRENT_LIST_DIR.)
-include(${CMAKE_ROOT}/Modules/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(LibArchive
                                   REQUIRED_VARS LibArchive_LIBRARY LibArchive_INCLUDE_DIR
                                   VERSION_VAR LibArchive_VERSION
   )
-set(LibArchive_FOUND ${LIBARCHIVE_FOUND})
 unset(LIBARCHIVE_FOUND)
 
 if(LibArchive_FOUND)

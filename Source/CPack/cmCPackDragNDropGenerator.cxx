@@ -1,25 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackDragNDropGenerator.h"
 
+#include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
-
 #include <iomanip>
+#include <map>
+#include <stdlib.h>
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -235,7 +227,7 @@ bool cmCPackDragNDropGenerator::CreateEmptyFile(std::ostringstream& target,
     return false;
   } else {
     // Seek to desired size - 1 byte
-    fout.seekp(size - 1, std::ios_base::beg);
+    fout.seekp(size - 1, std::ios::beg);
     char byte = 0;
     // Write one byte to ensure file grows
     fout.write(&byte, 1);
@@ -330,8 +322,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   if (!cpack_dmg_disable_applications_symlink) {
     std::ostringstream application_link;
     application_link << staging.str() << "/Applications";
-    cmSystemTools::CreateSymlink("/Applications",
-                                 application_link.str().c_str());
+    cmSystemTools::CreateSymlink("/Applications", application_link.str());
   }
 
   // Optionally add a custom volume icon ...
@@ -755,7 +746,7 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallDirNameSuffix(
     // the current COMPONENT belongs to.
     std::string groupVar =
       "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
-    const char* _groupName = GetOption(groupVar.c_str());
+    const char* _groupName = GetOption(groupVar);
     if (_groupName) {
       std::string groupName = _groupName;
 

@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindPkgConfig
 # -------------
@@ -11,22 +14,6 @@
 # In order to find the ``pkg-config`` executable, it uses the
 # :variable:`PKG_CONFIG_EXECUTABLE` variable or the ``PKG_CONFIG``
 # environment variable first.
-
-#=============================================================================
-# Copyright 2006-2014 Kitware, Inc.
-# Copyright 2014      Christoph Grüninger <foss@grueninger.de>
-# Copyright 2006      Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
-# Copyright 2016      Rolf Eike Beer <eike@sf-mail.de>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 ### Common stuff ####
 set(PKG_CONFIG_VERSION 1)
@@ -200,13 +187,13 @@ function(_pkg_create_imp_target _prefix _no_cmake_path _no_cmake_environment_pat
     set(_find_opts "NO_CMAKE_PATH")
   endif()
   if(_no_cmake_environment_path)
-    set(_find_opts "${_find_opts} NO_CMAKE_ENVIRONMENT_PATH")
+    string(APPEND _find_opts " NO_CMAKE_ENVIRONMENT_PATH")
   endif()
 
   foreach (flag IN LISTS ${_prefix}_LDFLAGS)
     if (flag MATCHES "^-L(.*)")
       # only look into the given paths from now on
-      set(_find_opts "HINTS ${${CMAKE_MATCH_1}} NO_DEFAULT_PATH")
+      set(_find_opts HINTS ${CMAKE_MATCH_1} NO_DEFAULT_PATH)
       continue()
     endif()
     if (flag MATCHES "^-l(.*)")
@@ -316,9 +303,13 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
             list(APPEND _lib_dirs "lib/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig")
           endif()
         else()
-          # not debian, chech the FIND_LIBRARY_USE_LIB64_PATHS property
+          # not debian, check the FIND_LIBRARY_USE_LIB32_PATHS and FIND_LIBRARY_USE_LIB64_PATHS properties
+          get_property(uselib32 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS)
+          if(uselib32 AND CMAKE_SIZEOF_VOID_P EQUAL 4)
+            list(APPEND _lib_dirs "lib32/pkgconfig")
+          endif()
           get_property(uselib64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
-          if(uselib64)
+          if(uselib64 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
             list(APPEND _lib_dirs "lib64/pkgconfig")
           endif()
         endif()
@@ -390,8 +381,9 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       if (_pkg_check_modules_pkg_op)
         list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_ver}")
       else()
-        list(APPEND _pkg_check_modules_exist_query --exists --print-errors --short-errors)
+        list(APPEND _pkg_check_modules_exist_query --exists)
       endif()
+      list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors)
 
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_VERSION)
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_PREFIX)
@@ -591,12 +583,14 @@ endmacro()
    XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp
 #]========================================]
 macro(pkg_check_modules _prefix _module0)
+  _pkgconfig_parse_options(_pkg_modules _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target "${_module0}" ${ARGN})
   # check cached value
   if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
-    _pkgconfig_parse_options   (_pkg_modules _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target "${_module0}" ${ARGN})
     _pkg_check_modules_internal("${_pkg_is_required}" "${_pkg_is_silent}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} "${_prefix}" ${_pkg_modules})
 
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
+  elseif (${_prefix}_FOUND AND ${_imp_target})
+    _pkg_create_imp_target("${_prefix}" _no_cmake_path _no_cmake_environment_path)
   endif()
 endmacro()
 
@@ -619,10 +613,10 @@ endmacro()
     pkg_search_module (BAR     libxml-2.0 libxml2 libxml>=2)
 #]========================================]
 macro(pkg_search_module _prefix _module0)
+  _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target "${_module0}" ${ARGN})
   # check cached value
   if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
     set(_pkg_modules_found 0)
-    _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target "${_module0}" ${ARGN})
 
     if (NOT ${_pkg_is_silent})
       message(STATUS "Checking for one of the modules '${_pkg_modules_alt}'")
@@ -646,6 +640,8 @@ macro(pkg_search_module _prefix _module0)
     endif()
 
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
+  elseif (${_prefix}_FOUND AND ${_imp_target})
+    _pkg_create_imp_target("${_prefix}" _no_cmake_path _no_cmake_environment_path)
   endif()
 endmacro()
 

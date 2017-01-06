@@ -1,39 +1,42 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-#include "cmSystemTools.h"
-
-// Need these for documentation support.
-#include "cmCPackGenerator.h"
-#include "cmCPackGeneratorFactory.h"
-#include "cmDocumentation.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmake.h"
-#include "cmake.h"
-
-#include "cmCPackLog.h"
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#include <cmConfigure.h>
 
 #include <cmsys/CommandLineArguments.hxx>
 #include <cmsys/Encoding.hxx>
-#include <cmsys/SystemTools.hxx>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <stddef.h>
+#include <string>
+#include <utility>
+#include <vector>
+
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+#include <cmsys/ConsoleBuf.hxx>
+#endif
+
+#include "cmCPackGenerator.h"
+#include "cmCPackGeneratorFactory.h"
+#include "cmCPackLog.h"
+#include "cmDocumentation.h"
+#include "cmDocumentationEntry.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmStateSnapshot.h"
+#include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 static const char* cmDocumentationName[][2] = {
-  { 0, "  cpack - Packaging driver provided by CMake." },
-  { 0, 0 }
+  { CM_NULLPTR, "  cpack - Packaging driver provided by CMake." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationUsage[][2] = {
-  { 0, "  cpack -G <generator> [options]" },
-  { 0, 0 }
+  { CM_NULLPTR, "  cpack -G <generator> [options]" },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationOptions[][2] = {
@@ -47,10 +50,10 @@ static const char* cmDocumentationOptions[][2] = {
   { "-R <package version>", "override/define CPACK_PACKAGE_VERSION" },
   { "-B <package directory>", "override/define CPACK_PACKAGE_DIRECTORY" },
   { "--vendor <vendor name>", "override/define CPACK_PACKAGE_VENDOR" },
-  { 0, 0 }
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
-int cpackUnknownArgument(const char*, void*)
+int cpackUnknownArgument(const char* /*unused*/, void* /*unused*/)
 {
   return 1;
 }
@@ -85,6 +88,13 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
 // this is CPack.
 int main(int argc, char const* const* argv)
 {
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+  // Replace streambuf so we can output Unicode to console
+  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
+  consoleOut.SetUTF8Pipes();
+  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
+  consoleErr.SetUTF8Pipes();
+#endif
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   argc = args.argc();
@@ -185,7 +195,7 @@ int main(int argc, char const* const* argv)
   cminst.GetCurrentSnapshot().SetDefaultDefinitions();
   cminst.GetState()->RemoveUnscriptableCommands();
   cmGlobalGenerator cmgg(&cminst);
-  cmsys::auto_ptr<cmMakefile> globalMF(
+  CM_AUTO_PTR<cmMakefile> globalMF(
     new cmMakefile(&cmgg, cminst.GetCurrentSnapshot()));
 #if defined(__CYGWIN__)
   globalMF->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
@@ -200,7 +210,7 @@ int main(int argc, char const* const* argv)
 
   cmCPackGeneratorFactory generators;
   generators.SetLogger(&log);
-  cmCPackGenerator* cpackGenerator = 0;
+  cmCPackGenerator* cpackGenerator = CM_NULLPTR;
 
   cmDocumentation doc;
   doc.addCPackStandardDocSections();
@@ -416,9 +426,7 @@ int main(int argc, char const* const* argv)
     }
     doc.SetSection("Generators", v);
 
-#undef cout
     return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
-#define cout no_cout_use_cmCPack_Log
   }
 
   if (cmSystemTools::GetErrorOccuredFlag()) {

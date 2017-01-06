@@ -1,1315 +1,62 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2015 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServerProtocol.h"
 
-#include "cmCommand.h"
+#include "cmExternalMakefileProjectGenerator.h"
+#include "cmFileMonitor.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmLinkLineComputer.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmServer.h"
-#include "cmServerCompleter.h"
-#include "cmServerDiff.h"
-#include "cmServerParser.h"
+#include "cmServerDictionary.h"
 #include "cmSourceFile.h"
-#include "cmVersionMacros.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+#include "cmServerDictionary.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cm_jsoncpp_reader.h"
 #include "cm_jsoncpp_value.h"
 #endif
 
-#include<memory>
+#include <algorithm>
+#include <string>
+#include <vector>
 
-cmServerProtocol::cmServerProtocol(cmMetadataServer* server,
-                                   std::string buildDir)
-  : Server(server)
-  , CMakeInstance(0)
-  , m_buildDir(buildDir)
+// Get rid of some windows macros:
+#undef max
+
+namespace {
+
+std::vector<std::string> getConfigurations(const cmake* cm)
 {
+  std::vector<std::string> configurations;
+  auto makefiles = cm->GetGlobalGenerator()->GetMakefiles();
+  if (makefiles.empty()) {
+    return configurations;
+  }
+
+  makefiles[0]->GetConfigurations(configurations);
+  if (configurations.empty()) {
+    configurations.push_back("");
+  }
+  return configurations;
 }
 
-cmServerProtocol::~cmServerProtocol()
+bool hasString(const Json::Value& v, const std::string& s)
 {
-  delete this->CMakeInstance;
-}
-
-void cmServerProtocol::Error(std::string const& error = "unknown")
-{
-  Json::Value obj = Json::objectValue;
-  obj["error"] = error;
-  this->Server->WriteResponse(obj);
-}
-
-// return true if server should quit, false otherwise.
-bool cmServerProtocol::processRequest(const std::string& json)
-{
-   Json::Value value;
-   if (!Json::Reader{}.parse(json, value)) {
-     this->Error("json parse failed on.\n" + json);
-     return false;
-   }
-
-  auto const type = value["type"].asString();
-  if (type == "quit") {
-    return true;
-  }
-
-  if (this->Server->GetState() == cmMetadataServer::Started) {
-    if (type == "handshake") {
-      this->ProcessHandshake(value["protocolVersion"].asString());
-    } else {
-      this->Error("unknown query type " + type);
-    }
-  } else if (this->Server->GetState() == cmMetadataServer::ProcessingRequests) {
-    if (type == "version") {
-      this->ProcessVersion();
-    } else if (type == "buildsystem") {
-      this->ProcessBuildsystem();
-    } else if (type == "cmake_variables") {
-      this->ProcessCMakeVariables();
-    } else if (type == "system_include_paths") {
-      this->ProcessSystemIncludePaths();
-    } else if (type == "target_info") {
-      const char* language = 0;
-      if (value.isMember("language")) {
-        language = value["language"].asCString();
-      }
-      this->ProcessTargetInfo(value["target_name"].asString(),
-                              value["config"].asString(), language);
-    } else if (type == "file_info") {
-      this->ProcessFileInfo(value["target_name"].asString(),
-                            value["config"].asString(),
-                            value["file_path"].asString());
-    } else if (type == "content") {
-      auto diff = cmServerDiff::GetDiff(value);
-      this->ProcessContent(value["file_path"].asString(),
-                           value["file_line"].asInt(), diff,
-                           value["matcher"].asString());
-    } else if (type == "parse") {
-      auto diff = cmServerDiff::GetDiff(value);
-      this->ProcessParse(value["file_path"].asString(), diff);
-    } else if (type == "contextual_help") {
-      this->ProcessContextualHelp(
-        value["file_path"].asString(), value["file_line"].asInt(),
-        value["file_column"].asInt(), value["file_content"].asString());
-    } else if (type == "content_diff") {
-      auto diffs = cmServerDiff::GetDiffs(value);
-      this->ProcessContentDiff(
-        value["file_path1"].asString(), value["file_line1"].asInt(),
-        value["file_path2"].asString(), value["file_line2"].asInt(), diffs);
-    } else if (type == "code_complete") {
-      auto diff = cmServerDiff::GetDiff(value);
-      this->ProcessCodeComplete(value["file_path"].asString(),
-                                value["file_line"].asInt(),
-                                value["file_column"].asInt(), diff);
-    } else if (type == "context_writers") {
-      auto diff = cmServerDiff::GetDiff(value);
-
-      this->ProcessContextWriters(value["file_path"].asString(),
-                                  value["file_line"].asInt(),
-                                  value["file_column"].asInt(), diff);
-    }
-    else if (type == "cmake_inputs") {
-        this->ProcessCMakeInputs();
-    }
-    else {
-      this->Error("unknown query type " + type);
-    }
-  } else {
-    this->Error("unknown query type " + type);
-  }
-
-  return false;
-}
-
-void cmServerProtocol::ProcessHandshake(std::string const& protocolVersion)
-{
-  // TODO: Handle version.
-  (void)protocolVersion;
-
-  this->Server->SetState(cmMetadataServer::Initializing);
-  this->CMakeInstance = new cmake;
-  this->CMakeInstance->SetWorkingMode(cmake::SNAPSHOT_RECORD_MODE);
-  std::set<std::string> emptySet;
-  if (!this->CMakeInstance->GetState()->LoadCache(m_buildDir.c_str(), true,
-                                                  emptySet, emptySet)) {
-    this->Error("LoadCache failed.");
-    return;
-  }
-
-  const char* genName =
-    this->CMakeInstance->GetState()->GetInitializedCacheValue(
-      "CMAKE_GENERATOR");
-  if (!genName) {
-    this->Error("CMAKE_GENERATOR not found in cache.");
-    return;
-  }
-
-  const char* sourceDir =
-    this->CMakeInstance->GetState()->GetInitializedCacheValue(
-      "CMAKE_HOME_DIRECTORY");
-  if (!sourceDir) {
-    this->Error("CMAKE_HOME_DIRECTORY not found in cache.");
-    return;
-  }
-
-  this->CMakeInstance->SetHomeDirectory(sourceDir);
-  this->CMakeInstance->SetHomeOutputDirectory(m_buildDir);
-  this->CMakeInstance->SetGlobalGenerator(
-    this->CMakeInstance->CreateGlobalGenerator(genName));
-
-  this->CMakeInstance->LoadCache();
-  this->CMakeInstance->SetSuppressDevWarnings(true);
-  this->CMakeInstance->SetWarnUninitialized(false);
-  this->CMakeInstance->SetWarnUnused(false);
-  this->CMakeInstance->PreLoadCMakeFiles();
-
-  Json::Value obj = Json::objectValue;
-  obj["progress"] = "initialized";
-
-  this->Server->WriteResponse(obj);
-
-  // First not? But some other mode that aborts after ActualConfigure
-  // and creates snapshots?
-  this->CMakeInstance->Configure();
-
-  obj["progress"] = "configured";
-
-  this->Server->WriteResponse(obj);
-
-  if (!this->CMakeInstance->GetGlobalGenerator()->Compute()) {
-    this->Error("GlobalGenerator::Compute failed.");
-    return;
-  }
-
-  obj["progress"] = "computed";
-
-  this->Server->WriteResponse(obj);
-
-  cmState* state = this->CMakeInstance->GetState();
-
-  auto snps = state->TraceSnapshots();
-  for (auto is = snps.begin(); is != snps.end(); ++is) {
-    this->Snapshots[is->first] = is->second;
-  }
-
-  auto srcDir = this->CMakeInstance->GetState()->GetSourceDirectory();
-
-  Json::Value idleObj = Json::objectValue;
-  idleObj["progress"] = "idle";
-  idleObj["source_dir"] = srcDir;
-  idleObj["binary_dir"] =
-    this->CMakeInstance->GetState()->GetBinaryDirectory();
-  idleObj["project_name"] = this->CMakeInstance->GetGlobalGenerator()
-                              ->GetLocalGenerators()[0]
-                              ->GetProjectName();
-
-  this->Server->SetState(cmMetadataServer::ProcessingRequests);
-
-  this->Server->WriteResponse(idleObj);
-}
-
-void cmServerProtocol::ProcessVersion()
-{
-  Json::Value obj = Json::objectValue;
-  obj["version"] = CMake_VERSION;
-
-  this->Server->WriteResponse(obj);
-}
-
-void cmServerProtocol::ProcessBuildsystem()
-{
-  Json::Value root = Json::objectValue;
-  Json::Value& obj = root["buildsystem"] = Json::objectValue;
-
-  auto mf = this->CMakeInstance->GetGlobalGenerator()->GetMakefiles()[0];
-  auto lg = this->CMakeInstance->GetGlobalGenerator()->GetLocalGenerators()[0];
-
-  obj["version"  ] = mf->GetSafeDefinition("CMAKE_VERSION");
-  obj["generator"] = mf->GetSafeDefinition("CMAKE_GENERATOR");
-
-  Json::Value& configs = obj["configs"] = Json::arrayValue;
-
-  std::vector<std::string> configsVec;
-  mf->GetConfigurations(configsVec);
-  for (auto const& config : configsVec) {
-    configs.append(config);
-  }
-
-  Json::Value& globalTargets = obj["globalTargets"] = Json::arrayValue;
-  Json::Value& targets = obj["targets"] = Json::arrayValue;
-  auto gens = this->CMakeInstance->GetGlobalGenerator()->GetLocalGenerators();
-
-  auto firstMf = this->CMakeInstance->GetGlobalGenerator()->GetMakefiles()[0];
-  auto firstTgts = firstMf->GetTargets();
-  for (auto const& tgt : firstTgts) {
-    if (tgt.second.GetType() == cmState::GLOBAL_TARGET) {
-      globalTargets.append(tgt.second.GetName());
-    }
-  }
-
-  for (auto const& gen : gens) {
-    for (auto const& tgt : gen->GetGeneratorTargets()) {
-      if (tgt->IsImported()) {
-        continue;
-      }
-      if (tgt->GetType() == cmState::GLOBAL_TARGET) {
-        continue;
-      }
-      Json::Value target = Json::objectValue;
-      target["name"] = tgt->GetName();
-      target["type"] = cmState::GetTargetTypeName(tgt->GetType());
-
-      if (tgt->GetType() <= cmState::UTILITY) {
-        auto lfbt = tgt->GetBacktrace();
-        Json::Value bt = Json::arrayValue;
-        for (auto const& lbtF : lfbt.FrameContexts()) {
-          Json::Value fff = Json::objectValue;
-          fff["path"] = lbtF.FilePath;
-          fff["line"] = (int)lbtF.Line;
-          bt.append(fff);
-        }
-        target["backtrace"] = bt;
-        if (tgt->GetType() < cmState::OBJECT_LIBRARY) {
-          //          std::string fp = (*ittgt)->GetFullPath(config, false,
-          //          true);
-          //          targetValue["target_file"] = fp;
-        }
-      }
-      // Should be list?
-      target["projectName"] = lg->GetProjectName();
-      targets.append(target);
-    }
-  }
-  this->Server->WriteResponse(root);
-}
-
-void cmServerProtocol::ProcessCMakeVariables()
-{
-  Json::Value root = Json::objectValue;
-  Json::Value& obj = root["cmake_variables"] = Json::objectValue;
-
-  auto const state = this->CMakeInstance->GetState();
-  for (auto const& key : state->GetCacheEntryKeys()) {
-    obj[key] = state->GetCacheEntryValue(key);
-  }
-  this->Server->WriteResponse(root);
-}
-
-namespace
-{
-  // we need to make sure the injected flag gets removed from cmake cache,
-  // otherwise all subsequent calls to try_compile will be affected.
-  // consequently, these operations are wrapped up in an RAII class to ensure
-  // proper removal.
-  struct VCSystemIncludePaths
-  {
-    VCSystemIncludePaths(cmake* cmake)
-    : cmake(cmake), mf(cmake->GetGlobalGenerator(), cmake->GetCurrentSnapshot())
-    {
-      if (this->cmake)
-      {
-        this->cmake->AddCacheEntry(this->entryName, "/verbosity:diagnostic",
-                                   nullptr, cmState::CacheEntryType::STRING);
-        this->ok = mf.ReadListFile(this->file.c_str());
-      }
-    }
-
-    ~VCSystemIncludePaths()
-    {
-      try
-      {
-        if (this->cmake)
-        {
-          this->cmake->GetState()->RemoveCacheEntry(entryName);
-          this->mf.RemoveDefinition(systemPathsFlag);
-        }
-      }
-      catch (...) { }
-    }
-
-    bool Failed() const { return !this->ok; }
-    auto const& FileName() const { return this->file; }
-
-    std::string GetPaths() const
-    {
-      auto val = this->mf.GetDefinition(systemPathsFlag);
-      if (val != nullptr)
-      {
-          return this->Extract(val);
-      }
-      else
-      {
-          return std::string();
-      }
-    }
-
-  private:
-    std::string Extract(std::string const& string) const
-    {
-      char const pattern [] = "\nIncludePath = ";
-      auto const index = string.find(pattern);
-      if (index != std::string::npos) {
-        auto const begin = index + (sizeof pattern - 1);
-        auto const end   = string.find('\n',begin);
-        if (end == std::string::npos) {
-          return {string,begin};
-        } else {
-          return {string,begin,end-begin};
-        }
-      }
-      return {};
-    }
-
-  private:
-    const std::string entryName = "MSBUILD_FLAGS";
-    const std::string systemPathsFlag = "VC_SYSTEM_INCLUDE_PATHS_OUTPUT";
-    std::string const file = cmSystemTools::GetCMakeRoot()
-                           + "/Modules/VCSystemIncludePaths.cmake";
-
-    cmake* const cmake = nullptr;
-    cmMakefile mf;
-    bool ok = false;
-  };
-}
-
-void cmServerProtocol::ProcessSystemIncludePaths()
-{
-  Json::Value root = Json::objectValue;
-  root["system_include_paths"] = "";
-
-  if (!this->CMakeInstance->GetIsInTryCompile()) {
-    VCSystemIncludePaths const paths(this->CMakeInstance);
-
-    if (paths.Failed()) {
-      this->Error("Could not find cmake module file: " + paths.FileName());
-      return;
-    }
-
-    root["system_include_paths"] = paths.GetPaths();
-  }
-
-  this->Server->WriteResponse(root);
-}
-
-void cmServerProtocol::ProcessTargetInfo(std::string tgtName,
-                                         std::string config,
-                                         const char* language)
-{
-  Json::Value obj = Json::objectValue;
-  Json::Value& root = obj["target_info"] = Json::objectValue;
-
-  auto tgt =
-    this->CMakeInstance->GetGlobalGenerator()->FindGeneratorTarget(tgtName);
-
-  if (!tgt) {
-    this->Error(tgtName + " not found.");
-    return;
-  }
-
-  root["target_name"] = tgt->GetName();
-
-  if (tgt->GetType() != cmState::GLOBAL_TARGET &&
-      tgt->GetType() != cmState::UTILITY &&
-      tgt->GetType() != cmState::OBJECT_LIBRARY) {
-    root["build_location"] = tgt->GetLocation(config);
-    if (tgt->HasImportLibrary()) {
-      root["build_implib"] = tgt->GetFullPath(config, true);
-    }
-  }
-
-  std::vector<const cmSourceFile*> files;
-
-  tgt->GetObjectSources(files, config);
-
-  Json::Value& object_sources = root["object_sources"] = Json::arrayValue;
-  Json::Value& generated_object_sources = root["generated_object_sources"] =
-    Json::arrayValue;
-  for (auto const& sf : files) {
-    std::string filePath = sf->GetFullPath();
-    if (sf->GetProperty("GENERATED")) {
-      generated_object_sources.append(filePath);
-    } else {
-      object_sources.append(filePath);
-    }
-  }
-
-  files.clear();
-
-  tgt->GetHeaderSources(files, config);
-
-  Json::Value& header_sources = root["header_sources"] = Json::arrayValue;
-  Json::Value& generated_header_sources = root["generated_header_sources"] =
-    Json::arrayValue;
-  for (auto const& sf : files) {
-    std::string filePath = sf->GetFullPath();
-    if (sf->GetProperty("GENERATED")) {
-      generated_header_sources.append(filePath);
-    } else {
-      header_sources.append(filePath);
-    }
-  }
-
-  Json::Value& target_defines = root["compile_definitions"] = Json::arrayValue;
-
-  std::string lang = language ? language : "CXX";
-
-  std::vector<std::string> cdefs;
-  tgt->GetCompileDefinitions(cdefs, config, lang);
-  for (auto const& cdef : cdefs) {
-    target_defines.append(cdef);
-  }
-
-  Json::Value& target_features = root["compile_features"] = Json::arrayValue;
-
-  std::vector<std::string> features;
-  tgt->GetCompileFeatures(cdefs, config);
-  for (auto const& feature : features) {
-    target_features.append(feature);
-  }
-
-  Json::Value& target_options = root["compile_options"] = Json::arrayValue;
-
-  std::vector<std::string> options;
-  tgt->GetCompileOptions(cdefs, config, lang);
-  for (auto const& option : options) {
-    target_options.append(option);
-  }
-
-  Json::Value& target_includes = root["include_directories"] =
-    Json::arrayValue;
-
-  std::vector<std::string> dirs;
-  tgt->GetLocalGenerator()->GetIncludeDirectories(dirs, tgt, lang, config);
-  for (auto const& dir : dirs) {
-    target_includes.append(dir);
-  }
-  this->Server->WriteResponse(obj);
-}
-
-void cmServerProtocol::ProcessFileInfo(std::string tgtName, std::string config,
-                                       std::string file_path)
-{
-  auto tgt =
-    this->CMakeInstance->GetGlobalGenerator()->FindGeneratorTarget(tgtName);
-
-  if (!tgt) {
-    this->Error(tgtName + " not found.");
-    return;
-  }
-
-  std::vector<const cmSourceFile*> files;
-  tgt->GetObjectSources(files, config);
-
-  const cmSourceFile* file = 0;
-  for (auto const& sf : files) {
-    if (sf->GetFullPath() == file_path) {
-      file = sf;
-      break;
-    }
-  }
-
-  if (!file) {
-    this->Error(file_path + " not found");
-    return;
-  }
-
-  Json::Value obj = Json::objectValue;
-  Json::Value& root = obj["file_info"] = Json::objectValue;
-
-  root["targetName"] = tgtName;
-  root["filePath"] = file_path;
-
-  auto lg = tgt->GetLocalGenerator();
-  auto mf = lg->GetMakefile();
-
-  root["c_compiler"]         = mf->GetSafeDefinition("CMAKE_C_COMPILER");
-  root["c_compiler_version"] = mf->GetSafeDefinition("CMAKE_C_COMPILER_VERSION");
-
-  root["cxx_compiler"]         = mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
-  root["cxx_compiler_version"] = mf->GetSafeDefinition("CMAKE_CXX_COMPILER_VERSION");
-
-
-  std::string lang = file->GetLanguage();
-
-  std::vector<std::string> includes;
-  lg->GetIncludeDirectories(includes, tgt, lang, config);
-
-  Json::Value& include_dirs = root["include_directories"] = Json::arrayValue;
-  for (auto const& dir : includes) {
-    include_dirs.append(dir);
-  }
-
-  std::set<std::string> defines;
-  lg->AppendDefines(defines, file->GetProperty("COMPILE_DEFINITIONS"));
-  {
-    std::string defPropName = "COMPILE_DEFINITIONS_";
-    defPropName += cmSystemTools::UpperCase(config);
-    lg->AppendDefines(defines, file->GetProperty(defPropName));
-  }
-
-  // Add the export symbol definition for shared library objects.
-  if (const char* exportMacro = tgt->GetExportMacro()) {
-    lg->AppendDefines(defines, exportMacro);
-  }
-
-  // Add preprocessor definitions for this target and configuration.
-  lg->AddCompileDefinitions(defines, tgt, config, lang);
-
-  Json::Value& compile_defs = root["compile_definitions"] = Json::arrayValue;
-  for (auto const& def : defines) {
-    compile_defs.append(def);
-  }
-
-  std::string flags;
-  lg->AddLanguageFlags(flags, lang, config);
-
-  lg->AddArchitectureFlags(flags, tgt, lang, config);
-
-  lg->AddVisibilityPresetFlags(flags, tgt, lang);
-
-  lg->AddCompileOptions(flags, tgt, lang, config);
-
-  root["compile_flags"] = flags;
-
-  this->Server->WriteResponse(obj);
-}
-
-std::pair<cmState::Snapshot, long> cmServerProtocol::GetSnapshotAndStartLine(
-  std::string filePath, long fileLine, DifferentialFileContent diff)
-{
-  assert(fileLine > 0);
-
-  const auto& chunks = diff.Chunks;
-
-  auto it = std::lower_bound(
-    chunks.begin(), chunks.end(), fileLine,
-    [](Chunk const& lhs, long rhs) { return lhs.NewStart < rhs; });
-  if (it == chunks.end() || it->NewStart != fileLine) {
-    --it;
-  }
-  auto theLine = it->NewStart;
-  while (it->NumCommon + it->NumAdded == 0) {
-    ++it;
-  }
-  assert(theLine == it->NewStart);
-
-  // it is the chunk which contains the line request.
-
-  auto searchStart = 0;
-  bool isNotCommon = it->NumAdded != 0 || it->NumRemoved != 0;
-  if (isNotCommon) {
-    if (it != chunks.begin()) {
-      auto it2 = it;
-      --it2;
-      searchStart = it2->OrigStart + it2->NumCommon;
-    } else {
-      searchStart = 1;
-    }
-  } else {
-    auto newLinesDistance = fileLine - it->NewStart;
-    searchStart = it->OrigStart + newLinesDistance;
-  }
-
-  auto ctx = this->GetSnapshotContext(filePath, searchStart);
-
-  auto mostRecentSnapshotLine = ctx.second;
-
-  // We might still have commands we can't execute in the dirty set. We
-  // will skip over them.
-
-  auto itToExecFrom = std::lower_bound(
-    chunks.begin(), chunks.end(), mostRecentSnapshotLine,
-    [](Chunk const& lhs, long rhs) { return lhs.OrigStart < rhs; });
-  if (itToExecFrom == chunks.end() ||
-      itToExecFrom->OrigStart != mostRecentSnapshotLine) {
-    --itToExecFrom;
-  }
-  isNotCommon = itToExecFrom->NumAdded != 0 || itToExecFrom->NumRemoved != 0;
-  long startFrom = 0;
-  if (isNotCommon) {
-    startFrom = -1;
-  } else {
-    auto oldLinesDistance = mostRecentSnapshotLine - itToExecFrom->OrigStart;
-
-    startFrom = itToExecFrom->NewStart + oldLinesDistance;
-  }
-
-  return std::make_pair(ctx.first, startFrom);
-}
-
-std::pair<cmState::Snapshot, cmListFileFunction>
-cmServerProtocol::GetDesiredSnapshot(
-  std::vector<std::string> const& editorLines, long startLine,
-  cmState::Snapshot snp, long fileLine, bool completionMode)
-{
-  auto prParseStart = editorLines.begin() + startLine - 1;
-  assert((long)editorLines.size() >= fileLine);
-  auto prParseEnd = editorLines.begin() + fileLine - 1;
-  if (completionMode) {
-    ++prParseEnd;
-  }
-
-  auto newString = cmJoin(cmMakeRange(prParseStart, prParseEnd), "\n");
-
-  cmGlobalGenerator* gg = this->CMakeInstance->GetGlobalGenerator();
-
-  cmMakefile mf(gg, snp);
-
-  cmListFile listFile;
-
-  if (!listFile.ParseString(newString.c_str(),
-                            snp.GetExecutionListFile().c_str(), &mf)) {
-    std::cout << "STRING PARSE ERROR" << std::endl;
-    return std::make_pair(cmState::Snapshot(), cmListFileFunction());
-  }
-
-  auto newToParse = fileLine - startLine + 1;
-  assert(newToParse >= 0);
-  return mf.ReadCommands(listFile.Functions, newToParse);
-}
-
-void cmServerProtocol::writeContent(cmState::Snapshot snp, std::string matcher)
-{
-  Json::Value obj = Json::objectValue;
-
-  Json::Value& content = obj["content"] = Json::objectValue;
-
-  std::vector<std::string> keys = snp.ClosureKeys();
-  for (const auto& p : keys) {
-    if (p.find(matcher) == 0)
-      content[p] = snp.GetDefinition(p);
-  }
-
-  this->Server->WriteResponse(obj);
-}
-
-bool cmServerProtocol::IsNotExecuted(std::string filePath, long fileLine)
-{
-  auto nx = this->CMakeInstance->GetState()->GetNotExecuted(filePath);
-  for (auto it = nx.begin(); it != nx.end(); ++it) {
-    if (fileLine >= it->first && fileLine < it->second) {
-      return true;
-    }
-  }
-  return false;
-}
-
-void cmServerProtocol::ProcessContent(std::string filePath, long fileLine,
-                                      DifferentialFileContent diff,
-                                      std::string matcher)
-{
-  assert(fileLine > 0);
-  if (this->IsNotExecuted(filePath, fileLine)) {
-    Json::Value obj = Json::objectValue;
-
-    obj["content_result"] = "unexecuted";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  auto res = this->GetSnapshotAndStartLine(filePath, fileLine, diff);
-  if (res.second < 0) {
-    Json::Value obj = Json::objectValue;
-    obj["content_result"] = "unexecuted";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  auto desired = this->GetDesiredSnapshot(diff.EditorLines, res.second,
-                                          res.first, fileLine);
-  cmState::Snapshot contentSnp = desired.first;
-  if (!contentSnp.IsValid()) {
-    Json::Value obj = Json::objectValue;
-    obj["content_result"] = "unexecuted";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  this->writeContent(contentSnp, matcher);
-}
-
-std::pair<cmState::Snapshot, long> cmServerProtocol::GetSnapshotContext(
-  std::string filePath, long fileLine)
-{
-  cmListFileContext lfc;
-  lfc.FilePath = filePath;
-  lfc.Line = fileLine;
-
-  auto it = this->Snapshots.lower_bound(lfc);
-
-  // Do some checks before any of this? ie, if the prev, then popped is
-  // macro or function, then do it, otherwise don't?
-  // Also some logic to know whether to go prev?
-
-  if (it != this->Snapshots.end()) {
-    cmState::Snapshot snp = it->second.back();
-
-    if (snp.GetExecutionListFile() == filePath &&
-        snp.GetStartingPoint() == fileLine) {
-      return std::make_pair(this->CMakeInstance->GetState()->PopArbitrary(snp),
-                            fileLine);
-    }
-  }
-
-  assert(it != this->Snapshots.begin());
-
-  --it;
-  cmState::Snapshot snp = it->second.back();
-
-  {
-    // Do this conditionally, depending on whether we need the state from
-    // inside
-    // a macro or included file.
-    cmListFileContext lfc2;
-    lfc2.FilePath = it->second.front().GetExecutionListFile();
-    lfc2.Line = it->second.front().GetStartingPoint();
-    //  if (lfc2 == it->first)
-    {
-      snp = this->CMakeInstance->GetState()->PopArbitrary(snp);
-    }
-  }
-
-  long startingPoint = it->first.Line;
-  return std::make_pair(snp, startingPoint);
-}
-
-void getUnreachable(Json::Value& unreachable,
-                    DifferentialFileContent const& diff,
-                    std::map<long, long> const& nx)
-{
-  auto& chunks = diff.Chunks;
-
-  auto chunkIt = chunks.begin();
-
-  for (auto it = nx.begin(); it != nx.end(); ++it) {
-    chunkIt = std::lower_bound(
-      chunkIt, chunks.end(), it->first,
-      [](const Chunk& lhs, long rhs) { return lhs.OrigStart < rhs; });
-    if (chunkIt == chunks.end() || chunkIt->OrigStart != it->first) {
-      --chunkIt;
-    }
-    auto theLine = chunkIt->NewStart;
-    while (chunkIt->NumCommon + chunkIt->NumAdded ==
-           0) // Should be NumRemoved?
-    {
-      ++chunkIt;
-    }
-    assert(theLine == chunkIt->NewStart);
-    if (chunkIt->OrigStart > it->first) {
-      continue;
-    }
-
-    long offset = chunkIt->NewStart - chunkIt->OrigStart;
-
-    Json::Value elem = Json::objectValue;
-    elem["begin"] = (int)(it->first + offset);
-    elem["end"] = (int)(it->second + offset);
-    unreachable.append(elem);
-  }
-}
-
-void cmServerProtocol::ProcessParse(std::string file_path,
-                                    DifferentialFileContent diff)
-{
-  Json::Value obj = Json::objectValue;
-  Json::Value& root = obj["parsed"] = Json::objectValue;
-
-  cmServerParser p(this->CMakeInstance->GetState(), file_path,
-                   cmSystemTools::GetCMakeRoot());
-  root["tokens"] = p.Parse(diff);
-
-  auto& unreachable = root["unreachable"] = Json::arrayValue;
-
-  auto nx = this->CMakeInstance->GetState()->GetNotExecuted(file_path);
-
-  getUnreachable(unreachable, diff, nx);
-
-  this->Server->WriteResponse(obj);
-}
-
-bool cmServerProtocol::WriteContextualHelp(std::string const& context,
-                                           std::string const& help_key)
-{
-  std::string pdir = cmSystemTools::GetCMakeRoot();
-  pdir += "/Help/" + context + "/";
-
-  std::string relevant = cmSystemTools::HelpFileName(help_key);
-  std::string helpFile = pdir + relevant + ".rst";
-  if (!cmSystemTools::FileExists(helpFile.c_str(), true)) {
-    return false;
-  }
-  Json::Value obj = Json::objectValue;
-
-  Json::Value& contextual_help = obj["contextual_help"] = Json::objectValue;
-
-  contextual_help["context"] = context;
-  contextual_help["help_key"] = relevant;
-
-  this->Server->WriteResponse(obj);
-
-  return true;
-}
-
-bool cmServerProtocol::EmitTypedIdentifier(
-  std::string const& commandName, std::vector<cmListFileArgument> args,
-  size_t argIndex)
-{
-  cmCommand* proto = this->CMakeInstance->GetState()->GetCommand(commandName);
-  if (!proto) {
-    return false;
-  }
-
-  std::vector<std::string> argStrings;
-  for (auto arg : args) {
-    argStrings.push_back(arg.Value);
-  }
-
-  auto contextType = proto->GetContextForParameter(argStrings, argIndex);
-
-  auto value = args[argIndex].Value;
-
-  std::string context;
-  switch (contextType) {
-    case cmCommand::TargetPropertyParameter:
-      context = "prop_tgt";
-      break;
-    case cmCommand::DirectoryPropertyParameter:
-      context = "prop_dir";
-      break;
-    case cmCommand::VariableIdentifierParameter:
-      context = "variable";
-      break;
-    case cmCommand::PolicyParameter:
-      context = "policy";
-      break;
-    case cmCommand::ModuleNameParameter:
-      context = "module";
-      break;
-    case cmCommand::PackageNameParameter:
-      context = "module";
-      value = "Find" + value;
-      break;
-    default:
-      break;
-  }
-
-  if (context.empty()) {
-    return false;
-  }
-
-  return this->WriteContextualHelp(context, value);
-}
-
-void cmServerProtocol::ProcessContextualHelp(std::string filePath,
-                                             long fileLine, long fileColumn,
-                                             std::string fileContent)
-{
-  assert(fileLine > 0);
-
-  std::string content;
-  {
-    std::stringstream ss(fileContent);
-
-    long desiredLines = fileLine;
-    for (std::string line; std::getline(ss, line, '\n') && desiredLines > 0;
-         --desiredLines) {
-      content += line + "\n";
-    }
-  }
-
-  cmListFile listFile;
-
-  if (!listFile.ParseString(
-        content.c_str(), filePath.c_str(),
-        this->CMakeInstance->GetGlobalGenerator()->GetMakefiles()[0])) {
-    this->Error("cmListFile::ParseString failed.");
-    return;
-  }
-
-  const size_t numberFunctions = listFile.Functions.size();
-  size_t funcIndex = 0;
-  for (; funcIndex < numberFunctions; ++funcIndex) {
-    if (listFile.Functions[funcIndex].Line > fileLine) {
-      Json::Value obj = Json::objectValue;
-      Json::Value& contextual_help = obj["contextual_help"] =
-        Json::objectValue;
-
-      contextual_help["nocontext"] = true;
-
-      this->Server->WriteResponse(obj);
-      break;
-    }
-
-    const long closeParenLine = listFile.Functions[funcIndex].CloseParenLine;
-
-    if (listFile.Functions[funcIndex].Line <= fileLine &&
-        closeParenLine >= fileLine) {
-      auto args = listFile.Functions[funcIndex].Arguments;
-      const size_t numberArgs = args.size();
-      size_t argIndex = 0;
-
-      for (; argIndex < numberArgs; ++argIndex) {
-        if (args[argIndex].Delim == cmListFileArgument::Bracket) {
-          continue;
-        }
-
-        const bool lastArg = (argIndex == numberArgs - 1);
-
-        if (lastArg || (argIndex != numberArgs &&
-                        (args[argIndex + 1].Line > fileLine ||
-                         args[argIndex + 1].Column > fileColumn))) {
-          if (args[argIndex].Line > fileLine ||
-              args[argIndex].Column > fileColumn) {
-            this->WriteContextualHelp("command",
-                                      listFile.Functions[funcIndex].Name);
-            return;
-          }
-          if (args[argIndex].Delim == cmListFileArgument::Unquoted) {
-            auto endPos = args[argIndex].Column + args[argIndex].Value.size();
-            if (args[argIndex].Line == fileLine &&
-                args[argIndex].Column <= fileColumn &&
-                (long)endPos >= fileColumn) {
-              auto inPos = fileColumn - args[argIndex].Column;
-              auto closePos = args[argIndex].Value.find('}', inPos);
-              auto openPos = args[argIndex].Value.rfind('{', inPos);
-              if (openPos != std::string::npos) {
-                if (openPos > 0 && args[argIndex].Value[openPos - 1] == '$') {
-                  auto endRel = closePos == std::string::npos
-                    ? closePos - openPos - 1
-                    : inPos - openPos - 1;
-                  std::string relevant =
-                    args[argIndex].Value.substr(openPos + 1, endRel);
-                  if (this->WriteContextualHelp("variable", relevant))
-                    return;
-                }
-              }
-              if (this->EmitTypedIdentifier(listFile.Functions[funcIndex].Name,
-                                            args, argIndex)) {
-                return;
-              }
-            }
-            break;
-          }
-
-          long fileLineDiff = fileLine - args[argIndex].Line;
-
-          long fileColumnDiff = fileColumn - args[argIndex].Column;
-
-          bool breakOut = false;
-
-          size_t argPos = 0;
-          while (fileLineDiff != 0) {
-            argPos = args[argIndex].Value.find('\n', argPos);
-            if (argPos == std::string::npos) {
-              breakOut = true;
-              break;
-            }
-            ++argPos;
-            fileColumnDiff = 0;
-            --fileLineDiff;
-          }
-          if (breakOut) {
-            break;
-          }
-
-          assert(fileLineDiff == 0);
-
-          size_t sentinal = args[argIndex].Value.find('\n', argPos);
-          if (sentinal == std::string::npos) {
-            sentinal = args[argIndex].Value.size() - argPos;
-            if ((long)sentinal < fileColumn) {
-              break;
-            }
-            if (this->EmitTypedIdentifier(listFile.Functions[funcIndex].Name,
-                                          args, argIndex)) {
-              return;
-            }
-          }
-
-          if (sentinal < argPos) {
-            // In between args?
-            break;
-          }
-
-          long inPos = fileColumnDiff;
-
-          std::string relevant =
-            args[argIndex].Value.substr(argPos, sentinal - argPos);
-
-          auto closePos = relevant.find('}', inPos);
-          auto openPos = relevant.rfind('{', inPos);
-          if (openPos != std::string::npos) {
-            if (openPos > 0 && relevant[openPos - 1] == '$') {
-              auto endRel = closePos == std::string::npos
-                ? closePos - openPos - 1
-                : inPos - openPos - 1;
-              relevant = relevant.substr(openPos + 1, endRel);
-              if (this->WriteContextualHelp("variable", relevant))
-                return;
-              else
-                break;
-            }
-          }
-          break;
-        }
-      }
-
-      this->WriteContextualHelp("command", listFile.Functions[funcIndex].Name);
-      return;
-    }
-  }
-}
-
-void cmServerProtocol::ProcessContentDiff(
-  std::string filePath1, long fileLine1, std::string filePath2, long fileLine2,
-  std::pair<DifferentialFileContent, DifferentialFileContent> diffs)
-{
-  assert(fileLine1 > 0);
-  assert(fileLine2 > 0);
-
-  if (this->IsNotExecuted(filePath1, fileLine1) ||
-      this->IsNotExecuted(filePath2, fileLine2)) {
-    Json::Value obj = Json::objectValue;
-
-    obj["content_result"] = "unexecuted";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  auto res1 = GetSnapshotAndStartLine(filePath1, fileLine1, diffs.first);
-  if (res1.second < 0) {
-    Json::Value obj = Json::objectValue;
-    obj["content_result"] = "unexecuted";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  auto res2 = GetSnapshotAndStartLine(filePath2, fileLine2, diffs.second);
-  if (res2.second < 0) {
-    Json::Value obj = Json::objectValue;
-    obj["content_result"] = "unexecuted";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  auto desired1 = GetDesiredSnapshot(diffs.first.EditorLines, res1.second,
-                                     res1.first, fileLine1);
-  cmState::Snapshot contentSnp1 = desired1.first;
-  if (!contentSnp1.IsValid()) {
-    Json::Value obj = Json::objectValue;
-    obj["content_result"] = "unexecuted";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  auto desired2 = GetDesiredSnapshot(diffs.second.EditorLines, res2.second,
-                                     res2.first, fileLine2);
-  cmState::Snapshot contentSnp2 = desired2.first;
-  if (!contentSnp2.IsValid()) {
-    Json::Value obj = Json::objectValue;
-    obj["content_result"] = "unexecuted";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  Json::Value obj = Json::objectValue;
-
-  Json::Value& content = obj["content_diff"] = Json::objectValue;
-
-  std::vector<std::string> keys1 = contentSnp1.ClosureKeys();
-  std::vector<std::string> keys2 = contentSnp2.ClosureKeys();
-
-  auto& addedDefs = content["addedDefs"] = Json::arrayValue;
-  auto& removedDefs = content["removedDefs"] = Json::arrayValue;
-
-  for (auto key : keys2) {
-    auto d1 = contentSnp1.GetDefinition(key);
-    d1 = d1 ? d1 : "";
-    auto d2 = contentSnp2.GetDefinition(key);
-    d2 = d2 ? d2 : "";
-    if (std::find(keys1.begin(), keys1.end(), key) != keys1.end() &&
-        !strcmp(d1, d2))
-      continue;
-    Json::Value def = Json::objectValue;
-    def["key"] = key;
-    def["value"] = contentSnp2.GetDefinition(key);
-    addedDefs.append(def);
-  }
-
-  for (auto key : keys1) {
-    auto d1 = contentSnp1.GetDefinition(key);
-    d1 = d1 ? d1 : "";
-    auto d2 = contentSnp2.GetDefinition(key);
-    d2 = d2 ? d2 : "";
-    if (!strcmp(d1, d2))
-      continue;
-    Json::Value def = Json::objectValue;
-    def["key"] = key;
-    def["value"] = contentSnp1.GetDefinition(key);
-    removedDefs.append(def);
-  }
-
-  this->Server->WriteResponse(obj);
-}
-
-void cmServerProtocol::ProcessCodeComplete(std::string filePath, long fileLine,
-                                           long fileColumn,
-                                           DifferentialFileContent diff)
-{
-  assert(fileLine > 0);
-
-  auto res = GetSnapshotAndStartLine(filePath, fileLine, diff);
-  if (res.second < 0) {
-    Json::Value obj = Json::objectValue;
-    obj["result"] = "no_completions";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  auto desired = GetDesiredSnapshot(diff.EditorLines, res.second, res.first,
-                                    fileLine, true);
-  cmState::Snapshot completionSnp = desired.first;
-  if (!completionSnp.IsValid()) {
-    Json::Value obj = Json::objectValue;
-    obj["result"] = "no_completions";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  auto prParseStart = diff.EditorLines.begin() + res.second - 1;
-  auto prParseEnd = diff.EditorLines.begin() + fileLine - 1;
-  auto newToParse = std::distance(prParseStart, prParseEnd) + 1;
-
-  auto theLine = *prParseEnd;
-
-  std::string completionPrefix;
-
-  auto columnData = theLine.substr(0, fileColumn);
-  auto strt = columnData.find_first_not_of(' ');
-  if (strt != std::string::npos) {
-    completionPrefix = columnData.substr(strt);
-  }
-
-  cmServerCompleter completer(this->CMakeInstance, completionSnp);
-
-  auto result = completer.Complete(completionSnp, desired.second,
-                                   completionPrefix, newToParse, fileColumn);
-
-  this->Server->WriteResponse(result);
-}
-
-void cmServerProtocol::ProcessContextWriters(std::string filePath,
-                                             long fileLine, long fileColumn,
-                                             DifferentialFileContent diff)
-{
-  assert(fileLine > 0);
-
-  auto res = GetSnapshotAndStartLine(filePath, fileLine, diff);
-  if (res.second < 0) {
-    Json::Value obj = Json::objectValue;
-    obj["result"] = "no_context";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  auto desired = GetDesiredSnapshot(diff.EditorLines, res.second, res.first,
-                                    fileLine, true);
-  cmState::Snapshot completionSnp = desired.first;
-  if (!completionSnp.IsValid()) {
-    Json::Value obj = Json::objectValue;
-    obj["result"] = "no_context";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  auto prParseStart = diff.EditorLines.begin() + res.second - 1;
-  auto prParseEnd = diff.EditorLines.begin() + fileLine - 1;
-  auto newToParse = std::distance(prParseStart, prParseEnd) + 1;
-
-  auto theLine = *prParseEnd;
-
-  std::string completionPrefix;
-
-  auto columnData = theLine.substr(0, fileColumn);
-
-  auto strt = columnData.find_first_not_of(' ');
-  if (strt != std::string::npos) {
-    completionPrefix = columnData.substr(strt);
-  }
-
-  cmServerCompleter completer(this->CMakeInstance, completionSnp, true);
-
-  auto result = completer.Complete(completionSnp, desired.second,
-                                   completionPrefix, newToParse, fileColumn);
-
-  if (!result.isMember("context_origin")) {
-    Json::Value obj = Json::objectValue;
-    obj["result"] = "no_context";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  if (!result["context_origin"].isMember("matcher")) {
-    Json::Value obj = Json::objectValue;
-    obj["result"] = "no_context";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  auto varName = result["context_origin"]["matcher"].asString();
-
-  auto snps =
-    this->CMakeInstance->GetState()->GetWriters(completionSnp, varName);
-
-  if (snps.empty()) {
-    Json::Value obj = Json::objectValue;
-    obj["result"] = "no_context";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  cmState::Snapshot snp = snps.front();
-
-  cmListFileContext lfc;
-  lfc.FilePath = snp.GetExecutionListFile();
-  lfc.Line = snp.GetStartingPoint();
-  auto it = this->Snapshots.lower_bound(lfc);
-
-  if (it == this->Snapshots.end()) {
-    Json::Value obj = Json::objectValue;
-    obj["result"] = "no_context";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  if (it->second.empty()) {
-    Json::Value obj = Json::objectValue;
-    obj["result"] = "no_context";
-    this->Server->WriteResponse(obj);
-    return;
-  }
-
-  ++it;
-
-  Json::Value obj = Json::objectValue;
-  obj["def_match"] = varName;
-  obj["def_origin"] = (int)it->first.Line - 1;
-  this->Server->WriteResponse(obj);
+  return !v.isNull() &&
+    std::find_if(v.begin(), v.end(), [s](const Json::Value& i) {
+      return i.asString() == s;
+    }) != v.end();
 }
 
 template <class T>
-static Json::Value fromStringList(const T& in)
+Json::Value fromStringList(const T& in)
 {
   Json::Value result = Json::arrayValue;
   for (const std::string& i : in) {
@@ -1318,38 +65,36 @@ static Json::Value fromStringList(const T& in)
   return result;
 }
 
-static void getCMakeInputs(const cmGlobalGenerator* gg,
-  const std::string& sourceDir,
-  const std::string& buildDir,
-  std::vector<std::string>* internalFiles,
-  std::vector<std::string>* explicitFiles,
-  std::vector<std::string>* tmpFiles)
+std::vector<std::string> toStringList(const Json::Value& in)
+{
+  std::vector<std::string> result;
+  for (const auto& it : in) {
+    result.push_back(it.asString());
+  }
+  return result;
+}
+
+void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
+                    const std::string& buildDir,
+                    std::vector<std::string>* internalFiles,
+                    std::vector<std::string>* explicitFiles,
+                    std::vector<std::string>* tmpFiles)
 {
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
-  std::string lcCMakeRootDir = cmakeRootDir;
-  std::transform(lcCMakeRootDir.begin(), lcCMakeRootDir.end(), 
-       lcCMakeRootDir.begin(), ::tolower);
-  std::string lcSourceDir = sourceDir;
-  std::transform(lcSourceDir.begin(), lcSourceDir.end(),
-      lcSourceDir.begin(), ::tolower);
-  std::string lcBuildDir = buildDir;
-  std::transform(lcBuildDir.begin(), lcBuildDir.end(), 
-      lcBuildDir.begin(), ::tolower);
-
   std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();
   for (auto it = makefiles.begin(); it != makefiles.end(); ++it) {
     const std::vector<std::string> listFiles = (*it)->GetListFiles();
 
-    for (auto jstr = listFiles.begin(); jstr != listFiles.end(); ++jstr) {
-      auto jt = *jstr;
-      std::transform(jt.begin(), jt.end(), jt.begin(), ::tolower);
-      const std::string startOfFile = jt.substr(0, lcCMakeRootDir.size());
-      const bool isInternal = (startOfFile == lcCMakeRootDir);
-      const bool isTemporary = !isInternal && (jt.find(lcBuildDir + '/') == 0);
-      std::string toAdd = jt;
-      if (!lcSourceDir.empty()) {
+    for (auto jt = listFiles.begin(); jt != listFiles.end(); ++jt) {
+
+      const std::string startOfFile = jt->substr(0, cmakeRootDir.size());
+      const bool isInternal = (startOfFile == cmakeRootDir);
+      const bool isTemporary = !isInternal && (jt->find(buildDir + '/') == 0);
+
+      std::string toAdd = *jt;
+      if (!sourceDir.empty()) {
         const std::string& relative =
-              cmSystemTools::RelativePath(lcSourceDir.c_str(), jt.c_str());
+          cmSystemTools::RelativePath(sourceDir.c_str(), jt->c_str());
         if (toAdd.size() > relative.size()) {
           toAdd = relative;
         }
@@ -1359,14 +104,12 @@ static void getCMakeInputs(const cmGlobalGenerator* gg,
         if (internalFiles) {
           internalFiles->push_back(toAdd);
         }
-      }
-      else {
+      } else {
         if (isTemporary) {
           if (tmpFiles) {
             tmpFiles->push_back(toAdd);
           }
-        }
-        else {
+        } else {
           if (explicitFiles) {
             explicitFiles->push_back(toAdd);
           }
@@ -1376,46 +119,1031 @@ static void getCMakeInputs(const cmGlobalGenerator* gg,
   }
 }
 
-void cmServerProtocol::ProcessCMakeInputs()
-{
-  const cmake* cm = this->CMakeInstance;
+} // namespace
 
+cmServerRequest::cmServerRequest(cmServer* server, const std::string& t,
+                                 const std::string& c, const Json::Value& d)
+  : Type(t)
+  , Cookie(c)
+  , Data(d)
+  , m_Server(server)
+{
+}
+
+void cmServerRequest::ReportProgress(int min, int current, int max,
+                                     const std::string& message) const
+{
+  this->m_Server->WriteProgress(*this, min, current, max, message);
+}
+
+void cmServerRequest::ReportMessage(const std::string& message,
+                                    const std::string& title) const
+{
+  m_Server->WriteMessage(*this, message, title);
+}
+
+cmServerResponse cmServerRequest::Reply(const Json::Value& data) const
+{
+  cmServerResponse response(*this);
+  response.SetData(data);
+  return response;
+}
+
+cmServerResponse cmServerRequest::ReportError(const std::string& message) const
+{
+  cmServerResponse response(*this);
+  response.SetError(message);
+  return response;
+}
+
+cmServerResponse::cmServerResponse(const cmServerRequest& request)
+  : Type(request.Type)
+  , Cookie(request.Cookie)
+{
+}
+
+void cmServerResponse::SetData(const Json::Value& data)
+{
+  assert(this->m_Payload == PAYLOAD_UNKNOWN);
+  if (!data[kCOOKIE_KEY].isNull() || !data[kTYPE_KEY].isNull()) {
+    this->SetError("Response contains cookie or type field.");
+    return;
+  }
+  this->m_Payload = PAYLOAD_DATA;
+  this->m_Data = data;
+}
+
+void cmServerResponse::SetError(const std::string& message)
+{
+  assert(this->m_Payload == PAYLOAD_UNKNOWN);
+  this->m_Payload = PAYLOAD_ERROR;
+  this->m_ErrorMessage = message;
+}
+
+bool cmServerResponse::IsComplete() const
+{
+  return this->m_Payload != PAYLOAD_UNKNOWN;
+}
+
+bool cmServerResponse::IsError() const
+{
+  assert(this->m_Payload != PAYLOAD_UNKNOWN);
+  return this->m_Payload == PAYLOAD_ERROR;
+}
+
+std::string cmServerResponse::ErrorMessage() const
+{
+  if (this->m_Payload == PAYLOAD_ERROR) {
+    return this->m_ErrorMessage;
+  }
+  return std::string();
+}
+
+Json::Value cmServerResponse::Data() const
+{
+  assert(this->m_Payload != PAYLOAD_UNKNOWN);
+  return this->m_Data;
+}
+
+bool cmServerProtocol::Activate(cmServer* server,
+                                const cmServerRequest& request,
+                                std::string* errorMessage)
+{
+  assert(server);
+  this->m_Server = server;
+  this->m_CMakeInstance = std::make_unique<cmake>();
+  const bool result = this->DoActivate(request, errorMessage);
+  if (!result) {
+    this->m_CMakeInstance = CM_NULLPTR;
+  }
+  return result;
+}
+
+cmFileMonitor* cmServerProtocol::FileMonitor() const
+{
+  return this->m_Server ? this->m_Server->FileMonitor() : nullptr;
+}
+
+void cmServerProtocol::SendSignal(const std::string& name,
+                                  const Json::Value& data) const
+{
+  if (this->m_Server) {
+    this->m_Server->WriteSignal(name, data);
+  }
+}
+
+cmake* cmServerProtocol::CMakeInstance() const
+{
+  return this->m_CMakeInstance.get();
+}
+
+bool cmServerProtocol::DoActivate(const cmServerRequest& /*request*/,
+                                  std::string* /*errorMessage*/)
+{
+  return true;
+}
+
+std::pair<int, int> cmServerProtocol1_0::ProtocolVersion() const
+{
+  return std::make_pair(1, 0);
+}
+
+static void setErrorMessage(std::string* errorMessage, const std::string& text)
+{
+  if (errorMessage) {
+    *errorMessage = text;
+  }
+}
+
+static bool testValue(cmState* state, const std::string& key,
+                      std::string& value, const std::string& keyDescription,
+                      std::string* errorMessage)
+{
+  const std::string cachedValue = std::string(state->GetCacheEntryValue(key));
+  if (!cachedValue.empty() && !value.empty() && cachedValue != value) {
+    setErrorMessage(errorMessage, std::string("\"") + key +
+                      "\" is set but incompatible with configured " +
+                      keyDescription + " value.");
+    return false;
+  }
+  if (value.empty()) {
+    value = cachedValue;
+  }
+  return true;
+}
+
+bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
+                                     std::string* errorMessage)
+{
+  std::string sourceDirectory = request.Data[kSOURCE_DIRECTORY_KEY].asString();
+  const std::string buildDirectory =
+    request.Data[kBUILD_DIRECTORY_KEY].asString();
+  std::string generator = request.Data[kGENERATOR_KEY].asString();
+  std::string extraGenerator = request.Data[kEXTRA_GENERATOR_KEY].asString();
+  std::string toolset = request.Data[kTOOLSET_KEY].asString();
+  std::string platform = request.Data[kPLATFORM_KEY].asString();
+
+  if (buildDirectory.empty()) {
+    setErrorMessage(errorMessage, std::string("\"") + kBUILD_DIRECTORY_KEY +
+                      "\" is missing.");
+    return false;
+  }
+
+  cmake* cm = CMakeInstance();
+  if (cmSystemTools::PathExists(buildDirectory)) {
+    if (!cmSystemTools::FileIsDirectory(buildDirectory)) {
+      setErrorMessage(errorMessage, std::string("\"") + kBUILD_DIRECTORY_KEY +
+                        "\" exists but is not a directory.");
+      return false;
+    }
+
+    const std::string cachePath = cm->FindCacheFile(buildDirectory);
+    if (cm->LoadCache(cachePath)) {
+      cmState* state = cm->GetState();
+
+      // Check generator:
+      if (!testValue(state, "CMAKE_GENERATOR", generator, "generator",
+                     errorMessage)) {
+        return false;
+      }
+
+      // check extra generator:
+      if (!testValue(state, "CMAKE_EXTRA_GENERATOR", extraGenerator,
+                     "extra generator", errorMessage)) {
+        return false;
+      }
+
+      // check sourcedir:
+      if (!testValue(state, "CMAKE_HOME_DIRECTORY", sourceDirectory,
+                     "source directory", errorMessage)) {
+        return false;
+      }
+
+      // check toolset:
+      if (!testValue(state, "CMAKE_GENERATOR_TOOLSET", toolset, "toolset",
+                     errorMessage)) {
+        return false;
+      }
+
+      // check platform:
+      if (!testValue(state, "CMAKE_GENERATOR_PLATFORM", platform, "platform",
+                     errorMessage)) {
+        return false;
+      }
+    }
+  }
+
+  if (sourceDirectory.empty()) {
+    setErrorMessage(errorMessage, std::string("\"") + kSOURCE_DIRECTORY_KEY +
+                      "\" is unset but required.");
+    return false;
+  }
+  if (!cmSystemTools::FileIsDirectory(sourceDirectory)) {
+    setErrorMessage(errorMessage, std::string("\"") + kSOURCE_DIRECTORY_KEY +
+                      "\" is not a directory.");
+    return false;
+  }
+  if (generator.empty()) {
+    setErrorMessage(errorMessage, std::string("\"") + kGENERATOR_KEY +
+                      "\" is unset but required.");
+    return false;
+  }
+
+  std::vector<cmake::GeneratorInfo> generators;
+  cm->GetRegisteredGenerators(generators);
+  auto baseIt = std::find_if(generators.begin(), generators.end(),
+                             [&generator](const cmake::GeneratorInfo& info) {
+                               return info.name == generator;
+                             });
+  if (baseIt == generators.end()) {
+    setErrorMessage(errorMessage, std::string("Generator \"") + generator +
+                      "\" not supported.");
+    return false;
+  }
+  auto extraIt = std::find_if(
+    generators.begin(), generators.end(),
+    [&generator, &extraGenerator](const cmake::GeneratorInfo& info) {
+      return info.baseName == generator && info.extraName == extraGenerator;
+    });
+  if (extraIt == generators.end()) {
+    setErrorMessage(errorMessage,
+                    std::string("The combination of generator \"" + generator +
+                                "\" and extra generator \"" + extraGenerator +
+                                "\" is not supported."));
+    return false;
+  }
+  if (!extraIt->supportsToolset && !toolset.empty()) {
+    setErrorMessage(errorMessage,
+                    std::string("Toolset was provided but is not supported by "
+                                "the requested generator."));
+    return false;
+  }
+  if (!extraIt->supportsPlatform && !platform.empty()) {
+    setErrorMessage(errorMessage,
+                    std::string("Platform was provided but is not supported "
+                                "by the requested generator."));
+    return false;
+  }
+
+  this->GeneratorInfo =
+    GeneratorInformation(generator, extraGenerator, toolset, platform,
+                         sourceDirectory, buildDirectory);
+
+  this->m_State = STATE_ACTIVE;
+  return true;
+}
+
+void cmServerProtocol1_0::HandleCMakeFileChanges(const std::string& path,
+                                                 int event, int status)
+{
+  assert(status == 0);
+  static_cast<void>(status);
+
+  if (!m_isDirty) {
+    m_isDirty = true;
+    SendSignal(kDIRTY_SIGNAL, Json::objectValue);
+  }
+  Json::Value obj = Json::objectValue;
+  obj[kPATH_KEY] = path;
+  Json::Value properties = Json::arrayValue;
+  if (event & UV_RENAME) {
+    properties.append(kRENAME_PROPERTY_VALUE);
+  }
+  if (event & UV_CHANGE) {
+    properties.append(kCHANGE_PROPERTY_VALUE);
+  }
+
+  obj[kPROPERTIES_KEY] = properties;
+  SendSignal(kFILE_CHANGE_SIGNAL, obj);
+}
+
+const cmServerResponse cmServerProtocol1_0::Process(
+  const cmServerRequest& request)
+{
+  assert(this->m_State >= STATE_ACTIVE);
+
+  if (request.Type == kCACHE_TYPE) {
+    return this->ProcessCache(request);
+  }
+  if (request.Type == kCMAKE_INPUTS_TYPE) {
+    return this->ProcessCMakeInputs(request);
+  }
+  if (request.Type == kCODE_MODEL_TYPE) {
+    return this->ProcessCodeModel(request);
+  }
+  if (request.Type == kCOMPUTE_TYPE) {
+    return this->ProcessCompute(request);
+  }
+  if (request.Type == kCONFIGURE_TYPE) {
+    return this->ProcessConfigure(request);
+  }
+  if (request.Type == kFILESYSTEM_WATCHERS_TYPE) {
+    return this->ProcessFileSystemWatchers(request);
+  }
+  if (request.Type == kGLOBAL_SETTINGS_TYPE) {
+    return this->ProcessGlobalSettings(request);
+  }
+  if (request.Type == kSET_GLOBAL_SETTINGS_TYPE) {
+    return this->ProcessSetGlobalSettings(request);
+  }
+
+  return request.ReportError("Unknown command!");
+}
+
+bool cmServerProtocol1_0::IsExperimental() const
+{
+  return true;
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessCache(
+  const cmServerRequest& request)
+{
+  if (this->m_State < STATE_CONFIGURED) {
+    return request.ReportError("This project was not configured yet.");
+  }
+
+  cmState* state = this->CMakeInstance()->GetState();
+
+  Json::Value result = Json::objectValue;
+
+  std::vector<std::string> allKeys = state->GetCacheEntryKeys();
+
+  Json::Value list = Json::arrayValue;
+  std::vector<std::string> keys = toStringList(request.Data[kKEYS_KEY]);
+  if (keys.empty()) {
+    keys = allKeys;
+  } else {
+    for (auto i : keys) {
+      if (std::find_if(allKeys.begin(), allKeys.end(),
+                       [i](const std::string& j) { return i == j; }) ==
+          allKeys.end()) {
+        return request.ReportError("Key \"" + i + "\" not found in cache.");
+      }
+    }
+  }
+  std::sort(keys.begin(), keys.end());
+  for (auto key : keys) {
+    Json::Value entry = Json::objectValue;
+    entry[kKEY_KEY] = key;
+    entry[kTYPE_KEY] =
+      cmState::CacheEntryTypeToString(state->GetCacheEntryType(key));
+    entry[kVALUE_KEY] = state->GetCacheEntryValue(key);
+
+    Json::Value props = Json::objectValue;
+    bool haveProperties = false;
+    for (auto prop : state->GetCacheEntryPropertyList(key)) {
+      haveProperties = true;
+      props[prop] = state->GetCacheEntryProperty(key, prop);
+    }
+    if (haveProperties) {
+      entry[kPROPERTIES_KEY] = props;
+    }
+
+    list.append(entry);
+  }
+
+  result[kCACHE_KEY] = list;
+  return request.Reply(result);
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessCMakeInputs(
+  const cmServerRequest& request)
+{
+  if (this->m_State < STATE_CONFIGURED) {
+    return request.ReportError("This instance was not yet configured.");
+  }
+
+  const cmake* cm = this->CMakeInstance();
   const cmGlobalGenerator* gg = cm->GetGlobalGenerator();
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot();
   const std::string buildDir = cm->GetHomeOutputDirectory();
   const std::string sourceDir = cm->GetHomeDirectory();
 
   Json::Value result = Json::objectValue;
-  result["sourceDirectory"] = sourceDir;
-  result["cmakeRootDirectory"] = cmakeRootDir;
+  result[kSOURCE_DIRECTORY_KEY] = sourceDir;
+  result[kCMAKE_ROOT_DIRECTORY_KEY] = cmakeRootDir;
 
   std::vector<std::string> internalFiles;
   std::vector<std::string> explicitFiles;
   std::vector<std::string> tmpFiles;
   getCMakeInputs(gg, sourceDir, buildDir, &internalFiles, &explicitFiles,
-      &tmpFiles);
-
+                 &tmpFiles);
 
   Json::Value array = Json::arrayValue;
 
   Json::Value tmp = Json::objectValue;
-  tmp["isCMake"] = true;
-  tmp["isTemporary"] = false;
-  tmp["sources"] = fromStringList(internalFiles);
+  tmp[kIS_CMAKE_KEY] = true;
+  tmp[kIS_TEMPORARY_KEY] = false;
+  tmp[kSOURCES_KEY] = fromStringList(internalFiles);
   array.append(tmp);
 
   tmp = Json::objectValue;
-  tmp["isCMake"] = false;
-  tmp["isTemporary"] = false;
-  tmp["sources"] = fromStringList(explicitFiles);
+  tmp[kIS_CMAKE_KEY] = false;
+  tmp[kIS_TEMPORARY_KEY] = false;
+  tmp[kSOURCES_KEY] = fromStringList(explicitFiles);
   array.append(tmp);
 
   tmp = Json::objectValue;
-  tmp["isCMake"] = false;
-  tmp["isTemporary"] = true;
-  tmp["sources"] = fromStringList(tmpFiles);
+  tmp[kIS_CMAKE_KEY] = false;
+  tmp[kIS_TEMPORARY_KEY] = true;
+  tmp[kSOURCES_KEY] = fromStringList(tmpFiles);
   array.append(tmp);
 
-  result["buildFiles"] = array;
-  this->Server->WriteResponse(result);
+  result[kBUILD_FILES_KEY] = array;
+
+  return request.Reply(result);
+}
+
+class LanguageData
+{
+public:
+  bool operator==(const LanguageData& other) const;
+
+  void SetDefines(const std::set<std::string>& defines);
+
+  bool IsGenerated = false;
+  std::string Language;
+  std::string Flags;
+  std::vector<std::string> Defines;
+  std::vector<std::pair<std::string, bool> > IncludePathList;
+};
+
+bool LanguageData::operator==(const LanguageData& other) const
+{
+  return Language == other.Language && Defines == other.Defines &&
+    Flags == other.Flags && IncludePathList == other.IncludePathList &&
+    IsGenerated == other.IsGenerated;
+}
+
+void LanguageData::SetDefines(const std::set<std::string>& defines)
+{
+  std::vector<std::string> result;
+  for (auto i : defines) {
+    result.push_back(i);
+  }
+  std::sort(result.begin(), result.end());
+  Defines = result;
+}
+
+namespace std {
+
+template <>
+struct hash<LanguageData>
+{
+  std::size_t operator()(const LanguageData& in) const
+  {
+    using std::hash;
+    size_t result =
+      hash<std::string>()(in.Language) ^ hash<std::string>()(in.Flags);
+    for (auto i : in.IncludePathList) {
+      result = result ^ (hash<std::string>()(i.first) ^
+                         (i.second ? std::numeric_limits<size_t>::max() : 0));
+    }
+    for (auto i : in.Defines) {
+      result = result ^ hash<std::string>()(i);
+    }
+    result =
+      result ^ (in.IsGenerated ? std::numeric_limits<size_t>::max() : 0);
+    return result;
+  }
+};
+
+} // namespace std
+
+static Json::Value DumpSourceFileGroup(const LanguageData& data,
+                                       const std::vector<std::string>& files,
+                                       const std::string& baseDir)
+{
+  Json::Value result = Json::objectValue;
+
+  if (!data.Language.empty()) {
+    result[kLANGUAGE_KEY] = data.Language;
+    if (!data.Flags.empty()) {
+      result[kCOMPILE_FLAGS_KEY] = data.Flags;
+    }
+    if (!data.IncludePathList.empty()) {
+      Json::Value includes = Json::arrayValue;
+      for (auto i : data.IncludePathList) {
+        Json::Value tmp = Json::objectValue;
+        tmp[kPATH_KEY] = i.first;
+        if (i.second) {
+          tmp[kIS_SYSTEM_KEY] = i.second;
+        }
+        includes.append(tmp);
+      }
+      result[kINCLUDE_PATH_KEY] = includes;
+    }
+    if (!data.Defines.empty()) {
+      result[kDEFINES_KEY] = fromStringList(data.Defines);
+    }
+  }
+
+  result[kIS_GENERATED_KEY] = data.IsGenerated;
+
+  Json::Value sourcesValue = Json::arrayValue;
+  for (auto i : files) {
+    const std::string relPath =
+      cmSystemTools::RelativePath(baseDir.c_str(), i.c_str());
+    sourcesValue.append(relPath.size() < i.size() ? relPath : i);
+  }
+
+  result[kSOURCES_KEY] = sourcesValue;
+  return result;
+}
+
+static Json::Value DumpSourceFilesList(
+  cmGeneratorTarget* target, const std::string& config,
+  const std::map<std::string, LanguageData>& languageDataMap)
+{
+  // Collect sourcefile groups:
+
+  std::vector<cmSourceFile*> files;
+  target->GetSourceFiles(files, config);
+
+  std::unordered_map<LanguageData, std::vector<std::string> > fileGroups;
+  for (cmSourceFile* file : files) {
+    LanguageData fileData;
+    fileData.Language = file->GetLanguage();
+    if (!fileData.Language.empty()) {
+      const LanguageData& ld = languageDataMap.at(fileData.Language);
+      cmLocalGenerator* lg = target->GetLocalGenerator();
+
+      std::string compileFlags = ld.Flags;
+      if (const char* cflags = file->GetProperty("COMPILE_FLAGS")) {
+        cmGeneratorExpression ge;
+        auto cge = ge.Parse(cflags);
+        const char* processed =
+          cge->Evaluate(target->GetLocalGenerator(), config);
+        lg->AppendFlags(compileFlags, processed);
+      }
+      fileData.Flags = compileFlags;
+
+      fileData.IncludePathList = ld.IncludePathList;
+
+      std::set<std::string> defines;
+      lg->AppendDefines(defines, file->GetProperty("COMPILE_DEFINITIONS"));
+      const std::string defPropName =
+        "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(config);
+      lg->AppendDefines(defines, file->GetProperty(defPropName));
+      defines.insert(ld.Defines.begin(), ld.Defines.end());
+
+      fileData.SetDefines(defines);
+    }
+
+    fileData.IsGenerated = file->GetPropertyAsBool("GENERATED");
+    std::vector<std::string>& groupFileList = fileGroups[fileData];
+    groupFileList.push_back(file->GetFullPath());
+  }
+
+  const std::string baseDir = target->Makefile->GetCurrentSourceDirectory();
+  Json::Value result = Json::arrayValue;
+  for (auto it = fileGroups.begin(); it != fileGroups.end(); ++it) {
+    Json::Value group = DumpSourceFileGroup(it->first, it->second, baseDir);
+    if (!group.isNull()) {
+      result.append(group);
+    }
+  }
+
+  return result;
+}
+
+static Json::Value DumpTarget(cmGeneratorTarget* target,
+                              const std::string& config)
+{
+  cmLocalGenerator* lg = target->GetLocalGenerator();
+  const cmState* state = lg->GetState();
+
+  const cmStateEnums::TargetType type = target->GetType();
+  const std::string typeName = state->GetTargetTypeName(type);
+
+  Json::Value ttl = Json::arrayValue;
+  ttl.append("EXECUTABLE");
+  ttl.append("STATIC_LIBRARY");
+  ttl.append("SHARED_LIBRARY");
+  ttl.append("MODULE_LIBRARY");
+  ttl.append("OBJECT_LIBRARY");
+  ttl.append("UTILITY");
+  ttl.append("INTERFACE_LIBRARY");
+
+  if (!hasString(ttl, typeName) || target->IsImported()) {
+    return Json::Value();
+  }
+
+  Json::Value result = Json::objectValue;
+  result[kNAME_KEY] = target->GetName();
+
+  result[kTYPE_KEY] = typeName;
+  result[kFULL_NAME_KEY] = target->GetFullName(config);
+  result[kSOURCE_DIRECTORY_KEY] = lg->GetCurrentSourceDirectory();
+  result[kBUILD_DIRECTORY_KEY] = lg->GetCurrentBinaryDirectory();
+
+  if (target->HaveWellDefinedOutputFiles()) {
+    Json::Value artifacts = Json::arrayValue;
+    artifacts.append(target->GetFullPath(config, false));
+    if (target->IsDLLPlatform()) {
+      artifacts.append(target->GetFullPath(config, true));
+      const cmGeneratorTarget::OutputInfo* output =
+        target->GetOutputInfo(config);
+      if (output && !output->PdbDir.empty()) {
+        artifacts.append(output->PdbDir + '/' + target->GetPDBName(config));
+      }
+    }
+    result[kARTIFACTS_KEY] = artifacts;
+
+    result[kLINKER_LANGUAGE_KEY] = target->GetLinkerLanguage(config);
+
+    std::string linkLibs;
+    std::string linkFlags;
+    std::string linkLanguageFlags;
+    std::string frameworkPath;
+    std::string linkPath;
+    cmLinkLineComputer linkLineComputer(lg,
+                                        lg->GetStateSnapshot().GetDirectory());
+    lg->GetTargetFlags(&linkLineComputer, config, linkLibs, linkLanguageFlags,
+                       linkFlags, frameworkPath, linkPath, target);
+
+    linkLibs = cmSystemTools::TrimWhitespace(linkLibs);
+    linkFlags = cmSystemTools::TrimWhitespace(linkFlags);
+    linkLanguageFlags = cmSystemTools::TrimWhitespace(linkLanguageFlags);
+    frameworkPath = cmSystemTools::TrimWhitespace(frameworkPath);
+    linkPath = cmSystemTools::TrimWhitespace(linkPath);
+
+    if (!cmSystemTools::TrimWhitespace(linkLibs).empty()) {
+      result[kLINK_LIBRARIES_KEY] = linkLibs;
+    }
+    if (!cmSystemTools::TrimWhitespace(linkFlags).empty()) {
+      result[kLINK_FLAGS_KEY] = linkFlags;
+    }
+    if (!cmSystemTools::TrimWhitespace(linkLanguageFlags).empty()) {
+      result[kLINK_LANGUAGE_FLAGS_KEY] = linkLanguageFlags;
+    }
+    if (!frameworkPath.empty()) {
+      result[kFRAMEWORK_PATH_KEY] = frameworkPath;
+    }
+    if (!linkPath.empty()) {
+      result[kLINK_PATH_KEY] = linkPath;
+    }
+    const std::string sysroot =
+      lg->GetMakefile()->GetSafeDefinition("CMAKE_SYSROOT");
+    if (!sysroot.empty()) {
+      result[kSYSROOT_KEY] = sysroot;
+    }
+  }
+
+  std::set<std::string> languages;
+  target->GetLanguages(languages, config);
+  std::map<std::string, LanguageData> languageDataMap;
+  for (auto lang : languages) {
+    LanguageData& ld = languageDataMap[lang];
+    ld.Language = lang;
+    lg->GetTargetCompileFlags(target, config, lang, ld.Flags);
+    std::set<std::string> defines;
+    lg->GetTargetDefines(target, config, lang, defines);
+    ld.SetDefines(defines);
+    std::vector<std::string> includePathList;
+    lg->GetIncludeDirectories(includePathList, target, lang, config, true);
+    for (auto i : includePathList) {
+      ld.IncludePathList.push_back(
+        std::make_pair(i, target->IsSystemIncludeDirectory(i, config)));
+    }
+  }
+
+  Json::Value sourceGroupsValue =
+    DumpSourceFilesList(target, config, languageDataMap);
+  if (!sourceGroupsValue.empty()) {
+    result[kFILE_GROUPS_KEY] = sourceGroupsValue;
+  }
+
+  return result;
+}
+
+static Json::Value DumpTargetsList(
+  const std::vector<cmLocalGenerator*>& generators, const std::string& config)
+{
+  Json::Value result = Json::arrayValue;
+
+  std::vector<cmGeneratorTarget*> targetList;
+  for (const auto& lgIt : generators) {
+    auto list = lgIt->GetGeneratorTargets();
+    targetList.insert(targetList.end(), list.begin(), list.end());
+  }
+  std::sort(targetList.begin(), targetList.end());
+
+  for (cmGeneratorTarget* target : targetList) {
+    Json::Value tmp = DumpTarget(target, config);
+    if (!tmp.isNull()) {
+      result.append(tmp);
+    }
+  }
+
+  return result;
+}
+
+static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
+{
+  Json::Value result = Json::arrayValue;
+
+  auto globalGen = cm->GetGlobalGenerator();
+
+  for (const auto& projectIt : globalGen->GetProjectMap()) {
+    Json::Value pObj = Json::objectValue;
+    pObj[kNAME_KEY] = projectIt.first;
+
+    // All Projects must have at least one local generator
+    assert(!projectIt.second.empty());
+    const cmLocalGenerator* lg = projectIt.second.at(0);
+
+    // Project structure information:
+    const cmMakefile* mf = lg->GetMakefile();
+    pObj[kSOURCE_DIRECTORY_KEY] = mf->GetCurrentSourceDirectory();
+    pObj[kBUILD_DIRECTORY_KEY] = mf->GetCurrentBinaryDirectory();
+    pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config);
+
+    result.append(pObj);
+  }
+
+  return result;
+}
+
+static Json::Value DumpConfiguration(const cmake* cm,
+                                     const std::string& config)
+{
+  Json::Value result = Json::objectValue;
+  result[kNAME_KEY] = config;
+
+  result[kPROJECTS_KEY] = DumpProjectList(cm, config);
+
+  return result;
+}
+
+static Json::Value DumpConfigurationsList(const cmake* cm)
+{
+  Json::Value result = Json::arrayValue;
+
+  for (const std::string& c : getConfigurations(cm)) {
+    result.append(DumpConfiguration(cm, c));
+  }
+
+  return result;
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessCodeModel(
+  const cmServerRequest& request)
+{
+  if (this->m_State != STATE_COMPUTED) {
+    return request.ReportError("No build system was generated yet.");
+  }
+
+  Json::Value result = Json::objectValue;
+  result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(this->CMakeInstance());
+  return request.Reply(result);
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessCompute(
+  const cmServerRequest& request)
+{
+  if (this->m_State > STATE_CONFIGURED) {
+    return request.ReportError("This build system was already generated.");
+  }
+  if (this->m_State < STATE_CONFIGURED) {
+    return request.ReportError("This project was not configured yet.");
+  }
+
+  cmake* cm = this->CMakeInstance();
+  int ret = cm->Generate();
+
+  if (ret < 0) {
+    return request.ReportError("Failed to compute build system.");
+  }
+  m_State = STATE_COMPUTED;
+  return request.Reply(Json::Value());
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessConfigure(
+  const cmServerRequest& request)
+{
+  if (this->m_State == STATE_INACTIVE) {
+    return request.ReportError("This instance is inactive.");
+  }
+
+  FileMonitor()->StopMonitoring();
+
+  std::string errorMessage;
+  cmake* cm = this->CMakeInstance();
+  this->GeneratorInfo.SetupGenerator(cm, &errorMessage);
+  if (!errorMessage.empty()) {
+    return request.ReportError(errorMessage);
+  }
+
+  // Make sure the types of cacheArguments matches (if given):
+  std::vector<std::string> cacheArgs = { "unused" };
+  bool cacheArgumentsError = false;
+  const Json::Value passedArgs = request.Data[kCACHE_ARGUMENTS_KEY];
+  if (!passedArgs.isNull()) {
+    if (passedArgs.isString()) {
+      cacheArgs.push_back(passedArgs.asString());
+    } else if (passedArgs.isArray()) {
+      for (auto i = passedArgs.begin(); i != passedArgs.end(); ++i) {
+        if (!i->isString()) {
+          cacheArgumentsError = true;
+          break;
+        }
+        cacheArgs.push_back(i->asString());
+      }
+    } else {
+      cacheArgumentsError = true;
+    }
+  }
+  if (cacheArgumentsError) {
+    request.ReportError(
+      "cacheArguments must be unset, a string or an array of strings.");
+  }
+
+  std::string sourceDir = cm->GetHomeDirectory();
+  const std::string buildDir = cm->GetHomeOutputDirectory();
+
+  cmGlobalGenerator* gg = cm->GetGlobalGenerator();
+
+  if (buildDir.empty()) {
+    return request.ReportError("No build directory set via Handshake.");
+  }
+
+  if (cm->LoadCache(buildDir)) {
+    // build directory has been set up before
+    const char* cachedSourceDir =
+      cm->GetState()->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY");
+    if (!cachedSourceDir) {
+      return request.ReportError("No CMAKE_HOME_DIRECTORY found in cache.");
+    }
+    if (sourceDir.empty()) {
+      sourceDir = std::string(cachedSourceDir);
+      cm->SetHomeDirectory(sourceDir);
+    }
+
+    const char* cachedGenerator =
+      cm->GetState()->GetInitializedCacheValue("CMAKE_GENERATOR");
+    if (cachedGenerator) {
+      if (gg && gg->GetName() != cachedGenerator) {
+        return request.ReportError("Configured generator does not match with "
+                                   "CMAKE_GENERATOR found in cache.");
+      }
+    }
+  } else {
+    // build directory has not been set up before
+    if (sourceDir.empty()) {
+      return request.ReportError("No sourceDirectory set via "
+                                 "setGlobalSettings and no cache found in "
+                                 "buildDirectory.");
+    }
+  }
+
+  if (cm->AddCMakePaths() != 1) {
+    return request.ReportError("Failed to set CMake paths.");
+  }
+
+  if (!cm->SetCacheArgs(cacheArgs)) {
+    return request.ReportError("cacheArguments could not be set.");
+  }
+
+  int ret = cm->Configure();
+  if (ret < 0) {
+    return request.ReportError("Configuration failed.");
+  }
+
+  std::vector<std::string> toWatchList;
+  getCMakeInputs(gg, std::string(), buildDir, nullptr, &toWatchList, nullptr);
+
+  FileMonitor()->MonitorPaths(toWatchList,
+                              [this](const std::string& p, int e, int s) {
+                                this->HandleCMakeFileChanges(p, e, s);
+                              });
+
+  m_State = STATE_CONFIGURED;
+  m_isDirty = false;
+  return request.Reply(Json::Value());
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessGlobalSettings(
+  const cmServerRequest& request)
+{
+  cmake* cm = this->CMakeInstance();
+  Json::Value obj = Json::objectValue;
+
+  // Capabilities information:
+  obj[kCAPABILITIES_KEY] = cm->ReportCapabilitiesJson(true);
+
+  obj[kDEBUG_OUTPUT_KEY] = cm->GetDebugOutput();
+  obj[kTRACE_KEY] = cm->GetTrace();
+  obj[kTRACE_EXPAND_KEY] = cm->GetTraceExpand();
+  obj[kWARN_UNINITIALIZED_KEY] = cm->GetWarnUninitialized();
+  obj[kWARN_UNUSED_KEY] = cm->GetWarnUnused();
+  obj[kWARN_UNUSED_CLI_KEY] = cm->GetWarnUnusedCli();
+  obj[kCHECK_SYSTEM_VARS_KEY] = cm->GetCheckSystemVars();
+
+  obj[kSOURCE_DIRECTORY_KEY] = this->GeneratorInfo.SourceDirectory;
+  obj[kBUILD_DIRECTORY_KEY] = this->GeneratorInfo.BuildDirectory;
+
+  // Currently used generator:
+  obj[kGENERATOR_KEY] = this->GeneratorInfo.GeneratorName;
+  obj[kEXTRA_GENERATOR_KEY] = this->GeneratorInfo.ExtraGeneratorName;
+
+  return request.Reply(obj);
+}
+
+static void setBool(const cmServerRequest& request, const std::string& key,
+                    std::function<void(bool)> const& setter)
+{
+  if (request.Data[key].isNull()) {
+    return;
+  }
+  setter(request.Data[key].asBool());
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessSetGlobalSettings(
+  const cmServerRequest& request)
+{
+  const std::vector<std::string> boolValues = {
+    kDEBUG_OUTPUT_KEY,       kTRACE_KEY,       kTRACE_EXPAND_KEY,
+    kWARN_UNINITIALIZED_KEY, kWARN_UNUSED_KEY, kWARN_UNUSED_CLI_KEY,
+    kCHECK_SYSTEM_VARS_KEY
+  };
+  for (auto i : boolValues) {
+    if (!request.Data[i].isNull() && !request.Data[i].isBool()) {
+      return request.ReportError("\"" + i +
+                                 "\" must be unset or a bool value.");
+    }
+  }
+
+  cmake* cm = this->CMakeInstance();
+
+  setBool(request, kDEBUG_OUTPUT_KEY,
+          [cm](bool e) { cm->SetDebugOutputOn(e); });
+  setBool(request, kTRACE_KEY, [cm](bool e) { cm->SetTrace(e); });
+  setBool(request, kTRACE_EXPAND_KEY, [cm](bool e) { cm->SetTraceExpand(e); });
+  setBool(request, kWARN_UNINITIALIZED_KEY,
+          [cm](bool e) { cm->SetWarnUninitialized(e); });
+  setBool(request, kWARN_UNUSED_KEY, [cm](bool e) { cm->SetWarnUnused(e); });
+  setBool(request, kWARN_UNUSED_CLI_KEY,
+          [cm](bool e) { cm->SetWarnUnusedCli(e); });
+  setBool(request, kCHECK_SYSTEM_VARS_KEY,
+          [cm](bool e) { cm->SetCheckSystemVars(e); });
+
+  return request.Reply(Json::Value());
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessFileSystemWatchers(
+  const cmServerRequest& request)
+{
+  const cmFileMonitor* const fm = FileMonitor();
+  Json::Value result = Json::objectValue;
+  Json::Value files = Json::arrayValue;
+  for (const auto& f : fm->WatchedFiles()) {
+    files.append(f);
+  }
+  Json::Value directories = Json::arrayValue;
+  for (const auto& d : fm->WatchedDirectories()) {
+    directories.append(d);
+  }
+  result[kWATCHED_FILES_KEY] = files;
+  result[kWATCHED_DIRECTORIES_KEY] = directories;
+
+  return request.Reply(result);
+}
+
+cmServerProtocol1_0::GeneratorInformation::GeneratorInformation(
+  const std::string& generatorName, const std::string& extraGeneratorName,
+  const std::string& toolset, const std::string& platform,
+  const std::string& sourceDirectory, const std::string& buildDirectory)
+  : GeneratorName(generatorName)
+  , ExtraGeneratorName(extraGeneratorName)
+  , Toolset(toolset)
+  , Platform(platform)
+  , SourceDirectory(sourceDirectory)
+  , BuildDirectory(buildDirectory)
+{
+}
+
+void cmServerProtocol1_0::GeneratorInformation::SetupGenerator(
+  cmake* cm, std::string* errorMessage)
+{
+  const std::string fullGeneratorName =
+    cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
+      GeneratorName, ExtraGeneratorName);
+
+  cm->SetHomeDirectory(SourceDirectory);
+  cm->SetHomeOutputDirectory(BuildDirectory);
+
+  cmGlobalGenerator* gg = cm->CreateGlobalGenerator(fullGeneratorName);
+  if (!gg) {
+    setErrorMessage(
+      errorMessage,
+      std::string("Could not set up the requested combination of \"") +
+        kGENERATOR_KEY + "\" and \"" + kEXTRA_GENERATOR_KEY + "\"");
+    return;
+  }
+
+  cm->SetGlobalGenerator(gg);
+
+  cm->SetGeneratorToolset(Toolset);
+  cm->SetGeneratorPlatform(Platform);
 }

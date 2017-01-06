@@ -7,7 +7,7 @@ shopt -s dotglob
 readonly name="KWIML"
 readonly ownership="KWIML Upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/KWIML"
-readonly repo="https://github.com/Kitware/KWIML.git"
+readonly repo="https://gitlab.kitware.com/utils/kwiml.git"
 readonly tag="master"
 readonly shortlog=true
 readonly paths="

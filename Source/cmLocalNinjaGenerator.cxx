@@ -1,37 +1,47 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2011 Peter Collingbourne <peter@pcc.me.uk>
-  Copyright 2011 Nicolas Despres <nicolas.despres@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalNinjaGenerator.h"
 
+#include <algorithm>
+#include <assert.h>
+#include <iterator>
+#include <sstream>
+#include <stdio.h>
+#include <utility>
+
+#include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmMakefile.h"
 #include "cmNinjaTargetGenerator.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
 #include "cmake.h"
-
-#include <assert.h>
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
                                              cmMakefile* mf)
-  : cmLocalCommonGenerator(gg, mf)
+  : cmLocalCommonGenerator(gg, mf, mf->GetState()->GetBinaryDirectory())
   , HomeRelativeOutputPath("")
 {
-  this->TargetImplib = "$TARGET_IMPLIB";
 }
 
 // Virtual public methods.
+
+cmRulePlaceholderExpander*
+cmLocalNinjaGenerator::CreateRulePlaceholderExpander() const
+{
+  cmRulePlaceholderExpander* ret = new cmRulePlaceholderExpander(
+    this->Compilers, this->VariableMappings, this->CompilerSysroot);
+  ret->SetTargetImpLib("$TARGET_IMPLIB");
+  return ret;
+}
 
 cmLocalNinjaGenerator::~cmLocalNinjaGenerator()
 {
@@ -41,8 +51,8 @@ void cmLocalNinjaGenerator::Generate()
 {
   // Compute the path to use when referencing the current output
   // directory from the top output directory.
-  this->HomeRelativeOutputPath = this->Convert(
-    this->GetCurrentBinaryDirectory(), cmOutputConverter::HOME_OUTPUT);
+  this->HomeRelativeOutputPath = this->ConvertToRelativePath(
+    this->GetBinaryDirectory(), this->GetCurrentBinaryDirectory());
   if (this->HomeRelativeOutputPath == ".") {
     this->HomeRelativeOutputPath = "";
   }
@@ -73,7 +83,7 @@ void cmLocalNinjaGenerator::Generate()
   std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
   for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
        t != targets.end(); ++t) {
-    if ((*t)->GetType() == cmState::INTERFACE_LIBRARY) {
+    if ((*t)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     cmNinjaTargetGenerator* tg = cmNinjaTargetGenerator::New(*t);
@@ -81,8 +91,9 @@ void cmLocalNinjaGenerator::Generate()
       tg->Generate();
       // Add the target to "all" if required.
       if (!this->GetGlobalNinjaGenerator()->IsExcluded(
-            this->GetGlobalNinjaGenerator()->GetLocalGenerators()[0], *t))
+            this->GetGlobalNinjaGenerator()->GetLocalGenerators()[0], *t)) {
         this->GetGlobalNinjaGenerator()->AddDependencyToAll(*t);
+      }
       delete tg;
     }
   }
@@ -120,20 +131,16 @@ cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
 
 // Virtual protected methods.
 
-std::string cmLocalNinjaGenerator::ConvertToLinkReference(
-  std::string const& lib, cmOutputConverter::OutputFormat format)
-{
-  std::string path = this->GetGlobalNinjaGenerator()->ConvertToNinjaPath(lib);
-  return this->ConvertToOutputFormat(path, format);
-}
-
 std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
   std::string const& path, cmOutputConverter::OutputFormat format,
   bool forceFullPaths)
 {
-  return this->Convert(path, forceFullPaths ? cmOutputConverter::FULL
-                                            : cmOutputConverter::HOME_OUTPUT,
-                       format);
+  if (forceFullPaths) {
+    return this->ConvertToOutputFormat(cmSystemTools::CollapseFullPath(path),
+                                       format);
+  }
+  return this->ConvertToOutputFormat(
+    this->ConvertToRelativePath(this->GetBinaryDirectory(), path), format);
 }
 
 // Private methods.
@@ -257,8 +264,9 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
   os << "# Write statements declared in CMakeLists.txt:" << std::endl
      << "# " << this->Makefile->GetDefinition("CMAKE_CURRENT_LIST_FILE")
      << std::endl;
-  if (this->IsRootMakefile())
+  if (this->IsRootMakefile()) {
     os << "# Which is the root file." << std::endl;
+  }
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << std::endl;
 }
@@ -282,24 +290,22 @@ void cmLocalNinjaGenerator::AppendCustomCommandDeps(
   for (std::vector<std::string>::const_iterator i = deps.begin();
        i != deps.end(); ++i) {
     std::string dep;
-    if (this->GetRealDependency(*i, this->GetConfigName(), dep))
+    if (this->GetRealDependency(*i, this->GetConfigName(), dep)) {
       ninjaDeps.push_back(
         this->GetGlobalNinjaGenerator()->ConvertToNinjaPath(dep));
+    }
   }
 }
 
 std::string cmLocalNinjaGenerator::BuildCommandLine(
   const std::vector<std::string>& cmdLines)
 {
-  // If we have no commands but we need to build a command anyway, use ":".
+  // If we have no commands but we need to build a command anyway, use noop.
   // This happens when building a POST_BUILD value for link targets that
   // don't use POST_BUILD.
-  if (cmdLines.empty())
-#ifdef _WIN32
-    return "cd .";
-#else
-    return ":";
-#endif
+  if (cmdLines.empty()) {
+    return cmGlobalNinjaGenerator::SHELL_NOOP;
+  }
 
   std::ostringstream cmd;
   for (std::vector<std::string>::const_iterator li = cmdLines.begin();
@@ -332,8 +338,9 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
 {
   if (ccg.GetNumberOfCommands() > 0) {
     std::string wd = ccg.GetWorkingDirectory();
-    if (wd.empty())
+    if (wd.empty()) {
       wd = this->GetCurrentBinaryDirectory();
+    }
 
     std::ostringstream cdCmd;
 #ifdef _WIN32
@@ -361,8 +368,9 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
 void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   cmCustomCommand const* cc, const cmNinjaDeps& orderOnlyDeps)
 {
-  if (this->GetGlobalNinjaGenerator()->SeenCustomCommand(cc))
+  if (this->GetGlobalNinjaGenerator()->SeenCustomCommand(cc)) {
     return;
+  }
 
   cmCustomCommandGenerator ccg(*cc, this->GetConfigName(), this);
 
@@ -391,8 +399,9 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   this->AppendCustomCommandDeps(ccg, ninjaDeps);
 
   for (cmNinjaDeps::iterator i = ninjaOutputs.begin(); i != ninjaOutputs.end();
-       ++i)
+       ++i) {
     this->GetGlobalNinjaGenerator()->SeenCustomCommandOutput(*i);
+  }
 
   std::vector<std::string> cmdLines;
   this->AppendCustomCommandLines(ccg, cmdLines);
@@ -405,7 +414,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   } else {
     this->GetGlobalNinjaGenerator()->WriteCustomCommandBuild(
       this->BuildCommandLine(cmdLines), this->ConstructComment(ccg),
-      "Custom command for " + ninjaOutputs[0], cc->GetUsesTerminal(),
+      "Custom command for " + ninjaOutputs[0], cc->GetDepfile(),
+      cc->GetUsesTerminal(),
       /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, ninjaDeps,
       orderOnlyDeps);
   }
@@ -443,13 +453,14 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
     std::set<cmGeneratorTarget*>::iterator j = i->second.begin();
     assert(j != i->second.end());
     std::vector<std::string> ccTargetDeps;
-    this->AppendTargetDepends(*j, ccTargetDeps);
+    this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(*j,
+                                                                ccTargetDeps);
     std::sort(ccTargetDeps.begin(), ccTargetDeps.end());
     ++j;
 
     for (; j != i->second.end(); ++j) {
       std::vector<std::string> jDeps, depsIntersection;
-      this->AppendTargetDepends(*j, jDeps);
+      this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(*j, jDeps);
       std::sort(jDeps.begin(), jDeps.end());
       std::set_intersection(ccTargetDeps.begin(), ccTargetDeps.end(),
                             jDeps.begin(), jDeps.end(),
@@ -464,8 +475,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
 std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   cmCustomCommandGenerator const& ccg)
 {
-  const char* property = "RULE_LAUNCH_CUSTOM";
-  const char* property_value = this->Makefile->GetProperty(property);
+  const char* property_value =
+    this->Makefile->GetProperty("RULE_LAUNCH_CUSTOM");
 
   if (!property_value || !*property_value) {
     return std::string();
@@ -473,22 +484,27 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
 
   // Expand rules in the empty string.  It may insert the launcher and
   // perform replacements.
-  RuleVariables vars;
-  vars.RuleLauncher = property;
+  cmRulePlaceholderExpander::RuleVariables vars;
+
   std::string output;
   const std::vector<std::string>& outputs = ccg.GetOutputs();
   if (!outputs.empty()) {
-    cmOutputConverter::RelativeRoot relative_root =
-      ccg.GetWorkingDirectory().empty() ? cmOutputConverter::START_OUTPUT
-                                        : cmOutputConverter::NONE;
-
-    output =
-      this->Convert(outputs[0], relative_root, cmOutputConverter::SHELL);
+    output = outputs[0];
+    if (ccg.GetWorkingDirectory().empty()) {
+      output =
+        this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), output);
+    }
+    output = this->ConvertToOutputFormat(output, cmOutputConverter::SHELL);
   }
   vars.Output = output.c_str();
 
-  std::string launcher;
-  this->ExpandRuleVariables(launcher, vars);
+  std::string launcher = property_value;
+  launcher += " ";
+
+  CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    this->CreateRulePlaceholderExpander());
+
+  rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);
   if (!launcher.empty()) {
     launcher += " ";
   }

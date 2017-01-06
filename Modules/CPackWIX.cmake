@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CPackWIX
 # --------
@@ -147,7 +150,7 @@
 #     }
 #
 #  Currently fragments can be injected into most
-#  Component, File and Directory elements.
+#  Component, File, Directory and Feature elements.
 #
 #  The following additional special Ids can be used:
 #
@@ -237,19 +240,34 @@
 #  * ARPURLUPDATEINFO - Update information URL
 #  * ARPHELPTELEPHONE - Help and support telephone number
 #  * ARPSIZE - Size (in kilobytes) of the application
-
-#=============================================================================
-# Copyright 2014-2015 Kitware, Inc.
 #
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
+# .. variable:: CPACK_WIX_ROOT_FEATURE_TITLE
 #
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
+# Sets the name of the root install feature in the WIX installer. Same as
+# CPACK_COMPONENT_<compName>_DISPLAY_NAME for components.
+#
+# .. variable:: CPACK_WIX_ROOT_FEATURE_DESCRIPTION
+#
+# Sets the description of the root install feature in the WIX installer. Same as
+# CPACK_COMPONENT_<compName>_DESCRIPTION for components.
+#
+# .. variable:: CPACK_WIX_SKIP_PROGRAM_FOLDER
+#
+# If this variable is set to true, the default install location
+# of the generated package will be CPACK_PACKAGE_INSTALL_DIRECTORY directly.
+# The install location will not be located relatively below
+# ProgramFiles or ProgramFiles64.
+#
+#   .. note::
+#     Installers created with this feature do not take differences
+#     between the system on which the installer is created
+#     and the system on which the installer might be used into account.
+#
+#     It is therefor possible that the installer e.g. might try to install
+#     onto a drive that is unavailable or unintended or a path that does not
+#     follow the localization or convention of the system on which the
+#     installation is performed.
+#
 
 if(NOT CPACK_WIX_ROOT)
   file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)

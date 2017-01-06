@@ -1,26 +1,20 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2004-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # this file has flags that are shared across languages and sets
 # cache values that can be initialized in the platform-compiler.cmake file
 # it may be included by more than one language.
 
-if(NOT "x$ENV{LDFLAGS}" STREQUAL "x")
-  set (CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_EXE_LINKER_FLAGS_INIT} $ENV{LDFLAGS}")
-  set (CMAKE_SHARED_LINKER_FLAGS_INIT "${CMAKE_SHARED_LINKER_FLAGS_INIT} $ENV{LDFLAGS}")
-  set (CMAKE_MODULE_LINKER_FLAGS_INIT "${CMAKE_MODULE_LINKER_FLAGS_INIT} $ENV{LDFLAGS}")
-endif()
+string(APPEND CMAKE_EXE_LINKER_FLAGS_INIT " $ENV{LDFLAGS}")
+string(APPEND CMAKE_SHARED_LINKER_FLAGS_INIT " $ENV{LDFLAGS}")
+string(APPEND CMAKE_MODULE_LINKER_FLAGS_INIT " $ENV{LDFLAGS}")
+
+foreach(t EXE SHARED MODULE STATIC)
+  foreach(c "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
+    string(STRIP "${CMAKE_${t}_LINKER_FLAGS${c}_INIT}" CMAKE_${t}_LINKER_FLAGS${c}_INIT)
+  endforeach()
+endforeach()
 
 if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
 # default build type is none

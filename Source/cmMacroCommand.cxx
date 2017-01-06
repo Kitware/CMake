@@ -1,18 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMacroCommand.h"
 
+#include <sstream>
+#include <stdio.h>
+
 #include "cmAlgorithms.h"
-#include "cmake.h"
+#include "cmExecutionStatus.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
 
 // define the class for macro commands
 class cmMacroHelperCommand : public cmCommand
@@ -21,44 +19,41 @@ public:
   cmMacroHelperCommand() {}
 
   ///! clean up any memory allocated by the macro
-  ~cmMacroHelperCommand() {}
+  ~cmMacroHelperCommand() CM_OVERRIDE {}
 
   /**
-   * This is used to avoid including this command
-   * in documentation. This is mainly used by
-   * cmMacroHelperCommand and cmFunctionHelperCommand
-   * which cannot provide appropriate documentation.
+   * This determines if the command is defined in a cmake script.
    */
-  virtual bool ShouldAppearInDocumentation() const { return false; }
+  bool IsUserDefined() const CM_OVERRIDE { return true; }
 
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmMacroHelperCommand* newC = new cmMacroHelperCommand;
     // we must copy when we clone
     newC->Args = this->Args;
     newC->Functions = this->Functions;
+    newC->FilePath = this->FilePath;
     newC->Policies = this->Policies;
-    newC->FunctionContext = this->FunctionContext;
-    newC->FunctionEndLine = this->FunctionEndLine;
     return newC;
   }
 
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() const { return true; }
+  bool IsScriptable() const CM_OVERRIDE { return true; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
-                                 cmExecutionStatus&);
+  bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
+                         cmExecutionStatus&) CM_OVERRIDE;
 
-  virtual bool InitialPass(std::vector<std::string> const&, cmExecutionStatus&)
+  bool InitialPass(std::vector<std::string> const&,
+                   cmExecutionStatus&) CM_OVERRIDE
   {
     return false;
   }
@@ -66,22 +61,17 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return this->Args[0]; }
-
-  cmTypeMacro(cmMacroHelperCommand, cmCommand);
+  std::string GetName() const CM_OVERRIDE { return this->Args[0]; }
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
   cmPolicies::PolicyMap Policies;
-  cmListFileContext FunctionContext;
-  long FunctionEndLine;
+  std::string FilePath;
 };
 
 bool cmMacroHelperCommand::InvokeInitialPass(
   const std::vector<cmListFileArgument>& args, cmExecutionStatus& inStatus)
 {
-  this->Makefile->GetStateSnapshot().UnmarkNotExecuted(
-    this->FunctionContext.Line + 1);
   // Expand the argument list to the macro.
   std::vector<std::string> expandedArgs;
   this->Makefile->ExpandArguments(args, expandedArgs);
@@ -96,8 +86,8 @@ bool cmMacroHelperCommand::InvokeInitialPass(
     return false;
   }
 
-  cmMakefile::MacroPushPop macroScope(this->Makefile, this->FunctionContext,
-                                      this->FunctionEndLine, this->Policies);
+  cmMakefile::MacroPushPop macroScope(this->Makefile, this->FilePath,
+                                      this->Policies);
 
   // set the value of argc
   std::ostringstream argcDefStream;
@@ -120,12 +110,6 @@ bool cmMacroHelperCommand::InvokeInitialPass(
     sprintf(argvName, "${ARGV%i}", j);
     argVs.push_back(argvName);
   }
-
-  // TODO: Find a way to put macro arguments into the state.
-  auto lfc = this->FunctionContext;
-  lfc.Line = lfc.CloseParenLine + 1;
-  this->Makefile->CreateArbitrarySnapshot(lfc);
-
   // Invoke all the functions that were collected in the block.
   cmListFileFunction newLFF;
   // for each function
@@ -198,31 +182,23 @@ bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
   } else if (!cmSystemTools::Strucmp(lff.Name.c_str(), "endmacro")) {
     // if this is the endmacro for this macro then execute
     if (!this->Depth) {
-      auto lfc =
-        cmListFileContext::FromCommandContext(lff, mf.GetExecutionFilePath());
-      mf.CreateArbitrarySnapshot(lfc);
-
       mf.AppendProperty("MACROS", this->Args[0].c_str());
       // create a new command and add it to cmake
       cmMacroHelperCommand* f = new cmMacroHelperCommand();
       f->Args = this->Args;
       f->Functions = this->Functions;
-      f->FunctionContext = this->GetStartingContext();
-      f->FunctionEndLine = lff.Line;
+      f->FilePath = this->GetStartingContext().FilePath;
       mf.RecordPolicies(f->Policies);
       std::string newName = "_" + this->Args[0];
       mf.GetState()->RenameCommand(this->Args[0], newName);
       mf.GetState()->AddCommand(f);
-      mf.GetStateSnapshot().MarkNotExecuted(
-        this->GetStartingContext().CloseParenLine + 1, lff.Line);
 
       // remove the function blocker now that the macro is defined
       mf.RemoveFunctionBlocker(this, lff);
       return true;
-    } else {
-      // decrement for each nested macro that ends
-      this->Depth--;
     }
+    // decrement for each nested macro that ends
+    this->Depth--;
   }
 
   // if it wasn't an endmacro and we are not executing then we must be
@@ -252,13 +228,10 @@ bool cmMacroFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
 bool cmMacroCommand::InitialPass(std::vector<std::string> const& args,
                                  cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
-
-  auto lfc = this->Makefile->GetExecutionContext();
-  this->Makefile->CreateArbitrarySnapshot(lfc);
 
   // create a function blocker
   cmMacroFunctionBlocker* f = new cmMacroFunctionBlocker();

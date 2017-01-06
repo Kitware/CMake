@@ -1,21 +1,22 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2013 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmGeneratorExpressionEvaluationFile_h
 #define cmGeneratorExpressionEvaluationFile_h
 
-#include "cmGeneratorExpression.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include <cmsys/auto_ptr.hxx>
+#include <map>
+#include <string>
+#include <vector>
+
+#include "cmGeneratorExpression.h"
+#include "cm_auto_ptr.hxx"
+
+#if defined(_MSC_VER)
+typedef unsigned short mode_t;
+#else
 #include <sys/types.h>
+#endif
 
 class cmLocalGenerator;
 
@@ -24,9 +25,8 @@ class cmGeneratorExpressionEvaluationFile
 public:
   cmGeneratorExpressionEvaluationFile(
     const std::string& input,
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> outputFileExpr,
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> condition,
-    bool inputIsContent);
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> outputFileExpr,
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> condition, bool inputIsContent);
 
   void Generate(cmLocalGenerator* lg);
 
@@ -42,8 +42,8 @@ private:
 
 private:
   const std::string Input;
-  const cmsys::auto_ptr<cmCompiledGeneratorExpression> OutputFileExpr;
-  const cmsys::auto_ptr<cmCompiledGeneratorExpression> Condition;
+  const CM_AUTO_PTR<cmCompiledGeneratorExpression> OutputFileExpr;
+  const CM_AUTO_PTR<cmCompiledGeneratorExpression> Condition;
   std::vector<std::string> Files;
   const bool InputIsContent;
 };

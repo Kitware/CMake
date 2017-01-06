@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindOpenMP
 # ----------
@@ -12,33 +15,27 @@
 #
 # The following variables are set:
 #
-# ::
+# ``OpenMP_C_FLAGS``
+#   Flags to add to the C compiler for OpenMP support.
+# ``OpenMP_CXX_FLAGS``
+#   Flags to add to the CXX compiler for OpenMP support.
+# ``OpenMP_Fortran_FLAGS``
+#   Flags to add to the Fortran compiler for OpenMP support.
+# ``OPENMP_FOUND``
+#   True if openmp is detected.
 #
-#    OpenMP_C_FLAGS - flags to add to the C compiler for OpenMP support
-#    OpenMP_CXX_FLAGS - flags to add to the CXX compiler for OpenMP support
-#    OpenMP_Fortran_FLAGS - flags to add to the Fortran compiler for OpenMP support
-#    OPENMP_FOUND - true if openmp is detected
+# The following internal variables are set, if detected:
 #
+# ``OpenMP_C_SPEC_DATE``
+#   Specification date of OpenMP version of C compiler.
+# ``OpenMP_CXX_SPEC_DATE``
+#   Specification date of OpenMP version of CXX compiler.
+# ``OpenMP_Fortran_SPEC_DATE``
+#   Specification date of OpenMP version of Fortran compiler.
 #
-#
-# Supported compilers can be found at
-# http://openmp.org/wp/openmp-compilers/
-
-#=============================================================================
-# Copyright 2009 Kitware, Inc.
-# Copyright 2008-2009 André Rigland Brodtkorb <Andre.Brodtkorb@ifi.uio.no>
-# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
-# Copyright 2014 Nicolas Bock <nicolasbock@gmail.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
+# The specification dates are formatted as integers of the form
+# ``CCYYMM`` where these represent the decimal digits of the century,
+# year, and month.
 
 set(_OPENMP_REQUIRED_VARS)
 set(CMAKE_REQUIRED_QUIET_SAVE ${CMAKE_REQUIRED_QUIET})
@@ -122,6 +119,75 @@ set(OpenMP_Fortran_TEST_SOURCE
   "
   )
 
+set(OpenMP_C_CXX_CHECK_VERSION_SOURCE
+"
+#include <stdio.h>
+#include <omp.h>
+const char ompver_str[] = { 'I', 'N', 'F', 'O', ':', 'O', 'p', 'e', 'n', 'M',
+                            'P', '-', 'd', 'a', 't', 'e', '[',
+                            ('0' + ((_OPENMP/100000)%10)),
+                            ('0' + ((_OPENMP/10000)%10)),
+                            ('0' + ((_OPENMP/1000)%10)),
+                            ('0' + ((_OPENMP/100)%10)),
+                            ('0' + ((_OPENMP/10)%10)),
+                            ('0' + ((_OPENMP/1)%10)),
+                            ']', '\\0' };
+int main(int argc, char *argv[])
+{
+  printf(\"%s\\n\", ompver_str);
+  return 0;
+}
+")
+
+set(OpenMP_Fortran_CHECK_VERSION_SOURCE
+"
+      program omp_ver
+      use omp_lib
+      integer, parameter :: zero = ichar('0')
+      integer, parameter :: ompv = openmp_version
+      character, dimension(24), parameter :: ompver_str =&
+      (/ 'I', 'N', 'F', 'O', ':', 'O', 'p', 'e', 'n', 'M', 'P', '-',&
+         'd', 'a', 't', 'e', '[',&
+         char(zero + mod(ompv/100000, 10)),&
+         char(zero + mod(ompv/10000, 10)),&
+         char(zero + mod(ompv/1000, 10)),&
+         char(zero + mod(ompv/100, 10)),&
+         char(zero + mod(ompv/10, 10)),&
+         char(zero + mod(ompv/1, 10)), ']' /)
+      print *, ompver_str
+      end program omp_ver
+")
+
+function(_OPENMP_GET_SPEC_DATE LANG SPEC_DATE)
+  set(WORK_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindOpenMP)
+  if("${LANG}" STREQUAL "C")
+    set(SRC_FILE ${WORK_DIR}/ompver.c)
+    file(WRITE ${SRC_FILE} "${OpenMP_C_CXX_CHECK_VERSION_SOURCE}")
+  elseif("${LANG}" STREQUAL "CXX")
+    set(SRC_FILE ${WORK_DIR}/ompver.cpp)
+    file(WRITE ${SRC_FILE} "${OpenMP_C_CXX_CHECK_VERSION_SOURCE}")
+  else() # ("${LANG}" STREQUAL "Fortran")
+    set(SRC_FILE ${WORK_DIR}/ompver.f90)
+    file(WRITE ${SRC_FILE} "${OpenMP_Fortran_CHECK_VERSION_SOURCE}")
+  endif()
+
+  set(BIN_FILE ${WORK_DIR}/ompver_${LANG}.bin)
+  try_compile(OpenMP_TRY_COMPILE_RESULT ${CMAKE_BINARY_DIR} ${SRC_FILE}
+              CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OpenMP_${LANG}_FLAGS}"
+              COPY_FILE ${BIN_FILE})
+
+  if(${OpenMP_TRY_COMPILE_RESULT})
+    file(STRINGS ${BIN_FILE} specstr LIMIT_COUNT 1 REGEX "INFO:OpenMP-date")
+    set(regex_spec_date ".*INFO:OpenMP-date\\[0*([^]]*)\\].*")
+    if("${specstr}" MATCHES "${regex_spec_date}")
+      set(${SPEC_DATE} "${CMAKE_MATCH_1}" PARENT_SCOPE)
+    endif()
+  endif()
+
+  unset(OpenMP_TRY_COMPILE_RESULT CACHE)
+endfunction()
+
+
 # check c compiler
 if(CMAKE_C_COMPILER_LOADED)
   # if these are set then do not try to find them again,
@@ -153,6 +219,12 @@ if(CMAKE_C_COMPILER_LOADED)
 
   list(APPEND _OPENMP_REQUIRED_VARS OpenMP_C_FLAGS)
   unset(OpenMP_C_FLAG_CANDIDATES)
+
+  if (NOT OpenMP_C_SPEC_DATE)
+    _OPENMP_GET_SPEC_DATE("C" OpenMP_C_SPEC_DATE_INTERNAL)
+    set(OpenMP_C_SPEC_DATE "${OpenMP_C_SPEC_DATE_INTERNAL}" CACHE
+      INTERNAL "C compiler's OpenMP specification date")
+  endif()
 endif()
 
 # check cxx compiler
@@ -189,7 +261,12 @@ if(CMAKE_CXX_COMPILER_LOADED)
 
   list(APPEND _OPENMP_REQUIRED_VARS OpenMP_CXX_FLAGS)
   unset(OpenMP_CXX_FLAG_CANDIDATES)
-  unset(OpenMP_CXX_TEST_SOURCE)
+
+  if (NOT OpenMP_CXX_SPEC_DATE)
+    _OPENMP_GET_SPEC_DATE("CXX" OpenMP_CXX_SPEC_DATE_INTERNAL)
+    set(OpenMP_CXX_SPEC_DATE "${OpenMP_CXX_SPEC_DATE_INTERNAL}" CACHE
+      INTERNAL "C++ compiler's OpenMP specification date")
+  endif()
 endif()
 
 # check Fortran compiler
@@ -223,7 +300,12 @@ if(CMAKE_Fortran_COMPILER_LOADED)
 
   list(APPEND _OPENMP_REQUIRED_VARS OpenMP_Fortran_FLAGS)
   unset(OpenMP_Fortran_FLAG_CANDIDATES)
-  unset(OpenMP_Fortran_TEST_SOURCE)
+
+  if (NOT OpenMP_Fortran_SPEC_DATE)
+    _OPENMP_GET_SPEC_DATE("Fortran" OpenMP_Fortran_SPEC_DATE_INTERNAL)
+    set(OpenMP_Fortran_SPEC_DATE "${OpenMP_Fortran_SPEC_DATE_INTERNAL}" CACHE
+      INTERNAL "Fortran compiler's OpenMP specification date")
+  endif()
 endif()
 
 set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
@@ -240,3 +322,9 @@ if(_OPENMP_REQUIRED_VARS)
 else()
   message(SEND_ERROR "FindOpenMP requires C or CXX language to be enabled")
 endif()
+
+unset(OpenMP_C_TEST_SOURCE)
+unset(OpenMP_CXX_TEST_SOURCE)
+unset(OpenMP_Fortran_TEST_SOURCE)
+unset(OpenMP_C_CXX_CHECK_VERSION_SOURCE)
+unset(OpenMP_Fortran_CHECK_VERSION_SOURCE)

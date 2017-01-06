@@ -1,50 +1,39 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmGetPropertyCommand_h
 #define cmGetPropertyCommand_h
 
+#include <cmConfigure.h>
+#include <string>
+#include <vector>
+
 #include "cmCommand.h"
+
+class cmExecutionStatus;
 
 class cmGetPropertyCommand : public cmCommand
 {
 public:
   cmGetPropertyCommand();
 
-  virtual cmCommand* Clone() { return new cmGetPropertyCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmGetPropertyCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
-
-  ParameterContext GetContextForParameter(const std::vector<std::string>& args,
-                                          size_t index);
-
-  std::vector<std::string> GetKeywords(std::vector<std::string> const& args,
-                                       size_t index);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() const { return true; }
+  bool IsScriptable() const CM_OVERRIDE { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "get_property"; }
-
-  cmTypeMacro(cmGetPropertyCommand, cmCommand);
+  std::string GetName() const CM_OVERRIDE { return "get_property"; }
 
 private:
   enum OutType

@@ -1,22 +1,22 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDynamicLoader.h"
+
+#include <cmConfigure.h>
+
+#include <cmsys/DynamicLoader.hxx>
+#include <map>
+#include <string>
+#include <utility>
 
 class cmDynamicLoaderCache
 {
 public:
   ~cmDynamicLoaderCache();
-  void CacheFile(const char* path, const cmsys::DynamicLoader::LibraryHandle&);
-  bool GetCacheFile(const char* path, cmsys::DynamicLoader::LibraryHandle&);
+  void CacheFile(const char* path,
+                 const cmsys::DynamicLoader::LibraryHandle& /*p*/);
+  bool GetCacheFile(const char* path,
+                    cmsys::DynamicLoader::LibraryHandle& /*p*/);
   bool FlushCache(const char* path);
   void FlushCache();
   static cmDynamicLoaderCache* GetInstance();
@@ -26,7 +26,7 @@ private:
   static cmDynamicLoaderCache* Instance;
 };
 
-cmDynamicLoaderCache* cmDynamicLoaderCache::Instance = 0;
+cmDynamicLoaderCache* cmDynamicLoaderCache::Instance = CM_NULLPTR;
 
 cmDynamicLoaderCache::~cmDynamicLoaderCache()
 {
@@ -75,7 +75,7 @@ void cmDynamicLoaderCache::FlushCache()
     cmsys::DynamicLoader::CloseLibrary(it->second);
   }
   delete cmDynamicLoaderCache::Instance;
-  cmDynamicLoaderCache::Instance = 0;
+  cmDynamicLoaderCache::Instance = CM_NULLPTR;
 }
 
 cmDynamicLoaderCache* cmDynamicLoaderCache::GetInstance()

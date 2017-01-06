@@ -1,18 +1,18 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2014 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmGlobalVisualStudio14Generator_h
 #define cmGlobalVisualStudio14Generator_h
 
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <string>
+
 #include "cmGlobalVisualStudio12Generator.h"
+
+class cmGlobalGeneratorFactory;
+class cmMakefile;
+class cmake;
 
 /** \class cmGlobalVisualStudio14Generator  */
 class cmGlobalVisualStudio14Generator : public cmGlobalVisualStudio12Generator

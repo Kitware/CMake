@@ -1,27 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddExecutableCommand.h"
 
-// cmExecutableCommand
-cmCommand::ParameterContext cmAddExecutableCommand::GetContextForParameter(
-  const std::vector<std::string>& args, size_t index)
-{
-  (void)args;
-  if (index == 0) {
-    return SingleBinaryTargetParameter;
-  }
-  return SourceFilePropertyParameter;
-}
+#include <sstream>
 
+#include "cmGeneratorExpression.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmStateTypes.h"
+#include "cmTarget.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
+
+// cmExecutableCommand
 bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
                                          cmExecutionStatus&)
 {
@@ -68,7 +61,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
     !cmGlobalGenerator::IsReservedTarget(exename);
 
   if (nameOk && !importTarget && !isAlias) {
-    nameOk = exename.find(":") == std::string::npos;
+    nameOk = exename.find(':') == std::string::npos;
   }
   if (!nameOk) {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
@@ -152,8 +145,8 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
       this->SetError(e.str());
       return false;
     }
-    cmState::TargetType type = aliasedTarget->GetType();
-    if (type != cmState::EXECUTABLE) {
+    cmStateEnums::TargetType type = aliasedTarget->GetType();
+    if (type != cmStateEnums::EXECUTABLE) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename << "\" because target \""
         << aliasedName << "\" is not an "
@@ -184,7 +177,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
     }
 
     // Create the imported target.
-    this->Makefile->AddImportedTarget(exename, cmState::EXECUTABLE,
+    this->Makefile->AddImportedTarget(exename, cmStateEnums::EXECUTABLE,
                                       importGlobal);
     return true;
   }

@@ -1,21 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestBuildCommand_h
 #define cmCTestBuildCommand_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestHandlerCommand.h"
 
-class cmGlobalGenerator;
+#include <string>
+#include <vector>
+
 class cmCTestBuildHandler;
+class cmCTestGenericHandler;
+class cmCommand;
+class cmExecutionStatus;
+class cmGlobalGenerator;
 
 /** \class cmCTestBuild
  * \brief Run a ctest script
@@ -26,12 +25,12 @@ class cmCTestBuildCommand : public cmCTestHandlerCommand
 {
 public:
   cmCTestBuildCommand();
-  ~cmCTestBuildCommand();
+  ~cmCTestBuildCommand() CM_OVERRIDE;
 
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestBuildCommand* ni = new cmCTestBuildCommand;
     ni->CTest = this->CTest;
@@ -42,12 +41,10 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_build"; }
+  std::string GetName() const CM_OVERRIDE { return "ctest_build"; }
 
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
-
-  cmTypeMacro(cmCTestBuildCommand, cmCTestHandlerCommand);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   cmGlobalGenerator* GlobalGenerator;
 
@@ -65,7 +62,7 @@ protected:
     ctb_LAST
   };
 
-  cmCTestGenericHandler* InitializeHandler();
+  cmCTestGenericHandler* InitializeHandler() CM_OVERRIDE;
 };
 
 #endif

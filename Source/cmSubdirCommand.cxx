@@ -1,21 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSubdirCommand.h"
+
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmSubdirCommand
 bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args,
                                   cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
@@ -35,12 +31,10 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args,
 
     // if they specified a relative path then compute the full
     std::string srcPath =
-      std::string(this->Makefile->GetCurrentSourceDirectory()) + "/" +
-      i->c_str();
+      std::string(this->Makefile->GetCurrentSourceDirectory()) + "/" + *i;
     if (cmSystemTools::FileIsDirectory(srcPath)) {
       std::string binPath =
-        std::string(this->Makefile->GetCurrentBinaryDirectory()) + "/" +
-        i->c_str();
+        std::string(this->Makefile->GetCurrentBinaryDirectory()) + "/" + *i;
       this->Makefile->AddSubDirectory(srcPath, binPath, excludeFromAll, false);
     }
     // otherwise it is a full path

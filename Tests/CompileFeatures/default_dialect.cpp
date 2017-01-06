@@ -2,7 +2,11 @@
 template <long l>
 struct Outputter;
 
-#if DEFAULT_CXX14
+#if DEFAULT_CXX17
+#if __cplusplus <= 201402L
+Outputter<__cplusplus> o;
+#endif
+#elif DEFAULT_CXX14
 #if __cplusplus != 201402L
 Outputter<__cplusplus> o;
 #endif

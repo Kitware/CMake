@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2002-2011 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # This module is shared by multiple languages; use include blocker.
 if(__HPUX_COMPILER_HP)
@@ -27,7 +17,7 @@ macro(__hpux_compiler_hp lang)
   set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG_SEP ":")
   set(CMAKE_SHARED_LIBRARY_SONAME_${lang}_FLAG "-Wl,+h")
 
-  set(CMAKE_${lang}_FLAGS_INIT "")
+  string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
 
   set(CMAKE_${lang}_LINK_FLAGS "-Wl,+s,+nodefaultrpath")
 endmacro()

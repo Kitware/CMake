@@ -15,6 +15,10 @@ warn by default:
   policy :policy:`CMP0060`.
 * ``CMAKE_POLICY_WARNING_CMP0065`` controls the warning for
   policy :policy:`CMP0065`.
+* ``CMAKE_POLICY_WARNING_CMP0066`` controls the warning for
+  policy :policy:`CMP0066`.
+* ``CMAKE_POLICY_WARNING_CMP0067`` controls the warning for
+  policy :policy:`CMP0067`.
 
 This variable should not be set by a project in CMake code.  Project
 developers running CMake may set this variable in their cache to

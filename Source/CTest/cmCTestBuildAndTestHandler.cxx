@@ -1,15 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestBuildAndTestHandler.h"
 
 #include "cmCTest.h"
@@ -17,7 +7,9 @@
 #include "cmGlobalGenerator.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+
 #include <cmsys/Process.h>
+#include <stdlib.h>
 
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
 {
@@ -72,7 +64,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     args.push_back(toolset);
   }
 
-  const char* config = 0;
+  const char* config = CM_NULLPTR;
   if (!this->CTest->GetConfigType().empty()) {
     config = this->CTest->GetConfigType().c_str();
   }
@@ -123,14 +115,15 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
   return 0;
 }
 
-void CMakeMessageCallback(const char* m, const char*, bool&, void* s)
+void CMakeMessageCallback(const char* m, const char* /*unused*/,
+                          bool& /*unused*/, void* s)
 {
   std::string* out = (std::string*)s;
   *out += m;
   *out += "\n";
 }
 
-void CMakeProgressCallback(const char* msg, float, void* s)
+void CMakeProgressCallback(const char* msg, float /*unused*/, void* s)
 {
   std::string* out = (std::string*)s;
   *out += msg;
@@ -158,10 +151,10 @@ public:
   }
   ~cmCTestBuildAndTestCaptureRAII()
   {
-    this->CM.SetProgressCallback(0, 0);
-    cmSystemTools::SetStderrCallback(0, 0);
-    cmSystemTools::SetStdoutCallback(0, 0);
-    cmSystemTools::SetMessageCallback(0, 0);
+    this->CM.SetProgressCallback(CM_NULLPTR, CM_NULLPTR);
+    cmSystemTools::SetStderrCallback(CM_NULLPTR, CM_NULLPTR);
+    cmSystemTools::SetStdoutCallback(CM_NULLPTR, CM_NULLPTR);
+    cmSystemTools::SetMessageCallback(CM_NULLPTR, CM_NULLPTR);
   }
 };
 
@@ -247,7 +240,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       }
     }
     std::string output;
-    const char* config = 0;
+    const char* config = CM_NULLPTR;
     if (!this->CTest->GetConfigType().empty()) {
       config = this->CTest->GetConfigType().c_str();
     }
@@ -302,7 +295,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     out << "Could not find path to executable, perhaps it was not built: "
         << this->TestCommand << "\n";
     out << "tried to find it in these places:\n";
-    out << fullPath.c_str() << "\n";
+    out << fullPath << "\n";
     for (unsigned int i = 0; i < failed.size(); ++i) {
       out << failed[i] << "\n";
     }
@@ -321,7 +314,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   for (size_t k = 0; k < this->TestCommandArgs.size(); ++k) {
     testCommand.push_back(this->TestCommandArgs[k].c_str());
   }
-  testCommand.push_back(0);
+  testCommand.push_back(CM_NULLPTR);
   std::string outs;
   int retval = 0;
   // run the test from the this->BuildRunDir if set
@@ -347,8 +340,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     }
   }
 
-  int runTestRes =
-    this->CTest->RunTest(testCommand, &outs, &retval, 0, remainingTime, 0);
+  int runTestRes = this->CTest->RunTest(testCommand, &outs, &retval,
+                                        CM_NULLPTR, remainingTime, CM_NULLPTR);
 
   if (runTestRes != cmsysProcess_State_Exited || retval != 0) {
     out << "Test command failed: " << testCommand[0] << "\n";

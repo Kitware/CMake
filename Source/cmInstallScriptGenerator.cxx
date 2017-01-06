@@ -1,21 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallScriptGenerator.h"
+
+#include "cmScriptGenerator.h"
+
+#include <ostream>
+#include <vector>
 
 cmInstallScriptGenerator::cmInstallScriptGenerator(const char* script,
                                                    bool code,
                                                    const char* component,
                                                    bool exclude_from_all)
-  : cmInstallGenerator(0, std::vector<std::string>(), component,
+  : cmInstallGenerator(CM_NULLPTR, std::vector<std::string>(), component,
                        MessageDefault, exclude_from_all)
   , Script(script)
   , Code(code)

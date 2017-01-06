@@ -1,18 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2015 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFortranParser.h"
-
+#include "cmFortranLexer.h"
 #include "cmSystemTools.h"
+
 #include <assert.h>
+#include <cmConfigure.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <string>
+#include <vector>
 
 bool cmFortranParser_s::FindIncludeFile(const char* dir,
                                         const char* includeName,
@@ -22,28 +20,26 @@ bool cmFortranParser_s::FindIncludeFile(const char* dir,
   if (cmSystemTools::FileIsFullPath(includeName)) {
     fileName = includeName;
     return cmSystemTools::FileExists(fileName.c_str(), true);
-  } else {
-    // Check for the file in the directory containing the including
-    // file.
-    std::string fullName = dir;
+  }
+  // Check for the file in the directory containing the including
+  // file.
+  std::string fullName = dir;
+  fullName += "/";
+  fullName += includeName;
+  if (cmSystemTools::FileExists(fullName.c_str(), true)) {
+    fileName = fullName;
+    return true;
+  }
+
+  // Search the include path for the file.
+  for (std::vector<std::string>::const_iterator i = this->IncludePath.begin();
+       i != this->IncludePath.end(); ++i) {
+    fullName = *i;
     fullName += "/";
     fullName += includeName;
     if (cmSystemTools::FileExists(fullName.c_str(), true)) {
       fileName = fullName;
       return true;
-    }
-
-    // Search the include path for the file.
-    for (std::vector<std::string>::const_iterator i =
-           this->IncludePath.begin();
-         i != this->IncludePath.end(); ++i) {
-      fullName = *i;
-      fullName += "/";
-      fullName += includeName;
-      if (cmSystemTools::FileExists(fullName.c_str(), true)) {
-        fileName = fullName;
-        return true;
-      }
     }
   }
   return false;
@@ -56,7 +52,7 @@ cmFortranParser_s::cmFortranParser_s(std::vector<std::string> const& includes,
   , PPDefinitions(defines)
   , Info(info)
 {
-  this->InInterface = 0;
+  this->InInterface = false;
   this->InPPFalseBranch = 0;
 
   // Initialize the lexical scanner.
@@ -65,7 +61,8 @@ cmFortranParser_s::cmFortranParser_s(std::vector<std::string> const& includes,
 
   // Create a dummy buffer that is never read but is the fallback
   // buffer when the last file is popped off the stack.
-  YY_BUFFER_STATE buffer = cmFortran_yy_create_buffer(0, 4, this->Scanner);
+  YY_BUFFER_STATE buffer =
+    cmFortran_yy_create_buffer(CM_NULLPTR, 4, this->Scanner);
   cmFortran_yy_switch_to_buffer(buffer, this->Scanner);
 }
 
@@ -83,13 +80,12 @@ bool cmFortranParser_FilePush(cmFortranParser* parser, const char* fname)
     std::string dir = cmSystemTools::GetParentDirectory(fname);
     cmFortranFile f(file, current, dir);
     YY_BUFFER_STATE buffer =
-      cmFortran_yy_create_buffer(0, 16384, parser->Scanner);
+      cmFortran_yy_create_buffer(CM_NULLPTR, 16384, parser->Scanner);
     cmFortran_yy_switch_to_buffer(buffer, parser->Scanner);
     parser->FileStack.push(f);
-    return 1;
-  } else {
-    return 0;
+    return true;
   }
+  return false;
 }
 
 bool cmFortranParser_FilePop(cmFortranParser* parser)
@@ -97,16 +93,15 @@ bool cmFortranParser_FilePop(cmFortranParser* parser)
   // Pop one file off the stack and close it.  Switch the lexer back
   // to the next one on the stack.
   if (parser->FileStack.empty()) {
-    return 0;
-  } else {
-    cmFortranFile f = parser->FileStack.top();
-    parser->FileStack.pop();
-    fclose(f.File);
-    YY_BUFFER_STATE current = cmFortranLexer_GetCurrentBuffer(parser->Scanner);
-    cmFortran_yy_delete_buffer(current, parser->Scanner);
-    cmFortran_yy_switch_to_buffer(f.Buffer, parser->Scanner);
-    return 1;
+    return false;
   }
+  cmFortranFile f = parser->FileStack.top();
+  parser->FileStack.pop();
+  fclose(f.File);
+  YY_BUFFER_STATE current = cmFortranLexer_GetCurrentBuffer(parser->Scanner);
+  cmFortran_yy_delete_buffer(current, parser->Scanner);
+  cmFortran_yy_switch_to_buffer(f.Buffer, parser->Scanner);
+  return true;
 }
 
 int cmFortranParser_Input(cmFortranParser* parser, char* buffer,
@@ -115,8 +110,19 @@ int cmFortranParser_Input(cmFortranParser* parser, char* buffer,
   // Read from the file on top of the stack.  If the stack is empty,
   // the end of the translation unit has been reached.
   if (!parser->FileStack.empty()) {
-    FILE* file = parser->FileStack.top().File;
-    return (int)fread(buffer, 1, bufferSize, file);
+    cmFortranFile& ff = parser->FileStack.top();
+    FILE* file = ff.File;
+    size_t n = fread(buffer, 1, bufferSize, file);
+    if (n > 0) {
+      ff.LastCharWasNewline = buffer[n - 1] == '\n';
+    } else if (!ff.LastCharWasNewline) {
+      // The file ended without a newline.  Inject one so
+      // that the file always ends in an end-of-statement.
+      buffer[0] = '\n';
+      n = 1;
+      ff.LastCharWasNewline = true;
+    }
+    return (int)n;
   }
   return 0;
 }
@@ -160,11 +166,9 @@ int cmFortranParser_GetOldStartcond(cmFortranParser* parser)
   return parser->OldStartcond;
 }
 
-void cmFortranParser_Error(cmFortranParser*, const char*)
+void cmFortranParser_Error(cmFortranParser* parser, const char* msg)
 {
-  // If there is a parser error just ignore it.  The source will not
-  // compile and the user will edit it.  Then dependencies will have
-  // to be regenerated anyway.
+  parser->Error = msg ? msg : "unknown error";
 }
 
 void cmFortranParser_RuleUse(cmFortranParser* parser, const char* name)

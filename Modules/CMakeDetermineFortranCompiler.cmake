@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2004-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # determine the compiler to use for Fortran programs
 # NOTE, a generator may set CMAKE_Fortran_COMPILER before
@@ -141,10 +131,10 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   set(_version_info "")
   foreach(m MAJOR MINOR PATCH TWEAK)
     set(_COMP "_${m}")
-    set(_version_info "${_version_info}
+    string(APPEND _version_info "
 #if defined(COMPILER_VERSION${_COMP})")
     foreach(d 1 2 3 4 5 6 7 8)
-      set(_version_info "${_version_info}
+      string(APPEND _version_info "
 # undef DEC
 # undef HEX
 # define DEC(n) DEC_${d}(n)
@@ -172,7 +162,7 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
 # endif
 ")
     endforeach()
-    set(_version_info "${_version_info}
+    string(APPEND _version_info "
 #endif")
   endforeach()
   set(CMAKE_Fortran_COMPILER_ID_VERSION_INFO "${_version_info}")

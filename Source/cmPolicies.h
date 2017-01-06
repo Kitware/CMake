@@ -1,23 +1,14 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmPolicies_h
 #define cmPolicies_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <bitset>
+#include <string>
 
 class cmMakefile;
-class cmPolicy;
 
 #define CM_FOR_EACH_POLICY_TABLE(POLICY, SELECT)                              \
   SELECT(POLICY, CMP0000,                                                     \
@@ -203,7 +194,13 @@ class cmPolicy;
   SELECT(POLICY, CMP0065,                                                     \
          "Do not add flags to export symbols from executables without "       \
          "the ENABLE_EXPORTS target property.",                               \
-         3, 4, 0, cmPolicies::WARN)
+         3, 4, 0, cmPolicies::WARN)                                           \
+  SELECT(POLICY, CMP0066,                                                     \
+         "Honor per-config flags in try_compile() source-file signature.", 3, \
+         7, 0, cmPolicies::WARN)                                              \
+  SELECT(POLICY, CMP0067,                                                     \
+         "Honor language standard in try_compile() source-file signature.",   \
+         3, 8, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

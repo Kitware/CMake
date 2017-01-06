@@ -50,7 +50,7 @@ else ()
 endif ()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+  string(APPEND CMAKE_CXX_FLAGS " -O3")
   unset(CSE_RESULT_O3 CACHE)
   message(STATUS "Testing with optimization -O3")
 

@@ -1342,7 +1342,7 @@ parse_line(struct archive_read *a, struct archive_entry *entry,
 /* strsep() is not in C90, but strcspn() is. */
 /* Taken from http://unixpapa.com/incnote/string.html */
 static char *
-la_strsep(char **sp, char *sep)
+la_strsep(char **sp, const char *sep)
 {
 	char *p, *s;
 	if (sp == NULL || *sp == NULL || **sp == '\0')
@@ -1385,12 +1385,12 @@ parse_device(dev_t *pdev, struct archive *a, char *val)
 				    "Missing number");
 				return ARCHIVE_WARN;
 			}
-			numbers[argc++] = (unsigned long)mtree_atol(&p);
-			if (argc > MAX_PACK_ARGS) {
+			if (argc >= MAX_PACK_ARGS) {
 				archive_set_error(a, ARCHIVE_ERRNO_FILE_FORMAT,
 				    "Too many arguments");
 				return ARCHIVE_WARN;
 			}
+			numbers[argc++] = (unsigned long)mtree_atol(&p);
 		}
 		if (argc < 2) {
 			archive_set_error(a, ARCHIVE_ERRNO_FILE_FORMAT,

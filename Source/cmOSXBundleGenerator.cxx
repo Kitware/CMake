@@ -1,21 +1,18 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2012 Nicolas Despres <nicolas.despres@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOSXBundleGenerator.h"
 
+#include <cmConfigure.h>
+
+#include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmSystemTools.h"
 #include "cmTarget.h"
 
 #include <cassert>
+
+class cmSourceFile;
 
 cmOSXBundleGenerator::cmOSXBundleGenerator(cmGeneratorTarget* target,
                                            const std::string& configName)
@@ -23,10 +20,11 @@ cmOSXBundleGenerator::cmOSXBundleGenerator(cmGeneratorTarget* target,
   , Makefile(target->Target->GetMakefile())
   , LocalGenerator(target->GetLocalGenerator())
   , ConfigName(configName)
-  , MacContentFolders(0)
+  , MacContentFolders(CM_NULLPTR)
 {
-  if (this->MustSkip())
+  if (this->MustSkip()) {
     return;
+  }
 }
 
 bool cmOSXBundleGenerator::MustSkip()
@@ -37,8 +35,9 @@ bool cmOSXBundleGenerator::MustSkip()
 void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
                                            std::string& outpath)
 {
-  if (this->MustSkip())
+  if (this->MustSkip()) {
     return;
+  }
 
   // Compute bundle directory names.
   std::string out = outpath;
@@ -64,8 +63,9 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
 void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
                                            const std::string& outpath)
 {
-  if (this->MustSkip())
+  if (this->MustSkip()) {
     return;
+  }
 
   assert(this->MacContentFolders);
 
@@ -92,8 +92,9 @@ void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
                                                    plist.c_str());
 
   // Generate Versions directory only for MacOSX frameworks
-  if (this->Makefile->PlatformIsAppleIos())
+  if (this->Makefile->PlatformIsAppleIos()) {
     return;
+  }
 
   // TODO: Use the cmMakefileTargetGenerator::ExtraFiles vector to
   // drive rules to create these files at build time.
@@ -162,8 +163,9 @@ void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
 void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
                                           const std::string& root)
 {
-  if (this->MustSkip())
+  if (this->MustSkip()) {
     return;
+  }
 
   // Compute bundle directory names.
   std::string out = root;
@@ -186,8 +188,9 @@ void cmOSXBundleGenerator::GenerateMacOSXContentStatements(
   std::vector<cmSourceFile const*> const& sources,
   MacOSXContentGeneratorType* generator)
 {
-  if (this->MustSkip())
+  if (this->MustSkip()) {
     return;
+  }
 
   for (std::vector<cmSourceFile const*>::const_iterator si = sources.begin();
        si != sources.end(); ++si) {

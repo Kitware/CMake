@@ -50,7 +50,6 @@ set_source_files_properties(
 set_target_properties(CFBundleTest PROPERTIES
     BUNDLE 1
     BUNDLE_EXTENSION plugin
-    XCODE_ATTRIBUTE_WRAPPER_EXTENSION plugin  #sets the extension to .plugin
     XCODE_ATTRIBUTE_MACH_O_TYPE mh_bundle
     XCODE_ATTRIBUTE_INFOPLIST_FILE ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/Info.plist

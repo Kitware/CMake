@@ -43,7 +43,7 @@ endif()
 #
 set(SharedLibrarySources sharedFile)
 add_library(CMakeTestLibraryShared SHARED ${SharedLibrarySources})
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
+string(APPEND CMAKE_C_FLAGS " -DTEST_C_FLAGS")
 add_library(CMakeTestCLibraryShared SHARED testConly.c)
 define_property(
   TARGET PROPERTY FOO

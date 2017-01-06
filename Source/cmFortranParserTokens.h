@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -69,12 +69,20 @@ extern int cmFortran_yydebug;
     F90PPR_ELIF = 279,
     F90PPR_ENDIF = 280,
     COMMA = 281,
-    DCOLON = 282,
-    CPP_TOENDL = 283,
-    UNTERMINATED_STRING = 284,
-    STRING = 285,
-    WORD = 286,
-    CPP_INCLUDE_ANGLE = 287
+    COLON = 282,
+    DCOLON = 283,
+    LPAREN = 284,
+    RPAREN = 285,
+    UNTERMINATED_STRING = 286,
+    STRING = 287,
+    WORD = 288,
+    CPP_INCLUDE_ANGLE = 289,
+    END = 290,
+    INCLUDE = 291,
+    INTERFACE = 292,
+    MODULE = 293,
+    SUBMODULE = 294,
+    USE = 295
   };
 #endif
 /* Tokens.  */
@@ -102,24 +110,34 @@ extern int cmFortran_yydebug;
 #define F90PPR_ELIF 279
 #define F90PPR_ENDIF 280
 #define COMMA 281
-#define DCOLON 282
-#define CPP_TOENDL 283
-#define UNTERMINATED_STRING 284
-#define STRING 285
-#define WORD 286
-#define CPP_INCLUDE_ANGLE 287
+#define COLON 282
+#define DCOLON 283
+#define LPAREN 284
+#define RPAREN 285
+#define UNTERMINATED_STRING 286
+#define STRING 287
+#define WORD 288
+#define CPP_INCLUDE_ANGLE 289
+#define END 290
+#define INCLUDE 291
+#define INTERFACE 292
+#define MODULE 293
+#define SUBMODULE 294
+#define USE 295
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE YYSTYPE;
+
 union YYSTYPE
 {
-#line 81 "cmFortranParser.y" /* yacc.c:1909  */
+#line 75 "cmFortranParser.y" /* yacc.c:1909  */
 
   char* string;
 
-#line 122 "cmFortranParserTokens.h" /* yacc.c:1909  */
+#line 138 "cmFortranParserTokens.h" /* yacc.c:1909  */
 };
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

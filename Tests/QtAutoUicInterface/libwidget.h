@@ -16,9 +16,10 @@ class LibWidget : public QWidget
   Q_OBJECT
 public:
   explicit LibWidget(QWidget* parent = 0);
+  ~LibWidget();
 
 private:
-  const std::auto_ptr<Ui::LibWidget> ui;
+  Ui::LibWidget* ui;
 };
 
 #endif

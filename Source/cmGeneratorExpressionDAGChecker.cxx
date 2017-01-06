@@ -1,19 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2012 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionDAGChecker.h"
 
 #include "cmAlgorithms.h"
+#include "cmGeneratorExpressionContext.h"
+#include "cmGeneratorExpressionEvaluator.h"
+#include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
+#include "cmake.h"
+
+#include <sstream>
+#include <string.h>
+#include <utility>
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   const cmListFileBacktrace& backtrace, const std::string& target,
@@ -55,8 +53,9 @@ void cmGeneratorExpressionDAGChecker::Initialize()
 
 #define TEST_TRANSITIVE_PROPERTY_METHOD(METHOD) top->METHOD() ||
 
-  if (CheckResult == DAG && (CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
-                              TEST_TRANSITIVE_PROPERTY_METHOD) false))
+  if (CheckResult == DAG &&
+      (CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
+        TEST_TRANSITIVE_PROPERTY_METHOD) false)) // NOLINT(clang-tidy)
 #undef TEST_TRANSITIVE_PROPERTY_METHOD
   {
     std::map<std::string, std::set<std::string> >::const_iterator it =
@@ -198,7 +197,7 @@ enum TransitiveProperty
 };
 
 template <TransitiveProperty>
-bool additionalTest(const char* const)
+bool additionalTest(const char* const /*unused*/)
 {
   return false;
 }

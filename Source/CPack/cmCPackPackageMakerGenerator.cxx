@@ -1,29 +1,21 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackPackageMakerGenerator.h"
+
+#include <assert.h>
+#include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
-
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/SystemTools.hxx>
-
-#include <assert.h>
+#include "cmXMLWriter.h"
 
 static inline unsigned int getVersion(unsigned int major, unsigned int minor)
 {
@@ -101,7 +93,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       if (!cmsys::SystemTools::MakeDirectory(preflightDirName.c_str())) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Problem creating installer directory: "
-                        << preflightDirName.c_str() << std::endl);
+                        << preflightDirName << std::endl);
         return 0;
       }
     }
@@ -109,7 +101,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       if (!cmsys::SystemTools::MakeDirectory(postflightDirName.c_str())) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Problem creating installer directory: "
-                        << postflightDirName.c_str() << std::endl);
+                        << postflightDirName << std::endl);
         return 0;
       }
     }
@@ -117,13 +109,13 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     // then copy them into the resource directory and make
     // them executable
     if (preflight) {
-      this->CopyInstallScript(resDir.c_str(), preflight, "preflight");
+      this->CopyInstallScript(resDir, preflight, "preflight");
     }
     if (postflight) {
-      this->CopyInstallScript(resDir.c_str(), postflight, "postflight");
+      this->CopyInstallScript(resDir, postflight, "postflight");
     }
     if (postupgrade) {
-      this->CopyInstallScript(resDir.c_str(), postupgrade, "postupgrade");
+      this->CopyInstallScript(resDir, postupgrade, "postupgrade");
     }
   } else if (postflight) {
     // create a postflight component to house the script
@@ -137,7 +129,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     if (!cmsys::SystemTools::MakeDirectory(packageDir.c_str())) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Problem creating component packages directory: "
-                      << packageDir.c_str() << std::endl);
+                      << packageDir << std::endl);
       return 0;
     }
 
@@ -147,7 +139,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
         "Problem creating component PostFlight Packages directory: "
-          << packageFileDir.c_str() << std::endl);
+          << packageFileDir << std::endl);
       return 0;
     }
     std::string packageFile =
@@ -159,7 +151,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
 
     // copy postflight script into resource directory of .pkg
     std::string resourceDir = packageFile + "/Contents/Resources";
-    this->CopyInstallScript(resourceDir.c_str(), postflight, "postflight");
+    this->CopyInstallScript(resourceDir, postflight, "postflight");
   }
 
   if (!this->Components.empty()) {
@@ -169,7 +161,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     if (!cmsys::SystemTools::MakeDirectory(basePackageDir.c_str())) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Problem creating component packages directory: "
-                      << basePackageDir.c_str() << std::endl);
+                      << basePackageDir << std::endl);
       return 0;
     }
 
@@ -253,9 +245,9 @@ int cmCPackPackageMakerGenerator::PackageFiles()
   this->SetOption("CPACK_MODULE_VERSION_SUFFIX", "");
 
   // Copy or create all of the resource files we need.
-  if (!this->CopyCreateResourceFile("License", resDir.c_str()) ||
-      !this->CopyCreateResourceFile("ReadMe", resDir.c_str()) ||
-      !this->CopyCreateResourceFile("Welcome", resDir.c_str()) ||
+  if (!this->CopyCreateResourceFile("License", resDir) ||
+      !this->CopyCreateResourceFile("ReadMe", resDir) ||
+      !this->CopyCreateResourceFile("Welcome", resDir) ||
       !this->CopyResourcePlistFile("Info.plist") ||
       !this->CopyResourcePlistFile("Description.plist")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the resource files"
@@ -314,12 +306,12 @@ int cmCPackPackageMakerGenerator::PackageFiles()
   }
   if (!res || retVal) {
     cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Run command: " << dmgCmd.str().c_str() << std::endl
+    ofs << "# Run command: " << dmgCmd.str() << std::endl
         << "# Output:" << std::endl
-        << output.c_str() << std::endl;
+        << output << std::endl;
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running hdiutil command: "
-                    << dmgCmd.str().c_str() << std::endl
-                    << "Please check " << tmpFile.c_str() << " for errors"
+                    << dmgCmd.str() << std::endl
+                    << "Please check " << tmpFile << " for errors"
                     << std::endl);
     return 0;
   }
@@ -371,7 +363,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   }
 
   // Get path to the real PackageMaker, not a symlink:
-  pkgPath = cmSystemTools::GetRealPath(pkgPath.c_str());
+  pkgPath = cmSystemTools::GetRealPath(pkgPath);
   // Up from there to find the version.plist file in the "Contents" dir:
   std::string contents_dir;
   contents_dir = cmSystemTools::GetFilenamePath(pkgPath);
@@ -382,7 +374,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   if (!cmSystemTools::FileExists(versionFile.c_str())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot find PackageMaker compiler version file: "
-                    << versionFile.c_str() << std::endl);
+                    << versionFile << std::endl);
     return 0;
   }
 
@@ -416,7 +408,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   if (!cmSystemTools::GetLineFromStream(ifs, line) || !rexVersion.find(line)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Problem reading the PackageMaker compiler version file: "
-                    << versionFile.c_str() << std::endl);
+                    << versionFile << std::endl);
     return 0;
   }
   this->PackageMakerVersion = atof(rexVersion.match(1).c_str());
@@ -481,11 +473,11 @@ bool cmCPackPackageMakerGenerator::RunPackageMaker(const char* command,
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Run command: " << command << std::endl
         << "# Output:" << std::endl
-        << output.c_str() << std::endl;
+        << output << std::endl;
     cmCPackLogger(
       cmCPackLog::LOG_ERROR, "Problem running PackageMaker command: "
         << command << std::endl
-        << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
+        << "Please check " << tmpFile << " for errors" << std::endl);
     return false;
   }
   // sometimes the command finishes but the directory is not yet
@@ -523,21 +515,22 @@ bool cmCPackPackageMakerGenerator::GenerateComponentPackage(
     std::string descriptionFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     descriptionFile += '/' + component.Name + "-Description.plist";
     cmsys::ofstream out(descriptionFile.c_str());
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl
-        << "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\""
-        << "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << std::endl
-        << "<plist version=\"1.4\">" << std::endl
-        << "<dict>" << std::endl
-        << "  <key>IFPkgDescriptionTitle</key>" << std::endl
-        << "  <string>" << component.DisplayName << "</string>" << std::endl
-        << "  <key>IFPkgDescriptionVersion</key>" << std::endl
-        << "  <string>" << this->GetOption("CPACK_PACKAGE_VERSION")
-        << "</string>" << std::endl
-        << "  <key>IFPkgDescriptionDescription</key>" << std::endl
-        << "  <string>" + this->EscapeForXML(component.Description)
-        << "</string>" << std::endl
-        << "</dict>" << std::endl
-        << "</plist>" << std::endl;
+    cmXMLWriter xout(out);
+    xout.StartDocument();
+    xout.Doctype("plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\""
+                 "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"");
+    xout.StartElement("plist");
+    xout.Attribute("version", "1.4");
+    xout.StartElement("dict");
+    xout.Element("key", "IFPkgDescriptionTitle");
+    xout.Element("string", component.DisplayName);
+    xout.Element("key", "IFPkgDescriptionVersion");
+    xout.Element("string", this->GetOption("CPACK_PACKAGE_VERSION"));
+    xout.Element("key", "IFPkgDescriptionDescription");
+    xout.Element("string", component.Description);
+    xout.EndElement(); // dict
+    xout.EndElement(); // plist
+    xout.EndDocument();
     out.close();
 
     // Create the Info.plist file for this component

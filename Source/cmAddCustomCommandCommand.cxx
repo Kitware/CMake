@@ -1,19 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddCustomCommandCommand.h"
 
-#include "cmTarget.h"
+#include <sstream>
 
+#include "cmCustomCommand.h"
+#include "cmCustomCommandLines.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
 #include "cmSourceFile.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmAddCustomCommandCommand
 bool cmAddCustomCommandCommand::InitialPass(
@@ -28,9 +29,9 @@ bool cmAddCustomCommandCommand::InitialPass(
     return false;
   }
 
-  std::string source, target, main_dependency, working;
+  std::string source, target, main_dependency, working, depfile;
   std::string comment_buffer;
-  const char* comment = 0;
+  const char* comment = CM_NULLPTR;
   std::vector<std::string> depends, outputs, output, byproducts;
   bool verbatim = false;
   bool append = false;
@@ -60,6 +61,7 @@ bool cmAddCustomCommandCommand::InitialPass(
     doing_byproducts,
     doing_comment,
     doing_working_directory,
+    doing_depfile,
     doing_nothing
   };
 
@@ -110,6 +112,13 @@ bool cmAddCustomCommandCommand::InitialPass(
       doing = doing_implicit_depends_lang;
     } else if (copy == "COMMENT") {
       doing = doing_comment;
+    } else if (copy == "DEPFILE") {
+      doing = doing_depfile;
+      if (this->Makefile->GetGlobalGenerator()->GetName() != "Ninja") {
+        this->SetError("Option DEPFILE not supported by " +
+                       this->Makefile->GetGlobalGenerator()->GetName());
+        return false;
+      }
     } else {
       std::string filename;
       switch (doing) {
@@ -147,6 +156,9 @@ bool cmAddCustomCommandCommand::InitialPass(
         filename = cmSystemTools::CollapseFullPath(filename);
       }
       switch (doing) {
+        case doing_depfile:
+          depfile = copy;
+          break;
         case doing_working_directory:
           working = copy;
           break;
@@ -250,8 +262,8 @@ bool cmAddCustomCommandCommand::InitialPass(
 
     // No command for this output exists.
     std::ostringstream e;
-    e << "given APPEND option with output \"" << output[0]
-      << "\" which is not already a custom command output.";
+    e << "given APPEND option with output\n\"" << output[0]
+      << "\"\nwhich is not already a custom command output.";
     this->SetError(e.str());
     return false;
   }
@@ -269,12 +281,12 @@ bool cmAddCustomCommandCommand::InitialPass(
     std::vector<std::string> no_depends;
     this->Makefile->AddCustomCommandToTarget(
       target, byproducts, no_depends, commandLines, cctype, comment,
-      working.c_str(), escapeOldStyle, uses_terminal);
+      working.c_str(), escapeOldStyle, uses_terminal, depfile);
   } else if (target.empty()) {
     // Target is empty, use the output.
     this->Makefile->AddCustomCommandToOutput(
       output, byproducts, depends, main_dependency, commandLines, comment,
-      working.c_str(), false, escapeOldStyle, uses_terminal);
+      working.c_str(), false, escapeOldStyle, uses_terminal, depfile);
 
     // Add implicit dependency scanning requests if any were given.
     if (!implicit_depends.empty()) {

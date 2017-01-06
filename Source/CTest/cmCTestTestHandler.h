@@ -1,22 +1,22 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestTestHandler_h
 #define cmCTestTestHandler_h
+
+#include <cmConfigure.h>
 
 #include "cmCTestGenericHandler.h"
 
 #include <cmsys/RegularExpression.hxx>
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <stddef.h>
+#include <string>
+#include <utility>
+#include <vector>
 
+class cmCTest;
 class cmMakefile;
 class cmXMLWriter;
 
@@ -31,12 +31,12 @@ class cmCTestTestHandler : public cmCTestGenericHandler
   friend class cmCTestBatchTestHandler;
 
 public:
-  cmTypeMacro(cmCTestTestHandler, cmCTestGenericHandler);
+  typedef cmCTestGenericHandler Superclass;
 
   /**
    * The main entry point for this class
    */
-  int ProcessHandler();
+  int ProcessHandler() CM_OVERRIDE;
 
   /**
    * When both -R and -I are used should te resulting test list be the
@@ -54,7 +54,7 @@ public:
   /**
    * This method is called when reading CTest custom file
    */
-  void PopulateCustomVectors(cmMakefile* mf);
+  void PopulateCustomVectors(cmMakefile* mf) CM_OVERRIDE;
 
   ///! Control the use of the regular expresisons, call these methods to turn
   /// them on
@@ -90,7 +90,7 @@ public:
    */
   bool SetTestsProperties(const std::vector<std::string>& args);
 
-  void Initialize();
+  void Initialize() CM_OVERRIDE;
 
   // NOTE: This struct is Saved/Restored
   // in cmCTestTestHandler, if you add to this class
@@ -128,6 +128,10 @@ public:
     std::vector<std::string> Environment;
     std::vector<std::string> Labels;
     std::set<std::string> LockedResources;
+    std::set<std::string> FixturesSetup;
+    std::set<std::string> FixturesCleanup;
+    std::set<std::string> FixturesRequired;
+    std::set<std::string> RequireSuccessDepends;
   };
 
   struct cmCTestTestResult
@@ -239,6 +243,11 @@ private:
   // compute the lists of tests that will actually run
   // based on LastTestFailed.log
   void ComputeTestListForRerunFailed();
+
+  // add required setup/cleanup tests not already in the
+  // list of tests to be run and update dependencies between
+  // tests to account for fixture setup/cleanup
+  void UpdateForFixtures(ListOfTests& tests) const;
 
   void UpdateMaxTestNameWidth();
 

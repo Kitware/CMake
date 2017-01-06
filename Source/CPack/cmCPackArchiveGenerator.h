@@ -1,21 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCPackArchiveGenerator_h
 #define cmCPackArchiveGenerator_h
 
-#include "cmCPackGenerator.h"
+#include <cmConfigure.h>
 
 #include "cmArchiveWrite.h"
+#include "cmCPackGenerator.h"
+
+#include <iosfwd>
+#include <string>
+
+class cmCPackComponent;
 
 /** \class cmCPackArchiveGenerator
  * \brief A generator base for libarchive generation.
@@ -26,20 +22,20 @@
 class cmCPackArchiveGenerator : public cmCPackGenerator
 {
 public:
-  cmTypeMacro(cmCPackArchiveGenerator, cmCPackGenerator);
+  typedef cmCPackGenerator Superclass;
 
   /**
    * Construct generator
    */
   cmCPackArchiveGenerator(cmArchiveWrite::Compress, std::string const& format);
-  virtual ~cmCPackArchiveGenerator();
+  ~cmCPackArchiveGenerator() CM_OVERRIDE;
   // Used to add a header to the archive
   virtual int GenerateHeader(std::ostream* os);
   // component support
-  virtual bool SupportsComponentInstallation() const;
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
 
 protected:
-  virtual int InitializeInternal();
+  int InitializeInternal() CM_OVERRIDE;
   /**
    * Add the files belonging to the specified component
    * to the provided (already opened) archive.
@@ -55,7 +51,7 @@ protected:
    * method will call either PackageComponents or
    * PackageComponentsAllInOne.
    */
-  int PackageFiles();
+  int PackageFiles() CM_OVERRIDE;
   /**
    * The method used to package files when component
    * install is used. This will create one
@@ -67,7 +63,7 @@ protected:
    * components will be put in a single installer.
    */
   int PackageComponentsAllInOne();
-  virtual const char* GetOutputExtension() = 0;
+  const char* GetOutputExtension() CM_OVERRIDE = 0;
   cmArchiveWrite::Compress Compress;
   std::string ArchiveFormat;
 };

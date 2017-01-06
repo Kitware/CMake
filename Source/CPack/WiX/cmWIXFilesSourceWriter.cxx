@@ -1,28 +1,22 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2014-2015 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXFilesSourceWriter.h"
 
 #include "cmWIXAccessControlList.h"
 
 #include <cmInstalledFile.h>
 
+#include <cmSystemTools.h>
+#include <cmUuid.h>
+
 #include <sys/types.h>
 // include sys/stat.h after sys/types.h
 #include <sys/stat.h>
 
 cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(cmCPackLog* logger,
-                                               std::string const& filename)
-  : cmWIXSourceWriter(logger, filename)
+                                               std::string const& filename,
+                                               GuidType componentGuidType)
+  : cmWIXSourceWriter(logger, filename, componentGuidType)
 {
 }
 
@@ -31,7 +25,7 @@ void cmWIXFilesSourceWriter::EmitShortcut(std::string const& id,
                                           std::string const& shortcutPrefix,
                                           size_t shortcutIndex)
 {
-  std::stringstream shortcutId;
+  std::ostringstream shortcutId;
   shortcutId << shortcutPrefix << id;
 
   if (shortcutIndex > 0) {
@@ -126,12 +120,14 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
   std::string componentId = std::string("CM_C") + id;
   std::string fileId = std::string("CM_F") + id;
 
+  std::string guid = CreateGuidFromComponentId(componentId);
+
   BeginElement("DirectoryRef");
   AddAttribute("Id", directoryId);
 
   BeginElement("Component");
   AddAttribute("Id", componentId);
-  AddAttribute("Guid", "*");
+  AddAttribute("Guid", guid);
 
   if (installedFile) {
     if (installedFile->GetPropertyAsBool("CPACK_NEVER_OVERWRITE")) {

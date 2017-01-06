@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindSDL
 # -------
@@ -68,20 +71,6 @@
 # "SDL.h", not <SDL/SDL.h>.  This is done for portability reasons
 # because not all systems place things in SDL/ (see FreeBSD).
 
-#=============================================================================
-# Copyright 2003-2009 Kitware, Inc.
-# Copyright 2012 Benjamin Eikel
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 find_path(SDL_INCLUDE_DIR SDL.h
   HINTS
     ENV SDLDIR
@@ -104,6 +93,11 @@ find_library(SDL_LIBRARY_TEMP
     ENV SDLDIR
   PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
 )
+
+# Hide this cache variable from the user, it's an internal implementation
+# detail. The documented library variable for the user is SDL_LIBRARY
+# which is derived from SDL_LIBRARY_TEMP further below.
+set_property(CACHE SDL_LIBRARY_TEMP PROPERTY TYPE INTERNAL)
 
 if(NOT SDL_BUILDING_LIBRARY)
   if(NOT SDL_INCLUDE_DIR MATCHES ".framework")
@@ -133,11 +127,10 @@ if(NOT APPLE)
   find_package(Threads)
 endif()
 
-# MinGW needs an additional library, mwindows
-# It's total link flags should look like -lmingw32 -lSDLmain -lSDL -lmwindows
-# (Actually on second look, I think it only needs one of the m* libraries.)
+# MinGW needs an additional link flag, -mwindows
+# It's total link flags should look like -lmingw32 -lSDLmain -lSDL -mwindows
 if(MINGW)
-  set(MINGW32_LIBRARY mingw32 CACHE STRING "mwindows for MinGW")
+  set(MINGW32_LIBRARY mingw32 "-mwindows" CACHE STRING "link flags for MinGW")
 endif()
 
 if(SDL_LIBRARY_TEMP)
@@ -174,8 +167,6 @@ if(SDL_LIBRARY_TEMP)
 
   # Set the final string here so the GUI reflects the final state.
   set(SDL_LIBRARY ${SDL_LIBRARY_TEMP} CACHE STRING "Where the SDL Library can be found")
-  # Set the temp variable to INTERNAL so it is not seen in the CMake GUI
-  set(SDL_LIBRARY_TEMP "${SDL_LIBRARY_TEMP}" CACHE INTERNAL "")
 endif()
 
 if(SDL_INCLUDE_DIR AND EXISTS "${SDL_INCLUDE_DIR}/SDL_version.h")

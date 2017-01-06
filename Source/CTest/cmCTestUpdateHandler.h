@@ -1,21 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestUpdateHandler_h
 #define cmCTestUpdateHandler_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestGenericHandler.h"
 
-#include "cmListFileCache.h"
+#include <string>
+#include <utility>
+#include <vector>
 
 /** \class cmCTestUpdateHandler
  * \brief A class that handles ctest -S invocations
@@ -24,12 +18,12 @@
 class cmCTestUpdateHandler : public cmCTestGenericHandler
 {
 public:
-  cmTypeMacro(cmCTestUpdateHandler, cmCTestGenericHandler);
+  typedef cmCTestGenericHandler Superclass;
 
   /*
    * The main entry point for this class
    */
-  int ProcessHandler();
+  int ProcessHandler() CM_OVERRIDE;
 
   cmCTestUpdateHandler();
 
@@ -48,7 +42,7 @@ public:
   /**
    * Initialize handler
    */
-  virtual void Initialize();
+  void Initialize() CM_OVERRIDE;
 
 private:
   // Some structures needed for update

@@ -188,10 +188,8 @@
 #      files.
 #
 #
-#
 #   CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS( output_file_var cuda_target
 #                                            nvcc_flags object_files)
-#
 #   -- Generates the link object required by separable compilation from the given
 #      object files.  This is called automatically for CUDA_ADD_EXECUTABLE and
 #      CUDA_ADD_LIBRARY, but can be called manually when using CUDA_WRAP_SRCS
@@ -200,6 +198,24 @@
 #      argument.  The only nvcc flag added automatically is the bitness flag as
 #      specified by CUDA_64_BIT_DEVICE_CODE.  Note that this is a function
 #      instead of a macro.
+#
+#   CUDA_SELECT_NVCC_ARCH_FLAGS(out_variable [target_CUDA_architectures])
+#   -- Selects GPU arch flags for nvcc based on target_CUDA_architectures
+#      target_CUDA_architectures : Auto | Common | All | LIST(ARCH_AND_PTX ...)
+#       - "Auto" detects local machine GPU compute arch at runtime.
+#       - "Common" and "All" cover common and entire subsets of architectures
+#      ARCH_AND_PTX : NAME | NUM.NUM | NUM.NUM(NUM.NUM) | NUM.NUM+PTX
+#      NAME: Fermi Kepler Maxwell Kepler+Tegra Kepler+Tesla Maxwell+Tegra Pascal
+#      NUM: Any number. Only those pairs are currently accepted by NVCC though:
+#            2.0 2.1 3.0 3.2 3.5 3.7 5.0 5.2 5.3 6.0 6.2
+#      Returns LIST of flags to be added to CUDA_NVCC_FLAGS in ${out_variable}
+#      Additionally, sets ${out_variable}_readable to the resulting numeric list
+#      Example:
+#       CUDA_SELECT_NVCC_ARCH_FLAGS(ARCH_FLAGS 3.0 3.5+PTX 5.2(5.0) Maxwell)
+#        LIST(APPEND CUDA_NVCC_FLAGS ${ARCH_FLAGS})
+#
+#      More info on CUDA architectures: https://en.wikipedia.org/wiki/CUDA
+#      Note that this is a function instead of a macro.
 #
 #   CUDA_WRAP_SRCS ( cuda_target format generated_files file0 file1 ...
 #                    [STATIC | SHARED | MODULE] [OPTIONS ...] )
@@ -283,10 +299,12 @@
 #                            implementation (alternative to:
 #                            CUDA_ADD_CUFFT_TO_TARGET macro)
 #   CUDA_CUBLAS_LIBRARIES -- Device or emulation library for the Cuda BLAS
-#                            implementation (alterative to:
+#                            implementation (alternative to:
 #                            CUDA_ADD_CUBLAS_TO_TARGET macro).
 #   CUDA_cudart_static_LIBRARY -- Statically linkable cuda runtime library.
 #                                 Only available for CUDA version 5.5+
+#   CUDA_cudadevrt_LIBRARY -- Device runtime library.
+#                             Required for separable compilation.
 #   CUDA_cupti_LIBRARY    -- CUDA Profiling Tools Interface library.
 #                            Only available for CUDA version 4.0+.
 #   CUDA_curand_LIBRARY   -- CUDA Random Number Generation library.
@@ -548,6 +566,7 @@ macro(cuda_unset_include_and_libraries)
     unset(CUDA_CUDARTEMU_LIBRARY CACHE)
   endif()
   unset(CUDA_cudart_static_LIBRARY CACHE)
+  unset(CUDA_cudadevrt_LIBRARY CACHE)
   unset(CUDA_cublas_LIBRARY CACHE)
   unset(CUDA_cublas_device_LIBRARY CACHE)
   unset(CUDA_cublasemu_LIBRARY CACHE)
@@ -563,8 +582,8 @@ macro(cuda_unset_include_and_libraries)
   unset(CUDA_npps_LIBRARY CACHE)
   unset(CUDA_nvcuvenc_LIBRARY CACHE)
   unset(CUDA_nvcuvid_LIBRARY CACHE)
-
   unset(CUDA_USE_STATIC_CUDA_RUNTIME CACHE)
+  unset(CUDA_GPU_DETECT_OUTPUT CACHE)
 endmacro()
 
 # Check to see if the CUDA_TOOLKIT_ROOT_DIR and CUDA_SDK_ROOT_DIR have changed,
@@ -580,31 +599,33 @@ if(NOT "${CUDA_TOOLKIT_TARGET_DIR}" STREQUAL "${CUDA_TOOLKIT_TARGET_DIR_INTERNAL
   cuda_unset_include_and_libraries()
 endif()
 
-if(NOT "${CUDA_SDK_ROOT_DIR}" STREQUAL "${CUDA_SDK_ROOT_DIR_INTERNAL}")
-  # No specific variables to catch.  Use this kind of code before calling
-  # find_package(CUDA) to clean up any variables that may depend on this path.
+#
+#  End of unset()
+#
 
-  #   unset(MY_SPECIAL_CUDA_SDK_INCLUDE_DIR CACHE)
-  #   unset(MY_SPECIAL_CUDA_SDK_LIBRARY CACHE)
-endif()
+#
+#  Start looking for things
+#
 
 # Search for the cuda distribution.
-if(NOT CUDA_TOOLKIT_ROOT_DIR)
-
+if(NOT CUDA_TOOLKIT_ROOT_DIR AND NOT CMAKE_CROSSCOMPILING)
   # Search in the CUDA_BIN_PATH first.
   find_path(CUDA_TOOLKIT_ROOT_DIR
     NAMES nvcc nvcc.exe
     PATHS
+      ENV CUDA_TOOLKIT_ROOT
       ENV CUDA_PATH
       ENV CUDA_BIN_PATH
     PATH_SUFFIXES bin bin64
     DOC "Toolkit location."
     NO_DEFAULT_PATH
     )
+
   # Now search default paths
   find_path(CUDA_TOOLKIT_ROOT_DIR
     NAMES nvcc nvcc.exe
-    PATHS /usr/local/bin
+    PATHS /opt/cuda/bin
+          /usr/local/bin
           /usr/local/cuda/bin
     DOC "Toolkit location."
     )
@@ -613,7 +634,9 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR)
     string(REGEX REPLACE "[/\\\\]?bin[64]*[/\\\\]?$" "" CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT_DIR})
     # We need to force this back into the cache.
     set(CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT_DIR} CACHE PATH "Toolkit location." FORCE)
+    set(CUDA_TOOLKIT_TARGET_DIR ${CUDA_TOOLKIT_ROOT_DIR})
   endif()
+
   if (NOT EXISTS ${CUDA_TOOLKIT_ROOT_DIR})
     if(CUDA_FIND_REQUIRED)
       message(FATAL_ERROR "Specify CUDA_TOOLKIT_ROOT_DIR")
@@ -623,8 +646,45 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR)
   endif ()
 endif ()
 
+if(CMAKE_CROSSCOMPILING)
+  SET (CUDA_TOOLKIT_ROOT $ENV{CUDA_TOOLKIT_ROOT})
+  if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
+    # Support for NVPACK
+    set (CUDA_TOOLKIT_TARGET_NAME "armv7-linux-androideabi")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+    # Support for arm cross compilation
+    set(CUDA_TOOLKIT_TARGET_NAME "armv7-linux-gnueabihf")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+    # Support for aarch64 cross compilation
+    if (ANDROID_ARCH_NAME STREQUAL "arm64")
+      set(CUDA_TOOLKIT_TARGET_NAME "aarch64-linux-androideabi")
+    else()
+      set(CUDA_TOOLKIT_TARGET_NAME "aarch64-linux")
+    endif (ANDROID_ARCH_NAME STREQUAL "arm64")
+  endif()
+
+  if (EXISTS "${CUDA_TOOLKIT_ROOT}/targets/${CUDA_TOOLKIT_TARGET_NAME}")
+    set(CUDA_TOOLKIT_TARGET_DIR "${CUDA_TOOLKIT_ROOT}/targets/${CUDA_TOOLKIT_TARGET_NAME}" CACHE PATH "CUDA Toolkit target location.")
+    SET (CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT})
+    mark_as_advanced(CUDA_TOOLKIT_TARGET_DIR)
+  endif()
+
+  # add known CUDA targetr root path to the set of directories we search for programs, libraries and headers
+  set( CMAKE_FIND_ROOT_PATH "${CUDA_TOOLKIT_TARGET_DIR};${CMAKE_FIND_ROOT_PATH}")
+  macro( cuda_find_host_program )
+    find_host_program( ${ARGN} )
+  endmacro()
+else()
+  # for non-cross-compile, find_host_program == find_program and CUDA_TOOLKIT_TARGET_DIR == CUDA_TOOLKIT_ROOT_DIR
+  macro( cuda_find_host_program )
+    find_program( ${ARGN} )
+  endmacro()
+  SET (CUDA_TOOLKIT_TARGET_DIR ${CUDA_TOOLKIT_ROOT_DIR})
+endif()
+
+
 # CUDA_NVCC_EXECUTABLE
-find_program(CUDA_NVCC_EXECUTABLE
+cuda_find_host_program(CUDA_NVCC_EXECUTABLE
   NAMES nvcc
   PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
   ENV CUDA_PATH
@@ -633,7 +693,7 @@ find_program(CUDA_NVCC_EXECUTABLE
   NO_DEFAULT_PATH
   )
 # Search default search paths, after we search our own set of paths.
-find_program(CUDA_NVCC_EXECUTABLE nvcc)
+cuda_find_host_program(CUDA_NVCC_EXECUTABLE nvcc)
 mark_as_advanced(CUDA_NVCC_EXECUTABLE)
 
 if(CUDA_NVCC_EXECUTABLE AND NOT CUDA_VERSION)
@@ -649,33 +709,14 @@ else()
   string(REGEX REPLACE "([0-9]+)\\.([0-9]+).*" "\\2" CUDA_VERSION_MINOR "${CUDA_VERSION}")
 endif()
 
+
 # Always set this convenience variable
 set(CUDA_VERSION_STRING "${CUDA_VERSION}")
-
-# Support for arm cross compilation with CUDA 5.5
-if(CUDA_VERSION VERSION_GREATER "5.0" AND CMAKE_CROSSCOMPILING AND CMAKE_SYSTEM_PROCESSOR MATCHES "arm" AND EXISTS "${CUDA_TOOLKIT_ROOT_DIR}/targets/armv7-linux-gnueabihf")
-  set(CUDA_TOOLKIT_TARGET_DIR "${CUDA_TOOLKIT_ROOT_DIR}/targets/armv7-linux-gnueabihf" CACHE PATH "Toolkit target location.")
-# Support for aarch64 cross compilation with CUDA 7.0
-elseif(CUDA_VERSION VERSION_GREATER "6.5" AND CMAKE_CROSSCOMPILING AND CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64" AND EXISTS "${CUDA_TOOLKIT_ROOT_DIR}/targets/aarch64-linux")
-  set(CUDA_TOOLKIT_TARGET_DIR "${CUDA_TOOLKIT_ROOT_DIR}/targets/aarch64-linux" CACHE PATH "Toolkit target location.")
-else()
-  set(CUDA_TOOLKIT_TARGET_DIR "${CUDA_TOOLKIT_ROOT_DIR}" CACHE PATH "Toolkit target location.")
-endif()
-mark_as_advanced(CUDA_TOOLKIT_TARGET_DIR)
-
-# Target CPU architecture
-if(CUDA_VERSION VERSION_GREATER "5.0" AND CMAKE_CROSSCOMPILING AND CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
-  set(_cuda_target_cpu_arch_initial "ARM")
-else()
-  set(_cuda_target_cpu_arch_initial "")
-endif()
-set(CUDA_TARGET_CPU_ARCH ${_cuda_target_cpu_arch_initial} CACHE STRING "Specify the name of the class of CPU architecture for which the input files must be compiled.")
-mark_as_advanced(CUDA_TARGET_CPU_ARCH)
 
 # CUDA_TOOLKIT_INCLUDE
 find_path(CUDA_TOOLKIT_INCLUDE
   device_functions.h # Header included in toolkit
-  PATHS "${CUDA_TOOLKIT_TARGET_DIR}" "${CUDA_TOOLKIT_ROOT_DIR}"
+  PATHS ${CUDA_TOOLKIT_TARGET_DIR}
   ENV CUDA_PATH
   ENV CUDA_INC_PATH
   PATH_SUFFIXES include
@@ -692,7 +733,7 @@ else()
 endif()
 
 # Set the user list of include dir to nothing to initialize it.
-set (CUDA_NVCC_INCLUDE_ARGS_USER "")
+set (CUDA_NVCC_INCLUDE_DIRS_USER "")
 set (CUDA_INCLUDE_DIRS ${CUDA_TOOLKIT_INCLUDE})
 
 macro(cuda_find_library_local_first_with_path_ext _var _names _doc _path_ext )
@@ -705,19 +746,21 @@ macro(cuda_find_library_local_first_with_path_ext _var _names _doc _path_ext )
   # (lib/Win32) and the old path (lib).
   find_library(${_var}
     NAMES ${_names}
-    PATHS "${CUDA_TOOLKIT_TARGET_DIR}" "${CUDA_TOOLKIT_ROOT_DIR}"
+    PATHS "${CUDA_TOOLKIT_TARGET_DIR}"
     ENV CUDA_PATH
     ENV CUDA_LIB_PATH
     PATH_SUFFIXES ${_cuda_64bit_lib_dir} "${_path_ext}lib/Win32" "${_path_ext}lib" "${_path_ext}libWin32"
     DOC ${_doc}
     NO_DEFAULT_PATH
     )
-  # Search default search paths, after we search our own set of paths.
-  find_library(${_var}
-    NAMES ${_names}
-    PATHS "/usr/lib/nvidia-current"
-    DOC ${_doc}
-    )
+  if (NOT CMAKE_CROSSCOMPILING)
+    # Search default search paths, after we search our own set of paths.
+    find_library(${_var}
+      NAMES ${_names}
+      PATHS "/usr/lib/nvidia-current"
+      DOC ${_doc}
+      )
+  endif()
 endmacro()
 
 macro(cuda_find_library_local_first _var _names _doc)
@@ -738,15 +781,25 @@ if(CUDA_VERSION VERSION_EQUAL "3.0")
     CUDA_CUDARTEMU_LIBRARY
     )
 endif()
+
 if(NOT CUDA_VERSION VERSION_LESS "5.5")
   cuda_find_library_local_first(CUDA_cudart_static_LIBRARY cudart_static "static CUDA runtime library")
   mark_as_advanced(CUDA_cudart_static_LIBRARY)
 endif()
+
+
 if(CUDA_cudart_static_LIBRARY)
-  # Set whether to use the static cuda runtime.
+  # If static cudart available, use it by default, but provide a user-visible option to disable it.
   option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" ON)
+  set(CUDA_CUDART_LIBRARY_VAR CUDA_cudart_static_LIBRARY)
 else()
-  option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" OFF)
+  # If not available, silently disable the option.
+  set(CUDA_USE_STATIC_CUDA_RUNTIME OFF CACHE INTERNAL "")
+  set(CUDA_CUDART_LIBRARY_VAR CUDA_CUDART_LIBRARY)
+endif()
+if(NOT CUDA_VERSION VERSION_LESS "5.0")
+  cuda_find_library_local_first(CUDA_cudadevrt_LIBRARY cudadevrt "\"cudadevrt\" library")
+  mark_as_advanced(CUDA_cudadevrt_LIBRARY)
 endif()
 
 if(CUDA_USE_STATIC_CUDA_RUNTIME)
@@ -772,8 +825,9 @@ if(CUDA_USE_STATIC_CUDA_RUNTIME)
     else()
       unset(CMAKE_THREAD_PREFER_PTHREAD)
     endif()
-    if (NOT APPLE)
-      # Here is librt that has things such as, clock_gettime, shm_open, and shm_unlink.
+
+    if(NOT APPLE)
+      #On Linux, you must link against librt when using the static cuda runtime.
       find_library(CUDA_rt_LIBRARY rt)
       if (NOT CUDA_rt_LIBRARY)
         message(WARNING "Expecting to find librt for libcudart_static, but didn't find it.")
@@ -955,12 +1009,13 @@ set(CUDA_SDK_ROOT_DIR_INTERNAL "${CUDA_SDK_ROOT_DIR}" CACHE INTERNAL
   "This is the value of the last time CUDA_SDK_ROOT_DIR was set successfully." FORCE)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
 find_package_handle_standard_args(CUDA
   REQUIRED_VARS
     CUDA_TOOLKIT_ROOT_DIR
     CUDA_NVCC_EXECUTABLE
     CUDA_INCLUDE_DIRS
-    CUDA_CUDART_LIBRARY
+    ${CUDA_CUDART_LIBRARY_VAR}
   VERSION_VAR
     CUDA_VERSION
   )
@@ -977,7 +1032,7 @@ find_package_handle_standard_args(CUDA
 # Add include directories to pass to the nvcc command.
 macro(CUDA_INCLUDE_DIRECTORIES)
   foreach(dir ${ARGN})
-    list(APPEND CUDA_NVCC_INCLUDE_ARGS_USER -I${dir})
+    list(APPEND CUDA_NVCC_INCLUDE_DIRS_USER ${dir})
   endforeach()
 endmacro()
 
@@ -986,6 +1041,7 @@ endmacro()
 cuda_find_helper_file(parse_cubin cmake)
 cuda_find_helper_file(make2cmake cmake)
 cuda_find_helper_file(run_nvcc cmake)
+include("${CMAKE_CURRENT_LIST_DIR}/FindCUDA/select_compute_arch.cmake")
 
 ##############################################################################
 # Separate the OPTIONS out from the sources
@@ -1139,6 +1195,18 @@ endfunction()
 
 macro(CUDA_WRAP_SRCS cuda_target format generated_files)
 
+  # Put optional arguments in list.
+  set(_argn_list "${ARGN}")
+  # If one of the given optional arguments is "PHONY", make a note of it, then
+  # remove it from the list.
+  list(FIND _argn_list "PHONY" _phony_idx)
+  if("${_phony_idx}" GREATER "-1")
+    set(_target_is_phony true)
+    list(REMOVE_AT _argn_list ${_phony_idx})
+  else()
+    set(_target_is_phony false)
+  endif()
+
   # If CMake doesn't support separable compilation, complain
   if(CUDA_SEPARABLE_COMPILATION AND CMAKE_VERSION VERSION_LESS "2.8.10.1")
     message(SEND_ERROR "CUDA_SEPARABLE_COMPILATION isn't supported for CMake versions less than 2.8.10.1")
@@ -1200,17 +1268,26 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   endif()
 
   # Initialize our list of includes with the user ones followed by the CUDA system ones.
-  set(CUDA_NVCC_INCLUDE_ARGS ${CUDA_NVCC_INCLUDE_ARGS_USER} "-I${CUDA_INCLUDE_DIRS}")
-  # Get the include directories for this directory and use them for our nvcc command.
-  # Remove duplicate entries which may be present since include_directories
-  # in CMake >= 2.8.8 does not remove them.
-  get_directory_property(CUDA_NVCC_INCLUDE_DIRECTORIES INCLUDE_DIRECTORIES)
-  list(REMOVE_DUPLICATES CUDA_NVCC_INCLUDE_DIRECTORIES)
-  if(CUDA_NVCC_INCLUDE_DIRECTORIES)
-    foreach(dir ${CUDA_NVCC_INCLUDE_DIRECTORIES})
-      list(APPEND CUDA_NVCC_INCLUDE_ARGS -I${dir})
-    endforeach()
+  set(CUDA_NVCC_INCLUDE_DIRS ${CUDA_NVCC_INCLUDE_DIRS_USER} "${CUDA_INCLUDE_DIRS}")
+  if(_target_is_phony)
+    # If the passed in target name isn't a real target (i.e., this is from a call to one of the
+    # cuda_compile_* functions), need to query directory properties to get include directories
+    # and compile definitions.
+    get_directory_property(_dir_include_dirs INCLUDE_DIRECTORIES)
+    get_directory_property(_dir_compile_defs COMPILE_DEFINITIONS)
+
+    list(APPEND CUDA_NVCC_INCLUDE_DIRS "${_dir_include_dirs}")
+    set(CUDA_NVCC_COMPILE_DEFINITIONS "${_dir_compile_defs}")
+  else()
+    # Append the include directories for this target via generator expression, which is
+    # expanded by the FILE(GENERATE) call below.  This generator expression captures all
+    # include dirs set by the user, whether via directory properties or target properties
+    list(APPEND CUDA_NVCC_INCLUDE_DIRS "$<TARGET_PROPERTY:${cuda_target},INCLUDE_DIRECTORIES>")
+
+    # Do the same thing with compile definitions
+    set(CUDA_NVCC_COMPILE_DEFINITIONS "$<TARGET_PROPERTY:${cuda_target},COMPILE_DEFINITIONS>")
   endif()
+
 
   # Reset these variables
   set(CUDA_WRAP_OPTION_NVCC_FLAGS)
@@ -1219,7 +1296,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     set(CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper})
   endforeach()
 
-  CUDA_GET_SOURCES_AND_OPTIONS(_cuda_wrap_sources _cuda_wrap_cmake_options _cuda_wrap_options ${ARGN})
+  CUDA_GET_SOURCES_AND_OPTIONS(_cuda_wrap_sources _cuda_wrap_cmake_options _cuda_wrap_options ${_argn_list})
   CUDA_PARSE_NVCC_OPTIONS(CUDA_WRAP_OPTION_NVCC_FLAGS ${_cuda_wrap_options})
 
   # Figure out if we are building a shared library.  BUILD_SHARED_LIBS is
@@ -1278,13 +1355,13 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
         set(_cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
       endif()
 
-      set(_cuda_host_flags "${_cuda_host_flags}\nset(CMAKE_HOST_FLAGS_${config_upper} ${_cuda_C_FLAGS})")
+      string(APPEND _cuda_host_flags "\nset(CMAKE_HOST_FLAGS_${config_upper} ${_cuda_C_FLAGS})")
     endif()
 
     # Note that if we ever want CUDA_NVCC_FLAGS_<CONFIG> to be string (instead of a list
     # like it is currently), we can remove the quotes around the
     # ${CUDA_NVCC_FLAGS_${config_upper}} variable like the CMAKE_HOST_FLAGS_<CONFIG> variable.
-    set(_cuda_nvcc_flags_config "${_cuda_nvcc_flags_config}\nset(CUDA_NVCC_FLAGS_${config_upper} ${CUDA_NVCC_FLAGS_${config_upper}} ;; ${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}})")
+    string(APPEND _cuda_nvcc_flags_config "\nset(CUDA_NVCC_FLAGS_${config_upper} ${CUDA_NVCC_FLAGS_${config_upper}} ;; ${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}})")
   endforeach()
 
   # Process the C++11 flag.  If the host sets the flag, we need to add it to nvcc and
@@ -1300,14 +1377,6 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     string(REGEX REPLACE "[-]+std=c\\+\\+11" "" _cuda_host_flags "${_cuda_host_flags}")
   endif()
 
-  # Get the list of definitions from the directory property
-  get_directory_property(CUDA_NVCC_DEFINITIONS COMPILE_DEFINITIONS)
-  if(CUDA_NVCC_DEFINITIONS)
-    foreach(_definition ${CUDA_NVCC_DEFINITIONS})
-      list(APPEND nvcc_flags "-D${_definition}")
-    endforeach()
-  endif()
-
   if(_cuda_build_shared_libs)
     list(APPEND nvcc_flags "-D${cuda_target}_EXPORTS")
   endif()
@@ -1317,7 +1386,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
 
   # Iterate over the macro arguments and create custom
   # commands for all the .cu files.
-  foreach(file ${ARGN})
+  foreach(file ${_argn_list})
     # Ignore any file marked as a HEADER_FILE_ONLY
     get_source_file_property(_is_header ${file} HEADER_FILE_ONLY)
     # Allow per source file overrides of the format.  Also allows compiling non-.cu files.
@@ -1675,6 +1744,12 @@ macro(CUDA_ADD_LIBRARY cuda_target)
     ${CUDA_LIBRARIES}
     )
 
+  if(CUDA_SEPARABLE_COMPILATION)
+    target_link_libraries(${cuda_target}
+      ${CUDA_cudadevrt_LIBRARY}
+      )
+  endif()
+
   # We need to set the linker language based on what the expected generated file
   # would be. CUDA_C_OR_CXX is computed based on CUDA_HOST_COMPILATION_CPP.
   set_target_properties(${cuda_target}
@@ -1735,12 +1810,23 @@ endmacro()
 ###############################################################################
 ###############################################################################
 macro(cuda_compile_base cuda_target format generated_files)
+  # Update a counter in this directory, to keep phony target names unique.
+  set(_cuda_target "${cuda_target}")
+  get_property(_counter DIRECTORY PROPERTY _cuda_internal_phony_counter)
+  if(_counter)
+    math(EXPR _counter "${_counter} + 1")
+  else()
+    set(_counter 1)
+  endif()
+  set(_cuda_target "${_cuda_target}_${_counter}")
+  set_property(DIRECTORY PROPERTY _cuda_internal_phony_counter ${_counter})
 
   # Separate the sources from the options
   CUDA_GET_SOURCES_AND_OPTIONS(_sources _cmake_options _options ${ARGN})
+
   # Create custom commands and targets for each file.
-  CUDA_WRAP_SRCS( ${cuda_target} ${format} _generated_files ${_sources} ${_cmake_options}
-    OPTIONS ${_options} )
+  CUDA_WRAP_SRCS( ${_cuda_target} ${format} _generated_files ${_sources}
+                  ${_cmake_options} OPTIONS ${_options} PHONY)
 
   set( ${generated_files} ${_generated_files})
 

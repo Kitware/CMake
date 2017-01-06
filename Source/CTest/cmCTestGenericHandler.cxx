@@ -1,25 +1,18 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestGenericHandler.h"
 
-#include "cmSystemTools.h"
+#include <cmConfigure.h>
+#include <sstream>
+#include <utility>
 
 #include "cmCTest.h"
+#include "cmSystemTools.h"
 
 cmCTestGenericHandler::cmCTestGenericHandler()
 {
   this->HandlerVerbose = cmSystemTools::OUTPUT_NONE;
-  this->CTest = 0;
+  this->CTest = CM_NULLPTR;
   this->SubmitIndex = 0;
   this->AppendXML = false;
   this->Quiet = false;
@@ -77,7 +70,7 @@ const char* cmCTestGenericHandler::GetOption(const std::string& op)
   cmCTestGenericHandler::t_StringToString::iterator remit =
     this->Options.find(op);
   if (remit == this->Options.end()) {
-    return 0;
+    return CM_NULLPTR;
   }
   return remit->second.c_str();
 }

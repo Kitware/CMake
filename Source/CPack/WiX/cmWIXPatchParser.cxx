@@ -1,15 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2013 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXPatchParser.h"
 
 #include <CPack/cmCPackGenerator.h>
@@ -88,7 +78,7 @@ void cmWIXPatchParser::StartFragment(const char** attributes)
 
     if (key == "Id") {
       if (Fragments.find(value) != Fragments.end()) {
-        std::stringstream tmp;
+        std::ostringstream tmp;
         tmp << "Invalid reuse of 'CPackWixFragment' 'Id': " << value;
         ReportValidationError(tmp.str());
       }

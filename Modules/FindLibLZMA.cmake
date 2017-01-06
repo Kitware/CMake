@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindLibLZMA
 # -----------
@@ -18,23 +21,6 @@
 #   LIBLZMA_VERSION_MINOR     - The minor version of lzma
 #   LIBLZMA_VERSION_PATCH     - The patch version of lzma
 #   LIBLZMA_VERSION_STRING    - version number as a string (ex: "5.0.3")
-
-#=============================================================================
-# Copyright 2008 Per Øyvind Karlsen <peroyvind@mandriva.org>
-# Copyright 2009 Alexander Neundorf <neundorf@kde.org>
-# Copyright 2009 Helio Chissini de Castro <helio@kde.org>
-# Copyright 2012 Mario Bensi <mbensi@ipsquad.net>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 
 find_path(LIBLZMA_INCLUDE_DIR lzma.h )
 find_library(LIBLZMA_LIBRARY lzma)

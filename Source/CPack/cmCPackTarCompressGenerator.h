@@ -1,19 +1,12 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCPackTarCompressGenerator_h
 #define cmCPackTarCompressGenerator_h
 
-#include "cmCPackTGZGenerator.h"
+#include <cmConfigure.h>
+
+#include "cmCPackArchiveGenerator.h"
+#include "cmCPackGenerator.h"
 
 /** \class cmCPackTarCompressGenerator
  * \brief A generator for TarCompress files
@@ -26,10 +19,10 @@ public:
    * Construct generator
    */
   cmCPackTarCompressGenerator();
-  virtual ~cmCPackTarCompressGenerator();
+  ~cmCPackTarCompressGenerator() CM_OVERRIDE;
 
 protected:
-  virtual const char* GetOutputExtension() { return ".tar.Z"; }
+  const char* GetOutputExtension() CM_OVERRIDE { return ".tar.Z"; }
 };
 
 #endif

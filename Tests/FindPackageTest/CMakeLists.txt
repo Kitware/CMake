@@ -102,6 +102,7 @@ endif()
 set(PACKAGES
   foo Foo Bar Blub TFramework Tframework TApp Tapp Special
   VersionedA VersionedB VersionedC VersionedD VersionedE
+  VersionedF VersionedG VersionedH
   WrongA WrongB WrongC WrongD
   wibbleA wibbleB
   RecursiveA RecursiveB RecursiveC
@@ -142,6 +143,10 @@ find_package(VersionedB 3.1 EXACT NAMES zot)
 find_package(VersionedC 4.0 EXACT NAMES zot)
 find_package(VersionedD 1.1 EXACT NAMES Baz)
 find_package(VersionedE 1.2 EXACT NAMES Baz)
+find_package(VersionedF 1.3 EXACT NAMES Baz)
+find_package(VersionedG 2.0 EXACT NAMES Baz)
+find_package(VersionedH 2.1 EXACT NAMES Baz)
+
 
 # Test Config files which set Xyz_FOUND themselves:
 find_package(SetFoundTRUE NO_MODULE)
@@ -158,12 +163,12 @@ find_package(WrongB 1.2 EXACT NAMES Baz)
 
 # Test wrong initial path when result is missing.
 set(WrongC_DIR "${VersionedD_DIR}")
-find_package(WrongC 1.3 EXACT QUIET NAMES Baz)
+find_package(WrongC 1.4 EXACT QUIET NAMES Baz)
 
 # Test wrong initial cache entry of UNINITIALIZED type when result is missing.
 set(WrongD_DIR "${VersionedD_DIR}" CACHE UNINITIALIZED "Wrong Value" FORCE)
 get_property(type CACHE WrongD_DIR PROPERTY TYPE)
-find_package(WrongD 1.3 EXACT QUIET NAMES Baz)
+find_package(WrongD 1.4 EXACT QUIET NAMES Baz)
 
 # HINTS should override the system but PATHS should not
 list(INSERT CMAKE_SYSTEM_PREFIX_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/A")
@@ -216,6 +221,9 @@ set(VersionedB_EXPECTED "lib/zot-3.1/zot-config.cmake")
 set(VersionedC_EXPECTED "lib/cmake/zot-4.0/zot-config.cmake")
 set(VersionedD_EXPECTED "Baz 1.1/BazConfig.cmake")
 set(VersionedE_EXPECTED "Baz 1.2/CMake/BazConfig.cmake")
+set(VersionedF_EXPECTED "Baz 1.3/lib/cmake/Baz/BazConfig.cmake")
+set(VersionedG_EXPECTED "Baz 2.0/share/Baz 2/BazConfig.cmake")
+set(VersionedH_EXPECTED "Baz 2.1/lib/Baz 2/cmake/BazConfig.cmake")
 set(WrongA_EXPECTED "${VersionedE_EXPECTED}")
 set(WrongB_EXPECTED "${VersionedE_EXPECTED}")
 set(WrongC_MISSING "WrongC_DIR-NOTFOUND")
@@ -333,7 +341,7 @@ endif()
 # Choose a unique version.
 string(REGEX REPLACE "-.*$" "" version ${CMAKE_VERSION})
 string(RANDOM LENGTH 4 ALPHABET "0123456789" v)
-set(version "${version}.${v}")
+string(APPEND version ".${v}")
 
 message(STATUS "Preparing export(PACKAGE) test project")
 try_compile(EXPORTER_COMPILED
@@ -625,3 +633,33 @@ endif()
 if(PACKAGE_VERSION_UNSUITABLE)
   message(SEND_ERROR "PACKAGE_VERSION_UNSUITABLE set, but must not be !")
 endif()
+
+
+############################################################################
+##Test FIND_PACKAGE using sorting
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+SET(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
+SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION ASC)
+
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+FIND_PACKAGE(SortLib CONFIG)
+IF (NOT "${SortLib_VERSION}" STREQUAL "3.1.1")
+  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Name Asc! ${SortLib_VERSION}")
+endif()
+unset(SortLib_VERSION)
+
+
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
+SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
+FIND_PACKAGE(SortLib CONFIG)
+IF (NOT "${SortLib_VERSION}" STREQUAL "3.10.1")
+  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Natural! Dec ${SortLib_VERSION}")
+endif()
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+unset(SortLib_VERSION)
+
+
+unset(CMAKE_FIND_PACKAGE_SORT_ORDER)
+unset(CMAKE_FIND_PACKAGE_SORT_DIRECTION)
+set(CMAKE_PREFIX_PATH )

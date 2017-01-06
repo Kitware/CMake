@@ -1,22 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestCVS.h"
 
 #include "cmCTest.h"
+#include "cmProcessTools.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
+#include <utility>
 
 cmCTestCVS::cmCTestCVS(cmCTest* ct, std::ostream& log)
   : cmCTestVC(ct, log)
@@ -53,7 +46,7 @@ private:
   cmsys::RegularExpression RegexFileRemoved1;
   cmsys::RegularExpression RegexFileRemoved2;
 
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexFileUpdated.find(this->Line)) {
       this->DoFile(PathUpdated, this->RegexFileUpdated.match(2));
@@ -103,7 +96,7 @@ bool cmCTestCVS::UpdateImpl()
        ai != args.end(); ++ai) {
     cvs_update.push_back(ai->c_str());
   }
-  cvs_update.push_back(0);
+  cvs_update.push_back(CM_NULLPTR);
 
   UpdateParser out(this, "up-out> ");
   UpdateParser err(this, "up-err> ");
@@ -140,7 +133,7 @@ private:
   SectionType Section;
   Revision Rev;
 
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->Line == ("======================================="
                        "======================================")) {
@@ -216,10 +209,9 @@ std::string cmCTestCVS::ComputeBranchFlag(std::string const& dir)
     std::string flag = "-r";
     flag += tagLine.substr(1);
     return flag;
-  } else {
-    // Use the default branch.
-    return "-b";
   }
+  // Use the default branch.
+  return "-b";
 }
 
 void cmCTestCVS::LoadRevisions(std::string const& file, const char* branchFlag,
@@ -229,7 +221,8 @@ void cmCTestCVS::LoadRevisions(std::string const& file, const char* branchFlag,
 
   // Run "cvs log" to get revisions of this file on this branch.
   const char* cvs = this->CommandLineTool.c_str();
-  const char* cvs_log[] = { cvs, "log", "-N", branchFlag, file.c_str(), 0 };
+  const char* cvs_log[] = { cvs,        "log",        "-N",
+                            branchFlag, file.c_str(), CM_NULLPTR };
 
   LogParser out(this, "log-out> ", revisions);
   OutputLogger err(this->Log, "log-err> ");

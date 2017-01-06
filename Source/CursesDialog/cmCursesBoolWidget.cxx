@@ -1,34 +1,30 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesBoolWidget.h"
 
-#include "cmCursesMainForm.h"
+#include "cmCursesWidget.h"
+#include "cmStateTypes.h"
+
+#include <string>
 
 cmCursesBoolWidget::cmCursesBoolWidget(int width, int height, int left,
                                        int top)
   : cmCursesWidget(width, height, left, top)
 {
-  this->Type = cmState::BOOL;
+  this->Type = cmStateEnums::BOOL;
   set_field_fore(this->Field, A_NORMAL);
   set_field_back(this->Field, A_STANDOUT);
   field_opts_off(this->Field, O_STATIC);
   this->SetValueAsBool(false);
 }
 
-bool cmCursesBoolWidget::HandleInput(int& key, cmCursesMainForm*, WINDOW* w)
+bool cmCursesBoolWidget::HandleInput(int& key, cmCursesMainForm* /*fm*/,
+                                     WINDOW* w)
 {
 
+  // toggle boolean values with enter or space
   // 10 == enter
-  if (key == 10 || key == KEY_ENTER) {
+  if (key == 10 || key == KEY_ENTER || key == ' ') {
     if (this->GetValueAsBool()) {
       this->SetValueAsBool(false);
     } else {
@@ -38,9 +34,8 @@ bool cmCursesBoolWidget::HandleInput(int& key, cmCursesMainForm*, WINDOW* w)
     touchwin(w);
     wrefresh(w);
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 
 void cmCursesBoolWidget::SetValueAsBool(bool value)

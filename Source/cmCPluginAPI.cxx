@@ -1,14 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 /*
    this file contains the implementation of the C API to CMake. Generally
    these routines just manipulate arguments and then call the associated
@@ -16,10 +7,12 @@
 
 #include "cmCPluginAPI.h"
 
+#include "cmExecutionStatus.h"
+#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmVersion.h"
-
 #include "cmSourceFile.h"
+#include "cmState.h"
+#include "cmVersion.h"
 
 #include <stdlib.h>
 
@@ -84,22 +77,22 @@ void CCONV cmAddCacheDefinition(void* arg, const char* name, const char* value,
 
   switch (type) {
     case CM_CACHE_BOOL:
-      mf->AddCacheDefinition(name, value, doc, cmState::BOOL);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::BOOL);
       break;
     case CM_CACHE_PATH:
-      mf->AddCacheDefinition(name, value, doc, cmState::PATH);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::PATH);
       break;
     case CM_CACHE_FILEPATH:
-      mf->AddCacheDefinition(name, value, doc, cmState::FILEPATH);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::FILEPATH);
       break;
     case CM_CACHE_STRING:
-      mf->AddCacheDefinition(name, value, doc, cmState::STRING);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::STRING);
       break;
     case CM_CACHE_INTERNAL:
-      mf->AddCacheDefinition(name, value, doc, cmState::INTERNAL);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::INTERNAL);
       break;
     case CM_CACHE_STATIC:
-      mf->AddCacheDefinition(name, value, doc, cmState::STATIC);
+      mf->AddCacheDefinition(name, value, doc, cmStateEnums::STATIC);
       break;
   }
 }
@@ -171,7 +164,14 @@ void CCONV cmAddLinkDirectoryForTarget(void* arg, const char* tgt,
                                        const char* d)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  mf->AddLinkDirectoryForTarget(tgt, d);
+  cmTarget* t = mf->FindLocalNonAliasTarget(tgt);
+  if (!t) {
+    cmSystemTools::Error(
+      "Attempt to add link directories to non-existent target: ", tgt,
+      " for directory ", d);
+    return;
+  }
+  t->AddLinkDirectory(d);
 }
 
 void CCONV cmAddExecutable(void* arg, const char* exename, int numSrcs,
@@ -218,8 +218,8 @@ void CCONV cmAddUtilityCommand(void* arg, const char* utilityName,
   }
 
   // Pass the call to the makefile instance.
-  mf->AddUtilityCommand(utilityName, (all ? false : true), 0, depends2,
-                        commandLines);
+  mf->AddUtilityCommand(utilityName, (all ? false : true), CM_NULLPTR,
+                        depends2, commandLines);
 }
 void CCONV cmAddCustomCommand(void* arg, const char* source,
                               const char* command, int numArgs,
@@ -257,7 +257,7 @@ void CCONV cmAddCustomCommand(void* arg, const char* source,
   }
 
   // Pass the call to the makefile instance.
-  const char* no_comment = 0;
+  const char* no_comment = CM_NULLPTR;
   mf->AddCustomCommandOldStyle(target, outputs2, depends2, source,
                                commandLines, no_comment);
 }
@@ -291,8 +291,8 @@ void CCONV cmAddCustomCommandToOutput(void* arg, const char* output,
   }
 
   // Pass the call to the makefile instance.
-  const char* no_comment = 0;
-  const char* no_working_dir = 0;
+  const char* no_comment = CM_NULLPTR;
+  const char* no_working_dir = CM_NULLPTR;
   mf->AddCustomCommandToOutput(output, depends2, main_dependency, commandLines,
                                no_comment, no_working_dir);
 }
@@ -333,10 +333,39 @@ void CCONV cmAddCustomCommandToTarget(void* arg, const char* target,
   // Pass the call to the makefile instance.
   std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
-  const char* no_comment = 0;
-  const char* no_working_dir = 0;
+  const char* no_comment = CM_NULLPTR;
+  const char* no_working_dir = CM_NULLPTR;
   mf->AddCustomCommandToTarget(target, no_byproducts, no_depends, commandLines,
                                cctype, no_comment, no_working_dir);
+}
+
+static void addLinkLibrary(cmMakefile* mf, std::string const& target,
+                           std::string const& lib, cmTargetLinkLibraryType llt)
+{
+  cmTarget* t = mf->FindLocalNonAliasTarget(target);
+  if (!t) {
+    std::ostringstream e;
+    e << "Attempt to add link library \"" << lib << "\" to target \"" << target
+      << "\" which is not built in this directory.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  }
+
+  cmTarget* tgt = mf->GetGlobalGenerator()->FindTarget(lib);
+  if (tgt && (tgt->GetType() != cmStateEnums::STATIC_LIBRARY) &&
+      (tgt->GetType() != cmStateEnums::SHARED_LIBRARY) &&
+      (tgt->GetType() != cmStateEnums::INTERFACE_LIBRARY) &&
+      !tgt->IsExecutableWithExports()) {
+    std::ostringstream e;
+    e << "Target \"" << lib << "\" of type "
+      << cmState::GetTargetTypeName(tgt->GetType())
+      << " may not be linked into another target.  "
+      << "One may link only to STATIC or SHARED libraries, or "
+      << "to executables with the ENABLE_EXPORTS property set.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  }
+
+  t->AddLinkLibrary(*mf, lib, llt);
 }
 
 void CCONV cmAddLinkLibraryForTarget(void* arg, const char* tgt,
@@ -346,13 +375,13 @@ void CCONV cmAddLinkLibraryForTarget(void* arg, const char* tgt,
 
   switch (libtype) {
     case CM_LIBRARY_GENERAL:
-      mf->AddLinkLibraryForTarget(tgt, value, GENERAL_LibraryType);
+      addLinkLibrary(mf, tgt, value, GENERAL_LibraryType);
       break;
     case CM_LIBRARY_DEBUG:
-      mf->AddLinkLibraryForTarget(tgt, value, DEBUG_LibraryType);
+      addLinkLibrary(mf, tgt, value, DEBUG_LibraryType);
       break;
     case CM_LIBRARY_OPTIMIZED:
-      mf->AddLinkLibraryForTarget(tgt, value, OPTIMIZED_LibraryType);
+      addLinkLibrary(mf, tgt, value, OPTIMIZED_LibraryType);
       break;
   }
 }
@@ -366,8 +395,8 @@ void CCONV cmAddLibrary(void* arg, const char* libname, int shared,
   for (i = 0; i < numSrcs; ++i) {
     srcs2.push_back(srcs[i]);
   }
-  mf->AddLibrary(libname,
-                 (shared ? cmState::SHARED_LIBRARY : cmState::STATIC_LIBRARY),
+  mf->AddLibrary(libname, (shared ? cmStateEnums::SHARED_LIBRARY
+                                  : cmStateEnums::STATIC_LIBRARY),
                  srcs2);
 }
 
@@ -379,7 +408,7 @@ char CCONV* cmExpandVariablesInString(void* arg, const char* source,
   std::string result = mf->ExpandVariablesInString(
     barf, (escapeQuotes ? true : false), (atOnly ? true : false));
   char* res = static_cast<char*>(malloc(result.size() + 1));
-  if (result.size()) {
+  if (!result.empty()) {
     strcpy(res, result.c_str());
   }
   res[result.size()] = '\0';
@@ -395,7 +424,7 @@ int CCONV cmExecuteCommand(void* arg, const char* name, int numArgs,
   for (int i = 0; i < numArgs; ++i) {
     // Assume all arguments are quoted.
     lff.Arguments.push_back(
-      cmListFileArgument(args[i], cmListFileArgument::Quoted, 0, 0));
+      cmListFileArgument(args[i], cmListFileArgument::Quoted, 0));
   }
   cmExecutionStatus status;
   return mf->ExecuteCommand(lff, status);
@@ -414,7 +443,7 @@ void CCONV cmExpandSourceListArguments(void* arg, int numArgs,
     result.push_back(args[i]);
   }
   int resargc = static_cast<int>(result.size());
-  char** resargv = 0;
+  char** resargv = CM_NULLPTR;
   if (resargc) {
     resargv = (char**)malloc(resargc * sizeof(char*));
   }
@@ -453,7 +482,7 @@ int CCONV cmGetTotalArgumentSize(int argc, char** argv)
 struct cmCPluginAPISourceFile
 {
   cmCPluginAPISourceFile()
-    : RealSourceFile(0)
+    : RealSourceFile(CM_NULLPTR)
   {
   }
   cmSourceFile* RealSourceFile;
@@ -524,9 +553,8 @@ void CCONV* cmGetSource(void* arg, const char* name)
       i = cmCPluginAPISourceFiles.insert(entry).first;
     }
     return (void*)i->second;
-  } else {
-    return 0;
   }
+  return CM_NULLPTR;
 }
 
 void* CCONV cmAddSource(void* arg, void* arg2)
@@ -534,7 +562,7 @@ void* CCONV cmAddSource(void* arg, void* arg2)
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
   cmCPluginAPISourceFile* osf = static_cast<cmCPluginAPISourceFile*>(arg2);
   if (osf->FullPath.empty()) {
-    return 0;
+    return CM_NULLPTR;
   }
 
   // Create the real cmSourceFile instance and copy over saved information.
@@ -542,7 +570,7 @@ void* CCONV cmAddSource(void* arg, void* arg2)
   rsf->GetProperties() = osf->Properties;
   for (std::vector<std::string>::iterator i = osf->Depends.begin();
        i != osf->Depends.end(); ++i) {
-    rsf->AddDepend(i->c_str());
+    rsf->AddDepend(*i);
   }
 
   // Create the proxy for the real source file.
@@ -574,12 +602,11 @@ const char* CCONV cmSourceFileGetProperty(void* arg, const char* prop)
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
     return rsf->GetProperty(prop);
-  } else {
-    if (!strcmp(prop, "LOCATION")) {
-      return sf->FullPath.c_str();
-    }
-    return sf->Properties.GetPropertyValue(prop);
   }
+  if (!strcmp(prop, "LOCATION")) {
+    return sf->FullPath.c_str();
+  }
+  return sf->Properties.GetPropertyValue(prop);
 }
 
 int CCONV cmSourceFileGetPropertyAsBool(void* arg, const char* prop)
@@ -587,9 +614,8 @@ int CCONV cmSourceFileGetPropertyAsBool(void* arg, const char* prop)
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
     return rsf->GetPropertyAsBool(prop) ? 1 : 0;
-  } else {
-    return cmSystemTools::IsOn(cmSourceFileGetProperty(arg, prop)) ? 1 : 0;
   }
+  return cmSystemTools::IsOn(cmSourceFileGetProperty(arg, prop)) ? 1 : 0;
 }
 
 void CCONV cmSourceFileSetProperty(void* arg, const char* prop,
@@ -650,7 +676,7 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
   std::string hname = pathname;
   if (cmSystemTools::FileExists(hname.c_str())) {
     sf->SourceName = cmSystemTools::GetFilenamePath(name);
-    if (sf->SourceName.size() > 0) {
+    if (!sf->SourceName.empty()) {
       sf->SourceName += "/";
     }
     sf->SourceName += cmSystemTools::GetFilenameWithoutLastExtension(name);
@@ -707,7 +733,6 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
     e << " ." << *ext;
   }
   cmSystemTools::Error(e.str().c_str());
-  return;
 }
 
 void CCONV cmSourceFileSetName2(void* arg, const char* name, const char* dir,
@@ -730,7 +755,7 @@ void CCONV cmSourceFileSetName2(void* arg, const char* name, const char* dir,
     fname += ".";
     fname += ext;
   }
-  sf->FullPath = cmSystemTools::CollapseFullPath(fname.c_str(), dir);
+  sf->FullPath = cmSystemTools::CollapseFullPath(fname, dir);
   cmSystemTools::ConvertToUnixSlashes(sf->FullPath);
   sf->SourceExtension = ext;
 }

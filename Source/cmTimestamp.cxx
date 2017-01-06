@@ -1,28 +1,17 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2012 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTimestamp.h"
 
-#include <cstdlib>
+#include <cmConfigure.h>
 #include <cstring>
 #include <sstream>
 
-#include <sys/types.h>
-// include sys/stat.h after sys/types.h
-#include <sys/stat.h>
+#include "cmSystemTools.h"
 
 std::string cmTimestamp::CurrentTime(const std::string& formatString,
                                      bool utcFlag)
 {
-  time_t currentTimeT = time(0);
+  time_t currentTimeT = time(CM_NULLPTR);
   if (currentTimeT == time_t(-1)) {
     return std::string();
   }
@@ -56,14 +45,14 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
   struct tm timeStruct;
   memset(&timeStruct, 0, sizeof(timeStruct));
 
-  struct tm* ptr = (struct tm*)0;
+  struct tm* ptr = (struct tm*)CM_NULLPTR;
   if (utcFlag) {
     ptr = gmtime(&timeT);
   } else {
     ptr = localtime(&timeT);
   }
 
-  if (ptr == 0) {
+  if (ptr == CM_NULLPTR) {
     return std::string();
   }
 
@@ -93,10 +82,9 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm& tm) const
 #else
   // From Linux timegm() manpage.
 
-  std::string tz_old = "TZ=";
-  if (const char* tz = cmSystemTools::GetEnv("TZ")) {
-    tz_old += tz;
-  }
+  std::string tz_old;
+  cmSystemTools::GetEnv("TZ", tz_old);
+  tz_old = "TZ=" + tz_old;
 
   // The standard says that "TZ=" or "TZ=[UNRECOGNIZED_TZ]" means UTC.
   // It seems that "TZ=" does NOT work, at least under Windows
@@ -124,6 +112,8 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
   formatString += flag;
 
   switch (flag) {
+    case 'a':
+    case 'b':
     case 'd':
     case 'H':
     case 'I':
@@ -152,7 +142,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
         return std::string();
       }
 
-      std::stringstream ss;
+      std::ostringstream ss;
       ss << static_cast<long int>(difftime(timeT, unixEpoch));
       return ss.str();
     }

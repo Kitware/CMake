@@ -1,64 +1,58 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#include <cmConfigure.h>
 
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-#include "cmCursesStandardIncludes.h"
-
-#include "../cmDocumentation.h"
-#include "../cmSystemTools.h"
-#include "../cmake.h"
-
-#include <signal.h>
-#include <sys/ioctl.h>
-
+#include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
-#include <cmsys/Encoding.hxx>
+#include "cmCursesStandardIncludes.h"
+#include "cmDocumentation.h"
+#include "cmDocumentationEntry.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
 
-#include <form.h>
+#include <cmsys/Encoding.hxx>
+#include <iostream>
+#include <signal.h>
+#include <string.h>
+#include <string>
+#include <vector>
 
 static const char* cmDocumentationName[][2] = {
-  { 0, "  ccmake - Curses Interface for CMake." },
-  { 0, 0 }
+  { CM_NULLPTR, "  ccmake - Curses Interface for CMake." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationUsage[][2] = {
-  { 0, "  ccmake <path-to-source>\n"
-       "  ccmake <path-to-existing-build>" },
-  { 0, "Specify a source directory to (re-)generate a build system for "
-       "it in the current working directory.  Specify an existing build "
-       "directory to re-generate its build system." },
-  { 0, 0 }
+  { CM_NULLPTR, "  ccmake <path-to-source>\n"
+                "  ccmake <path-to-existing-build>" },
+  { CM_NULLPTR,
+    "Specify a source directory to (re-)generate a build system for "
+    "it in the current working directory.  Specify an existing build "
+    "directory to re-generate its build system." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationUsageNote[][2] = {
-  { 0, "Run 'ccmake --help' for more information." },
-  { 0, 0 }
+  { CM_NULLPTR, "Run 'ccmake --help' for more information." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationOptions[]
                                          [2] = { CMAKE_STANDARD_OPTIONS_TABLE,
-                                                 { 0, 0 } };
+                                                 { CM_NULLPTR, CM_NULLPTR } };
 
-cmCursesForm* cmCursesForm::CurrentForm = 0;
+cmCursesForm* cmCursesForm::CurrentForm = CM_NULLPTR;
 
 extern "C" {
 
-void onsig(int)
+void onsig(int /*unused*/)
 {
   if (cmCursesForm::CurrentForm) {
     endwin();
     initscr();            /* Initialization */
     noecho();             /* Echo off */
     cbreak();             /* nl- or cr not needed */
-    keypad(stdscr, TRUE); /* Use key symbols as
-                             KEY_DOWN*/
+    keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
     refresh();
     int x, y;
     getmaxyx(stdscr, y, x);
@@ -69,8 +63,8 @@ void onsig(int)
 }
 }
 
-void CMakeMessageHandler(const char* message, const char* title, bool&,
-                         void* clientData)
+void CMakeMessageHandler(const char* message, const char* title,
+                         bool& /*unused*/, void* clientData)
 {
   cmCursesForm* self = static_cast<cmCursesForm*>(clientData);
   self->AddError(message, title);
@@ -133,8 +127,7 @@ int main(int argc, char const* const* argv)
   initscr();            /* Initialization */
   noecho();             /* Echo off */
   cbreak();             /* nl- or cr not needed */
-  keypad(stdscr, TRUE); /* Use key symbols as
-                           KEY_DOWN*/
+  keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
 
   signal(SIGWINCH, onsig);
 
@@ -176,7 +169,7 @@ int main(int argc, char const* const* argv)
   touchwin(stdscr);
   endwin();
   delete cmCursesForm::CurrentForm;
-  cmCursesForm::CurrentForm = 0;
+  cmCursesForm::CurrentForm = CM_NULLPTR;
 
   std::cout << std::endl << std::endl;
 

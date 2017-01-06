@@ -1,31 +1,26 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2013 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionEvaluationFile.h"
+
+#include <cmConfigure.h>
+#include <cmsys/FStream.hxx>
+#include <sstream>
+#include <utility>
 
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include <cmsys/FStream.hxx>
-
-#include <assert.h>
+#include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
   const std::string& input,
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> outputFileExpr,
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> condition,
-  bool inputIsContent)
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> outputFileExpr,
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> condition, bool inputIsContent)
   : Input(input)
   , OutputFileExpr(outputFileExpr)
   , Condition(condition)
@@ -40,8 +35,8 @@ void cmGeneratorExpressionEvaluationFile::Generate(
 {
   std::string rawCondition = this->Condition->GetInput();
   if (!rawCondition.empty()) {
-    std::string condResult =
-      this->Condition->Evaluate(lg, config, false, 0, 0, 0, lang);
+    std::string condResult = this->Condition->Evaluate(
+      lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, lang);
     if (condResult == "0") {
       return;
     }
@@ -56,10 +51,10 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     }
   }
 
-  const std::string outputFileName =
-    this->OutputFileExpr->Evaluate(lg, config, false, 0, 0, 0, lang);
-  const std::string outputContent =
-    inputExpression->Evaluate(lg, config, false, 0, 0, 0, lang);
+  const std::string outputFileName = this->OutputFileExpr->Evaluate(
+    lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, lang);
+  const std::string outputContent = inputExpression->Evaluate(
+    lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, lang);
 
   std::map<std::string, std::string>::iterator it =
     outputFiles.find(outputFileName);
@@ -97,8 +92,8 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
 
   for (std::vector<std::string>::const_iterator le = enabledLanguages.begin();
        le != enabledLanguages.end(); ++le) {
-    std::string name =
-      this->OutputFileExpr->Evaluate(lg, config, false, 0, 0, 0, *le);
+    std::string name = this->OutputFileExpr->Evaluate(
+      lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, *le);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(name);
     sf->SetProperty("GENERATED", "1");
 
@@ -135,7 +130,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
 
   cmListFileBacktrace lfbt = this->OutputFileExpr->GetBacktrace();
   cmGeneratorExpression contentGE(lfbt);
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> inputExpression =
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> inputExpression =
     contentGE.Parse(inputContent);
 
   std::map<std::string, std::string> outputFiles;

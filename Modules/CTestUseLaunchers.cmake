@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CTestUseLaunchers
 # -----------------
@@ -21,20 +24,9 @@
 # include(CTestUseLaunchers), it will use the value of the ENV variable
 # to initialize a CTEST_USE_LAUNCHERS cache variable.  This cache
 # variable initialization only occurs if CTEST_USE_LAUNCHERS is not
-# already defined.
-
-#=============================================================================
-# Copyright 2008-2012 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
+# already defined. If CTEST_USE_LAUNCHERS is on in a ctest -S script
+# the ctest_configure command will add -DCTEST_USE_LAUNCHERS:BOOL=TRUE
+# to the cmake command used to configure the project.
 
 if(NOT DEFINED CTEST_USE_LAUNCHERS AND DEFINED ENV{CTEST_USE_LAUNCHERS_DEFAULT})
   set(CTEST_USE_LAUNCHERS "$ENV{CTEST_USE_LAUNCHERS_DEFAULT}"
@@ -59,7 +51,7 @@ if(CTEST_USE_LAUNCHERS)
     "${__launch_common_options} --output <OUTPUT>")
 
   if("${CMAKE_GENERATOR}" MATCHES "Ninja")
-    set(__launch_compile_options "${__launch_compile_options} --filter-prefix <CMAKE_CL_SHOWINCLUDES_PREFIX>")
+    string(APPEND __launch_compile_options " --filter-prefix <CMAKE_CL_SHOWINCLUDES_PREFIX>")
   endif()
 
   set(CTEST_LAUNCH_COMPILE

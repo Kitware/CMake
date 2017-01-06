@@ -1,19 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmParseJacocoCoverage_h
 #define cmParseJacocoCoverage_h
 
-#include "cmCTestCoverageHandler.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <map>
+#include <string>
+#include <vector>
+
+class cmCTest;
+class cmCTestCoverageHandlerContainer;
 
 /** \class cmParseJacocoCoverage
  * \brief Parse JaCoCO coverage information
@@ -47,6 +44,7 @@ private:
   bool LoadSource(std::string d);
 
   class XMLParser;
+
   std::map<std::string, std::string> RoutineToDirectory;
   cmCTestCoverageHandlerContainer& Coverage;
   cmCTest* CTest;

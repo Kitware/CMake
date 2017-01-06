@@ -1,25 +1,21 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2004-2009 Kitware, Inc.
-  Copyright 2004 Alexander Neundorf (neundorf@kde.org)
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmExtraSublimeTextGenerator_h
 #define cmExtraSublimeTextGenerator_h
 
-#include "cmExternalMakefileProjectGenerator.h"
-#include "cmSourceFile.h"
+#include <cmConfigure.h>
 
-class cmLocalGenerator;
-class cmMakefile;
+#include "cmExternalMakefileProjectGenerator.h"
+
+#include <map>
+#include <string>
+#include <vector>
+
 class cmGeneratedFileStream;
 class cmGeneratorTarget;
+class cmLocalGenerator;
+class cmMakefile;
+class cmSourceFile;
 
 /** \class cmExtraSublimeTextGenerator
  * \brief Write Sublime Text 2 project files for Makefile based projects
@@ -27,23 +23,11 @@ class cmGeneratorTarget;
 class cmExtraSublimeTextGenerator : public cmExternalMakefileProjectGenerator
 {
 public:
+  static cmExternalMakefileProjectGeneratorFactory* GetFactory();
   typedef std::map<std::string, std::vector<std::string> > MapSourceFileFlags;
   cmExtraSublimeTextGenerator();
 
-  virtual std::string GetName() const
-  {
-    return cmExtraSublimeTextGenerator::GetActualName();
-  }
-  static std::string GetActualName() { return "Sublime Text 2"; }
-  static cmExternalMakefileProjectGenerator* New()
-  {
-    return new cmExtraSublimeTextGenerator;
-  }
-  /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const std::string& fullName) const;
-
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
 
 private:
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
@@ -80,6 +64,9 @@ private:
 
   std::string ComputeDefines(cmSourceFile* source, cmLocalGenerator* lg,
                              cmGeneratorTarget* gtgt);
+
+  bool ExcludeBuildFolder;
+  std::string EnvSettings;
 };
 
 #endif

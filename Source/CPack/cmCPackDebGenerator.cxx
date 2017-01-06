@@ -1,28 +1,23 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackDebGenerator.h"
 
 #include "cmArchiveWrite.h"
+#include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
-#include "cmMakefile.h"
 #include "cmSystemTools.h"
 
 #include <cmsys/Glob.hxx>
-#include <cmsys/SystemTools.hxx>
-
-#include <limits.h> // USHRT_MAX
+#include <limits.h>
+#include <map>
+#include <ostream>
+#include <set>
+#include <stdio.h>
+#include <string.h>
 #include <sys/stat.h>
+#include <utility>
 
 // NOTE:
 // A debian package .deb is simply an 'ar' archive. The only subtle difference
@@ -57,9 +52,9 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
   // Begin the archive for this pack
   std::string localToplevel(initialTopLevel);
   std::string packageFileName(cmSystemTools::GetParentDirectory(toplevel));
-  std::string outputFileName(std::string(
-                               this->GetOption("CPACK_PACKAGE_FILE_NAME")) +
-                             "-" + packageName + this->GetOutputExtension());
+  std::string outputFileName(
+    std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")) + "-" +
+    packageName + this->GetOutputExtension());
 
   localToplevel += "/" + packageName;
   /* replace the TEMP DIRECTORY with the component one */
@@ -133,7 +128,7 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
     for (compIt = this->Components.begin(); compIt != this->Components.end();
          ++compIt) {
       // Does the component belong to a group?
-      if (compIt->second.Group == NULL) {
+      if (compIt->second.Group == CM_NULLPTR) {
         cmCPackLogger(
           cmCPackLog::LOG_VERBOSE, "Component <"
             << compIt->second.Name
@@ -174,9 +169,9 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
   // The ALL GROUPS in ONE package case
   std::string localToplevel(initialTopLevel);
   std::string packageFileName(cmSystemTools::GetParentDirectory(toplevel));
-  std::string outputFileName(std::string(
-                               this->GetOption("CPACK_PACKAGE_FILE_NAME")) +
-                             this->GetOutputExtension());
+  std::string outputFileName(
+    std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")) +
+    this->GetOutputExtension());
   // all GROUP in one vs all COMPONENT in one
   localToplevel += "/" + compInstDirName;
 
@@ -242,15 +237,11 @@ int cmCPackDebGenerator::PackageFiles()
     // There will be 1 package for each component group
     // however one may require to ignore component group and
     // in this case you'll get 1 package for each component.
-    else {
-      return PackageComponents(componentPackageMethod ==
-                               ONE_PACKAGE_PER_COMPONENT);
-    }
+    return PackageComponents(componentPackageMethod ==
+                             ONE_PACKAGE_PER_COMPONENT);
   }
   // CASE 3 : NON COMPONENT package.
-  else {
-    return PackageComponentsAllInOne("");
-  }
+  return PackageComponentsAllInOne("");
 }
 
 int cmCPackDebGenerator::createDeb()
@@ -423,6 +414,12 @@ int cmCPackDebGenerator::createDeb()
                     << debian_compression_type << std::endl);
   }
 
+  const char* debian_archive_type =
+    this->GetOption("GEN_CPACK_DEBIAN_ARCHIVE_TYPE");
+  if (!debian_archive_type) {
+    debian_archive_type = "paxr";
+  }
+
   std::string filename_data_tar =
     strGenWDIR + "/data.tar" + compression_suffix;
 
@@ -435,7 +432,8 @@ int cmCPackDebGenerator::createDeb()
                       << filename_data_tar << "\" for writing" << std::endl);
       return 0;
     }
-    cmArchiveWrite data_tar(fileStream_data_tar, tar_compression_type, "paxr");
+    cmArchiveWrite data_tar(fileStream_data_tar, tar_compression_type,
+                            debian_archive_type);
 
     // uid/gid should be the one of the root user, and this root user has
     // always uid/gid equal to 0.
@@ -539,7 +537,8 @@ int cmCPackDebGenerator::createDeb()
       return 0;
     }
     cmArchiveWrite control_tar(fileStream_control_tar,
-                               cmArchiveWrite::CompressGZip, "paxr");
+                               cmArchiveWrite::CompressGZip,
+                               debian_archive_type);
 
     // sets permissions and uid/gid for the files
     control_tar.SetUIDAndGID(0u, 0u);
@@ -692,11 +691,10 @@ std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
   // the current COMPONENT belongs to.
   std::string groupVar =
     "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
-  if (NULL != GetOption(groupVar)) {
+  if (CM_NULLPTR != GetOption(groupVar)) {
     return std::string(GetOption(groupVar));
-  } else {
-    return componentName;
   }
+  return componentName;
 }
 
 // The following code is taken from OpenBSD ar:
@@ -739,14 +737,6 @@ std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-
-#include <sys/types.h>
-// include sys/stat.h after sys/types.h
-#include <sys/stat.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define ARMAG "!<arch>\n" /* ar "magic number" */
 #define SARMAG 8          /* strlen(ARMAG); */
@@ -826,8 +816,9 @@ static int copy_ar(CF* cfp, off_t size)
   size_t nr, nw;
   char buf[8 * 1024];
 
-  if (sz == 0)
+  if (sz == 0) {
     return 0;
+  }
 
   FILE* from = cfp->rFile;
   FILE* to = cfp->wFile;
@@ -837,16 +828,20 @@ static int copy_ar(CF* cfp, off_t size)
                        : sizeof(buf),
                      from)) > 0) {
     sz -= nr;
-    for (size_t off = 0; off < nr; nr -= off, off += nw)
-      if ((nw = fwrite(buf + off, 1, nr, to)) < nr)
+    for (size_t off = 0; off < nr; nr -= off, off += nw) {
+      if ((nw = fwrite(buf + off, 1, nr, to)) < nr) {
         return -1;
+      }
+    }
   }
-  if (sz)
+  if (sz) {
     return -2;
+  }
 
   if (cfp->flags & WPAD && (size + ar_already_written) & 1 &&
-      fwrite(&pad, 1, 1, to) != 1)
+      fwrite(&pad, 1, 1, to) != 1) {
     return -4;
+  }
 
   return 0;
 }
@@ -874,11 +869,11 @@ static int put_arobj(CF* cfp, struct stat* sb)
   if (gid > USHRT_MAX) {
     gid = USHRT_MAX;
   }
-  if (lname > sizeof(hdr->ar_name) || strchr(name, ' '))
+  if (lname > sizeof(hdr->ar_name) || strchr(name, ' ')) {
     (void)sprintf(ar_hb, HDR1, AR_EFMT1, (int)lname, (long int)sb->st_mtime,
                   (unsigned)uid, (unsigned)gid, (unsigned)sb->st_mode,
                   (long long)sb->st_size + lname, ARFMAG);
-  else {
+  } else {
     lname = 0;
     (void)sprintf(ar_hb, HDR2, name, (long int)sb->st_mtime, (unsigned)uid,
                   (unsigned)gid, (unsigned)sb->st_mode, (long long)sb->st_size,
@@ -886,12 +881,14 @@ static int put_arobj(CF* cfp, struct stat* sb)
   }
   off_t size = sb->st_size;
 
-  if (fwrite(ar_hb, 1, sizeof(HDR), cfp->wFile) != sizeof(HDR))
+  if (fwrite(ar_hb, 1, sizeof(HDR), cfp->wFile) != sizeof(HDR)) {
     return -1;
+  }
 
   if (lname) {
-    if (fwrite(name, 1, lname, cfp->wFile) != lname)
+    if (fwrite(name, 1, lname, cfp->wFile) != lname) {
       return -2;
+    }
     ar_already_written = lname;
   }
   result = copy_ar(cfp, size);
@@ -910,18 +907,18 @@ static int ar_append(const char* archive,
 {
   int eval = 0;
   FILE* aFile = cmSystemTools::Fopen(archive, "wb+");
-  if (aFile != NULL) {
+  if (aFile != CM_NULLPTR) {
     fwrite(ARMAG, SARMAG, 1, aFile);
     if (fseek(aFile, 0, SEEK_END) != -1) {
       CF cf;
       struct stat sb;
       /* Read from disk, write to an archive; pad on write. */
-      SETCF(NULL, 0, aFile, archive, WPAD);
+      SETCF(CM_NULLPTR, CM_NULLPTR, aFile, archive, WPAD);
       for (std::vector<std::string>::const_iterator fileIt = files.begin();
            fileIt != files.end(); ++fileIt) {
         const char* filename = fileIt->c_str();
         FILE* file = cmSystemTools::Fopen(filename, "rb");
-        if (file == NULL) {
+        if (file == CM_NULLPTR) {
           eval = -1;
           continue;
         }

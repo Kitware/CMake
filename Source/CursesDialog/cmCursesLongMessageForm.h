@@ -1,38 +1,31 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCursesLongMessageForm_h
 #define cmCursesLongMessageForm_h
 
-#include "cmCursesStandardIncludes.h"
+#include <cmConfigure.h>
 
 #include "cmCursesForm.h"
+#include "cmCursesStandardIncludes.h"
 
-class cmCursesCacheEntryComposite;
+#include <string>
+#include <vector>
 
 class cmCursesLongMessageForm : public cmCursesForm
 {
 public:
   cmCursesLongMessageForm(std::vector<std::string> const& messages,
                           const char* title);
-  virtual ~cmCursesLongMessageForm();
+  ~cmCursesLongMessageForm() CM_OVERRIDE;
 
   // Description:
   // Handle user input.
-  virtual void HandleInput();
+  void HandleInput() CM_OVERRIDE;
 
   // Description:
   // Display form. Use a window of size width x height, starting
   // at top, left.
-  virtual void Render(int left, int top, int width, int height);
+  void Render(int left, int top, int width, int height) CM_OVERRIDE;
 
   // Description:
   // This method should normally  called only by the form.
@@ -42,7 +35,7 @@ public:
   // Description:
   // This method should normally  called only by the form.
   // The only exception is during a resize.
-  virtual void UpdateStatusBar();
+  void UpdateStatusBar() CM_OVERRIDE;
 
 protected:
   cmCursesLongMessageForm(const cmCursesLongMessageForm& from);

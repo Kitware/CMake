@@ -36,15 +36,19 @@ Example to format locally modified files staged for commit:
 
     Utilities/Scripts/clang-format.bash --cached
 
-Example to format the current topic:
+Example to format files modified by the most recent commit:
 
-    git filter-branch \
-      --tree-filter "Utilities/Scripts/clang-format.bash --amend" \
-      master..
+    Utilities/Scripts/clang-format.bash --amend
 
 Example to format all files:
 
     Utilities/Scripts/clang-format.bash --tracked
+
+Example to format the current topic:
+
+    git filter-branch \
+      --tree-filter "Utilities/Scripts/clang-format.bash --tracked" \
+      master..
 '
 
 die() {
@@ -117,15 +121,16 @@ $git_ls -z -- '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx' |
   egrep -z -v '^Source/cmListFileLexer(\.in\.l|\.c)' |
 
   # Exclude third-party sources.
-  egrep -z -v '^Source/(cm_sha2|bindexplib)' |
+  egrep -z -v '^Source/bindexplib' |
   egrep -z -v '^Source/(kwsys|CursesDialog/form)/' |
   egrep -z -v '^Utilities/(KW|cm).*/' |
 
   # Exclude reference content.
-  egrep -z -v '^Tests/Module/GenerateExportHeader/reference/' |
+  egrep -z -v '^Tests/RunCMake/GenerateExportHeader/reference/' |
 
   # Exclude manually-formatted sources (e.g. with long lines).
   egrep -z -v '^Tests/PositionIndependentTargets/pic_test.h' |
+  egrep -z -v '^Tests/CompileFeatures/cxx_right_angle_brackets.cpp' |
 
   # Exclude sources with encoding not suported by clang-format.
   egrep -z -v '^Tests/RunCMake/CommandLine/cmake_depends/test_UTF-16LE.h' |

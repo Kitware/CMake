@@ -1,15 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2014-2015 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmWIXFilesSourceWriter_h
 #define cmWIXFilesSourceWriter_h
 
@@ -26,7 +16,8 @@
 class cmWIXFilesSourceWriter : public cmWIXSourceWriter
 {
 public:
-  cmWIXFilesSourceWriter(cmCPackLog* logger, std::string const& filename);
+  cmWIXFilesSourceWriter(cmCPackLog* logger, std::string const& filename,
+                         GuidType componentGuidType);
 
   void EmitShortcut(std::string const& id, cmWIXShortcut const& shortcut,
                     std::string const& shortcutPrefix, size_t shortcutIndex);

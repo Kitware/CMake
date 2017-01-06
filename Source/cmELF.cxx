@@ -1,20 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-#include "cmStandardIncludes.h" // to get CMAKE_USE_ELF_PARSER first
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmELF.h"
 
+#include <cm_auto_ptr.hxx>
+#include <cm_kwiml.h>
 #include <cmsys/FStream.hxx>
-#include <cmsys/auto_ptr.hxx>
+#include <map>
+#include <sstream>
+#include <stddef.h>
+#include <utility>
+#include <vector>
 
 // Include the ELF format information system header.
 #if defined(__OpenBSD__)
@@ -46,23 +41,26 @@ typedef struct Elf32_Rela Elf32_Rela;
 #if defined(__sun)
 #include <sys/link.h> // For dynamic section information
 #endif
+#ifdef _SCO_DS
+#include <link.h> // For DT_SONAME etc.
+#endif
 
 // Low-level byte swapping implementation.
 template <size_t s>
 struct cmELFByteSwapSize
 {
 };
-void cmELFByteSwap(char*, cmELFByteSwapSize<1> const&)
+void cmELFByteSwap(char* /*unused*/, cmELFByteSwapSize<1> const& /*unused*/)
 {
 }
-void cmELFByteSwap(char* data, cmELFByteSwapSize<2> const&)
+void cmELFByteSwap(char* data, cmELFByteSwapSize<2> const& /*unused*/)
 {
   char one_byte;
   one_byte = data[0];
   data[0] = data[1];
   data[1] = one_byte;
 }
-void cmELFByteSwap(char* data, cmELFByteSwapSize<4> const&)
+void cmELFByteSwap(char* data, cmELFByteSwapSize<4> const& /*unused*/)
 {
   char one_byte;
   one_byte = data[0];
@@ -72,7 +70,7 @@ void cmELFByteSwap(char* data, cmELFByteSwapSize<4> const&)
   data[1] = data[2];
   data[2] = one_byte;
 }
-void cmELFByteSwap(char* data, cmELFByteSwapSize<8> const&)
+void cmELFByteSwap(char* data, cmELFByteSwapSize<8> const& /*unused*/)
 {
   char one_byte;
   one_byte = data[0];
@@ -107,7 +105,7 @@ public:
   };
 
   // Construct and take ownership of the file stream object.
-  cmELFInternal(cmELF* external, cmsys::auto_ptr<cmsys::ifstream>& fin,
+  cmELFInternal(cmELF* external, CM_AUTO_PTR<cmsys::ifstream>& fin,
                 ByteOrderType order)
     : External(external)
     , Stream(*fin.release())
@@ -134,17 +132,12 @@ public:
 
   // Forward to the per-class implementation.
   virtual unsigned int GetNumberOfSections() const = 0;
-  virtual unsigned int GetDynamicEntryCount() = 0;
   virtual unsigned long GetDynamicEntryPosition(int j) = 0;
+  virtual cmELF::DynamicEntryList GetDynamicEntries() = 0;
+  virtual std::vector<char> EncodeDynamicEntries(
+    const cmELF::DynamicEntryList&) = 0;
   virtual StringEntry const* GetDynamicSectionString(unsigned int tag) = 0;
   virtual void PrintInfo(std::ostream& os) const = 0;
-
-  bool ReadBytes(unsigned long pos, unsigned long size, char* buf)
-  {
-    this->Stream.seekg(pos);
-    this->Stream.read(buf, size);
-    return !this->Stream.fail();
-  }
 
   // Lookup the SONAME in the DYNAMIC section.
   StringEntry const* GetSOName()
@@ -214,6 +207,7 @@ struct cmELFTypes32
 };
 
 // Configure the implementation template for 64-bit ELF files.
+#ifndef _SCO_DS
 struct cmELFTypes64
 {
   typedef Elf64_Ehdr ELF_Ehdr;
@@ -223,6 +217,7 @@ struct cmELFTypes64
   typedef KWIML_INT_uint64_t tagtype;
   static const char* GetName() { return "64-bit"; }
 };
+#endif
 
 // Parser implementation template.
 template <class Types>
@@ -237,24 +232,27 @@ public:
   typedef typename Types::tagtype tagtype;
 
   // Construct with a stream and byte swap indicator.
-  cmELFInternalImpl(cmELF* external, cmsys::auto_ptr<cmsys::ifstream>& fin,
+  cmELFInternalImpl(cmELF* external, CM_AUTO_PTR<cmsys::ifstream>& fin,
                     ByteOrderType order);
 
   // Return the number of sections as specified by the ELF header.
-  virtual unsigned int GetNumberOfSections() const
+  unsigned int GetNumberOfSections() const CM_OVERRIDE
   {
     return static_cast<unsigned int>(this->ELFHeader.e_shnum);
   }
 
-  // Get the file position and size of a dynamic section entry.
-  virtual unsigned int GetDynamicEntryCount();
-  virtual unsigned long GetDynamicEntryPosition(int j);
+  // Get the file position of a dynamic section entry.
+  unsigned long GetDynamicEntryPosition(int j) CM_OVERRIDE;
+
+  cmELF::DynamicEntryList GetDynamicEntries() CM_OVERRIDE;
+  std::vector<char> EncodeDynamicEntries(const cmELF::DynamicEntryList&)
+    CM_OVERRIDE;
 
   // Lookup a string from the dynamic section with the given tag.
-  virtual StringEntry const* GetDynamicSectionString(unsigned int tag);
+  StringEntry const* GetDynamicSectionString(unsigned int tag) CM_OVERRIDE;
 
   // Print information about the ELF file.
-  virtual void PrintInfo(std::ostream& os) const
+  void PrintInfo(std::ostream& os) const CM_OVERRIDE
   {
     os << "ELF " << Types::GetName();
     if (this->ByteOrder == ByteOrderMSB) {
@@ -289,6 +287,10 @@ public:
   }
 
 private:
+  // ByteSwap(ELF_Dyn) assumes d_val and d_ptr are the same size
+  typedef char dyn_size_assert
+    [sizeof(ELF_Dyn().d_un.d_val) == sizeof(ELF_Dyn().d_un.d_ptr) ? 1 : -1];
+
   void ByteSwap(ELF_Ehdr& elf_header)
   {
     cmELFByteSwap(elf_header.e_type);
@@ -323,121 +325,7 @@ private:
   void ByteSwap(ELF_Dyn& dyn)
   {
     cmELFByteSwap(dyn.d_tag);
-    switch (dyn.d_tag) {
-      case DT_NULL: /* dyn.d_un ignored */
-        break;
-      case DT_NEEDED:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_PLTRELSZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_PLTGOT:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_HASH:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_STRTAB:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_SYMTAB:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_RELA:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_RELASZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_RELAENT:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_STRSZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_SYMENT:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_INIT:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_FINI:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_SONAME:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_RPATH:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_SYMBOLIC: /* dyn.d_un ignored */
-        break;
-      case DT_REL:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_RELSZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_RELENT:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_PLTREL:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-      case DT_DEBUG:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-      case DT_TEXTREL: /* dyn.d_un ignored */
-        break;
-      case DT_JMPREL:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-#ifdef T_BIND_NOW
-      case T_BIND_NOW: /* dyn.d_un ignored */
-        break;
-#endif
-#ifdef DT_INIT_ARRAY
-      case DT_INIT_ARRAY:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-#endif
-#ifdef DT_FINI_ARRAY
-      case DT_FINI_ARRAY:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-#endif
-#ifdef DT_INIT_ARRAYSZ
-      case DT_INIT_ARRAYSZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-#endif
-#ifdef DT_FINI_ARRAYSZ
-      case DT_FINI_ARRAYSZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-#endif
-#ifdef DT_RUNPATH
-      case DT_RUNPATH:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-#endif
-#ifdef DT_FLAGS
-      case DT_FLAGS:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-#endif
-#ifdef DT_PREINIT_ARRAY
-      case DT_PREINIT_ARRAY:
-        cmELFByteSwap(dyn.d_un.d_ptr);
-        break;
-#endif
-#ifdef DT_PREINIT_ARRAYSZ
-      case DT_PREINIT_ARRAYSZ:
-        cmELFByteSwap(dyn.d_un.d_val);
-        break;
-#endif
-    }
+    cmELFByteSwap(dyn.d_un.d_val);
   }
 
   bool FileTypeValid(ELF_Half et)
@@ -537,8 +425,9 @@ private:
 };
 
 template <class Types>
-cmELFInternalImpl<Types>::cmELFInternalImpl(
-  cmELF* external, cmsys::auto_ptr<cmsys::ifstream>& fin, ByteOrderType order)
+cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
+                                            CM_AUTO_PTR<cmsys::ifstream>& fin,
+                                            ByteOrderType order)
   : cmELFInternal(external, fin, order)
 {
   // Read the main header.
@@ -635,20 +524,6 @@ bool cmELFInternalImpl<Types>::LoadDynamicSection()
 }
 
 template <class Types>
-unsigned int cmELFInternalImpl<Types>::GetDynamicEntryCount()
-{
-  if (!this->LoadDynamicSection()) {
-    return 0;
-  }
-  for (unsigned int i = 0; i < this->DynamicSectionEntries.size(); ++i) {
-    if (this->DynamicSectionEntries[i].d_tag == DT_NULL) {
-      return i;
-    }
-  }
-  return static_cast<unsigned int>(this->DynamicSectionEntries.size());
-}
-
-template <class Types>
 unsigned long cmELFInternalImpl<Types>::GetDynamicEntryPosition(int j)
 {
   if (!this->LoadDynamicSection()) {
@@ -662,6 +537,54 @@ unsigned long cmELFInternalImpl<Types>::GetDynamicEntryPosition(int j)
 }
 
 template <class Types>
+cmELF::DynamicEntryList cmELFInternalImpl<Types>::GetDynamicEntries()
+{
+  cmELF::DynamicEntryList result;
+
+  // Ensure entries have been read from file
+  if (!this->LoadDynamicSection()) {
+    return result;
+  }
+
+  // Copy into public array
+  result.reserve(this->DynamicSectionEntries.size());
+  for (typename std::vector<ELF_Dyn>::iterator di =
+         this->DynamicSectionEntries.begin();
+       di != this->DynamicSectionEntries.end(); ++di) {
+    ELF_Dyn& dyn = *di;
+    result.push_back(
+      std::pair<unsigned long, unsigned long>(dyn.d_tag, dyn.d_un.d_val));
+  }
+
+  return result;
+}
+
+template <class Types>
+std::vector<char> cmELFInternalImpl<Types>::EncodeDynamicEntries(
+  const cmELF::DynamicEntryList& entries)
+{
+  std::vector<char> result;
+  result.reserve(sizeof(ELF_Dyn) * entries.size());
+
+  for (cmELF::DynamicEntryList::const_iterator it = entries.begin();
+       it != entries.end(); it++) {
+    // Store the entry in an ELF_Dyn, byteswap it, then serialize to chars
+    ELF_Dyn dyn;
+    dyn.d_tag = static_cast<tagtype>(it->first);
+    dyn.d_un.d_val = static_cast<tagtype>(it->second);
+
+    if (this->NeedSwap) {
+      ByteSwap(dyn);
+    }
+
+    char* pdyn = reinterpret_cast<char*>(&dyn);
+    result.insert(result.end(), pdyn, pdyn + sizeof(ELF_Dyn));
+  }
+
+  return result;
+}
+
+template <class Types>
 cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
   unsigned int tag)
 {
@@ -672,7 +595,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
     if (dssi->second.Position > 0) {
       return &dssi->second;
     }
-    return 0;
+    return CM_NULLPTR;
   }
 
   // Create an entry for this tag.  Assume it is missing until found.
@@ -683,14 +606,14 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
 
   // Try reading the dynamic section.
   if (!this->LoadDynamicSection()) {
-    return 0;
+    return CM_NULLPTR;
   }
 
   // Get the string table referenced by the DYNAMIC section.
   ELF_Shdr const& sec = this->SectionHeaders[this->DynamicSectionIndex];
   if (sec.sh_link >= this->SectionHeaders.size()) {
     this->SetErrorMessage("Section DYNAMIC has invalid string table index.");
-    return 0;
+    return CM_NULLPTR;
   }
   ELF_Shdr const& strtab = this->SectionHeaders[sec.sh_link];
 
@@ -705,7 +628,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
       if (dyn.d_un.d_val >= strtab.sh_size) {
         this->SetErrorMessage("Section DYNAMIC references string beyond "
                               "the end of its string section.");
-        return 0;
+        return CM_NULLPTR;
       }
 
       // Seek to the position reported by the entry.
@@ -734,7 +657,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
       if (!this->Stream) {
         this->SetErrorMessage("Dynamic section specifies unreadable RPATH.");
         se.Value = "";
-        return 0;
+        return CM_NULLPTR;
       }
 
       // The value has been read successfully.  Report it.
@@ -745,17 +668,26 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
       return &se;
     }
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 //============================================================================
 // External class implementation.
 
+const long cmELF::TagRPath = DT_RPATH;
+const long cmELF::TagRunPath = DT_RUNPATH;
+
+#ifdef DT_MIPS_RLD_MAP_REL
+const long cmELF::TagMipsRldMapRel = DT_MIPS_RLD_MAP_REL;
+#else
+const long cmELF::TagMipsRldMapRel = 0;
+#endif
+
 cmELF::cmELF(const char* fname)
-  : Internal(0)
+  : Internal(CM_NULLPTR)
 {
   // Try to open the file.
-  cmsys::auto_ptr<cmsys::ifstream> fin(new cmsys::ifstream(fname));
+  CM_AUTO_PTR<cmsys::ifstream> fin(new cmsys::ifstream(fname));
 
   // Quit now if the file could not be opened.
   if (!fin.get() || !*fin) {
@@ -799,10 +731,14 @@ cmELF::cmELF(const char* fname)
   if (ident[EI_CLASS] == ELFCLASS32) {
     // 32-bit ELF
     this->Internal = new cmELFInternalImpl<cmELFTypes32>(this, fin, order);
-  } else if (ident[EI_CLASS] == ELFCLASS64) {
+  }
+#ifndef _SCO_DS
+  else if (ident[EI_CLASS] == ELFCLASS64) {
     // 64-bit ELF
     this->Internal = new cmELFInternalImpl<cmELFTypes64>(this, fin, order);
-  } else {
+  }
+#endif
+  else {
     this->ErrorMessage = "ELF file class is not 32-bit or 64-bit.";
     return;
   }
@@ -822,45 +758,43 @@ cmELF::FileType cmELF::GetFileType() const
 {
   if (this->Valid()) {
     return this->Internal->GetFileType();
-  } else {
-    return FileTypeInvalid;
   }
+  return FileTypeInvalid;
 }
 
 unsigned int cmELF::GetNumberOfSections() const
 {
   if (this->Valid()) {
     return this->Internal->GetNumberOfSections();
-  } else {
-    return 0;
   }
-}
-
-unsigned int cmELF::GetDynamicEntryCount() const
-{
-  if (this->Valid()) {
-    return this->Internal->GetDynamicEntryCount();
-  } else {
-    return 0;
-  }
+  return 0;
 }
 
 unsigned long cmELF::GetDynamicEntryPosition(int index) const
 {
   if (this->Valid()) {
     return this->Internal->GetDynamicEntryPosition(index);
-  } else {
-    return 0;
   }
+  return 0;
 }
 
-bool cmELF::ReadBytes(unsigned long pos, unsigned long size, char* buf) const
+cmELF::DynamicEntryList cmELF::GetDynamicEntries() const
 {
   if (this->Valid()) {
-    return this->Internal->ReadBytes(pos, size, buf);
-  } else {
-    return false;
+    return this->Internal->GetDynamicEntries();
   }
+
+  return cmELF::DynamicEntryList();
+}
+
+std::vector<char> cmELF::EncodeDynamicEntries(
+  const cmELF::DynamicEntryList& dentries) const
+{
+  if (this->Valid()) {
+    return this->Internal->EncodeDynamicEntries(dentries);
+  }
+
+  return std::vector<char>();
 }
 
 bool cmELF::GetSOName(std::string& soname)
@@ -868,9 +802,8 @@ bool cmELF::GetSOName(std::string& soname)
   if (StringEntry const* se = this->GetSOName()) {
     soname = se->Value;
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 
 cmELF::StringEntry const* cmELF::GetSOName()
@@ -878,9 +811,8 @@ cmELF::StringEntry const* cmELF::GetSOName()
   if (this->Valid() &&
       this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary) {
     return this->Internal->GetSOName();
-  } else {
-    return 0;
   }
+  return CM_NULLPTR;
 }
 
 cmELF::StringEntry const* cmELF::GetRPath()
@@ -889,9 +821,8 @@ cmELF::StringEntry const* cmELF::GetRPath()
       (this->Internal->GetFileType() == cmELF::FileTypeExecutable ||
        this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary)) {
     return this->Internal->GetRPath();
-  } else {
-    return 0;
   }
+  return CM_NULLPTR;
 }
 
 cmELF::StringEntry const* cmELF::GetRunPath()
@@ -900,9 +831,8 @@ cmELF::StringEntry const* cmELF::GetRunPath()
       (this->Internal->GetFileType() == cmELF::FileTypeExecutable ||
        this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary)) {
     return this->Internal->GetRunPath();
-  } else {
-    return 0;
   }
+  return CM_NULLPTR;
 }
 
 void cmELF::PrintInfo(std::ostream& os) const

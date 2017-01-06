@@ -1,26 +1,19 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef _cmDocumentation_h
 #define _cmDocumentation_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
 #include "cmDocumentationFormatter.h"
-#include "cmDocumentationSection.h"
-#include "cmake.h"
 
-namespace cmsys {
-class Directory;
-}
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <vector>
+
+class cmDocumentationSection;
+struct cmDocumentationEntry;
 
 /** Class to generate documentation.  */
 class cmDocumentation : public cmDocumentationEnums
@@ -39,7 +32,7 @@ public:
    * help arguments.
    */
   bool CheckOptions(int argc, const char* const* argv,
-                    const char* exitOpt = 0);
+                    const char* exitOpt = CM_NULLPTR);
 
   /**
    * Print help requested on the command line.  Call after

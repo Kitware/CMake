@@ -1,40 +1,25 @@
 %{
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 /*
 
-This file must be translated to C and modified to build everywhere.
+This file must be translated to C++ and modified to build everywhere.
 
-Run flex like this:
+Run flex >= 2.6 like this:
 
-  flex --prefix=cmDependsJava_yy --header-file=cmDependsJavaLexer.h -ocmDependsJavaLexer.cxx cmDependsJavaLexer.in.l
+  flex --nounistd -DFLEXINT_H --prefix=cmDependsJava_yy --header-file=cmDependsJavaLexer.h -ocmDependsJavaLexer.cxx cmDependsJavaLexer.in.l
 
-Modify cmDependsJavaLexer.c:
-  - remove TABs
-  - remove use of the 'register' storage class specifier
-  - remove "yyscanner" argument from these methods:
-      yy_fatal_error, cmDependsJava_yyalloc, cmDependsJava_yyrealloc, cmDependsJava_yyfree
-  - remove all YY_BREAK lines occurring right after return statements
-  - change while ( 1 ) to for(;;)
-
-Modify cmDependsJavaLexer.h:
-  - remove TABs
-  - remove the yy_init_globals function
-  - remove the block that includes unistd.h
-  - remove #line directives (avoids bogus warning on old Sun)
+Modify cmDependsJavaLexer.cxx:
+  - remove trailing whitespace: sed -i 's/\s*$//' cmDependsJavaLexer.h cmDependsJavaLexer.cxx
+  - remove blank lines at end of file
+  - #include "cmStandardLexer.h" at the top
+  - add cast in yy_scan_bytes for loop condition of _yybytes_len to size_t
 
 */
 
-#include "cmStandardLexer.h"
+/* IWYU pragma: no_forward_declare yyguts_t */
+
+#include <iostream>
 
 #include "cmDependsJavaParserHelper.h"
 
@@ -179,7 +164,7 @@ null { PRIMITIVE; return jp_NULLLITERAL; }
 
 \/\/.*\n { }
 [ \f\t\n\r] { }
-. 	{
+. {
   std::cerr << "Unknown character: " << yytext[0]
     << " (" << (int)yytext[0] << ")" << std::endl;
   yyextra->Error("Unknown character");

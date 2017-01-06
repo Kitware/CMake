@@ -1,18 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestConfigureCommand_h
 #define cmCTestConfigureCommand_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestHandlerCommand.h"
+
+#include <string>
+
+class cmCTestGenericHandler;
+class cmCommand;
 
 /** \class cmCTestConfigure
  * \brief Run a ctest script
@@ -27,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestConfigureCommand* ni = new cmCTestConfigureCommand;
     ni->CTest = this->CTest;
@@ -38,12 +36,10 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_configure"; }
-
-  cmTypeMacro(cmCTestConfigureCommand, cmCTestHandlerCommand);
+  std::string GetName() const CM_OVERRIDE { return "ctest_configure"; }
 
 protected:
-  cmCTestGenericHandler* InitializeHandler();
+  cmCTestGenericHandler* InitializeHandler() CM_OVERRIDE;
 
   enum
   {

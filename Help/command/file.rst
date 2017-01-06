@@ -83,10 +83,12 @@ from the input file.
 
 ::
 
-  file(<MD5|SHA1|SHA224|SHA256|SHA384|SHA512> <filename> <variable>)
+  file(<HASH> <filename> <variable>)
 
 Compute a cryptographic hash of the content of ``<filename>`` and
-store it in a ``<variable>``.
+store it in a ``<variable>``.  The supported ``<HASH>`` algorithm names
+are those listed by the :ref:`string(\<HASH\>) <Supported Hash Algorithms>`
+command.
 
 ------------------------------------------------------------------------------
 
@@ -153,7 +155,8 @@ Move a file or directory within a filesystem from ``<oldname>`` to
   file(REMOVE_RECURSE [<files>...])
 
 Remove the given files.  The ``REMOVE_RECURSE`` mode will remove the given
-files and directories, also non-empty directories
+files and directories, also non-empty directories. No error is emitted if a
+given file does not exist.
 
 ------------------------------------------------------------------------------
 
@@ -222,13 +225,19 @@ Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
 ``TIMEOUT <seconds>``
   Terminate the operation after a given total time has elapsed.
 
+``USERPWD <username>:<password>``
+  Set username and password for operation.
+
+``HTTPHEADER <HTTP-header>``
+  HTTP header for operation. Suboption can be repeated several times.
+
 Additional options to ``DOWNLOAD`` are:
 
 ``EXPECTED_HASH ALGO=<value>``
 
   Verify that the downloaded content hash matches the expected value, where
-  ``ALGO`` is one of ``MD5``, ``SHA1``, ``SHA224``, ``SHA256``, ``SHA384``, or
-  ``SHA512``.  If it does not match, the operation fails with an error.
+  ``ALGO`` is one of the algorithms supported by ``file(<HASH>)``.
+  If it does not match, the operation fails with an error.
 
 ``EXPECTED_MD5 <value>``
   Historical short-hand for ``EXPECTED_HASH MD5=<value>``.

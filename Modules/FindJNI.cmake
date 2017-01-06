@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindJNI
 # -------
@@ -22,19 +25,6 @@
 #   JAVA_INCLUDE_PATH2    = the include path to jni_md.h
 #   JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
 
-#=============================================================================
-# Copyright 2001-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 # Expand {libarch} occurences to java_libarch subdirectory(-ies) and set ${_var}
 macro(java_append_library_directories _var)
     # Determine java arch-specific library subdir
@@ -53,7 +43,7 @@ macro(java_append_library_directories _var)
         set(_java_libarch "alpha")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
         # Subdir is "arm" for both big-endian (arm) and little-endian (armel).
-        set(_java_libarch "arm")
+        set(_java_libarch "arm" "aarch32")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^mips")
         # mips* machines are bi-endian mostly so processor does not tell
         # endianess of the underlying system.
@@ -151,13 +141,14 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/jvm/java-6-sun-1.6.0.00/jre/lib/{libarch}       # can this one be removed according to #8821 ? Alex
   /usr/lib/jvm/java-6-openjdk/jre/lib/{libarch}
   /usr/lib/jvm/java-1.6.0-openjdk-1.6.0.0/jre/lib/{libarch}        # fedora
-  /usr/lib/jvm/java-8-openjdk-{libarch}/lib/{libarch}              # ubuntu 15.10
-  /usr/lib/jvm/java-7-openjdk-{libarch}/lib/{libarch}              # ubuntu 15.10
-  /usr/lib/jvm/java-6-openjdk-{libarch}/lib/{libarch}              # ubuntu 15.10
   # Debian specific paths for default JVM
   /usr/lib/jvm/default-java/jre/lib/{libarch}
   /usr/lib/jvm/default-java/jre/lib
   /usr/lib/jvm/default-java/lib
+  # Ubuntu specific paths for default JVM
+  /usr/lib/jvm/java-8-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
+  /usr/lib/jvm/java-7-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
+  /usr/lib/jvm/java-6-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
   # OpenBSD specific paths for default JVM
   /usr/local/jdk-1.7.0/jre/lib/{libarch}
   /usr/local/jre-1.7.0/lib/{libarch}
@@ -311,8 +302,11 @@ else()
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(JNI  DEFAULT_MSG  JAVA_AWT_LIBRARY JAVA_JVM_LIBRARY
-                                                    JAVA_INCLUDE_PATH  JAVA_INCLUDE_PATH2 JAVA_AWT_INCLUDE_PATH)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(JNI  DEFAULT_MSG  JAVA_AWT_LIBRARY
+                                                    JAVA_JVM_LIBRARY
+                                                    JAVA_INCLUDE_PATH
+                                                    JAVA_INCLUDE_PATH2
+                                                    JAVA_AWT_INCLUDE_PATH)
 
 mark_as_advanced(
   JAVA_AWT_LIBRARY

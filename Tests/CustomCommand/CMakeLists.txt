@@ -376,8 +376,8 @@ foreach(arg ${CHECK_ARGS} "")
   set(ARG "${arg}")
   string(REPLACE "\\" "\\\\" ARG "${ARG}")
   string(REPLACE "\"" "\\\"" ARG "${ARG}")
-  set(EXPECTED_ARGUMENTS
-    "${EXPECTED_ARGUMENTS}  \"${ARG}\",
+  string(APPEND EXPECTED_ARGUMENTS
+    "  \"${ARG}\",
 ")
 endforeach()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/check_command_line.c.in
@@ -476,7 +476,7 @@ add_custom_command(
 
 add_library(NormOutput "${gen_file}")
 
-set(gen_path "${gen_path}/bar")
+string(APPEND gen_path "/bar")
 set(gen_file "${gen_path}/bar.cxx")
 
 add_custom_command(

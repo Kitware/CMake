@@ -1,21 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddSubDirectoryCommand.h"
+
+#include <sstream>
+#include <string.h>
+
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmAddSubDirectoryCommand
 bool cmAddSubDirectoryCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
@@ -106,10 +105,6 @@ bool cmAddSubDirectoryCommand::InitialPass(
 
   // Add the subdirectory using the computed full paths.
   this->Makefile->AddSubDirectory(srcPath, binPath, excludeFromAll, true);
-
-  auto lfc = this->Makefile->GetExecutionContext();
-  lfc.Line = lfc.CloseParenLine + 1;
-  this->Makefile->CreateArbitrarySnapshot(lfc);
 
   return true;
 }

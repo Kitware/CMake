@@ -1,21 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2013 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportTryCompileFileGenerator.h"
 
-#include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cm_auto_ptr.hxx"
+
+#include <map>
+#include <utility>
 
 cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
   cmGlobalGenerator* gg, const std::vector<std::string>& targets,
@@ -63,13 +62,13 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
 
   cmGeneratorExpression ge;
 
-  cmGeneratorExpressionDAGChecker dagChecker(tgt->GetName(), propName, 0, 0);
+  cmGeneratorExpressionDAGChecker dagChecker(tgt->GetName(), propName,
+                                             CM_NULLPTR, CM_NULLPTR);
 
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
 
-  cmTarget dummyHead;
-  dummyHead.SetType(cmState::EXECUTABLE, "try_compile_dummy_exe");
-  dummyHead.SetMakefile(tgt->Target->GetMakefile());
+  cmTarget dummyHead("try_compile_dummy_exe", cmStateEnums::EXECUTABLE,
+                     cmTarget::VisibilityNormal, tgt->Target->GetMakefile());
 
   cmGeneratorTarget gDummyHead(&dummyHead, tgt->GetLocalGenerator());
 

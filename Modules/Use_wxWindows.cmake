@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # Use_wxWindows
 # -------------
@@ -28,20 +31,6 @@
 #
 #    *before* you include this file.
 
-#=============================================================================
-# Copyright 2003-2009 Kitware, Inc.
-# Copyright 2003      Jan Woetzel
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 # -----------------------------------------------------
 # 16.Feb.2004: changed INCLUDE to FIND_PACKAGE to read from users own non-system CMAKE_MODULE_PATH (Jan Woetzel JW)
 # 07/2006: rewrite as FindwxWidgets.cmake, kept for backward compatibility JW
@@ -68,7 +57,7 @@ if(WXWINDOWS_FOUND)
     link_libraries(${WXWINDOWS_LIBRARIES})
   endif()
   if (CMAKE_WXWINDOWS_CXX_FLAGS)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_WXWINDOWS_CXX_FLAGS}")
+    string(APPEND CMAKE_CXX_FLAGS " ${CMAKE_WXWINDOWS_CXX_FLAGS}")
   endif()
   if(WXWINDOWS_DEFINITIONS)
     add_definitions(${WXWINDOWS_DEFINITIONS})

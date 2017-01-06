@@ -1,15 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2015 Stephen Kelly <steveire@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmListFileCache.h"
@@ -17,53 +7,88 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cm_jsoncpp_value.h"
-#include <uv.h>
+#include "cm_uv.h"
 #endif
 
-class cmServerProtocol;
+#include <string>
+#include <vector>
 
-class cmMetadataServer
+class cmFileMonitor;
+class cmServerConnection;
+class cmServerProtocol;
+class cmServerRequest;
+class cmServerResponse;
+
+class cmServer
 {
 public:
-  enum ServerState
-  {
-    Uninitialized,
-    Started,
-    Initializing,
-    ProcessingRequests
-  };
+  class DebugInfo;
 
-  cmMetadataServer();
+  cmServer(cmServerConnection* conn, bool supportExperimental);
+  ~cmServer();
 
-  ~cmMetadataServer();
+  bool Serve(std::string* errorMessage);
 
-  void ServeMetadata(const std::string& buildDir);
-
-  bool PopOne();
-
-  void handleData(std::string const& data);
-
-  void WriteResponse(Json::Value const& jsonValue);
-
-  void SetState(ServerState state) { this->State = state; }
-
-  ServerState GetState() const { return this->State; }
+  cmFileMonitor* FileMonitor() const;
 
 private:
-  cmServerProtocol* Protocol;
-  std::string mBuildDir;
-  std::vector<std::string> mQueue;
+  void RegisterProtocol(cmServerProtocol* protocol);
 
-  std::string mDataBuffer;
-  std::string mJsonData;
+  // Callbacks from cmServerConnection:
+  void PopOne();
+  void QueueRequest(const std::string& request);
 
-  uv_loop_t* mLoop;
-  uv_pipe_t mStdin_pipe;
-  uv_pipe_t mStdout_pipe;
-  uv_tty_t mStdin_tty;
-  uv_tty_t mStdout_tty;
-  uv_pipe_t mLogFile_pipe;
+  static void reportProgress(const char* msg, float progress, void* data);
+  static void reportMessage(const char* msg, const char* title, bool& cancel,
+                            void* data);
 
-  ServerState State;
-  bool Writing;
+  // Handle requests:
+  cmServerResponse SetProtocolVersion(const cmServerRequest& request);
+
+  void PrintHello() const;
+
+  // Write responses:
+  void WriteProgress(const cmServerRequest& request, int min, int current,
+                     int max, const std::string& message) const;
+  void WriteMessage(const cmServerRequest& request, const std::string& message,
+                    const std::string& title) const;
+  void WriteResponse(const cmServerResponse& response,
+                     const DebugInfo* debug) const;
+  void WriteParseError(const std::string& message) const;
+  void WriteSignal(const std::string& name, const Json::Value& obj) const;
+
+  void WriteJsonObject(Json::Value const& jsonValue,
+                       const DebugInfo* debug) const;
+
+  static cmServerProtocol* FindMatchingProtocol(
+    const std::vector<cmServerProtocol*>& protocols, int major, int minor);
+
+  cmServerConnection* Connection = nullptr;
+  const bool SupportExperimental;
+
+  cmServerProtocol* Protocol = nullptr;
+  std::vector<cmServerProtocol*> SupportedProtocols;
+  std::vector<std::string> Queue;
+
+  std::string DataBuffer;
+  std::string JsonData;
+
+  uv_loop_t* Loop = nullptr;
+
+  typedef union
+  {
+    uv_tty_t tty;
+    uv_pipe_t pipe;
+  } InOutUnion;
+
+  InOutUnion Input;
+  InOutUnion Output;
+  uv_stream_t* InputStream = nullptr;
+  uv_stream_t* OutputStream = nullptr;
+
+  mutable bool Writing = false;
+
+  friend class cmServerConnection;
+  friend class cmServerProtocol;
+  friend class cmServerRequest;
 };

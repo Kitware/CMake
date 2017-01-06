@@ -1,40 +1,22 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestBuildHandler.h"
 
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmFileTimeComparison.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProcessOutput.h"
+#include "cmSystemTools.h"
 #include "cmXMLWriter.h"
-#include "cmake.h"
 
-//#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Process.h>
-
-// used for sleep
-#ifdef _WIN32
-#include "windows.h"
-#endif
-
-#include <float.h>
-#include <math.h>
+#include <set>
 #include <stdlib.h>
-#include <time.h>
+#include <string.h>
 
 static const char* cmCTestErrorMatches[] = {
   "^[Bb]us [Ee]rror",
@@ -92,7 +74,7 @@ static const char* cmCTestErrorMatches[] = {
   "^The project cannot be built\\.",
   "^\\[ERROR\\]",
   "^Command .* failed with exit code",
-  0
+  CM_NULLPTR
 };
 
 static const char* cmCTestErrorExceptions[] = {
@@ -107,7 +89,7 @@ static const char* cmCTestErrorExceptions[] = {
   ":[ \\t]+Where:",
   "([^ :]+):([0-9]+): Warning",
   "------ Build started: .* ------",
-  0
+  CM_NULLPTR
 };
 
 static const char* cmCTestWarningMatches[] = {
@@ -132,7 +114,7 @@ static const char* cmCTestWarningMatches[] = {
   "cc-[0-9]* CC: REMARK File = .*, Line = [0-9]*",
   "^CMake Warning.*:",
   "^\\[WARNING\\]",
-  0
+  CM_NULLPTR
 };
 
 static const char* cmCTestWarningExceptions[] = {
@@ -152,7 +134,7 @@ static const char* cmCTestWarningExceptions[] = {
   "ld32: WARNING 85: definition of dataKey in",
   "cc: warning 422: Unknown option \"\\+b",
   "_with_warning_C",
-  0
+  CM_NULLPTR
 };
 
 struct cmCTestBuildCompileErrorWarningRex
@@ -170,7 +152,7 @@ static cmCTestBuildCompileErrorWarningRex cmCTestWarningErrorFileLine[] = {
   { "^([a-zA-Z./0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2 },
   { "\"([a-zA-Z./0-9_+ ~-]+)\", line ([0-9]+)", 1, 2 },
   { "File = ([a-zA-Z./0-9_+ ~-]+), Line = ([0-9]+)", 1, 2 },
-  { 0, 0, 0 }
+  { CM_NULLPTR, 0, 0 }
 };
 
 cmCTestBuildHandler::cmCTestBuildHandler()
@@ -375,11 +357,11 @@ int cmCTestBuildHandler::ProcessHandler()
   regexes.clear();                                                            \
   cmCTestOptionalLog(this->CTest, DEBUG,                                      \
                      this << "Add " #regexes << std::endl, this->Quiet);      \
-  for (it = strings.begin(); it != strings.end(); ++it) {                     \
+  for (it = (strings).begin(); it != (strings).end(); ++it) {                 \
     cmCTestOptionalLog(this->CTest, DEBUG,                                    \
                        "Add " #strings ": " << *it << std::endl,              \
                        this->Quiet);                                          \
-    regexes.push_back(it->c_str());                                           \
+    (regexes).push_back(it->c_str());                                         \
   }
   cmCTestBuildHandlerPopulateRegexVector(this->CustomErrorMatches,
                                          this->ErrorMatchRegex);
@@ -521,7 +503,7 @@ public:
   {
   }
   FragmentCompare()
-    : FTC(0)
+    : FTC(CM_NULLPTR)
   {
   }
   bool operator()(std::string const& l, std::string const& r)
@@ -532,9 +514,8 @@ public:
     if (this->FTC->FileTimeCompare(l.c_str(), r.c_str(), &result) &&
         result != 0) {
       return result < 0;
-    } else {
-      return l < r;
     }
+    return l < r;
   }
 
 private:
@@ -785,7 +766,7 @@ void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
 
 int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
                                         const char* dir, int timeout,
-                                        std::ostream& ofs)
+                                        std::ostream& ofs, Encoding encoding)
 {
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
@@ -799,7 +780,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
        a != args.end(); ++a) {
     argv.push_back(a->c_str());
   }
-  argv.push_back(0);
+  argv.push_back(CM_NULLPTR);
 
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run command:",
                      this->Quiet);
@@ -829,6 +810,8 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 
   char* data;
   int length;
+  cmProcessOutput processOutput(encoding);
+  std::string strdata;
   cmCTestOptionalLog(
     this->CTest, HANDLER_PROGRESS_OUTPUT, "   Each symbol represents "
       << tick_len << " bytes of output." << std::endl
@@ -851,7 +834,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 
   // For every chunk of data
   int res;
-  while ((res = cmsysProcess_WaitForData(cp, &data, &length, 0))) {
+  while ((res = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR))) {
     // Replace '\0' with '\n', since '\0' does not really make sense. This is
     // for Visual Studio output
     for (int cc = 0; cc < length; ++cc) {
@@ -862,16 +845,29 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 
     // Process the chunk of data
     if (res == cmsysProcess_Pipe_STDERR) {
-      this->ProcessBuffer(data, length, tick, tick_len, ofs,
+      processOutput.DecodeText(data, length, strdata, 1);
+      this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len, ofs,
                           &this->BuildProcessingErrorQueue);
     } else {
-      this->ProcessBuffer(data, length, tick, tick_len, ofs,
+      processOutput.DecodeText(data, length, strdata, 2);
+      this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len, ofs,
                           &this->BuildProcessingQueue);
     }
   }
+  processOutput.DecodeText(std::string(), strdata, 1);
+  if (!strdata.empty()) {
+    this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len, ofs,
+                        &this->BuildProcessingErrorQueue);
+  }
+  processOutput.DecodeText(std::string(), strdata, 2);
+  if (!strdata.empty()) {
+    this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len, ofs,
+                        &this->BuildProcessingQueue);
+  }
 
-  this->ProcessBuffer(0, 0, tick, tick_len, ofs, &this->BuildProcessingQueue);
-  this->ProcessBuffer(0, 0, tick, tick_len, ofs,
+  this->ProcessBuffer(CM_NULLPTR, 0, tick, tick_len, ofs,
+                      &this->BuildProcessingQueue);
+  this->ProcessBuffer(CM_NULLPTR, 0, tick, tick_len, ofs,
                       &this->BuildProcessingErrorQueue);
   cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT, " Size of output: "
                        << ((this->BuildOutputLogSize + 512) / 1024) << "K"
@@ -879,7 +875,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
                      this->Quiet);
 
   // Properly handle output of the build command
-  cmsysProcess_WaitForExit(cp, 0);
+  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
   int result = cmsysProcess_GetState(cp);
 
   if (result == cmsysProcess_State_Exited) {
@@ -939,7 +935,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 //######################################################################
 //######################################################################
 
-void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
+void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
                                         size_t& tick, size_t tick_len,
                                         std::ostream& ofs,
                                         t_BuildProcessingQueueType* queue)
@@ -952,7 +948,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
   this->BuildOutputLogSize += length;
 
   // until there are any lines left in the buffer
-  while (1) {
+  while (true) {
     // Find the end of line
     t_BuildProcessingQueueType::iterator it;
     for (it = queue->begin(); it != queue->end(); ++it) {

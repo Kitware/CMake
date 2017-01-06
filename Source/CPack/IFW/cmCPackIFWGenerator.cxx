@@ -1,32 +1,21 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWGenerator.h"
 
-#include <CPack/cmCPackComponentGroup.h>
-#include <CPack/cmCPackLog.h>
+#include "CPack/cmCPackComponentGroup.h"
+#include "CPack/cmCPackGenerator.h"
+#include "CPack/cmCPackLog.h"
+#include "cmCPackIFWInstaller.h"
+#include "cmCPackIFWPackage.h"
+#include "cmCPackIFWRepository.h"
+#include "cmGeneratedFileStream.h"
+#include "cmSystemTools.h"
+#include "cmTimestamp.h"
+#include "cmVersionConfig.h"
+#include "cmXMLWriter.h"
 
-#include <cmsys/Directory.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/SystemTools.hxx>
-
-#include <cmGeneratedFileStream.h>
-#include <cmGlobalGenerator.h>
-#include <cmMakefile.h>
-#include <cmSystemTools.h>
-#include <cmTimestamp.h>
-#include <cmVersionConfig.h>
-#include <cmXMLWriter.h>
+#include <sstream>
+#include <utility>
 
 cmCPackIFWGenerator::cmCPackIFWGenerator()
 {
@@ -101,8 +90,9 @@ int cmCPackIFWGenerator::PackageFiles()
     int retVal = 1;
     cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Generate repository"
                     << std::endl);
-    bool res = cmSystemTools::RunSingleCommand(
-      ifwCmd.c_str(), &output, &output, &retVal, 0, this->GeneratorVerbose, 0);
+    bool res = cmSystemTools::RunSingleCommand(ifwCmd.c_str(), &output,
+                                               &output, &retVal, CM_NULLPTR,
+                                               this->GeneratorVerbose, 0);
     if (!res || retVal) {
       cmGeneratedFileStream ofs(ifwTmpFile.c_str());
       ofs << "# Run command: " << ifwCmd << std::endl
@@ -130,6 +120,19 @@ int cmCPackIFWGenerator::PackageFiles()
   {
     std::string ifwCmd = BinCreator;
     ifwCmd += " -c " + this->toplevel + "/config/config.xml";
+
+    if (!Installer.Resources.empty()) {
+      ifwCmd += " -r ";
+      std::vector<std::string>::iterator it = Installer.Resources.begin();
+      std::string path = this->toplevel + "/resources/";
+      ifwCmd += path + *it;
+      ++it;
+      while (it != Installer.Resources.end()) {
+        ifwCmd += "," + path + *it;
+        ++it;
+      }
+    }
+
     ifwCmd += " -p " + this->toplevel + "/packages";
 
     if (!PkgsDirsVector.empty()) {
@@ -178,8 +181,9 @@ int cmCPackIFWGenerator::PackageFiles()
     std::string output;
     int retVal = 1;
     cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Generate package" << std::endl);
-    bool res = cmSystemTools::RunSingleCommand(
-      ifwCmd.c_str(), &output, &output, &retVal, 0, this->GeneratorVerbose, 0);
+    bool res = cmSystemTools::RunSingleCommand(ifwCmd.c_str(), &output,
+                                               &output, &retVal, CM_NULLPTR,
+                                               this->GeneratorVerbose, 0);
     if (!res || retVal) {
       cmGeneratedFileStream ofs(ifwTmpFile.c_str());
       ofs << "# Run command: " << ifwCmd << std::endl
@@ -345,18 +349,21 @@ cmCPackComponent* cmCPackIFWGenerator::GetComponent(
   const std::string& projectName, const std::string& componentName)
 {
   ComponentsMap::iterator cit = Components.find(componentName);
-  if (cit != Components.end())
+  if (cit != Components.end()) {
     return &(cit->second);
+  }
 
   cmCPackComponent* component =
     cmCPackGenerator::GetComponent(projectName, componentName);
-  if (!component)
+  if (!component) {
     return component;
+  }
 
   std::string name = GetComponentPackageName(component);
   PackagesMap::iterator pit = Packages.find(name);
-  if (pit != Packages.end())
+  if (pit != Packages.end()) {
     return component;
+  }
 
   cmCPackIFWPackage* package = &Packages[name];
   package->Name = name;
@@ -387,13 +394,15 @@ cmCPackComponentGroup* cmCPackIFWGenerator::GetComponentGroup(
 {
   cmCPackComponentGroup* group =
     cmCPackGenerator::GetComponentGroup(projectName, groupName);
-  if (!group)
+  if (!group) {
     return group;
+  }
 
   std::string name = GetGroupPackageName(group);
   PackagesMap::iterator pit = Packages.find(name);
-  if (pit != Packages.end())
+  if (pit != Packages.end()) {
     return group;
+  }
 
   cmCPackIFWPackage* package = &Packages[name];
   package->Name = name;
@@ -462,8 +471,9 @@ std::string cmCPackIFWGenerator::GetGroupPackageName(
   cmCPackComponentGroup* group) const
 {
   std::string name;
-  if (!group)
+  if (!group) {
     return name;
+  }
   if (cmCPackIFWPackage* package = GetGroupPackage(group)) {
     return package->Name;
   }
@@ -488,8 +498,9 @@ std::string cmCPackIFWGenerator::GetComponentPackageName(
   cmCPackComponent* component) const
 {
   std::string name;
-  if (!component)
+  if (!component) {
     return name;
+  }
   if (cmCPackIFWPackage* package = GetComponentPackage(component)) {
     return package->Name;
   }
@@ -519,7 +530,7 @@ cmCPackIFWPackage* cmCPackIFWGenerator::GetGroupPackage(
 {
   std::map<cmCPackComponentGroup*, cmCPackIFWPackage*>::const_iterator pit =
     GroupPackages.find(group);
-  return pit != GroupPackages.end() ? pit->second : 0;
+  return pit != GroupPackages.end() ? pit->second : CM_NULLPTR;
 }
 
 cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
@@ -527,15 +538,16 @@ cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
 {
   std::map<cmCPackComponent*, cmCPackIFWPackage*>::const_iterator pit =
     ComponentPackages.find(component);
-  return pit != ComponentPackages.end() ? pit->second : 0;
+  return pit != ComponentPackages.end() ? pit->second : CM_NULLPTR;
 }
 
 cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
   const std::string& repositoryName)
 {
   RepositoriesMap::iterator rit = Repositories.find(repositoryName);
-  if (rit != Repositories.end())
+  if (rit != Repositories.end()) {
     return &(rit->second);
+  }
 
   cmCPackIFWRepository* repository = &Repositories[repositoryName];
   repository->Name = repositoryName;
@@ -548,7 +560,7 @@ cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
     }
   } else {
     Repositories.erase(repositoryName);
-    repository = 0;
+    repository = CM_NULLPTR;
     cmCPackLogger(cmCPackLog::LOG_WARNING, "Invalid repository \""
                     << repositoryName << "\""
                     << " configuration. Repository will be skipped."
@@ -559,7 +571,7 @@ cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
 
 void cmCPackIFWGenerator::WriteGeneratedByToStrim(cmXMLWriter& xout)
 {
-  std::stringstream comment;
+  std::ostringstream comment;
   comment << "Generated by CPack " << CMake_VERSION << " IFW generator "
           << "for QtIFW ";
   if (IsVersionLess("2.0")) {

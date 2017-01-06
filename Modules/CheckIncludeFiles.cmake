@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # CheckIncludeFiles
 # -----------------
@@ -31,19 +34,6 @@
 # See modules :module:`CheckIncludeFile` and :module:`CheckIncludeFileCXX`
 # to check for a single header file in ``C`` or ``CXX`` languages.
 
-#=============================================================================
-# Copyright 2003-2012 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
   if(NOT DEFINED "${VARIABLE}")
     set(CMAKE_CONFIGURABLE_FILE_CONTENT "/* */\n")
@@ -55,11 +45,11 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
     set(CHECK_INCLUDE_FILES_CONTENT "/* */\n")
     set(MACRO_CHECK_INCLUDE_FILES_FLAGS ${CMAKE_REQUIRED_FLAGS})
     foreach(FILE ${INCLUDE})
-      set(CMAKE_CONFIGURABLE_FILE_CONTENT
-        "${CMAKE_CONFIGURABLE_FILE_CONTENT}#include <${FILE}>\n")
+      string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT
+        "#include <${FILE}>\n")
     endforeach()
-    set(CMAKE_CONFIGURABLE_FILE_CONTENT
-      "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n\nint main(void){return 0;}\n")
+    string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT
+      "\n\nint main(void){return 0;}\n")
     configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
       "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c" @ONLY)
 

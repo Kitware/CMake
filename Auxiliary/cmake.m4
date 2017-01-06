@@ -1,14 +1,5 @@
-dnl ============================================================================
-dnl   CMake - Cross Platform Makefile Generator
-dnl   Copyright 2011 Matthias Kretz, kretz@kde.org
-dnl
-dnl   Distributed under the OSI-approved BSD License (the "License");
-dnl   see accompanying file Copyright.txt for details.
-dnl
-dnl   This software is distributed WITHOUT ANY WARRANTY; without even the
-dnl   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-dnl   See the License for more information.
-dnl ============================================================================
+dnl Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+dnl file Copyright.txt or https://cmake.org/licensing for details.
 
 AC_DEFUN([CMAKE_FIND_BINARY],
 [AC_ARG_VAR([CMAKE_BINARY], [path to the cmake binary])dnl

@@ -1,14 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2010 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmArchiveWrite.h"
 
 #include "cmLocale.h"
@@ -16,7 +7,11 @@
 #include "cm_get_date.h"
 #include <cm_libarchive.h>
 #include <cmsys/Directory.hxx>
+#include <cmsys/Encoding.hxx>
 #include <cmsys/FStream.hxx>
+#include <iostream>
+#include <string.h>
+#include <time.h>
 
 #ifndef __LA_SSIZE_T
 #define __LA_SSIZE_T la_ssize_t
@@ -64,15 +59,15 @@ public:
 struct cmArchiveWrite::Callback
 {
   // archive_write_callback
-  static __LA_SSIZE_T Write(struct archive*, void* cd, const void* b, size_t n)
+  static __LA_SSIZE_T Write(struct archive* /*unused*/, void* cd,
+                            const void* b, size_t n)
   {
     cmArchiveWrite* self = static_cast<cmArchiveWrite*>(cd);
     if (self->Stream.write(static_cast<const char*>(b),
                            static_cast<std::streamsize>(n))) {
       return static_cast<__LA_SSIZE_T>(n);
-    } else {
-      return static_cast<__LA_SSIZE_T>(-1);
     }
+    return static_cast<__LA_SSIZE_T>(-1);
   }
 };
 
@@ -151,9 +146,9 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
   }
 
   if (archive_write_open(
-        this->Archive, this, 0,
+        this->Archive, this, CM_NULLPTR,
         reinterpret_cast<archive_write_callback*>(&Callback::Write),
-        0) != ARCHIVE_OK) {
+        CM_NULLPTR) != ARCHIVE_OK) {
     this->Error = "archive_write_open: ";
     this->Error += cm_archive_error_string(this->Archive);
     return;
@@ -229,7 +224,8 @@ bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
   Entry e;
   cm_archive_entry_copy_sourcepath(e, file);
   cm_archive_entry_copy_pathname(e, dest);
-  if (archive_read_disk_entry_from_file(this->Disk, e, -1, 0) != ARCHIVE_OK) {
+  if (archive_read_disk_entry_from_file(this->Disk, e, -1, CM_NULLPTR) !=
+      ARCHIVE_OK) {
     this->Error = "archive_read_disk_entry_from_file '";
     this->Error += file;
     this->Error += "': ";
@@ -266,7 +262,7 @@ bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
   }
 
   if (this->PermissionsMask.IsSet()) {
-    mode_t perm = archive_entry_perm(e);
+    int perm = archive_entry_perm(e);
     archive_entry_set_perm(e, perm & this->PermissionsMask.Get());
   }
 

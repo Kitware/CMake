@@ -1,16 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-#=============================================================================
-# Copyright 2014 Stephen Kelly <steveire@gmail.com>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 function(_readFile file)
   include(${file})
@@ -25,7 +15,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
 
 function(compiler_id_detection outvar lang)
 
-  if (NOT lang STREQUAL Fortran)
+  if (NOT lang STREQUAL Fortran AND NOT lang STREQUAL CSharp)
     file(GLOB lang_files
       "${CMAKE_ROOT}/Modules/Compiler/*-DetermineCompiler.cmake")
     set(nonlang CXX)
@@ -100,6 +90,11 @@ function(compiler_id_detection outvar lang)
     list(APPEND ordered_compilers
       MIPSpro)
 
+    #Currently the only CUDA compilers are NVIDIA
+    if(lang STREQUAL CUDA)
+      set(ordered_compilers NVIDIA)
+    endif()
+
     if(CID_ID_DEFINE)
       foreach(Id ${ordered_compilers})
         set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}# define ${CID_PREFIX}COMPILER_IS_${Id} 0\n")
@@ -120,18 +115,18 @@ function(compiler_id_detection outvar lang)
       if (CID_ID_STRING)
         set(PREFIX ${CID_PREFIX})
         string(CONFIGURE "${_compiler_id_simulate_${Id}}" SIMULATE_BLOCK @ONLY)
-        set(id_content "${id_content}# define ${CID_PREFIX}COMPILER_ID \"${Id}\"${SIMULATE_BLOCK}")
+        string(APPEND id_content "# define ${CID_PREFIX}COMPILER_ID \"${Id}\"${SIMULATE_BLOCK}")
       endif()
       if (CID_ID_DEFINE)
-        set(id_content "${id_content}# undef ${CID_PREFIX}COMPILER_IS_${Id}\n")
-        set(id_content "${id_content}# define ${CID_PREFIX}COMPILER_IS_${Id} 1\n")
+        string(APPEND id_content "# undef ${CID_PREFIX}COMPILER_IS_${Id}\n")
+        string(APPEND id_content "# define ${CID_PREFIX}COMPILER_IS_${Id} 1\n")
       endif()
       if (CID_VERSION_STRINGS)
         set(PREFIX ${CID_PREFIX})
         set(MACRO_DEC DEC)
         set(MACRO_HEX HEX)
         string(CONFIGURE "${_compiler_id_version_compute_${Id}}" VERSION_BLOCK @ONLY)
-        set(id_content "${id_content}${VERSION_BLOCK}\n")
+        string(APPEND id_content "${VERSION_BLOCK}\n")
       endif()
       set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}\n${id_content}")
       set(pp_if "#elif")

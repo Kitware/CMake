@@ -1,17 +1,12 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindProgramCommand.h"
 
-#include <stdlib.h>
+#include "cmMakefile.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 #if defined(__APPLE__)
 #include <CoreFoundation/CoreFoundation.h>
@@ -99,7 +94,7 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn,
     if (this->AlreadyInCacheWithoutMetaInfo) {
       this->Makefile->AddCacheDefinition(this->VariableName, "",
                                          this->VariableDocumentation.c_str(),
-                                         cmState::FILEPATH);
+                                         cmStateEnums::FILEPATH);
     }
     return true;
   }
@@ -109,19 +104,19 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn,
     // Save the value in the cache
     this->Makefile->AddCacheDefinition(this->VariableName, result.c_str(),
                                        this->VariableDocumentation.c_str(),
-                                       cmState::FILEPATH);
+                                       cmStateEnums::FILEPATH);
 
     return true;
   }
   this->Makefile->AddCacheDefinition(
     this->VariableName, (this->VariableName + "-NOTFOUND").c_str(),
-    this->VariableDocumentation.c_str(), cmState::FILEPATH);
+    this->VariableDocumentation.c_str(), cmStateEnums::FILEPATH);
   return true;
 }
 
 std::string cmFindProgramCommand::FindProgram()
 {
-  std::string program = "";
+  std::string program;
 
   if (this->SearchAppBundleFirst || this->SearchAppBundleOnly) {
     program = FindAppBundle();
@@ -140,9 +135,8 @@ std::string cmFindProgramCommand::FindNormalProgram()
 {
   if (this->NamesPerDir) {
     return this->FindNormalProgramNamesPerDir();
-  } else {
-    return this->FindNormalProgramDirsPerName();
   }
+  return this->FindNormalProgramDirsPerName();
 }
 
 std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
@@ -220,7 +214,7 @@ std::string cmFindProgramCommand::FindAppBundle()
 
 std::string cmFindProgramCommand::GetBundleExecutable(std::string bundlePath)
 {
-  std::string executable = "";
+  std::string executable;
   (void)bundlePath;
 #if defined(__APPLE__)
   // Started with an example on developer.apple.com about finding bundles

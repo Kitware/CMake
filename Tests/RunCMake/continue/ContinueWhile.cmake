@@ -1,7 +1,7 @@
 message(STATUS "start")
 unset(iter)
 while(NOT "${iter}" STREQUAL "aaaaa")
-  set(iter "${iter}a")
+  string(APPEND iter "a")
   if("${iter}" STREQUAL "aaa")
     continue()
   endif()

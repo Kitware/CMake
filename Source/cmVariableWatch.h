@@ -1,18 +1,13 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmVariableWatch_h
 #define cmVariableWatch_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <map>
+#include <string>
+#include <vector>
 
 class cmMakefile;
 
@@ -36,9 +31,10 @@ public:
    * Add watch to the variable
    */
   bool AddWatch(const std::string& variable, WatchMethod method,
-                void* client_data = 0, DeleteData delete_data = 0);
+                void* client_data = CM_NULLPTR,
+                DeleteData delete_data = CM_NULLPTR);
   void RemoveWatch(const std::string& variable, WatchMethod method,
-                   void* client_data = 0);
+                   void* client_data = CM_NULLPTR);
 
   /**
    * This method is called when variable is accessed
@@ -71,9 +67,9 @@ protected:
     void* ClientData;
     DeleteData DeleteDataCall;
     Pair()
-      : Method(0)
-      , ClientData(0)
-      , DeleteDataCall(0)
+      : Method(CM_NULLPTR)
+      , ClientData(CM_NULLPTR)
+      , DeleteDataCall(CM_NULLPTR)
     {
     }
     ~Pair()

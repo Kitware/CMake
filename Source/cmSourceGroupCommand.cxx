@@ -1,21 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceGroupCommand.h"
+
+#include <sstream>
+
+#include "cmMakefile.h"
+#include "cmSourceGroup.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmSourceGroupCommand
 bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
@@ -28,7 +27,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
   std::vector<std::string> folders =
     cmSystemTools::tokenize(args[0], delimiter);
 
-  cmSourceGroup* sg = 0;
+  cmSourceGroup* sg = CM_NULLPTR;
   sg = this->Makefile->GetSourceGroup(folders);
   if (!sg) {
     this->Makefile->AddSourceGroup(folders);
@@ -70,7 +69,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
         src += "/";
         src += args[i];
       }
-      src = cmSystemTools::CollapseFullPath(src.c_str());
+      src = cmSystemTools::CollapseFullPath(src);
       sg->AddGroupFile(src);
     } else {
       std::ostringstream err;

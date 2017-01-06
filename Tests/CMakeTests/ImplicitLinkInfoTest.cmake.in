@@ -112,6 +112,12 @@ set(linux64_test3_libs "gfortran;m;quadmath;m;c")
 set(linux64_test3_dirs "/usr/lib/gcc/x86_64-redhat-linux/5.1.1;/usr/lib64;/lib64;/usr/lib")
 list(APPEND platforms linux64_test3)
 
+# clang -fsanitize=memory
+set(linux64_clang_sanitize_memory_text [[ "/usr/bin/ld" --hash-style=both --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o a.out /usr/bin/../lib/gcc/x86_64-linux-gnu/5.4.0/../../../x86_64-linux-gnu/crt1.o /usr/bin/../lib/gcc/x86_64-linux-gnu/5.4.0/../../../x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/5.4.0/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/5.4.0 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/5.4.0/../../../x86_64-linux-gnu -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/5.4.0/../../.. -L/usr/lib/llvm-3.8/bin/../lib -L/lib -L/usr/lib -whole-archive /usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/lib/linux/libclang_rt.msan-x86_64.a -no-whole-archive --dynamic-list=/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/lib/linux/libclang_rt.msan-x86_64.a.syms /tmp/dummy-27898d.o --no-as-needed -lpthread -lrt -lm -ldl -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/bin/../lib/gcc/x86_64-linux-gnu/5.4.0/crtend.o /usr/bin/../lib/gcc/x86_64-linux-gnu/5.4.0/../../../x86_64-linux-gnu/crtn.o]])
+set(linux64_clang_sanitize_memory_libs "pthread;rt;m;dl;c")
+set(linux64_clang_sanitize_memory_dirs "/usr/lib/gcc/x86_64-linux-gnu/5.4.0;/usr/lib/x86_64-linux-gnu;/lib/x86_64-linux-gnu;/lib64;/usr/lib;/usr/lib/llvm-3.8/lib;/lib")
+list(APPEND platforms linux64_clang_sanitize_memory)
+
 #-----------------------------------------------------------------------------
 # Mac
 

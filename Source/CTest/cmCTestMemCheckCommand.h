@@ -1,20 +1,16 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestMemCheckCommand_h
 #define cmCTestMemCheckCommand_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestTestCommand.h"
 
+#include <string>
+
 class cmCTestGenericHandler;
+class cmCommand;
 
 /** \class cmCTestMemCheck
  * \brief Run a ctest script
@@ -24,12 +20,12 @@ class cmCTestGenericHandler;
 class cmCTestMemCheckCommand : public cmCTestTestCommand
 {
 public:
-  cmCTestMemCheckCommand() {}
+  cmCTestMemCheckCommand();
 
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestMemCheckCommand* ni = new cmCTestMemCheckCommand;
     ni->CTest = this->CTest;
@@ -40,12 +36,18 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_memcheck"; }
-
-  cmTypeMacro(cmCTestMemCheckCommand, cmCTestTestCommand);
+  std::string GetName() const CM_OVERRIDE { return "ctest_memcheck"; }
 
 protected:
-  cmCTestGenericHandler* InitializeActualHandler();
+  cmCTestGenericHandler* InitializeActualHandler() CM_OVERRIDE;
+
+  void ProcessAdditionalValues(cmCTestGenericHandler* handler) CM_OVERRIDE;
+
+  enum
+  {
+    ctm_DEFECT_COUNT = ctt_LAST,
+    ctm_LAST
+  };
 };
 
 #endif

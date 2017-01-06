@@ -1,18 +1,22 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOutputRequiredFilesCommand.h"
 
-#include "cmAlgorithms.h"
 #include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <utility>
+
+#include "cmAlgorithms.h"
+#include "cmGeneratorExpression.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmSourceFile.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cm_unordered_map.hxx"
+
+class cmExecutionStatus;
 
 /** \class cmDependInformation
  * \brief Store dependency information for a single source file.
@@ -28,7 +32,7 @@ public:
    */
   cmDependInformation()
     : DependDone(false)
-    , SourceFile(0)
+    , SourceFile(CM_NULLPTR)
   {
   }
 
@@ -154,7 +158,7 @@ public:
    */
   const cmDependInformation* FindDependencies(const char* file)
   {
-    cmDependInformation* info = this->GetDependInformation(file, 0);
+    cmDependInformation* info = this->GetDependInformation(file, CM_NULLPTR);
     this->GenerateDependInformation(info);
     return info;
   }
@@ -176,34 +180,31 @@ protected:
     while (cmSystemTools::GetLineFromStream(fin, line)) {
       if (cmHasLiteralPrefix(line.c_str(), "#include")) {
         // if it is an include line then create a string class
-        std::string currentline = line;
-        size_t qstart = currentline.find('\"', 8);
+        size_t qstart = line.find('\"', 8);
         size_t qend;
         // if a quote is not found look for a <
         if (qstart == std::string::npos) {
-          qstart = currentline.find('<', 8);
+          qstart = line.find('<', 8);
           // if a < is not found then move on
           if (qstart == std::string::npos) {
-            cmSystemTools::Error("unknown include directive ",
-                                 currentline.c_str());
+            cmSystemTools::Error("unknown include directive ", line.c_str());
             continue;
           } else {
-            qend = currentline.find('>', qstart + 1);
+            qend = line.find('>', qstart + 1);
           }
         } else {
-          qend = currentline.find('\"', qstart + 1);
+          qend = line.find('\"', qstart + 1);
         }
         // extract the file being included
-        std::string includeFile =
-          currentline.substr(qstart + 1, qend - qstart - 1);
+        std::string includeFile = line.substr(qstart + 1, qend - qstart - 1);
         // see if the include matches the regular expression
         if (!this->IncludeFileRegularExpression.find(includeFile)) {
           if (this->Verbose) {
             std::string message = "Skipping ";
             message += includeFile;
             message += " for file ";
-            message += info->FullPath.c_str();
-            cmSystemTools::Error(message.c_str(), 0);
+            message += info->FullPath;
+            cmSystemTools::Error(message.c_str(), CM_NULLPTR);
           }
           continue;
         }
@@ -307,10 +308,10 @@ protected:
     // If dependencies are already done, stop now.
     if (info->DependDone) {
       return;
-    } else {
-      // Make sure we don't visit the same file more than once.
-      info->DependDone = true;
     }
+    // Make sure we don't visit the same file more than once.
+    info->DependDone = true;
+
     const char* path = info->FullPath.c_str();
     if (!path) {
       cmSystemTools::Error(
@@ -329,7 +330,7 @@ protected:
 
     // See if the cmSourceFile for it has any files specified as
     // dependency hints.
-    if (info->SourceFile != 0) {
+    if (info->SourceFile != CM_NULLPTR) {
 
       // Get the cmSourceFile corresponding to this.
       const cmSourceFile& cFile = *(info->SourceFile);
@@ -405,15 +406,14 @@ protected:
     if (result != this->DependInformationMap.end()) {
       // Found an instance, return it.
       return result->second;
-    } else {
-      // Didn't find an instance.  Create a new one and save it.
-      cmDependInformation* info = new cmDependInformation;
-      info->FullPath = fullPath;
-      info->PathOnly = cmSystemTools::GetFilenamePath(fullPath);
-      info->IncludeName = file;
-      this->DependInformationMap[fullPath] = info;
-      return info;
     }
+    // Didn't find an instance.  Create a new one and save it.
+    cmDependInformation* info = new cmDependInformation;
+    info->FullPath = fullPath;
+    info->PathOnly = cmSystemTools::GetFilenamePath(fullPath);
+    info->IncludeName = file;
+    this->DependInformationMap[fullPath] = info;
+    return info;
   }
 
   /**
@@ -517,7 +517,7 @@ bool cmOutputRequiredFilesCommand::InitialPass(
   const cmDependInformation* info = md.FindDependencies(this->File.c_str());
   if (info) {
     // write them out
-    FILE* fout = cmsys::SystemTools::Fopen(this->OutputFile.c_str(), "w");
+    FILE* fout = cmsys::SystemTools::Fopen(this->OutputFile, "w");
     if (!fout) {
       std::string err = "Can not open output file: ";
       err += this->OutputFile;

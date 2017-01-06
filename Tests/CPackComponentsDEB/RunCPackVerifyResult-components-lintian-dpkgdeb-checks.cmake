@@ -41,7 +41,7 @@ if(LINTIAN_EXECUTABLE)
                                   FILENAME "${_f}"
                                   ERROR_REGEX_STRINGS "${STRINGS_TO_AVOID}")
 
-    set(lintian_output_errors_all "${lintian_output_errors_all}${lintian_output_errors}")
+    string(APPEND lintian_output_errors_all "${lintian_output_errors}")
   endforeach()
 
   if(NOT "${lintian_output_errors_all}" STREQUAL "")

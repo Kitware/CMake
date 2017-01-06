@@ -1,40 +1,38 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestTestHandler.h"
+
+#include <algorithm>
+#include <cmsys/Base64.h>
+#include <cmsys/Directory.hxx>
+#include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
+#include <functional>
+#include <iomanip>
+#include <iterator>
+#include <set>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #include "cmCTest.h"
 #include "cmCTestBatchTestHandler.h"
 #include "cmCTestMultiProcessHandler.h"
-#include "cmCTestRunTest.h"
 #include "cmCommand.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
+#include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
+#include "cm_auto_ptr.hxx"
 #include "cm_utf8.h"
 #include "cmake.h"
-#include <cmsys/Base64.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Process.h>
-#include <cmsys/RegularExpression.hxx>
 
-#include <float.h>
-#include <math.h>
-#include <stdlib.h>
-
-#include <set>
+class cmExecutionStatus;
 
 class cmCTestSubdirCommand : public cmCommand
 {
@@ -42,7 +40,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestSubdirCommand* c = new cmCTestSubdirCommand;
     c->TestHandler = this->TestHandler;
@@ -53,21 +51,19 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus&);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "subdirs"; }
-
-  cmTypeMacro(cmCTestSubdirCommand, cmCommand);
+  std::string GetName() const CM_OVERRIDE { return "subdirs"; }
 
   cmCTestTestHandler* TestHandler;
 };
 
 bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
-                                       cmExecutionStatus&)
+                                       cmExecutionStatus& /*unused*/)
 {
   if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
@@ -123,7 +119,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestAddSubdirectoryCommand* c = new cmCTestAddSubdirectoryCommand;
     c->TestHandler = this->TestHandler;
@@ -134,21 +130,19 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus&);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "add_subdirectory"; }
-
-  cmTypeMacro(cmCTestAddSubdirectoryCommand, cmCommand);
+  std::string GetName() const CM_OVERRIDE { return "add_subdirectory"; }
 
   cmCTestTestHandler* TestHandler;
 };
 
 bool cmCTestAddSubdirectoryCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+  std::vector<std::string> const& args, cmExecutionStatus& /*unused*/)
 {
   if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
@@ -197,7 +191,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestAddTestCommand* c = new cmCTestAddTestCommand;
     c->TestHandler = this->TestHandler;
@@ -208,21 +202,19 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const&,
-                           cmExecutionStatus&);
+  bool InitialPass(std::vector<std::string> const& /*args*/,
+                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "add_test"; }
-
-  cmTypeMacro(cmCTestAddTestCommand, cmCommand);
+  std::string GetName() const CM_OVERRIDE { return "add_test"; }
 
   cmCTestTestHandler* TestHandler;
 };
 
 bool cmCTestAddTestCommand::InitialPass(std::vector<std::string> const& args,
-                                        cmExecutionStatus&)
+                                        cmExecutionStatus& /*unused*/)
 {
   if (args.size() < 2) {
     this->SetError("called with incorrect number of arguments");
@@ -237,7 +229,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestSetTestsPropertiesCommand* c = new cmCTestSetTestsPropertiesCommand;
     c->TestHandler = this->TestHandler;
@@ -248,21 +240,19 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
   */
-  virtual bool InitialPass(std::vector<std::string> const&,
-                           cmExecutionStatus&);
+  bool InitialPass(std::vector<std::string> const& /*args*/,
+                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "set_tests_properties"; }
-
-  cmTypeMacro(cmCTestSetTestsPropertiesCommand, cmCommand);
+  std::string GetName() const CM_OVERRIDE { return "set_tests_properties"; }
 
   cmCTestTestHandler* TestHandler;
 };
 
 bool cmCTestSetTestsPropertiesCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+  std::vector<std::string> const& args, cmExecutionStatus& /*unused*/)
 {
   return this->TestHandler->SetTestsProperties(args);
 }
@@ -284,14 +274,13 @@ inline int GetNextNumber(std::string const& in, int& val,
     }
     pos = pos2 + 1;
     return 1;
-  } else {
-    if (in.size() - pos == 0) {
-      val = -1;
-    } else {
-      val = atoi(in.substr(pos, in.size() - pos).c_str());
-    }
-    return 0;
   }
+  if (in.size() - pos == 0) {
+    val = -1;
+  } else {
+    val = atoi(in.substr(pos, in.size() - pos).c_str());
+  }
+  return 0;
 }
 
 // get the next number in a string with numbers separated by ,
@@ -311,14 +300,13 @@ inline int GetNextRealNumber(std::string const& in, double& val,
     }
     pos = pos2 + 1;
     return 1;
-  } else {
-    if (in.size() - pos == 0) {
-      val = -1;
-    } else {
-      val = atof(in.substr(pos, in.size() - pos).c_str());
-    }
-    return 0;
   }
+  if (in.size() - pos == 0) {
+    val = -1;
+  } else {
+    val = atof(in.substr(pos, in.size() - pos).c_str());
+  }
+  return 0;
 }
 
 cmCTestTestHandler::cmCTestTestHandler()
@@ -336,7 +324,7 @@ cmCTestTestHandler::cmCTestTestHandler()
 
   this->MemCheck = false;
 
-  this->LogFile = 0;
+  this->LogFile = CM_NULLPTR;
 
   // regex to detect <DartMeasurement>...</DartMeasurement>
   this->DartStuff.compile("(<DartMeasurement.*/DartMeasurement[a-zA-Z]*>)");
@@ -550,7 +538,7 @@ int cmCTestTestHandler::ProcessHandler()
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create "
                    << (this->MemCheck ? "memory check" : "testing")
                    << " XML file" << std::endl);
-      this->LogFile = 0;
+      this->LogFile = CM_NULLPTR;
       return 1;
     }
     cmXMLWriter xml(xmlfile);
@@ -558,15 +546,15 @@ int cmCTestTestHandler::ProcessHandler()
   }
 
   if (!this->PostProcessHandler()) {
-    this->LogFile = 0;
+    this->LogFile = CM_NULLPTR;
     return -1;
   }
 
   if (!failed.empty()) {
-    this->LogFile = 0;
+    this->LogFile = CM_NULLPTR;
     return -1;
   }
-  this->LogFile = 0;
+  this->LogFile = CM_NULLPTR;
   return 0;
 }
 
@@ -730,7 +718,7 @@ void cmCTestTestHandler::ComputeTestList()
   // Now create a final list of tests to run
   int cnt = 0;
   inREcnt = 0;
-  std::string last_directory = "";
+  std::string last_directory;
   ListOfTests finalList;
   for (it = this->TestList.begin(); it != this->TestList.end(); it++) {
     cnt++;
@@ -758,6 +746,9 @@ void cmCTestTestHandler::ComputeTestList()
     it->Index = cnt; // save the index into the test list for this test
     finalList.push_back(*it);
   }
+
+  UpdateForFixtures(finalList);
+
   // Save the total number of tests before exclusions
   this->TotalNumberOfTests = this->TestList.size();
   // Set the TestList to the final list of all test
@@ -787,6 +778,8 @@ void cmCTestTestHandler::ComputeTestListForRerunFailed()
     finalList.push_back(*it);
   }
 
+  UpdateForFixtures(finalList);
+
   // Save the total number of tests before exclusions
   this->TotalNumberOfTests = this->TestList.size();
 
@@ -794,6 +787,162 @@ void cmCTestTestHandler::ComputeTestListForRerunFailed()
   this->TestList = finalList;
 
   this->UpdateMaxTestNameWidth();
+}
+
+void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
+{
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                     "Updating test list for fixtures" << std::endl,
+                     this->Quiet);
+
+  // Prepare some maps to help us find setup and cleanup tests for
+  // any given fixture
+  typedef ListOfTests::const_iterator TestIterator;
+  typedef std::multimap<std::string, TestIterator> FixtureDependencies;
+  typedef FixtureDependencies::const_iterator FixtureDepsIterator;
+  FixtureDependencies fixtureSetups;
+  FixtureDependencies fixtureDeps;
+
+  for (ListOfTests::const_iterator it = this->TestList.begin();
+       it != this->TestList.end(); ++it) {
+    const cmCTestTestProperties& p = *it;
+
+    const std::set<std::string>& setups = p.FixturesSetup;
+    for (std::set<std::string>::const_iterator depsIt = setups.begin();
+         depsIt != setups.end(); ++depsIt) {
+      fixtureSetups.insert(std::make_pair(*depsIt, it));
+      fixtureDeps.insert(std::make_pair(*depsIt, it));
+    }
+
+    const std::set<std::string>& cleanups = p.FixturesCleanup;
+    for (std::set<std::string>::const_iterator depsIt = cleanups.begin();
+         depsIt != cleanups.end(); ++depsIt) {
+      fixtureDeps.insert(std::make_pair(*depsIt, it));
+    }
+  }
+
+  // Prepare fast lookup of tests already included in our list of tests
+  std::set<std::string> addedTests;
+  for (ListOfTests::const_iterator it = tests.begin(); it != tests.end();
+       ++it) {
+    const cmCTestTestProperties& p = *it;
+    addedTests.insert(p.Name);
+  }
+
+  // This is a lookup of fixture name to a list of indices into the
+  // final tests array for tests which require that fixture. It is
+  // needed at the end to populate dependencies of the cleanup tests
+  // in our final list of tests.
+  std::map<std::string, std::vector<size_t> > fixtureRequirements;
+
+  // Use integer index for iteration because we append to
+  // the tests vector as we go
+  size_t fixtureTestsAdded = 0;
+  std::set<std::string> addedFixtures;
+  for (size_t i = 0; i < tests.size(); ++i) {
+    if (tests[i].FixturesRequired.empty()) {
+      continue;
+    }
+    // Must copy the set of fixtures because we may invalidate
+    // the tests array by appending to it
+    const std::set<std::string> fixtures = tests[i].FixturesRequired;
+    for (std::set<std::string>::const_iterator fixturesIt = fixtures.begin();
+         fixturesIt != fixtures.end(); ++fixturesIt) {
+
+      const std::string& requiredFixtureName = *fixturesIt;
+      if (requiredFixtureName.empty()) {
+        continue;
+      }
+
+      fixtureRequirements[requiredFixtureName].push_back(i);
+
+      // Add dependencies to this test for all of the setup tests
+      // associated with the required fixture. If any of those setup
+      // tests fail, this test should not run. We make the fixture's
+      // cleanup tests depend on this test case later.
+      std::pair<FixtureDepsIterator, FixtureDepsIterator> setupRange =
+        fixtureSetups.equal_range(requiredFixtureName);
+      for (FixtureDepsIterator sIt = setupRange.first;
+           sIt != setupRange.second; ++sIt) {
+        const std::string& setupTestName = sIt->second->Name;
+        tests[i].RequireSuccessDepends.insert(setupTestName);
+        if (std::find(tests[i].Depends.begin(), tests[i].Depends.end(),
+                      setupTestName) == tests[i].Depends.end()) {
+          tests[i].Depends.push_back(setupTestName);
+        }
+      }
+
+      // Append any fixture setup/cleanup tests to our test list if they
+      // are not already in it (they could have been in the original
+      // set of tests passed to us at the outset or have already been
+      // added from a previously checked test). A fixture isn't required
+      // to have setup/cleanup tests.
+      if (!addedFixtures.insert(requiredFixtureName).second) {
+        // Already added this fixture
+        continue;
+      }
+      std::pair<FixtureDepsIterator, FixtureDepsIterator> fixtureRange =
+        fixtureDeps.equal_range(requiredFixtureName);
+      for (FixtureDepsIterator it = fixtureRange.first;
+           it != fixtureRange.second; ++it) {
+        ListOfTests::const_iterator lotIt = it->second;
+        const cmCTestTestProperties& p = *lotIt;
+
+        if (!addedTests.insert(p.Name).second) {
+          // Already have p in our test list
+          continue;
+        }
+
+        // This is a test not yet in our list, so add it and
+        // update its index to reflect where it was in the original
+        // full list of all tests (needed to track individual tests
+        // across ctest runs for re-run failed, etc.)
+        tests.push_back(p);
+        tests.back().Index =
+          1 + static_cast<int>(std::distance(this->TestList.begin(), lotIt));
+        ++fixtureTestsAdded;
+
+        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Added test "
+                             << p.Name << " required by fixture "
+                             << requiredFixtureName << std::endl,
+                           this->Quiet);
+      }
+    }
+  }
+
+  // Now that we have the final list of tests, we can update all cleanup
+  // tests to depend on those tests which require that fixture
+  for (ListOfTests::iterator tIt = tests.begin(); tIt != tests.end(); ++tIt) {
+    cmCTestTestProperties& p = *tIt;
+    const std::set<std::string>& cleanups = p.FixturesCleanup;
+    for (std::set<std::string>::const_iterator fIt = cleanups.begin();
+         fIt != cleanups.end(); ++fIt) {
+      const std::string& fixture = *fIt;
+      std::map<std::string, std::vector<size_t> >::const_iterator cIt =
+        fixtureRequirements.find(fixture);
+      if (cIt == fixtureRequirements.end()) {
+        // No test cases require the fixture this cleanup test is for.
+        // This cleanup test must have been part of the original test
+        // list passed in (which is not an error)
+        continue;
+      }
+
+      const std::vector<size_t>& indices = cIt->second;
+      for (std::vector<size_t>::const_iterator indexIt = indices.begin();
+           indexIt != indices.end(); ++indexIt) {
+        const std::string& reqTestName = tests[*indexIt].Name;
+        if (std::find(p.Depends.begin(), p.Depends.end(), reqTestName) ==
+            p.Depends.end()) {
+          p.Depends.push_back(reqTestName);
+        }
+      }
+    }
+  }
+
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Added "
+                       << fixtureTestsAdded
+                       << " tests to meet fixture requirements" << std::endl,
+                     this->Quiet);
 }
 
 void cmCTestTestHandler::UpdateMaxTestNameWidth()
@@ -936,7 +1085,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
 
   bool randomSchedule = this->CTest->GetScheduleType() == "Random";
   if (randomSchedule) {
-    srand((unsigned)time(0));
+    srand((unsigned)time(CM_NULLPTR));
   }
 
   for (ListOfTests::iterator it = this->TestList.begin();
@@ -986,7 +1135,8 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   *this->LogFile << "End testing: " << this->CTest->CurrentTime() << std::endl;
 }
 
-void cmCTestTestHandler::GenerateTestCommand(std::vector<std::string>&, int)
+void cmCTestTestHandler::GenerateTestCommand(
+  std::vector<std::string>& /*unused*/, int /*unused*/)
 {
 }
 
@@ -1154,7 +1304,8 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
     int retVal = 0;
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Run command: " << *it << std::endl, this->Quiet);
-    if (!cmSystemTools::RunSingleCommand(it->c_str(), 0, 0, &retVal, 0,
+    if (!cmSystemTools::RunSingleCommand(it->c_str(), CM_NULLPTR, CM_NULLPTR,
+                                         &retVal, CM_NULLPTR,
                                          cmSystemTools::OUTPUT_MERGE
                                          /*this->Verbose*/) ||
         retVal != 0) {
@@ -1321,7 +1472,7 @@ std::string cmCTestTestHandler::FindExecutable(
                  << "Looked in the following places:\n");
     for (std::vector<std::string>::iterator i = failed.begin();
          i != failed.end(); ++i) {
-      cmCTestLog(ctest, HANDLER_OUTPUT, i->c_str() << "\n");
+      cmCTestLog(ctest, HANDLER_OUTPUT, *i << "\n");
     }
   }
 
@@ -1351,7 +1502,7 @@ void cmCTestTestHandler::GetListOfTests()
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
-  cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
+  CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
   mf->AddDefinition("CTEST_CONFIGURATION_TYPE",
                     this->CTest->GetConfigType().c_str());
 
@@ -1498,7 +1649,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   int numFiles =
     static_cast<int>(cmsys::Directory::GetNumberOfFilesInDirectory(dirName));
   std::string pattern = "LastTestsFailed";
-  std::string logName = "";
+  std::string logName;
 
   for (int i = 0; i < numFiles; ++i) {
     std::string fileName = directory.GetFile(i);
@@ -1677,7 +1828,7 @@ void cmCTestTestHandler::GenerateRegressionImages(cmXMLWriter& xml,
           xml.Attribute(measurementfile.match(3).c_str(),
                         measurementfile.match(4));
           xml.Attribute("encoding", "base64");
-          std::stringstream ostr;
+          std::ostringstream ostr;
           for (size_t cc = 0; cc < rlen; cc++) {
             ostr << encoded_buffer[cc];
             if (cc % 60 == 0 && cc) {
@@ -1822,6 +1973,24 @@ bool cmCTestTestHandler::SetTestsProperties(
             cmSystemTools::ExpandListArgument(val, lval);
 
             rtit->LockedResources.insert(lval.begin(), lval.end());
+          }
+          if (key == "FIXTURES_SETUP") {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val, lval);
+
+            rtit->FixturesSetup.insert(lval.begin(), lval.end());
+          }
+          if (key == "FIXTURES_CLEANUP") {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val, lval);
+
+            rtit->FixturesCleanup.insert(lval.begin(), lval.end());
+          }
+          if (key == "FIXTURES_REQUIRED") {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val, lval);
+
+            rtit->FixturesRequired.insert(lval.begin(), lval.end());
           }
           if (key == "TIMEOUT") {
             rtit->Timeout = atof(val.c_str());

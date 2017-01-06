@@ -1,14 +1,5 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWriteFileCommand.h"
 
 #include <cmsys/FStream.hxx>
@@ -16,6 +7,11 @@
 #include <sys/types.h>
 // include sys/stat.h after sys/types.h
 #include <sys/stat.h>
+
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 // cmLibraryCommand
 bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args,
@@ -69,7 +65,7 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args,
                        overwrite ? std::ios::out : std::ios::app);
   if (!file) {
     std::string error = "Internal CMake error when trying to open file: ";
-    error += fileName.c_str();
+    error += fileName;
     error += " for writing.";
     this->SetError(error);
     return false;

@@ -1,18 +1,11 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetTestPropertyCommand.h"
 
+#include "cmMakefile.h"
 #include "cmTest.h"
-#include "cmake.h"
+
+class cmExecutionStatus;
 
 // cmGetTestPropertyCommand
 bool cmGetTestPropertyCommand::InitialPass(
@@ -27,7 +20,7 @@ bool cmGetTestPropertyCommand::InitialPass(
   std::string var = args[2];
   cmTest* test = this->Makefile->GetTest(testName);
   if (test) {
-    const char* prop = 0;
+    const char* prop = CM_NULLPTR;
     if (!args[1].empty()) {
       prop = test->GetProperty(args[1]);
     }

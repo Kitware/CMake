@@ -1,7 +1,5 @@
-CMake Error: Error in cmake code at
-.*/Tests/RunCMake/Syntax/CommandError2.cmake:1:
-Parse error.  Expected a command name, got bracket argument with text "oops-not-a-comment".
-CMake Error at CMakeLists.txt:3 \(include\):
-  include could not find load file:
-
-    CommandError2.cmake
+CMake Error at CommandError2.cmake:1:
+  Parse error.  Expected a command name, got bracket argument with text
+  "oops-not-a-comment".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

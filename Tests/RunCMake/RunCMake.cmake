@@ -75,6 +75,7 @@ function(run_cmake test)
       OUTPUT_VARIABLE actual_stdout
       ERROR_VARIABLE ${actual_stderr_var}
       RESULT_VARIABLE actual_result
+      ENCODING UTF8
       ${maybe_timeout}
       )
   else()
@@ -90,12 +91,13 @@ function(run_cmake test)
       OUTPUT_VARIABLE actual_stdout
       ERROR_VARIABLE ${actual_stderr_var}
       RESULT_VARIABLE actual_result
+      ENCODING UTF8
       ${maybe_timeout}
       )
   endif()
   set(msg "")
   if(NOT "${actual_result}" MATCHES "${expect_result}")
-    set(msg "${msg}Result is [${actual_result}], not [${expect_result}].\n")
+    string(APPEND msg "Result is [${actual_result}], not [${expect_result}].\n")
   endif()
   foreach(o out err)
     string(REGEX REPLACE "\r\n" "\n" actual_std${o} "${actual_std${o}}")
@@ -107,7 +109,7 @@ function(run_cmake test)
         string(REGEX REPLACE "\n" "\n expect-${o}> " expect_${o}
           " expect-${o}> ${expect_std${o}}")
         set(expect_${o} "Expected std${o} to match:\n${expect_${o}}\n")
-        set(msg "${msg}std${o} does not match that expected.\n")
+        string(APPEND msg "std${o} does not match that expected.\n")
       endif()
     endif()
   endforeach()
@@ -122,7 +124,7 @@ function(run_cmake test)
   endif()
   if(msg AND RunCMake_TEST_COMMAND)
     string(REPLACE ";" "\" \"" command "\"${RunCMake_TEST_COMMAND}\"")
-    set(msg "${msg}Command was:\n command> ${command}\n")
+    string(APPEND msg "Command was:\n command> ${command}\n")
   endif()
   if(msg)
     string(REGEX REPLACE "\n" "\n actual-out> " actual_out " actual-out> ${actual_stdout}")

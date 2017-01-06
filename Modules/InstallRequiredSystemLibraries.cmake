@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # InstallRequiredSystemLibraries
 # ------------------------------
@@ -25,8 +28,8 @@
 #
 # ``CMAKE_INSTALL_UCRT_LIBRARIES``
 #   Set to TRUE to install the Windows Universal CRT libraries for
-#   app-local deployment.  This is meaningful only with MSVC from
-#   Visual Studio 2015 or higher.
+#   app-local deployment (e.g. to Windows XP).  This is meaningful
+#   only with MSVC from Visual Studio 2015 or higher.
 #
 # ``CMAKE_INSTALL_MFC_LIBRARIES``
 #   Set to TRUE to install the MSVC MFC runtime libraries.
@@ -47,19 +50,6 @@
 # ``CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT``
 #   Specify the :command:`install(PROGRAMS)` command ``COMPONENT``
 #   option.  If not specified, no such option will be used.
-
-#=============================================================================
-# Copyright 2006-2015 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 if(MSVC)
   file(TO_CMAKE_PATH "$ENV{SYSTEMROOT}" SYSTEMROOT)

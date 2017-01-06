@@ -1,26 +1,20 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmCTestScriptHandler_h
 #define cmCTestScriptHandler_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestGenericHandler.h"
 
-#include "cmListFileCache.h"
+#include <string>
+#include <vector>
 
-class cmMakefile;
-class cmGlobalGenerator;
-class cmake;
+class cmCTest;
 class cmCTestCommand;
+class cmGlobalGenerator;
+class cmMakefile;
+class cmake;
 
 /** \class cmCTestScriptHandler
  * \brief A class that handles ctest -S invocations
@@ -61,7 +55,7 @@ class cmCTestCommand;
 class cmCTestScriptHandler : public cmCTestGenericHandler
 {
 public:
-  cmTypeMacro(cmCTestScriptHandler, cmCTestGenericHandler);
+  typedef cmCTestGenericHandler Superclass;
 
   /**
    * Add a script to run, and if is should run in the current process
@@ -71,7 +65,7 @@ public:
   /**
    * Run a dashboard using a specified confiuration script
    */
-  int ProcessHandler();
+  int ProcessHandler() CM_OVERRIDE;
 
   /*
    * Run a script
@@ -104,9 +98,9 @@ public:
   double GetRemainingTimeAllowed();
 
   cmCTestScriptHandler();
-  ~cmCTestScriptHandler();
+  ~cmCTestScriptHandler() CM_OVERRIDE;
 
-  void Initialize();
+  void Initialize() CM_OVERRIDE;
 
   void CreateCMake();
   cmake* GetCMake() { return this->CMake; }

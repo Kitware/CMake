@@ -1,20 +1,12 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmParseBlanketJSCoverage.h"
 
+#include "cmCTest.h"
+#include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
-#include <cmsys/Directory.hxx>
+
 #include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -42,9 +34,8 @@ public:
       std::string foundFileName =
         line.substr(begIndex + 3, endIndex - (begIndex + 4));
       return foundFileName;
-    } else {
-      return line.substr(begIndex, line.npos);
     }
+    return line.substr(begIndex, line.npos);
   }
   bool ParseFile(std::string const& file)
   {

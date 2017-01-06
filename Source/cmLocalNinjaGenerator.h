@@ -1,25 +1,29 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2011 Peter Collingbourne <peter@pcc.me.uk>
-  Copyright 2011 Nicolas Despres <nicolas.despres@gmail.com>
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmLocalNinjaGenerator_h
 #define cmLocalNinjaGenerator_h
 
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "cmLocalCommonGenerator.h"
-
 #include "cmNinjaTypes.h"
+#include "cmOutputConverter.h"
 
+class cmCustomCommand;
 class cmCustomCommandGenerator;
-class cmGlobalNinjaGenerator;
 class cmGeneratedFileStream;
+class cmGeneratorTarget;
+class cmGlobalGenerator;
+class cmGlobalNinjaGenerator;
+class cmMakefile;
+class cmRulePlaceholderExpander;
+class cmSourceFile;
 class cmake;
 
 /**
@@ -34,12 +38,14 @@ class cmLocalNinjaGenerator : public cmLocalCommonGenerator
 public:
   cmLocalNinjaGenerator(cmGlobalGenerator* gg, cmMakefile* mf);
 
-  virtual ~cmLocalNinjaGenerator();
+  ~cmLocalNinjaGenerator() CM_OVERRIDE;
 
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
 
-  virtual std::string GetTargetDirectory(
-    cmGeneratorTarget const* target) const;
+  cmRulePlaceholderExpander* CreateRulePlaceholderExpander() const CM_OVERRIDE;
+
+  std::string GetTargetDirectory(cmGeneratorTarget const* target) const
+    CM_OVERRIDE;
 
   const cmGlobalNinjaGenerator* GetGlobalNinjaGenerator() const;
   cmGlobalNinjaGenerator* GetGlobalNinjaGenerator();
@@ -54,12 +60,6 @@ public:
     return this->HomeRelativeOutputPath;
   }
 
-  void ExpandRuleVariables(std::string& string,
-                           const RuleVariables& replaceValues)
-  {
-    cmLocalGenerator::ExpandRuleVariables(string, replaceValues);
-  }
-
   std::string BuildCommandLine(const std::vector<std::string>& cmdLines);
 
   void AppendTargetOutputs(cmGeneratorTarget* target, cmNinjaDeps& outputs);
@@ -72,19 +72,15 @@ public:
   void AppendCustomCommandDeps(cmCustomCommandGenerator const& ccg,
                                cmNinjaDeps& ninjaDeps);
 
-  virtual std::string ConvertToLinkReference(
-    std::string const& lib,
-    cmOutputConverter::OutputFormat format = cmOutputConverter::SHELL);
-
-  virtual void ComputeObjectFilenames(
+  void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* gt = 0);
+    cmGeneratorTarget const* gt = CM_NULLPTR) CM_OVERRIDE;
 
 protected:
-  virtual std::string ConvertToIncludeReference(
+  std::string ConvertToIncludeReference(
     std::string const& path,
     cmOutputConverter::OutputFormat format = cmOutputConverter::SHELL,
-    bool forceFullPaths = false);
+    bool forceFullPaths = false) CM_OVERRIDE;
 
 private:
   cmGeneratedFileStream& GetBuildFileStream() const;

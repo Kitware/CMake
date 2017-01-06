@@ -1,3 +1,6 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 #.rst:
 # FindFreetype
 # ------------
@@ -21,19 +24,6 @@
 # $FREETYPE_DIR is an environment variable that would correspond to the
 # ./configure --prefix=$FREETYPE_DIR used in building FREETYPE.
 
-#=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 # Created by Eric Wing.
 # Modifications by Alexander Neundorf.
 # This file has been renamed to "FindFreetype.cmake" instead of the correct
@@ -51,9 +41,8 @@
 # wants explicit full paths and this trickery doesn't work too well.
 # I'm going to attempt to cut out the middleman and hope
 # everything still works.
-find_path(
-  FREETYPE_INCLUDE_DIR_ft2build
-  ft2build.h
+
+set(FREETYPE_FIND_ARGS
   HINTS
     ENV FREETYPE_DIR
   PATHS
@@ -64,6 +53,12 @@ find_path(
     ENV GTKMM_BASEPATH
     [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
+)
+
+find_path(
+  FREETYPE_INCLUDE_DIR_ft2build
+  ft2build.h
+  ${FREETYPE_FIND_ARGS}
   PATH_SUFFIXES
     include/freetype2
     include
@@ -75,40 +70,37 @@ find_path(
   NAMES
     freetype/config/ftheader.h
     config/ftheader.h
-  HINTS
-    ENV FREETYPE_DIR
-  PATHS
-    /usr/X11R6
-    /usr/local/X11R6
-    /usr/local/X11
-    /usr/freeware
-    ENV GTKMM_BASEPATH
-    [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
+  ${FREETYPE_FIND_ARGS}
   PATH_SUFFIXES
     include/freetype2
     include
     freetype2
 )
 
-find_library(FREETYPE_LIBRARY
-  NAMES
-    freetype
-    libfreetype
-    freetype219
-  HINTS
-    ENV FREETYPE_DIR
-  PATHS
-    /usr/X11R6
-    /usr/local/X11R6
-    /usr/local/X11
-    /usr/freeware
-    ENV GTKMM_BASEPATH
-    [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
-  PATH_SUFFIXES
-    lib
-)
+if(NOT FREETYPE_LIBRARY)
+  find_library(FREETYPE_LIBRARY_RELEASE
+    NAMES
+      freetype
+      libfreetype
+      freetype219
+    ${FREETYPE_FIND_ARGS}
+    PATH_SUFFIXES
+      lib
+  )
+  find_library(FREETYPE_LIBRARY_DEBUG
+    NAMES
+      freetyped
+      libfreetyped
+      freetype219d
+    ${FREETYPE_FIND_ARGS}
+    PATH_SUFFIXES
+      lib
+  )
+  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+  select_library_configurations(FREETYPE)
+endif()
+
+unset(FREETYPE_FIND_ARGS)
 
 # set the user variables
 if(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
@@ -133,7 +125,7 @@ if(FREETYPE_INCLUDE_DIR_freetype2 AND FREETYPE_H)
       if(VLINE MATCHES "^#[\t ]*define[\t ]+FREETYPE_${VPART}[\t ]+([0-9]+)$")
         set(FREETYPE_VERSION_PART "${CMAKE_MATCH_1}")
         if(FREETYPE_VERSION_STRING)
-          set(FREETYPE_VERSION_STRING "${FREETYPE_VERSION_STRING}.${FREETYPE_VERSION_PART}")
+          string(APPEND FREETYPE_VERSION_STRING ".${FREETYPE_VERSION_PART}")
         else()
           set(FREETYPE_VERSION_STRING "${FREETYPE_VERSION_PART}")
         endif()
@@ -143,9 +135,6 @@ if(FREETYPE_INCLUDE_DIR_freetype2 AND FREETYPE_H)
   endforeach()
 endif()
 
-
-# handle the QUIETLY and REQUIRED arguments and set FREETYPE_FOUND to TRUE if
-# all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 find_package_handle_standard_args(
@@ -158,7 +147,6 @@ find_package_handle_standard_args(
 )
 
 mark_as_advanced(
-  FREETYPE_LIBRARY
   FREETYPE_INCLUDE_DIR_freetype2
   FREETYPE_INCLUDE_DIR_ft2build
 )

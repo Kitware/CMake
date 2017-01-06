@@ -1,24 +1,15 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDependsC.h"
+
+#include <cmsys/FStream.hxx>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmFileTimeComparison.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include <cmsys/FStream.hxx>
-
-#include <ctype.h> // isspace
 
 #define INCLUDE_REGEX_LINE                                                    \
   "^[ \t]*#[ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"
@@ -29,7 +20,7 @@
 #define INCLUDE_REGEX_TRANSFORM_MARKER "#IncludeRegexTransform: "
 
 cmDependsC::cmDependsC()
-  : ValidDeps(0)
+  : ValidDeps(CM_NULLPTR)
 {
 }
 
@@ -105,7 +96,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   std::set<std::string> dependencies;
   bool haveDeps = false;
 
-  if (this->ValidDeps != 0) {
+  if (this->ValidDeps != CM_NULLPTR) {
     std::map<std::string, DependencyVector>::const_iterator tmpIt =
       this->ValidDeps->find(obj);
     if (tmpIt != this->ValidDeps->end()) {
@@ -158,7 +149,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
           this->HeaderLocationCache.find(current.FileName);
         if (headerLocationIt != this->HeaderLocationCache.end()) {
           fullName = headerLocationIt->second;
-        } else
+        } else {
           for (std::vector<std::string>::const_iterator i =
                  this->IncludePath.begin();
                i != this->IncludePath.end(); ++i) {
@@ -175,6 +166,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
               break;
             }
           }
+        }
       }
 
       // Complain if the file cannot be found and matches the complain
@@ -237,19 +229,18 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // written by the original local generator for this directory
   // convert the dependencies to paths relative to the home output
   // directory.  We must do the same here.
-  std::string obj_i =
-    this->LocalGenerator->Convert(obj, cmOutputConverter::HOME_OUTPUT);
-  std::string obj_m = this->LocalGenerator->ConvertToOutputFormat(
-    obj_i, cmOutputConverter::MAKERULE);
+  std::string binDir = this->LocalGenerator->GetBinaryDirectory();
+  std::string obj_i = this->LocalGenerator->ConvertToRelativePath(binDir, obj);
+  std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i.c_str());
   internalDepends << obj_i << std::endl;
 
   for (std::set<std::string>::const_iterator i = dependencies.begin();
        i != dependencies.end(); ++i) {
-    makeDepends << obj_m << ": "
-                << this->LocalGenerator->Convert(
-                     *i, cmOutputConverter::HOME_OUTPUT,
-                     cmOutputConverter::MAKERULE)
-                << std::endl;
+    makeDepends
+      << obj_m << ": "
+      << cmSystemTools::ConvertToOutputPath(
+           this->LocalGenerator->ConvertToRelativePath(binDir, *i).c_str())
+      << std::endl;
     internalDepends << " " << *i << std::endl;
   }
   makeDepends << std::endl;
@@ -268,12 +259,12 @@ void cmDependsC::ReadCacheFile()
   }
 
   std::string line;
-  cmIncludeLines* cacheEntry = 0;
+  cmIncludeLines* cacheEntry = CM_NULLPTR;
   bool haveFileName = false;
 
   while (cmSystemTools::GetLineFromStream(fin, line)) {
     if (line.empty()) {
-      cacheEntry = 0;
+      cacheEntry = CM_NULLPTR;
       haveFileName = false;
       continue;
     }
@@ -311,7 +302,7 @@ void cmDependsC::ReadCacheFile()
           }
         }
       }
-    } else if (cacheEntry != 0) {
+    } else if (cacheEntry != CM_NULLPTR) {
       UnscannedEntry entry;
       entry.FileName = line;
       if (cmSystemTools::GetLineFromStream(fin, line)) {
@@ -343,16 +334,16 @@ void cmDependsC::WriteCacheFile() const
          this->FileCache.begin();
        fileIt != this->FileCache.end(); ++fileIt) {
     if (fileIt->second->Used) {
-      cacheOut << fileIt->first.c_str() << std::endl;
+      cacheOut << fileIt->first << std::endl;
 
       for (std::vector<UnscannedEntry>::const_iterator incIt =
              fileIt->second->UnscannedEntries.begin();
            incIt != fileIt->second->UnscannedEntries.end(); ++incIt) {
-        cacheOut << incIt->FileName.c_str() << std::endl;
+        cacheOut << incIt->FileName << std::endl;
         if (incIt->QuotedLocation.empty()) {
           cacheOut << "-" << std::endl;
         } else {
-          cacheOut << incIt->QuotedLocation.c_str() << std::endl;
+          cacheOut << incIt->QuotedLocation << std::endl;
         }
       }
       cacheOut << std::endl;

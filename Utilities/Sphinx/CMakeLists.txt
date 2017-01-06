@@ -1,17 +1,9 @@
-#=============================================================================
-# CMake - Cross Platform Makefile Generator
-# Copyright 2000-2013 Kitware, Inc., Insight Software Consortium
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
 if(NOT CMake_SOURCE_DIR)
   set(CMakeHelp_STANDALONE 1)
-  cmake_minimum_required(VERSION 2.8.4 FATAL_ERROR)
+  cmake_minimum_required(VERSION 2.8.12.2 FATAL_ERROR)
   get_filename_component(tmp "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
   get_filename_component(CMake_SOURCE_DIR "${tmp}" PATH)
   include(${CMake_SOURCE_DIR}/Modules/CTestUseLaunchers.cmake)
@@ -156,18 +148,21 @@ if(SPHINX_MAN)
     if("x${m}" MATCHES "^x(.+)\\.([1-9])\\.rst$")
       set(name "${CMAKE_MATCH_1}")
       set(sec "${CMAKE_MATCH_2}")
+      set(skip FALSE)
       if(NOT CMakeHelp_STANDALONE)
         if(name STREQUAL "ccmake" AND NOT BUILD_CursesDialog)
-          continue()
-        endif()
-        if(name STREQUAL "cmake-gui" AND NOT BUILD_QtDialog)
-          continue()
+          set(skip TRUE)
+        elseif(name STREQUAL "cmake-gui" AND NOT BUILD_QtDialog)
+          set(skip TRUE)
         endif()
       endif()
-      CMake_OPTIONAL_COMPONENT(sphinx-man)
-      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/${name}.${sec}
-              DESTINATION ${CMAKE_MAN_DIR}/man${sec}
-              ${COMPONENT})
+      if(NOT skip)
+        CMake_OPTIONAL_COMPONENT(sphinx-man)
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/${name}.${sec}
+                DESTINATION ${CMAKE_MAN_DIR}/man${sec}
+                ${COMPONENT})
+      endif()
+      unset(skip)
     endif()
   endforeach()
 endif()

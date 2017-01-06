@@ -1,18 +1,12 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmHexFileConverter.h"
 
+#include <cmConfigure.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "cmSystemTools.h"
 
 #define INTEL_HEX_MIN_LINE_LENGTH (1 + 8 + 2)
 #define INTEL_HEX_MAX_LINE_LENGTH (1 + 8 + (256 * 2) + 2)
@@ -28,7 +22,7 @@ static bool cm_IsHexChar(char c)
 
 static unsigned int ChompStrlen(const char* line)
 {
-  if (line == 0) {
+  if (line == CM_NULLPTR) {
     return 0;
   }
   unsigned int length = static_cast<unsigned int>(strlen(line));
@@ -89,7 +83,8 @@ static bool ConvertMotorolaSrecLine(const char* buf, FILE* outFile)
   if ((buf[1] == '5') || (buf[1] == '7') || (buf[1] == '8') ||
       (buf[1] == '9')) {
     return true;
-  } else if (buf[1] == '1') {
+  }
+  if (buf[1] == '1') {
     dataStart = 8;
   } else if (buf[1] == '2') {
     dataStart = 10;
@@ -144,7 +139,7 @@ cmHexFileConverter::FileType cmHexFileConverter::DetermineFileType(
 {
   char buf[1024];
   FILE* inFile = cmsys::SystemTools::Fopen(inFileName, "rb");
-  if (inFile == 0) {
+  if (inFile == CM_NULLPTR) {
     return Binary;
   }
 
@@ -193,11 +188,11 @@ bool cmHexFileConverter::TryConvert(const char* inFileName,
   // try to open the file
   FILE* inFile = cmsys::SystemTools::Fopen(inFileName, "rb");
   FILE* outFile = cmsys::SystemTools::Fopen(outFileName, "wb");
-  if ((inFile == 0) || (outFile == 0)) {
-    if (inFile != 0) {
+  if ((inFile == CM_NULLPTR) || (outFile == CM_NULLPTR)) {
+    if (inFile != CM_NULLPTR) {
       fclose(inFile);
     }
-    if (outFile != 0) {
+    if (outFile != CM_NULLPTR) {
       fclose(outFile);
     }
     return false;
@@ -206,13 +201,13 @@ bool cmHexFileConverter::TryConvert(const char* inFileName,
   // convert them line by line
   bool success = false;
   char buf[1024];
-  while (fgets(buf, 1024, inFile) != 0) {
+  while (fgets(buf, 1024, inFile) != CM_NULLPTR) {
     if (type == MotorolaSrec) {
       success = ConvertMotorolaSrecLine(buf, outFile);
     } else if (type == IntelHex) {
       success = ConvertIntelHexLine(buf, outFile);
     }
-    if (success == false) {
+    if (!success) {
       break;
     }
   }

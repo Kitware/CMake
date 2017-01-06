@@ -2,13 +2,13 @@ set(NUMBERS "")
 set(COUNT 0)
 
 while(COUNT LESS 200)
-    set(NUMBERS "${NUMBERS} ${COUNT}")
+    string(APPEND NUMBERS " ${COUNT}")
     set(COUNT "2${COUNT}")
 
     set(NCOUNT 3)
     while(NCOUNT LESS 31)
-        set(NUMBERS "${NUMBERS} ${NCOUNT}")
-        set(NCOUNT "${NCOUNT}0")
+        string(APPEND NUMBERS " ${NCOUNT}")
+        string(APPEND NCOUNT "0")
     endwhile()
 endwhile()
 

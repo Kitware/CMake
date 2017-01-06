@@ -1,20 +1,10 @@
-/*============================================================================
-  CMake - Cross Platform Makefile Generator
-  Copyright 2014 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
-
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXDirectoriesSourceWriter.h"
 
 cmWIXDirectoriesSourceWriter::cmWIXDirectoriesSourceWriter(
-  cmCPackLog* logger, std::string const& filename)
-  : cmWIXSourceWriter(logger, filename)
+  cmCPackLog* logger, std::string const& filename, GuidType componentGuidType)
+  : cmWIXSourceWriter(logger, filename, componentGuidType)
 {
 }
 
@@ -52,8 +42,12 @@ size_t cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
   std::string const& programFilesFolderId,
   std::string const& installRootString)
 {
-  BeginElement("Directory");
-  AddAttribute("Id", programFilesFolderId);
+  size_t offset = 1;
+  if (!programFilesFolderId.empty()) {
+    BeginElement("Directory");
+    AddAttribute("Id", programFilesFolderId);
+    offset = 0;
+  }
 
   std::vector<std::string> installRoot;
 
@@ -69,7 +63,7 @@ size_t cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
     if (i == installRoot.size() - 1) {
       AddAttribute("Id", "INSTALL_ROOT");
     } else {
-      std::stringstream tmp;
+      std::ostringstream tmp;
       tmp << "INSTALL_PREFIX_" << i;
       AddAttribute("Id", tmp.str());
     }
@@ -77,7 +71,7 @@ size_t cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
     AddAttribute("Name", installRoot[i]);
   }
 
-  return installRoot.size();
+  return installRoot.size() - offset;
 }
 
 void cmWIXDirectoriesSourceWriter::EndInstallationPrefixDirectory(size_t size)
