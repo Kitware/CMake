@@ -3,6 +3,7 @@
 #include "cmVariableWatchCommand.h"
 
 #include <sstream>
+#include <utility>
 
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
@@ -84,15 +85,39 @@ static void deleteVariableWatchCallbackData(void* client_data)
   delete data;
 }
 
-cmVariableWatchCommand::cmVariableWatchCommand() = default;
-
-cmVariableWatchCommand::~cmVariableWatchCommand()
+/** This command does not really have a final pass but it needs to
+    stay alive since it owns variable watch callback information. */
+class FinalAction
 {
-  for (std::string const& wv : this->WatchedVariables) {
-    this->Makefile->GetCMakeInstance()->GetVariableWatch()->RemoveWatch(
-      wv, cmVariableWatchCommandVariableAccessed);
+public:
+  FinalAction(cmMakefile* makefile, std::string variable)
+    : Action(std::make_shared<Impl>(makefile, std::move(variable)))
+  {
   }
-}
+
+  void operator()(cmMakefile&) const {}
+
+private:
+  struct Impl
+  {
+    Impl(cmMakefile* makefile, std::string variable)
+      : Makefile(makefile)
+      , Variable(std::move(variable))
+    {
+    }
+
+    ~Impl()
+    {
+      this->Makefile->GetCMakeInstance()->GetVariableWatch()->RemoveWatch(
+        this->Variable, cmVariableWatchCommandVariableAccessed);
+    }
+
+    cmMakefile* Makefile;
+    std::string Variable;
+  };
+
+  std::shared_ptr<Impl const> Action;
+};
 
 bool cmVariableWatchCommand::InitialPass(std::vector<std::string> const& args,
                                          cmExecutionStatus&)
@@ -118,7 +143,6 @@ bool cmVariableWatchCommand::InitialPass(std::vector<std::string> const& args,
   data->InCallback = false;
   data->Command = command;
 
-  this->WatchedVariables.insert(variable);
   if (!this->Makefile->GetCMakeInstance()->GetVariableWatch()->AddWatch(
         variable, cmVariableWatchCommandVariableAccessed, data,
         deleteVariableWatchCallbackData)) {
@@ -126,5 +150,6 @@ bool cmVariableWatchCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
+  this->Makefile->AddFinalAction(FinalAction(this->Makefile, variable));
   return true;
 }
