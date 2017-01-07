@@ -55,10 +55,11 @@ cmServer::~cmServer()
   delete this->Connection;
 }
 
-void cmServer::PopOne()
+// return true if server should quit, false otherwise.
+bool cmServer::PopOne()
 {
   if (this->Queue.empty()) {
-    return;
+    return false;
   }
 
   Json::Reader reader;
@@ -68,7 +69,7 @@ void cmServer::PopOne()
 
   if (!reader.parse(input, value)) {
     this->WriteParseError("Failed to parse JSON input.");
-    return;
+    return false;
   }
 
   std::unique_ptr<DebugInfo> debug;
@@ -82,11 +83,15 @@ void cmServer::PopOne()
   const cmServerRequest request(this, value[kTYPE_KEY].asString(),
                                 value[kCOOKIE_KEY].asString(), value);
 
+  if (request.Type == kQUIT_TYPE) {
+    return true;
+  }
+
   if (request.Type == "") {
     cmServerResponse response(request);
     response.SetError("No type given in request.");
     this->WriteResponse(response, nullptr);
-    return;
+    return false;
   }
 
   cmSystemTools::SetMessageCallback(reportMessage,
@@ -98,6 +103,8 @@ void cmServer::PopOne()
   } else {
     this->WriteResponse(this->SetProtocolVersion(request), debug.get());
   }
+
+  return false;
 }
 
 void cmServer::RegisterProtocol(cmServerProtocol* protocol)
@@ -140,10 +147,10 @@ void cmServer::PrintHello() const
   this->WriteJsonObject(hello, nullptr);
 }
 
-void cmServer::QueueRequest(const std::string& request)
+bool cmServer::QueueRequest(const std::string& request)
 {
   this->Queue.push_back(request);
-  this->PopOne();
+  return this->PopOne();
 }
 
 void cmServer::reportProgress(const char* msg, float progress, void* data)

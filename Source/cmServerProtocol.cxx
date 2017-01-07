@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServerProtocol.h"
 
+#include "cmCacheManager.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"
 #include "cmGeneratorTarget.h"
@@ -26,6 +27,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <memory>
 
 // Get rid of some windows macros:
 #undef max
@@ -75,10 +77,10 @@ std::vector<std::string> toStringList(const Json::Value& in)
 }
 
 void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
-                    const std::string& buildDir,
-                    std::vector<std::string>* internalFiles,
-                    std::vector<std::string>* explicitFiles,
-                    std::vector<std::string>* tmpFiles)
+  const std::string& buildDir,
+  std::vector<std::string>* internalFiles,
+  std::vector<std::string>* explicitFiles,
+  std::vector<std::string>* tmpFiles)
 {
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
   std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();
@@ -425,6 +427,12 @@ const cmServerResponse cmServerProtocol1_0::Process(
   if (request.Type == kCACHE_TYPE) {
     return this->ProcessCache(request);
   }
+  if (request.Type == kVC_SYSTEM_INCLUDE_PATHS_TYPE) {
+    return this->ProcessSystemIncludePaths(request);
+  }
+  if (request.Type == kCMAKE_VARIABLES_TYPE) {
+    return this->ProcessCMakeVariables(request);
+  }
   if (request.Type == kCMAKE_INPUTS_TYPE) {
     return this->ProcessCMakeInputs(request);
   }
@@ -562,6 +570,11 @@ public:
   void SetDefines(const std::set<std::string>& defines);
 
   bool IsGenerated = false;
+  std::string CCompiler;
+  std::string CCompilerVersion;
+  std::string CXXCompiler;
+  std::string CXXCompilerVersion;
+
   std::string Language;
   std::string Flags;
   std::vector<std::string> Defines;
@@ -636,6 +649,18 @@ static Json::Value DumpSourceFileGroup(const LanguageData& data,
     if (!data.Defines.empty()) {
       result[kDEFINES_KEY] = fromStringList(data.Defines);
     }
+    if (!data.CCompiler.empty()) {
+      result[kCMAKE_C_COMPILER] = data.CCompiler;
+    }
+    if (!data.CCompilerVersion.empty()) {
+      result[kCMAKE_C_COMPILER_VERSION] = data.CCompilerVersion;
+    }
+    if (!data.CXXCompiler.empty()) {
+      result[kCMAKE_CXX_COMPILER] = data.CXXCompiler;
+    }
+    if (!data.CXXCompilerVersion.empty()) {
+      result[kCMAKE_CXX_COMPILER_VERSION] = data.CXXCompilerVersion;
+    }
   }
 
   result[kIS_GENERATED_KEY] = data.IsGenerated;
@@ -667,8 +692,16 @@ static Json::Value DumpSourceFilesList(
     if (!fileData.Language.empty()) {
       const LanguageData& ld = languageDataMap.at(fileData.Language);
       cmLocalGenerator* lg = target->GetLocalGenerator();
+      auto mf = lg->GetMakefile();
+
+      fileData.CCompiler = mf->GetSafeDefinition("CMAKE_C_COMPILER");
+      fileData.CCompilerVersion = mf->GetSafeDefinition("CMAKE_C_COMPILER_VERSION");
+
+      fileData.CXXCompiler = mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
+      fileData.CXXCompilerVersion = mf->GetSafeDefinition("CMAKE_CXX_COMPILER_VERSION");
 
       std::string compileFlags = ld.Flags;
+      lg->AppendFlags(compileFlags, file->GetProperty("COMPILE_FLAGS"));
       if (const char* cflags = file->GetProperty("COMPILE_FLAGS")) {
         cmGeneratorExpression ge;
         auto cge = ge.Parse(cflags);
@@ -1106,6 +1139,116 @@ cmServerResponse cmServerProtocol1_0::ProcessFileSystemWatchers(
   }
   result[kWATCHED_FILES_KEY] = files;
   result[kWATCHED_DIRECTORIES_KEY] = directories;
+
+  return request.Reply(result);
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessCMakeVariables(
+  const cmServerRequest& request)
+{
+  if (this->m_State < STATE_CONFIGURED) {
+    return request.ReportError("This instance was not yet configured.");
+  }
+
+  Json::Value result = Json::objectValue;
+  Json::Value& obj = result[kIS_CMAKE_VARIABLES] = Json::objectValue;
+
+  auto const state = this->CMakeInstance()->GetState();
+  for (auto const& key : state->GetCacheEntryKeys()) {
+    obj[key] = state->GetCacheEntryValue(key);
+  }
+  return request.Reply(result);
+}
+
+namespace
+{
+  // we need to make sure the injected flag gets removed from cmake cache,
+  // otherwise all subsequent calls to try_compile will be affected.
+  // consequently, these operations are wrapped up in an RAII class to ensure
+  // proper removal.
+  struct VCSystemIncludePaths
+  {
+    VCSystemIncludePaths(cmake* cmake)
+      : cmake(cmake), mf(cmake->GetGlobalGenerator(), cmake->GetCurrentSnapshot())
+    {
+      if (this->cmake)
+      {
+        this->cmake->AddCacheEntry(this->entryName, "/verbosity:diagnostic",
+          nullptr, cmStateEnums::CacheEntryType::STRING);
+        this->ok = mf.ReadListFile(this->file.c_str());
+      }
+    }
+
+    ~VCSystemIncludePaths()
+    {
+      try
+      {
+        if (this->cmake)
+        {
+          this->cmake->GetState()->RemoveCacheEntry(entryName);
+          this->mf.RemoveDefinition(systemPathsFlag);
+        }
+      }
+      catch (...) {}
+    }
+
+    bool Failed() const { return !this->ok; }
+    auto const& FileName() const { return this->file; }
+
+    std::string GetPaths() const
+    {
+      return this->Extract(this->mf.GetDefinition(systemPathsFlag));
+    }
+
+  private:
+    std::string Extract(std::string const& string) const
+    {
+      char const pattern[] = "\nIncludePath = ";
+      auto const index = string.find(pattern);
+      if (index != std::string::npos) {
+        auto const begin = index + (sizeof pattern - 1);
+        auto const end = string.find('\n', begin);
+        if (end == std::string::npos) {
+          return{ string,begin };
+        }
+        else {
+          return{ string,begin,end - begin };
+        }
+      }
+      return{};
+    }
+
+  private:
+    char const entryName[14] = "MSBUILD_FLAGS";
+    char const systemPathsFlag[31] = "VC_SYSTEM_INCLUDE_PATHS_OUTPUT";
+    std::string const file = cmSystemTools::GetCMakeRoot()
+      + "/Modules/VCSystemIncludePaths.cmake";
+
+    cmake* const cmake = nullptr;
+    cmMakefile mf;
+    bool ok = false;
+  };
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessSystemIncludePaths(
+  const cmServerRequest & request)
+{
+  if (this->m_State < STATE_CONFIGURED) {
+    return request.ReportError("This instance was not yet configured.");
+  }
+
+  Json::Value result = Json::objectValue;
+  result[kVC_SYSTEM_INCLUDE_PATHS] = "";
+
+  if (!this->CMakeInstance()->GetIsInTryCompile()) {
+    VCSystemIncludePaths const paths(this->CMakeInstance());
+
+    if (paths.Failed()) {
+      return request.ReportError("Could not find cmake module file: " + paths.FileName());
+    }
+
+    result[kVC_SYSTEM_INCLUDE_PATHS] = paths.GetPaths();
+  }
 
   return request.Reply(result);
 }

@@ -192,8 +192,11 @@ void cmServerConnection::ReadData(const std::string& data)
       continue;
     }
     if (line == kEND_MAGIC) {
-      this->Server->QueueRequest(this->RequestBuffer);
+      bool quitRequest = this->Server->QueueRequest(this->RequestBuffer);
       this->RequestBuffer.clear();
+      if (quitRequest) {
+        TriggerShutdown();
+      }
     } else {
       this->RequestBuffer += line;
       this->RequestBuffer += "\n";

@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "cmAlgorithms.h"
 #include "cmCPackPropertiesGenerator.h"
@@ -1792,6 +1793,18 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
   output += makeCommandStr;
   output += "\n";
 
+  // inject additional flags to msbuild.exe.
+  if (!makeCommand.empty()) {
+    auto build = makeCommand[0];
+    std::transform(build.begin(), build.end(), build.begin(), tolower);
+    if (build.find("msbuild.exe") != std::string::npos) {
+      auto const flag = this->CMakeInstance->GetCacheDefinition("MSBUILD_FLAGS");
+      if (flag) {
+        makeCommand.emplace_back(flag);
+      }
+    }
+  }
+
   if (!cmSystemTools::RunSingleCommand(makeCommand, outputPtr, outputPtr,
                                        &retVal, CM_NULLPTR, outputflag,
                                        timeout)) {
@@ -2348,7 +2361,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
         singleLine.push_back(cfgArg);
         cfgArg = "-DEFFECTIVE_PLATFORM_NAME=$(EFFECTIVE_PLATFORM_NAME)";
       } else {
-        cfgArg += mf->GetDefinition("CMAKE_CFG_INTDIR");
+        cfgArg += mf->GetSafeDefinition("CMAKE_CFG_INTDIR");
       }
       singleLine.push_back(cfgArg);
     }

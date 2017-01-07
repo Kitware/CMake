@@ -35,8 +35,8 @@ private:
   void RegisterProtocol(cmServerProtocol* protocol);
 
   // Callbacks from cmServerConnection:
-  void PopOne();
-  void QueueRequest(const std::string& request);
+  bool PopOne();
+  bool QueueRequest(const std::string& request);
 
   static void reportProgress(const char* msg, float progress, void* data);
   static void reportMessage(const char* msg, const char* title, bool& cancel,
