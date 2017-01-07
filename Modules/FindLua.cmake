@@ -74,6 +74,7 @@ function(_lua_set_version_vars)
              include/lua${CMAKE_MATCH_1}${CMAKE_MATCH_2}
              include/lua${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
              include/lua-${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
+             include/lua.${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
         )
         list(APPEND _lua_library_names
              lua${CMAKE_MATCH_1}${CMAKE_MATCH_2}
