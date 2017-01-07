@@ -23,17 +23,14 @@ bool cmCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args,
 const char* cmCommand::GetError()
 {
   if (this->Error.empty()) {
-    this->Error = this->GetName();
-    this->Error += " unknown error.";
+    return "unknown error.";
   }
   return this->Error.c_str();
 }
 
 void cmCommand::SetError(const std::string& e)
 {
-  this->Error = this->GetName();
-  this->Error += " ";
-  this->Error += e;
+  this->Error = e;
 }
 
 bool cmCommand::Disallowed(cmPolicies::PolicyID pol, const char* e)
