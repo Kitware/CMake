@@ -1197,7 +1197,15 @@ namespace
 
     std::string GetPaths() const
     {
-      return this->Extract(this->mf.GetDefinition(systemPathsFlag));
+      auto val = this->mf.GetDefinition(systemPathsFlag);
+      if (val != nullptr)
+      {
+        return this->Extract(val);
+      }
+      else
+      {
+        return std::string();
+      }
     }
 
   private:
@@ -1219,8 +1227,8 @@ namespace
     }
 
   private:
-    char const entryName[14] = "MSBUILD_FLAGS";
-    char const systemPathsFlag[31] = "VC_SYSTEM_INCLUDE_PATHS_OUTPUT";
+    const std::string entryName = "MSBUILD_FLAGS";
+    const std::string systemPathsFlag = "VC_SYSTEM_INCLUDE_PATHS_OUTPUT";
     std::string const file = cmSystemTools::GetCMakeRoot()
       + "/Modules/VCSystemIncludePaths.cmake";
 

@@ -1445,7 +1445,7 @@ int cmake::ActualConfigure()
 void cmake::CreateDefaultGlobalGenerator()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
-  std::string found;
+  std::string found = "";
   // Try to find the newest VS installed on the computer and
   // use that as a default if -G is not specified
   const std::string vsregBase = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\";
@@ -1459,7 +1459,6 @@ void cmake::CreateDefaultGlobalGenerator()
     const char* GeneratorName;
   };
   static VSVersionedGenerator const vsGenerators[] = {
-    { "15.0", "Visual Studio 15 2017" }, //
     { "14.0", "Visual Studio 14 2015" }, //
     { "12.0", "Visual Studio 12 2013" }, //
     { "11.0", "Visual Studio 11 2012" }, //
@@ -1472,9 +1471,26 @@ void cmake::CreateDefaultGlobalGenerator()
     "\\Setup\\VC;ProductDir", //
     ";InstallDir"             //
   };
-  cmVSSetupAPIHelper vsSetupAPIHelper;
-  if (vsSetupAPIHelper.IsVS2017Installed()) {
+
+  // For Dev15/VS 2017, there are no registry entries exposing the install location of VS.
+  // However a Microsoft version of CMake is installed with VS (placed relative to the root of VS). 
+  // If we are running MS version of cmake, then select VS2017 generator.
+  // For VS2017, cmake is deployed at <VSRoot>\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin
+  // Below condition works only for CMake bundled with VS.
+  std::string cmakeCommandLocation = cmSystemTools::GetCMakeCommand();
+  std::transform(cmakeCommandLocation.begin(), cmakeCommandLocation.end(), cmakeCommandLocation.begin(), ::tolower);
+  std::size_t match = cmakeCommandLocation.find("/common7/ide/commonextensions/microsoft/cmake/cmake/bin");
+  if (match != std::string::npos)
+  {
     found = "Visual Studio 15 2017";
+  }
+
+  // Query VS Setup API to check if VS 2017 is installed.
+  if (found == "") {
+    cmVSSetupAPIHelper vsSetupAPIHelper;
+    if (vsSetupAPIHelper.IsVS2017Installed()) {
+      found = "Visual Studio 15 2017";
+    }
   }
   else {
       for (VSVersionedGenerator const* g = cmArrayBegin(vsGenerators);
