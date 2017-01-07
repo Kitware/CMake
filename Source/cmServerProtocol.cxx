@@ -76,27 +76,36 @@ std::vector<std::string> toStringList(const Json::Value& in)
   return result;
 }
 
-void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
+static void getCMakeInputs(const cmGlobalGenerator* gg,
+  const std::string& sourceDir,
   const std::string& buildDir,
   std::vector<std::string>* internalFiles,
   std::vector<std::string>* explicitFiles,
   std::vector<std::string>* tmpFiles)
 {
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
+  std::string lcCMakeRootDir = cmakeRootDir;
+  std::transform(lcCMakeRootDir.begin(), lcCMakeRootDir.end(), lcCMakeRootDir.begin(), ::tolower);
+  std::string lcSourceDir = sourceDir;
+  std::transform(lcSourceDir.begin(), lcSourceDir.end(), lcSourceDir.begin(), ::tolower);
+  std::string lcBuildDir = buildDir;
+  std::transform(lcBuildDir.begin(), lcBuildDir.end(), lcBuildDir.begin(), ::tolower);
+
   std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();
   for (auto it = makefiles.begin(); it != makefiles.end(); ++it) {
     const std::vector<std::string> listFiles = (*it)->GetListFiles();
 
-    for (auto jt = listFiles.begin(); jt != listFiles.end(); ++jt) {
+    for (auto jstr = listFiles.begin(); jstr != listFiles.end(); ++jstr) {
+      auto jt = *jstr;
+      std::transform(jt.begin(), jt.end(), jt.begin(), ::tolower);
+      const std::string startOfFile = jt.substr(0, lcCMakeRootDir.size());
+      const bool isInternal = (startOfFile == lcCMakeRootDir);
+      const bool isTemporary = !isInternal && (jt.find(lcBuildDir + '/') == 0);
 
-      const std::string startOfFile = jt->substr(0, cmakeRootDir.size());
-      const bool isInternal = (startOfFile == cmakeRootDir);
-      const bool isTemporary = !isInternal && (jt->find(buildDir + '/') == 0);
-
-      std::string toAdd = *jt;
-      if (!sourceDir.empty()) {
+      std::string toAdd = jt;
+      if (!lcSourceDir.empty()) {
         const std::string& relative =
-          cmSystemTools::RelativePath(sourceDir.c_str(), jt->c_str());
+          cmSystemTools::RelativePath(lcSourceDir.c_str(), jt.c_str());
         if (toAdd.size() > relative.size()) {
           toAdd = relative;
         }
@@ -106,12 +115,14 @@ void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
         if (internalFiles) {
           internalFiles->push_back(toAdd);
         }
-      } else {
+      }
+      else {
         if (isTemporary) {
           if (tmpFiles) {
             tmpFiles->push_back(toAdd);
           }
-        } else {
+        }
+        else {
           if (explicitFiles) {
             explicitFiles->push_back(toAdd);
           }

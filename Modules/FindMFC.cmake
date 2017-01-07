@@ -1,6 +1,3 @@
-# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
-
 #.rst:
 # FindMFC
 # -------
@@ -15,6 +12,19 @@
 #   MFC_FOUND - Was MFC support found
 #
 # You don't need to include anything or link anything to use it.
+
+#=============================================================================
+# Copyright 2002-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distribute this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 # Assume no MFC support
 set(MFC_FOUND "NO")
@@ -31,6 +41,7 @@ if(MFC_ATTEMPT_TRY_COMPILE)
     configure_file(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx)
     message(STATUS "Looking for MFC")
+    # Try both shared and static as the root project may have set the /MT flag
     try_compile(MFC_HAVE_MFC
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx
@@ -38,6 +49,16 @@ if(MFC_ATTEMPT_TRY_COMPILE)
       -DCMAKE_MFC_FLAG:STRING=2
       -DCOMPILE_DEFINITIONS:STRING=-D_AFXDLL
       OUTPUT_VARIABLE OUTPUT)
+    if(NOT MFC_HAVE_MFC)
+      configure_file(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
+        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx)
+      try_compile(MFC_HAVE_MFC
+        ${CMAKE_BINARY_DIR}
+        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx
+        CMAKE_FLAGS
+        -DCMAKE_MFC_FLAG:STRING=1
+        OUTPUT_VARIABLE OUTPUT)
+    endif()
     if(MFC_HAVE_MFC)
       message(STATUS "Looking for MFC - found")
       set(MFC_HAVE_MFC 1 CACHE INTERNAL "Have MFC?")
