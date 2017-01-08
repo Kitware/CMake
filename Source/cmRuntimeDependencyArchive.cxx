@@ -6,7 +6,7 @@
 #include "cmBinUtilsLinuxELFLinker.h"
 #include "cmBinUtilsMacOSMachOLinker.h"
 #include "cmBinUtilsWindowsPELinker.h"
-#include "cmCommand.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -108,13 +108,13 @@ static cmsys::RegularExpression TransformCompile(const std::string& str)
 }
 
 cmRuntimeDependencyArchive::cmRuntimeDependencyArchive(
-  cmCommand* command, std::vector<std::string> searchDirectories,
+  cmExecutionStatus& status, std::vector<std::string> searchDirectories,
   std::string bundleExecutable,
   const std::vector<std::string>& preIncludeRegexes,
   const std::vector<std::string>& preExcludeRegexes,
   const std::vector<std::string>& postIncludeRegexes,
   const std::vector<std::string>& postExcludeRegexes)
-  : Command(command)
+  : Status(status)
   , SearchDirectories(std::move(searchDirectories))
   , BundleExecutable(std::move(bundleExecutable))
   , PreIncludeRegexes(preIncludeRegexes.size())
@@ -190,7 +190,7 @@ bool cmRuntimeDependencyArchive::GetRuntimeDependencies(
 
 void cmRuntimeDependencyArchive::SetError(const std::string& e)
 {
-  this->Command->SetError(e);
+  this->Status.SetError(e);
 }
 
 std::string cmRuntimeDependencyArchive::GetBundleExecutable()
@@ -361,7 +361,7 @@ void cmRuntimeDependencyArchive::AddUnresolvedPath(const std::string& name)
 
 cmMakefile* cmRuntimeDependencyArchive::GetMakefile()
 {
-  return this->Command->GetMakefile();
+  return &this->Status.GetMakefile();
 }
 
 const std::map<std::string, std::set<std::string>>&

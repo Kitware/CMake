@@ -14,14 +14,14 @@
 #include <string>
 #include <vector>
 
-class cmCommand;
+class cmExecutionStatus;
 class cmMakefile;
 
 class cmRuntimeDependencyArchive
 {
 public:
   explicit cmRuntimeDependencyArchive(
-    cmCommand* command, std::vector<std::string> searchDirectories,
+    cmExecutionStatus& status, std::vector<std::string> searchDirectories,
     std::string bundleExecutable,
     const std::vector<std::string>& preIncludeRegexes,
     const std::vector<std::string>& preExcludeRegexes,
@@ -51,7 +51,7 @@ public:
   const std::set<std::string>& GetUnresolvedPaths();
 
 private:
-  cmCommand* Command;
+  cmExecutionStatus& Status;
   std::unique_ptr<cmBinUtilsLinker> Linker;
 
   std::string GetRuntimeDependenciesTool;

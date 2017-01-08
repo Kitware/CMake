@@ -60,10 +60,12 @@
 #  include <windows.h>
 #endif
 
+namespace {
+
 #if defined(_WIN32)
 // libcurl doesn't support file:// urls for unicode filenames on Windows.
 // Convert string from UTF-8 to ACP if this is a file:// URL.
-static std::string fix_file_url_windows(const std::string& url)
+std::string fix_file_url_windows(const std::string& url)
 {
   std::string ret = url;
   if (strncmp(url.c_str(), "file://", 7) == 0) {
@@ -85,123 +87,8 @@ static std::string fix_file_url_windows(const std::string& url)
 }
 #endif
 
-// cmLibraryCommand
-bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
-                                cmExecutionStatus& status)
-{
-  if (args.size() < 2) {
-    status.SetError("must be called with at least two arguments.");
-    return false;
-  }
-  std::string const& subCommand = args[0];
-  if (subCommand == "WRITE") {
-    return this->HandleWriteCommand(args, false, status);
-  }
-  if (subCommand == "APPEND") {
-    return this->HandleWriteCommand(args, true, status);
-  }
-  if (subCommand == "DOWNLOAD") {
-    return this->HandleDownloadCommand(args, status);
-  }
-  if (subCommand == "UPLOAD") {
-    return this->HandleUploadCommand(args, status);
-  }
-  if (subCommand == "READ") {
-    return this->HandleReadCommand(args, status);
-  }
-  if (subCommand == "MD5" || subCommand == "SHA1" || subCommand == "SHA224" ||
-      subCommand == "SHA256" || subCommand == "SHA384" ||
-      subCommand == "SHA512" || subCommand == "SHA3_224" ||
-      subCommand == "SHA3_256" || subCommand == "SHA3_384" ||
-      subCommand == "SHA3_512") {
-    return this->HandleHashCommand(args, status);
-  }
-  if (subCommand == "STRINGS") {
-    return this->HandleStringsCommand(args, status);
-  }
-  if (subCommand == "GLOB") {
-    return this->HandleGlobCommand(args, false, status);
-  }
-  if (subCommand == "GLOB_RECURSE") {
-    return this->HandleGlobCommand(args, true, status);
-  }
-  if (subCommand == "MAKE_DIRECTORY") {
-    return this->HandleMakeDirectoryCommand(args, status);
-  }
-  if (subCommand == "RENAME") {
-    return this->HandleRename(args, status);
-  }
-  if (subCommand == "REMOVE") {
-    return this->HandleRemove(args, false, status);
-  }
-  if (subCommand == "REMOVE_RECURSE") {
-    return this->HandleRemove(args, true, status);
-  }
-  if (subCommand == "COPY") {
-    return this->HandleCopyCommand(args, status);
-  }
-  if (subCommand == "INSTALL") {
-    return this->HandleInstallCommand(args, status);
-  }
-  if (subCommand == "DIFFERENT") {
-    return this->HandleDifferentCommand(args, status);
-  }
-  if (subCommand == "RPATH_CHANGE" || subCommand == "CHRPATH") {
-    return this->HandleRPathChangeCommand(args, status);
-  }
-  if (subCommand == "RPATH_CHECK") {
-    return this->HandleRPathCheckCommand(args, status);
-  }
-  if (subCommand == "RPATH_REMOVE") {
-    return this->HandleRPathRemoveCommand(args, status);
-  }
-  if (subCommand == "READ_ELF") {
-    return this->HandleReadElfCommand(args, status);
-  }
-  if (subCommand == "RELATIVE_PATH") {
-    return this->HandleRelativePathCommand(args, status);
-  }
-  if (subCommand == "TO_CMAKE_PATH") {
-    return this->HandleCMakePathCommand(args, false, status);
-  }
-  if (subCommand == "TO_NATIVE_PATH") {
-    return this->HandleCMakePathCommand(args, true, status);
-  }
-  if (subCommand == "TOUCH") {
-    return this->HandleTouchCommand(args, true, status);
-  }
-  if (subCommand == "TOUCH_NOCREATE") {
-    return this->HandleTouchCommand(args, false, status);
-  }
-  if (subCommand == "TIMESTAMP") {
-    return this->HandleTimestampCommand(args, status);
-  }
-  if (subCommand == "GENERATE") {
-    return this->HandleGenerateCommand(args, status);
-  }
-  if (subCommand == "LOCK") {
-    return this->HandleLockCommand(args, status);
-  }
-  if (subCommand == "SIZE") {
-    return this->HandleSizeCommand(args, status);
-  }
-  if (subCommand == "READ_SYMLINK") {
-    return this->HandleReadSymlinkCommand(args, status);
-  }
-  if (subCommand == "CREATE_LINK") {
-    return this->HandleCreateLinkCommand(args, status);
-  }
-  if (subCommand == "GET_RUNTIME_DEPENDENCIES") {
-    return this->HandleGetRuntimeDependenciesCommand(args, status);
-  }
-
-  std::string e = "does not recognize sub-command " + subCommand;
-  status.SetError(e);
-  return false;
-}
-
-bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
-                                       bool append, cmExecutionStatus& status)
+bool HandleWriteCommand(std::vector<std::string> const& args, bool append,
+                        cmExecutionStatus& status)
 {
   std::vector<std::string>::const_iterator i = args.begin();
 
@@ -270,8 +157,8 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   return true;
 }
 
-bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args,
-                                      cmExecutionStatus& status)
+bool HandleReadCommand(std::vector<std::string> const& args,
+                       cmExecutionStatus& status)
 {
   if (args.size() < 3) {
     status.SetError("READ must be called with at least two additional "
@@ -372,8 +259,8 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args,
   return true;
 }
 
-bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args,
-                                      cmExecutionStatus& status)
+bool HandleHashCommand(std::vector<std::string> const& args,
+                       cmExecutionStatus& status)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   if (args.size() != 3) {
@@ -404,8 +291,8 @@ bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args,
 #endif
 }
 
-bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args,
-                                         cmExecutionStatus& status)
+bool HandleStringsCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
 {
   if (args.size() < 3) {
     status.SetError("STRINGS requires a file name and output variable");
@@ -761,8 +648,8 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args,
   return true;
 }
 
-bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
-                                      bool recurse, cmExecutionStatus& status)
+bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse,
+                       cmExecutionStatus& status)
 {
   // File commands has at least one argument
   assert(args.size() > 1);
@@ -949,8 +836,8 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
   return true;
 }
 
-bool cmFileCommand::HandleMakeDirectoryCommand(
-  std::vector<std::string> const& args, cmExecutionStatus& status)
+bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
+                                cmExecutionStatus& status)
 {
   // File command has at least one argument
   assert(args.size() > 1);
@@ -981,8 +868,8 @@ bool cmFileCommand::HandleMakeDirectoryCommand(
   return true;
 }
 
-bool cmFileCommand::HandleTouchCommand(std::vector<std::string> const& args,
-                                       bool create, cmExecutionStatus& status)
+bool HandleTouchCommand(std::vector<std::string> const& args, bool create,
+                        cmExecutionStatus& status)
 {
   // File command has at least one argument
   assert(args.size() > 1);
@@ -1011,8 +898,8 @@ bool cmFileCommand::HandleTouchCommand(std::vector<std::string> const& args,
   return true;
 }
 
-bool cmFileCommand::HandleDifferentCommand(
-  std::vector<std::string> const& args, cmExecutionStatus& status)
+bool HandleDifferentCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status)
 {
   /*
     FILE(DIFFERENT <variable> FILES <lhs> <rhs>)
@@ -1065,15 +952,15 @@ bool cmFileCommand::HandleDifferentCommand(
   return true;
 }
 
-bool cmFileCommand::HandleCopyCommand(std::vector<std::string> const& args,
-                                      cmExecutionStatus& status)
+bool HandleCopyCommand(std::vector<std::string> const& args,
+                       cmExecutionStatus& status)
 {
   cmFileCopier copier(status);
   return copier.Run(args);
 }
 
-bool cmFileCommand::HandleRPathChangeCommand(
-  std::vector<std::string> const& args, cmExecutionStatus& status)
+bool HandleRPathChangeCommand(std::vector<std::string> const& args,
+                              cmExecutionStatus& status)
 {
   // Evaluate arguments.
   std::string file;
@@ -1163,8 +1050,8 @@ bool cmFileCommand::HandleRPathChangeCommand(
   return success;
 }
 
-bool cmFileCommand::HandleRPathRemoveCommand(
-  std::vector<std::string> const& args, cmExecutionStatus& status)
+bool HandleRPathRemoveCommand(std::vector<std::string> const& args,
+                              cmExecutionStatus& status)
 {
   // Evaluate arguments.
   std::string file;
@@ -1223,8 +1110,8 @@ bool cmFileCommand::HandleRPathRemoveCommand(
   return success;
 }
 
-bool cmFileCommand::HandleRPathCheckCommand(
-  std::vector<std::string> const& args, cmExecutionStatus& status)
+bool HandleRPathCheckCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status)
 {
   // Evaluate arguments.
   std::string file;
@@ -1274,8 +1161,8 @@ bool cmFileCommand::HandleRPathCheckCommand(
   return true;
 }
 
-bool cmFileCommand::HandleReadElfCommand(std::vector<std::string> const& args,
-                                         cmExecutionStatus& status)
+bool HandleReadElfCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
 {
   if (args.size() < 4) {
     status.SetError("READ_ELF must be called with at least three additional "
@@ -1335,15 +1222,15 @@ bool cmFileCommand::HandleReadElfCommand(std::vector<std::string> const& args,
 #endif
 }
 
-bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args,
-                                         cmExecutionStatus& status)
+bool HandleInstallCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
 {
   cmFileInstaller installer(status);
   return installer.Run(args);
 }
 
-bool cmFileCommand::HandleRelativePathCommand(
-  std::vector<std::string> const& args, cmExecutionStatus& status)
+bool HandleRelativePathCommand(std::vector<std::string> const& args,
+                               cmExecutionStatus& status)
 {
   if (args.size() != 4) {
     status.SetError("RELATIVE_PATH called with incorrect number of arguments");
@@ -1373,8 +1260,8 @@ bool cmFileCommand::HandleRelativePathCommand(
   return true;
 }
 
-bool cmFileCommand::HandleRename(std::vector<std::string> const& args,
-                                 cmExecutionStatus& status)
+bool HandleRename(std::vector<std::string> const& args,
+                  cmExecutionStatus& status)
 {
   if (args.size() != 3) {
     status.SetError("RENAME given incorrect number of arguments.");
@@ -1409,8 +1296,8 @@ bool cmFileCommand::HandleRename(std::vector<std::string> const& args,
   return true;
 }
 
-bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
-                                 bool recurse, cmExecutionStatus& status)
+bool HandleRemove(std::vector<std::string> const& args, bool recurse,
+                  cmExecutionStatus& status)
 {
 
   std::string message;
@@ -1440,7 +1327,6 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
   return true;
 }
 
-namespace {
 std::string ToNativePath(const std::string& path)
 {
   const auto& outPath = cmSystemTools::ConvertToOutputPath(path);
@@ -1457,11 +1343,9 @@ std::string ToCMakePath(const std::string& path)
   cmSystemTools::ConvertToUnixSlashes(temp);
   return temp;
 }
-}
 
-bool cmFileCommand::HandleCMakePathCommand(
-  std::vector<std::string> const& args, bool nativePath,
-  cmExecutionStatus& status)
+bool HandleCMakePathCommand(std::vector<std::string> const& args,
+                            bool nativePath, cmExecutionStatus& status)
 {
   if (args.size() != 3) {
     status.SetError("FILE([TO_CMAKE_PATH|TO_NATIVE_PATH] path result) must be "
@@ -1485,8 +1369,6 @@ bool cmFileCommand::HandleCMakePathCommand(
 
 // Stuff for curl download/upload
 typedef std::vector<char> cmFileCommandVectorOfChar;
-
-namespace {
 
 size_t cmWriteToFileCallback(void* ptr, size_t size, size_t nmemb, void* data)
 {
@@ -1538,11 +1420,10 @@ size_t cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
 class cURLProgressHelper
 {
 public:
-  cURLProgressHelper(cmFileCommand* fc, const char* text)
+  cURLProgressHelper(cmMakefile* mf, const char* text)
+    : Makefile(mf)
+    , Text(text)
   {
-    this->CurrentPercentage = -1;
-    this->FileCommand = fc;
-    this->Text = text;
   }
 
   bool UpdatePercentage(double value, double total, std::string& status)
@@ -1569,11 +1450,11 @@ public:
     return updated;
   }
 
-  cmFileCommand* GetFileCommand() { return this->FileCommand; }
+  cmMakefile* GetMakefile() { return this->Makefile; }
 
 private:
-  long CurrentPercentage;
-  cmFileCommand* FileCommand;
+  long CurrentPercentage = -1;
+  cmMakefile* Makefile;
   std::string Text;
 };
 
@@ -1587,8 +1468,7 @@ int cmFileDownloadProgressCallback(void* clientp, double dltotal, double dlnow,
 
   std::string status;
   if (helper->UpdatePercentage(dlnow, dltotal, status)) {
-    cmFileCommand* fc = helper->GetFileCommand();
-    cmMakefile* mf = fc->GetMakefile();
+    cmMakefile* mf = helper->GetMakefile();
     mf->DisplayStatus(status, -1);
   }
 
@@ -1605,16 +1485,12 @@ int cmFileUploadProgressCallback(void* clientp, double dltotal, double dlnow,
 
   std::string status;
   if (helper->UpdatePercentage(ulnow, ultotal, status)) {
-    cmFileCommand* fc = helper->GetFileCommand();
-    cmMakefile* mf = fc->GetMakefile();
+    cmMakefile* mf = helper->GetMakefile();
     mf->DisplayStatus(status, -1);
   }
 
   return 0;
 }
-}
-
-namespace {
 
 class cURLEasyGuard
 {
@@ -1639,7 +1515,7 @@ public:
 private:
   ::CURL* Easy;
 };
-}
+
 #endif
 
 #define check_curl_result(result, errstr)                                     \
@@ -1652,8 +1528,8 @@ private:
     }                                                                         \
   } while (false)
 
-bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args,
-                                          cmExecutionStatus& status)
+bool HandleDownloadCommand(std::vector<std::string> const& args,
+                           cmExecutionStatus& status)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   std::vector<std::string>::const_iterator i = args.begin();
@@ -1930,7 +1806,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args,
   // scope intentionally, rather than inside the "if(showProgress)"
   // block...
   //
-  cURLProgressHelper helper(this, "download");
+  cURLProgressHelper helper(&status.GetMakefile(), "download");
 
   if (showProgress) {
     res = ::curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
@@ -2021,8 +1897,8 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args,
 #endif
 }
 
-bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args,
-                                        cmExecutionStatus& status)
+bool HandleUploadCommand(std::vector<std::string> const& args,
+                         cmExecutionStatus& status)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   if (args.size() < 3) {
@@ -2201,7 +2077,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args,
   // scope intentionally, rather than inside the "if(showProgress)"
   // block...
   //
-  cURLProgressHelper helper(this, "upload");
+  cURLProgressHelper helper(&status.GetMakefile(), "upload");
 
   if (showProgress) {
     res = ::curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
@@ -2293,11 +2169,10 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args,
 #endif
 }
 
-void cmFileCommand::AddEvaluationFile(const std::string& inputName,
-                                      const std::string& outputExpr,
-                                      const std::string& condition,
-                                      bool inputIsContent,
-                                      cmExecutionStatus& status)
+void AddEvaluationFile(const std::string& inputName,
+                       const std::string& outputExpr,
+                       const std::string& condition, bool inputIsContent,
+                       cmExecutionStatus& status)
 {
   cmListFileBacktrace lfbt = status.GetMakefile().GetBacktrace();
 
@@ -2313,8 +2188,8 @@ void cmFileCommand::AddEvaluationFile(const std::string& inputName,
     inputName, std::move(outputCge), std::move(conditionCge), inputIsContent);
 }
 
-bool cmFileCommand::HandleGenerateCommand(std::vector<std::string> const& args,
-                                          cmExecutionStatus& status)
+bool HandleGenerateCommand(std::vector<std::string> const& args,
+                           cmExecutionStatus& status)
 {
   if (args.size() < 5) {
     status.SetError("Incorrect arguments to GENERATE subcommand.");
@@ -2349,12 +2224,12 @@ bool cmFileCommand::HandleGenerateCommand(std::vector<std::string> const& args,
   }
   std::string input = args[4];
 
-  this->AddEvaluationFile(input, output, condition, inputIsContent, status);
+  AddEvaluationFile(input, output, condition, inputIsContent, status);
   return true;
 }
 
-bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args,
-                                      cmExecutionStatus& status)
+bool HandleLockCommand(std::vector<std::string> const& args,
+                       cmExecutionStatus& status)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   // Default values
@@ -2515,8 +2390,8 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args,
 #endif
 }
 
-bool cmFileCommand::HandleTimestampCommand(
-  std::vector<std::string> const& args, cmExecutionStatus& status)
+bool HandleTimestampCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status)
 {
   if (args.size() < 3) {
     status.SetError("sub-command TIMESTAMP requires at least two arguments.");
@@ -2558,8 +2433,8 @@ bool cmFileCommand::HandleTimestampCommand(
   return true;
 }
 
-bool cmFileCommand::HandleSizeCommand(std::vector<std::string> const& args,
-                                      cmExecutionStatus& status)
+bool HandleSizeCommand(std::vector<std::string> const& args,
+                       cmExecutionStatus& status)
 {
   if (args.size() != 3) {
     std::ostringstream e;
@@ -2587,8 +2462,8 @@ bool cmFileCommand::HandleSizeCommand(std::vector<std::string> const& args,
   return true;
 }
 
-bool cmFileCommand::HandleReadSymlinkCommand(
-  std::vector<std::string> const& args, cmExecutionStatus& status)
+bool HandleReadSymlinkCommand(std::vector<std::string> const& args,
+                              cmExecutionStatus& status)
 {
   if (args.size() != 3) {
     std::ostringstream e;
@@ -2614,8 +2489,8 @@ bool cmFileCommand::HandleReadSymlinkCommand(
   return true;
 }
 
-bool cmFileCommand::HandleCreateLinkCommand(
-  std::vector<std::string> const& args, cmExecutionStatus& status)
+bool HandleCreateLinkCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status)
 {
   if (args.size() < 3) {
     status.SetError("CREATE_LINK must be called with at least two additional "
@@ -2724,8 +2599,8 @@ bool cmFileCommand::HandleCreateLinkCommand(
   return true;
 }
 
-bool cmFileCommand::HandleGetRuntimeDependenciesCommand(
-  std::vector<std::string> const& args, cmExecutionStatus& status)
+bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
+                                         cmExecutionStatus& status)
 {
   static const std::set<std::string> supportedPlatforms = { "Windows", "Linux",
                                                             "Darwin" };
@@ -2811,7 +2686,7 @@ bool cmFileCommand::HandleGetRuntimeDependenciesCommand(
   }
 
   cmRuntimeDependencyArchive archive(
-    this, parsedArgs.Directories, parsedArgs.BundleExecutable,
+    status, parsedArgs.Directories, parsedArgs.BundleExecutable,
     parsedArgs.PreIncludeRegexes, parsedArgs.PreExcludeRegexes,
     parsedArgs.PostIncludeRegexes, parsedArgs.PostExcludeRegexes);
   if (!archive.Prepare()) {
@@ -2891,4 +2766,120 @@ bool cmFileCommand::HandleGetRuntimeDependenciesCommand(
       parsedArgs.ConflictingDependenciesPrefix + "_FILENAMES", val);
   }
   return true;
+}
+
+} // namespace
+
+bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
+                                cmExecutionStatus& status)
+{
+  if (args.size() < 2) {
+    status.SetError("must be called with at least two arguments.");
+    return false;
+  }
+  std::string const& subCommand = args[0];
+  if (subCommand == "WRITE") {
+    return HandleWriteCommand(args, false, status);
+  }
+  if (subCommand == "APPEND") {
+    return HandleWriteCommand(args, true, status);
+  }
+  if (subCommand == "DOWNLOAD") {
+    return HandleDownloadCommand(args, status);
+  }
+  if (subCommand == "UPLOAD") {
+    return HandleUploadCommand(args, status);
+  }
+  if (subCommand == "READ") {
+    return HandleReadCommand(args, status);
+  }
+  if (subCommand == "MD5" || subCommand == "SHA1" || subCommand == "SHA224" ||
+      subCommand == "SHA256" || subCommand == "SHA384" ||
+      subCommand == "SHA512" || subCommand == "SHA3_224" ||
+      subCommand == "SHA3_256" || subCommand == "SHA3_384" ||
+      subCommand == "SHA3_512") {
+    return HandleHashCommand(args, status);
+  }
+  if (subCommand == "STRINGS") {
+    return HandleStringsCommand(args, status);
+  }
+  if (subCommand == "GLOB") {
+    return HandleGlobCommand(args, false, status);
+  }
+  if (subCommand == "GLOB_RECURSE") {
+    return HandleGlobCommand(args, true, status);
+  }
+  if (subCommand == "MAKE_DIRECTORY") {
+    return HandleMakeDirectoryCommand(args, status);
+  }
+  if (subCommand == "RENAME") {
+    return HandleRename(args, status);
+  }
+  if (subCommand == "REMOVE") {
+    return HandleRemove(args, false, status);
+  }
+  if (subCommand == "REMOVE_RECURSE") {
+    return HandleRemove(args, true, status);
+  }
+  if (subCommand == "COPY") {
+    return HandleCopyCommand(args, status);
+  }
+  if (subCommand == "INSTALL") {
+    return HandleInstallCommand(args, status);
+  }
+  if (subCommand == "DIFFERENT") {
+    return HandleDifferentCommand(args, status);
+  }
+  if (subCommand == "RPATH_CHANGE" || subCommand == "CHRPATH") {
+    return HandleRPathChangeCommand(args, status);
+  }
+  if (subCommand == "RPATH_CHECK") {
+    return HandleRPathCheckCommand(args, status);
+  }
+  if (subCommand == "RPATH_REMOVE") {
+    return HandleRPathRemoveCommand(args, status);
+  }
+  if (subCommand == "READ_ELF") {
+    return HandleReadElfCommand(args, status);
+  }
+  if (subCommand == "RELATIVE_PATH") {
+    return HandleRelativePathCommand(args, status);
+  }
+  if (subCommand == "TO_CMAKE_PATH") {
+    return HandleCMakePathCommand(args, false, status);
+  }
+  if (subCommand == "TO_NATIVE_PATH") {
+    return HandleCMakePathCommand(args, true, status);
+  }
+  if (subCommand == "TOUCH") {
+    return HandleTouchCommand(args, true, status);
+  }
+  if (subCommand == "TOUCH_NOCREATE") {
+    return HandleTouchCommand(args, false, status);
+  }
+  if (subCommand == "TIMESTAMP") {
+    return HandleTimestampCommand(args, status);
+  }
+  if (subCommand == "GENERATE") {
+    return HandleGenerateCommand(args, status);
+  }
+  if (subCommand == "LOCK") {
+    return HandleLockCommand(args, status);
+  }
+  if (subCommand == "SIZE") {
+    return HandleSizeCommand(args, status);
+  }
+  if (subCommand == "READ_SYMLINK") {
+    return HandleReadSymlinkCommand(args, status);
+  }
+  if (subCommand == "CREATE_LINK") {
+    return HandleCreateLinkCommand(args, status);
+  }
+  if (subCommand == "GET_RUNTIME_DEPENDENCIES") {
+    return HandleGetRuntimeDependenciesCommand(args, status);
+  }
+
+  std::string e = "does not recognize sub-command " + subCommand;
+  status.SetError(e);
+  return false;
 }
