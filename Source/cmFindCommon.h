@@ -14,8 +14,6 @@
 #include "cmPathLabel.h"
 #include "cmSearchPath.h"
 
-class cmMakefile;
-
 /** \class cmFindCommon
  * \brief Base class for FIND_XXX implementations.
  *
@@ -105,7 +103,6 @@ protected:
 
   bool CheckCommonArgument(std::string const& arg);
   void AddPathSuffix(std::string const& arg);
-  void SetMakefile(cmMakefile* makefile);
 
   bool NoDefaultPath;
   bool NoCMakePath;
