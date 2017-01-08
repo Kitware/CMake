@@ -12,19 +12,19 @@
 #include <string>
 #include <vector>
 
-class cmFileCommand;
+class cmExecutionStatus;
 class cmMakefile;
 
 // File installation helper class.
 struct cmFileCopier
 {
-  cmFileCopier(cmFileCommand* command, const char* name = "COPY");
+  cmFileCopier(cmExecutionStatus& status, const char* name = "COPY");
   virtual ~cmFileCopier();
 
   bool Run(std::vector<std::string> const& args);
 
 protected:
-  cmFileCommand* FileCommand;
+  cmExecutionStatus& Status;
   cmMakefile* Makefile;
   const char* Name;
   bool Always;

@@ -12,11 +12,11 @@
 #include <string>
 #include <vector>
 
-class cmFileCommand;
+class cmExecutionStatus;
 
 struct cmFileInstaller : public cmFileCopier
 {
-  cmFileInstaller(cmFileCommand* command);
+  cmFileInstaller(cmExecutionStatus& status);
   ~cmFileInstaller() override;
 
 protected:

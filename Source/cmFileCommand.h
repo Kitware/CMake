@@ -37,43 +37,69 @@ public:
                    cmExecutionStatus& status) override;
 
 protected:
-  bool HandleRename(std::vector<std::string> const& args);
-  bool HandleRemove(std::vector<std::string> const& args, bool recurse);
-  bool HandleWriteCommand(std::vector<std::string> const& args, bool append);
-  bool HandleReadCommand(std::vector<std::string> const& args);
-  bool HandleHashCommand(std::vector<std::string> const& args);
-  bool HandleStringsCommand(std::vector<std::string> const& args);
-  bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse);
-  bool HandleTouchCommand(std::vector<std::string> const& args, bool create);
-  bool HandleMakeDirectoryCommand(std::vector<std::string> const& args);
+  bool HandleRename(std::vector<std::string> const& args,
+                    cmExecutionStatus& status);
+  bool HandleRemove(std::vector<std::string> const& args, bool recurse,
+                    cmExecutionStatus& status);
+  bool HandleWriteCommand(std::vector<std::string> const& args, bool append,
+                          cmExecutionStatus& status);
+  bool HandleReadCommand(std::vector<std::string> const& args,
+                         cmExecutionStatus& status);
+  bool HandleHashCommand(std::vector<std::string> const& args,
+                         cmExecutionStatus& status);
+  bool HandleStringsCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status);
+  bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse,
+                         cmExecutionStatus& status);
+  bool HandleTouchCommand(std::vector<std::string> const& args, bool create,
+                          cmExecutionStatus& status);
+  bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
+                                  cmExecutionStatus& status);
 
-  bool HandleRelativePathCommand(std::vector<std::string> const& args);
+  bool HandleRelativePathCommand(std::vector<std::string> const& args,
+                                 cmExecutionStatus& status);
   bool HandleCMakePathCommand(std::vector<std::string> const& args,
-                              bool nativePath);
-  bool HandleReadElfCommand(std::vector<std::string> const& args);
-  bool HandleRPathChangeCommand(std::vector<std::string> const& args);
-  bool HandleRPathCheckCommand(std::vector<std::string> const& args);
-  bool HandleRPathRemoveCommand(std::vector<std::string> const& args);
-  bool HandleDifferentCommand(std::vector<std::string> const& args);
+                              bool nativePath, cmExecutionStatus& status);
+  bool HandleReadElfCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status);
+  bool HandleRPathChangeCommand(std::vector<std::string> const& args,
+                                cmExecutionStatus& status);
+  bool HandleRPathCheckCommand(std::vector<std::string> const& args,
+                               cmExecutionStatus& status);
+  bool HandleRPathRemoveCommand(std::vector<std::string> const& args,
+                                cmExecutionStatus& status);
+  bool HandleDifferentCommand(std::vector<std::string> const& args,
+                              cmExecutionStatus& status);
 
-  bool HandleCopyCommand(std::vector<std::string> const& args);
-  bool HandleInstallCommand(std::vector<std::string> const& args);
-  bool HandleDownloadCommand(std::vector<std::string> const& args);
-  bool HandleUploadCommand(std::vector<std::string> const& args);
+  bool HandleCopyCommand(std::vector<std::string> const& args,
+                         cmExecutionStatus& status);
+  bool HandleInstallCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status);
+  bool HandleDownloadCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status);
+  bool HandleUploadCommand(std::vector<std::string> const& args,
+                           cmExecutionStatus& status);
 
-  bool HandleTimestampCommand(std::vector<std::string> const& args);
-  bool HandleGenerateCommand(std::vector<std::string> const& args);
-  bool HandleLockCommand(std::vector<std::string> const& args);
-  bool HandleSizeCommand(std::vector<std::string> const& args);
-  bool HandleReadSymlinkCommand(std::vector<std::string> const& args);
-  bool HandleCreateLinkCommand(std::vector<std::string> const& args);
+  bool HandleTimestampCommand(std::vector<std::string> const& args,
+                              cmExecutionStatus& status);
+  bool HandleGenerateCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status);
+  bool HandleLockCommand(std::vector<std::string> const& args,
+                         cmExecutionStatus& status);
+  bool HandleSizeCommand(std::vector<std::string> const& args,
+                         cmExecutionStatus& status);
+  bool HandleReadSymlinkCommand(std::vector<std::string> const& args,
+                                cmExecutionStatus& status);
+  bool HandleCreateLinkCommand(std::vector<std::string> const& args,
+                               cmExecutionStatus& status);
   bool HandleGetRuntimeDependenciesCommand(
-    std::vector<std::string> const& args);
+    std::vector<std::string> const& args, cmExecutionStatus& status);
 
 private:
   void AddEvaluationFile(const std::string& inputName,
                          const std::string& outputExpr,
-                         const std::string& condition, bool inputIsContent);
+                         const std::string& condition, bool inputIsContent,
+                         cmExecutionStatus& status);
 };
 
 #endif

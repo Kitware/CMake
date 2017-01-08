@@ -3,8 +3,8 @@
 
 #include "cmFileInstaller.h"
 
+#include "cmExecutionStatus.h"
 #include "cmFSPermissions.h"
-#include "cmFileCommand.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
@@ -14,8 +14,8 @@
 
 using namespace cmFSPermissions;
 
-cmFileInstaller::cmFileInstaller(cmFileCommand* command)
-  : cmFileCopier(command, "INSTALL")
+cmFileInstaller::cmFileInstaller(cmExecutionStatus& status)
+  : cmFileCopier(status, "INSTALL")
   , InstallType(cmInstallType_FILES)
   , Optional(false)
   , MessageAlways(false)
@@ -111,19 +111,19 @@ bool cmFileInstaller::Parse(std::vector<std::string> const& args)
 
   if (!this->Rename.empty()) {
     if (!this->FilesFromDir.empty()) {
-      this->FileCommand->SetError("INSTALL option RENAME may not be "
-                                  "combined with FILES_FROM_DIR.");
+      this->Status.SetError("INSTALL option RENAME may not be "
+                            "combined with FILES_FROM_DIR.");
       return false;
     }
     if (this->InstallType != cmInstallType_FILES &&
         this->InstallType != cmInstallType_PROGRAMS) {
-      this->FileCommand->SetError("INSTALL option RENAME may be used "
-                                  "only with FILES or PROGRAMS.");
+      this->Status.SetError("INSTALL option RENAME may be used "
+                            "only with FILES or PROGRAMS.");
       return false;
     }
     if (this->Files.size() > 1) {
-      this->FileCommand->SetError("INSTALL option RENAME may be used "
-                                  "only with one file.");
+      this->Status.SetError("INSTALL option RENAME may be used "
+                            "only with one file.");
       return false;
     }
   }
@@ -134,9 +134,9 @@ bool cmFileInstaller::Parse(std::vector<std::string> const& args)
 
   if (((this->MessageAlways ? 1 : 0) + (this->MessageLazy ? 1 : 0) +
        (this->MessageNever ? 1 : 0)) > 1) {
-    this->FileCommand->SetError("INSTALL options MESSAGE_ALWAYS, "
-                                "MESSAGE_LAZY, and MESSAGE_NEVER "
-                                "are mutually exclusive.");
+    this->Status.SetError("INSTALL options MESSAGE_ALWAYS, "
+                          "MESSAGE_LAZY, and MESSAGE_NEVER "
+                          "are mutually exclusive.");
     return false;
   }
 
@@ -213,7 +213,7 @@ bool cmFileInstaller::CheckKeyword(std::string const& arg)
     e << "INSTALL called with old-style " << arg << " argument.  "
       << "This script was generated with an older version of CMake.  "
       << "Re-run this cmake version on your build tree.";
-    this->FileCommand->SetError(e.str());
+    this->Status.SetError(e.str());
     this->Doing = DoingError;
   } else {
     return this->cmFileCopier::CheckKeyword(arg);
@@ -257,7 +257,7 @@ bool cmFileInstaller::GetTargetTypeFromString(const std::string& stype)
   } else {
     std::ostringstream e;
     e << "Option TYPE given unknown value \"" << stype << "\".";
-    this->FileCommand->SetError(e.str());
+    this->Status.SetError(e.str());
     return false;
   }
   return true;
@@ -269,8 +269,8 @@ bool cmFileInstaller::HandleInstallDestination()
 
   // allow for / to be a valid destination
   if (destination.size() < 2 && destination != "/") {
-    this->FileCommand->SetError("called with inappropriate arguments. "
-                                "No DESTINATION provided or .");
+    this->Status.SetError("called with inappropriate arguments. "
+                          "No DESTINATION provided or .");
     return false;
   }
 
@@ -300,7 +300,7 @@ bool cmFileInstaller::HandleInstallDestination()
       if (relative) {
         // This is relative path on unix or windows. Since we are doing
         // destdir, this case does not make sense.
-        this->FileCommand->SetError(
+        this->Status.SetError(
           "called with relative DESTINATION. This "
           "does not make sense when using DESTDIR. Specify "
           "absolute path or remove DESTDIR environment variable.");
@@ -315,7 +315,7 @@ bool cmFileInstaller::HandleInstallDestination()
           "absolute path or remove DESTDIR environment variable."
           "\nDESTINATION=\n";
         message += destination;
-        this->FileCommand->SetError(message);
+        this->Status.SetError(message);
         return false;
       }
     }
@@ -335,14 +335,14 @@ bool cmFileInstaller::HandleInstallDestination()
       if (!cmSystemTools::MakeDirectory(destination, default_dir_mode)) {
         std::string errstring = "cannot create directory: " + destination +
           ". Maybe need administrative privileges.";
-        this->FileCommand->SetError(errstring);
+        this->Status.SetError(errstring);
         return false;
       }
     }
     if (!cmSystemTools::FileIsDirectory(destination)) {
       std::string errstring =
         "INSTALL destination: " + destination + " is not a directory.";
-      this->FileCommand->SetError(errstring);
+      this->Status.SetError(errstring);
       return false;
     }
   }
