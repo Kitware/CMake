@@ -607,18 +607,18 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->MemoryTesterDynamicOptions.push_back("-E");
       this->MemoryTesterDynamicOptions.push_back("env");
       std::string envVar;
-      std::string extraOptions =
+      std::string extraOptions = ":" +
         this->CTest->GetCTestConfiguration("MemoryCheckSanitizerOptions");
       std::string suppressionsOption;
       if (!this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile")
              .empty()) {
-        suppressionsOption = " suppressions=" +
+        suppressionsOption = ":suppressions=" +
           this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile");
       }
       if (this->MemoryTesterStyle ==
           cmCTestMemCheckHandler::ADDRESS_SANITIZER) {
         envVar = "ASAN_OPTIONS";
-        extraOptions += " detect_leaks=1";
+        extraOptions += ":detect_leaks=1";
       } else if (this->MemoryTesterStyle ==
                  cmCTestMemCheckHandler::LEAK_SANITIZER) {
         envVar = "LSAN_OPTIONS";
@@ -633,7 +633,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
         envVar = "UBSAN_OPTIONS";
       }
       std::string outputFile =
-        envVar + "=log_path=\"" + this->MemoryTesterOutputFile + "\" ";
+        envVar + "=log_path=\"" + this->MemoryTesterOutputFile + "\"";
       this->MemoryTesterEnvironmentVariable =
         outputFile + extraOptions + suppressionsOption;
       break;

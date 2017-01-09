@@ -32,7 +32,7 @@ unset(CTEST_EXTRA_CODE)
 #-----------------------------------------------------------------------------
 # add standalone LeakSanitizer test
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55\")
 ")
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
@@ -45,7 +45,7 @@ unset(CTEST_EXTRA_CODE)
 #-----------------------------------------------------------------------------
 # add AddressSanitizer test
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55\")
 ")
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"\${CMAKE_COMMAND}\"
@@ -58,7 +58,7 @@ unset(CTEST_EXTRA_CODE)
 #-----------------------------------------------------------------------------
 # add AddressSanitizer/LeakSanitizer test
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55\")
 ")
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
@@ -71,7 +71,7 @@ unset(CTEST_EXTRA_CODE)
 #-----------------------------------------------------------------------------
 # add MemorySanitizer test
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55\")
 ")
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"\${CMAKE_COMMAND}\"
@@ -164,7 +164,7 @@ unset(CTEST_SUFFIX_CODE)
 set(CTEST_SUFFIX_CODE "message(\"Defect count: \${defect_count}\")")
 set(CTEST_MEMCHECK_ARGS "DEFECT_COUNT defect_count")
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55\")
 ")
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
