@@ -2215,7 +2215,7 @@ const char* cmMakefile::GetRequiredDefinition(const std::string& name) const
   const char* ret = this->GetDefinition(name);
   if (!ret) {
     cmSystemTools::Error("Error required internal CMake variable not "
-                         "set, cmake may be not be built correctly.\n",
+                         "set, cmake may not be built correctly.\n",
                          "Missing variable is:\n", name.c_str());
     return "";
   }
