@@ -609,6 +609,12 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       std::string envVar;
       std::string extraOptions =
         this->CTest->GetCTestConfiguration("MemoryCheckSanitizerOptions");
+      std::string suppressionsOption;
+      if (!this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile")
+             .empty()) {
+        suppressionsOption = " suppressions=" +
+          this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile");
+      }
       if (this->MemoryTesterStyle ==
           cmCTestMemCheckHandler::ADDRESS_SANITIZER) {
         envVar = "ASAN_OPTIONS";
@@ -628,7 +634,8 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       }
       std::string outputFile =
         envVar + "=log_path=\"" + this->MemoryTesterOutputFile + "\" ";
-      this->MemoryTesterEnvironmentVariable = outputFile + extraOptions;
+      this->MemoryTesterEnvironmentVariable =
+        outputFile + extraOptions + suppressionsOption;
       break;
     }
     default:
