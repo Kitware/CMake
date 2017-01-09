@@ -1,5 +1,5 @@
-VS_USER_PROPS_CXX
------------------
+VS_USER_PROPS
+-------------
 
 Sets the user props file to be included in the visual studio
 C++ project file. The standard path is

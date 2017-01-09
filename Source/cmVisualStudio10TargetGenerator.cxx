@@ -385,8 +385,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<ImportGroup Label=\"PropertySheets\">\n", 1);
   {
     std::string props = VS10_CXX_USER_PROPS;
-    if (const char* p =
-          this->GeneratorTarget->GetProperty("VS_USER_PROPS_CXX")) {
+    if (const char* p = this->GeneratorTarget->GetProperty("VS_USER_PROPS")) {
       props = p;
       this->ConvertToWindowsSlash(props);
     }
