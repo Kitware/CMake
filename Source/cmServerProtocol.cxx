@@ -997,6 +997,8 @@ cmServerResponse cmServerProtocol1_0::ProcessConfigure(
     }
   }
 
+  cmSystemTools::ResetErrorOccuredFlag(); // Reset error state
+
   if (cm->AddCMakePaths() != 1) {
     return request.ReportError("Failed to set CMake paths.");
   }
