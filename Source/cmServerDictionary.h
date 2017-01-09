@@ -11,7 +11,7 @@ static const std::string kFILE_CHANGE_SIGNAL = "fileChange";
 
 static const std::string kCACHE_TYPE = "cache";
 static const std::string kQUIT_TYPE = "quit";
-static const std::string kVC_SYSTEM_INCLUDE_PATHS_TYPE = "cmakeVariables";
+static const std::string kVC_SYSTEM_INCLUDE_PATHS_TYPE = "cmakeVCSystemIncludePaths";
 static const std::string kCMAKE_VARIABLES_TYPE = "cmakeVariables";
 static const std::string kCMAKE_INPUTS_TYPE = "cmakeInputs";
 static const std::string kCODE_MODEL_TYPE = "codemodel";
