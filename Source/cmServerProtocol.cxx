@@ -720,11 +720,15 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
 
   Json::Value result = Json::objectValue;
   result[kNAME_KEY] = target->GetName();
-
   result[kTYPE_KEY] = typeName;
-  result[kFULL_NAME_KEY] = target->GetFullName(config);
   result[kSOURCE_DIRECTORY_KEY] = lg->GetCurrentSourceDirectory();
   result[kBUILD_DIRECTORY_KEY] = lg->GetCurrentBinaryDirectory();
+
+  if (type == cmState::INTERFACE_LIBRARY) {
+    return result;
+  }
+
+  result[kFULL_NAME_KEY] = target->GetFullName(config);
 
   if (target->HaveWellDefinedOutputFiles()) {
     Json::Value artifacts = Json::arrayValue;
