@@ -155,8 +155,18 @@ VerifyResult.cmake script also automatically prints out standard output and
 standard error from CPack execution phase that is compared with
 '<test_name>/<generator_name>-stdout.txt' regular expression and
 and '<test_name>/<generator_name>-stderr.txt' regular expresson respectively.
-NOTE: For subtests generator name can also be suffixed with subtest name and in
-      such case subtest file is preferred.
+NOTE: For subtests generator name can also be suffixed with subtest name and/or
+      packaging type (MONOLITHIC, COMPONENT, GROUP) and in such cases the
+      preferences of which file will be used are as follows:
+        - generator name + packaging type + subtest name
+        - generator name + packaging type
+        - generator name + subtest name
+        - generator name
+        - default generator
+      File name format: '<generator_name>-<packaging_type>-<subtest_name>-std<type>.txt'
+                        where <type> can either be 'out' or 'err'.
+      File name format: '<generator_name>-<packaging_type>-std<type>.txt'
+                        where <type> can either be 'out' or 'err'.
       File name format: '<generator_name>-<subtest_name>-std<type>.txt' where
                         <type> can either be 'out' or 'err'.
 NOTE: If none of the comparison files are present then the default generator
@@ -223,3 +233,4 @@ To add a new generator we must
 - if needed add 'default_expected_std<type>.txt' files where <type> is either
   'out' or 'err' which will contain default expected output of package
   generation regular expression.
+- add generator to list of other CPack generators in RunCMake/CMakeLists.txt

@@ -60,7 +60,11 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source PACK
       )
 
     foreach(o out err)
-      if(SUBTEST_SUFFIX AND EXISTS ${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/${TEST_TYPE}-${SUBTEST_SUFFIX}-std${o}.txt)
+      if(SUBTEST_SUFFIX AND EXISTS ${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/${TEST_TYPE}-${PACKAGING_TYPE}-${SUBTEST_SUFFIX}-std${o}.txt)
+        set(RunCMake-std${o}-file "tests/${TEST_NAME}/${TEST_TYPE}-${PACKAGING_TYPE}-${SUBTEST_SUFFIX}-std${o}.txt")
+      elseif(EXISTS ${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/${TEST_TYPE}-${PACKAGING_TYPE}-std${o}.txt)
+        set(RunCMake-std${o}-file "tests/${TEST_NAME}/${TEST_TYPE}-${PACKAGING_TYPE}-std${o}.txt")
+      elseif(SUBTEST_SUFFIX AND EXISTS ${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/${TEST_TYPE}-${SUBTEST_SUFFIX}-std${o}.txt)
         set(RunCMake-std${o}-file "tests/${TEST_NAME}/${TEST_TYPE}-${SUBTEST_SUFFIX}-std${o}.txt")
       elseif(EXISTS ${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/${TEST_TYPE}-std${o}.txt)
         set(RunCMake-std${o}-file "tests/${TEST_NAME}/${TEST_TYPE}-std${o}.txt")
