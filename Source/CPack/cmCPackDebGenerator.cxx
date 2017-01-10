@@ -173,7 +173,11 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
     std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")) +
     this->GetOutputExtension());
   // all GROUP in one vs all COMPONENT in one
-  localToplevel += "/" + compInstDirName;
+  // if must be here otherwise non component paths have a trailing / while
+  // components don't
+  if (!compInstDirName.empty()) {
+    localToplevel += "/" + compInstDirName;
+  }
 
   /* replace the TEMP DIRECTORY with the component one */
   this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel.c_str());
