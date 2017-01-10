@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-project(launcher_test_project)
+project(launcher_custom_command_test_project)
 
 include(CTest)
 
