@@ -23,6 +23,19 @@
 
 #if defined(_WIN32) && !defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
 
+#ifndef _Outptr_result_maybenull_
+#define _Outptr_result_maybenull_
+#endif
+#ifndef _Out_writes_to_
+#define _Out_writes_to_(x,y)
+#endif
+#ifndef _Reserved_
+#define _Reserved_
+#endif
+#ifndef MAXUINT
+#define MAXUINT     ((UINT)~((UINT)0))
+#endif
+
 // Enumerations
 //
 /// <summary>
