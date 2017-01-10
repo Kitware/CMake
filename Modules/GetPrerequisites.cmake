@@ -654,6 +654,8 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
 
   if(NOT EXISTS "${target}")
     message("warning: target '${target}' does not exist...")
+    set(${prerequisites_var} "" PARENT_SCOPE)
+    return()
   endif()
 
   set(gp_cmd_paths ${gp_cmd_paths}
