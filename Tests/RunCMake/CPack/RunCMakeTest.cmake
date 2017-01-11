@@ -4,6 +4,7 @@ include(RunCMake)
 include("${RunCMake_SOURCE_DIR}/CPackTestHelpers.cmake")
 
 # run_cpack_test args: TEST_NAME "GENERATORS" RUN_CMAKE_BUILD_STEP "PACKAGING_TYPES"
+run_cpack_test(CUSTOM_BINARY_SPEC_FILE "RPM" false "MONOLITHIC;COMPONENT")
 run_cpack_test(CUSTOM_NAMES "RPM;DEB" true "COMPONENT")
 run_cpack_test(DEBUGINFO "RPM" true "COMPONENT")
 run_cpack_test(DEPENDENCIES "RPM;DEB" true "COMPONENT")
