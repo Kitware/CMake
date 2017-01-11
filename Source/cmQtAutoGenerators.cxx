@@ -29,6 +29,22 @@
 
 // -- Static functions
 
+static std::string GetConfigDefinition(cmMakefile* makefile,
+                                       const std::string& key,
+                                       const std::string& config)
+{
+  std::string keyConf = key;
+  if (!config.empty()) {
+    keyConf += "_";
+    keyConf += config;
+  }
+  const char* valueConf = makefile->GetDefinition(keyConf);
+  if (valueConf != CM_NULLPTR) {
+    return valueConf;
+  }
+  return makefile->GetSafeDefinition(key);
+}
+
 static std::string FindMatchingHeader(
   const std::string& absPath, const std::string& mocSubDir,
   const std::string& basename,
@@ -269,55 +285,30 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   // - Moc
   cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SKIP_MOC"),
                                     this->SkipMoc);
-  {
-    std::string compileDefsPropOrig = "AM_MOC_COMPILE_DEFINITIONS";
-    std::string compileDefsProp = compileDefsPropOrig;
-    if (!config.empty()) {
-      compileDefsProp += "_";
-      compileDefsProp += config;
-    }
-    const char* compileDefs = makefile->GetDefinition(compileDefsProp);
-    this->MocCompileDefinitionsStr = compileDefs
-      ? compileDefs
-      : makefile->GetSafeDefinition(compileDefsPropOrig);
-  }
-  {
-    std::string includesPropOrig = "AM_MOC_INCLUDES";
-    std::string includesProp = includesPropOrig;
-    if (!config.empty()) {
-      includesProp += "_";
-      includesProp += config;
-    }
-    const char* includes = makefile->GetDefinition(includesProp);
-    this->MocIncludesStr =
-      includes ? includes : makefile->GetSafeDefinition(includesPropOrig);
-  }
+  this->MocCompileDefinitionsStr =
+    GetConfigDefinition(makefile, "AM_MOC_COMPILE_DEFINITIONS", config);
+  this->MocIncludesStr =
+    GetConfigDefinition(makefile, "AM_MOC_INCLUDES", config);
   this->MocOptionsStr = makefile->GetSafeDefinition("AM_MOC_OPTIONS");
 
   // - Uic
   cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SKIP_UIC"),
                                     this->SkipUic);
+  cmSystemTools::ExpandListArgument(
+    GetConfigDefinition(makefile, "AM_UIC_TARGET_OPTIONS", config),
+    this->UicTargetOptions);
   {
-    const char* uicOptionsFiles =
-      makefile->GetSafeDefinition("AM_UIC_OPTIONS_FILES");
-    std::string uicOptionsPropOrig = "AM_UIC_TARGET_OPTIONS";
-    std::string uicOptionsProp = uicOptionsPropOrig;
-    if (!config.empty()) {
-      uicOptionsProp += "_";
-      uicOptionsProp += config;
-    }
-    const char* uicTargetOptions = makefile->GetSafeDefinition(uicOptionsProp);
-    cmSystemTools::ExpandListArgument(
-      uicTargetOptions ? uicTargetOptions
-                       : makefile->GetSafeDefinition(uicOptionsPropOrig),
-      this->UicTargetOptions);
-    const char* uicOptionsOptions =
-      makefile->GetSafeDefinition("AM_UIC_OPTIONS_OPTIONS");
     std::vector<std::string> uicFilesVec;
-    cmSystemTools::ExpandListArgument(uicOptionsFiles, uicFilesVec);
     std::vector<std::string> uicOptionsVec;
-    cmSystemTools::ExpandListArgument(uicOptionsOptions, uicOptionsVec);
+    cmSystemTools::ExpandListArgument(
+      makefile->GetSafeDefinition("AM_UIC_OPTIONS_FILES"), uicFilesVec);
+    cmSystemTools::ExpandListArgument(
+      makefile->GetSafeDefinition("AM_UIC_OPTIONS_OPTIONS"), uicOptionsVec);
     if (uicFilesVec.size() != uicOptionsVec.size()) {
+      std::ostringstream err;
+      err << "AutoGen: Error: Uic files/options lists size missmatch in: "
+          << filename << std::endl;
+      this->LogError(err.str());
       return false;
     }
     for (std::vector<std::string>::iterator fileIt = uicFilesVec.begin(),
@@ -329,20 +320,20 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   }
 
   // - Rcc
+  cmSystemTools::ExpandListArgument(
+    makefile->GetSafeDefinition("AM_RCC_SOURCES"), this->RccSources);
   {
-    std::string rccSources = makefile->GetSafeDefinition("AM_RCC_SOURCES");
-    cmSystemTools::ExpandListArgument(rccSources, this->RccSources);
-  }
-  {
-    const char* rccOptionsFiles =
-      makefile->GetSafeDefinition("AM_RCC_OPTIONS_FILES");
-    const char* rccOptionsOptions =
-      makefile->GetSafeDefinition("AM_RCC_OPTIONS_OPTIONS");
     std::vector<std::string> rccFilesVec;
-    cmSystemTools::ExpandListArgument(rccOptionsFiles, rccFilesVec);
     std::vector<std::string> rccOptionsVec;
-    cmSystemTools::ExpandListArgument(rccOptionsOptions, rccOptionsVec);
+    cmSystemTools::ExpandListArgument(
+      makefile->GetSafeDefinition("AM_RCC_OPTIONS_FILES"), rccFilesVec);
+    cmSystemTools::ExpandListArgument(
+      makefile->GetSafeDefinition("AM_RCC_OPTIONS_OPTIONS"), rccOptionsVec);
     if (rccFilesVec.size() != rccOptionsVec.size()) {
+      std::ostringstream err;
+      err << "AutoGen: Error: RCC files/options lists size missmatch in: "
+          << filename << std::endl;
+      this->LogError(err.str());
       return false;
     }
     for (std::vector<std::string>::iterator fileIt = rccFilesVec.begin(),
@@ -351,10 +342,11 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
       cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
       this->RccOptions[*fileIt] = *optionIt;
     }
-
-    const char* rccInputs = makefile->GetSafeDefinition("AM_RCC_INPUTS");
+  }
+  {
     std::vector<std::string> rccInputLists;
-    cmSystemTools::ExpandListArgument(rccInputs, rccInputLists);
+    cmSystemTools::ExpandListArgument(
+      makefile->GetSafeDefinition("AM_RCC_INPUTS"), rccInputLists);
 
     // qrc files in the end of the list may have been empty
     if (rccInputLists.size() < this->RccSources.size()) {
@@ -362,19 +354,17 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     }
     if (this->RccSources.size() != rccInputLists.size()) {
       std::ostringstream err;
-      err << "AutoGen: RCC sources lists size missmatch in: " << filename;
-      err << std::endl;
+      err << "AutoGen: Error: RCC sources/inputs lists size missmatch in: "
+          << filename << std::endl;
       this->LogError(err.str());
       return false;
     }
-
     for (std::vector<std::string>::iterator fileIt = this->RccSources.begin(),
                                             inputIt = rccInputLists.begin();
          fileIt != this->RccSources.end(); ++fileIt, ++inputIt) {
       cmSystemTools::ReplaceString(*inputIt, "@list_sep@", ";");
       std::vector<std::string> rccInputFiles;
       cmSystemTools::ExpandListArgument(*inputIt, rccInputFiles);
-
       this->RccInputs[*fileIt] = rccInputFiles;
     }
   }
