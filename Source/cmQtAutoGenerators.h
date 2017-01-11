@@ -5,6 +5,7 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 #include <cmFilePathChecksum.h>
+#include <cmsys/RegularExpression.hxx>
 
 #include <list>
 #include <map>
@@ -48,36 +49,45 @@ private:
   bool GenerateQrc(const std::string& qrcInputFile,
                    const std::string& qrcOutputFile, bool unique_n);
 
-  bool ParseCppFile(
+  bool ParseSourceFile(
     const std::string& absFilename,
     const std::vector<std::string>& headerExtensions,
     std::map<std::string, std::string>& includedMocs,
-    std::map<std::string, std::vector<std::string> >& includedUis);
-  bool StrictParseCppFile(
+    std::map<std::string, std::vector<std::string> >& includedUis,
+    bool relaxed);
+  void SearchHeadersForSourceFile(
     const std::string& absFilename,
     const std::vector<std::string>& headerExtensions,
-    std::map<std::string, std::string>& includedMocs,
-    std::map<std::string, std::vector<std::string> >& includedUis);
-  void SearchHeadersForCppFile(
-    const std::string& absFilename,
-    const std::vector<std::string>& headerExtensions,
-    std::set<std::string>& absHeaders);
+    std::set<std::string>& absHeadersMoc,
+    std::set<std::string>& absHeadersUic);
 
   void ParseHeaders(
-    const std::set<std::string>& absHeaders,
+    const std::set<std::string>& absHeadersMoc,
+    const std::set<std::string>& absHeadersUic,
     const std::map<std::string, std::string>& includedMocs,
     std::map<std::string, std::string>& notIncludedMocs,
     std::map<std::string, std::vector<std::string> >& includedUis);
 
-  void ParseForUic(
+  bool requiresMocing(const std::string& text, std::string& macroName);
+
+  void ParseContentForUic(
     const std::string& fileName, const std::string& contentsString,
     std::map<std::string, std::vector<std::string> >& includedUis);
+
+  bool ParseContentForMoc(const std::string& absFilename,
+                          const std::string& contentsString,
+                          const std::vector<std::string>& headerExtensions,
+                          std::map<std::string, std::string>& includedMocs,
+                          bool relaxed);
 
   void ParseForUic(
     const std::string& fileName,
     std::map<std::string, std::vector<std::string> >& includedUis);
 
   void Init();
+
+  bool MocSkipTest(const std::string& absFilename);
+  bool UicSkipTest(const std::string& absFilename);
 
   bool NameCollisionTest(const std::map<std::string, std::string>& genFiles,
                          std::multimap<std::string, std::string>& collisions);
@@ -91,7 +101,7 @@ private:
   void LogError(const std::string& message);
   void LogCommand(const std::vector<std::string>& command);
 
-  bool makeParentDirectory(const std::string& filename);
+  bool MakeParentDirectory(const std::string& filename);
 
   std::string JoinExts(const std::vector<std::string>& lst);
 
@@ -117,10 +127,10 @@ private:
   std::string UicExecutable;
   std::string RccExecutable;
   // - File lists
-  std::string Sources;
-  std::string Headers;
+  std::vector<std::string> Sources;
+  std::vector<std::string> Headers;
   // - Moc
-  std::string SkipMoc;
+  std::vector<std::string> SkipMoc;
   std::string MocCompileDefinitionsStr;
   std::string MocIncludesStr;
   std::string MocOptionsStr;
@@ -130,7 +140,7 @@ private:
   std::list<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
   // - Uic
-  std::string SkipUic;
+  std::vector<std::string> SkipUic;
   std::vector<std::string> UicTargetOptions;
   std::map<std::string, std::string> UicOptions;
   // - Rcc
@@ -142,6 +152,10 @@ private:
   std::string OldCompileSettingsStr;
   // - Utility
   cmFilePathChecksum fpathCheckSum;
+  cmsys::RegularExpression RegExpQObject;
+  cmsys::RegularExpression RegExpQGadget;
+  cmsys::RegularExpression RegExpMocInclude;
+  cmsys::RegularExpression RegExpUicInclude;
   // - Flags
   bool IncludeProjectDirsBefore;
   bool Verbose;

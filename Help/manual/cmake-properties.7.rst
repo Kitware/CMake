@@ -357,6 +357,10 @@ Properties on Source Files
    /prop_sf/MACOSX_PACKAGE_LOCATION
    /prop_sf/OBJECT_DEPENDS
    /prop_sf/OBJECT_OUTPUTS
+   /prop_sf/SKIP_AUTOGEN
+   /prop_sf/SKIP_AUTOMOC
+   /prop_sf/SKIP_AUTORCC
+   /prop_sf/SKIP_AUTOUIC
    /prop_sf/SYMBOLIC
    /prop_sf/VS_DEPLOYMENT_CONTENT
    /prop_sf/VS_DEPLOYMENT_LOCATION

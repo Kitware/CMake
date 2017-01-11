@@ -139,6 +139,69 @@ if (automoc_rerun_result)
   message(SEND_ERROR "Second build of automoc_rerun failed.")
 endif()
 
+# -- Test: AUTOMOC, SKIP_AUTOMOC
+# Test for SKIP_AUTOMOC and SKIP_AUTOGEN on an AUTOMOC enabled target
+qtx_wrap_cpp(skipMocWrapMoc
+  skipSource/qItemA.hpp
+  skipSource/qItemB.hpp)
+set(skipMocSources
+  skipMoc.cpp
+  skipSource/qItemA.cpp
+  skipSource/qItemB.cpp
+  skipSource/qItemC.cpp)
+set_property(SOURCE skipSource/qItemA.cpp PROPERTY SKIP_AUTOMOC ON)
+set_property(SOURCE skipSource/qItemB.cpp PROPERTY SKIP_AUTOGEN ON)
+# AUTOMOC enabled only
+add_executable(skipMocA ${skipMocSources} ${skipMocWrapMoc})
+set_property(TARGET skipMocA PROPERTY AUTOMOC ON)
+target_link_libraries(skipMocA ${QT_LIBRARIES})
+# AUTOMOC and AUTOUIC enabled
+add_executable(skipMocB ${skipMocSources} ${skipMocWrapMoc})
+set_property(TARGET skipMocB PROPERTY AUTOMOC ON)
+set_property(TARGET skipMocB PROPERTY AUTOUIC ON)
+target_link_libraries(skipMocB ${QT_LIBRARIES})
+
+# -- Test: AUTOUIC, SKIP_AUTOUIC
+# Test for SKIP_AUTOUIC and SKIP_AUTOGEN on an AUTOUIC enabled target
+set(skipUicSources
+  skipUic.cpp
+  skipSource/skipUicGen.cpp
+  skipSource/skipUicNoGen1.cpp
+  skipSource/skipUicNoGen2.cpp
+)
+set_property(SOURCE skipSource/skipUicNoGen1.cpp PROPERTY SKIP_AUTOUIC ON)
+set_property(SOURCE skipSource/skipUicNoGen2.cpp PROPERTY SKIP_AUTOGEN ON)
+# AUTOUIC enabled
+add_executable(skipUicA ${skipUicSources})
+set_property(TARGET skipUicA PROPERTY AUTOUIC ON)
+target_link_libraries(skipUicA ${QT_LIBRARIES})
+# AUTOUIC and AUTOMOC enabled
+add_executable(skipUicB ${skipUicSources})
+set_property(TARGET skipUicB PROPERTY AUTOUIC ON)
+set_property(TARGET skipUicB PROPERTY AUTOMOC ON)
+target_link_libraries(skipUicB ${QT_LIBRARIES})
+
+# -- Test: AUTORCC, SKIP_AUTORCC
+# Test for SKIP_AUTORCC and SKIP_AUTOGEN on an AUTORCC enabled target
+set(skipRccSources
+  skipRcc.cpp
+  skipSource/skipRccBad1.qrc
+  skipSource/skipRccBad2.qrc
+  skipSource/skipRccGood.qrc
+)
+set_property(SOURCE skipSource/skipRccBad1.qrc PROPERTY SKIP_AUTORCC ON)
+set_property(SOURCE skipSource/skipRccBad2.qrc PROPERTY SKIP_AUTOGEN ON)
+# AUTORCC enabled
+add_executable(skipRccA ${skipRccSources})
+set_property(TARGET skipRccA PROPERTY AUTORCC ON)
+target_link_libraries(skipRccA ${QT_LIBRARIES})
+# AUTORCC, AUTOUIC and AUTOMOC enabled
+add_executable(skipRccB ${skipRccSources})
+set_property(TARGET skipRccB PROPERTY AUTORCC ON)
+set_property(TARGET skipRccB PROPERTY AUTOUIC ON)
+set_property(TARGET skipRccB PROPERTY AUTOMOC ON)
+target_link_libraries(skipRccB ${QT_LIBRARIES})
+
 # -- Test: AUTOMOC AUTORCC
 # Source files with the same basename in different subdirectories
 add_subdirectory(sameName)

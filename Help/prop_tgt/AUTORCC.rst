@@ -24,5 +24,8 @@ generate unspecified unique names for ``rcc``.  Therefore if
 ``Q_INIT_RESOURCE()`` or ``Q_CLEANUP_RESOURCE()`` need to be used the
 ``.qrc`` file name must be unique.
 
+Source files can be excluded from :prop_tgt:`AUTORCC` processing by
+enabling :prop_sf:`SKIP_AUTORCC` or the broader :prop_sf:`SKIP_AUTOGEN`.
+
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
