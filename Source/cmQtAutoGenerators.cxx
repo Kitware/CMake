@@ -99,20 +99,18 @@ static bool ListContains(const std::vector<std::string>& list,
 
 static std::string JoinExts(const std::vector<std::string>& lst)
 {
-  if (lst.empty()) {
-    return "";
-  }
-
   std::string result;
-  std::string separator = ",";
-  for (std::vector<std::string>::const_iterator it = lst.begin();
-       it != lst.end(); ++it) {
-    if (it != lst.begin()) {
-      result += separator;
+  if (!lst.empty()) {
+    const std::string separator = ",";
+    for (std::vector<std::string>::const_iterator it = lst.begin();
+         it != lst.end(); ++it) {
+      if (it != lst.begin()) {
+        result += separator;
+      }
+      result += '.';
+      result += *it;
     }
-    result += '.' + (*it);
   }
-  result.erase(result.end() - 1);
   return result;
 }
 
