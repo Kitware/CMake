@@ -155,7 +155,9 @@ private:
   bool RunMocFailed;
   bool RunUicFailed;
   bool RunRccFailed;
-  bool GenerateAll;
+  bool GenerateMocAll;
+  bool GenerateUicAll;
+  bool GenerateRccAll;
   bool MocRelaxedMode;
 };
 

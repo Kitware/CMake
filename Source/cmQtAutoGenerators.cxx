@@ -197,7 +197,9 @@ cmQtAutoGenerators::cmQtAutoGenerators()
   , RunMocFailed(false)
   , RunUicFailed(false)
   , RunRccFailed(false)
-  , GenerateAll(false)
+  , GenerateMocAll(false)
+  , GenerateUicAll(false)
+  , GenerateRccAll(false)
 {
 
   std::string colorEnv;
@@ -419,14 +421,14 @@ void cmQtAutoGenerators::ReadOldMocSettingsFile(
     std::string oldSettings = makefile->GetSafeDefinition(MocOldSettingsKey);
     if (oldSettings != this->MocSettingsString) {
       // If settings changed everything needs to be re-generated.
-      this->GenerateAll = true;
+      this->GenerateMocAll = true;
       // Remove old file in case processing gets aborted before
       // writing the current settings in the end.
       cmSystemTools::RemoveFile(filename);
     }
   } else {
     // If the file could not be read everything needs to be re-generated.
-    this->GenerateAll = true;
+    this->GenerateMocAll = true;
   }
 }
 
@@ -1119,7 +1121,7 @@ bool cmQtAutoGenerators::MocGenerateFile(const std::string& sourceFile,
     this->AutogenBuildSubDir + subDirPrefix + mocFileName;
   const std::string mocFileAbs = this->CurrentBinaryDir + mocFileRel;
 
-  bool generateMoc = this->GenerateAll;
+  bool generateMoc = this->GenerateMocAll;
   // Test if the source file is newer that the build file
   if (!generateMoc) {
     generateMoc = FileAbsentOrOlder(mocFileAbs, sourceFile);
@@ -1247,7 +1249,7 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
     this->AutogenBuildSubDir + "include/" + uiOutputFile;
   const std::string uicFileAbs = this->CurrentBinaryDir + uicFileRel;
 
-  bool generateUic = this->GenerateAll;
+  bool generateUic = this->GenerateUicAll;
   // Test if the source file is newer that the build file
   if (!generateUic) {
     generateUic = FileAbsentOrOlder(uicFileAbs, uiInputFile);
@@ -1368,7 +1370,7 @@ bool cmQtAutoGenerators::QrcGenerateFile(const std::string& qrcInputFile,
 
   const std::string qrcBuildFile = this->CurrentBinaryDir + qrcOutputFile;
 
-  bool generateQrc = this->GenerateAll;
+  bool generateQrc = this->GenerateRccAll;
   // Test if the resources list file is newer than build file
   if (!generateQrc) {
     generateQrc = FileAbsentOrOlder(qrcBuildFile, qrcInputFile);
