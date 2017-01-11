@@ -22,6 +22,7 @@ public:
   bool Run(const std::string& targetDirectory, const std::string& config);
 
 private:
+  // - Configuration
   bool ReadAutogenInfoFile(cmMakefile* makefile,
                            const std::string& targetDirectory,
                            const std::string& config);
@@ -29,25 +30,16 @@ private:
                                  const std::string& targetDirectory);
   bool WriteOldMocDefinitionsFile(const std::string& targetDirectory);
 
-  std::string MakeCompileSettingsString(cmMakefile* makefile);
+  static std::string MakeCompileSettingsString(cmMakefile* makefile);
 
+  // - Init and run
+  void Init();
   bool RunAutogen(cmMakefile* makefile);
 
-  bool GenerateMocFiles(
-    const std::map<std::string, std::string>& includedMocs,
-    const std::map<std::string, std::string>& notIncludedMocs);
-  bool GenerateMoc(const std::string& sourceFile,
-                   const std::string& mocFileName,
-                   const std::string& subDirPrefix);
-
-  bool GenerateUiFiles(
-    const std::map<std::string, std::vector<std::string> >& includedUis);
-  bool GenerateUi(const std::string& realName, const std::string& uiInputFile,
-                  const std::string& uiOutputFile);
-
-  bool GenerateQrcFiles();
-  bool GenerateQrc(const std::string& qrcInputFile,
-                   const std::string& qrcOutputFile, bool unique_n);
+  // - Content analysis
+  bool requiresMocing(const std::string& text, std::string& macroName);
+  bool MocSkipTest(const std::string& absFilename);
+  bool UicSkipTest(const std::string& absFilename);
 
   bool ParseSourceFile(
     const std::string& absFilename,
@@ -55,6 +47,7 @@ private:
     std::map<std::string, std::string>& includedMocs,
     std::map<std::string, std::vector<std::string> >& includedUis,
     bool relaxed);
+
   void SearchHeadersForSourceFile(
     const std::string& absFilename,
     const std::vector<std::string>& headerExtensions,
@@ -68,8 +61,6 @@ private:
     std::map<std::string, std::string>& notIncludedMocs,
     std::map<std::string, std::vector<std::string> >& includedUis);
 
-  bool requiresMocing(const std::string& text, std::string& macroName);
-
   void ParseContentForUic(
     const std::string& fileName, const std::string& contentsString,
     std::map<std::string, std::vector<std::string> >& includedUis);
@@ -80,18 +71,31 @@ private:
                           std::map<std::string, std::string>& includedMocs,
                           bool relaxed);
 
-  void ParseForUic(
-    const std::string& fileName,
-    std::map<std::string, std::vector<std::string> >& includedUis);
+  // - Moc file generation
+  bool GenerateMocFiles(
+    const std::map<std::string, std::string>& includedMocs,
+    const std::map<std::string, std::string>& notIncludedMocs);
+  bool GenerateMoc(const std::string& sourceFile,
+                   const std::string& mocFileName,
+                   const std::string& subDirPrefix);
 
-  void Init();
+  // - Uic file generation
+  static void MergeUicOptions(std::vector<std::string>& opts,
+                              const std::vector<std::string>& fileOpts,
+                              bool isQt5);
+  bool GenerateUiFiles(
+    const std::map<std::string, std::vector<std::string> >& includedUis);
+  bool GenerateUi(const std::string& realName, const std::string& uiInputFile,
+                  const std::string& uiOutputFile);
 
-  bool MocSkipTest(const std::string& absFilename);
-  bool UicSkipTest(const std::string& absFilename);
+  // - Qrc file generation
+  bool InputFilesNewerThanQrc(const std::string& qrcFile,
+                              const std::string& rccOutput);
+  bool GenerateQrcFiles();
+  bool GenerateQrc(const std::string& qrcInputFile,
+                   const std::string& qrcOutputFile, bool unique_n);
 
-  bool NameCollisionTest(const std::map<std::string, std::string>& genFiles,
-                         std::multimap<std::string, std::string>& collisions);
-
+  // - Logging
   void LogErrorNameCollision(
     const std::string& message,
     const std::multimap<std::string, std::string>& collisions);
@@ -101,16 +105,11 @@ private:
   void LogError(const std::string& message);
   void LogCommand(const std::vector<std::string>& command);
 
+  // - Utility
+  bool NameCollisionTest(const std::map<std::string, std::string>& genFiles,
+                         std::multimap<std::string, std::string>& collisions);
   bool MakeParentDirectory(const std::string& filename);
-
-  std::string JoinExts(const std::vector<std::string>& lst);
-
-  static void MergeUicOptions(std::vector<std::string>& opts,
-                              const std::vector<std::string>& fileOpts,
-                              bool isQt5);
-
-  bool InputFilesNewerThanQrc(const std::string& qrcFile,
-                              const std::string& rccOutput);
+  static std::string JoinExts(const std::vector<std::string>& lst);
 
   // - Target names
   std::string OriginTargetName;

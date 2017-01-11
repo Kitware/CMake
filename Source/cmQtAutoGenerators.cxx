@@ -27,6 +27,8 @@
 #include <unistd.h>
 #endif
 
+// -- Static functions
+
 static std::string findMatchingHeader(
   const std::string& absPath, const std::string& mocSubDir,
   const std::string& basename,
@@ -95,6 +97,8 @@ static bool ListContains(const std::vector<std::string>& list,
   return (std::find(list.begin(), list.end(), entry) != list.end());
 }
 
+// -- Class methods
+
 cmQtAutoGenerators::cmQtAutoGenerators()
   : Verbose(cmsys::SystemTools::HasEnv("VERBOSE"))
   , ColorOutput(true)
@@ -122,40 +126,6 @@ cmQtAutoGenerators::cmQtAutoGenerators()
     "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
   this->RegExpUicInclude.compile("[\n][ \t]*#[ \t]*include[ \t]+"
                                  "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
-}
-
-void cmQtAutoGenerators::MergeUicOptions(
-  std::vector<std::string>& opts, const std::vector<std::string>& fileOpts,
-  bool isQt5)
-{
-  static const char* valueOptions[] = { "tr",      "translate",
-                                        "postfix", "generator",
-                                        "include", // Since Qt 5.3
-                                        "g" };
-  std::vector<std::string> extraOpts;
-  for (std::vector<std::string>::const_iterator it = fileOpts.begin();
-       it != fileOpts.end(); ++it) {
-    std::vector<std::string>::iterator existingIt =
-      std::find(opts.begin(), opts.end(), *it);
-    if (existingIt != opts.end()) {
-      const char* o = it->c_str();
-      if (*o == '-') {
-        ++o;
-      }
-      if (isQt5 && *o == '-') {
-        ++o;
-      }
-      if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
-                       cmStrCmp(*it)) != cmArrayEnd(valueOptions)) {
-        assert(existingIt + 1 != opts.end());
-        *(existingIt + 1) = *(it + 1);
-        ++it;
-      }
-    } else {
-      extraOpts.push_back(*it);
-    }
-  }
-  opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
 }
 
 bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
@@ -568,6 +538,60 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 }
 
 /**
+ * @brief Tests if the C++ content requires moc processing
+ * @return True if moc is required
+ */
+bool cmQtAutoGenerators::requiresMocing(const std::string& text,
+                                        std::string& macroName)
+{
+  // Run a simple check before an expensive regular expression check
+  if (strstr(text.c_str(), "Q_OBJECT") != CM_NULLPTR) {
+    if (this->RegExpQObject.find(text)) {
+      macroName = "Q_OBJECT";
+      return true;
+    }
+  }
+  if (strstr(text.c_str(), "Q_GADGET") != CM_NULLPTR) {
+    if (this->RegExpQGadget.find(text)) {
+      macroName = "Q_GADGET";
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * @brief Tests if the file should be ignored for moc scanning
+ * @return True if the file should be ignored
+ */
+bool cmQtAutoGenerators::MocSkipTest(const std::string& absFilename)
+{
+  // Test if moc scanning is enabled
+  if (!this->MocExecutable.empty()) {
+    // Test if the file name is on the skip list
+    if (!ListContains(this->SkipMoc, absFilename)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * @brief Tests if the file name is in the skip list
+ */
+bool cmQtAutoGenerators::UicSkipTest(const std::string& absFilename)
+{
+  // Test if uic scanning is enabled
+  if (!this->UicExecutable.empty()) {
+    // Test if the file name is on the skip list
+    if (!ListContains(this->SkipUic, absFilename)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
  * @return True on success
  */
 bool cmQtAutoGenerators::ParseSourceFile(
@@ -595,25 +619,6 @@ bool cmQtAutoGenerators::ParseSourceFile(
     }
   }
   return success;
-}
-
-bool cmQtAutoGenerators::requiresMocing(const std::string& text,
-                                        std::string& macroName)
-{
-  // Run a simple check before an expensive regular expression check
-  if (strstr(text.c_str(), "Q_OBJECT") != CM_NULLPTR) {
-    if (this->RegExpQObject.find(text)) {
-      macroName = "Q_OBJECT";
-      return true;
-    }
-  }
-  if (strstr(text.c_str(), "Q_GADGET") != CM_NULLPTR) {
-    if (this->RegExpQGadget.find(text)) {
-      macroName = "Q_GADGET";
-      return true;
-    }
-  }
-  return false;
 }
 
 void cmQtAutoGenerators::ParseContentForUic(
@@ -1104,6 +1109,40 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
   return false;
 }
 
+void cmQtAutoGenerators::MergeUicOptions(
+  std::vector<std::string>& opts, const std::vector<std::string>& fileOpts,
+  bool isQt5)
+{
+  static const char* valueOptions[] = { "tr",      "translate",
+                                        "postfix", "generator",
+                                        "include", // Since Qt 5.3
+                                        "g" };
+  std::vector<std::string> extraOpts;
+  for (std::vector<std::string>::const_iterator it = fileOpts.begin();
+       it != fileOpts.end(); ++it) {
+    std::vector<std::string>::iterator existingIt =
+      std::find(opts.begin(), opts.end(), *it);
+    if (existingIt != opts.end()) {
+      const char* o = it->c_str();
+      if (*o == '-') {
+        ++o;
+      }
+      if (isQt5 && *o == '-') {
+        ++o;
+      }
+      if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
+                       cmStrCmp(*it)) != cmArrayEnd(valueOptions)) {
+        assert(existingIt + 1 != opts.end());
+        *(existingIt + 1) = *(it + 1);
+        ++it;
+      }
+    } else {
+      extraOpts.push_back(*it);
+    }
+  }
+  opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
+}
+
 bool cmQtAutoGenerators::GenerateUiFiles(
   const std::map<std::string, std::vector<std::string> >& includedUis)
 {
@@ -1365,67 +1404,6 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
   return false;
 }
 
-/**
- * @brief Tests if the file should be ignored for moc scanning
- * @return True if the file should be ignored
- */
-bool cmQtAutoGenerators::MocSkipTest(const std::string& absFilename)
-{
-  // Test if moc scanning is enabled
-  if (!this->MocExecutable.empty()) {
-    // Test if the file name is on the skip list
-    if (!ListContains(this->SkipMoc, absFilename)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * @brief Tests if the file name is in the skip list
- */
-bool cmQtAutoGenerators::UicSkipTest(const std::string& absFilename)
-{
-  // Test if uic scanning is enabled
-  if (!this->UicExecutable.empty()) {
-    // Test if the file name is on the skip list
-    if (!ListContains(this->SkipUic, absFilename)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * @brief Collects name collisions as output/input pairs
- * @return True if there were collisions
- */
-bool cmQtAutoGenerators::NameCollisionTest(
-  const std::map<std::string, std::string>& genFiles,
-  std::multimap<std::string, std::string>& collisions)
-{
-  typedef std::map<std::string, std::string>::const_iterator Iter;
-  typedef std::map<std::string, std::string>::value_type VType;
-  for (Iter ait = genFiles.begin(); ait != genFiles.end(); ++ait) {
-    bool first_match(true);
-    for (Iter bit = (++Iter(ait)); bit != genFiles.end(); ++bit) {
-      if (ait->second == bit->second) {
-        if (first_match) {
-          if (collisions.find(ait->second) != collisions.end()) {
-            // We already know of this collision from before
-            break;
-          }
-          collisions.insert(VType(ait->second, ait->first));
-          first_match = false;
-        }
-        collisions.insert(VType(bit->second, bit->first));
-      }
-    }
-  }
-
-  return !collisions.empty();
-}
-
 void cmQtAutoGenerators::LogErrorNameCollision(
   const std::string& message,
   const std::multimap<std::string, std::string>& collisions)
@@ -1482,6 +1460,36 @@ void cmQtAutoGenerators::LogCommand(const std::vector<std::string>& command)
     sbuf << std::endl;
     this->LogInfo(sbuf.str());
   }
+}
+
+/**
+ * @brief Collects name collisions as output/input pairs
+ * @return True if there were collisions
+ */
+bool cmQtAutoGenerators::NameCollisionTest(
+  const std::map<std::string, std::string>& genFiles,
+  std::multimap<std::string, std::string>& collisions)
+{
+  typedef std::map<std::string, std::string>::const_iterator Iter;
+  typedef std::map<std::string, std::string>::value_type VType;
+  for (Iter ait = genFiles.begin(); ait != genFiles.end(); ++ait) {
+    bool first_match(true);
+    for (Iter bit = (++Iter(ait)); bit != genFiles.end(); ++bit) {
+      if (ait->second == bit->second) {
+        if (first_match) {
+          if (collisions.find(ait->second) != collisions.end()) {
+            // We already know of this collision from before
+            break;
+          }
+          collisions.insert(VType(ait->second, ait->first));
+          first_match = false;
+        }
+        collisions.insert(VType(bit->second, bit->first));
+      }
+    }
+  }
+
+  return !collisions.empty();
 }
 
 /**
