@@ -91,6 +91,19 @@ static std::string ReadAll(const std::string& filename)
   return stream.str();
 }
 
+/**
+ * @brief Tests if buildFile doesn't exist or is older than sourceFile
+ * @return True if buildFile doesn't exist or is older than sourceFile
+ */
+static bool FileAbsentOrOlder(const std::string& buildFile,
+                              const std::string& sourceFile)
+{
+  int result = 0;
+  bool success =
+    cmsys::SystemTools::FileTimeCompare(buildFile, sourceFile, &result);
+  return (!success || (result <= 0));
+}
+
 static bool ListContains(const std::vector<std::string>& list,
                          const std::string& entry)
 {
@@ -1284,22 +1297,6 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
   return false;
 }
 
-bool cmQtAutoGenerators::InputFilesNewerThanQrc(const std::string& qrcFile,
-                                                const std::string& rccOutput)
-{
-  std::vector<std::string> const& files = this->RccInputs[qrcFile];
-  for (std::vector<std::string>::const_iterator it = files.begin();
-       it != files.end(); ++it) {
-    int inputNewerThanQrc = 0;
-    bool success =
-      cmsys::SystemTools::FileTimeCompare(*it, rccOutput, &inputNewerThanQrc);
-    if (!success || inputNewerThanQrc >= 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
 bool cmQtAutoGenerators::GenerateQrcFiles()
 {
   // generate single map with input / output names
@@ -1361,14 +1358,23 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
 
   const std::string qrcBuildFile = this->CurrentBinaryDir + qrcOutputFile;
 
-  int sourceNewerThanQrc = 0;
-  bool generateQrc = !cmsys::SystemTools::FileTimeCompare(
-    qrcInputFile, qrcBuildFile, &sourceNewerThanQrc);
-  generateQrc = generateQrc || (sourceNewerThanQrc >= 0);
-  generateQrc =
-    generateQrc || this->InputFilesNewerThanQrc(qrcInputFile, qrcBuildFile);
-
-  if (this->GenerateAll || generateQrc) {
+  bool generateQrc = this->GenerateAll;
+  // Test if the resources list file is newer than build file
+  if (!generateQrc) {
+    generateQrc = FileAbsentOrOlder(qrcBuildFile, qrcInputFile);
+  }
+  // Test if any resource file is newer than the build file
+  if (!generateQrc) {
+    const std::vector<std::string>& files = this->RccInputs[qrcInputFile];
+    for (std::vector<std::string>::const_iterator it = files.begin();
+         it != files.end(); ++it) {
+      if (FileAbsentOrOlder(qrcBuildFile, *it)) {
+        generateQrc = true;
+        break;
+      }
+    }
+  }
+  if (generateQrc) {
     {
       std::string msg = "Generating RCC source ";
       msg += qrcOutputFile;

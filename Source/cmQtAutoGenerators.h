@@ -86,8 +86,6 @@ private:
                   const std::string& uiOutputFile);
 
   // - Qrc file generation
-  bool InputFilesNewerThanQrc(const std::string& qrcFile,
-                              const std::string& rccOutput);
   bool GenerateQrcFiles();
   bool GenerateQrc(const std::string& qrcInputFile,
                    const std::string& qrcOutputFile, bool unique_n);
