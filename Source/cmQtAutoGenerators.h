@@ -27,10 +27,12 @@ private:
                            const std::string& targetDirectory,
                            const std::string& config);
 
-  std::string MocCurrentSettingsString();
-  void ReadOldMocSettingsFile(cmMakefile* makefile,
-                              const std::string& targetDirectory);
-  bool WriteOldMocSettingsFile(const std::string& targetDirectory);
+  std::string MocSettingsStringCompose();
+  std::string UicSettingsStringCompose();
+  std::string RccSettingsStringCompose();
+  void OldSettingsReadFile(cmMakefile* makefile,
+                           const std::string& targetDirectory);
+  bool OldSettingsWriteFile(const std::string& targetDirectory);
 
   // - Init and run
   void Init();
@@ -138,10 +140,12 @@ private:
   std::vector<std::string> SkipUic;
   std::vector<std::string> UicTargetOptions;
   std::map<std::string, std::string> UicOptions;
+  std::string UicSettingsString;
   // - Rcc
   std::vector<std::string> RccSources;
   std::map<std::string, std::string> RccOptions;
   std::map<std::string, std::vector<std::string> > RccInputs;
+  std::string RccSettingsString;
   // - Utility
   cmFilePathChecksum fpathCheckSum;
   cmsys::RegularExpression RegExpQObject;

@@ -30,6 +30,8 @@
 // -- Static variables
 
 static const char* MocOldSettingsKey = "AM_MOC_OLD_SETTINGS";
+static const char* UicOldSettingsKey = "AM_UIC_OLD_SETTINGS";
+static const char* RccOldSettingsKey = "AM_RCC_OLD_SETTINGS";
 
 // -- Static functions
 
@@ -49,11 +51,11 @@ static std::string GetConfigDefinition(cmMakefile* makefile,
   return makefile->GetSafeDefinition(key);
 }
 
-static std::string MocOldSettingsFile(const std::string& targetDirectory)
+static std::string OldSettingsFile(const std::string& targetDirectory)
 {
   std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
   cmSystemTools::ConvertToUnixSlashes(filename);
-  filename += "/AutomocOldSettings.cmake";
+  filename += "/AutogenOldSettings.cmake";
   return filename;
 }
 
@@ -136,6 +138,21 @@ static bool ListContains(const std::vector<std::string>& list,
                          const std::string& entry)
 {
   return (std::find(list.begin(), list.end(), entry) != list.end());
+}
+
+static std::string JoinOptions(const std::map<std::string, std::string>& opts)
+{
+  std::string result;
+  for (std::map<std::string, std::string>::const_iterator it = opts.begin();
+       it != opts.end(); ++it) {
+    if (it != opts.begin()) {
+      result += "%%%";
+    }
+    result += it->first;
+    result += "===";
+    result += it->second;
+  }
+  return result;
 }
 
 static std::string JoinExts(const std::vector<std::string>& lst)
@@ -242,7 +259,7 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
     return false;
   }
   // Read old settings
-  this->ReadOldMocSettingsFile(mf.get(), targetDirectory);
+  this->OldSettingsReadFile(mf.get(), targetDirectory);
   // Init and run
   this->Init();
   if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5") {
@@ -251,7 +268,7 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
     }
   }
   // Write latest settings
-  if (!this->WriteOldMocSettingsFile(targetDirectory)) {
+  if (!this->OldSettingsWriteFile(targetDirectory)) {
     return false;
   }
   return true;
@@ -396,7 +413,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   return true;
 }
 
-std::string cmQtAutoGenerators::MocCurrentSettingsString()
+std::string cmQtAutoGenerators::MocSettingsStringCompose()
 {
   std::string res;
   res += this->MocCompileDefinitionsStr;
@@ -410,42 +427,108 @@ std::string cmQtAutoGenerators::MocCurrentSettingsString()
   return res;
 }
 
-void cmQtAutoGenerators::ReadOldMocSettingsFile(
+std::string cmQtAutoGenerators::UicSettingsStringCompose()
+{
+  std::string res;
+  res += cmJoin(this->UicTargetOptions, "@osep@");
+  res += " ~~~ ";
+  res += JoinOptions(this->UicOptions);
+  res += " ~~~ ";
+  return res;
+}
+
+std::string cmQtAutoGenerators::RccSettingsStringCompose()
+{
+  std::string res;
+  res += JoinOptions(this->RccOptions);
+  res += " ~~~ ";
+  return res;
+}
+
+void cmQtAutoGenerators::OldSettingsReadFile(
   cmMakefile* makefile, const std::string& targetDirectory)
 {
-  // Compose current settings string
-  this->MocSettingsString = this->MocCurrentSettingsString();
-  // Read old settings
-  const std::string filename = MocOldSettingsFile(targetDirectory);
-  if (makefile->ReadListFile(filename.c_str())) {
-    std::string oldSettings = makefile->GetSafeDefinition(MocOldSettingsKey);
-    if (oldSettings != this->MocSettingsString) {
-      // If settings changed everything needs to be re-generated.
+  if (!this->MocExecutable.empty() || !this->UicExecutable.empty() ||
+      !this->RccExecutable.empty()) {
+    // Compose current settings strings
+    this->MocSettingsString = this->MocSettingsStringCompose();
+    this->UicSettingsString = this->UicSettingsStringCompose();
+    this->RccSettingsString = this->RccSettingsStringCompose();
+
+    // Read old settings
+    const std::string filename = OldSettingsFile(targetDirectory);
+    if (makefile->ReadListFile(filename.c_str())) {
+      if (!this->MocExecutable.empty()) {
+        const std::string sol = makefile->GetSafeDefinition(MocOldSettingsKey);
+        if (sol != this->MocSettingsString) {
+          this->GenerateMocAll = true;
+        }
+      }
+      if (!this->UicExecutable.empty()) {
+        const std::string sol = makefile->GetSafeDefinition(UicOldSettingsKey);
+        if (sol != this->UicSettingsString) {
+          this->GenerateUicAll = true;
+        }
+      }
+      if (!this->RccExecutable.empty()) {
+        const std::string sol = makefile->GetSafeDefinition(RccOldSettingsKey);
+        if (sol != this->RccSettingsString) {
+          this->GenerateRccAll = true;
+        }
+      }
+      // In case any setting changed remove the old settings file.
+      // This triggers a full rebuild on the next run if the current
+      // build is aborted before writing the current settings in the end.
+      if (this->GenerateMocAll || this->GenerateUicAll ||
+          this->GenerateRccAll) {
+        cmSystemTools::RemoveFile(filename);
+      }
+    } else {
+      // If the file could not be read re-generate everythiung.
       this->GenerateMocAll = true;
-      // Remove old file in case processing gets aborted before
-      // writing the current settings in the end.
-      cmSystemTools::RemoveFile(filename);
+      this->GenerateUicAll = true;
+      this->GenerateRccAll = true;
     }
-  } else {
-    // If the file could not be read everything needs to be re-generated.
-    this->GenerateMocAll = true;
   }
 }
 
-bool cmQtAutoGenerators::WriteOldMocSettingsFile(
+bool cmQtAutoGenerators::OldSettingsWriteFile(
   const std::string& targetDirectory)
 {
   bool success = true;
-  if (!this->MocExecutable.empty()) {
-    const std::string filename = MocOldSettingsFile(targetDirectory);
+  // Only write if any setting changed
+  if (this->GenerateMocAll || this->GenerateUicAll || this->GenerateRccAll) {
+    const std::string filename = OldSettingsFile(targetDirectory);
     cmsys::ofstream outfile;
     outfile.open(filename.c_str(), std::ios::trunc);
-    if ((success = static_cast<bool>(outfile))) {
-      outfile << "set(" << MocOldSettingsKey << " "
-              << cmOutputConverter::EscapeForCMake(this->MocSettingsString)
-              << ")\n";
+    if (outfile) {
+      if (!this->MocExecutable.empty()) {
+        outfile << "set(" << MocOldSettingsKey << " "
+                << cmOutputConverter::EscapeForCMake(this->MocSettingsString)
+                << ")\n";
+      }
+      if (!this->UicExecutable.empty()) {
+        outfile << "set(" << UicOldSettingsKey << " "
+                << cmOutputConverter::EscapeForCMake(this->UicSettingsString)
+                << ")\n";
+      }
+      if (!this->RccExecutable.empty()) {
+        outfile << "set(" << RccOldSettingsKey << " "
+                << cmOutputConverter::EscapeForCMake(this->RccSettingsString)
+                << ")\n";
+      }
       success = outfile.good();
       outfile.close();
+    } else {
+      success = false;
+      // Remove old settings file to trigger full rebuild on next run
+      cmSystemTools::RemoveFile(filename);
+      {
+        std::ostringstream err;
+        err << "AutoGen: Error: Writing old settings file failed: " << filename
+            << std::endl;
+        this->LogError(err.str());
+      }
     }
   }
   return success;
