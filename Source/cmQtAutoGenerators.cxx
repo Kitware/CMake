@@ -27,6 +27,10 @@
 #include <unistd.h>
 #endif
 
+// -- Static variables
+
+static const char* MocOldSettingsKey = "AM_MOC_OLD_SETTINGS";
+
 // -- Static functions
 
 static std::string GetConfigDefinition(cmMakefile* makefile,
@@ -43,6 +47,14 @@ static std::string GetConfigDefinition(cmMakefile* makefile,
     return valueConf;
   }
   return makefile->GetSafeDefinition(key);
+}
+
+static std::string MocOldSettingsFile(const std::string& targetDirectory)
+{
+  std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
+  cmSystemTools::ConvertToUnixSlashes(filename);
+  filename += "/AutomocOldSettings.cmake";
+  return filename;
 }
 
 static std::string FindMatchingHeader(
@@ -227,15 +239,20 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   if (!this->ReadAutogenInfoFile(mf.get(), targetDirectory, config)) {
     return false;
   }
-  this->ReadOldMocDefinitionsFile(mf.get(), targetDirectory);
+  // Read old settings
+  this->ReadOldMocSettingsFile(mf.get(), targetDirectory);
+  // Init and run
   this->Init();
-
   if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5") {
     if (!this->RunAutogen(mf.get())) {
       return false;
     }
   }
-  return this->WriteOldMocDefinitionsFile(targetDirectory);
+  // Write latest settings
+  if (!this->WriteOldMocSettingsFile(targetDirectory)) {
+    return false;
+  }
+  return true;
 }
 
 bool cmQtAutoGenerators::ReadAutogenInfoFile(
@@ -369,9 +386,6 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     }
   }
 
-  // - Settings
-  this->CurrentCompileSettingsStr = this->MakeCompileSettingsString(makefile);
-
   // - Flags
   this->IncludeProjectDirsBefore =
     makefile->IsOn("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE");
@@ -380,58 +394,58 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   return true;
 }
 
-std::string cmQtAutoGenerators::MakeCompileSettingsString(cmMakefile* makefile)
+std::string cmQtAutoGenerators::MocCurrentSettingsString()
 {
-  std::string s;
-  s += makefile->GetSafeDefinition("AM_MOC_COMPILE_DEFINITIONS");
-  s += " ~~~ ";
-  s += makefile->GetSafeDefinition("AM_MOC_INCLUDES");
-  s += " ~~~ ";
-  s += makefile->GetSafeDefinition("AM_MOC_OPTIONS");
-  s += " ~~~ ";
-  s += makefile->IsOn("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE") ? "TRUE"
-                                                                     : "FALSE";
-  s += " ~~~ ";
-
-  return s;
+  std::string res;
+  res += this->MocCompileDefinitionsStr;
+  res += " ~~~ ";
+  res += this->MocIncludesStr;
+  res += " ~~~ ";
+  res += this->MocOptionsStr;
+  res += " ~~~ ";
+  res += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
+  res += " ~~~ ";
+  return res;
 }
 
-void cmQtAutoGenerators::ReadOldMocDefinitionsFile(
+void cmQtAutoGenerators::ReadOldMocSettingsFile(
   cmMakefile* makefile, const std::string& targetDirectory)
 {
-  std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
-  cmSystemTools::ConvertToUnixSlashes(filename);
-  filename += "/AutomocOldMocDefinitions.cmake";
-
+  // Compose current settings string
+  this->MocSettingsString = this->MocCurrentSettingsString();
+  // Read old settings
+  const std::string filename = MocOldSettingsFile(targetDirectory);
   if (makefile->ReadListFile(filename.c_str())) {
-    this->OldCompileSettingsStr =
-      makefile->GetSafeDefinition("AM_OLD_COMPILE_SETTINGS");
+    std::string oldSettings = makefile->GetSafeDefinition(MocOldSettingsKey);
+    if (oldSettings != this->MocSettingsString) {
+      // If settings changed everything needs to be re-generated.
+      this->GenerateAll = true;
+      // Remove old file in case processing gets aborted before
+      // writing the current settings in the end.
+      cmSystemTools::RemoveFile(filename);
+    }
+  } else {
+    // If the file could not be read everything needs to be re-generated.
+    this->GenerateAll = true;
   }
 }
 
-bool cmQtAutoGenerators::WriteOldMocDefinitionsFile(
+bool cmQtAutoGenerators::WriteOldMocSettingsFile(
   const std::string& targetDirectory)
 {
   bool success = true;
-
-  std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
-  cmSystemTools::ConvertToUnixSlashes(filename);
-  filename += "/AutomocOldMocDefinitions.cmake";
-
-  {
+  if (!this->MocExecutable.empty()) {
+    const std::string filename = MocOldSettingsFile(targetDirectory);
     cmsys::ofstream outfile;
     outfile.open(filename.c_str(), std::ios::trunc);
-    if (outfile) {
-      outfile << "set(AM_OLD_COMPILE_SETTINGS "
-              << cmOutputConverter::EscapeForCMake(
-                   this->CurrentCompileSettingsStr)
+    if ((success = static_cast<bool>(outfile))) {
+      outfile << "set(" << MocOldSettingsKey << " "
+              << cmOutputConverter::EscapeForCMake(this->MocSettingsString)
               << ")\n";
       success = outfile.good();
-    } else {
-      success = false;
+      outfile.close();
     }
   }
-
   return success;
 }
 
@@ -517,11 +531,6 @@ void cmQtAutoGenerators::Init()
 
 bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 {
-  // If settings changed everything needs to be re-generated.
-  if (this->OldCompileSettingsStr != this->CurrentCompileSettingsStr) {
-    this->GenerateAll = true;
-  }
-
   // the program goes through all .cpp files to see which moc files are
   // included. It is not really interesting how the moc file is named, but
   // what file the moc is created from. Once a moc is included the same moc

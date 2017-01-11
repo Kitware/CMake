@@ -26,11 +26,11 @@ private:
   bool ReadAutogenInfoFile(cmMakefile* makefile,
                            const std::string& targetDirectory,
                            const std::string& config);
-  void ReadOldMocDefinitionsFile(cmMakefile* makefile,
-                                 const std::string& targetDirectory);
-  bool WriteOldMocDefinitionsFile(const std::string& targetDirectory);
 
-  static std::string MakeCompileSettingsString(cmMakefile* makefile);
+  std::string MocCurrentSettingsString();
+  void ReadOldMocSettingsFile(cmMakefile* makefile,
+                              const std::string& targetDirectory);
+  bool WriteOldMocSettingsFile(const std::string& targetDirectory);
 
   // - Init and run
   void Init();
@@ -133,6 +133,7 @@ private:
   std::list<std::string> MocIncludes;
   std::list<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
+  std::string MocSettingsString;
   // - Uic
   std::vector<std::string> SkipUic;
   std::vector<std::string> UicTargetOptions;
@@ -141,9 +142,6 @@ private:
   std::vector<std::string> RccSources;
   std::map<std::string, std::string> RccOptions;
   std::map<std::string, std::vector<std::string> > RccInputs;
-  // - Settings
-  std::string CurrentCompileSettingsStr;
-  std::string OldCompileSettingsStr;
   // - Utility
   cmFilePathChecksum fpathCheckSum;
   cmsys::RegularExpression RegExpQObject;
