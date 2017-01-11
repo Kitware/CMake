@@ -1121,10 +1121,13 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
   const std::string mocFileRel =
     this->AutogenBuildSubDir + subDirPrefix + mocFileName;
   const std::string mocFileAbs = this->CurrentBinaryDir + mocFileRel;
-  int sourceNewerThanMoc = 0;
-  bool success = cmsys::SystemTools::FileTimeCompare(sourceFile, mocFileAbs,
-                                                     &sourceNewerThanMoc);
-  if (this->GenerateAll || !success || sourceNewerThanMoc >= 0) {
+
+  bool generateMoc = this->GenerateAll;
+  // Test if the source file is newer that the build file
+  if (!generateMoc) {
+    generateMoc = FileAbsentOrOlder(mocFileAbs, sourceFile);
+  }
+  if (generateMoc) {
     // Log
     this->LogBold("Generating MOC source " + mocFileRel);
 
