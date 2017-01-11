@@ -582,20 +582,14 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
                      notIncludedMocs, includedUis);
 
   // Generate files
-  if (!this->MocExecutable.empty()) {
-    if (!this->MocGenerateAll(includedMocs, notIncludedMocs)) {
-      return false;
-    }
+  if (!this->MocGenerateAll(includedMocs, notIncludedMocs)) {
+    return false;
   }
-  if (!this->UicExecutable.empty()) {
-    if (!this->UicGenerateAll(includedUis)) {
-      return false;
-    }
+  if (!this->UicGenerateAll(includedUis)) {
+    return false;
   }
-  if (!this->RccExecutable.empty()) {
-    if (!this->QrcGenerateAll()) {
-      return false;
-    }
+  if (!this->QrcGenerateAll()) {
+    return false;
   }
 
   return true;
@@ -994,6 +988,10 @@ bool cmQtAutoGenerators::MocGenerateAll(
   const std::map<std::string, std::string>& includedMocs,
   const std::map<std::string, std::string>& notIncludedMocs)
 {
+  if (this->MocExecutable.empty()) {
+    return true;
+  }
+
   // look for name collisions
   {
     std::multimap<std::string, std::string> collisions;
@@ -1179,6 +1177,10 @@ bool cmQtAutoGenerators::MocGenerateFile(const std::string& sourceFile,
 bool cmQtAutoGenerators::UicGenerateAll(
   const std::map<std::string, std::vector<std::string> >& includedUis)
 {
+  if (this->UicExecutable.empty()) {
+    return true;
+  }
+
   // single map with input / output names
   std::map<std::string, std::map<std::string, std::string> > uiGenMap;
   std::map<std::string, std::string> testMap;
@@ -1304,6 +1306,10 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
 
 bool cmQtAutoGenerators::QrcGenerateAll()
 {
+  if (this->RccExecutable.empty()) {
+    return true;
+  }
+
   // generate single map with input / output names
   std::map<std::string, std::string> qrcGenMap;
   for (std::vector<std::string>::const_iterator si = this->RccSources.begin();
