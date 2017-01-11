@@ -97,6 +97,25 @@ static bool ListContains(const std::vector<std::string>& list,
   return (std::find(list.begin(), list.end(), entry) != list.end());
 }
 
+static std::string JoinExts(const std::vector<std::string>& lst)
+{
+  if (lst.empty()) {
+    return "";
+  }
+
+  std::string result;
+  std::string separator = ",";
+  for (std::vector<std::string>::const_iterator it = lst.begin();
+       it != lst.end(); ++it) {
+    if (it != lst.begin()) {
+      result += separator;
+    }
+    result += '.' + (*it);
+  }
+  result.erase(result.end() - 1);
+  return result;
+}
+
 static void UicMergeOptions(std::vector<std::string>& opts,
                             const std::vector<std::string>& fileOpts,
                             bool isQt5)
@@ -749,7 +768,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
           err << "AutoMoc: Error: " << absFilename << "\n"
               << "The file includes the moc file \"" << currentMoc
               << "\", but could not find header \"" << basename << '{'
-              << this->JoinExts(headerExtensions) << "}\" ";
+              << JoinExts(headerExtensions) << "}\" ";
           if (mocSubDir.empty()) {
             err << "in " << scannedFileAbsPath << "\n";
           } else {
@@ -1508,23 +1527,4 @@ bool cmQtAutoGenerators::MakeParentDirectory(const std::string& filename)
     }
   }
   return success;
-}
-
-std::string cmQtAutoGenerators::JoinExts(const std::vector<std::string>& lst)
-{
-  if (lst.empty()) {
-    return "";
-  }
-
-  std::string result;
-  std::string separator = ",";
-  for (std::vector<std::string>::const_iterator it = lst.begin();
-       it != lst.end(); ++it) {
-    if (it != lst.begin()) {
-      result += separator;
-    }
-    result += '.' + (*it);
-  }
-  result.erase(result.end() - 1);
-  return result;
 }

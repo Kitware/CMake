@@ -106,7 +106,6 @@ private:
   bool NameCollisionTest(const std::map<std::string, std::string>& genFiles,
                          std::multimap<std::string, std::string>& collisions);
   bool MakeParentDirectory(const std::string& filename);
-  static std::string JoinExts(const std::vector<std::string>& lst);
 
   // - Target names
   std::string OriginTargetName;
