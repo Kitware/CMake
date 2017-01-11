@@ -1246,10 +1246,12 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
     this->AutogenBuildSubDir + "include/" + uiOutputFile;
   const std::string uicFileAbs = this->CurrentBinaryDir + uicFileRel;
 
-  int sourceNewerThanUi = 0;
-  bool success = cmsys::SystemTools::FileTimeCompare(uiInputFile, uicFileAbs,
-                                                     &sourceNewerThanUi);
-  if (this->GenerateAll || !success || sourceNewerThanUi >= 0) {
+  bool generateUic = this->GenerateAll;
+  // Test if the source file is newer that the build file
+  if (!generateUic) {
+    generateUic = FileAbsentOrOlder(uicFileAbs, uiInputFile);
+  }
+  if (generateUic) {
     // Log
     this->LogBold("Generating UIC header " + uicFileRel);
 
