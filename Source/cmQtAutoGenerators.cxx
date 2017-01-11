@@ -583,17 +583,17 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 
   // Generate files
   if (!this->MocExecutable.empty()) {
-    if (!this->GenerateMocFiles(includedMocs, notIncludedMocs)) {
+    if (!this->MocGenerateAll(includedMocs, notIncludedMocs)) {
       return false;
     }
   }
   if (!this->UicExecutable.empty()) {
-    if (!this->GenerateUiFiles(includedUis)) {
+    if (!this->UicGenerateAll(includedUis)) {
       return false;
     }
   }
   if (!this->RccExecutable.empty()) {
-    if (!this->GenerateQrcFiles()) {
+    if (!this->QrcGenerateAll()) {
       return false;
     }
   }
@@ -990,7 +990,7 @@ void cmQtAutoGenerators::ParseHeaders(
   }
 }
 
-bool cmQtAutoGenerators::GenerateMocFiles(
+bool cmQtAutoGenerators::MocGenerateAll(
   const std::map<std::string, std::string>& includedMocs,
   const std::map<std::string, std::string>& notIncludedMocs)
 {
@@ -1020,7 +1020,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
     for (std::map<std::string, std::string>::const_iterator it =
            includedMocs.begin();
          it != includedMocs.end(); ++it) {
-      if (!this->GenerateMoc(it->first, it->second, subDirPrefix)) {
+      if (!this->MocGenerateFile(it->first, it->second, subDirPrefix)) {
         if (this->RunMocFailed) {
           return false;
         }
@@ -1035,7 +1035,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
     for (std::map<std::string, std::string>::const_iterator it =
            notIncludedMocs.begin();
          it != notIncludedMocs.end(); ++it) {
-      if (this->GenerateMoc(it->first, it->second, subDirPrefix)) {
+      if (this->MocGenerateFile(it->first, it->second, subDirPrefix)) {
         automocCppChanged = true;
       } else {
         if (this->RunMocFailed) {
@@ -1114,9 +1114,9 @@ bool cmQtAutoGenerators::GenerateMocFiles(
 /**
  * @return True if a moc file was created. False may indicate an error.
  */
-bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
-                                     const std::string& mocFileName,
-                                     const std::string& subDirPrefix)
+bool cmQtAutoGenerators::MocGenerateFile(const std::string& sourceFile,
+                                         const std::string& mocFileName,
+                                         const std::string& subDirPrefix)
 {
   const std::string mocFileRel =
     this->AutogenBuildSubDir + subDirPrefix + mocFileName;
@@ -1176,7 +1176,7 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
   return false;
 }
 
-bool cmQtAutoGenerators::GenerateUiFiles(
+bool cmQtAutoGenerators::UicGenerateAll(
   const std::map<std::string, std::vector<std::string> >& includedUis)
 {
   // single map with input / output names
@@ -1224,7 +1224,7 @@ bool cmQtAutoGenerators::GenerateUiFiles(
     for (std::map<std::string, std::string>::const_iterator sit =
            it->second.begin();
          sit != it->second.end(); ++sit) {
-      if (!this->GenerateUi(it->first, sit->first, sit->second)) {
+      if (!this->UicGenerateFile(it->first, sit->first, sit->second)) {
         if (this->RunUicFailed) {
           return false;
         }
@@ -1238,9 +1238,9 @@ bool cmQtAutoGenerators::GenerateUiFiles(
 /**
  * @return True if a uic file was created. False may indicate an error.
  */
-bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
-                                    const std::string& uiInputFile,
-                                    const std::string& uiOutputFile)
+bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
+                                         const std::string& uiInputFile,
+                                         const std::string& uiOutputFile)
 {
   const std::string uicFileRel =
     this->AutogenBuildSubDir + "include/" + uiOutputFile;
@@ -1302,7 +1302,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
   return false;
 }
 
-bool cmQtAutoGenerators::GenerateQrcFiles()
+bool cmQtAutoGenerators::QrcGenerateAll()
 {
   // generate single map with input / output names
   std::map<std::string, std::string> qrcGenMap;
@@ -1335,7 +1335,7 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
          qrcGenMap.begin();
        si != qrcGenMap.end(); ++si) {
     bool unique = FileNameIsUnique(si->first, qrcGenMap);
-    if (!this->GenerateQrc(si->first, si->second, unique)) {
+    if (!this->QrcGenerateFile(si->first, si->second, unique)) {
       if (this->RunRccFailed) {
         return false;
       }
@@ -1347,9 +1347,9 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
 /**
  * @return True if a rcc file was created. False may indicate an error.
  */
-bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
-                                     const std::string& qrcOutputFile,
-                                     bool unique_n)
+bool cmQtAutoGenerators::QrcGenerateFile(const std::string& qrcInputFile,
+                                         const std::string& qrcOutputFile,
+                                         bool unique_n)
 {
   std::string symbolName =
     cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);

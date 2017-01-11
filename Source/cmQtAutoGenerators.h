@@ -72,23 +72,24 @@ private:
                           bool relaxed);
 
   // - Moc file generation
-  bool GenerateMocFiles(
+  bool MocGenerateAll(
     const std::map<std::string, std::string>& includedMocs,
     const std::map<std::string, std::string>& notIncludedMocs);
-  bool GenerateMoc(const std::string& sourceFile,
-                   const std::string& mocFileName,
-                   const std::string& subDirPrefix);
+  bool MocGenerateFile(const std::string& sourceFile,
+                       const std::string& mocFileName,
+                       const std::string& subDirPrefix);
 
   // - Uic file generation
-  bool GenerateUiFiles(
+  bool UicGenerateAll(
     const std::map<std::string, std::vector<std::string> >& includedUis);
-  bool GenerateUi(const std::string& realName, const std::string& uiInputFile,
-                  const std::string& uiOutputFile);
+  bool UicGenerateFile(const std::string& realName,
+                       const std::string& uiInputFile,
+                       const std::string& uiOutputFile);
 
   // - Qrc file generation
-  bool GenerateQrcFiles();
-  bool GenerateQrc(const std::string& qrcInputFile,
-                   const std::string& qrcOutputFile, bool unique_n);
+  bool QrcGenerateAll();
+  bool QrcGenerateFile(const std::string& qrcInputFile,
+                       const std::string& qrcOutputFile, bool unique_n);
 
   // - Logging
   void LogErrorNameCollision(
