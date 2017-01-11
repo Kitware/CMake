@@ -305,6 +305,9 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
     case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
       xml.Attribute("Checker", "AddressSanitizer");
       break;
+    case cmCTestMemCheckHandler::LEAK_SANITIZER:
+      xml.Attribute("Checker", "LeakSanitizer");
+      break;
     case cmCTestMemCheckHandler::THREAD_SANITIZER:
       xml.Attribute("Checker", "ThreadSanitizer");
       break;
@@ -459,6 +462,12 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     this->LogWithPID = true; // even if we give the log file the pid is added
   }
   if (this->CTest->GetCTestConfiguration("MemoryCheckType") ==
+      "LeakSanitizer") {
+    this->MemoryTester = this->CTest->GetCTestConfiguration("CMakeCommand");
+    this->MemoryTesterStyle = cmCTestMemCheckHandler::LEAK_SANITIZER;
+    this->LogWithPID = true; // even if we give the log file the pid is added
+  }
+  if (this->CTest->GetCTestConfiguration("MemoryCheckType") ==
       "ThreadSanitizer") {
     this->MemoryTester = this->CTest->GetCTestConfiguration("CMakeCommand");
     this->MemoryTesterStyle = cmCTestMemCheckHandler::THREAD_SANITIZER;
@@ -586,6 +595,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     }
     // these are almost the same but the env var used is different
     case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
+    case cmCTestMemCheckHandler::LEAK_SANITIZER:
     case cmCTestMemCheckHandler::THREAD_SANITIZER:
     case cmCTestMemCheckHandler::MEMORY_SANITIZER:
     case cmCTestMemCheckHandler::UB_SANITIZER: {
@@ -597,12 +607,20 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->MemoryTesterDynamicOptions.push_back("-E");
       this->MemoryTesterDynamicOptions.push_back("env");
       std::string envVar;
-      std::string extraOptions =
+      std::string extraOptions = ":" +
         this->CTest->GetCTestConfiguration("MemoryCheckSanitizerOptions");
+      std::string suppressionsOption;
+      if (!this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile")
+             .empty()) {
+        suppressionsOption = ":suppressions=" +
+          this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile");
+      }
       if (this->MemoryTesterStyle ==
           cmCTestMemCheckHandler::ADDRESS_SANITIZER) {
         envVar = "ASAN_OPTIONS";
-        extraOptions += " detect_leaks=1";
+      } else if (this->MemoryTesterStyle ==
+                 cmCTestMemCheckHandler::LEAK_SANITIZER) {
+        envVar = "LSAN_OPTIONS";
       } else if (this->MemoryTesterStyle ==
                  cmCTestMemCheckHandler::THREAD_SANITIZER) {
         envVar = "TSAN_OPTIONS";
@@ -614,8 +632,9 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
         envVar = "UBSAN_OPTIONS";
       }
       std::string outputFile =
-        envVar + "=log_path=\"" + this->MemoryTesterOutputFile + "\" ";
-      this->MemoryTesterEnvironmentVariable = outputFile + extraOptions;
+        envVar + "=log_path=\"" + this->MemoryTesterOutputFile + "\"";
+      this->MemoryTesterEnvironmentVariable =
+        outputFile + extraOptions + suppressionsOption;
       break;
     }
     default:
@@ -644,6 +663,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckOutput(const std::string& str,
     case cmCTestMemCheckHandler::PURIFY:
       return this->ProcessMemCheckPurifyOutput(str, log, results);
     case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
+    case cmCTestMemCheckHandler::LEAK_SANITIZER:
     case cmCTestMemCheckHandler::THREAD_SANITIZER:
     case cmCTestMemCheckHandler::MEMORY_SANITIZER:
     case cmCTestMemCheckHandler::UB_SANITIZER:
@@ -679,6 +699,9 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
   switch (this->MemoryTesterStyle) {
     case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
       regex = "ERROR: AddressSanitizer: (.*) on.*";
+      break;
+    case cmCTestMemCheckHandler::LEAK_SANITIZER:
+      // use leakWarning regex
       break;
     case cmCTestMemCheckHandler::THREAD_SANITIZER:
       regex = "WARNING: ThreadSanitizer: (.*) \\(pid=.*\\)";

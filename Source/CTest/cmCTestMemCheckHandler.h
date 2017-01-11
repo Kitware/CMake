@@ -47,6 +47,7 @@ private:
     BOUNDS_CHECKER,
     // checkers after here do not use the standard error list
     ADDRESS_SANITIZER,
+    LEAK_SANITIZER,
     THREAD_SANITIZER,
     MEMORY_SANITIZER,
     UB_SANITIZER
