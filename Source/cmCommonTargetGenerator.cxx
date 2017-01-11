@@ -63,6 +63,13 @@ void cmCommonTargetGenerator::AddFeatureFlags(std::string& flags,
 void cmCommonTargetGenerator::AddModuleDefinitionFlag(
   cmLinkLineComputer* linkLineComputer, std::string& flags)
 {
+  // A module definition file only makes sense on certain target types.
+  if (this->GeneratorTarget->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GeneratorTarget->GetType() != cmStateEnums::MODULE_LIBRARY &&
+      this->GeneratorTarget->GetType() != cmStateEnums::EXECUTABLE) {
+    return;
+  }
+
   if (!this->ModuleDefinitionFile) {
     return;
   }
