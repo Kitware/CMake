@@ -97,6 +97,40 @@ static bool ListContains(const std::vector<std::string>& list,
   return (std::find(list.begin(), list.end(), entry) != list.end());
 }
 
+static void UicMergeOptions(std::vector<std::string>& opts,
+                            const std::vector<std::string>& fileOpts,
+                            bool isQt5)
+{
+  static const char* valueOptions[] = { "tr",      "translate",
+                                        "postfix", "generator",
+                                        "include", // Since Qt 5.3
+                                        "g" };
+  std::vector<std::string> extraOpts;
+  for (std::vector<std::string>::const_iterator it = fileOpts.begin();
+       it != fileOpts.end(); ++it) {
+    std::vector<std::string>::iterator existingIt =
+      std::find(opts.begin(), opts.end(), *it);
+    if (existingIt != opts.end()) {
+      const char* o = it->c_str();
+      if (*o == '-') {
+        ++o;
+      }
+      if (isQt5 && *o == '-') {
+        ++o;
+      }
+      if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
+                       cmStrCmp(*it)) != cmArrayEnd(valueOptions)) {
+        assert(existingIt + 1 != opts.end());
+        *(existingIt + 1) = *(it + 1);
+        ++it;
+      }
+    } else {
+      extraOpts.push_back(*it);
+    }
+  }
+  opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
+}
+
 // -- Class methods
 
 cmQtAutoGenerators::cmQtAutoGenerators()
@@ -1109,40 +1143,6 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
   return false;
 }
 
-void cmQtAutoGenerators::MergeUicOptions(
-  std::vector<std::string>& opts, const std::vector<std::string>& fileOpts,
-  bool isQt5)
-{
-  static const char* valueOptions[] = { "tr",      "translate",
-                                        "postfix", "generator",
-                                        "include", // Since Qt 5.3
-                                        "g" };
-  std::vector<std::string> extraOpts;
-  for (std::vector<std::string>::const_iterator it = fileOpts.begin();
-       it != fileOpts.end(); ++it) {
-    std::vector<std::string>::iterator existingIt =
-      std::find(opts.begin(), opts.end(), *it);
-    if (existingIt != opts.end()) {
-      const char* o = it->c_str();
-      if (*o == '-') {
-        ++o;
-      }
-      if (isQt5 && *o == '-') {
-        ++o;
-      }
-      if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
-                       cmStrCmp(*it)) != cmArrayEnd(valueOptions)) {
-        assert(existingIt + 1 != opts.end());
-        *(existingIt + 1) = *(it + 1);
-        ++it;
-      }
-    } else {
-      extraOpts.push_back(*it);
-    }
-  }
-  opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
-}
-
 bool cmQtAutoGenerators::GenerateUiFiles(
   const std::map<std::string, std::vector<std::string> >& includedUis)
 {
@@ -1235,8 +1235,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
     if (optionIt != this->UicOptions.end()) {
       std::vector<std::string> fileOpts;
       cmSystemTools::ExpandListArgument(optionIt->second, fileOpts);
-      cmQtAutoGenerators::MergeUicOptions(opts, fileOpts,
-                                          this->QtMajorVersion == "5");
+      UicMergeOptions(opts, fileOpts, this->QtMajorVersion == "5");
     }
     command.insert(command.end(), opts.begin(), opts.end());
 

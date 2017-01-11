@@ -80,9 +80,6 @@ private:
                    const std::string& subDirPrefix);
 
   // - Uic file generation
-  static void MergeUicOptions(std::vector<std::string>& opts,
-                              const std::vector<std::string>& fileOpts,
-                              bool isQt5);
   bool GenerateUiFiles(
     const std::map<std::string, std::vector<std::string> >& includedUis);
   bool GenerateUi(const std::string& realName, const std::string& uiInputFile,
