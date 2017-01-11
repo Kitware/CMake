@@ -29,7 +29,7 @@
 
 // -- Static functions
 
-static std::string findMatchingHeader(
+static std::string FindMatchingHeader(
   const std::string& absPath, const std::string& mocSubDir,
   const std::string& basename,
   const std::vector<std::string>& headerExtensions)
@@ -700,7 +700,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
         basename = basename.substr(4);
         const std::string mocSubDir =
           extractSubDir(scannedFileAbsPath, currentMoc);
-        const std::string headerToMoc = findMatchingHeader(
+        const std::string headerToMoc = FindMatchingHeader(
           scannedFileAbsPath, mocSubDir, basename, headerExtensions);
 
         if (!headerToMoc.empty()) {
@@ -733,7 +733,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
           if (!requiresMoc || basename != scannedFileBasename) {
             const std::string mocSubDir =
               extractSubDir(scannedFileAbsPath, currentMoc);
-            const std::string headerToMoc = findMatchingHeader(
+            const std::string headerToMoc = FindMatchingHeader(
               scannedFileAbsPath, mocSubDir, basename, headerExtensions);
             if (!headerToMoc.empty()) {
               // This is for KDE4 compatibility:
