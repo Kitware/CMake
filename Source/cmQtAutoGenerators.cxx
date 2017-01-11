@@ -55,7 +55,7 @@ static std::string FindMatchingHeader(
   return header;
 }
 
-static std::string extractSubDir(const std::string& absPath,
+static std::string ExtractSubDir(const std::string& absPath,
                                  const std::string& currentMoc)
 {
   std::string subDir;
@@ -699,7 +699,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
         // finding the correct header, so we need to remove the moc_ part
         basename = basename.substr(4);
         const std::string mocSubDir =
-          extractSubDir(scannedFileAbsPath, currentMoc);
+          ExtractSubDir(scannedFileAbsPath, currentMoc);
         const std::string headerToMoc = FindMatchingHeader(
           scannedFileAbsPath, mocSubDir, basename, headerExtensions);
 
@@ -732,7 +732,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
           // Mode: Relaxed
           if (!requiresMoc || basename != scannedFileBasename) {
             const std::string mocSubDir =
-              extractSubDir(scannedFileAbsPath, currentMoc);
+              ExtractSubDir(scannedFileAbsPath, currentMoc);
             const std::string headerToMoc = FindMatchingHeader(
               scannedFileAbsPath, mocSubDir, basename, headerExtensions);
             if (!headerToMoc.empty()) {
