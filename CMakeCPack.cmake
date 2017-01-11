@@ -54,6 +54,9 @@ if(${CPACK_SYSTEM_NAME} MATCHES Windows)
   endif()
 endif()
 
+# Command for configure IFW script templates
+include(${CMake_SOURCE_DIR}/Modules/CPackIFWConfigureFile.cmake)
+
 # Advanced IFW configuration
 set(_cpifwrc CPACK_IFW_COMPONENT_GROUP_CMAKE_)
 set(_cpifwrcconf _CPACK_IFW_COMPONENT_GROUP_CMAKE)
@@ -85,8 +88,6 @@ _cmifwarg("Package <Default> tag (values: TRUE, FALSE, SCRIPT)"
 _cmifwarg("Package <Version> tag"
   STRING VERSION
   "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
-_cmifwarg("Package <Script> tag"
-  FILEPATH SCRIPT "${CMake_BINARY_DIR}/installscript.qs")
 _cmifwarg("Package <SortingPriority> tag"
   STRING PRIORITY "100")
 _cmifwarg("Package <ForsedInstallation> tag"
@@ -148,32 +149,21 @@ if(CMake_INSTALL_COMPONENTS)
   set(CPACK_COMPONENTS_ALL \"${_CPACK_IFW_COMPONENTS_ALL}\")
   set(CPACK_COMPONENTS_GROUPING IGNORE)
   ")
+  _cmifwarg("Package <Script> template"
+    FILEPATH SCRIPT_TEMPLATE "${CMake_SOURCE_DIR}/Source/QtIFW/CMake.qs.in")
 else()
   if(BUILD_QtDialog AND USE_LGPL)
     set(${_cpifwrc}LICENSES_DEFAULT
       "${${_cpifwrc}LICENSES_DEFAULT};LGPLv${USE_LGPL};${CMake_SOURCE_DIR}/Licenses/LGPLv${USE_LGPL}.txt")
   endif()
+  _cmifwarg("Package <Script> template"
+    FILEPATH SCRIPT_TEMPLATE "${CMake_SOURCE_DIR}/Source/QtIFW/installscript.qs.in")
 endif()
+_cmifwarg("Package <Script> generated"
+  FILEPATH SCRIPT_GENERATED "${CMake_BINARY_DIR}/CMake.qs")
 
 _cmifwarg("Package <Licenses> tag (pairs of <display_name> <file_path>)"
   STRING LICENSES "${${_cpifwrc}LICENSES_DEFAULT}")
-
-# Components scripts configuration
-if(CMake_INSTALL_COMPONENTS)
-  configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/CMake.qs.in"
-    "${CMake_BINARY_DIR}/installscript.qs" @ONLY
-  )
-else()
-  configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/installscript.qs.in"
-    "${CMake_BINARY_DIR}/installscript.qs" @ONLY
-  )
-endif()
-foreach(_script
-  CMake.Documentation.SphinxHTML
-  CMake.DeveloperReference.HTML)
-  configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/${_script}.qs.in"
-    "${CMake_BINARY_DIR}/${_script}.qs" @ONLY)
-endforeach()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES Windows)
   set(_CPACK_IFW_PACKAGE_ICON
@@ -198,6 +188,23 @@ if(${CMAKE_SYSTEM_NAME} MATCHES Linux)
   set(CPACK_IFW_TARGET_DIRECTORY "@HomeDir@/${CMAKE_PROJECT_NAME}")
   set(CPACK_IFW_ADMIN_TARGET_DIRECTORY "@ApplicationsDir@/${CMAKE_PROJECT_NAME}")
 endif()
+
+# Components scripts configuration
+if((EXISTS "${CMake_IFW_ROOT_COMPONENT_SCRIPT_TEMPLATE}")
+  AND (NOT "${CMake_IFW_ROOT_COMPONENT_SCRIPT_GENERATED}" STREQUAL "")
+  AND (NOT "${CMake_IFW_ROOT_COMPONENT_SCRIPT}"))
+  cpack_ifw_configure_file("${CMake_IFW_ROOT_COMPONENT_SCRIPT_TEMPLATE}"
+    "${CMake_IFW_ROOT_COMPONENT_SCRIPT_GENERATED}")
+  _cmifwarg("Package <Script> tag"
+    FILEPATH SCRIPT "${CMake_IFW_ROOT_COMPONENT_SCRIPT_GENERATED}")
+endif()
+foreach(_script
+  CMake.Dialogs.QtGUI
+  CMake.Documentation.SphinxHTML
+  CMake.DeveloperReference.HTML)
+  cpack_ifw_configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/${_script}.qs.in"
+    "${CMake_BINARY_DIR}/${_script}.qs")
+endforeach()
 
 if(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
   # if the CPACK_PACKAGE_FILE_NAME is not defined by the cache

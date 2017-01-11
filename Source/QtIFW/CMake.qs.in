@@ -1,3 +1,5 @@
+// Component: CMake
+
 function Component()
 {
     // Default constructor
@@ -9,12 +11,12 @@ Component.prototype.createOperations = function()
     if (installer.value("os") === "win") {
 
         component.addOperation("CreateShortcut",
-                               installer.value("TargetDir") + "/@CMAKE_DOC_DIR@/cmake.org.html",
-                               installer.value("StartMenuDir") + "/CMake Web Site.lnk");
+                               "@TargetDir@/%CMAKE_DOC_DIR%/cmake.org.html",
+                               "@StartMenuDir@/CMake Web Site.lnk");
 
         component.addOperation("CreateShortcut",
-                               installer.value("TargetDir") + "/cmake-maintenance.exe",
-                               installer.value("StartMenuDir") + "/CMake Maintenance Tool.lnk");
+                               "@TargetDir@/cmake-maintenance.exe",
+                               "@StartMenuDir@/CMake Maintenance Tool.lnk");
     }
 
     // Call default implementation
