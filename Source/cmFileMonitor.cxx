@@ -331,6 +331,9 @@ void cmFileMonitor::MonitorPaths(const std::vector<std::string>& paths,
           rootSegment)); // Can not be both filename and root part of the path!
 
       const std::string& currentSegment = pathSegments[i];
+      if (currentSegment.empty()) {
+        continue;
+      }
 
       cmIBaseWatcher* nextWatcher = currentWatcher->Find(currentSegment);
       if (!nextWatcher) {
