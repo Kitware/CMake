@@ -60,7 +60,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdCUDA/(\\./)?(CompilerIdCUDA.xctest/)?CompilerIdCUDA[ \t\n\\\"]")
   set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_INDEX 2)
 
-  set(CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-v")
+  set(CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS -v --keep --keep-dir tmp)
   if(CMAKE_CUDA_HOST_COMPILER)
       list(APPEND CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-ccbin=${CMAKE_CUDA_HOST_COMPILER}")
   endif()
@@ -70,6 +70,10 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 endif()
 
 include(CMakeFindBinUtils)
+if(MSVC_CUDA_ARCHITECTURE_ID)
+  set(SET_MSVC_CUDA_ARCHITECTURE_ID
+    "set(MSVC_CUDA_ARCHITECTURE_ID ${MSVC_CUDA_ARCHITECTURE_ID})")
+endif()
 
 #if this compiler vendor is matches NVIDIA we can determine
 #what the host compiler is. This only needs to be done if the CMAKE_CUDA_HOST_COMPILER
@@ -102,6 +106,14 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
       if("${_nvcc_output_line}" MATCHES "^ *nvlink")
         string(APPEND _nvcc_log "    ignoring nvlink line\n")
       elseif(_nvcc_libraries)
+        if("${_nvcc_output_line}" MATCHES "(@\"?tmp/a\\.exe\\.res\"?)")
+          set(_nvcc_link_res_arg "${CMAKE_MATCH_1}")
+          set(_nvcc_link_res "${CMAKE_PLATFORM_INFO_DIR}/CompilerIdCUDA/tmp/a.exe.res")
+          if(EXISTS "${_nvcc_link_res}")
+            file(READ "${_nvcc_link_res}" _nvcc_link_res_content)
+            string(REPLACE "${_nvcc_link_res_arg}" "${_nvcc_link_res_content}" _nvcc_output_line "${_nvcc_output_line}")
+          endif()
+        endif()
         string(FIND "${_nvcc_output_line}" "${_nvcc_libraries}" _nvcc_libraries_pos)
         if(NOT _nvcc_libraries_pos EQUAL -1)
           set(_nvcc_link_line "${_nvcc_output_line}")
@@ -112,9 +124,13 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
   endif()
 
   if(_nvcc_link_line)
-    #extract the compiler that is being used for linking
-    separate_arguments(_nvcc_link_line_args UNIX_COMMAND "${_nvcc_link_line}")
-    list(GET _nvcc_link_line_args 0 CMAKE_CUDA_HOST_LINK_LAUNCHER)
+    if("x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC")
+      set(CMAKE_CUDA_HOST_LINK_LAUNCHER "${CMAKE_LINKER}")
+    else()
+      #extract the compiler that is being used for linking
+      separate_arguments(_nvcc_link_line_args UNIX_COMMAND "${_nvcc_link_line}")
+      list(GET _nvcc_link_line_args 0 CMAKE_CUDA_HOST_LINK_LAUNCHER)
+    endif()
 
     #prefix the line with cuda-fake-ld so that implicit link info believes it is
     #a link line

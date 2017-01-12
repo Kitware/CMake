@@ -344,7 +344,8 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
 {
   cmMakefile* mf = this->GetMakefile();
   if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
-      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID")) {
+      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID") ||
+      mf->GetDefinition("MSVC_CUDA_ARCHITECTURE_ID")) {
     std::string pdbPath;
     std::string compilePdbPath = this->ComputeTargetCompilePDB();
     if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE ||

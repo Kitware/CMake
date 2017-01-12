@@ -2,12 +2,21 @@
 #include <cuda_runtime.h>
 #include <iostream>
 
+#ifndef PACKED_DEFINE
+#error "PACKED_DEFINE not defined!"
+#endif
+
 static
 __global__
 void DetermineIfValidCudaDevice()
 {
 }
 
+#ifdef _MSC_VER
+#pragma pack(push,1)
+#undef PACKED_DEFINE
+#define PACKED_DEFINE
+#endif
 struct PACKED_DEFINE result_type
 {
   bool valid;
@@ -16,6 +25,9 @@ struct PACKED_DEFINE result_type
 #error missing DEFREL flag
 #endif
 };
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
 
 result_type can_launch_kernel()
 {

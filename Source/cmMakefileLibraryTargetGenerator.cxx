@@ -281,6 +281,8 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
 
   // Get the language to use for linking this library.
   std::string linkLanguage = "CUDA";
+  std::string const objExt =
+    this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
 
   // Create set of linking flags.
   std::string linkFlags;
@@ -288,7 +290,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
 
   // Get the name of the device object to generate.
   std::string const targetOutputReal =
-    this->GeneratorTarget->ObjectDirectory + "cmake_device_link.o";
+    this->GeneratorTarget->ObjectDirectory + "cmake_device_link" + objExt;
   this->DeviceLinkObject = targetOutputReal;
 
   this->NumberOfProgressActions++;
@@ -364,12 +366,18 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
         this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutputReal),
       output);
 
+    std::string targetFullPathCompilePDB = this->ComputeTargetCompilePDB();
+    std::string targetOutPathCompilePDB =
+      this->LocalGenerator->ConvertToOutputFormat(targetFullPathCompilePDB,
+                                                  cmOutputConverter::SHELL);
+
     vars.Objects = buildObjs.c_str();
     vars.ObjectDir = objectDir.c_str();
     vars.Target = target.c_str();
     vars.LinkLibraries = linkLibs.c_str();
     vars.ObjectsQuoted = buildObjs.c_str();
     vars.LinkFlags = linkFlags.c_str();
+    vars.TargetCompilePDB = targetOutPathCompilePDB.c_str();
 
     // Add language feature flags.
     std::string langFlags;

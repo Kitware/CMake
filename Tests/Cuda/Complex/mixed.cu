@@ -4,10 +4,18 @@
 #include "file1.h"
 #include "file2.h"
 
+#ifdef _WIN32
+#define EXPORT __declspec(dllexport)
+#define IMPORT __declspec(dllimport)
+#else
+#define EXPORT
+#define IMPORT
+#endif
+
 result_type __device__ file1_func(int x);
 result_type_dynamic __device__ file2_func(int x);
 
-void __host__ cuda_dynamic_lib_func();
+IMPORT void __host__ cuda_dynamic_lib_func();
 
 static
 __global__
@@ -17,7 +25,7 @@ void mixed_kernel(result_type& r, int x)
   result_type_dynamic rd = file2_func(x);
 }
 
-int mixed_launch_kernel(int x)
+EXPORT int mixed_launch_kernel(int x)
 {
   cuda_dynamic_lib_func();
 

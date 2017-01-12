@@ -229,6 +229,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
     vars.SONameFlag = "$SONAME_FLAG";
     vars.TargetSOName = "$SONAME";
     vars.TargetPDB = "$TARGET_PDB";
+    vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
 
     vars.Flags = "$FLAGS";
     vars.LinkFlags = "$LINK_FLAGS";
@@ -602,10 +603,12 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
   // First and very important step is to make sure while inside this
   // step our link language is set to CUDA
   std::string cudaLinkLanguage = "CUDA";
+  std::string const objExt =
+    this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
 
   std::string const cfgName = this->GetConfigName();
-  std::string const targetOutputReal =
-    ConvertToNinjaPath(genTarget.ObjectDirectory + "cmake_device_link.o");
+  std::string const targetOutputReal = ConvertToNinjaPath(
+    genTarget.ObjectDirectory + "cmake_device_link" + objExt);
 
   std::string const targetOutputImplib =
     ConvertToNinjaPath(genTarget.GetFullPath(cfgName,
@@ -713,6 +716,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     this->ConvertToNinjaPath(objPath), cmOutputConverter::SHELL);
   EnsureDirectoryExists(objPath);
+
+  this->SetMsvcTargetPdbVariable(vars);
 
   if (this->GetGlobalGenerator()->IsGCCOnWindows()) {
     // ar.exe can't handle backslashes in rsp files (implicitly used by gcc)
