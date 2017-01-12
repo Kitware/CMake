@@ -918,7 +918,11 @@ bool cmQtAutoGenerators::ParseContentForMoc(
           }
         } else {
           // Mode: Strict
-          if (basename != scannedFileBasename) {
+          if (basename == scannedFileBasename) {
+            // Include self
+            fileToMoc = absFilename;
+            ownDotMocIncluded = true;
+          } else {
             // Don't allow FOO.moc include other than self in strict mode
             std::ostringstream err;
             err << "AutoMoc: Error: " << absFilename << "\n"
@@ -929,10 +933,6 @@ bool cmQtAutoGenerators::ParseContentForMoc(
                 << ".moc\" to run moc on this source file.\n";
             this->LogError(err.str());
             return false;
-          } else {
-            // Include self
-            fileToMoc = absFilename;
-            ownDotMocIncluded = true;
           }
         }
         if (!fileToMoc.empty()) {
