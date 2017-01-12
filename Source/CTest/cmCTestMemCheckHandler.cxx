@@ -634,7 +634,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       std::string outputFile =
         envVar + "=log_path=\"" + this->MemoryTesterOutputFile + "\"";
       this->MemoryTesterEnvironmentVariable =
-        outputFile + extraOptions + suppressionsOption;
+        outputFile + suppressionsOption + extraOptions;
       break;
     }
     default:
