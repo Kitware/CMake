@@ -5,18 +5,16 @@
 # CheckFunctionExists
 # -------------------
 #
-# Check if a C function can be linked
+# Check if a C function can be linked::
 #
-# CHECK_FUNCTION_EXISTS(<function> <variable>)
+#   check_function_exists(<function> <variable>)
 #
-# Check that the <function> is provided by libraries on the system and
-# store the result in a <variable>.  This does not verify that any
-# system header file declares the function, only that it can be found at
-# link time (consider using CheckSymbolExists).
-# <variable> will be created as an internal cache variable.
+# Check that the ``<function>`` is provided by libraries on the system and store
+# the result in a ``<variable>``. ``<variable>`` will be created as an internal
+# cache variable.
 #
-# The following variables may be set before calling this macro to modify
-# the way the check is run:
+# The following variables may be set before calling this macro to modify the
+# way the check is run:
 #
 # ::
 #
@@ -25,6 +23,20 @@
 #   CMAKE_REQUIRED_INCLUDES = list of include directories
 #   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 #   CMAKE_REQUIRED_QUIET = execute quietly without messages
+#
+# .. note::
+#
+#   Prefer using :Module:`CheckSymbolExists` instead of this module,
+#   for the following reasons:
+#
+#   * ``check_function_exists()`` can't detect functions that are inlined
+#     in headers or specified as a macro.
+#
+#   * ``check_function_exists()`` can't detect anything in the 32-bit
+#     versions of the Win32 API, because of a mismatch in calling conventions.
+#
+#   * ``check_function_exists()`` only verifies linking, it does not verify
+#     that the function is declared in system headers.
 
 macro(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
   if(NOT DEFINED "${VARIABLE}" OR "x${${VARIABLE}}" STREQUAL "x${VARIABLE}")
