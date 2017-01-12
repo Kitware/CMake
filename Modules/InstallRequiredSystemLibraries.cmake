@@ -210,21 +210,27 @@ if(MSVC)
     endif()
 
     if(CMAKE_INSTALL_UCRT_LIBRARIES AND NOT v VERSION_LESS 14)
-      # Find the Windows Universal CRT redistribution directory.
+      # Find the Windows Kits directory.
       get_filename_component(windows_kits_dir
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots;KitsRoot10]" ABSOLUTE)
       set(programfilesx86 "ProgramFiles(x86)")
-      find_path(WINDOWS_KITS_REDIST_DIR NAMES ucrt/DLLs/${CMAKE_MSVC_ARCH}/ucrtbase.dll
+      find_path(WINDOWS_KITS_DIR NAMES Redist/ucrt/DLLs/${CMAKE_MSVC_ARCH}/ucrtbase.dll
         PATHS
-        "${windows_kits_dir}/Redist"
-        "$ENV{ProgramFiles}/Windows Kits/10/Redist"
-        "$ENV{${programfilesx86}}/Windows Kits/10/Redist"
+        "${windows_kits_dir}"
+        "$ENV{ProgramFiles}/Windows Kits/10"
+        "$ENV{${programfilesx86}}/Windows Kits/10"
         )
-      mark_as_advanced(WINDOWS_KITS_REDIST_DIR)
+      mark_as_advanced(WINDOWS_KITS_DIR)
 
       # Glob the list of UCRT DLLs.
-      file(GLOB __ucrt_dlls "${WINDOWS_KITS_REDIST_DIR}/ucrt/DLLs/${CMAKE_MSVC_ARCH}/*.dll")
-      list(APPEND __install__libs ${__ucrt_dlls})
+      if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
+        file(GLOB __ucrt_dlls "${WINDOWS_KITS_DIR}/Redist/ucrt/DLLs/${CMAKE_MSVC_ARCH}/*.dll")
+        list(APPEND __install__libs ${__ucrt_dlls})
+      endif()
+      if(CMAKE_INSTALL_DEBUG_LIBRARIES)
+        file(GLOB __ucrt_dlls "${WINDOWS_KITS_DIR}/bin/${CMAKE_MSVC_ARCH}/ucrt/*.dll")
+        list(APPEND __install__libs ${__ucrt_dlls})
+      endif()
     endif()
   endmacro()
 
