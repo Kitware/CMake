@@ -663,7 +663,6 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
 
   this->addPoolNinjaVariable("JOB_POOL_LINK", &genTarget, vars);
 
-  this->AddModuleDefinitionFlag(linkLineComputer.get(), vars["LINK_FLAGS"]);
   vars["LINK_FLAGS"] =
     cmGlobalNinjaGenerator::EncodeLiteral(vars["LINK_FLAGS"]);
 

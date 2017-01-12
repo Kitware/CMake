@@ -157,15 +157,6 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   this->LocalGenerator->AppendFlags(
     linkFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
 
-  {
-    CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
-      this->CreateLinkLineComputer(
-        this->LocalGenerator,
-        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
-
-    this->AddModuleDefinitionFlag(linkLineComputer.get(), linkFlags);
-  }
-
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
   std::vector<std::string> exeCleanFiles;
