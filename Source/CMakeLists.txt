@@ -710,6 +710,8 @@ if (WIN32)
       cmGhsMultiTargetGenerator.h
       cmGhsMultiGpj.cxx
       cmGhsMultiGpj.h
+      cmVSSetupHelper.cxx
+      cmVSSetupHelper.h
       )
 
     # Add a manifest file to executables on Windows to allow for
