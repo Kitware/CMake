@@ -76,6 +76,8 @@ bool cmVSSetupAPIHelper::IsVS2017Installed()
   bool ret = false;
   if (chosenInstanceInfo.VSInstallLocation.compare(L"") == 0) {
     ret = EnumerateAndChooseVSInstance();
+  } else {
+    ret = true;
   }
 
   return ret;
