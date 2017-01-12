@@ -630,10 +630,6 @@ if(NOT CPackComponent_CMake_INCLUDED)
     include(CPackComponent)
 endif()
 
-if(NOT __CMAKE_PARSE_ARGUMENTS_INCLUDED)
-    include(CMakeParseArguments)
-endif()
-
 # Resolve full filename for script file
 macro(_cpack_ifw_resolve_script _variable)
   set(_ifw_script_macro ${_variable})

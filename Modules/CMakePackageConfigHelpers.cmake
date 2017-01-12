@@ -201,9 +201,6 @@
 #
 #    check_required_components(Foo)
 
-
-include(CMakeParseArguments)
-
 include(WriteBasicConfigVersionFile)
 
 macro(WRITE_BASIC_PACKAGE_VERSION_FILE)

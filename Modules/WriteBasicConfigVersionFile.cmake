@@ -18,8 +18,6 @@
 #
 # Deprecated, see WRITE_BASIC_PACKAGE_VERSION_FILE(), it is identical.
 
-include(CMakeParseArguments)
-
 function(WRITE_BASIC_CONFIG_VERSION_FILE _filename)
 
   set(options )

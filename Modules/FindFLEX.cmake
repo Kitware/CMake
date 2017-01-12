@@ -107,8 +107,6 @@ find_path(FLEX_INCLUDE_DIR FlexLexer.h
 
 mark_as_advanced(FL_LIBRARY FLEX_INCLUDE_DIR)
 
-include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
-
 set(FLEX_INCLUDE_DIRS ${FLEX_INCLUDE_DIR})
 set(FLEX_LIBRARIES ${FL_LIBRARY})
 

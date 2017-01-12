@@ -232,8 +232,6 @@ endmacro()
 
 
 macro(SWIG_ADD_LIBRARY name)
-
-  include(CMakeParseArguments)
   set(options "")
   set(oneValueArgs LANGUAGE
                    TYPE)
@@ -341,4 +339,3 @@ macro(SWIG_LINK_LIBRARIES name)
     message(SEND_ERROR "Cannot find Swig library \"${name}\".")
   endif()
 endmacro()
-
