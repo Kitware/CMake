@@ -134,6 +134,7 @@ void cmCTestRunTest::CompressOutput()
 
   size_t rlen = cmsysBase64_Encode(out, strm.total_out, encoded_buffer, 1);
 
+  this->CompressedOutput.clear();
   for (size_t i = 0; i < rlen; i++) {
     this->CompressedOutput += encoded_buffer[i];
   }
@@ -416,6 +417,7 @@ bool cmCTestRunTest::StartTest(size_t total)
                << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
                << this->TestProperties->Index << ": "
                << this->TestProperties->Name << std::endl);
+  this->ProcessOutput.clear();
   this->ComputeArguments();
   std::vector<std::string>& args = this->TestProperties->Args;
   this->TestResult.Properties = this->TestProperties;

@@ -12,4 +12,6 @@ add_test(NAME test1
 set_tests_properties(test1 PROPERTIES DEPENDS "initialization")
 
 add_test(hello ${CMAKE_COMMAND} -E echo hello)
+set_tests_properties(hello PROPERTIES FAIL_REGULAR_EXPRESSION "hello.*hello")
+
 add_test(goodbye ${CMAKE_COMMAND} -E echo goodbye)
