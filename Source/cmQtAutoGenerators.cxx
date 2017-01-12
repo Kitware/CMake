@@ -585,7 +585,6 @@ void cmQtAutoGenerators::Init()
 
   if (this->IncludeProjectDirsBefore) {
     const std::string binDir = "-I" + this->ProjectBinaryDir;
-
     const std::string srcDir = "-I" + this->ProjectSourceDir;
 
     std::list<std::string> sortedMocIncludes;
