@@ -39,7 +39,7 @@ private:
   bool RunAutogen(cmMakefile* makefile);
 
   // - Content analysis
-  bool requiresMocing(const std::string& text, std::string& macroName);
+  bool MocRequired(const std::string& text, std::string& macroName);
   bool MocSkipTest(const std::string& absFilename);
   bool UicSkipTest(const std::string& absFilename);
 

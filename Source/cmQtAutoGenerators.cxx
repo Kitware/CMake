@@ -683,8 +683,8 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
  * @brief Tests if the C++ content requires moc processing
  * @return True if moc is required
  */
-bool cmQtAutoGenerators::requiresMocing(const std::string& text,
-                                        std::string& macroName)
+bool cmQtAutoGenerators::MocRequired(const std::string& text,
+                                     std::string& macroName)
 {
   // Run a simple check before an expensive regular expression check
   if (strstr(text.c_str(), "Q_OBJECT") != CM_NULLPTR) {
@@ -812,7 +812,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
     cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
 
   std::string macroName;
-  const bool requiresMoc = this->requiresMocing(contentsString, macroName);
+  const bool requiresMoc = this->MocRequired(contentsString, macroName);
   bool ownDotMocIncluded = false;
   bool ownMocUnderscoreIncluded = false;
   std::string ownMocUnderscoreFile;
@@ -1053,7 +1053,7 @@ void cmQtAutoGenerators::ParseHeaders(
         this->LogInfo(err.str());
       }
       std::string macroName;
-      if (this->requiresMocing(contents, macroName)) {
+      if (this->MocRequired(contents, macroName)) {
         notIncludedMocs[headerName] = fpathCheckSum.getPart(headerName) +
           "/moc_" +
           cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName) +
