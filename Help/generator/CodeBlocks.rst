@@ -18,6 +18,9 @@ This "extra" generator may be specified as:
 ``CodeBlocks - NMake Makefiles``
  Generate with :generator:`NMake Makefiles`.
 
+``CodeBlocks - NMake Makefiles JOM``
+ Generate with :generator:`NMake Makefiles JOM`.
+
 ``CodeBlocks - Ninja``
  Generate with :generator:`Ninja`.
 
