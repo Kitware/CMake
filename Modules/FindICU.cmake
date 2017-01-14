@@ -126,6 +126,7 @@ function(_ICU_FIND)
   # Generic 64-bit and 32-bit directories
   list(APPEND icu_binary_suffixes "${_bin64}" "bin")
   list(APPEND icu_library_suffixes "${_lib64}" "lib")
+  list(APPEND icu_include_suffixes "include")
 
   # Find all ICU programs
   foreach(program ${icu_programs})
