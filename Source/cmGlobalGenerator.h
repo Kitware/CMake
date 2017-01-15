@@ -333,6 +333,10 @@ public:
 
   virtual bool UseFolderProperty() const;
 
+  /** Return whether the generator should use EFFECTIVE_PLATFORM_NAME. This is
+      relevant for mixed macOS and iOS builds. */
+  virtual bool UseEffectivePlatformName(cmMakefile*) const { return false; }
+
   std::string GetSharedLibFlagsForLanguage(std::string const& lang) const;
 
   /** Generate an <output>.rule file path for a given command output.  */
