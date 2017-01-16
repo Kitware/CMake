@@ -788,7 +788,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         this->SetError("LIST_DIRECTORIES missing bool value.");
         return false;
       }
-      ++i;
+      continue;
     }
 
     if (recurse && (*i == "FOLLOW_SYMLINKS")) {
