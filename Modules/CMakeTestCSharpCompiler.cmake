@@ -34,10 +34,6 @@ if(NOT CMAKE_CSharp_COMPILER_WORKS)
   # Move result from cache to normal variable.
   set(CMAKE_CSharp_COMPILER_WORKS ${CMAKE_CSharp_COMPILER_WORKS})
   unset(CMAKE_CSharp_COMPILER_WORKS CACHE)
-  if(NOT CMAKE_CSharp_COMPILER_WORKS)
-    message("forcing compiler works to true (will be removed once C# support is integrated)")
-    set(CMAKE_CSharp_COMPILER_WORKS 1)
-  endif()
   set(CSharp_TEST_WAS_RUN 1)
 endif()
 

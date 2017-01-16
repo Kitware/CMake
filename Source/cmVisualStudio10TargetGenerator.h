@@ -56,6 +56,7 @@ private:
   void WriteProjectConfigurations();
   void WriteProjectConfigurationValues();
   void WriteMSToolConfigurationValues(std::string const& config);
+  void WriteMSToolConfigurationValuesManaged(std::string const& config);
   void WriteHeaderSource(cmSourceFile const* sf);
   void WriteExtraSource(cmSourceFile const* sf);
   void WriteNsightTegraConfigurationValues(std::string const& config);
