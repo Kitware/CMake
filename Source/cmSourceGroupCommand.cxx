@@ -8,6 +8,99 @@
 #include "cmSourceGroup.h"
 #include "cmSystemTools.h"
 
+namespace {
+const size_t RootIndex = 1;
+const size_t FilesWithoutPrefixKeywordIndex = 2;
+const size_t FilesWithPrefixKeywordIndex = 4;
+const size_t PrefixKeywordIdex = 2;
+
+std::vector<std::string> tokenizePath(const std::string& path)
+{
+  return cmSystemTools::tokenize(path, "\\/");
+}
+
+std::string getFullFilePath(const std::string& currentPath,
+                            const std::string& path)
+{
+  std::string fullPath = path;
+
+  if (!cmSystemTools::FileIsFullPath(path.c_str())) {
+    fullPath = currentPath;
+    fullPath += "/";
+    fullPath += path;
+  }
+
+  return cmSystemTools::CollapseFullPath(fullPath);
+}
+
+std::set<std::string> getSourceGroupFilesPaths(
+  const std::string& currentPath, const std::string& root,
+  const std::vector<std::string>& files)
+{
+  std::set<std::string> ret;
+  const std::string::size_type rootLength = root.length();
+
+  for (size_t i = 0; i < files.size(); ++i) {
+    const std::string fullPath = getFullFilePath(currentPath, files[i]);
+
+    ret.insert(fullPath.substr(rootLength + 1)); // +1 to also omnit last '/'
+  }
+
+  return ret;
+}
+
+cmSourceGroup* addSourceGroup(const std::vector<std::string>& tokenizedPath,
+                              cmMakefile& makefile)
+{
+  cmSourceGroup* sg;
+
+  sg = makefile.GetSourceGroup(tokenizedPath);
+  if (!sg) {
+    makefile.AddSourceGroup(tokenizedPath);
+    sg = makefile.GetSourceGroup(tokenizedPath);
+    if (!sg) {
+      return CM_NULLPTR;
+    }
+  }
+
+  return sg;
+}
+
+bool addFilesToItsSourceGroups(const std::set<std::string>& sgFilesPaths,
+                               const std::string& prefix, cmMakefile& makefile,
+                               std::string& errorMsg)
+{
+  cmSourceGroup* sg;
+
+  for (std::set<std::string>::const_iterator it = sgFilesPaths.begin();
+       it != sgFilesPaths.end(); ++it) {
+
+    std::vector<std::string> tokenizedPath;
+    if (!prefix.empty()) {
+      tokenizedPath = tokenizePath(prefix + '/' + *it);
+    } else {
+      tokenizedPath = tokenizePath(*it);
+    }
+
+    if (tokenizedPath.size() > 1) {
+      tokenizedPath.pop_back();
+
+      sg = addSourceGroup(tokenizedPath, makefile);
+
+      if (!sg) {
+        errorMsg = "Could not create source group for file: " + *it;
+        return false;
+      }
+      const std::string fullPath =
+        getFullFilePath(makefile.GetCurrentSourceDirectory(), *it);
+      sg->AddGroupFile(fullPath);
+    }
+  }
+
+  return true;
+}
+}
+
 class cmExecutionStatus;
 
 // cmSourceGroupCommand
@@ -17,6 +110,17 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
   if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
+  }
+
+  if (args[0] == "TREE") {
+    std::string error;
+
+    if (!processTree(args, error)) {
+      this->SetError(error);
+      return false;
+    }
+
+    return true;
   }
 
   std::string delimiter = "\\";
@@ -78,6 +182,67 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
       this->SetError(err.str());
       return false;
     }
+  }
+
+  return true;
+}
+
+bool cmSourceGroupCommand::checkTreeArgumentsPreconditions(
+  const std::vector<std::string>& args, std::string& errorMsg) const
+{
+  if (args.size() == 1) {
+    errorMsg = "TREE argument given without a root.";
+    return false;
+  }
+
+  if (args.size() < 3) {
+    errorMsg = "Missing FILES arguments.";
+    return false;
+  }
+
+  if (args[FilesWithoutPrefixKeywordIndex] != "FILES" &&
+      args[PrefixKeywordIdex] != "PREFIX") {
+    errorMsg = "Unknown argument \"" + args[2] +
+      "\". Perhaps the FILES keyword is missing.\n";
+    return false;
+  }
+
+  if (args[PrefixKeywordIdex] == "PREFIX" &&
+      (args.size() < 5 || args[FilesWithPrefixKeywordIndex] != "FILES")) {
+    errorMsg = "Missing FILES arguments.";
+    return false;
+  }
+
+  return true;
+}
+
+bool cmSourceGroupCommand::processTree(const std::vector<std::string>& args,
+                                       std::string& errorMsg)
+{
+  if (!checkTreeArgumentsPreconditions(args, errorMsg)) {
+    return false;
+  }
+
+  const std::string root = cmSystemTools::CollapseFullPath(args[RootIndex]);
+  std::string prefix;
+  size_t filesBegin = FilesWithoutPrefixKeywordIndex + 1;
+  if (args[PrefixKeywordIdex] == "PREFIX") {
+    prefix = args[PrefixKeywordIdex + 1];
+    filesBegin = FilesWithPrefixKeywordIndex + 1;
+  }
+
+  const std::vector<std::string> filesVector(args.begin() + filesBegin,
+                                             args.end());
+
+  std::set<std::string> sourceGroupPaths = getSourceGroupFilesPaths(
+    this->Makefile->GetCurrentSourceDirectory(), root, filesVector);
+
+  addFilesToItsSourceGroups(sourceGroupPaths, prefix, *(this->Makefile),
+                            errorMsg);
+
+  if (!errorMsg.empty()) {
+    this->SetError(errorMsg);
+    return false;
   }
 
   return true;

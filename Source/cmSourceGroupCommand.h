@@ -36,6 +36,12 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   std::string GetName() const CM_OVERRIDE { return "source_group"; }
+
+private:
+  bool processTree(const std::vector<std::string>& args,
+                   std::string& errorMsg);
+  bool checkTreeArgumentsPreconditions(const std::vector<std::string>& args,
+                                       std::string& errorMsg) const;
 };
 
 #endif
