@@ -73,42 +73,19 @@ cmVSSetupAPIHelper::~cmVSSetupAPIHelper()
 
 bool cmVSSetupAPIHelper::IsVS2017Installed()
 {
-  bool ret = false;
-  if (chosenInstanceInfo.VSInstallLocation.compare(L"") == 0) {
-    ret = EnumerateAndChooseVSInstance();
-  }
-
-  return ret;
+  return this->EnumerateAndChooseVSInstance();
 }
 
 bool cmVSSetupAPIHelper::IsWin10SDKInstalled()
 {
-  bool isWin10SDKInstalled = false;
-  if (chosenInstanceInfo.VSInstallLocation.compare(L"") == 0) {
-    if (EnumerateAndChooseVSInstance() &&
-        chosenInstanceInfo.VSInstallLocation.compare(L"") != 0) {
-      isWin10SDKInstalled = chosenInstanceInfo.IsWin10SDKInstalled;
-    }
-  } else {
-    isWin10SDKInstalled = chosenInstanceInfo.IsWin10SDKInstalled;
-  }
-
-  return isWin10SDKInstalled;
+  return (this->EnumerateAndChooseVSInstance() &&
+          chosenInstanceInfo.IsWin10SDKInstalled);
 }
 
 bool cmVSSetupAPIHelper::IsWin81SDKInstalled()
 {
-  bool isWin81SDKInstalled = false;
-  if (chosenInstanceInfo.VSInstallLocation.compare(L"") == 0) {
-    if (EnumerateAndChooseVSInstance() &&
-        chosenInstanceInfo.VSInstallLocation.compare(L"") != 0) {
-      isWin81SDKInstalled = chosenInstanceInfo.IsWin81SDKInstalled;
-    }
-  } else {
-    isWin81SDKInstalled = chosenInstanceInfo.IsWin81SDKInstalled;
-  }
-
-  return isWin81SDKInstalled;
+  return (this->EnumerateAndChooseVSInstance() &&
+          chosenInstanceInfo.IsWin81SDKInstalled);
 }
 
 bool cmVSSetupAPIHelper::CheckInstalledComponent(
@@ -241,18 +218,12 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
 bool cmVSSetupAPIHelper::GetVSInstanceInfo(std::string& vsInstallLocation)
 {
   vsInstallLocation = "";
-  bool isInstalled = false;
+  bool isInstalled = this->EnumerateAndChooseVSInstance();
 
-  if (chosenInstanceInfo.VSInstallLocation.compare(L"") == 0) {
-    isInstalled = EnumerateAndChooseVSInstance();
-  }
-
-  // Enumerate and choose best VS instance
-  if (chosenInstanceInfo.VSInstallLocation.compare(L"") != 0) {
+  if (isInstalled) {
     std::string str(chosenInstanceInfo.VSInstallLocation.begin(),
                     chosenInstanceInfo.VSInstallLocation.end());
     vsInstallLocation = str;
-    isInstalled = true;
   }
 
   return isInstalled;
