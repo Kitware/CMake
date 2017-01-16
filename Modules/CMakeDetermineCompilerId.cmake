@@ -237,6 +237,10 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     set(id_src "${src}")
     set(id_compile "ClCompile")
     set(id_PostBuildEvent_Command "for %%i in (${id_cl}) do %40echo CMAKE_${lang}_COMPILER=%%~$PATH:i")
+    set(id_Import_props "")
+    set(id_Import_targets "")
+    set(id_ItemDefinitionGroup_entry "")
+    set(id_Link_AdditionalDependencies "")
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/VS-${v}.${ext}.in
       ${id_dir}/CompilerId${lang}.${ext} @ONLY)
     if(CMAKE_VS_MSBUILD_COMMAND AND NOT lang STREQUAL "Fortran")
