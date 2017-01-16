@@ -9,15 +9,15 @@
 function Component()
 {
     installer.valueChanged.connect( this, Component.prototype.reactOnTargetDirChange );
-    // set the default values to CMAKE@CM_VER_XY@_DIR
+    // set the default values to CMAKE%CMake_VERSION_MAJOR%%CMake_VERSION_MINOR%_BIN_DIR
     Component.prototype.reactOnTargetDirChange("TargetDir", installer.value("TargetDir"));
 }
 
 Component.prototype.reactOnTargetDirChange = function(key, value)
 {
     if (key == "TargetDir") {
-        var path = value + "/@CM_INST_PREF@";
-        installer.setValue("CMAKE@CM_VER_XY@_DIR", path.replace(/\\/g, "/"));
+        var path = value + "/%CMAKE_BIN_DIR%";
+        installer.setValue("CMAKE%CMake_VERSION_MAJOR%%CMake_VERSION_MINOR%_BIN_DIR", path.replace(/\\/g, "/"));
     }
 }
 
@@ -31,13 +31,13 @@ Component.prototype.createOperations = function()
                 return;
 
             var cmId = component.name;
-            installer.setValue("CMAKE@CM_VER_XY@_ID", cmId);
+            installer.setValue("CMAKE%CMake_VERSION_MAJOR%%CMake_VERSION_MINOR%_ID", cmId);
 
             component.addOperation("Execute",
                                    ["{0,2}", "@SDKToolBinary@", "addCMake",
                                     "--id", cmId,
-                                    "--name", "@CMake_IFW_ROOT_COMPONENT_DISPLAY_NAME@",
-                                    "--path", "@CM_VER_XY_DIR@/bin/cmake.exe",
+                                    "--name", "%CMake_IFW_ROOT_COMPONENT_DISPLAY_NAME%",
+                                    "--path", "@CMAKE%CMake_VERSION_MAJOR%%CMake_VERSION_MINOR%_BIN_DIR@/cmake.exe",
                                     "UNDOEXECUTE",
                                     "@SDKToolBinary@", "rmCMake", "--id", cmId]);
 
