@@ -49,11 +49,11 @@
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>for %%i in (@id_cl@) do %40echo CMAKE_@id_lang@_COMPILER=%%~$PATH:i</Command>
+      <Command>@id_PostBuildEvent_Command@</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="@id_src@" />
+    <@id_compile@ Include="@id_src@" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
