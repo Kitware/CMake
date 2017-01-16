@@ -674,6 +674,14 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   const std::string qtMajorVersion = GetQtMajorVersion(target);
   std::vector<std::string> autogenOutputFiles;
 
+  // Remove old settings on cleanup
+  {
+    std::string fname = GetAutogenTargetFilesDir(target);
+    fname += "/AutogenOldSettings.cmake";
+    makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES", fname.c_str(),
+                             false);
+  }
+
   // Create autogen target build directory and add it to the clean files
   cmSystemTools::MakeDirectory(autogenBuildDir);
   makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
