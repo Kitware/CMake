@@ -818,6 +818,9 @@ IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
         # for symbol lookup using dladdr
         TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ${CMAKE_DL_LIBS})
       ENDIF()
+      IF (CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+        TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} socket)
+      ENDIF()
     ENDIF()
   ENDIF()
 
