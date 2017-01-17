@@ -36,6 +36,7 @@ bool cmAddCustomCommandCommand::InitialPass(
   bool verbatim = false;
   bool append = false;
   bool uses_terminal = false;
+  bool command_expand_lists = false;
   std::string implicit_depends_lang;
   cmCustomCommand::ImplicitDependsList implicit_depends;
 
@@ -92,6 +93,8 @@ bool cmAddCustomCommandCommand::InitialPass(
       append = true;
     } else if (copy == "USES_TERMINAL") {
       uses_terminal = true;
+    } else if (copy == "COMMAND_EXPAND_LISTS") {
+      command_expand_lists = true;
     } else if (copy == "TARGET") {
       doing = doing_target;
     } else if (copy == "ARGS") {
@@ -281,12 +284,14 @@ bool cmAddCustomCommandCommand::InitialPass(
     std::vector<std::string> no_depends;
     this->Makefile->AddCustomCommandToTarget(
       target, byproducts, no_depends, commandLines, cctype, comment,
-      working.c_str(), escapeOldStyle, uses_terminal, depfile);
+      working.c_str(), escapeOldStyle, uses_terminal, depfile,
+      command_expand_lists);
   } else if (target.empty()) {
     // Target is empty, use the output.
     this->Makefile->AddCustomCommandToOutput(
       output, byproducts, depends, main_dependency, commandLines, comment,
-      working.c_str(), false, escapeOldStyle, uses_terminal, depfile);
+      working.c_str(), false, escapeOldStyle, uses_terminal,
+      command_expand_lists, depfile);
 
     // Add implicit dependency scanning requests if any were given.
     if (!implicit_depends.empty()) {

@@ -125,7 +125,8 @@ public:
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
     const char* comment, const char* workingDir, bool escapeOldStyle = true,
-    bool uses_terminal = false, const std::string& depfile = "");
+    bool uses_terminal = false, const std::string& depfile = "",
+    bool command_expand_lists = false);
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& byproducts,
@@ -133,13 +134,15 @@ public:
     const std::string& main_dependency,
     const cmCustomCommandLines& commandLines, const char* comment,
     const char* workingDir, bool replace = false, bool escapeOldStyle = true,
-    bool uses_terminal = false, const std::string& depfile = "");
+    bool uses_terminal = false, bool command_expand_lists = false,
+    const std::string& depfile = "");
   cmSourceFile* AddCustomCommandToOutput(
     const std::string& output, const std::vector<std::string>& depends,
     const std::string& main_dependency,
     const cmCustomCommandLines& commandLines, const char* comment,
     const char* workingDir, bool replace = false, bool escapeOldStyle = true,
-    bool uses_terminal = false, const std::string& depfile = "");
+    bool uses_terminal = false, bool command_expand_lists = false,
+    const std::string& depfile = "");
   void AddCustomCommandOldStyle(const std::string& target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
@@ -182,13 +185,15 @@ public:
     const std::string& utilityName, bool excludeFromAll,
     const char* workingDirectory, const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
-    const char* comment = CM_NULLPTR, bool uses_terminal = false);
+    const char* comment = CM_NULLPTR, bool uses_terminal = false,
+    bool command_expand_lists = false);
   cmTarget* AddUtilityCommand(
     const std::string& utilityName, bool excludeFromAll,
     const char* workingDirectory, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
-    const char* comment = CM_NULLPTR, bool uses_terminal = false);
+    const char* comment = CM_NULLPTR, bool uses_terminal = false,
+    bool command_expand_lists = false);
 
   /**
    * Add a subdirectory to the build.
