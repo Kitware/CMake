@@ -76,6 +76,34 @@
 #
 #  Filename for a logo is used as QWizard::LogoPixmap.
 #
+# .. variable:: CPACK_IFW_PACKAGE_WATERMARK
+#
+#  Filename for a watermark is used as QWizard::WatermarkPixmap.
+#
+# .. variable:: CPACK_IFW_PACKAGE_BANNER
+#
+#  Filename for a banner is used as QWizard::BannerPixmap.
+#
+# .. variable:: CPACK_IFW_PACKAGE_BACKGROUND
+#
+#  Filename for an image used as QWizard::BackgroundPixmap (only used by MacStyle).
+#
+# .. variable:: CPACK_IFW_PACKAGE_WIZARD_STYLE
+#
+#  Wizard style to be used ("Modern", "Mac", "Aero" or "Classic").
+#
+# .. variable:: CPACK_IFW_PACKAGE_WIZARD_DEFAULT_WIDTH
+#
+#  Default width of the wizard in pixels. Setting a banner image will override this.
+#
+# .. variable:: CPACK_IFW_PACKAGE_WIZARD_DEFAULT_HEIGHT
+#
+#  Default height of the wizard in pixels. Setting a watermark image will override this.
+#
+# .. variable:: CPACK_IFW_PACKAGE_TITLE_COLOR
+#
+#  Color of the titles and subtitles (takes an HTML color code, such as "#88FF33").
+#
 # .. variable:: CPACK_IFW_PACKAGE_START_MENU_DIRECTORY
 #
 #  Name of the default program group for the product in the Windows Start menu.
