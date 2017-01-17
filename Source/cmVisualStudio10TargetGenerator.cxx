@@ -610,30 +610,91 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
   this->GeneratorTarget->GetResxSources(resxObjs, "");
   if (!resxObjs.empty()) {
     this->WriteString("<ItemGroup>\n", 1);
+    std::string srcDir = this->Makefile->GetCurrentSourceDirectory();
+    this->ConvertToWindowsSlash(srcDir);
     for (std::vector<cmSourceFile const*>::const_iterator oi =
            resxObjs.begin();
          oi != resxObjs.end(); ++oi) {
       std::string obj = (*oi)->GetFullPath();
       this->WriteString("<EmbeddedResource Include=\"", 2);
       this->ConvertToWindowsSlash(obj);
+      bool useRelativePath = false;
+      if (csproj == this->ProjectType && this->InSourceBuild) {
+        // If we do an in-source build and the resource file is in a
+        // subdirectory
+        // of the .csproj file, we have to use relative pathnames, otherwise
+        // visual studio does not show the file in the IDE. Sorry.
+        if (obj.find(srcDir) == 0) {
+          obj = this->ConvertPath(obj, true);
+          this->ConvertToWindowsSlash(obj);
+          useRelativePath = true;
+        }
+      }
       (*this->BuildFileStream) << obj << "\">\n";
 
-      this->WriteString("<DependentUpon>", 3);
-      std::string hFileName = obj.substr(0, obj.find_last_of(".")) + ".h";
-      (*this->BuildFileStream) << hFileName << "</DependentUpon>\n";
+      if (csproj != this->ProjectType) {
+        this->WriteString("<DependentUpon>", 3);
+        std::string hFileName = obj.substr(0, obj.find_last_of(".")) + ".h";
+        (*this->BuildFileStream) << hFileName << "</DependentUpon>\n";
 
-      for (std::vector<std::string>::const_iterator i =
-             this->Configurations.begin();
-           i != this->Configurations.end(); ++i) {
-        this->WritePlatformConfigTag("LogicalName", i->c_str(), 3);
-        if (this->GeneratorTarget->GetProperty("VS_GLOBAL_ROOTNAMESPACE") ||
-            // Handle variant of VS_GLOBAL_<variable> for RootNamespace.
-            this->GeneratorTarget->GetProperty("VS_GLOBAL_RootNamespace")) {
-          (*this->BuildFileStream) << "$(RootNamespace).";
+        for (std::vector<std::string>::const_iterator i =
+               this->Configurations.begin();
+             i != this->Configurations.end(); ++i) {
+          this->WritePlatformConfigTag("LogicalName", i->c_str(), 3);
+          if (this->GeneratorTarget->GetProperty("VS_GLOBAL_ROOTNAMESPACE") ||
+              // Handle variant of VS_GLOBAL_<variable> for RootNamespace.
+              this->GeneratorTarget->GetProperty("VS_GLOBAL_RootNamespace")) {
+            (*this->BuildFileStream) << "$(RootNamespace).";
+          }
+          (*this->BuildFileStream) << "%(Filename)";
+          (*this->BuildFileStream) << ".resources";
+          (*this->BuildFileStream) << "</LogicalName>\n";
         }
-        (*this->BuildFileStream) << "%(Filename)";
-        (*this->BuildFileStream) << ".resources";
-        (*this->BuildFileStream) << "</LogicalName>\n";
+      } else {
+        std::string binDir = this->Makefile->GetCurrentBinaryDirectory();
+        this->ConvertToWindowsSlash(binDir);
+        // If the resource was NOT added using a relative path (which should
+        // be the default), we have to provide a link here
+        if (!useRelativePath) {
+          std::string link;
+          if (obj.find(srcDir) == 0) {
+            link = obj.substr(srcDir.length() + 1);
+          } else if (obj.find(binDir) == 0) {
+            link = obj.substr(binDir.length() + 1);
+          } else {
+            link = cmsys::SystemTools::GetFilenameName(obj);
+          }
+          if (!link.empty()) {
+            this->WriteString("<Link>", 3);
+            (*this->BuildFileStream) << link << "</Link>\n";
+          }
+        }
+        // Determine if this is a generated resource from a .Designer.cs file
+        std::string designerResource =
+          cmSystemTools::GetFilenamePath((*oi)->GetFullPath()) + "/" +
+          cmSystemTools::GetFilenameWithoutLastExtension(
+            (*oi)->GetFullPath()) +
+          ".Designer.cs";
+        if (cmsys::SystemTools::FileExists(designerResource)) {
+          std::string generator = "PublicResXFileCodeGenerator";
+          if (const char* g = (*oi)->GetProperty("VS_RESOURCE_GENERATOR")) {
+            generator = g;
+          }
+          this->WriteString("<Generator>", 3);
+          (*this->BuildFileStream) << cmVS10EscapeXML(generator)
+                                   << "</Generator>\n";
+          if (designerResource.find(srcDir) == 0) {
+            designerResource = designerResource.substr(srcDir.length() + 1);
+          } else if (designerResource.find(binDir) == 0) {
+            designerResource = designerResource.substr(binDir.length() + 1);
+          } else {
+            designerResource =
+              cmsys::SystemTools::GetFilenameName(designerResource);
+          }
+          this->ConvertToWindowsSlash(designerResource);
+          this->WriteString("<LastGenOutput>", 3);
+          (*this->BuildFileStream) << designerResource << "</LastGenOutput>\n";
+        }
       }
 
       this->WriteString("</EmbeddedResource>\n", 2);
@@ -661,6 +722,24 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup()
       }
 
       this->WriteSource(xamlType, *oi, ">\n");
+      if (csproj == this->ProjectType && !this->InSourceBuild) {
+        // add <Link> tag to written XAML source if necessary
+        const std::string srcDir = this->Makefile->GetCurrentSourceDirectory();
+        const std::string binDir = this->Makefile->GetCurrentBinaryDirectory();
+        std::string link;
+        if (obj.find(srcDir) == 0) {
+          link = obj.substr(srcDir.length() + 1);
+        } else if (obj.find(binDir) == 0) {
+          link = obj.substr(binDir.length() + 1);
+        } else {
+          link = cmsys::SystemTools::GetFilenameName(obj);
+        }
+        if (!link.empty()) {
+          this->ConvertToWindowsSlash(link);
+          this->WriteString("<Link>", 3);
+          (*this->BuildFileStream) << link << "</Link>\n";
+        }
+      }
       this->WriteString("<SubType>Designer</SubType>\n", 3);
       this->WriteString("</", 2);
       (*this->BuildFileStream) << xamlType << ">\n";
@@ -1348,7 +1427,12 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
   std::string shaderEntryPoint;
   std::string shaderModel;
   std::string shaderAdditionalFlags;
+  std::string settingsGenerator;
+  std::string settingsLastGenOutput;
   std::string sourceLink;
+  std::string subType;
+  std::string copyToOutDir;
+  std::string includeInVsix;
   std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
   if (csproj == this->ProjectType) {
     // EVERY extra source file must have a <Link>, otherwise it might not
@@ -1405,6 +1489,28 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     tool = "XML";
   } else if (ext == "natvis") {
     tool = "Natvis";
+  } else if (ext == "settings") {
+    // remove path to current source dir (if files are in current source dir)
+    if (!sourceLink.empty()) {
+      settingsLastGenOutput = sourceLink;
+    } else {
+      settingsLastGenOutput = sf->GetFullPath();
+    }
+    std::size_t pos = settingsLastGenOutput.find(".settings");
+    settingsLastGenOutput.replace(pos, 9, ".Designer.cs");
+    settingsGenerator = "SettingsSingleFileGenerator";
+    toolHasSettings = true;
+  } else if (ext == "vsixmanifest") {
+    subType = "Designer";
+  }
+  if (const char* c = sf->GetProperty("VS_COPY_TO_OUT_DIR")) {
+    copyToOutDir = c;
+    toolHasSettings = true;
+  }
+  if (sf->GetPropertyAsBool("VS_INCLUDE_IN_VSIX")) {
+    includeInVsix = "True";
+    tool = "Content";
+    toolHasSettings = true;
   }
 
   if (this->NsightTegra) {
@@ -1495,10 +1601,35 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       (*this->BuildFileStream) << cmVS10EscapeXML(shaderAdditionalFlags)
                                << "</AdditionalOptions>\n";
     }
+    if (!settingsGenerator.empty()) {
+      this->WriteString("<Generator>", 3);
+      (*this->BuildFileStream) << cmVS10EscapeXML(settingsGenerator)
+                               << "</Generator>\n";
+    }
+    if (!settingsLastGenOutput.empty()) {
+      this->WriteString("<LastGenOutput>", 3);
+      (*this->BuildFileStream) << cmVS10EscapeXML(settingsLastGenOutput)
+                               << "</LastGenOutput>\n";
+    }
     if (!sourceLink.empty()) {
       this->WriteString("<Link>", 3);
       (*this->BuildFileStream) << cmVS10EscapeXML(sourceLink) << "</Link>\n";
     }
+    if (!subType.empty()) {
+      this->WriteString("<SubType>", 3);
+      (*this->BuildFileStream) << cmVS10EscapeXML(subType) << "</SubType>\n";
+    }
+    if (!copyToOutDir.empty()) {
+      this->WriteString("<CopyToOutputDirectory>", 3);
+      (*this->BuildFileStream) << cmVS10EscapeXML(copyToOutDir)
+                               << "</CopyToOutputDirectory>\n";
+    }
+    if (!includeInVsix.empty()) {
+      this->WriteString("<IncludeInVSIX>", 3);
+      (*this->BuildFileStream) << cmVS10EscapeXML(includeInVsix)
+                               << "</IncludeInVSIX>\n";
+    }
+
     this->WriteString("</", 2);
     (*this->BuildFileStream) << tool << ">\n";
   } else {
@@ -1815,9 +1946,43 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         sourceFileTags["Link"] = link;
       }
     }
-    //
-    // NOTE: in future commits additional props will be added!
-    //
+    // check if file is a generated .Designer.cs or .xaml.cs file
+    // to add additional necessary tags
+    const std::string fileExtension =
+      cmsys::SystemTools::GetFilenameExtension(f);
+    if (fileExtension == ".Designer.cs" || fileExtension == ".xaml.cs") {
+      f = f.substr(0, f.length() - fileExtension.length());
+      if (sourceFileTags.find("Link") == sourceFileTags.end() &&
+          !this->InSourceBuild) {
+        // add link fallback
+        sourceFileTags["Link"] =
+          cmsys::SystemTools::GetFilenameName(f) + fileExtension;
+      }
+      std::vector<std::string> extensions;
+      extensions.push_back(".resx");
+      extensions.push_back(".settings");
+      extensions.push_back(".xaml");
+      extensions.push_back(".cs");
+      std::string dependencyExtension;
+      for (std::vector<std::string>::iterator i = extensions.begin();
+           i != extensions.end(); ++i) {
+        if (cmsys::SystemTools::FileExists(f + *i)) {
+          dependencyExtension = *i;
+          // There should never be more than one match. Otherwise
+          // one cannot tell on which match the file depends.
+          break;
+        }
+      }
+      if (dependencyExtension == ".resx") {
+        sourceFileTags["DesignTime"] = "True";
+        sourceFileTags["AutoGen"] = "True";
+      } else if (dependencyExtension == ".settings") {
+        sourceFileTags["DesignTimeSharedInput"] = "True";
+        sourceFileTags["AutoGen"] = "True";
+      }
+      sourceFileTags["DependentUpon"] =
+        cmsys::SystemTools::GetFilenameName(f) + dependencyExtension;
+    }
     // write source file specific tags
     if (!sourceFileTags.empty()) {
       hasFlags = true;
@@ -1825,7 +1990,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       firstString = "";
       for (CsPropMap::const_iterator i = sourceFileTags.begin();
            i != sourceFileTags.end(); ++i) {
-        this->WriteString("<", 2);
+        this->WriteString("<", 3);
         (*this->BuildFileStream)
           << i->first << ">" << cmVS10EscapeXML(i->second) << "</" << i->first
           << ">\n";
