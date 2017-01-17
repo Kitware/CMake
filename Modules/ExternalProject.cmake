@@ -889,7 +889,7 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
 
   if("${hash}" MATCHES "${_ep_hash_regex}")
     set(ALGO "${CMAKE_MATCH_1}")
-    set(EXPECT_VALUE "${CMAKE_MATCH_2}")
+    string(TOLOWER "${CMAKE_MATCH_2}" EXPECT_VALUE)
   else()
     set(ALGO "")
     set(EXPECT_VALUE "")
