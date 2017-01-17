@@ -31,6 +31,7 @@ run_cmake(GLOB_RECURSE)
 run_cmake(GLOB-error-LIST_DIRECTORIES-not-boolean)
 # test is valid both for GLOB and GLOB_RECURSE
 run_cmake(GLOB-error-LIST_DIRECTORIES-no-arg)
+run_cmake(GLOB-noexp-LIST_DIRECTORIES)
 
 if(NOT WIN32 OR CYGWIN)
   run_cmake(GLOB_RECURSE-cyclic-recursion)
