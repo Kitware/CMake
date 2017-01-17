@@ -506,7 +506,7 @@ public:
     : FTC(CM_NULLPTR)
   {
   }
-  bool operator()(std::string const& l, std::string const& r)
+  bool operator()(std::string const& l, std::string const& r) const
   {
     // Order files by modification time.  Use lexicographic order
     // among files with the same time.
