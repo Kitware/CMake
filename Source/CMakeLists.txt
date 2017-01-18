@@ -637,6 +637,7 @@ if(APPLE)
   set(SRCS ${SRCS}
     cmXCodeObject.cxx
     cmXCode21Object.cxx
+    cmXCodeScheme.cxx
     cmGlobalXCodeGenerator.cxx
     cmGlobalXCodeGenerator.h
     cmLocalXCodeGenerator.cxx
