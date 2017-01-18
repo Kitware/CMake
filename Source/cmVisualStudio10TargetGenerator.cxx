@@ -1671,12 +1671,6 @@ void cmVisualStudio10TargetGenerator::WriteSource(std::string const& tool,
       this->GlobalGenerator->PathTooLong(this->GeneratorTarget, sf, sourceRel);
     }
   }
-  if (csproj == this->ProjectType && this->InSourceBuild) {
-    std::string srcdir = this->Makefile->GetCurrentSourceDirectory();
-    if (sourceFile.find(srcdir) != std::string::npos) {
-      sourceFile = sourceFile.substr(srcdir.size() + 1);
-    }
-  }
   this->ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
   (*this->BuildFileStream) << tool << " Include=\""
