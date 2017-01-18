@@ -5,10 +5,10 @@
 
 #include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmXCodeObject.h"
 #include "cmGlobalXCodeGenerator.h"
-#include "cmXMLWriter.h"
 #include "cmSystemTools.h"
+#include "cmXCodeObject.h"
+#include "cmXMLWriter.h"
 
 /** \class cmXCodeScheme
  * \brief Write shared schemes for native targets in Xcode project.
@@ -16,25 +16,27 @@
 class cmXCodeScheme
 {
 public:
-    cmXCodeScheme(cmXCodeObject* xcObj, unsigned int xcVersion);
+  cmXCodeScheme(cmXCodeObject* xcObj, unsigned int xcVersion);
 
-    void WriteXCodeSharedScheme(const std::string& xcProjDir, const std::string sourceRoot);
+  void WriteXCodeSharedScheme(const std::string& xcProjDir,
+                              const std::string sourceRoot);
+
 private:
-    const std::string& targetName;
-    const std::string& targetId;
-    unsigned int XcodeVersion;
+  const std::string& targetName;
+  const std::string& targetId;
+  unsigned int XcodeVersion;
 
-    void WriteXCodeXCScheme(std::ostream& fout, const std::string& xcProjDir);
+  void WriteXCodeXCScheme(std::ostream& fout, const std::string& xcProjDir);
 
-    void WriteBuildAction(cmXMLWriter& xout, const std::string& xcProjDir);
-    void WriteTestAction(cmXMLWriter& xout, std::string configuration);
-    void WriteLaunchAction(cmXMLWriter& xout, std::string configuration,
-                           const std::string& xcProjDir);
-    void WriteProfileAction(cmXMLWriter& xout, std::string configuration);
-    void WriteAnalyzeAction(cmXMLWriter& xout, std::string configuration);
-    void WriteArchiveAction(cmXMLWriter& xout, std::string configuration);
+  void WriteBuildAction(cmXMLWriter& xout, const std::string& xcProjDir);
+  void WriteTestAction(cmXMLWriter& xout, std::string configuration);
+  void WriteLaunchAction(cmXMLWriter& xout, std::string configuration,
+                         const std::string& xcProjDir);
+  void WriteProfileAction(cmXMLWriter& xout, std::string configuration);
+  void WriteAnalyzeAction(cmXMLWriter& xout, std::string configuration);
+  void WriteArchiveAction(cmXMLWriter& xout, std::string configuration);
 
-    std::string WriteVersionString();
+  std::string WriteVersionString();
 };
 
 #endif

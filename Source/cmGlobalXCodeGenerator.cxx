@@ -3297,7 +3297,8 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
   }
   this->WriteXCodePBXProj(fout, root, generators);
 
-  // Since the lowest available Xcode version for testing was 7.0, I'm setting this as a limit then
+  // Since the lowest available Xcode version for testing was 7.0, I'm setting
+  // this as a limit then
   //
   if (this->XcodeVersion >= 70)
     this->OutputXCodeSharedSchemes(xcodeDir, root, generators);
@@ -3310,18 +3311,22 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
     root->GetBinaryDirectory());
 }
 
-void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(const std::string& xcProjDir,
-  cmLocalGenerator* root, std::vector<cmLocalGenerator*>& generators)
+void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
+  const std::string& xcProjDir, cmLocalGenerator* root,
+  std::vector<cmLocalGenerator*>& generators)
 {
-    for (std::vector<cmXCodeObject*>::const_iterator i = this->XCodeObjects.begin();
-         i != this->XCodeObjects.end(); ++i) {
-      cmXCodeObject* obj = *i;
-      if (obj->GetType() == cmXCodeObject::OBJECT &&
-          (obj->GetIsA() == cmXCodeObject::PBXNativeTarget || obj->GetIsA() == cmXCodeObject::PBXAggregateTarget)) {
-        cmXCodeScheme schm(obj, this->XcodeVersion);
-        schm.WriteXCodeSharedScheme(xcProjDir, root->GetCurrentSourceDirectory());
-      }
+  for (std::vector<cmXCodeObject*>::const_iterator i =
+         this->XCodeObjects.begin();
+       i != this->XCodeObjects.end(); ++i) {
+    cmXCodeObject* obj = *i;
+    if (obj->GetType() == cmXCodeObject::OBJECT &&
+        (obj->GetIsA() == cmXCodeObject::PBXNativeTarget ||
+         obj->GetIsA() == cmXCodeObject::PBXAggregateTarget)) {
+      cmXCodeScheme schm(obj, this->XcodeVersion);
+      schm.WriteXCodeSharedScheme(xcProjDir,
+                                  root->GetCurrentSourceDirectory());
     }
+  }
 }
 
 void cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
