@@ -46,7 +46,7 @@ AddCacheEntry::AddCacheEntry(QWidget* p, const QStringList& varNames,
 
 QString AddCacheEntry::name() const
 {
-  return this->Name->text();
+  return this->Name->text().trimmed();
 }
 
 QVariant AddCacheEntry::value() const
