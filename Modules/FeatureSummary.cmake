@@ -14,12 +14,12 @@ packages and/or feature for a build tree such as::
     LibXml2 (required version >= 2.4), XML processing lib, <http://xmlsoft.org>
        * Enables HTML-import in MyWordProcessor
        * Enables odt-export in MyWordProcessor
-    PNG , A PNG image library. , <http://www.libpng.org/pub/png/>
+    PNG, A PNG image library., <http://www.libpng.org/pub/png/>
        * Enables saving screenshots
     -- The following OPTIONAL packages have not been found:
-    Lua51 , The Lua scripting language. , <http://www.lua.org>
+    Lua51, The Lua scripting language., <http://www.lua.org>
        * Enables macros in MyWordProcessor
-    Foo , Foo provides cool stuff.
+    Foo, Foo provides cool stuff.
 
 Functions
 ^^^^^^^^^
@@ -87,11 +87,11 @@ function(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
         endif()
         get_property(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_DESCRIPTION)
         if(_info)
-          string(APPEND _currentFeatureText " , ${_info}")
+          string(APPEND _currentFeatureText ", ${_info}")
         endif()
         get_property(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_URL)
         if(_info)
-          string(APPEND _currentFeatureText " , <${_info}>")
+          string(APPEND _currentFeatureText ", <${_info}>")
         endif()
 
         get_property(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_PURPOSE)
@@ -287,7 +287,10 @@ function(FEATURE_SUMMARY)
       set(_tmp)
       _FS_GET_FEATURE_SUMMARY( ${part} _tmp ${_FS_INCLUDE_QUIET_PACKAGES})
       if(_tmp)
-        string(APPEND _fullText "\n-- ${title_${part}}\n${_tmp}\n")
+        if(_fullText)
+          string(APPEND _fullText "\n-- ")
+        endif()
+        string(APPEND _fullText "${title_${part}}\n${_tmp}\n")
         if("${part}" STREQUAL "REQUIRED_PACKAGES_NOT_FOUND")
           set(requiredPackagesNotFound TRUE)
         endif()
