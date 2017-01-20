@@ -120,8 +120,6 @@
 #include <string.h>
 #include <utility>
 
-class cmCommand;
-
 namespace {
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -1657,20 +1655,12 @@ const char* cmake::GetCacheDefinition(const std::string& name) const
 
 void cmake::AddScriptingCommands()
 {
-  std::vector<cmCommand*> const commands = GetScriptingCommands();
-  for (std::vector<cmCommand*>::const_iterator i = commands.begin();
-       i != commands.end(); ++i) {
-    this->State->AddCommand(*i);
-  }
+  GetScriptingCommands(this->State);
 }
 
 void cmake::AddProjectCommands()
 {
-  std::vector<cmCommand*> const commands = GetProjectCommands();
-  for (std::vector<cmCommand*>::const_iterator i = commands.begin();
-       i != commands.end(); ++i) {
-    this->State->AddCommand(*i);
-  }
+  GetProjectCommands(this->State);
 }
 
 void cmake::AddDefaultGenerators()
