@@ -105,28 +105,15 @@
 #include "cmWriteFileCommand.h"
 #endif
 
-std::vector<cmCommand*> GetPredefinedCommands()
+std::vector<cmCommand*> GetScriptingCommands()
 {
   std::vector<cmCommand*> commands;
 
-  commands.push_back(new cmAddCustomCommandCommand);
-  commands.push_back(new cmAddCustomTargetCommand);
-  commands.push_back(new cmAddDefinitionsCommand);
-  commands.push_back(new cmAddDependenciesCommand);
-  commands.push_back(new cmAddExecutableCommand);
-  commands.push_back(new cmAddLibraryCommand);
-  commands.push_back(new cmAddSubDirectoryCommand);
-  commands.push_back(new cmAddTestCommand);
   commands.push_back(new cmBreakCommand);
-  commands.push_back(new cmBuildCommand);
   commands.push_back(new cmCMakeMinimumRequired);
   commands.push_back(new cmCMakePolicyCommand);
   commands.push_back(new cmConfigureFileCommand);
   commands.push_back(new cmContinueCommand);
-  commands.push_back(new cmCreateTestSourceList);
-  commands.push_back(new cmDefinePropertyCommand);
-  commands.push_back(new cmEnableLanguageCommand);
-  commands.push_back(new cmEnableTestingCommand);
   commands.push_back(new cmExecProgramCommand);
   commands.push_back(new cmExecuteProcessCommand);
   commands.push_back(new cmFileCommand);
@@ -141,17 +128,8 @@ std::vector<cmCommand*> GetPredefinedCommands()
   commands.push_back(new cmGetDirectoryPropertyCommand);
   commands.push_back(new cmGetFilenameComponentCommand);
   commands.push_back(new cmGetPropertyCommand);
-  commands.push_back(new cmGetSourceFilePropertyCommand);
-  commands.push_back(new cmGetTargetPropertyCommand);
-  commands.push_back(new cmGetTestPropertyCommand);
   commands.push_back(new cmIfCommand);
   commands.push_back(new cmIncludeCommand);
-  commands.push_back(new cmIncludeDirectoryCommand);
-  commands.push_back(new cmIncludeRegularExpressionCommand);
-  commands.push_back(new cmInstallCommand);
-  commands.push_back(new cmInstallFilesCommand);
-  commands.push_back(new cmInstallTargetsCommand);
-  commands.push_back(new cmLinkDirectoriesCommand);
   commands.push_back(new cmListCommand);
   commands.push_back(new cmMacroCommand);
   commands.push_back(new cmMakeDirectoryCommand);
@@ -160,21 +138,13 @@ std::vector<cmCommand*> GetPredefinedCommands()
   commands.push_back(new cmMessageCommand);
   commands.push_back(new cmOptionCommand);
   commands.push_back(new cmParseArgumentsCommand);
-  commands.push_back(new cmProjectCommand);
   commands.push_back(new cmReturnCommand);
   commands.push_back(new cmSeparateArgumentsCommand);
   commands.push_back(new cmSetCommand);
   commands.push_back(new cmSetDirectoryPropertiesCommand);
   commands.push_back(new cmSetPropertyCommand);
-  commands.push_back(new cmSetSourceFilesPropertiesCommand);
-  commands.push_back(new cmSetTargetPropertiesCommand);
-  commands.push_back(new cmSetTestsPropertiesCommand);
   commands.push_back(new cmSiteNameCommand);
   commands.push_back(new cmStringCommand);
-  commands.push_back(new cmSubdirCommand);
-  commands.push_back(new cmTargetLinkLibrariesCommand);
-  commands.push_back(new cmTryCompileCommand);
-  commands.push_back(new cmTryRunCommand);
   commands.push_back(new cmUnsetCommand);
   commands.push_back(new cmWhileCommand);
 
@@ -207,9 +177,61 @@ std::vector<cmCommand*> GetPredefinedCommands()
                 "match the opening WHILE command."));
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+  commands.push_back(new cmCMakeHostSystemInformationCommand);
+  commands.push_back(new cmRemoveCommand);
+  commands.push_back(new cmVariableWatchCommand);
+  commands.push_back(new cmWriteFileCommand);
+
+  commands.push_back(new cmDisallowedCommand(
+    new cmBuildNameCommand, cmPolicies::CMP0036,
+    "The build_name command should not be called; see CMP0036."));
+  commands.push_back(new cmDisallowedCommand(
+    new cmUseMangledMesaCommand, cmPolicies::CMP0030,
+    "The use_mangled_mesa command should not be called; see CMP0030."));
+
+#endif
+
+  return commands;
+}
+
+std::vector<cmCommand*> GetProjectCommands()
+{
+  std::vector<cmCommand*> commands;
+
+  commands.push_back(new cmAddCustomCommandCommand);
+  commands.push_back(new cmAddCustomTargetCommand);
+  commands.push_back(new cmAddDefinitionsCommand);
+  commands.push_back(new cmAddDependenciesCommand);
+  commands.push_back(new cmAddExecutableCommand);
+  commands.push_back(new cmAddLibraryCommand);
+  commands.push_back(new cmAddSubDirectoryCommand);
+  commands.push_back(new cmAddTestCommand);
+  commands.push_back(new cmBuildCommand);
+  commands.push_back(new cmCreateTestSourceList);
+  commands.push_back(new cmDefinePropertyCommand);
+  commands.push_back(new cmEnableLanguageCommand);
+  commands.push_back(new cmEnableTestingCommand);
+  commands.push_back(new cmGetSourceFilePropertyCommand);
+  commands.push_back(new cmGetTargetPropertyCommand);
+  commands.push_back(new cmGetTestPropertyCommand);
+  commands.push_back(new cmIncludeDirectoryCommand);
+  commands.push_back(new cmIncludeRegularExpressionCommand);
+  commands.push_back(new cmInstallCommand);
+  commands.push_back(new cmInstallFilesCommand);
+  commands.push_back(new cmInstallTargetsCommand);
+  commands.push_back(new cmLinkDirectoriesCommand);
+  commands.push_back(new cmProjectCommand);
+  commands.push_back(new cmSetSourceFilesPropertiesCommand);
+  commands.push_back(new cmSetTargetPropertiesCommand);
+  commands.push_back(new cmSetTestsPropertiesCommand);
+  commands.push_back(new cmSubdirCommand);
+  commands.push_back(new cmTargetLinkLibrariesCommand);
+  commands.push_back(new cmTryCompileCommand);
+  commands.push_back(new cmTryRunCommand);
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   commands.push_back(new cmAddCompileOptionsCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
-  commands.push_back(new cmCMakeHostSystemInformationCommand);
   commands.push_back(new cmExportCommand);
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmIncludeExternalMSProjectCommand);
@@ -218,7 +240,6 @@ std::vector<cmCommand*> GetPredefinedCommands()
   commands.push_back(new cmLoadCacheCommand);
   commands.push_back(new cmQTWrapCPPCommand);
   commands.push_back(new cmQTWrapUICommand);
-  commands.push_back(new cmRemoveCommand);
   commands.push_back(new cmRemoveDefinitionsCommand);
   commands.push_back(new cmSourceGroupCommand);
   commands.push_back(new cmTargetCompileDefinitionsCommand);
@@ -226,12 +247,7 @@ std::vector<cmCommand*> GetPredefinedCommands()
   commands.push_back(new cmTargetCompileOptionsCommand);
   commands.push_back(new cmTargetIncludeDirectoriesCommand);
   commands.push_back(new cmTargetSourcesCommand);
-  commands.push_back(new cmVariableWatchCommand);
-  commands.push_back(new cmWriteFileCommand);
 
-  commands.push_back(new cmDisallowedCommand(
-    new cmBuildNameCommand, cmPolicies::CMP0036,
-    "The build_name command should not be called; see CMP0036."));
   commands.push_back(new cmDisallowedCommand(
     new cmExportLibraryDependenciesCommand, cmPolicies::CMP0033,
     "The export_library_dependencies command should not be called; "
@@ -246,9 +262,6 @@ std::vector<cmCommand*> GetPredefinedCommands()
   commands.push_back(new cmDisallowedCommand(
     new cmSubdirDependsCommand, cmPolicies::CMP0029,
     "The subdir_depends command should not be called; see CMP0029."));
-  commands.push_back(new cmDisallowedCommand(
-    new cmUseMangledMesaCommand, cmPolicies::CMP0030,
-    "The use_mangled_mesa command should not be called; see CMP0030."));
   commands.push_back(new cmDisallowedCommand(
     new cmUtilitySourceCommand, cmPolicies::CMP0034,
     "The utility_source command should not be called; see CMP0034."));

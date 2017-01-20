@@ -13,6 +13,7 @@ class cmCommand;
  * To add a new command edit cmCommands.cxx and add your command.
  * It is up to the caller to delete the commands created by this call.
  */
-std::vector<cmCommand*> GetPredefinedCommands();
+std::vector<cmCommand*> GetScriptingCommands();
+std::vector<cmCommand*> GetProjectCommands();
 
 #endif
