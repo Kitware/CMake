@@ -179,7 +179,8 @@ cmake::cmake()
 
   this->AddDefaultGenerators();
   this->AddDefaultExtraGenerators();
-  this->AddDefaultCommands();
+  this->AddScriptingCommands();
+  this->AddProjectCommands();
 
   // Make sure we can capture the build tool output.
   cmSystemTools::EnableVSConsoleOutput();
@@ -1654,9 +1655,18 @@ const char* cmake::GetCacheDefinition(const std::string& name) const
   return this->State->GetInitializedCacheValue(name);
 }
 
-void cmake::AddDefaultCommands()
+void cmake::AddScriptingCommands()
 {
-  std::vector<cmCommand*> const commands = GetPredefinedCommands();
+  std::vector<cmCommand*> const commands = GetScriptingCommands();
+  for (std::vector<cmCommand*>::const_iterator i = commands.begin();
+       i != commands.end(); ++i) {
+    this->State->AddCommand(*i);
+  }
+}
+
+void cmake::AddProjectCommands()
+{
+  std::vector<cmCommand*> const commands = GetProjectCommands();
   for (std::vector<cmCommand*>::const_iterator i = commands.begin();
        i != commands.end(); ++i) {
     this->State->AddCommand(*i);
