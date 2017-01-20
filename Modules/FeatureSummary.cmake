@@ -119,6 +119,7 @@ endfunction()
                      [INCLUDE_QUIET_PACKAGES]
                      [FATAL_ON_MISSING_REQUIRED_PACKAGES]
                      [DESCRIPTION "Found packages:"]
+                     [QUIET_ON_EMPTY]
                      WHAT (ALL | PACKAGES_FOUND | PACKAGES_NOT_FOUND
                           | ENABLED_FEATURES | DISABLED_FEATURES)
                    )
@@ -179,6 +180,11 @@ endfunction()
   ``FATAL_ON_MISSING_REQUIRED_PACKAGES`` is given, CMake will abort if a
   package which is marked as ``REQUIRED`` has not been found.
 
+  If the ``QUIET_ON_EMPTY`` option is used, if only one type of package was
+  requested, and no packages belonging to that category were found, then no
+  output (including the ``DESCRIPTION``) is printed or added to the ``VAR``
+  variable.
+
   Example 1, append everything to a file:
 
   .. code-block:: cmake
@@ -202,7 +208,7 @@ endfunction()
 
 function(FEATURE_SUMMARY)
 # CMAKE_PARSE_ARGUMENTS(<prefix> <options> <one_value_keywords> <multi_value_keywords> args...)
-  set(options APPEND INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
+  set(options APPEND INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES QUIET_ON_EMPTY)
   set(oneValueArgs FILENAME VAR DESCRIPTION)
   set(multiValueArgs WHAT)
 
@@ -232,7 +238,9 @@ function(FEATURE_SUMMARY)
   list(FIND validWhatParts "${_FS_WHAT}" indexInList)
   if(NOT "${indexInList}" STREQUAL "-1")
     _FS_GET_FEATURE_SUMMARY( ${_FS_WHAT} _featureSummary ${_FS_INCLUDE_QUIET_PACKAGES} )
-    set(_fullText "${_FS_DESCRIPTION}${_featureSummary}\n")
+    if(_featureSummary OR NOT _FS_QUIET_ON_EMPTY)
+      set(_fullText "${_FS_DESCRIPTION}${_featureSummary}\n")
+    endif()
     if (("${_FS_WHAT}" STREQUAL "REQUIRED_PACKAGES_NOT_FOUND") AND _featureSummary)
       set(requiredPackagesNotFound TRUE)
     endif()
@@ -298,21 +306,23 @@ function(FEATURE_SUMMARY)
     endforeach()
   endif()
 
-  if(_FS_FILENAME)
-    if(_FS_APPEND)
-      file(APPEND "${_FS_FILENAME}" "${_fullText}")
+  if(_fullText OR NOT _FS_QUIET_ON_EMPTY)
+    if(_FS_FILENAME)
+      if(_FS_APPEND)
+        file(APPEND "${_FS_FILENAME}" "${_fullText}")
+      else()
+        file(WRITE  "${_FS_FILENAME}" "${_fullText}")
+      endif()
+
     else()
-      file(WRITE  "${_FS_FILENAME}" "${_fullText}")
+      if(NOT _FS_VAR)
+        message(STATUS "${_fullText}")
+      endif()
     endif()
 
-  else()
-    if(NOT _FS_VAR)
-      message(STATUS "${_fullText}")
+    if(_FS_VAR)
+      set(${_FS_VAR} "${_fullText}" PARENT_SCOPE)
     endif()
-  endif()
-
-  if(_FS_VAR)
-    set(${_FS_VAR} "${_fullText}" PARENT_SCOPE)
   endif()
 
   if(requiredPackagesNotFound  AND  _FS_FATAL_ON_MISSING_REQUIRED_PACKAGES)
