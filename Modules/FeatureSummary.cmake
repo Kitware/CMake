@@ -477,7 +477,8 @@ endfunction()
     add_feature_info(<name> <enabled> <description>)
 
   Use this macro to add information about a feature with the given ``<name>``.
-  ``<enabled>`` contains whether this feature is enabled or not.
+  ``<enabled>`` contains whether this feature is enabled or not. It can be a
+  variable or a list of conditions.
   ``<description>`` is a text describing the feature.  The information can
   be displayed using ``feature_summary()`` for ``ENABLED_FEATURES`` and
   ``DISABLED_FEATURES`` respectively.
@@ -489,7 +490,16 @@ endfunction()
      option(WITH_FOO "Help for foo" ON)
      add_feature_info(Foo WITH_FOO "The Foo feature provides very cool stuff.")
 #]=======================================================================]
-function(ADD_FEATURE_INFO _name _enabled _desc)
+function(ADD_FEATURE_INFO _name _depends _desc)
+  set(_enabled 1)
+  foreach(_d ${_depends})
+    string(REGEX REPLACE " +" ";" _d "${_d}")
+    if(${_d})
+    else()
+      set(_enabled 0)
+      break()
+    endif()
+  endforeach()
   if (${_enabled})
     set_property(GLOBAL APPEND PROPERTY ENABLED_FEATURES "${_name}")
   else ()
