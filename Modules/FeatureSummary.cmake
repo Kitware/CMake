@@ -514,6 +514,7 @@ CMake versions:
   can be set are added automatically by the ``find_package()`` command.
 #]=======================================================================]
 function(SET_PACKAGE_INFO _name _desc)
+  message(DEPRECATION "SET_PACKAGE_INFO is deprecated. Use SET_PACKAGE_PROPERTIES instead.")
   unset(_url)
   unset(_purpose)
   if(ARGC GREATER 2)
@@ -543,6 +544,7 @@ endfunction()
     set_package_info(<name> <description> <url>)
 #]=======================================================================]
 function(SET_FEATURE_INFO)
+  message(DEPRECATION "SET_FEATURE_INFO is deprecated. Use ADD_FEATURE_INFO instead.")
   SET_PACKAGE_INFO(${ARGN})
 endfunction()
 
@@ -560,6 +562,8 @@ endfunction()
     feature_summary(WHAT ENABLED_FEATURES DESCRIPTION "Enabled features:")
 #]=======================================================================]
 function(PRINT_ENABLED_FEATURES)
+  message(DEPRECATION "PRINT_ENABLED_FEATURES is deprecated. Use
+    feature_summary(WHAT ENABLED_FEATURES DESCRIPTION \"Enabled features:\")")
   FEATURE_SUMMARY(WHAT ENABLED_FEATURES  DESCRIPTION "Enabled features:")
 endfunction()
 
@@ -577,5 +581,7 @@ endfunction()
     feature_summary(WHAT DISABLED_FEATURES DESCRIPTION "Disabled features:")
 #]=======================================================================]
 function(PRINT_DISABLED_FEATURES)
+  message(DEPRECATION "PRINT_DISABLED_FEATURES is deprecated. Use
+    feature_summary(WHAT DISABLED_FEATURES DESCRIPTION \"Disabled features:\")")
   FEATURE_SUMMARY(WHAT DISABLED_FEATURES  DESCRIPTION "Disabled features:")
 endfunction()
