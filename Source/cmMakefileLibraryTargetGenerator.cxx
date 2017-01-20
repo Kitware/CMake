@@ -597,12 +597,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // Clean files associated with this library.
   std::vector<std::string> libCleanFiles;
   libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath));
-  if (targetNameReal != targetName) {
+    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal));
+  if (targetName != targetNameReal) {
     libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal));
+      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath));
   }
-  if (targetNameSO != targetName && targetNameSO != targetNameReal) {
+  if (targetNameSO != targetNameReal && targetNameSO != targetName) {
     libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathSO));
   }
