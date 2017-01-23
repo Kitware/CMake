@@ -255,6 +255,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("MACOSX_RPATH", CM_NULLPTR);
     this->SetPropertyDefault("C_CLANG_TIDY", CM_NULLPTR);
     this->SetPropertyDefault("C_COMPILER_LAUNCHER", CM_NULLPTR);
+    this->SetPropertyDefault("C_CPPLINT", CM_NULLPTR);
     this->SetPropertyDefault("C_INCLUDE_WHAT_YOU_USE", CM_NULLPTR);
     this->SetPropertyDefault("LINK_WHAT_YOU_USE", CM_NULLPTR);
     this->SetPropertyDefault("C_STANDARD", CM_NULLPTR);
@@ -262,6 +263,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("C_EXTENSIONS", CM_NULLPTR);
     this->SetPropertyDefault("CXX_CLANG_TIDY", CM_NULLPTR);
     this->SetPropertyDefault("CXX_COMPILER_LAUNCHER", CM_NULLPTR);
+    this->SetPropertyDefault("CXX_CPPLINT", CM_NULLPTR);
     this->SetPropertyDefault("CXX_INCLUDE_WHAT_YOU_USE", CM_NULLPTR);
     this->SetPropertyDefault("CXX_STANDARD", CM_NULLPTR);
     this->SetPropertyDefault("CXX_STANDARD_REQUIRED", CM_NULLPTR);
