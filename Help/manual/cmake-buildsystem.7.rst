@@ -136,6 +136,12 @@ indirectly by using an :ref:`Interface Library <Interface Libraries>`
 whose :prop_tgt:`INTERFACE_SOURCES` target property is set to name
 ``$<TARGET_OBJECTS:objlib>``.
 
+Although object libraries may not be used as the ``TARGET``
+in a use of the :command:`add_custom_command(TARGET)` command signature,
+the list of objects can be used by :command:`add_custom_command(OUTPUT)` or
+:command:`file(GENERATE)` by using ``$<TARGET_OBJECTS:objlib>``.
+
+
 Build Specification and Usage Requirements
 ==========================================
 

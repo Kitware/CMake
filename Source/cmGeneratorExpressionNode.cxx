@@ -1243,20 +1243,38 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       return std::string();
     }
     if (!context->EvaluateForBuildsystem) {
-      std::ostringstream e;
-      e << "The evaluation of the TARGET_OBJECTS generator expression "
-           "is only suitable for consumption by CMake.  It is not suitable "
-           "for writing out elsewhere.";
-      reportError(context, content->GetOriginalExpression(), e.str());
-      return std::string();
+      cmGlobalGenerator* gg = context->LG->GetGlobalGenerator();
+      std::string reason;
+      if (!gg->HasKnownObjectFileLocation(&reason)) {
+        std::ostringstream e;
+        e << "The evaluation of the TARGET_OBJECTS generator expression "
+             "is only suitable for consumption by CMake (limited"
+          << reason << ").  "
+                       "It is not suitable for writing out elsewhere.";
+        reportError(context, content->GetOriginalExpression(), e.str());
+        return std::string();
+      }
     }
 
     std::vector<std::string> objects;
     gt->GetTargetObjectNames(context->Config, objects);
 
+    std::string obj_dir;
+    if (context->EvaluateForBuildsystem) {
+      // Use object file directory with buildsystem placeholder.
+      obj_dir = gt->ObjectDirectory;
+      // Here we assume that the set of object files produced
+      // by an object library does not vary with configuration
+      // and do not set HadContextSensitiveCondition to true.
+    } else {
+      // Use object file directory with per-config location.
+      obj_dir = gt->GetObjectDirectory(context->Config);
+      context->HadContextSensitiveCondition = true;
+    }
+
     for (std::vector<std::string>::iterator oi = objects.begin();
          oi != objects.end(); ++oi) {
-      *oi = gt->ObjectDirectory + *oi;
+      *oi = obj_dir + *oi;
     }
 
     // Create the cmSourceFile instances in the referencing directory.

@@ -290,9 +290,7 @@ Available output expressions are:
   Content of ``...`` converted to a C identifier.
 ``$<TARGET_OBJECTS:objLib>``
   List of objects resulting from build of ``objLib``. ``objLib`` must be an
-  object of type ``OBJECT_LIBRARY``.  This expression may only be used in
-  the sources of :command:`add_library` and :command:`add_executable`
-  commands.
+  object of type ``OBJECT_LIBRARY``.
 ``$<SHELL_PATH:...>``
   Content of ``...`` converted to shell path style. For example, slashes are
   converted to backslashes in Windows shells and drive letters are converted
