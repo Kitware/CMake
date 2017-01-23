@@ -326,6 +326,8 @@ function (interrogate_mpi_compiler lang try_libs)
         foreach(IPATH ${MPI_ALL_INCLUDE_PATHS})
           string(REGEX REPLACE "^ ?-I" "" IPATH ${IPATH})
           string(REPLACE "//" "/" IPATH ${IPATH})
+          string(REPLACE "\"" "" IPATH ${IPATH})
+          file(TO_CMAKE_PATH "${IPATH}" IPATH)
           list(APPEND MPI_INCLUDE_PATH_WORK ${IPATH})
         endforeach()
 
