@@ -12,6 +12,12 @@
 /* Forward declare test functions. */
 @CMAKE_FORWARD_DECLARE_TESTS@
 
+#ifdef __cplusplus
+#define CM_CAST(TYPE, EXPR) static_cast<TYPE>(EXPR)
+#else
+#define CM_CAST(TYPE, EXPR) (TYPE)(EXPR)
+#endif
+
 /* Create map.  */
 
 typedef int (*MainFuncPointer)(int, char* []);
@@ -34,13 +40,8 @@ static char* lowercase(const char* string)
   char *new_string, *p;
   size_t stringSize = 0;
 
-#ifdef __cplusplus
-  stringSize = static_cast<size_t>(strlen(string) + 1);
-  new_string = static_cast<char*>(malloc(sizeof(char) * stringSize));
-#else
-  stringSize = (size_t)(strlen(string) + 1);
-  new_string = (char*)(malloc(sizeof(char) * stringSize));
-#endif
+  stringSize = CM_CAST(size_t, strlen(string) + 1);
+  new_string = CM_CAST(char*, malloc(sizeof(char) * stringSize));
 
   if (!new_string) {
     return 0;
@@ -48,12 +49,7 @@ static char* lowercase(const char* string)
   strncpy(new_string, string, stringSize);
   p = new_string;
   while (*p != 0) {
-#ifdef __cplusplus
-    *p = static_cast<char>(tolower(*p));
-#else
-    *p = (char)(tolower(*p));
-#endif
-
+    *p = CM_CAST(char, tolower(*p));
     ++p;
   }
   return new_string;
