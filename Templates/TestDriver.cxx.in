@@ -32,6 +32,9 @@ static functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
   { 0, 0 }
 };
 
+static const int NumTests =
+  (sizeof(cmakeGeneratedFunctionMapEntries) / sizeof(functionMapEntry)) - 1;
+
 /* Allocate and create a lowercased copy of string
    (note that it has to be free'd manually) */
 
@@ -55,16 +58,12 @@ static char* lowercase(const char* string)
 
 int main(int ac, char* av[])
 {
-  int i, NumTests, testNum = 0, partial_match;
+  int i, testNum = 0, partial_match;
   char *arg, *test_name;
-  int count;
   int testToRun = -1;
 
   @CMAKE_TESTDRIVER_ARGVC_FUNCTION@
 
-  for (count = 0; cmakeGeneratedFunctionMapEntries[count].name != 0; count++) {
-  }
-  NumTests = count;
   /* If no test name was given */
   /* process command line with user function.  */
   if (ac < 2) {
