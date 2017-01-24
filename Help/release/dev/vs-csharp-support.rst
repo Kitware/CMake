@@ -19,7 +19,16 @@ vs-native-csharp-support
   that specifically targets C# contains ``CSharp`` as a part of
   their names.
 
-* More finetuning of C# targets can be done using target
-  properties. Specifically the Visual Studio related target
+* More finetuning of C# targets can be done using target and source
+  file properties. Specifically the Visual Studio related target
   properties (``VS_*``) are worth a look (for setting toolset
   versions, root namespaces, assembly icons, ...).
+
+* **Auto-"linking"** in .csproj files: In C#/.NET development with
+  Visual Studio there is a number of visual editors used which
+  generate code. Both the generated files and the ones edited
+  with the UI are connected in the ``.csproj`` file using
+  ``<DependentUpon>`` tags. If CMake finds within a C# project
+  any source file with extension ``.Designer.cs`` or ``.xaml.cs``,
+  it checks sibling files with extension ``.xaml``, ``.settings``,
+  ``.resx`` or ``.cs`` and establishes the dependency connection.
