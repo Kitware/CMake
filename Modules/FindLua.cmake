@@ -75,16 +75,9 @@ function(_lua_set_version_vars)
              include/lua${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
              include/lua-${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
         )
-        list(APPEND _lua_library_names
-             lua${CMAKE_MATCH_1}${CMAKE_MATCH_2}
-             lua${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
-             lua-${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
-             lua.${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
-        )
     endforeach ()
 
     set(_lua_include_subdirs "${_lua_include_subdirs}" PARENT_SCOPE)
-    set(_lua_library_names "${_lua_library_names}" PARENT_SCOPE)
     set(_lua_append_versions "${_lua_append_versions}" PARENT_SCOPE)
 endfunction(_lua_set_version_vars)
 
@@ -151,6 +144,15 @@ if (NOT LUA_VERSION_STRING)
 endif ()
 unset(_lua_include_subdirs)
 unset(_lua_append_versions)
+
+if (LUA_VERSION_STRING)
+    set(_lua_library_names
+        lua${LUA_VERSION_MAJOR}${LUA_VERSION_MINOR}
+        lua${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}
+        lua-${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}
+        lua.${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}
+    )
+endif ()
 
 find_library(LUA_LIBRARY
   NAMES ${_lua_library_names} lua
