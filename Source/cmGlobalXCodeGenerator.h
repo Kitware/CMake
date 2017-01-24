@@ -86,6 +86,8 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   bool IsMultiConfig() const CM_OVERRIDE;
 
+  bool UseEffectivePlatformName(cmMakefile* mf) const CM_OVERRIDE;
+
   bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) CM_OVERRIDE;
   void AppendFlag(std::string& flags, std::string const& flag);
 

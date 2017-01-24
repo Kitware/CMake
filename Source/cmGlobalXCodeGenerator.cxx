@@ -22,6 +22,7 @@
 #include "cmOutputConverter.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
+#include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -3542,6 +3543,19 @@ bool cmGlobalXCodeGenerator::IsMultiConfig() const
 
   // Newer Xcode versions are multi config:
   return true;
+}
+
+bool cmGlobalXCodeGenerator::UseEffectivePlatformName(cmMakefile* mf) const
+{
+  const char* epnValue =
+    this->GetCMakeInstance()->GetState()->GetGlobalProperty(
+      "XCODE_EMIT_EFFECTIVE_PLATFORM_NAME");
+
+  if (!epnValue) {
+    return mf->PlatformIsAppleIos();
+  }
+
+  return cmSystemTools::IsOn(epnValue);
 }
 
 void cmGlobalXCodeGenerator::ComputeTargetObjectDirectory(
