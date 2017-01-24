@@ -8,7 +8,6 @@ file(MAKE_DIRECTORY ${MY_BINARY_DIR})
 
 set(CMAKE_MyLang_COMPILER ${CMAKE_COMMAND})
 set(CMAKE_MyLang_COMPILER_ID_ARG1)
-set(CMAKE_MyLang_COMPILER_ID_FLAGS_LIST)
 set(CMAKE_MyLang_COMPILER_ID_DIR ${MY_BINARY_DIR})
 
 file(WRITE "${MY_BINARY_DIR}/BogusVendor.cmake" "message(\"This is a BogusVendor compiler\")")
@@ -22,7 +21,8 @@ set(CMAKE_MyLang_COMPILER_ID_VENDOR_FLAGS_MyVendor -P MyVendor.cmake)
 set(CMAKE_MyLang_COMPILER_ID_VENDOR_REGEX_MyVendor MyVendor)
 
 set(CMAKE_BINARY_DIR ${MY_BINARY_DIR})
-cmake_determine_compiler_id_vendor(MyLang)
+set(userflags)
+cmake_determine_compiler_id_vendor(MyLang "${userflags}")
 
 if("${CMAKE_MyLang_COMPILER_ID}" STREQUAL "MyVendor")
   message(STATUS "Found MyVendor compiler id!")
