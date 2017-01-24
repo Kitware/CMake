@@ -130,7 +130,10 @@ echo ""
 use_new_tail_syntax="-n"
 tail $use_new_tail_syntax +1 "$0" > /dev/null 2> /dev/null || use_new_tail_syntax=""
 
-tail $use_new_tail_syntax +###CPACK_HEADER_LENGTH### "$0" | gunzip | (cd "${toplevel}" && tar xf -) || cpack_echo_exit "Problem unpacking the @CPACK_PACKAGE_FILE_NAME@"
+extractor="pax -r"
+command -v pax > /dev/null 2> /dev/null || extractor="tar xf -"
+
+tail $use_new_tail_syntax +###CPACK_HEADER_LENGTH### "$0" | gunzip | (cd "${toplevel}" && ${extractor}) || cpack_echo_exit "Problem unpacking the @CPACK_PACKAGE_FILE_NAME@"
 
 echo "Unpacking finished successfully"
 
