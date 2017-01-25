@@ -20,6 +20,8 @@
 #              [VERSION <version>]
 #              [PROLOG <prolog>]
 #              [EPILOG <epilog>]
+#              [ALLOW_UNKNOWN_COMPILERS]
+#              [ALLOW_UNKNOWN_COMPILER_VERSIONS]
 #    )
 #
 # The ``write_compiler_detection_header`` function generates the
@@ -80,6 +82,11 @@
 #
 # See the :manual:`cmake-compile-features(7)` manual for information on
 # compile features.
+#
+# ``ALLOW_UNKNOWN_COMPILERS`` and ``ALLOW_UNKNOWN_COMPILER_VERSIONS`` cause
+# the module to generate conditions that treat unknown compilers as simply
+# lacking all features.  Without these options the default behavior is to
+# generate a ``#error`` for unknown compilers.
 #
 # Feature Test Macros
 # ===================
@@ -236,7 +243,7 @@ macro(_simpledefine FEATURE_NAME FEATURE_TESTNAME FEATURE_STRING FEATURE_DEFAULT
   if (feature STREQUAL "${FEATURE_NAME}")
         set(def_value "${prefix_arg}_${FEATURE_TESTNAME}")
         string(APPEND file_content "
-#  if ${def_name}
+#  if defined(${def_name}) && ${def_name}
 #    define ${def_value} ${FEATURE_STRING}
 #  else
 #    define ${def_value} ${FEATURE_DEFAULT_STRING}
@@ -255,7 +262,7 @@ function(write_compiler_detection_header
   if (NOT "x${prefix_keyword}" STREQUAL "xPREFIX")
     message(FATAL_ERROR "write_compiler_detection_header: PREFIX parameter missing.")
   endif()
-  set(options)
+  set(options ALLOW_UNKNOWN_COMPILERS ALLOW_UNKNOWN_COMPILER_VERSIONS)
   set(oneValueArgs VERSION EPILOG PROLOG OUTPUT_FILES_VAR OUTPUT_DIR)
   set(multiValueArgs COMPILERS FEATURES)
   cmake_parse_arguments(_WCD "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -439,10 +446,12 @@ function(write_compiler_detection_header
         set(compiler_file_content file_content)
       endif()
 
-      set(${compiler_file_content} "${${compiler_file_content}}
+      if(NOT _WCD_ALLOW_UNKNOWN_COMPILER_VERSIONS)
+        set(${compiler_file_content} "${${compiler_file_content}}
 #    if !(${_cmake_oldestSupported_${compiler}})
 #      error Unsupported compiler version
 #    endif\n")
+      endif()
 
       set(PREFIX ${prefix_arg}_)
       if (_need_hex_conversion)
@@ -473,10 +482,15 @@ function(write_compiler_detection_header
       endforeach()
     endforeach()
     if(pp_if STREQUAL "elif")
-      string(APPEND file_content "
+      if(_WCD_ALLOW_UNKNOWN_COMPILERS)
+        string(APPEND file_content "
+#  endif\n")
+      else()
+        string(APPEND file_content "
 #  else
 #    error Unsupported compiler
 #  endif\n")
+      endif()
     endif()
     foreach(feature ${${_lang}_features})
       string(TOUPPER ${feature} feature_upper)
@@ -492,12 +506,12 @@ function(write_compiler_detection_header
         set(static_assert_struct "template<bool> struct ${prefix_arg}StaticAssert;\ntemplate<> struct ${prefix_arg}StaticAssert<true>{};\n")
         set(def_standard "#    define ${def_value} static_assert(X, #X)\n#    define ${def_value_msg} static_assert(X, MSG)")
         set(def_alternative "${static_assert_struct}#    define ${def_value} sizeof(${prefix_arg}StaticAssert<X>)\n#    define ${def_value_msg} sizeof(${prefix_arg}StaticAssert<X>)")
-        string(APPEND file_content "#  if ${def_name}\n${def_standard}\n#  else\n${def_alternative}\n#  endif\n\n")
+        string(APPEND file_content "#  if defined(${def_name}) && ${def_name}\n${def_standard}\n#  else\n${def_alternative}\n#  endif\n\n")
       endif()
       if (feature STREQUAL cxx_alignas)
         set(def_value "${prefix_arg}_ALIGNAS(X)")
         string(APPEND file_content "
-#  if ${def_name}
+#  if defined(${def_name}) && ${def_name}
 #    define ${def_value} alignas(X)
 #  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang || ${prefix_arg}_COMPILER_IS_AppleClang
 #    define ${def_value} __attribute__ ((__aligned__(X)))
@@ -511,7 +525,7 @@ function(write_compiler_detection_header
       if (feature STREQUAL cxx_alignof)
         set(def_value "${prefix_arg}_ALIGNOF(X)")
         string(APPEND file_content "
-#  if ${def_name}
+#  if defined(${def_name}) && ${def_name}
 #    define ${def_value} alignof(X)
 #  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang || ${prefix_arg}_COMPILER_IS_AppleClang
 #    define ${def_value} __alignof__(X)
@@ -525,7 +539,7 @@ function(write_compiler_detection_header
       if (feature STREQUAL cxx_noexcept)
         set(def_value "${prefix_arg}_NOEXCEPT")
         string(APPEND file_content "
-#  if ${def_name}
+#  if defined(${def_name}) && ${def_name}
 #    define ${def_value} noexcept
 #    define ${def_value}_EXPR(X) noexcept(X)
 #  else
@@ -538,7 +552,7 @@ function(write_compiler_detection_header
       if (feature STREQUAL cxx_thread_local)
         set(def_value "${prefix_arg}_THREAD_LOCAL")
         string(APPEND file_content "
-#  if ${def_name}
+#  if defined(${def_name}) && ${def_name}
 #    define ${def_value} thread_local
 #  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang || ${prefix_arg}_COMPILER_IS_AppleClang
 #    define ${def_value} __thread
@@ -554,7 +568,7 @@ function(write_compiler_detection_header
         set(def_value "${prefix_arg}_DEPRECATED")
         string(APPEND file_content "
 #  ifndef ${def_value}
-#    if ${def_name}
+#    if defined(${def_name}) && ${def_name}
 #      define ${def_value} [[deprecated]]
 #      define ${def_value}_MSG(MSG) [[deprecated(MSG)]]
 #    elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang

@@ -4,6 +4,7 @@ project(WriteCompilerDetectionHeader)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(WriteCompilerDetectionHeader)
+include(CheckCXXSourceCompiles)
 
 get_property(cxx_known_features GLOBAL PROPERTY CMAKE_CXX_KNOWN_FEATURES)
 get_property(c_known_features GLOBAL PROPERTY CMAKE_C_KNOWN_FEATURES)
@@ -26,7 +27,6 @@ if (NOT CMAKE_CXX_COMPILE_FEATURES AND NOT CMAKE_C_COMPILE_FEATURES)
   add_executable(WriteCompilerDetectionHeader "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp")
 
   if(UNIX OR NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    include(CheckCXXSourceCompiles)
     check_cxx_source_compiles("#include \"${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection.h\"\nint main() { return 0; }\n"
       file_include_works
     )
@@ -155,4 +155,32 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU"
   set_property(TARGET WriteCompilerDetectionHeader_C11_multi PROPERTY C_STANDARD 11)
   set_defines(WriteCompilerDetectionHeader_C11_multi "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES;EXPECTED_COMPILER_C_RESTRICT" "")
   target_include_directories(WriteCompilerDetectionHeader_C11_multi PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
+endif()
+
+# test for ALLOW_UNKNOWN_COMPILERS
+
+# use a compiler does not match the current one,
+# so one always hits the fallback code
+if (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
+  set(OTHER_CXX "Intel")
+else()
+  set(OTHER_CXX "SunPro")
+endif()
+
+write_compiler_detection_header(
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection_allow_unknown.h"
+  PREFIX TEST
+  COMPILERS ${OTHER_CXX}
+  FEATURES cxx_nullptr
+  ALLOW_UNKNOWN_COMPILERS
+)
+
+# intentionally abuse the TEST_NULLPR variable: this will only work
+# with the fallback code.
+check_cxx_source_compiles("#include \"${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection_allow_unknown.h\"
+int main() {\n int i = TEST_NULLPTR;\n return 0; }\n"
+  file_include_works_allow_unknown
+)
+if (NOT file_include_works_allow_unknown)
+  message(SEND_ERROR "Inclusion of ${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection_allow_unknown.h was expected to work, but did not.")
 endif()
