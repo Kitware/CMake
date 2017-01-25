@@ -113,9 +113,10 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 #
 
 # Start out with the generic MPI compiler names, as these are most commonly used.
-set(_MPI_C_COMPILER_NAMES                  mpicc    mpcc      mpicc_r mpcc_r)
+set(_MPI_C_COMPILER_NAMES                  mpicc    mpcc      mpicc_r mpcc_r  mpicc.bat)
 set(_MPI_CXX_COMPILER_NAMES                mpicxx   mpiCC     mpcxx   mpCC    mpic++   mpc++
-                                           mpicxx_r mpiCC_r   mpcxx_r mpCC_r  mpic++_r mpc++_r)
+                                           mpicxx_r mpiCC_r   mpcxx_r mpCC_r  mpic++_r mpc++_r
+                                           mpicxx.bat)
 set(_MPI_Fortran_COMPILER_NAMES            mpif95   mpif95_r  mpf95   mpf95_r
                                            mpif90   mpif90_r  mpf90   mpf90_r
                                            mpif77   mpif77_r  mpf77   mpf77_r)
@@ -127,9 +128,9 @@ set(_MPI_GNU_Fortran_COMPILER_NAMES        mpigfortran mpgfortran mpigfortran_r 
                                            mpig77 mpig77_r mpg77 mpg77_r)
 
 # Intel MPI compiler names
-set(_MPI_Intel_C_COMPILER_NAMES            mpiicc)
-set(_MPI_Intel_CXX_COMPILER_NAMES          mpiicpc  mpiicxx mpiic++ mpiiCC)
-set(_MPI_Intel_Fortran_COMPILER_NAMES      mpiifort mpiif95 mpiif90 mpiif77)
+set(_MPI_Intel_C_COMPILER_NAMES            mpiicc   mpiicc.bat)
+set(_MPI_Intel_CXX_COMPILER_NAMES          mpiicpc  mpiicxx mpiic++ mpiiCC  mpiicpc.bat)
+set(_MPI_Intel_Fortran_COMPILER_NAMES      mpiifort mpiif95 mpiif90 mpiif77 mpiifort.bat)
 
 # PGI compiler names
 set(_MPI_PGI_C_COMPILER_NAMES              mpipgcc mppgcc)
@@ -325,6 +326,8 @@ function (interrogate_mpi_compiler lang try_libs)
         foreach(IPATH ${MPI_ALL_INCLUDE_PATHS})
           string(REGEX REPLACE "^ ?-I" "" IPATH ${IPATH})
           string(REPLACE "//" "/" IPATH ${IPATH})
+          string(REPLACE "\"" "" IPATH ${IPATH})
+          file(TO_CMAKE_PATH "${IPATH}" IPATH)
           list(APPEND MPI_INCLUDE_PATH_WORK ${IPATH})
         endforeach()
 
