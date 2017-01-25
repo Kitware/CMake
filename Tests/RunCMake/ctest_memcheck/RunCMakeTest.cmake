@@ -19,7 +19,7 @@ unset(CMAKELISTS_EXTRA_CODE)
 #-----------------------------------------------------------------------------
 # add ThreadSanitizer test
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"report_bugs=1:history_size=5:exitcode=55\")
 ")
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"\${CMAKE_COMMAND}\"
@@ -71,7 +71,7 @@ unset(CTEST_EXTRA_CODE)
 #-----------------------------------------------------------------------------
 # add MemorySanitizer test
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55\")
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55\")
 ")
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"\${CMAKE_COMMAND}\"
