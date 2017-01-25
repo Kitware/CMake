@@ -26,7 +26,7 @@ if (CMAKE_C_COMPILE_FEATURES)
   target_link_libraries(restrict_user lib_restrict)
 endif()
 
-if (CMAKE_CXX_COMPILE_FEATURES)
+if (CMAKE_CXX_COMPILE_FEATURES AND ";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";cxx_auto_type;")
   if (CMAKE_C_COMPILE_FEATURES)
     set(target_suffix _cxx)
   endif()
