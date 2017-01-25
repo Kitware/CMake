@@ -92,8 +92,14 @@ public:
   /// List of pages to load
   std::vector<std::string> UserInterfaces;
 
+  /// List of translation files to load
+  std::vector<std::string> Translations;
+
   /// Priority of the component in the tree
   std::string SortingPriority;
+
+  /// Description added to the component description
+  std::string UpdateText;
 
   /// Set to true to preselect the component in the installer
   std::string Default;
@@ -106,6 +112,9 @@ public:
 
   /// Determines that the package must always be installed
   std::string ForcedInstallation;
+
+  /// Package needs to be installed with elevated permissions
+  std::string RequiresAdminRights;
 
 public:
   // Internal implementation
@@ -139,6 +148,8 @@ public:
   std::set<cmCPackIFWPackage*> Dependencies;
   // Collection of unresolved dependencies
   std::set<DependenceStruct*> AlienDependencies;
+  // Collection of unresolved automatic dependency on
+  std::set<DependenceStruct*> AlienAutoDependOn;
   // Patch to package directory
   std::string Directory;
 
