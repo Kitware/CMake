@@ -232,6 +232,19 @@ function(_load_compiler_variables CompilerId lang)
   set(_compiler_id_version_compute_${CompilerId} ${_compiler_id_version_compute} PARENT_SCOPE)
 endfunction()
 
+macro(_simpledefine FEATURE_NAME FEATURE_TESTNAME FEATURE_STRING FEATURE_DEFAULT_STRING)
+  if (feature STREQUAL "${FEATURE_NAME}")
+        set(def_value "${prefix_arg}_${FEATURE_TESTNAME}")
+        string(APPEND file_content "
+#  if ${def_name}
+#    define ${def_value} ${FEATURE_STRING}
+#  else
+#    define ${def_value} ${FEATURE_DEFAULT_STRING}
+#  endif
+\n")
+  endif()
+endmacro()
+
 function(write_compiler_detection_header
     file_keyword file_arg
     prefix_keyword prefix_arg
@@ -469,46 +482,10 @@ function(write_compiler_detection_header
       string(TOUPPER ${feature} feature_upper)
       set(feature_PP "COMPILER_${feature_upper}")
       set(def_name ${prefix_arg}_${feature_PP})
-      if (feature STREQUAL c_restrict)
-        set(def_value "${prefix_arg}_RESTRICT")
-        string(APPEND file_content "
-#  if ${def_name}
-#    define ${def_value} restrict
-#  else
-#    define ${def_value}
-#  endif
-\n")
-      endif()
-      if (feature STREQUAL cxx_constexpr)
-        set(def_value "${prefix_arg}_CONSTEXPR")
-        string(APPEND file_content "
-#  if ${def_name}
-#    define ${def_value} constexpr
-#  else
-#    define ${def_value}
-#  endif
-\n")
-      endif()
-      if (feature STREQUAL cxx_final)
-        set(def_value "${prefix_arg}_FINAL")
-        string(APPEND file_content "
-#  if ${def_name}
-#    define ${def_value} final
-#  else
-#    define ${def_value}
-#  endif
-\n")
-      endif()
-      if (feature STREQUAL cxx_override)
-        set(def_value "${prefix_arg}_OVERRIDE")
-        string(APPEND file_content "
-#  if ${def_name}
-#    define ${def_value} override
-#  else
-#    define ${def_value}
-#  endif
-\n")
-      endif()
+      _simpledefine(c_restrict RESTRICT restrict "")
+      _simpledefine(cxx_constexpr CONSTEXPR constexpr "")
+      _simpledefine(cxx_final FINAL final "")
+      _simpledefine(cxx_override OVERRIDE override "")
       if (feature STREQUAL cxx_static_assert)
         set(def_value "${prefix_arg}_STATIC_ASSERT(X)")
         set(def_value_msg "${prefix_arg}_STATIC_ASSERT_MSG(X, MSG)")
@@ -543,26 +520,8 @@ function(write_compiler_detection_header
 #  endif
 \n")
       endif()
-      if (feature STREQUAL cxx_deleted_functions)
-        set(def_value "${prefix_arg}_DELETED_FUNCTION")
-        string(APPEND file_content "
-#  if ${def_name}
-#    define ${def_value} = delete
-#  else
-#    define ${def_value}
-#  endif
-\n")
-      endif()
-      if (feature STREQUAL cxx_extern_templates)
-        set(def_value "${prefix_arg}_EXTERN_TEMPLATE")
-        string(APPEND file_content "
-#  if ${def_name}
-#    define ${def_value} extern
-#  else
-#    define ${def_value}
-#  endif
-\n")
-      endif()
+      _simpledefine(cxx_deleted_functions DELETED_FUNCTION "= delete" "")
+      _simpledefine(cxx_extern_templates EXTERN_TEMPLATE extern "")
       if (feature STREQUAL cxx_noexcept)
         set(def_value "${prefix_arg}_NOEXCEPT")
         string(APPEND file_content "
@@ -575,16 +534,7 @@ function(write_compiler_detection_header
 #  endif
 \n")
       endif()
-      if (feature STREQUAL cxx_nullptr)
-        set(def_value "${prefix_arg}_NULLPTR")
-        string(APPEND file_content "
-#  if ${def_name}
-#    define ${def_value} nullptr
-#  else
-#    define ${def_value} 0
-#  endif
-\n")
-      endif()
+      _simpledefine(cxx_nullptr NULLPTR nullptr 0)
       if (feature STREQUAL cxx_thread_local)
         set(def_value "${prefix_arg}_THREAD_LOCAL")
         string(APPEND file_content "
