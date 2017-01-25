@@ -329,6 +329,12 @@ If no explicit ``<format string>`` is given it will default to:
 
 Write a string which can be used as an identifier in C.
 
+.. note::
+
+  If the ``SOURCE_DATE_EPOCH`` environment variable is set,
+  its value will be used instead of the current time.
+  See https://reproducible-builds.org/specs/source-date-epoch/ for details.
+
 UUID
 """"
 
