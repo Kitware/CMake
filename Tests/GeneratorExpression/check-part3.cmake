@@ -9,7 +9,7 @@ check(test_version_equal_1 "0")
 check(test_version_equal_2 "1")
 
 if(config AND NOT config STREQUAL NoConfig)
-  if(NOT "${test_imported_includes}" MATCHES "^;*/imported[12]/include;*$")
+  if(NOT "${test_imported_includes}" MATCHES "^;*/imported[12]/include/with space;*$")
     message(SEND_ERROR "test_imported_includes is not correct: ${test_imported_includes}")
   endif()
 else()
