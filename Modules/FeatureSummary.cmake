@@ -439,24 +439,22 @@ function(SET_PACKAGE_PROPERTIES _name _props)
   endif()
 
   # handle the TYPE
-  if(NOT _SPP_TYPE)
-    set(_SPP_TYPE OPTIONAL)
-  endif()
+  if(DEFINED _SPP_TYPE)
+    # List the supported types, according to their priority
+    set(validTypes "RUNTIME" "OPTIONAL" "RECOMMENDED" "REQUIRED" )
+    list(FIND validTypes ${_SPP_TYPE} _typeIndexInList)
+    if("${_typeIndexInList}" STREQUAL "-1" )
+      message(FATAL_ERROR "Bad package property type ${_SPP_TYPE} used in SET_PACKAGE_PROPERTIES(). "
+                          "Valid types are OPTIONAL, RECOMMENDED, REQUIRED and RUNTIME." )
+    endif()
 
-  # List the supported types, according to their priority
-  set(validTypes "RUNTIME" "OPTIONAL" "RECOMMENDED" "REQUIRED" )
-  list(FIND validTypes ${_SPP_TYPE} _typeIndexInList)
-  if("${_typeIndexInList}" STREQUAL "-1" )
-    message(FATAL_ERROR "Bad package property type ${_SPP_TYPE} used in SET_PACKAGE_PROPERTIES(). "
-                        "Valid types are OPTIONAL, RECOMMENDED, REQUIRED and RUNTIME." )
-  endif()
+    get_property(_previousType  GLOBAL PROPERTY _CMAKE_${_name}_TYPE)
+    list(FIND validTypes "${_previousType}" _prevTypeIndexInList)
 
-  get_property(_previousType  GLOBAL PROPERTY _CMAKE_${_name}_TYPE)
-  list(FIND validTypes "${_previousType}" _prevTypeIndexInList)
-
-  # make sure a previously set TYPE is not overridden with a lower new TYPE:
-  if("${_typeIndexInList}" GREATER "${_prevTypeIndexInList}")
-    set_property(GLOBAL PROPERTY _CMAKE_${_name}_TYPE "${_SPP_TYPE}" )
+    # make sure a previously set TYPE is not overridden with a lower new TYPE:
+    if("${_typeIndexInList}" GREATER "${_prevTypeIndexInList}")
+      set_property(GLOBAL PROPERTY _CMAKE_${_name}_TYPE "${_SPP_TYPE}" )
+    endif()
   endif()
 
 endfunction()
