@@ -275,7 +275,10 @@ if (CMAKE_CXX_COMPILE_FEATURES)
       )
     endif()
   endif()
+endif ()
 
+# these tests only work if at least cxx_auto_type is available
+if (";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";cxx_auto_type;")
   add_executable(CompileFeatures main.cpp)
   set_property(TARGET CompileFeatures
     PROPERTY COMPILE_FEATURES "cxx_auto_type"
