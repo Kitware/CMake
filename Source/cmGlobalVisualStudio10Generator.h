@@ -96,6 +96,7 @@ public:
   cmIDEFlagTable const* GetLibFlagTable() const;
   cmIDEFlagTable const* GetLinkFlagTable() const;
   cmIDEFlagTable const* GetMasmFlagTable() const;
+  cmIDEFlagTable const* GetNasmFlagTable() const;
 
 protected:
   virtual void Generate();
@@ -125,6 +126,7 @@ protected:
   cmIDEFlagTable const* DefaultLibFlagTable;
   cmIDEFlagTable const* DefaultLinkFlagTable;
   cmIDEFlagTable const* DefaultMasmFlagTable;
+  cmIDEFlagTable const* DefaultNasmFlagTable;
   cmIDEFlagTable const* DefaultRcFlagTable;
   bool SystemIsWindowsCE;
   bool SystemIsWindowsPhone;

@@ -51,7 +51,7 @@ private:
   };
 
   std::string ConvertPath(std::string const& path, bool forceRelative);
-  void ConvertToWindowsSlash(std::string& s);
+  static void ConvertToWindowsSlash(std::string& s);
   void WriteString(const char* line, int indentLevel);
   void WriteProjectConfigurations();
   void WriteProjectConfigurationValues();
@@ -102,6 +102,11 @@ private:
   bool ComputeMasmOptions(std::string const& config);
   void WriteMasmOptions(std::string const& config,
                         std::vector<std::string> const& includes);
+  bool ComputeNasmOptions();
+  bool ComputeNasmOptions(std::string const& config);
+  void WriteNasmOptions(std::string const& config,
+                        std::vector<std::string> includes);
+
   bool ComputeLinkOptions();
   bool ComputeLinkOptions(std::string const& config);
   bool ComputeLibOptions();
@@ -146,6 +151,7 @@ private:
   OptionsMap ClOptions;
   OptionsMap RcOptions;
   OptionsMap MasmOptions;
+  OptionsMap NasmOptions;
   OptionsMap LinkOptions;
   std::string PathToProjectFile;
   std::string ProjectFileExtension;
@@ -177,6 +183,7 @@ private:
 
   typedef std::map<std::string, ToolSources> ToolSourceMap;
   ToolSourceMap Tools;
+  std::string GetCMakeFilePath(const char* name) const;
 };
 
 #endif

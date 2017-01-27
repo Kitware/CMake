@@ -10,6 +10,7 @@
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmSystemTools.h"
 #include "cmVisualStudioGeneratorOptions.h"
 #include "windows.h"
 
@@ -205,6 +206,9 @@ void cmVisualStudio10TargetGenerator::Generate()
       return;
     }
     if (!this->ComputeMasmOptions()) {
+      return;
+    }
+    if (!this->ComputeNasmOptions()) {
       return;
     }
     if (!this->ComputeLinkOptions()) {
@@ -454,6 +458,21 @@ void cmVisualStudio10TargetGenerator::Generate()
                       "BuildCustomizations\\masm.props\" />\n",
                       2);
   }
+  if (this->GlobalGenerator->IsNasmEnabled()) {
+    // Always search in the standard modules location.
+    std::string propsTemplate =
+      GetCMakeFilePath("Templates/MSBuild/nasm.props.in");
+
+    std::string propsLocal;
+    propsLocal += this->DefaultArtifactDir;
+    propsLocal += "\\nasm.props";
+    this->ConvertToWindowsSlash(propsLocal);
+    this->Makefile->ConfigureFile(propsTemplate.c_str(), propsLocal.c_str(),
+                                  false, true, true);
+    std::string import = std::string("<Import Project=\"") +
+      cmVS10EscapeXML(propsLocal) + "\" />\n";
+    this->WriteString(import.c_str(), 2);
+  }
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("<ImportGroup Label=\"PropertySheets\">\n", 1);
   {
@@ -508,6 +527,13 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->WriteString("<Import Project=\"$(VCTargetsPath)\\"
                       "BuildCustomizations\\masm.targets\" />\n",
                       2);
+  }
+  if (this->GlobalGenerator->IsNasmEnabled()) {
+    std::string nasmTargets =
+      GetCMakeFilePath("Templates/MSBuild/nasm.targets");
+    std::string import = "<Import Project=\"";
+    import += cmVS10EscapeXML(nasmTargets) + "\" />\n";
+    this->WriteString(import.c_str(), 2);
   }
   this->WriteString("</ImportGroup>\n", 1);
   if (csproj == this->ProjectType) {
@@ -1719,6 +1745,8 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       tool = "ClCompile";
     } else if (lang == "ASM_MASM" && this->GlobalGenerator->IsMasmEnabled()) {
       tool = "MASM";
+    } else if (lang == "ASM_NASM" && this->GlobalGenerator->IsNasmEnabled()) {
+      tool = "NASM";
     } else if (lang == "RC") {
       tool = "ResourceCompile";
     } else if (lang == "CSharp") {
@@ -2431,6 +2459,71 @@ void cmVisualStudio10TargetGenerator::WriteMasmOptions(
   this->WriteString("</MASM>\n", 2);
 }
 
+bool cmVisualStudio10TargetGenerator::ComputeNasmOptions()
+{
+  if (!this->GlobalGenerator->IsNasmEnabled()) {
+    return true;
+  }
+  for (std::vector<std::string>::const_iterator i =
+         this->Configurations.begin();
+       i != this->Configurations.end(); ++i) {
+    if (!this->ComputeNasmOptions(*i)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool cmVisualStudio10TargetGenerator::ComputeNasmOptions(
+  std::string const& configName)
+{
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
+  CM_AUTO_PTR<Options> pOptions(new Options(
+    this->LocalGenerator, Options::NasmCompiler, gg->GetNasmFlagTable()));
+  Options& nasmOptions = *pOptions;
+
+  std::string CONFIG = cmSystemTools::UpperCase(configName);
+  std::string configFlagsVar = std::string("CMAKE_ASM_NASM_FLAGS_") + CONFIG;
+  std::string flags =
+    std::string(this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_FLAGS")) +
+    std::string(" -f") + std::string(this->Makefile->GetSafeDefinition(
+                           "CMAKE_ASM_NASM_OBJECT_FORMAT")) +
+    std::string(" ") +
+    std::string(this->Makefile->GetSafeDefinition(configFlagsVar));
+  nasmOptions.Parse(flags.c_str());
+  this->NasmOptions[configName] = pOptions.release();
+  return true;
+}
+
+void cmVisualStudio10TargetGenerator::WriteNasmOptions(
+  std::string const& configName, std::vector<std::string> includes)
+{
+  if (!this->GlobalGenerator->IsNasmEnabled()) {
+    return;
+  }
+  this->WriteString("<NASM>\n", 2);
+
+  Options& nasmOptions = *(this->NasmOptions[configName]);
+  for (size_t i = 0; i < includes.size(); i++) {
+    includes[i] += "\\";
+  }
+
+  nasmOptions.AppendFlag("IncludePaths", includes);
+  nasmOptions.AppendFlag("IncludePaths", "%(IncludePaths)");
+  nasmOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  nasmOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
+  nasmOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
+                                            "\n", "ASM_NASM");
+
+  // Preprocessor definitions and includes are shared with clOptions.
+  Options& clOptions = *(this->ClOptions[configName]);
+  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
+                                          "\n", "ASM_NASM");
+
+  this->WriteString("</NASM>\n", 2);
+}
+
 void cmVisualStudio10TargetGenerator::WriteLibOptions(
   std::string const& config)
 {
@@ -3062,6 +3155,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
       //    output rc compile flags <ResourceCompile></ResourceCompile>
       this->WriteRCOptions(*i, includes);
       this->WriteMasmOptions(*i, includes);
+      this->WriteNasmOptions(*i, includes);
     }
     //    output midl flags       <Midl></Midl>
     this->WriteMidlOptions(*i, includes);
@@ -3987,4 +4081,15 @@ bool cmVisualStudio10TargetGenerator::ForceOld(const std::string& source) const
 
   CloseHandle(h);
   return true;
+}
+
+std::string cmVisualStudio10TargetGenerator::GetCMakeFilePath(
+  const char* relativeFilePath) const
+{
+  // Always search in the standard modules location.
+  std::string path = cmSystemTools::GetCMakeRoot() + "/";
+  path += relativeFilePath;
+  this->ConvertToWindowsSlash(path);
+
+  return path;
 }

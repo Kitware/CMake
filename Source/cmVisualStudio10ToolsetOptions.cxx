@@ -11,6 +11,7 @@
 #include "cmVS10LibFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10MASMFlagTable.h"
+#include "cmVS10NASMFlagTable.h"
 #include "cmVS10RCFlagTable.h"
 #include "cmVS11CLFlagTable.h"
 #include "cmVS11CSharpFlagTable.h"
