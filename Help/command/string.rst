@@ -296,6 +296,7 @@ specifiers:
 
 ::
 
+   %%        A literal percent sign (%).
    %d        The day of the current month (01-31).
    %H        The hour on a 24-hour clock (00-23).
    %I        The hour on a 12-hour clock (01-12).

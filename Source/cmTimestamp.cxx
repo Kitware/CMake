@@ -136,6 +136,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
     case 'w':
     case 'y':
     case 'Y':
+    case '%':
       break;
     case 's': // Seconds since UNIX epoch (midnight 1-jan-1970)
     {
