@@ -162,6 +162,27 @@ static const struct BoolNode : public cmGeneratorExpressionNode
   }
 } boolNode;
 
+static const struct IfNode : public cmGeneratorExpressionNode
+{
+  IfNode() {}
+
+  int NumExpectedParameters() const CM_OVERRIDE { return 3; }
+
+  std::string Evaluate(const std::vector<std::string>& parameters,
+                       cmGeneratorExpressionContext* context,
+                       const GeneratorExpressionContent* content,
+                       cmGeneratorExpressionDAGChecker*) const CM_OVERRIDE
+  {
+    if (parameters[0] != "1" && parameters[0] != "0") {
+      reportError(context, content->GetOriginalExpression(),
+                  "First parameter to $<IF> must resolve to exactly one '0' "
+                  "or '1' value.");
+      return std::string();
+    }
+    return parameters[0] == "1" ? parameters[1] : parameters[2];
+  }
+} ifNode;
+
 static const struct StrEqualNode : public cmGeneratorExpressionNode
 {
   StrEqualNode() {}
@@ -1757,6 +1778,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     nodeMap["UPPER_CASE"] = &upperCaseNode;
     nodeMap["MAKE_C_IDENTIFIER"] = &makeCIdentifierNode;
     nodeMap["BOOL"] = &boolNode;
+    nodeMap["IF"] = &ifNode;
     nodeMap["ANGLE-R"] = &angle_rNode;
     nodeMap["COMMA"] = &commaNode;
     nodeMap["SEMICOLON"] = &semicolonNode;

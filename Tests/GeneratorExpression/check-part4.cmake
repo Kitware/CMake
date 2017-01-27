@@ -13,3 +13,8 @@ if(WIN32)
 else()
   check(test_shell_path [[/shell/path]])
 endif()
+
+check(if_1 "a")
+check(if_2 "b")
+check(if_3 "b")
+check(if_4 "a")

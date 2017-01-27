@@ -247,6 +247,10 @@ add_custom_target(check-part4 ALL
     # CMake as command-line argument
     -Dtest_shell_path=${path_prefix}$<SHELL_PATH:${test_shell_path}>
     -Dpath_prefix=${path_prefix}
+    -Dif_1=$<IF:1,a,b>
+    -Dif_2=$<IF:0,a,b>
+    -Dif_3=$<IF:$<EQUAL:10,30>,a,b>
+    -Dif_4=$<IF:$<EQUAL:30,30>,a,b>
     -DWIN32=${WIN32}
     -DCMAKE_GENERATOR=${CMAKE_GENERATOR}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part4.cmake
