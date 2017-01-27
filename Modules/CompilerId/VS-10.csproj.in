@@ -47,9 +47,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>cd /D &quot;$(MSBuildToolsPath)&quot;
-if not %errorlevel%==0 exit -1
-if not exist @id_cl@ exit -2
-%40echo CMAKE_@id_lang@_COMPILER=$(MSBuildToolsPath)\@id_cl@</PostBuildEvent>
+    <PostBuildEvent>if not "$(RoslynTargetsPath)"=="" if exist "$(RoslynTargetsPath)\@id_cl@" set _CSC=$(RoslynTargetsPath)
+if exist "$(MSBuildToolsPath)\@id_cl@" set _CSC=$(MSBuildToolsPath)
+if "%_CSC%"=="" exit -1
+%40echo CMAKE_@id_lang@_COMPILER=%_CSC%\@id_cl@</PostBuildEvent>
   </PropertyGroup>
 </Project>
