@@ -6,6 +6,11 @@ run_cmake(AppendNoArgs)
 run_cmake(Concat)
 run_cmake(ConcatNoArgs)
 
+run_cmake(Timestamp)
+run_cmake(TimestampEmpty)
+run_cmake(TimestampInvalid)
+run_cmake(TimestampInvalid2)
+
 run_cmake(Uuid)
 run_cmake(UuidMissingNamespace)
 run_cmake(UuidMissingNamespaceValue)
