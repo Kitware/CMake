@@ -49,6 +49,7 @@ macro(GET_DATE)
   # 01/12/2006  08:55:12
   # mm/dd/YYYY HH:MM:SS
   #
+  unset(ENV{SOURCE_DATE_EPOCH})
   string(TIMESTAMP "${GD_PREFIX}OV" "%m/%d/%Y %H:%M:%S")
 
   if(${GD_PREFIX}VERBOSE)

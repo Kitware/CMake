@@ -1,6 +1,7 @@
 set(STAMP_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/FileTimestamp-Stamp")
 set(STAMP_FORMAT "%Y-%m-%d")
 
+unset(ENV{SOURCE_DATE_EPOCH})
 string(TIMESTAMP timestamp1 "${STAMP_FORMAT}")
 
 file(WRITE "${STAMP_FILENAME}" "foo")
