@@ -214,18 +214,24 @@ set(FILE_PATH "${Preprocess_SOURCE_DIR}/file_def.h")
 set(TARGET_PATH "${Preprocess_SOURCE_DIR}/target_def.h")
 
 # Set some definition properties.
-foreach(c "" "_DEBUG" "_RELEASE")
+foreach(c "" "_DEBUG" "_RELEASE" "_RELWITHDEBINFO" "_MINSIZEREL")
+  set(FLAVOR "${c}")
+  # Treat RelWithDebInfo and MinSizeRel as Release to avoid having
+  # an exponentional matrix of inclusions and exclusions of defines
+  if("${c}" STREQUAL "_RELWITHDEBINFO" OR "${c}" STREQUAL "_MINSIZEREL")
+    set(FLAVOR "_RELEASE")
+  endif()
   set_property(
     DIRECTORY .
-    APPEND PROPERTY COMPILE_DEFINITIONS${c} "DIRECTORY_DEF${c}"
+    APPEND PROPERTY COMPILE_DEFINITIONS${c} "DIRECTORY_DEF${FLAVOR}"
     )
   set_property(
     TARGET Preprocess
-    PROPERTY COMPILE_DEFINITIONS${c} "TARGET_DEF${c}"
+    PROPERTY COMPILE_DEFINITIONS${c} "TARGET_DEF${FLAVOR}"
     )
   set_property(
     SOURCE preprocess.c preprocess.cxx
-    PROPERTY COMPILE_DEFINITIONS${c} "FILE_DEF${c}"
+    PROPERTY COMPILE_DEFINITIONS${c} "FILE_DEF${FLAVOR}"
     )
 endforeach()
 
