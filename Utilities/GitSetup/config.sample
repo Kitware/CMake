@@ -20,3 +20,13 @@
 	site = http://review.source.kitware.com
 	# pushurl placeholder "$username" is literal
 	pushurl = $username@review.source.kitware.com:Project
+
+[upstream]
+	url = git://public.kitware.com/Project.git
+
+[gitlab]
+	host = gitlab.kitware.com
+	group-path = group
+	group-name = Group
+	project-path = project
+	project-name = Project
