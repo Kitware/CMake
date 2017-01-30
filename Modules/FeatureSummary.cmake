@@ -14,30 +14,93 @@ packages and/or feature for a build tree such as::
     LibXml2 (required version >= 2.4), XML processing lib, <http://xmlsoft.org>
        * Enables HTML-import in MyWordProcessor
        * Enables odt-export in MyWordProcessor
-    PNG , A PNG image library. , <http://www.libpng.org/pub/png/>
+    PNG, A PNG image library., <http://www.libpng.org/pub/png/>
        * Enables saving screenshots
     -- The following OPTIONAL packages have not been found:
-    Lua51 , The Lua scripting language. , <http://www.lua.org>
+    Lua51, The Lua scripting language., <http://www.lua.org>
        * Enables macros in MyWordProcessor
-    Foo , Foo provides cool stuff.
+    Foo, Foo provides cool stuff.
+
+Global Properties
+^^^^^^^^^^^^^^^^^
+
+.. variable:: FeatureSummary_PKG_TYPES
+
+The global property :variable:`FeatureSummary_PKG_TYPES` defines the type of
+packages used by `FeatureSummary`.
+
+The order in this list is important, the first package type in the list is the
+least important, the last is the most important. the of a package can only be
+changed to higher types.
+
+The default package types are , ``RUNTIME``, ``OPTIONAL``, ``RECOMMENDED`` and
+``REQUIRED``, and their importance is
+``RUNTIME < OPTIONAL < RECOMMENDED < REQUIRED``.
+
+
+.. variable:: FeatureSummary_REQUIRED_PKG_TYPES
+
+The global property :variable:`FeatureSummary_REQUIRED_PKG_TYPES` defines which
+package types are required.
+
+If one or more package in this categories has not been found, CMake will abort
+when calling :cmd;`feature_summary` with the
+'FATAL_ON_MISSING_REQUIRED_PACKAGES' option enabled.
+
+The default value for this global property is ``REQUIRED``.
+
+
+.. variable:: FeatureSummary_DEFAULT_PKG_TYPE
+
+The global property :variable:`FeatureSummary_DEFAULT_PKG_TYPE` defines which
+package type is the default one.
+When calling :cmd;`feature_summary`, if the user did not set the package type
+explicitly, the package will be assigned to this category.
+
+This value must be one of the types defined in the
+:variable:`FeatureSummary_PKG_TYPES` global property unless the package type
+is set for all the packages.
+
+The default value for this global property is ``OPTIONAL``.
+
+#]=======================================================================]
+
+get_property(_fsPkgTypeIsSet GLOBAL PROPERTY FeatureSummary_PKG_TYPES SET)
+if(NOT _fsPkgTypeIsSet)
+  set_property(GLOBAL PROPERTY FeatureSummary_PKG_TYPES RUNTIME OPTIONAL RECOMMENDED REQUIRED)
+endif()
+
+get_property(_fsReqPkgTypesIsSet GLOBAL PROPERTY FeatureSummary_REQUIRED_PKG_TYPES SET)
+if(NOT _fsReqPkgTypesIsSet)
+  set_property(GLOBAL PROPERTY FeatureSummary_REQUIRED_PKG_TYPES REQUIRED)
+endif()
+
+get_property(_fsDefaultPkgTypeIsSet GLOBAL PROPERTY FeatureSummary_DEFAULT_PKG_TYPE SET)
+if(NOT _fsDefaultPkgTypeIsSet)
+  set_property(GLOBAL PROPERTY FeatureSummary_DEFAULT_PKG_TYPE OPTIONAL)
+endif()
+
+#[=======================================================================[.rst:
 
 Functions
 ^^^^^^^^^
 
 #]=======================================================================]
 
+include(CMakeParseArguments)
+
 function(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
 
+  get_property(_fsPkgTypes GLOBAL PROPERTY FeatureSummary_PKG_TYPES)
+  get_property(_fsDefaultPkgType GLOBAL PROPERTY FeatureSummary_DEFAULT_PKG_TYPE)
+
   set(_type "ANY")
-  if("${_property}" MATCHES "REQUIRED_")
-    set(_type "REQUIRED")
-  elseif("${_property}" MATCHES "RECOMMENDED_")
-    set(_type "RECOMMENDED")
-  elseif("${_property}" MATCHES "RUNTIME_")
-    set(_type "RUNTIME")
-  elseif("${_property}" MATCHES "OPTIONAL_")
-    set(_type "OPTIONAL")
-  endif()
+  foreach(_fsPkgType ${_fsPkgTypes})
+    if("${_property}" MATCHES "${_fsPkgType}_PACKAGES_(NOT_)?FOUND")
+      set(_type "${_fsPkgType}")
+      break()
+    endif()
+  endforeach()
 
   if("${_property}" MATCHES "PACKAGES_FOUND")
     set(_property "PACKAGES_FOUND")
@@ -57,15 +120,30 @@ function(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
     # does this package belong to the type we currently want to list ?
     get_property(_currentType  GLOBAL PROPERTY _CMAKE_${_currentFeature}_TYPE)
     if(NOT _currentType)
-      set(_currentType OPTIONAL)
+      list(FIND _fsPkgTypes "${_fsDefaultPkgType}" _defaultInPkgTypes)
+      if("${_defaultInPkgTypes}" STREQUAL "-1")
+        string(REGEX REPLACE ";([^;]+)$" " and \\1" _fsPkgTypes_msg "${_fsPkgTypes}")
+        string(REPLACE ";" ", " _fsPkgTypes_msg "${_fsPkgTypes_msg}")
+        message(FATAL_ERROR "Bad package property type ${_fsDefaultPkgType} used in global property FeatureSummary_DEFAULT_PKG_TYPE. "
+                            "Valid types are ${_fsPkgTypes_msg}. "
+                            "Either update FeatureSummary_DEFAULT_PKG_TYPE or add ${_fsDefaultPkgType} to the FeatureSummary_PKG_TYPES global property.")
+      endif()
+      set(_currentType ${_fsDefaultPkgType})
     endif()
 
     if("${_type}" STREQUAL ANY  OR  "${_type}" STREQUAL "${_currentType}")
-
       # check whether the current feature/package should be in the output depending on whether it was QUIET or not
       set(includeThisOne TRUE)
+      set(_required FALSE)
       # skip QUIET packages, except if they are REQUIRED or INCLUDE_QUIET_PACKAGES has been set
-      if((NOT "${_currentType}" STREQUAL "REQUIRED") AND NOT _includeQuiet)
+      get_property(_fsReqPkgTypes GLOBAL PROPERTY FeatureSummary_REQUIRED_PKG_TYPES)
+      foreach(_fsReqPkgType ${_fsReqPkgTypes})
+        if("${_currentType}" STREQUAL "${_fsReqPkgType}")
+          set(_required TRUE)
+          break()
+        endif()
+      endforeach()
+      if(NOT _required AND NOT _includeQuiet)
         get_property(_isQuiet  GLOBAL PROPERTY _CMAKE_${_currentFeature}_QUIET)
         if(_isQuiet)
           set(includeThisOne FALSE)
@@ -87,11 +165,11 @@ function(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
         endif()
         get_property(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_DESCRIPTION)
         if(_info)
-          string(APPEND _currentFeatureText " , ${_info}")
+          string(APPEND _currentFeatureText ", ${_info}")
         endif()
         get_property(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_URL)
         if(_info)
-          string(APPEND _currentFeatureText " , <${_info}>")
+          string(APPEND _currentFeatureText ", <${_info}>")
         endif()
 
         get_property(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_PURPOSE)
@@ -119,6 +197,7 @@ endfunction()
                      [INCLUDE_QUIET_PACKAGES]
                      [FATAL_ON_MISSING_REQUIRED_PACKAGES]
                      [DESCRIPTION "Found packages:"]
+                     [QUIET_ON_EMPTY]
                      WHAT (ALL | PACKAGES_FOUND | PACKAGES_NOT_FOUND
                           | ENABLED_FEATURES | DISABLED_FEATURES)
                    )
@@ -143,22 +222,15 @@ endfunction()
    the list of all packages which have been found
   ``PACKAGES_NOT_FOUND``
    the list of all packages which have not been found
-  ``OPTIONAL_PACKAGES_FOUND``
-   only those packages which have been found which have the type OPTIONAL
-  ``OPTIONAL_PACKAGES_NOT_FOUND``
-   only those packages which have not been found which have the type OPTIONAL
-  ``RECOMMENDED_PACKAGES_FOUND``
-   only those packages which have been found which have the type RECOMMENDED
-  ``RECOMMENDED_PACKAGES_NOT_FOUND``
-   only those packages which have not been found which have the type RECOMMENDED
-  ``REQUIRED_PACKAGES_FOUND``
-   only those packages which have been found which have the type REQUIRED
-  ``REQUIRED_PACKAGES_NOT_FOUND``
-   only those packages which have not been found which have the type REQUIRED
-  ``RUNTIME_PACKAGES_FOUND``
-   only those packages which have been found which have the type RUNTIME
-  ``RUNTIME_PACKAGES_NOT_FOUND``
-   only those packages which have not been found which have the type RUNTIME
+
+  For each package type ``<TYPE>`` defined by the
+  :variable:`FeatureSummary_PKG_TYPES` global property, the following
+  information can also be used:
+
+  ``<TYPE>_PACKAGES_FOUND``
+   only those packages which have been found which have the type <TYPE>
+  ``<TYPE>_PACKAGES_NOT_FOUND``
+   only those packages which have not been found which have the type <TYPE>
 
   With the exception of the ``ALL`` value, these values can be combined
   in order to customize the output. For example:
@@ -177,7 +249,20 @@ endfunction()
   packages which have been searched with ``find_package(... QUIET)`` will
   also be listed.  By default they are skipped.  If
   ``FATAL_ON_MISSING_REQUIRED_PACKAGES`` is given, CMake will abort if a
-  package which is marked as ``REQUIRED`` has not been found.
+  package which is marked as one of the package types listed in the
+  :variable:`FeatureSummary_REQUIRED_PKG_TYPES` global property has not been
+  found.
+  The default value for the :variable:`FeatureSummary_REQUIRED_PKG_TYPES` global
+  property is ``REQUIRED``.
+
+  The :variable:`FeatureSummary_DEFAULT_PKG_TYPE` global property can be
+  modified to change the default package type assigned when not explicitly
+  assigned by the user.
+
+  If the ``QUIET_ON_EMPTY`` option is used, if only one type of package was
+  requested, and no packages belonging to that category were found, then no
+  output (including the ``DESCRIPTION``) is printed or added to the ``VAR``
+  variable.
 
   Example 1, append everything to a file:
 
@@ -198,11 +283,28 @@ endfunction()
                    DESCRIPTION "Enabled Features:"
                    VAR enabledFeaturesText)
    message(STATUS "${enabledFeaturesText}")
+
+  Example 3, change default package types and print only the categories that
+  are not empty:
+
+  .. code-block:: cmake
+
+   include(FeatureSummary)
+   set_property(GLOBAL APPEND PROPERTY FeatureSummary_PKG_TYPES BUILD)
+   find_package(FOO)
+   set_package_properties(FOO PROPERTIES TYPE BUILD)
+   feature_summary(WHAT BUILD_PACKAGES_FOUND
+                   Description "Build tools found:"
+                   QUIET_ON_EMPTY)
+   feature_summary(WHAT BUILD_PACKAGES_NOT_FOUND
+                   Description "Build tools not found:"
+                   QUIET_ON_EMPTY)
+
 #]=======================================================================]
 
 function(FEATURE_SUMMARY)
 # CMAKE_PARSE_ARGUMENTS(<prefix> <options> <one_value_keywords> <multi_value_keywords> args...)
-  set(options APPEND INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
+  set(options APPEND INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES QUIET_ON_EMPTY)
   set(oneValueArgs FILENAME VAR DESCRIPTION)
   set(multiValueArgs WHAT)
 
@@ -219,40 +321,42 @@ function(FEATURE_SUMMARY)
   set(validWhatParts "ENABLED_FEATURES"
                      "DISABLED_FEATURES"
                      "PACKAGES_FOUND"
-                     "PACKAGES_NOT_FOUND"
-                     "OPTIONAL_PACKAGES_FOUND"
-                     "OPTIONAL_PACKAGES_NOT_FOUND"
-                     "RECOMMENDED_PACKAGES_FOUND"
-                     "RECOMMENDED_PACKAGES_NOT_FOUND"
-                     "REQUIRED_PACKAGES_FOUND"
-                     "REQUIRED_PACKAGES_NOT_FOUND"
-                     "RUNTIME_PACKAGES_FOUND"
-                     "RUNTIME_PACKAGES_NOT_FOUND")
+                     "PACKAGES_NOT_FOUND")
+
+  get_property(_fsPkgTypes GLOBAL PROPERTY FeatureSummary_PKG_TYPES)
+  get_property(_fsReqPkgTypes GLOBAL PROPERTY FeatureSummary_REQUIRED_PKG_TYPES)
+  foreach(_fsPkgType ${_fsPkgTypes})
+    list(APPEND validWhatParts "${_fsPkgType}_PACKAGES_FOUND"
+                               "${_fsPkgType}_PACKAGES_NOT_FOUND")
+  endforeach()
 
   list(FIND validWhatParts "${_FS_WHAT}" indexInList)
   if(NOT "${indexInList}" STREQUAL "-1")
     _FS_GET_FEATURE_SUMMARY( ${_FS_WHAT} _featureSummary ${_FS_INCLUDE_QUIET_PACKAGES} )
-    set(_fullText "${_FS_DESCRIPTION}${_featureSummary}\n")
-    if (("${_FS_WHAT}" STREQUAL "REQUIRED_PACKAGES_NOT_FOUND") AND _featureSummary)
-      set(requiredPackagesNotFound TRUE)
+    if(_featureSummary OR NOT _FS_QUIET_ON_EMPTY)
+      set(_fullText "${_FS_DESCRIPTION}${_featureSummary}\n")
+    endif()
+
+    if(_featureSummary)
+      foreach(_fsReqPkgType ${_fsReqPkgTypes})
+        if("${_FS_WHAT}" STREQUAL "${_fsReqPkgType}_PACKAGES_NOT_FOUND")
+          set(requiredPackagesNotFound TRUE)
+          break()
+        endif()
+      endforeach()
     endif()
 
   else()
     if("${_FS_WHAT}" STREQUAL "ALL")
 
-      set(allWhatParts "ENABLED_FEATURES"
-                       "RUNTIME_PACKAGES_FOUND"
-                       "OPTIONAL_PACKAGES_FOUND"
-                       "RECOMMENDED_PACKAGES_FOUND"
-                       "REQUIRED_PACKAGES_FOUND"
-
-                       "DISABLED_FEATURES"
-                       "RUNTIME_PACKAGES_NOT_FOUND"
-                       "OPTIONAL_PACKAGES_NOT_FOUND"
-                       "RECOMMENDED_PACKAGES_NOT_FOUND"
-                       "REQUIRED_PACKAGES_NOT_FOUND"
-      )
-
+      set(allWhatParts "ENABLED_FEATURES")
+      foreach(_fsPkgType ${_fsPkgTypes})
+        list(APPEND allWhatParts "${_fsPkgType}_PACKAGES_FOUND")
+      endforeach()
+      list(APPEND allWhatParts "DISABLED_FEATURES")
+      foreach(_fsPkgType ${_fsPkgTypes})
+        list(APPEND allWhatParts "${_fsPkgType}_PACKAGES_NOT_FOUND")
+      endforeach()
     else()
       set(allWhatParts)
       foreach(part ${_FS_WHAT})
@@ -273,43 +377,47 @@ function(FEATURE_SUMMARY)
     set(title_DISABLED_FEATURES              "The following features have been disabled:")
     set(title_PACKAGES_FOUND                 "The following packages have been found:")
     set(title_PACKAGES_NOT_FOUND             "The following packages have not been found:")
-    set(title_OPTIONAL_PACKAGES_FOUND        "The following OPTIONAL packages have been found:")
-    set(title_OPTIONAL_PACKAGES_NOT_FOUND    "The following OPTIONAL packages have not been found:")
-    set(title_RECOMMENDED_PACKAGES_FOUND     "The following RECOMMENDED packages have been found:")
-    set(title_RECOMMENDED_PACKAGES_NOT_FOUND "The following RECOMMENDED packages have not been found:")
-    set(title_REQUIRED_PACKAGES_FOUND        "The following REQUIRED packages have been found:")
-    set(title_REQUIRED_PACKAGES_NOT_FOUND    "The following REQUIRED packages have not been found:")
-    set(title_RUNTIME_PACKAGES_FOUND         "The following RUNTIME packages have been found:")
-    set(title_RUNTIME_PACKAGES_NOT_FOUND     "The following RUNTIME packages have not been found:")
+    foreach(_fsPkgType ${_fsPkgTypes})
+      set(title_${_fsPkgType}_PACKAGES_FOUND     "The following ${_fsPkgType} packages have been found:")
+      set(title_${_fsPkgType}_PACKAGES_NOT_FOUND "The following ${_fsPkgType} packages have not been found:")
+    endforeach()
 
     set(_fullText "${_FS_DESCRIPTION}")
     foreach(part ${allWhatParts})
       set(_tmp)
       _FS_GET_FEATURE_SUMMARY( ${part} _tmp ${_FS_INCLUDE_QUIET_PACKAGES})
       if(_tmp)
-        string(APPEND _fullText "\n-- ${title_${part}}\n${_tmp}\n")
-        if("${part}" STREQUAL "REQUIRED_PACKAGES_NOT_FOUND")
-          set(requiredPackagesNotFound TRUE)
+        if(_fullText)
+          string(APPEND _fullText "\n-- ")
         endif()
+        string(APPEND _fullText "${title_${part}}\n${_tmp}\n")
+        foreach(_fsReqPkgType ${_fsReqPkgTypes})
+          if("${part}" STREQUAL "${_fsReqPkgType}_PACKAGES_NOT_FOUND")
+            set(requiredPackagesNotFound TRUE)
+            break()
+          endif()
+        endforeach()
       endif()
     endforeach()
   endif()
 
-  if(_FS_FILENAME)
-    if(_FS_APPEND)
-      file(APPEND "${_FS_FILENAME}" "${_fullText}")
+  if(_fullText OR NOT _FS_QUIET_ON_EMPTY)
+    if(_FS_FILENAME)
+      if(_FS_APPEND)
+        file(APPEND "${_FS_FILENAME}" "${_fullText}")
+      else()
+        file(WRITE  "${_FS_FILENAME}" "${_fullText}")
+      endif()
+
     else()
-      file(WRITE  "${_FS_FILENAME}" "${_fullText}")
+      if(NOT _FS_VAR)
+        message(STATUS "${_fullText}")
+      endif()
     endif()
 
-  else()
-    if(NOT _FS_VAR)
-      message(STATUS "${_fullText}")
+    if(_FS_VAR)
+      set(${_FS_VAR} "${_fullText}" PARENT_SCOPE)
     endif()
-  endif()
-
-  if(_FS_VAR)
-    set(${_FS_VAR} "${_fullText}" PARENT_SCOPE)
   endif()
 
   if(requiredPackagesNotFound  AND  _FS_FATAL_ON_MISSING_REQUIRED_PACKAGES)
@@ -362,7 +470,8 @@ endfunction()
     TYPEs (``RUNTIME < OPTIONAL < RECOMMENDED < REQUIRED``), lower TYPEs are
     ignored.  The ``TYPE`` property is project-specific, so it cannot be set
     by the Find-module, but must be set in the project.
-
+    Type accepted can be changed by setting the
+    :variable:`FeatureSummary_PKG_TYPES` global property.
 
   ``PURPOSE <purpose>``
     This describes which features this package enables in the
@@ -435,25 +544,28 @@ function(SET_PACKAGE_PROPERTIES _name _props)
     set_property(GLOBAL APPEND PROPERTY _CMAKE_${_name}_PURPOSE "${_SPP_PURPOSE}" )
   endif()
 
+  get_property(_fsPkgTypes GLOBAL PROPERTY FeatureSummary_PKG_TYPES)
+  get_property(_fsDefaultPkgType GLOBAL PROPERTY FeatureSummary_DEFAULT_PKG_TYPE)
+
   # handle the TYPE
-  if(NOT _SPP_TYPE)
-    set(_SPP_TYPE OPTIONAL)
-  endif()
+  if(DEFINED _SPP_TYPE)
+    # Supported types are listed in FeatureSummary_PKG_TYPES according to their priority
+    get_property(_fsPkgTypes GLOBAL PROPERTY FeatureSummary_PKG_TYPES)
+    list(FIND _fsPkgTypes ${_SPP_TYPE} _typeIndexInList)
+    if("${_typeIndexInList}" STREQUAL "-1" )
+      string(REGEX REPLACE ";([^;]+)$" " and \\1" _fsPkgTypes_msg "${_fsPkgTypes}")
+      string(REPLACE ";" ", " _fsPkgTypes_msg "${_fsPkgTypes_msg}")
+      message(FATAL_ERROR "Bad package property type ${_SPP_TYPE} used in SET_PACKAGE_PROPERTIES(). "
+                          "Valid types are ${_fsPkgTypes_msg}." )
+    endif()
 
-  # List the supported types, according to their priority
-  set(validTypes "RUNTIME" "OPTIONAL" "RECOMMENDED" "REQUIRED" )
-  list(FIND validTypes ${_SPP_TYPE} _typeIndexInList)
-  if("${_typeIndexInList}" STREQUAL "-1" )
-    message(FATAL_ERROR "Bad package property type ${_SPP_TYPE} used in SET_PACKAGE_PROPERTIES(). "
-                        "Valid types are OPTIONAL, RECOMMENDED, REQUIRED and RUNTIME." )
-  endif()
+    get_property(_previousType  GLOBAL PROPERTY _CMAKE_${_name}_TYPE)
+    list(FIND _fsPkgTypes "${_previousType}" _prevTypeIndexInList)
 
-  get_property(_previousType  GLOBAL PROPERTY _CMAKE_${_name}_TYPE)
-  list(FIND validTypes "${_previousType}" _prevTypeIndexInList)
-
-  # make sure a previously set TYPE is not overridden with a lower new TYPE:
-  if("${_typeIndexInList}" GREATER "${_prevTypeIndexInList}")
-    set_property(GLOBAL PROPERTY _CMAKE_${_name}_TYPE "${_SPP_TYPE}" )
+    # make sure a previously set TYPE is not overridden with a lower new TYPE:
+    if("${_typeIndexInList}" GREATER "${_prevTypeIndexInList}")
+      set_property(GLOBAL PROPERTY _CMAKE_${_name}_TYPE "${_SPP_TYPE}" )
+    endif()
   endif()
 
 endfunction()
@@ -466,7 +578,8 @@ endfunction()
     add_feature_info(<name> <enabled> <description>)
 
   Use this macro to add information about a feature with the given ``<name>``.
-  ``<enabled>`` contains whether this feature is enabled or not.
+  ``<enabled>`` contains whether this feature is enabled or not. It can be a
+  variable or a list of conditions.
   ``<description>`` is a text describing the feature.  The information can
   be displayed using ``feature_summary()`` for ``ENABLED_FEATURES`` and
   ``DISABLED_FEATURES`` respectively.
@@ -478,7 +591,16 @@ endfunction()
      option(WITH_FOO "Help for foo" ON)
      add_feature_info(Foo WITH_FOO "The Foo feature provides very cool stuff.")
 #]=======================================================================]
-function(ADD_FEATURE_INFO _name _enabled _desc)
+function(ADD_FEATURE_INFO _name _depends _desc)
+  set(_enabled 1)
+  foreach(_d ${_depends})
+    string(REGEX REPLACE " +" ";" _d "${_d}")
+    if(${_d})
+    else()
+      set(_enabled 0)
+      break()
+    endif()
+  endforeach()
   if (${_enabled})
     set_property(GLOBAL APPEND PROPERTY ENABLED_FEATURES "${_name}")
   else ()
@@ -511,6 +633,7 @@ CMake versions:
   can be set are added automatically by the ``find_package()`` command.
 #]=======================================================================]
 function(SET_PACKAGE_INFO _name _desc)
+  message(DEPRECATION "SET_PACKAGE_INFO is deprecated. Use SET_PACKAGE_PROPERTIES instead.")
   unset(_url)
   unset(_purpose)
   if(ARGC GREATER 2)
@@ -540,6 +663,7 @@ endfunction()
     set_package_info(<name> <description> <url>)
 #]=======================================================================]
 function(SET_FEATURE_INFO)
+  message(DEPRECATION "SET_FEATURE_INFO is deprecated. Use ADD_FEATURE_INFO instead.")
   SET_PACKAGE_INFO(${ARGN})
 endfunction()
 
@@ -557,6 +681,8 @@ endfunction()
     feature_summary(WHAT ENABLED_FEATURES DESCRIPTION "Enabled features:")
 #]=======================================================================]
 function(PRINT_ENABLED_FEATURES)
+  message(DEPRECATION "PRINT_ENABLED_FEATURES is deprecated. Use
+    feature_summary(WHAT ENABLED_FEATURES DESCRIPTION \"Enabled features:\")")
   FEATURE_SUMMARY(WHAT ENABLED_FEATURES  DESCRIPTION "Enabled features:")
 endfunction()
 
@@ -574,5 +700,7 @@ endfunction()
     feature_summary(WHAT DISABLED_FEATURES DESCRIPTION "Disabled features:")
 #]=======================================================================]
 function(PRINT_DISABLED_FEATURES)
+  message(DEPRECATION "PRINT_DISABLED_FEATURES is deprecated. Use
+    feature_summary(WHAT DISABLED_FEATURES DESCRIPTION \"Disabled features:\")")
   FEATURE_SUMMARY(WHAT DISABLED_FEATURES  DESCRIPTION "Disabled features:")
 endfunction()

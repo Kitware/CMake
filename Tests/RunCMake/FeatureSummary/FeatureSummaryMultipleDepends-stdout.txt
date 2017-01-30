@@ -1,7 +1,10 @@
 -- The following features have been enabled:
 
- \* Foo, Foo\.
+ \* Bar, Bar\.
+ \* Baz, Baz\.
+ \* Goo, Goo\.
 
 -- The following features have been disabled:
 
- \* Bar, Bar\.
+ \* Foo, Foo\.
+ \* Fez, Fez\.

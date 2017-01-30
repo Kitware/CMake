@@ -1,4 +1,4 @@
 --( )
- \* Foo , Foo decscription\.
+ \* Foo, Foo description\.
 +
 --
