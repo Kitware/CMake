@@ -20,7 +20,57 @@ write_compiler_detection_header(
     ${cxx_known_features} ${c_known_features}
 )
 
-if (NOT CMAKE_CXX_COMPILE_FEATURES AND NOT CMAKE_C_COMPILE_FEATURES)
+macro(set_defines target true_defs false_defs)
+  set(defines)
+  foreach(def ${true_defs})
+    list(APPEND defines ${def}=1)
+  endforeach()
+  foreach(def ${false_defs})
+    list(APPEND defines ${def}=0)
+  endforeach()
+  target_compile_definitions(${target}
+    PRIVATE
+      ${defines}
+      EXPECTED_COMPILER_VERSION_MAJOR=${COMPILER_VERSION_MAJOR}
+      EXPECTED_COMPILER_VERSION_MINOR=${COMPILER_VERSION_MINOR}
+      EXPECTED_COMPILER_VERSION_PATCH=${COMPILER_VERSION_PATCH}
+  )
+endmacro()
+
+if (CMAKE_C_COMPILE_FEATURES)
+  string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" COMPILER_VERSION_MAJOR "${CMAKE_C_COMPILER_VERSION}")
+  string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" COMPILER_VERSION_MINOR "${CMAKE_C_COMPILER_VERSION}")
+  string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" COMPILER_VERSION_PATCH "${CMAKE_C_COMPILER_VERSION}")
+
+  if (CMAKE_C_COMPILER_ID STREQUAL "GNU"
+      OR CMAKE_C_COMPILER_ID STREQUAL "Clang"
+      OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
+      OR CMAKE_C_COMPILER_ID STREQUAL "Intel")
+    add_executable(WriteCompilerDetectionHeader_C11 main.c)
+    set_property(TARGET WriteCompilerDetectionHeader_C11 PROPERTY C_STANDARD 11)
+    set_defines(WriteCompilerDetectionHeader_C11 "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES;EXPECTED_COMPILER_C_RESTRICT" "")
+
+    add_executable(WriteCompilerDetectionHeader_C11_multi main_multi.c)
+    set_property(TARGET WriteCompilerDetectionHeader_C11_multi PROPERTY C_STANDARD 11)
+    set_defines(WriteCompilerDetectionHeader_C11_multi "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES;EXPECTED_COMPILER_C_RESTRICT" "")
+    target_include_directories(WriteCompilerDetectionHeader_C11_multi PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
+
+    add_executable(C_undefined c_undefined.c)
+    set_property(TARGET C_undefined PROPERTY C_STANDARD 90)
+    target_compile_options(C_undefined PRIVATE -Werror=undef)
+
+    add_executable(WriteCompilerDetectionHeader_C main.c)
+    set_property(TARGET WriteCompilerDetectionHeader_C PROPERTY C_STANDARD 90)
+    set_defines(WriteCompilerDetectionHeader_C "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES" "EXPECTED_COMPILER_C_RESTRICT")
+
+    add_executable(WriteCompilerDetectionHeader_C_multi main_multi.c)
+    set_property(TARGET WriteCompilerDetectionHeader_C_multi PROPERTY C_STANDARD 90)
+    set_defines(WriteCompilerDetectionHeader_C_multi "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES" "EXPECTED_COMPILER_C_RESTRICT")
+    target_include_directories(WriteCompilerDetectionHeader_C_multi PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
+  endif()
+endif()
+
+if (NOT CMAKE_CXX_COMPILE_FEATURES)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp"
     "int main(int,char**) { return 0; }\n"
   )
@@ -41,23 +91,6 @@ string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" COMPILER_VERSION_MAJO
 string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" COMPILER_VERSION_MINOR "${CMAKE_CXX_COMPILER_VERSION}")
 string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" COMPILER_VERSION_PATCH "${CMAKE_CXX_COMPILER_VERSION}")
 
-macro(set_defines target true_defs false_defs)
-  set(defines)
-  foreach(def ${true_defs})
-    list(APPEND defines ${def}=1)
-  endforeach()
-  foreach(def ${false_defs})
-    list(APPEND defines ${def}=0)
-  endforeach()
-  target_compile_definitions(${target}
-    PRIVATE
-      ${defines}
-      EXPECTED_COMPILER_VERSION_MAJOR=${COMPILER_VERSION_MAJOR}
-      EXPECTED_COMPILER_VERSION_MINOR=${COMPILER_VERSION_MINOR}
-      EXPECTED_COMPILER_VERSION_PATCH=${COMPILER_VERSION_PATCH}
-  )
-endmacro()
-
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang"
     OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"
@@ -77,25 +110,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     list(APPEND false_defs EXPECTED_COMPILER_CXX_DELEGATING_CONSTRUCTORS)
     list(APPEND false_defs EXPECTED_COMPILER_CXX_VARIADIC_TEMPLATES)
   endif()
-endif()
-
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU"
-    OR CMAKE_C_COMPILER_ID STREQUAL "Clang"
-    OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
-    OR CMAKE_C_COMPILER_ID STREQUAL "Intel")
-
-  add_executable(C_undefined c_undefined.c)
-  set_property(TARGET C_undefined PROPERTY C_STANDARD 90)
-  target_compile_options(C_undefined PRIVATE -Werror=undef)
-
-  add_executable(WriteCompilerDetectionHeader_C main.c)
-  set_property(TARGET WriteCompilerDetectionHeader_C PROPERTY C_STANDARD 90)
-  set_defines(WriteCompilerDetectionHeader_C "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES" "EXPECTED_COMPILER_C_RESTRICT")
-
-  add_executable(WriteCompilerDetectionHeader_C_multi main_multi.c)
-  set_property(TARGET WriteCompilerDetectionHeader_C_multi PROPERTY C_STANDARD 90)
-  set_defines(WriteCompilerDetectionHeader_C_multi "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES" "EXPECTED_COMPILER_C_RESTRICT")
-  target_include_directories(WriteCompilerDetectionHeader_C_multi PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
 endif()
 
 add_executable(WriteCompilerDetectionHeader main.cpp)
@@ -142,20 +156,6 @@ add_executable(multi_files_11 multi_files.cpp)
 set_property(TARGET multi_files_11 PROPERTY CXX_STANDARD 11)
 target_include_directories(multi_files_11 PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
 set_defines(multi_files_11 "${true_defs}" "${false_defs}")
-
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU"
-    OR CMAKE_C_COMPILER_ID STREQUAL "Clang"
-    OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
-    OR CMAKE_C_COMPILER_ID STREQUAL "Intel")
-  add_executable(WriteCompilerDetectionHeader_C11 main.c)
-  set_property(TARGET WriteCompilerDetectionHeader_C11 PROPERTY C_STANDARD 11)
-  set_defines(WriteCompilerDetectionHeader_C11 "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES;EXPECTED_COMPILER_C_RESTRICT" "")
-
-  add_executable(WriteCompilerDetectionHeader_C11_multi main_multi.c)
-  set_property(TARGET WriteCompilerDetectionHeader_C11_multi PROPERTY C_STANDARD 11)
-  set_defines(WriteCompilerDetectionHeader_C11_multi "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES;EXPECTED_COMPILER_C_RESTRICT" "")
-  target_include_directories(WriteCompilerDetectionHeader_C11_multi PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
-endif()
 
 # test for ALLOW_UNKNOWN_COMPILERS
 
