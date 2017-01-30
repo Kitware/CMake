@@ -3,14 +3,6 @@ cmake_minimum_required(VERSION 3.1)
 
 project(CompileFeatures)
 
-if (NOT CMAKE_C_COMPILE_FEATURES AND NOT CMAKE_CXX_COMPILE_FEATURES)
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp"
-    "int main(int,char**) { return 0; }\n"
-  )
-  add_executable(CompileFeatures "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp")
-  return()
-endif()
-
 macro(run_test feature lang)
   if (";${CMAKE_${lang}_COMPILE_FEATURES};" MATCHES ${feature})
     add_library(test_${feature} OBJECT ${feature})
@@ -277,8 +269,14 @@ if (CMAKE_CXX_COMPILE_FEATURES)
   endif()
 endif ()
 
-# these tests only work if at least cxx_auto_type is available
-if (";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";cxx_auto_type;")
+# always add a target "CompileFeatures"
+if (NOT ";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";cxx_auto_type;")
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp"
+    "int main(int,char**) { return 0; }\n"
+  )
+  add_executable(CompileFeatures "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp")
+else()
+  # these tests only work if at least cxx_auto_type is available
   add_executable(CompileFeatures main.cpp)
   set_property(TARGET CompileFeatures
     PROPERTY COMPILE_FEATURES "cxx_auto_type"
