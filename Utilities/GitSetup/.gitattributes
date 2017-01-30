@@ -1,5 +1,4 @@
 .git*            export-ignore
-.gitattributes  -export-ignore
 
 config*          eol=lf         whitespace=indent-with-non-tab
 git-*            eol=lf         whitespace=indent-with-non-tab
