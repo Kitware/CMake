@@ -117,7 +117,7 @@ bool cmNinjaTargetGenerator::NeedDyndep(std::string const& lang) const
 
 std::string cmNinjaTargetGenerator::OrderDependsTargetForTarget()
 {
-  return "cmake_order_depends_target_" + this->GetTargetName();
+  return "cmake_object_order_depends_target_" + this->GetTargetName();
 }
 
 // TODO: Most of the code is picked up from
