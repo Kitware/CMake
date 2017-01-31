@@ -37,8 +37,8 @@ die() {
 cd "${BASH_SOURCE%/*}" &&
 
 # Load the project configuration.
-fetchurl=$(git config -f config --get stage.url) &&
-pushurl_=$(git config -f config --get stage.pushurl || echo '') &&
+fetchurl_=$(git config -f config --get stage.url) &&
+pushurl_=$(git config -f config --get stage.pushurl || echo "$fetchurl_") &&
 remote=$(git config -f config --get stage.remote || echo 'stage') ||
 die 'This project is not configured to use a topic stage.'
 
@@ -65,13 +65,16 @@ fi
 # Perform setup if necessary.
 if test -n "$setup"; then
 	echo 'Setting up the topic stage...' &&
+	fetchurl="${fetchurl_}" &&
 	if test -z "$pushurl"; then
 		git remote add "$remote" "$fetchurl"
 	else
 		git config remote."$remote".url "$fetchurl"
 	fi &&
 	pushurl="${pushurl_}" &&
-	git config remote."$remote".pushurl "$pushurl" &&
+	if test "$pushurl" != "$fetchurl"; then
+		git config remote."$remote".pushurl "$pushurl"
+	fi &&
 	echo 'Remote "'"$remote"'" is now configured to push to
 
   '"$pushurl"'
