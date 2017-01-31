@@ -50,30 +50,56 @@ if (NOT TEST_IOS AND NOT TEST_WATCHOS AND NOT TEST_TVOS)
   add_dependencies(AppBundleExtTest AppBundleExt)
 endif()
 
-# Framework (not supported for iOS on Xcode < 6)
+# Shared Framework (not supported for iOS on Xcode < 6)
 
 if(NOT TEST_IOS OR NOT XCODE_VERSION VERSION_LESS 6)
-  add_library(Framework SHARED main.c)
-  set_target_properties(Framework PROPERTIES FRAMEWORK TRUE)
+  add_library(SharedFramework SHARED main.c)
+  set_target_properties(SharedFramework PROPERTIES FRAMEWORK TRUE)
 
-  add_custom_target(FrameworkTest ALL
+  add_custom_target(SharedFrameworkTest ALL
     COMMAND ${CMAKE_COMMAND} -E copy
-      "$<TARGET_FILE:Framework>" "$<TARGET_FILE:Framework>.old")
+      "$<TARGET_FILE:SharedFramework>" "$<TARGET_FILE:SharedFramework>.old")
 
-  add_dependencies(FrameworkTest Framework)
+  add_dependencies(SharedFrameworkTest SharedFramework)
 
   # with custom extension
 
-  add_library(FrameworkExt SHARED main.c)
-  set_target_properties(FrameworkExt PROPERTIES FRAMEWORK TRUE)
-  set_target_properties(FrameworkExt PROPERTIES BUNDLE_EXTENSION "foo")
-  install(TARGETS FrameworkExt FRAMEWORK DESTINATION FooExtension)
+  add_library(SharedFrameworkExt SHARED main.c)
+  set_target_properties(SharedFrameworkExt PROPERTIES FRAMEWORK TRUE)
+  set_target_properties(SharedFrameworkExt PROPERTIES BUNDLE_EXTENSION "foo")
+  install(TARGETS SharedFrameworkExt FRAMEWORK DESTINATION FooExtension)
 
-  add_custom_target(FrameworkExtTest ALL
+  add_custom_target(SharedFrameworkExtTest ALL
     COMMAND ${CMAKE_COMMAND} -E copy
-      "$<TARGET_FILE:FrameworkExt>" "$<TARGET_FILE:FrameworkExt>.old")
+      "$<TARGET_FILE:SharedFrameworkExt>" "$<TARGET_FILE:SharedFrameworkExt>.old")
 
-  add_dependencies(FrameworkExtTest FrameworkExt)
+  add_dependencies(SharedFrameworkExtTest SharedFrameworkExt)
+endif()
+
+# Static Framework (not supported for Xcode < 6)
+
+if(NOT XCODE_VERSION VERSION_LESS 6)
+  add_library(StaticFramework STATIC main.c)
+  set_target_properties(StaticFramework PROPERTIES FRAMEWORK TRUE)
+
+  add_custom_target(StaticFrameworkTest ALL
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_FILE:StaticFramework>" "$<TARGET_FILE:StaticFramework>.old")
+
+  add_dependencies(StaticFrameworkTest StaticFramework)
+
+  # with custom extension
+
+  add_library(StaticFrameworkExt STATIC main.c)
+  set_target_properties(StaticFrameworkExt PROPERTIES FRAMEWORK TRUE)
+  set_target_properties(StaticFrameworkExt PROPERTIES BUNDLE_EXTENSION "foo")
+  install(TARGETS StaticFrameworkExt FRAMEWORK DESTINATION StaticFooExtension)
+
+  add_custom_target(StaticFrameworkExtTest ALL
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_FILE:StaticFrameworkExt>" "$<TARGET_FILE:StaticFrameworkExt>.old")
+
+  add_dependencies(StaticFrameworkExtTest StaticFrameworkExt)
 endif()
 
 # Bundle

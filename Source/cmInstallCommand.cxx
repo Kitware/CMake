@@ -471,17 +471,39 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         }
       } break;
       case cmStateEnums::STATIC_LIBRARY: {
-        // Static libraries use ARCHIVE properties.
-        if (!archiveArgs.GetDestination().empty()) {
-          archiveGenerator =
-            CreateInstallTargetGenerator(target, archiveArgs, false);
+        // If it is marked with FRAMEWORK property use the FRAMEWORK set of
+        // INSTALL properties. Otherwise, use the LIBRARY properties.
+        if (target.IsFrameworkOnApple()) {
+          // When in namelink only mode skip frameworks.
+          if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+            continue;
+          }
+
+          // Use the FRAMEWORK properties.
+          if (!frameworkArgs.GetDestination().empty()) {
+            frameworkGenerator =
+              CreateInstallTargetGenerator(target, frameworkArgs, false);
+          } else {
+            std::ostringstream e;
+            e << "TARGETS given no FRAMEWORK DESTINATION for static library "
+                 "FRAMEWORK target \""
+              << target.GetName() << "\".";
+            this->SetError(e.str());
+            return false;
+          }
         } else {
-          std::ostringstream e;
-          e << "TARGETS given no ARCHIVE DESTINATION for static library "
-               "target \""
-            << target.GetName() << "\".";
-          this->SetError(e.str());
-          return false;
+          // Static libraries use ARCHIVE properties.
+          if (!archiveArgs.GetDestination().empty()) {
+            archiveGenerator =
+              CreateInstallTargetGenerator(target, archiveArgs, false);
+          } else {
+            std::ostringstream e;
+            e << "TARGETS given no ARCHIVE DESTINATION for static library "
+                 "target \""
+              << target.GetName() << "\".";
+            this->SetError(e.str());
+            return false;
+          }
         }
       } break;
       case cmStateEnums::MODULE_LIBRARY: {

@@ -5308,7 +5308,8 @@ bool cmGeneratorTarget::IsLinkable() const
 
 bool cmGeneratorTarget::IsFrameworkOnApple() const
 {
-  return (this->GetType() == cmStateEnums::SHARED_LIBRARY &&
+  return ((this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+           this->GetType() == cmStateEnums::STATIC_LIBRARY) &&
           this->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("FRAMEWORK"));
 }

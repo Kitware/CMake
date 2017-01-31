@@ -90,8 +90,10 @@ project.  There are five kinds of target files that may be installed:
 ``ARCHIVE``, ``LIBRARY``, ``RUNTIME``, ``FRAMEWORK``, and ``BUNDLE``.
 Executables are treated as ``RUNTIME`` targets, except that those
 marked with the ``MACOSX_BUNDLE`` property are treated as ``BUNDLE``
-targets on OS X.  Static libraries are always treated as ``ARCHIVE``
-targets.  Module libraries are always treated as ``LIBRARY`` targets.
+targets on OS X.  Static libraries are treated as ``ARCHIVE`` targets,
+except that those marked with the ``FRAMEWORK`` property are treated
+as ``FRAMEWORK`` targets on OS X.
+Module libraries are always treated as ``LIBRARY`` targets.
 For non-DLL platforms shared libraries are treated as ``LIBRARY``
 targets, except that those marked with the ``FRAMEWORK`` property are
 treated as ``FRAMEWORK`` targets on OS X.  For DLL platforms the DLL

@@ -57,29 +57,30 @@ add_custom_target(fooCustom ALL COMMAND ${CMAKE_COMMAND} -E copy foo-post-build 
 add_dependencies(fooCustom foo)
 
 # Make a static library and apply the framework properties to it to verify
-# that everything still builds correctly, but it will not actually produce
-# a framework... The framework properties only apply when the library type
-# is SHARED.
+# that everything still builds correctly. Xcode prior to version 5 does not
+# support static Frameworks.
 #
-add_library(fooStatic STATIC
-  foo.cxx
-  foo.h
-  foo2.h
-  fooExtensionlessResource
-  fooPublic.h
-  fooPublicExtensionlessHeader
-  fooPrivate.h
-  fooPrivateExtensionlessHeader
-  fooNeither.h
-  fooBoth.h
-  test.lua
-  fooDeepPublic.h
-)
-set_target_properties(fooStatic PROPERTIES
-  FRAMEWORK TRUE
-  FRAMEWORK_VERSION none
-)
-add_executable(barStatic bar.cxx)
-target_link_libraries(barStatic fooStatic)
+if(NOT XCODE OR NOT XCODE_VERSION VERSION_LESS 5)
+  add_library(fooStatic STATIC
+    foo.cxx
+    foo.h
+    foo2.h
+    fooExtensionlessResource
+    fooPublic.h
+    fooPublicExtensionlessHeader
+    fooPrivate.h
+    fooPrivateExtensionlessHeader
+    fooNeither.h
+    fooBoth.h
+    test.lua
+    fooDeepPublic.h
+  )
+  set_target_properties(fooStatic PROPERTIES
+    FRAMEWORK TRUE
+    FRAMEWORK_VERSION none
+  )
+  add_executable(barStatic bar.cxx)
+  target_link_libraries(barStatic fooStatic)
+endif()
 
 include(CPack)

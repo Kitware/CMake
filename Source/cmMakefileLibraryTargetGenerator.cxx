@@ -597,12 +597,26 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // Clean files associated with this library.
   std::vector<std::string> libCleanFiles;
   libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath));
-  if (targetNameReal != targetName) {
-    libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal));
+    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal));
+
+  std::vector<std::string> commands1;
+  // Add a command to remove any existing files for this library.
+  // for static libs only
+  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
+    this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
+                                             this->GeneratorTarget, "target");
+    this->LocalGenerator->CreateCDCommand(
+      commands1, this->Makefile->GetCurrentBinaryDirectory(),
+      this->LocalGenerator->GetBinaryDirectory());
+    commands.insert(commands.end(), commands1.begin(), commands1.end());
+    commands1.clear();
   }
-  if (targetNameSO != targetName && targetNameSO != targetNameReal) {
+
+  if (targetName != targetNameReal) {
+    libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath));
+  }
+  if (targetNameSO != targetNameReal && targetNameSO != targetName) {
     libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathSO));
   }
@@ -633,19 +647,6 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       (targetFullPath + ".manifest").c_str()));
   }
 #endif
-
-  std::vector<std::string> commands1;
-  // Add a command to remove any existing files for this library.
-  // for static libs only
-  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
-    this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
-                                             this->GeneratorTarget, "target");
-    this->LocalGenerator->CreateCDCommand(
-      commands1, this->Makefile->GetCurrentBinaryDirectory(),
-      this->LocalGenerator->GetBinaryDirectory());
-    commands.insert(commands.end(), commands1.begin(), commands1.end());
-    commands1.clear();
-  }
 
   // Add the pre-build and pre-link rules building but not when relinking.
   if (!relink) {

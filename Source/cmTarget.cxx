@@ -451,7 +451,8 @@ bool cmTarget::HasImportLibrary() const
 
 bool cmTarget::IsFrameworkOnApple() const
 {
-  return (this->GetType() == cmStateEnums::SHARED_LIBRARY &&
+  return ((this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+           this->GetType() == cmStateEnums::STATIC_LIBRARY) &&
           this->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("FRAMEWORK"));
 }

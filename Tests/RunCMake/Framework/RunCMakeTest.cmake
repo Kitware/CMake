@@ -1,33 +1,40 @@
 include(RunCMake)
 
-# iOS
+function(framework_layout_test Name Toolchain Type)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${Toolchain}${Type}FrameworkLayout-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_TOOLCHAIN_FILE=${RunCMake_SOURCE_DIR}/${Toolchain}.cmake")
+  list(APPEND RunCMake_TEST_OPTIONS "-DFRAMEWORK_TYPE=${Type}")
 
-set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/iOSFrameworkLayout-build)
-set(RunCMake_TEST_NO_CLEAN 1)
-set(RunCMake_TEST_OPTIONS "-DCMAKE_TOOLCHAIN_FILE=${RunCMake_SOURCE_DIR}/ios.cmake")
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
-file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
-file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake(FrameworkLayout)
+  run_cmake_command(${Name} ${CMAKE_COMMAND} --build .)
+endfunction()
 
-run_cmake(FrameworkLayout)
-run_cmake_command(iOSFrameworkLayout-build ${CMAKE_COMMAND} --build .)
+# build check cannot cope with multi-configuration generators directory layout
+if(NOT RunCMake_GENERATOR STREQUAL "Xcode")
+  framework_layout_test(iOSFrameworkLayout-build ios SHARED)
+  framework_layout_test(iOSFrameworkLayout-build ios STATIC)
+  framework_layout_test(OSXFrameworkLayout-build osx SHARED)
+  framework_layout_test(OSXFrameworkLayout-build osx STATIC)
+endif()
 
-unset(RunCMake_TEST_BINARY_DIR)
-unset(RunCMake_TEST_NO_CLEAN)
-unset(RunCMake_TEST_OPTIONS)
+function(framework_type_test Toolchain Type)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${Toolchain}${Type}FrameworkType-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_TOOLCHAIN_FILE=${RunCMake_SOURCE_DIR}/${Toolchain}.cmake")
+  list(APPEND RunCMake_TEST_OPTIONS "-DFRAMEWORK_TYPE=${Type}")
 
-# OSX
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
-set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/OSXFrameworkLayout-build)
-set(RunCMake_TEST_NO_CLEAN 1)
-set(RunCMake_TEST_OPTIONS "-DCMAKE_TOOLCHAIN_FILE=${RunCMake_SOURCE_DIR}/osx.cmake")
+  run_cmake(FrameworkLayout)
+  run_cmake_command(FrameworkType${Type}-build ${CMAKE_COMMAND} --build .)
+endfunction()
 
-file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
-file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-
-run_cmake(FrameworkLayout)
-run_cmake_command(OSXFrameworkLayout-build ${CMAKE_COMMAND} --build .)
-
-unset(RunCMake_TEST_BINARY_DIR)
-unset(RunCMake_TEST_NO_CLEAN)
-unset(RunCMake_TEST_OPTIONS)
+framework_type_test(ios SHARED)
+framework_type_test(ios STATIC)
+framework_type_test(osx SHARED)
+framework_type_test(osx STATIC)
