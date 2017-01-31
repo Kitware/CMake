@@ -1463,7 +1463,7 @@ if(NOT _Boost_THREAD_DEPENDENCY_LIBS EQUAL -1)
 endif()
 
 # If the user changed any of our control inputs flush previous results.
-if(_Boost_CHANGE_LIBDIR OR _Boost_CHANGE_LIBNAME)
+if(_Boost_CHANGE_LIBDIR_DEBUG OR _Boost_CHANGE_LIBDIR_RELEASE OR _Boost_CHANGE_LIBNAME)
   foreach(COMPONENT ${_Boost_COMPONENTS_SEARCHED})
     string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
     foreach(c DEBUG RELEASE)
