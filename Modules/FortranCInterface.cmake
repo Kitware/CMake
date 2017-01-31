@@ -348,7 +348,8 @@ function(FortranCInterface_VERIFY)
     try_compile(FortranCInterface_VERIFY_${lang}_COMPILED
       ${FortranCInterface_BINARY_DIR}/Verify${lang}
       ${FortranCInterface_SOURCE_DIR}/Verify
-      VerifyFortranC
+      VerifyFortranC # project name
+      VerifyFortranC # target name
       CMAKE_FLAGS -DVERIFY_CXX=${verify_cxx}
                   -DCMAKE_VERBOSE_MAKEFILE=ON
                  "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}"
