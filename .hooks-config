@@ -4,6 +4,7 @@
 # Loaded by .git/hooks/(pre-commit|commit-msg|prepare-commit-msg)
 # during git commit after local hooks have been installed.
 
-hooks_chain_pre_commit="Utilities/Git/pre-commit"
-hooks_chain_commit_msg="Utilities/Git/commit-msg"
-hooks_chain_prepare_commit_msg="Utilities/Git/prepare-commit-msg"
+[hooks "chain"]
+	pre-commit = Utilities/Git/pre-commit
+	commit-msg = Utilities/Git/commit-msg
+	prepare-commit-msg = Utilities/Git/prepare-commit-msg
