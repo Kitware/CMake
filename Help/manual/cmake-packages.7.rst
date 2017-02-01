@@ -449,12 +449,12 @@ be true. This can be tested with logic in the package configuration file:
   foreach(_comp ${ClimbingStats_FIND_COMPONENTS})
     if (NOT ";${_supported_components};" MATCHES _comp)
       set(ClimbingStats_FOUND False)
-      set(ClimbingStats_NOTFOUND_MESSAGE "Unsupported component: ${_comp}")
+      set(ClimbingStats_NOT_FOUND_MESSAGE "Unsupported component: ${_comp}")
     endif()
     include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStats${_comp}Targets.cmake")
   endforeach()
 
-Here, the ``ClimbingStats_NOTFOUND_MESSAGE`` is set to a diagnosis that the package
+Here, the ``ClimbingStats_NOT_FOUND_MESSAGE`` is set to a diagnosis that the package
 could not be found because an invalid component was specified.  This message
 variable can be set for any case where the ``_FOUND`` variable is set to ``False``,
 and will be displayed to the user.
