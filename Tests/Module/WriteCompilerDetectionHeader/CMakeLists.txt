@@ -4,6 +4,7 @@ project(WriteCompilerDetectionHeader)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(WriteCompilerDetectionHeader)
+include(CheckCXXSourceCompiles)
 
 get_property(cxx_known_features GLOBAL PROPERTY CMAKE_CXX_KNOWN_FEATURES)
 get_property(c_known_features GLOBAL PROPERTY CMAKE_C_KNOWN_FEATURES)
@@ -18,28 +19,6 @@ write_compiler_detection_header(
   FEATURES
     ${cxx_known_features} ${c_known_features}
 )
-
-if (NOT CMAKE_CXX_COMPILE_FEATURES AND NOT CMAKE_C_COMPILE_FEATURES)
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp"
-    "int main(int,char**) { return 0; }\n"
-  )
-  add_executable(WriteCompilerDetectionHeader "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp")
-
-  if(UNIX OR NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    include(CheckCXXSourceCompiles)
-    check_cxx_source_compiles("#include \"${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection.h\"\nint main() { return 0; }\n"
-      file_include_works
-    )
-    if (file_include_works)
-      message(SEND_ERROR "Inclusion of ${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection.h was expected to cause an error, but did not.")
-    endif()
-  endif()
-  return()
-endif()
-
-string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" COMPILER_VERSION_MAJOR "${CMAKE_CXX_COMPILER_VERSION}")
-string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" COMPILER_VERSION_MINOR "${CMAKE_CXX_COMPILER_VERSION}")
-string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" COMPILER_VERSION_PATCH "${CMAKE_CXX_COMPILER_VERSION}")
 
 macro(set_defines target true_defs false_defs)
   set(defines)
@@ -57,6 +36,60 @@ macro(set_defines target true_defs false_defs)
       EXPECTED_COMPILER_VERSION_PATCH=${COMPILER_VERSION_PATCH}
   )
 endmacro()
+
+if (CMAKE_C_COMPILE_FEATURES)
+  string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" COMPILER_VERSION_MAJOR "${CMAKE_C_COMPILER_VERSION}")
+  string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" COMPILER_VERSION_MINOR "${CMAKE_C_COMPILER_VERSION}")
+  string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" COMPILER_VERSION_PATCH "${CMAKE_C_COMPILER_VERSION}")
+
+  if (CMAKE_C_COMPILER_ID STREQUAL "GNU"
+      OR CMAKE_C_COMPILER_ID STREQUAL "Clang"
+      OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
+      OR CMAKE_C_COMPILER_ID STREQUAL "Intel")
+    add_executable(WriteCompilerDetectionHeader_C11 main.c)
+    set_property(TARGET WriteCompilerDetectionHeader_C11 PROPERTY C_STANDARD 11)
+    set_defines(WriteCompilerDetectionHeader_C11 "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES;EXPECTED_COMPILER_C_RESTRICT" "")
+
+    add_executable(WriteCompilerDetectionHeader_C11_multi main_multi.c)
+    set_property(TARGET WriteCompilerDetectionHeader_C11_multi PROPERTY C_STANDARD 11)
+    set_defines(WriteCompilerDetectionHeader_C11_multi "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES;EXPECTED_COMPILER_C_RESTRICT" "")
+    target_include_directories(WriteCompilerDetectionHeader_C11_multi PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
+
+    add_executable(C_undefined c_undefined.c)
+    set_property(TARGET C_undefined PROPERTY C_STANDARD 90)
+    target_compile_options(C_undefined PRIVATE -Werror=undef)
+
+    add_executable(WriteCompilerDetectionHeader_C main.c)
+    set_property(TARGET WriteCompilerDetectionHeader_C PROPERTY C_STANDARD 90)
+    set_defines(WriteCompilerDetectionHeader_C "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES" "EXPECTED_COMPILER_C_RESTRICT")
+
+    add_executable(WriteCompilerDetectionHeader_C_multi main_multi.c)
+    set_property(TARGET WriteCompilerDetectionHeader_C_multi PROPERTY C_STANDARD 90)
+    set_defines(WriteCompilerDetectionHeader_C_multi "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES" "EXPECTED_COMPILER_C_RESTRICT")
+    target_include_directories(WriteCompilerDetectionHeader_C_multi PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
+  endif()
+endif()
+
+if (NOT CMAKE_CXX_COMPILE_FEATURES)
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp"
+    "int main(int,char**) { return 0; }\n"
+  )
+  add_executable(WriteCompilerDetectionHeader "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp")
+
+  if(UNIX OR NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    check_cxx_source_compiles("#include \"${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection.h\"\nint main() { return 0; }\n"
+      file_include_works
+    )
+    if (file_include_works)
+      message(SEND_ERROR "Inclusion of ${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection.h was expected to cause an error, but did not.")
+    endif()
+  endif()
+  return()
+endif()
+
+string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" COMPILER_VERSION_MAJOR "${CMAKE_CXX_COMPILER_VERSION}")
+string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" COMPILER_VERSION_MINOR "${CMAKE_CXX_COMPILER_VERSION}")
+string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" COMPILER_VERSION_PATCH "${CMAKE_CXX_COMPILER_VERSION}")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang"
@@ -77,25 +110,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     list(APPEND false_defs EXPECTED_COMPILER_CXX_DELEGATING_CONSTRUCTORS)
     list(APPEND false_defs EXPECTED_COMPILER_CXX_VARIADIC_TEMPLATES)
   endif()
-endif()
-
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU"
-    OR CMAKE_C_COMPILER_ID STREQUAL "Clang"
-    OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
-    OR CMAKE_C_COMPILER_ID STREQUAL "Intel")
-
-  add_executable(C_undefined c_undefined.c)
-  set_property(TARGET C_undefined PROPERTY C_STANDARD 90)
-  target_compile_options(C_undefined PRIVATE -Werror=undef)
-
-  add_executable(WriteCompilerDetectionHeader_C main.c)
-  set_property(TARGET WriteCompilerDetectionHeader_C PROPERTY C_STANDARD 90)
-  set_defines(WriteCompilerDetectionHeader_C "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES" "EXPECTED_COMPILER_C_RESTRICT")
-
-  add_executable(WriteCompilerDetectionHeader_C_multi main_multi.c)
-  set_property(TARGET WriteCompilerDetectionHeader_C_multi PROPERTY C_STANDARD 90)
-  set_defines(WriteCompilerDetectionHeader_C_multi "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES" "EXPECTED_COMPILER_C_RESTRICT")
-  target_include_directories(WriteCompilerDetectionHeader_C_multi PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
 endif()
 
 add_executable(WriteCompilerDetectionHeader main.cpp)
@@ -143,16 +157,30 @@ set_property(TARGET multi_files_11 PROPERTY CXX_STANDARD 11)
 target_include_directories(multi_files_11 PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
 set_defines(multi_files_11 "${true_defs}" "${false_defs}")
 
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU"
-    OR CMAKE_C_COMPILER_ID STREQUAL "Clang"
-    OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
-    OR CMAKE_C_COMPILER_ID STREQUAL "Intel")
-  add_executable(WriteCompilerDetectionHeader_C11 main.c)
-  set_property(TARGET WriteCompilerDetectionHeader_C11 PROPERTY C_STANDARD 11)
-  set_defines(WriteCompilerDetectionHeader_C11 "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES;EXPECTED_COMPILER_C_RESTRICT" "")
+# test for ALLOW_UNKNOWN_COMPILERS
 
-  add_executable(WriteCompilerDetectionHeader_C11_multi main_multi.c)
-  set_property(TARGET WriteCompilerDetectionHeader_C11_multi PROPERTY C_STANDARD 11)
-  set_defines(WriteCompilerDetectionHeader_C11_multi "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES;EXPECTED_COMPILER_C_RESTRICT" "")
-  target_include_directories(WriteCompilerDetectionHeader_C11_multi PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
+# use a compiler does not match the current one,
+# so one always hits the fallback code
+if (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
+  set(OTHER_CXX "Intel")
+else()
+  set(OTHER_CXX "SunPro")
+endif()
+
+write_compiler_detection_header(
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection_allow_unknown.h"
+  PREFIX TEST
+  COMPILERS ${OTHER_CXX}
+  FEATURES cxx_nullptr
+  ALLOW_UNKNOWN_COMPILERS
+)
+
+# intentionally abuse the TEST_NULLPR variable: this will only work
+# with the fallback code.
+check_cxx_source_compiles("#include \"${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection_allow_unknown.h\"
+int main() {\n int i = TEST_NULLPTR;\n return 0; }\n"
+  file_include_works_allow_unknown
+)
+if (NOT file_include_works_allow_unknown)
+  message(SEND_ERROR "Inclusion of ${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection_allow_unknown.h was expected to work, but did not.")
 endif()
