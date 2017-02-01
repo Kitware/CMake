@@ -30,7 +30,8 @@ set(_result)
 try_compile(FortranCInterface_COMPILED
   ${FortranCInterface_BINARY_DIR}
   ${FortranCInterface_SOURCE_DIR}
-  FortranCInterface
+  FortranCInterface # project name
+  FortranCInterface # target name
   CMAKE_FLAGS
     "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}"
     "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"
