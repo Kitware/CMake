@@ -11,7 +11,7 @@ Introduction
 ============
 
 This manual is intended for reference by developers modifying the CMake
-source tree itself.
+source tree itself, and by those authoring externally-maintained modules.
 
 
 Permitted C++ Subset
