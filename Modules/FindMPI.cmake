@@ -322,6 +322,8 @@ function (interrogate_mpi_compiler lang try_libs)
 
         # Extract include paths from compile command line
         string(REGEX MATCHALL "(^| )-I([^\" ]+|\"[^\"]+\")" MPI_ALL_INCLUDE_PATHS "${MPI_COMPILE_CMDLINE}")
+        set(MPI_INCLUDE_PATH_WORK)
+
         foreach(IPATH ${MPI_ALL_INCLUDE_PATHS})
           string(REGEX REPLACE "^ ?-I" "" IPATH ${IPATH})
           string(REPLACE "//" "/" IPATH ${IPATH})
