@@ -383,10 +383,18 @@ endmacro()
 if(NOT HDF5_ROOT)
     set(HDF5_ROOT $ENV{HDF5_ROOT})
 endif()
+if(HDF5_ROOT)
+    set(_HDF5_SEARCH_OPTS NO_DEFAULT_PATH)
+else()
+    set(_HDF5_SEARCH_OPTS)
+endif()
 
 # Try to find HDF5 using an installed hdf5-config.cmake
-if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
-    find_package(HDF5 QUIET NO_MODULE)
+if(NOT HDF5_FOUND)
+    find_package(HDF5 QUIET NO_MODULE
+      HINTS ${HDF5_ROOT}
+      ${_HDF5_SEARCH_OPTS}
+      )
     if( HDF5_FOUND)
         set(HDF5_IS_PARALLEL ${HDF5_ENABLE_PARALLEL})
         set(HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
@@ -440,7 +448,7 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
     endif()
 endif()
 
-if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
+if(NOT HDF5_FOUND)
   set(_HDF5_NEED_TO_SEARCH False)
   set(HDF5_COMPILER_NO_INTERROGATE True)
   # Only search for languages we've enabled
@@ -488,8 +496,10 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
       # search options with the wrapper
       find_program(HDF5_${__lang}_COMPILER_EXECUTABLE
         NAMES ${HDF5_${__lang}_COMPILER_NAMES} NAMES_PER_DIR
+        HINTS ${HDF5_ROOT}
         PATH_SUFFIXES bin Bin
         DOC "HDF5 ${__lang} Wrapper compiler.  Used only to detect HDF5 compile flags."
+        ${_HDF5_SEARCH_OPTS}
       )
       mark_as_advanced( HDF5_${__lang}_COMPILER_EXECUTABLE )
       unset(HDF5_${__lang}_COMPILER_NAMES)
@@ -516,10 +526,20 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
           endif()
 
           foreach(L IN LISTS HDF5_${__lang}_LIBRARY_NAMES)
+            if(x"${L}" MATCHES "hdf5")
+              # hdf5 library
+              set(_HDF5_SEARCH_OPTS_LOCAL ${_HDF5_SEARCH_OPTS})
+            else()
+              # external library
+              set(_HDF5_SEARCH_OPTS_LOCAL)
+            endif()
             find_library(HDF5_${__lang}_LIBRARY_${L}
               NAMES ${L}
               HINTS ${HDF5_${__lang}_LIBRARY_DIRS}
+                    ${HDF5_ROOT}
+              ${_HDF5_SEARCH_OPTS_LOCAL}
               )
+            unset(_HDF5_SEARCH_OPTS_LOCAL)
             if(HDF5_${__lang}_LIBRARY_${L})
               list(APPEND HDF5_${__lang}_LIBRARIES ${HDF5_${__lang}_LIBRARY_${L}})
             else()
@@ -529,10 +549,20 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
           if(FIND_HL)
             set(HDF5_${__lang}_HL_LIBRARIES)
             foreach(L IN LISTS HDF5_${__lang}_HL_LIBRARY_NAMES)
+              if("x${L}" MATCHES "hdf5")
+                # hdf5 library
+                set(_HDF5_SEARCH_OPTS_LOCAL ${_HDF5_SEARCH_OPTS})
+              else()
+                # external library
+                set(_HDF5_SEARCH_OPTS_LOCAL)
+              endif()
               find_library(HDF5_${__lang}_LIBRARY_${L}
                 NAMES ${L}
                 HINTS ${HDF5_${__lang}_LIBRARY_DIRS}
+                      ${HDF5_ROOT}
+                ${_HDF5_SEARCH_OPTS_LOCAL}
                 )
+              unset(_HDF5_SEARCH_OPTS_LOCAL)
               if(HDF5_${__lang}_LIBRARY_${L})
                 list(APPEND HDF5_${__lang}_HL_LIBRARIES ${HDF5_${__lang}_LIBRARY_${L}})
               else()
@@ -614,11 +644,6 @@ elseif(NOT HDF5_FOUND AND NOT _HDF5_NEED_TO_SEARCH)
   endif()
 endif()
 
-if(HDF5_ROOT)
-    set(_HDF5_SEARCH_OPTS NO_DEFAULT_PATH)
-else()
-    set(_HDF5_SEARCH_OPTS)
-endif()
 find_program( HDF5_DIFF_EXECUTABLE
     NAMES h5diff
     HINTS ${HDF5_ROOT}
