@@ -22,7 +22,8 @@ int file3_launch_kernel(int x)
   cudaError_t err = cudaGetLastError();
   if(err != cudaSuccess)
     {
-    std::cerr << cudaGetErrorString(err) << std::endl;
+    std::cerr << "file3_kernel [SYNC] failed: "
+              << cudaGetErrorString(err) << std::endl;
     return x;
     }
   return r.sum;

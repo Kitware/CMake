@@ -28,6 +28,7 @@ EXPORT void cuda_dynamic_lib_func()
   cudaError_t err = cudaGetLastError();
   if(err != cudaSuccess)
     {
-    std::cerr << cudaGetErrorString(err) << std::endl;
+    std::cerr << "DetermineIfValidCudaDevice [SYNC] failed: "
+              << cudaGetErrorString(err) << std::endl;
     }
 }
