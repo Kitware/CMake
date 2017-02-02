@@ -516,7 +516,10 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
           endif()
 
           foreach(L IN LISTS HDF5_${__lang}_LIBRARY_NAMES)
-            find_library(HDF5_${__lang}_LIBRARY_${L} ${L} ${HDF5_${__lang}_LIBRARY_DIRS})
+            find_library(HDF5_${__lang}_LIBRARY_${L}
+              NAMES ${L}
+              HINTS ${HDF5_${__lang}_LIBRARY_DIRS}
+              )
             if(HDF5_${__lang}_LIBRARY_${L})
               list(APPEND HDF5_${__lang}_LIBRARIES ${HDF5_${__lang}_LIBRARY_${L}})
             else()
@@ -526,7 +529,10 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
           if(FIND_HL)
             set(HDF5_${__lang}_HL_LIBRARIES)
             foreach(L IN LISTS HDF5_${__lang}_HL_LIBRARY_NAMES)
-              find_library(HDF5_${__lang}_LIBRARY_${L} ${L} ${HDF5_${__lang}_LIBRARY_DIRS})
+              find_library(HDF5_${__lang}_LIBRARY_${L}
+                NAMES ${L}
+                HINTS ${HDF5_${__lang}_LIBRARY_DIRS}
+                )
               if(HDF5_${__lang}_LIBRARY_${L})
                 list(APPEND HDF5_${__lang}_HL_LIBRARIES ${HDF5_${__lang}_LIBRARY_${L}})
               else()
