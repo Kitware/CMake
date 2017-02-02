@@ -609,13 +609,15 @@ elseif(NOT HDF5_FOUND AND NOT _HDF5_NEED_TO_SEARCH)
 endif()
 
 if(HDF5_ROOT)
-    set(SEARCH_OPTS NO_DEFAULT_PATH)
+    set(_HDF5_SEARCH_OPTS NO_DEFAULT_PATH)
+else()
+    set(_HDF5_SEARCH_OPTS)
 endif()
 find_program( HDF5_DIFF_EXECUTABLE
     NAMES h5diff
     HINTS ${HDF5_ROOT}
     PATH_SUFFIXES bin Bin
-    ${SEARCH_OPTS}
+    ${_HDF5_SEARCH_OPTS}
     DOC "HDF5 file differencing tool." )
 mark_as_advanced( HDF5_DIFF_EXECUTABLE )
 
@@ -644,7 +646,7 @@ if( NOT HDF5_FOUND )
             HINTS ${HDF5_ROOT}
             PATHS $ENV{HOME}/.local/include
             PATH_SUFFIXES include Include
-            ${SEARCH_OPTS}
+            ${_HDF5_SEARCH_OPTS}
         )
         mark_as_advanced(HDF5_${LANGUAGE}_INCLUDE_DIR)
         list(APPEND HDF5_INCLUDE_DIRS ${HDF5_${__lang}_INCLUDE_DIR})
@@ -668,12 +670,12 @@ if( NOT HDF5_FOUND )
             find_library(HDF5_${LIB}_LIBRARY_DEBUG
                 NAMES ${THIS_LIBRARY_SEARCH_DEBUG}
                 HINTS ${HDF5_ROOT} PATH_SUFFIXES lib Lib
-                ${SEARCH_OPTS}
+                ${_HDF5_SEARCH_OPTS}
             )
             find_library( HDF5_${LIB}_LIBRARY_RELEASE
                 NAMES ${THIS_LIBRARY_SEARCH_RELEASE}
                 HINTS ${HDF5_ROOT} PATH_SUFFIXES lib Lib
-                ${SEARCH_OPTS}
+                ${_HDF5_SEARCH_OPTS}
             )
             select_library_configurations( HDF5_${LIB} )
             list(APPEND HDF5_${__lang}_LIBRARIES ${HDF5_${LIB}_LIBRARY})
@@ -705,12 +707,12 @@ if( NOT HDF5_FOUND )
                 find_library(HDF5_${LIB}_LIBRARY_DEBUG
                     NAMES ${THIS_LIBRARY_SEARCH_DEBUG}
                     HINTS ${HDF5_ROOT} PATH_SUFFIXES lib Lib
-                    ${SEARCH_OPTS}
+                    ${_HDF5_SEARCH_OPTS}
                 )
                 find_library( HDF5_${LIB}_LIBRARY_RELEASE
                     NAMES ${THIS_LIBRARY_SEARCH_RELEASE}
                     HINTS ${HDF5_ROOT} PATH_SUFFIXES lib Lib
-                    ${SEARCH_OPTS}
+                    ${_HDF5_SEARCH_OPTS}
                 )
                 select_library_configurations( HDF5_${LIB} )
                 list(APPEND HDF5_${__lang}_HL_LIBRARIES ${HDF5_${LIB}_LIBRARY})
@@ -785,3 +787,5 @@ find_package_handle_standard_args(HDF5
     VERSION_VAR   HDF5_VERSION
     HANDLE_COMPONENTS
 )
+
+unset(_HDF5_SEARCH_OPTS)
