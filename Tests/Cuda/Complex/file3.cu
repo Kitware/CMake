@@ -26,5 +26,12 @@ int file3_launch_kernel(int x)
               << cudaGetErrorString(err) << std::endl;
     return x;
     }
+  err = cudaDeviceSynchronize();
+  if(err != cudaSuccess)
+    {
+    std::cerr << "file3_kernel [ASYNC] failed: "
+              << cudaGetErrorString(cudaGetLastError()) << std::endl;
+    return x;
+    }
   return r.sum;
 }
