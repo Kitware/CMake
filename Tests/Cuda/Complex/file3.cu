@@ -9,17 +9,25 @@ result_type_dynamic __device__ file2_func(int x);
 
 static
 __global__
-void file3_kernel(result_type& r, int x)
+void file3_kernel(result_type* r, int x)
 {
-  r = file1_func(x);
+  *r = file1_func(x);
   result_type_dynamic rd = file2_func(x);
 }
 
 int file3_launch_kernel(int x)
 {
-  result_type r;
+  result_type* r;
+  cudaError_t err = cudaMallocManaged(&r, sizeof(result_type));
+  if(err != cudaSuccess)
+    {
+    std::cerr << "file3_launch_kernel: cudaMallocManaged failed: "
+              << cudaGetErrorString(err) << std::endl;
+    return x;
+    }
+
   file3_kernel <<<1,1>>> (r,x);
-  cudaError_t err = cudaGetLastError();
+  err = cudaGetLastError();
   if(err != cudaSuccess)
     {
     std::cerr << "file3_kernel [SYNC] failed: "
@@ -33,5 +41,14 @@ int file3_launch_kernel(int x)
               << cudaGetErrorString(cudaGetLastError()) << std::endl;
     return x;
     }
-  return r.sum;
+  int result = r->sum;
+  err = cudaFree(r);
+  if(err != cudaSuccess)
+    {
+    std::cerr << "file3_launch_kernel: cudaFree failed: "
+              << cudaGetErrorString(err) << std::endl;
+    return x;
+    }
+
+  return result;
 }
