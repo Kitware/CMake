@@ -68,7 +68,11 @@ if (CMAKE_C_COMPILE_FEATURES)
 
     add_executable(C_undefined c_undefined.c)
     set_property(TARGET C_undefined PROPERTY C_STANDARD 90)
-    target_compile_options(C_undefined PRIVATE -Werror=undef)
+    include(CheckCCompilerFlag)
+    check_c_compiler_flag(-Werror=undef use_error_undef)
+    if (use_error_undef)
+        target_compile_options(C_undefined PRIVATE -Werror=undef)
+    endif()
 
     add_executable(WriteCompilerDetectionHeader_C main.c)
     set_property(TARGET WriteCompilerDetectionHeader_C PROPERTY C_STANDARD 90)
