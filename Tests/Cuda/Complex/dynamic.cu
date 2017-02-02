@@ -26,7 +26,7 @@ EXPORT void cuda_dynamic_lib_func()
 {
   DetermineIfValidCudaDevice <<<1,1>>> ();
   cudaError_t err = cudaGetLastError();
-  if(err == cudaSuccess)
+  if(err != cudaSuccess)
     {
     std::cerr << cudaGetErrorString(err) << std::endl;
     }

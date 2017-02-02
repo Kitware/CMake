@@ -20,7 +20,7 @@ int file3_launch_kernel(int x)
   result_type r;
   file3_kernel <<<1,1>>> (r,x);
   cudaError_t err = cudaGetLastError();
-  if(err == cudaSuccess)
+  if(err != cudaSuccess)
     {
     std::cerr << cudaGetErrorString(err) << std::endl;
     return x;
