@@ -31,5 +31,12 @@ EXPORT int mixed_launch_kernel(int x)
 
   result_type r;
   mixed_kernel <<<1,1>>> (r,x);
+  cudaError_t err = cudaGetLastError();
+  if(err != cudaSuccess)
+    {
+    std::cerr << "mixed_kernel [SYNC] failed: "
+              << cudaGetErrorString(err) << std::endl;
+    return x;
+    }
   return r.sum;
 }
