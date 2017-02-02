@@ -32,6 +32,8 @@ add_library(CudaComplexSharedLib SHARED dynamic.cu)
 target_link_libraries(CudaComplexSharedLib PUBLIC CudaComplexCppBase)
 
 add_library(CudaComplexMixedLib SHARED mixed.cpp mixed.cu)
+set_target_properties(CudaComplexMixedLib
+                       PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_link_libraries(CudaComplexMixedLib
                       PUBLIC CudaComplexSharedLib
                       PRIVATE CudaComplexSeperableLib)
