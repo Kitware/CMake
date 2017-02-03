@@ -796,15 +796,16 @@ if( NOT HDF5_FOUND )
         "HDF5 library compiled with parallel IO support" )
     mark_as_advanced( HDF5_IS_PARALLEL )
 
-    # For backwards compatibility we set HDF5_INCLUDE_DIR to the value of
-    # HDF5_INCLUDE_DIRS
-    if( HDF5_INCLUDE_DIRS )
-        set( HDF5_INCLUDE_DIR "${HDF5_INCLUDE_DIRS}" )
-    endif()
     set(HDF5_REQUIRED_VARS HDF5_LIBRARIES HDF5_INCLUDE_DIRS)
     if(FIND_HL)
         list(APPEND HDF5_REQUIRED_VARS HDF5_HL_LIBRARIES)
     endif()
+endif()
+
+# For backwards compatibility we set HDF5_INCLUDE_DIR to the value of
+# HDF5_INCLUDE_DIRS
+if( HDF5_INCLUDE_DIRS )
+  set( HDF5_INCLUDE_DIR "${HDF5_INCLUDE_DIRS}" )
 endif()
 
 # If HDF5_REQUIRED_VARS is empty at this point, then it's likely that
