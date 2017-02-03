@@ -260,9 +260,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   args += this->GetBinaryDirectory();
   commandLine.push_back(args);
   commandLine.push_back("--check-stamp-file");
-  std::string stampFilename = this->ConvertToOutputFormat(
-    cmSystemTools::CollapseFullPath(stampName), cmOutputConverter::SHELL);
-  commandLine.push_back(stampFilename.c_str());
+  commandLine.push_back(stampName);
 
   std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
 
@@ -273,7 +271,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     cmSystemTools::CollapseFullPath(stampName.c_str());
   this->Makefile->AddCustomCommandToOutput(
     fullpathStampName.c_str(), listFiles, makefileIn.c_str(), commandLines,
-    comment.c_str(), no_working_directory, true);
+    comment.c_str(), no_working_directory, true, false);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str())) {
     return file;
   } else {

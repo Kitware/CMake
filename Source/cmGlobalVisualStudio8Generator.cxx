@@ -298,7 +298,9 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     commandLine.push_back("--check-stamp-list");
     commandLine.push_back(stampList.c_str());
     commandLine.push_back("--vs-solution-file");
-    commandLine.push_back("\"$(SolutionPath)\"");
+    std::string const sln = std::string(lg->GetBinaryDirectory()) + "/" +
+      lg->GetProjectName() + ".sln";
+    commandLine.push_back(sln);
     cmCustomCommandLines commandLines;
     commandLines.push_back(commandLine);
 
@@ -310,7 +312,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     std::vector<std::string> no_byproducts;
     if (cmSourceFile* file = mf->AddCustomCommandToOutput(
           stamps, no_byproducts, listFiles, no_main_dependency, commandLines,
-          "Checking Build System", no_working_directory, true)) {
+          "Checking Build System", no_working_directory, true, false)) {
       gt->AddSource(file->GetFullPath());
     } else {
       cmSystemTools::Error("Error adding rule for ", stamps[0].c_str());
