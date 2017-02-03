@@ -63,6 +63,16 @@ is set for all the packages.
 
 The default value for this global property is ``OPTIONAL``.
 
+
+.. variable:: FeatureSummary_<TYPE>_DESCRIPTION
+
+The global property :variable:`FeatureSummary_<TYPE>_DESCRIPTION` can be defined
+for each type to replace the type name with the specified string whenever the
+package type is used in an output string.
+
+If not set, the string "``<TYPE>`` packages" is used.
+
+
 #]=======================================================================]
 
 get_property(_fsPkgTypeIsSet GLOBAL PROPERTY FeatureSummary_PKG_TYPES SET)
@@ -351,8 +361,13 @@ function(FEATURE_SUMMARY)
   set(title_PACKAGES_FOUND                 "The following packages have been found:")
   set(title_PACKAGES_NOT_FOUND             "The following packages have not been found:")
   foreach(_fsPkgType ${_fsPkgTypes})
-    set(title_${_fsPkgType}_PACKAGES_FOUND     "The following ${_fsPkgType} packages have been found:")
-    set(title_${_fsPkgType}_PACKAGES_NOT_FOUND "The following ${_fsPkgType} packages have not been found:")
+    set(_fsPkgTypeDescription "${_fsPkgType} packages")
+    get_property(_fsPkgTypeDescriptionIsSet GLOBAL PROPERTY FeatureSummary_${_fsPkgType}_DESCRIPTION SET)
+    if(_fsPkgTypeDescriptionIsSet)
+      get_property(_fsPkgTypeDescription GLOBAL PROPERTY FeatureSummary_${_fsPkgType}_DESCRIPTION )
+    endif()
+    set(title_${_fsPkgType}_PACKAGES_FOUND     "The following ${_fsPkgTypeDescription} have been found:")
+    set(title_${_fsPkgType}_PACKAGES_NOT_FOUND "The following ${_fsPkgTypeDescription} have not been found:")
   endforeach()
 
   list(FIND validWhatParts "${_FS_WHAT}" indexInList)
