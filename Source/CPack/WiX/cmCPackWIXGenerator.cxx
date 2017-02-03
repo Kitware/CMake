@@ -437,8 +437,8 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   directoryDefinitions.AddAttribute("Name", "SourceDir");
 
   size_t installRootSize =
-    directoryDefinitions.BeginInstallationPrefixDirectory(
-      GetProgramFilesFolderId(), installRoot);
+    directoryDefinitions.BeginInstallationPrefixDirectory(GetRootFolderId(),
+                                                          installRoot);
 
   std::string fileDefinitionsFilename = this->CPackTopLevel + "/files.wxs";
 
@@ -570,16 +570,26 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   return this->Patch->CheckForUnappliedFragments();
 }
 
-std::string cmCPackWIXGenerator::GetProgramFilesFolderId() const
+std::string cmCPackWIXGenerator::GetRootFolderId() const
 {
   if (cmSystemTools::IsOn(GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER"))) {
     return "";
   }
-  if (GetArchitecture() == "x86") {
-    return "ProgramFilesFolder";
-  } else {
-    return "ProgramFiles64Folder";
+
+  std::string result = "ProgramFiles<64>Folder";
+
+  const char* rootFolderId = GetOption("CPACK_WIX_ROOT_FOLDER_ID");
+  if (rootFolderId) {
+    result = rootFolderId;
   }
+
+  if (GetArchitecture() == "x86") {
+    cmSystemTools::ReplaceString(result, "<64>", "");
+  } else {
+    cmSystemTools::ReplaceString(result, "<64>", "64");
+  }
+
+  return result;
 }
 
 bool cmCPackWIXGenerator::GenerateMainSourceFileFromTemplate()
