@@ -20,6 +20,17 @@ write_compiler_detection_header(
     ${cxx_known_features} ${c_known_features}
 )
 
+write_compiler_detection_header(
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files/multi_file_compiler_detection.h"
+  PREFIX MULTI
+  OUTPUT_FILES_VAR multi_files
+  OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files/compiler_support"
+  COMPILERS GNU Clang AppleClang MSVC SunPro Intel
+  VERSION 3.1
+  FEATURES
+    ${cxx_known_features} ${c_known_features}
+)
+
 macro(set_defines target true_defs false_defs)
   set(defines)
   foreach(def ${true_defs})
@@ -57,7 +68,11 @@ if (CMAKE_C_COMPILE_FEATURES)
 
     add_executable(C_undefined c_undefined.c)
     set_property(TARGET C_undefined PROPERTY C_STANDARD 90)
-    target_compile_options(C_undefined PRIVATE -Werror=undef)
+    include(CheckCCompilerFlag)
+    check_c_compiler_flag(-Werror=undef use_error_undef)
+    if (use_error_undef)
+        target_compile_options(C_undefined PRIVATE -Werror=undef)
+    endif()
 
     add_executable(WriteCompilerDetectionHeader_C main.c)
     set_property(TARGET WriteCompilerDetectionHeader_C PROPERTY C_STANDARD 90)
@@ -115,17 +130,6 @@ endif()
 add_executable(WriteCompilerDetectionHeader main.cpp)
 set_property(TARGET WriteCompilerDetectionHeader PROPERTY CXX_STANDARD 98)
 set_defines(WriteCompilerDetectionHeader "${true_defs}" "${false_defs}")
-
-write_compiler_detection_header(
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files/multi_file_compiler_detection.h"
-  PREFIX MULTI
-  OUTPUT_FILES_VAR multi_files
-  OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files/compiler_support"
-  COMPILERS GNU Clang AppleClang MSVC SunPro Intel
-  VERSION 3.1
-  FEATURES
-    ${cxx_known_features} ${c_known_features}
-)
 
 add_executable(multi_files multi_files.cpp)
 set_property(TARGET multi_files PROPERTY CXX_STANDARD 98)

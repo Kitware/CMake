@@ -338,6 +338,14 @@ versions specified for each:
 * ``SunPro``: Oracle SolarisStudio version 12.4.
 * ``Intel``: Intel compiler versions 12.1 through 17.0.
 
+CMake is currently aware of the :prop_tgt:`C standards <C_STANDARD>`
+and :prop_gbl:`compile features <CMAKE_C_KNOWN_FEATURES>` available from
+the following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>` as of the
+versions specified for each:
+
+* all compilers and versions listed above for C++
+* ``GNU``: GNU compiler versions 3.4 through 5.0.
+
 CMake is currently aware of the :prop_tgt:`CUDA standards <CUDA_STANDARD>`
 from the following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>` as of the
 versions specified for each:
