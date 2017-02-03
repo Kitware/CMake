@@ -44,7 +44,7 @@ The global property :variable:`FeatureSummary_REQUIRED_PKG_TYPES` defines which
 package types are required.
 
 If one or more package in this categories has not been found, CMake will abort
-when calling :cmd;`feature_summary` with the
+when calling :command:`feature_summary` with the
 'FATAL_ON_MISSING_REQUIRED_PACKAGES' option enabled.
 
 The default value for this global property is ``REQUIRED``.
@@ -54,7 +54,7 @@ The default value for this global property is ``REQUIRED``.
 
 The global property :variable:`FeatureSummary_DEFAULT_PKG_TYPE` defines which
 package type is the default one.
-When calling :cmd;`feature_summary`, if the user did not set the package type
+When calling :command:`feature_summary`, if the user did not set the package type
 explicitly, the package will be assigned to this category.
 
 This value must be one of the types defined in the
@@ -196,9 +196,11 @@ endfunction()
                      [VAR <variable_name>]
                      [INCLUDE_QUIET_PACKAGES]
                      [FATAL_ON_MISSING_REQUIRED_PACKAGES]
-                     [DESCRIPTION "Found packages:"]
+                     [DESCRIPTION "<description>"]
                      [QUIET_ON_EMPTY]
-                     WHAT (ALL | PACKAGES_FOUND | PACKAGES_NOT_FOUND
+                     WHAT (ALL
+                          | PACKAGES_FOUND | PACKAGES_NOT_FOUND
+                          | <TYPE>_PACKAGES_FOUND | <TYPE>_PACKAGES_NOT_FOUND
                           | ENABLED_FEATURES | DISABLED_FEATURES)
                    )
 
@@ -245,10 +247,10 @@ endfunction()
   information is "printed" into the specified variable.  If ``FILENAME`` is
   not used, the information is printed to the terminal.  Using the
   ``DESCRIPTION`` option a description or headline can be set which will be
-  printed above the actual content.  If ``INCLUDE_QUIET_PACKAGES`` is given,
-  packages which have been searched with ``find_package(... QUIET)`` will
-  also be listed.  By default they are skipped.  If
-  ``FATAL_ON_MISSING_REQUIRED_PACKAGES`` is given, CMake will abort if a
+  printed above the actual content.
+  If ``INCLUDE_QUIET_PACKAGES`` is given, packages which have been searched with
+  ``find_package(... QUIET)`` will also be listed. By default they are skipped.
+  If ``FATAL_ON_MISSING_REQUIRED_PACKAGES`` is given, CMake will abort if a
   package which is marked as one of the package types listed in the
   :variable:`FeatureSummary_REQUIRED_PKG_TYPES` global property has not been
   found.
