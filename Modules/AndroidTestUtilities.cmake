@@ -110,11 +110,18 @@ function(android_add_test_data test_name)
   endforeach()
 
   set(DATA_TARGET_NAME "${test_name}")
-  ExternalData_Expand_Arguments(
-    ${DATA_TARGET_NAME}
-    extern_data_output
-    ${AST_FILES})
-  ExternalData_Add_Target(${DATA_TARGET_NAME})
+  string(FIND "${AST_FILES}" "DATA{" data_files_found)
+  if(${data_files_found} GREATER "-1")
+    # Use ExternalData if any DATA{} files were found.
+    ExternalData_Expand_Arguments(
+      ${DATA_TARGET_NAME}
+      extern_data_output
+      ${AST_FILES})
+    ExternalData_Add_Target(${DATA_TARGET_NAME})
+  else()
+    add_custom_target(${DATA_TARGET_NAME} ALL)
+    set(extern_data_output ${AST_FILES})
+  endif()
 
   # For regular files on Linux, just copy them directly.
   foreach(path ${AST_FILES})
