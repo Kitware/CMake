@@ -654,6 +654,11 @@ public:
   static bool FileIsSymlink(const std::string& name);
 
   /**
+   * Return true if the file is a FIFO
+   */
+  static bool FileIsFIFO(const std::string& name);
+
+  /**
    * Return true if the file has a given signature (first set of bytes)
    */
   static bool FileHasSignature(const char* filename, const char* signature,
