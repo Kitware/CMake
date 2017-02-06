@@ -65,7 +65,7 @@ private:
 
   bool CreateWiXSourceFiles();
 
-  std::string GetProgramFilesFolderId() const;
+  std::string GetRootFolderId() const;
 
   bool GenerateMainSourceFileFromTemplate();
 
