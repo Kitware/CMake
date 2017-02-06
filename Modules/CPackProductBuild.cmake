@@ -20,9 +20,29 @@
 #  the automatically detected command (or specify its location if the
 #  auto-detection fails to find it.)
 #
+# .. variable:: CPACK_PRODUCTBUILD_IDENTITY_NAME
+#
+#  Adds a digital signature to the resulting package.
+#
+#
+# .. variable:: CPACK_PRODUCTBUILD_KEYCHAIN_PATH
+#
+#  Specify a specific keychain to search for the signing identity.
+#
+#
 # .. variable:: CPACK_COMMAND_PKGBUILD
 #
 #  Path to the pkgbuild(1) command used to generate an OS X component package
 #  on OS X.  This variable can be used to override the automatically detected
 #  command (or specify its location if the auto-detection fails to find it.)
+#
+#
+# .. variable:: CPACK_PKGBUILD_IDENTITY_NAME
+#
+#  Adds a digital signature to the resulting package.
+#
+#
+# .. variable:: CPACK_PKGBUILD_KEYCHAIN_PATH
+#
+#  Specify a specific keychain to search for the signing identity.
 #
