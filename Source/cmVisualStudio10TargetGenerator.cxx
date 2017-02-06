@@ -2158,6 +2158,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       this->Name.c_str());
     return false;
   }
+  this->LocalGenerator->AddLanguageStandardOptions(
+    flags, this->GeneratorTarget, linkLanguage, configName);
   if (linkLanguage == "C" || linkLanguage == "CXX" ||
       linkLanguage == "Fortran" || linkLanguage == "CSharp") {
     std::string baseFlagVar = "CMAKE_";
