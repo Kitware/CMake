@@ -20,6 +20,9 @@
 #   imported .proto files.
 # ``Protobuf_DEBUG``
 #   Show debug messages.
+# ``Protobuf_USE_STATIC_LIBS``
+#   Set to ON to force the use of the static libraries.
+#   Default is OFF.
 #
 # Defines the following variables:
 #
@@ -218,6 +221,14 @@ function(PROTOBUF_GENERATE_PYTHON SRCS)
   set(${SRCS} ${${SRCS}} PARENT_SCOPE)
 endfunction()
 
+
+if(Protobuf_DEBUG)
+  # Output some of their choices
+  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                 "Protobuf_USE_STATIC_LIBS = ${Protobuf_USE_STATIC_LIBS}")
+endif()
+
+
 # Backwards compatibility
 # Define camel case versions of input variables
 foreach(UPPER
@@ -243,6 +254,17 @@ endforeach()
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(_PROTOBUF_ARCH_DIR x64/)
+endif()
+
+
+# Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
+if( Protobuf_USE_STATIC_LIBS )
+  set( _protobuf_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+  if(WIN32)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+  else()
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a )
+  endif()
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
@@ -397,6 +419,11 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Protobuf
 
 if(Protobuf_FOUND)
     set(Protobuf_INCLUDE_DIRS ${Protobuf_INCLUDE_DIR})
+endif()
+
+# Restore the original find library ordering
+if( Protobuf_USE_STATIC_LIBS )
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ${_protobuf_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
 endif()
 
 # Backwards compatibility
