@@ -421,7 +421,7 @@ if(NOT HDF5_FOUND)
             #if we detect that occurrence clear the suffix
             if(_suffix AND NOT TARGET ${HDF5_${_lang}_TARGET}${_suffix})
               if(NOT TARGET ${HDF5_${_lang}_TARGET})
-                #cant find this component with our without the suffix
+                #cant find this component with or without the suffix
                 #so bail out, and let the following locate HDF5
                 set(HDF5_FOUND FALSE)
                 break()
