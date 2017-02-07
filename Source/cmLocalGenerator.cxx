@@ -746,6 +746,13 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
       this->AppendFlagEscape(flags, *i);
     }
   }
+}
+
+void cmLocalGenerator::AddLanguageStandardOptions(std::string& flags,
+                                                  cmGeneratorTarget* target,
+                                                  const std::string& lang,
+                                                  const std::string& config)
+{
   std::vector<std::string> features;
   target->GetCompileFeatures(features, config);
   for (std::vector<std::string>::const_iterator it = features.begin();
@@ -1052,6 +1059,8 @@ void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
                                              std::string& flags)
 {
   cmMakefile* mf = this->GetMakefile();
+
+  this->AddLanguageStandardOptions(flags, target, lang, config);
 
   // Add language-specific flags.
   this->AddLanguageFlags(flags, lang, config);

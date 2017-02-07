@@ -231,6 +231,9 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
     std::string flags;
     const char* lang = language.c_str();
 
+    this->LocalGenerator->AddLanguageStandardOptions(
+      flags, this->GeneratorTarget, lang, config);
+
     if (notKernel) {
       this->LocalGenerator->AddLanguageFlags(flags, lang, config);
     } else {

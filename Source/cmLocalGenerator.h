@@ -98,6 +98,10 @@ public:
                             const std::string& lang,
                             const std::string& config);
 
+  void AddLanguageStandardOptions(std::string& flags,
+                                  cmGeneratorTarget* target,
+                                  const std::string& lang,
+                                  const std::string& config);
   void AddLanguageFlags(std::string& flags, const std::string& lang,
                         const std::string& config);
   void AddCMP0018Flags(std::string& flags, cmGeneratorTarget const* target,
