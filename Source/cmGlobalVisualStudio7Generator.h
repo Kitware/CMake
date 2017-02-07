@@ -95,6 +95,7 @@ public:
 
   /** Is the Microsoft Assembler enabled?  */
   bool IsMasmEnabled() const { return this->MasmEnabled; }
+  bool IsNasmEnabled() const { return this->NasmEnabled; }
 
   // Encoding for Visual Studio files
   virtual std::string Encoding();
@@ -163,6 +164,7 @@ protected:
   std::string GeneratorPlatform;
   std::string DefaultPlatformName;
   bool MasmEnabled;
+  bool NasmEnabled;
 
 private:
   char* IntelProjectVersion;
