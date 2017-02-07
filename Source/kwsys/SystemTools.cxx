@@ -3067,6 +3067,28 @@ bool SystemTools::FileIsSymlink(const std::string& name)
 #endif
 }
 
+bool SystemTools::FileIsFIFO(const std::string& name)
+{
+#if defined(_WIN32)
+  HANDLE hFile =
+    CreateFileW(Encoding::ToWide(name).c_str(), GENERIC_READ, FILE_SHARE_READ,
+                NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+  if (hFile == INVALID_HANDLE_VALUE) {
+    return false;
+  }
+  const DWORD type = GetFileType(hFile);
+  CloseHandle(hFile);
+  return type == FILE_TYPE_PIPE;
+#else
+  struct stat fs;
+  if (lstat(name.c_str(), &fs) == 0) {
+    return S_ISFIFO(fs.st_mode);
+  } else {
+    return false;
+  }
+#endif
+}
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
 bool SystemTools::CreateSymlink(const std::string&, const std::string&)
 {
