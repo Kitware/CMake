@@ -146,12 +146,12 @@ static bool tailmatch(const char *cooke_domain, const char *hostname)
  * matching cookie path and url path
  * RFC6265 5.1.4 Paths and Path-Match
  */
-static bool pathmatch(const char* cookie_path, const char* request_uri)
+static bool pathmatch(const char *cookie_path, const char *request_uri)
 {
   size_t cookie_path_len;
   size_t uri_path_len;
-  char* uri_path = NULL;
-  char* pos;
+  char *uri_path = NULL;
+  char *pos;
   bool ret = FALSE;
 
   /* cookie_path must not have last '/' separator. ex: /sample */
@@ -798,8 +798,8 @@ Curl_cookie_add(struct Curl_easy *data,
   /* Check if the domain is a Public Suffix and if yes, ignore the cookie.
      This needs a libpsl compiled with builtin data. */
   if(domain && co->domain && !isip(co->domain)) {
-    if(((psl = psl_builtin()) != NULL)
-        && !psl_is_cookie_domain_acceptable(psl, domain, co->domain)) {
+    psl = psl_builtin();
+    if(psl && !psl_is_cookie_domain_acceptable(psl, domain, co->domain)) {
       infof(data,
             "cookie '%s' dropped, domain '%s' must not set cookies for '%s'\n",
             co->name, domain, co->domain);
