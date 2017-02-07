@@ -505,6 +505,39 @@ void cmSystemTools::ParseUnixCommandLine(const char* command,
   argv.Store(args);
 }
 
+std::vector<std::string> cmSystemTools::HandleResponseFile(
+  std::vector<std::string>::const_iterator argBeg,
+  std::vector<std::string>::const_iterator argEnd)
+{
+  std::vector<std::string> arg_full;
+  for (std::vector<std::string>::const_iterator a = argBeg; a != argEnd; ++a) {
+    std::string const& arg = *a;
+    if (cmHasLiteralPrefix(arg, "@")) {
+      cmsys::ifstream responseFile(arg.substr(1).c_str(), std::ios::in);
+      if (!responseFile) {
+        std::string error = "failed to open for reading (";
+        error += cmSystemTools::GetLastSystemError();
+        error += "):\n  ";
+        error += arg.substr(1);
+        cmSystemTools::Error(error.c_str());
+      } else {
+        std::string line;
+        cmSystemTools::GetLineFromStream(responseFile, line);
+        std::vector<std::string> args2;
+#ifdef _WIN32
+        cmSystemTools::ParseWindowsCommandLine(line.c_str(), args2);
+#else
+        cmSystemTools::ParseUnixCommandLine(line.c_str(), args2);
+#endif
+        arg_full.insert(arg_full.end(), args2.begin(), args2.end());
+      }
+    } else {
+      arg_full.push_back(arg);
+    }
+  }
+  return arg_full;
+}
+
 std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
 {
   std::vector<std::string> args;

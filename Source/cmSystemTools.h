@@ -253,6 +253,13 @@ public:
   static void ParseUnixCommandLine(const char* command,
                                    std::vector<std::string>& args);
 
+  /**
+   * Handle response file in an argument list and return a new argument list
+   * **/
+  static std::vector<std::string> HandleResponseFile(
+    std::vector<std::string>::const_iterator argBeg,
+    std::vector<std::string>::const_iterator argEnd);
+
   static size_t CalculateCommandLineLengthLimit();
 
   static void EnableMessages() { s_DisableMessages = false; }

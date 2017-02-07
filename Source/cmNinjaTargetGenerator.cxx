@@ -557,13 +557,26 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     // Write the rule for ninja dyndep file generation.
     std::vector<std::string> ddCmds;
 
+#ifdef _WIN32
+    // Windows command line length is limited -> use response file for dyndep
+    // rules
+    std::string ddRspFile = "$out.rsp";
+    std::string ddRspContent = "$in";
+    std::string ddInput = "@" + ddRspFile;
+#else
+    std::string ddRspFile;
+    std::string ddRspContent;
+    std::string ddInput = "$in";
+#endif
+
     // Run CMake dependency scanner on preprocessed output.
     std::string const cmake = this->GetLocalGenerator()->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
     ddCmds.push_back(cmake + " -E cmake_ninja_dyndep"
                              " --tdi=" +
                      tdi + " --dd=$out"
-                           " $in");
+                           " " +
+                     ddInput);
 
     std::string const ddCmdLine =
       this->GetLocalGenerator()->BuildCommandLine(ddCmds);
@@ -575,9 +588,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     this->GetGlobalGenerator()->AddRule(
       this->LanguageDyndepRule(lang), ddCmdLine, ddDesc.str(), ddComment.str(),
       /*depfile*/ "",
-      /*deps*/ "",
-      /*rspfile*/ "",
-      /*rspcontent*/ "",
+      /*deps*/ "", ddRspFile, ddRspContent,
       /*restat*/ "",
       /*generator*/ false);
   }
