@@ -1,4 +1,7 @@
-set(url "file://@CMAKE_CURRENT_SOURCE_DIR@/FileDownloadInput.png")
+if(NOT "@CMAKE_CURRENT_SOURCE_DIR@" MATCHES "^/")
+  set(slash /)
+endif()
+set(url "file://${slash}@CMAKE_CURRENT_SOURCE_DIR@/FileDownloadInput.png")
 set(dir "@CMAKE_CURRENT_BINARY_DIR@/downloads")
 
 file(DOWNLOAD
