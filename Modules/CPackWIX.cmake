@@ -268,6 +268,17 @@
 #     follow the localization or convention of the system on which the
 #     installation is performed.
 #
+# .. variable:: CPACK_WIX_ROOT_FOLDER_ID
+#
+# This variable allows specification of a custom root folder ID.
+# The generator specific ``<64>`` token can be used for
+# folder IDs that come in 32-bit and 64-bit variants.
+# In 32-bit builds the token will expand empty while in 64-bit builds
+# it will expand to ``64``.
+#
+# When unset generated installers will default installing to
+# ``ProgramFiles<64>Folder``.
+#
 
 if(NOT CPACK_WIX_ROOT)
   file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)
