@@ -1643,8 +1643,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
        li != languages.end(); ++li) {
     std::string const& lang = *li;
     std::string& flags = cflags[lang];
-    this->CurrentLocalGenerator->AddLanguageStandardOptions(flags, gtgt, lang,
-                                                            configName);
 
     // Add language-specific flags.
     this->CurrentLocalGenerator->AddLanguageFlags(flags, lang, configName);

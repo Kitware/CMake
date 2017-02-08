@@ -648,7 +648,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
         target->GetName().c_str());
       return;
     }
-    this->AddLanguageStandardOptions(flags, target, linkLanguage, configName);
     if (linkLanguage == "C" || linkLanguage == "CXX" ||
         linkLanguage == "Fortran") {
       std::string baseFlagVar = "CMAKE_";
