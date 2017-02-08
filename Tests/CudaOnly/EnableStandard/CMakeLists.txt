@@ -13,3 +13,14 @@ target_link_libraries(CudaOnlyEnableStandard PRIVATE CUDAStatic11 CUDADynamic11)
 
 set_target_properties(CUDAStatic11 CUDADynamic11 PROPERTIES CUDA_STANDARD 11)
 set_target_properties(CUDAStatic11 CUDADynamic11 PROPERTIES CUDA_STANDARD_REQUIRED TRUE)
+
+#Verify CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES
+foreach(dir ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+  if(NOT IS_DIRECTORY "${dir}")
+    message(FATAL_ERROR
+      "CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES entry\n"
+      " ${dir}\n"
+      "is not an existing directory."
+      )
+  endif()
+endforeach()
