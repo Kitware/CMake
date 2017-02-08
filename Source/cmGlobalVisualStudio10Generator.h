@@ -160,6 +160,9 @@ private:
 
   bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
+  std::string VCTargetsPath;
+  bool FindVCTargetsPath(cmMakefile* mf);
+
   // We do not use the reload macros for VS >= 10.
   virtual std::string GetUserMacrosDirectory() { return ""; }
 };
