@@ -53,6 +53,10 @@ public:
   /** The toolset host architecture name (e.g. x64 for 64-bit host tools).  */
   const char* GetPlatformToolsetHostArchitecture() const;
 
+  /** The cuda toolset version.  */
+  const char* GetPlatformToolsetCuda() const;
+  std::string const& GetPlatformToolsetCudaString() const;
+
   /** Return the CMAKE_SYSTEM_NAME.  */
   std::string const& GetSystemName() const { return this->SystemName; }
 
@@ -118,6 +122,7 @@ protected:
 
   std::string GeneratorToolset;
   std::string GeneratorToolsetHostArchitecture;
+  std::string GeneratorToolsetCuda;
   std::string DefaultPlatformToolset;
   std::string WindowsTargetPlatformVersion;
   std::string SystemName;

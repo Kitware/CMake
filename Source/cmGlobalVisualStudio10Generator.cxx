@@ -186,6 +186,9 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   if (const char* hostArch = this->GetPlatformToolsetHostArchitecture()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE", hostArch);
   }
+  if (const char* cuda = this->GetPlatformToolsetCuda()) {
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_CUDA", cuda);
+  }
   return true;
 }
 
@@ -261,8 +264,10 @@ bool cmGlobalVisualStudio10Generator::ParseGeneratorToolset(
 bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
   std::string const& key, std::string const& value)
 {
-  static_cast<void>(key);
-  static_cast<void>(value);
+  if (key == "cuda") {
+    this->GeneratorToolsetCuda = value;
+    return true;
+  }
   return false;
 }
 
@@ -461,6 +466,20 @@ cmGlobalVisualStudio10Generator::GetPlatformToolsetHostArchitecture() const
     return this->GeneratorToolsetHostArchitecture.c_str();
   }
   return CM_NULLPTR;
+}
+
+const char* cmGlobalVisualStudio10Generator::GetPlatformToolsetCuda() const
+{
+  if (!this->GeneratorToolsetCuda.empty()) {
+    return this->GeneratorToolsetCuda.c_str();
+  }
+  return CM_NULLPTR;
+}
+
+std::string const&
+cmGlobalVisualStudio10Generator::GetPlatformToolsetCudaString() const
+{
+  return this->GeneratorToolsetCuda;
 }
 
 bool cmGlobalVisualStudio10Generator::FindMakeProgram(cmMakefile* mf)
