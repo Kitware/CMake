@@ -35,9 +35,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,
 
 /* generic function that returns how much time there's left to run, according
    to the timeouts set */
-long Curl_timeleft(struct Curl_easy *data,
-                   struct timeval *nowp,
-                   bool duringconnect);
+time_t Curl_timeleft(struct Curl_easy *data,
+                     struct timeval *nowp,
+                     bool duringconnect);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
 #define HAPPY_EYEBALLS_TIMEOUT     200 /* milliseconds to wait between
@@ -51,6 +51,11 @@ long Curl_timeleft(struct Curl_easy *data,
  */
 curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp);
+
+/*
+ * Check if a connection seems to be alive.
+ */
+bool Curl_connalive(struct connectdata *conn);
 
 #ifdef USE_WINSOCK
 /* When you run a program that uses the Windows Sockets API, you may
@@ -136,5 +141,7 @@ void Curl_conncontrol(struct connectdata *conn,
 #define connclose(x,y) Curl_conncontrol(x, CONNCTRL_CONNECTION)
 #define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP)
 #endif
+
+bool Curl_conn_data_pending(struct connectdata *conn, int sockindex);
 
 #endif /* HEADER_CURL_CONNECT_H */

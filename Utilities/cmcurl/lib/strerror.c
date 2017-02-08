@@ -53,7 +53,7 @@ const char *
 curl_easy_strerror(CURLcode error)
 {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  switch (error) {
+  switch(error) {
   case CURLE_OK:
     return "No error";
 
@@ -348,7 +348,7 @@ const char *
 curl_multi_strerror(CURLMcode error)
 {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  switch (error) {
+  switch(error) {
   case CURLM_CALL_MULTI_PERFORM:
     return "Please call curl_multi_perform() soon";
 
@@ -393,7 +393,7 @@ const char *
 curl_share_strerror(CURLSHcode error)
 {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  switch (error) {
+  switch(error) {
   case CURLSHE_OK:
     return "No error";
 
@@ -435,7 +435,7 @@ get_winsock_error (int err, char *buf, size_t len)
   const char *p;
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  switch (err) {
+  switch(err) {
   case WSAEINTR:
     p = "Call interrupted";
     break;
@@ -609,7 +609,7 @@ get_winsock_error (int err, char *buf, size_t len)
   else
     p = "error";
 #endif
-  strncpy (buf, p, len);
+  strncpy(buf, p, len);
   buf [len-1] = '\0';
   return buf;
 }
@@ -715,10 +715,12 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   buf[max] = '\0'; /* make sure the string is zero terminated */
 
   /* strip trailing '\r\n' or '\n'. */
-  if((p = strrchr(buf, '\n')) != NULL && (p - buf) >= 2)
-     *p = '\0';
-  if((p = strrchr(buf, '\r')) != NULL && (p - buf) >= 1)
-     *p = '\0';
+  p = strrchr(buf, '\n');
+  if(p && (p - buf) >= 2)
+    *p = '\0';
+  p = strrchr(buf, '\r');
+  if(p && (p - buf) >= 1)
+    *p = '\0';
 
   if(old_errno != ERRNO)
     SET_ERRNO(old_errno);
@@ -750,7 +752,7 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
 
   old_errno = ERRNO;
 
-  switch (err) {
+  switch(err) {
     case SEC_E_OK:
       txt = "No error";
       break;
@@ -1035,10 +1037,12 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
     if(msg_formatted) {
       msgbuf[sizeof(msgbuf)-1] = '\0';
       /* strip trailing '\r\n' or '\n' */
-      if((p = strrchr(msgbuf, '\n')) != NULL && (p - msgbuf) >= 2)
-         *p = '\0';
-      if((p = strrchr(msgbuf, '\r')) != NULL && (p - msgbuf) >= 1)
-         *p = '\0';
+      p = strrchr(msgbuf, '\n');
+      if(p && (p - msgbuf) >= 2)
+        *p = '\0';
+      p = strrchr(msgbuf, '\r');
+      if(p && (p - msgbuf) >= 1)
+        *p = '\0';
       msg = msgbuf;
     }
     if(msg)

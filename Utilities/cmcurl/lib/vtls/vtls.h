@@ -50,13 +50,24 @@
 #define ALPN_HTTP_1_1_LENGTH 8
 #define ALPN_HTTP_1_1 "http/1.1"
 
-bool Curl_ssl_config_matches(struct ssl_config_data* data,
-                             struct ssl_config_data* needle);
-bool Curl_clone_ssl_config(struct ssl_config_data* source,
-                           struct ssl_config_data* dest);
-void Curl_free_ssl_config(struct ssl_config_data* sslc);
+/* set of helper macros for the backends to access the correct fields. For the
+   proxy or for the remote host - to properly support HTTPS proxy */
 
-unsigned int Curl_rand(struct Curl_easy *);
+#define SSL_IS_PROXY() (CURLPROXY_HTTPS == conn->http_proxy.proxytype && \
+  ssl_connection_complete != conn->proxy_ssl[conn->sock[SECONDARYSOCKET] == \
+  CURL_SOCKET_BAD ? FIRSTSOCKET : SECONDARYSOCKET].state)
+#define SSL_SET_OPTION(var) (SSL_IS_PROXY() ? data->set.proxy_ssl.var : \
+                             data->set.ssl.var)
+#define SSL_CONN_CONFIG(var) (SSL_IS_PROXY() ?          \
+  conn->proxy_ssl_config.var : conn->ssl_config.var)
+
+bool Curl_ssl_config_matches(struct ssl_primary_config* data,
+                             struct ssl_primary_config* needle);
+bool Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
+                                   struct ssl_primary_config *dest);
+void Curl_free_primary_ssl_config(struct ssl_primary_config* sslc);
+int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
+                     int numsocks);
 
 int Curl_ssl_backend(void);
 
@@ -87,12 +98,12 @@ int Curl_ssl_check_cxn(struct connectdata *conn);
 /* Certificate information list handling. */
 
 void Curl_ssl_free_certinfo(struct Curl_easy *data);
-CURLcode Curl_ssl_init_certinfo(struct Curl_easy * data, int num);
-CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy * data, int certnum,
-                                    const char * label, const char * value,
+CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num);
+CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data, int certnum,
+                                    const char *label, const char *value,
                                     size_t valuelen);
-CURLcode Curl_ssl_push_certinfo(struct Curl_easy * data, int certnum,
-                                const char * label, const char * value);
+CURLcode Curl_ssl_push_certinfo(struct Curl_easy *data, int certnum,
+                                const char *label, const char *value);
 
 /* Functions to be used by SSL library adaptation functions */
 
@@ -116,7 +127,8 @@ void Curl_ssl_sessionid_unlock(struct connectdata *conn);
  */
 bool Curl_ssl_getsessionid(struct connectdata *conn,
                            void **ssl_sessionid,
-                           size_t *idsize); /* set 0 if unknown */
+                           size_t *idsize, /* set 0 if unknown */
+                           int sockindex);
 /* add a new session ID
  * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
  * Caller must ensure that it has properly shared ownership of this sessionid
@@ -124,7 +136,8 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
  */
 CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
                                void *ssl_sessionid,
-                               size_t idsize);
+                               size_t idsize,
+                               int sockindex);
 /* Kill a single session ID entry in the cache
  * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
  * This will call engine-specific curlssl_session_free function, which must
@@ -140,10 +153,9 @@ void Curl_ssl_kill_session(struct curl_ssl_session *session);
  */
 void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid);
 
-/* get N random bytes into the buffer, return 0 if a find random is filled
-   in */
-int Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,
-                    size_t length);
+/* get N random bytes into the buffer */
+CURLcode Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,
+                         size_t length);
 CURLcode Curl_ssl_md5sum(unsigned char *tmp, /* input */
                          size_t tmplen,
                          unsigned char *md5sum, /* output */

@@ -62,7 +62,7 @@
 #include "sendf.h"
 #include "strcase.h"
 #include "warnless.h"
-
+#include "strdup.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -88,7 +88,8 @@ name_to_level(const char *name)
 
 /* Convert a protocol |level| to its char representation.
    We take an int to catch programming mistakes. */
-static char level_to_char(int level) {
+static char level_to_char(int level)
+{
   switch(level) {
   case PROT_CLEAR:
     return 'C';
@@ -202,7 +203,7 @@ static CURLcode read_data(struct connectdata *conn,
   if(len) {
     /* only realloc if there was a length */
     len = ntohl(len);
-    tmp = realloc(buf->data, len);
+    tmp = Curl_saferealloc(buf->data, len);
   }
   if(tmp == NULL)
     return CURLE_OUT_OF_MEMORY;
@@ -222,7 +223,7 @@ buffer_read(struct krb5buffer *buf, void *data, size_t len)
 {
   if(buf->size - buf->index < len)
     len = buf->size - buf->index;
-  memcpy(data, (char*)buf->data + buf->index, len);
+  memcpy(data, (char *)buf->data + buf->index, len);
   buf->index += len;
   return len;
 }
@@ -291,7 +292,7 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
       prot_level = conn->command_prot;
   }
   bytes = conn->mech->encode(conn->app_data, from, length, prot_level,
-                             (void**)&buffer);
+                             (void **)&buffer);
   if(!buffer || bytes <= 0)
     return; /* error */
 
@@ -411,7 +412,7 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
 static int sec_set_protection_level(struct connectdata *conn)
 {
   int code;
-  char* pbsz;
+  char *pbsz;
   static unsigned int buffer_size = 1 << 20; /* 1048576 */
   enum protection_level level = conn->request_data_prot;
 

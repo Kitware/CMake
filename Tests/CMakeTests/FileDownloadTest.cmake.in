@@ -1,4 +1,4 @@
-set(url "file://@CMAKE_CURRENT_SOURCE_DIR@/FileDownloadInput.png")
+set(url "file:///@CMAKE_CURRENT_SOURCE_DIR@/FileDownloadInput.png")
 set(dir "@CMAKE_CURRENT_BINARY_DIR@/downloads")
 
 message(STATUS "FileDownload:1")

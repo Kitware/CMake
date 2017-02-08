@@ -316,7 +316,7 @@ include (CheckCSourceCompiles)
 
 # On windows preload settings
 if(WIN32)
-  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WINSOCKAPI_")
+  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WINSOCKAPI_=")
   include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
 endif(WIN32)
 
@@ -801,7 +801,11 @@ endif()
 
 check_symbol_exists(basename      "${CURL_INCLUDES}" HAVE_BASENAME)
 check_symbol_exists(socket        "${CURL_INCLUDES}" HAVE_SOCKET)
-check_symbol_exists(poll          "${CURL_INCLUDES}" HAVE_POLL)
+# poll on macOS is unreliable, it first did not exist, then was broken until
+# fixed in 10.9 only to break again in 10.12.
+if(NOT APPLE)
+  check_symbol_exists(poll        "${CURL_INCLUDES}" HAVE_POLL)
+endif()
 check_symbol_exists(select        "${CURL_INCLUDES}" HAVE_SELECT)
 check_symbol_exists(strdup        "${CURL_INCLUDES}" HAVE_STRDUP)
 check_symbol_exists(strstr        "${CURL_INCLUDES}" HAVE_STRSTR)

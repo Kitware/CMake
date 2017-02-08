@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,6 +41,9 @@ int Curl_gskit_shutdown(struct connectdata *conn, int sockindex);
 size_t Curl_gskit_version(char *buffer, size_t size);
 int Curl_gskit_check_cxn(struct connectdata *cxn);
 
+/* Support HTTPS-proxy */
+/* TODO: add '#define HTTPS_PROXY_SUPPORT 1' and fix test #1014 (if need) */
+
 /* Set the API backend definition to GSKit */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_GSKIT
 
@@ -64,7 +67,7 @@ int Curl_gskit_check_cxn(struct connectdata *cxn);
 #define curlssl_version Curl_gskit_version
 #define curlssl_check_cxn(x) Curl_gskit_check_cxn(x)
 #define curlssl_data_pending(x,y) 0
-#define curlssl_random(x,y,z) -1
+#define curlssl_random(x,y,z) (x=x, y=y, z=z, CURLE_NOT_BUILT_IN)
 
 #endif /* USE_GSKIT */
 
