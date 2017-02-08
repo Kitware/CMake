@@ -38,10 +38,10 @@
 #
 #
 #
-# Additional Note: If you see an empty SDL2_LIBRARY_TEMP in your
+# Additional Note: If you see an empty SDL2_LIBRARIES_TEMP in your
 # configuration and no SDL2_LIBRARY, it means CMake did not find your SDL
 # library (SDL2.dll, libsdl2.so, SDL2.framework, etc).  Set
-# SDL2_LIBRARY_TEMP to point to your SDL2 library, and configure again.
+# SDL2_LIBRARIES_TEMP to point to your SDL2 library, and configure again.
 # Similarly, if you see an empty SDL2MAIN_LIBRARY, you should set this
 # value as appropriate.  These values are used to generate the final
 # SDL2_LIBRARY variable, but when these values are unset, SDL2_LIBRARY
@@ -75,15 +75,23 @@ else()
 endif()
 
 find_library(
-  SDL2_LIBRARY_TEMP
+  SDL2_LIBRARIES_TEMP
   SDL2
   PATH_SUFFIXES SDL2 lib SDL2/lib ${VC_LIB_PATH_SUFFIX} SDL2/${VC_LIB_PATH_SUFFIX}
 )
 
+find_library(
+  SDL2main_LIBRARY_TEMP
+  SDL2main
+  PATH_SUFFIXES SDL2 lib SDL2/lib ${VC_LIB_PATH_SUFFIX} SDL2/${VC_LIB_PATH_SUFFIX}
+)
+
+list(APPEND SDL2_LIBRARIES_TEMP ${SDL2main_LIBRARY_TEMP})
+
 # Hide this cache variable from the user, it's an internal implementation
 # detail. The documented library variable for the user is SDL2_LIBRARY
-# which is derived from SDL2_LIBRARY_TEMP further below.
-set_property(CACHE SDL2_LIBRARY_TEMP PROPERTY TYPE INTERNAL)
+# which is derived from SDL2_LIBRARIES_TEMP further below.
+set_property(CACHE SDL2_LIBRARIES_TEMP PROPERTY TYPE INTERNAL)
 
 if(NOT SDL2_BUILDING_LIBRARY)
   if(NOT SDL2_INCLUDE_DIR MATCHES ".framework")
@@ -119,12 +127,12 @@ if(MINGW)
   set(MINGW32_LIBRARY mingw32 "-mwindows" CACHE STRING "link flags for MinGW")
 endif()
 
-if(SDL2_LIBRARY_TEMP)
+if(SDL2_LIBRARIES_TEMP)
   # For SDLmain
   if(SDL2MAIN_LIBRARY AND NOT SDL2_BUILDING_LIBRARY)
-    list(FIND SDL2_LIBRARY_TEMP "${SDL2MAIN_LIBRARY}" _SDL2_MAIN_INDEX)
+    list(FIND SDL2_LIBRARIES_TEMP "${SDL2MAIN_LIBRARY}" _SDL2_MAIN_INDEX)
     if(_SDL2_MAIN_INDEX EQUAL -1)
-      set(SDL2_LIBRARY_TEMP "${SDL2MAIN_LIBRARY}" ${SDL2_LIBRARY_TEMP})
+      set(SDL2_LIBRARIES_TEMP "${SDL2MAIN_LIBRARY}" ${SDL2_LIBRARIES_TEMP})
     endif()
     unset(_SDL2_MAIN_INDEX)
   endif()
@@ -136,23 +144,23 @@ if(SDL2_LIBRARY_TEMP)
   # So I use a temporary variable until the end so I can set the
   # "real" variable in one-shot.
   if(APPLE)
-    set(SDL2_LIBRARY_TEMP ${SDL2_LIBRARY_TEMP} "-framework Cocoa")
+    set(SDL2_LIBRARIES_TEMP ${SDL2_LIBRARIES_TEMP} "-framework Cocoa")
   endif()
 
   # For threads, as mentioned Apple doesn't need this.
   # In fact, there seems to be a problem if I used the Threads package
   # and try using this line, so I'm just skipping it entirely for OS X.
   if(NOT APPLE)
-    set(SDL2_LIBRARY_TEMP ${SDL2_LIBRARY_TEMP} ${CMAKE_THREAD_LIBS_INIT})
+    set(SDL2_LIBRARIES_TEMP ${SDL2_LIBRARIES_TEMP} ${CMAKE_THREAD_LIBS_INIT})
   endif()
 
   # For MinGW library
   if(MINGW)
-    set(SDL2_LIBRARY_TEMP ${MINGW32_LIBRARY} ${SDL2_LIBRARY_TEMP})
+    set(SDL2_LIBRARIES_TEMP ${MINGW32_LIBRARY} ${SDL2_LIBRARIES_TEMP})
   endif()
 
   # Set the final string here so the GUI reflects the final state.
-  set(SDL2_LIBRARY ${SDL2_LIBRARY_TEMP} CACHE STRING "Where the SDL Library can be found")
+  set(SDL2_LIBRARIES ${SDL2_LIBRARIES_TEMP} CACHE STRING "Where the SDL Libraries can be found")
 endif()
 
 if(SDL2_INCLUDE_DIR AND EXISTS "${SDL2_INCLUDE_DIR}/SDL_version.h")
@@ -174,5 +182,5 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL2
-                                  REQUIRED_VARS SDL2_LIBRARY SDL2_INCLUDE_DIR
+                                  REQUIRED_VARS SDL2_LIBRARIES SDL2_INCLUDE_DIR
                                   VERSION_VAR SDL2_VERSION_STRING)
