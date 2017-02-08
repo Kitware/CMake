@@ -22,7 +22,10 @@
 #include "cmake.h"
 
 #include <cmsys/FStream.hxx>
+#include <cmsys/Glob.hxx>
 #include <cmsys/RegularExpression.hxx>
+
+#include <algorithm>
 
 static const char vs10generatorName[] = "Visual Studio 10 2010";
 
@@ -160,6 +163,13 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorPlatform(
   return true;
 }
 
+static void cmCudaToolVersion(std::string& s)
+{
+  // "CUDA x.y.props" => "x.y"
+  s = s.substr(5);
+  s = s.substr(0, s.size() - 6);
+}
+
 bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   std::string const& ts, cmMakefile* mf)
 {
@@ -178,6 +188,23 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
 
   if (!this->FindVCTargetsPath(mf)) {
     return false;
+  }
+
+  if (this->GeneratorToolsetCuda.empty()) {
+    // Find the highest available version of the CUDA tools.
+    std::vector<std::string> cudaTools;
+    std::string const bcDir = this->VCTargetsPath + "/BuildCustomizations";
+    cmsys::Glob gl;
+    gl.SetRelative(bcDir.c_str());
+    if (gl.FindFiles(bcDir + "/CUDA *.props")) {
+      cudaTools = gl.GetFiles();
+    }
+    if (!cudaTools.empty()) {
+      std::for_each(cudaTools.begin(), cudaTools.end(), cmCudaToolVersion);
+      std::sort(cudaTools.begin(), cudaTools.end(),
+                cmSystemTools::VersionCompareGreater);
+      this->GeneratorToolsetCuda = cudaTools.at(0);
+    }
   }
 
   if (const char* toolset = this->GetPlatformToolset()) {
