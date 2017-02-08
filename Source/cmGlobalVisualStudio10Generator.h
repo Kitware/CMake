@@ -23,7 +23,6 @@ public:
   virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
   virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
   virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
-  virtual bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand, const std::string& makeProgram,
@@ -106,6 +105,9 @@ protected:
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);
 
+  virtual bool ProcessGeneratorToolsetField(std::string const& key,
+                                            std::string const& value);
+
   virtual std::string SelectWindowsCEToolset() const;
   virtual bool SelectWindowsPhoneToolset(std::string& toolset) const;
   virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
@@ -155,6 +157,8 @@ private:
   virtual std::string FindMSBuildCommand();
   virtual std::string FindDevEnvCommand();
   virtual std::string GetVSMakeProgram() { return this->GetMSBuildCommand(); }
+
+  bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
   // We do not use the reload macros for VS >= 10.
   virtual std::string GetUserMacrosDirectory() { return ""; }

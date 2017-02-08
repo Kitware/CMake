@@ -5,6 +5,6 @@ CMake Error at CMakeLists.txt:[0-9]+ \(project\):
 
   given toolset specification
 
-    Test Toolset,host=x6[45]
+    Test Toolset,not_a_key
 
-  that contains invalid field 'host=x6[45]'\.$
+  that contains a field after the first ',' with no '='\.$
