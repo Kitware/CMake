@@ -65,12 +65,7 @@
 find_path(
   SDL2_INCLUDE_DIR
   SDL.h
-  HINTS
-    ENV SDLDIR
-  PATH_SUFFIXES
-    SDL2
-    include/SDL2
-    SDL2/include/SDL2
+  PATH_SUFFIXES SDL2 include/SDL2 SDL2/include/SDL2
 )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -81,14 +76,8 @@ endif()
 
 find_library(
   SDL2_LIBRARY_TEMP
-  NAMES SDL2
-  HINTS
-    ENV SDLDIR
-  PATH_SUFFIXES
-    lib
-    SDL2/lib
-    ${VC_LIB_PATH_SUFFIX}
-    SDL2/${VC_LIB_PATH_SUFFIX}
+  SDL2
+  PATH_SUFFIXES SDL2 lib SDL2/lib ${VC_LIB_PATH_SUFFIX} SDL2/${VC_LIB_PATH_SUFFIX}
 )
 
 # Hide this cache variable from the user, it's an internal implementation
@@ -105,7 +94,7 @@ if(NOT SDL2_BUILDING_LIBRARY)
     find_library(SDL2MAIN_LIBRARY
       NAMES SDL2main
       HINTS
-        ENV SDLDIR
+        ENV SDL2DIR
       PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
       PATHS
       /sw
