@@ -1,5 +1,6 @@
 enable_language(C)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH 1)
+set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR 1)
 add_subdirectory(EXPORT-OldIFace)
 add_library(foo SHARED empty.c)
 target_link_libraries(foo bar)

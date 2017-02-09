@@ -1194,6 +1194,11 @@ void cmGlobalGenerator::AddCMP0042WarnTarget(const std::string& target)
   this->CMP0042WarnTargets.insert(target);
 }
 
+void cmGlobalGenerator::AddCMP0068WarnTarget(const std::string& target)
+{
+  this->CMP0068WarnTargets.insert(target);
+}
+
 bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
 {
   // If the property is not enabled then okay.
@@ -1235,6 +1240,8 @@ bool cmGlobalGenerator::Compute()
 
   // clear targets to issue warning CMP0042 for
   this->CMP0042WarnTargets.clear();
+  // clear targets to issue warning CMP0068 for
+  this->CMP0068WarnTargets.clear();
 
   // Check whether this generator is allowed to run.
   if (!this->CheckALLOW_DUPLICATE_CUSTOM_TARGETS()) {
@@ -1361,6 +1368,24 @@ void cmGlobalGenerator::Generate()
     for (std::set<std::string>::iterator iter =
            this->CMP0042WarnTargets.begin();
          iter != this->CMP0042WarnTargets.end(); ++iter) {
+      w << " " << *iter << "\n";
+    }
+    this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+  }
+
+  if (!this->CMP0068WarnTargets.empty()) {
+    std::ostringstream w;
+    /* clang-format off */
+    w <<
+      cmPolicies::GetPolicyWarning(cmPolicies::CMP0068) << "\n"
+      "For compatibility with older versions of CMake, the install_name "
+      "fields for the following targets are still affected by RPATH "
+      "settings:\n"
+      ;
+    /* clang-format on */
+    for (std::set<std::string>::iterator iter =
+           this->CMP0068WarnTargets.begin();
+         iter != this->CMP0068WarnTargets.end(); ++iter) {
       w << " " << *iter << "\n";
     }
     this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, w.str());

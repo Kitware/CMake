@@ -10,6 +10,6 @@ This property is initialized by the value of the
 :variable:`CMAKE_BUILD_WITH_INSTALL_RPATH` variable if it is set when a target
 is created.
 
-This property also controls use of :prop_tgt:`INSTALL_NAME_DIR` in the build
-tree on macOS, but defers to the :prop_tgt:`BUILD_WITH_INSTALL_NAME_DIR` target
-property if the latter is set.
+If policy :policy:`CMP0068` is not ``NEW``, this property also controls use of
+:prop_tgt:`INSTALL_NAME_DIR` in the build tree on macOS.  Either way, the
+:prop_tgt:`BUILD_WITH_INSTALL_NAME_DIR` target property takes precedence.

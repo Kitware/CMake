@@ -1402,7 +1402,17 @@ bool cmGeneratorTarget::MacOSXUseInstallNameDir() const
     return cmSystemTools::IsOn(build_with_install_name);
   }
 
+  cmPolicies::PolicyStatus cmp0068 = this->GetPolicyStatusCMP0068();
+  if (cmp0068 == cmPolicies::NEW) {
+    return false;
+  }
+
   bool use_install_name = this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH");
+
+  if (use_install_name && cmp0068 == cmPolicies::WARN) {
+    this->LocalGenerator->GetGlobalGenerator()->AddCMP0068WarnTarget(
+      this->GetName());
+  }
 
   return use_install_name;
 }
@@ -1410,11 +1420,22 @@ bool cmGeneratorTarget::MacOSXUseInstallNameDir() const
 bool cmGeneratorTarget::CanGenerateInstallNameDir(
   InstallNameType name_type) const
 {
+  cmPolicies::PolicyStatus cmp0068 = this->GetPolicyStatusCMP0068();
+
+  if (cmp0068 == cmPolicies::NEW) {
+    return true;
+  }
+
   bool skip = this->Makefile->IsOn("CMAKE_SKIP_RPATH");
   if (name_type == INSTALL_NAME_FOR_INSTALL) {
     skip |= this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
   } else {
     skip |= this->GetPropertyAsBool("SKIP_BUILD_RPATH");
+  }
+
+  if (skip && cmp0068 == cmPolicies::WARN) {
+    this->LocalGenerator->GetGlobalGenerator()->AddCMP0068WarnTarget(
+      this->GetName());
   }
 
   return !skip;
