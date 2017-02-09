@@ -1396,6 +1396,12 @@ bool cmGeneratorTarget::MacOSXRpathInstallNameDirDefault() const
 
 bool cmGeneratorTarget::MacOSXUseInstallNameDir() const
 {
+  const char* build_with_install_name =
+    this->GetProperty("BUILD_WITH_INSTALL_NAME_DIR");
+  if (build_with_install_name) {
+    return cmSystemTools::IsOn(build_with_install_name);
+  }
+
   bool use_install_name = this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH");
 
   return use_install_name;
