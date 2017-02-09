@@ -781,6 +781,19 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
   result[kSOURCE_DIRECTORY_KEY] = lg->GetCurrentSourceDirectory();
   result[kBUILD_DIRECTORY_KEY] = lg->GetCurrentBinaryDirectory();
 
+  if (target->Target->GetHaveInstallRule()) {
+    result[kHAS_INSTALL_RULE] = true;
+    std::string installPrefix = target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
+    if (!installPrefix.empty()) {
+      result[kINSTALL_PATH] = installPrefix + '/' + target->Target->GetInstallPath();
+    }
+    else {
+      result[kINSTALL_PATH] = target->Target->GetInstallPath();
+    }
+  } else {
+    result[kHAS_INSTALL_RULE] = false;
+  }
+
   if (target->HaveWellDefinedOutputFiles()) {
     Json::Value artifacts = Json::arrayValue;
     artifacts.append(target->GetFullPath(config, false));

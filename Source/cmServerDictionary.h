@@ -97,6 +97,8 @@ static const std::string kCMAKE_C_COMPILER_VERSION = "cmakeCCompilerVersion";
 static const std::string kCMAKE_CXX_COMPILER = "cmakeCXXCompiler";
 static const std::string kCMAKE_CXX_COMPILER_VERSION = "cmakeCXXCompilerVersion";
 static const std::string kVC_SYSTEM_INCLUDE_PATHS = "vcSytemIncludePaths";
+static const std::string kHAS_INSTALL_RULE = "hasInstallRule";
+static const std::string kINSTALL_PATH = "installPath";
 
 static const std::string kSTART_MAGIC = "[== \"CMake Server\" ==[";
 static const std::string kEND_MAGIC = "]== \"CMake Server\" ==]";
