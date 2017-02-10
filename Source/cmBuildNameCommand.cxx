@@ -16,11 +16,6 @@ class cmExecutionStatus;
 bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args,
                                      cmExecutionStatus&)
 {
-  if (this->Disallowed(
-        cmPolicies::CMP0036,
-        "The build_name command should not be called; see CMP0036.")) {
-    return true;
-  }
   if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
