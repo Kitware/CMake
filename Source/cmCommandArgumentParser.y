@@ -91,131 +91,93 @@ static void cmCommandArgument_yyerror(yyscan_t yyscanner, const char* message);
 
 
 Start:
-GoalWithOptionalBackSlash
-{
-  $<str>$ = 0;
-  yyGetParser->SetResult($<str>1);
-}
+  GoalWithOptionalBackSlash {
+    $<str>$ = 0;
+    yyGetParser->SetResult($<str>1);
+  }
 
 GoalWithOptionalBackSlash:
-Goal
-{
-  $<str>$ = $<str>1;
-}
-|
-Goal cal_BSLASH
-{
-  $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
-}
+  Goal {
+    $<str>$ = $<str>1;
+  }
+| Goal cal_BSLASH {
+    $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
+  }
 
 Goal:
-{
-  $<str>$ = 0;
-}
-|
-String Goal
-{
-  $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
-}
+  {
+    $<str>$ = 0;
+  }
+| String Goal {
+    $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
+  }
 
 String:
-OuterText
-{
-  $<str>$ = $<str>1;
-}
-|
-Variable
-{
-  $<str>$ = $<str>1;
-}
+  OuterText {
+    $<str>$ = $<str>1;
+  }
+| Variable {
+    $<str>$ = $<str>1;
+  }
 
 OuterText:
-cal_NAME
-{
-  $<str>$ = $<str>1;
-}
-|
-cal_AT
-{
-  $<str>$ = $<str>1;
-}
-|
-cal_DOLLAR
-{
-  $<str>$ = $<str>1;
-}
-|
-cal_LCURLY
-{
-  $<str>$ = $<str>1;
-}
-|
-cal_RCURLY
-{
-  $<str>$ = $<str>1;
-}
-|
-cal_SYMBOL
-{
-  $<str>$ = $<str>1;
-}
+  cal_NAME {
+    $<str>$ = $<str>1;
+  }
+| cal_AT {
+    $<str>$ = $<str>1;
+  }
+| cal_DOLLAR {
+    $<str>$ = $<str>1;
+  }
+| cal_LCURLY {
+    $<str>$ = $<str>1;
+  }
+| cal_RCURLY {
+    $<str>$ = $<str>1;
+  }
+| cal_SYMBOL {
+    $<str>$ = $<str>1;
+  }
 
 Variable:
-cal_ENVCURLY EnvVarName cal_RCURLY
-{
-  $<str>$ = yyGetParser->ExpandSpecialVariable($<str>1,$<str>2);
-  //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
-}
-|
-cal_NCURLY MultipleIds cal_RCURLY
-{
-  $<str>$ = yyGetParser->ExpandSpecialVariable($<str>1,$<str>2);
-  //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
-}
-|
-cal_DCURLY MultipleIds cal_RCURLY
-{
-  $<str>$ = yyGetParser->ExpandVariable($<str>2);
-  //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
-}
-|
-cal_ATNAME
-{
-  $<str>$ = yyGetParser->ExpandVariableForAt($<str>1);
-}
+  cal_ENVCURLY EnvVarName cal_RCURLY {
+    $<str>$ = yyGetParser->ExpandSpecialVariable($<str>1, $<str>2);
+  }
+| cal_NCURLY MultipleIds cal_RCURLY {
+    $<str>$ = yyGetParser->ExpandSpecialVariable($<str>1, $<str>2);
+  }
+| cal_DCURLY MultipleIds cal_RCURLY {
+    $<str>$ = yyGetParser->ExpandVariable($<str>2);
+  }
+| cal_ATNAME {
+    $<str>$ = yyGetParser->ExpandVariableForAt($<str>1);
+  }
 
 EnvVarName:
-MultipleIds
-{
-  $<str>$ = $<str>1;
-}
-|
-cal_SYMBOL EnvVarName
-{
-  $<str>$ = $<str>1;
-}
+  MultipleIds {
+    $<str>$ = $<str>1;
+  }
+| cal_SYMBOL EnvVarName {
+    $<str>$ = $<str>1;
+  }
 
 MultipleIds:
-{
-  $<str>$ = 0;
-}
-|
-ID MultipleIds
-{
-  $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
-}
+  {
+    $<str>$ = 0;
+  }
+| ID MultipleIds {
+    $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
+  }
 
 ID:
-cal_NAME
-{
-  $<str>$ = $<str>1;
-}
-|
-Variable
-{
-  $<str>$ = $<str>1;
-}
-
+  cal_NAME {
+    $<str>$ = $<str>1;
+  }
+| Variable {
+    $<str>$ = $<str>1;
+  }
+;
 
 %%
 /* End of grammar */
