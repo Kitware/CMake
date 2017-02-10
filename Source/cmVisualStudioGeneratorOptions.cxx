@@ -252,19 +252,19 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   if (this->Defines.empty()) {
     return;
   }
+  const char* tag = "PreprocessorDefinitions";
   if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
     // if there are configuration specific flags, then
     // use the configuration specific tag for PreprocessorDefinitions
     if (!this->Configuration.empty()) {
       fout << prefix;
       this->TargetGenerator->WritePlatformConfigTag(
-        "PreprocessorDefinitions", this->Configuration.c_str(), 0, 0, 0,
-        &fout);
+        tag, this->Configuration.c_str(), 0, 0, 0, &fout);
     } else {
-      fout << prefix << "<PreprocessorDefinitions>";
+      fout << prefix << "<" << tag << ">";
     }
   } else {
-    fout << prefix << "PreprocessorDefinitions=\"";
+    fout << prefix << tag << "=\"";
   }
   const char* sep = "";
   for (std::vector<std::string>::const_iterator di = this->Defines.begin();
@@ -291,7 +291,7 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
     sep = ";";
   }
   if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-    fout << ";%(PreprocessorDefinitions)</PreprocessorDefinitions>" << suffix;
+    fout << ";%(" << tag << ")</" << tag << ">" << suffix;
   } else {
     fout << "\"" << suffix;
   }
