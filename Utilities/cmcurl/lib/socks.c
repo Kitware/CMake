@@ -57,7 +57,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
   ssize_t nread;
   ssize_t allread = 0;
   int result;
-  long timeleft;
+  time_t timeleft;
   *n = 0;
   for(;;) {
     timeleft = Curl_timeleft(conn->data, NULL, TRUE);
@@ -109,9 +109,10 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
                      const char *hostname,
                      int remote_port,
                      int sockindex,
-                     struct connectdata *conn,
-                     bool protocol4a)
+                     struct connectdata *conn)
 {
+  const bool protocol4a =
+    (conn->socks_proxy.proxytype == CURLPROXY_SOCKS4A) ? TRUE : FALSE;
 #define SOCKS4REQLEN 262
   unsigned char socksreq[SOCKS4REQLEN]; /* room for SOCKS4 request incl. user
                                            id */
@@ -125,6 +126,10 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     failf(data, "Connection time-out");
     return CURLE_OPERATION_TIMEDOUT;
   }
+
+  if(conn->bits.httpproxy)
+    infof(conn->data, "SOCKS4%s: connecting to HTTP proxy %s port %d\n",
+          protocol4a ? "a" : "", hostname, remote_port);
 
   (void)curlx_nonblock(sock, FALSE);
 
@@ -174,11 +179,11 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
       if(hp->ai_family == AF_INET) {
         struct sockaddr_in *saddr_in;
 
-        saddr_in = (struct sockaddr_in*)(void*)hp->ai_addr;
-        socksreq[4] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[0];
-        socksreq[5] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[1];
-        socksreq[6] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[2];
-        socksreq[7] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[3];
+        saddr_in = (struct sockaddr_in *)(void *)hp->ai_addr;
+        socksreq[4] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[0];
+        socksreq[5] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[1];
+        socksreq[6] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[2];
+        socksreq[7] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[3];
 
         infof(data, "SOCKS4 connect to IPv4 %s (locally resolved)\n", buf);
       }
@@ -219,7 +224,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     ssize_t written;
     ssize_t hostnamelen = 0;
     int packetsize = 9 +
-      (int)strlen((char*)socksreq + 8); /* size including NUL */
+      (int)strlen((char *)socksreq + 8); /* size including NUL */
 
     /* If SOCKS4a, set special invalid IP address 0.0.0.x */
     if(protocol4a) {
@@ -230,7 +235,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
       /* If still enough room in buffer, also append hostname */
       hostnamelen = (ssize_t)strlen(hostname) + 1; /* length including NUL */
       if(packetsize + hostnamelen <= SOCKS4REQLEN)
-        strcpy((char*)socksreq + packetsize, hostname);
+        strcpy((char *)socksreq + packetsize, hostname);
       else
         hostnamelen = 0; /* Flag: hostname did not fit in buffer */
     }
@@ -376,10 +381,15 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   CURLcode code;
   curl_socket_t sock = conn->sock[sockindex];
   struct Curl_easy *data = conn->data;
-  long timeout;
-  bool socks5_resolve_local = (conn->proxytype == CURLPROXY_SOCKS5)?TRUE:FALSE;
+  time_t timeout;
+  bool socks5_resolve_local =
+    (conn->socks_proxy.proxytype == CURLPROXY_SOCKS5) ? TRUE : FALSE;
   const size_t hostname_len = strlen(hostname);
   ssize_t len = 0;
+
+  if(conn->bits.httpproxy)
+    infof(conn->data, "SOCKS5: connecting to HTTP proxy %s port %d\n",
+          hostname, remote_port);
 
   /* RFC1928 chapter 5 specifies max 255 chars for domain name in packet */
   if(!socks5_resolve_local && hostname_len > 255) {
@@ -605,9 +615,9 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
         struct sockaddr_in *saddr_in;
         socksreq[len++] = 1; /* ATYP: IPv4 = 1 */
 
-        saddr_in = (struct sockaddr_in*)(void*)hp->ai_addr;
+        saddr_in = (struct sockaddr_in *)(void *)hp->ai_addr;
         for(i = 0; i < 4; i++) {
-          socksreq[len++] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[i];
+          socksreq[len++] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[i];
         }
 
         infof(data, "SOCKS5 connect to IPv4 %s (locally resolved)\n", buf);
@@ -617,9 +627,10 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
         struct sockaddr_in6 *saddr_in6;
         socksreq[len++] = 4; /* ATYP: IPv6 = 4 */
 
-        saddr_in6 = (struct sockaddr_in6*)(void*)hp->ai_addr;
+        saddr_in6 = (struct sockaddr_in6 *)(void *)hp->ai_addr;
         for(i = 0; i < 16; i++) {
-          socksreq[len++] = ((unsigned char*)&saddr_in6->sin6_addr.s6_addr)[i];
+          socksreq[len++] =
+            ((unsigned char *)&saddr_in6->sin6_addr.s6_addr)[i];
         }
 
         infof(data, "SOCKS5 connect to IPv6 %s (locally resolved)\n", buf);

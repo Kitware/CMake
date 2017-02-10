@@ -35,7 +35,7 @@
 #include "url.h"
 #include "connect.h"
 #include "strtoofft.h"
-
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -58,6 +58,12 @@
 #else
 #define nghttp2_session_callbacks_set_error_callback(x,y)
 #endif
+
+#if (NGHTTP2_VERSION_NUM >= 0x010c00)
+#define NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE 1
+#endif
+
+#define HTTP2_HUGE_WINDOW_SIZE (1 << 30)
 
 /*
  * Curl_http2_init_state() is called when the easy handle is created and
@@ -223,7 +229,8 @@ int Curl_http2_ver(char *p, size_t len)
 https://tools.ietf.org/html/rfc7540#page-77
 nghttp2_error_code enums are identical.
 */
-const char *Curl_http2_strerror(uint32_t err) {
+const char *Curl_http2_strerror(uint32_t err)
+{
 #ifndef NGHTTP2_HAS_HTTP2_STRERROR
   const char *str[] = {
     "NO_ERROR",             /* 0x0 */
@@ -841,10 +848,9 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
             stream->push_headers_alloc) {
       char **headp;
       stream->push_headers_alloc *= 2;
-      headp = realloc(stream->push_headers,
-                      stream->push_headers_alloc * sizeof(char *));
+      headp = Curl_saferealloc(stream->push_headers,
+                               stream->push_headers_alloc * sizeof(char *));
       if(!headp) {
-        free(stream->push_headers);
         stream->push_headers = NULL;
         return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
       }
@@ -966,7 +972,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
  */
 static nghttp2_settings_entry settings[] = {
   { NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS, 100 },
-  { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, NGHTTP2_INITIAL_WINDOW_SIZE },
+  { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, HTTP2_HUGE_WINDOW_SIZE },
 };
 
 #define H2_BUFSIZE 32768
@@ -1572,6 +1578,72 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 #define HEADER_OVERFLOW(x) \
   (x.namelen > (uint16_t)-1 || x.valuelen > (uint16_t)-1 - x.namelen)
 
+/*
+ * Check header memory for the token "trailers".
+ * Parse the tokens as separated by comma and surrounded by whitespace.
+ * Returns TRUE if found or FALSE if not.
+ */
+static bool contains_trailers(const char *p, size_t len)
+{
+  const char *end = p + len;
+  for(;;) {
+    for(; p != end && (*p == ' ' || *p == '\t'); ++p)
+      ;
+    if(p == end || (size_t)(end - p) < sizeof("trailers") - 1)
+      return FALSE;
+    if(strncasecompare("trailers", p, sizeof("trailers") - 1)) {
+      p += sizeof("trailers") - 1;
+      for(; p != end && (*p == ' ' || *p == '\t'); ++p)
+        ;
+      if(p == end || *p == ',')
+        return TRUE;
+    }
+    /* skip to next token */
+    for(; p != end && *p != ','; ++p)
+      ;
+    if(p == end)
+      return FALSE;
+    ++p;
+  }
+}
+
+typedef enum {
+  /* Send header to server */
+  HEADERINST_FORWARD,
+  /* Don't send header to server */
+  HEADERINST_IGNORE,
+  /* Discard header, and replace it with "te: trailers" */
+  HEADERINST_TE_TRAILERS
+} header_instruction;
+
+/* Decides how to treat given header field. */
+static header_instruction inspect_header(const char *name, size_t namelen,
+                                         const char *value, size_t valuelen) {
+  switch(namelen) {
+  case 2:
+    if(!strncasecompare("te", name, namelen))
+      return HEADERINST_FORWARD;
+
+    return contains_trailers(value, valuelen) ?
+           HEADERINST_TE_TRAILERS : HEADERINST_IGNORE;
+  case 7:
+    return strncasecompare("upgrade", name, namelen) ?
+           HEADERINST_IGNORE : HEADERINST_FORWARD;
+  case 10:
+    return (strncasecompare("connection", name, namelen) ||
+            strncasecompare("keep-alive", name, namelen)) ?
+           HEADERINST_IGNORE : HEADERINST_FORWARD;
+  case 16:
+    return strncasecompare("proxy-connection", name, namelen) ?
+           HEADERINST_IGNORE : HEADERINST_FORWARD;
+  case 17:
+    return strncasecompare("transfer-encoding", name, namelen) ?
+           HEADERINST_IGNORE : HEADERINST_FORWARD;
+  default:
+    return HEADERINST_FORWARD;
+  }
+}
+
 static ssize_t http2_send(struct connectdata *conn, int sockindex,
                           const void *mem, size_t len, CURLcode *err)
 {
@@ -1587,7 +1659,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   size_t nheader;
   size_t i;
   size_t authority_idx;
-  char *hdbuf = (char*)mem;
+  char *hdbuf = (char *)mem;
   char *end, *line_end;
   nghttp2_data_provider data_prd;
   int32_t stream_id;
@@ -1725,7 +1797,6 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   i = 3;
   while(i < nheader) {
     size_t hlen;
-    int skip = 0;
 
     hdbuf = line_end + 2;
 
@@ -1743,12 +1814,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
       goto fail;
     hlen = end - hdbuf;
 
-    if(hlen == 10 && strncasecompare("connection", hdbuf, 10)) {
-      /* skip Connection: headers! */
-      skip = 1;
-      --nheader;
-    }
-    else if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
+    if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
       authority_idx = i;
       nva[i].name = (unsigned char *)":authority";
       nva[i].namelen = strlen((char *)nva[i].name);
@@ -1761,16 +1827,28 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     while(*hdbuf == ' ' || *hdbuf == '\t')
       ++hdbuf;
     end = line_end;
-    if(!skip) {
+
+    switch(inspect_header((const char *)nva[i].name, nva[i].namelen, hdbuf,
+                          end - hdbuf)) {
+    case HEADERINST_IGNORE:
+      /* skip header fields prohibited by HTTP/2 specification. */
+      --nheader;
+      continue;
+    case HEADERINST_TE_TRAILERS:
+      nva[i].value = (uint8_t*)"trailers";
+      nva[i].valuelen = sizeof("trailers") - 1;
+      break;
+    default:
       nva[i].value = (unsigned char *)hdbuf;
       nva[i].valuelen = (size_t)(end - hdbuf);
-      nva[i].flags = NGHTTP2_NV_FLAG_NONE;
-      if(HEADER_OVERFLOW(nva[i])) {
-        failf(conn->data, "Failed sending HTTP request: Header overflow");
-        goto fail;
-      }
-      ++i;
     }
+
+    nva[i].flags = NGHTTP2_NV_FLAG_NONE;
+    if(HEADER_OVERFLOW(nva[i])) {
+      failf(conn->data, "Failed sending HTTP request: Header overflow");
+      goto fail;
+    }
+    ++i;
   }
 
   /* :authority must come before non-pseudo header fields */
@@ -1961,13 +2039,24 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   else {
     /* stream ID is unknown at this point */
     stream->stream_id = -1;
-    rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE, NULL, 0);
+    rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE, settings,
+                                 sizeof(settings) / sizeof(settings[0]));
     if(rv != 0) {
       failf(data, "nghttp2_submit_settings() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
       return CURLE_HTTP2;
     }
   }
+
+#ifdef NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE
+  rv = nghttp2_session_set_local_window_size(httpc->h2, NGHTTP2_FLAG_NONE, 0,
+                                             HTTP2_HUGE_WINDOW_SIZE);
+  if(rv != 0) {
+    failf(data, "nghttp2_session_set_local_window_size() failed: %s(%d)",
+          nghttp2_strerror(rv), rv);
+    return CURLE_HTTP2;
+  }
+#endif
 
   /* we are going to copy mem to httpc->inbuf.  This is required since
      mem is part of buffer pointed by stream->mem, and callbacks
@@ -1984,7 +2073,8 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
                     " after upgrade: len=%zu\n",
         nread);
 
-  memcpy(httpc->inbuf, mem, nread);
+  if(nread)
+    memcpy(httpc->inbuf, mem, nread);
   httpc->inbuflen = nread;
 
   nproc = nghttp2_session_mem_recv(httpc->h2, (const uint8_t *)httpc->inbuf,
@@ -2022,6 +2112,82 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   }
 
   return CURLE_OK;
+}
+
+void Curl_http2_add_child(struct Curl_easy *parent, struct Curl_easy *child,
+                          bool exclusive)
+{
+  struct Curl_http2_dep **tail;
+  struct Curl_http2_dep *dep = calloc(1, sizeof(struct Curl_http2_dep));
+  dep->data = child;
+
+  if(parent->set.stream_dependents && exclusive) {
+    struct Curl_http2_dep *node = parent->set.stream_dependents;
+    while(node) {
+      node->data->set.stream_depends_on = child;
+      node = node->next;
+    }
+
+    tail = &child->set.stream_dependents;
+    while(*tail)
+      tail = &(*tail)->next;
+
+    DEBUGASSERT(!*tail);
+    *tail = parent->set.stream_dependents;
+    parent->set.stream_dependents = 0;
+  }
+
+  tail = &parent->set.stream_dependents;
+  while(*tail) {
+    (*tail)->data->set.stream_depends_e = FALSE;
+    tail = &(*tail)->next;
+  }
+
+  DEBUGASSERT(!*tail);
+  *tail = dep;
+
+  child->set.stream_depends_on = parent;
+  child->set.stream_depends_e = exclusive;
+}
+
+void Curl_http2_remove_child(struct Curl_easy *parent, struct Curl_easy *child)
+{
+  struct Curl_http2_dep *last = 0;
+  struct Curl_http2_dep *data = parent->set.stream_dependents;
+  DEBUGASSERT(child->set.stream_depends_on == parent);
+
+  while(data && data->data != child) {
+    last = data;
+    data = data->next;
+  }
+
+  DEBUGASSERT(data);
+
+  if(data) {
+    if(last) {
+      last->next = data->next;
+    }
+    else {
+      parent->set.stream_dependents = data->next;
+    }
+    free(data);
+  }
+
+  child->set.stream_depends_on = 0;
+  child->set.stream_depends_e = FALSE;
+}
+
+void Curl_http2_cleanup_dependencies(struct Curl_easy *data)
+{
+  while(data->set.stream_dependents) {
+    struct Curl_easy *tmp = data->set.stream_dependents->data;
+    Curl_http2_remove_child(data, tmp);
+    if(data->set.stream_depends_on)
+      Curl_http2_add_child(data->set.stream_depends_on, tmp, FALSE);
+  }
+
+  if(data->set.stream_depends_on)
+    Curl_http2_remove_child(data->set.stream_depends_on, data);
 }
 
 #else /* !USE_NGHTTP2 */

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,8 +36,11 @@
 #include "memdebug.h"
 
 /*
- * This is supposed to be called in the beginning of a perform() session and
- * in curl_easy_reset() and should reset all session-info variables.
+ * Initialize statistical and informational data.
+ *
+ * This function is called in curl_easy_reset, curl_easy_duphandle and at the
+ * beginning of a perform session. It must reset the session-info variables,
+ * in particular all variables in struct PureInfo.
  */
 CURLcode Curl_initinfo(struct Curl_easy *data)
 {
@@ -75,6 +78,9 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   info->conn_primary_port = 0;
   info->conn_local_port = 0;
 
+  info->conn_scheme = 0;
+  info->conn_protocol = 0;
+
 #ifdef USE_SSL
   Curl_ssl_free_certinfo(data);
 #endif
@@ -83,7 +89,7 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
 }
 
 static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
-                             char **param_charp)
+                             const char **param_charp)
 {
   switch(info) {
   case CURLINFO_EFFECTIVE_URL:
@@ -119,6 +125,9 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_RTSP_SESSION_ID:
     *param_charp = data->set.str[STRING_RTSP_SESSION_ID];
+    break;
+  case CURLINFO_SCHEME:
+    *param_charp = data->info.conn_scheme;
     break;
 
   default:
@@ -156,6 +165,9 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_SSL_VERIFYRESULT:
     *param_longp = data->set.ssl.certverifyresult;
+    break;
+  case CURLINFO_PROXY_SSL_VERIFYRESULT:
+    *param_longp = data->set.proxy_ssl.certverifyresult;
     break;
   case CURLINFO_REDIRECT_COUNT:
     *param_longp = data->set.followlocation;
@@ -208,7 +220,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     *param_longp = data->state.rtsp_CSeq_recv;
     break;
   case CURLINFO_HTTP_VERSION:
-    switch (data->info.httpversion) {
+    switch(data->info.httpversion) {
     case 10:
       *param_longp = CURL_HTTP_VERSION_1_0;
       break;
@@ -222,6 +234,9 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
       *param_longp = CURL_HTTP_VERSION_NONE;
       break;
     }
+    break;
+  case CURLINFO_PROTOCOL:
+    *param_longp = data->info.conn_protocol;
     break;
 
   default:
@@ -379,7 +394,7 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   va_list arg;
   long *param_longp = NULL;
   double *param_doublep = NULL;
-  char **param_charp = NULL;
+  const char **param_charp = NULL;
   struct curl_slist **param_slistp = NULL;
   curl_socket_t *param_socketp = NULL;
   int type;
@@ -393,7 +408,7 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   type = CURLINFO_TYPEMASK & (int)info;
   switch(type) {
   case CURLINFO_STRING:
-    param_charp = va_arg(arg, char **);
+    param_charp = va_arg(arg, const char **);
     if(param_charp)
       result = getinfo_char(data, info, param_charp);
     break;
