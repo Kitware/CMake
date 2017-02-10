@@ -653,21 +653,12 @@ void cmMakefile::FinalPass()
   // we don't want cmake to re-run if a configured file is created and deleted
   // during processing as that would make it a transient file that can't
   // influence the build process
-
-  // remove_if will move all items that don't have a valid file name to the
-  // back of the vector
-  std::vector<std::string>::iterator new_output_files_end = std::remove_if(
-    this->OutputFiles.begin(), this->OutputFiles.end(), file_not_persistent());
-  // we just have to erase all items at the back
-  this->OutputFiles.erase(new_output_files_end, this->OutputFiles.end());
+  cmEraseIf(this->OutputFiles, file_not_persistent());
 
   // if a configured file is used as input for another configured file,
   // and then deleted it will show up in the input list files so we
   // need to scan those too
-  std::vector<std::string>::iterator new_list_files_end = std::remove_if(
-    this->ListFiles.begin(), this->ListFiles.end(), file_not_persistent());
-
-  this->ListFiles.erase(new_list_files_end, this->ListFiles.end());
+  cmEraseIf(this->ListFiles, file_not_persistent());
 }
 
 // Generate the output file

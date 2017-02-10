@@ -1864,10 +1864,7 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
     std::string binaryDir = this->GetState()->GetBinaryDirectory();
     if (this->Makefile->IsOn("CMAKE_DEPENDS_IN_PROJECT_ONLY")) {
       const char* sourceDir = this->GetState()->GetSourceDirectory();
-      std::vector<std::string>::iterator itr =
-        std::remove_if(includes.begin(), includes.end(),
-                       ::NotInProjectDir(sourceDir, binaryDir));
-      includes.erase(itr, includes.end());
+      cmEraseIf(includes, ::NotInProjectDir(sourceDir, binaryDir));
     }
     for (std::vector<std::string>::iterator i = includes.begin();
          i != includes.end(); ++i) {
