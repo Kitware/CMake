@@ -255,7 +255,7 @@ invocation as exactly one argument.
 
 For example:
 
-.. code-block:: cmake
+::
 
  message("This is a quoted argument containing multiple lines.
  This is always one argument even though it contains a ; character.
@@ -421,7 +421,7 @@ A ``#`` immediately followed by a `Bracket Argument`_ forms a
 
 For example:
 
-.. code-block:: cmake
+::
 
  #[[This is a bracket comment.
  It runs until the close bracket.]]
