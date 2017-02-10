@@ -27,6 +27,7 @@ public:
     Compiler,
     ResourceCompiler,
     MasmCompiler,
+    NasmCompiler,
     Linker,
     FortranCompiler,
     CSharpCompiler

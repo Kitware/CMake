@@ -47,6 +47,7 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   this->IntelProjectVersion = 0;
   this->DevEnvCommandInitialized = false;
   this->MasmEnabled = false;
+  this->NasmEnabled = false;
 
   if (platformName.empty()) {
     this->DefaultPlatformName = "Win32";

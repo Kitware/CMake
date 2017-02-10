@@ -13,6 +13,7 @@
 #include "cmVS10LibFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10MASMFlagTable.h"
+#include "cmVS10NASMFlagTable.h"
 #include "cmVS10RCFlagTable.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
@@ -113,6 +114,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->DefaultLibFlagTable = cmVS10LibFlagTable;
   this->DefaultLinkFlagTable = cmVS10LinkFlagTable;
   this->DefaultMasmFlagTable = cmVS10MASMFlagTable;
+  this->DefaultNasmFlagTable = cmVS10NASMFlagTable;
   this->DefaultRcFlagTable = cmVS10RCFlagTable;
   this->Version = VS10;
 }
@@ -354,6 +356,13 @@ void cmGlobalVisualStudio10Generator::Generate()
 void cmGlobalVisualStudio10Generator::EnableLanguage(
   std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
 {
+  for (std::vector<std::string>::const_iterator it = lang.begin();
+       it != lang.end(); ++it) {
+    if (*it == "ASM_NASM") {
+      this->NasmEnabled = true;
+    }
+  }
+  this->AddPlatformDefinitions(mf);
   cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
 }
 
@@ -662,4 +671,9 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMasmFlagTable() const
     this->GetPlatformName(), this->GetPlatformToolsetString());
 
   return (table != CM_NULLPTR) ? table : this->DefaultMasmFlagTable;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetNasmFlagTable() const
+{
+  return this->DefaultNasmFlagTable;
 }
