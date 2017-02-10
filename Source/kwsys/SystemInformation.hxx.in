@@ -67,7 +67,7 @@ public:
 
   bool Is64Bits();
 
-  unsigned int GetNumberOfLogicalCPU(); // per physical cpu
+  unsigned int GetNumberOfLogicalCPU();
   unsigned int GetNumberOfPhysicalCPU();
 
   bool DoesCPUSupportCPUID();
