@@ -9,17 +9,17 @@ Conditionally execute a group of commands.
    # then section.
    COMMAND1(ARGS ...)
    COMMAND2(ARGS ...)
-   ...
+   #...
  elseif(expression2)
    # elseif section.
    COMMAND1(ARGS ...)
    COMMAND2(ARGS ...)
-   ...
+   #...
  else(expression)
    # else section.
    COMMAND1(ARGS ...)
    COMMAND2(ARGS ...)
-   ...
+   #...
  endif(expression)
 
 Evaluates the given expression.  If the result is true, the commands

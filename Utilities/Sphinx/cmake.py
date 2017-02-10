@@ -46,7 +46,7 @@ from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
 from sphinx.util.nodes import make_refnode
-from sphinx import addnodes
+from sphinx import addnodes, version_info
 
 class CMakeModule(Directive):
     required_arguments = 1
@@ -123,7 +123,11 @@ class _cmake_index_entry:
         self.desc = desc
 
     def __call__(self, title, targetid, main = 'main'):
-        return ('pair', u'%s ; %s' % (self.desc, title), targetid, main)
+        # See https://github.com/sphinx-doc/sphinx/issues/2673
+        if version_info < (1, 4):
+            return ('pair', u'%s ; %s' % (self.desc, title), targetid, main)
+        else:
+            return ('pair', u'%s ; %s' % (self.desc, title), targetid, main, None)
 
 _cmake_index_objs = {
     'command':    _cmake_index_entry('command'),
