@@ -113,6 +113,8 @@ These commands are available only in CMake projects.
    /command/try_compile
    /command/try_run
 
+.. _`CTest Commands`:
+
 CTest Commands
 ==============
 
