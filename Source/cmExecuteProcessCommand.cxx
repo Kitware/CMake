@@ -47,7 +47,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   std::string error_variable;
   std::string result_variable;
   std::string working_directory;
-  cmProcessOutput::Encoding encoding = cmProcessOutput::Auto;
+  cmProcessOutput::Encoding encoding = cmProcessOutput::None;
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i] == "COMMAND") {
       doing_command = true;
