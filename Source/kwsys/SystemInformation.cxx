@@ -35,13 +35,8 @@
 #include "SystemInformation.hxx.in"
 #endif
 
-#include <algorithm>
-#include <bitset>
-#include <cassert>
 #include <fstream>
 #include <iostream>
-#include <limits>
-#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -399,6 +394,7 @@ public:
     bool SupportsMP;
     bool HasMMXPlus;
     bool HasSSEMMX;
+    bool SupportsHyperthreading;
     unsigned int LogicalProcessorsPerPhysical;
     int APIC_ID;
     CPUPowerManagement PowerManagement;
@@ -467,9 +463,10 @@ protected:
   unsigned int NumberOfLogicalCPU;
   unsigned int NumberOfPhysicalCPU;
 
-  void CPUCountWindows();    // For windows
+  int CPUCount(); // For windows
+  unsigned char LogicalCPUPerPhysicalCPU();
   unsigned char GetAPICId(); // For windows
-  bool IsSMTSupported();
+  bool IsHyperThreadingSupported();
   static LongLong GetCyclesDifference(DELAY_FUNC, unsigned int); // For windows
 
   // For Linux and Cygwin, /proc/cpuinfo formats are slightly different
@@ -1545,7 +1542,7 @@ void SystemInformationImplementation::RunCPUCheck()
     RetrieveProcessorSerialNumber();
   }
 
-  this->CPUCountWindows();
+  this->CPUCount();
 
 #elif defined(__APPLE__)
   this->ParseSysCtl();
@@ -2093,10 +2090,16 @@ bool SystemInformationImplementation::RetrieveCPUFeatures()
 
   // Retrieve Intel specific extended features.
   if (this->ChipManufacturer == Intel) {
-    bool SupportsSMT =
-      ((cpuinfo[3] & 0x10000000) != 0); // Intel specific: SMT --> Bit 28
+    this->Features.ExtendedFeatures.SupportsHyperthreading =
+      ((cpuinfo[3] & 0x10000000) !=
+       0); // Intel specific: Hyperthreading --> Bit 28
+    this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical =
+      (this->Features.ExtendedFeatures.SupportsHyperthreading)
+      ? ((cpuinfo[1] & 0x00FF0000) >> 16)
+      : 1;
 
-    if ((SupportsSMT) && (this->Features.HasAPIC)) {
+    if ((this->Features.ExtendedFeatures.SupportsHyperthreading) &&
+        (this->Features.HasAPIC)) {
       // Retrieve APIC information if there is one present.
       this->Features.ExtendedFeatures.APIC_ID =
         ((cpuinfo[1] & 0xFF000000) >> 24);
@@ -3398,7 +3401,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   fclose(fd);
   buffer.resize(fileSize - 2);
   // Number of logical CPUs (combination of multiple processors, multi-core
-  // and SMT)
+  // and hyperthreading)
   size_t pos = buffer.find("processor\t");
   while (pos != buffer.npos) {
     this->NumberOfLogicalCPU++;
@@ -3406,24 +3409,30 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   }
 
 #ifdef __linux
-  // Count sockets.
-  std::set<int> PhysicalIDs;
+  // Find the largest physical id.
+  int maxId = -1;
   std::string idc = this->ExtractValueFromCpuInfoFile(buffer, "physical id");
   while (this->CurrentPositionInFile != buffer.npos) {
     int id = atoi(idc.c_str());
-    PhysicalIDs.insert(id);
+    if (id > maxId) {
+      maxId = id;
+    }
     idc = this->ExtractValueFromCpuInfoFile(buffer, "physical id",
                                             this->CurrentPositionInFile + 1);
   }
-  uint64_t NumberOfSockets = PhysicalIDs.size();
-  NumberOfSockets = std::max(NumberOfSockets, (uint64_t)1);
   // Physical ids returned by Linux don't distinguish cores.
   // We want to record the total number of cores in this->NumberOfPhysicalCPU
   // (checking only the first proc)
-  std::string Cores = this->ExtractValueFromCpuInfoFile(buffer, "cpu cores");
-  int NumberOfCoresPerSocket = atoi(Cores.c_str());
-  NumberOfCoresPerSocket = std::max(NumberOfCoresPerSocket, 1);
-  this->NumberOfPhysicalCPU = NumberOfCoresPerSocket * NumberOfSockets;
+  std::string cores = this->ExtractValueFromCpuInfoFile(buffer, "cpu cores");
+  int numberOfCoresPerCPU = atoi(cores.c_str());
+  if (maxId > 0) {
+    this->NumberOfPhysicalCPU =
+      static_cast<unsigned int>(numberOfCoresPerCPU * (maxId + 1));
+  } else {
+    // Linux Sparc: get cpu count
+    this->NumberOfPhysicalCPU =
+      atoi(this->ExtractValueFromCpuInfoFile(buffer, "ncpus active").c_str());
+  }
 
 #else // __CYGWIN__
   // does not have "physical id" entries, neither "cpu cores"
@@ -3438,7 +3447,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   if (this->NumberOfPhysicalCPU <= 0) {
     this->NumberOfPhysicalCPU = 1;
   }
-  // LogicalProcessorsPerPhysical>1 => SMT.
+  // LogicalProcessorsPerPhysical>1 => hyperthreading.
   this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical =
     this->NumberOfLogicalCPU / this->NumberOfPhysicalCPU;
 
@@ -4313,10 +4322,68 @@ void SystemInformationImplementation::DelayOverhead(unsigned int uiMS)
   (void)uiMS;
 }
 
-/** Works only for windows */
-bool SystemInformationImplementation::IsSMTSupported()
+/** Return the number of logical CPU per physical CPUs Works only for windows
+ */
+unsigned char SystemInformationImplementation::LogicalCPUPerPhysicalCPU(void)
 {
-  return this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical > 1;
+#ifdef __APPLE__
+  size_t len = 4;
+  int cores_per_package = 0;
+  int err = sysctlbyname("machdep.cpu.cores_per_package", &cores_per_package,
+                         &len, NULL, 0);
+  if (err != 0) {
+    return 1; // That name was not found, default to 1
+  }
+  return static_cast<unsigned char>(cores_per_package);
+#else
+  int Regs[4] = { 0, 0, 0, 0 };
+#if USE_CPUID
+  if (!this->IsHyperThreadingSupported()) {
+    return static_cast<unsigned char>(1); // HT not supported
+  }
+  call_cpuid(1, Regs);
+#endif
+  return static_cast<unsigned char>((Regs[1] & NUM_LOGICAL_BITS) >> 16);
+#endif
+}
+
+/** Works only for windows */
+bool SystemInformationImplementation::IsHyperThreadingSupported()
+{
+  if (this->Features.ExtendedFeatures.SupportsHyperthreading) {
+    return true;
+  }
+
+#if USE_CPUID
+  int Regs[4] = { 0, 0, 0, 0 }, VendorId[4] = { 0, 0, 0, 0 };
+  // Get vendor id string
+  if (!call_cpuid(0, VendorId)) {
+    return false;
+  }
+  // eax contains family processor type
+  // edx has info about the availability of hyper-Threading
+  if (!call_cpuid(1, Regs)) {
+    return false;
+  }
+
+  if (((Regs[0] & FAMILY_ID) == PENTIUM4_ID) || (Regs[0] & EXT_FAMILY_ID)) {
+    if (VendorId[1] == 0x756e6547) // 'uneG'
+    {
+      if (VendorId[3] == 0x49656e69) // 'Ieni'
+      {
+        if (VendorId[2] == 0x6c65746e) // 'letn'
+        {
+          // Genuine Intel with hyper-Threading technology
+          this->Features.ExtendedFeatures.SupportsHyperthreading =
+            ((Regs[3] & HT_BIT) != 0);
+          return this->Features.ExtendedFeatures.SupportsHyperthreading;
+        }
+      }
+    }
+  }
+#endif
+
+  return 0; // Not genuine Intel processor
 }
 
 /** Return the APIC Id. Works only for windows. */
@@ -4325,7 +4392,7 @@ unsigned char SystemInformationImplementation::GetAPICId()
   int Regs[4] = { 0, 0, 0, 0 };
 
 #if USE_CPUID
-  if (!this->IsSMTSupported()) {
+  if (!this->IsHyperThreadingSupported()) {
     return static_cast<unsigned char>(-1); // HT not supported
   }                                        // Logical processor = 1
   call_cpuid(1, Regs);
@@ -4335,46 +4402,102 @@ unsigned char SystemInformationImplementation::GetAPICId()
 }
 
 /** Count the number of CPUs. Works only on windows. */
-void SystemInformationImplementation::CPUCountWindows()
+int SystemInformationImplementation::CPUCount()
 {
 #if defined(_WIN32)
-  std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> ProcInfo;
+  unsigned char StatusFlag = 0;
+  SYSTEM_INFO info;
+
   this->NumberOfPhysicalCPU = 0;
   this->NumberOfLogicalCPU = 0;
+  info.dwNumberOfProcessors = 0;
+  GetSystemInfo(&info);
 
-  {
-    DWORD Length = 0;
-    DWORD rc = GetLogicalProcessorInformation(NULL, &Length);
-    assert(FALSE == rc);
-    (void)rc; // Silence unused variable warning in Borland C++ 5.81
-    assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER);
-    ProcInfo.resize(Length / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION));
-    rc = GetLogicalProcessorInformation(&ProcInfo[0], &Length);
-    assert(rc != FALSE);
-    (void)rc; // Silence unused variable warning in Borland C++ 5.81
-  }
+  // Number of physical processors in a non-Intel system
+  // or in a 32-bit Intel system with Hyper-Threading technology disabled
+  this->NumberOfPhysicalCPU = (unsigned char)info.dwNumberOfProcessors;
 
-  typedef std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION>::iterator
-    pinfoIt_t;
-  for (pinfoIt_t it = ProcInfo.begin(); it != ProcInfo.end(); ++it) {
-    SYSTEM_LOGICAL_PROCESSOR_INFORMATION PInfo = *it;
-    if (PInfo.Relationship != RelationProcessorCore) {
-      continue;
+  if (this->IsHyperThreadingSupported()) {
+    unsigned char HT_Enabled = 0;
+    this->NumberOfLogicalCPU = this->LogicalCPUPerPhysicalCPU();
+    if (this->NumberOfLogicalCPU >=
+        1) // >1 Doesn't mean HT is enabled in the BIOS
+    {
+      HANDLE hCurrentProcessHandle;
+#ifndef _WIN64
+#define DWORD_PTR DWORD
+#endif
+      DWORD_PTR dwProcessAffinity;
+      DWORD_PTR dwSystemAffinity;
+      DWORD dwAffinityMask;
+
+      // Calculate the appropriate  shifts and mask based on the
+      // number of logical processors.
+      unsigned int i = 1;
+      unsigned char PHY_ID_MASK = 0xFF;
+      // unsigned char PHY_ID_SHIFT = 0;
+
+      while (i < this->NumberOfLogicalCPU) {
+        i *= 2;
+        PHY_ID_MASK <<= 1;
+        // PHY_ID_SHIFT++;
+      }
+
+      hCurrentProcessHandle = GetCurrentProcess();
+      GetProcessAffinityMask(hCurrentProcessHandle, &dwProcessAffinity,
+                             &dwSystemAffinity);
+
+      // Check if available process affinity mask is equal to the
+      // available system affinity mask
+      if (dwProcessAffinity != dwSystemAffinity) {
+        StatusFlag = HT_CANNOT_DETECT;
+        this->NumberOfPhysicalCPU = (unsigned char)-1;
+        return StatusFlag;
+      }
+
+      dwAffinityMask = 1;
+      while (dwAffinityMask != 0 && dwAffinityMask <= dwProcessAffinity) {
+        // Check if this CPU is available
+        if (dwAffinityMask & dwProcessAffinity) {
+          if (SetProcessAffinityMask(hCurrentProcessHandle, dwAffinityMask)) {
+            unsigned char APIC_ID, LOG_ID;
+            Sleep(0); // Give OS time to switch CPU
+
+            APIC_ID = GetAPICId();
+            LOG_ID = APIC_ID & ~PHY_ID_MASK;
+
+            if (LOG_ID != 0) {
+              HT_Enabled = 1;
+            }
+          }
+        }
+        dwAffinityMask = dwAffinityMask << 1;
+      }
+      // Reset the processor affinity
+      SetProcessAffinityMask(hCurrentProcessHandle, dwProcessAffinity);
+
+      if (this->NumberOfLogicalCPU ==
+          1) // Normal P4 : HT is disabled in hardware
+      {
+        StatusFlag = HT_DISABLED;
+      } else {
+        if (HT_Enabled) {
+          // Total physical processors in a Hyper-Threading enabled system.
+          this->NumberOfPhysicalCPU /= (this->NumberOfLogicalCPU);
+          StatusFlag = HT_ENABLED;
+        } else {
+          StatusFlag = HT_SUPPORTED_NOT_ENABLED;
+        }
+      }
     }
-
-    std::bitset<std::numeric_limits<ULONG_PTR>::digits> ProcMask(
-      (unsigned long long)PInfo.ProcessorMask);
-    unsigned int count = (unsigned int)ProcMask.count();
-    if (count == 0) { // I think this should never happen, but just to be safe.
-      continue;
-    }
-    this->NumberOfPhysicalCPU++;
-    this->NumberOfLogicalCPU += (unsigned int)count;
-    this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical = count;
+  } else {
+    // Processors do not have Hyper-Threading technology
+    StatusFlag = HT_NOT_CAPABLE;
+    this->NumberOfLogicalCPU = 1;
   }
-  this->NumberOfPhysicalCPU = std::max(1u, this->NumberOfPhysicalCPU);
-  this->NumberOfLogicalCPU = std::max(1u, this->NumberOfLogicalCPU);
+  return StatusFlag;
 #else
+  return 0;
 #endif
 }
 
@@ -4436,14 +4559,8 @@ bool SystemInformationImplementation::ParseSysCtl()
   sysctlbyname("hw.physicalcpu", &this->NumberOfPhysicalCPU, &len, NULL, 0);
   len = sizeof(this->NumberOfLogicalCPU);
   sysctlbyname("hw.logicalcpu", &this->NumberOfLogicalCPU, &len, NULL, 0);
-
-  int cores_per_package = 0;
-  len = sizeof(cores_per_package);
-  err = sysctlbyname("machdep.cpu.cores_per_package", &cores_per_package, &len,
-                     NULL, 0);
-  // That name was not found, default to 1
   this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical =
-    err != 0 ? 1 : static_cast<unsigned char>(cores_per_package);
+    this->LogicalCPUPerPhysicalCPU();
 
   len = sizeof(value);
   sysctlbyname("hw.cpufrequency", &value, &len, NULL, 0);
