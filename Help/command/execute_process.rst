@@ -70,10 +70,21 @@ Options:
 ``ENCODING <name>``
  On Windows, the encoding that is used to decode output from the process.
  Ignored on other platforms.
- Valid encoding names are: ``AUTO`` (the default), ``NONE``, ``UTF8``,
- ``ANSI`` and ``OEM``.
- ``AUTO`` encoding means current active console's codepage will be used
- or if that isn't available then ``ANSI`` codepage will be used.
+ Valid encoding names are:
+
+ ``NONE``
+   Perform no decoding.  This assumes that the process output is encoded
+   in the same way as CMake's internal encoding (UTF-8).
+   This is the default.
+ ``AUTO``
+   Use the current active console's codepage or if that isn't
+   available then use ANSI.
+ ``ANSI``
+   Use the ANSI codepage.
+ ``OEM``
+   Use the original equipment manufacturer (OEM) code page.
+ ``UTF8``
+   Use the UTF-8 codepage.
 
 If more than one ``OUTPUT_*`` or ``ERROR_*`` option is given for the
 same pipe the precedence is not specified.
