@@ -41,7 +41,6 @@ public:
   std::string GetName() const CM_OVERRIDE { return "export"; }
 
 private:
-  cmCommandArgumentsHelper Helper;
   cmCommandArgumentGroup ArgumentGroup;
   cmCAStringVector Targets;
   cmCAEnabler Append;

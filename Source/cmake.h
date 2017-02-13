@@ -425,8 +425,7 @@ protected:
   typedef std::vector<cmExternalMakefileProjectGeneratorFactory*>
     RegisteredExtraGeneratorsVector;
   RegisteredExtraGeneratorsVector ExtraGenerators;
-  void AddScriptingCommands();
-  void AddProjectCommands();
+  void AddDefaultCommands();
   void AddDefaultGenerators();
   void AddDefaultExtraGenerators();
 

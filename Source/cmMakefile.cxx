@@ -281,8 +281,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
       if (!invokeSucceeded || hadNestedError) {
         if (!hadNestedError) {
           // The command invocation requested that we report an error.
-          std::string const error = name + " " + pcmd->GetError();
-          this->IssueMessage(cmake::FATAL_ERROR, error.c_str());
+          this->IssueMessage(cmake::FATAL_ERROR, pcmd->GetError());
         }
         result = false;
         if (this->GetCMakeInstance()->GetWorkingMode() != cmake::NORMAL_MODE) {
