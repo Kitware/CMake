@@ -3,6 +3,7 @@
 #include "cmCommand.h"
 
 #include "cmMakefile.h"
+#include "cmake.h"
 
 class cmExecutionStatus;
 struct cmListFileArgument;
@@ -22,12 +23,32 @@ bool cmCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args,
 const char* cmCommand::GetError()
 {
   if (this->Error.empty()) {
-    return "unknown error.";
+    this->Error = this->GetName();
+    this->Error += " unknown error.";
   }
   return this->Error.c_str();
 }
 
 void cmCommand::SetError(const std::string& e)
 {
-  this->Error = e;
+  this->Error = this->GetName();
+  this->Error += " ";
+  this->Error += e;
+}
+
+bool cmCommand::Disallowed(cmPolicies::PolicyID pol, const char* e)
+{
+  switch (this->Makefile->GetPolicyStatus(pol)) {
+    case cmPolicies::WARN:
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+                                   cmPolicies::GetPolicyWarning(pol));
+    case cmPolicies::OLD:
+      return false;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e);
+      break;
+  }
+  return true;
 }

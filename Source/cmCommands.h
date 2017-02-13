@@ -3,14 +3,16 @@
 #ifndef cmCommands_h
 #define cmCommands_h
 
-class cmState;
+#include <cmConfigure.h> // IWYU pragma: keep
 
+#include <vector>
+
+class cmCommand;
 /**
- * Global function to register all compiled in commands.
+ * Global function to return all compiled in commands.
  * To add a new command edit cmCommands.cxx and add your command.
  * It is up to the caller to delete the commands created by this call.
  */
-void GetScriptingCommands(cmState* state);
-void GetProjectCommands(cmState* state);
+std::vector<cmCommand*> GetPredefinedCommands();
 
 #endif
