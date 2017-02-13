@@ -238,8 +238,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
 
   // Skip SDKs that do not contain <um/windows.h> because that indicates that
   // only the UCRT MSIs were installed for them.
-  sdks.erase(std::remove_if(sdks.begin(), sdks.end(), NoWindowsH()),
-             sdks.end());
+  cmEraseIf(sdks, NoWindowsH());
 
   if (!sdks.empty()) {
     // Only use the filename, which will be the SDK version.

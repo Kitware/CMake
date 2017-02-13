@@ -260,12 +260,9 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
       rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
                                                    *i, vars);
     }
-    {
-      // If there is no ranlib the command will be ":".  Skip it.
-      std::vector<std::string>::iterator newEnd = std::remove_if(
-        linkCmds.begin(), linkCmds.end(), cmNinjaRemoveNoOpCommands());
-      linkCmds.erase(newEnd, linkCmds.end());
-    }
+
+    // If there is no ranlib the command will be ":".  Skip it.
+    cmEraseIf(linkCmds, cmNinjaRemoveNoOpCommands());
 
     std::string linkCmd =
       this->GetLocalGenerator()->BuildCommandLine(linkCmds);
@@ -388,12 +385,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
       rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
                                                    *i, vars);
     }
-    {
-      // If there is no ranlib the command will be ":".  Skip it.
-      std::vector<std::string>::iterator newEnd = std::remove_if(
-        linkCmds.begin(), linkCmds.end(), cmNinjaRemoveNoOpCommands());
-      linkCmds.erase(newEnd, linkCmds.end());
-    }
+
+    // If there is no ranlib the command will be ":".  Skip it.
+    cmEraseIf(linkCmds, cmNinjaRemoveNoOpCommands());
 
     linkCmds.insert(linkCmds.begin(), "$PRE_LINK");
     linkCmds.push_back("$POST_BUILD");
