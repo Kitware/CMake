@@ -413,7 +413,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   return true;
 }
 
-std::string cmQtAutoGenerators::MocSettingsStringCompose()
+std::string cmQtAutoGenerators::SettingsStringGenMoc()
 {
   std::string res;
   res += this->MocCompileDefinitionsStr;
@@ -427,7 +427,7 @@ std::string cmQtAutoGenerators::MocSettingsStringCompose()
   return res;
 }
 
-std::string cmQtAutoGenerators::UicSettingsStringCompose()
+std::string cmQtAutoGenerators::SettingsStringGenUic()
 {
   std::string res;
   res += cmJoin(this->UicTargetOptions, "@osep@");
@@ -437,7 +437,7 @@ std::string cmQtAutoGenerators::UicSettingsStringCompose()
   return res;
 }
 
-std::string cmQtAutoGenerators::RccSettingsStringCompose()
+std::string cmQtAutoGenerators::SettingsStringGenRcc()
 {
   std::string res;
   res += JoinOptions(this->RccOptions);
@@ -449,9 +449,9 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
                                           const std::string& targetDirectory)
 {
   // Compose current settings strings
-  this->MocSettingsString = this->MocSettingsStringCompose();
-  this->UicSettingsString = this->UicSettingsStringCompose();
-  this->RccSettingsString = this->RccSettingsStringCompose();
+  this->MocSettingsString = this->SettingsStringGenMoc();
+  this->UicSettingsString = this->SettingsStringGenUic();
+  this->RccSettingsString = this->SettingsStringGenRcc();
 
   // Read old settings
   const std::string filename = OldSettingsFile(targetDirectory);

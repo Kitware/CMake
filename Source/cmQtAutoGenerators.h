@@ -27,9 +27,10 @@ private:
                            const std::string& targetDirectory,
                            const std::string& config);
 
-  std::string MocSettingsStringCompose();
-  std::string UicSettingsStringCompose();
-  std::string RccSettingsStringCompose();
+  // - Settings file
+  std::string SettingsStringGenMoc();
+  std::string SettingsStringGenUic();
+  std::string SettingsStringGenRcc();
   void SettingsFileRead(cmMakefile* makefile,
                         const std::string& targetDirectory);
   bool SettingsFileWrite(const std::string& targetDirectory);
