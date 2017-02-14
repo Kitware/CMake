@@ -2781,13 +2781,6 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     flags += " ";
     flags += flagsConfig;
   }
-  std::string standardLibsVar = "CMAKE_";
-  standardLibsVar += linkLanguage;
-  standardLibsVar += "_STANDARD_LIBRARIES";
-  std::string const libs =
-    this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
-  std::vector<std::string> libVec;
-  cmSystemTools::ParseWindowsCommandLine(libs.c_str(), libVec);
 
   cmComputeLinkInformation* pcli =
     this->GeneratorTarget->GetLinkInformation(config.c_str());
@@ -2797,10 +2790,17 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
       this->Name.c_str());
     return false;
   }
-  // add the libraries for the target to libs string
   cmComputeLinkInformation& cli = *pcli;
+
+  std::vector<std::string> libVec;
   std::vector<std::string> vsTargetVec;
   this->AddLibraries(cli, libVec, vsTargetVec);
+  std::string standardLibsVar = "CMAKE_";
+  standardLibsVar += linkLanguage;
+  standardLibsVar += "_STANDARD_LIBRARIES";
+  std::string const libs =
+    this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
+  cmSystemTools::ParseWindowsCommandLine(libs.c_str(), libVec);
   linkOptions.AddFlag("AdditionalDependencies", libVec);
 
   // Populate TargetsFileAndConfigsVec
