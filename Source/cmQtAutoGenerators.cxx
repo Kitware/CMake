@@ -259,7 +259,7 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
     return false;
   }
   // Read old settings
-  this->OldSettingsReadFile(mf.get(), targetDirectory);
+  this->SettingsFileRead(mf.get(), targetDirectory);
   // Init and run
   this->Init();
   if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5") {
@@ -268,7 +268,7 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
     }
   }
   // Write latest settings
-  if (!this->OldSettingsWriteFile(targetDirectory)) {
+  if (!this->SettingsFileWrite(targetDirectory)) {
     return false;
   }
   return true;
@@ -445,8 +445,8 @@ std::string cmQtAutoGenerators::RccSettingsStringCompose()
   return res;
 }
 
-void cmQtAutoGenerators::OldSettingsReadFile(
-  cmMakefile* makefile, const std::string& targetDirectory)
+void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
+                                          const std::string& targetDirectory)
 {
   // Compose current settings strings
   this->MocSettingsString = this->MocSettingsStringCompose();
@@ -488,8 +488,7 @@ void cmQtAutoGenerators::OldSettingsReadFile(
   }
 }
 
-bool cmQtAutoGenerators::OldSettingsWriteFile(
-  const std::string& targetDirectory)
+bool cmQtAutoGenerators::SettingsFileWrite(const std::string& targetDirectory)
 {
   bool success = true;
   // Only write if any setting changed

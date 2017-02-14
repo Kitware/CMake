@@ -30,9 +30,9 @@ private:
   std::string MocSettingsStringCompose();
   std::string UicSettingsStringCompose();
   std::string RccSettingsStringCompose();
-  void OldSettingsReadFile(cmMakefile* makefile,
-                           const std::string& targetDirectory);
-  bool OldSettingsWriteFile(const std::string& targetDirectory);
+  void SettingsFileRead(cmMakefile* makefile,
+                        const std::string& targetDirectory);
+  bool SettingsFileWrite(const std::string& targetDirectory);
 
   // - Init and run
   void Init();
