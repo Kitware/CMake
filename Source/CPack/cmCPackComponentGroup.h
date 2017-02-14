@@ -78,6 +78,10 @@ public:
   /// contains the files that are part of this component.
   std::string ArchiveFile;
 
+  /// The file to pass to --component-plist when using the
+  /// productbuild generator.
+  std::string Plist;
+
   /// The components that this component depends on.
   std::vector<cmCPackComponent*> Dependencies;
 
