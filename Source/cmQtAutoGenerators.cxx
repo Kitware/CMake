@@ -68,8 +68,10 @@ inline static bool SettingsMatch(cmMakefile* makefile, const char* key,
 static void SettingWrite(std::ostream& ostr, const char* key,
                          const std::string& value)
 {
-  ostr << "set(" << key << " " << cmOutputConverter::EscapeForCMake(value)
-       << ")\n";
+  if (!value.empty()) {
+    ostr << "set(" << key << " " << cmOutputConverter::EscapeForCMake(value)
+         << ")\n";
+  }
 }
 
 static std::string FindMatchingHeader(
@@ -429,32 +431,38 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
 std::string cmQtAutoGenerators::SettingsStringGenMoc()
 {
   std::string res;
-  res += this->MocCompileDefinitionsStr;
-  res += " ~~~ ";
-  res += this->MocIncludesStr;
-  res += " ~~~ ";
-  res += this->MocOptionsStr;
-  res += " ~~~ ";
-  res += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
-  res += " ~~~ ";
+  if (!this->MocExecutable.empty()) {
+    res += this->MocCompileDefinitionsStr;
+    res += " ~~~ ";
+    res += this->MocIncludesStr;
+    res += " ~~~ ";
+    res += this->MocOptionsStr;
+    res += " ~~~ ";
+    res += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
+    res += " ~~~ ";
+  }
   return res;
 }
 
 std::string cmQtAutoGenerators::SettingsStringGenUic()
 {
   std::string res;
-  res += cmJoin(this->UicTargetOptions, "@osep@");
-  res += " ~~~ ";
-  res += JoinOptions(this->UicOptions);
-  res += " ~~~ ";
+  if (!this->UicExecutable.empty()) {
+    res += cmJoin(this->UicTargetOptions, "@osep@");
+    res += " ~~~ ";
+    res += JoinOptions(this->UicOptions);
+    res += " ~~~ ";
+  }
   return res;
 }
 
 std::string cmQtAutoGenerators::SettingsStringGenRcc()
 {
   std::string res;
-  res += JoinOptions(this->RccOptions);
-  res += " ~~~ ";
+  if (!this->RccExecutable.empty()) {
+    res += JoinOptions(this->RccOptions);
+    res += " ~~~ ";
+  }
   return res;
 }
 
@@ -498,18 +506,17 @@ bool cmQtAutoGenerators::SettingsFileWrite(const std::string& targetDirectory)
   // Only write if any setting changed
   if (this->GenerateAllAny()) {
     const std::string filename = SettingsFile(targetDirectory);
+    if (this->Verbose) {
+      std::ostringstream err;
+      err << "AutoGen: Writing settings file " << filename << "\n";
+      this->LogInfo(err.str());
+    }
     cmsys::ofstream outfile;
     outfile.open(filename.c_str(), std::ios::trunc);
     if (outfile) {
-      if (!this->MocExecutable.empty()) {
-        SettingWrite(outfile, SettingsKeyMoc, this->MocSettingsString);
-      }
-      if (!this->UicExecutable.empty()) {
-        SettingWrite(outfile, SettingsKeyUic, this->UicSettingsString);
-      }
-      if (!this->RccExecutable.empty()) {
-        SettingWrite(outfile, SettingsKeyRcc, this->RccSettingsString);
-      }
+      SettingWrite(outfile, SettingsKeyMoc, this->MocSettingsString);
+      SettingWrite(outfile, SettingsKeyUic, this->UicSettingsString);
+      SettingWrite(outfile, SettingsKeyRcc, this->RccSettingsString);
       success = outfile.good();
       outfile.close();
     } else {
