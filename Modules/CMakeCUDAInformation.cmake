@@ -93,6 +93,12 @@ if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
 
 endif()
 
+if(CMAKE_CUDA_STANDARD_LIBRARIES_INIT)
+  set(CMAKE_CUDA_STANDARD_LIBRARIES "${CMAKE_CUDA_STANDARD_LIBRARIES_INIT}"
+    CACHE STRING "Libraries linked by default with all CUDA applications.")
+  mark_as_advanced(CMAKE_CUDA_STANDARD_LIBRARIES)
+endif()
+
 include(CMakeCommonLanguageInclude)
 
 # now define the following rules:
