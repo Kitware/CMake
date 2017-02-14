@@ -1200,13 +1200,15 @@ bool cmQtAutoGenerators::MocGenerateFile(const std::string& sourceFile,
                                          const std::string& mocFileName,
                                          const std::string& subDirPrefix)
 {
+  bool mocGenerated = false;
+  bool generateMoc = this->GenerateAllMoc;
+
   const std::string mocFileRel =
     this->AutogenBuildSubDir + subDirPrefix + mocFileName;
   const std::string mocFileAbs = this->CurrentBinaryDir + mocFileRel;
 
-  bool generateMoc = this->GenerateAllMoc;
-  // Test if the source file is newer that the build file
   if (!generateMoc) {
+    // Test if the source file is newer that the build file
     generateMoc = FileAbsentOrOlder(mocFileAbs, sourceFile);
   }
   if (generateMoc) {
@@ -1214,48 +1216,55 @@ bool cmQtAutoGenerators::MocGenerateFile(const std::string& sourceFile,
     this->LogBold("Generating MOC source " + mocFileRel);
 
     // Make sure the parent directory exists
-    if (!this->MakeParentDirectory(mocFileAbs)) {
-      this->RunMocFailed = true;
-      return false;
-    }
-
-    std::vector<std::string> command;
-    command.push_back(this->MocExecutable);
-    command.insert(command.end(), this->MocIncludes.begin(),
-                   this->MocIncludes.end());
-    command.insert(command.end(), this->MocDefinitions.begin(),
-                   this->MocDefinitions.end());
-    command.insert(command.end(), this->MocOptions.begin(),
-                   this->MocOptions.end());
+    if (this->MakeParentDirectory(mocFileAbs)) {
+      // Compose moc command
+      std::vector<std::string> cmd;
+      cmd.push_back(this->MocExecutable);
+      cmd.insert(cmd.end(), this->MocIncludes.begin(),
+                 this->MocIncludes.end());
+      cmd.insert(cmd.end(), this->MocDefinitions.begin(),
+                 this->MocDefinitions.end());
+      cmd.insert(cmd.end(), this->MocOptions.begin(), this->MocOptions.end());
 #ifdef _WIN32
-    command.push_back("-DWIN32");
+      cmd.push_back("-DWIN32");
 #endif
-    command.push_back("-o");
-    command.push_back(mocFileAbs);
-    command.push_back(sourceFile);
+      cmd.push_back("-o");
+      cmd.push_back(mocFileAbs);
+      cmd.push_back(sourceFile);
 
-    if (this->Verbose) {
-      this->LogCommand(command);
-    }
-
-    std::string output;
-    int retVal = 0;
-    bool result =
-      cmSystemTools::RunSingleCommand(command, &output, &output, &retVal);
-    if (!result || retVal) {
-      {
-        std::ostringstream err;
-        err << "AutoMoc: Error: moc process for " << mocFileRel << " failed:\n"
-            << output << std::endl;
-        this->LogError(err.str());
+      // Log moc command
+      if (this->Verbose) {
+        this->LogCommand(cmd);
       }
-      cmSystemTools::RemoveFile(mocFileAbs);
+
+      // Execute moc command
+      bool res = false;
+      int retVal = 0;
+      std::string output;
+      res = cmSystemTools::RunSingleCommand(cmd, &output, &output, &retVal);
+
+      if (!res || (retVal != 0)) {
+        // Command failed
+        {
+          std::ostringstream err;
+          err << "AutoMoc: Error: moc process failed for\n";
+          err << "\"" << mocFileRel << "\"\n";
+          err << "AutoMoc: Command:\n" << cmJoin(cmd, " ") << "\n";
+          err << "AutoMoc: Command output:\n" << output << "\n";
+          this->LogError(err.str());
+        }
+        cmSystemTools::RemoveFile(mocFileAbs);
+        this->RunMocFailed = true;
+      } else {
+        // Success
+        mocGenerated = true;
+      }
+    } else {
+      // Parent directory creation failed
       this->RunMocFailed = true;
-      return false;
     }
-    return true;
   }
-  return false;
+  return mocGenerated;
 }
 
 bool cmQtAutoGenerators::UicGenerateAll(
