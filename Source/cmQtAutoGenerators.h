@@ -108,6 +108,12 @@ private:
                          std::multimap<std::string, std::string>& collisions);
   bool MakeParentDirectory(const std::string& filename);
 
+  bool GenerateAllAny()
+  {
+    return (this->GenerateAllMoc || this->GenerateAllRcc ||
+            this->GenerateAllUic);
+  }
+
   // - Target names
   std::string OriginTargetName;
   std::string AutogenTargetName;

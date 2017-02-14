@@ -479,8 +479,7 @@ void cmQtAutoGenerators::OldSettingsReadFile(
       // In case any setting changed remove the old settings file.
       // This triggers a full rebuild on the next run if the current
       // build is aborted before writing the current settings in the end.
-      if (this->GenerateAllMoc || this->GenerateAllUic ||
-          this->GenerateAllRcc) {
+      if (this->GenerateAllAny()) {
         cmSystemTools::RemoveFile(filename);
       }
     } else {
@@ -497,7 +496,7 @@ bool cmQtAutoGenerators::OldSettingsWriteFile(
 {
   bool success = true;
   // Only write if any setting changed
-  if (this->GenerateAllMoc || this->GenerateAllUic || this->GenerateAllRcc) {
+  if (this->GenerateAllAny()) {
     const std::string filename = OldSettingsFile(targetDirectory);
     cmsys::ofstream outfile;
     outfile.open(filename.c_str(), std::ios::trunc);
