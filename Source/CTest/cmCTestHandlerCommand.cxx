@@ -123,8 +123,8 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
     if (capureCMakeError) {
       this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
                                     "-1");
-      const char* err = this->GetError();
-      if (err && !cmSystemTools::FindLastString(err, "unknown error.")) {
+      std::string const err = this->GetName() + " " + this->GetError();
+      if (!cmSystemTools::FindLastString(err.c_str(), "unknown error.")) {
         cmCTestLog(this->CTest, ERROR_MESSAGE, err << " error from command\n");
       }
       // return success because failure is recorded in CAPTURE_CMAKE_ERROR

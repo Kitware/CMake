@@ -174,11 +174,6 @@ cmLoadedCommand::~cmLoadedCommand()
 bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus&)
 {
-  if (this->Disallowed(
-        cmPolicies::CMP0031,
-        "The load_command command should not be called; see CMP0031.")) {
-    return true;
-  }
   if (args.empty()) {
     return true;
   }
