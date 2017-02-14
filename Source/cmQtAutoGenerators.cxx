@@ -427,7 +427,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   return true;
 }
 
-std::string cmQtAutoGenerators::SettingsStringGenMoc()
+std::string cmQtAutoGenerators::SettingsStringGenMoc() const
 {
   std::string res;
   if (this->MocEnabled()) {
@@ -443,7 +443,7 @@ std::string cmQtAutoGenerators::SettingsStringGenMoc()
   return res;
 }
 
-std::string cmQtAutoGenerators::SettingsStringGenUic()
+std::string cmQtAutoGenerators::SettingsStringGenUic() const
 {
   std::string res;
   if (this->UicEnabled()) {
@@ -455,7 +455,7 @@ std::string cmQtAutoGenerators::SettingsStringGenUic()
   return res;
 }
 
-std::string cmQtAutoGenerators::SettingsStringGenRcc()
+std::string cmQtAutoGenerators::SettingsStringGenRcc() const
 {
   std::string res;
   if (this->RccEnabled()) {
@@ -1601,7 +1601,7 @@ void cmQtAutoGenerators::LogCommand(const std::vector<std::string>& command)
  */
 bool cmQtAutoGenerators::NameCollisionTest(
   const std::map<std::string, std::string>& genFiles,
-  std::multimap<std::string, std::string>& collisions)
+  std::multimap<std::string, std::string>& collisions) const
 {
   typedef std::map<std::string, std::string>::const_iterator Iter;
   typedef std::map<std::string, std::string>::value_type VType;
@@ -1631,7 +1631,7 @@ bool cmQtAutoGenerators::NameCollisionTest(
  */
 std::string cmQtAutoGenerators::ChecksumedPath(const std::string& sourceFile,
                                                const char* basePrefix,
-                                               const char* baseSuffix)
+                                               const char* baseSuffix) const
 {
   std::string res = fpathCheckSum.getPart(sourceFile);
   res += "/";

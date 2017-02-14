@@ -28,9 +28,9 @@ private:
                            const std::string& config);
 
   // - Settings file
-  std::string SettingsStringGenMoc();
-  std::string SettingsStringGenUic();
-  std::string SettingsStringGenRcc();
+  std::string SettingsStringGenMoc() const;
+  std::string SettingsStringGenUic() const;
+  std::string SettingsStringGenRcc() const;
   void SettingsFileRead(cmMakefile* makefile,
                         const std::string& targetDirectory);
   bool SettingsFileWrite(const std::string& targetDirectory);
@@ -105,17 +105,19 @@ private:
   void LogCommand(const std::vector<std::string>& command);
 
   // - Utility
-  bool NameCollisionTest(const std::map<std::string, std::string>& genFiles,
-                         std::multimap<std::string, std::string>& collisions);
+  bool NameCollisionTest(
+    const std::map<std::string, std::string>& genFiles,
+    std::multimap<std::string, std::string>& collisions) const;
   std::string ChecksumedPath(const std::string& sourceFile,
-                             const char* basePrefix, const char* baseSuffix);
+                             const char* basePrefix,
+                             const char* baseSuffix) const;
   bool MakeParentDirectory(const std::string& filename);
 
   bool MocEnabled() const { return !this->MocExecutable.empty(); }
   bool UicEnabled() const { return !this->UicExecutable.empty(); }
   bool RccEnabled() const { return !this->RccExecutable.empty(); }
 
-  bool GenerateAllAny()
+  bool GenerateAllAny() const
   {
     return (this->GenerateAllMoc || this->GenerateAllRcc ||
             this->GenerateAllUic);
