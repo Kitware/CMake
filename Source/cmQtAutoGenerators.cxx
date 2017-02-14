@@ -672,7 +672,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   if (!this->UicGenerateAll(includedUis)) {
     return false;
   }
-  if (!this->QrcGenerateAll()) {
+  if (!this->RccGenerateAll()) {
     return false;
   }
 
@@ -1408,7 +1408,7 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
   return uicGenerated;
 }
 
-bool cmQtAutoGenerators::QrcGenerateAll()
+bool cmQtAutoGenerators::RccGenerateAll()
 {
   if (!this->RccEnabled()) {
     return true;
@@ -1445,7 +1445,7 @@ bool cmQtAutoGenerators::QrcGenerateAll()
          qrcGenMap.begin();
        si != qrcGenMap.end(); ++si) {
     bool unique = FileNameIsUnique(si->first, qrcGenMap);
-    if (!this->QrcGenerateFile(si->first, si->second, unique)) {
+    if (!this->RccGenerateFile(si->first, si->second, unique)) {
       if (this->RunRccFailed) {
         return false;
       }
@@ -1457,88 +1457,95 @@ bool cmQtAutoGenerators::QrcGenerateAll()
 /**
  * @return True if a rcc file was created. False may indicate an error.
  */
-bool cmQtAutoGenerators::QrcGenerateFile(const std::string& qrcInputFile,
-                                         const std::string& qrcOutputFile,
+bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
+                                         const std::string& rccOutputFile,
                                          bool unique_n)
 {
-  std::string symbolName =
-    cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
-  if (!unique_n) {
-    symbolName += "_";
-    symbolName += fpathCheckSum.getPart(qrcInputFile);
-  }
-  // Replace '-' with '_'. The former is valid for
-  // file names but not for symbol names.
-  std::replace(symbolName.begin(), symbolName.end(), '-', '_');
+  bool rccGenerated = false;
+  bool generateRcc = this->GenerateAllRcc;
 
-  const std::string qrcBuildFile = this->CurrentBinaryDir + qrcOutputFile;
+  const std::string rccBuildFile = this->CurrentBinaryDir + rccOutputFile;
 
-  bool generateQrc = this->GenerateAllRcc;
-  // Test if the resources list file is newer than build file
-  if (!generateQrc) {
-    generateQrc = FileAbsentOrOlder(qrcBuildFile, qrcInputFile);
-  }
-  // Test if any resource file is newer than the build file
-  if (!generateQrc) {
-    const std::vector<std::string>& files = this->RccInputs[qrcInputFile];
-    for (std::vector<std::string>::const_iterator it = files.begin();
-         it != files.end(); ++it) {
-      if (FileAbsentOrOlder(qrcBuildFile, *it)) {
-        generateQrc = true;
-        break;
+  if (!generateRcc) {
+    // Test if the resources list file is newer than build file
+    generateRcc = FileAbsentOrOlder(rccBuildFile, rccInputFile);
+    if (!generateRcc) {
+      // Test if any resource file is newer than the build file
+      const std::vector<std::string>& files = this->RccInputs[rccInputFile];
+      for (std::vector<std::string>::const_iterator it = files.begin();
+           it != files.end(); ++it) {
+        if (FileAbsentOrOlder(rccBuildFile, *it)) {
+          generateRcc = true;
+          break;
+        }
       }
     }
   }
-  if (generateQrc) {
-    {
-      std::string msg = "Generating RCC source ";
-      msg += qrcOutputFile;
-      this->LogBold(msg);
-    }
+  if (generateRcc) {
+    // Log
+    this->LogBold("Generating RCC source " + rccOutputFile);
 
     // Make sure the parent directory exists
-    if (!this->MakeParentDirectory(qrcOutputFile)) {
-      this->RunRccFailed = true;
-      return false;
-    }
-
-    std::vector<std::string> command;
-    command.push_back(this->RccExecutable);
-    {
-      std::map<std::string, std::string>::const_iterator optionIt =
-        this->RccOptions.find(qrcInputFile);
-      if (optionIt != this->RccOptions.end()) {
-        cmSystemTools::ExpandListArgument(optionIt->second, command);
+    if (this->MakeParentDirectory(rccBuildFile)) {
+      // Compose symbol name
+      std::string symbolName =
+        cmsys::SystemTools::GetFilenameWithoutLastExtension(rccInputFile);
+      if (!unique_n) {
+        symbolName += "_";
+        symbolName += fpathCheckSum.getPart(rccInputFile);
       }
-    }
-    command.push_back("-name");
-    command.push_back(symbolName);
-    command.push_back("-o");
-    command.push_back(qrcBuildFile);
-    command.push_back(qrcInputFile);
+      // Replace '-' with '_'. The former is valid for
+      // file names but not for symbol names.
+      std::replace(symbolName.begin(), symbolName.end(), '-', '_');
 
-    if (this->Verbose) {
-      this->LogCommand(command);
-    }
-    std::string output;
-    int retVal = 0;
-    bool result =
-      cmSystemTools::RunSingleCommand(command, &output, &output, &retVal);
-    if (!result || retVal) {
+      // Compose rcc command
+      std::vector<std::string> cmd;
+      cmd.push_back(this->RccExecutable);
       {
-        std::ostringstream err;
-        err << "AutoRcc: Error: rcc process for " << qrcOutputFile
-            << " failed:\n"
-            << output << std::endl;
-        this->LogError(err.str());
+        std::map<std::string, std::string>::const_iterator optionIt =
+          this->RccOptions.find(rccInputFile);
+        if (optionIt != this->RccOptions.end()) {
+          cmSystemTools::ExpandListArgument(optionIt->second, cmd);
+        }
       }
-      cmSystemTools::RemoveFile(qrcBuildFile);
+      cmd.push_back("-name");
+      cmd.push_back(symbolName);
+      cmd.push_back("-o");
+      cmd.push_back(rccBuildFile);
+      cmd.push_back(rccInputFile);
+
+      // Log command
+      if (this->Verbose) {
+        this->LogCommand(cmd);
+      }
+
+      // Execute command
+      bool res = false;
+      int retVal = 0;
+      std::string output;
+      res = cmSystemTools::RunSingleCommand(cmd, &output, &output, &retVal);
+      if (!res || (retVal != 0)) {
+        // Command failed
+        {
+          std::ostringstream err;
+          err << "AutoRcc: Error: rcc process failed for\n";
+          err << "\"" << rccOutputFile << "\"\n";
+          err << "AutoRcc: Command:\n" << cmJoin(cmd, " ") << "\n";
+          err << "AutoRcc: Command output:\n" << output << "\n";
+          this->LogError(err.str());
+        }
+        cmSystemTools::RemoveFile(rccBuildFile);
+        this->RunRccFailed = true;
+      } else {
+        // Success
+        rccGenerated = true;
+      }
+    } else {
+      // Parent directory creation failed
       this->RunRccFailed = true;
-      return false;
     }
-    return true;
   }
-  return false;
+  return rccGenerated;
 }
 
 void cmQtAutoGenerators::LogErrorNameCollision(

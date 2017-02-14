@@ -89,9 +89,9 @@ private:
                        const std::string& uiInputFile,
                        const std::string& uiOutputFile);
 
-  // - Qrc file generation
-  bool QrcGenerateAll();
-  bool QrcGenerateFile(const std::string& qrcInputFile,
+  // - Rcc file generation
+  bool RccGenerateAll();
+  bool RccGenerateFile(const std::string& qrcInputFile,
                        const std::string& qrcOutputFile, bool unique_n);
 
   // - Logging
