@@ -109,6 +109,10 @@ private:
                          std::multimap<std::string, std::string>& collisions);
   bool MakeParentDirectory(const std::string& filename);
 
+  bool MocEnabled() const { return !this->MocExecutable.empty(); }
+  bool UicEnabled() const { return !this->UicExecutable.empty(); }
+  bool RccEnabled() const { return !this->RccExecutable.empty(); }
+
   bool GenerateAllAny()
   {
     return (this->GenerateAllMoc || this->GenerateAllRcc ||
