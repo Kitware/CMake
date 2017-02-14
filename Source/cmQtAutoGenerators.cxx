@@ -1337,13 +1337,15 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
                                          const std::string& uiInputFile,
                                          const std::string& uiOutputFile)
 {
+  bool uicGenerated = false;
+  bool generateUic = this->GenerateAllUic;
+
   const std::string uicFileRel =
     this->AutogenBuildSubDir + "include/" + uiOutputFile;
   const std::string uicFileAbs = this->CurrentBinaryDir + uicFileRel;
 
-  bool generateUic = this->GenerateAllUic;
-  // Test if the source file is newer that the build file
   if (!generateUic) {
+    // Test if the source file is newer that the build file
     generateUic = FileAbsentOrOlder(uicFileAbs, uiInputFile);
   }
   if (generateUic) {
@@ -1351,50 +1353,59 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
     this->LogBold("Generating UIC header " + uicFileRel);
 
     // Make sure the parent directory exists
-    if (!this->MakeParentDirectory(uicFileAbs)) {
-      this->RunUicFailed = true;
-      return false;
-    }
-
-    std::vector<std::string> command;
-    command.push_back(this->UicExecutable);
-
-    std::vector<std::string> opts = this->UicTargetOptions;
-    std::map<std::string, std::string>::const_iterator optionIt =
-      this->UicOptions.find(uiInputFile);
-    if (optionIt != this->UicOptions.end()) {
-      std::vector<std::string> fileOpts;
-      cmSystemTools::ExpandListArgument(optionIt->second, fileOpts);
-      UicMergeOptions(opts, fileOpts, this->QtMajorVersion == "5");
-    }
-    command.insert(command.end(), opts.begin(), opts.end());
-
-    command.push_back("-o");
-    command.push_back(uicFileAbs);
-    command.push_back(uiInputFile);
-
-    if (this->Verbose) {
-      this->LogCommand(command);
-    }
-    std::string output;
-    int retVal = 0;
-    bool result =
-      cmSystemTools::RunSingleCommand(command, &output, &output, &retVal);
-    if (!result || retVal) {
+    if (this->MakeParentDirectory(uicFileAbs)) {
+      // Compose uic command
+      std::vector<std::string> cmd;
+      cmd.push_back(this->UicExecutable);
       {
-        std::ostringstream err;
-        err << "AutoUic: Error: uic process for " << uicFileRel
-            << " needed by\n \"" << realName << "\"\nfailed:\n"
-            << output << std::endl;
-        this->LogError(err.str());
+        std::vector<std::string> opts = this->UicTargetOptions;
+        std::map<std::string, std::string>::const_iterator optionIt =
+          this->UicOptions.find(uiInputFile);
+        if (optionIt != this->UicOptions.end()) {
+          std::vector<std::string> fileOpts;
+          cmSystemTools::ExpandListArgument(optionIt->second, fileOpts);
+          UicMergeOptions(opts, fileOpts, (this->QtMajorVersion == "5"));
+        }
+        cmd.insert(cmd.end(), opts.begin(), opts.end());
       }
-      cmSystemTools::RemoveFile(uicFileAbs);
+      cmd.push_back("-o");
+      cmd.push_back(uicFileAbs);
+      cmd.push_back(uiInputFile);
+
+      // Log command
+      if (this->Verbose) {
+        this->LogCommand(cmd);
+      }
+
+      // Execute command
+      bool res = false;
+      int retVal = 0;
+      std::string output;
+      res = cmSystemTools::RunSingleCommand(cmd, &output, &output, &retVal);
+
+      if (!res || (retVal != 0)) {
+        // Command failed
+        {
+          std::ostringstream err;
+          err << "AutoUic: Error: uic process failed for\n";
+          err << "\"" << uicFileRel << "\" needed by\n";
+          err << "\"" << realName << "\"\n";
+          err << "AutoUic: Command:\n" << cmJoin(cmd, " ") << "\n";
+          err << "AutoUic: Command output:\n" << output << "\n";
+          this->LogError(err.str());
+        }
+        cmSystemTools::RemoveFile(uicFileAbs);
+        this->RunUicFailed = true;
+      } else {
+        // Success
+        uicGenerated = true;
+      }
+    } else {
+      // Parent directory creation failed
       this->RunUicFailed = true;
-      return false;
     }
-    return true;
   }
-  return false;
+  return uicGenerated;
 }
 
 bool cmQtAutoGenerators::QrcGenerateAll()
