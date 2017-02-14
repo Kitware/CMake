@@ -214,9 +214,9 @@ cmQtAutoGenerators::cmQtAutoGenerators()
   , RunMocFailed(false)
   , RunUicFailed(false)
   , RunRccFailed(false)
-  , GenerateMocAll(false)
-  , GenerateUicAll(false)
-  , GenerateRccAll(false)
+  , GenerateAllMoc(false)
+  , GenerateAllUic(false)
+  , GenerateAllRcc(false)
 {
 
   std::string colorEnv;
@@ -461,33 +461,33 @@ void cmQtAutoGenerators::OldSettingsReadFile(
       if (!this->MocExecutable.empty()) {
         const std::string sol = makefile->GetSafeDefinition(MocOldSettingsKey);
         if (sol != this->MocSettingsString) {
-          this->GenerateMocAll = true;
+          this->GenerateAllMoc = true;
         }
       }
       if (!this->UicExecutable.empty()) {
         const std::string sol = makefile->GetSafeDefinition(UicOldSettingsKey);
         if (sol != this->UicSettingsString) {
-          this->GenerateUicAll = true;
+          this->GenerateAllUic = true;
         }
       }
       if (!this->RccExecutable.empty()) {
         const std::string sol = makefile->GetSafeDefinition(RccOldSettingsKey);
         if (sol != this->RccSettingsString) {
-          this->GenerateRccAll = true;
+          this->GenerateAllRcc = true;
         }
       }
       // In case any setting changed remove the old settings file.
       // This triggers a full rebuild on the next run if the current
       // build is aborted before writing the current settings in the end.
-      if (this->GenerateMocAll || this->GenerateUicAll ||
-          this->GenerateRccAll) {
+      if (this->GenerateAllMoc || this->GenerateAllUic ||
+          this->GenerateAllRcc) {
         cmSystemTools::RemoveFile(filename);
       }
     } else {
       // If the file could not be read re-generate everythiung.
-      this->GenerateMocAll = true;
-      this->GenerateUicAll = true;
-      this->GenerateRccAll = true;
+      this->GenerateAllMoc = true;
+      this->GenerateAllUic = true;
+      this->GenerateAllRcc = true;
     }
   }
 }
@@ -497,7 +497,7 @@ bool cmQtAutoGenerators::OldSettingsWriteFile(
 {
   bool success = true;
   // Only write if any setting changed
-  if (this->GenerateMocAll || this->GenerateUicAll || this->GenerateRccAll) {
+  if (this->GenerateAllMoc || this->GenerateAllUic || this->GenerateAllRcc) {
     const std::string filename = OldSettingsFile(targetDirectory);
     cmsys::ofstream outfile;
     outfile.open(filename.c_str(), std::ios::trunc);
@@ -1203,7 +1203,7 @@ bool cmQtAutoGenerators::MocGenerateFile(const std::string& sourceFile,
     this->AutogenBuildSubDir + subDirPrefix + mocFileName;
   const std::string mocFileAbs = this->CurrentBinaryDir + mocFileRel;
 
-  bool generateMoc = this->GenerateMocAll;
+  bool generateMoc = this->GenerateAllMoc;
   // Test if the source file is newer that the build file
   if (!generateMoc) {
     generateMoc = FileAbsentOrOlder(mocFileAbs, sourceFile);
@@ -1331,7 +1331,7 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
     this->AutogenBuildSubDir + "include/" + uiOutputFile;
   const std::string uicFileAbs = this->CurrentBinaryDir + uicFileRel;
 
-  bool generateUic = this->GenerateUicAll;
+  bool generateUic = this->GenerateAllUic;
   // Test if the source file is newer that the build file
   if (!generateUic) {
     generateUic = FileAbsentOrOlder(uicFileAbs, uiInputFile);
@@ -1452,7 +1452,7 @@ bool cmQtAutoGenerators::QrcGenerateFile(const std::string& qrcInputFile,
 
   const std::string qrcBuildFile = this->CurrentBinaryDir + qrcOutputFile;
 
-  bool generateQrc = this->GenerateRccAll;
+  bool generateQrc = this->GenerateAllRcc;
   // Test if the resources list file is newer than build file
   if (!generateQrc) {
     generateQrc = FileAbsentOrOlder(qrcBuildFile, qrcInputFile);
