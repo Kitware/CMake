@@ -7,7 +7,6 @@
 #include <cmConfigure.h>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Terminal.h>
-#include <iostream>
 #include <sstream>
 #include <stdlib.h>
 #include <string.h>
@@ -1573,21 +1572,21 @@ void cmQtAutoGenerators::LogBold(const std::string& message)
 
 void cmQtAutoGenerators::LogInfo(const std::string& message)
 {
-  std::cout << message.c_str();
+  cmSystemTools::Stdout(message.c_str(), message.size());
 }
 
 void cmQtAutoGenerators::LogWarning(const std::string& message)
 {
-  std::ostringstream ostr;
-  ostr << message << "\n";
-  std::cout << ostr.str();
+  std::string msg(message);
+  msg += "\n";
+  cmSystemTools::Stdout(msg.c_str(), msg.size());
 }
 
 void cmQtAutoGenerators::LogError(const std::string& message)
 {
-  std::ostringstream ostr;
-  ostr << message << "\n";
-  std::cerr << ostr.str();
+  std::string msg(message);
+  msg += "\n";
+  cmSystemTools::Stderr(msg.c_str(), msg.size());
 }
 
 void cmQtAutoGenerators::LogCommand(const std::vector<std::string>& command)
