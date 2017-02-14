@@ -107,6 +107,8 @@ private:
   // - Utility
   bool NameCollisionTest(const std::map<std::string, std::string>& genFiles,
                          std::multimap<std::string, std::string>& collisions);
+  std::string ChecksumedPath(const std::string& sourceFile,
+                             const char* basePrefix, const char* baseSuffix);
   bool MakeParentDirectory(const std::string& filename);
 
   bool MocEnabled() const { return !this->MocExecutable.empty(); }

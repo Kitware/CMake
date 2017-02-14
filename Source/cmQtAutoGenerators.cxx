@@ -1046,10 +1046,8 @@ void cmQtAutoGenerators::ParseHeaders(
       }
       std::string macroName;
       if (this->MocRequired(contents, macroName)) {
-        notIncludedMocs[headerName] = fpathCheckSum.getPart(headerName) +
-          "/moc_" +
-          cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName) +
-          ".cpp";
+        notIncludedMocs[headerName] =
+          this->ChecksumedPath(headerName, "moc_", ".cpp");
       }
     }
 
@@ -1412,9 +1410,8 @@ bool cmQtAutoGenerators::RccGenerateAll()
        si != this->RccSources.end(); ++si) {
     const std::string ext = cmsys::SystemTools::GetFilenameLastExtension(*si);
     if (ext == ".qrc") {
-      qrcGenMap[*si] = this->AutogenBuildSubDir + fpathCheckSum.getPart(*si) +
-        "/qrc_" + cmsys::SystemTools::GetFilenameWithoutLastExtension(*si) +
-        ".cpp";
+      qrcGenMap[*si] =
+        this->AutogenBuildSubDir + this->ChecksumedPath(*si, "qrc_", ".cpp");
     }
   }
 
@@ -1626,6 +1623,22 @@ bool cmQtAutoGenerators::NameCollisionTest(
   }
 
   return !collisions.empty();
+}
+
+/**
+ * @brief Generates a file path based on the checksum of the source file path
+ * @return The path
+ */
+std::string cmQtAutoGenerators::ChecksumedPath(const std::string& sourceFile,
+                                               const char* basePrefix,
+                                               const char* baseSuffix)
+{
+  std::string res = fpathCheckSum.getPart(sourceFile);
+  res += "/";
+  res += basePrefix;
+  res += cmsys::SystemTools::GetFilenameWithoutLastExtension(sourceFile);
+  res += baseSuffix;
+  return res;
 }
 
 /**
