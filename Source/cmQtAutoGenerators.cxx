@@ -431,7 +431,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
 std::string cmQtAutoGenerators::SettingsStringGenMoc()
 {
   std::string res;
-  if (!this->MocExecutable.empty()) {
+  if (this->MocEnabled()) {
     res += this->MocCompileDefinitionsStr;
     res += " ~~~ ";
     res += this->MocIncludesStr;
@@ -447,7 +447,7 @@ std::string cmQtAutoGenerators::SettingsStringGenMoc()
 std::string cmQtAutoGenerators::SettingsStringGenUic()
 {
   std::string res;
-  if (!this->UicExecutable.empty()) {
+  if (this->UicEnabled()) {
     res += cmJoin(this->UicTargetOptions, "@osep@");
     res += " ~~~ ";
     res += JoinOptions(this->UicOptions);
@@ -459,7 +459,7 @@ std::string cmQtAutoGenerators::SettingsStringGenUic()
 std::string cmQtAutoGenerators::SettingsStringGenRcc()
 {
   std::string res;
-  if (!this->RccExecutable.empty()) {
+  if (this->RccEnabled()) {
     res += JoinOptions(this->RccOptions);
     res += " ~~~ ";
   }
@@ -709,7 +709,7 @@ bool cmQtAutoGenerators::MocRequired(const std::string& text,
 bool cmQtAutoGenerators::MocSkipTest(const std::string& absFilename)
 {
   // Test if moc scanning is enabled
-  if (!this->MocExecutable.empty()) {
+  if (this->MocEnabled()) {
     // Test if the file name is on the skip list
     if (!ListContains(this->SkipMoc, absFilename)) {
       return false;
@@ -724,7 +724,7 @@ bool cmQtAutoGenerators::MocSkipTest(const std::string& absFilename)
 bool cmQtAutoGenerators::UicSkipTest(const std::string& absFilename)
 {
   // Test if uic scanning is enabled
-  if (!this->UicExecutable.empty()) {
+  if (this->UicEnabled()) {
     // Test if the file name is on the skip list
     if (!ListContains(this->SkipUic, absFilename)) {
       return false;
@@ -1072,7 +1072,7 @@ bool cmQtAutoGenerators::MocGenerateAll(
   const std::map<std::string, std::string>& includedMocs,
   const std::map<std::string, std::string>& notIncludedMocs)
 {
-  if (this->MocExecutable.empty()) {
+  if (!this->MocEnabled()) {
     return true;
   }
 
@@ -1261,7 +1261,7 @@ bool cmQtAutoGenerators::MocGenerateFile(const std::string& sourceFile,
 bool cmQtAutoGenerators::UicGenerateAll(
   const std::map<std::string, std::vector<std::string> >& includedUis)
 {
-  if (this->UicExecutable.empty()) {
+  if (!this->UicEnabled()) {
     return true;
   }
 
@@ -1390,7 +1390,7 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
 
 bool cmQtAutoGenerators::QrcGenerateAll()
 {
-  if (this->RccExecutable.empty()) {
+  if (!this->RccEnabled()) {
     return true;
   }
 
