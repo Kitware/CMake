@@ -2781,25 +2781,6 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     flags += " ";
     flags += flagsConfig;
   }
-  std::string standardLibsVar = "CMAKE_";
-  standardLibsVar += linkLanguage;
-  standardLibsVar += "_STANDARD_LIBRARIES";
-  std::string libs =
-    this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
-  // Remove trailing spaces from libs
-  std::string::size_type pos = libs.size() - 1;
-  if (!libs.empty()) {
-    while (libs[pos] == ' ') {
-      pos--;
-    }
-  }
-  if (pos != libs.size() - 1) {
-    libs = libs.substr(0, pos + 1);
-  }
-  // Replace spaces in libs with ;
-  std::replace(libs.begin(), libs.end(), ' ', ';');
-  std::vector<std::string> libVec;
-  cmSystemTools::ExpandListArgument(libs, libVec);
 
   cmComputeLinkInformation* pcli =
     this->GeneratorTarget->GetLinkInformation(config.c_str());
@@ -2809,10 +2790,17 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
       this->Name.c_str());
     return false;
   }
-  // add the libraries for the target to libs string
   cmComputeLinkInformation& cli = *pcli;
+
+  std::vector<std::string> libVec;
   std::vector<std::string> vsTargetVec;
   this->AddLibraries(cli, libVec, vsTargetVec);
+  std::string standardLibsVar = "CMAKE_";
+  standardLibsVar += linkLanguage;
+  standardLibsVar += "_STANDARD_LIBRARIES";
+  std::string const libs =
+    this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
+  cmSystemTools::ParseWindowsCommandLine(libs.c_str(), libVec);
   linkOptions.AddFlag("AdditionalDependencies", libVec);
 
   // Populate TargetsFileAndConfigsVec
