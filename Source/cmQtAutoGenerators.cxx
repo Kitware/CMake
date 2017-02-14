@@ -1580,13 +1580,13 @@ void cmQtAutoGenerators::LogWarning(const std::string& message)
 {
   std::ostringstream ostr;
   ostr << message << "\n";
-  std::cout << message.c_str();
+  std::cout << ostr.str();
 }
 
 void cmQtAutoGenerators::LogError(const std::string& message)
 {
   std::ostringstream ostr;
-  ostr << message << "\n\n";
+  ostr << message << "\n";
   std::cerr << ostr.str();
 }
 
