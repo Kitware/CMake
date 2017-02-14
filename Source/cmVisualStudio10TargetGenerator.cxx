@@ -2784,22 +2784,10 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   std::string standardLibsVar = "CMAKE_";
   standardLibsVar += linkLanguage;
   standardLibsVar += "_STANDARD_LIBRARIES";
-  std::string libs =
+  std::string const libs =
     this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
-  // Remove trailing spaces from libs
-  std::string::size_type pos = libs.size() - 1;
-  if (!libs.empty()) {
-    while (libs[pos] == ' ') {
-      pos--;
-    }
-  }
-  if (pos != libs.size() - 1) {
-    libs = libs.substr(0, pos + 1);
-  }
-  // Replace spaces in libs with ;
-  std::replace(libs.begin(), libs.end(), ' ', ';');
   std::vector<std::string> libVec;
-  cmSystemTools::ExpandListArgument(libs, libVec);
+  cmSystemTools::ParseWindowsCommandLine(libs.c_str(), libVec);
 
   cmComputeLinkInformation* pcli =
     this->GeneratorTarget->GetLinkInformation(config.c_str());
