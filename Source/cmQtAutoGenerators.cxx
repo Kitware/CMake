@@ -51,12 +51,18 @@ static std::string GetConfigDefinition(cmMakefile* makefile,
   return makefile->GetSafeDefinition(key);
 }
 
-static std::string OldSettingsFile(const std::string& targetDirectory)
+static std::string SettingsFile(const std::string& targetDirectory)
 {
   std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutogenOldSettings.cmake";
   return filename;
+}
+
+inline static bool SettingsMatch(cmMakefile* makefile, const char* key,
+                                 const std::string& value)
+{
+  return (value == makefile->GetSafeDefinition(key));
 }
 
 static std::string FindMatchingHeader(
@@ -454,25 +460,16 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
   this->RccSettingsString = this->SettingsStringGenRcc();
 
   // Read old settings
-  const std::string filename = OldSettingsFile(targetDirectory);
+  const std::string filename = SettingsFile(targetDirectory);
   if (makefile->ReadListFile(filename.c_str())) {
-    if (!this->MocExecutable.empty()) {
-      const std::string sol = makefile->GetSafeDefinition(SettingsKeyMoc);
-      if (sol != this->MocSettingsString) {
-        this->GenerateAllMoc = true;
-      }
+    if (!SettingsMatch(makefile, SettingsKeyMoc, this->MocSettingsString)) {
+      this->GenerateAllMoc = true;
     }
-    if (!this->UicExecutable.empty()) {
-      const std::string sol = makefile->GetSafeDefinition(SettingsKeyUic);
-      if (sol != this->UicSettingsString) {
-        this->GenerateAllUic = true;
-      }
+    if (!SettingsMatch(makefile, SettingsKeyUic, this->UicSettingsString)) {
+      this->GenerateAllUic = true;
     }
-    if (!this->RccExecutable.empty()) {
-      const std::string sol = makefile->GetSafeDefinition(SettingsKeyRcc);
-      if (sol != this->RccSettingsString) {
-        this->GenerateAllRcc = true;
-      }
+    if (!SettingsMatch(makefile, SettingsKeyRcc, this->RccSettingsString)) {
+      this->GenerateAllRcc = true;
     }
     // In case any setting changed remove the old settings file.
     // This triggers a full rebuild on the next run if the current
@@ -493,7 +490,7 @@ bool cmQtAutoGenerators::SettingsFileWrite(const std::string& targetDirectory)
   bool success = true;
   // Only write if any setting changed
   if (this->GenerateAllAny()) {
-    const std::string filename = OldSettingsFile(targetDirectory);
+    const std::string filename = SettingsFile(targetDirectory);
     cmsys::ofstream outfile;
     outfile.open(filename.c_str(), std::ios::trunc);
     if (outfile) {
@@ -615,7 +612,8 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   // what file the moc is created from. Once a moc is included the same moc
   // may not be included in the moc_compilation.cpp file anymore. OTOH if
   // there's a header containing Q_OBJECT where no corresponding moc file
-  // is included anywhere a moc_<filename>.cpp file is created and included in
+  // is included anywhere a moc_<filename>.cpp file is created and included
+  // in
   // the moc_compilation.cpp file.
 
   // key = moc source filepath, value = moc output filepath
