@@ -985,42 +985,35 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
   const std::vector<std::string>& headerExtensions,
   std::set<std::string>& absHeadersMoc, std::set<std::string>& absHeadersUic)
 {
-  // search for header files and private header files we may need to moc:
-  std::string basepath = cmsys::SystemTools::GetFilenamePath(
-    cmsys::SystemTools::GetRealPath(absFilename));
-  basepath += '/';
-  basepath += cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
+  std::string basepaths[2];
+  {
+    std::string bpath = cmsys::SystemTools::GetFilenamePath(
+      cmsys::SystemTools::GetRealPath(absFilename));
+    bpath += '/';
+    bpath += cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
 
-  // Search for regular header
-  for (std::vector<std::string>::const_iterator ext = headerExtensions.begin();
-       ext != headerExtensions.end(); ++ext) {
-    const std::string headerName = basepath + "." + (*ext);
-    if (cmsys::SystemTools::FileExists(headerName.c_str())) {
-      // Moc headers
-      if (!this->MocSkipTest(absFilename) && !this->MocSkipTest(headerName)) {
-        absHeadersMoc.insert(headerName);
-      }
-      // Uic headers
-      if (!this->UicSkipTest(absFilename) && !this->UicSkipTest(headerName)) {
-        absHeadersUic.insert(headerName);
-      }
-      break;
-    }
+    // search for default header files and private header files
+    basepaths[0] = (bpath + ".");
+    basepaths[1] = (bpath + "_p.");
   }
-  // Search for private header
-  for (std::vector<std::string>::const_iterator ext = headerExtensions.begin();
-       ext != headerExtensions.end(); ++ext) {
-    const std::string headerName = basepath + "_p." + (*ext);
-    if (cmsys::SystemTools::FileExists(headerName.c_str())) {
-      // Moc headers
-      if (!this->MocSkipTest(absFilename) && !this->MocSkipTest(headerName)) {
-        absHeadersMoc.insert(headerName);
+
+  for (const std::string* bpit = cmArrayBegin(basepaths);
+       bpit != cmArrayEnd(basepaths); ++bpit) {
+    for (std::vector<std::string>::const_iterator heit =
+           headerExtensions.begin();
+         heit != headerExtensions.end(); ++heit) {
+      const std::string hname = (*bpit) + (*heit);
+      if (cmsys::SystemTools::FileExists(hname.c_str())) {
+        // Moc headers
+        if (!this->MocSkipTest(absFilename) && !this->MocSkipTest(hname)) {
+          absHeadersMoc.insert(hname);
+        }
+        // Uic headers
+        if (!this->UicSkipTest(absFilename) && !this->UicSkipTest(hname)) {
+          absHeadersUic.insert(hname);
+        }
+        break;
       }
-      // Uic headers
-      if (!this->UicSkipTest(absFilename) && !this->UicSkipTest(headerName)) {
-        absHeadersUic.insert(headerName);
-      }
-      break;
     }
   }
 }
