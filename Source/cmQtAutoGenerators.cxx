@@ -29,9 +29,9 @@
 
 // -- Static variables
 
-static const char* MocOldSettingsKey = "AM_MOC_OLD_SETTINGS";
-static const char* UicOldSettingsKey = "AM_UIC_OLD_SETTINGS";
-static const char* RccOldSettingsKey = "AM_RCC_OLD_SETTINGS";
+static const char* SettingsKeyMoc = "AM_MOC_OLD_SETTINGS";
+static const char* SettingsKeyUic = "AM_UIC_OLD_SETTINGS";
+static const char* SettingsKeyRcc = "AM_RCC_OLD_SETTINGS";
 
 // -- Static functions
 
@@ -457,19 +457,19 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
   const std::string filename = OldSettingsFile(targetDirectory);
   if (makefile->ReadListFile(filename.c_str())) {
     if (!this->MocExecutable.empty()) {
-      const std::string sol = makefile->GetSafeDefinition(MocOldSettingsKey);
+      const std::string sol = makefile->GetSafeDefinition(SettingsKeyMoc);
       if (sol != this->MocSettingsString) {
         this->GenerateAllMoc = true;
       }
     }
     if (!this->UicExecutable.empty()) {
-      const std::string sol = makefile->GetSafeDefinition(UicOldSettingsKey);
+      const std::string sol = makefile->GetSafeDefinition(SettingsKeyUic);
       if (sol != this->UicSettingsString) {
         this->GenerateAllUic = true;
       }
     }
     if (!this->RccExecutable.empty()) {
-      const std::string sol = makefile->GetSafeDefinition(RccOldSettingsKey);
+      const std::string sol = makefile->GetSafeDefinition(SettingsKeyRcc);
       if (sol != this->RccSettingsString) {
         this->GenerateAllRcc = true;
       }
@@ -498,17 +498,17 @@ bool cmQtAutoGenerators::SettingsFileWrite(const std::string& targetDirectory)
     outfile.open(filename.c_str(), std::ios::trunc);
     if (outfile) {
       if (!this->MocExecutable.empty()) {
-        outfile << "set(" << MocOldSettingsKey << " "
+        outfile << "set(" << SettingsKeyMoc << " "
                 << cmOutputConverter::EscapeForCMake(this->MocSettingsString)
                 << ")\n";
       }
       if (!this->UicExecutable.empty()) {
-        outfile << "set(" << UicOldSettingsKey << " "
+        outfile << "set(" << SettingsKeyUic << " "
                 << cmOutputConverter::EscapeForCMake(this->UicSettingsString)
                 << ")\n";
       }
       if (!this->RccExecutable.empty()) {
-        outfile << "set(" << RccOldSettingsKey << " "
+        outfile << "set(" << SettingsKeyRcc << " "
                 << cmOutputConverter::EscapeForCMake(this->RccSettingsString)
                 << ")\n";
       }
