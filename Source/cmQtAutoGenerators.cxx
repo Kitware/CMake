@@ -65,6 +65,13 @@ inline static bool SettingsMatch(cmMakefile* makefile, const char* key,
   return (value == makefile->GetSafeDefinition(key));
 }
 
+static void SettingWrite(std::ostream& ostr, const char* key,
+                         const std::string& value)
+{
+  ostr << "set(" << key << " " << cmOutputConverter::EscapeForCMake(value)
+       << ")\n";
+}
+
 static std::string FindMatchingHeader(
   const std::string& absPath, const std::string& mocSubDir,
   const std::string& basename,
@@ -495,19 +502,13 @@ bool cmQtAutoGenerators::SettingsFileWrite(const std::string& targetDirectory)
     outfile.open(filename.c_str(), std::ios::trunc);
     if (outfile) {
       if (!this->MocExecutable.empty()) {
-        outfile << "set(" << SettingsKeyMoc << " "
-                << cmOutputConverter::EscapeForCMake(this->MocSettingsString)
-                << ")\n";
+        SettingWrite(outfile, SettingsKeyMoc, this->MocSettingsString);
       }
       if (!this->UicExecutable.empty()) {
-        outfile << "set(" << SettingsKeyUic << " "
-                << cmOutputConverter::EscapeForCMake(this->UicSettingsString)
-                << ")\n";
+        SettingWrite(outfile, SettingsKeyUic, this->UicSettingsString);
       }
       if (!this->RccExecutable.empty()) {
-        outfile << "set(" << SettingsKeyRcc << " "
-                << cmOutputConverter::EscapeForCMake(this->RccSettingsString)
-                << ")\n";
+        SettingWrite(outfile, SettingsKeyRcc, this->RccSettingsString);
       }
       success = outfile.good();
       outfile.close();
