@@ -6,14 +6,12 @@
 #error "PACKED_DEFINE not defined!"
 #endif
 
-static
-__global__
-void DetermineIfValidCudaDevice()
+static __global__ void DetermineIfValidCudaDevice()
 {
 }
 
 #ifdef _MSC_VER
-#pragma pack(push,1)
+#pragma pack(push, 1)
 #undef PACKED_DEFINE
 #define PACKED_DEFINE
 #endif
@@ -32,28 +30,24 @@ struct PACKED_DEFINE result_type
 result_type can_launch_kernel()
 {
   result_type r;
-  DetermineIfValidCudaDevice <<<1,1>>> ();
+  DetermineIfValidCudaDevice<<<1, 1>>>();
   r.valid = (cudaSuccess == cudaGetLastError());
-  if(r.valid)
-    {
+  if (r.valid) {
     r.value = 1;
-    }
-  else
-    {
+  } else {
     r.value = -1;
-    }
+  }
   return r;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   cudaError_t err;
   int nDevices = 0;
   err = cudaGetDeviceCount(&nDevices);
-  if(err != cudaSuccess)
-    {
-      std::cerr << cudaGetErrorString(err) << std::endl;
-      return 1;
-    }
+  if (err != cudaSuccess) {
+    std::cerr << cudaGetErrorString(err) << std::endl;
+    return 1;
+  }
   return 0;
 }
