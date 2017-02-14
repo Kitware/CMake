@@ -448,46 +448,43 @@ std::string cmQtAutoGenerators::RccSettingsStringCompose()
 void cmQtAutoGenerators::OldSettingsReadFile(
   cmMakefile* makefile, const std::string& targetDirectory)
 {
-  if (!this->MocExecutable.empty() || !this->UicExecutable.empty() ||
-      !this->RccExecutable.empty()) {
-    // Compose current settings strings
-    this->MocSettingsString = this->MocSettingsStringCompose();
-    this->UicSettingsString = this->UicSettingsStringCompose();
-    this->RccSettingsString = this->RccSettingsStringCompose();
+  // Compose current settings strings
+  this->MocSettingsString = this->MocSettingsStringCompose();
+  this->UicSettingsString = this->UicSettingsStringCompose();
+  this->RccSettingsString = this->RccSettingsStringCompose();
 
-    // Read old settings
-    const std::string filename = OldSettingsFile(targetDirectory);
-    if (makefile->ReadListFile(filename.c_str())) {
-      if (!this->MocExecutable.empty()) {
-        const std::string sol = makefile->GetSafeDefinition(MocOldSettingsKey);
-        if (sol != this->MocSettingsString) {
-          this->GenerateAllMoc = true;
-        }
+  // Read old settings
+  const std::string filename = OldSettingsFile(targetDirectory);
+  if (makefile->ReadListFile(filename.c_str())) {
+    if (!this->MocExecutable.empty()) {
+      const std::string sol = makefile->GetSafeDefinition(MocOldSettingsKey);
+      if (sol != this->MocSettingsString) {
+        this->GenerateAllMoc = true;
       }
-      if (!this->UicExecutable.empty()) {
-        const std::string sol = makefile->GetSafeDefinition(UicOldSettingsKey);
-        if (sol != this->UicSettingsString) {
-          this->GenerateAllUic = true;
-        }
-      }
-      if (!this->RccExecutable.empty()) {
-        const std::string sol = makefile->GetSafeDefinition(RccOldSettingsKey);
-        if (sol != this->RccSettingsString) {
-          this->GenerateAllRcc = true;
-        }
-      }
-      // In case any setting changed remove the old settings file.
-      // This triggers a full rebuild on the next run if the current
-      // build is aborted before writing the current settings in the end.
-      if (this->GenerateAllAny()) {
-        cmSystemTools::RemoveFile(filename);
-      }
-    } else {
-      // If the file could not be read re-generate everythiung.
-      this->GenerateAllMoc = true;
-      this->GenerateAllUic = true;
-      this->GenerateAllRcc = true;
     }
+    if (!this->UicExecutable.empty()) {
+      const std::string sol = makefile->GetSafeDefinition(UicOldSettingsKey);
+      if (sol != this->UicSettingsString) {
+        this->GenerateAllUic = true;
+      }
+    }
+    if (!this->RccExecutable.empty()) {
+      const std::string sol = makefile->GetSafeDefinition(RccOldSettingsKey);
+      if (sol != this->RccSettingsString) {
+        this->GenerateAllRcc = true;
+      }
+    }
+    // In case any setting changed remove the old settings file.
+    // This triggers a full rebuild on the next run if the current
+    // build is aborted before writing the current settings in the end.
+    if (this->GenerateAllAny()) {
+      cmSystemTools::RemoveFile(filename);
+    }
+  } else {
+    // If the file could not be read re-generate everythiung.
+    this->GenerateAllMoc = true;
+    this->GenerateAllUic = true;
+    this->GenerateAllRcc = true;
   }
 }
 
