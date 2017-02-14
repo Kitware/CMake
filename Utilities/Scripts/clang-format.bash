@@ -107,7 +107,7 @@ case "$mode" in
 esac
 
 # Filter sources to which our style should apply.
-$git_ls -z -- '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx' |
+$git_ls -z -- '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx' '*.cu' '*.notcu' |
 
   # Exclude lexer/parser generator input and output.
   egrep -z -v '^Source/cmCommandArgumentLexer\.' |
