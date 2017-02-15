@@ -119,6 +119,13 @@ private:
                              const char* baseSuffix) const;
   bool MakeParentDirectory(const std::string& filename);
 
+  bool FindHeader(std::string& header, const std::string& testBasePath,
+                  const std::vector<std::string>& headerExtensions) const;
+  std::string FindMatchingHeader(
+    const std::string& basePath, const std::string& baseName,
+    const std::string& subDir,
+    const std::vector<std::string>& headerExtensions) const;
+
   // - Target names
   std::string OriginTargetName;
   std::string AutogenTargetName;
