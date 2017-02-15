@@ -34,6 +34,13 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
 
+  void FinalPass() CM_OVERRIDE { this->Command->FinalPass(); }
+
+  bool HasFinalPass() const CM_OVERRIDE
+  {
+    return this->Command->HasFinalPass();
+  }
+
   bool IsScriptable() const CM_OVERRIDE
   {
     return this->Command->IsScriptable();
