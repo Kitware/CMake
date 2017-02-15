@@ -67,8 +67,6 @@ public:
                                      const char* suffix,
                                      const std::string& lang);
   void OutputFlagMap(std::ostream& fout, const char* indent);
-  void OutputAdditionalOptions(std::ostream& fout, const char* prefix,
-                               const char* suffix);
   void SetConfiguration(const char* config);
 
 private:

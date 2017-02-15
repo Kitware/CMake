@@ -74,9 +74,6 @@ protected:
   // Preprocessor definitions.
   std::vector<std::string> Defines;
 
-  // Unrecognized flags that get no special handling.
-  std::string FlagString;
-
   bool DoingDefine;
   bool AllowDefine;
   bool AllowSlash;

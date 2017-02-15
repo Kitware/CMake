@@ -245,10 +245,10 @@ void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
   }
 
   // This option is not known.  Store it in the output flags.
-  this->FlagString += " ";
-  this->FlagString += cmOutputConverter::EscapeWindowsShellArgument(
+  std::string const opts = cmOutputConverter::EscapeWindowsShellArgument(
     flag, cmOutputConverter::Shell_Flag_AllowMakeVariables |
       cmOutputConverter::Shell_Flag_VSIDE);
+  this->AppendFlagString("AdditionalOptions", opts);
 }
 
 void cmVisualStudioGeneratorOptions::SetConfiguration(const char* config)
@@ -340,29 +340,6 @@ void cmVisualStudioGeneratorOptions::OutputFlagMap(std::ostream& fout,
         sep = ";";
       }
       fout << "\"\n";
-    }
-  }
-}
-
-void cmVisualStudioGeneratorOptions::OutputAdditionalOptions(
-  std::ostream& fout, const char* prefix, const char* suffix)
-{
-  if (!this->FlagString.empty()) {
-    if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-      fout << prefix;
-      if (!this->Configuration.empty()) {
-        this->TargetGenerator->WritePlatformConfigTag(
-          "AdditionalOptions", this->Configuration.c_str(), 0, 0, 0, &fout);
-      } else {
-        fout << "<AdditionalOptions>";
-      }
-      fout << "%(AdditionalOptions) "
-           << cmVisualStudio10GeneratorOptionsEscapeForXML(this->FlagString)
-           << "</AdditionalOptions>\n";
-    } else {
-      fout << prefix << "AdditionalOptions=\"";
-      fout << cmVisualStudioGeneratorOptionsEscapeForXML(this->FlagString);
-      fout << "\"" << suffix;
     }
   }
 }
