@@ -144,7 +144,6 @@ private:
   // - Moc
   std::vector<std::string> SkipMoc;
   std::string MocInfoIncludes;
-  std::string MocInfoOptions;
   std::string OutMocCppFilenameRel;
   std::string OutMocCppFilenameAbs;
   std::list<std::string> MocIncludes;

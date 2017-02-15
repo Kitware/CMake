@@ -154,13 +154,19 @@ static bool ListContains(const std::vector<std::string>& list,
   return (std::find(list.begin(), list.end(), entry) != list.end());
 }
 
-static std::string JoinOptions(const std::map<std::string, std::string>& opts)
+static std::string JoinOptionsList(const std::vector<std::string>& opts)
+{
+  return cmOutputConverter::EscapeForCMake(cmJoin(opts, ";"));
+}
+
+static std::string JoinOptionsMap(
+  const std::map<std::string, std::string>& opts)
 {
   std::string result;
   for (std::map<std::string, std::string>::const_iterator it = opts.begin();
        it != opts.end(); ++it) {
     if (it != opts.begin()) {
-      result += "%%%";
+      result += "@list_sep@";
     }
     result += it->first;
     result += "===";
@@ -340,7 +346,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     this->MocDefinitions);
   this->MocInfoIncludes =
     GetConfigDefinition(makefile, "AM_MOC_INCLUDES", config);
-  this->MocInfoOptions = makefile->GetSafeDefinition("AM_MOC_OPTIONS");
+  cmSystemTools::ExpandListArgument(
+    makefile->GetSafeDefinition("AM_MOC_OPTIONS"), this->MocOptions);
 
   // - Uic
   cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SKIP_UIC"),
@@ -434,26 +441,25 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
   // Compose current settings strings
   if (this->MocEnabled()) {
     std::string& str = this->SettingsStringMoc;
-    str +=
-      cmOutputConverter::EscapeForCMake(cmJoin(this->MocDefinitions, ";"));
+    str += JoinOptionsList(this->MocDefinitions);
     str += " ~~~ ";
     str += this->MocInfoIncludes;
     str += " ~~~ ";
-    str += this->MocInfoOptions;
+    str += JoinOptionsList(this->MocOptions);
     str += " ~~~ ";
     str += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
     str += " ~~~ ";
   }
   if (this->UicEnabled()) {
     std::string& str = this->SettingsStringUic;
-    str += cmJoin(this->UicTargetOptions, "@osep@");
+    str += JoinOptionsList(this->UicTargetOptions);
     str += " ~~~ ";
-    str += JoinOptions(this->UicOptions);
+    str += JoinOptionsMap(this->UicOptions);
     str += " ~~~ ";
   }
   if (this->RccEnabled()) {
     std::string& str = this->SettingsStringRcc;
-    str += JoinOptions(this->RccOptions);
+    str += JoinOptionsMap(this->RccOptions);
     str += " ~~~ ";
   }
 
@@ -532,8 +538,6 @@ void cmQtAutoGenerators::Init()
   fpathCheckSum.setupParentDirs(this->CurrentSourceDir, this->CurrentBinaryDir,
                                 this->ProjectSourceDir,
                                 this->ProjectBinaryDir);
-
-  cmSystemTools::ExpandListArgument(this->MocInfoOptions, this->MocOptions);
 
   std::vector<std::string> incPaths;
   cmSystemTools::ExpandListArgument(this->MocInfoIncludes, incPaths);
