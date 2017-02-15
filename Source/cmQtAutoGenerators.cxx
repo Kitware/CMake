@@ -807,7 +807,12 @@ bool cmQtAutoGenerators::ParseContentForMoc(
         std::string fileToMoc;
         if (relaxed) {
           // Mode: Relaxed
-          if (!requiresMoc || (incBasename != scannedFileBasename)) {
+          if (requiresMoc && (incBasename == scannedFileBasename)) {
+            // Include self
+            fileToMoc = absFilename;
+            ownDotMocIncluded = true;
+          } else {
+            // In relaxed mode try to find a header instead but issue a warning
             const std::string headerToMoc = this->FindMatchingHeader(
               scannedFileAbsPath, incBasename, incSubDir);
             if (!headerToMoc.empty()) {
@@ -816,11 +821,10 @@ bool cmQtAutoGenerators::ParseContentForMoc(
               if (!requiresMoc && (incBasename == scannedFileBasename)) {
                 std::ostringstream err;
                 err << "AutoMoc: Warning: " << absFilename << "\n"
-                    << "The file includes the moc file \"" << incString
-                    << "\", but does not contain a " << macroName
-                    << " macro. Running moc on "
-                    << "\"" << headerToMoc << "\" ! Include \"moc_"
-                    << incBasename
+                    << "The file includes the moc file \"" << incString << "\""
+                    << ", but does not contain a Q_OBJECT or Q_GADGET macro.\n"
+                    << "Running moc on \"" << headerToMoc << "\"!\n"
+                    << "Include \"moc_" << incBasename
                     << ".cpp\" for a compatibility with "
                        "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n";
                 this->LogWarning(err.str());
@@ -828,10 +832,9 @@ bool cmQtAutoGenerators::ParseContentForMoc(
                 std::ostringstream err;
                 err << "AutoMoc: Warning: " << absFilename << "\n"
                     << "The file includes the moc file \"" << incString
-                    << "\" instead of \"moc_" << incBasename
-                    << ".cpp\". Running moc on "
-                    << "\"" << headerToMoc << "\" ! Include \"moc_"
-                    << incBasename
+                    << "\" instead of \"moc_" << incBasename << ".cpp\".\n"
+                    << "Running moc on \"" << headerToMoc << "\"!\n"
+                    << "Include \"moc_" << incBasename
                     << ".cpp\" for compatibility with "
                        "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n";
                 this->LogWarning(err.str());
@@ -846,10 +849,6 @@ bool cmQtAutoGenerators::ParseContentForMoc(
               this->LogError(err.str());
               return false;
             }
-          } else {
-            // Include self
-            fileToMoc = absFilename;
-            ownDotMocIncluded = true;
           }
         } else {
           // Mode: Strict
@@ -891,9 +890,9 @@ bool cmQtAutoGenerators::ParseContentForMoc(
           << "The file contains a " << macroName
           << " macro, but does not include "
           << "\"" << scannedFileBasename << ".moc\", but instead includes "
-          << "\"" << ownMocUnderscoreFile << "\". Running moc on "
-          << "\"" << absFilename << "\" ! Better include \""
-          << scannedFileBasename
+          << "\"" << ownMocUnderscoreFile << "\".\n"
+          << "Running moc on \"" << absFilename << "\"!\n"
+          << "Better include \"" << scannedFileBasename
           << ".moc\" for compatibility with "
              "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n";
       this->LogWarning(err.str());
@@ -907,7 +906,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
       err << "AutoMoc: Error: " << absFilename << "\n"
           << "The file contains a " << macroName
           << " macro, but does not include "
-          << "\"" << scannedFileBasename << ".moc\" !\n";
+          << "\"" << scannedFileBasename << ".moc\"!\n";
       this->LogError(err.str());
       return false;
     }
