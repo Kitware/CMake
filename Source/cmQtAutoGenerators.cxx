@@ -1131,11 +1131,8 @@ bool cmQtAutoGenerators::MocGenerateAll(
   }
 
   // Actually write moc_compilation.cpp
-  {
-    std::string msg = "Generating MOC compilation ";
-    msg += this->OutMocCppFilenameRel;
-    this->LogBold(msg);
-  }
+  this->LogBold("Generating MOC compilation " + this->OutMocCppFilenameRel);
+
   // Make sure the parent directory exists
   bool success = this->MakeParentDirectory(this->OutMocCppFilenameAbs);
   if (success) {
