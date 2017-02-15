@@ -81,6 +81,13 @@ void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
   }
 }
 
+void cmVisualStudioGeneratorOptions::ClearTables()
+{
+  for (int i = 0; i < FlagTableCount; ++i) {
+    this->FlagTable[i] = CM_NULLPTR;
+  }
+}
+
 void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
 {
   // Exception handling is on by default because the platform file has

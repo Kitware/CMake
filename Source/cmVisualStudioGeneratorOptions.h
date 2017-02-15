@@ -43,6 +43,9 @@ public:
   // Add a table of flags.
   void AddTable(cmVS7FlagTable const* table);
 
+  // Clear the flag tables.
+  void ClearTables();
+
   // Store options from command line flags.
   void Parse(const char* flags);
   void ParseFinish();
