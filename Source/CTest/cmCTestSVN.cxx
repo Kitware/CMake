@@ -99,7 +99,9 @@ std::string cmCTestSVN::LoadInfo(SVNInfo& svninfo)
 
 bool cmCTestSVN::NoteOldRevision()
 {
-  this->LoadRepositories();
+  if (!this->LoadRepositories()) {
+    return false;
+  }
 
   std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
   std::list<SVNInfo>::iterator itend = this->Repositories.end();
@@ -121,7 +123,9 @@ bool cmCTestSVN::NoteOldRevision()
 
 bool cmCTestSVN::NoteNewRevision()
 {
-  this->LoadRepositories();
+  if (!this->LoadRepositories()) {
+    return false;
+  }
 
   std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
   std::list<SVNInfo>::iterator itend = this->Repositories.end();
@@ -374,17 +378,18 @@ private:
 
 bool cmCTestSVN::LoadRevisions()
 {
+  bool result = true;
   // Get revisions for all the external repositories
   std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
   std::list<SVNInfo>::iterator itend = this->Repositories.end();
   for (; itbeg != itend; itbeg++) {
     SVNInfo& svninfo = *itbeg;
-    LoadRevisions(svninfo);
+    result = this->LoadRevisions(svninfo) && result;
   }
-  return true;
+  return result;
 }
 
-void cmCTestSVN::LoadRevisions(SVNInfo& svninfo)
+bool cmCTestSVN::LoadRevisions(SVNInfo& svninfo)
 {
   // We are interested in every revision included in the update.
   std::string revs;
@@ -403,7 +408,7 @@ void cmCTestSVN::LoadRevisions(SVNInfo& svninfo)
   svn_log.push_back(svninfo.LocalPath.c_str());
   LogParser out(this, "log-out> ", svninfo);
   OutputLogger err(this->Log, "log-err> ");
-  this->RunSVNCommand(svn_log, &out, &err);
+  return this->RunSVNCommand(svn_log, &out, &err);
 }
 
 void cmCTestSVN::DoRevisionSVN(Revision const& revision,
@@ -525,10 +530,10 @@ private:
   }
 };
 
-void cmCTestSVN::LoadRepositories()
+bool cmCTestSVN::LoadRepositories()
 {
   if (!this->Repositories.empty()) {
-    return;
+    return true;
   }
 
   // Info for root repository
@@ -540,7 +545,7 @@ void cmCTestSVN::LoadRepositories()
   svn_status.push_back("status");
   ExternalParser out(this, "external-out> ");
   OutputLogger err(this->Log, "external-err> ");
-  this->RunSVNCommand(svn_status, &out, &err);
+  return this->RunSVNCommand(svn_status, &out, &err);
 }
 
 std::string cmCTestSVN::SVNInfo::BuildLocalPath(std::string const& path) const

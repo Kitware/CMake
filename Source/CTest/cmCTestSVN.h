@@ -77,10 +77,10 @@ private:
   SVNInfo* RootInfo;
 
   std::string LoadInfo(SVNInfo& svninfo);
-  void LoadRepositories();
+  bool LoadRepositories();
   bool LoadModifications() CM_OVERRIDE;
   bool LoadRevisions() CM_OVERRIDE;
-  void LoadRevisions(SVNInfo& svninfo);
+  bool LoadRevisions(SVNInfo& svninfo);
 
   void GuessBase(SVNInfo& svninfo, std::vector<Change> const& changes);
 
