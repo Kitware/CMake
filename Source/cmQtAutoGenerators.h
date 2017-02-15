@@ -28,9 +28,6 @@ private:
                            const std::string& config);
 
   // - Settings file
-  std::string SettingsStringGenMoc() const;
-  std::string SettingsStringGenUic() const;
-  std::string SettingsStringGenRcc() const;
   void SettingsFileRead(cmMakefile* makefile,
                         const std::string& targetDirectory);
   bool SettingsFileWrite(const std::string& targetDirectory);

@@ -427,51 +427,33 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   return true;
 }
 
-std::string cmQtAutoGenerators::SettingsStringGenMoc() const
-{
-  std::string res;
-  if (this->MocEnabled()) {
-    res += this->MocCompileDefinitionsStr;
-    res += " ~~~ ";
-    res += this->MocIncludesStr;
-    res += " ~~~ ";
-    res += this->MocOptionsStr;
-    res += " ~~~ ";
-    res += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
-    res += " ~~~ ";
-  }
-  return res;
-}
-
-std::string cmQtAutoGenerators::SettingsStringGenUic() const
-{
-  std::string res;
-  if (this->UicEnabled()) {
-    res += cmJoin(this->UicTargetOptions, "@osep@");
-    res += " ~~~ ";
-    res += JoinOptions(this->UicOptions);
-    res += " ~~~ ";
-  }
-  return res;
-}
-
-std::string cmQtAutoGenerators::SettingsStringGenRcc() const
-{
-  std::string res;
-  if (this->RccEnabled()) {
-    res += JoinOptions(this->RccOptions);
-    res += " ~~~ ";
-  }
-  return res;
-}
-
 void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
                                           const std::string& targetDirectory)
 {
   // Compose current settings strings
-  this->SettingsStringMoc = this->SettingsStringGenMoc();
-  this->SettingsStringUic = this->SettingsStringGenUic();
-  this->SettingsStringRcc = this->SettingsStringGenRcc();
+  if (this->MocEnabled()) {
+    std::string& str = this->SettingsStringMoc;
+    str += this->MocCompileDefinitionsStr;
+    str += " ~~~ ";
+    str += this->MocIncludesStr;
+    str += " ~~~ ";
+    str += this->MocOptionsStr;
+    str += " ~~~ ";
+    str += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
+    str += " ~~~ ";
+  }
+  if (this->UicEnabled()) {
+    std::string& str = this->SettingsStringUic;
+    str += cmJoin(this->UicTargetOptions, "@osep@");
+    str += " ~~~ ";
+    str += JoinOptions(this->UicOptions);
+    str += " ~~~ ";
+  }
+  if (this->RccEnabled()) {
+    std::string& str = this->SettingsStringRcc;
+    str += JoinOptions(this->RccOptions);
+    str += " ~~~ ";
+  }
 
   // Read old settings
   const std::string filename = SettingsFile(targetDirectory);
