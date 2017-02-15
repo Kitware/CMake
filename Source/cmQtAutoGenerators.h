@@ -146,7 +146,7 @@ private:
   std::string MocInfoIncludes;
   std::string OutMocCppFilenameRel;
   std::string OutMocCppFilenameAbs;
-  std::list<std::string> MocIncludes;
+  std::vector<std::string> MocIncludes;
   std::vector<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
   // - Uic
