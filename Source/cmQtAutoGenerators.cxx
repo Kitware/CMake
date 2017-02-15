@@ -245,9 +245,9 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   // Read old settings
   this->SettingsFileRead(mf.get(), targetDirectory);
   // Init and run
-  this->Init();
+  this->Init(mf.get());
   if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5") {
-    if (!this->RunAutogen(mf.get())) {
+    if (!this->RunAutogen()) {
       return false;
     }
   }
@@ -487,7 +487,7 @@ bool cmQtAutoGenerators::SettingsFileWrite(const std::string& targetDirectory)
   return success;
 }
 
-void cmQtAutoGenerators::Init()
+void cmQtAutoGenerators::Init(cmMakefile* makefile)
 {
   this->AutogenBuildSubDir = this->AutogenTargetName;
   this->AutogenBuildSubDir += "/";
@@ -501,6 +501,9 @@ void cmQtAutoGenerators::Init()
   fpathCheckSum.setupParentDirs(this->CurrentSourceDir, this->CurrentBinaryDir,
                                 this->ProjectSourceDir,
                                 this->ProjectBinaryDir);
+
+  // Acquire header extensions
+  this->HeaderExtensions = makefile->GetCMakeInstance()->GetHeaderExtensions();
 
   // Compose moc includes list
   std::list<std::string> mocIncludes;
@@ -563,7 +566,7 @@ void cmQtAutoGenerators::Init()
                            mocIncludes.end());
 }
 
-bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
+bool cmQtAutoGenerators::RunAutogen()
 {
   // the program goes through all .cpp files to see which moc files are
   // included. It is not really interesting how the moc file is named, but
@@ -582,22 +585,17 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   std::set<std::string> uicHeaderFiles;
 
   // Parse sources
-  {
-    const std::vector<std::string>& headerExtensions =
-      makefile->GetCMakeInstance()->GetHeaderExtensions();
-
-    for (std::vector<std::string>::const_iterator it = this->Sources.begin();
-         it != this->Sources.end(); ++it) {
-      const std::string& absFilename = *it;
-      // Parse source file for MOC/UIC
-      if (!this->ParseSourceFile(absFilename, headerExtensions, mocsIncluded,
-                                 uisIncluded, this->MocRelaxedMode)) {
-        return false;
-      }
-      // Find additional headers
-      this->SearchHeadersForSourceFile(absFilename, headerExtensions,
-                                       mocHeaderFiles, uicHeaderFiles);
+  for (std::vector<std::string>::const_iterator it = this->Sources.begin();
+       it != this->Sources.end(); ++it) {
+    const std::string& absFilename = *it;
+    // Parse source file for MOC/UIC
+    if (!this->ParseSourceFile(absFilename, mocsIncluded, uisIncluded,
+                               this->MocRelaxedMode)) {
+      return false;
     }
+    // Find additional headers
+    this->SearchHeadersForSourceFile(absFilename, mocHeaderFiles,
+                                     uicHeaderFiles);
   }
 
   // Parse headers
@@ -655,7 +653,7 @@ bool cmQtAutoGenerators::MocRequired(const std::string& text,
  * @brief Tests if the file should be ignored for moc scanning
  * @return True if the file should be ignored
  */
-bool cmQtAutoGenerators::MocSkip(const std::string& absFilename)
+bool cmQtAutoGenerators::MocSkip(const std::string& absFilename) const
 {
   if (this->MocEnabled()) {
     // Test if the file name is on the skip list
@@ -669,7 +667,7 @@ bool cmQtAutoGenerators::MocSkip(const std::string& absFilename)
 /**
  * @brief Tests if the file name is in the skip list
  */
-bool cmQtAutoGenerators::UicSkip(const std::string& absFilename)
+bool cmQtAutoGenerators::UicSkip(const std::string& absFilename) const
 {
   if (this->UicEnabled()) {
     // Test if the file name is on the skip list
@@ -685,7 +683,6 @@ bool cmQtAutoGenerators::UicSkip(const std::string& absFilename)
  */
 bool cmQtAutoGenerators::ParseSourceFile(
   const std::string& absFilename,
-  const std::vector<std::string>& headerExtensions,
   std::map<std::string, std::string>& mocsIncluded,
   std::map<std::string, std::vector<std::string> >& uisIncluded, bool relaxed)
 {
@@ -699,8 +696,8 @@ bool cmQtAutoGenerators::ParseSourceFile(
   } else {
     // Parse source contents for MOC
     if (success && !this->MocSkip(absFilename)) {
-      success = this->ParseContentForMoc(
-        absFilename, contentsString, headerExtensions, mocsIncluded, relaxed);
+      success = this->ParseContentForMoc(absFilename, contentsString,
+                                         mocsIncluded, relaxed);
     }
     // Parse source contents for UIC
     if (success && !this->UicSkip(absFilename)) {
@@ -740,7 +737,6 @@ void cmQtAutoGenerators::ParseContentForUic(
  */
 bool cmQtAutoGenerators::ParseContentForMoc(
   const std::string& absFilename, const std::string& contentsString,
-  const std::vector<std::string>& headerExtensions,
   std::map<std::string, std::string>& mocsIncluded, bool relaxed)
 {
   if (this->Verbose) {
@@ -788,8 +784,8 @@ bool cmQtAutoGenerators::ParseContentForMoc(
         // Include: moc_FOO.cxx
         // Remove the moc_ part
         const std::string incRealBasename = incBasename.substr(4);
-        const std::string headerToMoc = FindMatchingHeader(
-          scannedFileAbsPath, incRealBasename, incSubDir, headerExtensions);
+        const std::string headerToMoc = this->FindMatchingHeader(
+          scannedFileAbsPath, incRealBasename, incSubDir);
         if (!headerToMoc.empty()) {
           mocsIncluded[headerToMoc] = incString;
           if (relaxed && (incRealBasename == scannedFileBasename)) {
@@ -802,7 +798,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
           err << "AutoMoc: Error: " << absFilename << "\n"
               << "The file includes the moc file \"" << incString
               << "\", but could not find header \"" << incRealBasename << '{'
-              << JoinExts(headerExtensions) << "}\"\n";
+              << JoinExts(this->HeaderExtensions) << "}\"\n";
           this->LogError(err.str());
           return false;
         }
@@ -812,8 +808,8 @@ bool cmQtAutoGenerators::ParseContentForMoc(
         if (relaxed) {
           // Mode: Relaxed
           if (!requiresMoc || (incBasename != scannedFileBasename)) {
-            const std::string headerToMoc = FindMatchingHeader(
-              scannedFileAbsPath, incBasename, incSubDir, headerExtensions);
+            const std::string headerToMoc = this->FindMatchingHeader(
+              scannedFileAbsPath, incBasename, incSubDir);
             if (!headerToMoc.empty()) {
               // This is for KDE4 compatibility:
               fileToMoc = headerToMoc;
@@ -921,9 +917,8 @@ bool cmQtAutoGenerators::ParseContentForMoc(
 }
 
 void cmQtAutoGenerators::SearchHeadersForSourceFile(
-  const std::string& absFilename,
-  const std::vector<std::string>& headerExtensions,
-  std::set<std::string>& mocHeaderFiles, std::set<std::string>& uicHeaderFiles)
+  const std::string& absFilename, std::set<std::string>& mocHeaderFiles,
+  std::set<std::string>& uicHeaderFiles) const
 {
   std::string basepaths[2];
   {
@@ -940,8 +935,8 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
   for (const std::string* bpit = cmArrayBegin(basepaths);
        bpit != cmArrayEnd(basepaths); ++bpit) {
     for (std::vector<std::string>::const_iterator heit =
-           headerExtensions.begin();
-         heit != headerExtensions.end(); ++heit) {
+           this->HeaderExtensions.begin();
+         heit != this->HeaderExtensions.end(); ++heit) {
       const std::string hname = (*bpit) + (*heit);
       if (cmsys::SystemTools::FileExists(hname.c_str())) {
         // Moc headers
@@ -1587,12 +1582,12 @@ std::string cmQtAutoGenerators::ChecksumedPath(const std::string& sourceFile,
  * appending different header extensions
  * @return True on success
  */
-bool cmQtAutoGenerators::FindHeader(
-  std::string& header, const std::string& testBasePath,
-  const std::vector<std::string>& headerExtensions) const
+bool cmQtAutoGenerators::FindHeader(std::string& header,
+                                    const std::string& testBasePath) const
 {
-  for (std::vector<std::string>::const_iterator ext = headerExtensions.begin();
-       ext != headerExtensions.end(); ++ext) {
+  for (std::vector<std::string>::const_iterator ext =
+         this->HeaderExtensions.begin();
+       ext != this->HeaderExtensions.end(); ++ext) {
     std::string testFilePath(testBasePath);
     testFilePath += '.';
     testFilePath += (*ext);
@@ -1606,17 +1601,16 @@ bool cmQtAutoGenerators::FindHeader(
 
 std::string cmQtAutoGenerators::FindMatchingHeader(
   const std::string& basePath, const std::string& baseName,
-  const std::string& subDir,
-  const std::vector<std::string>& headerExtensions) const
+  const std::string& subDir) const
 {
   std::string header;
   do {
     if (!subDir.empty()) {
-      if (FindHeader(header, basePath + subDir + baseName, headerExtensions)) {
+      if (this->FindHeader(header, basePath + subDir + baseName)) {
         break;
       }
     }
-    if (FindHeader(header, basePath + baseName, headerExtensions)) {
+    if (this->FindHeader(header, basePath + baseName)) {
       break;
     }
   } while (false);
