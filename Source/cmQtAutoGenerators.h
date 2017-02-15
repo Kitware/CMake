@@ -42,26 +42,23 @@ private:
   }
 
   // - Init and run
-  void Init();
-  bool RunAutogen(cmMakefile* makefile);
+  void Init(cmMakefile* makefile);
+  bool RunAutogen();
 
   // - Content analysis
   bool MocRequired(const std::string& text, std::string& macroName);
-  bool MocSkip(const std::string& absFilename);
-  bool UicSkip(const std::string& absFilename);
+  bool MocSkip(const std::string& absFilename) const;
+  bool UicSkip(const std::string& absFilename) const;
 
   bool ParseSourceFile(
     const std::string& absFilename,
-    const std::vector<std::string>& headerExtensions,
     std::map<std::string, std::string>& includedMocs,
     std::map<std::string, std::vector<std::string> >& includedUis,
     bool relaxed);
 
-  void SearchHeadersForSourceFile(
-    const std::string& absFilename,
-    const std::vector<std::string>& headerExtensions,
-    std::set<std::string>& absHeadersMoc,
-    std::set<std::string>& absHeadersUic);
+  void SearchHeadersForSourceFile(const std::string& absFilename,
+                                  std::set<std::string>& absHeadersMoc,
+                                  std::set<std::string>& absHeadersUic) const;
 
   void ParseHeaders(
     const std::set<std::string>& absHeadersMoc,
@@ -76,7 +73,6 @@ private:
 
   bool ParseContentForMoc(const std::string& absFilename,
                           const std::string& contentsString,
-                          const std::vector<std::string>& headerExtensions,
                           std::map<std::string, std::string>& includedMocs,
                           bool relaxed);
 
@@ -119,12 +115,10 @@ private:
                              const char* baseSuffix) const;
   bool MakeParentDirectory(const std::string& filename);
 
-  bool FindHeader(std::string& header, const std::string& testBasePath,
-                  const std::vector<std::string>& headerExtensions) const;
-  std::string FindMatchingHeader(
-    const std::string& basePath, const std::string& baseName,
-    const std::string& subDir,
-    const std::vector<std::string>& headerExtensions) const;
+  bool FindHeader(std::string& header, const std::string& testBasePath) const;
+  std::string FindMatchingHeader(const std::string& basePath,
+                                 const std::string& baseName,
+                                 const std::string& subDir) const;
 
   // - Target names
   std::string OriginTargetName;
@@ -165,6 +159,7 @@ private:
   std::map<std::string, std::vector<std::string> > RccInputs;
   // - Utility
   cmFilePathChecksum fpathCheckSum;
+  std::vector<std::string> HeaderExtensions;
   cmsys::RegularExpression RegExpQObject;
   cmsys::RegularExpression RegExpQGadget;
   cmsys::RegularExpression RegExpMocInclude;
