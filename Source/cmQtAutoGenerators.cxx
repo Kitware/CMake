@@ -340,7 +340,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
 
   // - Moc
   cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SKIP_MOC"),
-                                    this->SkipMoc);
+                                    this->MocSkipList);
   cmSystemTools::ExpandListArgument(
     GetConfigDefinition(makefile, "AM_MOC_COMPILE_DEFINITIONS", config),
     this->MocDefinitions);
@@ -351,7 +351,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
 
   // - Uic
   cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SKIP_UIC"),
-                                    this->SkipUic);
+                                    this->UicSkipList);
   cmSystemTools::ExpandListArgument(
     GetConfigDefinition(makefile, "AM_UIC_TARGET_OPTIONS", config),
     this->UicTargetOptions);
@@ -635,10 +635,10 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   for (std::vector<std::string>::const_iterator it = this->Headers.begin();
        it != this->Headers.end(); ++it) {
     const std::string& headerName = *it;
-    if (!this->MocSkipTest(headerName)) {
+    if (!this->MocSkip(headerName)) {
       headerFilesMoc.insert(headerName);
     }
-    if (!this->UicSkipTest(headerName)) {
+    if (!this->UicSkip(headerName)) {
       headerFilesUic.insert(headerName);
     }
   }
@@ -686,12 +686,12 @@ bool cmQtAutoGenerators::MocRequired(const std::string& text,
  * @brief Tests if the file should be ignored for moc scanning
  * @return True if the file should be ignored
  */
-bool cmQtAutoGenerators::MocSkipTest(const std::string& absFilename)
+bool cmQtAutoGenerators::MocSkip(const std::string& absFilename)
 {
   // Test if moc scanning is enabled
   if (this->MocEnabled()) {
     // Test if the file name is on the skip list
-    if (!ListContains(this->SkipMoc, absFilename)) {
+    if (!ListContains(this->MocSkipList, absFilename)) {
       return false;
     }
   }
@@ -701,12 +701,12 @@ bool cmQtAutoGenerators::MocSkipTest(const std::string& absFilename)
 /**
  * @brief Tests if the file name is in the skip list
  */
-bool cmQtAutoGenerators::UicSkipTest(const std::string& absFilename)
+bool cmQtAutoGenerators::UicSkip(const std::string& absFilename)
 {
   // Test if uic scanning is enabled
   if (this->UicEnabled()) {
     // Test if the file name is on the skip list
-    if (!ListContains(this->SkipUic, absFilename)) {
+    if (!ListContains(this->UicSkipList, absFilename)) {
       return false;
     }
   }
@@ -731,12 +731,12 @@ bool cmQtAutoGenerators::ParseSourceFile(
     this->LogWarning(err.str());
   } else {
     // Parse source contents for MOC
-    if (success && !this->MocSkipTest(absFilename)) {
+    if (success && !this->MocSkip(absFilename)) {
       success = this->ParseContentForMoc(
         absFilename, contentsString, headerExtensions, includedMocs, relaxed);
     }
     // Parse source contents for UIC
-    if (success && !this->UicSkipTest(absFilename)) {
+    if (success && !this->UicSkip(absFilename)) {
       this->ParseContentForUic(absFilename, contentsString, includedUis);
     }
   }
@@ -986,11 +986,11 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
       const std::string hname = (*bpit) + (*heit);
       if (cmsys::SystemTools::FileExists(hname.c_str())) {
         // Moc headers
-        if (!this->MocSkipTest(absFilename) && !this->MocSkipTest(hname)) {
+        if (!this->MocSkip(absFilename) && !this->MocSkip(hname)) {
           absHeadersMoc.insert(hname);
         }
         // Uic headers
-        if (!this->UicSkipTest(absFilename) && !this->UicSkipTest(hname)) {
+        if (!this->UicSkip(absFilename) && !this->UicSkip(hname)) {
           absHeadersUic.insert(hname);
         }
         break;

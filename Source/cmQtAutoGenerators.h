@@ -38,8 +38,8 @@ private:
 
   // - Content analysis
   bool MocRequired(const std::string& text, std::string& macroName);
-  bool MocSkipTest(const std::string& absFilename);
-  bool UicSkipTest(const std::string& absFilename);
+  bool MocSkip(const std::string& absFilename);
+  bool UicSkip(const std::string& absFilename);
 
   bool ParseSourceFile(
     const std::string& absFilename,
@@ -142,7 +142,7 @@ private:
   std::string SettingsStringUic;
   std::string SettingsStringRcc;
   // - Moc
-  std::vector<std::string> SkipMoc;
+  std::vector<std::string> MocSkipList;
   std::string MocInfoIncludes;
   std::string OutMocCppFilenameRel;
   std::string OutMocCppFilenameAbs;
@@ -150,7 +150,7 @@ private:
   std::vector<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
   // - Uic
-  std::vector<std::string> SkipUic;
+  std::vector<std::string> UicSkipList;
   std::vector<std::string> UicTargetOptions;
   std::map<std::string, std::string> UicOptions;
   // - Rcc
