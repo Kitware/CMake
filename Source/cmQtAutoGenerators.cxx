@@ -856,6 +856,15 @@ bool cmQtAutoGenerators::ParseContentForMoc(
             // Include self
             fileToMoc = absFilename;
             ownDotMocIncluded = true;
+            // Accept but issue a warning if moc isn't required
+            if (!requiresMoc) {
+              std::ostringstream err;
+              err << "AutoMoc: Error: " << absFilename << "\n"
+                  << "The file includes the moc file \"" << incString << "\""
+                  << ", but does not contain a Q_OBJECT or Q_GADGET "
+                     "macro.\n";
+              this->LogWarning(err.str());
+            }
           } else {
             // Don't allow FOO.moc include other than self in strict mode
             std::ostringstream err;
