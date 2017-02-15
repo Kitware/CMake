@@ -838,13 +838,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
           err << "AutoMoc: Error: " << absFilename << "\n"
               << "The file includes the moc file \"" << currentMoc
               << "\", but could not find header \"" << basename << '{'
-              << JoinExts(headerExtensions) << "}\" ";
-          if (mocSubDir.empty()) {
-            err << "in " << scannedFileAbsPath << "\n";
-          } else {
-            err << "neither in " << scannedFileAbsPath << " nor in "
-                << mocSubDir << "\n";
-          }
+              << JoinExts(headerExtensions) << "}\"\n";
           this->LogError(err.str());
           return false;
         }
