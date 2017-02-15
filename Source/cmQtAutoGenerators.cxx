@@ -335,11 +335,11 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   // - Moc
   cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SKIP_MOC"),
                                     this->SkipMoc);
-  this->MocCompileDefinitionsStr =
+  this->MocInfoCompileDefinitions =
     GetConfigDefinition(makefile, "AM_MOC_COMPILE_DEFINITIONS", config);
-  this->MocIncludesStr =
+  this->MocInfoIncludes =
     GetConfigDefinition(makefile, "AM_MOC_INCLUDES", config);
-  this->MocOptionsStr = makefile->GetSafeDefinition("AM_MOC_OPTIONS");
+  this->MocInfoOptions = makefile->GetSafeDefinition("AM_MOC_OPTIONS");
 
   // - Uic
   cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SKIP_UIC"),
@@ -433,11 +433,11 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
   // Compose current settings strings
   if (this->MocEnabled()) {
     std::string& str = this->SettingsStringMoc;
-    str += this->MocCompileDefinitionsStr;
+    str += this->MocInfoCompileDefinitions;
     str += " ~~~ ";
-    str += this->MocIncludesStr;
+    str += this->MocInfoIncludes;
     str += " ~~~ ";
-    str += this->MocOptionsStr;
+    str += this->MocInfoOptions;
     str += " ~~~ ";
     str += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
     str += " ~~~ ";
@@ -532,16 +532,16 @@ void cmQtAutoGenerators::Init()
                                 this->ProjectBinaryDir);
 
   std::vector<std::string> cdefList;
-  cmSystemTools::ExpandListArgument(this->MocCompileDefinitionsStr, cdefList);
+  cmSystemTools::ExpandListArgument(this->MocInfoCompileDefinitions, cdefList);
   for (std::vector<std::string>::const_iterator it = cdefList.begin();
        it != cdefList.end(); ++it) {
     this->MocDefinitions.push_back("-D" + (*it));
   }
 
-  cmSystemTools::ExpandListArgument(this->MocOptionsStr, this->MocOptions);
+  cmSystemTools::ExpandListArgument(this->MocInfoOptions, this->MocOptions);
 
   std::vector<std::string> incPaths;
-  cmSystemTools::ExpandListArgument(this->MocIncludesStr, incPaths);
+  cmSystemTools::ExpandListArgument(this->MocInfoIncludes, incPaths);
 
   std::set<std::string> frameworkPaths;
   for (std::vector<std::string>::const_iterator it = incPaths.begin();

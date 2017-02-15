@@ -143,9 +143,9 @@ private:
   std::string SettingsStringRcc;
   // - Moc
   std::vector<std::string> SkipMoc;
-  std::string MocCompileDefinitionsStr;
-  std::string MocIncludesStr;
-  std::string MocOptionsStr;
+  std::string MocInfoCompileDefinitions;
+  std::string MocInfoIncludes;
+  std::string MocInfoOptions;
   std::string OutMocCppFilenameRel;
   std::string OutMocCppFilenameAbs;
   std::list<std::string> MocIncludes;
