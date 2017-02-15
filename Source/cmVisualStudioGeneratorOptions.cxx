@@ -211,6 +211,17 @@ void cmVisualStudioGeneratorOptions::ParseFinish()
   }
 }
 
+void cmVisualStudioGeneratorOptions::PrependInheritedString(
+  std::string const& key)
+{
+  std::map<std::string, FlagValue>::iterator i = this->FlagMap.find(key);
+  if (i == this->FlagMap.end() || i->second.size() != 1) {
+    return;
+  }
+  std::string& value = i->second[0];
+  value = "%(" + key + ") " + value;
+}
+
 void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
 {
   // Look for Intel Fortran flags that do not map well in the flag table.

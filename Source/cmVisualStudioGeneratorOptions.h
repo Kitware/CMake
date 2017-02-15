@@ -47,6 +47,8 @@ public:
   void Parse(const char* flags);
   void ParseFinish();
 
+  void PrependInheritedString(std::string const& key);
+
   // Fix the ExceptionHandling option to default to off.
   void FixExceptionHandlingDefault();
 
