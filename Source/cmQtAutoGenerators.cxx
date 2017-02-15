@@ -335,8 +335,9 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   // - Moc
   cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SKIP_MOC"),
                                     this->SkipMoc);
-  this->MocInfoCompileDefinitions =
-    GetConfigDefinition(makefile, "AM_MOC_COMPILE_DEFINITIONS", config);
+  cmSystemTools::ExpandListArgument(
+    GetConfigDefinition(makefile, "AM_MOC_COMPILE_DEFINITIONS", config),
+    this->MocDefinitions);
   this->MocInfoIncludes =
     GetConfigDefinition(makefile, "AM_MOC_INCLUDES", config);
   this->MocInfoOptions = makefile->GetSafeDefinition("AM_MOC_OPTIONS");
@@ -433,7 +434,8 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
   // Compose current settings strings
   if (this->MocEnabled()) {
     std::string& str = this->SettingsStringMoc;
-    str += this->MocInfoCompileDefinitions;
+    str +=
+      cmOutputConverter::EscapeForCMake(cmJoin(this->MocDefinitions, ";"));
     str += " ~~~ ";
     str += this->MocInfoIncludes;
     str += " ~~~ ";
@@ -530,13 +532,6 @@ void cmQtAutoGenerators::Init()
   fpathCheckSum.setupParentDirs(this->CurrentSourceDir, this->CurrentBinaryDir,
                                 this->ProjectSourceDir,
                                 this->ProjectBinaryDir);
-
-  std::vector<std::string> cdefList;
-  cmSystemTools::ExpandListArgument(this->MocInfoCompileDefinitions, cdefList);
-  for (std::vector<std::string>::const_iterator it = cdefList.begin();
-       it != cdefList.end(); ++it) {
-    this->MocDefinitions.push_back("-D" + (*it));
-  }
 
   cmSystemTools::ExpandListArgument(this->MocInfoOptions, this->MocOptions);
 
@@ -1194,8 +1189,12 @@ bool cmQtAutoGenerators::MocGenerateFile(const std::string& sourceFile,
       cmd.push_back(this->MocExecutable);
       cmd.insert(cmd.end(), this->MocIncludes.begin(),
                  this->MocIncludes.end());
-      cmd.insert(cmd.end(), this->MocDefinitions.begin(),
-                 this->MocDefinitions.end());
+      // Add definitions
+      for (std::vector<std::string>::const_iterator it =
+             this->MocDefinitions.begin();
+           it != this->MocDefinitions.end(); ++it) {
+        cmd.push_back("-D" + (*it));
+      }
       cmd.insert(cmd.end(), this->MocOptions.begin(), this->MocOptions.end());
 #ifdef _WIN32
       cmd.push_back("-DWIN32");
