@@ -523,8 +523,11 @@ private:
 
 void cmCTestSVN::LoadRepositories()
 {
+  if (!this->Repositories.empty()) {
+    return;
+  }
+
   // Info for root repository
-  this->Repositories.clear();
   this->Repositories.push_back(SVNInfo(""));
   this->RootInfo = &(this->Repositories.back());
 
