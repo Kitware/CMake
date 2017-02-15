@@ -97,7 +97,7 @@ std::string cmCTestSVN::LoadInfo(SVNInfo& svninfo)
   return rev;
 }
 
-void cmCTestSVN::NoteOldRevision()
+bool cmCTestSVN::NoteOldRevision()
 {
   this->LoadRepositories();
 
@@ -116,9 +116,10 @@ void cmCTestSVN::NoteOldRevision()
   // Set the global old revision to the one of the root
   this->OldRevision = this->RootInfo->OldRevision;
   this->PriorRev.Rev = this->OldRevision;
+  return true;
 }
 
-void cmCTestSVN::NoteNewRevision()
+bool cmCTestSVN::NoteNewRevision()
 {
   this->LoadRepositories();
 
@@ -153,6 +154,7 @@ void cmCTestSVN::NoteNewRevision()
 
   // Set the global new revision to the one of the root
   this->NewRevision = this->RootInfo->NewRevision;
+  return true;
 }
 
 void cmCTestSVN::GuessBase(SVNInfo& svninfo,
@@ -370,7 +372,7 @@ private:
   }
 };
 
-void cmCTestSVN::LoadRevisions()
+bool cmCTestSVN::LoadRevisions()
 {
   // Get revisions for all the external repositories
   std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
@@ -379,6 +381,7 @@ void cmCTestSVN::LoadRevisions()
     SVNInfo& svninfo = *itbeg;
     LoadRevisions(svninfo);
   }
+  return true;
 }
 
 void cmCTestSVN::LoadRevisions(SVNInfo& svninfo)
@@ -468,7 +471,7 @@ private:
   }
 };
 
-void cmCTestSVN::LoadModifications()
+bool cmCTestSVN::LoadModifications()
 {
   // Run "svn status" which reports local modifications.
   std::vector<const char*> svn_status;
@@ -476,6 +479,7 @@ void cmCTestSVN::LoadModifications()
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
   this->RunSVNCommand(svn_status, &out, &err);
+  return true;
 }
 
 void cmCTestSVN::WriteXMLGlobal(cmXMLWriter& xml)
