@@ -74,42 +74,6 @@ static void SettingWrite(std::ostream& ostr, const char* key,
   }
 }
 
-static std::string FindMatchingHeader(
-  const std::string& absPath, const std::string& mocSubDir,
-  const std::string& basename,
-  const std::vector<std::string>& headerExtensions)
-{
-  std::string header;
-  for (std::vector<std::string>::const_iterator ext = headerExtensions.begin();
-       ext != headerExtensions.end(); ++ext) {
-    std::string sourceFilePath = absPath + basename + "." + (*ext);
-    if (cmsys::SystemTools::FileExists(sourceFilePath.c_str())) {
-      header = sourceFilePath;
-      break;
-    }
-    // Try subdirectory instead
-    if (!mocSubDir.empty()) {
-      sourceFilePath = mocSubDir + basename + "." + (*ext);
-      if (cmsys::SystemTools::FileExists(sourceFilePath.c_str())) {
-        header = sourceFilePath;
-        break;
-      }
-    }
-  }
-
-  return header;
-}
-
-static std::string ExtractSubDir(const std::string& absPath,
-                                 const std::string& currentMoc)
-{
-  std::string subDir;
-  if (currentMoc.find_first_of('/') != std::string::npos) {
-    subDir = absPath + cmsys::SystemTools::GetFilenamePath(currentMoc) + '/';
-  }
-  return subDir;
-}
-
 static bool FileNameIsUnique(const std::string& filePath,
                              const std::map<std::string, std::string>& fileMap)
 {
@@ -807,38 +771,38 @@ bool cmQtAutoGenerators::ParseContentForMoc(
   if (strstr(contentChars, "moc") != CM_NULLPTR) {
     // Iterate over all included moc files
     while (this->RegExpMocInclude.find(contentChars)) {
-      const std::string currentMoc = this->RegExpMocInclude.match(1);
-      // Basename of the current moc include
-      std::string basename =
-        cmsys::SystemTools::GetFilenameWithoutLastExtension(currentMoc);
+      const std::string incString = this->RegExpMocInclude.match(1);
+      // Basename of the moc include
+      const std::string incBasename =
+        cmsys::SystemTools::GetFilenameWithoutLastExtension(incString);
+      std::string incSubDir;
+      if (incString.find_first_of('/') != std::string::npos) {
+        incSubDir = cmsys::SystemTools::GetFilenamePath(incString) + '/';
+      }
 
       // If the moc include is of the moc_foo.cpp style we expect
       // the Q_OBJECT class declaration in a header file.
       // If the moc include is of the foo.moc style we need to look for
       // a Q_OBJECT macro in the current source file, if it contains the
       // macro we generate the moc file from the source file.
-      if (cmHasLiteralPrefix(basename, "moc_")) {
+      if (cmHasLiteralPrefix(incBasename, "moc_")) {
         // Include: moc_FOO.cxx
-        // basename should be the part of the moc filename used for
-        // finding the correct header, so we need to remove the moc_ part
-        basename = basename.substr(4);
-        const std::string mocSubDir =
-          ExtractSubDir(scannedFileAbsPath, currentMoc);
+        // Remove the moc_ part
+        const std::string incRealBasename = incBasename.substr(4);
         const std::string headerToMoc = FindMatchingHeader(
-          scannedFileAbsPath, mocSubDir, basename, headerExtensions);
-
+          scannedFileAbsPath, incRealBasename, incSubDir, headerExtensions);
         if (!headerToMoc.empty()) {
-          mocsIncluded[headerToMoc] = currentMoc;
-          if (relaxed && (basename == scannedFileBasename)) {
+          mocsIncluded[headerToMoc] = incString;
+          if (relaxed && (incRealBasename == scannedFileBasename)) {
             ownMocUnderscoreIncluded = true;
-            ownMocUnderscoreFile = currentMoc;
+            ownMocUnderscoreFile = incString;
             ownMocHeaderFile = headerToMoc;
           }
         } else {
           std::ostringstream err;
           err << "AutoMoc: Error: " << absFilename << "\n"
-              << "The file includes the moc file \"" << currentMoc
-              << "\", but could not find header \"" << basename << '{'
+              << "The file includes the moc file \"" << incString
+              << "\", but could not find header \"" << incRealBasename << '{'
               << JoinExts(headerExtensions) << "}\"\n";
           this->LogError(err.str());
           return false;
@@ -848,31 +812,31 @@ bool cmQtAutoGenerators::ParseContentForMoc(
         std::string fileToMoc;
         if (relaxed) {
           // Mode: Relaxed
-          if (!requiresMoc || basename != scannedFileBasename) {
-            const std::string mocSubDir =
-              ExtractSubDir(scannedFileAbsPath, currentMoc);
+          if (!requiresMoc || (incBasename != scannedFileBasename)) {
             const std::string headerToMoc = FindMatchingHeader(
-              scannedFileAbsPath, mocSubDir, basename, headerExtensions);
+              scannedFileAbsPath, incBasename, incSubDir, headerExtensions);
             if (!headerToMoc.empty()) {
               // This is for KDE4 compatibility:
               fileToMoc = headerToMoc;
-              if (!requiresMoc && basename == scannedFileBasename) {
+              if (!requiresMoc && (incBasename == scannedFileBasename)) {
                 std::ostringstream err;
                 err << "AutoMoc: Warning: " << absFilename << "\n"
-                    << "The file includes the moc file \"" << currentMoc
+                    << "The file includes the moc file \"" << incString
                     << "\", but does not contain a " << macroName
                     << " macro. Running moc on "
-                    << "\"" << headerToMoc << "\" ! Include \"moc_" << basename
+                    << "\"" << headerToMoc << "\" ! Include \"moc_"
+                    << incBasename
                     << ".cpp\" for a compatibility with "
                        "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n";
                 this->LogWarning(err.str());
               } else {
                 std::ostringstream err;
                 err << "AutoMoc: Warning: " << absFilename << "\n"
-                    << "The file includes the moc file \"" << currentMoc
-                    << "\" instead of \"moc_" << basename
+                    << "The file includes the moc file \"" << incString
+                    << "\" instead of \"moc_" << incBasename
                     << ".cpp\". Running moc on "
-                    << "\"" << headerToMoc << "\" ! Include \"moc_" << basename
+                    << "\"" << headerToMoc << "\" ! Include \"moc_"
+                    << incBasename
                     << ".cpp\" for compatibility with "
                        "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n";
                 this->LogWarning(err.str());
@@ -880,7 +844,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
             } else {
               std::ostringstream err;
               err << "AutoMoc: Error: " << absFilename << "\n"
-                  << "The file includes the moc file \"" << currentMoc
+                  << "The file includes the moc file \"" << incString
                   << "\", which seems to be the moc file from a different "
                      "source file. CMake also could not find a matching "
                      "header.\n";
@@ -894,7 +858,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
           }
         } else {
           // Mode: Strict
-          if (basename == scannedFileBasename) {
+          if (incBasename == scannedFileBasename) {
             // Include self
             fileToMoc = absFilename;
             ownDotMocIncluded = true;
@@ -902,7 +866,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
             // Don't allow FOO.moc include other than self in strict mode
             std::ostringstream err;
             err << "AutoMoc: Error: " << absFilename << "\n"
-                << "The file includes the moc file \"" << currentMoc
+                << "The file includes the moc file \"" << incString
                 << "\", which seems to be the moc file from a different "
                    "source file. This is not supported. Include \""
                 << scannedFileBasename
@@ -912,7 +876,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
           }
         }
         if (!fileToMoc.empty()) {
-          mocsIncluded[fileToMoc] = currentMoc;
+          mocsIncluded[fileToMoc] = incString;
         }
       }
       // Forward content pointer
@@ -920,11 +884,11 @@ bool cmQtAutoGenerators::ParseContentForMoc(
     }
   }
 
-  // In this case, check whether the scanned file itself contains a Q_OBJECT.
-  // If this is the case, the moc_foo.cpp should probably be generated from
-  // foo.cpp instead of foo.h, because otherwise it won't build.
-  // But warn, since this is not how it is supposed to be used.
   if (requiresMoc && !ownDotMocIncluded) {
+    // In this case, check whether the scanned file itself contains a Q_OBJECT.
+    // If this is the case, the moc_foo.cpp should probably be generated from
+    // foo.cpp instead of foo.h, because otherwise it won't build.
+    // But warn, since this is not how it is supposed to be used.
     if (relaxed && ownMocUnderscoreIncluded) {
       // This is for KDE4 compatibility:
       std::ostringstream err;
@@ -1617,6 +1581,47 @@ std::string cmQtAutoGenerators::ChecksumedPath(const std::string& sourceFile,
   res += cmsys::SystemTools::GetFilenameWithoutLastExtension(sourceFile);
   res += baseSuffix;
   return res;
+}
+
+/**
+ * @brief Tries to find the header file to the given file base path by
+ * appending different header extensions
+ * @return True on success
+ */
+bool cmQtAutoGenerators::FindHeader(
+  std::string& header, const std::string& testBasePath,
+  const std::vector<std::string>& headerExtensions) const
+{
+  for (std::vector<std::string>::const_iterator ext = headerExtensions.begin();
+       ext != headerExtensions.end(); ++ext) {
+    std::string testFilePath(testBasePath);
+    testFilePath += '.';
+    testFilePath += (*ext);
+    if (cmsys::SystemTools::FileExists(testFilePath.c_str())) {
+      header = testFilePath;
+      return true;
+    }
+  }
+  return false;
+}
+
+std::string cmQtAutoGenerators::FindMatchingHeader(
+  const std::string& basePath, const std::string& baseName,
+  const std::string& subDir,
+  const std::vector<std::string>& headerExtensions) const
+{
+  std::string header;
+  do {
+    if (!subDir.empty()) {
+      if (FindHeader(header, basePath + subDir + baseName, headerExtensions)) {
+        break;
+      }
+    }
+    if (FindHeader(header, basePath + baseName, headerExtensions)) {
+      break;
+    }
+  } while (false);
+  return header;
 }
 
 /**
