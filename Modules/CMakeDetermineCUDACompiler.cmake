@@ -75,13 +75,6 @@ if(MSVC_CUDA_ARCHITECTURE_ID)
     "set(MSVC_CUDA_ARCHITECTURE_ID ${MSVC_CUDA_ARCHITECTURE_ID})")
 endif()
 
-#if this compiler vendor is matches NVIDIA we can determine
-#what the host compiler is. This only needs to be done if the CMAKE_CUDA_HOST_COMPILER
-#has NOT been explicitly set
-#
-#Find the line from compiler ID that contains a.out ( or last line )
-#We also need to find the implicit link lines. Which can be done by replacing
-#the compiler with cuda-fake-ld  and pass too CMAKE_PARSE_IMPLICIT_LINK_INFO
 if(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
   set(_nvcc_log "")
   string(REPLACE "\r" "" _nvcc_output_orig "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
