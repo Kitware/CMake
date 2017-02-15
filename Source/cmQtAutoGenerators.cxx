@@ -688,7 +688,6 @@ bool cmQtAutoGenerators::MocRequired(const std::string& text,
  */
 bool cmQtAutoGenerators::MocSkip(const std::string& absFilename)
 {
-  // Test if moc scanning is enabled
   if (this->MocEnabled()) {
     // Test if the file name is on the skip list
     if (!ListContains(this->MocSkipList, absFilename)) {
@@ -703,7 +702,6 @@ bool cmQtAutoGenerators::MocSkip(const std::string& absFilename)
  */
 bool cmQtAutoGenerators::UicSkip(const std::string& absFilename)
 {
-  // Test if uic scanning is enabled
   if (this->UicEnabled()) {
     // Test if the file name is on the skip list
     if (!ListContains(this->UicSkipList, absFilename)) {
@@ -747,7 +745,6 @@ void cmQtAutoGenerators::ParseContentForUic(
   const std::string& absFilename, const std::string& contentsString,
   std::map<std::string, std::vector<std::string> >& includedUis)
 {
-  // Process
   if (this->Verbose) {
     std::ostringstream err;
     err << "AutoUic: Checking " << absFilename << "\n";
@@ -777,7 +774,6 @@ bool cmQtAutoGenerators::ParseContentForMoc(
   const std::vector<std::string>& headerExtensions,
   std::map<std::string, std::string>& includedMocs, bool relaxed)
 {
-  // Process
   if (this->Verbose) {
     std::ostringstream err;
     err << "AutoMoc: Checking " << absFilename << "\n";
@@ -1019,7 +1015,7 @@ void cmQtAutoGenerators::ParseHeaders(
     // Parse header content for MOC
     if ((absHeadersMoc.find(headerName) != absHeadersMoc.end()) &&
         (includedMocs.find(headerName) == includedMocs.end())) {
-      // Process
+      // Log
       if (this->Verbose) {
         std::ostringstream err;
         err << "AutoMoc: Checking " << headerName << "\n";

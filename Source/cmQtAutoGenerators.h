@@ -27,10 +27,20 @@ private:
                            const std::string& targetDirectory,
                            const std::string& config);
 
+  bool MocEnabled() const { return !this->MocExecutable.empty(); }
+  bool UicEnabled() const { return !this->UicExecutable.empty(); }
+  bool RccEnabled() const { return !this->RccExecutable.empty(); }
+
   // - Settings file
   void SettingsFileRead(cmMakefile* makefile,
                         const std::string& targetDirectory);
   bool SettingsFileWrite(const std::string& targetDirectory);
+
+  bool GenerateAllAny() const
+  {
+    return (this->GenerateAllMoc || this->GenerateAllRcc ||
+            this->GenerateAllUic);
+  }
 
   // - Init and run
   void Init();
@@ -109,16 +119,6 @@ private:
                              const char* basePrefix,
                              const char* baseSuffix) const;
   bool MakeParentDirectory(const std::string& filename);
-
-  bool MocEnabled() const { return !this->MocExecutable.empty(); }
-  bool UicEnabled() const { return !this->UicExecutable.empty(); }
-  bool RccEnabled() const { return !this->RccExecutable.empty(); }
-
-  bool GenerateAllAny() const
-  {
-    return (this->GenerateAllMoc || this->GenerateAllRcc ||
-            this->GenerateAllUic);
-  }
 
   // - Target names
   std::string OriginTargetName;
