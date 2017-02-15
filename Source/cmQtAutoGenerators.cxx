@@ -528,11 +528,10 @@ void cmQtAutoGenerators::Init()
   this->AutogenBuildSubDir = this->AutogenTargetName;
   this->AutogenBuildSubDir += "/";
 
-  this->OutMocCppFilenameRel = this->AutogenBuildSubDir;
-  this->OutMocCppFilenameRel += "moc_compilation.cpp";
+  this->MocCppFilenameRel = this->AutogenBuildSubDir;
+  this->MocCppFilenameRel += "moc_compilation.cpp";
 
-  this->OutMocCppFilenameAbs =
-    this->CurrentBinaryDir + this->OutMocCppFilenameRel;
+  this->MocCppFilenameAbs = this->CurrentBinaryDir + this->MocCppFilenameRel;
 
   // Init file path checksum generator
   fpathCheckSum.setupParentDirs(this->CurrentSourceDir, this->CurrentBinaryDir,
@@ -1124,12 +1123,12 @@ bool cmQtAutoGenerators::MocGenerateAll(
   // Check if we even need to update moc_compilation.cpp
   if (!automocCppChanged) {
     // compare contents of the moc_compilation.cpp file
-    const std::string oldContents = ReadAll(this->OutMocCppFilenameAbs);
+    const std::string oldContents = ReadAll(this->MocCppFilenameAbs);
     if (oldContents == automocSource) {
       // nothing changed: don't touch the moc_compilation.cpp file
       if (this->Verbose) {
         std::ostringstream err;
-        err << "AutoMoc: " << this->OutMocCppFilenameRel << " still up to date"
+        err << "AutoMoc: " << this->MocCppFilenameRel << " still up to date"
             << std::endl;
         this->LogInfo(err.str());
       }
@@ -1138,17 +1137,17 @@ bool cmQtAutoGenerators::MocGenerateAll(
   }
 
   // Actually write moc_compilation.cpp
-  this->LogBold("Generating MOC compilation " + this->OutMocCppFilenameRel);
+  this->LogBold("Generating MOC compilation " + this->MocCppFilenameRel);
 
   // Make sure the parent directory exists
-  bool success = this->MakeParentDirectory(this->OutMocCppFilenameAbs);
+  bool success = this->MakeParentDirectory(this->MocCppFilenameAbs);
   if (success) {
     cmsys::ofstream outfile;
-    outfile.open(this->OutMocCppFilenameAbs.c_str(), std::ios::trunc);
+    outfile.open(this->MocCppFilenameAbs.c_str(), std::ios::trunc);
     if (!outfile) {
       success = false;
       std::ostringstream err;
-      err << "AutoMoc: error opening " << this->OutMocCppFilenameAbs << "\n";
+      err << "AutoMoc: error opening " << this->MocCppFilenameAbs << "\n";
       this->LogError(err.str());
     } else {
       outfile << automocSource;
@@ -1156,7 +1155,7 @@ bool cmQtAutoGenerators::MocGenerateAll(
       if (!outfile.good()) {
         success = false;
         std::ostringstream err;
-        err << "AutoMoc: error writing " << this->OutMocCppFilenameAbs << "\n";
+        err << "AutoMoc: error writing " << this->MocCppFilenameAbs << "\n";
         this->LogError(err.str());
       }
     }
