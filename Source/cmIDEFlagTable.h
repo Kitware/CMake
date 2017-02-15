@@ -24,6 +24,9 @@ struct cmIDEFlagTable
                                     // IgnoreDefaultLibraryNames)
     UserFollowing = (1 << 5),       // expect value in following argument
     CaseInsensitive = (1 << 6),     // flag may be any case
+    SpaceAppendable = (1 << 7),     // a flag that if specified multiple times
+                                    // should have its value appended to the
+                                    // old value with spaces
 
     UserValueIgnored = UserValue | UserIgnored,
     UserValueRequired = UserValue | UserRequired

@@ -787,7 +787,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
          << this->ConvertToXMLOutputPath(modDir.c_str())
          << "\\$(ConfigurationName)\"\n";
   }
-  targetOptions.OutputAdditionalOptions(fout, "\t\t\t\t", "\n");
   fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
   std::vector<std::string> includes;
   this->GetIncludeDirectories(includes, target, "C", configName);
@@ -1090,7 +1089,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       if (!gg->NeedLinkLibraryDependencies(target)) {
         fout << "\t\t\t\tLinkLibraryDependencies=\"false\"\n";
       }
-      linkOptions.OutputAdditionalOptions(fout, "\t\t\t\t", "\n");
       // Use the NOINHERIT macro to avoid getting VS project default
       // libraries which may be set by the user to something bad.
       fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
@@ -1176,7 +1174,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       if (!gg->NeedLinkLibraryDependencies(target)) {
         fout << "\t\t\t\tLinkLibraryDependencies=\"false\"\n";
       }
-      linkOptions.OutputAdditionalOptions(fout, "\t\t\t\t", "\n");
       // Use the NOINHERIT macro to avoid getting VS project default
       // libraries which may be set by the user to something bad.
       fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
@@ -1675,7 +1672,6 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
             fileOptions.Parse(fc.CompileFlags.c_str());
             fileOptions.AddDefines(fc.CompileDefs.c_str());
             fileOptions.AddDefines(fc.CompileDefsConfig.c_str());
-            fileOptions.OutputAdditionalOptions(fout, "\t\t\t\t\t", "\n");
             fileOptions.OutputFlagMap(fout, "\t\t\t\t\t");
             fileOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t\t", "\n",
                                                       ppLang);

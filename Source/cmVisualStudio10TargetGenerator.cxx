@@ -1939,7 +1939,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       }
       clOptions.AddDefines(configDefines.c_str());
       clOptions.SetConfiguration((*config).c_str());
-      clOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
+      clOptions.PrependInheritedString("AdditionalOptions");
       clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
       clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                               "\n", lang);
@@ -2293,7 +2293,7 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     return;
   }
   this->WriteString("<ClCompile>\n", 2);
-  clOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
+  clOptions.PrependInheritedString("AdditionalOptions");
   clOptions.AppendFlag("AdditionalIncludeDirectories", includes);
   clOptions.AppendFlag("AdditionalIncludeDirectories",
                        "%(AdditionalIncludeDirectories)");
@@ -2395,8 +2395,8 @@ void cmVisualStudio10TargetGenerator::WriteRCOptions(
   rcOptions.AppendFlag("AdditionalIncludeDirectories", includes);
   rcOptions.AppendFlag("AdditionalIncludeDirectories",
                        "%(AdditionalIncludeDirectories)");
+  rcOptions.PrependInheritedString("AdditionalOptions");
   rcOptions.OutputFlagMap(*this->BuildFileStream, "      ");
-  rcOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
 
   this->WriteString("</ResourceCompile>\n", 2);
 }
@@ -2453,8 +2453,8 @@ void cmVisualStudio10TargetGenerator::WriteMasmOptions(
   Options& masmOptions = *(this->MasmOptions[configName]);
   masmOptions.AppendFlag("IncludePaths", includes);
   masmOptions.AppendFlag("IncludePaths", "%(IncludePaths)");
+  masmOptions.PrependInheritedString("AdditionalOptions");
   masmOptions.OutputFlagMap(*this->BuildFileStream, "      ");
-  masmOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
 
   this->WriteString("</MASM>\n", 2);
 }
@@ -2512,7 +2512,7 @@ void cmVisualStudio10TargetGenerator::WriteNasmOptions(
   nasmOptions.AppendFlag("IncludePaths", includes);
   nasmOptions.AppendFlag("IncludePaths", "%(IncludePaths)");
   nasmOptions.OutputFlagMap(*this->BuildFileStream, "      ");
-  nasmOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
+  nasmOptions.PrependInheritedString("AdditionalOptions");
   nasmOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                             "\n", "ASM_NASM");
 
@@ -2542,7 +2542,7 @@ void cmVisualStudio10TargetGenerator::WriteLibOptions(
       this->LocalGenerator, cmVisualStudioGeneratorOptions::Linker,
       gg->GetLibFlagTable(), 0, this);
     libOptions.Parse(libflags.c_str());
-    libOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
+    libOptions.PrependInheritedString("AdditionalOptions");
     libOptions.OutputFlagMap(*this->BuildFileStream, "      ");
     this->WriteString("</Lib>\n", 2);
   }
@@ -3019,7 +3019,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(
   Options& linkOptions = *(this->LinkOptions[config]);
   this->WriteString("<Link>\n", 2);
 
-  linkOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
+  linkOptions.PrependInheritedString("AdditionalOptions");
   linkOptions.OutputFlagMap(*this->BuildFileStream, "      ");
 
   this->WriteString("</Link>\n", 2);
