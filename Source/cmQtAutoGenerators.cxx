@@ -608,8 +608,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   // may not be included in the moc_compilation.cpp file anymore. OTOH if
   // there's a header containing Q_OBJECT where no corresponding moc file
   // is included anywhere a moc_<filename>.cpp file is created and included
-  // in
-  // the moc_compilation.cpp file.
+  // in the moc_compilation.cpp file.
 
   // key = moc source filepath, value = moc output filepath
   std::map<std::string, std::string> mocsIncluded;
