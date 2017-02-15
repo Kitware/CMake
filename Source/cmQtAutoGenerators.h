@@ -140,6 +140,10 @@ private:
   // - File lists
   std::vector<std::string> Sources;
   std::vector<std::string> Headers;
+  // - Settings
+  std::string SettingsStringMoc;
+  std::string SettingsStringUic;
+  std::string SettingsStringRcc;
   // - Moc
   std::vector<std::string> SkipMoc;
   std::string MocCompileDefinitionsStr;
@@ -150,17 +154,14 @@ private:
   std::list<std::string> MocIncludes;
   std::list<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
-  std::string MocSettingsString;
   // - Uic
   std::vector<std::string> SkipUic;
   std::vector<std::string> UicTargetOptions;
   std::map<std::string, std::string> UicOptions;
-  std::string UicSettingsString;
   // - Rcc
   std::vector<std::string> RccSources;
   std::map<std::string, std::string> RccOptions;
   std::map<std::string, std::vector<std::string> > RccInputs;
-  std::string RccSettingsString;
   // - Utility
   cmFilePathChecksum fpathCheckSum;
   cmsys::RegularExpression RegExpQObject;

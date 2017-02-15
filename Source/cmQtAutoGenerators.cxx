@@ -469,20 +469,20 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
                                           const std::string& targetDirectory)
 {
   // Compose current settings strings
-  this->MocSettingsString = this->SettingsStringGenMoc();
-  this->UicSettingsString = this->SettingsStringGenUic();
-  this->RccSettingsString = this->SettingsStringGenRcc();
+  this->SettingsStringMoc = this->SettingsStringGenMoc();
+  this->SettingsStringUic = this->SettingsStringGenUic();
+  this->SettingsStringRcc = this->SettingsStringGenRcc();
 
   // Read old settings
   const std::string filename = SettingsFile(targetDirectory);
   if (makefile->ReadListFile(filename.c_str())) {
-    if (!SettingsMatch(makefile, SettingsKeyMoc, this->MocSettingsString)) {
+    if (!SettingsMatch(makefile, SettingsKeyMoc, this->SettingsStringMoc)) {
       this->GenerateAllMoc = true;
     }
-    if (!SettingsMatch(makefile, SettingsKeyUic, this->UicSettingsString)) {
+    if (!SettingsMatch(makefile, SettingsKeyUic, this->SettingsStringUic)) {
       this->GenerateAllUic = true;
     }
-    if (!SettingsMatch(makefile, SettingsKeyRcc, this->RccSettingsString)) {
+    if (!SettingsMatch(makefile, SettingsKeyRcc, this->SettingsStringRcc)) {
       this->GenerateAllRcc = true;
     }
     // In case any setting changed remove the old settings file.
@@ -513,9 +513,9 @@ bool cmQtAutoGenerators::SettingsFileWrite(const std::string& targetDirectory)
     cmsys::ofstream outfile;
     outfile.open(filename.c_str(), std::ios::trunc);
     if (outfile) {
-      SettingWrite(outfile, SettingsKeyMoc, this->MocSettingsString);
-      SettingWrite(outfile, SettingsKeyUic, this->UicSettingsString);
-      SettingWrite(outfile, SettingsKeyRcc, this->RccSettingsString);
+      SettingWrite(outfile, SettingsKeyMoc, this->SettingsStringMoc);
+      SettingWrite(outfile, SettingsKeyUic, this->SettingsStringUic);
+      SettingWrite(outfile, SettingsKeyRcc, this->SettingsStringRcc);
       success = outfile.good();
       outfile.close();
     } else {
