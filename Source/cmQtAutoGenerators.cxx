@@ -655,10 +655,10 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
        it != this->Headers.end(); ++it) {
     const std::string& headerName = *it;
     if (!this->MocSkipTest(headerName)) {
-      headerFilesMoc.insert(this->Headers.begin(), this->Headers.end());
+      headerFilesMoc.insert(headerName);
     }
     if (!this->UicSkipTest(headerName)) {
-      headerFilesUic.insert(this->Headers.begin(), this->Headers.end());
+      headerFilesUic.insert(headerName);
     }
   }
   this->ParseHeaders(headerFilesMoc, headerFilesUic, includedMocs,
