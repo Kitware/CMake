@@ -253,6 +253,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("WIN32_EXECUTABLE", CM_NULLPTR);
     this->SetPropertyDefault("MACOSX_BUNDLE", CM_NULLPTR);
     this->SetPropertyDefault("MACOSX_RPATH", CM_NULLPTR);
+    this->SetPropertyDefault("BUILD_WITH_INSTALL_NAME_DIR", CM_NULLPTR);
     this->SetPropertyDefault("C_CLANG_TIDY", CM_NULLPTR);
     this->SetPropertyDefault("C_COMPILER_LAUNCHER", CM_NULLPTR);
     this->SetPropertyDefault("C_CPPLINT", CM_NULLPTR);

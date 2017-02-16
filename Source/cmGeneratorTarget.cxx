@@ -1321,8 +1321,7 @@ bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(
       return false;
     }
     const char* install_name = this->GetProperty("INSTALL_NAME_DIR");
-    bool use_install_name =
-      this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH");
+    bool use_install_name = this->MacOSXUseInstallNameDir();
     if (install_name && use_install_name &&
         std::string(install_name) == "@rpath") {
       install_name_is_rpath = true;
@@ -1393,6 +1392,53 @@ bool cmGeneratorTarget::MacOSXRpathInstallNameDirDefault() const
   }
 
   return cmp0042 == cmPolicies::NEW;
+}
+
+bool cmGeneratorTarget::MacOSXUseInstallNameDir() const
+{
+  const char* build_with_install_name =
+    this->GetProperty("BUILD_WITH_INSTALL_NAME_DIR");
+  if (build_with_install_name) {
+    return cmSystemTools::IsOn(build_with_install_name);
+  }
+
+  cmPolicies::PolicyStatus cmp0068 = this->GetPolicyStatusCMP0068();
+  if (cmp0068 == cmPolicies::NEW) {
+    return false;
+  }
+
+  bool use_install_name = this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH");
+
+  if (use_install_name && cmp0068 == cmPolicies::WARN) {
+    this->LocalGenerator->GetGlobalGenerator()->AddCMP0068WarnTarget(
+      this->GetName());
+  }
+
+  return use_install_name;
+}
+
+bool cmGeneratorTarget::CanGenerateInstallNameDir(
+  InstallNameType name_type) const
+{
+  cmPolicies::PolicyStatus cmp0068 = this->GetPolicyStatusCMP0068();
+
+  if (cmp0068 == cmPolicies::NEW) {
+    return true;
+  }
+
+  bool skip = this->Makefile->IsOn("CMAKE_SKIP_RPATH");
+  if (name_type == INSTALL_NAME_FOR_INSTALL) {
+    skip |= this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
+  } else {
+    skip |= this->GetPropertyAsBool("SKIP_BUILD_RPATH");
+  }
+
+  if (skip && cmp0068 == cmPolicies::WARN) {
+    this->LocalGenerator->GetGlobalGenerator()->AddCMP0068WarnTarget(
+      this->GetName());
+  }
+
+  return !skip;
 }
 
 std::string cmGeneratorTarget::GetSOName(const std::string& config) const
@@ -1503,24 +1549,25 @@ std::string cmGeneratorTarget::GetFullName(const std::string& config,
 std::string cmGeneratorTarget::GetInstallNameDirForBuildTree(
   const std::string& config) const
 {
-  // If building directly for installation then the build tree install_name
-  // is the same as the install tree.
-  if (this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH")) {
-    return this->GetInstallNameDirForInstallTree();
-  }
+  if (this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME")) {
 
-  // Use the build tree directory for the target.
-  if (this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME") &&
-      !this->Makefile->IsOn("CMAKE_SKIP_RPATH") &&
-      !this->GetPropertyAsBool("SKIP_BUILD_RPATH")) {
-    std::string dir;
-    if (this->MacOSXRpathInstallNameDirDefault()) {
-      dir = "@rpath";
-    } else {
-      dir = this->GetDirectory(config);
+    // If building directly for installation then the build tree install_name
+    // is the same as the install tree.
+    if (this->MacOSXUseInstallNameDir()) {
+      return this->GetInstallNameDirForInstallTree();
     }
-    dir += "/";
-    return dir;
+
+    // Use the build tree directory for the target.
+    if (this->CanGenerateInstallNameDir(INSTALL_NAME_FOR_BUILD)) {
+      std::string dir;
+      if (this->MacOSXRpathInstallNameDirDefault()) {
+        dir = "@rpath";
+      } else {
+        dir = this->GetDirectory(config);
+      }
+      dir += "/";
+      return dir;
+    }
   }
   return "";
 }
@@ -1531,8 +1578,7 @@ std::string cmGeneratorTarget::GetInstallNameDirForInstallTree() const
     std::string dir;
     const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
 
-    if (!this->Makefile->IsOn("CMAKE_SKIP_RPATH") &&
-        !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH")) {
+    if (this->CanGenerateInstallNameDir(INSTALL_NAME_FOR_INSTALL)) {
       if (install_name_dir && *install_name_dir) {
         dir = install_name_dir;
         dir += "/";

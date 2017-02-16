@@ -357,6 +357,7 @@ public:
   cmExportBuildFileGenerator* GetExportedTargetsFile(
     const std::string& filename) const;
   void AddCMP0042WarnTarget(const std::string& target);
+  void AddCMP0068WarnTarget(const std::string& target);
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
@@ -562,6 +563,8 @@ private:
 
   // track targets to issue CMP0042 warning for.
   std::set<std::string> CMP0042WarnTargets;
+  // track targets to issue CMP0068 warning for.
+  std::set<std::string> CMP0068WarnTargets;
 
   mutable std::map<cmSourceFile*, std::set<cmGeneratorTarget const*> >
     FilenameTargetDepends;
