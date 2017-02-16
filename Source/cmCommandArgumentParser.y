@@ -10,20 +10,12 @@ Run bison like this:
   bison --yacc --name-prefix=cmCommandArgument_yy --defines=cmCommandArgumentParserTokens.h -ocmCommandArgumentParser.cxx cmCommandArgumentParser.y
 
 Modify cmCommandArgumentParser.cxx:
-  - remove TABs
-  - remove use of the 'register' storage class specifier
-  - put header block at top of file
+  - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
 
 */
 
 #include "cmStandardIncludes.h"
 
-/* Configure the parser to use a lexer object.  */
-#define YYPARSE_PARAM yyscanner
-#define YYLEX_PARAM yyscanner
-#define YYERROR_VERBOSE 1
-#define cmCommandArgument_yyerror(x) \
-        cmCommandArgumentError(yyscanner, x)
 #define yyGetParser (cmCommandArgument_yyget_extra(yyscanner))
 
 /* Make sure malloc and free are available on QNX.  */
@@ -46,10 +38,9 @@ Modify cmCommandArgumentParser.cxx:
 /* Forward declare the lexer entry point.  */
 YY_DECL;
 
-/* Internal utility functions.  */
-static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
+/* Helper function to forward error callback from parser.  */
+static void cmCommandArgument_yyerror(yyscan_t yyscanner, const char* message);
 
-#define YYDEBUG 1
 /* Configure the parser to support large input.  */
 #define YYMAXDEPTH 100000
 #define YYINITDEPTH 10000
@@ -65,7 +56,13 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 %}
 
 /* Generate a reentrant parser object.  */
-%pure_parser
+%define api.pure
+
+/* Configure the parser to use a lexer object.  */
+%lex-param   {yyscan_t yyscanner}
+%parse-param {yyscan_t yyscanner}
+
+%define parse.error verbose
 
 /*
 %union {
@@ -224,7 +221,7 @@ Variable
 /* End of grammar */
 
 /*--------------------------------------------------------------------------*/
-void cmCommandArgumentError(yyscan_t yyscanner, const char* message)
+void cmCommandArgument_yyerror(yyscan_t yyscanner, const char* message)
 {
   yyGetParser->Error(message);
 }
