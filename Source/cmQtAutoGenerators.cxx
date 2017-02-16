@@ -773,7 +773,8 @@ bool cmQtAutoGenerators::ParseContentForMoc(
         cmsys::SystemTools::GetFilenameWithoutLastExtension(incString);
       std::string incSubDir;
       if (incString.find_first_of('/') != std::string::npos) {
-        incSubDir = cmsys::SystemTools::GetFilenamePath(incString) + '/';
+        incSubDir = cmsys::SystemTools::GetFilenamePath(incString);
+        incSubDir += '/';
       }
 
       // If the moc include is of the moc_foo.cpp style we expect
@@ -785,8 +786,8 @@ bool cmQtAutoGenerators::ParseContentForMoc(
         // Include: moc_FOO.cxx
         // Remove the moc_ part
         const std::string incRealBasename = incBasename.substr(4);
-        const std::string headerToMoc = this->FindMatchingHeader(
-          scannedFileAbsPath, incRealBasename, incSubDir);
+        const std::string headerToMoc =
+          this->FindMocHeader(scannedFileAbsPath, incRealBasename, incSubDir);
         if (!headerToMoc.empty()) {
           mocsIncluded[headerToMoc] = incString;
           if (relaxed && (incRealBasename == scannedFileBasename)) {
@@ -814,8 +815,8 @@ bool cmQtAutoGenerators::ParseContentForMoc(
             ownDotMocIncluded = true;
           } else {
             // In relaxed mode try to find a header instead but issue a warning
-            const std::string headerToMoc = this->FindMatchingHeader(
-              scannedFileAbsPath, incBasename, incSubDir);
+            const std::string headerToMoc =
+              this->FindMocHeader(scannedFileAbsPath, incBasename, incSubDir);
             if (!headerToMoc.empty()) {
               // This is for KDE4 compatibility:
               fileToMoc = headerToMoc;
@@ -1607,9 +1608,23 @@ bool cmQtAutoGenerators::FindHeader(std::string& header,
   return false;
 }
 
-std::string cmQtAutoGenerators::FindMatchingHeader(
-  const std::string& basePath, const std::string& baseName,
-  const std::string& subDir) const
+bool cmQtAutoGenerators::FindHeaderGlobal(
+  std::string& header, const std::string& testBasePath) const
+{
+  for (std::vector<std::string>::const_iterator iit =
+         this->MocIncludePaths.begin();
+       iit != this->MocIncludePaths.end(); ++iit) {
+    const std::string fullPath = ((*iit) + '/' + testBasePath);
+    if (FindHeader(header, fullPath)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+std::string cmQtAutoGenerators::FindMocHeader(const std::string& basePath,
+                                              const std::string& baseName,
+                                              const std::string& subDir) const
 {
   std::string header;
   do {
@@ -1621,7 +1636,15 @@ std::string cmQtAutoGenerators::FindMatchingHeader(
     if (this->FindHeader(header, basePath + baseName)) {
       break;
     }
+    // Try include directories
+    if (this->FindHeaderGlobal(header, subDir + baseName)) {
+      break;
+    }
   } while (false);
+  // Sanitize
+  if (!header.empty()) {
+    header = cmSystemTools::CollapseFullPath(header);
+  }
   return header;
 }
 
