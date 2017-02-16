@@ -311,8 +311,9 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   cmSystemTools::ExpandListArgument(
     GetConfigDefinition(makefile, "AM_MOC_COMPILE_DEFINITIONS", config),
     this->MocDefinitions);
-  this->MocInfoIncludes =
-    GetConfigDefinition(makefile, "AM_MOC_INCLUDES", config);
+  cmSystemTools::ExpandListArgument(
+    GetConfigDefinition(makefile, "AM_MOC_INCLUDES", config),
+    this->MocIncludePaths);
   cmSystemTools::ExpandListArgument(
     makefile->GetSafeDefinition("AM_MOC_OPTIONS"), this->MocOptions);
 
@@ -410,7 +411,7 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
     std::string& str = this->SettingsStringMoc;
     str += JoinOptionsList(this->MocDefinitions);
     str += " ~~~ ";
-    str += this->MocInfoIncludes;
+    str += JoinOptionsList(this->MocIncludePaths);
     str += " ~~~ ";
     str += JoinOptionsList(this->MocOptions);
     str += " ~~~ ";
@@ -512,22 +513,19 @@ void cmQtAutoGenerators::Init(cmMakefile* makefile)
   std::list<std::string> mocIncludes;
   {
     std::set<std::string> frameworkPaths;
-    {
-      std::vector<std::string> incPaths;
-      cmSystemTools::ExpandListArgument(this->MocInfoIncludes, incPaths);
-      for (std::vector<std::string>::const_iterator it = incPaths.begin();
-           it != incPaths.end(); ++it) {
-        const std::string& path = *it;
-        mocIncludes.push_back("-I" + path);
-        // Extract framework path
-        if (cmHasLiteralSuffix(path, ".framework/Headers")) {
-          // Go up twice to get to the framework root
-          std::vector<std::string> pathComponents;
-          cmsys::SystemTools::SplitPath(path, pathComponents);
-          std::string frameworkPath = cmsys::SystemTools::JoinPath(
-            pathComponents.begin(), pathComponents.end() - 2);
-          frameworkPaths.insert(frameworkPath);
-        }
+    for (std::vector<std::string>::const_iterator it =
+           this->MocIncludePaths.begin();
+         it != this->MocIncludePaths.end(); ++it) {
+      const std::string& path = *it;
+      mocIncludes.push_back("-I" + path);
+      // Extract framework path
+      if (cmHasLiteralSuffix(path, ".framework/Headers")) {
+        // Go up twice to get to the framework root
+        std::vector<std::string> pathComponents;
+        cmsys::SystemTools::SplitPath(path, pathComponents);
+        std::string frameworkPath = cmsys::SystemTools::JoinPath(
+          pathComponents.begin(), pathComponents.end() - 2);
+        frameworkPaths.insert(frameworkPath);
       }
     }
     // Append framework includes
