@@ -47,6 +47,8 @@ public:
   void Parse(const char* flags);
   void ParseFinish();
 
+  void PrependInheritedString(std::string const& key);
+
   // Fix the ExceptionHandling option to default to off.
   void FixExceptionHandlingDefault();
 
@@ -65,8 +67,6 @@ public:
                                      const char* suffix,
                                      const std::string& lang);
   void OutputFlagMap(std::ostream& fout, const char* indent);
-  void OutputAdditionalOptions(std::ostream& fout, const char* prefix,
-                               const char* suffix);
   void SetConfiguration(const char* config);
 
 private:
