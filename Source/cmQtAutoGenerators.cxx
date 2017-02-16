@@ -588,7 +588,7 @@ bool cmQtAutoGenerators::RunAutogen()
   // Parse sources
   for (std::vector<std::string>::const_iterator it = this->Sources.begin();
        it != this->Sources.end(); ++it) {
-    const std::string& absFilename = *it;
+    const std::string& absFilename = cmsys::SystemTools::GetRealPath(*it);
     // Parse source file for MOC/UIC
     if (!this->ParseSourceFile(absFilename, mocsIncluded, uisIncluded,
                                this->MocRelaxedMode)) {
@@ -602,7 +602,7 @@ bool cmQtAutoGenerators::RunAutogen()
   // Parse headers
   for (std::vector<std::string>::const_iterator it = this->Headers.begin();
        it != this->Headers.end(); ++it) {
-    const std::string& headerName = *it;
+    const std::string& headerName = cmsys::SystemTools::GetRealPath(*it);
     if (!this->MocSkip(headerName)) {
       mocHeaderFiles.insert(headerName);
     }
@@ -718,7 +718,6 @@ void cmQtAutoGenerators::ParseContentForUic(
     this->LogInfo(err.str());
   }
 
-  const std::string realName = cmsys::SystemTools::GetRealPath(absFilename);
   const char* contentChars = contentsString.c_str();
   if (strstr(contentChars, "ui_") != CM_NULLPTR) {
     while (this->RegExpUicInclude.find(contentChars)) {
@@ -727,7 +726,7 @@ void cmQtAutoGenerators::ParseContentForUic(
         cmsys::SystemTools::GetFilenameWithoutLastExtension(currentUi);
       // basename should be the part of the ui filename used for
       // finding the correct header, so we need to remove the ui_ part
-      uisIncluded[realName].push_back(basename.substr(3));
+      uisIncluded[absFilename].push_back(basename.substr(3));
       contentChars += this->RegExpUicInclude.end();
     }
   }
@@ -747,9 +746,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
   }
 
   const std::string scannedFileAbsPath =
-    cmsys::SystemTools::GetFilenamePath(
-      cmsys::SystemTools::GetRealPath(absFilename)) +
-    '/';
+    cmsys::SystemTools::GetFilenamePath(absFilename) + '/';
   const std::string scannedFileBasename =
     cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
 
@@ -932,33 +929,27 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
 {
   std::string basepaths[2];
   {
-    std::string bpath = cmsys::SystemTools::GetFilenamePath(
-      cmsys::SystemTools::GetRealPath(absFilename));
+    std::string bpath = cmsys::SystemTools::GetFilenamePath(absFilename);
     bpath += '/';
     bpath += cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
-
     // search for default header files and private header files
-    basepaths[0] = (bpath + ".");
-    basepaths[1] = (bpath + "_p.");
+    basepaths[0] = bpath;
+    basepaths[1] = bpath + "_p";
   }
 
   for (const std::string* bpit = cmArrayBegin(basepaths);
        bpit != cmArrayEnd(basepaths); ++bpit) {
-    for (std::vector<std::string>::const_iterator heit =
-           this->HeaderExtensions.begin();
-         heit != this->HeaderExtensions.end(); ++heit) {
-      const std::string hname = (*bpit) + (*heit);
-      if (cmsys::SystemTools::FileExists(hname.c_str())) {
-        // Moc headers
-        if (!this->MocSkip(absFilename) && !this->MocSkip(hname)) {
-          mocHeaderFiles.insert(hname);
-        }
-        // Uic headers
-        if (!this->UicSkip(absFilename) && !this->UicSkip(hname)) {
-          uicHeaderFiles.insert(hname);
-        }
-        break;
+    std::string headerName;
+    if (this->FindHeader(headerName, *bpit)) {
+      // Moc headers
+      if (!this->MocSkip(absFilename) && !this->MocSkip(headerName)) {
+        mocHeaderFiles.insert(headerName);
       }
+      // Uic headers
+      if (!this->UicSkip(absFilename) && !this->UicSkip(headerName)) {
+        uicHeaderFiles.insert(headerName);
+      }
+      break;
     }
   }
 }
@@ -1643,7 +1634,7 @@ std::string cmQtAutoGenerators::FindMocHeader(const std::string& basePath,
   } while (false);
   // Sanitize
   if (!header.empty()) {
-    header = cmSystemTools::CollapseFullPath(header);
+    header = cmsys::SystemTools::GetRealPath(header);
   }
   return header;
 }
