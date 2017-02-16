@@ -182,22 +182,78 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
 bool cmGlobalVisualStudio10Generator::ParseGeneratorToolset(
   std::string const& ts, cmMakefile* mf)
 {
-  if (ts.find_first_of(",=") != ts.npos) {
-    std::ostringstream e;
-    /* clang-format off */
-    e <<
-      "Generator\n"
-      "  " << this->GetName() << "\n"
-      "does not recognize the toolset\n"
-      "  " << ts << "\n"
-      "that was specified.";
-    /* clang-format on */
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return false;
+  std::vector<std::string> const fields = cmSystemTools::tokenize(ts, ",");
+  std::vector<std::string>::const_iterator fi = fields.begin();
+  if (fi == fields.end()) {
+    return true;
   }
 
-  this->GeneratorToolset = ts;
+  // The first field may be the VS platform toolset.
+  if (fi->find('=') == fi->npos) {
+    this->GeneratorToolset = *fi;
+    ++fi;
+  }
+
+  std::set<std::string> handled;
+
+  // The rest of the fields must be key=value pairs.
+  for (; fi != fields.end(); ++fi) {
+    std::string::size_type pos = fi->find('=');
+    if (pos == fi->npos) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given toolset specification\n"
+        "  " << ts << "\n"
+        "that contains a field after the first ',' with no '='."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return false;
+    }
+    std::string const key = fi->substr(0, pos);
+    std::string const value = fi->substr(pos + 1);
+    if (!handled.insert(key).second) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given toolset specification\n"
+        "  " << ts << "\n"
+        "that contains duplicate field key '" << key << "'."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return false;
+    }
+    if (!this->ProcessGeneratorToolsetField(key, value)) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given toolset specification\n"
+        "  " << ts << "\n"
+        "that contains invalid field '" << *fi << "'."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return false;
+    }
+  }
+
   return true;
+}
+
+bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
+  std::string const& key, std::string const& value)
+{
+  static_cast<void>(key);
+  static_cast<void>(value);
+  return false;
 }
 
 bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)

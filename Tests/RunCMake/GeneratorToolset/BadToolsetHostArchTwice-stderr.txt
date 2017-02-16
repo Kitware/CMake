@@ -5,6 +5,6 @@ CMake Error at CMakeLists.txt:[0-9]+ \(project\):
 
   given toolset specification
 
-    Test Toolset,host=x6[45]
+    Test Toolset,host=x64,host=x64
 
-  that contains invalid field 'host=x6[45]'\.$
+  that contains duplicate field key 'host'\.$
