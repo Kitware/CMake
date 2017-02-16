@@ -214,9 +214,12 @@ cmQtAutoGenerators::cmQtAutoGenerators()
     }
   }
 
+  this->MacroFilters[0].first = "Q_OBJECT";
+  this->MacroFilters[0].second.compile("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
+  this->MacroFilters[1].first = "Q_GADGET";
+  this->MacroFilters[1].second.compile("[\n][ \t]*Q_GADGET[^a-zA-Z0-9_]");
+
   // Precompile regular expressions
-  this->RegExpQObject.compile("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
-  this->RegExpQGadget.compile("[\n][ \t]*Q_GADGET[^a-zA-Z0-9_]");
   this->RegExpMocInclude.compile(
     "[\n][ \t]*#[ \t]*include[ \t]+"
     "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
@@ -632,19 +635,19 @@ bool cmQtAutoGenerators::RunAutogen()
  * @return True if moc is required
  */
 bool cmQtAutoGenerators::MocRequired(const std::string& text,
-                                     std::string& macroName)
+                                     std::string* macroName)
 {
-  // Run a simple check before an expensive regular expression check
-  if (strstr(text.c_str(), "Q_OBJECT") != CM_NULLPTR) {
-    if (this->RegExpQObject.find(text)) {
-      macroName = "Q_OBJECT";
-      return true;
-    }
-  }
-  if (strstr(text.c_str(), "Q_GADGET") != CM_NULLPTR) {
-    if (this->RegExpQGadget.find(text)) {
-      macroName = "Q_GADGET";
-      return true;
+  for (unsigned int ii = 0; ii != cmArraySize(this->MacroFilters); ++ii) {
+    MacroFilter& macroFilter = this->MacroFilters[ii];
+    // Run a simple check before an expensive regular expression check
+    if (text.find(macroFilter.first) != std::string::npos) {
+      if (macroFilter.second.find(text)) {
+        // Return macro name on demand
+        if (macroName != CM_NULLPTR) {
+          *macroName = macroFilter.first;
+        }
+        return true;
+      }
     }
   }
   return false;
@@ -754,7 +757,7 @@ bool cmQtAutoGenerators::ParseContentForMoc(
     cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
 
   std::string macroName;
-  const bool requiresMoc = this->MocRequired(contentsString, macroName);
+  const bool requiresMoc = this->MocRequired(contentsString, &macroName);
   bool ownDotMocIncluded = false;
   bool ownMocUnderscoreIncluded = false;
   std::string ownMocUnderscoreFile;
@@ -988,8 +991,7 @@ void cmQtAutoGenerators::ParseHeaders(
         err << "AutoMoc: Checking " << headerName << "\n";
         this->LogInfo(err.str());
       }
-      std::string macroName;
-      if (this->MocRequired(contents, macroName)) {
+      if (this->MocRequired(contents)) {
         mocsNotIncluded[headerName] =
           this->ChecksumedPath(headerName, "moc_", ".cpp");
       }
