@@ -59,12 +59,16 @@
 #                       bindings, if the HL component is enabled
 #
 # Available components are: C CXX Fortran and HL.  For each enabled language
-# binding, a corresponding HDF5_${LANG}_LIBRARIES variable will be defined.
+# binding, a corresponding HDF5_${LANG}_LIBRARIES variable, and potentially
+# HDF5_${LANG}_DEFINITIONS, will be defined.
 # If the HL component is enabled, then an HDF5_${LANG}_HL_LIBRARIES will
 # also be defined.  With all components enabled, the following variables will be defined:
 #
 # ::
 #
+#   HDF5_C_DEFINITIONS -- Required compiler definitions for HDF5 C bindings
+#   HDF5_CXX_DEFINITIONS -- Required compiler definitions for HDF5 C++ bindings
+#   HDF5_Fortran_DEFINITIONS -- Required compiler definitions for HDF5 Fortran bindings
 #   HDF5_C_LIBRARIES - Required libraries for the HDF5 C bindings
 #   HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
 #   HDF5_Fortran_LIBRARIES - Required libraries for the HDF5 Fortran bindings
