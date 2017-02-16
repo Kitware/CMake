@@ -54,19 +54,19 @@ private:
 
   bool ParseSourceFile(
     const std::string& absFilename,
-    std::map<std::string, std::string>& includedMocs,
+    std::map<std::string, std::string>& mocsIncluded,
     std::map<std::string, std::vector<std::string> >& includedUis,
     bool relaxed);
 
   void SearchHeadersForSourceFile(const std::string& absFilename,
-                                  std::set<std::string>& absHeadersMoc,
-                                  std::set<std::string>& absHeadersUic) const;
+                                  std::set<std::string>& mocHeaderFiles,
+                                  std::set<std::string>& uicHeaderFiles) const;
 
   void ParseHeaders(
-    const std::set<std::string>& absHeadersMoc,
-    const std::set<std::string>& absHeadersUic,
-    const std::map<std::string, std::string>& includedMocs,
-    std::map<std::string, std::string>& notIncludedMocs,
+    const std::set<std::string>& mocHeaderFiles,
+    const std::set<std::string>& uicHeaderFiles,
+    const std::map<std::string, std::string>& mocsIncluded,
+    std::map<std::string, std::string>& mocsNotIncluded,
     std::map<std::string, std::vector<std::string> >& includedUis);
 
   void ParseContentForUic(
@@ -75,13 +75,13 @@ private:
 
   bool ParseContentForMoc(const std::string& absFilename,
                           const std::string& contentsString,
-                          std::map<std::string, std::string>& includedMocs,
+                          std::map<std::string, std::string>& mocsIncluded,
                           bool relaxed);
 
   // - Moc file generation
   bool MocGenerateAll(
-    const std::map<std::string, std::string>& includedMocs,
-    const std::map<std::string, std::string>& notIncludedMocs);
+    const std::map<std::string, std::string>& mocsIncluded,
+    const std::map<std::string, std::string>& mocsNotIncluded);
   bool MocGenerateFile(const std::string& sourceFile,
                        const std::string& mocFileName,
                        const std::string& subDirPrefix);
