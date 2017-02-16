@@ -207,5 +207,13 @@ target_link_libraries(skipRccB ${QT_LIBRARIES})
 add_subdirectory(sameName)
 
 # -- Test
+# Tests various include moc patterns
+add_subdirectory(mocIncludeStrict)
+
+# -- Test
+# Tests various include moc patterns
+add_subdirectory(mocIncludeRelaxed)
+
+# -- Test
 # Complex test case
 add_subdirectory(complex)
