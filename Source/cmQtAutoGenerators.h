@@ -121,6 +121,8 @@ private:
   std::string FindMatchingHeader(const std::string& basePath,
                                  const std::string& baseName,
                                  const std::string& subDir) const;
+  bool FindInIncludeDirectories(std::string& file_n,
+                                const std::string& searchString) const;
 
   // - Target names
   std::string OriginTargetName;
