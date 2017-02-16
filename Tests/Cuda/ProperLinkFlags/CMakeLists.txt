@@ -9,7 +9,7 @@ project (ProperLinkFlags CUDA CXX)
 
 #Specify a set of valid CUDA flags and an invalid set of CXX flags ( for CUDA )
 #to make sure we don't use the CXX flags when linking CUDA executables
-set(CMAKE_CUDA_FLAGS "-arch=sm_35 --use_fast_math")
+string(APPEND CMAKE_CUDA_FLAGS " -arch=sm_35 --use_fast_math")
 set(CMAKE_CXX_FLAGS "-Wall")
 
 set(CMAKE_CXX_STANDARD 11)
