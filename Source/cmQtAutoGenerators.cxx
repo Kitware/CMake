@@ -1627,6 +1627,25 @@ std::string cmQtAutoGenerators::FindMatchingHeader(
 }
 
 /**
+ * @brief Tries to find a file in the include directories
+ * @return True on success
+ */
+bool cmQtAutoGenerators::FindInIncludeDirectories(
+  std::string& file_n, const std::string& searchString) const
+{
+  for (std::vector<std::string>::const_iterator iit =
+         this->MocIncludePaths.begin();
+       iit != this->MocIncludePaths.end(); ++iit) {
+    const std::string fullPath = ((*iit) + '/' + searchString);
+    if (cmsys::SystemTools::FileExists(fullPath.c_str())) {
+      file_n = fullPath;
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * @brief Generates the parent directory of the given file on demand
  * @return True on success
  */
