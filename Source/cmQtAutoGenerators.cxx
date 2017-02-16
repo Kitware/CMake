@@ -510,15 +510,44 @@ void cmQtAutoGenerators::Init(cmMakefile* makefile)
   // Acquire header extensions
   this->HeaderExtensions = makefile->GetCMakeInstance()->GetHeaderExtensions();
 
+  // Sort include directories on demand
+  if (this->IncludeProjectDirsBefore) {
+    // Move strings to temporary list
+    std::list<std::string> includes;
+    includes.insert(includes.end(), this->MocIncludePaths.begin(),
+                    this->MocIncludePaths.end());
+    this->MocIncludePaths.clear();
+    this->MocIncludePaths.reserve(includes.size());
+    // Append project directories only
+    {
+      const char* movePaths[2] = { this->ProjectBinaryDir.c_str(),
+                                   this->ProjectSourceDir.c_str() };
+      for (const char* const* mpit = cmArrayBegin(movePaths);
+           mpit != cmArrayEnd(movePaths); ++mpit) {
+        std::list<std::string>::iterator it = includes.begin();
+        while (it != includes.end()) {
+          const std::string& path = *it;
+          if (cmsys::SystemTools::StringStartsWith(path, *mpit)) {
+            this->MocIncludePaths.push_back(path);
+            it = includes.erase(it);
+          } else {
+            ++it;
+          }
+        }
+      }
+    }
+    // Append remaining directories
+    this->MocIncludePaths.insert(this->MocIncludePaths.end(), includes.begin(),
+                                 includes.end());
+  }
   // Compose moc includes list
-  std::list<std::string> mocIncludes;
   {
     std::set<std::string> frameworkPaths;
     for (std::vector<std::string>::const_iterator it =
            this->MocIncludePaths.begin();
          it != this->MocIncludePaths.end(); ++it) {
       const std::string& path = *it;
-      mocIncludes.push_back("-I" + path);
+      this->MocIncludes.push_back("-I" + path);
       // Extract framework path
       if (cmHasLiteralSuffix(path, ".framework/Headers")) {
         // Go up twice to get to the framework root
@@ -532,40 +561,10 @@ void cmQtAutoGenerators::Init(cmMakefile* makefile)
     // Append framework includes
     for (std::set<std::string>::const_iterator it = frameworkPaths.begin();
          it != frameworkPaths.end(); ++it) {
-      mocIncludes.push_back("-F");
-      mocIncludes.push_back(*it);
+      this->MocIncludes.push_back("-F");
+      this->MocIncludes.push_back(*it);
     }
   }
-  if (this->IncludeProjectDirsBefore) {
-    // Extract project includes
-    std::vector<std::string> mocSortedIncludes;
-    {
-      std::vector<std::string> movePaths;
-      movePaths.push_back("-I" + this->ProjectBinaryDir);
-      movePaths.push_back("-I" + this->ProjectSourceDir);
-
-      for (std::vector<std::string>::const_iterator mpit = movePaths.begin();
-           mpit != movePaths.end(); ++mpit) {
-        std::list<std::string>::iterator it = mocIncludes.begin();
-        while (it != mocIncludes.end()) {
-          const std::string& path = *it;
-          if (cmsys::SystemTools::StringStartsWith(path, mpit->c_str())) {
-            mocSortedIncludes.push_back(path);
-            it = mocIncludes.erase(it);
-          } else {
-            ++it;
-          }
-        }
-      }
-    }
-    // Place extracted includes at the begin
-    this->MocIncludes.insert(this->MocIncludes.end(),
-                             mocSortedIncludes.begin(),
-                             mocSortedIncludes.end());
-  }
-  // Append remaining includes
-  this->MocIncludes.insert(this->MocIncludes.end(), mocIncludes.begin(),
-                           mocIncludes.end());
 }
 
 bool cmQtAutoGenerators::RunAutogen()
