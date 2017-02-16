@@ -46,26 +46,26 @@ endif()
 
 get_property(QT_COMPILE_FEATURES TARGET ${QT_QTCORE_TARGET} PROPERTY INTERFACE_COMPILE_FEATURES)
 
-# -- Test: AUTORCC
+# -- Test
 # RCC only
 add_executable(rccOnly rccOnly.cpp rccOnlyRes.qrc)
 set_property(TARGET rccOnly PROPERTY AUTORCC ON)
 target_link_libraries(rccOnly ${QT_QTCORE_TARGET})
 
-# -- Test: AUTORCC
+# -- Test
 # RCC empty
 add_executable(rccEmpty rccEmpty.cpp rccEmptyRes.qrc)
 set_property(TARGET rccEmpty PROPERTY AUTORCC ON)
 target_link_libraries(rccEmpty ${QT_QTCORE_TARGET})
 
-# -- Test: AUTOUIC
+# -- Test
 # UIC only
 qtx_wrap_cpp(uicOnlyMoc uicOnlySource/uiconly.h)
 add_executable(uicOnly uicOnlySource/uiconly.cpp ${uicOnlyMoc})
 set_property(TARGET uicOnly PROPERTY AUTOUIC ON)
 target_link_libraries(uicOnly ${QT_LIBRARIES})
 
-# -- Test: AUTOMOC, AUTORCC
+# -- Test
 # Add not_generated_file.qrc to the source list to get the file-level
 # dependency, but don't generate a c++ file from it.  Disable the AUTORCC
 # feature for this target.  This tests that qrc files in the sources don't
@@ -80,7 +80,7 @@ set_target_properties(no_link_language PROPERTIES AUTOMOC TRUE)
 target_compile_features(no_link_language PRIVATE ${QT_COMPILE_FEATURES})
 target_compile_features(empty PRIVATE ${QT_COMPILE_FEATURES})
 
-# -- Test: AUTORCC
+# -- Test
 # When a file listed in a .qrc file changes the target must be rebuilt
 try_compile(RCC_DEPENDS
   "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"
@@ -115,7 +115,7 @@ if (NOT file1_step1 GREATER file1_before)
   message(SEND_ERROR "file1 (${qrc_file1}) should have changed in the first step!")
 endif()
 
-# -- Test: AUTOMOC
+# -- Test
 # Ensure a repeated build succeeds when a header containing a QObject changes
 try_compile(MOC_RERUN
   "${CMAKE_CURRENT_BINARY_DIR}/automoc_rerun"
@@ -139,7 +139,7 @@ if (automoc_rerun_result)
   message(SEND_ERROR "Second build of automoc_rerun failed.")
 endif()
 
-# -- Test: AUTOMOC, SKIP_AUTOMOC
+# -- Test
 # Test for SKIP_AUTOMOC and SKIP_AUTOGEN on an AUTOMOC enabled target
 qtx_wrap_cpp(skipMocWrapMoc
   skipSource/qItemA.hpp
@@ -161,7 +161,7 @@ set_property(TARGET skipMocB PROPERTY AUTOMOC ON)
 set_property(TARGET skipMocB PROPERTY AUTOUIC ON)
 target_link_libraries(skipMocB ${QT_LIBRARIES})
 
-# -- Test: AUTOUIC, SKIP_AUTOUIC
+# -- Test
 # Test for SKIP_AUTOUIC and SKIP_AUTOGEN on an AUTOUIC enabled target
 set(skipUicSources
   skipUic.cpp
@@ -181,7 +181,7 @@ set_property(TARGET skipUicB PROPERTY AUTOUIC ON)
 set_property(TARGET skipUicB PROPERTY AUTOMOC ON)
 target_link_libraries(skipUicB ${QT_LIBRARIES})
 
-# -- Test: AUTORCC, SKIP_AUTORCC
+# -- Test
 # Test for SKIP_AUTORCC and SKIP_AUTOGEN on an AUTORCC enabled target
 set(skipRccSources
   skipRcc.cpp
@@ -202,10 +202,10 @@ set_property(TARGET skipRccB PROPERTY AUTOUIC ON)
 set_property(TARGET skipRccB PROPERTY AUTOMOC ON)
 target_link_libraries(skipRccB ${QT_LIBRARIES})
 
-# -- Test: AUTOMOC AUTORCC
+# -- Test
 # Source files with the same basename in different subdirectories
 add_subdirectory(sameName)
 
-# -- Test: AUTOMOC AUTORCC AUTOUIC
+# -- Test
 # Complex test case
 add_subdirectory(complex)
