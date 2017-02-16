@@ -46,7 +46,8 @@ private:
   bool RunAutogen();
 
   // - Content analysis
-  bool MocRequired(const std::string& text, std::string& macroName);
+  bool MocRequired(const std::string& text,
+                   std::string* macroName = CM_NULLPTR);
   bool MocSkip(const std::string& absFilename) const;
   bool UicSkip(const std::string& absFilename) const;
 
@@ -160,8 +161,8 @@ private:
   // - Utility
   cmFilePathChecksum fpathCheckSum;
   std::vector<std::string> HeaderExtensions;
-  cmsys::RegularExpression RegExpQObject;
-  cmsys::RegularExpression RegExpQGadget;
+  typedef std::pair<std::string, cmsys::RegularExpression> MacroFilter;
+  MacroFilter MacroFilters[2];
   cmsys::RegularExpression RegExpMocInclude;
   cmsys::RegularExpression RegExpUicInclude;
   // - Flags
