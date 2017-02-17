@@ -14,6 +14,12 @@ Modify cmDependsJavaParser.cxx:
 
 */
 
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+
 #define yyGetParser (cmDependsJava_yyget_extra(yyscanner))
 
 /*-------------------------------------------------------------------------*/
