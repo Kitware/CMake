@@ -666,9 +666,9 @@ if( NOT HDF5_FOUND )
 
     foreach(__lang IN LISTS HDF5_LANGUAGE_BINDINGS)
         # find the HDF5 include directories
-        if(LANGUAGE STREQUAL "Fortran")
+        if("${__lang}" STREQUAL "Fortran")
             set(HDF5_INCLUDE_FILENAME hdf5.mod)
-        elseif(LANGUAGE STREQUAL "CXX")
+        elseif("${__lang}" STREQUAL "CXX")
             set(HDF5_INCLUDE_FILENAME H5Cpp.h)
         else()
             set(HDF5_INCLUDE_FILENAME hdf5.h)
@@ -680,7 +680,7 @@ if( NOT HDF5_FOUND )
             PATH_SUFFIXES include Include
             ${_HDF5_SEARCH_OPTS}
         )
-        mark_as_advanced(HDF5_${LANGUAGE}_INCLUDE_DIR)
+        mark_as_advanced(HDF5_${__lang}_INCLUDE_DIR)
         list(APPEND HDF5_INCLUDE_DIRS ${HDF5_${__lang}_INCLUDE_DIR})
 
         # find the HDF5 libraries
