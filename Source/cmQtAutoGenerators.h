@@ -21,6 +21,16 @@ public:
   bool Run(const std::string& targetDirectory, const std::string& config);
 
 private:
+  // - Types
+
+  /// @brief Used to extract additional dependencies from content text
+  struct MocDependFilter
+  {
+    std::string key;
+    cmsys::RegularExpression regExp;
+  };
+  typedef std::pair<std::string, cmsys::RegularExpression> MacroFilter;
+
   // - Configuration
   bool ReadAutogenInfoFile(cmMakefile* makefile,
                            const std::string& targetDirectory,
@@ -46,14 +56,19 @@ private:
   bool RunAutogen();
 
   // - Content analysis
-  bool MocRequired(const std::string& text,
+  bool MocRequired(const std::string& contentText,
                    std::string* macroName = CM_NULLPTR);
+  void MocFindDepends(
+    const std::string& absFilename, const std::string& contentText,
+    std::map<std::string, std::set<std::string> >& mocDepends);
+
   bool MocSkip(const std::string& absFilename) const;
   bool UicSkip(const std::string& absFilename) const;
 
   bool ParseSourceFile(
     const std::string& absFilename,
     std::map<std::string, std::string>& mocsIncluded,
+    std::map<std::string, std::set<std::string> >& mocDepends,
     std::map<std::string, std::vector<std::string> >& includedUis,
     bool relaxed);
 
@@ -66,24 +81,32 @@ private:
     const std::set<std::string>& uicHeaderFiles,
     const std::map<std::string, std::string>& mocsIncluded,
     std::map<std::string, std::string>& mocsNotIncluded,
+    std::map<std::string, std::set<std::string> >& mocDepends,
     std::map<std::string, std::vector<std::string> >& includedUis);
 
-  void ParseContentForUic(
-    const std::string& fileName, const std::string& contentsString,
+  void UicParseContent(
+    const std::string& fileName, const std::string& contentText,
     std::map<std::string, std::vector<std::string> >& includedUis);
 
-  bool ParseContentForMoc(const std::string& absFilename,
-                          const std::string& contentsString,
-                          std::map<std::string, std::string>& mocsIncluded,
-                          bool relaxed);
+  bool MocParseSourceContent(
+    const std::string& absFilename, const std::string& contentText,
+    std::map<std::string, std::string>& mocsIncluded,
+    std::map<std::string, std::set<std::string> >& mocDepends, bool relaxed);
+
+  void MocParseHeaderContent(
+    const std::string& absFilename, const std::string& contentText,
+    std::map<std::string, std::string>& mocsNotIncluded,
+    std::map<std::string, std::set<std::string> >& mocDepends);
 
   // - Moc file generation
   bool MocGenerateAll(
     const std::map<std::string, std::string>& mocsIncluded,
-    const std::map<std::string, std::string>& mocsNotIncluded);
-  bool MocGenerateFile(const std::string& sourceFile,
-                       const std::string& mocFileName,
-                       const std::string& subDirPrefix);
+    const std::map<std::string, std::string>& mocsNotIncluded,
+    const std::map<std::string, std::set<std::string> >& mocDepends);
+  bool MocGenerateFile(
+    const std::string& sourceFile, const std::string& mocFileName,
+    const std::string& subDirPrefix,
+    const std::map<std::string, std::set<std::string> >& mocDepends);
 
   // - Uic file generation
   bool UicGenerateAll(
@@ -101,11 +124,11 @@ private:
   void LogErrorNameCollision(
     const std::string& message,
     const std::multimap<std::string, std::string>& collisions);
-  void LogBold(const std::string& message);
-  void LogInfo(const std::string& message);
-  void LogWarning(const std::string& message);
-  void LogError(const std::string& message);
-  void LogCommand(const std::vector<std::string>& command);
+  void LogBold(const std::string& message) const;
+  void LogInfo(const std::string& message) const;
+  void LogWarning(const std::string& message) const;
+  void LogError(const std::string& message) const;
+  void LogCommand(const std::vector<std::string>& command) const;
 
   // - Utility
   bool NameCollisionTest(
@@ -122,8 +145,9 @@ private:
   std::string FindMocHeader(const std::string& basePath,
                             const std::string& baseName,
                             const std::string& subDir) const;
-  bool FindInIncludeDirectories(std::string& file_n,
-                                const std::string& searchString) const;
+  std::string FindIncludedFile(const std::string& sourceFile,
+                               const std::string& includeString) const;
+  std::string FindInIncludeDirectories(const std::string& includeString) const;
 
   // - Target names
   std::string OriginTargetName;
@@ -154,6 +178,7 @@ private:
   std::vector<std::string> MocIncludes;
   std::vector<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
+  std::vector<MocDependFilter> MocDependFilters;
   // - Uic
   std::vector<std::string> UicSkipList;
   std::vector<std::string> UicTargetOptions;
@@ -165,7 +190,6 @@ private:
   // - Utility
   cmFilePathChecksum fpathCheckSum;
   std::vector<std::string> HeaderExtensions;
-  typedef std::pair<std::string, cmsys::RegularExpression> MacroFilter;
   MacroFilter MacroFilters[2];
   cmsys::RegularExpression RegExpMocInclude;
   cmsys::RegularExpression RegExpUicInclude;
