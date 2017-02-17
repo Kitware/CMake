@@ -20,22 +20,6 @@ class cmGeneratedFileStream;
 class cmMakefile;
 class cmXMLWriter;
 
-#define cmCTestLog(ctSelf, logType, msg)                                      \
-  do {                                                                        \
-    std::ostringstream cmCTestLog_msg;                                        \
-    cmCTestLog_msg << msg;                                                    \
-    (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,                       \
-                  cmCTestLog_msg.str().c_str());                              \
-  } while (false)
-
-#define cmCTestOptionalLog(ctSelf, logType, msg, suppress)                    \
-  do {                                                                        \
-    std::ostringstream cmCTestLog_msg;                                        \
-    cmCTestLog_msg << msg;                                                    \
-    (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,                       \
-                  cmCTestLog_msg.str().c_str(), suppress);                    \
-  } while (false)
-
 /** \class cmCTest
  * \brief Represents a ctest invocation.
  *
@@ -646,5 +630,21 @@ inline std::ostream& operator<<(std::ostream& os, const cmCTestLogWrite& c)
   os.flush();
   return os;
 }
+
+#define cmCTestLog(ctSelf, logType, msg)                                      \
+  do {                                                                        \
+    std::ostringstream cmCTestLog_msg;                                        \
+    cmCTestLog_msg << msg;                                                    \
+    (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,                       \
+                  cmCTestLog_msg.str().c_str());                              \
+  } while (false)
+
+#define cmCTestOptionalLog(ctSelf, logType, msg, suppress)                    \
+  do {                                                                        \
+    std::ostringstream cmCTestLog_msg;                                        \
+    cmCTestLog_msg << msg;                                                    \
+    (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,                       \
+                  cmCTestLog_msg.str().c_str(), suppress);                    \
+  } while (false)
 
 #endif
