@@ -8,27 +8,15 @@
 #include <string>
 #include <vector>
 
-#define YYSTYPE cmCommandArgumentParserHelper::ParserType
-#define YYSTYPE_IS_DECLARED
-#define YY_EXTRA_TYPE cmCommandArgumentParserHelper*
-#define YY_DECL                                                               \
-  int cmCommandArgument_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
-
-/** \class cmCommandArgumentParserHelper
- * \brief Helper class for parsing java source files
- *
- * Finds dependencies for java file and list of outputs
- */
-
 class cmMakefile;
 
 class cmCommandArgumentParserHelper
 {
 public:
-  typedef struct
+  struct ParserType
   {
     char* str;
-  } ParserType;
+  };
 
   cmCommandArgumentParserHelper();
   ~cmCommandArgumentParserHelper();
@@ -99,5 +87,11 @@ private:
   bool ReplaceAtSyntax;
   bool RemoveEmpty;
 };
+
+#define YYSTYPE cmCommandArgumentParserHelper::ParserType
+#define YYSTYPE_IS_DECLARED
+#define YY_EXTRA_TYPE cmCommandArgumentParserHelper*
+#define YY_DECL                                                               \
+  int cmCommandArgument_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
 
 #endif
