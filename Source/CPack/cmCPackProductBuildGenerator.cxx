@@ -59,12 +59,25 @@ int cmCPackProductBuildGenerator::PackageFiles()
     }
   }
 
-  // Copy or create all of the resource files we need.
   std::string resDir = packageDirFileName + "/Contents";
+
+  if (this->IsSet("CPACK_PRODUCTBUILD_RESOURCES_DIR")) {
+    std::string userResDir =
+      this->GetOption("CPACK_PRODUCTBUILD_RESOURCES_DIR");
+
+    if (!cmSystemTools::CopyADirectory(userResDir, resDir)) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the resource files"
+                      << std::endl);
+      return 0;
+    }
+  }
+
+  // Copy or create all of the resource files we need.
   if (!this->CopyCreateResourceFile("License", resDir) ||
       !this->CopyCreateResourceFile("ReadMe", resDir) ||
       !this->CopyCreateResourceFile("Welcome", resDir)) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the resource files"
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Problem copying the License, ReadMe and Welcome files"
                     << std::endl);
     return 0;
   }

@@ -46,3 +46,11 @@
 #
 #  Specify a specific keychain to search for the signing identity.
 #
+#
+# .. variable:: CPACK_PRODUCTBUILD_RESOURCES_DIR
+#
+#  If specified the productbuild generator copies files from this directory
+#  (including subdirectories) to the ``Resources`` directory. This is done
+#  before the :variable:`CPACK_RESOURCE_FILE_WELCOME`,
+#  :variable:`CPACK_RESOURCE_FILE_README`, and
+#  :variable:`CPACK_RESOURCE_FILE_LICENSE` files are copied.
