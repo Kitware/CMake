@@ -1396,6 +1396,11 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
       component->ArchiveFile = archiveFile;
     }
 
+    const char* plist = this->GetOption(macroPrefix + "_PLIST");
+    if (plist && *plist) {
+      component->Plist = plist;
+    }
+
     const char* groupName = this->GetOption(macroPrefix + "_GROUP");
     if (groupName && *groupName) {
       component->Group = GetComponentGroup(projectName, groupName);
