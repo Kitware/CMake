@@ -26,7 +26,7 @@ Modify cmFortranParser.cxx:
   - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
 */
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <cmsys/String.h>
 #include <stdlib.h>
