@@ -711,12 +711,17 @@ void cmGeneratorTarget::GetExternalObjects(
   IMPLEMENT_VISIT(ExternalObjects);
 }
 
-void cmGeneratorTarget::GetExpectedResxHeaders(std::set<std::string>& srcs,
+void cmGeneratorTarget::GetExpectedResxHeaders(std::set<std::string>& headers,
                                                const std::string& config) const
 {
-  ResxData data;
-  IMPLEMENT_VISIT_IMPL(Resx, COMMA cmGeneratorTarget::ResxData)
-  srcs = data.ExpectedResxHeaders;
+  static std::unique_ptr<std::set<std::string> > cachedExpectedResxHeaders;
+  if (cachedExpectedResxHeaders == nullptr)
+  {
+    ResxData data;
+    IMPLEMENT_VISIT_IMPL(Resx, COMMA cmGeneratorTarget::ResxData)
+    cachedExpectedResxHeaders.reset(new std::set<std::string>(data.ExpectedResxHeaders));
+  }
+  headers = *cachedExpectedResxHeaders.get();
 }
 
 void cmGeneratorTarget::GetResxSources(std::vector<cmSourceFile const*>& srcs,
@@ -748,9 +753,14 @@ void cmGeneratorTarget::GetCertificates(std::vector<cmSourceFile const*>& data,
 void cmGeneratorTarget::GetExpectedXamlHeaders(std::set<std::string>& headers,
                                                const std::string& config) const
 {
-  XamlData data;
-  IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
-  headers = data.ExpectedXamlHeaders;
+  static std::unique_ptr<std::set<std::string> > cachedExpectedXamlHeaders;
+  if (cachedExpectedXamlHeaders == nullptr)
+  {
+    XamlData data;
+    IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
+    cachedExpectedXamlHeaders.reset(new std::set<std::string>(data.ExpectedXamlHeaders));
+  }
+  headers = *cachedExpectedXamlHeaders.get();
 }
 
 void cmGeneratorTarget::GetExpectedXamlSources(std::set<std::string>& srcs,
