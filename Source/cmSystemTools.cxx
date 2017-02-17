@@ -1978,6 +1978,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     // ???
   }
 #endif
+  exe_dir = cmSystemTools::GetActualCaseForPath(exe_dir);
   cmSystemToolsCMakeCommand = exe_dir;
   cmSystemToolsCMakeCommand += "/cmake";
   cmSystemToolsCMakeCommand += cmSystemTools::GetExecutableExtension();
@@ -2015,8 +2016,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   // Install tree has
   // - "<prefix><CMAKE_BIN_DIR>/cmake"
   // - "<prefix><CMAKE_DATA_DIR>"
-  const std::string actual_case = cmSystemTools::GetActualCaseForPath(exe_dir);
-  if (cmHasSuffix(actual_case, CMAKE_BIN_DIR)) {
+  if (cmHasSuffix(exe_dir, CMAKE_BIN_DIR)) {
     std::string const prefix =
       exe_dir.substr(0, exe_dir.size() - strlen(CMAKE_BIN_DIR));
     cmSystemToolsCMakeRoot = prefix + CMAKE_DATA_DIR;
