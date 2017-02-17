@@ -124,7 +124,7 @@ private:
   // - Logging
   void LogErrorNameCollision(
     const std::string& message,
-    const std::multimap<std::string, std::string>& collisions);
+    const std::multimap<std::string, std::string>& collisions) const;
   void LogBold(const std::string& message) const;
   void LogInfo(const std::string& message) const;
   void LogWarning(const std::string& message) const;
@@ -138,7 +138,7 @@ private:
   std::string ChecksumedPath(const std::string& sourceFile,
                              const char* basePrefix,
                              const char* baseSuffix) const;
-  bool MakeParentDirectory(const std::string& filename);
+  bool MakeParentDirectory(const std::string& filename) const;
 
   bool FindHeader(std::string& header, const std::string& testBasePath) const;
   bool FindHeaderGlobal(std::string& header,
