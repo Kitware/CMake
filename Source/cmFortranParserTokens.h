@@ -130,7 +130,7 @@ extern int cmFortran_yydebug;
 
 union YYSTYPE
 {
-#line 75 "cmFortranParser.y" /* yacc.c:1909  */
+#line 70 "cmFortranParser.y" /* yacc.c:1909  */
 
   char* string;
 
