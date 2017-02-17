@@ -67,9 +67,9 @@ public:
 protected:
   // Internal API to be implemented by subclasses.
   virtual void CleanupImpl();
-  virtual void NoteOldRevision();
+  virtual bool NoteOldRevision();
   virtual bool UpdateImpl();
-  virtual void NoteNewRevision();
+  virtual bool NoteNewRevision();
   virtual bool WriteXMLUpdates(cmXMLWriter& xml);
 
 #if defined(__SUNPRO_CC) && __SUNPRO_CC <= 0x510
