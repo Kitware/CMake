@@ -680,7 +680,7 @@ if( NOT HDF5_FOUND )
             PATH_SUFFIXES include Include
             ${_HDF5_SEARCH_OPTS}
         )
-        mark_as_advanced(HDF5_${LANGUAGE}_INCLUDE_DIR)
+        mark_as_advanced(HDF5_${__lang}_INCLUDE_DIR)
         list(APPEND HDF5_INCLUDE_DIRS ${HDF5_${__lang}_INCLUDE_DIR})
 
         # find the HDF5 libraries
