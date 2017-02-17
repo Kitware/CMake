@@ -86,7 +86,8 @@ try_compile(RCC_DEPENDS
   "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"
   "${CMAKE_CURRENT_SOURCE_DIR}/autorcc_depends"
   autorcc_depends
-  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}" "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
+              "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
               "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
   OUTPUT_VARIABLE output
 )
@@ -121,7 +122,8 @@ try_compile(MOC_RERUN
   "${CMAKE_CURRENT_BINARY_DIR}/automoc_rerun"
   "${CMAKE_CURRENT_SOURCE_DIR}/automoc_rerun"
   automoc_rerun
-  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}" "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
+              "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
               "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
   OUTPUT_VARIABLE output
 )
@@ -213,6 +215,61 @@ add_subdirectory(mocIncludeStrict)
 # -- Test
 # Tests various include moc patterns
 add_subdirectory(mocIncludeRelaxed)
+
+# -- Test
+# Tests Q_PLUGIN_METADATA json file change detection
+if (NOT QT_TEST_VERSION STREQUAL 4)
+  try_compile(MOC_PLUGIN
+    "${CMAKE_CURRENT_BINARY_DIR}/mocPlugin"
+    "${CMAKE_CURRENT_SOURCE_DIR}/mocPlugin"
+    mocPlugin
+    CMAKE_FLAGS "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+                "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
+    OUTPUT_VARIABLE output
+  )
+  if (NOT MOC_PLUGIN)
+    message(SEND_ERROR "Initial build of mocPlugin failed. Output: ${output}")
+  endif()
+
+  set(timeformat "%Y%j%H%M%S")
+  set(mocPluginBinDir "${CMAKE_CURRENT_BINARY_DIR}/mocPlugin")
+  find_library(style_a_file "PluginStyleA" "${mocPluginBinDir}")
+  find_library(style_b_file "PluginStyleB" "${mocPluginBinDir}")
+  find_library(style_c_file "PluginStyleC" "${mocPluginBinDir}")
+  find_library(style_d_file "PluginStyleD" "${mocPluginBinDir}")
+
+  file(TIMESTAMP "${style_a_file}" style_a_before "${timeformat}")
+  file(TIMESTAMP "${style_b_file}" style_b_before "${timeformat}")
+  file(TIMESTAMP "${style_c_file}" style_c_before "${timeformat}")
+  file(TIMESTAMP "${style_d_file}" style_d_before "${timeformat}")
+
+  # Ensure that the timestamp will change and touch the json files
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${mocPluginBinDir}/jsonFiles/StyleC.json")
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${mocPluginBinDir}/jsonFiles/sub/StyleD.json")
+
+  execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mocPlugin"
+  )
+
+  file(TIMESTAMP "${style_a_file}" style_a_after "${timeformat}")
+  file(TIMESTAMP "${style_b_file}" style_b_after "${timeformat}")
+  file(TIMESTAMP "${style_c_file}" style_c_after "${timeformat}")
+  file(TIMESTAMP "${style_d_file}" style_d_after "${timeformat}")
+
+  if (style_a_after GREATER style_a_before)
+    message(SEND_ERROR "file (${style_a_file}) should not have changed!")
+  endif()
+  if (style_b_after GREATER style_b_before)
+    message(SEND_ERROR "file (${style_b_file}) should not have changed!")
+  endif()
+  if (NOT style_c_after GREATER style_c_before)
+    message(SEND_ERROR "file (${style_c_file}) should have changed!")
+  endif()
+  if (NOT style_d_after GREATER style_d_before)
+    message(SEND_ERROR "file (${style_d_file}) should have changed!")
+  endif()
+endif()
 
 # -- Test
 # Complex test case
