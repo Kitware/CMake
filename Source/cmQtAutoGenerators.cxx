@@ -1069,6 +1069,9 @@ bool cmQtAutoGenerators::MocGenerateAll(
     return true;
   }
 
+  bool mocCompFileGenerated = false;
+  bool mocCompChanged = false;
+
   // look for name collisions
   {
     std::multimap<std::string, std::string> collisions;
@@ -1088,8 +1091,7 @@ bool cmQtAutoGenerators::MocGenerateAll(
       return false;
     }
   }
-
-  // generate moc files that are included by source files.
+  // Generate moc files that are included by source files.
   {
     const std::string subDir = "include/";
     for (std::map<std::string, std::string>::const_iterator it =
@@ -1102,16 +1104,14 @@ bool cmQtAutoGenerators::MocGenerateAll(
       }
     }
   }
-
-  // generate moc files that are _not_ included by source files.
-  bool automocCppChanged = false;
+  // Generate moc files that are _not_ included by source files.
   {
     const std::string subDir;
     for (std::map<std::string, std::string>::const_iterator it =
            mocsNotIncluded.begin();
          it != mocsNotIncluded.end(); ++it) {
       if (this->MocGenerateFile(it->first, it->second, subDir, mocDepends)) {
-        automocCppChanged = true;
+        mocCompFileGenerated = true;
       } else {
         if (this->RunMocFailed) {
           return false;
@@ -1140,46 +1140,47 @@ bool cmQtAutoGenerators::MocGenerateAll(
     automocSource = outStream.str();
   }
 
-  // Check if we even need to update moc_compilation.cpp
-  if (!automocCppChanged) {
-    // compare contents of the moc_compilation.cpp file
+  // Check if the content of moc_compilation.cpp changed
+  {
     const std::string oldContents = ReadAll(this->MocCppFilenameAbs);
-    if (oldContents == automocSource) {
-      // nothing changed: don't touch the moc_compilation.cpp file
-      if (this->Verbose) {
-        std::ostringstream err;
-        err << "AutoMoc: " << this->MocCppFilenameRel << " still up to date"
-            << std::endl;
-        this->LogInfo(err.str());
-      }
-      return true;
-    }
+    mocCompChanged = (oldContents != automocSource);
   }
 
-  // Actually write moc_compilation.cpp
-  this->LogBold("Generating MOC compilation " + this->MocCppFilenameRel);
+  bool success = true;
+  if (mocCompChanged) {
+    // Actually write moc_compilation.cpp
+    this->LogBold("Generating MOC compilation " + this->MocCppFilenameRel);
 
-  // Make sure the parent directory exists
-  bool success = this->MakeParentDirectory(this->MocCppFilenameAbs);
-  if (success) {
-    cmsys::ofstream outfile;
-    outfile.open(this->MocCppFilenameAbs.c_str(), std::ios::trunc);
-    if (!outfile) {
-      success = false;
-      std::ostringstream err;
-      err << "AutoMoc: error opening " << this->MocCppFilenameAbs << "\n";
-      this->LogError(err.str());
-    } else {
-      outfile << automocSource;
-      // Check for write errors
-      if (!outfile.good()) {
+    // Make sure the parent directory exists
+    success = this->MakeParentDirectory(this->MocCppFilenameAbs);
+    if (success) {
+      cmsys::ofstream outfile;
+      outfile.open(this->MocCppFilenameAbs.c_str(), std::ios::trunc);
+      if (!outfile) {
         success = false;
         std::ostringstream err;
-        err << "AutoMoc: error writing " << this->MocCppFilenameAbs << "\n";
+        err << "AutoMoc: error opening " << this->MocCppFilenameAbs << "\n";
         this->LogError(err.str());
+      } else {
+        outfile << automocSource;
+        // Check for write errors
+        if (!outfile.good()) {
+          success = false;
+          std::ostringstream err;
+          err << "AutoMoc: error writing " << this->MocCppFilenameAbs << "\n";
+          this->LogError(err.str());
+        }
       }
     }
+  } else if (mocCompFileGenerated) {
+    // Only touch moc_compilation.cpp
+    if (this->Verbose) {
+      this->LogInfo("Touching MOC compilation " + this->MocCppFilenameRel +
+                    "\n");
+    }
+    cmSystemTools::Touch(this->MocCppFilenameAbs, false);
   }
+
   return success;
 }
 
