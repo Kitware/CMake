@@ -14,13 +14,16 @@ Modify cmExprParser.cxx:
 
 */
 
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <stdlib.h>
+#include <string.h>
+
 /*-------------------------------------------------------------------------*/
 #define YYDEBUG 1
 #include "cmExprParserHelper.h" /* Interface to parser object.  */
 #include "cmExprLexer.h"  /* Interface to lexer object.  */
 #include "cmExprParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
-
-#include <math.h>
 
 /* Forward declare the lexer entry point.  */
 YY_DECL;

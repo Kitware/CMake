@@ -2,21 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLoadCommandCommand.h"
 
-#include "cmCPluginAPI.cxx"
-#include "cmCPluginAPI.h"
-#include "cmDynamicLoader.h"
-#include "cmMakefile.h"
-#include "cmPolicies.h"
-#include "cmState.h"
-#include "cmSystemTools.h"
-
-class cmExecutionStatus;
-
 #include <signal.h>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "cmCPluginAPI.cxx"
+#include "cmCPluginAPI.h"
+#include "cmDynamicLoader.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 #ifdef __QNX__
 #include <malloc.h> /* for malloc/free on QNX */

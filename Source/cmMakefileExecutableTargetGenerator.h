@@ -5,6 +5,8 @@
 
 #include <cmConfigure.h>
 
+#include <string>
+
 #include "cmMakefileTargetGenerator.h"
 
 class cmGeneratorTarget;

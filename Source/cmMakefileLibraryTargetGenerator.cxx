@@ -2,8 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefileLibraryTargetGenerator.h"
 
-#include <cmConfigure.h> // IWYU pragma: keep
-
+#include <algorithm>
 #include <sstream>
 #include <vector>
 

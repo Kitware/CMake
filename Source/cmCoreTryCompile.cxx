@@ -8,6 +8,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmExportTryCompileFileGenerator.h"

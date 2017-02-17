@@ -10,7 +10,6 @@
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
-#include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"

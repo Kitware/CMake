@@ -14,7 +14,9 @@ Modify cmCommandArgumentParser.cxx:
 
 */
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string.h>
 
 #define yyGetParser (cmCommandArgument_yyget_extra(yyscanner))
 
