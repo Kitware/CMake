@@ -13,7 +13,6 @@
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
-#include "cmLinkLineDeviceComputer.h"
 #include "cmMakefile.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"

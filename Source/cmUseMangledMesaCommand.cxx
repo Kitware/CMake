@@ -5,7 +5,6 @@
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
 
-#include "cmPolicies.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;

@@ -6,7 +6,6 @@
 #include <cmsys/RegularExpression.hxx>
 
 #include "cmMakefile.h"
-#include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 
