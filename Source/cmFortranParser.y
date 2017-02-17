@@ -26,12 +26,16 @@ Modify cmFortranParser.cxx:
   - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
 */
 
+#include <cmConfigure.h>
+
+#include <cmsys/String.h>
+#include <stdlib.h>
+#include <string.h>
+
 /*-------------------------------------------------------------------------*/
 #define cmFortranParser_cxx
 #include "cmFortranParser.h" /* Interface to parser object.  */
 #include "cmFortranParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
-
-#include <cmsys/String.h>
 
 /* Forward declare the lexer entry point.  */
 YY_DECL;
