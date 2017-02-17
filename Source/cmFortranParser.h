@@ -6,7 +6,9 @@
 #if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
+#include <set>
+#include <string>
+#include <vector>
 #endif
 
 #include <stddef.h> /* size_t */
