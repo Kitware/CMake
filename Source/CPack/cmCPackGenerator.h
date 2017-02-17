@@ -17,20 +17,6 @@ class cmCPackLog;
 class cmInstalledFile;
 class cmMakefile;
 
-#define cmCPackTypeMacro(klass, superclass)                                   \
-  typedef superclass Superclass;                                              \
-  const char* GetNameOfClass() CM_OVERRIDE { return #klass; }                 \
-  static cmCPackGenerator* CreateGenerator() { return new klass; }            \
-  class cmCPackTypeMacro_UseTrailingSemicolon
-
-#define cmCPackLogger(logType, msg)                                           \
-  do {                                                                        \
-    std::ostringstream cmCPackLog_msg;                                        \
-    cmCPackLog_msg << msg;                                                    \
-    this->Logger->Log(logType, __FILE__, __LINE__,                            \
-                      cmCPackLog_msg.str().c_str());                          \
-  } while (false)
-
 /** \class cmCPackGenerator
  * \brief A superclass of all CPack Generators
  *
@@ -310,5 +296,19 @@ protected:
 private:
   cmMakefile* MakefileMap;
 };
+
+#define cmCPackTypeMacro(klass, superclass)                                   \
+  typedef superclass Superclass;                                              \
+  const char* GetNameOfClass() CM_OVERRIDE { return #klass; }                 \
+  static cmCPackGenerator* CreateGenerator() { return new klass; }            \
+  class cmCPackTypeMacro_UseTrailingSemicolon
+
+#define cmCPackLogger(logType, msg)                                           \
+  do {                                                                        \
+    std::ostringstream cmCPackLog_msg;                                        \
+    cmCPackLog_msg << msg;                                                    \
+    this->Logger->Log(logType, __FILE__, __LINE__,                            \
+                      cmCPackLog_msg.str().c_str());                          \
+  } while (false)
 
 #endif
