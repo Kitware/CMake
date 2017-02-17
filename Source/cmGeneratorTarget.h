@@ -525,6 +525,16 @@ public:
   /** Whether this library defaults to \@rpath.  */
   bool MacOSXRpathInstallNameDirDefault() const;
 
+  enum InstallNameType
+  {
+    INSTALL_NAME_FOR_BUILD,
+    INSTALL_NAME_FOR_INSTALL
+  };
+  /** Whether to use INSTALL_NAME_DIR. */
+  bool MacOSXUseInstallNameDir() const;
+  /** Whether to generate an install_name. */
+  bool CanGenerateInstallNameDir(InstallNameType t) const;
+
   /** Test for special case of a third-party shared library that has
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const std::string& config) const;

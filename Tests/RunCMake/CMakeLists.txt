@@ -104,6 +104,9 @@ add_RunCMake_test(CMP0057)
 add_RunCMake_test(CMP0059)
 add_RunCMake_test(CMP0060)
 add_RunCMake_test(CMP0064)
+if(CMAKE_SYSTEM_NAME MATCHES Darwin AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG)
+  add_RunCMake_test(CMP0068)
+endif()
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
