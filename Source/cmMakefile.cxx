@@ -3362,7 +3362,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
   if (!moduleInCMakeModulePath.empty() && !moduleInCMakeRoot.empty()) {
     const char* currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
     std::string mods = cmSystemTools::GetCMakeRoot() + "/Modules/";
-    if (currentFile && strncmp(currentFile, mods.c_str(), mods.size()) == 0) {
+    if (currentFile && cmSystemTools::IsSubDirectory(currentFile, mods)) {
       switch (this->GetPolicyStatus(cmPolicies::CMP0017)) {
         case cmPolicies::WARN: {
           std::ostringstream e;
