@@ -423,14 +423,12 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   // Add XCODE depend helper
   std::string dir = root->GetCurrentBinaryDirectory();
   cmCustomCommandLine makeHelper;
-  if (this->XcodeVersion < 50) {
-    makeHelper.push_back("make");
-    makeHelper.push_back("-C");
-    makeHelper.push_back(dir);
-    makeHelper.push_back("-f");
-    makeHelper.push_back(this->CurrentXCodeHackMakefile);
-    makeHelper.push_back(""); // placeholder, see below
-  }
+  makeHelper.push_back("make");
+  makeHelper.push_back("-C");
+  makeHelper.push_back(dir);
+  makeHelper.push_back("-f");
+  makeHelper.push_back(this->CurrentXCodeHackMakefile);
+  makeHelper.push_back(""); // placeholder, see below
 
   // Add ZERO_CHECK
   bool regenerate = !mf->IsOn("CMAKE_SUPPRESS_REGENERATION");
@@ -475,12 +473,12 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
       // run the depend check makefile as a post build rule
       // this will make sure that when the next target is built
       // things are up-to-date
-      if (!makeHelper.empty() &&
-          (target->GetType() == cmStateEnums::EXECUTABLE ||
-           target->GetType() == cmStateEnums::OBJECT_LIBRARY ||
-           target->GetType() == cmStateEnums::STATIC_LIBRARY ||
-           target->GetType() == cmStateEnums::SHARED_LIBRARY ||
-           target->GetType() == cmStateEnums::MODULE_LIBRARY)) {
+      if (target->GetType() == cmStateEnums::OBJECT_LIBRARY ||
+          (this->XcodeVersion < 50 &&
+           (target->GetType() == cmStateEnums::EXECUTABLE ||
+            target->GetType() == cmStateEnums::STATIC_LIBRARY ||
+            target->GetType() == cmStateEnums::SHARED_LIBRARY ||
+            target->GetType() == cmStateEnums::MODULE_LIBRARY))) {
         makeHelper[makeHelper.size() - 1] = // fill placeholder
           this->PostBuildMakeTarget(target->GetName(), "$(CONFIGURATION)");
         cmCustomCommandLines commandLines;
