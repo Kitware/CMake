@@ -119,6 +119,13 @@ public:
    */
   void FinalPass();
 
+  /** How to handle custom commands for object libraries */
+  enum ObjectLibraryCommands
+  {
+    RejectObjectLibraryCommands,
+    AcceptObjectLibraryCommands
+  };
+
   /** Add a custom command to the build.  */
   void AddCustomCommandToTarget(
     const std::string& target, const std::vector<std::string>& byproducts,
@@ -126,7 +133,8 @@ public:
     const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
     const char* comment, const char* workingDir, bool escapeOldStyle = true,
     bool uses_terminal = false, const std::string& depfile = "",
-    bool command_expand_lists = false);
+    bool command_expand_lists = false,
+    ObjectLibraryCommands objLibraryCommands = RejectObjectLibraryCommands);
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& byproducts,

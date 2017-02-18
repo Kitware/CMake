@@ -489,7 +489,8 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
         std::vector<std::string> no_byproducts;
         lg->GetMakefile()->AddCustomCommandToTarget(
           target->GetName(), no_byproducts, no_depends, commandLines,
-          cmTarget::POST_BUILD, "Depend check for xcode", dir.c_str());
+          cmTarget::POST_BUILD, "Depend check for xcode", dir.c_str(), true,
+          false, "", false, cmMakefile::AcceptObjectLibraryCommands);
       }
 
       if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY &&

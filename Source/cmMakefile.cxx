@@ -684,7 +684,8 @@ void cmMakefile::AddCustomCommandToTarget(
   const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
   const char* comment, const char* workingDir, bool escapeOldStyle,
-  bool uses_terminal, const std::string& depfile, bool command_expand_lists)
+  bool uses_terminal, const std::string& depfile, bool command_expand_lists,
+  ObjectLibraryCommands objLibraryCommands)
 {
   // Find the target to which to add the custom command.
   cmTargets::iterator ti = this->Targets.find(target);
@@ -724,7 +725,8 @@ void cmMakefile::AddCustomCommandToTarget(
     return;
   }
 
-  if (ti->second.GetType() == cmStateEnums::OBJECT_LIBRARY) {
+  if (objLibraryCommands == RejectObjectLibraryCommands &&
+      ti->second.GetType() == cmStateEnums::OBJECT_LIBRARY) {
     std::ostringstream e;
     e << "Target \"" << target
       << "\" is an OBJECT library "
