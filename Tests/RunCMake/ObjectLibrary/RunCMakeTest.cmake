@@ -16,3 +16,22 @@ run_cmake(ObjWithObj)
 run_cmake(PostBuild)
 run_cmake(PreBuild)
 run_cmake(PreLink)
+
+function(run_Dependencies)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Dependencies-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake_command(Dependencies-build ${CMAKE_COMMAND} -E copy ${RunCMake_SOURCE_DIR}/depends_obj1.cpp ${RunCMake_TEST_BINARY_DIR}/depends_obj.cpp)
+  run_cmake(Dependencies)
+  run_cmake_command(Dependencies-build ${CMAKE_COMMAND} --build .)
+  run_cmake_command(Dependencies-build ${CMAKE_COMMAND} -E copy ${RunCMake_SOURCE_DIR}/depends_obj0.cpp ${RunCMake_TEST_BINARY_DIR}/depends_obj.cpp)
+  run_cmake_command(Dependencies-build ${CMAKE_COMMAND} -E sleep 1)
+  run_cmake_command(Dependencies-build ${CMAKE_COMMAND} -E touch_nocreate ${RunCMake_TEST_BINARY_DIR}/depends_obj.cpp)
+  run_cmake_command(Dependencies-build ${CMAKE_COMMAND} --build .)
+  run_cmake_command(Dependencies-build ${CMAKE_CTEST_COMMAND} -C Debug)
+endfunction()
+
+run_Dependencies()
