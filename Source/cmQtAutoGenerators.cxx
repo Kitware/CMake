@@ -306,7 +306,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
                                     this->Headers);
 
   // - Moc
-  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SKIP_MOC"),
+  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_MOC_SKIP"),
                                     this->MocSkipList);
   cmSystemTools::ExpandListArgument(
     GetConfigDefinition(makefile, "AM_MOC_COMPILE_DEFINITIONS", config),
@@ -318,7 +318,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     makefile->GetSafeDefinition("AM_MOC_OPTIONS"), this->MocOptions);
 
   // - Uic
-  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SKIP_UIC"),
+  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_UIC_SKIP"),
                                     this->UicSkipList);
   cmSystemTools::ExpandListArgument(
     GetConfigDefinition(makefile, "AM_UIC_TARGET_OPTIONS", config),
