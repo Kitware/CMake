@@ -98,6 +98,26 @@ static std::string GetQtMajorVersion(cmGeneratorTarget const* target)
   return qtMajorVersion;
 }
 
+static void GetCompileDefinitionsAndDirectories(
+  cmGeneratorTarget const* target, const std::string& config,
+  std::string& incs, std::string& defs)
+{
+  cmLocalGenerator* localGen = target->GetLocalGenerator();
+  {
+    std::vector<std::string> includeDirs;
+    // Get the include dirs for this target, without stripping the implicit
+    // include dirs off, see
+    // https://gitlab.kitware.com/cmake/cmake/issues/13667
+    localGen->GetIncludeDirectories(includeDirs, target, "CXX", config, false);
+    incs = cmJoin(includeDirs, ";");
+  }
+  {
+    std::set<std::string> defines;
+    localGen->AddCompileDefinitions(defines, target, config, "CXX");
+    defs += cmJoin(defines, ";");
+  }
+}
+
 static void SetupSourceFiles(cmGeneratorTarget const* target,
                              std::vector<std::string>& mocUicSources,
                              std::vector<std::string>& mocUicHeaders,
@@ -160,24 +180,6 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
       }
     }
   }
-}
-
-static void GetCompileDefinitionsAndDirectories(
-  cmGeneratorTarget const* target, const std::string& config,
-  std::string& incs, std::string& defs)
-{
-  std::vector<std::string> includeDirs;
-  cmLocalGenerator* localGen = target->GetLocalGenerator();
-  // Get the include dirs for this target, without stripping the implicit
-  // include dirs off, see https://gitlab.kitware.com/cmake/cmake/issues/13667
-  localGen->GetIncludeDirectories(includeDirs, target, "CXX", config, false);
-
-  incs = cmJoin(includeDirs, ";");
-
-  std::set<std::string> defines;
-  localGen->AddCompileDefinitions(defines, target, config, "CXX");
-
-  defs += cmJoin(defines, ";");
 }
 
 static void MocSetupAutoTarget(
