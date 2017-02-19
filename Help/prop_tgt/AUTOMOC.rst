@@ -8,31 +8,41 @@ preprocessor automatically, i.e.  without having to use the
 :module:`QT4_WRAP_CPP() <FindQt4>` or QT5_WRAP_CPP() macro.  Currently Qt4 and Qt5 are
 supported.
 
-When this property is set ``ON``, CMake will scan the
+When this property is set ``ON``, CMake will scan the header and
 source files at build time and invoke moc accordingly.
 
-* If an ``#include`` statement like ``#include "moc_foo.cpp"`` is found,
-  the ``Q_OBJECT`` class declaration is expected in the header, and
-  ``moc`` is run on the header file.  A ``moc_foo.cpp`` file will be
-  generated from the source's header into the
-  ``<CMAKE_CURRENT_BINARY_DIR>/<TARGETNAME>_autogen/include``
-  directory which is automatically added to the target's
+* If an ``#include`` statement like ``#include "moc_<basename>.cpp"`` is found,
+  the ``Q_OBJECT`` or ``Q_GADGET`` macros are expected in an otherwise empty
+  line of the ``<basename>.h(xx)`` header file. ``moc`` is run on the header file to
+  generate ``moc_<basename>.cpp`` in the
+  ``<CMAKE_CURRENT_BINARY_DIR>/<TARGETNAME>_autogen/include`` directory
+  which is automatically added to the target's
   :prop_tgt:`INCLUDE_DIRECTORIES`.  This allows the compiler to find the
-  included ``moc_foo.cpp`` file regardless of the location the original source.
-  However, if multiple source files in different directories do this then their
-  generated moc files would collide.  In this case a diagnostic will be issued.
+  included ``moc_<basename>.cpp`` file regardless of the location the
+  original source.
 
-* If an ``#include`` statement like ``#include "foo.moc"`` is found,
-  then a ``Q_OBJECT`` is expected in the current source file and ``moc``
-  is run on the file itself.  Additionally, header files with the same
-  base name (like ``foo.h``) or ``_p`` appended to the base name (like
-  ``foo_p.h``) are parsed for ``Q_OBJECT`` macros, and if found, ``moc``
-  is also executed on those files.  ``AUTOMOC`` checks multiple header
-  alternative extensions, such as ``hpp``, ``hxx`` etc when searching
-  for headers.  The resulting moc files, which are not included as shown
-  above in any of the source files are included in a generated
-  ``moc_compilation.cpp`` file, which is compiled as part of the
-  target.
+* If an ``#include`` statement like ``#include "<basename>.moc"`` is found,
+  then ``Q_OBJECT`` or ``Q_GADGET`` macros are expected in the current source
+  file and ``moc`` is run on the source file itself.
+
+* Header files that are not included by an ``#include "moc_<basename>.cpp"``
+  statement are nonetheless scanned for ``Q_OBJECT`` or ``Q_GADGET`` macros.
+  The resulting ``moc_<basename>.cpp`` files are generated in custom
+  directories and automatically included in the generated
+  ``<CMAKE_CURRENT_BINARY_DIR>/<TARGETNAME>_autogen/moc_compilation.cpp`` file,
+  which is compiled as part of the target. The custom directories help to
+  avoid name collisions for moc files with the same ``<basename>``.
+
+* Additionally, header files with the same base name as a source file,
+  (like ``<basename>.h``) or ``_p`` appended to the base name (like
+  ``<basename>_p.h``), are parsed for ``Q_OBJECT`` or ``Q_GADGET`` macros,
+  and if found, ``moc`` is also executed on those files.
+
+* ``AUTOMOC`` always checks multiple header alternative extensions,
+  such as ``hpp``, ``hxx``, etc. when searching for headers.
+
+* ``AUTOMOC`` looks for the ``Q_PLUGIN_METADATA`` macro and reruns the
+  ``moc`` when the file addressed by the ``FILE`` argument of the macro changes.
 
 This property is initialized by the value of the :variable:`CMAKE_AUTOMOC`
 variable if it is set when a target is created.
