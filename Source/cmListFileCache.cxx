@@ -80,6 +80,13 @@ bool cmListFileParser::ParseFile()
     return false;
   }
 
+  if (bom == cmListFileLexer_BOM_Broken) {
+    cmListFileLexer_SetFileName(this->Lexer, CM_NULLPTR, CM_NULLPTR);
+    this->IssueFileOpenError("Error while reading Byte-Order-Mark. "
+                             "File not seekable?");
+    return false;
+  }
+
   // Verify the Byte-Order-Mark, if any.
   if (bom != cmListFileLexer_BOM_None && bom != cmListFileLexer_BOM_UTF8) {
     cmListFileLexer_SetFileName(this->Lexer, CM_NULLPTR, CM_NULLPTR);

@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.1)
+
 include(RunCMake)
 
 run_cmake_command(NoArgs ${CMAKE_COMMAND})
@@ -301,3 +303,14 @@ set(CMAKE_RELATIVE_PATH_TOP_BINARY \"${RunCMake_TEST_BINARY_DIR}\")
     )
 endfunction()
 run_cmake_depends()
+
+function(reject_fifo)
+  find_program(BASH_EXECUTABLE bash)
+  if(BASH_EXECUTABLE)
+    set(BASH_COMMAND_ARGUMENT "'${CMAKE_COMMAND}' -P <(echo 'return()')")
+    run_cmake_command(reject_fifo ${BASH_EXECUTABLE} -c ${BASH_COMMAND_ARGUMENT})
+  endif()
+endfunction()
+if(CMAKE_HOST_UNIX AND NOT CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
+  reject_fifo()
+endif()
