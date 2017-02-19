@@ -194,7 +194,7 @@ static void MocSetupAutoTarget(
   makefile->AddDefinition(
     "_moc_options", cmOutputConverter::EscapeForCMake(_moc_options).c_str());
   makefile->AddDefinition(
-    "_skip_moc",
+    "_moc_skip",
     cmOutputConverter::EscapeForCMake(cmJoin(skipMoc, ";")).c_str());
   bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
   makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
@@ -278,7 +278,7 @@ static void UicSetupAutoTarget(
   skipped.insert(skipUic.begin(), skipUic.end());
 
   makefile->AddDefinition(
-    "_skip_uic",
+    "_uic_skip",
     cmOutputConverter::EscapeForCMake(cmJoin(skipUic, ";")).c_str());
 
   std::vector<cmSourceFile*> uiFilesWithOptions =
@@ -898,10 +898,10 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     SetupSourceFiles(target, mocUicSources, mocUicHeaders, skipMoc, skipUic);
   }
   makefile->AddDefinition(
-    "_moc_uic_sources",
+    "_sources",
     cmOutputConverter::EscapeForCMake(cmJoin(mocUicSources, ";")).c_str());
   makefile->AddDefinition(
-    "_moc_uic_headers",
+    "_headers",
     cmOutputConverter::EscapeForCMake(cmJoin(mocUicHeaders, ";")).c_str());
 
   if (target->GetPropertyAsBool("AUTOMOC")) {
