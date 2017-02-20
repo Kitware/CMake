@@ -18,6 +18,10 @@
 #include "cmVersion.h"
 #include "cmake.h"
 
+#if !defined(_WIN32)
+#include <sys/utsname.h>
+#endif
+
 #if defined(__CYGWIN__)
 #include "cmSystemTools.h"
 #endif
@@ -298,9 +302,15 @@ void cmStateSnapshot::SetDefaultDefinitions()
 #if defined(_WIN32)
   this->SetDefinition("WIN32", "1");
   this->SetDefinition("CMAKE_HOST_WIN32", "1");
+  this->SetDefinition("CMAKE_HOST_SYSTEM_NAME", "Windows");
 #else
   this->SetDefinition("UNIX", "1");
   this->SetDefinition("CMAKE_HOST_UNIX", "1");
+
+  struct utsname uts_name;
+  if (uname(&uts_name) == 0) {
+    this->SetDefinition("CMAKE_HOST_SYSTEM_NAME", uts_name.sysname);
+  }
 #endif
 #if defined(__CYGWIN__)
   std::string legacy;
