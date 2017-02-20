@@ -7,7 +7,6 @@
 #include <cmFilePathChecksum.h>
 #include <cmsys/RegularExpression.hxx>
 
-#include <list>
 #include <map>
 #include <set>
 #include <string>
