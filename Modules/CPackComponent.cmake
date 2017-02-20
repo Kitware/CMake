@@ -105,7 +105,8 @@
 #                       [DEPENDS comp1 comp2 ... ]
 #                       [INSTALL_TYPES type1 type2 ... ]
 #                       [DOWNLOADED]
-#                       [ARCHIVE_FILE filename])
+#                       [ARCHIVE_FILE filename]
+#                       [PLIST filename])
 #
 #
 #
@@ -162,6 +163,9 @@
 # be used for downloaded components.  If not supplied, CPack will create
 # a file with some name based on CPACK_PACKAGE_FILE_NAME and the name of
 # the component.  See cpack_configure_downloads for more information.
+#
+# PLIST gives a filename that is passed to pkgbuild with the
+# ``--component-plist`` argument when using the productbuild generator.
 #
 # .. command:: cpack_add_component_group
 #
@@ -389,7 +393,7 @@ endmacro()
 macro(cpack_add_component compname)
   string(TOUPPER ${compname} _CPACK_ADDCOMP_UNAME)
   cpack_parse_arguments(CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}
-    "DISPLAY_NAME;DESCRIPTION;GROUP;DEPENDS;INSTALL_TYPES;ARCHIVE_FILE"
+    "DISPLAY_NAME;DESCRIPTION;GROUP;DEPENDS;INSTALL_TYPES;ARCHIVE_FILE;PLIST"
     "HIDDEN;REQUIRED;DISABLED;DOWNLOADED"
     ${ARGN}
     )
@@ -444,6 +448,9 @@ macro(cpack_add_component compname)
     _CPACK_ADDCOMP_STR)
   cpack_append_option_set_command(
     CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_DOWNLOADED
+    _CPACK_ADDCOMP_STR)
+  cpack_append_string_variable_set_command(
+    CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_PLIST
     _CPACK_ADDCOMP_STR)
   # Backward compatibility issue.
   # Write to config iff the macros is used after CPack.cmake has been

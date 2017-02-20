@@ -236,6 +236,10 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
                                   : " --keychain \"" + keychainPath + "\"")
          << " \"" << packageFile << "\"";
 
+  if (component && !component->Plist.empty()) {
+    pkgCmd << " --component-plist \"" << component->Plist << "\"";
+  }
+
   // Run ProductBuild
   return RunProductBuild(pkgCmd.str());
 }
