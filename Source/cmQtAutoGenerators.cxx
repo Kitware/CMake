@@ -7,6 +7,7 @@
 #include <cmConfigure.h>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Terminal.h>
+#include <list>
 #include <sstream>
 #include <stdlib.h>
 #include <string.h>
