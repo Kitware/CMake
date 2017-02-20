@@ -109,7 +109,7 @@ void cmGlobalVisualStudio15Generator::WriteSLNHeader(std::ostream& fout)
   }
 }
 
-bool cmGlobalVisualStudio15Generator::InitializeWindows(cmMakefile *mf)
+bool cmGlobalVisualStudio15Generator::InitializeWindows(cmMakefile* mf)
 {
   // If the Win 8.1 SDK is installed then we can select a SDK matching
   // the target Windows version.

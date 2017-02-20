@@ -28,7 +28,7 @@ public:
 
   virtual const char* GetToolsVersion() { return "15.0"; }
 protected:
-  bool InitializeWindows(cmMakefile *mf) CM_OVERRIDE;
+  bool InitializeWindows(cmMakefile* mf) CM_OVERRIDE;
   virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
 
   virtual const char* GetIDEVersion() { return "15.0"; }
