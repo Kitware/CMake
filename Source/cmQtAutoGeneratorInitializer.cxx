@@ -22,7 +22,6 @@
 #endif
 
 #include <algorithm>
-#include <assert.h>
 #include <cmConfigure.h>
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
