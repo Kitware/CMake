@@ -133,7 +133,7 @@ static void AddDefinitionEscaped(cmMakefile* makefile, const char* key,
 }
 
 static void AddDefinitionEscaped(cmMakefile* makefile, const char* key,
-                                 const std::vector<std::string> values)
+                                 const std::vector<std::string>& values)
 {
   makefile->AddDefinition(
     key, cmOutputConverter::EscapeForCMake(cmJoin(values, ";")).c_str());
