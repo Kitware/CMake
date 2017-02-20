@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "cmAlgorithms.h"
+#include "cmFilePathChecksum.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"

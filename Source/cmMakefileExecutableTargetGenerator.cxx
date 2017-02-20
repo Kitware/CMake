@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefileExecutableTargetGenerator.h"
 
+#include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>

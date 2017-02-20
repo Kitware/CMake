@@ -14,7 +14,6 @@
 #include <time.h>
 #include <vector>
 
-class cmCTest;
 class cmCTestGenericHandler;
 class cmCTestStartCommand;
 class cmGeneratedFileStream;

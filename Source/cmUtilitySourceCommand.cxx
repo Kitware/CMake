@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "cmMakefile.h"
-#include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"

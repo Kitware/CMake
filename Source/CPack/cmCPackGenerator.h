@@ -13,7 +13,6 @@
 #include "cmCPackComponentGroup.h"
 #include "cmSystemTools.h"
 
-class cmCPackGenerator;
 class cmCPackLog;
 class cmInstalledFile;
 class cmMakefile;

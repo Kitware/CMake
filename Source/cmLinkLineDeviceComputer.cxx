@@ -2,10 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmLinkLineDeviceComputer.h"
+
+#include <set>
+#include <sstream>
+#include <vector>
+
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
-#include "cmOutputConverter.h"
+#include "cmStateDirectory.h"
+#include "cmStateTypes.h"
+
+class cmOutputConverter;
 
 cmLinkLineDeviceComputer::cmLinkLineDeviceComputer(
   cmOutputConverter* outputConverter, cmStateDirectory stateDir)
