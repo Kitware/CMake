@@ -105,11 +105,8 @@ typedef int64_t la_int64_t;
 # define __LA_DECL
 #endif
 
-#if defined(__GNUC__) && __GNUC__ >= 3 && __GNUC_MINOR__ >= 1
-# define __LA_DEPRECATED __attribute__((deprecated))
-#else
-# define __LA_DEPRECATED
-#endif
+/* CMake uses some deprecated APIs to build with old libarchive versions.  */
+#define __LA_DEPRECATED
 
 #ifdef __cplusplus
 extern "C" {
