@@ -223,7 +223,10 @@ function(_GTK2_SIGCXX_GET_VERSION _OUT_major _OUT_minor _OUT_micro _sigcxxversio
         set(${_OUT_minor} ${${_OUT_minor}} PARENT_SCOPE)
         set(${_OUT_micro} ${${_OUT_micro}} PARENT_SCOPE)
     else()
-        message(FATAL_ERROR "Include file ${_gtkversion_hdr} does not exist")
+        # The header does not have the version macros; assume it is ``0.0.0``.
+        set(${_OUT_major} 0)
+        set(${_OUT_minor} 0)
+        set(${_OUT_micro} 0)
     endif()
 endfunction()
 
