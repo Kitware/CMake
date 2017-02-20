@@ -38,6 +38,8 @@ SET(libarchive_SOURCES
   archive_hmac.c
   archive_hmac_private.h
   archive_match.c
+  archive_openssl_evp_private.h
+  archive_openssl_hmac_private.h
   archive_options.c
   archive_options_private.h
   archive_pack_dev.h
@@ -166,15 +168,33 @@ SET(libarchive_MANS
   archive_entry_time.3
   archive_read.3
   archive_read_add_passphrase.3
+  archive_read_data.3
   archive_read_disk.3
+  archive_read_extract.3
+  archive_read_filter.3
+  archive_read_format.3
+  archive_read_free.3
+  archive_read_header.3
+  archive_read_new.3
+  archive_read_open.3
   archive_read_set_options.3
   archive_util.3
   archive_write.3
+  archive_write_blocksize.3
+  archive_write_data.3
   archive_write_disk.3
+  archive_write_filter.3
+  archive_write_finish_entry.3
+  archive_write_format.3
+  archive_write_free.3
+  archive_write_header.3
+  archive_write_new.3
+  archive_write_open.3
   archive_write_set_options.3
   archive_write_set_passphrase.3
   cpio.5
   libarchive.3
+  libarchive_changes.3
   libarchive_internals.3
   libarchive-formats.5
   mtree.5
