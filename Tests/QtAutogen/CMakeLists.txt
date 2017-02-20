@@ -46,26 +46,26 @@ endif()
 
 get_property(QT_COMPILE_FEATURES TARGET ${QT_QTCORE_TARGET} PROPERTY INTERFACE_COMPILE_FEATURES)
 
-# -- Test: AUTORCC
+# -- Test
 # RCC only
 add_executable(rccOnly rccOnly.cpp rccOnlyRes.qrc)
 set_property(TARGET rccOnly PROPERTY AUTORCC ON)
 target_link_libraries(rccOnly ${QT_QTCORE_TARGET})
 
-# -- Test: AUTORCC
+# -- Test
 # RCC empty
 add_executable(rccEmpty rccEmpty.cpp rccEmptyRes.qrc)
 set_property(TARGET rccEmpty PROPERTY AUTORCC ON)
 target_link_libraries(rccEmpty ${QT_QTCORE_TARGET})
 
-# -- Test: AUTOUIC
+# -- Test
 # UIC only
 qtx_wrap_cpp(uicOnlyMoc uicOnlySource/uiconly.h)
 add_executable(uicOnly uicOnlySource/uiconly.cpp ${uicOnlyMoc})
 set_property(TARGET uicOnly PROPERTY AUTOUIC ON)
 target_link_libraries(uicOnly ${QT_LIBRARIES})
 
-# -- Test: AUTOMOC, AUTORCC
+# -- Test
 # Add not_generated_file.qrc to the source list to get the file-level
 # dependency, but don't generate a c++ file from it.  Disable the AUTORCC
 # feature for this target.  This tests that qrc files in the sources don't
@@ -80,13 +80,14 @@ set_target_properties(no_link_language PROPERTIES AUTOMOC TRUE)
 target_compile_features(no_link_language PRIVATE ${QT_COMPILE_FEATURES})
 target_compile_features(empty PRIVATE ${QT_COMPILE_FEATURES})
 
-# -- Test: AUTORCC
+# -- Test
 # When a file listed in a .qrc file changes the target must be rebuilt
 try_compile(RCC_DEPENDS
   "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"
   "${CMAKE_CURRENT_SOURCE_DIR}/autorcc_depends"
   autorcc_depends
-  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}" "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
+              "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
               "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
   OUTPUT_VARIABLE output
 )
@@ -115,13 +116,14 @@ if (NOT file1_step1 GREATER file1_before)
   message(SEND_ERROR "file1 (${qrc_file1}) should have changed in the first step!")
 endif()
 
-# -- Test: AUTOMOC
+# -- Test
 # Ensure a repeated build succeeds when a header containing a QObject changes
 try_compile(MOC_RERUN
   "${CMAKE_CURRENT_BINARY_DIR}/automoc_rerun"
   "${CMAKE_CURRENT_SOURCE_DIR}/automoc_rerun"
   automoc_rerun
-  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}" "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
+              "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
               "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
   OUTPUT_VARIABLE output
 )
@@ -139,7 +141,7 @@ if (automoc_rerun_result)
   message(SEND_ERROR "Second build of automoc_rerun failed.")
 endif()
 
-# -- Test: AUTOMOC, SKIP_AUTOMOC
+# -- Test
 # Test for SKIP_AUTOMOC and SKIP_AUTOGEN on an AUTOMOC enabled target
 qtx_wrap_cpp(skipMocWrapMoc
   skipSource/qItemA.hpp
@@ -161,7 +163,7 @@ set_property(TARGET skipMocB PROPERTY AUTOMOC ON)
 set_property(TARGET skipMocB PROPERTY AUTOUIC ON)
 target_link_libraries(skipMocB ${QT_LIBRARIES})
 
-# -- Test: AUTOUIC, SKIP_AUTOUIC
+# -- Test
 # Test for SKIP_AUTOUIC and SKIP_AUTOGEN on an AUTOUIC enabled target
 set(skipUicSources
   skipUic.cpp
@@ -181,7 +183,7 @@ set_property(TARGET skipUicB PROPERTY AUTOUIC ON)
 set_property(TARGET skipUicB PROPERTY AUTOMOC ON)
 target_link_libraries(skipUicB ${QT_LIBRARIES})
 
-# -- Test: AUTORCC, SKIP_AUTORCC
+# -- Test
 # Test for SKIP_AUTORCC and SKIP_AUTOGEN on an AUTORCC enabled target
 set(skipRccSources
   skipRcc.cpp
@@ -202,10 +204,73 @@ set_property(TARGET skipRccB PROPERTY AUTOUIC ON)
 set_property(TARGET skipRccB PROPERTY AUTOMOC ON)
 target_link_libraries(skipRccB ${QT_LIBRARIES})
 
-# -- Test: AUTOMOC AUTORCC
+# -- Test
 # Source files with the same basename in different subdirectories
 add_subdirectory(sameName)
 
-# -- Test: AUTOMOC AUTORCC AUTOUIC
+# -- Test
+# Tests various include moc patterns
+add_subdirectory(mocIncludeStrict)
+
+# -- Test
+# Tests various include moc patterns
+add_subdirectory(mocIncludeRelaxed)
+
+# -- Test
+# Tests Q_PLUGIN_METADATA json file change detection
+if (NOT QT_TEST_VERSION STREQUAL 4)
+  try_compile(MOC_PLUGIN
+    "${CMAKE_CURRENT_BINARY_DIR}/mocPlugin"
+    "${CMAKE_CURRENT_SOURCE_DIR}/mocPlugin"
+    mocPlugin
+    CMAKE_FLAGS "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+                "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
+    OUTPUT_VARIABLE output
+  )
+  if (NOT MOC_PLUGIN)
+    message(SEND_ERROR "Initial build of mocPlugin failed. Output: ${output}")
+  endif()
+
+  set(timeformat "%Y%j%H%M%S")
+  set(mocPluginBinDir "${CMAKE_CURRENT_BINARY_DIR}/mocPlugin")
+  find_library(style_a_file "PluginStyleA" "${mocPluginBinDir}")
+  find_library(style_b_file "PluginStyleB" "${mocPluginBinDir}")
+  find_library(style_c_file "PluginStyleC" "${mocPluginBinDir}")
+  find_library(style_d_file "PluginStyleD" "${mocPluginBinDir}")
+
+  file(TIMESTAMP "${style_a_file}" style_a_before "${timeformat}")
+  file(TIMESTAMP "${style_b_file}" style_b_before "${timeformat}")
+  file(TIMESTAMP "${style_c_file}" style_c_before "${timeformat}")
+  file(TIMESTAMP "${style_d_file}" style_d_before "${timeformat}")
+
+  # Ensure that the timestamp will change and touch the json files
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${mocPluginBinDir}/jsonFiles/StyleC.json")
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${mocPluginBinDir}/jsonFiles/sub/StyleD.json")
+
+  execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mocPlugin"
+  )
+
+  file(TIMESTAMP "${style_a_file}" style_a_after "${timeformat}")
+  file(TIMESTAMP "${style_b_file}" style_b_after "${timeformat}")
+  file(TIMESTAMP "${style_c_file}" style_c_after "${timeformat}")
+  file(TIMESTAMP "${style_d_file}" style_d_after "${timeformat}")
+
+  if (style_a_after GREATER style_a_before)
+    message(SEND_ERROR "file (${style_a_file}) should not have changed!")
+  endif()
+  if (style_b_after GREATER style_b_before)
+    message(SEND_ERROR "file (${style_b_file}) should not have changed!")
+  endif()
+  if (NOT style_c_after GREATER style_c_before)
+    message(SEND_ERROR "file (${style_c_file}) should have changed!")
+  endif()
+  if (NOT style_d_after GREATER style_d_before)
+    message(SEND_ERROR "file (${style_d_file}) should have changed!")
+  endif()
+endif()
+
+# -- Test
 # Complex test case
 add_subdirectory(complex)
