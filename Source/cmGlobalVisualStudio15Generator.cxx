@@ -109,6 +109,18 @@ void cmGlobalVisualStudio15Generator::WriteSLNHeader(std::ostream& fout)
   }
 }
 
+bool cmGlobalVisualStudio15Generator::InitializeWindows(cmMakefile *mf)
+{
+  // If the Win 8.1 SDK is installed then we can select a SDK matching
+  // the target Windows version.
+  if (vsSetupAPIHelper.IsWin81SDKInstalled()) {
+    return cmGlobalVisualStudio14Generator::InitializeWindows(mf);
+  }
+  // Otherwise we must choose a Win 10 SDK even if we are not targeting
+  // Windows 10.
+  return this->SelectWindows10SDK(mf, false);
+}
+
 bool cmGlobalVisualStudio15Generator::SelectWindowsStoreToolset(
   std::string& toolset) const
 {
