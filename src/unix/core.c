@@ -98,7 +98,7 @@ uint64_t uv_hrtime(void) {
 
 
 void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
-  assert(!(handle->flags & (UV_CLOSING | UV_CLOSED)));
+  assert(!uv__is_closing(handle));
 
   handle->flags |= UV_CLOSING;
   handle->close_cb = close_cb;
@@ -517,6 +517,9 @@ int uv__close_nocheckstdio(int fd) {
 
 int uv__close(int fd) {
   assert(fd > STDERR_FILENO);  /* Catch stdio close bugs. */
+#if defined(__MVS__)
+  epoll_file_close(fd);
+#endif
   return uv__close_nocheckstdio(fd);
 }
 
@@ -836,13 +839,8 @@ void uv__io_start(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
    * every tick of the event loop but the other backends allow us to
    * short-circuit here if the event mask is unchanged.
    */
-  if (w->events == w->pevents) {
-    if (w->events == 0 && !QUEUE_EMPTY(&w->watcher_queue)) {
-      QUEUE_REMOVE(&w->watcher_queue);
-      QUEUE_INIT(&w->watcher_queue);
-    }
+  if (w->events == w->pevents)
     return;
-  }
 #endif
 
   if (QUEUE_EMPTY(&w->watcher_queue))
@@ -1235,4 +1233,10 @@ void uv_os_free_passwd(uv_passwd_t* pwd) {
 
 int uv_os_get_passwd(uv_passwd_t* pwd) {
   return uv__getpwuid_r(pwd);
+}
+
+
+int uv_translate_sys_error(int sys_errno) {
+  /* If < 0 then it's already a libuv error. */
+  return sys_errno <= 0 ? sys_errno : -sys_errno;
 }
