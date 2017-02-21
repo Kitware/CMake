@@ -5,8 +5,8 @@ class SubObjA : public QObject
   Q_OBJECT
 
 public:
-  SubObjA() = default;
-  ~SubObjA() = default;
+  SubObjA() {}
+  ~SubObjA() {}
 
   Q_SLOT
   void aSlot();

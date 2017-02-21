@@ -5,8 +5,8 @@ class SubObjD : public QObject
   Q_OBJECT
 
 public:
-  SubObjD() = default;
-  ~SubObjD() = default;
+  SubObjD() {}
+  ~SubObjD() {}
 
   Q_SLOT
   void aSlot();
