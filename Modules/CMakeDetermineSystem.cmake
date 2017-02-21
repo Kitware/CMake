@@ -35,10 +35,9 @@
 if(CMAKE_HOST_UNIX)
   find_program(CMAKE_UNAME uname /bin /usr/bin /usr/local/bin )
   if(CMAKE_UNAME)
-    exec_program(uname ARGS -s OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_NAME)
-    exec_program(uname ARGS -r OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_VERSION)
+    exec_program(${CMAKE_UNAME} ARGS -r OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_VERSION)
     if(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux|CYGWIN.*|Darwin|^GNU$")
-      exec_program(uname ARGS -m OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
+      exec_program(${CMAKE_UNAME} ARGS -m OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
         RETURN_VALUE val)
       if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin" AND
          CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "Power Macintosh")
@@ -49,10 +48,10 @@ if(CMAKE_HOST_UNIX)
       exec_program(arch ARGS -s OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
         RETURN_VALUE val)
     else()
-      exec_program(uname ARGS -p OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
+      exec_program(${CMAKE_UNAME} ARGS -p OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
         RETURN_VALUE val)
       if("${val}" GREATER 0)
-        exec_program(uname ARGS -m OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
+        exec_program(${CMAKE_UNAME} ARGS -m OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
           RETURN_VALUE val)
       endif()
     endif()
@@ -67,7 +66,6 @@ if(CMAKE_HOST_UNIX)
   endif()
 else()
   if(CMAKE_HOST_WIN32)
-    set (CMAKE_HOST_SYSTEM_NAME "Windows")
     if (DEFINED ENV{PROCESSOR_ARCHITEW6432})
       set (CMAKE_HOST_SYSTEM_PROCESSOR "$ENV{PROCESSOR_ARCHITEW6432}")
     else()
