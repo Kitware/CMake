@@ -109,6 +109,18 @@ void cmGlobalVisualStudio15Generator::WriteSLNHeader(std::ostream& fout)
   }
 }
 
+bool cmGlobalVisualStudio15Generator::InitializeWindows(cmMakefile* mf)
+{
+  // If the Win 8.1 SDK is installed then we can select a SDK matching
+  // the target Windows version.
+  if (this->IsWin81SDKInstalled()) {
+    return cmGlobalVisualStudio14Generator::InitializeWindows(mf);
+  }
+  // Otherwise we must choose a Win 10 SDK even if we are not targeting
+  // Windows 10.
+  return this->SelectWindows10SDK(mf, false);
+}
+
 bool cmGlobalVisualStudio15Generator::SelectWindowsStoreToolset(
   std::string& toolset) const
 {
@@ -133,6 +145,28 @@ bool cmGlobalVisualStudio15Generator::IsWindowsDesktopToolsetInstalled() const
 bool cmGlobalVisualStudio15Generator::IsWindowsStoreToolsetInstalled() const
 {
   return vsSetupAPIHelper.IsWin10SDKInstalled();
+}
+
+bool cmGlobalVisualStudio15Generator::IsWin81SDKInstalled() const
+{
+  // Does the VS installer tool know about one?
+  if (vsSetupAPIHelper.IsWin81SDKInstalled()) {
+    return true;
+  }
+
+  // Does the registry know about one (e.g. from VS 2015)?
+  std::string win81Root;
+  if (cmSystemTools::ReadRegistryValue(
+        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+        "Windows Kits\\Installed Roots;KitsRoot81",
+        win81Root, cmSystemTools::KeyWOW64_32) ||
+      cmSystemTools::ReadRegistryValue(
+        "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\"
+        "Windows Kits\\Installed Roots;KitsRoot81",
+        win81Root, cmSystemTools::KeyWOW64_32)) {
+    return true;
+  }
+  return false;
 }
 
 std::string cmGlobalVisualStudio15Generator::FindMSBuildCommand()
