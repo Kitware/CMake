@@ -590,7 +590,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     std::vector<std::string> compileCommands;
     if (lang == "CUDA") {
       std::string cmdVar;
-      if (this->GeneratorTarget->GetProperty("CUDA_SEPARABLE_COMPILATION")) {
+      if (this->GeneratorTarget->GetPropertyAsBool(
+            "CUDA_SEPARABLE_COMPILATION")) {
         cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
       } else {
         cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
