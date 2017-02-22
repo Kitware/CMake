@@ -245,6 +245,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("AUTOMOC", CM_NULLPTR);
     this->SetPropertyDefault("AUTOUIC", CM_NULLPTR);
     this->SetPropertyDefault("AUTORCC", CM_NULLPTR);
+    this->SetPropertyDefault("AUTOMOC_DEPEND_FILTERS", CM_NULLPTR);
     this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", CM_NULLPTR);
     this->SetPropertyDefault("AUTOUIC_OPTIONS", CM_NULLPTR);
     this->SetPropertyDefault("AUTORCC_OPTIONS", CM_NULLPTR);

@@ -33,6 +33,7 @@ private:
   typedef std::pair<std::string, cmsys::RegularExpression> MacroFilter;
 
   // - Configuration
+  bool MocDependFilterPush(const std::string& key, const std::string& regExp);
   bool ReadAutogenInfoFile(cmMakefile* makefile,
                            const std::string& targetDirectory,
                            const std::string& config);

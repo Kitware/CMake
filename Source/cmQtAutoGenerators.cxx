@@ -260,6 +260,32 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   return success;
 }
 
+bool cmQtAutoGenerators::MocDependFilterPush(const std::string& key,
+                                             const std::string& regExp)
+{
+  bool success = false;
+  if (!key.empty()) {
+    if (!regExp.empty()) {
+      MocDependFilter filter;
+      filter.key = key;
+      if (filter.regExp.compile(regExp)) {
+        this->MocDependFilters.push_back(filter);
+        success = true;
+      } else {
+        this->LogError("AutoMoc: Error in AUTOMOC_DEPEND_FILTERS: Compiling "
+                       "regular expression failed.\nKey: \"" +
+                       key + "\"\nReg. exp.: \"" + regExp + "\"");
+      }
+    } else {
+      this->LogError("AutoMoc: Error in AUTOMOC_DEPEND_FILTERS: Regular "
+                     "expression is empty");
+    }
+  } else {
+    this->LogError("AutoMoc: Error in AUTOMOC_DEPEND_FILTERS: Key is empty");
+  }
+  return success;
+}
+
 bool cmQtAutoGenerators::ReadAutogenInfoFile(
   cmMakefile* makefile, const std::string& targetDirectory,
   const std::string& config)
@@ -320,6 +346,30 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     this->MocIncludePaths);
   cmSystemTools::ExpandListArgument(
     makefile->GetSafeDefinition("AM_MOC_OPTIONS"), this->MocOptions);
+  {
+    std::vector<std::string> mocDependFilters;
+    cmSystemTools::ExpandListArgument(
+      makefile->GetSafeDefinition("AM_MOC_DEPEND_FILTERS"), mocDependFilters);
+    // Insert Q_PLUGIN_METADATA dependency filter
+    if (this->QtMajorVersion != "4") {
+      this->MocDependFilterPush("Q_PLUGIN_METADATA",
+                                "[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\("
+                                "[^\\)]*FILE[ \t]*\"([^\"]+)\"");
+    }
+    // Insert user defined dependency filters
+    if ((mocDependFilters.size() % 2) == 0) {
+      for (std::vector<std::string>::const_iterator dit =
+             mocDependFilters.begin();
+           dit != mocDependFilters.end(); dit += 2) {
+        if (!this->MocDependFilterPush(*dit, *(dit + 1))) {
+          return false;
+        }
+      }
+    } else {
+      this->LogError("AutoMoc: Error: AUTOMOC_DEPEND_FILTERS list size is not "
+                     "a multiple of 2");
+    }
+  }
 
   // - Uic
   cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_UIC_SKIP"),
@@ -558,16 +608,6 @@ void cmQtAutoGenerators::Init(cmMakefile* makefile)
       this->MocIncludes.push_back("-F");
       this->MocIncludes.push_back(*it);
     }
-  }
-
-  // Insert MocDependFilter for Q_PLUGIN_METADATA
-  if (QtMajorVersion != "4") {
-    MocDependFilter filter;
-    filter.key = "Q_PLUGIN_METADATA";
-    filter.regExp.compile("[\n][ \t]*"
-                          "Q_PLUGIN_METADATA[ \t]*\\("
-                          "[^\\)]*FILE[ \t]*\"([^\"]+)\"");
-    this->MocDependFilters.push_back(filter);
   }
 }
 
