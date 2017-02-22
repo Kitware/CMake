@@ -1022,7 +1022,9 @@ bool cmQtAutoGenerators::MocParseSourceContent(
       ost << "AutoMoc: Error: " << Quoted(absFilename) << "\n"
           << "The file contains a " << macroName
           << " macro, but does not include "
-          << Quoted(scannedFileBasename + ".moc") << "!";
+          << Quoted(scannedFileBasename + ".moc") << "!\n"
+          << "Consider adding the include or enabling SKIP_AUTOMOC for this "
+             "file.";
       this->LogError(ost.str());
       return false;
     }
