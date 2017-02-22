@@ -212,6 +212,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
     nsl
     sendfile
     socket
+    rt
     )
   list(APPEND uv_headers
     include/uv-sunos.h
