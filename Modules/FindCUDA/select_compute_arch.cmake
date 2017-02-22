@@ -112,6 +112,7 @@ function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
   list(REMOVE_DUPLICATES CUDA_ARCH_LIST)
   foreach(arch_name ${CUDA_ARCH_LIST})
     set(arch_bin)
+    set(arch_ptx)
     set(add_ptx FALSE)
     # Check to see if we are compiling PTX
     if(arch_name MATCHES "(.*)\\+PTX$")
