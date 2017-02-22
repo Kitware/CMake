@@ -28,6 +28,10 @@
 #include <assert.h>
 #include <errno.h>
 
+#if !defined(SUNOS_NO_IFADDRS) && _XOPEN_SOURCE < 600
+#define SUNOS_NO_IFADDRS
+#endif
+
 #ifndef SUNOS_NO_IFADDRS
 # include <ifaddrs.h>
 #endif
