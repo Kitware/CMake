@@ -247,10 +247,7 @@ if (NOT QT_TEST_VERSION STREQUAL 4)
   execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
   execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${mocPluginBinDir}/jsonFiles/StyleC.json")
   execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${mocPluginBinDir}/jsonFiles/sub/StyleD.json")
-
-  execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mocPlugin"
-  )
+  execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${mocPluginBinDir}")
 
   file(TIMESTAMP "${style_a_file}" style_a_after "${timeformat}")
   file(TIMESTAMP "${style_b_file}" style_b_after "${timeformat}")
@@ -269,6 +266,23 @@ if (NOT QT_TEST_VERSION STREQUAL 4)
   if (NOT style_d_after GREATER style_d_before)
     message(SEND_ERROR "file (${style_d_file}) should have changed!")
   endif()
+
+  # Test custom macro
+  file(TIMESTAMP "${style_c_file}" style_c_before "${timeformat}")
+  file(TIMESTAMP "${style_d_file}" style_d_before "${timeformat}")
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${mocPluginBinDir}/jsonFiles/StyleC_Custom.json")
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${mocPluginBinDir}/jsonFiles/sub/StyleD_Custom.json")
+  execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${mocPluginBinDir}")
+  file(TIMESTAMP "${style_c_file}" style_c_after "${timeformat}")
+  file(TIMESTAMP "${style_d_file}" style_d_after "${timeformat}")
+  if (NOT style_c_after GREATER style_c_before)
+    message(SEND_ERROR "file (${style_c_file}) should have changed!")
+  endif()
+  if (NOT style_d_after GREATER style_d_before)
+    message(SEND_ERROR "file (${style_d_file}) should have changed!")
+  endif()
+
 endif()
 
 # -- Test

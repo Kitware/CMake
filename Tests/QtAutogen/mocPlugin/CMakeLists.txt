@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.8)
 
+set(CMAKE_AUTOMOC_DEPEND_FILTERS
+  "A_CUSTOM_MACRO"
+  "[\n][ \t]*A_CUSTOM_MACRO[ \t\r\n]*\\([^,]+,[ \t\r\n]*\"([^\"]+)\""
+  )
+
 if (NOT QT_TEST_VERSION STREQUAL 5)
   message(SEND_ERROR "Invalid Qt version specified.")
 endif()
@@ -9,8 +14,10 @@ if(Qt5_POSITION_INDEPENDENT_CODE AND CMAKE_CXX_COMPILE_OPTIONS_PIC)
   add_definitions(${CMAKE_CXX_COMPILE_OPTIONS_PIC})
 endif()
 
-configure_file(jsonIn/StyleC.json jsonFiles/StyleC.json @ONLY)
-configure_file(jsonIn/StyleD.json jsonFiles/sub/StyleD.json @ONLY)
+configure_file(jsonIn/StyleC.json jsonFiles/StyleC.json)
+configure_file(jsonIn/StyleD.json jsonFiles/sub/StyleD.json)
+configure_file(jsonIn/StyleC.json jsonFiles/StyleC_Custom.json)
+configure_file(jsonIn/StyleD.json jsonFiles/sub/StyleD_Custom.json)
 
 # Enable automoc
 set(CMAKE_AUTOMOC TRUE)
