@@ -272,9 +272,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   filename += "/AutogenInfo.cmake";
 
   if (!makefile->ReadListFile(filename.c_str())) {
-    std::ostringstream err;
-    err << "AutoGen: error processing file: " << filename << std::endl;
-    this->LogError(err.str());
+    this->LogError("AutoGen: Error processing file: " + filename);
     return false;
   }
 
@@ -333,10 +331,9 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     cmSystemTools::ExpandListArgument(
       makefile->GetSafeDefinition("AM_UIC_OPTIONS_OPTIONS"), uicOptionsVec);
     if (uicFilesVec.size() != uicOptionsVec.size()) {
-      std::ostringstream err;
-      err << "AutoGen: Error: Uic files/options lists size missmatch in: "
-          << filename << std::endl;
-      this->LogError(err.str());
+      this->LogError(
+        "AutoGen: Error: Uic files/options lists size missmatch in: " +
+        filename);
       return false;
     }
     for (std::vector<std::string>::iterator fileIt = uicFilesVec.begin(),
@@ -358,10 +355,9 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     cmSystemTools::ExpandListArgument(
       makefile->GetSafeDefinition("AM_RCC_OPTIONS_OPTIONS"), rccOptionsVec);
     if (rccFilesVec.size() != rccOptionsVec.size()) {
-      std::ostringstream err;
-      err << "AutoGen: Error: RCC files/options lists size missmatch in: "
-          << filename << std::endl;
-      this->LogError(err.str());
+      this->LogError(
+        "AutoGen: Error: RCC files/options lists size missmatch in: " +
+        filename);
       return false;
     }
     for (std::vector<std::string>::iterator fileIt = rccFilesVec.begin(),
@@ -381,10 +377,9 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
       rccInputLists.resize(this->RccSources.size());
     }
     if (this->RccSources.size() != rccInputLists.size()) {
-      std::ostringstream err;
-      err << "AutoGen: Error: RCC sources/inputs lists size missmatch in: "
-          << filename << std::endl;
-      this->LogError(err.str());
+      this->LogError(
+        "AutoGen: Error: RCC sources/inputs lists size missmatch in: " +
+        filename);
       return false;
     }
     for (std::vector<std::string>::iterator fileIt = this->RccSources.begin(),
@@ -480,12 +475,8 @@ bool cmQtAutoGenerators::SettingsFileWrite(const std::string& targetDirectory)
       success = false;
       // Remove old settings file to trigger full rebuild on next run
       cmSystemTools::RemoveFile(filename);
-      {
-        std::ostringstream err;
-        err << "AutoGen: Error: Writing old settings file failed: "
-            << filename;
-        this->LogError(err.str());
-      }
+      this->LogError("AutoGen: Error: Writing old settings file failed: " +
+                     filename);
     }
   }
   return success;
@@ -1150,13 +1141,13 @@ bool cmQtAutoGenerators::MocGenerateAll(
       outfile.open(this->MocCppFilenameAbs.c_str(), std::ios::trunc);
       if (!outfile) {
         success = false;
-        this->LogError("AutoMoc: error opening " + this->MocCppFilenameAbs);
+        this->LogError("AutoMoc: Error opening " + this->MocCppFilenameAbs);
       } else {
         outfile << automocSource;
         // Check for write errors
         if (!outfile.good()) {
           success = false;
-          this->LogError("AutoMoc: error writing " + this->MocCppFilenameAbs);
+          this->LogError("AutoMoc: Error writing " + this->MocCppFilenameAbs);
         }
       }
     }
@@ -1768,7 +1759,7 @@ bool cmQtAutoGenerators::MakeParentDirectory(const std::string& filename) const
   if (!dirName.empty()) {
     success = cmsys::SystemTools::MakeDirectory(dirName);
     if (!success) {
-      this->LogError("AutoGen: Directory creation failed: " + dirName);
+      this->LogError("AutoGen: Error: Directory creation failed: " + dirName);
     }
   }
   return success;
