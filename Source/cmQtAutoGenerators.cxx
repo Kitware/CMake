@@ -244,23 +244,20 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(&gg, snapshot));
   gg.SetCurrentMakefile(mf.get());
 
-  if (!this->ReadAutogenInfoFile(mf.get(), targetDirectory, config)) {
-    return false;
-  }
-  // Read old settings
-  this->SettingsFileRead(mf.get(), targetDirectory);
-  // Init and run
-  this->Init(mf.get());
-  if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5") {
-    if (!this->RunAutogen()) {
-      return false;
+  bool success = false;
+  if (this->ReadAutogenInfoFile(mf.get(), targetDirectory, config)) {
+    // Read old settings
+    this->SettingsFileRead(mf.get(), targetDirectory);
+    // Init and run
+    this->Init(mf.get());
+    if (this->RunAutogen()) {
+      // Write current settings
+      if (this->SettingsFileWrite(targetDirectory)) {
+        success = true;
+      }
     }
   }
-  // Write latest settings
-  if (!this->SettingsFileWrite(targetDirectory)) {
-    return false;
-  }
-  return true;
+  return success;
 }
 
 bool cmQtAutoGenerators::ReadAutogenInfoFile(
@@ -295,6 +292,13 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     this->QtMajorVersion =
       makefile->GetSafeDefinition("AM_Qt5Core_VERSION_MAJOR");
   }
+  // Check Qt version
+  if ((this->QtMajorVersion != "4") && (this->QtMajorVersion != "5")) {
+    this->LogError("AutoGen: Error: Unsupported Qt version: \"" +
+                   this->QtMajorVersion + "\"");
+    return false;
+  }
+
   this->MocExecutable = makefile->GetSafeDefinition("AM_QT_MOC_EXECUTABLE");
   this->UicExecutable = makefile->GetSafeDefinition("AM_QT_UIC_EXECUTABLE");
   this->RccExecutable = makefile->GetSafeDefinition("AM_QT_RCC_EXECUTABLE");
