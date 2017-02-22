@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #=============================================================================
-# Copyright 2015-2016 Kitware, Inc.
+# Copyright 2015-2017 Kitware, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -106,34 +106,12 @@ case "$mode" in
     *) die "invalid mode: $mode" ;;
 esac
 
-# Filter sources to which our style should apply.
-$git_ls -z -- '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx' '*.cu' '*.notcu' |
+# List files as selected above.
+$git_ls |
 
-  # Exclude lexer/parser generator input and output.
-  egrep -z -v '^Source/cmCommandArgumentLexer\.' |
-  egrep -z -v '^Source/cmCommandArgumentParser(\.y|\.cxx|Tokens\.h)' |
-  egrep -z -v '^Source/cmDependsJavaLexer\.' |
-  egrep -z -v '^Source/cmDependsJavaParser(\.y|\.cxx|Tokens\.h)' |
-  egrep -z -v '^Source/cmExprLexer\.' |
-  egrep -z -v '^Source/cmExprParser(\.y|\.cxx|Tokens\.h)' |
-  egrep -z -v '^Source/cmFortranLexer\.' |
-  egrep -z -v '^Source/cmFortranParser(\.y|\.cxx|Tokens\.h)' |
-  egrep -z -v '^Source/cmListFileLexer(\.in\.l|\.c)' |
-
-  # Exclude third-party sources.
-  egrep -z -v '^Source/bindexplib' |
-  egrep -z -v '^Source/(kwsys|CursesDialog/form)/' |
-  egrep -z -v '^Utilities/(KW|cm).*/' |
-
-  # Exclude reference content.
-  egrep -z -v '^Tests/RunCMake/GenerateExportHeader/reference/' |
-
-  # Exclude manually-formatted sources (e.g. with long lines).
-  egrep -z -v '^Tests/PositionIndependentTargets/pic_test.h' |
-  egrep -z -v '^Tests/CompileFeatures/cxx_right_angle_brackets.cpp' |
-
-  # Exclude sources with encoding not suported by clang-format.
-  egrep -z -v '^Tests/RunCMake/CommandLine/cmake_depends/test_UTF-16LE.h' |
+  # Select sources with our attribute.
+  git check-attr --stdin format.clang-format |
+  sed -n '/: format\.clang-format: set$/ {s/:[^:]*:[^:]*$//p}'  |
 
   # Update sources in-place.
-  xargs -0 "$clang_format" -i
+  xargs -d '\n' "$clang_format" -i
