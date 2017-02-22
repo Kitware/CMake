@@ -174,9 +174,16 @@ Create custom targets to build projects in external trees
   Install step options are:
 
   ``INSTALL_DIR <dir>``
-    Installation prefix
+    Installation prefix to be placed in the ``<INSTALL_DIR>`` placeholder.
+    This does not actually configure the external project to install to
+    the given prefix.  That must be done by passing appropriate arguments
+    to the external project configuration step, e.g. using ``<INSTALL_DIR>``.
   ``INSTALL_COMMAND <cmd>...``
-    Command to drive install after build
+    Command to drive installation of the external project after it has been
+    built.  This only happens at the *build* time of the calling project.
+    In order to install files from the external project alongside the
+    locally-built files, a separate local :command:`install` call must be
+    added to pick the files up from one of the external project trees.
 
   Test step options are:
 
