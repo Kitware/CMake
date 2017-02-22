@@ -45,7 +45,7 @@ void cmFilePathChecksum::setupParentDirs(const std::string& currentSrcDir,
   parentDirs[3].second = "ProjectBinary";
 }
 
-std::string cmFilePathChecksum::get(const std::string& filePath)
+std::string cmFilePathChecksum::get(const std::string& filePath) const
 {
   std::string relPath;
   std::string relSeed;
@@ -82,7 +82,7 @@ std::string cmFilePathChecksum::get(const std::string& filePath)
 }
 
 std::string cmFilePathChecksum::getPart(const std::string& filePath,
-                                        size_t length)
+                                        size_t length) const
 {
   return get(filePath).substr(0, length);
 }
