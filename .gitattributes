@@ -1,6 +1,10 @@
 .gitattributes   export-ignore
 .hooks*          export-ignore
 
+# Custom attribute to mark sources as generated.
+# Do not perform whitespace checks.
+[attr]generated  whitespace=-tab-in-indent,-indent-with-non-tab
+
 bootstrap        crlf=input
 configure        crlf=input
 *.[1-9]          crlf=input
