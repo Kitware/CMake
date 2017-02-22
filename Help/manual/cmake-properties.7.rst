@@ -45,6 +45,7 @@ Properties of Global Scope
    /prop_gbl/TARGET_SUPPORTS_SHARED_LIBS
    /prop_gbl/USE_FOLDERS
    /prop_gbl/XCODE_EMIT_EFFECTIVE_PLATFORM_NAME
+   /prop_gbl/XCODE_GENERATE_SCHEME
 
 .. _`Directory Properties`:
 
