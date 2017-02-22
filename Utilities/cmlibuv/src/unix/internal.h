@@ -38,6 +38,10 @@
 # include "linux-syscalls.h"
 #endif /* __linux__ */
 
+#if defined(__MVS__)
+# include "os390-syscalls.h"
+#endif /* __MVS__ */
+
 #if defined(__sun)
 # include <sys/port.h>
 # include <port.h>
@@ -50,6 +54,10 @@
 #else
 # include <poll.h>
 #endif /* _AIX */
+
+#if defined(__APPLE__) && !TARGET_OS_IPHONE
+# include <AvailabilityMacros.h>
+#endif
 
 #if defined(__ANDROID__)
 int uv__pthread_sigmask(int how, const sigset_t* set, sigset_t* oset);
@@ -154,7 +162,8 @@ struct uv__stream_queued_fds_s {
     defined(__DragonFly__) || \
     defined(__FreeBSD__) || \
     defined(__FreeBSD_kernel__) || \
-    defined(__linux__)
+    defined(__linux__) || \
+    defined(__OpenBSD__)
 #define uv__cloexec uv__cloexec_ioctl
 #define uv__nonblock uv__nonblock_ioctl
 #else
@@ -268,7 +277,6 @@ int uv__make_socketpair(int fds[2], int flags);
 int uv__make_pipe(int fds[2], int flags);
 
 #if defined(__APPLE__)
-#include <AvailabilityMacros.h>
 
 int uv__fsevents_init(uv_fs_event_t* handle);
 int uv__fsevents_close(uv_fs_event_t* handle);
