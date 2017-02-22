@@ -329,10 +329,16 @@ For example:
  To support legacy CMake code, unquoted arguments may also contain
  double-quoted strings (``"..."``, possibly enclosing horizontal
  whitespace), and make-style variable references (``$(MAKEVAR)``).
+
  Unescaped double-quotes must balance, may not appear at the
  beginning of an unquoted argument, and are treated as part of the
  content.  For example, the unquoted arguments ``-Da="b c"``,
  ``-Da=$(v)``, and ``a" "b"c"d`` are each interpreted literally.
+
+ Make-style references are treated literally as part of the content
+ and do not undergo variable expansion.  They are treated as part
+ of a single argument (rather than as separate ``$``, ``(``,
+ ``MAKEVAR``, and ``)`` arguments).
 
  The above "unquoted_legacy" production represents such arguments.
  We do not recommend using legacy unquoted arguments in new code.
