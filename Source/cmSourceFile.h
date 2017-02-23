@@ -86,6 +86,7 @@ public:
 
   // Get the properties
   cmPropertyMap& GetProperties() { return this->Properties; }
+  const cmPropertyMap& GetProperties() const { return this->Properties; }
 
   /**
    * Check whether the given source file location could refer to this
