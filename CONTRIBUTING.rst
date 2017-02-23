@@ -19,6 +19,7 @@ CMake uses `Kitware's GitLab Instance`_ to manage development and code review.
 To contribute patches:
 
 #. Fork the upstream `CMake Repository`_ into a personal account.
+#. Run `Utilities/SetupForDevelopment.sh`_ for local configuration.
 #. Base all new work on the upstream ``master`` branch.
 #. Create commits making incremental, distinct, logically complete changes.
 #. Push a topic branch to a personal repository fork on GitLab.
@@ -26,6 +27,7 @@ To contribute patches:
 
 .. _`Kitware's GitLab Instance`: https://gitlab.kitware.com
 .. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
+.. _`Utilities/SetupForDevelopment.sh`: Utilities/SetupForDevelopment.sh
 
 Code Style
 ==========
