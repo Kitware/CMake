@@ -1,6 +1,11 @@
 Contributing to CMake
 *********************
 
+The following summarizes the process for contributing changes.
+See documentation on `CMake Development`_ for more information.
+
+.. _`CMake Development`: Help/dev/README.rst
+
 Community
 =========
 
