@@ -733,9 +733,8 @@ void cmQtAutoGenerators::MocFindDepends(
         const std::string match = filter.regExp.match(1);
         if (!match.empty()) {
           // Find the dependency file
-          const std::string incFile =
-            this->FindIncludedFile(absFilename, match);
-          if (!incFile.empty()) {
+          std::string incFile;
+          if (this->FindIncludedFile(incFile, absFilename, match)) {
             mocDepends[absFilename].insert(incFile);
             if (this->Verbose) {
               this->LogInfo("AutoMoc: Found dependency:\n  " +
@@ -1780,40 +1779,35 @@ std::string cmQtAutoGenerators::FindMocHeader(const std::string& basePath,
   return header;
 }
 
-std::string cmQtAutoGenerators::FindIncludedFile(
-  const std::string& sourceFile, const std::string& includeString) const
+bool cmQtAutoGenerators::FindIncludedFile(
+  std::string& absFile, const std::string& sourceFile,
+  const std::string& includeString) const
 {
+  bool success = false;
   // Search in vicinity of the source
   {
     std::string testPath = cmSystemTools::GetFilenamePath(sourceFile);
     testPath += '/';
     testPath += includeString;
     if (cmsys::SystemTools::FileExists(testPath.c_str())) {
-      return cmsys::SystemTools::GetRealPath(testPath);
+      absFile = cmsys::SystemTools::GetRealPath(testPath);
+      success = true;
     }
   }
-  // Search globally
-  return FindInIncludeDirectories(includeString);
-}
-
-/**
- * @brief Tries to find a file in the include directories
- * @return True on success
- */
-std::string cmQtAutoGenerators::FindInIncludeDirectories(
-  const std::string& includeString) const
-{
-  std::string res;
-  for (std::vector<std::string>::const_iterator iit =
-         this->MocIncludePaths.begin();
-       iit != this->MocIncludePaths.end(); ++iit) {
-    const std::string fullPath = ((*iit) + '/' + includeString);
-    if (cmsys::SystemTools::FileExists(fullPath.c_str())) {
-      res = cmsys::SystemTools::GetRealPath(fullPath);
-      break;
+  // Search in include directories
+  if (!success) {
+    for (std::vector<std::string>::const_iterator iit =
+           this->MocIncludePaths.begin();
+         iit != this->MocIncludePaths.end(); ++iit) {
+      const std::string fullPath = ((*iit) + '/' + includeString);
+      if (cmsys::SystemTools::FileExists(fullPath.c_str())) {
+        absFile = cmsys::SystemTools::GetRealPath(fullPath);
+        success = true;
+        break;
+      }
     }
   }
-  return res;
+  return success;
 }
 
 /**

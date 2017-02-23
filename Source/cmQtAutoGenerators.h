@@ -147,9 +147,8 @@ private:
   std::string FindMocHeader(const std::string& basePath,
                             const std::string& baseName,
                             const std::string& subDir) const;
-  std::string FindIncludedFile(const std::string& sourceFile,
-                               const std::string& includeString) const;
-  std::string FindInIncludeDirectories(const std::string& includeString) const;
+  bool FindIncludedFile(std::string& absFile, const std::string& sourceFile,
+                        const std::string& includeString) const;
 
   // - Target names
   std::string OriginTargetName;
