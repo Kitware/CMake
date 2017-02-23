@@ -220,6 +220,11 @@ Properties
 Modules
 -------
 
+* A :module:`CSharpUtilities` module was added to aid parameterization of
+  Visual Studio C# targets.  It provides functions to allow automated
+  setting of source file properties to support Windows Forms, WPF/XAML or
+  other technologies as needed.
+
 * The :module:`ExternalData` module learned to support multiple
   content links for one data file using different hashes, e.g.
   ``img.png.sha256`` and ``img.png.sha1``.  This allows objects

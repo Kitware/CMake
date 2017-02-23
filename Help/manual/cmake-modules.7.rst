@@ -66,6 +66,7 @@ All Modules
    /module/CPackRPM
    /module/CPack
    /module/CPackWIX
+   /module/CSharpUtilities
    /module/CTest
    /module/CTestCoverageCollectGCOV
    /module/CTestScriptMode
