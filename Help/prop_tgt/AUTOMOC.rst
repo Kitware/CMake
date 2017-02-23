@@ -57,6 +57,9 @@ See the documentation for this variable for more details.
 The global property :prop_gbl:`AUTOGEN_TARGETS_FOLDER` can be used to group the
 automoc targets together in an IDE, e.g.  in MSVS.
 
+Additional ``moc`` dependency file names can be extracted from source code
+by using :prop_tgt:`AUTOMOC_DEPEND_FILTERS`.
+
 Source C++ files can be excluded from :prop_tgt:`AUTOMOC` processing by
 enabling :prop_sf:`SKIP_AUTOMOC` or the broader :prop_sf:`SKIP_AUTOGEN`.
 

@@ -87,6 +87,9 @@ following targets by setting the :variable:`CMAKE_AUTOMOC` variable.  The
 options to pass to ``moc``. The :variable:`CMAKE_AUTOMOC_MOC_OPTIONS`
 variable may be populated to pre-set the options for all following targets.
 
+Additional ``moc`` dependency file names can be extracted from source code
+by using :prop_tgt:`AUTOMOC_DEPEND_FILTERS`.
+
 Source C++ files can be excluded from :prop_tgt:`AUTOMOC` processing by
 enabling :prop_sf:`SKIP_AUTOMOC` or the broader :prop_sf:`SKIP_AUTOGEN`.
 
