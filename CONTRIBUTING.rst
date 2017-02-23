@@ -30,9 +30,12 @@ To contribute patches:
 #. Push a topic branch to a personal repository fork on GitLab.
 #. Create a GitLab Merge Request targeting the upstream ``master`` branch.
 
+The merge request will enter the `CMake Review Process`_ for consideration.
+
 .. _`Kitware's GitLab Instance`: https://gitlab.kitware.com
 .. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
 .. _`Utilities/SetupForDevelopment.sh`: Utilities/SetupForDevelopment.sh
+.. _`CMake Review Process`: Help/dev/review.rst
 
 Code Style
 ==========
