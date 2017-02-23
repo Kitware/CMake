@@ -111,6 +111,8 @@ private:
     const std::map<std::string, std::set<std::string> >& mocDepends);
 
   // - Uic file generation
+  bool UicFindIncludedFile(std::string& absFile, const std::string& sourceFile,
+                           const std::string& includeString);
   bool UicGenerateAll(
     const std::map<std::string, std::vector<std::string> >& includedUis);
   bool UicGenerateFile(const std::string& realName,
@@ -184,6 +186,7 @@ private:
   std::vector<std::string> UicSkipList;
   std::vector<std::string> UicTargetOptions;
   std::map<std::string, std::string> UicOptions;
+  std::vector<std::string> UicSearchPaths;
   // - Rcc
   std::vector<std::string> RccSources;
   std::map<std::string, std::string> RccOptions;

@@ -26,6 +26,7 @@ set(AM_UIC_SKIP @_uic_skip@)
 set(AM_UIC_TARGET_OPTIONS @_uic_target_options@)
 set(AM_UIC_OPTIONS_FILES @_qt_uic_options_files@)
 set(AM_UIC_OPTIONS_OPTIONS @_qt_uic_options_options@)
+set(AM_UIC_SEARCH_PATHS @_uic_search_paths@)
 # RCC settings
 set(AM_RCC_SOURCES @_rcc_files@ )
 set(AM_RCC_INPUTS @_rcc_inputs@)

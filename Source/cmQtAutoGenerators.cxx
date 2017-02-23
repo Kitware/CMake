@@ -412,19 +412,23 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
       makefile->GetSafeDefinition("AM_UIC_OPTIONS_FILES"), uicFilesVec);
     cmSystemTools::ExpandListArgument(
       makefile->GetSafeDefinition("AM_UIC_OPTIONS_OPTIONS"), uicOptionsVec);
-    if (uicFilesVec.size() != uicOptionsVec.size()) {
+    // Compare list sizes
+    if (uicFilesVec.size() == uicOptionsVec.size()) {
+      for (std::vector<std::string>::iterator fileIt = uicFilesVec.begin(),
+                                              optionIt = uicOptionsVec.begin();
+           fileIt != uicFilesVec.end(); ++fileIt, ++optionIt) {
+        cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
+        this->UicOptions[*fileIt] = *optionIt;
+      }
+    } else {
       this->LogError(
         "AutoGen: Error: Uic files/options lists size missmatch in: " +
         filename);
       return false;
     }
-    for (std::vector<std::string>::iterator fileIt = uicFilesVec.begin(),
-                                            optionIt = uicOptionsVec.begin();
-         fileIt != uicFilesVec.end(); ++fileIt, ++optionIt) {
-      cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
-      this->UicOptions[*fileIt] = *optionIt;
-    }
   }
+  cmSystemTools::ExpandListArgument(
+    makefile->GetSafeDefinition("AM_UIC_SEARCH_PATHS"), this->UicSearchPaths);
 
   // - Rcc
   cmSystemTools::ExpandListArgument(
@@ -831,12 +835,7 @@ void cmQtAutoGenerators::UicParseContent(
   const char* contentChars = contentText.c_str();
   if (strstr(contentChars, "ui_") != CM_NULLPTR) {
     while (this->RegExpUicInclude.find(contentChars)) {
-      const std::string currentUi = this->RegExpUicInclude.match(1);
-      const std::string basename =
-        cmsys::SystemTools::GetFilenameWithoutLastExtension(currentUi);
-      // basename should be the part of the ui filename used for
-      // finding the correct header, so we need to remove the ui_ part
-      uisIncluded[absFilename].push_back(basename.substr(3));
+      uisIncluded[absFilename].push_back(this->RegExpUicInclude.match(1));
       contentChars += this->RegExpUicInclude.end();
     }
   }
@@ -1325,6 +1324,36 @@ bool cmQtAutoGenerators::MocGenerateFile(
   return mocGenerated;
 }
 
+bool cmQtAutoGenerators::UicFindIncludedFile(std::string& absFile,
+                                             const std::string& sourceFile,
+                                             const std::string& includeString)
+{
+  bool success = false;
+  // Search in vicinity of the source
+  {
+    std::string testPath = subDirPrefix(sourceFile);
+    testPath += includeString;
+    if (cmsys::SystemTools::FileExists(testPath.c_str())) {
+      absFile = cmsys::SystemTools::GetRealPath(testPath);
+      success = true;
+    }
+  }
+  // Search in include directories
+  if (!success) {
+    for (std::vector<std::string>::const_iterator iit =
+           this->UicSearchPaths.begin();
+         iit != this->UicSearchPaths.end(); ++iit) {
+      const std::string fullPath = ((*iit) + '/' + includeString);
+      if (cmsys::SystemTools::FileExists(fullPath.c_str())) {
+        absFile = cmsys::SystemTools::GetRealPath(fullPath);
+        success = true;
+        break;
+      }
+    }
+  }
+  return success;
+}
+
 bool cmQtAutoGenerators::UicGenerateAll(
   const std::map<std::string, std::vector<std::string> >& uisIncluded)
 {
@@ -1333,46 +1362,57 @@ bool cmQtAutoGenerators::UicGenerateAll(
   }
 
   // single map with input / output names
-  std::map<std::string, std::map<std::string, std::string> > uiGenMap;
-  std::map<std::string, std::string> testMap;
-  for (std::map<std::string, std::vector<std::string> >::const_iterator it =
-         uisIncluded.begin();
-       it != uisIncluded.end(); ++it) {
-    // source file path
-    std::string sourcePath = cmsys::SystemTools::GetFilenamePath(it->first);
-    sourcePath += '/';
-    // insert new map for source file an use new reference
-    uiGenMap[it->first] = std::map<std::string, std::string>();
-    std::map<std::string, std::string>& sourceMap = uiGenMap[it->first];
-    for (std::vector<std::string>::const_iterator sit = it->second.begin();
-         sit != it->second.end(); ++sit) {
-      const std::string& uiFileName = *sit;
-      const std::string uiInputFile = sourcePath + uiFileName + ".ui";
-      const std::string uiOutputFile = "ui_" + uiFileName + ".h";
-      sourceMap[uiInputFile] = uiOutputFile;
-      testMap[uiInputFile] = uiOutputFile;
-    }
-  }
-
-  // look for name collisions
+  std::map<std::string, std::map<std::string, std::string> > sourceGenMap;
   {
-    std::multimap<std::string, std::string> collisions;
-    if (this->NameCollisionTest(testMap, collisions)) {
-      std::ostringstream ost;
-      ost << "AutoUic: Error: The same ui_NAME.h file will be generated "
-             "from different sources.\n"
-             "To avoid this error rename the source files.\n";
-      this->LogErrorNameCollision(ost.str(), collisions);
-      return false;
+    // Collision lookup map
+    std::map<std::string, std::string> testMap;
+    // Compile maps
+    for (std::map<std::string, std::vector<std::string> >::const_iterator sit =
+           uisIncluded.begin();
+         sit != uisIncluded.end(); ++sit) {
+      const std::string& source(sit->first);
+      const std::vector<std::string>& sourceIncs(sit->second);
+      // insert new source/destination map
+      std::map<std::string, std::string>& uiGenMap = sourceGenMap[source];
+      for (std::vector<std::string>::const_iterator uit = sourceIncs.begin();
+           uit != sourceIncs.end(); ++uit) {
+        // Remove ui_ from the begin filename by substr()
+        const std::string uiBasePath = subDirPrefix(*uit);
+        const std::string uiBaseName =
+          cmsys::SystemTools::GetFilenameWithoutLastExtension(*uit).substr(3);
+        const std::string searchFileName = uiBasePath + uiBaseName + ".ui";
+        std::string uiInputFile;
+        if (UicFindIncludedFile(uiInputFile, source, searchFileName)) {
+          std::string uiOutputFile = uiBasePath + "ui_" + uiBaseName + ".h";
+          cmSystemTools::ReplaceString(uiOutputFile, "..", "__");
+          uiGenMap[uiInputFile] = uiOutputFile;
+          testMap[uiInputFile] = uiOutputFile;
+        } else {
+          this->LogError("AutoUic: Error: " + Quoted(sit->first) +
+                         "\nCould not find " + Quoted(searchFileName));
+          return false;
+        }
+      }
+    }
+    // look for name collisions
+    {
+      std::multimap<std::string, std::string> collisions;
+      if (this->NameCollisionTest(testMap, collisions)) {
+        std::ostringstream ost;
+        ost << "AutoUic: Error: The same ui_NAME.h file will be generated "
+               "from different sources.\n"
+               "To avoid this error rename the source files.\n";
+        this->LogErrorNameCollision(ost.str(), collisions);
+        return false;
+      }
     }
   }
-  testMap.clear();
 
   // generate ui files
   for (std::map<std::string,
                 std::map<std::string, std::string> >::const_iterator it =
-         uiGenMap.begin();
-       it != uiGenMap.end(); ++it) {
+         sourceGenMap.begin();
+       it != sourceGenMap.end(); ++it) {
     for (std::map<std::string, std::string>::const_iterator sit =
            it->second.begin();
          sit != it->second.end(); ++sit) {
@@ -1415,15 +1455,15 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
       std::vector<std::string> cmd;
       cmd.push_back(this->UicExecutable);
       {
-        std::vector<std::string> opts = this->UicTargetOptions;
+        std::vector<std::string> allOpts = this->UicTargetOptions;
         std::map<std::string, std::string>::const_iterator optionIt =
           this->UicOptions.find(uiInputFile);
         if (optionIt != this->UicOptions.end()) {
           std::vector<std::string> fileOpts;
           cmSystemTools::ExpandListArgument(optionIt->second, fileOpts);
-          UicMergeOptions(opts, fileOpts, (this->QtMajorVersion == "5"));
+          UicMergeOptions(allOpts, fileOpts, (this->QtMajorVersion == "5"));
         }
-        cmd.insert(cmd.end(), opts.begin(), opts.end());
+        cmd.insert(cmd.end(), allOpts.begin(), allOpts.end());
       }
       cmd.push_back("-o");
       cmd.push_back(uicFileAbs);
