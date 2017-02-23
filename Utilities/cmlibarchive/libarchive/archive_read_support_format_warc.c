@@ -531,6 +531,10 @@ time_from_tm(struct tm *t)
 #endif
 }
 
+static int la_isblank(int c) {
+	return c == ' ' || c == '\t';
+}
+
 static time_t
 xstrpisotime(const char *s, char **endptr)
 {
@@ -543,7 +547,7 @@ xstrpisotime(const char *s, char **endptr)
 
 	/* as a courtesy to our callers, and since this is a non-standard
 	 * routine, we skip leading whitespace */
-	while (isblank((unsigned char)*s))
+	while (la_isblank((unsigned char)*s))
 		++s;
 
 	/* read year */
@@ -619,7 +623,7 @@ _warc_rdver(const char *buf, size_t bsz)
 			if (memcmp(buf + 3U + end, "\r\n", 2U) != 0)
 				ver = 0U;
 		} else if (ver < 1200U) {
-			if (!isblank(*(buf + 3U + end)))
+			if (!la_isblank(*(buf + 3U + end)))
 				ver = 0U;
 		}
 	}
@@ -643,7 +647,7 @@ _warc_rdtyp(const char *buf, size_t bsz)
 	}
 
 	/* overread whitespace */
-	while (val < eol && isblank((unsigned char)*val))
+	while (val < eol && la_isblank((unsigned char)*val))
 		++val;
 
 	if (val + 8U == eol) {
@@ -673,7 +677,7 @@ _warc_rduri(const char *buf, size_t bsz)
 		return res;
 	}
 
-	while (val < eol && isblank((unsigned char)*val))
+	while (val < eol && la_isblank((unsigned char)*val))
 		++val;
 
 	/* overread URL designators */
@@ -731,7 +735,7 @@ _warc_rdlen(const char *buf, size_t bsz)
 	}
 
 	/* skip leading whitespace */
-	while (val < eol && isblank(*val))
+	while (val < eol && la_isblank(*val))
 		val++;
 	/* there must be at least one digit */
 	if (!isdigit(*val))
