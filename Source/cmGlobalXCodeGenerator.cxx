@@ -423,14 +423,12 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   // Add XCODE depend helper
   std::string dir = root->GetCurrentBinaryDirectory();
   cmCustomCommandLine makeHelper;
-  if (this->XcodeVersion < 50) {
-    makeHelper.push_back("make");
-    makeHelper.push_back("-C");
-    makeHelper.push_back(dir);
-    makeHelper.push_back("-f");
-    makeHelper.push_back(this->CurrentXCodeHackMakefile);
-    makeHelper.push_back(""); // placeholder, see below
-  }
+  makeHelper.push_back("make");
+  makeHelper.push_back("-C");
+  makeHelper.push_back(dir);
+  makeHelper.push_back("-f");
+  makeHelper.push_back(this->CurrentXCodeHackMakefile);
+  makeHelper.push_back(""); // placeholder, see below
 
   // Add ZERO_CHECK
   bool regenerate = !mf->IsOn("CMAKE_SUPPRESS_REGENERATION");
@@ -475,13 +473,12 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
       // run the depend check makefile as a post build rule
       // this will make sure that when the next target is built
       // things are up-to-date
-      if (!makeHelper.empty() &&
-          (target->GetType() == cmStateEnums::EXECUTABLE ||
-           // Nope - no post-build for OBJECT_LIRBRARY
-           //          target->GetType() == cmStateEnums::OBJECT_LIBRARY ||
-           target->GetType() == cmStateEnums::STATIC_LIBRARY ||
-           target->GetType() == cmStateEnums::SHARED_LIBRARY ||
-           target->GetType() == cmStateEnums::MODULE_LIBRARY)) {
+      if (target->GetType() == cmStateEnums::OBJECT_LIBRARY ||
+          (this->XcodeVersion < 50 &&
+           (target->GetType() == cmStateEnums::EXECUTABLE ||
+            target->GetType() == cmStateEnums::STATIC_LIBRARY ||
+            target->GetType() == cmStateEnums::SHARED_LIBRARY ||
+            target->GetType() == cmStateEnums::MODULE_LIBRARY))) {
         makeHelper[makeHelper.size() - 1] = // fill placeholder
           this->PostBuildMakeTarget(target->GetName(), "$(CONFIGURATION)");
         cmCustomCommandLines commandLines;
@@ -489,7 +486,8 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
         std::vector<std::string> no_byproducts;
         lg->GetMakefile()->AddCustomCommandToTarget(
           target->GetName(), no_byproducts, no_depends, commandLines,
-          cmTarget::POST_BUILD, "Depend check for xcode", dir.c_str());
+          cmTarget::POST_BUILD, "Depend check for xcode", dir.c_str(), true,
+          false, "", false, cmMakefile::AcceptObjectLibraryCommands);
       }
 
       if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
@@ -3129,10 +3127,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     cmXCodeObject* t = *i;
     this->AddDependAndLinkInformation(t);
   }
-  if (this->XcodeVersion < 50) {
-    // now create xcode depend hack makefile
-    this->CreateXCodeDependHackTarget(targets);
-  }
+  this->CreateXCodeDependHackTarget(targets);
   // now add all targets to the root object
   cmXCodeObject* allTargets = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   for (std::vector<cmXCodeObject*>::iterator i = targets.begin();
@@ -3183,29 +3178,9 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
     "default:\n"
     "\techo \"Do not invoke directly\"\n"
     "\n";
-  makefileStream
-    << "# For each target create a dummy rule "
-    "so the target does not have to exist\n";
   /* clang-format on */
-  std::set<std::string> emitted;
-  for (std::vector<cmXCodeObject*>::iterator i = targets.begin();
-       i != targets.end(); ++i) {
-    cmXCodeObject* target = *i;
-    std::map<std::string, cmXCodeObject::StringVec> const& deplibs =
-      target->GetDependLibraries();
-    for (std::map<std::string, cmXCodeObject::StringVec>::const_iterator ci =
-           deplibs.begin();
-         ci != deplibs.end(); ++ci) {
-      for (cmXCodeObject::StringVec::const_iterator d = ci->second.begin();
-           d != ci->second.end(); ++d) {
-        if (emitted.insert(*d).second) {
-          makefileStream << this->ConvertToRelativeForMake(d->c_str())
-                         << ":\n";
-        }
-      }
-    }
-  }
-  makefileStream << "\n\n";
+
+  std::set<std::string> dummyRules;
 
   // Write rules to help Xcode relink things at the right time.
   /* clang-format off */
@@ -3224,8 +3199,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
       cmGeneratorTarget* gt = target->GetTarget();
 
       if (gt->GetType() == cmStateEnums::EXECUTABLE ||
-          // Nope - no post-build for OBJECT_LIRBRARY
-          //         gt->GetType() == cmStateEnums::OBJECT_LIBRARY ||
+          gt->GetType() == cmStateEnums::OBJECT_LIBRARY ||
           gt->GetType() == cmStateEnums::STATIC_LIBRARY ||
           gt->GetType() == cmStateEnums::SHARED_LIBRARY ||
           gt->GetType() == cmStateEnums::MODULE_LIBRARY) {
@@ -3235,6 +3209,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
       }
 
       if (gt->GetType() == cmStateEnums::EXECUTABLE ||
+          gt->GetType() == cmStateEnums::STATIC_LIBRARY ||
           gt->GetType() == cmStateEnums::SHARED_LIBRARY ||
           gt->GetType() == cmStateEnums::MODULE_LIBRARY) {
         std::string tfull = gt->GetFullPath(configName);
@@ -3252,6 +3227,15 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           }
         }
 
+        std::vector<cmGeneratorTarget*> objlibs;
+        gt->GetObjectLibrariesCMP0026(objlibs);
+        for (std::vector<cmGeneratorTarget*>::const_iterator it =
+               objlibs.begin();
+             it != objlibs.end(); ++it) {
+          makefileStream << this->PostBuildMakeTarget((*it)->GetName(), *ct)
+                         << ": " << trel << "\n";
+        }
+
         // Create a rule for this target.
         makefileStream << trel << ":";
 
@@ -3262,10 +3246,28 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           std::vector<std::string> const& deplibs = x->second;
           for (std::vector<std::string>::const_iterator d = deplibs.begin();
                d != deplibs.end(); ++d) {
-            makefileStream << "\\\n\t"
-                           << this->ConvertToRelativeForMake(d->c_str());
+            std::string file = this->ConvertToRelativeForMake(d->c_str());
+            makefileStream << "\\\n\t" << file;
+            dummyRules.insert(file);
           }
         }
+
+        for (std::vector<cmGeneratorTarget*>::const_iterator it =
+               objlibs.begin();
+             it != objlibs.end(); ++it) {
+
+          const std::string objLibName = (*it)->GetName();
+          std::string d = this->GetObjectsNormalDirectory(this->CurrentProject,
+                                                          configName, *it);
+          d += "lib";
+          d += objLibName;
+          d += ".a";
+
+          std::string dependency = this->ConvertToRelativeForMake(d.c_str());
+          makefileStream << "\\\n\t" << dependency;
+          dummyRules.insert(dependency);
+        }
+
         // Write the action to remove the target if it is out of date.
         makefileStream << "\n";
         makefileStream << "\t/bin/rm -f "
@@ -3292,6 +3294,14 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         makefileStream << "\n\n";
       }
     }
+  }
+
+  makefileStream << "\n\n"
+                 << "# For each target create a dummy rule"
+                 << "so the target does not have to exist\n";
+  for (std::set<std::string>::const_iterator it = dummyRules.begin();
+       it != dummyRules.end(); ++it) {
+    makefileStream << *it << ":\n";
   }
 }
 
