@@ -1147,7 +1147,7 @@ std::string cmGeneratorTarget::GetCompilePDBPath(
 {
   std::string dir = this->GetCompilePDBDirectory(config);
   std::string name = this->GetCompilePDBName(config);
-  if (dir.empty() && !name.empty()) {
+  if (dir.empty() && !name.empty() && this->HaveWellDefinedOutputFiles()) {
     dir = this->GetPDBDirectory(config);
   }
   if (!dir.empty()) {
