@@ -399,6 +399,11 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
     set(ri "ri-NOTFOUND")
     find_file(ri "${item}" ${exepath} ${dirs} NO_DEFAULT_PATH)
     find_file(ri "${item}" ${exepath} ${dirs} /usr/lib)
+
+    get_filename_component(basename_item "${item}" NAME)
+    find_file(ri "${basename_item}" PATHS ${exepath} ${dirs} NO_DEFAULT_PATH)
+    find_file(ri "${basename_item}" PATHS /usr/lib)
+
     if(ri)
       #message(STATUS "info: 'find_file' in exepath/dirs (${ri})")
       set(resolved 1)
