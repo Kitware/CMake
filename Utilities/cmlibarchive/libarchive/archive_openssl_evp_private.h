@@ -33,10 +33,7 @@
 #include <string.h> /* memset */
 static inline EVP_MD_CTX *EVP_MD_CTX_new(void)
 {
-	EVP_MD_CTX *ctx = (EVP_MD_CTX *)malloc(sizeof(EVP_MD_CTX));
-	if (ctx != NULL) {
-		memset(ctx, 0, sizeof(*ctx));
-	}
+	EVP_MD_CTX *ctx = (EVP_MD_CTX *)calloc(1, sizeof(EVP_MD_CTX));
 	return ctx;
 }
 

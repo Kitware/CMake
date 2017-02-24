@@ -766,7 +766,7 @@ __la_win_entry_in_posix_pathseparator(struct archive_entry *entry)
 			has_backslash = 1;
 	}
 	/*
-	 * If there is no backslach chars, return the original.
+	 * If there is no backslash chars, return the original.
 	 */
 	if (!has_backslash)
 		return (entry);
@@ -891,7 +891,7 @@ __la_dosmaperr(unsigned long e)
 		return;
 	}
 
-	for (i = 0; i < (int)sizeof(doserrors); i++)
+	for (i = 0; i < (int)(sizeof(doserrors)/sizeof(doserrors[0])); i++)
 	{
 		if (doserrors[i].winerr == e)
 		{
