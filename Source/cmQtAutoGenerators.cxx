@@ -396,6 +396,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     } else {
       this->LogError("AutoMoc: Error: AUTOMOC_DEPEND_FILTERS list size is not "
                      "a multiple of 2");
+      return false;
     }
   }
 
