@@ -3341,8 +3341,7 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
 
   // Since the lowest available Xcode version for testing was 7.0,
   // I'm setting this as a limit then
-  if (this->GetCMakeInstance()->GetState()->GetGlobalPropertyAsBool(
-        "XCODE_GENERATE_SCHEME") &&
+  if (root->GetMakefile()->IsOn("CMAKE_XCODE_GENERATE_SCHEME") &&
       this->XcodeVersion >= 70) {
     this->OutputXCodeSharedSchemes(xcodeDir);
     this->OutputXCodeWorkspaceSettings(xcodeDir);
