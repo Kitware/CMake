@@ -3345,6 +3345,7 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
         "XCODE_GENERATE_SCHEME") &&
       this->XcodeVersion >= 70) {
     this->OutputXCodeSharedSchemes(xcodeDir, root);
+    this->OutputXCodeWorkspaceSettings(xcodeDir);
   }
 
   this->ClearXCodeObjects();
@@ -3371,6 +3372,36 @@ void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
                                   root->GetCurrentSourceDirectory());
     }
   }
+}
+
+void cmGlobalXCodeGenerator::OutputXCodeWorkspaceSettings(
+  const std::string& xcProjDir)
+{
+  std::string xcodeSharedDataDir = xcProjDir;
+  xcodeSharedDataDir += "/project.xcworkspace/xcshareddata";
+  cmSystemTools::MakeDirectory(xcodeSharedDataDir);
+
+  std::string workspaceSettingsFile = xcodeSharedDataDir;
+  workspaceSettingsFile += "/WorkspaceSettings.xcsettings";
+
+  cmGeneratedFileStream fout(workspaceSettingsFile.c_str());
+  fout.SetCopyIfDifferent(true);
+  if (!fout) {
+    return;
+  }
+
+  cmXMLWriter xout(fout);
+  xout.StartDocument();
+  xout.Doctype("plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\""
+               "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"");
+  xout.StartElement("plist");
+  xout.Attribute("version", "1.0");
+  xout.StartElement("dict");
+  xout.Element("key", "IDEWorkspaceSharedSettings_AutocreateContextsIfNeeded");
+  xout.Element("false");
+  xout.EndElement(); // dict
+  xout.EndElement(); // plist
+  xout.EndDocument();
 }
 
 void cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
