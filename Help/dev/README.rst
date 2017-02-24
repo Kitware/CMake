@@ -13,3 +13,15 @@ The process for contributing changes is the same whether or not one
 has been invited to participate directly in upstream development.
 
 .. _`CONTRIBUTING.rst`: ../../CONTRIBUTING.rst
+
+Upstream Development
+====================
+
+CMake uses `Kitware's GitLab Instance`_ to manage development, review, and
+integration of changes.  The `CMake Repository`_ holds the integration
+branches and tags.  Changes follow the `CMake Review Process`_ for
+integration.
+
+.. _`Kitware's GitLab Instance`: https://gitlab.kitware.com
+.. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
+.. _`CMake Review Process`: review.rst
