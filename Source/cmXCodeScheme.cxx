@@ -47,6 +47,7 @@ void cmXCodeScheme::WriteXCodeXCScheme(std::ostream& fout,
                                        const std::string& xcProjDir)
 {
   cmXMLWriter xout(fout);
+  xout.SetIndentationElement(std::string(3, ' '));
   xout.StartDocument();
 
   xout.StartElement("Scheme");

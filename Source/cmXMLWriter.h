@@ -60,6 +60,8 @@ public:
 
   void FragmentFile(const char* fname);
 
+  void SetIndentationElement(std::string const& element);
+
 private:
   cmXMLWriter(const cmXMLWriter&);
   cmXMLWriter& operator=(const cmXMLWriter&);
@@ -107,6 +109,7 @@ private:
 private:
   std::ostream& Output;
   std::stack<std::string, std::vector<std::string> > Elements;
+  std::string IndentationElement;
   std::size_t Level;
   bool ElementOpen;
   bool BreakAttrib;
