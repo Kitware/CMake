@@ -24,6 +24,7 @@ public:
                               const std::string& container);
 
 private:
+  const cmXCodeObject* const Target;
   const std::string& TargetName;
   const std::string& TargetId;
   const std::vector<std::string>& ConfigList;
@@ -41,6 +42,8 @@ private:
 
   std::string WriteVersionString();
   std::string FindConfiguration(const std::string& name);
+
+  static bool IsExecutable(const cmXCodeObject* target);
 };
 
 #endif

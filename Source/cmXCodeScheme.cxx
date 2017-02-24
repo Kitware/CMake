@@ -13,7 +13,8 @@
 cmXCodeScheme::cmXCodeScheme(cmXCodeObject* xcObj,
                              const std::vector<std::string>& configList,
                              unsigned int xcVersion)
-  : TargetName(xcObj->GetTarget()->GetName())
+  : Target(xcObj)
+  , TargetName(xcObj->GetTarget()->GetName())
   , TargetId(xcObj->GetId())
   , ConfigList(configList)
   , XcodeVersion(xcVersion)
@@ -135,7 +136,14 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
   xout.Attribute("debugServiceExtension", "internal");
   xout.Attribute("allowLocationSimulation", "YES");
 
-  xout.StartElement("MacroExpansion");
+  if (IsExecutable(this->Target)) {
+    xout.StartElement("BuildableProductRunnable");
+    xout.BreakAttributes();
+    xout.Attribute("runnableDebuggingMode", "0");
+
+  } else {
+    xout.StartElement("MacroExpansion");
+  }
 
   xout.StartElement("BuildableReference");
   xout.BreakAttributes();
@@ -204,4 +212,15 @@ std::string cmXCodeScheme::FindConfiguration(const std::string& name)
     return this->ConfigList[0];
 
   return name;
+}
+
+bool cmXCodeScheme::IsExecutable(const cmXCodeObject* target)
+{
+  cmGeneratorTarget* gt = target->GetTarget();
+  if (!gt) {
+    cmSystemTools::Error("Error no target on xobject\n");
+    return false;
+  }
+
+  return gt->GetType() == cmStateEnums::EXECUTABLE;
 }
