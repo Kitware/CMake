@@ -94,6 +94,15 @@ static void SettingWrite(std::ostream& ostr, const char* key,
   }
 }
 
+std::string subDirPrefix(const std::string& fileName)
+{
+  std::string res(cmsys::SystemTools::GetFilenamePath(fileName));
+  if (!res.empty()) {
+    res += '/';
+  }
+  return res;
+}
+
 static bool FileNameIsUnique(const std::string& filePath,
                              const std::map<std::string, std::string>& fileMap)
 {
@@ -845,8 +854,7 @@ bool cmQtAutoGenerators::MocParseSourceContent(
     this->LogInfo("AutoMoc: Checking " + absFilename);
   }
 
-  const std::string scannedFileAbsPath =
-    cmsys::SystemTools::GetFilenamePath(absFilename) + '/';
+  const std::string scannedFileAbsPath = subDirPrefix(absFilename);
   const std::string scannedFileBasename =
     cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
 
@@ -865,13 +873,9 @@ bool cmQtAutoGenerators::MocParseSourceContent(
     while (this->RegExpMocInclude.find(contentChars)) {
       const std::string incString = this->RegExpMocInclude.match(1);
       // Basename of the moc include
+      const std::string incSubDir(subDirPrefix(incString));
       const std::string incBasename =
         cmsys::SystemTools::GetFilenameWithoutLastExtension(incString);
-      std::string incSubDir;
-      if (incString.find_first_of('/') != std::string::npos) {
-        incSubDir = cmsys::SystemTools::GetFilenamePath(incString);
-        incSubDir += '/';
-      }
 
       // If the moc include is of the moc_foo.cpp style we expect
       // the Q_OBJECT class declaration in a header file.
@@ -1055,8 +1059,7 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
 {
   std::string basepaths[2];
   {
-    std::string bpath = cmsys::SystemTools::GetFilenamePath(absFilename);
-    bpath += '/';
+    std::string bpath = subDirPrefix(absFilename);
     bpath += cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
     // search for default header files and private header files
     basepaths[0] = bpath;
@@ -1234,14 +1237,14 @@ bool cmQtAutoGenerators::MocGenerateAll(
  */
 bool cmQtAutoGenerators::MocGenerateFile(
   const std::string& sourceFile, const std::string& mocFileName,
-  const std::string& subDirPrefix,
+  const std::string& subDir,
   const std::map<std::string, std::set<std::string> >& mocDepends)
 {
   bool mocGenerated = false;
   bool generateMoc = this->GenerateAllMoc;
 
   const std::string mocFileRel =
-    this->AutogenBuildSubDir + subDirPrefix + mocFileName;
+    this->AutogenBuildSubDir + subDir + mocFileName;
   const std::string mocFileAbs = this->CurrentBinaryDir + mocFileRel;
 
   if (!generateMoc) {
@@ -1786,8 +1789,7 @@ bool cmQtAutoGenerators::FindIncludedFile(
   bool success = false;
   // Search in vicinity of the source
   {
-    std::string testPath = cmSystemTools::GetFilenamePath(sourceFile);
-    testPath += '/';
+    std::string testPath = subDirPrefix(sourceFile);
     testPath += includeString;
     if (cmsys::SystemTools::FileExists(testPath.c_str())) {
       absFile = cmsys::SystemTools::GetRealPath(testPath);

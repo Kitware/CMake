@@ -107,7 +107,7 @@ private:
     const std::map<std::string, std::set<std::string> >& mocDepends);
   bool MocGenerateFile(
     const std::string& sourceFile, const std::string& mocFileName,
-    const std::string& subDirPrefix,
+    const std::string& subDir,
     const std::map<std::string, std::set<std::string> >& mocDepends);
 
   // - Uic file generation
