@@ -48,6 +48,7 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     #GNU
     "-fopenmp"
     #Clang
+    "-fopenmp=libiomp5"
     "-fopenmp=libomp"
     #Microsoft Visual Studio
     "/openmp"
