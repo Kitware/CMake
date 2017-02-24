@@ -115,6 +115,7 @@ Properties on Targets
    /prop_tgt/ARCHIVE_OUTPUT_NAME_CONFIG
    /prop_tgt/ARCHIVE_OUTPUT_NAME
    /prop_tgt/AUTOGEN_TARGET_DEPENDS
+   /prop_tgt/AUTOMOC_DEPEND_FILTERS
    /prop_tgt/AUTOMOC_MOC_OPTIONS
    /prop_tgt/AUTOMOC
    /prop_tgt/AUTOUIC

@@ -256,6 +256,7 @@ Variables that Control the Build
    /variable/CMAKE_ANDROID_STL_TYPE
    /variable/CMAKE_ARCHIVE_OUTPUT_DIRECTORY
    /variable/CMAKE_ARCHIVE_OUTPUT_DIRECTORY_CONFIG
+   /variable/CMAKE_AUTOMOC_DEPEND_FILTERS
    /variable/CMAKE_AUTOMOC_MOC_OPTIONS
    /variable/CMAKE_AUTOMOC
    /variable/CMAKE_AUTORCC
