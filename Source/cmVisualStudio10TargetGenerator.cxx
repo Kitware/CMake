@@ -131,6 +131,7 @@ void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   }
   stream->fill(' ');
   stream->width(indentLevel * 2);
+  (*stream) << ""; // applies indentation
   (*stream) << "<" << tag << " Condition=\"";
   (*stream) << "'$(Configuration)|$(Platform)'=='";
   (*stream) << config << "|" << this->Platform;
