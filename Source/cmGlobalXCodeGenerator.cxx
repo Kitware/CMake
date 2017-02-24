@@ -3344,7 +3344,7 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
   if (this->GetCMakeInstance()->GetState()->GetGlobalPropertyAsBool(
         "XCODE_GENERATE_SCHEME") &&
       this->XcodeVersion >= 70) {
-    this->OutputXCodeSharedSchemes(xcodeDir, root);
+    this->OutputXCodeSharedSchemes(xcodeDir);
     this->OutputXCodeWorkspaceSettings(xcodeDir);
   }
 
@@ -3357,7 +3357,7 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
 }
 
 void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
-  const std::string& xcProjDir, cmLocalGenerator* root)
+  const std::string& xcProjDir)
 {
   for (std::vector<cmXCodeObject*>::const_iterator i =
          this->XCodeObjects.begin();
@@ -3369,7 +3369,7 @@ void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
       cmXCodeScheme schm(obj, this->CurrentConfigurationTypes,
                          this->XcodeVersion);
       schm.WriteXCodeSharedScheme(xcProjDir,
-                                  root->GetCurrentSourceDirectory());
+                                  this->RelativeToSource(xcProjDir.c_str()));
     }
   }
 }

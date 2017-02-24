@@ -21,7 +21,7 @@ public:
                 unsigned int xcVersion);
 
   void WriteXCodeSharedScheme(const std::string& xcProjDir,
-                              const std::string sourceRoot);
+                              const std::string& container);
 
 private:
   const std::string& TargetName;
@@ -29,12 +29,12 @@ private:
   const std::vector<std::string>& ConfigList;
   const unsigned int XcodeVersion;
 
-  void WriteXCodeXCScheme(std::ostream& fout, const std::string& xcProjDir);
+  void WriteXCodeXCScheme(std::ostream& fout, const std::string& container);
 
-  void WriteBuildAction(cmXMLWriter& xout, const std::string& xcProjDir);
+  void WriteBuildAction(cmXMLWriter& xout, const std::string& container);
   void WriteTestAction(cmXMLWriter& xout, std::string configuration);
   void WriteLaunchAction(cmXMLWriter& xout, std::string configuration,
-                         const std::string& xcProjDir);
+                         const std::string& container);
   void WriteProfileAction(cmXMLWriter& xout, std::string configuration);
   void WriteAnalyzeAction(cmXMLWriter& xout, std::string configuration);
   void WriteArchiveAction(cmXMLWriter& xout, std::string configuration);
