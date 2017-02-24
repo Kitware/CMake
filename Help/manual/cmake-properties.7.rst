@@ -121,6 +121,7 @@ Properties on Targets
    /prop_tgt/AUTOMOC
    /prop_tgt/AUTOUIC
    /prop_tgt/AUTOUIC_OPTIONS
+   /prop_tgt/AUTOUIC_SEARCH_PATHS
    /prop_tgt/AUTORCC
    /prop_tgt/AUTORCC_OPTIONS
    /prop_tgt/BINARY_DIR

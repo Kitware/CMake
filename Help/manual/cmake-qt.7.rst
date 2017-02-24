@@ -104,7 +104,9 @@ be run, and to create rules to execute ``uic`` at the appropriate time.
 
 If a preprocessor ``#include`` directive is found which matches
 ``ui_<basename>.h``, and a ``<basename>.ui`` file exists, then ``uic`` will
-be executed to generate the appropriate file.
+be executed to generate the appropriate file. The ``<basename>.ui`` file is
+searched for first in the vicinity of including file and afterwards in the
+optional :prop_tgt:`AUTOUIC_SEARCH_PATHS` of the target.
 
 The generated generated ``ui_*.h`` files are placed in the
 ``<CMAKE_CURRENT_BINARY_DIR>/<TARGETNAME>_autogen/include`` directory which is

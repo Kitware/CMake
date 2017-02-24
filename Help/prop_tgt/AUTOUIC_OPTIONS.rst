@@ -1,7 +1,7 @@
 AUTOUIC_OPTIONS
 ---------------
 
-Additional options for uic when using :prop_tgt:`AUTOUIC`
+Additional options for ``uic`` when using :prop_tgt:`AUTOUIC`
 
 This property holds additional command line options which will be used when
 ``uic`` is executed during the build via :prop_tgt:`AUTOUIC`, i.e. it is
