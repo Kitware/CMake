@@ -308,7 +308,8 @@ public:
                   this->DataSymbols.insert(symbol);
                } else {
                   if ( pSymbolTable->Type  ||
-                       !(SectChar & IMAGE_SCN_MEM_READ)) {
+                       !(SectChar & IMAGE_SCN_MEM_READ) ||
+                       (SectChar & IMAGE_SCN_MEM_EXECUTE)) {
                      this->Symbols.insert(symbol);
                   } else {
                      // printf(" strange symbol: %s \n",symbol.c_str());
