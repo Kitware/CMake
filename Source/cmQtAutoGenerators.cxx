@@ -740,6 +740,7 @@ void cmQtAutoGenerators::MocFindDepends(
     // regular expression check
     if (contentText.find(filter.key) != std::string::npos) {
       // Run regular expression check loop
+      const std::string sourcePath = subDirPrefix(absFilename);
       const char* contentChars = contentText.c_str();
       while (filter.regExp.find(contentChars)) {
         // Evaluate match
@@ -747,7 +748,7 @@ void cmQtAutoGenerators::MocFindDepends(
         if (!match.empty()) {
           // Find the dependency file
           std::string incFile;
-          if (this->FindIncludedFile(incFile, absFilename, match)) {
+          if (this->MocFindIncludedFile(incFile, sourcePath, match)) {
             mocDepends[absFilename].insert(incFile);
             if (this->Verbose) {
               this->LogInfo("AutoMoc: Found dependency:\n  " +
@@ -886,7 +887,7 @@ bool cmQtAutoGenerators::MocParseSourceContent(
         // Remove the moc_ part
         const std::string incRealBasename = incBasename.substr(4);
         const std::string headerToMoc =
-          this->FindMocHeader(scannedFileAbsPath, incRealBasename, incSubDir);
+          this->MocFindHeader(scannedFileAbsPath, incSubDir + incRealBasename);
         if (!headerToMoc.empty()) {
           // Register moc job
           mocsIncluded[headerToMoc] = incString;
@@ -919,7 +920,7 @@ bool cmQtAutoGenerators::MocParseSourceContent(
           } else {
             // In relaxed mode try to find a header instead but issue a warning
             const std::string headerToMoc =
-              this->FindMocHeader(scannedFileAbsPath, incBasename, incSubDir);
+              this->MocFindHeader(scannedFileAbsPath, incSubDir + incBasename);
             if (!headerToMoc.empty()) {
               // This is for KDE4 compatibility:
               fileToMoc = headerToMoc;
@@ -1782,39 +1783,22 @@ bool cmQtAutoGenerators::FindHeader(std::string& header,
   return false;
 }
 
-bool cmQtAutoGenerators::FindHeaderGlobal(
-  std::string& header, const std::string& testBasePath) const
-{
-  for (std::vector<std::string>::const_iterator iit =
-         this->MocIncludePaths.begin();
-       iit != this->MocIncludePaths.end(); ++iit) {
-    const std::string fullPath = ((*iit) + '/' + testBasePath);
-    if (FindHeader(header, fullPath)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-std::string cmQtAutoGenerators::FindMocHeader(const std::string& basePath,
-                                              const std::string& baseName,
-                                              const std::string& subDir) const
+std::string cmQtAutoGenerators::MocFindHeader(
+  const std::string& sourcePath, const std::string& includeBase) const
 {
   std::string header;
-  do {
-    if (!subDir.empty()) {
-      if (this->FindHeader(header, basePath + subDir + baseName)) {
+  // Search in vicinity of the source
+  if (!this->FindHeader(header, sourcePath + includeBase)) {
+    // Search in include directories
+    for (std::vector<std::string>::const_iterator iit =
+           this->MocIncludePaths.begin();
+         iit != this->MocIncludePaths.end(); ++iit) {
+      const std::string fullPath = ((*iit) + '/' + includeBase);
+      if (FindHeader(header, fullPath)) {
         break;
       }
     }
-    if (this->FindHeader(header, basePath + baseName)) {
-      break;
-    }
-    // Try include directories
-    if (this->FindHeaderGlobal(header, subDir + baseName)) {
-      break;
-    }
-  } while (false);
+  }
   // Sanitize
   if (!header.empty()) {
     header = cmsys::SystemTools::GetRealPath(header);
@@ -1822,14 +1806,14 @@ std::string cmQtAutoGenerators::FindMocHeader(const std::string& basePath,
   return header;
 }
 
-bool cmQtAutoGenerators::FindIncludedFile(
-  std::string& absFile, const std::string& sourceFile,
+bool cmQtAutoGenerators::MocFindIncludedFile(
+  std::string& absFile, const std::string& sourcePath,
   const std::string& includeString) const
 {
   bool success = false;
   // Search in vicinity of the source
   {
-    std::string testPath = subDirPrefix(sourceFile);
+    std::string testPath = sourcePath;
     testPath += includeString;
     if (cmsys::SystemTools::FileExists(testPath.c_str())) {
       absFile = cmsys::SystemTools::GetRealPath(testPath);

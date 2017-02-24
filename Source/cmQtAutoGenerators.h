@@ -144,13 +144,11 @@ private:
   bool MakeParentDirectory(const std::string& filename) const;
 
   bool FindHeader(std::string& header, const std::string& testBasePath) const;
-  bool FindHeaderGlobal(std::string& header,
-                        const std::string& testBasePath) const;
-  std::string FindMocHeader(const std::string& basePath,
-                            const std::string& baseName,
-                            const std::string& subDir) const;
-  bool FindIncludedFile(std::string& absFile, const std::string& sourceFile,
-                        const std::string& includeString) const;
+
+  std::string MocFindHeader(const std::string& sourcePath,
+                            const std::string& includeBase) const;
+  bool MocFindIncludedFile(std::string& absFile, const std::string& sourceFile,
+                           const std::string& includeString) const;
 
   // - Target names
   std::string OriginTargetName;
