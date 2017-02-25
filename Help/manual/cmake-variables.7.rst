@@ -130,6 +130,7 @@ Variables that Change Behavior
    /variable/CMAKE_SYSROOT
    /variable/CMAKE_FIND_APPBUNDLE
    /variable/CMAKE_FIND_FRAMEWORK
+   /variable/CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX
    /variable/CMAKE_FIND_LIBRARY_PREFIXES
    /variable/CMAKE_FIND_LIBRARY_SUFFIXES
    /variable/CMAKE_FIND_NO_INSTALL_PREFIX
