@@ -15,6 +15,7 @@ cmXCodeScheme::cmXCodeScheme(cmXCodeObject* xcObj,
                              unsigned int xcVersion)
   : Target(xcObj)
   , TargetName(xcObj->GetTarget()->GetName())
+  , BuildableName(xcObj->GetTarget()->GetFullName())
   , TargetId(xcObj->GetId())
   , ConfigList(configList)
   , XcodeVersion(xcVersion)
@@ -87,7 +88,7 @@ void cmXCodeScheme::WriteBuildAction(cmXMLWriter& xout,
   xout.BreakAttributes();
   xout.Attribute("BuildableIdentifier", "primary");
   xout.Attribute("BlueprintIdentifier", this->TargetId);
-  xout.Attribute("BuildableName", this->TargetName);
+  xout.Attribute("BuildableName", this->BuildableName);
   xout.Attribute("BlueprintName", this->TargetName);
   xout.Attribute("ReferencedContainer", "container:" + container);
   xout.EndElement();
@@ -149,7 +150,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
   xout.BreakAttributes();
   xout.Attribute("BuildableIdentifier", "primary");
   xout.Attribute("BlueprintIdentifier", this->TargetId);
-  xout.Attribute("BuildableName", this->TargetName);
+  xout.Attribute("BuildableName", this->BuildableName);
   xout.Attribute("BlueprintName", this->TargetName);
   xout.Attribute("ReferencedContainer", "container:" + container);
   xout.EndElement();

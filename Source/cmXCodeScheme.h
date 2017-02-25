@@ -26,6 +26,7 @@ public:
 private:
   const cmXCodeObject* const Target;
   const std::string& TargetName;
+  const std::string BuildableName;
   const std::string& TargetId;
   const std::vector<std::string>& ConfigList;
   const unsigned int XcodeVersion;
