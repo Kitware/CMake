@@ -117,4 +117,4 @@ except:
     proc.terminate()
     raise
 
-sys.exit(0)
+sys.exit(proc.returncode)
