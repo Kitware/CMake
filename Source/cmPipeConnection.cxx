@@ -7,7 +7,7 @@
 
 cmPipeConnection::cmPipeConnection(const std::string& name,
                                    cmConnectionBufferStrategy* bufferStrategy)
-  : cmConnection(bufferStrategy)
+  : cmEventBasedConnection(bufferStrategy)
   , PipeName(name)
 {
 }
@@ -26,8 +26,7 @@ void cmPipeConnection::Connect(uv_stream_t* server)
 
   this->ClientPipe = new uv_pipe_t();
   uv_pipe_init(this->Server->GetLoop(), this->ClientPipe, 0);
-  this->ClientPipe->data = static_cast<cmConnection*>(this);
-
+  this->ClientPipe->data = static_cast<cmEventBasedConnection*>(this);
   auto client = reinterpret_cast<uv_stream_t*>(this->ClientPipe);
   if (uv_accept(server, client) != 0) {
     uv_close(reinterpret_cast<uv_handle_t*>(client), &on_close_delete);
@@ -45,7 +44,7 @@ bool cmPipeConnection::OnServeStart(std::string* errorMessage)
 {
   this->ServerPipe = new uv_pipe_t();
   uv_pipe_init(this->Server->GetLoop(), this->ServerPipe, 0);
-  this->ServerPipe->data = static_cast<cmConnection*>(this);
+  this->ServerPipe->data = static_cast<cmEventBasedConnection*>(this);
 
   int r;
   if ((r = uv_pipe_bind(this->ServerPipe, this->PipeName.c_str())) != 0) {
@@ -63,7 +62,7 @@ bool cmPipeConnection::OnServeStart(std::string* errorMessage)
   return cmConnection::OnServeStart(errorMessage);
 }
 
-bool cmPipeConnection::OnServerShuttingDown()
+bool cmPipeConnection::OnConnectionShuttingDown()
 {
   if (this->ClientPipe) {
     uv_close(reinterpret_cast<uv_handle_t*>(this->ClientPipe),
@@ -77,5 +76,5 @@ bool cmPipeConnection::OnServerShuttingDown()
   this->WriteStream = nullptr;
   this->ReadStream = nullptr;
 
-  return cmConnection::OnServerShuttingDown();
+  return cmConnection::OnConnectionShuttingDown();
 }

@@ -32,14 +32,14 @@ private:
 /***
  * Generic connection over std io interfaces -- tty
  */
-class cmStdIoConnection : public cmConnection
+class cmStdIoConnection : public cmEventBasedConnection
 {
 public:
   cmStdIoConnection(cmConnectionBufferStrategy* bufferStrategy);
 
   void SetServer(cmServerBase* s) override;
 
-  bool OnServerShuttingDown() override;
+  bool OnConnectionShuttingDown() override;
 
   bool OnServeStart(std::string* pString) override;
 

@@ -46,43 +46,57 @@ public:
   // TODO: There should be a callback / flag set for errors
 };
 
-/***
- * Abstraction of a connection; ties in event callbacks from libuv and notifies
- * the server when appropriate
- */
 class cmConnection
 {
   CM_DISABLE_COPY(cmConnection)
 
 public:
+  cmConnection() {}
+
+  virtual void WriteData(const std::string& data) = 0;
+
   virtual ~cmConnection();
 
+  virtual bool OnConnectionShuttingDown();
+
+  virtual bool IsOpen() const = 0;
+
+  virtual void SetServer(cmServerBase* s);
+
+  virtual void ProcessRequest(const std::string& request);
+
+  virtual bool OnServeStart(std::string* pString);
+
+protected:
+  cmServerBase* Server = nullptr;
+};
+
+/***
+ * Abstraction of a connection; ties in event callbacks from libuv and notifies
+ * the server when appropriate
+ */
+class cmEventBasedConnection : public cmConnection
+{
+
+public:
   /***
    * @param bufferStrategy If no strategy is given, it will process the raw
    * chunks as they come in. The connection
    * owns the pointer given.
    */
-  cmConnection(cmConnectionBufferStrategy* bufferStrategy = nullptr);
+  cmEventBasedConnection(cmConnectionBufferStrategy* bufferStrategy = nullptr);
 
   virtual void Connect(uv_stream_t* server);
 
   virtual void ReadData(const std::string& data);
 
-  virtual bool OnServeStart(std::string* errString);
+  bool IsOpen() const override;
 
-  virtual bool OnServerShuttingDown();
-
-  virtual bool IsOpen() const;
-
-  virtual void WriteData(const std::string& data);
-
-  virtual void ProcessRequest(const std::string& request);
-
-  virtual void SetServer(cmServerBase* s);
+  void WriteData(const std::string& data) override;
+  bool OnConnectionShuttingDown() override;
 
   virtual void OnDisconnect(int errorCode);
   uv_stream_t* ReadStream = nullptr;
-  cmServerBase* Server = nullptr;
   uv_stream_t* WriteStream = nullptr;
 
   static void on_close(uv_handle_t* handle);

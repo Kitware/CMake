@@ -14,18 +14,19 @@ struct write_req_t
   uv_buf_t buf;
 };
 
-void cmConnection::on_alloc_buffer(uv_handle_t* handle, size_t suggested_size,
-                                   uv_buf_t* buf)
+void cmEventBasedConnection::on_alloc_buffer(uv_handle_t* handle,
+                                             size_t suggested_size,
+                                             uv_buf_t* buf)
 {
   (void)(handle);
   char* rawBuffer = new char[suggested_size];
   *buf = uv_buf_init(rawBuffer, static_cast<unsigned int>(suggested_size));
 }
 
-void cmConnection::on_read(uv_stream_t* stream, ssize_t nread,
-                           const uv_buf_t* buf)
+void cmEventBasedConnection::on_read(uv_stream_t* stream, ssize_t nread,
+                                     const uv_buf_t* buf)
 {
-  auto conn = reinterpret_cast<cmConnection*>(stream->data);
+  auto conn = reinterpret_cast<cmEventBasedConnection*>(stream->data);
   if (conn) {
     if (nread >= 0) {
       conn->ReadData(std::string(buf->base, buf->base + nread));
@@ -37,16 +38,16 @@ void cmConnection::on_read(uv_stream_t* stream, ssize_t nread,
   delete[](buf->base);
 }
 
-void cmConnection::on_close_delete(uv_handle_t* handle)
+void cmEventBasedConnection::on_close_delete(uv_handle_t* handle)
 {
   delete handle;
 }
 
-void cmConnection::on_close(uv_handle_t*)
+void cmEventBasedConnection::on_close(uv_handle_t* /*handle*/)
 {
 }
 
-void cmConnection::on_write(uv_write_t* req, int status)
+void cmEventBasedConnection::on_write(uv_write_t* req, int status)
 {
   (void)(status);
 
@@ -56,22 +57,22 @@ void cmConnection::on_write(uv_write_t* req, int status)
   delete wr;
 }
 
-void cmConnection::on_new_connection(uv_stream_t* stream, int status)
+void cmEventBasedConnection::on_new_connection(uv_stream_t* stream, int status)
 {
   (void)(status);
-  auto conn = reinterpret_cast<cmConnection*>(stream->data);
+  auto conn = reinterpret_cast<cmEventBasedConnection*>(stream->data);
 
   if (conn) {
     conn->Connect(stream);
   }
 }
 
-bool cmConnection::IsOpen() const
+bool cmEventBasedConnection::IsOpen() const
 {
   return this->WriteStream != CM_NULLPTR;
 }
 
-void cmConnection::WriteData(const std::string& data)
+void cmEventBasedConnection::WriteData(const std::string& data)
 {
   assert(this->WriteStream);
 
@@ -86,12 +87,7 @@ void cmConnection::WriteData(const std::string& data)
            on_write);
 }
 
-cmConnection::~cmConnection()
-{
-  OnServerShuttingDown();
-}
-
-void cmConnection::ReadData(const std::string& data)
+void cmEventBasedConnection::ReadData(const std::string& data)
 {
   this->RawReadBuffer += data;
   if (BufferStrategy) {
@@ -107,19 +103,37 @@ void cmConnection::ReadData(const std::string& data)
   }
 }
 
-void cmConnection::SetServer(cmServerBase* s)
-{
-  Server = s;
-}
-
-cmConnection::cmConnection(cmConnectionBufferStrategy* bufferStrategy)
+cmEventBasedConnection::cmEventBasedConnection(
+  cmConnectionBufferStrategy* bufferStrategy)
   : BufferStrategy(bufferStrategy)
 {
 }
 
-void cmConnection::Connect(uv_stream_t*)
+void cmEventBasedConnection::Connect(uv_stream_t* server)
 {
+  (void)server;
   Server->OnConnected(nullptr);
+}
+
+void cmEventBasedConnection::OnDisconnect(int onerror)
+{
+  (void)onerror;
+  this->OnConnectionShuttingDown();
+  this->Server->OnDisconnect(this);
+}
+
+cmConnection::~cmConnection()
+{
+}
+
+bool cmConnection::OnConnectionShuttingDown()
+{
+  return true;
+}
+
+void cmConnection::SetServer(cmServerBase* s)
+{
+  Server = s;
 }
 
 void cmConnection::ProcessRequest(const std::string& request)
@@ -133,13 +147,7 @@ bool cmConnection::OnServeStart(std::string* errString)
   return true;
 }
 
-void cmConnection::OnDisconnect(int errorCode)
-{
-  (void)errorCode;
-  this->Server->OnDisconnect(this);
-}
-
-bool cmConnection::OnServerShuttingDown()
+bool cmEventBasedConnection::OnConnectionShuttingDown()
 {
   this->WriteStream->data = nullptr;
   this->ReadStream->data = nullptr;

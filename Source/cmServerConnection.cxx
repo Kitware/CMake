@@ -7,7 +7,7 @@
 
 cmStdIoConnection::cmStdIoConnection(
   cmConnectionBufferStrategy* bufferStrategy)
-  : cmConnection(bufferStrategy)
+  : cmEventBasedConnection(bufferStrategy)
   , Input()
   , Output()
 {
@@ -23,13 +23,13 @@ void cmStdIoConnection::SetServer(cmServerBase* s)
     this->Input.tty = new uv_tty_t();
     uv_tty_init(this->Server->GetLoop(), this->Input.tty, 0, 1);
     uv_tty_set_mode(this->Input.tty, UV_TTY_MODE_NORMAL);
-    this->Input.tty->data = static_cast<cmConnection*>(this);
+    this->Input.tty->data = static_cast<cmEventBasedConnection*>(this);
     this->ReadStream = reinterpret_cast<uv_stream_t*>(this->Input.tty);
 
     this->Output.tty = new uv_tty_t();
     uv_tty_init(this->Server->GetLoop(), this->Output.tty, 1, 0);
     uv_tty_set_mode(this->Output.tty, UV_TTY_MODE_NORMAL);
-    this->Output.tty->data = static_cast<cmConnection*>(this);
+    this->Output.tty->data = static_cast<cmEventBasedConnection*>(this);
     this->WriteStream = reinterpret_cast<uv_stream_t*>(this->Output.tty);
   } else {
     usesTty = false;
@@ -37,13 +37,13 @@ void cmStdIoConnection::SetServer(cmServerBase* s)
     this->Input.pipe = new uv_pipe_t();
     uv_pipe_init(this->Server->GetLoop(), this->Input.pipe, 0);
     uv_pipe_open(this->Input.pipe, 0);
-    this->Input.pipe->data = static_cast<cmConnection*>(this);
+    this->Input.pipe->data = static_cast<cmEventBasedConnection*>(this);
     this->ReadStream = reinterpret_cast<uv_stream_t*>(this->Input.pipe);
 
     this->Output.pipe = new uv_pipe_t();
     uv_pipe_init(this->Server->GetLoop(), this->Output.pipe, 0);
     uv_pipe_open(this->Output.pipe, 1);
-    this->Output.pipe->data = static_cast<cmConnection*>(this);
+    this->Output.pipe->data = static_cast<cmEventBasedConnection*>(this);
     this->WriteStream = reinterpret_cast<uv_stream_t*>(this->Output.pipe);
   }
 }
@@ -55,9 +55,9 @@ bool cmStdIoConnection::OnServeStart(std::string* pString)
   return cmConnection::OnServeStart(pString);
 }
 
-bool cmStdIoConnection::OnServerShuttingDown()
+bool cmStdIoConnection::OnConnectionShuttingDown()
 {
-  cmConnection::OnServerShuttingDown();
+  cmEventBasedConnection::OnConnectionShuttingDown();
 
   if (usesTty) {
     uv_read_stop(reinterpret_cast<uv_stream_t*>(this->Input.tty));

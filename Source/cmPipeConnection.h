@@ -9,7 +9,7 @@
 
 #include <string>
 
-class cmPipeConnection : public cmConnection
+class cmPipeConnection : public cmEventBasedConnection
 {
 public:
   cmPipeConnection(const std::string& name,
@@ -17,7 +17,7 @@ public:
 
   bool OnServeStart(std::string* pString) override;
 
-  bool OnServerShuttingDown() override;
+  bool OnConnectionShuttingDown() override;
 
   void Connect(uv_stream_t* server) override;
 
