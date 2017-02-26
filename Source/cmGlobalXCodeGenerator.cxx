@@ -1154,8 +1154,12 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
           // dstPath in frameworks is relative to Versions/<version>
           ostr << mit->first;
         } else if (mit->first != "MacOS") {
-          // dstPath in bundles is relative to Contents/MacOS
-          ostr << "../" << mit->first.c_str();
+          if (gtgt->Target->GetMakefile()->PlatformIsAppleIos()) {
+            ostr << mit->first;
+          } else {
+            // dstPath in bundles is relative to Contents/MacOS
+            ostr << "../" << mit->first;
+          }
         }
         copyFilesBuildPhase->AddAttribute("dstPath",
                                           this->CreateString(ostr.str()));
