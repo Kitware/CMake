@@ -3317,6 +3317,8 @@ cmGeneratorTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const
       flags.MacFolder = location;
       if (strcmp(location, "Resources") == 0) {
         flags.Type = cmGeneratorTarget::SourceFileTypeResource;
+      } else if (cmSystemTools::StringStartsWith(location, "Resources/")) {
+        flags.Type = cmGeneratorTarget::SourceFileTypeDeepResource;
       } else {
         flags.Type = cmGeneratorTarget::SourceFileTypeMacContent;
       }

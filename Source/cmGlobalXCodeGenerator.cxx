@@ -1177,6 +1177,46 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
       }
     }
 
+    // create vector of "resource content file" build phases - only for
+    // framework or bundle targets
+    if (isFrameworkTarget || isBundleTarget || isCFBundleTarget) {
+      typedef std::map<std::string, std::vector<cmSourceFile*> >
+        mapOfVectorOfSourceFiles;
+      mapOfVectorOfSourceFiles bundleFiles;
+      for (std::vector<cmSourceFile*>::const_iterator i = classes.begin();
+           i != classes.end(); ++i) {
+        cmGeneratorTarget::SourceFileFlags tsFlags =
+          gtgt->GetTargetSourceFileFlags(*i);
+        if (tsFlags.Type == cmGeneratorTarget::SourceFileTypeDeepResource) {
+          bundleFiles[tsFlags.MacFolder].push_back(*i);
+        }
+      }
+      mapOfVectorOfSourceFiles::iterator mit;
+      for (mit = bundleFiles.begin(); mit != bundleFiles.end(); ++mit) {
+        cmXCodeObject* copyFilesBuildPhase =
+          this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
+        copyFilesBuildPhase->SetComment("Copy files");
+        copyFilesBuildPhase->AddAttribute("buildActionMask",
+                                          this->CreateString("2147483647"));
+        copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
+                                          this->CreateString("7"));
+        const std::string dstPath = mit->first.substr(strlen("Resources/"));
+        copyFilesBuildPhase->AddAttribute("dstPath",
+                                          this->CreateString(dstPath));
+        copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
+                                          this->CreateString("0"));
+        buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+        copyFilesBuildPhase->AddAttribute("files", buildFiles);
+        std::vector<cmSourceFile*>::iterator sfIt;
+        for (sfIt = mit->second.begin(); sfIt != mit->second.end(); ++sfIt) {
+          cmXCodeObject* xsf = this->CreateXCodeSourceFile(
+            this->CurrentLocalGenerator, *sfIt, gtgt);
+          buildFiles->AddObject(xsf);
+        }
+        contentBuildPhases.push_back(copyFilesBuildPhase);
+      }
+    }
+
     // create framework build phase
     cmXCodeObject* frameworkBuildPhase = 0;
     if (!externalObjFiles.empty()) {

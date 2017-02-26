@@ -422,7 +422,9 @@ public:
     SourceFileTypePublicHeader,  // is in "PUBLIC_HEADER" target property
     SourceFileTypeResource,      // is in "RESOURCE" target property *or*
                                  // has MACOSX_PACKAGE_LOCATION=="Resources"
-    SourceFileTypeMacContent     // has MACOSX_PACKAGE_LOCATION!="Resources"
+    SourceFileTypeDeepResource,  // MACOSX_PACKAGE_LOCATION starts with
+                                 // "Resources/"
+    SourceFileTypeMacContent     // has MACOSX_PACKAGE_LOCATION!="Resources[/]"
   };
   struct SourceFileFlags
   {
