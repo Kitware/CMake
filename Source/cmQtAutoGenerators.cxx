@@ -332,13 +332,20 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     makefile->GetSafeDefinition("AM_ORIGIN_TARGET_NAME");
   this->AutogenTargetName = makefile->GetSafeDefinition("AM_TARGET_NAME");
 
-  // - Directories
+  // - Files and directories
   this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
   this->ProjectBinaryDir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
   this->CurrentSourceDir =
     makefile->GetSafeDefinition("AM_CMAKE_CURRENT_SOURCE_DIR");
   this->CurrentBinaryDir =
     makefile->GetSafeDefinition("AM_CMAKE_CURRENT_BINARY_DIR");
+
+  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SOURCES"),
+                                    this->Sources);
+  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_HEADERS"),
+                                    this->Headers);
+  this->IncludeProjectDirsBefore =
+    makefile->IsOn("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE");
 
   // - Qt environment
   this->QtMajorVersion = makefile->GetSafeDefinition("AM_QT_VERSION_MAJOR");
@@ -352,137 +359,139 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
                    Quoted(this->QtMajorVersion));
     return false;
   }
-
+  // Qt executables
   this->MocExecutable = makefile->GetSafeDefinition("AM_QT_MOC_EXECUTABLE");
   this->UicExecutable = makefile->GetSafeDefinition("AM_QT_UIC_EXECUTABLE");
   this->RccExecutable = makefile->GetSafeDefinition("AM_QT_RCC_EXECUTABLE");
 
-  // - File Lists
-  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SOURCES"),
-                                    this->Sources);
-  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_HEADERS"),
-                                    this->Headers);
-
   // - Moc
-  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_MOC_SKIP"),
-                                    this->MocSkipList);
-  cmSystemTools::ExpandListArgument(
-    GetConfigDefinition(makefile, "AM_MOC_COMPILE_DEFINITIONS", config),
-    this->MocDefinitions);
-  cmSystemTools::ExpandListArgument(
-    GetConfigDefinition(makefile, "AM_MOC_INCLUDES", config),
-    this->MocIncludePaths);
-  cmSystemTools::ExpandListArgument(
-    makefile->GetSafeDefinition("AM_MOC_OPTIONS"), this->MocOptions);
-  {
-    std::vector<std::string> mocDependFilters;
+  if (this->MocEnabled()) {
     cmSystemTools::ExpandListArgument(
-      makefile->GetSafeDefinition("AM_MOC_DEPEND_FILTERS"), mocDependFilters);
-    // Insert Q_PLUGIN_METADATA dependency filter
-    if (this->QtMajorVersion != "4") {
-      this->MocDependFilterPush("Q_PLUGIN_METADATA",
-                                "[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\("
-                                "[^\\)]*FILE[ \t]*\"([^\"]+)\"");
-    }
-    // Insert user defined dependency filters
-    if ((mocDependFilters.size() % 2) == 0) {
-      for (std::vector<std::string>::const_iterator dit =
-             mocDependFilters.begin();
-           dit != mocDependFilters.end(); dit += 2) {
-        if (!this->MocDependFilterPush(*dit, *(dit + 1))) {
-          return false;
-        }
+      makefile->GetSafeDefinition("AM_MOC_SKIP"), this->MocSkipList);
+    cmSystemTools::ExpandListArgument(
+      GetConfigDefinition(makefile, "AM_MOC_COMPILE_DEFINITIONS", config),
+      this->MocDefinitions);
+    cmSystemTools::ExpandListArgument(
+      GetConfigDefinition(makefile, "AM_MOC_INCLUDES", config),
+      this->MocIncludePaths);
+    cmSystemTools::ExpandListArgument(
+      makefile->GetSafeDefinition("AM_MOC_OPTIONS"), this->MocOptions);
+    {
+      std::vector<std::string> mocDependFilters;
+      cmSystemTools::ExpandListArgument(
+        makefile->GetSafeDefinition("AM_MOC_DEPEND_FILTERS"),
+        mocDependFilters);
+      // Insert Q_PLUGIN_METADATA dependency filter
+      if (this->QtMajorVersion != "4") {
+        this->MocDependFilterPush("Q_PLUGIN_METADATA",
+                                  "[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\("
+                                  "[^\\)]*FILE[ \t]*\"([^\"]+)\"");
       }
-    } else {
-      this->LogError("AutoMoc: Error: AUTOMOC_DEPEND_FILTERS list size is not "
-                     "a multiple of 2");
-      return false;
+      // Insert user defined dependency filters
+      if ((mocDependFilters.size() % 2) == 0) {
+        for (std::vector<std::string>::const_iterator dit =
+               mocDependFilters.begin();
+             dit != mocDependFilters.end(); dit += 2) {
+          if (!this->MocDependFilterPush(*dit, *(dit + 1))) {
+            return false;
+          }
+        }
+      } else {
+        this->LogError(
+          "AutoMoc: Error: AUTOMOC_DEPEND_FILTERS list size is not "
+          "a multiple of 2");
+        return false;
+      }
     }
+
+    this->MocRelaxedMode = makefile->IsOn("AM_MOC_RELAXED_MODE");
   }
 
   // - Uic
-  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_UIC_SKIP"),
-                                    this->UicSkipList);
-  cmSystemTools::ExpandListArgument(
-    GetConfigDefinition(makefile, "AM_UIC_TARGET_OPTIONS", config),
-    this->UicTargetOptions);
-  {
-    std::vector<std::string> uicFilesVec;
-    std::vector<std::string> uicOptionsVec;
+  if (this->UicEnabled()) {
     cmSystemTools::ExpandListArgument(
-      makefile->GetSafeDefinition("AM_UIC_OPTIONS_FILES"), uicFilesVec);
+      makefile->GetSafeDefinition("AM_UIC_SKIP"), this->UicSkipList);
     cmSystemTools::ExpandListArgument(
-      makefile->GetSafeDefinition("AM_UIC_OPTIONS_OPTIONS"), uicOptionsVec);
-    // Compare list sizes
-    if (uicFilesVec.size() == uicOptionsVec.size()) {
-      for (std::vector<std::string>::iterator fileIt = uicFilesVec.begin(),
-                                              optionIt = uicOptionsVec.begin();
-           fileIt != uicFilesVec.end(); ++fileIt, ++optionIt) {
-        cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
-        this->UicOptions[*fileIt] = *optionIt;
+      GetConfigDefinition(makefile, "AM_UIC_TARGET_OPTIONS", config),
+      this->UicTargetOptions);
+    {
+      std::vector<std::string> uicFilesVec;
+      std::vector<std::string> uicOptionsVec;
+      cmSystemTools::ExpandListArgument(
+        makefile->GetSafeDefinition("AM_UIC_OPTIONS_FILES"), uicFilesVec);
+      cmSystemTools::ExpandListArgument(
+        makefile->GetSafeDefinition("AM_UIC_OPTIONS_OPTIONS"), uicOptionsVec);
+      // Compare list sizes
+      if (uicFilesVec.size() == uicOptionsVec.size()) {
+        for (std::vector<std::string>::iterator
+               fileIt = uicFilesVec.begin(),
+               optionIt = uicOptionsVec.begin();
+             fileIt != uicFilesVec.end(); ++fileIt, ++optionIt) {
+          cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
+          this->UicOptions[*fileIt] = *optionIt;
+        }
+      } else {
+        this->LogError(
+          "AutoGen: Error: Uic files/options lists size missmatch in: " +
+          filename);
+        return false;
       }
-    } else {
-      this->LogError(
-        "AutoGen: Error: Uic files/options lists size missmatch in: " +
-        filename);
-      return false;
     }
+    cmSystemTools::ExpandListArgument(
+      makefile->GetSafeDefinition("AM_UIC_SEARCH_PATHS"),
+      this->UicSearchPaths);
   }
-  cmSystemTools::ExpandListArgument(
-    makefile->GetSafeDefinition("AM_UIC_SEARCH_PATHS"), this->UicSearchPaths);
 
   // - Rcc
-  cmSystemTools::ExpandListArgument(
-    makefile->GetSafeDefinition("AM_RCC_SOURCES"), this->RccSources);
-  {
-    std::vector<std::string> rccFilesVec;
-    std::vector<std::string> rccOptionsVec;
+  if (this->RccEnabled()) {
     cmSystemTools::ExpandListArgument(
-      makefile->GetSafeDefinition("AM_RCC_OPTIONS_FILES"), rccFilesVec);
-    cmSystemTools::ExpandListArgument(
-      makefile->GetSafeDefinition("AM_RCC_OPTIONS_OPTIONS"), rccOptionsVec);
-    if (rccFilesVec.size() != rccOptionsVec.size()) {
-      this->LogError(
-        "AutoGen: Error: RCC files/options lists size missmatch in: " +
-        filename);
-      return false;
+      makefile->GetSafeDefinition("AM_RCC_SOURCES"), this->RccSources);
+    {
+      std::vector<std::string> rccFilesVec;
+      std::vector<std::string> rccOptionsVec;
+      cmSystemTools::ExpandListArgument(
+        makefile->GetSafeDefinition("AM_RCC_OPTIONS_FILES"), rccFilesVec);
+      cmSystemTools::ExpandListArgument(
+        makefile->GetSafeDefinition("AM_RCC_OPTIONS_OPTIONS"), rccOptionsVec);
+      if (rccFilesVec.size() != rccOptionsVec.size()) {
+        this->LogError(
+          "AutoGen: Error: RCC files/options lists size missmatch in: " +
+          filename);
+        return false;
+      }
+      for (std::vector<std::string>::iterator fileIt = rccFilesVec.begin(),
+                                              optionIt = rccOptionsVec.begin();
+           fileIt != rccFilesVec.end(); ++fileIt, ++optionIt) {
+        cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
+        this->RccOptions[*fileIt] = *optionIt;
+      }
     }
-    for (std::vector<std::string>::iterator fileIt = rccFilesVec.begin(),
-                                            optionIt = rccOptionsVec.begin();
-         fileIt != rccFilesVec.end(); ++fileIt, ++optionIt) {
-      cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
-      this->RccOptions[*fileIt] = *optionIt;
+    {
+      std::vector<std::string> rccInputLists;
+      cmSystemTools::ExpandListArgument(
+        makefile->GetSafeDefinition("AM_RCC_INPUTS"), rccInputLists);
+
+      // qrc files in the end of the list may have been empty
+      if (rccInputLists.size() < this->RccSources.size()) {
+        rccInputLists.resize(this->RccSources.size());
+      }
+      if (this->RccSources.size() != rccInputLists.size()) {
+        this->LogError(
+          "AutoGen: Error: RCC sources/inputs lists size missmatch in: " +
+          filename);
+        return false;
+      }
+      for (std::vector<std::string>::iterator
+             fileIt = this->RccSources.begin(),
+             inputIt = rccInputLists.begin();
+           fileIt != this->RccSources.end(); ++fileIt, ++inputIt) {
+        cmSystemTools::ReplaceString(*inputIt, "@list_sep@", ";");
+        std::vector<std::string> rccInputFiles;
+        cmSystemTools::ExpandListArgument(*inputIt, rccInputFiles);
+        this->RccInputs[*fileIt] = rccInputFiles;
+      }
     }
   }
-  {
-    std::vector<std::string> rccInputLists;
-    cmSystemTools::ExpandListArgument(
-      makefile->GetSafeDefinition("AM_RCC_INPUTS"), rccInputLists);
-
-    // qrc files in the end of the list may have been empty
-    if (rccInputLists.size() < this->RccSources.size()) {
-      rccInputLists.resize(this->RccSources.size());
-    }
-    if (this->RccSources.size() != rccInputLists.size()) {
-      this->LogError(
-        "AutoGen: Error: RCC sources/inputs lists size missmatch in: " +
-        filename);
-      return false;
-    }
-    for (std::vector<std::string>::iterator fileIt = this->RccSources.begin(),
-                                            inputIt = rccInputLists.begin();
-         fileIt != this->RccSources.end(); ++fileIt, ++inputIt) {
-      cmSystemTools::ReplaceString(*inputIt, "@list_sep@", ";");
-      std::vector<std::string> rccInputFiles;
-      cmSystemTools::ExpandListArgument(*inputIt, rccInputFiles);
-      this->RccInputs[*fileIt] = rccInputFiles;
-    }
-  }
-
-  // - Flags
-  this->IncludeProjectDirsBefore =
-    makefile->IsOn("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE");
-  this->MocRelaxedMode = makefile->IsOn("AM_MOC_RELAXED_MODE");
 
   return true;
 }
