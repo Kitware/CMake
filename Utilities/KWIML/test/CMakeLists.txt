@@ -10,7 +10,7 @@ endif()
 # Suppress printf/scanf format warnings; we test if the sizes match.
 foreach(lang C CXX)
   if(KWIML_LANGUAGE_${lang} AND CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} -Wno-format")
+    set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} -Wno-format -Wno-format-security")
   endif()
 endforeach()
 
