@@ -195,8 +195,10 @@ void cmExportInstallFileGenerator::GenerateImportPrefix(std::ostream& os)
        << " \"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n";
     if (cmHasLiteralPrefix(absDestS.c_str(), "/lib/") ||
         cmHasLiteralPrefix(absDestS.c_str(), "/lib64/") ||
+        cmHasLiteralPrefix(absDestS.c_str(), "/libx32/") ||
         cmHasLiteralPrefix(absDestS.c_str(), "/usr/lib/") ||
-        cmHasLiteralPrefix(absDestS.c_str(), "/usr/lib64/")) {
+        cmHasLiteralPrefix(absDestS.c_str(), "/usr/lib64/") ||
+        cmHasLiteralPrefix(absDestS.c_str(), "/usr/libx32/")) {
       // Handle "/usr move" symlinks created by some Linux distros.
       /* clang-format off */
       os <<

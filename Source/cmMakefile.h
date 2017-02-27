@@ -436,6 +436,8 @@ public:
 
   /** Return whether the target platform is 64-bit.  */
   bool PlatformIs64Bit() const;
+  /** Return whether the target platform is x32.  */
+  bool PlatformIsx32() const;
 
   /** Return whether the target platform is Apple iOS.  */
   bool PlatformIsAppleIos() const;

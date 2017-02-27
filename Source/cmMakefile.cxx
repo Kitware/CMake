@@ -2149,6 +2149,12 @@ bool cmMakefile::IsSet(const std::string& name) const
 
 bool cmMakefile::PlatformIs32Bit() const
 {
+  if (const char* plat_abi =
+        this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
+    if (strcmp(plat_abi, "ELF X32") == 0) {
+      return false;
+    }
+  }
   if (const char* sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
     return atoi(sizeof_dptr) == 4;
   }
@@ -2159,6 +2165,17 @@ bool cmMakefile::PlatformIs64Bit() const
 {
   if (const char* sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
     return atoi(sizeof_dptr) == 8;
+  }
+  return false;
+}
+
+bool cmMakefile::PlatformIsx32() const
+{
+  if (const char* plat_abi =
+        this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
+    if (strcmp(plat_abi, "ELF X32") == 0) {
+      return true;
+    }
   }
   return false;
 }
