@@ -385,7 +385,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   vars.CMTargetType =
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType());
   vars.Language = lang.c_str();
-  vars.Source = "$IN_ABS";
+  vars.Source = "$in";
   vars.Object = "$out";
   vars.Defines = "$DEFINES";
   vars.Includes = "$INCLUDES";
@@ -773,7 +773,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   cmSourceFile const* source, bool writeOrderDependsTargetForTarget)
 {
   std::string const language = source->GetLanguage();
-  std::string const sourceFileName = this->GetSourceFilePath(source);
+  std::string const sourceFileName =
+    language == "RC" ? source->GetFullPath() : this->GetSourceFilePath(source);
   std::string const objectDir =
     this->ConvertToNinjaPath(this->GeneratorTarget->GetSupportDirectory());
   std::string const objectFileName =
@@ -782,8 +783,6 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     cmSystemTools::GetFilenamePath(objectFileName);
 
   cmNinjaVars vars;
-  vars["IN_ABS"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    source->GetFullPath(), cmOutputConverter::SHELL);
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
   vars["INCLUDES"] = this->GetIncludes(language);
