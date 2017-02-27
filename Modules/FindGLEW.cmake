@@ -27,7 +27,7 @@
 find_path(GLEW_INCLUDE_DIR GL/glew.h)
 
 if(NOT GLEW_LIBRARY)
-  find_library(GLEW_LIBRARY_RELEASE NAMES GLEW glew32 glew glew32s PATH_SUFFIXES lib64)
+  find_library(GLEW_LIBRARY_RELEASE NAMES GLEW glew32 glew glew32s PATH_SUFFIXES lib64 libx32)
   find_library(GLEW_LIBRARY_DEBUG NAMES GLEWd glew32d glewd PATH_SUFFIXES lib64)
 
   include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
