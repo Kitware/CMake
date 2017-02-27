@@ -972,7 +972,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
                it = configMocDefines.begin(),
                end = configMocDefines.end();
              it != end; ++it) {
-          infoFile << "set(AM_MOC_COMPILE_DEFINITIONS_" << it->first << " "
+          infoFile << "set(AM_MOC_DEFINITIONS_" << it->first << " "
                    << it->second << ")\n";
         }
       }

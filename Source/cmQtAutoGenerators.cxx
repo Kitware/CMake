@@ -55,20 +55,38 @@ static std::string Quoted(const std::string& text)
   return res;
 }
 
-static std::string GetConfigDefinition(cmMakefile* makefile,
-                                       const std::string& key,
-                                       const std::string& config)
+static void InfoGet(cmMakefile* makefile, const char* key, std::string& value)
 {
-  std::string keyConf = key;
-  if (!config.empty()) {
-    keyConf += "_";
-    keyConf += config;
+  value = makefile->GetSafeDefinition(key);
+}
+
+static void InfoGet(cmMakefile* makefile, const char* key, bool& value)
+{
+  value = makefile->IsOn(key);
+}
+
+static void InfoGet(cmMakefile* makefile, const char* key,
+                    std::vector<std::string>& list)
+{
+  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition(key), list);
+}
+
+static void InfoGet(cmMakefile* makefile, const char* key,
+                    const std::string& config, std::vector<std::string>& list)
+{
+  const char* valueConf = CM_NULLPTR;
+  {
+    std::string keyConf = key;
+    if (!config.empty()) {
+      keyConf += "_";
+      keyConf += config;
+    }
+    valueConf = makefile->GetDefinition(keyConf);
   }
-  const char* valueConf = makefile->GetDefinition(keyConf);
-  if (valueConf != CM_NULLPTR) {
-    return valueConf;
+  if (valueConf == CM_NULLPTR) {
+    valueConf = makefile->GetSafeDefinition(key);
   }
-  return makefile->GetSafeDefinition(key);
+  cmSystemTools::ExpandListArgument(valueConf, list);
 }
 
 static std::string SettingsFile(const std::string& targetDirectory)
@@ -328,59 +346,44 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   }
 
   // - Target names
-  this->OriginTargetName =
-    makefile->GetSafeDefinition("AM_ORIGIN_TARGET_NAME");
-  this->AutogenTargetName = makefile->GetSafeDefinition("AM_TARGET_NAME");
+  InfoGet(makefile, "AM_TARGET_NAME", this->AutogenTargetName);
+  InfoGet(makefile, "AM_ORIGIN_TARGET_NAME", this->OriginTargetName);
 
   // - Files and directories
-  this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
-  this->ProjectBinaryDir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
-  this->CurrentSourceDir =
-    makefile->GetSafeDefinition("AM_CMAKE_CURRENT_SOURCE_DIR");
-  this->CurrentBinaryDir =
-    makefile->GetSafeDefinition("AM_CMAKE_CURRENT_BINARY_DIR");
-
-  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_SOURCES"),
-                                    this->Sources);
-  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition("AM_HEADERS"),
-                                    this->Headers);
-  this->IncludeProjectDirsBefore =
-    makefile->IsOn("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE");
+  InfoGet(makefile, "AM_CMAKE_SOURCE_DIR", this->ProjectSourceDir);
+  InfoGet(makefile, "AM_CMAKE_BINARY_DIR", this->ProjectBinaryDir);
+  InfoGet(makefile, "AM_CMAKE_CURRENT_SOURCE_DIR", this->CurrentSourceDir);
+  InfoGet(makefile, "AM_CMAKE_CURRENT_BINARY_DIR", this->CurrentBinaryDir);
+  InfoGet(makefile, "AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE",
+          this->IncludeProjectDirsBefore);
+  InfoGet(makefile, "AM_SOURCES", this->Sources);
+  InfoGet(makefile, "AM_HEADERS", this->Headers);
 
   // - Qt environment
-  this->QtMajorVersion = makefile->GetSafeDefinition("AM_QT_VERSION_MAJOR");
-  if (this->QtMajorVersion == "") {
-    this->QtMajorVersion =
-      makefile->GetSafeDefinition("AM_Qt5Core_VERSION_MAJOR");
+  InfoGet(makefile, "AM_QT_VERSION_MAJOR", this->QtMajorVersion);
+  if (this->QtMajorVersion.empty()) {
+    InfoGet(makefile, "AM_Qt5Core_VERSION_MAJOR", this->QtMajorVersion);
   }
+  InfoGet(makefile, "AM_QT_MOC_EXECUTABLE", this->MocExecutable);
+  InfoGet(makefile, "AM_QT_UIC_EXECUTABLE", this->UicExecutable);
+  InfoGet(makefile, "AM_QT_RCC_EXECUTABLE", this->RccExecutable);
   // Check Qt version
   if ((this->QtMajorVersion != "4") && (this->QtMajorVersion != "5")) {
     this->LogError("AutoGen: Error: Unsupported Qt version: " +
                    Quoted(this->QtMajorVersion));
     return false;
   }
-  // Qt executables
-  this->MocExecutable = makefile->GetSafeDefinition("AM_QT_MOC_EXECUTABLE");
-  this->UicExecutable = makefile->GetSafeDefinition("AM_QT_UIC_EXECUTABLE");
-  this->RccExecutable = makefile->GetSafeDefinition("AM_QT_RCC_EXECUTABLE");
 
   // - Moc
   if (this->MocEnabled()) {
-    cmSystemTools::ExpandListArgument(
-      makefile->GetSafeDefinition("AM_MOC_SKIP"), this->MocSkipList);
-    cmSystemTools::ExpandListArgument(
-      GetConfigDefinition(makefile, "AM_MOC_COMPILE_DEFINITIONS", config),
-      this->MocDefinitions);
-    cmSystemTools::ExpandListArgument(
-      GetConfigDefinition(makefile, "AM_MOC_INCLUDES", config),
-      this->MocIncludePaths);
-    cmSystemTools::ExpandListArgument(
-      makefile->GetSafeDefinition("AM_MOC_OPTIONS"), this->MocOptions);
+    InfoGet(makefile, "AM_MOC_SKIP", this->MocSkipList);
+    InfoGet(makefile, "AM_MOC_DEFINITIONS", config, this->MocDefinitions);
+    InfoGet(makefile, "AM_MOC_INCLUDES", config, this->MocIncludePaths);
+    InfoGet(makefile, "AM_MOC_OPTIONS", this->MocOptions);
+    InfoGet(makefile, "AM_MOC_RELAXED_MODE", this->MocRelaxedMode);
     {
       std::vector<std::string> mocDependFilters;
-      cmSystemTools::ExpandListArgument(
-        makefile->GetSafeDefinition("AM_MOC_DEPEND_FILTERS"),
-        mocDependFilters);
+      InfoGet(makefile, "AM_MOC_DEPEND_FILTERS", mocDependFilters);
       // Insert Q_PLUGIN_METADATA dependency filter
       if (this->QtMajorVersion != "4") {
         this->MocDependFilterPush("Q_PLUGIN_METADATA",
@@ -403,24 +406,18 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
         return false;
       }
     }
-
-    this->MocRelaxedMode = makefile->IsOn("AM_MOC_RELAXED_MODE");
   }
 
   // - Uic
   if (this->UicEnabled()) {
-    cmSystemTools::ExpandListArgument(
-      makefile->GetSafeDefinition("AM_UIC_SKIP"), this->UicSkipList);
-    cmSystemTools::ExpandListArgument(
-      GetConfigDefinition(makefile, "AM_UIC_TARGET_OPTIONS", config),
-      this->UicTargetOptions);
+    InfoGet(makefile, "AM_UIC_SKIP", this->UicSkipList);
+    InfoGet(makefile, "AM_UIC_SEARCH_PATHS", this->UicSearchPaths);
+    InfoGet(makefile, "AM_UIC_TARGET_OPTIONS", config, this->UicTargetOptions);
     {
       std::vector<std::string> uicFilesVec;
       std::vector<std::string> uicOptionsVec;
-      cmSystemTools::ExpandListArgument(
-        makefile->GetSafeDefinition("AM_UIC_OPTIONS_FILES"), uicFilesVec);
-      cmSystemTools::ExpandListArgument(
-        makefile->GetSafeDefinition("AM_UIC_OPTIONS_OPTIONS"), uicOptionsVec);
+      InfoGet(makefile, "AM_UIC_OPTIONS_FILES", uicFilesVec);
+      InfoGet(makefile, "AM_UIC_OPTIONS_OPTIONS", uicOptionsVec);
       // Compare list sizes
       if (uicFilesVec.size() == uicOptionsVec.size()) {
         for (std::vector<std::string>::iterator
@@ -437,22 +434,16 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
         return false;
       }
     }
-    cmSystemTools::ExpandListArgument(
-      makefile->GetSafeDefinition("AM_UIC_SEARCH_PATHS"),
-      this->UicSearchPaths);
   }
 
   // - Rcc
   if (this->RccEnabled()) {
-    cmSystemTools::ExpandListArgument(
-      makefile->GetSafeDefinition("AM_RCC_SOURCES"), this->RccSources);
+    InfoGet(makefile, "AM_RCC_SOURCES", this->RccSources);
     {
       std::vector<std::string> rccFilesVec;
       std::vector<std::string> rccOptionsVec;
-      cmSystemTools::ExpandListArgument(
-        makefile->GetSafeDefinition("AM_RCC_OPTIONS_FILES"), rccFilesVec);
-      cmSystemTools::ExpandListArgument(
-        makefile->GetSafeDefinition("AM_RCC_OPTIONS_OPTIONS"), rccOptionsVec);
+      InfoGet(makefile, "AM_RCC_OPTIONS_FILES", rccFilesVec);
+      InfoGet(makefile, "AM_RCC_OPTIONS_OPTIONS", rccOptionsVec);
       if (rccFilesVec.size() != rccOptionsVec.size()) {
         this->LogError(
           "AutoGen: Error: RCC files/options lists size missmatch in: " +
@@ -468,8 +459,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     }
     {
       std::vector<std::string> rccInputLists;
-      cmSystemTools::ExpandListArgument(
-        makefile->GetSafeDefinition("AM_RCC_INPUTS"), rccInputLists);
+      InfoGet(makefile, "AM_RCC_INPUTS", rccInputLists);
 
       // qrc files in the end of the list may have been empty
       if (rccInputLists.size() < this->RccSources.size()) {
