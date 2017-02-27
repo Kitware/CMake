@@ -224,6 +224,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
     list(APPEND uv_defines
       _XOPEN_SOURCE=500
       )
+    if(CMAKE_C_STANDARD)
+      set(CMAKE_C_STANDARD 90)
+    endif()
   else()
     list(APPEND uv_defines
       _XOPEN_SOURCE=600
