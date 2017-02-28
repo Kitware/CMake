@@ -135,15 +135,12 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
                              std::vector<std::string>& mocSkipList,
                              std::vector<std::string>& uicSkipList)
 {
-  cmMakefile* makefile = target->Target->GetMakefile();
-
   std::vector<cmSourceFile*> srcFiles;
   target->GetConfigCommonSourceFiles(srcFiles);
 
   const bool mocTarget = target->GetPropertyAsBool("AUTOMOC");
   const bool uicTarget = target->GetPropertyAsBool("AUTOUIC");
 
-  cmFilePathChecksum fpathCheckSum(makefile);
   for (std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
        fileIt != srcFiles.end(); ++fileIt) {
     cmSourceFile* sf = *fileIt;
