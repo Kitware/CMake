@@ -822,3 +822,9 @@ find_package_handle_standard_args(HDF5
 )
 
 unset(_HDF5_SEARCH_OPTS)
+
+if( HDF5_FOUND AND NOT HDF5_DIR)
+  # hide HDF5_DIR for the non-advanced user to avoid confusion with
+  # HDF5_DIR-NOT_FOUND while HDF5 was found.
+  mark_as_advanced(HDF5_DIR)
+endif()
