@@ -1,6 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGeneratorInitializer.h"
+#include "cmQtAutoGeneratorCommon.h"
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommandLines.h"
@@ -42,16 +43,6 @@ static void utilCopyTargetProperty(cmTarget* destinationTarget,
   if (propertyValue) {
     destinationTarget->SetProperty(propertyName, propertyValue);
   }
-}
-
-static std::string utilStripCR(std::string const& line)
-{
-  // Strip CR characters rcc may have printed (possibly more than one!).
-  std::string::size_type cr = line.find('\r');
-  if (cr != line.npos) {
-    return line.substr(0, cr);
-  }
-  return line;
 }
 
 static std::string GetSafeProperty(cmGeneratorTarget const* target,
@@ -361,7 +352,8 @@ static void UicSetupAutoTarget(
           uiFileFiles.push_back(absFile);
           {
             std::string opts = sf->GetProperty("AUTOUIC_OPTIONS");
-            cmSystemTools::ReplaceString(opts, ";", "@list_sep@");
+            cmSystemTools::ReplaceString(opts, ";",
+                                         cmQtAutoGeneratorCommon::listSep);
             uiFileOptions.push_back(opts);
           }
         }
@@ -469,146 +461,12 @@ static void RccMergeOptions(std::vector<std::string>& opts,
   opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
 }
 
-/// @brief Reads the resource files list from from a .qrc file - Qt5 version
-/// @return True if the .qrc file was successfully parsed
-static bool RccListInputsQt5(cmSourceFile* sf, cmGeneratorTarget const* target,
-                             std::vector<std::string>& depends)
-{
-  const std::string rccCommand = RccGetExecutable(target, "5");
-  if (rccCommand.empty()) {
-    cmSystemTools::Error("AUTOGEN: error: rcc executable not available\n");
-    return false;
-  }
-
-  bool hasDashDashList = false;
-  // Read rcc features
-  {
-    std::vector<std::string> command;
-    command.push_back(rccCommand);
-    command.push_back("--help");
-    std::string rccStdOut;
-    std::string rccStdErr;
-    int retVal = 0;
-    bool result =
-      cmSystemTools::RunSingleCommand(command, &rccStdOut, &rccStdErr, &retVal,
-                                      CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
-    if (result && retVal == 0 &&
-        rccStdOut.find("--list") != std::string::npos) {
-      hasDashDashList = true;
-    }
-  }
-  // Run rcc list command
-  std::vector<std::string> command;
-  command.push_back(rccCommand);
-  command.push_back(hasDashDashList ? "--list" : "-list");
-
-  std::string absFile = cmsys::SystemTools::GetRealPath(sf->GetFullPath());
-  command.push_back(absFile);
-
-  std::string rccStdOut;
-  std::string rccStdErr;
-  int retVal = 0;
-  bool result =
-    cmSystemTools::RunSingleCommand(command, &rccStdOut, &rccStdErr, &retVal,
-                                    CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
-  if (!result || retVal) {
-    std::ostringstream err;
-    err << "AUTOGEN: error: Rcc list process for " << sf->GetFullPath()
-        << " failed:\n"
-        << rccStdOut << "\n"
-        << rccStdErr << std::endl;
-    cmSystemTools::Error(err.str().c_str());
-    return false;
-  }
-
-  // Parse rcc list output
-  {
-    std::istringstream ostr(rccStdOut);
-    std::string oline;
-    while (std::getline(ostr, oline)) {
-      oline = utilStripCR(oline);
-      if (!oline.empty()) {
-        depends.push_back(oline);
-      }
-    }
-  }
-
-  {
-    std::istringstream estr(rccStdErr);
-    std::string eline;
-    while (std::getline(estr, eline)) {
-      eline = utilStripCR(eline);
-      if (cmHasLiteralPrefix(eline, "RCC: Error in")) {
-        static std::string searchString = "Cannot find file '";
-
-        std::string::size_type pos = eline.find(searchString);
-        if (pos == std::string::npos) {
-          std::ostringstream err;
-          err << "AUTOGEN: error: Rcc lists unparsable output " << eline
-              << std::endl;
-          cmSystemTools::Error(err.str().c_str());
-          return false;
-        }
-        pos += searchString.length();
-        std::string::size_type sz = eline.size() - pos - 1;
-        depends.push_back(eline.substr(pos, sz));
-      }
-    }
-  }
-
-  return true;
-}
-
-/// @brief Reads the resource files list from from a .qrc file - Qt4 version
-/// @return True if the .qrc file was successfully parsed
-static bool RccListInputsQt4(cmSourceFile* sf,
-                             std::vector<std::string>& depends)
-{
-  // Read file into string
-  std::string qrcContents;
-  {
-    std::ostringstream stream;
-    stream << cmsys::ifstream(sf->GetFullPath().c_str()).rdbuf();
-    qrcContents = stream.str();
-  }
-
-  cmsys::RegularExpression fileMatchRegex("(<file[^<]+)");
-  cmsys::RegularExpression fileReplaceRegex("(^<file[^>]*>)");
-
-  size_t offset = 0;
-  while (fileMatchRegex.find(qrcContents.c_str() + offset)) {
-    std::string qrcEntry = fileMatchRegex.match(1);
-    offset += qrcEntry.size();
-    {
-      fileReplaceRegex.find(qrcEntry);
-      std::string tag = fileReplaceRegex.match(1);
-      qrcEntry = qrcEntry.substr(tag.size());
-    }
-    if (!cmSystemTools::FileIsFullPath(qrcEntry.c_str())) {
-      qrcEntry = sf->GetLocation().GetDirectory() + "/" + qrcEntry;
-    }
-    depends.push_back(qrcEntry);
-  }
-  return true;
-}
-
-/// @brief Reads the resource files list from from a .qrc file
-/// @return True if the rcc file was successfully parsed
-static bool RccListInputs(const std::string& qtMajorVersion, cmSourceFile* sf,
-                          cmGeneratorTarget const* target,
-                          std::vector<std::string>& depends)
-{
-  if (qtMajorVersion == "5") {
-    return RccListInputsQt5(sf, target, depends);
-  }
-  return RccListInputsQt4(sf, depends);
-}
-
 static void RccSetupAutoTarget(cmGeneratorTarget const* target,
                                const std::string& qtMajorVersion)
 {
   cmMakefile* makefile = target->Target->GetMakefile();
   const bool qtMajorVersion5 = (qtMajorVersion == "5");
+  const std::string rccCommand = RccGetExecutable(target, qtMajorVersion);
   std::vector<std::string> _rcc_files;
   std::vector<std::string> _rcc_inputs;
   std::vector<std::string> rccFileFiles;
@@ -636,9 +494,10 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target,
         {
           std::string entriesList;
           if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
-            std::vector<std::string> depends;
-            if (RccListInputs(qtMajorVersion, sf, target, depends)) {
-              entriesList = cmJoin(depends, "@list_sep@");
+            std::vector<std::string> files;
+            if (cmQtAutoGeneratorCommon::RccListInputs(
+                  qtMajorVersion, rccCommand, absFile, files)) {
+              entriesList = cmJoin(files, cmQtAutoGeneratorCommon::listSep);
             } else {
               return;
             }
@@ -657,19 +516,19 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target,
           // Only store non empty options lists
           if (!rccOptions.empty()) {
             rccFileFiles.push_back(absFile);
-            rccFileOptions.push_back(cmJoin(rccOptions, "@list_sep@"));
+            rccFileOptions.push_back(
+              cmJoin(rccOptions, cmQtAutoGeneratorCommon::listSep));
           }
         }
       }
     }
   }
 
+  AddDefinitionEscaped(makefile, "_qt_rcc_executable", rccCommand);
   AddDefinitionEscaped(makefile, "_rcc_files", _rcc_files);
   AddDefinitionEscaped(makefile, "_rcc_inputs", _rcc_inputs);
   AddDefinitionEscaped(makefile, "_rcc_options_files", rccFileFiles);
   AddDefinitionEscaped(makefile, "_rcc_options_options", rccFileOptions);
-  AddDefinitionEscaped(makefile, "_qt_rcc_executable",
-                       RccGetExecutable(target, qtMajorVersion));
 }
 
 void cmQtAutoGeneratorInitializer::InitializeAutogenSources(
@@ -696,6 +555,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   const std::string workingDirectory =
     cmSystemTools::CollapseFullPath("", makefile->GetCurrentBinaryDirectory());
   const std::string qtMajorVersion = GetQtMajorVersion(target);
+  const std::string rccCommand = RccGetExecutable(target, qtMajorVersion);
   std::vector<std::string> autogenOutputFiles;
 
   // Remove old settings on cleanup
@@ -825,20 +685,22 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
           target->AddSource(rccOutputFile);
           // Register rcc output file as generated
           autogenOutputFiles.push_back(rccOutputFile);
-        }
-        if (lg->GetGlobalGenerator()->GetName() == "Ninja"
+
+          if (lg->GetGlobalGenerator()->GetName() == "Ninja"
 #if defined(_WIN32) && !defined(__CYGWIN__)
-            || usePRE_BUILD
+              || usePRE_BUILD
 #endif
-            ) {
-          if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
-            RccListInputs(qtMajorVersion, sf, target, depends);
+              ) {
+            if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
+              cmQtAutoGeneratorCommon::RccListInputs(
+                qtMajorVersion, rccCommand, absFile, depends);
 #if defined(_WIN32) && !defined(__CYGWIN__)
-            // Cannot use PRE_BUILD because the resource files themselves
-            // may not be sources within the target so VS may not know the
-            // target needs to re-build at all.
-            usePRE_BUILD = false;
+              // Cannot use PRE_BUILD because the resource files themselves
+              // may not be sources within the target so VS may not know the
+              // target needs to re-build at all.
+              usePRE_BUILD = false;
 #endif
+            }
           }
         }
       }

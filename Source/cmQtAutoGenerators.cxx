@@ -1,6 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenerators.h"
+#include "cmQtAutoGeneratorCommon.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -178,7 +179,7 @@ static std::string JoinOptionsMap(
   for (std::map<std::string, std::string>::const_iterator it = opts.begin();
        it != opts.end(); ++it) {
     if (it != opts.begin()) {
-      result += "@list_sep@";
+      result += cmQtAutoGeneratorCommon::listSep;
     }
     result += it->first;
     result += "===";
@@ -424,7 +425,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
                fileIt = uicFilesVec.begin(),
                optionIt = uicOptionsVec.begin();
              fileIt != uicFilesVec.end(); ++fileIt, ++optionIt) {
-          cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
+          cmSystemTools::ReplaceString(*optionIt,
+                                       cmQtAutoGeneratorCommon::listSep, ";");
           this->UicOptions[*fileIt] = *optionIt;
         }
       } else {
@@ -453,7 +455,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
       for (std::vector<std::string>::iterator fileIt = rccFilesVec.begin(),
                                               optionIt = rccOptionsVec.begin();
            fileIt != rccFilesVec.end(); ++fileIt, ++optionIt) {
-        cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
+        cmSystemTools::ReplaceString(*optionIt,
+                                     cmQtAutoGeneratorCommon::listSep, ";");
         this->RccOptions[*fileIt] = *optionIt;
       }
     }
@@ -475,7 +478,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
              fileIt = this->RccSources.begin(),
              inputIt = rccInputLists.begin();
            fileIt != this->RccSources.end(); ++fileIt, ++inputIt) {
-        cmSystemTools::ReplaceString(*inputIt, "@list_sep@", ";");
+        cmSystemTools::ReplaceString(*inputIt,
+                                     cmQtAutoGeneratorCommon::listSep, ";");
         std::vector<std::string> rccInputFiles;
         cmSystemTools::ExpandListArgument(*inputIt, rccInputFiles);
         this->RccInputs[*fileIt] = rccInputFiles;
