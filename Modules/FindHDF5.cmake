@@ -90,6 +90,8 @@
 # The following variable can be set to guide the search for HDF5 libraries and includes:
 #
 # HDF5_ROOT
+#
+# Set HDF5_FIND_DEBUG to true to get some extra debugging output.
 
 # This module is maintained by Will Dicharry <wdicharry@stellarscience.com>.
 
@@ -396,6 +398,9 @@ if(NOT HDF5_FOUND)
       ${_HDF5_SEARCH_OPTS}
       )
     if( HDF5_FOUND)
+        if(HDF5_FIND_DEBUG)
+            message(STATUS "Found HDF5 at ${HDF5_DIR} via NO_MODULE. Now trying to extract locations etc.")
+        endif()
         set(HDF5_IS_PARALLEL ${HDF5_ENABLE_PARALLEL})
         set(HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
         set(HDF5_LIBRARIES)
@@ -424,7 +429,11 @@ if(NOT HDF5_FOUND)
               set(_suffix "")
             endif()
 
+            if(HDF5_FIND_DEBUG)
+                message(STATUS "Trying to get properties of target ${HDF5_${_lang}_TARGET}${_suffix}")
+            endif()
             get_target_property(_lang_location ${HDF5_${_lang}_TARGET}${_suffix} LOCATION)
+
             if( _lang_location )
                 set(HDF5_${_lang}_LIBRARY ${_lang_location} CACHE PATH
                     "HDF5 ${_lang} library" )
@@ -827,4 +836,18 @@ if( HDF5_FOUND AND NOT HDF5_DIR)
   # hide HDF5_DIR for the non-advanced user to avoid confusion with
   # HDF5_DIR-NOT_FOUND while HDF5 was found.
   mark_as_advanced(HDF5_DIR)
+endif()
+
+if (HDF5_FIND_DEBUG)
+  message(STATUS "HDF5_DIR: ${HDF5_DIR}")
+  message(STATUS "HDF5_DEFINITIONS: ${HDF5_DEFINITIONS}")
+  message(STATUS "HDF5_INCLUDE_DIRS: ${HDF5_INCLUDE_DIRS}")
+  message(STATUS "HDF5_LIBRARIES: ${HDF5_LIBRARIES}")
+  foreach(__lang IN LISTS HDF5_LANGUAGE_BINDINGS)
+    message(STATUS "HDF5_${__lang}_DEFINITIONS: ${HDF5_${__lang}_DEFINITIONS}")
+    message(STATUS "HDF5_${__lang}_INCLUDE_DIR: ${HDF5_${__lang}_INCLUDE_DIR}")
+    message(STATUS "HDF5_${__lang}_INCLUDE_DIRS: ${HDF5_${__lang}_INCLUDE_DIRS}")
+    message(STATUS "HDF5_${__lang}_LIBRARY: ${HDF5_${__lang}_LIBRARY}")
+    message(STATUS "HDF5_${__lang}_LIBRARIES: ${HDF5_${__lang}_LIBRARIES}")
+  endforeach()
 endif()
