@@ -28,6 +28,7 @@
 #include "cmTarget.h"
 #include "cmXCode21Object.h"
 #include "cmXCodeObject.h"
+#include "cmXCodeScheme.h"
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
@@ -3337,12 +3338,39 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
     return;
   }
   this->WriteXCodePBXProj(fout, root, generators);
+
+  // Since the lowest available Xcode version for testing was 7.0,
+  // I'm setting this as a limit then
+  if (this->GetCMakeInstance()->GetState()->GetGlobalPropertyAsBool(
+        "XCODE_GENERATE_SCHEME") &&
+      this->XcodeVersion >= 70) {
+    this->OutputXCodeSharedSchemes(xcodeDir, root);
+  }
+
   this->ClearXCodeObjects();
 
   // Since this call may have created new cache entries, save the cache:
   //
   root->GetMakefile()->GetCMakeInstance()->SaveCache(
     root->GetBinaryDirectory());
+}
+
+void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
+  const std::string& xcProjDir, cmLocalGenerator* root)
+{
+  for (std::vector<cmXCodeObject*>::const_iterator i =
+         this->XCodeObjects.begin();
+       i != this->XCodeObjects.end(); ++i) {
+    cmXCodeObject* obj = *i;
+    if (obj->GetType() == cmXCodeObject::OBJECT &&
+        (obj->GetIsA() == cmXCodeObject::PBXNativeTarget ||
+         obj->GetIsA() == cmXCodeObject::PBXAggregateTarget)) {
+      cmXCodeScheme schm(obj, this->CurrentConfigurationTypes,
+                         this->XcodeVersion);
+      schm.WriteXCodeSharedScheme(xcProjDir,
+                                  root->GetCurrentSourceDirectory());
+    }
+  }
 }
 
 void cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
