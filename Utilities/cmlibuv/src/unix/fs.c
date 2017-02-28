@@ -244,9 +244,19 @@ skip:
 #endif
 }
 
+#if defined(__sun) && _XOPEN_SOURCE < 600
+static char* uv__mkdtemp(char *template)
+{
+  if (!mktemp(template) || mkdir(template, 0700))
+    return NULL;
+  return template;
+}
+#else
+#define uv__mkdtemp mkdtemp
+#endif
 
 static ssize_t uv__fs_mkdtemp(uv_fs_t* req) {
-  return mkdtemp((char*) req->path) ? 0 : -1;
+  return uv__mkdtemp((char*) req->path) ? 0 : -1;
 }
 
 
