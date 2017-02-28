@@ -739,6 +739,10 @@ private:
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;
 
+  typedef std::map<std::string, std::set<std::string> > HeadersCacheType;
+  mutable HeadersCacheType ResxHeadersCache;
+  mutable HeadersCacheType XamlHeadersCache;
+
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(
     const std::string& config) const;
