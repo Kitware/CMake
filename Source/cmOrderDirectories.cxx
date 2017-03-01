@@ -287,8 +287,7 @@ void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
         }
       }
 
-      if (this->ImplicitDirectories.find(dir) !=
-          this->ImplicitDirectories.end()) {
+      if (this->IsImplicitDirectory(dir)) {
         this->ImplicitDirEntries.push_back(
           new cmOrderDirectoriesConstraintSOName(this, fullPath, soname));
         return;
@@ -316,8 +315,7 @@ void cmOrderDirectories::AddLinkLibrary(std::string const& fullPath)
     // Implicit link directories need special handling.
     if (!this->ImplicitDirectories.empty()) {
       std::string dir = cmSystemTools::GetFilenamePath(fullPath);
-      if (this->ImplicitDirectories.find(dir) !=
-          this->ImplicitDirectories.end()) {
+      if (this->IsImplicitDirectory(dir)) {
         this->ImplicitDirEntries.push_back(
           new cmOrderDirectoriesConstraintLibrary(this, fullPath));
         return;
@@ -348,6 +346,12 @@ void cmOrderDirectories::SetImplicitDirectories(
   std::set<std::string> const& implicitDirs)
 {
   this->ImplicitDirectories = implicitDirs;
+}
+
+bool cmOrderDirectories::IsImplicitDirectory(std::string const& dir)
+{
+  return this->ImplicitDirectories.find(dir) !=
+    this->ImplicitDirectories.end();
 }
 
 void cmOrderDirectories::SetLinkExtensionInfo(
@@ -394,8 +398,7 @@ void cmOrderDirectories::AddOriginalDirectories(
   for (std::vector<std::string>::const_iterator di = dirs.begin();
        di != dirs.end(); ++di) {
     // We never explicitly specify implicit link directories.
-    if (this->ImplicitDirectories.find(*di) !=
-        this->ImplicitDirectories.end()) {
+    if (this->IsImplicitDirectory(*di)) {
       continue;
     }
 
