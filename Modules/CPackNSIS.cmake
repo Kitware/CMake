@@ -133,6 +133,10 @@
 #       "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake.html"
 #       "CMake Help" "https://cmake.org" "CMake Web Site")
 #
+# .. variable:: CPACK_NSIS_SIGN_UNINSTALLER
+#
+#  Specify a command to use for signing the uninstaller.  The command will
+#  be invoked a path to the uninstaller as its only argument.
 
 #FIXME we should put NSIS specific code here
 #FIXME but I'm not doing it because I'm not able to test it...
