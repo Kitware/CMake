@@ -20,7 +20,6 @@
 int main(int argc, char* argv[])
 {
   // if ( cmsys::SystemTools::FileExists(
-  std::string cwd = cmsys::SystemTools::GetCurrentWorkingDirectory();
   cmsys::ofstream ofs("/tmp/output.txt");
 
   CFStringRef fileName;
