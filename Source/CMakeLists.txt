@@ -381,6 +381,8 @@ set(SRCS
   cmVariableWatch.h
   cmVersion.cxx
   cmVersion.h
+  cmWorkingDirectory.cxx
+  cmWorkingDirectory.h
   cmXMLParser.cxx
   cmXMLParser.h
   cmXMLSafe.cxx
