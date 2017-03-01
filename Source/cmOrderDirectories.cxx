@@ -345,12 +345,17 @@ void cmOrderDirectories::AddLanguageDirectories(
 void cmOrderDirectories::SetImplicitDirectories(
   std::set<std::string> const& implicitDirs)
 {
-  this->ImplicitDirectories = implicitDirs;
+  this->ImplicitDirectories.clear();
+  for (std::set<std::string>::const_iterator i = implicitDirs.begin();
+       i != implicitDirs.end(); ++i) {
+    this->ImplicitDirectories.insert(this->GetRealPath(*i));
+  }
 }
 
 bool cmOrderDirectories::IsImplicitDirectory(std::string const& dir)
 {
-  return this->ImplicitDirectories.find(dir) !=
+  std::string const& real = this->GetRealPath(dir);
+  return this->ImplicitDirectories.find(real) !=
     this->ImplicitDirectories.end();
 }
 
