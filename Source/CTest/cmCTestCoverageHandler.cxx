@@ -1646,11 +1646,7 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
 
   std::string testingDir = this->CTest->GetBinaryDir() + "/Testing";
   std::string tempDir = testingDir + "/CoverageInfo";
-  std::string currentDirectory = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::MakeDirectory(tempDir.c_str());
-  cmSystemTools::ChangeDirectory(tempDir);
-
-  cmSystemTools::ChangeDirectory(currentDirectory);
 
   std::vector<std::string>::iterator fileIt;
   int file_count = 0;
@@ -1737,7 +1733,6 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
     }
     ++file_count;
   }
-  cmSystemTools::ChangeDirectory(currentDirectory);
   return file_count;
 }
 

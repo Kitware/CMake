@@ -1122,7 +1122,6 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
     if (log) {
       *log << "* Run internal CTest" << std::endl;
     }
-    std::string oldpath = cmSystemTools::GetCurrentWorkingDirectory();
 
     CM_AUTO_PTR<cmSystemTools::SaveRestoreEnvironment> saveEnv;
     if (modifyEnv) {
@@ -1137,7 +1136,6 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
     if (log && output) {
       *log << *output;
     }
-    cmSystemTools::ChangeDirectory(oldpath);
     if (output) {
       cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
                  "Internal cmCTest object used to run test." << std::endl
