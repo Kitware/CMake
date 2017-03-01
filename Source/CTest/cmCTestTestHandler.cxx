@@ -27,6 +27,7 @@
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
 #include "cm_auto_ptr.hxx"
 #include "cm_utf8.h"
@@ -86,22 +87,24 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
       // No subdirectory? So what...
       continue;
     }
-    cmSystemTools::ChangeDirectory(fname);
-    const char* testFilename;
-    if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
-      // does the CTestTestfile.cmake exist ?
-      testFilename = "CTestTestfile.cmake";
-    } else if (cmSystemTools::FileExists("DartTestfile.txt")) {
-      // does the DartTestfile.txt exist ?
-      testFilename = "DartTestfile.txt";
-    } else {
-      // No CTestTestfile? Who cares...
-      continue;
+    bool readit = false;
+    {
+      cmWorkingDirectory workdir(fname);
+      const char* testFilename;
+      if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
+        // does the CTestTestfile.cmake exist ?
+        testFilename = "CTestTestfile.cmake";
+      } else if (cmSystemTools::FileExists("DartTestfile.txt")) {
+        // does the DartTestfile.txt exist ?
+        testFilename = "DartTestfile.txt";
+      } else {
+        // No CTestTestfile? Who cares...
+        continue;
+      }
+      fname += "/";
+      fname += testFilename;
+      readit = this->Makefile->ReadDependentFile(fname.c_str());
     }
-    fname += "/";
-    fname += testFilename;
-    bool readit = this->Makefile->ReadDependentFile(fname.c_str());
-    cmSystemTools::ChangeDirectory(cwd);
     if (!readit) {
       std::string m = "Could not find include file: ";
       m += fname;
@@ -109,7 +112,6 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
       return false;
     }
   }
-  cmSystemTools::ChangeDirectory(cwd);
   return true;
 }
 
@@ -149,9 +151,7 @@ bool cmCTestAddSubdirectoryCommand::InitialPass(
     return false;
   }
 
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(cwd);
-  std::string fname = cwd;
+  std::string fname = cmSystemTools::GetCurrentWorkingDirectory();
   fname += "/";
   fname += args[0];
 
@@ -159,23 +159,23 @@ bool cmCTestAddSubdirectoryCommand::InitialPass(
     // No subdirectory? So what...
     return true;
   }
-  cmSystemTools::ChangeDirectory(fname);
-  const char* testFilename;
-  if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
-    // does the CTestTestfile.cmake exist ?
-    testFilename = "CTestTestfile.cmake";
-  } else if (cmSystemTools::FileExists("DartTestfile.txt")) {
-    // does the DartTestfile.txt exist ?
-    testFilename = "DartTestfile.txt";
-  } else {
-    // No CTestTestfile? Who cares...
-    cmSystemTools::ChangeDirectory(cwd);
-    return true;
+  bool readit = false;
+  {
+    const char* testFilename;
+    if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
+      // does the CTestTestfile.cmake exist ?
+      testFilename = "CTestTestfile.cmake";
+    } else if (cmSystemTools::FileExists("DartTestfile.txt")) {
+      // does the DartTestfile.txt exist ?
+      testFilename = "DartTestfile.txt";
+    } else {
+      // No CTestTestfile? Who cares...
+      return true;
+    }
+    fname += "/";
+    fname += testFilename;
+    readit = this->Makefile->ReadDependentFile(fname.c_str());
   }
-  fname += "/";
-  fname += testFilename;
-  bool readit = this->Makefile->ReadDependentFile(fname.c_str());
-  cmSystemTools::ChangeDirectory(cwd);
   if (!readit) {
     std::string m = "Could not find include file: ";
     m += fname;

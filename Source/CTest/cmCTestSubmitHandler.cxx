@@ -19,6 +19,7 @@
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmThirdParty.h"
+#include "cmWorkingDirectory.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
 
@@ -1519,7 +1520,6 @@ int cmCTestSubmitHandler::ProcessHandler()
 #endif
   } else if (dropMethod == "scp") {
     std::string url;
-    std::string oldWorkingDirectory;
     if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty()) {
       url += this->CTest->GetCTestConfiguration("DropSiteUser") + "@";
     }
@@ -1528,19 +1528,16 @@ int cmCTestSubmitHandler::ProcessHandler()
 
     // change to the build directory so that we can uses a relative path
     // on windows since scp dosn't support "c:" a drive in the path
-    oldWorkingDirectory = cmSystemTools::GetCurrentWorkingDirectory();
-    cmSystemTools::ChangeDirectory(buildDirectory);
+    cmWorkingDirectory workdir(buildDirectory);
 
     if (!this->SubmitUsingSCP(this->CTest->GetCTestConfiguration("ScpCommand"),
                               "Testing/" + this->CTest->GetCurrentTag(), files,
                               prefix, url)) {
-      cmSystemTools::ChangeDirectory(oldWorkingDirectory);
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "   Problems when submitting via SCP" << std::endl);
       ofs << "   Problems when submitting via SCP" << std::endl;
       return -1;
     }
-    cmSystemTools::ChangeDirectory(oldWorkingDirectory);
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "   Submission successful" << std::endl, this->Quiet);
     ofs << "   Submission successful" << std::endl;
@@ -1550,22 +1547,18 @@ int cmCTestSubmitHandler::ProcessHandler()
 
     // change to the build directory so that we can uses a relative path
     // on windows since scp dosn't support "c:" a drive in the path
-    std::string oldWorkingDirectory =
-      cmSystemTools::GetCurrentWorkingDirectory();
-    cmSystemTools::ChangeDirectory(buildDirectory);
+    cmWorkingDirectory workdir(buildDirectory);
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "   Change directory: " << buildDirectory << std::endl,
                        this->Quiet);
 
     if (!this->SubmitUsingCP("Testing/" + this->CTest->GetCurrentTag(), files,
                              prefix, location)) {
-      cmSystemTools::ChangeDirectory(oldWorkingDirectory);
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "   Problems when submitting via CP" << std::endl);
       ofs << "   Problems when submitting via cp" << std::endl;
       return -1;
     }
-    cmSystemTools::ChangeDirectory(oldWorkingDirectory);
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "   Submission successful" << std::endl, this->Quiet);
     ofs << "   Submission successful" << std::endl;

@@ -36,6 +36,7 @@
 #include "cmTest.h"
 #include "cmTestGenerator.h" // IWYU pragma: keep
 #include "cmVersion.h"
+#include "cmWorkingDirectory.h"
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
@@ -3147,8 +3148,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
 
   // change to the tests directory and run cmake
   // use the cmake object instead of calling cmake
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(bindir);
+  cmWorkingDirectory workdir(bindir);
 
   // make sure the same generator is used
   // use this program as the cmake to be run, it should not
@@ -3162,8 +3162,6 @@ int cmMakefile::TryCompile(const std::string& srcdir,
                          this->GetGlobalGenerator()->GetName() +
                          "' could not be created.");
     cmSystemTools::SetFatalErrorOccured();
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd);
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3227,8 +3225,6 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     this->IssueMessage(cmake::FATAL_ERROR,
                        "Failed to configure test project build system.");
     cmSystemTools::SetFatalErrorOccured();
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd);
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3237,8 +3233,6 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     this->IssueMessage(cmake::FATAL_ERROR,
                        "Failed to generate test project build system.");
     cmSystemTools::SetFatalErrorOccured();
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd);
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3247,7 +3241,6 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   int ret = this->GetGlobalGenerator()->TryCompile(
     srcdir, bindir, projectName, targetName, fast, output, this);
 
-  cmSystemTools::ChangeDirectory(cwd);
   this->IsSourceFileTryCompile = false;
   return ret;
 }
