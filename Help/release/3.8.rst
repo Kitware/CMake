@@ -34,15 +34,6 @@ C#
   Visual Studio (``VS_*``) are worth a look (for setting toolset
   versions, root namespaces, assembly icons, ...).
 
-* Auto-linking in ``.csproj`` files: In C#/.NET development with
-  Visual Studio there are a number of visual editors used which
-  generate code.  Both the generated files and the ones edited
-  with the UI are connected in the ``.csproj`` file using
-  ``<DependentUpon>`` tags.  If CMake finds within a C# project
-  any source file with extension ``.Designer.cs`` or ``.xaml.cs``,
-  it checks sibling files with extension ``.xaml``, ``.settings``,
-  ``.resx`` or ``.cs`` and establishes the dependency connection.
-
 CUDA
 ^^^^
 
@@ -228,6 +219,11 @@ Properties
 
 Modules
 -------
+
+* A :module:`CSharpUtilities` module was added to aid parameterization of
+  Visual Studio C# targets.  It provides functions to allow automated
+  setting of source file properties to support Windows Forms, WPF/XAML or
+  other technologies as needed.
 
 * The :module:`ExternalData` module learned to support multiple
   content links for one data file using different hashes, e.g.
