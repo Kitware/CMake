@@ -707,20 +707,40 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
           if (const char* g = (*oi)->GetProperty("VS_RESOURCE_GENERATOR")) {
             generator = g;
           }
-          this->WriteString("<Generator>", 3);
-          (*this->BuildFileStream) << cmVS10EscapeXML(generator)
-                                   << "</Generator>\n";
-          if (designerResource.find(srcDir) == 0) {
-            designerResource = designerResource.substr(srcDir.length() + 1);
-          } else if (designerResource.find(binDir) == 0) {
-            designerResource = designerResource.substr(binDir.length() + 1);
-          } else {
-            designerResource =
-              cmsys::SystemTools::GetFilenameName(designerResource);
+          if (!generator.empty()) {
+            this->WriteString("<Generator>", 3);
+            (*this->BuildFileStream) << cmVS10EscapeXML(generator)
+                                     << "</Generator>\n";
+            if (designerResource.find(srcDir) == 0) {
+              designerResource = designerResource.substr(srcDir.length() + 1);
+            } else if (designerResource.find(binDir) == 0) {
+              designerResource = designerResource.substr(binDir.length() + 1);
+            } else {
+              designerResource =
+                cmsys::SystemTools::GetFilenameName(designerResource);
+            }
+            this->ConvertToWindowsSlash(designerResource);
+            this->WriteString("<LastGenOutput>", 3);
+            (*this->BuildFileStream) << designerResource
+                                     << "</LastGenOutput>\n";
           }
-          this->ConvertToWindowsSlash(designerResource);
-          this->WriteString("<LastGenOutput>", 3);
-          (*this->BuildFileStream) << designerResource << "</LastGenOutput>\n";
+        }
+        const cmPropertyMap& props = (*oi)->GetProperties();
+        for (cmPropertyMap::const_iterator p = props.begin(); p != props.end();
+             ++p) {
+          static const std::string propNamePrefix = "VS_CSHARP_";
+          if (p->first.find(propNamePrefix.c_str()) == 0) {
+            std::string tagName = p->first.substr(propNamePrefix.length());
+            if (!tagName.empty()) {
+              std::string value = props.GetPropertyValue(p->first);
+              if (!value.empty()) {
+                this->WriteString("<", 3);
+                (*this->BuildFileStream) << tagName << ">";
+                (*this->BuildFileStream) << cmVS10EscapeXML(value);
+                (*this->BuildFileStream) << "</" << tagName << ">\n";
+              }
+            }
+          }
         }
       }
 
@@ -1969,42 +1989,21 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         sourceFileTags["Link"] = link;
       }
     }
-    // check if file is a generated .Designer.cs or .xaml.cs file
-    // to add additional necessary tags
-    const std::string fileExtension =
-      cmsys::SystemTools::GetFilenameExtension(f);
-    if (fileExtension == ".Designer.cs" || fileExtension == ".xaml.cs") {
-      f = f.substr(0, f.length() - fileExtension.length());
-      if (sourceFileTags.find("Link") == sourceFileTags.end() &&
-          !this->InSourceBuild) {
-        // add link fallback
-        sourceFileTags["Link"] =
-          cmsys::SystemTools::GetFilenameName(f) + fileExtension;
-      }
-      std::vector<std::string> extensions;
-      extensions.push_back(".resx");
-      extensions.push_back(".settings");
-      extensions.push_back(".xaml");
-      extensions.push_back(".cs");
-      std::string dependencyExtension;
-      for (std::vector<std::string>::iterator i = extensions.begin();
-           i != extensions.end(); ++i) {
-        if (cmsys::SystemTools::FileExists(f + *i)) {
-          dependencyExtension = *i;
-          // There should never be more than one match. Otherwise
-          // one cannot tell on which match the file depends.
-          break;
+    const cmPropertyMap& props = sf.GetProperties();
+    for (cmPropertyMap::const_iterator p = props.begin(); p != props.end();
+         ++p) {
+      static const std::string propNamePrefix = "VS_CSHARP_";
+      if (p->first.find(propNamePrefix.c_str()) == 0) {
+        std::string tagName = p->first.substr(propNamePrefix.length());
+        if (!tagName.empty()) {
+          const std::string val = props.GetPropertyValue(p->first);
+          if (!val.empty()) {
+            sourceFileTags[tagName] = val;
+          } else {
+            sourceFileTags.erase(tagName);
+          }
         }
       }
-      if (dependencyExtension == ".resx") {
-        sourceFileTags["DesignTime"] = "True";
-        sourceFileTags["AutoGen"] = "True";
-      } else if (dependencyExtension == ".settings") {
-        sourceFileTags["DesignTimeSharedInput"] = "True";
-        sourceFileTags["AutoGen"] = "True";
-      }
-      sourceFileTags["DependentUpon"] =
-        cmsys::SystemTools::GetFilenameName(f) + dependencyExtension;
     }
     // write source file specific tags
     if (!sourceFileTags.empty()) {
