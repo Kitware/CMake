@@ -152,7 +152,7 @@ static bool RccListInputsQt5(const std::string& rccCommand,
 
 // - Class definitions
 
-const char* cmQtAutoGeneratorCommon::listSep = "@list_sep@";
+const char* cmQtAutoGeneratorCommon::listSep = "@LSEP@";
 
 bool cmQtAutoGeneratorCommon::RccListInputs(const std::string& qtMajorVersion,
                                             const std::string& rccCommand,

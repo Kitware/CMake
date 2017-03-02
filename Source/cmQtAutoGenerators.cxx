@@ -441,48 +441,52 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   // - Rcc
   if (this->RccEnabled()) {
     InfoGet(makefile, "AM_RCC_SOURCES", this->RccSources);
+    // File options
     {
       std::vector<std::string> rccFilesVec;
       std::vector<std::string> rccOptionsVec;
       InfoGet(makefile, "AM_RCC_OPTIONS_FILES", rccFilesVec);
       InfoGet(makefile, "AM_RCC_OPTIONS_OPTIONS", rccOptionsVec);
       if (rccFilesVec.size() != rccOptionsVec.size()) {
+        for (std::vector<std::string>::iterator
+               fileIt = rccFilesVec.begin(),
+               optionIt = rccOptionsVec.begin();
+             fileIt != rccFilesVec.end(); ++fileIt, ++optionIt) {
+          // Replace item separator
+          cmSystemTools::ReplaceString(*optionIt,
+                                       cmQtAutoGeneratorCommon::listSep, ";");
+          this->RccOptions[*fileIt] = *optionIt;
+        }
+      } else {
         this->LogError(
           "AutoGen: Error: RCC files/options lists size missmatch in: " +
           filename);
         return false;
       }
-      for (std::vector<std::string>::iterator fileIt = rccFilesVec.begin(),
-                                              optionIt = rccOptionsVec.begin();
-           fileIt != rccFilesVec.end(); ++fileIt, ++optionIt) {
-        cmSystemTools::ReplaceString(*optionIt,
-                                     cmQtAutoGeneratorCommon::listSep, ";");
-        this->RccOptions[*fileIt] = *optionIt;
-      }
     }
+    // File lists
     {
       std::vector<std::string> rccInputLists;
       InfoGet(makefile, "AM_RCC_INPUTS", rccInputLists);
-
-      // qrc files in the end of the list may have been empty
-      if (rccInputLists.size() < this->RccSources.size()) {
-        rccInputLists.resize(this->RccSources.size());
-      }
-      if (this->RccSources.size() != rccInputLists.size()) {
+      if (this->RccSources.size() == rccInputLists.size()) {
+        for (std::vector<std::string>::iterator
+               fileIt = this->RccSources.begin(),
+               inputIt = rccInputLists.begin();
+             fileIt != this->RccSources.end(); ++fileIt, ++inputIt) {
+          // Remove braces
+          *inputIt = inputIt->substr(1, inputIt->size() - 2);
+          // Replace item separator
+          cmSystemTools::ReplaceString(*inputIt,
+                                       cmQtAutoGeneratorCommon::listSep, ";");
+          std::vector<std::string> rccInputFiles;
+          cmSystemTools::ExpandListArgument(*inputIt, rccInputFiles);
+          this->RccInputs[*fileIt] = rccInputFiles;
+        }
+      } else {
         this->LogError(
           "AutoGen: Error: RCC sources/inputs lists size missmatch in: " +
           filename);
         return false;
-      }
-      for (std::vector<std::string>::iterator
-             fileIt = this->RccSources.begin(),
-             inputIt = rccInputLists.begin();
-           fileIt != this->RccSources.end(); ++fileIt, ++inputIt) {
-        cmSystemTools::ReplaceString(*inputIt,
-                                     cmQtAutoGeneratorCommon::listSep, ";");
-        std::vector<std::string> rccInputFiles;
-        cmSystemTools::ExpandListArgument(*inputIt, rccInputFiles);
-        this->RccInputs[*fileIt] = rccInputFiles;
       }
     }
   }

@@ -489,16 +489,17 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target,
         _rcc_files.push_back(absFile);
         // qrc file entries
         {
-          std::string entriesList;
+          std::string entriesList = "{";
           if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
             std::vector<std::string> files;
             if (cmQtAutoGeneratorCommon::RccListInputs(
                   qtMajorVersion, rccCommand, absFile, files)) {
-              entriesList = cmJoin(files, cmQtAutoGeneratorCommon::listSep);
+              entriesList += cmJoin(files, cmQtAutoGeneratorCommon::listSep);
             } else {
               return;
             }
           }
+          entriesList += "}";
           _rcc_inputs.push_back(entriesList);
         }
         // rcc options for this qrc file
