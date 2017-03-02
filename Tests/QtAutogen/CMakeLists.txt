@@ -119,26 +119,26 @@ endif()
 # -- Test
 # Ensure a repeated build succeeds when a header containing a QObject changes
 try_compile(MOC_RERUN
-  "${CMAKE_CURRENT_BINARY_DIR}/automoc_rerun"
-  "${CMAKE_CURRENT_SOURCE_DIR}/automoc_rerun"
-  automoc_rerun
+  "${CMAKE_CURRENT_BINARY_DIR}/mocRerun"
+  "${CMAKE_CURRENT_SOURCE_DIR}/mocRerun"
+  mocRerun
   CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
               "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
               "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
   OUTPUT_VARIABLE output
 )
 if (NOT MOC_RERUN)
-  message(SEND_ERROR "Initial build of automoc_rerun failed. Output: ${output}")
+  message(SEND_ERROR "Initial build of mocRerun failed. Output: ${output}")
 endif()
 
-configure_file(automoc_rerun/test1.h.in2 automoc_rerun/test1.h COPYONLY)
+configure_file(mocRerun/test1b.h.in mocRerun/test1.h COPYONLY)
 
 execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/automoc_rerun"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mocRerun"
   RESULT_VARIABLE automoc_rerun_result
   )
 if (automoc_rerun_result)
-  message(SEND_ERROR "Second build of automoc_rerun failed.")
+  message(SEND_ERROR "Second build of mocRerun failed.")
 endif()
 
 # -- Test

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project(automoc_rerun CXX)
+project(mocRerun CXX)
 
 if (QT_TEST_VERSION STREQUAL 4)
   find_package(Qt4 REQUIRED)
@@ -16,7 +16,7 @@ endif()
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-configure_file(test1.h.in1 test1.h COPYONLY)
+configure_file(test1a.h.in test1.h COPYONLY)
 
 add_executable(test1
   ${CMAKE_CURRENT_BINARY_DIR}/test1.h
