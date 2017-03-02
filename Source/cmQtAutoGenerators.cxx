@@ -37,23 +37,9 @@ static const char* SettingsKeyRcc = "AM_RCC_OLD_SETTINGS";
 
 // -- Static functions
 
-/**
- * @brief Returns a the string escaped and enclosed in quotes
- */
-static std::string Quoted(const std::string& text)
+inline static std::string Quoted(const std::string& text)
 {
-  static const char* rep[18] = { "\\", "\\\\", "\"", "\\\"", "\a", "\\a",
-                                 "\b", "\\b",  "\f", "\\f",  "\n", "\\n",
-                                 "\r", "\\r",  "\t", "\\t",  "\v", "\\v" };
-
-  std::string res = text;
-  for (const char* const* it = cmArrayBegin(rep); it != cmArrayEnd(rep);
-       it += 2) {
-    cmSystemTools::ReplaceString(res, *it, *(it + 1));
-  }
-  res = '"' + res;
-  res += '"';
-  return res;
+  return cmQtAutoGeneratorCommon::Quoted(text);
 }
 
 static void InfoGet(cmMakefile* makefile, const char* key, std::string& value)
@@ -403,7 +389,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
       } else {
         this->LogError(
           "AutoMoc: Error: AUTOMOC_DEPEND_FILTERS list size is not "
-          "a multiple of 2");
+          "a multiple of 2 in:\n" +
+          Quoted(filename));
         return false;
       }
     }
@@ -431,8 +418,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
         }
       } else {
         this->LogError(
-          "AutoGen: Error: Uic files/options lists size missmatch in: " +
-          filename);
+          "AutoGen: Error: Uic files/options lists size missmatch in:\n" +
+          Quoted(filename));
         return false;
       }
     }
@@ -447,7 +434,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
       std::vector<std::string> rccOptionsVec;
       InfoGet(makefile, "AM_RCC_OPTIONS_FILES", rccFilesVec);
       InfoGet(makefile, "AM_RCC_OPTIONS_OPTIONS", rccOptionsVec);
-      if (rccFilesVec.size() != rccOptionsVec.size()) {
+      if (rccFilesVec.size() == rccOptionsVec.size()) {
         for (std::vector<std::string>::iterator
                fileIt = rccFilesVec.begin(),
                optionIt = rccOptionsVec.begin();
@@ -459,8 +446,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
         }
       } else {
         this->LogError(
-          "AutoGen: Error: RCC files/options lists size missmatch in: " +
-          filename);
+          "AutoGen: Error: RCC files/options lists size missmatch in:\n" +
+          Quoted(filename));
         return false;
       }
     }
@@ -484,8 +471,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
         }
       } else {
         this->LogError(
-          "AutoGen: Error: RCC sources/inputs lists size missmatch in: " +
-          filename);
+          "AutoGen: Error: RCC sources/inputs lists size missmatch in:\n" +
+          Quoted(filename));
         return false;
       }
     }
@@ -1574,13 +1561,30 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
     // Test if the resources list file is newer than build file
     generateRcc = FileAbsentOrOlder(rccBuildFile, rccInputFile);
     if (!generateRcc) {
-      // Test if any resource file is newer than the build file
-      const std::vector<std::string>& files = this->RccInputs[rccInputFile];
-      for (std::vector<std::string>::const_iterator it = files.begin();
-           it != files.end(); ++it) {
-        if (FileAbsentOrOlder(rccBuildFile, *it)) {
-          generateRcc = true;
-          break;
+      // Acquire input file list
+      std::vector<std::string> readFiles;
+      const std::vector<std::string>* files = &this->RccInputs[rccInputFile];
+      if (files->empty()) {
+        // Read input file list from qrc file
+        std::string error;
+        if (cmQtAutoGeneratorCommon::RccListInputs(
+              this->QtMajorVersion, this->RccExecutable, rccInputFile,
+              readFiles, &error)) {
+          files = &readFiles;
+        } else {
+          files = CM_NULLPTR;
+          this->LogError(error);
+          this->RunRccFailed = true;
+        }
+      }
+      // Test if any input file is newer than the build file
+      if (files != CM_NULLPTR) {
+        for (std::vector<std::string>::const_iterator it = files->begin();
+             it != files->end(); ++it) {
+          if (FileAbsentOrOlder(rccBuildFile, *it)) {
+            generateRcc = true;
+            break;
+          }
         }
       }
     }

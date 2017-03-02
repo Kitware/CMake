@@ -17,13 +17,18 @@ public:
   static const char* listSep;
 
 public:
+  /// @brief Returns a the string escaped and enclosed in quotes
+  ///
+  static std::string Quoted(const std::string& text);
+
   /// @brief Reads the resource files list from from a .qrc file
   /// @arg fileName Must be the absolute path of the .qrc file
   /// @return True if the rcc file was successfully parsed
   static bool RccListInputs(const std::string& qtMajorVersion,
                             const std::string& rccCommand,
                             const std::string& fileName,
-                            std::vector<std::string>& files);
+                            std::vector<std::string>& files,
+                            std::string* errorMessage = CM_NULLPTR);
 };
 
 #endif

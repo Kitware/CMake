@@ -490,13 +490,15 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target,
         // qrc file entries
         {
           std::string entriesList = "{";
+          // Read input file list only for non generated .qrc files.
           if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
+            std::string error;
             std::vector<std::string> files;
             if (cmQtAutoGeneratorCommon::RccListInputs(
-                  qtMajorVersion, rccCommand, absFile, files)) {
+                  qtMajorVersion, rccCommand, absFile, files, &error)) {
               entriesList += cmJoin(files, cmQtAutoGeneratorCommon::listSep);
             } else {
-              return;
+              cmSystemTools::Error(error.c_str());
             }
           }
           entriesList += "}";
@@ -690,8 +692,13 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 #endif
               ) {
             if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
-              cmQtAutoGeneratorCommon::RccListInputs(
-                qtMajorVersion, rccCommand, absFile, depends);
+              {
+                std::string error;
+                if (!cmQtAutoGeneratorCommon::RccListInputs(
+                      qtMajorVersion, rccCommand, absFile, depends, &error)) {
+                  cmSystemTools::Error(error.c_str());
+                }
+              }
 #if defined(_WIN32) && !defined(__CYGWIN__)
               // Cannot use PRE_BUILD because the resource files themselves
               // may not be sources within the target so VS may not know the

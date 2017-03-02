@@ -24,47 +24,62 @@ static std::string utilStripCR(std::string const& line)
 /// @brief Reads the resource files list from from a .qrc file - Qt4 version
 /// @return True if the .qrc file was successfully parsed
 static bool RccListInputsQt4(const std::string& fileName,
-                             std::vector<std::string>& files)
+                             std::vector<std::string>& files,
+                             std::string* errorMessage)
 {
-  // Qrc file directory
-  std::string qrcDir(cmsys::SystemTools::GetFilenamePath(fileName));
-  if (!qrcDir.empty()) {
-    qrcDir += '/';
-  }
-
-  // Read file into string
+  bool allGood = true;
+  // Read qrc file content into string
   std::string qrcContents;
   {
-    std::ostringstream stream;
-    stream << cmsys::ifstream(fileName).rdbuf();
-    qrcContents = stream.str();
-  }
-
-  cmsys::RegularExpression fileMatchRegex("(<file[^<]+)");
-  cmsys::RegularExpression fileReplaceRegex("(^<file[^>]*>)");
-
-  size_t offset = 0;
-  while (fileMatchRegex.find(qrcContents.c_str() + offset)) {
-    std::string qrcEntry = fileMatchRegex.match(1);
-    offset += qrcEntry.size();
-    {
-      fileReplaceRegex.find(qrcEntry);
-      std::string tag = fileReplaceRegex.match(1);
-      qrcEntry = qrcEntry.substr(tag.size());
+    cmsys::ifstream ifs(fileName.c_str());
+    if (ifs) {
+      std::ostringstream osst;
+      osst << ifs.rdbuf();
+      qrcContents = osst.str();
+    } else {
+      if (errorMessage != CM_NULLPTR) {
+        std::ostringstream ost;
+        ost << "AutoRcc: Error: Rcc file not readable:\n"
+            << cmQtAutoGeneratorCommon::Quoted(fileName) << "\n";
+        *errorMessage = ost.str();
+      }
+      allGood = false;
     }
-    if (!cmSystemTools::FileIsFullPath(qrcEntry.c_str())) {
-      qrcEntry = qrcDir + qrcEntry;
-    }
-    files.push_back(qrcEntry);
   }
-  return true;
+  if (allGood) {
+    // qrc file directory
+    std::string qrcDir(cmsys::SystemTools::GetFilenamePath(fileName));
+    if (!qrcDir.empty()) {
+      qrcDir += '/';
+    }
+
+    cmsys::RegularExpression fileMatchRegex("(<file[^<]+)");
+    cmsys::RegularExpression fileReplaceRegex("(^<file[^>]*>)");
+
+    size_t offset = 0;
+    while (fileMatchRegex.find(qrcContents.c_str() + offset)) {
+      std::string qrcEntry = fileMatchRegex.match(1);
+      offset += qrcEntry.size();
+      {
+        fileReplaceRegex.find(qrcEntry);
+        std::string tag = fileReplaceRegex.match(1);
+        qrcEntry = qrcEntry.substr(tag.size());
+      }
+      if (!cmSystemTools::FileIsFullPath(qrcEntry.c_str())) {
+        qrcEntry = qrcDir + qrcEntry;
+      }
+      files.push_back(qrcEntry);
+    }
+  }
+  return allGood;
 }
 
 /// @brief Reads the resource files list from from a .qrc file - Qt5 version
 /// @return True if the .qrc file was successfully parsed
 static bool RccListInputsQt5(const std::string& rccCommand,
                              const std::string& fileName,
-                             std::vector<std::string>& files)
+                             std::vector<std::string>& files,
+                             std::string* errorMessage)
 {
   if (rccCommand.empty()) {
     cmSystemTools::Error("AutoRcc: Error: rcc executable not available\n");
@@ -104,11 +119,14 @@ static bool RccListInputsQt5(const std::string& rccCommand,
                                       CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
   }
   if (!result || retVal) {
-    std::ostringstream err;
-    err << "AUTOGEN: error: Rcc list process for " << fileName << " failed:\n"
-        << rccStdOut << "\n"
-        << rccStdErr << std::endl;
-    cmSystemTools::Error(err.str().c_str());
+    if (errorMessage != CM_NULLPTR) {
+      std::ostringstream ost;
+      ost << "AutoRcc: Error: Rcc list process for " << fileName
+          << " failed:\n"
+          << rccStdOut << "\n"
+          << rccStdErr << "\n";
+      *errorMessage = ost.str();
+    }
     return false;
   }
 
@@ -134,10 +152,12 @@ static bool RccListInputsQt5(const std::string& rccCommand,
 
         std::string::size_type pos = eline.find(searchString);
         if (pos == std::string::npos) {
-          std::ostringstream err;
-          err << "AUTOGEN: error: Rcc lists unparsable output " << eline
-              << std::endl;
-          cmSystemTools::Error(err.str().c_str());
+          if (errorMessage != CM_NULLPTR) {
+            std::ostringstream ost;
+            ost << "AutoRcc: Error: Rcc lists unparsable output:\n"
+                << cmQtAutoGeneratorCommon::Quoted(eline) << "\n";
+            *errorMessage = ost.str();
+          }
           return false;
         }
         pos += searchString.length();
@@ -154,13 +174,42 @@ static bool RccListInputsQt5(const std::string& rccCommand,
 
 const char* cmQtAutoGeneratorCommon::listSep = "@LSEP@";
 
+std::string cmQtAutoGeneratorCommon::Quoted(const std::string& text)
+{
+  static const char* rep[18] = { "\\", "\\\\", "\"", "\\\"", "\a", "\\a",
+                                 "\b", "\\b",  "\f", "\\f",  "\n", "\\n",
+                                 "\r", "\\r",  "\t", "\\t",  "\v", "\\v" };
+
+  std::string res = text;
+  for (const char* const* it = cmArrayBegin(rep); it != cmArrayEnd(rep);
+       it += 2) {
+    cmSystemTools::ReplaceString(res, *it, *(it + 1));
+  }
+  res = '"' + res;
+  res += '"';
+  return res;
+}
+
 bool cmQtAutoGeneratorCommon::RccListInputs(const std::string& qtMajorVersion,
                                             const std::string& rccCommand,
                                             const std::string& fileName,
-                                            std::vector<std::string>& files)
+                                            std::vector<std::string>& files,
+                                            std::string* errorMessage)
 {
-  if (qtMajorVersion == "4") {
-    return RccListInputsQt4(fileName, files);
+  bool allGood = false;
+  if (cmsys::SystemTools::FileExists(fileName.c_str())) {
+    if (qtMajorVersion == "4") {
+      allGood = RccListInputsQt4(fileName, files, errorMessage);
+    } else {
+      allGood = RccListInputsQt5(rccCommand, fileName, files, errorMessage);
+    }
+  } else {
+    if (errorMessage != CM_NULLPTR) {
+      std::ostringstream ost;
+      ost << "AutoRcc: Error: Rcc file does not exist:\n"
+          << cmQtAutoGeneratorCommon::Quoted(fileName) << "\n";
+      *errorMessage = ost.str();
+    }
   }
-  return RccListInputsQt5(rccCommand, fileName, files);
+  return allGood;
 }
