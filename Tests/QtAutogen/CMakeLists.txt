@@ -101,7 +101,7 @@ list(GET target1List 0 binFile)
 set(timeformat "%Y%j%H%M%S")
 file(TIMESTAMP "${binFile}" timeBegin "${timeformat}")
 
-# Touch qrc input file and rebuild
+# Touch first qrc input file and rebuild
 execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
 execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/rccDepends/res1/input.txt")
 execute_process(COMMAND "${CMAKE_COMMAND}" --build .
@@ -111,11 +111,26 @@ execute_process(COMMAND "${CMAKE_COMMAND}" --build .
 if (rccDepends_result)
   message(SEND_ERROR "Second build of rccDepends failed.")
 endif()
-
 # Compare timestamps
 file(TIMESTAMP "${binFile}" timeStep1 "${timeformat}")
 if (NOT timeStep1 GREATER timeBegin)
-  message(SEND_ERROR "file1 (${binFile}) should have changed in the first step!")
+  message(SEND_ERROR "File (${binFile}) should have changed in the first step!")
+endif()
+
+# Touch second qrc input file and rebuild
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/rccDepends/res2/input.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/rccDepends"
+  RESULT_VARIABLE rccDepends_result
+)
+if (rccDepends_result)
+  message(SEND_ERROR "Third build of rccDepends failed.")
+endif()
+# Compare timestamps
+file(TIMESTAMP "${binFile}" timeStep2 "${timeformat}")
+if (NOT timeStep2 GREATER timeStep1)
+  message(SEND_ERROR "File (${binFile}) should have changed in the second step!")
 endif()
 
 # -- Test
