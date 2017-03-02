@@ -3,6 +3,7 @@
 #include "cmXCodeScheme.h"
 
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 
 #include "cmGeneratedFileStream.h"
@@ -12,7 +13,9 @@
 cmXCodeScheme::cmXCodeScheme(cmXCodeObject* xcObj,
                              const std::vector<std::string>& configList,
                              unsigned int xcVersion)
-  : TargetName(xcObj->GetTarget()->GetName())
+  : Target(xcObj)
+  , TargetName(xcObj->GetTarget()->GetName())
+  , BuildableName(xcObj->GetTarget()->GetFullName())
   , TargetId(xcObj->GetId())
   , ConfigList(configList)
   , XcodeVersion(xcVersion)
@@ -20,7 +23,7 @@ cmXCodeScheme::cmXCodeScheme(cmXCodeObject* xcObj,
 }
 
 void cmXCodeScheme::WriteXCodeSharedScheme(const std::string& xcProjDir,
-                                           const std::string sourceRoot)
+                                           const std::string& container)
 {
   // Create shared scheme sub-directory tree
   //
@@ -39,14 +42,14 @@ void cmXCodeScheme::WriteXCodeSharedScheme(const std::string& xcProjDir,
     return;
   }
 
-  std::string xcProjRelDir = xcProjDir.substr(sourceRoot.size() + 1);
-  WriteXCodeXCScheme(fout, xcProjRelDir);
+  WriteXCodeXCScheme(fout, container);
 }
 
 void cmXCodeScheme::WriteXCodeXCScheme(std::ostream& fout,
-                                       const std::string& xcProjDir)
+                                       const std::string& container)
 {
   cmXMLWriter xout(fout);
+  xout.SetIndentationElement(std::string(3, ' '));
   xout.StartDocument();
 
   xout.StartElement("Scheme");
@@ -54,9 +57,9 @@ void cmXCodeScheme::WriteXCodeXCScheme(std::ostream& fout,
   xout.Attribute("LastUpgradeVersion", WriteVersionString());
   xout.Attribute("version", "1.3");
 
-  WriteBuildAction(xout, xcProjDir);
+  WriteBuildAction(xout, container);
   WriteTestAction(xout, FindConfiguration("Debug"));
-  WriteLaunchAction(xout, FindConfiguration("Debug"), xcProjDir);
+  WriteLaunchAction(xout, FindConfiguration("Debug"), container);
   WriteProfileAction(xout, FindConfiguration("Release"));
   WriteAnalyzeAction(xout, FindConfiguration("Debug"));
   WriteArchiveAction(xout, FindConfiguration("Release"));
@@ -65,7 +68,7 @@ void cmXCodeScheme::WriteXCodeXCScheme(std::ostream& fout,
 }
 
 void cmXCodeScheme::WriteBuildAction(cmXMLWriter& xout,
-                                     const std::string& xcProjDir)
+                                     const std::string& container)
 {
   xout.StartElement("BuildAction");
   xout.BreakAttributes();
@@ -85,9 +88,9 @@ void cmXCodeScheme::WriteBuildAction(cmXMLWriter& xout,
   xout.BreakAttributes();
   xout.Attribute("BuildableIdentifier", "primary");
   xout.Attribute("BlueprintIdentifier", this->TargetId);
-  xout.Attribute("BuildableName", this->TargetName);
+  xout.Attribute("BuildableName", this->BuildableName);
   xout.Attribute("BlueprintName", this->TargetName);
-  xout.Attribute("ReferencedContainer", "container:" + xcProjDir);
+  xout.Attribute("ReferencedContainer", "container:" + container);
   xout.EndElement();
 
   xout.EndElement(); // BuildActionEntry
@@ -118,7 +121,7 @@ void cmXCodeScheme::WriteTestAction(cmXMLWriter& xout,
 
 void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
                                       std::string configuration,
-                                      const std::string& xcProjDir)
+                                      const std::string& container)
 {
   xout.StartElement("LaunchAction");
   xout.BreakAttributes();
@@ -134,15 +137,22 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
   xout.Attribute("debugServiceExtension", "internal");
   xout.Attribute("allowLocationSimulation", "YES");
 
-  xout.StartElement("MacroExpansion");
+  if (IsExecutable(this->Target)) {
+    xout.StartElement("BuildableProductRunnable");
+    xout.BreakAttributes();
+    xout.Attribute("runnableDebuggingMode", "0");
+
+  } else {
+    xout.StartElement("MacroExpansion");
+  }
 
   xout.StartElement("BuildableReference");
   xout.BreakAttributes();
   xout.Attribute("BuildableIdentifier", "primary");
   xout.Attribute("BlueprintIdentifier", this->TargetId);
-  xout.Attribute("BuildableName", this->TargetName);
+  xout.Attribute("BuildableName", this->BuildableName);
   xout.Attribute("BlueprintName", this->TargetName);
-  xout.Attribute("ReferencedContainer", "container:" + xcProjDir);
+  xout.Attribute("ReferencedContainer", "container:" + container);
   xout.EndElement();
 
   xout.EndElement(); // MacroExpansion
@@ -203,4 +213,15 @@ std::string cmXCodeScheme::FindConfiguration(const std::string& name)
     return this->ConfigList[0];
 
   return name;
+}
+
+bool cmXCodeScheme::IsExecutable(const cmXCodeObject* target)
+{
+  cmGeneratorTarget* gt = target->GetTarget();
+  if (!gt) {
+    cmSystemTools::Error("Error no target on xobject\n");
+    return false;
+  }
+
+  return gt->GetType() == cmStateEnums::EXECUTABLE;
 }

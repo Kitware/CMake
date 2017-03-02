@@ -21,26 +21,30 @@ public:
                 unsigned int xcVersion);
 
   void WriteXCodeSharedScheme(const std::string& xcProjDir,
-                              const std::string sourceRoot);
+                              const std::string& container);
 
 private:
+  const cmXCodeObject* const Target;
   const std::string& TargetName;
+  const std::string BuildableName;
   const std::string& TargetId;
   const std::vector<std::string>& ConfigList;
   const unsigned int XcodeVersion;
 
-  void WriteXCodeXCScheme(std::ostream& fout, const std::string& xcProjDir);
+  void WriteXCodeXCScheme(std::ostream& fout, const std::string& container);
 
-  void WriteBuildAction(cmXMLWriter& xout, const std::string& xcProjDir);
+  void WriteBuildAction(cmXMLWriter& xout, const std::string& container);
   void WriteTestAction(cmXMLWriter& xout, std::string configuration);
   void WriteLaunchAction(cmXMLWriter& xout, std::string configuration,
-                         const std::string& xcProjDir);
+                         const std::string& container);
   void WriteProfileAction(cmXMLWriter& xout, std::string configuration);
   void WriteAnalyzeAction(cmXMLWriter& xout, std::string configuration);
   void WriteArchiveAction(cmXMLWriter& xout, std::string configuration);
 
   std::string WriteVersionString();
   std::string FindConfiguration(const std::string& name);
+
+  static bool IsExecutable(const cmXCodeObject* target);
 };
 
 #endif
