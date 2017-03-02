@@ -45,6 +45,11 @@ static void utilCopyTargetProperty(cmTarget* destinationTarget,
   }
 }
 
+inline static bool PropertyEnabled(cmSourceFile* sourceFile, const char* key)
+{
+  return cmSystemTools::IsOn(sourceFile->GetPropertyForUser(key));
+}
+
 static std::string GetSafeProperty(cmGeneratorTarget const* target,
                                    const char* key)
 {
@@ -150,18 +155,12 @@ static void AcquireScanFiles(cmGeneratorTarget const* target,
         !(fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
       continue;
     }
-    if (cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
-      continue;
-    }
     const std::string absFile =
       cmsys::SystemTools::GetRealPath(sf->GetFullPath());
     // Skip flags
-    const bool skipAll =
-      cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOGEN"));
-    const bool mocSkip =
-      skipAll || cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
-    const bool uicSkip =
-      skipAll || cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC"));
+    const bool skipAll = PropertyEnabled(sf, "SKIP_AUTOGEN");
+    const bool mocSkip = skipAll || PropertyEnabled(sf, "SKIP_AUTOMOC");
+    const bool uicSkip = skipAll || PropertyEnabled(sf, "SKIP_AUTOUIC");
     // Add file name to skip lists.
     // Do this even when the file is not added to the sources/headers lists
     // because the file name may be extracted from an other file when
@@ -478,8 +477,8 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target,
        fileIt != srcFiles.end(); ++fileIt) {
     cmSourceFile* sf = *fileIt;
     if ((sf->GetExtension() == "qrc") &&
-        !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOGEN")) &&
-        !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"))) {
+        !PropertyEnabled(sf, "SKIP_AUTOGEN") &&
+        !PropertyEnabled(sf, "SKIP_AUTORCC")) {
       const std::string absFile =
         cmsys::SystemTools::GetRealPath(sf->GetFullPath());
       // qrc file
@@ -488,7 +487,7 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target,
       {
         std::string entriesList = "{";
         // Read input file list only for non generated .qrc files.
-        if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
+        if (!PropertyEnabled(sf, "GENERATED")) {
           std::string error;
           std::vector<std::string> files;
           if (cmQtAutoGeneratorCommon::RccListInputs(
@@ -555,7 +554,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     cmSystemTools::CollapseFullPath("", makefile->GetCurrentBinaryDirectory());
   const std::string qtMajorVersion = GetQtMajorVersion(target);
   const std::string rccCommand = RccGetExecutable(target, qtMajorVersion);
-  std::vector<std::string> autogenOutputFiles;
+  std::vector<std::string> autogenDepends;
+  std::vector<std::string> autogenProvides;
 
   // Remove old settings on cleanup
   {
@@ -563,31 +563,6 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     fname += "/AutogenOldSettings.cmake";
     makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES", fname.c_str(),
                              false);
-  }
-
-  // Create autogen target build directory and add it to the clean files
-  cmSystemTools::MakeDirectory(autogenBuildDir);
-  makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
-                           autogenBuildDir.c_str(), false);
-
-  if (mocEnabled || uicEnabled) {
-    // Create autogen target includes directory and
-    // add it to the origin target INCLUDE_DIRECTORIES
-    const std::string incsDir = autogenBuildDir + "include";
-    cmSystemTools::MakeDirectory(incsDir);
-    target->AddIncludeDirectory(incsDir, true);
-  }
-
-  if (mocEnabled) {
-    // Register moc compilation file as generated
-    autogenOutputFiles.push_back(autogenBuildDir + "moc_compilation.cpp");
-  }
-
-  // Initialize autogen target dependencies
-  std::vector<std::string> depends;
-  if (const char* autogenDepends =
-        target->GetProperty("AUTOGEN_TARGET_DEPENDS")) {
-    cmSystemTools::ExpandListArgument(autogenDepends, depends);
   }
 
   // Compose command lines
@@ -628,6 +603,24 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     autogenComment = "Automatic " + tools + " for target " + target->GetName();
   }
 
+  // Create autogen target build directory and add it to the clean files
+  cmSystemTools::MakeDirectory(autogenBuildDir);
+  makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
+                           autogenBuildDir.c_str(), false);
+
+  // Create autogen target includes directory and
+  // add it to the origin target INCLUDE_DIRECTORIES
+  if (mocEnabled || uicEnabled) {
+    const std::string incsDir = autogenBuildDir + "include";
+    cmSystemTools::MakeDirectory(incsDir);
+    target->AddIncludeDirectory(incsDir, true);
+  }
+
+  // Register moc compilation file as generated
+  if (mocEnabled) {
+    autogenProvides.push_back(autogenBuildDir + "moc_compilation.cpp");
+  }
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool usePRE_BUILD = false;
   cmGlobalGenerator* gg = lg->GetGlobalGenerator();
@@ -639,72 +632,100 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     // This also works around a VS 11 bug that may skip updating the target:
     //  https://connect.microsoft.com/VisualStudio/feedback/details/769495
     usePRE_BUILD = vsgg->GetVersion() >= cmGlobalVisualStudioGenerator::VS7;
-    if (usePRE_BUILD) {
-      // If the autogen target depends on an other target
-      // don't use PRE_BUILD
-      for (std::vector<std::string>::iterator it = depends.begin();
-           it != depends.end(); ++it) {
-        if (!makefile->FindTargetToUse(it->c_str())) {
-          usePRE_BUILD = false;
-          break;
-        }
-      }
-    }
   }
 #endif
 
-  if (rccEnabled) {
+  // Initialize autogen target dependencies
+  if (const char* deps = target->GetProperty("AUTOGEN_TARGET_DEPENDS")) {
+    cmSystemTools::ExpandListArgument(deps, autogenDepends);
+  }
+  // Add link library targets to the autogen dependencies
+  {
+    const cmTarget::LinkLibraryVectorType& libVec =
+      target->Target->GetOriginalLinkLibraries();
+    for (cmTarget::LinkLibraryVectorType::const_iterator it = libVec.begin();
+         it != libVec.end(); ++it) {
+      const std::string& libName = it->first;
+      if (makefile->FindTargetToUse(libName) != CM_NULLPTR) {
+        autogenDepends.push_back(libName);
+      }
+    }
+  }
+  {
     cmFilePathChecksum fpathCheckSum(makefile);
+    // Iterate over all source files
     std::vector<cmSourceFile*> srcFiles;
     target->GetConfigCommonSourceFiles(srcFiles);
     for (std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
          fileIt != srcFiles.end(); ++fileIt) {
       cmSourceFile* sf = *fileIt;
-      if (sf->GetExtension() == "qrc" &&
-          !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOGEN")) &&
-          !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"))) {
-        {
+      if (!PropertyEnabled(sf, "SKIP_AUTOGEN")) {
+        const std::string ext = sf->GetExtension();
+        // Add generated file that will be scanned by moc or uic to
+        // the dependencies
+        if (mocEnabled || uicEnabled) {
+          const cmSystemTools::FileFormat fileType =
+            cmSystemTools::GetFileFormat(ext.c_str());
+          if ((fileType == cmSystemTools::CXX_FILE_FORMAT) ||
+              (fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
+            if (PropertyEnabled(sf, "GENERATED")) {
+              if ((mocEnabled && !PropertyEnabled(sf, "SKIP_AUTOMOC")) ||
+                  (uicEnabled && !PropertyEnabled(sf, "SKIP_AUTOUIC"))) {
+                autogenDepends.push_back(
+                  cmsys::SystemTools::GetRealPath(sf->GetFullPath()));
+#if defined(_WIN32) && !defined(__CYGWIN__)
+                // Cannot use PRE_BUILD with generated files
+                usePRE_BUILD = false;
+#endif
+              }
+            }
+          }
+        }
+        // Process rcc enabled files
+        if (rccEnabled && (ext == "qrc") &&
+            !PropertyEnabled(sf, "SKIP_AUTORCC")) {
           const std::string absFile =
             cmsys::SystemTools::GetRealPath(sf->GetFullPath());
 
-          // Run cmake again when .qrc file changes
-          makefile->AddCMakeDependFile(absFile);
+          // Compose rcc output file name
+          {
+            std::string rccOut = autogenBuildDir;
+            rccOut += fpathCheckSum.getPart(absFile);
+            rccOut += "/qrc_";
+            rccOut +=
+              cmsys::SystemTools::GetFilenameWithoutLastExtension(absFile);
+            rccOut += ".cpp";
 
-          std::string rccOutputFile = autogenBuildDir;
-          rccOutputFile += fpathCheckSum.getPart(absFile);
-          rccOutputFile += "/qrc_";
-          rccOutputFile +=
-            cmsys::SystemTools::GetFilenameWithoutLastExtension(absFile);
-          rccOutputFile += ".cpp";
+            // Register rcc output file as generated
+            autogenProvides.push_back(rccOut);
 
-          // Add rcc output file to origin target sources
-          cmSourceFile* gf = makefile->GetOrCreateSource(rccOutputFile, true);
-          gf->SetProperty("SKIP_AUTOGEN", "On");
-          target->AddSource(rccOutputFile);
-          // Register rcc output file as generated
-          autogenOutputFiles.push_back(rccOutputFile);
+            // Add rcc output file to origin target sources
+            cmSourceFile* gf = makefile->GetOrCreateSource(rccOut, true);
+            gf->SetProperty("SKIP_AUTOGEN", "On");
+            target->AddSource(rccOut);
+          }
 
-          if (lg->GetGlobalGenerator()->GetName() == "Ninja"
-#if defined(_WIN32) && !defined(__CYGWIN__)
-              || usePRE_BUILD
-#endif
-              ) {
-            if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
-              {
-                std::string error;
-                if (!cmQtAutoGeneratorCommon::RccListInputs(
-                      qtMajorVersion, rccCommand, absFile, depends, &error)) {
-                  cmSystemTools::Error(error.c_str());
-                }
-              }
-#if defined(_WIN32) && !defined(__CYGWIN__)
-              // Cannot use PRE_BUILD because the resource files themselves
-              // may not be sources within the target so VS may not know the
-              // target needs to re-build at all.
-              usePRE_BUILD = false;
-#endif
+          if (PropertyEnabled(sf, "GENERATED")) {
+            // Add generated qrc file to the dependencies
+            autogenDepends.push_back(absFile);
+          } else {
+            // Run cmake again when .qrc file changes
+            makefile->AddCMakeDependFile(absFile);
+
+            // Add the qrc input files to the dependencies
+            std::string error;
+            if (!cmQtAutoGeneratorCommon::RccListInputs(
+                  qtMajorVersion, rccCommand, absFile, autogenDepends,
+                  &error)) {
+              cmSystemTools::Error(error.c_str());
             }
           }
+#if defined(_WIN32) && !defined(__CYGWIN__)
+          // Cannot use PRE_BUILD because the resource files themselves
+          // may not be sources within the target so VS may not know the
+          // target needs to re-build at all.
+          usePRE_BUILD = false;
+#endif
         }
       }
     }
@@ -712,12 +733,21 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   if (usePRE_BUILD) {
+    // If the autogen target depends on an other target don't use PRE_BUILD
+    for (std::vector<std::string>::iterator it = autogenDepends.begin();
+         it != autogenDepends.end(); ++it) {
+      if (makefile->FindTargetToUse(*it) != CM_NULLPTR) {
+        usePRE_BUILD = false;
+        break;
+      }
+    }
+  }
+  if (usePRE_BUILD) {
     // Add the pre-build command directly to bypass the OBJECT_LIBRARY
     // rejection in cmMakefile::AddCustomCommandToTarget because we know
     // PRE_BUILD will work for an OBJECT_LIBRARY in this specific case.
     std::vector<std::string> no_output;
-    std::vector<std::string> no_byproducts;
-    cmCustomCommand cc(makefile, no_output, no_byproducts, depends,
+    cmCustomCommand cc(makefile, no_output, autogenProvides, autogenDepends,
                        commandLines, autogenComment.c_str(),
                        workingDirectory.c_str());
     cc.SetEscapeOldStyle(false);
@@ -728,7 +758,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   {
     cmTarget* autogenTarget = makefile->AddUtilityCommand(
       autogenTargetName, true, workingDirectory.c_str(),
-      /*byproducts=*/autogenOutputFiles, depends, commandLines, false,
+      /*byproducts=*/autogenProvides, autogenDepends, commandLines, false,
       autogenComment.c_str());
 
     cmGeneratorTarget* gt = new cmGeneratorTarget(autogenTarget, lg);
