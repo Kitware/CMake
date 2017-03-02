@@ -83,19 +83,19 @@ target_compile_features(empty PRIVATE ${QT_COMPILE_FEATURES})
 # -- Test
 # When a file listed in a .qrc file changes the target must be rebuilt
 try_compile(RCC_DEPENDS
-  "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"
-  "${CMAKE_CURRENT_SOURCE_DIR}/autorcc_depends"
-  autorcc_depends
+  "${CMAKE_CURRENT_BINARY_DIR}/rccDepends"
+  "${CMAKE_CURRENT_SOURCE_DIR}/rccDepends"
+  rccDepends
   CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
               "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
               "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
   OUTPUT_VARIABLE output
 )
 if (NOT RCC_DEPENDS)
-  message(SEND_ERROR "Initial build of autorcc_depends failed. Output: ${output}")
+  message(SEND_ERROR "Initial build of rccDepends failed. Output: ${output}")
 endif()
 
-file(STRINGS "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends/info_file.txt" qrc_files)
+file(STRINGS "${CMAKE_CURRENT_BINARY_DIR}/rccDepends/info_file.txt" qrc_files)
 
 list(GET qrc_files 0 qrc_file1)
 
@@ -104,10 +104,10 @@ set(timeformat "%Y%j%H%M%S")
 file(TIMESTAMP "${qrc_file1}" file1_before "${timeformat}")
 
 execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends/res1/input.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/rccDepends/res1/input.txt")
 
 execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/rccDepends"
 )
 
 file(TIMESTAMP "${qrc_file1}" file1_step1 "${timeformat}")

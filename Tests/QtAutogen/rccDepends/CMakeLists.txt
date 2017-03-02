@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project(autorcc_depends)
+project(rccDepends)
 
 set(CMAKE_AUTORCC ON)
 
