@@ -25,3 +25,5 @@ add_executable(test1
   )
 target_include_directories(test1 PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(test1 ${QT_CORE_TARGET})
+add_custom_command(TARGET test1 POST_BUILD COMMAND
+  ${CMAKE_COMMAND} -E echo "$<TARGET_FILE:test1>" > target1.txt)

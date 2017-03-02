@@ -24,4 +24,4 @@ add_executable(test_res1
 )
 target_link_libraries(test_res1 ${QT_CORE_TARGET})
 add_custom_command(TARGET test_res1 POST_BUILD COMMAND
-  ${CMAKE_COMMAND} -E echo "$<TARGET_FILE:test_res1>" > info_file.txt)
+  ${CMAKE_COMMAND} -E echo "$<TARGET_FILE:test_res1>" > target1.txt)
