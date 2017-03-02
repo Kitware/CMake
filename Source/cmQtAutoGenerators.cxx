@@ -125,13 +125,19 @@ static bool FileNameIsUnique(const std::string& filePath,
   return true;
 }
 
-static std::string ReadAll(const std::string& filename)
+static bool ReadAll(std::string& content, const std::string& filename)
 {
-  cmsys::ifstream file(filename.c_str());
-  std::ostringstream stream;
-  stream << file.rdbuf();
-  file.close();
-  return stream.str();
+  bool success = false;
+  {
+    cmsys::ifstream ifs(filename.c_str());
+    if (ifs) {
+      std::ostringstream osst;
+      osst << ifs.rdbuf();
+      content = osst.str();
+      success = true;
+    }
+  }
+  return success;
 }
 
 /**
@@ -682,8 +688,10 @@ bool cmQtAutoGenerators::RunAutogen()
       uicHeaderFiles.insert(headerName);
     }
   }
-  this->ParseHeaders(mocHeaderFiles, uicHeaderFiles, mocsIncluded,
-                     mocsNotIncluded, mocDepends, uisIncluded);
+  if (!this->ParseHeaders(mocHeaderFiles, uicHeaderFiles, mocsIncluded,
+                          mocsNotIncluded, mocDepends, uisIncluded)) {
+    return false;
+  };
 
   // Generate files
   if (!this->MocGenerateAll(mocsIncluded, mocsNotIncluded, mocDepends)) {
@@ -799,23 +807,29 @@ bool cmQtAutoGenerators::ParseSourceFile(
   std::map<std::string, std::set<std::string> >& mocDepends,
   std::map<std::string, std::vector<std::string> >& uisIncluded, bool relaxed)
 {
-  bool success = true;
-  const std::string contentText = ReadAll(absFilename);
-  if (contentText.empty()) {
-    std::ostringstream ost;
-    ost << "AutoGen: Warning: " << absFilename << "\n"
-        << "The file is empty\n";
-    this->LogWarning(ost.str());
+  std::string contentText;
+  bool success = ReadAll(contentText, absFilename);
+  if (success) {
+    if (!contentText.empty()) {
+      // Parse source contents for MOC
+      if (success && !this->MocSkip(absFilename)) {
+        success = this->MocParseSourceContent(
+          absFilename, contentText, mocsIncluded, mocDepends, relaxed);
+      }
+      // Parse source contents for UIC
+      if (success && !this->UicSkip(absFilename)) {
+        this->UicParseContent(absFilename, contentText, uisIncluded);
+      }
+    } else {
+      std::ostringstream ost;
+      ost << "AutoGen: Warning: The file is empty:\n"
+          << Quoted(absFilename) << "\n";
+      this->LogWarning(ost.str());
+    }
   } else {
-    // Parse source contents for MOC
-    if (success && !this->MocSkip(absFilename)) {
-      success = this->MocParseSourceContent(absFilename, contentText,
-                                            mocsIncluded, mocDepends, relaxed);
-    }
-    // Parse source contents for UIC
-    if (success && !this->UicSkip(absFilename)) {
-      this->UicParseContent(absFilename, contentText, uisIncluded);
-    }
+    std::ostringstream ost;
+    ost << "AutoGen: Error: Could not read file:\n" << Quoted(absFilename);
+    this->LogError(ost.str());
   }
   return success;
 }
@@ -1078,7 +1092,7 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
   }
 }
 
-void cmQtAutoGenerators::ParseHeaders(
+bool cmQtAutoGenerators::ParseHeaders(
   const std::set<std::string>& mocHeaderFiles,
   const std::set<std::string>& uicHeaderFiles,
   const std::map<std::string, std::string>& mocsIncluded,
@@ -1086,6 +1100,7 @@ void cmQtAutoGenerators::ParseHeaders(
   std::map<std::string, std::set<std::string> >& mocDepends,
   std::map<std::string, std::vector<std::string> >& uisIncluded)
 {
+  bool success = true;
   // Merged header files list to read files only once
   std::set<std::string> headerFiles;
   headerFiles.insert(mocHeaderFiles.begin(), mocHeaderFiles.end());
@@ -1094,20 +1109,28 @@ void cmQtAutoGenerators::ParseHeaders(
   for (std::set<std::string>::const_iterator hIt = headerFiles.begin();
        hIt != headerFiles.end(); ++hIt) {
     const std::string& headerName = *hIt;
-    const std::string contentText = ReadAll(headerName);
-
-    // Parse header content for MOC
-    if ((mocHeaderFiles.find(headerName) != mocHeaderFiles.end()) &&
-        (mocsIncluded.find(headerName) == mocsIncluded.end())) {
-      this->MocParseHeaderContent(headerName, contentText, mocsNotIncluded,
-                                  mocDepends);
-    }
-
-    // Parse header content for UIC
-    if (uicHeaderFiles.find(headerName) != uicHeaderFiles.end()) {
-      this->UicParseContent(headerName, contentText, uisIncluded);
+    std::string contentText;
+    if (ReadAll(contentText, headerName)) {
+      // Parse header content for MOC
+      if ((mocHeaderFiles.find(headerName) != mocHeaderFiles.end()) &&
+          (mocsIncluded.find(headerName) == mocsIncluded.end())) {
+        this->MocParseHeaderContent(headerName, contentText, mocsNotIncluded,
+                                    mocDepends);
+      }
+      // Parse header content for UIC
+      if (uicHeaderFiles.find(headerName) != uicHeaderFiles.end()) {
+        this->UicParseContent(headerName, contentText, uisIncluded);
+      }
+    } else {
+      std::ostringstream ost;
+      ost << "AutoGen: Error: Could not read header file:\n"
+          << Quoted(headerName);
+      this->LogError(ost.str());
+      success = false;
+      break;
     }
   }
+  return success;
 }
 
 bool cmQtAutoGenerators::MocGenerateAll(
@@ -1190,8 +1213,12 @@ bool cmQtAutoGenerators::MocGenerateAll(
 
   // Check if the content of moc_compilation.cpp changed
   {
-    const std::string oldContents = ReadAll(this->MocCppFilenameAbs);
-    mocCompChanged = (oldContents != automocSource);
+    std::string oldContents;
+    if (ReadAll(oldContents, this->MocCppFilenameAbs)) {
+      mocCompChanged = (oldContents != automocSource);
+    } else {
+      mocCompChanged = true;
+    }
   }
 
   bool success = true;

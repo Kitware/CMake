@@ -78,7 +78,7 @@ private:
                                   std::set<std::string>& mocHeaderFiles,
                                   std::set<std::string>& uicHeaderFiles) const;
 
-  void ParseHeaders(
+  bool ParseHeaders(
     const std::set<std::string>& mocHeaderFiles,
     const std::set<std::string>& uicHeaderFiles,
     const std::map<std::string, std::string>& mocsIncluded,
