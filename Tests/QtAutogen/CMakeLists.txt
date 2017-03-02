@@ -239,6 +239,10 @@ target_link_libraries(skipRccB ${QT_LIBRARIES})
 add_subdirectory(sameName)
 
 # -- Test
+# Tests AUTOMOC with generated sources
+add_subdirectory(mocDepends)
+
+# -- Test
 # Tests various include moc patterns
 add_subdirectory(mocIncludeStrict)
 
