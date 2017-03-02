@@ -43,20 +43,22 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn,
     return true;
   }
 
-  if (this->Makefile->GetState()->GetGlobalPropertyAsBool(
-        "FIND_LIBRARY_USE_LIB32_PATHS")) {
-    // add special 32 bit paths if this is a 32 bit compile.
-    if (this->Makefile->PlatformIs32Bit()) {
-      this->AddArchitecturePaths("32");
-    }
+  // add custom lib<qual> paths instead of using fixed lib32 or lib64
+  if (const char* customLib = this->Makefile->GetDefinition(
+        "CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX")) {
+    this->AddArchitecturePaths(customLib);
   }
-
-  if (this->Makefile->GetState()->GetGlobalPropertyAsBool(
-        "FIND_LIBRARY_USE_LIB64_PATHS")) {
-    // add special 64 bit paths if this is a 64 bit compile.
-    if (this->Makefile->PlatformIs64Bit()) {
-      this->AddArchitecturePaths("64");
-    }
+  // add special 32 bit paths if this is a 32 bit compile.
+  else if (this->Makefile->PlatformIs32Bit() &&
+           this->Makefile->GetState()->GetGlobalPropertyAsBool(
+             "FIND_LIBRARY_USE_LIB32_PATHS")) {
+    this->AddArchitecturePaths("32");
+  }
+  // add special 64 bit paths if this is a 64 bit compile.
+  else if (this->Makefile->PlatformIs64Bit() &&
+           this->Makefile->GetState()->GetGlobalPropertyAsBool(
+             "FIND_LIBRARY_USE_LIB64_PATHS")) {
+    this->AddArchitecturePaths("64");
   }
 
   std::string library = this->FindLibrary();

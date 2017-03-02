@@ -49,6 +49,13 @@ path to the framework ``<fullPath>/A.framework``.  When a full path to a
 framework is used as a library, CMake will use a ``-framework A``, and a
 ``-F<fullPath>`` to link the framework to the target.
 
+If the :variable:`CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX` variable is set all
+search paths will be tested as normal, with the suffix appended, and with
+all matches of ``lib/`` replaced with
+``lib${CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX}/``.  This variable overrides
+the :prop_gbl:`FIND_LIBRARY_USE_LIB32_PATHS`
+and :prop_gbl:`FIND_LIBRARY_USE_LIB64_PATHS` global properties.
+
 If the :prop_gbl:`FIND_LIBRARY_USE_LIB32_PATHS` global property is set
 all search paths will be tested as normal, with ``32/`` appended, and
 with all matches of ``lib/`` replaced with ``lib32/``.  This property is

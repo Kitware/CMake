@@ -24,7 +24,7 @@ endmacro()
 macro(test_find_library_subst expected)
   get_filename_component(dir ${expected} PATH)
   get_filename_component(name ${expected} NAME)
-  string(REGEX REPLACE "lib/?64" "lib" dir "${dir}")
+  string(REGEX REPLACE "lib/?[36X][24Y][Z]*" "lib" dir "${dir}")
   test_find_library(", searched as ${dir}" "${expected}"
     NAMES ${name}
     PATHS ${CMAKE_CURRENT_SOURCE_DIR}/${dir}
@@ -79,3 +79,16 @@ test_find_library("" A/libtestA.a
   NAMES testB testA NAMES_PER_DIR
   PATHS ${CMAKE_CURRENT_SOURCE_DIR}/A ${CMAKE_CURRENT_SOURCE_DIR}/B
   )
+
+set(CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX "XYZ")
+foreach(libXYZ
+    lib/XYZ/libtest1.a
+    lib/A/libXYZ/libtest2.a
+    lib/libtest3.a
+    libXYZ/A/lib/libtest4.a
+    libXYZ/A/libXYZ/libtest5.a
+    libXYZ/A/libtest6.a
+    libXYZ/libtest7.a
+    )
+  test_find_library_subst(${libXYZ})
+endforeach()
