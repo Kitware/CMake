@@ -107,10 +107,12 @@ private:
     const std::map<std::string, std::set<std::string> >& mocDepends);
   bool MocGenerateFile(
     const std::string& sourceFile, const std::string& mocFileName,
-    const std::string& subDirPrefix,
+    const std::string& subDir,
     const std::map<std::string, std::set<std::string> >& mocDepends);
 
   // - Uic file generation
+  bool UicFindIncludedFile(std::string& absFile, const std::string& sourceFile,
+                           const std::string& includeString);
   bool UicGenerateAll(
     const std::map<std::string, std::vector<std::string> >& includedUis);
   bool UicGenerateFile(const std::string& realName,
@@ -142,14 +144,11 @@ private:
   bool MakeParentDirectory(const std::string& filename) const;
 
   bool FindHeader(std::string& header, const std::string& testBasePath) const;
-  bool FindHeaderGlobal(std::string& header,
-                        const std::string& testBasePath) const;
-  std::string FindMocHeader(const std::string& basePath,
-                            const std::string& baseName,
-                            const std::string& subDir) const;
-  std::string FindIncludedFile(const std::string& sourceFile,
-                               const std::string& includeString) const;
-  std::string FindInIncludeDirectories(const std::string& includeString) const;
+
+  std::string MocFindHeader(const std::string& sourcePath,
+                            const std::string& includeBase) const;
+  bool MocFindIncludedFile(std::string& absFile, const std::string& sourceFile,
+                           const std::string& includeString) const;
 
   // - Target names
   std::string OriginTargetName;
@@ -185,6 +184,7 @@ private:
   std::vector<std::string> UicSkipList;
   std::vector<std::string> UicTargetOptions;
   std::map<std::string, std::string> UicOptions;
+  std::vector<std::string> UicSearchPaths;
   // - Rcc
   std::vector<std::string> RccSources;
   std::map<std::string, std::string> RccOptions;

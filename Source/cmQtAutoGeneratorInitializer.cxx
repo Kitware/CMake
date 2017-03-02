@@ -306,6 +306,19 @@ static void UicSetupAutoTarget(
 
   AddDefinitionEscaped(makefile, "_uic_skip", uicSkipList);
 
+  // Uic search paths
+  {
+    std::vector<std::string> uicSearchPaths;
+    cmSystemTools::ExpandListArgument(
+      GetSafeProperty(target, "AUTOUIC_SEARCH_PATHS"), uicSearchPaths);
+    const std::string srcDir = makefile->GetCurrentSourceDirectory();
+    for (std::vector<std::string>::iterator it = uicSearchPaths.begin();
+         it != uicSearchPaths.end(); ++it) {
+      *it = cmSystemTools::CollapseFullPath(*it, srcDir);
+    }
+    AddDefinitionEscaped(makefile, "_uic_search_paths", uicSearchPaths);
+  }
+
   // Uic target options
   {
     std::string _uic_opts;
@@ -959,7 +972,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
                it = configMocDefines.begin(),
                end = configMocDefines.end();
              it != end; ++it) {
-          infoFile << "set(AM_MOC_COMPILE_DEFINITIONS_" << it->first << " "
+          infoFile << "set(AM_MOC_DEFINITIONS_" << it->first << " "
                    << it->second << ")\n";
         }
       }

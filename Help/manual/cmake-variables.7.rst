@@ -264,6 +264,7 @@ Variables that Control the Build
    /variable/CMAKE_AUTORCC_OPTIONS
    /variable/CMAKE_AUTOUIC
    /variable/CMAKE_AUTOUIC_OPTIONS
+   /variable/CMAKE_AUTOUIC_SEARCH_PATHS
    /variable/CMAKE_BUILD_RPATH
    /variable/CMAKE_BUILD_WITH_INSTALL_NAME_DIR
    /variable/CMAKE_BUILD_WITH_INSTALL_RPATH

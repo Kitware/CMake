@@ -287,5 +287,9 @@ if (NOT QT_TEST_VERSION STREQUAL 4)
 endif()
 
 # -- Test
+# Tests various .ui include directories
+add_subdirectory(uicInclude)
+
+# -- Test
 # Complex test case
 add_subdirectory(complex)
