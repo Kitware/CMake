@@ -23,3 +23,48 @@ is ignored for non-imported targets.
 This property is initialized by the value of the
 :variable:`CMAKE_MAP_IMPORTED_CONFIG_<CONFIG>` variable if it is set when a
 target is created.
+
+Example
+^^^^^^^
+
+For example creating imported C++ library ``foo``:
+
+.. code-block:: cmake
+
+  add_library(foo STATIC IMPORTED)
+
+Use ``foo_debug`` path for ``Debug`` build type:
+
+.. code-block:: cmake
+
+  set_property(
+    TARGET foo APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG
+    )
+
+  set_target_properties(foo PROPERTIES
+    IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+    IMPORTED_LOCATION_DEBUG "${foo_debug}"
+    )
+
+Use ``foo_release`` path for ``Release`` build type:
+
+.. code-block:: cmake
+
+  set_property(
+    TARGET foo APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE
+    )
+
+  set_target_properties(foo PROPERTIES
+    IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+    IMPORTED_LOCATION_RELEASE "${foo_release}"
+    )
+
+Use ``Release`` version of library for ``MinSizeRel`` and ``RelWithDebInfo``
+build types:
+
+.. code-block:: cmake
+
+  set_target_properties(foo PROPERTIES
+    MAP_IMPORTED_CONFIG_MINSIZEREL Release
+    MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release
+    )
