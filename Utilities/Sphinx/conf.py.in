@@ -18,7 +18,9 @@ release = '@conf_release@' # full version string
 
 primary_domain = 'cmake'
 
-exclude_patterns = []
+exclude_patterns = [
+    'dev', # ignore developer-only documentation
+    ]
 
 extensions = ['cmake']
 templates_path = ['@conf_path@/templates']
