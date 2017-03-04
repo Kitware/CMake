@@ -432,6 +432,16 @@ function(get_item_rpaths item rpaths_var)
     endif()
   endif()
 
+  if(UNIX AND NOT APPLE)
+    file(READ_ELF ${item} RPATH rpath_var RUNPATH runpath_var CAPTURE_ERROR error_var)
+    get_filename_component(item_dir ${item} DIRECTORY)
+    foreach(rpath ${rpath_var} ${runpath_var})
+      # Substitute $ORIGIN with the exepath and add to the found rpaths
+      string(REPLACE "$ORIGIN" "${item_dir}" rpath "${rpath}")
+      gp_append_unique(${rpaths_var} "${rpath}")
+    endforeach()
+  endif()
+
   set(${rpaths_var} ${${rpaths_var}} PARENT_SCOPE)
 endfunction()
 
