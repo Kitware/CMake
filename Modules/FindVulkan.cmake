@@ -48,6 +48,7 @@ if(WIN32)
       PATHS
         "$ENV{VULKAN_SDK}/Lib32"
         "$ENV{VULKAN_SDK}/Bin32"
+        NO_SYSTEM_ENVIRONMENT_PATH
         )
   endif()
 else()
