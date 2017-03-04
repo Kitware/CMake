@@ -1008,7 +1008,8 @@ function(verify_bundle_prerequisites bundle result_var info_var)
       endif()
 
       if(NOT ignoreFile)
-        get_prerequisites("${f}" prereqs 1 1 "${exepath}" "")
+        get_item_rpaths(${f} _main_exe_rpaths)
+        get_prerequisites("${f}" prereqs 1 1 "${exepath}" "${_main_exe_rpaths}")
 
         # On the Mac,
         # "embedded" and "system" prerequisites are fine... anything else means
