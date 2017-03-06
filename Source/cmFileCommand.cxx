@@ -42,6 +42,10 @@
 #include "cmFileLockResult.h"
 #endif
 
+#if defined(CMAKE_USE_ELF_PARSER)
+#include "cmELF.h"
+#endif
+
 class cmSystemToolsFileTime;
 
 // Table of permissions flags.
@@ -165,6 +169,9 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
   }
   if (subCommand == "RPATH_REMOVE") {
     return this->HandleRPathRemoveCommand(args);
+  }
+  if (subCommand == "READ_ELF") {
+    return this->HandleReadElfCommand(args);
   }
   if (subCommand == "RELATIVE_PATH") {
     return this->HandleRelativePathCommand(args);
@@ -2175,6 +2182,68 @@ bool cmFileCommand::HandleRPathCheckCommand(
   }
 
   return true;
+}
+
+bool cmFileCommand::HandleReadElfCommand(std::vector<std::string> const& args)
+{
+  if (args.size() < 4) {
+    this->SetError("READ_ELF must be called with at least three additional "
+                   "arguments.");
+    return false;
+  }
+
+  cmCommandArgumentsHelper argHelper;
+  cmCommandArgumentGroup group;
+
+  cmCAString readArg(&argHelper, "READ_ELF");
+  cmCAString fileNameArg(&argHelper, CM_NULLPTR);
+
+  cmCAString rpathArg(&argHelper, "RPATH", &group);
+  cmCAString runpathArg(&argHelper, "RUNPATH", &group);
+  cmCAString errorArg(&argHelper, "CAPTURE_ERROR", &group);
+
+  readArg.Follows(CM_NULLPTR);
+  fileNameArg.Follows(&readArg);
+  group.Follows(&fileNameArg);
+  argHelper.Parse(&args, CM_NULLPTR);
+
+  if (!cmSystemTools::FileExists(fileNameArg.GetString(), true)) {
+    std::ostringstream e;
+    e << "READ_ELF given FILE \"" << fileNameArg.GetString()
+      << "\" that does not exist.";
+    this->SetError(e.str());
+    return false;
+  }
+
+#if defined(CMAKE_USE_ELF_PARSER)
+  cmELF elf(fileNameArg.GetCString());
+
+  if (!rpathArg.GetString().empty()) {
+    if (cmELF::StringEntry const* se_rpath = elf.GetRPath()) {
+      std::string rpath(se_rpath->Value);
+      std::replace(rpath.begin(), rpath.end(), ':', ';');
+      this->Makefile->AddDefinition(rpathArg.GetString(), rpath.c_str());
+    }
+  }
+  if (!runpathArg.GetString().empty()) {
+    if (cmELF::StringEntry const* se_runpath = elf.GetRunPath()) {
+      std::string runpath(se_runpath->Value);
+      std::replace(runpath.begin(), runpath.end(), ':', ';');
+      this->Makefile->AddDefinition(runpathArg.GetString(), runpath.c_str());
+    }
+  }
+
+  return true;
+#else
+  std::string error = "ELF parser not available on this platform.";
+  if (errorArg.GetString().empty()) {
+    this->SetError(error);
+    return false;
+  } else {
+    this->Makefile->AddDefinition(errorArg.GetString(), error.c_str());
+    return true;
+  }
+#endif
 }
 
 bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)

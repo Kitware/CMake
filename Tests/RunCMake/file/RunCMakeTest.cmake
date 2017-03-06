@@ -25,6 +25,7 @@ run_cmake(LOCK-error-no-timeout)
 run_cmake(LOCK-error-timeout)
 run_cmake(LOCK-error-unknown-option)
 run_cmake(LOCK-lowercase)
+run_cmake(READ_ELF)
 run_cmake(GLOB)
 run_cmake(GLOB_RECURSE)
 # test is valid both for GLOB and GLOB_RECURSE
