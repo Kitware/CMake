@@ -1,11 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-// include these first, otherwise there will be problems on Windows
-// with GetCurrentDirectory() being redefined
-#ifdef CMAKE_BUILD_WITH_CMAKE
-#include "cmDocumentation.h"
-#include "cmDynamicLoader.h"
-#endif
+#include <cmConfigure.h>
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
@@ -17,7 +12,11 @@
 #include "cmake.h"
 #include "cmcmd.h"
 
-#include <cmConfigure.h>
+#ifdef CMAKE_BUILD_WITH_CMAKE
+#include "cmDocumentation.h"
+#include "cmDynamicLoader.h"
+#endif
+
 #include <cmsys/Encoding.hxx>
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
 #include <cmsys/ConsoleBuf.hxx>

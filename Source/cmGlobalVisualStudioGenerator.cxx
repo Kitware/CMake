@@ -5,6 +5,7 @@
 
 #include <cmsys/Encoding.hxx>
 #include <iostream>
+#include <windows.h>
 
 #include "cmAlgorithms.h"
 #include "cmCallVisualStudioMacro.h"
@@ -440,8 +441,6 @@ std::string cmGlobalVisualStudioGenerator::GetStartupProjectName(
   // default, if not specified
   return this->GetAllTargetName();
 }
-
-#include <windows.h>
 
 bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
                                         const std::string& regKeyBase,
