@@ -358,7 +358,7 @@ macro( _HDF5_parse_compile_line
       list(APPEND ${include_paths} "${CMAKE_MATCH_1}")
     elseif("${arg}" MATCHES "^-D(.*)$")
       # compile definition
-      list(APPEND ${definitions} "${CMAKE_MATCH_1}")
+      list(APPEND ${definitions} "-D${CMAKE_MATCH_1}")
     elseif("${arg}" MATCHES "^-L(.*)$")
       # library search path
       list(APPEND ${library_paths} "${CMAKE_MATCH_1}")
