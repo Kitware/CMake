@@ -142,6 +142,8 @@ private:
                              const char* basePrefix,
                              const char* baseSuffix) const;
   bool MakeParentDirectory(const std::string& filename) const;
+  bool RunCommand(const std::vector<std::string>& command,
+                  std::string& output) const;
 
   bool FindHeader(std::string& header, const std::string& testBasePath) const;
 

@@ -1312,18 +1312,12 @@ bool cmQtAutoGenerators::MocGenerateFile(
       cmd.push_back(mocFileAbs);
       cmd.push_back(sourceFile);
 
-      // Log moc command
-      if (this->Verbose) {
-        this->LogCommand(cmd);
-      }
-
       // Execute moc command
-      bool res = false;
-      int retVal = 0;
       std::string output;
-      res = cmSystemTools::RunSingleCommand(cmd, &output, &output, &retVal);
-
-      if (!res || (retVal != 0)) {
+      if (this->RunCommand(cmd, output)) {
+        // Success
+        mocGenerated = true;
+      } else {
         // Command failed
         {
           std::ostringstream ost;
@@ -1335,9 +1329,6 @@ bool cmQtAutoGenerators::MocGenerateFile(
         }
         cmSystemTools::RemoveFile(mocFileAbs);
         this->RunMocFailed = true;
-      } else {
-        // Success
-        mocGenerated = true;
       }
     } else {
       // Parent directory creation failed
@@ -1492,18 +1483,11 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
       cmd.push_back(uicFileAbs);
       cmd.push_back(uiInputFile);
 
-      // Log command
-      if (this->Verbose) {
-        this->LogCommand(cmd);
-      }
-
-      // Execute command
-      bool res = false;
-      int retVal = 0;
       std::string output;
-      res = cmSystemTools::RunSingleCommand(cmd, &output, &output, &retVal);
-
-      if (!res || (retVal != 0)) {
+      if (this->RunCommand(cmd, output)) {
+        // Success
+        uicGenerated = true;
+      } else {
         // Command failed
         {
           std::ostringstream ost;
@@ -1516,9 +1500,6 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
         }
         cmSystemTools::RemoveFile(uicFileAbs);
         this->RunUicFailed = true;
-      } else {
-        // Success
-        uicGenerated = true;
       }
     } else {
       // Parent directory creation failed
@@ -1649,17 +1630,11 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
       cmd.push_back(rccBuildFile);
       cmd.push_back(rccInputFile);
 
-      // Log command
-      if (this->Verbose) {
-        this->LogCommand(cmd);
-      }
-
-      // Execute command
-      bool res = false;
-      int retVal = 0;
       std::string output;
-      res = cmSystemTools::RunSingleCommand(cmd, &output, &output, &retVal);
-      if (!res || (retVal != 0)) {
+      if (this->RunCommand(cmd, output)) {
+        // Success
+        rccGenerated = true;
+      } else {
         // Command failed
         {
           std::ostringstream ost;
@@ -1671,9 +1646,6 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
         }
         cmSystemTools::RemoveFile(rccBuildFile);
         this->RunRccFailed = true;
-      } else {
-        // Success
-        rccGenerated = true;
       }
     } else {
       // Parent directory creation failed
@@ -1751,7 +1723,18 @@ void cmQtAutoGenerators::LogError(const std::string& message) const
 void cmQtAutoGenerators::LogCommand(
   const std::vector<std::string>& command) const
 {
-  this->LogInfo(cmJoin(command, " "));
+  std::vector<std::string> cmdEscaped;
+  typedef std::vector<std::string>::const_iterator Iter;
+  for (Iter cit = command.begin(); cit != command.end(); ++cit) {
+    const std::string cesc = Quoted(*cit);
+    if ((cesc.size() > (cit->size() + 2)) ||
+        (cesc.find(' ') != std::string::npos)) {
+      cmdEscaped.push_back(cesc);
+    } else {
+      cmdEscaped.push_back(*cit);
+    }
+  }
+  this->LogInfo(cmJoin(cmdEscaped, " "));
 }
 
 /**
@@ -1798,6 +1781,41 @@ std::string cmQtAutoGenerators::ChecksumedPath(const std::string& sourceFile,
   res += cmsys::SystemTools::GetFilenameWithoutLastExtension(sourceFile);
   res += baseSuffix;
   return res;
+}
+
+/**
+ * @brief Generates the parent directory of the given file on demand
+ * @return True on success
+ */
+bool cmQtAutoGenerators::MakeParentDirectory(const std::string& filename) const
+{
+  bool success = true;
+  const std::string dirName = cmSystemTools::GetFilenamePath(filename);
+  if (!dirName.empty()) {
+    success = cmsys::SystemTools::MakeDirectory(dirName);
+    if (!success) {
+      this->LogError("AutoGen: Error: Directory creation failed: " + dirName);
+    }
+  }
+  return success;
+}
+
+/**
+ * @brief Runs a command and returns true on success
+ * @return True on success
+ */
+bool cmQtAutoGenerators::RunCommand(const std::vector<std::string>& command,
+                                    std::string& output) const
+{
+  // Log command
+  if (this->Verbose) {
+    this->LogCommand(command);
+  }
+  // Execute command
+  int retVal = 0;
+  bool res =
+    cmSystemTools::RunSingleCommand(command, &output, &output, &retVal);
+  return (res && (retVal == 0));
 }
 
 /**
@@ -1870,23 +1888,6 @@ bool cmQtAutoGenerators::MocFindIncludedFile(
         success = true;
         break;
       }
-    }
-  }
-  return success;
-}
-
-/**
- * @brief Generates the parent directory of the given file on demand
- * @return True on success
- */
-bool cmQtAutoGenerators::MakeParentDirectory(const std::string& filename) const
-{
-  bool success = true;
-  const std::string dirName = cmSystemTools::GetFilenamePath(filename);
-  if (!dirName.empty()) {
-    success = cmsys::SystemTools::MakeDirectory(dirName);
-    if (!success) {
-      this->LogError("AutoGen: Error: Directory creation failed: " + dirName);
     }
   }
   return success;
