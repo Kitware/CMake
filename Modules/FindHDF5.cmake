@@ -69,6 +69,9 @@
 #   HDF5_C_DEFINITIONS -- Required compiler definitions for HDF5 C bindings
 #   HDF5_CXX_DEFINITIONS -- Required compiler definitions for HDF5 C++ bindings
 #   HDF5_Fortran_DEFINITIONS -- Required compiler definitions for HDF5 Fortran bindings
+#   HDF5_C_INCLUDE_DIRS -- Required include directories for HDF5 C bindings
+#   HDF5_CXX_INCLUDE_DIRS -- Required include directories for HDF5 C++ bindings
+#   HDF5_Fortran_INCLUDE_DIRS -- Required include directories for HDF5 Fortran bindings
 #   HDF5_C_LIBRARIES - Required libraries for the HDF5 C bindings
 #   HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
 #   HDF5_Fortran_LIBRARIES - Required libraries for the HDF5 Fortran bindings
@@ -696,6 +699,8 @@ if( NOT HDF5_FOUND )
             ${_HDF5_SEARCH_OPTS}
         )
         mark_as_advanced(HDF5_${__lang}_INCLUDE_DIR)
+        # set the _DIRS variable as this is what the user will normally use
+        set(HDF5_${__lang}_INCLUDE_DIRS ${HDF5_${__lang}_INCLUDE_DIR})
         list(APPEND HDF5_INCLUDE_DIRS ${HDF5_${__lang}_INCLUDE_DIR})
 
         # find the HDF5 libraries
