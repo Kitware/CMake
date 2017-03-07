@@ -52,6 +52,10 @@ public:
 
   void PrependInheritedString(std::string const& key);
 
+  // Parse the content of the given flag table entry again to extract
+  // known flags and leave the rest in the original entry.
+  void Reparse(std::string const& key);
+
   // Fix the ExceptionHandling option to default to off.
   void FixExceptionHandlingDefault();
 
@@ -83,6 +87,8 @@ private:
   bool FortranRuntimeDebug;
   bool FortranRuntimeDLL;
   bool FortranRuntimeMT;
+
+  std::string UnknownFlagField;
 
   virtual void StoreUnknownFlag(const char* flag);
 };

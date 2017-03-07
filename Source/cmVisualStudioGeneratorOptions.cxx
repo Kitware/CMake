@@ -43,6 +43,8 @@ cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
   this->FortranRuntimeDebug = false;
   this->FortranRuntimeDLL = false;
   this->FortranRuntimeMT = false;
+
+  this->UnknownFlagField = "AdditionalOptions";
 }
 
 cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
@@ -67,6 +69,8 @@ cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
   this->FortranRuntimeDebug = false;
   this->FortranRuntimeDLL = false;
   this->FortranRuntimeMT = false;
+
+  this->UnknownFlagField = "AdditionalOptions";
 }
 
 void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
@@ -229,6 +233,18 @@ void cmVisualStudioGeneratorOptions::PrependInheritedString(
   value = "%(" + key + ") " + value;
 }
 
+void cmVisualStudioGeneratorOptions::Reparse(std::string const& key)
+{
+  std::map<std::string, FlagValue>::iterator i = this->FlagMap.find(key);
+  if (i == this->FlagMap.end() || i->second.size() != 1) {
+    return;
+  }
+  std::string const original = i->second[0];
+  i->second[0] = "";
+  this->UnknownFlagField = key;
+  this->Parse(original.c_str());
+}
+
 void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
 {
   // Look for Intel Fortran flags that do not map well in the flag table.
@@ -255,7 +271,7 @@ void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
   std::string const opts = cmOutputConverter::EscapeWindowsShellArgument(
     flag, cmOutputConverter::Shell_Flag_AllowMakeVariables |
       cmOutputConverter::Shell_Flag_VSIDE);
-  this->AppendFlagString("AdditionalOptions", opts);
+  this->AppendFlagString(this->UnknownFlagField, opts);
 }
 
 void cmVisualStudioGeneratorOptions::SetConfiguration(const char* config)
