@@ -2470,6 +2470,10 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   cudaOptions.Parse(defineFlags.c_str());
   cudaOptions.ParseFinish();
 
+  if (this->GeneratorTarget->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION")) {
+    cudaOptions.AddFlag("GenerateRelocatableDeviceCode", "true");
+  }
+
   // Convert the host compiler options to the toolset's abstractions
   // using a secondary flag table.
   cudaOptions.ClearTables();
