@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION "@CMAKE_VERSION@")
+project("@TRY_COMPILE_PROJECT_NAME@" LANGUAGES CXX)
+
+# TODO: IPO policy
+
+add_library(foo foo.cpp)
+add_executable(boo main.cpp)
+target_link_libraries(boo PUBLIC foo)
