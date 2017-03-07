@@ -7,6 +7,7 @@
 #include "cmCTestTestHandler.h"
 #include "cmProcess.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 
 #include <cmConfigure.h>
 #include <cm_curl.h>
@@ -270,14 +271,11 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     *this->TestHandler->LogFile << "Test time = " << buf << std::endl;
   }
 
-  // Set the working directory to the tests directory
-  std::string oldpath = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(this->TestProperties->Directory);
-
-  this->DartProcessing();
-
-  // restore working directory
-  cmSystemTools::ChangeDirectory(oldpath);
+  // Set the working directory to the tests directory to process Dart files.
+  {
+    cmWorkingDirectory workdir(this->TestProperties->Directory);
+    this->DartProcessing();
+  }
 
   // if this is doing MemCheck then all the output needs to be put into
   // Output since that is what is parsed by cmCTestMemCheckHandler
@@ -356,11 +354,8 @@ bool cmCTestRunTest::StartAgain()
   }
   this->RunAgain = false; // reset
   // change to tests directory
-  std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(this->TestProperties->Directory);
+  cmWorkingDirectory workdir(this->TestProperties->Directory);
   this->StartTest(this->TotalNumberOfTests);
-  // change back
-  cmSystemTools::ChangeDirectory(current_dir);
   return true;
 }
 

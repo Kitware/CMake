@@ -42,6 +42,7 @@
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmVersion.h"
+#include "cmWorkingDirectory.h"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -1763,8 +1764,7 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
   /**
    * Run an executable command and put the stdout in output.
    */
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(bindir);
+  cmWorkingDirectory workdir(bindir);
   output += "Change Dir: ";
   output += bindir;
   output += "\n";
@@ -1804,8 +1804,6 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
       output += *outputPtr;
       output += "\nGenerator: execution of make clean failed.\n";
 
-      // return to the original directory
-      cmSystemTools::ChangeDirectory(cwd);
       return 1;
     }
     output += *outputPtr;
@@ -1828,8 +1826,6 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
     output += "\nGenerator: execution of make failed. Make command was: " +
       makeCommandStr + "\n";
 
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd);
     return 1;
   }
   output += *outputPtr;
@@ -1842,7 +1838,6 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
     retVal = 1;
   }
 
-  cmSystemTools::ChangeDirectory(cwd);
   return retVal;
 }
 

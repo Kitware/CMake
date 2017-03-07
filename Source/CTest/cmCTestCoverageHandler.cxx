@@ -12,6 +12,7 @@
 #include "cmParseJacocoCoverage.h"
 #include "cmParsePHPCoverage.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
@@ -969,9 +970,8 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
   std::string testingDir = this->CTest->GetBinaryDir() + "/Testing";
   std::string tempDir = testingDir + "/CoverageInfo";
-  std::string currentDirectory = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::MakeDirectory(tempDir.c_str());
-  cmSystemTools::ChangeDirectory(tempDir);
+  cmWorkingDirectory workdir(tempDir);
 
   int gcovStyle = 0;
 
@@ -1294,7 +1294,6 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     }
   }
 
-  cmSystemTools::ChangeDirectory(currentDirectory);
   return file_count;
 }
 
@@ -1340,7 +1339,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     return 0;
   }
   std::string testingDir = this->CTest->GetBinaryDir();
-  std::string currentDirectory = cmSystemTools::GetCurrentWorkingDirectory();
 
   std::set<std::string> missingFiles;
 
@@ -1362,7 +1360,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "." << std::flush,
                        this->Quiet);
     std::string fileDir = cmSystemTools::GetFilenamePath(*it);
-    cmSystemTools::ChangeDirectory(fileDir);
+    cmWorkingDirectory workdir(fileDir);
     std::string command = "\"" + lcovCommand + "\" " + lcovExtraFlags + " ";
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -1552,7 +1550,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     }
   }
 
-  cmSystemTools::ChangeDirectory(currentDirectory);
   return file_count;
 }
 
@@ -1591,13 +1588,8 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
   gl.RecurseOff(); // No need of recurse if -prof_dir${BUILD_DIR} flag is
                    // used while compiling.
   gl.RecurseThroughSymlinksOff();
-  std::string prevBinaryDir;
   std::string buildDir = this->CTest->GetCTestConfiguration("BuildDirectory");
-  if (cmSystemTools::ChangeDirectory(buildDir)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error changing directory to "
-                 << buildDir << std::endl);
-    return false;
-  }
+  cmWorkingDirectory workdir(buildDir);
 
   // Run profmerge to merge all *.dyn files into dpi files
   if (!cmSystemTools::RunSingleCommand("profmerge")) {
@@ -1605,11 +1597,9 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
     return false;
   }
 
-  prevBinaryDir = cmSystemTools::GetCurrentWorkingDirectory();
-
   // DPI file should appear in build directory
   std::string daGlob;
-  daGlob = prevBinaryDir;
+  daGlob = buildDir;
   daGlob += "/*.dpi";
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "   looking for dpi files in: " << daGlob << std::endl,
@@ -1646,11 +1636,7 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
 
   std::string testingDir = this->CTest->GetBinaryDir() + "/Testing";
   std::string tempDir = testingDir + "/CoverageInfo";
-  std::string currentDirectory = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::MakeDirectory(tempDir.c_str());
-  cmSystemTools::ChangeDirectory(tempDir);
-
-  cmSystemTools::ChangeDirectory(currentDirectory);
 
   std::vector<std::string>::iterator fileIt;
   int file_count = 0;
@@ -1737,7 +1723,6 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
     }
     ++file_count;
   }
-  cmSystemTools::ChangeDirectory(currentDirectory);
   return file_count;
 }
 

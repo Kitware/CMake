@@ -6,6 +6,7 @@
 #include "cmCTestGenericHandler.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 #include "cmake.h"
 
 #include <sstream>
@@ -216,8 +217,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
       handler->SetSubmitIndex(atoi(this->Values[ct_SUBMIT_INDEX]));
     }
   }
-  std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(
+  cmWorkingDirectory workdir(
     this->CTest->GetCTestConfiguration("BuildDirectory"));
   int res = handler->ProcessHandler();
   if (this->Values[ct_RETURN_VALUE] && *this->Values[ct_RETURN_VALUE]) {
@@ -243,7 +243,6 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
     this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
                                   returnString);
   }
-  cmSystemTools::ChangeDirectory(current_dir);
   return true;
 }
 

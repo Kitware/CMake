@@ -16,6 +16,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateSnapshot.h"
+#include "cmWorkingDirectory.h"
 #include "cmXMLSafe.h"
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
@@ -383,7 +384,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         goToDir += "/" + subdir;
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Change dir to: " << goToDir
                                                                << std::endl);
-        cmSystemTools::ChangeDirectory(goToDir);
+        cmWorkingDirectory workdir(goToDir);
         for (symlinkedIt = symlinkedFiles.begin();
              symlinkedIt != symlinkedFiles.end(); ++symlinkedIt) {
           cmCPackLogger(cmCPackLog::LOG_DEBUG, "Will create a symlink: "
@@ -408,7 +409,6 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         }
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Going back to: " << curDir
                                                                << std::endl);
-        cmSystemTools::ChangeDirectory(curDir);
       }
     }
   }

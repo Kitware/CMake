@@ -23,6 +23,7 @@
 #include "cmTargetLinkLibraryType.h"
 #include "cmUtils.hxx"
 #include "cmVersionConfig.h"
+#include "cmWorkingDirectory.h"
 #include "cm_auto_ptr.hxx"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -2199,23 +2200,22 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
     resultFile += "/__cmake_systeminformation/results.txt";
   }
 
-  // now run cmake on the CMakeLists file
-  cmSystemTools::ChangeDirectory(destPath);
-  std::vector<std::string> args2;
-  args2.push_back(args[0]);
-  args2.push_back(destPath);
-  std::string resultArg = "-DRESULT_FILE=";
-  resultArg += resultFile;
-  args2.push_back(resultArg);
-  int res = this->Run(args2, false);
+  {
+    // now run cmake on the CMakeLists file
+    cmWorkingDirectory workdir(destPath);
+    std::vector<std::string> args2;
+    args2.push_back(args[0]);
+    args2.push_back(destPath);
+    std::string resultArg = "-DRESULT_FILE=";
+    resultArg += resultFile;
+    args2.push_back(resultArg);
+    int res = this->Run(args2, false);
 
-  if (res != 0) {
-    std::cerr << "Error: --system-information failed on internal CMake!\n";
-    return res;
+    if (res != 0) {
+      std::cerr << "Error: --system-information failed on internal CMake!\n";
+      return res;
+    }
   }
-
-  // change back to the original directory
-  cmSystemTools::ChangeDirectory(cwd);
 
   // echo results to stdout if needed
   if (writeToStdout) {

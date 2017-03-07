@@ -7,6 +7,7 @@
 #include "cmCTestScriptHandler.h"
 #include "cmCTestTestHandler.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 
 #include <algorithm>
 #include <cmsys/FStream.hxx>
@@ -138,8 +139,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     }
   }
 
-  std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(this->Properties[test]->Directory);
+  cmWorkingDirectory workdir(this->Properties[test]->Directory);
 
   // Lock the resources we'll be using
   this->LockResources(test);
@@ -166,7 +166,6 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     this->Failed->push_back(this->Properties[test]->Name);
     delete testRun;
   }
-  cmSystemTools::ChangeDirectory(current_dir);
 }
 
 void cmCTestMultiProcessHandler::LockResources(int index)
@@ -683,9 +682,7 @@ void cmCTestMultiProcessHandler::PrintTestList()
     count++;
     cmCTestTestHandler::cmCTestTestProperties& p = *it->second;
 
-    // push working dir
-    std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
-    cmSystemTools::ChangeDirectory(p.Directory);
+    cmWorkingDirectory workdir(p.Directory);
 
     cmCTestRunTest testRun(this->TestHandler);
     testRun.SetIndex(p.Index);
@@ -724,8 +721,6 @@ void cmCTestMultiProcessHandler::PrintTestList()
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, " ", this->Quiet);
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, p.Name << std::endl,
                        this->Quiet);
-    // pop working dir
-    cmSystemTools::ChangeDirectory(current_dir);
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl

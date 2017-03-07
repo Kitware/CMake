@@ -404,6 +404,7 @@ CMAKE_CXX_SOURCES="\
   cmUnsetCommand \
   cmVersion \
   cmWhileCommand \
+  cmWorkingDirectory \
   cmake  \
   cmakemain \
   cmcmd  \
