@@ -36,5 +36,16 @@ static cmVS7FlagTable cmVS10CudaFlagTable[] = {
   { "cmake-temp-arch", "-gpu-architecture", "", "",
     cmVS7FlagTable::UserFollowing },
 
+  // Other flags.
+
+  { "FastMath", "use_fast_math", "", "true", 0 },
+  { "FastMath", "-use_fast_math", "", "true", 0 },
+
+  { "GPUDebugInfo", "G", "", "true", 0 },
+  { "GPUDebugInfo", "-device-debug", "", "true", 0 },
+
+  { "HostDebugInfo", "g", "", "true", 0 },
+  { "HostDebugInfo", "-debug", "", "true", 0 },
+
   { 0, 0, 0, 0, 0 }
 };
