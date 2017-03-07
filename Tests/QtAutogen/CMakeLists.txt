@@ -83,62 +83,92 @@ target_compile_features(empty PRIVATE ${QT_COMPILE_FEATURES})
 # -- Test
 # When a file listed in a .qrc file changes the target must be rebuilt
 try_compile(RCC_DEPENDS
-  "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"
-  "${CMAKE_CURRENT_SOURCE_DIR}/autorcc_depends"
-  autorcc_depends
+  "${CMAKE_CURRENT_BINARY_DIR}/rccDepends"
+  "${CMAKE_CURRENT_SOURCE_DIR}/rccDepends"
+  rccDepends
   CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
               "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
               "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
   OUTPUT_VARIABLE output
 )
 if (NOT RCC_DEPENDS)
-  message(SEND_ERROR "Initial build of autorcc_depends failed. Output: ${output}")
+  message(SEND_ERROR "Initial build of rccDepends failed. Output: ${output}")
 endif()
 
-file(STRINGS "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends/info_file.txt" qrc_files)
-
-list(GET qrc_files 0 qrc_file1)
-
+# Get name and timestamp of the output binary
+file(STRINGS "${CMAKE_CURRENT_BINARY_DIR}/rccDepends/target1.txt" target1List)
+list(GET target1List 0 binFile)
 set(timeformat "%Y%j%H%M%S")
+file(TIMESTAMP "${binFile}" timeBegin "${timeformat}")
 
-file(TIMESTAMP "${qrc_file1}" file1_before "${timeformat}")
-
+# Touch first qrc input file and rebuild
 execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends/res1/input.txt")
-
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/rccDepends/res1/input.txt")
 execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/rccDepends"
+  RESULT_VARIABLE rccDepends_result
 )
+if (rccDepends_result)
+  message(SEND_ERROR "Second build of rccDepends failed.")
+endif()
+# Compare timestamps
+file(TIMESTAMP "${binFile}" timeStep1 "${timeformat}")
+if (NOT timeStep1 GREATER timeBegin)
+  message(SEND_ERROR "File (${binFile}) should have changed in the first step!")
+endif()
 
-file(TIMESTAMP "${qrc_file1}" file1_step1 "${timeformat}")
-
-if (NOT file1_step1 GREATER file1_before)
-  message(SEND_ERROR "file1 (${qrc_file1}) should have changed in the first step!")
+# Touch second qrc input file and rebuild
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/rccDepends/res2/input.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/rccDepends"
+  RESULT_VARIABLE rccDepends_result
+)
+if (rccDepends_result)
+  message(SEND_ERROR "Third build of rccDepends failed.")
+endif()
+# Compare timestamps
+file(TIMESTAMP "${binFile}" timeStep2 "${timeformat}")
+if (NOT timeStep2 GREATER timeStep1)
+  message(SEND_ERROR "File (${binFile}) should have changed in the second step!")
 endif()
 
 # -- Test
 # Ensure a repeated build succeeds when a header containing a QObject changes
 try_compile(MOC_RERUN
-  "${CMAKE_CURRENT_BINARY_DIR}/automoc_rerun"
-  "${CMAKE_CURRENT_SOURCE_DIR}/automoc_rerun"
-  automoc_rerun
+  "${CMAKE_CURRENT_BINARY_DIR}/mocRerun"
+  "${CMAKE_CURRENT_SOURCE_DIR}/mocRerun"
+  mocRerun
   CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
               "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
               "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
   OUTPUT_VARIABLE output
 )
 if (NOT MOC_RERUN)
-  message(SEND_ERROR "Initial build of automoc_rerun failed. Output: ${output}")
+  message(SEND_ERROR "Initial build of mocRerun failed. Output: ${output}")
 endif()
 
-configure_file(automoc_rerun/test1.h.in2 automoc_rerun/test1.h COPYONLY)
+# Get name and timestamp of the output binary
+file(STRINGS "${CMAKE_CURRENT_BINARY_DIR}/mocRerun/target1.txt" target1List)
+list(GET target1List 0 binFile)
+set(timeformat "%Y%j%H%M%S")
+file(TIMESTAMP "${binFile}" timeBegin "${timeformat}")
 
+# Change file content and rebuild
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
+configure_file(mocRerun/test1b.h.in mocRerun/test1.h COPYONLY)
 execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/automoc_rerun"
-  RESULT_VARIABLE automoc_rerun_result
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mocRerun"
+  RESULT_VARIABLE mocRerun_result
   )
-if (automoc_rerun_result)
-  message(SEND_ERROR "Second build of automoc_rerun failed.")
+if (mocRerun_result)
+  message(SEND_ERROR "Second build of mocRerun failed.")
+endif()
+
+# Compare timestamps
+file(TIMESTAMP "${binFile}" timeStep1 "${timeformat}")
+if (NOT timeStep1 GREATER timeBegin)
+  message(SEND_ERROR "File (${binFile}) should have changed in the first step!")
 endif()
 
 # -- Test
@@ -207,6 +237,10 @@ target_link_libraries(skipRccB ${QT_LIBRARIES})
 # -- Test
 # Source files with the same basename in different subdirectories
 add_subdirectory(sameName)
+
+# -- Test
+# Tests AUTOMOC with generated sources
+add_subdirectory(mocDepends)
 
 # -- Test
 # Tests various include moc patterns

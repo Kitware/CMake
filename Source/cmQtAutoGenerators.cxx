@@ -1,6 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenerators.h"
+#include "cmQtAutoGeneratorCommon.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -36,23 +37,9 @@ static const char* SettingsKeyRcc = "AM_RCC_OLD_SETTINGS";
 
 // -- Static functions
 
-/**
- * @brief Returns a the string escaped and enclosed in quotes
- */
-static std::string Quoted(const std::string& text)
+inline static std::string Quoted(const std::string& text)
 {
-  static const char* rep[18] = { "\\", "\\\\", "\"", "\\\"", "\a", "\\a",
-                                 "\b", "\\b",  "\f", "\\f",  "\n", "\\n",
-                                 "\r", "\\r",  "\t", "\\t",  "\v", "\\v" };
-
-  std::string res = text;
-  for (const char* const* it = cmArrayBegin(rep); it != cmArrayEnd(rep);
-       it += 2) {
-    cmSystemTools::ReplaceString(res, *it, *(it + 1));
-  }
-  res = '"' + res;
-  res += '"';
-  return res;
+  return cmQtAutoGeneratorCommon::Quoted(text);
 }
 
 static void InfoGet(cmMakefile* makefile, const char* key, std::string& value)
@@ -138,13 +125,19 @@ static bool FileNameIsUnique(const std::string& filePath,
   return true;
 }
 
-static std::string ReadAll(const std::string& filename)
+static bool ReadAll(std::string& content, const std::string& filename)
 {
-  cmsys::ifstream file(filename.c_str());
-  std::ostringstream stream;
-  stream << file.rdbuf();
-  file.close();
-  return stream.str();
+  bool success = false;
+  {
+    cmsys::ifstream ifs(filename.c_str());
+    if (ifs) {
+      std::ostringstream osst;
+      osst << ifs.rdbuf();
+      content = osst.str();
+      success = true;
+    }
+  }
+  return success;
 }
 
 /**
@@ -178,7 +171,7 @@ static std::string JoinOptionsMap(
   for (std::map<std::string, std::string>::const_iterator it = opts.begin();
        it != opts.end(); ++it) {
     if (it != opts.begin()) {
-      result += "@list_sep@";
+      result += cmQtAutoGeneratorCommon::listSep;
     }
     result += it->first;
     result += "===";
@@ -402,7 +395,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
       } else {
         this->LogError(
           "AutoMoc: Error: AUTOMOC_DEPEND_FILTERS list size is not "
-          "a multiple of 2");
+          "a multiple of 2 in:\n" +
+          Quoted(filename));
         return false;
       }
     }
@@ -424,13 +418,14 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
                fileIt = uicFilesVec.begin(),
                optionIt = uicOptionsVec.begin();
              fileIt != uicFilesVec.end(); ++fileIt, ++optionIt) {
-          cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
+          cmSystemTools::ReplaceString(*optionIt,
+                                       cmQtAutoGeneratorCommon::listSep, ";");
           this->UicOptions[*fileIt] = *optionIt;
         }
       } else {
         this->LogError(
-          "AutoGen: Error: Uic files/options lists size missmatch in: " +
-          filename);
+          "AutoGen: Error: Uic files/options lists size missmatch in:\n" +
+          Quoted(filename));
         return false;
       }
     }
@@ -439,46 +434,52 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   // - Rcc
   if (this->RccEnabled()) {
     InfoGet(makefile, "AM_RCC_SOURCES", this->RccSources);
+    // File options
     {
       std::vector<std::string> rccFilesVec;
       std::vector<std::string> rccOptionsVec;
       InfoGet(makefile, "AM_RCC_OPTIONS_FILES", rccFilesVec);
       InfoGet(makefile, "AM_RCC_OPTIONS_OPTIONS", rccOptionsVec);
-      if (rccFilesVec.size() != rccOptionsVec.size()) {
+      if (rccFilesVec.size() == rccOptionsVec.size()) {
+        for (std::vector<std::string>::iterator
+               fileIt = rccFilesVec.begin(),
+               optionIt = rccOptionsVec.begin();
+             fileIt != rccFilesVec.end(); ++fileIt, ++optionIt) {
+          // Replace item separator
+          cmSystemTools::ReplaceString(*optionIt,
+                                       cmQtAutoGeneratorCommon::listSep, ";");
+          this->RccOptions[*fileIt] = *optionIt;
+        }
+      } else {
         this->LogError(
-          "AutoGen: Error: RCC files/options lists size missmatch in: " +
-          filename);
+          "AutoGen: Error: RCC files/options lists size missmatch in:\n" +
+          Quoted(filename));
         return false;
       }
-      for (std::vector<std::string>::iterator fileIt = rccFilesVec.begin(),
-                                              optionIt = rccOptionsVec.begin();
-           fileIt != rccFilesVec.end(); ++fileIt, ++optionIt) {
-        cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
-        this->RccOptions[*fileIt] = *optionIt;
-      }
     }
+    // File lists
     {
       std::vector<std::string> rccInputLists;
       InfoGet(makefile, "AM_RCC_INPUTS", rccInputLists);
-
-      // qrc files in the end of the list may have been empty
-      if (rccInputLists.size() < this->RccSources.size()) {
-        rccInputLists.resize(this->RccSources.size());
-      }
-      if (this->RccSources.size() != rccInputLists.size()) {
+      if (this->RccSources.size() == rccInputLists.size()) {
+        for (std::vector<std::string>::iterator
+               fileIt = this->RccSources.begin(),
+               inputIt = rccInputLists.begin();
+             fileIt != this->RccSources.end(); ++fileIt, ++inputIt) {
+          // Remove braces
+          *inputIt = inputIt->substr(1, inputIt->size() - 2);
+          // Replace item separator
+          cmSystemTools::ReplaceString(*inputIt,
+                                       cmQtAutoGeneratorCommon::listSep, ";");
+          std::vector<std::string> rccInputFiles;
+          cmSystemTools::ExpandListArgument(*inputIt, rccInputFiles);
+          this->RccInputs[*fileIt] = rccInputFiles;
+        }
+      } else {
         this->LogError(
-          "AutoGen: Error: RCC sources/inputs lists size missmatch in: " +
-          filename);
+          "AutoGen: Error: RCC sources/inputs lists size missmatch in:\n" +
+          Quoted(filename));
         return false;
-      }
-      for (std::vector<std::string>::iterator
-             fileIt = this->RccSources.begin(),
-             inputIt = rccInputLists.begin();
-           fileIt != this->RccSources.end(); ++fileIt, ++inputIt) {
-        cmSystemTools::ReplaceString(*inputIt, "@list_sep@", ";");
-        std::vector<std::string> rccInputFiles;
-        cmSystemTools::ExpandListArgument(*inputIt, rccInputFiles);
-        this->RccInputs[*fileIt] = rccInputFiles;
       }
     }
   }
@@ -687,8 +688,10 @@ bool cmQtAutoGenerators::RunAutogen()
       uicHeaderFiles.insert(headerName);
     }
   }
-  this->ParseHeaders(mocHeaderFiles, uicHeaderFiles, mocsIncluded,
-                     mocsNotIncluded, mocDepends, uisIncluded);
+  if (!this->ParseHeaders(mocHeaderFiles, uicHeaderFiles, mocsIncluded,
+                          mocsNotIncluded, mocDepends, uisIncluded)) {
+    return false;
+  };
 
   // Generate files
   if (!this->MocGenerateAll(mocsIncluded, mocsNotIncluded, mocDepends)) {
@@ -804,23 +807,29 @@ bool cmQtAutoGenerators::ParseSourceFile(
   std::map<std::string, std::set<std::string> >& mocDepends,
   std::map<std::string, std::vector<std::string> >& uisIncluded, bool relaxed)
 {
-  bool success = true;
-  const std::string contentText = ReadAll(absFilename);
-  if (contentText.empty()) {
-    std::ostringstream ost;
-    ost << "AutoGen: Warning: " << absFilename << "\n"
-        << "The file is empty\n";
-    this->LogWarning(ost.str());
+  std::string contentText;
+  bool success = ReadAll(contentText, absFilename);
+  if (success) {
+    if (!contentText.empty()) {
+      // Parse source contents for MOC
+      if (success && !this->MocSkip(absFilename)) {
+        success = this->MocParseSourceContent(
+          absFilename, contentText, mocsIncluded, mocDepends, relaxed);
+      }
+      // Parse source contents for UIC
+      if (success && !this->UicSkip(absFilename)) {
+        this->UicParseContent(absFilename, contentText, uisIncluded);
+      }
+    } else {
+      std::ostringstream ost;
+      ost << "AutoGen: Warning: The file is empty:\n"
+          << Quoted(absFilename) << "\n";
+      this->LogWarning(ost.str());
+    }
   } else {
-    // Parse source contents for MOC
-    if (success && !this->MocSkip(absFilename)) {
-      success = this->MocParseSourceContent(absFilename, contentText,
-                                            mocsIncluded, mocDepends, relaxed);
-    }
-    // Parse source contents for UIC
-    if (success && !this->UicSkip(absFilename)) {
-      this->UicParseContent(absFilename, contentText, uisIncluded);
-    }
+    std::ostringstream ost;
+    ost << "AutoGen: Error: Could not read file:\n" << Quoted(absFilename);
+    this->LogError(ost.str());
   }
   return success;
 }
@@ -1083,7 +1092,7 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
   }
 }
 
-void cmQtAutoGenerators::ParseHeaders(
+bool cmQtAutoGenerators::ParseHeaders(
   const std::set<std::string>& mocHeaderFiles,
   const std::set<std::string>& uicHeaderFiles,
   const std::map<std::string, std::string>& mocsIncluded,
@@ -1091,6 +1100,7 @@ void cmQtAutoGenerators::ParseHeaders(
   std::map<std::string, std::set<std::string> >& mocDepends,
   std::map<std::string, std::vector<std::string> >& uisIncluded)
 {
+  bool success = true;
   // Merged header files list to read files only once
   std::set<std::string> headerFiles;
   headerFiles.insert(mocHeaderFiles.begin(), mocHeaderFiles.end());
@@ -1099,20 +1109,28 @@ void cmQtAutoGenerators::ParseHeaders(
   for (std::set<std::string>::const_iterator hIt = headerFiles.begin();
        hIt != headerFiles.end(); ++hIt) {
     const std::string& headerName = *hIt;
-    const std::string contentText = ReadAll(headerName);
-
-    // Parse header content for MOC
-    if ((mocHeaderFiles.find(headerName) != mocHeaderFiles.end()) &&
-        (mocsIncluded.find(headerName) == mocsIncluded.end())) {
-      this->MocParseHeaderContent(headerName, contentText, mocsNotIncluded,
-                                  mocDepends);
-    }
-
-    // Parse header content for UIC
-    if (uicHeaderFiles.find(headerName) != uicHeaderFiles.end()) {
-      this->UicParseContent(headerName, contentText, uisIncluded);
+    std::string contentText;
+    if (ReadAll(contentText, headerName)) {
+      // Parse header content for MOC
+      if ((mocHeaderFiles.find(headerName) != mocHeaderFiles.end()) &&
+          (mocsIncluded.find(headerName) == mocsIncluded.end())) {
+        this->MocParseHeaderContent(headerName, contentText, mocsNotIncluded,
+                                    mocDepends);
+      }
+      // Parse header content for UIC
+      if (uicHeaderFiles.find(headerName) != uicHeaderFiles.end()) {
+        this->UicParseContent(headerName, contentText, uisIncluded);
+      }
+    } else {
+      std::ostringstream ost;
+      ost << "AutoGen: Error: Could not read header file:\n"
+          << Quoted(headerName);
+      this->LogError(ost.str());
+      success = false;
+      break;
     }
   }
+  return success;
 }
 
 bool cmQtAutoGenerators::MocGenerateAll(
@@ -1195,8 +1213,12 @@ bool cmQtAutoGenerators::MocGenerateAll(
 
   // Check if the content of moc_compilation.cpp changed
   {
-    const std::string oldContents = ReadAll(this->MocCppFilenameAbs);
-    mocCompChanged = (oldContents != automocSource);
+    std::string oldContents;
+    if (ReadAll(oldContents, this->MocCppFilenameAbs)) {
+      mocCompChanged = (oldContents != automocSource);
+    } else {
+      mocCompChanged = true;
+    }
   }
 
   bool success = true;
@@ -1290,18 +1312,12 @@ bool cmQtAutoGenerators::MocGenerateFile(
       cmd.push_back(mocFileAbs);
       cmd.push_back(sourceFile);
 
-      // Log moc command
-      if (this->Verbose) {
-        this->LogCommand(cmd);
-      }
-
       // Execute moc command
-      bool res = false;
-      int retVal = 0;
       std::string output;
-      res = cmSystemTools::RunSingleCommand(cmd, &output, &output, &retVal);
-
-      if (!res || (retVal != 0)) {
+      if (this->RunCommand(cmd, output)) {
+        // Success
+        mocGenerated = true;
+      } else {
         // Command failed
         {
           std::ostringstream ost;
@@ -1313,9 +1329,6 @@ bool cmQtAutoGenerators::MocGenerateFile(
         }
         cmSystemTools::RemoveFile(mocFileAbs);
         this->RunMocFailed = true;
-      } else {
-        // Success
-        mocGenerated = true;
       }
     } else {
       // Parent directory creation failed
@@ -1470,18 +1483,11 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
       cmd.push_back(uicFileAbs);
       cmd.push_back(uiInputFile);
 
-      // Log command
-      if (this->Verbose) {
-        this->LogCommand(cmd);
-      }
-
-      // Execute command
-      bool res = false;
-      int retVal = 0;
       std::string output;
-      res = cmSystemTools::RunSingleCommand(cmd, &output, &output, &retVal);
-
-      if (!res || (retVal != 0)) {
+      if (this->RunCommand(cmd, output)) {
+        // Success
+        uicGenerated = true;
+      } else {
         // Command failed
         {
           std::ostringstream ost;
@@ -1494,9 +1500,6 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
         }
         cmSystemTools::RemoveFile(uicFileAbs);
         this->RunUicFailed = true;
-      } else {
-        // Success
-        uicGenerated = true;
       }
     } else {
       // Parent directory creation failed
@@ -1566,13 +1569,30 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
     // Test if the resources list file is newer than build file
     generateRcc = FileAbsentOrOlder(rccBuildFile, rccInputFile);
     if (!generateRcc) {
-      // Test if any resource file is newer than the build file
-      const std::vector<std::string>& files = this->RccInputs[rccInputFile];
-      for (std::vector<std::string>::const_iterator it = files.begin();
-           it != files.end(); ++it) {
-        if (FileAbsentOrOlder(rccBuildFile, *it)) {
-          generateRcc = true;
-          break;
+      // Acquire input file list
+      std::vector<std::string> readFiles;
+      const std::vector<std::string>* files = &this->RccInputs[rccInputFile];
+      if (files->empty()) {
+        // Read input file list from qrc file
+        std::string error;
+        if (cmQtAutoGeneratorCommon::RccListInputs(
+              this->QtMajorVersion, this->RccExecutable, rccInputFile,
+              readFiles, &error)) {
+          files = &readFiles;
+        } else {
+          files = CM_NULLPTR;
+          this->LogError(error);
+          this->RunRccFailed = true;
+        }
+      }
+      // Test if any input file is newer than the build file
+      if (files != CM_NULLPTR) {
+        for (std::vector<std::string>::const_iterator it = files->begin();
+             it != files->end(); ++it) {
+          if (FileAbsentOrOlder(rccBuildFile, *it)) {
+            generateRcc = true;
+            break;
+          }
         }
       }
     }
@@ -1610,17 +1630,11 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
       cmd.push_back(rccBuildFile);
       cmd.push_back(rccInputFile);
 
-      // Log command
-      if (this->Verbose) {
-        this->LogCommand(cmd);
-      }
-
-      // Execute command
-      bool res = false;
-      int retVal = 0;
       std::string output;
-      res = cmSystemTools::RunSingleCommand(cmd, &output, &output, &retVal);
-      if (!res || (retVal != 0)) {
+      if (this->RunCommand(cmd, output)) {
+        // Success
+        rccGenerated = true;
+      } else {
         // Command failed
         {
           std::ostringstream ost;
@@ -1632,9 +1646,6 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
         }
         cmSystemTools::RemoveFile(rccBuildFile);
         this->RunRccFailed = true;
-      } else {
-        // Success
-        rccGenerated = true;
       }
     } else {
       // Parent directory creation failed
@@ -1712,7 +1723,18 @@ void cmQtAutoGenerators::LogError(const std::string& message) const
 void cmQtAutoGenerators::LogCommand(
   const std::vector<std::string>& command) const
 {
-  this->LogInfo(cmJoin(command, " "));
+  std::vector<std::string> cmdEscaped;
+  typedef std::vector<std::string>::const_iterator Iter;
+  for (Iter cit = command.begin(); cit != command.end(); ++cit) {
+    const std::string cesc = Quoted(*cit);
+    if ((cesc.size() > (cit->size() + 2)) ||
+        (cesc.find(' ') != std::string::npos)) {
+      cmdEscaped.push_back(cesc);
+    } else {
+      cmdEscaped.push_back(*cit);
+    }
+  }
+  this->LogInfo(cmJoin(cmdEscaped, " "));
 }
 
 /**
@@ -1759,6 +1781,41 @@ std::string cmQtAutoGenerators::ChecksumedPath(const std::string& sourceFile,
   res += cmsys::SystemTools::GetFilenameWithoutLastExtension(sourceFile);
   res += baseSuffix;
   return res;
+}
+
+/**
+ * @brief Generates the parent directory of the given file on demand
+ * @return True on success
+ */
+bool cmQtAutoGenerators::MakeParentDirectory(const std::string& filename) const
+{
+  bool success = true;
+  const std::string dirName = cmSystemTools::GetFilenamePath(filename);
+  if (!dirName.empty()) {
+    success = cmsys::SystemTools::MakeDirectory(dirName);
+    if (!success) {
+      this->LogError("AutoGen: Error: Directory creation failed: " + dirName);
+    }
+  }
+  return success;
+}
+
+/**
+ * @brief Runs a command and returns true on success
+ * @return True on success
+ */
+bool cmQtAutoGenerators::RunCommand(const std::vector<std::string>& command,
+                                    std::string& output) const
+{
+  // Log command
+  if (this->Verbose) {
+    this->LogCommand(command);
+  }
+  // Execute command
+  int retVal = 0;
+  bool res =
+    cmSystemTools::RunSingleCommand(command, &output, &output, &retVal);
+  return (res && (retVal == 0));
 }
 
 /**
@@ -1831,23 +1888,6 @@ bool cmQtAutoGenerators::MocFindIncludedFile(
         success = true;
         break;
       }
-    }
-  }
-  return success;
-}
-
-/**
- * @brief Generates the parent directory of the given file on demand
- * @return True on success
- */
-bool cmQtAutoGenerators::MakeParentDirectory(const std::string& filename) const
-{
-  bool success = true;
-  const std::string dirName = cmSystemTools::GetFilenamePath(filename);
-  if (!dirName.empty()) {
-    success = cmsys::SystemTools::MakeDirectory(dirName);
-    if (!success) {
-      this->LogError("AutoGen: Error: Directory creation failed: " + dirName);
     }
   }
   return success;

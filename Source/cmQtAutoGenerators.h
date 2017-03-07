@@ -78,7 +78,7 @@ private:
                                   std::set<std::string>& mocHeaderFiles,
                                   std::set<std::string>& uicHeaderFiles) const;
 
-  void ParseHeaders(
+  bool ParseHeaders(
     const std::set<std::string>& mocHeaderFiles,
     const std::set<std::string>& uicHeaderFiles,
     const std::map<std::string, std::string>& mocsIncluded,
@@ -142,6 +142,8 @@ private:
                              const char* basePrefix,
                              const char* baseSuffix) const;
   bool MakeParentDirectory(const std::string& filename) const;
+  bool RunCommand(const std::vector<std::string>& command,
+                  std::string& output) const;
 
   bool FindHeader(std::string& header, const std::string& testBasePath) const;
 

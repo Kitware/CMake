@@ -1,0 +1,11 @@
+#ifndef SIMPLE_LIB_H
+#define SIMPLE_LIB_H
+
+class SimpleLib
+{
+public:
+  SimpleLib();
+  ~SimpleLib();
+};
+
+#endif
