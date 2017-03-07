@@ -100,6 +100,8 @@ public:
   cmIDEFlagTable const* GetRcFlagTable() const;
   cmIDEFlagTable const* GetLibFlagTable() const;
   cmIDEFlagTable const* GetLinkFlagTable() const;
+  cmIDEFlagTable const* GetCudaFlagTable() const;
+  cmIDEFlagTable const* GetCudaHostFlagTable() const;
   cmIDEFlagTable const* GetMasmFlagTable() const;
   cmIDEFlagTable const* GetNasmFlagTable() const;
 
@@ -134,6 +136,8 @@ protected:
   cmIDEFlagTable const* DefaultCSharpFlagTable;
   cmIDEFlagTable const* DefaultLibFlagTable;
   cmIDEFlagTable const* DefaultLinkFlagTable;
+  cmIDEFlagTable const* DefaultCudaFlagTable;
+  cmIDEFlagTable const* DefaultCudaHostFlagTable;
   cmIDEFlagTable const* DefaultMasmFlagTable;
   cmIDEFlagTable const* DefaultNasmFlagTable;
   cmIDEFlagTable const* DefaultRcFlagTable;

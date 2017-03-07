@@ -10,6 +10,8 @@
 #include "cmSourceFile.h"
 #include "cmVS10CLFlagTable.h"
 #include "cmVS10CSharpFlagTable.h"
+#include "cmVS10CudaFlagTable.h"
+#include "cmVS10CudaHostFlagTable.h"
 #include "cmVS10LibFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10MASMFlagTable.h"
@@ -122,6 +124,8 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->DefaultCSharpFlagTable = cmVS10CSharpFlagTable;
   this->DefaultLibFlagTable = cmVS10LibFlagTable;
   this->DefaultLinkFlagTable = cmVS10LinkFlagTable;
+  this->DefaultCudaFlagTable = cmVS10CudaFlagTable;
+  this->DefaultCudaHostFlagTable = cmVS10CudaHostFlagTable;
   this->DefaultMasmFlagTable = cmVS10MASMFlagTable;
   this->DefaultNasmFlagTable = cmVS10NASMFlagTable;
   this->DefaultRcFlagTable = cmVS10RCFlagTable;
@@ -981,6 +985,17 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLinkFlagTable() const
     this->GetPlatformName(), this->GetPlatformToolsetString());
 
   return (table != CM_NULLPTR) ? table : this->DefaultLinkFlagTable;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCudaFlagTable() const
+{
+  return this->DefaultCudaFlagTable;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCudaHostFlagTable()
+  const
+{
+  return this->DefaultCudaHostFlagTable;
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMasmFlagTable() const
