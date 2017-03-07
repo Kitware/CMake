@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cmConfigure.h> // IWYU pragma: keep
+
 #include <functional>
 #include <string>
 #include <vector>
