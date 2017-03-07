@@ -750,6 +750,10 @@ bool cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(
     if (!gt->GetConfigCommonSourceFiles(sources)) {
       return false;
     }
+    // Only "real" targets are allowed to be C# targets.
+    if (gt->Target->GetType() > cmStateEnums::OBJECT_LIBRARY) {
+      return false;
+    }
   }
   gt->GetLanguages(languages, "");
   if (languages.size() == 1) {
