@@ -1717,8 +1717,10 @@ void cmVisualStudio10TargetGenerator::WriteSource(std::string const& tool,
   //
   // and fail if this exceeds the maximum allowed path length.  Our path
   // conversion uses full paths when possible to allow deeper trees.
-  bool forceRelative = false;
-  std::string sourceFile = this->ConvertPath(sf->GetFullPath(), false);
+  // However, CUDA 8.0 msbuild rules fail on absolute paths so for CUDA
+  // we must use relative paths.
+  bool forceRelative = sf->GetLanguage() == "CUDA";
+  std::string sourceFile = this->ConvertPath(sf->GetFullPath(), forceRelative);
   if (this->LocalGenerator->GetVersion() ==
         cmGlobalVisualStudioGenerator::VS10 &&
       cmSystemTools::FileIsFullPath(sourceFile.c_str())) {
