@@ -23,7 +23,9 @@ branches and tags.  Upstream development processes are covered by the
 following documents:
 
 * The `CMake Review Process`_ manages integration of changes.
+* The `CMake Testing Process`_ drives integration testing.
 
 .. _`Kitware's GitLab Instance`: https://gitlab.kitware.com
 .. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
 .. _`CMake Review Process`: review.rst
+.. _`CMake Testing Process`: testing.rst

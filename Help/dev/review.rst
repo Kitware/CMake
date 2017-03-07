@@ -198,14 +198,14 @@ Integration Testing
 
 The above `topic testing`_ tests the MR topic independent of other
 merge requests and on only a few key platforms and configurations.
-CMake also has a large number of testing machines provided by Kitware
-and generous volunteers that cover nearly all supported platforms,
-generators, and configurations.  In order to avoid overwhelming these
-resources, they do not test every MR individually.  Instead, these
-machines follow an *integration branch*, run tests on a nightly basis
-(or continuously during the day), and post to the `CMake CDash Page`_.
-Some follow ``master``.  Most follow a special integration branch,
-the *topic stage*.
+The `CMake Testing Process`_ also has a large number of machines
+provided by Kitware and generous volunteers that cover nearly all
+supported platforms, generators, and configurations.  In order to
+avoid overwhelming these resources, they do not test every MR
+individually.  Instead, these machines follow an *integration branch*,
+run tests on a nightly basis (or continuously during the day), and
+post to the `CMake CDash Page`_.  Some follow ``master``.  Most follow
+a special integration branch, the *topic stage*.
 
 The topic stage is a special branch maintained by the "Kitware Robot"
 (``@kwrobot``).  It consists of the head of the MR target integration
@@ -240,6 +240,8 @@ until one of the following occurs:
 
 Once a MR has been removed from the topic stage a new ``Do: stage``
 command is needed to stage it again.
+
+.. _`CMake Testing Process`: testing.rst
 
 Resolve
 =======
