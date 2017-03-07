@@ -2235,8 +2235,10 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   if (linkLanguage == "CXX") {
     clOptions.AddFlag("CompileAs", "CompileAsCpp");
   }
-  this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
-                                          linkLanguage, configName.c_str());
+  if (linkLanguage != "CUDA") {
+    this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
+                                            linkLanguage, configName.c_str());
+  }
 
   // Get preprocessor definitions for this directory.
   std::string defineFlags =
