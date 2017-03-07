@@ -52,6 +52,7 @@ int testSystemInformation(int, char* [])
   printMethod(info, GetOSRelease);
   printMethod(info, GetOSVersion);
   printMethod(info, GetOSPlatform);
+  printMethod(info, Is64Bits);
   printMethod(info, GetVendorString);
   printMethod(info, GetVendorID);
   printMethod(info, GetTypeID);
@@ -63,7 +64,6 @@ int testSystemInformation(int, char* [])
   printMethod2(info, GetProcessorCacheSize, "KB");
   printMethod(info, GetLogicalProcessorsPerPhysical);
   printMethod2(info, GetProcessorClockFrequency, "MHz");
-  printMethod(info, Is64Bits);
   printMethod(info, GetNumberOfLogicalCPU);
   printMethod(info, GetNumberOfPhysicalCPU);
   printMethod(info, DoesCPUSupportCPUID);

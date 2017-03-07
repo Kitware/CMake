@@ -539,6 +539,7 @@ protected:
   std::string OSRelease;
   std::string OSVersion;
   std::string OSPlatform;
+  bool OSIs64Bit;
 };
 
 SystemInformation::SystemInformation()
@@ -1499,6 +1500,7 @@ SystemInformationImplementation::SystemInformationImplementation()
   this->OSRelease = "";
   this->OSVersion = "";
   this->OSPlatform = "";
+  this->OSIs64Bit = (sizeof(void*) == 8);
 }
 
 SystemInformationImplementation::~SystemInformationImplementation()
@@ -5320,8 +5322,18 @@ bool SystemInformationImplementation::QueryOSInformation()
   this->Hostname = name;
 
   const char* arch = getenv("PROCESSOR_ARCHITECTURE");
+  const char* wow64 = getenv("PROCESSOR_ARCHITEW6432");
   if (arch) {
     this->OSPlatform = arch;
+  }
+
+  if (wow64) {
+    // the PROCESSOR_ARCHITEW6432 is only defined when running 32bit programs
+    // on 64bit OS
+    this->OSIs64Bit = true;
+  } else if (arch) {
+    // all values other than x86 map to 64bit architectures
+    this->OSIs64Bit = (strncmp(arch, "x86", 3) != 0);
   }
 
 #else
@@ -5334,6 +5346,12 @@ bool SystemInformationImplementation::QueryOSInformation()
     this->OSRelease = unameInfo.release;
     this->OSVersion = unameInfo.version;
     this->OSPlatform = unameInfo.machine;
+
+    // This is still insufficient to capture 64bit architecture such
+    // powerpc and possible mips and sparc
+    if (this->OSPlatform.find_first_of("64") != std::string::npos) {
+      this->OSIs64Bit = true;
+    }
   }
 
 #ifdef __APPLE__
@@ -5387,6 +5405,6 @@ void SystemInformationImplementation::TrimNewline(std::string& output)
 /** Return true if the machine is 64 bits */
 bool SystemInformationImplementation::Is64Bits()
 {
-  return (sizeof(void*) == 8);
+  return this->OSIs64Bit;
 }
 }

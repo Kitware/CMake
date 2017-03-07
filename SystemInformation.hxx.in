@@ -65,6 +65,7 @@ public:
   // on this system.
   std::string GetOSDescription();
 
+  // returns if the operating system is 64bit or not.
   bool Is64Bits();
 
   unsigned int GetNumberOfLogicalCPU();
