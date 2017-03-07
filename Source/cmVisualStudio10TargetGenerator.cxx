@@ -2470,6 +2470,16 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   cudaOptions.Parse(defineFlags.c_str());
   cudaOptions.ParseFinish();
 
+  // Convert the host compiler options to the toolset's abstractions
+  // using a secondary flag table.
+  cudaOptions.ClearTables();
+  cudaOptions.AddTable(gg->GetCudaHostFlagTable());
+  cudaOptions.Reparse("AdditionalCompilerOptions");
+
+  // `CUDA 8.0.targets` places these before nvcc!  Just drop whatever
+  // did not parse and hope it works.
+  cudaOptions.RemoveFlag("AdditionalCompilerOptions");
+
   std::vector<std::string> targetDefines;
   this->GeneratorTarget->GetCompileDefinitions(targetDefines,
                                                configName.c_str(), "CUDA");
