@@ -213,14 +213,7 @@ void cmLocalGenerator::TraceDependencies()
 
 void cmLocalGenerator::GenerateTestFiles()
 {
-  std::string file = this->StateSnapshot.GetDirectory().GetCurrentBinary();
-  file += "/";
-  file += "CTestTestfile.cmake";
-
   if (!this->Makefile->IsOn("CMAKE_TESTING_ENABLED")) {
-    if (cmSystemTools::FileExists(file)) {
-      cmSystemTools::RemoveFile(file);
-    }
     return;
   }
 
@@ -228,6 +221,10 @@ void cmLocalGenerator::GenerateTestFiles()
   std::vector<std::string> configurationTypes;
   const std::string& config =
     this->Makefile->GetConfigurations(configurationTypes, false);
+
+  std::string file = this->StateSnapshot.GetDirectory().GetCurrentBinary();
+  file += "/";
+  file += "CTestTestfile.cmake";
 
   cmGeneratedFileStream fout(file.c_str());
   fout.SetCopyIfDifferent(true);
