@@ -299,6 +299,9 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
     return;
   }
   const char* tag = "PreprocessorDefinitions";
+  if (lang == "CUDA") {
+    tag = "Defines";
+  }
   if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
     // if there are configuration specific flags, then
     // use the configuration specific tag for PreprocessorDefinitions

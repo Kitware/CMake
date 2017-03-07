@@ -112,6 +112,10 @@ cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
        i != this->LinkOptions.end(); ++i) {
     delete i->second;
   }
+  for (OptionsMap::iterator i = this->CudaOptions.begin();
+       i != this->CudaOptions.end(); ++i) {
+    delete i->second;
+  }
   if (!this->BuildFileStream) {
     return;
   }
@@ -204,6 +208,9 @@ void cmVisualStudio10TargetGenerator::Generate()
       return;
     }
     if (!this->ComputeRcOptions()) {
+      return;
+    }
+    if (!this->ComputeCudaOptions()) {
       return;
     }
     if (!this->ComputeMasmOptions()) {
@@ -454,6 +461,14 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->WriteString("<Import Project=\"" VS10_CXX_PROPS "\" />\n", 1);
   }
   this->WriteString("<ImportGroup Label=\"ExtensionSettings\">\n", 1);
+  if (this->GlobalGenerator->IsCudaEnabled()) {
+    this->WriteString("<Import Project=\"$(VCTargetsPath)\\"
+                      "BuildCustomizations\\CUDA ",
+                      2);
+    (*this->BuildFileStream)
+      << cmVS10EscapeXML(this->GlobalGenerator->GetPlatformToolsetCudaString())
+      << ".props\" />\n";
+  }
   if (this->GlobalGenerator->IsMasmEnabled()) {
     this->WriteString("<Import Project=\"$(VCTargetsPath)\\"
                       "BuildCustomizations\\masm.props\" />\n",
@@ -524,6 +539,14 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteTargetSpecificReferences();
   this->WriteString("<ImportGroup Label=\"ExtensionTargets\">\n", 1);
   this->WriteTargetsFileReferences();
+  if (this->GlobalGenerator->IsCudaEnabled()) {
+    this->WriteString("<Import Project=\"$(VCTargetsPath)\\"
+                      "BuildCustomizations\\CUDA ",
+                      2);
+    (*this->BuildFileStream)
+      << cmVS10EscapeXML(this->GlobalGenerator->GetPlatformToolsetCudaString())
+      << ".targets\" />\n";
+  }
   if (this->GlobalGenerator->IsMasmEnabled()) {
     this->WriteString("<Import Project=\"$(VCTargetsPath)\\"
                       "BuildCustomizations\\masm.targets\" />\n",
@@ -1772,6 +1795,8 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       tool = "ResourceCompile";
     } else if (lang == "CSharp") {
       tool = "Compile";
+    } else if (lang == "CUDA" && this->GlobalGenerator->IsCudaEnabled()) {
+      tool = "CudaCompile";
     }
 
     if (!tool.empty()) {
@@ -2399,6 +2424,83 @@ void cmVisualStudio10TargetGenerator::WriteRCOptions(
   rcOptions.OutputFlagMap(*this->BuildFileStream, "      ");
 
   this->WriteString("</ResourceCompile>\n", 2);
+}
+
+bool cmVisualStudio10TargetGenerator::ComputeCudaOptions()
+{
+  if (!this->GlobalGenerator->IsCudaEnabled()) {
+    return true;
+  }
+  for (std::vector<std::string>::const_iterator i =
+         this->Configurations.begin();
+       i != this->Configurations.end(); ++i) {
+    if (!this->ComputeCudaOptions(*i)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
+  std::string const& configName)
+{
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
+  CM_AUTO_PTR<Options> pOptions(new Options(
+    this->LocalGenerator, Options::CudaCompiler, gg->GetCudaFlagTable()));
+  Options& cudaOptions = *pOptions;
+
+  // Get compile flags for CUDA in this directory.
+  std::string CONFIG = cmSystemTools::UpperCase(configName);
+  std::string configFlagsVar = std::string("CMAKE_CUDA_FLAGS_") + CONFIG;
+  std::string flags =
+    std::string(this->Makefile->GetSafeDefinition("CMAKE_CUDA_FLAGS")) +
+    std::string(" ") +
+    std::string(this->Makefile->GetSafeDefinition(configFlagsVar));
+
+  // Get preprocessor definitions for this directory.
+  std::string defineFlags =
+    this->GeneratorTarget->Target->GetMakefile()->GetDefineFlags();
+
+  cudaOptions.Parse(flags.c_str());
+  cudaOptions.Parse(defineFlags.c_str());
+  cudaOptions.ParseFinish();
+
+  std::vector<std::string> targetDefines;
+  this->GeneratorTarget->GetCompileDefinitions(targetDefines,
+                                               configName.c_str(), "CUDA");
+  cudaOptions.AddDefines(targetDefines);
+
+  // Add a definition for the configuration name.
+  std::string configDefine = "CMAKE_INTDIR=\"";
+  configDefine += configName;
+  configDefine += "\"";
+  cudaOptions.AddDefine(configDefine);
+  if (const char* exportMacro = this->GeneratorTarget->GetExportMacro()) {
+    cudaOptions.AddDefine(exportMacro);
+  }
+
+  this->CudaOptions[configName] = pOptions.release();
+  return true;
+}
+
+void cmVisualStudio10TargetGenerator::WriteCudaOptions(
+  std::string const& configName, std::vector<std::string> const& includes)
+{
+  if (!this->MSTools || !this->GlobalGenerator->IsCudaEnabled()) {
+    return;
+  }
+  this->WriteString("<CudaCompile>\n", 2);
+
+  Options& cudaOptions = *(this->CudaOptions[configName]);
+  cudaOptions.AppendFlag("Include", includes);
+  cudaOptions.AppendFlag("Include", "%(Include)");
+  cudaOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
+                                            "\n", "CUDA");
+  cudaOptions.PrependInheritedString("AdditionalOptions");
+  cudaOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+
+  this->WriteString("</CudaCompile>\n", 2);
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeMasmOptions()
@@ -3142,6 +3244,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
       this->WriteClOptions(*i, includes);
       //    output rc compile flags <ResourceCompile></ResourceCompile>
       this->WriteRCOptions(*i, includes);
+      this->WriteCudaOptions(*i, includes);
       this->WriteMasmOptions(*i, includes);
       this->WriteNasmOptions(*i, includes);
     }
