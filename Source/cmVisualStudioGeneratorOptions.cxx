@@ -208,6 +208,57 @@ cmVisualStudioGeneratorOptions::GetCudaRuntime() const
   return CudaRuntimeStatic;
 }
 
+void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
+{
+  // Extract temporary values stored by our flag table.
+  FlagValue arch = this->TakeFlag("cmake-temp-arch");
+  FlagValue code = this->TakeFlag("cmake-temp-code");
+  FlagValue gencode = this->TakeFlag("cmake-temp-gencode");
+
+  // No -code allowed without -arch.
+  if (arch.empty()) {
+    code.clear();
+  }
+
+  if (arch.empty() && gencode.empty()) {
+    return;
+  }
+
+  // Create a CodeGeneration field with [arch],[code] syntax in each entry.
+  // CUDA will convert it to `-gencode=arch=[arch],code="[code],[arch]"`.
+  FlagValue& result = this->FlagMap["CodeGeneration"];
+
+  // First entries for the -arch=<arch> [-code=<code>,...] pair.
+  if (!arch.empty()) {
+    std::string arch_name = arch[0];
+    std::vector<std::string> codes;
+    if (!code.empty()) {
+      codes = cmSystemTools::tokenize(code[0], ",");
+    }
+    if (codes.empty()) {
+      codes.push_back(arch_name);
+      // nvcc -arch=<arch> has a special case that allows a real
+      // architecture to be specified instead of a virtual arch.
+      // It translates to -arch=<virtual> -code=<real>.
+      cmSystemTools::ReplaceString(arch_name, "sm_", "compute_");
+    }
+    for (std::vector<std::string>::iterator ci = codes.begin();
+         ci != codes.end(); ++ci) {
+      std::string entry = arch_name + "," + *ci;
+      result.push_back(entry);
+    }
+  }
+
+  // Now add entries for the -gencode=<arch>,<code> pairs.
+  for (std::vector<std::string>::iterator ei = gencode.begin();
+       ei != gencode.end(); ++ei) {
+    std::string entry = *ei;
+    cmSystemTools::ReplaceString(entry, "arch=", "");
+    cmSystemTools::ReplaceString(entry, "code=", "");
+    result.push_back(entry);
+  }
+}
+
 void cmVisualStudioGeneratorOptions::Parse(const char* flags)
 {
   // Parse the input string as a windows command line since the string

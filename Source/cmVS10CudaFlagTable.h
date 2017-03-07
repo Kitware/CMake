@@ -14,5 +14,27 @@ static cmVS7FlagTable cmVS10CudaFlagTable[] = {
   { "CudaRuntime", "cudart", "CUDA runtime library", "",
     cmVS7FlagTable::UserFollowing },
 
+  // Capture arch/code arguments into temporaries for post-processing.
+  { "cmake-temp-gencode", "gencode=", "", "",
+    cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
+  { "cmake-temp-gencode", "gencode", "", "",
+    cmVS7FlagTable::UserFollowing | cmVS7FlagTable::SemicolonAppendable },
+  { "cmake-temp-gencode", "-generate-code=", "", "",
+    cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
+  { "cmake-temp-gencode", "-generate-code", "", "",
+    cmVS7FlagTable::UserFollowing | cmVS7FlagTable::SemicolonAppendable },
+
+  { "cmake-temp-code", "code=", "", "", cmVS7FlagTable::UserValue },
+  { "cmake-temp-code", "code", "", "", cmVS7FlagTable::UserFollowing },
+  { "cmake-temp-code", "-gpu-code=", "", "", cmVS7FlagTable::UserValue },
+  { "cmake-temp-code", "-gpu-code", "", "", cmVS7FlagTable::UserFollowing },
+
+  { "cmake-temp-arch", "arch=", "", "", cmVS7FlagTable::UserValue },
+  { "cmake-temp-arch", "arch", "", "", cmVS7FlagTable::UserFollowing },
+  { "cmake-temp-arch", "-gpu-architecture=", "", "",
+    cmVS7FlagTable::UserValue },
+  { "cmake-temp-arch", "-gpu-architecture", "", "",
+    cmVS7FlagTable::UserFollowing },
+
   { 0, 0, 0, 0, 0 }
 };

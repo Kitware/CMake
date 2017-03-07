@@ -75,6 +75,8 @@ public:
   };
   CudaRuntime GetCudaRuntime() const;
 
+  void FixCudaCodeGeneration();
+
   bool IsDebug() const;
   bool IsWinRt() const;
   bool IsManaged() const;

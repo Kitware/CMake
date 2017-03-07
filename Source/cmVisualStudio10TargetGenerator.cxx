@@ -2480,6 +2480,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   // did not parse and hope it works.
   cudaOptions.RemoveFlag("AdditionalCompilerOptions");
 
+  cudaOptions.FixCudaCodeGeneration();
+
   std::vector<std::string> targetDefines;
   this->GeneratorTarget->GetCompileDefinitions(targetDefines,
                                                configName.c_str(), "CUDA");
