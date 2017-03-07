@@ -91,6 +91,8 @@ private:
   std::string UnknownFlagField;
 
   virtual void StoreUnknownFlag(const char* flag);
+
+  FlagValue TakeFlag(std::string const& key);
 };
 
 #endif

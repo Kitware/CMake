@@ -274,6 +274,18 @@ void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
   this->AppendFlagString(this->UnknownFlagField, opts);
 }
 
+cmIDEOptions::FlagValue cmVisualStudioGeneratorOptions::TakeFlag(
+  std::string const& key)
+{
+  FlagValue value;
+  std::map<std::string, FlagValue>::iterator i = this->FlagMap.find(key);
+  if (i != this->FlagMap.end()) {
+    value = i->second;
+    this->FlagMap.erase(i);
+  }
+  return value;
+}
+
 void cmVisualStudioGeneratorOptions::SetConfiguration(const char* config)
 {
   this->Configuration = config;
