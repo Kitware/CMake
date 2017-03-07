@@ -103,6 +103,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\10.0\\Setup\\VC;"
     "ProductDir",
     vc10Express, cmSystemTools::KeyWOW64_32);
+  this->CudaEnabled = false;
   this->SystemIsWindowsCE = false;
   this->SystemIsWindowsPhone = false;
   this->SystemIsWindowsStore = false;
@@ -458,6 +459,9 @@ void cmGlobalVisualStudio10Generator::EnableLanguage(
        it != lang.end(); ++it) {
     if (*it == "ASM_NASM") {
       this->NasmEnabled = true;
+    }
+    if (*it == "CUDA") {
+      this->CudaEnabled = true;
     }
   }
   this->AddPlatformDefinitions(mf);

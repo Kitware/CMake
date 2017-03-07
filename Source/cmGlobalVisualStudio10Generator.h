@@ -42,6 +42,8 @@ public:
                               cmMakefile*, bool optional);
   virtual void WriteSLNHeader(std::ostream& fout);
 
+  bool IsCudaEnabled() const { return this->CudaEnabled; }
+
   /** Generating for Nsight Tegra VS plugin?  */
   bool IsNsightTegra() const;
   std::string GetNsightTegraVersion() const;
@@ -167,6 +169,8 @@ private:
 
   std::string VCTargetsPath;
   bool FindVCTargetsPath(cmMakefile* mf);
+
+  bool CudaEnabled;
 
   // We do not use the reload macros for VS >= 10.
   virtual std::string GetUserMacrosDirectory() { return ""; }
