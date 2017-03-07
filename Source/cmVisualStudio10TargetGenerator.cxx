@@ -2855,8 +2855,10 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     this->LocalGenerator, Options::Linker, gg->GetLinkFlagTable(), 0, this));
   Options& linkOptions = *pOptions;
 
-  const std::string& linkLanguage =
-    this->GeneratorTarget->GetLinkerLanguage(config.c_str());
+  cmGeneratorTarget::LinkClosure const* linkClosure =
+    this->GeneratorTarget->GetLinkClosure(config);
+
+  const std::string& linkLanguage = linkClosure->LinkerLanguage;
   if (linkLanguage.empty()) {
     cmSystemTools::Error(
       "CMake can not determine linker language for target: ",
@@ -2911,6 +2913,19 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   std::vector<std::string> libVec;
   std::vector<std::string> vsTargetVec;
   this->AddLibraries(cli, libVec, vsTargetVec);
+  if (std::find(linkClosure->Languages.begin(), linkClosure->Languages.end(),
+                "CUDA") != linkClosure->Languages.end()) {
+    switch (this->CudaOptions[config]->GetCudaRuntime()) {
+      case cmVisualStudioGeneratorOptions::CudaRuntimeStatic:
+        libVec.push_back("cudart_static.lib");
+        break;
+      case cmVisualStudioGeneratorOptions::CudaRuntimeShared:
+        libVec.push_back("cudart.lib");
+        break;
+      case cmVisualStudioGeneratorOptions::CudaRuntimeNone:
+        break;
+    }
+  }
   std::string standardLibsVar = "CMAKE_";
   standardLibsVar += linkLanguage;
   standardLibsVar += "_STANDARD_LIBRARIES";

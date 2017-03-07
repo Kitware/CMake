@@ -67,6 +67,14 @@ public:
   bool UsingUnicode() const;
   bool UsingSBCS() const;
 
+  enum CudaRuntime
+  {
+    CudaRuntimeStatic,
+    CudaRuntimeShared,
+    CudaRuntimeNone
+  };
+  CudaRuntime GetCudaRuntime() const;
+
   bool IsDebug() const;
   bool IsWinRt() const;
   bool IsManaged() const;
