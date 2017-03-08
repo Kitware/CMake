@@ -33,9 +33,11 @@ endmacro()
 
 set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIBX32_PATHS TRUE)
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS TRUE)
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)
 
+set(CMAKE_INTERNAL_PLATFORM_ABI "ELF")
 set(CMAKE_SIZEOF_VOID_P 4)
 foreach(lib
     lib/32/libtest5.a
@@ -65,6 +67,20 @@ foreach(lib64
     lib64/libtest1.a
     )
   test_find_library_subst(${lib64})
+endforeach()
+
+set(CMAKE_INTERNAL_PLATFORM_ABI "ELF X32")
+set(CMAKE_SIZEOF_VOID_P 4)
+foreach(libx32
+    lib/x32/libtest2.a
+    lib/A/libx32/libtest3.a
+    lib/libtest3.a
+    libx32/A/lib/libtest2.a
+    libx32/A/libx32/libtest1.a
+    libx32/A/libtest1.a
+    libx32/libtest1.a
+    )
+  test_find_library_subst(${libx32})
 endforeach()
 
 test_find_library("" A/libtestA.a
