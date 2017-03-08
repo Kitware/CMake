@@ -77,6 +77,8 @@ public:
   bool HasExplicitObjectName(cmSourceFile const* file) const;
   void AddExplicitObjectName(cmSourceFile const* sf);
 
+  void GetModuleDefinitionSources(std::vector<cmSourceFile const*>&,
+                                  const std::string& config) const;
   void GetResxSources(std::vector<cmSourceFile const*>&,
                       const std::string& config) const;
   void GetIDLSources(std::vector<cmSourceFile const*>&,

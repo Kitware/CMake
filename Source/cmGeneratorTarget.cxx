@@ -112,7 +112,7 @@ struct IDLSourcesTag
 struct ResxTag
 {
 };
-struct ModuleDefinitionFileTag
+struct ModuleDefinitionSourcesTag
 {
 };
 struct AppManifestTag
@@ -236,8 +236,8 @@ struct TagVisitor
     } else if (!sf->GetLanguage().empty()) {
       DoAccept<IsSameTag<Tag, ObjectSourcesTag>::Result>::Do(this->Data, sf);
     } else if (ext == "def") {
-      DoAccept<IsSameTag<Tag, ModuleDefinitionFileTag>::Result>::Do(this->Data,
-                                                                    sf);
+      DoAccept<IsSameTag<Tag, ModuleDefinitionSourcesTag>::Result>::Do(
+        this->Data, sf);
       if (this->IsObjLib) {
         this->BadObjLibFiles.push_back(sf);
       }
@@ -679,6 +679,12 @@ bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
   std::set<cmSourceFile const*>::const_iterator it =
     this->ExplicitObjectName.find(file);
   return it != this->ExplicitObjectName.end();
+}
+
+void cmGeneratorTarget::GetModuleDefinitionSources(
+  std::vector<cmSourceFile const*>& data, const std::string& config) const
+{
+  IMPLEMENT_VISIT(ModuleDefinitionSources);
 }
 
 void cmGeneratorTarget::GetIDLSources(std::vector<cmSourceFile const*>& data,
@@ -1942,8 +1948,7 @@ cmSourceFile const* cmGeneratorTarget::GetModuleDefinitionFile(
   const std::string& config) const
 {
   std::vector<cmSourceFile const*> data;
-  IMPLEMENT_VISIT_IMPL(ModuleDefinitionFile,
-                       COMMA std::vector<cmSourceFile const*>)
+  this->GetModuleDefinitionSources(data, config);
   if (!data.empty()) {
     return data.front();
   }
