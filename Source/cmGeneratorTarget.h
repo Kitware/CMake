@@ -238,6 +238,7 @@ public:
   struct ModuleDefinitionInfo
   {
     std::string DefFile;
+    bool WindowsExportAllSymbols;
   };
   ModuleDefinitionInfo const* GetModuleDefinitionInfo(
     std::string const& config) const;

@@ -214,7 +214,7 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   // Add a dependency on the link definitions file, if any.
   cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
     this->GeneratorTarget->GetModuleDefinitionInfo(this->GetConfigName());
-  if (mdi && !mdi->DefFile.empty()) {
+  if (mdi && !mdi->WindowsExportAllSymbols && !mdi->DefFile.empty()) {
     result.push_back(this->ConvertToNinjaPath(mdi->DefFile));
   }
 

@@ -2923,15 +2923,6 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
                            "%(IgnoreSpecificDefaultLibraries)");
   }
 
-  if ((this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
-       this->GeneratorTarget->IsExecutableWithExports()) &&
-      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
-    if (this->GeneratorTarget->GetPropertyAsBool(
-          "WINDOWS_EXPORT_ALL_SYMBOLS")) {
-      linkOptions.AddFlag("ModuleDefinitionFile", "$(IntDir)exportall.def");
-    }
-  }
-
   // Hack to fix flag version selection in a common use case.
   // FIXME: Select flag table based on toolset instead of VS version.
   if (this->LocalGenerator->GetVersion() >=
@@ -3169,18 +3160,15 @@ void cmVisualStudio10TargetGenerator::WriteEvents(
   std::string const& configName)
 {
   bool addedPrelink = false;
-  if ((this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
-       this->GeneratorTarget->IsExecutableWithExports()) &&
-      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
-    if (this->GeneratorTarget->GetPropertyAsBool(
-          "WINDOWS_EXPORT_ALL_SYMBOLS")) {
-      addedPrelink = true;
-      std::vector<cmCustomCommand> commands =
-        this->GeneratorTarget->GetPreLinkCommands();
-      this->GlobalGenerator->AddSymbolExportCommand(this->GeneratorTarget,
-                                                    commands, configName);
-      this->WriteEvent("PreLinkEvent", commands, configName);
-    }
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    this->GeneratorTarget->GetModuleDefinitionInfo(configName);
+  if (mdi && mdi->WindowsExportAllSymbols) {
+    addedPrelink = true;
+    std::vector<cmCustomCommand> commands =
+      this->GeneratorTarget->GetPreLinkCommands();
+    this->GlobalGenerator->AddSymbolExportCommand(this->GeneratorTarget,
+                                                  commands, configName);
+    this->WriteEvent("PreLinkEvent", commands, configName);
   }
   if (!addedPrelink) {
     this->WriteEvent("PreLinkEvent",

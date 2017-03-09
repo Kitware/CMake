@@ -750,10 +750,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     }
 
     // maybe create .def file from list of objects
-    if (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY &&
-        this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
-      this->GenDefFile(real_link_commands, linkFlags);
-    }
+    this->GenDefFile(real_link_commands);
 
     std::string manifests = this->GetManifests();
 

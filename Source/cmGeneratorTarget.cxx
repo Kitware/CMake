@@ -1975,7 +1975,12 @@ void cmGeneratorTarget::ComputeModuleDefinitionInfo(
 {
   std::vector<cmSourceFile const*> sources;
   this->GetModuleDefinitionSources(sources, config);
-  if (!sources.empty()) {
+  info.WindowsExportAllSymbols =
+    this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS") &&
+    this->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS");
+  if (info.WindowsExportAllSymbols) {
+    info.DefFile = this->ObjectDirectory /* has slash */ + "exports.def";
+  } else if (!sources.empty()) {
     info.DefFile = sources.front()->GetFullPath();
   }
 }
