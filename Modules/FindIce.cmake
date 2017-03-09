@@ -198,7 +198,7 @@ function(_Ice_FIND)
   endif()
   # Generic 64-bit and 32-bit directories
   list(APPEND ice_binary_suffixes "bin${_x64}" "bin")
-  list(APPEND ice_library_suffixes "${_lib64}" "lib${_x64}" "lib")
+  list(APPEND ice_library_suffixes "libx32" "${_lib64}" "lib${_x64}" "lib")
   list(APPEND ice_include_suffixes "include")
   list(APPEND ice_slice_suffixes "slice")
 

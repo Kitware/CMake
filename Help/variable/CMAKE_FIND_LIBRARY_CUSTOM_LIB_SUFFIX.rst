@@ -9,3 +9,4 @@ This overrides the behavior of related global properties:
 
 * :prop_gbl:`FIND_LIBRARY_USE_LIB32_PATHS`
 * :prop_gbl:`FIND_LIBRARY_USE_LIB64_PATHS`
+* :prop_gbl:`FIND_LIBRARY_USE_LIBX32_PATHS`

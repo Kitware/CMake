@@ -45,7 +45,7 @@ find_path(IL_INCLUDE_DIR il.h
 
 find_library(IL_LIBRARIES
   NAMES IL DEVIL
-  PATH_SUFFIXES lib64 lib lib32
+  PATH_SUFFIXES libx32 lib64 lib lib32
   DOC "The file that corresponds to the base il library."
 )
 
@@ -53,7 +53,7 @@ find_library(IL_LIBRARIES
 
 find_library(ILUT_LIBRARIES
   NAMES ILUT
-  PATH_SUFFIXES lib64 lib lib32
+  PATH_SUFFIXES libx32 lib64 lib lib32
   DOC "The file that corresponds to the il (system?) utility library."
 )
 
@@ -61,7 +61,7 @@ find_library(ILUT_LIBRARIES
 
 find_library(ILU_LIBRARIES
   NAMES ILU
-  PATH_SUFFIXES lib64 lib lib32
+  PATH_SUFFIXES libx32 lib64 lib lib32
   DOC "The file that corresponds to the il utility library."
 )
 
