@@ -7,6 +7,7 @@ run_cmake(default-lang-none)
 run_cmake(not-supported-by-cmake)
 run_cmake(not-supported-by-compiler)
 run_cmake(save-to-result)
+run_cmake(cmp0069-is-old)
 
 if(RunCMake_GENERATOR MATCHES "^(Visual Studio |Xcode$)")
   run_cmake(not-supported-by-generator)

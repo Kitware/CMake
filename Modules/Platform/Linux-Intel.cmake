@@ -39,6 +39,7 @@ macro(__linux_compiler_intel lang)
       "${XIAR} cr <TARGET> <LINK_FLAGS> <OBJECTS> "
       "${XIAR} -s <TARGET> ")
     set(_CMAKE_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
+    set(_CMAKE_IPO_LEGACY_BEHAVIOR YES)
   else()
     set(_CMAKE_IPO_MAY_BE_SUPPORTED_BY_COMPILER NO)
   endif()

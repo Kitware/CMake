@@ -286,6 +286,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   , FortranModuleDirectoryCreated(false)
   , SourceFileFlagsConstructed(false)
   , PolicyWarnedCMP0022(false)
+  , PolicyReportedCMP0069(false)
   , DebugIncludesDone(false)
   , DebugCompileOptionsDone(false)
   , DebugCompileFeaturesDone(false)
@@ -659,7 +660,62 @@ const char* cmGeneratorTarget::GetFeature(const std::string& feature,
 bool cmGeneratorTarget::IsIPOEnabled(const std::string& config) const
 {
   const char* feature = "INTERPROCEDURAL_OPTIMIZATION";
-  return cmSystemTools::IsOn(this->GetFeature(feature, config));
+  const bool result = cmSystemTools::IsOn(this->GetFeature(feature, config));
+
+  if (!result) {
+    // 'INTERPROCEDURAL_OPTIMIZATION' is off, no need to check policies
+    return false;
+  }
+
+  cmPolicies::PolicyStatus cmp0069 = this->GetPolicyStatusCMP0069();
+
+  if (cmp0069 == cmPolicies::OLD || cmp0069 == cmPolicies::WARN) {
+    if (this->Makefile->IsOn("_CMAKE_IPO_LEGACY_BEHAVIOR")) {
+      return true;
+    }
+    if (this->PolicyReportedCMP0069) {
+      // problem is already reported, no need to issue a message
+      return false;
+    }
+    if (cmp0069 == cmPolicies::WARN) {
+      std::ostringstream w;
+      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0069) << "\n";
+      w << "INTERPROCEDURAL_OPTIMIZATION property will be ignored for target "
+        << "'" << this->GetName() << "'.";
+      this->LocalGenerator->GetCMakeInstance()->IssueMessage(
+        cmake::AUTHOR_WARNING, w.str(), this->GetBacktrace());
+
+      this->PolicyReportedCMP0069 = true;
+    }
+    return false;
+  }
+
+  // Note: check consistency with messages from CheckIPOSupported
+  const char* message = CM_NULLPTR;
+  if (!this->Makefile->IsOn("_CMAKE_IPO_SUPPORTED_BY_CMAKE")) {
+    message = "CMake doesn't support IPO for current compiler";
+  } else if (!this->Makefile->IsOn(
+               "_CMAKE_IPO_MAY_BE_SUPPORTED_BY_COMPILER")) {
+    message = "Compiler doesn't support IPO";
+  } else if (!this->GlobalGenerator->IsIPOSupported()) {
+    message = "CMake doesn't support IPO for current generator";
+  }
+
+  if (!message) {
+    // No error/warning messages
+    return true;
+  }
+
+  if (this->PolicyReportedCMP0069) {
+    // problem is already reported, no need to issue a message
+    return false;
+  }
+
+  this->PolicyReportedCMP0069 = true;
+
+  this->LocalGenerator->GetCMakeInstance()->IssueMessage(
+    cmake::FATAL_ERROR, message, this->GetBacktrace());
+  return false;
 }
 
 const std::string& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)

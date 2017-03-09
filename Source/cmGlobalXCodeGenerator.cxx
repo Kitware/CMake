@@ -1664,6 +1664,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     return;
   }
 
+  // Check IPO related warning/error.
+  gtgt->IsIPOEnabled(configName);
+
   // Add define flags
   this->CurrentLocalGenerator->AppendFlags(
     defFlags, this->CurrentMakefile->GetDefineFlags());

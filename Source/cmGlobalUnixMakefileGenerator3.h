@@ -149,6 +149,8 @@ public:
   /** Does the make tool tolerate .DELETE_ON_ERROR? */
   virtual bool AllowDeleteOnError() const { return true; }
 
+  bool IsIPOSupported() const CM_OVERRIDE { return true; }
+
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const CM_OVERRIDE;
 
   std::string IncludeDirective;

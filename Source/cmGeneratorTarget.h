@@ -743,6 +743,7 @@ private:
   mutable std::set<cmLinkItem> UtilityItems;
   cmPolicies::PolicyMap PolicyMap;
   mutable bool PolicyWarnedCMP0022;
+  mutable bool PolicyReportedCMP0069;
   mutable bool DebugIncludesDone;
   mutable bool DebugCompileOptionsDone;
   mutable bool DebugCompileFeaturesDone;

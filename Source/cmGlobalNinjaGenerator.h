@@ -99,6 +99,8 @@ public:
    */
   static bool SupportsPlatform() { return false; }
 
+  bool IsIPOSupported() const CM_OVERRIDE { return true; }
+
   /**
    * Write a build statement to @a os with the @a comment using
    * the @a rule the list of @a outputs files and inputs.

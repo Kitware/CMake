@@ -333,6 +333,8 @@ public:
 
   virtual bool UseFolderProperty() const;
 
+  virtual bool IsIPOSupported() const { return false; }
+
   /** Return whether the generator should use EFFECTIVE_PLATFORM_NAME. This is
       relevant for mixed macOS and iOS builds. */
   virtual bool UseEffectivePlatformName(cmMakefile*) const { return false; }

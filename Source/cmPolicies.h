@@ -203,6 +203,9 @@ class cmMakefile;
          3, 8, 0, cmPolicies::WARN)                                           \
   SELECT(POLICY, CMP0068,                                                     \
          "RPATH settings on macOS do not affect install_name.", 3, 9, 0,      \
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0069,                                                     \
+         "INTERPROCEDURAL_OPTIMIZATION is enforced when enabled.", 3, 9, 0,   \
          cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
@@ -225,7 +228,8 @@ class cmMakefile;
   F(CMP0060)                                                                  \
   F(CMP0063)                                                                  \
   F(CMP0065)                                                                  \
-  F(CMP0068)
+  F(CMP0068)                                                                  \
+  F(CMP0069)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies
