@@ -1944,16 +1944,40 @@ cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
   return &i->second;
 }
 
-cmSourceFile const* cmGeneratorTarget::GetModuleDefinitionFile(
-  const std::string& config) const
+cmGeneratorTarget::ModuleDefinitionInfo const*
+cmGeneratorTarget::GetModuleDefinitionInfo(std::string const& config) const
 {
-  std::vector<cmSourceFile const*> data;
-  this->GetModuleDefinitionSources(data, config);
-  if (!data.empty()) {
-    return data.front();
+  // A module definition file only makes sense on certain target types.
+  if (this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::MODULE_LIBRARY &&
+      !this->IsExecutableWithExports()) {
+    return CM_NULLPTR;
   }
 
-  return CM_NULLPTR;
+  // Lookup/compute/cache the compile information for this configuration.
+  std::string config_upper;
+  if (!config.empty()) {
+    config_upper = cmSystemTools::UpperCase(config);
+  }
+  ModuleDefinitionInfoMapType::const_iterator i =
+    this->ModuleDefinitionInfoMap.find(config_upper);
+  if (i == this->ModuleDefinitionInfoMap.end()) {
+    ModuleDefinitionInfo info;
+    this->ComputeModuleDefinitionInfo(config, info);
+    ModuleDefinitionInfoMapType::value_type entry(config_upper, info);
+    i = this->ModuleDefinitionInfoMap.insert(entry).first;
+  }
+  return &i->second;
+}
+
+void cmGeneratorTarget::ComputeModuleDefinitionInfo(
+  std::string const& config, ModuleDefinitionInfo& info) const
+{
+  std::vector<cmSourceFile const*> sources;
+  this->GetModuleDefinitionSources(sources, config);
+  if (!sources.empty()) {
+    info.DefFile = sources.front()->GetFullPath();
+  }
 }
 
 bool cmGeneratorTarget::IsDLLPlatform() const

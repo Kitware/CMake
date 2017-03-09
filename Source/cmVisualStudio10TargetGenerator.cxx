@@ -2914,10 +2914,10 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   linkOptions.Parse(flags.c_str());
 
   if (this->MSTools) {
-    if (cmSourceFile const* defsrc =
-          this->GeneratorTarget->GetModuleDefinitionFile("")) {
-      linkOptions.AddFlag("ModuleDefinitionFile",
-                          defsrc->GetFullPath().c_str());
+    cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+      this->GeneratorTarget->GetModuleDefinitionInfo(config);
+    if (mdi && !mdi->DefFile.empty()) {
+      linkOptions.AddFlag("ModuleDefinitionFile", mdi->DefFile.c_str());
     }
     linkOptions.AppendFlag("IgnoreSpecificDefaultLibraries",
                            "%(IgnoreSpecificDefaultLibraries)");

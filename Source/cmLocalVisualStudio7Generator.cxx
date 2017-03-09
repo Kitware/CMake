@@ -996,9 +996,11 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
   linkOptions.AddTable(cmLocalVisualStudio7GeneratorLinkFlagTable);
 
   linkOptions.Parse(extraLinkOptions.c_str());
-  if (!this->ModuleDefinitionFile.empty()) {
-    std::string defFile = this->ConvertToOutputFormat(
-      this->ModuleDefinitionFile, cmOutputConverter::SHELL);
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    target->GetModuleDefinitionInfo(configName);
+  if (mdi && !mdi->DefFile.empty()) {
+    std::string defFile =
+      this->ConvertToOutputFormat(mdi->DefFile, cmOutputConverter::SHELL);
     linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
   }
 
@@ -1362,7 +1364,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
 
   // get the classes from the source lists then add them to the groups
-  this->ModuleDefinitionFile = "";
   std::vector<cmSourceFile*> classes;
   if (!target->GetConfigCommonSourceFiles(classes)) {
     return;
@@ -1374,9 +1375,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     }
     // Add the file to the list of sources.
     std::string source = (*i)->GetFullPath();
-    if (cmSystemTools::UpperCase((*i)->GetExtension()) == "DEF") {
-      this->ModuleDefinitionFile = (*i)->GetFullPath();
-    }
     cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
     sourceGroup->AssignSource(*i);
