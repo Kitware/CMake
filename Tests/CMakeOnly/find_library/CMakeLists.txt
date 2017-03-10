@@ -24,7 +24,7 @@ endmacro()
 macro(test_find_library_subst expected)
   get_filename_component(dir ${expected} PATH)
   get_filename_component(name ${expected} NAME)
-  string(REGEX REPLACE "lib/?[36X][24Y][Z]*" "lib" dir "${dir}")
+  string(REGEX REPLACE "lib/?[36Xx][24Y3][Z2]*" "lib" dir "${dir}")
   test_find_library(", searched as ${dir}" "${expected}"
     NAMES ${name}
     PATHS ${CMAKE_CURRENT_SOURCE_DIR}/${dir}
