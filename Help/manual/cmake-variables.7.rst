@@ -40,6 +40,8 @@ Variables that Provide Information
    /variable/CMAKE_FIND_PACKAGE_NAME
    /variable/CMAKE_FIND_PACKAGE_SORT_DIRECTION
    /variable/CMAKE_FIND_PACKAGE_SORT_ORDER
+   /variable/CMAKE_GCC_AR
+   /variable/CMAKE_GCC_RANLIB
    /variable/CMAKE_GENERATOR
    /variable/CMAKE_GENERATOR_PLATFORM
    /variable/CMAKE_GENERATOR_TOOLSET
