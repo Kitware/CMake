@@ -43,12 +43,26 @@ if(CMAKE_HOST_WIN32)
   endif()
 endif()
 
+# First search the PATH and specific locations.
 find_program(GIT_EXECUTABLE
   NAMES ${git_names}
   PATHS ${github_path} ${_git_sourcetree_path}
-  PATH_SUFFIXES Git/cmd Git/bin
   DOC "Git command line client"
   )
+
+if(CMAKE_HOST_WIN32)
+  # Now look for installations in Git/ directories under typical installation
+  # prefixes on Windows.  Exclude PATH from this search because VS 2017's
+  # command prompt happens to have a PATH entry with a Git/ subdirectory
+  # containing a minimal git not meant for general use.
+  find_program(GIT_EXECUTABLE
+    NAMES ${git_names}
+    PATH_SUFFIXES Git/cmd Git/bin
+    NO_SYSTEM_ENVIRONMENT_PATH
+    DOC "Git command line client"
+    )
+endif()
+
 mark_as_advanced(GIT_EXECUTABLE)
 
 unset(git_names)
