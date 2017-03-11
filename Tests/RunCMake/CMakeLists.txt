@@ -293,6 +293,7 @@ add_RunCMake_test(target_link_libraries)
 
 add_RunCMake_test(target_compile_features)
 add_RunCMake_test(CheckModules)
+add_RunCMake_test(CheckIPOSupported)
 add_RunCMake_test(CommandLine -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
 add_RunCMake_test(CommandLineTar)
 
