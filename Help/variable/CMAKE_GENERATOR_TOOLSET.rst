@@ -20,3 +20,9 @@ Toolset specification is supported only on specific generators:
 * The :generator:`Xcode` generator for Xcode 3.0 and above
 
 See native build system documentation for allowed toolset names.
+
+Visual Studio Toolset Selection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+On :ref:`Visual Studio Generators` the selected toolset name
+is provided in the :variable:`CMAKE_VS_PLATFORM_TOOLSET` variable.
