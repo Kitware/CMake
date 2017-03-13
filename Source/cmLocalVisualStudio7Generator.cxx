@@ -996,19 +996,14 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
   linkOptions.AddTable(cmLocalVisualStudio7GeneratorLinkFlagTable);
 
   linkOptions.Parse(extraLinkOptions.c_str());
-  if (!this->ModuleDefinitionFile.empty()) {
-    std::string defFile = this->ConvertToOutputFormat(
-      this->ModuleDefinitionFile, cmOutputConverter::SHELL);
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    target->GetModuleDefinitionInfo(configName);
+  if (mdi && !mdi->DefFile.empty()) {
+    std::string defFile =
+      this->ConvertToOutputFormat(mdi->DefFile, cmOutputConverter::SHELL);
     linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
   }
 
-  if ((target->GetType() == cmStateEnums::SHARED_LIBRARY ||
-       target->IsExecutableWithExports()) &&
-      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
-    if (target->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS")) {
-      linkOptions.AddFlag("ModuleDefinitionFile", "$(IntDir)/exportall.def");
-    }
-  }
   switch (target->GetType()) {
     case cmStateEnums::UNKNOWN_LIBRARY:
       break;
@@ -1362,7 +1357,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
 
   // get the classes from the source lists then add them to the groups
-  this->ModuleDefinitionFile = "";
   std::vector<cmSourceFile*> classes;
   if (!target->GetConfigCommonSourceFiles(classes)) {
     return;
@@ -1374,9 +1368,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     }
     // Add the file to the list of sources.
     std::string source = (*i)->GetFullPath();
-    if (cmSystemTools::UpperCase((*i)->GetExtension()) == "DEF") {
-      this->ModuleDefinitionFile = (*i)->GetFullPath();
-    }
     cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
     sourceGroup->AssignSource(*i);
@@ -1825,17 +1816,15 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(
   tool = this->FortranProject ? "VFPreLinkEventTool" : "VCPreLinkEventTool";
   event.Start(tool);
   bool addedPrelink = false;
-  if ((target->GetType() == cmStateEnums::SHARED_LIBRARY ||
-       target->IsExecutableWithExports()) &&
-      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
-    if (target->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS")) {
-      addedPrelink = true;
-      std::vector<cmCustomCommand> commands = target->GetPreLinkCommands();
-      cmGlobalVisualStudioGenerator* gg =
-        static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator);
-      gg->AddSymbolExportCommand(target, commands, configName);
-      event.Write(commands);
-    }
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    target->GetModuleDefinitionInfo(configName);
+  if (mdi && mdi->WindowsExportAllSymbols) {
+    addedPrelink = true;
+    std::vector<cmCustomCommand> commands = target->GetPreLinkCommands();
+    cmGlobalVisualStudioGenerator* gg =
+      static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator);
+    gg->AddSymbolExportCommand(target, commands, configName);
+    event.Write(commands);
   }
   if (!addedPrelink) {
     event.Write(target->GetPreLinkCommands());

@@ -128,7 +128,6 @@ private:
 
   friend class EventWriter;
 
-  std::string ModuleDefinitionFile;
   bool FortranProject;
   bool WindowsCEProject;
   cmLocalVisualStudio7GeneratorInternals* Internal;

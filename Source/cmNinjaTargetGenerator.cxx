@@ -212,9 +212,10 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   std::transform(deps.begin(), deps.end(), result.begin(), MapToNinjaPath());
 
   // Add a dependency on the link definitions file, if any.
-  if (this->ModuleDefinitionFile) {
-    result.push_back(
-      this->ConvertToNinjaPath(this->ModuleDefinitionFile->GetFullPath()));
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    this->GeneratorTarget->GetModuleDefinitionInfo(this->GetConfigName());
+  if (mdi && !mdi->WindowsExportAllSymbols && !mdi->DefFile.empty()) {
+    result.push_back(this->ConvertToNinjaPath(mdi->DefFile));
   }
 
   // Add a dependency on user-specified manifest files, if any.

@@ -44,9 +44,6 @@ protected:
   cmGlobalCommonGenerator* GlobalGenerator;
   std::string ConfigName;
 
-  // The windows module definition source file (.def), if any.
-  cmSourceFile const* ModuleDefinitionFile;
-
   void AppendFortranFormatFlags(std::string& flags,
                                 cmSourceFile const& source);
 

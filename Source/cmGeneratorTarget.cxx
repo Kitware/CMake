@@ -112,7 +112,7 @@ struct IDLSourcesTag
 struct ResxTag
 {
 };
-struct ModuleDefinitionFileTag
+struct ModuleDefinitionSourcesTag
 {
 };
 struct AppManifestTag
@@ -236,8 +236,8 @@ struct TagVisitor
     } else if (!sf->GetLanguage().empty()) {
       DoAccept<IsSameTag<Tag, ObjectSourcesTag>::Result>::Do(this->Data, sf);
     } else if (ext == "def") {
-      DoAccept<IsSameTag<Tag, ModuleDefinitionFileTag>::Result>::Do(this->Data,
-                                                                    sf);
+      DoAccept<IsSameTag<Tag, ModuleDefinitionSourcesTag>::Result>::Do(
+        this->Data, sf);
       if (this->IsObjLib) {
         this->BadObjLibFiles.push_back(sf);
       }
@@ -679,6 +679,12 @@ bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
   std::set<cmSourceFile const*>::const_iterator it =
     this->ExplicitObjectName.find(file);
   return it != this->ExplicitObjectName.end();
+}
+
+void cmGeneratorTarget::GetModuleDefinitionSources(
+  std::vector<cmSourceFile const*>& data, const std::string& config) const
+{
+  IMPLEMENT_VISIT(ModuleDefinitionSources);
 }
 
 void cmGeneratorTarget::GetIDLSources(std::vector<cmSourceFile const*>& data,
@@ -1938,17 +1944,45 @@ cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
   return &i->second;
 }
 
-cmSourceFile const* cmGeneratorTarget::GetModuleDefinitionFile(
-  const std::string& config) const
+cmGeneratorTarget::ModuleDefinitionInfo const*
+cmGeneratorTarget::GetModuleDefinitionInfo(std::string const& config) const
 {
-  std::vector<cmSourceFile const*> data;
-  IMPLEMENT_VISIT_IMPL(ModuleDefinitionFile,
-                       COMMA std::vector<cmSourceFile const*>)
-  if (!data.empty()) {
-    return data.front();
+  // A module definition file only makes sense on certain target types.
+  if (this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::MODULE_LIBRARY &&
+      !this->IsExecutableWithExports()) {
+    return CM_NULLPTR;
   }
 
-  return CM_NULLPTR;
+  // Lookup/compute/cache the compile information for this configuration.
+  std::string config_upper;
+  if (!config.empty()) {
+    config_upper = cmSystemTools::UpperCase(config);
+  }
+  ModuleDefinitionInfoMapType::const_iterator i =
+    this->ModuleDefinitionInfoMap.find(config_upper);
+  if (i == this->ModuleDefinitionInfoMap.end()) {
+    ModuleDefinitionInfo info;
+    this->ComputeModuleDefinitionInfo(config, info);
+    ModuleDefinitionInfoMapType::value_type entry(config_upper, info);
+    i = this->ModuleDefinitionInfoMap.insert(entry).first;
+  }
+  return &i->second;
+}
+
+void cmGeneratorTarget::ComputeModuleDefinitionInfo(
+  std::string const& config, ModuleDefinitionInfo& info) const
+{
+  std::vector<cmSourceFile const*> sources;
+  this->GetModuleDefinitionSources(sources, config);
+  info.WindowsExportAllSymbols =
+    this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS") &&
+    this->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS");
+  if (info.WindowsExportAllSymbols) {
+    info.DefFile = this->ObjectDirectory /* has slash */ + "exports.def";
+  } else if (!sources.empty()) {
+    info.DefFile = sources.front()->GetFullPath();
+  }
 }
 
 bool cmGeneratorTarget::IsDLLPlatform() const

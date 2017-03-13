@@ -77,6 +77,8 @@ public:
   bool HasExplicitObjectName(cmSourceFile const* file) const;
   void AddExplicitObjectName(cmSourceFile const* sf);
 
+  void GetModuleDefinitionSources(std::vector<cmSourceFile const*>&,
+                                  const std::string& config) const;
   void GetResxSources(std::vector<cmSourceFile const*>&,
                       const std::string& config) const;
   void GetIDLSources(std::vector<cmSourceFile const*>&,
@@ -233,7 +235,13 @@ public:
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator const* GlobalGenerator;
 
-  cmSourceFile const* GetModuleDefinitionFile(const std::string& config) const;
+  struct ModuleDefinitionInfo
+  {
+    std::string DefFile;
+    bool WindowsExportAllSymbols;
+  };
+  ModuleDefinitionInfo const* GetModuleDefinitionInfo(
+    std::string const& config) const;
 
   /** Return whether or not the target is for a DLL platform.  */
   bool IsDLLPlatform() const;
@@ -720,6 +728,12 @@ private:
 
   typedef std::map<std::string, OutputInfo> OutputInfoMapType;
   mutable OutputInfoMapType OutputInfoMap;
+
+  typedef std::map<std::string, ModuleDefinitionInfo>
+    ModuleDefinitionInfoMapType;
+  mutable ModuleDefinitionInfoMapType ModuleDefinitionInfoMap;
+  void ComputeModuleDefinitionInfo(std::string const& config,
+                                   ModuleDefinitionInfo& info) const;
 
   typedef std::pair<std::string, bool> OutputNameKey;
   typedef std::map<OutputNameKey, std::string> OutputNameMapType;

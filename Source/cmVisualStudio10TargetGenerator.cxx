@@ -1841,10 +1841,9 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
     (*this->BuildFileStream) << cmVS10EscapeXML(obj) << "\" />\n";
   }
 
-  if (cmSourceFile const* defsrc =
-        this->GeneratorTarget->GetModuleDefinitionFile("")) {
-    this->WriteSource("None", defsrc);
-  }
+  std::vector<cmSourceFile const*> defSources;
+  this->GeneratorTarget->GetModuleDefinitionSources(defSources, "");
+  this->WriteSources("None", defSources);
 
   if (this->IsMissingFiles) {
     this->WriteMissingFiles();
@@ -2915,22 +2914,13 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   linkOptions.Parse(flags.c_str());
 
   if (this->MSTools) {
-    if (cmSourceFile const* defsrc =
-          this->GeneratorTarget->GetModuleDefinitionFile("")) {
-      linkOptions.AddFlag("ModuleDefinitionFile",
-                          defsrc->GetFullPath().c_str());
+    cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+      this->GeneratorTarget->GetModuleDefinitionInfo(config);
+    if (mdi && !mdi->DefFile.empty()) {
+      linkOptions.AddFlag("ModuleDefinitionFile", mdi->DefFile.c_str());
     }
     linkOptions.AppendFlag("IgnoreSpecificDefaultLibraries",
                            "%(IgnoreSpecificDefaultLibraries)");
-  }
-
-  if ((this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
-       this->GeneratorTarget->IsExecutableWithExports()) &&
-      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
-    if (this->GeneratorTarget->GetPropertyAsBool(
-          "WINDOWS_EXPORT_ALL_SYMBOLS")) {
-      linkOptions.AddFlag("ModuleDefinitionFile", "$(IntDir)exportall.def");
-    }
   }
 
   // Hack to fix flag version selection in a common use case.
@@ -3170,18 +3160,15 @@ void cmVisualStudio10TargetGenerator::WriteEvents(
   std::string const& configName)
 {
   bool addedPrelink = false;
-  if ((this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
-       this->GeneratorTarget->IsExecutableWithExports()) &&
-      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
-    if (this->GeneratorTarget->GetPropertyAsBool(
-          "WINDOWS_EXPORT_ALL_SYMBOLS")) {
-      addedPrelink = true;
-      std::vector<cmCustomCommand> commands =
-        this->GeneratorTarget->GetPreLinkCommands();
-      this->GlobalGenerator->AddSymbolExportCommand(this->GeneratorTarget,
-                                                    commands, configName);
-      this->WriteEvent("PreLinkEvent", commands, configName);
-    }
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    this->GeneratorTarget->GetModuleDefinitionInfo(configName);
+  if (mdi && mdi->WindowsExportAllSymbols) {
+    addedPrelink = true;
+    std::vector<cmCustomCommand> commands =
+      this->GeneratorTarget->GetPreLinkCommands();
+    this->GlobalGenerator->AddSymbolExportCommand(this->GeneratorTarget,
+                                                  commands, configName);
+    this->WriteEvent("PreLinkEvent", commands, configName);
   }
   if (!addedPrelink) {
     this->WriteEvent("PreLinkEvent",

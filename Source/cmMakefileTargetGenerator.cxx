@@ -1414,8 +1414,10 @@ void cmMakefileTargetGenerator::AppendLinkDepends(
   this->AppendTargetDepends(depends);
 
   // Add a dependency on the link definitions file, if any.
-  if (this->ModuleDefinitionFile) {
-    depends.push_back(this->ModuleDefinitionFile->GetFullPath());
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    this->GeneratorTarget->GetModuleDefinitionInfo(this->GetConfigName());
+  if (mdi && !mdi->WindowsExportAllSymbols && !mdi->DefFile.empty()) {
+    depends.push_back(mdi->DefFile);
   }
 
   // Add a dependency on user-specified manifest files, if any.
@@ -1718,49 +1720,39 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
 }
 
 void cmMakefileTargetGenerator::GenDefFile(
-  std::vector<std::string>& real_link_commands, std::string& linkFlags)
+  std::vector<std::string>& real_link_commands)
 {
-  if (this->GeneratorTarget->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS")) {
-    std::string name_of_def_file =
-      this->GeneratorTarget->GetSupportDirectory();
-    name_of_def_file += std::string("/") + this->GeneratorTarget->GetName();
-    name_of_def_file += ".def";
-    std::string cmd = cmSystemTools::GetCMakeCommand();
-    cmd = this->LocalGenerator->ConvertToOutputFormat(
-      cmd, cmOutputConverter::SHELL);
-    cmd += " -E __create_def ";
-    cmd += this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), name_of_def_file),
-      cmOutputConverter::SHELL);
-    cmd += " ";
-    std::string objlist_file = name_of_def_file;
-    objlist_file += ".objs";
-    cmd += this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), objlist_file),
-      cmOutputConverter::SHELL);
-    real_link_commands.insert(real_link_commands.begin(), cmd);
-    // create a list of obj files for the -E __create_def to read
-    cmGeneratedFileStream fout(objlist_file.c_str());
-    for (std::vector<std::string>::const_iterator i = this->Objects.begin();
-         i != this->Objects.end(); ++i) {
-      if (cmHasLiteralSuffix(*i, ".obj")) {
-        fout << *i << "\n";
-      }
-    }
-    for (std::vector<std::string>::const_iterator i =
-           this->ExternalObjects.begin();
-         i != this->ExternalObjects.end(); ++i) {
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    this->GeneratorTarget->GetModuleDefinitionInfo(this->GetConfigName());
+  if (!mdi || !mdi->WindowsExportAllSymbols) {
+    return;
+  }
+  std::string cmd = cmSystemTools::GetCMakeCommand();
+  cmd =
+    this->LocalGenerator->ConvertToOutputFormat(cmd, cmOutputConverter::SHELL);
+  cmd += " -E __create_def ";
+  cmd += this->LocalGenerator->ConvertToOutputFormat(
+    this->LocalGenerator->MaybeConvertToRelativePath(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), mdi->DefFile),
+    cmOutputConverter::SHELL);
+  cmd += " ";
+  std::string objlist_file = mdi->DefFile + ".objs";
+  cmd += this->LocalGenerator->ConvertToOutputFormat(
+    this->LocalGenerator->MaybeConvertToRelativePath(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), objlist_file),
+    cmOutputConverter::SHELL);
+  real_link_commands.insert(real_link_commands.begin(), cmd);
+  // create a list of obj files for the -E __create_def to read
+  cmGeneratedFileStream fout(objlist_file.c_str());
+  for (std::vector<std::string>::const_iterator i = this->Objects.begin();
+       i != this->Objects.end(); ++i) {
+    if (cmHasLiteralSuffix(*i, ".obj")) {
       fout << *i << "\n";
     }
-    // now add the def file link flag
-    linkFlags += " ";
-    linkFlags += this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-    linkFlags += this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), name_of_def_file),
-      cmOutputConverter::SHELL);
-    linkFlags += " ";
+  }
+  for (std::vector<std::string>::const_iterator i =
+         this->ExternalObjects.begin();
+       i != this->ExternalObjects.end(); ++i) {
+    fout << *i << "\n";
   }
 }
