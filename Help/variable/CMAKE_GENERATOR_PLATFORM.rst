@@ -20,3 +20,9 @@ Platform specification is supported only on specific generators:
   specifies the target architecture.
 
 See native build system documentation for allowed platform names.
+
+Visual Studio Platform Selection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+On :ref:`Visual Studio Generators` the selected platform name
+is provided in the :variable:`CMAKE_VS_PLATFORM_NAME` variable.
