@@ -1222,8 +1222,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
       xml.EndElement(); // NamedMeasurement
       if (!result->Reason.empty()) {
         const char* reasonType = "Pass Reason";
-        if (result->Status != cmCTestTestHandler::COMPLETED &&
-            result->Status != cmCTestTestHandler::NOT_RUN) {
+        if (result->Status != cmCTestTestHandler::COMPLETED) {
           reasonType = "Fail Reason";
         }
         xml.StartElement("NamedMeasurement");
@@ -1232,12 +1231,14 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
         xml.Element("Value", result->Reason);
         xml.EndElement(); // NamedMeasurement
       }
-      xml.StartElement("NamedMeasurement");
-      xml.Attribute("type", "text/string");
-      xml.Attribute("name", "Completion Status");
-      xml.Element("Value", result->CompletionStatus);
-      xml.EndElement(); // NamedMeasurement
     }
+
+    xml.StartElement("NamedMeasurement");
+    xml.Attribute("type", "text/string");
+    xml.Attribute("name", "Completion Status");
+    xml.Element("Value", result->CompletionStatus);
+    xml.EndElement(); // NamedMeasurement
+
     xml.StartElement("NamedMeasurement");
     xml.Attribute("type", "text/string");
     xml.Attribute("name", "Command Line");
