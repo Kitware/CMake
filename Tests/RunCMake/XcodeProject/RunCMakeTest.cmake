@@ -187,3 +187,19 @@ if(NOT XCODE_VERSION VERSION_LESS 5)
   unset(RunCMake_TEST_NO_CLEAN)
   unset(RunCMake_TEST_OPTIONS)
 endif()
+
+function(XcodeSchemaGeneration)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeSchemaGeneration-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_XCODE_GENERATE_SCHEME=ON")
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(XcodeSchemaGeneration)
+  run_cmake_command(XcodeSchemaGeneration-build xcodebuild -scheme foo build)
+endfunction()
+
+if(NOT XCODE_VERSION VERSION_LESS 7)
+  XcodeSchemaGeneration()
+endif()
