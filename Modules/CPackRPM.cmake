@@ -958,9 +958,19 @@ function(cpack_rpm_prepare_relocation_paths)
   foreach(RELOCATION_PATH ${RPM_RELOCATION_PATHS})
     if(IS_ABSOLUTE "${RELOCATION_PATH}")
       set(PREPARED_RELOCATION_PATH "${RELOCATION_PATH}")
+    elseif(PATH_PREFIX STREQUAL "/")
+      # don't prefix path with a second slash as "//" is treated as network path
+      # by get_filename_component() so it remains in path even inside rpm
+      # package where it may cause problems with relocation
+      set(PREPARED_RELOCATION_PATH "/${RELOCATION_PATH}")
     else()
       set(PREPARED_RELOCATION_PATH "${PATH_PREFIX}/${RELOCATION_PATH}")
     endif()
+
+    # handle cases where path contains extra slashes (e.g. /a//b/ instead of
+    # /a/b)
+    get_filename_component(PREPARED_RELOCATION_PATH
+      "${PREPARED_RELOCATION_PATH}" ABSOLUTE)
 
     if(EXISTS "${WDIR}/${PREPARED_RELOCATION_PATH}")
       string(APPEND TMP_RPM_PREFIXES "Prefix: ${PREPARED_RELOCATION_PATH}\n")
@@ -2129,6 +2139,11 @@ function(cpack_rpm_generate_package)
     if(NOT CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX)
       set(CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX "/usr/src/debug/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}")
     endif()
+
+    # handle cases where path contains extra slashes (e.g. /a//b/ instead of
+    # /a/b)
+    get_filename_component(CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX
+      "${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}" ABSOLUTE)
 
     if(CPACK_RPM_DEBUGINFO_SINGLE_PACKAGE AND GENERATE_SPEC_PARTS)
       file(WRITE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_COMPONENT}.files"
