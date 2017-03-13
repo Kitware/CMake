@@ -238,7 +238,9 @@ public:
   struct ModuleDefinitionInfo
   {
     std::string DefFile;
+    bool DefFileGenerated;
     bool WindowsExportAllSymbols;
+    std::vector<cmSourceFile const*> Sources;
   };
   ModuleDefinitionInfo const* GetModuleDefinitionInfo(
     std::string const& config) const;
