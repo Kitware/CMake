@@ -24,5 +24,27 @@ See native build system documentation for allowed toolset names.
 Visual Studio Toolset Selection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On :ref:`Visual Studio Generators` the selected toolset name
+The :ref:`Visual Studio Generators` support toolset specification
+using one of these forms:
+
+* ``toolset``
+* ``toolset[,key=value]*``
+* ``key=value[,key=value]*``
+
+The ``toolset`` specifies the toolset name.  The selected toolset name
 is provided in the :variable:`CMAKE_VS_PLATFORM_TOOLSET` variable.
+
+The ``key=value`` pairs form a comma-separated list of options to
+specify generator-specific details of the toolset selection.
+Supported pairs are:
+
+``cuda=<version>``
+  Specify the CUDA toolkit version to use.  Supported by VS 2010
+  and above with the CUDA toolkit VS integration installed.
+  See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_CUDA` variable.
+
+``host=x64``
+  Request use of the native ``x64`` toolchain on ``x64`` hosts.
+  Supported by VS 2013 and above.
+  See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE`
+  variable.
