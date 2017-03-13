@@ -26,6 +26,7 @@ public:
   {
     Compiler,
     ResourceCompiler,
+    CudaCompiler,
     MasmCompiler,
     NasmCompiler,
     Linker,
@@ -43,11 +44,18 @@ public:
   // Add a table of flags.
   void AddTable(cmVS7FlagTable const* table);
 
+  // Clear the flag tables.
+  void ClearTables();
+
   // Store options from command line flags.
   void Parse(const char* flags);
   void ParseFinish();
 
   void PrependInheritedString(std::string const& key);
+
+  // Parse the content of the given flag table entry again to extract
+  // known flags and leave the rest in the original entry.
+  void Reparse(std::string const& key);
 
   // Fix the ExceptionHandling option to default to off.
   void FixExceptionHandlingDefault();
@@ -58,6 +66,16 @@ public:
   // Check for specific options.
   bool UsingUnicode() const;
   bool UsingSBCS() const;
+
+  enum CudaRuntime
+  {
+    CudaRuntimeStatic,
+    CudaRuntimeShared,
+    CudaRuntimeNone
+  };
+  CudaRuntime GetCudaRuntime() const;
+
+  void FixCudaCodeGeneration();
 
   bool IsDebug() const;
   bool IsWinRt() const;
@@ -81,7 +99,11 @@ private:
   bool FortranRuntimeDLL;
   bool FortranRuntimeMT;
 
+  std::string UnknownFlagField;
+
   virtual void StoreUnknownFlag(const char* flag);
+
+  FlagValue TakeFlag(std::string const& key);
 };
 
 #endif

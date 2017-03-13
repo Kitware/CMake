@@ -25,6 +25,9 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    @id_Import_props@
+  </ImportGroup>
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|@id_platform@'">.\</OutDir>
@@ -44,16 +47,21 @@
       <DebugInformationFormat>
       </DebugInformationFormat>
     </ClCompile>
+    @id_ItemDefinitionGroup_entry@
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
+      @id_Link_AdditionalDependencies@
     </Link>
     <PostBuildEvent>
-      <Command>for %%i in (@id_cl@) do %40echo CMAKE_@id_lang@_COMPILER=%%~$PATH:i</Command>
+      <Command>@id_PostBuildEvent_Command@</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="@id_src@" />
+    <@id_compile@ Include="@id_src@" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    @id_Import_targets@
+  </ImportGroup>
 </Project>

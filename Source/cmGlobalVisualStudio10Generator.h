@@ -42,6 +42,8 @@ public:
                               cmMakefile*, bool optional);
   virtual void WriteSLNHeader(std::ostream& fout);
 
+  bool IsCudaEnabled() const { return this->CudaEnabled; }
+
   /** Generating for Nsight Tegra VS plugin?  */
   bool IsNsightTegra() const;
   std::string GetNsightTegraVersion() const;
@@ -52,6 +54,10 @@ public:
 
   /** The toolset host architecture name (e.g. x64 for 64-bit host tools).  */
   const char* GetPlatformToolsetHostArchitecture() const;
+
+  /** The cuda toolset version.  */
+  const char* GetPlatformToolsetCuda() const;
+  std::string const& GetPlatformToolsetCudaString() const;
 
   /** Return the CMAKE_SYSTEM_NAME.  */
   std::string const& GetSystemName() const { return this->SystemName; }
@@ -94,6 +100,8 @@ public:
   cmIDEFlagTable const* GetRcFlagTable() const;
   cmIDEFlagTable const* GetLibFlagTable() const;
   cmIDEFlagTable const* GetLinkFlagTable() const;
+  cmIDEFlagTable const* GetCudaFlagTable() const;
+  cmIDEFlagTable const* GetCudaHostFlagTable() const;
   cmIDEFlagTable const* GetMasmFlagTable() const;
   cmIDEFlagTable const* GetNasmFlagTable() const;
 
@@ -118,6 +126,7 @@ protected:
 
   std::string GeneratorToolset;
   std::string GeneratorToolsetHostArchitecture;
+  std::string GeneratorToolsetCuda;
   std::string DefaultPlatformToolset;
   std::string WindowsTargetPlatformVersion;
   std::string SystemName;
@@ -127,6 +136,8 @@ protected:
   cmIDEFlagTable const* DefaultCSharpFlagTable;
   cmIDEFlagTable const* DefaultLibFlagTable;
   cmIDEFlagTable const* DefaultLinkFlagTable;
+  cmIDEFlagTable const* DefaultCudaFlagTable;
+  cmIDEFlagTable const* DefaultCudaHostFlagTable;
   cmIDEFlagTable const* DefaultMasmFlagTable;
   cmIDEFlagTable const* DefaultNasmFlagTable;
   cmIDEFlagTable const* DefaultRcFlagTable;
@@ -159,6 +170,11 @@ private:
   virtual std::string GetVSMakeProgram() { return this->GetMSBuildCommand(); }
 
   bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
+
+  std::string VCTargetsPath;
+  bool FindVCTargetsPath(cmMakefile* mf);
+
+  bool CudaEnabled;
 
   // We do not use the reload macros for VS >= 10.
   virtual std::string GetUserMacrosDirectory() { return ""; }
