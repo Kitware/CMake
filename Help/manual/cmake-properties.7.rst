@@ -16,8 +16,11 @@ Properties of Global Scope
    :maxdepth: 1
 
    /prop_gbl/ALLOW_DUPLICATE_CUSTOM_TARGETS
+   /prop_gbl/AUTOGEN_SOURCE_GROUP
    /prop_gbl/AUTOGEN_TARGETS_FOLDER
+   /prop_gbl/AUTOMOC_SOURCE_GROUP
    /prop_gbl/AUTOMOC_TARGETS_FOLDER
+   /prop_gbl/AUTORCC_SOURCE_GROUP
    /prop_gbl/CMAKE_C_KNOWN_FEATURES
    /prop_gbl/CMAKE_CXX_KNOWN_FEATURES
    /prop_gbl/DEBUG_CONFIGURATIONS
