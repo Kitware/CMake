@@ -45,9 +45,7 @@ endif()
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH
   /usr/X11R6
   /usr/pkg
-  /opt/csw
   /opt
-  /opt/openwin
   )
 
 # List common include file locations not under the common prefixes.
