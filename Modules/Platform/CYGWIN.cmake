@@ -62,3 +62,13 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a")
 set(CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION 1)
 
 include(Platform/UnixPaths)
+
+# Windows API on Cygwin
+list(APPEND CMAKE_SYSTEM_INCLUDE_PATH
+  /usr/include/w32api
+  )
+
+# Windows API on Cygwin
+list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
+  /usr/lib/w32api
+  )

@@ -50,17 +50,11 @@ list(APPEND CMAKE_SYSTEM_PREFIX_PATH
 
 # List common include file locations not under the common prefixes.
 list(APPEND CMAKE_SYSTEM_INCLUDE_PATH
-  # Windows API on Cygwin
-  /usr/include/w32api
-
   # X11
   /usr/include/X11
   )
 
 list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
-  # Windows API on Cygwin
-  /usr/lib/w32api
-
   # X11
   /usr/lib/X11
   )
