@@ -349,6 +349,87 @@ void cmExtraCodeLiteGenerator::FindMatchingHeaderfiles(
   }
 }
 
+void cmExtraCodeLiteGenerator::CreateFoldersAndFiles(
+  std::set<std::string>& cFiles,
+  cmXMLWriter* _xml,
+  const std::string& projectPath)
+{
+  cmXMLWriter& xml(*_xml);
+  std::vector<std::string> tmp_path;
+  std::vector<std::string> components;
+  uint32_t numOfEndEl = 0;
+
+  for (std::set<std::string>::const_iterator it = cFiles.begin(); it != cFiles.end(); ++it)
+  {
+    std::string frelapath = cmSystemTools::RelativePath(projectPath.c_str(), it->c_str());
+    cmsys::SystemTools::SplitPath(frelapath, components, false);
+    components.pop_back(); // erase last member -> it is file, not folder
+    components.erase(components.begin()); // erase "root"
+
+    uint32_t sizeOfSkip = 0;
+
+    for (uint32_t i = 0; i < components.size(); ++i){
+      // skip relative path
+      if (components[i] == ".." || components[i] == "."){
+          sizeOfSkip++;
+          continue;
+      }
+
+      // same folder
+      if (tmp_path.size() > i-sizeOfSkip && tmp_path[i-sizeOfSkip] == components[i]){
+        continue;
+      }
+      
+      // delete "old" subfolders
+      if (tmp_path.size() > i-sizeOfSkip){ 
+        numOfEndEl = tmp_path.size() - i + sizeOfSkip;
+        tmp_path.erase(tmp_path.end()-numOfEndEl, tmp_path.end());
+        for (;numOfEndEl--;){
+          xml.EndElement();
+        }
+      }
+
+      // add folder
+      xml.StartElement("VirtualDirectory");
+      xml.Attribute("Name", components[i]);
+      tmp_path.push_back(components[i]);
+    }
+
+    // delete "old" subfolders
+    numOfEndEl = tmp_path.size() - components.size() + sizeOfSkip;
+    if (numOfEndEl){ 
+      tmp_path.erase(tmp_path.end()-numOfEndEl, tmp_path.end());
+      for (;numOfEndEl--;){
+        xml.EndElement();
+      }
+    }
+
+    // add file
+    xml.StartElement("File");
+    xml.Attribute("Name", frelapath);
+    xml.EndElement();
+  }
+
+  // end of folders
+  numOfEndEl = tmp_path.size();
+  for (;numOfEndEl--;){
+    xml.EndElement();
+  }
+}
+
+void cmExtraCodeLiteGenerator::CreateFoldersAndFiles(
+  std::map<std::string, cmSourceFile*>& cFiles,
+  cmXMLWriter* _xml,
+  const std::string& projectPath)
+{
+  std::set<std::string> s;
+  for (std::map<std::string, cmSourceFile*>::const_iterator it = cFiles.begin();
+       it != cFiles.end(); ++it ){
+     s.insert( it->first );
+  }
+  CreateFoldersAndFiles(s, _xml, projectPath);
+}
+
 void cmExtraCodeLiteGenerator::CreateProjectSourceEntries(
   std::map<std::string, cmSourceFile*>& cFiles,
   std::set<std::string>& otherFiles, cmXMLWriter* _xml,
