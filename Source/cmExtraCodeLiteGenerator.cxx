@@ -443,30 +443,17 @@ void cmExtraCodeLiteGenerator::CreateProjectSourceEntries(
   // and place all the implementation files into the src
   // folder, the rest goes to the include folder
   xml.StartElement("VirtualDirectory");
-  xml.Attribute("Name", "src");
+  xml.Attribute("Name", "Source");
 
   // insert all source files in the codelite project
   // first the C/C++ implementation files, then all others
-  for (std::map<std::string, cmSourceFile*>::const_iterator sit =
-         cFiles.begin();
-       sit != cFiles.end(); ++sit) {
-    xml.StartElement("File");
-    std::string fpath(sit->first);
-    std::string frelapath =
-      cmSystemTools::RelativePath(projectPath.c_str(), sit->first.c_str());
-    xml.Attribute("Name", frelapath);
-    xml.EndElement();
-  }
-  xml.EndElement(); // VirtualDirectory
+  CreateFoldersAndFiles(cFiles, _xml, projectPath);
+  xml.EndElement();
+
+  // VirtualDirectory
   xml.StartElement("VirtualDirectory");
-  xml.Attribute("Name", "include");
-  for (std::set<std::string>::const_iterator sit = otherFiles.begin();
-       sit != otherFiles.end(); ++sit) {
-    xml.StartElement("File");
-    xml.Attribute(
-      "Name", cmSystemTools::RelativePath(projectPath.c_str(), sit->c_str()));
-    xml.EndElement();
-  }
+  xml.Attribute("Name", "Include");
+  CreateFoldersAndFiles(otherFiles, _xml, projectPath);
   xml.EndElement(); // VirtualDirectory
 
   // Get the number of CPUs. We use this information for the make -jN
