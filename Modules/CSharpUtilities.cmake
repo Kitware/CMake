@@ -30,7 +30,7 @@ Main functions provided by the module
 .. command:: csharp_set_windows_forms_properties
 
   Sets source file properties for use of Windows Forms. Use this, if your CSharp
-  target uses windows forms::
+  target uses Windows Forms::
 
     csharp_set_windows_forms_properties([<file1> [<file2> [...]]])
 
@@ -59,8 +59,10 @@ Main functions provided by the module
 
 .. command:: csharp_set_designer_cs_properties
 
-  Sets source file properties for use of WPF/XAML. Use this, if your CSharp
-  target uses WPF/XAML::
+  Sets source file properties of ``.Designer.cs`` files depending on
+  sibling filenames. Use this, if your CSharp target does **not**
+  use Windows Forms (for Windows Forms use
+  :command:`csharp_set_designer_cs_properties` instead)::
 
     csharp_set_designer_cs_properties([<file1> [<file2> [...]]])
 
@@ -88,10 +90,16 @@ Main functions provided by the module
    - VS_CSHARP_DesignTimeSharedInput "True"
    - VS_CSHARP_DependentUpon <settings-filename>
 
+.. note::
+
+    Because the source file properties of the ``.Designer.cs`` file are set according
+    to the found matches and every match sets the **VS_CSHARP_DependentUpon**
+    property, there should only be one match for each ``Designer.cs`` file.
+
 .. command:: csharp_set_xaml_cs_properties
 
-  Sets source file properties for use of WPF/XAML. Use this, if your
-  CSharp target uses WPF/XAML::
+  Sets source file properties for use of Windows Presentation Foundation (WPF) and
+  XAML. Use this, if your CSharp target uses WPF/XAML::
 
     csharp_set_xaml_cs_properties([<file1> [<file2> [...]]])
 
@@ -101,7 +109,7 @@ Main functions provided by the module
     ``.xaml``, and ``.xaml.cs`` extensions).
 
   In the list of all given files for all files ending with
-  ``.xaml.cs`` is searched. For every xaml file, a file
+  ``.xaml.cs`` is searched. For every *xaml-cs* file, a file
   with the same base name but extension ``.xaml`` is searched.
   If a match is found, the source file properties of the ``.xaml.cs``
   file are set:
@@ -120,10 +128,10 @@ Helper functions which are used by the above ones
     csharp_get_filename_keys(OUT [<file1> [<file2> [...]]])
 
   ``OUT``
-    name of the variable in which the list of keys is stored
+    Name of the variable in which the list of keys is stored
 
   ``<fileN>``
-    filename as given to to CSharp target using :command:`add_library`
+    filename(s) as given to to CSharp target using :command:`add_library`
     or :command:`add_executable`
 
   In some way the function applies a canonicalization to the source names.
@@ -146,14 +154,14 @@ Helper functions which are used by the above ones
 
 .. command:: csharp_get_filename_key_base
 
-  Returns the full filepath and name **withouth** extension of a key.
+  Returns the full filepath and name **without** extension of a key.
   KEY is expected to be a key from csharp_get_filename_keys. In BASE
   the value of KEY without the file extension is returned::
 
     csharp_get_filename_key_base(BASE KEY)
 
   ``BASE``
-    The computed "base" of ``KEY``.
+    Name of the variable with the computed "base" of ``KEY``.
 
   ``KEY``
     The key of which the base will be computed. Expected to be a
@@ -167,10 +175,10 @@ Helper functions which are used by the above ones
     csharp_get_dependentupon_name(NAME FILE)
 
   ``NAME``
-    result value
+    Name of the variable with the result value
 
   ``FILE``
-    filename to convert to DependentUpon value
+    Filename to convert to ``<DependentUpon>`` value
 
   Actually this is only the filename without any path given at the moment.
 
