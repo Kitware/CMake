@@ -16,6 +16,13 @@ class cmQtAutoGeneratorCommon
 public:
   static const char* listSep;
 
+  enum GeneratorType
+  {
+    MOC,
+    UIC,
+    RCC
+  };
+
 public:
   /// @brief Returns a the string escaped and enclosed in quotes
   ///

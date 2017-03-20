@@ -134,6 +134,61 @@ static void AddDefinitionEscaped(cmMakefile* makefile, const char* key,
     key, cmOutputConverter::EscapeForCMake(cmJoin(values, ";")).c_str());
 }
 
+static bool AddToSourceGroup(cmMakefile* makefile, const std::string& fileName,
+                             cmQtAutoGeneratorCommon::GeneratorType genType)
+{
+  cmSourceGroup* sourceGroup = CM_NULLPTR;
+  // Acquire source group
+  {
+    const char* groupName = CM_NULLPTR;
+    // Use generator specific group name
+    switch (genType) {
+      case cmQtAutoGeneratorCommon::MOC:
+        groupName =
+          makefile->GetState()->GetGlobalProperty("AUTOMOC_SOURCE_GROUP");
+        break;
+      case cmQtAutoGeneratorCommon::RCC:
+        groupName =
+          makefile->GetState()->GetGlobalProperty("AUTORCC_SOURCE_GROUP");
+        break;
+      default:
+        break;
+    }
+    // Use default group name on demand
+    if ((groupName == CM_NULLPTR) || (*groupName == 0)) {
+      groupName =
+        makefile->GetState()->GetGlobalProperty("AUTOGEN_SOURCE_GROUP");
+    }
+    // Generate a source group on demand
+    if ((groupName != CM_NULLPTR) && (*groupName != 0)) {
+      {
+        const char* delimiter =
+          makefile->GetDefinition("SOURCE_GROUP_DELIMITER");
+        if (delimiter == CM_NULLPTR) {
+          delimiter = "\\";
+        }
+        std::vector<std::string> folders =
+          cmSystemTools::tokenize(groupName, delimiter);
+        sourceGroup = makefile->GetSourceGroup(folders);
+        if (sourceGroup == CM_NULLPTR) {
+          makefile->AddSourceGroup(folders);
+          sourceGroup = makefile->GetSourceGroup(folders);
+        }
+      }
+      if (sourceGroup == CM_NULLPTR) {
+        cmSystemTools::Error(
+          "Autogen: Could not create or find source group: ",
+          cmQtAutoGeneratorCommon::Quoted(groupName).c_str());
+        return false;
+      }
+    }
+  }
+  if (sourceGroup != CM_NULLPTR) {
+    sourceGroup->AddGroupFile(fileName);
+  }
+  return true;
+}
+
 static void AcquireScanFiles(cmGeneratorTarget const* target,
                              std::vector<std::string>& mocUicSources,
                              std::vector<std::string>& mocUicHeaders,
@@ -531,11 +586,14 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenSources(
 {
   if (target->GetPropertyAsBool("AUTOMOC")) {
     cmMakefile* makefile = target->Target->GetMakefile();
-    const std::string mocCppFile =
-      GetAutogenTargetBuildDir(target) + "moc_compilation.cpp";
-    cmSourceFile* gf = makefile->GetOrCreateSource(mocCppFile, true);
-    gf->SetProperty("SKIP_AUTOGEN", "On");
+    std::string mocCppFile = GetAutogenTargetBuildDir(target);
+    mocCppFile += "moc_compilation.cpp";
+    {
+      cmSourceFile* gFile = makefile->GetOrCreateSource(mocCppFile, true);
+      gFile->SetProperty("SKIP_AUTOGEN", "On");
+    }
     target->AddSource(mocCppFile);
+    AddToSourceGroup(makefile, mocCppFile, cmQtAutoGeneratorCommon::MOC);
   }
 }
 
@@ -700,9 +758,12 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
             autogenProvides.push_back(rccOut);
 
             // Add rcc output file to origin target sources
-            cmSourceFile* gf = makefile->GetOrCreateSource(rccOut, true);
-            gf->SetProperty("SKIP_AUTOGEN", "On");
+            {
+              cmSourceFile* gFile = makefile->GetOrCreateSource(rccOut, true);
+              gFile->SetProperty("SKIP_AUTOGEN", "On");
+            }
             target->AddSource(rccOut);
+            AddToSourceGroup(makefile, rccOut, cmQtAutoGeneratorCommon::RCC);
           }
 
           if (PropertyEnabled(sf, "GENERATED")) {
