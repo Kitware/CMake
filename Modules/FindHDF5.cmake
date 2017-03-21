@@ -89,7 +89,8 @@
 #
 # The following variable can be set to guide the search for HDF5 libraries and includes:
 #
-# HDF5_ROOT
+# ``HDF5_ROOT``
+#   Specify the path to the HDF5 installation to use.
 
 # This module is maintained by Will Dicharry <wdicharry@stellarscience.com>.
 
