@@ -16,6 +16,7 @@
 #include "cmGeneratedFileStream.h"
 
 #include <ctype.h> // for isspace
+#include <windows.h>
 
 static bool cmLVS7G_IsFAT(const char* dir);
 
@@ -2115,7 +2116,6 @@ std::string cmLocalVisualStudio7Generator::GetTargetDirectory(
   return dir;
 }
 
-#include <windows.h>
 static bool cmLVS7G_IsFAT(const char* dir)
 {
   if (dir[0] && dir[1] == ':') {

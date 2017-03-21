@@ -279,7 +279,6 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
 
-#undef GetCurrentDirectory
 void cmExportCommand::ReportRegistryError(std::string const& msg,
                                           std::string const& key, long err)
 {

@@ -1173,7 +1173,6 @@ void cmFindPackageCommand::FillPrefixesSystemRegistry()
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
-#undef GetCurrentDirectory
 // http://msdn.microsoft.com/en-us/library/aa384253%28v=vs.85%29.aspx
 #if !defined(KEY_WOW64_32KEY)
 #define KEY_WOW64_32KEY 0x0200

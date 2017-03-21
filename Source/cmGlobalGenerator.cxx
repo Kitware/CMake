@@ -1,12 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#include "windows.h" // this must be first to define GetCurrentDirectory
-#if defined(_MSC_VER) && _MSC_VER >= 1800
-#define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#endif
-#endif
-
 #include "cmGlobalGenerator.h"
 
 #include <algorithm>
@@ -18,6 +11,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#include <windows.h>
+#endif
 
 #include "cmAlgorithms.h"
 #include "cmCPackPropertiesGenerator.h"
@@ -49,6 +46,10 @@
 #include "cmCryptoHash.h"
 #include <cm_jsoncpp_value.h>
 #include <cm_jsoncpp_writer.h>
+#endif
+
+#if defined(_MSC_VER) && _MSC_VER >= 1800
+#define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 #endif
 
 const std::string kCMAKE_PLATFORM_INFO_INITIALIZED =
