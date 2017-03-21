@@ -2141,7 +2141,9 @@ function(cpack_rpm_generate_package)
         if(CPACK_RPM_DEBUGINFO_PACKAGE)
           # only add current package files to debuginfo list if debuginfo
           # generation is enabled for current package
-          set(install_files_ "${CPACK_RPM_INSTALL_FILES}")
+          string(STRIP "${CPACK_RPM_INSTALL_FILES}" install_files_)
+          string(REPLACE "\n" ";" install_files_ "${install_files_}")
+          string(REPLACE "\"" "" install_files_ "${install_files_}")
         else()
           unset(install_files_)
         endif()
@@ -2199,7 +2201,11 @@ function(cpack_rpm_generate_package)
 
         cpack_rpm_debugsymbol_check("${install_files_}" "${WDIR}")
       else()
-        cpack_rpm_debugsymbol_check("${CPACK_RPM_INSTALL_FILES}" "${WDIR}")
+        string(STRIP "${CPACK_RPM_INSTALL_FILES}" install_files_)
+        string(REPLACE "\n" ";" install_files_ "${install_files_}")
+        string(REPLACE "\"" "" install_files_ "${install_files_}")
+
+        cpack_rpm_debugsymbol_check("${install_files_}" "${WDIR}")
       endif()
 
       if(TMP_DEBUGINFO_ADDITIONAL_SOURCES)
