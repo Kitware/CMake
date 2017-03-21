@@ -65,9 +65,14 @@ The "Kitware Robot" (``@kwrobot``) automatically performs basic checks on
 the commits proposed in a MR.  If all is well the robot silently reports
 a successful "build" status to GitLab.  Otherwise the robot posts a comment
 with its diagnostics.  **A topic may not be merged until the automatic
-review succeeds.** The MR submitter is expected to address the robot's
-comments by *rewriting* the commits named by the robot's diagnostics
-(e.g. via ``git rebase -i``).
+review succeeds.**
+
+Note that the MR submitter is expected to address the robot's comments by
+*rewriting* the commits named by the robot's diagnostics (e.g., via
+``git rebase -i``). This is because the robot checks each commit individually,
+not the topic as a whole. This is done in order to ensure that commits in the
+middle of a topic do not, for example, add a giant file which is then later
+removed in the topic.
 
 The automatic check is repeated whenever the topic branch is updated.
 One may explicitly request a re-check by adding a comment with the
