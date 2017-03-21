@@ -541,7 +541,7 @@ if(NOT HDF5_FOUND)
 
           foreach(L IN LISTS HDF5_${__lang}_LIBRARY_NAMES)
             set(_HDF5_SEARCH_NAMES_LOCAL)
-            if(x"${L}" MATCHES "hdf5")
+            if("x${L}" MATCHES "hdf5")
               # hdf5 library
               set(_HDF5_SEARCH_OPTS_LOCAL ${_HDF5_SEARCH_OPTS})
               if(UNIX AND HDF5_USE_STATIC_LIBRARIES)
