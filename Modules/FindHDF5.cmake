@@ -89,7 +89,11 @@
 #
 # The following variable can be set to guide the search for HDF5 libraries and includes:
 #
-# HDF5_ROOT
+# ``HDF5_ROOT``
+#   Specify the path to the HDF5 installation to use.
+#
+# ``HDF5_NO_FIND_PACKAGE_CONFIG_FILE``
+#   Set to a true value to skip trying to find ``hdf5-config.cmake``.
 
 # This module is maintained by Will Dicharry <wdicharry@stellarscience.com>.
 
@@ -390,7 +394,7 @@ else()
 endif()
 
 # Try to find HDF5 using an installed hdf5-config.cmake
-if(NOT HDF5_FOUND)
+if(NOT HDF5_FOUND AND NOT HDF5_NO_FIND_PACKAGE_CONFIG_FILE)
     find_package(HDF5 QUIET NO_MODULE
       HINTS ${HDF5_ROOT}
       ${_HDF5_SEARCH_OPTS}
