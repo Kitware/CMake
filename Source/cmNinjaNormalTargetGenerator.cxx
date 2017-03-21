@@ -753,11 +753,10 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
 
   cmGlobalNinjaGenerator& globalGen = *this->GetGlobalGenerator();
 
-  int commandLineLengthLimit = -1;
-  if (!this->ForceResponseFile()) {
-    commandLineLengthLimit = calculateCommandLineLengthLimit(
-      globalGen.GetRuleCmdLength(this->LanguageLinkerDeviceRule()));
-  }
+  // Device linking currently doesn't support response files so
+  // do not check if the user has explicitly forced a response file.
+  int const commandLineLengthLimit = calculateCommandLineLengthLimit(
+    globalGen.GetRuleCmdLength(this->LanguageLinkerDeviceRule()));
 
   const std::string rspfile =
     std::string(cmake::GetCMakeFilesDirectoryPostSlash()) +
@@ -1048,8 +1047,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   }
   cmGlobalNinjaGenerator& globalGen = *this->GetGlobalGenerator();
 
+  bool const lang_supports_response =
+    !(this->TargetLinkLanguage == "RC" || this->TargetLinkLanguage == "CUDA");
   int commandLineLengthLimit = -1;
-  if (!this->ForceResponseFile()) {
+  if (!lang_supports_response || !this->ForceResponseFile()) {
     commandLineLengthLimit = calculateCommandLineLengthLimit(
       globalGen.GetRuleCmdLength(this->LanguageLinkerRule()));
   }
