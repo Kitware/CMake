@@ -96,9 +96,11 @@
 #
 # The following variable can be set to guide the search for HDF5 libraries and includes:
 #
-# HDF5_ROOT
+# ``HDF5_ROOT``
+#   Specify the path to the HDF5 installation to use.
 #
-# Set HDF5_FIND_DEBUG to true to get some extra debugging output.
+# ``HDF5_FIND_DEBUG``
+#   Set to a true value to get some extra debugging output.
 
 # This module is maintained by Will Dicharry <wdicharry@stellarscience.com>.
 
