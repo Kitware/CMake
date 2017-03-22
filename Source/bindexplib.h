@@ -13,6 +13,7 @@ class bindexplib
 {
 public:
   bindexplib() {}
+  bool AddDefinitionFile(const char* filename);
   bool AddObjectFile(const char* filename);
   void WriteFile(FILE* file);
 private:

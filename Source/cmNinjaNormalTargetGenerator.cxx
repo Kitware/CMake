@@ -978,7 +978,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   // maybe create .def file from list of objects
   cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
     gt.GetModuleDefinitionInfo(this->GetConfigName());
-  if (mdi && mdi->WindowsExportAllSymbols) {
+  if (mdi && mdi->DefFileGenerated) {
     std::string cmakeCommand =
       this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
@@ -987,17 +987,27 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     cmd += this->GetLocalGenerator()->ConvertToOutputFormat(
       mdi->DefFile, cmOutputConverter::SHELL);
     cmd += " ";
-    cmNinjaDeps objs = this->GetObjects();
     std::string obj_list_file = mdi->DefFile + ".objs";
     cmd += this->GetLocalGenerator()->ConvertToOutputFormat(
       obj_list_file, cmOutputConverter::SHELL);
     preLinkCmdLines.push_back(cmd);
+
     // create a list of obj files for the -E __create_def to read
     cmGeneratedFileStream fout(obj_list_file.c_str());
-    for (cmNinjaDeps::iterator i = objs.begin(); i != objs.end(); ++i) {
-      if (cmHasLiteralSuffix(*i, ".obj")) {
-        fout << *i << "\n";
+
+    if (mdi->WindowsExportAllSymbols) {
+      cmNinjaDeps objs = this->GetObjects();
+      for (cmNinjaDeps::iterator i = objs.begin(); i != objs.end(); ++i) {
+        if (cmHasLiteralSuffix(*i, ".obj")) {
+          fout << *i << "\n";
+        }
       }
+    }
+
+    for (std::vector<cmSourceFile const*>::const_iterator i =
+           mdi->Sources.begin();
+         i != mdi->Sources.end(); ++i) {
+      fout << (*i)->GetFullPath() << "\n";
     }
   }
   // If we have any PRE_LINK commands, we need to go back to CMAKE_BINARY_DIR

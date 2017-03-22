@@ -1819,7 +1819,7 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(
   bool addedPrelink = false;
   cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
     target->GetModuleDefinitionInfo(configName);
-  if (mdi && mdi->WindowsExportAllSymbols) {
+  if (mdi && mdi->DefFileGenerated) {
     addedPrelink = true;
     std::vector<cmCustomCommand> commands = target->GetPreLinkCommands();
     cmGlobalVisualStudioGenerator* gg =

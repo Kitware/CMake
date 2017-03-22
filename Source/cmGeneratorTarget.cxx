@@ -1973,15 +1973,16 @@ cmGeneratorTarget::GetModuleDefinitionInfo(std::string const& config) const
 void cmGeneratorTarget::ComputeModuleDefinitionInfo(
   std::string const& config, ModuleDefinitionInfo& info) const
 {
-  std::vector<cmSourceFile const*> sources;
-  this->GetModuleDefinitionSources(sources, config);
+  this->GetModuleDefinitionSources(info.Sources, config);
   info.WindowsExportAllSymbols =
     this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS") &&
     this->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS");
-  if (info.WindowsExportAllSymbols) {
+  info.DefFileGenerated =
+    info.WindowsExportAllSymbols || info.Sources.size() > 1;
+  if (info.DefFileGenerated) {
     info.DefFile = this->ObjectDirectory /* has slash */ + "exports.def";
-  } else if (!sources.empty()) {
-    info.DefFile = sources.front()->GetFullPath();
+  } else if (!info.Sources.empty()) {
+    info.DefFile = info.Sources.front()->GetFullPath();
   }
 }
 

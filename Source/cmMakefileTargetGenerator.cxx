@@ -1414,10 +1414,14 @@ void cmMakefileTargetGenerator::AppendLinkDepends(
   this->AppendTargetDepends(depends);
 
   // Add a dependency on the link definitions file, if any.
-  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
-    this->GeneratorTarget->GetModuleDefinitionInfo(this->GetConfigName());
-  if (mdi && !mdi->WindowsExportAllSymbols && !mdi->DefFile.empty()) {
-    depends.push_back(mdi->DefFile);
+  if (cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+        this->GeneratorTarget->GetModuleDefinitionInfo(
+          this->GetConfigName())) {
+    for (std::vector<cmSourceFile const*>::const_iterator i =
+           mdi->Sources.begin();
+         i != mdi->Sources.end(); ++i) {
+      depends.push_back((*i)->GetFullPath());
+    }
   }
 
   // Add a dependency on user-specified manifest files, if any.
@@ -1724,7 +1728,7 @@ void cmMakefileTargetGenerator::GenDefFile(
 {
   cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
     this->GeneratorTarget->GetModuleDefinitionInfo(this->GetConfigName());
-  if (!mdi || !mdi->WindowsExportAllSymbols) {
+  if (!mdi || !mdi->DefFileGenerated) {
     return;
   }
   std::string cmd = cmSystemTools::GetCMakeCommand();
@@ -1744,15 +1748,24 @@ void cmMakefileTargetGenerator::GenDefFile(
   real_link_commands.insert(real_link_commands.begin(), cmd);
   // create a list of obj files for the -E __create_def to read
   cmGeneratedFileStream fout(objlist_file.c_str());
-  for (std::vector<std::string>::const_iterator i = this->Objects.begin();
-       i != this->Objects.end(); ++i) {
-    if (cmHasLiteralSuffix(*i, ".obj")) {
+
+  if (mdi->WindowsExportAllSymbols) {
+    for (std::vector<std::string>::const_iterator i = this->Objects.begin();
+         i != this->Objects.end(); ++i) {
+      if (cmHasLiteralSuffix(*i, ".obj")) {
+        fout << *i << "\n";
+      }
+    }
+    for (std::vector<std::string>::const_iterator i =
+           this->ExternalObjects.begin();
+         i != this->ExternalObjects.end(); ++i) {
       fout << *i << "\n";
     }
   }
-  for (std::vector<std::string>::const_iterator i =
-         this->ExternalObjects.begin();
-       i != this->ExternalObjects.end(); ++i) {
-    fout << *i << "\n";
+
+  for (std::vector<cmSourceFile const*>::const_iterator i =
+         mdi->Sources.begin();
+       i != mdi->Sources.end(); ++i) {
+    fout << (*i)->GetFullPath() << "\n";
   }
 }

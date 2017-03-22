@@ -3300,7 +3300,7 @@ void cmVisualStudio10TargetGenerator::WriteEvents(
   bool addedPrelink = false;
   cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
     this->GeneratorTarget->GetModuleDefinitionInfo(configName);
-  if (mdi && mdi->WindowsExportAllSymbols) {
+  if (mdi && mdi->DefFileGenerated) {
     addedPrelink = true;
     std::vector<cmCustomCommand> commands =
       this->GeneratorTarget->GetPreLinkCommands();

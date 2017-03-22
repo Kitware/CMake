@@ -815,7 +815,7 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
 {
   cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
     gt->GetModuleDefinitionInfo(configName);
-  if (!mdi || !mdi->WindowsExportAllSymbols) {
+  if (!mdi || !mdi->DefFileGenerated) {
     return;
   }
 
@@ -842,46 +842,55 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   std::string obj_dir_expanded = obj_dir;
   cmSystemTools::ReplaceString(obj_dir_expanded, this->GetCMakeCFGIntDir(),
                                configName.c_str());
-  std::string objs_file = obj_dir_expanded;
-  cmSystemTools::MakeDirectory(objs_file.c_str());
-  objs_file += "/objects.txt";
+  cmSystemTools::MakeDirectory(obj_dir_expanded);
+  std::string const objs_file = obj_dir_expanded + "/objects.txt";
   cmdl.push_back(objs_file);
   cmGeneratedFileStream fout(objs_file.c_str());
   if (!fout) {
     cmSystemTools::Error("could not open ", objs_file.c_str());
     return;
   }
-  std::vector<std::string> objs;
-  for (std::vector<cmSourceFile const*>::const_iterator it =
-         objectSources.begin();
-       it != objectSources.end(); ++it) {
-    // Find the object file name corresponding to this source file.
-    std::map<cmSourceFile const*, std::string>::const_iterator map_it =
-      mapping.find(*it);
-    // It must exist because we populated the mapping just above.
-    assert(!map_it->second.empty());
-    std::string objFile = obj_dir + map_it->second;
-    objs.push_back(objFile);
-  }
-  std::vector<cmSourceFile const*> externalObjectSources;
-  gt->GetExternalObjects(externalObjectSources, configName);
-  for (std::vector<cmSourceFile const*>::const_iterator it =
-         externalObjectSources.begin();
-       it != externalObjectSources.end(); ++it) {
-    objs.push_back((*it)->GetFullPath());
-  }
 
-  gt->UseObjectLibraries(objs, configName);
-  for (std::vector<std::string>::iterator it = objs.begin(); it != objs.end();
-       ++it) {
-    std::string objFile = *it;
-    // replace $(ConfigurationName) in the object names
-    cmSystemTools::ReplaceString(objFile, this->GetCMakeCFGIntDir(),
-                                 configName.c_str());
-    if (cmHasLiteralSuffix(objFile, ".obj")) {
-      fout << objFile << "\n";
+  if (mdi->WindowsExportAllSymbols) {
+    std::vector<std::string> objs;
+    for (std::vector<cmSourceFile const*>::const_iterator it =
+           objectSources.begin();
+         it != objectSources.end(); ++it) {
+      // Find the object file name corresponding to this source file.
+      std::map<cmSourceFile const*, std::string>::const_iterator map_it =
+        mapping.find(*it);
+      // It must exist because we populated the mapping just above.
+      assert(!map_it->second.empty());
+      std::string objFile = obj_dir + map_it->second;
+      objs.push_back(objFile);
+    }
+    std::vector<cmSourceFile const*> externalObjectSources;
+    gt->GetExternalObjects(externalObjectSources, configName);
+    for (std::vector<cmSourceFile const*>::const_iterator it =
+           externalObjectSources.begin();
+         it != externalObjectSources.end(); ++it) {
+      objs.push_back((*it)->GetFullPath());
+    }
+
+    gt->UseObjectLibraries(objs, configName);
+    for (std::vector<std::string>::iterator it = objs.begin();
+         it != objs.end(); ++it) {
+      std::string objFile = *it;
+      // replace $(ConfigurationName) in the object names
+      cmSystemTools::ReplaceString(objFile, this->GetCMakeCFGIntDir(),
+                                   configName.c_str());
+      if (cmHasLiteralSuffix(objFile, ".obj")) {
+        fout << objFile << "\n";
+      }
     }
   }
+
+  for (std::vector<cmSourceFile const*>::const_iterator i =
+         mdi->Sources.begin();
+       i != mdi->Sources.end(); ++i) {
+    fout << (*i)->GetFullPath() << "\n";
+  }
+
   cmCustomCommandLines commandLines;
   commandLines.push_back(cmdl);
   cmCustomCommand command(gt->Target->GetMakefile(), outputs, empty, empty,

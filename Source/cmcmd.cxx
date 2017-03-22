@@ -258,11 +258,18 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
                   << "\n";
         return 1;
       }
-      std::string objfile;
+      std::string file;
       bindexplib deffile;
-      while (cmSystemTools::GetLineFromStream(fin, objfile)) {
-        if (!deffile.AddObjectFile(objfile.c_str())) {
-          return 1;
+      while (cmSystemTools::GetLineFromStream(fin, file)) {
+        std::string const& ext = cmSystemTools::GetFilenameLastExtension(file);
+        if (cmSystemTools::LowerCase(ext) == ".def") {
+          if (!deffile.AddDefinitionFile(file.c_str())) {
+            return 1;
+          }
+        } else {
+          if (!deffile.AddObjectFile(file.c_str())) {
+            return 1;
+          }
         }
       }
       deffile.WriteFile(fout);

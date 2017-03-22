@@ -4,6 +4,8 @@ project(ModuleDefinition C)
 # Test .def file source recognition for DLLs.
 add_library(example_dll SHARED example_dll.c example_dll.def)
 
+add_library(split_dll SHARED split_dll.c split_dll_1.def split_dll_2.def)
+
 # Test generated .def file.
 add_custom_command(OUTPUT example_dll_gen.def
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/example_dll_gen.def.in
@@ -24,7 +26,12 @@ endif()
 # Test .def file source recognition for EXEs.
 add_executable(example_exe example_exe.c example_exe.def)
 set_property(TARGET example_exe PROPERTY ENABLE_EXPORTS 1)
-target_link_libraries(example_exe example_dll example_dll_gen ${example_dll_2})
+target_link_libraries(example_exe
+  example_dll
+  example_dll_gen
+  ${example_dll_2}
+  split_dll
+  )
 
 # Test linking to the executable.
 add_library(example_mod_1 MODULE example_mod_1.c)
