@@ -74,6 +74,9 @@ not the topic as a whole. This is done in order to ensure that commits in the
 middle of a topic do not, for example, add a giant file which is then later
 removed in the topic.
 
+Automatic Check
+---------------
+
 The automatic check is repeated whenever the topic branch is updated.
 One may explicitly request a re-check by adding a comment with the
 following command among the `comment trailing lines`_::
@@ -154,7 +157,7 @@ Comment Trailer Commands
 Among the `comment trailing lines`_ authorized users may issue special
 commands to ``@kwrobot`` using the form ``Do: ...``:
 
-* ``Do: check`` explicitly re-runs `Robot Review`_ checks.
+* ``Do: check`` explicitly re-runs the robot `Automatic Check`_.
 * ``Do: test`` submits the MR for `Topic Testing`_.
 * ``Do: stage`` submits the MR for `Integration Testing`_.
 * ``Do: merge`` submits the MR for `Merge`_.
