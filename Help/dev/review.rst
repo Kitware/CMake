@@ -86,6 +86,21 @@ following command among the `comment trailing lines`_::
 ``@kwrobot`` will add an award emoji to the comment to indicate that it
 was processed and also run its checks again.
 
+Automatic Format
+----------------
+
+The automatic check will reject commits introducing source code not
+formatted according to ``clang-format``.  One may ask the robot to
+automatically rewrite the MR topic branch with expected formatting
+by adding a comment with the following command among the
+`comment trailing lines`_::
+
+  Do: reformat
+
+``@kwrobot`` will add an award emoji to the comment to indicate that it
+was processed and also rewrite the MR topic branch and force-push an
+updated version with every commit formatted as expected by the check.
+
 Human Review
 ============
 
@@ -158,6 +173,7 @@ Among the `comment trailing lines`_ authorized users may issue special
 commands to ``@kwrobot`` using the form ``Do: ...``:
 
 * ``Do: check`` explicitly re-runs the robot `Automatic Check`_.
+* ``Do: reformat`` rewrites the MR topic for `Automatic Format`_.
 * ``Do: test`` submits the MR for `Topic Testing`_.
 * ``Do: stage`` submits the MR for `Integration Testing`_.
 * ``Do: merge`` submits the MR for `Merge`_.
