@@ -1200,9 +1200,8 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
                                           this->CreateString("2147483647"));
         copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
                                           this->CreateString("7"));
-        const std::string dstPath = mit->first.substr(strlen("Resources/"));
         copyFilesBuildPhase->AddAttribute("dstPath",
-                                          this->CreateString(dstPath));
+                                          this->CreateString(mit->first));
         copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
                                           this->CreateString("0"));
         buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -3699,6 +3698,12 @@ bool cmGlobalXCodeGenerator::UseEffectivePlatformName(cmMakefile* mf) const
   }
 
   return cmSystemTools::IsOn(epnValue);
+}
+
+bool cmGlobalXCodeGenerator::ShouldStripResourcePath(cmMakefile*) const
+{
+  // Xcode determines Resource location itself
+  return true;
 }
 
 void cmGlobalXCodeGenerator::ComputeTargetObjectDirectory(

@@ -3315,10 +3315,18 @@ cmGeneratorTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const
     // were not listed in one of the other lists.
     if (const char* location = sf->GetProperty("MACOSX_PACKAGE_LOCATION")) {
       flags.MacFolder = location;
+      const bool stripResources =
+        this->GlobalGenerator->ShouldStripResourcePath(this->Makefile);
       if (strcmp(location, "Resources") == 0) {
         flags.Type = cmGeneratorTarget::SourceFileTypeResource;
+        if (stripResources) {
+          flags.MacFolder = "";
+        }
       } else if (cmSystemTools::StringStartsWith(location, "Resources/")) {
         flags.Type = cmGeneratorTarget::SourceFileTypeDeepResource;
+        if (stripResources) {
+          flags.MacFolder += strlen("Resources/");
+        }
       } else {
         flags.Type = cmGeneratorTarget::SourceFileTypeMacContent;
       }
@@ -3372,7 +3380,7 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
       if (cmSourceFile* sf = this->Makefile->GetSource(*it)) {
         SourceFileFlags& flags = this->SourceFlagsMap[sf];
         flags.MacFolder = "";
-        if (!this->Makefile->PlatformIsAppleIos()) {
+        if (!this->GlobalGenerator->ShouldStripResourcePath(this->Makefile)) {
           flags.MacFolder = "Resources";
         }
         flags.Type = cmGeneratorTarget::SourceFileTypeResource;
