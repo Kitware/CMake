@@ -985,7 +985,9 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang)
                                               lang, this->GetConfigName());
   for (std::vector<std::string>::iterator i = includes.begin();
        i != includes.end(); ++i) {
-    tdi_include_dirs.append(*i);
+    // Convert the include directories the same way we do for -I flags.
+    // See upstream ninja issue 1251.
+    tdi_include_dirs.append(this->ConvertToNinjaPath(*i));
   }
 
   Json::Value& tdi_linked_target_dirs = tdi["linked-target-dirs"] =
