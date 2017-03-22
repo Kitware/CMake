@@ -181,60 +181,6 @@ public:
 
   /*
    *----------------------------------------------------------------------
-   * HaveExportedObjects --
-   *
-   *      Returns true if export directives (declspec(dllexport)) exist.
-   *
-   *----------------------------------------------------------------------
-   */
-
-  bool HaveExportedObjects()
-  {
-    WORD i = 0;
-    size_t size = 0;
-    const char* rawdata = 0;
-    PIMAGE_SECTION_HEADER pDirectivesSectionHeader = 0;
-    PIMAGE_SECTION_HEADER pSectionHeaders = this->SectionHeaders;
-    for (i = 0; (i < this->ObjectImageHeader->NumberOfSections &&
-                 !pDirectivesSectionHeader);
-         i++)
-      if (!strncmp((const char*)&pSectionHeaders[i].Name[0], ".drectve", 8))
-        pDirectivesSectionHeader = &pSectionHeaders[i];
-    if (!pDirectivesSectionHeader)
-      return 0;
-
-    rawdata = (const char*)this->ObjectImageHeader +
-      pDirectivesSectionHeader->PointerToRawData;
-    if (!pDirectivesSectionHeader->PointerToRawData || !rawdata)
-      return 0;
-
-    size = pDirectivesSectionHeader->SizeOfRawData;
-    const char* posImportFlag = rawdata;
-    while ((posImportFlag = StrNStr(posImportFlag, " /EXPORT:", size))) {
-      const char* lookingForDict = posImportFlag + 9;
-      if (!strncmp(lookingForDict, "_G__cpp_", 8) ||
-          !strncmp(lookingForDict, "_G__set_cpp_", 12)) {
-        posImportFlag = lookingForDict;
-        continue;
-      }
-
-      const char* lookingForDATA = posImportFlag + 9;
-      while (*(++lookingForDATA) && *lookingForDATA != ' ')
-        ;
-      lookingForDATA -= 5;
-      // ignore DATA exports
-      if (strncmp(lookingForDATA, ",DATA", 5))
-        break;
-      posImportFlag = lookingForDATA + 5;
-    }
-    if (posImportFlag) {
-      return true;
-    }
-    return false;
-  }
-
-  /*
-   *----------------------------------------------------------------------
    * DumpObjFile --
    *
    *      Dump an object file's exported symbols.
@@ -318,19 +264,6 @@ public:
               }
             }
           }
-        }
-      } else if (pSymbolTable->SectionNumber == IMAGE_SYM_UNDEFINED &&
-                 !pSymbolTable->Type && 0) {
-        /*
-        *    The IMPORT global variable entry points
-        */
-        if (pSymbolTable->StorageClass == IMAGE_SYM_CLASS_EXTERNAL) {
-          symbol = stringTable + pSymbolTable->N.Name.Long;
-          while (isspace(symbol[0]))
-            symbol.erase(0, 1);
-          if (symbol[0] == '_')
-            symbol.erase(0, 1);
-          this->DataSymbols.insert(symbol);
         }
       }
 
