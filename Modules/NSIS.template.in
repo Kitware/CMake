@@ -30,19 +30,20 @@
 ;--------------------------------
 ;General
 !ifdef INNER
-  OutFile "$%TEMP%\tempinstaller.exe"
+  OutFile "${TEMPINSTALLER}.exe"
   SetCompress off                           ; for speed
 !else
   ; Call makensis again, defining INNER.  This writes an installer for us which, when
   ; it is invoked, will just write the uninstaller to some location, and then exit.
   ; Be sure to substitute the name of this script here.
-
-  !system "$\"${NSISDIR}\makensis$\" /DINNER $\"@CPACK_TEMPORARY_DIRECTORY@/../project.nsi$\"" = 0
+  !tempfile TEMPINSTALLER
+  !tempfile TEMPUNINSTALLER
+  !system "$\"${NSISDIR}\makensis$\" /DTEMPINSTALLER=$\"${TEMPINSTALLER}$\" /DTEMPUNINSTALLER=$\"${TEMPUNINSTALLER}$\" /DINNER $\"@CPACK_TEMPORARY_DIRECTORY@/../project.nsi$\"" = 0
 
   ; So now run that installer we just created as %TEMP%\tempinstaller.exe.  Since it
   ; calls quit the return value isn't zero.
 
-  !system "$%TEMP%\tempinstaller.exe" = 2
+  !system "$\"${TEMPINSTALLER}.exe$\"" = 2
 
   ; That will have written an uninstaller binary for us.  Now we sign it with your
   ; favourite code signing tool.
@@ -52,7 +53,7 @@
   !include "${INCEXIST}"
   !delfile "${INCEXIST}"
   !ifdef HAVE_SIGN_UNINST
-  !system '"@CPACK_NSIS_SIGN_UNINSTALLER@" "$%TEMP%\Uninstall.exe"' = 0
+  !system '"@CPACK_NSIS_SIGN_UNINSTALLER@" "${TEMPUNINSTALLER}.exe"' = 0
   !endif
 
   ; Good.  Now we can carry on writing the real installer.
@@ -674,7 +675,7 @@ Section "-Core installation"
   ;Create uninstaller
 !ifndef INNER
   ; this packages the signed uninstaller
-  File "$%TEMP%\Uninstall.exe"
+  File "/oname=Uninstall.exe" "${TEMPUNINSTALLER}.exe"
 !endif
   Push "DisplayName"
   Push "@CPACK_NSIS_DISPLAY_NAME@"
@@ -938,7 +939,7 @@ Function .onInit
   ; the installer.  This is better than processing a command line option as it means
   ; this entire code path is not present in the final (real) installer.
 
-  WriteUninstaller "$%TEMP%\Uninstall.exe"
+  WriteUninstaller "${TEMPUNINSTALLER}.exe"
   Quit  ; just bail out quickly when running the "inner" installer
 !endif
   StrCmp "@CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL@" "ON" 0 inst
