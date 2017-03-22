@@ -17,5 +17,4 @@
 /cmListFileLexer.c                 generated
 
 # Do not format third-party sources.
-/bindexplib.*                              -format.clang-format
 /kwsys/**                                  -format.clang-format
