@@ -69,21 +69,21 @@ if(MSVC)
   get_filename_component(devenv_dir "${CMAKE_MAKE_PROGRAM}" PATH)
   get_filename_component(base_dir "${devenv_dir}/../.." ABSOLUTE)
 
-  if(MSVC70)
+  if(MSVC_VERSION EQUAL 1300)
     set(__install__libs
       "${SYSTEMROOT}/system32/msvcp70.dll"
       "${SYSTEMROOT}/system32/msvcr70.dll"
       )
   endif()
 
-  if(MSVC71)
+  if(MSVC_VERSION EQUAL 1310)
     set(__install__libs
       "${SYSTEMROOT}/system32/msvcp71.dll"
       "${SYSTEMROOT}/system32/msvcr71.dll"
       )
   endif()
 
-  if(MSVC80)
+  if(MSVC_VERSION EQUAL 1400)
     # Find the runtime library redistribution directory.
     get_filename_component(msvc_install_dir
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0;InstallDir]" ABSOLUTE)
@@ -120,7 +120,7 @@ if(MSVC)
     endif()
   endif()
 
-  if(MSVC90)
+  if(MSVC_VERSION EQUAL 1500)
     # Find the runtime library redistribution directory.
     get_filename_component(msvc_install_dir
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0;InstallDir]" ABSOLUTE)
@@ -234,36 +234,36 @@ if(MSVC)
     endif()
   endmacro()
 
-  if(MSVC10)
+  if(MSVC_VERSION EQUAL 1600)
     MSVCRT_FILES_FOR_VERSION(10)
   endif()
 
-  if(MSVC11)
+  if(MSVC_VERSION EQUAL 1700)
     MSVCRT_FILES_FOR_VERSION(11)
   endif()
 
-  if(MSVC12)
+  if(MSVC_VERSION EQUAL 1800)
     MSVCRT_FILES_FOR_VERSION(12)
   endif()
 
-  if(MSVC14)
+  if(MSVC_VERSION EQUAL 1900 OR MSVC_VERSION EQUAL 1910)
     MSVCRT_FILES_FOR_VERSION(14)
   endif()
 
   if(CMAKE_INSTALL_MFC_LIBRARIES)
-    if(MSVC70)
+    if(MSVC_VERSION EQUAL 1300)
       set(__install__libs ${__install__libs}
         "${SYSTEMROOT}/system32/mfc70.dll"
         )
     endif()
 
-    if(MSVC71)
+    if(MSVC_VERSION EQUAL 1310)
       set(__install__libs ${__install__libs}
         "${SYSTEMROOT}/system32/mfc71.dll"
         )
     endif()
 
-    if(MSVC80)
+    if(MSVC_VERSION EQUAL 1400)
       if(CMAKE_INSTALL_DEBUG_LIBRARIES)
         set(MSVC80_MFC_DIR
           "${MSVC80_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC80.DebugMFC")
@@ -307,7 +307,7 @@ if(MSVC)
         )
     endif()
 
-    if(MSVC90)
+    if(MSVC_VERSION EQUAL 1500)
       if(CMAKE_INSTALL_DEBUG_LIBRARIES)
         set(MSVC90_MFC_DIR
           "${MSVC90_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC90.DebugMFC")
@@ -403,19 +403,19 @@ if(MSVC)
         )
     endmacro()
 
-    if(MSVC10)
+    if(MSVC_VERSION EQUAL 1600)
       MFC_FILES_FOR_VERSION(10)
     endif()
 
-    if(MSVC11)
+    if(MSVC_VERSION EQUAL 1700)
       MFC_FILES_FOR_VERSION(11)
     endif()
 
-    if(MSVC12)
+    if(MSVC_VERSION EQUAL 1800)
       MFC_FILES_FOR_VERSION(12)
     endif()
 
-    if(MSVC14)
+    if(MSVC_VERSION EQUAL 1900 OR MSVC_VERSION EQUAL 1910)
       MFC_FILES_FOR_VERSION(14)
     endif()
   endif()
@@ -434,22 +434,22 @@ if(MSVC)
       endif()
     endmacro()
 
-    if(MSVC80)
+    if(MSVC_VERSION EQUAL 1400)
       OPENMP_FILES_FOR_VERSION(80 80)
     endif()
-    if(MSVC90)
+    if(MSVC_VERSION EQUAL 1500)
       OPENMP_FILES_FOR_VERSION(90 90)
     endif()
-    if(MSVC10)
+    if(MSVC_VERSION EQUAL 1600)
       OPENMP_FILES_FOR_VERSION(10 100)
     endif()
-    if(MSVC11)
+    if(MSVC_VERSION EQUAL 1700)
       OPENMP_FILES_FOR_VERSION(11 110)
     endif()
-    if(MSVC12)
+    if(MSVC_VERSION EQUAL 1800)
       OPENMP_FILES_FOR_VERSION(12 120)
     endif()
-    if(MSVC14)
+    if(MSVC_VERSION EQUAL 1900 OR MSVC_VERSION EQUAL 1910)
       OPENMP_FILES_FOR_VERSION(14 140)
     endif()
   endif()
