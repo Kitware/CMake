@@ -105,7 +105,7 @@
 #   * 14236: Detect gthread library
 #            Detect pangocairo on windows
 #            Detect pangocairo with gtk module instead of with gtkmm
-#   * 14259: Use vc100 libraries with MSVC11
+#   * 14259: Use vc100 libraries with VS 11
 #   * 14260: Export a GTK2_DEFINITIONS variable to set /vd2 when appropriate
 #            (i.e. MSVC)
 #   * Use the optimized/debug syntax for _LIBRARY and _LIBRARIES variables when
@@ -354,13 +354,13 @@ function(_GTK2_FIND_LIBRARY _var _lib _expand_vc _append_version)
 
     if(_expand_vc AND MSVC)
         # Add vc80/vc90/vc100 midfixes
-        if(MSVC80)
+        if(MSVC_VERSION EQUAL 1400)
             set(_library   ${_library}-vc80)
-        elseif(MSVC90)
+        elseif(MSVC_VERSION EQUAL 1500)
             set(_library   ${_library}-vc90)
-        elseif(MSVC10)
+        elseif(MSVC_VERSION EQUAL 1600)
             set(_library ${_library}-vc100)
-        elseif(MSVC11)
+        elseif(MSVC_VERSION EQUAL 1700)
             # Up to gtkmm-win 2.22.0-2 there are no vc110 libraries but vc100 can be used
             set(_library ${_library}-vc100)
         endif()
