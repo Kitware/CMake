@@ -589,6 +589,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     if (this->GeneratorTarget->GetPropertyAsBool(
           "CUDA_SEPARABLE_COMPILATION")) {
       cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+    } else if (this->GeneratorTarget->GetPropertyAsBool(
+                 "CUDA_PTX_COMPILATION")) {
+      cmdVar = std::string("CMAKE_CUDA_COMPILE_PTX_COMPILATION");
     } else {
       cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
     }
