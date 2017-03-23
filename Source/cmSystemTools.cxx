@@ -33,7 +33,6 @@
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/System.h>
-#include <cmsys/SystemTools.hxx>
 #include <cmsys/Terminal.h>
 #include <ctype.h>
 #include <errno.h>
