@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/Texts2">
         <file>res2/input.txt</file>
     </qresource>
 </RCC>
