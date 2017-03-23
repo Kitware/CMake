@@ -8,6 +8,7 @@
 #include <cmsys/RegularExpression.hxx>
 
 #include <sstream>
+#include <stddef.h>
 
 // - Static functions
 

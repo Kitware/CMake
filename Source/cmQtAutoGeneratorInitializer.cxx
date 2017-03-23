@@ -7,12 +7,11 @@
 #include "cmCustomCommandLines.h"
 #include "cmFilePathChecksum.h"
 #include "cmGeneratorTarget.h"
-#include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmSourceFile.h"
-#include "cmSourceFileLocation.h"
+#include "cmSourceGroup.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -25,11 +24,8 @@
 #include <algorithm>
 #include <cmConfigure.h>
 #include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
 #include <map>
 #include <set>
-#include <sstream>
-#include <string.h>
 #include <string>
 #include <sys/stat.h>
 #include <utility>
