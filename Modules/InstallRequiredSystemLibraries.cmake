@@ -166,7 +166,10 @@ if(MSVC)
     endif()
   endif()
 
-  if(MSVC_VERSION EQUAL 1900 OR MSVC_VERSION EQUAL 1910)
+  if(MSVC_VERSION EQUAL 1910)
+    set(_MSVCRT_DLL_VERSION 140)
+    set(_MSVCRT_IDE_VERSION 15)
+  elseif(MSVC_VERSION EQUAL 1900)
     set(_MSVCRT_DLL_VERSION 140)
     set(_MSVCRT_IDE_VERSION 14)
   elseif(MSVC_VERSION EQUAL 1800)
@@ -191,7 +194,7 @@ if(MSVC)
     get_filename_component(msvc_install_dir
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${vs}.0;InstallDir]" ABSOLUTE)
     set(programfilesx86 "ProgramFiles(x86)")
-    if(DEFINED MSVC${vs}_REDIST_DIR AND EXISTS "${MSVC${vs}_REDIST_DIR}")
+    if(vs VERSION_LESS 15 AND DEFINED MSVC${vs}_REDIST_DIR AND EXISTS "${MSVC${vs}_REDIST_DIR}")
       set(MSVC_REDIST_DIR "${MSVC${vs}_REDIST_DIR}") # use old cache entry
     endif()
     find_path(MSVC_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.CRT
@@ -362,7 +365,10 @@ if(MSVC)
         )
     endif()
 
-    if(MSVC_VERSION EQUAL 1900 OR MSVC_VERSION EQUAL 1910)
+    if(MSVC_VERSION EQUAL 1910)
+      set(_MFC_DLL_VERSION 140)
+      set(_MFC_IDE_VERSION 15)
+    elseif(MSVC_VERSION EQUAL 1900)
       set(_MFC_DLL_VERSION 140)
       set(_MFC_IDE_VERSION 14)
     elseif(MSVC_VERSION EQUAL 1800)
@@ -383,7 +389,16 @@ if(MSVC)
       set(v "${_MFC_DLL_VERSION}")
       set(vs "${_MFC_IDE_VERSION}")
 
-      set(MSVC_REDIST_MFC_DIR "${MSVC_REDIST_DIR}")
+      # Starting with VS 15 the MFC DLLs may be in a different directory.
+      if (NOT vs VERSION_LESS 15)
+        file(GLOB _MSVC_REDIST_DIRS "${MSVC_REDIST_DIR}/../*")
+        find_path(MSVC_REDIST_MFC_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.MFC
+          PATHS ${_MSVC_REDIST_DIRS} NO_DEFAULT_PATH)
+        mark_as_advanced(MSVC_REDIST_MFC_DIR)
+        unset(_MSVC_REDIST_DIRS)
+      else()
+        set(MSVC_REDIST_MFC_DIR "${MSVC_REDIST_DIR}")
+      endif()
 
       # Multi-Byte Character Set versions of MFC are available as optional
       # addon since Visual Studio 12.  So for version 12 or higher, check
@@ -438,7 +453,10 @@ if(MSVC)
   # MSVC 8 was the first version with OpenMP
   # Furthermore, there is no debug version of this
   if(CMAKE_INSTALL_OPENMP_LIBRARIES)
-    if(MSVC_VERSION EQUAL 1900 OR MSVC_VERSION EQUAL 1910)
+    if(MSVC_VERSION EQUAL 1910)
+      set(_MSOMP_DLL_VERSION 140)
+      set(_MSOMP_IDE_VERSION 15)
+    elseif(MSVC_VERSION EQUAL 1900)
       set(_MSOMP_DLL_VERSION 140)
       set(_MSOMP_IDE_VERSION 14)
     elseif(MSVC_VERSION EQUAL 1800)
