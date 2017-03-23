@@ -255,6 +255,27 @@ static void setErrorMessage(std::string* errorMessage, const std::string& text)
   }
 }
 
+static bool testHomeDirectory(cmState* state, std::string& value,
+                              std::string* errorMessage)
+{
+  const std::string cachedValue =
+    std::string(state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY"));
+  const std::string suffix = "/CMakeLists.txt";
+  const std::string cachedValueCML = cachedValue + suffix;
+  const std::string valueCML = value + suffix;
+  if (!cmSystemTools::SameFile(valueCML, cachedValueCML)) {
+    setErrorMessage(errorMessage,
+                    std::string("\"CMAKE_HOME_DIRECTORY\" is set but "
+                                "incompatible with configured "
+                                "source directory value."));
+    return false;
+  }
+  if (value.empty()) {
+    value = cachedValue;
+  }
+  return true;
+}
+
 static bool testValue(cmState* state, const std::string& key,
                       std::string& value, const std::string& keyDescription,
                       std::string* errorMessage)
@@ -314,8 +335,7 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
       }
 
       // check sourcedir:
-      if (!testValue(state, "CMAKE_HOME_DIRECTORY", sourceDirectory,
-                     "source directory", errorMessage)) {
+      if (!testHomeDirectory(state, sourceDirectory, errorMessage)) {
         return false;
       }
 
