@@ -2648,8 +2648,8 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
     unset(expected_filenames_)
     unset(filenames_)
     if(CPACK_RPM_DEBUGINFO_PACKAGE AND NOT CPACK_RPM_FILE_NAME STREQUAL "RPM-DEFAULT")
-      string(TOLOWER "${CPACK_RPM_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}.*\\.rpm" efn_)
-      list(APPEND expected_filenames_ "${efn_}")
+      list(APPEND expected_filenames_
+        "${CPACK_RPM_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}.*\\.rpm")
       list(APPEND filenames_ "${CPACK_RPM_FILE_NAME}")
     endif()
 
