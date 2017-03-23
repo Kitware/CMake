@@ -125,10 +125,10 @@ The object files collection can be used as source inputs to other targets:
 
   add_executable(test_exe $<TARGET_OBJECTS:archive> test.cpp)
 
-``OBJECT`` libraries may only be used locally as sources in a buildsystem --
-they may not be installed, exported, or used in the right hand side of
+``OBJECT`` libraries may not be used in the right hand side of
 :command:`target_link_libraries`.  They also may not be used as the ``TARGET``
-in a use of the :command:`add_custom_command(TARGET)` command signature.
+in a use of the :command:`add_custom_command(TARGET)` command signature.  They
+may be installed, and will be exported as an INTERFACE library.
 
 Although object libraries may not be named directly in calls to
 the :command:`target_link_libraries` command, they can be "linked"

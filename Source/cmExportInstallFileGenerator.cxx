@@ -331,6 +331,8 @@ void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
                                     properties, importedLocations);
     this->SetImportLocationProperty(config, suffix, te->RuntimeGenerator,
                                     properties, importedLocations);
+    this->SetImportLocationProperty(config, suffix, te->ObjectsGenerator,
+                                    properties, importedLocations);
     this->SetImportLocationProperty(config, suffix, te->FrameworkGenerator,
                                     properties, importedLocations);
     this->SetImportLocationProperty(config, suffix, te->BundleGenerator,
@@ -396,6 +398,23 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
 
     // Store the property.
     properties[prop] = value;
+    importedLocations.insert(prop);
+  } else if (itgen->GetTarget()->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+    // Construct the property name.
+    std::string prop = "IMPORTED_OBJECTS";
+    prop += suffix;
+
+    // Compute all the object files inside this target and setup
+    // IMPORTED_OBJECTS as a list of object files
+    std::vector<std::string> objects;
+    itgen->GetInstallObjectNames(config, objects);
+    for (std::vector<std::string>::iterator i = objects.begin();
+         i != objects.end(); ++i) {
+      *i = value + *i;
+    }
+
+    // Store the property.
+    properties[prop] = cmJoin(objects, ";");
     importedLocations.insert(prop);
   } else {
     // Construct the property name.

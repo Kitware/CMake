@@ -1257,24 +1257,35 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     }
 
     std::vector<std::string> objects;
-    gt->GetTargetObjectNames(context->Config, objects);
 
-    std::string obj_dir;
-    if (context->EvaluateForBuildsystem) {
-      // Use object file directory with buildsystem placeholder.
-      obj_dir = gt->ObjectDirectory;
-      // Here we assume that the set of object files produced
-      // by an object library does not vary with configuration
-      // and do not set HadContextSensitiveCondition to true.
-    } else {
-      // Use object file directory with per-config location.
-      obj_dir = gt->GetObjectDirectory(context->Config);
+    if (gt->IsImported()) {
+      const char* loc = CM_NULLPTR;
+      const char* imp = CM_NULLPTR;
+      std::string suffix;
+      if (gt->Target->GetMappedConfig(context->Config, &loc, &imp, suffix)) {
+        cmSystemTools::ExpandListArgument(loc, objects);
+      }
       context->HadContextSensitiveCondition = true;
-    }
+    } else {
+      gt->GetTargetObjectNames(context->Config, objects);
 
-    for (std::vector<std::string>::iterator oi = objects.begin();
-         oi != objects.end(); ++oi) {
-      *oi = obj_dir + *oi;
+      std::string obj_dir;
+      if (context->EvaluateForBuildsystem) {
+        // Use object file directory with buildsystem placeholder.
+        obj_dir = gt->ObjectDirectory;
+        // Here we assume that the set of object files produced
+        // by an object library does not vary with configuration
+        // and do not set HadContextSensitiveCondition to true.
+      } else {
+        // Use object file directory with per-config location.
+        obj_dir = gt->GetObjectDirectory(context->Config);
+        context->HadContextSensitiveCondition = true;
+      }
+
+      for (std::vector<std::string>::iterator oi = objects.begin();
+           oi != objects.end(); ++oi) {
+        *oi = obj_dir + *oi;
+      }
     }
 
     // Create the cmSourceFile instances in the referencing directory.

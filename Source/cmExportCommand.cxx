@@ -149,11 +149,15 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
 
       if (cmTarget* target = gg->FindTarget(*currentTarget)) {
         if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-          std::ostringstream e;
-          e << "given OBJECT library \"" << *currentTarget
-            << "\" which may not be exported.";
-          this->SetError(e.str());
-          return false;
+          std::string reason;
+          if (!this->Makefile->GetGlobalGenerator()
+                 ->HasKnownObjectFileLocation(&reason)) {
+            std::ostringstream e;
+            e << "given OBJECT library \"" << *currentTarget
+              << "\" which may not be exported" << reason << ".";
+            this->SetError(e.str());
+            return false;
+          }
         }
         if (target->GetType() == cmStateEnums::UTILITY) {
           this->SetError("given custom target \"" + *currentTarget +
