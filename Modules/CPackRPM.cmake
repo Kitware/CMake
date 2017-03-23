@@ -1472,8 +1472,8 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
           string(LENGTH "${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}" debuginfo_dir_len)
           if(source_dir_len_ LESS debuginfo_dir_len)
             message(FATAL_ERROR "CPackRPM: source dir path '${source_dir_}' is"
-              " longer than debuginfo sources dir path '${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}'!"
-              " Source dir path must be shorter than debuginfo sources dir path."
+              " shorter than debuginfo sources dir path '${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}'!"
+              " Source dir path must be longer than debuginfo sources dir path."
               " Set CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX variable to a shorter value"
               " or make source dir path longer."
               " Required for debuginfo packaging. See documentation of"
