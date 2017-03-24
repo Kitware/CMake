@@ -3,12 +3,9 @@
 #ifndef cmQtAutoGeneratorCommon_h
 #define cmQtAutoGeneratorCommon_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include <cmConfigure.h>
 #include <string>
 #include <vector>
-
-class cmGeneratorTarget;
-class cmLocalGenerator;
 
 class cmQtAutoGeneratorCommon
 {
