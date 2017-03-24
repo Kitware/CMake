@@ -54,8 +54,7 @@ void cmFortranParser_RuleElse(cmFortranParser* parser);
 void cmFortranParser_RuleEndif(cmFortranParser* parser);
 
 /* Define the parser stack element type.  */
-typedef union cmFortran_yystype_u cmFortran_yystype;
-union cmFortran_yystype_u
+struct cmFortran_yystype
 {
   char* string;
 };
