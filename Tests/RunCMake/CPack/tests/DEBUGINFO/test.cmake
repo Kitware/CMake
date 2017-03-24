@@ -32,4 +32,9 @@ set(CPACK_RPM_PACKAGE_NAME "Debuginfo")
 set(CPACK_PACKAGE_FILE_NAME "TestDinfo-pkg")
 set(CPACK_RPM_LIBS_DEBUGINFO_PACKAGE ON)
 
+# test debuginfo package rename
+set(CPACK_RPM_DEBUGINFO_FILE_NAME
+  "@cpack_component@-DebugInfoPackage.rpm")
+set(CPACK_RPM_APPLICATIONS_DEBUGINFO_FILE_NAME "RPM-DEFAULT")
+
 set(CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX "/src")
