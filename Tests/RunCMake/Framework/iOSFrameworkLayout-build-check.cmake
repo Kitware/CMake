@@ -1,4 +1,4 @@
-set(framework-dir "${RunCMake_TEST_BINARY_DIR}/Framework.framework")
+include("${RunCMake_TEST_BINARY_DIR}/FrameworkName.cmake")
 set(framework-resources "${framework-dir}/Resources")
 set(framework-resource-file "${framework-dir}/res.txt")
 set(framework-flat-resource-file "${framework-dir}/flatresource.txt")

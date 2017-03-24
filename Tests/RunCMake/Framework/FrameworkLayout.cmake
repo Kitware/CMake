@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.4)
 enable_language(C)
 
+set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE INTERNAL "Supported configuration types")
+set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}) # get rid of ${EFFECTIVE_PLATFORM_NAME}
+
 add_library(Framework ${FRAMEWORK_TYPE}
             foo.c
             foo.h
@@ -18,3 +21,5 @@ set_source_files_properties(some.txt PROPERTIES MACOSX_PACKAGE_LOCATION somedir)
 
 add_custom_command(TARGET Framework POST_BUILD
                    COMMAND /usr/bin/file $<TARGET_FILE:Framework>)
+
+file(GENERATE OUTPUT FrameworkName.cmake CONTENT "set(framework-dir \"$<TARGET_BUNDLE_DIR:Framework>\")\n")
