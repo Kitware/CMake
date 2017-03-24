@@ -2,7 +2,9 @@
 #include <iostream>
 #include <string>
 
+#ifdef _WIN32
 #include <cmsys/ConsoleBuf.hxx>
+#endif
 
 #ifdef _WIN32
 void setEncoding(cmsys::ConsoleBuf::Manager& buf, UINT codepage)
