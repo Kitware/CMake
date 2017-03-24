@@ -337,6 +337,10 @@ public:
       relevant for mixed macOS and iOS builds. */
   virtual bool UseEffectivePlatformName(cmMakefile*) const { return false; }
 
+  /** Return whether the "Resources" folder prefix should be stripped from
+      MacFolder. */
+  virtual bool ShouldStripResourcePath(cmMakefile*) const;
+
   std::string GetSharedLibFlagsForLanguage(std::string const& lang) const;
 
   /** Generate an <output>.rule file path for a given command output.  */

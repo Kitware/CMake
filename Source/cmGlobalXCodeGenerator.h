@@ -88,6 +88,8 @@ public:
 
   bool UseEffectivePlatformName(cmMakefile* mf) const CM_OVERRIDE;
 
+  bool ShouldStripResourcePath(cmMakefile*) const CM_OVERRIDE;
+
   bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) CM_OVERRIDE;
   void AppendFlag(std::string& flags, std::string const& flag);
 

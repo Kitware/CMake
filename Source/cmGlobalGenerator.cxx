@@ -2487,6 +2487,11 @@ std::string cmGlobalGenerator::GenerateRuleFile(
   return ruleFile;
 }
 
+bool cmGlobalGenerator::ShouldStripResourcePath(cmMakefile* mf) const
+{
+  return mf->PlatformIsAppleIos();
+}
+
 std::string cmGlobalGenerator::GetSharedLibFlagsForLanguage(
   std::string const& l) const
 {
