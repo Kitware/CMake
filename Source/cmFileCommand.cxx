@@ -1028,8 +1028,6 @@ protected:
     {
     }
   };
-  struct MatchRule;
-  friend struct MatchRule;
   struct MatchRule
   {
     cmsys::RegularExpression Regex;
