@@ -16,10 +16,9 @@ endif()
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-configure_file(test1a.h.in test1.h COPYONLY)
 # Generated source file
 add_custom_command(OUTPUT main.cpp
-                   COMMAND ${CMAKE_COMMAND} -E sleep 3
+                   COMMAND ${CMAKE_COMMAND} -E sleep 2
                    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/main.cpp
                    )
 
