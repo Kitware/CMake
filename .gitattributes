@@ -2,18 +2,22 @@
 .gitattributes  -export-ignore
 .hooks*          export-ignore
 
+# Custom attribute to mark sources as using our C code style.
+#[attr]our-c-style  whitespace=tab-in-indent  format.clang-format
+
 /GitSetup        export-ignore
 /*.sh            export-ignore eol=lf
 /*.bash          export-ignore eol=lf
 /.clang-format   export-ignore
 
-*.c              whitespace=tab-in-indent,no-lf-at-eof
-*.h              whitespace=tab-in-indent,no-lf-at-eof
-*.h.in           whitespace=tab-in-indent,no-lf-at-eof
-*.cxx            whitespace=tab-in-indent,no-lf-at-eof
-*.hxx            whitespace=tab-in-indent,no-lf-at-eof
-*.hxx.in         whitespace=tab-in-indent,no-lf-at-eof
-*.txt            whitespace=tab-in-indent,no-lf-at-eof
-*.cmake          whitespace=tab-in-indent,no-lf-at-eof
+*.c              our-c-style
+*.c.in           our-c-style
+*.cxx            our-c-style
+*.h              our-c-style
+*.h.in           our-c-style
+*.hxx            our-c-style
+*.hxx.in         our-c-style
 
+*.cmake          whitespace=tab-in-indent
 *.rst            whitespace=tab-in-indent conflict-marker-size=79
+*.txt            whitespace=tab-in-indent

@@ -25,8 +25,7 @@ namespace @KWSYS_NAMESPACE@ {
 #if defined(_WIN32)
 
 template <class CharT, class Traits = std::char_traits<CharT> >
-class @KWSYS_NAMESPACE@_EXPORT BasicConsoleBuf
-  : public std::basic_streambuf<CharT, Traits>
+class BasicConsoleBuf : public std::basic_streambuf<CharT, Traits>
 {
 public:
   typedef typename Traits::int_type int_type;

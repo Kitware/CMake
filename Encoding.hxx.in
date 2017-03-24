@@ -13,7 +13,7 @@ class @KWSYS_NAMESPACE@_EXPORT Encoding
 {
 public:
   // Container class for argc/argv.
-  class CommandLineArguments
+  class @KWSYS_NAMESPACE@_EXPORT CommandLineArguments
   {
   public:
     // On Windows, get the program command line arguments
