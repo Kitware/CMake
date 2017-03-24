@@ -11,12 +11,7 @@
 
 #include "cmGeneratorExpression.h"
 #include "cm_auto_ptr.hxx"
-
-#if defined(_MSC_VER)
-typedef unsigned short mode_t;
-#else
-#include <sys/types.h>
-#endif
+#include "cm_sys_stat.h"
 
 class cmLocalGenerator;
 

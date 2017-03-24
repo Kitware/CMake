@@ -8,6 +8,7 @@
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
+#include "cm_sys_stat.h"
 
 #include <cmsys/Glob.hxx>
 #include <limits.h>
@@ -16,7 +17,6 @@
 #include <set>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <utility>
 
 // NOTE:

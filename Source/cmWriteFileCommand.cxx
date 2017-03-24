@@ -4,12 +4,9 @@
 
 #include <cmsys/FStream.hxx>
 
-#include <sys/types.h>
-// include sys/stat.h after sys/types.h
-#include <sys/stat.h>
-
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "cm_sys_stat.h"
 
 class cmExecutionStatus;
 

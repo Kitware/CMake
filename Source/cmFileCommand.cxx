@@ -16,10 +16,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <sys/types.h>
-// include sys/stat.h after sys/types.h
-#include <sys/stat.h>
-
 #include "cmAlgorithms.h"
 #include "cmCommandArgumentsHelper.h"
 #include "cmCryptoHash.h"
@@ -35,6 +31,7 @@
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cm_auto_ptr.hxx"
+#include "cm_sys_stat.h"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

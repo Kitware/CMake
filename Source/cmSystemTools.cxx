@@ -4,6 +4,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmProcessOutput.h"
+#include "cm_sys_stat.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmArchiveWrite.h"
@@ -42,7 +43,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <time.h>
 #include <utility>
 
