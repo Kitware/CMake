@@ -11,6 +11,7 @@
 #include <string>
 #include <utility>
 
+class cmConnection;
 class cmFileMonitor;
 class cmServer;
 class cmServerRequest;
@@ -52,9 +53,11 @@ public:
   const std::string Type;
   const std::string Cookie;
   const Json::Value Data;
+  cmConnection* Connection;
 
 private:
-  cmServerRequest(cmServer* server, const std::string& t, const std::string& c,
+  cmServerRequest(cmServer* server, cmConnection* connection,
+                  const std::string& t, const std::string& c,
                   const Json::Value& d);
 
   void ReportProgress(int min, int current, int max,

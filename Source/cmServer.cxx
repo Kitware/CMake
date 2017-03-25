@@ -83,7 +83,7 @@ void cmServer::ProcessRequest(cmConnection* connection,
     debug->PrintStatistics = debugValue["showStats"].asBool();
   }
 
-  const cmServerRequest request(this, value[kTYPE_KEY].asString(),
+  const cmServerRequest request(this, connection, value[kTYPE_KEY].asString(),
                                 value[kCOOKIE_KEY].asString(), value);
 
   if (request.Type == "") {
@@ -323,7 +323,7 @@ void cmServer::WriteProgress(const cmServerRequest& request, int min,
   obj[kPROGRESS_MAXIMUM_KEY] = max;
   obj[kPROGRESS_CURRENT_KEY] = current;
 
-  this->WriteJsonObject(obj, nullptr);
+  this->WriteJsonObject(request.Connection, obj, nullptr);
 }
 
 void cmServer::WriteMessage(const cmServerRequest& request,
@@ -343,7 +343,7 @@ void cmServer::WriteMessage(const cmServerRequest& request,
     obj[kTITLE_KEY] = title;
   }
 
-  WriteJsonObject(obj, nullptr);
+  WriteJsonObject(request.Connection, obj, nullptr);
 }
 
 void cmServer::WriteParseError(cmConnection* connection,
