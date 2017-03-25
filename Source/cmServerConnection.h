@@ -2,68 +2,46 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "cmConfigure.h"
+#include "cmConnection.h"
 
+#include "cmPipeConnection.h"
 #include "cm_uv.h"
 
 #include <string>
 
-class cmFileMonitor;
-class cmServer;
+class cmServerBase;
 
-class cmServerConnection
+/***
+ * This connection buffer strategy accepts messages in the form of
+ * [== "CMake Server" ==[
 {
-  CM_DISABLE_COPY(cmServerConnection)
-
+  ... some JSON message ...
+}
+]== "CMake Server" ==]
+ * and only passes on the core json; it discards the envelope.
+ */
+class cmServerBufferStrategy : public cmConnectionBufferStrategy
+{
 public:
-  cmServerConnection();
-  virtual ~cmServerConnection();
-
-  void SetServer(cmServer* s);
-
-  bool ProcessEvents(std::string* errorMessage);
-
-  void ReadData(const std::string& data);
-  void TriggerShutdown();
-  void WriteData(const std::string& data);
-  void ProcessNextRequest();
-
-  virtual void Connect(uv_stream_t* server) { (void)(server); }
-
-  cmFileMonitor* FileMonitor() const { return this->mFileMonitor; }
-
-protected:
-  virtual bool DoSetup(std::string* errorMessage) = 0;
-  virtual void TearDown() = 0;
-
-  void SendGreetings();
-
-  uv_loop_t* Loop() const { return mLoop; }
-
-protected:
-  std::string RawReadBuffer;
-  std::string RequestBuffer;
-
-  uv_stream_t* ReadStream = nullptr;
-  uv_stream_t* WriteStream = nullptr;
+  std::string BufferMessage(std::string& rawBuffer) override;
 
 private:
-  uv_loop_t* mLoop = nullptr;
-  cmFileMonitor* mFileMonitor = nullptr;
-  cmServer* Server = nullptr;
-  uv_signal_t* SIGINTHandler = nullptr;
-  uv_signal_t* SIGHUPHandler = nullptr;
-
-  friend class LoopGuard;
+  std::string RequestBuffer;
 };
 
-class cmServerStdIoConnection : public cmServerConnection
+/***
+ * Generic connection over std io interfaces -- tty
+ */
+class cmStdIoConnection : public cmConnection
 {
 public:
-  cmServerStdIoConnection();
-  bool DoSetup(std::string* errorMessage) override;
+  cmStdIoConnection(cmConnectionBufferStrategy* bufferStrategy);
 
-  void TearDown() override;
+  void SetServer(cmServerBase* s) override;
+
+  bool OnServerShuttingDown() override;
+
+  bool OnServeStart(std::string* pString) override;
 
 private:
   typedef union
@@ -78,18 +56,18 @@ private:
   InOutUnion Output;
 };
 
-class cmServerPipeConnection : public cmServerConnection
+/***
+ * These specific connections use the cmake server
+ * buffering strategy.
+ */
+class cmServerStdIoConnection : public cmStdIoConnection
+{
+public:
+  cmServerStdIoConnection();
+};
+
+class cmServerPipeConnection : public cmPipeConnection
 {
 public:
   cmServerPipeConnection(const std::string& name);
-  bool DoSetup(std::string* errorMessage) override;
-
-  void TearDown() override;
-
-  void Connect(uv_stream_t* server) override;
-
-private:
-  const std::string PipeName;
-  uv_pipe_t* ServerPipe = nullptr;
-  uv_pipe_t* ClientPipe = nullptr;
 };
