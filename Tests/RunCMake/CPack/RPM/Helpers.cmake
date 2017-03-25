@@ -36,6 +36,10 @@ function(getPackageContentList FILE RESULT_VAR)
           OUTPUT_STRIP_TRAILING_WHITESPACE)
   string(REGEX REPLACE "\n" ";" package_content_ "${package_content_}")
 
+  # never versions of rpmbuild (introduced in rpm 4.13.0.1) add build_id links
+  # to packages - tests should ignore them
+  list(FILTER package_content_ EXCLUDE REGEX ".*\.build-id.*")
+
   set(${RESULT_VAR} "${package_content_}" PARENT_SCOPE)
 endfunction()
 
