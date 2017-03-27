@@ -15,7 +15,7 @@
 // system tools because it is not implemented robustly enough to move
 // files across directories.
 #ifdef _WIN32
-#include <sys/stat.h>
+#include "cm_sys_stat.h"
 #include <windows.h>
 #endif
 

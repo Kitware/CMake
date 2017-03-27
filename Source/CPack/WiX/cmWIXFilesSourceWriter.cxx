@@ -9,9 +9,7 @@
 #include <cmSystemTools.h>
 #include <cmUuid.h>
 
-#include <sys/types.h>
-// include sys/stat.h after sys/types.h
-#include <sys/stat.h>
+#include "cm_sys_stat.h"
 
 cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(cmCPackLog* logger,
                                                std::string const& filename,

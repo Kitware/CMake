@@ -38,6 +38,7 @@
 #include "cmVersion.h"
 #include "cmWorkingDirectory.h"
 #include "cm_auto_ptr.hxx"
+#include "cm_sys_stat.h"
 #include "cmake.h"
 
 #ifdef CMAKE_BUILD_WITH_CMAKE

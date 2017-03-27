@@ -3,12 +3,12 @@
 #include "cmCPackOSXX11Generator.h"
 
 #include <sstream>
-#include <sys/stat.h>
 
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
+#include "cm_sys_stat.h"
 
 cmCPackOSXX11Generator::cmCPackOSXX11Generator()
 {

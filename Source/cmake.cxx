@@ -25,6 +25,7 @@
 #include "cmVersionConfig.h"
 #include "cmWorkingDirectory.h"
 #include "cm_auto_ptr.hxx"
+#include "cm_sys_stat.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include <cm_jsoncpp_writer.h>
@@ -105,10 +106,6 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #endif
-
-#include <sys/types.h>
-// include sys/stat.h after sys/types.h
-#include <sys/stat.h> // struct stat
 
 #include <algorithm>
 #include <cmsys/FStream.hxx>

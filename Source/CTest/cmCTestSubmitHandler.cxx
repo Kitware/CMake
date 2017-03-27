@@ -25,8 +25,8 @@
 
 #if defined(CTEST_USE_XMLRPC)
 #include "cmVersion.h"
+#include "cm_sys_stat.h"
 #include <cm_xmlrpc.h>
-#include <sys/stat.h>
 #endif
 
 #define SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT 120

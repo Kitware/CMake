@@ -12,12 +12,6 @@
 #include <string>
 #include <vector>
 
-#if defined(_MSC_VER)
-typedef unsigned short mode_t;
-#else
-#include <sys/types.h>
-#endif
-
 class cmSystemToolsFileTime;
 
 /** \class cmSystemTools

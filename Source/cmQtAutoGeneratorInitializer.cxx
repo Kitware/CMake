@@ -15,6 +15,7 @@
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cm_sys_stat.h"
 #include "cmake.h"
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -27,7 +28,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include <sys/stat.h>
 #include <utility>
 #include <vector>
 
