@@ -114,6 +114,7 @@ public:
     std::map<std::string, std::string> Measurements;
     bool IsInBasedOnREOptions;
     bool WillFail;
+    bool Disabled;
     float Cost;
     int PreviousRuns;
     bool RunSerial;

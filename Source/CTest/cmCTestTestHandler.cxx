@@ -487,6 +487,19 @@ int cmCTestTestHandler::ProcessHandler()
       }
     }
 
+    typedef std::set<cmCTestTestHandler::cmCTestTestResult,
+                     cmCTestTestResultLess>
+      SetOfTests;
+    SetOfTests resultsSet(this->TestResults.begin(), this->TestResults.end());
+    std::vector<cmCTestTestHandler::cmCTestTestResult> disabledTests;
+
+    for (SetOfTests::iterator ftit = resultsSet.begin();
+         ftit != resultsSet.end(); ++ftit) {
+      if (ftit->CompletionStatus == "Disabled") {
+        disabledTests.push_back(*ftit);
+      }
+    }
+
     float percent = float(passed.size()) * 100.0f / float(total);
     if (!failed.empty() && percent > 99) {
       percent = 99;
@@ -505,21 +518,33 @@ int cmCTestTestHandler::ProcessHandler()
                        "\nTotal Test time (real) = " << realBuf << "\n",
                        this->Quiet);
 
+    if (!disabledTests.empty()) {
+      cmGeneratedFileStream ofs;
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
+                   << "The following tests are disabled and did not run:"
+                   << std::endl);
+      this->StartLogFile("TestsDisabled", ofs);
+
+      for (std::vector<cmCTestTestHandler::cmCTestTestResult>::iterator dtit =
+             disabledTests.begin();
+           dtit != disabledTests.end(); ++dtit) {
+        ofs << dtit->TestCount << ":" << dtit->Name << std::endl;
+        cmCTestLog(this->CTest, HANDLER_OUTPUT, "\t"
+                     << std::setw(3) << dtit->TestCount << " - " << dtit->Name
+                     << std::endl);
+      }
+    }
+
     if (!failed.empty()) {
       cmGeneratedFileStream ofs;
       cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
                    << "The following tests FAILED:" << std::endl);
       this->StartLogFile("TestsFailed", ofs);
 
-      typedef std::set<cmCTestTestHandler::cmCTestTestResult,
-                       cmCTestTestResultLess>
-        SetOfTests;
-      SetOfTests resultsSet(this->TestResults.begin(),
-                            this->TestResults.end());
-
       for (SetOfTests::iterator ftit = resultsSet.begin();
            ftit != resultsSet.end(); ++ftit) {
-        if (ftit->Status != cmCTestTestHandler::COMPLETED) {
+        if (ftit->Status != cmCTestTestHandler::COMPLETED &&
+            ftit->CompletionStatus != "Disabled") {
           ofs << ftit->TestCount << ":" << ftit->Name << std::endl;
           cmCTestLog(
             this->CTest, HANDLER_OUTPUT, "\t"
@@ -841,6 +866,11 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
   size_t fixtureTestsAdded = 0;
   std::set<std::string> addedFixtures;
   for (size_t i = 0; i < tests.size(); ++i) {
+    // Skip disabled tests
+    if (tests[i].Disabled) {
+      continue;
+    }
+
     // There are two things to do for each test:
     //   1. For every fixture required by this test, record that fixture as
     //      being required and create dependencies on that fixture's setup
@@ -1200,6 +1230,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
     cmCTestTestResult* result = &this->TestResults[cc];
     this->WriteTestResultHeader(xml, result);
     xml.StartElement("Results");
+
     if (result->Status != cmCTestTestHandler::NOT_RUN) {
       if (result->Status != cmCTestTestHandler::COMPLETED ||
           result->ReturnValue) {
@@ -1208,6 +1239,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
         xml.Attribute("name", "Exit Code");
         xml.Element("Value", this->GetTestStatus(result->Status));
         xml.EndElement(); // NamedMeasurement
+
         xml.StartElement("NamedMeasurement");
         xml.Attribute("type", "text/string");
         xml.Attribute("name", "Exit Value");
@@ -2001,6 +2033,9 @@ bool cmCTestTestHandler::SetTestsProperties(
           if (key == "WILL_FAIL") {
             rtit->WillFail = cmSystemTools::IsOn(val.c_str());
           }
+          if (key == "DISABLED") {
+            rtit->Disabled = cmSystemTools::IsOn(val.c_str());
+          }
           if (key == "ATTACHED_FILES") {
             cmSystemTools::ExpandListArgument(val, rtit->AttachedFiles);
           }
@@ -2179,6 +2214,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
 
   test.IsInBasedOnREOptions = true;
   test.WillFail = false;
+  test.Disabled = false;
   test.RunSerial = false;
   test.Timeout = 0;
   test.ExplicitTimeout = false;

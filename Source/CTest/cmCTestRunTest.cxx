@@ -256,6 +256,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "Other");
         this->TestResult.Status = cmCTestTestHandler::OTHER_FAULT;
     }
+  } else if ("Disabled" == this->TestResult.CompletionStatus) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run (Disabled) ");
   } else // cmsysProcess_State_Error
   {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run ");
@@ -416,6 +418,24 @@ bool cmCTestRunTest::StartTest(size_t total)
                << this->TestProperties->Index << ": "
                << this->TestProperties->Name << std::endl);
   this->ProcessOutput.clear();
+
+  // Return immediately if test is disabled
+  if (this->TestProperties->Disabled) {
+    this->TestResult.Properties = this->TestProperties;
+    this->TestResult.ExecutionTime = 0;
+    this->TestResult.CompressOutput = false;
+    this->TestResult.ReturnValue = -1;
+    this->TestResult.CompletionStatus = "Disabled";
+    this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+    this->TestResult.TestCount = this->TestProperties->Index;
+    this->TestResult.Name = this->TestProperties->Name;
+    this->TestResult.Path = this->TestProperties->Directory;
+    this->TestProcess = new cmProcess;
+    this->TestResult.Output = "Disabled";
+    this->TestResult.FullCommandLine = "";
+    return false;
+  }
+
   this->ComputeArguments();
   std::vector<std::string>& args = this->TestProperties->Args;
   this->TestResult.Properties = this->TestProperties;

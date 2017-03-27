@@ -163,7 +163,9 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     this->TestRunningMap[test] = false;
     this->RunningCount -= GetProcessorsUsed(test);
     testRun->EndTest(this->Completed, this->Total, false);
-    this->Failed->push_back(this->Properties[test]->Name);
+    if (!this->Properties[test]->Disabled) {
+      this->Failed->push_back(this->Properties[test]->Name);
+    }
     delete testRun;
   }
 }
