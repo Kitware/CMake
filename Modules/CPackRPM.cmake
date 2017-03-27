@@ -721,14 +721,6 @@
 # Debuginfo packages contain debug symbols and sources for debugging packaged
 # binaries.
 #
-# .. note::
-#
-#  Currently multiple debuginfo packages are generated if component based
-#  packaging is used - one debuginfo package per component. This duplicates
-#  sources if multiple binaries are using them. This is a side effect of
-#  how CPackRPM currently generates component packages and will be addressed
-#  in later versions of the generator.
-#
 # Debuginfo RPM packaging has it's own set of variables:
 #
 # .. variable:: CPACK_RPM_DEBUGINFO_PACKAGE
