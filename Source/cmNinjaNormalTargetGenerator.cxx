@@ -550,10 +550,6 @@ static int calculateCommandLineLengthLimit(int linkRuleLength)
 #ifdef _WIN32
     8000,
 #endif
-#if defined(_SC_ARG_MAX)
-    // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
-    ((int)sysconf(_SC_ARG_MAX)) - 1000,
-#endif
 #if defined(__linux)
     // #define MAX_ARG_STRLEN (PAGE_SIZE * 32) in Linux's binfmts.h
     ((int)sysconf(_SC_PAGESIZE) * 32) - 1000,
@@ -562,7 +558,15 @@ static int calculateCommandLineLengthLimit(int linkRuleLength)
   };
 
   size_t const arrSz = cmArraySize(limits);
-  int const sz = *std::min_element(limits, limits + arrSz);
+  int sz = *std::min_element(limits, limits + arrSz);
+#if defined(_SC_ARG_MAX)
+  // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
+  int const szArgMax = static_cast<int>(sysconf(_SC_ARG_MAX));
+  // a return value of -1 signifies an unrestricted value
+  if (szArgMax != -1) {
+    sz = std::min(sz, szArgMax - 1000);
+  }
+#endif
   if (sz == std::numeric_limits<int>::max()) {
     return 0;
   }
