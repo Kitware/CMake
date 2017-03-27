@@ -205,14 +205,14 @@ if(CPackGen MATCHES "RPM")
 /usr/foo/bar/non_relocatable/depth_two
 /usr/foo/bar/non_relocatable/depth_two/symlink_from_non_relocatable_path
 /usr/foo/bar/other_relocatable
-/usr/foo/bar/other_relocatable/depth_two$")
+/usr/foo/bar/other_relocatable/depth_two(\n.*\.build-id.*)*$")
       elseif(check_file_headers_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_HEADERS_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*${CPACK_RPM_HEADERS_PACKAGE_DESCRIPTION}.*")
         set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
         set(check_file_match_expected_architecture "noarch")
         set(spec_regex "*headers*")
-        set(check_content_list "^/usr/foo/bar\n/usr/foo/bar/include\n/usr/foo/bar/include/mylib.h$")
+        set(check_content_list "^/usr/foo/bar\n/usr/foo/bar/include\n/usr/foo/bar/include/mylib.h(\n.*\.build-id.*)*$")
       elseif(check_file_applications_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*${CPACK_COMPONENT_APPLICATIONS_DESCRIPTION}.*")
@@ -221,7 +221,7 @@ if(CPackGen MATCHES "RPM")
         set(spec_regex "*applications*")
         set(check_content_list "^/usr/foo/bar
 /usr/foo/bar/bin
-/usr/foo/bar/bin/mylibapp$")
+/usr/foo/bar/bin/mylibapp(\n.*\.build-id.*)*$")
       elseif(check_file_Unspecified_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*DESCRIPTION.*")
@@ -241,7 +241,7 @@ if(CPackGen MATCHES "RPM")
 /usr/foo/bar/share/man/mylib/man3
 /usr/foo/bar/share/man/mylib/man3/mylib.1
 /usr/foo/bar/share/man/mylib/man3/mylib.1/mylib
-/usr/foo/bar/share/man/mylib/man3/mylib.1/mylib2$")
+/usr/foo/bar/share/man/mylib/man3/mylib.1/mylib2(\n.*\.build-id.*)*$")
       else()
         message(FATAL_ERROR "error: unexpected rpm package '${check_file}'")
       endif()
