@@ -817,6 +817,30 @@
 #  is set then :variable:`CPACK_RPM_DEBUGINFO_PACKAGE` is automatically set to
 #  ``ON`` when :variable:`CPACK_RPM_DEBUGINFO_SINGLE_PACKAGE` is set.
 #
+# .. variable:: CPACK_RPM_DEBUGINFO_FILE_NAME
+#               CPACK_RPM_<component>_DEBUGINFO_FILE_NAME
+#
+#  Debuginfo package file name.
+#
+#  * Mandatory : NO
+#  * Default   : rpmbuild tool generated package file name
+#
+#  Alternatively provided debuginfo package file name must end with ``.rpm``
+#  suffix and should differ from file names of other generated packages.
+#
+#  Variable may contain ``@cpack_component@`` placeholder which will be
+#  replaced by component name if component packaging is enabled otherwise it
+#  deletes the placeholder.
+#
+#  Setting the variable to ``RPM-DEFAULT`` may be used to explicitly set
+#  filename generation to default.
+#
+# .. note::
+#
+#  :variable:`CPACK_RPM_FILE_NAME` also supports rpmbuild tool generated package
+#  file name - disabled by default but can be enabled by setting the variable to
+#  ``RPM-DEFAULT``.
+#
 # Packaging of sources (SRPM)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
@@ -2640,9 +2664,25 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
     unset(expected_filenames_)
     unset(filenames_)
     if(CPACK_RPM_DEBUGINFO_PACKAGE AND NOT CPACK_RPM_FILE_NAME STREQUAL "RPM-DEFAULT")
-      string(TOLOWER "${CPACK_RPM_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}.*\\.rpm" efn_)
-      list(APPEND expected_filenames_ "${efn_}")
+      list(APPEND expected_filenames_
+        "${CPACK_RPM_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}.*\\.rpm")
       list(APPEND filenames_ "${CPACK_RPM_FILE_NAME}")
+    endif()
+
+    if(CPACK_RPM_DEBUGINFO_PACKAGE)
+      cpack_rpm_variable_fallback("CPACK_RPM_DEBUGINFO_FILE_NAME"
+        "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_DEBUGINFO_FILE_NAME"
+        "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEBUGINFO_FILE_NAME"
+        "CPACK_RPM_DEBUGINFO_FILE_NAME")
+
+      if(CPACK_RPM_DEBUGINFO_FILE_NAME AND
+        NOT CPACK_RPM_DEBUGINFO_FILE_NAME STREQUAL "RPM-DEFAULT")
+        list(APPEND expected_filenames_
+          "${CPACK_RPM_PACKAGE_NAME}-debuginfo-${CPACK_PACKAGE_VERSION}.*\\.rpm")
+        string(REPLACE "@cpack_component@" "${CPACK_RPM_PACKAGE_COMPONENT}"
+          CPACK_RPM_DEBUGINFO_FILE_NAME "${CPACK_RPM_DEBUGINFO_FILE_NAME}")
+        list(APPEND filenames_ "${CPACK_RPM_DEBUGINFO_FILE_NAME}")
+      endif()
     endif()
 
     # check if other files have to be renamed
