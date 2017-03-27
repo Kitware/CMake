@@ -163,6 +163,7 @@ public:
   /** What hierarchy level should the reported directory contain */
   enum BundleDirectoryLevel
   {
+    BundleDirLevel,
     ContentLevel,
     FullLevel
   };

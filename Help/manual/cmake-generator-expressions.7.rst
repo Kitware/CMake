@@ -205,6 +205,15 @@ Available informational expressions are:
   Name of the linker generated program database file (.pdb).
 ``$<TARGET_PDB_FILE_DIR:tgt>``
   Directory of the linker generated program database file (.pdb).
+``$<TARGET_BUNDLE_DIR:tgt>``
+  Full path to the bundle directory (``my.app``, ``my.framework``, or
+  ``my.bundle``) where ``tgt`` is the name of a target.
+``$<TARGET_BUNDLE_CONTENT_DIR:tgt>``
+  Full path to the bundle content directory where ``tgt`` is the name of a
+  target. For the macOS SDK it leads to ``my.app/Contents``, ``my.framework``,
+  or ``my.bundle/Contents``. For all other SDKs (e.g. iOS) it leads to
+  ``my.app``, ``my.framework``, or ``my.bundle`` due to the flat bundle
+  structure.
 ``$<TARGET_PROPERTY:tgt,prop>``
   Value of the property ``prop`` on the target ``tgt``.
 

@@ -1504,6 +1504,8 @@ class ArtifactNameTag;
 class ArtifactPathTag;
 class ArtifactPdbTag;
 class ArtifactSonameTag;
+class ArtifactBundleDirTag;
+class ArtifactBundleContentDirTag;
 
 template <typename ArtifactT>
 struct TargetFilesystemArtifactResultCreator
@@ -1596,6 +1598,56 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
       return std::string();
     }
     return target->GetFullPath(context->Config, target->HasImportLibrary());
+  }
+};
+
+template <>
+struct TargetFilesystemArtifactResultCreator<ArtifactBundleDirTag>
+{
+  static std::string Create(cmGeneratorTarget* target,
+                            cmGeneratorExpressionContext* context,
+                            const GeneratorExpressionContent* content)
+  {
+    if (target->IsImported()) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_BUNDLE_DIR not allowed for IMPORTED targets.");
+      return std::string();
+    }
+    if (!target->IsBundleOnApple()) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_BUNDLE_DIR is allowed only for Bundle targets.");
+      return std::string();
+    }
+
+    std::string outpath = target->GetDirectory(context->Config) + '/';
+    return target->BuildBundleDirectory(outpath, context->Config,
+                                        cmGeneratorTarget::BundleDirLevel);
+  }
+};
+
+template <>
+struct TargetFilesystemArtifactResultCreator<ArtifactBundleContentDirTag>
+{
+  static std::string Create(cmGeneratorTarget* target,
+                            cmGeneratorExpressionContext* context,
+                            const GeneratorExpressionContent* content)
+  {
+    if (target->IsImported()) {
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_BUNDLE_CONTENT_DIR not allowed for IMPORTED targets.");
+      return std::string();
+    }
+    if (!target->IsBundleOnApple()) {
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_BUNDLE_CONTENT_DIR is allowed only for Bundle targets.");
+      return std::string();
+    }
+
+    std::string outpath = target->GetDirectory(context->Config) + '/';
+    return target->BuildBundleDirectory(outpath, context->Config,
+                                        cmGeneratorTarget::ContentLevel);
   }
 };
 
@@ -1716,6 +1768,13 @@ static const TargetFilesystemArtifactNodeGroup<ArtifactSonameTag>
 static const TargetFilesystemArtifactNodeGroup<ArtifactPdbTag>
   targetPdbNodeGroup;
 
+static const TargetFilesystemArtifact<ArtifactBundleDirTag, ArtifactPathTag>
+  targetBundleDirNode;
+
+static const TargetFilesystemArtifact<ArtifactBundleContentDirTag,
+                                      ArtifactPathTag>
+  targetBundleContentDirNode;
+
 static const struct ShellPathNode : public cmGeneratorExpressionNode
 {
   ShellPathNode() {}
@@ -1772,6 +1831,8 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     nodeMap["TARGET_LINKER_FILE_DIR"] = &targetLinkerNodeGroup.FileDir;
     nodeMap["TARGET_SONAME_FILE_DIR"] = &targetSoNameNodeGroup.FileDir;
     nodeMap["TARGET_PDB_FILE_DIR"] = &targetPdbNodeGroup.FileDir;
+    nodeMap["TARGET_BUNDLE_DIR"] = &targetBundleDirNode;
+    nodeMap["TARGET_BUNDLE_CONTENT_DIR"] = &targetBundleContentDirNode;
     nodeMap["STREQUAL"] = &strEqualNode;
     nodeMap["EQUAL"] = &equalNode;
     nodeMap["LOWER_CASE"] = &lowerCaseNode;

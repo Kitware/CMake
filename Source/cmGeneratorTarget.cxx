@@ -1493,6 +1493,12 @@ static bool shouldAddFullLevel(cmGeneratorTarget::BundleDirectoryLevel level)
   return level == cmGeneratorTarget::FullLevel;
 }
 
+static bool shouldAddContentLevel(
+  cmGeneratorTarget::BundleDirectoryLevel level)
+{
+  return level == cmGeneratorTarget::ContentLevel || shouldAddFullLevel(level);
+}
+
 std::string cmGeneratorTarget::GetAppBundleDirectory(
   const std::string& config, BundleDirectoryLevel level) const
 {
@@ -1503,7 +1509,7 @@ std::string cmGeneratorTarget::GetAppBundleDirectory(
     ext = "app";
   }
   fpath += ext;
-  if (!this->Makefile->PlatformIsAppleIos()) {
+  if (shouldAddContentLevel(level) && !this->Makefile->PlatformIsAppleIos()) {
     fpath += "/Contents";
     if (shouldAddFullLevel(level)) {
       fpath += "/MacOS";
@@ -1533,7 +1539,7 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(
     }
   }
   fpath += ext;
-  if (!this->Makefile->PlatformIsAppleIos()) {
+  if (shouldAddContentLevel(level) && !this->Makefile->PlatformIsAppleIos()) {
     fpath += "/Contents";
     if (shouldAddFullLevel(level)) {
       fpath += "/MacOS";
