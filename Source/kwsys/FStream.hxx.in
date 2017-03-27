@@ -269,7 +269,7 @@ enum BOM
 // If a BOM exists, the stream is advanced to after the BOM.
 // This function requires a seekable stream (but not a relative
 // seekable stream).
-BOM ReadBOM(std::istream& in);
+@KWSYS_NAMESPACE@_EXPORT BOM ReadBOM(std::istream& in);
 }
 }
 
