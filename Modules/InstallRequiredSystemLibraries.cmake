@@ -196,6 +196,11 @@ if(MSVC)
     endif()
     if(NOT vs VERSION_LESS 15)
       set(_vs_redist_paths "")
+      cmake_host_system_information(RESULT _vs_dir QUERY VS_${vs}_DIR) # undocumented query
+      if(IS_DIRECTORY "${_vs_dir}")
+        file(GLOB _vs_redist_paths "${_vs_dir}/VC/Redist/MSVC/*")
+      endif()
+      unset(_vs_dir)
     else()
       get_filename_component(_vs_dir
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${vs}.0;InstallDir]" ABSOLUTE)
