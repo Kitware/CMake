@@ -191,19 +191,31 @@ if(MSVC)
     set(vs "${_MSVCRT_IDE_VERSION}")
 
     # Find the runtime library redistribution directory.
-    get_filename_component(msvc_install_dir
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${vs}.0;InstallDir]" ABSOLUTE)
-    set(programfilesx86 "ProgramFiles(x86)")
     if(vs VERSION_LESS 15 AND DEFINED MSVC${vs}_REDIST_DIR AND EXISTS "${MSVC${vs}_REDIST_DIR}")
       set(MSVC_REDIST_DIR "${MSVC${vs}_REDIST_DIR}") # use old cache entry
     endif()
-    find_path(MSVC_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.CRT
-      PATHS
-        "${msvc_install_dir}/../../VC/redist"
+    if(NOT vs VERSION_LESS 15)
+      set(_vs_redist_paths "")
+      cmake_host_system_information(RESULT _vs_dir QUERY VS_${vs}_DIR) # undocumented query
+      if(IS_DIRECTORY "${_vs_dir}")
+        file(GLOB _vs_redist_paths "${_vs_dir}/VC/Redist/MSVC/*")
+      endif()
+      unset(_vs_dir)
+    else()
+      get_filename_component(_vs_dir
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${vs}.0;InstallDir]" ABSOLUTE)
+      set(programfilesx86 "ProgramFiles(x86)")
+      set(_vs_redist_paths
+        "${_vs_dir}/../../VC/redist"
         "${base_dir}/VC/redist"
         "$ENV{ProgramFiles}/Microsoft Visual Studio ${vs}.0/VC/redist"
         "$ENV{${programfilesx86}}/Microsoft Visual Studio ${vs}.0/VC/redist"
-      )
+        )
+      unset(_vs_dir)
+      unset(programfilesx86)
+    endif()
+    find_path(MSVC_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.CRT PATHS ${_vs_redist_paths})
+    unset(_vs_redist_paths)
     mark_as_advanced(MSVC_REDIST_DIR)
     set(MSVC_CRT_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.CRT")
 
