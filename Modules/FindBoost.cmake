@@ -127,7 +127,10 @@
 #                              ('n' tag).  Default is OFF.
 #   Boost_COMPILER           - Set to the compiler-specific library suffix
 #                              (e.g. "-gcc43").  Default is auto-computed
-#                              for the C++ compiler in use.
+#                              for the C++ compiler in use.  A list may be
+#                              used if multiple compatible suffixes should
+#                              be tested for, in decreasing order of
+#                              preference.
 #   Boost_THREADAPI          - Suffix for "thread" component library name,
 #                              such as "pthread" or "win32".  Names with
 #                              and without this suffix will both be tried.
@@ -428,7 +431,7 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
     set(_boost_COMPILER "-ghs")
   elseif("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10)
-      set(_boost_COMPILER "-vc141")
+      set(_boost_COMPILER "-vc141;-vc140")
     elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
       set(_boost_COMPILER "-vc140")
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18)
@@ -902,6 +905,7 @@ function(_Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS component
     endif()
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10)
       list(APPEND ${componentlibvar} ${basedir}/lib${_arch_suffix}-msvc-14.1)
+      list(APPEND ${componentlibvar} ${basedir}/lib${_arch_suffix}-msvc-14.0)
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
       list(APPEND ${componentlibvar} ${basedir}/lib${_arch_suffix}-msvc-14.0)
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18)
@@ -1525,17 +1529,24 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   #
   # Find RELEASE libraries
   #
-  set(_boost_RELEASE_NAMES
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}-${Boost_LIB_VERSION}
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}
+  unset(_boost_RELEASE_NAMES)
+  foreach(compiler IN LISTS _boost_COMPILER)
+    list(APPEND _boost_RELEASE_NAMES
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG} )
+  endforeach()
+  list(APPEND _boost_RELEASE_NAMES
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}-${Boost_LIB_VERSION}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT} )
   if(_boost_STATIC_RUNTIME_WORKAROUND)
     set(_boost_RELEASE_STATIC_ABI_TAG "-s${_boost_RELEASE_ABI_TAG}")
+    foreach(compiler IN LISTS _boost_COMPILER)
+      list(APPEND _boost_RELEASE_NAMES
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG} )
+    endforeach()
     list(APPEND _boost_RELEASE_NAMES
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG} )
   endif()
@@ -1566,18 +1577,25 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   #
   # Find DEBUG libraries
   #
-  set(_boost_DEBUG_NAMES
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}-${Boost_LIB_VERSION}
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}
+  unset(_boost_DEBUG_NAMES)
+  foreach(compiler IN LISTS _boost_COMPILER)
+    list(APPEND _boost_DEBUG_NAMES
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG} )
+  endforeach()
+  list(APPEND _boost_DEBUG_NAMES
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}-${Boost_LIB_VERSION}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT} )
   if(_boost_STATIC_RUNTIME_WORKAROUND)
     set(_boost_DEBUG_STATIC_ABI_TAG "-s${_boost_DEBUG_ABI_TAG}")
+    foreach(compiler IN LISTS _boost_COMPILER)
+      list(APPEND _boost_DEBUG_NAMES
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG} )
+    endforeach()
     list(APPEND _boost_DEBUG_NAMES
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG} )
   endif()
