@@ -148,6 +148,11 @@ void cmIDEOptions::AddDefines(const std::vector<std::string>& defines)
   this->Defines.insert(this->Defines.end(), defines.begin(), defines.end());
 }
 
+std::vector<std::string> const& cmIDEOptions::GetDefines() const
+{
+  return this->Defines;
+}
+
 void cmIDEOptions::AddFlag(const char* flag, const char* value)
 {
   this->FlagMap[flag] = value;
