@@ -858,7 +858,7 @@ const char* cmGeneratorTarget::GetLocationForBuild() const
   }
 
   if (this->IsAppBundleOnApple()) {
-    std::string macdir = this->BuildMacContentDirectory("", "", false);
+    std::string macdir = this->BuildBundleDirectory("", "", FullLevel);
     if (!macdir.empty()) {
       location += "/";
       location += macdir;
@@ -1488,8 +1488,13 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
   return soName;
 }
 
-std::string cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
-                                                     bool contentOnly) const
+static bool shouldAddFullLevel(cmGeneratorTarget::BundleDirectoryLevel level)
+{
+  return level == cmGeneratorTarget::FullLevel;
+}
+
+std::string cmGeneratorTarget::GetAppBundleDirectory(
+  const std::string& config, BundleDirectoryLevel level) const
 {
   std::string fpath = this->GetFullName(config, false);
   fpath += ".";
@@ -1500,7 +1505,7 @@ std::string cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
   fpath += ext;
   if (!this->Makefile->PlatformIsAppleIos()) {
     fpath += "/Contents";
-    if (!contentOnly) {
+    if (shouldAddFullLevel(level)) {
       fpath += "/MacOS";
     }
   }
@@ -1513,8 +1518,8 @@ bool cmGeneratorTarget::IsBundleOnApple() const
     this->IsCFBundleOnApple();
 }
 
-std::string cmGeneratorTarget::GetCFBundleDirectory(const std::string& config,
-                                                    bool contentOnly) const
+std::string cmGeneratorTarget::GetCFBundleDirectory(
+  const std::string& config, BundleDirectoryLevel level) const
 {
   std::string fpath;
   fpath += this->GetOutputName(config, false);
@@ -1530,15 +1535,15 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(const std::string& config,
   fpath += ext;
   if (!this->Makefile->PlatformIsAppleIos()) {
     fpath += "/Contents";
-    if (!contentOnly) {
+    if (shouldAddFullLevel(level)) {
       fpath += "/MacOS";
     }
   }
   return fpath;
 }
 
-std::string cmGeneratorTarget::GetFrameworkDirectory(const std::string& config,
-                                                     bool rootDir) const
+std::string cmGeneratorTarget::GetFrameworkDirectory(
+  const std::string& config, BundleDirectoryLevel level) const
 {
   std::string fpath;
   fpath += this->GetOutputName(config, false);
@@ -1548,7 +1553,7 @@ std::string cmGeneratorTarget::GetFrameworkDirectory(const std::string& config,
     ext = "framework";
   }
   fpath += ext;
-  if (!rootDir && !this->Makefile->PlatformIsAppleIos()) {
+  if (shouldAddFullLevel(level) && !this->Makefile->PlatformIsAppleIos()) {
     fpath += "/Versions/";
     fpath += this->GetFrameworkVersion();
   }
@@ -1863,18 +1868,19 @@ void cmGeneratorTarget::GetFullNameComponents(std::string& prefix,
   this->GetFullNameInternal(config, implib, prefix, base, suffix);
 }
 
-std::string cmGeneratorTarget::BuildMacContentDirectory(
-  const std::string& base, const std::string& config, bool contentOnly) const
+std::string cmGeneratorTarget::BuildBundleDirectory(
+  const std::string& base, const std::string& config,
+  BundleDirectoryLevel level) const
 {
   std::string fpath = base;
   if (this->IsAppBundleOnApple()) {
-    fpath += this->GetAppBundleDirectory(config, contentOnly);
+    fpath += this->GetAppBundleDirectory(config, level);
   }
   if (this->IsFrameworkOnApple()) {
-    fpath += this->GetFrameworkDirectory(config, contentOnly);
+    fpath += this->GetFrameworkDirectory(config, level);
   }
   if (this->IsCFBundleOnApple()) {
-    fpath += this->GetCFBundleDirectory(config, contentOnly);
+    fpath += this->GetCFBundleDirectory(config, level);
   }
   return fpath;
 }
@@ -1885,13 +1891,13 @@ std::string cmGeneratorTarget::GetMacContentDirectory(
   // Start with the output directory for the target.
   std::string fpath = this->GetDirectory(config, implib);
   fpath += "/";
-  bool contentOnly = true;
+  BundleDirectoryLevel level = ContentLevel;
   if (this->IsFrameworkOnApple()) {
     // additional files with a framework go into the version specific
     // directory
-    contentOnly = false;
+    level = FullLevel;
   }
-  fpath = this->BuildMacContentDirectory(fpath, config, contentOnly);
+  fpath = this->BuildBundleDirectory(fpath, config, level);
   return fpath;
 }
 
@@ -2932,7 +2938,7 @@ std::string cmGeneratorTarget::NormalGetFullPath(const std::string& config,
   std::string fpath = this->GetDirectory(config, implib);
   fpath += "/";
   if (this->IsAppBundleOnApple()) {
-    fpath = this->BuildMacContentDirectory(fpath, config, false);
+    fpath = this->BuildBundleDirectory(fpath, config, FullLevel);
     fpath += "/";
   }
 
@@ -3229,7 +3235,7 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
   }
 
   if (this->IsCFBundleOnApple()) {
-    fw_prefix = this->GetCFBundleDirectory(config, false);
+    fw_prefix = this->GetCFBundleDirectory(config, FullLevel);
     fw_prefix += "/";
     targetPrefix = fw_prefix.c_str();
     targetSuffix = CM_NULLPTR;
