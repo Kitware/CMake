@@ -3222,13 +3222,7 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
   // frameworks have directory prefix but no suffix
   std::string fw_prefix;
   if (this->IsFrameworkOnApple()) {
-    fw_prefix = this->GetOutputName(config, false);
-    fw_prefix += ".";
-    const char* ext = this->GetProperty("BUNDLE_EXTENSION");
-    if (!ext) {
-      ext = "framework";
-    }
-    fw_prefix += ext;
+    fw_prefix = this->GetFrameworkDirectory(config, ContentLevel);
     fw_prefix += "/";
     targetPrefix = fw_prefix.c_str();
     targetSuffix = CM_NULLPTR;
