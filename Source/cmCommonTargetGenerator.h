@@ -32,7 +32,6 @@ protected:
 
   // Feature query methods.
   const char* GetFeature(const std::string& feature);
-  bool GetFeatureAsBool(const std::string& feature);
 
   // Helper to add flag for windows .def file.
   void AddModuleDefinitionFlag(cmLinkLineComputer* linkLineComputer,

@@ -1052,7 +1052,7 @@ void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
   // Add language-specific flags.
   this->AddLanguageFlags(flags, lang, config);
 
-  if (target->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION", config)) {
+  if (target->IsIPOEnabled(config)) {
     this->AppendFeatureOptions(flags, lang, "IPO");
   }
 

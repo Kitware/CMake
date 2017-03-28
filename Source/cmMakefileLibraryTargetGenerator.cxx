@@ -133,7 +133,7 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
   linkRuleVar += linkLanguage;
   linkRuleVar += "_CREATE_STATIC_LIBRARY";
 
-  if (this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION") &&
+  if (this->GeneratorTarget->IsIPOEnabled(this->ConfigName) &&
       this->Makefile->GetDefinition(linkRuleVar + "_IPO")) {
     linkRuleVar += "_IPO";
   }

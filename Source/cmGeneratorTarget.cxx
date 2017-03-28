@@ -656,9 +656,9 @@ const char* cmGeneratorTarget::GetFeature(const std::string& feature,
   return this->LocalGenerator->GetFeature(feature, config);
 }
 
-bool cmGeneratorTarget::GetFeatureAsBool(const std::string& feature,
-                                         const std::string& config) const
+bool cmGeneratorTarget::IsIPOEnabled(const std::string& config) const
 {
+  const char* feature = "INTERPROCEDURAL_OPTIMIZATION";
   return cmSystemTools::IsOn(this->GetFeature(feature, config));
 }
 
@@ -2416,7 +2416,7 @@ std::string cmGeneratorTarget::GetCreateRuleVariable(
   switch (this->GetType()) {
     case cmStateEnums::STATIC_LIBRARY: {
       std::string var = "CMAKE_" + lang + "_CREATE_STATIC_LIBRARY";
-      if (this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION", config)) {
+      if (this->IsIPOEnabled(config)) {
         std::string varIPO = var + "_IPO";
         if (this->Makefile->GetDefinition(varIPO)) {
           return varIPO;
