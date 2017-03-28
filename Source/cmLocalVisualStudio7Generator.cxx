@@ -746,11 +746,13 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
 
   if (this->FortranProject) {
     // Intel Fortran >= 15.0 uses TargetName property.
-    std::string targetNameFull = target->GetFullName(configName);
-    std::string targetName =
+    std::string const targetNameFull = target->GetFullName(configName);
+    std::string const targetName =
       cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
-    std::string targetExt =
-      cmSystemTools::GetFilenameLastExtension(targetNameFull);
+    std::string const targetExt =
+      target->GetType() == cmStateEnums::OBJECT_LIBRARY
+      ? ".lib"
+      : cmSystemTools::GetFilenameLastExtension(targetNameFull);
     /* clang-format off */
     fout <<
       "\t\t\tTargetName=\"" << this->EscapeForXML(targetName) << "\"\n"
