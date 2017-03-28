@@ -2466,19 +2466,28 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
   }
 }
 
+//----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetFeatureSpecificLinkRuleVariable(
+  std::string const& var, std::string const& config) const
+{
+  if (this->IsIPOEnabled(config)) {
+    std::string varIPO = var + "_IPO";
+    if (this->Makefile->IsDefinitionSet(varIPO)) {
+      return varIPO;
+    }
+  }
+
+  return var;
+}
+
+//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetCreateRuleVariable(
   std::string const& lang, std::string const& config) const
 {
   switch (this->GetType()) {
     case cmStateEnums::STATIC_LIBRARY: {
       std::string var = "CMAKE_" + lang + "_CREATE_STATIC_LIBRARY";
-      if (this->IsIPOEnabled(config)) {
-        std::string varIPO = var + "_IPO";
-        if (this->Makefile->GetDefinition(varIPO)) {
-          return varIPO;
-        }
-      }
-      return var;
+      return this->GetFeatureSpecificLinkRuleVariable(var, config);
     }
     case cmStateEnums::SHARED_LIBRARY:
       return "CMAKE_" + lang + "_CREATE_SHARED_LIBRARY";

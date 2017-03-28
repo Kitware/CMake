@@ -309,6 +309,9 @@ public:
   void GetAppleArchs(const std::string& config,
                      std::vector<std::string>& archVec) const;
 
+  std::string GetFeatureSpecificLinkRuleVariable(
+    std::string const& var, std::string const& config) const;
+
   /** Return the rule variable used to create this type of target.  */
   std::string GetCreateRuleVariable(std::string const& lang,
                                     std::string const& config) const;
