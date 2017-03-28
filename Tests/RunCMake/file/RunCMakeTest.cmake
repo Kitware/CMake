@@ -36,4 +36,5 @@ run_cmake(GLOB-noexp-LIST_DIRECTORIES)
 
 if(NOT WIN32 OR CYGWIN)
   run_cmake(GLOB_RECURSE-cyclic-recursion)
+  run_cmake(INSTALL-SYMLINK)
 endif()
