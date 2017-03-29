@@ -170,8 +170,6 @@ template <typename CharType, typename Traits = std::char_traits<CharType> >
 class basic_ifstream : public std::basic_istream<CharType, Traits>,
                        public basic_efilebuf<CharType, Traits>
 {
-  using basic_efilebuf<CharType, Traits>::is_open;
-
 public:
   typedef typename basic_efilebuf<CharType, Traits>::internal_buffer_type
     internal_buffer_type;
@@ -200,6 +198,8 @@ public:
   }
 
   void close() { this->_set_state(this->_close(), this, this); }
+
+  using basic_efilebuf<CharType, Traits>::is_open;
 
   internal_buffer_type* rdbuf() const { return this->buf_; }
 
