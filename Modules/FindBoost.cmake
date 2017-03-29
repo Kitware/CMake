@@ -1124,6 +1124,12 @@ if(NOT Boost_INCLUDE_DIR)
   if( Boost_NO_SYSTEM_PATHS)
     list(APPEND _boost_INCLUDE_SEARCH_DIRS NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
   else()
+    if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC")
+      foreach(ver ${_Boost_KNOWN_VERSIONS})
+        string(REPLACE "." "_" ver "${ver}")
+        list(APPEND _boost_INCLUDE_SEARCH_DIRS PATHS "C:/local/boost_${ver}")
+      endforeach()
+    endif()
     list(APPEND _boost_INCLUDE_SEARCH_DIRS PATHS
       C:/boost/include
       C:/boost
@@ -1397,12 +1403,16 @@ foreach(c DEBUG RELEASE)
     if( Boost_NO_SYSTEM_PATHS )
       list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
     else()
+      foreach(ver ${_Boost_KNOWN_VERSIONS})
+        string(REPLACE "." "_" ver "${ver}")
+        _Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS(_boost_LIBRARY_SEARCH_DIRS_${c} "C:/local/boost_${ver}")
+      endforeach()
+      _Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS(_boost_LIBRARY_SEARCH_DIRS_${c} "C:/boost")
       list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} PATHS
         C:/boost/lib
         C:/boost
         /sw/local/lib
         )
-      _Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS(_boost_LIBRARY_SEARCH_DIRS_${c} "C:/boost")
     endif()
   endif()
 endforeach()
