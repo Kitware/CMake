@@ -1,5 +1,6 @@
 #include "cmVisualStudioGeneratorOptions.h"
 
+#include "cmAlgorithms.h"
 #include "cmLocalVisualStudioGenerator.h"
 #include "cmOutputConverter.h"
 #include "cmSystemTools.h"
@@ -403,8 +404,10 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
     fout << prefix << tag << "=\"";
   }
   const char* sep = "";
+  std::vector<std::string>::const_iterator de =
+    cmRemoveDuplicates(this->Defines);
   for (std::vector<std::string>::const_iterator di = this->Defines.begin();
-       di != this->Defines.end(); ++di) {
+       di != de; ++di) {
     // Escape the definition for the compiler.
     std::string define;
     if (this->Version < cmGlobalVisualStudioGenerator::VS10) {

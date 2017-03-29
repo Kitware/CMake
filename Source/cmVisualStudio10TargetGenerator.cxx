@@ -2402,6 +2402,11 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
     std::string(this->Makefile->GetSafeDefinition(rcConfigFlagsVar));
 
   rcOptions.Parse(flags.c_str());
+
+  // For historical reasons, add the C preprocessor defines to RC.
+  Options& clOptions = *(this->ClOptions[configName]);
+  rcOptions.AddDefines(clOptions.GetDefines());
+
   this->RcOptions[configName] = pOptions.release();
   return true;
 }
@@ -2414,12 +2419,9 @@ void cmVisualStudio10TargetGenerator::WriteRCOptions(
   }
   this->WriteString("<ResourceCompile>\n", 2);
 
-  // Preprocessor definitions and includes are shared with clOptions.
-  Options& clOptions = *(this->ClOptions[configName]);
-  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                          "\n", "RC");
-
   Options& rcOptions = *(this->RcOptions[configName]);
+  rcOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
+                                          "\n", "RC");
   rcOptions.AppendFlag("AdditionalIncludeDirectories", includes);
   rcOptions.AppendFlag("AdditionalIncludeDirectories",
                        "%(AdditionalIncludeDirectories)");
