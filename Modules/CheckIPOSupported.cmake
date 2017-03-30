@@ -203,7 +203,12 @@ function(check_ipo_supported)
   endif()
 
   if(NOT _CMAKE_IPO_MAY_BE_SUPPORTED_BY_COMPILER)
-    _ipo_not_supported("compiler doesn't support IPO")
+    _ipo_not_supported("Compiler doesn't support IPO")
+    return()
+  endif()
+
+  if(CMAKE_GENERATOR MATCHES "^(Visual Studio |Xcode$)")
+    _ipo_not_supported("CMake doesn't support IPO for current generator")
     return()
   endif()
 
