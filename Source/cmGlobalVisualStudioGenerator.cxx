@@ -729,12 +729,26 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
       return false;
     }
   }
+  // If there's only one source language, Fortran has to be used
+  // in order for the sources to compile.
+  // Note: Via linker propagation, LINKER_LANGUAGE could become CXX in
+  // this situation and mismatch from the actual language of the linker.
   gt->GetLanguages(languages, "");
   if (languages.size() == 1) {
     if (*languages.begin() == "Fortran") {
       return true;
     }
   }
+
+  // In the case of mixed object files or sources mixed with objects,
+  // decide the language based on the value of LINKER_LANGUAGE.
+  // This will not make it possible to mix source files of different
+  // languages, but object libraries will be linked together in the
+  // same fashion as other generators do.
+  if (gt->GetLinkerLanguage("") == "Fortran") {
+    return true;
+  }
+
   return false;
 }
 
