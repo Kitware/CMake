@@ -37,6 +37,7 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmCurl.h"
 #include "cmFileLockResult.h"
+#include <cm_curl.h>
 #endif
 
 #if defined(CMAKE_USE_ELF_PARSER)
@@ -1028,8 +1029,6 @@ protected:
     {
     }
   };
-  struct MatchRule;
-  friend struct MatchRule;
   struct MatchRule
   {
     cmsys::RegularExpression Regex;
