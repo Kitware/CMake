@@ -3117,10 +3117,14 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
                                 this->CreateString(this->GeneratorToolset));
   }
   if (this->GetLanguageEnabled("Swift")) {
-    std::string swiftVersion = "2.3";
+    std::string swiftVersion;
     if (const char* vers = this->CurrentMakefile->GetDefinition(
           "CMAKE_Swift_LANGUAGE_VERSION")) {
       swiftVersion = vers;
+    } else if (this->XcodeVersion >= 83) {
+      swiftVersion = "3.0";
+    } else {
+      swiftVersion = "2.3";
     }
     buildSettings->AddAttribute("SWIFT_VERSION",
                                 this->CreateString(swiftVersion));
