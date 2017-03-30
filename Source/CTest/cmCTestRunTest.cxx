@@ -215,6 +215,9 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     if (this->TestProperties->SkipReturnCode >= 0 &&
         this->TestProperties->SkipReturnCode == retVal) {
       this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+      std::ostringstream s;
+      s << "SKIP_RETURN_CODE=" << this->TestProperties->SkipReturnCode;
+      this->TestResult.CompletionStatus = s.str();
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Skipped ");
     } else if ((success && !this->TestProperties->WillFail) ||
                (!success && this->TestProperties->WillFail)) {
@@ -253,6 +256,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "Other");
         this->TestResult.Status = cmCTestTestHandler::OTHER_FAULT;
     }
+  } else if ("Disabled" == this->TestResult.CompletionStatus) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run (Disabled) ");
   } else // cmsysProcess_State_Error
   {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run ");
@@ -413,6 +418,24 @@ bool cmCTestRunTest::StartTest(size_t total)
                << this->TestProperties->Index << ": "
                << this->TestProperties->Name << std::endl);
   this->ProcessOutput.clear();
+
+  // Return immediately if test is disabled
+  if (this->TestProperties->Disabled) {
+    this->TestResult.Properties = this->TestProperties;
+    this->TestResult.ExecutionTime = 0;
+    this->TestResult.CompressOutput = false;
+    this->TestResult.ReturnValue = -1;
+    this->TestResult.CompletionStatus = "Disabled";
+    this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+    this->TestResult.TestCount = this->TestProperties->Index;
+    this->TestResult.Name = this->TestProperties->Name;
+    this->TestResult.Path = this->TestProperties->Directory;
+    this->TestProcess = new cmProcess;
+    this->TestResult.Output = "Disabled";
+    this->TestResult.FullCommandLine = "";
+    return false;
+  }
+
   this->ComputeArguments();
   std::vector<std::string>& args = this->TestProperties->Args;
   this->TestResult.Properties = this->TestProperties;
@@ -437,7 +460,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     cmCTestLog(this->CTest, HANDLER_OUTPUT, msg << std::endl);
     this->TestResult.Output = msg;
     this->TestResult.FullCommandLine = "";
-    this->TestResult.CompletionStatus = "Not Run";
+    this->TestResult.CompletionStatus = "Fixture dependency failed";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
     return false;
   }
@@ -457,7 +480,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     cmCTestLog(this->CTest, ERROR_MESSAGE, msg << std::endl);
     this->TestResult.Output = msg;
     this->TestResult.FullCommandLine = "";
-    this->TestResult.CompletionStatus = "Not Run";
+    this->TestResult.CompletionStatus = "Missing Configuration";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
     return false;
   }
@@ -477,7 +500,7 @@ bool cmCTestRunTest::StartTest(size_t total)
                  "Unable to find required file: " << file << std::endl);
       this->TestResult.Output = "Unable to find required file: " + file;
       this->TestResult.FullCommandLine = "";
-      this->TestResult.CompletionStatus = "Not Run";
+      this->TestResult.CompletionStatus = "Required Files Missing";
       this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
       return false;
     }
@@ -493,7 +516,7 @@ bool cmCTestRunTest::StartTest(size_t total)
                "Unable to find executable: " << args[1] << std::endl);
     this->TestResult.Output = "Unable to find executable: " + args[1];
     this->TestResult.FullCommandLine = "";
-    this->TestResult.CompletionStatus = "Not Run";
+    this->TestResult.CompletionStatus = "Unable to find executable";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
     return false;
   }

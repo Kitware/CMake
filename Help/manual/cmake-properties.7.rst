@@ -325,6 +325,7 @@ Properties on Tests
    /prop_test/ATTACHED_FILES
    /prop_test/COST
    /prop_test/DEPENDS
+   /prop_test/DISABLED
    /prop_test/ENVIRONMENT
    /prop_test/FAIL_REGULAR_EXPRESSION
    /prop_test/FIXTURES_CLEANUP
