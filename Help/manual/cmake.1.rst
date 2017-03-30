@@ -315,6 +315,9 @@ The following ``cmake -E`` commands are available only on UNIX:
 ``create_symlink <old> <new>``
   Create a symbolic link ``<new>`` naming ``<old>``.
 
+.. note::
+  Path to where ``<new>`` symbolic link will be created has to exist beforehand.
+
 Windows-specific Command-Line Tools
 -----------------------------------
 

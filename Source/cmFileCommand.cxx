@@ -1486,6 +1486,9 @@ bool cmFileCopier::InstallSymlink(const char* fromFile, const char* toFile)
     // Remove the destination file so we can always create the symlink.
     cmSystemTools::RemoveFile(toFile);
 
+    // Create destination directory if it doesn't exist
+    cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(toFile));
+
     // Create the symlink.
     if (!cmSystemTools::CreateSymlink(symlinkTarget, toFile)) {
       std::ostringstream e;
