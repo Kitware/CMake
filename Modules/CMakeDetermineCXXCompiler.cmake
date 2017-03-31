@@ -170,6 +170,11 @@ if(MSVC_CXX_ARCHITECTURE_ID)
     "set(MSVC_CXX_ARCHITECTURE_ID ${MSVC_CXX_ARCHITECTURE_ID})")
 endif()
 
+if(CMAKE_CXX_XCODE_CURRENT_ARCH)
+  set(SET_CMAKE_XCODE_CURRENT_ARCH
+    "set(CMAKE_XCODE_CURRENT_ARCH ${CMAKE_CXX_XCODE_CURRENT_ARCH})")
+endif()
+
 # configure all variables set in this file
 configure_file(${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake
