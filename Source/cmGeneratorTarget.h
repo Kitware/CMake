@@ -160,9 +160,17 @@ public:
                                 bool realname) const;
   std::string NormalGetRealName(const std::string& config) const;
 
+  /** What hierarchy level should the reported directory contain */
+  enum BundleDirectoryLevel
+  {
+    BundleDirLevel,
+    ContentLevel,
+    FullLevel
+  };
+
   /** @return the Mac App directory without the base */
   std::string GetAppBundleDirectory(const std::string& config,
-                                    bool contentOnly) const;
+                                    BundleDirectoryLevel level) const;
 
   /** Return whether this target is an executable Bundle, a framework
       or CFBundle on Apple.  */
@@ -175,7 +183,7 @@ public:
 
   /** @return the Mac framework directory without the base. */
   std::string GetFrameworkDirectory(const std::string& config,
-                                    bool rootDir) const;
+                                    BundleDirectoryLevel level) const;
 
   /** Return the framework version string.  Undefined if
       IsFrameworkOnApple returns false.  */
@@ -183,7 +191,7 @@ public:
 
   /** @return the Mac CFBundle directory without the base */
   std::string GetCFBundleDirectory(const std::string& config,
-                                   bool contentOnly) const;
+                                   BundleDirectoryLevel level) const;
 
   /** Return the install name directory for the target in the
     * build tree.  For example: "\@rpath/", "\@loader_path/",
@@ -218,10 +226,11 @@ public:
                              const std::string& config = "",
                              bool implib = false) const;
 
-  /** Append to @a base the mac content directory and return it. */
-  std::string BuildMacContentDirectory(const std::string& base,
-                                       const std::string& config = "",
-                                       bool contentOnly = true) const;
+  /** Append to @a base the bundle directory hierarchy up to a certain @a level
+   * and return it. */
+  std::string BuildBundleDirectory(const std::string& base,
+                                   const std::string& config,
+                                   BundleDirectoryLevel level) const;
 
   /** @return the mac content directory for this target. */
   std::string GetMacContentDirectory(const std::string& config = CM_NULLPTR,
