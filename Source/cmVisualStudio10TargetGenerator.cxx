@@ -2239,6 +2239,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
                                             linkLanguage, configName.c_str());
   }
 
+  // Check IPO related warning/error.
+  this->GeneratorTarget->IsIPOEnabled(configName);
+
   // Get preprocessor definitions for this directory.
   std::string defineFlags =
     this->GeneratorTarget->Target->GetMakefile()->GetDefineFlags();

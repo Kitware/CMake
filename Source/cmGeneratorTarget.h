@@ -112,8 +112,8 @@ public:
 
   const char* GetFeature(const std::string& feature,
                          const std::string& config) const;
-  bool GetFeatureAsBool(const std::string& feature,
-                        const std::string& config) const;
+
+  bool IsIPOEnabled(const std::string& config) const;
 
   bool IsLinkInterfaceDependentBoolProperty(const std::string& p,
                                             const std::string& config) const;
@@ -308,6 +308,9 @@ public:
 
   void GetAppleArchs(const std::string& config,
                      std::vector<std::string>& archVec) const;
+
+  std::string GetFeatureSpecificLinkRuleVariable(
+    std::string const& var, std::string const& config) const;
 
   /** Return the rule variable used to create this type of target.  */
   std::string GetCreateRuleVariable(std::string const& lang,
@@ -745,6 +748,7 @@ private:
   mutable std::set<cmLinkItem> UtilityItems;
   cmPolicies::PolicyMap PolicyMap;
   mutable bool PolicyWarnedCMP0022;
+  mutable bool PolicyReportedCMP0069;
   mutable bool DebugIncludesDone;
   mutable bool DebugCompileOptionsDone;
   mutable bool DebugCompileFeaturesDone;

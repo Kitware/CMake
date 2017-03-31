@@ -28,6 +28,9 @@ property.
     Specify languages whose compilers to check.
     Languages ``C`` and ``CXX`` are supported.
 
+It makes no sense to use this module when :policy:`CMP0069` is set to ``OLD`` so
+module will return error in this case. See policy :policy:`CMP0069` for details.
+
 Examples
 ^^^^^^^^
 
@@ -125,7 +128,17 @@ macro(_ipo_run_language_check language)
 endmacro()
 
 function(check_ipo_supported)
-  # TODO: IPO policy
+  cmake_policy(GET CMP0069 x)
+
+  string(COMPARE EQUAL "${x}" "" not_set)
+  if(not_set)
+    message(FATAL_ERROR "Policy CMP0069 is not set")
+  endif()
+
+  string(COMPARE EQUAL "${x}" "OLD" is_old)
+  if(is_old)
+    message(FATAL_ERROR "Policy CMP0069 set to OLD")
+  endif()
 
   set(optional)
   set(one RESULT OUTPUT)
@@ -203,7 +216,12 @@ function(check_ipo_supported)
   endif()
 
   if(NOT _CMAKE_IPO_MAY_BE_SUPPORTED_BY_COMPILER)
-    _ipo_not_supported("compiler doesn't support IPO")
+    _ipo_not_supported("Compiler doesn't support IPO")
+    return()
+  endif()
+
+  if(CMAKE_GENERATOR MATCHES "^(Visual Studio |Xcode$)")
+    _ipo_not_supported("CMake doesn't support IPO for current generator")
     return()
   endif()
 

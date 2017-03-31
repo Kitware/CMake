@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.9
 .. toctree::
    :maxdepth: 1
 
+   CMP0069: INTERPROCEDURAL_OPTIMIZATION is enforced when enabled. </policy/CMP0069>
    CMP0068: RPATH settings on macOS do not affect install_name. </policy/CMP0068>
 
 Policies Introduced by CMake 3.8
