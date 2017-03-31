@@ -9,7 +9,14 @@ macro(add_CMakeOnly_test test)
 endmacro()
 
 add_CMakeOnly_test(LinkInterfaceLoop)
-set_property(TEST CMakeOnly.LinkInterfaceLoop PROPERTY TIMEOUT 90)
+# If a bug is introduced in CMake that causes an infinite loop while
+# analyzing LinkInterfaceLoop then don't let the test run too long.
+# Use an option to customize it so that the timeout can be extended
+# on busy machines.
+if(NOT DEFINED CMake_TEST_CMakeOnly.LinkInterfaceLoop_TIMEOUT)
+  set(CMake_TEST_CMakeOnly.LinkInterfaceLoop_TIMEOUT 90)
+endif()
+set_property(TEST CMakeOnly.LinkInterfaceLoop PROPERTY TIMEOUT ${CMake_TEST_CMakeOnly.LinkInterfaceLoop_TIMEOUT})
 
 add_CMakeOnly_test(CheckSymbolExists)
 
