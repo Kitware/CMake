@@ -1,7 +1,7 @@
-CMAKE_GCC_RANLIB
-----------------
+CMAKE_<LANG>_COMPILER_RANLIB
+----------------------------
 
 A wrapper around ``ranlib`` adding the appropriate ``--plugin`` option for the
-GCC compiler. For other compilers variable is not defined.
+compiler.
 
 See also :variable:`CMAKE_RANLIB`.
