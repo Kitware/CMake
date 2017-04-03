@@ -151,6 +151,8 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(cmake* cm,
   this->CurrentMakefile = 0;
   this->CurrentLocalGenerator = 0;
   this->XcodeBuildCommandInitialized = false;
+
+  cm->GetState()->SetIsGeneratorMultiConfig(true);
 }
 
 cmGlobalGeneratorFactory* cmGlobalXCodeGenerator::NewFactory()
