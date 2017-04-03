@@ -600,8 +600,11 @@ if(error_code)
   message(FATAL_ERROR \"Failed to clone repository: '${git_repository}'\")
 endif()
 
+# Use `git checkout <branch>` even though this risks ambiguity with a
+# local path.  Unfortunately we cannot use `git checkout <tree-ish> --`
+# because that will not search for remote branch names, a common use case.
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" \${git_options} checkout ${git_tag} --
+  COMMAND \"${git_EXECUTABLE}\" \${git_options} checkout ${git_tag}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
