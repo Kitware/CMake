@@ -531,6 +531,15 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
   else()
     set(git_clone_shallow_options "--depth 1")
   endif()
+  if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
+    # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
+    set(git_checkout_explicit-- "--")
+  else()
+    # Use `git checkout <branch>` even though this risks ambiguity with a
+    # local path.  Unfortunately we cannot use `git checkout <tree-ish> --`
+    # because that will not search for remote branch names, a common use case.
+    set(git_checkout_explicit-- "")
+  endif()
   file(WRITE ${script_filename}
 "if(\"${git_tag}\" STREQUAL \"\")
   message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
@@ -600,11 +609,8 @@ if(error_code)
   message(FATAL_ERROR \"Failed to clone repository: '${git_repository}'\")
 endif()
 
-# Use `git checkout <branch>` even though this risks ambiguity with a
-# local path.  Unfortunately we cannot use `git checkout <tree-ish> --`
-# because that will not search for remote branch names, a common use case.
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" \${git_options} checkout ${git_tag}
+  COMMAND \"${git_EXECUTABLE}\" \${git_options} checkout ${git_tag} ${git_checkout_explicit--}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
