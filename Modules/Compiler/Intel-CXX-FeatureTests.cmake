@@ -13,7 +13,6 @@
 #     - __cpp_variadic_templates 200704
 
 set(_cmake_feature_test_cxx_variable_templates "__cpp_variable_templates >= 201304")
-set(_cmake_feature_test_cxx_relaxed_constexpr "__cpp_constexpr >= 201304")
 
 set(_cmake_oldestSupported "__INTEL_COMPILER >= 1210")
 set(DETECT_CXX11 "((__cplusplus >= 201103L) || defined(__INTEL_CXX11_MODE__) || defined(__GXX_EXPERIMENTAL_CXX0X__))")
@@ -23,6 +22,9 @@ set(DETECT_CXX11 "((__cplusplus >= 201103L) || defined(__INTEL_CXX11_MODE__) || 
 set(DETECT_BUGGY_ICC15 "((__INTEL_COMPILER == 1500) && (__INTEL_COMPILER_UPDATE == 1))")
 set(DETECT_CXX14 "((__cplusplus >= 201300L) || ((__cplusplus == 201103L) && !defined(__INTEL_CXX11_MODE__)) || ((${DETECT_BUGGY_ICC15}) && defined(__GXX_EXPERIMENTAL_CXX0X__) && !defined(__INTEL_CXX11_MODE__) ) || (defined(__INTEL_CXX11_MODE__) && defined(__cpp_aggregate_nsdmi)) )")
 unset(DETECT_BUGGY_ICC15)
+
+set(Intel17_CXX14 "__INTEL_COMPILER >= 1700 && ${DETECT_CXX14}")
+set(_cmake_feature_test_cxx_relaxed_constexpr "__cpp_constexpr >= 201304 || (${Intel17_CXX14} && !defined(_MSC_VER))")
 
 set(Intel16_CXX14 "__INTEL_COMPILER >= 1600 && ${DETECT_CXX14}")
 set(_cmake_feature_test_cxx_aggregate_default_initializers "${Intel16_CXX14}")
