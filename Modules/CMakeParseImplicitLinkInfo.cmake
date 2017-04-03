@@ -49,8 +49,12 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
     if("${cmd}" MATCHES "${linker_regex}")
       string(APPEND log "  link line: [${line}]\n")
       string(REGEX REPLACE ";-([LYz]);" ";-\\1" args "${args}")
+      set(skip_value_of "")
       foreach(arg IN LISTS args)
-        if("${arg}" MATCHES "^-L(.:)?[/\\]")
+        if(skip_value_of)
+          string(APPEND log "    arg [${arg}] ==> skip value of ${skip_value_of}\n")
+          set(skip_value_of "")
+        elseif("${arg}" MATCHES "^-L(.:)?[/\\]")
           # Unix search path.
           string(REGEX REPLACE "^-L" "" dir "${arg}")
           list(APPEND implicit_dirs_tmp ${dir})
@@ -66,6 +70,10 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
           set(lib "${CMAKE_MATCH_1}")
           list(APPEND implicit_libs_tmp ${lib})
           string(APPEND log "    arg [${arg}] ==> lib [${lib}]\n")
+        elseif("${arg}" STREQUAL "-lto_library")
+          # ld argument "-lto_library <path>"
+          set(skip_value_of "${arg}")
+          string(APPEND log "    arg [${arg}] ==> ignore, skip following value\n")
         elseif("${arg}" MATCHES "^-l([^:].*)$")
           # Unix library.
           set(lib "${CMAKE_MATCH_1}")
