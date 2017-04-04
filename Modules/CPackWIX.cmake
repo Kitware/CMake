@@ -279,6 +279,14 @@
 #  When unset generated installers will default installing to
 #  ``ProgramFiles<64>Folder``.
 #
+# .. variable:: CPACK_WIX_ROOT
+#
+#  This variable can optionally be set to the root directory
+#  of a custom WiX Toolset installation.
+#
+#  When unspecified CPack will try to locate a WiX Toolset
+#  installation via the ``WIX`` environment variable instead.
+#
 
 if(NOT CPACK_WIX_ROOT)
   file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)
