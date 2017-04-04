@@ -71,8 +71,24 @@ function(check_custom_platform TARGET_FILE PROJECT_NAME PLATFORM_NAME RESULT)
   set(${RESULT} ${IS_FOUND} PARENT_SCOPE)
 endfunction()
 
+# Search project's build configuration line by project name and target configuration name.
+# Returns TRUE if found and FALSE otherwise
+function(check_custom_configuration TARGET_FILE PROJECT_NAME SLN_CONFIG DST_CONFIG RESULT)
+  set(${RESULT} "FALSE" PARENT_SCOPE)
+  # extract project guid
+  parse_project_section(${TARGET_FILE} ${PROJECT_NAME})
+  if(NOT IS_FOUND)
+    return()
+  endif()
+
+  set(REG_EXP "^(\t)*\\{${FOUND_GUID}\\}\\.${SLN_CONFIG}[^ ]*\\.ActiveCfg = ${DST_CONFIG}\\|.*$")
+  check_line_exists(${TARGET_FILE} REG_EXP)
+
+  set(${RESULT} ${IS_FOUND} PARENT_SCOPE)
+endfunction()
+
 # RunCMake test check helper
-function(check_project test name guid type platform)
+function(check_project test name guid type platform imported_release_config_name)
   set(sln "${RunCMake_TEST_BINARY_DIR}/${test}.sln")
   set(sep "")
   set(failed "")
@@ -87,6 +103,9 @@ function(check_project test name guid type platform)
     else()
       set(platform "Win32")
     endif()
+  endif()
+  if(NOT imported_release_config_name)
+    set(imported_release_config_name "Release")
   endif()
   if(guid)
     check_project_guid("${sln}" "${name}" "${guid}" passed_guid)
@@ -107,5 +126,11 @@ function(check_project test name guid type platform)
     string(APPEND failed "${sep}${name} solution has no project with expected PLATFORM=${platform}")
     set(sep "\n")
   endif()
+  check_custom_configuration("${sln}" "${name}" "Release" "${imported_release_config_name}" passed_configuration)
+  if(NOT passed_configuration)
+    string(APPEND failed "${sep}${name} solution has no project with expected CONFIG=${imported_release_config_name}")
+    set(sep "\n")
+  endif()
+
   set(RunCMake_TEST_FAILED "${failed}" PARENT_SCOPE)
 endfunction()
