@@ -67,7 +67,7 @@ endmacro()
 
 # Run IPO/LTO test
 macro(_ipo_run_language_check language)
-  set(testdir "${CMAKE_CURRENT_BINARY_DIR}/_CMakeLTOTest-${language}")
+  set(testdir "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/_CMakeLTOTest-${language}")
 
   file(REMOVE_RECURSE "${testdir}")
   file(MAKE_DIRECTORY "${testdir}")
