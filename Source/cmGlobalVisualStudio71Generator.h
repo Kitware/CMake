@@ -56,8 +56,8 @@ protected:
                                    const char* path,
                                    cmGeneratorTarget const* t);
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const std::string& name, cmStateEnums::TargetType type,
-    std::vector<std::string> const& configs,
+    std::ostream& fout, const std::string& name,
+    cmGeneratorTarget const& target, std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const std::string& platformMapping = "");
   virtual void WriteExternalProject(std::ostream& fout,

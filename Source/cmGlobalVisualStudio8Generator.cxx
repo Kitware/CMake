@@ -353,7 +353,7 @@ void cmGlobalVisualStudio8Generator::WriteSolutionConfigurations(
 }
 
 void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
-  std::ostream& fout, const std::string& name, cmStateEnums::TargetType type,
+  std::ostream& fout, const std::string& name, cmGeneratorTarget const& target,
   std::vector<std::string> const& configs,
   const std::set<std::string>& configsPartOfDefaultBuild,
   std::string const& platformMapping)
@@ -375,7 +375,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
                                         : this->GetPlatformName())
            << "\n";
     }
-    if (this->NeedsDeploy(type)) {
+    if (this->NeedsDeploy(target.GetType())) {
       fout << "\t\t{" << guid << "}." << *i << "|" << this->GetPlatformName()
            << ".Deploy.0 = " << *i << "|"
            << (!platformMapping.empty() ? platformMapping
