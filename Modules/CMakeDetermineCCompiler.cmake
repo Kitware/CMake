@@ -175,6 +175,11 @@ if(MSVC_C_ARCHITECTURE_ID)
     "set(MSVC_C_ARCHITECTURE_ID ${MSVC_C_ARCHITECTURE_ID})")
 endif()
 
+if(CMAKE_C_XCODE_CURRENT_ARCH)
+  set(SET_CMAKE_XCODE_CURRENT_ARCH
+    "set(CMAKE_XCODE_CURRENT_ARCH ${CMAKE_C_XCODE_CURRENT_ARCH})")
+endif()
+
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeCCompiler.cmake
