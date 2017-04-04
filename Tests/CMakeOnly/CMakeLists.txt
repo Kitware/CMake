@@ -37,7 +37,11 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio ([^789]|[789][0-9])")
   add_CMakeOnly_test(CompilerIdCSharp)
 endif()
 
-add_CMakeOnly_test(AllFindModules)
+add_test(CMakeOnly.AllFindModules ${CMAKE_CMAKE_COMMAND}
+  -DTEST=AllFindModules
+  -DCMAKE_ARGS=-DCMake_TEST_CMakeOnly.AllFindModules_NO_VERSION=${CMake_TEST_CMakeOnly.AllFindModules_NO_VERSION}
+  -P ${CMAKE_CURRENT_BINARY_DIR}/Test.cmake
+  )
 
 add_CMakeOnly_test(SelectLibraryConfigurations)
 
