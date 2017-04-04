@@ -75,11 +75,13 @@ set (CMAKE_ASM${ASM_DIALECT}_FLAGS "${CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT}" CACHE
      "Flags used by the assembler during all build types.")
 
 if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
-# default build type is none
-  if(NOT CMAKE_NO_BUILD_TYPE)
+  get_property(_GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+  # default build type is none
+  if(NOT _GENERATOR_IS_MULTI_CONFIG AND NOT CMAKE_NO_BUILD_TYPE)
     set (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_INIT} CACHE STRING
       "Choose the type of build, options are: None, Debug Release RelWithDebInfo MinSizeRel.")
   endif()
+  unset(_GENERATOR_IS_MULTI_CONFIG)
   set (CMAKE_ASM${ASM_DIALECT}_FLAGS_DEBUG "${CMAKE_ASM${ASM_DIALECT}_FLAGS_DEBUG_INIT}" CACHE STRING
     "Flags used by the assembler during debug builds.")
   set (CMAKE_ASM${ASM_DIALECT}_FLAGS_MINSIZEREL "${CMAKE_ASM${ASM_DIALECT}_FLAGS_MINSIZEREL_INIT}" CACHE STRING
