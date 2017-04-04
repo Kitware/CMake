@@ -5,6 +5,7 @@ find_package(PythonInterp REQUIRED)
 
 macro(do_test bsname file)
   execute_process(COMMAND ${PYTHON_EXECUTABLE}
+    -B # no .pyc files
     "${CMAKE_SOURCE_DIR}/server-test.py"
     "${CMAKE_COMMAND}"
     "${CMAKE_SOURCE_DIR}/${file}"
