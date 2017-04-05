@@ -117,7 +117,7 @@ Available logical expressions are:
   .. code-block:: cmake
 
     add_library(myapp_c foo.c)
-    add_library(myapp_cxx foo.c)
+    add_library(myapp_cxx bar.cpp)
     target_compile_options(myapp_cxx PUBLIC -fno-exceptions)
     add_executable(myapp main.cpp)
     target_link_libraries(myapp myapp_c myapp_cxx)
