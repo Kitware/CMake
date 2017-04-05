@@ -29,34 +29,6 @@
 
 ;--------------------------------
 ;General
-!ifdef INNER
-  OutFile "${TEMPINSTALLER}.exe"
-  SetCompress off                           ; for speed
-!else
-  ; Call makensis again, defining INNER.  This writes an installer for us which, when
-  ; it is invoked, will just write the uninstaller to some location, and then exit.
-  ; Be sure to substitute the name of this script here.
-  !tempfile TEMPINSTALLER
-  !tempfile TEMPUNINSTALLER
-  !system "$\"${NSISDIR}\makensis$\" /DTEMPINSTALLER=$\"${TEMPINSTALLER}$\" /DTEMPUNINSTALLER=$\"${TEMPUNINSTALLER}$\" /DINNER $\"@CPACK_TEMPORARY_DIRECTORY@/../project.nsi$\"" = 0
-
-  ; So now run that installer we just created as %TEMP%\tempinstaller.exe.  Since it
-  ; calls quit the return value isn't zero.
-
-  !system "$\"${TEMPINSTALLER}.exe$\"" = 2
-
-  ; That will have written an uninstaller binary for us.  Now we sign it with your
-  ; favourite code signing tool.
-
-  !tempfile INCEXIST
-  !system 'if exist "@CPACK_NSIS_SIGN_UNINSTALLER@" echo !define HAVE_SIGN_UNINST > "${INCEXIST}"'
-  !include "${INCEXIST}"
-  !delfile "${INCEXIST}"
-  !ifdef HAVE_SIGN_UNINST
-  !system '"@CPACK_NSIS_SIGN_UNINSTALLER@" "${TEMPUNINSTALLER}.exe"' = 0
-  !endif
-
-  ; Good.  Now we can carry on writing the real installer.
 
   ;Name and file
   Name "@CPACK_NSIS_PACKAGE_NAME@"
@@ -64,7 +36,6 @@
 
   ;Set compression
   SetCompressor @CPACK_NSIS_COMPRESSOR@
-!endif
 
   ;Require administrator access
   RequestExecutionLevel admin
@@ -588,10 +559,8 @@ FunctionEnd
   !insertmacro MUI_PAGE_INSTFILES
   !insertmacro MUI_PAGE_FINISH
 
-!ifdef INNER
   !insertmacro MUI_UNPAGE_CONFIRM
   !insertmacro MUI_UNPAGE_INSTFILES
-!endif
 
 ;--------------------------------
 ;Languages
@@ -673,10 +642,7 @@ Section "-Core installation"
   WriteRegStr SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "" $INSTDIR
 
   ;Create uninstaller
-!ifndef INNER
-  ; this packages the signed uninstaller
-  File "/oname=Uninstall.exe" "${TEMPUNINSTALLER}.exe"
-!endif
+  WriteUninstaller "$INSTDIR\Uninstall.exe"
   Push "DisplayName"
   Push "@CPACK_NSIS_DISPLAY_NAME@"
   Call ConditionalAddToRegisty
@@ -835,7 +801,6 @@ FunctionEnd
 ;--------------------------------
 ;Uninstaller Section
 
-!ifdef INNER
 Section "Uninstall"
   ReadRegStr $START_MENU SHCTX \
    "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "StartMenu"
@@ -921,7 +886,6 @@ Section "Uninstall"
     Call un.RemoveFromPath
   doNotRemoveFromPath:
 SectionEnd
-!endif
 
 ;--------------------------------
 ; determine admin versus local install
@@ -934,14 +898,6 @@ SectionEnd
 ; "Program Files" for AllUsers, "My Documents" for JustMe...
 
 Function .onInit
-!ifdef INNER
-  ; If INNER is defined, then we aren't supposed to do anything except write out
-  ; the installer.  This is better than processing a command line option as it means
-  ; this entire code path is not present in the final (real) installer.
-
-  WriteUninstaller "${TEMPUNINSTALLER}.exe"
-  Quit  ; just bail out quickly when running the "inner" installer
-!endif
   StrCmp "@CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL@" "ON" 0 inst
 
   ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "UninstallString"
