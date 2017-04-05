@@ -67,7 +67,7 @@ endmacro()
 
 # Run IPO/LTO test
 macro(_ipo_run_language_check language)
-  set(testdir "${CMAKE_CURRENT_BINARY_DIR}/_CMakeLTOTest-${language}")
+  set(testdir "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/_CMakeLTOTest-${language}")
 
   file(REMOVE_RECURSE "${testdir}")
   file(MAKE_DIRECTORY "${testdir}")
@@ -93,11 +93,14 @@ macro(_ipo_run_language_check language)
 
   string(COMPARE EQUAL "${language}" "C" is_c)
   string(COMPARE EQUAL "${language}" "CXX" is_cxx)
+  string(COMPARE EQUAL "${language}" "Fortran" is_fortran)
 
   if(is_c)
     set(copy_sources foo.c main.c)
   elseif(is_cxx)
     set(copy_sources foo.cpp main.cpp)
+  elseif(is_fortran)
+    set(copy_sources foo.f main.f)
   else()
     message(FATAL_ERROR "Language not supported")
   endif()
@@ -202,12 +205,6 @@ function(check_ipo_supported)
       )
       return()
     endif()
-  endif()
-
-  list(FIND languages "Fortran" result)
-  if(NOT result EQUAL -1)
-    _ipo_not_supported("Fortran is not supported")
-    return()
   endif()
 
   if(NOT _CMAKE_IPO_SUPPORTED_BY_CMAKE)
