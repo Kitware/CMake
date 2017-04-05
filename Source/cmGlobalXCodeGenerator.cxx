@@ -282,13 +282,7 @@ void cmGlobalXCodeGenerator::EnableLanguage(
   }
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
-  const char* osxArch = mf->GetDefinition("CMAKE_OSX_ARCHITECTURES");
-  const char* sysroot = mf->GetDefinition("CMAKE_OSX_SYSROOT");
-  if (osxArch && sysroot) {
-    this->Architectures.clear();
-    cmSystemTools::ExpandListArgument(std::string(osxArch),
-                                      this->Architectures);
-  }
+  this->ComputeArchitectures(mf);
 }
 
 void cmGlobalXCodeGenerator::GenerateBuildCommand(
@@ -3089,23 +3083,16 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
                            this->CreateString(defaultConfigName));
   cmXCodeObject* buildSettings =
     this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  const char* osxArch =
-    this->CurrentMakefile->GetDefinition("CMAKE_OSX_ARCHITECTURES");
   const char* sysroot =
     this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
   const char* deploymentTarget =
     this->CurrentMakefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
-  std::string archs;
   if (sysroot) {
-    if (osxArch) {
-      // recompute this as it may have been changed since enable language
-      this->Architectures.clear();
-      cmSystemTools::ExpandListArgument(std::string(osxArch),
-                                        this->Architectures);
-      archs = cmJoin(this->Architectures, " ");
-    }
     buildSettings->AddAttribute("SDKROOT", this->CreateString(sysroot));
   }
+  // recompute this as it may have been changed since enable language
+  this->ComputeArchitectures(this->CurrentMakefile);
+  std::string const archs = cmJoin(this->Architectures, " ");
   if (archs.empty()) {
     // Tell Xcode to use NATIVE_ARCH instead of ARCHS.
     buildSettings->AddAttribute("ONLY_ACTIVE_ARCH", this->CreateString("YES"));
@@ -3210,6 +3197,17 @@ std::string cmGlobalXCodeGenerator::GetObjectsNormalDirectory(
   dir += ".build/Objects-normal/";
 
   return dir;
+}
+
+void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
+{
+  this->Architectures.clear();
+  const char* osxArch = mf->GetDefinition("CMAKE_OSX_ARCHITECTURES");
+  const char* sysroot = mf->GetDefinition("CMAKE_OSX_SYSROOT");
+  if (osxArch && sysroot) {
+    cmSystemTools::ExpandListArgument(std::string(osxArch),
+                                      this->Architectures);
+  }
 }
 
 void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(

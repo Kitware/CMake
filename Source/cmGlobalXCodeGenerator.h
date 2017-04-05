@@ -240,6 +240,8 @@ private:
                                         const std::string& configName,
                                         const cmGeneratorTarget* t) const;
 
+  void ComputeArchitectures(cmMakefile* mf);
+
   void addObject(cmXCodeObject* obj);
   std::string PostBuildMakeTarget(std::string const& tName,
                                   std::string const& configName);
