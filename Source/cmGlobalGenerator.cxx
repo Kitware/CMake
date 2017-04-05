@@ -1347,10 +1347,11 @@ void cmGlobalGenerator::Generate()
   for (std::map<std::string, cmExportBuildFileGenerator*>::iterator it =
          this->BuildExportSets.begin();
        it != this->BuildExportSets.end(); ++it) {
-    if (!it->second->GenerateImportFile() &&
-        !cmSystemTools::GetErrorOccuredFlag()) {
-      this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR,
-                                             "Could not write export file.");
+    if (!it->second->GenerateImportFile()) {
+      if (!cmSystemTools::GetErrorOccuredFlag()) {
+        this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR,
+                                               "Could not write export file.");
+      }
       return;
     }
   }
