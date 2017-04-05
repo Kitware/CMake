@@ -9,7 +9,7 @@ string(REGEX MATCH "^([0-9]+\\.[0-9]+)" __version_x_y
 get_filename_component(__gcc_hints "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER}" DIRECTORY)
 
 # http://manpages.ubuntu.com/manpages/wily/en/man1/gcc-ar.1.html
-find_program(CMAKE_GCC_AR NAMES
+find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR NAMES
     "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ar"
     "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ar-${__version_x_y}"
     HINTS ${__gcc_hints}
@@ -17,7 +17,7 @@ find_program(CMAKE_GCC_AR NAMES
 )
 
 # http://manpages.ubuntu.com/manpages/wily/en/man1/gcc-ranlib.1.html
-find_program(CMAKE_GCC_RANLIB NAMES
+find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_RANLIB NAMES
     "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ranlib"
     "${_CMAKE_TOOLCHAIN_PREFIX}gcc-ranlib-${__version_x_y}"
     HINTS ${__gcc_hints}
