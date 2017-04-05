@@ -152,6 +152,8 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(cmake* cm,
   this->CurrentLocalGenerator = 0;
   this->XcodeBuildCommandInitialized = false;
 
+  this->ComputeObjectDirArch();
+
   cm->GetState()->SetIsGeneratorMultiConfig(true);
 }
 
@@ -3210,6 +3212,21 @@ void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
   }
 }
 
+void cmGlobalXCodeGenerator::ComputeObjectDirArch()
+{
+  if (this->XcodeVersion >= 21) {
+    this->ObjectDirArch = "$(CURRENT_ARCH)";
+  } else {
+#if defined(__ppc__)
+    this->ObjectDirArch = "ppc";
+#elif defined(__i386)
+    this->ObjectDirArch = "i386";
+#else
+    this->ObjectDirArch = "";
+#endif
+  }
+}
+
 void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
   std::vector<cmXCodeObject*>& targets)
 {
@@ -3719,15 +3736,7 @@ void cmGlobalXCodeGenerator::ComputeTargetObjectDirectory(
   std::string configName = this->GetCMakeCFGIntDir();
   std::string dir =
     this->GetObjectsNormalDirectory("$(PROJECT_NAME)", configName, gt);
-  if (this->XcodeVersion >= 21) {
-    dir += "$(CURRENT_ARCH)/";
-  } else {
-#ifdef __ppc__
-    dir += "ppc/";
-#endif
-#ifdef __i386
-    dir += "i386/";
-#endif
-  }
+  dir += this->ObjectDirArch;
+  dir += "/";
   gt->ObjectDirectory = dir;
 }

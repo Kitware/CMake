@@ -241,6 +241,7 @@ private:
                                         const cmGeneratorTarget* t) const;
 
   void ComputeArchitectures(cmMakefile* mf);
+  void ComputeObjectDirArch();
 
   void addObject(cmXCodeObject* obj);
   std::string PostBuildMakeTarget(std::string const& tName,
@@ -263,6 +264,7 @@ private:
   std::map<std::string, cmXCodeObject*> FileRefs;
   std::map<cmGeneratorTarget const*, cmXCodeObject*> XCodeObjectMap;
   std::vector<std::string> Architectures;
+  std::string ObjectDirArch;
   std::string GeneratorToolset;
 };
 
