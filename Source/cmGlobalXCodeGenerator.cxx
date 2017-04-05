@@ -152,6 +152,7 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(cmake* cm,
   this->CurrentLocalGenerator = 0;
   this->XcodeBuildCommandInitialized = false;
 
+  this->ObjectDirArchDefault = "$(CURRENT_ARCH)";
   this->ComputeObjectDirArch();
 
   cm->GetState()->SetIsGeneratorMultiConfig(true);
@@ -3210,12 +3211,28 @@ void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
     cmSystemTools::ExpandListArgument(std::string(osxArch),
                                       this->Architectures);
   }
+
+  if (this->Architectures.empty()) {
+    // With no ARCHS we use ONLY_ACTIVE_ARCH.
+    // Look up the arch that Xcode chooses in this case.
+    if (const char* arch = mf->GetDefinition("CMAKE_XCODE_CURRENT_ARCH")) {
+      this->ObjectDirArchDefault = arch;
+    }
+  }
+
+  this->ComputeObjectDirArch();
 }
 
 void cmGlobalXCodeGenerator::ComputeObjectDirArch()
 {
   if (this->XcodeVersion >= 21) {
-    this->ObjectDirArch = "$(CURRENT_ARCH)";
+    if (this->Architectures.size() > 1) {
+      this->ObjectDirArch = "$(CURRENT_ARCH)";
+    } else if (!this->Architectures.empty()) {
+      this->ObjectDirArch = this->Architectures[0];
+    } else {
+      this->ObjectDirArch = this->ObjectDirArchDefault;
+    }
   } else {
 #if defined(__ppc__)
     this->ObjectDirArch = "ppc";

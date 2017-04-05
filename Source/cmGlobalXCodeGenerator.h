@@ -264,6 +264,7 @@ private:
   std::map<std::string, cmXCodeObject*> FileRefs;
   std::map<cmGeneratorTarget const*, cmXCodeObject*> XCodeObjectMap;
   std::vector<std::string> Architectures;
+  std::string ObjectDirArchDefault;
   std::string ObjectDirArch;
   std::string GeneratorToolset;
 };
