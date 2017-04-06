@@ -356,16 +356,16 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
     if (expath) {
       std::set<std::string> allConfigurations(configs.begin(), configs.end());
       const char* mapping = target->GetProperty("VS_PLATFORM_MAPPING");
-      this->WriteProjectConfigurations(
-        fout, target->GetName().c_str(), target->GetType(), configs,
-        allConfigurations, mapping ? mapping : "");
+      this->WriteProjectConfigurations(fout, target->GetName().c_str(),
+                                       *target, configs, allConfigurations,
+                                       mapping ? mapping : "");
     } else {
       const std::set<std::string>& configsPartOfDefaultBuild =
         this->IsPartOfDefaultBuild(configs, projectTargets, target);
       const char* vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
       if (vcprojName) {
-        this->WriteProjectConfigurations(fout, vcprojName, target->GetType(),
-                                         configs, configsPartOfDefaultBuild);
+        this->WriteProjectConfigurations(fout, vcprojName, *target, configs,
+                                         configsPartOfDefaultBuild);
       }
     }
   }

@@ -353,7 +353,7 @@ void cmGlobalVisualStudio8Generator::WriteSolutionConfigurations(
 }
 
 void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
-  std::ostream& fout, const std::string& name, cmStateEnums::TargetType type,
+  std::ostream& fout, const std::string& name, cmGeneratorTarget const& target,
   std::vector<std::string> const& configs,
   const std::set<std::string>& configsPartOfDefaultBuild,
   std::string const& platformMapping)
@@ -361,8 +361,13 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
   std::string guid = this->GetGUID(name);
   for (std::vector<std::string>::const_iterator i = configs.begin();
        i != configs.end(); ++i) {
+    const char* dstConfig = target.GetProperty("MAP_IMPORTED_CONFIG_" +
+                                               cmSystemTools::UpperCase(*i));
+    if (dstConfig == CM_NULLPTR) {
+      dstConfig = i->c_str();
+    }
     fout << "\t\t{" << guid << "}." << *i << "|" << this->GetPlatformName()
-         << ".ActiveCfg = " << *i << "|"
+         << ".ActiveCfg = " << dstConfig << "|"
          << (!platformMapping.empty() ? platformMapping
                                       : this->GetPlatformName())
          << "\n";
@@ -370,14 +375,14 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
       configsPartOfDefaultBuild.find(*i);
     if (!(ci == configsPartOfDefaultBuild.end())) {
       fout << "\t\t{" << guid << "}." << *i << "|" << this->GetPlatformName()
-           << ".Build.0 = " << *i << "|"
+           << ".Build.0 = " << dstConfig << "|"
            << (!platformMapping.empty() ? platformMapping
                                         : this->GetPlatformName())
            << "\n";
     }
-    if (this->NeedsDeploy(type)) {
+    if (this->NeedsDeploy(target.GetType())) {
       fout << "\t\t{" << guid << "}." << *i << "|" << this->GetPlatformName()
-           << ".Deploy.0 = " << *i << "|"
+           << ".Deploy.0 = " << dstConfig << "|"
            << (!platformMapping.empty() ? platformMapping
                                         : this->GetPlatformName())
            << "\n";

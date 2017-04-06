@@ -249,7 +249,7 @@ void cmGlobalVisualStudio71Generator::WriteExternalProject(
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
-  std::ostream& fout, const std::string& name, cmStateEnums::TargetType,
+  std::ostream& fout, const std::string& name, cmGeneratorTarget const& target,
   std::vector<std::string> const& configs,
   const std::set<std::string>& configsPartOfDefaultBuild,
   std::string const& platformMapping)
@@ -259,13 +259,18 @@ void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
   std::string guid = this->GetGUID(name);
   for (std::vector<std::string>::const_iterator i = configs.begin();
        i != configs.end(); ++i) {
-    fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << *i << "|"
-         << platformName << std::endl;
+    const char* dstConfig = target.GetProperty("MAP_IMPORTED_CONFIG_" +
+                                               cmSystemTools::UpperCase(*i));
+    if (dstConfig == CM_NULLPTR) {
+      dstConfig = i->c_str();
+    }
+    fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << dstConfig
+         << "|" << platformName << std::endl;
     std::set<std::string>::const_iterator ci =
       configsPartOfDefaultBuild.find(*i);
     if (!(ci == configsPartOfDefaultBuild.end())) {
-      fout << "\t\t{" << guid << "}." << *i << ".Build.0 = " << *i << "|"
-           << platformName << std::endl;
+      fout << "\t\t{" << guid << "}." << *i << ".Build.0 = " << dstConfig
+           << "|" << platformName << std::endl;
     }
   }
 }
