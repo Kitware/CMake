@@ -360,6 +360,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   InfoGet(makefile, "AM_QT_MOC_EXECUTABLE", this->MocExecutable);
   InfoGet(makefile, "AM_QT_UIC_EXECUTABLE", this->UicExecutable);
   InfoGet(makefile, "AM_QT_RCC_EXECUTABLE", this->RccExecutable);
+
+  InfoGet(makefile, "AM_MOC_PREDEFS_CMD", this->MocPredefsCmd);
   // Check Qt version
   if ((this->QtMajorVersion != "4") && (this->QtMajorVersion != "5")) {
     this->LogError("AutoGen: Error: Unsupported Qt version: " +
@@ -578,6 +580,12 @@ void cmQtAutoGenerators::Init(cmMakefile* makefile)
   this->MocCppFilenameRel += "moc_compilation.cpp";
 
   this->MocCppFilenameAbs = this->CurrentBinaryDir + this->MocCppFilenameRel;
+
+  // Moc predefs file
+  if (!this->MocPredefsCmd.empty()) {
+    this->MocPredefsFileRel = this->AutogenBuildSubDir + "moc_predefs.h";
+    this->MocPredefsFileAbs = this->CurrentBinaryDir + this->MocPredefsFileRel;
+  }
 
   // Init file path checksum generator
   fpathCheckSum.setupParentDirs(this->CurrentSourceDir, this->CurrentBinaryDir,
@@ -1142,6 +1150,50 @@ bool cmQtAutoGenerators::MocGenerateAll(
     return true;
   }
 
+  // Generate moc_predefs
+  if (!this->MocPredefsCmd.empty()) {
+    if (!this->MakeParentDirectory(this->MocPredefsFileAbs)) {
+      this->LogError("AutoMoc: Error creating directory for " +
+                     this->MocPredefsFileRel);
+      return false;
+    }
+    this->LogBold("Generating MOC predefs " + this->MocPredefsFileRel);
+
+    std::vector<std::string> cmd = this->MocPredefsCmd;
+    cmd.insert(cmd.end(), this->MocIncludes.begin(), this->MocIncludes.end());
+    for (std::vector<std::string>::const_iterator it =
+           this->MocDefinitions.begin();
+         it != this->MocDefinitions.end(); ++it) {
+      cmd.push_back("-D" + (*it));
+    }
+    cmd.insert(cmd.end(), this->MocOptions.begin(), this->MocOptions.end());
+
+    std::string output;
+    bool moc_predefsGenerated = this->RunCommand(cmd, output, false);
+    if (!moc_predefsGenerated) {
+      return false;
+    }
+
+    // actually write the file
+    cmsys::ofstream outfile;
+    outfile.open(this->MocPredefsFileAbs.c_str(), std::ios::trunc);
+    if (!outfile) {
+      moc_predefsGenerated = false;
+      this->LogError("AutoMoc: Error opening " + this->MocPredefsFileRel);
+    } else {
+      outfile << output;
+      // Check for write errors
+      if (!outfile.good()) {
+        moc_predefsGenerated = false;
+        this->LogError("AutoMoc: Error writing " + this->MocPredefsFileRel);
+      }
+    }
+
+    if (!moc_predefsGenerated) {
+      return false;
+    }
+  }
+
   bool mocCompFileGenerated = false;
   bool mocCompChanged = false;
 
@@ -1305,6 +1357,10 @@ bool cmQtAutoGenerators::MocGenerateFile(
         cmd.push_back("-D" + (*it));
       }
       cmd.insert(cmd.end(), this->MocOptions.begin(), this->MocOptions.end());
+      if (!this->MocPredefsFileAbs.empty()) {
+        cmd.push_back("--include");
+        cmd.push_back(this->MocPredefsFileAbs);
+      }
 #ifdef _WIN32
       cmd.push_back("-DWIN32");
 #endif
@@ -1805,7 +1861,7 @@ bool cmQtAutoGenerators::MakeParentDirectory(const std::string& filename) const
  * @return True on success
  */
 bool cmQtAutoGenerators::RunCommand(const std::vector<std::string>& command,
-                                    std::string& output) const
+                                    std::string& output, bool verbose) const
 {
   // Log command
   if (this->Verbose) {
@@ -1813,8 +1869,9 @@ bool cmQtAutoGenerators::RunCommand(const std::vector<std::string>& command,
   }
   // Execute command
   int retVal = 0;
-  bool res =
-    cmSystemTools::RunSingleCommand(command, &output, &output, &retVal);
+  bool res = cmSystemTools::RunSingleCommand(
+    command, &output, &output, &retVal, CM_NULLPTR,
+    verbose ? cmSystemTools::OUTPUT_MERGE : cmSystemTools::OUTPUT_NONE);
   return (res && (retVal == 0));
 }
 
