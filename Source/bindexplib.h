@@ -16,6 +16,7 @@ public:
   bool AddDefinitionFile(const char* filename);
   bool AddObjectFile(const char* filename);
   void WriteFile(FILE* file);
+
 private:
   std::set<std::string> Symbols;
   std::set<std::string> DataSymbols;
