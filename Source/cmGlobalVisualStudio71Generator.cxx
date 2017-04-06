@@ -250,21 +250,27 @@ void cmGlobalVisualStudio71Generator::WriteExternalProject(
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
   std::ostream& fout, const std::string& name, cmStateEnums::TargetType,
-  std::vector<std::string> const& configs,
+  cmGeneratorTarget const& target, std::vector<std::string> const& configs,
   const std::set<std::string>& configsPartOfDefaultBuild,
   std::string const& platformMapping)
 {
   const std::string& platformName =
     !platformMapping.empty() ? platformMapping : this->GetPlatformName();
-  std::string guid = this->GetGUID(name);
+  std::string guid = this->GetGUID(name); 
+
   for (std::vector<std::string>::const_iterator i = configs.begin();
        i != configs.end(); ++i) {
-    fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << *i << "|"
+    const char *dstConfig = target.GetProperty("MAP_IMPORTED_CONFIG_" + 
+                                               cmSystemTools::UpperCase(*i));
+    if (dstConfig == nullptr){
+      dstConfig = i->c_str();
+    }
+    fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << dstConfig << "|"
          << platformName << std::endl;
     std::set<std::string>::const_iterator ci =
       configsPartOfDefaultBuild.find(*i);
     if (!(ci == configsPartOfDefaultBuild.end())) {
-      fout << "\t\t{" << guid << "}." << *i << ".Build.0 = " << *i << "|"
+      fout << "\t\t{" << guid << "}." << *i << ".Build.0 = " << dstConfig << "|"
            << platformName << std::endl;
     }
   }

@@ -20,3 +20,6 @@ command to make things depend on the external project.
 specify the type of project, id (GUID) of the project and the name of
 the target platform.  This is useful for projects requiring values
 other than the default (e.g.  WIX projects).
+
+If imported project has different configurations namings then standard cmake,
+specify a mapping throught property ``MAP_IMPORTED_CONFIG_*``
