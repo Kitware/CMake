@@ -50,6 +50,12 @@ protected:
                                   const cmMakefile* mf,
                                   const std::string& projectType,
                                   const std::string& targetName);
+  void CreateFoldersAndFiles(std::set<std::string>& cFiles,
+                             cmXMLWriter* _xml,
+                             const std::string& projectPath);
+  void CreateFoldersAndFiles(std::map<std::string, cmSourceFile*>& cFiles,
+                             cmXMLWriter* _xml,
+                             const std::string& projectPath);
 
 public:
   cmExtraCodeLiteGenerator();
