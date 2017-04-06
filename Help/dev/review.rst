@@ -106,6 +106,10 @@ Human Review
 
 Anyone is welcome to review merge requests and make comments!
 
+Please make comments directly on the MR page Discussion and Changes tabs
+and not on individual commits.  Comments on a commit may disappear
+from the MR page if the commit is rewritten in response.
+
 Reviewers may add comments providing feedback or to acknowledge their
 approval.  Lines of specific forms will be extracted during the `merge`_
 step and included as trailing lines of the generated merge commit message.
