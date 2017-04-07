@@ -547,12 +547,6 @@ void cmGeneratorTarget::GetModuleDefinitionSources(
   IMPLEMENT_VISIT(SourceKindModuleDefinition);
 }
 
-void cmGeneratorTarget::GetIDLSources(std::vector<cmSourceFile const*>& data,
-                                      const std::string& config) const
-{
-  IMPLEMENT_VISIT(SourceKindIDL);
-}
-
 void cmGeneratorTarget::GetHeaderSources(
   std::vector<cmSourceFile const*>& data, const std::string& config) const
 {
