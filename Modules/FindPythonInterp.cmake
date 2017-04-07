@@ -91,12 +91,15 @@ unset(_PYTHON3_VERSIONS)
 if(NOT PYTHON_EXECUTABLE)
     foreach(_CURRENT_VERSION IN LISTS _Python_VERSIONS)
       set(_Python_NAMES python${_CURRENT_VERSION})
-      if(WIN32)
+      if(CMAKE_HOST_WIN32)
         list(APPEND _Python_NAMES python)
       endif()
       find_program(PYTHON_EXECUTABLE
         NAMES ${_Python_NAMES}
-        PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]
+        PATHS
+            [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]
+            [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-32\\InstallPath]
+            [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-64\\InstallPath]
         )
     endforeach()
 endif()
