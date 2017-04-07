@@ -658,7 +658,37 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReference(
     this->WriteString("<HintPath>", 3);
     (*this->BuildFileStream) << hint << "</HintPath>\n";
   }
+  this->WriteDotNetReferenceCustomTags(ref);
   this->WriteString("</Reference>\n", 2);
+}
+
+void cmVisualStudio10TargetGenerator::WriteDotNetReferenceCustomTags(
+  std::string const& ref)
+{
+
+  static const std::string refpropPrefix = "VS_DOTNET_REFERENCEPROP_";
+  static const std::string refpropInfix = "_TAG_";
+  const std::string refPropFullPrefix = refpropPrefix + ref + refpropInfix;
+  typedef std::map<std::string, std::string> CustomTags;
+  CustomTags tags;
+  cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
+  for (cmPropertyMap::const_iterator i = props.begin(); i != props.end();
+       ++i) {
+    if (i->first.find(refPropFullPrefix) == 0) {
+      std::string refTag = i->first.substr(refPropFullPrefix.length());
+      std::string refVal = i->second.GetValue();
+      if (!refTag.empty() && !refVal.empty()) {
+        tags[refTag] = refVal;
+      }
+    }
+  }
+  for (CustomTags::const_iterator tag = tags.begin(); tag != tags.end();
+       ++tag) {
+    this->WriteString("<", 3);
+    (*this->BuildFileStream) << tag->first << ">"
+                             << cmVS10EscapeXML(tag->second) << "</"
+                             << tag->first << ">\n";
+  }
 }
 
 void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
@@ -3493,6 +3523,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
     (*this->BuildFileStream) << "</Project>\n";
     this->WriteString("<Name>", 3);
     (*this->BuildFileStream) << name << "</Name>\n";
+    this->WriteDotNetReferenceCustomTags(name);
     this->WriteString("</ProjectReference>\n", 2);
   }
   this->WriteString("</ItemGroup>\n", 1);
