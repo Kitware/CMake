@@ -304,6 +304,11 @@ Exactly one ``CONTENT`` or ``INPUT`` option must be given.  A specific
 Generated files are modified on subsequent cmake runs only if their content
 is changed.
 
+Note also that ``file(GENERATE)`` does not create the output file until the
+generation phase. The output file will not yet have been written when the
+``file(GENERATE)`` command returns, it is written only after processing all
+of a project's ``CMakeLists.txt`` files.
+
 ------------------------------------------------------------------------------
 
 ::
