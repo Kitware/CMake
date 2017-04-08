@@ -60,6 +60,7 @@ Variables that Provide Information
    /variable/CMAKE_MINOR_VERSION
    /variable/CMAKE_PARENT_LIST_FILE
    /variable/CMAKE_PATCH_VERSION
+   /variable/CMAKE_PROJECT_DESCRIPTION
    /variable/CMAKE_PROJECT_NAME
    /variable/CMAKE_RANLIB
    /variable/CMAKE_ROOT
@@ -97,6 +98,7 @@ Variables that Provide Information
    /variable/PROJECT-NAME_VERSION_PATCH
    /variable/PROJECT-NAME_VERSION_TWEAK
    /variable/PROJECT_BINARY_DIR
+   /variable/PROJECT_DESCRIPTION
    /variable/PROJECT_NAME
    /variable/PROJECT_SOURCE_DIR
    /variable/PROJECT_VERSION

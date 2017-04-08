@@ -98,7 +98,12 @@
 #
 # .. variable:: CPACK_PACKAGE_DESCRIPTION_SUMMARY
 #
-#  Short description of the project (only a few words).
+#  Short description of the project (only a few words). Default value is::
+#
+#    ${PROJECT_DESCRIPTION}
+#
+#  if DESCRIPTION has given to the project() call or
+#  CMake generated string with PROJECT_NAME otherwise.
 #
 # .. variable:: CPACK_PACKAGE_FILE_NAME
 #
@@ -360,8 +365,13 @@ _cpack_set_default(CPACK_PACKAGE_VERSION_PATCH "1")
 _cpack_set_default(CPACK_PACKAGE_VERSION
   "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 _cpack_set_default(CPACK_PACKAGE_VENDOR "Humanity")
-_cpack_set_default(CPACK_PACKAGE_DESCRIPTION_SUMMARY
-  "${CMAKE_PROJECT_NAME} built using CMake")
+if(CMAKE_PROJECT_DESCRIPTION)
+  _cpack_set_default(CPACK_PACKAGE_DESCRIPTION_SUMMARY
+    "${CMAKE_PROJECT_DESCRIPTION}")
+else()
+  _cpack_set_default(CPACK_PACKAGE_DESCRIPTION_SUMMARY
+    "${CMAKE_PROJECT_NAME} built using CMake")
+endif()
 
 _cpack_set_default(CPACK_PACKAGE_DESCRIPTION_FILE
   "${CMAKE_ROOT}/Templates/CPack.GenericDescription.txt")
