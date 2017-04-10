@@ -53,6 +53,10 @@ endif()
 
 mark_as_advanced(
 CMAKE_RC_FLAGS
+CMAKE_RC_FLAGS_DEBUG
+CMAKE_RC_FLAGS_MINSIZEREL
+CMAKE_RC_FLAGS_RELEASE
+CMAKE_RC_FLAGS_RELWITHDEBINFO
 )
 # set this variable so we can avoid loading this more than once.
 set(CMAKE_RC_INFORMATION_LOADED 1)
