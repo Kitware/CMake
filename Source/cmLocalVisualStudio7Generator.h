@@ -119,7 +119,8 @@ private:
 
   bool WriteGroup(const cmSourceGroup* sg, cmGeneratorTarget* target,
                   std::ostream& fout, const std::string& libName,
-                  std::vector<std::string> const& configs);
+                  std::vector<std::string> const& configs,
+                  std::map<cmSourceFile const*, size_t> const& sourcesIndex);
 
   friend class cmLocalVisualStudio7GeneratorFCInfo;
   friend class cmLocalVisualStudio7GeneratorInternals;

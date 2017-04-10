@@ -1241,16 +1241,15 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
 
   // collect up group information
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
-  std::vector<cmSourceFile*> classes;
-  if (!this->GeneratorTarget->GetConfigCommonSourceFiles(classes)) {
-    return;
-  }
+
+  std::vector<cmGeneratorTarget::AllConfigSource> const& sources =
+    this->GeneratorTarget->GetAllConfigSources();
 
   std::set<cmSourceGroup*> groupsUsed;
-  for (std::vector<cmSourceFile*>::const_iterator s = classes.begin();
-       s != classes.end(); s++) {
-    cmSourceFile* sf = *s;
-    std::string const& source = sf->GetFullPath();
+  for (std::vector<cmGeneratorTarget::AllConfigSource>::const_iterator si =
+         sources.begin();
+       si != sources.end(); ++si) {
+    std::string const& source = si->Source->GetFullPath();
     cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
     groupsUsed.insert(sourceGroup);
@@ -1734,12 +1733,17 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
   }
   this->WriteString("<ItemGroup>\n", 1);
 
-  cmGeneratorTarget::KindedSources const& sources =
-    this->GeneratorTarget->GetKindedSources("");
+  std::vector<size_t> all_configs;
+  for (size_t ci = 0; ci < this->Configurations.size(); ++ci) {
+    all_configs.push_back(ci);
+  }
 
-  for (std::vector<cmGeneratorTarget::SourceAndKind>::const_iterator si =
-         sources.Sources.begin();
-       si != sources.Sources.end(); ++si) {
+  std::vector<cmGeneratorTarget::AllConfigSource> const& sources =
+    this->GeneratorTarget->GetAllConfigSources();
+
+  for (std::vector<cmGeneratorTarget::AllConfigSource>::const_iterator si =
+         sources.begin();
+       si != sources.end(); ++si) {
     std::string tool;
     switch (si->Kind) {
       case cmGeneratorTarget::SourceKindAppManifest:
@@ -1810,14 +1814,35 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
     }
 
     if (!tool.empty()) {
+      // Compute set of configurations to exclude, if any.
+      std::vector<size_t> const& include_configs = si->Configs;
+      std::vector<size_t> exclude_configs;
+      std::set_difference(all_configs.begin(), all_configs.end(),
+                          include_configs.begin(), include_configs.end(),
+                          std::back_inserter(exclude_configs));
+
       if (si->Kind == cmGeneratorTarget::SourceKindObjectSource) {
+        // FIXME: refactor generation to avoid tracking XML syntax state.
         this->WriteSource(tool, si->Source, " ");
-        if (this->OutputSourceSpecificFlags(si->Source)) {
+        bool have_nested = this->OutputSourceSpecificFlags(si->Source);
+        if (!exclude_configs.empty()) {
+          if (!have_nested) {
+            (*this->BuildFileStream) << ">\n";
+          }
+          this->WriteExcludeFromBuild(exclude_configs);
+          have_nested = true;
+        }
+        if (have_nested) {
           this->WriteString("</", 2);
           (*this->BuildFileStream) << tool << ">\n";
         } else {
           (*this->BuildFileStream) << " />\n";
         }
+      } else if (!exclude_configs.empty()) {
+        this->WriteSource(tool, si->Source, ">\n");
+        this->WriteExcludeFromBuild(exclude_configs);
+        this->WriteString("</", 2);
+        (*this->BuildFileStream) << tool << ">\n";
       } else {
         this->WriteSource(tool, si->Source);
       }
@@ -1999,6 +2024,19 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   }
 
   return hasFlags;
+}
+
+void cmVisualStudio10TargetGenerator::WriteExcludeFromBuild(
+  std::vector<size_t> const& exclude_configs)
+{
+  for (std::vector<size_t>::const_iterator ci = exclude_configs.begin();
+       ci != exclude_configs.end(); ++ci) {
+    this->WriteString("", 3);
+    (*this->BuildFileStream)
+      << "<ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='"
+      << cmVS10EscapeXML(this->Configurations[*ci]) << "|"
+      << cmVS10EscapeXML(this->Platform) << "'\">true</ExcludedFromBuild>\n";
+  }
 }
 
 void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
