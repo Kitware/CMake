@@ -9,6 +9,7 @@
 #include <map>
 #include <set>
 #include <stack>
+#include <stddef.h>
 #include <string>
 #include <vector>
 
@@ -405,6 +406,8 @@ public:
    */
   cmSourceFile* GetOrCreateSource(const std::string& sourceName,
                                   bool generated = false);
+
+  void AddTargetObject(std::string const& tgtName, std::string const& objFile);
 
   /**
    * Given a variable name, return its value (as a string).
@@ -817,6 +820,7 @@ protected:
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   std::vector<cmSourceGroup> SourceGroups;
+  size_t ObjectLibrariesSourceGroupIndex;
 #endif
 
   std::vector<cmCommand*> FinalPassCommands;

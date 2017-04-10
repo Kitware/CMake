@@ -14,7 +14,6 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -33,6 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <utility>
+
+class cmSourceFile;
 
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   std::string const& prop, cmLocalGenerator* lg,
@@ -1265,6 +1266,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
 
     gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
 
+    cmMakefile* mf = context->LG->GetMakefile();
+
     std::string obj_dir = gt->ObjectDirectory;
     std::string result;
     const char* sep = "";
@@ -1278,10 +1281,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       assert(!map_it->second.empty());
       result += sep;
       std::string objFile = obj_dir + map_it->second;
-      cmSourceFile* sf =
-        context->LG->GetMakefile()->GetOrCreateSource(objFile, true);
-      sf->SetObjectLibrary(tgtName);
-      sf->SetProperty("EXTERNAL_OBJECT", "1");
+      mf->AddTargetObject(tgtName, objFile);
       result += objFile;
       sep = ";";
     }
