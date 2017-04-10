@@ -70,6 +70,43 @@ public:
   void GetSourceFiles(std::vector<cmSourceFile*>& files,
                       const std::string& config) const;
 
+  /** Source file kinds (classifications).
+      Generators use this to decide how to treat a source file.  */
+  enum SourceKind
+  {
+    SourceKindAppManifest,
+    SourceKindCertificate,
+    SourceKindCustomCommand,
+    SourceKindExternalObject,
+    SourceKindExtra,
+    SourceKindHeader,
+    SourceKindIDL,
+    SourceKindManifest,
+    SourceKindModuleDefinition,
+    SourceKindObjectSource,
+    SourceKindResx,
+    SourceKindXaml
+  };
+
+  /** A source file paired with a kind (classification).  */
+  struct SourceAndKind
+  {
+    cmSourceFile* Source;
+    SourceKind Kind;
+  };
+
+  /** All sources needed for a configuration with kinds assigned.  */
+  struct KindedSources
+  {
+    std::vector<SourceAndKind> Sources;
+    std::set<std::string> ExpectedResxHeaders;
+    std::set<std::string> ExpectedXamlHeaders;
+    std::set<std::string> ExpectedXamlSources;
+  };
+
+  /** Get all sources needed for a configuration with kinds assigned.  */
+  KindedSources const& GetKindedSources(std::string const& config) const;
+
   void GetObjectSources(std::vector<cmSourceFile const*>&,
                         const std::string& config) const;
   const std::string& GetObjectName(cmSourceFile const* file);
@@ -522,19 +559,6 @@ public:
   struct SourceFileFlags GetTargetSourceFileFlags(
     const cmSourceFile* sf) const;
 
-  struct ResxData
-  {
-    mutable std::set<std::string> ExpectedResxHeaders;
-    mutable std::vector<cmSourceFile const*> ResxSources;
-  };
-
-  struct XamlData
-  {
-    std::set<std::string> ExpectedXamlHeaders;
-    std::set<std::string> ExpectedXamlSources;
-    std::vector<cmSourceFile const*> XamlSources;
-  };
-
   void ReportPropertyOrigin(const std::string& p, const std::string& result,
                             const std::string& report,
                             const std::string& compatibilityType) const;
@@ -707,9 +731,10 @@ private:
     const std::string& config, const cmGeneratorTarget* head,
     bool usage_requirements_only) const;
 
-  typedef std::map<std::string, std::vector<cmSourceFile*> >
-    SourceFilesMapType;
-  mutable SourceFilesMapType SourceFilesMap;
+  typedef std::map<std::string, KindedSources> KindedSourcesMapType;
+  mutable KindedSourcesMapType KindedSourcesMap;
+  void ComputeKindedSources(KindedSources& files,
+                            std::string const& config) const;
 
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
@@ -769,10 +794,6 @@ private:
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;
-
-  typedef std::map<std::string, std::set<std::string> > HeadersCacheType;
-  mutable HeadersCacheType ResxHeadersCache;
-  mutable HeadersCacheType XamlHeadersCache;
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(

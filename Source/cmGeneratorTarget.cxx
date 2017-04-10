@@ -75,197 +75,6 @@ public:
 };
 cmLinkImplItem cmGeneratorTarget::TargetPropertyEntry::NoLinkImplItem;
 
-void reportBadObjLib(std::vector<cmSourceFile*> const& badObjLib,
-                     cmGeneratorTarget const* target, cmake* cm)
-{
-  if (!badObjLib.empty()) {
-    std::ostringstream e;
-    e << "OBJECT library \"" << target->GetName() << "\" contains:\n";
-    for (std::vector<cmSourceFile*>::const_iterator i = badObjLib.begin();
-         i != badObjLib.end(); ++i) {
-      e << "  " << (*i)->GetLocation().GetName() << "\n";
-    }
-    e << "but may contain only sources that compile, header files, and "
-         "other files that would not affect linking of a normal library.";
-    cm->IssueMessage(cmake::FATAL_ERROR, e.str(), target->GetBacktrace());
-  }
-}
-
-struct ObjectSourcesTag
-{
-};
-struct CustomCommandsTag
-{
-};
-struct ExtraSourcesTag
-{
-};
-struct HeaderSourcesTag
-{
-};
-struct ExternalObjectsTag
-{
-};
-struct IDLSourcesTag
-{
-};
-struct ResxTag
-{
-};
-struct ModuleDefinitionSourcesTag
-{
-};
-struct AppManifestTag
-{
-};
-struct ManifestsTag
-{
-};
-struct CertificatesTag
-{
-};
-struct XamlTag
-{
-};
-
-template <typename Tag, typename OtherTag>
-struct IsSameTag
-{
-  enum
-  {
-    Result = false
-  };
-};
-
-template <typename Tag>
-struct IsSameTag<Tag, Tag>
-{
-  enum
-  {
-    Result = true
-  };
-};
-
-template <bool>
-struct DoAccept
-{
-  template <typename T>
-  static void Do(T& /*unused*/, cmSourceFile* /*unused*/)
-  {
-  }
-};
-
-template <>
-struct DoAccept<true>
-{
-  static void Do(std::vector<cmSourceFile const*>& files, cmSourceFile* f)
-  {
-    files.push_back(f);
-  }
-  static void Do(cmGeneratorTarget::ResxData& data, cmSourceFile* f)
-  {
-    // Build and save the name of the corresponding .h file
-    // This relationship will be used later when building the project files.
-    // Both names would have been auto generated from Visual Studio
-    // where the user supplied the file name and Visual Studio
-    // appended the suffix.
-    std::string resx = f->GetFullPath();
-    std::string hFileName = resx.substr(0, resx.find_last_of('.')) + ".h";
-    data.ExpectedResxHeaders.insert(hFileName);
-    data.ResxSources.push_back(f);
-  }
-  static void Do(cmGeneratorTarget::XamlData& data, cmSourceFile* f)
-  {
-    // Build and save the name of the corresponding .h and .cpp file
-    // This relationship will be used later when building the project files.
-    // Both names would have been auto generated from Visual Studio
-    // where the user supplied the file name and Visual Studio
-    // appended the suffix.
-    std::string xaml = f->GetFullPath();
-    std::string hFileName = xaml + ".h";
-    std::string cppFileName = xaml + ".cpp";
-    data.ExpectedXamlHeaders.insert(hFileName);
-    data.ExpectedXamlSources.insert(cppFileName);
-    data.XamlSources.push_back(f);
-  }
-  static void Do(std::string& data, cmSourceFile* f)
-  {
-    data = f->GetFullPath();
-  }
-};
-
-template <typename Tag, typename DataType = std::vector<cmSourceFile const*> >
-struct TagVisitor
-{
-  DataType& Data;
-  std::vector<cmSourceFile*> BadObjLibFiles;
-  cmGeneratorTarget const* Target;
-  cmGlobalGenerator* GlobalGenerator;
-  cmsys::RegularExpression Header;
-  bool IsObjLib;
-
-  TagVisitor(cmGeneratorTarget const* target, DataType& data)
-    : Data(data)
-    , Target(target)
-    , GlobalGenerator(target->GetLocalGenerator()->GetGlobalGenerator())
-    , Header(CM_HEADER_REGEX)
-    , IsObjLib(target->GetType() == cmStateEnums::OBJECT_LIBRARY)
-  {
-  }
-
-  ~TagVisitor()
-  {
-    reportBadObjLib(this->BadObjLibFiles, this->Target,
-                    this->GlobalGenerator->GetCMakeInstance());
-  }
-
-  void Accept(cmSourceFile* sf)
-  {
-    std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
-    if (sf->GetCustomCommand()) {
-      DoAccept<IsSameTag<Tag, CustomCommandsTag>::Result>::Do(this->Data, sf);
-    } else if (this->Target->GetType() == cmStateEnums::UTILITY) {
-      DoAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>::Do(this->Data, sf);
-    } else if (sf->GetPropertyAsBool("HEADER_FILE_ONLY")) {
-      DoAccept<IsSameTag<Tag, HeaderSourcesTag>::Result>::Do(this->Data, sf);
-    } else if (sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
-      DoAccept<IsSameTag<Tag, ExternalObjectsTag>::Result>::Do(this->Data, sf);
-      if (this->IsObjLib) {
-        this->BadObjLibFiles.push_back(sf);
-      }
-    } else if (!sf->GetLanguage().empty()) {
-      DoAccept<IsSameTag<Tag, ObjectSourcesTag>::Result>::Do(this->Data, sf);
-    } else if (ext == "def") {
-      DoAccept<IsSameTag<Tag, ModuleDefinitionSourcesTag>::Result>::Do(
-        this->Data, sf);
-      if (this->IsObjLib) {
-        this->BadObjLibFiles.push_back(sf);
-      }
-    } else if (ext == "idl") {
-      DoAccept<IsSameTag<Tag, IDLSourcesTag>::Result>::Do(this->Data, sf);
-      if (this->IsObjLib) {
-        this->BadObjLibFiles.push_back(sf);
-      }
-    } else if (ext == "resx") {
-      DoAccept<IsSameTag<Tag, ResxTag>::Result>::Do(this->Data, sf);
-    } else if (ext == "appxmanifest") {
-      DoAccept<IsSameTag<Tag, AppManifestTag>::Result>::Do(this->Data, sf);
-    } else if (ext == "manifest") {
-      DoAccept<IsSameTag<Tag, ManifestsTag>::Result>::Do(this->Data, sf);
-    } else if (ext == "pfx") {
-      DoAccept<IsSameTag<Tag, CertificatesTag>::Result>::Do(this->Data, sf);
-    } else if (ext == "xaml") {
-      DoAccept<IsSameTag<Tag, XamlTag>::Result>::Do(this->Data, sf);
-    } else if (this->Header.find(sf->GetFullPath().c_str())) {
-      DoAccept<IsSameTag<Tag, HeaderSourcesTag>::Result>::Do(this->Data, sf);
-    } else if (this->GlobalGenerator->IgnoreFile(sf->GetExtension().c_str())) {
-      DoAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>::Do(this->Data, sf);
-    } else {
-      DoAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>::Do(this->Data, sf);
-    }
-  }
-};
-
 void CreatePropertyGeneratorExpressions(
   cmStringRange const& entries, cmBacktraceRange const& backtraces,
   std::vector<cmGeneratorTarget::TargetPropertyEntry*>& items,
@@ -516,7 +325,7 @@ void cmGeneratorTarget::AddSourceCommon(const std::string& src)
   CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(src);
   cge->SetEvaluateForBuildsystem(true);
   this->SourceEntries.push_back(new TargetPropertyEntry(cge));
-  this->SourceFilesMap.clear();
+  this->KindedSourcesMap.clear();
   this->LinkImplementationLanguageIsContextDependent = true;
 }
 
@@ -588,27 +397,22 @@ static void handleSystemIncludesDep(
 }
 
 /* clang-format off */
-#define IMPLEMENT_VISIT_IMPL(DATA, DATATYPE)                                  \
+#define IMPLEMENT_VISIT(KIND)                                                 \
   {                                                                           \
-    std::vector<cmSourceFile*> sourceFiles;                                   \
-    this->GetSourceFiles(sourceFiles, config);                                \
-    TagVisitor< DATA##Tag DATATYPE > visitor(this, data);                     \
-    for (std::vector<cmSourceFile*>::const_iterator si = sourceFiles.begin(); \
-         si != sourceFiles.end(); ++si) {                                     \
-      visitor.Accept(*si);                                                    \
+    KindedSources const& kinded = this->GetKindedSources(config);             \
+    for (std::vector<SourceAndKind>::const_iterator                           \
+         si = kinded.Sources.begin(); si != kinded.Sources.end(); ++si) {     \
+      if (si->Kind == KIND) {                                                 \
+        data.push_back(si->Source);                                           \
+      }                                                                       \
     }                                                                         \
   }
 /* clang-format on */
 
-#define IMPLEMENT_VISIT(DATA) IMPLEMENT_VISIT_IMPL(DATA, EMPTY)
-
-#define EMPTY
-#define COMMA ,
-
 void cmGeneratorTarget::GetObjectSources(
   std::vector<cmSourceFile const*>& data, const std::string& config) const
 {
-  IMPLEMENT_VISIT(ObjectSources);
+  IMPLEMENT_VISIT(SourceKindObjectSource);
 
   if (!this->Objects.empty()) {
     return;
@@ -740,99 +544,82 @@ bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
 void cmGeneratorTarget::GetModuleDefinitionSources(
   std::vector<cmSourceFile const*>& data, const std::string& config) const
 {
-  IMPLEMENT_VISIT(ModuleDefinitionSources);
+  IMPLEMENT_VISIT(SourceKindModuleDefinition);
 }
 
 void cmGeneratorTarget::GetIDLSources(std::vector<cmSourceFile const*>& data,
                                       const std::string& config) const
 {
-  IMPLEMENT_VISIT(IDLSources);
+  IMPLEMENT_VISIT(SourceKindIDL);
 }
 
 void cmGeneratorTarget::GetHeaderSources(
   std::vector<cmSourceFile const*>& data, const std::string& config) const
 {
-  IMPLEMENT_VISIT(HeaderSources);
+  IMPLEMENT_VISIT(SourceKindHeader);
 }
 
 void cmGeneratorTarget::GetExtraSources(std::vector<cmSourceFile const*>& data,
                                         const std::string& config) const
 {
-  IMPLEMENT_VISIT(ExtraSources);
+  IMPLEMENT_VISIT(SourceKindExtra);
 }
 
 void cmGeneratorTarget::GetCustomCommands(
   std::vector<cmSourceFile const*>& data, const std::string& config) const
 {
-  IMPLEMENT_VISIT(CustomCommands);
+  IMPLEMENT_VISIT(SourceKindCustomCommand);
 }
 
 void cmGeneratorTarget::GetExternalObjects(
   std::vector<cmSourceFile const*>& data, const std::string& config) const
 {
-  IMPLEMENT_VISIT(ExternalObjects);
+  IMPLEMENT_VISIT(SourceKindExternalObject);
 }
 
 void cmGeneratorTarget::GetExpectedResxHeaders(std::set<std::string>& headers,
                                                const std::string& config) const
 {
-  HeadersCacheType::const_iterator it = this->ResxHeadersCache.find(config);
-  if (it == this->ResxHeadersCache.end()) {
-    ResxData data;
-    IMPLEMENT_VISIT_IMPL(Resx, COMMA cmGeneratorTarget::ResxData)
-    it = this->ResxHeadersCache
-           .insert(std::make_pair(config, data.ExpectedResxHeaders))
-           .first;
-  }
-  headers = it->second;
+  KindedSources const& kinded = this->GetKindedSources(config);
+  headers = kinded.ExpectedResxHeaders;
 }
 
-void cmGeneratorTarget::GetResxSources(std::vector<cmSourceFile const*>& srcs,
+void cmGeneratorTarget::GetResxSources(std::vector<cmSourceFile const*>& data,
                                        const std::string& config) const
 {
-  ResxData data;
-  IMPLEMENT_VISIT_IMPL(Resx, COMMA cmGeneratorTarget::ResxData)
-  srcs = data.ResxSources;
+  IMPLEMENT_VISIT(SourceKindResx);
 }
 
 void cmGeneratorTarget::GetAppManifest(std::vector<cmSourceFile const*>& data,
                                        const std::string& config) const
 {
-  IMPLEMENT_VISIT(AppManifest);
+  IMPLEMENT_VISIT(SourceKindAppManifest);
 }
 
 void cmGeneratorTarget::GetManifests(std::vector<cmSourceFile const*>& data,
                                      const std::string& config) const
 {
-  IMPLEMENT_VISIT(Manifests);
+  IMPLEMENT_VISIT(SourceKindManifest);
 }
 
 void cmGeneratorTarget::GetCertificates(std::vector<cmSourceFile const*>& data,
                                         const std::string& config) const
 {
-  IMPLEMENT_VISIT(Certificates);
+  IMPLEMENT_VISIT(SourceKindCertificate);
 }
 
 void cmGeneratorTarget::GetExpectedXamlHeaders(std::set<std::string>& headers,
                                                const std::string& config) const
 {
-  HeadersCacheType::const_iterator it = this->XamlHeadersCache.find(config);
-  if (it == this->XamlHeadersCache.end()) {
-    XamlData data;
-    IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
-    it = this->XamlHeadersCache
-           .insert(std::make_pair(config, data.ExpectedXamlHeaders))
-           .first;
-  }
-  headers = it->second;
+  KindedSources const& kinded = this->GetKindedSources(config);
+  headers = kinded.ExpectedXamlHeaders;
 }
 
 void cmGeneratorTarget::GetExpectedXamlSources(std::set<std::string>& srcs,
                                                const std::string& config) const
 {
-  XamlData data;
-  IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
-  srcs = data.ExpectedXamlSources;
+  KindedSources const& kinded = this->GetKindedSources(config);
+  srcs = kinded.ExpectedXamlSources;
 }
 
 std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
@@ -850,12 +637,10 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
   return this->UtilityItems;
 }
 
-void cmGeneratorTarget::GetXamlSources(std::vector<cmSourceFile const*>& srcs,
+void cmGeneratorTarget::GetXamlSources(std::vector<cmSourceFile const*>& data,
                                        const std::string& config) const
 {
-  XamlData data;
-  IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
-  srcs = data.XamlSources;
+  IMPLEMENT_VISIT(SourceKindXaml);
 }
 
 const char* cmGeneratorTarget::GetLocation(const std::string& config) const
@@ -1162,32 +947,131 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<std::string>& files,
 void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*>& files,
                                        const std::string& config) const
 {
+  KindedSources const& kinded = this->GetKindedSources(config);
+  files.reserve(kinded.Sources.size());
+  for (std::vector<SourceAndKind>::const_iterator si = kinded.Sources.begin();
+       si != kinded.Sources.end(); ++si) {
+    files.push_back(si->Source);
+  }
+}
 
-  // Lookup any existing link implementation for this configuration.
-  std::string key = cmSystemTools::UpperCase(config);
-
+cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
+  std::string const& config) const
+{
+  // If we already processed one configuration and found no dependenc
+  // on configuration then always use the one result.
   if (!this->LinkImplementationLanguageIsContextDependent) {
-    files = this->SourceFilesMap.begin()->second;
-    return;
+    return this->KindedSourcesMap.begin()->second;
   }
 
-  SourceFilesMapType::iterator it = this->SourceFilesMap.find(key);
-  if (it != this->SourceFilesMap.end()) {
-    files = it->second;
-  } else {
-    std::vector<std::string> srcs;
-    this->GetSourceFiles(srcs, config);
+  // Lookup any existing link implementation for this configuration.
+  std::string const key = cmSystemTools::UpperCase(config);
+  KindedSourcesMapType::iterator it = this->KindedSourcesMap.find(key);
+  if (it != this->KindedSourcesMap.end()) {
+    return it->second;
+  }
 
-    std::set<cmSourceFile*> emitted;
+  // Add an entry to the map for this configuration.
+  KindedSources& files = this->KindedSourcesMap[key];
+  this->ComputeKindedSources(files, config);
+  return files;
+}
 
-    for (std::vector<std::string>::const_iterator i = srcs.begin();
-         i != srcs.end(); ++i) {
-      cmSourceFile* sf = this->Makefile->GetOrCreateSource(*i);
-      if (emitted.insert(sf).second) {
-        files.push_back(sf);
-      }
+void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
+                                             std::string const& config) const
+{
+  // Get the source file paths by string.
+  std::vector<std::string> srcs;
+  this->GetSourceFiles(srcs, config);
+
+  cmsys::RegularExpression header_regex(CM_HEADER_REGEX);
+  std::vector<cmSourceFile*> badObjLib;
+
+  std::set<cmSourceFile*> emitted;
+  for (std::vector<std::string>::const_iterator i = srcs.begin();
+       i != srcs.end(); ++i) {
+    // Create each source at most once.
+    cmSourceFile* sf = this->Makefile->GetOrCreateSource(*i);
+    if (!emitted.insert(sf).second) {
+      continue;
     }
-    this->SourceFilesMap[key] = files;
+
+    // Compute the kind (classification) of this source file.
+    SourceKind kind;
+    std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
+    if (sf->GetCustomCommand()) {
+      kind = SourceKindCustomCommand;
+    } else if (this->Target->GetType() == cmStateEnums::UTILITY) {
+      kind = SourceKindExtra;
+    } else if (sf->GetPropertyAsBool("HEADER_FILE_ONLY")) {
+      kind = SourceKindHeader;
+    } else if (sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
+      kind = SourceKindExternalObject;
+      if (this->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+        badObjLib.push_back(sf);
+      }
+    } else if (!sf->GetLanguage().empty()) {
+      kind = SourceKindObjectSource;
+    } else if (ext == "def") {
+      kind = SourceKindModuleDefinition;
+      if (this->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+        badObjLib.push_back(sf);
+      }
+    } else if (ext == "idl") {
+      kind = SourceKindIDL;
+      if (this->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+        badObjLib.push_back(sf);
+      }
+    } else if (ext == "resx") {
+      kind = SourceKindResx;
+      // Build and save the name of the corresponding .h file
+      // This relationship will be used later when building the project files.
+      // Both names would have been auto generated from Visual Studio
+      // where the user supplied the file name and Visual Studio
+      // appended the suffix.
+      std::string resx = sf->GetFullPath();
+      std::string hFileName = resx.substr(0, resx.find_last_of('.')) + ".h";
+      files.ExpectedResxHeaders.insert(hFileName);
+    } else if (ext == "appxmanifest") {
+      kind = SourceKindAppManifest;
+    } else if (ext == "manifest") {
+      kind = SourceKindManifest;
+    } else if (ext == "pfx") {
+      kind = SourceKindCertificate;
+    } else if (ext == "xaml") {
+      kind = SourceKindXaml;
+      // Build and save the name of the corresponding .h and .cpp file
+      // This relationship will be used later when building the project files.
+      // Both names would have been auto generated from Visual Studio
+      // where the user supplied the file name and Visual Studio
+      // appended the suffix.
+      std::string xaml = sf->GetFullPath();
+      std::string hFileName = xaml + ".h";
+      std::string cppFileName = xaml + ".cpp";
+      files.ExpectedXamlHeaders.insert(hFileName);
+      files.ExpectedXamlSources.insert(cppFileName);
+    } else if (header_regex.find(sf->GetFullPath().c_str())) {
+      kind = SourceKindHeader;
+    } else {
+      kind = SourceKindExtra;
+    }
+
+    // Save this classified source file in the result vector.
+    SourceAndKind entry = { sf, kind };
+    files.Sources.push_back(entry);
+  }
+
+  if (!badObjLib.empty()) {
+    std::ostringstream e;
+    e << "OBJECT library \"" << this->GetName() << "\" contains:\n";
+    for (std::vector<cmSourceFile*>::const_iterator i = badObjLib.begin();
+         i != badObjLib.end(); ++i) {
+      e << "  " << (*i)->GetLocation().GetName() << "\n";
+    }
+    e << "but may contain only sources that compile, header files, and "
+         "other files that would not affect linking of a normal library.";
+    this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
+      cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
   }
 }
 
