@@ -13,7 +13,7 @@ set(CMake_IFW_ROOT_COMPONENT_NAME
   "qt.tools.cmake.${CMake_VERSION_MAJOR}${CMake_VERSION_MINOR}"
   CACHE STRING "QtSDK CMake tools component name")
 set(CMake_IFW_ROOT_COMPONENT_DISPLAY_NAME
-  "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}"
+  "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}"
   CACHE STRING "QtSDK CMake tools component display name")
 set(CMake_IFW_ROOT_COMPONENT_DESCRIPTION
   "CMake Build Tools ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATH}"

@@ -25,24 +25,22 @@ Component.prototype.createOperations = function()
 {
     component.createOperations();
 
-    if (installer.value("os") == "win") {
-        try {
-            if (installer.value("SDKToolBinary") == "")
-                return;
+    try {
+        if (installer.value("SDKToolBinary") == "")
+            return;
 
-            var cmId = component.name;
-            installer.setValue("CMAKE%CMake_VERSION_MAJOR%%CMake_VERSION_MINOR%_ID", cmId);
+        var cmId = component.name;
+        installer.setValue("CMAKE%CMake_VERSION_MAJOR%%CMake_VERSION_MINOR%_ID", cmId);
 
-            component.addOperation("Execute",
-                                   ["{0,2}", "@SDKToolBinary@", "addCMake",
-                                    "--id", cmId,
-                                    "--name", "%CMake_IFW_ROOT_COMPONENT_DISPLAY_NAME%",
-                                    "--path", "@CMAKE%CMake_VERSION_MAJOR%%CMake_VERSION_MINOR%_BIN_DIR@/cmake.exe",
-                                    "UNDOEXECUTE",
-                                    "@SDKToolBinary@", "rmCMake", "--id", cmId]);
+        component.addOperation("Execute",
+                               ["{0,2}", "@SDKToolBinary@", "addCMake",
+                                "--id", cmId,
+                                "--name", "%CMake_IFW_ROOT_COMPONENT_DISPLAY_NAME%",
+                                "--path", "@CMAKE%CMake_VERSION_MAJOR%%CMake_VERSION_MINOR%_BIN_DIR@/cmake%CMAKE_EXECUTABLE_SUFFIX%",
+                                "UNDOEXECUTE",
+                                "@SDKToolBinary@", "rmCMake", "--id", cmId]);
 
-        } catch( e ) {
-            print( e );
-        }
+    } catch( e ) {
+        print( e );
     }
 }
