@@ -1337,23 +1337,6 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     this->WriteString("</ItemGroup>\n", 1);
   }
 
-  // Add object library contents as external objects.
-  std::vector<std::string> objs;
-  this->GeneratorTarget->UseObjectLibraries(objs, "");
-  if (!objs.empty()) {
-    this->WriteString("<ItemGroup>\n", 1);
-    for (std::vector<std::string>::const_iterator oi = objs.begin();
-         oi != objs.end(); ++oi) {
-      std::string obj = *oi;
-      this->WriteString("<Object Include=\"", 2);
-      this->ConvertToWindowsSlash(obj);
-      (*this->BuildFileStream) << cmVS10EscapeXML(obj) << "\">\n";
-      this->WriteString("<Filter>Object Libraries</Filter>\n", 3);
-      this->WriteString("</Object>\n", 2);
-    }
-    this->WriteString("</ItemGroup>\n", 1);
-  }
-
   this->WriteString("<ItemGroup>\n", 1);
   for (std::set<cmSourceGroup*>::iterator g = groupsUsed.begin();
        g != groupsUsed.end(); ++g) {
@@ -1370,15 +1353,6 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
                                << "</UniqueIdentifier>\n";
       this->WriteString("</Filter>\n", 2);
     }
-  }
-  if (!objs.empty()) {
-    this->WriteString("<Filter Include=\"Object Libraries\">\n", 2);
-    std::string guidName = "SG_Filter_Object Libraries";
-    this->WriteString("<UniqueIdentifier>", 3);
-    std::string guid = this->GlobalGenerator->GetGUID(guidName.c_str());
-    (*this->BuildFileStream) << "{" << guid << "}"
-                             << "</UniqueIdentifier>\n";
-    this->WriteString("</Filter>\n", 2);
   }
 
   if (!resxObjs.empty() || !this->AddedFiles.empty()) {
@@ -1824,14 +1798,6 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
 
   std::vector<cmSourceFile const*> externalObjects;
   this->GeneratorTarget->GetExternalObjects(externalObjects, "");
-  for (std::vector<cmSourceFile const*>::iterator si = externalObjects.begin();
-       si != externalObjects.end();) {
-    if (!(*si)->GetObjectLibrary().empty()) {
-      si = externalObjects.erase(si);
-    } else {
-      ++si;
-    }
-  }
   if (this->LocalGenerator->GetVersion() >
       cmGlobalVisualStudioGenerator::VS10) {
     // For VS >= 11 we use LinkObjects to avoid linking custom command
@@ -1855,17 +1821,6 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
          extraSources.begin();
        si != extraSources.end(); ++si) {
     this->WriteExtraSource(*si);
-  }
-
-  // Add object library contents as external objects.
-  std::vector<std::string> objs;
-  this->GeneratorTarget->UseObjectLibraries(objs, "");
-  for (std::vector<std::string>::const_iterator oi = objs.begin();
-       oi != objs.end(); ++oi) {
-    std::string obj = *oi;
-    this->WriteString("<Object Include=\"", 2);
-    this->ConvertToWindowsSlash(obj);
-    (*this->BuildFileStream) << cmVS10EscapeXML(obj) << "\" />\n";
   }
 
   std::vector<cmSourceFile const*> defSources;
