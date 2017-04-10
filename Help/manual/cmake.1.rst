@@ -263,8 +263,10 @@ Available commands are:
      052f86c15bbde68af55c7f7b340ab639  file2.txt
 
 ``remove [-f] <file>...``
-  Remove the file(s), use ``-f`` to force it.  If a file does
-  not exist it will be silently ignored.
+  Remove the file(s). If any of the listed files already do not
+  exist, the command returns a non-zero exit code, but no message
+  is logged. The ``-f`` option changes the behavior to return a
+  zero exit code (i.e. success) in such situations instead.
 
 ``remove_directory <dir>``
   Remove a directory and its contents.  If a directory does
