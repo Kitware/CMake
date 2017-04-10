@@ -12,6 +12,7 @@
 
 #include <map>
 #include <set>
+#include <stddef.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -106,6 +107,17 @@ public:
 
   /** Get all sources needed for a configuration with kinds assigned.  */
   KindedSources const& GetKindedSources(std::string const& config) const;
+
+  struct AllConfigSource
+  {
+    cmSourceFile const* Source;
+    cmGeneratorTarget::SourceKind Kind;
+    std::vector<size_t> Configs;
+  };
+
+  /** Get all sources needed for all configurations with kinds and
+      per-source configurations assigned.  */
+  std::vector<AllConfigSource> const& GetAllConfigSources() const;
 
   void GetObjectSources(std::vector<cmSourceFile const*>&,
                         const std::string& config) const;
@@ -730,6 +742,9 @@ private:
   mutable KindedSourcesMapType KindedSourcesMap;
   void ComputeKindedSources(KindedSources& files,
                             std::string const& config) const;
+
+  mutable std::vector<AllConfigSource> AllConfigSources;
+  void ComputeAllConfigSources() const;
 
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;

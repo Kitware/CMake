@@ -1069,6 +1069,43 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
   }
 }
 
+std::vector<cmGeneratorTarget::AllConfigSource> const&
+cmGeneratorTarget::GetAllConfigSources() const
+{
+  if (this->AllConfigSources.empty()) {
+    this->ComputeAllConfigSources();
+  }
+  return this->AllConfigSources;
+}
+
+void cmGeneratorTarget::ComputeAllConfigSources() const
+{
+  std::vector<std::string> configs;
+  this->Makefile->GetConfigurations(configs);
+
+  std::map<cmSourceFile const*, size_t> index;
+
+  for (size_t ci = 0; ci < configs.size(); ++ci) {
+    KindedSources const& sources = this->GetKindedSources(configs[ci]);
+    for (std::vector<cmGeneratorTarget::SourceAndKind>::const_iterator si =
+           sources.Sources.begin();
+         si != sources.Sources.end(); ++si) {
+      std::map<cmSourceFile const*, size_t>::iterator mi =
+        index.find(si->Source);
+      if (mi == index.end()) {
+        AllConfigSource acs;
+        acs.Source = si->Source;
+        acs.Kind = si->Kind;
+        this->AllConfigSources.push_back(acs);
+        std::map<cmSourceFile const*, size_t>::value_type entry(
+          si->Source, this->AllConfigSources.size() - 1);
+        mi = index.insert(entry).first;
+      }
+      this->AllConfigSources[mi->second].Configs.push_back(ci);
+    }
+  }
+}
+
 std::string cmGeneratorTarget::GetCompilePDBName(
   const std::string& config) const
 {
