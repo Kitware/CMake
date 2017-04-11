@@ -60,25 +60,6 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
 void cmInstallTargetGenerator::GenerateScriptForConfig(
   std::ostream& os, const std::string& config, Indent const& indent)
 {
-  // Compute the build tree directory from which to copy the target.
-  std::string fromDirConfig;
-  if (this->Target->NeedRelinkBeforeInstall(config)) {
-    fromDirConfig =
-      this->Target->GetLocalGenerator()->GetCurrentBinaryDirectory();
-    fromDirConfig += cmake::GetCMakeFilesDirectory();
-    fromDirConfig += "/CMakeRelink.dir/";
-  } else {
-    fromDirConfig = this->Target->GetDirectory(config, this->ImportLibrary);
-    fromDirConfig += "/";
-  }
-  std::string toDir =
-    this->ConvertToAbsoluteDestination(this->GetDestination(config));
-  toDir += "/";
-
-  // Compute the list of files to install for this target.
-  std::vector<std::string> filesFrom;
-  std::vector<std::string> filesTo;
-  std::string literal_args;
   cmStateEnums::TargetType targetType = this->Target->GetType();
   cmInstallType type = cmInstallType();
   switch (targetType) {
@@ -109,6 +90,28 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
         "cmInstallTargetGenerator created with non-installable target.");
       return;
   }
+
+  // Compute the build tree directory from which to copy the target.
+  std::string fromDirConfig;
+  if (this->Target->NeedRelinkBeforeInstall(config)) {
+    fromDirConfig =
+      this->Target->GetLocalGenerator()->GetCurrentBinaryDirectory();
+    fromDirConfig += cmake::GetCMakeFilesDirectory();
+    fromDirConfig += "/CMakeRelink.dir/";
+  } else {
+    fromDirConfig = this->Target->GetDirectory(config, this->ImportLibrary);
+    fromDirConfig += "/";
+  }
+
+  std::string toDir =
+    this->ConvertToAbsoluteDestination(this->GetDestination(config));
+  toDir += "/";
+
+  // Compute the list of files to install for this target.
+  std::vector<std::string> filesFrom;
+  std::vector<std::string> filesTo;
+  std::string literal_args;
+
   if (targetType == cmStateEnums::EXECUTABLE) {
     // There is a bug in cmInstallCommand if this fails.
     assert(this->NamelinkMode == NamelinkModeNone);
