@@ -4,6 +4,7 @@
 #define cmCommonTargetGenerator_h
 
 #include <cmConfigure.h> // IWYU pragma: keep
+
 #include <map>
 #include <string>
 #include <vector>

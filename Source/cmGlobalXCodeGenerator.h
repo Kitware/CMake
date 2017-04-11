@@ -4,6 +4,7 @@
 #define cmGlobalXCodeGenerator_h
 
 #include <cmConfigure.h>
+
 #include <iosfwd>
 #include <map>
 #include <set>

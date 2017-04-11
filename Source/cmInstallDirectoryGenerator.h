@@ -7,6 +7,7 @@
 #include "cmScriptGenerator.h"
 
 #include <cmConfigure.h>
+
 #include <iosfwd>
 #include <string>
 #include <vector>

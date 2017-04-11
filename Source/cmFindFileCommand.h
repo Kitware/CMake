@@ -4,6 +4,7 @@
 #define cmFindFileCommand_h
 
 #include <cmConfigure.h>
+
 #include <string>
 
 #include "cmFindPathCommand.h"

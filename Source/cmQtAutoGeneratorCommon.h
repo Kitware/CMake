@@ -4,6 +4,7 @@
 #define cmQtAutoGeneratorCommon_h
 
 #include <cmConfigure.h>
+
 #include <string>
 #include <vector>
 

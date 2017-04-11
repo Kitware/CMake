@@ -4,6 +4,7 @@
 #define cmCMakeHostSystemInformationCommand_h
 
 #include <cmConfigure.h>
+
 #include <stddef.h>
 #include <string>
 #include <vector>

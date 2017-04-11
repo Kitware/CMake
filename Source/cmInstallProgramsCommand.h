@@ -4,6 +4,7 @@
 #define cmInstallProgramsCommand_h
 
 #include <cmConfigure.h>
+
 #include <string>
 #include <vector>
 

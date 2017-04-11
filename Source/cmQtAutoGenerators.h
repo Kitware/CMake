@@ -4,6 +4,7 @@
 #define cmQtAutoGenerators_h
 
 #include <cmConfigure.h> // IWYU pragma: keep
+
 #include <cmFilePathChecksum.h>
 #include <cmsys/RegularExpression.hxx>
 

@@ -4,6 +4,7 @@
 #define cmOutputRequiredFilesCommand_h
 
 #include <cmConfigure.h>
+
 #include <set>
 #include <stdio.h>
 #include <string>

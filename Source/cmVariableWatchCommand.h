@@ -4,6 +4,7 @@
 #define cmVariableWatchCommand_h
 
 #include <cmConfigure.h>
+
 #include <set>
 #include <string>
 #include <vector>

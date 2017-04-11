@@ -4,6 +4,7 @@
 #define cmCPackOSXX11Generator_h
 
 #include <cmConfigure.h>
+
 #include <string>
 
 #include "cmCPackGenerator.h"
