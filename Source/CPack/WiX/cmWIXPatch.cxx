@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXPatch.h"
 
-#include <CPack/cmCPackGenerator.h>
+#include "cmCPackGenerator.h"
 
 cmWIXPatch::cmWIXPatch(cmCPackLog* logger)
   : Logger(logger)

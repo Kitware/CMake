@@ -889,6 +889,12 @@ add_library(CTestLib ${CTEST_SRCS})
 target_link_libraries(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_LIBRARIES})
 
 #
+# CPack
+#
+include_directories(
+  "${CMake_SOURCE_DIR}/Source/CPack"
+  )
+#
 # Sources for CPack
 #
 set(CPACK_SRCS

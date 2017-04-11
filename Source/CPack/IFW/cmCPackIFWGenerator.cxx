@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWGenerator.h"
 
-#include "CPack/cmCPackComponentGroup.h"
-#include "CPack/cmCPackGenerator.h"
-#include "CPack/cmCPackLog.h"
+#include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
 #include "cmCPackIFWInstaller.h"
 #include "cmCPackIFWPackage.h"
 #include "cmCPackIFWRepository.h"
+#include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"

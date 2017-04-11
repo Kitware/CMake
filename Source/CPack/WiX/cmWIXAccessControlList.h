@@ -5,7 +5,7 @@
 
 #include "cmWIXSourceWriter.h"
 
-#include <CPack/cmCPackLog.h>
+#include "cmCPackLog.h"
 #include <cmInstalledFile.h>
 
 class cmWIXAccessControlList

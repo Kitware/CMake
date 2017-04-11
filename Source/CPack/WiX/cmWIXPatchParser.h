@@ -3,7 +3,7 @@
 #ifndef cmCPackWIXPatchParser_h
 #define cmCPackWIXPatchParser_h
 
-#include <CPack/cmCPackLog.h>
+#include "cmCPackLog.h"
 
 #include <cmXMLParser.h>
 

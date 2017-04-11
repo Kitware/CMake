@@ -3,7 +3,7 @@
 #ifndef cmWIXSourceWriter_h
 #define cmWIXSourceWriter_h
 
-#include <CPack/cmCPackLog.h>
+#include "cmCPackLog.h"
 
 #include <cmsys/FStream.hxx>
 

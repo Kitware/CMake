@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackWIXGenerator.h"
 
-#include <CPack/cmCPackComponentGroup.h>
-#include <CPack/cmCPackLog.h>
+#include "cmCPackComponentGroup.h"
+#include "cmCPackLog.h"
 #include <algorithm>
 #include <cmCryptoHash.h>
 #include <cmGeneratedFileStream.h>

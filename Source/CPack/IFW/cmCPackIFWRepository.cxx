@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWRepository.h"
 
-#include "CPack/cmCPackGenerator.h"
+#include "cmCPackGenerator.h"
 #include "cmCPackIFWGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"

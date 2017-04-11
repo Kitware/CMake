@@ -5,8 +5,8 @@
 
 #include <cmConfigure.h>
 
-#include "CPack/cmCPackComponentGroup.h"
-#include "CPack/cmCPackGenerator.h"
+#include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
 #include "cmCPackIFWInstaller.h"
 #include "cmCPackIFWPackage.h"
 #include "cmCPackIFWRepository.h"
