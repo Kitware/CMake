@@ -33,8 +33,6 @@
 #include <string.h>
 #include <utility>
 
-class cmSourceFile;
-
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   std::string const& prop, cmLocalGenerator* lg,
   cmGeneratorExpressionContext* context, cmGeneratorTarget const* headTarget,
@@ -1254,38 +1252,22 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    std::vector<cmSourceFile const*> objectSources;
-    gt->GetObjectSources(objectSources, context->Config);
-    std::map<cmSourceFile const*, std::string> mapping;
+    std::vector<std::string> objects;
+    gt->GetTargetObjectNames(context->Config, objects);
 
-    for (std::vector<cmSourceFile const*>::const_iterator it =
-           objectSources.begin();
-         it != objectSources.end(); ++it) {
-      mapping[*it];
+    for (std::vector<std::string>::iterator oi = objects.begin();
+         oi != objects.end(); ++oi) {
+      *oi = gt->ObjectDirectory + *oi;
     }
 
-    gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
-
+    // Create the cmSourceFile instances in the referencing directory.
     cmMakefile* mf = context->LG->GetMakefile();
-
-    std::string obj_dir = gt->ObjectDirectory;
-    std::string result;
-    const char* sep = "";
-    for (std::vector<cmSourceFile const*>::const_iterator it =
-           objectSources.begin();
-         it != objectSources.end(); ++it) {
-      // Find the object file name corresponding to this source file.
-      std::map<cmSourceFile const*, std::string>::const_iterator map_it =
-        mapping.find(*it);
-      // It must exist because we populated the mapping just above.
-      assert(!map_it->second.empty());
-      result += sep;
-      std::string objFile = obj_dir + map_it->second;
-      mf->AddTargetObject(tgtName, objFile);
-      result += objFile;
-      sep = ";";
+    for (std::vector<std::string>::iterator oi = objects.begin();
+         oi != objects.end(); ++oi) {
+      mf->AddTargetObject(tgtName, *oi);
     }
-    return result;
+
+    return cmJoin(objects, ";");
   }
 } targetObjectsNode;
 

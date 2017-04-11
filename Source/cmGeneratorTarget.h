@@ -209,6 +209,11 @@ public:
                                 bool realname) const;
   std::string NormalGetRealName(const std::string& config) const;
 
+  /** Get the names of an object library's object files underneath
+      its object file directory.  */
+  void GetTargetObjectNames(std::string const& config,
+                            std::vector<std::string>& objects) const;
+
   /** What hierarchy level should the reported directory contain */
   enum BundleDirectoryLevel
   {
