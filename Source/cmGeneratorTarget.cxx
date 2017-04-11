@@ -3254,6 +3254,19 @@ std::string cmGeneratorTarget::GetPDBName(const std::string& config) const
   return prefix + base + ".pdb";
 }
 
+std::string cmGeneratorTarget::GetObjectDirectory(
+  std::string const& config) const
+{
+  std::string obj_dir =
+    this->GlobalGenerator->ExpandCFGIntDir(this->ObjectDirectory, config);
+#if defined(__APPLE__)
+  // find and replace $(PROJECT_NAME) xcode placeholder
+  const std::string projectName = this->LocalGenerator->GetProjectName();
+  cmSystemTools::ReplaceString(obj_dir, "$(PROJECT_NAME)", projectName);
+#endif
+  return obj_dir;
+}
+
 void cmGeneratorTarget::GetTargetObjectNames(
   std::string const& config, std::vector<std::string>& objects) const
 {

@@ -369,6 +369,10 @@ public:
       time config name placeholder if needed for the generator.  */
   std::string ObjectDirectory;
 
+  /** Full path with trailing slash to the top-level directory
+      holding object files for the given configuration.  */
+  std::string GetObjectDirectory(std::string const& config) const;
+
   void GetAppleArchs(const std::string& config,
                      std::vector<std::string>& archVec) const;
 
