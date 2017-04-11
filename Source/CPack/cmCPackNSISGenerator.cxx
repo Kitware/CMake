@@ -8,9 +8,9 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
+#include "cmsys/Directory.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/Directory.hxx>
-#include <cmsys/RegularExpression.hxx>
 #include <map>
 #include <sstream>
 #include <stdlib.h>

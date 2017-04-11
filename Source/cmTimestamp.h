@@ -3,7 +3,7 @@
 #ifndef cmTimestamp_h
 #define cmTimestamp_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <time.h>

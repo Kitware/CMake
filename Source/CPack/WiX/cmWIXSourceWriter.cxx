@@ -4,7 +4,7 @@
 
 #include "cmCPackGenerator.h"
 
-#include <cmUuid.h>
+#include "cmUuid.h"
 
 #include <windows.h>
 

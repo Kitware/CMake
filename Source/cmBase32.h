@@ -3,7 +3,7 @@
 #ifndef cmBase32_h
 #define cmBase32_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <stddef.h>
 #include <string>

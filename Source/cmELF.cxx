@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmELF.h"
 
-#include <cm_auto_ptr.hxx>
-#include <cm_kwiml.h>
-#include <cmsys/FStream.hxx>
+#include "cm_auto_ptr.hxx"
+#include "cm_kwiml.h"
+#include "cmsys/FStream.hxx"
 #include <map>
 #include <sstream>
 #include <stddef.h>

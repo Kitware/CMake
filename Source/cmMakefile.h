@@ -3,9 +3,9 @@
 #ifndef cmMakefile_h
 #define cmMakefile_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <map>
 #include <set>
 #include <stack>

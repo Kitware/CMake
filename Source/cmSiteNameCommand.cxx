@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSiteNameCommand.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmMakefile.h"
 #include "cmStateTypes.h"

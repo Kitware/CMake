@@ -3,7 +3,7 @@
 #ifndef cmDisallowedCommand_h
 #define cmDisallowedCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 #include <vector>

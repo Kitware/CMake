@@ -3,7 +3,7 @@
 #ifndef cmLinkItem_h
 #define cmLinkItem_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <algorithm>
 #include <map>

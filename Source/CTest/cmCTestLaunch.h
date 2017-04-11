@@ -3,9 +3,9 @@
 #ifndef cmCTestLaunch_h
 #define cmCTestLaunch_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <set>
 #include <string>
 #include <vector>

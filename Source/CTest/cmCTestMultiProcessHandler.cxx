@@ -9,10 +9,10 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/String.hxx"
+#include "cmsys/SystemInformation.hxx"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
-#include <cmsys/String.hxx>
-#include <cmsys/SystemInformation.hxx>
 #include <iomanip>
 #include <list>
 #include <math.h>

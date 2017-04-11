@@ -10,7 +10,7 @@
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
 
-#include <cmsys/Glob.hxx>
+#include "cmsys/Glob.hxx"
 #include <limits.h>
 #include <map>
 #include <ostream>

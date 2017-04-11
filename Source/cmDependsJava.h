@@ -3,7 +3,7 @@
 #ifndef cmDependsJava_h
 #define cmDependsJava_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmDepends.h"
 

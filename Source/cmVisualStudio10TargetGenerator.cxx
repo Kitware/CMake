@@ -14,7 +14,7 @@
 #include "cmVisualStudioGeneratorOptions.h"
 #include "windows.h"
 
-#include <cm_auto_ptr.hxx>
+#include "cm_auto_ptr.hxx"
 
 static std::string const kWINDOWS_7_1_SDK = "Windows7.1SDK";
 

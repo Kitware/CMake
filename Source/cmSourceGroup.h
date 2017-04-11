@@ -3,9 +3,9 @@
 #ifndef cmSourceGroup_h
 #define cmSourceGroup_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <set>
 #include <string>
 #include <vector>

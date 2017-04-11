@@ -28,7 +28,7 @@
 #include "cm_sys_stat.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include <cm_jsoncpp_writer.h>
+#include "cm_jsoncpp_writer.h"
 
 #include "cmGraphVizWriter.h"
 #include "cmVariableWatch.h"
@@ -107,10 +107,10 @@
 #include <sys/time.h>
 #endif
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
 #include <iostream>
 #include <sstream>
 #include <stdio.h>

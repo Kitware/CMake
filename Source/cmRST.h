@@ -3,9 +3,9 @@
 #ifndef _cmRST_h
 #define _cmRST_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <iosfwd>
 #include <map>
 #include <set>

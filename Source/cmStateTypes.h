@@ -4,7 +4,7 @@
 #ifndef cmStateTypes_h
 #define cmStateTypes_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmLinkedTree.h"
 

@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDependsJavaParserHelper.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmDependsJavaLexer.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>

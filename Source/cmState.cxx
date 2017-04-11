@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmState.h"
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/RegularExpression.hxx>
 #include <string.h>
 #include <utility>
 

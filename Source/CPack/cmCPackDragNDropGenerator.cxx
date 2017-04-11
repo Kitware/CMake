@@ -7,8 +7,8 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <iomanip>
 #include <map>
 #include <stdlib.h>

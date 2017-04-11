@@ -22,9 +22,9 @@
 #include "cmGlobalVisualStudioGenerator.h"
 #endif
 
+#include "cmConfigure.h"
+#include "cmsys/FStream.hxx"
 #include <algorithm>
-#include <cmConfigure.h>
-#include <cmsys/FStream.hxx>
 #include <map>
 #include <set>
 #include <string>

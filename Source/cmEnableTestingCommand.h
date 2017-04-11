@@ -3,7 +3,7 @@
 #ifndef cmEnableTestingCommand_h
 #define cmEnableTestingCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 #include <vector>

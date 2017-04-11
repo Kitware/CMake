@@ -18,8 +18,8 @@
 // /showIncludes is equivalent to -MD, not -MMD, that is, system headers are
 // included.
 
-#include <cmSystemTools.h>
-#include <cmsys/Encoding.hxx>
+#include "cmSystemTools.h"
+#include "cmsys/Encoding.hxx"
 
 #include <algorithm>
 #include <sstream>

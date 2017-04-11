@@ -3,7 +3,7 @@
 #ifndef cmSourceGroupCommand_h
 #define cmSourceGroupCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 #include <vector>

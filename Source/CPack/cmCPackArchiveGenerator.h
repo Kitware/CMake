@@ -3,7 +3,7 @@
 #ifndef cmCPackArchiveGenerator_h
 #define cmCPackArchiveGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmArchiveWrite.h"
 #include "cmCPackGenerator.h"

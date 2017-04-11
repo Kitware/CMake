@@ -3,7 +3,7 @@
 #ifndef cmMessenger_h
 #define cmMessenger_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmListFileCache.h"
 #include "cmake.h"

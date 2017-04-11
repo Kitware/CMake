@@ -3,7 +3,7 @@
 #ifndef cmCursesBoolWidget_h
 #define cmCursesBoolWidget_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"

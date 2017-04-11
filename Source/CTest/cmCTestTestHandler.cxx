@@ -2,11 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestTestHandler.h"
 
+#include "cmsys/Base64.h"
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/Base64.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
 #include <functional>
 #include <iomanip>
 #include <iterator>

@@ -3,9 +3,9 @@
 #ifndef cmFindPackageCommand_h
 #define cmFindPackageCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cm_kwiml.h>
+#include "cm_kwiml.h"
 #include <map>
 #include <set>
 #include <string>

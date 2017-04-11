@@ -3,7 +3,7 @@
 #ifndef cmUtils_hxx
 #define cmUtils_hxx
 
-#include <cmsys/SystemTools.hxx>
+#include "cmsys/SystemTools.hxx"
 
 // Use the make system's VERBOSE environment variable to enable
 // verbose output. This can be skipped by also setting CMAKE_NO_VERBOSE

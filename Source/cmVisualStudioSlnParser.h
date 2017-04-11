@@ -3,7 +3,7 @@
 #ifndef cmVisualStudioSlnParser_h
 #define cmVisualStudioSlnParser_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <bitset>
 #include <iosfwd>

@@ -3,7 +3,7 @@
 #ifndef bindexplib_h
 #define bindexplib_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <set>
 #include <stdio.h>

@@ -20,11 +20,11 @@
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
+#include "cmConfigure.h"
+#include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 #include <algorithm>
 #include <assert.h>
-#include <cmConfigure.h>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/String.h>
 #include <errno.h>
 #include <map>
 #include <set>

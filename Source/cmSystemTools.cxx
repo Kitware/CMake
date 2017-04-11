@@ -9,7 +9,7 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmArchiveWrite.h"
 #include "cmLocale.h"
-#include <cm_libarchive.h>
+#include "cm_libarchive.h"
 #ifndef __LA_INT64_T
 #define __LA_INT64_T la_int64_t
 #endif
@@ -27,14 +27,14 @@
 #include "cmMachO.h"
 #endif
 
+#include "cmsys/Directory.hxx"
+#include "cmsys/Encoding.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
+#include "cmsys/System.h"
+#include "cmsys/Terminal.h"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/Encoding.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/System.h>
-#include <cmsys/Terminal.h>
 #include <ctype.h>
 #include <errno.h>
 #include <iostream>

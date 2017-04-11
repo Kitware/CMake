@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWInstaller.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 #include <sstream>
 #include <stddef.h>
 #include <utility>

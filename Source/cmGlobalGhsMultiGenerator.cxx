@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalGhsMultiGenerator.h"
 
-#include <cmsys/SystemTools.hxx>
+#include "cmsys/SystemTools.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"

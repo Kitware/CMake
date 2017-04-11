@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindLibraryCommand.h"
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/RegularExpression.hxx>
 #include <set>
 #include <stdio.h>
 #include <string.h>

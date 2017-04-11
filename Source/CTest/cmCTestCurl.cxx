@@ -5,7 +5,7 @@
 #include "cmCTest.h"
 #include "cmSystemTools.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 #include <ostream>
 #include <stdio.h>
 

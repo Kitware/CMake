@@ -3,7 +3,7 @@
 #ifndef cmELF_h
 #define cmELF_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <string>

@@ -3,7 +3,7 @@
 #ifndef cmGlobalWatcomWMakeGenerator_h
 #define cmGlobalWatcomWMakeGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalUnixMakefileGenerator3.h"

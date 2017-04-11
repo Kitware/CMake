@@ -3,7 +3,7 @@
 #ifndef cmSeparateArgumentsCommand_h
 #define cmSeparateArgumentsCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 #include <vector>

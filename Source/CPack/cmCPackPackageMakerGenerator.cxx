@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackPackageMakerGenerator.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <assert.h>
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
 #include <map>
 #include <sstream>
 #include <stdio.h>

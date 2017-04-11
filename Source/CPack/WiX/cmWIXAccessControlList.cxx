@@ -4,7 +4,7 @@
 
 #include "cmCPackGenerator.h"
 
-#include <cmSystemTools.h>
+#include "cmSystemTools.h"
 
 cmWIXAccessControlList::cmWIXAccessControlList(
   cmCPackLog* logger, cmInstalledFile const& installedFile,

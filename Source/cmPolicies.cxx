@@ -8,8 +8,8 @@
 #include "cmVersion.h"
 #include "cmake.h"
 
+#include "cmConfigure.h"
 #include <assert.h>
-#include <cmConfigure.h>
 #include <ctype.h>
 #include <sstream>
 #include <stdio.h>

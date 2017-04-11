@@ -3,7 +3,7 @@
 #ifndef cmCPackIFWGenerator_h
 #define cmCPackIFWGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"

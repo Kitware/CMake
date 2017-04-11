@@ -3,7 +3,7 @@
 #ifndef cmCPackGeneratorFactory_h
 #define cmCPackGeneratorFactory_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <string>

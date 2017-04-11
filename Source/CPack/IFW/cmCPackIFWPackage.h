@@ -3,7 +3,7 @@
 #ifndef cmCPackIFWPackage_h
 #define cmCPackIFWPackage_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <set>
 #include <string>

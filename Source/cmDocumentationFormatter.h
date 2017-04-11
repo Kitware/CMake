@@ -3,7 +3,7 @@
 #ifndef _cmDocumentationFormatter_h
 #define _cmDocumentationFormatter_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 

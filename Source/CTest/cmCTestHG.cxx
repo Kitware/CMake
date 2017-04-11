@@ -8,7 +8,7 @@
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <ostream>
 #include <vector>
 

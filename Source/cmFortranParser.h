@@ -4,7 +4,7 @@
 #define cmFortranParser_h
 
 #if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <set>
 #include <string>

@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalUnixMakefileGenerator3.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/Terminal.h"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Terminal.h>
 #include <functional>
 #include <sstream>
 #include <stdio.h>

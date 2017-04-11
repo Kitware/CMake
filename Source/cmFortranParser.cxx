@@ -97,9 +97,9 @@ Modify cmFortranParser.cxx:
   - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
 */
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cmsys/String.h>
+#include "cmsys/String.h"
 #include <stdlib.h>
 #include <string.h>
 

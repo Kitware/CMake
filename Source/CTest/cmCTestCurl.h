@@ -3,9 +3,9 @@
 #ifndef cmCTestCurl_h
 #define cmCTestCurl_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cm_curl.h>
+#include "cm_curl.h"
 #include <string>
 #include <vector>
 

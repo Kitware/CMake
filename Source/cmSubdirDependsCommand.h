@@ -3,7 +3,7 @@
 #ifndef cmSubdirDependsCommand_h
 #define cmSubdirDependsCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 #include <vector>

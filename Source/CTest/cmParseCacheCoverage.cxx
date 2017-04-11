@@ -4,8 +4,8 @@
 #include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
 #include <map>
 #include <stdio.h>
 #include <stdlib.h>

@@ -3,7 +3,7 @@
 #ifndef cmCoreTryCompile_h
 #define cmCoreTryCompile_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

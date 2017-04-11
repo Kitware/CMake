@@ -3,7 +3,7 @@
 #ifndef cmIncludeCommand_h
 #define cmIncludeCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 #include <vector>

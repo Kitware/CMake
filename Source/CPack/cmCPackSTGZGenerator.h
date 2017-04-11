@@ -3,7 +3,7 @@
 #ifndef cmCPackSTGZGenerator_h
 #define cmCPackSTGZGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCPackGenerator.h"
 #include "cmCPackTGZGenerator.h"

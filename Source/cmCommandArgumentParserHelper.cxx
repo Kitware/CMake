@@ -8,7 +8,7 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 #include <iostream>
 #include <sstream>
 #include <string.h>

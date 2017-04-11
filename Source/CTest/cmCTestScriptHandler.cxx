@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestScriptHandler.h"
 
-#include <cmsys/Directory.hxx>
-#include <cmsys/Process.h>
+#include "cmsys/Directory.hxx"
+#include "cmsys/Process.h"
 #include <map>
 #include <sstream>
 #include <stdio.h>

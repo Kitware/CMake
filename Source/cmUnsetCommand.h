@@ -3,7 +3,7 @@
 #ifndef cmUnsetCommand_h
 #define cmUnsetCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 #include <vector>

@@ -1,9 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cmsys/CommandLineArguments.hxx>
-#include <cmsys/Encoding.hxx>
+#include "cmsys/CommandLineArguments.hxx"
+#include "cmsys/Encoding.hxx"
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -13,7 +13,7 @@
 #include <vector>
 
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-#include <cmsys/ConsoleBuf.hxx>
+#include "cmsys/ConsoleBuf.hxx"
 #endif
 
 #include "cmCPackGenerator.h"

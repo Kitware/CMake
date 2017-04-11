@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXRichTextFormatWriter.h"
 
-#include <cmVersion.h>
+#include "cmVersion.h"
 
 cmWIXRichTextFormatWriter::cmWIXRichTextFormatWriter(
   std::string const& filename)

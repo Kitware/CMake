@@ -13,7 +13,7 @@
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
-#include <cmsys/SystemInformation.hxx>
+#include "cmsys/SystemInformation.hxx"
 #include <map>
 #include <set>
 #include <sstream>

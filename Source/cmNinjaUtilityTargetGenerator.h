@@ -3,7 +3,7 @@
 #ifndef cmNinjaUtilityTargetGenerator_h
 #define cmNinjaUtilityTargetGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmNinjaTargetGenerator.h"
 

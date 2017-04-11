@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmBuildNameCommand.h"
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/RegularExpression.hxx>
 
 #include "cmMakefile.h"
 #include "cmStateTypes.h"

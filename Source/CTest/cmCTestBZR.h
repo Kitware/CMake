@@ -3,7 +3,7 @@
 #ifndef cmCTestBZR_h
 #define cmCTestBZR_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestGlobalVC.h"
 

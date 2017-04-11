@@ -3,7 +3,7 @@
 #ifndef cmVisualStudioTargetGenerator_h
 #define cmVisualStudioTargetGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <map>

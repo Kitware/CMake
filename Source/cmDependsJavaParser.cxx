@@ -85,7 +85,7 @@ Modify cmDependsJavaParser.cxx:
 
 */
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <stdlib.h>
 #include <string.h>

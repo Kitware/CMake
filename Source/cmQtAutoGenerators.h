@@ -3,10 +3,10 @@
 #ifndef cmQtAutoGenerators_h
 #define cmQtAutoGenerators_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cmFilePathChecksum.h>
-#include <cmsys/RegularExpression.hxx>
+#include "cmFilePathChecksum.h"
+#include "cmsys/RegularExpression.hxx"
 
 #include <map>
 #include <set>

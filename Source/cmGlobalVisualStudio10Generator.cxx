@@ -23,9 +23,9 @@
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
 
 #include <algorithm>
 

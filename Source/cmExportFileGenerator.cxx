@@ -17,9 +17,9 @@
 #include "cmTargetExport.h"
 #include "cmake.h"
 
+#include "cm_auto_ptr.hxx"
+#include "cmsys/FStream.hxx"
 #include <assert.h>
-#include <cm_auto_ptr.hxx>
-#include <cmsys/FStream.hxx>
 #include <sstream>
 #include <string.h>
 #include <utility>

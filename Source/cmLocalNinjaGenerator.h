@@ -3,7 +3,7 @@
 #ifndef cmLocalNinjaGenerator_h
 #define cmLocalNinjaGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <map>

@@ -3,7 +3,7 @@
 #ifndef cmCPackLog_h
 #define cmCPackLog_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <ostream>
 #include <string.h>

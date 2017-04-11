@@ -9,7 +9,7 @@
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 #include <stddef.h>
 
 #ifdef cmCPackLogger

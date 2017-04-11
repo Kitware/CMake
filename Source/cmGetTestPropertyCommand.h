@@ -3,7 +3,7 @@
 #ifndef cmGetTestPropertyCommand_h
 #define cmGetTestPropertyCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 #include <vector>

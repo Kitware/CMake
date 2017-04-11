@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackGenerator.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
 #include <list>
 #include <utility>
 

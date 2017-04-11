@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindPackageCommand.h"
 
+#include "cmSystemTools.h"
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 #include <algorithm>
 #include <assert.h>
-#include <cmSystemTools.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/String.h>
 #include <functional>
 #include <iterator>
 #include <sstream>

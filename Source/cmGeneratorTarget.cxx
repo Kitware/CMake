@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorTarget.h"
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/RegularExpression.hxx>
 #include <errno.h>
 #include <iterator>
 #include <queue>

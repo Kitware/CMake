@@ -3,7 +3,7 @@
 #ifndef cmFileLockResult_h
 #define cmFileLockResult_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 

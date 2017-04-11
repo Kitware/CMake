@@ -9,7 +9,7 @@
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <map>
 #include <ostream>
 #include <stdlib.h>

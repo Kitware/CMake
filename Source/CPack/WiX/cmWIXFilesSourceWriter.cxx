@@ -4,10 +4,10 @@
 
 #include "cmWIXAccessControlList.h"
 
-#include <cmInstalledFile.h>
+#include "cmInstalledFile.h"
 
-#include <cmSystemTools.h>
-#include <cmUuid.h>
+#include "cmSystemTools.h"
+#include "cmUuid.h"
 
 #include "cm_sys_stat.h"
 

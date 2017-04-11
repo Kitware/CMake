@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestGIT.h"
 
-#include <cmsys/FStream.hxx>
-#include <cmsys/Process.h>
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>

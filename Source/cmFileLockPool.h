@@ -3,7 +3,7 @@
 #ifndef cmFileLockPool_h
 #define cmFileLockPool_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <list>
 #include <string>

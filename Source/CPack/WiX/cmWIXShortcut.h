@@ -3,7 +3,7 @@
 #ifndef cmWIXShortcut_h
 #define cmWIXShortcut_h
 
-#include <cmInstalledFile.h>
+#include "cmInstalledFile.h"
 
 #include <map>
 #include <set>

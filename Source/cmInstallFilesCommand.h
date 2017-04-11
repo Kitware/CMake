@@ -3,7 +3,7 @@
 #ifndef cmInstallFilesCommand_h
 #define cmInstallFilesCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 #include <vector>

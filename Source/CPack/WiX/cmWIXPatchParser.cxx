@@ -4,7 +4,7 @@
 
 #include "cmCPackGenerator.h"
 
-#include <cm_expat.h>
+#include "cm_expat.h"
 
 cmWIXPatchNode::Type cmWIXPatchText::type()
 {

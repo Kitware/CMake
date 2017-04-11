@@ -3,7 +3,7 @@
 #ifndef cmFortran_h
 #define cmFortran_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <set>

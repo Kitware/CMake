@@ -1,5 +1,5 @@
 #include <cmSystemTools.h>
-#include <cmsys/Encoding.hxx>
+#include "cmsys/Encoding.hxx"
 #include <string>
 
 #define RETVAL @_retval@

@@ -3,7 +3,7 @@
 #ifndef cmPropertyDefinition_h
 #define cmPropertyDefinition_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmProperty.h"
 

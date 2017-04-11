@@ -30,9 +30,9 @@
 #include "cmCryptoHash.h"
 #endif
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/RegularExpression.hxx>
 #include <iterator>
 #include <sstream>
 #include <stdio.h>

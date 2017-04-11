@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestSubmitHandler.h"
 
-#include <cm_curl.h>
-#include <cm_jsoncpp_reader.h>
-#include <cm_jsoncpp_value.h>
-#include <cmsys/Process.h>
+#include "cm_curl.h"
+#include "cm_jsoncpp_reader.h"
+#include "cm_jsoncpp_value.h"
+#include "cmsys/Process.h"
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +26,7 @@
 #if defined(CTEST_USE_XMLRPC)
 #include "cmVersion.h"
 #include "cm_sys_stat.h"
-#include <cm_xmlrpc.h>
+#include "cm_xmlrpc.h"
 #endif
 
 #define SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT 120

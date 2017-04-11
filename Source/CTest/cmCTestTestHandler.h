@@ -3,11 +3,11 @@
 #ifndef cmCTestTestHandler_h
 #define cmCTestTestHandler_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestGenericHandler.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <iosfwd>
 #include <map>
 #include <set>

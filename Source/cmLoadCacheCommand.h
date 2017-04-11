@@ -3,7 +3,7 @@
 #ifndef cmLoadCacheCommand_h
 #define cmLoadCacheCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <set>
 #include <string>

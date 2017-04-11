@@ -5,7 +5,7 @@
 
 #include "cmCPackLog.h"
 
-#include <cmXMLParser.h>
+#include "cmXMLParser.h"
 
 #include <list>
 #include <map>

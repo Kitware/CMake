@@ -6,7 +6,7 @@
 #include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 #include <stdio.h>
 #include <stdlib.h>
 

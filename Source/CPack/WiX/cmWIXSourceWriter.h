@@ -5,7 +5,7 @@
 
 #include "cmCPackLog.h"
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 
 #include <string>
 #include <vector>

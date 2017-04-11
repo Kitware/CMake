@@ -3,11 +3,11 @@
 #include "cmQtAutoGenerators.h"
 #include "cmQtAutoGeneratorCommon.h"
 
+#include "cmConfigure.h"
+#include "cmsys/FStream.hxx"
+#include "cmsys/Terminal.h"
 #include <algorithm>
 #include <assert.h>
-#include <cmConfigure.h>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Terminal.h>
 #include <list>
 #include <sstream>
 #include <stdlib.h>

@@ -3,7 +3,7 @@
 #ifndef cmQTWrapCPPCommand_h
 #define cmQTWrapCPPCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 #include <vector>

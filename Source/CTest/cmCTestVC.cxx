@@ -6,7 +6,7 @@
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
-#include <cmsys/Process.h>
+#include "cmsys/Process.h"
 #include <sstream>
 #include <stdio.h>
 #include <time.h>

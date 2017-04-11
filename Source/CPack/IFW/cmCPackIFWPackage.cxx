@@ -12,7 +12,7 @@
 #include "cmTimestamp.h"
 #include "cmXMLWriter.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 #include <map>
 #include <sstream>
 #include <stddef.h>

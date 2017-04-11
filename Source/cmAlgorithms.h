@@ -3,10 +3,10 @@
 #ifndef cmAlgorithms_h
 #define cmAlgorithms_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cm_kwiml.h"
 #include <algorithm>
-#include <cm_kwiml.h>
 #include <functional>
 #include <iterator>
 #include <sstream>

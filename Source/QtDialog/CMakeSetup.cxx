@@ -8,6 +8,9 @@
 #include "cmDocumentationEntry.h"
 #include "cmVersion.h"
 #include "cmake.h"
+#include "cmsys/CommandLineArguments.hxx"
+#include "cmsys/Encoding.hxx"
+#include "cmsys/SystemTools.hxx"
 #include <QApplication>
 #include <QDir>
 #include <QLocale>
@@ -15,9 +18,6 @@
 #include <QTextCodec>
 #include <QTranslator>
 #include <QtPlugin>
-#include <cmsys/CommandLineArguments.hxx>
-#include <cmsys/Encoding.hxx>
-#include <cmsys/SystemTools.hxx>
 #include <iostream>
 
 #include "cmSystemTools.h" // IWYU pragma: keep

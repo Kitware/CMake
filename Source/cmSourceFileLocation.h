@@ -3,7 +3,7 @@
 #ifndef cmSourceFileLocation_h
 #define cmSourceFileLocation_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 

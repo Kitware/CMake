@@ -3,7 +3,7 @@
 #ifndef cmGeneratorExpressionEvaluationFile_h
 #define cmGeneratorExpressionEvaluationFile_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <string>

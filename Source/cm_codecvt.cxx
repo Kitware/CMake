@@ -6,7 +6,7 @@
 #if defined(_WIN32)
 #include <windows.h>
 #undef max
-#include <cmsys/Encoding.hxx>
+#include "cmsys/Encoding.hxx"
 #endif
 
 codecvt::codecvt(Encoding e)
