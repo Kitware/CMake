@@ -887,7 +887,6 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
       objs.push_back((*it)->GetFullPath());
     }
 
-    gt->UseObjectLibraries(objs, configName);
     for (std::vector<std::string>::iterator it = objs.begin();
          it != objs.end(); ++it) {
       std::string objFile = *it;

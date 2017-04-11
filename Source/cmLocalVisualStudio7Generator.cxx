@@ -1306,14 +1306,21 @@ void cmLocalVisualStudio7GeneratorInternals::OutputObjects(
   // list object library content on the link line instead.
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
   std::string currentBinDir = lg->GetCurrentBinaryDirectory();
-  std::vector<std::string> objs;
-  gt->UseObjectLibraries(objs, "");
+
+  std::vector<cmSourceFile*> sources;
+  if (!gt->GetConfigCommonSourceFiles(sources)) {
+    return;
+  }
+
   const char* sep = isep ? isep : "";
-  for (std::vector<std::string>::const_iterator oi = objs.begin();
-       oi != objs.end(); ++oi) {
-    std::string rel = lg->ConvertToRelativePath(currentBinDir, oi->c_str());
-    fout << sep << lg->ConvertToXMLOutputPath(rel.c_str());
-    sep = " ";
+  for (std::vector<cmSourceFile*>::const_iterator i = sources.begin();
+       i != sources.end(); i++) {
+    if (!(*i)->GetObjectLibrary().empty()) {
+      std::string const& objFile = (*i)->GetFullPath();
+      std::string rel = lg->ConvertToRelativePath(currentBinDir, objFile);
+      fout << sep << lg->ConvertToXMLOutputPath(rel.c_str());
+      sep = " ";
+    }
   }
 }
 
@@ -1370,7 +1377,13 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   for (std::vector<cmSourceFile*>::const_iterator i = classes.begin();
        i != classes.end(); i++) {
     if (!(*i)->GetObjectLibrary().empty()) {
-      continue;
+      if (this->GetVersion() < cmGlobalVisualStudioGenerator::VS8 ||
+          this->FortranProject) {
+        // VS < 8 does not support per-config source locations so we
+        // list object library content on the link line instead.
+        // See OutputObjects.
+        continue;
+      }
     }
     // Add the file to the list of sources.
     std::string source = (*i)->GetFullPath();
@@ -1390,24 +1403,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   for (unsigned int i = 0; i < sourceGroups.size(); ++i) {
     cmSourceGroup sg = sourceGroups[i];
     this->WriteGroup(&sg, target, fout, libName, configs);
-  }
-
-  if (this->GetVersion() >= cmGlobalVisualStudioGenerator::VS8 &&
-      !this->FortranProject) {
-    // VS >= 8 support per-config source locations so we
-    // list object library content as external objects.
-    std::vector<std::string> objs;
-    target->UseObjectLibraries(objs, "");
-    if (!objs.empty()) {
-      // TODO: Separate sub-filter for each object library used?
-      fout << "\t\t<Filter Name=\"Object Libraries\">\n";
-      for (std::vector<std::string>::const_iterator oi = objs.begin();
-           oi != objs.end(); ++oi) {
-        std::string o = this->ConvertToXMLOutputPathSingle(oi->c_str());
-        fout << "\t\t\t<File RelativePath=\"" << o << "\" />\n";
-      }
-      fout << "\t\t</Filter>\n";
-    }
   }
 
   fout << "\t</Files>\n";

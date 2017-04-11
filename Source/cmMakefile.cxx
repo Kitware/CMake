@@ -94,6 +94,10 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->AddSourceGroup("CMake Rules", "\\.rule$");
   this->AddSourceGroup("Resources", "\\.plist$");
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
+
+  this->ObjectLibrariesSourceGroupIndex = this->SourceGroups.size();
+  this->SourceGroups.push_back(
+    cmSourceGroup("Object Libraries", "^MATCH_NO_SOURCES$"));
 #endif
 }
 
@@ -3122,6 +3126,18 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
     return esf;
   }
   return this->CreateSource(sourceName, generated);
+}
+
+void cmMakefile::AddTargetObject(std::string const& tgtName,
+                                 std::string const& objFile)
+{
+  cmSourceFile* sf = this->GetOrCreateSource(objFile, true);
+  sf->SetObjectLibrary(tgtName);
+  sf->SetProperty("EXTERNAL_OBJECT", "1");
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->SourceGroups[this->ObjectLibrariesSourceGroupIndex].AddGroupFile(
+    sf->GetFullPath());
+#endif
 }
 
 void cmMakefile::EnableLanguage(std::vector<std::string> const& lang,
