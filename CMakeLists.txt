@@ -226,6 +226,17 @@ option(CMAKE_USE_FOLDERS "Enable folder grouping of projects in IDEs." ON)
 mark_as_advanced(CMAKE_USE_FOLDERS)
 
 
+option(CMake_RUN_IWYU "Run include-what-you-use with the compiler." OFF)
+if(CMake_RUN_IWYU)
+  find_program(IWYU_COMMAND NAMES include-what-you-use iwyu)
+  if(NOT IWYU_COMMAND)
+    message(FATAL_ERROR "CMake_RUN_IWYU is ON but include-what-you-use is not found!")
+  endif()
+  set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE
+    "${IWYU_COMMAND};-Xiwyu;--mapping_file=${CMake_SOURCE_DIR}/Utilities/IWYU/mapping.imp")
+endif()
+
+
 #-----------------------------------------------------------------------
 # a macro that only sets the FOLDER target property if it's
 # "appropriate"
