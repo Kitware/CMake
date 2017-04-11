@@ -227,7 +227,7 @@ Available commands are:
 ``copy <file>... <destination>``
   Copy files to ``<destination>`` (either file or directory).
   If multiple files are specified, the ``<destination>`` must be
-  directory and it must exist.
+  directory and it must exist. Wildcards are not supported.
 
 ``copy_directory <dir>... <destination>``
   Copy directories to ``<destination>`` directory.
