@@ -3720,6 +3720,18 @@ bool cmGlobalXCodeGenerator::IsMultiConfig() const
   return true;
 }
 
+bool cmGlobalXCodeGenerator::HasKnownObjectFileLocation(
+  std::string* reason) const
+{
+  if (this->ObjectDirArch.find('$') != std::string::npos) {
+    if (reason != CM_NULLPTR) {
+      *reason = " under Xcode with multiple architectures";
+    }
+    return false;
+  }
+  return true;
+}
+
 bool cmGlobalXCodeGenerator::UseEffectivePlatformName(cmMakefile* mf) const
 {
   const char* epnValue =

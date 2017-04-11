@@ -331,6 +331,11 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig() const { return false; }
 
+  /** Return true if we know the exact location of object files.
+      If false, store the reason in the given string.
+      This is meaningful only after EnableLanguage has been called.  */
+  virtual bool HasKnownObjectFileLocation(std::string*) const { return true; }
+
   virtual bool UseFolderProperty() const;
 
   virtual bool IsIPOSupported() const { return false; }
