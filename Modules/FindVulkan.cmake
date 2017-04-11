@@ -41,6 +41,7 @@ if(WIN32)
       PATHS
         "$ENV{VULKAN_SDK}/Lib"
         "$ENV{VULKAN_SDK}/Bin"
+        NO_SYSTEM_ENVIRONMENT_PATH
         )
   elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
     find_library(Vulkan_LIBRARY
