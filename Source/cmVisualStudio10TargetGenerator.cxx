@@ -1727,15 +1727,6 @@ void cmVisualStudio10TargetGenerator::WriteSource(std::string const& tool,
   this->Tools[tool].push_back(toolSource);
 }
 
-void cmVisualStudio10TargetGenerator::WriteSources(
-  std::string const& tool, std::vector<cmSourceFile const*> const& sources)
-{
-  for (std::vector<cmSourceFile const*>::const_iterator si = sources.begin();
-       si != sources.end(); ++si) {
-    this->WriteSource(tool, *si);
-  }
-}
-
 void cmVisualStudio10TargetGenerator::WriteAllSources()
 {
   if (this->GeneratorTarget->GetType() > cmStateEnums::UTILITY) {
@@ -1743,89 +1734,95 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
   }
   this->WriteString("<ItemGroup>\n", 1);
 
-  std::vector<cmSourceFile const*> headerSources;
-  this->GeneratorTarget->GetHeaderSources(headerSources, "");
-  for (std::vector<cmSourceFile const*>::const_iterator si =
-         headerSources.begin();
-       si != headerSources.end(); ++si) {
-    this->WriteHeaderSource(*si);
-  }
-  std::vector<cmSourceFile const*> idlSources;
-  this->GeneratorTarget->GetIDLSources(idlSources, "");
-  this->WriteSources("Midl", idlSources);
+  cmGeneratorTarget::KindedSources const& sources =
+    this->GeneratorTarget->GetKindedSources("");
 
-  std::vector<cmSourceFile const*> objectSources;
-  this->GeneratorTarget->GetObjectSources(objectSources, "");
-  for (std::vector<cmSourceFile const*>::const_iterator si =
-         objectSources.begin();
-       si != objectSources.end(); ++si) {
-    const std::string& lang = (*si)->GetLanguage();
+  for (std::vector<cmGeneratorTarget::SourceAndKind>::const_iterator si =
+         sources.Sources.begin();
+       si != sources.Sources.end(); ++si) {
     std::string tool;
-    if (lang == "C" || lang == "CXX") {
-      tool = "ClCompile";
-    } else if (lang == "ASM_MASM" && this->GlobalGenerator->IsMasmEnabled()) {
-      tool = "MASM";
-    } else if (lang == "ASM_NASM" && this->GlobalGenerator->IsNasmEnabled()) {
-      tool = "NASM";
-    } else if (lang == "RC") {
-      tool = "ResourceCompile";
-    } else if (lang == "CSharp") {
-      tool = "Compile";
-    } else if (lang == "CUDA" && this->GlobalGenerator->IsCudaEnabled()) {
-      tool = "CudaCompile";
+    switch (si->Kind) {
+      case cmGeneratorTarget::SourceKindAppManifest:
+        tool = "AppxManifest";
+        break;
+      case cmGeneratorTarget::SourceKindCertificate:
+        tool = "None";
+        break;
+      case cmGeneratorTarget::SourceKindCustomCommand:
+        // Handled elsewhere.
+        break;
+      case cmGeneratorTarget::SourceKindExternalObject:
+        tool = "Object";
+        if (this->LocalGenerator->GetVersion() <
+            cmGlobalVisualStudioGenerator::VS11) {
+          // For VS == 10 we cannot use LinkObjects to avoid linking custom
+          // command outputs.  If an object file is generated in this target,
+          // then vs10 will use it in the build, and we have to list it as
+          // None instead of Object.
+          std::vector<cmSourceFile*> const* d =
+            this->GeneratorTarget->GetSourceDepends(si->Source);
+          if (d && !d->empty()) {
+            tool = "None";
+          }
+        }
+        break;
+      case cmGeneratorTarget::SourceKindExtra:
+        this->WriteExtraSource(si->Source);
+        break;
+      case cmGeneratorTarget::SourceKindHeader:
+        this->WriteHeaderSource(si->Source);
+        break;
+      case cmGeneratorTarget::SourceKindIDL:
+        tool = "Midl";
+        break;
+      case cmGeneratorTarget::SourceKindManifest:
+        // Handled elsewhere.
+        break;
+      case cmGeneratorTarget::SourceKindModuleDefinition:
+        tool = "None";
+        break;
+      case cmGeneratorTarget::SourceKindObjectSource: {
+        const std::string& lang = si->Source->GetLanguage();
+        if (lang == "C" || lang == "CXX") {
+          tool = "ClCompile";
+        } else if (lang == "ASM_MASM" &&
+                   this->GlobalGenerator->IsMasmEnabled()) {
+          tool = "MASM";
+        } else if (lang == "ASM_NASM" &&
+                   this->GlobalGenerator->IsNasmEnabled()) {
+          tool = "NASM";
+        } else if (lang == "RC") {
+          tool = "ResourceCompile";
+        } else if (lang == "CSharp") {
+          tool = "Compile";
+        } else if (lang == "CUDA" && this->GlobalGenerator->IsCudaEnabled()) {
+          tool = "CudaCompile";
+        } else {
+          tool = "None";
+        }
+      } break;
+      case cmGeneratorTarget::SourceKindResx:
+        // Handled elsewhere.
+        break;
+      case cmGeneratorTarget::SourceKindXaml:
+        // Handled elsewhere.
+        break;
     }
 
     if (!tool.empty()) {
-      this->WriteSource(tool, *si, " ");
-      if (this->OutputSourceSpecificFlags(*si)) {
-        this->WriteString("</", 2);
-        (*this->BuildFileStream) << tool << ">\n";
+      if (si->Kind == cmGeneratorTarget::SourceKindObjectSource) {
+        this->WriteSource(tool, si->Source, " ");
+        if (this->OutputSourceSpecificFlags(si->Source)) {
+          this->WriteString("</", 2);
+          (*this->BuildFileStream) << tool << ">\n";
+        } else {
+          (*this->BuildFileStream) << " />\n";
+        }
       } else {
-        (*this->BuildFileStream) << " />\n";
+        this->WriteSource(tool, si->Source);
       }
-    } else {
-      this->WriteSource("None", *si);
     }
   }
-
-  std::vector<cmSourceFile const*> manifestSources;
-  this->GeneratorTarget->GetAppManifest(manifestSources, "");
-  this->WriteSources("AppxManifest", manifestSources);
-
-  std::vector<cmSourceFile const*> certificateSources;
-  this->GeneratorTarget->GetCertificates(certificateSources, "");
-  this->WriteSources("None", certificateSources);
-
-  std::vector<cmSourceFile const*> externalObjects;
-  this->GeneratorTarget->GetExternalObjects(externalObjects, "");
-  if (this->LocalGenerator->GetVersion() >
-      cmGlobalVisualStudioGenerator::VS10) {
-    // For VS >= 11 we use LinkObjects to avoid linking custom command
-    // outputs.  Use Object for all external objects, generated or not.
-    this->WriteSources("Object", externalObjects);
-  } else {
-    // If an object file is generated in this target, then vs10 will use
-    // it in the build, and we have to list it as None instead of Object.
-    for (std::vector<cmSourceFile const*>::const_iterator si =
-           externalObjects.begin();
-         si != externalObjects.end(); ++si) {
-      std::vector<cmSourceFile*> const* d =
-        this->GeneratorTarget->GetSourceDepends(*si);
-      this->WriteSource((d && !d->empty()) ? "None" : "Object", *si);
-    }
-  }
-
-  std::vector<cmSourceFile const*> extraSources;
-  this->GeneratorTarget->GetExtraSources(extraSources, "");
-  for (std::vector<cmSourceFile const*>::const_iterator si =
-         extraSources.begin();
-       si != extraSources.end(); ++si) {
-    this->WriteExtraSource(*si);
-  }
-
-  std::vector<cmSourceFile const*> defSources;
-  this->GeneratorTarget->GetModuleDefinitionSources(defSources, "");
-  this->WriteSources("None", defSources);
 
   if (this->IsMissingFiles) {
     this->WriteMissingFiles();
