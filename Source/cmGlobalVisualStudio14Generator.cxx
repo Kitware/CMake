@@ -220,6 +220,14 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
   std::vector<std::string> win10Roots;
 
   {
+    std::string win10Root;
+    if (cmSystemTools::GetEnv("CMAKE_WINDOWS_KITS_10_DIR", win10Root)) {
+      cmSystemTools::ConvertToUnixSlashes(win10Root);
+      win10Roots.push_back(win10Root);
+    }
+  }
+
+  {
     // This logic is taken from the vcvarsqueryregistry.bat file from VS2015
     // Try HKLM and then HKCU.
     std::string win10Root;
