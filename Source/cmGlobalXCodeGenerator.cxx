@@ -2673,7 +2673,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       std::string linkObjs;
       const char* sep = "";
       std::vector<cmSourceFile const*> objs;
-      gt->GetExternalObjects(objs, "");
+      gt->GetExternalObjects(objs, configName);
       for (std::vector<cmSourceFile const*>::const_iterator oi = objs.begin();
            oi != objs.end(); ++oi) {
         if ((*oi)->GetObjectLibrary().empty()) {
