@@ -217,24 +217,36 @@ struct NoWindowsH
 std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  // This logic is taken from the vcvarsqueryregistry.bat file from VS2015
-  // Try HKLM and then HKCU.
-  std::string win10Root;
-  if (!cmSystemTools::ReadRegistryValue(
-        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
-        "Windows Kits\\Installed Roots;KitsRoot10",
-        win10Root, cmSystemTools::KeyWOW64_32) &&
-      !cmSystemTools::ReadRegistryValue(
-        "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\"
-        "Windows Kits\\Installed Roots;KitsRoot10",
-        win10Root, cmSystemTools::KeyWOW64_32)) {
+  std::vector<std::string> win10Roots;
+
+  {
+    // This logic is taken from the vcvarsqueryregistry.bat file from VS2015
+    // Try HKLM and then HKCU.
+    std::string win10Root;
+    if (cmSystemTools::ReadRegistryValue(
+          "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+          "Windows Kits\\Installed Roots;KitsRoot10",
+          win10Root, cmSystemTools::KeyWOW64_32) ||
+        cmSystemTools::ReadRegistryValue(
+          "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\"
+          "Windows Kits\\Installed Roots;KitsRoot10",
+          win10Root, cmSystemTools::KeyWOW64_32)) {
+      cmSystemTools::ConvertToUnixSlashes(win10Root);
+      win10Roots.push_back(win10Root);
+    }
+  }
+
+  if (win10Roots.empty()) {
     return std::string();
   }
 
   std::vector<std::string> sdks;
-  std::string path = win10Root + "Include/*";
   // Grab the paths of the different SDKs that are installed
-  cmSystemTools::GlobDirs(path, sdks);
+  for (std::vector<std::string>::iterator i = win10Roots.begin();
+       i != win10Roots.end(); ++i) {
+    std::string path = *i + "/Include/*";
+    cmSystemTools::GlobDirs(path, sdks);
+  }
 
   // Skip SDKs that do not contain <um/windows.h> because that indicates that
   // only the UCRT MSIs were installed for them.
