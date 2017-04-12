@@ -1881,7 +1881,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   std::string lang =
     this->GlobalGenerator->GetLanguageFromExtension(sf.GetExtension().c_str());
   std::string sourceLang = this->LocalGenerator->GetSourceFileLanguage(sf);
-  const std::string& linkLanguage = this->GeneratorTarget->GetLinkerLanguage();
+  const std::string& linkLanguage =
+    this->GeneratorTarget->GetLinkerLanguage("");
   bool needForceLang = false;
   // source file does not match its extension language
   if (lang != sourceLang) {
