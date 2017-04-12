@@ -2799,17 +2799,20 @@ bool cmGlobalXCodeGenerator::CreateGroups(
         this->GroupMap[key] = pbxgroup;
       }
 
-      // Put OBJECT_LIBRARY objects in proper groups:
-      std::vector<std::string> objs;
-      gtgt->UseObjectLibraries(objs, "");
-      for (std::vector<std::string>::const_iterator oi = objs.begin();
-           oi != objs.end(); ++oi) {
-        std::string const& source = *oi;
-        cmSourceGroup* sourceGroup =
-          mf->FindSourceGroup(source.c_str(), sourceGroups);
-        cmXCodeObject* pbxgroup = this->CreateOrGetPBXGroup(gtgt, sourceGroup);
-        std::string key = GetGroupMapKeyFromPath(gtgt, source);
-        this->GroupMap[key] = pbxgroup;
+      if (this->XcodeVersion < 50) {
+        // Put OBJECT_LIBRARY objects in proper groups:
+        std::vector<std::string> objs;
+        gtgt->UseObjectLibraries(objs, "");
+        for (std::vector<std::string>::const_iterator oi = objs.begin();
+             oi != objs.end(); ++oi) {
+          std::string const& source = *oi;
+          cmSourceGroup* sourceGroup =
+            mf->FindSourceGroup(source.c_str(), sourceGroups);
+          cmXCodeObject* pbxgroup =
+            this->CreateOrGetPBXGroup(gtgt, sourceGroup);
+          std::string key = GetGroupMapKeyFromPath(gtgt, source);
+          this->GroupMap[key] = pbxgroup;
+        }
       }
     }
   }
