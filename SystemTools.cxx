@@ -54,7 +54,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <time.h>
 
 #if defined(_WIN32) && !defined(_MSC_VER) && defined(__GNUC__)
@@ -1254,6 +1253,38 @@ bool SystemTools::TestFileAccess(const std::string& filename,
                   permissions) == 0;
 #else
   return access(filename.c_str(), permissions) == 0;
+#endif
+}
+
+//----------------------------------------------------------------------------
+int SystemTools::Stat(const char* path, SystemTools::Stat_t* buf)
+{
+  if (!path) {
+    errno = EFAULT;
+    return -1;
+  }
+  return SystemTools::Stat(std::string(path), buf);
+}
+
+//----------------------------------------------------------------------------
+int SystemTools::Stat(const std::string& path, SystemTools::Stat_t* buf)
+{
+  if (path.empty()) {
+    errno = ENOENT;
+    return -1;
+  }
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  // Ideally we should use ConvertToWindowsExtendedPath to support
+  // long paths, but _wstat64 rejects paths with '?' in them, thinking
+  // they are wildcards.
+  std::wstring const& wpath = Encoding::ToWide(path);
+#if defined(__BORLANDC__)
+  return _wstati64(wpath.c_str(), buf);
+#else
+  return _wstat64(wpath.c_str(), buf);
+#endif
+#else
+  return stat(path.c_str(), buf);
 #endif
 }
 

@@ -4341,18 +4341,35 @@ unsigned char SystemInformationImplementation::GetAPICId()
 void SystemInformationImplementation::CPUCountWindows()
 {
 #if defined(_WIN32)
-  std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> ProcInfo;
   this->NumberOfPhysicalCPU = 0;
   this->NumberOfLogicalCPU = 0;
 
+  typedef BOOL(WINAPI * GetLogicalProcessorInformationType)(
+    PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
+  static GetLogicalProcessorInformationType pGetLogicalProcessorInformation =
+    (GetLogicalProcessorInformationType)GetProcAddress(
+      GetModuleHandleW(L"kernel32"), "GetLogicalProcessorInformation");
+
+  if (!pGetLogicalProcessorInformation) {
+    // Fallback to approximate implementation on ancient Windows versions.
+    SYSTEM_INFO info;
+    ZeroMemory(&info, sizeof(info));
+    GetSystemInfo(&info);
+    this->NumberOfPhysicalCPU =
+      static_cast<unsigned int>(info.dwNumberOfProcessors);
+    this->NumberOfLogicalCPU = this->NumberOfPhysicalCPU;
+    return;
+  }
+
+  std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> ProcInfo;
   {
     DWORD Length = 0;
-    DWORD rc = GetLogicalProcessorInformation(NULL, &Length);
+    DWORD rc = pGetLogicalProcessorInformation(NULL, &Length);
     assert(FALSE == rc);
     (void)rc; // Silence unused variable warning in Borland C++ 5.81
     assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER);
     ProcInfo.resize(Length / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION));
-    rc = GetLogicalProcessorInformation(&ProcInfo[0], &Length);
+    rc = pGetLogicalProcessorInformation(&ProcInfo[0], &Length);
     assert(rc != FALSE);
     (void)rc; // Silence unused variable warning in Borland C++ 5.81
   }
