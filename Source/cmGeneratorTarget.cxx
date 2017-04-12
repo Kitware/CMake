@@ -1937,41 +1937,6 @@ bool cmGeneratorTarget::IsDLLPlatform() const
   return this->DLLPlatform;
 }
 
-void cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs,
-                                           const std::string& config) const
-{
-  std::vector<cmSourceFile const*> objectFiles;
-  this->GetExternalObjects(objectFiles, config);
-  std::vector<cmGeneratorTarget*> objectLibraries;
-  for (std::vector<cmSourceFile const*>::const_iterator it =
-         objectFiles.begin();
-       it != objectFiles.end(); ++it) {
-    std::string objLib = (*it)->GetObjectLibrary();
-    if (cmGeneratorTarget* tgt =
-          this->LocalGenerator->FindGeneratorTargetToUse(objLib)) {
-      objectLibraries.push_back(tgt);
-    }
-  }
-
-  std::vector<cmGeneratorTarget*>::const_iterator end =
-    cmRemoveDuplicates(objectLibraries);
-
-  for (std::vector<cmGeneratorTarget*>::const_iterator ti =
-         objectLibraries.begin();
-       ti != end; ++ti) {
-    cmGeneratorTarget* ogt = *ti;
-    std::vector<cmSourceFile const*> objectSources;
-    ogt->GetObjectSources(objectSources, config);
-    for (std::vector<cmSourceFile const*>::const_iterator si =
-           objectSources.begin();
-         si != objectSources.end(); ++si) {
-      std::string obj = ogt->ObjectDirectory;
-      obj += ogt->Objects[*si];
-      objs.push_back(obj);
-    }
-  }
-}
-
 void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string>& result,
                                           const std::string& config) const
 {

@@ -347,9 +347,6 @@ public:
       time config name placeholder if needed for the generator.  */
   std::string ObjectDirectory;
 
-  void UseObjectLibraries(std::vector<std::string>& objs,
-                          const std::string& config) const;
-
   void GetAppleArchs(const std::string& config,
                      std::vector<std::string>& archVec) const;
 
