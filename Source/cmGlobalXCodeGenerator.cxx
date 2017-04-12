@@ -651,11 +651,6 @@ std::string GetGroupMapKeyFromPath(cmGeneratorTarget* target,
   return key;
 }
 
-std::string GetGroupMapKey(cmGeneratorTarget* target, cmSourceFile* sf)
-{
-  return GetGroupMapKeyFromPath(target, sf->GetFullPath());
-}
-
 cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFileFromPath(
   const std::string& fullpath, cmGeneratorTarget* target,
   const std::string& lang, cmSourceFile* sf)
@@ -2788,41 +2783,25 @@ bool cmGlobalXCodeGenerator::CreateGroups(
         gtgt->AddSource(plist);
       }
 
-      std::vector<cmSourceFile*> classes;
-      if (!gtgt->GetConfigCommonSourceFiles(classes)) {
-        return false;
-      }
+      std::vector<cmGeneratorTarget::AllConfigSource> const& sources =
+        gtgt->GetAllConfigSources();
+
       // Put cmSourceFile instances in proper groups:
-      for (std::vector<cmSourceFile*>::const_iterator s = classes.begin();
-           s != classes.end(); s++) {
-        cmSourceFile* sf = *s;
+      for (std::vector<cmGeneratorTarget::AllConfigSource>::const_iterator si =
+             sources.begin();
+           si != sources.end(); ++si) {
+        cmSourceFile const* sf = si->Source;
+        if (this->XcodeVersion >= 50 && !sf->GetObjectLibrary().empty()) {
+          // Object library files go on the link line instead.
+          continue;
+        }
         // Add the file to the list of sources.
         std::string const& source = sf->GetFullPath();
         cmSourceGroup* sourceGroup =
           mf->FindSourceGroup(source.c_str(), sourceGroups);
         cmXCodeObject* pbxgroup = this->CreateOrGetPBXGroup(gtgt, sourceGroup);
-        std::string key = GetGroupMapKey(gtgt, sf);
+        std::string key = GetGroupMapKeyFromPath(gtgt, source);
         this->GroupMap[key] = pbxgroup;
-      }
-
-      if (this->XcodeVersion < 50) {
-        // Put OBJECT_LIBRARY objects in proper groups:
-        std::vector<cmSourceFile const*> objs;
-        gtgt->GetExternalObjects(objs, "");
-        for (std::vector<cmSourceFile const*>::const_iterator oi =
-               objs.begin();
-             oi != objs.end(); ++oi) {
-          if ((*oi)->GetObjectLibrary().empty()) {
-            continue;
-          }
-          std::string const& source = (*oi)->GetFullPath();
-          cmSourceGroup* sourceGroup =
-            mf->FindSourceGroup(source.c_str(), sourceGroups);
-          cmXCodeObject* pbxgroup =
-            this->CreateOrGetPBXGroup(gtgt, sourceGroup);
-          std::string key = GetGroupMapKeyFromPath(gtgt, source);
-          this->GroupMap[key] = pbxgroup;
-        }
       }
     }
   }
