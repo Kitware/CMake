@@ -22,8 +22,8 @@ or macro in ``C``.
 If the header files define the symbol as a macro it is considered
 available and assumed to work.  If the header files declare the symbol
 as a function or variable then the symbol must also be available for
-linking.
-If the symbol is a type or enum value it will not be recognized
+linking (so intrinsics may not be detected).
+If the symbol is a type, enum value, or intrinsic it will not be recognized
 (consider using :module:`CheckTypeSize` or :module:`CheckCSourceCompiles`).
 If the check needs to be done in C++, consider using
 :module:`CheckCXXSymbolExists` instead.
