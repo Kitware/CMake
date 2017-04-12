@@ -152,6 +152,9 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(cmake* cm,
   this->CurrentLocalGenerator = 0;
   this->XcodeBuildCommandInitialized = false;
 
+  this->ObjectDirArchDefault = "$(CURRENT_ARCH)";
+  this->ComputeObjectDirArch();
+
   cm->GetState()->SetIsGeneratorMultiConfig(true);
 }
 
@@ -282,13 +285,7 @@ void cmGlobalXCodeGenerator::EnableLanguage(
   }
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
-  const char* osxArch = mf->GetDefinition("CMAKE_OSX_ARCHITECTURES");
-  const char* sysroot = mf->GetDefinition("CMAKE_OSX_SYSROOT");
-  if (osxArch && sysroot) {
-    this->Architectures.clear();
-    cmSystemTools::ExpandListArgument(std::string(osxArch),
-                                      this->Architectures);
-  }
+  this->ComputeArchitectures(mf);
 }
 
 void cmGlobalXCodeGenerator::GenerateBuildCommand(
@@ -3089,23 +3086,16 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
                            this->CreateString(defaultConfigName));
   cmXCodeObject* buildSettings =
     this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  const char* osxArch =
-    this->CurrentMakefile->GetDefinition("CMAKE_OSX_ARCHITECTURES");
   const char* sysroot =
     this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
   const char* deploymentTarget =
     this->CurrentMakefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
-  std::string archs;
   if (sysroot) {
-    if (osxArch) {
-      // recompute this as it may have been changed since enable language
-      this->Architectures.clear();
-      cmSystemTools::ExpandListArgument(std::string(osxArch),
-                                        this->Architectures);
-      archs = cmJoin(this->Architectures, " ");
-    }
     buildSettings->AddAttribute("SDKROOT", this->CreateString(sysroot));
   }
+  // recompute this as it may have been changed since enable language
+  this->ComputeArchitectures(this->CurrentMakefile);
+  std::string const archs = cmJoin(this->Architectures, " ");
   if (archs.empty()) {
     // Tell Xcode to use NATIVE_ARCH instead of ARCHS.
     buildSettings->AddAttribute("ONLY_ACTIVE_ARCH", this->CreateString("YES"));
@@ -3210,6 +3200,48 @@ std::string cmGlobalXCodeGenerator::GetObjectsNormalDirectory(
   dir += ".build/Objects-normal/";
 
   return dir;
+}
+
+void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
+{
+  this->Architectures.clear();
+  const char* osxArch = mf->GetDefinition("CMAKE_OSX_ARCHITECTURES");
+  const char* sysroot = mf->GetDefinition("CMAKE_OSX_SYSROOT");
+  if (osxArch && sysroot) {
+    cmSystemTools::ExpandListArgument(std::string(osxArch),
+                                      this->Architectures);
+  }
+
+  if (this->Architectures.empty()) {
+    // With no ARCHS we use ONLY_ACTIVE_ARCH.
+    // Look up the arch that Xcode chooses in this case.
+    if (const char* arch = mf->GetDefinition("CMAKE_XCODE_CURRENT_ARCH")) {
+      this->ObjectDirArchDefault = arch;
+    }
+  }
+
+  this->ComputeObjectDirArch();
+}
+
+void cmGlobalXCodeGenerator::ComputeObjectDirArch()
+{
+  if (this->XcodeVersion >= 21) {
+    if (this->Architectures.size() > 1) {
+      this->ObjectDirArch = "$(CURRENT_ARCH)";
+    } else if (!this->Architectures.empty()) {
+      this->ObjectDirArch = this->Architectures[0];
+    } else {
+      this->ObjectDirArch = this->ObjectDirArchDefault;
+    }
+  } else {
+#if defined(__ppc__)
+    this->ObjectDirArch = "ppc";
+#elif defined(__i386)
+    this->ObjectDirArch = "i386";
+#else
+    this->ObjectDirArch = "";
+#endif
+  }
 }
 
 void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
@@ -3721,15 +3753,7 @@ void cmGlobalXCodeGenerator::ComputeTargetObjectDirectory(
   std::string configName = this->GetCMakeCFGIntDir();
   std::string dir =
     this->GetObjectsNormalDirectory("$(PROJECT_NAME)", configName, gt);
-  if (this->XcodeVersion >= 21) {
-    dir += "$(CURRENT_ARCH)/";
-  } else {
-#ifdef __ppc__
-    dir += "ppc/";
-#endif
-#ifdef __i386
-    dir += "i386/";
-#endif
-  }
+  dir += this->ObjectDirArch;
+  dir += "/";
   gt->ObjectDirectory = dir;
 }
