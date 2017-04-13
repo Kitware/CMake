@@ -70,6 +70,8 @@ public:
   bool GetPropertyAsBool(const std::string& prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files,
                       const std::string& config) const;
+  void GetSourceFilesWithoutObjectLibraries(std::vector<cmSourceFile*>& files,
+                                            const std::string& config) const;
 
   /** Source file kinds (classifications).
       Generators use this to decide how to treat a source file.  */
@@ -350,6 +352,9 @@ public:
   std::string GetFullNameImported(const std::string& config,
                                   bool implib) const;
 
+  /** Get source files common to all configurations and diagnose cases
+      with per-config sources.  Excludes sources added by a TARGET_OBJECTS
+      generator expression.  */
   bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
 
   bool HaveBuildTreeRPATH(const std::string& config) const;

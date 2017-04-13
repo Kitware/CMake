@@ -949,6 +949,19 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*>& files,
   }
 }
 
+void cmGeneratorTarget::GetSourceFilesWithoutObjectLibraries(
+  std::vector<cmSourceFile*>& files, const std::string& config) const
+{
+  KindedSources const& kinded = this->GetKindedSources(config);
+  files.reserve(kinded.Sources.size());
+  for (std::vector<SourceAndKind>::const_iterator si = kinded.Sources.begin();
+       si != kinded.Sources.end(); ++si) {
+    if (si->Source->GetObjectLibrary().empty()) {
+      files.push_back(si->Source);
+    }
+  }
+}
+
 cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
   std::string const& config) const
 {
@@ -4937,11 +4950,11 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
 
   std::vector<std::string>::const_iterator it = configs.begin();
   const std::string& firstConfig = *it;
-  this->GetSourceFiles(files, firstConfig);
+  this->GetSourceFilesWithoutObjectLibraries(files, firstConfig);
 
   for (; it != configs.end(); ++it) {
     std::vector<cmSourceFile*> configFiles;
-    this->GetSourceFiles(configFiles, *it);
+    this->GetSourceFilesWithoutObjectLibraries(configFiles, *it);
     if (configFiles != files) {
       std::string firstConfigFiles;
       const char* sep = "";
