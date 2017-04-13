@@ -135,6 +135,19 @@ static bool CheckFileOperations()
     res = false;
   }
 
+  kwsys::SystemTools::Stat_t buf;
+  if (kwsys::SystemTools::Stat(testTxtFile.c_str(), &buf) != 0) {
+    std::cerr << "Problem with Stat - unable to stat text file: "
+              << testTxtFile << std::endl;
+    res = false;
+  }
+
+  if (kwsys::SystemTools::Stat(testBinFile, &buf) != 0) {
+    std::cerr << "Problem with Stat - unable to stat bin file: " << testBinFile
+              << std::endl;
+    res = false;
+  }
+
   if (!kwsys::SystemTools::MakeDirectory(testNewDir)) {
     std::cerr << "Problem with MakeDirectory for: " << testNewDir << std::endl;
     res = false;
