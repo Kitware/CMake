@@ -185,9 +185,7 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
   }
 
   // Add the import library for windows DLLs.
-  if (target->IsDLLPlatform() &&
-      (target->GetType() == cmStateEnums::SHARED_LIBRARY ||
-       target->IsExecutableWithExports()) &&
+  if (target->HasImportLibrary() &&
       mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
     std::string prop = "IMPORTED_IMPLIB";
     prop += suffix;
