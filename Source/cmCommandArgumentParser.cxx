@@ -85,7 +85,7 @@ Modify cmCommandArgumentParser.cxx:
 
 */
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string.h>
 

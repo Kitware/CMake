@@ -3,7 +3,8 @@
 #ifndef cmSetsPropertiesCommand_h
 #define cmSetsPropertiesCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <set>
 #include <string>
 #include <vector>

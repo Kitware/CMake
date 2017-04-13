@@ -3,7 +3,7 @@
 #ifndef cmCursesMainForm_h
 #define cmCursesMainForm_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCursesForm.h"
 #include "cmCursesStandardIncludes.h"

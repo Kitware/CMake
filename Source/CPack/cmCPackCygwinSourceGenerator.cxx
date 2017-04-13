@@ -9,7 +9,7 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include <cmsys/SystemTools.hxx>
+#include "cmsys/SystemTools.hxx"
 
 // Includes needed for implementation of RenameFile.  This is not in
 // system tools because it is not implemented robustly enough to move

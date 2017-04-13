@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalGenerator.h"
 
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
 #include <iterator>
 #include <sstream>
 #include <stdio.h>
@@ -44,8 +44,8 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmCryptoHash.h"
-#include <cm_jsoncpp_value.h>
-#include <cm_jsoncpp_writer.h>
+#include "cm_jsoncpp_value.h"
+#include "cm_jsoncpp_writer.h"
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1800

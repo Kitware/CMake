@@ -3,7 +3,7 @@
 #ifndef cmWorkingDirectory_h
 #define cmWorkingDirectory_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 

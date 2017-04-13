@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProcess.h"
 
-#include <cmConfigure.h>
-#include <cmProcessOutput.h>
-#include <cmSystemTools.h>
+#include "cmConfigure.h"
+#include "cmProcessOutput.h"
+#include "cmSystemTools.h"
 #include <iostream>
 
 cmProcess::cmProcess()

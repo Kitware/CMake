@@ -3,12 +3,12 @@
 #ifndef cmCTestBuildHandler_h
 #define cmCTestBuildHandler_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestGenericHandler.h"
 
-#include <cmProcessOutput.h>
-#include <cmsys/RegularExpression.hxx>
+#include "cmProcessOutput.h"
+#include "cmsys/RegularExpression.hxx"
 #include <deque>
 #include <iosfwd>
 #include <stddef.h>

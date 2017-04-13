@@ -3,7 +3,7 @@
 #ifndef cmGlobalCommonGenerator_h
 #define cmGlobalCommonGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmGlobalGenerator.h"
 

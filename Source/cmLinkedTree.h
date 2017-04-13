@@ -3,7 +3,7 @@
 #ifndef cmLinkedTree_h
 #define cmLinkedTree_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <assert.h>
 #include <iterator>

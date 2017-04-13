@@ -3,7 +3,8 @@
 #ifndef cmFindPathCommand_h
 #define cmFindPathCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 

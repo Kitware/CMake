@@ -3,7 +3,7 @@
 #ifndef cmComputeTargetDepends_h
 #define cmComputeTargetDepends_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmGraphAdjacencyList.h"
 

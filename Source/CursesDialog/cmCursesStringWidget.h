@@ -3,7 +3,7 @@
 #ifndef cmCursesStringWidget_h
 #define cmCursesStringWidget_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"

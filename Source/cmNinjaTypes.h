@@ -3,7 +3,7 @@
 #ifndef cmNinjaTypes_h
 #define cmNinjaTypes_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <string>

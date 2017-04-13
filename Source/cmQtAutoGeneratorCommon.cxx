@@ -4,8 +4,8 @@
 #include "cmAlgorithms.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 
 #include <sstream>
 #include <stddef.h>

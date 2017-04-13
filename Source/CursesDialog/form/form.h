@@ -33,7 +33,7 @@
 #ifndef FORM_H
 #define FORM_H
 
-#include <cmFormConfigure.h>
+#include "cmFormConfigure.h"
 
 /* figure out which curses.h to include */
 # if defined(CURSES_HAVE_NCURSES_H)

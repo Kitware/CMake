@@ -3,7 +3,8 @@
 #ifndef cmGetDirectoryPropertyCommand_h
 #define cmGetDirectoryPropertyCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 

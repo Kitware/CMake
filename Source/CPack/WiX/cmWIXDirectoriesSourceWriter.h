@@ -5,7 +5,7 @@
 
 #include "cmWIXSourceWriter.h"
 
-#include <CPack/cmCPackGenerator.h>
+#include "cmCPackGenerator.h"
 
 #include <string>
 

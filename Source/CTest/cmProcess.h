@@ -3,9 +3,9 @@
 #ifndef cmProcess_h
 #define cmProcess_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cmsys/Process.h>
+#include "cmsys/Process.h"
 #include <string>
 #include <vector>
 

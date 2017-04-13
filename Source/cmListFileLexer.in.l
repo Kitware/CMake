@@ -21,7 +21,7 @@ Modify cmListFileLexer.c:
 /* IWYU pragma: no_forward_declare yyguts_t */
 
 #ifdef WIN32
-#include <cmsys/Encoding.h>
+#include "cmsys/Encoding.h"
 #endif
 
 /* Setup the proper cmListFileLexer_yylex declaration.  */

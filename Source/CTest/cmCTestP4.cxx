@@ -7,8 +7,8 @@
 #include "cmProcessTools.h"
 #include "cmSystemTools.h"
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/RegularExpression.hxx>
 #include <ostream>
 #include <time.h>
 #include <utility>

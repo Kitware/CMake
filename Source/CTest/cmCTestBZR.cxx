@@ -8,8 +8,8 @@
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
-#include <cm_expat.h>
-#include <cmsys/RegularExpression.hxx>
+#include "cm_expat.h"
+#include "cmsys/RegularExpression.hxx"
 #include <list>
 #include <map>
 #include <ostream>

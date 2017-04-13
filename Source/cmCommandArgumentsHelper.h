@@ -3,7 +3,7 @@
 #ifndef cmCommandArgumentsHelper_h
 #define cmCommandArgumentsHelper_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <set>
 #include <string>

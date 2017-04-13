@@ -3,7 +3,7 @@
 #ifndef cmInstallExportGenerator_h
 #define cmInstallExportGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmInstallGenerator.h"
 #include "cmScriptGenerator.h"

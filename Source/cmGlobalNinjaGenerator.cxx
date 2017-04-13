@@ -2,11 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalNinjaGenerator.h"
 
+#include "cm_jsoncpp_reader.h"
+#include "cm_jsoncpp_value.h"
+#include "cm_jsoncpp_writer.h"
+#include "cmsys/FStream.hxx"
 #include <algorithm>
-#include <cm_jsoncpp_reader.h>
-#include <cm_jsoncpp_value.h>
-#include <cm_jsoncpp_writer.h>
-#include <cmsys/FStream.hxx>
 #include <ctype.h>
 #include <functional>
 #include <iterator>

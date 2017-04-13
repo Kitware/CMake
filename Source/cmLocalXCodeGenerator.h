@@ -3,7 +3,8 @@
 #ifndef cmLocalXCodeGenerator_h
 #define cmLocalXCodeGenerator_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
+
 #include <map>
 #include <string>
 

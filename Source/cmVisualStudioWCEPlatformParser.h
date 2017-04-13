@@ -3,7 +3,7 @@
 #ifndef cmVisualStudioWCEPlatformParser_h
 #define cmVisualStudioWCEPlatformParser_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <map>
 #include <stddef.h>

@@ -3,7 +3,7 @@
 #ifndef cmExpandedCommandArgument_h
 #define cmExpandedCommandArgument_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 

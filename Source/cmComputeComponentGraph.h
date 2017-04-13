@@ -3,7 +3,7 @@
 #ifndef cmComputeComponentGraph_h
 #define cmComputeComponentGraph_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmGraphAdjacencyList.h"
 

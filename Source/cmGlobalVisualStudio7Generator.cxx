@@ -9,7 +9,7 @@
 #include "cmState.h"
 #include "cmUuid.h"
 #include "cmake.h"
-#include <cmsys/Encoding.hxx>
+#include "cmsys/Encoding.hxx"
 
 #include <assert.h>
 #include <windows.h>

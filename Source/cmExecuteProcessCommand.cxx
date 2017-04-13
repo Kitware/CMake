@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExecuteProcessCommand.h"
 
-#include <cmsys/Process.h>
+#include "cmsys/Process.h"
 #include <ctype.h> /* isspace */
 #include <sstream>
 #include <stdio.h>

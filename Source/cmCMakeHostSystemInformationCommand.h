@@ -3,7 +3,8 @@
 #ifndef cmCMakeHostSystemInformationCommand_h
 #define cmCMakeHostSystemInformationCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <stddef.h>
 #include <string>
 #include <vector>

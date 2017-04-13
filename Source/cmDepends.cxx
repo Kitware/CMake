@@ -9,7 +9,7 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 #include <sstream>
 #include <string.h>
 #include <utility>

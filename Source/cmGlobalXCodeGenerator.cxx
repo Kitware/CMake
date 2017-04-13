@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalXCodeGenerator.h"
 
+#include "cmsys/RegularExpression.hxx"
 #include <assert.h>
-#include <cmsys/RegularExpression.hxx>
 #include <iomanip>
 #include <sstream>
 #include <stdio.h>

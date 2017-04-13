@@ -3,7 +3,7 @@
 #ifndef cmTargetPropertyComputer_h
 #define cmTargetPropertyComputer_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 

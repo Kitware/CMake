@@ -3,7 +3,7 @@
 #ifndef cmParseCacheCoverage_h
 #define cmParseCacheCoverage_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmParseMumpsCoverage.h"
 

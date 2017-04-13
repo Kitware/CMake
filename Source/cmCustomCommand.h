@@ -3,7 +3,7 @@
 #ifndef cmCustomCommand_h
 #define cmCustomCommand_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCustomCommandLines.h"
 #include "cmListFileCache.h"

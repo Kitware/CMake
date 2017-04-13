@@ -63,8 +63,8 @@
 */
 #include "bindexplib.h"
 
-#include <cmsys/Encoding.hxx>
-#include <cmsys/FStream.hxx>
+#include "cmsys/Encoding.hxx"
+#include "cmsys/FStream.hxx"
 #include <iostream>
 #include <windows.h>
 

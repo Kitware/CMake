@@ -3,7 +3,7 @@
 #ifndef cmXCodeObject_h
 #define cmXCodeObject_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <algorithm>
 #include <iosfwd>

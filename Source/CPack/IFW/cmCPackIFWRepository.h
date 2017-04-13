@@ -3,7 +3,7 @@
 #ifndef cmCPackIFWRepository_h
 #define cmCPackIFWRepository_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

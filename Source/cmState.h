@@ -3,7 +3,7 @@
 #ifndef cmState_h
 #define cmState_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <set>

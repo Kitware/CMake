@@ -3,7 +3,7 @@
 #ifndef cmExportSetMap_h
 #define cmExportSetMap_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <string>

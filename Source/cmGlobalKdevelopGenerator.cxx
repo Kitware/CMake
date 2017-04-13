@@ -14,8 +14,8 @@
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
 #include <map>
 #include <set>
 #include <string.h>

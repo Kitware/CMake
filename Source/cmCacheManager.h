@@ -3,7 +3,7 @@
 #ifndef cmCacheManager_h
 #define cmCacheManager_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <map>

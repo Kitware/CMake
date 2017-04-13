@@ -4,7 +4,7 @@
 
 #include "cmSystemTools.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 cmScriptGenerator::cmScriptGenerator(
   const std::string& config_var,

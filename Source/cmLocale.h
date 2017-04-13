@@ -3,7 +3,7 @@
 #ifndef cmLocale_h
 #define cmLocale_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <locale.h>
 #include <string>

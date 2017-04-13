@@ -3,7 +3,7 @@
 #ifndef cmTargetPropCommandBase_h
 #define cmTargetPropCommandBase_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

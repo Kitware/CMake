@@ -9,12 +9,12 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
-#include <cmConfigure.h>
-#include <cm_curl.h>
-#include <cm_zlib.h>
-#include <cmsys/Base64.h>
-#include <cmsys/Process.h>
-#include <cmsys/RegularExpression.hxx>
+#include "cmConfigure.h"
+#include "cm_curl.h"
+#include "cm_zlib.h"
+#include "cmsys/Base64.h"
+#include "cmsys/Process.h"
+#include "cmsys/RegularExpression.hxx"
 #include <iomanip>
 #include <sstream>
 #include <stdio.h>

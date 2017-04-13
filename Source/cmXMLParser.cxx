@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmXMLParser.h"
 
-#include <cm_expat.h>
-#include <cmsys/FStream.hxx>
+#include "cm_expat.h"
+#include "cmsys/FStream.hxx"
 #include <ctype.h>
 #include <iostream>
 #include <sstream>

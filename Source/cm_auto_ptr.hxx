@@ -3,7 +3,7 @@
 #ifndef CM_AUTO_PTR_HXX
 #define CM_AUTO_PTR_HXX
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #ifdef CMake_HAVE_CXX_AUTO_PTR
 

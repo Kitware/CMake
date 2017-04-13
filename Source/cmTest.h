@@ -3,7 +3,7 @@
 #ifndef cmTest_h
 #define cmTest_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmListFileCache.h"
 #include "cmPropertyMap.h"

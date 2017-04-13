@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileCommand.h"
 
+#include "cm_kwiml.h"
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cm_kwiml.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/String.hxx>
 #include <list>
 #include <sstream>
 #include <stdio.h>
@@ -37,7 +37,7 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmCurl.h"
 #include "cmFileLockResult.h"
-#include <cm_curl.h>
+#include "cm_curl.h"
 #endif
 
 #if defined(CMAKE_USE_ELF_PARSER)

@@ -3,7 +3,7 @@
 #ifndef cmPathLabel_h
 #define cmPathLabel_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 

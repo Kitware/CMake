@@ -3,7 +3,7 @@
 #ifndef cmPolicies_h
 #define cmPolicies_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <bitset>
 #include <string>

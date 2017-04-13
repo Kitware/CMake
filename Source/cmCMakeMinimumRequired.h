@@ -3,7 +3,8 @@
 #ifndef cmCMakeMinimumRequired_h
 #define cmCMakeMinimumRequired_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 

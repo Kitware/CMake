@@ -3,7 +3,7 @@
 #ifndef cmParseDelphiCoverage_h
 #define cmParseDelphiCoverage_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

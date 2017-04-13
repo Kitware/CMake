@@ -7,8 +7,8 @@
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <utility>
 
 cmCTestCVS::cmCTestCVS(cmCTest* ct, std::ostream& log)

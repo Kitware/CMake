@@ -3,10 +3,10 @@
 #ifndef cmCTest_h
 #define cmCTest_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cmProcessOutput.h>
-#include <cmsys/String.hxx>
+#include "cmProcessOutput.h"
+#include "cmsys/String.hxx"
 #include <map>
 #include <set>
 #include <sstream>

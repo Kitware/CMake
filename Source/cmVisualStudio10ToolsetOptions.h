@@ -3,7 +3,7 @@
 #ifndef cmVisualStudio10ToolsetOptions_h
 #define cmVisualStudio10ToolsetOptions_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 

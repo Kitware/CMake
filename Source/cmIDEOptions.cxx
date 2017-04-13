@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIDEOptions.h"
 
-#include <cmsys/String.h>
+#include "cmsys/String.h"
 #include <iterator>
 #include <string.h>
 

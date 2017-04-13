@@ -3,7 +3,7 @@
 #ifndef cmTargetExport_h
 #define cmTargetExport_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 

@@ -3,7 +3,7 @@
 #ifndef cmCPackPackageMakerGenerator_h
 #define cmCPackPackageMakerGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCPackGenerator.h"
 #include "cmCPackPKGGenerator.h"

@@ -3,11 +3,11 @@
 #ifndef cmSystemTools_h
 #define cmSystemTools_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmProcessOutput.h"
+#include "cmsys/Process.h"
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
-#include <cmProcessOutput.h>
-#include <cmsys/Process.h>
 #include <stddef.h>
 #include <string>
 #include <vector>

@@ -3,7 +3,8 @@
 #ifndef cmMarkAsAdvancedCommand_h
 #define cmMarkAsAdvancedCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 

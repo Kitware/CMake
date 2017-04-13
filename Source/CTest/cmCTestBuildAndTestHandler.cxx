@@ -9,7 +9,7 @@
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
 
-#include <cmsys/Process.h>
+#include "cmsys/Process.h"
 #include <stdlib.h>
 
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()

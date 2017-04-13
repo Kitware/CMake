@@ -3,7 +3,7 @@
 #ifndef cmSourceFile_h
 #define cmSourceFile_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmPropertyMap.h"
 #include "cmSourceFileLocation.h"

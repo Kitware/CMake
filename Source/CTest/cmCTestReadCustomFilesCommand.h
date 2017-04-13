@@ -3,7 +3,7 @@
 #ifndef cmCTestReadCustomFilesCommand_h
 #define cmCTestReadCustomFilesCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestCommand.h"
 

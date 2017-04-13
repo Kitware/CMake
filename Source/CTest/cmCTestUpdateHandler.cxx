@@ -16,7 +16,7 @@
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
 
-#include <cm_auto_ptr.hxx>
+#include "cm_auto_ptr.hxx"
 #include <sstream>
 
 static const char* cmCTestUpdateHandlerUpdateStrings[] = {

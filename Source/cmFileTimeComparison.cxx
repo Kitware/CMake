@@ -13,7 +13,7 @@
 #include "cm_sys_stat.h"
 #define cmFileTimeComparison_Type struct stat
 #else
-#include <cmsys/Encoding.hxx>
+#include "cmsys/Encoding.hxx"
 #include <windows.h>
 #define cmFileTimeComparison_Type FILETIME
 #endif

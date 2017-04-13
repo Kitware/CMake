@@ -3,7 +3,7 @@
 #ifndef QCMakeWidgets_h
 #define QCMakeWidgets_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <QComboBox>
 #include <QCompleter>

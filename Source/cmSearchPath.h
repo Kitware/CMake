@@ -3,7 +3,7 @@
 #ifndef cmSearchPath_h
 #define cmSearchPath_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <set>
 #include <string>

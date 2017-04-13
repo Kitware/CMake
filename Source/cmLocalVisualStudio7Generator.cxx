@@ -9,8 +9,8 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
+#include "cm_expat.h"
 #include "cmake.h"
-#include <cm_expat.h>
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"

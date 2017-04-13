@@ -8,7 +8,7 @@
 #include "cmWIXPatch.h"
 #include "cmWIXShortcut.h"
 
-#include <CPack/cmCPackGenerator.h>
+#include "cmCPackGenerator.h"
 
 /** \class cmWIXFilesSourceWriter
  * \brief Helper class to generate files.wxs
