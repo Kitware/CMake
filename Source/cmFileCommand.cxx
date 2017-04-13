@@ -1147,6 +1147,7 @@ protected:
   bool UseGivenPermissionsDir;
   bool UseSourcePermissions;
   std::string Destination;
+  std::string FilesFromDir;
   std::vector<std::string> Files;
   int Doing;
 
@@ -1156,6 +1157,7 @@ protected:
     DoingNone,
     DoingError,
     DoingDestination,
+    DoingFilesFromDir,
     DoingFiles,
     DoingPattern,
     DoingRegex,
@@ -1251,6 +1253,12 @@ bool cmFileCopier::CheckKeyword(std::string const& arg)
     } else {
       this->Doing = DoingDestination;
     }
+  } else if (arg == "FILES_FROM_DIR") {
+    if (this->CurrentMatchRule) {
+      this->NotAfterMatch(arg);
+    } else {
+      this->Doing = DoingFilesFromDir;
+    }
   } else if (arg == "PATTERN") {
     this->Doing = DoingPattern;
   } else if (arg == "REGEX") {
@@ -1325,6 +1333,16 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       }
       this->Doing = DoingNone;
       break;
+    case DoingFilesFromDir:
+      if (cmSystemTools::FileIsFullPath(arg.c_str())) {
+        this->FilesFromDir = arg;
+      } else {
+        this->FilesFromDir = this->Makefile->GetCurrentSourceDirectory();
+        this->FilesFromDir += "/" + arg;
+      }
+      cmSystemTools::ConvertToUnixSlashes(this->FilesFromDir);
+      this->Doing = DoingNone;
+      break;
     case DoingPattern: {
       // Convert the pattern to a regular expression.  Require a
       // leading slash and trailing end-of-string in the matched
@@ -1388,9 +1406,17 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
        i != this->Files.end(); ++i) {
     std::string file;
     if (!i->empty() && !cmSystemTools::FileIsFullPath(*i)) {
-      file = this->Makefile->GetCurrentSourceDirectory();
+      if (!this->FilesFromDir.empty()) {
+        file = this->FilesFromDir;
+      } else {
+        file = this->Makefile->GetCurrentSourceDirectory();
+      }
       file += "/";
       file += *i;
+    } else if (!this->FilesFromDir.empty()) {
+      this->FileCommand->SetError("option FILES_FROM_DIR requires all files "
+                                  "to be specified as relative paths.");
+      return false;
     } else {
       file = *i;
     }
@@ -1404,6 +1430,13 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
 
     // Compute the full path to the destination file.
     std::string toFile = this->Destination;
+    if (!this->FilesFromDir.empty()) {
+      std::string dir = cmSystemTools::GetFilenamePath(*i);
+      if (!dir.empty()) {
+        toFile += "/";
+        toFile += dir;
+      }
+    }
     std::string const& toName = this->ToName(fromName);
     if (!toName.empty()) {
       toFile += "/";
@@ -1754,6 +1787,11 @@ bool cmFileInstaller::Parse(std::vector<std::string> const& args)
   }
 
   if (!this->Rename.empty()) {
+    if (!this->FilesFromDir.empty()) {
+      this->FileCommand->SetError("INSTALL option RENAME may not be "
+                                  "combined with FILES_FROM_DIR.");
+      return false;
+    }
     if (this->InstallType != cmInstallType_FILES &&
         this->InstallType != cmInstallType_PROGRAMS) {
       this->FileCommand->SetError("INSTALL option RENAME may be used "
