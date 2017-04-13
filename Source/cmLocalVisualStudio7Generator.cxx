@@ -30,7 +30,7 @@ public:
   typedef cmComputeLinkInformation::ItemVector ItemVector;
   void OutputLibraries(std::ostream& fout, ItemVector const& libs);
   void OutputObjects(std::ostream& fout, cmGeneratorTarget* t,
-                     const char* isep = 0);
+                     std::string const& config, const char* isep = 0);
 
 private:
   cmLocalVisualStudio7Generator* LocalGenerator;
@@ -1043,7 +1043,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       if (this->GetVersion() < cmGlobalVisualStudioGenerator::VS8 ||
           this->FortranProject) {
         std::ostringstream libdeps;
-        this->Internal->OutputObjects(libdeps, target);
+        this->Internal->OutputObjects(libdeps, target, configName);
         if (!libdeps.str().empty()) {
           fout << "\t\t\t\tAdditionalDependencies=\"" << libdeps.str()
                << "\"\n";
@@ -1096,7 +1096,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
            << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
       if (this->GetVersion() < cmGlobalVisualStudioGenerator::VS8 ||
           this->FortranProject) {
-        this->Internal->OutputObjects(fout, target, " ");
+        this->Internal->OutputObjects(fout, target, configName, " ");
       }
       fout << " ";
       this->Internal->OutputLibraries(fout, cli.GetItems());
@@ -1181,7 +1181,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
            << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
       if (this->GetVersion() < cmGlobalVisualStudioGenerator::VS8 ||
           this->FortranProject) {
-        this->Internal->OutputObjects(fout, target, " ");
+        this->Internal->OutputObjects(fout, target, configName, " ");
       }
       fout << " ";
       this->Internal->OutputLibraries(fout, cli.GetItems());
@@ -1300,21 +1300,20 @@ void cmLocalVisualStudio7GeneratorInternals::OutputLibraries(
 }
 
 void cmLocalVisualStudio7GeneratorInternals::OutputObjects(
-  std::ostream& fout, cmGeneratorTarget* gt, const char* isep)
+  std::ostream& fout, cmGeneratorTarget* gt, std::string const& configName,
+  const char* isep)
 {
   // VS < 8 does not support per-config source locations so we
   // list object library content on the link line instead.
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
   std::string currentBinDir = lg->GetCurrentBinaryDirectory();
 
-  std::vector<cmSourceFile*> sources;
-  if (!gt->GetConfigCommonSourceFiles(sources)) {
-    return;
-  }
+  std::vector<cmSourceFile const*> objs;
+  gt->GetExternalObjects(objs, configName);
 
   const char* sep = isep ? isep : "";
-  for (std::vector<cmSourceFile*>::const_iterator i = sources.begin();
-       i != sources.end(); i++) {
+  for (std::vector<cmSourceFile const*>::const_iterator i = objs.begin();
+       i != objs.end(); ++i) {
     if (!(*i)->GetObjectLibrary().empty()) {
       std::string const& objFile = (*i)->GetFullPath();
       std::string rel = lg->ConvertToRelativePath(currentBinDir, objFile);
