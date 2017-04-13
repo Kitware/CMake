@@ -1051,11 +1051,14 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
       // Add object library contents as external objects. (Equivalent to
       // the externalObjFiles above, except each one is not a cmSourceFile
       // within the target.)
-      std::vector<std::string> objs;
-      gtgt->UseObjectLibraries(objs, "");
-      for (std::vector<std::string>::const_iterator oi = objs.begin();
+      std::vector<cmSourceFile const*> objs;
+      gtgt->GetExternalObjects(objs, "");
+      for (std::vector<cmSourceFile const*>::const_iterator oi = objs.begin();
            oi != objs.end(); ++oi) {
-        std::string obj = *oi;
+        if ((*oi)->GetObjectLibrary().empty()) {
+          continue;
+        }
+        std::string const& obj = (*oi)->GetFullPath();
         cmXCodeObject* xsf =
           this->CreateXCodeSourceFileFromPath(obj, gtgt, "", 0);
         externalObjFiles.push_back(xsf);
@@ -2669,13 +2672,16 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       // Add object library contents as link flags.
       std::string linkObjs;
       const char* sep = "";
-      std::vector<std::string> objs;
-      gt->UseObjectLibraries(objs, "");
-      for (std::vector<std::string>::const_iterator oi = objs.begin();
+      std::vector<cmSourceFile const*> objs;
+      gt->GetExternalObjects(objs, "");
+      for (std::vector<cmSourceFile const*>::const_iterator oi = objs.begin();
            oi != objs.end(); ++oi) {
+        if ((*oi)->GetObjectLibrary().empty()) {
+          continue;
+        }
         linkObjs += sep;
         sep = " ";
-        linkObjs += this->XCodeEscapePath(*oi);
+        linkObjs += this->XCodeEscapePath((*oi)->GetFullPath());
       }
       this->AppendBuildSettingAttribute(
         target, this->GetTargetLinkFlagsVar(gt), linkObjs.c_str(), configName);
@@ -2799,17 +2805,24 @@ bool cmGlobalXCodeGenerator::CreateGroups(
         this->GroupMap[key] = pbxgroup;
       }
 
-      // Put OBJECT_LIBRARY objects in proper groups:
-      std::vector<std::string> objs;
-      gtgt->UseObjectLibraries(objs, "");
-      for (std::vector<std::string>::const_iterator oi = objs.begin();
-           oi != objs.end(); ++oi) {
-        std::string const& source = *oi;
-        cmSourceGroup* sourceGroup =
-          mf->FindSourceGroup(source.c_str(), sourceGroups);
-        cmXCodeObject* pbxgroup = this->CreateOrGetPBXGroup(gtgt, sourceGroup);
-        std::string key = GetGroupMapKeyFromPath(gtgt, source);
-        this->GroupMap[key] = pbxgroup;
+      if (this->XcodeVersion < 50) {
+        // Put OBJECT_LIBRARY objects in proper groups:
+        std::vector<cmSourceFile const*> objs;
+        gtgt->GetExternalObjects(objs, "");
+        for (std::vector<cmSourceFile const*>::const_iterator oi =
+               objs.begin();
+             oi != objs.end(); ++oi) {
+          if ((*oi)->GetObjectLibrary().empty()) {
+            continue;
+          }
+          std::string const& source = (*oi)->GetFullPath();
+          cmSourceGroup* sourceGroup =
+            mf->FindSourceGroup(source.c_str(), sourceGroups);
+          cmXCodeObject* pbxgroup =
+            this->CreateOrGetPBXGroup(gtgt, sourceGroup);
+          std::string key = GetGroupMapKeyFromPath(gtgt, source);
+          this->GroupMap[key] = pbxgroup;
+        }
       }
     }
   }
