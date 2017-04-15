@@ -29,6 +29,12 @@
 #    MPI_<lang>_LINK_FLAGS      Linking flags for MPI programs
 #    MPI_<lang>_LIBRARIES       All libraries to link MPI programs against
 #
+# Additionally, the following :prop_tgt:`IMPORTED` targets are defined:
+#
+# ::
+#
+#    MPI::MPI_<lang>            Target for using MPI from <lang>
+#
 # Additionally, FindMPI sets the following variables for running MPI
 # programs from the command line:
 #
@@ -620,6 +626,29 @@ foreach (lang C CXX Fortran)
       find_package_handle_standard_args(MPI_${lang} DEFAULT_MSG MPI_${lang}_COMPILER)
     else()
       find_package_handle_standard_args(MPI_${lang} DEFAULT_MSG MPI_${lang}_LIBRARIES MPI_${lang}_INCLUDE_PATH)
+    endif()
+
+    if(MPI_${lang}_FOUND)
+      if(NOT TARGET MPI::MPI_${lang})
+        add_library(MPI::MPI_${lang} INTERFACE IMPORTED)
+      endif()
+      if(MPI_${lang}_COMPILE_FLAGS)
+        set(_MPI_${lang}_COMPILE_OPTIONS "${MPI_${lang}_COMPILE_FLAGS}")
+        separate_arguments(_MPI_${lang}_COMPILE_OPTIONS)
+        set_property(TARGET MPI::MPI_${lang} PROPERTY
+          INTERFACE_COMPILE_OPTIONS "${_MPI_${lang}_COMPILE_OPTIONS}")
+      endif()
+
+      unset(_MPI_${lang}_LINK_LINE)
+      if(MPI_${lang}_LINK_FLAGS)
+        list(APPEND _MPI_${lang}_LINK_LINE "${MPI_${lang}_LINK_FLAGS}")
+      endif()
+      list(APPEND _MPI_${lang}_LINK_LINE "${MPI_${lang}_LIBRARIES}")
+      set_property(TARGET MPI::MPI_${lang} PROPERTY
+        INTERFACE_LINK_LIBRARIES "${_MPI_${lang}_LINK_LINE}")
+
+      set_property(TARGET MPI::MPI_${lang} PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES "${MPI_${lang}_INCLUDE_PATH}")
     endif()
   endif()
 endforeach()
