@@ -660,6 +660,7 @@ if (MPI_NUMLIBS GREATER 1)
 else()
   set(MPI_EXTRA_LIBRARY "MPI_EXTRA_LIBRARY-NOTFOUND" CACHE STRING "Extra MPI libraries to link against" FORCE)
 endif()
+mark_as_advanced(MPI_LIBRARY MPI_EXTRA_LIBRARY)
 #=============================================================================
 
 # unset these vars to cleanup namespace
