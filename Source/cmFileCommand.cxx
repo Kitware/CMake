@@ -1147,6 +1147,7 @@ protected:
   bool UseGivenPermissionsDir;
   bool UseSourcePermissions;
   std::string Destination;
+  std::string FilesFromDir;
   std::vector<std::string> Files;
   int Doing;
 
@@ -1156,6 +1157,7 @@ protected:
     DoingNone,
     DoingError,
     DoingDestination,
+    DoingFilesFromDir,
     DoingFiles,
     DoingPattern,
     DoingRegex,
@@ -1251,6 +1253,12 @@ bool cmFileCopier::CheckKeyword(std::string const& arg)
     } else {
       this->Doing = DoingDestination;
     }
+  } else if (arg == "FILES_FROM_DIR") {
+    if (this->CurrentMatchRule) {
+      this->NotAfterMatch(arg);
+    } else {
+      this->Doing = DoingFilesFromDir;
+    }
   } else if (arg == "PATTERN") {
     this->Doing = DoingPattern;
   } else if (arg == "REGEX") {
@@ -1314,13 +1322,7 @@ bool cmFileCopier::CheckValue(std::string const& arg)
 {
   switch (this->Doing) {
     case DoingFiles:
-      if (arg.empty() || cmSystemTools::FileIsFullPath(arg.c_str())) {
-        this->Files.push_back(arg);
-      } else {
-        std::string file = this->Makefile->GetCurrentSourceDirectory();
-        file += "/" + arg;
-        this->Files.push_back(file);
-      }
+      this->Files.push_back(arg);
       break;
     case DoingDestination:
       if (arg.empty() || cmSystemTools::FileIsFullPath(arg.c_str())) {
@@ -1329,6 +1331,16 @@ bool cmFileCopier::CheckValue(std::string const& arg)
         this->Destination = this->Makefile->GetCurrentBinaryDirectory();
         this->Destination += "/" + arg;
       }
+      this->Doing = DoingNone;
+      break;
+    case DoingFilesFromDir:
+      if (cmSystemTools::FileIsFullPath(arg.c_str())) {
+        this->FilesFromDir = arg;
+      } else {
+        this->FilesFromDir = this->Makefile->GetCurrentSourceDirectory();
+        this->FilesFromDir += "/" + arg;
+      }
+      cmSystemTools::ConvertToUnixSlashes(this->FilesFromDir);
       this->Doing = DoingNone;
       break;
     case DoingPattern: {
@@ -1390,17 +1402,41 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
     return false;
   }
 
-  std::vector<std::string> const& files = this->Files;
-  for (std::vector<std::string>::size_type i = 0; i < files.size(); ++i) {
+  for (std::vector<std::string>::const_iterator i = this->Files.begin();
+       i != this->Files.end(); ++i) {
+    std::string file;
+    if (!i->empty() && !cmSystemTools::FileIsFullPath(*i)) {
+      if (!this->FilesFromDir.empty()) {
+        file = this->FilesFromDir;
+      } else {
+        file = this->Makefile->GetCurrentSourceDirectory();
+      }
+      file += "/";
+      file += *i;
+    } else if (!this->FilesFromDir.empty()) {
+      this->FileCommand->SetError("option FILES_FROM_DIR requires all files "
+                                  "to be specified as relative paths.");
+      return false;
+    } else {
+      file = *i;
+    }
+
     // Split the input file into its directory and name components.
     std::vector<std::string> fromPathComponents;
-    cmSystemTools::SplitPath(files[i], fromPathComponents);
+    cmSystemTools::SplitPath(file, fromPathComponents);
     std::string fromName = *(fromPathComponents.end() - 1);
     std::string fromDir = cmSystemTools::JoinPath(
       fromPathComponents.begin(), fromPathComponents.end() - 1);
 
     // Compute the full path to the destination file.
     std::string toFile = this->Destination;
+    if (!this->FilesFromDir.empty()) {
+      std::string dir = cmSystemTools::GetFilenamePath(*i);
+      if (!dir.empty()) {
+        toFile += "/";
+        toFile += dir;
+      }
+    }
     std::string const& toName = this->ToName(fromName);
     if (!toName.empty()) {
       toFile += "/";
@@ -1751,6 +1787,11 @@ bool cmFileInstaller::Parse(std::vector<std::string> const& args)
   }
 
   if (!this->Rename.empty()) {
+    if (!this->FilesFromDir.empty()) {
+      this->FileCommand->SetError("INSTALL option RENAME may not be "
+                                  "combined with FILES_FROM_DIR.");
+      return false;
+    }
     if (this->InstallType != cmInstallType_FILES &&
         this->InstallType != cmInstallType_PROGRAMS) {
       this->FileCommand->SetError("INSTALL option RENAME may be used "
