@@ -715,8 +715,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   }
 
   cmNinjaDeps orderOnlyDeps;
-  this->GetLocalGenerator()->AppendTargetDepends(this->GeneratorTarget,
-                                                 orderOnlyDeps);
+  this->GetLocalGenerator()->AppendTargetDepends(
+    this->GeneratorTarget, orderOnlyDeps, DependOnTargetOrdering);
 
   // Add order-only dependencies on other files associated with the target.
   orderOnlyDeps.insert(orderOnlyDeps.end(), this->ExtraFiles.begin(),
@@ -741,7 +741,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   orderOnlyDeps.erase(std::unique(orderOnlyDeps.begin(), orderOnlyDeps.end()),
                       orderOnlyDeps.end());
 
-  if (!orderOnlyDeps.empty()) {
+  {
     cmNinjaDeps orderOnlyTarget;
     orderOnlyTarget.push_back(this->OrderDependsTargetForTarget());
     this->GetGlobalGenerator()->WritePhonyBuild(
@@ -754,7 +754,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   for (std::vector<cmSourceFile const*>::const_iterator si =
          objectSources.begin();
        si != objectSources.end(); ++si) {
-    this->WriteObjectBuildStatement(*si, !orderOnlyDeps.empty());
+    this->WriteObjectBuildStatement(*si);
   }
 
   if (!this->DDIFiles.empty()) {
@@ -779,8 +779,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
     // our dependencies produces them.  Fixing this will require
     // refactoring the Ninja generator to generate targets in
     // dependency order so that we can collect the needed information.
-    this->GetLocalGenerator()->AppendTargetDepends(this->GeneratorTarget,
-                                                   ddOrderOnlyDeps);
+    this->GetLocalGenerator()->AppendTargetDepends(
+      this->GeneratorTarget, ddOrderOnlyDeps, DependOnTargetArtifact);
 
     this->GetGlobalGenerator()->WriteBuild(
       this->GetBuildFileStream(), ddComment, ddRule, ddOutputs, ddImplicitOuts,
@@ -791,7 +791,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
 }
 
 void cmNinjaTargetGenerator::WriteObjectBuildStatement(
-  cmSourceFile const* source, bool writeOrderDependsTargetForTarget)
+  cmSourceFile const* source)
 {
   std::string const language = source->GetLanguage();
   std::string const sourceFileName =
@@ -842,9 +842,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   }
 
   cmNinjaDeps orderOnlyDeps;
-  if (writeOrderDependsTargetForTarget) {
-    orderOnlyDeps.push_back(this->OrderDependsTargetForTarget());
-  }
+  orderOnlyDeps.push_back(this->OrderDependsTargetForTarget());
 
   // If the source file is GENERATED and does not have a custom command
   // (either attached to this source file or another one), assume that one of

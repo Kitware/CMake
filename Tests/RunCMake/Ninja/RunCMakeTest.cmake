@@ -95,6 +95,23 @@ ${ninja_stderr}
   endif()
 endfunction(run_ninja)
 
+function (run_LooseObjectDepends)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/LooseObjectDepends-build)
+  run_cmake(LooseObjectDepends)
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" "CMakeFiles/top.dir/top.c${CMAKE_C_OUTPUT_EXTENSION}")
+  if (EXISTS "${RunCMake_TEST_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}dep${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    message(FATAL_ERROR
+      "The `dep` library was created when requesting an object file to be "
+      "built; this should no longer be necessary.")
+  endif ()
+  if (EXISTS "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/dep.dir/dep.c${CMAKE_C_OUTPUT_EXTENSION}")
+    message(FATAL_ERROR
+      "The `dep.c` object file was created when requesting an object file to "
+      "be built; this should no longer be necessary.")
+  endif ()
+endfunction ()
+run_LooseObjectDepends()
+
 function(sleep delay)
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E sleep ${delay}
