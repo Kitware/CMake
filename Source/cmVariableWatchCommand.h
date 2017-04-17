@@ -38,11 +38,6 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
 
-  /**
-   * This determines if the command is invoked when in script mode.
-   */
-  bool IsScriptable() const CM_OVERRIDE { return true; }
-
   /** This command does not really have a final pass but it needs to
       stay alive since it owns variable watch callback information. */
   bool HasFinalPass() const CM_OVERRIDE { return true; }

@@ -36,11 +36,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "set_property"; }
 
-  /**
-   * This determines if the command is invoked when in script mode.
-   */
-  bool IsScriptable() const CM_OVERRIDE { return true; }
-
 private:
   std::set<std::string> Names;
   std::string PropertyName;

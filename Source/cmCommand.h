@@ -80,11 +80,6 @@ public:
   virtual cmCommand* Clone() = 0;
 
   /**
-   * This determines if the command is invoked when in script mode.
-   */
-  virtual bool IsScriptable() const { return false; }
-
-  /**
    * This determines if the command is defined in a cmake script.
    * It is the case for cmMacroHelperCommand and cmFunctionHelperCommand.
    */

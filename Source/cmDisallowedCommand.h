@@ -42,11 +42,6 @@ public:
     return this->Command->HasFinalPass();
   }
 
-  bool IsScriptable() const CM_OVERRIDE
-  {
-    return this->Command->IsScriptable();
-  }
-
   std::string GetName() const CM_OVERRIDE { return this->Command->GetName(); }
 
 private:
