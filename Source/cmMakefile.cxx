@@ -272,11 +272,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
     pcmd->SetMakefile(this);
 
     // Decide whether to invoke the command.
-    if (!cmSystemTools::GetFatalErrorOccured() &&
-        (this->GetCMakeInstance()->GetWorkingMode() != cmake::SCRIPT_MODE ||
-         pcmd->IsScriptable()))
-
-    {
+    if (!cmSystemTools::GetFatalErrorOccured()) {
       // if trace is enabled, print out invoke information
       if (this->GetCMakeInstance()->GetTrace()) {
         this->PrintCommandTrace(lff);
@@ -298,15 +294,6 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         // use the command
         this->FinalPassCommands.push_back(pcmd.release());
       }
-    } else if (this->GetCMakeInstance()->GetWorkingMode() ==
-                 cmake::SCRIPT_MODE &&
-               !pcmd->IsScriptable()) {
-      std::string error = "Command ";
-      error += pcmd->GetName();
-      error += "() is not scriptable";
-      this->IssueMessage(cmake::FATAL_ERROR, error);
-      result = false;
-      cmSystemTools::SetFatalErrorOccured();
     }
   } else {
     if (!cmSystemTools::GetFatalErrorOccured()) {
