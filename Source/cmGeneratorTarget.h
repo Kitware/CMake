@@ -12,6 +12,7 @@
 
 #include <map>
 #include <set>
+#include <stddef.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -69,6 +70,8 @@ public:
   bool GetPropertyAsBool(const std::string& prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files,
                       const std::string& config) const;
+  void GetSourceFilesWithoutObjectLibraries(std::vector<cmSourceFile*>& files,
+                                            const std::string& config) const;
 
   /** Source file kinds (classifications).
       Generators use this to decide how to treat a source file.  */
@@ -106,6 +109,17 @@ public:
 
   /** Get all sources needed for a configuration with kinds assigned.  */
   KindedSources const& GetKindedSources(std::string const& config) const;
+
+  struct AllConfigSource
+  {
+    cmSourceFile const* Source;
+    cmGeneratorTarget::SourceKind Kind;
+    std::vector<size_t> Configs;
+  };
+
+  /** Get all sources needed for all configurations with kinds and
+      per-source configurations assigned.  */
+  std::vector<AllConfigSource> const& GetAllConfigSources() const;
 
   void GetObjectSources(std::vector<cmSourceFile const*>&,
                         const std::string& config) const;
@@ -338,6 +352,9 @@ public:
   std::string GetFullNameImported(const std::string& config,
                                   bool implib) const;
 
+  /** Get source files common to all configurations and diagnose cases
+      with per-config sources.  Excludes sources added by a TARGET_OBJECTS
+      generator expression.  */
   bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
 
   bool HaveBuildTreeRPATH(const std::string& config) const;
@@ -730,6 +747,9 @@ private:
   mutable KindedSourcesMapType KindedSourcesMap;
   void ComputeKindedSources(KindedSources& files,
                             std::string const& config) const;
+
+  mutable std::vector<AllConfigSource> AllConfigSources;
+  void ComputeAllConfigSources() const;
 
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;

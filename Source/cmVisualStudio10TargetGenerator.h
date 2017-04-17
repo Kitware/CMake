@@ -62,6 +62,7 @@ private:
   void WriteNsightTegraConfigurationValues(std::string const& config);
   void WriteSource(std::string const& tool, cmSourceFile const* sf,
                    const char* end = 0);
+  void WriteExcludeFromBuild(std::vector<size_t> const& exclude_configs);
   void WriteAllSources();
   void WriteDotNetReferences();
   void WriteDotNetReference(std::string const& ref, std::string const& hint);

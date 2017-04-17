@@ -949,6 +949,19 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*>& files,
   }
 }
 
+void cmGeneratorTarget::GetSourceFilesWithoutObjectLibraries(
+  std::vector<cmSourceFile*>& files, const std::string& config) const
+{
+  KindedSources const& kinded = this->GetKindedSources(config);
+  files.reserve(kinded.Sources.size());
+  for (std::vector<SourceAndKind>::const_iterator si = kinded.Sources.begin();
+       si != kinded.Sources.end(); ++si) {
+    if (si->Source->GetObjectLibrary().empty()) {
+      files.push_back(si->Source);
+    }
+  }
+}
+
 cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
   std::string const& config) const
 {
@@ -1066,6 +1079,43 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
          "other files that would not affect linking of a normal library.";
     this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
       cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
+  }
+}
+
+std::vector<cmGeneratorTarget::AllConfigSource> const&
+cmGeneratorTarget::GetAllConfigSources() const
+{
+  if (this->AllConfigSources.empty()) {
+    this->ComputeAllConfigSources();
+  }
+  return this->AllConfigSources;
+}
+
+void cmGeneratorTarget::ComputeAllConfigSources() const
+{
+  std::vector<std::string> configs;
+  this->Makefile->GetConfigurations(configs);
+
+  std::map<cmSourceFile const*, size_t> index;
+
+  for (size_t ci = 0; ci < configs.size(); ++ci) {
+    KindedSources const& sources = this->GetKindedSources(configs[ci]);
+    for (std::vector<cmGeneratorTarget::SourceAndKind>::const_iterator si =
+           sources.Sources.begin();
+         si != sources.Sources.end(); ++si) {
+      std::map<cmSourceFile const*, size_t>::iterator mi =
+        index.find(si->Source);
+      if (mi == index.end()) {
+        AllConfigSource acs;
+        acs.Source = si->Source;
+        acs.Kind = si->Kind;
+        this->AllConfigSources.push_back(acs);
+        std::map<cmSourceFile const*, size_t>::value_type entry(
+          si->Source, this->AllConfigSources.size() - 1);
+        mi = index.insert(entry).first;
+      }
+      this->AllConfigSources[mi->second].Configs.push_back(ci);
+    }
   }
 }
 
@@ -4900,11 +4950,11 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
 
   std::vector<std::string>::const_iterator it = configs.begin();
   const std::string& firstConfig = *it;
-  this->GetSourceFiles(files, firstConfig);
+  this->GetSourceFilesWithoutObjectLibraries(files, firstConfig);
 
   for (; it != configs.end(); ++it) {
     std::vector<cmSourceFile*> configFiles;
-    this->GetSourceFiles(configFiles, *it);
+    this->GetSourceFilesWithoutObjectLibraries(configFiles, *it);
     if (configFiles != files) {
       std::string firstConfigFiles;
       const char* sep = "";
