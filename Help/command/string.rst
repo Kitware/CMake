@@ -113,7 +113,7 @@ The following characters have special meaning in regular expressions:
   in the ``REGEX REPLACE`` operation. Additionally it is saved
   by all regular expression-related commands, including
   e.g. :command:`if(MATCHES)`, in the variables
-  ``CMAKE_MATCH_<n>`` for ``<n>`` 0..9.
+  :variable:`CMAKE_MATCH_<n>` for ``<n>`` 0..9.
 
 ``*``, ``+`` and ``?`` have higher precedence than concatenation.  ``|``
 has lower precedence than concatenation.  This means that the regular
