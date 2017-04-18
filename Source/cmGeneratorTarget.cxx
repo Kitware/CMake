@@ -941,6 +941,26 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<std::string>& files,
 void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*>& files,
                                        const std::string& config) const
 {
+  if (!this->GlobalGenerator->GetConfigureDoneCMP0026()) {
+    // Since we are still configuring not all sources may exist yet,
+    // so we need to avoid full source classification because that
+    // requires the absolute paths to all sources to be determined.
+    // Since this is only for compatibility with old policies that
+    // projects should not depend on anymore, just compute the files
+    // without memoizing them.
+    std::vector<std::string> srcs;
+    this->GetSourceFiles(srcs, config);
+    std::set<cmSourceFile*> emitted;
+    for (std::vector<std::string>::const_iterator i = srcs.begin();
+         i != srcs.end(); ++i) {
+      cmSourceFile* sf = this->Makefile->GetOrCreateSource(*i);
+      if (emitted.insert(sf).second) {
+        files.push_back(sf);
+      }
+    }
+    return;
+  }
+
   KindedSources const& kinded = this->GetKindedSources(config);
   files.reserve(kinded.Sources.size());
   for (std::vector<SourceAndKind>::const_iterator si = kinded.Sources.begin();
