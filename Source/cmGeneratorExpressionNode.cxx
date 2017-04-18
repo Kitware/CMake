@@ -1226,15 +1226,6 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
                        cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
     CM_OVERRIDE
   {
-    if (!context->EvaluateForBuildsystem) {
-      std::ostringstream e;
-      e << "The evaluation of the TARGET_OBJECTS generator expression "
-           "is only suitable for consumption by CMake.  It is not suitable "
-           "for writing out elsewhere.";
-      reportError(context, content->GetOriginalExpression(), e.str());
-      return std::string();
-    }
-
     std::string tgtName = parameters.front();
     cmGeneratorTarget* gt = context->LG->FindGeneratorTargetToUse(tgtName);
     if (!gt) {
@@ -1248,6 +1239,14 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       std::ostringstream e;
       e << "Objects of target \"" << tgtName
         << "\" referenced but is not an OBJECT library.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return std::string();
+    }
+    if (!context->EvaluateForBuildsystem) {
+      std::ostringstream e;
+      e << "The evaluation of the TARGET_OBJECTS generator expression "
+           "is only suitable for consumption by CMake.  It is not suitable "
+           "for writing out elsewhere.";
       reportError(context, content->GetOriginalExpression(), e.str());
       return std::string();
     }
