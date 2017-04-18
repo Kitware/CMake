@@ -291,13 +291,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (this->GetType() != cmStateEnums::UTILITY) {
     const char* configProps[] = {
       /* clang-format needs this comment to break after the opening brace */
-      "ARCHIVE_OUTPUT_DIRECTORY_",
-      "LIBRARY_OUTPUT_DIRECTORY_",
-      "RUNTIME_OUTPUT_DIRECTORY_",
-      "PDB_OUTPUT_DIRECTORY_",
-      "COMPILE_PDB_OUTPUT_DIRECTORY_",
-      "MAP_IMPORTED_CONFIG_",
-      CM_NULLPTR
+      "ARCHIVE_OUTPUT_DIRECTORY_",     "LIBRARY_OUTPUT_DIRECTORY_",
+      "RUNTIME_OUTPUT_DIRECTORY_",     "PDB_OUTPUT_DIRECTORY_",
+      "COMPILE_PDB_OUTPUT_DIRECTORY_", "MAP_IMPORTED_CONFIG_",
+      "INTERPROCEDURAL_OPTIMIZATION_", CM_NULLPTR
     };
     for (std::vector<std::string>::iterator ci = configNames.begin();
          ci != configNames.end(); ++ci) {
