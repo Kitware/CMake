@@ -9,42 +9,23 @@ endif()
 # Analyze 'cmake --help' output for list of available generators:
 #
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${dir})
-execute_process(COMMAND ${CMAKE_COMMAND} --help
+execute_process(COMMAND ${CMAKE_COMMAND} -E capabilities
   RESULT_VARIABLE result
   OUTPUT_VARIABLE stdout
   ERROR_VARIABLE stderr
   WORKING_DIRECTORY ${dir})
 
-string(REPLACE ";" "\\;" stdout "${stdout}")
-string(REPLACE "\n" "E;" stdout "${stdout}")
-
-set(collecting 0)
 set(generators)
-foreach(eline ${stdout})
-  string(REGEX REPLACE "^(.*)E$" "\\1" line "${eline}")
-  if(collecting AND NOT line STREQUAL "")
-    if(line MATCHES "=")
-      string(REGEX REPLACE "^  (.+)= (.*)$" "\\1" gen "${line}")
-      if(gen MATCHES "[A-Za-z]")
-        string(REGEX REPLACE "^(.*[^ ]) +$" "\\1" gen "${gen}")
-        if(gen)
-          set(generators ${generators} ${gen})
-        endif()
-      endif()
-    else()
-      if(line MATCHES "^  [A-Za-z0-9]")
-        string(REGEX REPLACE "^  (.+)$" "\\1" gen "${line}")
-        string(REGEX REPLACE "^(.*[^ ]) +$" "\\1" gen "${gen}")
-        if(gen)
-          set(generators ${generators} ${gen})
-        endif()
-      endif()
+string(REGEX MATCHALL [["name":"[^"]+","platformSupport"]] generators_json "${stdout}")
+foreach(gen_json IN LISTS generators_json)
+  if("${gen_json}" MATCHES [["name":"([^"]+)"]])
+    set(gen "${CMAKE_MATCH_1}")
+    if(NOT gen MATCHES " (Win64|IA64|ARM)$")
+      list(APPEND generators "${gen}")
     endif()
   endif()
-  if(line STREQUAL "The following generators are available on this platform:")
-    set(collecting 1)
-  endif()
 endforeach()
+list(REMOVE_DUPLICATES generators)
 
 # Also call with one non-existent generator:
 #
