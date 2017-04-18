@@ -112,6 +112,22 @@ function (run_LooseObjectDepends)
 endfunction ()
 run_LooseObjectDepends()
 
+function (run_AssumedSources)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/AssumedSources-build)
+  run_cmake(AssumedSources)
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" "target.c")
+  if (NOT EXISTS "${RunCMake_TEST_BINARY_DIR}/target.c")
+    message(FATAL_ERROR
+      "Dependencies for an assumed source did not hook up properly for 'target.c'.")
+  endif ()
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" "target-no-depends.c")
+  if (EXISTS "${RunCMake_TEST_BINARY_DIR}/target-no-depends.c")
+    message(FATAL_ERROR
+      "Dependencies for an assumed source were magically hooked up for 'target-no-depends.c'.")
+  endif ()
+endfunction ()
+run_AssumedSources()
+
 function(sleep delay)
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E sleep ${delay}
