@@ -77,6 +77,8 @@ The replace expression may refer to paren-delimited subexpressions of the
 match using ``\1``, ``\2``, ..., ``\9``.  Note that two backslashes (``\\1``)
 are required in CMake code to get a backslash through argument parsing.
 
+.. _`Regex Specification`:
+
 Regex Specification
 """""""""""""""""""
 
