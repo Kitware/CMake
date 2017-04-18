@@ -737,6 +737,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
                    std::back_inserter(orderOnlyDeps), MapToNinjaPath());
   }
 
+  std::sort(orderOnlyDeps.begin(), orderOnlyDeps.end());
+  orderOnlyDeps.erase(std::unique(orderOnlyDeps.begin(), orderOnlyDeps.end()),
+                      orderOnlyDeps.end());
+
   if (!orderOnlyDeps.empty()) {
     cmNinjaDeps orderOnlyTarget;
     orderOnlyTarget.push_back(this->OrderDependsTargetForTarget());
