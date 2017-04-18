@@ -1158,6 +1158,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       )
     list(APPEND TEST_BUILD_DIRS
       "${CMake_BINARY_DIR}/Tests/CMakeTestAllGenerators")
+    # This test runs a lot of processes.  Do not make them compete
+    # for resources with other tests.
+    set_property(TEST CMakeTestAllGenerators PROPERTY RUN_SERIAL 1)
   endif()
 
   if(NOT DEFINED CTEST_RUN_CMakeTestMultipleConfigures)
