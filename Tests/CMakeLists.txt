@@ -1411,6 +1411,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindOpenSSL)
   endif()
 
+  if(CMake_TEST_FindMPI)
+    add_subdirectory(FindMPI)
+  endif()
+
   if(CMake_TEST_FindPNG)
     add_subdirectory(FindPNG)
   endif()
