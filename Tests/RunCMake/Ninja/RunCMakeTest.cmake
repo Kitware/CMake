@@ -73,7 +73,7 @@ run_SubDir()
 
 function(run_ninja dir)
   execute_process(
-    COMMAND "${RunCMake_MAKE_PROGRAM}"
+    COMMAND "${RunCMake_MAKE_PROGRAM}" ${ARGN}
     WORKING_DIRECTORY "${dir}"
     OUTPUT_VARIABLE ninja_stdout
     ERROR_VARIABLE ninja_stderr
