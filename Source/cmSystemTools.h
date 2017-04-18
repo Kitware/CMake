@@ -253,6 +253,8 @@ public:
   static void ParseUnixCommandLine(const char* command,
                                    std::vector<std::string>& args);
 
+  static size_t CalculateCommandLineLengthLimit();
+
   static void EnableMessages() { s_DisableMessages = false; }
   static void DisableMessages() { s_DisableMessages = true; }
   static void DisableRunCommandOutput() { s_DisableRunCommandOutput = true; }
