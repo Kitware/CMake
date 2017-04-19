@@ -153,13 +153,6 @@ void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
   fout << "# Visual Studio 2005\n";
 }
 
-void cmGlobalVisualStudio8Generator::GetDocumentation(
-  cmDocumentationEntry& entry)
-{
-  entry.Name = cmGlobalVisualStudio8Generator::GetActualName();
-  entry.Brief = "Generates Visual Studio 8 2005 project files.";
-}
-
 std::string cmGlobalVisualStudio8Generator::GetGenerateStampList()
 {
   return "generate.stamp.list";
