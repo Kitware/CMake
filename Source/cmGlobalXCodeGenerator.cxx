@@ -1817,7 +1817,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       gtgt->GetType() == cmStateEnums::MODULE_LIBRARY ||
       gtgt->GetType() == cmStateEnums::EXECUTABLE) {
     if (this->XcodeVersion >= 21) {
-      if (!gtgt->UsesDefaultOutputDir(configName, false)) {
+      if (!gtgt->UsesDefaultOutputDir(configName,
+                                      cmStateEnums::RuntimeBinaryArtifact)) {
         std::string pncdir = gtgt->GetDirectory(configName);
         buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
                                     this->CreateString(pncdir));

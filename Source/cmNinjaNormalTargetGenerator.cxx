@@ -491,10 +491,9 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         cmGeneratorTarget& gt = *this->GetGeneratorTarget();
         const std::string cfgName = this->GetConfigName();
         std::string targetOutput = ConvertToNinjaPath(gt.GetFullPath(cfgName));
-        std::string targetOutputReal =
-          this->ConvertToNinjaPath(gt.GetFullPath(cfgName,
-                                                  /*implib=*/false,
-                                                  /*realname=*/true));
+        std::string targetOutputReal = this->ConvertToNinjaPath(
+          gt.GetFullPath(cfgName, cmStateEnums::RuntimeBinaryArtifact,
+                         /*realname=*/true));
         cmakeCommand += targetOutputReal;
         cmakeCommand += " || true";
         linkCmds.push_back(cmakeCommand);
@@ -616,9 +615,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
   std::string const targetOutputReal = ConvertToNinjaPath(
     genTarget.ObjectDirectory + "cmake_device_link" + objExt);
 
-  std::string const targetOutputImplib =
-    ConvertToNinjaPath(genTarget.GetFullPath(cfgName,
-                                             /*implib=*/true));
+  std::string const targetOutputImplib = ConvertToNinjaPath(
+    genTarget.GetFullPath(cfgName, cmStateEnums::ImportLibraryArtifact));
 
   this->DeviceLinkObject = targetOutputReal;
 
@@ -788,13 +786,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmGeneratorTarget& gt = *this->GetGeneratorTarget();
   const std::string cfgName = this->GetConfigName();
   std::string targetOutput = ConvertToNinjaPath(gt.GetFullPath(cfgName));
-  std::string targetOutputReal =
-    ConvertToNinjaPath(gt.GetFullPath(cfgName,
-                                      /*implib=*/false,
-                                      /*realname=*/true));
-  std::string targetOutputImplib =
-    ConvertToNinjaPath(gt.GetFullPath(cfgName,
-                                      /*implib=*/true));
+  std::string targetOutputReal = ConvertToNinjaPath(
+    gt.GetFullPath(cfgName, cmStateEnums::RuntimeBinaryArtifact,
+                   /*realname=*/true));
+  std::string targetOutputImplib = ConvertToNinjaPath(
+    gt.GetFullPath(cfgName, cmStateEnums::ImportLibraryArtifact));
 
   if (gt.IsAppBundleOnApple()) {
     // Create the app bundle

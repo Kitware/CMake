@@ -509,8 +509,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
         this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
         this->GeneratorTarget->GetType() == cmStateEnums::MODULE_LIBRARY) {
-      targetFullPathReal =
-        this->GeneratorTarget->GetFullPath(this->ConfigName, false, true);
+      targetFullPathReal = this->GeneratorTarget->GetFullPath(
+        this->ConfigName, cmStateEnums::RuntimeBinaryArtifact, true);
       targetFullPathPDB =
         this->GeneratorTarget->GetPDBDirectory(this->ConfigName);
       targetFullPathPDB += "/";

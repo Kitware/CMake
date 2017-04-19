@@ -1051,8 +1051,8 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
 
   std::string postfixName = cmSystemTools::UpperCase(config);
   postfixName += "_POSTFIX";
-  std::string assemblyName =
-    this->GeneratorTarget->GetOutputName(config, false);
+  std::string assemblyName = this->GeneratorTarget->GetOutputName(
+    config, cmStateEnums::RuntimeBinaryArtifact);
   if (const char* postfix = this->GeneratorTarget->GetProperty(postfixName)) {
     assemblyName += postfix;
   }
@@ -3014,8 +3014,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     std::string pdb = this->GeneratorTarget->GetPDBDirectory(config.c_str());
     pdb += "/";
     pdb += targetNamePDB;
-    std::string imLib =
-      this->GeneratorTarget->GetDirectory(config.c_str(), true);
+    std::string imLib = this->GeneratorTarget->GetDirectory(
+      config.c_str(), cmStateEnums::ImportLibraryArtifact);
     imLib += "/";
     imLib += targetNameImport;
 

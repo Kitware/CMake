@@ -200,9 +200,11 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
       prop += suffix;
       std::string value;
       if (target->IsAppBundleOnApple()) {
-        value = target->GetFullPath(config, false);
+        value =
+          target->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
       } else {
-        value = target->GetFullPath(config, false, true);
+        value = target->GetFullPath(config,
+                                    cmStateEnums::RuntimeBinaryArtifact, true);
       }
       properties[prop] = value;
     }
@@ -212,7 +214,8 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
         mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
       std::string prop = "IMPORTED_IMPLIB";
       prop += suffix;
-      std::string value = target->GetFullPath(config, true);
+      std::string value =
+        target->GetFullPath(config, cmStateEnums::ImportLibraryArtifact);
       target->GetImplibGNUtoMS(value, value, "${CMAKE_IMPORT_LIBRARY_SUFFIX}");
       properties[prop] = value;
     }

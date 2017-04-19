@@ -1133,7 +1133,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       if (stackVal) {
         fout << "\t\t\t\tStackReserveSize=\"" << stackVal << "\"\n";
       }
-      temp = target->GetDirectory(configName, true);
+      temp =
+        target->GetDirectory(configName, cmStateEnums::ImportLibraryArtifact);
       temp += "/";
       temp += targetNameImport;
       fout << "\t\t\t\tImportLibrary=\""
@@ -1231,7 +1232,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       if (stackVal) {
         fout << "\t\t\t\tStackReserveSize=\"" << stackVal << "\"";
       }
-      temp = target->GetDirectory(configName, true);
+      temp =
+        target->GetDirectory(configName, cmStateEnums::ImportLibraryArtifact);
       temp += "/";
       temp += targetNameImport;
       fout << "\t\t\t\tImportLibrary=\""

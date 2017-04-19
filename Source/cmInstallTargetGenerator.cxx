@@ -103,7 +103,10 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
     fromDirConfig += cmake::GetCMakeFilesDirectory();
     fromDirConfig += "/CMakeRelink.dir/";
   } else {
-    fromDirConfig = this->Target->GetDirectory(config, this->ImportLibrary);
+    cmStateEnums::ArtifactType artifact = this->ImportLibrary
+      ? cmStateEnums::ImportLibraryArtifact
+      : cmStateEnums::RuntimeBinaryArtifact;
+    fromDirConfig = this->Target->GetDirectory(config, artifact);
     fromDirConfig += "/";
   }
 
