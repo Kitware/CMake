@@ -209,6 +209,11 @@ public:
                                 bool realname) const;
   std::string NormalGetRealName(const std::string& config) const;
 
+  /** Get the names of an object library's object files underneath
+      its object file directory.  */
+  void GetTargetObjectNames(std::string const& config,
+                            std::vector<std::string>& objects) const;
+
   /** What hierarchy level should the reported directory contain */
   enum BundleDirectoryLevel
   {
@@ -363,6 +368,10 @@ public:
       holding object files for this target.  Includes the build
       time config name placeholder if needed for the generator.  */
   std::string ObjectDirectory;
+
+  /** Full path with trailing slash to the top-level directory
+      holding object files for the given configuration.  */
+  std::string GetObjectDirectory(std::string const& config) const;
 
   void GetAppleArchs(const std::string& config,
                      std::vector<std::string>& archVec) const;
@@ -534,7 +543,7 @@ public:
   std::string GetPDBDirectory(const std::string& config) const;
 
   ///! Return the preferred linker language for this target
-  std::string GetLinkerLanguage(const std::string& config = "") const;
+  std::string GetLinkerLanguage(const std::string& config) const;
 
   /** Does this target have a GNU implib to convert to MS format?  */
   bool HasImplibGNUtoMS() const;

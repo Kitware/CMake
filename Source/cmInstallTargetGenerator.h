@@ -41,6 +41,9 @@ public:
 
   std::string GetInstallFilename(const std::string& config) const;
 
+  void GetInstallObjectNames(std::string const& config,
+                             std::vector<std::string>& objects) const;
+
   enum NameType
   {
     NameNormal,
@@ -65,6 +68,9 @@ protected:
   void GenerateScript(std::ostream& os) CM_OVERRIDE;
   void GenerateScriptForConfig(std::ostream& os, const std::string& config,
                                Indent const& indent) CM_OVERRIDE;
+  void GenerateScriptForConfigObjectLibrary(std::ostream& os,
+                                            const std::string& config,
+                                            Indent const& indent);
   typedef void (cmInstallTargetGenerator::*TweakMethod)(std::ostream&,
                                                         Indent const&,
                                                         const std::string&,

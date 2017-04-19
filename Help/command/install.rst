@@ -73,7 +73,7 @@ Installing Targets
 ::
 
   install(TARGETS targets... [EXPORT <export-name>]
-          [[ARCHIVE|LIBRARY|RUNTIME|FRAMEWORK|BUNDLE|
+          [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
             PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE]
            [DESTINATION <dir>]
            [PERMISSIONS permissions...]
@@ -86,10 +86,10 @@ Installing Targets
           )
 
 The ``TARGETS`` form specifies rules for installing targets from a
-project.  There are five kinds of target files that may be installed:
-``ARCHIVE``, ``LIBRARY``, ``RUNTIME``, ``FRAMEWORK``, and ``BUNDLE``.
-Executables are treated as ``RUNTIME`` targets, except that those
-marked with the ``MACOSX_BUNDLE`` property are treated as ``BUNDLE``
+project.  There are six kinds of target files that may be installed:
+``ARCHIVE``, ``LIBRARY``, ``RUNTIME``, ``OBJECTS``, ``FRAMEWORK``, and
+``BUNDLE``. Executables are treated as ``RUNTIME`` targets, except that
+those marked with the ``MACOSX_BUNDLE`` property are treated as ``BUNDLE``
 targets on OS X.  Static libraries are treated as ``ARCHIVE`` targets,
 except that those marked with the ``FRAMEWORK`` property are treated
 as ``FRAMEWORK`` targets on OS X.
@@ -99,10 +99,11 @@ targets, except that those marked with the ``FRAMEWORK`` property are
 treated as ``FRAMEWORK`` targets on OS X.  For DLL platforms the DLL
 part of a shared library is treated as a ``RUNTIME`` target and the
 corresponding import library is treated as an ``ARCHIVE`` target.
-All Windows-based systems including Cygwin are DLL platforms.
-The ``ARCHIVE``, ``LIBRARY``, ``RUNTIME``, and ``FRAMEWORK`` arguments
-change the type of target to which the subsequent properties apply.
-If none is given the installation properties apply to all target
+All Windows-based systems including Cygwin are DLL platforms. Object
+libraries are always treated as ``OBJECTS`` targets.
+The ``ARCHIVE``, ``LIBRARY``, ``RUNTIME``, ``OBJECTS``, and ``FRAMEWORK``
+arguments change the type of target to which the subsequent properties
+apply. If none is given the installation properties apply to all target
 types.  If only one is given then only targets of that type will be
 installed (which can be used to install just a DLL or just an import
 library).
@@ -165,8 +166,8 @@ the ``mySharedLib`` DLL will be installed to ``<prefix>/bin`` and
 
 The ``EXPORT`` option associates the installed target files with an
 export called ``<export-name>``.  It must appear before any ``RUNTIME``,
-``LIBRARY``, or ``ARCHIVE`` options.  To actually install the export
-file itself, call ``install(EXPORT)``, documented below.
+``LIBRARY``, ``ARCHIVE``, or ``OBJECTS`` options.  To actually install the
+export file itself, call ``install(EXPORT)``, documented below.
 
 Installing a target with the :prop_tgt:`EXCLUDE_FROM_ALL` target property
 set to ``TRUE`` has undefined behavior.

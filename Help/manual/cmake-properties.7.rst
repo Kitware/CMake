@@ -194,6 +194,8 @@ Properties on Targets
    /prop_tgt/IMPORTED_LOCATION
    /prop_tgt/IMPORTED_NO_SONAME_CONFIG
    /prop_tgt/IMPORTED_NO_SONAME
+   /prop_tgt/IMPORTED_OBJECTS_CONFIG
+   /prop_tgt/IMPORTED_OBJECTS
    /prop_tgt/IMPORTED
    /prop_tgt/IMPORTED_SONAME_CONFIG
    /prop_tgt/IMPORTED_SONAME

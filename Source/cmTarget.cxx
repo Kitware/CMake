@@ -1351,11 +1351,9 @@ std::string cmTarget::ImportedGetFullPath(const std::string& config,
 
   // Lookup/compute/cache the import information for this
   // configuration.
-  std::string config_upper;
-  if (!config.empty()) {
-    config_upper = cmSystemTools::UpperCase(config);
-  } else {
-    config_upper = "NOCONFIG";
+  std::string desired_config = config;
+  if (config.empty()) {
+    desired_config = "NOCONFIG";
   }
 
   std::string result;
@@ -1365,7 +1363,7 @@ std::string cmTarget::ImportedGetFullPath(const std::string& config,
   std::string suffix;
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      this->GetMappedConfig(config_upper, &loc, &imp, suffix)) {
+      this->GetMappedConfig(desired_config, &loc, &imp, suffix)) {
     if (!pimplib) {
       if (loc) {
         result = loc;
@@ -1448,18 +1446,28 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
                                const char** loc, const char** imp,
                                std::string& suffix) const
 {
-  std::string const locPropBase =
-    this->GetType() == cmStateEnums::INTERFACE_LIBRARY ? "IMPORTED_LIBNAME"
-                                                       : "IMPORTED_LOCATION";
+  std::string config_upper;
+  if (!desired_config.empty()) {
+    config_upper = cmSystemTools::UpperCase(desired_config);
+  }
+
+  std::string locPropBase;
+  if (this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    locPropBase = "IMPORTED_LIBNAME";
+  } else if (this->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+    locPropBase = "IMPORTED_OBJECTS";
+  } else {
+    locPropBase = "IMPORTED_LOCATION";
+  }
 
   // Track the configuration-specific property suffix.
   suffix = "_";
-  suffix += desired_config;
+  suffix += config_upper;
 
   std::vector<std::string> mappedConfigs;
   {
     std::string mapProp = "MAP_IMPORTED_CONFIG_";
-    mapProp += desired_config;
+    mapProp += config_upper;
     if (const char* mapValue = this->GetProperty(mapProp)) {
       cmSystemTools::ExpandListArgument(mapValue, mappedConfigs, true);
     }

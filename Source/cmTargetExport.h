@@ -26,6 +26,7 @@ public:
   cmInstallTargetGenerator* ArchiveGenerator;
   cmInstallTargetGenerator* RuntimeGenerator;
   cmInstallTargetGenerator* LibraryGenerator;
+  cmInstallTargetGenerator* ObjectsGenerator;
   cmInstallTargetGenerator* FrameworkGenerator;
   cmInstallTargetGenerator* BundleGenerator;
   cmInstallFilesGenerator* HeaderGenerator;

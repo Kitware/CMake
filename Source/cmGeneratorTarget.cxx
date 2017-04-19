@@ -3274,6 +3274,46 @@ std::string cmGeneratorTarget::GetPDBName(const std::string& config) const
   return prefix + base + ".pdb";
 }
 
+std::string cmGeneratorTarget::GetObjectDirectory(
+  std::string const& config) const
+{
+  std::string obj_dir =
+    this->GlobalGenerator->ExpandCFGIntDir(this->ObjectDirectory, config);
+#if defined(__APPLE__)
+  // find and replace $(PROJECT_NAME) xcode placeholder
+  const std::string projectName = this->LocalGenerator->GetProjectName();
+  cmSystemTools::ReplaceString(obj_dir, "$(PROJECT_NAME)", projectName);
+#endif
+  return obj_dir;
+}
+
+void cmGeneratorTarget::GetTargetObjectNames(
+  std::string const& config, std::vector<std::string>& objects) const
+{
+  std::vector<cmSourceFile const*> objectSources;
+  this->GetObjectSources(objectSources, config);
+  std::map<cmSourceFile const*, std::string> mapping;
+
+  for (std::vector<cmSourceFile const*>::const_iterator it =
+         objectSources.begin();
+       it != objectSources.end(); ++it) {
+    mapping[*it];
+  }
+
+  this->LocalGenerator->ComputeObjectFilenames(mapping, this);
+
+  for (std::vector<cmSourceFile const*>::const_iterator it =
+         objectSources.begin();
+       it != objectSources.end(); ++it) {
+    // Find the object file name corresponding to this source file.
+    std::map<cmSourceFile const*, std::string>::const_iterator map_it =
+      mapping.find(*it);
+    // It must exist because we populated the mapping just above.
+    assert(!map_it->second.empty());
+    objects.push_back(map_it->second);
+  }
+}
+
 bool cmGeneratorTarget::StrictTargetComparison::operator()(
   cmGeneratorTarget const* t1, cmGeneratorTarget const* t2) const
 {

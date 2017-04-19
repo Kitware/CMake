@@ -1,3 +1,4 @@
+enable_language(CXX)
 
 file(GENERATE
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/$<BOOL:$<TARGET_OBJECTS:foo>>somefile.cpp"

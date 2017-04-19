@@ -33,8 +33,6 @@
 #include <string.h>
 #include <utility>
 
-class cmSourceFile;
-
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   std::string const& prop, cmLocalGenerator* lg,
   cmGeneratorExpressionContext* context, cmGeneratorTarget const* headTarget,
@@ -1228,15 +1226,6 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
                        cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
     CM_OVERRIDE
   {
-    if (!context->EvaluateForBuildsystem) {
-      std::ostringstream e;
-      e << "The evaluation of the TARGET_OBJECTS generator expression "
-           "is only suitable for consumption by CMake.  It is not suitable "
-           "for writing out elsewhere.";
-      reportError(context, content->GetOriginalExpression(), e.str());
-      return std::string();
-    }
-
     std::string tgtName = parameters.front();
     cmGeneratorTarget* gt = context->LG->FindGeneratorTargetToUse(tgtName);
     if (!gt) {
@@ -1253,39 +1242,60 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       reportError(context, content->GetOriginalExpression(), e.str());
       return std::string();
     }
-
-    std::vector<cmSourceFile const*> objectSources;
-    gt->GetObjectSources(objectSources, context->Config);
-    std::map<cmSourceFile const*, std::string> mapping;
-
-    for (std::vector<cmSourceFile const*>::const_iterator it =
-           objectSources.begin();
-         it != objectSources.end(); ++it) {
-      mapping[*it];
+    if (!context->EvaluateForBuildsystem) {
+      cmGlobalGenerator* gg = context->LG->GetGlobalGenerator();
+      std::string reason;
+      if (!gg->HasKnownObjectFileLocation(&reason)) {
+        std::ostringstream e;
+        e << "The evaluation of the TARGET_OBJECTS generator expression "
+             "is only suitable for consumption by CMake (limited"
+          << reason << ").  "
+                       "It is not suitable for writing out elsewhere.";
+        reportError(context, content->GetOriginalExpression(), e.str());
+        return std::string();
+      }
     }
 
-    gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
+    std::vector<std::string> objects;
 
+    if (gt->IsImported()) {
+      const char* loc = CM_NULLPTR;
+      const char* imp = CM_NULLPTR;
+      std::string suffix;
+      if (gt->Target->GetMappedConfig(context->Config, &loc, &imp, suffix)) {
+        cmSystemTools::ExpandListArgument(loc, objects);
+      }
+      context->HadContextSensitiveCondition = true;
+    } else {
+      gt->GetTargetObjectNames(context->Config, objects);
+
+      std::string obj_dir;
+      if (context->EvaluateForBuildsystem) {
+        // Use object file directory with buildsystem placeholder.
+        obj_dir = gt->ObjectDirectory;
+        // Here we assume that the set of object files produced
+        // by an object library does not vary with configuration
+        // and do not set HadContextSensitiveCondition to true.
+      } else {
+        // Use object file directory with per-config location.
+        obj_dir = gt->GetObjectDirectory(context->Config);
+        context->HadContextSensitiveCondition = true;
+      }
+
+      for (std::vector<std::string>::iterator oi = objects.begin();
+           oi != objects.end(); ++oi) {
+        *oi = obj_dir + *oi;
+      }
+    }
+
+    // Create the cmSourceFile instances in the referencing directory.
     cmMakefile* mf = context->LG->GetMakefile();
-
-    std::string obj_dir = gt->ObjectDirectory;
-    std::string result;
-    const char* sep = "";
-    for (std::vector<cmSourceFile const*>::const_iterator it =
-           objectSources.begin();
-         it != objectSources.end(); ++it) {
-      // Find the object file name corresponding to this source file.
-      std::map<cmSourceFile const*, std::string>::const_iterator map_it =
-        mapping.find(*it);
-      // It must exist because we populated the mapping just above.
-      assert(!map_it->second.empty());
-      result += sep;
-      std::string objFile = obj_dir + map_it->second;
-      mf->AddTargetObject(tgtName, objFile);
-      result += objFile;
-      sep = ";";
+    for (std::vector<std::string>::iterator oi = objects.begin();
+         oi != objects.end(); ++oi) {
+      mf->AddTargetObject(tgtName, *oi);
     }
-    return result;
+
+    return cmJoin(objects, ";");
   }
 } targetObjectsNode;
 
