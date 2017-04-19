@@ -3194,13 +3194,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
     this->ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << cmVS10EscapeXML(path) << "\">\n";
     this->WriteString("<Project>", 3);
-    if (csproj == this->ProjectType) {
-      (*this->BuildFileStream) << "{";
-    }
-    (*this->BuildFileStream) << this->GlobalGenerator->GetGUID(name.c_str());
-    if (csproj == this->ProjectType) {
-      (*this->BuildFileStream) << "}";
-    }
+    (*this->BuildFileStream)
+      << "{" << this->GlobalGenerator->GetGUID(name.c_str()) << "}";
     (*this->BuildFileStream) << "</Project>\n";
     this->WriteString("<Name>", 3);
     (*this->BuildFileStream) << name << "</Name>\n";
