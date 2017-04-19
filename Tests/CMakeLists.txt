@@ -477,6 +477,17 @@ if(BUILD_TESTING)
 
   ADD_TEST_MACRO(Module.CheckTypeSize CheckTypeSize)
 
+  set(Module.CheckIPOSupported-C_BUILD_OPTIONS -DCMake_TEST_IPO_WORKS_C=${CMake_TEST_IPO_WORKS_C})
+  ADD_TEST_MACRO(Module.CheckIPOSupported-C CheckIPOSupported-C)
+
+  set(Module.CheckIPOSupported-CXX_BUILD_OPTIONS -DCMake_TEST_IPO_WORKS_CXX=${CMake_TEST_IPO_WORKS_CXX})
+  ADD_TEST_MACRO(Module.CheckIPOSupported-CXX CheckIPOSupported-CXX)
+
+  if(CMAKE_Fortran_COMPILER)
+    set(Module.CheckIPOSupported-Fortran_BUILD_OPTIONS -DCMake_TEST_IPO_WORKS_Fortran=${CMake_TEST_IPO_WORKS_Fortran})
+    ADD_TEST_MACRO(Module.CheckIPOSupported-Fortran CheckIPOSupported-Fortran)
+  endif()
+
   add_test(Module.ExternalData ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Module/ExternalData"
