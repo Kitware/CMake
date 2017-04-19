@@ -54,7 +54,6 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
     this->DefaultPlatformName = platformName;
   }
   this->ExtraFlagTable = cmVS7ExtraFlagTable;
-  this->Version = VS7;
 }
 
 cmGlobalVisualStudio7Generator::~cmGlobalVisualStudio7Generator()
