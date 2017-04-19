@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,7 +56,8 @@
 #include <base64.h>
 #include <cert.h>
 #include <prerror.h>
-#include <keyhi.h>        /* for SECKEY_DestroyPublicKey() */
+#include <keyhi.h>         /* for SECKEY_DestroyPublicKey() */
+#include <private/pprio.h> /* for PR_ImportTCPSocket */
 
 #define NSSVERNUM ((NSS_VMAJOR<<16)|(NSS_VMINOR<<8)|NSS_VPATCH)
 
@@ -77,11 +78,10 @@
 /* enough to fit the string "PEM Token #[0|1]" */
 #define SLOTSIZE 13
 
-PRFileDesc *PR_ImportTCPSocket(PRInt32 osfd);
 static PRLock *nss_initlock = NULL;
 static PRLock *nss_crllock = NULL;
 static PRLock *nss_findslot_lock = NULL;
-static struct curl_llist *nss_crl_list = NULL;
+static struct curl_llist nss_crl_list;
 static NSSInitContext *nss_context = NULL;
 static volatile int initialized = 0;
 
@@ -365,9 +365,9 @@ static char *dup_nickname(struct Curl_easy *data, const char *str)
 static PK11SlotInfo* nss_find_slot_by_name(const char *slot_name)
 {
   PK11SlotInfo *slot;
-  PR_Lock(nss_initlock);
+  PR_Lock(nss_findslot_lock);
   slot = PK11_FindSlotByName(slot_name);
-  PR_Unlock(nss_initlock);
+  PR_Unlock(nss_findslot_lock);
   return slot;
 }
 
@@ -401,7 +401,7 @@ static CURLcode nss_create_object(struct ssl_connect_data *ssl,
   PK11_SETATTRS(attrs, attr_cnt, CKA_CLASS, &obj_class, sizeof(obj_class));
   PK11_SETATTRS(attrs, attr_cnt, CKA_TOKEN, &cktrue, sizeof(CK_BBOOL));
   PK11_SETATTRS(attrs, attr_cnt, CKA_LABEL, (unsigned char *)filename,
-                strlen(filename) + 1);
+                (CK_ULONG)strlen(filename) + 1);
 
   if(CKO_CERTIFICATE == obj_class) {
     CK_BBOOL *pval = (cacert) ? (&cktrue) : (&ckfalse);
@@ -413,7 +413,7 @@ static CURLcode nss_create_object(struct ssl_connect_data *ssl,
   if(!obj)
     return result;
 
-  if(!Curl_llist_insert_next(ssl->obj_list, ssl->obj_list->tail, obj)) {
+  if(!Curl_llist_insert_next(&ssl->obj_list, ssl->obj_list.tail, obj)) {
     PK11_DestroyGenericObject(obj);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -496,7 +496,7 @@ static CURLcode nss_cache_crl(SECItem *crl_der)
   PR_Lock(nss_crllock);
 
   /* store the CRL item so that we can free it in Curl_nss_cleanup() */
-  if(!Curl_llist_insert_next(nss_crl_list, nss_crl_list->tail, crl_der)) {
+  if(!Curl_llist_insert_next(&nss_crl_list, nss_crl_list.tail, crl_der)) {
     SECITEM_FreeItem(crl_der, PR_TRUE);
     PR_Unlock(nss_crllock);
     return CURLE_OUT_OF_MEMORY;
@@ -1227,9 +1227,7 @@ static CURLcode nss_init(struct Curl_easy *data)
     return CURLE_OK;
 
   /* list of all CRL items we need to destroy in Curl_nss_cleanup() */
-  nss_crl_list = Curl_llist_alloc(nss_destroy_crl_item);
-  if(!nss_crl_list)
-    return CURLE_OUT_OF_MEMORY;
+  Curl_llist_init(&nss_crl_list, nss_destroy_crl_item);
 
   /* First we check if $SSL_DIR points to a valid dir */
   cert_dir = getenv("SSL_DIR");
@@ -1336,8 +1334,7 @@ void Curl_nss_cleanup(void)
   }
 
   /* destroy all CRL items */
-  Curl_llist_destroy(nss_crl_list, NULL);
-  nss_crl_list = NULL;
+  Curl_llist_destroy(&nss_crl_list, NULL);
 
   PR_Unlock(nss_initlock);
 
@@ -1385,8 +1382,7 @@ static void nss_close(struct ssl_connect_data *connssl)
   connssl->client_nickname = NULL;
 
   /* destroy all NSS objects in order to avoid failure of NSS shutdown */
-  Curl_llist_destroy(connssl->obj_list, NULL);
-  connssl->obj_list = NULL;
+  Curl_llist_destroy(&connssl->obj_list, NULL);
   connssl->obj_clicert = NULL;
 
   if(connssl->handle) {
@@ -1512,78 +1508,108 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
   return CURLE_OK;
 }
 
+static CURLcode nss_sslver_from_curl(PRUint16 *nssver, long version)
+{
+  switch(version) {
+  case CURL_SSLVERSION_TLSv1:
+    /* TODO: set sslver->max to SSL_LIBRARY_VERSION_TLS_1_3 once stable */
+#ifdef SSL_LIBRARY_VERSION_TLS_1_2
+    *nssver = SSL_LIBRARY_VERSION_TLS_1_2;
+#elif defined SSL_LIBRARY_VERSION_TLS_1_1
+    *nssver = SSL_LIBRARY_VERSION_TLS_1_1;
+#else
+    *nssver = SSL_LIBRARY_VERSION_TLS_1_0;
+#endif
+    return CURLE_OK;
+
+  case CURL_SSLVERSION_SSLv2:
+    *nssver = SSL_LIBRARY_VERSION_2;
+    return CURLE_OK;
+
+  case CURL_SSLVERSION_SSLv3:
+    *nssver = SSL_LIBRARY_VERSION_3_0;
+    return CURLE_OK;
+
+  case CURL_SSLVERSION_TLSv1_0:
+    *nssver = SSL_LIBRARY_VERSION_TLS_1_0;
+    return CURLE_OK;
+
+  case CURL_SSLVERSION_TLSv1_1:
+#ifdef SSL_LIBRARY_VERSION_TLS_1_1
+    *nssver = SSL_LIBRARY_VERSION_TLS_1_1;
+    return CURLE_OK;
+#else
+    return CURLE_SSL_CONNECT_ERROR;
+#endif
+
+  case CURL_SSLVERSION_TLSv1_2:
+#ifdef SSL_LIBRARY_VERSION_TLS_1_2
+    *nssver = SSL_LIBRARY_VERSION_TLS_1_2;
+    return CURLE_OK;
+#else
+    return CURLE_SSL_CONNECT_ERROR;
+#endif
+
+  case CURL_SSLVERSION_TLSv1_3:
+#ifdef SSL_LIBRARY_VERSION_TLS_1_3
+    *nssver = SSL_LIBRARY_VERSION_TLS_1_3;
+    return CURLE_OK;
+#else
+    return CURLE_SSL_CONNECT_ERROR;
+#endif
+
+  default:
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+}
+
 static CURLcode nss_init_sslver(SSLVersionRange *sslver,
                                 struct Curl_easy *data,
                                 struct connectdata *conn)
 {
-  switch(SSL_CONN_CONFIG(version)) {
-  case CURL_SSLVERSION_DEFAULT:
+  CURLcode result;
+  const long min = SSL_CONN_CONFIG(version);
+  const long max = SSL_CONN_CONFIG(version_max);
+
+  /* map CURL_SSLVERSION_DEFAULT to NSS default */
+  if(min == CURL_SSLVERSION_DEFAULT || max == CURL_SSLVERSION_MAX_DEFAULT) {
     /* map CURL_SSLVERSION_DEFAULT to NSS default */
     if(SSL_VersionRangeGetDefault(ssl_variant_stream, sslver) != SECSuccess)
       return CURLE_SSL_CONNECT_ERROR;
     /* ... but make sure we use at least TLSv1.0 according to libcurl API */
     if(sslver->min < SSL_LIBRARY_VERSION_TLS_1_0)
       sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
-    return CURLE_OK;
-
-  case CURL_SSLVERSION_TLSv1:
-    sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
-    /* TODO: set sslver->max to SSL_LIBRARY_VERSION_TLS_1_3 once stable */
-#ifdef SSL_LIBRARY_VERSION_TLS_1_2
-    sslver->max = SSL_LIBRARY_VERSION_TLS_1_2;
-#elif defined SSL_LIBRARY_VERSION_TLS_1_1
-    sslver->max = SSL_LIBRARY_VERSION_TLS_1_1;
-#else
-    sslver->max = SSL_LIBRARY_VERSION_TLS_1_0;
-#endif
-    return CURLE_OK;
-
-  case CURL_SSLVERSION_SSLv2:
-    sslver->min = SSL_LIBRARY_VERSION_2;
-    sslver->max = SSL_LIBRARY_VERSION_2;
-    return CURLE_OK;
-
-  case CURL_SSLVERSION_SSLv3:
-    sslver->min = SSL_LIBRARY_VERSION_3_0;
-    sslver->max = SSL_LIBRARY_VERSION_3_0;
-    return CURLE_OK;
-
-  case CURL_SSLVERSION_TLSv1_0:
-    sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
-    sslver->max = SSL_LIBRARY_VERSION_TLS_1_0;
-    return CURLE_OK;
-
-  case CURL_SSLVERSION_TLSv1_1:
-#ifdef SSL_LIBRARY_VERSION_TLS_1_1
-    sslver->min = SSL_LIBRARY_VERSION_TLS_1_1;
-    sslver->max = SSL_LIBRARY_VERSION_TLS_1_1;
-    return CURLE_OK;
-#endif
-    break;
-
-  case CURL_SSLVERSION_TLSv1_2:
-#ifdef SSL_LIBRARY_VERSION_TLS_1_2
-    sslver->min = SSL_LIBRARY_VERSION_TLS_1_2;
-    sslver->max = SSL_LIBRARY_VERSION_TLS_1_2;
-    return CURLE_OK;
-#endif
-    break;
-
-  case CURL_SSLVERSION_TLSv1_3:
-#ifdef SSL_LIBRARY_VERSION_TLS_1_3
-    sslver->min = SSL_LIBRARY_VERSION_TLS_1_3;
-    sslver->max = SSL_LIBRARY_VERSION_TLS_1_3;
-    return CURLE_OK;
-#endif
-    break;
-
-  default:
-    failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
-    return CURLE_SSL_CONNECT_ERROR;
   }
 
-  failf(data, "TLS minor version cannot be set");
-  return CURLE_SSL_CONNECT_ERROR;
+  switch(min) {
+  case CURL_SSLVERSION_DEFAULT:
+    break;
+  case CURL_SSLVERSION_TLSv1:
+    sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
+    break;
+  default:
+    result = nss_sslver_from_curl(&sslver->min, min);
+    if(result) {
+      failf(data, "unsupported min version passed via CURLOPT_SSLVERSION");
+      return result;
+    }
+    if(max == CURL_SSLVERSION_MAX_NONE)
+      sslver->max = sslver->min;
+  }
+
+  switch(max) {
+  case CURL_SSLVERSION_MAX_NONE:
+  case CURL_SSLVERSION_MAX_DEFAULT:
+    break;
+  default:
+    result = nss_sslver_from_curl(&sslver->max, max >> 16);
+    if(result) {
+      failf(data, "unsupported max version passed via CURLOPT_SSLVERSION");
+      return result;
+    }
+  }
+
+  return CURLE_OK;
 }
 
 static CURLcode nss_fail_connect(struct ssl_connect_data *connssl,
@@ -1606,19 +1632,19 @@ static CURLcode nss_fail_connect(struct ssl_connect_data *connssl,
   }
 
   /* cleanup on connection failure */
-  Curl_llist_destroy(connssl->obj_list, NULL);
-  connssl->obj_list = NULL;
+  Curl_llist_destroy(&connssl->obj_list, NULL);
 
   return curlerr;
 }
 
-/* Switch the SSL socket into non-blocking mode. */
-static CURLcode nss_set_nonblock(struct ssl_connect_data *connssl,
-                                 struct Curl_easy *data)
+/* Switch the SSL socket into blocking or non-blocking mode. */
+static CURLcode nss_set_blocking(struct ssl_connect_data *connssl,
+                                 struct Curl_easy *data,
+                                 bool blocking)
 {
   static PRSocketOptionData sock_opt;
   sock_opt.option = PR_SockOpt_Nonblocking;
-  sock_opt.value.non_blocking = PR_TRUE;
+  sock_opt.value.non_blocking = !blocking;
 
   if(PR_SetSocketOption(connssl->handle, &sock_opt) != PR_SUCCESS)
     return nss_fail_connect(connssl, data, CURLE_SSL_CONNECT_ERROR);
@@ -1647,9 +1673,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   connssl->data = data;
 
   /* list of all NSS objects we need to destroy in Curl_nss_close() */
-  connssl->obj_list = Curl_llist_alloc(nss_destroy_object);
-  if(!connssl->obj_list)
-    return CURLE_OUT_OF_MEMORY;
+  Curl_llist_init(&connssl->obj_list, nss_destroy_object);
 
   /* FIXME. NSS doesn't support multiple databases open at the same time. */
   PR_Lock(nss_initlock);
@@ -1696,7 +1720,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     goto error;
 
   /* do not use SSL cache if disabled or we are not going to verify peer */
-  ssl_no_cache = (data->set.general_ssl.sessionid
+  ssl_no_cache = (SSL_SET_OPTION(primary.sessionid)
                   && SSL_CONN_CONFIG(verifypeer)) ? PR_FALSE : PR_TRUE;
   if(SSL_OptionSet(model, SSL_NO_CACHE, ssl_no_cache) != SECSuccess)
     goto error;
@@ -1746,9 +1770,12 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   if(SSL_HandshakeCallback(model, HandshakeCallback, conn) != SECSuccess)
     goto error;
 
-  if(SSL_CONN_CONFIG(verifypeer)) {
+  {
     const CURLcode rv = nss_load_ca_certificates(conn, sockindex);
-    if(rv) {
+    if((rv == CURLE_SSL_CACERT_BADFILE) && !SSL_CONN_CONFIG(verifypeer))
+      /* not a fatal error because we are not going to verify the peer */
+      infof(data, "warning: CA certificates failed to load\n");
+    else if(rv) {
       result = rv;
       goto error;
     }
@@ -1933,8 +1960,8 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
 
 
   /* check timeout situation */
-  const long time_left = Curl_timeleft(data, NULL, TRUE);
-  if(time_left < 0L) {
+  const time_t time_left = Curl_timeleft(data, NULL, TRUE);
+  if(time_left < 0) {
     failf(data, "timed out before SSL handshake");
     result = CURLE_OPERATION_TIMEDOUT;
     goto error;
@@ -2007,15 +2034,13 @@ static CURLcode nss_connect_common(struct connectdata *conn, int sockindex,
       /* we do not expect CURLE_AGAIN from nss_setup_connect() */
       return result;
 
-    if(!blocking) {
-      /* in non-blocking mode, set NSS non-blocking mode before handshake */
-      result = nss_set_nonblock(connssl, data);
-      if(result)
-        return result;
-    }
-
     connssl->connecting_state = ssl_connect_2;
   }
+
+  /* enable/disable blocking mode before handshake */
+  result = nss_set_blocking(connssl, data, blocking);
+  if(result)
+    return result;
 
   result = nss_do_connect(conn, sockindex);
   switch(result) {
@@ -2032,7 +2057,7 @@ static CURLcode nss_connect_common(struct connectdata *conn, int sockindex,
 
   if(blocking) {
     /* in blocking mode, set NSS non-blocking mode _after_ SSL handshake */
-    result = nss_set_nonblock(connssl, data);
+    result = nss_set_blocking(connssl, data, /* blocking */ FALSE);
     if(result)
       return result;
   }
@@ -2138,17 +2163,17 @@ int Curl_nss_seed(struct Curl_easy *data)
 }
 
 /* data might be NULL */
-int Curl_nss_random(struct Curl_easy *data,
-                    unsigned char *entropy,
-                    size_t length)
+CURLcode Curl_nss_random(struct Curl_easy *data,
+                         unsigned char *entropy,
+                         size_t length)
 {
   Curl_nss_seed(data);  /* Initiate the seed if not already done */
 
   if(SECSuccess != PK11_GenerateRandom(entropy, curlx_uztosi(length)))
     /* signal a failure */
-    return -1;
+    return CURLE_FAILED_INIT;
 
-  return 0;
+  return CURLE_OK;
 }
 
 void Curl_nss_md5sum(unsigned char *tmp, /* input */

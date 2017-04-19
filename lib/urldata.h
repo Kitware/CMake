@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -136,8 +136,10 @@
 #undef realloc
 #endif /* USE_AXTLS */
 
-#ifdef USE_SCHANNEL
+#if defined(USE_SCHANNEL) || defined(USE_WINDOWS_SSPI)
 #include "curl_sspi.h"
+#endif
+#ifdef USE_SCHANNEL
 #include <schnlsp.h>
 #include <schannel.h>
 #endif
@@ -201,6 +203,9 @@
 /* Download buffer size, keep it fairly big for speed reasons */
 #undef BUFSIZE
 #define BUFSIZE CURL_MAX_WRITE_SIZE
+#undef MAX_BUFSIZE
+#define MAX_BUFSIZE CURL_MAX_READ_SIZE
+#define CURL_BUFSIZE(x) ((x)?(x):(BUFSIZE))
 
 /* Initial size of the buffer to store headers in, it'll be enlarged in case
    of need. */
@@ -311,7 +316,7 @@ struct ssl_connect_data {
   PRFileDesc *handle;
   char *client_nickname;
   struct Curl_easy *data;
-  struct curl_llist *obj_list;
+  struct curl_llist obj_list;
   PK11GenericObject *obj_clicert;
 #elif defined(USE_GSKIT)
   gsk_handle handle;
@@ -345,6 +350,7 @@ struct ssl_connect_data {
 
 struct ssl_primary_config {
   long version;          /* what version the client wants to use */
+  long version_max;      /* max supported version the client wants to use*/
   bool verifypeer;       /* set TRUE if this is desired */
   bool verifyhost;       /* set TRUE if CN/SAN must match hostname */
   bool verifystatus;     /* set TRUE if certificate status must be checked */
@@ -354,6 +360,7 @@ struct ssl_primary_config {
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
+  bool sessionid;        /* cache session IDs or not */
 };
 
 struct ssl_config_data {
@@ -383,7 +390,6 @@ struct ssl_config_data {
 };
 
 struct ssl_general_config {
-  bool sessionid; /* cache session IDs or not */
   size_t max_ssl_sessions; /* SSL session id cache size */
 };
 
@@ -405,6 +411,7 @@ struct digestdata {
 #if defined(USE_WINDOWS_SSPI)
   BYTE *input_token;
   size_t input_token_len;
+  CtxtHandle *http_context;
 #else
   char *nonce;
   char *cnonce;
@@ -842,6 +849,8 @@ struct Curl_handler {
                                           request instead of per connection */
 #define PROTOPT_ALPN_NPN (1<<8) /* set ALPN and/or NPN for this */
 #define PROTOPT_STREAM (1<<9) /* a protocol with individual logical streams */
+#define PROTOPT_URLOPTIONS (1<<10) /* allow options part in the userinfo field
+                                      of the URL */
 
 /* return the count of bytes sent, or -1 on error */
 typedef ssize_t (Curl_send)(struct connectdata *conn, /* connection data */
@@ -931,7 +940,6 @@ struct connectdata {
   char *secondaryhostname; /* secondary socket host name (ftp) */
   struct hostname conn_to_host; /* the host to connect to. valid only if
                                    bits.conn_to_host is set */
-  struct hostname proxy;
 
   struct proxy_info socks_proxy;
   struct proxy_info http_proxy;
@@ -1050,10 +1058,10 @@ struct connectdata {
                               handle */
   bool writechannel_inuse; /* whether the write channel is in use by an easy
                               handle */
-  struct curl_llist *send_pipe; /* List of handles waiting to
-                                   send on this pipeline */
-  struct curl_llist *recv_pipe; /* List of handles waiting to read
-                                   their responses on this pipeline */
+  struct curl_llist send_pipe; /* List of handles waiting to send on this
+                                  pipeline */
+  struct curl_llist recv_pipe; /* List of handles waiting to read their
+                                  responses on this pipeline */
   char *master_buffer; /* The master buffer allocated on-demand;
                           used for pipelining. */
   size_t read_pos; /* Current read position in the master buffer */
@@ -1133,6 +1141,7 @@ struct connectdata {
 
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
+  bool abstract_unix_socket;
 #endif
 };
 
@@ -1274,8 +1283,8 @@ struct auth {
                           this resource */
   bool done;  /* TRUE when the auth phase is done and ready to do the *actual*
                  request */
-  bool multi; /* TRUE if this is not yet authenticated but within the auth
-                 multipass negotiation */
+  bool multipass; /* TRUE if this is not yet authenticated but within the
+                     auth multipass negotiation */
   bool iestyle; /* TRUE if digest should be done IE-style or FALSE if it should
                    be RFC compliant */
 };
@@ -1283,6 +1292,19 @@ struct auth {
 struct Curl_http2_dep {
   struct Curl_http2_dep *next;
   struct Curl_easy *data;
+};
+
+/*
+ * This struct is for holding data that was attemped to get sent to the user's
+ * callback but is held due to pausing. One instance per type (BOTH, HEADER,
+ * BODY).
+ */
+struct tempbuf {
+  char *buf;  /* allocated buffer to keep data in when a write callback
+                 returns to make the connection paused */
+  size_t len; /* size of the 'tempwrite' allocated buffer */
+  int type;   /* type of the 'tempwrite' buffer as a bitmask that is used with
+                 Curl_client_write() */
 };
 
 struct UrlState {
@@ -1303,9 +1325,9 @@ struct UrlState {
   char *headerbuff; /* allocated buffer to store headers in */
   size_t headersize;   /* size of the allocation */
 
-  char buffer[BUFSIZE+1]; /* download buffer */
+  char *buffer; /* download buffer */
   char uploadbuffer[BUFSIZE+1]; /* upload buffer */
-  curl_off_t current_speed;  /* the ProgressShow() funcion sets this,
+  curl_off_t current_speed;  /* the ProgressShow() function sets this,
                                 bytes / second */
   bool this_is_a_follow; /* this is a followed Location: request */
 
@@ -1318,11 +1340,8 @@ struct UrlState {
   int first_remote_port; /* remote port of the first (not followed) request */
   struct curl_ssl_session *session; /* array of 'max_ssl_sessions' size */
   long sessionage;                  /* number of the most recent session */
-  char *tempwrite;      /* allocated buffer to keep data in when a write
-                           callback returns to make the connection paused */
-  size_t tempwritesize; /* size of the 'tempwrite' allocated buffer */
-  int tempwritetype;    /* type of the 'tempwrite' buffer as a bitmask that is
-                           used with Curl_client_write() */
+  unsigned int tempcount; /* number of entries in use in tempwrite, 0 - 3 */
+  struct tempbuf tempwrite[3]; /* BOTH, HEADER, BODY */
   char *scratch; /* huge buffer[BUFSIZE*2] when doing upload CRLF replacing */
   bool errorbuf; /* Set to TRUE if the error buffer is already filled in.
                     This must be set to FALSE every time _easy_perform() is
@@ -1355,7 +1374,7 @@ struct UrlState {
 #endif /* USE_OPENSSL */
   struct timeval expiretime; /* set this with Curl_expire() only */
   struct Curl_tree timenode; /* for the splay stuff */
-  struct curl_llist *timeoutlist; /* list of pending timeouts */
+  struct curl_llist timeoutlist; /* list of pending timeouts */
 
   /* a place to store the most recently set FTP entrypath */
   char *most_recent_ftp_entrypath;
@@ -1638,7 +1657,6 @@ struct UserDefined {
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
   curl_proxytype proxytype; /* what kind of proxy that is in use */
-  curl_proxytype socks_proxytype; /* what kind of socks proxy that is in use */
   long dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
   void *private_data; /* application-private data */
@@ -1748,12 +1766,16 @@ struct UserDefined {
   bool pipewait;        /* wait for pipe/multiplex status before starting a
                            new connection */
   long expect_100_timeout; /* in milliseconds */
+  bool suppress_connect_headers;  /* suppress proxy CONNECT response headers
+                                     from user callbacks */
 
   struct Curl_easy *stream_depends_on;
   bool stream_depends_e; /* set or don't set the Exclusive bit */
   int stream_weight;
 
   struct Curl_http2_dep *stream_dependents;
+
+  bool abstract_unix_socket;
 };
 
 struct Names {

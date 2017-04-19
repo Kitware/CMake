@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -95,6 +95,7 @@ Curl_ssl_config_matches(struct ssl_primary_config* data,
                         struct ssl_primary_config* needle)
 {
   if((data->version == needle->version) &&
+     (data->version_max == needle->version_max) &&
      (data->verifypeer == needle->verifypeer) &&
      (data->verifyhost == needle->verifyhost) &&
      Curl_safe_strcasecompare(data->CApath, needle->CApath) &&
@@ -113,6 +114,7 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   dest->verifyhost = source->verifyhost;
   dest->verifypeer = source->verifypeer;
   dest->version = source->version;
+  dest->version_max = source->version_max;
 
   CLONE_STRING(CAfile);
   CLONE_STRING(CApath);
@@ -120,6 +122,9 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   CLONE_STRING(egdsocket);
   CLONE_STRING(random_file);
   CLONE_STRING(clientcert);
+
+  /* Disable dest sessionid cache if a client cert is used, CVE-2016-5419. */
+  dest->sessionid = (dest->clientcert ? false : source->sessionid);
   return TRUE;
 }
 
@@ -173,11 +178,24 @@ void Curl_ssl_cleanup(void)
 static bool ssl_prefs_check(struct Curl_easy *data)
 {
   /* check for CURLOPT_SSLVERSION invalid parameter value */
-  if((data->set.ssl.primary.version < 0)
-     || (data->set.ssl.primary.version >= CURL_SSLVERSION_LAST)) {
+  const long sslver = data->set.ssl.primary.version;
+  if((sslver < 0) || (sslver >= CURL_SSLVERSION_LAST)) {
     failf(data, "Unrecognized parameter value passed via CURLOPT_SSLVERSION");
     return FALSE;
   }
+
+  switch(data->set.ssl.primary.version_max) {
+  case CURL_SSLVERSION_MAX_NONE:
+  case CURL_SSLVERSION_MAX_DEFAULT:
+    break;
+
+  default:
+    if((data->set.ssl.primary.version_max >> 16) < sslver) {
+      failf(data, "CURL_SSLVERSION_MAX incompatible with CURL_SSLVERSION");
+      return FALSE;
+    }
+  }
+
   return TRUE;
 }
 
@@ -286,16 +304,16 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
 
   const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
-                                                 &conn->proxy_ssl_config :
-                                                 &conn->ssl_config;
+    &conn->proxy_ssl_config :
+    &conn->ssl_config;
   const char * const name = isProxy ? conn->http_proxy.host.name :
-                                      conn->host.name;
+    conn->host.name;
   int port = isProxy ? (int)conn->port : conn->remote_port;
   *ssl_sessionid = NULL;
 
-  DEBUGASSERT(data->set.general_ssl.sessionid);
+  DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
-  if(!data->set.general_ssl.sessionid)
+  if(!SSL_SET_OPTION(primary.sessionid))
     /* session ID re-use is disabled */
     return TRUE;
 
@@ -394,10 +412,10 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   long *general_age;
   const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
-                                           &conn->proxy_ssl_config :
-                                           &conn->ssl_config;
+    &conn->proxy_ssl_config :
+    &conn->ssl_config;
 
-  DEBUGASSERT(data->set.general_ssl.sessionid);
+  DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
   clone_host = strdup(isProxy ? conn->http_proxy.host.name : conn->host.name);
   if(!clone_host)
@@ -447,7 +465,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   store->sessionid = ssl_sessionid;
   store->idsize = idsize;
   store->age = *general_age;    /* set current age */
-    /* free it if there's one already present */
+  /* free it if there's one already present */
   free(store->name);
   free(store->conn_to_host);
   store->name = clone_host;               /* clone host name */
@@ -484,9 +502,9 @@ void Curl_ssl_close_all(struct Curl_easy *data)
   curlssl_close_all(data);
 }
 
-#if defined(USE_SSLEAY) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
-    defined(USE_DARWINSSL) || defined(USE_NSS)
-/* This function is for OpenSSL, GnuTLS, darwinssl, and schannel only. */
+#if defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
+  defined(USE_DARWINSSL) || defined(USE_POLARSSL) || defined(USE_NSS) || \
+  defined(USE_MBEDTLS)
 int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
                      int numsocks)
 {
@@ -500,7 +518,7 @@ int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
     socks[0] = conn->sock[FIRSTSOCKET];
     return GETSOCK_WRITESOCK(0);
   }
-  else if(connssl->connecting_state == ssl_connect_2_reading) {
+  if(connssl->connecting_state == ssl_connect_2_reading) {
     /* read mode */
     socks[0] = conn->sock[FIRSTSOCKET];
     return GETSOCK_READSOCK(0);
@@ -510,15 +528,15 @@ int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
 }
 #else
 int Curl_ssl_getsock(struct connectdata *conn,
-                          curl_socket_t *socks,
-                          int numsocks)
+                     curl_socket_t *socks,
+                     int numsocks)
 {
   (void)conn;
   (void)socks;
   (void)numsocks;
   return GETSOCK_BLANK;
 }
-/* USE_SSLEAY || USE_GNUTLS || USE_SCHANNEL || USE_DARWINSSL || USE_NSS */
+/* USE_OPENSSL || USE_GNUTLS || USE_SCHANNEL || USE_DARWINSSL || USE_NSS */
 #endif
 
 void Curl_ssl_close(struct connectdata *conn, int sockindex)
@@ -703,12 +721,7 @@ CURLcode Curl_ssl_random(struct Curl_easy *data,
                          unsigned char *entropy,
                          size_t length)
 {
-  int rc = curlssl_random(data, entropy, length);
-  if(rc) {
-    failf(data, "PRNG seeding failed");
-    return CURLE_FAILED_INIT; /* possibly weird return code */
-  }
-  return CURLE_OK;
+  return curlssl_random(data, entropy, length);
 }
 
 /*

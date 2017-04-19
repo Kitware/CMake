@@ -140,6 +140,68 @@ static void polarssl_debug(void *context, int level, const char *line)
 static Curl_recv polarssl_recv;
 static Curl_send polarssl_send;
 
+static CURLcode polarssl_version_from_curl(int *polarver, long ssl_version)
+{
+  switch(ssl_version) {
+    case CURL_SSLVERSION_TLSv1_0:
+      *polarver = SSL_MINOR_VERSION_1;
+      return CURLE_OK;
+    case CURL_SSLVERSION_TLSv1_1:
+      *polarver = SSL_MINOR_VERSION_2;
+      return CURLE_OK;
+    case CURL_SSLVERSION_TLSv1_2:
+      *polarver = SSL_MINOR_VERSION_3;
+      return CURLE_OK;
+    case CURL_SSLVERSION_TLSv1_3:
+      break;
+  }
+  return CURLE_SSL_CONNECT_ERROR;
+}
+
+static CURLcode
+set_ssl_version_min_max(struct connectdata *conn, int sockindex)
+{
+  struct Curl_easy *data = conn->data;
+  struct ssl_connect_data* connssl = &conn->ssl[sockindex];
+  long ssl_version = SSL_CONN_CONFIG(version);
+  long ssl_version_max = SSL_CONN_CONFIG(version_max);
+  int ssl_min_ver = SSL_MINOR_VERSION_1;
+  int ssl_max_ver = SSL_MINOR_VERSION_1;
+  CURLcode result = CURLE_OK;
+
+  switch(ssl_version) {
+    case CURL_SSLVERSION_DEFAULT:
+    case CURL_SSLVERSION_TLSv1:
+      ssl_version = CURL_SSLVERSION_TLSv1_0;
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+      break;
+  }
+
+  switch(ssl_version_max) {
+    case CURL_SSLVERSION_MAX_NONE:
+      ssl_version_max = ssl_version << 16;
+      break;
+    case CURL_SSLVERSION_MAX_DEFAULT:
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+      break;
+  }
+
+  result = polarssl_version_from_curl(&ssl_min_ver, ssl_version);
+  if(result) {
+    failf(data, "unsupported min version passed via CURLOPT_SSLVERSION");
+    return result;
+  }
+  result = polarssl_version_from_curl(&ssl_max_ver, ssl_version_max >> 16);
+  if(result) {
+    failf(data, "unsupported max version passed via CURLOPT_SSLVERSION");
+    return result;
+  }
+
+  ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3, ssl_min_ver);
+  ssl_set_max_version(&connssl->ssl, SSL_MAJOR_VERSION_3, ssl_max_ver);
+
+  return result;
+}
 
 static CURLcode
 polarssl_connect_step1(struct connectdata *conn,
@@ -287,29 +349,15 @@ polarssl_connect_step1(struct connectdata *conn,
     infof(data, "PolarSSL: Forced min. SSL Version to be SSLv3\n");
     break;
   case CURL_SSLVERSION_TLSv1_0:
-    ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
-                        SSL_MINOR_VERSION_1);
-    ssl_set_max_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
-                        SSL_MINOR_VERSION_1);
-    infof(data, "PolarSSL: Forced min. SSL Version to be TLS 1.0\n");
-    break;
   case CURL_SSLVERSION_TLSv1_1:
-    ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
-                        SSL_MINOR_VERSION_2);
-    ssl_set_max_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
-                        SSL_MINOR_VERSION_2);
-    infof(data, "PolarSSL: Forced min. SSL Version to be TLS 1.1\n");
-    break;
   case CURL_SSLVERSION_TLSv1_2:
-    ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
-                        SSL_MINOR_VERSION_3);
-    ssl_set_max_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
-                        SSL_MINOR_VERSION_3);
-    infof(data, "PolarSSL: Forced min. SSL Version to be TLS 1.2\n");
-    break;
   case CURL_SSLVERSION_TLSv1_3:
-    failf(data, "PolarSSL: TLS 1.3 is not yet supported");
-    return CURLE_SSL_CONNECT_ERROR;
+    {
+      CURLcode result = set_ssl_version_min_max(conn, sockindex);
+      if(result != CURLE_OK)
+        return result;
+      break;
+    }
   default:
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;
@@ -327,7 +375,7 @@ polarssl_connect_step1(struct connectdata *conn,
   ssl_set_ciphersuites(&connssl->ssl, ssl_list_ciphersuites());
 
   /* Check if there's a cached ID we can/should use here! */
-  if(data->set.general_ssl.sessionid) {
+  if(SSL_SET_OPTION(primary.sessionid)) {
     void *old_session = NULL;
 
     Curl_ssl_sessionid_lock(conn);
@@ -555,7 +603,7 @@ polarssl_connect_step3(struct connectdata *conn,
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
-  if(data->set.general_ssl.sessionid) {
+  if(SSL_SET_OPTION(primary.sessionid)) {
     int ret;
     ssl_session *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
@@ -564,7 +612,7 @@ polarssl_connect_step3(struct connectdata *conn,
     if(!our_ssl_sessionid)
       return CURLE_OUT_OF_MEMORY;
 
-    ssl_session_init(our_ssl_sessionid);
+    memset(our_ssl_sessionid, 0, sizeof(ssl_session));
 
     ret = ssl_get_session(&connssl->ssl, our_ssl_sessionid);
     if(ret) {
@@ -814,6 +862,12 @@ int Curl_polarssl_init(void)
 void Curl_polarssl_cleanup(void)
 {
   (void)Curl_polarsslthreadlock_thread_cleanup();
+}
+
+
+int Curl_polarssl_data_pending(const struct connectdata *conn, int sockindex)
+{
+  return ssl_get_bytes_avail(&conn->ssl[sockindex].ssl) != 0;
 }
 
 #endif /* USE_POLARSSL */

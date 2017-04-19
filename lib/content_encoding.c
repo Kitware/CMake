@@ -130,8 +130,7 @@ inflate_stream(struct connectdata *conn,
         free(decomp);
         if(inflateEnd(z) == Z_OK)
           return exit_zlib(z, &k->zlib_init, result);
-        else
-          return exit_zlib(z, &k->zlib_init, process_zlib_error(conn, z));
+        return exit_zlib(z, &k->zlib_init, process_zlib_error(conn, z));
       }
 
       /* Done with these bytes, exit */
@@ -314,7 +313,7 @@ Curl_unencode_gzip_write(struct connectdata *conn,
 #ifndef OLD_ZLIB_SUPPORT
   /* Support for old zlib versions is compiled away and we are running with
      an old version, so return an error. */
-  return exit_zlib(z, &k->zlib_init, CURLE_FUNCTION_NOT_FOUND);
+  return exit_zlib(z, &k->zlib_init, CURLE_WRITE_ERROR);
 
 #else
   /* This next mess is to get around the potential case where there isn't
