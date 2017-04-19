@@ -29,3 +29,12 @@ following documents:
 .. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
 .. _`CMake Review Process`: review.rst
 .. _`CMake Testing Process`: testing.rst
+
+Developer Documentation
+=======================
+
+CMake developer documentation is provided by the following documents:
+
+* The `CMake Source Code Guide`_.
+
+.. _`CMake Source Code Guide`: source.rst
