@@ -12,6 +12,6 @@ run_cmake(StartupProject)
 run_cmake(StartupProjectMissing)
 run_cmake(AddPackageToDefault)
 
-if(RunCMake_GENERATOR MATCHES "Visual Studio ([^7]|[7][0-9])" AND NOT NO_USE_FOLDERS)
+if(NOT NO_USE_FOLDERS)
   run_cmake(StartupProjectUseFolders)
 endif()

@@ -5,7 +5,7 @@ Tell cmake to use MFC for an executable or dll.
 
 This can be set in a ``CMakeLists.txt`` file and will enable MFC in the
 application.  It should be set to ``1`` for the static MFC library, and ``2``
-for the shared MFC library.  This is used in Visual Studio 7
+for the shared MFC library.  This is used in Visual Studio
 project files.  The CMakeSetup dialog used MFC and the ``CMakeLists.txt``
 looks like this:
 

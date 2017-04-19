@@ -215,7 +215,7 @@ of the following is specified:
 
 ``PRE_BUILD``
   Run before any other rules are executed within the target.
-  This is supported only on Visual Studio 7 or later.
+  This is supported only on Visual Studio 8 or later.
   For all other generators ``PRE_BUILD`` will be treated as
   ``PRE_LINK``.
 ``PRE_LINK``

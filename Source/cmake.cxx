@@ -63,7 +63,6 @@
 #include "cmGlobalVisualStudio12Generator.h"
 #include "cmGlobalVisualStudio14Generator.h"
 #include "cmGlobalVisualStudio15Generator.h"
-#include "cmGlobalVisualStudio71Generator.h"
 #include "cmGlobalVisualStudio8Generator.h"
 #include "cmGlobalVisualStudio9Generator.h"
 #include "cmVSSetupHelper.h"
@@ -1461,8 +1460,7 @@ void cmake::CreateDefaultGlobalGenerator()
     { "11.0", "Visual Studio 11 2012" }, //
     { "10.0", "Visual Studio 10 2010" }, //
     { "9.0", "Visual Studio 9 2008" },   //
-    { "8.0", "Visual Studio 8 2005" },   //
-    { "7.1", "Visual Studio 7 .NET 2003" }
+    { "8.0", "Visual Studio 8 2005" }
   };
   static const char* const vsEntries[] = {
     "\\Setup\\VC;ProductDir", //
@@ -1672,7 +1670,6 @@ void cmake::AddDefaultGenerators()
   this->Generators.push_back(cmGlobalVisualStudio10Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio9Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio8Generator::NewFactory());
-  this->Generators.push_back(cmGlobalVisualStudio71Generator::NewFactory());
   this->Generators.push_back(cmGlobalBorlandMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalNMakeMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalJOMMakefileGenerator::NewFactory());

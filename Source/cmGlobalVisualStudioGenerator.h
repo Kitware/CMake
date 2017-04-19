@@ -32,7 +32,6 @@ public:
   /** Known versions of Visual Studio.  */
   enum VSVersion
   {
-    VS71 = 71,
     VS8 = 80,
     VS9 = 90,
     VS10 = 100,
