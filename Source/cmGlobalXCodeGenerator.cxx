@@ -2009,6 +2009,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   BuildObjectListOrString dirs(this, this->XcodeVersion >= 30);
   BuildObjectListOrString fdirs(this, this->XcodeVersion >= 30);
+  BuildObjectListOrString sysdirs(this, this->XcodeVersion >= 30);
+  BuildObjectListOrString sysfdirs(this, this->XcodeVersion >= 30);
+  const bool emitSystemIncludes = this->XcodeVersion >= 83;
+
   std::vector<std::string> includes;
   this->CurrentLocalGenerator->GetIncludeDirectories(includes, gtgt, "C",
                                                      configName);
@@ -2022,11 +2026,22 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       frameworkDir += "/../";
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
       if (emitted.insert(frameworkDir).second) {
-        fdirs.Add(this->XCodeEscapePath(frameworkDir));
+        std::string incpath = this->XCodeEscapePath(frameworkDir);
+        if (emitSystemIncludes &&
+            gtgt->IsSystemIncludeDirectory(frameworkDir, configName)) {
+          sysfdirs.Add(incpath);
+        } else {
+          fdirs.Add(incpath);
+        }
       }
     } else {
       std::string incpath = this->XCodeEscapePath(*i);
-      dirs.Add(incpath);
+      if (emitSystemIncludes &&
+          gtgt->IsSystemIncludeDirectory(*i, configName)) {
+        sysdirs.Add(incpath);
+      } else {
+        dirs.Add(incpath);
+      }
     }
   }
   // Add framework search paths needed for linking.
@@ -2035,7 +2050,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     for (std::vector<std::string>::const_iterator fdi = fwDirs.begin();
          fdi != fwDirs.end(); ++fdi) {
       if (emitted.insert(*fdi).second) {
-        fdirs.Add(this->XCodeEscapePath(*fdi));
+        std::string incpath = this->XCodeEscapePath(*fdi);
+        if (emitSystemIncludes &&
+            gtgt->IsSystemIncludeDirectory(*fdi, configName)) {
+          sysfdirs.Add(incpath);
+        } else {
+          fdirs.Add(incpath);
+        }
       }
     }
   }
@@ -2045,8 +2066,16 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   if (!dirs.IsEmpty()) {
     buildSettings->AddAttribute("HEADER_SEARCH_PATHS", dirs.CreateList());
   }
+  if (!sysfdirs.IsEmpty()) {
+    buildSettings->AddAttribute("SYSTEM_FRAMEWORK_SEARCH_PATHS",
+                                sysfdirs.CreateList());
+  }
+  if (!sysdirs.IsEmpty()) {
+    buildSettings->AddAttribute("SYSTEM_HEADER_SEARCH_PATHS",
+                                sysdirs.CreateList());
+  }
 
-  if (this->XcodeVersion >= 60) {
+  if (this->XcodeVersion >= 60 && !emitSystemIncludes) {
     // Add those per-language flags in addition to HEADER_SEARCH_PATHS to gain
     // system include directory awareness. We need to also keep on setting
     // HEADER_SEARCH_PATHS to work around a missing compile options flag for
