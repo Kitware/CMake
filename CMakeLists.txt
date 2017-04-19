@@ -69,6 +69,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3 FATAL_ERROR)
 FOREACH(p
     CMP0025 # CMake 3.0, Compiler id for Apple Clang is now AppleClang.
+    CMP0048 # CMake 3.0, Let the project command manage version variables.
     CMP0056 # CMake 3.2, Honor link flags in try_compile() source-file signature.
     CMP0063 # CMake 3.3, Honor visibility properties for all target types.
     )
