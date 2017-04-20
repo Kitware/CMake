@@ -25,9 +25,6 @@ endif()
 if("${CMAKE_GENERATOR}" MATCHES "Watcom WMake")
   set(PP_WATCOM 1)
 endif()
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 7$")
-  set(PP_VS70 1)
-endif()
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   set(PP_VS 1)
 endif()
@@ -46,14 +43,11 @@ endif()
 # must not have it escaped inside the configured header.
 set(STRING_EXTRA "")
 
-if(NOT BORLAND AND NOT PP_VS70)
-  # Borland, VS70 IDE: ;
+if(NOT BORLAND)
+  # Borland: ;
   # The Borland compiler will simply not accept a non-escaped semicolon
   # on the command line.  If it is escaped \; then the escape character
   # shows up in the preprocessing output too.
-  #
-  # The VS 7.0 IDE separates definitions on semicolons and commas with
-  # no regard for quotes.  Fortunately VS 7.1 and above are okay.
   set(SEMICOLON "\;")
 endif()
 

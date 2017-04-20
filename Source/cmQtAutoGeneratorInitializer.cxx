@@ -681,11 +681,11 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   if (gg->GetName().find("Visual Studio") != std::string::npos) {
     cmGlobalVisualStudioGenerator* vsgg =
       static_cast<cmGlobalVisualStudioGenerator*>(gg);
-    // Under VS >= 7 use a PRE_BUILD event instead of a separate target to
+    // Under VS use a PRE_BUILD event instead of a separate target to
     // reduce the number of targets loaded into the IDE.
     // This also works around a VS 11 bug that may skip updating the target:
     //  https://connect.microsoft.com/VisualStudio/feedback/details/769495
-    usePRE_BUILD = vsgg->GetVersion() >= cmGlobalVisualStudioGenerator::VS7;
+    usePRE_BUILD = true;
   }
 #endif
 

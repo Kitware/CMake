@@ -898,8 +898,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   // end of <Tool Name=VCMIDLTool
 
   // Add manifest tool settings.
-  if (targetBuilds &&
-      this->GetVersion() >= cmGlobalVisualStudioGenerator::VS8) {
+  if (targetBuilds) {
     const char* manifestTool = "VCManifestTool";
     if (this->FortranProject) {
       manifestTool = "VFManifestTool";
@@ -1040,8 +1039,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"" << tool << "\"\n";
 
-      if (this->GetVersion() < cmGlobalVisualStudioGenerator::VS8 ||
-          this->FortranProject) {
+      if (this->FortranProject) {
         std::ostringstream libdeps;
         this->Internal->OutputObjects(libdeps, target, configName);
         if (!libdeps.str().empty()) {
@@ -1094,8 +1092,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       // libraries which may be set by the user to something bad.
       fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
            << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
-      if (this->GetVersion() < cmGlobalVisualStudioGenerator::VS8 ||
-          this->FortranProject) {
+      if (this->FortranProject) {
         this->Internal->OutputObjects(fout, target, configName, " ");
       }
       fout << " ";
@@ -1179,8 +1176,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       // libraries which may be set by the user to something bad.
       fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
            << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
-      if (this->GetVersion() < cmGlobalVisualStudioGenerator::VS8 ||
-          this->FortranProject) {
+      if (this->FortranProject) {
         this->Internal->OutputObjects(fout, target, configName, " ");
       }
       fout << " ";
@@ -1376,10 +1372,9 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     cmSourceFile const* sf = sources[si].Source;
     sourcesIndex[sf] = si;
     if (!sf->GetObjectLibrary().empty()) {
-      if (this->GetVersion() < cmGlobalVisualStudioGenerator::VS8 ||
-          this->FortranProject) {
-        // VS < 8 does not support per-config source locations so we
-        // list object library content on the link line instead.
+      if (this->FortranProject) {
+        // Intel Fortran does not support per-config source locations
+        // so we list object library content on the link line instead.
         // See OutputObjects.
         continue;
       }
@@ -1962,11 +1957,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStart(
        << "<VisualStudioProject\n"
        << "\tProjectType=\"Visual C++\"\n";
   /* clang-format on */
-  if (gg->GetVersion() == cmGlobalVisualStudioGenerator::VS71) {
-    fout << "\tVersion=\"7.10\"\n";
-  } else {
-    fout << "\tVersion=\"" << (gg->GetVersion() / 10) << ".00\"\n";
-  }
+  fout << "\tVersion=\"" << (gg->GetVersion() / 10) << ".00\"\n";
   const char* projLabel = target->GetProperty("PROJECT_LABEL");
   if (!projLabel) {
     projLabel = libName.c_str();
@@ -1976,9 +1967,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStart(
     keyword = "Win32Proj";
   }
   fout << "\tName=\"" << projLabel << "\"\n";
-  if (gg->GetVersion() >= cmGlobalVisualStudioGenerator::VS8) {
-    fout << "\tProjectGUID=\"{" << gg->GetGUID(libName.c_str()) << "}\"\n";
-  }
+  fout << "\tProjectGUID=\"{" << gg->GetGUID(libName.c_str()) << "}\"\n";
   this->WriteProjectSCC(fout, target);
   if (const char* targetFrameworkVersion =
         target->GetProperty("VS_DOTNET_TARGET_FRAMEWORK_VERSION")) {

@@ -2,12 +2,6 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 
-# Nothing here yet
-if(CMAKE_GENERATOR MATCHES "Visual Studio 7")
-  include(CMakeVS7BackwardCompatibility)
-  set(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
-endif()
-
 if(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
   # Old CMake versions did not support OS X universal binaries anyway,
   # so just get through this with at least some size for the types.
