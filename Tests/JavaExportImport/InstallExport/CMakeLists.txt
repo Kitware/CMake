@@ -10,5 +10,6 @@ add_jar(${PROJECT_NAME} Bar.java)
 install_jar(${PROJECT_NAME} DESTINATION share/java)
 install_jar_exports(
   TARGETS ${PROJECT_NAME}
+  NAMESPACE bar::
   FILE JavaInstallExportTestConfig.cmake
   DESTINATION share/cmake)
