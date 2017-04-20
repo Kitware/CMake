@@ -11,5 +11,3 @@
 *.cmake          whitespace=tab-in-indent
 *.rst            whitespace=tab-in-indent conflict-marker-size=79
 *.txt            whitespace=tab-in-indent
-
-* -format.clang-format
