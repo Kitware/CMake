@@ -887,6 +887,19 @@
 #
 #  * Mandatory : YES
 #  * Default   : "/"
+#
+# .. VARIABLE:: CPACK_RPM_BUILDREQUIRES
+#
+#  List of source rpm build dependencies.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to set source RPM build dependencies (BuildRequires). Note that
+#  you must enclose the complete build requirements string between quotes, for
+#  example::
+#
+#   set(CPACK_RPM_BUILDREQUIRES "python >= 2.5.0, cmake >= 2.8")
 
 # Author: Eric Noulard with the help of Alexander Neundorf.
 
