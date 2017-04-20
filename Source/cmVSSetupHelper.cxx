@@ -1,18 +1,43 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-file Copyright.txt or https://cmake.org/licensing for details.  */
-
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVSSetupHelper.h"
 
 #ifndef VSSetupConstants
 #define VSSetupConstants
-const IID IID_ISetupConfiguration = { 0x42843719, 0xDB4C, 0x46C2,{ 0x8E,  0x7C,  0x64,  0xF1,  0x81,  0x6E,  0xFD,  0x5B } };
-const IID IID_ISetupConfiguration2 = { 0x26AAB78C, 0x4A60, 0x49D6,{ 0xAF,  0x3B,  0x3C,  0x35,  0xBC,  0x93,  0x36,  0x5D } };
-const IID IID_ISetupPackageReference = { 0xda8d8a16, 0xb2b6, 0x4487,{ 0xa2,  0xf1,  0x59,  0x4c,  0xcc,  0xcd,  0x6b,  0xf5 } };
-const IID IID_ISetupHelper = { 0x42b21b78, 0x6192, 0x463e,{ 0x87,  0xbf,  0xd5,  0x77,  0x83,  0x8f,  0x1d,  0x5c } };
-const IID IID_IEnumSetupInstances = { 0x6380BCFF, 0x41D3, 0x4B2E,{ 0x8B,  0x2E,  0xBF,  0x8A,  0x68,  0x10,  0xC8,  0x48 } };
-const IID IID_ISetupInstance2 = { 0x89143C9A, 0x05AF, 0x49B0,{ 0xB7,  0x17,  0x72,  0xE2,  0x18,  0xA2,  0x18,  0x5C } };
-const IID IID_ISetupInstance = { 0xB41463C3, 0x8866, 0x43B5,{ 0xBC,  0x33,  0x2B,  0x06,  0x76,  0xF7,  0xF4,  0x2E } };
-const CLSID CLSID_SetupConfiguration = { 0x177F0C4A, 0x1CD3, 0x4DE7,{ 0xA3,  0x2C,  0x71,  0xDB,  0xBB,  0x9F,  0xA3,  0x6D } };
+/* clang-format off */
+const IID IID_ISetupConfiguration = {
+  0x42843719, 0xDB4C, 0x46C2,
+  { 0x8E, 0x7C, 0x64, 0xF1, 0x81, 0x6E, 0xFD, 0x5B }
+};
+const IID IID_ISetupConfiguration2 = {
+  0x26AAB78C, 0x4A60, 0x49D6,
+  { 0xAF, 0x3B, 0x3C, 0x35, 0xBC, 0x93, 0x36, 0x5D }
+};
+const IID IID_ISetupPackageReference = {
+  0xda8d8a16, 0xb2b6, 0x4487,
+  { 0xa2, 0xf1, 0x59, 0x4c, 0xcc, 0xcd, 0x6b, 0xf5 }
+};
+const IID IID_ISetupHelper = {
+  0x42b21b78, 0x6192, 0x463e,
+  { 0x87, 0xbf, 0xd5, 0x77, 0x83, 0x8f, 0x1d, 0x5c }
+};
+const IID IID_IEnumSetupInstances = {
+  0x6380BCFF, 0x41D3, 0x4B2E,
+  { 0x8B, 0x2E, 0xBF, 0x8A, 0x68, 0x10, 0xC8, 0x48 }
+};
+const IID IID_ISetupInstance2 = {
+  0x89143C9A, 0x05AF, 0x49B0,
+  { 0xB7, 0x17, 0x72, 0xE2, 0x18, 0xA2, 0x18, 0x5C }
+};
+const IID IID_ISetupInstance = {
+  0xB41463C3, 0x8866, 0x43B5,
+  { 0xBC, 0x33, 0x2B, 0x06, 0x76, 0xF7, 0xF4, 0x2E }
+};
+const CLSID CLSID_SetupConfiguration = {
+  0x177F0C4A, 0x1CD3, 0x4DE7,
+  { 0xA3, 0x2C, 0x71, 0xDB, 0xBB, 0x9F, 0xA3, 0x6D }
+};
+/* clang-format on */
 #endif
 
 const WCHAR* VCToolsetComponent =
@@ -32,8 +57,7 @@ cmVSSetupAPIHelper::cmVSSetupAPIHelper()
   comInitialized = CoInitializeEx(NULL, 0);
   if (SUCCEEDED(comInitialized)) {
     Initialize();
-  }
-  else {
+  } else {
     initializationFailure = true;
   }
 }
@@ -49,42 +73,19 @@ cmVSSetupAPIHelper::~cmVSSetupAPIHelper()
 
 bool cmVSSetupAPIHelper::IsVS2017Installed()
 {
-  bool ret = false;
-  if (chosenInstanceInfo.VSInstallLocation.compare(L"") == 0) {
-    ret = EnumerateAndChooseVSInstance();
-  }
-
-  return ret;
+  return this->EnumerateAndChooseVSInstance();
 }
 
 bool cmVSSetupAPIHelper::IsWin10SDKInstalled()
 {
-  bool isWin10SDKInstalled = false;
-  if (chosenInstanceInfo.VSInstallLocation.compare(L"") == 0) {
-    if (EnumerateAndChooseVSInstance() &&
-        chosenInstanceInfo.VSInstallLocation.compare(L"") != 0) {
-      isWin10SDKInstalled = chosenInstanceInfo.IsWin10SDKInstalled;
-    }
-  } else {
-    isWin10SDKInstalled = chosenInstanceInfo.IsWin10SDKInstalled;
-  }
-
-  return isWin10SDKInstalled;
+  return (this->EnumerateAndChooseVSInstance() &&
+          chosenInstanceInfo.IsWin10SDKInstalled);
 }
 
 bool cmVSSetupAPIHelper::IsWin81SDKInstalled()
 {
-  bool isWin81SDKInstalled = false;
-  if (chosenInstanceInfo.VSInstallLocation.compare(L"") == 0) {
-    if (EnumerateAndChooseVSInstance() &&
-        chosenInstanceInfo.VSInstallLocation.compare(L"") != 0) {
-      isWin81SDKInstalled = chosenInstanceInfo.IsWin81SDKInstalled;
-    }
-  } else {
-    isWin81SDKInstalled = chosenInstanceInfo.IsWin81SDKInstalled;
-  }
-
-  return isWin81SDKInstalled;
+  return (this->EnumerateAndChooseVSInstance() &&
+          chosenInstanceInfo.IsWin81SDKInstalled);
 }
 
 bool cmVSSetupAPIHelper::CheckInstalledComponent(
@@ -128,7 +129,8 @@ bool cmVSSetupAPIHelper::CheckInstalledComponent(
   return ret;
 }
 
-// Gather additional info such as if VCToolset, WinSDKs are installed, location of VS and version information.
+// Gather additional info such as if VCToolset, WinSDKs are installed, location
+// of VS and version information.
 bool cmVSSetupAPIHelper::GetVSInstanceInfo(
   SmartCOMPtr<ISetupInstance2> pInstance, VSInstanceInfo& vsInstanceInfo)
 {
@@ -216,18 +218,12 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
 bool cmVSSetupAPIHelper::GetVSInstanceInfo(std::string& vsInstallLocation)
 {
   vsInstallLocation = "";
-  bool isInstalled = false;
+  bool isInstalled = this->EnumerateAndChooseVSInstance();
 
-  if (chosenInstanceInfo.VSInstallLocation.compare(L"") == 0) {
-    isInstalled = EnumerateAndChooseVSInstance();
-  }
-
-  // Enumerate and choose best VS instance
-  if (chosenInstanceInfo.VSInstallLocation.compare(L"") != 0) {
+  if (isInstalled) {
     std::string str(chosenInstanceInfo.VSInstallLocation.begin(),
                     chosenInstanceInfo.VSInstallLocation.end());
     vsInstallLocation = str;
-    isInstalled = true;
   }
 
   return isInstalled;
@@ -240,8 +236,8 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     return true;
   }
 
-  if (initializationFailure || setupConfig == NULL ||
-      setupConfig2 == NULL || setupHelper == NULL)
+  if (initializationFailure || setupConfig == NULL || setupConfig2 == NULL ||
+      setupHelper == NULL)
     return false;
 
   std::vector<VSInstanceInfo> vecVSInstances;
@@ -255,8 +251,8 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
   SmartCOMPtr<ISetupInstance> instance;
   while (SUCCEEDED(enumInstances->Next(1, &instance, NULL)) && instance) {
     SmartCOMPtr<ISetupInstance2> instance2 = NULL;
-    if (FAILED(instance->QueryInterface(IID_ISetupInstance2,
-                                        (void**)&instance2)) ||
+    if (FAILED(
+          instance->QueryInterface(IID_ISetupInstance2, (void**)&instance2)) ||
         !instance2) {
       instance = NULL;
       continue;
@@ -321,9 +317,9 @@ int cmVSSetupAPIHelper::ChooseVSInstance(
     // If there is no difference in WinSDKs then look for the highest version
     // of installed VS
     if ((vecVSInstances[chosenIndex].IsWin10SDKInstalled ==
-        vecVSInstances[i].IsWin10SDKInstalled) &&
+         vecVSInstances[i].IsWin10SDKInstalled) &&
         (vecVSInstances[chosenIndex].IsWin81SDKInstalled ==
-          vecVSInstances[i].IsWin81SDKInstalled) &&
+         vecVSInstances[i].IsWin81SDKInstalled) &&
         vecVSInstances[chosenIndex].Version < vecVSInstances[i].Version) {
       chosenIndex = i;
       continue;
@@ -343,8 +339,8 @@ bool cmVSSetupAPIHelper::Initialize()
     return false;
   }
 
-  if (FAILED(setupConfig.CoCreateInstance(CLSID_SetupConfiguration,
-                                          NULL, IID_ISetupConfiguration,
+  if (FAILED(setupConfig.CoCreateInstance(CLSID_SetupConfiguration, NULL,
+                                          IID_ISetupConfiguration,
                                           CLSCTX_INPROC_SERVER)) ||
       setupConfig == NULL) {
     initializationFailure = true;
@@ -358,8 +354,8 @@ bool cmVSSetupAPIHelper::Initialize()
     return false;
   }
 
-  if (FAILED(setupConfig.QueryInterface(IID_ISetupHelper,
-                                        (void**)&setupHelper)) ||
+  if (FAILED(
+        setupConfig.QueryInterface(IID_ISetupHelper, (void**)&setupHelper)) ||
       setupHelper == NULL) {
     initializationFailure = true;
     return false;

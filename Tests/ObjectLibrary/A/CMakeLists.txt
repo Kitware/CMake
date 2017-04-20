@@ -21,3 +21,4 @@ add_custom_command(
 
 add_library(A OBJECT a1.c a2.c a.cmake)
 target_include_directories(A PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+set_property(TARGET A PROPERTY COMPILE_PDB_NAME Apdb)

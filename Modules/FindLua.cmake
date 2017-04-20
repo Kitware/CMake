@@ -75,16 +75,9 @@ function(_lua_set_version_vars)
              include/lua${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
              include/lua-${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
         )
-        list(APPEND _lua_library_names
-             lua${CMAKE_MATCH_1}${CMAKE_MATCH_2}
-             lua${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
-             lua-${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
-             lua.${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
-        )
     endforeach ()
 
     set(_lua_include_subdirs "${_lua_include_subdirs}" PARENT_SCOPE)
-    set(_lua_library_names "${_lua_library_names}" PARENT_SCOPE)
     set(_lua_append_versions "${_lua_append_versions}" PARENT_SCOPE)
 endfunction(_lua_set_version_vars)
 
@@ -152,6 +145,15 @@ endif ()
 unset(_lua_include_subdirs)
 unset(_lua_append_versions)
 
+if (LUA_VERSION_STRING)
+    set(_lua_library_names
+        lua${LUA_VERSION_MAJOR}${LUA_VERSION_MINOR}
+        lua${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}
+        lua-${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}
+        lua.${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}
+    )
+endif ()
+
 find_library(LUA_LIBRARY
   NAMES ${_lua_library_names} lua
   HINTS
@@ -172,6 +174,13 @@ if (LUA_LIBRARY)
     if (UNIX AND NOT APPLE AND NOT BEOS)
         find_library(LUA_MATH_LIBRARY m)
         set(LUA_LIBRARIES "${LUA_LIBRARY};${LUA_MATH_LIBRARY}")
+
+        # include dl library for statically-linked Lua library
+        get_filename_component(LUA_LIB_EXT ${LUA_LIBRARY} EXT)
+        if(LUA_LIB_EXT STREQUAL CMAKE_STATIC_LIBRARY_SUFFIX)
+          list(APPEND LUA_LIBRARIES ${CMAKE_DL_LIBS})
+        endif()
+
     # For Windows and Mac, don't need to explicitly include the math library
     else ()
         set(LUA_LIBRARIES "${LUA_LIBRARY}")

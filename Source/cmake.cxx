@@ -1445,7 +1445,7 @@ int cmake::ActualConfigure()
 void cmake::CreateDefaultGlobalGenerator()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
-  std::string found = "";
+  std::string found;
   // Try to find the newest VS installed on the computer and
   // use that as a default if -G is not specified
   const std::string vsregBase = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\";
@@ -1459,6 +1459,7 @@ void cmake::CreateDefaultGlobalGenerator()
     const char* GeneratorName;
   };
   static VSVersionedGenerator const vsGenerators[] = {
+    { "15.0", "Visual Studio 15 2017" }, //
     { "14.0", "Visual Studio 14 2015" }, //
     { "12.0", "Visual Studio 12 2013" }, //
     { "11.0", "Visual Studio 11 2012" }, //

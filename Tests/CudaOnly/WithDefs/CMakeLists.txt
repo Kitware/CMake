@@ -3,8 +3,13 @@ cmake_minimum_required(VERSION 3.7)
 project (CudaOnlyWithDefs CUDA)
 
 #verify that we can pass explicit cuda arch flags
-set(CMAKE_CUDA_FLAGS "-gencode arch=compute_30,code=compute_30")
-set(debug_compile_flags --generate-code arch=compute_20,code=sm_20 -Xcompiler=-Werror)
+string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=compute_30")
+set(debug_compile_flags --generate-code arch=compute_20,code=sm_20)
+if(CMAKE_CUDA_SIMULATE_ID STREQUAL "MSVC")
+  list(APPEND debug_compile_flags -Xcompiler=-WX)
+else()
+  list(APPEND debug_compile_flags -Xcompiler=-Werror)
+endif()
 set(release_compile_defs DEFREL)
 
 #Goal for this example:

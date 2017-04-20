@@ -21,7 +21,8 @@ The first signature is for adding a custom command to produce an output::
                      [WORKING_DIRECTORY dir]
                      [COMMENT comment]
                      [DEPFILE depfile]
-                     [VERBATIM] [APPEND] [USES_TERMINAL])
+                     [VERBATIM] [APPEND] [USES_TERMINAL]
+                     [COMMAND_EXPAND_LISTS])
 
 This defines a command to generate specified ``OUTPUT`` file(s).
 A target created in the same directory (``CMakeLists.txt`` file)
@@ -121,6 +122,14 @@ The options are:
 
   Arguments to ``DEPENDS`` may use
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
+``COMMAND_EXPAND_LISTS``
+  Lists in ``COMMAND`` arguments will be expanded, including those
+  created with
+  :manual:`generator expressions <cmake-generator-expressions(7)>`,
+  allowing ``COMMAND`` arguments such as
+  ``${CC} "-I$<JOIN:$<TARGET_PROPERTY:foo,INCLUDE_DIRECTORIES>,;-I>" foo.cc``
+  to be properly expanded.
 
 ``IMPLICIT_DEPENDS``
   Request scanning of implicit dependencies of an input file.

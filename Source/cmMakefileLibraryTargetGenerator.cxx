@@ -281,6 +281,8 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
 
   // Get the language to use for linking this library.
   std::string linkLanguage = "CUDA";
+  std::string const objExt =
+    this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
 
   // Create set of linking flags.
   std::string linkFlags;
@@ -288,7 +290,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
 
   // Get the name of the device object to generate.
   std::string const targetOutputReal =
-    this->GeneratorTarget->ObjectDirectory + "cmake_device_link.o";
+    this->GeneratorTarget->ObjectDirectory + "cmake_device_link" + objExt;
   this->DeviceLinkObject = targetOutputReal;
 
   this->NumberOfProgressActions++;
@@ -364,12 +366,18 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
         this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutputReal),
       output);
 
+    std::string targetFullPathCompilePDB = this->ComputeTargetCompilePDB();
+    std::string targetOutPathCompilePDB =
+      this->LocalGenerator->ConvertToOutputFormat(targetFullPathCompilePDB,
+                                                  cmOutputConverter::SHELL);
+
     vars.Objects = buildObjs.c_str();
     vars.ObjectDir = objectDir.c_str();
     vars.Target = target.c_str();
     vars.LinkLibraries = linkLibs.c_str();
     vars.ObjectsQuoted = buildObjs.c_str();
     vars.LinkFlags = linkFlags.c_str();
+    vars.TargetCompilePDB = targetOutPathCompilePDB.c_str();
 
     // Add language feature flags.
     std::string langFlags;
@@ -589,12 +597,26 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // Clean files associated with this library.
   std::vector<std::string> libCleanFiles;
   libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath));
-  if (targetNameReal != targetName) {
-    libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal));
+    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal));
+
+  std::vector<std::string> commands1;
+  // Add a command to remove any existing files for this library.
+  // for static libs only
+  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
+    this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
+                                             this->GeneratorTarget, "target");
+    this->LocalGenerator->CreateCDCommand(
+      commands1, this->Makefile->GetCurrentBinaryDirectory(),
+      this->LocalGenerator->GetBinaryDirectory());
+    commands.insert(commands.end(), commands1.begin(), commands1.end());
+    commands1.clear();
   }
-  if (targetNameSO != targetName && targetNameSO != targetNameReal) {
+
+  if (targetName != targetNameReal) {
+    libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath));
+  }
+  if (targetNameSO != targetNameReal && targetNameSO != targetName) {
     libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathSO));
   }
@@ -625,19 +647,6 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       (targetFullPath + ".manifest").c_str()));
   }
 #endif
-
-  std::vector<std::string> commands1;
-  // Add a command to remove any existing files for this library.
-  // for static libs only
-  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
-    this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
-                                             this->GeneratorTarget, "target");
-    this->LocalGenerator->CreateCDCommand(
-      commands1, this->Makefile->GetCurrentBinaryDirectory(),
-      this->LocalGenerator->GetBinaryDirectory());
-    commands.insert(commands.end(), commands1.begin(), commands1.end());
-    commands1.clear();
-  }
 
   // Add the pre-build and pre-link rules building but not when relinking.
   if (!relink) {

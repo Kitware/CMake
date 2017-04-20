@@ -28,6 +28,7 @@ public:
 
   virtual const char* GetToolsVersion() { return "15.0"; }
 protected:
+  bool InitializeWindows(cmMakefile* mf) CM_OVERRIDE;
   virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
 
   virtual const char* GetIDEVersion() { return "15.0"; }
@@ -41,12 +42,17 @@ protected:
   bool IsWindowsStoreToolsetInstalled() const;
 
   bool FindMakeProgram(cmMakefile* mf) CM_OVERRIDE;
+  std::string FindMSBuildCommand() CM_OVERRIDE;
+  std::string FindDevEnvCommand() CM_OVERRIDE;
 
   std::string const& GetMSBuildCommand();
   std::string MSBuildCommand;
   bool MSBuildCommandInitialized;
-  virtual std::string FindMSBuildCommand();
-  virtual std::string FindDevEnvCommand();
+
+  // Check for a Win 8 SDK known to the registry or VS installer tool.
+  bool IsWin81SDKInstalled() const;
+
+
   virtual std::string GetVSMakeProgram() { return this->GetMSBuildCommand(); }
 
 private:

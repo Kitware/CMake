@@ -30,6 +30,8 @@ failTest(setupFails)    # 9
 passTest(wontRun)       # 10
 passTest(cyclicSetup)   # 11
 passTest(cyclicCleanup) # 12
+passTest(cleanupUnused) # 13
+passTest(setupUnused)   # 14
 
 # Define fixture dependencies and ordering
 set_tests_properties(setupFoo   PROPERTIES FIXTURES_SETUP    "Foo")
@@ -50,6 +52,9 @@ set_tests_properties(two        PROPERTIES FIXTURES_REQUIRED "Bar")
 set_tests_properties(three      PROPERTIES FIXTURES_REQUIRED "Meta;Bar")
 set_tests_properties(wontRun    PROPERTIES FIXTURES_REQUIRED "Fails")
 
+set_tests_properties(cleanupUnused PROPERTIES FIXTURES_CLEANUP "Unused")
+set_tests_properties(setupUnused   PROPERTIES FIXTURES_SETUP   "Unused")
+
 @CASE_CMAKELISTS_CYCLIC_CODE@
 
 # These are the cases verified by the main cmake build
@@ -62,6 +67,7 @@ set_tests_properties(wontRun    PROPERTIES FIXTURES_REQUIRED "Fails")
 #    wontRun        9, 10
 #    cyclicSetup    -NA- (configure fails)
 #    cyclicCleanup  -NA- (configure fails)
+#    unused         14, 13
 #
 # In the case of asking for just setupFoo, since there are
 # no tests using the Foo fixture, we do NOT expect cleanupFoo

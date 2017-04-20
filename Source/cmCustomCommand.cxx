@@ -13,6 +13,7 @@ cmCustomCommand::cmCustomCommand()
   this->EscapeOldStyle = true;
   this->EscapeAllowMakeVars = false;
   this->UsesTerminal = false;
+  this->CommandExpandLists = false;
 }
 
 cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
@@ -32,6 +33,7 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
   , HaveComment(comment != CM_NULLPTR)
   , EscapeAllowMakeVars(false)
   , EscapeOldStyle(true)
+  , CommandExpandLists(false)
 {
   if (mf) {
     this->Backtrace = mf->GetBacktrace();
@@ -125,6 +127,16 @@ bool cmCustomCommand::GetUsesTerminal() const
 void cmCustomCommand::SetUsesTerminal(bool b)
 {
   this->UsesTerminal = b;
+}
+
+bool cmCustomCommand::GetCommandExpandLists() const
+{
+  return this->CommandExpandLists;
+}
+
+void cmCustomCommand::SetCommandExpandLists(bool b)
+{
+  this->CommandExpandLists = b;
 }
 
 const std::string& cmCustomCommand::GetDepfile() const

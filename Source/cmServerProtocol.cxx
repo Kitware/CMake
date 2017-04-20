@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServerProtocol.h"
 
-#include "cmCacheManager.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"
 #include "cmGeneratorTarget.h"
@@ -76,7 +75,7 @@ std::vector<std::string> toStringList(const Json::Value& in)
   return result;
 }
 
-static void getCMakeInputs(const cmGlobalGenerator* gg,
+void getCMakeInputs(const cmGlobalGenerator* gg,
   const std::string& sourceDir,
   const std::string& buildDir,
   std::vector<std::string>* internalFiles,
@@ -268,6 +267,27 @@ static void setErrorMessage(std::string* errorMessage, const std::string& text)
   }
 }
 
+static bool testHomeDirectory(cmState* state, std::string& value,
+                              std::string* errorMessage)
+{
+  const std::string cachedValue =
+    std::string(state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY"));
+  const std::string suffix = "/CMakeLists.txt";
+  const std::string cachedValueCML = cachedValue + suffix;
+  const std::string valueCML = value + suffix;
+  if (!cmSystemTools::SameFile(valueCML, cachedValueCML)) {
+    setErrorMessage(errorMessage,
+                    std::string("\"CMAKE_HOME_DIRECTORY\" is set but "
+                                "incompatible with configured "
+                                "source directory value."));
+    return false;
+  }
+  if (value.empty()) {
+    value = cachedValue;
+  }
+  return true;
+}
+
 static bool testValue(cmState* state, const std::string& key,
                       std::string& value, const std::string& keyDescription,
                       std::string* errorMessage)
@@ -327,8 +347,7 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
       }
 
       // check sourcedir:
-      if (!testValue(state, "CMAKE_HOME_DIRECTORY", sourceDirectory,
-                     "source directory", errorMessage)) {
+      if (!testHomeDirectory(state, sourceDirectory, errorMessage)) {
         return false;
       }
 
@@ -720,6 +739,7 @@ static Json::Value DumpSourceFilesList(
           cge->Evaluate(target->GetLocalGenerator(), config);
         lg->AppendFlags(compileFlags, processed);
       }
+      
       fileData.Flags = compileFlags;
 
       fileData.IncludePathList = ld.IncludePathList;
@@ -775,11 +795,14 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
 
   Json::Value result = Json::objectValue;
   result[kNAME_KEY] = target->GetName();
-
   result[kTYPE_KEY] = typeName;
-  result[kFULL_NAME_KEY] = target->GetFullName(config);
   result[kSOURCE_DIRECTORY_KEY] = lg->GetCurrentSourceDirectory();
   result[kBUILD_DIRECTORY_KEY] = lg->GetCurrentBinaryDirectory();
+
+  if (type == cmStateEnums::INTERFACE_LIBRARY) {
+    return result;
+  }
+  result[kFULL_NAME_KEY] = target->GetFullName(config);
 
   if (target->Target->GetHaveInstallRule()) {
     result[kHAS_INSTALL_RULE] = true;
@@ -1053,6 +1076,8 @@ cmServerResponse cmServerProtocol1_0::ProcessConfigure(
                                  "buildDirectory.");
     }
   }
+
+  cmSystemTools::ResetErrorOccuredFlag(); // Reset error state
 
   if (cm->AddCMakePaths() != 1) {
     return request.ReportError("Failed to set CMake paths.");

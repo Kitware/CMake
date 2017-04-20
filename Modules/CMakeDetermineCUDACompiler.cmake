@@ -60,7 +60,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdCUDA/(\\./)?(CompilerIdCUDA.xctest/)?CompilerIdCUDA[ \t\n\\\"]")
   set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_INDEX 2)
 
-  set(CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-v")
+  set(CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS -v --keep --keep-dir tmp)
   if(CMAKE_CUDA_HOST_COMPILER)
       list(APPEND CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-ccbin=${CMAKE_CUDA_HOST_COMPILER}")
   endif()
@@ -70,6 +70,10 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 endif()
 
 include(CMakeFindBinUtils)
+if(MSVC_CUDA_ARCHITECTURE_ID)
+  set(SET_MSVC_CUDA_ARCHITECTURE_ID
+    "set(MSVC_CUDA_ARCHITECTURE_ID ${MSVC_CUDA_ARCHITECTURE_ID})")
+endif()
 
 #if this compiler vendor is matches NVIDIA we can determine
 #what the host compiler is. This only needs to be done if the CMAKE_CUDA_HOST_COMPILER
@@ -80,20 +84,20 @@ include(CMakeFindBinUtils)
 #the compiler with cuda-fake-ld  and pass too CMAKE_PARSE_IMPLICIT_LINK_INFO
 if(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
   set(_nvcc_log "")
-  string(REPLACE "\r" "" _nvcc_output "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
-  if(_nvcc_output MATCHES "#\\\$ +LIBRARIES= *([^\n]*)\n")
+  string(REPLACE "\r" "" _nvcc_output_orig "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
+  if(_nvcc_output_orig MATCHES "#\\\$ +LIBRARIES= *([^\n]*)\n")
     set(_nvcc_libraries "${CMAKE_MATCH_1}")
     string(APPEND _nvcc_log "  found 'LIBRARIES=' string: [${_nvcc_libraries}]\n")
   else()
     set(_nvcc_libraries "")
-    string(REPLACE "\n" "\n    " _nvcc_output_log "\n${_nvcc_output}")
+    string(REPLACE "\n" "\n    " _nvcc_output_log "\n${_nvcc_output_orig}")
     string(APPEND _nvcc_log "  no 'LIBRARIES=' string found in nvcc output:${_nvcc_output_log}\n")
   endif()
 
   set(_nvcc_link_line "")
   if(_nvcc_libraries)
     # Remove variable assignments.
-    string(REGEX REPLACE "#\\\$ *[^= ]+=[^\n]*\n" "" _nvcc_output "${_nvcc_output}")
+    string(REGEX REPLACE "#\\\$ *[^= ]+=[^\n]*\n" "" _nvcc_output "${_nvcc_output_orig}")
     # Split lines.
     string(REGEX REPLACE "\n+(#\\\$ )?" ";" _nvcc_output "${_nvcc_output}")
     foreach(line IN LISTS _nvcc_output)
@@ -102,6 +106,14 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
       if("${_nvcc_output_line}" MATCHES "^ *nvlink")
         string(APPEND _nvcc_log "    ignoring nvlink line\n")
       elseif(_nvcc_libraries)
+        if("${_nvcc_output_line}" MATCHES "(@\"?tmp/a\\.exe\\.res\"?)")
+          set(_nvcc_link_res_arg "${CMAKE_MATCH_1}")
+          set(_nvcc_link_res "${CMAKE_PLATFORM_INFO_DIR}/CompilerIdCUDA/tmp/a.exe.res")
+          if(EXISTS "${_nvcc_link_res}")
+            file(READ "${_nvcc_link_res}" _nvcc_link_res_content)
+            string(REPLACE "${_nvcc_link_res_arg}" "${_nvcc_link_res_content}" _nvcc_output_line "${_nvcc_output_line}")
+          endif()
+        endif()
         string(FIND "${_nvcc_output_line}" "${_nvcc_libraries}" _nvcc_libraries_pos)
         if(NOT _nvcc_libraries_pos EQUAL -1)
           set(_nvcc_link_line "${_nvcc_output_line}")
@@ -112,9 +124,13 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
   endif()
 
   if(_nvcc_link_line)
-    #extract the compiler that is being used for linking
-    separate_arguments(_nvcc_link_line_args UNIX_COMMAND "${_nvcc_link_line}")
-    list(GET _nvcc_link_line_args 0 CMAKE_CUDA_HOST_LINK_LAUNCHER)
+    if("x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC")
+      set(CMAKE_CUDA_HOST_LINK_LAUNCHER "${CMAKE_LINKER}")
+    else()
+      #extract the compiler that is being used for linking
+      separate_arguments(_nvcc_link_line_args UNIX_COMMAND "${_nvcc_link_line}")
+      list(GET _nvcc_link_line_args 0 CMAKE_CUDA_HOST_LINK_LAUNCHER)
+    endif()
 
     #prefix the line with cuda-fake-ld so that implicit link info believes it is
     #a link line
@@ -133,6 +149,32 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
       "Failed to parsed CUDA nvcc implicit link information:\n${_nvcc_log}\n\n")
     message(FATAL_ERROR "Failed to extract nvcc implicit link line.")
   endif()
+
+  set(CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES )
+  if(_nvcc_output_orig MATCHES "#\\\$ +INCLUDES= *([^\n]*)\n")
+    set(_nvcc_includes "${CMAKE_MATCH_1}")
+    string(APPEND _nvcc_log "  found 'INCLUDES=' string: [${_nvcc_includes}]\n")
+  else()
+    set(_nvcc_includes "")
+    string(REPLACE "\n" "\n    " _nvcc_output_log "\n${_nvcc_output_orig}")
+    string(APPEND _nvcc_log "  no 'INCLUDES=' string found in nvcc output:${_nvcc_output_log}\n")
+  endif()
+  if(_nvcc_includes)
+    # across all operating system each include directory is prefixed with -I
+    separate_arguments(_nvcc_output UNIX_COMMAND "${_nvcc_includes}")
+    foreach(line IN LISTS _nvcc_output)
+      string(REGEX REPLACE "^-I" "" line "${line}")
+      get_filename_component(line "${line}" ABSOLUTE)
+      list(APPEND CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES "${line}")
+    endforeach()
+
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+      "Parsed CUDA nvcc include information from above output:\n${_nvcc_log}\n${log}\n\n")
+  else()
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+      "Failed to detect CUDA nvcc include information:\n${_nvcc_log}\n\n")
+  endif()
+
 
 endif()
 

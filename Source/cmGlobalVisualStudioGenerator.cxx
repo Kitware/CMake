@@ -753,6 +753,10 @@ bool cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(
     if (!gt->GetConfigCommonSourceFiles(sources)) {
       return false;
     }
+    // Only "real" targets are allowed to be C# targets.
+    if (gt->Target->GetType() > cmStateEnums::OBJECT_LIBRARY) {
+      return false;
+    }
   }
   gt->GetLanguages(languages, "");
   if (languages.size() == 1) {
@@ -859,6 +863,14 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
     std::string objFile = obj_dir + map_it->second;
     objs.push_back(objFile);
   }
+  std::vector<cmSourceFile const*> externalObjectSources;
+  gt->GetExternalObjects(externalObjectSources, configName);
+  for (std::vector<cmSourceFile const*>::const_iterator it =
+         externalObjectSources.begin();
+       it != externalObjectSources.end(); ++it) {
+    objs.push_back((*it)->GetFullPath());
+  }
+
   gt->UseObjectLibraries(objs, configName);
   for (std::vector<std::string>::iterator it = objs.begin(); it != objs.end();
        ++it) {

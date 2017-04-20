@@ -19,7 +19,7 @@ unset(CMAKELISTS_EXTRA_CODE)
 #-----------------------------------------------------------------------------
 # add ThreadSanitizer test
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"report_bugs=1:history_size=5:exitcode=55\")
 ")
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"\${CMAKE_COMMAND}\"
@@ -30,22 +30,22 @@ unset(CMAKELISTS_EXTRA_CODE)
 unset(CTEST_EXTRA_CODE)
 
 #-----------------------------------------------------------------------------
-# add LeakSanitizer test
+# add standalone LeakSanitizer test
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55\")
 ")
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
 -P \"${RunCMake_SOURCE_DIR}/testLeakSanitizer.cmake\")
 ")
-run_mc_test(DummyLeakSanitizer "" -DMEMCHECK_TYPE=AddressSanitizer)
+run_mc_test(DummyLeakSanitizer "" -DMEMCHECK_TYPE=LeakSanitizer)
 unset(CMAKELISTS_EXTRA_CODE)
 unset(CTEST_EXTRA_CODE)
 
 #-----------------------------------------------------------------------------
 # add AddressSanitizer test
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55\")
 ")
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"\${CMAKE_COMMAND}\"
@@ -56,9 +56,22 @@ unset(CMAKELISTS_EXTRA_CODE)
 unset(CTEST_EXTRA_CODE)
 
 #-----------------------------------------------------------------------------
+# add AddressSanitizer/LeakSanitizer test
+set(CTEST_EXTRA_CODE
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55\")
+")
+set(CMAKELISTS_EXTRA_CODE
+"add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
+-P \"${RunCMake_SOURCE_DIR}/testAddressLeakSanitizer.cmake\")
+")
+run_mc_test(DummyAddressLeakSanitizer "" -DMEMCHECK_TYPE=AddressSanitizer)
+unset(CMAKELISTS_EXTRA_CODE)
+unset(CTEST_EXTRA_CODE)
+
+#-----------------------------------------------------------------------------
 # add MemorySanitizer test
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55\")
 ")
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"\${CMAKE_COMMAND}\"
@@ -151,13 +164,13 @@ unset(CTEST_SUFFIX_CODE)
 set(CTEST_SUFFIX_CODE "message(\"Defect count: \${defect_count}\")")
 set(CTEST_MEMCHECK_ARGS "DEFECT_COUNT defect_count")
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55\")
 ")
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
 -P \"${RunCMake_SOURCE_DIR}/testLeakSanitizer.cmake\")
 ")
-run_mc_test(DummyLeakSanitizerPrintDefects "" -DMEMCHECK_TYPE=AddressSanitizer)
+run_mc_test(DummyLeakSanitizerPrintDefects "" -DMEMCHECK_TYPE=LeakSanitizer)
 unset(CMAKELISTS_EXTRA_CODE)
 unset(CTEST_EXTRA_CODE)
 unset(CTEST_MEMCHECK_ARGS)

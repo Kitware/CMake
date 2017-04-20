@@ -590,7 +590,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     std::vector<std::string> compileCommands;
     if (lang == "CUDA") {
       std::string cmdVar;
-      if (this->GeneratorTarget->GetProperty("CUDA_SEPARABLE_COMPILATION")) {
+      if (this->GeneratorTarget->GetPropertyAsBool(
+            "CUDA_SEPARABLE_COMPILATION")) {
         cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
       } else {
         cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
@@ -631,7 +632,9 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       const char* iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
       std::string const tidy_prop = lang + "_CLANG_TIDY";
       const char* tidy = this->GeneratorTarget->GetProperty(tidy_prop);
-      if ((iwyu && *iwyu) || (tidy && *tidy)) {
+      std::string const cpplint_prop = lang + "_CPPLINT";
+      const char* cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
+      if ((iwyu && *iwyu) || (tidy && *tidy) || (cpplint && *cpplint)) {
         std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_iwyu";
         if (iwyu && *iwyu) {
           run_iwyu += " --iwyu=";
@@ -640,6 +643,12 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         if (tidy && *tidy) {
           run_iwyu += " --tidy=";
           run_iwyu += this->LocalGenerator->EscapeForShell(tidy);
+        }
+        if (cpplint && *cpplint) {
+          run_iwyu += " --cpplint=";
+          run_iwyu += this->LocalGenerator->EscapeForShell(cpplint);
+        }
+        if ((tidy && *tidy) || (cpplint && *cpplint)) {
           run_iwyu += " --source=";
           run_iwyu += sourceFile;
         }

@@ -47,5 +47,8 @@ See the documentation for this variable for more details.
 The global property :prop_gbl:`AUTOGEN_TARGETS_FOLDER` can be used to group the
 automoc targets together in an IDE, e.g.  in MSVS.
 
+Source C++ files can be excluded from :prop_tgt:`AUTOMOC` processing by
+enabling :prop_sf:`SKIP_AUTOMOC` or the broader :prop_sf:`SKIP_AUTOGEN`.
+
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.

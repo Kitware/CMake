@@ -30,6 +30,17 @@ source_group(Base\\Sub1\\Base FILES bar.c)
 # a group without files, is currently not created
 source_group(EmptyGroup)
 
+set(root ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_executable(SourceGroups main.c bar.c foo.c sub1/foo.c sub1/foobar.c baz.c README.txt)
+set(tree_files_without_prefix ${root}/sub1/tree_bar.c
+                              ${root}/sub1/tree_baz.c
+                              ${root}/sub1/tree_subdir/tree_foobar.c)
 
+set(tree_files_with_prefix ${root}/tree_foo.c)
+
+source_group(TREE ${root} FILES ${tree_files_without_prefix})
+
+source_group(TREE ${root} PREFIX tree_root/subgroup FILES ${tree_files_with_prefix})
+
+add_executable(SourceGroups main.c bar.c foo.c sub1/foo.c sub1/foobar.c baz.c
+                            ${tree_files_with_prefix} ${tree_files_without_prefix} README.txt)

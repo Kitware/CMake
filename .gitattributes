@@ -1,6 +1,13 @@
 .gitattributes   export-ignore
 .hooks*          export-ignore
 
+# Custom attribute to mark sources as using our C code style.
+[attr]our-c-style  whitespace=tab-in-indent  format.clang-format
+
+# Custom attribute to mark sources as generated.
+# Do not perform whitespace checks.  Do not format.
+[attr]generated  whitespace=-tab-in-indent,-indent-with-non-tab -format.clang-format
+
 bootstrap        crlf=input
 configure        crlf=input
 *.[1-9]          crlf=input
@@ -16,10 +23,17 @@ configure        crlf=input
 *.sln           -crlf
 *.vcproj        -crlf
 
-*.c              whitespace=tab-in-indent
-*.h              whitespace=tab-in-indent
-*.cxx            whitespace=tab-in-indent
-*.txt            whitespace=tab-in-indent
-*.cmake          whitespace=tab-in-indent
+*.c              our-c-style
+*.cc             our-c-style
+*.cpp            our-c-style
+*.cu             our-c-style
+*.cxx            our-c-style
+*.h              our-c-style
+*.hh             our-c-style
+*.hpp            our-c-style
+*.hxx            our-c-style
+*.notcu          our-c-style
 
+*.cmake          whitespace=tab-in-indent
 *.rst            whitespace=tab-in-indent conflict-marker-size=79
+*.txt            whitespace=tab-in-indent

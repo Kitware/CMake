@@ -69,376 +69,437 @@ if(MSVC)
   get_filename_component(devenv_dir "${CMAKE_MAKE_PROGRAM}" PATH)
   get_filename_component(base_dir "${devenv_dir}/../.." ABSOLUTE)
 
-  if(MSVC70)
+  if(MSVC_VERSION EQUAL 1300)
     set(__install__libs
       "${SYSTEMROOT}/system32/msvcp70.dll"
       "${SYSTEMROOT}/system32/msvcr70.dll"
       )
   endif()
 
-  if(MSVC71)
+  if(MSVC_VERSION EQUAL 1310)
     set(__install__libs
       "${SYSTEMROOT}/system32/msvcp71.dll"
       "${SYSTEMROOT}/system32/msvcr71.dll"
       )
   endif()
 
-  if(MSVC80)
+  if(MSVC_VERSION EQUAL 1400)
     # Find the runtime library redistribution directory.
     get_filename_component(msvc_install_dir
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0;InstallDir]" ABSOLUTE)
-    find_path(MSVC80_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest
+    if(DEFINED MSVC80_REDIST_DIR AND EXISTS "${MSVC80_REDIST_DIR}")
+      set(MSVC_REDIST_DIR "${MSVC80_REDIST_DIR}") # use old cache entry
+    endif()
+    find_path(MSVC_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest
       PATHS
         "${msvc_install_dir}/../../VC/redist"
         "${base_dir}/VC/redist"
       )
-    mark_as_advanced(MSVC80_REDIST_DIR)
-    set(MSVC80_CRT_DIR "${MSVC80_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC80.CRT")
+    mark_as_advanced(MSVC_REDIST_DIR)
+    set(MSVC_CRT_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC80.CRT")
 
     # Install the manifest that allows DLLs to be loaded from the
     # directory containing the executable.
     if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
       set(__install__libs
-        "${MSVC80_CRT_DIR}/Microsoft.VC80.CRT.manifest"
-        "${MSVC80_CRT_DIR}/msvcm80.dll"
-        "${MSVC80_CRT_DIR}/msvcp80.dll"
-        "${MSVC80_CRT_DIR}/msvcr80.dll"
+        "${MSVC_CRT_DIR}/Microsoft.VC80.CRT.manifest"
+        "${MSVC_CRT_DIR}/msvcm80.dll"
+        "${MSVC_CRT_DIR}/msvcp80.dll"
+        "${MSVC_CRT_DIR}/msvcr80.dll"
         )
     else()
       set(__install__libs)
     endif()
 
     if(CMAKE_INSTALL_DEBUG_LIBRARIES)
-      set(MSVC80_CRT_DIR
-        "${MSVC80_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC80.DebugCRT")
+      set(MSVC_CRT_DIR
+        "${MSVC_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC80.DebugCRT")
       set(__install__libs ${__install__libs}
-        "${MSVC80_CRT_DIR}/Microsoft.VC80.DebugCRT.manifest"
-        "${MSVC80_CRT_DIR}/msvcm80d.dll"
-        "${MSVC80_CRT_DIR}/msvcp80d.dll"
-        "${MSVC80_CRT_DIR}/msvcr80d.dll"
+        "${MSVC_CRT_DIR}/Microsoft.VC80.DebugCRT.manifest"
+        "${MSVC_CRT_DIR}/msvcm80d.dll"
+        "${MSVC_CRT_DIR}/msvcp80d.dll"
+        "${MSVC_CRT_DIR}/msvcr80d.dll"
         )
     endif()
   endif()
 
-  if(MSVC90)
+  if(MSVC_VERSION EQUAL 1500)
     # Find the runtime library redistribution directory.
     get_filename_component(msvc_install_dir
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0;InstallDir]" ABSOLUTE)
     get_filename_component(msvc_express_install_dir
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\9.0;InstallDir]" ABSOLUTE)
-    find_path(MSVC90_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest
+    if(DEFINED MSVC90_REDIST_DIR AND EXISTS "${MSVC90_REDIST_DIR}")
+      set(MSVC_REDIST_DIR "${MSVC90_REDIST_DIR}") # use old cache entry
+    endif()
+    find_path(MSVC_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest
       PATHS
         "${msvc_install_dir}/../../VC/redist"
         "${msvc_express_install_dir}/../../VC/redist"
         "${base_dir}/VC/redist"
       )
-    mark_as_advanced(MSVC90_REDIST_DIR)
-    set(MSVC90_CRT_DIR "${MSVC90_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC90.CRT")
+    mark_as_advanced(MSVC_REDIST_DIR)
+    set(MSVC_CRT_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC90.CRT")
 
     # Install the manifest that allows DLLs to be loaded from the
     # directory containing the executable.
     if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
       set(__install__libs
-        "${MSVC90_CRT_DIR}/Microsoft.VC90.CRT.manifest"
-        "${MSVC90_CRT_DIR}/msvcm90.dll"
-        "${MSVC90_CRT_DIR}/msvcp90.dll"
-        "${MSVC90_CRT_DIR}/msvcr90.dll"
+        "${MSVC_CRT_DIR}/Microsoft.VC90.CRT.manifest"
+        "${MSVC_CRT_DIR}/msvcm90.dll"
+        "${MSVC_CRT_DIR}/msvcp90.dll"
+        "${MSVC_CRT_DIR}/msvcr90.dll"
         )
     else()
       set(__install__libs)
     endif()
 
     if(CMAKE_INSTALL_DEBUG_LIBRARIES)
-      set(MSVC90_CRT_DIR
-        "${MSVC90_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC90.DebugCRT")
+      set(MSVC_CRT_DIR
+        "${MSVC_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC90.DebugCRT")
       set(__install__libs ${__install__libs}
-        "${MSVC90_CRT_DIR}/Microsoft.VC90.DebugCRT.manifest"
-        "${MSVC90_CRT_DIR}/msvcm90d.dll"
-        "${MSVC90_CRT_DIR}/msvcp90d.dll"
-        "${MSVC90_CRT_DIR}/msvcr90d.dll"
+        "${MSVC_CRT_DIR}/Microsoft.VC90.DebugCRT.manifest"
+        "${MSVC_CRT_DIR}/msvcm90d.dll"
+        "${MSVC_CRT_DIR}/msvcp90d.dll"
+        "${MSVC_CRT_DIR}/msvcr90d.dll"
         )
     endif()
   endif()
 
-  macro(MSVCRT_FILES_FOR_VERSION version)
-    set(v "${version}")
+  if(MSVC_VERSION EQUAL 1910)
+    set(_MSVCRT_DLL_VERSION 140)
+    set(_MSVCRT_IDE_VERSION 15)
+  elseif(MSVC_VERSION EQUAL 1900)
+    set(_MSVCRT_DLL_VERSION 140)
+    set(_MSVCRT_IDE_VERSION 14)
+  elseif(MSVC_VERSION EQUAL 1800)
+    set(_MSVCRT_DLL_VERSION 120)
+    set(_MSVCRT_IDE_VERSION 12)
+  elseif(MSVC_VERSION EQUAL 1700)
+    set(_MSVCRT_DLL_VERSION 110)
+    set(_MSVCRT_IDE_VERSION 11)
+  elseif(MSVC_VERSION EQUAL 1600)
+    set(_MSVCRT_DLL_VERSION 100)
+    set(_MSVCRT_IDE_VERSION 10)
+  else()
+    set(_MSVCRT_DLL_VERSION "")
+    set(_MSVCRT_IDE_VERSION "")
+  endif()
+
+  if(_MSVCRT_DLL_VERSION)
+    set(v "${_MSVCRT_DLL_VERSION}")
+    set(vs "${_MSVCRT_IDE_VERSION}")
 
     # Find the runtime library redistribution directory.
-    get_filename_component(msvc_install_dir
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${v}.0;InstallDir]" ABSOLUTE)
-    set(programfilesx86 "ProgramFiles(x86)")
-    find_path(MSVC${v}_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.CRT
-      PATHS
-        "${msvc_install_dir}/../../VC/redist"
+    if(vs VERSION_LESS 15 AND DEFINED MSVC${vs}_REDIST_DIR AND EXISTS "${MSVC${vs}_REDIST_DIR}")
+      set(MSVC_REDIST_DIR "${MSVC${vs}_REDIST_DIR}") # use old cache entry
+    endif()
+    if(NOT vs VERSION_LESS 15)
+      set(_vs_redist_paths "")
+      cmake_host_system_information(RESULT _vs_dir QUERY VS_${vs}_DIR) # undocumented query
+      if(IS_DIRECTORY "${_vs_dir}")
+        file(GLOB _vs_redist_paths "${_vs_dir}/VC/Redist/MSVC/*")
+      endif()
+      unset(_vs_dir)
+    else()
+      get_filename_component(_vs_dir
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${vs}.0;InstallDir]" ABSOLUTE)
+      set(programfilesx86 "ProgramFiles(x86)")
+      set(_vs_redist_paths
+        "${_vs_dir}/../../VC/redist"
         "${base_dir}/VC/redist"
-        "$ENV{ProgramFiles}/Microsoft Visual Studio ${v}.0/VC/redist"
-        "$ENV{${programfilesx86}}/Microsoft Visual Studio ${v}.0/VC/redist"
-      )
-    mark_as_advanced(MSVC${v}_REDIST_DIR)
-    set(MSVC${v}_CRT_DIR "${MSVC${v}_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.CRT")
+        "$ENV{ProgramFiles}/Microsoft Visual Studio ${vs}.0/VC/redist"
+        "$ENV{${programfilesx86}}/Microsoft Visual Studio ${vs}.0/VC/redist"
+        )
+      unset(_vs_dir)
+      unset(programfilesx86)
+    endif()
+    find_path(MSVC_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.CRT PATHS ${_vs_redist_paths})
+    unset(_vs_redist_paths)
+    mark_as_advanced(MSVC_REDIST_DIR)
+    set(MSVC_CRT_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.CRT")
 
     if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
       set(__install__libs
-        "${MSVC${v}_CRT_DIR}/msvcp${v}0.dll"
+        "${MSVC_CRT_DIR}/msvcp${v}.dll"
         )
-      if(NOT v VERSION_LESS 14)
-        list(APPEND __install__libs "${MSVC${v}_CRT_DIR}/vcruntime${v}0.dll")
+      if(NOT vs VERSION_LESS 14)
+        list(APPEND __install__libs
+            "${MSVC_CRT_DIR}/vcruntime${v}.dll"
+            "${MSVC_CRT_DIR}/concrt${v}.dll"
+            )
       else()
-        list(APPEND __install__libs "${MSVC${v}_CRT_DIR}/msvcr${v}0.dll")
+        list(APPEND __install__libs "${MSVC_CRT_DIR}/msvcr${v}.dll")
       endif()
     else()
       set(__install__libs)
     endif()
 
     if(CMAKE_INSTALL_DEBUG_LIBRARIES)
-      set(MSVC${v}_CRT_DIR
-        "${MSVC${v}_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.DebugCRT")
+      set(MSVC_CRT_DIR
+        "${MSVC_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.DebugCRT")
       set(__install__libs ${__install__libs}
-        "${MSVC${v}_CRT_DIR}/msvcp${v}0d.dll"
+        "${MSVC_CRT_DIR}/msvcp${v}d.dll"
         )
-      if(NOT v VERSION_LESS 14)
-        list(APPEND __install__libs "${MSVC${v}_CRT_DIR}/vcruntime${v}0d.dll")
+      if(NOT vs VERSION_LESS 14)
+        list(APPEND __install__libs
+            "${MSVC_CRT_DIR}/vcruntime${v}d.dll"
+            "${MSVC_CRT_DIR}/concrt${v}d.dll"
+            )
       else()
-        list(APPEND __install__libs "${MSVC${v}_CRT_DIR}/msvcr${v}0d.dll")
+        list(APPEND __install__libs "${MSVC_CRT_DIR}/msvcr${v}d.dll")
       endif()
     endif()
 
-    if(CMAKE_INSTALL_UCRT_LIBRARIES AND NOT v VERSION_LESS 14)
-      # Find the Windows Universal CRT redistribution directory.
+    if(CMAKE_INSTALL_UCRT_LIBRARIES AND NOT vs VERSION_LESS 14)
+      # Find the Windows Kits directory.
       get_filename_component(windows_kits_dir
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots;KitsRoot10]" ABSOLUTE)
       set(programfilesx86 "ProgramFiles(x86)")
-      find_path(WINDOWS_KITS_REDIST_DIR NAMES ucrt/DLLs/${CMAKE_MSVC_ARCH}/ucrtbase.dll
+      find_path(WINDOWS_KITS_DIR NAMES Redist/ucrt/DLLs/${CMAKE_MSVC_ARCH}/ucrtbase.dll
         PATHS
-        "${windows_kits_dir}/Redist"
-        "$ENV{ProgramFiles}/Windows Kits/10/Redist"
-        "$ENV{${programfilesx86}}/Windows Kits/10/Redist"
+        "${windows_kits_dir}"
+        "$ENV{ProgramFiles}/Windows Kits/10"
+        "$ENV{${programfilesx86}}/Windows Kits/10"
         )
-      mark_as_advanced(WINDOWS_KITS_REDIST_DIR)
+      mark_as_advanced(WINDOWS_KITS_DIR)
 
       # Glob the list of UCRT DLLs.
-      file(GLOB __ucrt_dlls "${WINDOWS_KITS_REDIST_DIR}/ucrt/DLLs/${CMAKE_MSVC_ARCH}/*.dll")
-      list(APPEND __install__libs ${__ucrt_dlls})
+      if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
+        file(GLOB __ucrt_dlls "${WINDOWS_KITS_DIR}/Redist/ucrt/DLLs/${CMAKE_MSVC_ARCH}/*.dll")
+        list(APPEND __install__libs ${__ucrt_dlls})
+      endif()
+      if(CMAKE_INSTALL_DEBUG_LIBRARIES)
+        file(GLOB __ucrt_dlls "${WINDOWS_KITS_DIR}/bin/${CMAKE_MSVC_ARCH}/ucrt/*.dll")
+        list(APPEND __install__libs ${__ucrt_dlls})
+      endif()
     endif()
-  endmacro()
-
-  if(MSVC10)
-    MSVCRT_FILES_FOR_VERSION(10)
-  endif()
-
-  if(MSVC11)
-    MSVCRT_FILES_FOR_VERSION(11)
-  endif()
-
-  if(MSVC12)
-    MSVCRT_FILES_FOR_VERSION(12)
-  endif()
-
-  if(MSVC14)
-    MSVCRT_FILES_FOR_VERSION(14)
   endif()
 
   if(CMAKE_INSTALL_MFC_LIBRARIES)
-    if(MSVC70)
+    if(MSVC_VERSION EQUAL 1300)
       set(__install__libs ${__install__libs}
         "${SYSTEMROOT}/system32/mfc70.dll"
         )
     endif()
 
-    if(MSVC71)
+    if(MSVC_VERSION EQUAL 1310)
       set(__install__libs ${__install__libs}
         "${SYSTEMROOT}/system32/mfc71.dll"
         )
     endif()
 
-    if(MSVC80)
+    if(MSVC_VERSION EQUAL 1400)
       if(CMAKE_INSTALL_DEBUG_LIBRARIES)
-        set(MSVC80_MFC_DIR
-          "${MSVC80_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC80.DebugMFC")
+        set(MSVC_MFC_DIR
+          "${MSVC_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC80.DebugMFC")
         set(__install__libs ${__install__libs}
-          "${MSVC80_MFC_DIR}/Microsoft.VC80.DebugMFC.manifest"
-          "${MSVC80_MFC_DIR}/mfc80d.dll"
-          "${MSVC80_MFC_DIR}/mfc80ud.dll"
-          "${MSVC80_MFC_DIR}/mfcm80d.dll"
-          "${MSVC80_MFC_DIR}/mfcm80ud.dll"
+          "${MSVC_MFC_DIR}/Microsoft.VC80.DebugMFC.manifest"
+          "${MSVC_MFC_DIR}/mfc80d.dll"
+          "${MSVC_MFC_DIR}/mfc80ud.dll"
+          "${MSVC_MFC_DIR}/mfcm80d.dll"
+          "${MSVC_MFC_DIR}/mfcm80ud.dll"
           )
       endif()
 
-      set(MSVC80_MFC_DIR "${MSVC80_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC80.MFC")
+      set(MSVC_MFC_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC80.MFC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
       if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
         set(__install__libs ${__install__libs}
-          "${MSVC80_MFC_DIR}/Microsoft.VC80.MFC.manifest"
-          "${MSVC80_MFC_DIR}/mfc80.dll"
-          "${MSVC80_MFC_DIR}/mfc80u.dll"
-          "${MSVC80_MFC_DIR}/mfcm80.dll"
-          "${MSVC80_MFC_DIR}/mfcm80u.dll"
+          "${MSVC_MFC_DIR}/Microsoft.VC80.MFC.manifest"
+          "${MSVC_MFC_DIR}/mfc80.dll"
+          "${MSVC_MFC_DIR}/mfc80u.dll"
+          "${MSVC_MFC_DIR}/mfcm80.dll"
+          "${MSVC_MFC_DIR}/mfcm80u.dll"
           )
       endif()
 
       # include the language dll's for vs8 as well as the actuall dll's
-      set(MSVC80_MFCLOC_DIR "${MSVC80_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC80.MFCLOC")
+      set(MSVC_MFCLOC_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC80.MFCLOC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
       set(__install__libs ${__install__libs}
-        "${MSVC80_MFCLOC_DIR}/Microsoft.VC80.MFCLOC.manifest"
-        "${MSVC80_MFCLOC_DIR}/mfc80chs.dll"
-        "${MSVC80_MFCLOC_DIR}/mfc80cht.dll"
-        "${MSVC80_MFCLOC_DIR}/mfc80enu.dll"
-        "${MSVC80_MFCLOC_DIR}/mfc80esp.dll"
-        "${MSVC80_MFCLOC_DIR}/mfc80deu.dll"
-        "${MSVC80_MFCLOC_DIR}/mfc80fra.dll"
-        "${MSVC80_MFCLOC_DIR}/mfc80ita.dll"
-        "${MSVC80_MFCLOC_DIR}/mfc80jpn.dll"
-        "${MSVC80_MFCLOC_DIR}/mfc80kor.dll"
+        "${MSVC_MFCLOC_DIR}/Microsoft.VC80.MFCLOC.manifest"
+        "${MSVC_MFCLOC_DIR}/mfc80chs.dll"
+        "${MSVC_MFCLOC_DIR}/mfc80cht.dll"
+        "${MSVC_MFCLOC_DIR}/mfc80enu.dll"
+        "${MSVC_MFCLOC_DIR}/mfc80esp.dll"
+        "${MSVC_MFCLOC_DIR}/mfc80deu.dll"
+        "${MSVC_MFCLOC_DIR}/mfc80fra.dll"
+        "${MSVC_MFCLOC_DIR}/mfc80ita.dll"
+        "${MSVC_MFCLOC_DIR}/mfc80jpn.dll"
+        "${MSVC_MFCLOC_DIR}/mfc80kor.dll"
         )
     endif()
 
-    if(MSVC90)
+    if(MSVC_VERSION EQUAL 1500)
       if(CMAKE_INSTALL_DEBUG_LIBRARIES)
-        set(MSVC90_MFC_DIR
-          "${MSVC90_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC90.DebugMFC")
+        set(MSVC_MFC_DIR
+          "${MSVC_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC90.DebugMFC")
         set(__install__libs ${__install__libs}
-          "${MSVC90_MFC_DIR}/Microsoft.VC90.DebugMFC.manifest"
-          "${MSVC90_MFC_DIR}/mfc90d.dll"
-          "${MSVC90_MFC_DIR}/mfc90ud.dll"
-          "${MSVC90_MFC_DIR}/mfcm90d.dll"
-          "${MSVC90_MFC_DIR}/mfcm90ud.dll"
+          "${MSVC_MFC_DIR}/Microsoft.VC90.DebugMFC.manifest"
+          "${MSVC_MFC_DIR}/mfc90d.dll"
+          "${MSVC_MFC_DIR}/mfc90ud.dll"
+          "${MSVC_MFC_DIR}/mfcm90d.dll"
+          "${MSVC_MFC_DIR}/mfcm90ud.dll"
           )
       endif()
 
-      set(MSVC90_MFC_DIR "${MSVC90_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC90.MFC")
+      set(MSVC_MFC_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC90.MFC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
       if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
         set(__install__libs ${__install__libs}
-          "${MSVC90_MFC_DIR}/Microsoft.VC90.MFC.manifest"
-          "${MSVC90_MFC_DIR}/mfc90.dll"
-          "${MSVC90_MFC_DIR}/mfc90u.dll"
-          "${MSVC90_MFC_DIR}/mfcm90.dll"
-          "${MSVC90_MFC_DIR}/mfcm90u.dll"
+          "${MSVC_MFC_DIR}/Microsoft.VC90.MFC.manifest"
+          "${MSVC_MFC_DIR}/mfc90.dll"
+          "${MSVC_MFC_DIR}/mfc90u.dll"
+          "${MSVC_MFC_DIR}/mfcm90.dll"
+          "${MSVC_MFC_DIR}/mfcm90u.dll"
           )
       endif()
 
       # include the language dll's for vs9 as well as the actuall dll's
-      set(MSVC90_MFCLOC_DIR "${MSVC90_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC90.MFCLOC")
+      set(MSVC_MFCLOC_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC90.MFCLOC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
       set(__install__libs ${__install__libs}
-        "${MSVC90_MFCLOC_DIR}/Microsoft.VC90.MFCLOC.manifest"
-        "${MSVC90_MFCLOC_DIR}/mfc90chs.dll"
-        "${MSVC90_MFCLOC_DIR}/mfc90cht.dll"
-        "${MSVC90_MFCLOC_DIR}/mfc90enu.dll"
-        "${MSVC90_MFCLOC_DIR}/mfc90esp.dll"
-        "${MSVC90_MFCLOC_DIR}/mfc90deu.dll"
-        "${MSVC90_MFCLOC_DIR}/mfc90fra.dll"
-        "${MSVC90_MFCLOC_DIR}/mfc90ita.dll"
-        "${MSVC90_MFCLOC_DIR}/mfc90jpn.dll"
-        "${MSVC90_MFCLOC_DIR}/mfc90kor.dll"
+        "${MSVC_MFCLOC_DIR}/Microsoft.VC90.MFCLOC.manifest"
+        "${MSVC_MFCLOC_DIR}/mfc90chs.dll"
+        "${MSVC_MFCLOC_DIR}/mfc90cht.dll"
+        "${MSVC_MFCLOC_DIR}/mfc90enu.dll"
+        "${MSVC_MFCLOC_DIR}/mfc90esp.dll"
+        "${MSVC_MFCLOC_DIR}/mfc90deu.dll"
+        "${MSVC_MFCLOC_DIR}/mfc90fra.dll"
+        "${MSVC_MFCLOC_DIR}/mfc90ita.dll"
+        "${MSVC_MFCLOC_DIR}/mfc90jpn.dll"
+        "${MSVC_MFCLOC_DIR}/mfc90kor.dll"
         )
     endif()
 
-    macro(MFC_FILES_FOR_VERSION version)
-      set(v "${version}")
+    if(MSVC_VERSION EQUAL 1910)
+      set(_MFC_DLL_VERSION 140)
+      set(_MFC_IDE_VERSION 15)
+    elseif(MSVC_VERSION EQUAL 1900)
+      set(_MFC_DLL_VERSION 140)
+      set(_MFC_IDE_VERSION 14)
+    elseif(MSVC_VERSION EQUAL 1800)
+      set(_MFC_DLL_VERSION 120)
+      set(_MFC_IDE_VERSION 12)
+    elseif(MSVC_VERSION EQUAL 1700)
+      set(_MFC_DLL_VERSION 110)
+      set(_MFC_IDE_VERSION 11)
+    elseif(MSVC_VERSION EQUAL 1600)
+      set(_MFC_DLL_VERSION 100)
+      set(_MFC_IDE_VERSION 10)
+    else()
+      set(_MFC_DLL_VERSION "")
+      set(_MFC_IDE_VERSION "")
+    endif()
+
+    if(_MFC_DLL_VERSION)
+      set(v "${_MFC_DLL_VERSION}")
+      set(vs "${_MFC_IDE_VERSION}")
+
+      # Starting with VS 15 the MFC DLLs may be in a different directory.
+      if (NOT vs VERSION_LESS 15)
+        file(GLOB _MSVC_REDIST_DIRS "${MSVC_REDIST_DIR}/../*")
+        find_path(MSVC_REDIST_MFC_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.MFC
+          PATHS ${_MSVC_REDIST_DIRS} NO_DEFAULT_PATH)
+        mark_as_advanced(MSVC_REDIST_MFC_DIR)
+        unset(_MSVC_REDIST_DIRS)
+      else()
+        set(MSVC_REDIST_MFC_DIR "${MSVC_REDIST_DIR}")
+      endif()
 
       # Multi-Byte Character Set versions of MFC are available as optional
       # addon since Visual Studio 12.  So for version 12 or higher, check
       # whether they are available and exclude them if they are not.
 
       if(CMAKE_INSTALL_DEBUG_LIBRARIES)
-        set(MSVC${v}_MFC_DIR
-          "${MSVC${v}_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.DebugMFC")
+        set(MSVC_MFC_DIR
+          "${MSVC_REDIST_MFC_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.DebugMFC")
         set(__install__libs ${__install__libs}
-          "${MSVC${v}_MFC_DIR}/mfc${v}0ud.dll"
-          "${MSVC${v}_MFC_DIR}/mfcm${v}0ud.dll"
+          "${MSVC_MFC_DIR}/mfc${v}ud.dll"
+          "${MSVC_MFC_DIR}/mfcm${v}ud.dll"
           )
-        if("${v}" LESS 12 OR EXISTS "${MSVC${v}_MFC_DIR}/mfc${v}0d.dll")
+        if("${v}" LESS 12 OR EXISTS "${MSVC_MFC_DIR}/mfc${v}d.dll")
           set(__install__libs ${__install__libs}
-            "${MSVC${v}_MFC_DIR}/mfc${v}0d.dll"
-            "${MSVC${v}_MFC_DIR}/mfcm${v}0d.dll"
+            "${MSVC_MFC_DIR}/mfc${v}d.dll"
+            "${MSVC_MFC_DIR}/mfcm${v}d.dll"
           )
         endif()
       endif()
 
-      set(MSVC${v}_MFC_DIR "${MSVC${v}_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.MFC")
+      set(MSVC_MFC_DIR "${MSVC_REDIST_MFC_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.MFC")
       if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
         set(__install__libs ${__install__libs}
-          "${MSVC${v}_MFC_DIR}/mfc${v}0u.dll"
-          "${MSVC${v}_MFC_DIR}/mfcm${v}0u.dll"
+          "${MSVC_MFC_DIR}/mfc${v}u.dll"
+          "${MSVC_MFC_DIR}/mfcm${v}u.dll"
           )
-        if("${v}" LESS 12 OR EXISTS "${MSVC${v}_MFC_DIR}/mfc${v}0.dll")
+        if("${v}" LESS 12 OR EXISTS "${MSVC_MFC_DIR}/mfc${v}.dll")
           set(__install__libs ${__install__libs}
-            "${MSVC${v}_MFC_DIR}/mfc${v}0.dll"
-            "${MSVC${v}_MFC_DIR}/mfcm${v}0.dll"
+            "${MSVC_MFC_DIR}/mfc${v}.dll"
+            "${MSVC_MFC_DIR}/mfcm${v}.dll"
           )
         endif()
       endif()
 
       # include the language dll's as well as the actuall dll's
-      set(MSVC${v}_MFCLOC_DIR "${MSVC${v}_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.MFCLOC")
+      set(MSVC_MFCLOC_DIR "${MSVC_REDIST_MFC_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.MFCLOC")
       set(__install__libs ${__install__libs}
-        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0chs.dll"
-        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0cht.dll"
-        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0deu.dll"
-        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0enu.dll"
-        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0esn.dll"
-        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0fra.dll"
-        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0ita.dll"
-        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0jpn.dll"
-        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0kor.dll"
-        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0rus.dll"
+        "${MSVC_MFCLOC_DIR}/mfc${v}chs.dll"
+        "${MSVC_MFCLOC_DIR}/mfc${v}cht.dll"
+        "${MSVC_MFCLOC_DIR}/mfc${v}deu.dll"
+        "${MSVC_MFCLOC_DIR}/mfc${v}enu.dll"
+        "${MSVC_MFCLOC_DIR}/mfc${v}esn.dll"
+        "${MSVC_MFCLOC_DIR}/mfc${v}fra.dll"
+        "${MSVC_MFCLOC_DIR}/mfc${v}ita.dll"
+        "${MSVC_MFCLOC_DIR}/mfc${v}jpn.dll"
+        "${MSVC_MFCLOC_DIR}/mfc${v}kor.dll"
+        "${MSVC_MFCLOC_DIR}/mfc${v}rus.dll"
         )
-    endmacro()
-
-    if(MSVC10)
-      MFC_FILES_FOR_VERSION(10)
-    endif()
-
-    if(MSVC11)
-      MFC_FILES_FOR_VERSION(11)
-    endif()
-
-    if(MSVC12)
-      MFC_FILES_FOR_VERSION(12)
-    endif()
-
-    if(MSVC14)
-      MFC_FILES_FOR_VERSION(14)
     endif()
   endif()
 
   # MSVC 8 was the first version with OpenMP
   # Furthermore, there is no debug version of this
   if(CMAKE_INSTALL_OPENMP_LIBRARIES)
-    macro(OPENMP_FILES_FOR_VERSION version_a version_b)
-      set(va "${version_a}")
-      set(vb "${version_b}")
-      set(MSVC${va}_OPENMP_DIR "${MSVC${va}_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vb}.OPENMP")
+    if(MSVC_VERSION EQUAL 1910)
+      set(_MSOMP_DLL_VERSION 140)
+      set(_MSOMP_IDE_VERSION 15)
+    elseif(MSVC_VERSION EQUAL 1900)
+      set(_MSOMP_DLL_VERSION 140)
+      set(_MSOMP_IDE_VERSION 14)
+    elseif(MSVC_VERSION EQUAL 1800)
+      set(_MSOMP_DLL_VERSION 120)
+      set(_MSOMP_IDE_VERSION 12)
+    elseif(MSVC_VERSION EQUAL 1700)
+      set(_MSOMP_DLL_VERSION 110)
+      set(_MSOMP_IDE_VERSION 11)
+    elseif(MSVC_VERSION EQUAL 1600)
+      set(_MSOMP_DLL_VERSION 100)
+      set(_MSOMP_IDE_VERSION 10)
+    elseif(MSVC_VERSION EQUAL 1500)
+      set(_MSOMP_DLL_VERSION 90)
+      set(_MSOMP_IDE_VERSION 9)
+    elseif(MSVC_VERSION EQUAL 1400)
+      set(_MSOMP_DLL_VERSION 80)
+      set(_MSOMP_IDE_VERSION 8)
+    else()
+      set(_MSOMP_DLL_VERSION "")
+      set(_MSOMP_IDE_VERSION "")
+    endif()
+
+    if(_MSOMP_DLL_VERSION)
+      set(v "${_MSOMP_DLL_VERSION}")
+      set(vs "${_MSOMP_IDE_VERSION}")
+      set(MSVC_OPENMP_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.OPENMP")
 
       if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
         set(__install__libs ${__install__libs}
-          "${MSVC${va}_OPENMP_DIR}/vcomp${vb}.dll")
+          "${MSVC_OPENMP_DIR}/vcomp${v}.dll")
       endif()
-    endmacro()
-
-    if(MSVC80)
-      OPENMP_FILES_FOR_VERSION(80 80)
-    endif()
-    if(MSVC90)
-      OPENMP_FILES_FOR_VERSION(90 90)
-    endif()
-    if(MSVC10)
-      OPENMP_FILES_FOR_VERSION(10 100)
-    endif()
-    if(MSVC11)
-      OPENMP_FILES_FOR_VERSION(11 110)
-    endif()
-    if(MSVC12)
-      OPENMP_FILES_FOR_VERSION(12 120)
-    endif()
-    if(MSVC14)
-      OPENMP_FILES_FOR_VERSION(14 140)
     endif()
   endif()
 

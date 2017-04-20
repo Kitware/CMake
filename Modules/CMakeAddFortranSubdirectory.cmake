@@ -45,7 +45,6 @@
 set(_MS_MINGW_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 include(CheckLanguage)
 include(ExternalProject)
-include(CMakeParseArguments)
 
 function(_setup_mingw_config_and_build source_dir build_dir)
   # Look for a MinGW gfortran.

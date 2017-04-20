@@ -56,10 +56,16 @@ Submit to CDash Upload API
 
 ::
 
-  ctest_submit(CDASH_UPLOAD <file> [CDASH_UPLOAD_TYPE <type>])
+  ctest_submit(CDASH_UPLOAD <file> [CDASH_UPLOAD_TYPE <type>]
+               [RETRY_COUNT <count>]
+               [RETRY_DELAY <delay>]
+               [QUIET])
 
 This second signature is used to upload files to CDash via the CDash
 file upload API. The api first sends a request to upload to CDash along
 with a content hash of the file. If CDash does not already have the file,
 then it is uploaded. Along with the file, a CDash type string is specified
 to tell CDash which handler to use to process the data.
+
+This signature accepts the ``RETRY_COUNT``, ``RETRY_DELAY``, and ``QUIET``
+options as described above.

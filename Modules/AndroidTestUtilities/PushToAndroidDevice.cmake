@@ -39,7 +39,9 @@ function(android_push_test_files_to_device)
   # if(file_exists) will return true.
   macro(check_device_file_exists device_file file_exists)
     set(${file_exists} "")
-    execute_adb_command(shell ls ${device_file})
+    execute_process(
+      COMMAND ${adb_executable} shell ls ${device_file}
+      OUTPUT_VARIABLE out_var ERROR_VARIABLE out_var)
     if(NOT out_var) # when a directory exists but is empty the output is empty
       set(${file_exists} "YES")
     else()
@@ -117,7 +119,7 @@ function(android_push_test_files_to_device)
   check_device_file_exists(${_ptd_DEV_TEST_DIR} test_dir_exists)
   if(test_dir_exists)
     # This is protected in the SetupProjectTests module.
-    execute_adb_command(shell echo rm -r ${_ptd_DEV_TEST_DIR} | su)
+    execute_adb_command(shell rm -r ${_ptd_DEV_TEST_DIR})
   endif()
   execute_adb_command(shell mkdir -p ${_ptd_DEV_TEST_DIR})
 

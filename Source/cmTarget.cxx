@@ -255,6 +255,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("MACOSX_RPATH", CM_NULLPTR);
     this->SetPropertyDefault("C_CLANG_TIDY", CM_NULLPTR);
     this->SetPropertyDefault("C_COMPILER_LAUNCHER", CM_NULLPTR);
+    this->SetPropertyDefault("C_CPPLINT", CM_NULLPTR);
     this->SetPropertyDefault("C_INCLUDE_WHAT_YOU_USE", CM_NULLPTR);
     this->SetPropertyDefault("LINK_WHAT_YOU_USE", CM_NULLPTR);
     this->SetPropertyDefault("C_STANDARD", CM_NULLPTR);
@@ -262,6 +263,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("C_EXTENSIONS", CM_NULLPTR);
     this->SetPropertyDefault("CXX_CLANG_TIDY", CM_NULLPTR);
     this->SetPropertyDefault("CXX_COMPILER_LAUNCHER", CM_NULLPTR);
+    this->SetPropertyDefault("CXX_CPPLINT", CM_NULLPTR);
     this->SetPropertyDefault("CXX_INCLUDE_WHAT_YOU_USE", CM_NULLPTR);
     this->SetPropertyDefault("CXX_STANDARD", CM_NULLPTR);
     this->SetPropertyDefault("CXX_STANDARD_REQUIRED", CM_NULLPTR);
@@ -449,7 +451,8 @@ bool cmTarget::HasImportLibrary() const
 
 bool cmTarget::IsFrameworkOnApple() const
 {
-  return (this->GetType() == cmStateEnums::SHARED_LIBRARY &&
+  return ((this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+           this->GetType() == cmStateEnums::STATIC_LIBRARY) &&
           this->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("FRAMEWORK"));
 }
@@ -847,14 +850,26 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
 
 void cmTarget::SetProperty(const std::string& prop, const char* value)
 {
-  if (!cmTargetPropertyComputer::PassesWhitelist(
-        this->GetType(), prop, this->Makefile->GetMessenger(),
-        this->Makefile->GetBacktrace())) {
-    return;
-  }
+	if (!cmTargetPropertyComputer::PassesWhitelist(
+		this->GetType(), prop, this->Makefile->GetMessenger(),
+		this->Makefile->GetBacktrace())) {
+		return;
+	}
+	if (prop == "MANUALLY_ADDED_DEPENDENCIES") {
+		std::ostringstream e;
+		e << "MANUALLY_ADDED_DEPENDENCIES property is read-only\n";
+		this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+		return;
+	}
   if (prop == "NAME") {
     std::ostringstream e;
     e << "NAME property is read-only\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  }
+  if (prop == "TYPE") {
+    std::ostringstream e;
+    e << "TYPE property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
@@ -1162,6 +1177,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
   MAKE_STATIC_PROP(COMPILE_OPTIONS);
   MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
   MAKE_STATIC_PROP(IMPORTED);
+  MAKE_STATIC_PROP(MANUALLY_ADDED_DEPENDENCIES);
   MAKE_STATIC_PROP(NAME);
   MAKE_STATIC_PROP(BINARY_DIR);
   MAKE_STATIC_PROP(SOURCE_DIR);
@@ -1175,6 +1191,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     specialProps.insert(propCOMPILE_OPTIONS);
     specialProps.insert(propCOMPILE_DEFINITIONS);
     specialProps.insert(propIMPORTED);
+    specialProps.insert(propMANUALLY_ADDED_DEPENDENCIES);
     specialProps.insert(propNAME);
     specialProps.insert(propBINARY_DIR);
     specialProps.insert(propSOURCE_DIR);
@@ -1228,6 +1245,15 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->Internal->CompileDefinitionsEntries, ";");
+      return output.c_str();
+    }
+    if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
+      if (this->Utilities.empty()) {
+        return CM_NULLPTR;
+      }
+
+      static std::string output;
+      output = cmJoin(this->Utilities, ";");
       return output.c_str();
     }
     if (prop == propIMPORTED) {

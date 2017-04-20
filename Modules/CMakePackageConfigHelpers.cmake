@@ -40,7 +40,7 @@
 #    set(FOO_INCLUDE_DIR   "@CMAKE_INSTALL_FULL_INCLUDEDIR@" )
 #    set(FOO_DATA_DIR   "@CMAKE_INSTALL_PREFIX@/@RELATIVE_DATA_INSTALL_DIR@" )
 #    set(FOO_ICONS_DIR   "@CMAKE_INSTALL_PREFIX@/share/icons" )
-#    ...logic to determine installedPrefix from the own location...
+#    #...logic to determine installedPrefix from the own location...
 #    set(FOO_CONFIG_DIR  "${installedPrefix}/@CONFIG_INSTALL_DIR@" )
 #
 # All 4 options shown above are not sufficient, since the first 3 hardcode the
@@ -174,7 +174,7 @@
 #    set(INCLUDE_INSTALL_DIR include/ ... CACHE )
 #    set(LIB_INSTALL_DIR lib/ ... CACHE )
 #    set(SYSCONFIG_INSTALL_DIR etc/foo/ ... CACHE )
-#    ...
+#    #...
 #    include(CMakePackageConfigHelpers)
 #    configure_package_config_file(FooConfig.cmake.in
 #      ${CMAKE_CURRENT_BINARY_DIR}/FooConfig.cmake
@@ -190,7 +190,7 @@
 #
 # ``FooConfig.cmake.in``:
 #
-# .. code-block:: cmake
+# ::
 #
 #    set(FOO_VERSION x.y.z)
 #    ...
@@ -200,9 +200,6 @@
 #    set_and_check(FOO_SYSCONFIG_DIR "@PACKAGE_SYSCONFIG_INSTALL_DIR@")
 #
 #    check_required_components(Foo)
-
-
-include(CMakeParseArguments)
 
 include(WriteBasicConfigVersionFile)
 

@@ -1592,8 +1592,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
 
       // Provide a "/fast" version of the target.
       depends.clear();
-      if ((targetName == "install") || (targetName == "install_local") ||
-          (targetName == "install_strip")) {
+      if ((targetName == "install") || (targetName == "install/local") ||
+          (targetName == "install/strip")) {
         // Provide a fast install target that does not depend on all
         // but has the same command.
         depends.push_back("preinstall/fast");

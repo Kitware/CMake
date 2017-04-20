@@ -17,6 +17,9 @@ public:
   std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
                                    std::string const& stdLibString)
     CM_OVERRIDE;
+
+  std::string GetLinkerLanguage(cmGeneratorTarget* target,
+                                std::string const& config) CM_OVERRIDE;
 };
 
 class cmNinjaLinkLineDeviceComputer : public cmLinkLineDeviceComputer

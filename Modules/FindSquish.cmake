@@ -119,9 +119,6 @@
 #
 #    This is deprecated. Use SQUISH_V3_ADD_TEST() if you are using Squish 3.x instead.
 
-
-include(CMakeParseArguments)
-
 set(SQUISH_INSTALL_DIR_STRING "Directory containing the bin, doc, and lib directories for Squish; this should be the root of the installation directory.")
 set(SQUISH_SERVER_EXECUTABLE_STRING "The squishserver executable program.")
 set(SQUISH_CLIENT_EXECUTABLE_STRING "The squishclient executable program.")

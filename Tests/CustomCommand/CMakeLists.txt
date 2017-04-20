@@ -513,3 +513,24 @@ add_custom_target(UseConsoleTarget ALL
   VERBATIM
   USES_TERMINAL
 )
+
+# Test COMMAND_EXPAND_LISTS
+set(cmp_args "1ARG=COMMAND_EXPAND_LISTS" "2ARG=test" "3ARG=outfile"
+  "4ARG=content")
+set(AARGS "")
+foreach(arg IN LISTS cmp_args)
+  list(APPEND AARGS "-DA${arg}")
+endforeach()
+
+set(gen_file "expand_custom_command.phony")
+add_custom_command(
+  OUTPUT "${gen_file}"
+  COMMAND ${CMAKE_COMMAND} ${AARGS}
+    "-DB$<JOIN:$<TARGET_PROPERTY:command_expand_lists,CMPARGS>,;-DB>"
+    "-P" "${CMAKE_CURRENT_SOURCE_DIR}/compare_options.cmake"
+    COMMAND_EXPAND_LISTS
+  VERBATIM
+)
+set_property(SOURCE "${gen_file}" PROPERTY SYMBOLIC ON)
+add_custom_target(command_expand_lists ALL DEPENDS "${gen_file}")
+set_property(TARGET command_expand_lists PROPERTY CMPARGS "${cmp_args}")

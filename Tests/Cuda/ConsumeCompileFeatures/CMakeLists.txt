@@ -11,7 +11,7 @@ project (CudaConsumeCompileFeatures CXX CUDA)
 
 
 add_library(CudaConsumeLib STATIC static.cpp static.cu)
-target_compile_features(CudaConsumeLib PUBLIC cxx_constexpr)
+target_compile_features(CudaConsumeLib PUBLIC cxx_nullptr)
 
 add_executable(CudaConsumeCompileFeatures main.cu)
 target_link_libraries(CudaConsumeCompileFeatures PRIVATE CudaConsumeLib)

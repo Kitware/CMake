@@ -99,39 +99,64 @@ static std::string GetQtMajorVersion(cmGeneratorTarget const* target)
 }
 
 static void SetupSourceFiles(cmGeneratorTarget const* target,
-                             std::vector<std::string>& skipMoc,
-                             std::vector<std::string>& mocSources,
-                             std::vector<std::string>& mocHeaders,
-                             std::vector<std::string>& skipUic)
+                             std::vector<std::string>& mocUicSources,
+                             std::vector<std::string>& mocUicHeaders,
+                             std::vector<std::string>& skipMocList,
+                             std::vector<std::string>& skipUicList)
 {
   cmMakefile* makefile = target->Target->GetMakefile();
 
   std::vector<cmSourceFile*> srcFiles;
   target->GetConfigCommonSourceFiles(srcFiles);
 
+  const bool targetMoc = target->GetPropertyAsBool("AUTOMOC");
+  const bool targetUic = target->GetPropertyAsBool("AUTOUIC");
+
   cmFilePathChecksum fpathCheckSum(makefile);
   for (std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
        fileIt != srcFiles.end(); ++fileIt) {
     cmSourceFile* sf = *fileIt;
+    const cmSystemTools::FileFormat fileType =
+      cmSystemTools::GetFileFormat(sf->GetExtension().c_str());
+
+    if (!(fileType == cmSystemTools::CXX_FILE_FORMAT) &&
+        !(fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
+      continue;
+    }
+    if (cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
+      continue;
+    }
     const std::string absFile =
       cmsys::SystemTools::GetRealPath(sf->GetFullPath());
-    const std::string ext = sf->GetExtension();
-
-    if (cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC"))) {
-      skipUic.push_back(absFile);
+    // Skip flags
+    const bool skipAll =
+      cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOGEN"));
+    const bool skipMoc =
+      skipAll || cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
+    const bool skipUic =
+      skipAll || cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC"));
+    // Add file name to skip lists.
+    // Do this even when the file is not added to the sources/headers lists
+    // because the file name may be extracted from an other file when
+    // processing
+    if (skipMoc) {
+      skipMocList.push_back(absFile);
+    }
+    if (skipUic) {
+      skipUicList.push_back(absFile);
     }
 
-    if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"))) {
-      if (cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"))) {
-        skipMoc.push_back(absFile);
-      } else {
-        cmSystemTools::FileFormat fileType =
-          cmSystemTools::GetFileFormat(ext.c_str());
-        if (fileType == cmSystemTools::CXX_FILE_FORMAT) {
-          mocSources.push_back(absFile);
-        } else if (fileType == cmSystemTools::HEADER_FILE_FORMAT) {
-          mocHeaders.push_back(absFile);
-        }
+    if ((targetMoc && !skipMoc) || (targetUic && !skipUic)) {
+      // Add file name to sources or headers list
+      switch (fileType) {
+        case cmSystemTools::CXX_FILE_FORMAT:
+          mocUicSources.push_back(absFile);
+          break;
+        case cmSystemTools::HEADER_FILE_FORMAT:
+          mocUicHeaders.push_back(absFile);
+          break;
+        default:
+          break;
       }
     }
   }
@@ -158,7 +183,6 @@ static void GetCompileDefinitionsAndDirectories(
 static void MocSetupAutoTarget(
   cmGeneratorTarget const* target, const std::string& autogenTargetName,
   std::vector<std::string> const& skipMoc,
-  std::vector<std::string> const& mocHeaders,
   std::map<std::string, std::string>& configIncludes,
   std::map<std::string, std::string>& configDefines)
 {
@@ -172,9 +196,6 @@ static void MocSetupAutoTarget(
   makefile->AddDefinition(
     "_skip_moc",
     cmOutputConverter::EscapeForCMake(cmJoin(skipMoc, ";")).c_str());
-  makefile->AddDefinition(
-    "_moc_headers",
-    cmOutputConverter::EscapeForCMake(cmJoin(mocHeaders, ";")).c_str());
   bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
   makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
 
@@ -569,7 +590,9 @@ static void RccSetupAutoTarget(cmGeneratorTarget const* target,
     std::string ext = sf->GetExtension();
     if (ext == "qrc") {
       std::string absFile = cmsys::SystemTools::GetRealPath(sf->GetFullPath());
-      bool skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"));
+      const bool skip =
+        cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOGEN")) ||
+        cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"));
 
       if (!skip) {
         _rcc_files += sepRccFiles;
@@ -632,7 +655,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenSources(
     cmMakefile* makefile = target->Target->GetMakefile();
     const std::string mocCppFile =
       GetAutogenTargetBuildDir(target) + "moc_compilation.cpp";
-    makefile->GetOrCreateSource(mocCppFile, true);
+    cmSourceFile* gf = makefile->GetOrCreateSource(mocCppFile, true);
+    gf->SetProperty("SKIP_AUTOGEN", "On");
     target->AddSource(mocCppFile);
   }
 }
@@ -649,6 +673,14 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     cmSystemTools::CollapseFullPath("", makefile->GetCurrentBinaryDirectory());
   const std::string qtMajorVersion = GetQtMajorVersion(target);
   std::vector<std::string> autogenOutputFiles;
+
+  // Remove old settings on cleanup
+  {
+    std::string fname = GetAutogenTargetFilesDir(target);
+    fname += "/AutogenOldSettings.cmake";
+    makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES", fname.c_str(),
+                             false);
+  }
 
   // Create autogen target build directory and add it to the clean files
   cmSystemTools::MakeDirectory(autogenBuildDir);
@@ -747,6 +779,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
          fileIt != srcFiles.end(); ++fileIt) {
       cmSourceFile* sf = *fileIt;
       if (sf->GetExtension() == "qrc" &&
+          !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOGEN")) &&
           !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"))) {
         {
           const std::string absFile =
@@ -763,7 +796,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
           rccOutputFile += ".cpp";
 
           // Add rcc output file to origin target sources
-          makefile->GetOrCreateSource(rccOutputFile, true);
+          cmSourceFile* gf = makefile->GetOrCreateSource(rccOutputFile, true);
+          gf->SetProperty("SKIP_AUTOGEN", "On");
           target->AddSource(rccOutputFile);
           // Register rcc output file as generated
           autogenOutputFiles.push_back(rccOutputFile);
@@ -850,10 +884,10 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     cmOutputConverter::EscapeForCMake(target->GetName()).c_str());
   makefile->AddDefinition("_target_qt_version", qtMajorVersion.c_str());
 
-  std::vector<std::string> skipUic;
+  std::vector<std::string> mocUicSources;
+  std::vector<std::string> mocUicHeaders;
   std::vector<std::string> skipMoc;
-  std::vector<std::string> mocSources;
-  std::vector<std::string> mocHeaders;
+  std::vector<std::string> skipUic;
   std::map<std::string, std::string> configMocIncludes;
   std::map<std::string, std::string> configMocDefines;
   std::map<std::string, std::string> configUicOptions;
@@ -861,14 +895,18 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
   if (target->GetPropertyAsBool("AUTOMOC") ||
       target->GetPropertyAsBool("AUTOUIC") ||
       target->GetPropertyAsBool("AUTORCC")) {
-    SetupSourceFiles(target, skipMoc, mocSources, mocHeaders, skipUic);
+    SetupSourceFiles(target, mocUicSources, mocUicHeaders, skipMoc, skipUic);
   }
   makefile->AddDefinition(
-    "_cpp_files",
-    cmOutputConverter::EscapeForCMake(cmJoin(mocSources, ";")).c_str());
+    "_moc_uic_sources",
+    cmOutputConverter::EscapeForCMake(cmJoin(mocUicSources, ";")).c_str());
+  makefile->AddDefinition(
+    "_moc_uic_headers",
+    cmOutputConverter::EscapeForCMake(cmJoin(mocUicHeaders, ";")).c_str());
+
   if (target->GetPropertyAsBool("AUTOMOC")) {
-    MocSetupAutoTarget(target, autogenTargetName, skipMoc, mocHeaders,
-                       configMocIncludes, configMocDefines);
+    MocSetupAutoTarget(target, autogenTargetName, skipMoc, configMocIncludes,
+                       configMocDefines);
   }
   if (target->GetPropertyAsBool("AUTOUIC")) {
     UicSetupAutoTarget(target, skipUic, configUicOptions);

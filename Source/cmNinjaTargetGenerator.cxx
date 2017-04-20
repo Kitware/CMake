@@ -344,7 +344,8 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
 {
   cmMakefile* mf = this->GetMakefile();
   if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
-      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID")) {
+      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID") ||
+      mf->GetDefinition("MSVC_CUDA_ARCHITECTURE_ID")) {
     std::string pdbPath;
     std::string compilePdbPath = this->ComputeTargetCompilePDB();
     if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE ||
@@ -384,7 +385,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   vars.CMTargetType =
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType());
   vars.Language = lang.c_str();
-  vars.Source = "$IN_ABS";
+  vars.Source = "$in";
   vars.Object = "$out";
   vars.Defines = "$DEFINES";
   vars.Includes = "$INCLUDES";
@@ -404,7 +405,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   std::string rspcontent;
   std::string responseFlag;
 
-  if (lang != "RC" && this->ForceResponseFile()) {
+  bool const lang_supports_response = !(lang == "RC" || lang == "CUDA");
+  if (lang_supports_response && this->ForceResponseFile()) {
     rspfile = "$RSP_FILE";
     responseFlag = "@" + rspfile;
     rspcontent = " $DEFINES $INCLUDES $FLAGS";
@@ -579,7 +581,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   std::vector<std::string> compileCmds;
   if (lang == "CUDA") {
     std::string cmdVar;
-    if (this->GeneratorTarget->GetProperty("CUDA_SEPARABLE_COMPILATION")) {
+    if (this->GeneratorTarget->GetPropertyAsBool(
+          "CUDA_SEPARABLE_COMPILATION")) {
       cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
     } else {
       cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
@@ -599,7 +602,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     const char* iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
     std::string const tidy_prop = lang + "_CLANG_TIDY";
     const char* tidy = this->GeneratorTarget->GetProperty(tidy_prop);
-    if ((iwyu && *iwyu) || (tidy && *tidy)) {
+    std::string const cpplint_prop = lang + "_CPPLINT";
+    const char* cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
+    if ((iwyu && *iwyu) || (tidy && *tidy) || (cpplint && *cpplint)) {
       std::string run_iwyu = this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
       run_iwyu += " -E __run_iwyu";
@@ -610,6 +615,12 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
       if (tidy && *tidy) {
         run_iwyu += " --tidy=";
         run_iwyu += this->GetLocalGenerator()->EscapeForShell(tidy);
+      }
+      if (cpplint && *cpplint) {
+        run_iwyu += " --cpplint=";
+        run_iwyu += this->GetLocalGenerator()->EscapeForShell(cpplint);
+      }
+      if ((tidy && *tidy) || (cpplint && *cpplint)) {
         run_iwyu += " --source=$in";
       }
       run_iwyu += " -- ";
@@ -763,7 +774,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   cmSourceFile const* source, bool writeOrderDependsTargetForTarget)
 {
   std::string const language = source->GetLanguage();
-  std::string const sourceFileName = this->GetSourceFilePath(source);
+  std::string const sourceFileName =
+    language == "RC" ? source->GetFullPath() : this->GetSourceFilePath(source);
   std::string const objectDir =
     this->ConvertToNinjaPath(this->GeneratorTarget->GetSupportDirectory());
   std::string const objectFileName =
@@ -772,8 +784,6 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     cmSystemTools::GetFilenamePath(objectFileName);
 
   cmNinjaVars vars;
-  vars["IN_ABS"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    source->GetFullPath(), cmOutputConverter::SHELL);
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
   vars["INCLUDES"] = this->GetIncludes(language);
@@ -921,9 +931,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   this->SetMsvcTargetPdbVariable(vars);
 
-  bool const isRC = (language == "RC");
+  bool const lang_supports_response =
+    !(language == "RC" || language == "CUDA");
   int const commandLineLengthLimit =
-    ((!isRC && this->ForceResponseFile())) ? -1 : 0;
+    ((lang_supports_response && this->ForceResponseFile())) ? -1 : 0;
   std::string const rspfile = objectFileName + ".rsp";
 
   this->GetGlobalGenerator()->WriteBuild(
@@ -969,7 +980,9 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang)
                                               lang, this->GetConfigName());
   for (std::vector<std::string>::iterator i = includes.begin();
        i != includes.end(); ++i) {
-    tdi_include_dirs.append(*i);
+    // Convert the include directories the same way we do for -I flags.
+    // See upstream ninja issue 1251.
+    tdi_include_dirs.append(this->ConvertToNinjaPath(*i));
   }
 
   Json::Value& tdi_linked_target_dirs = tdi["linked-target-dirs"] =

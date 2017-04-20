@@ -184,7 +184,6 @@
 # :prop_tgt:`CXX_VISIBILITY_PRESET <<LANG>_VISIBILITY_PRESET>` and
 # :prop_tgt:`VISIBILITY_INLINES_HIDDEN` instead.
 
-include(CMakeParseArguments)
 include(CheckCXXCompilerFlag)
 
 # TODO: Install this macro separately?

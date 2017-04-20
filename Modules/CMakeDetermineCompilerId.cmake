@@ -131,6 +131,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags src)
   # Create a clean working directory.
   file(REMOVE_RECURSE ${CMAKE_${lang}_COMPILER_ID_DIR})
   file(MAKE_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR})
+  file(MAKE_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}/tmp)
   CMAKE_DETERMINE_COMPILER_ID_WRITE("${lang}" "${src}")
 
   # Construct a description of this test case.
@@ -268,7 +269,13 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       set(id_toolset "")
     endif()
     if("${lang}" STREQUAL "Swift")
-      set(id_lang_version "SWIFT_VERSION = 2.3;")
+      if(CMAKE_Swift_LANGUAGE_VERSION)
+        set(id_lang_version "SWIFT_VERSION = ${CMAKE_Swift_LANGUAGE_VERSION};")
+      elseif(XCODE_VERSION VERSION_GREATER_EQUAL 8.3)
+        set(id_lang_version "SWIFT_VERSION = 3.0;")
+      else()
+        set(id_lang_version "SWIFT_VERSION = 2.3;")
+      endif()
     else()
       set(id_lang_version "")
     endif()

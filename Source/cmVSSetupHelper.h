@@ -1,14 +1,19 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-file Copyright.txt or https://cmake.org/licensing for details.  */
-
+   file Copyright.txt or https://cmake.org/licensing for details.  */
 #ifndef cmVSSetupHelper_h
 #define cmVSSetupHelper_h
 
-#include "Setup.Configuration.h" // Published by Visual Studio Setup team
+#ifndef NOMINMAX
+#define NOMINMAX // Undefine min and max defined by windows.h
+#endif
 
-#include <Windows.h>
+// Published by Visual Studio Setup team
+#include "cmvssetup/Setup.Configuration.h"
+
 #include <string>
 #include <vector>
+
+#include <windows.h>
 
 template <class T>
 class SmartCOMPtr
@@ -48,8 +53,8 @@ public:
       return E_FAIL;
     }
   }
-  HRESULT CoCreateInstance(REFCLSID clsid, IUnknown* pUnknown, REFIID interfaceId,
-                           DWORD dwClsContext = CLSCTX_ALL)
+  HRESULT CoCreateInstance(REFCLSID clsid, IUnknown* pUnknown,
+                           REFIID interfaceId, DWORD dwClsContext = CLSCTX_ALL)
   {
     HRESULT hr = ::CoCreateInstance(clsid, pUnknown, dwClsContext, interfaceId,
                                     (void**)&ptr);

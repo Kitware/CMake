@@ -39,8 +39,6 @@
 #
 #   -- CMAKE_C_COMPILER="/usr/bin/gcc" ; CMAKE_MAJOR_VERSION="2" ; DOES_NOT_EXIST=""
 
-include(CMakeParseArguments)
-
 function(CMAKE_PRINT_VARIABLES)
    set(msg "")
    foreach(var ${ARGN})

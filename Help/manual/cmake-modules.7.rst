@@ -59,12 +59,14 @@ All Modules
    /module/CPackDeb
    /module/CPackDMG
    /module/CPackIFW
+   /module/CPackIFWConfigureFile
    /module/CPackNSIS
    /module/CPackPackageMaker
    /module/CPackProductBuild
    /module/CPackRPM
    /module/CPack
    /module/CPackWIX
+   /module/CSharpUtilities
    /module/CTest
    /module/CTestCoverageCollectGCOV
    /module/CTestScriptMode

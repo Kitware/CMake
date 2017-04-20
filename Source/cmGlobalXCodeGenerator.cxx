@@ -22,6 +22,7 @@
 #include "cmOutputConverter.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
+#include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -1815,8 +1816,34 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   // Handle settings for each target type.
   switch (gtgt->GetType()) {
-    case cmStateEnums::OBJECT_LIBRARY:
-    case cmStateEnums::STATIC_LIBRARY: {
+    case cmStateEnums::STATIC_LIBRARY:
+      if (gtgt->GetPropertyAsBool("FRAMEWORK")) {
+        std::string fw_version = gtgt->GetFrameworkVersion();
+        buildSettings->AddAttribute("FRAMEWORK_VERSION",
+                                    this->CreateString(fw_version));
+        const char* ext = gtgt->GetProperty("BUNDLE_EXTENSION");
+        if (ext) {
+          buildSettings->AddAttribute("WRAPPER_EXTENSION",
+                                      this->CreateString(ext));
+        }
+
+        std::string plist = this->ComputeInfoPListLocation(gtgt);
+        // Xcode will create the final version of Info.plist at build time,
+        // so let it replace the framework name. This avoids creating
+        // a per-configuration Info.plist file.
+        this->CurrentLocalGenerator->GenerateFrameworkInfoPList(
+          gtgt, "$(EXECUTABLE_NAME)", plist.c_str());
+        buildSettings->AddAttribute("INFOPLIST_FILE",
+                                    this->CreateString(plist));
+        buildSettings->AddAttribute("MACH_O_TYPE",
+                                    this->CreateString("staticlib"));
+      } else {
+        buildSettings->AddAttribute("LIBRARY_STYLE",
+                                    this->CreateString("STATIC"));
+      }
+      break;
+
+    case cmStateEnums::OBJECT_LIBRARY: {
       buildSettings->AddAttribute("LIBRARY_STYLE",
                                   this->CreateString("STATIC"));
       break;
@@ -1975,6 +2002,22 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
   if (!dirs.IsEmpty()) {
     buildSettings->AddAttribute("HEADER_SEARCH_PATHS", dirs.CreateList());
+  }
+
+  if (this->XcodeVersion >= 60) {
+    // Add those per-language flags in addition to HEADER_SEARCH_PATHS to gain
+    // system include directory awareness. We need to also keep on setting
+    // HEADER_SEARCH_PATHS to work around a missing compile options flag for
+    // GNU assembly files (#16449)
+    for (std::set<std::string>::iterator li = languages.begin();
+         li != languages.end(); ++li) {
+      std::string includeFlags = this->CurrentLocalGenerator->GetIncludeFlags(
+        includes, gtgt, *li, true, false, configName);
+
+      if (!includeFlags.empty()) {
+        cflags[*li] += " " + includeFlags;
+      }
+    }
   }
 
   bool same_gflags = true;
@@ -2319,8 +2362,10 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(
 
   switch (target->GetType()) {
     case cmStateEnums::OBJECT_LIBRARY:
-    case cmStateEnums::STATIC_LIBRARY:
       return "archive.ar";
+    case cmStateEnums::STATIC_LIBRARY:
+      return (target->GetPropertyAsBool("FRAMEWORK") ? "wrapper.framework"
+                                                     : "archive.ar");
     case cmStateEnums::MODULE_LIBRARY:
       if (target->IsXCTestOnApple())
         return "wrapper.cfbundle";
@@ -2350,8 +2395,11 @@ const char* cmGlobalXCodeGenerator::GetTargetProductType(
 
   switch (target->GetType()) {
     case cmStateEnums::OBJECT_LIBRARY:
-    case cmStateEnums::STATIC_LIBRARY:
       return "com.apple.product-type.library.static";
+    case cmStateEnums::STATIC_LIBRARY:
+      return (target->GetPropertyAsBool("FRAMEWORK")
+                ? "com.apple.product-type.framework"
+                : "com.apple.product-type.library.static");
     case cmStateEnums::MODULE_LIBRARY:
       if (target->IsXCTestOnApple())
         return "com.apple.product-type.bundle.unit-test";
@@ -3027,10 +3075,14 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
                                 this->CreateString(this->GeneratorToolset));
   }
   if (this->GetLanguageEnabled("Swift")) {
-    std::string swiftVersion = "2.3";
+    std::string swiftVersion;
     if (const char* vers = this->CurrentMakefile->GetDefinition(
           "CMAKE_Swift_LANGUAGE_VERSION")) {
       swiftVersion = vers;
+    } else if (this->XcodeVersion >= 83) {
+      swiftVersion = "3.0";
+    } else {
+      swiftVersion = "2.3";
     }
     buildSettings->AddAttribute("SWIFT_VERSION",
                                 this->CreateString(swiftVersion));
@@ -3526,6 +3578,19 @@ bool cmGlobalXCodeGenerator::IsMultiConfig() const
 
   // Newer Xcode versions are multi config:
   return true;
+}
+
+bool cmGlobalXCodeGenerator::UseEffectivePlatformName(cmMakefile* mf) const
+{
+  const char* epnValue =
+    this->GetCMakeInstance()->GetState()->GetGlobalProperty(
+      "XCODE_EMIT_EFFECTIVE_PLATFORM_NAME");
+
+  if (!epnValue) {
+    return mf->PlatformIsAppleIos();
+  }
+
+  return cmSystemTools::IsOn(epnValue);
 }
 
 void cmGlobalXCodeGenerator::ComputeTargetObjectDirectory(

@@ -184,3 +184,9 @@ std::string cmLinkLineComputer::ComputeLinkLibraries(
 
   return fout.str();
 }
+
+std::string cmLinkLineComputer::GetLinkerLanguage(cmGeneratorTarget* target,
+                                                  std::string const& config)
+{
+  return target->GetLinkerLanguage(config);
+}

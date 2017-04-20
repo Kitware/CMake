@@ -763,7 +763,7 @@ bool SystemTools::MakeDirectory(const char* path)
 
 bool SystemTools::MakeDirectory(const std::string& path)
 {
-  if (SystemTools::FileExists(path)) {
+  if (SystemTools::PathExists(path)) {
     return SystemTools::FileIsDirectory(path);
   }
   if (path.empty()) {
@@ -1280,7 +1280,7 @@ bool SystemTools::PathCygwinToWin32(const char* path, char* win32_path)
 
 bool SystemTools::Touch(const std::string& filename, bool create)
 {
-  if (!SystemTools::FileExists(filename)) {
+  if (!SystemTools::PathExists(filename)) {
     if (create) {
       FILE* file = Fopen(filename, "a+b");
       if (file) {
@@ -4289,7 +4289,7 @@ bool SystemTools::GetLineFromStream(std::istream& is, std::string& line,
     // if we read too much then truncate the buffer
     if (leftToRead > 0) {
       if (static_cast<long>(length) > leftToRead) {
-        buffer[leftToRead - 1] = 0;
+        buffer[leftToRead] = 0;
         leftToRead = 0;
       } else {
         leftToRead -= static_cast<long>(length);
@@ -4389,10 +4389,7 @@ bool SystemTools::SetPermissions(const char* file, mode_t mode,
 bool SystemTools::SetPermissions(const std::string& file, mode_t mode,
                                  bool honor_umask)
 {
-  // TEMPORARY / TODO:  After FileExists calls lstat() instead of
-  // access(), change this call to FileExists instead of
-  // TestFileAccess so that we don't follow symlinks.
-  if (!SystemTools::TestFileAccess(file, TEST_FILE_OK)) {
+  if (!SystemTools::PathExists(file)) {
     return false;
   }
   if (honor_umask) {

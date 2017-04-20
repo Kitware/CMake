@@ -1147,7 +1147,7 @@ std::string cmGeneratorTarget::GetCompilePDBPath(
 {
   std::string dir = this->GetCompilePDBDirectory(config);
   std::string name = this->GetCompilePDBName(config);
-  if (dir.empty() && !name.empty()) {
+  if (dir.empty() && !name.empty() && this->HaveWellDefinedOutputFiles()) {
     dir = this->GetPDBDirectory(config);
   }
   if (!dir.empty()) {
@@ -4419,9 +4419,10 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
 
   // The generator may add the configuration's subdirectory.
   if (!conf.empty()) {
-    bool iosPlatform = this->Makefile->PlatformIsAppleIos();
+    bool useEPN =
+      this->GlobalGenerator->UseEffectivePlatformName(this->Makefile);
     std::string suffix =
-      usesDefaultOutputDir && iosPlatform ? "${EFFECTIVE_PLATFORM_NAME}" : "";
+      usesDefaultOutputDir && useEPN ? "${EFFECTIVE_PLATFORM_NAME}" : "";
     this->LocalGenerator->GetGlobalGenerator()->AppendDirectoryForConfig(
       "/", conf, suffix, out);
   }
@@ -5307,7 +5308,8 @@ bool cmGeneratorTarget::IsLinkable() const
 
 bool cmGeneratorTarget::IsFrameworkOnApple() const
 {
-  return (this->GetType() == cmStateEnums::SHARED_LIBRARY &&
+  return ((this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+           this->GetType() == cmStateEnums::STATIC_LIBRARY) &&
           this->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("FRAMEWORK"));
 }

@@ -17,6 +17,7 @@ run_ctest_test(two      INCLUDE two)
 run_ctest_test(three    INCLUDE three)
 run_ctest_test(setupFoo INCLUDE setupFoo)
 run_ctest_test(wontRun  INCLUDE wontRun)
+run_ctest_test(unused   INCLUDE Unused)
 
 #------------------------------------------------------------
 # CMake configure will fail due to cyclic test dependencies

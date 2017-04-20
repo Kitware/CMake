@@ -296,6 +296,7 @@ specifiers:
 
 ::
 
+   %%        A literal percent sign (%).
    %d        The day of the current month (01-31).
    %H        The hour on a 24-hour clock (00-23).
    %I        The hour on a 12-hour clock (01-12).
@@ -328,6 +329,12 @@ If no explicit ``<format string>`` is given it will default to:
   string(MAKE_C_IDENTIFIER <input string> <output variable>)
 
 Write a string which can be used as an identifier in C.
+
+.. note::
+
+  If the ``SOURCE_DATE_EPOCH`` environment variable is set,
+  its value will be used instead of the current time.
+  See https://reproducible-builds.org/specs/source-date-epoch/ for details.
 
 UUID
 """"

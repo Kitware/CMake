@@ -261,6 +261,12 @@ set(mac_absoft_libs "af90math;afio;amisc;absoftmain;af77math;m;mv")
 set(mac_absoft_dirs "/Applications/Absoft11.1/lib;/usr/lib/i686-apple-darwin10/4.2.1;/usr/lib/gcc/i686-apple-darwin10/4.2.1;/usr/lib")
 list(APPEND platforms mac_absoft)
 
+# Xcode 8.3: clang++ dummy.cpp -v
+set(mac_clang_v_text " \"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld\" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -no_deduplicate -dynamic -arch x86_64 -macosx_version_min 10.12.0 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk -o a.out /var/folders/hc/95l7dhnx459c57g4yg_6yd8c0000gp/T/dummy-384ea1.o -lc++ -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/lib/darwin/libclang_rt.osx.a")
+set(mac_clang_v_libs "c++")
+set(mac_clang_v_dirs "")
+list(APPEND platforms mac_clang_v)
+
 #-----------------------------------------------------------------------------
 # Sun
 
@@ -518,6 +524,13 @@ set(msys_g77_libs "frtbegin;g2c;mingw32;moldname;mingwex;msvcrt;user32;kernel32;
 set(msys_g77_dirs "C:/some-mingw/lib/gcc/mingw32/3.4.5;C:/some-mingw/lib/gcc;/some-mingw/lib;C:/some-mingw/lib")
 list(APPEND platforms msys_g77)
 
+#-----------------------------------------------------------------------------
+# MSVC from NVIDIA CUDA
+
+set(nvcc_msvc_text [[cuda-fake-ld cl.exe -nologo "tmp/a_dlink.obj" "tmp/CMakeCUDACompilerId.obj" -link -INCREMENTAL:NO   "/LIBPATH:C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v8.0/bin/../lib/x64" cudadevrt.lib  cudart_static.lib -Fe"a.exe"]])
+set(nvcc_msvc_libs "cudadevrt.lib;cudart_static.lib")
+set(nvcc_msvc_dirs "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v8.0/lib/x64")
+list(APPEND platforms nvcc_msvc)
 
 #-----------------------------------------------------------------------------
 # Test parsing for all above examples.

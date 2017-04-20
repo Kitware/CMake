@@ -44,6 +44,7 @@ Properties of Global Scope
    /prop_gbl/TARGET_MESSAGES
    /prop_gbl/TARGET_SUPPORTS_SHARED_LIBS
    /prop_gbl/USE_FOLDERS
+   /prop_gbl/XCODE_EMIT_EFFECTIVE_PLATFORM_NAME
 
 .. _`Directory Properties`:
 
@@ -211,6 +212,7 @@ Properties on Targets
    /prop_tgt/LABELS
    /prop_tgt/LANG_CLANG_TIDY
    /prop_tgt/LANG_COMPILER_LAUNCHER
+   /prop_tgt/LANG_CPPLINT
    /prop_tgt/LANG_INCLUDE_WHAT_YOU_USE
    /prop_tgt/LANG_VISIBILITY_PRESET
    /prop_tgt/LIBRARY_OUTPUT_DIRECTORY_CONFIG
@@ -236,6 +238,7 @@ Properties on Targets
    /prop_tgt/MACOSX_BUNDLE
    /prop_tgt/MACOSX_FRAMEWORK_INFO_PLIST
    /prop_tgt/MACOSX_RPATH
+   /prop_tgt/MANUALLY_ADDED_DEPENDENCIES
    /prop_tgt/MAP_IMPORTED_CONFIG_CONFIG
    /prop_tgt/NAME
    /prop_tgt/NO_SONAME
@@ -291,7 +294,7 @@ Properties on Targets
    /prop_tgt/VS_SCC_PROJECTNAME
    /prop_tgt/VS_SCC_PROVIDER
    /prop_tgt/VS_SDK_REFERENCES
-   /prop_tgt/VS_USER_PROPS_CXX
+   /prop_tgt/VS_USER_PROPS
    /prop_tgt/VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION
    /prop_tgt/VS_WINRT_COMPONENT
    /prop_tgt/VS_WINRT_EXTENSIONS
@@ -357,9 +360,17 @@ Properties on Source Files
    /prop_sf/MACOSX_PACKAGE_LOCATION
    /prop_sf/OBJECT_DEPENDS
    /prop_sf/OBJECT_OUTPUTS
+   /prop_sf/SKIP_AUTOGEN
+   /prop_sf/SKIP_AUTOMOC
+   /prop_sf/SKIP_AUTORCC
+   /prop_sf/SKIP_AUTOUIC
    /prop_sf/SYMBOLIC
+   /prop_sf/VS_COPY_TO_OUT_DIR
+   /prop_sf/VS_CSHARP_tagname
    /prop_sf/VS_DEPLOYMENT_CONTENT
    /prop_sf/VS_DEPLOYMENT_LOCATION
+   /prop_sf/VS_INCLUDE_IN_VSIX
+   /prop_sf/VS_RESOURCE_GENERATOR
    /prop_sf/VS_SHADER_ENTRYPOINT
    /prop_sf/VS_SHADER_FLAGS
    /prop_sf/VS_SHADER_MODEL

@@ -83,6 +83,9 @@ following targets by setting the :variable:`CMAKE_AUTOMOC` variable.  The
 options to pass to ``moc``. The :variable:`CMAKE_AUTOMOC_MOC_OPTIONS`
 variable may be populated to pre-set the options for all following targets.
 
+Source C++ files can be excluded from :prop_tgt:`AUTOMOC` processing by
+enabling :prop_sf:`SKIP_AUTOMOC` or the broader :prop_sf:`SKIP_AUTOGEN`.
+
 .. _`Qt AUTOUIC`:
 
 AUTOUIC
@@ -149,6 +152,9 @@ result of linking with the :prop_tgt:`IMPORTED` target:
     Qt5::Widgets
   )
 
+Source files can be excluded from :prop_tgt:`AUTOUIC` processing by
+enabling :prop_sf:`SKIP_AUTOUIC` or the broader :prop_sf:`SKIP_AUTOGEN`.
+
 .. _`Qt AUTORCC`:
 
 AUTORCC
@@ -170,6 +176,9 @@ populated to pre-set the options for all following targets.  The
 :prop_sf:`AUTORCC_OPTIONS` source file property may be set on the
 ``<name>.qrc`` file to set particular options for the file.  This
 overrides options from the :prop_tgt:`AUTORCC_OPTIONS` target property.
+
+Source files can be excluded from :prop_tgt:`AUTORCC` processing by
+enabling :prop_sf:`SKIP_AUTORCC` or the broader :prop_sf:`SKIP_AUTOGEN`.
 
 qtmain.lib on Windows
 =====================

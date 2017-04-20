@@ -829,23 +829,31 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
     addedTests.insert(p.Name);
   }
 
-  // This is a lookup of fixture name to a list of indices into the
-  // final tests array for tests which require that fixture. It is
-  // needed at the end to populate dependencies of the cleanup tests
-  // in our final list of tests.
+  // These are lookups of fixture name to a list of indices into the final
+  // tests array for tests which require that fixture and tests which are
+  // setups for that fixture. They are needed at the end to populate
+  // dependencies of the cleanup tests in our final list of tests.
   std::map<std::string, std::vector<size_t> > fixtureRequirements;
+  std::map<std::string, std::vector<size_t> > setupFixturesAdded;
 
   // Use integer index for iteration because we append to
   // the tests vector as we go
   size_t fixtureTestsAdded = 0;
   std::set<std::string> addedFixtures;
   for (size_t i = 0; i < tests.size(); ++i) {
-    if (tests[i].FixturesRequired.empty()) {
-      continue;
-    }
-    // Must copy the set of fixtures because we may invalidate
+    // There are two things to do for each test:
+    //   1. For every fixture required by this test, record that fixture as
+    //      being required and create dependencies on that fixture's setup
+    //      tests.
+    //   2. Record all setup tests in the final test list so we can later make
+    //      cleanup tests in the test list depend on their associated setup
+    //      tests to enforce correct ordering.
+
+    // 1. Handle fixture requirements
+    //
+    // Must copy the set of fixtures required because we may invalidate
     // the tests array by appending to it
-    const std::set<std::string> fixtures = tests[i].FixturesRequired;
+    std::set<std::string> fixtures = tests[i].FixturesRequired;
     for (std::set<std::string>::const_iterator fixturesIt = fixtures.begin();
          fixturesIt != fixtures.end(); ++fixturesIt) {
 
@@ -908,32 +916,62 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
                            this->Quiet);
       }
     }
+
+    // 2. Record all setup fixtures included in the final list of tests
+    for (std::set<std::string>::const_iterator fixturesIt =
+           tests[i].FixturesSetup.begin();
+         fixturesIt != tests[i].FixturesSetup.end(); ++fixturesIt) {
+
+      const std::string& setupFixtureName = *fixturesIt;
+      if (setupFixtureName.empty()) {
+        continue;
+      }
+
+      setupFixturesAdded[setupFixtureName].push_back(i);
+    }
   }
 
   // Now that we have the final list of tests, we can update all cleanup
-  // tests to depend on those tests which require that fixture
+  // tests to depend on those tests which require that fixture and on any
+  // setup tests for that fixture. The latter is required to handle the
+  // pathological case where setup and cleanup tests are in the test set
+  // but no other test has that fixture as a requirement.
   for (ListOfTests::iterator tIt = tests.begin(); tIt != tests.end(); ++tIt) {
     cmCTestTestProperties& p = *tIt;
     const std::set<std::string>& cleanups = p.FixturesCleanup;
     for (std::set<std::string>::const_iterator fIt = cleanups.begin();
          fIt != cleanups.end(); ++fIt) {
       const std::string& fixture = *fIt;
+
+      // This cleanup test could be part of the original test list that was
+      // passed in. It is then possible that no other test requires the
+      // fIt fixture, so we have to check for this.
       std::map<std::string, std::vector<size_t> >::const_iterator cIt =
         fixtureRequirements.find(fixture);
-      if (cIt == fixtureRequirements.end()) {
-        // No test cases require the fixture this cleanup test is for.
-        // This cleanup test must have been part of the original test
-        // list passed in (which is not an error)
-        continue;
+      if (cIt != fixtureRequirements.end()) {
+        const std::vector<size_t>& indices = cIt->second;
+        for (std::vector<size_t>::const_iterator indexIt = indices.begin();
+             indexIt != indices.end(); ++indexIt) {
+          const std::string& reqTestName = tests[*indexIt].Name;
+          if (std::find(p.Depends.begin(), p.Depends.end(), reqTestName) ==
+              p.Depends.end()) {
+            p.Depends.push_back(reqTestName);
+          }
+        }
       }
 
-      const std::vector<size_t>& indices = cIt->second;
-      for (std::vector<size_t>::const_iterator indexIt = indices.begin();
-           indexIt != indices.end(); ++indexIt) {
-        const std::string& reqTestName = tests[*indexIt].Name;
-        if (std::find(p.Depends.begin(), p.Depends.end(), reqTestName) ==
-            p.Depends.end()) {
-          p.Depends.push_back(reqTestName);
+      // Ensure fixture cleanup tests always run after their setup tests, even
+      // if no other test cases require the fixture
+      cIt = setupFixturesAdded.find(fixture);
+      if (cIt != setupFixturesAdded.end()) {
+        const std::vector<size_t>& indices = cIt->second;
+        for (std::vector<size_t>::const_iterator indexIt = indices.begin();
+             indexIt != indices.end(); ++indexIt) {
+          const std::string& setupTestName = tests[*indexIt].Name;
+          if (std::find(p.Depends.begin(), p.Depends.end(), setupTestName) ==
+              p.Depends.end()) {
+            p.Depends.push_back(setupTestName);
+          }
         }
       }
     }

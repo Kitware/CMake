@@ -60,6 +60,27 @@ public:
   /// Filename for a logo
   std::string Logo;
 
+  /// Filename for a watermark
+  std::string Watermark;
+
+  /// Filename for a banner
+  std::string Banner;
+
+  /// Filename for a background
+  std::string Background;
+
+  /// Wizard style name
+  std::string WizardStyle;
+
+  /// Wizard width
+  std::string WizardDefaultWidth;
+
+  /// Wizard height
+  std::string WizardDefaultHeight;
+
+  /// Title color
+  std::string TitleColor;
+
   /// Name of the default program group in the Windows Start menu
   std::string StartMenuDir;
 
@@ -110,6 +131,10 @@ public:
 
 protected:
   void WriteGeneratedByToStrim(cmXMLWriter& xout);
+
+private:
+  void printSkippedOptionWarning(const std::string& optionName,
+                                 const std::string& optionValue);
 };
 
 #endif // cmCPackIFWInstaller_h

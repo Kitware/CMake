@@ -59,6 +59,12 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
   return fout.str();
 }
 
+std::string cmLinkLineDeviceComputer::GetLinkerLanguage(cmGeneratorTarget*,
+                                                        std::string const&)
+{
+  return "CUDA";
+}
+
 cmNinjaLinkLineDeviceComputer::cmNinjaLinkLineDeviceComputer(
   cmOutputConverter* outputConverter, cmStateDirectory stateDir,
   cmGlobalNinjaGenerator const* gg)

@@ -37,6 +37,13 @@ Commit the merge with an informative message:
  the general GitSetup repository "setup" branch.
  ------------------------------------------------------------------------
 
+Optionally add to the project ".gitattributes" file the line
+
+ /Utilities/GitSetup export-ignore
+
+to exclude the GitSetup directory from inclusion by "git archive"
+since it does not make sense in source tarballs.
+
 
 Configuration
 -------------

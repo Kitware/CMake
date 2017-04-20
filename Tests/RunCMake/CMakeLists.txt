@@ -153,6 +153,9 @@ add_RunCMake_test(TargetPropertyGeneratorExpressions)
 add_RunCMake_test(Languages)
 add_RunCMake_test(LinkStatic)
 add_RunCMake_test(ObjectLibrary)
+if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG AND CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
+  add_RunCMake_test(RuntimePath)
+endif()
 add_RunCMake_test(Swift)
 add_RunCMake_test(TargetObjects)
 add_RunCMake_test(TargetSources)
@@ -255,6 +258,11 @@ if(PKG_CONFIG_FOUND)
   add_RunCMake_test(FindPkgConfig)
 endif()
 
+find_package(GTK2 QUIET)
+if (GTK2_FOUND)
+  add_RunCMake_test(FindGTK2)
+endif()
+
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   add_RunCMake_test(include_external_msproject)
   if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([789]|10)" AND NOT CMAKE_VS_DEVENV_COMMAND)
@@ -271,8 +279,7 @@ if(XCODE_VERSION AND NOT "${XCODE_VERSION}" VERSION_LESS 3)
   add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION})
 endif()
 
-if(NOT XCODE
-    AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
+if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
     AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.0)
   add_RunCMake_test(Framework)
 endif()
@@ -340,12 +347,14 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   endif()
   add_executable(pseudo_tidy pseudo_tidy.c)
   add_executable(pseudo_iwyu pseudo_iwyu.c)
+  add_executable(pseudo_cpplint pseudo_cpplint.c)
   add_RunCMake_test(ClangTidy -DPSEUDO_TIDY=$<TARGET_FILE:pseudo_tidy>)
   add_RunCMake_test(IncludeWhatYouUse -DPSEUDO_IWYU=$<TARGET_FILE:pseudo_iwyu>)
+  add_RunCMake_test(Cpplint -DPSEUDO_CPPLINT=$<TARGET_FILE:pseudo_cpplint>)
   add_RunCMake_test(CompilerLauncher)
 endif()
 
-add_RunCMake_test_group(CPack "DEB;RPM;TGZ")
+add_RunCMake_test_group(CPack "DEB;RPM;7Z;TBZ2;TGZ;TXZ;TZ;ZIP;STGZ")
 # add a test to make sure symbols are exported from a shared library
 # for MSVC compilers CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS property is used
 add_RunCMake_test(AutoExportDll)

@@ -44,9 +44,10 @@ endif ()
 #
 function(CUDA_DETECT_INSTALLED_GPUS OUT_VARIABLE)
   if(NOT CUDA_GPU_DETECT_OUTPUT)
-    set(cufile ${PROJECT_BINARY_DIR}/detect_cuda_archs.cu)
+    set(file ${PROJECT_BINARY_DIR}/detect_cuda_compute_capabilities.cpp)
 
-    file(WRITE ${cufile} ""
+    file(WRITE ${file} ""
+      "#include <cuda_runtime.h>\n"
       "#include <cstdio>\n"
       "int main()\n"
       "{\n"
@@ -62,14 +63,15 @@ function(CUDA_DETECT_INSTALLED_GPUS OUT_VARIABLE)
       "  return 0;\n"
       "}\n")
 
-    execute_process(COMMAND "${CUDA_NVCC_EXECUTABLE}" "--run" "${cufile}"
-                    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/CMakeFiles/"
-                    RESULT_VARIABLE nvcc_res OUTPUT_VARIABLE nvcc_out
-                    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    try_run(run_result compile_result ${PROJECT_BINARY_DIR} ${file}
+            CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${CUDA_INCLUDE_DIRS}"
+            LINK_LIBRARIES ${CUDA_LIBRARIES}
+            RUN_OUTPUT_VARIABLE compute_capabilities)
 
-    if(nvcc_res EQUAL 0)
-      string(REPLACE "2.1" "2.1(2.0)" nvcc_out "${nvcc_out}")
-      set(CUDA_GPU_DETECT_OUTPUT ${nvcc_out} CACHE INTERNAL "Returned GPU architetures from detect_gpus tool" FORCE)
+    if(run_result EQUAL 0)
+      string(REPLACE "2.1" "2.1(2.0)" compute_capabilities "${compute_capabilities}")
+      set(CUDA_GPU_DETECT_OUTPUT ${compute_capabilities}
+        CACHE INTERNAL "Returned GPU architectures from detect_gpus tool" FORCE)
     endif()
   endif()
 
@@ -110,6 +112,7 @@ function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
   list(REMOVE_DUPLICATES CUDA_ARCH_LIST)
   foreach(arch_name ${CUDA_ARCH_LIST})
     set(arch_bin)
+    set(arch_ptx)
     set(add_ptx FALSE)
     # Check to see if we are compiling PTX
     if(arch_name MATCHES "(.*)\\+PTX$")

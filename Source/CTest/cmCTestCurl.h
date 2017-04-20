@@ -25,6 +25,7 @@ public:
   void SetCurlOptions(std::vector<std::string> const& args);
   void SetUseHttp10On() { this->UseHttp10 = true; }
   void SetTimeOutSeconds(int s) { this->TimeOutSeconds = s; }
+  void SetQuiet(bool b) { this->Quiet = b; }
   std::string Escape(std::string const& source);
 
 protected:
@@ -40,6 +41,7 @@ private:
   bool VerifyHostOff;
   bool VerifyPeerOff;
   bool UseHttp10;
+  bool Quiet;
   int TimeOutSeconds;
 };
 

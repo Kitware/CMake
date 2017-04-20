@@ -721,14 +721,6 @@
 # Debuginfo packages contain debug symbols and sources for debugging packaged
 # binaries.
 #
-# .. note::
-#
-#  Currently multiple debuginfo packages are generated if component based
-#  packaging is used - one debuginfo package per component. This duplicates
-#  sources if multiple binaries are using them. This is a side effect of
-#  how CPackRPM currently generates component packages and will be addressed
-#  in later versions of the generator.
-#
 # Debuginfo RPM packaging has it's own set of variables:
 #
 # .. variable:: CPACK_RPM_DEBUGINFO_PACKAGE
@@ -1472,8 +1464,8 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
           string(LENGTH "${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}" debuginfo_dir_len)
           if(source_dir_len_ LESS debuginfo_dir_len)
             message(FATAL_ERROR "CPackRPM: source dir path '${source_dir_}' is"
-              " longer than debuginfo sources dir path '${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}'!"
-              " Source dir path must be shorter than debuginfo sources dir path."
+              " shorter than debuginfo sources dir path '${CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX}/src_${index_}'!"
+              " Source dir path must be longer than debuginfo sources dir path."
               " Set CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX variable to a shorter value"
               " or make source dir path longer."
               " Required for debuginfo packaging. See documentation of"
@@ -2141,7 +2133,9 @@ function(cpack_rpm_generate_package)
         if(CPACK_RPM_DEBUGINFO_PACKAGE)
           # only add current package files to debuginfo list if debuginfo
           # generation is enabled for current package
-          set(install_files_ "${CPACK_RPM_INSTALL_FILES}")
+          string(STRIP "${CPACK_RPM_INSTALL_FILES}" install_files_)
+          string(REPLACE "\n" ";" install_files_ "${install_files_}")
+          string(REPLACE "\"" "" install_files_ "${install_files_}")
         else()
           unset(install_files_)
         endif()
@@ -2199,7 +2193,11 @@ function(cpack_rpm_generate_package)
 
         cpack_rpm_debugsymbol_check("${install_files_}" "${WDIR}")
       else()
-        cpack_rpm_debugsymbol_check("${CPACK_RPM_INSTALL_FILES}" "${WDIR}")
+        string(STRIP "${CPACK_RPM_INSTALL_FILES}" install_files_)
+        string(REPLACE "\n" ";" install_files_ "${install_files_}")
+        string(REPLACE "\"" "" install_files_ "${install_files_}")
+
+        cpack_rpm_debugsymbol_check("${install_files_}" "${WDIR}")
       endif()
 
       if(TMP_DEBUGINFO_ADDITIONAL_SOURCES)
@@ -2473,8 +2471,8 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
     # We should generate a USER spec file template:
     #  - either because the user asked for it : CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE
     #  - or the user did not provide one : NOT CPACK_RPM_USER_BINARY_SPECFILE
+    set(RPMBUILD_FLAGS "-bb")
     if(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE OR NOT CPACK_RPM_USER_BINARY_SPECFILE)
-      set(RPMBUILD_FLAGS "-bb")
 
       file(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
         "# -*- rpm-spec -*-

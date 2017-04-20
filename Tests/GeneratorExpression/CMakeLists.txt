@@ -145,13 +145,13 @@ add_library(imported1 SHARED IMPORTED)
 set_property(TARGET imported1 PROPERTY IMPORTED_LOCATION_RELEASE release_loc)
 set_property(TARGET imported1 PROPERTY IMPORTED_LOCATION_DEBUG debug_loc)
 set_property(TARGET imported1 PROPERTY IMPORTED_CONFIGURATIONS RELEASE DEBUG)
-set_property(TARGET imported1 PROPERTY INTERFACE_INCLUDE_DIRECTORIES /imported1/include)
+set_property(TARGET imported1 PROPERTY INTERFACE_INCLUDE_DIRECTORIES "/imported1/include/with space")
 
 add_library(imported2 SHARED IMPORTED)
 set_property(TARGET imported2 PROPERTY IMPORTED_LOCATION_RELEASE release_loc)
 set_property(TARGET imported2 PROPERTY IMPORTED_LOCATION_DEBUG debug_loc)
 set_property(TARGET imported2 PROPERTY IMPORTED_CONFIGURATIONS RELEASE DEBUG)
-set_property(TARGET imported2 PROPERTY INTERFACE_INCLUDE_DIRECTORIES /imported2/include)
+set_property(TARGET imported2 PROPERTY INTERFACE_INCLUDE_DIRECTORIES "/imported2/include/with space")
 
 add_library(imported3 SHARED IMPORTED)
 set_property(TARGET imported3 PROPERTY IMPORTED_LOCATION_RELEASE release_loc)
@@ -161,6 +161,10 @@ set_property(TARGET imported3 APPEND PROPERTY
   INTERFACE_INCLUDE_DIRECTORIES $<$<CONFIG:DEBUG>:$<TARGET_PROPERTY:imported1,INTERFACE_INCLUDE_DIRECTORIES>>)
 set_property(TARGET imported3 APPEND PROPERTY
   INTERFACE_INCLUDE_DIRECTORIES $<$<CONFIG:RELEASE>:$<TARGET_PROPERTY:imported2,INTERFACE_INCLUDE_DIRECTORIES>>)
+set_property(TARGET imported3 APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES $<$<CONFIG:RELWITHDEBINFO>:$<TARGET_PROPERTY:imported2,INTERFACE_INCLUDE_DIRECTORIES>>)
+set_property(TARGET imported3 APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES $<$<CONFIG:MINSIZEREL>:$<TARGET_PROPERTY:imported2,INTERFACE_INCLUDE_DIRECTORIES>>)
 
 add_library(imported4 SHARED IMPORTED)
 set_property(TARGET imported4 APPEND PROPERTY
@@ -187,10 +191,7 @@ add_custom_target(check-part3 ALL
     -Dtest_version_equal_1=$<VERSION_EQUAL:1.0.1,1.1>
     -Dtest_version_equal_2=$<VERSION_EQUAL:1.1,1.1>
     -Dconfig=$<CONFIGURATION>
-    -Dtest_imported_debug=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
-    -Dtest_imported_release=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
-    -Dtest_imported_relwithdebinfo=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
-    -Dtest_imported_minsizerel=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
+    -Dtest_imported_includes=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
     -Dtest_imported_fallback=$<STREQUAL:$<TARGET_FILE_NAME:importedFallback>,fallback_loc>
     -Dtest_alias_file_exe=$<STREQUAL:$<TARGET_FILE:Alias::SomeExe>,$<TARGET_FILE:someexe>>
     -Dtest_alias_file_lib=$<STREQUAL:$<TARGET_FILE:Alias::SomeLib>,$<TARGET_FILE:empty1>>
@@ -246,6 +247,10 @@ add_custom_target(check-part4 ALL
     # CMake as command-line argument
     -Dtest_shell_path=${path_prefix}$<SHELL_PATH:${test_shell_path}>
     -Dpath_prefix=${path_prefix}
+    -Dif_1=$<IF:1,a,b>
+    -Dif_2=$<IF:0,a,b>
+    -Dif_3=$<IF:$<EQUAL:10,30>,a,b>
+    -Dif_4=$<IF:$<EQUAL:30,30>,a,b>
     -DWIN32=${WIN32}
     -DCMAKE_GENERATOR=${CMAKE_GENERATOR}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part4.cmake

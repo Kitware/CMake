@@ -1,9 +1,9 @@
 FRAMEWORK
 ---------
 
-Build ``SHARED`` library as Framework Bundle on the OS X and iOS.
+Build ``SHARED`` or ``STATIC`` library as Framework Bundle on the OS X and iOS.
 
-If a ``SHARED`` library target has this property set to ``TRUE`` it will be
+If such a library target has this property set to ``TRUE`` it will be
 built as a framework when built on the OS X and iOS.  It will have the
 directory structure required for a framework and will be suitable to
 be used with the ``-framework`` option

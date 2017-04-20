@@ -914,7 +914,7 @@ function(cpack_deb_prepare_package_vars)
         extract_so_info("${_FILE}" libname soversion)
         if(libname AND soversion)
           list(APPEND CPACK_DEBIAN_PACKAGE_SHLIBS_LIST
-               "${libname} ${soversion} ${CPACK_DEBIAN_PACKAGE_NAME} (${CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY} ${CPACK_PACKAGE_VERSION})")
+               "${libname} ${soversion} ${CPACK_DEBIAN_PACKAGE_NAME} (${CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY} ${CPACK_DEBIAN_PACKAGE_VERSION})")
         else()
           message(AUTHOR_WARNING "Shared library '${_FILE}' is missing soname or soversion. Library will not be added to DEBIAN/shlibs control file.")
         endif()
@@ -967,7 +967,7 @@ function(cpack_deb_prepare_package_vars)
       # Patch package file name to be in corrent debian format:
       # <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
       set(CPACK_OUTPUT_FILE_NAME
-        "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
+        "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_DEBIAN_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
     else()
       cmake_policy(PUSH)
         cmake_policy(SET CMP0010 NEW)

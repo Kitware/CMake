@@ -29,6 +29,19 @@ die 'The following changes add lines too long for our C++ style:
 
 Use lines strictly less than '"$line_too_long"' characters in C++ code.'
 
+#-----------------------------------------------------------------------------
+
+# Check that development setup is up-to-date.
+lastSetupForDevelopment=$(git config --get hooks.SetupForDevelopment || echo 0)
+eval $(grep '^SetupForDevelopment_VERSION=' "${BASH_SOURCE%/*}/../SetupForDevelopment.sh")
+test -n "$SetupForDevelopment_VERSION" || SetupForDevelopment_VERSION=0
+if test $lastSetupForDevelopment -lt $SetupForDevelopment_VERSION; then
+  die 'Developer setup in this work tree is out of date.  Please re-run
+
+  Utilities/SetupForDevelopment.sh
+'
+fi
+
 #-------------------------------------------------------------------------------
 if test -z "$HOOKS_ALLOW_KWSYS"; then
   # Disallow changes to KWSys

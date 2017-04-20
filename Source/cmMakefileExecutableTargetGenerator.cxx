@@ -104,10 +104,12 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 
   // Get the language to use for linking this library.
   std::string linkLanguage = "CUDA";
+  std::string const objExt =
+    this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
 
   // Get the name of the device object to generate.
   std::string const targetOutputReal =
-    this->GeneratorTarget->ObjectDirectory + "cmake_device_link.o";
+    this->GeneratorTarget->ObjectDirectory + "cmake_device_link" + objExt;
   this->DeviceLinkObject = targetOutputReal;
 
   this->NumberOfProgressActions++;
@@ -154,15 +156,6 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
   this->LocalGenerator->AppendFlags(
     linkFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
-
-  {
-    CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
-      this->CreateLinkLineComputer(
-        this->LocalGenerator,
-        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
-
-    this->AddModuleDefinitionFlag(linkLineComputer.get(), linkFlags);
-  }
 
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
@@ -228,6 +221,11 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
         this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutputReal),
       output);
 
+    std::string targetFullPathCompilePDB = this->ComputeTargetCompilePDB();
+    std::string targetOutPathCompilePDB =
+      this->LocalGenerator->ConvertToOutputFormat(targetFullPathCompilePDB,
+                                                  cmOutputConverter::SHELL);
+
     vars.Language = linkLanguage.c_str();
     vars.Objects = buildObjs.c_str();
     vars.ObjectDir = objectDir.c_str();
@@ -235,6 +233,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     vars.LinkLibraries = linkLibs.c_str();
     vars.Flags = flags.c_str();
     vars.LinkFlags = linkFlags.c_str();
+    vars.TargetCompilePDB = targetOutPathCompilePDB.c_str();
 
     std::string launcher;
 

@@ -2,7 +2,7 @@
 # Reference: http://clang.llvm.org/cxx_status.html
 # http://clang.llvm.org/docs/LanguageExtensions.html
 
-set(_cmake_oldestSupported "((__clang_major__ * 100) + __clang_minor__) >= 304")
+set(_cmake_oldestSupported "((__clang_major__ * 100) + __clang_minor__) >= 301")
 
 include("${CMAKE_CURRENT_LIST_DIR}/Clang-CXX-TestableFeatures.cmake")
 
@@ -15,7 +15,6 @@ set(_cmake_feature_test_cxx_digit_separators "${Clang34_CXX14}")
 # http://llvm.org/bugs/show_bug.cgi?id=19674
 set(_cmake_feature_test_cxx_generic_lambdas "${Clang34_CXX14}")
 
-# TODO: Should be supported by Clang 3.1
 set(Clang31_CXX11 "${_cmake_oldestSupported} && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_enum_forward_declarations "${Clang31_CXX11}")
 set(_cmake_feature_test_cxx_sizeof_member "${Clang31_CXX11}")

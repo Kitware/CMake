@@ -439,7 +439,7 @@ macro(QT4_CREATE_TRANSLATION _qm_files)
          get_filename_component(_abs_include "${_pro_include}" ABSOLUTE)
          string(APPEND _pro_includes " \\\n  \"${_abs_include}\"")
        endforeach()
-       file(WRITE ${_ts_pro} "SOURCES =${_pro_srcs}\nINCLUDEPATH =${_pro_includes}\n")
+       file(GENERATE OUTPUT ${_ts_pro} CONTENT "SOURCES =${_pro_srcs}\nINCLUDEPATH =${_pro_includes}\n")
      endif()
      add_custom_command(OUTPUT ${_ts_file}
         COMMAND Qt4::lupdate

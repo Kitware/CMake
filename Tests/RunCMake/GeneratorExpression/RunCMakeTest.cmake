@@ -1,5 +1,6 @@
 include(RunCMake)
 
+run_cmake(BadIF)
 run_cmake(BadCONFIG)
 run_cmake(BadOR)
 run_cmake(BadAND)

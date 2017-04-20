@@ -33,8 +33,15 @@
 #      all the possibilities
 #   BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
 #
-# ## List of vendors (BLA_VENDOR) valid in this module # Intel(mkl),
-# OpenBLAS, ACML,Apple, NAS, Generic
+# List of vendors (BLA_VENDOR) valid in this module:
+#
+# * Intel(mkl)
+# * OpenBLAS
+# * ACML
+# * Apple
+# * NAS
+# * Generic
+#
 
 set(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 

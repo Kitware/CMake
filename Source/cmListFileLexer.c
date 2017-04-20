@@ -2518,7 +2518,7 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer)
 }
 
 /*--------------------------------------------------------------------------*/
-cmListFileLexer* cmListFileLexer_New()
+cmListFileLexer* cmListFileLexer_New(void)
 {
   cmListFileLexer* lexer = (cmListFileLexer*)malloc(sizeof(cmListFileLexer));
   if (!lexer) {
