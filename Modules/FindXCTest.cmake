@@ -123,6 +123,10 @@ function(xctest_add_bundle target testee)
     # testee is a Framework
     target_link_libraries(${target} PRIVATE ${testee})
 
+  elseif(_testee_type STREQUAL "STATIC_LIBRARY")
+    # testee is a static library
+    target_link_libraries(${target} PRIVATE ${testee})
+
   elseif(_testee_type STREQUAL "EXECUTABLE" AND _testee_macosx_bundle)
     # testee is an App Bundle
     add_dependencies(${target} ${testee})
