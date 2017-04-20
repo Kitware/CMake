@@ -767,6 +767,17 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
 
     ddOutputs.push_back(this->GetDyndepFilePath("Fortran"));
 
+    // Make sure dyndep files for all our dependencies have already
+    // been generated so that the 'FortranModules.json' files they
+    // produced as side-effects are available for us to read.
+    // Ideally we should depend on the 'FortranModules.json' files
+    // from our dependencies directly, but we don't know which of
+    // our dependencies produces them.  Fixing this will require
+    // refactoring the Ninja generator to generate targets in
+    // dependency order so that we can collect the needed information.
+    this->GetLocalGenerator()->AppendTargetDepends(this->GeneratorTarget,
+                                                   ddOrderOnlyDeps);
+
     this->GetGlobalGenerator()->WriteBuild(
       this->GetBuildFileStream(), ddComment, ddRule, ddOutputs, ddImplicitOuts,
       ddExplicitDeps, ddImplicitDeps, ddOrderOnlyDeps, ddVars);
