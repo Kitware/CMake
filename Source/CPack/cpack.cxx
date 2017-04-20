@@ -23,7 +23,6 @@
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cm_auto_ptr.hxx"
@@ -193,7 +192,6 @@ int main(int argc, char const* const* argv)
   cminst.SetHomeDirectory("");
   cminst.SetHomeOutputDirectory("");
   cminst.GetCurrentSnapshot().SetDefaultDefinitions();
-  cminst.GetState()->RemoveUnscriptableCommands();
   cmGlobalGenerator cmgg(&cminst);
   CM_AUTO_PTR<cmMakefile> globalMF(
     new cmMakefile(&cmgg, cminst.GetCurrentSnapshot()));

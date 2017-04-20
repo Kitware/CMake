@@ -290,10 +290,6 @@ void cmCTestScriptHandler::CreateCMake()
 
   this->CMake->SetProgressCallback(ctestScriptProgressCallback, this->CTest);
 
-  // remove all cmake commands which are not scriptable, since they can't be
-  // used in ctest scripts
-  this->CMake->GetState()->RemoveUnscriptableCommands();
-
   // add any ctest specific commands, probably should have common superclass
   // for ctest commands to clean this up. If a couple more commands are
   // created with the same format lets do that - ken

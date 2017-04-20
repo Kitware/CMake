@@ -410,21 +410,6 @@ void cmState::AddCommand(cmCommand* command)
   this->Commands.insert(std::make_pair(name, command));
 }
 
-void cmState::RemoveUnscriptableCommands()
-{
-  std::vector<std::string> unscriptableCommands;
-  for (std::map<std::string, cmCommand*>::iterator pos =
-         this->Commands.begin();
-       pos != this->Commands.end();) {
-    if (!pos->second->IsScriptable()) {
-      delete pos->second;
-      this->Commands.erase(pos++);
-    } else {
-      ++pos;
-    }
-  }
-}
-
 cmCommand* cmState::GetCommand(std::string const& name) const
 {
   cmCommand* command = CM_NULLPTR;
