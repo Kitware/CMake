@@ -188,9 +188,8 @@ protected:
           if (qstart == std::string::npos) {
             cmSystemTools::Error("unknown include directive ", line.c_str());
             continue;
-          } else {
-            qend = line.find('>', qstart + 1);
           }
+          qend = line.find('>', qstart + 1);
         } else {
           qend = line.find('\"', qstart + 1);
         }

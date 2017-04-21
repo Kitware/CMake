@@ -764,9 +764,8 @@ void cmCursesMainForm::HandleInput()
       // quit
       if (key == 'q') {
         break;
-      } else {
-        continue;
       }
+      continue;
     }
 
     currentField = current_field(this->Form);
@@ -826,7 +825,7 @@ void cmCursesMainForm::HandleInput()
       // (index always corresponds to the value field)
       // scroll down with arrow down, ctrl+n (emacs binding), or j (vim
       // binding)
-      else if (key == KEY_DOWN || key == ctrl('n') || key == 'j') {
+      if (key == KEY_DOWN || key == ctrl('n') || key == 'j') {
         FIELD* cur = current_field(this->Form);
         size_t findex = field_index(cur);
         if (findex == 3 * this->NumberOfVisibleEntries - 1) {

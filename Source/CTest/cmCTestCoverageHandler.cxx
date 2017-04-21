@@ -2222,7 +2222,8 @@ void cmCTestCoverageHandler::LoadLabels(const char* dir)
     if (line.empty() || line[0] == '#') {
       // Ignore blank and comment lines.
       continue;
-    } else if (line[0] == ' ') {
+    }
+    if (line[0] == ' ') {
       // Label lines appear indented by one space.
       std::string label = line.substr(1);
       int id = this->GetLabelId(label);

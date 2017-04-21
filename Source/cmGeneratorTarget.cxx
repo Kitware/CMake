@@ -3933,15 +3933,14 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
             << theTarget->GetName() << "\".\n";
           cmSystemTools::Error(e.str().c_str());
           break;
-        } else {
-          propContent = consistent.second;
-          continue;
         }
-      } else {
-        // Explicitly set on target and not set in iface. Can't disagree.
+        propContent = consistent.second;
         continue;
       }
-    } else if (impliedByUse) {
+      // Explicitly set on target and not set in iface. Can't disagree.
+      continue;
+    }
+    if (impliedByUse) {
       propContent = impliedValue<PropertyType>(propContent);
 
       if (ifaceIsSet) {
@@ -3959,43 +3958,36 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
             << "\" is in conflict.\n";
           cmSystemTools::Error(e.str().c_str());
           break;
-        } else {
-          propContent = consistent.second;
-          continue;
         }
-      } else {
-        // Implicitly set on target and not set in iface. Can't disagree.
+        propContent = consistent.second;
         continue;
       }
+      // Implicitly set on target and not set in iface. Can't disagree.
+      continue;
+    }
+    if (ifaceIsSet) {
+      if (propInitialized) {
+        std::pair<bool, PropertyType> consistent =
+          consistentProperty(propContent, ifacePropContent, t);
+        report += reportEntry;
+        report += compatibilityAgree(t, propContent != consistent.second);
+        if (!consistent.first) {
+          std::ostringstream e;
+          e << "The INTERFACE_" << p << " property of \""
+            << theTarget->GetName() << "\" does\nnot agree with the value of "
+            << p << " already determined\nfor \"" << tgt->GetName() << "\".\n";
+          cmSystemTools::Error(e.str().c_str());
+          break;
+        }
+        propContent = consistent.second;
+        continue;
+      }
+      report += reportEntry + "(Interface set)\n";
+      propContent = ifacePropContent;
+      propInitialized = true;
     } else {
-      if (ifaceIsSet) {
-        if (propInitialized) {
-          std::pair<bool, PropertyType> consistent =
-            consistentProperty(propContent, ifacePropContent, t);
-          report += reportEntry;
-          report += compatibilityAgree(t, propContent != consistent.second);
-          if (!consistent.first) {
-            std::ostringstream e;
-            e << "The INTERFACE_" << p << " property of \""
-              << theTarget->GetName() << "\" does\nnot agree with the value "
-                                         "of "
-              << p << " already determined\nfor \"" << tgt->GetName()
-              << "\".\n";
-            cmSystemTools::Error(e.str().c_str());
-            break;
-          } else {
-            propContent = consistent.second;
-            continue;
-          }
-        } else {
-          report += reportEntry + "(Interface set)\n";
-          propContent = ifacePropContent;
-          propInitialized = true;
-        }
-      } else {
-        // Not set. Nothing to agree on.
-        continue;
-      }
+      // Not set. Nothing to agree on.
+      continue;
     }
   }
 
