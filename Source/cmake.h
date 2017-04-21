@@ -409,7 +409,7 @@ public:
   void WatchUnusedCli(const std::string& var);
 
   cmState* GetState() const { return this->State; }
-  void SetCurrentSnapshot(cmStateSnapshot snapshot)
+  void SetCurrentSnapshot(cmStateSnapshot const& snapshot)
   {
     this->CurrentSnapshot = snapshot;
   }
