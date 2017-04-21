@@ -32,11 +32,6 @@ public:
     , Target(t)
   {
   }
-  cmLinkItem(cmLinkItem const& r)
-    : std_string(r)
-    , Target(r.Target)
-  {
-  }
   cmGeneratorTarget const* Target;
 };
 
