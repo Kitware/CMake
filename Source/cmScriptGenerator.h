@@ -35,7 +35,7 @@ private:
   int Level;
 };
 inline std::ostream& operator<<(std::ostream& os,
-                                cmScriptGeneratorIndent const& indent)
+                                cmScriptGeneratorIndent indent)
 {
   indent.Write(os);
   return os;
@@ -58,12 +58,12 @@ public:
 protected:
   typedef cmScriptGeneratorIndent Indent;
   virtual void GenerateScript(std::ostream& os);
-  virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
-  virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
+  virtual void GenerateScriptConfigs(std::ostream& os, Indent indent);
+  virtual void GenerateScriptActions(std::ostream& os, Indent indent);
   virtual void GenerateScriptForConfig(std::ostream& os,
                                        const std::string& config,
-                                       Indent const& indent);
-  virtual void GenerateScriptNoConfig(std::ostream&, Indent const&) {}
+                                       Indent indent);
+  virtual void GenerateScriptNoConfig(std::ostream&, Indent) {}
   virtual bool NeedsScriptNoConfig() const { return false; }
 
   // Test if this generator does something for a given configuration.
@@ -90,8 +90,8 @@ private:
   cmScriptGenerator(cmScriptGenerator const&);
   cmScriptGenerator& operator=(cmScriptGenerator const&);
 
-  void GenerateScriptActionsOnce(std::ostream& os, Indent const& indent);
-  void GenerateScriptActionsPerConfig(std::ostream& os, Indent const& indent);
+  void GenerateScriptActionsOnce(std::ostream& os, Indent indent);
+  void GenerateScriptActionsPerConfig(std::ostream& os, Indent indent);
 };
 
 #endif

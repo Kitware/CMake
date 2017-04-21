@@ -166,7 +166,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
 }
 
 void cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
-                                                     Indent const& indent)
+                                                     Indent indent)
 {
   // Create the main install rules first.
   this->cmInstallGenerator::GenerateScriptConfigs(os, indent);
@@ -189,7 +189,7 @@ void cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
 }
 
 void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
-                                                     Indent const& indent)
+                                                     Indent indent)
 {
   // Remove old per-configuration export files if the main changes.
   std::string installedDir = "$ENV{DESTDIR}";

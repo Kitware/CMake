@@ -48,7 +48,7 @@ void cmInstallDirectoryGenerator::Compute(cmLocalGenerator* lg)
 }
 
 void cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
-                                                        Indent const& indent)
+                                                        Indent indent)
 {
   if (this->ActionsPerConfig) {
     this->cmInstallGenerator::GenerateScriptActions(os, indent);
@@ -58,7 +58,7 @@ void cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
 }
 
 void cmInstallDirectoryGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent const& indent)
+  std::ostream& os, const std::string& config, Indent indent)
 {
   std::vector<std::string> dirs;
   cmGeneratorExpression ge;
@@ -82,7 +82,7 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
 }
 
 void cmInstallDirectoryGenerator::AddDirectoryInstallRule(
-  std::ostream& os, const std::string& config, Indent const& indent,
+  std::ostream& os, const std::string& config, Indent indent,
   std::vector<std::string> const& dirs)
 {
   // Write code to install the directories.
