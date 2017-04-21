@@ -133,16 +133,12 @@ public:
   bool SupportsPlatform() const CM_OVERRIDE { return false; }
 };
 
-cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(cmake* cm,
-                                               std::string const& version)
+cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(
+  cmake* cm, std::string const& version_string, unsigned int version_number)
   : cmGlobalGenerator(cm)
 {
-  this->VersionString = version;
-
-  // Compute an integer form of the version number.
-  unsigned int v[2] = { 0, 0 };
-  sscanf(this->VersionString.c_str(), "%u.%u", &v[0], &v[1]);
-  this->XcodeVersion = 10 * v[0] + v[1];
+  this->VersionString = version_string;
+  this->XcodeVersion = version_number;
 
   this->RootObject = 0;
   this->MainGroupChildren = 0;
@@ -189,8 +185,15 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
     parser.ParseFile(
       "/Developer/Applications/Xcode.app/Contents/version.plist");
   }
+  std::string const& version_string = parser.Version;
+
+  // Compute an integer form of the version number.
+  unsigned int v[2] = { 0, 0 };
+  sscanf(version_string.c_str(), "%u.%u", &v[0], &v[1]);
+  unsigned int version_number = 10 * v[0] + v[1];
+
   CM_AUTO_PTR<cmGlobalXCodeGenerator> gg(
-    new cmGlobalXCodeGenerator(cm, parser.Version));
+    new cmGlobalXCodeGenerator(cm, version_string, version_number));
   if (gg->XcodeVersion == 20) {
     cmSystemTools::Message("Xcode 2.0 not really supported by cmake, "
                            "using Xcode 15 generator\n");
