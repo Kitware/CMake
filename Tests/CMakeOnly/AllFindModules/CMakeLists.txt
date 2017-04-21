@@ -1,9 +1,5 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.4) # new enough for CMP0017
 project(AllFindModules)
-
-if (POLICY CMP0017)
-  cmake_policy(SET CMP0017 NEW)
-endif ()
 
 # Avoid ctest truncation of output
 message(STATUS "CTEST_FULL_OUTPUT")
