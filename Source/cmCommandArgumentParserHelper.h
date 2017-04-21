@@ -60,6 +60,10 @@ public:
   char BSLASHVariable[3];
 
 private:
+  cmCommandArgumentParserHelper(cmCommandArgumentParserHelper const&);
+  cmCommandArgumentParserHelper& operator=(
+    cmCommandArgumentParserHelper const&);
+
   std::string::size_type InputBufferPos;
   std::string InputBuffer;
   std::vector<char> OutputBuffer;
