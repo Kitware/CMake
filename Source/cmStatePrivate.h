@@ -57,11 +57,6 @@ struct cmStateDetail::PolicyStackEntry : public cmPolicies::PolicyMap
     , Weak(w)
   {
   }
-  PolicyStackEntry(PolicyStackEntry const& r)
-    : derived(r)
-    , Weak(r.Weak)
-  {
-  }
   bool Weak;
 };
 
