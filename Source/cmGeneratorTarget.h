@@ -512,11 +512,6 @@ public:
       , MacFolder(CM_NULLPTR)
     {
     }
-    SourceFileFlags(SourceFileFlags const& r)
-      : Type(r.Type)
-      , MacFolder(r.MacFolder)
-    {
-    }
     SourceFileType Type;
     const char* MacFolder; // location inside Mac content folders
   };
