@@ -17,6 +17,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestBatchTestHandler.h"
 #include "cmCTestMultiProcessHandler.h"
@@ -495,7 +496,8 @@ int cmCTestTestHandler::ProcessHandler()
 
     for (SetOfTests::iterator ftit = resultsSet.begin();
          ftit != resultsSet.end(); ++ftit) {
-      if (ftit->CompletionStatus == "Disabled") {
+      if (cmHasLiteralPrefix(ftit->CompletionStatus, "SKIP_RETURN_CODE=") ||
+          ftit->CompletionStatus == "Disabled") {
         disabledTests.push_back(*ftit);
       }
     }
@@ -544,6 +546,7 @@ int cmCTestTestHandler::ProcessHandler()
       for (SetOfTests::iterator ftit = resultsSet.begin();
            ftit != resultsSet.end(); ++ftit) {
         if (ftit->Status != cmCTestTestHandler::COMPLETED &&
+            !cmHasLiteralPrefix(ftit->CompletionStatus, "SKIP_RETURN_CODE=") &&
             ftit->CompletionStatus != "Disabled") {
           ofs << ftit->TestCount << ":" << ftit->Name << std::endl;
           cmCTestLog(
