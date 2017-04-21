@@ -87,6 +87,9 @@ protected:
   bool ActionsPerConfig;
 
 private:
+  cmScriptGenerator(cmScriptGenerator const&);
+  cmScriptGenerator& operator=(cmScriptGenerator const&);
+
   void GenerateScriptActionsOnce(std::ostream& os, Indent const& indent);
   void GenerateScriptActionsPerConfig(std::ostream& os, Indent const& indent);
 };
