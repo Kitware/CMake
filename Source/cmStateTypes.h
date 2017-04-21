@@ -53,6 +53,12 @@ enum CacheEntryType
   STATIC,
   UNINITIALIZED
 };
+
+enum ArtifactType
+{
+  RuntimeBinaryArtifact,
+  ImportLibraryArtifact
+};
 }
 
 #endif

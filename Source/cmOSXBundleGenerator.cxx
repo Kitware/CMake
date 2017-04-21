@@ -7,6 +7,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
@@ -213,8 +214,8 @@ std::string cmOSXBundleGenerator::InitMacOSXContentDirectory(
 {
   // Construct the full path to the content subdirectory.
 
-  std::string macdir = this->GT->GetMacContentDirectory(this->ConfigName,
-                                                        /*implib*/ false);
+  std::string macdir = this->GT->GetMacContentDirectory(
+    this->ConfigName, cmStateEnums::RuntimeBinaryArtifact);
   macdir += "/";
   macdir += pkgloc;
   cmSystemTools::MakeDirectory(macdir.c_str());

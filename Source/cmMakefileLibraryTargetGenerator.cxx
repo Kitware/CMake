@@ -514,7 +514,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
     if (!targetNameImport.empty()) {
-      outpathImp = this->GeneratorTarget->GetDirectory(this->ConfigName, true);
+      outpathImp = this->GeneratorTarget->GetDirectory(
+        this->ConfigName, cmStateEnums::ImportLibraryArtifact);
       cmSystemTools::MakeDirectory(outpathImp.c_str());
       outpathImp += "/";
     }

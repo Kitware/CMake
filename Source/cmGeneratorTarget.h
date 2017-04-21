@@ -203,9 +203,12 @@ public:
 
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
-  std::string GetFullPath(const std::string& config = "", bool implib = false,
-                          bool realname = false) const;
-  std::string NormalGetFullPath(const std::string& config, bool implib,
+  std::string GetFullPath(
+    const std::string& config = "",
+    cmStateEnums::ArtifactType artifact = cmStateEnums::RuntimeBinaryArtifact,
+    bool realname = false) const;
+  std::string NormalGetFullPath(const std::string& config,
+                                cmStateEnums::ArtifactType artifact,
                                 bool realname) const;
   std::string NormalGetRealName(const std::string& config) const;
 
@@ -233,7 +236,8 @@ public:
   /** Get the full name of the target according to the settings in its
       makefile.  */
   std::string GetFullName(const std::string& config = "",
-                          bool implib = false) const;
+                          cmStateEnums::ArtifactType artifact =
+                            cmStateEnums::RuntimeBinaryArtifact) const;
 
   /** @return the Mac framework directory without the base. */
   std::string GetFrameworkDirectory(const std::string& config,
@@ -278,7 +282,8 @@ public:
   void GetFullNameComponents(std::string& prefix, std::string& base,
                              std::string& suffix,
                              const std::string& config = "",
-                             bool implib = false) const;
+                             cmStateEnums::ArtifactType artifact =
+                               cmStateEnums::RuntimeBinaryArtifact) const;
 
   /** Append to @a base the bundle directory hierarchy up to a certain @a level
    * and return it. */
@@ -287,8 +292,8 @@ public:
                                    BundleDirectoryLevel level) const;
 
   /** @return the mac content directory for this target. */
-  std::string GetMacContentDirectory(const std::string& config = CM_NULLPTR,
-                                     bool implib = false) const;
+  std::string GetMacContentDirectory(
+    const std::string& config, cmStateEnums::ArtifactType artifact) const;
 
   /** @return folder prefix for IDEs. */
   std::string GetEffectiveFolderName() const;
@@ -355,7 +360,7 @@ public:
     std::vector<cmGeneratorTarget*>& objlibs) const;
 
   std::string GetFullNameImported(const std::string& config,
-                                  bool implib) const;
+                                  cmStateEnums::ArtifactType artifact) const;
 
   /** Get source files common to all configurations and diagnose cases
       with per-config sources.  Excludes sources added by a TARGET_OBJECTS
@@ -415,7 +420,8 @@ public:
       subdirectory for that configuration.  Otherwise just the canonical
       output directory is given.  */
   std::string GetDirectory(const std::string& config = "",
-                           bool implib = false) const;
+                           cmStateEnums::ArtifactType artifact =
+                             cmStateEnums::RuntimeBinaryArtifact) const;
 
   /** Get the directory in which to place the target compiler .pdb file.
       If the configuration name is given then the generator will add its
@@ -429,7 +435,8 @@ public:
 
   /** Return whether this target uses the default value for its output
       directory.  */
-  bool UsesDefaultOutputDir(const std::string& config, bool implib) const;
+  bool UsesDefaultOutputDir(const std::string& config,
+                            cmStateEnums::ArtifactType artifact) const;
 
   // Cache target output paths for each configuration.
   struct OutputInfo
@@ -470,7 +477,8 @@ public:
   std::string GetCompilePDBPath(const std::string& config = "") const;
 
   // Get the target base name.
-  std::string GetOutputName(const std::string& config, bool implib) const;
+  std::string GetOutputName(const std::string& config,
+                            cmStateEnums::ArtifactType artifact) const;
 
   void AddSource(const std::string& src);
   void AddTracedSources(std::vector<std::string> const& srcs);
@@ -653,8 +661,9 @@ private:
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
 
   std::string GetFullNameInternal(const std::string& config,
-                                  bool implib) const;
-  void GetFullNameInternal(const std::string& config, bool implib,
+                                  cmStateEnums::ArtifactType artifact) const;
+  void GetFullNameInternal(const std::string& config,
+                           cmStateEnums::ArtifactType artifact,
                            std::string& outPrefix, std::string& outBase,
                            std::string& outSuffix) const;
 
@@ -662,7 +671,7 @@ private:
   mutable LinkClosureMapType LinkClosureMap;
 
   // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
-  const char* GetOutputTargetType(bool implib) const;
+  const char* GetOutputTargetType(cmStateEnums::ArtifactType artifact) const;
 
   void ComputeVersionedName(std::string& vName, std::string const& prefix,
                             std::string const& base, std::string const& suffix,
@@ -788,7 +797,8 @@ private:
 
   cmLinkImplementationLibraries const* GetLinkImplementationLibrariesInternal(
     const std::string& config, const cmGeneratorTarget* head) const;
-  bool ComputeOutputDir(const std::string& config, bool implib,
+  bool ComputeOutputDir(const std::string& config,
+                        cmStateEnums::ArtifactType artifact,
                         std::string& out) const;
 
   typedef std::map<std::string, OutputInfo> OutputInfoMapType;
@@ -800,7 +810,7 @@ private:
   void ComputeModuleDefinitionInfo(std::string const& config,
                                    ModuleDefinitionInfo& info) const;
 
-  typedef std::pair<std::string, bool> OutputNameKey;
+  typedef std::pair<std::string, cmStateEnums::ArtifactType> OutputNameKey;
   typedef std::map<OutputNameKey, std::string> OutputNameMapType;
   mutable OutputNameMapType OutputNameMap;
   mutable std::set<cmLinkItem> UtilityItems;

@@ -80,8 +80,10 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
       !(isFortran && target->GetType() == cmStateEnums::SHARED_LIBRARY)) {
     return pcc;
   }
-  std::string outDir = target->GetDirectory(config, false);
-  std::string impDir = target->GetDirectory(config, true);
+  std::string outDir =
+    target->GetDirectory(config, cmStateEnums::RuntimeBinaryArtifact);
+  std::string impDir =
+    target->GetDirectory(config, cmStateEnums::ImportLibraryArtifact);
   if (impDir == outDir) {
     return pcc;
   }

@@ -983,8 +983,8 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
     case cmStateEnums::SHARED_LIBRARY:
     case cmStateEnums::STATIC_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY: {
-      outputs.push_back(this->ConvertToNinjaPath(
-        target->GetFullPath(configName, false, realname)));
+      outputs.push_back(this->ConvertToNinjaPath(target->GetFullPath(
+        configName, cmStateEnums::RuntimeBinaryArtifact, realname)));
       break;
     }
     case cmStateEnums::OBJECT_LIBRARY:
