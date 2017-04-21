@@ -143,8 +143,8 @@ private:
                              const char* basePrefix,
                              const char* baseSuffix) const;
   bool MakeParentDirectory(const std::string& filename) const;
-  bool RunCommand(const std::vector<std::string>& command,
-                  std::string& output) const;
+  bool RunCommand(const std::vector<std::string>& command, std::string& output,
+                  bool verbose = true) const;
 
   bool FindHeader(std::string& header, const std::string& testBasePath) const;
 
@@ -177,6 +177,8 @@ private:
   // - Moc
   std::string MocCppFilenameRel;
   std::string MocCppFilenameAbs;
+  std::string MocPredefsFileRel;
+  std::string MocPredefsFileAbs;
   std::vector<std::string> MocSkipList;
   std::vector<std::string> MocIncludePaths;
   std::vector<std::string> MocIncludes;
@@ -198,6 +200,8 @@ private:
   MacroFilter MacroFilters[2];
   cmsys::RegularExpression RegExpMocInclude;
   cmsys::RegularExpression RegExpUicInclude;
+  // - moc_predefs
+  std::vector<std::string> MocPredefsCmd;
   // - Flags
   bool IncludeProjectDirsBefore;
   bool Verbose;

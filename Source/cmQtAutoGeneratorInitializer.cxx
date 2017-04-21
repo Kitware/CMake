@@ -96,6 +96,41 @@ static std::string GetQtMajorVersion(cmGeneratorTarget const* target)
   return qtMajorVersion;
 }
 
+static std::string GetQtMinorVersion(cmGeneratorTarget const* target,
+                                     const std::string& qtMajorVersion)
+{
+  cmMakefile* makefile = target->Target->GetMakefile();
+  std::string qtMinorVersion;
+  if (qtMajorVersion == "5") {
+    qtMinorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MINOR");
+  }
+  if (qtMinorVersion.empty()) {
+    qtMinorVersion = makefile->GetSafeDefinition("QT_VERSION_MINOR");
+  }
+
+  const char* targetQtVersion =
+    target->GetLinkInterfaceDependentStringProperty("QT_MINOR_VERSION", "");
+  if (targetQtVersion != CM_NULLPTR) {
+    qtMinorVersion = targetQtVersion;
+  }
+  return qtMinorVersion;
+}
+
+static bool QtVersionGreaterOrEqual(const std::string& major,
+                                    const std::string& minor,
+                                    unsigned long requestMajor,
+                                    unsigned long requestMinor)
+{
+  unsigned long majorUL(0);
+  unsigned long minorUL(0);
+  if (cmSystemTools::StringToULong(major.c_str(), &majorUL) &&
+      cmSystemTools::StringToULong(minor.c_str(), &minorUL)) {
+    return (majorUL > requestMajor) ||
+      (majorUL == requestMajor && minorUL >= requestMinor);
+  }
+  return false;
+}
+
 static void GetCompileDefinitionsAndDirectories(
   cmGeneratorTarget const* target, const std::string& config,
   std::string& incs, std::string& defs)
@@ -258,6 +293,12 @@ static void MocSetupAutoTarget(
   AddDefinitionEscaped(makefile, "_moc_depend_filters",
                        GetSafeProperty(target, "AUTOMOC_DEPEND_FILTERS"));
 
+  if (QtVersionGreaterOrEqual(
+        qtMajorVersion, GetQtMinorVersion(target, qtMajorVersion), 5, 8)) {
+    AddDefinitionEscaped(
+      makefile, "_moc_predefs_cmd",
+      makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_PREDEFINES_COMMAND"));
+  }
   // Moc includes and compile definitions
   {
     std::string _moc_incs;
