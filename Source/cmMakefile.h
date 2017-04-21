@@ -717,6 +717,8 @@ public:
     }
     ~ScopePushPop() { this->Makefile->PopScope(); }
   private:
+    ScopePushPop(ScopePushPop const&);
+    ScopePushPop& operator=(ScopePushPop const&);
     cmMakefile* Makefile;
   };
 
