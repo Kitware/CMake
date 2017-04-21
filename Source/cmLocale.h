@@ -10,8 +10,6 @@
 
 class cmLocaleRAII
 {
-  std::string OldLocale;
-
 public:
   cmLocaleRAII()
     : OldLocale(setlocale(LC_CTYPE, CM_NULLPTR))
@@ -19,6 +17,12 @@ public:
     setlocale(LC_CTYPE, "");
   }
   ~cmLocaleRAII() { setlocale(LC_CTYPE, this->OldLocale.c_str()); }
+
+private:
+  cmLocaleRAII(cmLocaleRAII const&);
+  cmLocaleRAII& operator=(cmLocaleRAII const&);
+
+  std::string OldLocale;
 };
 
 #endif
