@@ -10,8 +10,8 @@
 +
 Total Test time \(real\) = +[0-9.]+ sec
 +
-The following tests are disabled and did not run:
-.*2 \- DisabledTest
+The following tests did not run:
+.*2 \- DisabledTest \(Disabled\)
 +
 The following tests FAILED:
 .*3 - NotRunTest \(Not Run\)

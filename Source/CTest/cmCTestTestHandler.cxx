@@ -523,17 +523,22 @@ int cmCTestTestHandler::ProcessHandler()
     if (!disabledTests.empty()) {
       cmGeneratedFileStream ofs;
       cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
-                   << "The following tests are disabled and did not run:"
-                   << std::endl);
+                   << "The following tests did not run:" << std::endl);
       this->StartLogFile("TestsDisabled", ofs);
 
+      const char* disabled_reason;
       for (std::vector<cmCTestTestHandler::cmCTestTestResult>::iterator dtit =
              disabledTests.begin();
            dtit != disabledTests.end(); ++dtit) {
         ofs << dtit->TestCount << ":" << dtit->Name << std::endl;
+        if (dtit->CompletionStatus == "Disabled") {
+          disabled_reason = "Disabled";
+        } else {
+          disabled_reason = "Skipped";
+        }
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "\t"
                      << std::setw(3) << dtit->TestCount << " - " << dtit->Name
-                     << std::endl);
+                     << " (" << disabled_reason << ")" << std::endl);
       }
     }
 

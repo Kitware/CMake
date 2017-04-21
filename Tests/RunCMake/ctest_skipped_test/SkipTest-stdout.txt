@@ -7,5 +7,5 @@
 +
 Total Test time \(real\) = +[0-9.]+ sec
 +
-The following tests are disabled and did not run:
-.*2 \- SkipTest
+The following tests did not run:
+.*2 \- SkipTest \(Skipped\)
