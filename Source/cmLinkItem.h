@@ -51,12 +51,6 @@ public:
     , FromGenex(fromGenex)
   {
   }
-  cmLinkImplItem(cmLinkImplItem const& r)
-    : cmLinkItem(r)
-    , Backtrace(r.Backtrace)
-    , FromGenex(r.FromGenex)
-  {
-  }
   cmListFileBacktrace Backtrace;
   bool FromGenex;
 };
