@@ -2467,6 +2467,12 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
 
   if (this->GeneratorTarget->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION")) {
     cudaOptions.AddFlag("GenerateRelocatableDeviceCode", "true");
+  } else if (this->GeneratorTarget->GetPropertyAsBool(
+               "CUDA_PTX_COMPILATION")) {
+    cudaOptions.AddFlag("NvccCompilation", "ptx");
+    // We drop the %(Extension) component as CMake expects all PTX files
+    // to not have the source file extension at all
+    cudaOptions.AddFlag("CompileOut", "$(IntDir)%(Filename).ptx");
   }
 
   // Convert the host compiler options to the toolset's abstractions

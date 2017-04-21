@@ -273,7 +273,8 @@ public:
   // Compute object file names.
   std::string GetObjectFileNameWithoutTarget(
     const cmSourceFile& source, std::string const& dir_max,
-    bool* hasSourceExtension = CM_NULLPTR);
+    bool* hasSourceExtension = CM_NULLPTR,
+    char const* customOutputExtension = CM_NULLPTR);
 
   /** Fill out the static linker flags for the given target.  */
   void GetStaticLibraryFlags(std::string& flags, std::string const& config,

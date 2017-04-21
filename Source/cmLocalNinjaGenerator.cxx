@@ -249,12 +249,15 @@ void cmLocalNinjaGenerator::ComputeObjectFilenames(
   std::map<cmSourceFile const*, std::string>& mapping,
   cmGeneratorTarget const* gt)
 {
+  // Determine if these object files should use a custom extension
+  char const* custom_ext = gt->GetCustomObjectExtension();
   for (std::map<cmSourceFile const*, std::string>::iterator si =
          mapping.begin();
        si != mapping.end(); ++si) {
     cmSourceFile const* sf = si->first;
-    si->second =
-      this->GetObjectFileNameWithoutTarget(*sf, gt->ObjectDirectory);
+    bool keptSourceExtension;
+    si->second = this->GetObjectFileNameWithoutTarget(
+      *sf, gt->ObjectDirectory, &keptSourceExtension, custom_ext);
   }
 }
 

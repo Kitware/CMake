@@ -536,6 +536,18 @@ const std::string& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
   return this->Objects[file];
 }
 
+const char* cmGeneratorTarget::GetCustomObjectExtension() const
+{
+  static std::string extension;
+  const bool has_ptx_extension =
+    this->GetPropertyAsBool("CUDA_PTX_COMPILATION");
+  if (has_ptx_extension) {
+    extension = ".ptx";
+    return extension.c_str();
+  }
+  return CM_NULLPTR;
+}
+
 void cmGeneratorTarget::AddExplicitObjectName(cmSourceFile const* sf)
 {
   this->ExplicitObjectName.insert(sf);

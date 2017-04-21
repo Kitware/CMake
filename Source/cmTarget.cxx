@@ -941,6 +941,14 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME") &&
              !this->CheckImportedLibName(prop, value ? value : "")) {
     /* error was reported by check method */
+  } else if (prop == "CUDA_PTX_COMPILATION" &&
+             this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
+    std::ostringstream e;
+    e << "CUDA_PTX_COMPILATION property can only be applied to OBJECT "
+         "targets (\""
+      << this->Name << "\")\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
   } else {
     this->Properties.SetProperty(prop, value);
   }
