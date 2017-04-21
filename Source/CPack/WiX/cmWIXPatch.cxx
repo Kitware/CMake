@@ -29,7 +29,11 @@ void cmWIXPatch::ApplyFragment(std::string const& id,
     return;
 
   const cmWIXPatchElement& fragment = i->second;
-
+  for (cmWIXPatchElement::attributes_t::const_iterator attr_i =
+         fragment.attributes.begin();
+       attr_i != fragment.attributes.end(); ++attr_i) {
+    writer.AddAttribute(attr_i->first, attr_i->second);
+  }
   this->ApplyElementChildren(fragment, writer);
 
   Fragments.erase(i);

@@ -906,12 +906,12 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitions(
       directoryDefinitions.BeginElement("Directory");
       directoryDefinitions.AddAttribute("Id", subDirectoryId);
       directoryDefinitions.AddAttribute("Name", fileName);
+      this->Patch->ApplyFragment(subDirectoryId, directoryDefinitions);
 
       AddDirectoryAndFileDefinitions(
         fullPath, subDirectoryId, directoryDefinitions, fileDefinitions,
         featureDefinitions, packageExecutables, desktopExecutables, shortcuts);
 
-      this->Patch->ApplyFragment(subDirectoryId, directoryDefinitions);
       directoryDefinitions.EndElement("Directory");
     } else {
       cmInstalledFile const* installedFile = this->GetInstalledFile(
