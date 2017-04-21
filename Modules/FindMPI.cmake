@@ -10,77 +10,78 @@
 # The Message Passing Interface (MPI) is a library used to write
 # high-performance distributed-memory parallel applications, and is
 # typically deployed on a cluster.  MPI is a standard interface (defined
-# by the MPI forum) for which many implementations are available.  All
-# of them have somewhat different include paths, libraries to link
-# against, etc., and this module tries to smooth out those differences.
+# by the MPI forum) for which many implementations are available.
 #
 # Variables
 # ^^^^^^^^^
 #
 # This module will set the following variables per language in your
-# project, where <lang> is one of C, CXX, or Fortran:
+# project, where ``<lang>`` is one of C, CXX, or Fortran:
 #
-# ::
-#
-#    MPI_<lang>_FOUND           TRUE if FindMPI found MPI flags for <lang>
-#    MPI_<lang>_COMPILER        MPI Compiler wrapper for <lang>
-#    MPI_<lang>_COMPILE_FLAGS   Compilation flags for MPI programs
-#    MPI_<lang>_INCLUDE_PATH    Include path(s) for MPI header
-#    MPI_<lang>_LINK_FLAGS      Linking flags for MPI programs
-#    MPI_<lang>_LIBRARIES       All libraries to link MPI programs against
+# ``MPI_<lang>_FOUND``
+#   Variable indicating the MPI settings for ``<lang>`` were found.
+# ``MPI_<lang>_COMPILER``
+#   MPI Compiler wrapper for ``<lang>``.
+# ``MPI_<lang>_COMPILE_FLAGS``
+#   Compilation flags for MPI programs, separated by spaces.
+#   This is *not* a :ref:`;-list <CMake Language Lists>`.
+# ``MPI_<lang>_INCLUDE_PATH``
+#   Include path(s) for MPI header.
+# ``MPI_<lang>_LINK_FLAGS``
+#   Linker flags for MPI programs.
+# ``MPI_<lang>_LIBRARIES``
+#   All libraries to link MPI programs against.
 #
 # Additionally, the following :prop_tgt:`IMPORTED` targets are defined:
 #
-# ::
-#
-#    MPI::MPI_<lang>            Target for using MPI from <lang>
+# ``MPI::MPI_<lang>``
+#   Target for using MPI from ``<lang>``.
 #
 # Additionally, FindMPI sets the following variables for running MPI
 # programs from the command line:
 #
-# ::
-#
-#    MPIEXEC                    Executable for running MPI programs
-#    MPIEXEC_NUMPROC_FLAG       Flag to pass to MPIEXEC before giving
-#                               it the number of processors to run on
-#    MPIEXEC_PREFLAGS           Flags to pass to MPIEXEC directly
-#                               before the executable to run.
-#    MPIEXEC_POSTFLAGS          Flags to pass to MPIEXEC after other flags
+# ``MPIEXEC``
+#   Executable for running MPI programs, if provided.
+# ``MPIEXEC_NUMPROC_FLAG``
+#   Flag to pass to ``MPIEXEC`` before giving it the number of processors to run on.
+# ``MPIEXEC_MAX_NUMPROCS``
+#   Number of MPI processors to utilize. Defaults to the number
+#   of processors detected on the host system.
+# ``MPIEXEC_PREFLAGS``
+#   Flags to pass to ``MPIEXEC`` directly before the executable to run.
+# ``MPIEXEC_POSTFLAGS``
+#   Flags to pass to ``MPIEXEC`` after other flags.
 #
 # Usage
 # ^^^^^
 #
-# To use this module, simply call FindMPI from a CMakeLists.txt file, or
-# run ``find_package(MPI)``, then run CMake.  If you are happy with the
+# To use this module, call ``find_package(MPI)``.  If you are happy with the
 # auto-detected configuration for your language, then you're done.  If
 # not, you have two options:
 #
-# ::
-#
-#    1. Set MPI_<lang>_COMPILER to the MPI wrapper (mpicc, etc.) of your
-#       choice and reconfigure.  FindMPI will attempt to determine all the
-#       necessary variables using THAT compiler's compile and link flags.
-#    2. If this fails, or if your MPI implementation does not come with
-#       a compiler wrapper, then set both MPI_<lang>_LIBRARIES and
-#       MPI_<lang>_INCLUDE_PATH.  You may also set any other variables
-#       listed above, but these two are required.  This will circumvent
-#       autodetection entirely.
+# 1. Set ``MPI_<lang>_COMPILER`` to the MPI wrapper (e.g. ``mpicc``) of your
+#    choice and reconfigure.  FindMPI will attempt to determine all the
+#    necessary variables using *that* compiler's compile and link flags.
+# 2. If this fails, or if your MPI implementation does not come with
+#    a compiler wrapper, then set both ``MPI_<lang>_LIBRARIES`` and
+#    ``MPI_<lang>_INCLUDE_PATH``.  You may also set any other variables
+#    listed above, but these two are required.  This will circumvent
+#    autodetection entirely.
 #
 # When configuration is successful, ``MPI_<lang>_COMPILER`` will be set to
-# the compiler wrapper for <lang>, if it was found.  ``MPI_<lang>_FOUND``
+# the compiler wrapper for ``<lang>``, if it was found. ``MPI_<lang>_FOUND``
 # and other variables above will be set if any MPI implementation was
-# found for <lang>, regardless of whether a compiler was found.
+# found for ``<lang>``, regardless of whether a compiler was found.
 #
 # When using ``MPIEXEC`` to execute MPI applications, you should typically
 # use all of the ``MPIEXEC`` flags as follows:
 #
 # ::
 #
-#    ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} PROCS
+#    ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS}
 #      ${MPIEXEC_PREFLAGS} EXECUTABLE ${MPIEXEC_POSTFLAGS} ARGS
 #
-# where ``PROCS`` is the number of processors on which to execute the
-# program, ``EXECUTABLE`` is the MPI program, and ``ARGS`` are the arguments to
+# where ``EXECUTABLE`` is the MPI program, and ``ARGS`` are the arguments to
 # pass to the MPI program.
 #
 # Backward Compatibility
@@ -106,12 +107,12 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 # The compilers are detected in this order:
 #
 # 1. Try to find the most generic available MPI compiler, as this is usually set up by
-#    cluster admins.  e.g., if plain old mpicc is available, we'll use it and assume it's
+#    cluster admins, e.g. if plain old mpicc is available, we'll use it and assume it's
 #    the right compiler.
 #
 # 2. If a generic mpicc is NOT found, then we attempt to find one that matches
 #    CMAKE_<lang>_COMPILER_ID. e.g. if you are using XL compilers, we'll try to find mpixlc
-#    and company, but not mpiicc.  This hopefully prevents toolchain mismatches.
+#    and company, but not mpiicc. This hopefully prevents toolchain mismatches.
 #
 # If you want to force a particular MPI compiler other than what we autodetect (e.g. if you
 # want to compile regular stuff with GNU and parallel stuff with Intel), you can always set
@@ -482,7 +483,7 @@ function (interrogate_mpi_compiler lang try_libs)
     set(MPI_${lang}_LIBRARIES     ${MPI_LIBRARIES_WORK}     CACHE STRING "MPI ${lang} libraries to link against" FORCE)
     mark_as_advanced(MPI_${lang}_COMPILE_FLAGS MPI_${lang}_INCLUDE_PATH MPI_${lang}_LINK_FLAGS MPI_${lang}_LIBRARIES)
 
-    # clear out our temporary lib/header detectionv variable here.
+    # clear out our temporary lib/header detection variable here.
     set(MPI_LIB         "MPI_LIB-NOTFOUND"         CACHE INTERNAL "Scratch variable for MPI lib detection"    FORCE)
     set(MPI_HEADER_PATH "MPI_HEADER_PATH-NOTFOUND" CACHE INTERNAL "Scratch variable for MPI header detection" FORCE)
   endif()
