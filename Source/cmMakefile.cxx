@@ -4002,6 +4002,13 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
     return false;
   }
 
+  // Deprecate old policies, especially those that require a lot
+  // of code to maintain the old behavior.
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0036) {
+    this->IssueMessage(cmake::DEPRECATION_WARNING,
+                       cmPolicies::GetPolicyDeprecatedWarning(id));
+  }
+
   this->StateSnapshot.SetPolicy(id, status);
   return true;
 }
