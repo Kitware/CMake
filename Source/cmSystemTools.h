@@ -381,9 +381,12 @@ public:
   {
   public:
     SaveRestoreEnvironment();
-    virtual ~SaveRestoreEnvironment();
+    ~SaveRestoreEnvironment();
 
   private:
+    SaveRestoreEnvironment(SaveRestoreEnvironment const&);
+    SaveRestoreEnvironment& operator=(SaveRestoreEnvironment const&);
+
     std::vector<std::string> Env;
   };
 #endif
