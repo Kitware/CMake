@@ -360,7 +360,8 @@ std::string cmWrap(std::string const& prefix, Range const& r,
 }
 
 template <typename Range>
-std::string cmWrap(char prefix, Range const& r, char suffix, std::string sep)
+std::string cmWrap(char prefix, Range const& r, char suffix,
+                   std::string const& sep)
 {
   return cmWrap(std::string(1, prefix), r, std::string(1, suffix), sep);
 }
