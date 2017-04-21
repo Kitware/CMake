@@ -78,6 +78,9 @@ public:
   std::string FinalizeHex();
 
 private:
+  cmCryptoHash(cmCryptoHash const&);
+  cmCryptoHash& operator=(cmCryptoHash const&);
+
   unsigned int Id;
   struct rhash_context* CTX;
 };
