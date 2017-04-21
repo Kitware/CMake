@@ -677,10 +677,10 @@ bool cmCPackWIXGenerator::AddComponentsToFeature(
                                       cpackPackageDesktopLinksList);
   }
 
-  AddDirectoryAndFileDefinitons(rootPath, "INSTALL_ROOT", directoryDefinitions,
-                                fileDefinitions, featureDefinitions,
-                                cpackPackageExecutablesList,
-                                cpackPackageDesktopLinksList, shortcuts);
+  AddDirectoryAndFileDefinitions(
+    rootPath, "INSTALL_ROOT", directoryDefinitions, fileDefinitions,
+    featureDefinitions, cpackPackageExecutablesList,
+    cpackPackageDesktopLinksList, shortcuts);
 
   featureDefinitions.EndElement("FeatureRef");
 
@@ -841,7 +841,7 @@ bool cmCPackWIXGenerator::CreateLicenseFile()
   return true;
 }
 
-void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
+void cmCPackWIXGenerator::AddDirectoryAndFileDefinitions(
   std::string const& topdir, std::string const& directoryId,
   cmWIXDirectoriesSourceWriter& directoryDefinitions,
   cmWIXFilesSourceWriter& fileDefinitions,
@@ -907,7 +907,7 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
       directoryDefinitions.AddAttribute("Id", subDirectoryId);
       directoryDefinitions.AddAttribute("Name", fileName);
 
-      AddDirectoryAndFileDefinitons(
+      AddDirectoryAndFileDefinitions(
         fullPath, subDirectoryId, directoryDefinitions, fileDefinitions,
         featureDefinitions, packageExecutables, desktopExecutables, shortcuts);
 
