@@ -552,10 +552,21 @@ find_program(MPIEXEC
 get_filename_component(_MPI_BASE_DIR "${MPIEXEC}" PATH)
 get_filename_component(_MPI_BASE_DIR "${_MPI_BASE_DIR}" PATH)
 
-set(MPIEXEC_NUMPROC_FLAG "-np" CACHE STRING "Flag used by MPI to specify the number of processes for MPIEXEC; the next option will be the number of processes.")
+# According to the MPI standard, section 8.8 -n is a guaranteed, and the only guaranteed way to
+# launch an MPI process using mpiexec if such a program exists.
+set(MPIEXEC_NUMPROC_FLAG "-n"  CACHE STRING "Flag used by MPI to specify the number of processes for MPIEXEC; the next option will be the number of processes.")
 set(MPIEXEC_PREFLAGS     ""    CACHE STRING "These flags will be directly before the executable that is being run by MPIEXEC.")
 set(MPIEXEC_POSTFLAGS    ""    CACHE STRING "These flags will come after all flags given to MPIEXEC.")
-set(MPIEXEC_MAX_NUMPROCS "2"   CACHE STRING "Maximum number of processors available to run MPI applications.")
+
+# Set the number of processes to the processor count and the previous default
+# of 2 if that couldn't be determined.
+include(${CMAKE_CURRENT_LIST_DIR}/ProcessorCount.cmake)
+ProcessorCount(_MPIEXEC_NUMPROCS)
+if("${_MPIEXEC_NUMPROCS}" EQUAL "0")
+  set(_MPIEXEC_NUMPROCS 2)
+endif()
+set(MPIEXEC_MAX_NUMPROCS "${_MPIEXEC_NUMPROCS}"   CACHE STRING "Maximum number of processors available to run MPI applications.")
+unset(_MPIEXEC_NUMPROCS)
 mark_as_advanced(MPIEXEC MPIEXEC_NUMPROC_FLAG MPIEXEC_PREFLAGS MPIEXEC_POSTFLAGS MPIEXEC_MAX_NUMPROCS)
 
 
