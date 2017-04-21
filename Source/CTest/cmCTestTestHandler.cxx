@@ -1727,7 +1727,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
     // bcc crashes if we attempt a normal substring comparison,
     // hence the following workaround
     std::string fileNameSubstring = fileName.substr(0, pattern.length());
-    if (fileNameSubstring.compare(pattern) != 0) {
+    if (fileNameSubstring != pattern) {
       continue;
     }
     if (logName == "") {

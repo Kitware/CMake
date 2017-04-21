@@ -514,11 +514,11 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
     Default.clear();
   } else if (const char* value = GetOption(option)) {
     std::string lowerValue = cmsys::SystemTools::LowerCase(value);
-    if (lowerValue.compare("true") == 0) {
+    if (lowerValue == "true") {
       Default = "true";
-    } else if (lowerValue.compare("false") == 0) {
+    } else if (lowerValue == "false") {
       Default = "false";
-    } else if (lowerValue.compare("script") == 0) {
+    } else if (lowerValue == "script") {
       Default = "script";
     } else {
       Default = value;
