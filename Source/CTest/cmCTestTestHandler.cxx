@@ -1633,10 +1633,10 @@ void cmCTestTestHandler::UseExcludeRegExp()
 
 const char* cmCTestTestHandler::GetTestStatus(int status)
 {
-  static const char statuses[][100] = {
-    "Not Run",   "Timeout",     "SEGFAULT", "ILLEGAL",     "INTERRUPT",
-    "NUMERICAL", "OTHER_FAULT", "Failed",   "BAD_COMMAND", "Completed"
-  };
+  static const char* statuses[] = { "Not Run",     "Timeout",   "SEGFAULT",
+                                    "ILLEGAL",     "INTERRUPT", "NUMERICAL",
+                                    "OTHER_FAULT", "Failed",    "BAD_COMMAND",
+                                    "Completed" };
 
   if (status < cmCTestTestHandler::NOT_RUN ||
       status > cmCTestTestHandler::COMPLETED) {
