@@ -570,6 +570,46 @@ std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
   return args;
 }
 
+size_t cmSystemTools::CalculateCommandLineLengthLimit()
+{
+  size_t sz =
+#ifdef _WIN32
+    // There's a maximum of 65536 bytes and thus 32768 WCHARs on Windows
+    // However, cmd.exe itself can only handle 8191 WCHARs and Ninja for
+    // example uses it to spawn processes.
+    size_t(8191);
+#elif defined(__linux)
+    // MAX_ARG_STRLEN is the maximum length of a string permissible for
+    // the execve() syscall on Linux. It's defined as (PAGE_SIZE * 32)
+    // in Linux's binfmts.h
+    static_cast<size_t>(sysconf(_SC_PAGESIZE) * 32);
+#else
+    size_t(0);
+#endif
+
+#if defined(_SC_ARG_MAX)
+  // ARG_MAX is the maximum size of the command and environment
+  // that can be passed to the exec functions on UNIX.
+  // The value in limits.h does not need to be present and may
+  // depend upon runtime memory constraints, hence sysconf()
+  // should be used to query it.
+  long szArgMax = sysconf(_SC_ARG_MAX);
+  // A return value of -1 signifies an undetermined limit, but
+  // it does not imply an infinite limit, and thus is ignored.
+  if (szArgMax != -1) {
+    // We estimate the size of the environment block to be 1000.
+    // This isn't accurate at all, but leaves some headroom.
+    szArgMax = szArgMax < 1000 ? 0 : szArgMax - 1000;
+#if defined(_WIN32) || defined(__linux)
+    sz = std::min(sz, static_cast<size_t>(szArgMax));
+#else
+    sz = static_cast<size_t>(szArgMax);
+#endif
+  }
+#endif
+  return sz;
+}
+
 bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      std::string* captureStdOut,
                                      std::string* captureStdErr, int* retVal,

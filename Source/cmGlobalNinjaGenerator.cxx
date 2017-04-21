@@ -246,7 +246,7 @@ void cmGlobalNinjaGenerator::WriteBuild(
   bool useResponseFile = false;
   if (cmdLineLimit < 0 ||
       (cmdLineLimit > 0 &&
-       (args.size() + buildstr.size() + assignments.size()) >
+       (args.size() + buildstr.size() + assignments.size() + 1000) >
          static_cast<size_t>(cmdLineLimit))) {
     variable_assignments.str(std::string());
     cmGlobalNinjaGenerator::WriteVariable(variable_assignments, "RSP_FILE",

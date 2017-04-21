@@ -30,10 +30,6 @@
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
-#ifndef _WIN32
-#include <unistd.h>
-#endif
-
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
   : cmCommonTargetGenerator(target)
   , OSXBundleGenerator(CM_NULLPTR)
@@ -1492,15 +1488,6 @@ void cmMakefileTargetGenerator::CreateLinkScript(
   makefile_depends.push_back(linkScriptName);
 }
 
-static size_t calculateCommandLineLengthLimit()
-{
-#if defined(_SC_ARG_MAX)
-  return ((size_t)sysconf(_SC_ARG_MAX)) - 1000;
-#else
-  return 0;
-#endif
-}
-
 bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
   std::string const& l) const
 {
@@ -1514,7 +1501,7 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
   }
 
   // Check for a system limit.
-  if (size_t const limit = calculateCommandLineLengthLimit()) {
+  if (size_t const limit = cmSystemTools::CalculateCommandLineLengthLimit()) {
     // Compute the total length of our list of object files with room
     // for argument separation and quoting.  This does not convert paths
     // relative to CMAKE_CURRENT_BINARY_DIR like the final list will be, so the
