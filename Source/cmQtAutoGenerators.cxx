@@ -42,6 +42,25 @@ inline static std::string Quoted(const std::string& text)
   return cmQtAutoGeneratorCommon::Quoted(text);
 }
 
+static std::string QuotedCommand(const std::vector<std::string>& command)
+{
+  std::string res;
+  for (std::vector<std::string>::const_iterator cit = command.begin();
+       cit != command.end(); ++cit) {
+    if (!res.empty()) {
+      res.push_back(' ');
+    }
+    const std::string cesc = Quoted(*cit);
+    if (cit->empty() || (cesc.size() > (cit->size() + 2)) ||
+        (cesc.find(' ') != std::string::npos)) {
+      res += cesc;
+    } else {
+      res += *cit;
+    }
+  }
+  return res;
+}
+
 static void InfoGet(cmMakefile* makefile, const char* key, std::string& value)
 {
   value = makefile->GetSafeDefinition(key);
@@ -1190,7 +1209,7 @@ bool cmQtAutoGenerators::MocGenerateAll(
         {
           std::ostringstream ost;
           ost << "AutoMoc: Error: moc predefs generation command failed\n";
-          ost << "AutoMoc: Command:\n" << cmJoin(cmd, " ") << "\n";
+          ost << "AutoMoc: Command:\n" << QuotedCommand(cmd) << "\n";
           ost << "AutoMoc: Command output:\n" << output << "\n";
           this->LogError(ost.str());
         }
@@ -1348,7 +1367,7 @@ bool cmQtAutoGenerators::MocGenerateFile(
           std::ostringstream ost;
           ost << "AutoMoc: Error: moc process failed for\n";
           ost << Quoted(mocFileRel) << "\n";
-          ost << "AutoMoc: Command:\n" << cmJoin(cmd, " ") << "\n";
+          ost << "AutoMoc: Command:\n" << QuotedCommand(cmd) << "\n";
           ost << "AutoMoc: Command output:\n" << output << "\n";
           this->LogError(ost.str());
         }
@@ -1519,7 +1538,7 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
           ost << "AutoUic: Error: uic process failed for\n";
           ost << Quoted(uicFileRel) << " needed by\n";
           ost << Quoted(realName) << "\n";
-          ost << "AutoUic: Command:\n" << cmJoin(cmd, " ") << "\n";
+          ost << "AutoUic: Command:\n" << QuotedCommand(cmd) << "\n";
           ost << "AutoUic: Command output:\n" << output << "\n";
           this->LogError(ost.str());
         }
@@ -1665,7 +1684,7 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
           std::ostringstream ost;
           ost << "AutoRcc: Error: rcc process failed for\n";
           ost << Quoted(rccOutputFile) << "\n";
-          ost << "AutoRcc: Command:\n" << cmJoin(cmd, " ") << "\n";
+          ost << "AutoRcc: Command:\n" << QuotedCommand(cmd) << "\n";
           ost << "AutoRcc: Command output:\n" << output << "\n";
           this->LogError(ost.str());
         }
@@ -1743,23 +1762,6 @@ void cmQtAutoGenerators::LogError(const std::string& message) const
     msg.push_back('\n');
     cmSystemTools::Stderr(msg.c_str(), msg.size());
   }
-}
-
-void cmQtAutoGenerators::LogCommand(
-  const std::vector<std::string>& command) const
-{
-  std::vector<std::string> cmdEscaped;
-  typedef std::vector<std::string>::const_iterator Iter;
-  for (Iter cit = command.begin(); cit != command.end(); ++cit) {
-    const std::string cesc = Quoted(*cit);
-    if ((cesc.size() > (cit->size() + 2)) ||
-        (cesc.find(' ') != std::string::npos)) {
-      cmdEscaped.push_back(cesc);
-    } else {
-      cmdEscaped.push_back(*cit);
-    }
-  }
-  this->LogInfo(cmJoin(cmdEscaped, " "));
 }
 
 /**
@@ -1881,7 +1883,7 @@ bool cmQtAutoGenerators::RunCommand(const std::vector<std::string>& command,
 {
   // Log command
   if (this->Verbose) {
-    this->LogCommand(command);
+    this->LogInfo(QuotedCommand(command));
   }
   // Execute command
   int retVal = 0;
