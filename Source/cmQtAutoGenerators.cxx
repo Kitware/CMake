@@ -1148,7 +1148,7 @@ bool cmQtAutoGenerators::MocGenerateAll(
 
   // Generate moc_predefs
   if (!this->MocPredefsCmd.empty()) {
-    if (!this->MakeParentDirectory(this->MocPredefsFileAbs)) {
+    if (!this->MakeParentDirectory("AutoMoc", this->MocPredefsFileAbs)) {
       this->LogError("AutoMoc: Error creating directory for " +
                      this->MocPredefsFileRel);
       return false;
@@ -1275,7 +1275,7 @@ bool cmQtAutoGenerators::MocGenerateAll(
     this->LogBold("Generating MOC compilation " + this->MocCppFilenameRel);
 
     // Make sure the parent directory exists
-    success = this->MakeParentDirectory(this->MocCppFilenameAbs);
+    success = this->MakeParentDirectory("AutoMoc", this->MocCppFilenameAbs);
     if (success) {
       cmsys::ofstream outfile;
       outfile.open(this->MocCppFilenameAbs.c_str(), std::ios::trunc);
@@ -1340,7 +1340,7 @@ bool cmQtAutoGenerators::MocGenerateFile(
     this->LogBold("Generating MOC source " + mocFileRel);
 
     // Make sure the parent directory exists
-    if (this->MakeParentDirectory(mocFileAbs)) {
+    if (this->MakeParentDirectory("AutoMoc", mocFileAbs)) {
       // Compose moc command
       std::vector<std::string> cmd;
       cmd.push_back(this->MocExecutable);
@@ -1516,7 +1516,7 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
     this->LogBold("Generating UIC header " + uicFileRel);
 
     // Make sure the parent directory exists
-    if (this->MakeParentDirectory(uicFileAbs)) {
+    if (this->MakeParentDirectory("AutoUic", uicFileAbs)) {
       // Compose uic command
       std::vector<std::string> cmd;
       cmd.push_back(this->UicExecutable);
@@ -1654,7 +1654,7 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
     this->LogBold("Generating RCC source " + rccOutputFile);
 
     // Make sure the parent directory exists
-    if (this->MakeParentDirectory(rccBuildFile)) {
+    if (this->MakeParentDirectory("AutoRcc", rccBuildFile)) {
       // Compose symbol name
       std::string symbolName =
         cmsys::SystemTools::GetFilenameWithoutLastExtension(rccInputFile);
@@ -1839,14 +1839,18 @@ std::string cmQtAutoGenerators::ChecksumedPath(const std::string& sourceFile,
  * @brief Generates the parent directory of the given file on demand
  * @return True on success
  */
-bool cmQtAutoGenerators::MakeParentDirectory(const std::string& filename) const
+bool cmQtAutoGenerators::MakeParentDirectory(const char* logPrefix,
+                                             const std::string& filename) const
 {
   bool success = true;
   const std::string dirName = cmSystemTools::GetFilenamePath(filename);
   if (!dirName.empty()) {
     success = cmsys::SystemTools::MakeDirectory(dirName);
     if (!success) {
-      this->LogError("AutoGen: Error: Directory creation failed: " + dirName);
+      std::string error = logPrefix;
+      error += ": Error: Parent directory creation failed for ";
+      error += Quoted(filename);
+      this->LogError(error);
     }
   }
   return success;

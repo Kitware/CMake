@@ -141,7 +141,8 @@ private:
   std::string ChecksumedPath(const std::string& sourceFile,
                              const char* basePrefix,
                              const char* baseSuffix) const;
-  bool MakeParentDirectory(const std::string& filename) const;
+  bool MakeParentDirectory(const char* logPrefix,
+                           const std::string& filename) const;
   bool RunCommand(const std::vector<std::string>& command, std::string& output,
                   bool verbose = true) const;
 
