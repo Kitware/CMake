@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "cmAlgorithms.h"
+#include "cmCryptoHash.h"
 #include "cmFilePathChecksum.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -31,9 +32,9 @@
 
 // -- Static variables
 
-static const char* SettingsKeyMoc = "AM_MOC_OLD_SETTINGS";
-static const char* SettingsKeyUic = "AM_UIC_OLD_SETTINGS";
-static const char* SettingsKeyRcc = "AM_RCC_OLD_SETTINGS";
+static const char* SettingsKeyMoc = "AM_MOC_SETTINGS_HASH";
+static const char* SettingsKeyUic = "AM_UIC_SETTINGS_HASH";
+static const char* SettingsKeyRcc = "AM_RCC_SETTINGS_HASH";
 
 // -- Static functions
 
@@ -511,30 +512,36 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
 void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile)
 {
   // Compose current settings strings
-  if (this->MocEnabled()) {
-    std::string& str = this->SettingsStringMoc;
-    str += JoinOptionsList(this->MocDefinitions);
-    str += " ~~~ ";
-    str += JoinOptionsList(this->MocIncludePaths);
-    str += " ~~~ ";
-    str += JoinOptionsList(this->MocOptions);
-    str += " ~~~ ";
-    str += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
-    str += " ~~~ ";
-    str += JoinOptionsList(this->MocPredefsCmd);
-    str += " ~~~ ";
-  }
-  if (this->UicEnabled()) {
-    std::string& str = this->SettingsStringUic;
-    str += JoinOptionsList(this->UicTargetOptions);
-    str += " ~~~ ";
-    str += JoinOptionsMap(this->UicOptions);
-    str += " ~~~ ";
-  }
-  if (this->RccEnabled()) {
-    std::string& str = this->SettingsStringRcc;
-    str += JoinOptionsMap(this->RccOptions);
-    str += " ~~~ ";
+  {
+    cmCryptoHash crypt(cmCryptoHash::AlgoSHA256);
+    if (this->MocEnabled()) {
+      std::string str;
+      str += JoinOptionsList(this->MocDefinitions);
+      str += " ~~~ ";
+      str += JoinOptionsList(this->MocIncludePaths);
+      str += " ~~~ ";
+      str += JoinOptionsList(this->MocOptions);
+      str += " ~~~ ";
+      str += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
+      str += " ~~~ ";
+      str += JoinOptionsList(this->MocPredefsCmd);
+      str += " ~~~ ";
+      this->SettingsStringMoc = crypt.HashString(str);
+    }
+    if (this->UicEnabled()) {
+      std::string str;
+      str += JoinOptionsList(this->UicTargetOptions);
+      str += " ~~~ ";
+      str += JoinOptionsMap(this->UicOptions);
+      str += " ~~~ ";
+      this->SettingsStringUic = crypt.HashString(str);
+    }
+    if (this->RccEnabled()) {
+      std::string str;
+      str += JoinOptionsMap(this->RccOptions);
+      str += " ~~~ ";
+      this->SettingsStringRcc = crypt.HashString(str);
+    }
   }
 
   // Read old settings
