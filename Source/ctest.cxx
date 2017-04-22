@@ -52,6 +52,18 @@ static const char* cmDocumentationOptions[][2] = {
                                            "expression." },
   { "-LE <regex>, --label-exclude <regex>", "Exclude tests with labels "
                                             "matching regular expression." },
+  { "-FA <regex>, --fixture-exclude-any <regex>", "Do not automatically "
+                                                  "add any tests for "
+                                                  "fixtures matching "
+                                                  "regular expression." },
+  { "-FS <regex>, --fixture-exclude-setup <regex>", "Do not automatically "
+                                                    "add setup tests for "
+                                                    "fixtures matching "
+                                                    "regular expression." },
+  { "-FC <regex>, --fixture-exclude-cleanup <regex>", "Do not automatically "
+                                                      "add cleanup tests for "
+                                                      "fixtures matching "
+                                                      "regular expression." },
   { "-D <dashboard>, --dashboard <dashboard>", "Execute dashboard test" },
   { "-D <var>:<type>=<value>", "Define a variable for script mode" },
   { "-M <model>, --test-model <model>", "Sets the model for a dashboard" },

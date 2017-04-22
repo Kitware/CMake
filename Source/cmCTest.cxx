@@ -1899,6 +1899,34 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       ->SetPersistentOption("ExcludeRegularExpression", args[i].c_str());
   }
 
+  if (this->CheckArgument(arg, "-FA", "--fixture-exclude-any") &&
+      i < args.size() - 1) {
+    i++;
+    this->GetHandler("test")->SetPersistentOption(
+      "ExcludeFixtureRegularExpression", args[i].c_str());
+    this->GetHandler("memcheck")
+      ->SetPersistentOption("ExcludeFixtureRegularExpression",
+                            args[i].c_str());
+  }
+  if (this->CheckArgument(arg, "-FS", "--fixture-exclude-setup") &&
+      i < args.size() - 1) {
+    i++;
+    this->GetHandler("test")->SetPersistentOption(
+      "ExcludeFixtureSetupRegularExpression", args[i].c_str());
+    this->GetHandler("memcheck")
+      ->SetPersistentOption("ExcludeFixtureSetupRegularExpression",
+                            args[i].c_str());
+  }
+  if (this->CheckArgument(arg, "-FC", "--fixture-exclude-cleanup") &&
+      i < args.size() - 1) {
+    i++;
+    this->GetHandler("test")->SetPersistentOption(
+      "ExcludeFixtureCleanupRegularExpression", args[i].c_str());
+    this->GetHandler("memcheck")
+      ->SetPersistentOption("ExcludeFixtureCleanupRegularExpression",
+                            args[i].c_str());
+  }
+
   if (this->CheckArgument(arg, "--rerun-failed")) {
     this->GetHandler("test")->SetPersistentOption("RerunFailed", "true");
     this->GetHandler("memcheck")->SetPersistentOption("RerunFailed", "true");

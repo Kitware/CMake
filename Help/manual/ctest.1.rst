@@ -117,6 +117,23 @@ Options
  This option tells ctest to NOT run the tests whose labels match the
  given regular expression.
 
+``-FA <regex>, --fixture-exclude-any <regex>``
+ Exclude fixtures matching ``<regex>`` from automatically adding any tests to
+ the test set.
+
+ If a test in the set of tests to be executed requires a particular fixture,
+ that fixture's setup and cleanup tests would normally be added to the test set
+ automatically. This option prevents adding setup or cleanup tests for fixtures
+ matching the ``<regex>``. Note that all other fixture behavior is retained,
+ including test dependencies and skipping tests that have fixture setup tests
+ that fail.
+
+``-FS <regex>, --fixture-exclude-setup <regex>``
+ Same as ``-FA`` except only matching setup tests are excluded.
+
+``-FC <regex>, --fixture-exclude-cleanup <regex>``
+ Same as ``-FA`` except only matching cleanup tests are excluded.
+
 ``-D <dashboard>, --dashboard <dashboard>``
  Execute dashboard test.
 
