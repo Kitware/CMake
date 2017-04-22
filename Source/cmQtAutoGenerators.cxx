@@ -1856,6 +1856,49 @@ bool cmQtAutoGenerators::MakeParentDirectory(const char* logPrefix,
   return success;
 }
 
+bool cmQtAutoGenerators::FileDiffers(const std::string& filename,
+                                     const std::string& content)
+{
+  bool differs = true;
+  {
+    std::string oldContents;
+    if (ReadAll(oldContents, filename)) {
+      differs = (oldContents != content);
+    }
+  }
+  return differs;
+}
+
+bool cmQtAutoGenerators::FileWrite(const char* logPrefix,
+                                   const std::string& filename,
+                                   const std::string& content)
+{
+  std::string error;
+  // Make sure the parent directory exists
+  if (this->MakeParentDirectory(logPrefix, filename)) {
+    cmsys::ofstream outfile;
+    outfile.open(filename.c_str(), std::ios::trunc);
+    if (outfile) {
+      outfile << content;
+      // Check for write errors
+      if (!outfile.good()) {
+        error = logPrefix;
+        error += ": Error writing ";
+        error += Quoted(filename);
+      }
+    } else {
+      error = logPrefix;
+      error = ": Error opening ";
+      error += Quoted(filename);
+    }
+  }
+  if (!error.empty()) {
+    this->LogError(error);
+    return false;
+  }
+  return true;
+}
+
 /**
  * @brief Runs a command and returns true on success
  * @return True on success

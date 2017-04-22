@@ -143,6 +143,10 @@ private:
                              const char* baseSuffix) const;
   bool MakeParentDirectory(const char* logPrefix,
                            const std::string& filename) const;
+  bool FileDiffers(const std::string& filename, const std::string& content);
+  bool FileWrite(const char* logPrefix, const std::string& filename,
+                 const std::string& content);
+
   bool RunCommand(const std::vector<std::string>& command, std::string& output,
                   bool verbose = true) const;
 
