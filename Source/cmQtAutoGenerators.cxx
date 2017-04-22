@@ -1146,54 +1146,7 @@ bool cmQtAutoGenerators::MocGenerateAll(
     return true;
   }
 
-  // Generate moc_predefs
-  if (!this->MocPredefsCmd.empty()) {
-    if (!this->MakeParentDirectory("AutoMoc", this->MocPredefsFileAbs)) {
-      this->LogError("AutoMoc: Error creating directory for " +
-                     this->MocPredefsFileRel);
-      return false;
-    }
-    this->LogBold("Generating MOC predefs " + this->MocPredefsFileRel);
-
-    std::vector<std::string> cmd = this->MocPredefsCmd;
-    cmd.insert(cmd.end(), this->MocIncludes.begin(), this->MocIncludes.end());
-    for (std::vector<std::string>::const_iterator it =
-           this->MocDefinitions.begin();
-         it != this->MocDefinitions.end(); ++it) {
-      cmd.push_back("-D" + (*it));
-    }
-    cmd.insert(cmd.end(), this->MocOptions.begin(), this->MocOptions.end());
-
-    std::string output;
-    bool moc_predefsGenerated = this->RunCommand(cmd, output, false);
-    if (!moc_predefsGenerated) {
-      return false;
-    }
-
-    // actually write the file
-    cmsys::ofstream outfile;
-    outfile.open(this->MocPredefsFileAbs.c_str(), std::ios::trunc);
-    if (!outfile) {
-      moc_predefsGenerated = false;
-      this->LogError("AutoMoc: Error opening " + this->MocPredefsFileRel);
-    } else {
-      outfile << output;
-      // Check for write errors
-      if (!outfile.good()) {
-        moc_predefsGenerated = false;
-        this->LogError("AutoMoc: Error writing " + this->MocPredefsFileRel);
-      }
-    }
-
-    if (!moc_predefsGenerated) {
-      return false;
-    }
-  }
-
-  bool mocCompFileGenerated = false;
-  bool mocCompChanged = false;
-
-  // look for name collisions
+  // Look for name collisions
   {
     std::multimap<std::string, std::string> collisions;
     // Test merged map of included and notIncluded
@@ -1211,6 +1164,47 @@ bool cmQtAutoGenerators::MocGenerateAll(
       return false;
     }
   }
+
+  // Generate moc_predefs
+  if (!this->MocPredefsCmd.empty()) {
+    this->LogBold("Generating MOC predefs " + this->MocPredefsFileRel);
+
+    std::string output;
+    {
+      std::vector<std::string> cmd = this->MocPredefsCmd;
+      // Add includes
+      cmd.insert(cmd.end(), this->MocIncludes.begin(),
+                 this->MocIncludes.end());
+      // Add definitions
+      for (std::vector<std::string>::const_iterator it =
+             this->MocDefinitions.begin();
+           it != this->MocDefinitions.end(); ++it) {
+        cmd.push_back("-D" + (*it));
+#ifdef _WIN32
+        cmd.push_back("-DWIN32");
+#endif
+      }
+      // Add options
+      cmd.insert(cmd.end(), this->MocOptions.begin(), this->MocOptions.end());
+      if (!this->RunCommand(cmd, output, false)) {
+        {
+          std::ostringstream ost;
+          ost << "AutoMoc: Error: moc predefs generation command failed\n";
+          ost << "AutoMoc: Command:\n" << cmJoin(cmd, " ") << "\n";
+          ost << "AutoMoc: Command output:\n" << output << "\n";
+          this->LogError(ost.str());
+        }
+        return false;
+      }
+    }
+
+    if (this->FileDiffers(this->MocPredefsFileAbs, output)) {
+      if (!this->FileWrite("AutoMoc", this->MocPredefsFileAbs, output)) {
+        return false;
+      }
+    }
+  }
+
   // Generate moc files that are included by source files.
   {
     const std::string subDir = "include/";
@@ -1224,7 +1218,9 @@ bool cmQtAutoGenerators::MocGenerateAll(
       }
     }
   }
+
   // Generate moc files that are _not_ included by source files.
+  bool mocCompFileGenerated = false;
   {
     const std::string subDir;
     for (std::map<std::string, std::string>::const_iterator it =
@@ -1259,37 +1255,11 @@ bool cmQtAutoGenerators::MocGenerateAll(
     automocSource = ost.str();
   }
 
-  // Check if the content of moc_compilation.cpp changed
-  {
-    std::string oldContents;
-    if (ReadAll(oldContents, this->MocCppFilenameAbs)) {
-      mocCompChanged = (oldContents != automocSource);
-    } else {
-      mocCompChanged = true;
-    }
-  }
-
-  bool success = true;
-  if (mocCompChanged) {
+  if (this->FileDiffers(this->MocCppFilenameAbs, automocSource)) {
     // Actually write moc_compilation.cpp
     this->LogBold("Generating MOC compilation " + this->MocCppFilenameRel);
-
-    // Make sure the parent directory exists
-    success = this->MakeParentDirectory("AutoMoc", this->MocCppFilenameAbs);
-    if (success) {
-      cmsys::ofstream outfile;
-      outfile.open(this->MocCppFilenameAbs.c_str(), std::ios::trunc);
-      if (!outfile) {
-        success = false;
-        this->LogError("AutoMoc: Error opening " + this->MocCppFilenameAbs);
-      } else {
-        outfile << automocSource;
-        // Check for write errors
-        if (!outfile.good()) {
-          success = false;
-          this->LogError("AutoMoc: Error writing " + this->MocCppFilenameAbs);
-        }
-      }
+    if (!this->FileWrite("AutoMoc", this->MocCppFilenameAbs, automocSource)) {
+      return false;
     }
   } else if (mocCompFileGenerated) {
     // Only touch moc_compilation.cpp
@@ -1299,7 +1269,7 @@ bool cmQtAutoGenerators::MocGenerateAll(
     cmSystemTools::Touch(this->MocCppFilenameAbs, false);
   }
 
-  return success;
+  return true;
 }
 
 /**
@@ -1344,6 +1314,7 @@ bool cmQtAutoGenerators::MocGenerateFile(
       // Compose moc command
       std::vector<std::string> cmd;
       cmd.push_back(this->MocExecutable);
+      // Add includes
       cmd.insert(cmd.end(), this->MocIncludes.begin(),
                  this->MocIncludes.end());
       // Add definitions
@@ -1352,14 +1323,16 @@ bool cmQtAutoGenerators::MocGenerateFile(
            it != this->MocDefinitions.end(); ++it) {
         cmd.push_back("-D" + (*it));
       }
+#ifdef _WIN32
+      cmd.push_back("-DWIN32");
+#endif
+      // Add options
       cmd.insert(cmd.end(), this->MocOptions.begin(), this->MocOptions.end());
+      // Add predefs include
       if (!this->MocPredefsFileAbs.empty()) {
         cmd.push_back("--include");
         cmd.push_back(this->MocPredefsFileAbs);
       }
-#ifdef _WIN32
-      cmd.push_back("-DWIN32");
-#endif
       cmd.push_back("-o");
       cmd.push_back(mocFileAbs);
       cmd.push_back(sourceFile);
