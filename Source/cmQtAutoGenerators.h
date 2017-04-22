@@ -186,6 +186,7 @@ private:
   std::string SettingsStringRcc;
   // -- Moc
   bool MocSettingsChanged;
+  bool MocPredefsChanged;
   bool MocRelaxedMode;
   bool MocRunFailed;
   std::string MocCppFilenameRel;

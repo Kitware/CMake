@@ -248,6 +248,7 @@ cmQtAutoGenerators::cmQtAutoGenerators()
   : Verbose(cmsys::SystemTools::HasEnv("VERBOSE"))
   , ColorOutput(true)
   , MocSettingsChanged(false)
+  , MocPredefsChanged(false)
   , MocRunFailed(false)
   , UicSettingsChanged(false)
   , UicRunFailed(false)
@@ -519,6 +520,8 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile)
     str += JoinOptionsList(this->MocOptions);
     str += " ~~~ ";
     str += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
+    str += " ~~~ ";
+    str += JoinOptionsList(this->MocPredefsCmd);
     str += " ~~~ ";
   }
   if (this->UicEnabled()) {
@@ -1186,40 +1189,48 @@ bool cmQtAutoGenerators::MocGenerateAll(
 
   // Generate moc_predefs
   if (!this->MocPredefsCmd.empty()) {
-    this->LogBold("Generating MOC predefs " + this->MocPredefsFileRel);
+    if (this->MocSettingsChanged ||
+        FileAbsentOrOlder(this->MocPredefsFileAbs, this->SettingsFile)) {
+      this->LogBold("Generating MOC predefs " + this->MocPredefsFileRel);
 
-    std::string output;
-    {
-      std::vector<std::string> cmd = this->MocPredefsCmd;
-      // Add includes
-      cmd.insert(cmd.end(), this->MocIncludes.begin(),
-                 this->MocIncludes.end());
-      // Add definitions
-      for (std::vector<std::string>::const_iterator it =
-             this->MocDefinitions.begin();
-           it != this->MocDefinitions.end(); ++it) {
-        cmd.push_back("-D" + (*it));
+      std::string output;
+      {
+        // Compose command
+        std::vector<std::string> cmd = this->MocPredefsCmd;
+        // Add includes
+        cmd.insert(cmd.end(), this->MocIncludes.begin(),
+                   this->MocIncludes.end());
+        // Add definitions
+        for (std::vector<std::string>::const_iterator it =
+               this->MocDefinitions.begin();
+             it != this->MocDefinitions.end(); ++it) {
+          cmd.push_back("-D" + (*it));
 #ifdef _WIN32
-        cmd.push_back("-DWIN32");
+          cmd.push_back("-DWIN32");
 #endif
-      }
-      // Add options
-      cmd.insert(cmd.end(), this->MocOptions.begin(), this->MocOptions.end());
-      if (!this->RunCommand(cmd, output, false)) {
-        {
-          std::ostringstream ost;
-          ost << "AutoMoc: Error: moc predefs generation command failed\n";
-          ost << "AutoMoc: Command:\n" << QuotedCommand(cmd) << "\n";
-          ost << "AutoMoc: Command output:\n" << output << "\n";
-          this->LogError(ost.str());
         }
-        return false;
+        // Add options
+        cmd.insert(cmd.end(), this->MocOptions.begin(),
+                   this->MocOptions.end());
+        // Execute command
+        if (!this->RunCommand(cmd, output, false)) {
+          {
+            std::ostringstream ost;
+            ost << "AutoMoc: Error: moc predefs generation command failed\n";
+            ost << "AutoMoc: Command:\n" << QuotedCommand(cmd) << "\n";
+            ost << "AutoMoc: Command output:\n" << output << "\n";
+            this->LogError(ost.str());
+          }
+          return false;
+        }
       }
-    }
-
-    if (this->FileDiffers(this->MocPredefsFileAbs, output)) {
-      if (!this->FileWrite("AutoMoc", this->MocPredefsFileAbs, output)) {
-        return false;
+      // (Re)write predefs file only on demand
+      if (this->FileDiffers(this->MocPredefsFileAbs, output)) {
+        if (this->FileWrite("AutoMoc", this->MocPredefsFileAbs, output)) {
+          this->MocPredefsChanged = true;
+        } else {
+          return false;
+        }
       }
     }
   }
@@ -1300,7 +1311,7 @@ bool cmQtAutoGenerators::MocGenerateFile(
   const std::map<std::string, std::set<std::string> >& mocDepends)
 {
   bool mocGenerated = false;
-  bool generateMoc = this->MocSettingsChanged;
+  bool generateMoc = this->MocSettingsChanged || this->MocPredefsChanged;
 
   const std::string mocFileRel =
     this->AutogenBuildSubDir + subDir + mocFileName;
