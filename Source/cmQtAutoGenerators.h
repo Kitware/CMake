@@ -44,9 +44,8 @@ private:
   bool RccEnabled() const { return !this->RccExecutable.empty(); }
 
   // -- Settings file
-  void SettingsFileRead(cmMakefile* makefile,
-                        const std::string& targetDirectory);
-  bool SettingsFileWrite(const std::string& targetDirectory);
+  void SettingsFileRead(cmMakefile* makefile);
+  bool SettingsFileWrite();
 
   bool AnySettingsChanged() const
   {
@@ -176,6 +175,7 @@ private:
   bool IncludeProjectDirsBefore;
   bool Verbose;
   bool ColorOutput;
+  std::string SettingsFile;
   std::string SettingsStringMoc;
   std::string SettingsStringUic;
   std::string SettingsStringRcc;

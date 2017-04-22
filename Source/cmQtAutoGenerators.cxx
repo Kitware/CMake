@@ -76,14 +76,6 @@ static void InfoGet(cmMakefile* makefile, const char* key,
   cmSystemTools::ExpandListArgument(valueConf, list);
 }
 
-static std::string SettingsFile(const std::string& targetDirectory)
-{
-  std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
-  cmSystemTools::ConvertToUnixSlashes(filename);
-  filename += "/AutogenOldSettings.cmake";
-  return filename;
-}
-
 inline static bool SettingsMatch(cmMakefile* makefile, const char* key,
                                  const std::string& value)
 {
@@ -286,12 +278,12 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   bool success = false;
   if (this->ReadAutogenInfoFile(mf.get(), targetDirectory, config)) {
     // Read old settings
-    this->SettingsFileRead(mf.get(), targetDirectory);
+    this->SettingsFileRead(mf.get());
     // Init and run
     this->Init(mf.get());
     if (this->RunAutogen()) {
       // Write current settings
-      if (this->SettingsFileWrite(targetDirectory)) {
+      if (this->SettingsFileWrite()) {
         success = true;
       }
     }
@@ -336,6 +328,13 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   if (!makefile->ReadListFile(filename.c_str())) {
     this->LogError("AutoGen: Error processing file: " + filename);
     return false;
+  }
+
+  // - Old settings file
+  {
+    this->SettingsFile = cmSystemTools::CollapseFullPath(targetDirectory);
+    cmSystemTools::ConvertToUnixSlashes(this->SettingsFile);
+    this->SettingsFile += "/AutogenOldSettings.cmake";
   }
 
   // - Target names
@@ -489,8 +488,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   return true;
 }
 
-void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
-                                          const std::string& targetDirectory)
+void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile)
 {
   // Compose current settings strings
   if (this->MocEnabled()) {
@@ -518,8 +516,7 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
   }
 
   // Read old settings
-  const std::string filename = SettingsFile(targetDirectory);
-  if (makefile->ReadListFile(filename.c_str())) {
+  if (makefile->ReadListFile(this->SettingsFile.c_str())) {
     if (!SettingsMatch(makefile, SettingsKeyMoc, this->SettingsStringMoc)) {
       this->MocSettingsChanged = true;
     }
@@ -533,7 +530,7 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
     // This triggers a full rebuild on the next run if the current
     // build is aborted before writing the current settings in the end.
     if (this->AnySettingsChanged()) {
-      cmSystemTools::RemoveFile(filename);
+      cmSystemTools::RemoveFile(this->SettingsFile);
     }
   } else {
     // If the file could not be read re-generate everythiung.
@@ -543,17 +540,16 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile,
   }
 }
 
-bool cmQtAutoGenerators::SettingsFileWrite(const std::string& targetDirectory)
+bool cmQtAutoGenerators::SettingsFileWrite()
 {
   bool success = true;
   // Only write if any setting changed
   if (this->AnySettingsChanged()) {
-    const std::string filename = SettingsFile(targetDirectory);
     if (this->Verbose) {
-      this->LogInfo("AutoGen: Writing settings file " + filename);
+      this->LogInfo("AutoGen: Writing settings file " + this->SettingsFile);
     }
     cmsys::ofstream outfile;
-    outfile.open(filename.c_str(), std::ios::trunc);
+    outfile.open(this->SettingsFile.c_str(), std::ios::trunc);
     if (outfile) {
       SettingWrite(outfile, SettingsKeyMoc, this->SettingsStringMoc);
       SettingWrite(outfile, SettingsKeyUic, this->SettingsStringUic);
@@ -563,9 +559,9 @@ bool cmQtAutoGenerators::SettingsFileWrite(const std::string& targetDirectory)
     } else {
       success = false;
       // Remove old settings file to trigger full rebuild on next run
-      cmSystemTools::RemoveFile(filename);
+      cmSystemTools::RemoveFile(this->SettingsFile);
       this->LogError("AutoGen: Error: Writing old settings file failed: " +
-                     filename);
+                     this->SettingsFile);
     }
   }
   return success;
