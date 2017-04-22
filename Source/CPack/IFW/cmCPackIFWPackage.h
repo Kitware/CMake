@@ -7,6 +7,7 @@
 
 #include "cmCPackIFWCommon.h"
 
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -69,10 +70,10 @@ public:
   // Configuration
 
   /// Human-readable name of the component
-  std::string DisplayName;
+  std::map<std::string, std::string> DisplayName;
 
   /// Human-readable description of the component
-  std::string Description;
+  std::map<std::string, std::string> Description;
 
   /// Version number of the component
   std::string Version;

@@ -11,6 +11,8 @@
 #include "cmXMLWriter.h"
 
 #include <sstream>
+#include <utility>
+#include <vector>
 
 cmCPackIFWCommon::cmCPackIFWCommon()
   : Generator(CM_NULLPTR)
@@ -70,6 +72,50 @@ bool cmCPackIFWCommon::IsVersionEqual(const char* version)
   return cmSystemTools::VersionCompare(
     cmSystemTools::OP_EQUAL, this->Generator->FrameworkVersion.data(),
     version);
+}
+
+void cmCPackIFWCommon::ExpandListArgument(
+  const std::string& arg, std::map<std::string, std::string>& argsOut)
+{
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArgument(arg, args, false);
+  if (args.empty()) {
+    return;
+  }
+
+  std::size_t i = 0;
+  std::size_t c = args.size();
+  if (c % 2) {
+    argsOut[""] = args[i];
+    ++i;
+  }
+
+  --c;
+  for (; i < c; i += 2) {
+    argsOut[args[i]] = args[i + 1];
+  }
+}
+
+void cmCPackIFWCommon::ExpandListArgument(
+  const std::string& arg, std::multimap<std::string, std::string>& argsOut)
+{
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArgument(arg, args, false);
+  if (args.empty()) {
+    return;
+  }
+
+  std::size_t i = 0;
+  std::size_t c = args.size();
+  if (c % 2) {
+    argsOut.insert(std::pair<std::string, std::string>("", args[i]));
+    ++i;
+  }
+
+  --c;
+  for (; i < c; i += 2) {
+    argsOut.insert(std::pair<std::string, std::string>(args[i], args[i + 1]));
+  }
 }
 
 void cmCPackIFWCommon::WriteGeneratedByToStrim(cmXMLWriter& xout)

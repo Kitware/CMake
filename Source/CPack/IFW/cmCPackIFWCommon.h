@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <map>
 #include <string>
 
 class cmCPackIFWGenerator;
@@ -45,6 +46,21 @@ public:
    * Compare \a version with QtIFW framework version
    */
   bool IsVersionEqual(const char* version);
+
+  /** Expand the list argument containing the map of the key-value pairs.
+   *  If the number of elements is odd, then the first value is used as the
+   *  default value with an empty key.
+   *  Any values with the same keys will be permanently overwritten.
+   */
+  static void ExpandListArgument(const std::string& arg,
+                                 std::map<std::string, std::string>& argsOut);
+
+  /** Expand the list argument containing the multimap of the key-value pairs.
+   *  If the number of elements is odd, then the first value is used as the
+   *  default value with an empty key.
+   */
+  static void ExpandListArgument(
+    const std::string& arg, std::multimap<std::string, std::string>& argsOut);
 
   cmCPackIFWGenerator* Generator;
 
