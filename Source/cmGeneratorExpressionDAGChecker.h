@@ -3,7 +3,7 @@
 #ifndef cmGeneratorExpressionDAGChecker_h
 #define cmGeneratorExpressionDAGChecker_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmListFileCache.h"
 

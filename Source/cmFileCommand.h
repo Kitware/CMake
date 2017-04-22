@@ -3,7 +3,8 @@
 #ifndef cmFileCommand_h
 #define cmFileCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 
@@ -53,6 +54,7 @@ protected:
   bool HandleRelativePathCommand(std::vector<std::string> const& args);
   bool HandleCMakePathCommand(std::vector<std::string> const& args,
                               bool nativePath);
+  bool HandleReadElfCommand(std::vector<std::string> const& args);
   bool HandleRPathChangeCommand(std::vector<std::string> const& args);
   bool HandleRPathCheckCommand(std::vector<std::string> const& args);
   bool HandleRPathRemoveCommand(std::vector<std::string> const& args);

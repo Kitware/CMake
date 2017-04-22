@@ -20,9 +20,6 @@ public:
   ///! Get the name for the generator.
   virtual std::string GetName() const { return this->Name; }
 
-  /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
-
   /** Get the name of the main stamp list file. */
   static std::string GetGenerateStampList();
 
@@ -82,8 +79,8 @@ protected:
   virtual void WriteSolutionConfigurations(
     std::ostream& fout, std::vector<std::string> const& configs);
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const std::string& name, cmStateEnums::TargetType type,
-    std::vector<std::string> const& configs,
+    std::ostream& fout, const std::string& name,
+    cmGeneratorTarget const& target, std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const std::string& platformMapping = "");
   virtual bool ComputeTargetDepends();

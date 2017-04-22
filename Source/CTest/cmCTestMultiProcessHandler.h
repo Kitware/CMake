@@ -3,9 +3,9 @@
 #ifndef cmCTestMultiProcessHandler_h
 #define cmCTestMultiProcessHandler_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cmCTestTestHandler.h>
+#include "cmCTestTestHandler.h"
 #include <map>
 #include <set>
 #include <stddef.h>

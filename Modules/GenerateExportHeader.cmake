@@ -215,9 +215,6 @@ macro(_test_compiler_hidden_visibility)
     check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
     check_cxx_compiler_flag(-fvisibility-inlines-hidden
       COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
-    option(USE_COMPILER_HIDDEN_VISIBILITY
-      "Use HIDDEN visibility support if available." ON)
-    mark_as_advanced(USE_COMPILER_HIDDEN_VISIBILITY)
   endif()
 endmacro()
 
@@ -267,7 +264,7 @@ macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
     if(WIN32 OR CYGWIN)
       set(DEFINE_EXPORT "__declspec(dllexport)")
       set(DEFINE_IMPORT "__declspec(dllimport)")
-    elseif(COMPILER_HAS_HIDDEN_VISIBILITY AND USE_COMPILER_HIDDEN_VISIBILITY)
+    elseif(COMPILER_HAS_HIDDEN_VISIBILITY)
       set(DEFINE_EXPORT "__attribute__((visibility(\"default\")))")
       set(DEFINE_IMPORT "__attribute__((visibility(\"default\")))")
       set(DEFINE_NO_EXPORT "__attribute__((visibility(\"hidden\")))")
@@ -388,6 +385,9 @@ function(add_compiler_export_flags)
   _test_compiler_hidden_visibility()
   _test_compiler_has_deprecated()
 
+  option(USE_COMPILER_HIDDEN_VISIBILITY
+    "Use HIDDEN visibility support if available." ON)
+  mark_as_advanced(USE_COMPILER_HIDDEN_VISIBILITY)
   if(NOT (USE_COMPILER_HIDDEN_VISIBILITY AND COMPILER_HAS_HIDDEN_VISIBILITY))
     # Just return if there are no flags to add.
     return()

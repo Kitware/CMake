@@ -312,6 +312,10 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
           if(uselib64 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
             list(APPEND _lib_dirs "lib64/pkgconfig")
           endif()
+          get_property(uselibx32 GLOBAL PROPERTY FIND_LIBRARY_USE_LIBX32_PATHS)
+          if(uselibx32 AND CMAKE_INTERNAL_PLATFORM_ABI STREQUAL "ELF X32")
+            list(APPEND _lib_dirs "libx32/pkgconfig")
+          endif()
         endif()
       endif()
       list(APPEND _lib_dirs "lib/pkgconfig")
@@ -360,38 +364,25 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
         set(_pkg_check_modules_pkg_ver)
       endif()
 
-      # handle the operands
-      if (_pkg_check_modules_pkg_op STREQUAL ">=")
-        list(APPEND _pkg_check_modules_exist_query --atleast-version)
-      endif()
-
-      if (_pkg_check_modules_pkg_op STREQUAL "=")
-        list(APPEND _pkg_check_modules_exist_query --exact-version)
-      endif()
-
-      if (_pkg_check_modules_pkg_op STREQUAL "<=")
-        list(APPEND _pkg_check_modules_exist_query --max-version)
-      endif()
-
-      # create the final query which is of the format:
-      # * --atleast-version <version> <pkg-name>
-      # * --exact-version <version> <pkg-name>
-      # * --max-version <version> <pkg-name>
-      # * --exists <pkg-name>
-      if (_pkg_check_modules_pkg_op)
-        list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_ver}")
-      else()
-        list(APPEND _pkg_check_modules_exist_query --exists)
-      endif()
-      list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors)
-
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_VERSION)
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_PREFIX)
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_INCLUDEDIR)
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_LIBDIR)
 
-      list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_name}")
       list(APPEND _pkg_check_modules_packages    "${_pkg_check_modules_pkg_name}")
+
+      # create the final query which is of the format:
+      # * <pkg-name> >= <version>
+      # * <pkg-name> = <version>
+      # * <pkg-name> <= <version>
+      # * --exists <pkg-name>
+      list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors)
+      if (_pkg_check_modules_pkg_op)
+        list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_name} ${_pkg_check_modules_pkg_op} ${_pkg_check_modules_pkg_ver}")
+      else()
+        list(APPEND _pkg_check_modules_exist_query --exists)
+        list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_name}")
+      endif()
 
       # execute the query
       execute_process(

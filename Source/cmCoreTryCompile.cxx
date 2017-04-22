@@ -2,12 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCoreTryCompile.h"
 
-#include <cmConfigure.h>
-#include <cmsys/Directory.hxx>
+#include "cmConfigure.h"
+#include "cmsys/Directory.hxx"
 #include <set>
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmExportTryCompileFileGenerator.h"

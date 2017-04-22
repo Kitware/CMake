@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmNinjaTargetGenerator.h"
 
+#include "cm_jsoncpp_value.h"
+#include "cm_jsoncpp_writer.h"
 #include <algorithm>
 #include <assert.h>
-#include <cm_jsoncpp_value.h>
-#include <cm_jsoncpp_writer.h>
 #include <iterator>
 #include <map>
 #include <sstream>
@@ -212,9 +212,14 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   std::transform(deps.begin(), deps.end(), result.begin(), MapToNinjaPath());
 
   // Add a dependency on the link definitions file, if any.
-  if (this->ModuleDefinitionFile) {
-    result.push_back(
-      this->ConvertToNinjaPath(this->ModuleDefinitionFile->GetFullPath()));
+  if (cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+        this->GeneratorTarget->GetModuleDefinitionInfo(
+          this->GetConfigName())) {
+    for (std::vector<cmSourceFile const*>::const_iterator i =
+           mdi->Sources.begin();
+         i != mdi->Sources.end(); ++i) {
+      result.push_back(this->ConvertToNinjaPath((*i)->GetFullPath()));
+    }
   }
 
   // Add a dependency on user-specified manifest files, if any.

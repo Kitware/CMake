@@ -3,7 +3,7 @@
 #ifndef cmake_h
 #define cmake_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <map>
 #include <set>
@@ -16,7 +16,7 @@
 #include "cmStateTypes.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include <cm_jsoncpp_value.h>
+#include "cm_jsoncpp_value.h"
 #endif
 
 class cmExternalMakefileProjectGeneratorFactory;
@@ -425,7 +425,8 @@ protected:
   typedef std::vector<cmExternalMakefileProjectGeneratorFactory*>
     RegisteredExtraGeneratorsVector;
   RegisteredExtraGeneratorsVector ExtraGenerators;
-  void AddDefaultCommands();
+  void AddScriptingCommands();
+  void AddProjectCommands();
   void AddDefaultGenerators();
   void AddDefaultExtraGenerators();
 

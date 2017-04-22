@@ -3,8 +3,9 @@
 #ifndef cmFindPackageCommand_h
 #define cmFindPackageCommand_h
 
-#include <cmConfigure.h>
-#include <cm_kwiml.h>
+#include "cmConfigure.h"
+
+#include "cm_kwiml.h"
 #include <map>
 #include <set>
 #include <string>
@@ -169,6 +170,7 @@ private:
   bool DebugMode;
   bool UseLib32Paths;
   bool UseLib64Paths;
+  bool UseLibx32Paths;
   bool PolicyScope;
   std::string LibraryArchitecture;
   std::vector<std::string> Names;

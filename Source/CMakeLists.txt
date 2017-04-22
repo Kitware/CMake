@@ -344,6 +344,8 @@ set(SRCS
   cmPropertyDefinitionMap.h
   cmPropertyMap.cxx
   cmPropertyMap.h
+  cmQtAutoGeneratorCommon.cxx
+  cmQtAutoGeneratorCommon.h
   cmQtAutoGeneratorInitializer.cxx
   cmQtAutoGeneratorInitializer.h
   cmQtAutoGenerators.cxx
@@ -381,6 +383,8 @@ set(SRCS
   cmVariableWatch.h
   cmVersion.cxx
   cmVersion.h
+  cmWorkingDirectory.cxx
+  cmWorkingDirectory.h
   cmXMLParser.cxx
   cmXMLParser.h
   cmXMLSafe.cxx
@@ -440,6 +444,8 @@ set(SRCS
   cmCreateTestSourceList.h
   cmDefinePropertyCommand.cxx
   cmDefinePropertyCommand.h
+  cmDisallowedCommand.cxx
+  cmDisallowedCommand.h
   cmEnableLanguageCommand.cxx
   cmEnableLanguageCommand.h
   cmEnableTestingCommand.cxx
@@ -637,6 +643,7 @@ if(APPLE)
   set(SRCS ${SRCS}
     cmXCodeObject.cxx
     cmXCode21Object.cxx
+    cmXCodeScheme.cxx
     cmGlobalXCodeGenerator.cxx
     cmGlobalXCodeGenerator.h
     cmLocalXCodeGenerator.cxx
@@ -881,6 +888,12 @@ set(CTEST_SRCS cmCTest.cxx
 add_library(CTestLib ${CTEST_SRCS})
 target_link_libraries(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_LIBRARIES})
 
+#
+# CPack
+#
+include_directories(
+  "${CMake_SOURCE_DIR}/Source/CPack"
+  )
 #
 # Sources for CPack
 #

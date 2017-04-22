@@ -3,7 +3,8 @@
 #ifndef cmIncludeRegularExpressionCommand_h
 #define cmIncludeRegularExpressionCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 

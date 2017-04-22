@@ -3,7 +3,7 @@
 #ifndef cmArchiveWrite_h
 #define cmArchiveWrite_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <stddef.h>

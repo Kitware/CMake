@@ -3,8 +3,8 @@
 #ifndef RegexExplorer_h
 #define RegexExplorer_h
 
+#include "cmsys/RegularExpression.hxx"
 #include <QDialog>
-#include <cmsys/RegularExpression.hxx>
 #include <string>
 
 #include "ui_RegexExplorer.h"

@@ -12,22 +12,22 @@ project (CudaOnlySeparateCompilation CUDA)
 string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=compute_30")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CUDA_STANDARD 11)
-add_library(CUDASerarateLibA STATIC file1.cu file2.cu file3.cu)
+add_library(CUDASeparateLibA STATIC file1.cu file2.cu file3.cu)
 
 #Having file4/file5 in a shared library causes serious problems
 #with the nvcc linker and it will generate bad entries that will
 #cause a segv when trying to run the executable
 #
-add_library(CUDASerarateLibB STATIC file4.cu file5.cu)
-target_link_libraries(CUDASerarateLibB PRIVATE CUDASerarateLibA)
+add_library(CUDASeparateLibB STATIC file4.cu file5.cu)
+target_link_libraries(CUDASeparateLibB PRIVATE CUDASeparateLibA)
 
 add_executable(CudaOnlySeparateCompilation main.cu)
-target_link_libraries(CudaOnlySeparateCompilation PRIVATE CUDASerarateLibB)
+target_link_libraries(CudaOnlySeparateCompilation PRIVATE CUDASeparateLibB)
 
-set_target_properties( CUDASerarateLibA
-                       CUDASerarateLibB
+set_target_properties( CUDASeparateLibA
+                       CUDASeparateLibB
                        PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
-set_target_properties( CUDASerarateLibA
-                       CUDASerarateLibB
+set_target_properties( CUDASeparateLibA
+                       CUDASeparateLibB
                        PROPERTIES POSITION_INDEPENDENT_CODE ON)

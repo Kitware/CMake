@@ -20,3 +20,7 @@ command to make things depend on the external project.
 specify the type of project, id (GUID) of the project and the name of
 the target platform.  This is useful for projects requiring values
 other than the default (e.g.  WIX projects).
+
+If the imported project has different configuration names than the
+current project, set the :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>`
+target property to specify the mapping.

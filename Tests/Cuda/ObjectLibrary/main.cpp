@@ -4,14 +4,16 @@
 int static_func(int);
 int file1_sq_func(int);
 
-void test_functions()
+int test_functions()
 {
-  file1_sq_func(static_func(42));
+  return file1_sq_func(static_func(42));
 }
 
 int main(int argc, char** argv)
 {
-  test_functions();
+  if (test_functions() == 1) {
+    return 1;
+  }
   std::cout
     << "this executable doesn't use cuda code, just call methods defined"
     << std::endl;

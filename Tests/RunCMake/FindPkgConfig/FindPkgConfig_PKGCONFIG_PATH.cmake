@@ -30,9 +30,12 @@ if(NOT DEFINED CMAKE_SYSTEM_NAME
     endif()
   else()
     # not debian, check the FIND_LIBRARY_USE_LIB32_PATHS and FIND_LIBRARY_USE_LIB64_PATHS propertie
+    get_property(uselibx32 GLOBAL PROPERTY FIND_LIBRARY_USE_LIBX32_PATHS)
     get_property(uselib32 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS)
     get_property(uselib64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
-    if(uselib32 AND CMAKE_SIZEOF_VOID_P EQUAL 4)
+    if(uselibx32 AND CMAKE_INTERNAL_PLATFORM_ABI STREQUAL "ELF X32")
+      set(expected_path "/baz:${CMAKE_CURRENT_SOURCE_DIR}/pc-foo/libx32/pkgconfig:${CMAKE_CURRENT_SOURCE_DIR}/pc-foo/lib/pkgconfig:${CMAKE_CURRENT_SOURCE_DIR}/pc-bar/libx32/pkgconfig:${CMAKE_CURRENT_SOURCE_DIR}/pc-bar/lib/pkgconfig")
+    elseif(uselib32 AND CMAKE_SIZEOF_VOID_P EQUAL 4)
       set(expected_path "/baz:${CMAKE_CURRENT_SOURCE_DIR}/pc-foo/lib32/pkgconfig:${CMAKE_CURRENT_SOURCE_DIR}/pc-foo/lib/pkgconfig:${CMAKE_CURRENT_SOURCE_DIR}/pc-bar/lib32/pkgconfig:${CMAKE_CURRENT_SOURCE_DIR}/pc-bar/lib/pkgconfig")
     elseif(uselib64 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(expected_path "/baz:${CMAKE_CURRENT_SOURCE_DIR}/pc-foo/lib64/pkgconfig:${CMAKE_CURRENT_SOURCE_DIR}/pc-foo/lib/pkgconfig:${CMAKE_CURRENT_SOURCE_DIR}/pc-bar/lib64/pkgconfig:${CMAKE_CURRENT_SOURCE_DIR}/pc-bar/lib/pkgconfig")

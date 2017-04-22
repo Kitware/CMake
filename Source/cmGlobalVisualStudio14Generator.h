@@ -3,7 +3,7 @@
 #ifndef cmGlobalVisualStudio14Generator_h
 #define cmGlobalVisualStudio14Generator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <string>

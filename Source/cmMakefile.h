@@ -3,12 +3,13 @@
 #ifndef cmMakefile_h
 #define cmMakefile_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <map>
 #include <set>
 #include <stack>
+#include <stddef.h>
 #include <string>
 #include <vector>
 
@@ -119,6 +120,13 @@ public:
    */
   void FinalPass();
 
+  /** How to handle custom commands for object libraries */
+  enum ObjectLibraryCommands
+  {
+    RejectObjectLibraryCommands,
+    AcceptObjectLibraryCommands
+  };
+
   /** Add a custom command to the build.  */
   void AddCustomCommandToTarget(
     const std::string& target, const std::vector<std::string>& byproducts,
@@ -126,7 +134,8 @@ public:
     const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
     const char* comment, const char* workingDir, bool escapeOldStyle = true,
     bool uses_terminal = false, const std::string& depfile = "",
-    bool command_expand_lists = false);
+    bool command_expand_lists = false,
+    ObjectLibraryCommands objLibraryCommands = RejectObjectLibraryCommands);
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& byproducts,
@@ -398,6 +407,8 @@ public:
   cmSourceFile* GetOrCreateSource(const std::string& sourceName,
                                   bool generated = false);
 
+  void AddTargetObject(std::string const& tgtName, std::string const& objFile);
+
   /**
    * Given a variable name, return its value (as a string).
    * If the variable is not found in this makefile instance, the
@@ -428,6 +439,8 @@ public:
 
   /** Return whether the target platform is 64-bit.  */
   bool PlatformIs64Bit() const;
+  /** Return whether the target platform is x32.  */
+  bool PlatformIsx32() const;
 
   /** Return whether the target platform is Apple iOS.  */
   bool PlatformIsAppleIos() const;
@@ -807,6 +820,7 @@ protected:
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   std::vector<cmSourceGroup> SourceGroups;
+  size_t ObjectLibrariesSourceGroupIndex;
 #endif
 
   std::vector<cmCommand*> FinalPassCommands;

@@ -3,7 +3,8 @@
 #ifndef cmLinkLibrariesCommand_h
 #define cmLinkLibrariesCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 

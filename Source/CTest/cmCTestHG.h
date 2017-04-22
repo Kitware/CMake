@@ -3,7 +3,7 @@
 #ifndef cmCTestHG_h
 #define cmCTestHG_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestGlobalVC.h"
 
@@ -26,12 +26,12 @@ public:
 
 private:
   std::string GetWorkingRevision();
-  void NoteOldRevision() CM_OVERRIDE;
-  void NoteNewRevision() CM_OVERRIDE;
+  bool NoteOldRevision() CM_OVERRIDE;
+  bool NoteNewRevision() CM_OVERRIDE;
   bool UpdateImpl() CM_OVERRIDE;
 
-  void LoadRevisions() CM_OVERRIDE;
-  void LoadModifications() CM_OVERRIDE;
+  bool LoadRevisions() CM_OVERRIDE;
+  bool LoadModifications() CM_OVERRIDE;
 
   // Parsing helper classes.
   class IdentifyParser;

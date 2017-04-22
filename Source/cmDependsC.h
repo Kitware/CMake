@@ -3,11 +3,11 @@
 #ifndef cmDependsC_h
 #define cmDependsC_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmDepends.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <iosfwd>
 #include <map>
 #include <queue>

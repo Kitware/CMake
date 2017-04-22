@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceFileLocation.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmAlgorithms.h"
 #include "cmGlobalGenerator.h"

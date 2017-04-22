@@ -226,6 +226,17 @@ option(CMAKE_USE_FOLDERS "Enable folder grouping of projects in IDEs." ON)
 mark_as_advanced(CMAKE_USE_FOLDERS)
 
 
+option(CMake_RUN_IWYU "Run include-what-you-use with the compiler." OFF)
+if(CMake_RUN_IWYU)
+  find_program(IWYU_COMMAND NAMES include-what-you-use iwyu)
+  if(NOT IWYU_COMMAND)
+    message(FATAL_ERROR "CMake_RUN_IWYU is ON but include-what-you-use is not found!")
+  endif()
+  set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE
+    "${IWYU_COMMAND};-Xiwyu;--mapping_file=${CMake_SOURCE_DIR}/Utilities/IWYU/mapping.imp")
+endif()
+
+
 #-----------------------------------------------------------------------
 # a macro that only sets the FOLDER target property if it's
 # "appropriate"
@@ -421,14 +432,15 @@ macro (CMAKE_BUILD_UTILITIES)
       if(NOT LIBLZMA_FOUND)
         message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBLZMA is ON but LibLZMA is not found!")
       endif()
-      set(LZMA_INCLUDE_DIR ${LIBLZMA_INCLUDE_DIRS})
-      set(LZMA_LIBRARY ${LIBLZMA_LIBRARIES})
     else()
       add_subdirectory(Utilities/cmliblzma)
       CMAKE_SET_TARGET_FOLDER(cmliblzma "Utilities/3rdParty")
-      set(LZMA_INCLUDE_DIR
+      set(LIBLZMA_HAS_AUTO_DECODER 1)
+      set(LIBLZMA_HAS_EASY_ENCODER 1)
+      set(LIBLZMA_HAS_LZMA_PRESET 1)
+      set(LIBLZMA_INCLUDE_DIR
         "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmliblzma/liblzma/api")
-      set(LZMA_LIBRARY cmliblzma)
+      set(LIBLZMA_LIBRARY cmliblzma)
     endif()
   endif()
 
@@ -449,13 +461,14 @@ macro (CMAKE_BUILD_UTILITIES)
     add_definitions(-DLIBARCHIVE_STATIC)
     set(ENABLE_NETTLE OFF CACHE INTERNAL "Enable use of Nettle")
     set(ENABLE_OPENSSL ${CMAKE_USE_OPENSSL} CACHE INTERNAL "Enable use of OpenSSL")
-    set(ENABLE_LZMA ON CACHE INTERNAL "Enable the use of the system found LZMA library if found")
-    set(ENABLE_ZLIB ON CACHE INTERNAL "Enable the use of the system found ZLIB library if found")
-    set(ENABLE_BZip2 ON CACHE INTERNAL "Enable the use of the system found BZip2 library if found")
-    set(ENABLE_LIBXML2 OFF CACHE INTERNAL "Enable the use of the system found libxml2 library if found")
-    set(ENABLE_EXPAT ON CACHE INTERNAL "Enable the use of the system found EXPAT library if found")
-    set(ENABLE_PCREPOSIX OFF CACHE INTERNAL "Enable the use of the system found PCREPOSIX library if found")
-    set(ENABLE_LibGCC OFF CACHE INTERNAL "Enable the use of the system found LibGCC library if found")
+    set(ENABLE_LZMA ON CACHE INTERNAL "Enable the use of the system LZMA library if found")
+    set(ENABLE_LZO OFF CACHE INTERNAL "Enable the use of the system LZO library if found")
+    set(ENABLE_ZLIB ON CACHE INTERNAL "Enable the use of the system ZLIB library if found")
+    set(ENABLE_BZip2 ON CACHE INTERNAL "Enable the use of the system BZip2 library if found")
+    set(ENABLE_LIBXML2 OFF CACHE INTERNAL "Enable the use of the system libxml2 library if found")
+    set(ENABLE_EXPAT ON CACHE INTERNAL "Enable the use of the system EXPAT library if found")
+    set(ENABLE_PCREPOSIX OFF CACHE INTERNAL "Enable the use of the system PCREPOSIX library if found")
+    set(ENABLE_LibGCC OFF CACHE INTERNAL "Enable the use of the system LibGCC library if found")
     set(ENABLE_XATTR OFF CACHE INTERNAL "Enable extended attribute support")
     set(ENABLE_ACL OFF CACHE INTERNAL "Enable ACL support")
     set(ENABLE_ICONV OFF CACHE INTERNAL "Enable iconv support")
@@ -505,12 +518,6 @@ int main(void) { return 0; }
       # libuv does not support Cygwin
       set(CMAKE_USE_LIBUV 0)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "HP-UX")
-      # Disable until it can be ported.
-      set(CMAKE_USE_LIBUV 0)
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "sparc")
-      # Disable until it can be ported.
-      set(CMAKE_USE_LIBUV 0)
-    elseif(CMAKE_SYSTEM STREQUAL "SunOS-5.10")
       # Disable until it can be ported.
       set(CMAKE_USE_LIBUV 0)
     endif()
@@ -810,6 +817,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     PATTERN "*.sh*" PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                                 GROUP_READ GROUP_EXECUTE
                                 WORLD_READ WORLD_EXECUTE
+    REGEX "Help/dev($|/)" EXCLUDE
     )
 
   # Install auxiliary files integrating with other tools.

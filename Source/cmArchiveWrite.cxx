@@ -5,10 +5,10 @@
 #include "cmLocale.h"
 #include "cmSystemTools.h"
 #include "cm_get_date.h"
-#include <cm_libarchive.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/Encoding.hxx>
-#include <cmsys/FStream.hxx>
+#include "cm_libarchive.h"
+#include "cmsys/Directory.hxx"
+#include "cmsys/Encoding.hxx"
+#include "cmsys/FStream.hxx"
 #include <iostream>
 #include <string.h>
 #include <time.h>

@@ -15,6 +15,7 @@ readonly paths="
 
 extract_source () {
     git_archive
+    disable_custom_gitattributes
 }
 
 export HOOKS_ALLOW_KWSYS=1

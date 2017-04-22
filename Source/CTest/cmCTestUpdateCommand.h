@@ -3,7 +3,7 @@
 #ifndef cmCTestUpdateCommand_h
 #define cmCTestUpdateCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestHandlerCommand.h"
 

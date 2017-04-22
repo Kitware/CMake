@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTarget.h"
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/RegularExpression.hxx>
 #include <map>
 #include <set>
 #include <sstream>
@@ -230,6 +230,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("INSTALL_NAME_DIR", CM_NULLPTR);
     this->SetPropertyDefault("INSTALL_RPATH", "");
     this->SetPropertyDefault("INSTALL_RPATH_USE_LINK_PATH", "OFF");
+    this->SetPropertyDefault("INTERPROCEDURAL_OPTIMIZATION", CM_NULLPTR);
     this->SetPropertyDefault("SKIP_BUILD_RPATH", "OFF");
     this->SetPropertyDefault("BUILD_WITH_INSTALL_RPATH", "OFF");
     this->SetPropertyDefault("ARCHIVE_OUTPUT_DIRECTORY", CM_NULLPTR);
@@ -245,14 +246,17 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("AUTOMOC", CM_NULLPTR);
     this->SetPropertyDefault("AUTOUIC", CM_NULLPTR);
     this->SetPropertyDefault("AUTORCC", CM_NULLPTR);
+    this->SetPropertyDefault("AUTOMOC_DEPEND_FILTERS", CM_NULLPTR);
     this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", CM_NULLPTR);
     this->SetPropertyDefault("AUTOUIC_OPTIONS", CM_NULLPTR);
+    this->SetPropertyDefault("AUTOUIC_SEARCH_PATHS", CM_NULLPTR);
     this->SetPropertyDefault("AUTORCC_OPTIONS", CM_NULLPTR);
     this->SetPropertyDefault("LINK_DEPENDS_NO_SHARED", CM_NULLPTR);
     this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", CM_NULLPTR);
     this->SetPropertyDefault("WIN32_EXECUTABLE", CM_NULLPTR);
     this->SetPropertyDefault("MACOSX_BUNDLE", CM_NULLPTR);
     this->SetPropertyDefault("MACOSX_RPATH", CM_NULLPTR);
+    this->SetPropertyDefault("BUILD_WITH_INSTALL_NAME_DIR", CM_NULLPTR);
     this->SetPropertyDefault("C_CLANG_TIDY", CM_NULLPTR);
     this->SetPropertyDefault("C_COMPILER_LAUNCHER", CM_NULLPTR);
     this->SetPropertyDefault("C_CPPLINT", CM_NULLPTR);
@@ -287,13 +291,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (this->GetType() != cmStateEnums::UTILITY) {
     const char* configProps[] = {
       /* clang-format needs this comment to break after the opening brace */
-      "ARCHIVE_OUTPUT_DIRECTORY_",
-      "LIBRARY_OUTPUT_DIRECTORY_",
-      "RUNTIME_OUTPUT_DIRECTORY_",
-      "PDB_OUTPUT_DIRECTORY_",
-      "COMPILE_PDB_OUTPUT_DIRECTORY_",
-      "MAP_IMPORTED_CONFIG_",
-      CM_NULLPTR
+      "ARCHIVE_OUTPUT_DIRECTORY_",     "LIBRARY_OUTPUT_DIRECTORY_",
+      "RUNTIME_OUTPUT_DIRECTORY_",     "PDB_OUTPUT_DIRECTORY_",
+      "COMPILE_PDB_OUTPUT_DIRECTORY_", "MAP_IMPORTED_CONFIG_",
+      "INTERPROCEDURAL_OPTIMIZATION_", CM_NULLPTR
     };
     for (std::vector<std::string>::iterator ci = configNames.begin();
          ci != configNames.end(); ++ci) {
@@ -1350,11 +1351,9 @@ std::string cmTarget::ImportedGetFullPath(const std::string& config,
 
   // Lookup/compute/cache the import information for this
   // configuration.
-  std::string config_upper;
-  if (!config.empty()) {
-    config_upper = cmSystemTools::UpperCase(config);
-  } else {
-    config_upper = "NOCONFIG";
+  std::string desired_config = config;
+  if (config.empty()) {
+    desired_config = "NOCONFIG";
   }
 
   std::string result;
@@ -1364,7 +1363,7 @@ std::string cmTarget::ImportedGetFullPath(const std::string& config,
   std::string suffix;
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      this->GetMappedConfig(config_upper, &loc, &imp, suffix)) {
+      this->GetMappedConfig(desired_config, &loc, &imp, suffix)) {
     if (!pimplib) {
       if (loc) {
         result = loc;
@@ -1447,18 +1446,28 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
                                const char** loc, const char** imp,
                                std::string& suffix) const
 {
-  std::string const locPropBase =
-    this->GetType() == cmStateEnums::INTERFACE_LIBRARY ? "IMPORTED_LIBNAME"
-                                                       : "IMPORTED_LOCATION";
+  std::string config_upper;
+  if (!desired_config.empty()) {
+    config_upper = cmSystemTools::UpperCase(desired_config);
+  }
+
+  std::string locPropBase;
+  if (this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    locPropBase = "IMPORTED_LIBNAME";
+  } else if (this->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+    locPropBase = "IMPORTED_OBJECTS";
+  } else {
+    locPropBase = "IMPORTED_LOCATION";
+  }
 
   // Track the configuration-specific property suffix.
   suffix = "_";
-  suffix += desired_config;
+  suffix += config_upper;
 
   std::vector<std::string> mappedConfigs;
   {
     std::string mapProp = "MAP_IMPORTED_CONFIG_";
-    mapProp += desired_config;
+    mapProp += config_upper;
     if (const char* mapValue = this->GetProperty(mapProp)) {
       cmSystemTools::ExpandListArgument(mapValue, mappedConfigs, true);
     }

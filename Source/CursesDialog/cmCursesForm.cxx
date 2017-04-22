@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesForm.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 cmsys::ofstream cmCursesForm::DebugFile;
 bool cmCursesForm::Debug = false;

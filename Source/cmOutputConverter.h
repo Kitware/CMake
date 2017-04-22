@@ -3,7 +3,7 @@
 #ifndef cmOutputConverter_h
 #define cmOutputConverter_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 

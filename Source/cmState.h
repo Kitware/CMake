@@ -3,7 +3,7 @@
 #ifndef cmState_h
 #define cmState_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <set>
@@ -116,6 +116,9 @@ public:
   bool GetIsInTryCompile() const;
   void SetIsInTryCompile(bool b);
 
+  bool GetIsGeneratorMultiConfig() const;
+  void SetIsGeneratorMultiConfig(bool b);
+
   cmCommand* GetCommand(std::string const& name) const;
   void AddCommand(cmCommand* command);
   void RemoveUnscriptableCommands();
@@ -174,6 +177,7 @@ private:
   std::string SourceDirectory;
   std::string BinaryDirectory;
   bool IsInTryCompile;
+  bool IsGeneratorMultiConfig;
   bool WindowsShell;
   bool WindowsVSIDE;
   bool WatcomWMake;

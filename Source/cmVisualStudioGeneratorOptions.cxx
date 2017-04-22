@@ -44,6 +44,8 @@ cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
   this->FortranRuntimeDebug = false;
   this->FortranRuntimeDLL = false;
   this->FortranRuntimeMT = false;
+
+  this->UnknownFlagField = "AdditionalOptions";
 }
 
 cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
@@ -68,6 +70,8 @@ cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
   this->FortranRuntimeDebug = false;
   this->FortranRuntimeDLL = false;
   this->FortranRuntimeMT = false;
+
+  this->UnknownFlagField = "AdditionalOptions";
 }
 
 void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
@@ -82,6 +86,13 @@ void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
   }
 }
 
+void cmVisualStudioGeneratorOptions::ClearTables()
+{
+  for (int i = 0; i < FlagTableCount; ++i) {
+    this->FlagTable[i] = CM_NULLPTR;
+  }
+}
+
 void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
 {
   // Exception handling is on by default because the platform file has
@@ -90,10 +101,6 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
   // the flag to disable exception handling.  When the user does
   // remove the flag we need to override the IDE default of on.
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VS7:
-    case cmGlobalVisualStudioGenerator::VS71:
-      this->FlagMap["ExceptionHandling"] = "FALSE";
-      break;
     case cmGlobalVisualStudioGenerator::VS10:
     case cmGlobalVisualStudioGenerator::VS11:
     case cmGlobalVisualStudioGenerator::VS12:
@@ -177,6 +184,78 @@ bool cmVisualStudioGeneratorOptions::UsingSBCS() const
   return false;
 }
 
+cmVisualStudioGeneratorOptions::CudaRuntime
+cmVisualStudioGeneratorOptions::GetCudaRuntime() const
+{
+  std::map<std::string, FlagValue>::const_iterator i =
+    this->FlagMap.find("CudaRuntime");
+  if (i != this->FlagMap.end() && i->second.size() == 1) {
+    std::string const& cudaRuntime = i->second[0];
+    if (cudaRuntime == "Static") {
+      return CudaRuntimeStatic;
+    }
+    if (cudaRuntime == "Shared") {
+      return CudaRuntimeShared;
+    }
+    if (cudaRuntime == "None") {
+      return CudaRuntimeNone;
+    }
+  }
+  // nvcc default is static
+  return CudaRuntimeStatic;
+}
+
+void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
+{
+  // Extract temporary values stored by our flag table.
+  FlagValue arch = this->TakeFlag("cmake-temp-arch");
+  FlagValue code = this->TakeFlag("cmake-temp-code");
+  FlagValue gencode = this->TakeFlag("cmake-temp-gencode");
+
+  // No -code allowed without -arch.
+  if (arch.empty()) {
+    code.clear();
+  }
+
+  if (arch.empty() && gencode.empty()) {
+    return;
+  }
+
+  // Create a CodeGeneration field with [arch],[code] syntax in each entry.
+  // CUDA will convert it to `-gencode=arch=[arch],code="[code],[arch]"`.
+  FlagValue& result = this->FlagMap["CodeGeneration"];
+
+  // First entries for the -arch=<arch> [-code=<code>,...] pair.
+  if (!arch.empty()) {
+    std::string arch_name = arch[0];
+    std::vector<std::string> codes;
+    if (!code.empty()) {
+      codes = cmSystemTools::tokenize(code[0], ",");
+    }
+    if (codes.empty()) {
+      codes.push_back(arch_name);
+      // nvcc -arch=<arch> has a special case that allows a real
+      // architecture to be specified instead of a virtual arch.
+      // It translates to -arch=<virtual> -code=<real>.
+      cmSystemTools::ReplaceString(arch_name, "sm_", "compute_");
+    }
+    for (std::vector<std::string>::iterator ci = codes.begin();
+         ci != codes.end(); ++ci) {
+      std::string entry = arch_name + "," + *ci;
+      result.push_back(entry);
+    }
+  }
+
+  // Now add entries for the -gencode=<arch>,<code> pairs.
+  for (std::vector<std::string>::iterator ei = gencode.begin();
+       ei != gencode.end(); ++ei) {
+    std::string entry = *ei;
+    cmSystemTools::ReplaceString(entry, "arch=", "");
+    cmSystemTools::ReplaceString(entry, "code=", "");
+    result.push_back(entry);
+  }
+}
+
 void cmVisualStudioGeneratorOptions::Parse(const char* flags)
 {
   // Parse the input string as a windows command line since the string
@@ -210,6 +289,44 @@ void cmVisualStudioGeneratorOptions::ParseFinish()
     rl += this->FortranRuntimeDLL ? "DLL" : "";
     this->FlagMap["RuntimeLibrary"] = rl;
   }
+
+  if (this->CurrentTool == CudaCompiler) {
+    std::map<std::string, FlagValue>::iterator i =
+      this->FlagMap.find("CudaRuntime");
+    if (i != this->FlagMap.end() && i->second.size() == 1) {
+      std::string& cudaRuntime = i->second[0];
+      if (cudaRuntime == "static") {
+        cudaRuntime = "Static";
+      } else if (cudaRuntime == "shared") {
+        cudaRuntime = "Shared";
+      } else if (cudaRuntime == "none") {
+        cudaRuntime = "None";
+      }
+    }
+  }
+}
+
+void cmVisualStudioGeneratorOptions::PrependInheritedString(
+  std::string const& key)
+{
+  std::map<std::string, FlagValue>::iterator i = this->FlagMap.find(key);
+  if (i == this->FlagMap.end() || i->second.size() != 1) {
+    return;
+  }
+  std::string& value = i->second[0];
+  value = "%(" + key + ") " + value;
+}
+
+void cmVisualStudioGeneratorOptions::Reparse(std::string const& key)
+{
+  std::map<std::string, FlagValue>::iterator i = this->FlagMap.find(key);
+  if (i == this->FlagMap.end() || i->second.size() != 1) {
+    return;
+  }
+  std::string const original = i->second[0];
+  i->second[0] = "";
+  this->UnknownFlagField = key;
+  this->Parse(original.c_str());
 }
 
 void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
@@ -235,10 +352,22 @@ void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
   }
 
   // This option is not known.  Store it in the output flags.
-  this->FlagString += " ";
-  this->FlagString += cmOutputConverter::EscapeWindowsShellArgument(
+  std::string const opts = cmOutputConverter::EscapeWindowsShellArgument(
     flag, cmOutputConverter::Shell_Flag_AllowMakeVariables |
       cmOutputConverter::Shell_Flag_VSIDE);
+  this->AppendFlagString(this->UnknownFlagField, opts);
+}
+
+cmIDEOptions::FlagValue cmVisualStudioGeneratorOptions::TakeFlag(
+  std::string const& key)
+{
+  FlagValue value;
+  std::map<std::string, FlagValue>::iterator i = this->FlagMap.find(key);
+  if (i != this->FlagMap.end()) {
+    value = i->second;
+    this->FlagMap.erase(i);
+  }
+  return value;
 }
 
 void cmVisualStudioGeneratorOptions::SetConfiguration(const char* config)
@@ -253,19 +382,22 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   if (this->Defines.empty()) {
     return;
   }
+  const char* tag = "PreprocessorDefinitions";
+  if (lang == "CUDA") {
+    tag = "Defines";
+  }
   if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
     // if there are configuration specific flags, then
     // use the configuration specific tag for PreprocessorDefinitions
     if (!this->Configuration.empty()) {
       fout << prefix;
       this->TargetGenerator->WritePlatformConfigTag(
-        "PreprocessorDefinitions", this->Configuration.c_str(), 0, 0, 0,
-        &fout);
+        tag, this->Configuration.c_str(), 0, 0, 0, &fout);
     } else {
-      fout << prefix << "<PreprocessorDefinitions>";
+      fout << prefix << "<" << tag << ">";
     }
   } else {
-    fout << prefix << "PreprocessorDefinitions=\"";
+    fout << prefix << tag << "=\"";
   }
   const char* sep = "";
   std::vector<std::string>::const_iterator de =
@@ -294,7 +426,7 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
     sep = ";";
   }
   if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-    fout << ";%(PreprocessorDefinitions)</PreprocessorDefinitions>" << suffix;
+    fout << ";%(" << tag << ")</" << tag << ">" << suffix;
   } else {
     fout << "\"" << suffix;
   }
@@ -332,29 +464,6 @@ void cmVisualStudioGeneratorOptions::OutputFlagMap(std::ostream& fout,
         sep = ";";
       }
       fout << "\"\n";
-    }
-  }
-}
-
-void cmVisualStudioGeneratorOptions::OutputAdditionalOptions(
-  std::ostream& fout, const char* prefix, const char* suffix)
-{
-  if (!this->FlagString.empty()) {
-    if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-      fout << prefix;
-      if (!this->Configuration.empty()) {
-        this->TargetGenerator->WritePlatformConfigTag(
-          "AdditionalOptions", this->Configuration.c_str(), 0, 0, 0, &fout);
-      } else {
-        fout << "<AdditionalOptions>";
-      }
-      fout << "%(AdditionalOptions) "
-           << cmVisualStudio10GeneratorOptionsEscapeForXML(this->FlagString)
-           << "</AdditionalOptions>\n";
-    } else {
-      fout << prefix << "AdditionalOptions=\"";
-      fout << cmVisualStudioGeneratorOptionsEscapeForXML(this->FlagString);
-      fout << "\"" << suffix;
     }
   }
 }

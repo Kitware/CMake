@@ -302,7 +302,8 @@ aes_ctr_release(archive_crypto_ctx *ctx)
 static int
 aes_ctr_init(archive_crypto_ctx *ctx, const uint8_t *key, size_t key_len)
 {
-	ctx->ctx = EVP_CIPHER_CTX_new();
+	if ((ctx->ctx = EVP_CIPHER_CTX_new()) == NULL)
+		return -1;
 
 	switch (key_len) {
 	case 16: ctx->type = EVP_aes_128_ecb(); break;

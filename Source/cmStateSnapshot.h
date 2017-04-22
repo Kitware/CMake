@@ -4,7 +4,7 @@
 #ifndef cmStateSnapshot_h
 #define cmStateSnapshot_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

@@ -199,7 +199,7 @@ const struct Curl_handler Curl_handler_tftp = {
 static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
 {
   time_t maxtime, timeout;
-  long timeout_ms;
+  time_t timeout_ms;
   bool start = (state->state == TFTP_STATE_START) ? TRUE : FALSE;
 
   time(&state->start_time);
@@ -304,7 +304,7 @@ static unsigned short getrpacketblock(const tftp_packet_t *packet)
 
 static size_t Curl_strnlen(const char *string, size_t maxlen)
 {
-  const char *end = memchr (string, '\0', maxlen);
+  const char *end = memchr(string, '\0', maxlen);
   return end ? (size_t) (end - string) : maxlen;
 }
 
@@ -1356,7 +1356,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
 static CURLcode tftp_setup_connection(struct connectdata * conn)
 {
   struct Curl_easy *data = conn->data;
-  char * type;
+  char *type;
   char command;
 
   conn->socktype = SOCK_DGRAM;   /* UDP datagram based */
@@ -1372,7 +1372,7 @@ static CURLcode tftp_setup_connection(struct connectdata * conn)
     *type = 0;                   /* it was in the middle of the hostname */
     command = Curl_raw_toupper(type[6]);
 
-    switch (command) {
+    switch(command) {
     case 'A': /* ASCII mode */
     case 'N': /* NETASCII mode */
       data->set.prefer_ascii = TRUE;

@@ -3,11 +3,11 @@
 #ifndef cmCursesForm_h
 #define cmCursesForm_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCursesStandardIncludes.h"
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 
 class cmCursesForm
 {

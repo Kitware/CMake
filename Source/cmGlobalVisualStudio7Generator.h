@@ -95,6 +95,7 @@ public:
 
   /** Is the Microsoft Assembler enabled?  */
   bool IsMasmEnabled() const { return this->MasmEnabled; }
+  bool IsNasmEnabled() const { return this->NasmEnabled; }
 
   // Encoding for Visual Studio files
   virtual std::string Encoding();
@@ -120,8 +121,8 @@ protected:
                                    const char* path,
                                    cmGeneratorTarget const* t) = 0;
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const std::string& name, cmStateEnums::TargetType type,
-    std::vector<std::string> const& configs,
+    std::ostream& fout, const std::string& name,
+    cmGeneratorTarget const& target, std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const std::string& platformMapping = "") = 0;
   virtual void WriteSLNGlobalSections(std::ostream& fout,
@@ -163,6 +164,7 @@ protected:
   std::string GeneratorPlatform;
   std::string DefaultPlatformName;
   bool MasmEnabled;
+  bool NasmEnabled;
 
 private:
   char* IntelProjectVersion;

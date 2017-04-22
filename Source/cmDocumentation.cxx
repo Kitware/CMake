@@ -9,9 +9,9 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
 #include <ctype.h>
 #include <string.h>
 #include <utility>

@@ -4,8 +4,17 @@
 #ifndef cmLinkLineDeviceComputer_h
 #define cmLinkLineDeviceComputer_h
 
+#include "cmConfigure.h"
+
+#include <string>
+
 #include "cmLinkLineComputer.h"
+
+class cmComputeLinkInformation;
+class cmGeneratorTarget;
 class cmGlobalNinjaGenerator;
+class cmOutputConverter;
+class cmStateDirectory;
 
 class cmLinkLineDeviceComputer : public cmLinkLineComputer
 {

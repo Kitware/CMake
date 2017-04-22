@@ -3,7 +3,7 @@
 #ifndef cmCallVisualStudioMacro_h
 #define cmCallVisualStudioMacro_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 

@@ -3,7 +3,7 @@
 #ifndef cmCTestGlobalVC_h
 #define cmCTestGlobalVC_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestVC.h"
 
@@ -64,8 +64,8 @@ protected:
   virtual void DoRevision(Revision const& revision,
                           std::vector<Change> const& changes);
   virtual void DoModification(PathStatus status, std::string const& path);
-  virtual void LoadModifications() = 0;
-  virtual void LoadRevisions() = 0;
+  virtual bool LoadModifications() = 0;
+  virtual bool LoadRevisions() = 0;
 
   virtual void WriteXMLGlobal(cmXMLWriter& xml);
   void WriteXMLDirectory(cmXMLWriter& xml, std::string const& path,

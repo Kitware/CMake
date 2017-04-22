@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMachO.h"
 
+#include "cmsys/FStream.hxx"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
 #include <stddef.h>
 #include <string>
 #include <vector>

@@ -11,9 +11,9 @@
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Process.h>
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
 #include <set>
 #include <stdlib.h>
 #include <string.h>

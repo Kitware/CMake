@@ -7,8 +7,8 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <iomanip>
 #include <map>
 #include <stdlib.h>
@@ -390,6 +390,8 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   bool remount_image =
     !cpack_package_icon.empty() || !cpack_dmg_ds_store_setup_script.empty();
 
+  std::string temp_image_format = "UDZO";
+
   // Create 1 MB dummy padding file in staging area when we need to remount
   // image, so we have enough space for storing changes ...
   if (remount_image) {
@@ -401,6 +403,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
 
       return 0;
     }
+    temp_image_format = "UDRW";
   }
 
   // Create a temporary read-write disk image ...
@@ -413,7 +416,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   temp_image_command << " -ov";
   temp_image_command << " -srcfolder \"" << staging.str() << "\"";
   temp_image_command << " -volname \"" << cpack_dmg_volume_name << "\"";
-  temp_image_command << " -format UDRW";
+  temp_image_command << " -format " << temp_image_format;
   temp_image_command << " \"" << temp_image << "\"";
 
   if (!this->RunCommand(temp_image_command)) {
@@ -632,29 +635,33 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       return 0;
     }
 
-    // convert to UDCO
-    std::string temp_udco = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    temp_udco += "/temp-udco.dmg";
+    if (temp_image_format != "UDZO") {
+      temp_image_format = "UDZO";
+      // convert to UDZO to enable unflatten/flatten
+      std::string temp_udzo = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+      temp_udzo += "/temp-udzo.dmg";
 
-    std::ostringstream udco_image_command;
-    udco_image_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
-    udco_image_command << " convert \"" << temp_image << "\"";
-    udco_image_command << " -format UDCO";
-    udco_image_command << " -ov -o \"" << temp_udco << "\"";
+      std::ostringstream udco_image_command;
+      udco_image_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
+      udco_image_command << " convert \"" << temp_image << "\"";
+      udco_image_command << " -format UDZO";
+      udco_image_command << " -ov -o \"" << temp_udzo << "\"";
 
-    if (!this->RunCommand(udco_image_command, &error)) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error converting to UDCO dmg for adding SLA."
-                      << std::endl
-                      << error << std::endl);
-      return 0;
+      if (!this->RunCommand(udco_image_command, &error)) {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+                      "Error converting to UDCO dmg for adding SLA."
+                        << std::endl
+                        << error << std::endl);
+        return 0;
+      }
+      temp_image = temp_udzo;
     }
 
     // unflatten dmg
     std::ostringstream unflatten_command;
     unflatten_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     unflatten_command << " unflatten ";
-    unflatten_command << "\"" << temp_udco << "\"";
+    unflatten_command << "\"" << temp_image << "\"";
 
     if (!this->RunCommand(unflatten_command, &error)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -673,7 +680,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     }
     embed_sla_command << " \"" << sla_r << "\"";
     embed_sla_command << " -a -o ";
-    embed_sla_command << "\"" << temp_udco << "\"";
+    embed_sla_command << "\"" << temp_image << "\"";
 
     if (!this->RunCommand(embed_sla_command, &error)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "Error adding SLA." << std::endl
@@ -686,7 +693,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     std::ostringstream flatten_command;
     flatten_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     flatten_command << " flatten ";
-    flatten_command << "\"" << temp_udco << "\"";
+    flatten_command << "\"" << temp_image << "\"";
 
     if (!this->RunCommand(flatten_command, &error)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -695,8 +702,6 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
                                                            << std::endl);
       return 0;
     }
-
-    temp_image = temp_udco;
   }
 
   // Create the final compressed read-only disk image ...

@@ -13,6 +13,9 @@
 #include <@KWSYS_NAMESPACE@/String.hxx>
 
 #include <sys/types.h>
+// include sys/stat.h after sys/types.h
+#include <sys/stat.h>
+
 #if !defined(_WIN32) || defined(__CYGWIN__)
 #include <unistd.h> // For access permissions for use with access()
 #endif
@@ -262,13 +265,7 @@ public:
   static void ConvertToUnixSlashes(std::string& path);
 
 #ifdef _WIN32
-  /**
-   * Convert the path to an extended length path to avoid MAX_PATH length
-   * limitations on Windows. If the input is a local path the result will be
-   * prefixed with \\?\; if the input is instead a network path, the result
-   * will be prefixed with \\?\UNC\. All output will also be converted to
-   * absolute paths with Windows-style backslashes.
-   **/
+  /** Calls Encoding::ToWindowsExtendedPath.  */
   static std::wstring ConvertToWindowsExtendedPath(const std::string&);
 #endif
 
@@ -324,6 +321,27 @@ public:
                              TestFilePermissions permissions);
   static bool TestFileAccess(const std::string& filename,
                              TestFilePermissions permissions);
+/**
+ * Cross platform wrapper for stat struct
+ */
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(__BORLANDC__)
+  typedef struct stati64 Stat_t;
+#else
+  typedef struct _stat64 Stat_t;
+#endif
+#else
+  typedef struct stat Stat_t;
+#endif
+
+  /**
+   * Cross platform wrapper for stat system call
+   *
+   * On Windows this may not work for paths longer than 250 characters
+   * due to limitations of the underlying '_wstat64' call.
+   */
+  static int Stat(const char* path, Stat_t* buf);
+  static int Stat(const std::string& path, Stat_t* buf);
 
 /**
  * Converts Cygwin path to Win32 path. Uses dictionary container for
@@ -652,6 +670,11 @@ public:
    * Return true if the file is a symlink
    */
   static bool FileIsSymlink(const std::string& name);
+
+  /**
+   * Return true if the file is a FIFO
+   */
+  static bool FileIsFIFO(const std::string& name);
 
   /**
    * Return true if the file has a given signature (first set of bytes)

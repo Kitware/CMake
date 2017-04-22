@@ -3,7 +3,7 @@
 #ifndef cmParseBlanketJSCoverage_h
 #define cmParseBlanketJSCoverage_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

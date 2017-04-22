@@ -10,7 +10,10 @@ endif()
 file(MAKE_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@/uploads")
 
 set(filename "@CMAKE_CURRENT_SOURCE_DIR@/FileDownloadInput.png")
-set(urlbase "file://@CMAKE_CURRENT_BINARY_DIR@/uploads")
+if(NOT "@CMAKE_CURRENT_BINARY_DIR@" MATCHES "^/")
+  set(slash /)
+endif()
+set(urlbase "file://${slash}@CMAKE_CURRENT_BINARY_DIR@/uploads")
 
 message(STATUS "FileUpload:1")
 file(UPLOAD

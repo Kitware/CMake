@@ -123,7 +123,7 @@ INLINE static int fs__capture_path(uv_fs_t* req, const char* path,
     const char* new_path, const int copy_path) {
   char* buf;
   char* pos;
-  ssize_t buf_sz = 0, path_len, pathw_len = 0, new_pathw_len = 0;
+  ssize_t buf_sz = 0, path_len = 0, pathw_len = 0, new_pathw_len = 0;
 
   /* new_path can only be set if path is also set. */
   assert(new_path == NULL || path != NULL);
@@ -403,7 +403,6 @@ void fs__open(uv_fs_t* req) {
   switch (flags & (_O_RDONLY | _O_WRONLY | _O_RDWR)) {
   case _O_RDONLY:
     access = FILE_GENERIC_READ;
-    attributes |= FILE_FLAG_BACKUP_SEMANTICS;
     break;
   case _O_WRONLY:
     access = FILE_GENERIC_WRITE;
@@ -418,7 +417,6 @@ void fs__open(uv_fs_t* req) {
   if (flags & _O_APPEND) {
     access &= ~FILE_WRITE_DATA;
     access |= FILE_APPEND_DATA;
-    attributes &= ~FILE_FLAG_BACKUP_SEMANTICS;
   }
 
   /*

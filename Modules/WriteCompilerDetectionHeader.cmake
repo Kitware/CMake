@@ -503,10 +503,19 @@ function(write_compiler_detection_header
       if (feature STREQUAL cxx_static_assert)
         set(def_value "${prefix_arg}_STATIC_ASSERT(X)")
         set(def_value_msg "${prefix_arg}_STATIC_ASSERT_MSG(X, MSG)")
-        set(static_assert_struct "template<bool> struct ${prefix_arg}StaticAssert;\ntemplate<> struct ${prefix_arg}StaticAssert<true>{};\n")
-        set(def_standard "#    define ${def_value} static_assert(X, #X)\n#    define ${def_value_msg} static_assert(X, MSG)")
-        set(def_alternative "${static_assert_struct}#    define ${def_value} sizeof(${prefix_arg}StaticAssert<X>)\n#    define ${def_value_msg} sizeof(${prefix_arg}StaticAssert<X>)")
-        string(APPEND file_content "#  if defined(${def_name}) && ${def_name}\n${def_standard}\n#  else\n${def_alternative}\n#  endif\n\n")
+        set(def_fallback "enum { ${prefix_arg}_STATIC_ASSERT_JOIN(${prefix_arg}StaticAssertEnum, __LINE__) = sizeof(${prefix_arg}StaticAssert<X>) }")
+        string(APPEND file_content "#  if defined(${def_name}) && ${def_name}
+#    define ${def_value} static_assert(X, #X)
+#    define ${def_value_msg} static_assert(X, MSG)
+#  else
+#    define ${prefix_arg}_STATIC_ASSERT_JOIN(X, Y) ${prefix_arg}_STATIC_ASSERT_JOIN_IMPL(X, Y)
+#    define ${prefix_arg}_STATIC_ASSERT_JOIN_IMPL(X, Y) X##Y
+template<bool> struct ${prefix_arg}StaticAssert;
+template<> struct ${prefix_arg}StaticAssert<true>{};
+#    define ${def_value} ${def_fallback}
+#    define ${def_value_msg} ${def_fallback}
+#  endif
+\n")
       endif()
       if (feature STREQUAL cxx_alignas)
         set(def_value "${prefix_arg}_ALIGNAS(X)")

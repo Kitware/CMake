@@ -3,7 +3,7 @@
 #ifndef cmParsePHPCoverage_h
 #define cmParsePHPCoverage_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <string>

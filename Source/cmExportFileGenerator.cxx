@@ -17,9 +17,9 @@
 #include "cmTargetExport.h"
 #include "cmake.h"
 
+#include "cm_auto_ptr.hxx"
+#include "cmsys/FStream.hxx"
 #include <assert.h>
-#include <cm_auto_ptr.hxx>
-#include <cmsys/FStream.hxx>
 #include <sstream>
 #include <string.h>
 #include <utility>
@@ -441,6 +441,11 @@ void getCompatibleInterfaceProperties(cmGeneratorTarget* target,
                                       std::set<std::string>& ifaceProperties,
                                       const std::string& config)
 {
+  if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+    // object libraries have no link information, so nothing to compute
+    return;
+  }
+
   cmComputeLinkInformation* info = target->GetLinkInformation(config);
 
   if (!info) {
@@ -926,6 +931,9 @@ void cmExportFileGenerator::GenerateImportTargetCode(
       break;
     case cmStateEnums::UNKNOWN_LIBRARY:
       os << "add_library(" << targetName << " UNKNOWN IMPORTED)\n";
+      break;
+    case cmStateEnums::OBJECT_LIBRARY:
+      os << "add_library(" << targetName << " OBJECT IMPORTED)\n";
       break;
     case cmStateEnums::INTERFACE_LIBRARY:
       os << "add_library(" << targetName << " INTERFACE IMPORTED)\n";

@@ -3,7 +3,7 @@
 #ifndef cmGlobalGenerator_h
 #define cmGlobalGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <map>
@@ -331,11 +331,22 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig() const { return false; }
 
+  /** Return true if we know the exact location of object files.
+      If false, store the reason in the given string.
+      This is meaningful only after EnableLanguage has been called.  */
+  virtual bool HasKnownObjectFileLocation(std::string*) const { return true; }
+
   virtual bool UseFolderProperty() const;
+
+  virtual bool IsIPOSupported() const { return false; }
 
   /** Return whether the generator should use EFFECTIVE_PLATFORM_NAME. This is
       relevant for mixed macOS and iOS builds. */
   virtual bool UseEffectivePlatformName(cmMakefile*) const { return false; }
+
+  /** Return whether the "Resources" folder prefix should be stripped from
+      MacFolder. */
+  virtual bool ShouldStripResourcePath(cmMakefile*) const;
 
   std::string GetSharedLibFlagsForLanguage(std::string const& lang) const;
 
@@ -357,6 +368,7 @@ public:
   cmExportBuildFileGenerator* GetExportedTargetsFile(
     const std::string& filename) const;
   void AddCMP0042WarnTarget(const std::string& target);
+  void AddCMP0068WarnTarget(const std::string& target);
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
@@ -562,6 +574,8 @@ private:
 
   // track targets to issue CMP0042 warning for.
   std::set<std::string> CMP0042WarnTargets;
+  // track targets to issue CMP0068 warning for.
+  std::set<std::string> CMP0068WarnTargets;
 
   mutable std::map<cmSourceFile*, std::set<cmGeneratorTarget const*> >
     FilenameTargetDepends;

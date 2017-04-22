@@ -16,8 +16,11 @@ Properties of Global Scope
    :maxdepth: 1
 
    /prop_gbl/ALLOW_DUPLICATE_CUSTOM_TARGETS
+   /prop_gbl/AUTOGEN_SOURCE_GROUP
    /prop_gbl/AUTOGEN_TARGETS_FOLDER
+   /prop_gbl/AUTOMOC_SOURCE_GROUP
    /prop_gbl/AUTOMOC_TARGETS_FOLDER
+   /prop_gbl/AUTORCC_SOURCE_GROUP
    /prop_gbl/CMAKE_C_KNOWN_FEATURES
    /prop_gbl/CMAKE_CXX_KNOWN_FEATURES
    /prop_gbl/DEBUG_CONFIGURATIONS
@@ -26,7 +29,9 @@ Properties of Global Scope
    /prop_gbl/ENABLED_LANGUAGES
    /prop_gbl/FIND_LIBRARY_USE_LIB32_PATHS
    /prop_gbl/FIND_LIBRARY_USE_LIB64_PATHS
+   /prop_gbl/FIND_LIBRARY_USE_LIBX32_PATHS
    /prop_gbl/FIND_LIBRARY_USE_OPENBSD_VERSIONING
+   /prop_gbl/GENERATOR_IS_MULTI_CONFIG
    /prop_gbl/GLOBAL_DEPENDS_DEBUG_MODE
    /prop_gbl/GLOBAL_DEPENDS_NO_CYCLES
    /prop_gbl/IN_TRY_COMPILE
@@ -115,14 +120,17 @@ Properties on Targets
    /prop_tgt/ARCHIVE_OUTPUT_NAME_CONFIG
    /prop_tgt/ARCHIVE_OUTPUT_NAME
    /prop_tgt/AUTOGEN_TARGET_DEPENDS
+   /prop_tgt/AUTOMOC_DEPEND_FILTERS
    /prop_tgt/AUTOMOC_MOC_OPTIONS
    /prop_tgt/AUTOMOC
    /prop_tgt/AUTOUIC
    /prop_tgt/AUTOUIC_OPTIONS
+   /prop_tgt/AUTOUIC_SEARCH_PATHS
    /prop_tgt/AUTORCC
    /prop_tgt/AUTORCC_OPTIONS
    /prop_tgt/BINARY_DIR
    /prop_tgt/BUILD_RPATH
+   /prop_tgt/BUILD_WITH_INSTALL_NAME_DIR
    /prop_tgt/BUILD_WITH_INSTALL_RPATH
    /prop_tgt/BUNDLE_EXTENSION
    /prop_tgt/BUNDLE
@@ -186,6 +194,8 @@ Properties on Targets
    /prop_tgt/IMPORTED_LOCATION
    /prop_tgt/IMPORTED_NO_SONAME_CONFIG
    /prop_tgt/IMPORTED_NO_SONAME
+   /prop_tgt/IMPORTED_OBJECTS_CONFIG
+   /prop_tgt/IMPORTED_OBJECTS
    /prop_tgt/IMPORTED
    /prop_tgt/IMPORTED_SONAME_CONFIG
    /prop_tgt/IMPORTED_SONAME
@@ -318,6 +328,7 @@ Properties on Tests
    /prop_test/ATTACHED_FILES
    /prop_test/COST
    /prop_test/DEPENDS
+   /prop_test/DISABLED
    /prop_test/ENVIRONMENT
    /prop_test/FAIL_REGULAR_EXPRESSION
    /prop_test/FIXTURES_CLEANUP

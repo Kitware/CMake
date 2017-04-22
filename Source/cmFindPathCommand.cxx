@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindPathCommand.h"
 
-#include <cmsys/Glob.hxx>
+#include "cmsys/Glob.hxx"
 
 #include "cmMakefile.h"
 #include "cmStateTypes.h"

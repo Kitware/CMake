@@ -58,6 +58,10 @@ if(NOT TEST_IOS OR NOT XCODE_VERSION VERSION_LESS 6)
 
   add_custom_target(SharedFrameworkTest ALL
     COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_BUNDLE_DIR:SharedFramework>" "$<TARGET_BUNDLE_DIR:SharedFramework>.old"
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_BUNDLE_CONTENT_DIR:SharedFramework>" "$<TARGET_BUNDLE_CONTENT_DIR:SharedFramework>.old"
+    COMMAND ${CMAKE_COMMAND} -E copy
       "$<TARGET_FILE:SharedFramework>" "$<TARGET_FILE:SharedFramework>.old")
 
   add_dependencies(SharedFrameworkTest SharedFramework)
@@ -70,6 +74,10 @@ if(NOT TEST_IOS OR NOT XCODE_VERSION VERSION_LESS 6)
   install(TARGETS SharedFrameworkExt FRAMEWORK DESTINATION FooExtension)
 
   add_custom_target(SharedFrameworkExtTest ALL
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_BUNDLE_DIR:SharedFrameworkExt>" "$<TARGET_BUNDLE_DIR:SharedFrameworkExt>.old"
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_BUNDLE_CONTENT_DIR:SharedFrameworkExt>" "$<TARGET_BUNDLE_CONTENT_DIR:SharedFrameworkExt>.old"
     COMMAND ${CMAKE_COMMAND} -E copy
       "$<TARGET_FILE:SharedFrameworkExt>" "$<TARGET_FILE:SharedFrameworkExt>.old")
 
@@ -84,6 +92,10 @@ if(NOT XCODE_VERSION VERSION_LESS 6)
 
   add_custom_target(StaticFrameworkTest ALL
     COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_BUNDLE_DIR:StaticFramework>" "$<TARGET_BUNDLE_DIR:StaticFramework>.old"
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_BUNDLE_CONTENT_DIR:StaticFramework>" "$<TARGET_BUNDLE_CONTENT_DIR:StaticFramework>.old"
+    COMMAND ${CMAKE_COMMAND} -E copy
       "$<TARGET_FILE:StaticFramework>" "$<TARGET_FILE:StaticFramework>.old")
 
   add_dependencies(StaticFrameworkTest StaticFramework)
@@ -96,6 +108,10 @@ if(NOT XCODE_VERSION VERSION_LESS 6)
   install(TARGETS StaticFrameworkExt FRAMEWORK DESTINATION StaticFooExtension)
 
   add_custom_target(StaticFrameworkExtTest ALL
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_BUNDLE_DIR:StaticFrameworkExt>" "$<TARGET_BUNDLE_DIR:StaticFrameworkExt>.old"
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_BUNDLE_CONTENT_DIR:StaticFrameworkExt>" "$<TARGET_BUNDLE_CONTENT_DIR:StaticFrameworkExt>.old"
     COMMAND ${CMAKE_COMMAND} -E copy
       "$<TARGET_FILE:StaticFrameworkExt>" "$<TARGET_FILE:StaticFrameworkExt>.old")
 
@@ -110,6 +126,10 @@ if(NOT CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE)
 
   add_custom_target(BundleTest ALL
     COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_BUNDLE_DIR:Bundle>" "$<TARGET_BUNDLE_DIR:Bundle>.old"
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_BUNDLE_CONTENT_DIR:Bundle>" "$<TARGET_BUNDLE_CONTENT_DIR:Bundle>.old"
+    COMMAND ${CMAKE_COMMAND} -E copy
       "$<TARGET_FILE:Bundle>" "$<TARGET_FILE:Bundle>.old")
 
   add_dependencies(BundleTest Bundle)
@@ -122,6 +142,10 @@ if(NOT CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE)
   install(TARGETS BundleExt LIBRARY DESTINATION FooExtension)
 
   add_custom_target(BundleExtTest ALL
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_BUNDLE_DIR:BundleExt>" "$<TARGET_BUNDLE_DIR:BundleExt>.old"
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_BUNDLE_CONTENT_DIR:BundleExt>" "$<TARGET_BUNDLE_CONTENT_DIR:BundleExt>.old"
     COMMAND ${CMAKE_COMMAND} -E copy
       "$<TARGET_FILE:BundleExt>" "$<TARGET_FILE:BundleExt>.old")
 

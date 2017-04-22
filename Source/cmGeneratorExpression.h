@@ -3,11 +3,11 @@
 #ifndef cmGeneratorExpression_h
 #define cmGeneratorExpression_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmListFileCache.h"
 
-#include <cm_auto_ptr.hxx>
+#include "cm_auto_ptr.hxx"
 #include <map>
 #include <set>
 #include <string>

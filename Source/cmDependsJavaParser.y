@@ -10,18 +10,16 @@ Run bison like this:
   bison --yacc --name-prefix=cmDependsJava_yy --defines=cmDependsJavaParserTokens.h -ocmDependsJavaParser.cxx cmDependsJavaParser.y
 
 Modify cmDependsJavaParser.cxx:
-  - remove TABs
-  - remove use of the 'register' storage class specifier
-  - add __HP_aCC to the #if test for yyerrorlab warning suppression
+  - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
 
 */
 
-/* Configure the parser to use a lexer object.  */
-#define YYPARSE_PARAM yyscanner
-#define YYLEX_PARAM yyscanner
-#define YYERROR_VERBOSE 1
-#define cmDependsJava_yyerror(x) \
-        cmDependsJavaError(yyscanner, x)
+#include "cmConfigure.h" // IWYU pragma: keep
+
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+
 #define yyGetParser (cmDependsJava_yyget_extra(yyscanner))
 
 /*-------------------------------------------------------------------------*/
@@ -32,10 +30,9 @@ Modify cmDependsJavaParser.cxx:
 /* Forward declare the lexer entry point.  */
 YY_DECL;
 
-/* Internal utility functions.  */
-static void cmDependsJavaError(yyscan_t yyscanner, const char* message);
+/* Helper function to forward error callback from parser.  */
+static void cmDependsJava_yyerror(yyscan_t yyscanner, const char* message);
 
-#define YYDEBUG 1
 #define YYMAXDEPTH 1000000
 
 
@@ -50,7 +47,13 @@ static void cmDependsJavaError(yyscan_t yyscanner, const char* message);
 %}
 
 /* Generate a reentrant parser object.  */
-%pure_parser
+%define api.pure
+
+/* Configure the parser to use a lexer object.  */
+%lex-param   {yyscan_t yyscanner}
+%parse-param {yyscan_t yyscanner}
+
+%define parse.error verbose
 
 /*
 %union {
@@ -3205,7 +3208,7 @@ Name jp_DOT jp_NEW
 /* End of grammar */
 
 /*--------------------------------------------------------------------------*/
-void cmDependsJavaError(yyscan_t yyscanner, const char* message)
+void cmDependsJava_yyerror(yyscan_t yyscanner, const char* message)
 {
   yyGetParser->Error(message);
 }

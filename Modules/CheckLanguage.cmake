@@ -46,6 +46,8 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
     execute_process(
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang}
       COMMAND ${CMAKE_COMMAND} . -G ${CMAKE_GENERATOR}
+                                 -A "${CMAKE_GENERATOR_PLATFORM}"
+                                 -T "${CMAKE_GENERATOR_TOOLSET}"
       OUTPUT_VARIABLE output
       ERROR_VARIABLE output
       RESULT_VARIABLE result

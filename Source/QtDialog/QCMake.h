@@ -3,7 +3,7 @@
 #ifndef QCMake_h
 #define QCMake_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmake.h"
 

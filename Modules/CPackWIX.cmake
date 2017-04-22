@@ -243,20 +243,20 @@
 #
 # .. variable:: CPACK_WIX_ROOT_FEATURE_TITLE
 #
-# Sets the name of the root install feature in the WIX installer. Same as
-# CPACK_COMPONENT_<compName>_DISPLAY_NAME for components.
+#  Sets the name of the root install feature in the WIX installer. Same as
+#  CPACK_COMPONENT_<compName>_DISPLAY_NAME for components.
 #
 # .. variable:: CPACK_WIX_ROOT_FEATURE_DESCRIPTION
 #
-# Sets the description of the root install feature in the WIX installer. Same as
-# CPACK_COMPONENT_<compName>_DESCRIPTION for components.
+#  Sets the description of the root install feature in the WIX installer. Same as
+#  CPACK_COMPONENT_<compName>_DESCRIPTION for components.
 #
 # .. variable:: CPACK_WIX_SKIP_PROGRAM_FOLDER
 #
-# If this variable is set to true, the default install location
-# of the generated package will be CPACK_PACKAGE_INSTALL_DIRECTORY directly.
-# The install location will not be located relatively below
-# ProgramFiles or ProgramFiles64.
+#  If this variable is set to true, the default install location
+#  of the generated package will be CPACK_PACKAGE_INSTALL_DIRECTORY directly.
+#  The install location will not be located relatively below
+#  ProgramFiles or ProgramFiles64.
 #
 #   .. note::
 #     Installers created with this feature do not take differences
@@ -267,6 +267,25 @@
 #     onto a drive that is unavailable or unintended or a path that does not
 #     follow the localization or convention of the system on which the
 #     installation is performed.
+#
+# .. variable:: CPACK_WIX_ROOT_FOLDER_ID
+#
+#  This variable allows specification of a custom root folder ID.
+#  The generator specific ``<64>`` token can be used for
+#  folder IDs that come in 32-bit and 64-bit variants.
+#  In 32-bit builds the token will expand empty while in 64-bit builds
+#  it will expand to ``64``.
+#
+#  When unset generated installers will default installing to
+#  ``ProgramFiles<64>Folder``.
+#
+# .. variable:: CPACK_WIX_ROOT
+#
+#  This variable can optionally be set to the root directory
+#  of a custom WiX Toolset installation.
+#
+#  When unspecified CPack will try to locate a WiX Toolset
+#  installation via the ``WIX`` environment variable instead.
 #
 
 if(NOT CPACK_WIX_ROOT)

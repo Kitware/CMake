@@ -3,7 +3,7 @@
 #ifndef cmFilePathChecksum_h
 #define cmFilePathChecksum_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <stddef.h>
 #include <string>
@@ -47,13 +47,13 @@ public:
   /* @brief Calculates the path checksum for the parent directory of a file
    *
    */
-  std::string get(const std::string& filePath);
+  std::string get(const std::string& filePath) const;
 
   /* @brief Same as get() but returns only the first length characters
    *
    */
   std::string getPart(const std::string& filePath,
-                      size_t length = partLengthDefault);
+                      size_t length = partLengthDefault) const;
 
 private:
   /// Size of the parent directory list

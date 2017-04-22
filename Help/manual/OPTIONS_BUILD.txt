@@ -48,31 +48,19 @@
  build system.  Possible generator names are specified in the
  :manual:`cmake-generators(7)` manual.
 
-``-T <toolset-name>``
- Specify toolset name if supported by generator.
+``-T <toolset-spec>``
+ Toolset specification for the generator, if supported.
 
- Some CMake generators support a toolset name to be given to the
- native build system to choose a compiler.
- See the :variable:`CMAKE_GENERATOR_TOOLSET` variable.
- This is supported only on specific generators:
-
- * :ref:`Visual Studio Generators` for VS 2010 and above
- * The :generator:`Xcode` generator for Xcode 3.0 and above
-
- See native build system documentation for allowed toolset names.
+ Some CMake generators support a toolset specification to tell
+ the native build system how to choose a compiler.  See the
+ :variable:`CMAKE_GENERATOR_TOOLSET` variable for details.
 
 ``-A <platform-name>``
  Specify platform name if supported by generator.
 
  Some CMake generators support a platform name to be given to the
  native build system to choose a compiler or SDK.  See the
- :variable:`CMAKE_GENERATOR_PLATFORM` variable.
- This is supported only on specific generators:
-
- * For :ref:`Visual Studio Generators` with VS 2005 and above this
-   specifies the target architecture.
-
- See native build system documentation for allowed platform names.
+ :variable:`CMAKE_GENERATOR_PLATFORM` variable for details.
 
 ``-Wno-dev``
  Suppress developer warnings.

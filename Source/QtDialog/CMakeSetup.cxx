@@ -8,6 +8,9 @@
 #include "cmDocumentationEntry.h"
 #include "cmVersion.h"
 #include "cmake.h"
+#include "cmsys/CommandLineArguments.hxx"
+#include "cmsys/Encoding.hxx"
+#include "cmsys/SystemTools.hxx"
 #include <QApplication>
 #include <QDir>
 #include <QLocale>
@@ -15,9 +18,6 @@
 #include <QTextCodec>
 #include <QTranslator>
 #include <QtPlugin>
-#include <cmsys/CommandLineArguments.hxx>
-#include <cmsys/Encoding.hxx>
-#include <cmsys/SystemTools.hxx>
 #include <iostream>
 
 #include "cmSystemTools.h" // IWYU pragma: keep
@@ -184,9 +184,9 @@ int main(int argc, char** argv)
 }
 
 #if defined(Q_OS_MAC)
+#include "cm_sys_stat.h"
 #include <errno.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <unistd.h>
 static bool cmOSXInstall(std::string const& dir, std::string const& tool)
 {

@@ -3,7 +3,7 @@
 #ifndef cmGlobalVisualStudio12Generator_h
 #define cmGlobalVisualStudio12Generator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <string>
@@ -31,8 +31,8 @@ public:
   // version number
   virtual const char* GetToolsVersion() { return "12.0"; }
 protected:
-  bool ParseGeneratorToolset(std::string const& ts,
-                             cmMakefile* mf) CM_OVERRIDE;
+  bool ProcessGeneratorToolsetField(std::string const& key,
+                                    std::string const& value) CM_OVERRIDE;
 
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);

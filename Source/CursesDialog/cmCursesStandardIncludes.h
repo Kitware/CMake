@@ -3,7 +3,7 @@
 #ifndef cmCursesStandardIncludes_h
 #define cmCursesStandardIncludes_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #if defined(__hpux)
 #define _BOOL_DEFINED

@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindPackageCommand.h"
 
+#include "cmSystemTools.h"
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 #include <algorithm>
 #include <assert.h>
-#include <cmSystemTools.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/String.h>
 #include <functional>
 #include <iterator>
 #include <sstream>
@@ -92,6 +92,7 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->DebugMode = false;
   this->UseLib32Paths = false;
   this->UseLib64Paths = false;
+  this->UseLibx32Paths = false;
   this->PolicyScope = true;
   this->VersionMajor = 0;
   this->VersionMinor = 0;
@@ -171,6 +172,13 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
       this->Makefile->GetState()->GetGlobalPropertyAsBool(
         "FIND_LIBRARY_USE_LIB64_PATHS")) {
     this->UseLib64Paths = true;
+  }
+
+  // Lookup whether libx32 paths should be used.
+  if (this->Makefile->PlatformIsx32() &&
+      this->Makefile->GetState()->GetGlobalPropertyAsBool(
+        "FIND_LIBRARY_USE_LIBX32_PATHS")) {
+    this->UseLibx32Paths = true;
   }
 
   // Check if User Package Registry should be disabled
@@ -1165,7 +1173,6 @@ void cmFindPackageCommand::FillPrefixesSystemRegistry()
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
-#undef GetCurrentDirectory
 // http://msdn.microsoft.com/en-us/library/aa384253%28v=vs.85%29.aspx
 #if !defined(KEY_WOW64_32KEY)
 #define KEY_WOW64_32KEY 0x0200
@@ -2001,6 +2008,9 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   }
   if (this->UseLib64Paths) {
     common.push_back("lib64");
+  }
+  if (this->UseLibx32Paths) {
+    common.push_back("libx32");
   }
   common.push_back("lib");
   common.push_back("share");

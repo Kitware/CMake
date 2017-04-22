@@ -49,7 +49,7 @@ They may be set by end users to point at libuv components.
 
 #-----------------------------------------------------------------------------
 find_library(LibUV_LIBRARY
-  NAMES uv
+  NAMES uv libuv
   )
 mark_as_advanced(LibUV_LIBRARY)
 

@@ -3,12 +3,10 @@
 #ifndef cmCommand_h
 #define cmCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
-
-#include "cmCommandArgumentsHelper.h"
-#include "cmPolicies.h"
 
 class cmExecutionStatus;
 class cmMakefile;
@@ -105,12 +103,12 @@ public:
    */
   void SetError(const std::string& e);
 
-  /** Check if the command is disallowed by a policy.  */
-  bool Disallowed(cmPolicies::PolicyID pol, const char* e);
+private:
+  cmCommand(cmCommand const&);            // = delete;
+  cmCommand& operator=(cmCommand const&); // = delete;
 
 protected:
   cmMakefile* Makefile;
-  cmCommandArgumentsHelper Helper;
 
 private:
   std::string Error;

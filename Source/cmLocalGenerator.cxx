@@ -13,7 +13,6 @@
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
-#include "cmLinkLineDeviceComputer.h"
 #include "cmMakefile.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
@@ -31,9 +30,9 @@
 #include "cmCryptoHash.h"
 #endif
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/RegularExpression.hxx>
 #include <iterator>
 #include <sstream>
 #include <stdio.h>
@@ -1053,7 +1052,7 @@ void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
   // Add language-specific flags.
   this->AddLanguageFlags(flags, lang, config);
 
-  if (target->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION", config)) {
+  if (target->IsIPOEnabled(config)) {
     this->AppendFeatureOptions(flags, lang, "IPO");
   }
 

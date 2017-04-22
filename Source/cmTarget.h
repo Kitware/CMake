@@ -3,7 +3,7 @@
 #ifndef cmTarget_h
 #define cmTarget_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <map>

@@ -10,20 +10,14 @@ Run bison like this:
   bison --yacc --name-prefix=cmCommandArgument_yy --defines=cmCommandArgumentParserTokens.h -ocmCommandArgumentParser.cxx cmCommandArgumentParser.y
 
 Modify cmCommandArgumentParser.cxx:
-  - remove TABs
-  - remove use of the 'register' storage class specifier
-  - put header block at top of file
+  - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
 
 */
 
-#include "cmStandardIncludes.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
-/* Configure the parser to use a lexer object.  */
-#define YYPARSE_PARAM yyscanner
-#define YYLEX_PARAM yyscanner
-#define YYERROR_VERBOSE 1
-#define cmCommandArgument_yyerror(x) \
-        cmCommandArgumentError(yyscanner, x)
+#include <string.h>
+
 #define yyGetParser (cmCommandArgument_yyget_extra(yyscanner))
 
 /* Make sure malloc and free are available on QNX.  */
@@ -46,10 +40,9 @@ Modify cmCommandArgumentParser.cxx:
 /* Forward declare the lexer entry point.  */
 YY_DECL;
 
-/* Internal utility functions.  */
-static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
+/* Helper function to forward error callback from parser.  */
+static void cmCommandArgument_yyerror(yyscan_t yyscanner, const char* message);
 
-#define YYDEBUG 1
 /* Configure the parser to support large input.  */
 #define YYMAXDEPTH 100000
 #define YYINITDEPTH 10000
@@ -65,7 +58,13 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 %}
 
 /* Generate a reentrant parser object.  */
-%pure_parser
+%define api.pure
+
+/* Configure the parser to use a lexer object.  */
+%lex-param   {yyscan_t yyscanner}
+%parse-param {yyscan_t yyscanner}
+
+%define parse.error verbose
 
 /*
 %union {
@@ -94,137 +93,99 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 
 
 Start:
-GoalWithOptionalBackSlash
-{
-  $<str>$ = 0;
-  yyGetParser->SetResult($<str>1);
-}
+  GoalWithOptionalBackSlash {
+    $<str>$ = 0;
+    yyGetParser->SetResult($<str>1);
+  }
 
 GoalWithOptionalBackSlash:
-Goal
-{
-  $<str>$ = $<str>1;
-}
-|
-Goal cal_BSLASH
-{
-  $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
-}
+  Goal {
+    $<str>$ = $<str>1;
+  }
+| Goal cal_BSLASH {
+    $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
+  }
 
 Goal:
-{
-  $<str>$ = 0;
-}
-|
-String Goal
-{
-  $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
-}
+  {
+    $<str>$ = 0;
+  }
+| String Goal {
+    $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
+  }
 
 String:
-OuterText
-{
-  $<str>$ = $<str>1;
-}
-|
-Variable
-{
-  $<str>$ = $<str>1;
-}
+  OuterText {
+    $<str>$ = $<str>1;
+  }
+| Variable {
+    $<str>$ = $<str>1;
+  }
 
 OuterText:
-cal_NAME
-{
-  $<str>$ = $<str>1;
-}
-|
-cal_AT
-{
-  $<str>$ = $<str>1;
-}
-|
-cal_DOLLAR
-{
-  $<str>$ = $<str>1;
-}
-|
-cal_LCURLY
-{
-  $<str>$ = $<str>1;
-}
-|
-cal_RCURLY
-{
-  $<str>$ = $<str>1;
-}
-|
-cal_SYMBOL
-{
-  $<str>$ = $<str>1;
-}
+  cal_NAME {
+    $<str>$ = $<str>1;
+  }
+| cal_AT {
+    $<str>$ = $<str>1;
+  }
+| cal_DOLLAR {
+    $<str>$ = $<str>1;
+  }
+| cal_LCURLY {
+    $<str>$ = $<str>1;
+  }
+| cal_RCURLY {
+    $<str>$ = $<str>1;
+  }
+| cal_SYMBOL {
+    $<str>$ = $<str>1;
+  }
 
 Variable:
-cal_ENVCURLY EnvVarName cal_RCURLY
-{
-  $<str>$ = yyGetParser->ExpandSpecialVariable($<str>1,$<str>2);
-  //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
-}
-|
-cal_NCURLY MultipleIds cal_RCURLY
-{
-  $<str>$ = yyGetParser->ExpandSpecialVariable($<str>1,$<str>2);
-  //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
-}
-|
-cal_DCURLY MultipleIds cal_RCURLY
-{
-  $<str>$ = yyGetParser->ExpandVariable($<str>2);
-  //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
-}
-|
-cal_ATNAME
-{
-  $<str>$ = yyGetParser->ExpandVariableForAt($<str>1);
-}
+  cal_ENVCURLY EnvVarName cal_RCURLY {
+    $<str>$ = yyGetParser->ExpandSpecialVariable($<str>1, $<str>2);
+  }
+| cal_NCURLY MultipleIds cal_RCURLY {
+    $<str>$ = yyGetParser->ExpandSpecialVariable($<str>1, $<str>2);
+  }
+| cal_DCURLY MultipleIds cal_RCURLY {
+    $<str>$ = yyGetParser->ExpandVariable($<str>2);
+  }
+| cal_ATNAME {
+    $<str>$ = yyGetParser->ExpandVariableForAt($<str>1);
+  }
 
 EnvVarName:
-MultipleIds
-{
-  $<str>$ = $<str>1;
-}
-|
-cal_SYMBOL EnvVarName
-{
-  $<str>$ = $<str>1;
-}
+  MultipleIds {
+    $<str>$ = $<str>1;
+  }
+| cal_SYMBOL EnvVarName {
+    $<str>$ = $<str>1;
+  }
 
 MultipleIds:
-{
-  $<str>$ = 0;
-}
-|
-ID MultipleIds
-{
-  $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
-}
+  {
+    $<str>$ = 0;
+  }
+| ID MultipleIds {
+    $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
+  }
 
 ID:
-cal_NAME
-{
-  $<str>$ = $<str>1;
-}
-|
-Variable
-{
-  $<str>$ = $<str>1;
-}
-
+  cal_NAME {
+    $<str>$ = $<str>1;
+  }
+| Variable {
+    $<str>$ = $<str>1;
+  }
+;
 
 %%
 /* End of grammar */
 
 /*--------------------------------------------------------------------------*/
-void cmCommandArgumentError(yyscan_t yyscanner, const char* message)
+void cmCommandArgument_yyerror(yyscan_t yyscanner, const char* message)
 {
   yyGetParser->Error(message);
 }

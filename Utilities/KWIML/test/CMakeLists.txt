@@ -38,6 +38,8 @@ endif()
 
 add_executable(kwiml_test ${test_srcs})
 set_property(TARGET kwiml_test PROPERTY COMPILE_DEFINITIONS ${test_defs})
+set_property(TARGET kwiml_test PROPERTY C_INCLUDE_WHAT_YOU_USE "")
+set_property(TARGET kwiml_test PROPERTY CXX_INCLUDE_WHAT_YOU_USE "")
 set_property(TARGET kwiml_test PROPERTY
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_test(NAME ${KWIML_TEST_PREFIX}.test COMMAND kwiml_test)

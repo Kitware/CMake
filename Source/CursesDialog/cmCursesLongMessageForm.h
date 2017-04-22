@@ -3,7 +3,7 @@
 #ifndef cmCursesLongMessageForm_h
 #define cmCursesLongMessageForm_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCursesForm.h"
 #include "cmCursesStandardIncludes.h"

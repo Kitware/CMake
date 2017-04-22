@@ -3,9 +3,9 @@
 #ifndef cmOrderDirectories_h
 #define cmOrderDirectories_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <map>
 #include <set>
 #include <string>

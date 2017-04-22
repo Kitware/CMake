@@ -2,11 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestTestHandler.h"
 
+#include "cmsys/Base64.h"
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/Base64.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
 #include <functional>
 #include <iomanip>
 #include <iterator>
@@ -27,6 +27,7 @@
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
 #include "cm_auto_ptr.hxx"
 #include "cm_utf8.h"
@@ -86,22 +87,24 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
       // No subdirectory? So what...
       continue;
     }
-    cmSystemTools::ChangeDirectory(fname);
-    const char* testFilename;
-    if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
-      // does the CTestTestfile.cmake exist ?
-      testFilename = "CTestTestfile.cmake";
-    } else if (cmSystemTools::FileExists("DartTestfile.txt")) {
-      // does the DartTestfile.txt exist ?
-      testFilename = "DartTestfile.txt";
-    } else {
-      // No CTestTestfile? Who cares...
-      continue;
+    bool readit = false;
+    {
+      cmWorkingDirectory workdir(fname);
+      const char* testFilename;
+      if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
+        // does the CTestTestfile.cmake exist ?
+        testFilename = "CTestTestfile.cmake";
+      } else if (cmSystemTools::FileExists("DartTestfile.txt")) {
+        // does the DartTestfile.txt exist ?
+        testFilename = "DartTestfile.txt";
+      } else {
+        // No CTestTestfile? Who cares...
+        continue;
+      }
+      fname += "/";
+      fname += testFilename;
+      readit = this->Makefile->ReadDependentFile(fname.c_str());
     }
-    fname += "/";
-    fname += testFilename;
-    bool readit = this->Makefile->ReadDependentFile(fname.c_str());
-    cmSystemTools::ChangeDirectory(cwd);
     if (!readit) {
       std::string m = "Could not find include file: ";
       m += fname;
@@ -109,7 +112,6 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
       return false;
     }
   }
-  cmSystemTools::ChangeDirectory(cwd);
   return true;
 }
 
@@ -149,9 +151,7 @@ bool cmCTestAddSubdirectoryCommand::InitialPass(
     return false;
   }
 
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(cwd);
-  std::string fname = cwd;
+  std::string fname = cmSystemTools::GetCurrentWorkingDirectory();
   fname += "/";
   fname += args[0];
 
@@ -159,23 +159,23 @@ bool cmCTestAddSubdirectoryCommand::InitialPass(
     // No subdirectory? So what...
     return true;
   }
-  cmSystemTools::ChangeDirectory(fname);
-  const char* testFilename;
-  if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
-    // does the CTestTestfile.cmake exist ?
-    testFilename = "CTestTestfile.cmake";
-  } else if (cmSystemTools::FileExists("DartTestfile.txt")) {
-    // does the DartTestfile.txt exist ?
-    testFilename = "DartTestfile.txt";
-  } else {
-    // No CTestTestfile? Who cares...
-    cmSystemTools::ChangeDirectory(cwd);
-    return true;
+  bool readit = false;
+  {
+    const char* testFilename;
+    if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
+      // does the CTestTestfile.cmake exist ?
+      testFilename = "CTestTestfile.cmake";
+    } else if (cmSystemTools::FileExists("DartTestfile.txt")) {
+      // does the DartTestfile.txt exist ?
+      testFilename = "DartTestfile.txt";
+    } else {
+      // No CTestTestfile? Who cares...
+      return true;
+    }
+    fname += "/";
+    fname += testFilename;
+    readit = this->Makefile->ReadDependentFile(fname.c_str());
   }
-  fname += "/";
-  fname += testFilename;
-  bool readit = this->Makefile->ReadDependentFile(fname.c_str());
-  cmSystemTools::ChangeDirectory(cwd);
   if (!readit) {
     std::string m = "Could not find include file: ";
     m += fname;
@@ -487,6 +487,19 @@ int cmCTestTestHandler::ProcessHandler()
       }
     }
 
+    typedef std::set<cmCTestTestHandler::cmCTestTestResult,
+                     cmCTestTestResultLess>
+      SetOfTests;
+    SetOfTests resultsSet(this->TestResults.begin(), this->TestResults.end());
+    std::vector<cmCTestTestHandler::cmCTestTestResult> disabledTests;
+
+    for (SetOfTests::iterator ftit = resultsSet.begin();
+         ftit != resultsSet.end(); ++ftit) {
+      if (ftit->CompletionStatus == "Disabled") {
+        disabledTests.push_back(*ftit);
+      }
+    }
+
     float percent = float(passed.size()) * 100.0f / float(total);
     if (!failed.empty() && percent > 99) {
       percent = 99;
@@ -505,21 +518,33 @@ int cmCTestTestHandler::ProcessHandler()
                        "\nTotal Test time (real) = " << realBuf << "\n",
                        this->Quiet);
 
+    if (!disabledTests.empty()) {
+      cmGeneratedFileStream ofs;
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
+                   << "The following tests are disabled and did not run:"
+                   << std::endl);
+      this->StartLogFile("TestsDisabled", ofs);
+
+      for (std::vector<cmCTestTestHandler::cmCTestTestResult>::iterator dtit =
+             disabledTests.begin();
+           dtit != disabledTests.end(); ++dtit) {
+        ofs << dtit->TestCount << ":" << dtit->Name << std::endl;
+        cmCTestLog(this->CTest, HANDLER_OUTPUT, "\t"
+                     << std::setw(3) << dtit->TestCount << " - " << dtit->Name
+                     << std::endl);
+      }
+    }
+
     if (!failed.empty()) {
       cmGeneratedFileStream ofs;
       cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
                    << "The following tests FAILED:" << std::endl);
       this->StartLogFile("TestsFailed", ofs);
 
-      typedef std::set<cmCTestTestHandler::cmCTestTestResult,
-                       cmCTestTestResultLess>
-        SetOfTests;
-      SetOfTests resultsSet(this->TestResults.begin(),
-                            this->TestResults.end());
-
       for (SetOfTests::iterator ftit = resultsSet.begin();
            ftit != resultsSet.end(); ++ftit) {
-        if (ftit->Status != cmCTestTestHandler::COMPLETED) {
+        if (ftit->Status != cmCTestTestHandler::COMPLETED &&
+            ftit->CompletionStatus != "Disabled") {
           ofs << ftit->TestCount << ":" << ftit->Name << std::endl;
           cmCTestLog(
             this->CTest, HANDLER_OUTPUT, "\t"
@@ -841,6 +866,11 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
   size_t fixtureTestsAdded = 0;
   std::set<std::string> addedFixtures;
   for (size_t i = 0; i < tests.size(); ++i) {
+    // Skip disabled tests
+    if (tests[i].Disabled) {
+      continue;
+    }
+
     // There are two things to do for each test:
     //   1. For every fixture required by this test, record that fixture as
     //      being required and create dependencies on that fixture's setup
@@ -1200,6 +1230,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
     cmCTestTestResult* result = &this->TestResults[cc];
     this->WriteTestResultHeader(xml, result);
     xml.StartElement("Results");
+
     if (result->Status != cmCTestTestHandler::NOT_RUN) {
       if (result->Status != cmCTestTestHandler::COMPLETED ||
           result->ReturnValue) {
@@ -1208,6 +1239,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
         xml.Attribute("name", "Exit Code");
         xml.Element("Value", this->GetTestStatus(result->Status));
         xml.EndElement(); // NamedMeasurement
+
         xml.StartElement("NamedMeasurement");
         xml.Attribute("type", "text/string");
         xml.Attribute("name", "Exit Value");
@@ -1222,8 +1254,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
       xml.EndElement(); // NamedMeasurement
       if (!result->Reason.empty()) {
         const char* reasonType = "Pass Reason";
-        if (result->Status != cmCTestTestHandler::COMPLETED &&
-            result->Status != cmCTestTestHandler::NOT_RUN) {
+        if (result->Status != cmCTestTestHandler::COMPLETED) {
           reasonType = "Fail Reason";
         }
         xml.StartElement("NamedMeasurement");
@@ -1232,12 +1263,14 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
         xml.Element("Value", result->Reason);
         xml.EndElement(); // NamedMeasurement
       }
-      xml.StartElement("NamedMeasurement");
-      xml.Attribute("type", "text/string");
-      xml.Attribute("name", "Completion Status");
-      xml.Element("Value", result->CompletionStatus);
-      xml.EndElement(); // NamedMeasurement
     }
+
+    xml.StartElement("NamedMeasurement");
+    xml.Attribute("type", "text/string");
+    xml.Attribute("name", "Completion Status");
+    xml.Element("Value", result->CompletionStatus);
+    xml.EndElement(); // NamedMeasurement
+
     xml.StartElement("NamedMeasurement");
     xml.Attribute("type", "text/string");
     xml.Attribute("name", "Command Line");
@@ -2000,6 +2033,9 @@ bool cmCTestTestHandler::SetTestsProperties(
           if (key == "WILL_FAIL") {
             rtit->WillFail = cmSystemTools::IsOn(val.c_str());
           }
+          if (key == "DISABLED") {
+            rtit->Disabled = cmSystemTools::IsOn(val.c_str());
+          }
           if (key == "ATTACHED_FILES") {
             cmSystemTools::ExpandListArgument(val, rtit->AttachedFiles);
           }
@@ -2178,6 +2214,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
 
   test.IsInBasedOnREOptions = true;
   test.WillFail = false;
+  test.Disabled = false;
   test.RunSerial = false;
   test.Timeout = 0;
   test.ExplicitTimeout = false;

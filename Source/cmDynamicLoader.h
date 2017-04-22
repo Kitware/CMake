@@ -8,9 +8,9 @@
 #ifndef cmDynamicLoader_h
 #define cmDynamicLoader_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cmsys/DynamicLoader.hxx>
+#include "cmsys/DynamicLoader.hxx" // IWYU pragma: export
 
 class cmDynamicLoader
 {

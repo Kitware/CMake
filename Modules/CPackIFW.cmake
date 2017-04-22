@@ -28,8 +28,32 @@
 # and Mac OS X.
 #
 # You should also install QtIFW_ to use CPack ``IFW`` generator.
-# If you don't use a default path for the installation, please set
-# the used path in the variable ``QTIFWDIR``.
+#
+# Hints
+# ^^^^^
+#
+# Generally, the CPack ``IFW`` generator automatically finds QtIFW_ tools,
+# but if you don't use a default path for installation of the QtIFW_ tools,
+# the path may be specified in either a CMake or an environment variable:
+#
+# .. variable:: CPACK_IFW_ROOT
+#
+#  An CMake variable which specifies the location of the QtIFW_ tool suite.
+#
+#  The variable will be cached in the ``CPackConfig.cmake`` file and used at
+#  CPack runtime.
+#
+# .. variable:: QTIFWDIR
+#
+#  An environment variable which specifies the location of the QtIFW_ tool
+#  suite.
+#
+# .. note::
+#   The specified path should not contain "bin" at the end
+#   (for example: "D:\\DevTools\\QtIFW2.0.5").
+#
+# The :variable:`CPACK_IFW_ROOT` variable has a higher priority and overrides
+# the value of the :variable:`QTIFWDIR` variable.
 #
 # Variables
 # ^^^^^^^^^
@@ -197,7 +221,7 @@
 #  dependent components.
 #
 # Tools
-# """"""""
+# """""
 #
 # .. variable:: CPACK_IFW_FRAMEWORK_VERSION
 #
@@ -207,13 +231,25 @@
 #
 #  The path to "binarycreator" command line client.
 #
-#  This variable is cached and can be configured user if need.
+#  This variable is cached and may be configured if needed.
 #
 # .. variable:: CPACK_IFW_REPOGEN_EXECUTABLE
 #
 #  The path to "repogen" command line client.
 #
-#  This variable is cached and can be configured user if need.
+#  This variable is cached and may be configured if needed.
+#
+# .. variable:: CPACK_IFW_INSTALLERBASE_EXECUTABLE
+#
+#  The path to "installerbase" installer executable base.
+#
+#  This variable is cached and may be configured if needed.
+#
+# .. variable:: CPACK_IFW_DEVTOOL_EXECUTABLE
+#
+#  The path to "devtool" command line client.
+#
+#  This variable is cached and may be configured if needed.
 #
 # Commands
 # ^^^^^^^^^
@@ -568,7 +604,7 @@
 
 # Default path
 
-foreach(_CPACK_IFW_PATH_VAR "QTIFWDIR" "QTDIR")
+foreach(_CPACK_IFW_PATH_VAR "CPACK_IFW_ROOT" "QTIFWDIR" "QTDIR")
   if(DEFINED ${_CPACK_IFW_PATH_VAR}
     AND NOT "${${_CPACK_IFW_PATH_VAR}}" STREQUAL "")
     list(APPEND _CPACK_IFW_PATHS "${${_CPACK_IFW_PATH_VAR}}")
@@ -597,6 +633,10 @@ set(_CPACK_IFW_PREFIXES
   "QtIFW-")
 
 set(_CPACK_IFW_VERSIONS
+  "3.1"
+  "3.1.0"
+  "3.0"
+  "3.0.0"
   "2.3"
   "2.3.0"
   "2.2"
@@ -604,6 +644,7 @@ set(_CPACK_IFW_VERSIONS
   "2.1"
   "2.1.0"
   "2.0"
+  "2.0.5"
   "2.0.3"
   "2.0.2"
   "2.0.1"

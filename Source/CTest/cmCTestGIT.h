@@ -3,7 +3,7 @@
 #ifndef cmCTestGIT_h
 #define cmCTestGIT_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestGlobalVC.h"
 
@@ -28,8 +28,8 @@ private:
   unsigned int CurrentGitVersion;
   unsigned int GetGitVersion();
   std::string GetWorkingRevision();
-  void NoteOldRevision() CM_OVERRIDE;
-  void NoteNewRevision() CM_OVERRIDE;
+  bool NoteOldRevision() CM_OVERRIDE;
+  bool NoteNewRevision() CM_OVERRIDE;
   bool UpdateImpl() CM_OVERRIDE;
 
   std::string FindGitDir();
@@ -39,8 +39,8 @@ private:
   bool UpdateByCustom(std::string const& custom);
   bool UpdateInternal();
 
-  void LoadRevisions() CM_OVERRIDE;
-  void LoadModifications() CM_OVERRIDE;
+  bool LoadRevisions() CM_OVERRIDE;
+  bool LoadModifications() CM_OVERRIDE;
 
   // "public" needed by older Sun compilers
 public:

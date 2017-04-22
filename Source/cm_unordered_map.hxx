@@ -3,7 +3,7 @@
 #ifndef CM_UNORDERED_MAP_HXX
 #define CM_UNORDERED_MAP_HXX
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #if defined(CMake_HAVE_CXX_UNORDERED_MAP)
 
@@ -12,7 +12,7 @@
 
 #elif defined(CMAKE_BUILD_WITH_CMAKE)
 
-#include <cmsys/hash_map.hxx>
+#include "cmsys/hash_map.hxx"
 #define CM_UNORDERED_MAP cmsys::hash_map
 
 #else

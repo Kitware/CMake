@@ -3,7 +3,8 @@
 #ifndef cmTargetCompileFeaturesCommand_h
 #define cmTargetCompileFeaturesCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 

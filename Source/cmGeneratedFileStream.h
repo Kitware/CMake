@@ -3,10 +3,10 @@
 #ifndef cmGeneratedFileStream_h
 #define cmGeneratedFileStream_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cm_codecvt.hxx>
-#include <cmsys/FStream.hxx>
+#include "cm_codecvt.hxx"
+#include "cmsys/FStream.hxx"
 #include <string>
 
 // This is the first base class of cmGeneratedFileStream.  It will be

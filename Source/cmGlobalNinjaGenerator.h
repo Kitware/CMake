@@ -3,7 +3,7 @@
 #ifndef cmGlobalNinjaGenerator_h
 #define cmGlobalNinjaGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <map>
@@ -98,6 +98,8 @@ public:
    * supports platforms.
    */
   static bool SupportsPlatform() { return false; }
+
+  bool IsIPOSupported() const CM_OVERRIDE { return true; }
 
   /**
    * Write a build statement to @a os with the @a comment using

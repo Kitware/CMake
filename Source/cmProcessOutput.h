@@ -3,7 +3,7 @@
 #ifndef cmProcessOutput_h
 #define cmProcessOutput_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <stddef.h>
 #include <string>

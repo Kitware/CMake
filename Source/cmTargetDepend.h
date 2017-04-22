@@ -3,7 +3,7 @@
 #ifndef cmTargetDepend_h
 #define cmTargetDepend_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <set>
 

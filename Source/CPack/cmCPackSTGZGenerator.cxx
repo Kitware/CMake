@@ -2,19 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackSTGZGenerator.h"
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 #include <sstream>
 #include <stdio.h>
 #include <string>
 #include <vector>
 
-#include <sys/types.h>
-// include sys/stat.h after sys/types.h
-#include <sys/stat.h>
-
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmSystemTools.h"
+#include "cm_sys_stat.h"
 
 cmCPackSTGZGenerator::cmCPackSTGZGenerator()
 {

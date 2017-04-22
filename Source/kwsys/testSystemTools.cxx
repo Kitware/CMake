@@ -135,6 +135,19 @@ static bool CheckFileOperations()
     res = false;
   }
 
+  kwsys::SystemTools::Stat_t buf;
+  if (kwsys::SystemTools::Stat(testTxtFile.c_str(), &buf) != 0) {
+    std::cerr << "Problem with Stat - unable to stat text file: "
+              << testTxtFile << std::endl;
+    res = false;
+  }
+
+  if (kwsys::SystemTools::Stat(testBinFile, &buf) != 0) {
+    std::cerr << "Problem with Stat - unable to stat bin file: " << testBinFile
+              << std::endl;
+    res = false;
+  }
+
   if (!kwsys::SystemTools::MakeDirectory(testNewDir)) {
     std::cerr << "Problem with MakeDirectory for: " << testNewDir << std::endl;
     res = false;
@@ -571,85 +584,6 @@ static bool CheckStringOperations()
               << "\"Mary Had A Little Lamb.\"" << std::endl;
     res = false;
   }
-
-#ifdef _WIN32
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath(
-        "L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") !=
-      L"\\\\?\\L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo\""
-              << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath(
-        "L:/Local Mojo/Hex Power Pack/Iffy Voodoo") !=
-      L"\\\\?\\L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"L:/Local Mojo/Hex Power Pack/Iffy Voodoo\"" << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath(
-        "\\\\Foo\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") !=
-      L"\\\\?\\UNC\\Foo\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"\\\\Foo\\Local Mojo\\Hex Power Pack\\Iffy Voodoo\""
-              << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath(
-        "//Foo/Local Mojo/Hex Power Pack/Iffy Voodoo") !=
-      L"\\\\?\\UNC\\Foo\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"//Foo/Local Mojo/Hex Power Pack/Iffy Voodoo\""
-              << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath("//") != L"//") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"//\"" << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath("\\\\.\\") !=
-      L"\\\\.\\") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"\\\\.\\\"" << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath("\\\\.\\X") !=
-      L"\\\\.\\X") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"\\\\.\\X\"" << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath("\\\\.\\X:") !=
-      L"\\\\?\\X:") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"\\\\.\\X:\"" << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath("\\\\.\\X:\\") !=
-      L"\\\\?\\X:\\") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"\\\\.\\X:\\\"" << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath("NUL") !=
-      L"\\\\.\\NUL") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"NUL\"" << std::endl;
-    res = false;
-  }
-
-#endif
 
   if (kwsys::SystemTools::ConvertToWindowsOutputPath(
         "L://Local Mojo/Hex Power Pack/Iffy Voodoo") !=

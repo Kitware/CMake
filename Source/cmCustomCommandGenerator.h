@@ -3,8 +3,8 @@
 #ifndef cmCustomCommandGenerator_h
 #define cmCustomCommandGenerator_h
 
+#include "cmConfigure.h" // IWYU pragma: keep
 #include "cmCustomCommandLines.h"
-#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <string>
 #include <vector>

@@ -3,7 +3,7 @@
 #ifndef cmExportInstallFileGenerator_h
 #define cmExportInstallFileGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmExportFileGenerator.h"
 

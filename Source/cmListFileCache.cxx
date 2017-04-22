@@ -9,9 +9,9 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+#include "cmConfigure.h"
 #include <algorithm>
 #include <assert.h>
-#include <cmConfigure.h>
 #include <sstream>
 
 struct cmListFileParser
@@ -77,6 +77,13 @@ bool cmListFileParser::ParseFile()
   cmListFileLexer_BOM bom;
   if (!cmListFileLexer_SetFileName(this->Lexer, this->FileName, &bom)) {
     this->IssueFileOpenError("cmListFileCache: error can not open file.");
+    return false;
+  }
+
+  if (bom == cmListFileLexer_BOM_Broken) {
+    cmListFileLexer_SetFileName(this->Lexer, CM_NULLPTR, CM_NULLPTR);
+    this->IssueFileOpenError("Error while reading Byte-Order-Mark. "
+                             "File not seekable?");
     return false;
   }
 

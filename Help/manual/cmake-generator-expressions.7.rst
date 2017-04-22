@@ -117,7 +117,7 @@ Available logical expressions are:
   .. code-block:: cmake
 
     add_library(myapp_c foo.c)
-    add_library(myapp_cxx foo.c)
+    add_library(myapp_cxx bar.cpp)
     target_compile_options(myapp_cxx PUBLIC -fno-exceptions)
     add_executable(myapp main.cpp)
     target_link_libraries(myapp myapp_c myapp_cxx)
@@ -205,6 +205,15 @@ Available informational expressions are:
   Name of the linker generated program database file (.pdb).
 ``$<TARGET_PDB_FILE_DIR:tgt>``
   Directory of the linker generated program database file (.pdb).
+``$<TARGET_BUNDLE_DIR:tgt>``
+  Full path to the bundle directory (``my.app``, ``my.framework``, or
+  ``my.bundle``) where ``tgt`` is the name of a target.
+``$<TARGET_BUNDLE_CONTENT_DIR:tgt>``
+  Full path to the bundle content directory where ``tgt`` is the name of a
+  target. For the macOS SDK it leads to ``my.app/Contents``, ``my.framework``,
+  or ``my.bundle/Contents``. For all other SDKs (e.g. iOS) it leads to
+  ``my.app``, ``my.framework``, or ``my.bundle`` due to the flat bundle
+  structure.
 ``$<TARGET_PROPERTY:tgt,prop>``
   Value of the property ``prop`` on the target ``tgt``.
 
@@ -281,9 +290,7 @@ Available output expressions are:
   Content of ``...`` converted to a C identifier.
 ``$<TARGET_OBJECTS:objLib>``
   List of objects resulting from build of ``objLib``. ``objLib`` must be an
-  object of type ``OBJECT_LIBRARY``.  This expression may only be used in
-  the sources of :command:`add_library` and :command:`add_executable`
-  commands.
+  object of type ``OBJECT_LIBRARY``.
 ``$<SHELL_PATH:...>``
   Content of ``...`` converted to shell path style. For example, slashes are
   converted to backslashes in Windows shells and drive letters are converted

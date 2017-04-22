@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXSourceWriter.h"
 
-#include <CPack/cmCPackGenerator.h>
+#include "cmCPackGenerator.h"
 
-#include <cmUuid.h>
+#include "cmUuid.h"
 
 #include <windows.h>
 

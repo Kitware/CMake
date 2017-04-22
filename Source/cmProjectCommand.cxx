@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProjectCommand.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <sstream>
 #include <stdio.h>
 
@@ -62,10 +62,13 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
 
   bool haveVersion = false;
   bool haveLanguages = false;
+  bool haveDescription = false;
   std::string version;
+  std::string description;
   std::vector<std::string> languages;
   enum Doing
   {
+    DoingDescription,
     DoingLanguages,
     DoingVersion
   };
@@ -89,9 +92,21 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
       }
       haveVersion = true;
       doing = DoingVersion;
+    } else if (args[i] == "DESCRIPTION") {
+      if (haveDescription) {
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR, "DESCRITPION may be specified at most once.");
+        cmSystemTools::SetFatalErrorOccured();
+        return true;
+      }
+      haveDescription = true;
+      doing = DoingDescription;
     } else if (doing == DoingVersion) {
       doing = DoingLanguages;
       version = args[i];
+    } else if (doing == DoingDescription) {
+      doing = DoingLanguages;
+      description = args[i];
     } else // doing == DoingLanguages
     {
       languages.push_back(args[i]);
@@ -194,6 +209,22 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
       w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0048)
         << "\nThe following variable(s) would be set to empty:" << vw;
       this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+    }
+  }
+
+  if (haveDescription) {
+    this->Makefile->AddDefinition("PROJECT_DESCRIPTION", description.c_str());
+    // Set the CMAKE_PROJECT_DESCRIPTION variable to be the highest-level
+    // project name in the tree. If there are two project commands
+    // in the same CMakeLists.txt file, and it is the top level
+    // CMakeLists.txt file, then go with the last one.
+    if (!this->Makefile->GetDefinition("CMAKE_PROJECT_DESCRIPTION") ||
+        (this->Makefile->IsRootMakefile())) {
+      this->Makefile->AddDefinition("CMAKE_PROJECT_DESCRIPTION",
+                                    description.c_str());
+      this->Makefile->AddCacheDefinition(
+        "CMAKE_PROJECT_DESCRIPTION", description.c_str(),
+        "Value Computed by CMake", cmStateEnums::STATIC);
     }
   }
 

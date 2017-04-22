@@ -10,10 +10,10 @@
 
 // Use a platform-specific API to get file times efficiently.
 #if !defined(_WIN32) || defined(__CYGWIN__)
-#include <sys/stat.h>
+#include "cm_sys_stat.h"
 #define cmFileTimeComparison_Type struct stat
 #else
-#include <cmsys/Encoding.hxx>
+#include "cmsys/Encoding.hxx"
 #include <windows.h>
 #define cmFileTimeComparison_Type FILETIME
 #endif

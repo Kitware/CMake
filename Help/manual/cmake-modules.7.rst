@@ -27,6 +27,7 @@ All Modules
    /module/CheckFortranFunctionExists
    /module/CheckFortranSourceCompiles
    /module/CheckFunctionExists
+   /module/CheckIPOSupported
    /module/CheckIncludeFileCXX
    /module/CheckIncludeFile
    /module/CheckIncludeFiles
@@ -229,6 +230,7 @@ All Modules
    /module/GenerateExportHeader
    /module/GetPrerequisites
    /module/GNUInstallDirs
+   /module/GoogleTest
    /module/InstallRequiredSystemLibraries
    /module/MacroAddFileDependencies
    /module/ProcessorCount

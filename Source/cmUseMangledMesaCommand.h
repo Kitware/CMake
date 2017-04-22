@@ -3,7 +3,8 @@
 #ifndef cmUseMangledMesaCommand_h
 #define cmUseMangledMesaCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 

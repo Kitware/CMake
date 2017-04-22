@@ -9,7 +9,7 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include <cmsys/SystemTools.hxx>
+#include "cmsys/SystemTools.hxx"
 
 cmCPackCygwinBinaryGenerator::cmCPackCygwinBinaryGenerator()
 {

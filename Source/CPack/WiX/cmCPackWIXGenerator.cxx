@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackWIXGenerator.h"
 
-#include <CPack/cmCPackComponentGroup.h>
-#include <CPack/cmCPackLog.h>
+#include "cmCPackComponentGroup.h"
+#include "cmCPackLog.h"
+#include "cmCryptoHash.h"
+#include "cmGeneratedFileStream.h"
+#include "cmInstalledFile.h"
+#include "cmSystemTools.h"
+#include "cmUuid.h"
 #include <algorithm>
-#include <cmCryptoHash.h>
-#include <cmGeneratedFileStream.h>
-#include <cmInstalledFile.h>
-#include <cmSystemTools.h>
-#include <cmUuid.h>
 
 #include "cmWIXDirectoriesSourceWriter.h"
 #include "cmWIXFeaturesSourceWriter.h"
@@ -17,10 +17,10 @@
 #include "cmWIXRichTextFormatWriter.h"
 #include "cmWIXSourceWriter.h"
 
-#include <cmsys/Directory.hxx>
-#include <cmsys/Encoding.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/SystemTools.hxx>
+#include "cmsys/Directory.hxx"
+#include "cmsys/Encoding.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/SystemTools.hxx"
 
 #include <rpc.h> // for GUID generation
 
@@ -437,8 +437,8 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   directoryDefinitions.AddAttribute("Name", "SourceDir");
 
   size_t installRootSize =
-    directoryDefinitions.BeginInstallationPrefixDirectory(
-      GetProgramFilesFolderId(), installRoot);
+    directoryDefinitions.BeginInstallationPrefixDirectory(GetRootFolderId(),
+                                                          installRoot);
 
   std::string fileDefinitionsFilename = this->CPackTopLevel + "/files.wxs";
 
@@ -570,16 +570,26 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   return this->Patch->CheckForUnappliedFragments();
 }
 
-std::string cmCPackWIXGenerator::GetProgramFilesFolderId() const
+std::string cmCPackWIXGenerator::GetRootFolderId() const
 {
   if (cmSystemTools::IsOn(GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER"))) {
     return "";
   }
-  if (GetArchitecture() == "x86") {
-    return "ProgramFilesFolder";
-  } else {
-    return "ProgramFiles64Folder";
+
+  std::string result = "ProgramFiles<64>Folder";
+
+  const char* rootFolderId = GetOption("CPACK_WIX_ROOT_FOLDER_ID");
+  if (rootFolderId) {
+    result = rootFolderId;
   }
+
+  if (GetArchitecture() == "x86") {
+    cmSystemTools::ReplaceString(result, "<64>", "");
+  } else {
+    cmSystemTools::ReplaceString(result, "<64>", "64");
+  }
+
+  return result;
 }
 
 bool cmCPackWIXGenerator::GenerateMainSourceFileFromTemplate()

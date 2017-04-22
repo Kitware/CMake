@@ -1,12 +1,13 @@
-/* A Bison parser, made by GNU Bison 1.875d.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
-/* Skeleton parser for Yacc-like parsing with Bison, Copyright (C) 1984,
-   1989, 1990, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+/* Bison implementation for Yacc-like parsers in C
 
-   This program is free software; you can redistribute it and/or modify
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,17 +15,23 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* As a special exception, when this file is copied by Bison into a
-   Bison output file, you may use that output file without restriction.
-   This special exception was added by the Free Software Foundation
-   in version 1.24 of Bison.  */
+/* As a special exception, you may create a larger work that contains
+   part or all of the Bison parser skeleton and distribute that work
+   under terms of your choice, so long as that work isn't itself a
+   parser generator using the skeleton or a modified version thereof
+   as a parser skeleton.  Alternatively, if you modify or redistribute
+   the parser skeleton itself, you may (at your option) remove this
+   special exception, which will cause the skeleton and the resulting
+   Bison output files to be licensed under the GNU General Public
+   License without this special exception.
 
-/* Written by Richard Stallman by simplifying the original so called
-   ``semantic'' parser.  */
+   This special exception was added by the Free Software Foundation in
+   version 2.2 of Bison.  */
+
+/* C LALR(1) parser skeleton written by Richard Stallman, by
+   simplifying the original so-called "semantic" parser.  */
 
 /* All symbols defined below should begin with yy or YY, to avoid
    infringing on user name space.  This should be done even for local
@@ -33,13 +40,11 @@
    define necessary library symbols; they are noted "INFRINGES ON
    USER NAME SPACE" below.  */
 
-/* turn off some warning as this is generated code */
-#if defined(_MSC_VER)
-#  pragma warning ( disable : 4702 ) /* unreachable code */
-#endif
-
 /* Identify Bison output.  */
 #define YYBISON 1
+
+/* Bison version.  */
+#define YYBISON_VERSION "3.0.4"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -47,131 +52,211 @@
 /* Pure parsers.  */
 #define YYPURE 1
 
-/* Using locations.  */
-#define YYLSP_NEEDED 0
+/* Push parsers.  */
+#define YYPUSH 0
 
-/* If NAME_PREFIX is specified substitute the variables and functions
-   names.  */
-#define yyparse cmDependsJava_yyparse
-#define yylex   cmDependsJava_yylex
-#define yyerror cmDependsJava_yyerror
-#define yylval  cmDependsJava_yylval
-#define yychar  cmDependsJava_yychar
-#define yydebug cmDependsJava_yydebug
-#define yynerrs cmDependsJava_yynerrs
+/* Pull parsers.  */
+#define YYPULL 1
 
 
-/* Tokens.  */
+/* Substitute the variable and function names.  */
+#define yyparse         cmDependsJava_yyparse
+#define yylex           cmDependsJava_yylex
+#define yyerror         cmDependsJava_yyerror
+#define yydebug         cmDependsJava_yydebug
+#define yynerrs         cmDependsJava_yynerrs
+
+
+/* Copy the first part of user declarations.  */
+#line 1 "cmDependsJavaParser.y" /* yacc.c:339  */
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+/*
+
+This file must be translated to C and modified to build everywhere.
+
+Run bison like this:
+
+  bison --yacc --name-prefix=cmDependsJava_yy --defines=cmDependsJavaParserTokens.h -ocmDependsJavaParser.cxx cmDependsJavaParser.y
+
+Modify cmDependsJavaParser.cxx:
+  - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
+
+*/
+
+#include "cmConfigure.h" // IWYU pragma: keep
+
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+
+#define yyGetParser (cmDependsJava_yyget_extra(yyscanner))
+
+/*-------------------------------------------------------------------------*/
+#include "cmDependsJavaParserHelper.h" /* Interface to parser object.  */
+#include "cmDependsJavaLexer.h"  /* Interface to lexer object.  */
+#include "cmDependsJavaParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
+
+/* Forward declare the lexer entry point.  */
+YY_DECL;
+
+/* Helper function to forward error callback from parser.  */
+static void cmDependsJava_yyerror(yyscan_t yyscanner, const char* message);
+
+#define YYMAXDEPTH 1000000
+
+
+#define jpCheckEmpty(cnt) yyGetParser->CheckEmpty(__LINE__, cnt, yyvsp);
+#define jpElementStart(cnt) yyGetParser->PrepareElement(&yyval)
+#define jpStoreClass(str) yyGetParser->AddClassFound(str); yyGetParser->DeallocateParserType(&(str))
+/* Disable some warnings in the generated code.  */
+#ifdef _MSC_VER
+# pragma warning (disable: 4102) /* Unused goto label.  */
+# pragma warning (disable: 4065) /* Switch statement contains default but no case. */
+#endif
+
+#line 120 "cmDependsJavaParser.cxx" /* yacc.c:339  */
+
+# ifndef YY_NULLPTR
+#  if defined __cplusplus && 201103L <= __cplusplus
+#   define YY_NULLPTR nullptr
+#  else
+#   define YY_NULLPTR 0
+#  endif
+# endif
+
+/* Enabling verbose error messages.  */
+#ifdef YYERROR_VERBOSE
+# undef YYERROR_VERBOSE
+# define YYERROR_VERBOSE 1
+#else
+# define YYERROR_VERBOSE 1
+#endif
+
+/* In a future release of Bison, this section will be replaced
+   by #include "cmDependsJavaParserTokens.h".  */
+#ifndef YY_CMDEPENDSJAVA_YY_CMDEPENDSJAVAPARSERTOKENS_H_INCLUDED
+# define YY_CMDEPENDSJAVA_YY_CMDEPENDSJAVAPARSERTOKENS_H_INCLUDED
+/* Debug traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int cmDependsJava_yydebug;
+#endif
+
+/* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     jp_ABSTRACT = 258,
-     jp_ASSERT = 259,
-     jp_BOOLEAN_TYPE = 260,
-     jp_BREAK = 261,
-     jp_BYTE_TYPE = 262,
-     jp_CASE = 263,
-     jp_CATCH = 264,
-     jp_CHAR_TYPE = 265,
-     jp_CLASS = 266,
-     jp_CONTINUE = 267,
-     jp_DEFAULT = 268,
-     jp_DO = 269,
-     jp_DOUBLE_TYPE = 270,
-     jp_ELSE = 271,
-     jp_EXTENDS = 272,
-     jp_FINAL = 273,
-     jp_FINALLY = 274,
-     jp_FLOAT_TYPE = 275,
-     jp_FOR = 276,
-     jp_IF = 277,
-     jp_IMPLEMENTS = 278,
-     jp_IMPORT = 279,
-     jp_INSTANCEOF = 280,
-     jp_INT_TYPE = 281,
-     jp_INTERFACE = 282,
-     jp_LONG_TYPE = 283,
-     jp_NATIVE = 284,
-     jp_NEW = 285,
-     jp_PACKAGE = 286,
-     jp_PRIVATE = 287,
-     jp_PROTECTED = 288,
-     jp_PUBLIC = 289,
-     jp_RETURN = 290,
-     jp_SHORT_TYPE = 291,
-     jp_STATIC = 292,
-     jp_STRICTFP = 293,
-     jp_SUPER = 294,
-     jp_SWITCH = 295,
-     jp_SYNCHRONIZED = 296,
-     jp_THIS = 297,
-     jp_THROW = 298,
-     jp_THROWS = 299,
-     jp_TRANSIENT = 300,
-     jp_TRY = 301,
-     jp_VOID = 302,
-     jp_VOLATILE = 303,
-     jp_WHILE = 304,
-     jp_BOOLEANLITERAL = 305,
-     jp_CHARACTERLITERAL = 306,
-     jp_DECIMALINTEGERLITERAL = 307,
-     jp_FLOATINGPOINTLITERAL = 308,
-     jp_HEXINTEGERLITERAL = 309,
-     jp_NULLLITERAL = 310,
-     jp_STRINGLITERAL = 311,
-     jp_NAME = 312,
-     jp_AND = 313,
-     jp_ANDAND = 314,
-     jp_ANDEQUALS = 315,
-     jp_BRACKETEND = 316,
-     jp_BRACKETSTART = 317,
-     jp_CARROT = 318,
-     jp_CARROTEQUALS = 319,
-     jp_COLON = 320,
-     jp_COMMA = 321,
-     jp_CURLYEND = 322,
-     jp_CURLYSTART = 323,
-     jp_DIVIDE = 324,
-     jp_DIVIDEEQUALS = 325,
-     jp_DOLLAR = 326,
-     jp_DOT = 327,
-     jp_EQUALS = 328,
-     jp_EQUALSEQUALS = 329,
-     jp_EXCLAMATION = 330,
-     jp_EXCLAMATIONEQUALS = 331,
-     jp_GREATER = 332,
-     jp_GTEQUALS = 333,
-     jp_GTGT = 334,
-     jp_GTGTEQUALS = 335,
-     jp_GTGTGT = 336,
-     jp_GTGTGTEQUALS = 337,
-     jp_LESLESEQUALS = 338,
-     jp_LESSTHAN = 339,
-     jp_LTEQUALS = 340,
-     jp_LTLT = 341,
-     jp_MINUS = 342,
-     jp_MINUSEQUALS = 343,
-     jp_MINUSMINUS = 344,
-     jp_PAREEND = 345,
-     jp_PARESTART = 346,
-     jp_PERCENT = 347,
-     jp_PERCENTEQUALS = 348,
-     jp_PIPE = 349,
-     jp_PIPEEQUALS = 350,
-     jp_PIPEPIPE = 351,
-     jp_PLUS = 352,
-     jp_PLUSEQUALS = 353,
-     jp_PLUSPLUS = 354,
-     jp_QUESTION = 355,
-     jp_SEMICOL = 356,
-     jp_TILDE = 357,
-     jp_TIMES = 358,
-     jp_TIMESEQUALS = 359,
-     jp_ERROR = 360
-   };
+  enum yytokentype
+  {
+    jp_ABSTRACT = 258,
+    jp_ASSERT = 259,
+    jp_BOOLEAN_TYPE = 260,
+    jp_BREAK = 261,
+    jp_BYTE_TYPE = 262,
+    jp_CASE = 263,
+    jp_CATCH = 264,
+    jp_CHAR_TYPE = 265,
+    jp_CLASS = 266,
+    jp_CONTINUE = 267,
+    jp_DEFAULT = 268,
+    jp_DO = 269,
+    jp_DOUBLE_TYPE = 270,
+    jp_ELSE = 271,
+    jp_EXTENDS = 272,
+    jp_FINAL = 273,
+    jp_FINALLY = 274,
+    jp_FLOAT_TYPE = 275,
+    jp_FOR = 276,
+    jp_IF = 277,
+    jp_IMPLEMENTS = 278,
+    jp_IMPORT = 279,
+    jp_INSTANCEOF = 280,
+    jp_INT_TYPE = 281,
+    jp_INTERFACE = 282,
+    jp_LONG_TYPE = 283,
+    jp_NATIVE = 284,
+    jp_NEW = 285,
+    jp_PACKAGE = 286,
+    jp_PRIVATE = 287,
+    jp_PROTECTED = 288,
+    jp_PUBLIC = 289,
+    jp_RETURN = 290,
+    jp_SHORT_TYPE = 291,
+    jp_STATIC = 292,
+    jp_STRICTFP = 293,
+    jp_SUPER = 294,
+    jp_SWITCH = 295,
+    jp_SYNCHRONIZED = 296,
+    jp_THIS = 297,
+    jp_THROW = 298,
+    jp_THROWS = 299,
+    jp_TRANSIENT = 300,
+    jp_TRY = 301,
+    jp_VOID = 302,
+    jp_VOLATILE = 303,
+    jp_WHILE = 304,
+    jp_BOOLEANLITERAL = 305,
+    jp_CHARACTERLITERAL = 306,
+    jp_DECIMALINTEGERLITERAL = 307,
+    jp_FLOATINGPOINTLITERAL = 308,
+    jp_HEXINTEGERLITERAL = 309,
+    jp_NULLLITERAL = 310,
+    jp_STRINGLITERAL = 311,
+    jp_NAME = 312,
+    jp_AND = 313,
+    jp_ANDAND = 314,
+    jp_ANDEQUALS = 315,
+    jp_BRACKETEND = 316,
+    jp_BRACKETSTART = 317,
+    jp_CARROT = 318,
+    jp_CARROTEQUALS = 319,
+    jp_COLON = 320,
+    jp_COMMA = 321,
+    jp_CURLYEND = 322,
+    jp_CURLYSTART = 323,
+    jp_DIVIDE = 324,
+    jp_DIVIDEEQUALS = 325,
+    jp_DOLLAR = 326,
+    jp_DOT = 327,
+    jp_EQUALS = 328,
+    jp_EQUALSEQUALS = 329,
+    jp_EXCLAMATION = 330,
+    jp_EXCLAMATIONEQUALS = 331,
+    jp_GREATER = 332,
+    jp_GTEQUALS = 333,
+    jp_GTGT = 334,
+    jp_GTGTEQUALS = 335,
+    jp_GTGTGT = 336,
+    jp_GTGTGTEQUALS = 337,
+    jp_LESLESEQUALS = 338,
+    jp_LESSTHAN = 339,
+    jp_LTEQUALS = 340,
+    jp_LTLT = 341,
+    jp_MINUS = 342,
+    jp_MINUSEQUALS = 343,
+    jp_MINUSMINUS = 344,
+    jp_PAREEND = 345,
+    jp_PARESTART = 346,
+    jp_PERCENT = 347,
+    jp_PERCENTEQUALS = 348,
+    jp_PIPE = 349,
+    jp_PIPEEQUALS = 350,
+    jp_PIPEPIPE = 351,
+    jp_PLUS = 352,
+    jp_PLUSEQUALS = 353,
+    jp_PLUSPLUS = 354,
+    jp_QUESTION = 355,
+    jp_SEMICOL = 356,
+    jp_TILDE = 357,
+    jp_TIMES = 358,
+    jp_TIMESEQUALS = 359,
+    jp_ERROR = 360
+  };
 #endif
+/* Tokens.  */
 #define jp_ABSTRACT 258
 #define jp_ASSERT 259
 #define jp_BOOLEAN_TYPE 260
@@ -276,141 +361,205 @@
 #define jp_TIMESEQUALS 359
 #define jp_ERROR 360
 
+/* Value type.  */
 
 
 
-/* Copy the first part of user declarations.  */
-#line 1 "cmDependsJavaParser.y"
+int cmDependsJava_yyparse (yyscan_t yyscanner);
 
-/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
-/*
-
-This file must be translated to C and modified to build everywhere.
-
-Run bison like this:
-
-  bison --yacc --name-prefix=cmDependsJava_yy
-  --defines=cmDependsJavaParserTokens.h -ocmDependsJavaParser.cxx
-  cmDependsJavaParser.y
-
-Modify cmDependsJavaParser.c:
-  - remove TABs
-
-*/
-
-/* Configure the parser to use a lexer object.  */
-#define YYPARSE_PARAM yyscanner
-#define YYLEX_PARAM yyscanner
-#define YYERROR_VERBOSE 1
-#define cmDependsJava_yyerror(x) \
-        cmDependsJavaError(yyscanner, x)
-#define yyGetParser (cmDependsJava_yyget_extra(yyscanner))
-
-/*-------------------------------------------------------------------------*/
-#include "cmDependsJavaParserHelper.h" /* Interface to parser object.  */
-#include "cmDependsJavaLexer.h"  /* Interface to lexer object.  */
-#include "cmDependsJavaParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
-
-/* Forward declare the lexer entry point.  */
-YY_DECL;
-
-/* Internal utility functions.  */
-static void cmDependsJavaError(yyscan_t yyscanner, const char* message);
-
-#define YYDEBUG 1
-#define YYMAXDEPTH 1000000
-
-
-#define jpCheckEmpty(cnt) yyGetParser->CheckEmpty(__LINE__, cnt, yyvsp);
-#define jpElementStart(cnt) yyGetParser->PrepareElement(&yyval)
-#define jpStoreClass(str) \
-yyGetParser->AddClassFound(str); yyGetParser->DeallocateParserType(&(str))
-/* Disable some warnings in the generated code.  */
-#ifdef _MSC_VER
-# pragma warning (disable: 4102) /* Unused goto label.  */
-# pragma warning (disable: 4065) /* Switch statement contains default but
-                                    no case. */
-#endif
-
-
-/* Enabling traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-
-/* Enabling verbose error messages.  */
-#ifdef YYERROR_VERBOSE
-# undef YYERROR_VERBOSE
-# define YYERROR_VERBOSE 1
-#else
-# define YYERROR_VERBOSE 0
-#endif
-
-#if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-typedef int YYSTYPE;
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
-# define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
-#endif
-
-
+#endif /* !YY_CMDEPENDSJAVA_YY_CMDEPENDSJAVAPARSERTOKENS_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
+#line 375 "cmDependsJavaParser.cxx" /* yacc.c:358  */
 
-/* Line 214 of yacc.c.  */
-#line 372 "cmDependsJavaParser.cxx"
+#ifdef short
+# undef short
+#endif
 
-#if ! defined (yyoverflow) || YYERROR_VERBOSE
+#ifdef YYTYPE_UINT8
+typedef YYTYPE_UINT8 yytype_uint8;
+#else
+typedef unsigned char yytype_uint8;
+#endif
 
-# ifndef YYFREE
-#  define YYFREE free
+#ifdef YYTYPE_INT8
+typedef YYTYPE_INT8 yytype_int8;
+#else
+typedef signed char yytype_int8;
+#endif
+
+#ifdef YYTYPE_UINT16
+typedef YYTYPE_UINT16 yytype_uint16;
+#else
+typedef unsigned short int yytype_uint16;
+#endif
+
+#ifdef YYTYPE_INT16
+typedef YYTYPE_INT16 yytype_int16;
+#else
+typedef short int yytype_int16;
+#endif
+
+#ifndef YYSIZE_T
+# ifdef __SIZE_TYPE__
+#  define YYSIZE_T __SIZE_TYPE__
+# elif defined size_t
+#  define YYSIZE_T size_t
+# elif ! defined YYSIZE_T
+#  include <stddef.h> /* INFRINGES ON USER NAME SPACE */
+#  define YYSIZE_T size_t
+# else
+#  define YYSIZE_T unsigned int
 # endif
-# ifndef YYMALLOC
-#  define YYMALLOC malloc
+#endif
+
+#define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
+
+#ifndef YY_
+# if defined YYENABLE_NLS && YYENABLE_NLS
+#  if ENABLE_NLS
+#   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
+#   define YY_(Msgid) dgettext ("bison-runtime", Msgid)
+#  endif
 # endif
+# ifndef YY_
+#  define YY_(Msgid) Msgid
+# endif
+#endif
+
+#ifndef YY_ATTRIBUTE
+# if (defined __GNUC__                                               \
+      && (2 < __GNUC__ || (__GNUC__ == 2 && 96 <= __GNUC_MINOR__)))  \
+     || defined __SUNPRO_C && 0x5110 <= __SUNPRO_C
+#  define YY_ATTRIBUTE(Spec) __attribute__(Spec)
+# else
+#  define YY_ATTRIBUTE(Spec) /* empty */
+# endif
+#endif
+
+#ifndef YY_ATTRIBUTE_PURE
+# define YY_ATTRIBUTE_PURE   YY_ATTRIBUTE ((__pure__))
+#endif
+
+#ifndef YY_ATTRIBUTE_UNUSED
+# define YY_ATTRIBUTE_UNUSED YY_ATTRIBUTE ((__unused__))
+#endif
+
+#if !defined _Noreturn \
+     && (!defined __STDC_VERSION__ || __STDC_VERSION__ < 201112)
+# if defined _MSC_VER && 1200 <= _MSC_VER
+#  define _Noreturn __declspec (noreturn)
+# else
+#  define _Noreturn YY_ATTRIBUTE ((__noreturn__))
+# endif
+#endif
+
+/* Suppress unused-variable warnings by "using" E.  */
+#if ! defined lint || defined __GNUC__
+# define YYUSE(E) ((void) (E))
+#else
+# define YYUSE(E) /* empty */
+#endif
+
+#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
+/* Suppress an incorrect diagnostic about yylval being uninitialized.  */
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
+    _Pragma ("GCC diagnostic push") \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")\
+    _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END \
+    _Pragma ("GCC diagnostic pop")
+#else
+# define YY_INITIAL_VALUE(Value) Value
+#endif
+#ifndef YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END
+#endif
+#ifndef YY_INITIAL_VALUE
+# define YY_INITIAL_VALUE(Value) /* Nothing. */
+#endif
+
+
+#if ! defined yyoverflow || YYERROR_VERBOSE
 
 /* The parser invokes alloca or malloc; define the necessary symbols.  */
 
 # ifdef YYSTACK_USE_ALLOCA
 #  if YYSTACK_USE_ALLOCA
-#   define YYSTACK_ALLOC alloca
-#  endif
-# else
-#  if defined (alloca) || defined (_ALLOCA_H)
-#   define YYSTACK_ALLOC alloca
-#  else
 #   ifdef __GNUC__
 #    define YYSTACK_ALLOC __builtin_alloca
+#   elif defined __BUILTIN_VA_ARG_INCR
+#    include <alloca.h> /* INFRINGES ON USER NAME SPACE */
+#   elif defined _AIX
+#    define YYSTACK_ALLOC __alloca
+#   elif defined _MSC_VER
+#    include <malloc.h> /* INFRINGES ON USER NAME SPACE */
+#    define alloca _alloca
+#   else
+#    define YYSTACK_ALLOC alloca
+#    if ! defined _ALLOCA_H && ! defined EXIT_SUCCESS
+#     include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
+      /* Use EXIT_SUCCESS as a witness for stdlib.h.  */
+#     ifndef EXIT_SUCCESS
+#      define EXIT_SUCCESS 0
+#     endif
+#    endif
 #   endif
 #  endif
 # endif
 
 # ifdef YYSTACK_ALLOC
-   /* Pacify GCC's `empty if-body' warning. */
+   /* Pacify GCC's 'empty if-body' warning.  */
 #  define YYSTACK_FREE(Ptr) do { /* empty */; } while (0)
-# else
-#  if defined (__STDC__) || defined (__cplusplus)
-#   include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
-#   define YYSIZE_T size_t
+#  ifndef YYSTACK_ALLOC_MAXIMUM
+    /* The OS might guarantee only one guard page at the bottom of the stack,
+       and a page size can be as small as 4096 bytes.  So we cannot safely
+       invoke alloca (N) if N exceeds 4096.  Use a slightly smaller number
+       to allow for a few compiler-allocated temporary stack slots.  */
+#   define YYSTACK_ALLOC_MAXIMUM 4032 /* reasonable circa 2006 */
 #  endif
+# else
 #  define YYSTACK_ALLOC YYMALLOC
 #  define YYSTACK_FREE YYFREE
+#  ifndef YYSTACK_ALLOC_MAXIMUM
+#   define YYSTACK_ALLOC_MAXIMUM YYSIZE_MAXIMUM
+#  endif
+#  if (defined __cplusplus && ! defined EXIT_SUCCESS \
+       && ! ((defined YYMALLOC || defined malloc) \
+             && (defined YYFREE || defined free)))
+#   include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
+#   ifndef EXIT_SUCCESS
+#    define EXIT_SUCCESS 0
+#   endif
+#  endif
+#  ifndef YYMALLOC
+#   define YYMALLOC malloc
+#   if ! defined malloc && ! defined EXIT_SUCCESS
+void *malloc (YYSIZE_T); /* INFRINGES ON USER NAME SPACE */
+#   endif
+#  endif
+#  ifndef YYFREE
+#   define YYFREE free
+#   if ! defined free && ! defined EXIT_SUCCESS
+void free (void *); /* INFRINGES ON USER NAME SPACE */
+#   endif
+#  endif
 # endif
-#endif /* ! defined (yyoverflow) || YYERROR_VERBOSE */
+#endif /* ! defined yyoverflow || YYERROR_VERBOSE */
 
 
-#if (! defined (yyoverflow) \
-     && (! defined (__cplusplus) \
-   || (defined (YYSTYPE_IS_TRIVIAL) && YYSTYPE_IS_TRIVIAL)))
+#if (! defined yyoverflow \
+     && (! defined __cplusplus \
+         || (defined YYSTYPE_IS_TRIVIAL && YYSTYPE_IS_TRIVIAL)))
 
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  short int yyss;
-  YYSTYPE yyvs;
-  };
+  yytype_int16 yyss_alloc;
+  YYSTYPE yyvs_alloc;
+};
 
 /* The size of the maximum gap between one aligned stack and the next.  */
 # define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
@@ -418,74 +567,74 @@ union yyalloc
 /* The size of an array large to enough to hold all stacks, each with
    N elements.  */
 # define YYSTACK_BYTES(N) \
-     ((N) * (sizeof (short int) + sizeof (YYSTYPE))      \
+     ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE)) \
       + YYSTACK_GAP_MAXIMUM)
 
-/* Copy COUNT objects from FROM to TO.  The source and destination do
-   not overlap.  */
-# ifndef YYCOPY
-#  if defined (__GNUC__) && 1 < __GNUC__
-#   define YYCOPY(To, From, Count) \
-      __builtin_memcpy (To, From, (Count) * sizeof (*(From)))
-#  else
-#   define YYCOPY(To, From, Count)    \
-      do          \
-  {          \
-    YYSIZE_T yyi;    \
-    for (yyi = 0; yyi < (Count); yyi++)  \
-      (To)[yyi] = (From)[yyi];    \
-  }          \
-      while (0)
-#  endif
-# endif
+# define YYCOPY_NEEDED 1
 
 /* Relocate STACK from its old location to the new one.  The
    local variables YYSIZE and YYSTACKSIZE give the old and new number of
    elements in the stack, and YYPTR gives the new location of the
    stack.  Advance YYPTR to a properly aligned location for the next
    stack.  */
-# define YYSTACK_RELOCATE(Stack)          \
-    do                  \
-      {                  \
-  YYSIZE_T yynewbytes;            \
-  YYCOPY (&yyptr->Stack, Stack, yysize);        \
-  Stack = &yyptr->Stack;            \
-  yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
-  yyptr += yynewbytes / sizeof (*yyptr);        \
-      }                  \
+# define YYSTACK_RELOCATE(Stack_alloc, Stack)                           \
+    do                                                                  \
+      {                                                                 \
+        YYSIZE_T yynewbytes;                                            \
+        YYCOPY (&yyptr->Stack_alloc, Stack, yysize);                    \
+        Stack = &yyptr->Stack_alloc;                                    \
+        yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
+        yyptr += yynewbytes / sizeof (*yyptr);                          \
+      }                                                                 \
     while (0)
 
 #endif
 
-#if defined (__STDC__) || defined (__cplusplus)
-   typedef signed char yysigned_char;
-#else
-   typedef short int yysigned_char;
-#endif
+#if defined YYCOPY_NEEDED && YYCOPY_NEEDED
+/* Copy COUNT objects from SRC to DST.  The source and destination do
+   not overlap.  */
+# ifndef YYCOPY
+#  if defined __GNUC__ && 1 < __GNUC__
+#   define YYCOPY(Dst, Src, Count) \
+      __builtin_memcpy (Dst, Src, (Count) * sizeof (*(Src)))
+#  else
+#   define YYCOPY(Dst, Src, Count)              \
+      do                                        \
+        {                                       \
+          YYSIZE_T yyi;                         \
+          for (yyi = 0; yyi < (Count); yyi++)   \
+            (Dst)[yyi] = (Src)[yyi];            \
+        }                                       \
+      while (0)
+#  endif
+# endif
+#endif /* !YYCOPY_NEEDED */
 
-/* YYFINAL -- State number of the termination state. */
+/* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  23
 /* YYLAST -- Last index in YYTABLE.  */
 #define YYLAST   2215
 
-/* YYNTOKENS -- Number of terminals. */
+/* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  106
-/* YYNNTS -- Number of nonterminals. */
+/* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  158
-/* YYNRULES -- Number of rules. */
+/* YYNRULES -- Number of rules.  */
 #define YYNRULES  351
-/* YYNRULES -- Number of states. */
+/* YYNSTATES -- Number of states.  */
 #define YYNSTATES  575
 
-/* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
+/* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
+   by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   360
 
-#define YYTRANSLATE(YYX)             \
+#define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
 
-/* YYTRANSLATE[YYLEX] -- Bison symbol number corresponding to YYLEX.  */
-static const unsigned char yytranslate[] =
+/* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
+   as returned by yylex, without out-of-bounds checking.  */
+static const yytype_uint8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -527,201 +676,51 @@ static const unsigned char yytranslate[] =
 };
 
 #if YYDEBUG
-/* YYPRHS[YYN] -- Index of the first RHS symbol of rule number YYN in
-   YYRHS.  */
-static const unsigned short int yyprhs[] =
+  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
+static const yytype_uint16 yyrline[] =
 {
-       0,     0,     3,     5,     7,     9,    11,    13,    15,    17,
-      19,    21,    23,    25,    27,    29,    31,    33,    35,    37,
-      39,    41,    43,    45,    47,    49,    51,    54,    57,    59,
-      61,    63,    65,    68,    72,    76,    80,    84,    86,    88,
-      92,    93,    95,    96,    99,   100,   103,   107,   109,   111,
-     115,   121,   123,   125,   127,   129,   132,   134,   136,   138,
-     140,   142,   144,   146,   148,   150,   152,   154,   158,   161,
-     165,   169,   174,   175,   177,   180,   183,   185,   189,   193,
-     194,   197,   199,   201,   203,   205,   207,   209,   214,   216,
-     220,   222,   226,   228,   232,   234,   236,   239,   242,   246,
-     251,   256,   257,   259,   264,   268,   269,   271,   273,   277,
-     281,   284,   286,   290,   292,   295,   300,   306,   311,   316,
-     317,   320,   326,   332,   336,   340,   341,   343,   346,   350,
-     354,   355,   358,   360,   362,   364,   367,   369,   372,   374,
-     377,   379,   382,   386,   387,   389,   392,   394,   398,   402,
-     403,   405,   407,   410,   412,   414,   416,   419,   423,   426,
-     428,   430,   432,   434,   436,   438,   440,   442,   444,   446,
-     448,   450,   452,   454,   456,   458,   460,   462,   464,   466,
-     468,   470,   472,   474,   478,   482,   485,   487,   489,   491,
-     493,   495,   497,   499,   505,   513,   521,   527,   532,   533,
-     535,   536,   539,   542,   544,   547,   551,   554,   560,   566,
-     574,   584,   585,   587,   588,   590,   600,   601,   603,   605,
-     607,   609,   611,   615,   619,   625,   629,   630,   632,   636,
-     640,   644,   650,   654,   659,   660,   662,   664,   667,   673,
-     676,   678,   680,   682,   684,   688,   690,   692,   694,   696,
-     703,   704,   706,   707,   709,   711,   715,   720,   725,   730,
-     735,   736,   738,   740,   743,   747,   750,   754,   758,   762,
-     766,   770,   775,   782,   789,   796,   801,   806,   808,   810,
-     814,   816,   818,   821,   824,   826,   828,   831,   834,   836,
-     839,   842,   844,   847,   850,   852,   858,   863,   869,   871,
-     875,   879,   883,   885,   889,   893,   895,   899,   903,   907,
-     909,   913,   917,   921,   925,   929,   931,   935,   939,   941,
-     945,   947,   951,   953,   957,   959,   963,   965,   969,   971,
-     977,   979,   981,   985,   987,   989,   991,   993,   995,   997,
-     999,  1001,  1003,  1005,  1007,  1009,  1011,  1013,  1015,  1017,
-    1019,  1021
-};
-
-/* YYRHS -- A `-1'-separated list of the rules' RHS. */
-static const short int yyrhs[] =
-{
-     107,     0,    -1,   122,    -1,   109,    -1,    53,    -1,    50,
-      -1,    51,    -1,    56,    -1,    55,    -1,    52,    -1,    54,
-      -1,   111,    -1,   112,    -1,     7,    -1,    36,    -1,    26,
-      -1,    28,    -1,    10,    -1,    20,    -1,    15,    -1,     5,
-      -1,   113,    -1,   116,    -1,   117,    -1,   113,    -1,   113,
-      -1,   111,   234,    -1,   117,   234,    -1,   118,    -1,   120,
-      -1,   119,    -1,    57,    -1,    71,    57,    -1,   117,    72,
-     119,    -1,   117,    72,    11,    -1,   117,    72,    42,    -1,
-     121,    72,    11,    -1,   111,    -1,    47,    -1,   123,   124,
-     125,    -1,    -1,   126,    -1,    -1,   124,   127,    -1,    -1,
-     125,   130,    -1,    31,   117,   101,    -1,   128,    -1,   129,
-      -1,    24,   117,   101,    -1,    24,   117,    72,   103,   101,
-      -1,   134,    -1,   165,    -1,   101,    -1,   132,    -1,   131,
-     132,    -1,    34,    -1,    33,    -1,    32,    -1,    37,    -1,
-       3,    -1,    18,    -1,    29,    -1,    41,    -1,    45,    -1,
-      48,    -1,    38,    -1,   135,    11,   119,    -1,   133,   139,
-      -1,   133,   137,   139,    -1,   133,   136,   139,    -1,   133,
-     136,   137,   139,    -1,    -1,   131,    -1,    17,   114,    -1,
-      23,   138,    -1,   115,    -1,   138,    66,   115,    -1,    68,
-     140,    67,    -1,    -1,   140,   141,    -1,   142,    -1,   158,
-      -1,   159,    -1,   130,    -1,   143,    -1,   148,    -1,   135,
-     110,   144,   101,    -1,   145,    -1,   144,    66,   145,    -1,
-     146,    -1,   146,    73,   147,    -1,   119,    -1,   146,    62,
-      61,    -1,   261,    -1,   174,    -1,   149,   101,    -1,   149,
-     157,    -1,   149,   157,   101,    -1,   135,   110,   151,   150,
-      -1,   135,    47,   151,   150,    -1,    -1,   155,    -1,   119,
-      91,   152,    90,    -1,   151,    62,    61,    -1,    -1,   153,
-      -1,   154,    -1,   153,    66,   154,    -1,   135,   110,   146,
-      -1,    44,   156,    -1,   114,    -1,   156,    66,   114,    -1,
-     177,    -1,    37,   177,    -1,   135,   160,   150,   161,    -1,
-     135,   160,   150,   161,   101,    -1,   118,    91,   152,    90,
-      -1,    68,   162,   178,    67,    -1,    -1,   162,   163,    -1,
-      42,    91,   228,    90,   101,    -1,    39,    91,   228,    90,
-     101,    -1,   135,    27,   119,    -1,   164,   166,   168,    -1,
-      -1,   167,    -1,    17,   115,    -1,   167,    66,   115,    -1,
-      68,   169,    67,    -1,    -1,   169,   170,    -1,   171,    -1,
-     172,    -1,   134,    -1,   134,   101,    -1,   165,    -1,   165,
-     101,    -1,   143,    -1,   149,   173,    -1,   101,    -1,   173,
-     101,    -1,    68,   175,    67,    -1,    -1,   176,    -1,   176,
-      66,    -1,   147,    -1,   176,    66,   147,    -1,    68,   178,
-      67,    -1,    -1,   179,    -1,   180,    -1,   179,   180,    -1,
-     181,    -1,   183,    -1,   134,    -1,   182,   101,    -1,   131,
-     110,   144,    -1,   110,   144,    -1,   185,    -1,   187,    -1,
-     191,    -1,   192,    -1,   201,    -1,   204,    -1,   185,    -1,
-     188,    -1,   193,    -1,   202,    -1,   207,    -1,   177,    -1,
-     186,    -1,   189,    -1,   194,    -1,   203,    -1,   213,    -1,
-     215,    -1,   216,    -1,   218,    -1,   217,    -1,   219,    -1,
-     212,    -1,   101,    -1,   119,    65,   183,    -1,   119,    65,
-     184,    -1,   190,   101,    -1,   258,    -1,   242,    -1,   243,
-      -1,   239,    -1,   240,    -1,   236,    -1,   226,    -1,    22,
-      91,   261,    90,   183,    -1,    22,    91,   261,    90,   184,
-      16,   183,    -1,    22,    91,   261,    90,   184,    16,   184,
-      -1,    40,    91,   261,    90,   195,    -1,    68,   197,   196,
-      67,    -1,    -1,   199,    -1,    -1,   197,   198,    -1,   199,
-     179,    -1,   200,    -1,   199,   200,    -1,     8,   262,    65,
-      -1,    13,    65,    -1,    49,    91,   261,    90,   183,    -1,
-      49,    91,   261,    90,   184,    -1,    14,   183,    49,    91,
-     261,    90,   101,    -1,    21,    91,   206,   101,   208,   101,
-     205,    90,   183,    -1,    -1,   210,    -1,    -1,   209,    -1,
-      21,    91,   206,   101,   208,   101,   205,    90,   184,    -1,
-      -1,   261,    -1,   211,    -1,   182,    -1,   211,    -1,   190,
-      -1,   211,    66,   190,    -1,     4,   261,   101,    -1,     4,
-     261,    65,   261,   101,    -1,     6,   214,   101,    -1,    -1,
-     119,    -1,    12,   214,   101,    -1,    35,   208,   101,    -1,
-      43,   261,   101,    -1,    41,    91,   261,    90,   177,    -1,
-      46,   177,   221,    -1,    46,   177,   220,   223,    -1,    -1,
-     221,    -1,   222,    -1,   221,   222,    -1,     9,    91,   154,
-      90,   177,    -1,    19,   177,    -1,   225,    -1,   230,    -1,
-     108,    -1,    42,    -1,    91,   261,    90,    -1,   226,    -1,
-     235,    -1,   236,    -1,   237,    -1,   263,   114,    91,   228,
-      90,   227,    -1,    -1,   139,    -1,    -1,   229,    -1,   261,
-      -1,   229,    66,   261,    -1,   263,   111,   232,   231,    -1,
-     263,   113,   232,   231,    -1,   263,   111,   234,   174,    -1,
-     263,   113,   234,   174,    -1,    -1,   234,    -1,   233,    -1,
-     232,   233,    -1,    62,   261,    61,    -1,    62,    61,    -1,
-     234,    62,    61,    -1,   224,    72,   119,    -1,    39,    72,
-     119,    -1,    42,    72,   119,    -1,   224,    72,    42,    -1,
-     117,    91,   228,    90,    -1,   224,    72,   119,    91,   228,
-      90,    -1,    39,    72,   119,    91,   228,    90,    -1,    42,
-      72,   119,    91,   228,    90,    -1,   117,    62,   261,    61,
-      -1,   225,    62,   261,    61,    -1,   224,    -1,   117,    -1,
-     116,    72,    11,    -1,   239,    -1,   240,    -1,   238,    99,
-      -1,   238,    89,    -1,   242,    -1,   243,    -1,    97,   241,
-      -1,    87,   241,    -1,   244,    -1,    99,   241,    -1,    89,
-     241,    -1,   238,    -1,   102,   241,    -1,    75,   241,    -1,
-     245,    -1,    91,   111,   231,    90,   241,    -1,    91,   261,
-      90,   244,    -1,    91,   117,   234,    90,   244,    -1,   241,
-      -1,   246,   103,   241,    -1,   246,    69,   241,    -1,   246,
-      92,   241,    -1,   246,    -1,   247,    97,   246,    -1,   247,
-      87,   246,    -1,   247,    -1,   248,    86,   247,    -1,   248,
-      79,   247,    -1,   248,    81,   247,    -1,   248,    -1,   249,
-      84,   248,    -1,   249,    77,   248,    -1,   249,    85,   248,
-      -1,   249,    78,   248,    -1,   249,    25,   112,    -1,   249,
-      -1,   250,    74,   249,    -1,   250,    76,   249,    -1,   250,
-      -1,   251,    58,   250,    -1,   251,    -1,   252,    63,   251,
-      -1,   252,    -1,   253,    94,   252,    -1,   253,    -1,   254,
-      59,   253,    -1,   254,    -1,   255,    96,   254,    -1,   255,
-      -1,   255,   100,   261,    65,   256,    -1,   256,    -1,   258,
-      -1,   259,   260,   257,    -1,   117,    -1,   235,    -1,   237,
-      -1,    73,    -1,   104,    -1,    70,    -1,    93,    -1,    98,
-      -1,    88,    -1,    83,    -1,    80,    -1,    82,    -1,    60,
-      -1,    64,    -1,    95,    -1,   257,    -1,   261,    -1,    30,
-      -1,   117,    72,    30,    -1
-};
-
-/* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const unsigned short int yyrline[] =
-{
-       0,   191,   191,   200,   208,   216,   224,   232,   240,   249,
-     257,   266,   274,   283,   288,   293,   298,   303,   308,   313,
-     318,   324,   332,   341,   351,   360,   369,   377,   387,   393,
-     400,   407,   413,   420,   429,   439,   449,   458,   466,   475,
-     484,   490,   499,   505,   514,   520,   529,   541,   549,   558,
-     570,   583,   591,   599,   608,   616,   625,   625,   625,   626,
-     627,   627,   627,   627,   627,   627,   628,   631,   641,   650,
-     659,   668,   678,   684,   693,   702,   711,   719,   728,   737,
-     743,   752,   760,   768,   776,   785,   793,   802,   808,   816,
-     825,   833,   842,   851,   860,   868,   877,   885,   893,   902,
-     911,   921,   928,   938,   948,   955,   962,   965,   971,   981,
-     991,  1001,  1007,  1017,  1027,  1037,  1046,  1056,  1067,  1077,
-    1084,  1094,  1103,  1113,  1122,  1132,  1138,  1148,  1157,  1167,
-    1177,  1184,  1193,  1202,  1211,  1220,  1228,  1237,  1246,  1256,
-    1266,  1275,  1285,  1295,  1302,  1311,  1321,  1330,  1340,  1349,
-    1356,  1366,  1375,  1385,  1394,  1403,  1413,  1423,  1432,  1442,
-    1451,  1460,  1469,  1478,  1487,  1497,  1506,  1515,  1524,  1533,
-    1543,  1552,  1561,  1570,  1579,  1588,  1597,  1606,  1615,  1624,
-    1633,  1642,  1652,  1662,  1673,  1683,  1693,  1702,  1711,  1720,
-    1729,  1738,  1747,  1757,  1767,  1777,  1787,  1794,  1801,  1808,
-    1818,  1825,  1835,  1845,  1854,  1864,  1873,  1883,  1890,  1897,
-    1904,  1912,  1919,  1929,  1936,  1946,  1956,  1963,  1973,  1982,
-    1992,  2002,  2011,  2021,  2030,  2040,  2051,  2058,  2065,  2076,
-    2086,  2096,  2106,  2115,  2125,  2132,  2142,  2151,  2161,  2168,
-    2178,  2187,  2197,  2206,  2212,  2221,  2230,  2239,  2248,  2258,
-    2268,  2275,  2285,  2292,  2302,  2311,  2321,  2330,  2339,  2348,
-    2358,  2365,  2375,  2384,  2394,  2404,  2410,  2417,  2427,  2437,
-    2447,  2458,  2468,  2479,  2489,  2500,  2510,  2520,  2529,  2538,
-    2547,  2556,  2566,  2576,  2586,  2595,  2604,  2613,  2622,  2632,
-    2642,  2652,  2661,  2670,  2679,  2689,  2698,  2707,  2714,  2723,
-    2732,  2741,  2751,  2760,  2769,  2779,  2788,  2797,  2806,  2816,
-    2825,  2834,  2843,  2852,  2861,  2871,  2880,  2889,  2899,  2908,
-    2918,  2927,  2937,  2946,  2956,  2965,  2975,  2984,  2994,  3003,
-    3013,  3022,  3032,  3042,  3052,  3061,  3071,  3080,  3089,  3098,
-    3107,  3116,  3125,  3134,  3143,  3152,  3161,  3170,  3180,  3190,
-    3200,  3209
+       0,   179,   179,   188,   196,   204,   212,   220,   228,   237,
+     245,   254,   262,   271,   276,   281,   286,   291,   296,   301,
+     306,   312,   320,   329,   339,   348,   357,   365,   375,   381,
+     388,   395,   401,   408,   417,   427,   437,   446,   454,   463,
+     472,   478,   487,   493,   502,   508,   517,   529,   537,   546,
+     558,   571,   579,   587,   596,   604,   613,   613,   613,   614,
+     615,   615,   615,   615,   615,   615,   616,   619,   629,   638,
+     647,   656,   666,   672,   681,   690,   699,   707,   716,   725,
+     731,   740,   748,   756,   764,   773,   781,   790,   796,   804,
+     813,   821,   830,   839,   848,   856,   865,   873,   881,   890,
+     899,   909,   916,   926,   936,   943,   950,   953,   959,   969,
+     979,   989,   995,  1005,  1015,  1025,  1034,  1044,  1055,  1065,
+    1072,  1082,  1091,  1101,  1110,  1120,  1126,  1136,  1145,  1155,
+    1165,  1172,  1181,  1190,  1199,  1208,  1216,  1225,  1234,  1244,
+    1254,  1263,  1273,  1283,  1290,  1299,  1309,  1318,  1328,  1337,
+    1344,  1354,  1363,  1373,  1382,  1391,  1401,  1411,  1420,  1430,
+    1439,  1448,  1457,  1466,  1475,  1485,  1494,  1503,  1512,  1521,
+    1531,  1540,  1549,  1558,  1567,  1576,  1585,  1594,  1603,  1612,
+    1621,  1630,  1640,  1650,  1661,  1671,  1681,  1690,  1699,  1708,
+    1717,  1726,  1735,  1745,  1755,  1765,  1775,  1782,  1789,  1796,
+    1806,  1813,  1823,  1833,  1842,  1852,  1861,  1871,  1878,  1885,
+    1892,  1900,  1907,  1917,  1924,  1934,  1944,  1951,  1961,  1970,
+    1980,  1990,  1999,  2009,  2018,  2028,  2039,  2046,  2053,  2064,
+    2074,  2084,  2094,  2103,  2113,  2120,  2130,  2139,  2149,  2156,
+    2166,  2175,  2185,  2194,  2200,  2209,  2218,  2227,  2236,  2246,
+    2256,  2263,  2273,  2280,  2290,  2299,  2309,  2318,  2327,  2336,
+    2346,  2353,  2363,  2372,  2382,  2392,  2398,  2405,  2415,  2425,
+    2435,  2446,  2456,  2467,  2477,  2488,  2498,  2508,  2517,  2526,
+    2535,  2544,  2554,  2564,  2574,  2583,  2592,  2601,  2610,  2620,
+    2630,  2640,  2649,  2658,  2667,  2677,  2686,  2695,  2702,  2711,
+    2720,  2729,  2739,  2748,  2757,  2767,  2776,  2785,  2794,  2804,
+    2813,  2822,  2831,  2840,  2849,  2859,  2868,  2877,  2887,  2896,
+    2906,  2915,  2925,  2934,  2944,  2953,  2963,  2972,  2982,  2991,
+    3001,  3010,  3020,  3030,  3040,  3049,  3059,  3068,  3077,  3086,
+    3095,  3104,  3113,  3122,  3131,  3140,  3149,  3158,  3168,  3178,
+    3188,  3197
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE
-/* YYTNME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-   First, the terminals, then, starting at YYNTOKENS, nonterminals. */
+#if YYDEBUG || YYERROR_VERBOSE || 1
+/* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
+   First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "jp_ABSTRACT", "jp_ASSERT",
@@ -798,14 +797,14 @@ static const char *const yytname[] =
   "ConditionalAndExpression", "ConditionalOrExpression",
   "ConditionalExpression", "AssignmentExpression", "Assignment",
   "LeftHandSide", "AssignmentOperator", "Expression", "ConstantExpression",
-  "New", 0
+  "New", YY_NULLPTR
 };
 #endif
 
 # ifdef YYPRINT
-/* YYTOKNUM[YYLEX-NUM] -- Internal token number corresponding to
-   token YYLEX-NUM.  */
-static const unsigned short int yytoknum[] =
+/* YYTOKNUM[NUM] -- (External) token number corresponding to the
+   (internal) symbol number NUM (which must be that of a token).  */
+static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
@@ -821,178 +820,19 @@ static const unsigned short int yytoknum[] =
 };
 # endif
 
-/* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
-static const unsigned short int yyr1[] =
-{
-       0,   106,   107,   108,   108,   108,   108,   108,   108,   109,
-     109,   110,   110,   111,   111,   111,   111,   111,   111,   111,
-     111,   112,   112,   113,   114,   115,   116,   116,   117,   117,
-     118,   119,   119,   120,   120,   120,   120,   121,   121,   122,
-     123,   123,   124,   124,   125,   125,   126,   127,   127,   128,
-     129,   130,   130,   130,   131,   131,   132,   132,   132,   132,
-     132,   132,   132,   132,   132,   132,   132,   133,   134,   134,
-     134,   134,   135,   135,   136,   137,   138,   138,   139,   140,
-     140,   141,   141,   141,   141,   142,   142,   143,   144,   144,
-     145,   145,   146,   146,   147,   147,   148,   148,   148,   149,
-     149,   150,   150,   151,   151,   152,   152,   153,   153,   154,
-     155,   156,   156,   157,   158,   159,   159,   160,   161,   162,
-     162,   163,   163,   164,   165,   166,   166,   167,   167,   168,
-     169,   169,   170,   170,   170,   170,   170,   170,   171,   172,
-     173,   173,   174,   175,   175,   175,   176,   176,   177,   178,
-     178,   179,   179,   180,   180,   180,   181,   182,   182,   183,
-     183,   183,   183,   183,   183,   184,   184,   184,   184,   184,
-     185,   185,   185,   185,   185,   185,   185,   185,   185,   185,
-     185,   185,   186,   187,   188,   189,   190,   190,   190,   190,
-     190,   190,   190,   191,   192,   193,   194,   195,   196,   196,
-     197,   197,   198,   199,   199,   200,   200,   201,   202,   203,
-     204,   205,   205,   206,   206,   207,   208,   208,   209,   209,
-     210,   211,   211,   212,   212,   213,   214,   214,   215,   216,
-     217,   218,   219,   219,   220,   220,   221,   221,   222,   223,
-     224,   224,   225,   225,   225,   225,   225,   225,   225,   226,
-     227,   227,   228,   228,   229,   229,   230,   230,   230,   230,
-     231,   231,   232,   232,   233,   234,   234,   235,   235,   235,
-     235,   236,   236,   236,   236,   237,   237,   238,   238,   238,
-     238,   238,   239,   240,   241,   241,   241,   241,   241,   242,
-     243,   244,   244,   244,   244,   245,   245,   245,   246,   246,
-     246,   246,   247,   247,   247,   248,   248,   248,   248,   249,
-     249,   249,   249,   249,   249,   250,   250,   250,   251,   251,
-     252,   252,   253,   253,   254,   254,   255,   255,   256,   256,
-     257,   257,   258,   259,   259,   259,   260,   260,   260,   260,
-     260,   260,   260,   260,   260,   260,   260,   260,   261,   262,
-     263,   263
-};
-
-/* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
-static const unsigned char yyr2[] =
-{
-       0,     2,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     2,     2,     1,     1,
-       1,     1,     2,     3,     3,     3,     3,     1,     1,     3,
-       0,     1,     0,     2,     0,     2,     3,     1,     1,     3,
-       5,     1,     1,     1,     1,     2,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     3,     2,     3,
-       3,     4,     0,     1,     2,     2,     1,     3,     3,     0,
-       2,     1,     1,     1,     1,     1,     1,     4,     1,     3,
-       1,     3,     1,     3,     1,     1,     2,     2,     3,     4,
-       4,     0,     1,     4,     3,     0,     1,     1,     3,     3,
-       2,     1,     3,     1,     2,     4,     5,     4,     4,     0,
-       2,     5,     5,     3,     3,     0,     1,     2,     3,     3,
-       0,     2,     1,     1,     1,     2,     1,     2,     1,     2,
-       1,     2,     3,     0,     1,     2,     1,     3,     3,     0,
-       1,     1,     2,     1,     1,     1,     2,     3,     2,     1,
-       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     3,     3,     2,     1,     1,     1,     1,
-       1,     1,     1,     5,     7,     7,     5,     4,     0,     1,
-       0,     2,     2,     1,     2,     3,     2,     5,     5,     7,
-       9,     0,     1,     0,     1,     9,     0,     1,     1,     1,
-       1,     1,     3,     3,     5,     3,     0,     1,     3,     3,
-       3,     5,     3,     4,     0,     1,     1,     2,     5,     2,
-       1,     1,     1,     1,     3,     1,     1,     1,     1,     6,
-       0,     1,     0,     1,     1,     3,     4,     4,     4,     4,
-       0,     1,     1,     2,     3,     2,     3,     3,     3,     3,
-       3,     4,     6,     6,     6,     4,     4,     1,     1,     3,
-       1,     1,     2,     2,     1,     1,     2,     2,     1,     2,
-       2,     1,     2,     2,     1,     5,     4,     5,     1,     3,
-       3,     3,     1,     3,     3,     1,     3,     3,     3,     1,
-       3,     3,     3,     3,     3,     1,     3,     3,     1,     3,
-       1,     3,     1,     3,     1,     3,     1,     3,     1,     5,
-       1,     1,     3,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     3
-};
-
-/* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
-   STATE-NUM when YYTABLE doesn't specify something else to do.  Zero
-   means the default is an error.  */
-static const unsigned short int yydefact[] =
-{
-      40,     0,     0,     2,    42,    41,    20,    13,    17,    19,
-      18,    15,    16,    14,    38,    31,     0,    37,     0,    28,
-      30,    29,     0,     1,    44,    32,     0,    46,     0,     0,
-      72,    43,    47,    48,    34,    35,    33,    36,     0,    60,
-      61,    62,    58,    57,    56,    59,    66,    63,    64,    65,
-      53,    45,    73,    54,     0,    51,     0,   125,    52,     0,
-      49,    55,     0,     0,    79,     0,     0,    68,     0,     0,
-       0,     0,   126,     0,    24,    74,    23,    25,    76,    75,
-      72,     0,    70,    69,    67,   123,   127,   130,   124,     0,
-      50,     0,    59,    78,    84,     0,    80,    81,    85,    86,
-       0,    82,    83,    71,    72,   128,    77,    72,   114,    38,
-       0,    11,    12,    21,    22,    23,    28,   101,    96,    97,
-     113,   129,   134,     0,   138,     0,   136,   131,   132,   133,
-       0,   226,   226,     0,     0,     0,   350,   216,     0,     0,
-      63,   243,     0,     0,     0,     5,     6,     9,     4,    10,
-       8,     7,     0,     0,     0,   182,   242,     3,     0,    22,
-     333,    30,    73,   155,     0,   170,     0,    72,   151,   153,
-       0,   154,   159,   171,   160,   172,     0,   161,   162,   173,
-     163,   174,   164,   181,   175,   176,   177,   179,   178,   180,
-     277,   240,   245,   241,   246,   247,   248,     0,   189,   190,
-     187,   188,   186,     0,     0,     0,   101,    92,     0,    88,
-      90,   101,     0,    26,    27,    72,     0,     0,   102,    98,
-     135,   140,   139,   137,     0,     0,     0,     0,     0,    37,
-       0,   278,   245,   247,   291,   280,   281,   298,   284,   285,
-     288,   294,   302,   305,   309,   315,   318,   320,   322,   324,
-     326,   328,   330,   348,   331,     0,   227,     0,     0,     0,
-       0,   213,     0,     0,   217,     0,     0,     0,     0,     0,
-     234,     0,   278,   246,   248,   290,     0,   289,    92,   158,
-       0,     0,     0,   252,     0,     0,   148,   152,   156,   185,
-       0,     0,   283,   282,   345,   346,   338,   336,   343,   344,
-     342,   341,   339,   347,   340,   337,     0,    37,    24,     0,
-      72,     0,   100,     0,    87,     0,     0,    99,   265,     0,
-       0,     0,   106,   107,   111,   110,   119,   115,   141,   293,
-     287,    37,   278,     0,   286,   292,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,   223,   225,
-     228,     0,     0,   219,   221,     0,   214,   218,     0,   229,
-     268,     0,     0,   269,   230,     0,     0,   232,   236,     0,
-     244,   279,     0,   351,     0,   253,   254,   183,   157,   270,
-     267,     0,   332,     0,   260,   262,     0,   260,     0,   252,
-       0,   104,    89,    93,   143,    91,    95,    94,   266,     0,
-     117,    72,     0,    72,   116,     0,    26,    27,   244,   300,
-     301,   299,   304,   303,   307,   308,   306,   314,   311,   313,
-     310,   312,   316,   317,   319,   321,   323,   325,   327,     0,
-       0,     0,   216,     0,     0,   252,     0,     0,   252,    72,
-       0,   233,   237,     0,   275,   271,     0,   252,   276,     0,
-     256,   263,   261,   258,   257,   259,     0,   103,   146,     0,
-     144,   109,   108,   112,     0,   243,   120,     0,     0,     0,
-     296,     0,   224,     0,     0,   222,     0,     0,     0,    30,
-     193,     0,   159,   166,   167,   168,   169,     0,   200,   196,
-     231,     0,     0,   239,   207,   255,     0,   264,   250,   142,
-     145,   252,   252,   118,   295,   297,   329,     0,   211,   213,
-       0,     0,     0,     0,   273,   198,   274,     0,   272,   251,
-     249,   147,     0,     0,   209,     0,   212,   220,     0,     0,
-       0,   184,   194,     0,     0,     0,   201,    72,   203,   238,
-       0,     0,     0,   216,     0,     0,   349,     0,   206,   197,
-     202,   204,   122,   121,   210,     0,     0,   208,   205,   211,
-       0,     0,   195,     0,   215
-};
-
-/* YYDEFGOTO[NTERM-NUM]. */
-static const short int yydefgoto[] =
-{
-      -1,     2,   156,   157,   158,   229,   112,   113,    75,    78,
-     230,   231,    19,    20,    21,    22,     3,     4,    24,    30,
-       5,    31,    32,    33,    51,    52,    53,    54,   163,   164,
-      65,    66,    79,    67,    80,    96,    97,    98,   208,   209,
-     210,   405,    99,   100,   217,   206,   321,   322,   323,   218,
-     325,   119,   101,   102,   117,   327,   413,   476,    57,    58,
-      71,    72,    88,   104,   127,   128,   129,   222,   406,   469,
-     470,   165,   166,   167,   168,   169,   170,   171,   491,   172,
-     173,   174,   493,   175,   176,   177,   178,   494,   179,   499,
-     545,   525,   546,   547,   548,   180,   495,   181,   182,   535,
-     365,   496,   263,   366,   536,   367,   183,   184,   257,   185,
-     186,   187,   188,   189,   376,   377,   378,   451,   190,   191,
-     232,   530,   384,   385,   193,   415,   394,   395,   214,   194,
-     233,   196,   234,   235,   236,   237,   238,   239,   240,   241,
-     242,   243,   244,   245,   246,   247,   248,   249,   250,   251,
-     252,   253,   254,   203,   306,   386,   557,   204
-};
-
-/* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-   STATE-NUM.  */
 #define YYPACT_NINF -503
-static const short int yypact[] =
+
+#define yypact_value_is_default(Yystate) \
+  (!!((Yystate) == (-503)))
+
+#define YYTABLE_NINF -336
+
+#define yytable_value_is_error(Yytable_value) \
+  0
+
+  /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+     STATE-NUM.  */
+static const yytype_int16 yypact[] =
 {
      159,  1039,   236,  -503,  -503,  -503,  -503,  -503,  -503,  -503,
     -503,  -503,  -503,  -503,  -503,  -503,   186,  -503,    56,  -503,
@@ -1054,8 +894,73 @@ static const short int yypact[] =
     1699,   432,  -503,  1699,  -503
 };
 
-/* YYPGOTO[NTERM-NUM].  */
-static const short int yypgoto[] =
+  /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+     Performed when YYTABLE does not specify something else to do.  Zero
+     means the default is an error.  */
+static const yytype_uint16 yydefact[] =
+{
+      40,     0,     0,     2,    42,    41,    20,    13,    17,    19,
+      18,    15,    16,    14,    38,    31,     0,    37,     0,    28,
+      30,    29,     0,     1,    44,    32,     0,    46,     0,     0,
+      72,    43,    47,    48,    34,    35,    33,    36,     0,    60,
+      61,    62,    58,    57,    56,    59,    66,    63,    64,    65,
+      53,    45,    73,    54,     0,    51,     0,   125,    52,     0,
+      49,    55,     0,     0,    79,     0,     0,    68,     0,     0,
+       0,     0,   126,     0,    24,    74,    23,    25,    76,    75,
+      72,     0,    70,    69,    67,   123,   127,   130,   124,     0,
+      50,     0,    59,    78,    84,     0,    80,    81,    85,    86,
+       0,    82,    83,    71,    72,   128,    77,    72,   114,    38,
+       0,    11,    12,    21,    22,    23,    28,   101,    96,    97,
+     113,   129,   134,     0,   138,     0,   136,   131,   132,   133,
+       0,   226,   226,     0,     0,     0,   350,   216,     0,     0,
+      63,   243,     0,     0,     0,     5,     6,     9,     4,    10,
+       8,     7,     0,     0,     0,   182,   242,     3,     0,    22,
+     333,    30,    73,   155,     0,   170,     0,    72,   151,   153,
+       0,   154,   159,   171,   160,   172,     0,   161,   162,   173,
+     163,   174,   164,   181,   175,   176,   177,   179,   178,   180,
+     277,   240,   245,   241,   246,   247,   248,     0,   189,   190,
+     187,   188,   186,     0,     0,     0,   101,    92,     0,    88,
+      90,   101,     0,    26,    27,    72,     0,     0,   102,    98,
+     135,   140,   139,   137,     0,     0,     0,     0,     0,    37,
+       0,   278,   245,   247,   291,   280,   281,   298,   284,   285,
+     288,   294,   302,   305,   309,   315,   318,   320,   322,   324,
+     326,   328,   330,   348,   331,     0,   227,     0,     0,     0,
+       0,   213,     0,     0,   217,     0,     0,     0,     0,     0,
+     234,     0,   278,   246,   248,   290,     0,   289,    92,   158,
+       0,     0,     0,   252,     0,     0,   148,   152,   156,   185,
+       0,     0,   283,   282,   345,   346,   338,   336,   343,   344,
+     342,   341,   339,   347,   340,   337,     0,    37,    24,     0,
+      72,     0,   100,     0,    87,     0,     0,    99,   265,     0,
+       0,     0,   106,   107,   111,   110,   119,   115,   141,   293,
+     287,    37,   278,     0,   286,   292,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,   223,   225,
+     228,     0,     0,   219,   221,     0,   214,   218,     0,   229,
+     268,     0,     0,   269,   230,     0,     0,   232,   236,     0,
+     244,   279,     0,   351,     0,   253,   254,   183,   157,   270,
+     267,     0,   332,     0,   260,   262,     0,   260,     0,   252,
+       0,   104,    89,    93,   143,    91,    95,    94,   266,     0,
+     117,    72,     0,    72,   116,     0,    26,    27,   244,   300,
+     301,   299,   304,   303,   307,   308,   306,   314,   311,   313,
+     310,   312,   316,   317,   319,   321,   323,   325,   327,     0,
+       0,     0,   216,     0,     0,   252,     0,     0,   252,    72,
+       0,   233,   237,     0,   275,   271,     0,   252,   276,     0,
+     256,   263,   261,   258,   257,   259,     0,   103,   146,     0,
+     144,   109,   108,   112,     0,   243,   120,     0,     0,     0,
+     296,     0,   224,     0,     0,   222,     0,     0,     0,    30,
+     193,     0,   159,   166,   167,   168,   169,     0,   200,   196,
+     231,     0,     0,   239,   207,   255,     0,   264,   250,   142,
+     145,   252,   252,   118,   295,   297,   329,     0,   211,   213,
+       0,     0,     0,     0,   273,   198,   274,     0,   272,   251,
+     249,   147,     0,     0,   209,     0,   212,   220,     0,     0,
+       0,   184,   194,     0,     0,     0,   201,    72,   203,   238,
+       0,     0,     0,   216,     0,     0,   349,     0,   206,   197,
+     202,   204,   122,   121,   210,     0,     0,   208,   205,   211,
+       0,     0,   195,     0,   215
+};
+
+  /* YYPGOTO[NTERM-NUM].  */
+static const yytype_int16 yypgoto[] =
 {
     -503,  -503,  -503,  -503,   -85,     2,   181,   -41,  -198,   -45,
      -87,    -1,   431,    14,  -503,  -503,  -503,  -503,  -503,  -503,
@@ -1075,12 +980,31 @@ static const short int yypgoto[] =
       95,   274,   350,  -503,  -503,   660,  -503,  -503
 };
 
-/* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
-   positive, shift that token.  If negative, reduce the rule which
-   number is the opposite.  If zero, do what YYDEFACT says.
-   If YYTABLE_NINF, syntax error.  */
-#define YYTABLE_NINF -336
-static const short int yytable[] =
+  /* YYDEFGOTO[NTERM-NUM].  */
+static const yytype_int16 yydefgoto[] =
+{
+      -1,     2,   156,   157,   158,   229,   112,   113,    75,    78,
+     230,   231,    19,    20,    21,    22,     3,     4,    24,    30,
+       5,    31,    32,    33,    51,    52,    53,    54,   163,   164,
+      65,    66,    79,    67,    80,    96,    97,    98,   208,   209,
+     210,   405,    99,   100,   217,   206,   321,   322,   323,   218,
+     325,   119,   101,   102,   117,   327,   413,   476,    57,    58,
+      71,    72,    88,   104,   127,   128,   129,   222,   406,   469,
+     470,   165,   166,   167,   168,   169,   170,   171,   491,   172,
+     173,   174,   493,   175,   176,   177,   178,   494,   179,   499,
+     545,   525,   546,   547,   548,   180,   495,   181,   182,   535,
+     365,   496,   263,   366,   536,   367,   183,   184,   257,   185,
+     186,   187,   188,   189,   376,   377,   378,   451,   190,   191,
+     232,   530,   384,   385,   193,   415,   394,   395,   214,   194,
+     233,   196,   234,   235,   236,   237,   238,   239,   240,   241,
+     242,   243,   244,   245,   246,   247,   248,   249,   250,   251,
+     252,   253,   254,   203,   306,   386,   557,   204
+};
+
+  /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+     positive, shift that token.  If negative, reduce the rule whose
+     number is the opposite.  If YYTABLE_NINF, syntax error.  */
+static const yytype_int16 yytable[] =
 {
       18,    82,    83,    17,   287,    61,   309,    56,   114,   364,
      110,   363,   279,   468,    34,   108,   537,   103,   324,   107,
@@ -1306,7 +1230,7 @@ static const short int yytable[] =
        0,     0,     0,     0,     0,   305
 };
 
-static const short int yycheck[] =
+static const yytype_int16 yycheck[] =
 {
        1,    65,    66,     1,   167,    52,   204,    30,    95,   261,
       95,   261,   158,   404,    11,    92,   518,    81,   216,    68,
@@ -1532,9 +1456,9 @@ static const short int yycheck[] =
       -1,    -1,    -1,    -1,    -1,   104
 };
 
-/* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
-   symbol of state STATE-NUM.  */
-static const unsigned short int yystos[] =
+  /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
+     symbol of state STATE-NUM.  */
+static const yytype_uint16 yystos[] =
 {
        0,    31,   107,   122,   123,   126,     5,     7,    10,    15,
       20,    26,    28,    36,    47,    57,    71,   111,   117,   118,
@@ -1596,78 +1520,123 @@ static const unsigned short int yystos[] =
       16,   205,   184,    90,   184
 };
 
-#if ! defined (YYSIZE_T) && defined (__SIZE_TYPE__)
-# define YYSIZE_T __SIZE_TYPE__
-#endif
-#if ! defined (YYSIZE_T) && defined (size_t)
-# define YYSIZE_T size_t
-#endif
-#if ! defined (YYSIZE_T)
-# if defined (__STDC__) || defined (__cplusplus)
-#  include <stddef.h> /* INFRINGES ON USER NAME SPACE */
-#  define YYSIZE_T size_t
-# endif
-#endif
-#if ! defined (YYSIZE_T)
-# define YYSIZE_T unsigned int
-#endif
+  /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
+static const yytype_uint16 yyr1[] =
+{
+       0,   106,   107,   108,   108,   108,   108,   108,   108,   109,
+     109,   110,   110,   111,   111,   111,   111,   111,   111,   111,
+     111,   112,   112,   113,   114,   115,   116,   116,   117,   117,
+     118,   119,   119,   120,   120,   120,   120,   121,   121,   122,
+     123,   123,   124,   124,   125,   125,   126,   127,   127,   128,
+     129,   130,   130,   130,   131,   131,   132,   132,   132,   132,
+     132,   132,   132,   132,   132,   132,   132,   133,   134,   134,
+     134,   134,   135,   135,   136,   137,   138,   138,   139,   140,
+     140,   141,   141,   141,   141,   142,   142,   143,   144,   144,
+     145,   145,   146,   146,   147,   147,   148,   148,   148,   149,
+     149,   150,   150,   151,   151,   152,   152,   153,   153,   154,
+     155,   156,   156,   157,   158,   159,   159,   160,   161,   162,
+     162,   163,   163,   164,   165,   166,   166,   167,   167,   168,
+     169,   169,   170,   170,   170,   170,   170,   170,   171,   172,
+     173,   173,   174,   175,   175,   175,   176,   176,   177,   178,
+     178,   179,   179,   180,   180,   180,   181,   182,   182,   183,
+     183,   183,   183,   183,   183,   184,   184,   184,   184,   184,
+     185,   185,   185,   185,   185,   185,   185,   185,   185,   185,
+     185,   185,   186,   187,   188,   189,   190,   190,   190,   190,
+     190,   190,   190,   191,   192,   193,   194,   195,   196,   196,
+     197,   197,   198,   199,   199,   200,   200,   201,   202,   203,
+     204,   205,   205,   206,   206,   207,   208,   208,   209,   209,
+     210,   211,   211,   212,   212,   213,   214,   214,   215,   216,
+     217,   218,   219,   219,   220,   220,   221,   221,   222,   223,
+     224,   224,   225,   225,   225,   225,   225,   225,   225,   226,
+     227,   227,   228,   228,   229,   229,   230,   230,   230,   230,
+     231,   231,   232,   232,   233,   234,   234,   235,   235,   235,
+     235,   236,   236,   236,   236,   237,   237,   238,   238,   238,
+     238,   238,   239,   240,   241,   241,   241,   241,   241,   242,
+     243,   244,   244,   244,   244,   245,   245,   245,   246,   246,
+     246,   246,   247,   247,   247,   248,   248,   248,   248,   249,
+     249,   249,   249,   249,   249,   250,   250,   250,   251,   251,
+     252,   252,   253,   253,   254,   254,   255,   255,   256,   256,
+     257,   257,   258,   259,   259,   259,   260,   260,   260,   260,
+     260,   260,   260,   260,   260,   260,   260,   260,   261,   262,
+     263,   263
+};
 
-#define yyerrok    (yyerrstatus = 0)
-#define yyclearin  (yychar = YYEMPTY)
-#define YYEMPTY    (-2)
-#define YYEOF    0
+  /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
+static const yytype_uint8 yyr2[] =
+{
+       0,     2,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     2,     2,     1,     1,
+       1,     1,     2,     3,     3,     3,     3,     1,     1,     3,
+       0,     1,     0,     2,     0,     2,     3,     1,     1,     3,
+       5,     1,     1,     1,     1,     2,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     3,     2,     3,
+       3,     4,     0,     1,     2,     2,     1,     3,     3,     0,
+       2,     1,     1,     1,     1,     1,     1,     4,     1,     3,
+       1,     3,     1,     3,     1,     1,     2,     2,     3,     4,
+       4,     0,     1,     4,     3,     0,     1,     1,     3,     3,
+       2,     1,     3,     1,     2,     4,     5,     4,     4,     0,
+       2,     5,     5,     3,     3,     0,     1,     2,     3,     3,
+       0,     2,     1,     1,     1,     2,     1,     2,     1,     2,
+       1,     2,     3,     0,     1,     2,     1,     3,     3,     0,
+       1,     1,     2,     1,     1,     1,     2,     3,     2,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     3,     3,     2,     1,     1,     1,     1,
+       1,     1,     1,     5,     7,     7,     5,     4,     0,     1,
+       0,     2,     2,     1,     2,     3,     2,     5,     5,     7,
+       9,     0,     1,     0,     1,     9,     0,     1,     1,     1,
+       1,     1,     3,     3,     5,     3,     0,     1,     3,     3,
+       3,     5,     3,     4,     0,     1,     1,     2,     5,     2,
+       1,     1,     1,     1,     3,     1,     1,     1,     1,     6,
+       0,     1,     0,     1,     1,     3,     4,     4,     4,     4,
+       0,     1,     1,     2,     3,     2,     3,     3,     3,     3,
+       3,     4,     6,     6,     6,     4,     4,     1,     1,     3,
+       1,     1,     2,     2,     1,     1,     2,     2,     1,     2,
+       2,     1,     2,     2,     1,     5,     4,     5,     1,     3,
+       3,     3,     1,     3,     3,     1,     3,     3,     3,     1,
+       3,     3,     3,     3,     3,     1,     3,     3,     1,     3,
+       1,     3,     1,     3,     1,     3,     1,     3,     1,     5,
+       1,     1,     3,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     3
+};
 
-#define YYACCEPT  goto yyacceptlab
-#define YYABORT    goto yyabortlab
-#define YYERROR    goto yyerrorlab
 
+#define yyerrok         (yyerrstatus = 0)
+#define yyclearin       (yychar = YYEMPTY)
+#define YYEMPTY         (-2)
+#define YYEOF           0
 
-/* Like YYERROR except do call yyerror.  This remains here temporarily
-   to ease the transition to the new meaning of YYERROR, for GCC.
-   Once GCC version 2 has supplanted version 1, this can go.  */
+#define YYACCEPT        goto yyacceptlab
+#define YYABORT         goto yyabortlab
+#define YYERROR         goto yyerrorlab
 
-#define YYFAIL    goto yyerrlab
 
 #define YYRECOVERING()  (!!yyerrstatus)
 
-#define YYBACKUP(Token, Value)          \
-do                \
-  if (yychar == YYEMPTY && yylen == 1)        \
-    {                \
-      yychar = (Token);            \
-      yylval = (Value);            \
-      yytoken = YYTRANSLATE (yychar);        \
-      YYPOPSTACK;            \
-      goto yybackup;            \
-    }                \
-  else                \
-    {                 \
-      yyerror ("syntax error: cannot back up");\
-      YYERROR;              \
-    }                \
+#define YYBACKUP(Token, Value)                                  \
+do                                                              \
+  if (yychar == YYEMPTY)                                        \
+    {                                                           \
+      yychar = (Token);                                         \
+      yylval = (Value);                                         \
+      YYPOPSTACK (yylen);                                       \
+      yystate = *yyssp;                                         \
+      goto yybackup;                                            \
+    }                                                           \
+  else                                                          \
+    {                                                           \
+      yyerror (yyscanner, YY_("syntax error: cannot back up")); \
+      YYERROR;                                                  \
+    }                                                           \
 while (0)
 
-#define YYTERROR  1
-#define YYERRCODE  256
+/* Error token number */
+#define YYTERROR        1
+#define YYERRCODE       256
 
-/* YYLLOC_DEFAULT -- Compute the default location (before the actions
-   are run).  */
 
-#ifndef YYLLOC_DEFAULT
-# define YYLLOC_DEFAULT(Current, Rhs, N)    \
-   ((Current).first_line   = (Rhs)[1].first_line,  \
-    (Current).first_column = (Rhs)[1].first_column,  \
-    (Current).last_line    = (Rhs)[N].last_line,  \
-    (Current).last_column  = (Rhs)[N].last_column)
-#endif
-
-/* YYLEX -- calling `yylex' with the right arguments.  */
-
-#ifdef YYLEX_PARAM
-# define YYLEX yylex (&yylval, YYLEX_PARAM)
-#else
-# define YYLEX yylex (&yylval)
-#endif
 
 /* Enable debugging if requested.  */
 #if YYDEBUG
@@ -1677,54 +1646,85 @@ while (0)
 #  define YYFPRINTF fprintf
 # endif
 
-# define YYDPRINTF(Args)      \
-do {            \
-  if (yydebug)          \
-    YYFPRINTF Args;        \
+# define YYDPRINTF(Args)                        \
+do {                                            \
+  if (yydebug)                                  \
+    YYFPRINTF Args;                             \
 } while (0)
 
-# define YYDSYMPRINT(Args)      \
-do {            \
-  if (yydebug)          \
-    yysymprint Args;        \
+/* This macro is provided for backward compatibility. */
+#ifndef YY_LOCATION_PRINT
+# define YY_LOCATION_PRINT(File, Loc) ((void) 0)
+#endif
+
+
+# define YY_SYMBOL_PRINT(Title, Type, Value, Location)                    \
+do {                                                                      \
+  if (yydebug)                                                            \
+    {                                                                     \
+      YYFPRINTF (stderr, "%s ", Title);                                   \
+      yy_symbol_print (stderr,                                            \
+                  Type, Value, yyscanner); \
+      YYFPRINTF (stderr, "\n");                                           \
+    }                                                                     \
 } while (0)
 
-# define YYDSYMPRINTF(Title, Token, Value, Location)    \
-do {                \
-  if (yydebug)              \
-    {                \
-      YYFPRINTF (stderr, "%s ", Title);        \
-      yysymprint (stderr,           \
-                  Token, Value);  \
-      YYFPRINTF (stderr, "\n");          \
-    }                \
-} while (0)
+
+/*----------------------------------------.
+| Print this symbol's value on YYOUTPUT.  |
+`----------------------------------------*/
+
+static void
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, yyscan_t yyscanner)
+{
+  FILE *yyo = yyoutput;
+  YYUSE (yyo);
+  YYUSE (yyscanner);
+  if (!yyvaluep)
+    return;
+# ifdef YYPRINT
+  if (yytype < YYNTOKENS)
+    YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
+# endif
+  YYUSE (yytype);
+}
+
+
+/*--------------------------------.
+| Print this symbol on YYOUTPUT.  |
+`--------------------------------*/
+
+static void
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, yyscan_t yyscanner)
+{
+  YYFPRINTF (yyoutput, "%s %s (",
+             yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
+
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yyscanner);
+  YYFPRINTF (yyoutput, ")");
+}
 
 /*------------------------------------------------------------------.
 | yy_stack_print -- Print the state stack from its BOTTOM up to its |
 | TOP (included).                                                   |
 `------------------------------------------------------------------*/
 
-#if defined (__STDC__) || defined (__cplusplus)
 static void
-yy_stack_print (short int *bottom, short int *top)
-#else
-static void
-yy_stack_print (bottom, top)
-    short int *bottom;
-    short int *top;
-#endif
+yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)
 {
   YYFPRINTF (stderr, "Stack now");
-  for (/* Nothing. */; bottom <= top; ++bottom)
-    YYFPRINTF (stderr, " %d", *bottom);
+  for (; yybottom <= yytop; yybottom++)
+    {
+      int yybot = *yybottom;
+      YYFPRINTF (stderr, " %d", yybot);
+    }
   YYFPRINTF (stderr, "\n");
 }
 
-# define YY_STACK_PRINT(Bottom, Top)        \
-do {                \
-  if (yydebug)              \
-    yy_stack_print ((Bottom), (Top));        \
+# define YY_STACK_PRINT(Bottom, Top)                            \
+do {                                                            \
+  if (yydebug)                                                  \
+    yy_stack_print ((Bottom), (Top));                           \
 } while (0)
 
 
@@ -1732,29 +1732,30 @@ do {                \
 | Report that the YYRULE is going to be reduced.  |
 `------------------------------------------------*/
 
-#if defined (__STDC__) || defined (__cplusplus)
 static void
-yy_reduce_print (int yyrule)
-#else
-static void
-yy_reduce_print (yyrule)
-    int yyrule;
-#endif
+yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, yyscan_t yyscanner)
 {
+  unsigned long int yylno = yyrline[yyrule];
+  int yynrhs = yyr2[yyrule];
   int yyi;
-  unsigned int yylno = yyrline[yyrule];
-  YYFPRINTF (stderr, "Reducing stack by rule %d (line %u), ",
+  YYFPRINTF (stderr, "Reducing stack by rule %d (line %lu):\n",
              yyrule - 1, yylno);
-  /* Print the symbols being reduced, and their result.  */
-  for (yyi = yyprhs[yyrule]; 0 <= yyrhs[yyi]; yyi++)
-    YYFPRINTF (stderr, "%s ", yytname [yyrhs[yyi]]);
-  YYFPRINTF (stderr, "-> %s\n", yytname [yyr1[yyrule]]);
+  /* The symbols being reduced.  */
+  for (yyi = 0; yyi < yynrhs; yyi++)
+    {
+      YYFPRINTF (stderr, "   $%d = ", yyi + 1);
+      yy_symbol_print (stderr,
+                       yystos[yyssp[yyi + 1 - yynrhs]],
+                       &(yyvsp[(yyi + 1) - (yynrhs)])
+                                              , yyscanner);
+      YYFPRINTF (stderr, "\n");
+    }
 }
 
-# define YY_REDUCE_PRINT(Rule)    \
-do {          \
-  if (yydebug)        \
-    yy_reduce_print (Rule);    \
+# define YY_REDUCE_PRINT(Rule)          \
+do {                                    \
+  if (yydebug)                          \
+    yy_reduce_print (yyssp, yyvsp, Rule, yyscanner); \
 } while (0)
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1762,15 +1763,14 @@ do {          \
 int yydebug;
 #else /* !YYDEBUG */
 # define YYDPRINTF(Args)
-# define YYDSYMPRINT(Args)
-# define YYDSYMPRINTF(Title, Token, Value, Location)
+# define YY_SYMBOL_PRINT(Title, Type, Value, Location)
 # define YY_STACK_PRINT(Bottom, Top)
 # define YY_REDUCE_PRINT(Rule)
 #endif /* !YYDEBUG */
 
 
 /* YYINITDEPTH -- initial size of the parser's stacks.  */
-#ifndef  YYINITDEPTH
+#ifndef YYINITDEPTH
 # define YYINITDEPTH 200
 #endif
 
@@ -1778,58 +1778,40 @@ int yydebug;
    if the built-in stack extension method is used).
 
    Do not make this value too large; the results are undefined if
-   SIZE_MAX < YYSTACK_BYTES (YYMAXDEPTH)
+   YYSTACK_ALLOC_MAXIMUM < YYSTACK_BYTES (YYMAXDEPTH)
    evaluated with infinite-precision integer arithmetic.  */
-
-#if defined (YYMAXDEPTH) && YYMAXDEPTH == 0
-# undef YYMAXDEPTH
-#endif
 
 #ifndef YYMAXDEPTH
 # define YYMAXDEPTH 10000
 #endif
 
-
 
 #if YYERROR_VERBOSE
 
 # ifndef yystrlen
-#  if defined (__GLIBC__) && defined (_STRING_H)
+#  if defined __GLIBC__ && defined _STRING_H
 #   define yystrlen strlen
 #  else
 /* Return the length of YYSTR.  */
 static YYSIZE_T
-#   if defined (__STDC__) || defined (__cplusplus)
 yystrlen (const char *yystr)
-#   else
-yystrlen (yystr)
-     const char *yystr;
-#   endif
 {
-  const char *yys = yystr;
-
-  while (*yys++ != '\0')
+  YYSIZE_T yylen;
+  for (yylen = 0; yystr[yylen]; yylen++)
     continue;
-
-  return yys - yystr - 1;
+  return yylen;
 }
 #  endif
 # endif
 
 # ifndef yystpcpy
-#  if defined (__GLIBC__) && defined (_STRING_H) && defined (_GNU_SOURCE)
+#  if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
 #   define yystpcpy stpcpy
 #  else
 /* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
    YYDEST.  */
 static char *
-#   if defined (__STDC__) || defined (__cplusplus)
 yystpcpy (char *yydest, const char *yysrc)
-#   else
-yystpcpy (yydest, yysrc)
-     char *yydest;
-     const char *yysrc;
-#   endif
 {
   char *yyd = yydest;
   const char *yys = yysrc;
@@ -1842,91 +1824,207 @@ yystpcpy (yydest, yysrc)
 #  endif
 # endif
 
-#endif /* !YYERROR_VERBOSE */
-
-
-
-#if YYDEBUG
-/*--------------------------------.
-| Print this symbol on YYOUTPUT.  |
-`--------------------------------*/
-
-#if defined (__STDC__) || defined (__cplusplus)
-static void
-yysymprint (FILE *yyoutput, int yytype, YYSTYPE *yyvaluep)
-#else
-static void
-yysymprint (yyoutput, yytype, yyvaluep)
-    FILE *yyoutput;
-    int yytype;
-    YYSTYPE *yyvaluep;
-#endif
+# ifndef yytnamerr
+/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
+   quotes and backslashes, so that it's suitable for yyerror.  The
+   heuristic is that double-quoting is unnecessary unless the string
+   contains an apostrophe, a comma, or backslash (other than
+   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
+   null, do not copy; instead, return the length of what the result
+   would have been.  */
+static YYSIZE_T
+yytnamerr (char *yyres, const char *yystr)
 {
-  /* Pacify ``unused variable'' warnings.  */
-  (void) yyvaluep;
-
-  if (yytype < YYNTOKENS)
+  if (*yystr == '"')
     {
-      YYFPRINTF (yyoutput, "token %s (", yytname[yytype]);
-# ifdef YYPRINT
-      YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
-# endif
-    }
-  else
-    YYFPRINTF (yyoutput, "nterm %s (", yytname[yytype]);
+      YYSIZE_T yyn = 0;
+      char const *yyp = yystr;
 
-  switch (yytype)
-    {
-      default:
-        break;
+      for (;;)
+        switch (*++yyp)
+          {
+          case '\'':
+          case ',':
+            goto do_not_strip_quotes;
+
+          case '\\':
+            if (*++yyp != '\\')
+              goto do_not_strip_quotes;
+            /* Fall through.  */
+          default:
+            if (yyres)
+              yyres[yyn] = *yyp;
+            yyn++;
+            break;
+
+          case '"':
+            if (yyres)
+              yyres[yyn] = '\0';
+            return yyn;
+          }
+    do_not_strip_quotes: ;
     }
-  YYFPRINTF (yyoutput, ")");
+
+  if (! yyres)
+    return yystrlen (yystr);
+
+  return yystpcpy (yyres, yystr) - yyres;
 }
+# endif
 
-#endif /* ! YYDEBUG */
+/* Copy into *YYMSG, which is of size *YYMSG_ALLOC, an error message
+   about the unexpected token YYTOKEN for the state stack whose top is
+   YYSSP.
+
+   Return 0 if *YYMSG was successfully written.  Return 1 if *YYMSG is
+   not large enough to hold the message.  In that case, also set
+   *YYMSG_ALLOC to the required number of bytes.  Return 2 if the
+   required number of bytes is too large to store.  */
+static int
+yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
+                yytype_int16 *yyssp, int yytoken)
+{
+  YYSIZE_T yysize0 = yytnamerr (YY_NULLPTR, yytname[yytoken]);
+  YYSIZE_T yysize = yysize0;
+  enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
+  /* Internationalized format string. */
+  const char *yyformat = YY_NULLPTR;
+  /* Arguments of yyformat. */
+  char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
+  /* Number of reported tokens (one for the "unexpected", one per
+     "expected"). */
+  int yycount = 0;
+
+  /* There are many possibilities here to consider:
+     - If this state is a consistent state with a default action, then
+       the only way this function was invoked is if the default action
+       is an error action.  In that case, don't check for expected
+       tokens because there are none.
+     - The only way there can be no lookahead present (in yychar) is if
+       this state is a consistent state with a default action.  Thus,
+       detecting the absence of a lookahead is sufficient to determine
+       that there is no unexpected or expected token to report.  In that
+       case, just report a simple "syntax error".
+     - Don't assume there isn't a lookahead just because this state is a
+       consistent state with a default action.  There might have been a
+       previous inconsistent state, consistent state with a non-default
+       action, or user semantic action that manipulated yychar.
+     - Of course, the expected token list depends on states to have
+       correct lookahead information, and it depends on the parser not
+       to perform extra reductions after fetching a lookahead from the
+       scanner and before detecting a syntax error.  Thus, state merging
+       (from LALR or IELR) and default reductions corrupt the expected
+       token list.  However, the list is correct for canonical LR with
+       one exception: it will still contain any token that will not be
+       accepted due to an error action in a later state.
+  */
+  if (yytoken != YYEMPTY)
+    {
+      int yyn = yypact[*yyssp];
+      yyarg[yycount++] = yytname[yytoken];
+      if (!yypact_value_is_default (yyn))
+        {
+          /* Start YYX at -YYN if negative to avoid negative indexes in
+             YYCHECK.  In other words, skip the first -YYN actions for
+             this state because they are default actions.  */
+          int yyxbegin = yyn < 0 ? -yyn : 0;
+          /* Stay within bounds of both yycheck and yytname.  */
+          int yychecklim = YYLAST - yyn + 1;
+          int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+          int yyx;
+
+          for (yyx = yyxbegin; yyx < yyxend; ++yyx)
+            if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR
+                && !yytable_value_is_error (yytable[yyx + yyn]))
+              {
+                if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
+                  {
+                    yycount = 1;
+                    yysize = yysize0;
+                    break;
+                  }
+                yyarg[yycount++] = yytname[yyx];
+                {
+                  YYSIZE_T yysize1 = yysize + yytnamerr (YY_NULLPTR, yytname[yyx]);
+                  if (! (yysize <= yysize1
+                         && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
+                    return 2;
+                  yysize = yysize1;
+                }
+              }
+        }
+    }
+
+  switch (yycount)
+    {
+# define YYCASE_(N, S)                      \
+      case N:                               \
+        yyformat = S;                       \
+      break
+      YYCASE_(0, YY_("syntax error"));
+      YYCASE_(1, YY_("syntax error, unexpected %s"));
+      YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
+      YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
+      YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
+      YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+# undef YYCASE_
+    }
+
+  {
+    YYSIZE_T yysize1 = yysize + yystrlen (yyformat);
+    if (! (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
+      return 2;
+    yysize = yysize1;
+  }
+
+  if (*yymsg_alloc < yysize)
+    {
+      *yymsg_alloc = 2 * yysize;
+      if (! (yysize <= *yymsg_alloc
+             && *yymsg_alloc <= YYSTACK_ALLOC_MAXIMUM))
+        *yymsg_alloc = YYSTACK_ALLOC_MAXIMUM;
+      return 1;
+    }
+
+  /* Avoid sprintf, as that infringes on the user's name space.
+     Don't have undefined behavior even if the translation
+     produced a string with the wrong number of "%s"s.  */
+  {
+    char *yyp = *yymsg;
+    int yyi = 0;
+    while ((*yyp = *yyformat) != '\0')
+      if (*yyp == '%' && yyformat[1] == 's' && yyi < yycount)
+        {
+          yyp += yytnamerr (yyp, yyarg[yyi++]);
+          yyformat += 2;
+        }
+      else
+        {
+          yyp++;
+          yyformat++;
+        }
+  }
+  return 0;
+}
+#endif /* YYERROR_VERBOSE */
+
 /*-----------------------------------------------.
 | Release the memory associated to this symbol.  |
 `-----------------------------------------------*/
 
-#if defined (__STDC__) || defined (__cplusplus)
 static void
-yydestruct (int yytype, YYSTYPE *yyvaluep)
-#else
-static void
-yydestruct (yytype, yyvaluep)
-    int yytype;
-    YYSTYPE *yyvaluep;
-#endif
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, yyscan_t yyscanner)
 {
-  /* Pacify ``unused variable'' warnings.  */
-  (void) yyvaluep;
+  YYUSE (yyvaluep);
+  YYUSE (yyscanner);
+  if (!yymsg)
+    yymsg = "Deleting";
+  YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
 
-  switch (yytype)
-    {
-
-      default:
-        break;
-    }
+  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+  YYUSE (yytype);
+  YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
-
-
-/* Prevent warnings from -Wmissing-prototypes.  */
-
-#ifdef YYPARSE_PARAM
-# if defined (__STDC__) || defined (__cplusplus)
-int yyparse (void *YYPARSE_PARAM);
-# else
-int yyparse ();
-# endif
-#else /* ! YYPARSE_PARAM */
-#if defined (__STDC__) || defined (__cplusplus)
-int yyparse (void);
-#else
-int yyparse ();
-#endif
-#endif /* ! YYPARSE_PARAM */
-
-
 
 
 
@@ -1935,90 +2033,76 @@ int yyparse ();
 | yyparse.  |
 `----------*/
 
-#ifdef YYPARSE_PARAM
-# if defined (__STDC__) || defined (__cplusplus)
-int yyparse (void *YYPARSE_PARAM)
-# else
-int yyparse (YYPARSE_PARAM)
-  void *YYPARSE_PARAM;
-# endif
-#else /* ! YYPARSE_PARAM */
-#if defined (__STDC__) || defined (__cplusplus)
 int
-yyparse (void)
-#else
-int
-yyparse ()
-
-#endif
-#endif
+yyparse (yyscan_t yyscanner)
 {
-  /* The lookahead symbol.  */
+/* The lookahead symbol.  */
 int yychar;
 
+
 /* The semantic value of the lookahead symbol.  */
-YYSTYPE yylval;
+/* Default value used for initialization, for pacifying older GCCs
+   or non-GCC compilers.  */
+YY_INITIAL_VALUE (static YYSTYPE yyval_default;)
+YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
 
-/* Number of syntax errors so far.  */
-int yynerrs;
+    /* Number of syntax errors so far.  */
+    int yynerrs;
 
-  int yystate;
+    int yystate;
+    /* Number of tokens to shift before error messages enabled.  */
+    int yyerrstatus;
+
+    /* The stacks and their tools:
+       'yyss': related to states.
+       'yyvs': related to semantic values.
+
+       Refer to the stacks through separate pointers, to allow yyoverflow
+       to reallocate them elsewhere.  */
+
+    /* The state stack.  */
+    yytype_int16 yyssa[YYINITDEPTH];
+    yytype_int16 *yyss;
+    yytype_int16 *yyssp;
+
+    /* The semantic value stack.  */
+    YYSTYPE yyvsa[YYINITDEPTH];
+    YYSTYPE *yyvs;
+    YYSTYPE *yyvsp;
+
+    YYSIZE_T yystacksize;
+
   int yyn;
   int yyresult;
-  /* Number of tokens to shift before error messages enabled.  */
-  int yyerrstatus;
   /* Lookahead token as an internal (translated) token number.  */
   int yytoken = 0;
-
-  /* Three stacks and their tools:
-     `yyss': related to states,
-     `yyvs': related to semantic values,
-     `yyls': related to locations.
-
-     Refer to the stacks thru separate pointers, to allow yyoverflow
-     to reallocate them elsewhere.  */
-
-  /* The state stack.  */
-  short int yyssa[YYINITDEPTH];
-  short int *yyss = yyssa;
-  short int *yyssp;
-
-  /* The semantic value stack.  */
-  YYSTYPE yyvsa[YYINITDEPTH];
-  YYSTYPE *yyvs = yyvsa;
-  YYSTYPE *yyvsp;
-
-
-
-#define YYPOPSTACK   (yyvsp--, yyssp--)
-
-  YYSIZE_T yystacksize = YYINITDEPTH;
-
   /* The variables used to return semantic value and location from the
      action routines.  */
   YYSTYPE yyval;
 
+#if YYERROR_VERBOSE
+  /* Buffer for error messages, and its allocated size.  */
+  char yymsgbuf[128];
+  char *yymsg = yymsgbuf;
+  YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
+#endif
 
-  /* When reducing, the number of symbols on the RHS of the reduced
-     rule.  */
-  int yylen;
+#define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
+
+  /* The number of symbols on the RHS of the reduced rule.
+     Keep to zero when no symbol should be popped.  */
+  int yylen = 0;
+
+  yyssp = yyss = yyssa;
+  yyvsp = yyvs = yyvsa;
+  yystacksize = YYINITDEPTH;
 
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yystate = 0;
   yyerrstatus = 0;
   yynerrs = 0;
-  yychar = YYEMPTY;    /* Cause a token to be read.  */
-
-  /* Initialize stack pointers.
-     Waste one element of value and location stack
-     so that they stay on the same level as the state stack.
-     The wasted elements are never initialized.  */
-
-  yyssp = yyss;
-  yyvsp = yyvs;
-
-
+  yychar = YYEMPTY; /* Cause a token to be read.  */
   goto yysetstate;
 
 /*------------------------------------------------------------.
@@ -2026,8 +2110,7 @@ int yynerrs;
 `------------------------------------------------------------*/
  yynewstate:
   /* In all cases, when you get here, the value and location stacks
-     have just been pushed. so pushing a state here evens the stacks.
-     */
+     have just been pushed.  So pushing a state here evens the stacks.  */
   yyssp++;
 
  yysetstate:
@@ -2040,49 +2123,46 @@ int yynerrs;
 
 #ifdef yyoverflow
       {
-  /* Give user a chance to reallocate the stack. Use copies of
-     these so that the &'s don't force the real ones into
-     memory.  */
-  YYSTYPE *yyvs1 = yyvs;
-  short int *yyss1 = yyss;
+        /* Give user a chance to reallocate the stack.  Use copies of
+           these so that the &'s don't force the real ones into
+           memory.  */
+        YYSTYPE *yyvs1 = yyvs;
+        yytype_int16 *yyss1 = yyss;
 
+        /* Each stack pointer address is followed by the size of the
+           data in use in that stack, in bytes.  This used to be a
+           conditional around just the two extra args, but that might
+           be undefined if yyoverflow is a macro.  */
+        yyoverflow (YY_("memory exhausted"),
+                    &yyss1, yysize * sizeof (*yyssp),
+                    &yyvs1, yysize * sizeof (*yyvsp),
+                    &yystacksize);
 
-  /* Each stack pointer address is followed by the size of the
-     data in use in that stack, in bytes.  This used to be a
-     conditional around just the two extra args, but that might
-     be undefined if yyoverflow is a macro.  */
-  yyoverflow ("parser stack overflow",
-        &yyss1, yysize * sizeof (*yyssp),
-        &yyvs1, yysize * sizeof (*yyvsp),
-
-        &yystacksize);
-
-  yyss = yyss1;
-  yyvs = yyvs1;
+        yyss = yyss1;
+        yyvs = yyvs1;
       }
 #else /* no yyoverflow */
 # ifndef YYSTACK_RELOCATE
-      goto yyoverflowlab;
+      goto yyexhaustedlab;
 # else
       /* Extend the stack our own way.  */
       if (YYMAXDEPTH <= yystacksize)
-  goto yyoverflowlab;
+        goto yyexhaustedlab;
       yystacksize *= 2;
       if (YYMAXDEPTH < yystacksize)
-  yystacksize = YYMAXDEPTH;
+        yystacksize = YYMAXDEPTH;
 
       {
-  short int *yyss1 = yyss;
-  union yyalloc *yyptr =
-    (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
-  if (! yyptr)
-    goto yyoverflowlab;
-  YYSTACK_RELOCATE (yyss);
-  YYSTACK_RELOCATE (yyvs);
-
+        yytype_int16 *yyss1 = yyss;
+        union yyalloc *yyptr =
+          (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
+        if (! yyptr)
+          goto yyexhaustedlab;
+        YYSTACK_RELOCATE (yyss_alloc, yyss);
+        YYSTACK_RELOCATE (yyvs_alloc, yyvs);
 #  undef YYSTACK_RELOCATE
-  if (yyss1 != yyssa)
-    YYSTACK_FREE (yyss1);
+        if (yyss1 != yyssa)
+          YYSTACK_FREE (yyss1);
       }
 # endif
 #endif /* no yyoverflow */
@@ -2090,15 +2170,17 @@ int yynerrs;
       yyssp = yyss + yysize - 1;
       yyvsp = yyvs + yysize - 1;
 
-
       YYDPRINTF ((stderr, "Stack size increased to %lu\n",
-      (unsigned long int) yystacksize));
+                  (unsigned long int) yystacksize));
 
       if (yyss + yystacksize - 1 <= yyssp)
-  YYABORT;
+        YYABORT;
     }
 
   YYDPRINTF ((stderr, "Entering state %d\n", yystate));
+
+  if (yystate == YYFINAL)
+    YYACCEPT;
 
   goto yybackup;
 
@@ -2107,14 +2189,12 @@ int yynerrs;
 `-----------*/
 yybackup:
 
-/* Do appropriate processing given the current state.  */
-/* Read a lookahead token if we need one and don't already have one.  */
-/* yyresume: */
+  /* Do appropriate processing given the current state.  Read a
+     lookahead token if we need one and don't already have one.  */
 
   /* First try to decide what to do without reference to lookahead token.  */
-
   yyn = yypact[yystate];
-  if (yyn == YYPACT_NINF)
+  if (yypact_value_is_default (yyn))
     goto yydefault;
 
   /* Not known => get a lookahead token if don't already have one.  */
@@ -2123,7 +2203,7 @@ yybackup:
   if (yychar == YYEMPTY)
     {
       YYDPRINTF ((stderr, "Reading a token: "));
-      yychar = YYLEX;
+      yychar = yylex (&yylval, yyscanner);
     }
 
   if (yychar <= YYEOF)
@@ -2134,7 +2214,7 @@ yybackup:
   else
     {
       yytoken = YYTRANSLATE (yychar);
-      YYDSYMPRINTF ("Next token is", yytoken, &yylval, &yylloc);
+      YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
     }
 
   /* If the proper action on seeing token YYTOKEN is to reduce or to
@@ -2145,31 +2225,28 @@ yybackup:
   yyn = yytable[yyn];
   if (yyn <= 0)
     {
-      if (yyn == 0 || yyn == YYTABLE_NINF)
-  goto yyerrlab;
+      if (yytable_value_is_error (yyn))
+        goto yyerrlab;
       yyn = -yyn;
       goto yyreduce;
     }
-
-  if (yyn == YYFINAL)
-    YYACCEPT;
-
-  /* Shift the lookahead token.  */
-  YYDPRINTF ((stderr, "Shifting token %s, ", yytname[yytoken]));
-
-  /* Discard the token being shifted unless it is eof.  */
-  if (yychar != YYEOF)
-    yychar = YYEMPTY;
-
-  *++yyvsp = yylval;
-
 
   /* Count tokens shifted since error; after three, turn off error
      status.  */
   if (yyerrstatus)
     yyerrstatus--;
 
+  /* Shift the lookahead token.  */
+  YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
+
+  /* Discard the shifted token.  */
+  yychar = YYEMPTY;
+
   yystate = yyn;
+  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+  *++yyvsp = yylval;
+  YY_IGNORE_MAYBE_UNINITIALIZED_END
+
   goto yynewstate;
 
 
@@ -2191,7 +2268,7 @@ yyreduce:
   yylen = yyr2[yyn];
 
   /* If YYLEN is nonzero, implement the default value of the action:
-     `$$ = $1'.
+     '$$ = $1'.
 
      Otherwise, the following line sets YYVAL to garbage.
      This behavior is undocumented and Bison
@@ -2205,3581 +2282,3927 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 192 "cmDependsJavaParser.y"
+#line 180 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2293 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 201 "cmDependsJavaParser.y"
+#line 189 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2304 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 209 "cmDependsJavaParser.y"
+#line 197 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2315 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 217 "cmDependsJavaParser.y"
+#line 205 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2326 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 225 "cmDependsJavaParser.y"
+#line 213 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2337 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 233 "cmDependsJavaParser.y"
+#line 221 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2348 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 241 "cmDependsJavaParser.y"
+#line 229 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2359 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 250 "cmDependsJavaParser.y"
+#line 238 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2370 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 258 "cmDependsJavaParser.y"
+#line 246 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2381 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 267 "cmDependsJavaParser.y"
+#line 255 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2392 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 275 "cmDependsJavaParser.y"
+#line 263 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2403 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 284 "cmDependsJavaParser.y"
+#line 272 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
 }
+#line 2411 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 289 "cmDependsJavaParser.y"
+#line 277 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
 }
+#line 2419 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 294 "cmDependsJavaParser.y"
+#line 282 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
 }
+#line 2427 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 299 "cmDependsJavaParser.y"
+#line 287 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
 }
+#line 2435 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 304 "cmDependsJavaParser.y"
+#line 292 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
 }
+#line 2443 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 309 "cmDependsJavaParser.y"
+#line 297 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
 }
+#line 2451 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 314 "cmDependsJavaParser.y"
+#line 302 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
 }
+#line 2459 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 319 "cmDependsJavaParser.y"
+#line 307 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
 }
+#line 2467 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 325 "cmDependsJavaParser.y"
+#line 313 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2478 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 333 "cmDependsJavaParser.y"
+#line 321 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2489 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 342 "cmDependsJavaParser.y"
+#line 330 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  jpStoreClass(yyvsp[0].str);
+  jpStoreClass((yyvsp[0].str));
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2501 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 352 "cmDependsJavaParser.y"
+#line 340 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2512 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 361 "cmDependsJavaParser.y"
+#line 349 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2523 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 370 "cmDependsJavaParser.y"
+#line 358 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2534 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 378 "cmDependsJavaParser.y"
+#line 366 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
-  jpStoreClass(yyvsp[-1].str);
+  jpStoreClass((yyvsp[-1].str));
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2546 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 388 "cmDependsJavaParser.y"
+#line 376 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  yyval.str = yyvsp[0].str;
+  (yyval.str) = (yyvsp[0].str);
 }
+#line 2555 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 394 "cmDependsJavaParser.y"
+#line 382 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  yyval.str = yyvsp[0].str;
+  (yyval.str) = (yyvsp[0].str);
 }
+#line 2564 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 401 "cmDependsJavaParser.y"
+#line 389 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  yyval.str = yyvsp[0].str;
+  (yyval.str) = (yyvsp[0].str);
 }
+#line 2573 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 408 "cmDependsJavaParser.y"
+#line 396 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  yyval.str = yyvsp[0].str;
+  (yyval.str) = (yyvsp[0].str);
 }
+#line 2582 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 414 "cmDependsJavaParser.y"
+#line 402 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
-  yyval.str = yyvsp[0].str;
+  (yyval.str) = (yyvsp[0].str);
 }
+#line 2591 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 421 "cmDependsJavaParser.y"
+#line 409 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  yyGetParser->AddClassFound(yyvsp[-2].str);
-  yyGetParser->UpdateCombine(yyvsp[-2].str, yyvsp[0].str);
-  yyGetParser->DeallocateParserType(&(yyvsp[-2].str));
-  yyval.str = const_cast<char*>(yyGetParser->GetCurrentCombine());
+  yyGetParser->AddClassFound((yyvsp[-2].str));
+  yyGetParser->UpdateCombine((yyvsp[-2].str), (yyvsp[0].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-2].str)));
+  (yyval.str) = const_cast<char*>(yyGetParser->GetCurrentCombine());
 }
+#line 2603 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 430 "cmDependsJavaParser.y"
+#line 418 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  jpStoreClass(yyvsp[-2].str);
+  jpStoreClass((yyvsp[-2].str));
   jpCheckEmpty(3);
   yyGetParser->SetCurrentCombine("");
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2616 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 440 "cmDependsJavaParser.y"
+#line 428 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  jpStoreClass(yyvsp[-2].str);
+  jpStoreClass((yyvsp[-2].str));
   yyGetParser->SetCurrentCombine("");
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2629 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 450 "cmDependsJavaParser.y"
+#line 438 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2640 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 459 "cmDependsJavaParser.y"
+#line 447 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2651 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 467 "cmDependsJavaParser.y"
+#line 455 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2662 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 476 "cmDependsJavaParser.y"
+#line 464 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2673 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 484 "cmDependsJavaParser.y"
+#line 472 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2683 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 491 "cmDependsJavaParser.y"
+#line 479 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2694 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 499 "cmDependsJavaParser.y"
+#line 487 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2704 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 506 "cmDependsJavaParser.y"
+#line 494 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2715 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 514 "cmDependsJavaParser.y"
+#line 502 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2725 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 521 "cmDependsJavaParser.y"
+#line 509 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2736 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 530 "cmDependsJavaParser.y"
+#line 518 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  yyGetParser->SetCurrentPackage(yyvsp[-1].str);
-  yyGetParser->DeallocateParserType(&(yyvsp[-1].str));
+  yyGetParser->SetCurrentPackage((yyvsp[-1].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-1].str)));
   yyGetParser->SetCurrentCombine("");
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2750 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 542 "cmDependsJavaParser.y"
+#line 530 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2761 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 550 "cmDependsJavaParser.y"
+#line 538 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2772 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 559 "cmDependsJavaParser.y"
+#line 547 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  yyGetParser->AddPackagesImport(yyvsp[-1].str);
-  yyGetParser->DeallocateParserType(&(yyvsp[-1].str));
+  yyGetParser->AddPackagesImport((yyvsp[-1].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-1].str)));
   yyGetParser->SetCurrentCombine("");
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2786 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 571 "cmDependsJavaParser.y"
+#line 559 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
-  std::string str = yyvsp[-3].str;
+  std::string str = (yyvsp[-3].str);
   str += ".*";
   yyGetParser->AddPackagesImport(str.c_str());
-  yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
   yyGetParser->SetCurrentCombine("");
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2801 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 584 "cmDependsJavaParser.y"
+#line 572 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2812 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 592 "cmDependsJavaParser.y"
+#line 580 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2823 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 600 "cmDependsJavaParser.y"
+#line 588 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2834 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 609 "cmDependsJavaParser.y"
+#line 597 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2845 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 617 "cmDependsJavaParser.y"
+#line 605 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2856 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 67:
-#line 632 "cmDependsJavaParser.y"
+#line 620 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
-  yyGetParser->StartClass(yyvsp[0].str);
+  yyGetParser->StartClass((yyvsp[0].str));
   jpElementStart(3);
-  yyGetParser->DeallocateParserType(&(yyvsp[0].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
   jpCheckEmpty(3);
 }
+#line 2867 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 68:
-#line 642 "cmDependsJavaParser.y"
+#line 630 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
 }
+#line 2879 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 69:
-#line 651 "cmDependsJavaParser.y"
+#line 639 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
 }
+#line 2891 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 70:
-#line 660 "cmDependsJavaParser.y"
+#line 648 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
 }
+#line 2903 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 71:
-#line 669 "cmDependsJavaParser.y"
+#line 657 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
 }
+#line 2915 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 72:
-#line 678 "cmDependsJavaParser.y"
+#line 666 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2925 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 73:
-#line 685 "cmDependsJavaParser.y"
+#line 673 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2936 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 74:
-#line 694 "cmDependsJavaParser.y"
+#line 682 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2947 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 75:
-#line 703 "cmDependsJavaParser.y"
+#line 691 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2958 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 76:
-#line 712 "cmDependsJavaParser.y"
+#line 700 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2969 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 77:
-#line 720 "cmDependsJavaParser.y"
+#line 708 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2980 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 78:
-#line 729 "cmDependsJavaParser.y"
+#line 717 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 2991 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 79:
-#line 737 "cmDependsJavaParser.y"
+#line 725 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3001 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 80:
-#line 744 "cmDependsJavaParser.y"
+#line 732 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3012 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 81:
-#line 753 "cmDependsJavaParser.y"
+#line 741 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3023 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 82:
-#line 761 "cmDependsJavaParser.y"
+#line 749 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3034 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 83:
-#line 769 "cmDependsJavaParser.y"
+#line 757 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3045 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 84:
-#line 777 "cmDependsJavaParser.y"
+#line 765 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3056 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 85:
-#line 786 "cmDependsJavaParser.y"
+#line 774 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3067 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 86:
-#line 794 "cmDependsJavaParser.y"
+#line 782 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3078 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 87:
-#line 803 "cmDependsJavaParser.y"
+#line 791 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
 }
+#line 3086 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 88:
-#line 809 "cmDependsJavaParser.y"
+#line 797 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3097 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 89:
-#line 817 "cmDependsJavaParser.y"
+#line 805 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3108 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 90:
-#line 826 "cmDependsJavaParser.y"
+#line 814 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3119 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 91:
-#line 834 "cmDependsJavaParser.y"
+#line 822 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3130 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 92:
-#line 843 "cmDependsJavaParser.y"
+#line 831 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  yyGetParser->DeallocateParserType(&(yyvsp[0].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3142 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 93:
-#line 852 "cmDependsJavaParser.y"
+#line 840 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3153 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 94:
-#line 861 "cmDependsJavaParser.y"
+#line 849 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3164 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 95:
-#line 869 "cmDependsJavaParser.y"
+#line 857 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3175 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 96:
-#line 878 "cmDependsJavaParser.y"
+#line 866 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3186 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 97:
-#line 886 "cmDependsJavaParser.y"
+#line 874 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3197 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 98:
-#line 894 "cmDependsJavaParser.y"
+#line 882 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3208 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 99:
-#line 903 "cmDependsJavaParser.y"
+#line 891 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3220 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 100:
-#line 912 "cmDependsJavaParser.y"
+#line 900 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3232 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 101:
-#line 921 "cmDependsJavaParser.y"
+#line 909 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3243 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 102:
-#line 929 "cmDependsJavaParser.y"
+#line 917 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3255 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 103:
-#line 939 "cmDependsJavaParser.y"
+#line 927 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
-  yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3268 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 104:
-#line 949 "cmDependsJavaParser.y"
+#line 937 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
 
 }
+#line 3277 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 105:
-#line 955 "cmDependsJavaParser.y"
+#line 943 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3288 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 107:
-#line 966 "cmDependsJavaParser.y"
+#line 954 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
 
 }
+#line 3297 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 108:
-#line 972 "cmDependsJavaParser.y"
+#line 960 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3309 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 109:
-#line 982 "cmDependsJavaParser.y"
+#line 970 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3321 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 110:
-#line 992 "cmDependsJavaParser.y"
+#line 980 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3333 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 111:
-#line 1002 "cmDependsJavaParser.y"
+#line 990 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
 
 }
+#line 3342 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 112:
-#line 1008 "cmDependsJavaParser.y"
+#line 996 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3354 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 113:
-#line 1018 "cmDependsJavaParser.y"
+#line 1006 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3366 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 114:
-#line 1028 "cmDependsJavaParser.y"
+#line 1016 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3378 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 115:
-#line 1038 "cmDependsJavaParser.y"
+#line 1026 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3390 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 116:
-#line 1047 "cmDependsJavaParser.y"
+#line 1035 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
   jpCheckEmpty(5);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3402 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 117:
-#line 1057 "cmDependsJavaParser.y"
+#line 1045 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
-  yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3415 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 118:
-#line 1068 "cmDependsJavaParser.y"
+#line 1056 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3427 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 119:
-#line 1077 "cmDependsJavaParser.y"
+#line 1065 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3438 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 120:
-#line 1085 "cmDependsJavaParser.y"
+#line 1073 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3450 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 121:
-#line 1095 "cmDependsJavaParser.y"
+#line 1083 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
   jpCheckEmpty(5);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3462 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 122:
-#line 1104 "cmDependsJavaParser.y"
+#line 1092 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
   jpCheckEmpty(5);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3474 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 123:
-#line 1114 "cmDependsJavaParser.y"
+#line 1102 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
-  yyGetParser->StartClass(yyvsp[0].str);
+  yyGetParser->StartClass((yyvsp[0].str));
   jpElementStart(3);
-  yyGetParser->DeallocateParserType(&(yyvsp[0].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
   jpCheckEmpty(3);
 }
+#line 3485 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 124:
-#line 1123 "cmDependsJavaParser.y"
+#line 1111 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
 }
+#line 3497 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 125:
-#line 1132 "cmDependsJavaParser.y"
+#line 1120 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
+#line 3507 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 126:
-#line 1139 "cmDependsJavaParser.y"
+#line 1127 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3519 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 127:
-#line 1149 "cmDependsJavaParser.y"
+#line 1137 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3531 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 128:
-#line 1158 "cmDependsJavaParser.y"
+#line 1146 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3543 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 129:
-#line 1168 "cmDependsJavaParser.y"
+#line 1156 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3555 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 130:
-#line 1177 "cmDependsJavaParser.y"
+#line 1165 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3566 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 131:
-#line 1185 "cmDependsJavaParser.y"
+#line 1173 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3577 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 132:
-#line 1194 "cmDependsJavaParser.y"
+#line 1182 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3589 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 133:
-#line 1203 "cmDependsJavaParser.y"
+#line 1191 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3601 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 134:
-#line 1212 "cmDependsJavaParser.y"
+#line 1200 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3613 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 135:
-#line 1221 "cmDependsJavaParser.y"
+#line 1209 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3624 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 136:
-#line 1229 "cmDependsJavaParser.y"
+#line 1217 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3636 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 137:
-#line 1238 "cmDependsJavaParser.y"
+#line 1226 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3647 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 138:
-#line 1247 "cmDependsJavaParser.y"
+#line 1235 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3659 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 139:
-#line 1257 "cmDependsJavaParser.y"
+#line 1245 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3671 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 140:
-#line 1267 "cmDependsJavaParser.y"
+#line 1255 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3683 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 141:
-#line 1276 "cmDependsJavaParser.y"
+#line 1264 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3695 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 142:
-#line 1286 "cmDependsJavaParser.y"
+#line 1274 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3707 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 143:
-#line 1295 "cmDependsJavaParser.y"
+#line 1283 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3718 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 144:
-#line 1303 "cmDependsJavaParser.y"
+#line 1291 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3730 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 145:
-#line 1312 "cmDependsJavaParser.y"
+#line 1300 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3742 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 146:
-#line 1322 "cmDependsJavaParser.y"
+#line 1310 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3754 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 147:
-#line 1331 "cmDependsJavaParser.y"
+#line 1319 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3766 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 148:
-#line 1341 "cmDependsJavaParser.y"
+#line 1329 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3777 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 149:
-#line 1349 "cmDependsJavaParser.y"
+#line 1337 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3788 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 150:
-#line 1357 "cmDependsJavaParser.y"
+#line 1345 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3800 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 151:
-#line 1367 "cmDependsJavaParser.y"
+#line 1355 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3812 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 152:
-#line 1376 "cmDependsJavaParser.y"
+#line 1364 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3824 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 153:
-#line 1386 "cmDependsJavaParser.y"
+#line 1374 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3836 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 154:
-#line 1395 "cmDependsJavaParser.y"
+#line 1383 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3848 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 155:
-#line 1404 "cmDependsJavaParser.y"
+#line 1392 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3860 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 156:
-#line 1414 "cmDependsJavaParser.y"
+#line 1402 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3872 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 157:
-#line 1424 "cmDependsJavaParser.y"
+#line 1412 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3884 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 158:
-#line 1433 "cmDependsJavaParser.y"
+#line 1421 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3896 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 159:
-#line 1443 "cmDependsJavaParser.y"
+#line 1431 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3908 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 160:
-#line 1452 "cmDependsJavaParser.y"
+#line 1440 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3920 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 161:
-#line 1461 "cmDependsJavaParser.y"
+#line 1449 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3932 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 162:
-#line 1470 "cmDependsJavaParser.y"
+#line 1458 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3944 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 163:
-#line 1479 "cmDependsJavaParser.y"
+#line 1467 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3956 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 164:
-#line 1488 "cmDependsJavaParser.y"
+#line 1476 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3968 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 165:
-#line 1498 "cmDependsJavaParser.y"
+#line 1486 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3980 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 166:
-#line 1507 "cmDependsJavaParser.y"
+#line 1495 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 3992 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 167:
-#line 1516 "cmDependsJavaParser.y"
+#line 1504 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4004 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 168:
-#line 1525 "cmDependsJavaParser.y"
+#line 1513 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4016 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 169:
-#line 1534 "cmDependsJavaParser.y"
+#line 1522 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4028 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 170:
-#line 1544 "cmDependsJavaParser.y"
+#line 1532 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4040 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 171:
-#line 1553 "cmDependsJavaParser.y"
+#line 1541 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4052 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 172:
-#line 1562 "cmDependsJavaParser.y"
+#line 1550 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4064 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 173:
-#line 1571 "cmDependsJavaParser.y"
+#line 1559 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4076 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 174:
-#line 1580 "cmDependsJavaParser.y"
+#line 1568 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4088 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 175:
-#line 1589 "cmDependsJavaParser.y"
+#line 1577 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4100 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 176:
-#line 1598 "cmDependsJavaParser.y"
+#line 1586 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4112 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 177:
-#line 1607 "cmDependsJavaParser.y"
+#line 1595 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4124 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 178:
-#line 1616 "cmDependsJavaParser.y"
+#line 1604 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4136 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 179:
-#line 1625 "cmDependsJavaParser.y"
+#line 1613 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4148 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 180:
-#line 1634 "cmDependsJavaParser.y"
+#line 1622 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4160 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 181:
-#line 1643 "cmDependsJavaParser.y"
+#line 1631 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4172 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 182:
-#line 1653 "cmDependsJavaParser.y"
+#line 1641 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4184 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 183:
-#line 1663 "cmDependsJavaParser.y"
+#line 1651 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  yyGetParser->DeallocateParserType(&(yyvsp[-2].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-2].str)));
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4197 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 184:
-#line 1674 "cmDependsJavaParser.y"
+#line 1662 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4209 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 185:
-#line 1684 "cmDependsJavaParser.y"
+#line 1672 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4221 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 186:
-#line 1694 "cmDependsJavaParser.y"
+#line 1682 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4233 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 187:
-#line 1703 "cmDependsJavaParser.y"
+#line 1691 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4245 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 188:
-#line 1712 "cmDependsJavaParser.y"
+#line 1700 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4257 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 189:
-#line 1721 "cmDependsJavaParser.y"
+#line 1709 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4269 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 190:
-#line 1730 "cmDependsJavaParser.y"
+#line 1718 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4281 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 191:
-#line 1739 "cmDependsJavaParser.y"
+#line 1727 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4293 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 192:
-#line 1748 "cmDependsJavaParser.y"
+#line 1736 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4305 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 193:
-#line 1758 "cmDependsJavaParser.y"
+#line 1746 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
   jpCheckEmpty(5);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4317 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 194:
-#line 1768 "cmDependsJavaParser.y"
+#line 1756 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(7);
   jpCheckEmpty(7);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4329 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 195:
-#line 1778 "cmDependsJavaParser.y"
+#line 1766 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(7);
   jpCheckEmpty(7);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4341 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 196:
-#line 1788 "cmDependsJavaParser.y"
+#line 1776 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
 
 }
+#line 4350 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 197:
-#line 1795 "cmDependsJavaParser.y"
+#line 1783 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
 
 }
+#line 4359 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 198:
-#line 1801 "cmDependsJavaParser.y"
+#line 1789 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4370 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 199:
-#line 1809 "cmDependsJavaParser.y"
+#line 1797 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4382 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 200:
-#line 1818 "cmDependsJavaParser.y"
+#line 1806 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4393 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 201:
-#line 1826 "cmDependsJavaParser.y"
+#line 1814 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4405 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 202:
-#line 1836 "cmDependsJavaParser.y"
+#line 1824 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4417 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 203:
-#line 1846 "cmDependsJavaParser.y"
+#line 1834 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4429 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 204:
-#line 1855 "cmDependsJavaParser.y"
+#line 1843 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4441 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 205:
-#line 1865 "cmDependsJavaParser.y"
+#line 1853 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4453 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 206:
-#line 1874 "cmDependsJavaParser.y"
+#line 1862 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4465 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 207:
-#line 1884 "cmDependsJavaParser.y"
+#line 1872 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
 
 }
+#line 4474 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 208:
-#line 1891 "cmDependsJavaParser.y"
+#line 1879 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
 
 }
+#line 4483 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 209:
-#line 1898 "cmDependsJavaParser.y"
+#line 1886 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(7);
 
 }
+#line 4492 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 210:
-#line 1906 "cmDependsJavaParser.y"
+#line 1894 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(9);
 
 }
+#line 4501 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 211:
-#line 1912 "cmDependsJavaParser.y"
+#line 1900 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4512 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 212:
-#line 1920 "cmDependsJavaParser.y"
+#line 1908 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4524 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 213:
-#line 1929 "cmDependsJavaParser.y"
+#line 1917 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4535 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 214:
-#line 1937 "cmDependsJavaParser.y"
+#line 1925 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4547 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 215:
-#line 1948 "cmDependsJavaParser.y"
+#line 1936 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(9);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4558 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 216:
-#line 1956 "cmDependsJavaParser.y"
+#line 1944 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4569 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 217:
-#line 1964 "cmDependsJavaParser.y"
+#line 1952 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4581 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 218:
-#line 1974 "cmDependsJavaParser.y"
+#line 1962 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4593 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 219:
-#line 1983 "cmDependsJavaParser.y"
+#line 1971 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4605 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 220:
-#line 1993 "cmDependsJavaParser.y"
+#line 1981 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4617 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 221:
-#line 2003 "cmDependsJavaParser.y"
+#line 1991 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4629 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 222:
-#line 2012 "cmDependsJavaParser.y"
+#line 2000 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4641 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 223:
-#line 2022 "cmDependsJavaParser.y"
+#line 2010 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4653 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 224:
-#line 2031 "cmDependsJavaParser.y"
+#line 2019 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
   jpCheckEmpty(5);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4665 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 225:
-#line 2041 "cmDependsJavaParser.y"
+#line 2029 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  yyGetParser->DeallocateParserType(&(yyvsp[-1].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-1].str)));
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4678 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 226:
-#line 2051 "cmDependsJavaParser.y"
+#line 2039 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4689 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 227:
-#line 2059 "cmDependsJavaParser.y"
+#line 2047 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
 
 }
+#line 4698 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 228:
-#line 2066 "cmDependsJavaParser.y"
+#line 2054 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  yyGetParser->DeallocateParserType(&(yyvsp[-1].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-1].str)));
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4711 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 229:
-#line 2077 "cmDependsJavaParser.y"
+#line 2065 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4723 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 230:
-#line 2087 "cmDependsJavaParser.y"
+#line 2075 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4735 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 231:
-#line 2097 "cmDependsJavaParser.y"
+#line 2085 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
   jpCheckEmpty(5);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4747 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 232:
-#line 2107 "cmDependsJavaParser.y"
+#line 2095 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4759 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 233:
-#line 2116 "cmDependsJavaParser.y"
+#line 2104 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4771 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 234:
-#line 2125 "cmDependsJavaParser.y"
+#line 2113 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4782 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 235:
-#line 2133 "cmDependsJavaParser.y"
+#line 2121 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4794 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 236:
-#line 2143 "cmDependsJavaParser.y"
+#line 2131 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4806 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 237:
-#line 2152 "cmDependsJavaParser.y"
+#line 2140 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4818 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 238:
-#line 2162 "cmDependsJavaParser.y"
+#line 2150 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
 
 }
+#line 4827 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 239:
-#line 2169 "cmDependsJavaParser.y"
+#line 2157 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4839 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 240:
-#line 2179 "cmDependsJavaParser.y"
+#line 2167 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4851 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 241:
-#line 2188 "cmDependsJavaParser.y"
+#line 2176 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4863 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 242:
-#line 2198 "cmDependsJavaParser.y"
+#line 2186 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4875 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 243:
-#line 2207 "cmDependsJavaParser.y"
+#line 2195 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
 
 }
+#line 4884 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 244:
-#line 2213 "cmDependsJavaParser.y"
+#line 2201 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4896 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 245:
-#line 2222 "cmDependsJavaParser.y"
+#line 2210 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4908 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 246:
-#line 2231 "cmDependsJavaParser.y"
+#line 2219 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4920 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 247:
-#line 2240 "cmDependsJavaParser.y"
+#line 2228 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4932 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 248:
-#line 2249 "cmDependsJavaParser.y"
+#line 2237 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4944 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 249:
-#line 2259 "cmDependsJavaParser.y"
+#line 2247 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(6);
   jpCheckEmpty(6);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4956 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 250:
-#line 2268 "cmDependsJavaParser.y"
+#line 2256 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4967 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 251:
-#line 2276 "cmDependsJavaParser.y"
+#line 2264 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4979 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 252:
-#line 2285 "cmDependsJavaParser.y"
+#line 2273 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 4990 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 253:
-#line 2293 "cmDependsJavaParser.y"
+#line 2281 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5002 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 254:
-#line 2303 "cmDependsJavaParser.y"
+#line 2291 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5014 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 255:
-#line 2312 "cmDependsJavaParser.y"
+#line 2300 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5026 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 256:
-#line 2322 "cmDependsJavaParser.y"
+#line 2310 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5038 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 257:
-#line 2331 "cmDependsJavaParser.y"
+#line 2319 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5050 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 258:
-#line 2340 "cmDependsJavaParser.y"
+#line 2328 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5062 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 259:
-#line 2349 "cmDependsJavaParser.y"
+#line 2337 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5074 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 260:
-#line 2358 "cmDependsJavaParser.y"
+#line 2346 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(0);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5085 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 261:
-#line 2366 "cmDependsJavaParser.y"
+#line 2354 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5097 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 262:
-#line 2376 "cmDependsJavaParser.y"
+#line 2364 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5109 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 263:
-#line 2385 "cmDependsJavaParser.y"
+#line 2373 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5121 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 264:
-#line 2395 "cmDependsJavaParser.y"
+#line 2383 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5133 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 265:
-#line 2405 "cmDependsJavaParser.y"
+#line 2393 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
 
 }
+#line 5142 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 266:
-#line 2411 "cmDependsJavaParser.y"
+#line 2399 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
 
 }
+#line 5151 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 267:
-#line 2418 "cmDependsJavaParser.y"
+#line 2406 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  yyGetParser->DeallocateParserType(&(yyvsp[0].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5164 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 268:
-#line 2428 "cmDependsJavaParser.y"
+#line 2416 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  yyGetParser->DeallocateParserType(&(yyvsp[0].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5177 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 269:
-#line 2438 "cmDependsJavaParser.y"
+#line 2426 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  yyGetParser->DeallocateParserType(&(yyvsp[0].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5190 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 270:
-#line 2448 "cmDependsJavaParser.y"
+#line 2436 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  yyGetParser->DeallocateParserType(&(yyvsp[0].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5203 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 271:
-#line 2459 "cmDependsJavaParser.y"
+#line 2447 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
-  yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5216 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 272:
-#line 2469 "cmDependsJavaParser.y"
+#line 2457 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(6);
-  yyGetParser->DeallocateParserType(&(yyvsp[-5].str));
-  yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-5].str)));
+  yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
   jpCheckEmpty(6);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5230 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 273:
-#line 2480 "cmDependsJavaParser.y"
+#line 2468 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(6);
-  yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
   jpCheckEmpty(6);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5243 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 274:
-#line 2490 "cmDependsJavaParser.y"
+#line 2478 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(6);
-  yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
   jpCheckEmpty(6);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5256 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 275:
-#line 2501 "cmDependsJavaParser.y"
+#line 2489 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
-  yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5269 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 276:
-#line 2511 "cmDependsJavaParser.y"
+#line 2499 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5281 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 277:
-#line 2521 "cmDependsJavaParser.y"
+#line 2509 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5293 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 278:
-#line 2530 "cmDependsJavaParser.y"
+#line 2518 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  yyGetParser->DeallocateParserType(&(yyvsp[0].str));
-  yyval.str = 0;
+  yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5305 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 279:
-#line 2539 "cmDependsJavaParser.y"
+#line 2527 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5317 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 280:
-#line 2548 "cmDependsJavaParser.y"
+#line 2536 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5329 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 281:
-#line 2557 "cmDependsJavaParser.y"
+#line 2545 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5341 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 282:
-#line 2567 "cmDependsJavaParser.y"
+#line 2555 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5353 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 283:
-#line 2577 "cmDependsJavaParser.y"
+#line 2565 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5365 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 284:
-#line 2587 "cmDependsJavaParser.y"
+#line 2575 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5377 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 285:
-#line 2596 "cmDependsJavaParser.y"
+#line 2584 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5389 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 286:
-#line 2605 "cmDependsJavaParser.y"
+#line 2593 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5401 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 287:
-#line 2614 "cmDependsJavaParser.y"
+#line 2602 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5413 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 288:
-#line 2623 "cmDependsJavaParser.y"
+#line 2611 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5425 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 289:
-#line 2633 "cmDependsJavaParser.y"
+#line 2621 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5437 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 290:
-#line 2643 "cmDependsJavaParser.y"
+#line 2631 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5449 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 291:
-#line 2653 "cmDependsJavaParser.y"
+#line 2641 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5461 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 292:
-#line 2662 "cmDependsJavaParser.y"
+#line 2650 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5473 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 293:
-#line 2671 "cmDependsJavaParser.y"
+#line 2659 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(2);
   jpCheckEmpty(2);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5485 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 294:
-#line 2680 "cmDependsJavaParser.y"
+#line 2668 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5497 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 295:
-#line 2690 "cmDependsJavaParser.y"
+#line 2678 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
   jpCheckEmpty(5);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5509 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 296:
-#line 2699 "cmDependsJavaParser.y"
+#line 2687 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(4);
   jpCheckEmpty(4);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5521 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 297:
-#line 2708 "cmDependsJavaParser.y"
+#line 2696 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
 
 }
+#line 5530 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 298:
-#line 2715 "cmDependsJavaParser.y"
+#line 2703 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5542 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 299:
-#line 2724 "cmDependsJavaParser.y"
+#line 2712 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5554 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 300:
-#line 2733 "cmDependsJavaParser.y"
+#line 2721 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5566 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 301:
-#line 2742 "cmDependsJavaParser.y"
+#line 2730 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5578 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 302:
-#line 2752 "cmDependsJavaParser.y"
+#line 2740 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5590 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 303:
-#line 2761 "cmDependsJavaParser.y"
+#line 2749 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5602 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 304:
-#line 2770 "cmDependsJavaParser.y"
+#line 2758 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5614 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 305:
-#line 2780 "cmDependsJavaParser.y"
+#line 2768 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5626 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 306:
-#line 2789 "cmDependsJavaParser.y"
+#line 2777 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5638 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 307:
-#line 2798 "cmDependsJavaParser.y"
+#line 2786 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5650 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 308:
-#line 2807 "cmDependsJavaParser.y"
+#line 2795 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5662 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 309:
-#line 2817 "cmDependsJavaParser.y"
+#line 2805 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5674 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 310:
-#line 2826 "cmDependsJavaParser.y"
+#line 2814 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5686 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 311:
-#line 2835 "cmDependsJavaParser.y"
+#line 2823 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5698 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 312:
-#line 2844 "cmDependsJavaParser.y"
+#line 2832 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5710 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 313:
-#line 2853 "cmDependsJavaParser.y"
+#line 2841 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5722 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 314:
-#line 2862 "cmDependsJavaParser.y"
+#line 2850 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5734 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 315:
-#line 2872 "cmDependsJavaParser.y"
+#line 2860 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5746 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 316:
-#line 2881 "cmDependsJavaParser.y"
+#line 2869 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5758 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 317:
-#line 2890 "cmDependsJavaParser.y"
+#line 2878 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5770 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 318:
-#line 2900 "cmDependsJavaParser.y"
+#line 2888 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5782 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 319:
-#line 2909 "cmDependsJavaParser.y"
+#line 2897 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5794 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 320:
-#line 2919 "cmDependsJavaParser.y"
+#line 2907 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5806 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 321:
-#line 2928 "cmDependsJavaParser.y"
+#line 2916 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5818 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 322:
-#line 2938 "cmDependsJavaParser.y"
+#line 2926 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5830 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 323:
-#line 2947 "cmDependsJavaParser.y"
+#line 2935 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5842 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 324:
-#line 2957 "cmDependsJavaParser.y"
+#line 2945 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5854 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 325:
-#line 2966 "cmDependsJavaParser.y"
+#line 2954 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5866 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 326:
-#line 2976 "cmDependsJavaParser.y"
+#line 2964 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5878 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 327:
-#line 2985 "cmDependsJavaParser.y"
+#line 2973 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5890 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 328:
-#line 2995 "cmDependsJavaParser.y"
+#line 2983 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5902 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 329:
-#line 3004 "cmDependsJavaParser.y"
+#line 2992 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(5);
   jpCheckEmpty(5);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5914 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 330:
-#line 3014 "cmDependsJavaParser.y"
+#line 3002 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5926 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 331:
-#line 3023 "cmDependsJavaParser.y"
+#line 3011 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5938 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 332:
-#line 3033 "cmDependsJavaParser.y"
+#line 3021 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5950 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 333:
-#line 3043 "cmDependsJavaParser.y"
+#line 3031 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
-  yyGetParser->DeallocateParserType(&(yyvsp[0].str));
+  yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5963 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 334:
-#line 3053 "cmDependsJavaParser.y"
+#line 3041 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5975 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 335:
-#line 3062 "cmDependsJavaParser.y"
+#line 3050 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5987 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 336:
-#line 3072 "cmDependsJavaParser.y"
+#line 3060 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 5999 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 337:
-#line 3081 "cmDependsJavaParser.y"
+#line 3069 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6011 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 338:
-#line 3090 "cmDependsJavaParser.y"
+#line 3078 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6023 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 339:
-#line 3099 "cmDependsJavaParser.y"
+#line 3087 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6035 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 340:
-#line 3108 "cmDependsJavaParser.y"
+#line 3096 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6047 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 341:
-#line 3117 "cmDependsJavaParser.y"
+#line 3105 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6059 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 342:
-#line 3126 "cmDependsJavaParser.y"
+#line 3114 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6071 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 343:
-#line 3135 "cmDependsJavaParser.y"
+#line 3123 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6083 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 344:
-#line 3144 "cmDependsJavaParser.y"
+#line 3132 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6095 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 345:
-#line 3153 "cmDependsJavaParser.y"
+#line 3141 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6107 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 346:
-#line 3162 "cmDependsJavaParser.y"
+#line 3150 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6119 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 347:
-#line 3171 "cmDependsJavaParser.y"
+#line 3159 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6131 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 348:
-#line 3181 "cmDependsJavaParser.y"
+#line 3169 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6143 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 349:
-#line 3191 "cmDependsJavaParser.y"
+#line 3179 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6155 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 350:
-#line 3201 "cmDependsJavaParser.y"
+#line 3189 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(1);
   jpCheckEmpty(1);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6167 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
   case 351:
-#line 3210 "cmDependsJavaParser.y"
+#line 3198 "cmDependsJavaParser.y" /* yacc.c:1646  */
     {
   jpElementStart(3);
-  jpStoreClass(yyvsp[-2].str);
+  jpStoreClass((yyvsp[-2].str));
   jpCheckEmpty(3);
-  yyval.str = 0;
+  (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
+#line 6180 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
     break;
 
 
+#line 6184 "cmDependsJavaParser.cxx" /* yacc.c:1646  */
+      default: break;
     }
+  /* User semantic actions sometimes alter yychar, and that requires
+     that yytoken be updated with the new translation.  We take the
+     approach of translating immediately before every use of yytoken.
+     One alternative is translating here after every semantic action,
+     but that translation would be missed if the semantic action invokes
+     YYABORT, YYACCEPT, or YYERROR immediately after altering yychar or
+     if it invokes YYBACKUP.  In the case of YYABORT or YYACCEPT, an
+     incorrect destructor might then be invoked immediately.  In the
+     case of YYERROR or YYBACKUP, subsequent parser actions might lead
+     to an incorrect destructor call or verbose syntax error message
+     before the lookahead is translated.  */
+  YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
 
-/* Line 1010 of yacc.c.  */
-#line 5780 "cmDependsJavaParser.cxx"
-
-  yyvsp -= yylen;
-  yyssp -= yylen;
-
-
+  YYPOPSTACK (yylen);
+  yylen = 0;
   YY_STACK_PRINT (yyss, yyssp);
 
   *++yyvsp = yyval;
 
-
-  /* Now `shift' the result of the reduction.  Determine what state
+  /* Now 'shift' the result of the reduction.  Determine what state
      that goes to, based on the state we popped back to and the rule
      number reduced by.  */
 
@@ -5794,74 +6217,52 @@ yyreduce:
   goto yynewstate;
 
 
-/*------------------------------------.
-| yyerrlab -- here on detecting error |
-`------------------------------------*/
+/*--------------------------------------.
+| yyerrlab -- here on detecting error.  |
+`--------------------------------------*/
 yyerrlab:
+  /* Make sure we have latest lookahead translation.  See comments at
+     user semantic actions for why this is necessary.  */
+  yytoken = yychar == YYEMPTY ? YYEMPTY : YYTRANSLATE (yychar);
+
   /* If not already recovering from an error, report this error.  */
   if (!yyerrstatus)
     {
       ++yynerrs;
-#if YYERROR_VERBOSE
-      yyn = yypact[yystate];
-
-      if (YYPACT_NINF < yyn && yyn < YYLAST)
-  {
-    YYSIZE_T yysize = 0;
-    int yytype = YYTRANSLATE (yychar);
-    const char* yyprefix;
-    char *yymsg;
-    int yyx;
-
-    /* Start YYX at -YYN if negative to avoid negative indexes in
-       YYCHECK.  */
-    int yyxbegin = yyn < 0 ? -yyn : 0;
-
-    /* Stay within bounds of both yycheck and yytname.  */
-    int yychecklim = YYLAST - yyn;
-    int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
-    int yycount = 0;
-
-    yyprefix = ", expecting ";
-    for (yyx = yyxbegin; yyx < yyxend; ++yyx)
-      if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR)
-        {
-    yysize += yystrlen (yyprefix) + yystrlen (yytname [yyx]);
-    yycount += 1;
-    if (yycount == 5)
+#if ! YYERROR_VERBOSE
+      yyerror (yyscanner, YY_("syntax error"));
+#else
+# define YYSYNTAX_ERROR yysyntax_error (&yymsg_alloc, &yymsg, \
+                                        yyssp, yytoken)
       {
-        yysize = 0;
-        break;
-      }
-        }
-    yysize += (sizeof ("syntax error, unexpected ")
-         + yystrlen (yytname[yytype]));
-    yymsg = (char *) YYSTACK_ALLOC (yysize);
-    if (yymsg != 0)
-      {
-        char *yyp = yystpcpy (yymsg, "syntax error, unexpected ");
-        yyp = yystpcpy (yyp, yytname[yytype]);
-
-        if (yycount < 5)
-    {
-      yyprefix = ", expecting ";
-      for (yyx = yyxbegin; yyx < yyxend; ++yyx)
-        if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR)
+        char const *yymsgp = YY_("syntax error");
+        int yysyntax_error_status;
+        yysyntax_error_status = YYSYNTAX_ERROR;
+        if (yysyntax_error_status == 0)
+          yymsgp = yymsg;
+        else if (yysyntax_error_status == 1)
           {
-      yyp = yystpcpy (yyp, yyprefix);
-      yyp = yystpcpy (yyp, yytname[yyx]);
-      yyprefix = " or ";
+            if (yymsg != yymsgbuf)
+              YYSTACK_FREE (yymsg);
+            yymsg = (char *) YYSTACK_ALLOC (yymsg_alloc);
+            if (!yymsg)
+              {
+                yymsg = yymsgbuf;
+                yymsg_alloc = sizeof yymsgbuf;
+                yysyntax_error_status = 2;
+              }
+            else
+              {
+                yysyntax_error_status = YYSYNTAX_ERROR;
+                yymsgp = yymsg;
+              }
           }
-    }
-        yyerror (yymsg);
-        YYSTACK_FREE (yymsg);
+        yyerror (yyscanner, yymsgp);
+        if (yysyntax_error_status == 2)
+          goto yyexhaustedlab;
       }
-    else
-      yyerror ("syntax error; also virtual memory exhausted");
-  }
-      else
-#endif /* YYERROR_VERBOSE */
-  yyerror ("syntax error");
+# undef YYSYNTAX_ERROR
+#endif
     }
 
 
@@ -5869,31 +6270,23 @@ yyerrlab:
   if (yyerrstatus == 3)
     {
       /* If just tried and failed to reuse lookahead token after an
-   error, discard it.  */
+         error, discard it.  */
 
       if (yychar <= YYEOF)
         {
-          /* If at end of input, pop the error token,
-       then the rest of the stack, then return failure.  */
-    if (yychar == YYEOF)
-       for (;;)
-         {
-     YYPOPSTACK;
-     if (yyssp == yyss)
-       YYABORT;
-     YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp, yylsp);
-     yydestruct (yystos[*yyssp], yyvsp);
-         }
+          /* Return failure if at end of input.  */
+          if (yychar == YYEOF)
+            YYABORT;
         }
       else
-  {
-    YYDSYMPRINTF ("Error: discarding", yytoken, &yylval, &yylloc);
-    yydestruct (yytoken, &yylval);
-    yychar = YYEMPTY;
-
-  }
+        {
+          yydestruct ("Error: discarding",
+                      yytoken, &yylval, yyscanner);
+          yychar = YYEMPTY;
+        }
     }
 
+#if 0
   /* Else will try to reuse lookahead token after shifting the error
      token.  */
   goto yyerrlab1;
@@ -5904,15 +6297,17 @@ yyerrlab:
 `---------------------------------------------------*/
 yyerrorlab:
 
-#if defined(__GNUC__) || defined(__HP_aCC)
-  /* Pacify GCC when the user code never invokes YYERROR and the label
-     yyerrorlab therefore never appears in user code.  */
-  if (0)
+  /* Pacify compilers like GCC when the user code never invokes
+     YYERROR and the label yyerrorlab therefore never appears in user
+     code.  */
+  if (/*CONSTCOND*/ 0)
      goto yyerrorlab;
-#endif
 
-  yyvsp -= yylen;
-  yyssp -= yylen;
+  /* Do not reclaim the symbols of the rule whose action triggered
+     this YYERROR.  */
+  YYPOPSTACK (yylen);
+  yylen = 0;
+  YY_STACK_PRINT (yyss, yyssp);
   yystate = *yyssp;
   goto yyerrlab1;
 
@@ -5921,40 +6316,42 @@ yyerrorlab:
 | yyerrlab1 -- common code for both syntax error and YYERROR.  |
 `-------------------------------------------------------------*/
 yyerrlab1:
-  yyerrstatus = 3;  /* Each real token shifted decrements this.  */
+#endif
+  yyerrstatus = 3;      /* Each real token shifted decrements this.  */
 
   for (;;)
     {
       yyn = yypact[yystate];
-      if (yyn != YYPACT_NINF)
-  {
-    yyn += YYTERROR;
-    if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYTERROR)
-      {
-        yyn = yytable[yyn];
-        if (0 < yyn)
-    break;
-      }
-  }
+      if (!yypact_value_is_default (yyn))
+        {
+          yyn += YYTERROR;
+          if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYTERROR)
+            {
+              yyn = yytable[yyn];
+              if (0 < yyn)
+                break;
+            }
+        }
 
       /* Pop the current state because it cannot handle the error token.  */
       if (yyssp == yyss)
-  YYABORT;
+        YYABORT;
 
-      YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp, yylsp);
-      yydestruct (yystos[yystate], yyvsp);
-      YYPOPSTACK;
+
+      yydestruct ("Error: popping",
+                  yystos[yystate], yyvsp, yyscanner);
+      YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
     }
 
-  if (yyn == YYFINAL)
-    YYACCEPT;
-
-  YYDPRINTF ((stderr, "Shifting error token, "));
-
+  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   *++yyvsp = yylval;
+  YY_IGNORE_MAYBE_UNINITIALIZED_END
 
+
+  /* Shift the error token.  */
+  YY_SYMBOL_PRINT ("Shifting", yystos[yyn], yyvsp, yylsp);
 
   yystate = yyn;
   goto yynewstate;
@@ -5974,33 +6371,51 @@ yyabortlab:
   yyresult = 1;
   goto yyreturn;
 
-#ifndef yyoverflow
-/*----------------------------------------------.
-| yyoverflowlab -- parser overflow comes here.  |
-`----------------------------------------------*/
-yyoverflowlab:
-  yyerror ("parser stack overflow");
+#if !defined yyoverflow || YYERROR_VERBOSE
+/*-------------------------------------------------.
+| yyexhaustedlab -- memory exhaustion comes here.  |
+`-------------------------------------------------*/
+yyexhaustedlab:
+  yyerror (yyscanner, YY_("memory exhausted"));
   yyresult = 2;
   /* Fall through.  */
 #endif
 
 yyreturn:
+  if (yychar != YYEMPTY)
+    {
+      /* Make sure we have latest lookahead translation.  See comments at
+         user semantic actions for why this is necessary.  */
+      yytoken = YYTRANSLATE (yychar);
+      yydestruct ("Cleanup: discarding lookahead",
+                  yytoken, &yylval, yyscanner);
+    }
+  /* Do not reclaim the symbols of the rule whose action triggered
+     this YYABORT or YYACCEPT.  */
+  YYPOPSTACK (yylen);
+  YY_STACK_PRINT (yyss, yyssp);
+  while (yyssp != yyss)
+    {
+      yydestruct ("Cleanup: popping",
+                  yystos[*yyssp], yyvsp, yyscanner);
+      YYPOPSTACK (1);
+    }
 #ifndef yyoverflow
   if (yyss != yyssa)
     YYSTACK_FREE (yyss);
 #endif
+#if YYERROR_VERBOSE
+  if (yymsg != yymsgbuf)
+    YYSTACK_FREE (yymsg);
+#endif
   return yyresult;
 }
-
-
-#line 3219 "cmDependsJavaParser.y"
+#line 3207 "cmDependsJavaParser.y" /* yacc.c:1906  */
 
 /* End of grammar */
 
 /*--------------------------------------------------------------------------*/
-void cmDependsJavaError(yyscan_t yyscanner, const char* message)
+void cmDependsJava_yyerror(yyscan_t yyscanner, const char* message)
 {
   yyGetParser->Error(message);
 }
-
-

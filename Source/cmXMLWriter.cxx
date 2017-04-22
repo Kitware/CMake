@@ -2,11 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmXMLWriter.h"
 
+#include "cmsys/FStream.hxx"
 #include <cassert>
-#include <cmsys/FStream.hxx>
 
 cmXMLWriter::cmXMLWriter(std::ostream& output, std::size_t level)
   : Output(output)
+  , IndentationElement(1, '\t')
   , Level(level)
   , ElementOpen(false)
   , BreakAttrib(false)
@@ -100,10 +101,18 @@ void cmXMLWriter::FragmentFile(const char* fname)
   this->Output << fin.rdbuf();
 }
 
+void cmXMLWriter::SetIndentationElement(std::string const& element)
+{
+  this->IndentationElement = element;
+}
+
 void cmXMLWriter::ConditionalLineBreak(bool condition, std::size_t indent)
 {
   if (condition) {
-    this->Output << '\n' << std::string(indent + this->Level, '\t');
+    this->Output << '\n';
+    for (std::size_t i = 0; i < indent + this->Level; ++i) {
+      this->Output << this->IndentationElement;
+    }
   }
 }
 

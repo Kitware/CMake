@@ -3,7 +3,7 @@
 #ifndef cmParseJacocoCoverage_h
 #define cmParseJacocoCoverage_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <string>

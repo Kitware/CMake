@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmState.h"
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/RegularExpression.hxx>
 #include <string.h>
 #include <utility>
 
@@ -20,6 +20,7 @@
 
 cmState::cmState()
   : IsInTryCompile(false)
+  , IsGeneratorMultiConfig(false)
   , WindowsShell(false)
   , WindowsVSIDE(false)
   , WatcomWMake(false)
@@ -364,6 +365,16 @@ void cmState::SetIsInTryCompile(bool b)
   this->IsInTryCompile = b;
 }
 
+bool cmState::GetIsGeneratorMultiConfig() const
+{
+  return this->IsGeneratorMultiConfig;
+}
+
+void cmState::SetIsGeneratorMultiConfig(bool b)
+{
+  this->IsGeneratorMultiConfig = b;
+}
+
 void cmState::RenameCommand(std::string const& oldName,
                             std::string const& newName)
 {
@@ -481,6 +492,9 @@ const char* cmState::GetGlobalProperty(const std::string& prop)
   } else if (prop == "IN_TRY_COMPILE") {
     this->SetGlobalProperty("IN_TRY_COMPILE",
                             this->IsInTryCompile ? "1" : "0");
+  } else if (prop == "GENERATOR_IS_MULTI_CONFIG") {
+    this->SetGlobalProperty("GENERATOR_IS_MULTI_CONFIG",
+                            this->IsGeneratorMultiConfig ? "1" : "0");
   } else if (prop == "ENABLED_LANGUAGES") {
     std::string langs;
     langs = cmJoin(this->EnabledLanguages, ";");

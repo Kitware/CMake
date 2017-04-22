@@ -1,6 +1,9 @@
-set(framework-dir "${RunCMake_TEST_BINARY_DIR}/Framework.framework")
+include("${RunCMake_TEST_BINARY_DIR}/FrameworkName.cmake")
 set(framework-resources "${framework-dir}/Resources")
 set(framework-resource-file "${framework-dir}/res.txt")
+set(framework-flat-resource-file "${framework-dir}/flatresource.txt")
+set(framework-deep-resource-file "${framework-dir}/deep/deepresource.txt")
+set(framework-some-file "${framework-dir}/somedir/some.txt")
 set(framework-library "${framework-dir}/Framework")
 set(framework-versions "${framework-dir}/Versions")
 set(plist-file "${framework-dir}/Info.plist")
@@ -20,6 +23,18 @@ endif()
 
 if(NOT EXISTS ${framework-resource-file})
   message(SEND_ERROR "Framework resource file not found at ${framework-resource-file}")
+endif()
+
+if(NOT EXISTS ${framework-flat-resource-file})
+  message(SEND_ERROR "Framework flat resource file not found at ${framework-flat-resource-file}")
+endif()
+
+if(NOT EXISTS ${framework-deep-resource-file})
+  message(SEND_ERROR "Framework deep resource file not found at ${framework-deep-resource-file}")
+endif()
+
+if(NOT EXISTS ${framework-some-file})
+  message(SEND_ERROR "Framework some file not found at ${framework-some-file}")
 endif()
 
 if(EXISTS ${framework-versions})

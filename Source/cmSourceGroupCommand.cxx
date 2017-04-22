@@ -2,7 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceGroupCommand.h"
 
+#include <set>
 #include <sstream>
+#include <stddef.h>
 
 #include "cmMakefile.h"
 #include "cmSourceGroup.h"

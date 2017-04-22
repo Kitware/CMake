@@ -3,7 +3,7 @@
 #ifndef _cmDocumentation_h
 #define _cmDocumentation_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmDocumentationFormatter.h"
 

@@ -3,9 +3,9 @@
 #ifndef cmWIXRichTextFormatWriter_h
 #define cmWIXRichTextFormatWriter_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 #include <string>
 
 /** \class cmWIXRichtTextFormatWriter

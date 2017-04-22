@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefile.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
 #include <ctype.h>
 #include <sstream>
 #include <stdlib.h>
@@ -36,7 +36,9 @@
 #include "cmTest.h"
 #include "cmTestGenerator.h" // IWYU pragma: keep
 #include "cmVersion.h"
+#include "cmWorkingDirectory.h"
 #include "cm_auto_ptr.hxx"
+#include "cm_sys_stat.h"
 #include "cmake.h"
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -92,6 +94,10 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->AddSourceGroup("CMake Rules", "\\.rule$");
   this->AddSourceGroup("Resources", "\\.plist$");
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
+
+  this->ObjectLibrariesSourceGroupIndex = this->SourceGroups.size();
+  this->SourceGroups.push_back(
+    cmSourceGroup("Object Libraries", "^MATCH_NO_SOURCES$"));
 #endif
 }
 
@@ -281,7 +287,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
       if (!invokeSucceeded || hadNestedError) {
         if (!hadNestedError) {
           // The command invocation requested that we report an error.
-          this->IssueMessage(cmake::FATAL_ERROR, pcmd->GetError());
+          std::string const error = name + " " + pcmd->GetError();
+          this->IssueMessage(cmake::FATAL_ERROR, error);
         }
         result = false;
         if (this->GetCMakeInstance()->GetWorkingMode() != cmake::NORMAL_MODE) {
@@ -653,21 +660,12 @@ void cmMakefile::FinalPass()
   // we don't want cmake to re-run if a configured file is created and deleted
   // during processing as that would make it a transient file that can't
   // influence the build process
-
-  // remove_if will move all items that don't have a valid file name to the
-  // back of the vector
-  std::vector<std::string>::iterator new_output_files_end = std::remove_if(
-    this->OutputFiles.begin(), this->OutputFiles.end(), file_not_persistent());
-  // we just have to erase all items at the back
-  this->OutputFiles.erase(new_output_files_end, this->OutputFiles.end());
+  cmEraseIf(this->OutputFiles, file_not_persistent());
 
   // if a configured file is used as input for another configured file,
   // and then deleted it will show up in the input list files so we
   // need to scan those too
-  std::vector<std::string>::iterator new_list_files_end = std::remove_if(
-    this->ListFiles.begin(), this->ListFiles.end(), file_not_persistent());
-
-  this->ListFiles.erase(new_list_files_end, this->ListFiles.end());
+  cmEraseIf(this->ListFiles, file_not_persistent());
 }
 
 // Generate the output file
@@ -692,7 +690,8 @@ void cmMakefile::AddCustomCommandToTarget(
   const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
   const char* comment, const char* workingDir, bool escapeOldStyle,
-  bool uses_terminal, const std::string& depfile, bool command_expand_lists)
+  bool uses_terminal, const std::string& depfile, bool command_expand_lists,
+  ObjectLibraryCommands objLibraryCommands)
 {
   // Find the target to which to add the custom command.
   cmTargets::iterator ti = this->Targets.find(target);
@@ -732,7 +731,8 @@ void cmMakefile::AddCustomCommandToTarget(
     return;
   }
 
-  if (ti->second.GetType() == cmStateEnums::OBJECT_LIBRARY) {
+  if (objLibraryCommands == RejectObjectLibraryCommands &&
+      ti->second.GetType() == cmStateEnums::OBJECT_LIBRARY) {
     std::ostringstream e;
     e << "Target \"" << target
       << "\" is an OBJECT library "
@@ -2155,6 +2155,12 @@ bool cmMakefile::IsSet(const std::string& name) const
 
 bool cmMakefile::PlatformIs32Bit() const
 {
+  if (const char* plat_abi =
+        this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
+    if (strcmp(plat_abi, "ELF X32") == 0) {
+      return false;
+    }
+  }
   if (const char* sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
     return atoi(sizeof_dptr) == 4;
   }
@@ -2165,6 +2171,17 @@ bool cmMakefile::PlatformIs64Bit() const
 {
   if (const char* sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
     return atoi(sizeof_dptr) == 8;
+  }
+  return false;
+}
+
+bool cmMakefile::PlatformIsx32() const
+{
+  if (const char* plat_abi =
+        this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
+    if (strcmp(plat_abi, "ELF X32") == 0) {
+      return true;
+    }
   }
   return false;
 }
@@ -3111,6 +3128,18 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
   return this->CreateSource(sourceName, generated);
 }
 
+void cmMakefile::AddTargetObject(std::string const& tgtName,
+                                 std::string const& objFile)
+{
+  cmSourceFile* sf = this->GetOrCreateSource(objFile, true);
+  sf->SetObjectLibrary(tgtName);
+  sf->SetProperty("EXTERNAL_OBJECT", "1");
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->SourceGroups[this->ObjectLibrariesSourceGroupIndex].AddGroupFile(
+    sf->GetFullPath());
+#endif
+}
+
 void cmMakefile::EnableLanguage(std::vector<std::string> const& lang,
                                 bool optional)
 {
@@ -3153,8 +3182,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
 
   // change to the tests directory and run cmake
   // use the cmake object instead of calling cmake
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(bindir);
+  cmWorkingDirectory workdir(bindir);
 
   // make sure the same generator is used
   // use this program as the cmake to be run, it should not
@@ -3168,8 +3196,6 @@ int cmMakefile::TryCompile(const std::string& srcdir,
                          this->GetGlobalGenerator()->GetName() +
                          "' could not be created.");
     cmSystemTools::SetFatalErrorOccured();
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd);
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3233,8 +3259,6 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     this->IssueMessage(cmake::FATAL_ERROR,
                        "Failed to configure test project build system.");
     cmSystemTools::SetFatalErrorOccured();
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd);
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3243,8 +3267,6 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     this->IssueMessage(cmake::FATAL_ERROR,
                        "Failed to generate test project build system.");
     cmSystemTools::SetFatalErrorOccured();
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd);
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3253,7 +3275,6 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   int ret = this->GetGlobalGenerator()->TryCompile(
     srcdir, bindir, projectName, targetName, fast, output, this);
 
-  cmSystemTools::ChangeDirectory(cwd);
   this->IsSourceFileTryCompile = false;
   return ret;
 }

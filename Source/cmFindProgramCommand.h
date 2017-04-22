@@ -3,7 +3,8 @@
 #ifndef cmFindProgramCommand_h
 #define cmFindProgramCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 

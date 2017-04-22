@@ -28,6 +28,10 @@
 #include <assert.h>
 #include <errno.h>
 
+#if !defined(SUNOS_NO_IFADDRS) && _XOPEN_SOURCE < 600
+#define SUNOS_NO_IFADDRS
+#endif
+
 #ifndef SUNOS_NO_IFADDRS
 # include <ifaddrs.h>
 #endif
@@ -695,6 +699,11 @@ void uv_free_cpu_info(uv_cpu_info_t* cpu_infos, int count) {
   uv__free(cpu_infos);
 }
 
+#ifdef SUNOS_NO_IFADDRS
+int uv_interface_addresses(uv_interface_address_t** addresses, int* count) {
+  return -ENOSYS;
+}
+#else  /* SUNOS_NO_IFADDRS */
 /*
  * Inspired By:
  * https://blogs.oracle.com/paulie/entry/retrieving_mac_address_in_solaris
@@ -742,9 +751,6 @@ static int uv__set_phys_addr(uv_interface_address_t* address,
 }
 
 int uv_interface_addresses(uv_interface_address_t** addresses, int* count) {
-#ifdef SUNOS_NO_IFADDRS
-  return -ENOSYS;
-#else
   uv_interface_address_t* address;
   struct ifaddrs* addrs;
   struct ifaddrs* ent;
@@ -805,9 +811,8 @@ int uv_interface_addresses(uv_interface_address_t** addresses, int* count) {
   freeifaddrs(addrs);
 
   return 0;
-#endif  /* SUNOS_NO_IFADDRS */
 }
-
+#endif  /* SUNOS_NO_IFADDRS */
 
 void uv_free_interface_addresses(uv_interface_address_t* addresses,
   int count) {

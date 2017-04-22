@@ -1,15 +1,15 @@
-extern int generated_by_testExe1();
-extern int generated_by_testExe3();
-extern int generated_by_testExe4();
-extern int testLib2();
-extern int testLib3();
-extern int testLib4();
-extern int testLib4lib();
-extern int testLib5();
-extern int testLib6();
-extern int testLib7();
-extern int testLibCycleA1();
-extern int testLibPerConfigDest();
+extern int generated_by_testExe1(void);
+extern int generated_by_testExe3(void);
+extern int generated_by_testExe4(void);
+extern int testLib2(void);
+extern int testLib3(void);
+extern int testLib4(void);
+extern int testLib4lib(void);
+extern int testLib5(void);
+extern int testLib6(void);
+extern int testLib7(void);
+extern int testLibCycleA1(void);
+extern int testLibPerConfigDest(void);
 
 /* Switch a symbol between debug and optimized builds to make sure the
    proper library is found from the testLib4 link interface.  */

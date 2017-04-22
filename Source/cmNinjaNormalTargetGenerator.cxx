@@ -260,12 +260,9 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
       rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
                                                    *i, vars);
     }
-    {
-      // If there is no ranlib the command will be ":".  Skip it.
-      std::vector<std::string>::iterator newEnd = std::remove_if(
-        linkCmds.begin(), linkCmds.end(), cmNinjaRemoveNoOpCommands());
-      linkCmds.erase(newEnd, linkCmds.end());
-    }
+
+    // If there is no ranlib the command will be ":".  Skip it.
+    cmEraseIf(linkCmds, cmNinjaRemoveNoOpCommands());
 
     std::string linkCmd =
       this->GetLocalGenerator()->BuildCommandLine(linkCmds);
@@ -388,12 +385,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
       rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
                                                    *i, vars);
     }
-    {
-      // If there is no ranlib the command will be ":".  Skip it.
-      std::vector<std::string>::iterator newEnd = std::remove_if(
-        linkCmds.begin(), linkCmds.end(), cmNinjaRemoveNoOpCommands());
-      linkCmds.erase(newEnd, linkCmds.end());
-    }
+
+    // If there is no ranlib the command will be ":".  Skip it.
+    cmEraseIf(linkCmds, cmNinjaRemoveNoOpCommands());
 
     linkCmds.insert(linkCmds.begin(), "$PRE_LINK");
     linkCmds.push_back("$POST_BUILD");
@@ -522,6 +516,10 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         std::string linkCmdVar = "CMAKE_";
         linkCmdVar += this->TargetLinkLanguage;
         linkCmdVar += "_ARCHIVE_CREATE";
+
+        linkCmdVar = this->GeneratorTarget->GetFeatureSpecificLinkRuleVariable(
+          linkCmdVar, this->GetConfigName());
+
         const char* linkCmd = mf->GetRequiredDefinition(linkCmdVar);
         cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       }
@@ -529,6 +527,10 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         std::string linkCmdVar = "CMAKE_";
         linkCmdVar += this->TargetLinkLanguage;
         linkCmdVar += "_ARCHIVE_FINISH";
+
+        linkCmdVar = this->GeneratorTarget->GetFeatureSpecificLinkRuleVariable(
+          linkCmdVar, this->GetConfigName());
+
         const char* linkCmd = mf->GetRequiredDefinition(linkCmdVar);
         cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       }
@@ -869,19 +871,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     linkLineComputer.get(), this->GetConfigName(), vars["LINK_LIBRARIES"],
     vars["FLAGS"], vars["LINK_FLAGS"], frameworkPath, linkPath, &genTarget);
 
-  if (this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS") &&
-      (gt.GetType() == cmStateEnums::SHARED_LIBRARY ||
-       gt.IsExecutableWithExports())) {
-    if (gt.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS")) {
-      std::string name_of_def_file = gt.GetSupportDirectory();
-      name_of_def_file += "/" + gt.GetName();
-      name_of_def_file += ".def ";
-      vars["LINK_FLAGS"] += " /DEF:";
-      vars["LINK_FLAGS"] += this->GetLocalGenerator()->ConvertToOutputFormat(
-        name_of_def_file, cmOutputConverter::SHELL);
-    }
-  }
-
   // Add OS X version flags, if any.
   if (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
       this->GeneratorTarget->GetType() == cmStateEnums::MODULE_LIBRARY) {
@@ -998,34 +987,38 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   }
 
   // maybe create .def file from list of objects
-  if ((gt.GetType() == cmStateEnums::SHARED_LIBRARY ||
-       gt.IsExecutableWithExports()) &&
-      this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
-    if (gt.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS")) {
-      std::string cmakeCommand =
-        this->GetLocalGenerator()->ConvertToOutputFormat(
-          cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
-      std::string name_of_def_file = gt.GetSupportDirectory();
-      name_of_def_file += "/" + gt.GetName();
-      name_of_def_file += ".def";
-      std::string cmd = cmakeCommand;
-      cmd += " -E __create_def ";
-      cmd += this->GetLocalGenerator()->ConvertToOutputFormat(
-        name_of_def_file, cmOutputConverter::SHELL);
-      cmd += " ";
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    gt.GetModuleDefinitionInfo(this->GetConfigName());
+  if (mdi && mdi->DefFileGenerated) {
+    std::string cmakeCommand =
+      this->GetLocalGenerator()->ConvertToOutputFormat(
+        cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
+    std::string cmd = cmakeCommand;
+    cmd += " -E __create_def ";
+    cmd += this->GetLocalGenerator()->ConvertToOutputFormat(
+      mdi->DefFile, cmOutputConverter::SHELL);
+    cmd += " ";
+    std::string obj_list_file = mdi->DefFile + ".objs";
+    cmd += this->GetLocalGenerator()->ConvertToOutputFormat(
+      obj_list_file, cmOutputConverter::SHELL);
+    preLinkCmdLines.push_back(cmd);
+
+    // create a list of obj files for the -E __create_def to read
+    cmGeneratedFileStream fout(obj_list_file.c_str());
+
+    if (mdi->WindowsExportAllSymbols) {
       cmNinjaDeps objs = this->GetObjects();
-      std::string obj_list_file = name_of_def_file;
-      obj_list_file += ".objs";
-      cmd += this->GetLocalGenerator()->ConvertToOutputFormat(
-        obj_list_file, cmOutputConverter::SHELL);
-      preLinkCmdLines.push_back(cmd);
-      // create a list of obj files for the -E __create_def to read
-      cmGeneratedFileStream fout(obj_list_file.c_str());
       for (cmNinjaDeps::iterator i = objs.begin(); i != objs.end(); ++i) {
         if (cmHasLiteralSuffix(*i, ".obj")) {
           fout << *i << "\n";
         }
       }
+    }
+
+    for (std::vector<cmSourceFile const*>::const_iterator i =
+           mdi->Sources.begin();
+         i != mdi->Sources.end(); ++i) {
+      fout << (*i)->GetFullPath() << "\n";
     }
   }
   // If we have any PRE_LINK commands, we need to go back to CMAKE_BINARY_DIR

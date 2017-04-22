@@ -3,7 +3,8 @@
 #ifndef cmTargetIncludeDirectoriesCommand_h
 #define cmTargetIncludeDirectoriesCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 

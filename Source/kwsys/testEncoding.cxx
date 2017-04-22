@@ -180,6 +180,88 @@ static int testCommandLineArguments()
   return status;
 }
 
+static int testToWindowsExtendedPath()
+{
+#ifdef _WIN32
+  int ret = 0;
+  if (kwsys::Encoding::ToWindowsExtendedPath(
+        "L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") !=
+      L"\\\\?\\L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") {
+    std::cout << "Problem with ToWindowsExtendedPath "
+              << "\"L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo\""
+              << std::endl;
+    ++ret;
+  }
+
+  if (kwsys::Encoding::ToWindowsExtendedPath(
+        "L:/Local Mojo/Hex Power Pack/Iffy Voodoo") !=
+      L"\\\\?\\L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") {
+    std::cout << "Problem with ToWindowsExtendedPath "
+              << "\"L:/Local Mojo/Hex Power Pack/Iffy Voodoo\"" << std::endl;
+    ++ret;
+  }
+
+  if (kwsys::Encoding::ToWindowsExtendedPath(
+        "\\\\Foo\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") !=
+      L"\\\\?\\UNC\\Foo\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") {
+    std::cout << "Problem with ToWindowsExtendedPath "
+              << "\"\\\\Foo\\Local Mojo\\Hex Power Pack\\Iffy Voodoo\""
+              << std::endl;
+    ++ret;
+  }
+
+  if (kwsys::Encoding::ToWindowsExtendedPath(
+        "//Foo/Local Mojo/Hex Power Pack/Iffy Voodoo") !=
+      L"\\\\?\\UNC\\Foo\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") {
+    std::cout << "Problem with ToWindowsExtendedPath "
+              << "\"//Foo/Local Mojo/Hex Power Pack/Iffy Voodoo\""
+              << std::endl;
+    ++ret;
+  }
+
+  if (kwsys::Encoding::ToWindowsExtendedPath("//") != L"//") {
+    std::cout << "Problem with ToWindowsExtendedPath "
+              << "\"//\"" << std::endl;
+    ++ret;
+  }
+
+  if (kwsys::Encoding::ToWindowsExtendedPath("\\\\.\\") != L"\\\\.\\") {
+    std::cout << "Problem with ToWindowsExtendedPath "
+              << "\"\\\\.\\\"" << std::endl;
+    ++ret;
+  }
+
+  if (kwsys::Encoding::ToWindowsExtendedPath("\\\\.\\X") != L"\\\\.\\X") {
+    std::cout << "Problem with ToWindowsExtendedPath "
+              << "\"\\\\.\\X\"" << std::endl;
+    ++ret;
+  }
+
+  if (kwsys::Encoding::ToWindowsExtendedPath("\\\\.\\X:") != L"\\\\?\\X:") {
+    std::cout << "Problem with ToWindowsExtendedPath "
+              << "\"\\\\.\\X:\"" << std::endl;
+    ++ret;
+  }
+
+  if (kwsys::Encoding::ToWindowsExtendedPath("\\\\.\\X:\\") !=
+      L"\\\\?\\X:\\") {
+    std::cout << "Problem with ToWindowsExtendedPath "
+              << "\"\\\\.\\X:\\\"" << std::endl;
+    ++ret;
+  }
+
+  if (kwsys::Encoding::ToWindowsExtendedPath("NUL") != L"\\\\.\\NUL") {
+    std::cout << "Problem with ToWindowsExtendedPath "
+              << "\"NUL\"" << std::endl;
+    ++ret;
+  }
+
+  return ret;
+#else
+  return 0;
+#endif
+}
+
 //----------------------------------------------------------------------------
 int testEncoding(int, char* [])
 {
@@ -196,6 +278,7 @@ int testEncoding(int, char* [])
   ret |= testRobustEncoding();
   ret |= testCommandLineArguments();
   ret |= testWithNulls();
+  ret |= testToWindowsExtendedPath();
 
   return ret;
 }

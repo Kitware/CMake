@@ -3,7 +3,7 @@
 #ifndef cmGlobalCodeLiteGenerator_h
 #define cmGlobalCodeLiteGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmExternalMakefileProjectGenerator.h"
 
@@ -50,6 +50,10 @@ protected:
                                   const cmMakefile* mf,
                                   const std::string& projectType,
                                   const std::string& targetName);
+  void CreateFoldersAndFiles(std::set<std::string>& cFiles, cmXMLWriter& xml,
+                             const std::string& projectPath);
+  void CreateFoldersAndFiles(std::map<std::string, cmSourceFile*>& cFiles,
+                             cmXMLWriter& xml, const std::string& projectPath);
 
 public:
   cmExtraCodeLiteGenerator();

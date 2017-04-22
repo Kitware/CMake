@@ -3,7 +3,7 @@
 #ifndef cmCPackTarBZip2Generator_h
 #define cmCPackTarBZip2Generator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCPackArchiveGenerator.h"
 #include "cmCPackGenerator.h"

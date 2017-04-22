@@ -3,7 +3,8 @@
 #ifndef cmContinueCommand_h
 #define cmContinueCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 

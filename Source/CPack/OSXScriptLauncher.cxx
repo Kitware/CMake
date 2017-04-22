@@ -1,8 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include <cmsys/FStream.hxx>
-#include <cmsys/Process.h>
-#include <cmsys/SystemTools.hxx>
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
+#include "cmsys/SystemTools.hxx"
 #include <iostream>
 #include <stddef.h>
 #include <string>
@@ -20,7 +20,6 @@
 int main(int argc, char* argv[])
 {
   // if ( cmsys::SystemTools::FileExists(
-  std::string cwd = cmsys::SystemTools::GetCurrentWorkingDirectory();
   cmsys::ofstream ofs("/tmp/output.txt");
 
   CFStringRef fileName;
@@ -86,8 +85,6 @@ int main(int argc, char* argv[])
   int length;
   while (cmsysProcess_WaitForData(cp, &data, &length, 0)) {
     // Translate NULL characters in the output into valid text.
-    // Visual Studio 7 puts these characters in the output of its
-    // build process.
     for (int i = 0; i < length; ++i) {
       if (data[i] == '\0') {
         data[i] = ' ';

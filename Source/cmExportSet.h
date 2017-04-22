@@ -3,7 +3,7 @@
 #ifndef cmExportSet_h
 #define cmExportSet_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

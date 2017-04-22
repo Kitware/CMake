@@ -6,8 +6,8 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
+#include "cmsys/FStream.hxx"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
 #include <ctype.h>
 #include <iterator>
 #include <stddef.h>

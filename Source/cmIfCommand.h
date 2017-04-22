@@ -3,7 +3,8 @@
 #ifndef cmIfCommand_h
 #define cmIfCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 
@@ -21,6 +22,7 @@ public:
   cmIfFunctionBlocker()
   {
     this->HasRun = false;
+    this->ElseSeen = false;
     this->ScopeDepth = 0;
   }
   ~cmIfFunctionBlocker() CM_OVERRIDE {}
@@ -32,6 +34,7 @@ public:
   std::vector<cmListFileFunction> Functions;
   bool IsBlocking;
   bool HasRun;
+  bool ElseSeen;
   unsigned int ScopeDepth;
 };
 

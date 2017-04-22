@@ -27,5 +27,13 @@ else()
       set(CMAKE_${lang}_COMPILE_OPTIONS_TARGET "--target=")
       set(CMAKE_${lang}_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN "--gcc-toolchain=")
     endif()
+
+    set(_CMAKE_IPO_SUPPORTED_BY_CMAKE NO)
+    set(_CMAKE_IPO_MAY_BE_SUPPORTED_BY_COMPILER NO)
+
+    unset(CMAKE_${lang}_COMPILE_OPTIONS_IPO)
+    unset(CMAKE_${lang}_ARCHIVE_CREATE_IPO)
+    unset(CMAKE_${lang}_ARCHIVE_APPEND_IPO)
+    unset(CMAKE_${lang}_ARCHIVE_FINISH_IPO)
   endmacro()
 endif()

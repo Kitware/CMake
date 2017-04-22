@@ -162,6 +162,7 @@ if(WIN32 AND NOT CYGWIN)
         libcrypto
         libeay32${_OPENSSL_MSVC_RT_MODE}
         libeay32
+        crypto
       NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES

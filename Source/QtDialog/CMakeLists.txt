@@ -198,7 +198,7 @@ if(UNIX AND NOT APPLE)
 
   # install a desktop file so CMake appears in the application start menu
   # with an icon
-  install(FILES CMake.desktop
+  install(FILES cmake-gui.desktop
     DESTINATION "${CMAKE_XDGDATA_DIR}/applications"
     ${COMPONENT})
   install(FILES cmakecache.xml

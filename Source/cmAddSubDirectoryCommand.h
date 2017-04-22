@@ -3,7 +3,8 @@
 #ifndef cmAddSubDirectoryCommand_h
 #define cmAddSubDirectoryCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 

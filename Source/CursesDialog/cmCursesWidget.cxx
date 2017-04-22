@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesWidget.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 cmCursesWidget::cmCursesWidget(int width, int height, int left, int top)
 {

@@ -296,6 +296,9 @@ typedef uint64_t uintmax_t;
 /* Define to 1 if you have the `acl_create_entry' function. */
 #cmakedefine HAVE_ACL_CREATE_ENTRY 1
 
+/* Define to 1 if you have the `acl_get_fd_np' function. */
+#cmakedefine HAVE_ACL_GET_FD_NP 1
+
 /* Define to 1 if you have the `acl_get_link' function. */
 #cmakedefine HAVE_ACL_GET_LINK 1
 
@@ -325,6 +328,12 @@ typedef uint64_t uintmax_t;
 
 /* Define to 1 if you have the `acl_set_file' function. */
 #cmakedefine HAVE_ACL_SET_FILE 1
+
+/* True for FreeBSD with NFSv4 ACL support */
+#cmakedefine HAVE_ACL_TYPE_NFS4 1
+
+/* True for MacOS ACL support */
+#cmakedefine HAVE_ACL_TYPE_EXTENDED 1
 
 /* True for systems with POSIX ACL support */
 #cmakedefine HAVE_ACL_USER 1
@@ -727,6 +736,9 @@ typedef uint64_t uintmax_t;
 /* Define to 1 if you have the <lzma.h> header file. */
 #cmakedefine HAVE_LZMA_H 1
 
+/* Define to 1 if you have a working `lzma_stream_encoder_mt' function. */
+#cmakedefine HAVE_LZMA_STREAM_ENCODER_MT 1
+
 /* Define to 1 if you have the <lzo/lzo1x.h> header file. */
 #cmakedefine HAVE_LZO_LZO1X_H 1
 
@@ -929,6 +941,12 @@ typedef uint64_t uintmax_t;
 /* Define to 1 if `__tm_gmtoff' is a member of `struct tm'. */
 #cmakedefine HAVE_STRUCT_TM___TM_GMTOFF 1
 
+/* Define to 1 if you have `struct vfsconf'. */
+#cmakedefine HAVE_STRUCT_VFSCONF 1
+
+/* Define to 1 if you have `struct xvfsconf'. */
+#cmakedefine HAVE_STRUCT_XVFSCONF 1
+
 /* Define to 1 if you have the `symlink' function. */
 #cmakedefine HAVE_SYMLINK 1
 
@@ -1086,6 +1104,9 @@ typedef uint64_t uintmax_t;
 
 /* Define to 1 if you have a working EXT2_IOC_GETFLAGS */
 #cmakedefine HAVE_WORKING_EXT2_IOC_GETFLAGS 1
+
+/* Define to 1 if you have a working FS_IOC_GETFLAGS */
+#cmakedefine HAVE_WORKING_FS_IOC_GETFLAGS 1
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #cmakedefine HAVE_ZLIB_H 1

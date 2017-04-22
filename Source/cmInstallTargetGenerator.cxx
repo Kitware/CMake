@@ -60,25 +60,6 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
 void cmInstallTargetGenerator::GenerateScriptForConfig(
   std::ostream& os, const std::string& config, Indent const& indent)
 {
-  // Compute the build tree directory from which to copy the target.
-  std::string fromDirConfig;
-  if (this->Target->NeedRelinkBeforeInstall(config)) {
-    fromDirConfig =
-      this->Target->GetLocalGenerator()->GetCurrentBinaryDirectory();
-    fromDirConfig += cmake::GetCMakeFilesDirectory();
-    fromDirConfig += "/CMakeRelink.dir/";
-  } else {
-    fromDirConfig = this->Target->GetDirectory(config, this->ImportLibrary);
-    fromDirConfig += "/";
-  }
-  std::string toDir =
-    this->ConvertToAbsoluteDestination(this->GetDestination(config));
-  toDir += "/";
-
-  // Compute the list of files to install for this target.
-  std::vector<std::string> filesFrom;
-  std::vector<std::string> filesTo;
-  std::string literal_args;
   cmStateEnums::TargetType targetType = this->Target->GetType();
   cmInstallType type = cmInstallType();
   switch (targetType) {
@@ -100,7 +81,11 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       assert(false &&
              "INTERFACE_LIBRARY targets have no installable outputs.");
       break;
+
     case cmStateEnums::OBJECT_LIBRARY:
+      this->GenerateScriptForConfigObjectLibrary(os, config, indent);
+      return;
+
     case cmStateEnums::UTILITY:
     case cmStateEnums::GLOBAL_TARGET:
     case cmStateEnums::UNKNOWN_LIBRARY:
@@ -109,6 +94,28 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
         "cmInstallTargetGenerator created with non-installable target.");
       return;
   }
+
+  // Compute the build tree directory from which to copy the target.
+  std::string fromDirConfig;
+  if (this->Target->NeedRelinkBeforeInstall(config)) {
+    fromDirConfig =
+      this->Target->GetLocalGenerator()->GetCurrentBinaryDirectory();
+    fromDirConfig += cmake::GetCMakeFilesDirectory();
+    fromDirConfig += "/CMakeRelink.dir/";
+  } else {
+    fromDirConfig = this->Target->GetDirectory(config, this->ImportLibrary);
+    fromDirConfig += "/";
+  }
+
+  std::string toDir =
+    this->ConvertToAbsoluteDestination(this->GetDestination(config));
+  toDir += "/";
+
+  // Compute the list of files to install for this target.
+  std::vector<std::string> filesFrom;
+  std::vector<std::string> filesTo;
+  std::string literal_args;
+
   if (targetType == cmStateEnums::EXECUTABLE) {
     // There is a bug in cmInstallCommand if this fails.
     assert(this->NamelinkMode == NamelinkModeNone);
@@ -313,6 +320,49 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   // Add post-installation tweaks.
   this->AddTweak(os, indent, config, filesTo,
                  &cmInstallTargetGenerator::PostReplacementTweaks);
+}
+
+static std::string computeInstallObjectDir(cmGeneratorTarget* gt,
+                                           std::string const& config)
+{
+  std::string objectDir = "objects";
+  if (!config.empty()) {
+    objectDir += "-";
+    objectDir += config;
+  }
+  objectDir += "/";
+  objectDir += gt->GetName();
+  return objectDir;
+}
+
+void cmInstallTargetGenerator::GenerateScriptForConfigObjectLibrary(
+  std::ostream& os, const std::string& config, Indent const& indent)
+{
+  // Compute all the object files inside this target
+  std::vector<std::string> objects;
+  this->Target->GetTargetObjectNames(config, objects);
+
+  std::string const dest = this->GetDestination(config) + "/" +
+    computeInstallObjectDir(this->Target, config);
+
+  std::string const obj_dir = this->Target->GetObjectDirectory(config);
+  std::string const literal_args = " FILES_FROM_DIR \"" + obj_dir + "\"";
+
+  const char* no_dir_permissions = CM_NULLPTR;
+  const char* no_rename = CM_NULLPTR;
+  this->AddInstallRule(os, dest, cmInstallType_FILES, objects, this->Optional,
+                       this->FilePermissions.c_str(), no_dir_permissions,
+                       no_rename, literal_args.c_str(), indent);
+}
+
+void cmInstallTargetGenerator::GetInstallObjectNames(
+  std::string const& config, std::vector<std::string>& objects) const
+{
+  this->Target->GetTargetObjectNames(config, objects);
+  for (std::vector<std::string>::iterator i = objects.begin();
+       i != objects.end(); ++i) {
+    *i = computeInstallObjectDir(this->Target, config) + "/" + *i;
+  }
 }
 
 std::string cmInstallTargetGenerator::GetDestination(

@@ -1,23 +1,20 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#include "windows.h" // this must be first to define GetCurrentDirectory
-#if defined(_MSC_VER) && _MSC_VER >= 1800
-#define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#endif
-#endif
-
 #include "cmGlobalGenerator.h"
 
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
 #include <iterator>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#include <windows.h>
+#endif
 
 #include "cmAlgorithms.h"
 #include "cmCPackPropertiesGenerator.h"
@@ -42,12 +39,17 @@
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmVersion.h"
+#include "cmWorkingDirectory.h"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmCryptoHash.h"
-#include <cm_jsoncpp_value.h>
-#include <cm_jsoncpp_writer.h>
+#include "cm_jsoncpp_value.h"
+#include "cm_jsoncpp_writer.h"
+#endif
+
+#if defined(_MSC_VER) && _MSC_VER >= 1800
+#define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 #endif
 
 const std::string kCMAKE_PLATFORM_INFO_INITIALIZED =
@@ -94,6 +96,7 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->ConfigureDoneCMP0026AndCMP0024 = false;
   this->FirstTimeProgress = 0.0f;
 
+  cm->GetState()->SetIsGeneratorMultiConfig(false);
   cm->GetState()->SetMinGWMake(false);
   cm->GetState()->SetMSYSShell(false);
   cm->GetState()->SetNMake(false);
@@ -1194,6 +1197,11 @@ void cmGlobalGenerator::AddCMP0042WarnTarget(const std::string& target)
   this->CMP0042WarnTargets.insert(target);
 }
 
+void cmGlobalGenerator::AddCMP0068WarnTarget(const std::string& target)
+{
+  this->CMP0068WarnTargets.insert(target);
+}
+
 bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
 {
   // If the property is not enabled then okay.
@@ -1235,6 +1243,8 @@ bool cmGlobalGenerator::Compute()
 
   // clear targets to issue warning CMP0042 for
   this->CMP0042WarnTargets.clear();
+  // clear targets to issue warning CMP0068 for
+  this->CMP0068WarnTargets.clear();
 
   // Check whether this generator is allowed to run.
   if (!this->CheckALLOW_DUPLICATE_CUSTOM_TARGETS()) {
@@ -1337,10 +1347,11 @@ void cmGlobalGenerator::Generate()
   for (std::map<std::string, cmExportBuildFileGenerator*>::iterator it =
          this->BuildExportSets.begin();
        it != this->BuildExportSets.end(); ++it) {
-    if (!it->second->GenerateImportFile() &&
-        !cmSystemTools::GetErrorOccuredFlag()) {
-      this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR,
-                                             "Could not write export file.");
+    if (!it->second->GenerateImportFile()) {
+      if (!cmSystemTools::GetErrorOccuredFlag()) {
+        this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR,
+                                               "Could not write export file.");
+      }
       return;
     }
   }
@@ -1361,6 +1372,24 @@ void cmGlobalGenerator::Generate()
     for (std::set<std::string>::iterator iter =
            this->CMP0042WarnTargets.begin();
          iter != this->CMP0042WarnTargets.end(); ++iter) {
+      w << " " << *iter << "\n";
+    }
+    this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+  }
+
+  if (!this->CMP0068WarnTargets.empty()) {
+    std::ostringstream w;
+    /* clang-format off */
+    w <<
+      cmPolicies::GetPolicyWarning(cmPolicies::CMP0068) << "\n"
+      "For compatibility with older versions of CMake, the install_name "
+      "fields for the following targets are still affected by RPATH "
+      "settings:\n"
+      ;
+    /* clang-format on */
+    for (std::set<std::string>::iterator iter =
+           this->CMP0068WarnTargets.begin();
+         iter != this->CMP0068WarnTargets.end(); ++iter) {
       w << " " << *iter << "\n";
     }
     this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, w.str());
@@ -1738,8 +1767,7 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
   /**
    * Run an executable command and put the stdout in output.
    */
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(bindir);
+  cmWorkingDirectory workdir(bindir);
   output += "Change Dir: ";
   output += bindir;
   output += "\n";
@@ -1779,8 +1807,6 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
       output += *outputPtr;
       output += "\nGenerator: execution of make clean failed.\n";
 
-      // return to the original directory
-      cmSystemTools::ChangeDirectory(cwd);
       return 1;
     }
     output += *outputPtr;
@@ -1803,8 +1829,6 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
     output += "\nGenerator: execution of make failed. Make command was: " +
       makeCommandStr + "\n";
 
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd);
     return 1;
   }
   output += *outputPtr;
@@ -1817,7 +1841,6 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
     retVal = 1;
   }
 
-  cmSystemTools::ChangeDirectory(cwd);
   return retVal;
 }
 
@@ -2464,6 +2487,11 @@ std::string cmGlobalGenerator::GenerateRuleFile(
                                  cmake::GetCMakeFilesDirectory());
   }
   return ruleFile;
+}
+
+bool cmGlobalGenerator::ShouldStripResourcePath(cmMakefile* mf) const
+{
+  return mf->PlatformIsAppleIos();
 }
 
 std::string cmGlobalGenerator::GetSharedLibFlagsForLanguage(

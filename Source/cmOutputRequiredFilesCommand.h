@@ -3,7 +3,8 @@
 #ifndef cmOutputRequiredFilesCommand_h
 #define cmOutputRequiredFilesCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <set>
 #include <stdio.h>
 #include <string>

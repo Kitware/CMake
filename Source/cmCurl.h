@@ -3,9 +3,9 @@
 #ifndef cmCurl_h
 #define cmCurl_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cm_curl.h>
+#include "cm_curl.h"
 #include <string>
 
 std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile = CM_NULLPTR);

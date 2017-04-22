@@ -4,11 +4,12 @@
 
 #include "cmAlgorithms.h"
 #include "cmProcessOutput.h"
+#include "cm_sys_stat.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmArchiveWrite.h"
 #include "cmLocale.h"
-#include <cm_libarchive.h>
+#include "cm_libarchive.h"
 #ifndef __LA_INT64_T
 #define __LA_INT64_T la_int64_t
 #endif
@@ -26,15 +27,14 @@
 #include "cmMachO.h"
 #endif
 
+#include "cmsys/Directory.hxx"
+#include "cmsys/Encoding.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
+#include "cmsys/System.h"
+#include "cmsys/Terminal.h"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/Encoding.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/System.h>
-#include <cmsys/SystemTools.hxx>
-#include <cmsys/Terminal.h>
 #include <ctype.h>
 #include <errno.h>
 #include <iostream>
@@ -43,8 +43,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <time.h>
+#include <utility>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -617,8 +617,6 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
     while ((pipe = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) >
            0) {
       // Translate NULL characters in the output into valid text.
-      // Visual Studio 7 puts these characters in the output of its
-      // build process.
       for (int i = 0; i < length; ++i) {
         if (data[i] == '\0') {
           data[i] = ' ';
@@ -1978,6 +1976,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     // ???
   }
 #endif
+  exe_dir = cmSystemTools::GetActualCaseForPath(exe_dir);
   cmSystemToolsCMakeCommand = exe_dir;
   cmSystemToolsCMakeCommand += "/cmake";
   cmSystemToolsCMakeCommand += cmSystemTools::GetExecutableExtension();
@@ -2015,8 +2014,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   // Install tree has
   // - "<prefix><CMAKE_BIN_DIR>/cmake"
   // - "<prefix><CMAKE_DATA_DIR>"
-  const std::string actual_case = cmSystemTools::GetActualCaseForPath(exe_dir);
-  if (cmHasSuffix(actual_case, CMAKE_BIN_DIR)) {
+  if (cmHasSuffix(exe_dir, CMAKE_BIN_DIR)) {
     std::string const prefix =
       exe_dir.substr(0, exe_dir.size() - strlen(CMAKE_BIN_DIR));
     cmSystemToolsCMakeRoot = prefix + CMAKE_DATA_DIR;
