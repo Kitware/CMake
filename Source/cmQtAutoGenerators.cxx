@@ -102,12 +102,15 @@ inline static bool SettingsMatch(cmMakefile* makefile, const char* key,
   return (value == makefile->GetSafeDefinition(key));
 }
 
-static void SettingWrite(std::ostream& ostr, const char* key,
-                         const std::string& value)
+static void SettingAppend(std::string& str, const char* key,
+                          const std::string& value)
 {
   if (!value.empty()) {
-    ostr << "set(" << key << " " << cmOutputConverter::EscapeForCMake(value)
-         << ")\n";
+    str += "set(";
+    str += key;
+    str += " ";
+    str += cmOutputConverter::EscapeForCMake(value);
+    str += ")\n";
   }
 }
 
@@ -575,22 +578,21 @@ bool cmQtAutoGenerators::SettingsFileWrite()
   // Only write if any setting changed
   if (this->AnySettingsChanged()) {
     if (this->Verbose) {
-      this->LogInfo("AutoGen: Writing settings file " + this->SettingsFile);
+      this->LogInfo("AutoGen: Writing settings file " +
+                    Quoted(this->SettingsFile));
     }
-    cmsys::ofstream outfile;
-    outfile.open(this->SettingsFile.c_str(), std::ios::trunc);
-    if (outfile) {
-      SettingWrite(outfile, SettingsKeyMoc, this->SettingsStringMoc);
-      SettingWrite(outfile, SettingsKeyUic, this->SettingsStringUic);
-      SettingWrite(outfile, SettingsKeyRcc, this->SettingsStringRcc);
-      success = outfile.good();
-      outfile.close();
-    } else {
-      success = false;
-      // Remove old settings file to trigger full rebuild on next run
+    // Compose settings file content
+    std::string settings;
+    SettingAppend(settings, SettingsKeyMoc, this->SettingsStringMoc);
+    SettingAppend(settings, SettingsKeyUic, this->SettingsStringUic);
+    SettingAppend(settings, SettingsKeyRcc, this->SettingsStringRcc);
+    // Write settings file
+    if (!this->FileWrite("AutoGen", this->SettingsFile, settings)) {
+      this->LogError("AutoGen: Error: Could not write old settings file " +
+                     Quoted(this->SettingsFile));
+      // Remove old settings file to trigger a full rebuild on the next run
       cmSystemTools::RemoveFile(this->SettingsFile);
-      this->LogError("AutoGen: Error: Writing old settings file failed: " +
-                     this->SettingsFile);
+      success = false;
     }
   }
   return success;
