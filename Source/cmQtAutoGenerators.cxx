@@ -110,7 +110,7 @@ static void SettingWrite(std::ostream& ostr, const char* key,
   }
 }
 
-std::string subDirPrefix(const std::string& fileName)
+static std::string SubDirPrefix(const std::string& fileName)
 {
   std::string res(cmsys::SystemTools::GetFilenamePath(fileName));
   if (!res.empty()) {
@@ -766,7 +766,7 @@ void cmQtAutoGenerators::MocFindDepends(
     // regular expression check
     if (contentText.find(filter.key) != std::string::npos) {
       // Run regular expression check loop
-      const std::string sourcePath = subDirPrefix(absFilename);
+      const std::string sourcePath = SubDirPrefix(absFilename);
       const char* contentChars = contentText.c_str();
       while (filter.regExp.find(contentChars)) {
         // Evaluate match
@@ -886,7 +886,7 @@ bool cmQtAutoGenerators::MocParseSourceContent(
     this->LogInfo("AutoMoc: Checking " + absFilename);
   }
 
-  const std::string scannedFileAbsPath = subDirPrefix(absFilename);
+  const std::string scannedFileAbsPath = SubDirPrefix(absFilename);
   const std::string scannedFileBasename =
     cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
 
@@ -905,7 +905,7 @@ bool cmQtAutoGenerators::MocParseSourceContent(
     while (this->MocRegExpInclude.find(contentChars)) {
       const std::string incString = this->MocRegExpInclude.match(1);
       // Basename of the moc include
-      const std::string incSubDir(subDirPrefix(incString));
+      const std::string incSubDir(SubDirPrefix(incString));
       const std::string incBasename =
         cmsys::SystemTools::GetFilenameWithoutLastExtension(incString);
 
@@ -1091,7 +1091,7 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
 {
   std::string basepaths[2];
   {
-    std::string bpath = subDirPrefix(absFilename);
+    std::string bpath = SubDirPrefix(absFilename);
     bpath += cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
     // search for default header files and private header files
     basepaths[0] = bpath;
@@ -1389,7 +1389,7 @@ bool cmQtAutoGenerators::UicFindIncludedFile(std::string& absFile,
   bool success = false;
   // Search in vicinity of the source
   {
-    std::string testPath = subDirPrefix(sourceFile);
+    std::string testPath = SubDirPrefix(sourceFile);
     testPath += includeString;
     if (cmsys::SystemTools::FileExists(testPath.c_str())) {
       absFile = cmsys::SystemTools::GetRealPath(testPath);
@@ -1435,7 +1435,7 @@ bool cmQtAutoGenerators::UicGenerateAll(
       for (std::vector<std::string>::const_iterator uit = sourceIncs.begin();
            uit != sourceIncs.end(); ++uit) {
         // Remove ui_ from the begin filename by substr()
-        const std::string uiBasePath = subDirPrefix(*uit);
+        const std::string uiBasePath = SubDirPrefix(*uit);
         const std::string uiBaseName =
           cmsys::SystemTools::GetFilenameWithoutLastExtension(*uit).substr(3);
         const std::string searchFileName = uiBasePath + uiBaseName + ".ui";
