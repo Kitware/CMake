@@ -14,7 +14,6 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include "cmConfigure.h"
 #include <assert.h>
 #include <vector>
 

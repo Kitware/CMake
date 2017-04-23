@@ -3,7 +3,7 @@
 #ifndef cmFileLockPool_h
 #define cmFileLockPool_h
 
-#include "cmConfigure.h" // IWYU pragma: keep
+#include "cmConfigure.h"
 
 #include <list>
 #include <string>
@@ -13,6 +13,8 @@ class cmFileLockResult;
 
 class cmFileLockPool
 {
+  CM_DISABLE_COPY(cmFileLockPool)
+
 public:
   cmFileLockPool();
   ~cmFileLockPool();
@@ -52,13 +54,12 @@ public:
   cmFileLockResult Release(const std::string& filename);
 
 private:
-  cmFileLockPool(const cmFileLockPool&);
-  cmFileLockPool& operator=(const cmFileLockPool&);
-
   bool IsAlreadyLocked(const std::string& filename) const;
 
   class ScopePool
   {
+    CM_DISABLE_COPY(ScopePool)
+
   public:
     ScopePool();
     ~ScopePool();
@@ -69,9 +70,6 @@ private:
     bool IsAlreadyLocked(const std::string& filename) const;
 
   private:
-    ScopePool(const ScopePool&);
-    ScopePool& operator=(const ScopePool&);
-
     typedef std::list<cmFileLock*> List;
     typedef List::iterator It;
     typedef List::const_iterator CIt;

@@ -3,7 +3,7 @@
 #ifndef cmSystemTools_h
 #define cmSystemTools_h
 
-#include "cmConfigure.h" // IWYU pragma: keep
+#include "cmConfigure.h"
 
 #include "cmProcessOutput.h"
 #include "cmsys/Process.h"
@@ -379,14 +379,12 @@ public:
       original environment. */
   class SaveRestoreEnvironment
   {
+    CM_DISABLE_COPY(SaveRestoreEnvironment)
   public:
     SaveRestoreEnvironment();
     ~SaveRestoreEnvironment();
 
   private:
-    SaveRestoreEnvironment(SaveRestoreEnvironment const&);
-    SaveRestoreEnvironment& operator=(SaveRestoreEnvironment const&);
-
     std::vector<std::string> Env;
   };
 #endif

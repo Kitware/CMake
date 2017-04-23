@@ -27,6 +27,8 @@ class cmTarget;
 
 class cmGeneratorTarget
 {
+  CM_DISABLE_COPY(cmGeneratorTarget)
+
 public:
   cmGeneratorTarget(cmTarget*, cmLocalGenerator* lg);
   ~cmGeneratorTarget();
@@ -700,9 +702,6 @@ private:
 
   void CheckPropertyCompatibility(cmComputeLinkInformation* info,
                                   const std::string& config) const;
-
-  cmGeneratorTarget(cmGeneratorTarget const&);
-  void operator=(cmGeneratorTarget const&);
 
   struct LinkImplClosure : public std::vector<cmGeneratorTarget const*>
   {

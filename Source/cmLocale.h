@@ -10,6 +10,8 @@
 
 class cmLocaleRAII
 {
+  CM_DISABLE_COPY(cmLocaleRAII)
+
 public:
   cmLocaleRAII()
     : OldLocale(setlocale(LC_CTYPE, CM_NULLPTR))
@@ -19,9 +21,6 @@ public:
   ~cmLocaleRAII() { setlocale(LC_CTYPE, this->OldLocale.c_str()); }
 
 private:
-  cmLocaleRAII(cmLocaleRAII const&);
-  cmLocaleRAII& operator=(cmLocaleRAII const&);
-
   std::string OldLocale;
 };
 

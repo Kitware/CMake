@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDynamicLoader.h"
 
-#include "cmConfigure.h"
-
 #include <map>
 #include <string>
 #include <utility>

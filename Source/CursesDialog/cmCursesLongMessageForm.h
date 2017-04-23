@@ -13,6 +13,8 @@
 
 class cmCursesLongMessageForm : public cmCursesForm
 {
+  CM_DISABLE_COPY(cmCursesLongMessageForm)
+
 public:
   cmCursesLongMessageForm(std::vector<std::string> const& messages,
                           const char* title);
@@ -38,9 +40,6 @@ public:
   void UpdateStatusBar() CM_OVERRIDE;
 
 protected:
-  cmCursesLongMessageForm(const cmCursesLongMessageForm& from);
-  void operator=(const cmCursesLongMessageForm&);
-
   std::string Messages;
   std::string Title;
 

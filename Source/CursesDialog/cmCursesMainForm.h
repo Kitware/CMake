@@ -23,6 +23,8 @@ class cmake;
  */
 class cmCursesMainForm : public cmCursesForm
 {
+  CM_DISABLE_COPY(cmCursesMainForm)
+
 public:
   cmCursesMainForm(std::vector<std::string> const& args, int initwidth);
   ~cmCursesMainForm() CM_OVERRIDE;
@@ -103,9 +105,6 @@ public:
   static void UpdateProgress(const char* msg, float prog, void*);
 
 protected:
-  cmCursesMainForm(const cmCursesMainForm& from);
-  void operator=(const cmCursesMainForm&);
-
   // Copy the cache values from the user interface to the actual
   // cache.
   void FillCacheManagerFromUI();

@@ -21,6 +21,8 @@ class cmMakefile;
  */
 class cmInstallGenerator : public cmScriptGenerator
 {
+  CM_DISABLE_COPY(cmInstallGenerator)
+
 public:
   enum MessageLevel
   {

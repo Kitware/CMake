@@ -18,6 +18,8 @@ class cmStateDirectory;
 
 class cmLinkLineDeviceComputer : public cmLinkLineComputer
 {
+  CM_DISABLE_COPY(cmLinkLineDeviceComputer)
+
 public:
   cmLinkLineDeviceComputer(cmOutputConverter* outputConverter,
                            cmStateDirectory stateDir);
@@ -33,6 +35,8 @@ public:
 
 class cmNinjaLinkLineDeviceComputer : public cmLinkLineDeviceComputer
 {
+  CM_DISABLE_COPY(cmNinjaLinkLineDeviceComputer)
+
 public:
   cmNinjaLinkLineDeviceComputer(cmOutputConverter* outputConverter,
                                 cmStateDirectory stateDir,

@@ -3,7 +3,7 @@
 #ifndef cmCommandArgumentParserHelper_h
 #define cmCommandArgumentParserHelper_h
 
-#include "cmConfigure.h" // IWYU pragma: keep
+#include "cmConfigure.h"
 
 #include <string>
 #include <vector>
@@ -12,6 +12,8 @@ class cmMakefile;
 
 class cmCommandArgumentParserHelper
 {
+  CM_DISABLE_COPY(cmCommandArgumentParserHelper)
+
 public:
   struct ParserType
   {
@@ -60,10 +62,6 @@ public:
   char BSLASHVariable[3];
 
 private:
-  cmCommandArgumentParserHelper(cmCommandArgumentParserHelper const&);
-  cmCommandArgumentParserHelper& operator=(
-    cmCommandArgumentParserHelper const&);
-
   std::string::size_type InputBufferPos;
   std::string InputBuffer;
   std::vector<char> OutputBuffer;

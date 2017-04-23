@@ -3,7 +3,7 @@
 #ifndef cmTestGenerator_h
 #define cmTestGenerator_h
 
-#include "cmConfigure.h" // IWYU pragma: keep
+#include "cmConfigure.h"
 
 #include "cmScriptGenerator.h"
 
@@ -20,6 +20,8 @@ class cmTest;
  */
 class cmTestGenerator : public cmScriptGenerator
 {
+  CM_DISABLE_COPY(cmTestGenerator)
+
 public:
   cmTestGenerator(cmTest* test,
                   std::vector<std::string> const& configurations =

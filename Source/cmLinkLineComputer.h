@@ -4,7 +4,7 @@
 #ifndef cmLinkLineComputer_h
 #define cmLinkLineComputer_h
 
-#include "cmConfigure.h" // IWYU pragma: keep
+#include "cmConfigure.h"
 
 #include <string>
 
@@ -16,6 +16,8 @@ class cmOutputConverter;
 
 class cmLinkLineComputer
 {
+  CM_DISABLE_COPY(cmLinkLineComputer)
+
 public:
   cmLinkLineComputer(cmOutputConverter* outputConverter,
                      cmStateDirectory stateDir);
@@ -41,9 +43,6 @@ public:
                                         std::string const& config);
 
 protected:
-  cmLinkLineComputer(cmLinkLineComputer const&);
-  cmLinkLineComputer& operator=(cmLinkLineComputer const&);
-
   std::string ComputeLinkLibs(cmComputeLinkInformation& cli);
   std::string ComputeRPath(cmComputeLinkInformation& cli);
 
