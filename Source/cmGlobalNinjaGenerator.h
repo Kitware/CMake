@@ -316,10 +316,12 @@ public:
     ASD.insert(deps.begin(), deps.end());
   }
 
-  void AppendTargetOutputs(cmGeneratorTarget const* target,
-                           cmNinjaDeps& outputs);
-  void AppendTargetDepends(cmGeneratorTarget const* target,
-                           cmNinjaDeps& outputs);
+  void AppendTargetOutputs(
+    cmGeneratorTarget const* target, cmNinjaDeps& outputs,
+    cmNinjaTargetDepends depends = DependOnTargetArtifact);
+  void AppendTargetDepends(
+    cmGeneratorTarget const* target, cmNinjaDeps& outputs,
+    cmNinjaTargetDepends depends = DependOnTargetArtifact);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaDeps& outputs);
   void AddDependencyToAll(cmGeneratorTarget* target);
