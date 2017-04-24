@@ -7,4 +7,7 @@ find_package(Java COMPONENTS Development)
 include(UseJava)
 
 add_jar(${PROJECT_NAME} Foo.java)
-export_jars(TARGETS ${PROJECT_NAME} FILE JavaBuildExportTestConfig.cmake)
+export_jars(
+  TARGETS ${PROJECT_NAME}
+  NAMESPACE foo::
+  FILE JavaBuildExportTestConfig.cmake)
