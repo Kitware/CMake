@@ -54,7 +54,7 @@ public:
   void GetDocumentation(cmDocumentationEntry& entry) const CM_OVERRIDE
   {
     entry.Name = std::string(vs8generatorName) + " [arch]";
-    entry.Brief = "Generates Visual Studio 2005 project files.  "
+    entry.Brief = "Deprecated.  Generates Visual Studio 2005 project files.  "
                   "Optional [arch] can be \"Win64\".";
   }
 

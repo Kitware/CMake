@@ -1,7 +1,14 @@
 Visual Studio 8 2005
 --------------------
 
-Generates Visual Studio 8 2005 project files.
+Deprecated.  Generates Visual Studio 8 2005 project files.
+
+.. note::
+  This generator is deprecated and will be removed in a future version
+  of CMake.  It will still be possible to build with VS 8 2005 tools
+  using the :generator:`Visual Studio 10 2010` (or above) generator
+  with :variable:`CMAKE_GENERATOR_TOOLSET` set to ``v80``, or by
+  using the :generator:`NMake Makefiles` generator.
 
 The :variable:`CMAKE_GENERATOR_PLATFORM` variable may be set
 to specify a target platform name.
