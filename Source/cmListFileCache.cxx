@@ -16,7 +16,7 @@
 
 struct cmListFileParser
 {
-  cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
+  cmListFileParser(cmListFile* lf, cmListFileBacktrace const& lfbt,
                    cmMessenger* messenger, const char* filename);
   ~cmListFileParser();
   void IssueFileOpenError(std::string const& text) const;
@@ -39,7 +39,8 @@ struct cmListFileParser
   } Separation;
 };
 
-cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
+cmListFileParser::cmListFileParser(cmListFile* lf,
+                                   cmListFileBacktrace const& lfbt,
                                    cmMessenger* messenger,
                                    const char* filename)
   : ListFile(lf)

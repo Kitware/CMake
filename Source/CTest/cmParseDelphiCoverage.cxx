@@ -46,7 +46,8 @@ public:
         beginSet.push_back("begin");
         coverageVector.push_back(-1);
         continue;
-      } else if (line.find('{') != line.npos) {
+      }
+      if (line.find('{') != line.npos) {
         blockComFlag = true;
       } else if (line.find('}') != line.npos) {
         blockComFlag = false;

@@ -561,7 +561,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
   // In parallel test runs repeatedly move dependencies of the tests on
   // the current dependency level to the next level until no
   // further dependencies exist.
-  while (priorityStack.back().size()) {
+  while (!priorityStack.back().empty()) {
     TestSet& previousSet = priorityStack.back();
     priorityStack.push_back(TestSet());
     TestSet& currentSet = priorityStack.back();

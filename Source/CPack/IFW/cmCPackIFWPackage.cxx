@@ -590,7 +590,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   if (!Script.empty()) {
     std::string name = cmSystemTools::GetFilenameName(Script);
     std::string path = Directory + "/meta/" + name;
-    cmsys::SystemTools::CopyFileIfDifferent(Script.data(), path.data());
+    cmsys::SystemTools::CopyFileIfDifferent(Script, path);
     xout.Element("Script", name);
   }
 
@@ -599,8 +599,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   for (size_t i = 0; i < userInterfaces.size(); i++) {
     std::string name = cmSystemTools::GetFilenameName(userInterfaces[i]);
     std::string path = Directory + "/meta/" + name;
-    cmsys::SystemTools::CopyFileIfDifferent(userInterfaces[i].data(),
-                                            path.data());
+    cmsys::SystemTools::CopyFileIfDifferent(userInterfaces[i], path);
     userInterfaces[i] = name;
   }
   if (!userInterfaces.empty()) {
@@ -616,8 +615,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   for (size_t i = 0; i < translations.size(); i++) {
     std::string name = cmSystemTools::GetFilenameName(translations[i]);
     std::string path = Directory + "/meta/" + name;
-    cmsys::SystemTools::CopyFileIfDifferent(translations[i].data(),
-                                            path.data());
+    cmsys::SystemTools::CopyFileIfDifferent(translations[i], path);
     translations[i] = name;
   }
   if (!translations.empty()) {
@@ -675,7 +673,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   for (size_t i = 1; i < licenses.size(); i += 2) {
     std::string name = cmSystemTools::GetFilenameName(licenses[i]);
     std::string path = Directory + "/meta/" + name;
-    cmsys::SystemTools::CopyFileIfDifferent(licenses[i].data(), path.data());
+    cmsys::SystemTools::CopyFileIfDifferent(licenses[i], path);
     licenses[i] = name;
   }
   if (!licenses.empty()) {

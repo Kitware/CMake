@@ -1450,7 +1450,8 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
     if (*arg == "--") {
       ++arg;
       break;
-    } else if (*arg == "--manifests") {
+    }
+    if (*arg == "--manifests") {
       for (++arg; arg != argEnd && !cmHasLiteralPrefix(*arg, "-"); ++arg) {
         this->UserManifests.push_back(*arg);
       }
