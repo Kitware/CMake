@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceGroupCommand.h"
 
+#include <algorithm>
+#include <iterator>
 #include <set>
 #include <sstream>
 #include <stddef.h>
@@ -36,19 +38,29 @@ std::string getFullFilePath(const std::string& currentPath,
 }
 
 std::set<std::string> getSourceGroupFilesPaths(
-  const std::string& currentPath, const std::string& root,
-  const std::vector<std::string>& files)
+  const std::string& root, const std::vector<std::string>& files)
 {
   std::set<std::string> ret;
   const std::string::size_type rootLength = root.length();
 
   for (size_t i = 0; i < files.size(); ++i) {
-    const std::string fullPath = getFullFilePath(currentPath, files[i]);
-
-    ret.insert(fullPath.substr(rootLength + 1)); // +1 to also omnit last '/'
+    ret.insert(files[i].substr(rootLength + 1)); // +1 to also omnit last '/'
   }
 
   return ret;
+}
+
+bool rootIsPrefix(const std::string& root,
+                  const std::vector<std::string>& files, std::string& error)
+{
+  for (size_t i = 0; i < files.size(); ++i) {
+    if (!cmSystemTools::StringStartsWith(files[i], root.c_str())) {
+      error = "ROOT: " + root + " is not a prefix of file: " + files[i];
+      return false;
+    }
+  }
+
+  return true;
 }
 
 cmSourceGroup* addSourceGroup(const std::vector<std::string>& tokenizedPath,
@@ -68,7 +80,22 @@ cmSourceGroup* addSourceGroup(const std::vector<std::string>& tokenizedPath,
   return sg;
 }
 
-bool addFilesToItsSourceGroups(const std::set<std::string>& sgFilesPaths,
+std::string prepareFilePathForTree(const std::string& path)
+{
+  return cmSystemTools::CollapseFullPath(path);
+}
+
+std::vector<std::string> prepareFilesPathsForTree(
+  std::vector<std::string>::const_iterator begin,
+  std::vector<std::string>::const_iterator end)
+{
+  std::vector<std::string> prepared(std::distance(begin, end));
+  std::transform(begin, end, prepared.begin(), prepareFilePathForTree);
+  return prepared;
+}
+
+bool addFilesToItsSourceGroups(const std::string& root,
+                               const std::set<std::string>& sgFilesPaths,
                                const std::string& prefix, cmMakefile& makefile,
                                std::string& errorMsg)
 {
@@ -93,8 +120,7 @@ bool addFilesToItsSourceGroups(const std::set<std::string>& sgFilesPaths,
         errorMsg = "Could not create source group for file: " + *it;
         return false;
       }
-      const std::string fullPath =
-        getFullFilePath(makefile.GetCurrentSourceDirectory(), *it);
+      const std::string fullPath = getFullFilePath(root, *it);
       sg->AddGroupFile(fullPath);
     }
   }
@@ -233,17 +259,18 @@ bool cmSourceGroupCommand::processTree(const std::vector<std::string>& args,
     filesBegin = FilesWithPrefixKeywordIndex + 1;
   }
 
-  const std::vector<std::string> filesVector(args.begin() + filesBegin,
-                                             args.end());
+  const std::vector<std::string> filesVector =
+    prepareFilesPathsForTree(args.begin() + filesBegin, args.end());
 
-  std::set<std::string> sourceGroupPaths = getSourceGroupFilesPaths(
-    this->Makefile->GetCurrentSourceDirectory(), root, filesVector);
+  if (!rootIsPrefix(root, filesVector, errorMsg)) {
+    return false;
+  }
 
-  addFilesToItsSourceGroups(sourceGroupPaths, prefix, *(this->Makefile),
-                            errorMsg);
+  std::set<std::string> sourceGroupPaths =
+    getSourceGroupFilesPaths(root, filesVector);
 
-  if (!errorMsg.empty()) {
-    this->SetError(errorMsg);
+  if (!addFilesToItsSourceGroups(root, sourceGroupPaths, prefix,
+                                 *(this->Makefile), errorMsg)) {
     return false;
   }
 
