@@ -33,6 +33,7 @@ endfunction()
 
 if(CMAKE_CXX_STANDARD)
   cm_check_cxx_feature(auto_ptr)
+  cm_check_cxx_feature(eq_delete)
   cm_check_cxx_feature(make_unique)
   if(CMake_HAVE_CXX_MAKE_UNIQUE)
     set(CMake_HAVE_CXX_UNIQUE_PTR 1)

@@ -21,6 +21,7 @@
 #cmakedefine CMAKE_USE_MACH_PARSER
 #cmakedefine CMAKE_USE_LIBUV
 #cmakedefine CMake_HAVE_CXX_AUTO_PTR
+#cmakedefine CMake_HAVE_CXX_EQ_DELETE
 #cmakedefine CMake_HAVE_CXX_MAKE_UNIQUE
 #cmakedefine CMake_HAVE_CXX_NULLPTR
 #cmakedefine CMake_HAVE_CXX_OVERRIDE
@@ -29,6 +30,12 @@
 #cmakedefine CMake_HAVE_CXX_UNORDERED_SET
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
 #define CMAKE_DATA_DIR "/@CMAKE_DATA_DIR@"
+
+#ifdef CMake_HAVE_CXX_EQ_DELETE
+#define CM_EQ_DELETE = delete
+#else
+#define CM_EQ_DELETE
+#endif
 
 #ifdef CMake_HAVE_CXX_NULLPTR
 #define CM_NULLPTR nullptr
@@ -41,5 +48,9 @@
 #else
 #define CM_OVERRIDE
 #endif
+
+#define CM_DISABLE_COPY(Class)                                                \
+  Class(Class const&) CM_EQ_DELETE;                                           \
+  Class& operator=(Class const&) CM_EQ_DELETE;
 
 #endif
