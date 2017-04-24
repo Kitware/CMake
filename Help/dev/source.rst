@@ -34,6 +34,24 @@ need to be handled with care:
   warnings about deprecated interfaces in general.  Use the ``CM_AUTO_PTR``
   macro instead.
 
+* Use ``CM_EQ_DELETE;`` instead of ``= delete;``.
+
+  Defining functions as *deleted* is not supported in C++98.  Using
+  ``CM_EQ_DELETE`` will delete the functions if the compiler supports it and
+  give them no implementation otherwise.  Calling such a function will lead
+  to compiler errors if the compiler supports *deleted* functions and linker
+  errors otherwise.
+
+* Use ``CM_DISABLE_COPY(Class)`` to mark classes as non-copyable.
+
+  The ``CM_DISABLE_COPY`` macro should be used in the private section of a
+  class to make sure that attempts to copy or assign an instance of the class
+  lead to compiler errors even if the compiler does not support *deleted*
+  functions.  As a guideline, all polymorphic classes should be made
+  non-copyable in order to avoid slicing.  Classes that are composed of or
+  derived from non-copyable classes must also be made non-copyable explicitly
+  with ``CM_DISABLE_COPY``.
+
 * Use ``size_t`` instead of ``std::size_t``.
 
   Various implementations have differing implementation of ``size_t``.
