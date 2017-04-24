@@ -560,12 +560,6 @@ private:
       : LastDiskTime(-1)
     {
     }
-    DirectoryContent(DirectoryContent const& dc)
-      : LastDiskTime(dc.LastDiskTime)
-      , All(dc.All)
-      , Generated(dc.Generated)
-    {
-    }
   };
   std::map<std::string, DirectoryContent> DirectoryContentMap;
 
