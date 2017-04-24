@@ -901,7 +901,7 @@ function(_Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS component
       set(_arch_suffix 32)
     endif()
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10)
-      list(APPEND ${componentlibvar} ${basedir}/lib${_arch_suffix}-msvc-15.0)
+      list(APPEND ${componentlibvar} ${basedir}/lib${_arch_suffix}-msvc-14.1)
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
       list(APPEND ${componentlibvar} ${basedir}/lib${_arch_suffix}-msvc-14.0)
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18)
