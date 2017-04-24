@@ -1,7 +1,7 @@
 include(RunCMake)
 
 run_cmake(CommandConflict)
-if("${RunCMake_GENERATOR}" MATCHES "Visual Studio|Xcode" AND NOT XCODE_BELOW_2)
+if("${RunCMake_GENERATOR}" MATCHES "Visual Studio|Xcode")
   run_cmake(OutputConflict)
 endif()
 run_cmake(EmptyCondition1)
