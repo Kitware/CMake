@@ -104,7 +104,7 @@ private:
 
   bool RunLightCommand(std::string const& objectFiles);
 
-  void AddDirectoryAndFileDefinitons(
+  void AddDirectoryAndFileDefinitions(
     std::string const& topdir, std::string const& directoryId,
     cmWIXDirectoriesSourceWriter& directoryDefinitions,
     cmWIXFilesSourceWriter& fileDefinitions,
