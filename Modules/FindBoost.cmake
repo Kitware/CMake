@@ -896,7 +896,7 @@ endfunction()
 # This function would append corresponding directories if MSVC is a current compiler,
 # so having `BOOST_ROOT` would be enough to specify to find everything.
 #
-macro(_Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS componentlibvar basedir)
+function(_Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS componentlibvar basedir)
   if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC")
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(_arch_suffix 64)
@@ -919,8 +919,9 @@ macro(_Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS componentlib
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
       list(APPEND ${componentlibvar} ${basedir}/lib${_arch_suffix}-msvc-8.0)
     endif()
+    set(${componentlibvar} ${${componentlibvar}} PARENT_SCOPE)
   endif()
-endmacro()
+endfunction()
 
 #
 # End functions/macros

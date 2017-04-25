@@ -5,11 +5,9 @@
 #include <algorithm>
 #include <assert.h>
 #include <iterator>
-#include <limits>
 #include <map>
 #include <set>
 #include <sstream>
-#include <stddef.h>
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
@@ -34,10 +32,6 @@
 #include "cmSystemTools.h"
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
-
-#ifndef _WIN32
-#include <unistd.h>
-#endif
 
 cmNinjaNormalTargetGenerator::cmNinjaNormalTargetGenerator(
   cmGeneratorTarget* target)
@@ -491,10 +485,9 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         cmGeneratorTarget& gt = *this->GetGeneratorTarget();
         const std::string cfgName = this->GetConfigName();
         std::string targetOutput = ConvertToNinjaPath(gt.GetFullPath(cfgName));
-        std::string targetOutputReal =
-          this->ConvertToNinjaPath(gt.GetFullPath(cfgName,
-                                                  /*implib=*/false,
-                                                  /*realname=*/true));
+        std::string targetOutputReal = this->ConvertToNinjaPath(
+          gt.GetFullPath(cfgName, cmStateEnums::RuntimeBinaryArtifact,
+                         /*realname=*/true));
         cmakeCommand += targetOutputReal;
         cmakeCommand += " || true";
         linkCmds.push_back(cmakeCommand);
@@ -546,36 +539,6 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
   return std::vector<std::string>();
 }
 
-static int calculateCommandLineLengthLimit(int linkRuleLength)
-{
-  static int const limits[] = {
-#ifdef _WIN32
-    8000,
-#endif
-#if defined(__linux)
-    // #define MAX_ARG_STRLEN (PAGE_SIZE * 32) in Linux's binfmts.h
-    ((int)sysconf(_SC_PAGESIZE) * 32) - 1000,
-#endif
-    std::numeric_limits<int>::max()
-  };
-
-  size_t const arrSz = cmArraySize(limits);
-  int sz = *std::min_element(limits, limits + arrSz);
-#if defined(_SC_ARG_MAX)
-  // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
-  int const szArgMax = static_cast<int>(sysconf(_SC_ARG_MAX));
-  // a return value of -1 signifies an unrestricted value
-  if (szArgMax != -1) {
-    sz = std::min(sz, szArgMax - 1000);
-  }
-#endif
-  if (sz == std::numeric_limits<int>::max()) {
-    return 0;
-  }
-
-  return sz - linkRuleLength;
-}
-
 void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
 {
   cmGeneratorTarget& genTarget = *this->GetGeneratorTarget();
@@ -616,9 +579,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
   std::string const targetOutputReal = ConvertToNinjaPath(
     genTarget.ObjectDirectory + "cmake_device_link" + objExt);
 
-  std::string const targetOutputImplib =
-    ConvertToNinjaPath(genTarget.GetFullPath(cfgName,
-                                             /*implib=*/true));
+  std::string const targetOutputImplib = ConvertToNinjaPath(
+    genTarget.GetFullPath(cfgName, cmStateEnums::ImportLibraryArtifact));
 
   this->DeviceLinkObject = targetOutputReal;
 
@@ -761,8 +723,9 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
 
   // Device linking currently doesn't support response files so
   // do not check if the user has explicitly forced a response file.
-  int const commandLineLengthLimit = calculateCommandLineLengthLimit(
-    globalGen.GetRuleCmdLength(this->LanguageLinkerDeviceRule()));
+  int const commandLineLengthLimit =
+    static_cast<int>(cmSystemTools::CalculateCommandLineLengthLimit()) -
+    globalGen.GetRuleCmdLength(this->LanguageLinkerDeviceRule());
 
   const std::string rspfile =
     std::string(cmake::GetCMakeFilesDirectoryPostSlash()) +
@@ -788,13 +751,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmGeneratorTarget& gt = *this->GetGeneratorTarget();
   const std::string cfgName = this->GetConfigName();
   std::string targetOutput = ConvertToNinjaPath(gt.GetFullPath(cfgName));
-  std::string targetOutputReal =
-    ConvertToNinjaPath(gt.GetFullPath(cfgName,
-                                      /*implib=*/false,
-                                      /*realname=*/true));
-  std::string targetOutputImplib =
-    ConvertToNinjaPath(gt.GetFullPath(cfgName,
-                                      /*implib=*/true));
+  std::string targetOutputReal = ConvertToNinjaPath(
+    gt.GetFullPath(cfgName, cmStateEnums::RuntimeBinaryArtifact,
+                   /*realname=*/true));
+  std::string targetOutputImplib = ConvertToNinjaPath(
+    gt.GetFullPath(cfgName, cmStateEnums::ImportLibraryArtifact));
 
   if (gt.IsAppBundleOnApple()) {
     // Create the app bundle
@@ -1048,8 +1009,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     !(this->TargetLinkLanguage == "RC" || this->TargetLinkLanguage == "CUDA");
   int commandLineLengthLimit = -1;
   if (!lang_supports_response || !this->ForceResponseFile()) {
-    commandLineLengthLimit = calculateCommandLineLengthLimit(
-      globalGen.GetRuleCmdLength(this->LanguageLinkerRule()));
+    commandLineLengthLimit =
+      static_cast<int>(cmSystemTools::CalculateCommandLineLengthLimit()) -
+      globalGen.GetRuleCmdLength(this->LanguageLinkerRule());
   }
 
   const std::string rspfile =

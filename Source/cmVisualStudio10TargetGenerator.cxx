@@ -1051,8 +1051,8 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
 
   std::string postfixName = cmSystemTools::UpperCase(config);
   postfixName += "_POSTFIX";
-  std::string assemblyName =
-    this->GeneratorTarget->GetOutputName(config, false);
+  std::string assemblyName = this->GeneratorTarget->GetOutputName(
+    config, cmStateEnums::RuntimeBinaryArtifact);
   if (const char* postfix = this->GeneratorTarget->GetProperty(postfixName)) {
     assemblyName += postfix;
   }
@@ -2495,6 +2495,12 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
 
   if (this->GeneratorTarget->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION")) {
     cudaOptions.AddFlag("GenerateRelocatableDeviceCode", "true");
+  } else if (this->GeneratorTarget->GetPropertyAsBool(
+               "CUDA_PTX_COMPILATION")) {
+    cudaOptions.AddFlag("NvccCompilation", "ptx");
+    // We drop the %(Extension) component as CMake expects all PTX files
+    // to not have the source file extension at all
+    cudaOptions.AddFlag("CompileOut", "$(IntDir)%(Filename).ptx");
   }
 
   // Convert the host compiler options to the toolset's abstractions
@@ -3042,8 +3048,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     std::string pdb = this->GeneratorTarget->GetPDBDirectory(config.c_str());
     pdb += "/";
     pdb += targetNamePDB;
-    std::string imLib =
-      this->GeneratorTarget->GetDirectory(config.c_str(), true);
+    std::string imLib = this->GeneratorTarget->GetDirectory(
+      config.c_str(), cmStateEnums::ImportLibraryArtifact);
     imLib += "/";
     imLib += targetNameImport;
 
@@ -3423,13 +3429,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
     this->ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << cmVS10EscapeXML(path) << "\">\n";
     this->WriteString("<Project>", 3);
-    if (csproj == this->ProjectType) {
-      (*this->BuildFileStream) << "{";
-    }
-    (*this->BuildFileStream) << this->GlobalGenerator->GetGUID(name.c_str());
-    if (csproj == this->ProjectType) {
-      (*this->BuildFileStream) << "}";
-    }
+    (*this->BuildFileStream)
+      << "{" << this->GlobalGenerator->GetGUID(name.c_str()) << "}";
     (*this->BuildFileStream) << "</Project>\n";
     this->WriteString("<Name>", 3);
     (*this->BuildFileStream) << name << "</Name>\n";

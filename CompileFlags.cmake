@@ -4,10 +4,6 @@
 #-----------------------------------------------------------------------------
 # set some special flags for different compilers
 #
-if(CMAKE_GENERATOR MATCHES "Visual Studio 7")
-  set(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
-endif()
-
 if(WIN32 AND CMAKE_C_COMPILER_ID STREQUAL "Intel")
   set(_INTEL_WINDOWS 1)
 endif()

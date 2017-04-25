@@ -1607,7 +1607,10 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
                     "executables with ENABLE_EXPORTS.");
       return std::string();
     }
-    return target->GetFullPath(context->Config, target->HasImportLibrary());
+    cmStateEnums::ArtifactType artifact = target->HasImportLibrary()
+      ? cmStateEnums::ImportLibraryArtifact
+      : cmStateEnums::RuntimeBinaryArtifact;
+    return target->GetFullPath(context->Config, artifact);
   }
 };
 
@@ -1668,7 +1671,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactNameTag>
                             cmGeneratorExpressionContext* context,
                             const GeneratorExpressionContent* /*unused*/)
   {
-    return target->GetFullPath(context->Config, false, true);
+    return target->GetFullPath(context->Config,
+                               cmStateEnums::RuntimeBinaryArtifact, true);
   }
 };
 

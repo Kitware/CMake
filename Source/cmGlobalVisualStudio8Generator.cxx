@@ -54,7 +54,7 @@ public:
   void GetDocumentation(cmDocumentationEntry& entry) const CM_OVERRIDE
   {
     entry.Name = std::string(vs8generatorName) + " [arch]";
-    entry.Brief = "Generates Visual Studio 2005 project files.  "
+    entry.Brief = "Deprecated.  Generates Visual Studio 2005 project files.  "
                   "Optional [arch] can be \"Win64\".";
   }
 
@@ -151,13 +151,6 @@ void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 9.00\n";
   fout << "# Visual Studio 2005\n";
-}
-
-void cmGlobalVisualStudio8Generator::GetDocumentation(
-  cmDocumentationEntry& entry)
-{
-  entry.Name = cmGlobalVisualStudio8Generator::GetActualName();
-  entry.Brief = "Generates Visual Studio 8 2005 project files.";
 }
 
 std::string cmGlobalVisualStudio8Generator::GetGenerateStampList()

@@ -15,7 +15,8 @@ readonly paths="
 
 extract_source () {
     git_archive
-    disable_custom_gitattributes
+    sed -i -e '/import off/,/import on/d' "$extractdir/$name-reduced/.gitattributes"
+    sed -i -e 's/project=KWSys/project=PublicDashboard/' "$extractdir/$name-reduced/CTestConfig.cmake"
 }
 
 export HOOKS_ALLOW_KWSYS=1

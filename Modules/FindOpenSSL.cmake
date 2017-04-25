@@ -145,6 +145,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(LIB_EAY_DEBUG
       NAMES
         libcrypto${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
+        libcrypto${_OPENSSL_MSVC_RT_MODE}d
         libcryptod
         libeay32${_OPENSSL_MSVC_RT_MODE}d
         libeay32d
@@ -157,6 +158,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(LIB_EAY_RELEASE
       NAMES
         libcrypto${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
+        libcrypto${_OPENSSL_MSVC_RT_MODE}
         libcrypto
         libeay32${_OPENSSL_MSVC_RT_MODE}
         libeay32
@@ -170,6 +172,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(SSL_EAY_DEBUG
       NAMES
         libssl${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
+        libssl${_OPENSSL_MSVC_RT_MODE}d
         libssld
         ssleay32${_OPENSSL_MSVC_RT_MODE}d
         ssleay32d
@@ -182,6 +185,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(SSL_EAY_RELEASE
       NAMES
         libssl${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
+        libssl${_OPENSSL_MSVC_RT_MODE}
         libssl
         ssleay32${_OPENSSL_MSVC_RT_MODE}
         ssleay32

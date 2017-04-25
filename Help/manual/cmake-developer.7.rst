@@ -13,30 +13,6 @@ Introduction
 This manual is intended for reference by developers modifying the CMake
 source tree itself, and by those authoring externally-maintained modules.
 
-
-Permitted C++ Subset
-====================
-
-CMake is required to build with ancient C++ compilers and standard library
-implementations.  Some common C++ constructs may not be used in CMake in order
-to build with such toolchains.
-
-std::auto_ptr
--------------
-
-The ``std::auto_ptr`` template is deprecated in C++11.  We want to use it
-so we can build on C++98 compilers but we do not want to turn off compiler
-warnings about deprecated interfaces in general.  Use the ``CM_AUTO_PTR``
-macro instead.
-
-size_t
-------
-
-Various implementations have differing implementation of ``size_t``.  When
-assigning the result of ``.size()`` on a container for example, the result
-should be assigned to ``size_t`` not to ``std::size_t``, ``unsigned int`` or
-similar types.
-
 Adding Compile Features
 =======================
 

@@ -216,52 +216,60 @@ const char* cmGeneratorTarget::GetProperty(const std::string& prop) const
   return this->Target->GetProperty(prop);
 }
 
-const char* cmGeneratorTarget::GetOutputTargetType(bool implib) const
+const char* cmGeneratorTarget::GetOutputTargetType(
+  cmStateEnums::ArtifactType artifact) const
 {
   switch (this->GetType()) {
     case cmStateEnums::SHARED_LIBRARY:
       if (this->IsDLLPlatform()) {
-        if (implib) {
-          // A DLL import library is treated as an archive target.
-          return "ARCHIVE";
+        switch (artifact) {
+          case cmStateEnums::RuntimeBinaryArtifact:
+            // A DLL shared library is treated as a runtime target.
+            return "RUNTIME";
+          case cmStateEnums::ImportLibraryArtifact:
+            // A DLL import library is treated as an archive target.
+            return "ARCHIVE";
         }
-        // A DLL shared library is treated as a runtime target.
-        return "RUNTIME";
       } else {
         // For non-DLL platforms shared libraries are treated as
         // library targets.
         return "LIBRARY";
       }
+      break;
     case cmStateEnums::STATIC_LIBRARY:
       // Static libraries are always treated as archive targets.
       return "ARCHIVE";
     case cmStateEnums::MODULE_LIBRARY:
-      if (implib) {
-        // Module libraries are always treated as library targets.
-        return "ARCHIVE";
-      } else {
-        // Module import libraries are treated as archive targets.
-        return "LIBRARY";
+      switch (artifact) {
+        case cmStateEnums::RuntimeBinaryArtifact:
+          // Module import libraries are treated as archive targets.
+          return "LIBRARY";
+        case cmStateEnums::ImportLibraryArtifact:
+          // Module libraries are always treated as library targets.
+          return "ARCHIVE";
       }
+      break;
     case cmStateEnums::EXECUTABLE:
-      if (implib) {
-        // Executable import libraries are treated as archive targets.
-        return "ARCHIVE";
-      } else {
-        // Executables are always treated as runtime targets.
-        return "RUNTIME";
+      switch (artifact) {
+        case cmStateEnums::RuntimeBinaryArtifact:
+          // Executables are always treated as runtime targets.
+          return "RUNTIME";
+        case cmStateEnums::ImportLibraryArtifact:
+          // Executable import libraries are treated as archive targets.
+          return "ARCHIVE";
       }
+      break;
     default:
       break;
   }
   return "";
 }
 
-std::string cmGeneratorTarget::GetOutputName(const std::string& config,
-                                             bool implib) const
+std::string cmGeneratorTarget::GetOutputName(
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   // Lookup/compute/cache the output name for this configuration.
-  OutputNameKey key(config, implib);
+  OutputNameKey key(config, artifact);
   cmGeneratorTarget::OutputNameMapType::iterator i =
     this->OutputNameMap.find(key);
   if (i == this->OutputNameMap.end()) {
@@ -271,7 +279,7 @@ std::string cmGeneratorTarget::GetOutputName(const std::string& config,
 
     // Compute output name.
     std::vector<std::string> props;
-    std::string type = this->GetOutputTargetType(implib);
+    std::string type = this->GetOutputTargetType(artifact);
     std::string configUpper = cmSystemTools::UpperCase(config);
     if (!type.empty() && !configUpper.empty()) {
       // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME_<CONFIG>
@@ -528,6 +536,18 @@ const std::string& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
   return this->Objects[file];
 }
 
+const char* cmGeneratorTarget::GetCustomObjectExtension() const
+{
+  static std::string extension;
+  const bool has_ptx_extension =
+    this->GetPropertyAsBool("CUDA_PTX_COMPILATION");
+  if (has_ptx_extension) {
+    extension = ".ptx";
+    return extension.c_str();
+  }
+  return CM_NULLPTR;
+}
+
 void cmGeneratorTarget::AddExplicitObjectName(cmSourceFile const* sf)
 {
   this->ExplicitObjectName.insert(sf);
@@ -641,9 +661,10 @@ const char* cmGeneratorTarget::GetLocation(const std::string& config) const
 {
   static std::string location;
   if (this->IsImported()) {
-    location = this->Target->ImportedGetFullPath(config, false);
+    location = this->Target->ImportedGetFullPath(
+      config, cmStateEnums::RuntimeBinaryArtifact);
   } else {
-    location = this->GetFullPath(config, false);
+    location = this->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
   }
   return location.c_str();
 }
@@ -680,7 +701,8 @@ const char* cmGeneratorTarget::GetLocationForBuild() const
 {
   static std::string location;
   if (this->IsImported()) {
-    location = this->Target->ImportedGetFullPath("", false);
+    location = this->Target->ImportedGetFullPath(
+      "", cmStateEnums::RuntimeBinaryArtifact);
     return location.c_str();
   }
 
@@ -700,7 +722,7 @@ const char* cmGeneratorTarget::GetLocationForBuild() const
     }
   }
   location += "/";
-  location += this->GetFullName("", false);
+  location += this->GetFullName("", cmStateEnums::RuntimeBinaryArtifact);
   return location.c_str();
 }
 
@@ -1145,7 +1167,8 @@ std::string cmGeneratorTarget::GetCompilePDBName(
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->GetFullNameInternal(config, false, prefix, base, suffix);
+  this->GetFullNameInternal(config, cmStateEnums::RuntimeBinaryArtifact,
+                            prefix, base, suffix);
 
   // Check for a per-configuration output directory target property.
   std::string configUpper = cmSystemTools::UpperCase(config);
@@ -1506,7 +1529,8 @@ static bool shouldAddContentLevel(
 std::string cmGeneratorTarget::GetAppBundleDirectory(
   const std::string& config, BundleDirectoryLevel level) const
 {
-  std::string fpath = this->GetFullName(config, false);
+  std::string fpath =
+    this->GetFullName(config, cmStateEnums::RuntimeBinaryArtifact);
   fpath += ".";
   const char* ext = this->GetProperty("BUNDLE_EXTENSION");
   if (!ext) {
@@ -1532,7 +1556,7 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(
   const std::string& config, BundleDirectoryLevel level) const
 {
   std::string fpath;
-  fpath += this->GetOutputName(config, false);
+  fpath += this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact);
   fpath += ".";
   const char* ext = this->GetProperty("BUNDLE_EXTENSION");
   if (!ext) {
@@ -1556,7 +1580,7 @@ std::string cmGeneratorTarget::GetFrameworkDirectory(
   const std::string& config, BundleDirectoryLevel level) const
 {
   std::string fpath;
-  fpath += this->GetOutputName(config, false);
+  fpath += this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact);
   fpath += ".";
   const char* ext = this->GetProperty("BUNDLE_EXTENSION");
   if (!ext) {
@@ -1570,13 +1594,13 @@ std::string cmGeneratorTarget::GetFrameworkDirectory(
   return fpath;
 }
 
-std::string cmGeneratorTarget::GetFullName(const std::string& config,
-                                           bool implib) const
+std::string cmGeneratorTarget::GetFullName(
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   if (this->IsImported()) {
-    return this->GetFullNameImported(config, implib);
+    return this->GetFullNameImported(config, artifact);
   }
-  return this->GetFullNameInternal(config, implib);
+  return this->GetFullNameInternal(config, artifact);
 }
 
 std::string cmGeneratorTarget::GetInstallNameDirForBuildTree(
@@ -1869,13 +1893,11 @@ void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
   }
 }
 
-void cmGeneratorTarget::GetFullNameComponents(std::string& prefix,
-                                              std::string& base,
-                                              std::string& suffix,
-                                              const std::string& config,
-                                              bool implib) const
+void cmGeneratorTarget::GetFullNameComponents(
+  std::string& prefix, std::string& base, std::string& suffix,
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
-  this->GetFullNameInternal(config, implib, prefix, base, suffix);
+  this->GetFullNameInternal(config, artifact, prefix, base, suffix);
 }
 
 std::string cmGeneratorTarget::BuildBundleDirectory(
@@ -1896,10 +1918,10 @@ std::string cmGeneratorTarget::BuildBundleDirectory(
 }
 
 std::string cmGeneratorTarget::GetMacContentDirectory(
-  const std::string& config, bool implib) const
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   // Start with the output directory for the target.
-  std::string fpath = this->GetDirectory(config, implib);
+  std::string fpath = this->GetDirectory(config, artifact);
   fpath += "/";
   BundleDirectoryLevel level = ContentLevel;
   if (this->IsFrameworkOnApple()) {
@@ -2860,7 +2882,8 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
   }
 
   // Get the directory.
-  std::string dir = this->GetDirectory(config, false);
+  std::string dir =
+    this->GetDirectory(config, cmStateEnums::RuntimeBinaryArtifact);
 
   // Add each name.
   std::string f;
@@ -2889,7 +2912,7 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
     gg->AddToManifest(f);
   }
   if (!impName.empty()) {
-    f = this->GetDirectory(config, true);
+    f = this->GetDirectory(config, cmStateEnums::ImportLibraryArtifact);
     f += "/";
     f += impName;
     gg->AddToManifest(f);
@@ -2907,19 +2930,20 @@ std::string cmGeneratorTarget::GetImportedLibName(
 }
 
 std::string cmGeneratorTarget::GetFullPath(const std::string& config,
-                                           bool implib, bool realname) const
+                                           cmStateEnums::ArtifactType artifact,
+                                           bool realname) const
 {
   if (this->IsImported()) {
-    return this->Target->ImportedGetFullPath(config, implib);
+    return this->Target->ImportedGetFullPath(config, artifact);
   }
-  return this->NormalGetFullPath(config, implib, realname);
+  return this->NormalGetFullPath(config, artifact, realname);
 }
 
-std::string cmGeneratorTarget::NormalGetFullPath(const std::string& config,
-                                                 bool implib,
-                                                 bool realname) const
+std::string cmGeneratorTarget::NormalGetFullPath(
+  const std::string& config, cmStateEnums::ArtifactType artifact,
+  bool realname) const
 {
-  std::string fpath = this->GetDirectory(config, implib);
+  std::string fpath = this->GetDirectory(config, artifact);
   fpath += "/";
   if (this->IsAppBundleOnApple()) {
     fpath = this->BuildBundleDirectory(fpath, config, FullLevel);
@@ -2927,12 +2951,18 @@ std::string cmGeneratorTarget::NormalGetFullPath(const std::string& config,
   }
 
   // Add the full name of the target.
-  if (implib) {
-    fpath += this->GetFullName(config, true);
-  } else if (realname) {
-    fpath += this->NormalGetRealName(config);
-  } else {
-    fpath += this->GetFullName(config, false);
+  switch (artifact) {
+    case cmStateEnums::RuntimeBinaryArtifact:
+      if (realname) {
+        fpath += this->NormalGetRealName(config);
+      } else {
+        fpath +=
+          this->GetFullName(config, cmStateEnums::RuntimeBinaryArtifact);
+      }
+      break;
+    case cmStateEnums::ImportLibraryArtifact:
+      fpath += this->GetFullName(config, cmStateEnums::ImportLibraryArtifact);
+      break;
   }
   return fpath;
 }
@@ -3009,7 +3039,8 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name, std::string& soName,
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->GetFullNameInternal(config, false, prefix, base, suffix);
+  this->GetFullNameInternal(config, cmStateEnums::RuntimeBinaryArtifact,
+                            prefix, base, suffix);
 
   // The library name.
   name = prefix + base + suffix;
@@ -3034,7 +3065,8 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name, std::string& soName,
   // The import library name.
   if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
       this->GetType() == cmStateEnums::MODULE_LIBRARY) {
-    impName = this->GetFullNameInternal(config, true);
+    impName =
+      this->GetFullNameInternal(config, cmStateEnums::ImportLibraryArtifact);
   } else {
     impName = "";
   }
@@ -3075,7 +3107,8 @@ void cmGeneratorTarget::GetExecutableNames(std::string& name,
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->GetFullNameInternal(config, false, prefix, base, suffix);
+  this->GetFullNameInternal(config, cmStateEnums::RuntimeBinaryArtifact,
+                            prefix, base, suffix);
 
   // The executable name.
   name = prefix + base + suffix;
@@ -3095,19 +3128,20 @@ void cmGeneratorTarget::GetExecutableNames(std::string& name,
 #endif
 
   // The import library name.
-  impName = this->GetFullNameInternal(config, true);
+  impName =
+    this->GetFullNameInternal(config, cmStateEnums::ImportLibraryArtifact);
 
   // The program database file name.
   pdbName = this->GetPDBName(config);
 }
 
-std::string cmGeneratorTarget::GetFullNameInternal(const std::string& config,
-                                                   bool implib) const
+std::string cmGeneratorTarget::GetFullNameInternal(
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->GetFullNameInternal(config, implib, prefix, base, suffix);
+  this->GetFullNameInternal(config, artifact, prefix, base, suffix);
   return prefix + base + suffix;
 }
 
@@ -3116,22 +3150,21 @@ const char* cmGeneratorTarget::ImportedGetLocation(
 {
   static std::string location;
   assert(this->IsImported());
-  location = this->Target->ImportedGetFullPath(config, false);
+  location = this->Target->ImportedGetFullPath(
+    config, cmStateEnums::RuntimeBinaryArtifact);
   return location.c_str();
 }
 
-std::string cmGeneratorTarget::GetFullNameImported(const std::string& config,
-                                                   bool implib) const
+std::string cmGeneratorTarget::GetFullNameImported(
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   return cmSystemTools::GetFilenameName(
-    this->Target->ImportedGetFullPath(config, implib));
+    this->Target->ImportedGetFullPath(config, artifact));
 }
 
-void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
-                                            bool implib,
-                                            std::string& outPrefix,
-                                            std::string& outBase,
-                                            std::string& outSuffix) const
+void cmGeneratorTarget::GetFullNameInternal(
+  const std::string& config, cmStateEnums::ArtifactType artifact,
+  std::string& outPrefix, std::string& outBase, std::string& outSuffix) const
 {
   // Use just the target name for non-main target types.
   if (this->GetType() != cmStateEnums::STATIC_LIBRARY &&
@@ -3144,9 +3177,12 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
     return;
   }
 
+  const bool isImportedLibraryArtifact =
+    (artifact == cmStateEnums::ImportLibraryArtifact);
+
   // Return an empty name for the import library if this platform
   // does not support import libraries.
-  if (implib &&
+  if (isImportedLibraryArtifact &&
       !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
     outPrefix = "";
     outBase = "";
@@ -3159,14 +3195,16 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
   if (this->GetType() != cmStateEnums::SHARED_LIBRARY &&
       this->GetType() != cmStateEnums::MODULE_LIBRARY &&
       this->GetType() != cmStateEnums::EXECUTABLE) {
-    implib = false;
+    artifact = cmStateEnums::RuntimeBinaryArtifact;
   }
 
   // Compute the full name for main target types.
-  const char* targetPrefix = (implib ? this->GetProperty("IMPORT_PREFIX")
-                                     : this->GetProperty("PREFIX"));
-  const char* targetSuffix = (implib ? this->GetProperty("IMPORT_SUFFIX")
-                                     : this->GetProperty("SUFFIX"));
+  const char* targetPrefix =
+    (isImportedLibraryArtifact ? this->GetProperty("IMPORT_PREFIX")
+                               : this->GetProperty("PREFIX"));
+  const char* targetSuffix =
+    (isImportedLibraryArtifact ? this->GetProperty("IMPORT_SUFFIX")
+                               : this->GetProperty("SUFFIX"));
   const char* configPostfix = CM_NULLPTR;
   if (!config.empty()) {
     std::string configProp = cmSystemTools::UpperCase(config);
@@ -3178,8 +3216,8 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
       configPostfix = CM_NULLPTR;
     }
   }
-  const char* prefixVar = this->Target->GetPrefixVariableInternal(implib);
-  const char* suffixVar = this->Target->GetSuffixVariableInternal(implib);
+  const char* prefixVar = this->Target->GetPrefixVariableInternal(artifact);
+  const char* suffixVar = this->Target->GetSuffixVariableInternal(artifact);
 
   // Check for language-specific default prefix and suffix.
   std::string ll = this->GetLinkerLanguage(config);
@@ -3223,14 +3261,15 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
   outPrefix = targetPrefix ? targetPrefix : "";
 
   // Append the target name or property-specified name.
-  outBase += this->GetOutputName(config, implib);
+  outBase += this->GetOutputName(config, artifact);
 
   // Append the per-configuration postfix.
   outBase += configPostfix ? configPostfix : "";
 
   // Name shared libraries with their version number on some platforms.
   if (const char* soversion = this->GetProperty("SOVERSION")) {
-    if (this->GetType() == cmStateEnums::SHARED_LIBRARY && !implib &&
+    if (this->GetType() == cmStateEnums::SHARED_LIBRARY &&
+        !isImportedLibraryArtifact &&
         this->Makefile->IsOn("CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION")) {
       outBase += "-";
       outBase += soversion;
@@ -3252,7 +3291,8 @@ std::string cmGeneratorTarget::GetPDBName(const std::string& config) const
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->GetFullNameInternal(config, false, prefix, base, suffix);
+  this->GetFullNameInternal(config, cmStateEnums::RuntimeBinaryArtifact,
+                            prefix, base, suffix);
 
   std::vector<std::string> props;
   std::string configUpper = cmSystemTools::UpperCase(config);
@@ -3933,15 +3973,14 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
             << theTarget->GetName() << "\".\n";
           cmSystemTools::Error(e.str().c_str());
           break;
-        } else {
-          propContent = consistent.second;
-          continue;
         }
-      } else {
-        // Explicitly set on target and not set in iface. Can't disagree.
+        propContent = consistent.second;
         continue;
       }
-    } else if (impliedByUse) {
+      // Explicitly set on target and not set in iface. Can't disagree.
+      continue;
+    }
+    if (impliedByUse) {
       propContent = impliedValue<PropertyType>(propContent);
 
       if (ifaceIsSet) {
@@ -3959,43 +3998,36 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
             << "\" is in conflict.\n";
           cmSystemTools::Error(e.str().c_str());
           break;
-        } else {
-          propContent = consistent.second;
-          continue;
         }
-      } else {
-        // Implicitly set on target and not set in iface. Can't disagree.
+        propContent = consistent.second;
         continue;
       }
+      // Implicitly set on target and not set in iface. Can't disagree.
+      continue;
+    }
+    if (ifaceIsSet) {
+      if (propInitialized) {
+        std::pair<bool, PropertyType> consistent =
+          consistentProperty(propContent, ifacePropContent, t);
+        report += reportEntry;
+        report += compatibilityAgree(t, propContent != consistent.second);
+        if (!consistent.first) {
+          std::ostringstream e;
+          e << "The INTERFACE_" << p << " property of \""
+            << theTarget->GetName() << "\" does\nnot agree with the value of "
+            << p << " already determined\nfor \"" << tgt->GetName() << "\".\n";
+          cmSystemTools::Error(e.str().c_str());
+          break;
+        }
+        propContent = consistent.second;
+        continue;
+      }
+      report += reportEntry + "(Interface set)\n";
+      propContent = ifacePropContent;
+      propInitialized = true;
     } else {
-      if (ifaceIsSet) {
-        if (propInitialized) {
-          std::pair<bool, PropertyType> consistent =
-            consistentProperty(propContent, ifacePropContent, t);
-          report += reportEntry;
-          report += compatibilityAgree(t, propContent != consistent.second);
-          if (!consistent.first) {
-            std::ostringstream e;
-            e << "The INTERFACE_" << p << " property of \""
-              << theTarget->GetName() << "\" does\nnot agree with the value "
-                                         "of "
-              << p << " already determined\nfor \"" << tgt->GetName()
-              << "\".\n";
-            cmSystemTools::Error(e.str().c_str());
-            break;
-          } else {
-            propContent = consistent.second;
-            continue;
-          }
-        } else {
-          report += reportEntry + "(Interface set)\n";
-          propContent = ifacePropContent;
-          propInitialized = true;
-        }
-      } else {
-        // Not set. Nothing to agree on.
-        continue;
-      }
+      // Not set. Nothing to agree on.
+      continue;
     }
   }
 
@@ -4404,26 +4436,31 @@ const cmLinkInterfaceLibraries* cmGeneratorTarget::GetLinkInterfaceLibraries(
   return iface.Exists ? &iface : CM_NULLPTR;
 }
 
-std::string cmGeneratorTarget::GetDirectory(const std::string& config,
-                                            bool implib) const
+std::string cmGeneratorTarget::GetDirectory(
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   if (this->IsImported()) {
     // Return the directory from which the target is imported.
     return cmSystemTools::GetFilenamePath(
-      this->Target->ImportedGetFullPath(config, implib));
+      this->Target->ImportedGetFullPath(config, artifact));
   }
   if (OutputInfo const* info = this->GetOutputInfo(config)) {
     // Return the directory in which the target will be built.
-    return implib ? info->ImpDir : info->OutDir;
+    switch (artifact) {
+      case cmStateEnums::RuntimeBinaryArtifact:
+        return info->OutDir;
+      case cmStateEnums::ImportLibraryArtifact:
+        return info->ImpDir;
+    }
   }
   return "";
 }
 
-bool cmGeneratorTarget::UsesDefaultOutputDir(const std::string& config,
-                                             bool implib) const
+bool cmGeneratorTarget::UsesDefaultOutputDir(
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   std::string dir;
-  return this->ComputeOutputDir(config, implib, dir);
+  return this->ComputeOutputDir(config, artifact, dir);
 }
 
 cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
@@ -4457,8 +4494,10 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
     i = this->OutputInfoMap.insert(entry).first;
 
     // Compute output directories.
-    this->ComputeOutputDir(config, false, info.OutDir);
-    this->ComputeOutputDir(config, true, info.ImpDir);
+    this->ComputeOutputDir(config, cmStateEnums::RuntimeBinaryArtifact,
+                           info.OutDir);
+    this->ComputeOutputDir(config, cmStateEnums::ImportLibraryArtifact,
+                           info.ImpDir);
     if (!this->ComputePDBOutputDir("PDB", config, info.PdbDir)) {
       info.PdbDir = info.OutDir;
     }
@@ -4478,14 +4517,15 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
 }
 
 bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
-                                         bool implib, std::string& out) const
+                                         cmStateEnums::ArtifactType artifact,
+                                         std::string& out) const
 {
   bool usesDefaultOutputDir = false;
   std::string conf = config;
 
   // Look for a target property defining the target output directory
   // based on the target type.
-  std::string targetTypeName = this->GetOutputTargetType(implib);
+  std::string targetTypeName = this->GetOutputTargetType(artifact);
   const char* propertyName = CM_NULLPTR;
   std::string propertyNameStr = targetTypeName;
   if (!propertyNameStr.empty()) {

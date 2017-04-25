@@ -41,6 +41,9 @@ public:
                                         std::string const& config);
 
 protected:
+  cmLinkLineComputer(cmLinkLineComputer const&);
+  cmLinkLineComputer& operator=(cmLinkLineComputer const&);
+
   std::string ComputeLinkLibs(cmComputeLinkInformation& cli);
   std::string ComputeRPath(cmComputeLinkInformation& cli);
 

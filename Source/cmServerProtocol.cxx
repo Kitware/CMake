@@ -763,9 +763,11 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
 
   if (target->HaveWellDefinedOutputFiles()) {
     Json::Value artifacts = Json::arrayValue;
-    artifacts.append(target->GetFullPath(config, false));
+    artifacts.append(
+      target->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact));
     if (target->IsDLLPlatform()) {
-      artifacts.append(target->GetFullPath(config, true));
+      artifacts.append(
+        target->GetFullPath(config, cmStateEnums::ImportLibraryArtifact));
       const cmGeneratorTarget::OutputInfo* output =
         target->GetOutputInfo(config);
       if (output && !output->PdbDir.empty()) {

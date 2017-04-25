@@ -288,7 +288,7 @@ public:
     hasFiles = false;
     hasErrors = false;
 
-    basePath = cmSystemTools::GetFilenamePath(installer->Resources[r].data());
+    basePath = cmSystemTools::GetFilenamePath(installer->Resources[r]);
 
     ParseFile(installer->Resources[r].data());
 
@@ -360,8 +360,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
       cmSystemTools::GetFilenameName(InstallerApplicationIcon);
     std::string path = Directory + "/config/" + name;
     name = cmSystemTools::GetFilenameWithoutExtension(name);
-    cmsys::SystemTools::CopyFileIfDifferent(InstallerApplicationIcon.data(),
-                                            path.data());
+    cmsys::SystemTools::CopyFileIfDifferent(InstallerApplicationIcon, path);
     xout.Element("InstallerApplicationIcon", name);
   }
 
@@ -369,8 +368,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   if (!InstallerWindowIcon.empty()) {
     std::string name = cmSystemTools::GetFilenameName(InstallerWindowIcon);
     std::string path = Directory + "/config/" + name;
-    cmsys::SystemTools::CopyFileIfDifferent(InstallerWindowIcon.data(),
-                                            path.data());
+    cmsys::SystemTools::CopyFileIfDifferent(InstallerWindowIcon, path);
     xout.Element("InstallerWindowIcon", name);
   }
 
@@ -378,7 +376,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   if (!Logo.empty()) {
     std::string name = cmSystemTools::GetFilenameName(Logo);
     std::string path = Directory + "/config/" + name;
-    cmsys::SystemTools::CopyFileIfDifferent(Logo.data(), path.data());
+    cmsys::SystemTools::CopyFileIfDifferent(Logo, path);
     xout.Element("Logo", name);
   }
 
@@ -386,7 +384,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   if (!Banner.empty()) {
     std::string name = cmSystemTools::GetFilenameName(Banner);
     std::string path = Directory + "/config/" + name;
-    cmsys::SystemTools::CopyFileIfDifferent(Banner.data(), path.data());
+    cmsys::SystemTools::CopyFileIfDifferent(Banner, path);
     xout.Element("Banner", name);
   }
 
@@ -394,7 +392,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   if (!Watermark.empty()) {
     std::string name = cmSystemTools::GetFilenameName(Watermark);
     std::string path = Directory + "/config/" + name;
-    cmsys::SystemTools::CopyFileIfDifferent(Watermark.data(), path.data());
+    cmsys::SystemTools::CopyFileIfDifferent(Watermark, path);
     xout.Element("Watermark", name);
   }
 
@@ -402,7 +400,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   if (!Background.empty()) {
     std::string name = cmSystemTools::GetFilenameName(Background);
     std::string path = Directory + "/config/" + name;
-    cmsys::SystemTools::CopyFileIfDifferent(Background.data(), path.data());
+    cmsys::SystemTools::CopyFileIfDifferent(Background, path);
     xout.Element("Background", name);
   }
 
@@ -480,7 +478,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   if (!IsVersionLess("2.0") && !ControlScript.empty()) {
     std::string name = cmSystemTools::GetFilenameName(ControlScript);
     std::string path = Directory + "/config/" + name;
-    cmsys::SystemTools::CopyFileIfDifferent(ControlScript.data(), path.data());
+    cmsys::SystemTools::CopyFileIfDifferent(ControlScript, path);
     xout.Element("ControlScript", name);
   }
 
@@ -492,8 +490,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
       if (parser.ParseResource(i)) {
         std::string name = cmSystemTools::GetFilenameName(Resources[i]);
         std::string path = Directory + "/resources/" + name;
-        cmsys::SystemTools::CopyFileIfDifferent(Resources[i].data(),
-                                                path.data());
+        cmsys::SystemTools::CopyFileIfDifferent(Resources[i], path);
         resources.push_back(name);
       } else {
         cmCPackLogger(cmCPackLog::LOG_WARNING, "Can't copy resources from \""

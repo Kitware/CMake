@@ -570,6 +570,46 @@ std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
   return args;
 }
 
+size_t cmSystemTools::CalculateCommandLineLengthLimit()
+{
+  size_t sz =
+#ifdef _WIN32
+    // There's a maximum of 65536 bytes and thus 32768 WCHARs on Windows
+    // However, cmd.exe itself can only handle 8191 WCHARs and Ninja for
+    // example uses it to spawn processes.
+    size_t(8191);
+#elif defined(__linux)
+    // MAX_ARG_STRLEN is the maximum length of a string permissible for
+    // the execve() syscall on Linux. It's defined as (PAGE_SIZE * 32)
+    // in Linux's binfmts.h
+    static_cast<size_t>(sysconf(_SC_PAGESIZE) * 32);
+#else
+    size_t(0);
+#endif
+
+#if defined(_SC_ARG_MAX)
+  // ARG_MAX is the maximum size of the command and environment
+  // that can be passed to the exec functions on UNIX.
+  // The value in limits.h does not need to be present and may
+  // depend upon runtime memory constraints, hence sysconf()
+  // should be used to query it.
+  long szArgMax = sysconf(_SC_ARG_MAX);
+  // A return value of -1 signifies an undetermined limit, but
+  // it does not imply an infinite limit, and thus is ignored.
+  if (szArgMax != -1) {
+    // We estimate the size of the environment block to be 1000.
+    // This isn't accurate at all, but leaves some headroom.
+    szArgMax = szArgMax < 1000 ? 0 : szArgMax - 1000;
+#if defined(_WIN32) || defined(__linux)
+    sz = std::min(sz, static_cast<size_t>(szArgMax));
+#else
+    sz = static_cast<size_t>(szArgMax);
+#endif
+  }
+#endif
+  return sz;
+}
+
 bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      std::string* captureStdOut,
                                      std::string* captureStdErr, int* retVal,
@@ -617,8 +657,6 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
     while ((pipe = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) >
            0) {
       // Translate NULL characters in the output into valid text.
-      // Visual Studio 7 puts these characters in the output of its
-      // build process.
       for (int i = 0; i < length; ++i) {
         if (data[i] == '\0') {
           data[i] = ' ';
@@ -1669,7 +1707,8 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
     for (; outiter != out.end(); ++outiter) {
       if ((*outiter == '\r') && ((outiter + 1) == out.end())) {
         break;
-      } else if (*outiter == '\n' || *outiter == '\0') {
+      }
+      if (*outiter == '\n' || *outiter == '\0') {
         std::vector<char>::size_type length = outiter - out.begin();
         if (length > 1 && *(outiter - 1) == '\r') {
           --length;
@@ -1686,7 +1725,8 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
     for (; erriter != err.end(); ++erriter) {
       if ((*erriter == '\r') && ((erriter + 1) == err.end())) {
         break;
-      } else if (*erriter == '\n' || *erriter == '\0') {
+      }
+      if (*erriter == '\n' || *erriter == '\0') {
         std::vector<char>::size_type length = erriter - err.begin();
         if (length > 1 && *(erriter - 1) == '\r') {
           --length;
@@ -2585,29 +2625,28 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
         it = dentries.erase(it);
         entriesErased++;
         continue;
-      } else {
-        if (cmELF::TagMipsRldMapRel != 0 &&
-            it->first == cmELF::TagMipsRldMapRel) {
-          // Background: debuggers need to know the "linker map" which contains
-          // the addresses each dynamic object is loaded at. Most arches use
-          // the DT_DEBUG tag which the dynamic linker writes to (directly) and
-          // contain the location of the linker map, however on MIPS the
-          // .dynamic section is always read-only so this is not possible. MIPS
-          // objects instead contain a DT_MIPS_RLD_MAP tag which contains the
-          // address where the dyanmic linker will write to (an indirect
-          // version of DT_DEBUG). Since this doesn't work when using PIE, a
-          // relative equivalent was created - DT_MIPS_RLD_MAP_REL. Since this
-          // version contains a relative offset, moving it changes the
-          // calculated address. This may cause the dyanmic linker to write
-          // into memory it should not be changing.
-          //
-          // To fix this, we adjust the value of DT_MIPS_RLD_MAP_REL here. If
-          // we move it up by n bytes, we add n bytes to the value of this tag.
-          it->second += entriesErased * sizeof_dentry;
-        }
-
-        it++;
       }
+      if (cmELF::TagMipsRldMapRel != 0 &&
+          it->first == cmELF::TagMipsRldMapRel) {
+        // Background: debuggers need to know the "linker map" which contains
+        // the addresses each dynamic object is loaded at. Most arches use
+        // the DT_DEBUG tag which the dynamic linker writes to (directly) and
+        // contain the location of the linker map, however on MIPS the
+        // .dynamic section is always read-only so this is not possible. MIPS
+        // objects instead contain a DT_MIPS_RLD_MAP tag which contains the
+        // address where the dyanmic linker will write to (an indirect
+        // version of DT_DEBUG). Since this doesn't work when using PIE, a
+        // relative equivalent was created - DT_MIPS_RLD_MAP_REL. Since this
+        // version contains a relative offset, moving it changes the
+        // calculated address. This may cause the dyanmic linker to write
+        // into memory it should not be changing.
+        //
+        // To fix this, we adjust the value of DT_MIPS_RLD_MAP_REL here. If
+        // we move it up by n bytes, we add n bytes to the value of this tag.
+        it->second += entriesErased * sizeof_dentry;
+      }
+
+      it++;
     }
 
     // Encode new entries list

@@ -32,9 +32,8 @@ bool cmSetTestsPropertiesCommand::InitialPass(
       }
       propertyPairs.insert(propertyPairs.end(), j, args.end());
       break;
-    } else {
-      numFiles++;
     }
+    numFiles++;
   }
   if (propertyPairs.empty()) {
     this->SetError("called with illegal arguments, maybe "

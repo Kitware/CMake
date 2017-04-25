@@ -63,15 +63,6 @@ if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 6.1)
   set(Swift_ARGS -DXCODE_BELOW_6_1=1)
 endif()
 
-if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 3)
-  set(GeneratorToolset_ARGS -DXCODE_BELOW_3=1)
-endif()
-
-if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 2)
-  set(TargetSources_ARGS -DXCODE_BELOW_2=1)
-  set(File_Generate_ARGS -DXCODE_BELOW_2=1)
-endif()
-
 # Test MSVC for older host CMake versions, and test
 # WIN32/CMAKE_C_COMPILER_ID to fix check on Intel for Windows.
 if(MSVC OR (WIN32 AND CMAKE_C_COMPILER_ID MATCHES "MSVC|Intel"))
@@ -119,6 +110,10 @@ if(CMAKE_GENERATOR MATCHES "Make")
   add_RunCMake_test(Make)
 endif()
 if(CMAKE_GENERATOR STREQUAL "Ninja")
+  set(Ninja_ARGS
+    -DCMAKE_C_OUTPUT_EXTENSION=${CMAKE_C_OUTPUT_EXTENSION}
+    -DCMAKE_SHARED_LIBRARY_PREFIX=${CMAKE_SHARED_LIBRARY_PREFIX}
+    -DCMAKE_SHARED_LIBRARY_SUFFIX=${CMAKE_SHARED_LIBRARY_SUFFIX})
   add_RunCMake_test(Ninja)
 endif()
 add_RunCMake_test(CTest)
@@ -270,17 +265,17 @@ endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   add_RunCMake_test(include_external_msproject)
-  if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([789]|10)" AND NOT CMAKE_VS_DEVENV_COMMAND)
+  if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([89]|10)" AND NOT CMAKE_VS_DEVENV_COMMAND)
     set(NO_USE_FOLDERS 1)
   endif()
   add_RunCMake_test(VSSolution -DNO_USE_FOLDERS=${NO_USE_FOLDERS})
 endif()
 
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^789]|[789][0-9])")
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^89]|[89][0-9])")
   add_RunCMake_test(VS10Project)
 endif()
 
-if(XCODE_VERSION AND NOT "${XCODE_VERSION}" VERSION_LESS 3)
+if(XCODE_VERSION)
   add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION})
 endif()
 
@@ -328,19 +323,6 @@ add_executable(pseudo_emulator_custom_command pseudo_emulator_custom_command.c)
 add_RunCMake_test(CrosscompilingEmulator
  -DPSEUDO_EMULATOR=$<TARGET_FILE:pseudo_emulator>
  -DPSEUDO_EMULATOR_CUSTOM_COMMAND=$<TARGET_FILE:pseudo_emulator_custom_command>)
-# Xcode 2.x forgets to create the output directory before linking
-# the individual architectures.
-if(CMAKE_OSX_ARCHITECTURES AND XCODE AND NOT "${XCODE_VERSION}" MATCHES "^[^12]")
-  add_custom_command(
-    TARGET pseudo_emulator
-    PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CFG_INTDIR}"
-    )
-  add_custom_command(
-    TARGET pseudo_emulator_custom_command
-    PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CFG_INTDIR}"
-    )
-endif()
-
 if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   if(UNIX AND NOT CYGWIN)
     execute_process(COMMAND ldd --help

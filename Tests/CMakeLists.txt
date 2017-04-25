@@ -46,7 +46,7 @@ if(BUILD_TESTING)
   set(CMake_TEST_DEVENV "")
   if(CMAKE_VS_DEVENV_COMMAND)
     set(CMake_TEST_DEVENV "${CMAKE_VS_DEVENV_COMMAND}")
-  elseif(CMAKE_GENERATOR MATCHES "Visual Studio [7-9] " AND
+  elseif(CMAKE_GENERATOR MATCHES "Visual Studio [89] " AND
       NOT CMAKE_MAKE_PROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
     set(CMake_TEST_DEVENV "${CMAKE_MAKE_PROGRAM}")
   endif()
@@ -325,7 +325,7 @@ if(BUILD_TESTING)
     endif()
   endif()
 
-  if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^789]|[789][0-9])")
+  if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^89]|[89][0-9])")
     ADD_TEST_MACRO(CSharpOnly CSharpOnly)
   endif()
 
@@ -626,8 +626,8 @@ if(BUILD_TESTING)
   endif()
 
   # test for correct sub-project generation
-  # not implemented in VS 7.0, Xcode, or Ninja
-  if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 7$|Xcode|Ninja")
+  # not implemented in Xcode or Ninja
+  if(NOT CMAKE_GENERATOR MATCHES "Xcode|Ninja")
     # run cmake and configure all of SubProject
     # but only build the independent executable car
     add_test(SubProject ${CMAKE_CTEST_COMMAND}
@@ -1942,7 +1942,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   endif()
 
   if(MSVC AND NOT MSVC_VERSION LESS 1310
-     AND NOT CMAKE_GENERATOR MATCHES "Visual Studio 7( |$)"
      AND (NOT CMAKE_GENERATOR MATCHES "Visual Studio [89]( |$)"
           OR CMAKE_SIZEOF_VOID_P EQUAL 4)
       )
@@ -1954,7 +1953,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       ADD_TEST_MACRO(SBCS SBCS)
     endif()
 
-    if(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio [789]( |$)"
+    if(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio [89]( |$)"
         AND NOT CMAKE_GENERATOR_TOOLSET)
       ADD_TEST_MACRO(VSWindowsFormsResx VSWindowsFormsResx)
     endif()
@@ -2153,7 +2152,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endif()
   endif()
 
-  if(CMAKE_GENERATOR MATCHES "Visual Studio ([^789]|[789][0-9])" AND nasm)
+  if(CMAKE_GENERATOR MATCHES "Visual Studio ([^89]|[89][0-9])" AND nasm)
     ADD_TEST_MACRO(VSNASM VSNASM)
   endif()
 

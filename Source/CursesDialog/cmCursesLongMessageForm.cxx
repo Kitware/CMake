@@ -159,7 +159,8 @@ void cmCursesLongMessageForm::HandleInput()
     // quit
     if (key == 'o' || key == 'e') {
       break;
-    } else if (key == KEY_DOWN || key == ctrl('n')) {
+    }
+    if (key == KEY_DOWN || key == ctrl('n')) {
       form_driver(this->Form, REQ_SCR_FLINE);
     } else if (key == KEY_UP || key == ctrl('p')) {
       form_driver(this->Form, REQ_SCR_BLINE);

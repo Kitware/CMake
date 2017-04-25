@@ -253,6 +253,8 @@ public:
   static void ParseUnixCommandLine(const char* command,
                                    std::vector<std::string>& args);
 
+  static size_t CalculateCommandLineLengthLimit();
+
   static void EnableMessages() { s_DisableMessages = false; }
   static void DisableMessages() { s_DisableMessages = true; }
   static void DisableRunCommandOutput() { s_DisableRunCommandOutput = true; }
@@ -379,9 +381,12 @@ public:
   {
   public:
     SaveRestoreEnvironment();
-    virtual ~SaveRestoreEnvironment();
+    ~SaveRestoreEnvironment();
 
   private:
+    SaveRestoreEnvironment(SaveRestoreEnvironment const&);
+    SaveRestoreEnvironment& operator=(SaveRestoreEnvironment const&);
+
     std::vector<std::string> Env;
   };
 #endif

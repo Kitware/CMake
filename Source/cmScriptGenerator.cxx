@@ -90,8 +90,7 @@ void cmScriptGenerator::GenerateScript(std::ostream& os)
   this->GenerateScriptConfigs(os, indent);
 }
 
-void cmScriptGenerator::GenerateScriptConfigs(std::ostream& os,
-                                              Indent const& indent)
+void cmScriptGenerator::GenerateScriptConfigs(std::ostream& os, Indent indent)
 {
   if (this->ActionsPerConfig) {
     this->GenerateScriptActionsPerConfig(os, indent);
@@ -100,8 +99,7 @@ void cmScriptGenerator::GenerateScriptConfigs(std::ostream& os,
   }
 }
 
-void cmScriptGenerator::GenerateScriptActions(std::ostream& os,
-                                              Indent const& indent)
+void cmScriptGenerator::GenerateScriptActions(std::ostream& os, Indent indent)
 {
   if (this->ActionsPerConfig) {
     // This is reached for single-configuration build generators in a
@@ -112,7 +110,7 @@ void cmScriptGenerator::GenerateScriptActions(std::ostream& os,
 
 void cmScriptGenerator::GenerateScriptForConfig(std::ostream& /*unused*/,
                                                 const std::string& /*unused*/,
-                                                Indent const& /*unused*/)
+                                                Indent /*unused*/)
 {
   // No actions for this generator.
 }
@@ -138,7 +136,7 @@ bool cmScriptGenerator::GeneratesForConfig(const std::string& config)
 }
 
 void cmScriptGenerator::GenerateScriptActionsOnce(std::ostream& os,
-                                                  Indent const& indent)
+                                                  Indent indent)
 {
   if (this->Configurations.empty()) {
     // This rule is for all configurations.
@@ -153,7 +151,7 @@ void cmScriptGenerator::GenerateScriptActionsOnce(std::ostream& os,
 }
 
 void cmScriptGenerator::GenerateScriptActionsPerConfig(std::ostream& os,
-                                                       Indent const& indent)
+                                                       Indent indent)
 {
   if (this->ConfigurationTypes->empty()) {
     // In a single-configuration generator there is only one action

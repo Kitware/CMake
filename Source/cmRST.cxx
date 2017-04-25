@@ -96,14 +96,14 @@ void cmRST::ProcessModule(std::istream& is)
         if (line == "#") {
           this->ProcessLine("");
           continue;
-        } else if (line.substr(0, 2) == "# ") {
+        }
+        if (line.substr(0, 2) == "# ") {
           this->ProcessLine(line.substr(2, line.npos));
           continue;
-        } else {
-          rst = "";
-          this->Reset();
-          this->OutputLinePending = true;
         }
+        rst = "";
+        this->Reset();
+        this->OutputLinePending = true;
       }
       if (line == "#.rst:") {
         rst = "#";

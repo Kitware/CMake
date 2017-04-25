@@ -32,7 +32,8 @@ struct cmDocumentationEntry;
 class cmGlobalXCodeGenerator : public cmGlobalGenerator
 {
 public:
-  cmGlobalXCodeGenerator(cmake* cm, std::string const& version);
+  cmGlobalXCodeGenerator(cmake* cm, std::string const& version_string,
+                         unsigned int version_number);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.

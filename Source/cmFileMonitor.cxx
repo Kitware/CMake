@@ -236,7 +236,7 @@ public:
                 cmFileMonitor::Callback cb)
     : Parent(p)
     , PathSegment(ps)
-    , CbList({ cb })
+    , CbList({ std::move(cb) })
   {
     assert(p);
     assert(!ps.empty());

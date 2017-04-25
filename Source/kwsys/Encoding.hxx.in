@@ -59,6 +59,17 @@ public:
   static std::string ToNarrow(const std::wstring& str);
   static std::string ToNarrow(const wchar_t* str);
 
+#if defined(_WIN32)
+  /**
+   * Convert the path to an extended length path to avoid MAX_PATH length
+   * limitations on Windows. If the input is a local path the result will be
+   * prefixed with \\?\; if the input is instead a network path, the result
+   * will be prefixed with \\?\UNC\. All output will also be converted to
+   * absolute paths with Windows-style backslashes.
+   **/
+  static std::wstring ToWindowsExtendedPath(std::string const&);
+#endif
+
 #endif // @KWSYS_NAMESPACE@_STL_HAS_WSTRING
 
 }; // class Encoding

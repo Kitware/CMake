@@ -613,8 +613,8 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       continue;
     }
 
-    else if ((c >= 0x20 && c < 0x7F) || c == '\t' ||
-             (c == '\n' && newline_consume)) {
+    if ((c >= 0x20 && c < 0x7F) || c == '\t' ||
+        (c == '\n' && newline_consume)) {
       // This is an ASCII character that may be part of a string.
       // Cast added to avoid compiler warning. Cast is ok because
       // c is guaranteed to fit in char by the above if...

@@ -117,7 +117,7 @@ bool cmNinjaTargetGenerator::NeedDyndep(std::string const& lang) const
 
 std::string cmNinjaTargetGenerator::OrderDependsTargetForTarget()
 {
-  return "cmake_order_depends_target_" + this->GetTargetName();
+  return "cmake_object_order_depends_target_" + this->GetTargetName();
 }
 
 // TODO: Most of the code is picked up from
@@ -589,6 +589,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     if (this->GeneratorTarget->GetPropertyAsBool(
           "CUDA_SEPARABLE_COMPILATION")) {
       cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+    } else if (this->GeneratorTarget->GetPropertyAsBool(
+                 "CUDA_PTX_COMPILATION")) {
+      cmdVar = std::string("CMAKE_CUDA_COMPILE_PTX_COMPILATION");
     } else {
       cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
     }
@@ -715,8 +718,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   }
 
   cmNinjaDeps orderOnlyDeps;
-  this->GetLocalGenerator()->AppendTargetDepends(this->GeneratorTarget,
-                                                 orderOnlyDeps);
+  this->GetLocalGenerator()->AppendTargetDepends(
+    this->GeneratorTarget, orderOnlyDeps, DependOnTargetOrdering);
 
   // Add order-only dependencies on other files associated with the target.
   orderOnlyDeps.insert(orderOnlyDeps.end(), this->ExtraFiles.begin(),
@@ -737,7 +740,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
                    std::back_inserter(orderOnlyDeps), MapToNinjaPath());
   }
 
-  if (!orderOnlyDeps.empty()) {
+  std::sort(orderOnlyDeps.begin(), orderOnlyDeps.end());
+  orderOnlyDeps.erase(std::unique(orderOnlyDeps.begin(), orderOnlyDeps.end()),
+                      orderOnlyDeps.end());
+
+  {
     cmNinjaDeps orderOnlyTarget;
     orderOnlyTarget.push_back(this->OrderDependsTargetForTarget());
     this->GetGlobalGenerator()->WritePhonyBuild(
@@ -750,7 +757,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   for (std::vector<cmSourceFile const*>::const_iterator si =
          objectSources.begin();
        si != objectSources.end(); ++si) {
-    this->WriteObjectBuildStatement(*si, !orderOnlyDeps.empty());
+    this->WriteObjectBuildStatement(*si);
   }
 
   if (!this->DDIFiles.empty()) {
@@ -767,6 +774,17 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
 
     ddOutputs.push_back(this->GetDyndepFilePath("Fortran"));
 
+    // Make sure dyndep files for all our dependencies have already
+    // been generated so that the 'FortranModules.json' files they
+    // produced as side-effects are available for us to read.
+    // Ideally we should depend on the 'FortranModules.json' files
+    // from our dependencies directly, but we don't know which of
+    // our dependencies produces them.  Fixing this will require
+    // refactoring the Ninja generator to generate targets in
+    // dependency order so that we can collect the needed information.
+    this->GetLocalGenerator()->AppendTargetDepends(
+      this->GeneratorTarget, ddOrderOnlyDeps, DependOnTargetArtifact);
+
     this->GetGlobalGenerator()->WriteBuild(
       this->GetBuildFileStream(), ddComment, ddRule, ddOutputs, ddImplicitOuts,
       ddExplicitDeps, ddImplicitDeps, ddOrderOnlyDeps, ddVars);
@@ -776,7 +794,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
 }
 
 void cmNinjaTargetGenerator::WriteObjectBuildStatement(
-  cmSourceFile const* source, bool writeOrderDependsTargetForTarget)
+  cmSourceFile const* source)
 {
   std::string const language = source->GetLanguage();
   std::string const sourceFileName =
@@ -827,9 +845,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   }
 
   cmNinjaDeps orderOnlyDeps;
-  if (writeOrderDependsTargetForTarget) {
-    orderOnlyDeps.push_back(this->OrderDependsTargetForTarget());
-  }
+  orderOnlyDeps.push_back(this->OrderDependsTargetForTarget());
 
   // If the source file is GENERATED and does not have a custom command
   // (either attached to this source file or another one), assume that one of

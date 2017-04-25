@@ -20,9 +20,6 @@ public:
   ///! Get the name for the generator.
   virtual std::string GetName() const { return this->Name; }
 
-  /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
-
   /** Get the name of the main stamp list file. */
   static std::string GetGenerateStampList();
 

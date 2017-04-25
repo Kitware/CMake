@@ -25,6 +25,7 @@ To contribute patches:
 
 #. Fork the upstream `CMake Repository`_ into a personal account.
 #. Run `Utilities/SetupForDevelopment.sh`_ for local configuration.
+#. See the `CMake Source Code Guide`_ for coding guidelines.
 #. Base all new work on the upstream ``master`` branch.
 #. Create commits making incremental, distinct, logically complete changes.
 #. Push a topic branch to a personal repository fork on GitLab.
@@ -35,19 +36,8 @@ The merge request will enter the `CMake Review Process`_ for consideration.
 .. _`Kitware's GitLab Instance`: https://gitlab.kitware.com
 .. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
 .. _`Utilities/SetupForDevelopment.sh`: Utilities/SetupForDevelopment.sh
+.. _`CMake Source Code Guide`: Help/dev/source.rst
 .. _`CMake Review Process`: Help/dev/review.rst
-
-Code Style
-==========
-
-We use `clang-format`_ to define our style for C++ code in the CMake source
-tree.  See the `.clang-format`_ configuration file for our style settings.
-Use ``clang-format`` version 3.8 or higher to format source files.
-See also the `Utilities/Scripts/clang-format.bash`_ script.
-
-.. _`clang-format`: http://clang.llvm.org/docs/ClangFormat.html
-.. _`.clang-format`: .clang-format
-.. _`Utilities/Scripts/clang-format.bash`: Utilities/Scripts/clang-format.bash
 
 License
 =======

@@ -54,7 +54,7 @@ std::string cmInstallFilesGenerator::GetDestination(
 }
 
 void cmInstallFilesGenerator::AddFilesInstallRule(
-  std::ostream& os, std::string const& config, Indent const& indent,
+  std::ostream& os, std::string const& config, Indent indent,
   std::vector<std::string> const& files)
 {
   // Write code to install the files.
@@ -67,7 +67,7 @@ void cmInstallFilesGenerator::AddFilesInstallRule(
 }
 
 void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
-                                                    Indent const& indent)
+                                                    Indent indent)
 {
   if (this->ActionsPerConfig) {
     this->cmInstallGenerator::GenerateScriptActions(os, indent);
@@ -77,7 +77,7 @@ void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
 }
 
 void cmInstallFilesGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent const& indent)
+  std::ostream& os, const std::string& config, Indent indent)
 {
   std::vector<std::string> files;
   cmGeneratorExpression ge;

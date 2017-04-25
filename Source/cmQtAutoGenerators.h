@@ -23,7 +23,7 @@ public:
   bool Run(const std::string& targetDirectory, const std::string& config);
 
 private:
-  // - Types
+  // -- Types
 
   /// @brief Used to extract additional dependencies from content text
   struct MocDependFilter
@@ -31,9 +31,9 @@ private:
     std::string key;
     cmsys::RegularExpression regExp;
   };
-  typedef std::pair<std::string, cmsys::RegularExpression> MacroFilter;
+  typedef std::pair<std::string, cmsys::RegularExpression> MocMacroFilter;
 
-  // - Configuration
+  // -- Configuration
   bool MocDependFilterPush(const std::string& key, const std::string& regExp);
   bool ReadAutogenInfoFile(cmMakefile* makefile,
                            const std::string& targetDirectory,
@@ -43,22 +43,21 @@ private:
   bool UicEnabled() const { return !this->UicExecutable.empty(); }
   bool RccEnabled() const { return !this->RccExecutable.empty(); }
 
-  // - Settings file
-  void SettingsFileRead(cmMakefile* makefile,
-                        const std::string& targetDirectory);
-  bool SettingsFileWrite(const std::string& targetDirectory);
+  // -- Settings file
+  void SettingsFileRead(cmMakefile* makefile);
+  bool SettingsFileWrite();
 
-  bool GenerateAllAny() const
+  bool AnySettingsChanged() const
   {
-    return (this->GenerateAllMoc || this->GenerateAllRcc ||
-            this->GenerateAllUic);
+    return (this->MocSettingsChanged || this->RccSettingsChanged ||
+            this->UicSettingsChanged);
   }
 
-  // - Init and run
+  // -- Init and run
   void Init(cmMakefile* makefile);
   bool RunAutogen();
 
-  // - Content analysis
+  // -- Content analysis
   bool MocRequired(const std::string& contentText,
                    std::string* macroName = CM_NULLPTR);
   void MocFindDepends(
@@ -101,7 +100,7 @@ private:
     std::map<std::string, std::string>& mocsNotIncluded,
     std::map<std::string, std::set<std::string> >& mocDepends);
 
-  // - Moc file generation
+  // -- Moc file generation
   bool MocGenerateAll(
     const std::map<std::string, std::string>& mocsIncluded,
     const std::map<std::string, std::string>& mocsNotIncluded,
@@ -111,7 +110,7 @@ private:
     const std::string& subDir,
     const std::map<std::string, std::set<std::string> >& mocDepends);
 
-  // - Uic file generation
+  // -- Uic file generation
   bool UicFindIncludedFile(std::string& absFile, const std::string& sourceFile,
                            const std::string& includeString);
   bool UicGenerateAll(
@@ -120,12 +119,12 @@ private:
                        const std::string& uiInputFile,
                        const std::string& uiOutputFile);
 
-  // - Rcc file generation
+  // -- Rcc file generation
   bool RccGenerateAll();
   bool RccGenerateFile(const std::string& qrcInputFile,
                        const std::string& qrcOutputFile, bool unique_n);
 
-  // - Logging
+  // -- Logging
   void LogErrorNameCollision(
     const std::string& message,
     const std::multimap<std::string, std::string>& collisions) const;
@@ -135,16 +134,21 @@ private:
   void LogError(const std::string& message) const;
   void LogCommand(const std::vector<std::string>& command) const;
 
-  // - Utility
+  // -- Utility
   bool NameCollisionTest(
     const std::map<std::string, std::string>& genFiles,
     std::multimap<std::string, std::string>& collisions) const;
   std::string ChecksumedPath(const std::string& sourceFile,
                              const char* basePrefix,
                              const char* baseSuffix) const;
-  bool MakeParentDirectory(const std::string& filename) const;
-  bool RunCommand(const std::vector<std::string>& command,
-                  std::string& output) const;
+  bool MakeParentDirectory(const char* logPrefix,
+                           const std::string& filename) const;
+  bool FileDiffers(const std::string& filename, const std::string& content);
+  bool FileWrite(const char* logPrefix, const std::string& filename,
+                 const std::string& content);
+
+  bool RunCommand(const std::vector<std::string>& command, std::string& output,
+                  bool verbose = true) const;
 
   bool FindHeader(std::string& header, const std::string& testBasePath) const;
 
@@ -153,62 +157,65 @@ private:
   bool MocFindIncludedFile(std::string& absFile, const std::string& sourceFile,
                            const std::string& includeString) const;
 
-  // - Target names
+  // -- Target names
   std::string OriginTargetName;
   std::string AutogenTargetName;
-  // - Directories
+  // -- Directories
   std::string ProjectSourceDir;
   std::string ProjectBinaryDir;
   std::string CurrentSourceDir;
   std::string CurrentBinaryDir;
   std::string AutogenBuildSubDir;
-  // - Qt environment
+  // -- Qt environment
   std::string QtMajorVersion;
   std::string MocExecutable;
   std::string UicExecutable;
   std::string RccExecutable;
-  // - File lists
+  // -- File lists
   std::vector<std::string> Sources;
   std::vector<std::string> Headers;
-  // - Settings
+  std::vector<std::string> HeaderExtensions;
+  cmFilePathChecksum FPathChecksum;
+  // -- Settings
+  bool IncludeProjectDirsBefore;
+  bool Verbose;
+  bool ColorOutput;
+  std::string SettingsFile;
   std::string SettingsStringMoc;
   std::string SettingsStringUic;
   std::string SettingsStringRcc;
-  // - Moc
+  // -- Moc
+  bool MocSettingsChanged;
+  bool MocPredefsChanged;
+  bool MocRelaxedMode;
+  bool MocRunFailed;
   std::string MocCppFilenameRel;
   std::string MocCppFilenameAbs;
+  std::string MocPredefsFileRel;
+  std::string MocPredefsFileAbs;
   std::vector<std::string> MocSkipList;
   std::vector<std::string> MocIncludePaths;
   std::vector<std::string> MocIncludes;
   std::vector<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
+  std::vector<std::string> MocPredefsCmd;
   std::vector<MocDependFilter> MocDependFilters;
-  // - Uic
+  MocMacroFilter MocMacroFilters[2];
+  cmsys::RegularExpression MocRegExpInclude;
+  // -- Uic
+  bool UicSettingsChanged;
+  bool UicRunFailed;
   std::vector<std::string> UicSkipList;
   std::vector<std::string> UicTargetOptions;
   std::map<std::string, std::string> UicOptions;
   std::vector<std::string> UicSearchPaths;
-  // - Rcc
+  cmsys::RegularExpression UicRegExpInclude;
+  // -- Rcc
+  bool RccSettingsChanged;
+  bool RccRunFailed;
   std::vector<std::string> RccSources;
   std::map<std::string, std::string> RccOptions;
   std::map<std::string, std::vector<std::string> > RccInputs;
-  // - Utility
-  cmFilePathChecksum fpathCheckSum;
-  std::vector<std::string> HeaderExtensions;
-  MacroFilter MacroFilters[2];
-  cmsys::RegularExpression RegExpMocInclude;
-  cmsys::RegularExpression RegExpUicInclude;
-  // - Flags
-  bool IncludeProjectDirsBefore;
-  bool Verbose;
-  bool ColorOutput;
-  bool RunMocFailed;
-  bool RunUicFailed;
-  bool RunRccFailed;
-  bool GenerateAllMoc;
-  bool GenerateAllUic;
-  bool GenerateAllRcc;
-  bool MocRelaxedMode;
 };
 
 #endif

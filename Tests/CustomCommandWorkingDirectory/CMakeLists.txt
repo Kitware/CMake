@@ -19,6 +19,7 @@ add_executable(working "${TestWorkingDir_BINARY_DIR}/working.c"
 add_custom_target(
   Custom ALL
   COMMAND "${CMAKE_COMMAND}" -E copy_if_different ./customTarget.c "${TestWorkingDir_BINARY_DIR}/customTarget.c"
+  BYPRODUCTS "${TestWorkingDir_BINARY_DIR}/customTarget.c"
   WORKING_DIRECTORY  "${TestWorkingDir_SOURCE_DIR}"
 )
 
@@ -36,6 +37,7 @@ add_executable(working2 working2.c ${TestWorkingDir_BINARY_DIR}/customTarget2.c)
 add_custom_target(
   Custom2 ALL
   COMMAND "${CMAKE_COMMAND}" -E copy_if_different ${TestWorkingDir_SOURCE_DIR}/customTarget.c ../customTarget2.c
+  BYPRODUCTS "${TestWorkingDir_BINARY_DIR}/customTarget2.c"
   WORKING_DIRECTORY work/ # Relative to build tree, trailing slash
 )
 

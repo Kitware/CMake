@@ -1369,8 +1369,10 @@ cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_BINARY_DIR \"${CMAKE_
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BIN_DIR \"/bootstrap-not-insalled\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-insalled\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP"
+cmake_report cmConfigure.h${_tmp} "#define CM_EQ_DELETE"
 cmake_report cmConfigure.h${_tmp} "#define CM_NULLPTR 0"
 cmake_report cmConfigure.h${_tmp} "#define CM_OVERRIDE"
+cmake_report cmConfigure.h${_tmp} "#define CM_DISABLE_COPY(Class)"
 
 # Regenerate configured headers
 for h in Configure VersionConfig; do

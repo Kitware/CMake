@@ -30,10 +30,6 @@
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
-#ifndef _WIN32
-#include <unistd.h>
-#endif
-
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
   : cmCommonTargetGenerator(target)
   , OSXBundleGenerator(CM_NULLPTR)
@@ -509,8 +505,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
         this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
         this->GeneratorTarget->GetType() == cmStateEnums::MODULE_LIBRARY) {
-      targetFullPathReal =
-        this->GeneratorTarget->GetFullPath(this->ConfigName, false, true);
+      targetFullPathReal = this->GeneratorTarget->GetFullPath(
+        this->ConfigName, cmStateEnums::RuntimeBinaryArtifact, true);
       targetFullPathPDB =
         this->GeneratorTarget->GetPDBDirectory(this->ConfigName);
       targetFullPathPDB += "/";
@@ -593,6 +589,9 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       if (this->GeneratorTarget->GetPropertyAsBool(
             "CUDA_SEPARABLE_COMPILATION")) {
         cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+      } else if (this->GeneratorTarget->GetPropertyAsBool(
+                   "CUDA_PTX_COMPILATION")) {
+        cmdVar = std::string("CMAKE_CUDA_COMPILE_PTX_COMPILATION");
       } else {
         cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
       }
@@ -1492,15 +1491,6 @@ void cmMakefileTargetGenerator::CreateLinkScript(
   makefile_depends.push_back(linkScriptName);
 }
 
-static size_t calculateCommandLineLengthLimit()
-{
-#if defined(_SC_ARG_MAX)
-  return ((size_t)sysconf(_SC_ARG_MAX)) - 1000;
-#else
-  return 0;
-#endif
-}
-
 bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
   std::string const& l) const
 {
@@ -1514,7 +1504,7 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
   }
 
   // Check for a system limit.
-  if (size_t const limit = calculateCommandLineLengthLimit()) {
+  if (size_t const limit = cmSystemTools::CalculateCommandLineLengthLimit()) {
     // Compute the total length of our list of object files with room
     // for argument separation and quoting.  This does not convert paths
     // relative to CMAKE_CURRENT_BINARY_DIR like the final list will be, so the

@@ -2162,7 +2162,7 @@ bool cmLocalGenerator::IsNMake() const
 
 std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   const cmSourceFile& source, std::string const& dir_max,
-  bool* hasSourceExtension)
+  bool* hasSourceExtension, char const* customOutputExtension)
 {
   // Construct the object file name using the full path to the source
   // file which is its only unique identification.
@@ -2223,7 +2223,7 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
     }
 
     // Remove the source extension if it is to be replaced.
-    if (replaceExt) {
+    if (replaceExt || customOutputExtension) {
       keptSourceExtension = false;
       std::string::size_type dot_pos = objectName.rfind('.');
       if (dot_pos != std::string::npos) {
@@ -2232,7 +2232,11 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
     }
 
     // Store the new extension.
-    objectName += this->GlobalGenerator->GetLanguageOutputExtension(source);
+    if (customOutputExtension) {
+      objectName += customOutputExtension;
+    } else {
+      objectName += this->GlobalGenerator->GetLanguageOutputExtension(source);
+    }
   }
   if (hasSourceExtension) {
     *hasSourceExtension = keptSourceExtension;

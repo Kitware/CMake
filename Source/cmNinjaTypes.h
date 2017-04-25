@@ -9,6 +9,12 @@
 #include <string>
 #include <vector>
 
+enum cmNinjaTargetDepends
+{
+  DependOnTargetArtifact,
+  DependOnTargetOrdering
+};
+
 typedef std::vector<std::string> cmNinjaDeps;
 typedef std::map<std::string, std::string> cmNinjaVars;
 

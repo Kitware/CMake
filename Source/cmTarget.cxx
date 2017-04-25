@@ -35,7 +35,7 @@ const char* cmTargetPropertyComputer::ComputeLocationForBuild<cmTarget>(
 {
   static std::string loc;
   if (tgt->IsImported()) {
-    loc = tgt->ImportedGetFullPath("", false);
+    loc = tgt->ImportedGetFullPath("", cmStateEnums::RuntimeBinaryArtifact);
     return loc.c_str();
   }
 
@@ -54,7 +54,8 @@ const char* cmTargetPropertyComputer::ComputeLocation<cmTarget>(
 {
   static std::string loc;
   if (tgt->IsImported()) {
-    loc = tgt->ImportedGetFullPath(config, false);
+    loc =
+      tgt->ImportedGetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
     return loc.c_str();
   }
 
@@ -63,7 +64,7 @@ const char* cmTargetPropertyComputer::ComputeLocation<cmTarget>(
     gg->CreateGenerationObjects();
   }
   cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
-  loc = gt->GetFullPath(config, false);
+  loc = gt->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
   return loc.c_str();
 }
 
@@ -944,6 +945,14 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME") &&
              !this->CheckImportedLibName(prop, value ? value : "")) {
     /* error was reported by check method */
+  } else if (prop == "CUDA_PTX_COMPILATION" &&
+             this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
+    std::ostringstream e;
+    e << "CUDA_PTX_COMPILATION property can only be applied to OBJECT "
+         "targets (\""
+      << this->Name << "\")\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
   } else {
     this->Properties.SetProperty(prop, value);
   }
@@ -1298,58 +1307,88 @@ bool cmTarget::GetPropertyAsBool(const std::string& prop) const
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
-const char* cmTarget::GetSuffixVariableInternal(bool implib) const
+const char* cmTarget::GetSuffixVariableInternal(
+  cmStateEnums::ArtifactType artifact) const
 {
   switch (this->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_SUFFIX";
     case cmStateEnums::SHARED_LIBRARY:
-      return (implib ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
-                     : "CMAKE_SHARED_LIBRARY_SUFFIX");
+      switch (artifact) {
+        case cmStateEnums::RuntimeBinaryArtifact:
+          return "CMAKE_SHARED_LIBRARY_SUFFIX";
+        case cmStateEnums::ImportLibraryArtifact:
+          return "CMAKE_IMPORT_LIBRARY_SUFFIX";
+      }
+      break;
     case cmStateEnums::MODULE_LIBRARY:
-      return (implib ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
-                     : "CMAKE_SHARED_MODULE_SUFFIX");
+      switch (artifact) {
+        case cmStateEnums::RuntimeBinaryArtifact:
+          return "CMAKE_SHARED_MODULE_SUFFIX";
+        case cmStateEnums::ImportLibraryArtifact:
+          return "CMAKE_IMPORT_LIBRARY_SUFFIX";
+      }
+      break;
     case cmStateEnums::EXECUTABLE:
-      return (implib
-                ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
-                // Android GUI application packages store the native
-                // binary as a shared library.
-                : (this->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
-                     ? "CMAKE_SHARED_LIBRARY_SUFFIX"
-                     : "CMAKE_EXECUTABLE_SUFFIX"));
+      switch (artifact) {
+        case cmStateEnums::RuntimeBinaryArtifact:
+          // Android GUI application packages store the native
+          // binary as a shared library.
+          return (this->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
+                    ? "CMAKE_SHARED_LIBRARY_SUFFIX"
+                    : "CMAKE_EXECUTABLE_SUFFIX");
+        case cmStateEnums::ImportLibraryArtifact:
+          return "CMAKE_IMPORT_LIBRARY_SUFFIX";
+      }
+      break;
     default:
       break;
   }
   return "";
 }
 
-const char* cmTarget::GetPrefixVariableInternal(bool implib) const
+const char* cmTarget::GetPrefixVariableInternal(
+  cmStateEnums::ArtifactType artifact) const
 {
   switch (this->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_PREFIX";
     case cmStateEnums::SHARED_LIBRARY:
-      return (implib ? "CMAKE_IMPORT_LIBRARY_PREFIX"
-                     : "CMAKE_SHARED_LIBRARY_PREFIX");
+      switch (artifact) {
+        case cmStateEnums::RuntimeBinaryArtifact:
+          return "CMAKE_SHARED_LIBRARY_PREFIX";
+        case cmStateEnums::ImportLibraryArtifact:
+          return "CMAKE_IMPORT_LIBRARY_PREFIX";
+      }
+      break;
     case cmStateEnums::MODULE_LIBRARY:
-      return (implib ? "CMAKE_IMPORT_LIBRARY_PREFIX"
-                     : "CMAKE_SHARED_MODULE_PREFIX");
+      switch (artifact) {
+        case cmStateEnums::RuntimeBinaryArtifact:
+          return "CMAKE_SHARED_MODULE_PREFIX";
+        case cmStateEnums::ImportLibraryArtifact:
+          return "CMAKE_IMPORT_LIBRARY_PREFIX";
+      }
+      break;
     case cmStateEnums::EXECUTABLE:
-      return (implib
-                ? "CMAKE_IMPORT_LIBRARY_PREFIX"
-                // Android GUI application packages store the native
-                // binary as a shared library.
-                : (this->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
-                     ? "CMAKE_SHARED_LIBRARY_PREFIX"
-                     : ""));
+      switch (artifact) {
+        case cmStateEnums::RuntimeBinaryArtifact:
+          // Android GUI application packages store the native
+          // binary as a shared library.
+          return (this->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
+                    ? "CMAKE_SHARED_LIBRARY_PREFIX"
+                    : "");
+        case cmStateEnums::ImportLibraryArtifact:
+          return "CMAKE_IMPORT_LIBRARY_PREFIX";
+      }
+      break;
     default:
       break;
   }
   return "";
 }
 
-std::string cmTarget::ImportedGetFullPath(const std::string& config,
-                                          bool pimplib) const
+std::string cmTarget::ImportedGetFullPath(
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   assert(this->IsImported());
 
@@ -1368,32 +1407,37 @@ std::string cmTarget::ImportedGetFullPath(const std::string& config,
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetMappedConfig(desired_config, &loc, &imp, suffix)) {
-    if (!pimplib) {
-      if (loc) {
-        result = loc;
-      } else {
-        std::string impProp = "IMPORTED_LOCATION";
-        impProp += suffix;
-        if (const char* config_location = this->GetProperty(impProp)) {
-          result = config_location;
-        } else if (const char* location =
-                     this->GetProperty("IMPORTED_LOCATION")) {
-          result = location;
+    switch (artifact) {
+      case cmStateEnums::RuntimeBinaryArtifact:
+        if (loc) {
+          result = loc;
+        } else {
+          std::string impProp = "IMPORTED_LOCATION";
+          impProp += suffix;
+          if (const char* config_location = this->GetProperty(impProp)) {
+            result = config_location;
+          } else if (const char* location =
+                       this->GetProperty("IMPORTED_LOCATION")) {
+            result = location;
+          }
         }
-      }
-    } else {
-      if (imp) {
-        result = imp;
-      } else if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
-                 this->IsExecutableWithExports()) {
-        std::string impProp = "IMPORTED_IMPLIB";
-        impProp += suffix;
-        if (const char* config_implib = this->GetProperty(impProp)) {
-          result = config_implib;
-        } else if (const char* implib = this->GetProperty("IMPORTED_IMPLIB")) {
-          result = implib;
+        break;
+
+      case cmStateEnums::ImportLibraryArtifact:
+        if (imp) {
+          result = imp;
+        } else if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+                   this->IsExecutableWithExports()) {
+          std::string impProp = "IMPORTED_IMPLIB";
+          impProp += suffix;
+          if (const char* config_implib = this->GetProperty(impProp)) {
+            result = config_implib;
+          } else if (const char* implib =
+                       this->GetProperty("IMPORTED_IMPLIB")) {
+            result = implib;
+          }
         }
-      }
+        break;
     }
   }
 

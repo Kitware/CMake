@@ -15,37 +15,8 @@ class cmGlobalVisualStudio71Generator : public cmGlobalVisualStudio7Generator
 public:
   cmGlobalVisualStudio71Generator(cmake* cm,
                                   const std::string& platformName = "");
-  static cmGlobalGeneratorFactory* NewFactory()
-  {
-    return new cmGlobalGeneratorSimpleFactory<
-      cmGlobalVisualStudio71Generator>();
-  }
-
-  ///! Get the name for the generator.
-  virtual std::string GetName() const
-  {
-    return cmGlobalVisualStudio71Generator::GetActualName();
-  }
-  static std::string GetActualName() { return "Visual Studio 7 .NET 2003"; }
-
-  /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
-
-  /**
-   * Where does this version of Visual Studio look for macros for the
-   * current user? Returns the empty string if this version of Visual
-   * Studio does not implement support for VB macros.
-   */
-  virtual std::string GetUserMacrosDirectory();
-
-  /**
-   * What is the reg key path to "vsmacros" for this version of Visual
-   * Studio?
-   */
-  virtual std::string GetUserMacrosRegKeyBase();
 
 protected:
-  virtual const char* GetIDEVersion() { return "7.1"; }
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSolutionConfigurations(

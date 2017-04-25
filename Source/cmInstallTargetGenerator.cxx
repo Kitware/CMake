@@ -58,7 +58,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
 }
 
 void cmInstallTargetGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent const& indent)
+  std::ostream& os, const std::string& config, Indent indent)
 {
   cmStateEnums::TargetType targetType = this->Target->GetType();
   cmInstallType type = cmInstallType();
@@ -103,7 +103,10 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
     fromDirConfig += cmake::GetCMakeFilesDirectory();
     fromDirConfig += "/CMakeRelink.dir/";
   } else {
-    fromDirConfig = this->Target->GetDirectory(config, this->ImportLibrary);
+    cmStateEnums::ArtifactType artifact = this->ImportLibrary
+      ? cmStateEnums::ImportLibraryArtifact
+      : cmStateEnums::RuntimeBinaryArtifact;
+    fromDirConfig = this->Target->GetDirectory(config, artifact);
     fromDirConfig += "/";
   }
 
@@ -336,7 +339,7 @@ static std::string computeInstallObjectDir(cmGeneratorTarget* gt,
 }
 
 void cmInstallTargetGenerator::GenerateScriptForConfigObjectLibrary(
-  std::ostream& os, const std::string& config, Indent const& indent)
+  std::ostream& os, const std::string& config, Indent indent)
 {
   // Compute all the object files inside this target
   std::vector<std::string> objects;
@@ -441,7 +444,7 @@ void cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
   this->Target = lg->FindLocalNonAliasGeneratorTarget(this->TargetName);
 }
 
-void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent const& indent,
+void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent indent,
                                         const std::string& config,
                                         std::string const& file,
                                         TweakMethod tweak)
@@ -457,7 +460,7 @@ void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent const& indent,
   }
 }
 
-void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent const& indent,
+void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent indent,
                                         const std::string& config,
                                         std::vector<std::string> const& files,
                                         TweakMethod tweak)
@@ -497,7 +500,7 @@ std::string cmInstallTargetGenerator::GetDestDirPath(std::string const& file)
 }
 
 void cmInstallTargetGenerator::PreReplacementTweaks(std::ostream& os,
-                                                    Indent const& indent,
+                                                    Indent indent,
                                                     const std::string& config,
                                                     std::string const& file)
 {
@@ -505,7 +508,7 @@ void cmInstallTargetGenerator::PreReplacementTweaks(std::ostream& os,
 }
 
 void cmInstallTargetGenerator::PostReplacementTweaks(std::ostream& os,
-                                                     Indent const& indent,
+                                                     Indent indent,
                                                      const std::string& config,
                                                      std::string const& file)
 {
@@ -517,7 +520,7 @@ void cmInstallTargetGenerator::PostReplacementTweaks(std::ostream& os,
 }
 
 void cmInstallTargetGenerator::AddInstallNamePatchRule(
-  std::ostream& os, Indent const& indent, const std::string& config,
+  std::ostream& os, Indent indent, const std::string& config,
   std::string const& toDestDirPath)
 {
   if (this->ImportLibrary ||
@@ -618,7 +621,7 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(
 }
 
 void cmInstallTargetGenerator::AddRPathCheckRule(
-  std::ostream& os, Indent const& indent, const std::string& config,
+  std::ostream& os, Indent indent, const std::string& config,
   std::string const& toDestDirPath)
 {
   // Skip the chrpath if the target does not need it.
@@ -652,7 +655,7 @@ void cmInstallTargetGenerator::AddRPathCheckRule(
 }
 
 void cmInstallTargetGenerator::AddChrpathPatchRule(
-  std::ostream& os, Indent const& indent, const std::string& config,
+  std::ostream& os, Indent indent, const std::string& config,
   std::string const& toDestDirPath)
 {
   // Skip the chrpath if the target does not need it.
@@ -747,8 +750,7 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
   }
 }
 
-void cmInstallTargetGenerator::AddStripRule(std::ostream& os,
-                                            Indent const& indent,
+void cmInstallTargetGenerator::AddStripRule(std::ostream& os, Indent indent,
                                             const std::string& toDestDirPath)
 {
 
@@ -776,8 +778,7 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os,
   os << indent << "endif()\n";
 }
 
-void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
-                                             Indent const& indent,
+void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os, Indent indent,
                                              const std::string& toDestDirPath)
 {
   // Static libraries need ranlib on this platform.
@@ -802,7 +803,7 @@ void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
 }
 
 void cmInstallTargetGenerator::AddUniversalInstallRule(
-  std::ostream& os, Indent const& indent, const std::string& toDestDirPath)
+  std::ostream& os, Indent indent, const std::string& toDestDirPath)
 {
   cmMakefile const* mf = this->Target->Target->GetMakefile();
 

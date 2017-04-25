@@ -30,7 +30,7 @@ public:
   operator cmGeneratorTarget const*() const { return this->Target; }
   cmGeneratorTarget const* operator->() const { return this->Target; }
   cmGeneratorTarget const& operator*() const { return *this->Target; }
-  friend bool operator<(cmTargetDepend const& l, cmTargetDepend const& r)
+  friend bool operator<(cmTargetDepend l, cmTargetDepend r)
   {
     return l.Target < r.Target;
   }

@@ -54,7 +54,6 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
     this->DefaultPlatformName = platformName;
   }
   this->ExtraFlagTable = cmVS7ExtraFlagTable;
-  this->Version = VS7;
 }
 
 cmGlobalVisualStudio7Generator::~cmGlobalVisualStudio7Generator()
@@ -295,16 +294,16 @@ void cmGlobalVisualStudio7Generator::Generate()
     this->CallVisualStudioMacro(MacroReload);
   }
 
-  if (this->Version == VS71 && !this->CMakeInstance->GetIsInTryCompile()) {
-    const char* cmakeWarnVS71 =
-      this->CMakeInstance->GetState()->GetCacheEntryValue("CMAKE_WARN_VS71");
-    if (!cmakeWarnVS71 || !cmSystemTools::IsOff(cmakeWarnVS71)) {
+  if (this->Version == VS8 && !this->CMakeInstance->GetIsInTryCompile()) {
+    const char* cmakeWarnVS8 =
+      this->CMakeInstance->GetState()->GetCacheEntryValue("CMAKE_WARN_VS8");
+    if (!cmakeWarnVS8 || !cmSystemTools::IsOff(cmakeWarnVS8)) {
       this->CMakeInstance->IssueMessage(
         cmake::WARNING,
-        "The \"Visual Studio 7 .NET 2003\" generator is deprecated "
+        "The \"Visual Studio 8 2005\" generator is deprecated "
         "and will be removed in a future version of CMake."
         "\n"
-        "Add CMAKE_WARN_VS71=OFF to the cache to disable this warning.");
+        "Add CMAKE_WARN_VS8=OFF to the cache to disable this warning.");
     }
   }
 }

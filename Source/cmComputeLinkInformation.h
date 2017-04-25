@@ -36,12 +36,6 @@ public:
       , Target(CM_NULLPTR)
     {
     }
-    Item(Item const& item)
-      : Value(item.Value)
-      , IsPath(item.IsPath)
-      , Target(item.Target)
-    {
-    }
     Item(std::string const& v, bool p,
          cmGeneratorTarget const* target = CM_NULLPTR)
       : Value(v)
