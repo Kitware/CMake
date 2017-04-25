@@ -213,6 +213,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("ANDROID_API", CM_NULLPTR);
     this->SetPropertyDefault("ANDROID_API_MIN", CM_NULLPTR);
     this->SetPropertyDefault("ANDROID_ARCH", CM_NULLPTR);
+    this->SetPropertyDefault("ANDROID_ENABLE_RTTI", CM_NULLPTR);
+    this->SetPropertyDefault("ANDROID_ENABLE_EXCEPTION", CM_NULLPTR);
+    this->SetPropertyDefault("ANDROID_ENABLE_THUMB", CM_NULLPTR);
+    this->SetPropertyDefault("ANDROID_FLOAT_ABI", CM_NULLPTR);
     this->SetPropertyDefault("ANDROID_STL_TYPE", CM_NULLPTR);
     this->SetPropertyDefault("ANDROID_SKIP_ANT_STEP", CM_NULLPTR);
     this->SetPropertyDefault("ANDROID_PROCESS_MAX", CM_NULLPTR);
