@@ -292,8 +292,12 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     cmLocalUnixMakefileGenerator3::EchoProgress progress;
     this->MakeEchoProgress(progress);
     // Add the link message.
-    std::string buildEcho = "Linking " + linkLanguage + " device code";
-    buildEcho += targetOutputReal;
+    std::string buildEcho = "Linking " + linkLanguage + " device code ";
+    buildEcho += this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->MaybeConvertToRelativePath(
+        this->LocalGenerator->GetCurrentBinaryDirectory(),
+        this->DeviceLinkObject),
+      cmOutputConverter::SHELL);
     this->LocalGenerator->AppendEcho(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
