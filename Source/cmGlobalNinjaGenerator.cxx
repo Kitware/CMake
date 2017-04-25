@@ -1842,10 +1842,14 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
 int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
                              std::vector<std::string>::const_iterator argEnd)
 {
+  std::vector<std::string> arg_full =
+    cmSystemTools::HandleResponseFile(argBeg, argEnd);
+
   std::string arg_dd;
   std::string arg_tdi;
   std::vector<std::string> arg_ddis;
-  for (std::vector<std::string>::const_iterator a = argBeg; a != argEnd; ++a) {
+  for (std::vector<std::string>::const_iterator a = arg_full.begin();
+       a != arg_full.end(); ++a) {
     std::string const& arg = *a;
     if (cmHasLiteralPrefix(arg, "--tdi=")) {
       arg_tdi = arg.substr(6);
