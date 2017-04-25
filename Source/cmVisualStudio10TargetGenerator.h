@@ -101,6 +101,11 @@ private:
   bool ComputeCudaOptions(std::string const& config);
   void WriteCudaOptions(std::string const& config,
                         std::vector<std::string> const& includes);
+
+  bool ComputeCudaLinkOptions();
+  bool ComputeCudaLinkOptions(std::string const& config);
+  void WriteCudaLinkOptions(std::string const& config);
+
   bool ComputeMasmOptions();
   bool ComputeMasmOptions(std::string const& config);
   void WriteMasmOptions(std::string const& config,
@@ -154,6 +159,7 @@ private:
   OptionsMap ClOptions;
   OptionsMap RcOptions;
   OptionsMap CudaOptions;
+  OptionsMap CudaLinkOptions;
   OptionsMap MasmOptions;
   OptionsMap NasmOptions;
   OptionsMap LinkOptions;

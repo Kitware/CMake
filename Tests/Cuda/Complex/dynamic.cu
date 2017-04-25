@@ -37,7 +37,7 @@ EXPORT int choose_cuda_device()
                 << std::endl;
       return 1;
     }
-    if (prop.major >= 4) {
+    if (prop.major >= 3) {
       err = cudaSetDevice(i);
       if (err != cudaSuccess) {
         std::cout << "Could not select CUDA device " << i << std::endl;
