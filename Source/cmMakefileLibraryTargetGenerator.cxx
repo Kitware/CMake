@@ -127,6 +127,24 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
 
 void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 {
+  const std::string cuda_lang("CUDA");
+  cmGeneratorTarget::LinkClosure const* closure =
+    this->GeneratorTarget->GetLinkClosure(this->ConfigName);
+
+  const bool hasCUDA =
+    (std::find(closure->Languages.begin(), closure->Languages.end(),
+               cuda_lang) != closure->Languages.end());
+
+  const bool resolveDeviceSymbols =
+    this->GeneratorTarget->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
+  if (hasCUDA && resolveDeviceSymbols) {
+    std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
+    std::string extraFlags;
+    this->LocalGenerator->AppendFlags(
+      extraFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
+    this->WriteDeviceLibraryRules(linkRuleVar, extraFlags, false);
+  }
+
   std::string linkLanguage =
     this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
 
@@ -860,6 +878,16 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       // Construct the individual object list strings.
       std::vector<std::string> object_strings;
       this->WriteObjectsStrings(object_strings, archiveCommandLimit);
+
+      // Add the cuda device object to the list of archive files. This will
+      // only occur on archives which have CUDA_RESOLVE_DEVICE_SYMBOLS enabled
+      if (!this->DeviceLinkObject.empty()) {
+        object_strings.push_back(this->LocalGenerator->ConvertToOutputFormat(
+          this->LocalGenerator->MaybeConvertToRelativePath(
+            this->LocalGenerator->GetCurrentBinaryDirectory(),
+            this->DeviceLinkObject),
+          cmOutputConverter::SHELL));
+      }
 
       // Create the archive with the first set of objects.
       std::vector<std::string>::iterator osi = object_strings.begin();

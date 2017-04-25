@@ -447,6 +447,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeDeviceLinkCmd()
   // an executable or a dynamic library.
   std::string linkCmd;
   switch (this->GetGeneratorTarget()->GetType()) {
+    case cmStateEnums::STATIC_LIBRARY:
     case cmStateEnums::SHARED_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY: {
       const std::string cudaLinkCmd(
@@ -559,11 +560,15 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
     case cmStateEnums::EXECUTABLE:
       shouldHaveDeviceLinking = true;
       break;
+    case cmStateEnums::STATIC_LIBRARY:
+      shouldHaveDeviceLinking =
+        genTarget.GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
+      break;
     default:
       break;
   }
 
-  if (!shouldHaveDeviceLinking || !hasCUDA) {
+  if (!(shouldHaveDeviceLinking && hasCUDA)) {
     return;
   }
 

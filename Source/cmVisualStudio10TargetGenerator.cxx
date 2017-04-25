@@ -2563,6 +2563,10 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
     case cmStateEnums::EXECUTABLE:
       doDeviceLinking = true;
       break;
+    case cmStateEnums::STATIC_LIBRARY:
+      doDeviceLinking = this->GeneratorTarget->GetPropertyAsBool(
+        "CUDA_RESOLVE_DEVICE_SYMBOLS");
+      break;
     default:
       break;
   }
