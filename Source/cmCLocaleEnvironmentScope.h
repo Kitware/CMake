@@ -3,21 +3,20 @@
 #ifndef cmCLocaleEnvironmentScope_h
 #define cmCLocaleEnvironmentScope_h
 
-#include "cmConfigure.h" // IWYU pragma: keep
+#include "cmConfigure.h"
 
 #include <map>
 #include <string>
 
 class cmCLocaleEnvironmentScope
 {
+  CM_DISABLE_COPY(cmCLocaleEnvironmentScope)
+
 public:
   cmCLocaleEnvironmentScope();
   ~cmCLocaleEnvironmentScope();
 
 private:
-  cmCLocaleEnvironmentScope(cmCLocaleEnvironmentScope const&);
-  cmCLocaleEnvironmentScope& operator=(cmCLocaleEnvironmentScope const&);
-
   std::string GetEnv(std::string const& key);
   void SetEnv(std::string const& key, std::string const& value);
 

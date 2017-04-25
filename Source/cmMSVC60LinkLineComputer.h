@@ -15,6 +15,8 @@ class cmStateDirectory;
 
 class cmMSVC60LinkLineComputer : public cmLinkLineComputer
 {
+  CM_DISABLE_COPY(cmMSVC60LinkLineComputer)
+
 public:
   cmMSVC60LinkLineComputer(cmOutputConverter* outputConverter,
                            cmStateDirectory stateDir);

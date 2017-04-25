@@ -20,6 +20,8 @@ class cmCursesMainForm;
 
 class cmCursesStringWidget : public cmCursesWidget
 {
+  CM_DISABLE_COPY(cmCursesStringWidget)
+
 public:
   cmCursesStringWidget(int width, int height, int left, int top);
 
@@ -60,9 +62,6 @@ public:
   bool PrintKeys() CM_OVERRIDE;
 
 protected:
-  cmCursesStringWidget(const cmCursesStringWidget& from);
-  void operator=(const cmCursesStringWidget&);
-
   // true if the widget is in edit mode
   bool InEdit;
   char* OriginalString;

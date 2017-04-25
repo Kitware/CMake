@@ -24,6 +24,8 @@ struct cmListFileArgument;
  */
 class cmCommand
 {
+  CM_DISABLE_COPY(cmCommand)
+
 public:
   /**
    * Construct the command. By default it has no makefile.
@@ -102,10 +104,6 @@ public:
    * Set the error message
    */
   void SetError(const std::string& e);
-
-private:
-  cmCommand(cmCommand const&);            // = delete;
-  cmCommand& operator=(cmCommand const&); // = delete;
 
 protected:
   cmMakefile* Makefile;

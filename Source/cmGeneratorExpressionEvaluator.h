@@ -30,8 +30,7 @@ struct cmGeneratorExpressionEvaluator
                                cmGeneratorExpressionDAGChecker*) const = 0;
 
 private:
-  cmGeneratorExpressionEvaluator(const cmGeneratorExpressionEvaluator&);
-  void operator=(const cmGeneratorExpressionEvaluator&);
+  CM_DISABLE_COPY(cmGeneratorExpressionEvaluator)
 };
 
 struct TextContent : public cmGeneratorExpressionEvaluator

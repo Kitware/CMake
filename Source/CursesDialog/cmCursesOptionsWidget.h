@@ -15,6 +15,8 @@ class cmCursesMainForm;
 
 class cmCursesOptionsWidget : public cmCursesWidget
 {
+  CM_DISABLE_COPY(cmCursesOptionsWidget)
+
 public:
   cmCursesOptionsWidget(int width, int height, int left, int top);
 
@@ -29,8 +31,6 @@ public:
   void PreviousOption();
 
 protected:
-  cmCursesOptionsWidget(const cmCursesOptionsWidget& from);
-  void operator=(const cmCursesOptionsWidget&);
   std::vector<std::string> Options;
   std::vector<std::string>::size_type CurrentOption;
 };

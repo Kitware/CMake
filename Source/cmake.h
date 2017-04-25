@@ -55,6 +55,8 @@ struct cmDocumentationEntry;
 
 class cmake
 {
+  CM_DISABLE_COPY(cmake)
+
 public:
   enum MessageType
   {
@@ -460,8 +462,6 @@ protected:
   cmVariableWatch* VariableWatch;
 
 private:
-  cmake(const cmake&);          // Not implemented.
-  void operator=(const cmake&); // Not implemented.
   ProgressCallbackType ProgressCallback;
   void* ProgressCallbackClientData;
   bool InTryCompile;

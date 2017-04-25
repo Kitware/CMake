@@ -54,6 +54,8 @@ class cmVariableWatch;
  */
 class cmMakefile
 {
+  CM_DISABLE_COPY(cmMakefile)
+
 public:
   /* Mark a variable as used */
   void MarkVariableAsUsed(const std::string& var);
@@ -709,6 +711,7 @@ public:
   /** Helper class to push and pop scopes automatically.  */
   class ScopePushPop
   {
+    CM_DISABLE_COPY(ScopePushPop)
   public:
     ScopePushPop(cmMakefile* m)
       : Makefile(m)
@@ -717,8 +720,6 @@ public:
     }
     ~ScopePushPop() { this->Makefile->PopScope(); }
   private:
-    ScopePushPop(ScopePushPop const&);
-    ScopePushPop& operator=(ScopePushPop const&);
     cmMakefile* Makefile;
   };
 
@@ -831,9 +832,6 @@ protected:
                          cmExecutionStatus& status);
 
 private:
-  cmMakefile(const cmMakefile& mf);
-  cmMakefile& operator=(const cmMakefile& mf);
-
   cmStateSnapshot StateSnapshot;
   cmListFileBacktrace Backtrace;
 
