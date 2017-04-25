@@ -279,6 +279,7 @@ public:
 
   ///! return a warning string for a given policy
   static std::string GetPolicyWarning(cmPolicies::PolicyID id);
+  static std::string GetPolicyDeprecatedWarning(cmPolicies::PolicyID id);
 
   ///! return an error string for when a required policy is unspecified
   static std::string GetRequiredPolicyError(cmPolicies::PolicyID id);
