@@ -60,6 +60,10 @@ run_cmake(CMP0062-OLD)
 run_cmake(CMP0062-NEW)
 run_cmake(CMP0062-WARN)
 
+if(NOT RunCMake_GENERATOR STREQUAL "Xcode" OR NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" MATCHES "[;$]")
+  run_install_test(FILES-TARGET_OBJECTS)
+endif()
+
 set(run_install_test_components 1)
 run_install_test(FILES-EXCLUDE_FROM_ALL)
 run_install_test(TARGETS-EXCLUDE_FROM_ALL)
