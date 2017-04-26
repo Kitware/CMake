@@ -44,6 +44,7 @@ run_BuildDepends(Custom-Symbolic-and-Byproduct)
 run_BuildDepends(Custom-Always)
 
 if(RunCMake_GENERATOR MATCHES "Make")
+  run_BuildDepends(MakeCustomIncludes)
   if(NOT "${RunCMake_BINARY_DIR}" STREQUAL "${RunCMake_SOURCE_DIR}")
     run_BuildDepends(MakeInProjectOnly)
   endif()
