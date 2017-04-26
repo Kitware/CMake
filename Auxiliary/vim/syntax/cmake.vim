@@ -320,7 +320,7 @@ syn keyword cmakeKWremove
             \ contained
 
 syn keyword cmakeKWseparate_arguments
-            \ MSDN UNIX_COMMAND VARIABLE WINDOWS WINDOWS_COMMAND _COMMAND
+            \ MSDN NATIVE_COMMAND UNIX_COMMAND VARIABLE WINDOWS WINDOWS_COMMAND _COMMAND
             \ contained
 
 syn keyword cmakeKWset
