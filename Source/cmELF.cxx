@@ -157,11 +157,7 @@ public:
   // Lookup the RUNPATH in the DYNAMIC section.
   StringEntry const* GetRunPath()
   {
-#if defined(DT_RUNPATH)
     return this->GetDynamicSectionString(DT_RUNPATH);
-#else
-    return 0;
-#endif
   }
 
   // Return the recorded ELF type.
