@@ -55,3 +55,19 @@ xctest_add_bundle(CocoaExampleTests CocoaExample
   CocoaExampleTests/CocoaExampleTests.m)
 
 xctest_add_test(XCTest.CocoaExample CocoaExampleTests)
+
+# Static lib
+
+add_library(StaticLibExample STATIC
+  StaticLibExample/StaticLibExample.h
+  StaticLibExample/StaticLibExample.c
+)
+
+target_include_directories(StaticLibExample PUBLIC .)
+
+# XCTest for Static lib
+
+xctest_add_bundle(StaticLibExampleTests StaticLibExample
+  StaticLibExampleTests/StaticLibExampleTests.m)
+
+xctest_add_test(XCTest.StaticLibExample StaticLibExampleTests)
