@@ -17,6 +17,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestBatchTestHandler.h"
 #include "cmCTestMultiProcessHandler.h"
@@ -495,7 +496,8 @@ int cmCTestTestHandler::ProcessHandler()
 
     for (SetOfTests::iterator ftit = resultsSet.begin();
          ftit != resultsSet.end(); ++ftit) {
-      if (ftit->CompletionStatus == "Disabled") {
+      if (cmHasLiteralPrefix(ftit->CompletionStatus, "SKIP_RETURN_CODE=") ||
+          ftit->CompletionStatus == "Disabled") {
         disabledTests.push_back(*ftit);
       }
     }
@@ -521,17 +523,22 @@ int cmCTestTestHandler::ProcessHandler()
     if (!disabledTests.empty()) {
       cmGeneratedFileStream ofs;
       cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
-                   << "The following tests are disabled and did not run:"
-                   << std::endl);
+                   << "The following tests did not run:" << std::endl);
       this->StartLogFile("TestsDisabled", ofs);
 
+      const char* disabled_reason;
       for (std::vector<cmCTestTestHandler::cmCTestTestResult>::iterator dtit =
              disabledTests.begin();
            dtit != disabledTests.end(); ++dtit) {
         ofs << dtit->TestCount << ":" << dtit->Name << std::endl;
+        if (dtit->CompletionStatus == "Disabled") {
+          disabled_reason = "Disabled";
+        } else {
+          disabled_reason = "Skipped";
+        }
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "\t"
                      << std::setw(3) << dtit->TestCount << " - " << dtit->Name
-                     << std::endl);
+                     << " (" << disabled_reason << ")" << std::endl);
       }
     }
 
@@ -544,6 +551,7 @@ int cmCTestTestHandler::ProcessHandler()
       for (SetOfTests::iterator ftit = resultsSet.begin();
            ftit != resultsSet.end(); ++ftit) {
         if (ftit->Status != cmCTestTestHandler::COMPLETED &&
+            !cmHasLiteralPrefix(ftit->CompletionStatus, "SKIP_RETURN_CODE=") &&
             ftit->CompletionStatus != "Disabled") {
           ofs << ftit->TestCount << ":" << ftit->Name << std::endl;
           cmCTestLog(

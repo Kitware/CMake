@@ -167,6 +167,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   std::vector<std::pair<cmsys::RegularExpression, std::string> >::iterator
     passIt;
   bool forceFail = false;
+  bool skipped = false;
   bool outputTestErrorsToConsole = false;
   if (!this->TestProperties->RequiredRegularExpressions.empty() &&
       this->FailedDependencies.empty()) {
@@ -219,6 +220,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       s << "SKIP_RETURN_CODE=" << this->TestProperties->SkipReturnCode;
       this->TestResult.CompletionStatus = s.str();
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Skipped ");
+      skipped = true;
     } else if ((success && !this->TestProperties->WillFail) ||
                (!success && this->TestProperties->WillFail)) {
       this->TestResult.Status = cmCTestTestHandler::COMPLETED;
@@ -338,7 +340,9 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       compress ? this->CompressedOutput : this->ProcessOutput;
     this->TestResult.CompressOutput = compress;
     this->TestResult.ReturnValue = this->TestProcess->GetExitValue();
-    this->TestResult.CompletionStatus = "Completed";
+    if (!skipped) {
+      this->TestResult.CompletionStatus = "Completed";
+    }
     this->TestResult.ExecutionTime = this->TestProcess->GetTotalTime();
     this->MemCheckPostProcess();
     this->ComputeWeightedCost();
@@ -349,7 +353,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     this->TestHandler->TestResults.push_back(this->TestResult);
   }
   delete this->TestProcess;
-  return passed;
+  return passed || skipped;
 }
 
 bool cmCTestRunTest::StartAgain()
