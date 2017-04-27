@@ -43,14 +43,6 @@ const char* cmCommonTargetGenerator::GetFeature(const std::string& feature)
   return this->GeneratorTarget->GetFeature(feature, this->ConfigName);
 }
 
-void cmCommonTargetGenerator::AddFeatureFlags(std::string& flags,
-                                              const std::string& lang)
-{
-  // Add language-specific flags.
-  this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget, lang,
-                                         this->ConfigName);
-}
-
 void cmCommonTargetGenerator::AddModuleDefinitionFlag(
   cmLinkLineComputer* linkLineComputer, std::string& flags)
 {

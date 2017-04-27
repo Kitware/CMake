@@ -150,7 +150,8 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
                                       linkLanguage, *this->GeneratorTarget));
 
   // Add language feature flags.
-  this->AddFeatureFlags(flags, linkLanguage);
+  this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
+                                         linkLanguage, this->ConfigName);
 
   this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
                                              linkLanguage, this->ConfigName);
@@ -433,7 +434,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   }
 
   // Add language feature flags.
-  this->AddFeatureFlags(flags, linkLanguage);
+  this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
+                                         linkLanguage, this->ConfigName);
 
   this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
                                              linkLanguage, this->ConfigName);
