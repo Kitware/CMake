@@ -13,12 +13,15 @@ function(run_install_test case)
   # Check "all" components.
   set(CMAKE_INSTALL_PREFIX ${RunCMake_TEST_BINARY_DIR}/root-all)
   run_cmake_command(${case}-all ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DBUILD_TYPE=Debug -P cmake_install.cmake)
-  # Check unspecified component.
-  set(CMAKE_INSTALL_PREFIX ${RunCMake_TEST_BINARY_DIR}/root-uns)
-  run_cmake_command(${case}-uns ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DBUILD_TYPE=Debug -DCOMPONENT=Unspecified -P cmake_install.cmake)
-  # Check explicit component.
-  set(CMAKE_INSTALL_PREFIX ${RunCMake_TEST_BINARY_DIR}/root-exc)
-  run_cmake_command(${case}-exc ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DBUILD_TYPE=Debug -DCOMPONENT=exc -P cmake_install.cmake)
+
+  if(run_install_test_components)
+    # Check unspecified component.
+    set(CMAKE_INSTALL_PREFIX ${RunCMake_TEST_BINARY_DIR}/root-uns)
+    run_cmake_command(${case}-uns ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DBUILD_TYPE=Debug -DCOMPONENT=Unspecified -P cmake_install.cmake)
+    # Check explicit component.
+    set(CMAKE_INSTALL_PREFIX ${RunCMake_TEST_BINARY_DIR}/root-exc)
+    run_cmake_command(${case}-exc ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DBUILD_TYPE=Debug -DCOMPONENT=exc -P cmake_install.cmake)
+  endif()
 endfunction()
 
 # Function called in *-check.cmake scripts to check installed files.
@@ -57,5 +60,10 @@ run_cmake(CMP0062-OLD)
 run_cmake(CMP0062-NEW)
 run_cmake(CMP0062-WARN)
 
+if(NOT RunCMake_GENERATOR STREQUAL "Xcode" OR NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" MATCHES "[;$]")
+  run_install_test(FILES-TARGET_OBJECTS)
+endif()
+
+set(run_install_test_components 1)
 run_install_test(FILES-EXCLUDE_FROM_ALL)
 run_install_test(TARGETS-EXCLUDE_FROM_ALL)
