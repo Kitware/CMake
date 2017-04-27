@@ -44,6 +44,9 @@ typedef struct Elf32_Rela Elf32_Rela;
 #ifdef _SCO_DS
 #include <link.h> // For DT_SONAME etc.
 #endif
+#ifndef DT_RUNPATH
+#define DT_RUNPATH 29
+#endif
 
 // Low-level byte swapping implementation.
 template <size_t s>
@@ -154,11 +157,7 @@ public:
   // Lookup the RUNPATH in the DYNAMIC section.
   StringEntry const* GetRunPath()
   {
-#if defined(DT_RUNPATH)
     return this->GetDynamicSectionString(DT_RUNPATH);
-#else
-    return 0;
-#endif
   }
 
   // Return the recorded ELF type.
