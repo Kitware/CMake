@@ -90,6 +90,8 @@ public:
 
   bool HasKnownObjectFileLocation(std::string* reason) const CM_OVERRIDE;
 
+  bool IsIPOSupported() const CM_OVERRIDE { return true; }
+
   bool UseEffectivePlatformName(cmMakefile* mf) const CM_OVERRIDE;
 
   bool ShouldStripResourcePath(cmMakefile*) const CM_OVERRIDE;

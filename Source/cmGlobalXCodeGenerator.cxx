@@ -1683,8 +1683,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     return;
   }
 
-  // Check IPO related warning/error.
-  gtgt->IsIPOEnabled(configName);
+  if (gtgt->IsIPOEnabled(configName)) {
+    const char* ltoValue =
+      this->CurrentMakefile->IsOn("_CMAKE_LTO_THIN") ? "YES_THIN" : "YES";
+    buildSettings->AddAttribute("LLVM_LTO", this->CreateString(ltoValue));
+  }
 
   // Add define flags
   this->CurrentLocalGenerator->AppendFlags(
