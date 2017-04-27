@@ -39,9 +39,24 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
       continue;
     }
 
-    if (li->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-        li->Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
-        li->Target->GetType() == cmStateEnums::MODULE_LIBRARY) {
+    bool skippable = false;
+    switch (li->Target->GetType()) {
+      case cmStateEnums::SHARED_LIBRARY:
+      case cmStateEnums::MODULE_LIBRARY:
+      case cmStateEnums::INTERFACE_LIBRARY:
+        skippable = true;
+        break;
+      case cmStateEnums::STATIC_LIBRARY:
+        // If a static library is resolving its device linking, it should
+        // be removed for other device linking
+        skippable =
+          li->Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
+        break;
+      default:
+        break;
+    }
+
+    if (skippable) {
       continue;
     }
 

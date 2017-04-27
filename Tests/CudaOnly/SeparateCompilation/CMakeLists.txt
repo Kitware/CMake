@@ -12,6 +12,7 @@ project (CudaOnlySeparateCompilation CUDA)
 string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=compute_30")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CUDA_STANDARD 11)
+
 add_library(CUDASeparateLibA STATIC file1.cu file2.cu file3.cu)
 
 #Having file4/file5 in a shared library causes serious problems
@@ -22,12 +23,24 @@ add_library(CUDASeparateLibB STATIC file4.cu file5.cu)
 target_link_libraries(CUDASeparateLibB PRIVATE CUDASeparateLibA)
 
 add_executable(CudaOnlySeparateCompilation main.cu)
-target_link_libraries(CudaOnlySeparateCompilation PRIVATE CUDASeparateLibB)
+target_link_libraries(CudaOnlySeparateCompilation
+                      PRIVATE CUDASeparateLibB)
 
-set_target_properties( CUDASeparateLibA
-                       CUDASeparateLibB
-                       PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(CUDASeparateLibA
+                      CUDASeparateLibB
+                      PROPERTIES CUDA_SEPARABLE_COMPILATION ON
+                      POSITION_INDEPENDENT_CODE ON)
 
-set_target_properties( CUDASeparateLibA
-                       CUDASeparateLibB
-                       PROPERTIES POSITION_INDEPENDENT_CODE ON)
+if (CMAKE_GENERATOR MATCHES "^Visual Studio")
+  #Visual Studio CUDA integration will not perform device linking
+  #on a target that itself does not have GenerateRelocatableDeviceCode
+  #enabled.
+  set_target_properties(CudaOnlySeparateCompilation
+                        PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+endif()
+
+if (APPLE)
+  # We need to add the default path to the driver (libcuda.dylib) as an rpath, so that
+  # the static cuda runtime can find it at runtime.
+  target_link_libraries(CudaOnlySeparateCompilation PRIVATE -Wl,-rpath,/usr/local/cuda/lib)
+endif()

@@ -122,7 +122,11 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     std::string buildEcho = "Linking ";
     buildEcho += linkLanguage;
     buildEcho += " device code ";
-    buildEcho += targetOutputReal;
+    buildEcho += this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->MaybeConvertToRelativePath(
+        this->LocalGenerator->GetCurrentBinaryDirectory(),
+        this->DeviceLinkObject),
+      cmOutputConverter::SHELL);
     this->LocalGenerator->AppendEcho(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }

@@ -116,6 +116,10 @@ cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
        i != this->CudaOptions.end(); ++i) {
     delete i->second;
   }
+  for (OptionsMap::iterator i = this->CudaLinkOptions.begin();
+       i != this->CudaLinkOptions.end(); ++i) {
+    delete i->second;
+  }
   if (!this->BuildFileStream) {
     return;
   }
@@ -211,6 +215,9 @@ void cmVisualStudio10TargetGenerator::Generate()
       return;
     }
     if (!this->ComputeCudaOptions()) {
+      return;
+    }
+    if (!this->ComputeCudaLinkOptions()) {
       return;
     }
     if (!this->ComputeMasmOptions()) {
@@ -2524,6 +2531,70 @@ void cmVisualStudio10TargetGenerator::WriteCudaOptions(
   this->WriteString("</CudaCompile>\n", 2);
 }
 
+bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions()
+{
+  if (!this->GlobalGenerator->IsCudaEnabled()) {
+    return true;
+  }
+  for (std::vector<std::string>::const_iterator i =
+         this->Configurations.begin();
+       i != this->Configurations.end(); ++i) {
+    if (!this->ComputeCudaLinkOptions(*i)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
+  std::string const& configName)
+{
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
+  CM_AUTO_PTR<Options> pOptions(new Options(
+    this->LocalGenerator, Options::CudaCompiler, gg->GetCudaFlagTable()));
+  Options& cudaLinkOptions = *pOptions;
+
+  // Determine if we need to do a device link
+  bool doDeviceLinking = false;
+  switch (this->GeneratorTarget->GetType()) {
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
+    case cmStateEnums::EXECUTABLE:
+      doDeviceLinking = true;
+      break;
+    case cmStateEnums::STATIC_LIBRARY:
+      doDeviceLinking = this->GeneratorTarget->GetPropertyAsBool(
+        "CUDA_RESOLVE_DEVICE_SYMBOLS");
+      break;
+    default:
+      break;
+  }
+
+  cudaLinkOptions.AddFlag("PerformDeviceLink",
+                          doDeviceLinking ? "true" : "false");
+
+  this->CudaLinkOptions[configName] = pOptions.release();
+  return true;
+}
+
+void cmVisualStudio10TargetGenerator::WriteCudaLinkOptions(
+  std::string const& configName)
+{
+  if (this->GeneratorTarget->GetType() > cmStateEnums::MODULE_LIBRARY) {
+    return;
+  }
+
+  if (!this->MSTools || !this->GlobalGenerator->IsCudaEnabled()) {
+    return;
+  }
+
+  this->WriteString("<CudaLink>\n", 2);
+  Options& cudaLinkOptions = *(this->CudaLinkOptions[configName]);
+  cudaLinkOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  this->WriteString("</CudaLink>\n", 2);
+}
+
 bool cmVisualStudio10TargetGenerator::ComputeMasmOptions()
 {
   if (!this->GlobalGenerator->IsMasmEnabled()) {
@@ -3283,6 +3354,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     }
     //    output link flags       <Link></Link>
     this->WriteLinkOptions(*i);
+    this->WriteCudaLinkOptions(*i);
     //    output lib flags       <Lib></Lib>
     this->WriteLibOptions(*i);
     //    output manifest flags  <Manifest></Manifest>
