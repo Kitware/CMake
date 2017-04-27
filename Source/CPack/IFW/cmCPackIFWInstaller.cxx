@@ -171,17 +171,17 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
 
   // WizardStyle
   if (const char* option = GetOption("CPACK_IFW_PACKAGE_WIZARD_STYLE")) {
-    if (WizardStyle.compare("Modern") == 0 &&
-        WizardStyle.compare("Aero") == 0 && WizardStyle.compare("Mac") == 0 &&
-        WizardStyle.compare("Classic") == 0) {
+    // Setting the user value in any case
+    WizardStyle = option;
+    // Check known values
+    if (WizardStyle != "Modern" && WizardStyle != "Aero" &&
+        WizardStyle != "Mac" && WizardStyle != "Classic") {
       cmCPackLogger(
         cmCPackLog::LOG_WARNING,
         "Option CPACK_IFW_PACKAGE_WIZARD_STYLE has unknown value \""
           << option << "\". Expected values are: Modern, Aero, Mac, Classic."
           << std::endl);
     }
-
-    WizardStyle = option;
   }
 
   // WizardDefaultWidth

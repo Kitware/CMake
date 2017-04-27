@@ -3153,7 +3153,7 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const& lang,
   langs.reserve(lang.size());
   for (std::vector<std::string>::const_iterator i = lang.begin();
        i != lang.end(); ++i) {
-    if (i->compare("RC") == 0) {
+    if (*i == "RC") {
       langsRC.push_back(*i);
     } else {
       langs.push_back(*i);
