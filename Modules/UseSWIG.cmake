@@ -326,6 +326,9 @@ macro(SWIG_ADD_LIBRARY name)
     if (APPLE)
       set_target_properties (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".bundle")
     endif ()
+  else()
+    # assume empty prefix because we expect the module to be dynamically loaded
+    set_target_properties (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
   endif ()
 endmacro()
 
