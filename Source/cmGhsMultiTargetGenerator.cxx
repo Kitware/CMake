@@ -232,10 +232,12 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
     const char* lang = language.c_str();
 
     if (notKernel) {
-      this->LocalGenerator->AddLanguageFlags(flags, lang, config);
+      this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
+                                             lang, config);
     } else {
-      this->LocalGenerator->AddLanguageFlags(
-        flags, lang + std::string("_GHS_KERNEL"), config);
+      this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
+                                             lang + std::string("_GHS_KERNEL"),
+                                             config);
     }
     this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget, lang,
                                           config);

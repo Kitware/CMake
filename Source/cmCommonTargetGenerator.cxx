@@ -47,11 +47,8 @@ void cmCommonTargetGenerator::AddFeatureFlags(std::string& flags,
                                               const std::string& lang)
 {
   // Add language-specific flags.
-  this->LocalGenerator->AddLanguageFlags(flags, lang, this->ConfigName);
-
-  if (this->GeneratorTarget->IsIPOEnabled(this->ConfigName)) {
-    this->LocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
-  }
+  this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget, lang,
+                                         this->ConfigName);
 }
 
 void cmCommonTargetGenerator::AddModuleDefinitionFlag(
