@@ -120,10 +120,12 @@ if (GLUT_FOUND)
   # If not, we need some way to figure out what platform we are on.
   set( GLUT_LIBRARIES
     ${GLUT_glut_LIBRARY}
-    ${GLUT_Xmu_LIBRARY}
-    ${GLUT_Xi_LIBRARY}
-    ${GLUT_cocoa_LIBRARY}
     )
+  foreach(v GLUT_Xmu_LIBRARY GLUT_Xi_LIBRARY GLUT_cocoa_LIBRARY)
+    if(${v})
+      list(APPEND GLUT_LIBRARIES ${${v}})
+    endif()
+  endforeach()
 
   if(NOT TARGET GLUT::GLUT)
     add_library(GLUT::GLUT UNKNOWN IMPORTED)
