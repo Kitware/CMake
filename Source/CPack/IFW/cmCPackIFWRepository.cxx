@@ -2,32 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWRepository.h"
 
-#include "cmCPackGenerator.h"
 #include "cmCPackIFWGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 
-#include "cmConfigure.h"
 #include <stddef.h>
-
-#ifdef cmCPackLogger
-#undef cmCPackLogger
-#endif
-#define cmCPackLogger(logType, msg)                                           \
-  do {                                                                        \
-    std::ostringstream cmCPackLog_msg;                                        \
-    cmCPackLog_msg << msg;                                                    \
-    if (Generator) {                                                          \
-      Generator->Logger->Log(logType, __FILE__, __LINE__,                     \
-                             cmCPackLog_msg.str().c_str());                   \
-    }                                                                         \
-  } while (false)
 
 cmCPackIFWRepository::cmCPackIFWRepository()
   : Update(None)
-  , Generator(CM_NULLPTR)
 {
 }
 
@@ -51,31 +35,6 @@ bool cmCPackIFWRepository::IsValid() const
   }
 
   return valid;
-}
-
-const char* cmCPackIFWRepository::GetOption(const std::string& op) const
-{
-  return Generator ? Generator->GetOption(op) : CM_NULLPTR;
-}
-
-bool cmCPackIFWRepository::IsOn(const std::string& op) const
-{
-  return Generator ? Generator->IsOn(op) : false;
-}
-
-bool cmCPackIFWRepository::IsVersionLess(const char* version)
-{
-  return Generator ? Generator->IsVersionLess(version) : false;
-}
-
-bool cmCPackIFWRepository::IsVersionGreater(const char* version)
-{
-  return Generator ? Generator->IsVersionGreater(version) : false;
-}
-
-bool cmCPackIFWRepository::IsVersionEqual(const char* version)
-{
-  return Generator ? Generator->IsVersionEqual(version) : false;
 }
 
 bool cmCPackIFWRepository::ConfigureFromOptions()
@@ -323,12 +282,5 @@ void cmCPackIFWRepository::WriteRepositoryUpdates(cmXMLWriter& xout)
       (*rit)->WriteRepositoryUpdate(xout);
     }
     xout.EndElement();
-  }
-}
-
-void cmCPackIFWRepository::WriteGeneratedByToStrim(cmXMLWriter& xout)
-{
-  if (Generator) {
-    Generator->WriteGeneratedByToStrim(xout);
   }
 }

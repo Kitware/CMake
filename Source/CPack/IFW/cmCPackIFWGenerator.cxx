@@ -4,48 +4,29 @@
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
+#include "cmCPackIFWCommon.h"
 #include "cmCPackIFWInstaller.h"
 #include "cmCPackIFWPackage.h"
 #include "cmCPackIFWRepository.h"
-#include "cmCPackLog.h"
+#include "cmCPackLog.h" // IWYU pragma: keep
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
-#include "cmTimestamp.h"
-#include "cmVersionConfig.h"
-#include "cmXMLWriter.h"
 
 #include <sstream>
 #include <utility>
 
 cmCPackIFWGenerator::cmCPackIFWGenerator()
 {
+  Generator = this;
 }
 
 cmCPackIFWGenerator::~cmCPackIFWGenerator()
 {
 }
 
-bool cmCPackIFWGenerator::IsVersionLess(const char* version)
-{
-  return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                       FrameworkVersion.data(), version);
-}
-
-bool cmCPackIFWGenerator::IsVersionGreater(const char* version)
-{
-  return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER,
-                                       FrameworkVersion.data(), version);
-}
-
-bool cmCPackIFWGenerator::IsVersionEqual(const char* version)
-{
-  return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
-                                       FrameworkVersion.data(), version);
-}
-
 int cmCPackIFWGenerator::PackageFiles()
 {
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Configuration" << std::endl);
+  cmCPackIFWLogger(OUTPUT, "- Configuration" << std::endl);
 
   // Installer configuragion
   Installer.GenerateInstallerFile();
@@ -85,11 +66,10 @@ int cmCPackIFWGenerator::PackageFiles()
       }
     }
     ifwCmd += " " + this->toplevel + "/repository";
-    cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << ifwCmd << std::endl);
+    cmCPackIFWLogger(VERBOSE, "Execute: " << ifwCmd << std::endl);
     std::string output;
     int retVal = 1;
-    cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Generate repository"
-                    << std::endl);
+    cmCPackIFWLogger(OUTPUT, "- Generate repository" << std::endl);
     bool res = cmSystemTools::RunSingleCommand(ifwCmd.c_str(), &output,
                                                &output, &retVal, CM_NULLPTR,
                                                this->GeneratorVerbose, 0);
@@ -98,22 +78,24 @@ int cmCPackIFWGenerator::PackageFiles()
       ofs << "# Run command: " << ifwCmd << std::endl
           << "# Output:" << std::endl
           << output << std::endl;
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running IFW command: "
-                      << ifwCmd << std::endl
-                      << "Please check " << ifwTmpFile << " for errors"
-                      << std::endl);
+      cmCPackIFWLogger(ERROR, "Problem running IFW command: "
+                         << ifwCmd << std::endl
+                         << "Please check " << ifwTmpFile << " for errors"
+                         << std::endl);
       return 0;
     }
 
     if (!Repository.RepositoryUpdate.empty() &&
         !Repository.PatchUpdatesXml()) {
-      cmCPackLogger(cmCPackLog::LOG_WARNING, "Problem patch IFW \"Updates\" "
-                      << "file: " << this->toplevel + "/repository/Updates.xml"
-                      << std::endl);
+      cmCPackIFWLogger(WARNING, "Problem patch IFW \"Updates\" "
+                         << "file: "
+                         << this->toplevel + "/repository/Updates.xml"
+                         << std::endl);
     }
 
-    cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- repository: "
-                    << this->toplevel << "/repository generated" << std::endl);
+    cmCPackIFWLogger(OUTPUT, "- repository: " << this->toplevel
+                                              << "/repository generated"
+                                              << std::endl);
   }
 
   // Run binary creator
@@ -177,10 +159,10 @@ int cmCPackIFWGenerator::PackageFiles()
     } else {
       ifwCmd += " installer";
     }
-    cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << ifwCmd << std::endl);
+    cmCPackIFWLogger(VERBOSE, "Execute: " << ifwCmd << std::endl);
     std::string output;
     int retVal = 1;
-    cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Generate package" << std::endl);
+    cmCPackIFWLogger(OUTPUT, "- Generate package" << std::endl);
     bool res = cmSystemTools::RunSingleCommand(ifwCmd.c_str(), &output,
                                                &output, &retVal, CM_NULLPTR,
                                                this->GeneratorVerbose, 0);
@@ -189,10 +171,10 @@ int cmCPackIFWGenerator::PackageFiles()
       ofs << "# Run command: " << ifwCmd << std::endl
           << "# Output:" << std::endl
           << output << std::endl;
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running IFW command: "
-                      << ifwCmd << std::endl
-                      << "Please check " << ifwTmpFile << " for errors"
-                      << std::endl);
+      cmCPackIFWLogger(ERROR, "Problem running IFW command: "
+                         << ifwCmd << std::endl
+                         << "Please check " << ifwTmpFile << " for errors"
+                         << std::endl);
       return 0;
     }
   }
@@ -243,10 +225,9 @@ int cmCPackIFWGenerator::InitializeInternal()
   }
 
   if (BinCreator.empty()) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Cannot find QtIFW compiler \"binarycreator\": "
-                  "likely it is not installed, or not in your PATH"
-                    << std::endl);
+    cmCPackIFWLogger(ERROR, "Cannot find QtIFW compiler \"binarycreator\": "
+                            "likely it is not installed, or not in your PATH"
+                       << std::endl);
     return 0;
   }
 
@@ -309,10 +290,10 @@ int cmCPackIFWGenerator::InitializeInternal()
   }
 
   if (!Installer.RemoteRepositories.empty() && RepoGen.empty()) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Cannot find QtIFW repository generator \"repogen\": "
-                  "likely it is not installed, or not in your PATH"
-                    << std::endl);
+    cmCPackIFWLogger(ERROR,
+                     "Cannot find QtIFW repository generator \"repogen\": "
+                     "likely it is not installed, or not in your PATH"
+                       << std::endl);
     return 0;
   }
 
@@ -381,9 +362,9 @@ cmCPackComponent* cmCPackIFWGenerator::GetComponent(
     }
   } else {
     Packages.erase(name);
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot configure package \""
-                    << name << "\" for component \"" << component->Name << "\""
-                    << std::endl);
+    cmCPackIFWLogger(ERROR, "Cannot configure package \""
+                       << name << "\" for component \"" << component->Name
+                       << "\"" << std::endl);
   }
 
   return component;
@@ -416,9 +397,9 @@ cmCPackComponentGroup* cmCPackIFWGenerator::GetComponentGroup(
     BinaryPackages.insert(package);
   } else {
     Packages.erase(name);
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot configure package \""
-                    << name << "\" for component group \"" << group->Name
-                    << "\"" << std::endl);
+    cmCPackIFWLogger(ERROR, "Cannot configure package \""
+                       << name << "\" for component group \"" << group->Name
+                       << "\"" << std::endl);
   }
   return group;
 }
@@ -561,24 +542,10 @@ cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
   } else {
     Repositories.erase(repositoryName);
     repository = CM_NULLPTR;
-    cmCPackLogger(cmCPackLog::LOG_WARNING, "Invalid repository \""
-                    << repositoryName << "\""
-                    << " configuration. Repository will be skipped."
-                    << std::endl);
+    cmCPackIFWLogger(WARNING, "Invalid repository \""
+                       << repositoryName << "\""
+                       << " configuration. Repository will be skipped."
+                       << std::endl);
   }
   return repository;
-}
-
-void cmCPackIFWGenerator::WriteGeneratedByToStrim(cmXMLWriter& xout)
-{
-  std::ostringstream comment;
-  comment << "Generated by CPack " << CMake_VERSION << " IFW generator "
-          << "for QtIFW ";
-  if (IsVersionLess("2.0")) {
-    comment << "less 2.0";
-  } else {
-    comment << FrameworkVersion;
-  }
-  comment << " tools at " << cmTimestamp().CurrentTime("", true);
-  xout.Comment(comment.str().c_str());
 }

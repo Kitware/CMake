@@ -3,33 +3,18 @@
 #include "cmCPackIFWPackage.h"
 
 #include "cmCPackComponentGroup.h"
-#include "cmCPackGenerator.h"
+#include "cmCPackIFWCommon.h"
 #include "cmCPackIFWGenerator.h"
 #include "cmCPackIFWInstaller.h"
-#include "cmCPackLog.h"
+#include "cmCPackLog.h" // IWYU pragma: keep
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cmXMLWriter.h"
 
-#include "cmConfigure.h"
 #include <map>
 #include <sstream>
 #include <stddef.h>
-
-//----------------------------------------------------------------- Logger ---
-#ifdef cmCPackLogger
-#undef cmCPackLogger
-#endif
-#define cmCPackLogger(logType, msg)                                           \
-  do {                                                                        \
-    std::ostringstream cmCPackLog_msg;                                        \
-    cmCPackLog_msg << msg;                                                    \
-    if (Generator) {                                                          \
-      Generator->Logger->Log(logType, __FILE__, __LINE__,                     \
-                             cmCPackLog_msg.str().c_str());                   \
-    }                                                                         \
-  } while (false)
 
 //---------------------------------------------------------- CompareStruct ---
 cmCPackIFWPackage::CompareStruct::CompareStruct()
@@ -104,45 +89,8 @@ std::string cmCPackIFWPackage::DependenceStruct::NameWithCompare() const
 
 //------------------------------------------------------ cmCPackIFWPackage ---
 cmCPackIFWPackage::cmCPackIFWPackage()
-  : Generator(CM_NULLPTR)
-  , Installer(CM_NULLPTR)
+  : Installer(CM_NULLPTR)
 {
-}
-
-const char* cmCPackIFWPackage::GetOption(const std::string& op) const
-{
-  const char* option = Generator ? Generator->GetOption(op) : CM_NULLPTR;
-  return option && *option ? option : CM_NULLPTR;
-}
-
-bool cmCPackIFWPackage::IsOn(const std::string& op) const
-{
-  return Generator ? Generator->IsOn(op) : false;
-}
-
-bool cmCPackIFWPackage::IsSetToOff(const std::string& op) const
-{
-  return Generator ? Generator->IsSetToOff(op) : false;
-}
-
-bool cmCPackIFWPackage::IsSetToEmpty(const std::string& op) const
-{
-  return Generator ? Generator->IsSetToEmpty(op) : false;
-}
-
-bool cmCPackIFWPackage::IsVersionLess(const char* version)
-{
-  return Generator ? Generator->IsVersionLess(version) : false;
-}
-
-bool cmCPackIFWPackage::IsVersionGreater(const char* version)
-{
-  return Generator ? Generator->IsVersionGreater(version) : false;
-}
-
-bool cmCPackIFWPackage::IsVersionEqual(const char* version)
-{
-  return Generator ? Generator->IsVersionEqual(version) : false;
 }
 
 std::string cmCPackIFWPackage::GetComponentName(cmCPackComponent* component)
@@ -264,11 +212,11 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
     Licenses.clear();
     cmSystemTools::ExpandListArgument(option, Licenses);
     if (Licenses.size() % 2 != 0) {
-      cmCPackLogger(
-        cmCPackLog::LOG_WARNING, prefix
-          << "LICENSES"
-          << " should contain pairs of <display_name> and <file_path>."
-          << std::endl);
+      cmCPackIFWLogger(
+        WARNING,
+        prefix << "LICENSES"
+               << " should contain pairs of <display_name> and <file_path>."
+               << std::endl);
       Licenses.clear();
     }
   }
@@ -276,8 +224,8 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
   // Priority
   if (const char* option = this->GetOption(prefix + "PRIORITY")) {
     SortingPriority = option;
-    cmCPackLogger(
-      cmCPackLog::LOG_WARNING, "The \"PRIORITY\" option is set "
+    cmCPackIFWLogger(
+      WARNING, "The \"PRIORITY\" option is set "
         << "for component \"" << component->Name << "\", but there option is "
         << "deprecated. Please use \"SORTING_PRIORITY\" option instead."
         << std::endl);
@@ -341,11 +289,11 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
     Licenses.clear();
     cmSystemTools::ExpandListArgument(option, Licenses);
     if (Licenses.size() % 2 != 0) {
-      cmCPackLogger(
-        cmCPackLog::LOG_WARNING, prefix
-          << "LICENSES"
-          << " should contain pairs of <display_name> and <file_path>."
-          << std::endl);
+      cmCPackIFWLogger(
+        WARNING,
+        prefix << "LICENSES"
+               << " should contain pairs of <display_name> and <file_path>."
+               << std::endl);
       Licenses.clear();
     }
   }
@@ -353,8 +301,8 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
   // Priority
   if (const char* option = this->GetOption(prefix + "PRIORITY")) {
     SortingPriority = option;
-    cmCPackLogger(
-      cmCPackLog::LOG_WARNING, "The \"PRIORITY\" option is set "
+    cmCPackIFWLogger(
+      WARNING, "The \"PRIORITY\" option is set "
         << "for component group \"" << group->Name
         << "\", but there option is "
         << "deprecated. Please use \"SORTING_PRIORITY\" option instead."
@@ -713,11 +661,4 @@ void cmCPackIFWPackage::GeneratePackageFile()
 
   xout.EndElement();
   xout.EndDocument();
-}
-
-void cmCPackIFWPackage::WriteGeneratedByToStrim(cmXMLWriter& xout)
-{
-  if (Generator) {
-    Generator->WriteGeneratedByToStrim(xout);
-  }
 }
