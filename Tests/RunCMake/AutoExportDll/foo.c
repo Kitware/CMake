@@ -13,3 +13,5 @@ int bar()
 {
   return 5;
 }
+
+const char testconst[] = "testconst";
