@@ -78,6 +78,7 @@ configure_file(
 include_directories(
   "${CMake_BINARY_DIR}/Source"
   "${CMake_SOURCE_DIR}/Source"
+  "${CMake_SOURCE_DIR}/Source/LexerParser"
   ${CMAKE_ZLIB_INCLUDES}
   ${CMAKE_EXPAT_INCLUDES}
   ${CMAKE_TAR_INCLUDES}
@@ -102,14 +103,40 @@ endif()
 # Sources for CMakeLib
 #
 set(SRCS
+  # Lexers/Parsers
+  LexerParser/cmCommandArgumentLexer.cxx
+  LexerParser/cmCommandArgumentLexer.h
+  LexerParser/cmCommandArgumentLexer.in.l
+  LexerParser/cmCommandArgumentParser.cxx
+  LexerParser/cmCommandArgumentParserTokens.h
+  LexerParser/cmCommandArgumentParser.y
+  LexerParser/cmDependsJavaLexer.cxx
+  LexerParser/cmDependsJavaLexer.h
+  LexerParser/cmDependsJavaLexer.in.l
+  LexerParser/cmDependsJavaParser.cxx
+  LexerParser/cmDependsJavaParserTokens.h
+  LexerParser/cmDependsJavaParser.y
+  LexerParser/cmExprLexer.cxx
+  LexerParser/cmExprLexer.h
+  LexerParser/cmExprLexer.in.l
+  LexerParser/cmExprParser.cxx
+  LexerParser/cmExprParserTokens.h
+  LexerParser/cmExprParser.y
+  LexerParser/cmFortranLexer.cxx
+  LexerParser/cmFortranLexer.h
+  LexerParser/cmFortranLexer.in.l
+  LexerParser/cmFortranParser.cxx
+  LexerParser/cmFortranParserTokens.h
+  LexerParser/cmFortranParser.y
+  LexerParser/cmListFileLexer.c
+  LexerParser/cmListFileLexer.in.l
+
   cmArchiveWrite.cxx
   cmBase32.cxx
   cmCacheManager.cxx
   cmCacheManager.h
   cmCLocaleEnvironmentScope.h
   cmCLocaleEnvironmentScope.cxx
-  cmCommandArgumentLexer.cxx
-  cmCommandArgumentParser.cxx
   cmCommandArgumentParserHelper.cxx
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
@@ -141,8 +168,6 @@ set(SRCS
   cmDependsFortran.h
   cmDependsJava.cxx
   cmDependsJava.h
-  cmDependsJavaLexer.cxx
-  cmDependsJavaParser.cxx
   cmDependsJavaParserHelper.cxx
   cmDependsJavaParserHelper.h
   cmDocumentation.cxx
@@ -151,8 +176,6 @@ set(SRCS
   cmDynamicLoader.cxx
   cmDynamicLoader.h
   ${ELF_SRCS}
-  cmExprLexer.cxx
-  cmExprParser.cxx
   cmExprParserHelper.cxx
   cmExportBuildAndroidMKGenerator.h
   cmExportBuildAndroidMKGenerator.cxx
@@ -192,10 +215,6 @@ set(SRCS
   cmFilePathChecksum.h
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
-  cmFortranLexer.cxx
-  cmFortranLexer.h
-  cmFortranParser.cxx
-  cmFortranParser.h
   cmFortranParserImpl.cxx
   cmGeneratedFileStream.cxx
   cmGeneratorExpressionContext.cxx
@@ -247,7 +266,6 @@ set(SRCS
   cmLinkLineDeviceComputer.h
   cmListFileCache.cxx
   cmListFileCache.h
-  cmListFileLexer.c
   cmLocalCommonGenerator.cxx
   cmLocalCommonGenerator.h
   cmLocalGenerator.cxx
