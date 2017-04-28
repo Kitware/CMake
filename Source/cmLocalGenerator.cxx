@@ -1002,7 +1002,7 @@ void cmLocalGenerator::GetTargetFlags(
           target->GetName().c_str());
         return;
       }
-      this->AddLanguageFlags(flags, target, linkLanguage, buildType);
+      this->AddLanguageFlagsForLinking(flags, target, linkLanguage, buildType);
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                   frameworkPath, linkPath);
@@ -1315,6 +1315,13 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   if (target->IsIPOEnabled(config)) {
     this->AppendFeatureOptions(flags, lang, "IPO");
   }
+}
+
+void cmLocalGenerator::AddLanguageFlagsForLinking(
+  std::string& flags, cmGeneratorTarget const* target, const std::string& lang,
+  const std::string& config)
+{
+  this->AddLanguageFlags(flags, target, lang, config);
 }
 
 cmGeneratorTarget* cmLocalGenerator::FindGeneratorTargetToUse(

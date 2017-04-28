@@ -102,6 +102,10 @@ public:
 
   void AddLanguageFlags(std::string& flags, cmGeneratorTarget const* target,
                         const std::string& lang, const std::string& config);
+  void AddLanguageFlagsForLinking(std::string& flags,
+                                  cmGeneratorTarget const* target,
+                                  const std::string& lang,
+                                  const std::string& config);
   void AddCMP0018Flags(std::string& flags, cmGeneratorTarget const* target,
                        std::string const& lang, const std::string& config);
   void AddVisibilityPresetFlags(std::string& flags,
