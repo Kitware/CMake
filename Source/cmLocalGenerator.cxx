@@ -1321,6 +1321,15 @@ void cmLocalGenerator::AddLanguageFlagsForLinking(
   std::string& flags, cmGeneratorTarget const* target, const std::string& lang,
   const std::string& config)
 {
+  if (this->Makefile->IsOn("CMAKE_" + lang +
+                           "_LINK_WITH_STANDARD_COMPILE_OPTION")) {
+    // This toolchain requires use of the language standard flag
+    // when linking in order to use the matching standard library.
+    // FIXME: If CMake gains an abstraction for standard library
+    // selection, this will have to be reconciled with it.
+    this->AddCompilerRequirementFlag(flags, target, lang);
+  }
+
   this->AddLanguageFlags(flags, target, lang, config);
 }
 
