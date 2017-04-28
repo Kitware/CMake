@@ -3,3 +3,6 @@
 
 
 __BlueGeneP_set_static_flags(XL C)
+
+# -qhalt=e       = Halt on error messages (rather than just severe errors)
+string(APPEND CMAKE_C_FLAGS_INIT " -qhalt=e")

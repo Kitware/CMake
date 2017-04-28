@@ -3,3 +3,6 @@
 
 
 __BlueGeneP_set_dynamic_flags(XL CXX)
+
+# -qhalt=s       = Halt on severe error messages
+string(APPEND CMAKE_CXX_FLAGS_INIT " -qhalt=s")
