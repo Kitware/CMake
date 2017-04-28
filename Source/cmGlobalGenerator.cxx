@@ -1272,6 +1272,18 @@ bool cmGlobalGenerator::Compute()
     this->LocalGenerators[i]->AddHelperCommands();
   }
 
+  // Finalize the set of compile features for each target.
+  // FIXME: This turns into calls to cmMakefile::AddRequiredTargetFeature
+  // which actually modifies the <lang>_STANDARD target property
+  // on the original cmTarget instance.  It accumulates features
+  // across all configurations.  Some refactoring is needed to
+  // compute a per-config resulta purely during generation.
+  for (i = 0; i < this->LocalGenerators.size(); ++i) {
+    if (!this->LocalGenerators[i]->ComputeTargetCompileFeatures()) {
+      return false;
+    }
+  }
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for (std::vector<cmGeneratorTarget const*>::iterator it =
          autogenTargets.begin();

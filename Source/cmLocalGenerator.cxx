@@ -558,6 +558,31 @@ void cmLocalGenerator::ComputeTargetManifest()
   }
 }
 
+bool cmLocalGenerator::ComputeTargetCompileFeatures()
+{
+  // Collect the set of configuration types.
+  std::vector<std::string> configNames;
+  this->Makefile->GetConfigurations(configNames);
+  if (configNames.empty()) {
+    configNames.push_back("");
+  }
+
+  // Process compile features of all targets.
+  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
+  for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+       t != targets.end(); ++t) {
+    cmGeneratorTarget* target = *t;
+    for (std::vector<std::string>::iterator ci = configNames.begin();
+         ci != configNames.end(); ++ci) {
+      if (!target->ComputeCompileFeatures(*ci)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 bool cmLocalGenerator::IsRootMakefile() const
 {
   return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
@@ -740,14 +765,6 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
          i != opts.end(); ++i) {
       // COMPILE_OPTIONS are escaped.
       this->AppendFlagEscape(flags, *i);
-    }
-  }
-  std::vector<std::string> features;
-  target->GetCompileFeatures(features, config);
-  for (std::vector<std::string>::const_iterator it = features.begin();
-       it != features.end(); ++it) {
-    if (!this->Makefile->AddRequiredTargetFeature(target->Target, *it)) {
-      return;
     }
   }
 

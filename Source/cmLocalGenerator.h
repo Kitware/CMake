@@ -70,6 +70,8 @@ public:
    */
   void ComputeTargetManifest();
 
+  bool ComputeTargetCompileFeatures();
+
   bool IsRootMakefile() const;
 
   ///! Get the makefile for this generator
