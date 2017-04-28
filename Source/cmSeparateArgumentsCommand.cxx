@@ -40,6 +40,13 @@ bool cmSeparateArgumentsCommand::InitialPass(
     if (doing == DoingVariable) {
       var = args[i];
       doing = DoingMode;
+    } else if (doing == DoingMode && args[i] == "NATIVE_COMMAND") {
+#ifdef _WIN32
+      mode = ModeWindows;
+#else
+      mode = ModeUnix;
+#endif
+      doing = DoingCommand;
     } else if (doing == DoingMode && args[i] == "UNIX_COMMAND") {
       mode = ModeUnix;
       doing = DoingCommand;
