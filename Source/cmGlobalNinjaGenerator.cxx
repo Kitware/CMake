@@ -898,6 +898,10 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
     this->GetCMakeInstance()->GetHomeOutputDirectory();
   if (!this->CompileCommandsStream) {
     std::string buildFilePath = buildFileDir + "/compile_commands.json";
+    if (this->ComputingUnknownDependencies) {
+      this->CombinedBuildOutputs.insert(
+        this->NinjaOutputPath("compile_commands.json"));
+    }
 
     // Get a stream where to generate things.
     this->CompileCommandsStream =
