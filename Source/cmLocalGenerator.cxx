@@ -915,6 +915,9 @@ void cmLocalGenerator::GetTargetFlags(
   const char* libraryLinkVariable =
     "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
 
+  const std::string linkLanguage =
+    linkLineComputer->GetLinkerLanguage(target, buildType);
+
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
       this->GetStaticLibraryFlags(linkFlags, buildType, target);
@@ -976,9 +979,6 @@ void cmLocalGenerator::GetTargetFlags(
         linkFlags += this->Makefile->GetSafeDefinition(build);
         linkFlags += " ";
       }
-
-      const std::string linkLanguage =
-        linkLineComputer->GetLinkerLanguage(target, buildType);
       if (linkLanguage.empty()) {
         cmSystemTools::Error(
           "CMake can not determine linker language for target: ",
@@ -1040,6 +1040,8 @@ void cmLocalGenerator::GetTargetFlags(
     default:
       break;
   }
+
+  this->AppendIPOLinkerFlags(linkFlags, target, config, linkLanguage);
 }
 
 void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
@@ -1767,6 +1769,38 @@ void cmLocalGenerator::AppendFlagEscape(std::string& flags,
                                         const std::string& rawFlag)
 {
   this->AppendFlags(flags, this->EscapeForShell(rawFlag));
+}
+
+void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
+                                            cmGeneratorTarget* target,
+                                            const std::string& config,
+                                            const std::string& lang)
+{
+  if (!target->IsIPOEnabled(config)) {
+    return;
+  }
+
+  switch (target->GetType()) {
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
+      break;
+    default:
+      return;
+  }
+
+  const std::string name = "CMAKE_" + lang + "_LINK_OPTIONS_IPO";
+  const char* rawFlagsList = this->Makefile->GetDefinition(name);
+  if (rawFlagsList == CM_NULLPTR) {
+    return;
+  }
+
+  std::vector<std::string> flagsList;
+  cmSystemTools::ExpandListArgument(rawFlagsList, flagsList);
+  for (std::vector<std::string>::const_iterator oi = flagsList.begin();
+       oi != flagsList.end(); ++oi) {
+    this->AppendFlagEscape(flags, *oi);
+  }
 }
 
 void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
