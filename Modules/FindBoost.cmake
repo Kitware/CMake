@@ -889,6 +889,33 @@ function(_Boost_MISSING_DEPENDENCIES componentvar extravar)
 endfunction()
 
 #
+# Some boost libraries may require particular set of compler features.
+# The very first one was `boost::fiber` introduced in Boost 1.62.
+# One can check required compiler features of it in
+# `${Boost_ROOT}/libs/fiber/build/Jamfile.v2`.
+#
+function(_Boost_COMPILER_FEATURES component _ret)
+  # Boost >= 1.62 and < 1.65
+  if(NOT Boost_VERSION VERSION_LESS 106200 AND Boost_VERSION VERSION_LESS 106500)
+    set(_Boost_FIBER_COMPILER_FEATURES
+        cxx_alias_templates
+        cxx_auto_type
+        cxx_constexpr
+        cxx_defaulted_functions
+        cxx_final
+        cxx_lambdas
+        cxx_noexcept
+        cxx_nullptr
+        cxx_rvalue_references
+        cxx_thread_local
+        cxx_variadic_templates
+    )
+  endif()
+  string(TOUPPER ${component} uppercomponent)
+  set(${_ret} ${_Boost_${uppercomponent}_COMPILER_FEATURES} PARENT_SCOPE)
+endfunction()
+
+#
 # Update library search directory hint variable with paths used by prebuilt boost binaries.
 #
 # Prebuilt windows binaries (https://sourceforge.net/projects/boost/files/boost-binaries/)
@@ -1640,6 +1667,9 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
 
   _Boost_ADJUST_LIB_VARS(${UPPERCOMPONENT})
 
+  # Check if component requires some compiler features
+  _Boost_COMPILER_FEATURES(${COMPONENT} _Boost_${UPPERCOMPONENT}_COMPILER_FEATURES)
+
 endforeach()
 
 # Restore the original find library ordering
@@ -1810,6 +1840,10 @@ if(Boost_FOUND)
           endif()
           set_target_properties(Boost::${COMPONENT} PROPERTIES
             INTERFACE_LINK_LIBRARIES "${_Boost_${UPPERCOMPONENT}_TARGET_DEPENDENCIES}")
+        endif()
+        if(_Boost_${UPPERCOMPONENT}_COMPILER_FEATURES)
+          set_target_properties(Boost::${COMPONENT} PROPERTIES
+            INTERFACE_COMPILE_FEATURES "${_Boost_${UPPERCOMPONENT}_COMPILER_FEATURES}")
         endif()
       endif()
     endif()
