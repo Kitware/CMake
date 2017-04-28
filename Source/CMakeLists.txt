@@ -88,61 +88,6 @@ include_directories(
 # let cmake know it is supposed to use it
 add_definitions(-DCMAKE_BUILD_WITH_CMAKE)
 
-option(CMAKE_REGENERATE_YACCLEX
-  "Regenerate YACC and LEXX files" OFF)
-mark_as_advanced(CMAKE_REGENERATE_YACCLEX)
-if(CMAKE_REGENERATE_YACCLEX)
-  set(parsersLexers cmFortran cmCommandArgument cmExpr)
-  find_program(YACC_EXECUTABLE
-    NAMES yacc bison
-    PATHS /usr/bin
-    DOC "Yacc or Bison executable")
-  find_program(FLEX_EXECUTABLE
-    NAMES flex
-    PATHS /usr/bin
-    DOC "Flex executable")
-  mark_as_advanced(YACC_EXECUTABLE FLEX_EXECUTABLE)
-  if(YACC_EXECUTABLE)
-    set(BISON_FLAGS)
-    if(YACC_EXECUTABLE MATCHES "bison")
-      set(BISON_FLAGS "--yacc")
-    endif()
-    set(yacc_files)
-    foreach(name ${parsersLexers})
-      set(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Parser.y")
-      set(dst "${CMAKE_CURRENT_BINARY_DIR}/${name}Parser.cxx")
-      set(hdr "${CMAKE_CURRENT_BINARY_DIR}/${name}ParserTokens.h")
-      add_custom_command(
-        OUTPUT "${dst}"
-        DEPENDS "${src}"
-        COMMAND
-        ${YACC_EXECUTABLE}
-        --name-prefix=${name}_yy --defines=${hdr} -o${dst} ${src}
-        )
-      set(yacc_files ${yacc_files} "${dst}")
-    endforeach()
-    add_custom_target(RerunYacc DEPENDS ${yacc_files})
-  endif()
-  if(FLEX_EXECUTABLE)
-    set(lex_files)
-    foreach(name ${parsersLexers})
-      set(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Lexer.in.l")
-      set(dst "${CMAKE_CURRENT_BINARY_DIR}/${name}Lexer.cxx")
-      set(hdr "${CMAKE_CURRENT_BINARY_DIR}/${name}Lexer.h")
-      add_custom_command(
-        OUTPUT "${dst}"
-        DEPENDS "${src}"
-        COMMAND
-        ${FLEX_EXECUTABLE}
-        --prefix=${name}_yy --header-file=${hdr} -o${dst} ${src}
-        )
-      set(lex_files ${lex_files} "${dst}")
-    endforeach()
-    add_custom_target(RerunLex DEPENDS ${lex_files})
-  endif()
-
-endif()
-
 # Check if we can build the ELF parser.
 if(CMAKE_USE_ELF_PARSER)
   set(ELF_SRCS cmELF.h cmELF.cxx)
