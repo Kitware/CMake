@@ -162,4 +162,3 @@ void cmExpr_yyerror(yyscan_t yyscanner, const char* message)
 {
   cmExpr_yyget_extra(yyscanner)->Error(message);
 }
-
