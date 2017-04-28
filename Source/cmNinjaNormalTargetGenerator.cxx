@@ -655,7 +655,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
     localGen.AddArchitectureFlags(t, &genTarget, cudaLinkLanguage, cfgName);
     vars["ARCH_FLAGS"] = t;
     t = "";
-    localGen.AddLanguageFlags(t, cudaLinkLanguage, cfgName);
+    localGen.AddLanguageFlags(t, &genTarget, cudaLinkLanguage, cfgName);
     vars["LANGUAGE_COMPILE_FLAGS"] = t;
   }
   if (this->GetGeneratorTarget()->HasSOName(cfgName)) {
@@ -874,7 +874,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     vars["ARCH_FLAGS"] = t;
     t = "";
     t += lwyuFlags;
-    localGen.AddLanguageFlags(t, TargetLinkLanguage, cfgName);
+    localGen.AddLanguageFlags(t, &genTarget, TargetLinkLanguage, cfgName);
     vars["LANGUAGE_COMPILE_FLAGS"] = t;
   }
   if (this->GetGeneratorTarget()->HasSOName(cfgName)) {

@@ -28,9 +28,6 @@ public:
   std::string const& GetConfigName() const;
 
 protected:
-  // Add language feature flags.
-  void AddFeatureFlags(std::string& flags, const std::string& lang);
-
   // Feature query methods.
   const char* GetFeature(const std::string& feature);
 

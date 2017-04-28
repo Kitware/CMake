@@ -985,7 +985,7 @@ void cmLocalGenerator::GetTargetFlags(
           target->GetName().c_str());
         return;
       }
-      this->AddLanguageFlags(flags, linkLanguage, buildType);
+      this->AddLanguageFlags(flags, target, linkLanguage, buildType);
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                   frameworkPath, linkPath);
@@ -1050,11 +1050,7 @@ void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
   cmMakefile* mf = this->GetMakefile();
 
   // Add language-specific flags.
-  this->AddLanguageFlags(flags, lang, config);
-
-  if (target->IsIPOEnabled(config)) {
-    this->AppendFeatureOptions(flags, lang, "IPO");
-  }
+  this->AddLanguageFlags(flags, target, lang, config);
 
   this->AddArchitectureFlags(flags, target, lang, config);
 
@@ -1287,6 +1283,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
 }
 
 void cmLocalGenerator::AddLanguageFlags(std::string& flags,
+                                        cmGeneratorTarget const* target,
                                         const std::string& lang,
                                         const std::string& config)
 {
@@ -1295,6 +1292,10 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   flagsVar += lang;
   flagsVar += "_FLAGS";
   this->AddConfigVariableFlags(flags, flagsVar, config);
+
+  if (target->IsIPOEnabled(config)) {
+    this->AppendFeatureOptions(flags, lang, "IPO");
+  }
 }
 
 cmGeneratorTarget* cmLocalGenerator::FindGeneratorTargetToUse(
