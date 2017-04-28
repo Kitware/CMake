@@ -22,6 +22,7 @@ macro (CHECK_COMPILER_FLAG_COMMON_PATTERNS _VAR)
      FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
      FAIL_REGEX "command option .* is not recognized"       # XL
      FAIL_REGEX "command option .* contains an incorrect subargument" # XL
+     FAIL_REGEX "Option .* is not recognized.  Option will be ignored." # XL
      FAIL_REGEX "not supported in this configuration. ignored"       # AIX
      FAIL_REGEX "File with unknown suffix passed to linker" # PGI
      FAIL_REGEX "[Uu]nknown switch"                         # PGI
