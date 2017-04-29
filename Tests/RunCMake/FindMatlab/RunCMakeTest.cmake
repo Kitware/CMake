@@ -1,5 +1,13 @@
 
 include(RunCMake)
+
+
+if(NOT "${MCR_ROOT}" STREQUAL "")
+    if(NOT EXISTS "${MCR_ROOT}")
+        message(FATAL_ERROR "MCR does not exist ${MCR_ROOT}")
+    endif()
+    set(RunCMake_TEST_OPTIONS "-Dmatlab_root=${MCR_ROOT}")
+endif()
 run_cmake(MatlabTest1)
 
 if(RunCMake_GENERATOR MATCHES "Make" AND UNIX)
@@ -11,6 +19,9 @@ if(RunCMake_GENERATOR MATCHES "Make" AND UNIX)
 
   message(STATUS "RerunFindMatlab: first configuration to extract real Matlab_ROOT_DIR")
   set(RunCMake_TEST_OPTIONS "-Dmatlab_required=REQUIRED")
+  if(NOT "${MCR_ROOT}" STREQUAL "")
+    set(RunCMake_TEST_OPTIONS ${RunCMake_TEST_OPTIONS} "-Dmatlab_root=${MCR_ROOT}")
+  endif()
   run_cmake(MatlabTest2)
 
   message(STATUS "RerunFindMatlab: flushing the variables")
