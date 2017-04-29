@@ -251,8 +251,6 @@ private:
   std::string PostBuildMakeTarget(std::string const& tName,
                                   std::string const& configName);
   cmXCodeObject* MainGroupChildren;
-  cmXCodeObject* SourcesGroupChildren;
-  cmXCodeObject* ResourcesGroupChildren;
   cmMakefile* CurrentMakefile;
   cmLocalGenerator* CurrentLocalGenerator;
   std::vector<std::string> CurrentConfigurationTypes;
