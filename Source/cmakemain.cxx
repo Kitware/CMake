@@ -201,7 +201,7 @@ int do_cmake(int ac, char const* const* av)
   doc.addCMakeStandardDocSections();
   if (doc.CheckOptions(ac, av)) {
     // Construct and print requested documentation.
-    cmake hcm;
+    cmake hcm(cmake::RoleInternal);
     hcm.SetHomeDirectory("");
     hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
@@ -283,13 +283,13 @@ int do_cmake(int ac, char const* const* av)
     }
   }
   if (sysinfo) {
-    cmake cm;
+    cmake cm(cmake::RoleProject);
     cm.SetHomeDirectory("");
     cm.SetHomeOutputDirectory("");
     int ret = cm.GetSystemInformation(args);
     return ret;
   }
-  cmake cm;
+  cmake cm(cmake::RoleProject);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cmSystemTools::SetMessageCallback(cmakemainMessageCallback, (void*)&cm);
@@ -407,7 +407,7 @@ static int do_build(int ac, char const* const* av)
     return 1;
   }
 
-  cmake cm;
+  cmake cm(cmake::RoleInternal);
   cmSystemTools::SetMessageCallback(cmakemainMessageCallback, (void*)&cm);
   cm.SetProgressCallback(cmakemainProgressCallback, (void*)&cm);
   return cm.Build(dir, target, config, nativeOptions, clean);

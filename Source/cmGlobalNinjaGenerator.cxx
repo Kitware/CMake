@@ -1903,7 +1903,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
     }
   }
 
-  cmake cm;
+  cmake cm(cmake::RoleInternal);
   cm.SetHomeDirectory(dir_top_src);
   cm.SetHomeOutputDirectory(dir_top_bld);
   CM_AUTO_PTR<cmGlobalNinjaGenerator> ggd(

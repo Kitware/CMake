@@ -623,7 +623,7 @@ int cmCTestLaunch::Main(int argc, const char* const argv[])
 
 void cmCTestLaunch::LoadConfig()
 {
-  cmake cm;
+  cmake cm(cmake::RoleScript);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();

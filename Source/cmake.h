@@ -58,6 +58,13 @@ class cmake
   CM_DISABLE_COPY(cmake)
 
 public:
+  enum Role
+  {
+    RoleInternal, // no commands
+    RoleScript,   // script commands
+    RoleProject   // all commands
+  };
+
   enum MessageType
   {
     AUTHOR_WARNING,
@@ -112,7 +119,7 @@ public:
   typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
 
   /// Default constructor
-  cmake();
+  cmake(Role role);
   /// Destructor
   ~cmake();
 

@@ -40,7 +40,7 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> const& args,
     "Welcome to ccmake, curses based user interface for CMake.");
   this->HelpMessage.push_back("");
   this->HelpMessage.push_back(s_ConstHelpMessage);
-  this->CMakeInstance = new cmake;
+  this->CMakeInstance = new cmake(cmake::RoleProject);
   this->CMakeInstance->SetCMakeEditCommand(
     cmSystemTools::GetCMakeCursesCommand());
 

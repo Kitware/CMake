@@ -583,7 +583,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         std::cerr << "-E capabilities accepts no additional arguments\n";
         return 1;
       }
-      cmake cm;
+      cmake cm(cmake::RoleInternal);
 #if defined(HAVE_SERVER_MODE) && HAVE_SERVER_MODE
       std::cout << cm.ReportCapabilities(true);
 #else
@@ -760,7 +760,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       const bool verbose = isCMakeVerbose();
 
       // Create a cmake object instance to process dependencies.
-      cmake cm;
+      cmake cm(cmake::RoleScript); // All we need is the `set` command.
       std::string gen;
       std::string homeDir;
       std::string startDir;
