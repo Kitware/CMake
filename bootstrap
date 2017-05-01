@@ -240,6 +240,10 @@ CMAKE_UNUSED_SOURCES="\
 "
 
 CMAKE_CXX_SOURCES="\
+  LexerParser/cmCommandArgumentLexer \
+  LexerParser/cmCommandArgumentParser \
+  LexerParser/cmExprLexer \
+  LexerParser/cmExprParser \
   cmAddCustomCommandCommand \
   cmAddCustomTargetCommand \
   cmAddDefinitionsCommand \
@@ -255,8 +259,6 @@ CMAKE_CXX_SOURCES="\
   cmCPackPropertiesGenerator \
   cmCacheManager \
   cmCommand \
-  cmCommandArgumentLexer \
-  cmCommandArgumentParser \
   cmCommandArgumentParserHelper \
   cmCommandArgumentsHelper \
   cmCommands \
@@ -288,8 +290,6 @@ CMAKE_CXX_SOURCES="\
   cmExportSet \
   cmExportSetMap \
   cmExportTryCompileFileGenerator \
-  cmExprLexer \
-  cmExprParser \
   cmExprParserHelper \
   cmExternalMakefileProjectGenerator \
   cmFileCommand \
@@ -417,7 +417,7 @@ if ${cmake_system_mingw}; then
 fi
 
 CMAKE_C_SOURCES="\
-  cmListFileLexer \
+  LexerParser/cmListFileLexer \
   "
 
 if ${cmake_system_mingw}; then
@@ -808,6 +808,11 @@ cd "${cmake_bootstrap_dir}"
 [ -d "cmsys" ] || mkdir "cmsys"
 if [ ! -d "cmsys" ]; then
   cmake_error 4 "Cannot create directory ${cmake_bootstrap_dir}/cmsys"
+fi
+
+[ -d "LexerParser" ] || mkdir "LexerParser"
+if [ ! -d "LexerParser" ]; then
+  cmake_error 5 "Cannot create directory ${cmake_bootstrap_dir}/LexerParser"
 fi
 
 # Delete all the bootstrap files
@@ -1431,9 +1436,15 @@ cmake_cxx_flags_SystemTools="
   -DKWSYS_CXX_HAS_UTIMENSAT=${KWSYS_CXX_HAS_UTIMENSAT}
   -DKWSYS_CXX_HAS_UTIMES=${KWSYS_CXX_HAS_UTIMES}
 "
-cmake_c_flags="${cmake_c_flags}-I`cmake_escape \"${cmake_bootstrap_dir}\"` -I`cmake_escape \"${cmake_source_dir}/Source\"` \
+cmake_c_flags="${cmake_c_flags} \
+  -I`cmake_escape \"${cmake_bootstrap_dir}\"` \
+  -I`cmake_escape \"${cmake_source_dir}/Source\"` \
+  -I`cmake_escape \"${cmake_source_dir}/Source/LexerParser\"` \
   -I`cmake_escape \"${cmake_source_dir}/Utilities\"`"
-cmake_cxx_flags="${cmake_cxx_flags} -I`cmake_escape \"${cmake_bootstrap_dir}\"` -I`cmake_escape \"${cmake_source_dir}/Source\"` \
+cmake_cxx_flags="${cmake_cxx_flags} \
+  -I`cmake_escape \"${cmake_bootstrap_dir}\"` \
+  -I`cmake_escape \"${cmake_source_dir}/Source\"` \
+  -I`cmake_escape \"${cmake_source_dir}/Source/LexerParser\"` \
   -I`cmake_escape \"${cmake_source_dir}/Utilities\"`"
 echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
 echo "	${cmake_cxx_compiler} ${cmake_ld_flags} ${cmake_cxx_flags} ${objs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"

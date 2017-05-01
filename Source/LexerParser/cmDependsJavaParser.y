@@ -242,7 +242,7 @@ jp_DECIMALINTEGERLITERAL
   yyGetParser->SetCurrentCombine("");
 }
 |
-jp_HEXINTEGERLITERAL	
+jp_HEXINTEGERLITERAL
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -3212,4 +3212,3 @@ void cmDependsJava_yyerror(yyscan_t yyscanner, const char* message)
 {
   yyGetParser->Error(message);
 }
-

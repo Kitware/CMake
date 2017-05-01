@@ -78,6 +78,7 @@ configure_file(
 include_directories(
   "${CMake_BINARY_DIR}/Source"
   "${CMake_SOURCE_DIR}/Source"
+  "${CMake_SOURCE_DIR}/Source/LexerParser"
   ${CMAKE_ZLIB_INCLUDES}
   ${CMAKE_EXPAT_INCLUDES}
   ${CMAKE_TAR_INCLUDES}
@@ -87,61 +88,6 @@ include_directories(
 
 # let cmake know it is supposed to use it
 add_definitions(-DCMAKE_BUILD_WITH_CMAKE)
-
-option(CMAKE_REGENERATE_YACCLEX
-  "Regenerate YACC and LEXX files" OFF)
-mark_as_advanced(CMAKE_REGENERATE_YACCLEX)
-if(CMAKE_REGENERATE_YACCLEX)
-  set(parsersLexers cmFortran cmCommandArgument cmExpr)
-  find_program(YACC_EXECUTABLE
-    NAMES yacc bison
-    PATHS /usr/bin
-    DOC "Yacc or Bison executable")
-  find_program(FLEX_EXECUTABLE
-    NAMES flex
-    PATHS /usr/bin
-    DOC "Flex executable")
-  mark_as_advanced(YACC_EXECUTABLE FLEX_EXECUTABLE)
-  if(YACC_EXECUTABLE)
-    set(BISON_FLAGS)
-    if(YACC_EXECUTABLE MATCHES "bison")
-      set(BISON_FLAGS "--yacc")
-    endif()
-    set(yacc_files)
-    foreach(name ${parsersLexers})
-      set(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Parser.y")
-      set(dst "${CMAKE_CURRENT_BINARY_DIR}/${name}Parser.cxx")
-      set(hdr "${CMAKE_CURRENT_BINARY_DIR}/${name}ParserTokens.h")
-      add_custom_command(
-        OUTPUT "${dst}"
-        DEPENDS "${src}"
-        COMMAND
-        ${YACC_EXECUTABLE}
-        --name-prefix=${name}_yy --defines=${hdr} -o${dst} ${src}
-        )
-      set(yacc_files ${yacc_files} "${dst}")
-    endforeach()
-    add_custom_target(RerunYacc DEPENDS ${yacc_files})
-  endif()
-  if(FLEX_EXECUTABLE)
-    set(lex_files)
-    foreach(name ${parsersLexers})
-      set(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Lexer.in.l")
-      set(dst "${CMAKE_CURRENT_BINARY_DIR}/${name}Lexer.cxx")
-      set(hdr "${CMAKE_CURRENT_BINARY_DIR}/${name}Lexer.h")
-      add_custom_command(
-        OUTPUT "${dst}"
-        DEPENDS "${src}"
-        COMMAND
-        ${FLEX_EXECUTABLE}
-        --prefix=${name}_yy --header-file=${hdr} -o${dst} ${src}
-        )
-      set(lex_files ${lex_files} "${dst}")
-    endforeach()
-    add_custom_target(RerunLex DEPENDS ${lex_files})
-  endif()
-
-endif()
 
 # Check if we can build the ELF parser.
 if(CMAKE_USE_ELF_PARSER)
@@ -157,14 +103,40 @@ endif()
 # Sources for CMakeLib
 #
 set(SRCS
+  # Lexers/Parsers
+  LexerParser/cmCommandArgumentLexer.cxx
+  LexerParser/cmCommandArgumentLexer.h
+  LexerParser/cmCommandArgumentLexer.in.l
+  LexerParser/cmCommandArgumentParser.cxx
+  LexerParser/cmCommandArgumentParserTokens.h
+  LexerParser/cmCommandArgumentParser.y
+  LexerParser/cmDependsJavaLexer.cxx
+  LexerParser/cmDependsJavaLexer.h
+  LexerParser/cmDependsJavaLexer.in.l
+  LexerParser/cmDependsJavaParser.cxx
+  LexerParser/cmDependsJavaParserTokens.h
+  LexerParser/cmDependsJavaParser.y
+  LexerParser/cmExprLexer.cxx
+  LexerParser/cmExprLexer.h
+  LexerParser/cmExprLexer.in.l
+  LexerParser/cmExprParser.cxx
+  LexerParser/cmExprParserTokens.h
+  LexerParser/cmExprParser.y
+  LexerParser/cmFortranLexer.cxx
+  LexerParser/cmFortranLexer.h
+  LexerParser/cmFortranLexer.in.l
+  LexerParser/cmFortranParser.cxx
+  LexerParser/cmFortranParserTokens.h
+  LexerParser/cmFortranParser.y
+  LexerParser/cmListFileLexer.c
+  LexerParser/cmListFileLexer.in.l
+
   cmArchiveWrite.cxx
   cmBase32.cxx
   cmCacheManager.cxx
   cmCacheManager.h
   cmCLocaleEnvironmentScope.h
   cmCLocaleEnvironmentScope.cxx
-  cmCommandArgumentLexer.cxx
-  cmCommandArgumentParser.cxx
   cmCommandArgumentParserHelper.cxx
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
@@ -196,8 +168,6 @@ set(SRCS
   cmDependsFortran.h
   cmDependsJava.cxx
   cmDependsJava.h
-  cmDependsJavaLexer.cxx
-  cmDependsJavaParser.cxx
   cmDependsJavaParserHelper.cxx
   cmDependsJavaParserHelper.h
   cmDocumentation.cxx
@@ -206,8 +176,6 @@ set(SRCS
   cmDynamicLoader.cxx
   cmDynamicLoader.h
   ${ELF_SRCS}
-  cmExprLexer.cxx
-  cmExprParser.cxx
   cmExprParserHelper.cxx
   cmExportBuildAndroidMKGenerator.h
   cmExportBuildAndroidMKGenerator.cxx
@@ -247,10 +215,6 @@ set(SRCS
   cmFilePathChecksum.h
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
-  cmFortranLexer.cxx
-  cmFortranLexer.h
-  cmFortranParser.cxx
-  cmFortranParser.h
   cmFortranParserImpl.cxx
   cmGeneratedFileStream.cxx
   cmGeneratorExpressionContext.cxx
@@ -302,7 +266,6 @@ set(SRCS
   cmLinkLineDeviceComputer.h
   cmListFileCache.cxx
   cmListFileCache.h
-  cmListFileLexer.c
   cmLocalCommonGenerator.cxx
   cmLocalCommonGenerator.h
   cmLocalGenerator.cxx
