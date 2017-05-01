@@ -8,6 +8,8 @@ if(__COMPILER_PGI)
 endif()
 set(__COMPILER_PGI 1)
 
+include(Compiler/CMakeCommonCompilerMacros)
+
 macro(__compiler_pgi lang)
   # Feature flags.
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
