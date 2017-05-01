@@ -103,6 +103,11 @@
         PRINT *, 'INFO:compiler[MIPSpro]'
 #elif defined(__hpux) || defined(__hpux__)
         PRINT *, 'INFO:compiler[HP]'
+#elif defined(NAGFOR)
+        PRINT *, 'INFO:compiler[NAG]'
+#define COMPILER_VERSION_MAJOR DEC(__NAG_COMPILER_RELEASE/10)
+#define COMPILER_VERSION_MINOR DEC(__NAG_COMPILER_RELEASE % 10)
+#define COMPILER_VERSION_PATCH DEC(__NAG_COMPILER_BUILD)
 #elif 1
 #       if 0
 !       The above 'elif 1' instead of 'else' is to work around a bug in the
