@@ -47,21 +47,10 @@ if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
   endif()
 endif()
 
-if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
-  if (NOT CMAKE_CXX_COMPILER_FORCED)
-    if (NOT CMAKE_CXX_STANDARD_COMPUTED_DEFAULT)
-      message(FATAL_ERROR "CMAKE_CXX_STANDARD_COMPUTED_DEFAULT should be set for ${CMAKE_CXX_COMPILER_ID} (${CMAKE_CXX_COMPILER}) version ${CMAKE_CXX_COMPILER_VERSION}")
-    else()
-      set(CMAKE_CXX_STANDARD_DEFAULT ${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT})
-    endif()
-  elseif (NOT CMAKE_CXX_STANDARD_COMPUTED_DEFAULT)
-    # Compiler id was forced so just guess the default standard level.
-    set(CMAKE_CXX_STANDARD_DEFAULT 98)
-  endif()
-endif()
-
 unset(_std)
 unset(_ext)
+
+__compiler_check_default_language_standard(CXX 12.1 98)
 
 macro(cmake_record_cxx_compile_features)
   set(_result 0)

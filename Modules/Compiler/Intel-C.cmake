@@ -30,24 +30,10 @@ if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 12.0)
   set(CMAKE_C99_EXTENSION_COMPILE_OPTION "${_std}=${_ext}99")
 endif()
 
-if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 12.1)
-  if (NOT CMAKE_C_COMPILER_FORCED)
-    if (NOT CMAKE_C_STANDARD_COMPUTED_DEFAULT)
-      message(FATAL_ERROR "CMAKE_C_STANDARD_COMPUTED_DEFAULT should be set for ${CMAKE_C_COMPILER_ID} (${CMAKE_C_COMPILER}) version ${CMAKE_C_COMPILER_VERSION}")
-    endif()
-    set(CMAKE_C_STANDARD_DEFAULT ${CMAKE_C_STANDARD_COMPUTED_DEFAULT})
-  elseif(NOT DEFINED CMAKE_C_STANDARD_DEFAULT)
-    # Compiler id was forced so just guess the default standard level.
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 15.0.0)
-      set(CMAKE_C_STANDARD_DEFAULT 11)
-    else()
-      set(CMAKE_C_STANDARD_DEFAULT 90)
-    endif()
-  endif()
-endif()
-
 unset(_std)
 unset(_ext)
+
+__compiler_check_default_language_standard(C 12.1 90 15.0.0 11)
 
 macro(cmake_record_c_compile_features)
   set(_result 0)

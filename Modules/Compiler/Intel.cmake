@@ -8,6 +8,8 @@ if(__COMPILER_INTEL)
 endif()
 set(__COMPILER_INTEL 1)
 
+include(Compiler/CMakeCommonCompilerMacros)
+
 if(CMAKE_HOST_WIN32)
   # MSVC-like
   macro(__compiler_intel lang)
