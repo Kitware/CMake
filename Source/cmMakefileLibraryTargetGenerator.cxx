@@ -494,6 +494,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // Create set of linking flags.
   std::string linkFlags;
   this->LocalGenerator->AppendFlags(linkFlags, extraFlags);
+  this->LocalGenerator->AppendIPOLinkerFlags(linkFlags, this->GeneratorTarget,
+                                             this->ConfigName, linkLanguage);
 
   // Add OSX version flags, if any.
   if (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
