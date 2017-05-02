@@ -1497,7 +1497,11 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
            "does not know the compile flags to use to enable it.";
       this->IssueMessage(cmake::FATAL_ERROR, e.str());
     } else {
-      this->AppendFlagEscape(flags, opt);
+      std::vector<std::string> optVec;
+      cmSystemTools::ExpandListArgument(opt, optVec);
+      for (size_t i = 0; i < optVec.size(); ++i) {
+        this->AppendFlagEscape(flags, optVec[i]);
+      }
     }
     return;
   }
