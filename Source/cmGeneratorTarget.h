@@ -412,6 +412,8 @@ public:
   /** Add the target output files to the global generator manifest.  */
   void ComputeTargetManifest(const std::string& config) const;
 
+  bool ComputeCompileFeatures(std::string const& config) const;
+
   /**
    * Trace through the source files in this target and add al source files
    * that they depend on, used by all generators

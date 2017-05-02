@@ -2919,6 +2919,19 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
   }
 }
 
+bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config) const
+{
+  std::vector<std::string> features;
+  this->GetCompileFeatures(features, config);
+  for (std::vector<std::string>::const_iterator it = features.begin();
+       it != features.end(); ++it) {
+    if (!this->Makefile->AddRequiredTargetFeature(this->Target, *it)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 std::string cmGeneratorTarget::GetImportedLibName(
   std::string const& config) const
 {

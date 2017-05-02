@@ -397,8 +397,8 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
 
     // Add language-specific flags.
     std::string langFlags;
-    this->LocalGenerator->AddLanguageFlags(langFlags, this->GeneratorTarget,
-                                           linkLanguage, this->ConfigName);
+    this->LocalGenerator->AddLanguageFlagsForLinking(
+      langFlags, this->GeneratorTarget, linkLanguage, this->ConfigName);
 
     vars.LanguageCompileFlags = langFlags.c_str();
 
@@ -858,8 +858,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
     // Add language-specific flags.
     std::string langFlags;
-    this->LocalGenerator->AddLanguageFlags(langFlags, this->GeneratorTarget,
-                                           linkLanguage, this->ConfigName);
+    this->LocalGenerator->AddLanguageFlagsForLinking(
+      langFlags, this->GeneratorTarget, linkLanguage, this->ConfigName);
 
     this->LocalGenerator->AddArchitectureFlags(
       langFlags, this->GeneratorTarget, linkLanguage, this->ConfigName);
