@@ -20,6 +20,9 @@ cmCTestTestCommand::cmCTestTestCommand()
   this->Arguments[ctt_INCLUDE] = "INCLUDE";
   this->Arguments[ctt_EXCLUDE_LABEL] = "EXCLUDE_LABEL";
   this->Arguments[ctt_INCLUDE_LABEL] = "INCLUDE_LABEL";
+  this->Arguments[ctt_EXCLUDE_FIXTURE] = "EXCLUDE_FIXTURE";
+  this->Arguments[ctt_EXCLUDE_FIXTURE_SETUP] = "EXCLUDE_FIXTURE_SETUP";
+  this->Arguments[ctt_EXCLUDE_FIXTURE_CLEANUP] = "EXCLUDE_FIXTURE_CLEANUP";
   this->Arguments[ctt_PARALLEL_LEVEL] = "PARALLEL_LEVEL";
   this->Arguments[ctt_SCHEDULE_RANDOM] = "SCHEDULE_RANDOM";
   this->Arguments[ctt_STOP_TIME] = "STOP_TIME";
@@ -75,6 +78,18 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   if (this->Values[ctt_INCLUDE_LABEL]) {
     handler->SetOption("LabelRegularExpression",
                        this->Values[ctt_INCLUDE_LABEL]);
+  }
+  if (this->Values[ctt_EXCLUDE_FIXTURE]) {
+    handler->SetOption("ExcludeFixtureRegularExpression",
+                       this->Values[ctt_EXCLUDE_FIXTURE]);
+  }
+  if (this->Values[ctt_EXCLUDE_FIXTURE_SETUP]) {
+    handler->SetOption("ExcludeFixtureSetupRegularExpression",
+                       this->Values[ctt_EXCLUDE_FIXTURE_SETUP]);
+  }
+  if (this->Values[ctt_EXCLUDE_FIXTURE_CLEANUP]) {
+    handler->SetOption("ExcludeFixtureCleanupRegularExpression",
+                       this->Values[ctt_EXCLUDE_FIXTURE_CLEANUP]);
   }
   if (this->Values[ctt_PARALLEL_LEVEL]) {
     handler->SetOption("ParallelLevel", this->Values[ctt_PARALLEL_LEVEL]);

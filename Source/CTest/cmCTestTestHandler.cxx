@@ -362,6 +362,9 @@ void cmCTestTestHandler::Initialize()
   this->ExcludeLabelRegularExpression = "";
   this->IncludeRegExp = "";
   this->ExcludeRegExp = "";
+  this->ExcludeFixtureRegExp.clear();
+  this->ExcludeFixtureSetupRegExp.clear();
+  this->ExcludeFixtureCleanupRegExp.clear();
 
   TestsToRunString = "";
   this->UseUnion = false;
@@ -438,6 +441,18 @@ int cmCTestTestHandler::ProcessHandler()
   if (val) {
     this->UseExcludeRegExp();
     this->SetExcludeRegExp(val);
+  }
+  val = this->GetOption("ExcludeFixtureRegularExpression");
+  if (val) {
+    this->ExcludeFixtureRegExp = val;
+  }
+  val = this->GetOption("ExcludeFixtureSetupRegularExpression");
+  if (val) {
+    this->ExcludeFixtureSetupRegExp = val;
+  }
+  val = this->GetOption("ExcludeFixtureCleanupRegularExpression");
+  if (val) {
+    this->ExcludeFixtureCleanupRegExp = val;
   }
   this->SetRerunFailed(cmSystemTools::IsOn(this->GetOption("RerunFailed")));
 
@@ -828,13 +843,35 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
                      "Updating test list for fixtures" << std::endl,
                      this->Quiet);
 
+  // Prepare regular expression evaluators
+  std::string setupRegExp(this->ExcludeFixtureRegExp);
+  std::string cleanupRegExp(this->ExcludeFixtureRegExp);
+  if (!this->ExcludeFixtureSetupRegExp.empty()) {
+    if (setupRegExp.empty()) {
+      setupRegExp = this->ExcludeFixtureSetupRegExp;
+    } else {
+      setupRegExp.append("(" + setupRegExp + ")|(" +
+                         this->ExcludeFixtureSetupRegExp + ")");
+    }
+  }
+  if (!this->ExcludeFixtureCleanupRegExp.empty()) {
+    if (cleanupRegExp.empty()) {
+      cleanupRegExp = this->ExcludeFixtureCleanupRegExp;
+    } else {
+      cleanupRegExp.append("(" + cleanupRegExp + ")|(" +
+                           this->ExcludeFixtureCleanupRegExp + ")");
+    }
+  }
+  cmsys::RegularExpression excludeSetupRegex(setupRegExp);
+  cmsys::RegularExpression excludeCleanupRegex(cleanupRegExp);
+
   // Prepare some maps to help us find setup and cleanup tests for
   // any given fixture
   typedef ListOfTests::const_iterator TestIterator;
   typedef std::multimap<std::string, TestIterator> FixtureDependencies;
   typedef FixtureDependencies::const_iterator FixtureDepsIterator;
   FixtureDependencies fixtureSetups;
-  FixtureDependencies fixtureDeps;
+  FixtureDependencies fixtureCleanups;
 
   for (ListOfTests::const_iterator it = this->TestList.begin();
        it != this->TestList.end(); ++it) {
@@ -844,13 +881,12 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
     for (std::set<std::string>::const_iterator depsIt = setups.begin();
          depsIt != setups.end(); ++depsIt) {
       fixtureSetups.insert(std::make_pair(*depsIt, it));
-      fixtureDeps.insert(std::make_pair(*depsIt, it));
     }
 
     const std::set<std::string>& cleanups = p.FixturesCleanup;
     for (std::set<std::string>::const_iterator depsIt = cleanups.begin();
          depsIt != cleanups.end(); ++depsIt) {
-      fixtureDeps.insert(std::make_pair(*depsIt, it));
+      fixtureCleanups.insert(std::make_pair(*depsIt, it));
     }
   }
 
@@ -924,34 +960,72 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
       // added from a previously checked test). A fixture isn't required
       // to have setup/cleanup tests.
       if (!addedFixtures.insert(requiredFixtureName).second) {
-        // Already added this fixture
+        // Already seen this fixture, no need to check it again
         continue;
       }
-      std::pair<FixtureDepsIterator, FixtureDepsIterator> fixtureRange =
-        fixtureDeps.equal_range(requiredFixtureName);
-      for (FixtureDepsIterator it = fixtureRange.first;
-           it != fixtureRange.second; ++it) {
-        ListOfTests::const_iterator lotIt = it->second;
-        const cmCTestTestProperties& p = *lotIt;
 
-        if (!addedTests.insert(p.Name).second) {
-          // Already have p in our test list
-          continue;
+      // Only add setup tests if this fixture has not been excluded
+      if (setupRegExp.empty() ||
+          !excludeSetupRegex.find(requiredFixtureName)) {
+        std::pair<FixtureDepsIterator, FixtureDepsIterator> fixtureRange =
+          fixtureSetups.equal_range(requiredFixtureName);
+        for (FixtureDepsIterator it = fixtureRange.first;
+             it != fixtureRange.second; ++it) {
+          ListOfTests::const_iterator lotIt = it->second;
+          const cmCTestTestProperties& p = *lotIt;
+
+          if (!addedTests.insert(p.Name).second) {
+            // Already have p in our test list
+            continue;
+          }
+
+          // This is a test not yet in our list, so add it and
+          // update its index to reflect where it was in the original
+          // full list of all tests (needed to track individual tests
+          // across ctest runs for re-run failed, etc.)
+          tests.push_back(p);
+          tests.back().Index =
+            1 + static_cast<int>(std::distance(this->TestList.begin(), lotIt));
+          ++fixtureTestsAdded;
+
+          cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                             "Added setup test "
+                               << p.Name << " required by fixture "
+                               << requiredFixtureName << std::endl,
+                             this->Quiet);
         }
+      }
 
-        // This is a test not yet in our list, so add it and
-        // update its index to reflect where it was in the original
-        // full list of all tests (needed to track individual tests
-        // across ctest runs for re-run failed, etc.)
-        tests.push_back(p);
-        tests.back().Index =
-          1 + static_cast<int>(std::distance(this->TestList.begin(), lotIt));
-        ++fixtureTestsAdded;
+      // Only add cleanup tests if this fixture has not been excluded
+      if (cleanupRegExp.empty() ||
+          !excludeCleanupRegex.find(requiredFixtureName)) {
+        std::pair<FixtureDepsIterator, FixtureDepsIterator> fixtureRange =
+          fixtureCleanups.equal_range(requiredFixtureName);
+        for (FixtureDepsIterator it = fixtureRange.first;
+             it != fixtureRange.second; ++it) {
+          ListOfTests::const_iterator lotIt = it->second;
+          const cmCTestTestProperties& p = *lotIt;
 
-        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Added test "
-                             << p.Name << " required by fixture "
-                             << requiredFixtureName << std::endl,
-                           this->Quiet);
+          if (!addedTests.insert(p.Name).second) {
+            // Already have p in our test list
+            continue;
+          }
+
+          // This is a test not yet in our list, so add it and
+          // update its index to reflect where it was in the original
+          // full list of all tests (needed to track individual tests
+          // across ctest runs for re-run failed, etc.)
+          tests.push_back(p);
+          tests.back().Index =
+            1 + static_cast<int>(std::distance(this->TestList.begin(), lotIt));
+          ++fixtureTestsAdded;
+
+          cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                             "Added cleanup test "
+                               << p.Name << " required by fixture "
+                               << requiredFixtureName << std::endl,
+                             this->Quiet);
+        }
       }
     }
 

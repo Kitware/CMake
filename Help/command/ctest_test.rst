@@ -13,6 +13,9 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [INCLUDE <include-regex>]
              [EXCLUDE_LABEL <label-exclude-regex>]
              [INCLUDE_LABEL <label-include-regex>]
+             [EXCLUDE_FIXTURE <regex>]
+             [EXCLUDE_FIXTURE_SETUP <regex>]
+             [EXCLUDE_FIXTURE_CLEANUP <regex>]
              [PARALLEL_LEVEL <level>]
              [TEST_LOAD <threshold>]
              [SCHEDULE_RANDOM <ON|OFF>]
@@ -60,6 +63,20 @@ The options are:
 ``INCLUDE_LABEL <label-include-regex>``
   Specify a regular expression matching test labels to include.
   Tests not matching this expression are excluded.
+
+``EXCLUDE_FIXTURE <regex>``
+  If a test in the set of tests to be executed requires a particular fixture,
+  that fixture's setup and cleanup tests would normally be added to the test
+  set automatically. This option prevents adding setup or cleanup tests for
+  fixtures matching the ``<regex>``. Note that all other fixture behavior is
+  retained, including test dependencies and skipping tests that have fixture
+  setup tests that fail.
+
+``EXCLUDE_FIXTURE_SETUP <regex>``
+  Same as ``EXCLUDE_FIXTURE`` except only matching setup tests are excluded.
+
+``EXCLUDE_FIXTURE_CLEANUP <regex>``
+  Same as ``EXCLUDE_FIXTURE`` except only matching cleanup tests are excluded.
 
 ``PARALLEL_LEVEL <level>``
   Specify a positive number representing the number of tests to

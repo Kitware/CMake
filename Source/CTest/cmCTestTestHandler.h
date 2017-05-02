@@ -280,6 +280,9 @@ private:
   std::string ExcludeLabelRegExp;
   std::string IncludeRegExp;
   std::string ExcludeRegExp;
+  std::string ExcludeFixtureRegExp;
+  std::string ExcludeFixtureSetupRegExp;
+  std::string ExcludeFixtureCleanupRegExp;
   cmsys::RegularExpression IncludeLabelRegularExpression;
   cmsys::RegularExpression ExcludeLabelRegularExpression;
   cmsys::RegularExpression IncludeTestsRegularExpression;
