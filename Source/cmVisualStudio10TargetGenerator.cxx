@@ -1943,9 +1943,24 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       hasFlags = true;
       cmGlobalVisualStudio10Generator* gg =
         static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
+      cmIDEFlagTable const* flagtable = CM_NULLPTR;
+      const std::string& srclang = source->GetLanguage();
+      if (srclang == "C" || srclang == "CXX") {
+        flagtable = gg->GetClFlagTable();
+      } else if (srclang == "ASM_MASM" &&
+                 this->GlobalGenerator->IsMasmEnabled()) {
+        flagtable = gg->GetMasmFlagTable();
+      } else if (lang == "ASM_NASM" &&
+                 this->GlobalGenerator->IsNasmEnabled()) {
+        flagtable = gg->GetNasmFlagTable();
+      } else if (srclang == "RC") {
+        flagtable = gg->GetRcFlagTable();
+      } else if (srclang == "CSharp") {
+        flagtable = gg->GetCSharpFlagTable();
+      }
       cmVisualStudioGeneratorOptions clOptions(
         this->LocalGenerator, cmVisualStudioGeneratorOptions::Compiler,
-        gg->GetClFlagTable(), 0, this);
+        flagtable, 0, this);
       if (compileAs) {
         clOptions.AddFlag("CompileAs", compileAs);
       }
