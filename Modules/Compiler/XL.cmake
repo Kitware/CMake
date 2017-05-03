@@ -8,6 +8,8 @@ if(__COMPILER_XL)
 endif()
 set(__COMPILER_XL 1)
 
+include(Compiler/CMakeCommonCompilerMacros)
+
 # Find the CreateExportList program that comes with this toolchain.
 find_program(CMAKE_XL_CreateExportList
   NAMES CreateExportList
