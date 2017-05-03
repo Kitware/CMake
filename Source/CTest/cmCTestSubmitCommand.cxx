@@ -129,6 +129,12 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     static_cast<cmCTestSubmitHandler*>(handler)->SelectParts(this->Parts);
   }
 
+  // Pass along any HTTPHEADER to the handler if this option was given.
+  if (!this->HttpHeaders.empty()) {
+    static_cast<cmCTestSubmitHandler*>(handler)->SetHttpHeaders(
+      this->HttpHeaders);
+  }
+
   static_cast<cmCTestSubmitHandler*>(handler)->SetOption(
     "RetryDelay", this->RetryDelay.c_str());
   static_cast<cmCTestSubmitHandler*>(handler)->SetOption(
@@ -182,6 +188,11 @@ bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
     }
   }
   // Arguments used by both modes.
+  if (arg == "HTTPHEADER") {
+    this->ArgumentDoing = ArgumentDoingHttpHeader;
+    return true;
+  }
+
   if (arg == "RETRY_COUNT") {
     this->ArgumentDoing = ArgumentDoingRetryCount;
     return true;
@@ -227,6 +238,11 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       this->ArgumentDoing = ArgumentDoingError;
     }
+    return true;
+  }
+
+  if (this->ArgumentDoing == ArgumentDoingHttpHeader) {
+    this->HttpHeaders.push_back(arg);
     return true;
   }
 
