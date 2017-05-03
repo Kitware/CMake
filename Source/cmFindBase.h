@@ -50,6 +50,7 @@ protected:
 
 private:
   // Add pieces of the search.
+  void FillPackageRootPath();
   void FillCMakeVariablePath();
   void FillCMakeEnvironmentPath();
   void FillUserHintsPath();

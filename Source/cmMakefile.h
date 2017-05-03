@@ -6,6 +6,7 @@
 #include "cmConfigure.h"
 
 #include "cmsys/RegularExpression.hxx"
+#include <deque>
 #include <map>
 #include <set>
 #include <stack>
@@ -785,6 +786,10 @@ public:
     const;
   void RemoveExportBuildFileGeneratorCMP0024(cmExportBuildFileGenerator* gen);
   void AddExportBuildFileGenerator(cmExportBuildFileGenerator* gen);
+
+  // Maintain a stack of pacakge names to determine the depth of find modules
+  // we are currently being called with
+  std::deque<std::string> FindPackageModuleStack;
 
 protected:
   // add link libraries and directories to the target
