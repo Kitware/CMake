@@ -1175,12 +1175,9 @@ void CMakeSetupDialog::showUserChanges()
       value = prop.Value.toString();
     }
 
-    QString line("%1:%2=");
-    line = line.arg(prop.Key);
-    line = line.arg(type);
-
-    command += QString("-D%1\"%2\" ").arg(line).arg(value);
-    cache += QString("%1%2\n").arg(line).arg(value);
+    QString const line = QString("%1:%2=").arg(prop.Key, type);
+    command += QString("-D%1\"%2\" ").arg(line, value);
+    cache += QString("%1%2\n").arg(line, value);
   }
 
   textedit->append(tr("Commandline options:"));
