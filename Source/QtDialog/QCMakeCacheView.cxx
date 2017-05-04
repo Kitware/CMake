@@ -254,8 +254,11 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
 
     QStandardItem* root = this->invisibleRootItem();
 
-    foreach (QString key, newPropsTree.keys()) {
-      QCMakePropertyList props2 = newPropsTree[key];
+    for (QMap<QString, QCMakePropertyList>::const_iterator iter =
+           newPropsTree.begin();
+         iter != newPropsTree.end(); ++iter) {
+      QString const& key = iter.key();
+      QCMakePropertyList const& props2 = iter.value();
 
       QList<QStandardItem*> parentItems;
       parentItems.append(
@@ -280,8 +283,11 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
       }
     }
 
-    foreach (QString key, newPropsTree2.keys()) {
-      QCMakePropertyList props2 = newPropsTree2[key];
+    for (QMap<QString, QCMakePropertyList>::const_iterator iter =
+           newPropsTree2.begin();
+         iter != newPropsTree2.end(); ++iter) {
+      QString const& key = iter.key();
+      QCMakePropertyList const& props2 = iter.value();
 
       QStandardItem* parentItem =
         new QStandardItem(key.isEmpty() ? tr("Ungrouped Entries") : key);
