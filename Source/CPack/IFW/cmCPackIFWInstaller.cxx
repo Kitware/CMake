@@ -2,69 +2,29 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWInstaller.h"
 
-#include "cmConfigure.h"
-#include <sstream>
-#include <stddef.h>
-#include <utility>
-
-#include "cmCPackGenerator.h"
+#include "cmCPackIFWCommon.h"
 #include "cmCPackIFWGenerator.h"
 #include "cmCPackIFWPackage.h"
 #include "cmCPackIFWRepository.h"
-#include "cmCPackLog.h"
+#include "cmCPackLog.h" // IWYU pragma: keep
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 
-#ifdef cmCPackLogger
-#undef cmCPackLogger
-#endif
-#define cmCPackLogger(logType, msg)                                           \
-  do {                                                                        \
-    std::ostringstream cmCPackLog_msg;                                        \
-    cmCPackLog_msg << msg;                                                    \
-    if (Generator) {                                                          \
-      Generator->Logger->Log(logType, __FILE__, __LINE__,                     \
-                             cmCPackLog_msg.str().c_str());                   \
-    }                                                                         \
-  } while (false)
+#include <sstream>
+#include <stddef.h>
+#include <utility>
 
 cmCPackIFWInstaller::cmCPackIFWInstaller()
-  : Generator(CM_NULLPTR)
 {
-}
-
-const char* cmCPackIFWInstaller::GetOption(const std::string& op) const
-{
-  return Generator ? Generator->GetOption(op) : CM_NULLPTR;
-}
-
-bool cmCPackIFWInstaller::IsOn(const std::string& op) const
-{
-  return Generator ? Generator->IsOn(op) : false;
-}
-
-bool cmCPackIFWInstaller::IsVersionLess(const char* version)
-{
-  return Generator ? Generator->IsVersionLess(version) : false;
-}
-
-bool cmCPackIFWInstaller::IsVersionGreater(const char* version)
-{
-  return Generator ? Generator->IsVersionGreater(version) : false;
-}
-
-bool cmCPackIFWInstaller::IsVersionEqual(const char* version)
-{
-  return Generator ? Generator->IsVersionEqual(version) : false;
 }
 
 void cmCPackIFWInstaller::printSkippedOptionWarning(
   const std::string& optionName, const std::string& optionValue)
 {
-  cmCPackLogger(
-    cmCPackLog::LOG_WARNING, "Option "
+  cmCPackIFWLogger(
+    WARNING, "Option "
       << optionName << " is set to \"" << optionValue
       << "\" but will be skipped because the specified file does not exist."
       << std::endl);
@@ -176,9 +136,8 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     // Check known values
     if (WizardStyle != "Modern" && WizardStyle != "Aero" &&
         WizardStyle != "Mac" && WizardStyle != "Classic") {
-      cmCPackLogger(
-        cmCPackLog::LOG_WARNING,
-        "Option CPACK_IFW_PACKAGE_WIZARD_STYLE has unknown value \""
+      cmCPackIFWLogger(
+        WARNING, "Option CPACK_IFW_PACKAGE_WIZARD_STYLE has unknown value \""
           << option << "\". Expected values are: Modern, Aero, Mac, Classic."
           << std::endl);
     }
@@ -493,9 +452,9 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
         cmsys::SystemTools::CopyFileIfDifferent(Resources[i], path);
         resources.push_back(name);
       } else {
-        cmCPackLogger(cmCPackLog::LOG_WARNING, "Can't copy resources from \""
-                        << Resources[i] << "\". Resource will be skipped."
-                        << std::endl);
+        cmCPackIFWLogger(WARNING, "Can't copy resources from \""
+                           << Resources[i] << "\". Resource will be skipped."
+                           << std::endl);
       }
     }
     Resources = resources;
@@ -532,12 +491,5 @@ void cmCPackIFWInstaller::GeneratePackageFiles()
        ++pit) {
     cmCPackIFWPackage* package = pit->second;
     package->GeneratePackageFile();
-  }
-}
-
-void cmCPackIFWInstaller::WriteGeneratedByToStrim(cmXMLWriter& xout)
-{
-  if (Generator) {
-    Generator->WriteGeneratedByToStrim(xout);
   }
 }

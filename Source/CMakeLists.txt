@@ -867,10 +867,6 @@ set(CPACK_SRCS
   CPack/cmCPackGenerator.cxx
   CPack/cmCPackLog.cxx
   CPack/cmCPackNSISGenerator.cxx
-  CPack/IFW/cmCPackIFWPackage.cxx
-  CPack/IFW/cmCPackIFWInstaller.cxx
-  CPack/IFW/cmCPackIFWRepository.cxx
-  CPack/IFW/cmCPackIFWGenerator.cxx
   CPack/cmCPackSTGZGenerator.cxx
   CPack/cmCPackTGZGenerator.cxx
   CPack/cmCPackTXZGenerator.cxx
@@ -878,6 +874,19 @@ set(CPACK_SRCS
   CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackZIPGenerator.cxx
   CPack/cmCPack7zGenerator.cxx
+  )
+# CPack IFW generator
+set(CPACK_SRCS ${CPACK_SRCS}
+  CPack/IFW/cmCPackIFWCommon.cxx
+  CPack/IFW/cmCPackIFWCommon.h
+  CPack/IFW/cmCPackIFWGenerator.cxx
+  CPack/IFW/cmCPackIFWGenerator.h
+  CPack/IFW/cmCPackIFWInstaller.cxx
+  CPack/IFW/cmCPackIFWInstaller.h
+  CPack/IFW/cmCPackIFWPackage.cxx
+  CPack/IFW/cmCPackIFWPackage.h
+  CPack/IFW/cmCPackIFWRepository.cxx
+  CPack/IFW/cmCPackIFWRepository.h
   )
 
 if(CYGWIN)
