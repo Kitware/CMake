@@ -242,14 +242,3 @@ std::string cmGlobalVisualStudio15Generator::FindDevEnvCommand()
     return DevEnvLocation;
   }
 }
-
-bool cmGlobalVisualStudio15Generator::FindMakeProgram(cmMakefile* mf)
-{
-  std::string makeProgram = this->GetVSMakeProgram();
-  mf->AddDefinition("CMAKE_VS_MSBUILD_COMMAND", makeProgram.c_str());
-
-  if (makeProgram.empty())
-    return false;
-
-  return true;
-}

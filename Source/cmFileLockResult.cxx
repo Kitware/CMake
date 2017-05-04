@@ -58,7 +58,7 @@ std::string cmFileLockResult::GetOutputMessage() const
      char winmsg[WINMSG_BUF_LEN];
 
       DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS;
+        FORMAT_MESSAGE_IGNORE_INSERTS;
       if (FormatMessageA(flags, NULL, this->ErrorValue,
                        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                        (LPSTR)winmsg, WINMSG_BUF_LEN, NULL)) {

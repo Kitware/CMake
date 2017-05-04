@@ -41,7 +41,6 @@ protected:
   // of the toolset is installed
   bool IsWindowsStoreToolsetInstalled() const;
 
-  bool FindMakeProgram(cmMakefile* mf) CM_OVERRIDE;
   std::string FindMSBuildCommand() CM_OVERRIDE;
   std::string FindDevEnvCommand() CM_OVERRIDE;
 
