@@ -103,8 +103,8 @@ bool cmCTestSVN::NoteOldRevision()
     return false;
   }
 
-  std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
-  std::list<SVNInfo>::iterator itend = this->Repositories.end();
+  std::vector<SVNInfo>::iterator itbeg = this->Repositories.begin();
+  std::vector<SVNInfo>::iterator itend = this->Repositories.end();
   for (; itbeg != itend; itbeg++) {
     SVNInfo& svninfo = *itbeg;
     svninfo.OldRevision = this->LoadInfo(svninfo);
@@ -127,8 +127,8 @@ bool cmCTestSVN::NoteNewRevision()
     return false;
   }
 
-  std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
-  std::list<SVNInfo>::iterator itend = this->Repositories.end();
+  std::vector<SVNInfo>::iterator itbeg = this->Repositories.begin();
+  std::vector<SVNInfo>::iterator itend = this->Repositories.end();
   for (; itbeg != itend; itbeg++) {
     SVNInfo& svninfo = *itbeg;
     svninfo.NewRevision = this->LoadInfo(svninfo);
@@ -380,8 +380,8 @@ bool cmCTestSVN::LoadRevisions()
 {
   bool result = true;
   // Get revisions for all the external repositories
-  std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
-  std::list<SVNInfo>::iterator itend = this->Repositories.end();
+  std::vector<SVNInfo>::iterator itbeg = this->Repositories.begin();
+  std::vector<SVNInfo>::iterator itend = this->Repositories.end();
   for (; itbeg != itend; itbeg++) {
     SVNInfo& svninfo = *itbeg;
     result = this->LoadRevisions(svninfo) && result;

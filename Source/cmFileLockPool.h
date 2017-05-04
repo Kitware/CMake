@@ -5,8 +5,8 @@
 
 #include "cmConfigure.h"
 
-#include <list>
 #include <string>
+#include <vector>
 
 class cmFileLock;
 class cmFileLockResult;
@@ -70,14 +70,14 @@ private:
     bool IsAlreadyLocked(const std::string& filename) const;
 
   private:
-    typedef std::list<cmFileLock*> List;
+    typedef std::vector<cmFileLock*> List;
     typedef List::iterator It;
     typedef List::const_iterator CIt;
 
     List Locks;
   };
 
-  typedef std::list<ScopePool*> List;
+  typedef std::vector<ScopePool*> List;
 
   typedef List::iterator It;
   typedef List::const_iterator CIt;

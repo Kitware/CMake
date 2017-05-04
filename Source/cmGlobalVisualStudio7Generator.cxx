@@ -12,6 +12,7 @@
 #include "cmsys/Encoding.hxx"
 
 #include <assert.h>
+#include <vector>
 #include <windows.h>
 
 static cmVS7FlagTable cmVS7ExtraFlagTable[] = {
@@ -680,10 +681,10 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   // default build if another target depends on it
   int type = target->GetType();
   if (type == cmStateEnums::GLOBAL_TARGET) {
-    std::list<std::string> targetNames;
+    std::vector<std::string> targetNames;
     targetNames.push_back("INSTALL");
     targetNames.push_back("PACKAGE");
-    for (std::list<std::string>::const_iterator t = targetNames.begin();
+    for (std::vector<std::string>::const_iterator t = targetNames.begin();
          t != targetNames.end(); ++t) {
       // check if target <*t> is part of default build
       if (target->GetName() == *t) {
