@@ -990,10 +990,10 @@ void CMakeSetupDialog::removeSelectedCacheEntries()
 {
   QModelIndexList idxs = this->CacheValues->selectionModel()->selectedRows();
   QList<QPersistentModelIndex> pidxs;
-  foreach (QModelIndex i, idxs) {
+  foreach (QModelIndex const& i, idxs) {
     pidxs.append(i);
   }
-  foreach (QPersistentModelIndex pi, pidxs) {
+  foreach (QPersistentModelIndex const& pi, pidxs) {
     this->CacheValues->model()->removeRow(pi.row(), pi.parent());
   }
 }
@@ -1152,7 +1152,7 @@ void CMakeSetupDialog::showUserChanges()
   QString command;
   QString cache;
 
-  foreach (QCMakeProperty prop, changes) {
+  foreach (QCMakeProperty const& prop, changes) {
     QString type;
     switch (prop.Type) {
       case QCMakeProperty::BOOL:
