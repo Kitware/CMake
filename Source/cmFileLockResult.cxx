@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <string.h>
 
+#define WINMSG_BUF_LEN (1024)
 cmFileLockResult cmFileLockResult::MakeOk()
 {
   return cmFileLockResult(OK, 0);
@@ -53,18 +54,15 @@ std::string cmFileLockResult::GetOutputMessage() const
     case SYSTEM:
 #if defined(_WIN32)
     {
-      char* errorText = NULL;
+     // cmExportCommand.cxx (ReportRegistryError)
+     char winmsg[WINMSG_BUF_LEN];
 
-      // http://stackoverflow.com/a/455533/2288008
       DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM |
         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS;
-      ::FormatMessageA(flags, NULL, this->ErrorValue,
+      if (FormatMessageA(flags, NULL, this->ErrorValue,
                        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                       (LPSTR)&errorText, 0, NULL);
-
-      if (errorText != NULL) {
-        const std::string message = errorText;
-        ::LocalFree(errorText);
+                       (LPSTR)winmsg, WINMSG_BUF_LEN, NULL)) {
+        const std::string message = winmsg;
         return message;
       } else {
         return "Internal error (FormatMessageA failed)";
