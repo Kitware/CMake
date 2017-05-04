@@ -40,6 +40,16 @@ run_CMP0058(NEW-by)
 
 run_cmake(CustomCommandDepfile)
 
+function(run_CommandConcat)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CommandConcat-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake(CommandConcat)
+  run_cmake_command(CommandConcat-build ${CMAKE_COMMAND} --build .)
+endfunction()
+run_CommandConcat()
+
 function(run_SubDir)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SubDir-build)

@@ -322,7 +322,13 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
     } else if (cmdLines.size() > 1) {
       cmd << "cmd.exe /C \"";
     }
-    cmd << *li;
+    // Put current cmdLine in brackets if it contains "||" because it has
+    // higher precedence than "&&" in cmd.exe
+    if (li->find("||") != std::string::npos) {
+      cmd << "( " << *li << " )";
+    } else {
+      cmd << *li;
+    }
   }
   if (cmdLines.size() > 1) {
     cmd << "\"";
