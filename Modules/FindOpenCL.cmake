@@ -117,7 +117,11 @@ if(WIN32)
   endif()
 else()
   find_library(OpenCL_LIBRARY
-    NAMES OpenCL)
+    NAMES OpenCL
+      ENV AMDAPPSDKROOT
+    PATH_SUFFIXES
+      lib/x86_64
+      lib/x64)
 endif()
 
 set(OpenCL_LIBRARIES ${OpenCL_LIBRARY})
