@@ -943,7 +943,11 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
         #
         if(NOT list_length_before_append EQUAL list_length_after_append)
           gp_resolve_item("${target}" "${item}" "${exepath}" "${dirs}" resolved_item "${rpaths}")
-          set(unseen_prereqs ${unseen_prereqs} "${resolved_item}")
+          if(EXISTS "${resolved_item}")
+            # Recurse only if we could resolve the item.
+            # Otherwise the prerequisites_var list will be cleared
+            set(unseen_prereqs ${unseen_prereqs} "${resolved_item}")
+          endif()
         endif()
       endif()
     endif()
