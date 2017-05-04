@@ -142,8 +142,6 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(
 
   this->RootObject = 0;
   this->MainGroupChildren = 0;
-  this->SourcesGroupChildren = 0;
-  this->ResourcesGroupChildren = 0;
   this->CurrentMakefile = 0;
   this->CurrentLocalGenerator = 0;
   this->XcodeBuildCommandInitialized = false;
@@ -701,18 +699,13 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
 
   cmXCodeObject* buildFile =
     this->CreateXCodeSourceFileFromPath(sf->GetFullPath(), gtgt, lang, sf);
-  cmXCodeObject* fileRef = buildFile->GetObject("fileRef")->GetObject();
 
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   settings->AddAttributeIfNotEmpty("COMPILER_FLAGS",
                                    this->CreateString(flags));
 
-  // Is this a resource file in this target? Add it to the resources group...
-  //
-
   cmGeneratorTarget::SourceFileFlags tsFlags =
     gtgt->GetTargetSourceFileFlags(sf);
-  bool isResource = tsFlags.Type == cmGeneratorTarget::SourceFileTypeResource;
 
   cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
 
@@ -722,10 +715,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   if (gtgt->IsFrameworkOnApple()) {
     if (tsFlags.Type == cmGeneratorTarget::SourceFileTypePrivateHeader) {
       attrs->AddObject(this->CreateString("Private"));
-      isResource = true;
     } else if (tsFlags.Type == cmGeneratorTarget::SourceFileTypePublicHeader) {
       attrs->AddObject(this->CreateString("Public"));
-      isResource = true;
     }
   }
 
@@ -744,14 +735,6 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   }
 
   settings->AddAttributeIfNotEmpty("ATTRIBUTES", attrs);
-
-  // Add the fileRef to the top level Resources group/folder if it is not
-  // already there.
-  //
-  if (isResource && this->ResourcesGroupChildren &&
-      !this->ResourcesGroupChildren->HasObject(fileRef)) {
-    this->ResourcesGroupChildren->AddObject(fileRef);
-  }
 
   buildFile->AddAttributeIfNotEmpty("settings", settings);
   return buildFile;
@@ -2819,7 +2802,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateOrGetPBXGroup(
       tgroup = this->CreatePBXGroup(tgroup, tgt_folders[i]);
       this->TargetGroup[curr_tgt_folder] = tgroup;
       if (i == 0) {
-        this->SourcesGroupChildren->AddObject(tgroup);
+        this->MainGroupChildren->AddObject(tgroup);
       }
     }
   }
@@ -2865,8 +2848,6 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
 {
   this->ClearXCodeObjects();
   this->RootObject = 0;
-  this->SourcesGroupChildren = 0;
-  this->ResourcesGroupChildren = 0;
   this->MainGroupChildren = 0;
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
@@ -2887,21 +2868,6 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   this->MainGroupChildren = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   mainGroup->AddAttribute("children", this->MainGroupChildren);
   mainGroup->AddAttribute("sourceTree", this->CreateString("<group>"));
-
-  cmXCodeObject* sourcesGroup = this->CreateObject(cmXCodeObject::PBXGroup);
-  this->SourcesGroupChildren = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  sourcesGroup->AddAttribute("name", this->CreateString("Sources"));
-  sourcesGroup->AddAttribute("children", this->SourcesGroupChildren);
-  sourcesGroup->AddAttribute("sourceTree", this->CreateString("<group>"));
-  this->MainGroupChildren->AddObject(sourcesGroup);
-
-  cmXCodeObject* resourcesGroup = this->CreateObject(cmXCodeObject::PBXGroup);
-  this->ResourcesGroupChildren =
-    this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  resourcesGroup->AddAttribute("name", this->CreateString("Resources"));
-  resourcesGroup->AddAttribute("children", this->ResourcesGroupChildren);
-  resourcesGroup->AddAttribute("sourceTree", this->CreateString("<group>"));
-  this->MainGroupChildren->AddObject(resourcesGroup);
 
   // now create the cmake groups
   if (!this->CreateGroups(generators)) {
