@@ -429,7 +429,7 @@ QCMakePropertyList QCMakeCacheModel::properties() const
     return props;
   }
 
-  QList<QModelIndex> idxs;
+  QVector<QModelIndex> idxs;
   idxs.append(this->index(0, 0));
 
   // walk the entire model for property entries
@@ -454,7 +454,7 @@ QCMakePropertyList QCMakeCacheModel::properties() const
                (idxs.last().row() + 1) >= rowCount(idxs.last().parent()) ||
 #endif
                !idxs.last().sibling(idxs.last().row() + 1, 0).isValid())) {
-        idxs.removeLast();
+        idxs.remove(idxs.size() - 1);
       }
       if (!idxs.isEmpty()) {
         idxs.last() = idxs.last().sibling(idxs.last().row() + 1, 0);
