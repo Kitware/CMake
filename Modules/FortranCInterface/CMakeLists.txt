@@ -15,11 +15,11 @@ int main() { return 0; }
 # List manglings of global symbol names to try.
 set(global_symbols
   my_sub    # VisualAge
-  my_sub_   # GNU, Intel, HP, SunPro, MIPSpro
+  my_sub_   # GNU, Intel, HP, SunPro, MIPSpro, PGI
   my_sub__  # GNU g77
   MY_SUB    # Intel on Windows
   mysub     # VisualAge
-  mysub_    # GNU, Intel, HP, SunPro, MIPSpro
+  mysub_    # GNU, Intel, HP, SunPro, MIPSpro, PGI
   MYSUB     # Intel on Windows
   ${FortranCInterface_GLOBAL_SYMBOLS}
   )
@@ -71,7 +71,7 @@ if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "^(PathScale|Cray)$")
   #    use '.in.' so we cannot provide them anyway.
   #  - Cray Fortran >= 7.3.2 uses module init symbols but module symbols
   #    use 'mysub$mymodule_' so we cannot provide them anyway.
-  list(APPEND symbol_sources mymodule_.c my_module_.c)
+  list(APPEND symbol_sources mymodule_.c my_module_.c MY_MODULE.c MYMODULE.c)
 endif()
 foreach(symbol IN LISTS global_symbols module_symbols)
   # Skip symbols with '$' if C cannot handle them.
