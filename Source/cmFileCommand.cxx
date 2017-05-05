@@ -10,11 +10,11 @@
 #include "cmsys/String.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <list>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 #include "cmAlgorithms.h"
 #include "cmCommandArgumentsHelper.h"
@@ -2618,7 +2618,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   bool showProgress = false;
   std::string userpwd;
 
-  std::list<std::string> curl_headers;
+  std::vector<std::string> curl_headers;
 
   while (i != args.end()) {
     if (*i == "TIMEOUT") {
@@ -2862,7 +2862,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   }
 
   struct curl_slist* headers = CM_NULLPTR;
-  for (std::list<std::string>::const_iterator h = curl_headers.begin();
+  for (std::vector<std::string>::const_iterator h = curl_headers.begin();
        h != curl_headers.end(); ++h) {
     headers = ::curl_slist_append(headers, h->c_str());
   }
@@ -2952,7 +2952,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   bool showProgress = false;
   std::string userpwd;
 
-  std::list<std::string> curl_headers;
+  std::vector<std::string> curl_headers;
 
   while (i != args.end()) {
     if (*i == "TIMEOUT") {
@@ -3120,7 +3120,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   }
 
   struct curl_slist* headers = CM_NULLPTR;
-  for (std::list<std::string>::const_iterator h = curl_headers.begin();
+  for (std::vector<std::string>::const_iterator h = curl_headers.begin();
        h != curl_headers.end(); ++h) {
     headers = ::curl_slist_append(headers, h->c_str());
   }

@@ -8,7 +8,6 @@
 #include "cmCTestGlobalVC.h"
 
 #include <iosfwd>
-#include <list>
 #include <string>
 #include <vector>
 
@@ -71,7 +70,7 @@ private:
   friend struct Revision;
 
   // Info of all the repositories (root, externals and nested ones).
-  std::list<SVNInfo> Repositories;
+  std::vector<SVNInfo> Repositories;
 
   // Pointer to the infos of the root repository.
   SVNInfo* RootInfo;

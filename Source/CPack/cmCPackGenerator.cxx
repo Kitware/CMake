@@ -6,7 +6,6 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <list>
 #include <utility>
 
 #include "cmCPackComponentGroup.h"
@@ -314,7 +313,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
     const std::string& tempDir = tempInstallDirectory;
     for (it = installDirectoriesVector.begin();
          it != installDirectoriesVector.end(); ++it) {
-      std::list<std::pair<std::string, std::string> > symlinkedFiles;
+      std::vector<std::pair<std::string, std::string> > symlinkedFiles;
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
       cmsys::Glob gl;
       std::string top = *it;
@@ -378,7 +377,8 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       }
       /* rebuild symlinks in the installed tree */
       if (!symlinkedFiles.empty()) {
-        std::list<std::pair<std::string, std::string> >::iterator symlinkedIt;
+        std::vector<std::pair<std::string, std::string> >::iterator
+          symlinkedIt;
         std::string curDir = cmSystemTools::GetCurrentWorkingDirectory();
         std::string goToDir = tempDir;
         goToDir += "/" + subdir;
