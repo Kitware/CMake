@@ -5,9 +5,9 @@
 #include "cmsys/SystemTools.hxx"
 
 #include <cassert>
-#include <iostream>
-#include <set>
+#include <stddef.h>
 #include <unordered_map>
+#include <utility>
 
 namespace {
 void on_directory_change(uv_fs_event_t* handle, const char* filename,

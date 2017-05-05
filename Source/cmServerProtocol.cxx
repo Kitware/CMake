@@ -4,27 +4,32 @@
 
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkLineComputer.h"
-#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmServer.h"
 #include "cmServerDictionary.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cm_uv.h"
 #include "cmake.h"
 
-#include "cmServerDictionary.h"
-
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cm_jsoncpp_reader.h"
-#include "cm_jsoncpp_value.h"
-#endif
-
 #include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <functional>
+#include <limits>
+#include <map>
+#include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 // Get rid of some windows macros:
