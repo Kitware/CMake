@@ -47,6 +47,12 @@
   #{ symbol: [ "std::pair", private, "<map>", public ] },
   #{ symbol: [ "std::pair", private, "<set>", public ] },
 
+  # IWYU wrongly suggests to include "cm_auto_ptr.hxx" in some places.  This
+  # might be a misinterpretation of a template specialization in <utility>.
+  # As a workaround, map the symbol auto_ptr to "cmConfigure.h".
+  # This will still correctly require "cm_auto_ptr.hxx" for CM_AUTO_PTR.
+  { symbol: [ "cm::auto_ptr", private, "\"cmConfigure.h\"", public ] },
+
   # Wrappers for headers added in TR1 / C++11
   # { include: [ "<array>", public, "\"cm_array.hxx\"", public ] },
   # { include: [ "<functional>", public, "\"cm_functional.hxx\"", public ] },
