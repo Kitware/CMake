@@ -226,6 +226,20 @@ option(CMAKE_USE_FOLDERS "Enable folder grouping of projects in IDEs." ON)
 mark_as_advanced(CMAKE_USE_FOLDERS)
 
 
+option(CMake_RUN_CLANG_TIDY "Run clang-tidy with the compiler." OFF)
+if(CMake_RUN_CLANG_TIDY)
+  if(CMake_SOURCE_DIR STREQUAL CMake_BINARY_DIR)
+    message(FATAL_ERROR "CMake_RUN_CLANG_TIDY requires an out-of-source build!")
+  endif()
+  find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
+  if(NOT CLANG_TIDY_COMMAND)
+    message(FATAL_ERROR "CMake_RUN_CLANG_TIDY is ON but clang-tidy is not found!")
+  endif()
+  set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
+endif()
+configure_file(.clang-tidy .clang-tidy COPYONLY)
+
+
 option(CMake_RUN_IWYU "Run include-what-you-use with the compiler." OFF)
 if(CMake_RUN_IWYU)
   find_program(IWYU_COMMAND NAMES include-what-you-use iwyu)

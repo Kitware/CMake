@@ -29,3 +29,6 @@ endif()
 if(WIX_CUSTOM_ACTION_ENABLED)
   add_subdirectory(Release/WiX)
 endif()
+
+# Make sure generated files use the same clang-tidy checks (none).
+configure_file(.clang-tidy .clang-tidy COPYONLY)
