@@ -119,6 +119,11 @@
   { include: [ "\"cmzlib/zconf.h\"", private, "\"cm_zlib.h\"", public ] },
   { include: [ "\"cmzlib/zlib.h\"", private, "\"cm_zlib.h\"", public ] },
 
+  # System symbols used by libuv
+  { symbol: [ "SIGHUP", private, "\"cm_uv.h\"", public ] },
+  { symbol: [ "SIGINT", private, "\"cm_uv.h\"", public ] },
+  { symbol: [ "ssize_t", private, "\"cm_uv.h\"", public ] },
+
   { symbol: [ "std::ifstream", private, "\"cmsys/FStream.hxx\"", public ] },
   { symbol: [ "std::ofstream", private, "\"cmsys/FStream.hxx\"", public ] },
   { symbol: [ "cmsys::ifstream", private, "\"cmsys/FStream.hxx\"", public ] },
