@@ -118,6 +118,7 @@ if(WIN32)
 else()
   find_library(OpenCL_LIBRARY
     NAMES OpenCL
+    PATHS
       ENV AMDAPPSDKROOT
     PATH_SUFFIXES
       lib/x86_64
