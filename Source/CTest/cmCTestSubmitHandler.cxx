@@ -301,8 +301,18 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
   CURLcode res;
   FILE* ftpfile;
   char error_buffer[1024];
+  // Set Content-Type to satisfy fussy modsecurity rules.
   struct curl_slist* headers =
     ::curl_slist_append(CM_NULLPTR, "Content-Type: text/xml");
+
+  // Add any additional headers that the user specified.
+  for (std::vector<std::string>::const_iterator h = this->HttpHeaders.begin();
+       h != this->HttpHeaders.end(); ++h) {
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                       "   Add HTTP Header: \"" << *h << "\"" << std::endl,
+                       this->Quiet);
+    headers = ::curl_slist_append(headers, h->c_str());
+  }
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
@@ -376,7 +386,6 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       ::curl_easy_setopt(curl, CURLOPT_PUT, 1);
       ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 
-      // Be sure to set Content-Type to satisfy fussy modsecurity rules
       ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
       std::string local_file = *file;
@@ -1014,6 +1023,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   cmSystemTools::ExpandListArgument(curlopt, args);
   curl.SetCurlOptions(args);
   curl.SetTimeOutSeconds(SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
+  curl.SetHttpHeaders(this->HttpHeaders);
   std::string dropMethod;
   std::string url;
   this->ConstructCDashURL(dropMethod, url);
