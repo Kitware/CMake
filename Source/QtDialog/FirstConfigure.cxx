@@ -130,7 +130,7 @@ bool StartCompilerSetup::crossCompilerSetup() const
 void StartCompilerSetup::onSelectionChanged(bool on)
 {
   if (on) {
-    selectionChanged();
+    emit selectionChanged();
   }
 }
 

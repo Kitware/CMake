@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileMonitor.h"
 
+#include "cmAlgorithms.h"
 #include "cmsys/SystemTools.hxx"
 
 #include <cassert>
@@ -36,12 +37,7 @@ public:
 class cmVirtualDirectoryWatcher : public cmIBaseWatcher
 {
 public:
-  ~cmVirtualDirectoryWatcher() override
-  {
-    for (auto i : this->Children) {
-      delete i.second;
-    }
-  }
+  ~cmVirtualDirectoryWatcher() override { cmDeleteAll(this->Children); }
 
   cmIBaseWatcher* Find(const std::string& ps)
   {
@@ -102,9 +98,7 @@ public:
 
   void Reset()
   {
-    for (auto c : this->Children) {
-      delete c.second;
-    }
+    cmDeleteAll(this->Children);
     this->Children.clear();
   }
 
