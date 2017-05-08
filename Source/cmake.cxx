@@ -447,6 +447,8 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         cmSystemTools::Error("No cmake script provided.");
         return false;
       }
+      // Register fake project commands that hint misuse in script mode.
+      GetProjectCommandsInScriptMode(this->State);
       this->ReadListFile(args, path.c_str());
     } else if (arg.find("--find-package", 0) == 0) {
       findPackageMode = true;

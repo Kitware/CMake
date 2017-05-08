@@ -12,5 +12,6 @@ class cmState;
  */
 void GetScriptingCommands(cmState* state);
 void GetProjectCommands(cmState* state);
+void GetProjectCommandsInScriptMode(cmState* state);
 
 #endif
