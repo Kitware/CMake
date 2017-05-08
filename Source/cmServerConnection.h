@@ -2,21 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "cmConfigure.h" // IWYU pragma: keep
+#include "cmConfigure.h"
+
+#include "cm_uv.h"
 
 #include <string>
-#include <vector>
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cm_uv.h"
-#endif
-
-class cmServer;
 class cmFileMonitor;
-class LoopGuard;
+class cmServer;
 
 class cmServerConnection
 {
+  CM_DISABLE_COPY(cmServerConnection)
+
 public:
   cmServerConnection();
   virtual ~cmServerConnection();

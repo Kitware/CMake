@@ -2,13 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "cmListFileCache.h"
-#include "cmState.h"
+#include "cmConfigure.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cm_jsoncpp_value.h"
 #include "cm_uv.h"
-#endif
 
 #include <string>
 #include <vector>
@@ -21,6 +18,8 @@ class cmServerResponse;
 
 class cmServer
 {
+  CM_DISABLE_COPY(cmServer)
+
 public:
   class DebugInfo;
 

@@ -6,18 +6,15 @@
 #include "cmServerDictionary.h"
 #include "cmServerProtocol.h"
 #include "cmSystemTools.h"
-#include "cmVersionMacros.h"
-#include "cmake.h"
-
-#if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cm_jsoncpp_reader.h"
-#include "cm_jsoncpp_value.h"
-#endif
+#include "cm_jsoncpp_writer.h"
+#include "cmake.h"
+#include "cmsys/FStream.hxx"
 
 #include <algorithm>
-#include <fstream>
-#include <iostream>
-#include <memory>
+#include <cassert>
+#include <cstdint>
+#include <utility>
 
 class cmServer::DebugInfo
 {
@@ -270,10 +267,8 @@ void cmServer::WriteJsonObject(const Json::Value& jsonValue,
     }
 
     if (!debug->OutputFile.empty()) {
-      std::ofstream myfile;
-      myfile.open(debug->OutputFile);
+      cmsys::ofstream myfile(debug->OutputFile.c_str());
       myfile << result;
-      myfile.close();
     }
   }
 
