@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(TestFindMPI)
+project(TestFindMPI NONE)
 include(CTest)
 
 macro(source_code_mapper_helper LANG_NAME)

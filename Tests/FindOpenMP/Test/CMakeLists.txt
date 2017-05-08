@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(TestFindOpenMP)
+project(TestFindOpenMP NONE)
 include(CTest)
 
 macro(source_code_mapper_helper LANG_NAME SRC_FILE_NAME)
