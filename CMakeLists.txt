@@ -63,6 +63,10 @@ if(NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMake_NO_CXX_STANDARD)
   endif()
 endif()
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
+  # include special compile flags for some compilers
+  include(CompileFlags.cmake)
+
+  # check for available C++ features
   include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx_features.cmake)
 endif()
 
@@ -647,9 +651,6 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(BUILD_TESTING)
     include(${CMake_SOURCE_DIR}/Tests/CMakeInstall.cmake)
   endif()
-
-  # include special compile flags for some compilers
-  include(CompileFlags.cmake)
 
   # no clue why we are testing for this here
   include(CheckSymbolExists)
