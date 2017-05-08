@@ -76,10 +76,10 @@ cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 function(_OPENMP_FLAG_CANDIDATES LANG)
   if(NOT OpenMP_${LANG}_FLAG)
-    set(OpenMP_FLAG_CANDIDATES "")
+    unset(OpenMP_FLAG_CANDIDATES)
 
     set(OMP_FLAG_GNU "-fopenmp")
-    set(OMP_FLAG_Clang "-fopenmp=libomp" "-fopenmp=libiomp5")
+    set(OMP_FLAG_Clang "-fopenmp=libomp" "-fopenmp=libiomp5" "-fopenmp")
     set(OMP_FLAG_HP "+Oopenmp")
     if(WIN32)
       set(OMP_FLAG_Intel "-Qopenmp")
@@ -92,16 +92,21 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     set(OMP_FLAG_MIPSpro "-mp")
     set(OMP_FLAG_MSVC "-openmp")
     set(OMP_FLAG_PathScale "-openmp")
+    set(OMP_FLAG_NAG "-openmp")
+    set(OMP_FLAG_Absoft "-openmp")
     set(OMP_FLAG_PGI "-mp")
     set(OMP_FLAG_SunPro "-xopenmp")
     set(OMP_FLAG_XL "-qsmp=omp")
     # Cray compiles with OpenMP automatically
+    set(OMP_FLAG_Cray " ")
 
+    # If we know the correct flags, use those
     if(DEFINED OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID})
-      list(APPEND OpenMP_FLAG_CANDIDATES "${OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID}}")
+      set(OpenMP_FLAG_CANDIDATES "${OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID}}")
+    # Fall back to reasonable default tries otherwise
+    else()
+      set(OpenMP_FLAG_CANDIDATES "-openmp" "-fopenmp" "-mp" " ")
     endif()
-
-    list(APPEND OpenMP_FLAG_CANDIDATES " ")
     set(OpenMP_${LANG}_FLAG_CANDIDATES "${OpenMP_FLAG_CANDIDATES}" PARENT_SCOPE)
   else()
     set(OpenMP_${LANG}_FLAG_CANDIDATES "${OpenMP_${LANG}_FLAG}" PARENT_SCOPE)
