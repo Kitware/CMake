@@ -47,7 +47,6 @@ int uv_pipe_bind(uv_pipe_t* handle, const char* name) {
   int err;
 
   pipe_fname = NULL;
-  sockfd = -1;
 
   /* Already bound? */
   if (uv__stream_fd(handle) >= 0)
@@ -76,7 +75,9 @@ int uv_pipe_bind(uv_pipe_t* handle, const char* name) {
     /* Convert ENOENT to EACCES for compatibility with Windows. */
     if (err == -ENOENT)
       err = -EACCES;
-    goto err_bind;
+
+    uv__close(sockfd);
+    goto err_socket;
   }
 
   /* Success. */
@@ -84,9 +85,6 @@ int uv_pipe_bind(uv_pipe_t* handle, const char* name) {
   handle->pipe_fname = pipe_fname; /* Is a strdup'ed copy. */
   handle->io_watcher.fd = sockfd;
   return 0;
-
-err_bind:
-  uv__close(sockfd);
 
 err_socket:
   uv__free((void*)pipe_fname);
