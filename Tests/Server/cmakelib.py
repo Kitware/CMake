@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys, subprocess, json
 
 termwidth = 150
@@ -13,8 +14,8 @@ def ordered(obj):
     return obj
 
 def col_print(title, array):
-  print
-  print
+  print()
+  print()
   print(title)
 
   indentwidth = 4
