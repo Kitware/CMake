@@ -55,14 +55,22 @@ if(NOT DEFINED CMAKE_C_STANDARD AND NOT CMake_NO_C_STANDARD)
   endif()
 endif()
 if(NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMake_NO_CXX_STANDARD)
-  include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx14_cstdio.cmake)
-  if(NOT CMake_CXX14_CSTDIO_BROKEN)
-    set(CMAKE_CXX_STANDARD 14)
+  if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.14)
+    set(CMAKE_CXX_STANDARD 98)
   else()
-    set(CMAKE_CXX_STANDARD 11)
+    include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx14_cstdio.cmake)
+    if(NOT CMake_CXX14_CSTDIO_BROKEN)
+      set(CMAKE_CXX_STANDARD 14)
+    else()
+      set(CMAKE_CXX_STANDARD 11)
+    endif()
   endif()
 endif()
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
+  # include special compile flags for some compilers
+  include(CompileFlags.cmake)
+
+  # check for available C++ features
   include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx_features.cmake)
 endif()
 
@@ -647,9 +655,6 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(BUILD_TESTING)
     include(${CMake_SOURCE_DIR}/Tests/CMakeInstall.cmake)
   endif()
-
-  # include special compile flags for some compilers
-  include(CompileFlags.cmake)
 
   # no clue why we are testing for this here
   include(CheckSymbolExists)
