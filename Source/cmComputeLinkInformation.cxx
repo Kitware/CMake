@@ -1737,7 +1737,13 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     }
   }
   if (use_build_rpath || use_link_rpath) {
-    std::string rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+    std::string rootPath;
+    if (const char* sysrootLink =
+          this->Makefile->GetDefinition("CMAKE_SYSROOT_LINK")) {
+      rootPath = sysrootLink;
+    } else {
+      rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+    }
     const char* stagePath =
       this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX");
     const char* installPrefix =

@@ -154,10 +154,16 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   }
 
   const char* sysroot = this->Makefile->GetDefinition("CMAKE_SYSROOT");
+  const char* sysrootCompile =
+    this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE");
+  const char* sysrootLink =
+    this->Makefile->GetDefinition("CMAKE_SYSROOT_LINK");
   const char* rootPath = this->Makefile->GetDefinition("CMAKE_FIND_ROOT_PATH");
   const bool noSysroot = !sysroot || !*sysroot;
+  const bool noCompileSysroot = !sysrootCompile || !*sysrootCompile;
+  const bool noLinkSysroot = !sysrootLink || !*sysrootLink;
   const bool noRootPath = !rootPath || !*rootPath;
-  if (noSysroot && noRootPath) {
+  if (noSysroot && noCompileSysroot && noLinkSysroot && noRootPath) {
     return;
   }
 
@@ -165,6 +171,12 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   std::vector<std::string> roots;
   if (rootPath) {
     cmSystemTools::ExpandListArgument(rootPath, roots);
+  }
+  if (sysrootCompile) {
+    roots.push_back(sysrootCompile);
+  }
+  if (sysrootLink) {
+    roots.push_back(sysrootLink);
   }
   if (sysroot) {
     roots.push_back(sysroot);

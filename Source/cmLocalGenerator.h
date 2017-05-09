@@ -362,6 +362,7 @@ protected:
   std::map<std::string, std::string> Compilers;
   std::map<std::string, std::string> VariableMappings;
   std::string CompilerSysroot;
+  std::string LinkerSysroot;
 
   bool EmitUniversalBinaryFlags;
 

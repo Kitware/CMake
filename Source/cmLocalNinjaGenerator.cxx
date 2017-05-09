@@ -37,8 +37,9 @@ cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
 cmRulePlaceholderExpander*
 cmLocalNinjaGenerator::CreateRulePlaceholderExpander() const
 {
-  cmRulePlaceholderExpander* ret = new cmRulePlaceholderExpander(
-    this->Compilers, this->VariableMappings, this->CompilerSysroot);
+  cmRulePlaceholderExpander* ret =
+    new cmRulePlaceholderExpander(this->Compilers, this->VariableMappings,
+                                  this->CompilerSysroot, this->LinkerSysroot);
   ret->SetTargetImpLib("$TARGET_IMPLIB");
   return ret;
 }
