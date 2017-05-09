@@ -647,9 +647,9 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
      xw.EndElement(); // ItemGroup
     xw.StartElement("PropertyGroup");
      xw.Attribute("Label", "Globals");
-     xw.StartElement("ProjectGUID");
+     xw.StartElement("ProjectGuid");
       xw.Content("{F3FC6D86-508D-3FB1-96D2-995F08B142EC}");
-     xw.EndElement(); // ProjectGUID
+     xw.EndElement(); // ProjectGuid
      xw.StartElement("Keyword");
       xw.Content("Win32Proj");
      xw.EndElement(); // Keyword
