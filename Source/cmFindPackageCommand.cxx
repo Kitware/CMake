@@ -729,8 +729,9 @@ bool cmFindPackageCommand::HandlePackageMode()
 
   // package not found
   if (result && !found) {
-    // warn if package required and not quiet
-    if (!this->Quiet || this->Required) {
+    // warn if package required or neither quiet nor in config mode
+    if (this->Required ||
+        !(this->Quiet || (this->UseConfigFiles && !this->UseFindModules))) {
       // The variable is not set.
       std::ostringstream e;
       std::ostringstream aw;
@@ -831,6 +832,13 @@ bool cmFindPackageCommand::HandlePackageMode()
       if (!aw.str().empty()) {
         this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, aw.str());
       }
+    }
+    // output result if in config mode but not in quiet mode
+    else if (!this->Quiet) {
+      std::ostringstream aw;
+      aw << "Could NOT find " << this->Name << " (missing: " << this->Name
+         << "_DIR)";
+      this->Makefile->DisplayStatus(aw.str().c_str(), -1);
     }
   }
 
