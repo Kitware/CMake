@@ -246,7 +246,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
     // create a function blocker and set it up
     cmLoadedCommand* f = new cmLoadedCommand();
     (*initFunction)(&f->info);
-    this->Makefile->GetState()->AddCommand(f);
+    this->Makefile->GetState()->AddScriptedCommand(args[0], f);
     return true;
   }
   this->SetError("Attempt to load command failed. "

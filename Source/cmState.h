@@ -126,6 +126,7 @@ public:
   void AddDisallowedCommand(std::string const& name, cmCommand* command,
                             cmPolicies::PolicyID policy, const char* message);
   void AddUnexpectedCommand(std::string const& name, const char* error);
+  void AddScriptedCommand(std::string const& name, cmCommand* command);
   void RenameCommand(std::string const& oldName, std::string const& newName);
   void RemoveUserDefinedCommands();
   std::vector<std::string> GetCommandNames() const;

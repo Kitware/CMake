@@ -184,10 +184,7 @@ bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       f->Functions = this->Functions;
       f->FilePath = this->GetStartingContext().FilePath;
       mf.RecordPolicies(f->Policies);
-      std::string newName = "_" + this->Args[0];
-      mf.GetState()->RenameCommand(this->Args[0], newName);
-      mf.GetState()->AddCommand(f);
-
+      mf.GetState()->AddScriptedCommand(this->Args[0], f);
       // remove the function blocker now that the macro is defined
       mf.RemoveFunctionBlocker(this, lff);
       return true;

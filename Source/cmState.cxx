@@ -433,6 +433,12 @@ void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
   this->AddBuiltinCommand(name, new cmUnexpectedCommand(name, error));
 }
 
+void cmState::AddScriptedCommand(std::string const& name, cmCommand* command)
+{
+  this->RenameCommand(name, "_" + name);
+  this->AddCommand(command);
+}
+
 cmCommand* cmState::GetCommand(std::string const& name) const
 {
   cmCommand* command = CM_NULLPTR;
