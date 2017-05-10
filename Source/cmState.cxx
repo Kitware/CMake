@@ -12,10 +12,12 @@
 #include "cmCacheManager.h"
 #include "cmCommand.h"
 #include "cmDefinitions.h"
+#include "cmDisallowedCommand.h"
 #include "cmListFileCache.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
+#include "cmUnexpectedCommand.h"
 #include "cmake.h"
 
 cmState::cmState()
@@ -408,6 +410,27 @@ void cmState::AddCommand(cmCommand* command)
     this->Commands.erase(pos);
   }
   this->Commands.insert(std::make_pair(name, command));
+}
+
+void cmState::AddBuiltinCommand(std::string const& name, cmCommand* command)
+{
+  assert(name == cmSystemTools::LowerCase(name));
+  assert(name == cmSystemTools::LowerCase(command->GetName()));
+  assert(this->Commands.find(name) == this->Commands.end());
+  this->Commands.insert(std::make_pair(name, command));
+}
+
+void cmState::AddDisallowedCommand(std::string const& name, cmCommand* command,
+                                   cmPolicies::PolicyID policy,
+                                   const char* message)
+{
+  this->AddBuiltinCommand(name,
+                          new cmDisallowedCommand(command, policy, message));
+}
+
+void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
+{
+  this->AddBuiltinCommand(name, new cmUnexpectedCommand(name, error));
 }
 
 cmCommand* cmState::GetCommand(std::string const& name) const

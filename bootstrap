@@ -278,6 +278,7 @@ CMAKE_CXX_SOURCES="\
   cmDefinitions \
   cmDepends \
   cmDependsC \
+  cmDisallowedCommand \
   cmDocumentationFormatter \
   cmEnableLanguageCommand \
   cmEnableTestingCommand \
