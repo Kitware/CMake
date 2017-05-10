@@ -297,8 +297,8 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->WriteProjectConfigurations();
   }
   this->WriteString("<PropertyGroup Label=\"Globals\">\n", 1);
-  this->WriteString("<ProjectGUID>", 2);
-  (*this->BuildFileStream) << "{" << this->GUID << "}</ProjectGUID>\n";
+  this->WriteString("<ProjectGuid>", 2);
+  (*this->BuildFileStream) << "{" << this->GUID << "}</ProjectGuid>\n";
 
   if (this->MSTools &&
       this->GeneratorTarget->GetType() <= cmStateEnums::GLOBAL_TARGET) {
