@@ -1662,23 +1662,23 @@ void cmCTestTestHandler::GetListOfTests()
   // Add handler for ADD_TEST
   cmCTestAddTestCommand* newCom1 = new cmCTestAddTestCommand;
   newCom1->TestHandler = this;
-  cm.GetState()->AddCommand(newCom1);
+  cm.GetState()->AddBuiltinCommand("add_test", newCom1);
 
   // Add handler for SUBDIRS
   cmCTestSubdirCommand* newCom2 = new cmCTestSubdirCommand;
   newCom2->TestHandler = this;
-  cm.GetState()->AddCommand(newCom2);
+  cm.GetState()->AddBuiltinCommand("subdirs", newCom2);
 
   // Add handler for ADD_SUBDIRECTORY
   cmCTestAddSubdirectoryCommand* newCom3 = new cmCTestAddSubdirectoryCommand;
   newCom3->TestHandler = this;
-  cm.GetState()->AddCommand(newCom3);
+  cm.GetState()->AddBuiltinCommand("add_subdirectory", newCom3);
 
-  // Add handler for SET_SOURCE_FILES_PROPERTIES
+  // Add handler for SET_TESTS_PROPERTIES
   cmCTestSetTestsPropertiesCommand* newCom4 =
     new cmCTestSetTestsPropertiesCommand;
   newCom4->TestHandler = this;
-  cm.GetState()->AddCommand(newCom4);
+  cm.GetState()->AddBuiltinCommand("set_tests_properties", newCom4);
 
   const char* testFilename;
   if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
