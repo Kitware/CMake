@@ -80,17 +80,6 @@ public:
   virtual cmCommand* Clone() = 0;
 
   /**
-   * This determines if the command is defined in a cmake script.
-   * It is the case for cmMacroHelperCommand and cmFunctionHelperCommand.
-   */
-  virtual bool IsUserDefined() const { return false; }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  virtual std::string GetName() const = 0;
-
-  /**
    * Return the last error string.
    */
   const char* GetError();

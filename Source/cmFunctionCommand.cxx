@@ -21,11 +21,6 @@ public:
   ~cmFunctionHelperCommand() CM_OVERRIDE {}
 
   /**
-   * This determines if the command is defined in a cmake script.
-   */
-  bool IsUserDefined() const CM_OVERRIDE { return true; }
-
-  /**
    * This is a virtual constructor for the command.
    */
   cmCommand* Clone() CM_OVERRIDE
@@ -51,11 +46,6 @@ public:
   {
     return false;
   }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return this->Args[0]; }
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;

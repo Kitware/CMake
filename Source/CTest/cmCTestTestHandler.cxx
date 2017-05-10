@@ -56,11 +56,6 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& /*unused*/) CM_OVERRIDE;
 
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "subdirs"; }
-
   cmCTestTestHandler* TestHandler;
 };
 
@@ -136,11 +131,6 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& /*unused*/) CM_OVERRIDE;
 
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "add_subdirectory"; }
-
   cmCTestTestHandler* TestHandler;
 };
 
@@ -206,11 +196,6 @@ public:
   bool InitialPass(std::vector<std::string> const& /*args*/,
                    cmExecutionStatus& /*unused*/) CM_OVERRIDE;
 
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "add_test"; }
-
   cmCTestTestHandler* TestHandler;
 };
 
@@ -243,11 +228,6 @@ public:
   */
   bool InitialPass(std::vector<std::string> const& /*args*/,
                    cmExecutionStatus& /*unused*/) CM_OVERRIDE;
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "set_tests_properties"; }
 
   cmCTestTestHandler* TestHandler;
 };

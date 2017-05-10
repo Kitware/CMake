@@ -66,11 +66,6 @@ public:
     return this->info.FinalPass != CM_NULLPTR;
   }
 
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return info.Name; }
-
   static const char* LastName;
   static void TrapsForSignals(int sig)
   {

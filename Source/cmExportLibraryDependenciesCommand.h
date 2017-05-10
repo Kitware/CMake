@@ -21,10 +21,6 @@ public:
   }
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
-  std::string GetName() const CM_OVERRIDE
-  {
-    return "export_library_dependencies";
-  }
 
   void FinalPass() CM_OVERRIDE;
   bool HasFinalPass() const CM_OVERRIDE { return true; }

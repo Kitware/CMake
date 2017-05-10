@@ -25,6 +25,11 @@ public:
   cmCTestHandlerCommand();
 
   /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual std::string GetName() const = 0;
+
+  /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */

@@ -26,11 +26,6 @@ public:
                    cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "set_target_properties"; }
-
-  /**
    *  Used by this command and cmSetPropertiesCommand
    */
   static bool SetOneTarget(const std::string& tname,

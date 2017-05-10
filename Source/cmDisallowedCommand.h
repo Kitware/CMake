@@ -42,8 +42,6 @@ public:
     return this->Command->HasFinalPass();
   }
 
-  std::string GetName() const CM_OVERRIDE { return this->Command->GetName(); }
-
 private:
   cmCommand* Command;
   cmPolicies::PolicyID Policy;

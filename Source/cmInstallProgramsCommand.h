@@ -34,11 +34,6 @@ public:
                    cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "install_programs"; }
-
-  /**
    * This is called at the end after all the information
    * specified by the command is accumulated. Most commands do
    * not implement this method.  At this point, reading and

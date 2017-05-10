@@ -381,7 +381,6 @@ void cmState::SetIsGeneratorMultiConfig(bool b)
 void cmState::AddBuiltinCommand(std::string const& name, cmCommand* command)
 {
   assert(name == cmSystemTools::LowerCase(name));
-  assert(name == cmSystemTools::LowerCase(command->GetName()));
   assert(this->BuiltinCommands.find(name) == this->BuiltinCommands.end());
   this->BuiltinCommands.insert(std::make_pair(name, command));
 }

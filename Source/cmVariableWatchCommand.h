@@ -42,11 +42,6 @@ public:
       stay alive since it owns variable watch callback information. */
   bool HasFinalPass() const CM_OVERRIDE { return true; }
 
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "variable_watch"; }
-
 protected:
   std::set<std::string> WatchedVariables;
 };
