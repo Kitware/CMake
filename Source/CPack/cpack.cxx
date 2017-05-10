@@ -23,7 +23,6 @@
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cm_auto_ptr.hxx"
@@ -189,11 +188,10 @@ int main(int argc, char const* const* argv)
   cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
               "Read CPack config file: " << cpackConfigFile << std::endl);
 
-  cmake cminst;
+  cmake cminst(cmake::RoleScript);
   cminst.SetHomeDirectory("");
   cminst.SetHomeOutputDirectory("");
   cminst.GetCurrentSnapshot().SetDefaultDefinitions();
-  cminst.GetState()->RemoveUnscriptableCommands();
   cmGlobalGenerator cmgg(&cminst);
   CM_AUTO_PTR<cmMakefile> globalMF(
     new cmMakefile(&cmgg, cminst.GetCurrentSnapshot()));

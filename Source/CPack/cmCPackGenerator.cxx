@@ -620,7 +620,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
                           << installComponent << std::endl);
         }
 
-        cmake cm;
+        cmake cm(cmake::RoleScript);
         cm.SetHomeDirectory("");
         cm.SetHomeOutputDirectory("");
         cm.GetCurrentSnapshot().SetDefaultDefinitions();

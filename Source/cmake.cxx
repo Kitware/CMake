@@ -136,7 +136,7 @@ void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
   cm->MarkCliAsUsed(variable);
 }
 
-cmake::cmake()
+cmake::cmake(Role role)
 {
   this->Trace = false;
   this->TraceExpand = false;
@@ -174,8 +174,12 @@ cmake::cmake()
 
   this->AddDefaultGenerators();
   this->AddDefaultExtraGenerators();
-  this->AddScriptingCommands();
-  this->AddProjectCommands();
+  if (role == RoleScript || role == RoleProject) {
+    this->AddScriptingCommands();
+  }
+  if (role == RoleProject) {
+    this->AddProjectCommands();
+  }
 
   // Make sure we can capture the build tool output.
   cmSystemTools::EnableVSConsoleOutput();
@@ -443,6 +447,8 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         cmSystemTools::Error("No cmake script provided.");
         return false;
       }
+      // Register fake project commands that hint misuse in script mode.
+      GetProjectCommandsInScriptMode(this->State);
       this->ReadListFile(args, path.c_str());
     } else if (arg.find("--find-package", 0) == 0) {
       findPackageMode = true;
@@ -1888,7 +1894,7 @@ int cmake::CheckBuildSystem()
 
   // Read the rerun check file and use it to decide whether to do the
   // global generate.
-  cmake cm;
+  cmake cm(RoleScript); // Actually, all we need is the `set` command.
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
@@ -2418,6 +2424,9 @@ int cmake::Build(const std::string& dir, const std::string& target,
     std::string homeOrig = this->GetHomeDirectory();
     std::string homeOutputOrig = this->GetHomeOutputDirectory();
     this->SetDirectoriesFromFile(cachePath.c_str());
+
+    this->AddScriptingCommands();
+    this->AddProjectCommands();
 
     int ret = this->Configure();
     if (ret) {

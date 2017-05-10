@@ -41,11 +41,6 @@ public:
   }
 
   /**
-   * This determines if the command is invoked when in script mode.
-   */
-  bool IsScriptable() const CM_OVERRIDE { return true; }
-
-  /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */

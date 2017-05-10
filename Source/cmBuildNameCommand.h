@@ -19,7 +19,6 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
   std::string GetName() const CM_OVERRIDE { return "build_name"; }
-  bool IsScriptable() const CM_OVERRIDE { return true; }
 };
 
 #endif

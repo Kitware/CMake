@@ -266,3 +266,64 @@ void GetProjectCommands(cmState* state)
     "The variable_requires command should not be called; see CMP0035."));
 #endif
 }
+
+void GetProjectCommandsInScriptMode(cmState* state)
+{
+#define CM_UNEXPECTED_PROJECT_COMMAND(NAME)                                   \
+  state->AddCommand(new cmUnexpectedCommand(NAME, "command is not "           \
+                                                  "scriptable"))
+
+  CM_UNEXPECTED_PROJECT_COMMAND("add_compile_options");
+  CM_UNEXPECTED_PROJECT_COMMAND("add_custom_command");
+  CM_UNEXPECTED_PROJECT_COMMAND("add_custom_target");
+  CM_UNEXPECTED_PROJECT_COMMAND("add_definitions");
+  CM_UNEXPECTED_PROJECT_COMMAND("add_dependencies");
+  CM_UNEXPECTED_PROJECT_COMMAND("add_executable");
+  CM_UNEXPECTED_PROJECT_COMMAND("add_library");
+  CM_UNEXPECTED_PROJECT_COMMAND("add_subdirectory");
+  CM_UNEXPECTED_PROJECT_COMMAND("add_test");
+  CM_UNEXPECTED_PROJECT_COMMAND("aux_source_directory");
+  CM_UNEXPECTED_PROJECT_COMMAND("build_command");
+  CM_UNEXPECTED_PROJECT_COMMAND("create_test_sourcelist");
+  CM_UNEXPECTED_PROJECT_COMMAND("define_property");
+  CM_UNEXPECTED_PROJECT_COMMAND("enable_language");
+  CM_UNEXPECTED_PROJECT_COMMAND("enable_testing");
+  CM_UNEXPECTED_PROJECT_COMMAND("export");
+  CM_UNEXPECTED_PROJECT_COMMAND("fltk_wrap_ui");
+  CM_UNEXPECTED_PROJECT_COMMAND("get_source_file_property");
+  CM_UNEXPECTED_PROJECT_COMMAND("get_target_property");
+  CM_UNEXPECTED_PROJECT_COMMAND("get_test_property");
+  CM_UNEXPECTED_PROJECT_COMMAND("include_directories");
+  CM_UNEXPECTED_PROJECT_COMMAND("include_external_msproject");
+  CM_UNEXPECTED_PROJECT_COMMAND("include_regular_expression");
+  CM_UNEXPECTED_PROJECT_COMMAND("install");
+  CM_UNEXPECTED_PROJECT_COMMAND("link_directories");
+  CM_UNEXPECTED_PROJECT_COMMAND("link_libraries");
+  CM_UNEXPECTED_PROJECT_COMMAND("load_cache");
+  CM_UNEXPECTED_PROJECT_COMMAND("project");
+  CM_UNEXPECTED_PROJECT_COMMAND("qt_wrap_cpp");
+  CM_UNEXPECTED_PROJECT_COMMAND("qt_wrap_ui");
+  CM_UNEXPECTED_PROJECT_COMMAND("remove_definitions");
+  CM_UNEXPECTED_PROJECT_COMMAND("set_source_files_properties");
+  CM_UNEXPECTED_PROJECT_COMMAND("set_target_properties");
+  CM_UNEXPECTED_PROJECT_COMMAND("set_tests_properties");
+  CM_UNEXPECTED_PROJECT_COMMAND("source_group");
+  CM_UNEXPECTED_PROJECT_COMMAND("target_compile_definitions");
+  CM_UNEXPECTED_PROJECT_COMMAND("target_compile_features");
+  CM_UNEXPECTED_PROJECT_COMMAND("target_compile_options");
+  CM_UNEXPECTED_PROJECT_COMMAND("target_include_directories");
+  CM_UNEXPECTED_PROJECT_COMMAND("target_link_libraries");
+  CM_UNEXPECTED_PROJECT_COMMAND("target_sources");
+  CM_UNEXPECTED_PROJECT_COMMAND("try_compile");
+  CM_UNEXPECTED_PROJECT_COMMAND("try_run");
+
+  // deprected commands
+  CM_UNEXPECTED_PROJECT_COMMAND("export_library_dependencies");
+  CM_UNEXPECTED_PROJECT_COMMAND("load_command");
+  CM_UNEXPECTED_PROJECT_COMMAND("output_required_files");
+  CM_UNEXPECTED_PROJECT_COMMAND("subdir_depends");
+  CM_UNEXPECTED_PROJECT_COMMAND("utility_source");
+  CM_UNEXPECTED_PROJECT_COMMAND("variable_requires");
+
+#undef CM_UNEXPECTED_PROJECT_COMMAND
+}

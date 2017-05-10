@@ -69,11 +69,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "if"; }
 
-  /**
-   * This determines if the command is invoked when in script mode.
-   */
-  bool IsScriptable() const CM_OVERRIDE { return true; }
-
   // Filter the given variable definition based on policy CMP0054.
   static const char* GetDefinitionIfUnquoted(
     const cmMakefile* mf, cmExpandedCommandArgument const& argument);

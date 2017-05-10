@@ -286,7 +286,7 @@ cmQtAutoGenerators::cmQtAutoGenerators()
 bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
                              const std::string& config)
 {
-  cmake cm;
+  cmake cm(cmake::RoleScript);
   cm.SetHomeOutputDirectory(targetDirectory);
   cm.SetHomeDirectory(targetDirectory);
   cm.GetCurrentSnapshot().SetDefaultDefinitions();

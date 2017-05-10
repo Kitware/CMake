@@ -7,7 +7,6 @@
 #include "cmCTest.h"
 #include "cmDocumentation.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 #include "cmsys/Encoding.hxx"
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
@@ -170,11 +169,6 @@ int main(int argc, char const* const* argv)
     cmDocumentation doc;
     doc.addCTestStandardDocSections();
     if (doc.CheckOptions(argc, argv)) {
-      cmake hcm;
-      hcm.SetHomeDirectory("");
-      hcm.SetHomeOutputDirectory("");
-      hcm.AddCMakePaths();
-
       // Construct and print requested documentation.
       cmCTestScriptHandler* ch =
         static_cast<cmCTestScriptHandler*>(inst.GetHandler("script"));

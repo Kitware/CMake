@@ -41,11 +41,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "exec_program"; }
 
-  /**
-   * This determines if the command is invoked when in script mode.
-   */
-  bool IsScriptable() const CM_OVERRIDE { return true; }
-
 private:
   static bool RunCommand(const char* command, std::string& output, int& retVal,
                          const char* directory = CM_NULLPTR,

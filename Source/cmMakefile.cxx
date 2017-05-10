@@ -272,11 +272,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
     pcmd->SetMakefile(this);
 
     // Decide whether to invoke the command.
-    if (!cmSystemTools::GetFatalErrorOccured() &&
-        (this->GetCMakeInstance()->GetWorkingMode() != cmake::SCRIPT_MODE ||
-         pcmd->IsScriptable()))
-
-    {
+    if (!cmSystemTools::GetFatalErrorOccured()) {
       // if trace is enabled, print out invoke information
       if (this->GetCMakeInstance()->GetTrace()) {
         this->PrintCommandTrace(lff);
@@ -298,15 +294,6 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         // use the command
         this->FinalPassCommands.push_back(pcmd.release());
       }
-    } else if (this->GetCMakeInstance()->GetWorkingMode() ==
-                 cmake::SCRIPT_MODE &&
-               !pcmd->IsScriptable()) {
-      std::string error = "Command ";
-      error += pcmd->GetName();
-      error += "() is not scriptable";
-      this->IssueMessage(cmake::FATAL_ERROR, error);
-      result = false;
-      cmSystemTools::SetFatalErrorOccured();
     }
   } else {
     if (!cmSystemTools::GetFatalErrorOccured()) {
@@ -3187,7 +3174,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   // make sure the same generator is used
   // use this program as the cmake to be run, it should not
   // be run that way but the cmake object requires a vailid path
-  cmake cm;
+  cmake cm(cmake::RoleProject);
   cm.SetIsInTryCompile(true);
   cmGlobalGenerator* gg =
     cm.CreateGlobalGenerator(this->GetGlobalGenerator()->GetName());

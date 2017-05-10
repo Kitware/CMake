@@ -121,7 +121,6 @@ public:
 
   cmCommand* GetCommand(std::string const& name) const;
   void AddCommand(cmCommand* command);
-  void RemoveUnscriptableCommands();
   void RenameCommand(std::string const& oldName, std::string const& newName);
   void RemoveUserDefinedCommands();
   std::vector<std::string> GetCommandNames() const;

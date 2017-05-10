@@ -275,7 +275,7 @@ void cmCTestScriptHandler::CreateCMake()
     delete this->GlobalGenerator;
     delete this->Makefile;
   }
-  this->CMake = new cmake;
+  this->CMake = new cmake(cmake::RoleScript);
   this->CMake->SetHomeDirectory("");
   this->CMake->SetHomeOutputDirectory("");
   this->CMake->GetCurrentSnapshot().SetDefaultDefinitions();
@@ -289,10 +289,6 @@ void cmCTestScriptHandler::CreateCMake()
   this->Makefile = new cmMakefile(this->GlobalGenerator, snapshot);
 
   this->CMake->SetProgressCallback(ctestScriptProgressCallback, this->CTest);
-
-  // remove all cmake commands which are not scriptable, since they can't be
-  // used in ctest scripts
-  this->CMake->GetState()->RemoveUnscriptableCommands();
 
   // add any ctest specific commands, probably should have common superclass
   // for ctest commands to clean this up. If a couple more commands are

@@ -30,11 +30,6 @@ public:
    */
   std::string GetName() const CM_OVERRIDE { return "configure_file"; }
 
-  /**
-   * This determines if the command is invoked when in script mode.
-   */
-  bool IsScriptable() const CM_OVERRIDE { return true; }
-
 private:
   int ConfigureFile();
 

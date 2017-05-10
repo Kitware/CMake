@@ -167,7 +167,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     return 1;
   }
 
-  cmake cm;
+  cmake cm(cmake::RoleProject);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   std::string cmakeOutString;
