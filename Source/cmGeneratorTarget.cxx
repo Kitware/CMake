@@ -489,7 +489,9 @@ bool cmGeneratorTarget::IsIPOEnabled(const std::string& config) const
       // problem is already reported, no need to issue a message
       return false;
     }
-    if (cmp0069 == cmPolicies::WARN) {
+    const bool in_try_compile =
+      this->LocalGenerator->GetCMakeInstance()->GetIsInTryCompile();
+    if (cmp0069 == cmPolicies::WARN && !in_try_compile) {
       std::ostringstream w;
       w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0069) << "\n";
       w << "INTERPROCEDURAL_OPTIMIZATION property will be ignored for target "
