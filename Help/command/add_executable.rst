@@ -40,6 +40,9 @@ the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
 manual for more on defining buildsystem properties.
 
+See also :prop_sf:`HEADER_FILE_ONLY` on what to do if some sources are
+pre-processed, and you want to have the original sources reachable from
+within IDE.
 
 --------------------------------------------------------------------------
 
