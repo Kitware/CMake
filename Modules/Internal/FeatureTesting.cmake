@@ -22,9 +22,18 @@ macro(_record_compiler_features lang compile_flags feature_list)
   file(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}"
     "\n};\n\nint main(int argc, char** argv) { (void)argv; return features[argc]; }\n")
 
+  if(CMAKE_${lang}_LINK_WITH_STANDARD_COMPILE_OPTION)
+    # This toolchain requires use of the language standard flag
+    # when linking in order to use the matching standard library.
+    set(compile_flags_for_link "${compile_flags}")
+  else()
+    set(compile_flags_for_link "")
+  endif()
+
   try_compile(CMAKE_${lang}_FEATURE_TEST
     ${CMAKE_BINARY_DIR} "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}"
     COMPILE_DEFINITIONS "${compile_flags}"
+    LINK_LIBRARIES "${compile_flags_for_link}"
     OUTPUT_VARIABLE _output
     COPY_FILE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin"
     COPY_FILE_ERROR _copy_error
@@ -35,6 +44,7 @@ macro(_record_compiler_features lang compile_flags feature_list)
     set(_result 255)
   endif()
   unset(CMAKE_${lang}_FEATURE_TEST CACHE)
+  unset(compile_flags_for_link)
 
   if (_result EQUAL 0)
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
