@@ -118,7 +118,7 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
 {
   if (!this->ExecutionStatusStack.empty()) {
     if ((t == cmake::FATAL_ERROR) || (t == cmake::INTERNAL_ERROR)) {
-      this->ExecutionStatusStack.back()->SetNestedError(true);
+      this->ExecutionStatusStack.back()->SetNestedError();
     }
   }
   this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace());

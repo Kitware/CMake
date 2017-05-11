@@ -151,15 +151,15 @@ bool cmMacroHelperCommand::InvokeInitialPass(
       // The error message should have already included the call stack
       // so we do not need to report an error here.
       macroScope.Quiet();
-      inStatus.SetNestedError(true);
+      inStatus.SetNestedError();
       return false;
     }
     if (status.GetReturnInvoked()) {
-      inStatus.SetReturnInvoked(true);
+      inStatus.SetReturnInvoked();
       return true;
     }
     if (status.GetBreakInvoked()) {
-      inStatus.SetBreakInvoked(true);
+      inStatus.SetBreakInvoked();
       return true;
     }
   }

@@ -19,7 +19,7 @@ bool cmContinueCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
 
-  status.SetContinueInvoked(true);
+  status.SetContinueInvoked();
 
   if (!args.empty()) {
     this->Makefile->IssueMessage(cmake::FATAL_ERROR,
