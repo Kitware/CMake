@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -116,18 +116,11 @@ static int http2_getsock(struct connectdata *conn,
   return http2_perform_getsock(conn, sock, numsocks);
 }
 
-static CURLcode http2_disconnect(struct connectdata *conn,
-                                 bool dead_connection)
+/*
+ * http2_stream_free() free HTTP2 stream related data
+ */
+static void http2_stream_free(struct HTTP *http)
 {
-  struct HTTP *http = conn->data->req.protop;
-  struct http_conn *c = &conn->proto.httpc;
-  (void)dead_connection;
-
-  DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT starts now\n"));
-
-  nghttp2_session_del(c->h2);
-  Curl_safefree(c->inbuf);
-
   if(http) {
     Curl_add_buffer_free(http->header_recvbuf);
     http->header_recvbuf = NULL; /* clear the pointer */
@@ -139,6 +132,19 @@ static CURLcode http2_disconnect(struct connectdata *conn,
     free(http->push_headers);
     http->push_headers = NULL;
   }
+}
+
+static CURLcode http2_disconnect(struct connectdata *conn,
+                                 bool dead_connection)
+{
+  struct http_conn *c = &conn->proto.httpc;
+  (void)dead_connection;
+
+  DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT starts now\n"));
+
+  nghttp2_session_del(c->h2);
+  Curl_safefree(c->inbuf);
+  http2_stream_free(conn->data->req.protop);
 
   DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
 
@@ -402,6 +408,7 @@ static int push_promise(struct Curl_easy *data,
     stream = data->req.protop;
     if(!stream) {
       failf(data, "Internal NULL stream!\n");
+      (void)Curl_close(newhandle);
       rv = 1;
       goto fail;
     }
@@ -415,9 +422,11 @@ static int push_promise(struct Curl_easy *data,
       free(stream->push_headers[i]);
     free(stream->push_headers);
     stream->push_headers = NULL;
+    stream->push_headers_used = 0;
 
     if(rv) {
       /* denied, kill off the new handle again */
+      http2_stream_free(newhandle->req.protop);
       (void)Curl_close(newhandle);
       goto fail;
     }
@@ -432,6 +441,7 @@ static int push_promise(struct Curl_easy *data,
     rc = Curl_multi_add_perform(data->multi, newhandle, conn);
     if(rc) {
       infof(data, "failed to add handle to multi\n");
+      http2_stream_free(newhandle->req.protop);
       Curl_close(newhandle);
       rv = 1;
       goto fail;
@@ -587,6 +597,9 @@ static int on_invalid_frame_recv(nghttp2_session *session,
 {
   struct Curl_easy *data_s = NULL;
   (void)userp;
+#if !defined(DEBUGBUILD) || defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void)lib_error_code;
+#endif
 
   data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
   if(data_s) {
@@ -697,6 +710,9 @@ static int on_frame_not_send(nghttp2_session *session,
 {
   struct Curl_easy *data_s;
   (void)userp;
+#if !defined(DEBUGBUILD) || defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void)lib_error_code;
+#endif
 
   data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
   if(data_s) {
@@ -967,14 +983,6 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   return nread;
 }
 
-/*
- * The HTTP2 settings we send in the Upgrade request
- */
-static nghttp2_settings_entry settings[] = {
-  { NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS, 100 },
-  { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, HTTP2_HUGE_WINDOW_SIZE },
-};
-
 #define H2_BUFSIZE 32768
 
 #ifdef NGHTTP2_HAS_ERROR_CALLBACK
@@ -989,6 +997,23 @@ static int error_callback(nghttp2_session *session,
   return 0;
 }
 #endif
+
+static void populate_settings(struct connectdata *conn,
+                              struct http_conn *httpc)
+{
+  nghttp2_settings_entry *iv = httpc->local_settings;
+
+  iv[0].settings_id = NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS;
+  iv[0].value = 100;
+
+  iv[1].settings_id = NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE;
+  iv[1].value = HTTP2_HUGE_WINDOW_SIZE;
+
+  iv[2].settings_id = NGHTTP2_SETTINGS_ENABLE_PUSH;
+  iv[2].value = conn->data->multi->push_cb != NULL;
+
+  httpc->local_settings_num = 3;
+}
 
 void Curl_http2_done(struct connectdata *conn, bool premature)
 {
@@ -1103,16 +1128,14 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   size_t blen;
   struct SingleRequest *k = &conn->data->req;
   uint8_t *binsettings = conn->proto.httpc.binsettings;
+  struct http_conn *httpc = &conn->proto.httpc;
 
-  /* As long as we have a fixed set of settings, we don't have to dynamically
-   * figure out the base64 strings since it'll always be the same. However,
-   * the settings will likely not be fixed every time in the future.
-   */
+  populate_settings(conn, httpc);
 
   /* this returns number of bytes it wrote */
   binlen = nghttp2_pack_settings_payload(binsettings, H2_BINSETTINGS_LEN,
-                                         settings,
-                                         sizeof(settings)/sizeof(settings[0]));
+                                         httpc->local_settings,
+                                         httpc->local_settings_num);
   if(!binlen) {
     failf(conn->data, "nghttp2 unexpectedly failed on pack_settings_payload");
     return CURLE_FAILED_INIT;
@@ -1862,28 +1885,22 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
 
   /* Warn stream may be rejected if cumulative length of headers is too large.
      It appears nghttp2 will not send a header frame larger than 64KB. */
+#define MAX_ACC 60000  /* <64KB to account for some overhead */
   {
     size_t acc = 0;
-    const size_t max_acc = 60000;  /* <64KB to account for some overhead */
 
     for(i = 0; i < nheader; ++i) {
-      if(nva[i].namelen > max_acc - acc)
-        break;
-      acc += nva[i].namelen;
-
-      if(nva[i].valuelen > max_acc - acc)
-        break;
-      acc += nva[i].valuelen;
+      acc += nva[i].namelen + nva[i].valuelen;
 
       DEBUGF(infof(conn->data, "h2 header: %.*s:%.*s\n",
                    nva[i].namelen, nva[i].name,
                    nva[i].valuelen, nva[i].value));
     }
 
-    if(i != nheader) {
+    if(acc > MAX_ACC) {
       infof(conn->data, "http2_send: Warning: The cumulative length of all "
-                        "headers exceeds %zu bytes and that could cause the "
-                        "stream to be rejected.\n", max_acc);
+            "headers exceeds %zu bytes and that could cause the "
+            "stream to be rejected.\n", MAX_ACC);
     }
   }
 
@@ -2037,10 +2054,13 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
                                          conn->data);
   }
   else {
+    populate_settings(conn, httpc);
+
     /* stream ID is unknown at this point */
     stream->stream_id = -1;
-    rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE, settings,
-                                 sizeof(settings) / sizeof(settings[0]));
+    rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE,
+                                 httpc->local_settings,
+                                 httpc->local_settings_num);
     if(rv != 0) {
       failf(data, "nghttp2_submit_settings() failed: %s(%d)",
             nghttp2_strerror(rv), rv);

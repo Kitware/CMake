@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2014, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -219,6 +219,7 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
   return ortn;
 }
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 CF_INLINE const char *SSLCipherNameForNumber(SSLCipherSuite cipher)
 {
   switch(cipher) {
@@ -776,6 +777,7 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
   }
   return "TLS_NULL_WITH_NULL_NULL";
 }
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 #if CURL_BUILD_MAC
 CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
@@ -885,12 +887,13 @@ static OSStatus CopyIdentityWithLabel(char *label,
                                       SecIdentityRef *out_cert_and_key)
 {
   OSStatus status = errSecItemNotFound;
+
+#if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
   CFArrayRef keys_list;
   CFIndex keys_list_count;
   CFIndex i;
   CFStringRef common_name;
 
-#if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
   /* SecItemCopyMatching() was introduced in iOS and Snow Leopard.
      kSecClassIdentity was introduced in Lion. If both exist, let's use them
      to find the certificate. */
@@ -929,28 +932,35 @@ static OSStatus CopyIdentityWithLabel(char *label,
     if(status == noErr) {
       keys_list_count = CFArrayGetCount(keys_list);
       *out_cert_and_key = NULL;
+      status = 1;
       for(i=0; i<keys_list_count; i++) {
         OSStatus err = noErr;
         SecCertificateRef cert = NULL;
-        *out_cert_and_key =
+        SecIdentityRef identity =
           (SecIdentityRef) CFArrayGetValueAtIndex(keys_list, i);
-        err = SecIdentityCopyCertificate(*out_cert_and_key, &cert);
+        err = SecIdentityCopyCertificate(identity, &cert);
         if(err == noErr) {
+#if CURL_BUILD_IOS
+          common_name = SecCertificateCopySubjectSummary(cert);
+#elif CURL_BUILD_MAC_10_7
           SecCertificateCopyCommonName(cert, &common_name);
+#endif
           if(CFStringCompare(common_name, label_cf, 0) == kCFCompareEqualTo) {
             CFRelease(cert);
             CFRelease(common_name);
+            CFRetain(identity);
+            *out_cert_and_key = identity;
             status = noErr;
             break;
           }
           CFRelease(common_name);
         }
-        *out_cert_and_key = NULL;
-        status = 1;
         CFRelease(cert);
       }
     }
 
+    if(keys_list)
+      CFRelease(keys_list);
     CFRelease(query_dict);
     CFRelease(label_cf);
   }
@@ -1034,6 +1044,109 @@ CF_INLINE bool is_file(const char *filename)
   return false;
 }
 
+#if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
+static CURLcode darwinssl_version_from_curl(long *darwinver, long ssl_version)
+{
+  switch(ssl_version) {
+    case CURL_SSLVERSION_TLSv1_0:
+      *darwinver = kTLSProtocol1;
+      return CURLE_OK;
+    case CURL_SSLVERSION_TLSv1_1:
+      *darwinver = kTLSProtocol11;
+      return CURLE_OK;
+    case CURL_SSLVERSION_TLSv1_2:
+      *darwinver = kTLSProtocol12;
+      return CURLE_OK;
+    case CURL_SSLVERSION_TLSv1_3:
+      break;
+  }
+  return CURLE_SSL_CONNECT_ERROR;
+}
+#endif
+
+static CURLcode
+set_ssl_version_min_max(struct connectdata *conn, int sockindex)
+{
+  struct Curl_easy *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  long ssl_version = SSL_CONN_CONFIG(version);
+  long ssl_version_max = SSL_CONN_CONFIG(version_max);
+
+  switch(ssl_version) {
+    case CURL_SSLVERSION_DEFAULT:
+    case CURL_SSLVERSION_TLSv1:
+      ssl_version = CURL_SSLVERSION_TLSv1_0;
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+      break;
+  }
+
+  switch(ssl_version_max) {
+    case CURL_SSLVERSION_MAX_NONE:
+      ssl_version_max = ssl_version << 16;
+      break;
+    case CURL_SSLVERSION_MAX_DEFAULT:
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+      break;
+  }
+
+#if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
+  if(SSLSetProtocolVersionMax != NULL) {
+    SSLProtocol darwin_ver_min = kTLSProtocol1;
+    SSLProtocol darwin_ver_max = kTLSProtocol1;
+    CURLcode result = darwinssl_version_from_curl(&darwin_ver_min,
+                                                  ssl_version);
+    if(result) {
+      failf(data, "unsupported min version passed via CURLOPT_SSLVERSION");
+      return result;
+    }
+    result = darwinssl_version_from_curl(&darwin_ver_max,
+                                         ssl_version_max >> 16);
+    if(result) {
+      failf(data, "unsupported max version passed via CURLOPT_SSLVERSION");
+      return result;
+    }
+
+    (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, darwin_ver_min);
+    (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, darwin_ver_max);
+    return result;
+  }
+  else {
+#if CURL_SUPPORT_MAC_10_8
+    long i = ssl_version;
+    (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                       kSSLProtocolAll,
+                                       false);
+    for(; i <= (ssl_version_max >> 16); i++) {
+      switch(i) {
+        case CURL_SSLVERSION_TLSv1_0:
+          (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                            kTLSProtocol1,
+                                            true);
+          break;
+        case CURL_SSLVERSION_TLSv1_1:
+          (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                            kTLSProtocol11,
+                                            true);
+          break;
+        case CURL_SSLVERSION_TLSv1_2:
+          (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                            kTLSProtocol12,
+                                            true);
+          break;
+        case CURL_SSLVERSION_TLSv1_3:
+          failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
+          return CURLE_SSL_CONNECT_ERROR;
+      }
+    }
+    return CURLE_OK;
+#endif  /* CURL_SUPPORT_MAC_10_8 */
+  }
+#endif  /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
+  failf(data, "DarwinSSL: cannot set SSL protocol");
+  return CURLE_SSL_CONNECT_ERROR;
+}
+
+
 static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                         int sockindex)
 {
@@ -1103,20 +1216,15 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
       break;
     case CURL_SSLVERSION_TLSv1_0:
-      (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol1);
-      (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol1);
-      break;
     case CURL_SSLVERSION_TLSv1_1:
-      (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol11);
-      (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol11);
-      break;
     case CURL_SSLVERSION_TLSv1_2:
-      (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol12);
-      (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
-      break;
     case CURL_SSLVERSION_TLSv1_3:
-      failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
-      return CURLE_SSL_CONNECT_ERROR;
+      {
+        CURLcode result = set_ssl_version_min_max(conn, sockindex);
+        if(result != CURLE_OK)
+          return result;
+        break;
+      }
     case CURL_SSLVERSION_SSLv3:
       err = SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol3);
       if(err != noErr) {
@@ -1157,23 +1265,15 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                          true);
       break;
     case CURL_SSLVERSION_TLSv1_0:
-      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                         kTLSProtocol1,
-                                         true);
-      break;
     case CURL_SSLVERSION_TLSv1_1:
-      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                         kTLSProtocol11,
-                                         true);
-      break;
     case CURL_SSLVERSION_TLSv1_2:
-      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                         kTLSProtocol12,
-                                         true);
-      break;
     case CURL_SSLVERSION_TLSv1_3:
-      failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
-      return CURLE_SSL_CONNECT_ERROR;
+      {
+        CURLcode result = set_ssl_version_min_max(conn, sockindex);
+        if(result != CURLE_OK)
+          return result;
+        break;
+      }
     case CURL_SSLVERSION_SSLv3:
       err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                          kSSLProtocol3,
@@ -1199,6 +1299,11 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif  /* CURL_SUPPORT_MAC_10_8 */
   }
 #else
+  if(conn->ssl_config.version_max != CURL_SSLVERSION_MAX_NONE) {
+    failf(data, "Your version of the OS does not support to set maximum"
+                " SSL/TLS version");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
   (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx, kSSLProtocolAll, false);
   switch(conn->ssl_config.version) {
   case CURL_SSLVERSION_DEFAULT:
@@ -1385,17 +1490,12 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
 
-  if(ssl_cafile) {
+  if(ssl_cafile && verifypeer) {
     bool is_cert_file = is_file(ssl_cafile);
 
     if(!is_cert_file) {
       failf(data, "SSL: can't load CA certificate file %s", ssl_cafile);
       return CURLE_SSL_CACERT_BADFILE;
-    }
-    if(!verifypeer) {
-      failf(data, "SSL: CA certificate set, but certificate verification "
-            "is disabled");
-      return CURLE_SSL_CONNECT_ERROR;
     }
   }
 
@@ -1419,6 +1519,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       infof(data, "WARNING: using IP address, SNI is being disabled by "
             "the OS.\n");
     }
+  }
+  else {
+    infof(data, "WARNING: disabling hostname validation also disables SNI.\n");
   }
 
   /* Disable cipher suites that ST supports but are not safe. These ciphers
@@ -1541,7 +1644,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif /* CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7 */
 
   /* Check if there's a cached ID we can/should use here! */
-  if(data->set.general_ssl.sessionid) {
+  if(SSL_SET_OPTION(primary.sessionid)) {
     char *ssl_sessionid;
     size_t ssl_sessionid_len;
 
@@ -1921,7 +2024,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       /* The below is errSSLServerAuthCompleted; it's not defined in
         Leopard's headers */
       case -9841:
-        if(SSL_CONN_CONFIG(CAfile)) {
+        if(SSL_CONN_CONFIG(CAfile) && SSL_CONN_CONFIG(verifypeer)) {
           int res = verify_cert(SSL_CONN_CONFIG(CAfile), data,
                                 connssl->ssl_ctx);
           if(res != CURLE_OK)
@@ -2034,9 +2137,11 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
   }
 }
 
-static CURLcode
-darwinssl_connect_step3(struct connectdata *conn,
-                        int sockindex)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+/* This should be called during step3 of the connection at the earliest */
+static void
+show_verbose_server_cert(struct connectdata *conn,
+                         int sockindex)
 {
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -2048,9 +2153,9 @@ darwinssl_connect_step3(struct connectdata *conn,
   CFIndex i, count;
   SecTrustRef trust = NULL;
 
-  /* There is no step 3!
-   * Well, okay, if verbose mode is on, let's print the details of the
-   * server certificates. */
+  if(!connssl->ssl_ctx)
+    return;
+
 #if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
 #if CURL_BUILD_IOS
 #pragma unused(server_certs)
@@ -2147,6 +2252,23 @@ darwinssl_connect_step3(struct connectdata *conn,
     CFRelease(server_certs);
   }
 #endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
+}
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+
+static CURLcode
+darwinssl_connect_step3(struct connectdata *conn,
+                        int sockindex)
+{
+  struct Curl_easy *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+
+  /* There is no step 3!
+   * Well, okay, if verbose mode is on, let's print the details of the
+   * server certificates. */
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  if(data->set.verbose)
+    show_verbose_server_cert(conn, sockindex);
+#endif
 
   connssl->connecting_state = ssl_connect_done;
   return CURLE_OK;
@@ -2424,8 +2546,8 @@ bool Curl_darwinssl_data_pending(const struct connectdata *conn,
     return false;
 }
 
-int Curl_darwinssl_random(unsigned char *entropy,
-                          size_t length)
+CURLcode Curl_darwinssl_random(unsigned char *entropy,
+                               size_t length)
 {
   /* arc4random_buf() isn't available on cats older than Lion, so let's
      do this manually for the benefit of the older cats. */
@@ -2439,7 +2561,7 @@ int Curl_darwinssl_random(unsigned char *entropy,
     random_number >>= 8;
   }
   i = random_number = 0;
-  return 0;
+  return CURLE_OK;
 }
 
 void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
