@@ -290,8 +290,11 @@ if(ENABLE_MANUAL)
     message(WARNING "Found no *nroff program")
   endif()
 endif()
+
+if(0) # This code not needed for building within CMake.
 # Required for building manual, docs, tests
 find_package(Perl REQUIRED)
+endif()
 
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
@@ -1125,7 +1128,9 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
+if(0) # This code not needed for building within CMake.
 add_subdirectory(docs)
+endif()
 add_subdirectory(lib)
 if(BUILD_CURL_EXE)
   add_subdirectory(src)
