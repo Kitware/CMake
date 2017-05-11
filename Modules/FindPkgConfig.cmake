@@ -190,10 +190,12 @@ function(_pkg_create_imp_target _prefix _no_cmake_path _no_cmake_environment_pat
     string(APPEND _find_opts " NO_CMAKE_ENVIRONMENT_PATH")
   endif()
 
+  unset(_search_paths)
   foreach (flag IN LISTS ${_prefix}_LDFLAGS)
     if (flag MATCHES "^-L(.*)")
       # only look into the given paths from now on
-      set(_find_opts HINTS ${CMAKE_MATCH_1} NO_DEFAULT_PATH)
+      list(APPEND _search_paths ${CMAKE_MATCH_1})
+      set(_find_opts HINTS ${_search_paths} NO_DEFAULT_PATH)
       continue()
     endif()
     if (flag MATCHES "^-l(.*)")
