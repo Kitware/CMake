@@ -88,7 +88,19 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   std::vector<std::string> enabledLanguages =
     this->GetState()->GetEnabledLanguages();
 
-  this->CompilerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  if (const char* sysrootCompile =
+        this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE")) {
+    this->CompilerSysroot = sysrootCompile;
+  } else {
+    this->CompilerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  }
+
+  if (const char* sysrootLink =
+        this->Makefile->GetDefinition("CMAKE_SYSROOT_LINK")) {
+    this->LinkerSysroot = sysrootLink;
+  } else {
+    this->LinkerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  }
 
   for (std::vector<std::string>::iterator i = enabledLanguages.begin();
        i != enabledLanguages.end(); ++i) {
@@ -142,7 +154,8 @@ cmRulePlaceholderExpander* cmLocalGenerator::CreateRulePlaceholderExpander()
   const
 {
   return new cmRulePlaceholderExpander(this->Compilers, this->VariableMappings,
-                                       this->CompilerSysroot);
+                                       this->CompilerSysroot,
+                                       this->LinkerSysroot);
 }
 
 cmLocalGenerator::~cmLocalGenerator()
@@ -843,7 +856,13 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     return;
   }
 
-  std::string rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  std::string rootPath;
+  if (const char* sysrootCompile =
+        this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE")) {
+    rootPath = sysrootCompile;
+  } else {
+    rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  }
 
   std::vector<std::string> implicitDirs;
   // Load implicit include directories for this language.

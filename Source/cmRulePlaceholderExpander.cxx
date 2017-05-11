@@ -12,10 +12,11 @@
 cmRulePlaceholderExpander::cmRulePlaceholderExpander(
   std::map<std::string, std::string> const& compilers,
   std::map<std::string, std::string> const& variableMappings,
-  std::string const& compilerSysroot)
+  std::string const& compilerSysroot, std::string const& linkerSysroot)
   : Compilers(compilers)
   , VariableMappings(variableMappings)
   , CompilerSysroot(compilerSysroot)
+  , LinkerSysroot(linkerSysroot)
 {
 }
 
@@ -249,10 +250,19 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       ret += compilerOptionExternalToolchain;
       ret += outputConverter->EscapeForShell(compilerExternalToolchain, true);
     }
-    if (!this->CompilerSysroot.empty() && !compilerOptionSysroot.empty()) {
+    std::string sysroot;
+    // Some platforms may use separate sysroots for compiling and linking.
+    // If we detect link flags, then we pass the link sysroot instead.
+    // FIXME: Use a more robust way to detect link line expansion.
+    if (replaceValues.LinkFlags) {
+      sysroot = this->LinkerSysroot;
+    } else {
+      sysroot = this->CompilerSysroot;
+    }
+    if (!sysroot.empty() && !compilerOptionSysroot.empty()) {
       ret += " ";
       ret += compilerOptionSysroot;
-      ret += outputConverter->EscapeForShell(this->CompilerSysroot, true);
+      ret += outputConverter->EscapeForShell(sysroot, true);
     }
     return ret;
   }

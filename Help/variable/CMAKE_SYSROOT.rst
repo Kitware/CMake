@@ -10,3 +10,6 @@ paths searched by the ``find_*`` commands.
 
 This variable may only be set in a toolchain file specified by
 the :variable:`CMAKE_TOOLCHAIN_FILE` variable.
+
+See also the :variable:`CMAKE_SYSROOT_COMPILE` and
+:variable:`CMAKE_SYSROOT_LINK` variables.
