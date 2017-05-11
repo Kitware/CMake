@@ -34,6 +34,29 @@ set(ENABLE_THREADED_RESOLVER OFF CACHE INTERNAL "No curl POSIX threaded DNS look
 set(ENABLE_UNIX_SOCKETS OFF CACHE INTERNAL "No curl Unix domain sockets support")
 set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
 set(USE_WIN32_LDAP OFF CACHE INTERNAL "No curl Windows LDAP")
+if(CMAKE_USE_OPENSSL)
+elseif(WIN32)
+  set(CMAKE_USE_WINSSL ON CACHE INTERNAL "enable Windows native SSL/TLS")
+  set(CURL_WINDOWS_SSPI ON CACHE INTERNAL "Use windows libraries to allow NTLM authentication without openssl")
+elseif(APPLE)
+  # Use OS X SSL/TLS native implementation if available on target version.
+  if(CMAKE_OSX_DEPLOYMENT_TARGET)
+    set(OSX_VERSION ${CMAKE_OSX_DEPLOYMENT_TARGET})
+  else()
+    execute_process(
+      COMMAND sw_vers -productVersion
+      OUTPUT_VARIABLE OSX_VERSION
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+  endif()
+  if(NOT OSX_VERSION VERSION_LESS 10.6 AND
+      CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+    set(CMAKE_USE_DARWINSSL ON CACHE INTERNAL "enable Apple OS native SSL/TLS")
+  else()
+    set(CMAKE_USE_DARWINSSL OFF CACHE INTERNAL "enable Apple OS native SSL/TLS")
+  endif()
+endif()
+set(CMAKE_USE_MBEDTLS OFF CACHE INTERNAL "Enable mbedTLS for SSL/TLS")
 
 # Windows Vista and above have inet_pton, but this will link on
 # older versions and then the executable will fail to launch at
@@ -389,7 +412,6 @@ set(openssl_default ON)
 if(WIN32 OR CMAKE_USE_DARWINSSL OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
   set(openssl_default OFF)
 endif()
-option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default})
 
 collect_true(enabled_ssl_options enabled_ssl_options_count
   CMAKE_USE_WINSSL
@@ -449,6 +471,15 @@ if(CMAKE_USE_OPENSSL)
   check_symbol_exists(RAND_status "${CURL_INCLUDES}" HAVE_RAND_STATUS)
   check_symbol_exists(RAND_screen "${CURL_INCLUDES}" HAVE_RAND_SCREEN)
   check_symbol_exists(RAND_egd    "${CURL_INCLUDES}" HAVE_RAND_EGD)
+
+  # Optionally build with a specific CA cert bundle.
+  if(CURL_CA_BUNDLE)
+    add_definitions(-DCURL_CA_BUNDLE="${CURL_CA_BUNDLE}")
+  endif()
+  # Optionally build with a specific CA cert dir.
+  if(CURL_CA_PATH)
+    add_definitions(-DCURL_CA_PATH="${CURL_CA_PATH}")
+  endif()
 endif()
 
 if(CMAKE_USE_MBEDTLS)
