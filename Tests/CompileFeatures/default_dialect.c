@@ -11,7 +11,8 @@
 #if !DEFAULT_C90
 #error Buildsystem error
 #endif
-#if defined(__STDC_VERSION__)
+#if defined(__STDC_VERSION__) &&                                              \
+  !(defined(__SUNPRO_C) && __STDC_VERSION__ == 199409L)
 #error Unexpected __STDC_VERSION__ definition
 #endif
 #endif
