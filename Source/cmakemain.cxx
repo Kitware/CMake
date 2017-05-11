@@ -289,7 +289,9 @@ int do_cmake(int ac, char const* const* av)
     int ret = cm.GetSystemInformation(args);
     return ret;
   }
-  cmake cm(cmake::RoleProject);
+  cmake::Role const role =
+    workingMode == cmake::NORMAL_MODE ? cmake::RoleProject : cmake::RoleScript;
+  cmake cm(role);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cmSystemTools::SetMessageCallback(cmakemainMessageCallback, (void*)&cm);
