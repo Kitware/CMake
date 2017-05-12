@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -872,7 +872,7 @@ static CURLcode check_telnet_options(struct connectdata *conn)
         continue;
       }
 
-          /* Window Size */
+      /* Window Size */
       if(strcasecompare(option_keyword, "WS")) {
         if(sscanf(option_arg, "%hu%*[xX]%hu",
                   &tn->subopt_wsx, &tn->subopt_wsy) == 2)
@@ -899,11 +899,9 @@ static CURLcode check_telnet_options(struct connectdata *conn)
       result = CURLE_UNKNOWN_TELNET_OPTION;
       break;
     }
-    else {
-      failf(data, "Syntax error in telnet option: %s", head->data);
-      result = CURLE_TELNET_OPTION_SYNTAX;
-      break;
-    }
+    failf(data, "Syntax error in telnet option: %s", head->data);
+    result = CURLE_TELNET_OPTION_SYNTAX;
+    break;
   }
 
   if(result) {
@@ -1016,7 +1014,7 @@ static void sendsuboption(struct connectdata *conn, int option)
     CURL_SB_ACCUM(tn, CURL_IAC);
     CURL_SB_ACCUM(tn, CURL_SB);
     CURL_SB_ACCUM(tn, CURL_TELOPT_NAWS);
-    /* We must deal either with litte or big endien processors */
+    /* We must deal either with litte or big endian processors */
     /* Window size must be sent according to the 'network order' */
     x=htons(tn->subopt_wsx);
     y=htons(tn->subopt_wsy);
@@ -1186,7 +1184,7 @@ CURLcode telrcv(struct connectdata *conn,
              * IAC SE was left off, or another option got inserted into the
              * suboption are all possibilities.  If we assume that the IAC was
              * not doubled, and really the IAC SE was left off, we could get
-             * into an infinate loop here.  So, instead, we terminate the
+             * into an infinite loop here.  So, instead, we terminate the
              * suboption, and process the partial suboption if we can.
              */
             CURL_SB_ACCUM(tn, CURL_IAC);
@@ -1326,7 +1324,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 #ifdef USE_WINSOCK
   /*
   ** This functionality only works with WinSock >= 2.0.  So,
-  ** make sure have it.
+  ** make sure we have it.
   */
   result = check_wsock2(data);
   if(result)
@@ -1416,28 +1414,29 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 
   /* Keep on listening and act on events */
   while(keepon) {
+    const DWORD buf_size = (DWORD)CURL_BUFSIZE(data->set.buffer_size);
     waitret = WaitForMultipleObjects(obj_count, objs, FALSE, wait_timeout);
     switch(waitret) {
     case WAIT_TIMEOUT:
     {
       for(;;) {
         if(data->set.is_fread_set) {
+          size_t n;
           /* read from user-supplied method */
-          result = (int)data->state.fread_func(buf, 1, BUFSIZE - 1,
-                                               data->state.in);
-          if(result == CURL_READFUNC_ABORT) {
+          n = data->state.fread_func(buf, 1, BUFSIZE - 1, data->state.in);
+          if(n == CURL_READFUNC_ABORT) {
             keepon = FALSE;
             result = CURLE_READ_ERROR;
             break;
           }
 
-          if(result == CURL_READFUNC_PAUSE)
+          if(n == CURL_READFUNC_PAUSE)
             break;
 
-          if(result == 0)                        /* no bytes */
+          if(n == 0)                        /* no bytes */
             break;
 
-          readfile_read = result; /* fall thru with number of bytes read */
+          readfile_read = (DWORD)n; /* fall thru with number of bytes read */
         }
         else {
           /* read from stdin */
@@ -1451,7 +1450,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
           if(!readfile_read)
             break;
 
-          if(!ReadFile(stdin_handle, buf, sizeof(data->state.buffer),
+          if(!ReadFile(stdin_handle, buf, buf_size,
                        &readfile_read, NULL)) {
             keepon = FALSE;
             result = CURLE_READ_ERROR;
@@ -1470,7 +1469,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 
     case WAIT_OBJECT_0 + 1:
     {
-      if(!ReadFile(stdin_handle, buf, sizeof(data->state.buffer),
+      if(!ReadFile(stdin_handle, buf, buf_size,
                    &readfile_read, NULL)) {
         keepon = FALSE;
         result = CURLE_READ_ERROR;
@@ -1593,7 +1592,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
         if(result == CURLE_AGAIN)
           break;
         /* returned not-zero, this an error */
-        else if(result) {
+        if(result) {
           keepon = FALSE;
           break;
         }

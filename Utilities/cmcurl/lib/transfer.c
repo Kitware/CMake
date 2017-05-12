@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -117,7 +117,8 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     *nreadp = 0;
     return CURLE_ABORTED_BY_CALLBACK;
   }
-  else if(nread == CURL_READFUNC_PAUSE) {
+  if(nread == CURL_READFUNC_PAUSE) {
+    struct SingleRequest *k = &data->req;
 
     if(conn->handler->flags & PROTOPT_NONETWORK) {
       /* protocols that work without network cannot be paused. This is
@@ -126,16 +127,15 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
       failf(data, "Read callback asked for PAUSE when not supported!");
       return CURLE_READ_ERROR;
     }
-    else {
-      struct SingleRequest *k = &data->req;
-      /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
-      k->keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
-      if(data->req.upload_chunky) {
+
+    /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
+    k->keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
+    if(data->req.upload_chunky) {
         /* Back out the preallocation done above */
-        data->req.upload_fromhere -= (8 + 2);
-      }
-      *nreadp = 0;
+      data->req.upload_fromhere -= (8 + 2);
     }
+    *nreadp = 0;
+
     return CURLE_OK; /* nothing was read */
   }
   else if((size_t)nread > buffersize) {
@@ -642,7 +642,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
           failf(data, "%s in chunked-encoding", Curl_chunked_strerror(res));
           return CURLE_RECV_ERROR;
         }
-        else if(CHUNKE_STOP == res) {
+        if(CHUNKE_STOP == res) {
           size_t dataleft;
           /* we're done reading chunks! */
           k->keepon &= ~KEEP_RECV; /* read no more */
@@ -918,7 +918,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
         /* this is a paused transfer */
         break;
       }
-      else if(nread<=0) {
+      if(nread<=0) {
         result = done_sending(conn, k);
         if(result)
           return result;
@@ -1192,7 +1192,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             k->size - k->bytecount);
       return CURLE_PARTIAL_FILE;
     }
-    else if(!(data->set.opt_no_body) &&
+    if(!(data->set.opt_no_body) &&
             k->chunk &&
             (conn->chunk.state != CHUNK_STOP)) {
       /*
@@ -1356,13 +1356,12 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
     if(data->set.wildcardmatch) {
       struct WildcardData *wc = &data->wildcard;
-      if(!wc->filelist) {
+      if(wc->state < CURLWC_INIT) {
         result = Curl_wildcard_init(wc); /* init wildcard structures */
         if(result)
           return CURLE_OUT_OF_MEMORY;
       }
     }
-
   }
 
   return result;
@@ -1795,7 +1794,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
     break;
 
   case 303: /* See Other */
-    /* Disable both types of POSTs, unless the user explicitely
+    /* Disable both types of POSTs, unless the user explicitly
        asks for POST after POST */
     if(data->set.httpreq != HTTPREQ_GET
       && !(data->set.keep_post & CURL_REDIR_POST_303)) {
@@ -1843,12 +1842,17 @@ CURLcode Curl_retry_request(struct connectdata *conn,
     return CURLE_OK;
 
   if((data->req.bytecount + data->req.headerbytecount == 0) &&
-     conn->bits.reuse &&
-     (data->set.rtspreq != RTSPREQ_RECEIVE)) {
-    /* We didn't get a single byte when we attempted to re-use a
-       connection. This might happen if the connection was left alive when we
-       were done using it before, but that was closed when we wanted to use it
-       again. Bad luck. Retry the same request on a fresh connect! */
+      conn->bits.reuse &&
+      (!data->set.opt_no_body
+        || (conn->handler->protocol & PROTO_FAMILY_HTTP)) &&
+      (data->set.rtspreq != RTSPREQ_RECEIVE)) {
+    /* We got no data, we attempted to re-use a connection. For HTTP this
+       can be a retry so we try again regardless if we expected a body.
+       For other protocols we only try again only if we expected a body.
+
+       This might happen if the connection was left alive when we were
+       done using it before, but that was closed when we wanted to read from
+       it again. Bad luck. Retry the same request on a fresh connect! */
     infof(conn->data, "Connection died, retrying a fresh connect\n");
     *url = strdup(conn->data->change.url);
     if(!*url)
