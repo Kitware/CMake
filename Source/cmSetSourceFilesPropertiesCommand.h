@@ -28,14 +28,6 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
 
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE
-  {
-    return "set_source_files_properties";
-  }
-
   static bool RunCommand(cmMakefile* mf,
                          std::vector<std::string>::const_iterator filebeg,
                          std::vector<std::string>::const_iterator fileend,

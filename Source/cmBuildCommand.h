@@ -42,11 +42,6 @@ public:
    */
   virtual bool TwoArgsSignature(std::vector<std::string> const& args);
 
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "build_command"; }
-
 private:
   bool IgnoreErrors() const;
 };

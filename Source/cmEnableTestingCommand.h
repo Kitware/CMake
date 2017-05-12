@@ -39,11 +39,6 @@ public:
    */
   bool InitialPass(std::vector<std::string> const&,
                    cmExecutionStatus&) CM_OVERRIDE;
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "enable_testing"; }
 };
 
 #endif

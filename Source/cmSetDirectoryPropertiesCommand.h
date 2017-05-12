@@ -29,14 +29,6 @@ public:
                    cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE
-  {
-    return "set_directory_properties";
-  }
-
-  /**
    * Static entry point for use by other commands
    */
   static bool RunCommand(cmMakefile* mf,

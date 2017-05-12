@@ -64,11 +64,6 @@ public:
     return false;
   }
 
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "if"; }
-
   // Filter the given variable definition based on policy CMP0054.
   static const char* GetDefinitionIfUnquoted(
     const cmMakefile* mf, cmExpandedCommandArgument const& argument);

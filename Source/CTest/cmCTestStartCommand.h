@@ -54,11 +54,6 @@ public:
    */
   bool ShouldBeQuiet() { return this->Quiet; }
 
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "ctest_start"; }
-
 private:
   bool InitialCheckout(std::ostream& ofs, std::string const& sourceDir);
   bool CreateNewTag;

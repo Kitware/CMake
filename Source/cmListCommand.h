@@ -31,11 +31,6 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
 
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "list"; }
-
 protected:
   bool HandleLengthCommand(std::vector<std::string> const& args);
   bool HandleGetCommand(std::vector<std::string> const& args);
