@@ -240,10 +240,6 @@ CMAKE_UNUSED_SOURCES="\
 "
 
 CMAKE_CXX_SOURCES="\
-  LexerParser/cmCommandArgumentLexer \
-  LexerParser/cmCommandArgumentParser \
-  LexerParser/cmExprLexer \
-  LexerParser/cmExprParser \
   cmAddCustomCommandCommand \
   cmAddCustomTargetCommand \
   cmAddDefinitionsCommand \
@@ -416,9 +412,16 @@ if ${cmake_system_mingw}; then
     cmGlobalMinGWMakefileGenerator"
 fi
 
-CMAKE_C_SOURCES="\
-  LexerParser/cmListFileLexer \
-  "
+LexerParser_CXX_SOURCES="\
+  cmCommandArgumentLexer \
+  cmCommandArgumentParser \
+  cmExprLexer \
+  cmExprParser \
+"
+
+LexerParser_C_SOURCES="\
+  cmListFileLexer \
+"
 
 if ${cmake_system_mingw}; then
   KWSYS_C_SOURCES="\
@@ -808,11 +811,6 @@ cd "${cmake_bootstrap_dir}"
 [ -d "cmsys" ] || mkdir "cmsys"
 if [ ! -d "cmsys" ]; then
   cmake_error 4 "Cannot create directory ${cmake_bootstrap_dir}/cmsys"
-fi
-
-[ -d "LexerParser" ] || mkdir "LexerParser"
-if [ ! -d "LexerParser" ]; then
-  cmake_error 5 "Cannot create directory ${cmake_bootstrap_dir}/LexerParser"
 fi
 
 # Delete all the bootstrap files
@@ -1347,6 +1345,8 @@ cmake_compiler_settings_comment="/*
  *
  * Sources:
  * ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES}
+ * LexerParser Sources:
+ * ${LexerParser_CXX_SOURCES} ${LexerParser_C_SOURCES}
  * kwSys Sources:
  * ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}
  */
@@ -1408,7 +1408,7 @@ cmake_generate_file "${cmake_bootstrap_dir}/cmThirdParty.h" ""
 # Generate Makefile
 dep="cmConfigure.h cmsys/*.hxx cmsys/*.h `cmake_escape \"${cmake_source_dir}\"`/Source/*.h"
 objs=""
-for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}; do
+for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${LexerParser_CXX_SOURCES} ${LexerParser_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}; do
   objs="${objs} ${a}.o"
 done
 
@@ -1456,6 +1456,17 @@ for a in ${CMAKE_CXX_SOURCES}; do
 done
 for a in ${CMAKE_C_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/${a}.c"`
+  echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_c_compiler} ${cmake_c_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
+done
+for a in ${LexerParser_CXX_SOURCES}; do
+  src=`cmake_escape "${cmake_source_dir}/Source/LexerParser/${a}.cxx"`
+  src_flags=`eval echo \\${cmake_cxx_flags_\${a}}`
+  echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} ${src_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
+done
+for a in ${LexerParser_C_SOURCES}; do
+  src=`cmake_escape "${cmake_source_dir}/Source/LexerParser/${a}.c"`
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "	${cmake_c_compiler} ${cmake_c_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
 done
