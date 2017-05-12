@@ -1537,6 +1537,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     langStdMap["C"].push_back("99");
     langStdMap["C"].push_back("90");
 
+    langStdMap["CUDA"].push_back("14");
     langStdMap["CUDA"].push_back("11");
     langStdMap["CUDA"].push_back("98");
   }
