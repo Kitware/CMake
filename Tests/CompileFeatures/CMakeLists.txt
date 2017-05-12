@@ -239,6 +239,16 @@ if (CMAKE_C_COMPILE_FEATURES)
         EXPECT_C_STATIC_ASSERT=0
         )
     endif()
+  elseif (CMAKE_C_COMPILER_ID STREQUAL "SunPro")
+    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.13)
+      list(APPEND expected_defs
+        EXPECT_C_STATIC_ASSERT=1
+        )
+    else()
+      list(APPEND expected_defs
+        EXPECT_C_STATIC_ASSERT=0
+        )
+    endif()
   endif()
 
   list(APPEND expected_defs
