@@ -33,7 +33,7 @@ function(getPackageContentList FILE RESULT_VAR)
 endfunction()
 
 function(toExpectedContentList FILE_NO CONTENT_VAR)
-  findExpectedFile("${FILE_NO}" "file_")
+  findExpectedFile("${FILE_NO}" "file_" "glob_expr_")
 
   # component and monolithic packages differ for some reason by either having
   # package filename prefix in path or not
