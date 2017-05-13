@@ -517,32 +517,39 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile)
   // Compose current settings strings
   {
     cmCryptoHash crypt(cmCryptoHash::AlgoSHA256);
+    const std::string sep(" ~~~ ");
     if (this->MocEnabled()) {
       std::string str;
+      str += this->MocExecutable;
+      str += sep;
       str += JoinOptionsList(this->MocDefinitions);
-      str += " ~~~ ";
+      str += sep;
       str += JoinOptionsList(this->MocIncludePaths);
-      str += " ~~~ ";
+      str += sep;
       str += JoinOptionsList(this->MocOptions);
-      str += " ~~~ ";
+      str += sep;
       str += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
-      str += " ~~~ ";
+      str += sep;
       str += JoinOptionsList(this->MocPredefsCmd);
-      str += " ~~~ ";
+      str += sep;
       this->SettingsStringMoc = crypt.HashString(str);
     }
     if (this->UicEnabled()) {
       std::string str;
+      str += this->UicExecutable;
+      str += sep;
       str += JoinOptionsList(this->UicTargetOptions);
-      str += " ~~~ ";
+      str += sep;
       str += JoinOptionsMap(this->UicOptions);
-      str += " ~~~ ";
+      str += sep;
       this->SettingsStringUic = crypt.HashString(str);
     }
     if (this->RccEnabled()) {
       std::string str;
+      str += this->RccExecutable;
+      str += sep;
       str += JoinOptionsMap(this->RccOptions);
-      str += " ~~~ ";
+      str += sep;
       this->SettingsStringRcc = crypt.HashString(str);
     }
   }
