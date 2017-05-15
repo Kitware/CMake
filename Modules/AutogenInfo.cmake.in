@@ -1,6 +1,3 @@
-# Target names
-set(AM_TARGET_NAME @_autogen_target_name@)
-set(AM_ORIGIN_TARGET_NAME @_origin_target_name@)
 # Directories and files
 set(AM_CMAKE_BINARY_DIR "@CMAKE_BINARY_DIR@/")
 set(AM_CMAKE_SOURCE_DIR "@CMAKE_SOURCE_DIR@/")

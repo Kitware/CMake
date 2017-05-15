@@ -64,6 +64,6 @@ target_link_libraries(MyWidget KI18n ${QT_GUI_TARGET})
 add_executable(QtAutoUicInterface main.cpp)
 target_compile_definitions(QtAutoUicInterface
   PRIVATE
-    UI_LIBWIDGET_H="${CMAKE_CURRENT_BINARY_DIR}/LibWidget_autogen/include/ui_libwidget.h"
-    UI_MYWIDGET_H="${CMAKE_CURRENT_BINARY_DIR}/MyWidget_autogen/include/ui_mywidget.h"
+    UI_LIBWIDGET_H="${CMAKE_CURRENT_BINARY_DIR}/LibWidget_autogen/include_${CMAKE_BUILD_TYPE}/ui_libwidget.h"
+    UI_MYWIDGET_H="${CMAKE_CURRENT_BINARY_DIR}/MyWidget_autogen/include_${CMAKE_BUILD_TYPE}/ui_mywidget.h"
 )

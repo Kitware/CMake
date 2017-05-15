@@ -78,8 +78,8 @@ static void InfoGet(cmMakefile* makefile, const char* key,
   cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition(key), list);
 }
 
-static void InfoGet(cmMakefile* makefile, const char* key,
-                    const std::string& config, std::vector<std::string>& list)
+static void InfoGetConfig(cmMakefile* makefile, const char* key,
+                          const std::string& config, std::string& value)
 {
   const char* valueConf = CM_NULLPTR;
   {
@@ -93,7 +93,16 @@ static void InfoGet(cmMakefile* makefile, const char* key,
   if (valueConf == CM_NULLPTR) {
     valueConf = makefile->GetSafeDefinition(key);
   }
-  cmSystemTools::ExpandListArgument(valueConf, list);
+  value = valueConf;
+}
+
+static void InfoGetConfig(cmMakefile* makefile, const char* key,
+                          const std::string& config,
+                          std::vector<std::string>& list)
+{
+  std::string value;
+  InfoGetConfig(makefile, key, config, value);
+  cmSystemTools::ExpandListArgument(value, list);
 }
 
 inline static bool SettingsMatch(cmMakefile* makefile, const char* key,
@@ -270,6 +279,7 @@ cmQtAutoGenerators::cmQtAutoGenerators()
     }
   }
 
+  // Moc macro filters
   this->MocMacroFilters[0].first = "Q_OBJECT";
   this->MocMacroFilters[0].second.compile("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
   this->MocMacroFilters[1].first = "Q_GADGET";
@@ -358,12 +368,13 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   {
     this->SettingsFile = cmSystemTools::CollapseFullPath(targetDirectory);
     cmSystemTools::ConvertToUnixSlashes(this->SettingsFile);
-    this->SettingsFile += "/AutogenOldSettings.cmake";
+    this->SettingsFile += "/AutogenOldSettings";
+    this->SettingsFile += this->ConfigSuffix;
+    this->SettingsFile += ".cmake";
   }
 
-  // - Target names
-  InfoGet(makefile, "AM_TARGET_NAME", this->AutogenTargetName);
-  InfoGet(makefile, "AM_ORIGIN_TARGET_NAME", this->OriginTargetName);
+  // -- Meta
+  InfoGetConfig(makefile, "AM_CONFIG_SUFFIX", config, this->ConfigSuffix);
 
   // - Files and directories
   InfoGet(makefile, "AM_CMAKE_SOURCE_DIR", this->ProjectSourceDir);
@@ -373,6 +384,10 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   InfoGet(makefile, "AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE",
           this->IncludeProjectDirsBefore);
   InfoGet(makefile, "AM_BUILD_DIR", this->AutogenBuildDir);
+  if (this->AutogenBuildDir.empty()) {
+    this->LogError("AutoGen: Error: Missing autogen build directory ");
+    return false;
+  }
   InfoGet(makefile, "AM_SOURCES", this->Sources);
   InfoGet(makefile, "AM_HEADERS", this->Headers);
 
@@ -396,7 +411,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   // - Moc
   if (this->MocEnabled()) {
     InfoGet(makefile, "AM_MOC_SKIP", this->MocSkipList);
-    InfoGet(makefile, "AM_MOC_DEFINITIONS", config, this->MocDefinitions);
+    InfoGetConfig(makefile, "AM_MOC_DEFINITIONS", config,
+                  this->MocDefinitions);
 #ifdef _WIN32
     {
       const std::string win32("WIN32");
@@ -405,7 +421,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
       }
     }
 #endif
-    InfoGet(makefile, "AM_MOC_INCLUDES", config, this->MocIncludePaths);
+    InfoGetConfig(makefile, "AM_MOC_INCLUDES", config, this->MocIncludePaths);
     InfoGet(makefile, "AM_MOC_OPTIONS", this->MocOptions);
     InfoGet(makefile, "AM_MOC_RELAXED_MODE", this->MocRelaxedMode);
     {
@@ -440,7 +456,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   if (this->UicEnabled()) {
     InfoGet(makefile, "AM_UIC_SKIP", this->UicSkipList);
     InfoGet(makefile, "AM_UIC_SEARCH_PATHS", this->UicSearchPaths);
-    InfoGet(makefile, "AM_UIC_TARGET_OPTIONS", config, this->UicTargetOptions);
+    InfoGetConfig(makefile, "AM_UIC_TARGET_OPTIONS", config,
+                  this->UicTargetOptions);
     {
       std::vector<std::string> uicFilesVec;
       std::vector<std::string> uicOptionsVec;
@@ -616,9 +633,17 @@ bool cmQtAutoGenerators::SettingsFileWrite()
 
 void cmQtAutoGenerators::Init(cmMakefile* makefile)
 {
-  this->MocCppFilenameRel = "moc_compilation.cpp";
-  this->MocCppFilenameAbs = cmSystemTools::CollapseCombinedPath(
-    this->AutogenBuildDir, this->MocCppFilenameRel);
+  // Mocs compilation file
+  this->MocCompFileRel = "mocs_compilation";
+  this->MocCompFileRel += this->ConfigSuffix;
+  this->MocCompFileRel += ".cpp";
+  this->MocCompFileAbs = cmSystemTools::CollapseCombinedPath(
+    this->AutogenBuildDir, this->MocCompFileRel);
+
+  // Mocs include directory
+  this->AutogenIncludeDir = "include";
+  this->AutogenIncludeDir += this->ConfigSuffix;
+  this->AutogenIncludeDir += "/";
 
   // Moc predefs file
   if (!this->MocPredefsCmd.empty()) {
@@ -697,10 +722,10 @@ bool cmQtAutoGenerators::RunAutogen()
   // the program goes through all .cpp files to see which moc files are
   // included. It is not really interesting how the moc file is named, but
   // what file the moc is created from. Once a moc is included the same moc
-  // may not be included in the moc_compilation.cpp file anymore. OTOH if
-  // there's a header containing Q_OBJECT where no corresponding moc file
-  // is included anywhere a moc_<filename>.cpp file is created and included
-  // in the moc_compilation.cpp file.
+  // may not be included in the mocs_compilation_$<CONFIG>.cpp file anymore.
+  // OTOH if there's a header containing Q_OBJECT where no corresponding
+  // moc file is included anywhere a moc_<filename>.cpp file is created and
+  // included in the mocs_compilation_$<CONFIG>.cpp file.
 
   // key = moc source filepath, value = moc output filepath
   std::map<std::string, std::string> mocsIncluded;
@@ -1105,7 +1130,7 @@ void cmQtAutoGenerators::MocParseHeaderContent(
   if (this->MocRequired(contentText)) {
     // Register moc job
     mocsNotIncluded[absFilename] =
-      this->ChecksumedPath(absFilename, "moc_", ".cpp");
+      this->ChecksumedPath(absFilename, "moc_", this->ConfigSuffix + ".cpp");
     this->MocFindDepends(absFilename, contentText, mocDepends);
   }
 }
@@ -1255,37 +1280,31 @@ bool cmQtAutoGenerators::MocGenerateAll(
   }
 
   // Generate moc files that are included by source files.
-  {
-    const std::string subDir = "include/";
-    for (std::map<std::string, std::string>::const_iterator it =
-           mocsIncluded.begin();
-         it != mocsIncluded.end(); ++it) {
-      if (!this->MocGenerateFile(it->first, it->second, subDir, mocDepends)) {
-        if (this->MocRunFailed) {
-          return false;
-        }
+  for (std::map<std::string, std::string>::const_iterator it =
+         mocsIncluded.begin();
+       it != mocsIncluded.end(); ++it) {
+    if (!this->MocGenerateFile(it->first, it->second, mocDepends, true)) {
+      if (this->MocRunFailed) {
+        return false;
       }
     }
   }
 
   // Generate moc files that are _not_ included by source files.
   bool mocCompFileGenerated = false;
-  {
-    const std::string subDir;
-    for (std::map<std::string, std::string>::const_iterator it =
-           mocsNotIncluded.begin();
-         it != mocsNotIncluded.end(); ++it) {
-      if (this->MocGenerateFile(it->first, it->second, subDir, mocDepends)) {
-        mocCompFileGenerated = true;
-      } else {
-        if (this->MocRunFailed) {
-          return false;
-        }
+  for (std::map<std::string, std::string>::const_iterator it =
+         mocsNotIncluded.begin();
+       it != mocsNotIncluded.end(); ++it) {
+    if (this->MocGenerateFile(it->first, it->second, mocDepends, false)) {
+      mocCompFileGenerated = true;
+    } else {
+      if (this->MocRunFailed) {
+        return false;
       }
     }
   }
 
-  // Compose moc_compilation.cpp content
+  // Compose mocs compilation file content
   std::string automocSource;
   {
     std::ostringstream ost;
@@ -1304,18 +1323,18 @@ bool cmQtAutoGenerators::MocGenerateAll(
     automocSource = ost.str();
   }
 
-  if (this->FileDiffers(this->MocCppFilenameAbs, automocSource)) {
-    // Actually write moc_compilation.cpp
-    this->LogBold("Generating MOC compilation " + this->MocCppFilenameRel);
-    if (!this->FileWrite("AutoMoc", this->MocCppFilenameAbs, automocSource)) {
+  if (this->FileDiffers(this->MocCompFileAbs, automocSource)) {
+    // Actually write mocs compilation file
+    this->LogBold("Generating MOC compilation " + this->MocCompFileRel);
+    if (!this->FileWrite("AutoMoc", this->MocCompFileAbs, automocSource)) {
       return false;
     }
   } else if (mocCompFileGenerated) {
-    // Only touch moc_compilation.cpp
+    // Only touch mocs compilation file
     if (this->Verbose) {
-      this->LogInfo("Touching MOC compilation " + this->MocCppFilenameRel);
+      this->LogInfo("Touching MOC compilation " + this->MocCompFileRel);
     }
-    cmSystemTools::Touch(this->MocCppFilenameAbs, false);
+    cmSystemTools::Touch(this->MocCompFileAbs, false);
   }
 
   return true;
@@ -1326,14 +1345,14 @@ bool cmQtAutoGenerators::MocGenerateAll(
  */
 bool cmQtAutoGenerators::MocGenerateFile(
   const std::string& sourceFile, const std::string& mocFileName,
-  const std::string& subDir,
-  const std::map<std::string, std::set<std::string> >& mocDepends)
+  const std::map<std::string, std::set<std::string> >& mocDepends,
+  bool included)
 {
   bool mocGenerated = false;
   bool generateMoc = this->MocSettingsChanged || this->MocPredefsChanged;
 
   const std::string mocFileRel =
-    cmSystemTools::CollapseCombinedPath(subDir, mocFileName);
+    included ? (this->AutogenIncludeDir + mocFileName) : mocFileName;
   const std::string mocFileAbs =
     cmSystemTools::CollapseCombinedPath(this->AutogenBuildDir, mocFileRel);
 
@@ -1523,8 +1542,7 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
   bool uicGenerated = false;
   bool generateUic = this->UicSettingsChanged;
 
-  const std::string uicFileRel =
-    cmSystemTools::CollapseCombinedPath("include", uiOutputFile);
+  const std::string uicFileRel = this->AutogenIncludeDir + uiOutputFile;
   const std::string uicFileAbs =
     cmSystemTools::CollapseCombinedPath(this->AutogenBuildDir, uicFileRel);
 
@@ -1590,11 +1608,17 @@ bool cmQtAutoGenerators::RccGenerateAll()
 
   // generate single map with input / output names
   std::map<std::string, std::string> qrcGenMap;
-  for (std::vector<std::string>::const_iterator si = this->RccSources.begin();
-       si != this->RccSources.end(); ++si) {
-    const std::string ext = cmsys::SystemTools::GetFilenameLastExtension(*si);
-    if (ext == ".qrc") {
-      qrcGenMap[*si] = this->ChecksumedPath(*si, "qrc_", ".cpp");
+  {
+    const std::string qrcPrefix = "qrc_";
+    const std::string qrcSuffix = this->ConfigSuffix + ".cpp";
+    for (std::vector<std::string>::const_iterator si =
+           this->RccSources.begin();
+         si != this->RccSources.end(); ++si) {
+      const std::string ext =
+        cmsys::SystemTools::GetFilenameLastExtension(*si);
+      if (ext == ".qrc") {
+        qrcGenMap[*si] = this->ChecksumedPath(*si, qrcPrefix, qrcSuffix);
+      }
     }
   }
 
@@ -1827,9 +1851,9 @@ bool cmQtAutoGenerators::NameCollisionTest(
  * @brief Generates a file path based on the checksum of the source file path
  * @return The path
  */
-std::string cmQtAutoGenerators::ChecksumedPath(const std::string& sourceFile,
-                                               const char* basePrefix,
-                                               const char* baseSuffix) const
+std::string cmQtAutoGenerators::ChecksumedPath(
+  const std::string& sourceFile, const std::string& basePrefix,
+  const std::string& baseSuffix) const
 {
   std::string res = FPathChecksum.getPart(sourceFile);
   res += "/";

@@ -68,14 +68,24 @@ be included by the user in the C++ implementation file with a preprocessor
 ``#include``.
 
 Included ``moc_*.cpp`` and ``*.moc`` files will be generated in the
-``<CMAKE_CURRENT_BINARY_DIR>/<TARGETNAME>_autogen/include`` directory which is
+``<AUTOGEN_BUILD_DIR>/include`` directory which is
 automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
 (This differs from CMake 3.7 and below; see their documentation for details.)
 
+* For multi configuration generators, except Xcode, the include directory is
+  ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
+
+* See :prop_tgt:`AUTOGEN_BUILD_DIR`.
+
 Not included ``moc_<basename>.cpp`` files will be generated in custom
 folders to avoid name collisions and included in a separate
-``<CMAKE_CURRENT_BINARY_DIR>/<TARGETNAME>_autogen/moc_compilation.cpp``
-file which is compiled into the target.
+``<AUTOGEN_BUILD_DIR>/mocs_compilation.cpp`` file which is compiled
+into the target.
+
+* For multi configuration generators, except Xcode, the file is
+  ``<AUTOGEN_BUILD_DIR>/mocs_compilation_<CONFIG>.cpp``.
+
+* See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
 The ``moc`` command line will consume the :prop_tgt:`COMPILE_DEFINITIONS` and
 :prop_tgt:`INCLUDE_DIRECTORIES` target properties from the target it is being
@@ -109,9 +119,14 @@ searched for first in the vicinity of including file and afterwards in the
 optional :prop_tgt:`AUTOUIC_SEARCH_PATHS` of the target.
 
 The generated generated ``ui_*.h`` files are placed in the
-``<CMAKE_CURRENT_BINARY_DIR>/<TARGETNAME>_autogen/include`` directory which is
+``<AUTOGEN_BUILD_DIR>/include`` directory which is
 automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
 (This differs from CMake 3.7 and below; see their documentation for details.)
+
+* For multi configuration generators, except Xcode, the include directory is
+  ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
+
+* See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
 The :prop_tgt:`AUTOUIC` target property may be pre-set for all following
 targets by setting the :variable:`CMAKE_AUTOUIC` variable.  The
