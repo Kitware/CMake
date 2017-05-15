@@ -795,6 +795,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           cmsys::Glob glA;
           glA.RecurseOn();
           glA.SetRecurseListDirs(true);
+          glA.SetRecurseThroughSymlinks(false);
           glA.FindFiles(findExpr);
           std::vector<std::string> filesAfter = glA.GetFiles();
           std::sort(filesAfter.begin(), filesAfter.end());
