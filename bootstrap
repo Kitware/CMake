@@ -1419,6 +1419,7 @@ fi
 cmake_c_flags_String="-DKWSYS_STRING_C"
 if ${cmake_system_mingw}; then
   cmake_c_flags_EncodingC="-DKWSYS_ENCODING_DEFAULT_CODEPAGE=CP_ACP"
+  cmake_cxx_flags_EncodingCXX="${cmake_c_flags_EncodingC}"
   cmake_cxx_flags_cmProcessOutput="${cmake_c_flags_EncodingC}"
 fi
 cmake_cxx_flags_SystemTools="

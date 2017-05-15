@@ -42,6 +42,10 @@
 #include "cmFileLockResult.h"
 #endif
 
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 class cmSystemToolsFileTime;
 
 // Table of permissions flags.
