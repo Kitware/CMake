@@ -147,7 +147,7 @@ endmacro()
 macro(_FPHSA_HANDLE_FAILURE_CONFIG_MODE)
   # <name>_CONFIG is set, but FOUND is false, this means that some other of the REQUIRED_VARS was not found:
   if(${_NAME}_CONFIG)
-    _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: missing: ${MISSING_VARS} (found ${${_NAME}_CONFIG} ${VERSION_MSG})")
+    _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: missing:${MISSING_VARS} (found ${${_NAME}_CONFIG} ${VERSION_MSG})")
   else()
     # If _CONSIDERED_CONFIGS is set, the config-file has been found, but no suitable version.
     # List them all in the error message:
@@ -374,7 +374,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       if(NOT VERSION_OK)
         _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: ${VERSION_MSG} (found ${${_FIRST_REQUIRED_VAR}})")
       else()
-        _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE} (missing: ${MISSING_VARS}) ${VERSION_MSG}")
+        _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE} (missing:${MISSING_VARS}) ${VERSION_MSG}")
       endif()
     endif()
 
