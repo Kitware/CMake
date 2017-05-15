@@ -1,6 +1,9 @@
 # a macro for tests that have a simple format where the name matches the
 # directory and project
-macro(ADD_TEST_MACRO NAME COMMAND)
+macro(ADD_TEST_MACRO NAME)
+  if(${ARGC} GREATER 1)
+    set(_test_command --test-command ${ARGN})
+  endif()
   string(REPLACE "." "/" dir "${NAME}")
   string(REGEX REPLACE "[^.]*\\." "" proj "${NAME}")
   add_test(NAME "${NAME}" COMMAND "${CMAKE_CTEST_COMMAND}"
@@ -13,7 +16,8 @@ macro(ADD_TEST_MACRO NAME COMMAND)
     ${${NAME}_CTEST_OPTIONS}
     --build-options ${build_options}
     ${${NAME}_BUILD_OPTIONS}
-    --test-command ${COMMAND} ${ARGN})
+    ${_test_command})
+  unset(_test_command)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 endmacro()
 
