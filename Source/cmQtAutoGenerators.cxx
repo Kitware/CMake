@@ -396,6 +396,14 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   if (this->MocEnabled()) {
     InfoGet(makefile, "AM_MOC_SKIP", this->MocSkipList);
     InfoGet(makefile, "AM_MOC_DEFINITIONS", config, this->MocDefinitions);
+#ifdef _WIN32
+    {
+      const std::string win32("WIN32");
+      if (!ListContains(this->MocDefinitions, win32)) {
+        this->MocDefinitions.push_back(win32);
+      }
+    }
+#endif
     InfoGet(makefile, "AM_MOC_INCLUDES", config, this->MocIncludePaths);
     InfoGet(makefile, "AM_MOC_OPTIONS", this->MocOptions);
     InfoGet(makefile, "AM_MOC_RELAXED_MODE", this->MocRelaxedMode);
@@ -517,32 +525,39 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile)
   // Compose current settings strings
   {
     cmCryptoHash crypt(cmCryptoHash::AlgoSHA256);
+    const std::string sep(" ~~~ ");
     if (this->MocEnabled()) {
       std::string str;
+      str += this->MocExecutable;
+      str += sep;
       str += JoinOptionsList(this->MocDefinitions);
-      str += " ~~~ ";
+      str += sep;
       str += JoinOptionsList(this->MocIncludePaths);
-      str += " ~~~ ";
+      str += sep;
       str += JoinOptionsList(this->MocOptions);
-      str += " ~~~ ";
+      str += sep;
       str += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
-      str += " ~~~ ";
+      str += sep;
       str += JoinOptionsList(this->MocPredefsCmd);
-      str += " ~~~ ";
+      str += sep;
       this->SettingsStringMoc = crypt.HashString(str);
     }
     if (this->UicEnabled()) {
       std::string str;
+      str += this->UicExecutable;
+      str += sep;
       str += JoinOptionsList(this->UicTargetOptions);
-      str += " ~~~ ";
+      str += sep;
       str += JoinOptionsMap(this->UicOptions);
-      str += " ~~~ ";
+      str += sep;
       this->SettingsStringUic = crypt.HashString(str);
     }
     if (this->RccEnabled()) {
       std::string str;
+      str += this->RccExecutable;
+      str += sep;
       str += JoinOptionsMap(this->RccOptions);
-      str += " ~~~ ";
+      str += sep;
       this->SettingsStringRcc = crypt.HashString(str);
     }
   }
@@ -1214,9 +1229,6 @@ bool cmQtAutoGenerators::MocGenerateAll(
                this->MocDefinitions.begin();
              it != this->MocDefinitions.end(); ++it) {
           cmd.push_back("-D" + (*it));
-#ifdef _WIN32
-          cmd.push_back("-DWIN32");
-#endif
         }
         // Add options
         cmd.insert(cmd.end(), this->MocOptions.begin(),
@@ -1362,9 +1374,6 @@ bool cmQtAutoGenerators::MocGenerateFile(
            it != this->MocDefinitions.end(); ++it) {
         cmd.push_back("-D" + (*it));
       }
-#ifdef _WIN32
-      cmd.push_back("-DWIN32");
-#endif
       // Add options
       cmd.insert(cmd.end(), this->MocOptions.begin(), this->MocOptions.end());
       // Add predefs include
