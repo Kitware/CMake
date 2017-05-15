@@ -165,7 +165,7 @@ private:
   std::string ProjectBinaryDir;
   std::string CurrentSourceDir;
   std::string CurrentBinaryDir;
-  std::string AutogenBuildSubDir;
+  std::string AutogenBuildDir;
   // -- Qt environment
   std::string QtMajorVersion;
   std::string MocExecutable;

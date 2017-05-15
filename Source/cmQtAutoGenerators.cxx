@@ -372,6 +372,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   InfoGet(makefile, "AM_CMAKE_CURRENT_BINARY_DIR", this->CurrentBinaryDir);
   InfoGet(makefile, "AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE",
           this->IncludeProjectDirsBefore);
+  InfoGet(makefile, "AM_BUILD_DIR", this->AutogenBuildDir);
   InfoGet(makefile, "AM_SOURCES", this->Sources);
   InfoGet(makefile, "AM_HEADERS", this->Headers);
 
@@ -615,18 +616,15 @@ bool cmQtAutoGenerators::SettingsFileWrite()
 
 void cmQtAutoGenerators::Init(cmMakefile* makefile)
 {
-  this->AutogenBuildSubDir = this->AutogenTargetName;
-  this->AutogenBuildSubDir += "/";
-
-  this->MocCppFilenameRel = this->AutogenBuildSubDir;
-  this->MocCppFilenameRel += "moc_compilation.cpp";
-
-  this->MocCppFilenameAbs = this->CurrentBinaryDir + this->MocCppFilenameRel;
+  this->MocCppFilenameRel = "moc_compilation.cpp";
+  this->MocCppFilenameAbs = cmSystemTools::CollapseCombinedPath(
+    this->AutogenBuildDir, this->MocCppFilenameRel);
 
   // Moc predefs file
   if (!this->MocPredefsCmd.empty()) {
-    this->MocPredefsFileRel = this->AutogenBuildSubDir + "moc_predefs.h";
-    this->MocPredefsFileAbs = this->CurrentBinaryDir + this->MocPredefsFileRel;
+    this->MocPredefsFileRel = "moc_predefs.h";
+    this->MocPredefsFileAbs = cmSystemTools::CollapseCombinedPath(
+      this->AutogenBuildDir, this->MocPredefsFileRel);
   }
 
   // Init file path checksum generator
@@ -1335,8 +1333,9 @@ bool cmQtAutoGenerators::MocGenerateFile(
   bool generateMoc = this->MocSettingsChanged || this->MocPredefsChanged;
 
   const std::string mocFileRel =
-    this->AutogenBuildSubDir + subDir + mocFileName;
-  const std::string mocFileAbs = this->CurrentBinaryDir + mocFileRel;
+    cmSystemTools::CollapseCombinedPath(subDir, mocFileName);
+  const std::string mocFileAbs =
+    cmSystemTools::CollapseCombinedPath(this->AutogenBuildDir, mocFileRel);
 
   if (!generateMoc) {
     // Test if the source file is newer that the build file
@@ -1525,8 +1524,9 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
   bool generateUic = this->UicSettingsChanged;
 
   const std::string uicFileRel =
-    this->AutogenBuildSubDir + "include/" + uiOutputFile;
-  const std::string uicFileAbs = this->CurrentBinaryDir + uicFileRel;
+    cmSystemTools::CollapseCombinedPath("include", uiOutputFile);
+  const std::string uicFileAbs =
+    cmSystemTools::CollapseCombinedPath(this->AutogenBuildDir, uicFileRel);
 
   if (!generateUic) {
     // Test if the source file is newer that the build file
@@ -1594,8 +1594,7 @@ bool cmQtAutoGenerators::RccGenerateAll()
        si != this->RccSources.end(); ++si) {
     const std::string ext = cmsys::SystemTools::GetFilenameLastExtension(*si);
     if (ext == ".qrc") {
-      qrcGenMap[*si] =
-        this->AutogenBuildSubDir + this->ChecksumedPath(*si, "qrc_", ".cpp");
+      qrcGenMap[*si] = this->ChecksumedPath(*si, "qrc_", ".cpp");
     }
   }
 
@@ -1636,7 +1635,8 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
   bool rccGenerated = false;
   bool generateRcc = this->RccSettingsChanged;
 
-  const std::string rccBuildFile = this->CurrentBinaryDir + rccOutputFile;
+  const std::string rccBuildFile =
+    cmSystemTools::CollapseCombinedPath(this->AutogenBuildDir, rccOutputFile);
 
   if (!generateRcc) {
     // Test if the resources list file is newer than build file

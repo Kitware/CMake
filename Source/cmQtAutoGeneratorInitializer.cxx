@@ -67,7 +67,7 @@ static std::string GetAutogenTargetFilesDir(cmGeneratorTarget const* target)
   targetDir += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
   targetDir += "/";
   targetDir += GetAutogenTargetName(target);
-  targetDir += ".dir/";
+  targetDir += ".dir";
   return targetDir;
 }
 
@@ -77,7 +77,6 @@ static std::string GetAutogenTargetBuildDir(cmGeneratorTarget const* target)
   std::string targetDir = makefile->GetCurrentBinaryDirectory();
   targetDir += "/";
   targetDir += GetAutogenTargetName(target);
-  targetDir += "/";
   return targetDir;
 }
 
@@ -624,7 +623,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenSources(
   if (target->GetPropertyAsBool("AUTOMOC")) {
     cmMakefile* makefile = target->Target->GetMakefile();
     std::string mocCppFile = GetAutogenTargetBuildDir(target);
-    mocCppFile += "moc_compilation.cpp";
+    mocCppFile += "/moc_compilation.cpp";
     {
       cmSourceFile* gFile = makefile->GetOrCreateSource(mocCppFile, true);
       gFile->SetProperty("SKIP_AUTOGEN", "On");
@@ -706,14 +705,14 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   // Create autogen target includes directory and
   // add it to the origin target INCLUDE_DIRECTORIES
   if (mocEnabled || uicEnabled) {
-    const std::string incsDir = autogenBuildDir + "include";
+    const std::string incsDir = autogenBuildDir + "/include";
     cmSystemTools::MakeDirectory(incsDir);
     target->AddIncludeDirectory(incsDir, true);
   }
 
   // Register moc compilation file as generated
   if (mocEnabled) {
-    autogenProvides.push_back(autogenBuildDir + "moc_compilation.cpp");
+    autogenProvides.push_back(autogenBuildDir + "/moc_compilation.cpp");
   }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -785,6 +784,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
           // Compose rcc output file name
           {
             std::string rccOut = autogenBuildDir;
+            rccOut += "/";
             rccOut += fpathCheckSum.getPart(absFile);
             rccOut += "/qrc_";
             rccOut +=
@@ -919,6 +919,8 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
       }
     }
 
+    AddDefinitionEscaped(makefile, "_autogen_build_dir",
+                         GetAutogenTargetBuildDir(target));
     AddDefinitionEscaped(makefile, "_autogen_target_name", autogenTargetName);
     AddDefinitionEscaped(makefile, "_origin_target_name", target->GetName());
     AddDefinitionEscaped(makefile, "_qt_version_major", qtMajorVersion);
