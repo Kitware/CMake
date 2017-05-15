@@ -3280,7 +3280,8 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
   // Since the lowest available Xcode version for testing was 7.0,
   // I'm setting this as a limit then
   if (this->XcodeVersion >= 70) {
-    if (root->GetMakefile()->IsOn("CMAKE_XCODE_GENERATE_SCHEME")) {
+    if (root->GetMakefile()->GetCMakeInstance()->GetIsInTryCompile() ||
+        root->GetMakefile()->IsOn("CMAKE_XCODE_GENERATE_SCHEME")) {
       this->OutputXCodeSharedSchemes(xcodeDir);
       this->OutputXCodeWorkspaceSettings(xcodeDir);
     }
