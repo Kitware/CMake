@@ -48,7 +48,14 @@ macro(set_defines target true_defs false_defs)
   )
 endmacro()
 
+# Only run the compiler detection header test for compilers with
+# detailed features tables, not just meta-features
+
 if (CMAKE_C_COMPILE_FEATURES)
+  set(C_expected_features ${CMAKE_C_COMPILE_FEATURES})
+  list(FILTER C_expected_features EXCLUDE REGEX "^c_std_[0-9][0-9]")
+endif()
+if (C_expected_features)
   string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" COMPILER_VERSION_MAJOR "${CMAKE_C_COMPILER_VERSION}")
   string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" COMPILER_VERSION_MINOR "${CMAKE_C_COMPILER_VERSION}")
   string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" COMPILER_VERSION_PATCH "${CMAKE_C_COMPILER_VERSION}")
@@ -85,7 +92,11 @@ if (CMAKE_C_COMPILE_FEATURES)
   endif()
 endif()
 
-if (NOT CMAKE_CXX_COMPILE_FEATURES)
+if (CMAKE_CXX_COMPILE_FEATURES)
+  set(CXX_expected_features ${CMAKE_CXX_COMPILE_FEATURES})
+  list(FILTER CXX_expected_features EXCLUDE REGEX "^cxx_std_[0-9][0-9]")
+endif()
+if (NOT CXX_expected_features)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp"
     "int main(int,char**) { return 0; }\n"
   )

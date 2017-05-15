@@ -275,7 +275,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(SystemInformation SystemInformation)
   ADD_TEST_MACRO(MathTest MathTest)
   ADD_TEST_MACRO(CompileFeatures CompileFeatures)
-  ADD_TEST_MACRO(CMakeCommands.target_compile_features target_compile_features)
+  ADD_TEST_MACRO(CMakeCommands.target_compile_features)
 
   if(CMake_TEST_RESOURCES)
     ADD_TEST_MACRO(VSResource VSResource)
