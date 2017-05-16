@@ -143,6 +143,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     _DARWIN_UNLIMITED_SELECT=1
     )
   list(APPEND uv_sources
+    src/unix/bsd-ifaddrs.c
     src/unix/darwin.c
     src/unix/darwin-proctitle.c
     src/unix/fsevents.c
@@ -175,8 +176,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
     include/uv-bsd.h
     )
   list(APPEND uv_sources
+    src/unix/bsd-ifaddrs.c
     src/unix/freebsd.c
     src/unix/kqueue.c
+    src/unix/posix-hrtime.c
     )
 endif()
 
@@ -188,8 +191,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
     include/uv-bsd.h
     )
   list(APPEND uv_sources
+    src/unix/bsd-ifaddrs.c
     src/unix/netbsd.c
     src/unix/kqueue.c
+    src/unix/posix-hrtime.c
     )
 endif()
 
@@ -201,8 +206,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
     include/uv-bsd.h
     )
   list(APPEND uv_sources
+    src/unix/bsd-ifaddrs.c
     src/unix/openbsd.c
     src/unix/kqueue.c
+    src/unix/posix-hrtime.c
     )
 endif()
 
