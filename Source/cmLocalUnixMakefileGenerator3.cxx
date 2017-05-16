@@ -105,8 +105,6 @@ cmLocalUnixMakefileGenerator3::~cmLocalUnixMakefileGenerator3()
 
 void cmLocalUnixMakefileGenerator3::Generate()
 {
-  this->SetConfigName();
-
   // Record whether some options are enabled to avoid checking many
   // times later.
   if (!this->GetGlobalGenerator()->GetCMakeInstance()->GetIsInTryCompile()) {

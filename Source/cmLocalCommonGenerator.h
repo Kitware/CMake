@@ -33,7 +33,6 @@ public:
 protected:
   std::string WorkingDirectory;
 
-  void SetConfigName();
   std::string ConfigName;
 
   friend class cmCommonTargetGenerator;
