@@ -35,7 +35,6 @@
 typedef unsigned short mode_t;
 #endif
 
-//----------------------------------------------------------------------------
 static const char* toUnixPaths[][2] = {
   { "/usr/local/bin/passwd", "/usr/local/bin/passwd" },
   { "/usr/lo cal/bin/pa sswd", "/usr/lo cal/bin/pa sswd" },
@@ -67,7 +66,6 @@ static bool CheckConvertToUnixSlashes(std::string input, std::string output)
   return true;
 }
 
-//----------------------------------------------------------------------------
 static const char* checkEscapeChars[][4] = { { "1 foo 2 bar 2", "12", "\\",
                                                "\\1 foo \\2 bar \\2" },
                                              { " {} ", "{}", "#", " #{#} " },
@@ -86,7 +84,6 @@ static bool CheckEscapeChars(std::string input, const char* chars_to_escape,
   return true;
 }
 
-//----------------------------------------------------------------------------
 static bool CheckFileOperations()
 {
   bool res = true;
@@ -469,7 +466,6 @@ static bool CheckFileOperations()
   return res;
 }
 
-//----------------------------------------------------------------------------
 static bool CheckStringOperations()
 {
   bool res = true;
@@ -612,8 +608,6 @@ static bool CheckStringOperations()
 
   return res;
 }
-
-//----------------------------------------------------------------------------
 
 static bool CheckPutEnv(const std::string& env, const char* name,
                         const char* value)
@@ -842,7 +836,6 @@ static bool CheckGetLineFromStream()
   return ret;
 }
 
-//----------------------------------------------------------------------------
 int testSystemTools(int, char* [])
 {
   bool res = true;

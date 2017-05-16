@@ -27,7 +27,6 @@
   main(int argc, char* argv[])
 #endif
 
-/*--------------------------------------------------------------------------*/
 #ifdef TEST_KWSYS_C_HAS_PTRDIFF_T
 #include <stddef.h>
 int f(ptrdiff_t n)
@@ -43,7 +42,6 @@ int KWSYS_PLATFORM_TEST_C_MAIN()
 }
 #endif
 
-/*--------------------------------------------------------------------------*/
 #ifdef TEST_KWSYS_C_HAS_SSIZE_T
 #include <unistd.h>
 int f(ssize_t n)
@@ -57,7 +55,6 @@ int KWSYS_PLATFORM_TEST_C_MAIN()
 }
 #endif
 
-/*--------------------------------------------------------------------------*/
 #ifdef TEST_KWSYS_C_TYPE_MACROS
 char* info_macros =
 #if defined(__SIZEOF_SHORT__)

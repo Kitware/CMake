@@ -22,7 +22,6 @@
 #include "Encoding.hxx.in"
 #endif
 
-//----------------------------------------------------------------------------
 static const unsigned char helloWorldStrings[][32] = {
   // English
   { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', 0 },
@@ -50,7 +49,6 @@ static const unsigned char helloWorldStrings[][32] = {
   { 0 }
 };
 
-//----------------------------------------------------------------------------
 static int testHelloWorldEncoding()
 {
   int ret = 0;
@@ -262,7 +260,6 @@ static int testToWindowsExtendedPath()
 #endif
 }
 
-//----------------------------------------------------------------------------
 int testEncoding(int, char* [])
 {
   const char* loc = setlocale(LC_ALL, "");

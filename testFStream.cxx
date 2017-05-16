@@ -20,7 +20,6 @@
 
 #include <iostream>
 
-//----------------------------------------------------------------------------
 static int testNoFile()
 {
   kwsys::ifstream in_file("NoSuchFile.txt");
@@ -69,7 +68,6 @@ static unsigned char file_data[num_test_files][max_test_file_size] = {
     0x72, 0x00, 0x00, 0x00, 0x6C, 0x00, 0x00, 0x00, 0x64 },
 };
 
-//----------------------------------------------------------------------------
 static int testBOM()
 {
   // test various encodings in binary mode
@@ -104,7 +102,6 @@ static int testBOM()
   return 0;
 }
 
-//----------------------------------------------------------------------------
 int testFStream(int, char* [])
 {
   int ret = 0;
