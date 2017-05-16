@@ -376,7 +376,7 @@ set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} )
 if (OPENSSL_VERSION)
   find_package_handle_standard_args(OpenSSL
     REQUIRED_VARS
-      OPENSSL_SSL_LIBRARY
+      #OPENSSL_SSL_LIBRARY # FIXME: require based on a component request?
       OPENSSL_CRYPTO_LIBRARY
       OPENSSL_INCLUDE_DIR
     VERSION_VAR
@@ -386,7 +386,7 @@ if (OPENSSL_VERSION)
   )
 else ()
   find_package_handle_standard_args(OpenSSL "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
-    OPENSSL_SSL_LIBRARY
+    #OPENSSL_SSL_LIBRARY # FIXME: require based on a component request?
     OPENSSL_CRYPTO_LIBRARY
     OPENSSL_INCLUDE_DIR
   )
