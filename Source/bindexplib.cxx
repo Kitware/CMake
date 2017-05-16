@@ -251,13 +251,16 @@ public:
             SectChar = this->SectionHeaders[pSymbolTable->SectionNumber - 1]
                          .Characteristics;
 
-            if (SectChar & IMAGE_SCN_MEM_EXECUTE) {
-              this->Symbols.insert(symbol);
-            } else if (SectChar & IMAGE_SCN_MEM_READ) {
-              // skip __real@ and __xmm@
-              if (symbol.find("_real") == std::string::npos &&
-                  symbol.find("_xmm") == std::string::npos) {
-                this->DataSymbols.insert(symbol);
+            // skip symbols containing a dot
+            if (symbol.find('.') == std::string::npos) {
+              if (SectChar & IMAGE_SCN_MEM_EXECUTE) {
+                this->Symbols.insert(symbol);
+              } else if (SectChar & IMAGE_SCN_MEM_READ) {
+                // skip __real@ and __xmm@
+                if (symbol.find("_real") == std::string::npos &&
+                    symbol.find("_xmm") == std::string::npos) {
+                  this->DataSymbols.insert(symbol);
+                }
               }
             }
           }
