@@ -55,6 +55,33 @@
 # The :variable:`CPACK_IFW_ROOT` variable has a higher priority and overrides
 # the value of the :variable:`QTIFWDIR` variable.
 #
+# Internationalization
+# ^^^^^^^^^^^^^^^^^^^^
+#
+# Some variables and command arguments support internationalization via
+# CMake script. This is an optional feature.
+#
+# Installers created by QtIFW_ tools have built-in support for
+# internationalization and many phrases are localized to many languages,
+# but this does not apply to the description of the your components and groups
+# that will be distributed.
+#
+# Localization of the description of your components and groups is useful for
+# users of your installers.
+#
+# A localized variable or argument can contain a single default value, and a
+# set of pairs the name of the locale and the localized value.
+#
+# For example:
+#
+# .. code-block:: cmake
+#
+#    set(LOCALIZABLE_VARIABLE "Default value"
+#      en "English value"
+#      en_US "American value"
+#      en_GB "Great Britain value"
+#      )
+#
 # Variables
 # ^^^^^^^^^
 #
@@ -265,8 +292,8 @@
 #     cpack_ifw_configure_component(<compname> [COMMON] [ESSENTIAL] [VIRTUAL]
 #                         [FORCED_INSTALLATION] [REQUIRES_ADMIN_RIGHTS]
 #                         [NAME <name>]
-#                         [DISPLAY_NAME <display_name>]
-#                         [DESCRIPTION <description>]
+#                         [DISPLAY_NAME <display_name>] # Note: Internationalization supported
+#                         [DESCRIPTION <description>] # Note: Internationalization supported
 #                         [UPDATE_TEXT <update_text>]
 #                         [VERSION <version>]
 #                         [RELEASE_DATE <release_date>]
@@ -368,8 +395,8 @@
 #     cpack_ifw_configure_component_group(<groupname> [VIRTUAL]
 #                         [FORCED_INSTALLATION] [REQUIRES_ADMIN_RIGHTS]
 #                         [NAME <name>]
-#                         [DISPLAY_NAME <display_name>]
-#                         [DESCRIPTION <description>]
+#                         [DISPLAY_NAME <display_name>] # Note: Internationalization supported
+#                         [DESCRIPTION <description>] # Note: Internationalization supported
 #                         [UPDATE_TEXT <update_text>]
 #                         [VERSION <version>]
 #                         [RELEASE_DATE <release_date>]
@@ -546,8 +573,9 @@
 #
 #    cpack_add_component(myapp
 #        DISPLAY_NAME "MyApp"
-#        DESCRIPTION "My Application")
+#        DESCRIPTION "My Application") # Default description
 #    cpack_ifw_configure_component(myapp
+#        DESCRIPTION ru_RU "Мое Приложение" # Localized description
 #        VERSION "1.2.3" # Version of component
 #        SCRIPT "operations.qs")
 #    cpack_add_component(mybigplugin
@@ -835,8 +863,8 @@ macro(cpack_ifw_configure_component compname)
   string(TOUPPER ${compname} _CPACK_IFWCOMP_UNAME)
 
   set(_IFW_OPT COMMON ESSENTIAL VIRTUAL FORCED_INSTALLATION REQUIRES_ADMIN_RIGHTS)
-  set(_IFW_ARGS NAME DISPLAY_NAME DESCRIPTION VERSION RELEASE_DATE SCRIPT PRIORITY SORTING_PRIORITY UPDATE_TEXT DEFAULT)
-  set(_IFW_MULTI_ARGS DEPENDS DEPENDENCIES AUTO_DEPEND_ON LICENSES USER_INTERFACES TRANSLATIONS)
+  set(_IFW_ARGS NAME VERSION RELEASE_DATE SCRIPT PRIORITY SORTING_PRIORITY UPDATE_TEXT DEFAULT)
+  set(_IFW_MULTI_ARGS DISPLAY_NAME DESCRIPTION DEPENDS DEPENDENCIES AUTO_DEPEND_ON LICENSES USER_INTERFACES TRANSLATIONS)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
   _cpack_ifw_resolve_script(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_SCRIPT)
@@ -876,8 +904,8 @@ macro(cpack_ifw_configure_component_group grpname)
   string(TOUPPER ${grpname} _CPACK_IFWGRP_UNAME)
 
   set(_IFW_OPT VIRTUAL FORCED_INSTALLATION REQUIRES_ADMIN_RIGHTS)
-  set(_IFW_ARGS NAME DISPLAY_NAME DESCRIPTION VERSION RELEASE_DATE SCRIPT PRIORITY SORTING_PRIORITY UPDATE_TEXT DEFAULT)
-  set(_IFW_MULTI_ARGS DEPENDS DEPENDENCIES AUTO_DEPEND_ON LICENSES USER_INTERFACES TRANSLATIONS)
+  set(_IFW_ARGS NAME VERSION RELEASE_DATE SCRIPT PRIORITY SORTING_PRIORITY UPDATE_TEXT DEFAULT)
+  set(_IFW_MULTI_ARGS DISPLAY_NAME DESCRIPTION DEPENDS DEPENDENCIES AUTO_DEPEND_ON LICENSES USER_INTERFACES TRANSLATIONS)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
   _cpack_ifw_resolve_script(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_SCRIPT)

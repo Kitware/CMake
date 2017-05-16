@@ -15,6 +15,7 @@
 #include <map>
 #include <sstream>
 #include <stddef.h>
+#include <utility>
 
 //---------------------------------------------------------- CompareStruct ---
 cmCPackIFWPackage::CompareStruct::CompareStruct()
@@ -108,8 +109,8 @@ std::string cmCPackIFWPackage::GetComponentName(cmCPackComponent* component)
 
 void cmCPackIFWPackage::DefaultConfiguration()
 {
-  this->DisplayName = "";
-  this->Description = "";
+  this->DisplayName.clear();
+  this->Description.clear();
   this->Version = "";
   this->ReleaseDate = "";
   this->Script = "";
@@ -136,17 +137,17 @@ int cmCPackIFWPackage::ConfigureFromOptions()
 
   // Display name
   if (const char* option = this->GetOption("CPACK_PACKAGE_NAME")) {
-    this->DisplayName = option;
+    this->DisplayName[""] = option;
   } else {
-    this->DisplayName = "Your package";
+    this->DisplayName[""] = "Your package";
   }
 
   // Description
   if (const char* option =
         this->GetOption("CPACK_PACKAGE_DESCRIPTION_SUMMARY")) {
-    this->Description = option;
+    this->Description[""] = option;
   } else {
-    this->Description = "Your package description";
+    this->Description[""] = "Your package description";
   }
 
   // Version
@@ -174,10 +175,10 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
     cmsys::SystemTools::UpperCase(component->Name) + "_";
 
   // Display name
-  this->DisplayName = component->DisplayName;
+  this->DisplayName[""] = component->DisplayName;
 
   // Description
-  this->Description = component->Description;
+  this->Description[""] = component->Description;
 
   // Version
   if (const char* optVERSION = this->GetOption(prefix + "VERSION")) {
@@ -262,8 +263,8 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
   std::string prefix = "CPACK_IFW_COMPONENT_GROUP_" +
     cmsys::SystemTools::UpperCase(group->Name) + "_";
 
-  this->DisplayName = group->DisplayName;
-  this->Description = group->Description;
+  this->DisplayName[""] = group->DisplayName;
+  this->Description[""] = group->Description;
 
   // Version
   if (const char* optVERSION = this->GetOption(prefix + "VERSION")) {
@@ -358,7 +359,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   if (this->IsSetToEmpty(option)) {
     this->DisplayName.clear();
   } else if (const char* value = this->GetOption(option)) {
-    this->DisplayName = value;
+    this->ExpandListArgument(value, this->DisplayName);
   }
 
   // Description
@@ -366,7 +367,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   if (this->IsSetToEmpty(option)) {
     this->Description.clear();
   } else if (const char* value = this->GetOption(option)) {
-    this->Description = value;
+    this->ExpandListArgument(value, this->Description);
   }
 
   // Release date
@@ -519,8 +520,29 @@ void cmCPackIFWPackage::GeneratePackageFile()
 
   xout.StartElement("Package");
 
-  xout.Element("DisplayName", this->DisplayName);
-  xout.Element("Description", this->Description);
+  // DisplayName (with translations)
+  for (std::map<std::string, std::string>::iterator it =
+         this->DisplayName.begin();
+       it != this->DisplayName.end(); ++it) {
+    xout.StartElement("DisplayName");
+    if (!it->first.empty()) {
+      xout.Attribute("xml:lang", it->first);
+    }
+    xout.Content(it->second);
+    xout.EndElement();
+  }
+
+  // Description (with translations)
+  for (std::map<std::string, std::string>::iterator it =
+         this->Description.begin();
+       it != this->Description.end(); ++it) {
+    xout.StartElement("Description");
+    if (!it->first.empty()) {
+      xout.Attribute("xml:lang", it->first);
+    }
+    xout.Content(it->second);
+    xout.EndElement();
+  }
 
   // Update text
   if (!this->UpdateText.empty()) {
