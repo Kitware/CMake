@@ -547,8 +547,6 @@ bool SystemTools::HasEnv(const std::string& key)
   return SystemTools::HasEnv(key.c_str());
 }
 
-//----------------------------------------------------------------------------
-
 #if KWSYS_CXX_HAS_UNSETENV
 /* unsetenv("A") removes A from the environment.
    On older platforms it returns void instead of int.  */
@@ -639,8 +637,6 @@ static int kwsysUnPutEnv(const std::string& env)
 }
 #endif
 
-//----------------------------------------------------------------------------
-
 #if KWSYS_CXX_HAS_SETENV
 
 /* setenv("A", "B", 1) will set A=B in the environment and makes its
@@ -730,8 +726,6 @@ bool SystemTools::UnPutEnv(const std::string& env)
 }
 
 #endif
-
-//----------------------------------------------------------------------------
 
 const char* SystemTools::GetExecutableExtension()
 {
@@ -1144,7 +1138,6 @@ bool SystemTools::SameFile(const std::string& file1, const std::string& file2)
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool SystemTools::PathExists(const std::string& path)
 {
   if (path.empty()) {
@@ -1167,7 +1160,6 @@ bool SystemTools::PathExists(const std::string& path)
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool SystemTools::FileExists(const char* filename)
 {
   if (!filename) {
@@ -1176,7 +1168,6 @@ bool SystemTools::FileExists(const char* filename)
   return SystemTools::FileExists(std::string(filename));
 }
 
-//----------------------------------------------------------------------------
 bool SystemTools::FileExists(const std::string& filename)
 {
   if (filename.empty()) {
@@ -1203,7 +1194,6 @@ bool SystemTools::FileExists(const std::string& filename)
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool SystemTools::FileExists(const char* filename, bool isFile)
 {
   if (!filename) {
@@ -1212,7 +1202,6 @@ bool SystemTools::FileExists(const char* filename, bool isFile)
   return SystemTools::FileExists(std::string(filename), isFile);
 }
 
-//----------------------------------------------------------------------------
 bool SystemTools::FileExists(const std::string& filename, bool isFile)
 {
   if (SystemTools::FileExists(filename)) {
@@ -1223,7 +1212,6 @@ bool SystemTools::FileExists(const std::string& filename, bool isFile)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool SystemTools::TestFileAccess(const char* filename,
                                  TestFilePermissions permissions)
 {
@@ -1233,7 +1221,6 @@ bool SystemTools::TestFileAccess(const char* filename,
   return SystemTools::TestFileAccess(std::string(filename), permissions);
 }
 
-//----------------------------------------------------------------------------
 bool SystemTools::TestFileAccess(const std::string& filename,
                                  TestFilePermissions permissions)
 {
@@ -1255,7 +1242,6 @@ bool SystemTools::TestFileAccess(const std::string& filename,
 #endif
 }
 
-//----------------------------------------------------------------------------
 int SystemTools::Stat(const char* path, SystemTools::Stat_t* buf)
 {
   if (!path) {
@@ -1265,7 +1251,6 @@ int SystemTools::Stat(const char* path, SystemTools::Stat_t* buf)
   return SystemTools::Stat(std::string(path), buf);
 }
 
-//----------------------------------------------------------------------------
 int SystemTools::Stat(const std::string& path, SystemTools::Stat_t* buf)
 {
   if (path.empty()) {
@@ -1287,7 +1272,6 @@ int SystemTools::Stat(const std::string& path, SystemTools::Stat_t* buf)
 #endif
 }
 
-//----------------------------------------------------------------------------
 #ifdef __CYGWIN__
 bool SystemTools::PathCygwinToWin32(const char* path, char* win32_path)
 {
@@ -1752,7 +1736,6 @@ std::string SystemTools::CropString(const std::string& s, size_t max_len)
   return n;
 }
 
-//----------------------------------------------------------------------------
 std::vector<kwsys::String> SystemTools::SplitString(const std::string& p,
                                                     char sep, bool isPath)
 {
@@ -1777,7 +1760,6 @@ std::vector<kwsys::String> SystemTools::SplitString(const std::string& p,
   return paths;
 }
 
-//----------------------------------------------------------------------------
 int SystemTools::EstimateFormatLength(const char* format, va_list ap)
 {
   if (!format) {
@@ -2165,7 +2147,6 @@ bool SystemTools::FilesDiffer(const std::string& source,
   return false;
 }
 
-//----------------------------------------------------------------------------
 /**
  * Copy a file named by "source" to the file named by "destination".
  */
@@ -2269,7 +2250,6 @@ bool SystemTools::CopyFileAlways(const std::string& source,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool SystemTools::CopyAFile(const std::string& source,
                             const std::string& destination, bool always)
 {
@@ -3550,7 +3530,6 @@ static std::string GetCasePathName(std::string const& pathIn)
 }
 #endif
 
-//----------------------------------------------------------------------------
 std::string SystemTools::GetActualCaseForPath(const std::string& p)
 {
 #ifndef _WIN32
@@ -3571,7 +3550,6 @@ std::string SystemTools::GetActualCaseForPath(const std::string& p)
 #endif
 }
 
-//----------------------------------------------------------------------------
 const char* SystemTools::SplitPathRootComponent(const std::string& p,
                                                 std::string* root)
 {
@@ -3638,7 +3616,6 @@ const char* SystemTools::SplitPathRootComponent(const std::string& p,
   return c;
 }
 
-//----------------------------------------------------------------------------
 void SystemTools::SplitPath(const std::string& p,
                             std::vector<std::string>& components,
                             bool expand_home_dir)
@@ -3695,13 +3672,11 @@ void SystemTools::SplitPath(const std::string& p,
   }
 }
 
-//----------------------------------------------------------------------------
 std::string SystemTools::JoinPath(const std::vector<std::string>& components)
 {
   return SystemTools::JoinPath(components.begin(), components.end());
 }
 
-//----------------------------------------------------------------------------
 std::string SystemTools::JoinPath(
   std::vector<std::string>::const_iterator first,
   std::vector<std::string>::const_iterator last)
@@ -3733,7 +3708,6 @@ std::string SystemTools::JoinPath(
   return result;
 }
 
-//----------------------------------------------------------------------------
 bool SystemTools::ComparePath(const std::string& c1, const std::string& c2)
 {
 #if defined(_WIN32) || defined(__APPLE__)
@@ -3749,7 +3723,6 @@ bool SystemTools::ComparePath(const std::string& c1, const std::string& c2)
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool SystemTools::Split(const std::string& str,
                         std::vector<std::string>& lines, char separator)
 {
@@ -3770,7 +3743,6 @@ bool SystemTools::Split(const std::string& str,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool SystemTools::Split(const std::string& str,
                         std::vector<std::string>& lines)
 {
@@ -4707,7 +4679,6 @@ std::string SystemTools::GetOperatingSystemNameAndVersion()
   return res;
 }
 
-// ----------------------------------------------------------------------
 bool SystemTools::ParseURLProtocol(const std::string& URL,
                                    std::string& protocol,
                                    std::string& dataglom)
@@ -4726,7 +4697,6 @@ bool SystemTools::ParseURLProtocol(const std::string& URL,
   return true;
 }
 
-// ----------------------------------------------------------------------
 bool SystemTools::ParseURL(const std::string& URL, std::string& protocol,
                            std::string& username, std::string& password,
                            std::string& hostname, std::string& dataport,
@@ -4757,7 +4727,6 @@ bool SystemTools::ParseURL(const std::string& URL, std::string& protocol,
   return true;
 }
 
-// ----------------------------------------------------------------------
 // These must NOT be initialized.  Default initialization to zero is
 // necessary.
 static unsigned int SystemToolsManagerCount;

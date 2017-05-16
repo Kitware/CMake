@@ -37,7 +37,6 @@ namespace KWSYS_NAMESPACE {
 #define KWSYS_GLOB_SUPPORT_NETWORK_PATHS
 #endif
 
-//----------------------------------------------------------------------------
 class GlobInternals
 {
 public:
@@ -45,7 +44,6 @@ public:
   std::vector<kwsys::RegularExpression> Expressions;
 };
 
-//----------------------------------------------------------------------------
 Glob::Glob()
 {
   this->Internals = new GlobInternals;
@@ -62,19 +60,16 @@ Glob::Glob()
   this->RecurseListDirs = false;
 }
 
-//----------------------------------------------------------------------------
 Glob::~Glob()
 {
   delete this->Internals;
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string>& Glob::GetFiles()
 {
   return this->Internals->Files;
 }
 
-//----------------------------------------------------------------------------
 std::string Glob::PatternToRegex(const std::string& pattern,
                                  bool require_whole_string, bool preserve_case)
 {
@@ -183,7 +178,6 @@ std::string Glob::PatternToRegex(const std::string& pattern,
   return regex;
 }
 
-//----------------------------------------------------------------------------
 bool Glob::RecurseDirectory(std::string::size_type start,
                             const std::string& dir, GlobMessages* messages)
 {
@@ -277,7 +271,6 @@ bool Glob::RecurseDirectory(std::string::size_type start,
   return true;
 }
 
-//----------------------------------------------------------------------------
 void Glob::ProcessDirectory(std::string::size_type start,
                             const std::string& dir, GlobMessages* messages)
 {
@@ -337,7 +330,6 @@ void Glob::ProcessDirectory(std::string::size_type start,
   }
 }
 
-//----------------------------------------------------------------------------
 bool Glob::FindFiles(const std::string& inexpr, GlobMessages* messages)
 {
   std::string cexpr;
@@ -420,14 +412,12 @@ bool Glob::FindFiles(const std::string& inexpr, GlobMessages* messages)
   return true;
 }
 
-//----------------------------------------------------------------------------
 void Glob::AddExpression(const std::string& expr)
 {
   this->Internals->Expressions.push_back(
     kwsys::RegularExpression(this->PatternToRegex(expr)));
 }
 
-//----------------------------------------------------------------------------
 void Glob::SetRelative(const char* dir)
 {
   if (!dir) {
@@ -437,7 +427,6 @@ void Glob::SetRelative(const char* dir)
   this->Relative = dir;
 }
 
-//----------------------------------------------------------------------------
 const char* Glob::GetRelative()
 {
   if (this->Relative.empty()) {
@@ -446,7 +435,6 @@ const char* Glob::GetRelative()
   return this->Relative.c_str();
 }
 
-//----------------------------------------------------------------------------
 void Glob::AddFile(std::vector<std::string>& files, const std::string& file)
 {
   if (!this->Relative.empty()) {

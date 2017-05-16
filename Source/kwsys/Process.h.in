@@ -42,7 +42,6 @@
 #define kwsysProcess_State_Expired kwsys_ns(Process_State_Expired)
 #define kwsysProcess_State_Killed kwsys_ns(Process_State_Killed)
 #define kwsysProcess_State_Disowned kwsys_ns(Process_State_Disowned)
-#define kwsysProcess_GetState kwsys_ns(Process_GetState)
 #define kwsysProcess_State_e kwsys_ns(Process_State_e)
 #define kwsysProcess_Exception_None kwsys_ns(Process_Exception_None)
 #define kwsysProcess_Exception_Fault kwsys_ns(Process_Exception_Fault)
@@ -50,12 +49,21 @@
 #define kwsysProcess_Exception_Interrupt kwsys_ns(Process_Exception_Interrupt)
 #define kwsysProcess_Exception_Numerical kwsys_ns(Process_Exception_Numerical)
 #define kwsysProcess_Exception_Other kwsys_ns(Process_Exception_Other)
-#define kwsysProcess_GetExitException kwsys_ns(Process_GetExitException)
 #define kwsysProcess_Exception_e kwsys_ns(Process_Exception_e)
+#define kwsysProcess_GetState kwsys_ns(Process_GetState)
+#define kwsysProcess_GetExitException kwsys_ns(Process_GetExitException)
 #define kwsysProcess_GetExitCode kwsys_ns(Process_GetExitCode)
 #define kwsysProcess_GetExitValue kwsys_ns(Process_GetExitValue)
 #define kwsysProcess_GetErrorString kwsys_ns(Process_GetErrorString)
 #define kwsysProcess_GetExceptionString kwsys_ns(Process_GetExceptionString)
+#define kwsysProcess_GetStateByIndex kwsys_ns(Process_GetStateByIndex)
+#define kwsysProcess_GetExitExceptionByIndex                                  \
+  kwsys_ns(Process_GetExitExceptionByIndex)
+#define kwsysProcess_GetExitCodeByIndex kwsys_ns(Process_GetExitCodeByIndex)
+#define kwsysProcess_GetExitValueByIndex kwsys_ns(Process_GetExitValueByIndex)
+#define kwsysProcess_GetExceptionStringByIndex                                \
+  kwsys_ns(Process_GetExceptionStringByIndex)
+#define kwsysProcess_GetExitCodeByIndex kwsys_ns(Process_GetExitCodeByIndex)
 #define kwsysProcess_Execute kwsys_ns(Process_Execute)
 #define kwsysProcess_Disown kwsys_ns(Process_Disown)
 #define kwsysProcess_WaitForData kwsys_ns(Process_WaitForData)
@@ -296,6 +304,67 @@ kwsysEXPORT const char* kwsysProcess_GetErrorString(kwsysProcess* cp);
  * describing the problem.  Otherwise, it returns NULL.
  */
 kwsysEXPORT const char* kwsysProcess_GetExceptionString(kwsysProcess* cp);
+
+/**
+* Get the current state of the Process instance.  Possible states are:
+*
+*  kwsysProcess_StateByIndex_Starting  = Execute has not yet been called.
+*  kwsysProcess_StateByIndex_Exception = Child process exited abnormally.
+*  kwsysProcess_StateByIndex_Exited    = Child process exited normally.
+*  kwsysProcess_StateByIndex_Error     = Error getting the child return code.
+*/
+kwsysEXPORT int kwsysProcess_GetStateByIndex(kwsysProcess* cp, int idx);
+enum kwsysProcess_StateByIndex_e
+{
+  kwsysProcess_StateByIndex_Starting = kwsysProcess_State_Starting,
+  kwsysProcess_StateByIndex_Exception = kwsysProcess_State_Exception,
+  kwsysProcess_StateByIndex_Exited = kwsysProcess_State_Exited,
+  kwsysProcess_StateByIndex_Error = kwsysProcess_State_Error
+};
+
+/**
+* When GetState returns "Exception", this method returns a
+* platform-independent description of the exceptional behavior that
+* caused the child to terminate abnormally.  Possible exceptions are:
+*
+*  kwsysProcess_Exception_None      = No exceptional behavior occurred.
+*  kwsysProcess_Exception_Fault     = Child crashed with a memory fault.
+*  kwsysProcess_Exception_Illegal   = Child crashed with an illegal
+*                                     instruction.
+*  kwsysProcess_Exception_Interrupt = Child was interrupted by user
+*                                     (Cntl-C/Break).
+*  kwsysProcess_Exception_Numerical = Child crashed with a numerical
+*                                     exception.
+*  kwsysProcess_Exception_Other     = Child terminated for another reason.
+*/
+kwsysEXPORT int kwsysProcess_GetExitExceptionByIndex(kwsysProcess* cp,
+                                                     int idx);
+
+/**
+* When GetState returns "Exited" or "Exception", this method returns
+* the platform-specific raw exit code of the process.  UNIX platforms
+* should use WIFEXITED/WEXITSTATUS and WIFSIGNALED/WTERMSIG to access
+* this value.  Windows users should compare the value to the various
+* EXCEPTION_* values.
+*
+* If GetState returns "Exited", use GetExitValue to get the
+* platform-independent child return value.
+*/
+kwsysEXPORT int kwsysProcess_GetExitCodeByIndex(kwsysProcess* cp, int idx);
+
+/**
+* When GetState returns "Exited", this method returns the child's
+* platform-independent exit code (such as the value returned by the
+* child's main).
+*/
+kwsysEXPORT int kwsysProcess_GetExitValueByIndex(kwsysProcess* cp, int idx);
+
+/**
+* When GetState returns "Exception", this method returns a string
+* describing the problem.  Otherwise, it returns NULL.
+*/
+kwsysEXPORT const char* kwsysProcess_GetExceptionStringByIndex(
+  kwsysProcess* cp, int idx);
 
 /**
  * Start executing the child process.
