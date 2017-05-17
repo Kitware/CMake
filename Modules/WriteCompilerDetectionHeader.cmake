@@ -447,7 +447,7 @@ function(write_compiler_detection_header
       endif()
 
       if(NOT _WCD_ALLOW_UNKNOWN_COMPILER_VERSIONS)
-        set(${compiler_file_content} "${${compiler_file_content}}
+        string(APPEND ${compiler_file_content} "
 #    if !(${_cmake_oldestSupported_${compiler}})
 #      error Unsupported compiler version
 #    endif\n")
@@ -462,7 +462,7 @@ function(write_compiler_detection_header
         set(MACRO_HEX)
       endif()
       string(CONFIGURE "${_compiler_id_version_compute_${compiler}}" VERSION_BLOCK @ONLY)
-      set(${compiler_file_content} "${${compiler_file_content}}${VERSION_BLOCK}\n")
+      string(APPEND ${compiler_file_content} "${VERSION_BLOCK}\n")
       set(PREFIX)
       set(MACRO_DEC)
       set(MACRO_HEX)
@@ -478,7 +478,7 @@ function(write_compiler_detection_header
           set(_define_item "\n#      define ${prefix_arg}_${feature_PP} 0\n")
           set(_define_item "\n#    if ${_cmake_feature_test_${compiler}_${feature}}\n#      define ${prefix_arg}_${feature_PP} 1\n#    else${_define_item}#    endif\n")
         endif()
-        set(${compiler_file_content} "${${compiler_file_content}}${_define_item}")
+        string(APPEND ${compiler_file_content} "${_define_item}")
       endforeach()
     endforeach()
     if(pp_if STREQUAL "elif")
