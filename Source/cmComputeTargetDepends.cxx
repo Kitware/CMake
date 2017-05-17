@@ -294,9 +294,11 @@ void cmComputeTargetDepends::AddInterfaceDepends(
   }
 
   if (dependee) {
-    this->AddInterfaceDepends(depender_index, dependee, "", emitted);
     std::vector<std::string> configs;
     depender->Makefile->GetConfigurations(configs);
+    if (configs.empty()) {
+      configs.push_back("");
+    }
     for (std::vector<std::string>::const_iterator it = configs.begin();
          it != configs.end(); ++it) {
       // A target should not depend on itself.
