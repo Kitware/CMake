@@ -151,6 +151,13 @@ bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf,
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
   }
+  if (!cmSystemTools::VersionCompareEqual(this->WindowsTargetPlatformVersion,
+                                          this->SystemVersion)) {
+    std::ostringstream e;
+    e << "Selecting Windows SDK version " << this->WindowsTargetPlatformVersion
+      << " to target Windows " << this->SystemVersion << ".";
+    mf->DisplayStatus(e.str().c_str(), -1);
+  }
   mf->AddDefinition("CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION",
                     this->WindowsTargetPlatformVersion.c_str());
   return true;
