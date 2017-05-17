@@ -40,6 +40,15 @@
 # ``Protobuf_LITE_LIBRARIES``
 #   The protobuf-lite libraries
 #
+# The following :prop_tgt:`IMPORTED` targets are also defined:
+#
+# ``Protobuf::protobuf``
+#   The protobuf library.
+# ``Protobuf::protobuf-lite``
+#   The protobuf lite library.
+# ``Protobuf::protoc``
+#   The protoc library.
+#
 # The following cache variables are also available to set or use:
 #
 # ``Protobuf_LIBRARY``
@@ -408,6 +417,78 @@ if(Protobuf_INCLUDE_DIR)
   if(NOT "${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" VERSION_EQUAL "${Protobuf_VERSION}")
       message(WARNING "Protobuf compiler version ${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}"
           " doesn't match library version ${Protobuf_VERSION}")
+  endif()
+
+  if(Protobuf_LIBRARY)
+      if(NOT TARGET Protobuf::protobuf)
+          add_library(Protobuf::protobuf UNKNOWN IMPORTED)
+          set_target_properties(Protobuf::protobuf PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${Protobuf_INCLUDE_DIR}")
+          if(EXISTS "${Protobuf_LIBRARY}")
+            set_target_properties(Protobuf::protobuf PROPERTIES
+              IMPORTED_LOCATION "${Protobuf_LIBRARY}")
+          endif()
+          if(EXISTS "${Protobuf_LIBRARY_RELEASE}")
+            set_property(TARGET Protobuf::protobuf APPEND PROPERTY
+              IMPORTED_CONFIGURATIONS RELEASE)
+            set_target_properties(Protobuf::protobuf PROPERTIES
+              IMPORTED_LOCATION_RELEASE "${Protobuf_LIBRARY_RELEASE}")
+          endif()
+          if(EXISTS "${Protobuf_LIBRARY_DEBUG}")
+            set_property(TARGET Protobuf::protobuf APPEND PROPERTY
+              IMPORTED_CONFIGURATIONS DEBUG)
+            set_target_properties(Protobuf::protobuf PROPERTIES
+              IMPORTED_LOCATION_DEBUG "${Protobuf_LIBRARY_DEBUG}")
+          endif()
+      endif()
+  endif()
+
+  if(Protobuf_LITE_LIBRARY)
+      if(NOT TARGET Protobuf::protobuf-lite)
+          add_library(Protobuf::protobuf-lite UNKNOWN IMPORTED)
+          set_target_properties(Protobuf::protobuf-lite PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${Protobuf_INCLUDE_DIR}")
+          if(EXISTS "${Protobuf_LITE_LIBRARY}")
+            set_target_properties(Protobuf::protobuf-lite PROPERTIES
+              IMPORTED_LOCATION "${Protobuf_LITE_LIBRARY}")
+          endif()
+          if(EXISTS "${Protobuf_LITE_LIBRARY_RELEASE}")
+            set_property(TARGET Protobuf::protobuf-lite APPEND PROPERTY
+              IMPORTED_CONFIGURATIONS RELEASE)
+            set_target_properties(Protobuf::protobuf-lite PROPERTIES
+              IMPORTED_LOCATION_RELEASE "${Protobuf_LITE_LIBRARY_RELEASE}")
+          endif()
+          if(EXISTS "${Protobuf_LITE_LIBRARY_DEBUG}")
+            set_property(TARGET Protobuf::protobuf-lite APPEND PROPERTY
+              IMPORTED_CONFIGURATIONS DEBUG)
+            set_target_properties(Protobuf::protobuf-lite PROPERTIES
+              IMPORTED_LOCATION_DEBUG "${Protobuf_LITE_LIBRARY_DEBUG}")
+          endif()
+      endif()
+  endif()
+
+  if(Protobuf_PROTOC_LIBRARY)
+      if(NOT TARGET Protobuf::protoc)
+          add_library(Protobuf::protoc UNKNOWN IMPORTED)
+          set_target_properties(Protobuf::protoc PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${Protobuf_INCLUDE_DIR}")
+          if(EXISTS "${Protobuf_PROTOC_LIBRARY}")
+            set_target_properties(Protobuf::protoc PROPERTIES
+              IMPORTED_LOCATION "${Protobuf_PROTOC_LIBRARY}")
+          endif()
+          if(EXISTS "${Protobuf_PROTOC_LIBRARY_RELEASE}")
+            set_property(TARGET Protobuf::protoc APPEND PROPERTY
+              IMPORTED_CONFIGURATIONS RELEASE)
+            set_target_properties(Protobuf::protoc PROPERTIES
+              IMPORTED_LOCATION_RELEASE "${Protobuf_PROTOC_LIBRARY_RELEASE}")
+          endif()
+          if(EXISTS "${Protobuf_PROTOC_LIBRARY_DEBUG}")
+            set_property(TARGET Protobuf::protoc APPEND PROPERTY
+              IMPORTED_CONFIGURATIONS DEBUG)
+            set_target_properties(Protobuf::protoc PROPERTIES
+              IMPORTED_LOCATION_DEBUG "${Protobuf_PROTOC_LIBRARY_DEBUG}")
+          endif()
+      endif()
   endif()
 endif()
 
