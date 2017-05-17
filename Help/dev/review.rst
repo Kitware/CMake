@@ -261,6 +261,10 @@ until one of the following occurs:
   and the MR cannot be merged into the topic stage again due to conflicts.
 
 * A developer or the submitter posts an explicit ``Do: unstage`` command.
+  This is useful to remove a MR from the topic stage when one is not ready
+  to push an update to the MR topic branch.  It is unnecessary to explicitly
+  unstage just before or after pushing an update because the push will cause
+  the MR to be unstaged automatically.
 
 * The MR is closed.
 
