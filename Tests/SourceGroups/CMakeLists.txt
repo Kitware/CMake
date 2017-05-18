@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.8)
 project(SourceGroups)
 
 # this is not really a test which can fail
@@ -33,10 +33,11 @@ source_group(EmptyGroup)
 set(root ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(tree_files_without_prefix ${root}/sub1/tree_bar.c
-                              ${root}/sub1/tree_baz.c
-                              ${root}/sub1/tree_subdir/tree_foobar.c)
+                              sub1/tree_baz.c
+                              sub1/../sub1/tree_subdir/tree_foobar.c)
 
-set(tree_files_with_prefix ${root}/tree_foo.c)
+set(tree_files_with_prefix ${root}/tree_prefix_foo.c
+                           tree_prefix_bar.c)
 
 source_group(TREE ${root} FILES ${tree_files_without_prefix})
 
