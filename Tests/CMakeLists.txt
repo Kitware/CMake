@@ -1391,6 +1391,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
   if(CMake_TEST_FindGTest)
     add_subdirectory(FindGTest)
+    add_subdirectory(GoogleTest)
   endif()
 
   if(CMake_TEST_FindICU)
