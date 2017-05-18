@@ -1825,7 +1825,7 @@ macro(cuda_compile_base cuda_target format generated_files)
   else()
     set(_counter 1)
   endif()
-  set(_cuda_target "${_cuda_target}_${_counter}")
+  string(APPEND _cuda_target "_${_counter}")
   set_property(DIRECTORY PROPERTY _cuda_internal_phony_counter ${_counter})
 
   # Separate the sources from the options

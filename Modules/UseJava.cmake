@@ -417,7 +417,7 @@ endfunction ()
 
 function(__java_lcat VAR)
     foreach(_line ${ARGN})
-        set(${VAR} "${${VAR}}${_line}\n")
+        string(APPEND ${VAR} "${_line}\n")
     endforeach()
 
     set(${VAR} "${${VAR}}" PARENT_SCOPE)

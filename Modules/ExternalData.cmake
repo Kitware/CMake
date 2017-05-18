@@ -1111,7 +1111,7 @@ if("${ExternalData_ACTION}" STREQUAL "fetch")
       list(GET algo_list ${ii} algo)
       _ExternalData_download_object("${name}" "${hash}" "${algo}"
         obj succeeded algoErrorMsg)
-      set(errorMsg "${errorMsg}\n${algoErrorMsg}")
+      string(APPEND errorMsg "\n${algoErrorMsg}")
       if(succeeded)
         break()
       endif()

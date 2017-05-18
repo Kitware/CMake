@@ -415,7 +415,7 @@ file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines
 foreach(line IN LISTS lines)
   if("${line}" MATCHES "^\\.\\. command:: ([A-Za-z0-9_]+)")
     if(_ep_func)
-      set(_ep_keywords_${_ep_func} "${_ep_keywords_${_ep_func}})$")
+      string(APPEND _ep_keywords_${_ep_func} ")$")
     endif()
     set(_ep_func "${CMAKE_MATCH_1}")
     #message("function [${_ep_func}]")
@@ -424,13 +424,13 @@ foreach(line IN LISTS lines)
   elseif("${line}" MATCHES "^  ``([A-Z0-9_]+) .*``$")
     set(_ep_key "${CMAKE_MATCH_1}")
     #message("  keyword [${_ep_key}]")
-    set(_ep_keywords_${_ep_func}
-      "${_ep_keywords_${_ep_func}}${_ep_keyword_sep}${_ep_key}")
+    string(APPEND _ep_keywords_${_ep_func}
+      "${_ep_keyword_sep}${_ep_key}")
     set(_ep_keyword_sep "|")
   endif()
 endforeach()
 if(_ep_func)
-  set(_ep_keywords_${_ep_func} "${_ep_keywords_${_ep_func}})$")
+  string(APPEND _ep_keywords_${_ep_func} ")$")
 endif()
 
 # Save regex matching supported hash algorithm names.
