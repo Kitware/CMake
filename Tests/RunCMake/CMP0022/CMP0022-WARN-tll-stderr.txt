@@ -4,13 +4,13 @@ CMake Warning \(dev\) in CMakeLists.txt:
   cmake_policy command to set the policy and suppress this warning.
 
   Target "bar" has an INTERFACE_LINK_LIBRARIES property which differs from
-  its LINK_INTERFACE_LIBRARIES properties.
+  its LINK_INTERFACE_LIBRARIES(_DEBUG)? properties.
 
   INTERFACE_LINK_LIBRARIES:
 
     foo
 
-  LINK_INTERFACE_LIBRARIES:
+  LINK_INTERFACE_LIBRARIES(_DEBUG)?:
 
     bat
 
