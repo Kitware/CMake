@@ -72,8 +72,6 @@
 #pragma warn - 8019
 #endif
 
-/*--------------------------------------------------------------------------*/
-
 /* Full path to the directory in which this executable is built.  Do
    not include a trailing slash.  */
 #if !defined(@KWSYS_NAMESPACE@_SHARED_FORWARD_DIR_BUILD)
@@ -159,7 +157,6 @@
 #undef KWSYS_SHARED_FORWARD_OPTION_LDD
 #endif
 
-/*--------------------------------------------------------------------------*/
 /* Include needed system headers.  */
 
 #include <errno.h>
@@ -180,7 +177,6 @@
 #include <unistd.h>
 #endif
 
-/*--------------------------------------------------------------------------*/
 /* Configuration for this platform.  */
 
 /* The path separator for this platform.  */
@@ -292,7 +288,6 @@ static const char kwsys_shared_forward_path_slash[2] = {
 #endif
 
 #ifdef KWSYS_SHARED_FORWARD_ESCAPE_ARGV
-/*--------------------------------------------------------------------------*/
 typedef struct kwsys_sf_arg_info_s
 {
   const char* arg;
@@ -300,7 +295,6 @@ typedef struct kwsys_sf_arg_info_s
   int quote;
 } kwsys_sf_arg_info;
 
-/*--------------------------------------------------------------------------*/
 static kwsys_sf_arg_info kwsys_sf_get_arg_info(const char* in)
 {
   /* Initialize information.  */
@@ -354,7 +348,6 @@ static kwsys_sf_arg_info kwsys_sf_get_arg_info(const char* in)
   return info;
 }
 
-/*--------------------------------------------------------------------------*/
 static char* kwsys_sf_get_arg(kwsys_sf_arg_info info, char* out)
 {
   /* String iterator.  */
@@ -413,7 +406,6 @@ static char* kwsys_sf_get_arg(kwsys_sf_arg_info info, char* out)
 }
 #endif
 
-/*--------------------------------------------------------------------------*/
 /* Function to convert a logical or relative path to a physical full path.  */
 static int kwsys_shared_forward_realpath(const char* in_path, char* out_path)
 {
@@ -428,7 +420,6 @@ static int kwsys_shared_forward_realpath(const char* in_path, char* out_path)
 #endif
 }
 
-/*--------------------------------------------------------------------------*/
 static int kwsys_shared_forward_samepath(const char* file1, const char* file2)
 {
 #if defined(_WIN32)
@@ -458,7 +449,6 @@ static int kwsys_shared_forward_samepath(const char* file1, const char* file2)
 #endif
 }
 
-/*--------------------------------------------------------------------------*/
 /* Function to report a system error message.  */
 static void kwsys_shared_forward_strerror(char* message)
 {
@@ -481,7 +471,6 @@ static void kwsys_shared_forward_strerror(char* message)
 #endif
 }
 
-/*--------------------------------------------------------------------------*/
 /* Functions to execute a child process.  */
 static void kwsys_shared_forward_execvp(const char* cmd,
                                         char const* const* argv)
@@ -521,7 +510,6 @@ static void kwsys_shared_forward_execvp(const char* cmd,
 #endif
 }
 
-/*--------------------------------------------------------------------------*/
 /* Function to get the directory containing the given file or directory.  */
 static void kwsys_shared_forward_dirname(const char* begin, char* result)
 {
@@ -557,7 +545,6 @@ static void kwsys_shared_forward_dirname(const char* begin, char* result)
   }
 }
 
-/*--------------------------------------------------------------------------*/
 /* Function to check if a file exists and is executable.  */
 static int kwsys_shared_forward_is_executable(const char* f)
 {
@@ -578,7 +565,6 @@ static int kwsys_shared_forward_is_executable(const char* f)
   }
 }
 
-/*--------------------------------------------------------------------------*/
 /* Function to locate the executable currently running.  */
 static int kwsys_shared_forward_self_path(const char* argv0, char* result)
 {
@@ -644,7 +630,6 @@ static int kwsys_shared_forward_self_path(const char* argv0, char* result)
   return 0;
 }
 
-/*--------------------------------------------------------------------------*/
 /* Function to convert a specified path to a full path.  If it is not
    already full, it is taken relative to the self path.  */
 static int kwsys_shared_forward_fullpath(const char* self_path,
@@ -681,7 +666,6 @@ static int kwsys_shared_forward_fullpath(const char* self_path,
   return 1;
 }
 
-/*--------------------------------------------------------------------------*/
 /* Function to compute the library search path and executable name
    based on the self path.  */
 static int kwsys_shared_forward_get_settings(const char* self_path,
@@ -773,7 +757,6 @@ static int kwsys_shared_forward_get_settings(const char* self_path,
   return 1;
 }
 
-/*--------------------------------------------------------------------------*/
 /* Function to print why execution of a command line failed.  */
 static void kwsys_shared_forward_print_failure(char const* const* argv)
 {
@@ -791,7 +774,6 @@ static void kwsys_shared_forward_print_failure(char const* const* argv)
 static char kwsys_shared_forward_ldpath[65535] =
   KWSYS_SHARED_FORWARD_LDPATH "=";
 
-/*--------------------------------------------------------------------------*/
 /* Main driver function to be called from main.  */
 static int @KWSYS_NAMESPACE@_shared_forward_to_real(int argc, char** argv_in)
 {

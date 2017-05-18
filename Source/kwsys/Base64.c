@@ -9,13 +9,11 @@
 #include "Base64.h.in"
 #endif
 
-/*--------------------------------------------------------------------------*/
 static const unsigned char kwsysBase64EncodeTable[65] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   "abcdefghijklmnopqrstuvwxyz"
   "0123456789+/";
 
-/*--------------------------------------------------------------------------*/
 static const unsigned char kwsysBase64DecodeTable[256] = {
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -40,19 +38,16 @@ static const unsigned char kwsysBase64DecodeTable[256] = {
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
-/*--------------------------------------------------------------------------*/
 static unsigned char kwsysBase64EncodeChar(int c)
 {
   return kwsysBase64EncodeTable[(unsigned char)c];
 }
 
-/*--------------------------------------------------------------------------*/
 static unsigned char kwsysBase64DecodeChar(unsigned char c)
 {
   return kwsysBase64DecodeTable[c];
 }
 
-/*--------------------------------------------------------------------------*/
 /* Encode 3 bytes into a 4 byte string. */
 void kwsysBase64_Encode3(const unsigned char* src, unsigned char* dest)
 {
@@ -64,7 +59,6 @@ void kwsysBase64_Encode3(const unsigned char* src, unsigned char* dest)
   dest[3] = kwsysBase64EncodeChar(src[2] & 0x3F);
 }
 
-/*--------------------------------------------------------------------------*/
 /* Encode 2 bytes into a 4 byte string. */
 void kwsysBase64_Encode2(const unsigned char* src, unsigned char* dest)
 {
@@ -75,7 +69,6 @@ void kwsysBase64_Encode2(const unsigned char* src, unsigned char* dest)
   dest[3] = '=';
 }
 
-/*--------------------------------------------------------------------------*/
 /* Encode 1 bytes into a 4 byte string. */
 void kwsysBase64_Encode1(const unsigned char* src, unsigned char* dest)
 {
@@ -85,7 +78,6 @@ void kwsysBase64_Encode1(const unsigned char* src, unsigned char* dest)
   dest[3] = '=';
 }
 
-/*--------------------------------------------------------------------------*/
 /* Encode 'length' bytes from the input buffer and store the
    encoded stream into the output buffer. Return the length of the encoded
    buffer (output). Note that the output buffer must be allocated by the caller
@@ -135,7 +127,6 @@ size_t kwsysBase64_Encode(const unsigned char* input, size_t length,
   return (size_t)(optr - output);
 }
 
-/*--------------------------------------------------------------------------*/
 /* Decode 4 bytes into a 3 byte string. */
 int kwsysBase64_Decode3(const unsigned char* src, unsigned char* dest)
 {
@@ -169,7 +160,6 @@ int kwsysBase64_Decode3(const unsigned char* src, unsigned char* dest)
   return 3;
 }
 
-/*--------------------------------------------------------------------------*/
 /* Decode bytes from the input buffer and store the decoded stream
    into the output buffer until 'length' bytes have been decoded.  Return the
    real length of the decoded stream (which should be equal to 'length'). Note

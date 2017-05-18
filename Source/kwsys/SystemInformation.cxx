@@ -838,7 +838,6 @@ void SystemInformation::RunMemoryCheck()
   this->Implementation->RunMemoryCheck();
 }
 
-// --------------------------------------------------------------
 // SystemInformationImplementation starts here
 
 #define STORE_TLBCACHE_INFO(x, y) x = (x < (y)) ? (y) : x
@@ -1314,7 +1313,6 @@ private:
   int ReportPath;
 };
 
-// --------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& os, const SymbolProperties& sp)
 {
 #if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
@@ -1333,7 +1331,6 @@ std::ostream& operator<<(std::ostream& os, const SymbolProperties& sp)
   return os;
 }
 
-// --------------------------------------------------------------------------
 SymbolProperties::SymbolProperties()
 {
   // not using an initializer list
@@ -1352,7 +1349,6 @@ SymbolProperties::SymbolProperties()
   this->GetLineNumber();
 }
 
-// --------------------------------------------------------------------------
 std::string SymbolProperties::GetFileName(const std::string& path) const
 {
   std::string file(path);
@@ -1365,7 +1361,6 @@ std::string SymbolProperties::GetFileName(const std::string& path) const
   return file;
 }
 
-// --------------------------------------------------------------------------
 std::string SymbolProperties::GetBinary() const
 {
 // only linux has proc fs
@@ -1386,7 +1381,6 @@ std::string SymbolProperties::GetBinary() const
   return this->GetFileName(this->Binary);
 }
 
-// --------------------------------------------------------------------------
 std::string SymbolProperties::Demangle(const char* symbol) const
 {
   std::string result = safes(symbol);
@@ -1406,7 +1400,6 @@ std::string SymbolProperties::Demangle(const char* symbol) const
   return result;
 }
 
-// --------------------------------------------------------------------------
 void SymbolProperties::Initialize(void* address)
 {
   this->Address = address;
@@ -1425,7 +1418,6 @@ void SymbolProperties::Initialize(void* address)
 }
 #endif // don't define this class if we're not using it
 
-// --------------------------------------------------------------------------
 #if defined(_WIN32) || defined(__CYGWIN__)
 #define KWSYS_SYSTEMINFORMATION_USE_GetSystemTimes
 #endif

@@ -22,7 +22,6 @@ typedef ptrdiff_t kwsysSystem_ptrdiff_t;
 typedef int kwsysSystem_ptrdiff_t;
 #endif
 
-/*--------------------------------------------------------------------------*/
 static int kwsysSystem__AppendByte(char* local, char** begin, char** end,
                                    int* size, char c)
 {
@@ -47,7 +46,6 @@ static int kwsysSystem__AppendByte(char* local, char** begin, char** end,
   return 1;
 }
 
-/*--------------------------------------------------------------------------*/
 static int kwsysSystem__AppendArgument(char** local, char*** begin,
                                        char*** end, int* size, char* arg_local,
                                        char** arg_begin, char** arg_end,
@@ -91,7 +89,6 @@ static int kwsysSystem__AppendArgument(char** local, char*** begin,
   return 1;
 }
 
-/*--------------------------------------------------------------------------*/
 #define KWSYSPE_LOCAL_BYTE_COUNT 1024
 #define KWSYSPE_LOCAL_ARGS_COUNT 32
 static char** kwsysSystem__ParseUnixCommand(const char* command, int flags)
@@ -227,7 +224,6 @@ static char** kwsysSystem__ParseUnixCommand(const char* command, int flags)
   return newCommand;
 }
 
-/*--------------------------------------------------------------------------*/
 char** kwsysSystem_Parse_CommandForUnix(const char* command, int flags)
 {
   /* Validate the flags.  */
