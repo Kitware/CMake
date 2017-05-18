@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 project(TestFindGTest CXX)
 include(CTest)
 
-# CMake does not actually provide FindGTest publicly.
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../Source/Modules)
-
 find_package(GTest REQUIRED)
 
 add_executable(test_gtest_tgt main.cxx)

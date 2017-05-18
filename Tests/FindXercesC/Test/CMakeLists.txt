@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 project(TestFindXercesC CXX)
 include(CTest)
 
-# CMake does not actually provide FindXercesC publicly.
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../Source/Modules)
-
 find_package(XercesC REQUIRED)
 
 add_executable(test_xercesc_tgt main.cxx)
