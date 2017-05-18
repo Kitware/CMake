@@ -25,6 +25,28 @@ cmCPackArchiveGenerator::~cmCPackArchiveGenerator()
 {
 }
 
+std::string cmCPackArchiveGenerator::GetArchiveComponentFileName(
+  const std::string& component, bool isGroupName)
+{
+  std::string componentUpper(cmSystemTools::UpperCase(component));
+  std::string packageFileName;
+
+  if (this->IsSet("CPACK_ARCHIVE_" + componentUpper + "_FILE_NAME")) {
+    packageFileName +=
+      this->GetOption("CPACK_ARCHIVE_" + componentUpper + "_FILE_NAME");
+  } else if (this->IsSet("CPACK_ARCHIVE_FILE_NAME")) {
+    packageFileName += GetComponentPackageFileName(
+      this->GetOption("CPACK_ARCHIVE_FILE_NAME"), component, isGroupName);
+  } else {
+    packageFileName += GetComponentPackageFileName(
+      this->GetOption("CPACK_PACKAGE_FILE_NAME"), component, isGroupName);
+  }
+
+  packageFileName += this->GetOutputExtension();
+
+  return packageFileName;
+}
+
 int cmCPackArchiveGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "1");
@@ -101,11 +123,9 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Packaging component group: "
                       << compGIt->first << std::endl);
       // Begin the archive for this group
-      std::string packageFileName = std::string(toplevel);
-      packageFileName += "/" +
-        GetComponentPackageFileName(this->GetOption("CPACK_PACKAGE_FILE_NAME"),
-                                    compGIt->first, true) +
-        this->GetOutputExtension();
+      std::string packageFileName = std::string(toplevel) + "/" +
+        this->GetArchiveComponentFileName(compGIt->first, true);
+
       // open a block in order to automatically close archive
       // at the end of the block
       {
@@ -137,10 +157,9 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
         std::string packageFileName = std::string(toplevel);
 
         localToplevel += "/" + compIt->first;
-        packageFileName += "/" + GetComponentPackageFileName(
-                                   this->GetOption("CPACK_PACKAGE_FILE_NAME"),
-                                   compIt->first, false) +
-          this->GetOutputExtension();
+        packageFileName +=
+          "/" + this->GetArchiveComponentFileName(compIt->first, false);
+
         {
           DECLARE_AND_OPEN_ARCHIVE(packageFileName, archive);
           // Add the files of this component to the archive
@@ -161,10 +180,9 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
       std::string packageFileName = std::string(toplevel);
 
       localToplevel += "/" + compIt->first;
-      packageFileName += "/" +
-        GetComponentPackageFileName(this->GetOption("CPACK_PACKAGE_FILE_NAME"),
-                                    compIt->first, false) +
-        this->GetOutputExtension();
+      packageFileName +=
+        "/" + this->GetArchiveComponentFileName(compIt->first, false);
+
       {
         DECLARE_AND_OPEN_ARCHIVE(packageFileName, archive);
         // Add the files of this component to the archive
@@ -182,9 +200,16 @@ int cmCPackArchiveGenerator::PackageComponentsAllInOne()
   // reset the package file names
   packageFileNames.clear();
   packageFileNames.push_back(std::string(toplevel));
-  packageFileNames[0] += "/" +
-    std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")) +
-    this->GetOutputExtension();
+  packageFileNames[0] += "/";
+
+  if (this->IsSet("CPACK_ARCHIVE_FILE_NAME")) {
+    packageFileNames[0] += this->GetOption("CPACK_ARCHIVE_FILE_NAME");
+  } else {
+    packageFileNames[0] += this->GetOption("CPACK_PACKAGE_FILE_NAME");
+  }
+
+  packageFileNames[0] += this->GetOutputExtension();
+
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Packaging all groups in one package..."
                 "(CPACK_COMPONENTS_ALL_GROUPS_IN_ONE_PACKAGE is set)"

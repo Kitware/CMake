@@ -54,6 +54,7 @@ All Modules
    /module/CMakePrintSystemInformation
    /module/CMakePushCheckState
    /module/CMakeVerifyManifest
+   /module/CPackArchive
    /module/CPackBundle
    /module/CPackComponent
    /module/CPackCygwin

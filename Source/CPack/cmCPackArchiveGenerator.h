@@ -34,6 +34,11 @@ public:
   // component support
   bool SupportsComponentInstallation() const CM_OVERRIDE;
 
+private:
+  // get archive component filename
+  std::string GetArchiveComponentFileName(const std::string& component,
+                                          bool isGroupName);
+
 protected:
   int InitializeInternal() CM_OVERRIDE;
   /**
