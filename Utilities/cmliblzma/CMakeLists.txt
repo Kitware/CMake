@@ -15,11 +15,11 @@ CHECK_C_SOURCE_COMPILES(
   HAVE___RESTRICT)
 
 CHECK_C_SOURCE_COMPILES(
-  "inline int test (void) {return 0;}\nint main (void) {return test();}"
+  "static inline int test (void) {return 0;}\nint main (void) {return test();}"
   HAVE_INLINE)
 
 CHECK_C_SOURCE_COMPILES (
-  "__inline int test (void) {return 0;}\nint main (void) {return test();}"
+  "static __inline int test (void) {return 0;}\nint main (void) {return test();}"
   HAVE___INLINE)
 
 CHECK_INCLUDE_FILE(byteswap.h HAVE_BYTESWAP_H)
