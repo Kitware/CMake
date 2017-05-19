@@ -4,7 +4,7 @@
 #define testLibNoSONAME_EXPORT
 #endif
 
-testLibNoSONAME_EXPORT int testLibNoSONAME(void)
+testLibNoSONAME_EXPORT int testLibNoSoName(void)
 {
   return 0;
 }
