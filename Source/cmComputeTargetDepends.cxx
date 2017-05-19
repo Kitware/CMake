@@ -238,7 +238,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
         // Don't emit the same library twice for this target.
         if (emitted.insert(*lib).second) {
           this->AddTargetDepend(depender_index, *lib, true);
-          this->AddInterfaceDepends(depender_index, *lib, emitted);
+          this->AddInterfaceDepends(depender_index, *lib, *it, emitted);
         }
       }
     }
@@ -273,7 +273,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
       // Don't emit the same library twice for this target.
       if (emitted.insert(*lib).second) {
         this->AddTargetDepend(depender_index, *lib, true);
-        this->AddInterfaceDepends(depender_index, *lib, emitted);
+        this->AddInterfaceDepends(depender_index, *lib, config, emitted);
       }
     }
   }
@@ -281,7 +281,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
 
 void cmComputeTargetDepends::AddInterfaceDepends(
   int depender_index, cmLinkItem const& dependee_name,
-  std::set<std::string>& emitted)
+  const std::string& config, std::set<std::string>& emitted)
 {
   cmGeneratorTarget const* depender = this->Targets[depender_index];
   cmGeneratorTarget const* dependee = dependee_name.Target;
@@ -294,15 +294,9 @@ void cmComputeTargetDepends::AddInterfaceDepends(
   }
 
   if (dependee) {
-    this->AddInterfaceDepends(depender_index, dependee, "", emitted);
-    std::vector<std::string> configs;
-    depender->Makefile->GetConfigurations(configs);
-    for (std::vector<std::string>::const_iterator it = configs.begin();
-         it != configs.end(); ++it) {
-      // A target should not depend on itself.
-      emitted.insert(depender->GetName());
-      this->AddInterfaceDepends(depender_index, dependee, *it, emitted);
-    }
+    // A target should not depend on itself.
+    emitted.insert(depender->GetName());
+    this->AddInterfaceDepends(depender_index, dependee, config, emitted);
   }
 }
 
