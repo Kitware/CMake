@@ -10,6 +10,7 @@
 #include "cmsys/String.h"
 #include <algorithm>
 #include <assert.h>
+#include <deque>
 #include <functional>
 #include <iterator>
 #include <sstream>
@@ -585,6 +586,9 @@ void cmFindPackageCommand::SetModuleVariables(const std::string& components)
     exact += "_FIND_VERSION_EXACT";
     this->AddFindDefinition(exact, this->VersionExact ? "1" : "0");
   }
+
+  // Push on to the pacakge stack
+  this->Makefile->FindPackageModuleStack.push_back(this->Name);
 }
 
 void cmFindPackageCommand::AddFindDefinition(const std::string& var,
@@ -1059,6 +1063,9 @@ void cmFindPackageCommand::AppendSuccessInformation()
 
   // Restore original state of "_FIND_" variables we set.
   this->RestoreFindDefinitions();
+
+  // Pop the package stack
+  this->Makefile->FindPackageModuleStack.pop_back();
 }
 
 void cmFindPackageCommand::ComputePrefixes()

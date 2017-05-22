@@ -10,6 +10,8 @@
 #include "cmSystemTools.h"
 
 cmFindCommon::PathGroup cmFindCommon::PathGroup::All("ALL");
+cmFindCommon::PathLabel cmFindCommon::PathLabel::PackageRoot(
+  "PacakgeName_ROOT");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMake("CMAKE");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMakeEnvironment(
   "CMAKE_ENVIRONMENT");
@@ -23,6 +25,7 @@ cmFindCommon::cmFindCommon()
 {
   this->FindRootPathMode = RootPathModeBoth;
   this->NoDefaultPath = false;
+  this->NoPackageRootPath = false;
   this->NoCMakePath = false;
   this->NoCMakeEnvironmentPath = false;
   this->NoSystemEnvironmentPath = false;
@@ -57,6 +60,7 @@ void cmFindCommon::InitializeSearchPathGroups()
 
   // All search paths
   labels = &this->PathGroupLabelMap[PathGroup::All];
+  labels->push_back(PathLabel::PackageRoot);
   labels->push_back(PathLabel::CMake);
   labels->push_back(PathLabel::CMakeEnvironment);
   labels->push_back(PathLabel::Hints);
@@ -68,6 +72,8 @@ void cmFindCommon::InitializeSearchPathGroups()
   this->PathGroupOrder.push_back(PathGroup::All);
 
   // Create the idividual labeld search paths
+  this->LabeledPaths.insert(
+    std::make_pair(PathLabel::PackageRoot, cmSearchPath(this)));
   this->LabeledPaths.insert(
     std::make_pair(PathLabel::CMake, cmSearchPath(this)));
   this->LabeledPaths.insert(
@@ -271,10 +277,12 @@ bool cmFindCommon::CheckCommonArgument(std::string const& arg)
 {
   if (arg == "NO_DEFAULT_PATH") {
     this->NoDefaultPath = true;
-  } else if (arg == "NO_CMAKE_ENVIRONMENT_PATH") {
-    this->NoCMakeEnvironmentPath = true;
+  } else if (arg == "NO_PACKAGE_ROOT_PATH") {
+    this->NoPackageRootPath = true;
   } else if (arg == "NO_CMAKE_PATH") {
     this->NoCMakePath = true;
+  } else if (arg == "NO_CMAKE_ENVIRONMENT_PATH") {
+    this->NoCMakeEnvironmentPath = true;
   } else if (arg == "NO_SYSTEM_ENVIRONMENT_PATH") {
     this->NoSystemEnvironmentPath = true;
   } else if (arg == "NO_CMAKE_SYSTEM_PATH") {

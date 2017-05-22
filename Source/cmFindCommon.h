@@ -55,6 +55,7 @@ protected:
       : cmPathLabel(label)
     {
     }
+    static PathLabel PackageRoot;
     static PathLabel CMake;
     static PathLabel CMakeEnvironment;
     static PathLabel Hints;
@@ -105,6 +106,7 @@ protected:
   void AddPathSuffix(std::string const& arg);
 
   bool NoDefaultPath;
+  bool NoPackageRootPath;
   bool NoCMakePath;
   bool NoCMakeEnvironmentPath;
   bool NoSystemEnvironmentPath;
