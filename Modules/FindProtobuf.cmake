@@ -42,11 +42,11 @@
 #
 # The following :prop_tgt:`IMPORTED` targets are also defined:
 #
-# ``Protobuf::protobuf``
+# ``protobuf::libprotobuf``
 #   The protobuf library.
-# ``Protobuf::protobuf-lite``
+# ``protobuf::libprotobuf-lite``
 #   The protobuf lite library.
-# ``Protobuf::protoc``
+# ``protobuf::libprotoc``
 #   The protoc library.
 #
 # The following cache variables are also available to set or use:
@@ -420,72 +420,72 @@ if(Protobuf_INCLUDE_DIR)
   endif()
 
   if(Protobuf_LIBRARY)
-      if(NOT TARGET Protobuf::protobuf)
-          add_library(Protobuf::protobuf UNKNOWN IMPORTED)
-          set_target_properties(Protobuf::protobuf PROPERTIES
+      if(NOT TARGET protobuf::libprotobuf)
+          add_library(protobuf::libprotobuf UNKNOWN IMPORTED)
+          set_target_properties(protobuf::libprotobuf PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${Protobuf_INCLUDE_DIR}")
           if(EXISTS "${Protobuf_LIBRARY}")
-            set_target_properties(Protobuf::protobuf PROPERTIES
+            set_target_properties(protobuf::libprotobuf PROPERTIES
               IMPORTED_LOCATION "${Protobuf_LIBRARY}")
           endif()
           if(EXISTS "${Protobuf_LIBRARY_RELEASE}")
-            set_property(TARGET Protobuf::protobuf APPEND PROPERTY
+            set_property(TARGET protobuf::libprotobuf APPEND PROPERTY
               IMPORTED_CONFIGURATIONS RELEASE)
-            set_target_properties(Protobuf::protobuf PROPERTIES
+            set_target_properties(protobuf::libprotobuf PROPERTIES
               IMPORTED_LOCATION_RELEASE "${Protobuf_LIBRARY_RELEASE}")
           endif()
           if(EXISTS "${Protobuf_LIBRARY_DEBUG}")
-            set_property(TARGET Protobuf::protobuf APPEND PROPERTY
+            set_property(TARGET protobuf::libprotobuf APPEND PROPERTY
               IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(Protobuf::protobuf PROPERTIES
+            set_target_properties(protobuf::libprotobuf PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_LIBRARY_DEBUG}")
           endif()
       endif()
   endif()
 
   if(Protobuf_LITE_LIBRARY)
-      if(NOT TARGET Protobuf::protobuf-lite)
-          add_library(Protobuf::protobuf-lite UNKNOWN IMPORTED)
-          set_target_properties(Protobuf::protobuf-lite PROPERTIES
+      if(NOT TARGET protobuf::libprotobuf-lite)
+          add_library(protobuf::libprotobuf-lite UNKNOWN IMPORTED)
+          set_target_properties(protobuf::libprotobuf-lite PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${Protobuf_INCLUDE_DIR}")
           if(EXISTS "${Protobuf_LITE_LIBRARY}")
-            set_target_properties(Protobuf::protobuf-lite PROPERTIES
+            set_target_properties(protobuf::libprotobuf-lite PROPERTIES
               IMPORTED_LOCATION "${Protobuf_LITE_LIBRARY}")
           endif()
           if(EXISTS "${Protobuf_LITE_LIBRARY_RELEASE}")
-            set_property(TARGET Protobuf::protobuf-lite APPEND PROPERTY
+            set_property(TARGET protobuf::libprotobuf-lite APPEND PROPERTY
               IMPORTED_CONFIGURATIONS RELEASE)
-            set_target_properties(Protobuf::protobuf-lite PROPERTIES
+            set_target_properties(protobuf::libprotobuf-lite PROPERTIES
               IMPORTED_LOCATION_RELEASE "${Protobuf_LITE_LIBRARY_RELEASE}")
           endif()
           if(EXISTS "${Protobuf_LITE_LIBRARY_DEBUG}")
-            set_property(TARGET Protobuf::protobuf-lite APPEND PROPERTY
+            set_property(TARGET protobuf::libprotobuf-lite APPEND PROPERTY
               IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(Protobuf::protobuf-lite PROPERTIES
+            set_target_properties(protobuf::libprotobuf-lite PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_LITE_LIBRARY_DEBUG}")
           endif()
       endif()
   endif()
 
   if(Protobuf_PROTOC_LIBRARY)
-      if(NOT TARGET Protobuf::protoc)
-          add_library(Protobuf::protoc UNKNOWN IMPORTED)
-          set_target_properties(Protobuf::protoc PROPERTIES
+      if(NOT TARGET protobuf::libprotoc)
+          add_library(protobuf::libprotoc UNKNOWN IMPORTED)
+          set_target_properties(protobuf::libprotoc PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${Protobuf_INCLUDE_DIR}")
           if(EXISTS "${Protobuf_PROTOC_LIBRARY}")
-            set_target_properties(Protobuf::protoc PROPERTIES
+            set_target_properties(protobuf::libprotoc PROPERTIES
               IMPORTED_LOCATION "${Protobuf_PROTOC_LIBRARY}")
           endif()
           if(EXISTS "${Protobuf_PROTOC_LIBRARY_RELEASE}")
-            set_property(TARGET Protobuf::protoc APPEND PROPERTY
+            set_property(TARGET protobuf::libprotoc APPEND PROPERTY
               IMPORTED_CONFIGURATIONS RELEASE)
-            set_target_properties(Protobuf::protoc PROPERTIES
+            set_target_properties(protobuf::libprotoc PROPERTIES
               IMPORTED_LOCATION_RELEASE "${Protobuf_PROTOC_LIBRARY_RELEASE}")
           endif()
           if(EXISTS "${Protobuf_PROTOC_LIBRARY_DEBUG}")
-            set_property(TARGET Protobuf::protoc APPEND PROPERTY
+            set_property(TARGET protobuf::libprotoc APPEND PROPERTY
               IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(Protobuf::protoc PROPERTIES
+            set_target_properties(protobuf::libprotoc PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_PROTOC_LIBRARY_DEBUG}")
           endif()
       endif()
