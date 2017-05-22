@@ -3,10 +3,15 @@ function(cm_check_cxx_feature name)
   string(TOUPPER ${name} FEATURE)
   if(NOT DEFINED CMake_HAVE_CXX_${FEATURE})
     message(STATUS "Checking if compiler supports C++ ${name}")
+    if(CMAKE_CXX_STANDARD)
+      set(maybe_cxx_standard -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD})
+    else()
+      set(maybe_cxx_standard "")
+    endif()
     try_compile(CMake_HAVE_CXX_${FEATURE}
       ${CMAKE_CURRENT_BINARY_DIR}
       ${CMAKE_CURRENT_LIST_DIR}/cm_cxx_${name}.cxx
-      CMAKE_FLAGS -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+      CMAKE_FLAGS ${maybe_cxx_standard}
       OUTPUT_VARIABLE OUTPUT
       )
     # If using the feature causes warnings, treat it as broken/unavailable.
@@ -31,16 +36,14 @@ function(cm_check_cxx_feature name)
   endif()
 endfunction()
 
-if(CMAKE_CXX_STANDARD)
-  cm_check_cxx_feature(auto_ptr)
-  cm_check_cxx_feature(eq_delete)
-  cm_check_cxx_feature(make_unique)
-  if(CMake_HAVE_CXX_MAKE_UNIQUE)
-    set(CMake_HAVE_CXX_UNIQUE_PTR 1)
-  endif()
-  cm_check_cxx_feature(nullptr)
-  cm_check_cxx_feature(override)
-  cm_check_cxx_feature(unique_ptr)
-  cm_check_cxx_feature(unordered_map)
-  cm_check_cxx_feature(unordered_set)
+cm_check_cxx_feature(auto_ptr)
+cm_check_cxx_feature(eq_delete)
+cm_check_cxx_feature(make_unique)
+if(CMake_HAVE_CXX_MAKE_UNIQUE)
+  set(CMake_HAVE_CXX_UNIQUE_PTR 1)
 endif()
+cm_check_cxx_feature(nullptr)
+cm_check_cxx_feature(override)
+cm_check_cxx_feature(unique_ptr)
+cm_check_cxx_feature(unordered_map)
+cm_check_cxx_feature(unordered_set)
