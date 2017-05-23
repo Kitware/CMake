@@ -982,19 +982,21 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   const char* mfcFlag =
     this->GeneratorTarget->Target->GetMakefile()->GetDefinition(
       "CMAKE_MFC_FLAG");
-  std::string mfcFlagValue = mfcFlag ? mfcFlag : "0";
+  if (mfcFlag) {
+    std::string const mfcFlagValue = mfcFlag;
 
-  std::string useOfMfcValue = "false";
-  if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
-    if (mfcFlagValue == "1") {
-      useOfMfcValue = "Static";
-    } else if (mfcFlagValue == "2") {
-      useOfMfcValue = "Dynamic";
+    std::string useOfMfcValue = "false";
+    if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
+      if (mfcFlagValue == "1") {
+        useOfMfcValue = "Static";
+      } else if (mfcFlagValue == "2") {
+        useOfMfcValue = "Dynamic";
+      }
     }
+    std::string mfcLine = "<UseOfMfc>";
+    mfcLine += useOfMfcValue + "</UseOfMfc>\n";
+    this->WriteString(mfcLine.c_str(), 2);
   }
-  std::string mfcLine = "<UseOfMfc>";
-  mfcLine += useOfMfcValue + "</UseOfMfc>\n";
-  this->WriteString(mfcLine.c_str(), 2);
 
   if ((this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY &&
        this->ClOptions[config]->UsingUnicode()) ||
