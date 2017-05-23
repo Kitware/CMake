@@ -338,7 +338,7 @@ private:
   }
   bool decodeInputBuffer(const std::string buffer, std::wstring& wbuffer)
   {
-    int length = int(buffer.length());
+    size_t length = buffer.length();
     if (length == 0) {
       wbuffer = std::wstring();
       return true;
@@ -353,11 +353,12 @@ private:
       data += BOMsize;
       length -= BOMsize;
     }
-    const int wlength =
-      MultiByteToWideChar(actualCodepage, 0, data, length, NULL, 0);
+    const size_t wlength = static_cast<size_t>(MultiByteToWideChar(
+      actualCodepage, 0, data, static_cast<int>(length), NULL, 0));
     wchar_t* wbuf = new wchar_t[wlength];
     const bool success =
-      MultiByteToWideChar(actualCodepage, 0, data, length, wbuf, wlength) > 0
+      MultiByteToWideChar(actualCodepage, 0, data, static_cast<int>(length),
+                          wbuf, static_cast<int>(wlength)) > 0
       ? true
       : false;
     wbuffer = std::wstring(wbuf, wlength);
