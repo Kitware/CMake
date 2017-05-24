@@ -348,12 +348,12 @@ bool cmSystemTools::IsInternallyOn(const char* val)
   if (!val) {
     return false;
   }
-  std::basic_string<char> v = val;
+  std::string v = val;
   if (v.size() > 4) {
     return false;
   }
 
-  for (std::basic_string<char>::iterator c = v.begin(); c != v.end(); c++) {
+  for (std::string::iterator c = v.begin(); c != v.end(); c++) {
     *c = static_cast<char>(toupper(*c));
   }
   return v == "I_ON";
@@ -368,7 +368,7 @@ bool cmSystemTools::IsOn(const char* val)
   if (len > 4) {
     return false;
   }
-  std::basic_string<char> v(val, len);
+  std::string v(val, len);
 
   static std::set<std::string> onValues;
   if (onValues.empty()) {
@@ -378,7 +378,7 @@ bool cmSystemTools::IsOn(const char* val)
     onValues.insert("TRUE");
     onValues.insert("Y");
   }
-  for (std::basic_string<char>::iterator c = v.begin(); c != v.end(); c++) {
+  for (std::string::iterator c = v.begin(); c != v.end(); c++) {
     *c = static_cast<char>(toupper(*c));
   }
   return (onValues.count(v) > 0);
@@ -413,8 +413,8 @@ bool cmSystemTools::IsOff(const char* val)
     offValues.insert("IGNORE");
   }
   // Try and avoid toupper().
-  std::basic_string<char> v(val, len);
-  for (std::basic_string<char>::iterator c = v.begin(); c != v.end(); c++) {
+  std::string v(val, len);
+  for (std::string::iterator c = v.begin(); c != v.end(); c++) {
     *c = static_cast<char>(toupper(*c));
   }
   return (offValues.count(v) > 0);
