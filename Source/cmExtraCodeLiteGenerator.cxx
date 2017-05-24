@@ -240,7 +240,7 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
         bool isCFile = false;
         std::string lang = (*si)->GetLanguage();
         if (lang == "C" || lang == "CXX") {
-          std::string srcext = (*si)->GetExtension();
+          std::string const& srcext = (*si)->GetExtension();
           for (std::vector<std::string>::const_iterator ext = srcExts.begin();
                ext != srcExts.end(); ++ext) {
             if (srcext == *ext) {

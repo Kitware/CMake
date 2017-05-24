@@ -924,7 +924,7 @@ bool cmFindPackageCommand::FindConfig()
 
 bool cmFindPackageCommand::FindPrefixedConfig()
 {
-  std::vector<std::string>& prefixes = this->SearchPaths;
+  std::vector<std::string> const& prefixes = this->SearchPaths;
   for (std::vector<std::string>::const_iterator pi = prefixes.begin();
        pi != prefixes.end(); ++pi) {
     if (this->SearchPrefix(*pi)) {
@@ -936,7 +936,7 @@ bool cmFindPackageCommand::FindPrefixedConfig()
 
 bool cmFindPackageCommand::FindFrameworkConfig()
 {
-  std::vector<std::string>& prefixes = this->SearchPaths;
+  std::vector<std::string> const& prefixes = this->SearchPaths;
   for (std::vector<std::string>::const_iterator i = prefixes.begin();
        i != prefixes.end(); ++i) {
     if (this->SearchFrameworkPrefix(*i)) {
@@ -948,7 +948,7 @@ bool cmFindPackageCommand::FindFrameworkConfig()
 
 bool cmFindPackageCommand::FindAppBundleConfig()
 {
-  std::vector<std::string>& prefixes = this->SearchPaths;
+  std::vector<std::string> const& prefixes = this->SearchPaths;
   for (std::vector<std::string>::const_iterator i = prefixes.begin();
        i != prefixes.end(); ++i) {
     if (this->SearchAppBundlePrefix(*i)) {

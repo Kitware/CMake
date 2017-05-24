@@ -20,7 +20,7 @@ bool cmGetCMakePropertyCommand::InitialPass(
     return false;
   }
 
-  std::string variable = args[0];
+  std::string const& variable = args[0];
   std::string output = "NOTFOUND";
 
   if (args[1] == "VARIABLES") {

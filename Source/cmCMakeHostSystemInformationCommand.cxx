@@ -26,7 +26,7 @@ bool cmCMakeHostSystemInformationCommand::InitialPass(
     return false;
   }
 
-  std::string variable = args[current_index + 1];
+  std::string const& variable = args[current_index + 1];
   current_index += 2;
 
   if (args.size() < (current_index + 2) || args[current_index] != "QUERY") {
@@ -41,7 +41,7 @@ bool cmCMakeHostSystemInformationCommand::InitialPass(
 
   std::string result_list;
   for (size_t i = current_index + 1; i < args.size(); ++i) {
-    std::string key = args[i];
+    std::string const& key = args[i];
     if (i != current_index + 1) {
       result_list += ";";
     }

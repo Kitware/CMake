@@ -110,7 +110,7 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("must be called with at least two arguments.");
     return false;
   }
-  std::string subCommand = args[0];
+  std::string const& subCommand = args[0];
   if (subCommand == "WRITE") {
     return this->HandleWriteCommand(args, false);
   }

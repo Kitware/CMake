@@ -301,7 +301,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 {
   bool findPackageMode = false;
   for (unsigned int i = 1; i < args.size(); ++i) {
-    std::string arg = args[i];
+    std::string const& arg = args[i];
     if (arg.find("-D", 0) == 0) {
       std::string entry = arg.substr(2);
       if (entry.empty()) {
@@ -617,7 +617,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
   bool haveToolset = false;
   bool havePlatform = false;
   for (unsigned int i = 1; i < args.size(); ++i) {
-    std::string arg = args[i];
+    std::string const& arg = args[i];
     if (arg.find("-H", 0) == 0) {
       directoriesSet = true;
       std::string path = arg.substr(2);
@@ -2146,7 +2146,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   // process the arguments
   bool writeToStdout = true;
   for (unsigned int i = 1; i < args.size(); ++i) {
-    std::string arg = args[i];
+    std::string const& arg = args[i];
     if (arg.find("-G", 0) == 0) {
       std::string value = arg.substr(2);
       if (value.empty()) {

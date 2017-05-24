@@ -24,7 +24,7 @@ bool cmAddCustomTargetCommand::InitialPass(
     return false;
   }
 
-  std::string targetName = args[0];
+  std::string const& targetName = args[0];
 
   // Check the target name.
   if (targetName.find_first_of("/\\") != targetName.npos) {

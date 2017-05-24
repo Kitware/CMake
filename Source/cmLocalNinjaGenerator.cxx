@@ -213,7 +213,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
     std::vector<std::string> pools;
     cmSystemTools::ExpandListArgument(jobpools, pools);
     for (size_t i = 0; i < pools.size(); ++i) {
-      const std::string pool = pools[i];
+      std::string const& pool = pools[i];
       const std::string::size_type eq = pool.find('=');
       unsigned int jobs;
       if (eq != std::string::npos &&

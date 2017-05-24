@@ -755,7 +755,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
          fileIt != srcFiles.end(); ++fileIt) {
       cmSourceFile* sf = *fileIt;
       if (!PropertyEnabled(sf, "SKIP_AUTOGEN")) {
-        const std::string ext = sf->GetExtension();
+        std::string const& ext = sf->GetExtension();
         // Add generated file that will be scanned by moc or uic to
         // the dependencies
         if (mocEnabled || uicEnabled) {

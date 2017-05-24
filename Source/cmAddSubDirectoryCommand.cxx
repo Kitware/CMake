@@ -20,7 +20,7 @@ bool cmAddSubDirectoryCommand::InitialPass(
   }
 
   // store the binpath
-  std::string srcArg = args[0];
+  std::string const& srcArg = args[0];
   std::string binArg;
 
   bool excludeFromAll = false;

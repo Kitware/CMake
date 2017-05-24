@@ -20,7 +20,7 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
   }
 
   std::vector<std::string>::const_iterator i = args.begin();
-  std::string variable = *i;
+  std::string const& variable = *i;
   ++i;
 
   // get the directory argument if there is one

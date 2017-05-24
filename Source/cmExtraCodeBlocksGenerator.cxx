@@ -353,7 +353,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   all_files_map_t allFiles;
   std::vector<std::string> cFiles;
 
-  std::vector<std::string> srcExts =
+  std::vector<std::string> const& srcExts =
     this->GlobalGenerator->GetCMakeInstance()->GetSourceExtensions();
 
   for (std::vector<cmLocalGenerator*>::const_iterator lg = lgs.begin();
@@ -387,7 +387,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             bool isCFile = false;
             std::string lang = (*si)->GetLanguage();
             if (lang == "C" || lang == "CXX") {
-              std::string srcext = (*si)->GetExtension();
+              std::string const& srcext = (*si)->GetExtension();
               for (std::vector<std::string>::const_iterator ext =
                      srcExts.begin();
                    ext != srcExts.end(); ++ext) {
@@ -398,7 +398,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
               }
             }
 
-            std::string fullPath = (*si)->GetFullPath();
+            std::string const& fullPath = (*si)->GetFullPath();
 
             if (isCFile) {
               cFiles.push_back(fullPath);
@@ -414,7 +414,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
     }
   }
 
-  std::vector<std::string> headerExts =
+  std::vector<std::string> const& headerExts =
     this->GlobalGenerator->GetCMakeInstance()->GetHeaderExtensions();
 
   // The following loop tries to add header files matching to implementation

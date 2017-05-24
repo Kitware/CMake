@@ -21,7 +21,7 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args,
   std::string message;
   std::vector<std::string>::const_iterator i = args.begin();
 
-  std::string fileName = *i;
+  std::string const& fileName = *i;
   bool overwrite = true;
   i++;
 
