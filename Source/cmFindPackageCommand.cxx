@@ -731,104 +731,116 @@ bool cmFindPackageCommand::HandlePackageMode()
     }
   }
 
-  if (result && !found && (!this->Quiet || this->Required)) {
-    // The variable is not set.
-    std::ostringstream e;
-    std::ostringstream aw;
-    if (configFileSetFOUNDFalse) {
-      /* clang-format off */
-      e << "Found package configuration file:\n"
-        "  " << this->FileFound << "\n"
-        "but it set " << foundVar << " to FALSE so package \"" <<
-        this->Name << "\" is considered to be NOT FOUND.";
-      /* clang-format on */
-      if (!notFoundMessage.empty()) {
-        e << " Reason given by package: \n" << notFoundMessage << "\n";
+  // package not found
+  if (result && !found) {
+    // warn if package required or neither quiet nor in config mode
+    if (this->Required || !(this->Quiet || (this->UseConfigFiles && !this->UseFindModules))) {
+      // The variable is not set.
+      std::ostringstream e;
+      std::ostringstream aw;
+      if (configFileSetFOUNDFalse) {
+        /* clang-format off */
+        e << "Found package configuration file:\n"
+          "  " << this->FileFound << "\n"
+          "but it set " << foundVar << " to FALSE so package \"" <<
+          this->Name << "\" is considered to be NOT FOUND.";
+        /* clang-format on */
+        if (!notFoundMessage.empty()) {
+          e << " Reason given by package: \n" << notFoundMessage << "\n";
+        }
       }
-    }
-    // If there are files in ConsideredConfigs, it means that FooConfig.cmake
-    // have been found, but they didn't have appropriate versions.
-    else if (!this->ConsideredConfigs.empty()) {
-      std::vector<ConfigFileInfo>::const_iterator duplicate_end =
-        cmRemoveDuplicates(this->ConsideredConfigs);
-      e << "Could not find a configuration file for package \"" << this->Name
-        << "\" that "
-        << (this->VersionExact ? "exactly matches" : "is compatible with")
-        << " requested version \"" << this->Version << "\".\n"
-        << "The following configuration files were considered but not "
-           "accepted:\n";
-      for (std::vector<ConfigFileInfo>::const_iterator i =
-             this->ConsideredConfigs.begin();
-           i != duplicate_end; ++i) {
-        e << "  " << i->filename << ", version: " << i->version << "\n";
-      }
-    } else {
-      std::string requestedVersionString;
-      if (!this->Version.empty()) {
-        requestedVersionString = " (requested version ";
-        requestedVersionString += this->Version;
-        requestedVersionString += ")";
-      }
-
-      if (this->UseConfigFiles) {
-        if (this->UseFindModules) {
-          e << "By not providing \"Find" << this->Name
-            << ".cmake\" in "
-               "CMAKE_MODULE_PATH this project has asked CMake to find a "
-               "package configuration file provided by \""
-            << this->Name << "\", "
-                             "but CMake did not find one.\n";
+      // If there are files in ConsideredConfigs, it means that FooConfig.cmake
+      // have been found, but they didn't have appropriate versions.
+      else if (!this->ConsideredConfigs.empty()) {
+        std::vector<ConfigFileInfo>::const_iterator duplicate_end =
+          cmRemoveDuplicates(this->ConsideredConfigs);
+        e << "Could not find a configuration file for package \"" << this->Name
+          << "\" that "
+          << (this->VersionExact ? "exactly matches" : "is compatible with")
+          << " requested version \"" << this->Version << "\".\n"
+          << "The following configuration files were considered but not "
+            "accepted:\n";
+        for (std::vector<ConfigFileInfo>::const_iterator i =
+              this->ConsideredConfigs.begin();
+            i != duplicate_end; ++i) {
+          e << "  " << i->filename << ", version: " << i->version << "\n";
+        }
+      } else {
+        std::string requestedVersionString;
+        if (!this->Version.empty()) {
+          requestedVersionString = " (requested version ";
+          requestedVersionString += this->Version;
+          requestedVersionString += ")";
         }
 
-        if (this->Configs.size() == 1) {
-          e << "Could not find a package configuration file named \""
-            << this->Configs[0] << "\" provided by package \"" << this->Name
-            << "\"" << requestedVersionString << ".\n";
-        } else {
-          e << "Could not find a package configuration file provided by \""
-            << this->Name << "\"" << requestedVersionString
-            << " with any of the following names:\n"
-            << cmWrap("  ", this->Configs, "", "\n") << "\n";
+        if (this->UseConfigFiles) {
+          if (this->UseFindModules) {
+            e << "By not providing \"Find" << this->Name
+              << ".cmake\" in "
+                "CMAKE_MODULE_PATH this project has asked CMake to find a "
+                "package configuration file provided by \""
+              << this->Name << "\", "
+                              "but CMake did not find one.\n";
+          }
+
+          if (this->Configs.size() == 1) {
+            e << "Could not find a package configuration file named \""
+              << this->Configs[0] << "\" provided by package \"" << this->Name
+              << "\"" << requestedVersionString << ".\n";
+          } else {
+            e << "Could not find a package configuration file provided by \""
+              << this->Name << "\"" << requestedVersionString
+              << " with any of the following names:\n"
+              << cmWrap("  ", this->Configs, "", "\n") << "\n";
+          }
+
+          e << "Add the installation prefix of \"" << this->Name
+            << "\" to "
+              "CMAKE_PREFIX_PATH or set \""
+            << this->Variable << "\" to a "
+                                "directory containing one of the above files. "
+                                "If \""
+            << this->Name << "\" provides a separate development "
+                            "package or SDK, be sure it has been installed.";
+        } else // if(!this->UseFindModules && !this->UseConfigFiles)
+        {
+          e << "No \"Find" << this->Name << ".cmake\" found in "
+            << "CMAKE_MODULE_PATH.";
+
+          aw << "Find" << this->Name
+             << ".cmake must either be part of this "
+                "project itself, in this case adjust CMAKE_MODULE_PATH so that "
+                "it points to the correct location inside its source tree.\n"
+                "Or it must be installed by a package which has already been "
+                "found via find_package().  In this case make sure that "
+                "package has indeed been found and adjust CMAKE_MODULE_PATH to "
+                "contain the location where that package has installed "
+                "Find"
+             << this->Name
+             << ".cmake.  This must be a location "
+                "provided by that package.  This error in general means that "
+                "the buildsystem of this project is relying on a Find-module "
+                "without ensuring that it is actually available.\n";
         }
+      }
 
-        e << "Add the installation prefix of \"" << this->Name
-          << "\" to "
-             "CMAKE_PREFIX_PATH or set \""
-          << this->Variable << "\" to a "
-                               "directory containing one of the above files. "
-                               "If \""
-          << this->Name << "\" provides a separate development "
-                           "package or SDK, be sure it has been installed.";
-      } else // if(!this->UseFindModules && !this->UseConfigFiles)
-      {
-        e << "No \"Find" << this->Name << ".cmake\" found in "
-          << "CMAKE_MODULE_PATH.";
+      this->Makefile->IssueMessage(
+        this->Required ? cmake::FATAL_ERROR : cmake::WARNING, e.str());
+      if (this->Required) {
+        cmSystemTools::SetFatalErrorOccured();
+      }
 
-        aw << "Find" << this->Name
-           << ".cmake must either be part of this "
-              "project itself, in this case adjust CMAKE_MODULE_PATH so that "
-              "it points to the correct location inside its source tree.\n"
-              "Or it must be installed by a package which has already been "
-              "found via find_package().  In this case make sure that "
-              "package has indeed been found and adjust CMAKE_MODULE_PATH to "
-              "contain the location where that package has installed "
-              "Find"
-           << this->Name
-           << ".cmake.  This must be a location "
-              "provided by that package.  This error in general means that "
-              "the buildsystem of this project is relying on a Find-module "
-              "without ensuring that it is actually available.\n";
+      if (!aw.str().empty()) {
+        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, aw.str());
       }
     }
-
-    this->Makefile->IssueMessage(
-      this->Required ? cmake::FATAL_ERROR : cmake::WARNING, e.str());
-    if (this->Required) {
-      cmSystemTools::SetFatalErrorOccured();
-    }
-
-    if (!aw.str().empty()) {
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, aw.str());
+    // output result if in config mode but not in quiet mode
+    else if (!this->Quiet) {
+      std::ostringstream aw;
+      aw << "Could NOT find " << this->Name
+         << " (missing: " << this->Name
+         << "-config.cmake)";
+      this->Makefile->DisplayStatus(aw.str().c_str(), -1);
     }
   }
 
