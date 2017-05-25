@@ -1,7 +1,10 @@
 include(RunCMake)
 
-run_cmake(EXACT-no-version)
-run_cmake(empty-version)
-run_cmake(empty-arg-3)
-run_cmake(invalid-arg-3)
-run_cmake(extra-args)
+# Success tests
+run_cmake(realistic)
+run_cmake(basic)
+
+# Failure tests
+run_cmake(invalid-arg)
+run_cmake(bad-version-fuzzy)
+run_cmake(bad-version-exact)
