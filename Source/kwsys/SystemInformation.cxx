@@ -845,30 +845,6 @@ void SystemInformation::RunMemoryCheck()
 #define CLASSICAL_CPU_FREQ_LOOP 10000000
 #define RDTSC_INSTRUCTION _asm _emit 0x0f _asm _emit 0x31
 
-#define MMX_FEATURE 0x00000001
-#define MMX_PLUS_FEATURE 0x00000002
-#define SSE_FEATURE 0x00000004
-#define SSE2_FEATURE 0x00000008
-#define AMD_3DNOW_FEATURE 0x00000010
-#define AMD_3DNOW_PLUS_FEATURE 0x00000020
-#define IA64_FEATURE 0x00000040
-#define MP_CAPABLE 0x00000080
-#define HYPERTHREAD_FEATURE 0x00000100
-#define SERIALNUMBER_FEATURE 0x00000200
-#define APIC_FEATURE 0x00000400
-#define SSE_FP_FEATURE 0x00000800
-#define SSE_MMX_FEATURE 0x00001000
-#define CMOV_FEATURE 0x00002000
-#define MTRR_FEATURE 0x00004000
-#define L1CACHE_FEATURE 0x00008000
-#define L2CACHE_FEATURE 0x00010000
-#define L3CACHE_FEATURE 0x00020000
-#define ACPI_FEATURE 0x00040000
-#define THERMALMONITOR_FEATURE 0x00080000
-#define TEMPSENSEDIODE_FEATURE 0x00100000
-#define FREQUENCYID_FEATURE 0x00200000
-#define VOLTAGEID_FREQUENCY 0x00400000
-
 // Status Flag
 #define HT_NOT_CAPABLE 0
 #define HT_ENABLED 1
@@ -1867,11 +1843,11 @@ int SystemInformationImplementation::GetProcessorCacheSize()
 int SystemInformationImplementation::GetProcessorCacheXSize(long int dwCacheID)
 {
   switch (dwCacheID) {
-    case L1CACHE_FEATURE:
+    case SystemInformation::CPU_FEATURE_L1CACHE:
       return this->Features.L1CacheSize;
-    case L2CACHE_FEATURE:
+    case SystemInformation::CPU_FEATURE_L2CACHE:
       return this->Features.L2CacheSize;
-    case L3CACHE_FEATURE:
+    case SystemInformation::CPU_FEATURE_L3CACHE:
       return this->Features.L3CacheSize;
   }
   return -1;
@@ -1882,102 +1858,119 @@ bool SystemInformationImplementation::DoesCPUSupportFeature(long int dwFeature)
   bool bHasFeature = false;
 
   // Check for MMX instructions.
-  if (((dwFeature & MMX_FEATURE) != 0) && this->Features.HasMMX)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_MMX) != 0) &&
+      this->Features.HasMMX)
     bHasFeature = true;
 
   // Check for MMX+ instructions.
-  if (((dwFeature & MMX_PLUS_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_MMX_PLUS) != 0) &&
       this->Features.ExtendedFeatures.HasMMXPlus)
     bHasFeature = true;
 
   // Check for SSE FP instructions.
-  if (((dwFeature & SSE_FEATURE) != 0) && this->Features.HasSSE)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_SSE) != 0) &&
+      this->Features.HasSSE)
     bHasFeature = true;
 
   // Check for SSE FP instructions.
-  if (((dwFeature & SSE_FP_FEATURE) != 0) && this->Features.HasSSEFP)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_SSE_FP) != 0) &&
+      this->Features.HasSSEFP)
     bHasFeature = true;
 
   // Check for SSE MMX instructions.
-  if (((dwFeature & SSE_MMX_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_SSE_MMX) != 0) &&
       this->Features.ExtendedFeatures.HasSSEMMX)
     bHasFeature = true;
 
   // Check for SSE2 instructions.
-  if (((dwFeature & SSE2_FEATURE) != 0) && this->Features.HasSSE2)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_SSE2) != 0) &&
+      this->Features.HasSSE2)
     bHasFeature = true;
 
   // Check for 3DNow! instructions.
-  if (((dwFeature & AMD_3DNOW_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_AMD_3DNOW) != 0) &&
       this->Features.ExtendedFeatures.Has3DNow)
     bHasFeature = true;
 
   // Check for 3DNow+ instructions.
-  if (((dwFeature & AMD_3DNOW_PLUS_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_AMD_3DNOW_PLUS) != 0) &&
       this->Features.ExtendedFeatures.Has3DNowPlus)
     bHasFeature = true;
 
   // Check for IA64 instructions.
-  if (((dwFeature & IA64_FEATURE) != 0) && this->Features.HasIA64)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_IA64) != 0) &&
+      this->Features.HasIA64)
     bHasFeature = true;
 
   // Check for MP capable.
-  if (((dwFeature & MP_CAPABLE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_MP_CAPABLE) != 0) &&
       this->Features.ExtendedFeatures.SupportsMP)
     bHasFeature = true;
 
   // Check for a serial number for the processor.
-  if (((dwFeature & SERIALNUMBER_FEATURE) != 0) && this->Features.HasSerial)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_SERIALNUMBER) != 0) &&
+      this->Features.HasSerial)
     bHasFeature = true;
 
   // Check for a local APIC in the processor.
-  if (((dwFeature & APIC_FEATURE) != 0) && this->Features.HasAPIC)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_APIC) != 0) &&
+      this->Features.HasAPIC)
     bHasFeature = true;
 
   // Check for CMOV instructions.
-  if (((dwFeature & CMOV_FEATURE) != 0) && this->Features.HasCMOV)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_CMOV) != 0) &&
+      this->Features.HasCMOV)
     bHasFeature = true;
 
   // Check for MTRR instructions.
-  if (((dwFeature & MTRR_FEATURE) != 0) && this->Features.HasMTRR)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_MTRR) != 0) &&
+      this->Features.HasMTRR)
     bHasFeature = true;
 
   // Check for L1 cache size.
-  if (((dwFeature & L1CACHE_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_L1CACHE) != 0) &&
       (this->Features.L1CacheSize != -1))
     bHasFeature = true;
 
   // Check for L2 cache size.
-  if (((dwFeature & L2CACHE_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_L2CACHE) != 0) &&
       (this->Features.L2CacheSize != -1))
     bHasFeature = true;
 
   // Check for L3 cache size.
-  if (((dwFeature & L3CACHE_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_L3CACHE) != 0) &&
       (this->Features.L3CacheSize != -1))
     bHasFeature = true;
 
   // Check for ACPI capability.
-  if (((dwFeature & ACPI_FEATURE) != 0) && this->Features.HasACPI)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_ACPI) != 0) &&
+      this->Features.HasACPI)
     bHasFeature = true;
 
   // Check for thermal monitor support.
-  if (((dwFeature & THERMALMONITOR_FEATURE) != 0) && this->Features.HasThermal)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_THERMALMONITOR) != 0) &&
+      this->Features.HasThermal)
     bHasFeature = true;
 
   // Check for temperature sensing diode support.
-  if (((dwFeature & TEMPSENSEDIODE_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_TEMPSENSEDIODE) != 0) &&
       this->Features.ExtendedFeatures.PowerManagement.HasTempSenseDiode)
     bHasFeature = true;
 
   // Check for frequency ID support.
-  if (((dwFeature & FREQUENCYID_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_FREQUENCYID) != 0) &&
       this->Features.ExtendedFeatures.PowerManagement.HasFrequencyID)
     bHasFeature = true;
 
   // Check for voltage ID support.
-  if (((dwFeature & VOLTAGEID_FREQUENCY) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_VOLTAGEID_FREQUENCY) !=
+       0) &&
       this->Features.ExtendedFeatures.PowerManagement.HasVoltageID)
+    bHasFeature = true;
+
+  // Check for FPU support.
+  if (((dwFeature & SystemInformation::CPU_FEATURE_FPU) != 0) &&
+      this->Features.HasFPU)
     bHasFeature = true;
 
   return bHasFeature;
