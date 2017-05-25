@@ -472,55 +472,6 @@ uint64_t uv__hrtime(uv_clocktype_t type) {
 }
 
 
-void uv_loadavg(double avg[3]) {
-  struct sysinfo info;
-
-  if (sysinfo(&info) < 0) return;
-
-  avg[0] = (double) info.loads[0] / 65536.0;
-  avg[1] = (double) info.loads[1] / 65536.0;
-  avg[2] = (double) info.loads[2] / 65536.0;
-}
-
-
-int uv_exepath(char* buffer, size_t* size) {
-  ssize_t n;
-
-  if (buffer == NULL || size == NULL || *size == 0)
-    return -EINVAL;
-
-  n = *size - 1;
-  if (n > 0)
-    n = readlink("/proc/self/exe", buffer, n);
-
-  if (n == -1)
-    return -errno;
-
-  buffer[n] = '\0';
-  *size = n;
-
-  return 0;
-}
-
-
-uint64_t uv_get_free_memory(void) {
-  struct sysinfo info;
-
-  if (sysinfo(&info) == 0)
-    return (uint64_t) info.freeram * info.mem_unit;
-  return 0;
-}
-
-
-uint64_t uv_get_total_memory(void) {
-  struct sysinfo info;
-
-  if (sysinfo(&info) == 0)
-    return (uint64_t) info.totalram * info.mem_unit;
-  return 0;
-}
-
-
 int uv_resident_set_memory(size_t* rss) {
   char buf[1024];
   const char* s;
