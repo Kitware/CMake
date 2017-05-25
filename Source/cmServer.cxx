@@ -147,7 +147,7 @@ void cmServer::reportProgress(const char* msg, float progress, void* data)
 {
   const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
   assert(request);
-  if (progress < 0.0 || progress > 1.0) {
+  if (progress < 0.0f || progress > 1.0f) {
     request->ReportMessage(msg, "");
   } else {
     request->ReportProgress(0, static_cast<int>(progress * 1000), 1000, msg);
