@@ -27,10 +27,12 @@ copies of KWSys within dependent projects can be updated to get the changes.
 Code Style
 ==========
 
-We use `clang-format`_ to define our style for C++ code in the KWSys source
-tree.  See the `.clang-format`_ configuration file for our style settings.
-Use ``clang-format`` version 3.8 or higher to format source files.
-See also the `clang-format.bash`_ script.
+We use `clang-format`_ version **3.8** to define our style for C++ code in
+the KWSys source tree.  See the `.clang-format`_ configuration file for
+our style settings.  Use the `clang-format.bash`_ script to format source
+code.  It automatically runs ``clang-format`` on the set of source files
+for which we enforce style.  The script also has options to format only
+a subset of files, such as those that are locally modified.
 
 .. _`clang-format`: http://clang.llvm.org/docs/ClangFormat.html
 .. _`.clang-format`: .clang-format
