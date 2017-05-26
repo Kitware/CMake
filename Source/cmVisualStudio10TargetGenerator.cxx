@@ -2074,15 +2074,15 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
     return;
   }
 
-  this->WriteString("<PropertyGroup>\n", 2);
+  this->WriteString("<PropertyGroup>\n", 1);
   this->WriteString("<_ProjectFileVersion>10.0.20506.1"
                     "</_ProjectFileVersion>\n",
-                    3);
+                    2);
   for (std::vector<std::string>::const_iterator config =
          this->Configurations.begin();
        config != this->Configurations.end(); ++config) {
     if (ttype >= cmStateEnums::UTILITY) {
-      this->WritePlatformConfigTag("IntDir", config->c_str(), 3);
+      this->WritePlatformConfigTag("IntDir", config->c_str(), 2);
       *this->BuildFileStream
         << "$(Platform)\\$(Configuration)\\$(ProjectName)\\"
         << "</IntDir>\n";
@@ -2105,24 +2105,24 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
       this->ConvertToWindowsSlash(intermediateDir);
       this->ConvertToWindowsSlash(outDir);
 
-      this->WritePlatformConfigTag("OutDir", config->c_str(), 3);
+      this->WritePlatformConfigTag("OutDir", config->c_str(), 2);
       *this->BuildFileStream << cmVS10EscapeXML(outDir) << "</OutDir>\n";
 
-      this->WritePlatformConfigTag("IntDir", config->c_str(), 3);
+      this->WritePlatformConfigTag("IntDir", config->c_str(), 2);
       *this->BuildFileStream << cmVS10EscapeXML(intermediateDir)
                              << "</IntDir>\n";
 
       if (const char* workingDir = this->GeneratorTarget->GetProperty(
             "VS_DEBUGGER_WORKING_DIRECTORY")) {
         this->WritePlatformConfigTag("LocalDebuggerWorkingDirectory",
-                                     config->c_str(), 3);
+                                     config->c_str(), 2);
         *this->BuildFileStream << cmVS10EscapeXML(workingDir)
                                << "</LocalDebuggerWorkingDirectory>\n";
       }
 
       std::string name =
         cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
-      this->WritePlatformConfigTag("TargetName", config->c_str(), 3);
+      this->WritePlatformConfigTag("TargetName", config->c_str(), 2);
       *this->BuildFileStream << cmVS10EscapeXML(name) << "</TargetName>\n";
 
       std::string ext =
@@ -2132,13 +2132,13 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
         // A single "." appears to be treated as an empty extension.
         ext = ".";
       }
-      this->WritePlatformConfigTag("TargetExt", config->c_str(), 3);
+      this->WritePlatformConfigTag("TargetExt", config->c_str(), 2);
       *this->BuildFileStream << cmVS10EscapeXML(ext) << "</TargetExt>\n";
 
       this->OutputLinkIncremental(*config);
     }
   }
-  this->WriteString("</PropertyGroup>\n", 2);
+  this->WriteString("</PropertyGroup>\n", 1);
 }
 
 void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
@@ -2159,13 +2159,13 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
   Options& linkOptions = *(this->LinkOptions[configName]);
 
   const char* incremental = linkOptions.GetFlag("LinkIncremental");
-  this->WritePlatformConfigTag("LinkIncremental", configName.c_str(), 3);
+  this->WritePlatformConfigTag("LinkIncremental", configName.c_str(), 2);
   *this->BuildFileStream << (incremental ? incremental : "true")
                          << "</LinkIncremental>\n";
   linkOptions.RemoveFlag("LinkIncremental");
 
   const char* manifest = linkOptions.GetFlag("GenerateManifest");
-  this->WritePlatformConfigTag("GenerateManifest", configName.c_str(), 3);
+  this->WritePlatformConfigTag("GenerateManifest", configName.c_str(), 2);
   *this->BuildFileStream << (manifest ? manifest : "true")
                          << "</GenerateManifest>\n";
   linkOptions.RemoveFlag("GenerateManifest");
@@ -2176,7 +2176,7 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
   for (const char** f = flags; *f; ++f) {
     const char* flag = *f;
     if (const char* value = linkOptions.GetFlag(flag)) {
-      this->WritePlatformConfigTag(flag, configName.c_str(), 3);
+      this->WritePlatformConfigTag(flag, configName.c_str(), 2);
       *this->BuildFileStream << value << "</" << flag << ">\n";
       linkOptions.RemoveFlag(flag);
     }
