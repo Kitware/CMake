@@ -2,6 +2,9 @@ cmake_minimum_required (VERSION 2.6)
 cmake_policy(SET CMP0054 NEW)
 project(Plugin)
 
+# We need proper C++98 support from the compiler
+set(CMAKE_CXX_STANDARD 98)
+
 # Test per-target output directory properties.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${Plugin_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${Plugin_BINARY_DIR}/lib/plugin)
@@ -24,9 +27,6 @@ include_directories(
   ${Plugin_BINARY_DIR}/include
   ${Plugin_SOURCE_DIR}/include
   )
-
-# We need proper C++98 support from the compiler
-set(CMAKE_CXX_STANDARD 98)
 
 # Those versions of the HP compiler that need a flag to get proper C++98
 # template support also need a flag to use the newer C++ library.
