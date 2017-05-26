@@ -18,7 +18,7 @@ class cmExecutionStatus;
 bool cmAuxSourceDirectoryCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  if (args.size() < 2 || args.size() > 2) {
+  if (args.size() != 2) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
