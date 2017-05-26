@@ -133,6 +133,27 @@ if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
     )
 endif()
 
+if(CMAKE_SYSTEM_NAME MATCHES "CYGWIN")
+  list(APPEND uv_libraries
+    )
+  list(APPEND uv_headers
+    include/uv-posix.h
+    )
+  list(APPEND uv_defines
+    )
+  list(APPEND uv_sources
+    src/unix/cygwin.c
+    src/unix/bsd-ifaddrs.c
+    src/unix/no-fsevents.c
+    src/unix/no-proctitle.c
+    src/unix/posix-hrtime.c
+    src/unix/posix-poll.c
+    src/unix/procfs-exepath.c
+    src/unix/sysinfo-loadavg.c
+    src/unix/sysinfo-memory.c
+    )
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   list(APPEND uv_headers
     include/uv-darwin.h
