@@ -196,7 +196,6 @@ void cmSystemTools::ExpandRegistryValues(std::string& source,
   while (regEntry.find(source)) {
     // the arguments are the second match
     std::string key = regEntry.match(1);
-    std::string val;
     std::string reg = "[";
     reg += key + "]";
     cmSystemTools::ReplaceString(source, reg.c_str(), "/registry");

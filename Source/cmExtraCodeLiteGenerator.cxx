@@ -600,9 +600,6 @@ void cmExtraCodeLiteGenerator::CreateNewProjectFile(
   // which may have an acompanying header, one for all other files
   std::string projectType;
 
-  std::vector<std::string> headerExts =
-    this->GlobalGenerator->GetCMakeInstance()->GetHeaderExtensions();
-
   std::map<std::string, cmSourceFile*> cFiles;
   std::set<std::string> otherFiles;
 

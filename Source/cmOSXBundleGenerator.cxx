@@ -48,8 +48,6 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
   cmSystemTools::MakeDirectory(out.c_str());
   this->Makefile->AddCMakeOutputFile(out);
 
-  std::string newoutpath = out;
-
   // Configure the Info.plist file.  Note that it needs the executable name
   // to be set.
   std::string plist = outpath;
@@ -60,7 +58,7 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
   this->LocalGenerator->GenerateAppleInfoPList(this->GT, targetName,
                                                plist.c_str());
   this->Makefile->AddCMakeOutputFile(plist);
-  outpath = newoutpath;
+  outpath = out;
 }
 
 void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
