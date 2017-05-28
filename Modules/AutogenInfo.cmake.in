@@ -1,12 +1,10 @@
-# Target names
-set(AM_TARGET_NAME @_autogen_target_name@)
-set(AM_ORIGIN_TARGET_NAME @_origin_target_name@)
 # Directories and files
 set(AM_CMAKE_BINARY_DIR "@CMAKE_BINARY_DIR@/")
 set(AM_CMAKE_SOURCE_DIR "@CMAKE_SOURCE_DIR@/")
 set(AM_CMAKE_CURRENT_SOURCE_DIR "@CMAKE_CURRENT_SOURCE_DIR@/")
 set(AM_CMAKE_CURRENT_BINARY_DIR "@CMAKE_CURRENT_BINARY_DIR@/")
 set(AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE "@CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE@")
+set(AM_BUILD_DIR @_autogen_build_dir@)
 set(AM_SOURCES @_sources@)
 set(AM_HEADERS @_headers@)
 # Qt environment

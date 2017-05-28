@@ -107,8 +107,8 @@ private:
     const std::map<std::string, std::set<std::string> >& mocDepends);
   bool MocGenerateFile(
     const std::string& sourceFile, const std::string& mocFileName,
-    const std::string& subDir,
-    const std::map<std::string, std::set<std::string> >& mocDepends);
+    const std::map<std::string, std::set<std::string> >& mocDepends,
+    bool included);
 
   // -- Uic file generation
   bool UicFindIncludedFile(std::string& absFile, const std::string& sourceFile,
@@ -139,8 +139,8 @@ private:
     const std::map<std::string, std::string>& genFiles,
     std::multimap<std::string, std::string>& collisions) const;
   std::string ChecksumedPath(const std::string& sourceFile,
-                             const char* basePrefix,
-                             const char* baseSuffix) const;
+                             const std::string& basePrefix,
+                             const std::string& baseSuffix) const;
   bool MakeParentDirectory(const char* logPrefix,
                            const std::string& filename) const;
   bool FileDiffers(const std::string& filename, const std::string& content);
@@ -157,15 +157,15 @@ private:
   bool MocFindIncludedFile(std::string& absFile, const std::string& sourceFile,
                            const std::string& includeString) const;
 
-  // -- Target names
-  std::string OriginTargetName;
-  std::string AutogenTargetName;
+  // -- Meta
+  std::string ConfigSuffix;
   // -- Directories
   std::string ProjectSourceDir;
   std::string ProjectBinaryDir;
   std::string CurrentSourceDir;
   std::string CurrentBinaryDir;
-  std::string AutogenBuildSubDir;
+  std::string AutogenBuildDir;
+  std::string AutogenIncludeDir;
   // -- Qt environment
   std::string QtMajorVersion;
   std::string MocExecutable;
@@ -189,8 +189,8 @@ private:
   bool MocPredefsChanged;
   bool MocRelaxedMode;
   bool MocRunFailed;
-  std::string MocCppFilenameRel;
-  std::string MocCppFilenameAbs;
+  std::string MocCompFileRel;
+  std::string MocCompFileAbs;
   std::string MocPredefsFileRel;
   std::string MocPredefsFileAbs;
   std::vector<std::string> MocSkipList;
