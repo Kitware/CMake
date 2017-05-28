@@ -8,16 +8,27 @@ string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT " -DNDEBUG")
 set(CMAKE_DEPFILE_FLAGS_CXX "-MD -MT <OBJECT> -MF <DEPFILE>")
 
 if("x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
-  set(_std -Qstd)
-  set(_ext c++)
+
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.0)
     set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "-Qstd=c++14")
-    # todo: there is no gnu++14 value supported; figure out what to do
     set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION "-Qstd=c++14")
   endif()
+
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 13.0)
+    set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-Qstd=c++11")
+    set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-Qstd=c++11")
+  elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
+    set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-Qstd=c++0x")
+    set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-Qstd=c++0x")
+  endif()
+
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
+    set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "")
+    set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION "")
+  endif()
+
 else()
-  set(_std -std)
-  set(_ext gnu++)
+
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0.2)
     set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "-std=c++14")
     # todo: there is no gnu++14 value supported; figure out what to do
@@ -27,28 +38,21 @@ else()
     # todo: there is no gnu++14 value supported; figure out what to do
     set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION "-std=c++1y")
   endif()
-endif()
 
-if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 13.0)
-  set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "${_std}=c++11")
-  set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "${_std}=${_ext}11")
-elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
-  set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "${_std}=c++0x")
-  set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "${_std}=${_ext}0x")
-endif()
-
-if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
-  if("x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
-    set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "")
-    set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION "")
-  else()
-    set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "${_std}=c++98")
-    set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION "${_std}=gnu++98")
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 13.0)
+    set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-std=c++11")
+    set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-std=gnu++11")
+  elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
+    set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-std=c++0x")
+    set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-std=gnu++0x")
   endif()
-endif()
 
-unset(_std)
-unset(_ext)
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
+    set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "-std=c++98")
+    set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION "-std=gnu++98")
+  endif()
+
+endif()
 
 __compiler_check_default_language_standard(CXX 12.1 98)
 
