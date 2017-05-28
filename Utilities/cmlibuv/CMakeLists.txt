@@ -164,7 +164,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     src/unix/linux-inotify.c
     src/unix/linux-syscalls.c
     src/unix/linux-syscalls.h
+    src/unix/procfs-exepath.c
     src/unix/proctitle.c
+    src/unix/sysinfo-loadavg.c
+    src/unix/sysinfo-memory.c
     )
 endif()
 
@@ -249,6 +252,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
       )
   endif()
   list(APPEND uv_sources
+    src/unix/no-proctitle.c
     src/unix/sunos.c
     )
 endif()
