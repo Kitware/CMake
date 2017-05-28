@@ -663,7 +663,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
     // Command to change directory and run a program.
     if (args[1] == "chdir" && args.size() >= 4) {
-      std::string directory = args[2];
+      std::string const& directory = args[2];
       if (!cmSystemTools::FileExists(directory.c_str())) {
         cmSystemTools::Error("Directory does not exist for chdir command: ",
                              args[2].c_str());
@@ -883,8 +883,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     if (args[1] == "tar" && args.size() > 3) {
       const char* knownFormats[] = { "7zip", "gnutar", "pax", "paxr", "zip" };
 
-      std::string flags = args[2];
-      std::string outFile = args[3];
+      std::string const& flags = args[2];
+      std::string const& outFile = args[3];
       std::vector<std::string> files;
       std::string mtime;
       std::string format;
@@ -1077,9 +1077,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 int cmcmd::SymlinkLibrary(std::vector<std::string>& args)
 {
   int result = 0;
-  std::string realName = args[2];
-  std::string soName = args[3];
-  std::string name = args[4];
+  std::string const& realName = args[2];
+  std::string const& soName = args[3];
+  std::string const& name = args[4];
   if (soName != realName) {
     if (!cmcmd::SymlinkInternal(realName, soName)) {
       cmSystemTools::ReportLastSystemError("cmake_symlink_library");
@@ -1098,8 +1098,8 @@ int cmcmd::SymlinkLibrary(std::vector<std::string>& args)
 int cmcmd::SymlinkExecutable(std::vector<std::string>& args)
 {
   int result = 0;
-  std::string realName = args[2];
-  std::string name = args[3];
+  std::string const& realName = args[2];
+  std::string const& name = args[3];
   if (name != realName) {
     if (!cmcmd::SymlinkInternal(realName, name)) {
       cmSystemTools::ReportLastSystemError("cmake_symlink_executable");

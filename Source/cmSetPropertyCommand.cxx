@@ -138,7 +138,7 @@ bool cmSetPropertyCommand::HandleGlobalMode()
 
   // Set or append the property.
   cmake* cm = this->Makefile->GetCMakeInstance();
-  const char* name = this->PropertyName.c_str();
+  std::string const& name = this->PropertyName;
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
     value = CM_NULLPTR;
@@ -188,7 +188,7 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
   }
 
   // Set or append the property.
-  const char* name = this->PropertyName.c_str();
+  std::string const& name = this->PropertyName;
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
     value = CM_NULLPTR;
@@ -229,7 +229,7 @@ bool cmSetPropertyCommand::HandleTargetMode()
 bool cmSetPropertyCommand::HandleTarget(cmTarget* target)
 {
   // Set or append the property.
-  const char* name = this->PropertyName.c_str();
+  std::string const& name = this->PropertyName;
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
     value = CM_NULLPTR;
@@ -268,7 +268,7 @@ bool cmSetPropertyCommand::HandleSourceMode()
 bool cmSetPropertyCommand::HandleSource(cmSourceFile* sf)
 {
   // Set or append the property.
-  const char* name = this->PropertyName.c_str();
+  std::string const& name = this->PropertyName;
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
     value = CM_NULLPTR;
@@ -316,7 +316,7 @@ bool cmSetPropertyCommand::HandleTestMode()
 bool cmSetPropertyCommand::HandleTest(cmTest* test)
 {
   // Set or append the property.
-  const char* name = this->PropertyName.c_str();
+  std::string const& name = this->PropertyName;
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
     value = CM_NULLPTR;
@@ -383,7 +383,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
 bool cmSetPropertyCommand::HandleCacheEntry(std::string const& cacheKey)
 {
   // Set or append the property.
-  const char* name = this->PropertyName.c_str();
+  std::string const& name = this->PropertyName;
   const char* value = this->PropertyValue.c_str();
   cmState* state = this->Makefile->GetState();
   if (this->Remove) {

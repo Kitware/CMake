@@ -22,8 +22,8 @@ bool cmGetTargetPropertyCommand::InitialPass(
     this->SetError("called with incorrect number of arguments");
     return false;
   }
-  std::string var = args[0];
-  const std::string& targetName = args[1];
+  std::string const& var = args[0];
+  std::string const& targetName = args[1];
   std::string prop;
   bool prop_exists = false;
 

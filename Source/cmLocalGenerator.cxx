@@ -2258,7 +2258,7 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
 {
   // Construct the object file name using the full path to the source
   // file which is its only unique identification.
-  const char* fullPath = source.GetFullPath().c_str();
+  std::string const& fullPath = source.GetFullPath();
 
   // Try referencing the source relative to the source tree.
   std::string relFromSource =

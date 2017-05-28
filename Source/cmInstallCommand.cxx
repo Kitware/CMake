@@ -75,29 +75,31 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args,
     this->DefaultComponentName = "Unspecified";
   }
 
+  std::string const& mode = args[0];
+
   // Switch among the command modes.
-  if (args[0] == "SCRIPT") {
+  if (mode == "SCRIPT") {
     return this->HandleScriptMode(args);
   }
-  if (args[0] == "CODE") {
+  if (mode == "CODE") {
     return this->HandleScriptMode(args);
   }
-  if (args[0] == "TARGETS") {
+  if (mode == "TARGETS") {
     return this->HandleTargetsMode(args);
   }
-  if (args[0] == "FILES") {
+  if (mode == "FILES") {
     return this->HandleFilesMode(args);
   }
-  if (args[0] == "PROGRAMS") {
+  if (mode == "PROGRAMS") {
     return this->HandleFilesMode(args);
   }
-  if (args[0] == "DIRECTORY") {
+  if (mode == "DIRECTORY") {
     return this->HandleDirectoryMode(args);
   }
-  if (args[0] == "EXPORT") {
+  if (mode == "EXPORT") {
     return this->HandleExportMode(args);
   }
-  if (args[0] == "EXPORT_ANDROID_MK") {
+  if (mode == "EXPORT_ANDROID_MK") {
     return this->HandleExportAndroidMKMode(args);
   }
 
@@ -165,7 +167,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
         script.c_str(), false, component.c_str(), exclude_from_all));
     } else if (doing_code) {
       doing_code = false;
-      std::string code = args[i];
+      std::string const& code = args[i];
       this->Makefile->AddInstallGenerator(new cmInstallScriptGenerator(
         code.c_str(), true, component.c_str(), exclude_from_all));
     }

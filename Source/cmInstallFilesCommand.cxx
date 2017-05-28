@@ -54,7 +54,7 @@ void cmInstallFilesCommand::FinalPass()
   }
 
   std::string testf;
-  std::string ext = this->FinalArgs[0];
+  std::string const& ext = this->FinalArgs[0];
 
   // two different options
   if (this->FinalArgs.size() > 1) {
@@ -64,7 +64,7 @@ void cmInstallFilesCommand::FinalPass()
     // for each argument, get the files
     for (; s != this->FinalArgs.end(); ++s) {
       // replace any variables
-      std::string temps = *s;
+      std::string const& temps = *s;
       if (!cmSystemTools::GetFilenamePath(temps).empty()) {
         testf = cmSystemTools::GetFilenamePath(temps) + "/" +
           cmSystemTools::GetFilenameWithoutLastExtension(temps) + ext;
@@ -78,7 +78,7 @@ void cmInstallFilesCommand::FinalPass()
   } else // reg exp list
   {
     std::vector<std::string> files;
-    std::string regex = this->FinalArgs[0];
+    std::string const& regex = this->FinalArgs[0];
     cmSystemTools::Glob(this->Makefile->GetCurrentSourceDirectory(), regex,
                         files);
 

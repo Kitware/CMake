@@ -101,7 +101,7 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
   std::set<std::string> files;
   std::string tmp;
 
-  std::vector<std::string> hdrExts =
+  std::vector<std::string> const& hdrExts =
     this->GlobalGenerator->GetCMakeInstance()->GetHeaderExtensions();
 
   for (std::vector<cmLocalGenerator*>::const_iterator it = lgs.begin();

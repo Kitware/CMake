@@ -37,7 +37,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
 
   std::vector<std::string>::const_iterator s = args.begin();
 
-  std::string libName = *s;
+  std::string const& libName = *s;
 
   ++s;
 

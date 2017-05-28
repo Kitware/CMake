@@ -19,7 +19,7 @@ bool cmAddDependenciesCommand::InitialPass(
     return false;
   }
 
-  std::string target_name = args[0];
+  std::string const& target_name = args[0];
   if (this->Makefile->IsAlias(target_name)) {
     std::ostringstream e;
     e << "Cannot add target-level dependencies to alias target \""

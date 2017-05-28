@@ -56,7 +56,7 @@ void cmGlobalNinjaGenerator::Indent(std::ostream& os, int count)
 void cmGlobalNinjaGenerator::WriteDivider(std::ostream& os)
 {
   os << "# ======================================"
-     << "=======================================\n";
+        "=======================================\n";
 }
 
 void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,

@@ -240,7 +240,7 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
         bool isCFile = false;
         std::string lang = (*si)->GetLanguage();
         if (lang == "C" || lang == "CXX") {
-          std::string srcext = (*si)->GetExtension();
+          std::string const& srcext = (*si)->GetExtension();
           for (std::vector<std::string>::const_iterator ext = srcExts.begin();
                ext != srcExts.end(); ++ext) {
             if (srcext == *ext) {
@@ -599,9 +599,6 @@ void cmExtraCodeLiteGenerator::CreateNewProjectFile(
   // Sort them into two containers, one for C/C++ implementation files
   // which may have an acompanying header, one for all other files
   std::string projectType;
-
-  std::vector<std::string> headerExts =
-    this->GlobalGenerator->GetCMakeInstance()->GetHeaderExtensions();
 
   std::map<std::string, cmSourceFile*> cFiles;
   std::set<std::string> otherFiles;

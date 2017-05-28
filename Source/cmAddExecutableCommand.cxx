@@ -24,7 +24,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
   }
   std::vector<std::string>::const_iterator s = args.begin();
 
-  std::string exename = *s;
+  std::string const& exename = *s;
 
   ++s;
   bool use_win32 = false;

@@ -17,11 +17,11 @@ bool cmVariableRequiresCommand::InitialPass(
     return false;
   }
 
-  std::string testVariable = args[0];
+  std::string const& testVariable = args[0];
   if (!this->Makefile->IsOn(testVariable)) {
     return true;
   }
-  std::string resultVariable = args[1];
+  std::string const& resultVariable = args[1];
   bool requirementsMet = true;
   std::string notSet;
   bool hasAdvanced = false;

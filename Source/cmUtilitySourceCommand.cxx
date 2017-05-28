@@ -23,7 +23,7 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
   std::vector<std::string>::const_iterator arg = args.begin();
 
   // The first argument is the cache entry name.
-  std::string cacheEntry = *arg++;
+  std::string const& cacheEntry = *arg++;
   const char* cacheValue = this->Makefile->GetDefinition(cacheEntry);
   // If it exists already and appears up to date then we are done.  If
   // the string contains "(IntDir)" but that is not the
@@ -57,11 +57,11 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
 
   // The second argument is the utility's executable name, which will be
   // needed later.
-  std::string utilityName = *arg++;
+  std::string const& utilityName = *arg++;
 
   // The third argument specifies the relative directory of the source
   // of the utility.
-  std::string relativeSource = *arg++;
+  std::string const& relativeSource = *arg++;
   std::string utilitySource = this->Makefile->GetCurrentSourceDirectory();
   utilitySource = utilitySource + "/" + relativeSource;
 

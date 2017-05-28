@@ -23,7 +23,7 @@ bool cmNewLineStyle::ReadFromArguments(const std::vector<std::string>& args,
     if (args[i] == "NEWLINE_STYLE") {
       size_t const styleIndex = i + 1;
       if (args.size() > styleIndex) {
-        const std::string eol = args[styleIndex];
+        std::string const& eol = args[styleIndex];
         if (eol == "LF" || eol == "UNIX") {
           NewLineStyle = LF;
           return true;
