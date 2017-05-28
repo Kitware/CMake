@@ -1111,56 +1111,6 @@ rm -f "${TMPFILE}.cxx"
 if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
   # Check for non-GNU compiler flags
 
-  # If we are on OSF, check for -timplicit_local -no_implicit_include
-  cmake_test_flags="-timplicit_local -no_implicit_include"
-  if [ "x${cmake_system}" = "xOSF1" ]; then
-    TMPFILE=`cmake_tmp_file`
-    echo '
-    #include <iostream>
-    int main() { std::cout << "We need '"${cmake_test_flags}"'" << std::endl; return 0;}
-' > ${TMPFILE}.cxx
-    cmake_need_flags=1
-    if cmake_try_run "${cmake_cxx_compiler}" \
-      "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-      :
-    else
-      cmake_need_flags=0
-    fi
-    if [ "x${cmake_need_flags}" = "x1" ]; then
-      cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
-      echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
-    else
-      echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
-    fi
-    rm -f "${TMPFILE}.cxx"
-  fi
-  cmake_test_flags=
-
-  # If we are on OSF, check for -std strict_ansi -nopure_cname
-  cmake_test_flags="-std strict_ansi -nopure_cname"
-  if [ "x${cmake_system}" = "xOSF1" ]; then
-    TMPFILE=`cmake_tmp_file`
-    echo '
-    #include <iostream>
-    int main() { std::cout << "We need '"${cmake_test_flags}"'" << std::endl; return 0;}
-' > ${TMPFILE}.cxx
-    cmake_need_flags=1
-    if cmake_try_run "${cmake_cxx_compiler}" \
-      "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-      :
-    else
-      cmake_need_flags=0
-    fi
-    if [ "x${cmake_need_flags}" = "x1" ]; then
-      cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
-      echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
-    else
-      echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
-    fi
-    rm -f "${TMPFILE}.cxx"
-  fi
-  cmake_test_flags=
-
   # If we are on HP-UX, check for -Ae for the C compiler.
   if [ "x${cmake_system}" = "xHP-UX" ]; then
     cmake_test_flags="-Ae"
