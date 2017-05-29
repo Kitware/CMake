@@ -36,4 +36,4 @@ if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5)
   set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std=gnu++1z")
 endif()
 
-__compiler_check_default_language_standard(CXX 3.1 98)
+__compiler_check_default_language_standard(CXX 2.1 98)
