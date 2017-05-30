@@ -2372,8 +2372,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       // not being changed.
       rp[rp_count].Value = se[i]->Value.substr(0, prefix_len);
       rp[rp_count].Value += newRPath;
-      rp[rp_count].Value +=
-        se[i]->Value.substr(pos + oldRPath.length(), std::string::npos);
+      rp[rp_count].Value += se[i]->Value.substr(pos + oldRPath.length());
 
       if (!rp[rp_count].Value.empty()) {
         remove_rpath = false;

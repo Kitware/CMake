@@ -35,7 +35,7 @@ public:
         line.substr(begIndex + 3, endIndex - (begIndex + 4));
       return foundFileName;
     }
-    return line.substr(begIndex, std::string::npos);
+    return line.substr(begIndex);
   }
   bool ParseFile(std::string const& file)
   {
@@ -78,7 +78,7 @@ public:
          *  only the value of the line coverage is captured
          */
         std::string result = getValue(line, 1);
-        result = result.substr(2, std::string::npos);
+        result = result.substr(2);
         if (result == "\"\"") {
           // Empty quotation marks indicate that the
           // line is not executable

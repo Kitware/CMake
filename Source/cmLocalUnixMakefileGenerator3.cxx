@@ -79,7 +79,7 @@ static std::string cmSplitExtension(std::string const& in, std::string& base)
   std::string::size_type dot_pos = in.rfind('.');
   if (dot_pos != std::string::npos) {
     // Remove the extension first in case &base == &in.
-    ext = in.substr(dot_pos, std::string::npos);
+    ext = in.substr(dot_pos);
     base = in.substr(0, dot_pos);
   } else {
     base = in;

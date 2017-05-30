@@ -673,8 +673,7 @@ bool cmCTest::UpdateCTestConfiguration()
         continue;
       }
       std::string key = line.substr(0, cpos);
-      std::string value =
-        cmCTest::CleanString(line.substr(cpos + 1, std::string::npos));
+      std::string value = cmCTest::CleanString(line.substr(cpos + 1));
       this->CTestConfiguration[key] = value;
     }
     fin.close();
@@ -2518,7 +2517,7 @@ void cmCTest::AddCTestConfigurationOverwrite(const std::string& overStr)
     return;
   }
   std::string key = overStr.substr(0, epos);
-  std::string value = overStr.substr(epos + 1, std::string::npos);
+  std::string value = overStr.substr(epos + 1);
   this->CTestConfigurationOverwrites[key] = value;
 }
 

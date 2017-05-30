@@ -453,7 +453,7 @@ void cmDependsC::ParseTransform(std::string const& xform)
     return;
   }
   std::string name = xform.substr(0, pos);
-  std::string value = xform.substr(pos + 4, std::string::npos);
+  std::string value = xform.substr(pos + 4);
   this->TransformRules[name] = value;
 }
 

@@ -2730,7 +2730,7 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
     }
 
     // Get the filename.
-    fname = line.substr(33, std::string::npos);
+    fname = line.substr(33);
 
     // Look for a hash for this file's rule.
     std::map<std::string, RuleHash>::const_iterator rhi =

@@ -98,7 +98,7 @@ void cmRST::ProcessModule(std::istream& is)
           continue;
         }
         if (line.substr(0, 2) == "# ") {
-          this->ProcessLine(line.substr(2, std::string::npos));
+          this->ProcessLine(line.substr(2));
           continue;
         }
         rst = "";
