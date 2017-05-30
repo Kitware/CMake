@@ -1111,34 +1111,6 @@ rm -f "${TMPFILE}.cxx"
 if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
   # Check for non-GNU compiler flags
 
-  # If we are on IRIX, check for -LANG:std
-  cmake_test_flags="-LANG:std"
-  if [ "x${cmake_system}" = "xIRIX64" ]; then
-    TMPFILE=`cmake_tmp_file`
-    echo '
-    #include <iostream>
-    int main() { std::cout << "No need for '"${cmake_test_flags}"'" << std::endl; return 0;}
-' > ${TMPFILE}.cxx
-    cmake_need_lang_std=0
-    if cmake_try_run "${cmake_cxx_compiler}" \
-      "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-      :
-    else
-      if cmake_try_run "${cmake_cxx_compiler}" \
-        "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-        cmake_need_lang_std=1
-      fi
-    fi
-    if [ "x${cmake_need_lang_std}" = "x1" ]; then
-      cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
-      echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
-    else
-      echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
-    fi
-    rm -f "${TMPFILE}.cxx"
-  fi
-  cmake_test_flags=
-
   # If we are on OSF, check for -timplicit_local -no_implicit_include
   cmake_test_flags="-timplicit_local -no_implicit_include"
   if [ "x${cmake_system}" = "xOSF1" ]; then
