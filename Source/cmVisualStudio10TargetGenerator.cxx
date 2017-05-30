@@ -3154,8 +3154,6 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   // FIXME: Select flag table based on toolset instead of VS version.
   if (this->LocalGenerator->GetVersion() >=
       cmGlobalVisualStudioGenerator::VS14) {
-    cmGlobalVisualStudio10Generator* gg =
-      static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
     const char* toolset = gg->GetPlatformToolset();
     if (toolset &&
         (toolset == kWINDOWS_7_1_SDK || /* clang-format please break here */
