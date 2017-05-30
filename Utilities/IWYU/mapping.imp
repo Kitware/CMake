@@ -21,6 +21,7 @@
   { include: [ "<wctype.h>", public, "<cwctype>", public ] },
 
   # HACK: check whether this can be removed with next iwyu release.
+  { include: [ "<bits/std_function.h>", private, "<functional>", public ] },
   { include: [ "<bits/time.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/clock_t.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/struct_timespec.h>", private, "<time.h>", public ] },
