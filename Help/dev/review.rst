@@ -216,7 +216,12 @@ Builder names follow the pattern ``project-host-os-buildtype-generator``:
 * ``host``: the buildbot host
 * ``os``: one of ``windows``, ``osx``, or ``linux``
 * ``buildtype``: ``release`` or ``debug``
-* ``generator``: ``ninja``, ``makefiles``, or ``vs<year>``
+* ``generator``: ``ninja``, ``makefiles``, ``vs<year>``,
+  or ``lint-iwyu-tidy``
+
+The special ``lint-<tools>`` generator name is a builder that builds
+CMake using lint tools but does not run the test suite (so the actual
+generator does not matter).
 
 .. _`buildbot`: http://buildbot.net
 .. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
