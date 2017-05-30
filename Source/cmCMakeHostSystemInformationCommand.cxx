@@ -76,6 +76,55 @@ bool cmCMakeHostSystemInformationCommand::GetValue(
     value = this->ValueToString(info.GetTotalPhysicalMemory());
   } else if (key == "AVAILABLE_PHYSICAL_MEMORY") {
     value = this->ValueToString(info.GetAvailablePhysicalMemory());
+  } else if (key == "IS_64BIT") {
+    value = this->ValueToString(info.Is64Bits());
+  } else if (key == "HAS_FPU") {
+    value = this->ValueToString(
+      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_FPU));
+  } else if (key == "HAS_MMX") {
+    value = this->ValueToString(
+      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_MMX));
+  } else if (key == "HAS_MMX_PLUS") {
+    value = this->ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_MMX_PLUS));
+  } else if (key == "HAS_SSE") {
+    value = this->ValueToString(
+      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_SSE));
+  } else if (key == "HAS_SSE2") {
+    value = this->ValueToString(
+      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_SSE2));
+  } else if (key == "HAS_SSE_FP") {
+    value = this->ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_SSE_FP));
+  } else if (key == "HAS_SSE_MMX") {
+    value = this->ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_SSE_MMX));
+  } else if (key == "HAS_AMD_3DNOW") {
+    value = this->ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_AMD_3DNOW));
+  } else if (key == "HAS_AMD_3DNOW_PLUS") {
+    value = this->ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_AMD_3DNOW_PLUS));
+  } else if (key == "HAS_IA64") {
+    value = this->ValueToString(
+      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_IA64));
+  } else if (key == "HAS_SERIAL_NUMBER") {
+    value = this->ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_SERIALNUMBER));
+  } else if (key == "PROCESSOR_NAME") {
+    value = this->ValueToString(info.GetExtendedProcessorName());
+  } else if (key == "PROCESSOR_DESCRIPTION") {
+    value = info.GetCPUDescription();
+  } else if (key == "PROCESSOR_SERIAL_NUMBER") {
+    value = this->ValueToString(info.GetProcessorSerialNumber());
+  } else if (key == "OS_NAME") {
+    value = this->ValueToString(info.GetOSName());
+  } else if (key == "OS_RELEASE") {
+    value = this->ValueToString(info.GetOSRelease());
+  } else if (key == "OS_VERSION") {
+    value = this->ValueToString(info.GetOSVersion());
+  } else if (key == "OS_PLATFORM") {
+    value = this->ValueToString(info.GetOSPlatform());
 #ifdef HAVE_VS_SETUP_HELPER
   } else if (key == "VS_15_DIR") {
     cmVSSetupAPIHelper vsSetupAPIHelper;
