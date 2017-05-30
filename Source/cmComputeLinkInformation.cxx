@@ -1033,8 +1033,8 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
   // See documentation of CMP0008.
   std::string generator = this->GlobalGenerator->GetName();
   if (this->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
-      (generator.find("Visual Studio") != generator.npos ||
-       generator.find("Xcode") != generator.npos)) {
+      (generator.find("Visual Studio") != std::string::npos ||
+       generator.find("Xcode") != std::string::npos)) {
     std::string file = cmSystemTools::GetFilenameName(item);
     if (!this->ExtractAnyLibraryName.find(file.c_str())) {
       this->HandleBadFullItem(item, file);

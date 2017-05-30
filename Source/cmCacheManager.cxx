@@ -387,7 +387,7 @@ void cmCacheManager::OutputKey(std::ostream& fout, std::string const& key)
 {
   // support : in key name by double quoting
   const char* q =
-    (key.find(':') != key.npos || key.find("//") == 0) ? "\"" : "";
+    (key.find(':') != std::string::npos || key.find("//") == 0) ? "\"" : "";
   fout << q << key << q;
 }
 
@@ -490,7 +490,7 @@ void cmCacheManager::AddCacheEntry(const std::string& key, const char* value,
   e.Type = type;
   // make sure we only use unix style paths
   if (type == cmStateEnums::FILEPATH || type == cmStateEnums::PATH) {
-    if (e.Value.find(';') != e.Value.npos) {
+    if (e.Value.find(';') != std::string::npos) {
       std::vector<std::string> paths;
       cmSystemTools::ExpandListArgument(e.Value, paths);
       const char* sep = "";

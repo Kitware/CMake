@@ -24,7 +24,7 @@ std::string cmMSVC60LinkLineComputer::ConvertToLinkReference(
   // Work-ardound command line parsing limitations in MSVC 6.0
   // Search for the last space.
   std::string::size_type pos = lib.rfind(' ');
-  if (pos != lib.npos) {
+  if (pos != std::string::npos) {
     // Find the slash after the last space, if any.
     pos = lib.find('/', pos);
 

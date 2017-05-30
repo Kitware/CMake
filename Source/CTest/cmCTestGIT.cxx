@@ -191,9 +191,9 @@ bool cmCTestGIT::UpdateByFetchAndReset()
     std::string line;
     while (sha1.empty() && cmSystemTools::GetLineFromStream(fin, line)) {
       this->Log << "FETCH_HEAD> " << line << "\n";
-      if (line.find("\tnot-for-merge\t") == line.npos) {
+      if (line.find("\tnot-for-merge\t") == std::string::npos) {
         std::string::size_type pos = line.find('\t');
-        if (pos != line.npos) {
+        if (pos != std::string::npos) {
           sha1 = line.substr(0, pos);
         }
       }

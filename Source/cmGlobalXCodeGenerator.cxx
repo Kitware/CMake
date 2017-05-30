@@ -170,7 +170,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
     std::string::size_type pos;
     if (cmSystemTools::RunSingleCommand("xcode-select --print-path", &out, 0,
                                         0, 0, cmSystemTools::OUTPUT_NONE) &&
-        (pos = out.find(".app/"), pos != out.npos)) {
+        (pos = out.find(".app/"), pos != std::string::npos)) {
       versionFile = out.substr(0, pos + 5) + "Contents/version.plist";
     }
   }
@@ -244,7 +244,7 @@ std::string cmGlobalXCodeGenerator::FindXcodeBuildCommand()
 bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
                                                  cmMakefile* mf)
 {
-  if (ts.find_first_of(",=") != ts.npos) {
+  if (ts.find_first_of(",=") != std::string::npos) {
     std::ostringstream e;
     /* clang-format off */
     e <<
@@ -1400,7 +1400,7 @@ std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
   std::string retFlag;
   std::string::size_type lastOccurancePos = flags.rfind(flag);
   bool saved = false;
-  while (lastOccurancePos != flags.npos) {
+  while (lastOccurancePos != std::string::npos) {
     // increment pos, we use lastOccurancePos to reduce search space on next
     // inc
     std::string::size_type pos = lastOccurancePos;
@@ -3423,7 +3423,7 @@ std::string cmGlobalXCodeGenerator::RelativeToBinary(const char* p)
 
 std::string cmGlobalXCodeGenerator::XCodeEscapePath(const std::string& p)
 {
-  if (p.find(' ') != p.npos) {
+  if (p.find(' ') != std::string::npos) {
     std::string t = "\"";
     t += p;
     t += "\"";
@@ -3511,7 +3511,7 @@ void cmGlobalXCodeGenerator::AppendFlag(std::string& flags,
 
   // Check if the flag needs quoting.
   bool quoteFlag =
-    flag.find_first_of("`~!@#$%^&*()+={}[]|:;\"'<>,.? ") != flag.npos;
+    flag.find_first_of("`~!@#$%^&*()+={}[]|:;\"'<>,.? ") != std::string::npos;
 
   // We escape a flag as follows:
   //   - Place each flag in single quotes ''

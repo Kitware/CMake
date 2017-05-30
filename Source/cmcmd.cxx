@@ -351,8 +351,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
 
         // Warn if iwyu reported anything.
-        if (stdErr.find("should remove these lines:") != stdErr.npos ||
-            stdErr.find("should add these lines:") != stdErr.npos) {
+        if (stdErr.find("should remove these lines:") != std::string::npos ||
+            stdErr.find("should add these lines:") != std::string::npos) {
           std::cerr << "Warning: include-what-you-use reported diagnostics:\n"
                     << stdErr << "\n";
         }
@@ -412,7 +412,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
         // Output the stdout from ldd -r -u to stderr
         // Warn if lwyu reported anything.
-        if (stdOut.find("Unused direct dependencies:") != stdOut.npos) {
+        if (stdOut.find("Unused direct dependencies:") != std::string::npos) {
           std::cerr << "Warning: " << stdOut;
         }
       }
@@ -480,7 +480,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           std::cerr << "cmake -E env: unknown option '" << a << "'"
                     << std::endl;
           return 1;
-        } else if (a.find('=') != a.npos) {
+        } else if (a.find('=') != std::string::npos) {
           // Set environment variable.
           cmSystemTools::PutEnv(a);
         } else {
@@ -924,15 +924,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         cmSystemTools::TarCompressNone;
       bool verbose = false;
       int nCompress = 0;
-      if (flags.find_first_of('j') != flags.npos) {
+      if (flags.find_first_of('j') != std::string::npos) {
         compress = cmSystemTools::TarCompressBZip2;
         ++nCompress;
       }
-      if (flags.find_first_of('J') != flags.npos) {
+      if (flags.find_first_of('J') != std::string::npos) {
         compress = cmSystemTools::TarCompressXZ;
         ++nCompress;
       }
-      if (flags.find_first_of('z') != flags.npos) {
+      if (flags.find_first_of('z') != std::string::npos) {
         compress = cmSystemTools::TarCompressGZip;
         ++nCompress;
       }
@@ -946,22 +946,22 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
                              "at most one flag of z, j, or J may be used");
         return 1;
       }
-      if (flags.find_first_of('v') != flags.npos) {
+      if (flags.find_first_of('v') != std::string::npos) {
         verbose = true;
       }
 
-      if (flags.find_first_of('t') != flags.npos) {
+      if (flags.find_first_of('t') != std::string::npos) {
         if (!cmSystemTools::ListTar(outFile.c_str(), verbose)) {
           cmSystemTools::Error("Problem listing tar: ", outFile.c_str());
           return 1;
         }
-      } else if (flags.find_first_of('c') != flags.npos) {
+      } else if (flags.find_first_of('c') != std::string::npos) {
         if (!cmSystemTools::CreateTar(outFile.c_str(), files, compress,
                                       verbose, mtime, format)) {
           cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
           return 1;
         }
-      } else if (flags.find_first_of('x') != flags.npos) {
+      } else if (flags.find_first_of('x') != std::string::npos) {
         if (!cmSystemTools::ExtractTar(outFile.c_str(), verbose)) {
           cmSystemTools::Error("Problem extracting tar: ", outFile.c_str());
           return 1;
@@ -1272,7 +1272,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
   int result = 0;
   while (result == 0 && cmSystemTools::GetLineFromStream(fin, command)) {
     // Skip empty command lines.
-    if (command.find_first_not_of(" \t") == command.npos) {
+    if (command.find_first_not_of(" \t") == std::string::npos) {
       continue;
     }
 
@@ -1420,7 +1420,7 @@ static bool RunCommand(const char* comment, std::vector<std::string>& command,
   // it is the dumb rc command banner, but if the command
   // returned an error code then print the output anyway as
   // the banner may be mixed with some other important information.
-  if (output.find("Resource Compiler Version") == output.npos || !res ||
+  if (output.find("Resource Compiler Version") == std::string::npos || !res ||
       retCode) {
     std::cout << output;
   }

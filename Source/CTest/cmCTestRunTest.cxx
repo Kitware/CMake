@@ -596,8 +596,7 @@ void cmCTestRunTest::ComputeArguments()
 void cmCTestRunTest::DartProcessing()
 {
   if (!this->ProcessOutput.empty() &&
-      this->ProcessOutput.find("<DartMeasurement") !=
-        this->ProcessOutput.npos) {
+      this->ProcessOutput.find("<DartMeasurement") != std::string::npos) {
     if (this->TestHandler->DartStuff.find(this->ProcessOutput.c_str())) {
       this->TestResult.DartString = this->TestHandler->DartStuff.match(1);
       // keep searching and replacing until none are left

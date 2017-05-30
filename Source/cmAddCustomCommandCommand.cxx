@@ -369,7 +369,7 @@ bool cmAddCustomCommandCommand::CheckOutputs(
 
     // Make sure the output file name has no invalid characters.
     std::string::size_type pos = o->find_first_of("#<>");
-    if (pos != o->npos) {
+    if (pos != std::string::npos) {
       std::ostringstream msg;
       msg << "called with OUTPUT containing a \"" << (*o)[pos]
           << "\".  This character is not allowed.";

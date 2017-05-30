@@ -134,6 +134,7 @@ public:
   operator bool() const { return this->handle_ != INVALID_HANDLE_VALUE; }
   bool operator!() const { return this->handle_ == INVALID_HANDLE_VALUE; }
   operator HANDLE() const { return this->handle_; }
+
 private:
   HANDLE handle_;
 };
@@ -2372,7 +2373,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       rp[rp_count].Value = se[i]->Value.substr(0, prefix_len);
       rp[rp_count].Value += newRPath;
       rp[rp_count].Value +=
-        se[i]->Value.substr(pos + oldRPath.length(), oldRPath.npos);
+        se[i]->Value.substr(pos + oldRPath.length(), std::string::npos);
 
       if (!rp[rp_count].Value.empty()) {
         remove_rpath = false;

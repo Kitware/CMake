@@ -303,7 +303,7 @@ bool cmFindLibraryHelper::HasValidSuffix(std::string const& name)
     // Check if a valid library suffix is somewhere in the name,
     // this may happen e.g. for versioned shared libraries: libfoo.so.2
     suffix += ".";
-    if (name.find(suffix) != name.npos) {
+    if (name.find(suffix) != std::string::npos) {
       return true;
     }
   }

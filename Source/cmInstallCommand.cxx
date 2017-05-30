@@ -1210,7 +1210,7 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
 
   // Check the file name.
   std::string fname = filename.GetString();
-  if (fname.find_first_of(":/\\") != fname.npos) {
+  if (fname.find_first_of(":/\\") != std::string::npos) {
     std::ostringstream e;
     e << args[0] << " given invalid export file name \"" << fname << "\".  "
       << "The FILE argument may not contain a path.  "
@@ -1228,7 +1228,7 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
     this->SetError(e.str());
     return false;
   }
-  if (fname.find_first_of(":/\\") != fname.npos) {
+  if (fname.find_first_of(":/\\") != std::string::npos) {
     std::ostringstream e;
     e << args[0] << " given export name \"" << exp.GetString() << "\".  "
       << "This name cannot be safely converted to a file name.  "
@@ -1302,7 +1302,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 
   // Check the file name.
   std::string fname = filename.GetString();
-  if (fname.find_first_of(":/\\") != fname.npos) {
+  if (fname.find_first_of(":/\\") != std::string::npos) {
     std::ostringstream e;
     e << args[0] << " given invalid export file name \"" << fname << "\".  "
       << "The FILE argument may not contain a path.  "
@@ -1326,7 +1326,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
     fname = exp.GetString();
     fname += ".cmake";
 
-    if (fname.find_first_of(":/\\") != fname.npos) {
+    if (fname.find_first_of(":/\\") != std::string::npos) {
       std::ostringstream e;
       e << args[0] << " given export name \"" << exp.GetString() << "\".  "
         << "This name cannot be safely converted to a file name.  "
@@ -1391,7 +1391,7 @@ bool cmInstallCommand::MakeFilesFullPath(
     }
 
     // Make sure the file is not a directory.
-    if (gpos == file.npos && cmSystemTools::FileIsDirectory(file)) {
+    if (gpos == std::string::npos && cmSystemTools::FileIsDirectory(file)) {
       std::ostringstream e;
       e << modeName << " given directory \"" << (*fileIt) << "\" to install.";
       this->SetError(e.str());

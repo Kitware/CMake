@@ -306,7 +306,7 @@ bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
   // if there are spaces in the make program use short path
   // but do not short path the actual program name, as
   // this can cause trouble with VSExpress
-  if (makeProgram.find(' ') != makeProgram.npos) {
+  if (makeProgram.find(' ') != std::string::npos) {
     std::string dir;
     std::string file;
     cmSystemTools::SplitProgramPath(makeProgram, dir, file);
@@ -2730,7 +2730,7 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
     }
 
     // Get the filename.
-    fname = line.substr(33, line.npos);
+    fname = line.substr(33, std::string::npos);
 
     // Look for a hash for this file's rule.
     std::map<std::string, RuleHash>::const_iterator rhi =

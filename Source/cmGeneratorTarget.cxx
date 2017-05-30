@@ -5148,11 +5148,11 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
   // do the expansion but users link to libraries like " ${VAR} ".
   std::string lib = item;
   std::string::size_type pos = lib.find_first_not_of(" \t\r\n");
-  if (pos != lib.npos) {
-    lib = lib.substr(pos, lib.npos);
+  if (pos != std::string::npos) {
+    lib = lib.substr(pos, std::string::npos);
   }
   pos = lib.find_last_not_of(" \t\r\n");
-  if (pos != lib.npos) {
+  if (pos != std::string::npos) {
     lib = lib.substr(0, pos + 1);
   }
   if (lib != item) {

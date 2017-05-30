@@ -1476,7 +1476,7 @@ bool cmTarget::CheckImportedLibName(std::string const& prop,
       return false;
     }
     std::string::size_type bad = value.find_first_of(":/\\;");
-    if (bad != value.npos) {
+    if (bad != std::string::npos) {
       this->Makefile->IssueMessage(
         cmake::FATAL_ERROR, prop + " property value\n  " + value +
           "\nmay not contain '" + value.substr(bad, 1) + "'.");

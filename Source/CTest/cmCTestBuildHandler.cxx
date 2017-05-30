@@ -596,10 +596,10 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
           // At this point we need to make this->SourceFile relative to
           // the source root of the project, so cvs links will work
           cmSystemTools::ConvertToUnixSlashes(cm->SourceFile);
-          if (cm->SourceFile.find("/.../") != cm->SourceFile.npos) {
+          if (cm->SourceFile.find("/.../") != std::string::npos) {
             cmSystemTools::ReplaceString(cm->SourceFile, "/.../", "");
             std::string::size_type p = cm->SourceFile.find('/');
-            if (p != cm->SourceFile.npos) {
+            if (p != std::string::npos) {
               cm->SourceFile =
                 cm->SourceFile.substr(p + 1, cm->SourceFile.size() - p);
             }

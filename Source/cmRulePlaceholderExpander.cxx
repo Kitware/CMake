@@ -155,7 +155,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
         // Strip the last extension off the target name.
         std::string targetBase = replaceValues.Target;
         std::string::size_type pos = targetBase.rfind('.');
-        if (pos != targetBase.npos) {
+        if (pos != std::string::npos) {
           return targetBase.substr(0, pos);
         }
         return targetBase;
@@ -270,7 +270,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   std::map<std::string, std::string>::iterator mapIt =
     this->VariableMappings.find(variable);
   if (mapIt != this->VariableMappings.end()) {
-    if (variable.find("_FLAG") == variable.npos) {
+    if (variable.find("_FLAG") == std::string::npos) {
       return outputConverter->ConvertToOutputForExisting(mapIt->second);
     }
     return mapIt->second;
@@ -284,15 +284,15 @@ void cmRulePlaceholderExpander::ExpandRuleVariables(
 {
   std::string::size_type start = s.find('<');
   // no variables to expand
-  if (start == s.npos) {
+  if (start == std::string::npos) {
     return;
   }
   std::string::size_type pos = 0;
   std::string expandedInput;
-  while (start != s.npos && start < s.size() - 2) {
+  while (start != std::string::npos && start < s.size() - 2) {
     std::string::size_type end = s.find('>', start);
     // if we find a < with no > we are done
-    if (end == s.npos) {
+    if (end == std::string::npos) {
       return;
     }
     char c = s[start + 1];
