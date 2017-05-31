@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
+project(mocPlugin CXX)
 
 set(CMAKE_AUTOMOC_DEPEND_FILTERS
   "A_CUSTOM_MACRO"
