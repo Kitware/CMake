@@ -209,7 +209,7 @@ void cmGlobalNinjaGenerator::WriteBuild(
        ++i) {
     build += " " + EncodeIdent(EncodePath(*i), os);
     if (this->ComputingUnknownDependencies) {
-      this->CombinedBuildOutputs.insert(EncodePath(*i));
+      this->CombinedBuildOutputs.insert(*i);
     }
   }
   if (!implicitOuts.empty()) {
@@ -311,7 +311,7 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
     // we need to track every dependency that comes in, since we are trying
     // to find dependencies that are side effects of build commands
     for (cmNinjaDeps::const_iterator i = deps.begin(); i != deps.end(); ++i) {
-      this->CombinedCustomCommandExplicitDependencies.insert(EncodePath(*i));
+      this->CombinedCustomCommandExplicitDependencies.insert(*i);
     }
   }
 }
