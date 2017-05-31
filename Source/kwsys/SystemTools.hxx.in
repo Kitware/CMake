@@ -474,6 +474,10 @@ public:
   static std::string JoinPath(std::vector<std::string>::const_iterator first,
                               std::vector<std::string>::const_iterator last);
 
+  /** Removes empty components from path.
+   */
+  static void RemoveEmptyPathElements(std::vector<std::string>& path);
+
   /**
    * Compare a path or components of a path.
    */
