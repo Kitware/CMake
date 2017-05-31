@@ -4,7 +4,7 @@ if("${build_ninja}" MATCHES [====[
 # Tell Ninja that they may appear as side effects of build rules
 # otherwise ordered by order-only dependencies.
 
-((build [^:]*: phony [^\n]*
+((build [^:]*: phony[^\n]*
 )*)# ========]====])
   set(phony "${CMAKE_MATCH_1}")
   if(NOT phony)
