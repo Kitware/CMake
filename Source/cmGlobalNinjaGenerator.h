@@ -75,7 +75,6 @@ public:
   static std::string EncodeIdent(const std::string& ident, std::ostream& vars);
   static std::string EncodeLiteral(const std::string& lit);
   std::string EncodePath(const std::string& path);
-  static std::string EncodeDepfileSpace(const std::string& path);
 
   cmLinkLineComputer* CreateLinkLineComputer(
     cmOutputConverter* outputConverter,

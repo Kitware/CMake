@@ -18,9 +18,8 @@ if(CMAKE_RC_COMPILER MATCHES windres)
   message(STATUS "CMAKE_RC_COMPILER MATCHES windres")
   add_definitions(/DCMAKE_RCDEFINE=test.txt)
   add_definitions(/DCMAKE_RCDEFINE_NO_QUOTED_STRINGS)
-  if(MSYS AND CMAKE_CURRENT_BINARY_DIR MATCHES " ")
-    # windres cannot handle spaces in include dir, and
-    # for the MSys shell we do not convert to shortpath.
+  if(CMAKE_CURRENT_BINARY_DIR MATCHES " ")
+    # windres cannot handle spaces in include dir
     set(CMAKE_RC_NO_INCLUDE 1)
   endif()
 elseif(MSVC60)

@@ -146,13 +146,6 @@ std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
   return EncodeLiteral(result);
 }
 
-std::string cmGlobalNinjaGenerator::EncodeDepfileSpace(const std::string& path)
-{
-  std::string result = path;
-  cmSystemTools::ReplaceString(result, " ", "\\ ");
-  return result;
-}
-
 void cmGlobalNinjaGenerator::WriteBuild(
   std::ostream& os, const std::string& comment, const std::string& rule,
   const cmNinjaDeps& outputs, const cmNinjaDeps& implicitOuts,

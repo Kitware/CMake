@@ -822,8 +822,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   vars["DEFINES"] = this->ComputeDefines(source, language);
   vars["INCLUDES"] = this->GetIncludes(language);
   if (!this->NeedDepTypeMSVC(language)) {
-    vars["DEP_FILE"] =
-      cmGlobalNinjaGenerator::EncodeDepfileSpace(objectFileName + ".d");
+    vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+      objectFileName + ".d", cmOutputConverter::SHELL);
   }
 
   this->ExportObjectCompileCommand(
@@ -920,8 +920,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     vars["INCLUDES"] = sourceDirectoryFlag + " " + vars["INCLUDES"];
 
     // Explicit preprocessing always uses a depfile.
-    ppVars["DEP_FILE"] =
-      cmGlobalNinjaGenerator::EncodeDepfileSpace(ppFileName + ".d");
+    ppVars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+      ppFileName + ".d", cmOutputConverter::SHELL);
     // The actual compilation does not need a depfile because it
     // depends on the already-preprocessed source.
     vars.erase("DEP_FILE");
