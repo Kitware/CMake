@@ -54,7 +54,8 @@ static const char* toUnixPaths[][2] = {
   { 0, 0 }
 };
 
-static bool CheckConvertToUnixSlashes(std::string input, std::string output)
+static bool CheckConvertToUnixSlashes(std::string const& input,
+                                      std::string const& output)
 {
   std::string result = input;
   kwsys::SystemTools::ConvertToUnixSlashes(result);
@@ -71,8 +72,9 @@ static const char* checkEscapeChars[][4] = { { "1 foo 2 bar 2", "12", "\\",
                                              { " {} ", "{}", "#", " #{#} " },
                                              { 0, 0, 0, 0 } };
 
-static bool CheckEscapeChars(std::string input, const char* chars_to_escape,
-                             char escape_char, std::string output)
+static bool CheckEscapeChars(std::string const& input,
+                             const char* chars_to_escape, char escape_char,
+                             std::string const& output)
 {
   std::string result = kwsys::SystemTools::EscapeChars(
     input.c_str(), chars_to_escape, escape_char);
