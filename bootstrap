@@ -6,6 +6,17 @@ die() {
   echo "$@" 1>&2 ; exit 1
 }
 
+# Compile flag extraction function.
+cmake_extract_standard_flags()
+{
+  cd "${cmake_source_dir}/Modules/Compiler/"
+  for file in ${1:-*}-${2}.cmake; do
+    cat "${file}" \
+      | sed -n "s/ *set *( *CMAKE_${2}${3}_EXTENSION_COMPILE_OPTION *\"\{0,1\}\([^\")]*\).*/\1/p" \
+      | tr ';' ' '
+  done
+}
+
 # Version number extraction function.
 cmake_version_component()
 {
@@ -954,6 +965,17 @@ for a in ${cmake_c_compilers}; do
     cmake_c_compiler="${a}"
   fi
 done
+for std in 11 99 90; do
+  try_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" C \"${std}\"`"
+  for flag in $try_flags; do
+    echo "Checking whether ${cmake_c_compiler} supports ${flag}" >> cmake_bootstrap.log 2>&1
+    if cmake_try_run "${cmake_c_compiler}" "${cmake_c_flags} ${flag}" \
+      "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
+      cmake_c_flags="${cmake_c_flags} ${flag}"
+      break 2
+    fi
+  done
+done
 rm -f "${TMPFILE}.c"
 
 if [ -z "${cmake_c_compiler}" ]; then
@@ -988,6 +1010,10 @@ echo '
 # include <iostream.h>
 #endif
 
+#if __cplusplus >= 201103L && defined(__SUNPRO_CC) && __SUNPRO_CC < 0x5140
+#error "SunPro <= 5.13 C++ 11 mode not supported due to bug in move semantics."
+#endif
+
 class NeedCXX
 {
 public:
@@ -1012,6 +1038,17 @@ for a in ${cmake_cxx_compilers}; do
     if [ -z "${cmake_cxx_compiler}" ] && \
       cmake_try_run "${a}" "${cmake_cxx_flags} -DTEST${b}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
       cmake_cxx_compiler="${a}"
+    fi
+  done
+done
+for std in 14 11 98; do
+  try_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" CXX \"${std}\"`"
+  for flag in $try_flags; do
+    echo "Checking for wheter ${cmake_cxx_flags} supports ${flag}" >> cmake_bootstrap.log 2>&1
+    if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags} ${flag} -DTEST1" \
+      "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+      cmake_cxx_flags="${cmake_cxx_flags} ${flag} "
+      break 2
     fi
   done
 done
@@ -1159,34 +1196,6 @@ if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
     fi
   fi
   cmake_test_flags=
-fi
-
-
-if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
-  # Are we SolarisStudio?
-
-  TMPFILE=`cmake_tmp_file`
-  echo '
-  #if defined(__SUNPRO_CC)
-  #include <iostream>
-  int main() { std::cout << "This is SolarisStudio" << std::endl; return 0;}
-  #endif
-  ' > ${TMPFILE}.cxx
-  cmake_cxx_compiler_is_solarisstudio=0
-  if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags} " "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-    cmake_cxx_compiler_is_solarisstudio=1
-  fi
-  if [ "x${cmake_cxx_compiler_is_solarisstudio}" = "x1" ]; then
-    echo "${cmake_cxx_compiler} is SolarisStudio compiler"
-  else
-    echo "${cmake_cxx_compiler} is not SolarisStudio compiler"
-  fi
-  rm -f "${TMPFILE}.cxx"
-
-  if [ "x${cmake_cxx_compiler_is_solarisstudio}" = "x1" ]; then
-    cmake_cxx_flags="${cmake_cxx_flags} -library=stlport4"
-  fi
 fi
 
 
