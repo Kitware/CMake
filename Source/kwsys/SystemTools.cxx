@@ -554,7 +554,7 @@ bool SystemTools::HasEnv(const std::string& key)
 static int kwsysUnPutEnv(const std::string& env)
 {
   size_t pos = env.find('=');
-  if (pos != env.npos) {
+  if (pos != std::string::npos) {
     std::string name = env.substr(0, pos);
     unsetenv(name.c_str());
   } else {
@@ -570,7 +570,7 @@ static int kwsysUnPutEnv(const std::string& env)
 {
   int err = 0;
   size_t pos = env.find('=');
-  size_t const len = pos == env.npos ? env.size() : pos;
+  size_t const len = pos == std::string::npos ? env.size() : pos;
   size_t const sz = len + 1;
   char local_buf[256];
   char* buf = sz > sizeof(local_buf) ? (char*)malloc(sz) : local_buf;
@@ -604,7 +604,7 @@ static int kwsysUnPutEnv(std::string const& env)
 {
   std::wstring wEnv = Encoding::ToWide(env);
   size_t const pos = wEnv.find('=');
-  size_t const len = pos == wEnv.npos ? wEnv.size() : pos;
+  size_t const len = pos == std::string::npos ? wEnv.size() : pos;
   wEnv.resize(len + 1, L'=');
   wchar_t* newEnv = _wcsdup(wEnv.c_str());
   if (!newEnv) {
@@ -620,7 +620,7 @@ static int kwsysUnPutEnv(std::string const& env)
 static int kwsysUnPutEnv(const std::string& env)
 {
   size_t pos = env.find('=');
-  size_t const len = pos == env.npos ? env.size() : pos;
+  size_t const len = pos == std::string::npos ? env.size() : pos;
   int in = 0;
   int out = 0;
   while (environ[in]) {
@@ -645,7 +645,7 @@ static int kwsysUnPutEnv(const std::string& env)
 bool SystemTools::PutEnv(const std::string& env)
 {
   size_t pos = env.find('=');
-  if (pos != env.npos) {
+  if (pos != std::string::npos) {
     std::string name = env.substr(0, pos);
     return setenv(name.c_str(), env.c_str() + pos + 1, 1) == 0;
   } else {
@@ -1722,7 +1722,7 @@ std::string SystemTools::CropString(const std::string& s, size_t max_len)
   size_t middle = max_len / 2;
 
   n += s.substr(0, middle);
-  n += s.substr(s.size() - (max_len - middle), std::string::npos);
+  n += s.substr(s.size() - (max_len - middle));
 
   if (max_len > 2) {
     n[middle] = '.';
@@ -1851,7 +1851,7 @@ static void ConvertVMSToUnix(std::string& path)
 {
   std::string::size_type rootEnd = path.find(":[");
   std::string::size_type pathEnd = path.find("]");
-  if (rootEnd != path.npos) {
+  if (rootEnd != std::string::npos) {
     std::string root = path.substr(0, rootEnd);
     std::string pathPart = path.substr(rootEnd + 2, pathEnd - rootEnd - 2);
     const char* pathCString = pathPart.c_str();
@@ -4337,7 +4337,7 @@ bool SystemTools::GetPermissions(const std::string& file, mode_t& mode)
     mode |= S_IFREG;
   }
   size_t dotPos = file.rfind('.');
-  const char* ext = dotPos == file.npos ? 0 : (file.c_str() + dotPos);
+  const char* ext = dotPos == std::string::npos ? 0 : (file.c_str() + dotPos);
   if (ext && (Strucmp(ext, ".exe") == 0 || Strucmp(ext, ".com") == 0 ||
               Strucmp(ext, ".cmd") == 0 || Strucmp(ext, ".bat") == 0)) {
     mode |= (_S_IEXEC | (_S_IEXEC >> 3) | (_S_IEXEC >> 6));
