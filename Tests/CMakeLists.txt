@@ -3110,6 +3110,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endif ()
   endif ()
 
+  if(CMake_TEST_EXTERNAL_CMAKE)
+    set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
+  endif()
   if("${CMAKE_GENERATOR}" MATCHES Xcode)
     set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
   endif()
