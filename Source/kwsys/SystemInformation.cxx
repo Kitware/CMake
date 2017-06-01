@@ -918,7 +918,8 @@ int LoadLines(const char* fileName, std::vector<std::string>& lines)
 
 // ****************************************************************************
 template <typename T>
-int NameValue(std::vector<std::string>& lines, std::string name, T& value)
+int NameValue(std::vector<std::string> const& lines, std::string const& name,
+              T& value)
 {
   size_t nLines = lines.size();
   for (size_t i = 0; i < nLines; ++i) {
