@@ -22,7 +22,7 @@ public:
 
   virtual ~JSONParser() {}
 
-  std::string getValue(std::string line, int type)
+  std::string getValue(std::string const& line, int type)
   {
     size_t begIndex;
     size_t endIndex;
