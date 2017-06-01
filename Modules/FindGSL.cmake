@@ -37,9 +37,10 @@
 #
 # This script expects to find libraries at ``$GSL_ROOT_DIR/lib`` and the GSL
 # headers at ``$GSL_ROOT_DIR/include/gsl``.  The library directory may
-# optionally provide Release and Debug folders.  For Unix-like systems, this
-# script will use ``$GSL_ROOT_DIR/bin/gsl-config`` (if found) to aid in the
-# discovery GSL.
+# optionally provide Release and Debug folders. If available, the libraries
+# named ``gsld``, ``gslblasd`` or ``cblasd`` are recognized as debug libraries.
+# For Unix-like systems, this script will use ``$GSL_ROOT_DIR/bin/gsl-config``
+# (if found) to aid in the discovery of GSL.
 #
 # Cache Variables
 # ^^^^^^^^^^^^^^^
@@ -105,12 +106,12 @@ find_library( GSL_CBLAS_LIBRARY
 )
 # Do we also have debug versions?
 find_library( GSL_LIBRARY_DEBUG
-  NAMES gsl
+  NAMES gsld gsl
   HINTS ${GSL_ROOT_DIR}/lib ${GSL_LIBDIR}
   PATH_SUFFIXES Debug
 )
 find_library( GSL_CBLAS_LIBRARY_DEBUG
-  NAMES gslcblas cblas
+  NAMES gslcblasd cblasd gslcblas cblas
   HINTS ${GSL_ROOT_DIR}/lib ${GSL_LIBDIR}
   PATH_SUFFIXES Debug
 )
