@@ -1287,6 +1287,7 @@ public:
     this->CurrentString += this->NextObject;
   }
   void Done() { this->Strings.push_back(this->CurrentString); }
+
 private:
   std::string MaybeConvertToRelativePath(std::string const& obj)
   {
@@ -1596,7 +1597,8 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
                                             frameworkPath, linkPath);
   linkLibs = frameworkPath + linkPath + linkLibs;
 
-  if (useResponseFile && linkLibs.find_first_not_of(' ') != linkLibs.npos) {
+  if (useResponseFile &&
+      linkLibs.find_first_not_of(' ') != std::string::npos) {
     // Lookup the response file reference flag.
     std::string responseFlagVar = "CMAKE_";
     responseFlagVar +=

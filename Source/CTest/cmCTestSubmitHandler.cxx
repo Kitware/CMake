@@ -595,7 +595,7 @@ void cmCTestSubmitHandler::ParseResponse(
   std::string output;
   output.append(chunk.begin(), chunk.end());
 
-  if (output.find("<cdash") != output.npos) {
+  if (output.find("<cdash") != std::string::npos) {
     ResponseParser parser;
     parser.Parse(output.c_str());
 

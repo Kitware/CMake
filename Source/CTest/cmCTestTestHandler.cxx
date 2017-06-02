@@ -225,7 +225,7 @@ public:
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
-  */
+   */
   bool InitialPass(std::vector<std::string> const& /*args*/,
                    cmExecutionStatus& /*unused*/) CM_OVERRIDE;
 
@@ -247,7 +247,7 @@ inline int GetNextNumber(std::string const& in, int& val,
                          std::string::size_type& pos2)
 {
   pos2 = in.find(',', pos);
-  if (pos2 != in.npos) {
+  if (pos2 != std::string::npos) {
     if (pos2 - pos == 0) {
       val = -1;
     } else {
@@ -273,7 +273,7 @@ inline int GetNextRealNumber(std::string const& in, double& val,
                              std::string::size_type& pos2)
 {
   pos2 = in.find(',', pos);
-  if (pos2 != in.npos) {
+  if (pos2 != std::string::npos) {
     if (pos2 - pos == 0) {
       val = -1;
     } else {
@@ -1823,7 +1823,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
     std::string::size_type pos;
     while (cmSystemTools::GetLineFromStream(ifs, line)) {
       pos = line.find(':', 0);
-      if (pos == line.npos) {
+      if (pos == std::string::npos) {
         continue;
       }
 
@@ -2027,7 +2027,7 @@ void cmCTestTestHandler::SetTestsToRunInformation(const char* in)
 bool cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length)
 {
   if (!length || length >= output.size() ||
-      output.find("CTEST_FULL_OUTPUT") != output.npos) {
+      output.find("CTEST_FULL_OUTPUT") != std::string::npos) {
     return true;
   }
 
@@ -2175,7 +2175,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           }
           if (key == "MEASUREMENT") {
             size_t pos = val.find_first_of('=');
-            if (pos != val.npos) {
+            if (pos != std::string::npos) {
               std::string mKey = val.substr(0, pos);
               const char* mVal = val.c_str() + pos + 1;
               rtit->Measurements[mKey] = mVal;

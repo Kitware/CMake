@@ -140,7 +140,7 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
     for (const char* const* replaceIter = cmArrayBegin(ruleReplaceVars);
          replaceIter != cmArrayEnd(ruleReplaceVars); ++replaceIter) {
       std::string actualReplace = *replaceIter;
-      if (actualReplace.find("${LANG}") != actualReplace.npos) {
+      if (actualReplace.find("${LANG}") != std::string::npos) {
         cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
       }
 
@@ -1932,7 +1932,7 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
       // -DNAME="value" instead of -D"NAME=value" for historical reasons.
       std::string::size_type eq = defineIt->find("=");
       def += defineIt->substr(0, eq);
-      if (eq != defineIt->npos) {
+      if (eq != std::string::npos) {
         def += "=";
         def += this->EscapeForShell(defineIt->c_str() + eq + 1, true);
       }
@@ -2109,7 +2109,7 @@ static bool cmLocalGeneratorShortenObjectName(std::string& objName,
   // its own md5 sum.
   std::string::size_type pos =
     objName.find('/', objName.size() - max_len + 32);
-  if (pos != objName.npos) {
+  if (pos != std::string::npos) {
     cmCryptoHash md5(cmCryptoHash::AlgoMD5);
     std::string md5name = md5.HashString(objName.substr(0, pos));
     md5name += objName.substr(pos);
@@ -2460,7 +2460,7 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
   }
 
   // Many compilers do not support # in the value so we disable it.
-  if (define.find_first_of('#') != define.npos) {
+  if (define.find_first_of('#') != std::string::npos) {
     std::ostringstream e;
     /* clang-format off */
     e << "WARNING: Preprocessor definitions containing '#' may not be "

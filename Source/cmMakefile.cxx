@@ -316,6 +316,7 @@ public:
                bool noPolicyScope);
   ~IncludeScope();
   void Quiet() { this->ReportError = false; }
+
 private:
   cmMakefile* Makefile;
   bool NoPolicyScope;
@@ -480,6 +481,7 @@ public:
   }
 
   void Quiet() { this->ReportError = false; }
+
 private:
   cmMakefile* Makefile;
   bool ReportError;
@@ -625,7 +627,7 @@ struct file_not_persistent
 {
   bool operator()(const std::string& path) const
   {
-    return !(path.find("CMakeTmp") == path.npos &&
+    return !(path.find("CMakeTmp") == std::string::npos &&
              cmSystemTools::FileExists(path.c_str()));
   }
 };
@@ -1347,6 +1349,7 @@ public:
   }
 
   void Quiet() { this->ReportError = false; }
+
 private:
   cmMakefile* Makefile;
   cmGlobalGenerator* GG;
@@ -1893,7 +1896,7 @@ cmSourceFile* cmMakefile::LinearGetSourceFileWithOutput(
         out = *o;
         std::string::size_type pos = out.rfind(name);
         // If the output matches exactly
-        if (pos != out.npos && pos == out.size() - name.size() &&
+        if (pos != std::string::npos && pos == out.size() - name.size() &&
             (pos == 0 || out[pos - 1] == '/')) {
           return *i;
         }
@@ -2406,7 +2409,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
   bool removeEmpty, bool replaceAt) const
 {
   // Fast path strings without any special characters.
-  if (source.find_first_of("$@\\") == source.npos) {
+  if (source.find_first_of("$@\\") == std::string::npos) {
     return cmake::LOG;
   }
 

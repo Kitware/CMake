@@ -16,7 +16,7 @@ static std::string utilStripCR(std::string const& line)
 {
   // Strip CR characters rcc may have printed (possibly more than one!).
   std::string::size_type cr = line.find('\r');
-  if (cr != line.npos) {
+  if (cr != std::string::npos) {
     return line.substr(0, cr);
   }
   return line;

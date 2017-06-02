@@ -1050,7 +1050,7 @@ void cmCursesMainForm::JumpToCacheEntry(const char* astr)
         const char* curField = lbl->GetValue();
         if (curField) {
           std::string cfld = cmSystemTools::LowerCase(curField);
-          if (cfld.find(str) != cfld.npos && findex != start_index) {
+          if (cfld.find(str) != std::string::npos && findex != start_index) {
             break;
           }
         }

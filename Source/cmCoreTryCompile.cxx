@@ -672,7 +672,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       fprintf(fout, " \"%s\"", si->c_str());
 
       // Add dependencies on any non-temporary sources.
-      if (si->find("CMakeTmp") == si->npos) {
+      if (si->find("CMakeTmp") == std::string::npos) {
         this->Makefile->AddCMakeDependFile(*si);
       }
     }

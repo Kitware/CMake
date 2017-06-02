@@ -326,7 +326,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
     } else if (doing == DoingPathSuffixes) {
       this->AddPathSuffix(args[i]);
     } else if (doing == DoingConfigs) {
-      if (args[i].find_first_of(":/\\") != args[i].npos ||
+      if (args[i].find_first_of(":/\\") != std::string::npos ||
           cmSystemTools::GetFilenameLastExtension(args[i]) != ".cmake") {
         std::ostringstream e;
         e << "given CONFIGS option followed by invalid file name \"" << args[i]
@@ -1593,6 +1593,7 @@ class cmFileListGeneratorBase
 {
 public:
   virtual ~cmFileListGeneratorBase() {}
+
 protected:
   bool Consider(std::string const& fullPath, cmFileList& listing);
 
