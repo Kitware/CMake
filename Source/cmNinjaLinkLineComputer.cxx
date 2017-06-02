@@ -4,12 +4,11 @@
 #include "cmNinjaLinkLineComputer.h"
 
 #include "cmGlobalNinjaGenerator.h"
-#include "cmStateDirectory.h"
 
 class cmOutputConverter;
 
 cmNinjaLinkLineComputer::cmNinjaLinkLineComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory stateDir,
+  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir,
   cmGlobalNinjaGenerator const* gg)
   : cmLinkLineComputer(outputConverter, stateDir)
   , GG(gg)

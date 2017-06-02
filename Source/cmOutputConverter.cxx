@@ -14,7 +14,7 @@
 #include "cmStateDirectory.h"
 #include "cmSystemTools.h"
 
-cmOutputConverter::cmOutputConverter(cmStateSnapshot snapshot)
+cmOutputConverter::cmOutputConverter(cmStateSnapshot const& snapshot)
   : StateSnapshot(snapshot)
   , LinkScriptShell(false)
 {
@@ -81,7 +81,7 @@ static bool cmOutputConverterNotAbove(const char* a, const char* b)
 
 bool cmOutputConverter::ContainedInDirectory(std::string const& local_path,
                                              std::string const& remote_path,
-                                             cmStateDirectory directory)
+                                             cmStateDirectory const& directory)
 {
   const std::string relativePathTopBinary =
     directory.GetRelativePathTopBinary();

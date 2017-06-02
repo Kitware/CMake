@@ -205,8 +205,7 @@ bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
   return false;
 }
 
-void cmCacheManager::WritePropertyEntries(std::ostream& os,
-                                          CacheIterator const& i)
+void cmCacheManager::WritePropertyEntries(std::ostream& os, CacheIterator i)
 {
   for (const char** p = this->PersistentProperties; *p; ++p) {
     if (const char* value = i.GetProperty(*p)) {

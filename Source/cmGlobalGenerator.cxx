@@ -1482,13 +1482,13 @@ cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
 }
 
 cmLinkLineComputer* cmGlobalGenerator::CreateLinkLineComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory stateDir) const
+  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir) const
 {
   return new cmLinkLineComputer(outputConverter, stateDir);
 }
 
 cmLinkLineComputer* cmGlobalGenerator::CreateMSVC60LinkLineComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory stateDir) const
+  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir) const
 {
   return new cmMSVC60LinkLineComputer(outputConverter, stateDir);
 }

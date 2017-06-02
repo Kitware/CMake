@@ -43,7 +43,7 @@ private:
   std::string FindNormalProgramDirsPerName();
   std::string FindNormalProgramNamesPerDir();
   std::string FindAppBundle();
-  std::string GetBundleExecutable(std::string bundlePath);
+  std::string GetBundleExecutable(std::string const& bundlePath);
 };
 
 #endif

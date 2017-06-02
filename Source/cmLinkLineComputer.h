@@ -20,7 +20,7 @@ class cmLinkLineComputer
 
 public:
   cmLinkLineComputer(cmOutputConverter* outputConverter,
-                     cmStateDirectory stateDir);
+                     cmStateDirectory const& stateDir);
   virtual ~cmLinkLineComputer();
 
   void SetUseWatcomQuote(bool useWatcomQuote);

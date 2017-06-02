@@ -107,7 +107,7 @@ public:
 
   // Construct an empty backtrace whose bottom sits in the directory
   // indicated by the given valid snapshot.
-  cmListFileBacktrace(cmStateSnapshot snapshot);
+  cmListFileBacktrace(cmStateSnapshot const& snapshot);
 
   // Backtraces may be copied and assigned as values.
   cmListFileBacktrace(cmListFileBacktrace const& r);
@@ -143,9 +143,9 @@ private:
 
   cmStateSnapshot Bottom;
   Entry* Cur;
-  cmListFileBacktrace(cmStateSnapshot bottom, Entry* up,
+  cmListFileBacktrace(cmStateSnapshot const& bottom, Entry* up,
                       cmListFileContext const& lfc);
-  cmListFileBacktrace(cmStateSnapshot bottom, Entry* cur);
+  cmListFileBacktrace(cmStateSnapshot const& bottom, Entry* cur);
 };
 
 struct cmListFile

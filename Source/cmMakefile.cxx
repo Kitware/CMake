@@ -3463,7 +3463,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
 
 int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
                               bool copyonly, bool atOnly, bool escapeQuotes,
-                              const cmNewLineStyle& newLine)
+                              cmNewLineStyle newLine)
 {
   int res = 1;
   if (!this->CanIWriteThisFile(outfile)) {

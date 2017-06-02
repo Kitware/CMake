@@ -143,7 +143,7 @@ protected:
                         std::vector<std::string>& makefile_depends);
 
   cmLinkLineComputer* CreateLinkLineComputer(
-    cmOutputConverter* outputConverter, cmStateDirectory stateDir);
+    cmOutputConverter* outputConverter, cmStateDirectory const& stateDir);
 
   /** Create a response file with the given set of options.  Returns
       the relative path from the target build working directory to the

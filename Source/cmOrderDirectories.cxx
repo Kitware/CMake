@@ -424,7 +424,7 @@ struct cmOrderDirectoriesCompare
   // The conflict pair is unique based on just the directory
   // (first).  The second element is only used for displaying
   // information about why the entry is present.
-  bool operator()(ConflictPair const& l, ConflictPair const& r)
+  bool operator()(ConflictPair l, ConflictPair r)
   {
     return l.first == r.first;
   }

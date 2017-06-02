@@ -36,18 +36,20 @@ public:
 
   cmStateSnapshot CreateBaseSnapshot();
   cmStateSnapshot CreateBuildsystemDirectorySnapshot(
-    cmStateSnapshot originSnapshot);
-  cmStateSnapshot CreateFunctionCallSnapshot(cmStateSnapshot originSnapshot,
-                                             std::string const& fileName);
-  cmStateSnapshot CreateMacroCallSnapshot(cmStateSnapshot originSnapshot,
-                                          std::string const& fileName);
-  cmStateSnapshot CreateIncludeFileSnapshot(cmStateSnapshot originSnapshot,
-                                            std::string const& fileName);
-  cmStateSnapshot CreateVariableScopeSnapshot(cmStateSnapshot originSnapshot);
-  cmStateSnapshot CreateInlineListFileSnapshot(cmStateSnapshot originSnapshot,
-                                               std::string const& fileName);
-  cmStateSnapshot CreatePolicyScopeSnapshot(cmStateSnapshot originSnapshot);
-  cmStateSnapshot Pop(cmStateSnapshot originSnapshot);
+    cmStateSnapshot const& originSnapshot);
+  cmStateSnapshot CreateFunctionCallSnapshot(
+    cmStateSnapshot const& originSnapshot, std::string const& fileName);
+  cmStateSnapshot CreateMacroCallSnapshot(
+    cmStateSnapshot const& originSnapshot, std::string const& fileName);
+  cmStateSnapshot CreateIncludeFileSnapshot(
+    cmStateSnapshot const& originSnapshot, std::string const& fileName);
+  cmStateSnapshot CreateVariableScopeSnapshot(
+    cmStateSnapshot const& originSnapshot);
+  cmStateSnapshot CreateInlineListFileSnapshot(
+    cmStateSnapshot const& originSnapshot, std::string const& fileName);
+  cmStateSnapshot CreatePolicyScopeSnapshot(
+    cmStateSnapshot const& originSnapshot);
+  cmStateSnapshot Pop(cmStateSnapshot const& originSnapshot);
 
   static cmStateEnums::CacheEntryType StringToCacheEntryType(const char*);
   static const char* CacheEntryTypeToString(cmStateEnums::CacheEntryType);

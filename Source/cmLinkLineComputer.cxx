@@ -13,7 +13,7 @@
 #include "cmStateTypes.h"
 
 cmLinkLineComputer::cmLinkLineComputer(cmOutputConverter* outputConverter,
-                                       cmStateDirectory stateDir)
+                                       cmStateDirectory const& stateDir)
   : StateDir(stateDir)
   , OutputConverter(outputConverter)
   , ForResponse(false)
