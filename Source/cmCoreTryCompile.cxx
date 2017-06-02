@@ -219,6 +219,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
             if (tgt->IsExecutableWithExports()) {
               break;
             }
+            CM_FALLTHROUGH;
           default:
             this->Makefile->IssueMessage(
               cmake::FATAL_ERROR,
@@ -516,6 +517,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         this->Makefile->IssueMessage(
           cmake::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0066));
+        CM_FALLTHROUGH;
       case cmPolicies::NEW: {
         // NEW behavior is to pass config-specific compiler flags.
         static std::string const cfgDefault = "DEBUG";
@@ -553,6 +555,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         this->Makefile->IssueMessage(
           cmake::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0056));
+        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior is to pass linker flags.
         {
@@ -693,6 +696,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         case cmPolicies::WARN:
           warnCMP0067 = this->Makefile->PolicyOptionalWarningEnabled(
             "CMAKE_POLICY_WARNING_CMP0067");
+          CM_FALLTHROUGH;
         case cmPolicies::OLD:
           // OLD behavior is to not honor the language standard variables.
           honorStandard = false;

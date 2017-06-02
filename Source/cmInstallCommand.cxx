@@ -1406,11 +1406,11 @@ bool cmInstallCommand::MakeFilesFullPath(
 bool cmInstallCommand::CheckCMP0006(bool& failure)
 {
   switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0006)) {
-    case cmPolicies::WARN: {
+    case cmPolicies::WARN:
       this->Makefile->IssueMessage(
         cmake::AUTHOR_WARNING,
         cmPolicies::GetPolicyWarning(cmPolicies::CMP0006));
-    }
+      CM_FALLTHROUGH;
     case cmPolicies::OLD:
       // OLD behavior is to allow compatibility
       return true;

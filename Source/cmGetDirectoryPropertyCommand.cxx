@@ -78,6 +78,7 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
           this->Makefile->IssueMessage(
             cmake::AUTHOR_WARNING,
             cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
+          CM_FALLTHROUGH;
         case cmPolicies::OLD:
           this->StoreResult(variable, this->Makefile->GetDefineFlagsCMP0059());
           return true;

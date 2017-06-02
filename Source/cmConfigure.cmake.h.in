@@ -22,6 +22,9 @@
 #cmakedefine CMAKE_USE_LIBUV
 #cmakedefine CMake_HAVE_CXX_AUTO_PTR
 #cmakedefine CMake_HAVE_CXX_EQ_DELETE
+#cmakedefine CMake_HAVE_CXX_FALLTHROUGH
+#cmakedefine CMake_HAVE_CXX_GNU_FALLTHROUGH
+#cmakedefine CMake_HAVE_CXX_ATTRIBUTE_FALLTHROUGH
 #cmakedefine CMake_HAVE_CXX_MAKE_UNIQUE
 #cmakedefine CMake_HAVE_CXX_NULLPTR
 #cmakedefine CMake_HAVE_CXX_OVERRIDE
@@ -35,6 +38,16 @@
 #define CM_EQ_DELETE = delete
 #else
 #define CM_EQ_DELETE
+#endif
+
+#if defined(CMake_HAVE_CXX_FALLTHROUGH)
+#define CM_FALLTHROUGH [[fallthrough]]
+#elif defined(CMake_HAVE_CXX_GNU_FALLTHROUGH)
+#define CM_FALLTHROUGH [[gnu::fallthrough]]
+elif defined(CMake_HAVE_CXX_ATTRIBUTE_FALLTHROUGH)
+#define CM_FALLTHROUGH __attribute__((fallthrough))
+#else
+#define CM_FALLTHROUGH
 #endif
 
 #ifdef CMake_HAVE_CXX_NULLPTR

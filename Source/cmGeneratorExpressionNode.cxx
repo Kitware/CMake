@@ -410,6 +410,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0044);
           context->LG->GetCMakeInstance()->IssueMessage(
             cmake::AUTHOR_WARNING, e.str(), context->Backtrace);
+          CM_FALLTHROUGH;
         }
         case cmPolicies::OLD:
           return "1";
@@ -1459,6 +1460,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
             lg->IssueMessage(
               cmake::AUTHOR_WARNING,
               cmPolicies::GetPolicyWarning(policyForString(policy)));
+            CM_FALLTHROUGH;
           case cmPolicies::REQUIRED_IF_USED:
           case cmPolicies::REQUIRED_ALWAYS:
           case cmPolicies::OLD:

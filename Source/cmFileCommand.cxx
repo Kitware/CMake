@@ -1770,6 +1770,7 @@ protected:
         if (this->Makefile->IsOn("CMAKE_INSTALL_SO_NO_EXE")) {
           break;
         }
+        CM_FALLTHROUGH;
       case cmInstallType_EXECUTABLE:
       case cmInstallType_PROGRAMS:
         this->FilePermissions |= mode_owner_execute;

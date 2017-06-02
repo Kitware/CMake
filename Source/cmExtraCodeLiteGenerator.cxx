@@ -141,6 +141,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
         case cmStateEnums::STATIC_LIBRARY:
         case cmStateEnums::MODULE_LIBRARY:
           visualname = "lib" + visualname;
+          CM_FALLTHROUGH;
         case cmStateEnums::EXECUTABLE:
           xml->StartElement("Project");
           xml->Attribute("Name", visualname);

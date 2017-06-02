@@ -285,12 +285,12 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
   bool oldResult = this->GetBooleanValueOld(newArg, oneArg);
   if (newResult != oldResult) {
     switch (this->Policy12Status) {
-      case cmPolicies::WARN: {
+      case cmPolicies::WARN:
         errorString = "An argument named \"" + newArg.GetValue() +
           "\" appears in a conditional statement.  " +
           cmPolicies::GetPolicyWarning(cmPolicies::CMP0012);
         status = cmake::AUTHOR_WARNING;
-      }
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         return oldResult;
       case cmPolicies::REQUIRED_IF_USED:
