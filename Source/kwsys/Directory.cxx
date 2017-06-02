@@ -109,7 +109,7 @@ bool Directory::Load(const std::string& name)
     // Make sure the slashes in the wildcard suffix are consistent with the
     // rest of the path
     buf = new char[n + 2 + 1];
-    if (name.find('\\') != name.npos) {
+    if (name.find('\\') != std::string::npos) {
       sprintf(buf, "%s\\*", name.c_str());
     } else {
       sprintf(buf, "%s/*", name.c_str());

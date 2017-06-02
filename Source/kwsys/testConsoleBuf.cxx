@@ -329,9 +329,8 @@ static int testPipe()
             throw std::runtime_error("ReadFile#3 failed!");
           }
           buffer2[bytesRead] = 0;
-          didFail =
-            encodedTestString.compare(0, encodedTestString.npos, buffer2,
-                                      encodedTestString.size()) == 0
+          didFail = encodedTestString.compare(0, std::string::npos, buffer2,
+                                              encodedTestString.size()) == 0
             ? 0
             : 1;
         }
@@ -435,9 +434,8 @@ static int testFile()
             throw std::runtime_error("ReadFile#2 failed!");
           }
           buffer2[bytesRead] = 0;
-          didFail =
-            encodedTestString.compare(0, encodedTestString.npos, buffer2,
-                                      encodedTestString.size()) == 0
+          didFail = encodedTestString.compare(0, std::string::npos, buffer2,
+                                              encodedTestString.size()) == 0
             ? 0
             : 1;
         }
