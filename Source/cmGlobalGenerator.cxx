@@ -838,6 +838,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
           /* clang-format on */
           mf->IssueMessage(cmake::AUTHOR_WARNING, w.str());
         }
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior is to convert AppleClang to Clang.
         mf->AddDefinition(compilerIdVar, "Clang");
@@ -867,6 +868,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
           /* clang-format on */
           mf->IssueMessage(cmake::AUTHOR_WARNING, w.str());
         }
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior is to convert QCC to GNU.
         mf->AddDefinition(compilerIdVar, "GNU");
@@ -881,6 +883,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
         mf->IssueMessage(
           cmake::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0047));
+        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior is to keep QCC.
         break;

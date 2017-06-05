@@ -960,6 +960,7 @@ void cmLocalGenerator::GetTargetFlags(
       break;
     case cmStateEnums::MODULE_LIBRARY:
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";
+      CM_FALLTHROUGH;
     case cmStateEnums::SHARED_LIBRARY: {
       linkFlags = this->Makefile->GetSafeDefinition(libraryLinkVariable);
       linkFlags += " ";
@@ -1248,6 +1249,7 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
           /* clang-format on */
           this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
         }
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior is to always add the flags
         add_shlib_flags = true;
@@ -1257,6 +1259,7 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
         this->IssueMessage(
           cmake::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0065));
+        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior is to only add the flags if ENABLE_EXPORTS is on
         add_shlib_flags = tgt.GetPropertyAsBool("ENABLE_EXPORTS");
@@ -1747,7 +1750,7 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
             << cmPolicies::GetPolicyWarning(cmPolicies::CMP0018);
 
           this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
-          // fall through to OLD behaviour
+          CM_FALLTHROUGH;
         }
         case cmPolicies::OLD:
           return true;

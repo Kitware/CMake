@@ -423,13 +423,17 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
              &parsed_minor, &parsed_patch, &parsed_tweak);
     switch (this->VersionCount) {
       case 4:
-        this->VersionTweak = parsed_tweak; // no break!
+        this->VersionTweak = parsed_tweak;
+        CM_FALLTHROUGH;
       case 3:
-        this->VersionPatch = parsed_patch; // no break!
+        this->VersionPatch = parsed_patch;
+        CM_FALLTHROUGH;
       case 2:
-        this->VersionMinor = parsed_minor; // no break!
+        this->VersionMinor = parsed_minor;
+        CM_FALLTHROUGH;
       case 1:
-        this->VersionMajor = parsed_major; // no break!
+        this->VersionMajor = parsed_major;
+        CM_FALLTHROUGH;
       default:
         break;
     }
@@ -1542,13 +1546,17 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file,
                &parsed_minor, &parsed_patch, &parsed_tweak);
       switch (this->VersionFoundCount) {
         case 4:
-          this->VersionFoundTweak = parsed_tweak; // no break!
+          this->VersionFoundTweak = parsed_tweak;
+          CM_FALLTHROUGH;
         case 3:
-          this->VersionFoundPatch = parsed_patch; // no break!
+          this->VersionFoundPatch = parsed_patch;
+          CM_FALLTHROUGH;
         case 2:
-          this->VersionFoundMinor = parsed_minor; // no break!
+          this->VersionFoundMinor = parsed_minor;
+          CM_FALLTHROUGH;
         case 1:
-          this->VersionFoundMajor = parsed_major; // no break!
+          this->VersionFoundMajor = parsed_major;
+          CM_FALLTHROUGH;
         default:
           break;
       }

@@ -232,6 +232,7 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
       case cmPolicies::WARN:
         mf->IssueMessage(cmake::AUTHOR_WARNING,
                          cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         return this->StoreResult(mf->GetDefineFlagsCMP0059());
       case cmPolicies::NEW:

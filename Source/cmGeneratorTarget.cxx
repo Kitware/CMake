@@ -2481,6 +2481,7 @@ static void processIncludeDirectories(
           switch (tgt->GetPolicyStatusCMP0027()) {
             case cmPolicies::WARN:
               e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0027) << "\n";
+              CM_FALLTHROUGH;
             case cmPolicies::OLD:
               messageType = cmake::AUTHOR_WARNING;
               break;
@@ -2837,6 +2838,7 @@ void cmGeneratorTarget::GetCompileDefinitions(
           std::ostringstream e;
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0043);
           this->LocalGenerator->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+          CM_FALLTHROUGH;
         }
         case cmPolicies::OLD: {
           cmGeneratorExpression ge;
@@ -4132,11 +4134,14 @@ void cmGeneratorTarget::GetTargetVersion(bool soversion, int& major,
     switch (sscanf(version, "%d.%d.%d", &parsed_major, &parsed_minor,
                    &parsed_patch)) {
       case 3:
-        patch = parsed_patch; // no break!
+        patch = parsed_patch;
+        CM_FALLTHROUGH;
       case 2:
-        minor = parsed_minor; // no break!
+        minor = parsed_minor;
+        CM_FALLTHROUGH;
       case 1:
-        major = parsed_major; // no break!
+        major = parsed_major;
+        CM_FALLTHROUGH;
       default:
         break;
     }

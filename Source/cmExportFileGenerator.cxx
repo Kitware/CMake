@@ -273,6 +273,7 @@ static bool checkInterfaceDirs(const std::string& prepro,
                 << std::endl;
               target->GetLocalGenerator()->IssueMessage(cmake::AUTHOR_WARNING,
                                                         s.str());
+              CM_FALLTHROUGH;
             }
             case cmPolicies::OLD:
               shouldContinue = true;

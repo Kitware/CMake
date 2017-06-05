@@ -360,6 +360,7 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
         // We should never make this policy required, but we handle it
         // here just in case.
         this->CheckCMP0011 = true;
+        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior is to push a (strong) scope.
         this->Makefile->PushPolicy();
@@ -1161,6 +1162,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
       case cmPolicies::WARN:
         this->IssueMessage(cmake::AUTHOR_WARNING,
                            cmPolicies::GetPolicyWarning(cmPolicies::CMP0005));
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior is to not escape the value.  We should not
         // convert the definition to use the property.
@@ -1511,6 +1513,7 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         e << "\n" << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0014);
+        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior prints the error.
         this->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -2340,6 +2343,7 @@ const char* cmMakefile::ExpandVariablesInString(
         newErrorstr, newResult, escapeQuotes, noEscapes, atOnly, filename,
         line, removeEmpty, replaceAt);
       this->SuppressWatches = false;
+      CM_FALLTHROUGH;
     }
     case cmPolicies::OLD:
       mtype =
@@ -2496,6 +2500,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
       switch (this->GetPolicyStatus(cmPolicies::CMP0010)) {
         case cmPolicies::WARN:
           error << "\n" << cmPolicies::GetPolicyWarning(cmPolicies::CMP0010);
+          CM_FALLTHROUGH;
         case cmPolicies::OLD:
           // OLD behavior is to just warn and continue.
           mtype = cmake::AUTHOR_WARNING;
@@ -2649,6 +2654,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
           }
           break;
         }
+        CM_FALLTHROUGH;
       case '\\':
         if (!noEscapes) {
           const char* next = in + 1;
@@ -3386,7 +3392,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
           /* clang-format on */
 
           this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
-          // break;  // fall through to OLD behaviour
+          CM_FALLTHROUGH;
         }
         case cmPolicies::OLD:
           result = moduleInCMakeModulePath;
@@ -3779,6 +3785,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       case cmPolicies::WARN:
         this->IssueMessage(cmake::AUTHOR_WARNING,
                            cmPolicies::GetPolicyWarning(cmPolicies::CMP0002));
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         return true;
       case cmPolicies::REQUIRED_IF_USED:
@@ -3864,12 +3871,14 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
         << "compatibility.";
       /* clang-format on */
       this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      CM_FALLTHROUGH;
     case cmPolicies::OLD:
       // OLD behavior does not warn.
       return true;
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0013) << "\n";
+      CM_FALLTHROUGH;
     case cmPolicies::NEW:
       // NEW behavior prints the error.
       /* clang-format off */
