@@ -10,13 +10,12 @@
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
-#include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 
 class cmOutputConverter;
 
 cmLinkLineDeviceComputer::cmLinkLineDeviceComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory stateDir)
+  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir)
   : cmLinkLineComputer(outputConverter, stateDir)
 {
 }
@@ -89,7 +88,7 @@ std::string cmLinkLineDeviceComputer::GetLinkerLanguage(cmGeneratorTarget*,
 }
 
 cmNinjaLinkLineDeviceComputer::cmNinjaLinkLineDeviceComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory stateDir,
+  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir,
   cmGlobalNinjaGenerator const* gg)
   : cmLinkLineDeviceComputer(outputConverter, stateDir)
   , GG(gg)

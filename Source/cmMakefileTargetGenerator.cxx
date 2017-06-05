@@ -1255,7 +1255,7 @@ class cmMakefileTargetGeneratorObjectStrings
 public:
   cmMakefileTargetGeneratorObjectStrings(std::vector<std::string>& strings,
                                          cmOutputConverter* outputConverter,
-                                         cmStateDirectory stateDir,
+                                         cmStateDirectory const& stateDir,
                                          std::string::size_type limit)
     : Strings(strings)
     , OutputConverter(outputConverter)
@@ -1574,7 +1574,7 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
 }
 
 cmLinkLineComputer* cmMakefileTargetGenerator::CreateLinkLineComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory stateDir)
+  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir)
 {
   if (this->Makefile->IsOn("MSVC60")) {
     return this->GlobalGenerator->CreateMSVC60LinkLineComputer(outputConverter,

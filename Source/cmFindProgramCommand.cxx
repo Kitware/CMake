@@ -212,7 +212,8 @@ std::string cmFindProgramCommand::FindAppBundle()
   return "";
 }
 
-std::string cmFindProgramCommand::GetBundleExecutable(std::string bundlePath)
+std::string cmFindProgramCommand::GetBundleExecutable(
+  std::string const& bundlePath)
 {
   std::string executable;
   (void)bundlePath;

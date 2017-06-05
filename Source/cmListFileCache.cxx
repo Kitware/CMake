@@ -307,7 +307,8 @@ struct cmListFileBacktrace::Entry : public cmListFileContext
   unsigned int RefCount;
 };
 
-cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot bottom, Entry* up,
+cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& bottom,
+                                         Entry* up,
                                          cmListFileContext const& lfc)
   : Bottom(bottom)
   , Cur(new Entry(lfc, up))
@@ -316,7 +317,8 @@ cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot bottom, Entry* up,
   this->Cur->Ref();
 }
 
-cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot bottom, Entry* cur)
+cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& bottom,
+                                         Entry* cur)
   : Bottom(bottom)
   , Cur(cur)
 {
@@ -332,7 +334,7 @@ cmListFileBacktrace::cmListFileBacktrace()
 {
 }
 
-cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot snapshot)
+cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& snapshot)
   : Bottom(snapshot.GetCallStackBottom())
   , Cur(CM_NULLPTR)
 {

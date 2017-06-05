@@ -548,7 +548,7 @@ public:
    */
   int ConfigureFile(const char* infile, const char* outfile, bool copyonly,
                     bool atOnly, bool escapeQuotes,
-                    const cmNewLineStyle& = cmNewLineStyle());
+                    cmNewLineStyle = cmNewLineStyle());
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /**

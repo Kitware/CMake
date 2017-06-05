@@ -76,7 +76,7 @@ public:
 cmLinkImplItem cmGeneratorTarget::TargetPropertyEntry::NoLinkImplItem;
 
 void CreatePropertyGeneratorExpressions(
-  cmStringRange const& entries, cmBacktraceRange const& backtraces,
+  cmStringRange entries, cmBacktraceRange backtraces,
   std::vector<cmGeneratorTarget::TargetPropertyEntry*>& items,
   bool evaluateForBuildsystem = false)
 {

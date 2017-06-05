@@ -27,7 +27,7 @@ void cmInstallGenerator::AddInstallRule(
   std::vector<std::string> const& files, bool optional /* = false */,
   const char* permissions_file /* = 0 */,
   const char* permissions_dir /* = 0 */, const char* rename /* = 0 */,
-  const char* literal_args /* = 0 */, Indent const& indent)
+  const char* literal_args /* = 0 */, Indent indent)
 {
   // Use the FILE command to install the file.
   std::string stype;

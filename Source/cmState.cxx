@@ -633,7 +633,7 @@ cmStateSnapshot cmState::CreateBaseSnapshot()
 }
 
 cmStateSnapshot cmState::CreateBuildsystemDirectorySnapshot(
-  cmStateSnapshot originSnapshot)
+  cmStateSnapshot const& originSnapshot)
 {
   assert(originSnapshot.IsValid());
   cmStateDetail::PositionType pos =
@@ -667,7 +667,7 @@ cmStateSnapshot cmState::CreateBuildsystemDirectorySnapshot(
 }
 
 cmStateSnapshot cmState::CreateFunctionCallSnapshot(
-  cmStateSnapshot originSnapshot, std::string const& fileName)
+  cmStateSnapshot const& originSnapshot, std::string const& fileName)
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -686,7 +686,7 @@ cmStateSnapshot cmState::CreateFunctionCallSnapshot(
 }
 
 cmStateSnapshot cmState::CreateMacroCallSnapshot(
-  cmStateSnapshot originSnapshot, std::string const& fileName)
+  cmStateSnapshot const& originSnapshot, std::string const& fileName)
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -701,7 +701,7 @@ cmStateSnapshot cmState::CreateMacroCallSnapshot(
 }
 
 cmStateSnapshot cmState::CreateIncludeFileSnapshot(
-  cmStateSnapshot originSnapshot, const std::string& fileName)
+  cmStateSnapshot const& originSnapshot, std::string const& fileName)
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -716,7 +716,7 @@ cmStateSnapshot cmState::CreateIncludeFileSnapshot(
 }
 
 cmStateSnapshot cmState::CreateVariableScopeSnapshot(
-  cmStateSnapshot originSnapshot)
+  cmStateSnapshot const& originSnapshot)
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -734,7 +734,7 @@ cmStateSnapshot cmState::CreateVariableScopeSnapshot(
 }
 
 cmStateSnapshot cmState::CreateInlineListFileSnapshot(
-  cmStateSnapshot originSnapshot, const std::string& fileName)
+  cmStateSnapshot const& originSnapshot, std::string const& fileName)
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -748,7 +748,7 @@ cmStateSnapshot cmState::CreateInlineListFileSnapshot(
 }
 
 cmStateSnapshot cmState::CreatePolicyScopeSnapshot(
-  cmStateSnapshot originSnapshot)
+  cmStateSnapshot const& originSnapshot)
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -759,7 +759,7 @@ cmStateSnapshot cmState::CreatePolicyScopeSnapshot(
   return cmStateSnapshot(this, pos);
 }
 
-cmStateSnapshot cmState::Pop(cmStateSnapshot originSnapshot)
+cmStateSnapshot cmState::Pop(cmStateSnapshot const& originSnapshot)
 {
   cmStateDetail::PositionType pos = originSnapshot.Position;
   cmStateDetail::PositionType prevPos = pos;

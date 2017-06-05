@@ -22,7 +22,7 @@ class cmLinkLineDeviceComputer : public cmLinkLineComputer
 
 public:
   cmLinkLineDeviceComputer(cmOutputConverter* outputConverter,
-                           cmStateDirectory stateDir);
+                           cmStateDirectory const& stateDir);
   ~cmLinkLineDeviceComputer() CM_OVERRIDE;
 
   std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
@@ -39,7 +39,7 @@ class cmNinjaLinkLineDeviceComputer : public cmLinkLineDeviceComputer
 
 public:
   cmNinjaLinkLineDeviceComputer(cmOutputConverter* outputConverter,
-                                cmStateDirectory stateDir,
+                                cmStateDirectory const& stateDir,
                                 cmGlobalNinjaGenerator const* gg);
 
   std::string ConvertToLinkReference(std::string const& input) const

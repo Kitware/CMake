@@ -1121,9 +1121,9 @@ protected:
 
   bool InstallSymlink(const char* fromFile, const char* toFile);
   bool InstallFile(const char* fromFile, const char* toFile,
-                   MatchProperties const& match_properties);
+                   MatchProperties match_properties);
   bool InstallDirectory(const char* source, const char* destination,
-                        MatchProperties const& match_properties);
+                        MatchProperties match_properties);
   virtual bool Install(const char* fromFile, const char* toFile);
   virtual std::string const& ToName(std::string const& fromName)
   {
@@ -1542,7 +1542,7 @@ bool cmFileCopier::InstallSymlink(const char* fromFile, const char* toFile)
 }
 
 bool cmFileCopier::InstallFile(const char* fromFile, const char* toFile,
-                               MatchProperties const& match_properties)
+                               MatchProperties match_properties)
 {
   // Determine whether we will copy the file.
   bool copy = true;
@@ -1596,7 +1596,7 @@ bool cmFileCopier::InstallFile(const char* fromFile, const char* toFile,
 
 bool cmFileCopier::InstallDirectory(const char* source,
                                     const char* destination,
-                                    MatchProperties const& match_properties)
+                                    MatchProperties match_properties)
 {
   // Inform the user about this directory installation.
   this->ReportCopy(destination, TypeDir,

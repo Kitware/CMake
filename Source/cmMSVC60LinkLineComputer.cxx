@@ -3,8 +3,6 @@
 
 #include "cmMSVC60LinkLineComputer.h"
 
-#include "cmStateDirectory.h"
-
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include "cmSystemTools.h"
 #endif
@@ -12,7 +10,7 @@
 class cmOutputConverter;
 
 cmMSVC60LinkLineComputer::cmMSVC60LinkLineComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory stateDir)
+  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir)
   : cmLinkLineComputer(outputConverter, stateDir)
 {
 }
