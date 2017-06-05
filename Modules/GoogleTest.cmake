@@ -172,20 +172,50 @@ function(gtest_add_tests)
 
       # Parameterized tests have a different signature for the filter
       if("x${test_type}" STREQUAL "xTEST_P")
-        string(REGEX REPLACE ${gtest_case_name_regex}  "*/\\1.\\2/*" test_name ${hit})
+        string(REGEX REPLACE ${gtest_case_name_regex}  "*/\\1.\\2/*" gtest_test_name ${hit})
       elseif("x${test_type}" STREQUAL "xTEST_F" OR "x${test_type}" STREQUAL "xTEST")
-        string(REGEX REPLACE ${gtest_case_name_regex} "\\1.\\2" test_name ${hit})
+        string(REGEX REPLACE ${gtest_case_name_regex} "\\1.\\2" gtest_test_name ${hit})
       elseif("x${test_type}" STREQUAL "xTYPED_TEST")
-        string(REGEX REPLACE ${gtest_case_name_regex} "\\1/*.\\2" test_name ${hit})
+        string(REGEX REPLACE ${gtest_case_name_regex} "\\1/*.\\2" gtest_test_name ${hit})
       else()
         message(WARNING "Could not parse GTest ${hit} for adding to CTest.")
         continue()
       endif()
-      add_test(NAME ${ARGS_TEST_PREFIX}${test_name}${ARGS_TEST_SUFFIX}
-               ${workDir}
-               COMMAND ${ARGS_TARGET} --gtest_filter=${test_name} ${ARGS_EXTRA_ARGS}
-      )
-      list(APPEND testList ${ARGS_TEST_PREFIX}${test_name}${ARGS_TEST_SUFFIX})
+
+      # Make sure tests disabled in GTest get disabled in CTest
+      if(gtest_test_name MATCHES "(^|\\.)DISABLED_")
+        # Add the disabled test if CMake is new enough
+        # Note that this check is to allow backwards compatibility so this
+        # module can be copied locally in projects to use with older CMake
+        # versions
+        if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.8.20170401)
+          string(REGEX REPLACE
+                 "(^|\\.)DISABLED_" "\\1"
+                 orig_test_name "${gtest_test_name}"
+          )
+          set(ctest_test_name
+              ${ARGS_TEST_PREFIX}${orig_test_name}${ARGS_TEST_SUFFIX}
+          )
+          add_test(NAME ${ctest_test_name}
+                   ${workDir}
+                   COMMAND ${ARGS_TARGET}
+                     --gtest_also_run_disabled_tests
+                     --gtest_filter=${gtest_test_name}
+                     ${ARGS_EXTRA_ARGS}
+          )
+          set_tests_properties(${ctest_test_name} PROPERTIES DISABLED TRUE)
+          list(APPEND testList ${ctest_test_name})
+        endif()
+      else()
+        set(ctest_test_name ${ARGS_TEST_PREFIX}${gtest_test_name}${ARGS_TEST_SUFFIX})
+        add_test(NAME ${ctest_test_name}
+                 ${workDir}
+                 COMMAND ${ARGS_TARGET}
+                   --gtest_filter=${gtest_test_name}
+                   ${ARGS_EXTRA_ARGS}
+        )
+        list(APPEND testList ${ctest_test_name})
+      endif()
     endforeach()
   endforeach()
 

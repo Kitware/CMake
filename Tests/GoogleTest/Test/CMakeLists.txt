@@ -53,12 +53,25 @@ gtest_add_tests(TARGET test_gtest2
 )
 set(expectedTests
   GoogleTest.SomethingElse
+  GoogleTest.OffTest1
+  GoogleTest.OffTest2
+  GoogleTest.OffTest3
 )
 if(NOT testList STREQUAL "${expectedTests}")
   message(FATAL_ERROR "Expected test list: ${expectedTests}
 Actual test list: ${testList}")
 endif()
-
+set(disabledTests
+  GoogleTest.OffTest1
+  GoogleTest.OffTest2
+  GoogleTest.OffTest3
+)
+foreach(T ${disabledTests})
+  get_test_property(${T} DISABLED testDisabled)
+  if(NOT testDisabled)
+    message(FATAL_ERROR "Test ${T} should be disabled but is not")
+  endif()
+endforeach()
 
 # Non-keyword form, auto-find sources
 add_executable(test_gtest3 main3.cxx)
