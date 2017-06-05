@@ -720,9 +720,13 @@ void cmCTestMultiProcessHandler::PrintTestList()
       std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
         << indexStr.str(),
       this->Quiet);
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, " ", this->Quiet);
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, p.Name << std::endl,
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, " " << p.Name,
                        this->Quiet);
+    if (p.Disabled) {
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, " (Disabled)",
+                         this->Quiet);
+    }
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl, this->Quiet);
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl
