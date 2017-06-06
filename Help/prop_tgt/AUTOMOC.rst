@@ -20,9 +20,6 @@ source files at build time and invoke moc accordingly.
   This allows the compiler to find the included ``moc_<basename>.cpp`` file
   regardless of the location the original source.
 
-  * For multi configuration generators, except Xcode, the include directory is
-    ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
-
   * See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
 * If an ``#include`` statement like ``#include "<basename>.moc"`` is found,
@@ -35,10 +32,6 @@ source files at build time and invoke moc accordingly.
   directories and automatically included in a generated
   ``<AUTOGEN_BUILD_DIR>/mocs_compilation.cpp`` file,
   which is compiled as part of the target.
-
-  * For multi configuration generators, except Xcode, the file names are
-    ``moc_<basename>_<CONFIG>.cpp`` and
-    ``<AUTOGEN_BUILD_DIR>/mocs_compilation_<CONFIG>.cpp``.
 
   * The custom directories with checksum
     based names help to avoid name collisions for moc files with the same

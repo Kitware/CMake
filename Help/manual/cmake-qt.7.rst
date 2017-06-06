@@ -72,18 +72,12 @@ Included ``moc_*.cpp`` and ``*.moc`` files will be generated in the
 automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
 (This differs from CMake 3.7 and below; see their documentation for details.)
 
-* For multi configuration generators, except Xcode, the include directory is
-  ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
-
 * See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
 Not included ``moc_<basename>.cpp`` files will be generated in custom
 folders to avoid name collisions and included in a separate
 ``<AUTOGEN_BUILD_DIR>/mocs_compilation.cpp`` file which is compiled
 into the target.
-
-* For multi configuration generators, except Xcode, the file is
-  ``<AUTOGEN_BUILD_DIR>/mocs_compilation_<CONFIG>.cpp``.
 
 * See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
@@ -122,9 +116,6 @@ The generated generated ``ui_*.h`` files are placed in the
 ``<AUTOGEN_BUILD_DIR>/include`` directory which is
 automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
 (This differs from CMake 3.7 and below; see their documentation for details.)
-
-* For multi configuration generators, except Xcode, the include directory is
-  ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
 
 * See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
