@@ -41,7 +41,7 @@ cmake_install_dest_default()
 
 cmake_toupper()
 {
-    echo "$1" | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'
+    echo "$1" | tr '[:lower:]' '[:upper:]'
 }
 
 # Detect system and directory information.
