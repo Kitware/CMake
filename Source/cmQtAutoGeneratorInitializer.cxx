@@ -162,6 +162,10 @@ static bool IsMultiConfig(cmGlobalGenerator* globalGen)
   if (globalGen->GetName().find("Xcode") != std::string::npos) {
     return false;
   }
+  // FIXME: Visual Studio does not fully support per-config sources yet.
+  if (globalGen->GetName().find("Visual Studio") != std::string::npos) {
+    return false;
+  }
   return globalGen->IsMultiConfig();
 }
 
