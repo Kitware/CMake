@@ -9,11 +9,8 @@ die() {
 # Compile flag extraction function.
 cmake_extract_standard_flags()
 {
-  cd "${cmake_source_dir}/Modules/Compiler/"
-  for file in ${1:-*}-${2}.cmake; do
-    sed -n "s/ *set *( *CMAKE_${2}${3}_EXTENSION_COMPILE_OPTION *\"\{0,1\}\([^\")]*\).*/\1/p" \
-      "${file}" | tr ';' ' '
-  done
+  sed -n "s/ *set *( *CMAKE_${2}${3}_EXTENSION_COMPILE_OPTION *\"\{0,1\}\([^\")]*\).*/\1/p" \
+    "${file}" "${cmake_source_dir}/Modules/Compiler/"${1:-*}-${2}.cmake 2>/dev/null | tr ';' ' '
 }
 
 # Version number extraction function.
