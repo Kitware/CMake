@@ -11,24 +11,23 @@ cmake_extract_standard_flags()
 {
   cd "${cmake_source_dir}/Modules/Compiler/"
   for file in ${1:-*}-${2}.cmake; do
-    cat "${file}" \
-      | sed -n "s/ *set *( *CMAKE_${2}${3}_EXTENSION_COMPILE_OPTION *\"\{0,1\}\([^\")]*\).*/\1/p" \
-      | tr ';' ' '
+    sed -n "s/ *set *( *CMAKE_${2}${3}_EXTENSION_COMPILE_OPTION *\"\{0,1\}\([^\")]*\).*/\1/p" \
+      "${file}" | tr ';' ' '
   done
 }
 
 # Version number extraction function.
 cmake_version_component()
 {
-  cat "${cmake_source_dir}/Source/CMakeVersion.cmake" | sed -n "
+  sed -n "
 /^set(CMake_VERSION_${1}/ {s/set(CMake_VERSION_${1} *\([0-9]*\))/\1/;p;}
-"
+" "${cmake_source_dir}/Source/CMakeVersion.cmake"
 }
 
 # Install destination extraction function.
 cmake_install_dest_default()
 {
-  cat "${cmake_source_dir}/Source/CMakeInstallDestinations.cmake" | sed -n '
+  sed -n '
 /^ *set(CMAKE_'"${1}"'_DIR_DEFAULT.*) # '"${2}"'$/ {
   s/^ *set(CMAKE_'"${1}"'_DIR_DEFAULT *"\([^"]*\)").*$/\1/
   s/${CMake_VERSION_MAJOR}/'"${cmake_version_major}"'/
@@ -37,7 +36,7 @@ cmake_install_dest_default()
   p
   q
 }
-'
+' "${cmake_source_dir}/Source/CMakeInstallDestinations.cmake"
 }
 
 cmake_toupper()
@@ -581,8 +580,7 @@ cmake_replace_string ()
   SEARCHFOR="$3"
   REPLACEWITH="$4"
   if [ -f "${INFILE}" ] || ${cmake_system_openvms}; then
-    cat "${INFILE}" |
-      sed "s/\@${SEARCHFOR}\@/${REPLACEWITH}/g" > "${OUTFILE}${_tmp}"
+    sed "s/\@${SEARCHFOR}\@/${REPLACEWITH}/g" "${INFILE}" > "${OUTFILE}${_tmp}"
     if [ -f "${OUTFILE}${_tmp}" ]; then
       if "${_diff}" "${OUTFILE}" "${OUTFILE}${_tmp}" > /dev/null 2> /dev/null ; then
         #echo "Files are the same"
@@ -604,15 +602,14 @@ cmake_kwsys_config_replace_string ()
   APPEND="$*"
   if [ -f "${INFILE}" ] || ${cmake_system_openvms}; then
     echo "${APPEND}" > "${OUTFILE}${_tmp}"
-    cat "${INFILE}" |
-      sed "/./ {s/\@KWSYS_NAMESPACE\@/cmsys/g;
-                s/@KWSYS_BUILD_SHARED@/${KWSYS_BUILD_SHARED}/g;
-                s/@KWSYS_LFS_AVAILABLE@/${KWSYS_LFS_AVAILABLE}/g;
-                s/@KWSYS_LFS_REQUESTED@/${KWSYS_LFS_REQUESTED}/g;
-                s/@KWSYS_NAME_IS_KWSYS@/${KWSYS_NAME_IS_KWSYS}/g;
-                s/@KWSYS_STL_HAS_WSTRING@/${KWSYS_STL_HAS_WSTRING}/g;
-                s/@KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H@/${KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H}/g;
-               }" >> "${OUTFILE}${_tmp}"
+    sed "/./ {s/\@KWSYS_NAMESPACE\@/cmsys/g;
+              s/@KWSYS_BUILD_SHARED@/${KWSYS_BUILD_SHARED}/g;
+              s/@KWSYS_LFS_AVAILABLE@/${KWSYS_LFS_AVAILABLE}/g;
+              s/@KWSYS_LFS_REQUESTED@/${KWSYS_LFS_REQUESTED}/g;
+              s/@KWSYS_NAME_IS_KWSYS@/${KWSYS_NAME_IS_KWSYS}/g;
+              s/@KWSYS_STL_HAS_WSTRING@/${KWSYS_STL_HAS_WSTRING}/g;
+              s/@KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H@/${KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H}/g;
+             }" "${INFILE}" >> "${OUTFILE}${_tmp}"
     if [ -f "${OUTFILE}${_tmp}" ]; then
       if "${_diff}" "${OUTFILE}" "${OUTFILE}${_tmp}" > /dev/null 2> /dev/null ; then
         #echo "Files are the same"
