@@ -15,7 +15,7 @@ function(cm_check_cxx_feature name)
       OUTPUT_VARIABLE OUTPUT
       )
     # If using the feature causes warnings, treat it as broken/unavailable.
-    if(OUTPUT MATCHES "[Ww]arning")
+    if(OUTPUT MATCHES "[Ww]arning" AND NOT OUTPUT MATCHES "0 Warning")
       set(CMake_HAVE_CXX_${FEATURE} OFF CACHE INTERNAL "TRY_COMPILE" FORCE)
     endif()
     if(CMake_HAVE_CXX_${FEATURE})
