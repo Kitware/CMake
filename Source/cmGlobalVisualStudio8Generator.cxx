@@ -10,6 +10,7 @@
 #include "cmSourceFile.h"
 #include "cmVisualStudioWCEPlatformParser.h"
 #include "cmake.h"
+#include "cmState.h"
 
 static const char vs8generatorName[] = "Visual Studio 8 2005";
 
@@ -165,7 +166,11 @@ void cmGlobalVisualStudio8Generator::Configure()
 
 bool cmGlobalVisualStudio8Generator::UseFolderProperty()
 {
-  return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
+  const char* prop = this->GetCMakeInstance()->GetState()->
+                       GetGlobalProperty("FORCE_USE_FOLDERS");
+  const bool forceUseFolders = prop ? cmSystemTools::IsOn(prop) : false;
+  return (IsExpressEdition() && !forceUseFolders) ?
+    false : cmGlobalGenerator::UseFolderProperty();
 }
 
 std::string cmGlobalVisualStudio8Generator::GetUserMacrosDirectory()
