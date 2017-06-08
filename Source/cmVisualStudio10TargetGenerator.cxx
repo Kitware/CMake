@@ -2354,6 +2354,34 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
       *this->BuildFileStream << cmVS10EscapeXML(processMax)
                              << "</ProcessMax>\n";
     }
+
+    if (const char* enableRTTI =
+        this->GeneratorTarget->GetProperty("ANDROID_ENABLE_RTTI")) {
+        this->WriteString("<RuntimeTypeInfo>", 3);
+        (*this->BuildFileStream) << std::string(cmSystemTools::IsOff(enableRTTI) ? "false" : "true")
+                                 << "</RuntimeTypeInfo>\n";
+    }
+
+    if (const char* enableException =
+        this->GeneratorTarget->GetProperty("ANDROID_ENABLE_EXCEPTION")) {
+        this->WriteString("<GccExceptionHandling>", 3);
+        (*this->BuildFileStream) << std::string(cmSystemTools::IsOff(enableException) ? "false" : "true")
+                                 << "</GccExceptionHandling>\n";
+    }
+
+    if (const char* enableThumb =
+        this->GeneratorTarget->GetProperty("ANDROID_ENABLE_THUMB")) {
+        this->WriteString("<ThumbMode>", 3);
+        (*this->BuildFileStream) << std::string(cmSystemTools::IsOff(enableThumb) ? "false" : "true")
+                                 << "</ThumbMode>\n";
+    }
+
+    if (const char* floatAbi =
+        this->GeneratorTarget->GetProperty("ANDROID_FLOAT_ABI")) {
+        this->WriteString("<FloatAbi>", 3);
+        *this->BuildFileStream << cmVS10EscapeXML(floatAbi)
+                               << "</FloatAbi>\n";
+    }
   }
 
   if (this->MSTools) {
