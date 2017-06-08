@@ -6,7 +6,7 @@ add_custom_command(
 add_custom_target(generate ALL DEPENDS output.cxx)
 set_property(TARGET generate PROPERTY INCLUDE_DIRECTORIES ${CMAKE_CURRENT_BINARY_DIR})
 
-file(GENERATE OUTPUT check-$<LOWER_CASE:$<CONFIG>>.cmake CONTENT "
+file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/check-$<LOWER_CASE:$<CONFIG>>.cmake CONTENT "
 set(check_pairs
   \"${CMAKE_CURRENT_BINARY_DIR}/output.cxx|${CMAKE_CURRENT_BINARY_DIR}/MakeCustomIncludes.h\"
   )

@@ -16,7 +16,7 @@ add_custom_command(
 
 add_custom_target(drive ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/after-always)
 
-file(GENERATE OUTPUT check-$<LOWER_CASE:$<CONFIG>>.cmake CONTENT "
+file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/check-$<LOWER_CASE:$<CONFIG>>.cmake CONTENT "
 set(check_pairs
   \"${CMAKE_CURRENT_BINARY_DIR}/always-updated|${CMAKE_CURRENT_BINARY_DIR}/before-always\"
   \"${CMAKE_CURRENT_BINARY_DIR}/after-always|${CMAKE_CURRENT_BINARY_DIR}/always-updated\"

@@ -1,3 +1,3 @@
 add_library(StaticLib empty.cpp)
 
-file(GENERATE OUTPUT test_output CONTENT $<TARGET_OBJECTS:StaticLib>)
+file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test_output CONTENT $<TARGET_OBJECTS:StaticLib>)
