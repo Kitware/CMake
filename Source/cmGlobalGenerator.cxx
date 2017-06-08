@@ -1075,7 +1075,7 @@ bool cmGlobalGenerator::GetLanguageEnabled(const std::string& l) const
 
 void cmGlobalGenerator::ClearEnabledLanguages()
 {
-  return this->CMakeInstance->GetState()->ClearEnabledLanguages();
+  this->CMakeInstance->GetState()->ClearEnabledLanguages();
 }
 
 void cmGlobalGenerator::CreateLocalGenerators()
