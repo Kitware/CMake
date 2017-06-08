@@ -23,7 +23,7 @@ public:
    * Construct generator
    */
   cmCPackOSXX11Generator();
-  virtual ~cmCPackOSXX11Generator();
+  ~cmCPackOSXX11Generator() CM_OVERRIDE;
 
 protected:
   virtual int InitializeInternal() CM_OVERRIDE;

@@ -25,7 +25,7 @@ public:
    * Construct generator
    */
   cmCPackProductBuildGenerator();
-  virtual ~cmCPackProductBuildGenerator();
+  ~cmCPackProductBuildGenerator() CM_OVERRIDE;
 
 protected:
   int InitializeInternal() CM_OVERRIDE;

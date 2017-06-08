@@ -23,7 +23,7 @@ public:
   cmCPackTypeMacro(cmCPackDragNDropGenerator, cmCPackGenerator);
 
   cmCPackDragNDropGenerator();
-  virtual ~cmCPackDragNDropGenerator();
+  ~cmCPackDragNDropGenerator() CM_OVERRIDE;
 
 protected:
   int InitializeInternal() CM_OVERRIDE;
