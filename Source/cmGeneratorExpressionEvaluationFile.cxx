@@ -51,10 +51,14 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     }
   }
 
-  const std::string outputFileName = this->OutputFileExpr->Evaluate(
+  std::string outputFileName = this->OutputFileExpr->Evaluate(
     lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, lang);
   const std::string outputContent = inputExpression->Evaluate(
     lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, lang);
+
+  if (cmSystemTools::FileIsFullPath(outputFileName)) {
+    outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
+  }
 
   std::map<std::string, std::string>::iterator it =
     outputFiles.find(outputFileName);
@@ -111,12 +115,16 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
   if (this->InputIsContent) {
     inputContent = this->Input;
   } else {
-    lg->GetMakefile()->AddCMakeDependFile(this->Input);
-    cmSystemTools::GetPermissions(this->Input.c_str(), perm);
-    cmsys::ifstream fin(this->Input.c_str());
+    std::string inputFileName = this->Input;
+    if (cmSystemTools::FileIsFullPath(inputFileName)) {
+      inputFileName = cmSystemTools::CollapseFullPath(inputFileName);
+    }
+    lg->GetMakefile()->AddCMakeDependFile(inputFileName);
+    cmSystemTools::GetPermissions(inputFileName.c_str(), perm);
+    cmsys::ifstream fin(inputFileName.c_str());
     if (!fin) {
       std::ostringstream e;
-      e << "Evaluation file \"" << this->Input << "\" cannot be read.";
+      e << "Evaluation file \"" << inputFileName << "\" cannot be read.";
       lg->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
     }
