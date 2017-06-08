@@ -9,26 +9,22 @@ die() {
 # Compile flag extraction function.
 cmake_extract_standard_flags()
 {
-  cd "${cmake_source_dir}/Modules/Compiler/"
-  for file in ${1:-*}-${2}.cmake; do
-    cat "${file}" \
-      | sed -n "s/ *set *( *CMAKE_${2}${3}_EXTENSION_COMPILE_OPTION *\"\{0,1\}\([^\")]*\).*/\1/p" \
-      | tr ';' ' '
-  done
+  sed -n "s/ *set *( *CMAKE_${2}${3}_EXTENSION_COMPILE_OPTION *\"\{0,1\}\([^\")]*\).*/\1/p" \
+    "${file}" "${cmake_source_dir}/Modules/Compiler/"${1:-*}-${2}.cmake 2>/dev/null | tr ';' ' '
 }
 
 # Version number extraction function.
 cmake_version_component()
 {
-  cat "${cmake_source_dir}/Source/CMakeVersion.cmake" | sed -n "
+  sed -n "
 /^set(CMake_VERSION_${1}/ {s/set(CMake_VERSION_${1} *\([0-9]*\))/\1/;p;}
-"
+" "${cmake_source_dir}/Source/CMakeVersion.cmake"
 }
 
 # Install destination extraction function.
 cmake_install_dest_default()
 {
-  cat "${cmake_source_dir}/Source/CMakeInstallDestinations.cmake" | sed -n '
+  sed -n '
 /^ *set(CMAKE_'"${1}"'_DIR_DEFAULT.*) # '"${2}"'$/ {
   s/^ *set(CMAKE_'"${1}"'_DIR_DEFAULT *"\([^"]*\)").*$/\1/
   s/${CMake_VERSION_MAJOR}/'"${cmake_version_major}"'/
@@ -37,12 +33,12 @@ cmake_install_dest_default()
   p
   q
 }
-'
+' "${cmake_source_dir}/Source/CMakeInstallDestinations.cmake"
 }
 
 cmake_toupper()
 {
-    echo "$1" | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'
+    echo "$1" | tr '[:lower:]' '[:upper:]'
 }
 
 # Detect system and directory information.
@@ -84,7 +80,7 @@ cmake_sphinx_build=""
 cmake_sphinx_flags=""
 
 # Determine whether this is a Cygwin environment.
-if echo "${cmake_system}" | grep CYGWIN >/dev/null 2>&1; then
+if echo "${cmake_system}" | grep -q CYGWIN; then
   cmake_system_cygwin=true
   cmake_doc_dir_keyword="CYGWIN"
   cmake_man_dir_keyword="CYGWIN"
@@ -93,21 +89,21 @@ else
 fi
 
 # Determine whether this is a MinGW environment.
-if echo "${cmake_system}" | grep 'MINGW\|MSYS' >/dev/null 2>&1; then
+if echo "${cmake_system}" | grep -q 'MINGW\|MSYS'; then
   cmake_system_mingw=true
 else
   cmake_system_mingw=false
 fi
 
 # Determine whether this is OS X
-if echo "${cmake_system}" | grep Darwin >/dev/null 2>&1; then
+if echo "${cmake_system}" | grep -q Darwin; then
   cmake_system_darwin=true
 else
   cmake_system_darwin=false
 fi
 
 # Determine whether this is BeOS
-if echo "${cmake_system}" | grep BeOS >/dev/null 2>&1; then
+if echo "${cmake_system}" | grep -q BeOS; then
   cmake_system_beos=true
   cmake_doc_dir_keyword="HAIKU"
   cmake_man_dir_keyword="HAIKU"
@@ -116,7 +112,7 @@ else
 fi
 
 # Determine whether this is Haiku
-if echo "${cmake_system}" | grep Haiku >/dev/null 2>&1; then
+if echo "${cmake_system}" | grep -q Haiku; then
   cmake_system_haiku=true
   cmake_doc_dir_keyword="HAIKU"
   cmake_man_dir_keyword="HAIKU"
@@ -125,21 +121,21 @@ else
 fi
 
 # Determine whether this is OpenVMS
-if echo "${cmake_system}" | grep OpenVMS >/dev/null 2>&1; then
+if echo "${cmake_system}" | grep -q OpenVMS; then
   cmake_system_openvms=true
 else
   cmake_system_openvms=false
 fi
 
 # Determine whether this is HP-UX
-if echo "${cmake_system}" | grep HP-UX >/dev/null 2>&1; then
+if echo "${cmake_system}" | grep -q HP-UX; then
   cmake_system_hpux=true
 else
   cmake_system_hpux=false
 fi
 
 # Determine whether this is Linux
-if echo "${cmake_system}" | grep Linux >/dev/null 2>&1; then
+if echo "${cmake_system}" | grep -q Linux; then
   cmake_system_linux=true
 else
   cmake_system_linux=false
@@ -150,11 +146,11 @@ else
 # may falsely detect parisc on HP-UX m68k
 cmake_machine_parisc=false
 if ${cmake_system_linux}; then
-  if uname -m | grep parisc >/dev/null 2>&1; then
+  if uname -m | grep -q parisc; then
     cmake_machine_parisc=true
   fi
 elif ${cmake_system_hpux}; then
-  if uname -m | grep ia64 >/dev/null 2>&1; then : ; else
+  if uname -m | grep -q ia64; then : ; else
     cmake_machine_parisc=true
   fi
 fi
@@ -581,8 +577,7 @@ cmake_replace_string ()
   SEARCHFOR="$3"
   REPLACEWITH="$4"
   if [ -f "${INFILE}" ] || ${cmake_system_openvms}; then
-    cat "${INFILE}" |
-      sed "s/\@${SEARCHFOR}\@/${REPLACEWITH}/g" > "${OUTFILE}${_tmp}"
+    sed "s/\@${SEARCHFOR}\@/${REPLACEWITH}/g" "${INFILE}" > "${OUTFILE}${_tmp}"
     if [ -f "${OUTFILE}${_tmp}" ]; then
       if "${_diff}" "${OUTFILE}" "${OUTFILE}${_tmp}" > /dev/null 2> /dev/null ; then
         #echo "Files are the same"
@@ -604,15 +599,14 @@ cmake_kwsys_config_replace_string ()
   APPEND="$*"
   if [ -f "${INFILE}" ] || ${cmake_system_openvms}; then
     echo "${APPEND}" > "${OUTFILE}${_tmp}"
-    cat "${INFILE}" |
-      sed "/./ {s/\@KWSYS_NAMESPACE\@/cmsys/g;
-                s/@KWSYS_BUILD_SHARED@/${KWSYS_BUILD_SHARED}/g;
-                s/@KWSYS_LFS_AVAILABLE@/${KWSYS_LFS_AVAILABLE}/g;
-                s/@KWSYS_LFS_REQUESTED@/${KWSYS_LFS_REQUESTED}/g;
-                s/@KWSYS_NAME_IS_KWSYS@/${KWSYS_NAME_IS_KWSYS}/g;
-                s/@KWSYS_STL_HAS_WSTRING@/${KWSYS_STL_HAS_WSTRING}/g;
-                s/@KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H@/${KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H}/g;
-               }" >> "${OUTFILE}${_tmp}"
+    sed "/./ {s/\@KWSYS_NAMESPACE\@/cmsys/g;
+              s/@KWSYS_BUILD_SHARED@/${KWSYS_BUILD_SHARED}/g;
+              s/@KWSYS_LFS_AVAILABLE@/${KWSYS_LFS_AVAILABLE}/g;
+              s/@KWSYS_LFS_REQUESTED@/${KWSYS_LFS_REQUESTED}/g;
+              s/@KWSYS_NAME_IS_KWSYS@/${KWSYS_NAME_IS_KWSYS}/g;
+              s/@KWSYS_STL_HAS_WSTRING@/${KWSYS_STL_HAS_WSTRING}/g;
+              s/@KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H@/${KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H}/g;
+             }" "${INFILE}" >> "${OUTFILE}${_tmp}"
     if [ -f "${OUTFILE}${_tmp}" ]; then
       if "${_diff}" "${OUTFILE}" "${OUTFILE}${_tmp}" > /dev/null 2> /dev/null ; then
         #echo "Files are the same"
