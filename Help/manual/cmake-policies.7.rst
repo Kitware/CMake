@@ -51,6 +51,14 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.10
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0070: Define file(GENERATE) behavior for relative paths. </policy/CMP0070>
+
 Policies Introduced by CMake 3.9
 ================================
 

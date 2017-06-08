@@ -592,7 +592,8 @@ void cmMakefile::AddEvaluationFile(
   CM_AUTO_PTR<cmCompiledGeneratorExpression> condition, bool inputIsContent)
 {
   this->EvaluationFiles.push_back(new cmGeneratorExpressionEvaluationFile(
-    inputFile, outputName, condition, inputIsContent));
+    inputFile, outputName, condition, inputIsContent,
+    this->GetPolicyStatus(cmPolicies::CMP0070)));
 }
 
 std::vector<cmGeneratorExpressionEvaluationFile*>
