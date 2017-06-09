@@ -14,8 +14,10 @@ function(cm_check_cxx_feature name)
       CMAKE_FLAGS ${maybe_cxx_standard}
       OUTPUT_VARIABLE OUTPUT
       )
+    # Filter out MSBuild output that looks like a warning.
+    string(REGEX REPLACE " +0 Warning\\(s\\)" "" check_output "${OUTPUT}")
     # If using the feature causes warnings, treat it as broken/unavailable.
-    if(OUTPUT MATCHES "[Ww]arning" AND NOT OUTPUT MATCHES "0 Warning")
+    if(check_output MATCHES "[Ww]arning")
       set(CMake_HAVE_CXX_${FEATURE} OFF CACHE INTERNAL "TRY_COMPILE" FORCE)
     endif()
     if(CMake_HAVE_CXX_${FEATURE})
