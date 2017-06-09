@@ -76,6 +76,7 @@ The following individuals and institutions are among the Contributors:
 * Nicolas Bock <nicolasbock@gmail.com>
 * Nicolas Despres <nicolas.despres@gmail.com>
 * Nikita Krupen'ko <krnekit@gmail.com>
+* NVIDIA Corporation <www.nvidia.com>
 * OpenGamma Ltd. <opengamma.com>
 * Per Øyvind Karlsen <peroyvind@mandriva.org>
 * Peter Collingbourne <peter@pcc.me.uk>
