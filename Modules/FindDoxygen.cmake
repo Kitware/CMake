@@ -396,10 +396,12 @@ macro(_Doxygen_find_doxygen)
         endif()
 
         # Create an imported target for Doxygen
-        add_executable(Doxygen::doxygen IMPORTED GLOBAL)
-        set_target_properties(Doxygen::doxygen PROPERTIES
-            IMPORTED_LOCATION "${DOXYGEN_EXECUTABLE}"
-        )
+        if(NOT TARGET Doxygen::doxygen)
+            add_executable(Doxygen::doxygen IMPORTED GLOBAL)
+            set_target_properties(Doxygen::doxygen PROPERTIES
+                IMPORTED_LOCATION "${DOXYGEN_EXECUTABLE}"
+            )
+        endif()
     endif()
 endmacro()
 
@@ -429,10 +431,12 @@ macro(_Doxygen_find_dia)
         endif()
 
         # Create an imported target for component
-        add_executable(Doxygen::dia IMPORTED GLOBAL)
-        set_target_properties(Doxygen::dia PROPERTIES
-            IMPORTED_LOCATION "${DOXYGEN_DIA_EXECUTABLE}"
-        )
+        if(NOT TARGET Doxygen::dia)
+            add_executable(Doxygen::dia IMPORTED GLOBAL)
+            set_target_properties(Doxygen::dia PROPERTIES
+                IMPORTED_LOCATION "${DOXYGEN_DIA_EXECUTABLE}"
+            )
+        endif()
     endif()
 
     unset(_x86)
@@ -474,10 +478,12 @@ macro(_Doxygen_find_dot)
         endif()
 
         # Create an imported target for component
-        add_executable(Doxygen::dot IMPORTED GLOBAL)
-        set_target_properties(Doxygen::dot PROPERTIES
-            IMPORTED_LOCATION "${DOXYGEN_DOT_EXECUTABLE}"
-        )
+        if(NOT TARGET Doxygen::dot)
+            add_executable(Doxygen::dot IMPORTED GLOBAL)
+            set_target_properties(Doxygen::dot PROPERTIES
+                IMPORTED_LOCATION "${DOXYGEN_DOT_EXECUTABLE}"
+            )
+        endif()
     endif()
 
     unset(_Doxygen_GRAPHVIZ_BIN_DIRS)
@@ -510,10 +516,12 @@ macro(_Doxygen_find_mscgen)
         endif()
 
         # Create an imported target for component
-        add_executable(Doxygen::mscgen IMPORTED GLOBAL)
-        set_target_properties(Doxygen::mscgen PROPERTIES
-            IMPORTED_LOCATION "${DOXYGEN_MSCGEN_EXECUTABLE}"
-        )
+        if(NOT TARGET Doxygen::mscgen)
+            add_executable(Doxygen::mscgen IMPORTED GLOBAL)
+            set_target_properties(Doxygen::mscgen PROPERTIES
+                IMPORTED_LOCATION "${DOXYGEN_MSCGEN_EXECUTABLE}"
+            )
+        endif()
     endif()
 
     unset(_x86)
