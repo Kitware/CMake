@@ -25,7 +25,7 @@ public:
    * Construct generator
    */
   cmCPackPackageMakerGenerator();
-  virtual ~cmCPackPackageMakerGenerator();
+  ~cmCPackPackageMakerGenerator() CM_OVERRIDE;
   bool SupportsComponentInstallation() const CM_OVERRIDE;
 
 protected:
