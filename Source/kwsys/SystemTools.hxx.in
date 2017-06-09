@@ -461,6 +461,10 @@ public:
    * produce the original path.  Home directory references are
    * automatically expanded if expand_home_dir is true and this
    * platform supports them.
+   *
+   * This does *not* normalize the input path.  All components are
+   * preserved, including empty ones.  Typically callers should use
+   * this only on paths that have already been normalized.
    */
   static void SplitPath(const std::string& p,
                         std::vector<std::string>& components,
@@ -469,14 +473,14 @@ public:
   /**
    * Join components of a path name into a single string.  See
    * SplitPath for the format of the components.
+   *
+   * This does *not* normalize the input path.  All components are
+   * preserved, including empty ones.  Typically callers should use
+   * this only on paths that have already been normalized.
    */
   static std::string JoinPath(const std::vector<std::string>& components);
   static std::string JoinPath(std::vector<std::string>::const_iterator first,
                               std::vector<std::string>::const_iterator last);
-
-  /** Removes empty components from path.
-   */
-  static void RemoveEmptyPathElements(std::vector<std::string>& path);
 
   /**
    * Compare a path or components of a path.
