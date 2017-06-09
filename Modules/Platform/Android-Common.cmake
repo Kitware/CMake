@@ -156,6 +156,11 @@ macro(__android_compiler_common lang)
   # necessary so that Android API-version-specific headers are preferred
   # over those in the toolchain's `include-fixed` directory (which cannot
   # possibly match all versions).
-  list(APPEND CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES "${CMAKE_SYSROOT}/usr/include")
-  list(REMOVE_ITEM CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES "/usr/include")
+  #
+  # Do not do this for a standalone toolchain because it is already
+  # tied to a specific API version.
+  if(CMAKE_ANDROID_NDK)
+    list(APPEND CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES "${CMAKE_SYSROOT}/usr/include")
+    list(REMOVE_ITEM CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES "/usr/include")
+  endif()
 endmacro()
