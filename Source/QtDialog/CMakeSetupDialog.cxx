@@ -1195,7 +1195,7 @@ void CMakeSetupDialog::setSearchFilter(const QString& str)
   this->CacheValues->setSearchFilter(str);
 }
 
-void CMakeSetupDialog::doOutputContextMenu(const QPoint& pt)
+void CMakeSetupDialog::doOutputContextMenu(QPoint pt)
 {
   QMenu* menu = this->Output->createStandardContextMenu();
 
