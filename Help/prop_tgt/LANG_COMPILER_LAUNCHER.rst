@@ -1,7 +1,8 @@
 <LANG>_COMPILER_LAUNCHER
 ------------------------
 
-This property is implemented only when ``<LANG>`` is ``C`` or ``CXX``.
+This property is implemented only when ``<LANG>`` is ``C``, ``CXX``,
+or ``CUDA``.
 
 Specify a :ref:`;-list <CMake Language Lists>` containing a command line
 for a compiler launching tool. The :ref:`Makefile Generators` and the
