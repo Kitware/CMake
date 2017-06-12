@@ -10,6 +10,7 @@ Execute one or more child processes.
                   [WORKING_DIRECTORY <directory>]
                   [TIMEOUT <seconds>]
                   [RESULT_VARIABLE <variable>]
+                  [RESULTS_VARIABLE <variable>]
                   [OUTPUT_VARIABLE <variable>]
                   [ERROR_VARIABLE <variable>]
                   [INPUT_FILE <file>]
@@ -49,9 +50,15 @@ Options:
  specified number of seconds (fractions are allowed).
 
 ``RESULT_VARIABLE``
- The variable will be set to contain the result of running the processes.
+ The variable will be set to contain the result of last child process.
  This will be an integer return code from the last child or a string
  describing an error condition.
+
+``RESULTS_VARIABLE <variable>``
+ The variable will be set to contain the result of all processes as a
+ :ref:`;-list <CMake Language Lists>`, in order of the given ``COMMAND``
+ arguments.  Each entry will be an integer return code from the
+ corresponding child or a string describing an error condition.
 
 ``OUTPUT_VARIABLE``, ``ERROR_VARIABLE``
  The variable named will be set with the contents of the standard output
