@@ -100,7 +100,7 @@ if (NOT RCC_DEPENDS)
   message(SEND_ERROR "Initial build of rccDepends failed. Output: ${output}")
 endif()
 # Get name and timestamp of the output binary
-file(STRINGS "${RCC_DEPENDS_BIN}/target.txt" targetList)
+file(STRINGS "${RCC_DEPENDS_BIN}/target.txt" targetList ENCODING UTF-8)
 list(GET targetList 0 rccDependsBin)
 file(TIMESTAMP "${rccDependsBin}" timeBegin "${timeformat}")
 # Sleep, touch regular qrc input file, rebuild and compare timestamp
@@ -188,7 +188,7 @@ if (NOT MOC_RERUN)
   message(SEND_ERROR "Initial build of mocRerun failed. Output: ${output}")
 endif()
 # Get name and timestamp of the output binary
-file(STRINGS "${CMAKE_CURRENT_BINARY_DIR}/mocRerun/target1.txt" target1List)
+file(STRINGS "${CMAKE_CURRENT_BINARY_DIR}/mocRerun/target1.txt" target1List ENCODING UTF-8)
 list(GET target1List 0 binFile)
 file(TIMESTAMP "${binFile}" timeBegin "${timeformat}")
 # Change file content and rebuild
