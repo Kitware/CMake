@@ -100,11 +100,34 @@ endif()
 
 set(_ANDROID_STANDALONE_TOOLCHAIN_API "")
 if(CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
-  set(_ANDROID_API_LEVEL_H_REGEX "^[\t ]*#[\t ]*define[\t ]+__ANDROID_API__[\t ]+([0-9]+)")
-  file(STRINGS "${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/sysroot/usr/include/android/api-level.h"
-    _ANDROID_API_LEVEL_H_CONTENT REGEX "${_ANDROID_API_LEVEL_H_REGEX}")
-  if(_ANDROID_API_LEVEL_H_CONTENT MATCHES "${_ANDROID_API_LEVEL_H_REGEX}")
-    set(_ANDROID_STANDALONE_TOOLCHAIN_API "${CMAKE_MATCH_1}")
+  # Try to read the API level from the toolchain launcher.
+  if(EXISTS "${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/bin/clang")
+    set(_ANDROID_API_LEVEL_CLANG_REGEX "__ANDROID_API__=([0-9]+)")
+    file(STRINGS "${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/bin/clang" _ANDROID_STANDALONE_TOOLCHAIN_BIN_CLANG
+      REGEX "${_ANDROID_API_LEVEL_CLANG_REGEX}" LIMIT_COUNT 1 LIMIT_INPUT 65536)
+    if(_ANDROID_STANDALONE_TOOLCHAIN_BIN_CLANG MATCHES "${_ANDROID_API_LEVEL_CLANG_REGEX}")
+      set(_ANDROID_STANDALONE_TOOLCHAIN_API "${CMAKE_MATCH_1}")
+    endif()
+    unset(_ANDROID_STANDALONE_TOOLCHAIN_BIN_CLANG)
+    unset(_ANDROID_API_LEVEL_CLANG_REGEX)
+  endif()
+  if(NOT _ANDROID_STANDALONE_TOOLCHAIN_API)
+    # The compiler launcher does not know __ANDROID_API__.  Assume this
+    # is not unified headers and look for it in the api-level.h header.
+    set(_ANDROID_API_LEVEL_H_REGEX "^[\t ]*#[\t ]*define[\t ]+__ANDROID_API__[\t ]+([0-9]+)")
+    file(STRINGS "${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/sysroot/usr/include/android/api-level.h"
+      _ANDROID_API_LEVEL_H_CONTENT REGEX "${_ANDROID_API_LEVEL_H_REGEX}")
+    if(_ANDROID_API_LEVEL_H_CONTENT MATCHES "${_ANDROID_API_LEVEL_H_REGEX}")
+      set(_ANDROID_STANDALONE_TOOLCHAIN_API "${CMAKE_MATCH_1}")
+    endif()
+  endif()
+  if(NOT _ANDROID_STANDALONE_TOOLCHAIN_API)
+    message(WARNING
+      "Android: Did not detect API level from\n"
+      "  ${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/bin/clang\n"
+      "or\n"
+      "  ${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/sysroot/usr/include/android/api-level.h\n"
+      )
   endif()
 endif()
 
