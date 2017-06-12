@@ -9,6 +9,9 @@
 #include "IFW/cmCPackIFWGenerator.h"
 #include "cmAlgorithms.h"
 #include "cmCPack7zGenerator.h"
+#ifdef HAVE_FREEBSD_PKG
+#include "cmCPackFreeBSDGenerator.h"
+#endif
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmCPackNSISGenerator.h"
@@ -130,6 +133,12 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
   if (cmCPackRPMGenerator::CanGenerate()) {
     this->RegisterGenerator("RPM", "RPM packages",
                             cmCPackRPMGenerator::CreateGenerator);
+  }
+#endif
+#ifdef HAVE_FREEBSD_PKG
+  if (cmCPackFreeBSDGenerator::CanGenerate()) {
+    this->RegisterGenerator("FREEBSD", "FreeBSD pkg(8) packages",
+                            cmCPackFreeBSDGenerator::CreateGenerator);
   }
 #endif
 }

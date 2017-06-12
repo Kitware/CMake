@@ -471,6 +471,7 @@ if(NOT CPACK_GENERATOR)
         option(CPACK_BINARY_TZ  "Enable to build TZ packages"     ON)
       endif()
       option(CPACK_BINARY_DEB  "Enable to build Debian packages"  OFF)
+      option(CPACK_BINARY_FREEBSD  "Enable to build FreeBSD packages"  OFF)
       option(CPACK_BINARY_NSIS "Enable to build NSIS packages"    OFF)
       option(CPACK_BINARY_RPM  "Enable to build RPM packages"     OFF)
       option(CPACK_BINARY_STGZ "Enable to build STGZ packages"    ON)
@@ -491,6 +492,7 @@ if(NOT CPACK_GENERATOR)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_CYGWIN       CygwinBinary)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_DEB          DEB)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_DRAGNDROP    DragNDrop)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_FREEBSD      FREEBSD)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_IFW          IFW)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NSIS         NSIS)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_OSXX11       OSXX11)
@@ -542,6 +544,7 @@ mark_as_advanced(
   CPACK_BINARY_CYGWIN
   CPACK_BINARY_DEB
   CPACK_BINARY_DRAGNDROP
+  CPACK_BINARY_FREEBSD
   CPACK_BINARY_IFW
   CPACK_BINARY_NSIS
   CPACK_BINARY_OSXX11
