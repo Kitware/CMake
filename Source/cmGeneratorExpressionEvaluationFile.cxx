@@ -20,11 +20,13 @@
 cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
   const std::string& input,
   CM_AUTO_PTR<cmCompiledGeneratorExpression> outputFileExpr,
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> condition, bool inputIsContent)
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> condition, bool inputIsContent,
+  cmPolicies::PolicyStatus policyStatusCMP0070)
   : Input(input)
   , OutputFileExpr(outputFileExpr)
   , Condition(condition)
   , InputIsContent(inputIsContent)
+  , PolicyStatusCMP0070(policyStatusCMP0070)
 {
 }
 
@@ -58,6 +60,8 @@ void cmGeneratorExpressionEvaluationFile::Generate(
 
   if (cmSystemTools::FileIsFullPath(outputFileName)) {
     outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
+  } else {
+    outputFileName = this->FixRelativePath(outputFileName, PathForOutput, lg);
   }
 
   std::map<std::string, std::string>::iterator it =
@@ -118,6 +122,8 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
     std::string inputFileName = this->Input;
     if (cmSystemTools::FileIsFullPath(inputFileName)) {
       inputFileName = cmSystemTools::CollapseFullPath(inputFileName);
+    } else {
+      inputFileName = this->FixRelativePath(inputFileName, PathForInput, lg);
     }
     lg->GetMakefile()->AddCMakeDependFile(inputFileName);
     cmSystemTools::GetPermissions(inputFileName.c_str(), perm);
@@ -166,4 +172,58 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
       }
     }
   }
+}
+
+std::string cmGeneratorExpressionEvaluationFile::FixRelativePath(
+  std::string const& relativePath, PathRole role, cmLocalGenerator* lg)
+{
+  std::string resultPath;
+  switch (this->PolicyStatusCMP0070) {
+    case cmPolicies::WARN: {
+      std::string arg;
+      switch (role) {
+        case PathForInput:
+          arg = "INPUT";
+          break;
+        case PathForOutput:
+          arg = "OUTPUT";
+          break;
+      }
+      std::ostringstream w;
+      /* clang-format off */
+      w <<
+        cmPolicies::GetPolicyWarning(cmPolicies::CMP0070) << "\n"
+        "file(GENERATE) given relative " << arg << " path:\n"
+        "  " << relativePath << "\n"
+        "This is not defined behavior unless CMP0070 is set to NEW.  "
+        "For compatibility with older versions of CMake, the previous "
+        "undefined behavior will be used."
+        ;
+      /* clang-format on */
+      lg->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+    }
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      // OLD behavior is to use the relative path unchanged,
+      // which ends up being used relative to the working dir.
+      resultPath = relativePath;
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      // NEW behavior is to interpret the relative path with respect
+      // to the current source or binary directory.
+      switch (role) {
+        case PathForInput:
+          resultPath = cmSystemTools::CollapseFullPath(
+            relativePath, lg->GetCurrentSourceDirectory());
+          break;
+        case PathForOutput:
+          resultPath = cmSystemTools::CollapseFullPath(
+            relativePath, lg->GetCurrentBinaryDirectory());
+          break;
+      }
+      break;
+  }
+  return resultPath;
 }

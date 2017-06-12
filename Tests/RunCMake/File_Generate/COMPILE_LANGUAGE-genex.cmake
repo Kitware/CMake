@@ -7,6 +7,6 @@ target_compile_options(empty
 )
 
 file(GENERATE
-  OUTPUT opts-$<COMPILE_LANGUAGE>.txt
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/opts-$<COMPILE_LANGUAGE>.txt
   CONTENT "$<TARGET_PROPERTY:empty,COMPILE_OPTIONS>\n"
 )

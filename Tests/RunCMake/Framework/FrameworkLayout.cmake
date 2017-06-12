@@ -22,4 +22,4 @@ set_source_files_properties(some.txt PROPERTIES MACOSX_PACKAGE_LOCATION somedir)
 add_custom_command(TARGET Framework POST_BUILD
                    COMMAND /usr/bin/file $<TARGET_FILE:Framework>)
 
-file(GENERATE OUTPUT FrameworkName.cmake CONTENT "set(framework-dir \"$<TARGET_BUNDLE_DIR:Framework>\")\n")
+file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/FrameworkName.cmake CONTENT "set(framework-dir \"$<TARGET_BUNDLE_DIR:Framework>\")\n")
