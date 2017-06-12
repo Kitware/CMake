@@ -65,7 +65,7 @@ macro(_pkgconfig_invoke _pkglist _prefix _varname _regexp)
     set(_pkgconfig_${_varname} "")
     _pkgconfig_unset(${_prefix}_${_varname})
   else()
-    string(REGEX REPLACE "[\r\n]"                  " " _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
+    string(REGEX REPLACE "[\r\n]"       " " _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
 
     if (NOT ${_regexp} STREQUAL "")
       string(REGEX REPLACE "${_regexp}" " " _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
