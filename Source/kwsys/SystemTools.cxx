@@ -22,7 +22,6 @@
 #include KWSYS_HEADER(FStream.hxx)
 #include KWSYS_HEADER(Encoding.hxx)
 
-#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <set>
@@ -3707,16 +3706,6 @@ std::string SystemTools::JoinPath(
 
   // Return the concatenated result.
   return result;
-}
-
-void SystemTools::RemoveEmptyPathElements(std::vector<std::string>& path)
-{
-  if (path.empty()) {
-    return;
-  }
-
-  path.erase(std::remove(path.begin() + 1, path.end(), std::string("")),
-             path.end());
 }
 
 bool SystemTools::ComparePath(const std::string& c1, const std::string& c2)
