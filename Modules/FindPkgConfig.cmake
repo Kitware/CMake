@@ -86,6 +86,9 @@ endmacro()
 
     pkg_get_variable(<RESULT> <MODULE> <VARIABLE>)
 
+  If multiple values are returned variable will contain a
+  :ref:`;-list <CMake Language Lists>`.
+
   For example:
 
   .. code-block:: cmake
@@ -523,6 +526,9 @@ endmacro()
 
     <XPREFIX> = <PREFIX>        for common case
     <XPREFIX> = <PREFIX>_STATIC for static linking
+
+ Every variable containing multiple values will be a
+ :ref:`;-list <CMake Language Lists>`.
 
  There are some special variables whose prefix depends on the count of
  given modules.  When there is only one module, <PREFIX> stays
