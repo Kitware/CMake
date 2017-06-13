@@ -2591,6 +2591,13 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
   cudaLinkOptions.AddFlag("PerformDeviceLink",
                           doDeviceLinking ? "true" : "false");
 
+  // Suppress deprecation warnings for default GPU targets during device link.
+  if (cmSystemTools::VersionCompareGreaterEq(
+        this->GlobalGenerator->GetPlatformToolsetCudaString(), "8.0")) {
+    cudaLinkOptions.AppendFlag("AdditionalOptions",
+                               "-Wno-deprecated-gpu-targets");
+  }
+
   this->CudaLinkOptions[configName] = pOptions.release();
   return true;
 }
