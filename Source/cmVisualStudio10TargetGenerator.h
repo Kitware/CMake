@@ -153,6 +153,11 @@ private:
 
   bool ForceOld(const std::string& source) const;
 
+  void GetCSharpSourceProperties(cmSourceFile const* sf,
+                                 std::map<std::string, std::string>& tags);
+  void WriteCSharpSourceProperties(
+    const std::map<std::string, std::string>& tags);
+
 private:
   typedef cmVisualStudioGeneratorOptions Options;
   typedef std::map<std::string, Options*> OptionsMap;

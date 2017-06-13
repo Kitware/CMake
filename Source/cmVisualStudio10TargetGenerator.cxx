@@ -1565,6 +1565,10 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     toolHasSettings = true;
   }
 
+  // Collect VS_CSHARP_* property values (if some are set)
+  std::map<std::string, std::string> sourceFileTags;
+  this->GetCSharpSourceProperties(sf, sourceFileTags);
+
   if (this->NsightTegra) {
     // Nsight Tegra needs specific file types to check up-to-dateness.
     std::string name = cmSystemTools::LowerCase(sf->GetLocation().GetName());
@@ -1681,7 +1685,8 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       (*this->BuildFileStream) << cmVS10EscapeXML(includeInVsix)
                                << "</IncludeInVSIX>\n";
     }
-
+    // write source file specific tags
+    this->WriteCSharpSourceProperties(sourceFileTags);
     this->WriteString("</", 2);
     (*this->BuildFileStream) << tool << ">\n";
   } else {
@@ -2017,34 +2022,13 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         sourceFileTags["Link"] = link;
       }
     }
-    const cmPropertyMap& props = sf.GetProperties();
-    for (cmPropertyMap::const_iterator p = props.begin(); p != props.end();
-         ++p) {
-      static const std::string propNamePrefix = "VS_CSHARP_";
-      if (p->first.find(propNamePrefix.c_str()) == 0) {
-        std::string tagName = p->first.substr(propNamePrefix.length());
-        if (!tagName.empty()) {
-          const std::string val = props.GetPropertyValue(p->first);
-          if (!val.empty()) {
-            sourceFileTags[tagName] = val;
-          } else {
-            sourceFileTags.erase(tagName);
-          }
-        }
-      }
-    }
+    this->GetCSharpSourceProperties(&sf, sourceFileTags);
     // write source file specific tags
     if (!sourceFileTags.empty()) {
       hasFlags = true;
       (*this->BuildFileStream) << firstString;
       firstString = "";
-      for (CsPropMap::const_iterator i = sourceFileTags.begin();
-           i != sourceFileTags.end(); ++i) {
-        this->WriteString("<", 3);
-        (*this->BuildFileStream)
-          << i->first << ">" << cmVS10EscapeXML(i->second) << "</" << i->first
-          << ">\n";
-      }
+      this->WriteCSharpSourceProperties(sourceFileTags);
     }
   }
 
@@ -4278,6 +4262,42 @@ bool cmVisualStudio10TargetGenerator::ForceOld(const std::string& source) const
 
   CloseHandle(h);
   return true;
+}
+
+void cmVisualStudio10TargetGenerator::GetCSharpSourceProperties(
+  cmSourceFile const* sf, std::map<std::string, std::string>& tags)
+{
+  if (csproj == this->ProjectType) {
+    const cmPropertyMap& props = sf->GetProperties();
+    for (cmPropertyMap::const_iterator p = props.begin(); p != props.end();
+         ++p) {
+      static const std::string propNamePrefix = "VS_CSHARP_";
+      if (p->first.find(propNamePrefix.c_str()) == 0) {
+        std::string tagName = p->first.substr(propNamePrefix.length());
+        if (!tagName.empty()) {
+          const std::string val = props.GetPropertyValue(p->first);
+          if (!val.empty()) {
+            tags[tagName] = val;
+          } else {
+            tags.erase(tagName);
+          }
+        }
+      }
+    }
+  }
+}
+
+void cmVisualStudio10TargetGenerator::WriteCSharpSourceProperties(
+  const std::map<std::string, std::string>& tags)
+{
+  if (!tags.empty()) {
+    for (std::map<std::string, std::string>::const_iterator i = tags.begin();
+         i != tags.end(); ++i) {
+      this->WriteString("<", 3);
+      (*this->BuildFileStream) << i->first << ">" << cmVS10EscapeXML(i->second)
+                               << "</" << i->first << ">\n";
+    }
+  }
 }
 
 std::string cmVisualStudio10TargetGenerator::GetCMakeFilePath(
