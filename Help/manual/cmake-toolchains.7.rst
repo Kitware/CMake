@@ -385,6 +385,11 @@ Configure use of an Android NDK with the following variables:
   If not specified, a default for this variable will be chosen
   as specified :ref:`above <Cross Compiling for Android>`.
 
+:variable:`CMAKE_ANDROID_NDK_DEPRECATED_HEADERS`
+  Set to a true value to use the deprecated per-api-level headers
+  instead of the unified headers.  If not specified, the default will
+  be false unless using a NDK that does not provide unified headers.
+
 :variable:`CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION`
   Set to the version of the NDK toolchain to be selected as the compiler.
   If not specified, the default will be the latest available GCC toolchain.

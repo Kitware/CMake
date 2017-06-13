@@ -62,6 +62,11 @@ Commands
 Variables
 ---------
 
+* A :variable:`CMAKE_ANDROID_NDK_DEPRECATED_HEADERS` variable was added
+  for use when :ref:`Cross Compiling for Android with the NDK` to request
+  use of the deprecated headers even when unified headers are available.
+  The default is now to use unified headers if available.
+
 * A :variable:`CMAKE_AUTOMOC_DEPEND_FILTERS` variable was introduced to
   allow :variable:`CMAKE_AUTOMOC` to extract additional dependency file names
   for ``moc`` from the contents of source files.
