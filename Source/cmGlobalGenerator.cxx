@@ -490,7 +490,6 @@ void cmGlobalGenerator::EnableLanguage(
     windowsVersionString << osviex.dwMajorVersion << "."
                          << osviex.dwMinorVersion << "."
                          << osviex.dwBuildNumber;
-    windowsVersionString.str();
     mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION",
                       windowsVersionString.str().c_str());
 #endif
