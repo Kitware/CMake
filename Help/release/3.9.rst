@@ -17,6 +17,11 @@ Languages
   for VS 2010 and above.  This complements the existing support by the
   :ref:`Makefile Generators` and the :generator:`Ninja` generator.
 
+* CMake is now aware of the :prop_tgt:`C++ standards <CXX_STANDARD>` and
+  :prop_tgt:`C standards <C_STANDARD>` and thier associated meta-features for
+  the following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>`: ``Cray``,
+  ``PGI``, and ``XL``.
+
 Generators
 ----------
 
