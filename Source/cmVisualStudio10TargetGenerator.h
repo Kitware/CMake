@@ -66,6 +66,7 @@ private:
   void WriteAllSources();
   void WriteDotNetReferences();
   void WriteDotNetReference(std::string const& ref, std::string const& hint);
+  void WriteDotNetReferenceCustomTags(std::string const& ref);
   void WriteEmbeddedResourceGroup();
   void WriteWinRTReferences();
   void WriteWinRTPackageCertificateKeyFile();
