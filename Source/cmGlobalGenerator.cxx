@@ -90,7 +90,7 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->TryCompileTimeout = 0;
 
   this->ExtraGenerator = CM_NULLPTR;
-  this->CurrentMakefile = CM_NULLPTR;
+  this->CurrentConfigureMakefile = CM_NULLPTR;
   this->TryCompileOuterMakefile = CM_NULLPTR;
 
   this->ConfigureDoneCMP0026AndCMP0024 = false;

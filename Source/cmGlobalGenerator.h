@@ -187,9 +187,15 @@ public:
     return this->LocalGenerators;
   }
 
-  cmMakefile* GetCurrentMakefile() const { return this->CurrentMakefile; }
+  cmMakefile* GetCurrentMakefile() const
+  {
+    return this->CurrentConfigureMakefile;
+  }
 
-  void SetCurrentMakefile(cmMakefile* mf) { this->CurrentMakefile = mf; }
+  void SetCurrentMakefile(cmMakefile* mf)
+  {
+    this->CurrentConfigureMakefile = mf;
+  }
 
   void AddMakefile(cmMakefile* mf);
 
@@ -460,7 +466,7 @@ protected:
   cmake* CMakeInstance;
   std::vector<cmMakefile*> Makefiles;
   std::vector<cmLocalGenerator*> LocalGenerators;
-  cmMakefile* CurrentMakefile;
+  cmMakefile* CurrentConfigureMakefile;
   // map from project name to vector of local generators in that project
   std::map<std::string, std::vector<cmLocalGenerator*> > ProjectMap;
 
