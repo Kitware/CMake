@@ -93,7 +93,7 @@ The CMake source tree is organized as follows.
   packagers, etc.
 
 * ``Tests/``:
-  The test suite.
+  The test suite.  See `Tests/README.rst`_.
 
 * ``Utilities/``:
   Scripts, third-party source code.
@@ -103,3 +103,5 @@ The CMake source tree is organized as follows.
 
   * ``Utilities/Release/``:
     Scripts used to package CMake itself for distribution on ``cmake.org``.
+
+.. _`Tests/README.rst`: ../../Tests/README.rst
