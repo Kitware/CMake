@@ -58,3 +58,48 @@ need to be handled with care:
   When assigning the result of ``.size()`` on a container for example,
   the result should be assigned to ``size_t`` not to ``std::size_t``,
   ``unsigned int`` or similar types.
+
+Source Tree Layout
+==================
+
+The CMake source tree is organized as follows.
+
+* ``Auxiliary/``:
+  Shell and editor integration files.
+
+* ``Help/``:
+  Documentation.
+
+  * ``Help/dev/``:
+    Developer documentation.
+
+  * ``Help/release/dev/``:
+    Release note snippets for development since last release.
+
+* ``Licenses/``:
+  License files for third-party libraries in binary distributions.
+
+* ``Modules/``:
+  CMake language modules installed with CMake.
+
+* ``Packaging/``:
+  Files used for packaging CMake itself for distribution.
+
+* ``Source/``:
+  Source code of CMake itself.
+
+* ``Templates/``:
+  Files distributed with CMake as implementation details for generators,
+  packagers, etc.
+
+* ``Tests/``:
+  The test suite.
+
+* ``Utilities/``:
+  Scripts, third-party source code.
+
+  * ``Utilities/Sphinx/``:
+    Sphinx configuration to build CMake user documentation.
+
+  * ``Utilities/Release/``:
+    Scripts used to package CMake itself for distribution on ``cmake.org``.
