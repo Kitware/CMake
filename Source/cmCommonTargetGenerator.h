@@ -37,8 +37,8 @@ protected:
 
   cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;
-  cmLocalCommonGenerator* LocalGenerator;
-  cmGlobalCommonGenerator* GlobalGenerator;
+  cmLocalCommonGenerator* LocalCommonGenerator;
+  cmGlobalCommonGenerator* GlobalCommonGenerator;
   std::string ConfigName;
 
   void AppendFortranFormatFlags(std::string& flags,
