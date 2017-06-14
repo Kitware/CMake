@@ -512,7 +512,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         linkCmdVar += "_ARCHIVE_CREATE";
 
         linkCmdVar = this->GeneratorTarget->GetFeatureSpecificLinkRuleVariable(
-          linkCmdVar, this->GetConfigName());
+          linkCmdVar, this->TargetLinkLanguage, this->GetConfigName());
 
         const char* linkCmd = mf->GetRequiredDefinition(linkCmdVar);
         cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
@@ -523,7 +523,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         linkCmdVar += "_ARCHIVE_FINISH";
 
         linkCmdVar = this->GeneratorTarget->GetFeatureSpecificLinkRuleVariable(
-          linkCmdVar, this->GetConfigName());
+          linkCmdVar, this->TargetLinkLanguage, this->GetConfigName());
 
         const char* linkCmd = mf->GetRequiredDefinition(linkCmdVar);
         cmSystemTools::ExpandListArgument(linkCmd, linkCmds);

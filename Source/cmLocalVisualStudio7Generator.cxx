@@ -672,7 +672,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     this->AddCompileOptions(flags, target, linkLanguage, configName);
 
     // Check IPO related warning/error.
-    target->IsIPOEnabled(configName);
+    target->IsIPOEnabled(linkLanguage, configName);
   }
 
   if (this->FortranProject) {

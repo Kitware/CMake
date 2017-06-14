@@ -165,7 +165,7 @@ public:
   const char* GetFeature(const std::string& feature,
                          const std::string& config) const;
 
-  bool IsIPOEnabled(const std::string& config) const;
+  bool IsIPOEnabled(std::string const& lang, std::string const& config) const;
 
   bool IsLinkInterfaceDependentBoolProperty(const std::string& p,
                                             const std::string& config) const;
@@ -385,7 +385,8 @@ public:
                      std::vector<std::string>& archVec) const;
 
   std::string GetFeatureSpecificLinkRuleVariable(
-    std::string const& var, std::string const& config) const;
+    std::string const& var, std::string const& lang,
+    std::string const& config) const;
 
   /** Return the rule variable used to create this type of target.  */
   std::string GetCreateRuleVariable(std::string const& lang,
