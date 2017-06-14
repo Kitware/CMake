@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,8 +26,7 @@
 /* ftp can use this as well */
 CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            int tunnelsocket,
-                           const char *hostname, int remote_port,
-                           bool blocking);
+                           const char *hostname, int remote_port);
 
 /* Default proxy timeout in milliseconds */
 #define PROXY_TIMEOUT (3600*1000)
@@ -35,7 +34,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex);
 
 #else
-#define Curl_proxyCONNECT(x,y,z,w,v) CURLE_NOT_BUILT_IN
+#define Curl_proxyCONNECT(x,y,z,w) CURLE_NOT_BUILT_IN
 #define Curl_proxy_connect(x,y) CURLE_OK
 #endif
 
