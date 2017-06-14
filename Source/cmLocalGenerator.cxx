@@ -1334,7 +1334,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   flagsVar += "_FLAGS";
   this->AddConfigVariableFlags(flags, flagsVar, config);
 
-  if (target->IsIPOEnabled(config)) {
+  if (target->IsIPOEnabled(lang, config)) {
     this->AppendFeatureOptions(flags, lang, "IPO");
   }
 }
@@ -1836,7 +1836,7 @@ void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
                                             const std::string& config,
                                             const std::string& lang)
 {
-  if (!target->IsIPOEnabled(config)) {
+  if (!target->IsIPOEnabled(lang, config)) {
     return;
   }
 

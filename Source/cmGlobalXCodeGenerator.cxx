@@ -1666,7 +1666,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     return;
   }
 
-  if (gtgt->IsIPOEnabled(configName)) {
+  if (gtgt->IsIPOEnabled(llang, configName)) {
     const char* ltoValue =
       this->CurrentMakefile->IsOn("_CMAKE_LTO_THIN") ? "YES_THIN" : "YES";
     buildSettings->AddAttribute("LLVM_LTO", this->CreateString(ltoValue));

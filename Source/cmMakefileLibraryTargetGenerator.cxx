@@ -699,7 +699,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     arCreateVar += "_ARCHIVE_CREATE";
 
     arCreateVar = this->GeneratorTarget->GetFeatureSpecificLinkRuleVariable(
-      arCreateVar, this->ConfigName);
+      arCreateVar, linkLanguage, this->ConfigName);
 
     if (const char* rule = this->Makefile->GetDefinition(arCreateVar)) {
       cmSystemTools::ExpandListArgument(rule, archiveCreateCommands);
@@ -709,7 +709,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     arAppendVar += "_ARCHIVE_APPEND";
 
     arAppendVar = this->GeneratorTarget->GetFeatureSpecificLinkRuleVariable(
-      arAppendVar, this->ConfigName);
+      arAppendVar, linkLanguage, this->ConfigName);
 
     if (const char* rule = this->Makefile->GetDefinition(arAppendVar)) {
       cmSystemTools::ExpandListArgument(rule, archiveAppendCommands);
@@ -719,7 +719,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     arFinishVar += "_ARCHIVE_FINISH";
 
     arFinishVar = this->GeneratorTarget->GetFeatureSpecificLinkRuleVariable(
-      arFinishVar, this->ConfigName);
+      arFinishVar, linkLanguage, this->ConfigName);
 
     if (const char* rule = this->Makefile->GetDefinition(arFinishVar)) {
       cmSystemTools::ExpandListArgument(rule, archiveFinishCommands);

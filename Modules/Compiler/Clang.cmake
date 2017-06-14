@@ -30,8 +30,8 @@ else()
       set(CMAKE_${lang}_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN "--gcc-toolchain=")
     endif()
 
-    set(_CMAKE_IPO_SUPPORTED_BY_CMAKE YES)
-    set(_CMAKE_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
+    set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
+    set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
 
     string(COMPARE EQUAL "${CMAKE_${lang}_COMPILER_ID}" "AppleClang" __is_apple_clang)
 
