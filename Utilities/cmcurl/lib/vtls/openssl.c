@@ -236,8 +236,8 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
   /* we have the "SSL is seeded" boolean static to prevent multiple
      time-consuming seedings in vain */
   static bool ssl_seeded = FALSE;
-  char *buf = data->state.buffer; /* point to the big buffer */
   int nread=0;
+  char fname[256];
 
   if(ssl_seeded)
     return CURLE_OK;
@@ -297,11 +297,11 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
   } while(!rand_enough());
 
   /* generates a default path for the random seed file */
-  buf[0]=0; /* blank it first */
-  RAND_file_name(buf, BUFSIZE);
-  if(buf[0]) {
+  fname[0]=0; /* blank it first */
+  RAND_file_name(fname, sizeof(fname));
+  if(fname[0]) {
     /* we got a file name to try */
-    nread += RAND_load_file(buf, RAND_LOAD_LENGTH);
+    nread += RAND_load_file(fname, RAND_LOAD_LENGTH);
     if(rand_enough())
       return nread;
   }
@@ -1371,7 +1371,8 @@ static CURLcode verifystatus(struct connectdata *conn,
   st = SSL_CTX_get_cert_store(connssl->ctx);
 
 #if ((OPENSSL_VERSION_NUMBER <= 0x1000201fL) /* Fixed after 1.0.2a */ || \
-     defined(LIBRESSL_VERSION_NUMBER))
+     (defined(LIBRESSL_VERSION_NUMBER) &&                               \
+      LIBRESSL_VERSION_NUMBER <= 0x2040200fL))
   /* The authorized responder cert in the OCSP response MUST be signed by the
      peer cert's issuer (see RFC6960 section 4.2.2.2). If that's a root cert,
      no problem, but if it's an intermediate cert OpenSSL has a bug where it
@@ -2807,7 +2808,7 @@ static CURLcode servercert(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   X509 *issuer;
   FILE *fp;
-  char *buffer = data->state.buffer;
+  char buffer[2048];
   const char *ptr;
   long * const certverifyresult = SSL_IS_PROXY() ?
     &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
@@ -2819,6 +2820,7 @@ static CURLcode servercert(struct connectdata *conn,
 
   connssl->server_cert = SSL_get_peer_certificate(connssl->handle);
   if(!connssl->server_cert) {
+    BIO_free(mem);
     if(!strict)
       return CURLE_OK;
 
@@ -2829,7 +2831,7 @@ static CURLcode servercert(struct connectdata *conn,
   infof(data, "%s certificate:\n", SSL_IS_PROXY() ? "Proxy" : "Server");
 
   rc = x509_name_oneline(X509_get_subject_name(connssl->server_cert),
-                         buffer, BUFSIZE);
+                         buffer, sizeof(buffer));
   infof(data, " subject: %s\n", rc?"[NONE]":buffer);
 
   ASN1_TIME_print(mem, X509_get0_notBefore(connssl->server_cert));
@@ -2854,7 +2856,7 @@ static CURLcode servercert(struct connectdata *conn,
   }
 
   rc = x509_name_oneline(X509_get_issuer_name(connssl->server_cert),
-                         buffer, BUFSIZE);
+                         buffer, sizeof(buffer));
   if(rc) {
     if(strict)
       failf(data, "SSL: couldn't get X509-issuer name!");

@@ -561,7 +561,7 @@ static void events_setup(struct Curl_multi *multi, struct events *ev)
 static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 {
   bool done = FALSE;
-  CURLMcode mcode;
+  CURLMcode mcode = CURLM_OK;
   CURLcode result = CURLE_OK;
 
   while(!done) {
@@ -615,12 +615,18 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
         }
       }
 
-      if(!ev->msbump)
+      if(!ev->msbump) {
         /* If nothing updated the timeout, we decrease it by the spent time.
          * If it was updated, it has the new timeout time stored already.
          */
-        ev->ms += (long)curlx_tvdiff(after, before);
-
+        time_t timediff = curlx_tvdiff(after, before);
+        if(timediff > 0) {
+          if(timediff > ev->ms)
+            ev->ms = 0;
+          else
+            ev->ms -= (long)timediff;
+        }
+      }
     }
     else
       return CURLE_RECV_ERROR;
@@ -870,7 +876,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
    * the likeliness of us forgetting to init a buffer here in the future.
    */
   outcurl->set.buffer_size = data->set.buffer_size;
-  outcurl->state.buffer = malloc(CURL_BUFSIZE(outcurl->set.buffer_size) + 1);
+  outcurl->state.buffer = malloc(outcurl->set.buffer_size + 1);
   if(!outcurl->state.buffer)
     goto fail;
 
@@ -1044,7 +1050,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   if(!result &&
      ((newstate&(KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
       (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) )
-    Curl_expire(data, 0); /* get this handle going again */
+    Curl_expire(data, 0, EXPIRE_RUN_NOW); /* get this handle going again */
 
   return result;
 }
