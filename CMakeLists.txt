@@ -380,7 +380,7 @@ if(CMAKE_USE_MBEDTLS)
   set(SSL_ENABLED ON)
   set(USE_MBEDTLS ON)
   list(APPEND CURL_LIBS ${MBEDTLS_LIBRARIES})
-  include_directories(${MBEDTLS_INCLUDE_DIR})
+  include_directories(${MBEDTLS_INCLUDE_DIRS})
 endif()
 
 option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
@@ -620,6 +620,78 @@ if(ENABLE_UNIX_SOCKETS)
   check_struct_has_member("struct sockaddr_un" sun_path "sys/un.h" USE_UNIX_SOCKETS)
 else()
   unset(USE_UNIX_SOCKETS CACHE)
+endif()
+
+
+#
+# CA handling
+#
+set(CURL_CA_BUNDLE "auto" CACHE STRING
+    "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+set(CURL_CA_FALLBACK OFF CACHE BOOL
+    "Set ON to use built-in CA store of TLS backend. Defaults to OFF")
+set(CURL_CA_PATH "auto" CACHE STRING
+    "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+
+if("${CURL_CA_BUNDLE}" STREQUAL "")
+    message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")
+elseif("${CURL_CA_BUNDLE}" STREQUAL "none")
+    unset(CURL_CA_BUNDLE CACHE)
+elseif("${CURL_CA_BUNDLE}" STREQUAL "auto")
+    unset(CURL_CA_BUNDLE CACHE)
+    set(CURL_CA_BUNDLE_AUTODETECT TRUE)
+else()
+    set(CURL_CA_BUNDLE_SET TRUE)
+endif()
+
+if("${CURL_CA_PATH}" STREQUAL "")
+    message(FATAL_ERROR "Invalid value of CURL_CA_PATH. Use 'none', 'auto' or directory path.")
+elseif("${CURL_CA_PATH}" STREQUAL "none")
+    unset(CURL_CA_PATH CACHE)
+elseif("${CURL_CA_PATH}" STREQUAL "auto")
+    unset(CURL_CA_PATH CACHE)
+    set(CURL_CA_PATH_AUTODETECT TRUE)
+else()
+    set(CURL_CA_PATH_SET TRUE)
+endif()
+
+if(CURL_CA_BUNDLE_SET AND CURL_CA_PATH_AUTODETECT)
+    # Skip autodetection of unset CA path because CA bundle is set explicitly
+elseif(CURL_CA_PATH_SET AND CURL_CA_BUNDLE_AUTODETECT)
+    # Skip autodetection of unset CA bundle because CA path is set explicitly
+elseif(CURL_CA_PATH_AUTODETECT OR CURL_CA_BUNDLE_AUTODETECT)
+    # first try autodetecting a CA bundle, then a CA path
+
+    if(CURL_CA_BUNDLE_AUTODETECT)
+        set(SEARCH_CA_BUNDLE_PATHS
+            /etc/ssl/certs/ca-certificates.crt
+            /etc/pki/tls/certs/ca-bundle.crt
+            /usr/share/ssl/certs/ca-bundle.crt
+            /usr/local/share/certs/ca-root-nss.crt
+            /etc/ssl/cert.pem)
+
+        foreach(SEARCH_CA_BUNDLE_PATH ${SEARCH_CA_BUNDLE_PATHS})
+            if(EXISTS "${SEARCH_CA_BUNDLE_PATH}")
+                message(STATUS "Found CA bundle: ${SEARCH_CA_BUNDLE_PATH}")
+                set(CURL_CA_BUNDLE "${SEARCH_CA_BUNDLE_PATH}")
+                set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
+                break()
+            endif()
+        endforeach()
+    endif()
+
+    if(CURL_CA_PATH_AUTODETECT AND (NOT CURL_CA_PATH_SET))
+        if(EXISTS "/etc/ssl/certs")
+            set(CURL_CA_PATH "/etc/ssl/certs")
+            set(CURL_CA_PATH_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
+        endif()
+    endif()
+endif()
+
+if(CURL_CA_PATH_SET AND NOT USE_OPENSSL AND NOT USE_MBEDTLS)
+    message(FATAL_ERROR
+            "CA path only supported by OpenSSL, GnuTLS or mbed TLS. "
+            "Set CURL_CA_PATH=none or enable one of those TLS backends.")
 endif()
 
 
@@ -1127,8 +1199,7 @@ _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR
-   USE_WINDOWS_SSPI OR GNUTLS_ENABLED OR NSS_ENABLED OR USE_DARWINSSL OR USE_MBEDTLS))
+if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_WINDOWS_SSPI OR USE_DARWINSSL OR USE_MBEDTLS))
   _add_if("NTLM"        1)
   # TODO missing option (autoconf: --enable-ntlm-wb)
   _add_if("NTLM_WB"     NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
@@ -1177,8 +1248,6 @@ set(CC                      "${CMAKE_C_COMPILER}")
 set(CONFIGURE_OPTIONS       "")
 # TODO when to set "-DCURL_STATICLIB" for CPPFLAG_CURL_STATICLIB?
 set(CPPFLAG_CURL_STATICLIB  "")
-# TODO need to set this (see CURL_CHECK_CA_BUNDLE in acinclude.m4)
-set(CURL_CA_BUNDLE          "")
 set(CURLVERSION             "${CURL_VERSION}")
 set(ENABLE_SHARED           "yes")
 if(CURL_STATICLIB)

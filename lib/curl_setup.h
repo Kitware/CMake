@@ -588,9 +588,13 @@ int netware_init(void);
 #endif
 #endif
 
-#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H)
+#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H) && !defined(USE_WIN32_IDN)
 /* The lib and header are present */
 #define USE_LIBIDN2
+#endif
+
+#if defined(USE_LIBIDN2) && defined(USE_WIN32_IDN)
+#error "Both libidn2 and WinIDN are enabled, choose one."
 #endif
 
 #ifndef SIZEOF_TIME_T
@@ -623,14 +627,14 @@ int netware_init(void);
 #if !defined(CURL_DISABLE_NTLM) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 #if defined(USE_OPENSSL) || defined(USE_WINDOWS_SSPI) || \
     defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_DARWINSSL) || \
-    defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
+    defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) || \
+    defined(USE_MBEDTLS)
 
 #define USE_NTLM
 
-#elif defined(USE_MBEDTLS)
+#  if defined(USE_MBEDTLS)
+/* Get definition of MBEDTLS_MD4_C */
 #  include <mbedtls/md4.h>
-#  if defined(MBEDTLS_MD4_C)
-#define USE_NTLM
 #  endif
 
 #endif

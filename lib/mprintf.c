@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1999 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,10 +41,6 @@
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
-
-#ifndef SIZEOF_LONG_DOUBLE
-#define SIZEOF_LONG_DOUBLE 0
-#endif
 
 /*
  * If SIZEOF_SIZE_T has not been defined, default to the size of long.
@@ -614,7 +610,7 @@ static int dprintf_formatf(
     int is_neg;
 
     /* Base of a number to be written.  */
-    long base;
+    unsigned long base;
 
     /* Integral values to be written.  */
     mp_uintmax_t num;
@@ -955,9 +951,7 @@ static int dprintf_formatf(
         /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
            output characters */
         (sprintf)(work, formatbuf, p->data.dnum);
-#ifdef CURLDEBUG
-        assert(strlen(work) <= sizeof(work));
-#endif
+        DEBUGASSERT(strlen(work) <= sizeof(work));
         for(fptr=work; *fptr; fptr++)
           OUTCHAR(*fptr);
       }

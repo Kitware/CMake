@@ -81,9 +81,11 @@
   } WHILE_FALSE
 
 #define  CURL_SB_GET(x) ((*x->subpointer++)&0xff)
-#define  CURL_SB_PEEK(x)   ((*x->subpointer)&0xff)
-#define  CURL_SB_EOF(x) (x->subpointer >= x->subend)
 #define  CURL_SB_LEN(x) (x->subend - x->subpointer)
+
+/* For posterity:
+#define  CURL_SB_PEEK(x) ((*x->subpointer)&0xff)
+#define  CURL_SB_EOF(x) (x->subpointer >= x->subend) */
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
 #define printoption(a,b,c,d)  Curl_nop_stmt
@@ -1218,43 +1220,63 @@ CURLcode telrcv(struct connectdata *conn,
 }
 
 /* Escape and send a telnet data block */
-/* TODO: write large chunks of data instead of one byte at a time */
 static CURLcode send_telnet_data(struct connectdata *conn,
                                  char *buffer, ssize_t nread)
 {
-  unsigned char outbuf[2];
-  ssize_t bytes_written, total_written;
-  int out_count;
+  ssize_t escapes, i, j, outlen;
+  unsigned char *outbuf = NULL;
   CURLcode result = CURLE_OK;
+  ssize_t bytes_written, total_written;
 
-  while(!result && nread--) {
-    outbuf[0] = *buffer++;
-    out_count = 1;
-    if(outbuf[0] == CURL_IAC)
-      outbuf[out_count++] = CURL_IAC;
+  /* Determine size of new buffer after escaping */
+  escapes = 0;
+  for(i = 0; i < nread; i++)
+    if((unsigned char)buffer[i] == CURL_IAC)
+      escapes++;
+  outlen = nread + escapes;
 
-    total_written = 0;
-    do {
-      /* Make sure socket is writable to avoid EWOULDBLOCK condition */
-      struct pollfd pfd[1];
-      pfd[0].fd = conn->sock[FIRSTSOCKET];
-      pfd[0].events = POLLOUT;
-      switch(Curl_poll(pfd, 1, -1)) {
-        case -1:                    /* error, abort writing */
-        case 0:                     /* timeout (will never happen) */
-          result = CURLE_SEND_ERROR;
-          break;
-        default:                    /* write! */
-          bytes_written = 0;
-          result = Curl_write(conn, conn->sock[FIRSTSOCKET],
-                              outbuf+total_written, out_count-total_written,
-                              &bytes_written);
-          total_written += bytes_written;
-          break;
-      }
-      /* handle partial write */
-    } while(!result && total_written < out_count);
+  if(outlen == nread)
+    outbuf = (unsigned char *)buffer;
+  else {
+    outbuf = malloc(nread + escapes + 1);
+    if(!outbuf)
+      return CURLE_OUT_OF_MEMORY;
+
+    j = 0;
+    for(i = 0; i < nread; i++) {
+      outbuf[j++] = buffer[i];
+      if((unsigned char)buffer[i] == CURL_IAC)
+        outbuf[j++] = CURL_IAC;
+    }
+    outbuf[j] = '\0';
   }
+
+  total_written = 0;
+  while(!result && total_written < outlen) {
+    /* Make sure socket is writable to avoid EWOULDBLOCK condition */
+    struct pollfd pfd[1];
+    pfd[0].fd = conn->sock[FIRSTSOCKET];
+    pfd[0].events = POLLOUT;
+    switch(Curl_poll(pfd, 1, -1)) {
+      case -1:                    /* error, abort writing */
+      case 0:                     /* timeout (will never happen) */
+        result = CURLE_SEND_ERROR;
+        break;
+      default:                    /* write! */
+        bytes_written = 0;
+        result = Curl_write(conn, conn->sock[FIRSTSOCKET],
+                            outbuf + total_written,
+                            outlen - total_written,
+                            &bytes_written);
+        total_written += bytes_written;
+        break;
+    }
+  }
+
+  /* Free malloc copy if escaped */
+  if(outbuf != (unsigned char *)buffer)
+    free(outbuf);
+
   return result;
 }
 
@@ -1414,7 +1436,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 
   /* Keep on listening and act on events */
   while(keepon) {
-    const DWORD buf_size = (DWORD)CURL_BUFSIZE(data->set.buffer_size);
+    const DWORD buf_size = (DWORD)data->set.buffer_size;
     waitret = WaitForMultipleObjects(obj_count, objs, FALSE, wait_timeout);
     switch(waitret) {
     case WAIT_TIMEOUT:
@@ -1423,7 +1445,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
         if(data->set.is_fread_set) {
           size_t n;
           /* read from user-supplied method */
-          n = data->state.fread_func(buf, 1, BUFSIZE - 1, data->state.in);
+          n = data->state.fread_func(buf, 1, buf_size, data->state.in);
           if(n == CURL_READFUNC_ABORT) {
             keepon = FALSE;
             result = CURLE_READ_ERROR;
@@ -1498,7 +1520,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       }
       if(events.lNetworkEvents & FD_READ) {
         /* read data from network */
-        result = Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+        result = Curl_read(conn, sockfd, buf, data->set.buffer_size, &nread);
         /* read would've blocked. Loop again */
         if(result == CURLE_AGAIN)
           break;
@@ -1587,7 +1609,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     default:                    /* read! */
       if(pfd[0].revents & POLLIN) {
         /* read data from network */
-        result = Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+        result = Curl_read(conn, sockfd, buf, data->set.buffer_size, &nread);
         /* read would've blocked. Loop again */
         if(result == CURLE_AGAIN)
           break;
@@ -1623,12 +1645,12 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       nread = 0;
       if(poll_cnt == 2) {
         if(pfd[1].revents & POLLIN) { /* read from in file */
-          nread = read(pfd[1].fd, buf, BUFSIZE - 1);
+          nread = read(pfd[1].fd, buf, data->set.buffer_size);
         }
       }
       else {
         /* read from user-supplied method */
-        nread = (int)data->state.fread_func(buf, 1, BUFSIZE - 1,
+        nread = (int)data->state.fread_func(buf, 1, data->set.buffer_size,
                                             data->state.in);
         if(nread == CURL_READFUNC_ABORT) {
           keepon = FALSE;
