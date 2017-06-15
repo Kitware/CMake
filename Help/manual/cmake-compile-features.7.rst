@@ -347,7 +347,7 @@ versions specified for each:
 * ``GNU``: GNU compiler versions 3.4 through 5.0.
 
 CMake is currently aware of the :prop_tgt:`C++ standards <CXX_STANDARD>` and
-thier associated meta-features (e.g. ``cxx_std_11``) available from the
+their associated meta-features (e.g. ``cxx_std_11``) available from the
 following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>` as of the
 versions specified for each:
 
@@ -356,7 +356,7 @@ versions specified for each:
 * ``XL``: IBM XL version 10.1 through 13.1.5.
 
 CMake is currently aware of the :prop_tgt:`C standards <C_STANDARD>` and
-thier associated meta-features (e.g. ``c_std_99``) available from the
+their associated meta-features (e.g. ``c_std_99``) available from the
 following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>` as of the
 versions specified for each:
 
