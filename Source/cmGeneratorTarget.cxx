@@ -469,7 +469,8 @@ const char* cmGeneratorTarget::GetFeature(const std::string& feature,
   return this->LocalGenerator->GetFeature(feature, config);
 }
 
-bool cmGeneratorTarget::IsIPOEnabled(const std::string& config) const
+bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
+                                     std::string const& config) const
 {
   const char* feature = "INTERPROCEDURAL_OPTIMIZATION";
   const bool result = cmSystemTools::IsOn(this->GetFeature(feature, config));
@@ -479,10 +480,15 @@ bool cmGeneratorTarget::IsIPOEnabled(const std::string& config) const
     return false;
   }
 
+  if (lang != "C" && lang != "CXX" && lang != "Fortran") {
+    // We do not define IPO behavior for other languages.
+    return false;
+  }
+
   cmPolicies::PolicyStatus cmp0069 = this->GetPolicyStatusCMP0069();
 
   if (cmp0069 == cmPolicies::OLD || cmp0069 == cmPolicies::WARN) {
-    if (this->Makefile->IsOn("_CMAKE_IPO_LEGACY_BEHAVIOR")) {
+    if (this->Makefile->IsOn("_CMAKE_" + lang + "_IPO_LEGACY_BEHAVIOR")) {
       return true;
     }
     if (this->PolicyReportedCMP0069) {
@@ -506,10 +512,10 @@ bool cmGeneratorTarget::IsIPOEnabled(const std::string& config) const
 
   // Note: check consistency with messages from CheckIPOSupported
   const char* message = CM_NULLPTR;
-  if (!this->Makefile->IsOn("_CMAKE_IPO_SUPPORTED_BY_CMAKE")) {
+  if (!this->Makefile->IsOn("_CMAKE_" + lang + "_IPO_SUPPORTED_BY_CMAKE")) {
     message = "CMake doesn't support IPO for current compiler";
-  } else if (!this->Makefile->IsOn(
-               "_CMAKE_IPO_MAY_BE_SUPPORTED_BY_COMPILER")) {
+  } else if (!this->Makefile->IsOn("_CMAKE_" + lang +
+                                   "_IPO_MAY_BE_SUPPORTED_BY_COMPILER")) {
     message = "Compiler doesn't support IPO";
   } else if (!this->GlobalGenerator->IsIPOSupported()) {
     message = "CMake doesn't support IPO for current generator";
@@ -2417,9 +2423,10 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
 
 //----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetFeatureSpecificLinkRuleVariable(
-  std::string const& var, std::string const& config) const
+  std::string const& var, std::string const& lang,
+  std::string const& config) const
 {
-  if (this->IsIPOEnabled(config)) {
+  if (this->IsIPOEnabled(lang, config)) {
     std::string varIPO = var + "_IPO";
     if (this->Makefile->IsDefinitionSet(varIPO)) {
       return varIPO;
@@ -2436,7 +2443,7 @@ std::string cmGeneratorTarget::GetCreateRuleVariable(
   switch (this->GetType()) {
     case cmStateEnums::STATIC_LIBRARY: {
       std::string var = "CMAKE_" + lang + "_CREATE_STATIC_LIBRARY";
-      return this->GetFeatureSpecificLinkRuleVariable(var, config);
+      return this->GetFeatureSpecificLinkRuleVariable(var, lang, config);
     }
     case cmStateEnums::SHARED_LIBRARY:
       return "CMAKE_" + lang + "_CREATE_SHARED_LIBRARY";
