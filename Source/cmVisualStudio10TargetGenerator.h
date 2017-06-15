@@ -127,6 +127,10 @@ private:
   void OutputLinkIncremental(std::string const& configName);
   void WriteCustomRule(cmSourceFile const* source,
                        cmCustomCommand const& command);
+  void WriteCustomRuleCpp(std::string const& config, std::string const& script,
+                          std::string const& inputs,
+                          std::string const& outputs,
+                          std::string const& comment);
   void WriteCustomCommands();
   void WriteCustomCommand(cmSourceFile const* sf);
   void WriteGroups();

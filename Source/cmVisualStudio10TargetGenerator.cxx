@@ -1218,41 +1218,53 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     std::string comment = lg->ConstructComment(ccg);
     comment = cmVS10EscapeComment(comment);
     std::string script = cmVS10EscapeXML(lg->ConstructScript(ccg));
-    this->WritePlatformConfigTag("Message", i->c_str(), 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(comment) << "</Message>\n";
-    this->WritePlatformConfigTag("Command", i->c_str(), 3);
-    (*this->BuildFileStream) << script << "</Command>\n";
-    this->WritePlatformConfigTag("AdditionalInputs", i->c_str(), 3);
-
-    (*this->BuildFileStream) << cmVS10EscapeXML(source->GetFullPath());
+    // input files for custom command
+    std::stringstream inputs;
+    inputs << cmVS10EscapeXML(source->GetFullPath());
     for (std::vector<std::string>::const_iterator d = ccg.GetDepends().begin();
          d != ccg.GetDepends().end(); ++d) {
       std::string dep;
       if (this->LocalGenerator->GetRealDependency(d->c_str(), i->c_str(),
                                                   dep)) {
         this->ConvertToWindowsSlash(dep);
-        (*this->BuildFileStream) << ";" << cmVS10EscapeXML(dep);
+        inputs << ";" << cmVS10EscapeXML(dep);
       }
     }
-    (*this->BuildFileStream) << ";%(AdditionalInputs)</AdditionalInputs>\n";
-    this->WritePlatformConfigTag("Outputs", i->c_str(), 3);
+    // output files for custom command
+    std::stringstream outputs;
     const char* sep = "";
     for (std::vector<std::string>::const_iterator o = ccg.GetOutputs().begin();
          o != ccg.GetOutputs().end(); ++o) {
       std::string out = *o;
       this->ConvertToWindowsSlash(out);
-      (*this->BuildFileStream) << sep << cmVS10EscapeXML(out);
+      outputs << sep << cmVS10EscapeXML(out);
       sep = ";";
     }
-    (*this->BuildFileStream) << "</Outputs>\n";
-    if (this->LocalGenerator->GetVersion() >
-        cmGlobalVisualStudioGenerator::VS10) {
-      // VS >= 11 let us turn off linking of custom command outputs.
-      this->WritePlatformConfigTag("LinkObjects", i->c_str(), 3);
-      (*this->BuildFileStream) << "false</LinkObjects>\n";
-    }
+    this->WriteCustomRuleCpp(*i, script, inputs.str(), outputs.str(), comment);
   }
   this->WriteString("</CustomBuild>\n", 2);
+}
+
+void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
+  std::string const& config, std::string const& script,
+  std::string const& inputs, std::string const& outputs,
+  std::string const& comment)
+{
+  this->WritePlatformConfigTag("Message", config, 3);
+  (*this->BuildFileStream) << cmVS10EscapeXML(comment) << "</Message>\n";
+  this->WritePlatformConfigTag("Command", config, 3);
+  (*this->BuildFileStream) << script << "</Command>\n";
+  this->WritePlatformConfigTag("AdditionalInputs", config, 3);
+  (*this->BuildFileStream) << inputs;
+  (*this->BuildFileStream) << ";%(AdditionalInputs)</AdditionalInputs>\n";
+  this->WritePlatformConfigTag("Outputs", config, 3);
+  (*this->BuildFileStream) << outputs << "</Outputs>\n";
+  if (this->LocalGenerator->GetVersion() >
+      cmGlobalVisualStudioGenerator::VS10) {
+    // VS >= 11 let us turn off linking of custom command outputs.
+    this->WritePlatformConfigTag("LinkObjects", config, 3);
+    (*this->BuildFileStream) << "false</LinkObjects>\n";
+  }
 }
 
 std::string cmVisualStudio10TargetGenerator::ConvertPath(
