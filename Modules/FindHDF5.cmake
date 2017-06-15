@@ -187,8 +187,16 @@ function(_HDF5_test_regular_compiler_C success version is_parallel)
     file(WRITE ${test_file}
       "#include <hdf5.h>\n"
       "#include <hdf5_hl.h>\n"
-      "int main(void) {\n"
-      "  char const* info_ver = \"INFO\" \":\" H5_VERSION;\n"
+      "const char* info_ver = \"INFO\" \":\" H5_VERSION;\n"
+      "#ifdef H5_HAVE_PARALLEL\n"
+      "const char* info_parallel = \"INFO\" \":\" \"PARALLEL\";\n"
+      "#endif\n"
+      "int main(int argc, char **argv) {\n"
+      "  int require = 0;\n"
+      "  require += info_ver[argc];\n"
+      "#ifdef H5_HAVE_PARALLEL\n"
+      "  require += info_parallel[argc];\n"
+      "#endif\n"
       "  hid_t fid;\n"
       "  fid = H5Fcreate(\"foo.h5\",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);\n"
       "  return 0;\n"
@@ -198,11 +206,11 @@ function(_HDF5_test_regular_compiler_C success version is_parallel)
     )
   endif()
   if(${success})
-    file(STRINGS ${scratch_directory}/compiler_has_h5_c INFO_VER
-      REGEX "^INFO:([0-9]+\\.[0-9]+\\.[0-9]+)(-patch([0-9]+))?"
+    file(STRINGS ${scratch_directory}/compiler_has_h5_c INFO_STRINGS
+      REGEX "^INFO:"
     )
     string(REGEX MATCH "^INFO:([0-9]+\\.[0-9]+\\.[0-9]+)(-patch([0-9]+))?"
-      INFO_VER "${INFO_VER}"
+      INFO_VER "${INFO_STRINGS}"
     )
     set(${version} ${CMAKE_MATCH_1})
     if(CMAKE_MATCH_3)
@@ -210,12 +218,7 @@ function(_HDF5_test_regular_compiler_C success version is_parallel)
     endif()
     set(${version} ${${version}} PARENT_SCOPE)
 
-    execute_process(COMMAND ${CMAKE_C_COMPILER} -showconfig
-      OUTPUT_VARIABLE config_output
-      ERROR_VARIABLE config_error
-      RESULT_VARIABLE config_result
-      )
-    if(config_output MATCHES "Parallel HDF5: yes")
+    if(INFO_STRINGS MATCHES "INFO:PARALLEL")
       set(${is_parallel} TRUE PARENT_SCOPE)
     else()
       set(${is_parallel} FALSE PARENT_SCOPE)
@@ -233,8 +236,16 @@ function(_HDF5_test_regular_compiler_CXX success version is_parallel)
       "#ifndef H5_NO_NAMESPACE\n"
       "using namespace H5;\n"
       "#endif\n"
+      "const char* info_ver = \"INFO\" \":\" H5_VERSION;\n"
+      "#ifdef H5_HAVE_PARALLEL\n"
+      "const char* info_parallel = \"INFO\" \":\" \"PARALLEL\";\n"
+      "#endif\n"
       "int main(int argc, char **argv) {\n"
-      "  char const* info_ver = \"INFO\" \":\" H5_VERSION;\n"
+      "  int require = 0;\n"
+      "  require += info_ver[argc];\n"
+      "#ifdef H5_HAVE_PARALLEL\n"
+      "  require += info_parallel[argc];\n"
+      "#endif\n"
       "  H5File file(\"foo.h5\", H5F_ACC_TRUNC);\n"
       "  return 0;\n"
       "}")
@@ -243,11 +254,11 @@ function(_HDF5_test_regular_compiler_CXX success version is_parallel)
     )
   endif()
   if(${success})
-    file(STRINGS ${scratch_directory}/compiler_has_h5_cxx INFO_VER
-      REGEX "^INFO:([0-9]+\\.[0-9]+\\.[0-9]+)(-patch([0-9]+))?"
+    file(STRINGS ${scratch_directory}/compiler_has_h5_cxx INFO_STRINGS
+      REGEX "^INFO:"
     )
     string(REGEX MATCH "^INFO:([0-9]+\\.[0-9]+\\.[0-9]+)(-patch([0-9]+))?"
-      INFO_VER "${INFO_VER}"
+      INFO_VER "${INFO_STRINGS}"
     )
     set(${version} ${CMAKE_MATCH_1})
     if(CMAKE_MATCH_3)
@@ -255,12 +266,7 @@ function(_HDF5_test_regular_compiler_CXX success version is_parallel)
     endif()
     set(${version} ${${version}} PARENT_SCOPE)
 
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -showconfig
-      OUTPUT_VARIABLE config_output
-      ERROR_VARIABLE config_error
-      RESULT_VARIABLE config_result
-      )
-    if(config_output MATCHES "Parallel HDF5: yes")
+    if(INFO_STRINGS MATCHES "INFO:PARALLEL")
       set(${is_parallel} TRUE PARENT_SCOPE)
     else()
       set(${is_parallel} FALSE PARENT_SCOPE)
