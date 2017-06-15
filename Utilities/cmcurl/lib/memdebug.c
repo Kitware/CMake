@@ -35,10 +35,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifndef HAVE_ASSERT_H
-#  define assert(x) Curl_nop_stmt
-#endif
-
 /*
  * Until 2011-08-17 libcurl's Memory Tracking feature also performed
  * automatic malloc and free filling operations using 0xA5 and 0x13
@@ -167,7 +163,7 @@ void *curl_domalloc(size_t wantedsize, int line, const char *source)
   struct memdebug *mem;
   size_t size;
 
-  assert(wantedsize != 0);
+  DEBUGASSERT(wantedsize != 0);
 
   if(countcheck("malloc", line, source))
     return NULL;
@@ -196,8 +192,8 @@ void *curl_docalloc(size_t wanted_elements, size_t wanted_size,
   struct memdebug *mem;
   size_t size, user_size;
 
-  assert(wanted_elements != 0);
-  assert(wanted_size != 0);
+  DEBUGASSERT(wanted_elements != 0);
+  DEBUGASSERT(wanted_size != 0);
 
   if(countcheck("calloc", line, source))
     return NULL;
@@ -223,7 +219,7 @@ char *curl_dostrdup(const char *str, int line, const char *source)
   char *mem;
   size_t len;
 
-  assert(str != NULL);
+  DEBUGASSERT(str != NULL);
 
   if(countcheck("strdup", line, source))
     return NULL;
@@ -236,7 +232,7 @@ char *curl_dostrdup(const char *str, int line, const char *source)
 
   if(source)
     curl_memlog("MEM %s:%d strdup(%p) (%zu) = %p\n",
-                source, line, (void *)str, len, (void *)mem);
+                source, line, (const void *)str, len, (const void *)mem);
 
   return mem;
 }
@@ -247,7 +243,7 @@ wchar_t *curl_dowcsdup(const wchar_t *str, int line, const char *source)
   wchar_t *mem;
   size_t wsiz, bsiz;
 
-  assert(str != NULL);
+  DEBUGASSERT(str != NULL);
 
   if(countcheck("wcsdup", line, source))
     return NULL;
@@ -276,7 +272,7 @@ void *curl_dorealloc(void *ptr, size_t wantedsize,
 
   size_t size = sizeof(struct memdebug)+wantedsize;
 
-  assert(wantedsize != 0);
+  DEBUGASSERT(wantedsize != 0);
 
   if(countcheck("realloc", line, source))
     return NULL;
@@ -445,7 +441,7 @@ int curl_fclose(FILE *file, int line, const char *source)
 {
   int res;
 
-  assert(file != NULL);
+  DEBUGASSERT(file != NULL);
 
   res=fclose(file);
 
@@ -480,7 +476,7 @@ void curl_memlog(const char *format, ...)
     nchars = LOGLINE_BUFSIZE - 1;
 
   if(nchars > 0)
-    fwrite(buf, 1, nchars, logfile);
+    fwrite(buf, 1, (size_t)nchars, logfile);
 
   (Curl_cfree)(buf);
 }

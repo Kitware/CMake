@@ -81,9 +81,16 @@
 static PRLock *nss_initlock = NULL;
 static PRLock *nss_crllock = NULL;
 static PRLock *nss_findslot_lock = NULL;
+static PRLock *nss_trustload_lock = NULL;
 static struct curl_llist nss_crl_list;
 static NSSInitContext *nss_context = NULL;
 static volatile int initialized = 0;
+
+/* type used to wrap pointers as list nodes */
+struct ptr_list_wrap {
+  void *ptr;
+  struct curl_llist_element node;
+};
 
 typedef struct {
   const char *name;
@@ -201,7 +208,10 @@ static const cipher_s cipherlist[] = {
 };
 
 static const char *pem_library = "libnsspem.so";
-static SECMODModule *mod = NULL;
+static SECMODModule *pem_module = NULL;
+
+static const char *trust_library = "libnssckbi.so";
+static SECMODModule *trust_module = NULL;
 
 /* NSPR I/O layer we use to detect blocking direction during SSL handshake */
 static PRDescIdentity nspr_io_identity = PR_INVALID_IO_LAYER;
@@ -371,6 +381,18 @@ static PK11SlotInfo* nss_find_slot_by_name(const char *slot_name)
   return slot;
 }
 
+/* wrap 'ptr' as list node and tail-insert into 'list' */
+static CURLcode insert_wrapped_ptr(struct curl_llist *list, void *ptr)
+{
+  struct ptr_list_wrap *wrap = malloc(sizeof *wrap);
+  if(!wrap)
+    return CURLE_OUT_OF_MEMORY;
+
+  wrap->ptr = ptr;
+  Curl_llist_insert_next(list, list->tail, wrap, &wrap->node);
+  return CURLE_OK;
+}
+
 /* Call PK11_CreateGenericObject() with the given obj_class and filename.  If
  * the call succeeds, append the object handle to the list of objects so that
  * the object can be destroyed in Curl_nss_close(). */
@@ -413,7 +435,7 @@ static CURLcode nss_create_object(struct ssl_connect_data *ssl,
   if(!obj)
     return result;
 
-  if(!Curl_llist_insert_next(&ssl->obj_list, ssl->obj_list.tail, obj)) {
+  if(insert_wrapped_ptr(&ssl->obj_list, obj) != CURLE_OK) {
     PK11_DestroyGenericObject(obj);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -430,17 +452,21 @@ static CURLcode nss_create_object(struct ssl_connect_data *ssl,
  * NSS objects in Curl_nss_close() */
 static void nss_destroy_object(void *user, void *ptr)
 {
-  PK11GenericObject *obj = (PK11GenericObject *)ptr;
+  struct ptr_list_wrap *wrap = (struct ptr_list_wrap *) ptr;
+  PK11GenericObject *obj = (PK11GenericObject *) wrap->ptr;
   (void) user;
   PK11_DestroyGenericObject(obj);
+  free(wrap);
 }
 
 /* same as nss_destroy_object() but for CRL items */
 static void nss_destroy_crl_item(void *user, void *ptr)
 {
-  SECItem *crl_der = (SECItem *)ptr;
+  struct ptr_list_wrap *wrap = (struct ptr_list_wrap *) ptr;
+  SECItem *crl_der = (SECItem *) wrap->ptr;
   (void) user;
   SECITEM_FreeItem(crl_der, PR_TRUE);
+  free(wrap);
 }
 
 static CURLcode nss_load_cert(struct ssl_connect_data *ssl,
@@ -496,7 +522,7 @@ static CURLcode nss_cache_crl(SECItem *crl_der)
   PR_Lock(nss_crllock);
 
   /* store the CRL item so that we can free it in Curl_nss_cleanup() */
-  if(!Curl_llist_insert_next(&nss_crl_list, nss_crl_list.tail, crl_der)) {
+  if(insert_wrapped_ptr(&nss_crl_list, crl_der) != CURLE_OK) {
     SECITEM_FreeItem(crl_der, PR_TRUE);
     PR_Unlock(nss_crllock);
     return CURLE_OUT_OF_MEMORY;
@@ -581,7 +607,7 @@ fail:
 static CURLcode nss_load_key(struct connectdata *conn, int sockindex,
                              char *key_file)
 {
-  PK11SlotInfo *slot;
+  PK11SlotInfo *slot, *tmp;
   SECStatus status;
   CURLcode result;
   struct ssl_connect_data *ssl = conn->ssl;
@@ -600,7 +626,9 @@ static CURLcode nss_load_key(struct connectdata *conn, int sockindex,
     return CURLE_SSL_CERTPROBLEM;
 
   /* This will force the token to be seen as re-inserted */
-  SECMOD_WaitForAnyTokenEvent(mod, 0, 0);
+  tmp = SECMOD_WaitForAnyTokenEvent(pem_module, 0, 0);
+  if(tmp)
+    PK11_FreeSlot(tmp);
   PK11_IsPresent(slot);
 
   status = PK11_Authenticate(slot, PR_TRUE, SSL_SET_OPTION(key_passwd));
@@ -1178,6 +1206,50 @@ static PRStatus nspr_io_close(PRFileDesc *fd)
   return close_fn(fd);
 }
 
+/* load a PKCS #11 module */
+static CURLcode nss_load_module(SECMODModule **pmod, const char *library,
+                                const char *name)
+{
+  char *config_string;
+  SECMODModule *module = *pmod;
+  if(module)
+    /* already loaded */
+    return CURLE_OK;
+
+  config_string = aprintf("library=%s name=%s", library, name);
+  if(!config_string)
+    return CURLE_OUT_OF_MEMORY;
+
+  module = SECMOD_LoadUserModule(config_string, NULL, PR_FALSE);
+  free(config_string);
+
+  if(module && module->loaded) {
+    /* loaded successfully */
+    *pmod = module;
+    return CURLE_OK;
+  }
+
+  if(module)
+    SECMOD_DestroyModule(module);
+  return CURLE_FAILED_INIT;
+}
+
+/* unload a PKCS #11 module */
+static void nss_unload_module(SECMODModule **pmod)
+{
+  SECMODModule *module = *pmod;
+  if(!module)
+    /* not loaded */
+    return;
+
+  if(SECMOD_UnloadUserModule(module) != SECSuccess)
+    /* unload failed */
+    return;
+
+  SECMOD_DestroyModule(module);
+  *pmod = NULL;
+}
+
 /* data might be NULL */
 static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
 {
@@ -1287,6 +1359,7 @@ int Curl_nss_init(void)
     nss_initlock = PR_NewLock();
     nss_crllock = PR_NewLock();
     nss_findslot_lock = PR_NewLock();
+    nss_trustload_lock = PR_NewLock();
   }
 
   /* We will actually initialize NSS later */
@@ -1325,10 +1398,8 @@ void Curl_nss_cleanup(void)
      * the certificates. */
     SSL_ClearSessionCache();
 
-    if(mod && SECSuccess == SECMOD_UnloadUserModule(mod)) {
-      SECMOD_DestroyModule(mod);
-      mod = NULL;
-    }
+    nss_unload_module(&pem_module);
+    nss_unload_module(&trust_module);
     NSS_ShutdownContext(nss_context);
     nss_context = NULL;
   }
@@ -1341,6 +1412,7 @@ void Curl_nss_cleanup(void)
   PR_DestroyLock(nss_initlock);
   PR_DestroyLock(nss_crllock);
   PR_DestroyLock(nss_findslot_lock);
+  PR_DestroyLock(nss_trustload_lock);
   nss_initlock = NULL;
 
   initialized = 0;
@@ -1462,12 +1534,44 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   const char *cafile = SSL_CONN_CONFIG(CAfile);
   const char *capath = SSL_CONN_CONFIG(CApath);
+  bool use_trust_module;
+  CURLcode result = CURLE_OK;
 
-  if(cafile) {
-    CURLcode result = nss_load_cert(&conn->ssl[sockindex], cafile, PR_TRUE);
-    if(result)
-      return result;
+  /* treat empty string as unset */
+  if(cafile && !cafile[0])
+    cafile = NULL;
+  if(capath && !capath[0])
+    capath = NULL;
+
+  infof(data, "  CAfile: %s\n  CApath: %s\n",
+      cafile ? cafile : "none",
+      capath ? capath : "none");
+
+  /* load libnssckbi.so if no other trust roots were specified */
+  use_trust_module = !cafile && !capath;
+
+  PR_Lock(nss_trustload_lock);
+  if(use_trust_module && !trust_module) {
+    /* libnssckbi.so needed but not yet loaded --> load it! */
+    result = nss_load_module(&trust_module, trust_library, "trust");
+    infof(data, "%s %s\n", (result) ? "failed to load" : "loaded",
+          trust_library);
+    if(result == CURLE_FAILED_INIT)
+      /* make the error non-fatal if we are not going to verify peer */
+      result = CURLE_SSL_CACERT_BADFILE;
   }
+  else if(!use_trust_module && trust_module) {
+    /* libnssckbi.so not needed but already loaded --> unload it! */
+    infof(data, "unloading %s\n", trust_library);
+    nss_unload_module(&trust_module);
+  }
+  PR_Unlock(nss_trustload_lock);
+
+  if(cafile)
+    result = nss_load_cert(&conn->ssl[sockindex], cafile, PR_TRUE);
+
+  if(result)
+    return result;
 
   if(capath) {
     struct_stat st;
@@ -1500,10 +1604,6 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
     else
       infof(data, "warning: CURLOPT_CAPATH not a directory (%s)\n", capath);
   }
-
-  infof(data, "  CAfile: %s\n  CApath: %s\n",
-      cafile ? cafile : "none",
-      capath ? capath : "none");
 
   return CURLE_OK;
 }
@@ -1683,29 +1783,17 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     goto error;
   }
 
-  result = CURLE_SSL_CONNECT_ERROR;
-
-  if(!mod) {
-    char *configstring = aprintf("library=%s name=PEM", pem_library);
-    if(!configstring) {
-      PR_Unlock(nss_initlock);
-      goto error;
-    }
-    mod = SECMOD_LoadUserModule(configstring, NULL, PR_FALSE);
-    free(configstring);
-
-    if(!mod || !mod->loaded) {
-      if(mod) {
-        SECMOD_DestroyModule(mod);
-        mod = NULL;
-      }
-      infof(data, "WARNING: failed to load NSS PEM library %s. Using "
-                  "OpenSSL PEM certificates will not work.\n", pem_library);
-    }
-  }
-
   PK11_SetPasswordFunc(nss_get_password);
+
+  result = nss_load_module(&pem_module, pem_library, "PEM");
   PR_Unlock(nss_initlock);
+  if(result == CURLE_FAILED_INIT)
+    infof(data, "WARNING: failed to load NSS PEM library %s. Using "
+                "OpenSSL PEM certificates will not work.\n", pem_library);
+  else if(result)
+    goto error;
+
+  result = CURLE_SSL_CONNECT_ERROR;
 
   model = PR_NewTCPSocket();
   if(!model)

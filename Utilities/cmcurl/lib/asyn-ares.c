@@ -232,7 +232,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
   milli = (timeout->tv_sec * 1000) + (timeout->tv_usec/1000);
   if(milli == 0)
     milli += 10;
-  Curl_expire_latest(conn->data, milli);
+  Curl_expire(conn->data, milli, EXPIRE_ASYNC_NAME);
 
   return max;
 }
@@ -373,7 +373,6 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   /* Wait for the name resolve query to complete. */
   while(!result) {
     struct timeval *tvp, tv, store;
-    long timediff;
     int itimeout;
     int timeout_ms;
 
@@ -402,8 +401,13 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
       result = CURLE_ABORTED_BY_CALLBACK;
     else {
       struct timeval now2 = Curl_tvnow();
-      timediff = Curl_tvdiff(now2, now); /* spent time */
-      timeout -= timediff?timediff:1; /* always deduct at least 1 */
+      time_t timediff = Curl_tvdiff(now2, now); /* spent time */
+      if(timediff <= 0)
+        timeout -= 1; /* always deduct at least 1 */
+      else if(timediff > timeout)
+        timeout = -1;
+      else
+        timeout -= (long)timediff;
       now = now2; /* for next loop */
     }
     if(timeout < 0)
