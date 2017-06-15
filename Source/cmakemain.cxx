@@ -27,6 +27,10 @@
 #include <vector>
 
 #ifdef CMAKE_USE_LIBUV
+#ifdef _WIN32
+#include <fcntl.h>  /* _O_TEXT */
+#include <stdlib.h> /* _set_fmode, _fmode */
+#endif
 #include "cm_uv.h"
 #endif
 
@@ -167,6 +171,18 @@ int main(int ac, char const* const* av)
     cmsys::Encoding::CommandLineArguments::Main(ac, av);
   ac = args.argc();
   av = args.argv();
+
+#if defined(CMAKE_USE_LIBUV) && defined(_WIN32)
+  // Perform libuv one-time initialization now, and then un-do its
+  // global _fmode setting so that using libuv does not change the
+  // default file text/binary mode.  See libuv issue 840.
+  uv_loop_close(uv_default_loop());
+#ifdef _MSC_VER
+  _set_fmode(_O_TEXT);
+#else
+  _fmode = _O_TEXT;
+#endif
+#endif
 
   cmSystemTools::EnableMSVCDebugHook();
   cmSystemTools::FindCMakeResources(av[0]);
