@@ -678,6 +678,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang userflags)
         "Checking whether the ${lang} compiler is ${vendor} using \"${flags}\" "
         "matched \"${regex}\":\n${output}")
       set(CMAKE_${lang}_COMPILER_ID "${vendor}" PARENT_SCOPE)
+      set(CMAKE_${lang}_COMPILER_ID_OUTPUT "${output}" PARENT_SCOPE)
       break()
     else()
       if("${result}" MATCHES  "timeout")

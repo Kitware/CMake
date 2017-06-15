@@ -73,6 +73,9 @@ else()
   set(CMAKE_CXX_COMPILER_ID_TEST_FLAGS
     # Try compiling to an object file only.
     "-c"
+    # IAR does not detect language automatically
+    "--c++"
+    "--ec++"
     )
 endif()
 

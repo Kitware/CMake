@@ -103,7 +103,22 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
   include(CMakeDetermineCompilerId)
   set(userflags)
   CMAKE_DETERMINE_COMPILER_ID_VENDOR(ASM${ASM_DIALECT} "${userflags}")
+  if("${CMAKE_ASM${ASM_DIALECT}_COMPILER_ID}" STREQUAL "IAR")
+    # primary necessary to detect architecture, so the right archiver and linker can be picked
+    # eg. IAR Assembler V8.10.1.12857/W32 for ARM
+    # Cut out identification first, newline handling is a pain
+    string(REGEX MATCH "IAR Assembler[^\r\n]*" _compileid "${CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_OUTPUT}")
+    if("${_compileid}" MATCHES "V([0-9]+\\.[0-9]+\\.[0-9]+)")
+      set(CMAKE_ASM${ASM_DIALECT}_COMPILER_VERSION ${CMAKE_MATCH_1})
+    endif()
+    if("${_compileid}" MATCHES "for[ ]+([A-Za-z0-9]+)")
+      set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID ${CMAKE_MATCH_1})
+    endif()
+  endif()
+  unset(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_OUTPUT)
+  unset(_compileid)
 endif()
+
 
 if(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
   if(CMAKE_ASM${ASM_DIALECT}_COMPILER_VERSION)
@@ -149,6 +164,9 @@ endif ()
 
 
 include(CMakeFindBinUtils)
+set(_CMAKE_PROCESSING_LANGUAGE "ASM")
+include(Compiler/${CMAKE_ASM${ASM_DIALECT}_COMPILER_ID}-FindBinUtils OPTIONAL)
+unset(_CMAKE_PROCESSING_LANGUAGE)
 
 set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ENV_VAR "ASM${ASM_DIALECT}")
 
