@@ -8,6 +8,36 @@ See documentation on `CMake Development`_ for more information.
 
 .. contents:: Maintainer Processes:
 
+Review a Merge Request
+======================
+
+The `CMake Review Process`_ requires a maintainer to issue the ``Do: merge``
+command to integrate a merge request.  Please check at least the following:
+
+* If the MR source branch is not named well for the change it makes
+  (e.g. it is just ``master`` or the patch changed during review),
+  add a ``Topic-rename: <topic>`` trailing line to the MR description
+  to provide a better topic name.
+
+* If the MR introduces a new feature or a user-facing behavior change,
+  such as a policy, ensure that a ``Help/release/dev/$topic.rst`` file
+  is added with a release note.
+
+* If a commit changes a specific area, such as a module, its commit
+  message should have an ``area:`` prefix on its first line.
+
+* If a commit fixes a tracked issue, its commit message should have
+  a trailing line such as ``Fixes: #00000``.
+
+* Ensure that the MR has been tested sufficiently.  Typically it should
+  be staged for nightly testing with ``Do: stage``.  Then manually
+  review the `CMake CDash Page`_ to verify that no regressions were
+  introduced.  (Learn to tolerate spurious failures due to idiosyncrasies
+  of various nightly builders.)
+
+.. _`CMake Review Process`: review.rst
+.. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
+
 Branch a New Release
 ====================
 
