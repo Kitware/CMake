@@ -1,25 +1,36 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# CheckCXXCompilerFlag
-# --------------------
-#
-# Check whether the CXX compiler supports a given flag.
-#
-# CHECK_CXX_COMPILER_FLAG(<flag> <var>)
-#
-# ::
-#
-#   <flag> - the compiler flag
-#   <var>  - variable to store the result
-#
-# This internally calls the check_cxx_source_compiles macro and sets
-# CMAKE_REQUIRED_DEFINITIONS to <flag>.  See help for
-# CheckCXXSourceCompiles for a listing of variables that can otherwise
-# modify the build.  The result only tells that the compiler does not
-# give an error message when it encounters the flag.  If the flag has
-# any effect or even a specific one is beyond the scope of this module.
+#[=======================================================================[.rst:
+CheckCXXCompilerFlag
+------------------------
+
+Check whether the CXX compiler supports a given flag.
+
+.. command:: check_cxx_compiler_flag
+
+  ::
+
+    check_cxx_compiler_flag(<flag> <var>)
+
+  Check that the ``<flag>`` is accepted by the compiler without
+  a diagnostic.  Stores the result in an internal cache entry
+  named ``<var>``.
+
+This command temporarily sets the ``CMAKE_REQUIRED_DEFINITIONS`` variable
+and calls the ``check_cxx_source_compiles`` macro from the
+:module:`CheckCXXSourceCompiles` module.  See documentation of that
+module for a listing of variables that can otherwise modify the build.
+
+A positive result from this check indicates only that the compiler did not
+issue a diagnostic message when given the flag.  Whether the flag has any
+effect or even a specific one is beyond the scope of this module.
+
+.. note::
+  Since the :command:`try_compile` command forwards flags from variables
+  like :variable:`CMAKE_CXX_FLAGS <CMAKE_<LANG>_FLAGS>`, unknown flags
+  in such variables may cause a false negative for this check.
+#]=======================================================================]
 
 include(CheckCXXSourceCompiles)
 include(CMakeCheckCompilerFlagCommonPatterns)
