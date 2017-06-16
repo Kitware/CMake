@@ -40,8 +40,6 @@ protected:
 
   int CreateDMG(const std::string& src_dir, const std::string& output_file);
 
-  std::string InstallPrefix;
-
 private:
   std::string slaDirectory;
   bool singleLicense;
