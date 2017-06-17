@@ -1,11 +1,14 @@
 VS_DOTNET_REFERENCEPROP_<refname>_TAG_<tagname>
 -----------------------------------------------
 
-Visual Studio managed project .NET reference with name ``<refname>``
-and hint path.
+Defines an XML property ``<tagname>`` for a .NET reference
+``<refname>``.
 
-Adds one .NET reference to generated Visual Studio project. The
-reference will have the name ``<refname>`` and will point to the
-assembly given as value of the property.
+Reference properties can be set for .NET references which are
+defined by the target properties :prop_tgt:`VS_DOTNET_REFERENCES`,
+:prop_tgt:`VS_DOTNET_REFERENCE_<refname>`
+and also for project references to other C# targets which are
+established by :command:`target_link_libraries()`.
 
-See also the :prop_tgt:`VS_DOTNET_REFERENCE_<refname>` target property.
+This property is only applicable to C# targets and Visual Studio
+generators 2010 and later.
