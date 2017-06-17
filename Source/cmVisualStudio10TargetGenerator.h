@@ -162,6 +162,7 @@ private:
                                  std::map<std::string, std::string>& tags);
   void WriteCSharpSourceProperties(
     const std::map<std::string, std::string>& tags);
+  void GetCSharpSourceLink(cmSourceFile const* sf, std::string& link);
 
 private:
   typedef cmVisualStudioGeneratorOptions Options;

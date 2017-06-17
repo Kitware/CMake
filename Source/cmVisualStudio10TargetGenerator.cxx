@@ -2056,14 +2056,10 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     typedef std::map<std::string, std::string> CsPropMap;
     CsPropMap sourceFileTags;
     // set <Link> tag if necessary
-    if (!this->InSourceBuild) {
-      const std::string stripFromPath =
-        this->Makefile->GetCurrentSourceDirectory();
-      if (f.find(stripFromPath) != std::string::npos) {
-        std::string link = f.substr(stripFromPath.length() + 1);
-        this->ConvertToWindowsSlash(link);
-        sourceFileTags["Link"] = link;
-      }
+    std::string link;
+    this->GetCSharpSourceLink(source, link);
+    if (!link.empty()) {
+      sourceFileTags["Link"] = link;
     }
     this->GetCSharpSourceProperties(&sf, sourceFileTags);
     // write source file specific tags
@@ -4376,6 +4372,23 @@ void cmVisualStudio10TargetGenerator::WriteCSharpSourceProperties(
       this->WriteString("<", 3);
       (*this->BuildFileStream) << i->first << ">" << cmVS10EscapeXML(i->second)
                                << "</" << i->first << ">\n";
+    }
+  }
+}
+
+void cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
+  cmSourceFile const* sf, std::string& link)
+{
+  std::string f = sf->GetFullPath();
+  if (!this->InSourceBuild) {
+    const std::string stripFromPath =
+      this->Makefile->GetCurrentSourceDirectory();
+    if (f.find(stripFromPath) != std::string::npos) {
+      link = f.substr(stripFromPath.length() + 1);
+      if (const char* l = sf->GetProperty("VS_CSHARP_Link")) {
+        link = l;
+      }
+      this->ConvertToWindowsSlash(link);
     }
   }
 }
