@@ -490,10 +490,6 @@ bool cmServerProtocol1::IsExperimental() const
 cmServerResponse cmServerProtocol1::ProcessCache(
   const cmServerRequest& request)
 {
-  if (this->m_State < STATE_CONFIGURED) {
-    return request.ReportError("This project was not configured yet.");
-  }
-
   cmState* state = this->CMakeInstance()->GetState();
 
   Json::Value result = Json::objectValue;

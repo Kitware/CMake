@@ -666,8 +666,7 @@ and will not survive the build directory getting cleaned out.
 Type "cache"
 ^^^^^^^^^^^^
 
-The "cache" request can be used once a project is configured and will
-list the cached configuration values.
+The "cache" request will list the cached configuration values.
 
 Example::
 
