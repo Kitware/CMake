@@ -451,6 +451,19 @@ void cmLocalGenerator::GenerateInstallRules()
     /* clang-format on */
   }
 
+  // Copy cmake cross compile state to install code.
+  if (const char* crosscompiling =
+        this->Makefile->GetDefinition("CMAKE_CROSSCOMPILING")) {
+    /* clang-format off */
+    fout <<
+      "# Is this installation the result of a crosscompile?\n"
+      "if(NOT DEFINED CMAKE_CROSSCOMPILING)\n"
+      "  set(CMAKE_CROSSCOMPILING \"" << crosscompiling << "\")\n"
+      "endif()\n"
+      "\n";
+    /* clang-format on */
+  }
+
   // Ask each install generator to write its code.
   std::vector<cmInstallGenerator*> const& installers =
     this->Makefile->GetInstallGenerators();

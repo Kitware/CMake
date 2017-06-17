@@ -874,6 +874,7 @@ set(CPACK_SRCS
   CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackZIPGenerator.cxx
   CPack/cmCPack7zGenerator.cxx
+  CPack/cmCPackDebGenerator.cxx
   )
 # CPack IFW generator
 set(CPACK_SRCS ${CPACK_SRCS}
@@ -900,7 +901,6 @@ option(CPACK_ENABLE_FREEBSD_PKG "Add FreeBSD pkg(8) generator to CPack." OFF)
 
 if(UNIX)
   set(CPACK_SRCS ${CPACK_SRCS}
-    CPack/cmCPackDebGenerator.cxx
     CPack/cmCPackRPMGenerator.cxx
     )
 

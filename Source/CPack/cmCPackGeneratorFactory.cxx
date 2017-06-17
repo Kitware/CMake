@@ -12,6 +12,7 @@
 #ifdef HAVE_FREEBSD_PKG
 #include "cmCPackFreeBSDGenerator.h"
 #endif
+#include "cmCPackDebGenerator.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmCPackNSISGenerator.h"
@@ -37,7 +38,6 @@
 
 #if !defined(_WIN32) && !defined(__QNXNTO__) && !defined(__BEOS__) &&         \
   !defined(__HAIKU__)
-#include "cmCPackDebGenerator.h"
 #include "cmCPackRPMGenerator.h"
 #endif
 
@@ -102,6 +102,10 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
     this->RegisterGenerator("TZ", "Tar Compress compression",
                             cmCPackTarCompressGenerator::CreateGenerator);
   }
+  if (cmCPackDebGenerator::CanGenerate()) {
+    this->RegisterGenerator("DEB", "Debian packages",
+                            cmCPackDebGenerator::CreateGenerator);
+  }
 #ifdef __APPLE__
   if (cmCPackDragNDropGenerator::CanGenerate()) {
     this->RegisterGenerator("DragNDrop", "Mac OSX Drag And Drop",
@@ -126,10 +130,6 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 #endif
 #if !defined(_WIN32) && !defined(__QNXNTO__) && !defined(__BEOS__) &&         \
   !defined(__HAIKU__)
-  if (cmCPackDebGenerator::CanGenerate()) {
-    this->RegisterGenerator("DEB", "Debian packages",
-                            cmCPackDebGenerator::CreateGenerator);
-  }
   if (cmCPackRPMGenerator::CanGenerate()) {
     this->RegisterGenerator("RPM", "RPM packages",
                             cmCPackRPMGenerator::CreateGenerator);

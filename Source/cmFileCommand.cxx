@@ -55,14 +55,14 @@ class cmSystemToolsFileTime;
 static mode_t mode_owner_read = S_IREAD;
 static mode_t mode_owner_write = S_IWRITE;
 static mode_t mode_owner_execute = S_IEXEC;
-static mode_t mode_group_read = 0;
-static mode_t mode_group_write = 0;
-static mode_t mode_group_execute = 0;
-static mode_t mode_world_read = 0;
-static mode_t mode_world_write = 0;
-static mode_t mode_world_execute = 0;
-static mode_t mode_setuid = 0;
-static mode_t mode_setgid = 0;
+static mode_t mode_group_read = 040;
+static mode_t mode_group_write = 020;
+static mode_t mode_group_execute = 010;
+static mode_t mode_world_read = 04;
+static mode_t mode_world_write = 02;
+static mode_t mode_world_execute = 01;
+static mode_t mode_setuid = 04000;
+static mode_t mode_setgid = 02000;
 #else
 static mode_t mode_owner_read = S_IRUSR;
 static mode_t mode_owner_write = S_IWUSR;
@@ -1076,11 +1076,26 @@ protected:
 
   bool SetPermissions(const char* toFile, mode_t permissions)
   {
-    if (permissions && !cmSystemTools::SetPermissions(toFile, permissions)) {
-      std::ostringstream e;
-      e << this->Name << " cannot set permissions on \"" << toFile << "\"";
-      this->FileCommand->SetError(e.str());
-      return false;
+    if (permissions) {
+#ifdef WIN32
+      if (Makefile->IsOn("CMAKE_CROSSCOMPILING")) {
+        std::string mode_t_adt_filename =
+          std::string(toFile) + ":cmake_mode_t";
+
+        cmsys::ofstream permissionStream(mode_t_adt_filename.c_str());
+
+        if (permissionStream) {
+          permissionStream << std::oct << permissions << std::endl;
+        }
+      }
+#endif
+
+      if (!cmSystemTools::SetPermissions(toFile, permissions)) {
+        std::ostringstream e;
+        e << this->Name << " cannot set permissions on \"" << toFile << "\"";
+        this->FileCommand->SetError(e.str());
+        return false;
+      }
     }
     return true;
   }
