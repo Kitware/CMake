@@ -2340,6 +2340,12 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       clOptions.AddFlag("CallingConvention", "");
     }
   }
+  if (csproj == this->ProjectType) {
+    // /nowin32manifest overrides /win32manifest: parameter
+    if (clOptions.HasFlag("NoWin32Manifest")) {
+      clOptions.RemoveFlag("ApplicationManifest");
+    }
+  }
 
   this->ClOptions[configName] = pOptions.release();
   return true;
