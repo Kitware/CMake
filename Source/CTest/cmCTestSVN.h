@@ -3,12 +3,11 @@
 #ifndef cmCTestSVN_h
 #define cmCTestSVN_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestGlobalVC.h"
 
 #include <iosfwd>
-#include <list>
 #include <string>
 #include <vector>
 
@@ -30,8 +29,8 @@ public:
 private:
   // Implement cmCTestVC internal API.
   void CleanupImpl() CM_OVERRIDE;
-  void NoteOldRevision() CM_OVERRIDE;
-  void NoteNewRevision() CM_OVERRIDE;
+  bool NoteOldRevision() CM_OVERRIDE;
+  bool NoteNewRevision() CM_OVERRIDE;
   bool UpdateImpl() CM_OVERRIDE;
 
   bool RunSVNCommand(std::vector<char const*> const& parameters,
@@ -71,16 +70,16 @@ private:
   friend struct Revision;
 
   // Info of all the repositories (root, externals and nested ones).
-  std::list<SVNInfo> Repositories;
+  std::vector<SVNInfo> Repositories;
 
   // Pointer to the infos of the root repository.
   SVNInfo* RootInfo;
 
   std::string LoadInfo(SVNInfo& svninfo);
-  void LoadRepositories();
-  void LoadModifications() CM_OVERRIDE;
-  void LoadRevisions() CM_OVERRIDE;
-  void LoadRevisions(SVNInfo& svninfo);
+  bool LoadRepositories();
+  bool LoadModifications() CM_OVERRIDE;
+  bool LoadRevisions() CM_OVERRIDE;
+  bool LoadRevisions(SVNInfo& svninfo);
 
   void GuessBase(SVNInfo& svninfo, std::vector<Change> const& changes);
 

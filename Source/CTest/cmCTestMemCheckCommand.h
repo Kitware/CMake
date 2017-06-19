@@ -3,11 +3,9 @@
 #ifndef cmCTestMemCheckCommand_h
 #define cmCTestMemCheckCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestTestCommand.h"
-
-#include <string>
 
 class cmCTestGenericHandler;
 class cmCommand;
@@ -32,11 +30,6 @@ public:
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
   }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "ctest_memcheck"; }
 
 protected:
   cmCTestGenericHandler* InitializeActualHandler() CM_OVERRIDE;

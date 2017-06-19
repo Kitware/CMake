@@ -14,6 +14,13 @@ be automatically exported and imported by callers.  This simplifies porting
 projects to Windows by reducing the need for explicit ``dllexport`` markup,
 even in ``C++`` classes.
 
+When this property is enabled, zero or more ``.def`` files may also be
+specified as source files of the target.  The exports named by these files
+will be merged with those detected from the object files to generate a
+single module definition file to be passed to the linker.  This can be
+used to export symbols from a ``.dll`` that are not in any of its object
+files but are added by the linker from dependencies (e.g. ``msvcrt.lib``).
+
 This property is initialized by the value of
 the :variable:`CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS` variable if it is set
 when a target is created.

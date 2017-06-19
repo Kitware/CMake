@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -169,7 +169,7 @@ int Curl_resolver_duphandle(void **to, void *from)
   return CURLE_OK;
 }
 
-static void destroy_async_data (struct Curl_async *async);
+static void destroy_async_data(struct Curl_async *async);
 
 /*
  * Cancel all possibly still on-going resolves for this connection.
@@ -184,7 +184,7 @@ void Curl_resolver_cancel(struct connectdata *conn)
 /*
  * destroy_async_data() cleans up async resolver data.
  */
-static void destroy_async_data (struct Curl_async *async)
+static void destroy_async_data(struct Curl_async *async)
 {
   free(async->hostname);
 
@@ -232,7 +232,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
   milli = (timeout->tv_sec * 1000) + (timeout->tv_usec/1000);
   if(milli == 0)
     milli += 10;
-  Curl_expire_latest(conn->data, milli);
+  Curl_expire(conn->data, milli, EXPIRE_ASYNC_NAME);
 
   return max;
 }
@@ -358,14 +358,21 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   struct timeval now = Curl_tvnow();
   struct Curl_dns_entry *temp_entry;
 
+  if(entry)
+    *entry = NULL; /* clear on entry */
+
   timeout = Curl_timeleft(data, &now, TRUE);
+  if(timeout < 0) {
+    /* already expired! */
+    connclose(conn, "Timed out before name resolve started");
+    return CURLE_OPERATION_TIMEDOUT;
+  }
   if(!timeout)
     timeout = CURL_TIMEOUT_RESOLVE * 1000; /* default name resolve timeout */
 
   /* Wait for the name resolve query to complete. */
-  for(;;) {
+  while(!result) {
     struct timeval *tvp, tv, store;
-    long timediff;
     int itimeout;
     int timeout_ms;
 
@@ -385,28 +392,30 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
       timeout_ms = 1000;
 
     waitperform(conn, timeout_ms);
-    Curl_resolver_is_resolved(conn, &temp_entry);
+    result = Curl_resolver_is_resolved(conn, &temp_entry);
 
-    if(conn->async.done)
+    if(result || conn->async.done)
       break;
 
-    if(Curl_pgrsUpdate(conn)) {
+    if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
-      timeout = -1; /* trigger the cancel below */
-    }
     else {
       struct timeval now2 = Curl_tvnow();
-      timediff = Curl_tvdiff(now2, now); /* spent time */
-      timeout -= timediff?timediff:1; /* always deduct at least 1 */
+      time_t timediff = Curl_tvdiff(now2, now); /* spent time */
+      if(timediff <= 0)
+        timeout -= 1; /* always deduct at least 1 */
+      else if(timediff > timeout)
+        timeout = -1;
+      else
+        timeout -= (long)timediff;
       now = now2; /* for next loop */
     }
-
-    if(timeout < 0) {
-      /* our timeout, so we cancel the ares operation */
-      ares_cancel((ares_channel)data->state.resolver);
-      break;
-    }
+    if(timeout < 0)
+      result = CURLE_OPERATION_TIMEDOUT;
   }
+  if(result)
+    /* failure, so we cancel the ares operation */
+    ares_cancel((ares_channel)data->state.resolver);
 
   /* Operation complete, if the lookup was successful we now have the entry
      in the cache. */

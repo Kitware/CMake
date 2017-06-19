@@ -16,8 +16,9 @@ The general signature is:
              [PATH_SUFFIXES suffix1 [suffix2 ...]]
              [DOC "cache documentation string"]
              [NO_DEFAULT_PATH]
-             [NO_CMAKE_ENVIRONMENT_PATH]
+             [NO_PACKAGE_ROOT_PATH]
              [NO_CMAKE_PATH]
+             [NO_CMAKE_ENVIRONMENT_PATH]
              [NO_SYSTEM_ENVIRONMENT_PATH]
              [NO_CMAKE_SYSTEM_PATH]
              [CMAKE_FIND_ROOT_PATH_BOTH |
@@ -60,6 +61,10 @@ If ``NO_DEFAULT_PATH`` is specified, then no additional paths are
 added to the search.
 If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
 
+.. |FIND_PACKAGE_ROOT_PREFIX_PATH_XXX_SUBDIR| replace::
+   |prefix_XXX_SUBDIR| for each ``<prefix>`` in ``PackageName_ROOT`` if called
+   from within a find module
+
 .. |CMAKE_PREFIX_PATH_XXX_SUBDIR| replace::
    |prefix_XXX_SUBDIR| for each ``<prefix>`` in :variable:`CMAKE_PREFIX_PATH`
 
@@ -71,33 +76,47 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
    |prefix_XXX_SUBDIR| for each ``<prefix>`` in
    :variable:`CMAKE_SYSTEM_PREFIX_PATH`
 
-1. Search paths specified in cmake-specific cache variables.
+1. If called from within a find module, search prefix paths unique to the
+   current package being found.  Specifically look in the ``PackageName_ROOT``
+   CMake and environment variables.  The package root variables are maintained
+   as a stack so if called from nested find modules, root paths from the
+   parent's find module will be searchd after paths from the current module,
+   i.e. ``CurrentPackage_ROOT``, ``ENV{CurrentPackage_ROOT}``,
+   ``ParentPackage_ROOT``, ``ENV{ParentPacakge_ROOT}``, etc.
+   This can be skipped if ``NO_PACKAGE_ROOT_PATH`` is passed.
+
+   * |FIND_PACKAGE_ROOT_PREFIX_PATH_XXX|
+
+2. Search paths specified in cmake-specific cache variables.
    These are intended to be used on the command line with a ``-DVAR=value``.
+   The values are interpreted as :ref:`;-lists <CMake Language Lists>`.
    This can be skipped if ``NO_CMAKE_PATH`` is passed.
 
    * |CMAKE_PREFIX_PATH_XXX|
    * |CMAKE_XXX_PATH|
    * |CMAKE_XXX_MAC_PATH|
 
-2. Search paths specified in cmake-specific environment variables.
-   These are intended to be set in the user's shell configuration.
+3. Search paths specified in cmake-specific environment variables.
+   These are intended to be set in the user's shell configuration,
+   and therefore use the host's native path separator
+   (``;`` on Windows and ``:`` on UNIX).
    This can be skipped if ``NO_CMAKE_ENVIRONMENT_PATH`` is passed.
 
    * |CMAKE_PREFIX_PATH_XXX|
    * |CMAKE_XXX_PATH|
    * |CMAKE_XXX_MAC_PATH|
 
-3. Search the paths specified by the ``HINTS`` option.
+4. Search the paths specified by the ``HINTS`` option.
    These should be paths computed by system introspection, such as a
    hint provided by the location of another item already found.
    Hard-coded guesses should be specified with the ``PATHS`` option.
 
-4. Search the standard system environment variables.
+5. Search the standard system environment variables.
    This can be skipped if ``NO_SYSTEM_ENVIRONMENT_PATH`` is an argument.
 
    * |SYSTEM_ENVIRONMENT_PATH_XXX|
 
-5. Search cmake variables defined in the Platform files
+6. Search cmake variables defined in the Platform files
    for the current system.  This can be skipped if ``NO_CMAKE_SYSTEM_PATH``
    is passed.
 
@@ -105,7 +124,7 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
    * |CMAKE_SYSTEM_XXX_PATH|
    * |CMAKE_SYSTEM_XXX_MAC_PATH|
 
-6. Search the paths specified by the PATHS option
+7. Search the paths specified by the PATHS option
    or in the short-hand version of the command.
    These are typically hard-coded guesses.
 

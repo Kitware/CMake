@@ -3,10 +3,11 @@
 #ifndef cmCPackIFWGenerator_h
 #define cmCPackIFWGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h" // IWYU pragma: keep
 
-#include "CPack/cmCPackComponentGroup.h"
-#include "CPack/cmCPackGenerator.h"
+#include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
+#include "cmCPackIFWCommon.h"
 #include "cmCPackIFWInstaller.h"
 #include "cmCPackIFWPackage.h"
 #include "cmCPackIFWRepository.h"
@@ -16,14 +17,12 @@
 #include <string>
 #include <vector>
 
-class cmXMLWriter;
-
 /** \class cmCPackIFWGenerator
  * \brief A generator for Qt Installer Framework tools
  *
  * http://qt-project.org/doc/qtinstallerframework/index.html
  */
-class cmCPackIFWGenerator : public cmCPackGenerator
+class cmCPackIFWGenerator : public cmCPackGenerator, public cmCPackIFWCommon
 {
 public:
   cmCPackTypeMacro(cmCPackIFWGenerator, cmCPackGenerator);
@@ -35,6 +34,11 @@ public:
   typedef std::map<std::string, cmCPackIFWPackage::DependenceStruct>
     DependenceMap;
 
+  using cmCPackIFWCommon::GetOption;
+  using cmCPackIFWCommon::IsOn;
+  using cmCPackIFWCommon::IsSetToOff;
+  using cmCPackIFWCommon::IsSetToEmpty;
+
   /**
    * Construct IFW generator
    */
@@ -44,21 +48,6 @@ public:
    * Destruct IFW generator
    */
   ~cmCPackIFWGenerator() CM_OVERRIDE;
-
-  /**
-   * Compare \a version with QtIFW framework version
-   */
-  bool IsVersionLess(const char* version);
-
-  /**
-   * Compare \a version with QtIFW framework version
-   */
-  bool IsVersionGreater(const char* version);
-
-  /**
-   * Compare \a version with QtIFW framework version
-   */
-  bool IsVersionEqual(const char* version);
 
 protected:
   // cmCPackGenerator reimplementation
@@ -124,12 +113,11 @@ protected:
 
   cmCPackIFWRepository* GetRepository(const std::string& repositoryName);
 
-  void WriteGeneratedByToStrim(cmXMLWriter& xout);
-
 protected:
   // Data
 
   friend class cmCPackIFWPackage;
+  friend class cmCPackIFWCommon;
   friend class cmCPackIFWInstaller;
   friend class cmCPackIFWRepository;
 

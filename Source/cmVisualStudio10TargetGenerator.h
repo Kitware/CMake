@@ -3,7 +3,7 @@
 #ifndef cmVisualStudioTargetGenerator_h
 #define cmVisualStudioTargetGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <map>
@@ -51,7 +51,7 @@ private:
   };
 
   std::string ConvertPath(std::string const& path, bool forceRelative);
-  void ConvertToWindowsSlash(std::string& s);
+  static void ConvertToWindowsSlash(std::string& s);
   void WriteString(const char* line, int indentLevel);
   void WriteProjectConfigurations();
   void WriteProjectConfigurationValues();
@@ -62,8 +62,7 @@ private:
   void WriteNsightTegraConfigurationValues(std::string const& config);
   void WriteSource(std::string const& tool, cmSourceFile const* sf,
                    const char* end = 0);
-  void WriteSources(std::string const& tool,
-                    std::vector<cmSourceFile const*> const&);
+  void WriteExcludeFromBuild(std::vector<size_t> const& exclude_configs);
   void WriteAllSources();
   void WriteDotNetReferences();
   void WriteDotNetReference(std::string const& ref, std::string const& hint);
@@ -98,10 +97,24 @@ private:
   bool ComputeRcOptions(std::string const& config);
   void WriteRCOptions(std::string const& config,
                       std::vector<std::string> const& includes);
+  bool ComputeCudaOptions();
+  bool ComputeCudaOptions(std::string const& config);
+  void WriteCudaOptions(std::string const& config,
+                        std::vector<std::string> const& includes);
+
+  bool ComputeCudaLinkOptions();
+  bool ComputeCudaLinkOptions(std::string const& config);
+  void WriteCudaLinkOptions(std::string const& config);
+
   bool ComputeMasmOptions();
   bool ComputeMasmOptions(std::string const& config);
   void WriteMasmOptions(std::string const& config,
                         std::vector<std::string> const& includes);
+  bool ComputeNasmOptions();
+  bool ComputeNasmOptions(std::string const& config);
+  void WriteNasmOptions(std::string const& config,
+                        std::vector<std::string> includes);
+
   bool ComputeLinkOptions();
   bool ComputeLinkOptions(std::string const& config);
   bool ComputeLibOptions();
@@ -145,7 +158,10 @@ private:
   typedef std::map<std::string, Options*> OptionsMap;
   OptionsMap ClOptions;
   OptionsMap RcOptions;
+  OptionsMap CudaOptions;
+  OptionsMap CudaLinkOptions;
   OptionsMap MasmOptions;
+  OptionsMap NasmOptions;
   OptionsMap LinkOptions;
   std::string PathToProjectFile;
   std::string ProjectFileExtension;
@@ -177,6 +193,7 @@ private:
 
   typedef std::map<std::string, ToolSources> ToolSourceMap;
   ToolSourceMap Tools;
+  std::string GetCMakeFilePath(const char* name) const;
 };
 
 #endif

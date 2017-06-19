@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCacheManager.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
@@ -205,8 +205,7 @@ bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
   return false;
 }
 
-void cmCacheManager::WritePropertyEntries(std::ostream& os,
-                                          CacheIterator const& i)
+void cmCacheManager::WritePropertyEntries(std::ostream& os, CacheIterator i)
 {
   for (const char** p = this->PersistentProperties; *p; ++p) {
     if (const char* value = i.GetProperty(*p)) {
@@ -387,7 +386,7 @@ void cmCacheManager::OutputKey(std::ostream& fout, std::string const& key)
 {
   // support : in key name by double quoting
   const char* q =
-    (key.find(':') != key.npos || key.find("//") == 0) ? "\"" : "";
+    (key.find(':') != std::string::npos || key.find("//") == 0) ? "\"" : "";
   fout << q << key << q;
 }
 
@@ -490,7 +489,7 @@ void cmCacheManager::AddCacheEntry(const std::string& key, const char* value,
   e.Type = type;
   // make sure we only use unix style paths
   if (type == cmStateEnums::FILEPATH || type == cmStateEnums::PATH) {
-    if (e.Value.find(';') != e.Value.npos) {
+    if (e.Value.find(';') != std::string::npos) {
       std::vector<std::string> paths;
       cmSystemTools::ExpandListArgument(e.Value, paths);
       const char* sep = "";

@@ -34,6 +34,29 @@ set(ENABLE_THREADED_RESOLVER OFF CACHE INTERNAL "No curl POSIX threaded DNS look
 set(ENABLE_UNIX_SOCKETS OFF CACHE INTERNAL "No curl Unix domain sockets support")
 set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
 set(USE_WIN32_LDAP OFF CACHE INTERNAL "No curl Windows LDAP")
+if(CMAKE_USE_OPENSSL)
+elseif(WIN32)
+  set(CMAKE_USE_WINSSL ON CACHE INTERNAL "enable Windows native SSL/TLS")
+  set(CURL_WINDOWS_SSPI ON CACHE INTERNAL "Use windows libraries to allow NTLM authentication without openssl")
+elseif(APPLE)
+  # Use OS X SSL/TLS native implementation if available on target version.
+  if(CMAKE_OSX_DEPLOYMENT_TARGET)
+    set(OSX_VERSION ${CMAKE_OSX_DEPLOYMENT_TARGET})
+  else()
+    execute_process(
+      COMMAND sw_vers -productVersion
+      OUTPUT_VARIABLE OSX_VERSION
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+  endif()
+  if(NOT OSX_VERSION VERSION_LESS 10.6 AND
+      CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+    set(CMAKE_USE_DARWINSSL ON CACHE INTERNAL "enable Apple OS native SSL/TLS")
+  else()
+    set(CMAKE_USE_DARWINSSL OFF CACHE INTERNAL "enable Apple OS native SSL/TLS")
+  endif()
+endif()
+set(CMAKE_USE_MBEDTLS OFF CACHE INTERNAL "Enable mbedTLS for SSL/TLS")
 
 # Windows Vista and above have inet_pton, but this will link on
 # older versions and then the executable will fail to launch at
@@ -291,6 +314,11 @@ if(ENABLE_MANUAL)
   endif()
 endif()
 
+if(0) # This code not needed for building within CMake.
+# Required for building manual, docs, tests
+find_package(Perl REQUIRED)
+endif()
+
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_REQUIRED_FLAGS ${CMAKE_ANSI_CFLAGS})
@@ -316,7 +344,7 @@ include (CheckCSourceCompiles)
 
 # On windows preload settings
 if(WIN32)
-  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WINSOCKAPI_")
+  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WINSOCKAPI_=")
   include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
 endif(WIN32)
 
@@ -367,60 +395,99 @@ if(WIN32)
   check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
 endif()
 
-set(USE_OPENSSL OFF)
-set(HAVE_LIBCRYPTO OFF)
-set(HAVE_LIBSSL OFF)
+# check SSL libraries
+# TODO support GNUTLS, NSS, POLARSSL, AXTLS, CYASSL
+
+if(APPLE)
+  option(CMAKE_USE_DARWINSSL "enable Apple OS native SSL/TLS" OFF)
+endif()
+if(WIN32)
+  option(CMAKE_USE_WINSSL "enable Windows native SSL/TLS" OFF)
+  cmake_dependent_option(CURL_WINDOWS_SSPI "Use windows libraries to allow NTLM authentication without openssl" ON
+    CMAKE_USE_WINSSL OFF)
+endif()
+option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF)
+
+set(openssl_default ON)
+if(WIN32 OR CMAKE_USE_DARWINSSL OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
+  set(openssl_default OFF)
+endif()
+
+collect_true(enabled_ssl_options enabled_ssl_options_count
+  CMAKE_USE_WINSSL
+  CMAKE_USE_DARWINSSL
+  CMAKE_USE_OPENSSL
+  CMAKE_USE_MBEDTLS
+)
+if(enabled_ssl_options_count GREATER 1)
+  message(FATAL_ERROR "Multiple SSL options specified: ${enabled_ssl_options}. Please pick at most one and disable the rest.")
+endif()
+
+if(CMAKE_USE_WINSSL)
+  set(SSL_ENABLED ON)
+  set(USE_SCHANNEL ON) # Windows native SSL/TLS support
+  set(USE_WINDOWS_SSPI ON) # CMAKE_USE_WINSSL implies CURL_WINDOWS_SSPI
+  list(APPEND CURL_LIBS "crypt32")
+endif()
+if(CURL_WINDOWS_SSPI)
+  set(USE_WINDOWS_SSPI ON)
+  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DSECURITY_WIN32")
+endif()
+
+if(CMAKE_USE_DARWINSSL)
+  find_library(COREFOUNDATION_FRAMEWORK "CoreFoundation")
+  if(NOT COREFOUNDATION_FRAMEWORK)
+      message(FATAL_ERROR "CoreFoundation framework not found")
+  endif()
+
+  find_library(SECURITY_FRAMEWORK "Security")
+  if(NOT SECURITY_FRAMEWORK)
+     message(FATAL_ERROR "Security framework not found")
+  endif()
+
+  set(SSL_ENABLED ON)
+  set(USE_DARWINSSL ON)
+  list(APPEND CURL_LIBS "${COREFOUNDATION_FRAMEWORK}" "${SECURITY_FRAMEWORK}")
+endif()
 
 if(CMAKE_USE_OPENSSL)
-  find_package(OpenSSL)
-  if(OPENSSL_FOUND)
-    list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
-    set(USE_OPENSSL ON)
-    set(HAVE_LIBCRYPTO ON)
-    set(HAVE_LIBSSL ON)
-    include_directories(${OPENSSL_INCLUDE_DIR})
-    set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
-    check_include_file("openssl/crypto.h" HAVE_OPENSSL_CRYPTO_H)
-    check_include_file("openssl/engine.h" HAVE_OPENSSL_ENGINE_H)
-    check_include_file("openssl/err.h"    HAVE_OPENSSL_ERR_H)
-    check_include_file("openssl/pem.h"    HAVE_OPENSSL_PEM_H)
-    check_include_file("openssl/pkcs12.h" HAVE_OPENSSL_PKCS12_H)
-    check_include_file("openssl/rsa.h"    HAVE_OPENSSL_RSA_H)
-    check_include_file("openssl/ssl.h"    HAVE_OPENSSL_SSL_H)
-    check_include_file("openssl/x509.h"   HAVE_OPENSSL_X509_H)
-    check_include_file("openssl/rand.h"   HAVE_OPENSSL_RAND_H)
+  find_package(OpenSSL REQUIRED)
+  set(SSL_ENABLED ON)
+  set(USE_OPENSSL ON)
+  set(HAVE_LIBCRYPTO ON)
+  set(HAVE_LIBSSL ON)
+  list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
+  include_directories(${OPENSSL_INCLUDE_DIR})
+  set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+  check_include_file("openssl/crypto.h" HAVE_OPENSSL_CRYPTO_H)
+  check_include_file("openssl/engine.h" HAVE_OPENSSL_ENGINE_H)
+  check_include_file("openssl/err.h"    HAVE_OPENSSL_ERR_H)
+  check_include_file("openssl/pem.h"    HAVE_OPENSSL_PEM_H)
+  check_include_file("openssl/pkcs12.h" HAVE_OPENSSL_PKCS12_H)
+  check_include_file("openssl/rsa.h"    HAVE_OPENSSL_RSA_H)
+  check_include_file("openssl/ssl.h"    HAVE_OPENSSL_SSL_H)
+  check_include_file("openssl/x509.h"   HAVE_OPENSSL_X509_H)
+  check_include_file("openssl/rand.h"   HAVE_OPENSSL_RAND_H)
+  check_symbol_exists(RAND_status "${CURL_INCLUDES}" HAVE_RAND_STATUS)
+  check_symbol_exists(RAND_screen "${CURL_INCLUDES}" HAVE_RAND_SCREEN)
+  check_symbol_exists(RAND_egd    "${CURL_INCLUDES}" HAVE_RAND_EGD)
 
-    # Optionally build with a specific CA cert bundle.
-    if(CURL_CA_BUNDLE)
-      add_definitions(-DCURL_CA_BUNDLE="${CURL_CA_BUNDLE}")
-    endif()
-    # Optionally build with a specific CA cert dir.
-    if(CURL_CA_PATH)
-      add_definitions(-DCURL_CA_PATH="${CURL_CA_PATH}")
-    endif()
+  # Optionally build with a specific CA cert bundle.
+  if(CURL_CA_BUNDLE)
+    add_definitions(-DCURL_CA_BUNDLE="${CURL_CA_BUNDLE}")
   endif()
-elseif(WIN32)
-  # Use Windows SSL/TLS native implementation.
-  set(CURL_WINDOWS_SSPI ON)
-elseif(APPLE)
-  # Use OS X SSL/TLS native implementation if available on target version.
-  if(CMAKE_OSX_DEPLOYMENT_TARGET)
-    set(OSX_VERSION ${CMAKE_OSX_DEPLOYMENT_TARGET})
-  else()
-    execute_process(
-      COMMAND sw_vers -productVersion
-      OUTPUT_VARIABLE OSX_VERSION
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
+  # Optionally build with a specific CA cert dir.
+  if(CURL_CA_PATH)
+    add_definitions(-DCURL_CA_PATH="${CURL_CA_PATH}")
   endif()
-  if(NOT OSX_VERSION VERSION_LESS 10.6 AND
-     CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-    add_definitions(-DUSE_DARWINSSL)
-    list(APPEND CURL_LIBS
-      "-framework CoreFoundation"
-      "-framework Security"
-      )
-  endif()
+endif()
+
+if(CMAKE_USE_MBEDTLS)
+  find_package(MbedTLS REQUIRED)
+  set(SSL_ENABLED ON)
+  set(USE_MBEDTLS ON)
+  list(APPEND CURL_LIBS ${MBEDTLS_LIBRARIES})
+  include_directories(${MBEDTLS_INCLUDE_DIRS})
 endif()
 
 option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
@@ -675,24 +742,88 @@ else()
 endif()
 
 
+if(0) # This code not needed for building within CMake.
+#
+# CA handling
+#
+set(CURL_CA_BUNDLE "auto" CACHE STRING
+    "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+set(CURL_CA_FALLBACK OFF CACHE BOOL
+    "Set ON to use built-in CA store of TLS backend. Defaults to OFF")
+set(CURL_CA_PATH "auto" CACHE STRING
+    "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+
+if("${CURL_CA_BUNDLE}" STREQUAL "")
+    message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")
+elseif("${CURL_CA_BUNDLE}" STREQUAL "none")
+    unset(CURL_CA_BUNDLE CACHE)
+elseif("${CURL_CA_BUNDLE}" STREQUAL "auto")
+    unset(CURL_CA_BUNDLE CACHE)
+    set(CURL_CA_BUNDLE_AUTODETECT TRUE)
+else()
+    set(CURL_CA_BUNDLE_SET TRUE)
+endif()
+
+if("${CURL_CA_PATH}" STREQUAL "")
+    message(FATAL_ERROR "Invalid value of CURL_CA_PATH. Use 'none', 'auto' or directory path.")
+elseif("${CURL_CA_PATH}" STREQUAL "none")
+    unset(CURL_CA_PATH CACHE)
+elseif("${CURL_CA_PATH}" STREQUAL "auto")
+    unset(CURL_CA_PATH CACHE)
+    set(CURL_CA_PATH_AUTODETECT TRUE)
+else()
+    set(CURL_CA_PATH_SET TRUE)
+endif()
+
+if(CURL_CA_BUNDLE_SET AND CURL_CA_PATH_AUTODETECT)
+    # Skip autodetection of unset CA path because CA bundle is set explicitly
+elseif(CURL_CA_PATH_SET AND CURL_CA_BUNDLE_AUTODETECT)
+    # Skip autodetection of unset CA bundle because CA path is set explicitly
+elseif(CURL_CA_PATH_AUTODETECT OR CURL_CA_BUNDLE_AUTODETECT)
+    # first try autodetecting a CA bundle, then a CA path
+
+    if(CURL_CA_BUNDLE_AUTODETECT)
+        set(SEARCH_CA_BUNDLE_PATHS
+            /etc/ssl/certs/ca-certificates.crt
+            /etc/pki/tls/certs/ca-bundle.crt
+            /usr/share/ssl/certs/ca-bundle.crt
+            /usr/local/share/certs/ca-root-nss.crt
+            /etc/ssl/cert.pem)
+
+        foreach(SEARCH_CA_BUNDLE_PATH ${SEARCH_CA_BUNDLE_PATHS})
+            if(EXISTS "${SEARCH_CA_BUNDLE_PATH}")
+                message(STATUS "Found CA bundle: ${SEARCH_CA_BUNDLE_PATH}")
+                set(CURL_CA_BUNDLE "${SEARCH_CA_BUNDLE_PATH}")
+                set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
+                break()
+            endif()
+        endforeach()
+    endif()
+
+    if(CURL_CA_PATH_AUTODETECT AND (NOT CURL_CA_PATH_SET))
+        if(EXISTS "/etc/ssl/certs")
+            set(CURL_CA_PATH "/etc/ssl/certs")
+            set(CURL_CA_PATH_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
+        endif()
+    endif()
+endif()
+
+if(CURL_CA_PATH_SET AND NOT USE_OPENSSL AND NOT USE_MBEDTLS)
+    message(FATAL_ERROR
+            "CA path only supported by OpenSSL, GnuTLS or mbed TLS. "
+            "Set CURL_CA_PATH=none or enable one of those TLS backends.")
+endif()
+endif()
+
+
 # Check for header files
 if(NOT UNIX)
   check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
   check_include_file_concat("winsock.h"      HAVE_WINSOCK_H)
   check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
   check_include_file_concat("winsock2.h"     HAVE_WINSOCK2_H)
-  if(CURL_WINDOWS_SSPI)
-    set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DSECURITY_WIN32")
-    check_include_file_concat("sspi.h"       HAVE_SSPI_H)
-    if(HAVE_SSPI_H)
-      check_include_file_concat("schannel.h" HAVE_SCHANNEL_H)
-      set(USE_WINDOWS_SSPI ON)
-      if(HAVE_SCHANNEL_H)
-        set(USE_SCHANNEL ON)
-        set(SSL_ENABLED ON)
-        set(CURL_LIBS ${CURL_LIBS} "crypt32")
-      endif()
-    endif()
+  if(NOT CURL_WINDOWS_SSPI AND USE_OPENSSL)
+    set(CURL_LIBS ${CURL_LIBS} "crypt32")
   endif()
 else()
   set(HAVE_WINDOWS_H 0)
@@ -717,6 +848,7 @@ check_include_file_concat("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file_concat("sys/uio.h"        HAVE_SYS_UIO_H)
 check_include_file_concat("sys/un.h"         HAVE_SYS_UN_H)
 check_include_file_concat("sys/utime.h"      HAVE_SYS_UTIME_H)
+check_include_file_concat("sys/xattr.h"      HAVE_SYS_XATTR_H)
 check_include_file_concat("alloca.h"         HAVE_ALLOCA_H)
 check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)
 check_include_file_concat("arpa/tftp.h"      HAVE_ARPA_TFTP_H)
@@ -801,7 +933,11 @@ endif()
 
 check_symbol_exists(basename      "${CURL_INCLUDES}" HAVE_BASENAME)
 check_symbol_exists(socket        "${CURL_INCLUDES}" HAVE_SOCKET)
-check_symbol_exists(poll          "${CURL_INCLUDES}" HAVE_POLL)
+# poll on macOS is unreliable, it first did not exist, then was broken until
+# fixed in 10.9 only to break again in 10.12.
+if(NOT APPLE)
+  check_symbol_exists(poll        "${CURL_INCLUDES}" HAVE_POLL)
+endif()
 check_symbol_exists(select        "${CURL_INCLUDES}" HAVE_SELECT)
 check_symbol_exists(strdup        "${CURL_INCLUDES}" HAVE_STRDUP)
 check_symbol_exists(strstr        "${CURL_INCLUDES}" HAVE_STRSTR)
@@ -833,14 +969,6 @@ check_symbol_exists(strlcat       "${CURL_INCLUDES}" HAVE_STRLCAT)
 check_symbol_exists(getpwuid      "${CURL_INCLUDES}" HAVE_GETPWUID)
 check_symbol_exists(geteuid       "${CURL_INCLUDES}" HAVE_GETEUID)
 check_symbol_exists(utime         "${CURL_INCLUDES}" HAVE_UTIME)
-if(CMAKE_USE_OPENSSL)
-  check_symbol_exists(RAND_status   "${CURL_INCLUDES}" HAVE_RAND_STATUS)
-  check_symbol_exists(RAND_screen   "${CURL_INCLUDES}" HAVE_RAND_SCREEN)
-  check_symbol_exists(RAND_egd      "${CURL_INCLUDES}" HAVE_RAND_EGD)
-  if(HAVE_LIBCRYPTO AND HAVE_LIBSSL)
-    set(USE_OPENSSL 1)
-  endif(HAVE_LIBCRYPTO AND HAVE_LIBSSL)
-endif(CMAKE_USE_OPENSSL)
 check_symbol_exists(gmtime_r      "${CURL_INCLUDES}" HAVE_GMTIME_R)
 check_symbol_exists(localtime_r   "${CURL_INCLUDES}" HAVE_LOCALTIME_R)
 
@@ -874,6 +1002,13 @@ check_symbol_exists(setsockopt     "${CURL_INCLUDES}" HAVE_SETSOCKOPT)
 
 # symbol exists in win32, but function does not.
 check_function_exists(inet_pton HAVE_INET_PTON)
+
+check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
+if(HAVE_FSETXATTR)
+  foreach(CURL_TEST HAVE_FSETXATTR_5 HAVE_FSETXATTR_6)
+    curl_internal_test_run(${CURL_TEST})
+  endforeach(CURL_TEST)
+endif(HAVE_FSETXATTR)
 
 # sigaction and sigsetjmp are special. Use special mechanism for
 # detecting those, but only if previous attempt failed.
@@ -1088,9 +1223,9 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
   string(REPLACE "$(top_srcdir)"   "\${CURL_SOURCE_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
   string(REPLACE "$(top_builddir)" "\${CURL_BINARY_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
 
-  string(REGEX REPLACE "\\\\\n" "§!§" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
+  string(REGEX REPLACE "\\\\\n" "!Ï€!Î±!" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
   string(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*)" "SET(\\1 \\2)" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-  string(REPLACE "§!§" "\n" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
+  string(REPLACE "!Ï€!Î±!" "\n" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
 
   string(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})    # Replace $() with ${}
   string(REGEX REPLACE "@([a-zA-Z_][a-zA-Z0-9_]*)@" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})    # Replace @@ with ${}, even if that may not be read by CMake scripts.
@@ -1098,6 +1233,9 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
+if(0) # This code not needed for building within CMake.
+add_subdirectory(docs)
+endif()
 add_subdirectory(lib)
 if(BUILD_CURL_EXE)
   add_subdirectory(src)
@@ -1121,11 +1259,6 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
-# TODO support GNUTLS, NSS, POLARSSL, AXTLS, CYASSL, WINSSL, DARWINSSL
-if(USE_OPENSSL)
-  set(SSL_ENABLED 1)
-endif()
-
 # Helper to populate a list (_items) with a label when conditions (the remaining
 # args) are satisfied
 function(_add_if label)
@@ -1139,6 +1272,8 @@ endfunction()
 set(_items)
 _add_if("WinSSL"        SSL_ENABLED AND USE_WINDOWS_SSPI)
 _add_if("OpenSSL"       SSL_ENABLED AND USE_OPENSSL)
+_add_if("DarwinSSL"     SSL_ENABLED AND USE_DARWINSSL)
+_add_if("mbedTLS"       SSL_ENABLED AND USE_MBEDTLS)
 _add_if("IPv6"          ENABLE_IPV6)
 _add_if("unix-sockets"  USE_UNIX_SOCKETS)
 _add_if("libz"          HAVE_LIBZ)
@@ -1155,9 +1290,8 @@ _add_if("SPNEGO"        NOT CURL_DISABLE_CRYPTO_AUTH AND
 _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
-# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS, DARWINSSL
-if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR
-   USE_WINDOWS_SSPI OR GNUTLS_ENABLED OR NSS_ENABLED OR DARWINSSL_ENABLED))
+# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
+if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_WINDOWS_SSPI OR USE_DARWINSSL OR USE_MBEDTLS))
   _add_if("NTLM"        1)
   # TODO missing option (autoconf: --enable-ntlm-wb)
   _add_if("NTLM_WB"     NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
@@ -1206,8 +1340,6 @@ set(CC                      "${CMAKE_C_COMPILER}")
 set(CONFIGURE_OPTIONS       "")
 # TODO when to set "-DCURL_STATICLIB" for CPPFLAG_CURL_STATICLIB?
 set(CPPFLAG_CURL_STATICLIB  "")
-# TODO need to set this (see CURL_CHECK_CA_BUNDLE in acinclude.m4)
-set(CURL_CA_BUNDLE          "")
 set(CURLVERSION             "${CURL_VERSION}")
 set(ENABLE_SHARED           "yes")
 if(CURL_STATICLIB)

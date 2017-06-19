@@ -3,7 +3,7 @@
 #ifndef cmCTestUploadHandler_h
 #define cmCTestUploadHandler_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"

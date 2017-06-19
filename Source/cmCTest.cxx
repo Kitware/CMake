@@ -2,15 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTest.h"
 
-#include <cm_curl.h>
-#include <cm_zlib.h>
-#include <cmsys/Base64.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/Process.h>
-#include <cmsys/String.hxx>
-#include <cmsys/SystemInformation.hxx>
+#include "cm_curl.h"
+#include "cm_zlib.h"
+#include "cmsys/Base64.h"
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/Process.h"
+#include "cmsys/String.hxx"
+#include "cmsys/SystemInformation.hxx"
 #include <ctype.h>
 #include <iostream>
 #include <map>
@@ -119,10 +119,10 @@ std::string cmCTest::CleanString(const std::string& str)
 {
   std::string::size_type spos = str.find_first_not_of(" \n\t\r\f\v");
   std::string::size_type epos = str.find_last_not_of(" \n\t\r\f\v");
-  if (spos == str.npos) {
+  if (spos == std::string::npos) {
     return std::string();
   }
-  if (epos != str.npos) {
+  if (epos != std::string::npos) {
     epos = epos - spos + 1;
   }
   return str.substr(spos, epos);
@@ -416,7 +416,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
     }
   }
 
-  cmake cm;
+  cmake cm(cmake::RoleScript);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
@@ -669,12 +669,11 @@ bool cmCTest::UpdateCTestConfiguration()
         continue;
       }
       std::string::size_type cpos = line.find_first_of(':');
-      if (cpos == line.npos) {
+      if (cpos == std::string::npos) {
         continue;
       }
       std::string key = line.substr(0, cpos);
-      std::string value =
-        cmCTest::CleanString(line.substr(cpos + 1, line.npos));
+      std::string value = cmCTest::CleanString(line.substr(cpos + 1));
       this->CTestConfiguration[key] = value;
     }
     fin.close();
@@ -1122,7 +1121,6 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
     if (log) {
       *log << "* Run internal CTest" << std::endl;
     }
-    std::string oldpath = cmSystemTools::GetCurrentWorkingDirectory();
 
     CM_AUTO_PTR<cmSystemTools::SaveRestoreEnvironment> saveEnv;
     if (modifyEnv) {
@@ -1137,7 +1135,6 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
     if (log && output) {
       *log << *output;
     }
-    cmSystemTools::ChangeDirectory(oldpath);
     if (output) {
       cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
                  "Internal cmCTest object used to run test." << std::endl
@@ -1243,7 +1240,7 @@ std::string cmCTest::SafeBuildIdField(const std::string& value)
     //
     const char* disallowed = "\\:*?\"<>|\n\r\t\f\v";
 
-    if (safevalue.find_first_of(disallowed) != value.npos) {
+    if (safevalue.find_first_of(disallowed) != std::string::npos) {
       std::string::size_type i = 0;
       std::string::size_type n = strlen(disallowed);
       char replace[2];
@@ -1901,6 +1898,34 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       ->SetPersistentOption("ExcludeRegularExpression", args[i].c_str());
   }
 
+  if (this->CheckArgument(arg, "-FA", "--fixture-exclude-any") &&
+      i < args.size() - 1) {
+    i++;
+    this->GetHandler("test")->SetPersistentOption(
+      "ExcludeFixtureRegularExpression", args[i].c_str());
+    this->GetHandler("memcheck")
+      ->SetPersistentOption("ExcludeFixtureRegularExpression",
+                            args[i].c_str());
+  }
+  if (this->CheckArgument(arg, "-FS", "--fixture-exclude-setup") &&
+      i < args.size() - 1) {
+    i++;
+    this->GetHandler("test")->SetPersistentOption(
+      "ExcludeFixtureSetupRegularExpression", args[i].c_str());
+    this->GetHandler("memcheck")
+      ->SetPersistentOption("ExcludeFixtureSetupRegularExpression",
+                            args[i].c_str());
+  }
+  if (this->CheckArgument(arg, "-FC", "--fixture-exclude-cleanup") &&
+      i < args.size() - 1) {
+    i++;
+    this->GetHandler("test")->SetPersistentOption(
+      "ExcludeFixtureCleanupRegularExpression", args[i].c_str());
+    this->GetHandler("memcheck")
+      ->SetPersistentOption("ExcludeFixtureCleanupRegularExpression",
+                            args[i].c_str());
+  }
+
   if (this->CheckArgument(arg, "--rerun-failed")) {
     this->GetHandler("test")->SetPersistentOption("RerunFailed", "true");
     this->GetHandler("memcheck")->SetPersistentOption("RerunFailed", "true");
@@ -2323,8 +2348,8 @@ std::string cmCTest::GetShortPathToFile(const char* cfname)
     cmSystemTools::RelativePath(buildDir.c_str(), fname.c_str());
 
   // If any contains "." it is not parent directory
-  bool inSrc = srcRelpath.find("..") == srcRelpath.npos;
-  bool inBld = bldRelpath.find("..") == bldRelpath.npos;
+  bool inSrc = srcRelpath.find("..") == std::string::npos;
+  bool inBld = bldRelpath.find("..") == std::string::npos;
   // TODO: Handle files with .. in their name
 
   std::string* res = CM_NULLPTR;
@@ -2483,7 +2508,7 @@ void cmCTest::AddSubmitFile(Part part, const char* name)
 void cmCTest::AddCTestConfigurationOverwrite(const std::string& overStr)
 {
   size_t epos = overStr.find('=');
-  if (epos == overStr.npos) {
+  if (epos == std::string::npos) {
     cmCTestLog(this, ERROR_MESSAGE,
                "CTest configuration overwrite specified in the wrong format."
                  << std::endl
@@ -2492,7 +2517,7 @@ void cmCTest::AddCTestConfigurationOverwrite(const std::string& overStr)
     return;
   }
   std::string key = overStr.substr(0, epos);
-  std::string value = overStr.substr(epos + 1, overStr.npos);
+  std::string value = overStr.substr(epos + 1);
   this->CTestConfigurationOverwrites[key] = value;
 }
 

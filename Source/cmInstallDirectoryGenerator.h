@@ -6,7 +6,8 @@
 #include "cmInstallGenerator.h"
 #include "cmScriptGenerator.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -33,12 +34,11 @@ public:
   std::string GetDestination(std::string const& config) const;
 
 protected:
-  void GenerateScriptActions(std::ostream& os,
-                             Indent const& indent) CM_OVERRIDE;
+  void GenerateScriptActions(std::ostream& os, Indent indent) CM_OVERRIDE;
   void GenerateScriptForConfig(std::ostream& os, const std::string& config,
-                               Indent const& indent) CM_OVERRIDE;
+                               Indent indent) CM_OVERRIDE;
   void AddDirectoryInstallRule(std::ostream& os, const std::string& config,
-                               Indent const& indent,
+                               Indent indent,
                                std::vector<std::string> const& dirs);
   cmLocalGenerator* LocalGenerator;
   std::vector<std::string> Directories;

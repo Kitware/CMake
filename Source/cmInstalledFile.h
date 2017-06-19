@@ -3,6 +3,8 @@
 #ifndef cmInstalledFile_h
 #define cmInstalledFile_h
 
+#include "cmConfigure.h" // IWYU pragma: keep
+
 #include "cmGeneratorExpression.h"
 #include "cm_auto_ptr.hxx"
 

@@ -12,4 +12,5 @@ macro(__linux_compiler_gnu lang)
   # We pass this for historical reasons.  Projects may have
   # executables that use dlopen but do not set ENABLE_EXPORTS.
   set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-rdynamic")
+  set(CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "${CMAKE_${lang}_COMPILER}" "-dM" "-E" "-c" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
 endmacro()

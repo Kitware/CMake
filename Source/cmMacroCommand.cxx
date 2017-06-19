@@ -22,11 +22,6 @@ public:
   ~cmMacroHelperCommand() CM_OVERRIDE {}
 
   /**
-   * This determines if the command is defined in a cmake script.
-   */
-  bool IsUserDefined() const CM_OVERRIDE { return true; }
-
-  /**
    * This is a virtual constructor for the command.
    */
   cmCommand* Clone() CM_OVERRIDE
@@ -41,11 +36,6 @@ public:
   }
 
   /**
-   * This determines if the command is invoked when in script mode.
-   */
-  bool IsScriptable() const CM_OVERRIDE { return true; }
-
-  /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
@@ -57,11 +47,6 @@ public:
   {
     return false;
   }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return this->Args[0]; }
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
@@ -156,15 +141,15 @@ bool cmMacroHelperCommand::InvokeInitialPass(
       // The error message should have already included the call stack
       // so we do not need to report an error here.
       macroScope.Quiet();
-      inStatus.SetNestedError(true);
+      inStatus.SetNestedError();
       return false;
     }
     if (status.GetReturnInvoked()) {
-      inStatus.SetReturnInvoked(true);
+      inStatus.SetReturnInvoked();
       return true;
     }
     if (status.GetBreakInvoked()) {
-      inStatus.SetBreakInvoked(true);
+      inStatus.SetBreakInvoked();
       return true;
     }
   }
@@ -189,10 +174,7 @@ bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       f->Functions = this->Functions;
       f->FilePath = this->GetStartingContext().FilePath;
       mf.RecordPolicies(f->Policies);
-      std::string newName = "_" + this->Args[0];
-      mf.GetState()->RenameCommand(this->Args[0], newName);
-      mf.GetState()->AddCommand(f);
-
+      mf.GetState()->AddScriptedCommand(this->Args[0], f);
       // remove the function blocker now that the macro is defined
       mf.RemoveFunctionBlocker(this, lff);
       return true;

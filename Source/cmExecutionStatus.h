@@ -11,16 +11,13 @@
 class cmExecutionStatus
 {
 public:
-  cmExecutionStatus() { this->Clear(); }
-
-  void SetReturnInvoked(bool val) { this->ReturnInvoked = val; }
-  bool GetReturnInvoked() { return this->ReturnInvoked; }
-
-  void SetBreakInvoked(bool val) { this->BreakInvoked = val; }
-  bool GetBreakInvoked() { return this->BreakInvoked; }
-
-  void SetContinueInvoked(bool val) { this->ContinueInvoked = val; }
-  bool GetContinueInvoked() { return this->ContinueInvoked; }
+  cmExecutionStatus()
+    : ReturnInvoked(false)
+    , BreakInvoked(false)
+    , ContinueInvoked(false)
+    , NestedError(false)
+  {
+  }
 
   void Clear()
   {
@@ -29,8 +26,18 @@ public:
     this->ContinueInvoked = false;
     this->NestedError = false;
   }
-  void SetNestedError(bool val) { this->NestedError = val; }
-  bool GetNestedError() { return this->NestedError; }
+
+  void SetReturnInvoked() { this->ReturnInvoked = true; }
+  bool GetReturnInvoked() const { return this->ReturnInvoked; }
+
+  void SetBreakInvoked() { this->BreakInvoked = true; }
+  bool GetBreakInvoked() const { return this->BreakInvoked; }
+
+  void SetContinueInvoked() { this->ContinueInvoked = true; }
+  bool GetContinueInvoked() const { return this->ContinueInvoked; }
+
+  void SetNestedError() { this->NestedError = true; }
+  bool GetNestedError() const { return this->NestedError; }
 
 private:
   bool ReturnInvoked;

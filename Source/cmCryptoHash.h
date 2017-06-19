@@ -3,7 +3,7 @@
 #ifndef cmCryptoHash_h
 #define cmCryptoHash_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h"
 
 #include <stddef.h>
 #include <string>
@@ -16,6 +16,8 @@
  */
 class cmCryptoHash
 {
+  CM_DISABLE_COPY(cmCryptoHash)
+
 public:
   enum Algo
   {

@@ -49,6 +49,7 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
       case cmPolicies::REQUIRED_ALWAYS:
         e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0015);
         this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior converts
         convertToAbsolute = true;

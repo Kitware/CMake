@@ -58,7 +58,7 @@ std::string cmBase32Encoder::encodeString(const unsigned char* input,
     input += blockSize;
   }
 
-  size_t remain(end - input);
+  size_t remain = static_cast<size_t>(end - input);
   if (remain != 0) {
     // Temporary source buffer filled up with 0s
     unsigned char extended[blockSize];

@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProjectCommand.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <sstream>
 #include <stdio.h>
 
@@ -22,11 +22,14 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("PROJECT called with incorrect number of arguments");
     return false;
   }
-  this->Makefile->SetProjectName(args[0]);
 
-  std::string bindir = args[0];
+  std::string const& projectName = args[0];
+
+  this->Makefile->SetProjectName(projectName);
+
+  std::string bindir = projectName;
   bindir += "_BINARY_DIR";
-  std::string srcdir = args[0];
+  std::string srcdir = projectName;
   srcdir += "_SOURCE_DIR";
 
   this->Makefile->AddCacheDefinition(
@@ -44,7 +47,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
   this->Makefile->AddDefinition(srcdir,
                                 this->Makefile->GetCurrentSourceDirectory());
 
-  this->Makefile->AddDefinition("PROJECT_NAME", args[0].c_str());
+  this->Makefile->AddDefinition("PROJECT_NAME", projectName.c_str());
 
   // Set the CMAKE_PROJECT_NAME variable to be the highest-level
   // project name in the tree. If there are two project commands
@@ -54,18 +57,21 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
   // will work.
   if (!this->Makefile->GetDefinition("CMAKE_PROJECT_NAME") ||
       (this->Makefile->IsRootMakefile())) {
-    this->Makefile->AddDefinition("CMAKE_PROJECT_NAME", args[0].c_str());
-    this->Makefile->AddCacheDefinition("CMAKE_PROJECT_NAME", args[0].c_str(),
-                                       "Value Computed by CMake",
-                                       cmStateEnums::STATIC);
+    this->Makefile->AddDefinition("CMAKE_PROJECT_NAME", projectName.c_str());
+    this->Makefile->AddCacheDefinition(
+      "CMAKE_PROJECT_NAME", projectName.c_str(), "Value Computed by CMake",
+      cmStateEnums::STATIC);
   }
 
   bool haveVersion = false;
   bool haveLanguages = false;
+  bool haveDescription = false;
   std::string version;
+  std::string description;
   std::vector<std::string> languages;
   enum Doing
   {
+    DoingDescription,
     DoingLanguages,
     DoingVersion
   };
@@ -89,9 +95,21 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
       }
       haveVersion = true;
       doing = DoingVersion;
+    } else if (args[i] == "DESCRIPTION") {
+      if (haveDescription) {
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR, "DESCRITPION may be specified at most once.");
+        cmSystemTools::SetFatalErrorOccured();
+        return true;
+      }
+      haveDescription = true;
+      doing = DoingDescription;
     } else if (doing == DoingVersion) {
       doing = DoingLanguages;
       version = args[i];
+    } else if (doing == DoingDescription) {
+      doing = DoingLanguages;
+      description = args[i];
     } else // doing == DoingLanguages
     {
       languages.push_back(args[i]);
@@ -148,19 +166,19 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     }
 
     std::string vv;
-    vv = args[0] + "_VERSION";
+    vv = projectName + "_VERSION";
     this->Makefile->AddDefinition("PROJECT_VERSION", vs.c_str());
     this->Makefile->AddDefinition(vv, vs.c_str());
-    vv = args[0] + "_VERSION_MAJOR";
+    vv = projectName + "_VERSION_MAJOR";
     this->Makefile->AddDefinition("PROJECT_VERSION_MAJOR", vb[0]);
     this->Makefile->AddDefinition(vv, vb[0]);
-    vv = args[0] + "_VERSION_MINOR";
+    vv = projectName + "_VERSION_MINOR";
     this->Makefile->AddDefinition("PROJECT_VERSION_MINOR", vb[1]);
     this->Makefile->AddDefinition(vv, vb[1]);
-    vv = args[0] + "_VERSION_PATCH";
+    vv = projectName + "_VERSION_PATCH";
     this->Makefile->AddDefinition("PROJECT_VERSION_PATCH", vb[2]);
     this->Makefile->AddDefinition(vv, vb[2]);
-    vv = args[0] + "_VERSION_TWEAK";
+    vv = projectName + "_VERSION_TWEAK";
     this->Makefile->AddDefinition("PROJECT_VERSION_TWEAK", vb[3]);
     this->Makefile->AddDefinition(vv, vb[3]);
   } else if (cmp0048 != cmPolicies::OLD) {
@@ -171,11 +189,11 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     vv.push_back("PROJECT_VERSION_MINOR");
     vv.push_back("PROJECT_VERSION_PATCH");
     vv.push_back("PROJECT_VERSION_TWEAK");
-    vv.push_back(args[0] + "_VERSION");
-    vv.push_back(args[0] + "_VERSION_MAJOR");
-    vv.push_back(args[0] + "_VERSION_MINOR");
-    vv.push_back(args[0] + "_VERSION_PATCH");
-    vv.push_back(args[0] + "_VERSION_TWEAK");
+    vv.push_back(projectName + "_VERSION");
+    vv.push_back(projectName + "_VERSION_MAJOR");
+    vv.push_back(projectName + "_VERSION_MINOR");
+    vv.push_back(projectName + "_VERSION_PATCH");
+    vv.push_back(projectName + "_VERSION_TWEAK");
     std::string vw;
     for (std::vector<std::string>::iterator i = vv.begin(); i != vv.end();
          ++i) {
@@ -197,13 +215,29 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
 
+  if (haveDescription) {
+    this->Makefile->AddDefinition("PROJECT_DESCRIPTION", description.c_str());
+    // Set the CMAKE_PROJECT_DESCRIPTION variable to be the highest-level
+    // project name in the tree. If there are two project commands
+    // in the same CMakeLists.txt file, and it is the top level
+    // CMakeLists.txt file, then go with the last one.
+    if (!this->Makefile->GetDefinition("CMAKE_PROJECT_DESCRIPTION") ||
+        (this->Makefile->IsRootMakefile())) {
+      this->Makefile->AddDefinition("CMAKE_PROJECT_DESCRIPTION",
+                                    description.c_str());
+      this->Makefile->AddCacheDefinition(
+        "CMAKE_PROJECT_DESCRIPTION", description.c_str(),
+        "Value Computed by CMake", cmStateEnums::STATIC);
+    }
+  }
+
   if (languages.empty()) {
     // if no language is specified do c and c++
     languages.push_back("C");
     languages.push_back("CXX");
   }
   this->Makefile->EnableLanguage(languages, false);
-  std::string extraInclude = "CMAKE_PROJECT_" + args[0] + "_INCLUDE";
+  std::string extraInclude = "CMAKE_PROJECT_" + projectName + "_INCLUDE";
   const char* include = this->Makefile->GetDefinition(extraInclude);
   if (include) {
     bool readit = this->Makefile->ReadDependentFile(include);

@@ -3,7 +3,7 @@
 #ifndef cmCTestCVS_h
 #define cmCTestCVS_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestVC.h"
 

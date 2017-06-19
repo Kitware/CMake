@@ -5,6 +5,10 @@
 
 set(_cmake_oldestSupported "__SUNPRO_CC >= 0x5130")
 
+set(SolarisStudio125_CXX11 "(__SUNPRO_CC >= 0x5140) && __cplusplus >= 201103L")
+set(_cmake_feature_test_cxx_binary_literals "${SolarisStudio125_CXX11}")
+set(_cmake_feature_test_cxx_reference_qualified_functions "${SolarisStudio125_CXX11}")
+
 set(SolarisStudio124_CXX11 "(__SUNPRO_CC >= 0x5130) && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_alignas "${SolarisStudio124_CXX11}")
 set(_cmake_feature_test_cxx_alignof "${SolarisStudio124_CXX11}")

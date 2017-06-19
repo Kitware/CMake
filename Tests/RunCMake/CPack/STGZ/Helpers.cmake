@@ -35,7 +35,7 @@ function(getPackageContentList FILE RESULT_VAR)
 endfunction()
 
 function(toExpectedContentList FILE_NO CONTENT_VAR)
-  findExpectedFile("${FILE_NO}" "file_")
+  findExpectedFile("${FILE_NO}" "file_" "glob_expr_")
 
   get_filename_component(prefix_ "${file_}" NAME)
   # NAME_WE removes everything after the dot and dot is in version so replace instead

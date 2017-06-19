@@ -4,14 +4,25 @@
 #ifndef cmLinkLineDeviceComputer_h
 #define cmLinkLineDeviceComputer_h
 
+#include "cmConfigure.h"
+
+#include <string>
+
 #include "cmLinkLineComputer.h"
+
+class cmComputeLinkInformation;
+class cmGeneratorTarget;
 class cmGlobalNinjaGenerator;
+class cmOutputConverter;
+class cmStateDirectory;
 
 class cmLinkLineDeviceComputer : public cmLinkLineComputer
 {
+  CM_DISABLE_COPY(cmLinkLineDeviceComputer)
+
 public:
   cmLinkLineDeviceComputer(cmOutputConverter* outputConverter,
-                           cmStateDirectory stateDir);
+                           cmStateDirectory const& stateDir);
   ~cmLinkLineDeviceComputer() CM_OVERRIDE;
 
   std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
@@ -24,9 +35,11 @@ public:
 
 class cmNinjaLinkLineDeviceComputer : public cmLinkLineDeviceComputer
 {
+  CM_DISABLE_COPY(cmNinjaLinkLineDeviceComputer)
+
 public:
   cmNinjaLinkLineDeviceComputer(cmOutputConverter* outputConverter,
-                                cmStateDirectory stateDir,
+                                cmStateDirectory const& stateDir,
                                 cmGlobalNinjaGenerator const* gg);
 
   std::string ConvertToLinkReference(std::string const& input) const

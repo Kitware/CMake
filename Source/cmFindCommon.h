@@ -3,7 +3,7 @@
 #ifndef cmFindCommon_h
 #define cmFindCommon_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <map>
 #include <set>
@@ -13,8 +13,6 @@
 #include "cmCommand.h"
 #include "cmPathLabel.h"
 #include "cmSearchPath.h"
-
-class cmMakefile;
 
 /** \class cmFindCommon
  * \brief Base class for FIND_XXX implementations.
@@ -57,6 +55,7 @@ protected:
       : cmPathLabel(label)
     {
     }
+    static PathLabel PackageRoot;
     static PathLabel CMake;
     static PathLabel CMakeEnvironment;
     static PathLabel Hints;
@@ -105,9 +104,9 @@ protected:
 
   bool CheckCommonArgument(std::string const& arg);
   void AddPathSuffix(std::string const& arg);
-  void SetMakefile(cmMakefile* makefile);
 
   bool NoDefaultPath;
+  bool NoPackageRootPath;
   bool NoCMakePath;
   bool NoCMakeEnvironmentPath;
   bool NoSystemEnvironmentPath;

@@ -3,7 +3,7 @@
 #ifndef CM_AUTO_PTR_HXX
 #define CM_AUTO_PTR_HXX
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #ifdef CMake_HAVE_CXX_AUTO_PTR
 
@@ -100,10 +100,10 @@ public:
   /** Assign from an auto_ptr holding a compatible object.  This
       transfers ownership to the left-hand-side of the assignment.  */
   template <class Y>
-  auto_ptr& operator=(auto_ptr<Y> cm_AUTO_PTR_CONST& a) throw()
+  auto_ptr& operator=(auto_ptr<Y> cm_AUTO_PTR_CONST& a) throw() // NOLINT
   {
     this->reset(cm_AUTO_PTR_CAST(a).release());
-    return *this;
+    return *this; // NOLINT
   }
 
   /**
@@ -127,10 +127,10 @@ public:
 
   /** Assign from another auto_ptr holding an object of the same type.
       This transfers ownership to the newly constructed auto_ptr.  */
-  auto_ptr& operator=(auto_ptr cm_AUTO_PTR_CONST& a) throw()
+  auto_ptr& operator=(auto_ptr cm_AUTO_PTR_CONST& a) throw() // NOLINT
   {
     this->reset(cm_AUTO_PTR_CAST(a).release());
-    return *this;
+    return *this; // NOLINT
   }
 
   /** Destruct and delete the object held.  */
@@ -192,7 +192,7 @@ public:
   auto_ptr& operator=(detail::auto_ptr_ref<X> r) throw()
   {
     this->reset(r.p_);
-    return *this;
+    return *this; // NOLINT
   }
 
   /** Convert to an auto_ptr_ref.  This is used when a function

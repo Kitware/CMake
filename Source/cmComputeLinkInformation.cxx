@@ -500,7 +500,10 @@ bool cmComputeLinkInformation::Compute()
       cmGeneratorTarget const* tgt = *i;
       bool implib = (this->UseImportLibrary &&
                      (tgt->GetType() == cmStateEnums::SHARED_LIBRARY));
-      std::string lib = tgt->GetFullPath(this->Config, implib, true);
+      cmStateEnums::ArtifactType artifact = implib
+        ? cmStateEnums::ImportLibraryArtifact
+        : cmStateEnums::RuntimeBinaryArtifact;
+      std::string lib = tgt->GetFullPath(this->Config, artifact, true);
       this->OldLinkDirItems.push_back(lib);
     }
   }
@@ -596,8 +599,11 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // platform.  Add it now.
       std::string linkItem;
       linkItem = this->LoaderFlag;
+      cmStateEnums::ArtifactType artifact = this->UseImportLibrary
+        ? cmStateEnums::ImportLibraryArtifact
+        : cmStateEnums::RuntimeBinaryArtifact;
 
-      std::string exe = tgt->GetFullPath(config, this->UseImportLibrary, true);
+      std::string exe = tgt->GetFullPath(config, artifact, true);
       linkItem += exe;
       this->Items.push_back(Item(linkItem, true, tgt));
       this->Depends.push_back(exe);
@@ -617,9 +623,12 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       bool implib =
         (this->UseImportLibrary &&
          (impexe || tgt->GetType() == cmStateEnums::SHARED_LIBRARY));
+      cmStateEnums::ArtifactType artifact = implib
+        ? cmStateEnums::ImportLibraryArtifact
+        : cmStateEnums::RuntimeBinaryArtifact;
 
       // Pass the full path to the target file.
-      std::string lib = tgt->GetFullPath(config, implib, true);
+      std::string lib = tgt->GetFullPath(config, artifact, true);
       if (!this->LinkDependsNoShared ||
           tgt->GetType() != cmStateEnums::SHARED_LIBRARY) {
         this->Depends.push_back(lib);
@@ -689,7 +698,10 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
   // linked will be able to find it.
   std::string lib;
   if (tgt) {
-    lib = tgt->GetFullPath(this->Config, this->UseImportLibrary);
+    cmStateEnums::ArtifactType artifact = this->UseImportLibrary
+      ? cmStateEnums::ImportLibraryArtifact
+      : cmStateEnums::RuntimeBinaryArtifact;
+    lib = tgt->GetFullPath(this->Config, artifact);
     this->AddLibraryRuntimeInfo(lib, tgt);
   } else {
     lib = item;
@@ -1021,8 +1033,8 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
   // See documentation of CMP0008.
   std::string generator = this->GlobalGenerator->GetName();
   if (this->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
-      (generator.find("Visual Studio") != generator.npos ||
-       generator.find("Xcode") != generator.npos)) {
+      (generator.find("Visual Studio") != std::string::npos ||
+       generator.find("Xcode") != std::string::npos)) {
     std::string file = cmSystemTools::GetFilenameName(item);
     if (!this->ExtractAnyLibraryName.find(file.c_str())) {
       this->HandleBadFullItem(item, file);
@@ -1725,7 +1737,13 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     }
   }
   if (use_build_rpath || use_link_rpath) {
-    std::string rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+    std::string rootPath;
+    if (const char* sysrootLink =
+          this->Makefile->GetDefinition("CMAKE_SYSROOT_LINK")) {
+      rootPath = sysrootLink;
+    } else {
+      rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+    }
     const char* stagePath =
       this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX");
     const char* installPrefix =

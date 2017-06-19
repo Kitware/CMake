@@ -19,7 +19,7 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
-  const char* inFile = args[0].c_str();
+  std::string const& inFile = args[0];
   if (!cmSystemTools::FileIsFullPath(inFile)) {
     this->InputFile = this->Makefile->GetCurrentSourceDirectory();
     this->InputFile += "/";
@@ -38,7 +38,7 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
-  const char* outFile = args[1].c_str();
+  std::string const& outFile = args[1];
   if (!cmSystemTools::FileIsFullPath(outFile)) {
     this->OutputFile = this->Makefile->GetCurrentBinaryDirectory();
     this->OutputFile += "/";

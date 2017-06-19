@@ -7,8 +7,9 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 #include <sstream>
 #include <string.h>
 #include <utility>
@@ -75,13 +76,7 @@ bool cmDepends::Check(const char* makeFile, const char* internalFile,
                       std::map<std::string, DependencyVector>& validDeps)
 {
   // Dependency checks must be done in proper working directory.
-  std::string oldcwd = ".";
-  if (this->CompileDirectory != ".") {
-    // Get the CWD but do not call CollapseFullPath because
-    // we only need it to cd back, and the form does not matter
-    oldcwd = cmSystemTools::GetCurrentWorkingDirectory(false);
-    cmSystemTools::ChangeDirectory(this->CompileDirectory);
-  }
+  cmWorkingDirectory workdir(this->CompileDirectory);
 
   // Check whether dependencies must be regenerated.
   bool okay = true;
@@ -91,11 +86,6 @@ bool cmDepends::Check(const char* makeFile, const char* internalFile,
     this->Clear(makeFile);
     cmSystemTools::RemoveFile(internalFile);
     okay = false;
-  }
-
-  // Restore working directory.
-  if (oldcwd != ".") {
-    cmSystemTools::ChangeDirectory(oldcwd);
   }
 
   return okay;

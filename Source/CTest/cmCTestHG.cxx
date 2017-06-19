@@ -8,7 +8,7 @@
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <ostream>
 #include <vector>
 
@@ -104,19 +104,21 @@ std::string cmCTestHG::GetWorkingRevision()
   return rev;
 }
 
-void cmCTestHG::NoteOldRevision()
+bool cmCTestHG::NoteOldRevision()
 {
   this->OldRevision = this->GetWorkingRevision();
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Old revision of repository is: "
                << this->OldRevision << "\n");
   this->PriorRev.Rev = this->OldRevision;
+  return true;
 }
 
-void cmCTestHG::NoteNewRevision()
+bool cmCTestHG::NoteNewRevision()
 {
   this->NewRevision = this->GetWorkingRevision();
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   New revision of repository is: "
                << this->NewRevision << "\n");
+  return true;
 }
 
 bool cmCTestHG::UpdateImpl()
@@ -262,7 +264,7 @@ private:
   }
 };
 
-void cmCTestHG::LoadRevisions()
+bool cmCTestHG::LoadRevisions()
 {
   // Use 'hg log' to get revisions in a xml format.
   //
@@ -293,9 +295,10 @@ void cmCTestHG::LoadRevisions()
   OutputLogger err(this->Log, "log-err> ");
   this->RunChild(hg_log, &out, &err);
   out.Process("</log>\n");
+  return true;
 }
 
-void cmCTestHG::LoadModifications()
+bool cmCTestHG::LoadModifications()
 {
   // Use 'hg status' to get modified files.
   const char* hg = this->CommandLineTool.c_str();
@@ -303,4 +306,5 @@ void cmCTestHG::LoadModifications()
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
   this->RunChild(hg_status, &out, &err);
+  return true;
 }

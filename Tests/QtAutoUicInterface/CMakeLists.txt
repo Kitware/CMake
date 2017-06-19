@@ -53,6 +53,12 @@ set_property(TARGET KI18n APPEND PROPERTY
 
 # END upstream
 
+if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+set(INC_DIR "include_${CMAKE_BUILD_TYPE}" )
+else()
+set(INC_DIR "include" )
+endif()
+
 add_library(LibWidget libwidget.cpp)
 target_link_libraries(LibWidget KI18n ${QT_GUI_TARGET})
 set_property(TARGET LibWidget PROPERTY NO_KUIT_SEMANTIC ON)
@@ -64,6 +70,6 @@ target_link_libraries(MyWidget KI18n ${QT_GUI_TARGET})
 add_executable(QtAutoUicInterface main.cpp)
 target_compile_definitions(QtAutoUicInterface
   PRIVATE
-    UI_LIBWIDGET_H="${CMAKE_CURRENT_BINARY_DIR}/LibWidget_autogen/include/ui_libwidget.h"
-    UI_MYWIDGET_H="${CMAKE_CURRENT_BINARY_DIR}/MyWidget_autogen/include/ui_mywidget.h"
+    UI_LIBWIDGET_H="${CMAKE_CURRENT_BINARY_DIR}/LibWidget_autogen/${INC_DIR}/ui_libwidget.h"
+    UI_MYWIDGET_H="${CMAKE_CURRENT_BINARY_DIR}/MyWidget_autogen/${INC_DIR}/ui_mywidget.h"
 )

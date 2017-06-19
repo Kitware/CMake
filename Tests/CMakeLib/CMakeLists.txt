@@ -34,16 +34,6 @@ target_link_libraries(CMakeLibTests CMakeLib)
 add_executable(testEncoding testEncoding.cxx)
 target_link_libraries(testEncoding cmsys)
 
-# Xcode 2.x forgets to create the output directory before linking
-# the individual architectures.
-if(CMAKE_OSX_ARCHITECTURES AND XCODE
-    AND NOT "${XCODE_VERSION}" MATCHES "^[^12]")
-  add_custom_command(
-    TARGET CMakeLibTests
-    PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CFG_INTDIR}"
-    )
-endif()
-
 foreach(test ${CMakeLib_TESTS})
   add_test(CMakeLib.${test} CMakeLibTests ${test} ${${test}_ARGS})
 endforeach()

@@ -1,6 +1,17 @@
 include(RunCMake)
 
-run_cmake(Opt)
-run_cmake(Root)
-run_cmake(Usr)
-run_cmake(UsrLocal)
+if(SYSTEM_NAME MATCHES "^(.*BSD|DragonFly)$")
+  set(EXPECT_BSD 1)
+endif()
+
+foreach(case
+    Opt
+    Root
+    Usr
+    UsrLocal
+    )
+  if(EXPECT_BSD)
+    set(RunCMake-stderr-file ${case}-BSD-stderr.txt)
+  endif()
+  run_cmake(${case})
+endforeach()

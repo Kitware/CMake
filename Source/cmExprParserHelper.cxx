@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExprParserHelper.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmExprLexer.h"
 

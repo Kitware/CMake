@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGraphVizWriter.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 #include <iostream>
 #include <sstream>
 #include <utility>
@@ -61,7 +61,7 @@ cmGraphVizWriter::cmGraphVizWriter(
 void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
                                     const char* fallbackSettingsFileName)
 {
-  cmake cm;
+  cmake cm(cmake::RoleScript);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();

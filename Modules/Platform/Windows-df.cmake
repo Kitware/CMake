@@ -30,7 +30,7 @@ set(CMAKE_Fortran_LINK_EXECUTABLE
 set(CMAKE_CREATE_WIN32_EXE /winapp)
 set(CMAKE_CREATE_CONSOLE_EXE )
 
-if(CMAKE_GENERATOR MATCHES "Visual Studio 7" OR CMAKE_GENERATOR MATCHES "Visual Studio 8")
+if(CMAKE_GENERATOR MATCHES "Visual Studio 8")
   set (CMAKE_NO_BUILD_TYPE 1)
 endif()
 # does the compiler support pdbtype and is it the newer compiler

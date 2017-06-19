@@ -2,11 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalNinjaGenerator.h"
 
+#include "cm_jsoncpp_reader.h"
+#include "cm_jsoncpp_value.h"
+#include "cm_jsoncpp_writer.h"
+#include "cmsys/FStream.hxx"
 #include <algorithm>
-#include <cm_jsoncpp_reader.h>
-#include <cm_jsoncpp_value.h>
-#include <cm_jsoncpp_writer.h>
-#include <cmsys/FStream.hxx>
 #include <ctype.h>
 #include <functional>
 #include <iterator>
@@ -56,7 +56,7 @@ void cmGlobalNinjaGenerator::Indent(std::ostream& os, int count)
 void cmGlobalNinjaGenerator::WriteDivider(std::ostream& os)
 {
   os << "# ======================================"
-     << "=======================================\n";
+        "=======================================\n";
 }
 
 void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
@@ -77,7 +77,8 @@ void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
 }
 
 cmLinkLineComputer* cmGlobalNinjaGenerator::CreateLinkLineComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory /* stateDir */) const
+  cmOutputConverter* outputConverter,
+  cmStateDirectory const& /* stateDir */) const
 {
   return new cmNinjaLinkLineComputer(
     outputConverter,
@@ -146,13 +147,6 @@ std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
   return EncodeLiteral(result);
 }
 
-std::string cmGlobalNinjaGenerator::EncodeDepfileSpace(const std::string& path)
-{
-  std::string result = path;
-  cmSystemTools::ReplaceString(result, " ", "\\ ");
-  return result;
-}
-
 void cmGlobalNinjaGenerator::WriteBuild(
   std::ostream& os, const std::string& comment, const std::string& rule,
   const cmNinjaDeps& outputs, const cmNinjaDeps& implicitOuts,
@@ -216,7 +210,7 @@ void cmGlobalNinjaGenerator::WriteBuild(
        ++i) {
     build += " " + EncodeIdent(EncodePath(*i), os);
     if (this->ComputingUnknownDependencies) {
-      this->CombinedBuildOutputs.insert(EncodePath(*i));
+      this->CombinedBuildOutputs.insert(*i);
     }
   }
   if (!implicitOuts.empty()) {
@@ -246,7 +240,7 @@ void cmGlobalNinjaGenerator::WriteBuild(
   bool useResponseFile = false;
   if (cmdLineLimit < 0 ||
       (cmdLineLimit > 0 &&
-       (args.size() + buildstr.size() + assignments.size()) >
+       (args.size() + buildstr.size() + assignments.size() + 1000) >
          static_cast<size_t>(cmdLineLimit))) {
     variable_assignments.str(std::string());
     cmGlobalNinjaGenerator::WriteVariable(variable_assignments, "RSP_FILE",
@@ -318,7 +312,7 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
     // we need to track every dependency that comes in, since we are trying
     // to find dependencies that are side effects of build commands
     for (cmNinjaDeps::const_iterator i = deps.begin(); i != deps.end(); ++i) {
-      this->CombinedCustomCommandExplicitDependencies.insert(EncodePath(*i));
+      this->CombinedCustomCommandExplicitDependencies.insert(*i);
     }
   }
 }
@@ -898,6 +892,10 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
     this->GetCMakeInstance()->GetHomeOutputDirectory();
   if (!this->CompileCommandsStream) {
     std::string buildFilePath = buildFileDir + "/compile_commands.json";
+    if (this->ComputingUnknownDependencies) {
+      this->CombinedBuildOutputs.insert(
+        this->NinjaOutputPath("compile_commands.json"));
+    }
 
     // Get a stream where to generate things.
     this->CompileCommandsStream =
@@ -966,8 +964,14 @@ void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
   }
 }
 
+std::string OrderDependsTargetForTarget(cmGeneratorTarget const* target)
+{
+  return "cmake_object_order_depends_target_" + target->GetName();
+}
+
 void cmGlobalNinjaGenerator::AppendTargetOutputs(
-  cmGeneratorTarget const* target, cmNinjaDeps& outputs)
+  cmGeneratorTarget const* target, cmNinjaDeps& outputs,
+  cmNinjaTargetDepends depends)
 {
   std::string configName =
     target->Target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
@@ -979,15 +983,27 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
   bool realname = target->IsFrameworkOnApple();
 
   switch (target->GetType()) {
-    case cmStateEnums::EXECUTABLE:
     case cmStateEnums::SHARED_LIBRARY:
     case cmStateEnums::STATIC_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY: {
-      outputs.push_back(this->ConvertToNinjaPath(
-        target->GetFullPath(configName, false, realname)));
+      if (depends == DependOnTargetOrdering) {
+        outputs.push_back(OrderDependsTargetForTarget(target));
+        break;
+      }
+    }
+    // FALLTHROUGH
+    case cmStateEnums::EXECUTABLE: {
+      outputs.push_back(this->ConvertToNinjaPath(target->GetFullPath(
+        configName, cmStateEnums::RuntimeBinaryArtifact, realname)));
       break;
     }
-    case cmStateEnums::OBJECT_LIBRARY:
+    case cmStateEnums::OBJECT_LIBRARY: {
+      if (depends == DependOnTargetOrdering) {
+        outputs.push_back(OrderDependsTargetForTarget(target));
+        break;
+      }
+    }
+    // FALLTHROUGH
     case cmStateEnums::GLOBAL_TARGET:
     case cmStateEnums::UTILITY: {
       std::string path =
@@ -1003,7 +1019,8 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
 }
 
 void cmGlobalNinjaGenerator::AppendTargetDepends(
-  cmGeneratorTarget const* target, cmNinjaDeps& outputs)
+  cmGeneratorTarget const* target, cmNinjaDeps& outputs,
+  cmNinjaTargetDepends depends)
 {
   if (target->GetType() == cmStateEnums::GLOBAL_TARGET) {
     // These depend only on other CMake-provided targets, e.g. "all".
@@ -1023,7 +1040,7 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
       if ((*i)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
-      this->AppendTargetOutputs(*i, outs);
+      this->AppendTargetOutputs(*i, outs, depends);
     }
     std::sort(outs.begin(), outs.end());
     outputs.insert(outputs.end(), outs.begin(), outs.end());
@@ -1823,10 +1840,14 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
 int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
                              std::vector<std::string>::const_iterator argEnd)
 {
+  std::vector<std::string> arg_full =
+    cmSystemTools::HandleResponseFile(argBeg, argEnd);
+
   std::string arg_dd;
   std::string arg_tdi;
   std::vector<std::string> arg_ddis;
-  for (std::vector<std::string>::const_iterator a = argBeg; a != argEnd; ++a) {
+  for (std::vector<std::string>::const_iterator a = arg_full.begin();
+       a != arg_full.end(); ++a) {
     std::string const& arg = *a;
     if (cmHasLiteralPrefix(arg, "--tdi=")) {
       arg_tdi = arg.substr(6);
@@ -1880,7 +1901,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
     }
   }
 
-  cmake cm;
+  cmake cm(cmake::RoleInternal);
   cm.SetHomeDirectory(dir_top_src);
   cm.SetHomeOutputDirectory(dir_top_bld);
   CM_AUTO_PTR<cmGlobalNinjaGenerator> ggd(

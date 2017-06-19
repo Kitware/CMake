@@ -3,7 +3,8 @@
 #ifndef cmCPackBundleGenerator_h
 #define cmCPackBundleGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 
 #include "cmCPackDragNDropGenerator.h"

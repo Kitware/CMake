@@ -3,7 +3,7 @@
 #ifndef cmake_h
 #define cmake_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <map>
 #include <set>
@@ -16,7 +16,7 @@
 #include "cmStateTypes.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include <cm_jsoncpp_value.h>
+#include "cm_jsoncpp_value.h"
 #endif
 
 class cmExternalMakefileProjectGeneratorFactory;
@@ -55,7 +55,16 @@ struct cmDocumentationEntry;
 
 class cmake
 {
+  CM_DISABLE_COPY(cmake)
+
 public:
+  enum Role
+  {
+    RoleInternal, // no commands
+    RoleScript,   // script commands
+    RoleProject   // all commands
+  };
+
   enum MessageType
   {
     AUTHOR_WARNING,
@@ -110,7 +119,7 @@ public:
   typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
 
   /// Default constructor
-  cmake();
+  cmake(Role role);
   /// Destructor
   ~cmake();
 
@@ -409,7 +418,7 @@ public:
   void WatchUnusedCli(const std::string& var);
 
   cmState* GetState() const { return this->State; }
-  void SetCurrentSnapshot(cmStateSnapshot snapshot)
+  void SetCurrentSnapshot(cmStateSnapshot const& snapshot)
   {
     this->CurrentSnapshot = snapshot;
   }
@@ -425,7 +434,8 @@ protected:
   typedef std::vector<cmExternalMakefileProjectGeneratorFactory*>
     RegisteredExtraGeneratorsVector;
   RegisteredExtraGeneratorsVector ExtraGenerators;
-  void AddDefaultCommands();
+  void AddScriptingCommands();
+  void AddProjectCommands();
   void AddDefaultGenerators();
   void AddDefaultExtraGenerators();
 
@@ -459,8 +469,6 @@ protected:
   cmVariableWatch* VariableWatch;
 
 private:
-  cmake(const cmake&);          // Not implemented.
-  void operator=(const cmake&); // Not implemented.
   ProgressCallbackType ProgressCallback;
   void* ProgressCallbackClientData;
   bool InTryCompile;

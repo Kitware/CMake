@@ -2,21 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLoadCommandCommand.h"
 
-#include "cmCPluginAPI.cxx"
-#include "cmCPluginAPI.h"
-#include "cmDynamicLoader.h"
-#include "cmMakefile.h"
-#include "cmPolicies.h"
-#include "cmState.h"
-#include "cmSystemTools.h"
-
-class cmExecutionStatus;
-
 #include <signal.h>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "cmCPluginAPI.cxx"
+#include "cmCPluginAPI.h"
+#include "cmDynamicLoader.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 #ifdef __QNX__
 #include <malloc.h> /* for malloc/free on QNX */
@@ -66,11 +65,6 @@ public:
   {
     return this->info.FinalPass != CM_NULLPTR;
   }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return info.Name; }
 
   static const char* LastName;
   static void TrapsForSignals(int sig)
@@ -174,11 +168,6 @@ cmLoadedCommand::~cmLoadedCommand()
 bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus&)
 {
-  if (this->Disallowed(
-        cmPolicies::CMP0031,
-        "The load_command command should not be called; see CMP0031.")) {
-    return true;
-  }
   if (args.empty()) {
     return true;
   }
@@ -252,7 +241,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
     // create a function blocker and set it up
     cmLoadedCommand* f = new cmLoadedCommand();
     (*initFunction)(&f->info);
-    this->Makefile->GetState()->AddCommand(f);
+    this->Makefile->GetState()->AddScriptedCommand(args[0], f);
     return true;
   }
   this->SetError("Attempt to load command failed. "

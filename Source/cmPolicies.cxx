@@ -8,8 +8,8 @@
 #include "cmVersion.h"
 #include "cmake.h"
 
+#include "cmConfigure.h"
 #include <assert.h>
-#include <cmConfigure.h>
 #include <ctype.h>
 #include <sstream>
 #include <stdio.h>
@@ -272,6 +272,22 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
                            "policy details.  "
                            "Use the cmake_policy command to set the policy "
                            "and suppress this warning.";
+  return msg.str();
+}
+
+std::string cmPolicies::GetPolicyDeprecatedWarning(cmPolicies::PolicyID id)
+{
+  std::ostringstream msg;
+  /* clang-format off */
+  msg <<
+    "The OLD behavior for policy " << idToString(id) << " "
+    "will be removed from a future version of CMake.\n"
+    "The cmake-policies(7) manual explains that the OLD behaviors of all "
+    "policies are deprecated and that a policy should be set to OLD only "
+    "under specific short-term circumstances.  Projects should be ported "
+    "to the NEW behavior and not rely on setting a policy to OLD."
+    ;
+  /* clang-format on */
   return msg.str();
 }
 

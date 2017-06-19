@@ -4,7 +4,7 @@
 #ifndef cmMSVC60LinkLineComputer_h
 #define cmMSVC60LinkLineComputer_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 
@@ -15,9 +15,11 @@ class cmStateDirectory;
 
 class cmMSVC60LinkLineComputer : public cmLinkLineComputer
 {
+  CM_DISABLE_COPY(cmMSVC60LinkLineComputer)
+
 public:
   cmMSVC60LinkLineComputer(cmOutputConverter* outputConverter,
-                           cmStateDirectory stateDir);
+                           cmStateDirectory const& stateDir);
 
   std::string ConvertToLinkReference(std::string const& input) const
     CM_OVERRIDE;

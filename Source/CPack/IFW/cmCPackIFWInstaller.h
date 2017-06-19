@@ -3,21 +3,21 @@
 #ifndef cmCPackIFWInstaller_h
 #define cmCPackIFWInstaller_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
+
+#include "cmCPackIFWCommon.h"
 
 #include <map>
 #include <string>
 #include <vector>
 
-class cmCPackIFWGenerator;
 class cmCPackIFWPackage;
 class cmCPackIFWRepository;
-class cmXMLWriter;
 
 /** \class cmCPackIFWInstaller
  * \brief A binary installer to be created CPack IFW generator
  */
-class cmCPackIFWInstaller
+class cmCPackIFWInstaller : public cmCPackIFWCommon
 {
 public:
   // Types
@@ -111,28 +111,17 @@ public:
 public:
   // Internal implementation
 
-  const char* GetOption(const std::string& op) const;
-  bool IsOn(const std::string& op) const;
-
-  bool IsVersionLess(const char* version);
-  bool IsVersionGreater(const char* version);
-  bool IsVersionEqual(const char* version);
-
   void ConfigureFromOptions();
 
   void GenerateInstallerFile();
 
   void GeneratePackageFiles();
 
-  cmCPackIFWGenerator* Generator;
   PackagesMap Packages;
   RepositoriesVector RemoteRepositories;
   std::string Directory;
 
 protected:
-  void WriteGeneratedByToStrim(cmXMLWriter& xout);
-
-private:
   void printSkippedOptionWarning(const std::string& optionName,
                                  const std::string& optionValue);
 };

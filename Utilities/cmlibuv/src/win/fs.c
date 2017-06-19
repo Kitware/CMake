@@ -114,7 +114,7 @@ const WCHAR UNC_PATH_PREFIX[] = L"\\\\?\\UNC\\";
 const WCHAR UNC_PATH_PREFIX_LEN = 8;
 
 
-void uv_fs_init() {
+void uv_fs_init(void) {
   _fmode = _O_BINARY;
 }
 
@@ -123,7 +123,7 @@ INLINE static int fs__capture_path(uv_fs_t* req, const char* path,
     const char* new_path, const int copy_path) {
   char* buf;
   char* pos;
-  ssize_t buf_sz = 0, path_len, pathw_len = 0, new_pathw_len = 0;
+  ssize_t buf_sz = 0, path_len = 0, pathw_len = 0, new_pathw_len = 0;
 
   /* new_path can only be set if path is also set. */
   assert(new_path == NULL || path != NULL);
@@ -220,9 +220,7 @@ INLINE static int fs__capture_path(uv_fs_t* req, const char* path,
 
 INLINE static void uv_fs_req_init(uv_loop_t* loop, uv_fs_t* req,
     uv_fs_type fs_type, const uv_fs_cb cb) {
-  uv_req_init(loop, (uv_req_t*) req);
-
-  req->type = UV_FS;
+  UV_REQ_INIT(req, UV_FS);
   req->loop = loop;
   req->flags = 0;
   req->fs_type = fs_type;
@@ -403,7 +401,6 @@ void fs__open(uv_fs_t* req) {
   switch (flags & (_O_RDONLY | _O_WRONLY | _O_RDWR)) {
   case _O_RDONLY:
     access = FILE_GENERIC_READ;
-    attributes |= FILE_FLAG_BACKUP_SEMANTICS;
     break;
   case _O_WRONLY:
     access = FILE_GENERIC_WRITE;
@@ -418,7 +415,6 @@ void fs__open(uv_fs_t* req) {
   if (flags & _O_APPEND) {
     access &= ~FILE_WRITE_DATA;
     access |= FILE_APPEND_DATA;
-    attributes &= ~FILE_FLAG_BACKUP_SEMANTICS;
   }
 
   /*
@@ -1375,7 +1371,7 @@ static void fs__access(uv_fs_t* req) {
    * - or it's a directory.
    * (Directories cannot be read-only on Windows.)
    */
-  if (!(req->flags & W_OK) ||
+  if (!(req->fs.info.mode & W_OK) ||
       !(attr & FILE_ATTRIBUTE_READONLY) ||
       (attr & FILE_ATTRIBUTE_DIRECTORY)) {
     SET_REQ_RESULT(req, 0);
@@ -2402,7 +2398,7 @@ int uv_fs_access(uv_loop_t* loop,
   if (err)
     return uv_translate_sys_error(err);
 
-  req->flags = flags;
+  req->fs.info.mode = flags;
 
   if (cb) {
     QUEUE_FS_TP_JOB(loop, req);

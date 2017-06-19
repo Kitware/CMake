@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,6 +35,7 @@
 #endif
 
 #include "curlver.h"         /* libcurl version defines   */
+#include "system.h"          /* determine things run-time */
 #include "cmcurl/include/curl/curlbuild.h" /* libcurl build definitions */
 #include "curlrules.h"       /* libcurl rules enforcement */
 
@@ -143,7 +144,7 @@ struct curl_httppost {
   char *buffer;                     /* pointer to allocated buffer contents */
   long bufferlength;                /* length of buffer field */
   char *contenttype;                /* Content-Type */
-  struct curl_slist* contentheader; /* list of extra headers for this form */
+  struct curl_slist *contentheader; /* list of extra headers for this form */
   struct curl_httppost *more;       /* if one field name has more than one
                                        file, this link should link to following
                                        files */
@@ -192,6 +193,11 @@ typedef int (*curl_xferinfo_callback)(void *clientp,
                                       curl_off_t dlnow,
                                       curl_off_t ultotal,
                                       curl_off_t ulnow);
+
+#ifndef CURL_MAX_READ_SIZE
+  /* The maximum receive buffer size configurable via CURLOPT_BUFFERSIZE. */
+#define CURL_MAX_READ_SIZE 524288
+#endif
 
 #ifndef CURL_MAX_WRITE_SIZE
   /* Tests have proven that 20K is a very bad buffer size for uploads on
@@ -270,7 +276,7 @@ struct curl_fileinfo {
   unsigned int flags;
 
   /* used internally */
-  char * b_data;
+  char *b_data;
   size_t b_size;
   size_t b_used;
 };
@@ -479,7 +485,7 @@ typedef enum {
   CURLE_LDAP_CANNOT_BIND,        /* 38 */
   CURLE_LDAP_SEARCH_FAILED,      /* 39 */
   CURLE_OBSOLETE40,              /* 40 - NOT USED */
-  CURLE_FUNCTION_NOT_FOUND,      /* 41 */
+  CURLE_FUNCTION_NOT_FOUND,      /* 41 - NOT USED starting with 7.53.0 */
   CURLE_ABORTED_BY_CALLBACK,     /* 42 */
   CURLE_BAD_FUNCTION_ARGUMENT,   /* 43 */
   CURLE_OBSOLETE44,              /* 44 - NOT USED */
@@ -640,6 +646,7 @@ typedef enum {
                            CONNECT HTTP/1.1 */
   CURLPROXY_HTTP_1_0 = 1,   /* added in 7.19.4, force to use CONNECT
                                HTTP/1.0  */
+  CURLPROXY_HTTPS = 2, /* added in 7.52.0 */
   CURLPROXY_SOCKS4 = 4, /* support added in 7.15.2, enum existed already
                            in 7.10 */
   CURLPROXY_SOCKS5 = 5, /* added in 7.10 */
@@ -1206,7 +1213,8 @@ typedef enum {
   CINIT(SHARE, OBJECTPOINT, 100),
 
   /* indicates type of proxy. accepted values are CURLPROXY_HTTP (default),
-     CURLPROXY_SOCKS4, CURLPROXY_SOCKS4A and CURLPROXY_SOCKS5. */
+     CURLPROXY_HTTPS, CURLPROXY_SOCKS4, CURLPROXY_SOCKS4A and
+     CURLPROXY_SOCKS5. */
   CINIT(PROXYTYPE, LONG, 101),
 
   /* Set the Accept-Encoding string. Use this to tell a server you would like
@@ -1593,7 +1601,7 @@ typedef enum {
   CINIT(DNS_SERVERS, STRINGPOINT, 211),
 
   /* Time-out accept operations (currently for FTP only) after this amount
-     of miliseconds. */
+     of milliseconds. */
   CINIT(ACCEPTTIMEOUT_MS, LONG, 212),
 
   /* Set TCP keepalive */
@@ -1704,6 +1712,76 @@ typedef enum {
    * HTTP status code >= 300 */
   CINIT(KEEP_SENDING_ON_ERROR, LONG, 245),
 
+  /* The CApath or CAfile used to validate the proxy certificate
+     this option is used only if PROXY_SSL_VERIFYPEER is true */
+  CINIT(PROXY_CAINFO, STRINGPOINT, 246),
+
+  /* The CApath directory used to validate the proxy certificate
+     this option is used only if PROXY_SSL_VERIFYPEER is true */
+  CINIT(PROXY_CAPATH, STRINGPOINT, 247),
+
+  /* Set if we should verify the proxy in ssl handshake,
+     set 1 to verify. */
+  CINIT(PROXY_SSL_VERIFYPEER, LONG, 248),
+
+  /* Set if we should verify the Common name from the proxy certificate in ssl
+   * handshake, set 1 to check existence, 2 to ensure that it matches
+   * the provided hostname. */
+  CINIT(PROXY_SSL_VERIFYHOST, LONG, 249),
+
+  /* What version to specifically try to use for proxy.
+     See CURL_SSLVERSION defines below. */
+  CINIT(PROXY_SSLVERSION, LONG, 250),
+
+  /* Set a username for authenticated TLS for proxy */
+  CINIT(PROXY_TLSAUTH_USERNAME, STRINGPOINT, 251),
+
+  /* Set a password for authenticated TLS for proxy */
+  CINIT(PROXY_TLSAUTH_PASSWORD, STRINGPOINT, 252),
+
+  /* Set authentication type for authenticated TLS for proxy */
+  CINIT(PROXY_TLSAUTH_TYPE, STRINGPOINT, 253),
+
+  /* name of the file keeping your private SSL-certificate for proxy */
+  CINIT(PROXY_SSLCERT, STRINGPOINT, 254),
+
+  /* type of the file keeping your SSL-certificate ("DER", "PEM", "ENG") for
+     proxy */
+  CINIT(PROXY_SSLCERTTYPE, STRINGPOINT, 255),
+
+  /* name of the file keeping your private SSL-key for proxy */
+  CINIT(PROXY_SSLKEY, STRINGPOINT, 256),
+
+  /* type of the file keeping your private SSL-key ("DER", "PEM", "ENG") for
+     proxy */
+  CINIT(PROXY_SSLKEYTYPE, STRINGPOINT, 257),
+
+  /* password for the SSL private key for proxy */
+  CINIT(PROXY_KEYPASSWD, STRINGPOINT, 258),
+
+  /* Specify which SSL ciphers to use for proxy */
+  CINIT(PROXY_SSL_CIPHER_LIST, STRINGPOINT, 259),
+
+  /* CRL file for proxy */
+  CINIT(PROXY_CRLFILE, STRINGPOINT, 260),
+
+  /* Enable/disable specific SSL features with a bitmask for proxy, see
+     CURLSSLOPT_* */
+  CINIT(PROXY_SSL_OPTIONS, LONG, 261),
+
+  /* Name of pre proxy to use. */
+  CINIT(PRE_PROXY, STRINGPOINT, 262),
+
+  /* The public key in DER form used to validate the proxy public key
+     this option is used only if PROXY_SSL_VERIFYPEER is true */
+  CINIT(PROXY_PINNEDPUBLICKEY, STRINGPOINT, 263),
+
+  /* Path to an abstract Unix domain socket */
+  CINIT(ABSTRACT_UNIX_SOCKET, STRINGPOINT, 264),
+
+  /* Suppress proxy CONNECT response headers from user callbacks */
+  CINIT(SUPPRESS_CONNECT_HEADERS, LONG, 265),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -1805,8 +1883,21 @@ enum {
   CURL_SSLVERSION_TLSv1_0,
   CURL_SSLVERSION_TLSv1_1,
   CURL_SSLVERSION_TLSv1_2,
+  CURL_SSLVERSION_TLSv1_3,
 
   CURL_SSLVERSION_LAST /* never use, keep last */
+};
+
+enum {
+  CURL_SSLVERSION_MAX_NONE =     0,
+  CURL_SSLVERSION_MAX_DEFAULT =  (CURL_SSLVERSION_TLSv1   << 16),
+  CURL_SSLVERSION_MAX_TLSv1_0 =  (CURL_SSLVERSION_TLSv1_0 << 16),
+  CURL_SSLVERSION_MAX_TLSv1_1 =  (CURL_SSLVERSION_TLSv1_1 << 16),
+  CURL_SSLVERSION_MAX_TLSv1_2 =  (CURL_SSLVERSION_TLSv1_2 << 16),
+  CURL_SSLVERSION_MAX_TLSv1_3 =  (CURL_SSLVERSION_TLSv1_3 << 16),
+
+  /* never use, keep last */
+  CURL_SSLVERSION_MAX_LAST =     (CURL_SSLVERSION_LAST    << 16)
 };
 
 enum CURL_TLSAUTH {
@@ -1839,7 +1930,10 @@ typedef enum {
 
 
 /* curl_strequal() and curl_strnequal() are subject for removal in a future
-   libcurl, see lib/README.curlx for details */
+   libcurl, see lib/README.curlx for details
+
+   !checksrc! disable SPACEBEFOREPAREN 2
+*/
 CURL_EXTERN int (curl_strequal)(const char *s1, const char *s2);
 CURL_EXTERN int (curl_strnequal)(const char *s1, const char *s2, size_t n);
 
@@ -2157,6 +2251,7 @@ struct curl_tlssessioninfo {
 #define CURLINFO_LONG     0x200000
 #define CURLINFO_DOUBLE   0x300000
 #define CURLINFO_SLIST    0x400000
+#define CURLINFO_PTR      0x400000 /* same as SLIST */
 #define CURLINFO_SOCKET   0x500000
 #define CURLINFO_MASK     0x0fffff
 #define CURLINFO_TYPEMASK 0xf00000
@@ -2196,7 +2291,7 @@ typedef enum {
   CURLINFO_REDIRECT_URL     = CURLINFO_STRING + 31,
   CURLINFO_PRIMARY_IP       = CURLINFO_STRING + 32,
   CURLINFO_APPCONNECT_TIME  = CURLINFO_DOUBLE + 33,
-  CURLINFO_CERTINFO         = CURLINFO_SLIST  + 34,
+  CURLINFO_CERTINFO         = CURLINFO_PTR    + 34,
   CURLINFO_CONDITION_UNMET  = CURLINFO_LONG   + 35,
   CURLINFO_RTSP_SESSION_ID  = CURLINFO_STRING + 36,
   CURLINFO_RTSP_CLIENT_CSEQ = CURLINFO_LONG   + 37,
@@ -2205,13 +2300,16 @@ typedef enum {
   CURLINFO_PRIMARY_PORT     = CURLINFO_LONG   + 40,
   CURLINFO_LOCAL_IP         = CURLINFO_STRING + 41,
   CURLINFO_LOCAL_PORT       = CURLINFO_LONG   + 42,
-  CURLINFO_TLS_SESSION      = CURLINFO_SLIST  + 43,
+  CURLINFO_TLS_SESSION      = CURLINFO_PTR    + 43,
   CURLINFO_ACTIVESOCKET     = CURLINFO_SOCKET + 44,
-  CURLINFO_TLS_SSL_PTR      = CURLINFO_SLIST  + 45,
+  CURLINFO_TLS_SSL_PTR      = CURLINFO_PTR    + 45,
   CURLINFO_HTTP_VERSION     = CURLINFO_LONG   + 46,
+  CURLINFO_PROXY_SSL_VERIFYRESULT = CURLINFO_LONG + 47,
+  CURLINFO_PROTOCOL         = CURLINFO_LONG   + 48,
+  CURLINFO_SCHEME           = CURLINFO_STRING + 49,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 46
+  CURLINFO_LASTONE          = 49
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
@@ -2365,13 +2463,14 @@ typedef struct {
 #define CURL_VERSION_CURLDEBUG    (1<<13) /* Debug memory tracking supported */
 #define CURL_VERSION_TLSAUTH_SRP  (1<<14) /* TLS-SRP auth is supported */
 #define CURL_VERSION_NTLM_WB      (1<<15) /* NTLM delegation to winbind helper
-                                             is suported */
+                                             is supported */
 #define CURL_VERSION_HTTP2        (1<<16) /* HTTP2 support built-in */
 #define CURL_VERSION_GSSAPI       (1<<17) /* Built against a GSS-API library */
 #define CURL_VERSION_KERBEROS5    (1<<18) /* Kerberos V5 auth is supported */
 #define CURL_VERSION_UNIX_SOCKETS (1<<19) /* Unix domain sockets support */
 #define CURL_VERSION_PSL          (1<<20) /* Mozilla's Public Suffix List, used
                                              for cookie domain verification */
+#define CURL_VERSION_HTTPS_PROXY  (1<<21) /* HTTPS-proxy support built-in */
 
  /*
  * NAME curl_version_info()

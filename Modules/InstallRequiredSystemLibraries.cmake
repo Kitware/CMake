@@ -31,6 +31,11 @@
 #   app-local deployment (e.g. to Windows XP).  This is meaningful
 #   only with MSVC from Visual Studio 2015 or higher.
 #
+#   One may set a ``CMAKE_WINDOWS_KITS_10_DIR`` *environment variable*
+#   to an absolute path to tell CMake to look for Windows 10 SDKs in
+#   a custom location.  The specified directory is expected to contain
+#   ``Redist/ucrt/DLLs/*`` directories.
+#
 # ``CMAKE_INSTALL_MFC_LIBRARIES``
 #   Set to TRUE to install the MSVC MFC runtime libraries.
 #
@@ -258,6 +263,7 @@ if(MSVC)
       set(programfilesx86 "ProgramFiles(x86)")
       find_path(WINDOWS_KITS_DIR NAMES Redist/ucrt/DLLs/${CMAKE_MSVC_ARCH}/ucrtbase.dll
         PATHS
+        $ENV{CMAKE_WINDOWS_KITS_10_DIR}
         "${windows_kits_dir}"
         "$ENV{ProgramFiles}/Windows Kits/10"
         "$ENV{${programfilesx86}}/Windows Kits/10"

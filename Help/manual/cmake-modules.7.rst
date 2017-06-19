@@ -27,6 +27,7 @@ All Modules
    /module/CheckFortranFunctionExists
    /module/CheckFortranSourceCompiles
    /module/CheckFunctionExists
+   /module/CheckIPOSupported
    /module/CheckIncludeFileCXX
    /module/CheckIncludeFile
    /module/CheckIncludeFiles
@@ -53,6 +54,7 @@ All Modules
    /module/CMakePrintSystemInformation
    /module/CMakePushCheckState
    /module/CMakeVerifyManifest
+   /module/CPackArchive
    /module/CPackBundle
    /module/CPackComponent
    /module/CPackCygwin
@@ -229,6 +231,7 @@ All Modules
    /module/GenerateExportHeader
    /module/GetPrerequisites
    /module/GNUInstallDirs
+   /module/GoogleTest
    /module/InstallRequiredSystemLibraries
    /module/MacroAddFileDependencies
    /module/ProcessorCount

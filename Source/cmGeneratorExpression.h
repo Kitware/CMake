@@ -3,11 +3,11 @@
 #ifndef cmGeneratorExpression_h
 #define cmGeneratorExpression_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmListFileCache.h"
 
-#include <cm_auto_ptr.hxx>
+#include "cm_auto_ptr.hxx"
 #include <map>
 #include <set>
 #include <string>
@@ -31,6 +31,8 @@ struct cmGeneratorExpressionEvaluator;
  */
 class cmGeneratorExpression
 {
+  CM_DISABLE_COPY(cmGeneratorExpression)
+
 public:
   /** Construct. */
   cmGeneratorExpression(
@@ -61,14 +63,13 @@ public:
   static std::string StripEmptyListElements(const std::string& input);
 
 private:
-  cmGeneratorExpression(const cmGeneratorExpression&);
-  void operator=(const cmGeneratorExpression&);
-
   cmListFileBacktrace Backtrace;
 };
 
 class cmCompiledGeneratorExpression
 {
+  CM_DISABLE_COPY(cmCompiledGeneratorExpression)
+
 public:
   const char* Evaluate(
     cmLocalGenerator* lg, const std::string& config, bool quiet = false,
@@ -132,9 +133,6 @@ private:
                                 const std::string& input);
 
   friend class cmGeneratorExpression;
-
-  cmCompiledGeneratorExpression(const cmCompiledGeneratorExpression&);
-  void operator=(const cmCompiledGeneratorExpression&);
 
   cmListFileBacktrace Backtrace;
   std::vector<cmGeneratorExpressionEvaluator*> Evaluators;

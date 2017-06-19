@@ -63,25 +63,36 @@ If a ``Q_OBJECT`` or ``Q_GADGET`` macro is found in a header file, ``moc``
 will be run on the file.  The result will be put into a file named according
 to ``moc_<basename>.cpp``.  If the macro is found in a C++ implementation
 file, the moc output will be put into a file named according to
-``<basename>.moc``, following the Qt conventions.  The ``moc file`` may be
-included by the user in the C++ implementation file with a preprocessor
-``#include``.  If it is not so included, it will be added to a separate file
-which is compiled into the target.
+``<basename>.moc``, following the Qt conventions.  The ``<basename>.moc`` must
+be included by the user in the C++ implementation file with a preprocessor
+``#include``.
+
+Included ``moc_*.cpp`` and ``*.moc`` files will be generated in the
+``<AUTOGEN_BUILD_DIR>/include`` directory which is
+automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
+(This differs from CMake 3.7 and below; see their documentation for details.)
+
+* See :prop_tgt:`AUTOGEN_BUILD_DIR`.
+
+Not included ``moc_<basename>.cpp`` files will be generated in custom
+folders to avoid name collisions and included in a separate
+``<AUTOGEN_BUILD_DIR>/mocs_compilation.cpp`` file which is compiled
+into the target.
+
+* See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
 The ``moc`` command line will consume the :prop_tgt:`COMPILE_DEFINITIONS` and
 :prop_tgt:`INCLUDE_DIRECTORIES` target properties from the target it is being
 invoked for, and for the appropriate build configuration.
-
-The generated ``moc_*.cpp`` and ``*.moc`` files are placed in the
-``<CMAKE_CURRENT_BINARY_DIR>/<TARGETNAME>_autogen/include`` directory which is
-automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
-(This differs from CMake 3.7 and below; see their documentation for details.)
 
 The :prop_tgt:`AUTOMOC` target property may be pre-set for all
 following targets by setting the :variable:`CMAKE_AUTOMOC` variable.  The
 :prop_tgt:`AUTOMOC_MOC_OPTIONS` target property may be populated to set
 options to pass to ``moc``. The :variable:`CMAKE_AUTOMOC_MOC_OPTIONS`
 variable may be populated to pre-set the options for all following targets.
+
+Additional ``moc`` dependency file names can be extracted from source code
+by using :prop_tgt:`AUTOMOC_DEPEND_FILTERS`.
 
 Source C++ files can be excluded from :prop_tgt:`AUTOMOC` processing by
 enabling :prop_sf:`SKIP_AUTOMOC` or the broader :prop_sf:`SKIP_AUTOGEN`.
@@ -97,12 +108,16 @@ be run, and to create rules to execute ``uic`` at the appropriate time.
 
 If a preprocessor ``#include`` directive is found which matches
 ``ui_<basename>.h``, and a ``<basename>.ui`` file exists, then ``uic`` will
-be executed to generate the appropriate file.
+be executed to generate the appropriate file. The ``<basename>.ui`` file is
+searched for first in the vicinity of including file and afterwards in the
+optional :prop_tgt:`AUTOUIC_SEARCH_PATHS` of the target.
 
 The generated generated ``ui_*.h`` files are placed in the
-``<CMAKE_CURRENT_BINARY_DIR>/<TARGETNAME>_autogen/include`` directory which is
+``<AUTOGEN_BUILD_DIR>/include`` directory which is
 automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
 (This differs from CMake 3.7 and below; see their documentation for details.)
+
+* See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
 The :prop_tgt:`AUTOUIC` target property may be pre-set for all following
 targets by setting the :variable:`CMAKE_AUTOUIC` variable.  The

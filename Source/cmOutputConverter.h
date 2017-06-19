@@ -3,7 +3,7 @@
 #ifndef cmOutputConverter_h
 #define cmOutputConverter_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 
@@ -15,7 +15,7 @@ class cmStateDirectory;
 class cmOutputConverter
 {
 public:
-  cmOutputConverter(cmStateSnapshot snapshot);
+  cmOutputConverter(cmStateSnapshot const& snapshot);
 
   enum OutputFormat
   {
@@ -94,7 +94,7 @@ public:
 
   static bool ContainedInDirectory(std::string const& local_path,
                                    std::string const& remote_path,
-                                   cmStateDirectory directory);
+                                   cmStateDirectory const& directory);
 
   /**
    * Convert the given remote path to a relative path with respect to

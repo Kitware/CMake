@@ -32,7 +32,7 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
   }
 
   // The cmake variable in which to store the result.
-  const char* variable = args[0].c_str();
+  std::string const& variable = args[0];
 
   // Parse remaining arguments.
   std::string configuration;
@@ -104,7 +104,7 @@ bool cmBuildCommand::TwoArgsSignature(std::vector<std::string> const& args)
     return false;
   }
 
-  const char* define = args[0].c_str();
+  std::string const& define = args[0];
   const char* cacheValue = this->Makefile->GetDefinition(define);
 
   std::string configType;

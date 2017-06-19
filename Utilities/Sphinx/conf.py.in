@@ -18,7 +18,9 @@ release = '@conf_release@' # full version string
 
 primary_domain = 'cmake'
 
-exclude_patterns = []
+exclude_patterns = [
+    'dev', # ignore developer-only documentation
+    ]
 
 extensions = ['cmake']
 templates_path = ['@conf_path@/templates']
@@ -52,6 +54,26 @@ html_show_sourcelink = True
 html_static_path = ['@conf_path@/static']
 html_style = 'cmake.css'
 html_theme = 'default'
+html_theme_options = {
+    'footerbgcolor':    '#00182d',
+    'footertextcolor':  '#ffffff',
+    'sidebarbgcolor':   '#e4ece8',
+    'sidebarbtncolor':  '#00a94f',
+    'sidebartextcolor': '#333333',
+    'sidebarlinkcolor': '#00a94f',
+    'relbarbgcolor':    '#00529b',
+    'relbartextcolor':  '#ffffff',
+    'relbarlinkcolor':  '#ffffff',
+    'bgcolor':          '#ffffff',
+    'textcolor':        '#444444',
+    'headbgcolor':      '#f2f2f2',
+    'headtextcolor':    '#003564',
+    'headlinkcolor':    '#3d8ff2',
+    'linkcolor':        '#2b63a8',
+    'visitedlinkcolor': '#2b63a8',
+    'codebgcolor':      '#eeeeee',
+    'codetextcolor':    '#333333',
+}
 html_title = 'CMake %s Documentation' % release
 html_short_title = '%s Documentation' % release
 html_favicon = '@conf_path@/static/cmake-favicon.ico'

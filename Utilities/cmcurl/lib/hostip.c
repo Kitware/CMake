@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -143,7 +143,7 @@ void Curl_global_host_cache_dtor(void)
 }
 
 /*
- * Return # of adresses in a Curl_addrinfo struct
+ * Return # of addresses in a Curl_addrinfo struct
  */
 int Curl_num_addresses(const Curl_addrinfo *addr)
 {
@@ -172,7 +172,7 @@ Curl_printable_address(const Curl_addrinfo *ai, char *buf, size_t bufsize)
   const struct in6_addr *ipaddr6;
 #endif
 
-  switch (ai->ai_family) {
+  switch(ai->ai_family) {
     case AF_INET:
       sa4 = (const void *)ai->ai_addr;
       ipaddr4 = &sa4->sin_addr;
@@ -538,7 +538,6 @@ RETSIGTYPE alarmfunc(int sig)
   /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
   (void)sig;
   siglongjmp(curl_jmpenv, 1);
-  return;
 }
 #endif /* USE_ALARM_TIMEOUT */
 
@@ -568,12 +567,12 @@ int Curl_resolv_timeout(struct connectdata *conn,
                         const char *hostname,
                         int port,
                         struct Curl_dns_entry **entry,
-                        long timeoutms)
+                        time_t timeoutms)
 {
 #ifdef USE_ALARM_TIMEOUT
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
-  volatile bool keep_copysig = FALSE; /* wether old sigact has been saved */
+  volatile bool keep_copysig = FALSE; /* whether old sigact has been saved */
   struct sigaction sigact;
 #else
 #ifdef HAVE_SIGNAL
@@ -597,7 +596,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
     /* Ignore the timeout when signals are disabled */
     timeout = 0;
   else
-    timeout = timeoutms;
+    timeout = (timeoutms > LONG_MAX) ? LONG_MAX : (long)timeoutms;
 
   if(!timeout)
     /* USE_ALARM_TIMEOUT defined, but no timeout actually requested */
@@ -689,10 +688,11 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    unsigned long elapsed_ms = Curl_tvdiff(Curl_tvnow(), conn->created);
+    unsigned long elapsed_secs = (unsigned long) (Curl_tvdiff(Curl_tvnow(),
+                                   conn->created) / 1000);
 
     /* the alarm period is counted in even number of seconds */
-    unsigned long alarm_set = prev_alarm - elapsed_ms/1000;
+    unsigned long alarm_set = prev_alarm - elapsed_secs;
 
     if(!alarm_set ||
        ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000)) ) {

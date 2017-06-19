@@ -8,7 +8,7 @@ readonly name="curl"
 readonly ownership="Curl Upstream <curl-library@cool.haxx.se>"
 readonly subtree="Utilities/cmcurl"
 readonly repo="https://github.com/curl/curl.git"
-readonly tag="curl-7_51_0"
+readonly tag="curl-7_54_1"
 readonly shortlog=false
 readonly paths="
   CMake/*
@@ -32,6 +32,7 @@ extract_source () {
     git_archive
     pushd "${extractdir}/${name}-reduced"
     rm lib/config-*.h
+    echo "* -whitespace" > .gitattributes
     popd
 }
 

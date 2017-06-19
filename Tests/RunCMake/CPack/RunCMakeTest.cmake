@@ -5,7 +5,7 @@ include("${RunCMake_SOURCE_DIR}/CPackTestHelpers.cmake")
 
 # run_cpack_test args: TEST_NAME "GENERATORS" RUN_CMAKE_BUILD_STEP "PACKAGING_TYPES"
 run_cpack_test(CUSTOM_BINARY_SPEC_FILE "RPM" false "MONOLITHIC;COMPONENT")
-run_cpack_test(CUSTOM_NAMES "RPM;DEB" true "COMPONENT")
+run_cpack_test(CUSTOM_NAMES "RPM;DEB;TGZ" true "COMPONENT")
 run_cpack_test(DEBUGINFO "RPM" true "COMPONENT")
 run_cpack_test(DEPENDENCIES "RPM;DEB" true "COMPONENT")
 run_cpack_test(DIST "RPM" false "MONOLITHIC")
@@ -21,7 +21,9 @@ run_cpack_test_subtests(PACKAGE_CHECKSUM "invalid;MD5;SHA1;SHA224;SHA256;SHA384;
 run_cpack_test(PARTIALLY_RELOCATABLE_WARNING "RPM" false "COMPONENT")
 run_cpack_test(PER_COMPONENT_FIELDS "RPM;DEB" false "COMPONENT")
 run_cpack_test_subtests(SINGLE_DEBUGINFO "no_main_component;one_component;one_component_main;no_debuginfo;one_component_no_debuginfo;no_components;valid" "RPM" true "CUSTOM")
+run_cpack_test(EXTRA_SLASH_IN_PATH "RPM" true "COMPONENT")
 run_cpack_source_test(SOURCE_PACKAGE "RPM")
 run_cpack_test(SUGGESTS "RPM" false "MONOLITHIC")
+run_cpack_test(SYMLINKS "RPM;TGZ" false "MONOLITHIC;COMPONENT")
 run_cpack_test(USER_FILELIST "RPM" false "MONOLITHIC")
 run_cpack_test(MD5SUMS "DEB" false "MONOLITHIC;COMPONENT")

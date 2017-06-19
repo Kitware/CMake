@@ -74,7 +74,6 @@ std::basic_streambuf<wchar_t>* errstream(const wchar_t* unused)
   return std::wcerr.rdbuf();
 }
 
-//----------------------------------------------------------------------------
 template <typename T>
 static void dumpBuffers(const T* expected, const T* received, size_t size)
 {
@@ -107,7 +106,6 @@ static void dumpBuffers(const T* expected, const T* received, size_t size)
   std::cerr << std::endl;
 }
 
-//----------------------------------------------------------------------------
 static bool createProcess(HANDLE hIn, HANDLE hOut, HANDLE hErr)
 {
   BOOL bInheritHandles = FALSE;
@@ -158,7 +156,6 @@ static bool createProcess(HANDLE hIn, HANDLE hOut, HANDLE hErr)
   return success;
 }
 
-//----------------------------------------------------------------------------
 static void finishProcess(bool success)
 {
   if (success) {
@@ -172,7 +169,6 @@ static void finishProcess(bool success)
   CloseHandle(processInfo.hThread);
 }
 
-//----------------------------------------------------------------------------
 static bool createPipe(PHANDLE readPipe, PHANDLE writePipe)
 {
   SECURITY_ATTRIBUTES securityAttributes;
@@ -183,7 +179,6 @@ static bool createPipe(PHANDLE readPipe, PHANDLE writePipe)
                                                                       : true;
 }
 
-//----------------------------------------------------------------------------
 static void finishPipe(HANDLE readPipe, HANDLE writePipe)
 {
   if (readPipe != INVALID_HANDLE_VALUE) {
@@ -194,7 +189,6 @@ static void finishPipe(HANDLE readPipe, HANDLE writePipe)
   }
 }
 
-//----------------------------------------------------------------------------
 static HANDLE createFile(LPCWSTR fileName)
 {
   SECURITY_ATTRIBUTES securityAttributes;
@@ -218,15 +212,12 @@ static HANDLE createFile(LPCWSTR fileName)
   return file;
 }
 
-//----------------------------------------------------------------------------
 static void finishFile(HANDLE file)
 {
   if (file != INVALID_HANDLE_VALUE) {
     CloseHandle(file);
   }
 }
-
-//----------------------------------------------------------------------------
 
 #ifndef MAPVK_VK_TO_VSC
 #define MAPVK_VK_TO_VSC (0)
@@ -269,7 +260,6 @@ static void writeInputKeyEvent(INPUT_RECORD inputBuffer[], WCHAR chr)
   inputBuffer[1].Event.KeyEvent.dwControlKeyState = 0;
 }
 
-//----------------------------------------------------------------------------
 static int testPipe()
 {
   int didFail = 1;
@@ -339,9 +329,8 @@ static int testPipe()
             throw std::runtime_error("ReadFile#3 failed!");
           }
           buffer2[bytesRead] = 0;
-          didFail =
-            encodedTestString.compare(0, encodedTestString.npos, buffer2,
-                                      encodedTestString.size()) == 0
+          didFail = encodedTestString.compare(0, std::string::npos, buffer2,
+                                              encodedTestString.size()) == 0
             ? 0
             : 1;
         }
@@ -377,7 +366,6 @@ static int testPipe()
   return didFail;
 }
 
-//----------------------------------------------------------------------------
 static int testFile()
 {
   int didFail = 1;
@@ -446,9 +434,8 @@ static int testFile()
             throw std::runtime_error("ReadFile#2 failed!");
           }
           buffer2[bytesRead] = 0;
-          didFail =
-            encodedTestString.compare(0, encodedTestString.npos, buffer2,
-                                      encodedTestString.size()) == 0
+          didFail = encodedTestString.compare(0, std::string::npos, buffer2,
+                                              encodedTestString.size()) == 0
             ? 0
             : 1;
         }
@@ -487,7 +474,6 @@ static int testFile()
 #define _WIN32_WINNT_VISTA 0x0600
 #endif
 
-//----------------------------------------------------------------------------
 static int testConsole()
 {
   int didFail = 1;
@@ -748,7 +734,6 @@ static int testConsole()
 
 #endif
 
-//----------------------------------------------------------------------------
 int testConsoleBuf(int, char* [])
 {
   int ret = 0;

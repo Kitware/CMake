@@ -3,7 +3,7 @@
 #ifndef cmCursesLabelWidget_h
 #define cmCursesLabelWidget_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"
@@ -14,6 +14,8 @@ class cmCursesMainForm;
 
 class cmCursesLabelWidget : public cmCursesWidget
 {
+  CM_DISABLE_COPY(cmCursesLabelWidget)
+
 public:
   cmCursesLabelWidget(int width, int height, int left, int top,
                       const std::string& name);
@@ -24,10 +26,6 @@ public:
   // when this widget has focus. Returns true if the input was
   // handled
   bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w) CM_OVERRIDE;
-
-protected:
-  cmCursesLabelWidget(const cmCursesLabelWidget& from);
-  void operator=(const cmCursesLabelWidget&);
 };
 
 #endif // cmCursesLabelWidget_h

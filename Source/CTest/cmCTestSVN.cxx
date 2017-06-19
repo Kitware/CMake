@@ -9,7 +9,7 @@
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <map>
 #include <ostream>
 #include <stdlib.h>
@@ -97,12 +97,14 @@ std::string cmCTestSVN::LoadInfo(SVNInfo& svninfo)
   return rev;
 }
 
-void cmCTestSVN::NoteOldRevision()
+bool cmCTestSVN::NoteOldRevision()
 {
-  this->LoadRepositories();
+  if (!this->LoadRepositories()) {
+    return false;
+  }
 
-  std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
-  std::list<SVNInfo>::iterator itend = this->Repositories.end();
+  std::vector<SVNInfo>::iterator itbeg = this->Repositories.begin();
+  std::vector<SVNInfo>::iterator itend = this->Repositories.end();
   for (; itbeg != itend; itbeg++) {
     SVNInfo& svninfo = *itbeg;
     svninfo.OldRevision = this->LoadInfo(svninfo);
@@ -116,14 +118,17 @@ void cmCTestSVN::NoteOldRevision()
   // Set the global old revision to the one of the root
   this->OldRevision = this->RootInfo->OldRevision;
   this->PriorRev.Rev = this->OldRevision;
+  return true;
 }
 
-void cmCTestSVN::NoteNewRevision()
+bool cmCTestSVN::NoteNewRevision()
 {
-  this->LoadRepositories();
+  if (!this->LoadRepositories()) {
+    return false;
+  }
 
-  std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
-  std::list<SVNInfo>::iterator itend = this->Repositories.end();
+  std::vector<SVNInfo>::iterator itbeg = this->Repositories.begin();
+  std::vector<SVNInfo>::iterator itend = this->Repositories.end();
   for (; itbeg != itend; itbeg++) {
     SVNInfo& svninfo = *itbeg;
     svninfo.NewRevision = this->LoadInfo(svninfo);
@@ -153,6 +158,7 @@ void cmCTestSVN::NoteNewRevision()
 
   // Set the global new revision to the one of the root
   this->NewRevision = this->RootInfo->NewRevision;
+  return true;
 }
 
 void cmCTestSVN::GuessBase(SVNInfo& svninfo,
@@ -370,18 +376,20 @@ private:
   }
 };
 
-void cmCTestSVN::LoadRevisions()
+bool cmCTestSVN::LoadRevisions()
 {
+  bool result = true;
   // Get revisions for all the external repositories
-  std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
-  std::list<SVNInfo>::iterator itend = this->Repositories.end();
+  std::vector<SVNInfo>::iterator itbeg = this->Repositories.begin();
+  std::vector<SVNInfo>::iterator itend = this->Repositories.end();
   for (; itbeg != itend; itbeg++) {
     SVNInfo& svninfo = *itbeg;
-    LoadRevisions(svninfo);
+    result = this->LoadRevisions(svninfo) && result;
   }
+  return result;
 }
 
-void cmCTestSVN::LoadRevisions(SVNInfo& svninfo)
+bool cmCTestSVN::LoadRevisions(SVNInfo& svninfo)
 {
   // We are interested in every revision included in the update.
   std::string revs;
@@ -400,7 +408,7 @@ void cmCTestSVN::LoadRevisions(SVNInfo& svninfo)
   svn_log.push_back(svninfo.LocalPath.c_str());
   LogParser out(this, "log-out> ", svninfo);
   OutputLogger err(this->Log, "log-err> ");
-  this->RunSVNCommand(svn_log, &out, &err);
+  return this->RunSVNCommand(svn_log, &out, &err);
 }
 
 void cmCTestSVN::DoRevisionSVN(Revision const& revision,
@@ -468,7 +476,7 @@ private:
   }
 };
 
-void cmCTestSVN::LoadModifications()
+bool cmCTestSVN::LoadModifications()
 {
   // Run "svn status" which reports local modifications.
   std::vector<const char*> svn_status;
@@ -476,6 +484,7 @@ void cmCTestSVN::LoadModifications()
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
   this->RunSVNCommand(svn_status, &out, &err);
+  return true;
 }
 
 void cmCTestSVN::WriteXMLGlobal(cmXMLWriter& xml)
@@ -521,10 +530,10 @@ private:
   }
 };
 
-void cmCTestSVN::LoadRepositories()
+bool cmCTestSVN::LoadRepositories()
 {
   if (!this->Repositories.empty()) {
-    return;
+    return true;
   }
 
   // Info for root repository
@@ -536,7 +545,7 @@ void cmCTestSVN::LoadRepositories()
   svn_status.push_back("status");
   ExternalParser out(this, "external-out> ");
   OutputLogger err(this->Log, "external-err> ");
-  this->RunSVNCommand(svn_status, &out, &err);
+  return this->RunSVNCommand(svn_status, &out, &err);
 }
 
 std::string cmCTestSVN::SVNInfo::BuildLocalPath(std::string const& path) const

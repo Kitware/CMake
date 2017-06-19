@@ -25,6 +25,10 @@ const char info_sizeof_dptr[] = {
 #elif defined(__GNU__) && defined(__ELF__) && defined(__ARMEL__)
 #define ABI_ID "ELF ARM"
 
+#elif defined(__linux__) && defined(__ELF__) && defined(__amd64__) &&         \
+  defined(__ILP32__)
+#define ABI_ID "ELF X32"
+
 #elif defined(__ELF__)
 #define ABI_ID "ELF"
 #endif

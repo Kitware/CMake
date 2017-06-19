@@ -106,7 +106,7 @@ bool cmVariableWatchCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("must be called with at least one argument.");
     return false;
   }
-  std::string variable = args[0];
+  std::string const& variable = args[0];
   std::string command;
   if (args.size() > 1) {
     command = args[1];

@@ -3,7 +3,7 @@
 #ifndef cmCPackLog_h
 #define cmCPackLog_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <ostream>
 #include <string.h>
@@ -85,12 +85,12 @@ public:
 
   //! Set the various prefixes for the logging. SetPrefix sets the generic
   // prefix that overwrittes missing ones.
-  void SetPrefix(std::string pfx) { this->Prefix = pfx; }
-  void SetOutputPrefix(std::string pfx) { this->OutputPrefix = pfx; }
-  void SetVerbosePrefix(std::string pfx) { this->VerbosePrefix = pfx; }
-  void SetDebugPrefix(std::string pfx) { this->DebugPrefix = pfx; }
-  void SetWarningPrefix(std::string pfx) { this->WarningPrefix = pfx; }
-  void SetErrorPrefix(std::string pfx) { this->ErrorPrefix = pfx; }
+  void SetPrefix(std::string const& pfx) { this->Prefix = pfx; }
+  void SetOutputPrefix(std::string const& pfx) { this->OutputPrefix = pfx; }
+  void SetVerbosePrefix(std::string const& pfx) { this->VerbosePrefix = pfx; }
+  void SetDebugPrefix(std::string const& pfx) { this->DebugPrefix = pfx; }
+  void SetWarningPrefix(std::string const& pfx) { this->WarningPrefix = pfx; }
+  void SetErrorPrefix(std::string const& pfx) { this->ErrorPrefix = pfx; }
 
 private:
   bool Verbose;

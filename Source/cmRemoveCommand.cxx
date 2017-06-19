@@ -15,7 +15,7 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
 
-  const char* variable = args[0].c_str(); // VAR is always first
+  std::string const& variable = args[0]; // VAR is always first
   // get the old value
   const char* cacheValue = this->Makefile->GetDefinition(variable);
 

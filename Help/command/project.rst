@@ -8,6 +8,7 @@ Set a name, version, and enable languages for the entire project.
  project(<PROJECT-NAME> [LANGUAGES] [<language-name>...])
  project(<PROJECT-NAME>
          [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
+         [DESCRIPTION <project-description-string>]
          [LANGUAGES <language-name>...])
 
 Sets the name of the project and stores the name in the
@@ -39,6 +40,10 @@ in variables
 
 Variables corresponding to unspecified versions are set to the empty string
 (if policy :policy:`CMP0048` is set to ``NEW``).
+
+If optional ``DESCRIPTION`` is given, then additional :variable:`PROJECT_DESCRIPTION`
+variable will be set to its argument. The argument must be a string with short
+description of the project (only a few words).
 
 Optionally you can specify which languages your project supports.
 Example languages are ``C``, ``CXX`` (i.e.  C++), ``Fortran``, etc.

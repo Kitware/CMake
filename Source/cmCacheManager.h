@@ -3,7 +3,7 @@
 #ifndef cmCacheManager_h
 #define cmCacheManager_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <map>
@@ -228,7 +228,7 @@ private:
 
   static const char* PersistentProperties[];
   bool ReadPropertyEntry(std::string const& key, CacheEntry& e);
-  void WritePropertyEntries(std::ostream& os, CacheIterator const& i);
+  void WritePropertyEntries(std::ostream& os, CacheIterator i);
 
   CacheEntryMap Cache;
   // Only cmake and cmState should be able to add cache values

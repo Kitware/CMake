@@ -27,7 +27,7 @@ QCMake::QCMake(QObject* p)
   cmSystemTools::SetStdoutCallback(QCMake::stdoutCallback, this);
   cmSystemTools::SetStderrCallback(QCMake::stderrCallback, this);
 
-  this->CMakeInstance = new cmake;
+  this->CMakeInstance = new cmake(cmake::RoleProject);
   this->CMakeInstance->SetCMakeEditCommand(
     cmSystemTools::GetCMakeGUICommand());
   this->CMakeInstance->SetProgressCallback(QCMake::progressCallback, this);
@@ -219,14 +219,14 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
   }
 
   // remove some properites
-  foreach (QString s, toremove) {
+  foreach (QString const& s, toremove) {
     this->CMakeInstance->UnwatchUnusedCli(s.toLocal8Bit().data());
 
     state->RemoveCacheEntry(s.toLocal8Bit().data());
   }
 
   // add some new properites
-  foreach (QCMakeProperty s, props) {
+  foreach (QCMakeProperty const& s, props) {
     this->CMakeInstance->WatchUnusedCli(s.Key.toLocal8Bit().data());
 
     if (s.Type == QCMakeProperty::BOOL) {

@@ -195,8 +195,10 @@ void cmExportInstallFileGenerator::GenerateImportPrefix(std::ostream& os)
        << " \"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n";
     if (cmHasLiteralPrefix(absDestS.c_str(), "/lib/") ||
         cmHasLiteralPrefix(absDestS.c_str(), "/lib64/") ||
+        cmHasLiteralPrefix(absDestS.c_str(), "/libx32/") ||
         cmHasLiteralPrefix(absDestS.c_str(), "/usr/lib/") ||
-        cmHasLiteralPrefix(absDestS.c_str(), "/usr/lib64/")) {
+        cmHasLiteralPrefix(absDestS.c_str(), "/usr/lib64/") ||
+        cmHasLiteralPrefix(absDestS.c_str(), "/usr/libx32/")) {
       // Handle "/usr move" symlinks created by some Linux distros.
       /* clang-format off */
       os <<
@@ -253,7 +255,8 @@ void cmExportInstallFileGenerator::ReplaceInstallPrefix(std::string& input)
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
 
-  while ((pos = input.find("$<INSTALL_PREFIX>", lastPos)) != input.npos) {
+  while ((pos = input.find("$<INSTALL_PREFIX>", lastPos)) !=
+         std::string::npos) {
     std::string::size_type endPos = pos + sizeof("$<INSTALL_PREFIX>") - 1;
     input.replace(pos, endPos - pos, "${_IMPORT_PREFIX}");
     lastPos = endPos;
@@ -329,6 +332,8 @@ void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
                                     properties, importedLocations);
     this->SetImportLocationProperty(config, suffix, te->RuntimeGenerator,
                                     properties, importedLocations);
+    this->SetImportLocationProperty(config, suffix, te->ObjectsGenerator,
+                                    properties, importedLocations);
     this->SetImportLocationProperty(config, suffix, te->FrameworkGenerator,
                                     properties, importedLocations);
     this->SetImportLocationProperty(config, suffix, te->BundleGenerator,
@@ -394,6 +399,23 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
 
     // Store the property.
     properties[prop] = value;
+    importedLocations.insert(prop);
+  } else if (itgen->GetTarget()->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+    // Construct the property name.
+    std::string prop = "IMPORTED_OBJECTS";
+    prop += suffix;
+
+    // Compute all the object files inside this target and setup
+    // IMPORTED_OBJECTS as a list of object files
+    std::vector<std::string> objects;
+    itgen->GetInstallObjectNames(config, objects);
+    for (std::vector<std::string>::iterator i = objects.begin();
+         i != objects.end(); ++i) {
+      *i = value + *i;
+    }
+
+    // Store the property.
+    properties[prop] = cmJoin(objects, ";");
     importedLocations.insert(prop);
   } else {
     // Construct the property name.

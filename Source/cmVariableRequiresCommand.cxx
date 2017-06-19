@@ -3,7 +3,6 @@
 #include "cmVariableRequiresCommand.h"
 
 #include "cmMakefile.h"
-#include "cmPolicies.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
 
@@ -13,21 +12,16 @@ class cmExecutionStatus;
 bool cmVariableRequiresCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  if (this->Disallowed(
-        cmPolicies::CMP0035,
-        "The variable_requires command should not be called; see CMP0035.")) {
-    return true;
-  }
   if (args.size() < 3) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
 
-  std::string testVariable = args[0];
+  std::string const& testVariable = args[0];
   if (!this->Makefile->IsOn(testVariable)) {
     return true;
   }
-  std::string resultVariable = args[1];
+  std::string const& resultVariable = args[1];
   bool requirementsMet = true;
   std::string notSet;
   bool hasAdvanced = false;

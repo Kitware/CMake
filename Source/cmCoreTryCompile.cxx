@@ -2,12 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCoreTryCompile.h"
 
-#include <cmConfigure.h>
-#include <cmsys/Directory.hxx>
+#include "cmConfigure.h"
+#include "cmsys/Directory.hxx"
 #include <set>
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmExportTryCompileFileGenerator.h"
@@ -40,6 +41,8 @@ static std::string const kCMAKE_OSX_SYSROOT = "CMAKE_OSX_SYSROOT";
 static std::string const kCMAKE_POSITION_INDEPENDENT_CODE =
   "CMAKE_POSITION_INDEPENDENT_CODE";
 static std::string const kCMAKE_SYSROOT = "CMAKE_SYSROOT";
+static std::string const kCMAKE_SYSROOT_COMPILE = "CMAKE_SYSROOT_COMPILE";
+static std::string const kCMAKE_SYSROOT_LINK = "CMAKE_SYSROOT_LINK";
 static std::string const kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES =
   "CMAKE_TRY_COMPILE_OSX_ARCHITECTURES";
 static std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
@@ -216,6 +219,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
             if (tgt->IsExecutableWithExports()) {
               break;
             }
+            CM_FALLTHROUGH;
           default:
             this->Makefile->IssueMessage(
               cmake::FATAL_ERROR,
@@ -513,6 +517,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         this->Makefile->IssueMessage(
           cmake::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0066));
+        CM_FALLTHROUGH;
       case cmPolicies::NEW: {
         // NEW behavior is to pass config-specific compiler flags.
         static std::string const cfgDefault = "DEBUG";
@@ -550,6 +555,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         this->Makefile->IssueMessage(
           cmake::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0056));
+        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior is to pass linker flags.
         {
@@ -608,6 +614,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(kCMAKE_OSX_SYSROOT);
       vars.insert(kCMAKE_POSITION_INDEPENDENT_CODE);
       vars.insert(kCMAKE_SYSROOT);
+      vars.insert(kCMAKE_SYSROOT_COMPILE);
+      vars.insert(kCMAKE_SYSROOT_LINK);
       vars.insert(kCMAKE_WARN_DEPRECATED);
 
       if (const char* varListStr = this->Makefile->GetDefinition(
@@ -667,7 +675,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       fprintf(fout, " \"%s\"", si->c_str());
 
       // Add dependencies on any non-temporary sources.
-      if (si->find("CMakeTmp") == si->npos) {
+      if (si->find("CMakeTmp") == std::string::npos) {
         this->Makefile->AddCMakeDependFile(*si);
       }
     }
@@ -688,6 +696,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         case cmPolicies::WARN:
           warnCMP0067 = this->Makefile->PolicyOptionalWarningEnabled(
             "CMAKE_POLICY_WARNING_CMP0067");
+          CM_FALLTHROUGH;
         case cmPolicies::OLD:
           // OLD behavior is to not honor the language standard variables.
           honorStandard = false;

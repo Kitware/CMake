@@ -17,13 +17,13 @@ SET(CMAKE_MACOSX_RPATH ON)
 #
 FILE(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/build/version _version)
 STRING(REGEX REPLACE
- "^([0-9])[0-9][0-9][0-9][0-9][0-9][0-9][a-z]?$" "\\1" _major ${_version})
+ "^([0-9])[0-9][0-9][0-9][0-9][0-9][0-9][a-z]*$" "\\1" _major ${_version})
 STRING(REGEX REPLACE
- "^[0-9]([0-9][0-9][0-9])[0-9][0-9][0-9][a-z]?$" "\\1" _minor ${_version})
+ "^[0-9]([0-9][0-9][0-9])[0-9][0-9][0-9][a-z]*$" "\\1" _minor ${_version})
 STRING(REGEX REPLACE
- "^[0-9][0-9][0-9][0-9]([0-9][0-9][0-9])[a-z]?$" "\\1" _revision ${_version})
+ "^[0-9][0-9][0-9][0-9]([0-9][0-9][0-9])[a-z]*$" "\\1" _revision ${_version})
 STRING(REGEX REPLACE
- "^[0-9][0-9][0-9][0-9][0-9][0-9][0-9]([a-z]?)$" "\\1" _quality ${_version})
+ "^[0-9][0-9][0-9][0-9][0-9][0-9][0-9]([a-z]*)$" "\\1" _quality ${_version})
 SET(_version_number ${_major}${_minor}${_revision})
 STRING(REGEX REPLACE "[0]*([^0]*[0-9])$" "\\1" _trimmed_minor ${_minor})
 STRING(REGEX REPLACE "[0]*([^0]*[0-9])$" "\\1" _trimmed_revision ${_revision})
@@ -71,13 +71,15 @@ include(CTest)
 
 OPTION(ENABLE_NETTLE "Enable use of Nettle" ON)
 OPTION(ENABLE_OPENSSL "Enable use of OpenSSL" ON)
-OPTION(ENABLE_LZMA "Enable the use of the system found LZMA library if found" ON)
-OPTION(ENABLE_ZLIB "Enable the use of the system found ZLIB library if found" ON)
-OPTION(ENABLE_BZip2 "Enable the use of the system found BZip2 library if found" ON)
-OPTION(ENABLE_LIBXML2 "Enable the use of the system found libxml2 library if found" ON)
-OPTION(ENABLE_EXPAT "Enable the use of the system found EXPAT library if found" ON)
-OPTION(ENABLE_PCREPOSIX "Enable the use of the system found PCREPOSIX library if found" ON)
-OPTION(ENABLE_LibGCC "Enable the use of the system found LibGCC library if found" ON)
+OPTION(ENABLE_LZO "Enable the use of the system LZO library if found" OFF)
+OPTION(ENABLE_LZMA "Enable the use of the system LZMA library if found" ON)
+
+OPTION(ENABLE_ZLIB "Enable the use of the system ZLIB library if found" ON)
+OPTION(ENABLE_BZip2 "Enable the use of the system BZip2 library if found" ON)
+OPTION(ENABLE_LIBXML2 "Enable the use of the system libxml2 library if found" ON)
+OPTION(ENABLE_EXPAT "Enable the use of the system EXPAT library if found" ON)
+OPTION(ENABLE_PCREPOSIX "Enable the use of the system PCREPOSIX library if found" ON)
+OPTION(ENABLE_LibGCC "Enable the use of the system LibGCC library if found" ON)
 # CNG is used for encrypt/decrypt Zip archives on Windows.
 OPTION(ENABLE_CNG "Enable the use of CNG(Crypto Next Generation)" ON)
 
@@ -107,7 +109,7 @@ INCLUDE(CheckHeaderDirent)
 INCLUDE(CheckIncludeFile)
 INCLUDE(CheckIncludeFiles)
 INCLUDE(CheckLibraryExists)
-INCLUDE(CheckStructMember)
+INCLUDE(CheckStructHasMember)
 INCLUDE(CheckSymbolExists)
 INCLUDE(CheckTypeExists)
 INCLUDE(CheckTypeSize)
@@ -285,21 +287,20 @@ MARK_AS_ADVANCED(CLEAR BZIP2_LIBRARIES)
 # Find LZMA
 #
 IF(ENABLE_LZMA)
-  FIND_PACKAGE(LZMA)
+  FIND_PACKAGE(LibLZMA)
 ELSE()
-  SET(LZMA_FOUND FALSE) # Override cached value
-  SET(LZMADEC_FOUND FALSE) # Override cached value
+  SET(LIBZMA_FOUND FALSE) # Override cached value
 ENDIF()
 
-IF(LZMA_FOUND)
+IF(LIBLZMA_FOUND)
   SET(HAVE_LIBLZMA 1)
   SET(HAVE_LZMA_H 1)
-  INCLUDE_DIRECTORIES(${LZMA_INCLUDE_DIR})
-  LIST(APPEND ADDITIONAL_LIBS ${LZMA_LIBRARIES})
+  INCLUDE_DIRECTORIES(${LIBLZMA_INCLUDE_DIRS})
+  LIST(APPEND ADDITIONAL_LIBS ${LIBLZMA_LIBRARIES})
   IF(CMAKE_USE_SYSTEM_LIBLZMA)
     # Test if a macro is needed for the library.
     TRY_MACRO_FOR_LIBRARY(
-      "${LZMA_INCLUDE_DIR}" "${LZMA_LIBRARIES}"
+      "${LIBLZMA_INCLUDE_DIRS}" "${LIBLZMA_LIBRARIES}"
       COMPILES
       "#include <lzma.h>\nint main() {return (int)lzma_version_number(); }"
       "WITHOUT_LZMA_API_STATIC;LZMA_API_STATIC")
@@ -309,27 +310,26 @@ IF(LZMA_FOUND)
   ELSE()
     ADD_DEFINITIONS(-DLZMA_API_STATIC)
   ENDIF()
-ELSEIF(LZMADEC_FOUND)
-  SET(HAVE_LIBLZMADEC 1)
-  SET(HAVE_LZMADEC_H 1)
-  INCLUDE_DIRECTORIES(${LZMADEC_INCLUDE_DIR})
-  LIST(APPEND ADDITIONAL_LIBS ${LZMADEC_LIBRARIES})
-ELSE(LZMA_FOUND)
+ELSE(LIBLZMA_FOUND)
 # LZMA not found and will not be used.
-ENDIF(LZMA_FOUND)
+ENDIF(LIBLZMA_FOUND)
 IF(0) # CMake does not need LZO2 support in libarchive
 #
 # Find LZO2
 #
-IF (LZO2_INCLUDE_DIR)
-  # Already in cache, be silent
-  SET(LZO2_FIND_QUIETLY TRUE)
-ENDIF (LZO2_INCLUDE_DIR)
+IF(ENABLE_LZO)
+  IF (LZO2_INCLUDE_DIR)
+    # Already in cache, be silent
+    SET(LZO2_FIND_QUIETLY TRUE)
+  ENDIF (LZO2_INCLUDE_DIR)
 
-FIND_PATH(LZO2_INCLUDE_DIR lzo/lzoconf.h)
-FIND_LIBRARY(LZO2_LIBRARY NAMES lzo2 liblzo2)
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LZO2 DEFAULT_MSG LZO2_LIBRARY LZO2_INCLUDE_DIR)
+  FIND_PATH(LZO2_INCLUDE_DIR lzo/lzoconf.h)
+  FIND_LIBRARY(LZO2_LIBRARY NAMES lzo2 liblzo2)
+  INCLUDE(FindPackageHandleStandardArgs)
+  FIND_PACKAGE_HANDLE_STANDARD_ARGS(LZO2 DEFAULT_MSG LZO2_LIBRARY LZO2_INCLUDE_DIR)
+ELSE(ENABLE_LZO)
+  SET(LIBZMA_FOUND FALSE) # Override cached value
+ENDIF(ENABLE_LZO)
 IF(LZO2_FOUND)
   SET(HAVE_LIBLZO2 1)
   SET(HAVE_LZO_LZOCONF_H 1)
@@ -415,6 +415,11 @@ LA_CHECK_INCLUDE_FILE("limits.h" HAVE_LIMITS_H)
 LA_CHECK_INCLUDE_FILE("linux/types.h" HAVE_LINUX_TYPES_H)
 LA_CHECK_INCLUDE_FILE("linux/fiemap.h" HAVE_LINUX_FIEMAP_H)
 LA_CHECK_INCLUDE_FILE("linux/fs.h" HAVE_LINUX_FS_H)
+
+CHECK_C_SOURCE_COMPILES("#include <sys/ioctl.h>
+#include <linux/fs.h>
+int main(void) { return FS_IOC_GETFLAGS; }" HAVE_WORKING_FS_IOC_GETFLAGS)
+
 LA_CHECK_INCLUDE_FILE("linux/magic.h" HAVE_LINUX_MAGIC_H)
 LA_CHECK_INCLUDE_FILE("locale.h" HAVE_LOCALE_H)
 LA_CHECK_INCLUDE_FILE("memory.h" HAVE_MEMORY_H)
@@ -459,7 +464,7 @@ IF(ENABLE_CNG)
 ELSE(ENABLE_CNG)
   UNSET(HAVE_BCRYPT_H CACHE)
 ENDIF(ENABLE_CNG)
-# Following files need windwos.h, so we should test it after windows.h test.
+# Following files need windows.h, so we should test it after windows.h test.
 LA_CHECK_INCLUDE_FILE("wincrypt.h" HAVE_WINCRYPT_H)
 LA_CHECK_INCLUDE_FILE("winioctl.h" HAVE_WINIOCTL_H)
 
@@ -1005,6 +1010,14 @@ CHECK_FUNCTION_EXISTS(wmemmove HAVE_WMEMMOVE)
 
 CMAKE_POP_CHECK_STATE()	# Restore the state of the variables
 
+CHECK_C_SOURCE_COMPILES(
+  "#include <sys/types.h>\n#include <sys/mount.h>\nint main(void) { struct vfsconf v; return sizeof(v);}"
+  HAVE_STRUCT_VFSCONF)
+
+CHECK_C_SOURCE_COMPILES(
+  "#include <sys/types.h>\n#include <sys/mount.h>\nint main(void) { struct xvfsconf v; return sizeof(v);}"
+  HAVE_STRUCT_XVFSCONF)
+
 # Make sure we have the POSIX version of readdir_r, not the
 # older 2-argument version.
 CHECK_C_SOURCE_COMPILES(
@@ -1029,6 +1042,10 @@ CHECK_C_SOURCE_COMPILES(
 CHECK_C_SOURCE_COMPILES(
   "#include <sys/sysmacros.h>\nint main() { return major(256); }"
   MAJOR_IN_SYSMACROS)
+
+CHECK_C_SOURCE_COMPILES(
+  "#include <lzma.h>\n#if LZMA_VERSION < 50020000\n#error unsupported\n#endif\nint main(void){lzma_stream_encoder_mt(0, 0); return 0;}"
+  HAVE_LZMA_STREAM_ENCODER_MT)
 
 IF(HAVE_STRERROR_R)
   SET(HAVE_DECL_STRERROR_R 1)
@@ -1063,47 +1080,47 @@ CHECK_SYMBOL_EXISTS(SSIZE_MAX        "limits.h"   HAVE_DECL_SSIZE_MAX)
 # Check struct members
 #
 # Check for tm_gmtoff in struct tm
-CHECK_STRUCT_MEMBER("struct tm" tm_gmtoff
+CHECK_STRUCT_HAS_MEMBER("struct tm" tm_gmtoff
     "time.h" HAVE_STRUCT_TM_TM_GMTOFF)
-CHECK_STRUCT_MEMBER("struct tm" __tm_gmtoff
+CHECK_STRUCT_HAS_MEMBER("struct tm" __tm_gmtoff
     "time.h" HAVE_STRUCT_TM___TM_GMTOFF)
 
 # Check for f_namemax in struct statfs
-CHECK_STRUCT_MEMBER("struct statfs" f_namemax
+CHECK_STRUCT_HAS_MEMBER("struct statfs" f_namemax
     "sys/param.h;sys/mount.h" HAVE_STRUCT_STATFS_F_NAMEMAX)
 
 # Check for birthtime in struct stat
-CHECK_STRUCT_MEMBER("struct stat" st_birthtime
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_birthtime
     "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_BIRTHTIME)
 
 # Check for high-resolution timestamps in struct stat
-CHECK_STRUCT_MEMBER("struct stat" st_birthtimespec.tv_nsec
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_birthtimespec.tv_nsec
     "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_BIRTHTIMESPEC_TV_NSEC)
-CHECK_STRUCT_MEMBER("struct stat" st_mtimespec.tv_nsec
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_mtimespec.tv_nsec
     "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC)
-CHECK_STRUCT_MEMBER("struct stat" st_mtim.tv_nsec
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_mtim.tv_nsec
     "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC)
-CHECK_STRUCT_MEMBER("struct stat" st_mtime_n
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_mtime_n
     "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_MTIME_N)
-CHECK_STRUCT_MEMBER("struct stat" st_umtime
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_umtime
     "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_UMTIME)
-CHECK_STRUCT_MEMBER("struct stat" st_mtime_usec
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_mtime_usec
     "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_MTIME_USEC)
 # Check for block size support in struct stat
-CHECK_STRUCT_MEMBER("struct stat" st_blksize
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_blksize
     "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_BLKSIZE)
 # Check for st_flags in struct stat (BSD fflags)
-CHECK_STRUCT_MEMBER("struct stat" st_flags
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_flags
     "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_FLAGS)
 
 IF(HAVE_SYS_STATVFS_H)
-  CHECK_STRUCT_MEMBER("struct statvfs" f_iosize
+  CHECK_STRUCT_HAS_MEMBER("struct statvfs" f_iosize
     "sys/types.h;sys/statvfs.h" HAVE_STRUCT_STATVFS_F_IOSIZE)
 ENDIF()
 
 #
 #
-CHECK_STRUCT_MEMBER("struct tm" tm_sec
+CHECK_STRUCT_HAS_MEMBER("struct tm" tm_sec
     "sys/types.h;sys/time.h;time.h" TIME_WITH_SYS_TIME)
 
 #
@@ -1323,16 +1340,36 @@ IF(ENABLE_ACL)
   # test for specific permissions in a permset.)  Linux uses the obvious
   # name, FreeBSD adds _np to mark it as "non-Posix extension."
   # Test for both as a double-check that we really have POSIX-style ACL support.
+  CHECK_FUNCTION_EXISTS(acl_get_fd_np HAVE_ACL_GET_FD_NP)
   CHECK_FUNCTION_EXISTS(acl_get_perm HAVE_ACL_GET_PERM)
   CHECK_FUNCTION_EXISTS(acl_get_perm_np HAVE_ACL_GET_PERM_NP)
   CHECK_FUNCTION_EXISTS(acl_get_link HAVE_ACL_GET_LINK)
   CHECK_FUNCTION_EXISTS(acl_get_link_np HAVE_ACL_GET_LINK_NP)
   CHECK_FUNCTION_EXISTS(acl_is_trivial_np HAVE_ACL_IS_TRIVIAL_NP)
   CHECK_FUNCTION_EXISTS(acl_set_link_np HAVE_ACL_SET_LINK_NP)
+  CHECK_SYMBOL_EXISTS(ACL_TYPE_NFS4 "${INCLUDES}" HAVE_ACL_TYPE_NFS4)
 
   # MacOS has an acl.h that isn't POSIX.  It can be detected by
   # checking for ACL_USER
   CHECK_SYMBOL_EXISTS(ACL_USER "${INCLUDES}" HAVE_ACL_USER)
+  CHECK_C_SOURCE_COMPILES("#include <sys/types.h>
+#include <sys/acl.h>
+int main(void) { return ACL_TYPE_EXTENDED; }" HAVE_ACL_TYPE_EXTENDED)
+
+  # Solaris and derivates ACLs
+  CHECK_LIBRARY_EXISTS(sec "acl_get" "" HAVE_LIBSEC)
+  IF(HAVE_LIBSEC)
+    SET(CMAKE_REQUIRED_LIBRARIES "sec")
+    FIND_LIBRARY(SEC_LIBRARY NAMES sec)
+    LIST(APPEND ADDITIONAL_LIBS ${SEC_LIBRARY})
+  ENDIF(HAVE_LIBSEC)
+  #
+  CHECK_TYPE_EXISTS(aclent_t "${INCLUDES}" HAVE_ACLENT_T)
+  CHECK_TYPE_EXISTS(ace_t "${INCLUDES}" HAVE_ACE_T)
+  CHECK_FUNCTION_EXISTS(acl_get HAVE_FACL_GET)
+  CHECK_FUNCTION_EXISTS(facl_get HAVE_FACL_GET)
+  CHECK_FUNCTION_EXISTS(acl_set HAVE_FACL_SET)
+  CHECK_FUNCTION_EXISTS(facl_set HAVE_FACL_SET)
 ELSE(ENABLE_ACL)
   # If someone runs cmake, then disables ACL support, we need
   # to forcibly override the cached values for these.
@@ -1347,7 +1384,15 @@ ELSE(ENABLE_ACL)
   SET(HAVE_ACL_SET_FD FALSE)
   SET(HAVE_ACL_SET_FD_NP FALSE)
   SET(HAVE_ACL_SET_FILE FALSE)
+  SET(HAVE_ACL_TYPE_NFS4 FALSE)
   SET(HAVE_ACL_USER FALSE)
+  SET(HAVE_ACL_TYPE_EXTENDED FALSE)
+  SET(HAVE_ACL_GET FALSE)
+  SET(HAVE_ACLENT_T FALSE)
+  SET(HAVE_ACE_T FALSE)
+  SET(HAVE_FACL_GET FALSE)
+  SET(HAVE_ACL_SET FALSE)
+  SET(HAVE_FACL_SET FALSE)
 ENDIF(ENABLE_ACL)
 
 #

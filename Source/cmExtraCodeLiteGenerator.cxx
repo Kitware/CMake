@@ -13,7 +13,7 @@
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
-#include <cmsys/SystemInformation.hxx>
+#include "cmsys/SystemInformation.hxx"
 #include <map>
 #include <set>
 #include <sstream>
@@ -141,6 +141,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
         case cmStateEnums::STATIC_LIBRARY:
         case cmStateEnums::MODULE_LIBRARY:
           visualname = "lib" + visualname;
+          CM_FALLTHROUGH;
         case cmStateEnums::EXECUTABLE:
           xml->StartElement("Project");
           xml->Attribute("Name", visualname);
@@ -240,7 +241,7 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
         bool isCFile = false;
         std::string lang = (*si)->GetLanguage();
         if (lang == "C" || lang == "CXX") {
-          std::string srcext = (*si)->GetExtension();
+          std::string const& srcext = (*si)->GetExtension();
           for (std::vector<std::string>::const_iterator ext = srcExts.begin();
                ext != srcExts.end(); ++ext) {
             if (srcext == *ext) {
@@ -349,6 +350,87 @@ void cmExtraCodeLiteGenerator::FindMatchingHeaderfiles(
   }
 }
 
+void cmExtraCodeLiteGenerator::CreateFoldersAndFiles(
+  std::set<std::string>& cFiles, cmXMLWriter& xml,
+  const std::string& projectPath)
+{
+  std::vector<std::string> tmp_path;
+  std::vector<std::string> components;
+  size_t numOfEndEl = 0;
+
+  for (std::set<std::string>::const_iterator it = cFiles.begin();
+       it != cFiles.end(); ++it) {
+    std::string frelapath =
+      cmSystemTools::RelativePath(projectPath.c_str(), it->c_str());
+    cmsys::SystemTools::SplitPath(frelapath, components, false);
+    components.pop_back(); // erase last member -> it is file, not folder
+    components.erase(components.begin()); // erase "root"
+
+    size_t sizeOfSkip = 0;
+
+    for (size_t i = 0; i < components.size(); ++i) {
+      // skip relative path
+      if (components[i] == ".." || components[i] == ".") {
+        sizeOfSkip++;
+        continue;
+      }
+
+      // same folder
+      if (tmp_path.size() > i - sizeOfSkip &&
+          tmp_path[i - sizeOfSkip] == components[i]) {
+        continue;
+      }
+
+      // delete "old" subfolders
+      if (tmp_path.size() > i - sizeOfSkip) {
+        numOfEndEl = tmp_path.size() - i + sizeOfSkip;
+        tmp_path.erase(tmp_path.end() - numOfEndEl, tmp_path.end());
+        for (; numOfEndEl--;) {
+          xml.EndElement();
+        }
+      }
+
+      // add folder
+      xml.StartElement("VirtualDirectory");
+      xml.Attribute("Name", components[i]);
+      tmp_path.push_back(components[i]);
+    }
+
+    // delete "old" subfolders
+    numOfEndEl = tmp_path.size() - components.size() + sizeOfSkip;
+    if (numOfEndEl) {
+      tmp_path.erase(tmp_path.end() - numOfEndEl, tmp_path.end());
+      for (; numOfEndEl--;) {
+        xml.EndElement();
+      }
+    }
+
+    // add file
+    xml.StartElement("File");
+    xml.Attribute("Name", frelapath);
+    xml.EndElement();
+  }
+
+  // end of folders
+  numOfEndEl = tmp_path.size();
+  for (; numOfEndEl--;) {
+    xml.EndElement();
+  }
+}
+
+void cmExtraCodeLiteGenerator::CreateFoldersAndFiles(
+  std::map<std::string, cmSourceFile*>& cFiles, cmXMLWriter& xml,
+  const std::string& projectPath)
+{
+  std::set<std::string> s;
+  for (std::map<std::string, cmSourceFile*>::const_iterator it =
+         cFiles.begin();
+       it != cFiles.end(); ++it) {
+    s.insert(it->first);
+  }
+  this->CreateFoldersAndFiles(s, xml, projectPath);
+}
+
 void cmExtraCodeLiteGenerator::CreateProjectSourceEntries(
   std::map<std::string, cmSourceFile*>& cFiles,
   std::set<std::string>& otherFiles, cmXMLWriter* _xml,
@@ -366,26 +448,12 @@ void cmExtraCodeLiteGenerator::CreateProjectSourceEntries(
 
   // insert all source files in the codelite project
   // first the C/C++ implementation files, then all others
-  for (std::map<std::string, cmSourceFile*>::const_iterator sit =
-         cFiles.begin();
-       sit != cFiles.end(); ++sit) {
-    xml.StartElement("File");
-    std::string fpath(sit->first);
-    std::string frelapath =
-      cmSystemTools::RelativePath(projectPath.c_str(), sit->first.c_str());
-    xml.Attribute("Name", frelapath);
-    xml.EndElement();
-  }
+  this->CreateFoldersAndFiles(cFiles, xml, projectPath);
   xml.EndElement(); // VirtualDirectory
+
   xml.StartElement("VirtualDirectory");
   xml.Attribute("Name", "include");
-  for (std::set<std::string>::const_iterator sit = otherFiles.begin();
-       sit != otherFiles.end(); ++sit) {
-    xml.StartElement("File");
-    xml.Attribute(
-      "Name", cmSystemTools::RelativePath(projectPath.c_str(), sit->c_str()));
-    xml.EndElement();
-  }
+  this->CreateFoldersAndFiles(otherFiles, xml, projectPath);
   xml.EndElement(); // VirtualDirectory
 
   // Get the number of CPUs. We use this information for the make -jN
@@ -532,9 +600,6 @@ void cmExtraCodeLiteGenerator::CreateNewProjectFile(
   // Sort them into two containers, one for C/C++ implementation files
   // which may have an acompanying header, one for all other files
   std::string projectType;
-
-  std::vector<std::string> headerExts =
-    this->GlobalGenerator->GetCMakeInstance()->GetHeaderExtensions();
 
   std::map<std::string, cmSourceFile*> cFiles;
   std::set<std::string> otherFiles;

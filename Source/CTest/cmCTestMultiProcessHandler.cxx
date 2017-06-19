@@ -7,11 +7,12 @@
 #include "cmCTestScriptHandler.h"
 #include "cmCTestTestHandler.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/String.hxx"
+#include "cmsys/SystemInformation.hxx"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
-#include <cmsys/String.hxx>
-#include <cmsys/SystemInformation.hxx>
 #include <iomanip>
 #include <list>
 #include <math.h>
@@ -138,8 +139,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     }
   }
 
-  std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(this->Properties[test]->Directory);
+  cmWorkingDirectory workdir(this->Properties[test]->Directory);
 
   // Lock the resources we'll be using
   this->LockResources(test);
@@ -163,10 +163,11 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     this->TestRunningMap[test] = false;
     this->RunningCount -= GetProcessorsUsed(test);
     testRun->EndTest(this->Completed, this->Total, false);
-    this->Failed->push_back(this->Properties[test]->Name);
+    if (!this->Properties[test]->Disabled) {
+      this->Failed->push_back(this->Properties[test]->Name);
+    }
     delete testRun;
   }
-  cmSystemTools::ChangeDirectory(current_dir);
 }
 
 void cmCTestMultiProcessHandler::LockResources(int index)
@@ -560,7 +561,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
   // In parallel test runs repeatedly move dependencies of the tests on
   // the current dependency level to the next level until no
   // further dependencies exist.
-  while (priorityStack.back().size()) {
+  while (!priorityStack.back().empty()) {
     TestSet& previousSet = priorityStack.back();
     priorityStack.push_back(TestSet());
     TestSet& currentSet = priorityStack.back();
@@ -683,9 +684,7 @@ void cmCTestMultiProcessHandler::PrintTestList()
     count++;
     cmCTestTestHandler::cmCTestTestProperties& p = *it->second;
 
-    // push working dir
-    std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
-    cmSystemTools::ChangeDirectory(p.Directory);
+    cmWorkingDirectory workdir(p.Directory);
 
     cmCTestRunTest testRun(this->TestHandler);
     testRun.SetIndex(p.Index);
@@ -721,11 +720,13 @@ void cmCTestMultiProcessHandler::PrintTestList()
       std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
         << indexStr.str(),
       this->Quiet);
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, " ", this->Quiet);
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, p.Name << std::endl,
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, " " << p.Name,
                        this->Quiet);
-    // pop working dir
-    cmSystemTools::ChangeDirectory(current_dir);
+    if (p.Disabled) {
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, " (Disabled)",
+                         this->Quiet);
+    }
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl, this->Quiet);
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl

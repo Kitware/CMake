@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpression.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <utility>
 
 #include "assert.h"
@@ -126,7 +126,7 @@ cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression()
 std::string cmGeneratorExpression::StripEmptyListElements(
   const std::string& input)
 {
-  if (input.find(';') == input.npos) {
+  if (input.find(';') == std::string::npos) {
     return input;
   }
   std::string result;
@@ -161,7 +161,7 @@ static std::string stripAllGeneratorExpressions(const std::string& input)
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
   int nestingLevel = 0;
-  while ((pos = input.find("$<", lastPos)) != input.npos) {
+  while ((pos = input.find("$<", lastPos)) != std::string::npos) {
     result += input.substr(lastPos, pos - lastPos);
     pos += 2;
     nestingLevel = 1;
@@ -290,7 +290,7 @@ void cmGeneratorExpression::Split(const std::string& input,
 {
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
-  while ((pos = input.find("$<", lastPos)) != input.npos) {
+  while ((pos = input.find("$<", lastPos)) != std::string::npos) {
     std::string part = input.substr(lastPos, pos - lastPos);
     std::string preGenex;
     if (!part.empty()) {

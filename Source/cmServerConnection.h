@@ -2,19 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include <string>
-#include <vector>
+#include "cmConfigure.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cm_uv.h"
-#endif
 
-class cmServer;
+#include <string>
+
 class cmFileMonitor;
-class LoopGuard;
+class cmServer;
 
 class cmServerConnection
 {
+  CM_DISABLE_COPY(cmServerConnection)
+
 public:
   cmServerConnection();
   virtual ~cmServerConnection();

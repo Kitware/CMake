@@ -3,7 +3,7 @@
 #ifndef cmCursesDummyWidget_h
 #define cmCursesDummyWidget_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"
@@ -12,6 +12,8 @@ class cmCursesMainForm;
 
 class cmCursesDummyWidget : public cmCursesWidget
 {
+  CM_DISABLE_COPY(cmCursesDummyWidget)
+
 public:
   cmCursesDummyWidget(int width, int height, int left, int top);
 
@@ -20,10 +22,6 @@ public:
   // when this widget has focus. Returns true if the input was
   // handled.
   bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w) CM_OVERRIDE;
-
-protected:
-  cmCursesDummyWidget(const cmCursesDummyWidget& from);
-  void operator=(const cmCursesDummyWidget&);
 };
 
 #endif // cmCursesDummyWidget_h

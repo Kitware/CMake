@@ -333,7 +333,7 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
   return index;
 }
 
-void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
+void cmComputeLinkDepends::FollowLinkEntry(BFSEntry qe)
 {
   // Get this entry representation.
   int depender_index = qe.Index;

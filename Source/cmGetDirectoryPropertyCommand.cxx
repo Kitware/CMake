@@ -20,7 +20,7 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
   }
 
   std::vector<std::string>::const_iterator i = args.begin();
-  std::string variable = *i;
+  std::string const& variable = *i;
   ++i;
 
   // get the directory argument if there is one
@@ -78,6 +78,7 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
           this->Makefile->IssueMessage(
             cmake::AUTHOR_WARNING,
             cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
+          CM_FALLTHROUGH;
         case cmPolicies::OLD:
           this->StoreResult(variable, this->Makefile->GetDefineFlagsCMP0059());
           return true;

@@ -9,8 +9,8 @@ int __host__ file1_sq_func(int x)
   int nDevices = 0;
   err = cudaGetDeviceCount(&nDevices);
   if (err != cudaSuccess) {
-    std::cout << "nDevices: " << nDevices << std::endl;
-    std::cout << "err: " << err << std::endl;
+    std::cerr << "nDevices: " << nDevices << std::endl;
+    std::cerr << "err: " << err << std::endl;
     return 1;
   }
   std::cout << "this library uses cuda code" << std::endl;

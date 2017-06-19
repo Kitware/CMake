@@ -3,7 +3,7 @@
 #ifndef cmDependsJava_h
 #define cmDependsJava_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmDepends.h"
 
@@ -17,6 +17,8 @@
  */
 class cmDependsJava : public cmDepends
 {
+  CM_DISABLE_COPY(cmDependsJava)
+
 public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
@@ -33,10 +35,6 @@ protected:
   bool CheckDependencies(
     std::istream& internalDepends, const char* internalDependsFileName,
     std::map<std::string, DependencyVector>& validDeps) CM_OVERRIDE;
-
-private:
-  cmDependsJava(cmDependsJava const&);  // Purposely not implemented.
-  void operator=(cmDependsJava const&); // Purposely not implemented.
 };
 
 #endif

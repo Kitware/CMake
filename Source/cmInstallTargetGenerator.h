@@ -3,7 +3,7 @@
 #ifndef cmInstallTargetGenerator_h
 #define cmInstallTargetGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmInstallGenerator.h"
 #include "cmScriptGenerator.h"
@@ -41,6 +41,9 @@ public:
 
   std::string GetInstallFilename(const std::string& config) const;
 
+  void GetInstallObjectNames(std::string const& config,
+                             std::vector<std::string>& objects) const;
+
   enum NameType
   {
     NameNormal,
@@ -64,39 +67,39 @@ public:
 protected:
   void GenerateScript(std::ostream& os) CM_OVERRIDE;
   void GenerateScriptForConfig(std::ostream& os, const std::string& config,
-                               Indent const& indent) CM_OVERRIDE;
-  typedef void (cmInstallTargetGenerator::*TweakMethod)(std::ostream&,
-                                                        Indent const&,
+                               Indent indent) CM_OVERRIDE;
+  void GenerateScriptForConfigObjectLibrary(std::ostream& os,
+                                            const std::string& config,
+                                            Indent indent);
+  typedef void (cmInstallTargetGenerator::*TweakMethod)(std::ostream&, Indent,
                                                         const std::string&,
                                                         std::string const&);
-  void AddTweak(std::ostream& os, Indent const& indent,
-                const std::string& config, std::string const& file,
-                TweakMethod tweak);
-  void AddTweak(std::ostream& os, Indent const& indent,
-                const std::string& config,
+  void AddTweak(std::ostream& os, Indent indent, const std::string& config,
+                std::string const& file, TweakMethod tweak);
+  void AddTweak(std::ostream& os, Indent indent, const std::string& config,
                 std::vector<std::string> const& files, TweakMethod tweak);
   std::string GetDestDirPath(std::string const& file);
-  void PreReplacementTweaks(std::ostream& os, Indent const& indent,
+  void PreReplacementTweaks(std::ostream& os, Indent indent,
                             const std::string& config,
                             std::string const& file);
-  void PostReplacementTweaks(std::ostream& os, Indent const& indent,
+  void PostReplacementTweaks(std::ostream& os, Indent indent,
                              const std::string& config,
                              std::string const& file);
-  void AddInstallNamePatchRule(std::ostream& os, Indent const& indent,
+  void AddInstallNamePatchRule(std::ostream& os, Indent indent,
                                const std::string& config,
                                const std::string& toDestDirPath);
-  void AddChrpathPatchRule(std::ostream& os, Indent const& indent,
+  void AddChrpathPatchRule(std::ostream& os, Indent indent,
                            const std::string& config,
                            std::string const& toDestDirPath);
-  void AddRPathCheckRule(std::ostream& os, Indent const& indent,
+  void AddRPathCheckRule(std::ostream& os, Indent indent,
                          const std::string& config,
                          std::string const& toDestDirPath);
 
-  void AddStripRule(std::ostream& os, Indent const& indent,
+  void AddStripRule(std::ostream& os, Indent indent,
                     const std::string& toDestDirPath);
-  void AddRanlibRule(std::ostream& os, Indent const& indent,
+  void AddRanlibRule(std::ostream& os, Indent indent,
                      const std::string& toDestDirPath);
-  void AddUniversalInstallRule(std::ostream& os, Indent const& indent,
+  void AddUniversalInstallRule(std::ostream& os, Indent indent,
                                const std::string& toDestDirPath);
 
   std::string TargetName;

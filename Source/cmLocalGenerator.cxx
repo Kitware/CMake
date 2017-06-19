@@ -13,7 +13,6 @@
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
-#include "cmLinkLineDeviceComputer.h"
 #include "cmMakefile.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
@@ -31,9 +30,9 @@
 #include "cmCryptoHash.h"
 #endif
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/RegularExpression.hxx>
 #include <iterator>
 #include <sstream>
 #include <stdio.h>
@@ -89,7 +88,19 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   std::vector<std::string> enabledLanguages =
     this->GetState()->GetEnabledLanguages();
 
-  this->CompilerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  if (const char* sysrootCompile =
+        this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE")) {
+    this->CompilerSysroot = sysrootCompile;
+  } else {
+    this->CompilerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  }
+
+  if (const char* sysrootLink =
+        this->Makefile->GetDefinition("CMAKE_SYSROOT_LINK")) {
+    this->LinkerSysroot = sysrootLink;
+  } else {
+    this->LinkerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  }
 
   for (std::vector<std::string>::iterator i = enabledLanguages.begin();
        i != enabledLanguages.end(); ++i) {
@@ -129,7 +140,7 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
     for (const char* const* replaceIter = cmArrayBegin(ruleReplaceVars);
          replaceIter != cmArrayEnd(ruleReplaceVars); ++replaceIter) {
       std::string actualReplace = *replaceIter;
-      if (actualReplace.find("${LANG}") != actualReplace.npos) {
+      if (actualReplace.find("${LANG}") != std::string::npos) {
         cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
       }
 
@@ -143,7 +154,8 @@ cmRulePlaceholderExpander* cmLocalGenerator::CreateRulePlaceholderExpander()
   const
 {
   return new cmRulePlaceholderExpander(this->Compilers, this->VariableMappings,
-                                       this->CompilerSysroot);
+                                       this->CompilerSysroot,
+                                       this->LinkerSysroot);
 }
 
 cmLocalGenerator::~cmLocalGenerator()
@@ -562,6 +574,31 @@ void cmLocalGenerator::ComputeTargetManifest()
   }
 }
 
+bool cmLocalGenerator::ComputeTargetCompileFeatures()
+{
+  // Collect the set of configuration types.
+  std::vector<std::string> configNames;
+  this->Makefile->GetConfigurations(configNames);
+  if (configNames.empty()) {
+    configNames.push_back("");
+  }
+
+  // Process compile features of all targets.
+  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
+  for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+       t != targets.end(); ++t) {
+    cmGeneratorTarget* target = *t;
+    for (std::vector<std::string>::iterator ci = configNames.begin();
+         ci != configNames.end(); ++ci) {
+      if (!target->ComputeCompileFeatures(*ci)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 bool cmLocalGenerator::IsRootMakefile() const
 {
   return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
@@ -746,14 +783,6 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
       this->AppendFlagEscape(flags, *i);
     }
   }
-  std::vector<std::string> features;
-  target->GetCompileFeatures(features, config);
-  for (std::vector<std::string>::const_iterator it = features.begin();
-       it != features.end(); ++it) {
-    if (!this->Makefile->AddRequiredTargetFeature(target->Target, *it)) {
-      return;
-    }
-  }
 
   for (std::map<std::string, std::string>::const_iterator it =
          target->GetMaxLanguageStandards().begin();
@@ -830,7 +859,13 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     return;
   }
 
-  std::string rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  std::string rootPath;
+  if (const char* sysrootCompile =
+        this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE")) {
+    rootPath = sysrootCompile;
+  } else {
+    rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  }
 
   std::vector<std::string> implicitDirs;
   // Load implicit include directories for this language.
@@ -919,12 +954,16 @@ void cmLocalGenerator::GetTargetFlags(
   const char* libraryLinkVariable =
     "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
 
+  const std::string linkLanguage =
+    linkLineComputer->GetLinkerLanguage(target, buildType);
+
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
       this->GetStaticLibraryFlags(linkFlags, buildType, target);
       break;
     case cmStateEnums::MODULE_LIBRARY:
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";
+      CM_FALLTHROUGH;
     case cmStateEnums::SHARED_LIBRARY: {
       linkFlags = this->Makefile->GetSafeDefinition(libraryLinkVariable);
       linkFlags += " ";
@@ -980,16 +1019,13 @@ void cmLocalGenerator::GetTargetFlags(
         linkFlags += this->Makefile->GetSafeDefinition(build);
         linkFlags += " ";
       }
-
-      const std::string linkLanguage =
-        linkLineComputer->GetLinkerLanguage(target, buildType);
       if (linkLanguage.empty()) {
         cmSystemTools::Error(
           "CMake can not determine linker language for target: ",
           target->GetName().c_str());
         return;
       }
-      this->AddLanguageFlags(flags, linkLanguage, buildType);
+      this->AddLanguageFlagsForLinking(flags, target, linkLanguage, buildType);
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                   frameworkPath, linkPath);
@@ -1044,6 +1080,8 @@ void cmLocalGenerator::GetTargetFlags(
     default:
       break;
   }
+
+  this->AppendIPOLinkerFlags(linkFlags, target, config, linkLanguage);
 }
 
 void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
@@ -1054,11 +1092,7 @@ void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
   cmMakefile* mf = this->GetMakefile();
 
   // Add language-specific flags.
-  this->AddLanguageFlags(flags, lang, config);
-
-  if (target->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION", config)) {
-    this->AppendFeatureOptions(flags, lang, "IPO");
-  }
+  this->AddLanguageFlags(flags, target, lang, config);
 
   this->AddArchitectureFlags(flags, target, lang, config);
 
@@ -1218,6 +1252,7 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
           /* clang-format on */
           this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
         }
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior is to always add the flags
         add_shlib_flags = true;
@@ -1227,6 +1262,7 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
         this->IssueMessage(
           cmake::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0065));
+        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior is to only add the flags if ENABLE_EXPORTS is on
         add_shlib_flags = tgt.GetPropertyAsBool("ENABLE_EXPORTS");
@@ -1291,6 +1327,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
 }
 
 void cmLocalGenerator::AddLanguageFlags(std::string& flags,
+                                        cmGeneratorTarget const* target,
                                         const std::string& lang,
                                         const std::string& config)
 {
@@ -1299,6 +1336,26 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   flagsVar += lang;
   flagsVar += "_FLAGS";
   this->AddConfigVariableFlags(flags, flagsVar, config);
+
+  if (target->IsIPOEnabled(lang, config)) {
+    this->AppendFeatureOptions(flags, lang, "IPO");
+  }
+}
+
+void cmLocalGenerator::AddLanguageFlagsForLinking(
+  std::string& flags, cmGeneratorTarget const* target, const std::string& lang,
+  const std::string& config)
+{
+  if (this->Makefile->IsOn("CMAKE_" + lang +
+                           "_LINK_WITH_STANDARD_COMPILE_OPTION")) {
+    // This toolchain requires use of the language standard flag
+    // when linking in order to use the matching standard library.
+    // FIXME: If CMake gains an abstraction for standard library
+    // selection, this will have to be reconciled with it.
+    this->AddCompilerRequirementFlag(flags, target, lang);
+  }
+
+  this->AddLanguageFlags(flags, target, lang, config);
 }
 
 cmGeneratorTarget* cmLocalGenerator::FindGeneratorTargetToUse(
@@ -1465,7 +1522,11 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
            "does not know the compile flags to use to enable it.";
       this->IssueMessage(cmake::FATAL_ERROR, e.str());
     } else {
-      this->AppendFlagEscape(flags, opt);
+      std::vector<std::string> optVec;
+      cmSystemTools::ExpandListArgument(opt, optVec);
+      for (size_t i = 0; i < optVec.size(); ++i) {
+        this->AppendFlagEscape(flags, optVec[i]);
+      }
     }
     return;
   }
@@ -1482,6 +1543,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     langStdMap["C"].push_back("99");
     langStdMap["C"].push_back("90");
 
+    langStdMap["CUDA"].push_back("14");
     langStdMap["CUDA"].push_back("11");
     langStdMap["CUDA"].push_back("98");
   }
@@ -1691,7 +1753,7 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
             << cmPolicies::GetPolicyWarning(cmPolicies::CMP0018);
 
           this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
-          // fall through to OLD behaviour
+          CM_FALLTHROUGH;
         }
         case cmPolicies::OLD:
           return true;
@@ -1772,6 +1834,38 @@ void cmLocalGenerator::AppendFlagEscape(std::string& flags,
   this->AppendFlags(flags, this->EscapeForShell(rawFlag));
 }
 
+void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
+                                            cmGeneratorTarget* target,
+                                            const std::string& config,
+                                            const std::string& lang)
+{
+  if (!target->IsIPOEnabled(lang, config)) {
+    return;
+  }
+
+  switch (target->GetType()) {
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
+      break;
+    default:
+      return;
+  }
+
+  const std::string name = "CMAKE_" + lang + "_LINK_OPTIONS_IPO";
+  const char* rawFlagsList = this->Makefile->GetDefinition(name);
+  if (rawFlagsList == CM_NULLPTR) {
+    return;
+  }
+
+  std::vector<std::string> flagsList;
+  cmSystemTools::ExpandListArgument(rawFlagsList, flagsList);
+  for (std::vector<std::string>::const_iterator oi = flagsList.begin();
+       oi != flagsList.end(); ++oi) {
+    this->AppendFlagEscape(flags, *oi);
+  }
+}
+
 void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
                                      const char* defines_list) const
 {
@@ -1844,7 +1938,7 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
       // -DNAME="value" instead of -D"NAME=value" for historical reasons.
       std::string::size_type eq = defineIt->find("=");
       def += defineIt->substr(0, eq);
-      if (eq != defineIt->npos) {
+      if (eq != std::string::npos) {
         def += "=";
         def += this->EscapeForShell(defineIt->c_str() + eq + 1, true);
       }
@@ -2021,7 +2115,7 @@ static bool cmLocalGeneratorShortenObjectName(std::string& objName,
   // its own md5 sum.
   std::string::size_type pos =
     objName.find('/', objName.size() - max_len + 32);
-  if (pos != objName.npos) {
+  if (pos != std::string::npos) {
     cmCryptoHash md5(cmCryptoHash::AlgoMD5);
     std::string md5name = md5.HashString(objName.substr(0, pos));
     md5name += objName.substr(pos);
@@ -2166,11 +2260,11 @@ bool cmLocalGenerator::IsNMake() const
 
 std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   const cmSourceFile& source, std::string const& dir_max,
-  bool* hasSourceExtension)
+  bool* hasSourceExtension, char const* customOutputExtension)
 {
   // Construct the object file name using the full path to the source
   // file which is its only unique identification.
-  const char* fullPath = source.GetFullPath().c_str();
+  std::string const& fullPath = source.GetFullPath();
 
   // Try referencing the source relative to the source tree.
   std::string relFromSource =
@@ -2227,7 +2321,7 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
     }
 
     // Remove the source extension if it is to be replaced.
-    if (replaceExt) {
+    if (replaceExt || customOutputExtension) {
       keptSourceExtension = false;
       std::string::size_type dot_pos = objectName.rfind('.');
       if (dot_pos != std::string::npos) {
@@ -2236,7 +2330,11 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
     }
 
     // Store the new extension.
-    objectName += this->GlobalGenerator->GetLanguageOutputExtension(source);
+    if (customOutputExtension) {
+      objectName += customOutputExtension;
+    } else {
+      objectName += this->GlobalGenerator->GetLanguageOutputExtension(source);
+    }
   }
   if (hasSourceExtension) {
     *hasSourceExtension = keptSourceExtension;
@@ -2368,7 +2466,7 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
   }
 
   // Many compilers do not support # in the value so we disable it.
-  if (define.find_first_of('#') != define.npos) {
+  if (define.find_first_of('#') != std::string::npos) {
     std::ostringstream e;
     /* clang-format off */
     e << "WARNING: Preprocessor definitions containing '#' may not be "

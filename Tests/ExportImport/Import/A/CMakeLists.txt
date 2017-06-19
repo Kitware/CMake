@@ -228,6 +228,16 @@ target_link_libraries(imp_lib1 exp_testLib2)
 add_library(imp_lib1b STATIC imp_lib1.c)
 target_link_libraries(imp_lib1b bld_testLib2)
 
+if(NOT CMAKE_GENERATOR STREQUAL "Xcode" OR NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;$]")
+  # Create a executable that is using objects imported from the install tree
+  add_executable(imp_testLib8 imp_testLib8.c $<TARGET_OBJECTS:exp_testLib8>)
+
+  if(NOT CMAKE_GENERATOR STREQUAL "Xcode" OR NOT XCODE_VERSION VERSION_LESS 5)
+    # Create a executable that is using objects imported from the build tree
+    add_executable(imp_testLib8b imp_testLib8.c $<TARGET_OBJECTS:bld_testLib8>)
+  endif()
+endif()
+
 #-----------------------------------------------------------------------------
 # Test that handling imported targets, including transitive dependencies,
 # works in CheckFunctionExists (...and hopefully all other try_compile() checks

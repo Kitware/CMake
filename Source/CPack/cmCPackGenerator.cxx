@@ -2,11 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackGenerator.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <list>
 #include <utility>
 
 #include "cmCPackComponentGroup.h"
@@ -16,6 +15,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateSnapshot.h"
+#include "cmWorkingDirectory.h"
 #include "cmXMLSafe.h"
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
@@ -313,7 +313,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
     const std::string& tempDir = tempInstallDirectory;
     for (it = installDirectoriesVector.begin();
          it != installDirectoriesVector.end(); ++it) {
-      std::list<std::pair<std::string, std::string> > symlinkedFiles;
+      std::vector<std::pair<std::string, std::string> > symlinkedFiles;
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
       cmsys::Glob gl;
       std::string top = *it;
@@ -377,13 +377,14 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       }
       /* rebuild symlinks in the installed tree */
       if (!symlinkedFiles.empty()) {
-        std::list<std::pair<std::string, std::string> >::iterator symlinkedIt;
+        std::vector<std::pair<std::string, std::string> >::iterator
+          symlinkedIt;
         std::string curDir = cmSystemTools::GetCurrentWorkingDirectory();
         std::string goToDir = tempDir;
         goToDir += "/" + subdir;
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Change dir to: " << goToDir
                                                                << std::endl);
-        cmSystemTools::ChangeDirectory(goToDir);
+        cmWorkingDirectory workdir(goToDir);
         for (symlinkedIt = symlinkedFiles.begin();
              symlinkedIt != symlinkedFiles.end(); ++symlinkedIt) {
           cmCPackLogger(cmCPackLog::LOG_DEBUG, "Will create a symlink: "
@@ -408,7 +409,6 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         }
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Going back to: " << curDir
                                                                << std::endl);
-        cmSystemTools::ChangeDirectory(curDir);
       }
     }
   }
@@ -620,7 +620,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
                           << installComponent << std::endl);
         }
 
-        cmake cm;
+        cmake cm(cmake::RoleScript);
         cm.SetHomeDirectory("");
         cm.SetHomeOutputDirectory("");
         cm.GetCurrentSnapshot().SetDefaultDefinitions();
@@ -795,6 +795,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           cmsys::Glob glA;
           glA.RecurseOn();
           glA.SetRecurseListDirs(true);
+          glA.SetRecurseThroughSymlinks(false);
           glA.FindFiles(findExpr);
           std::vector<std::string> filesAfter = glA.GetFiles();
           std::sort(filesAfter.begin(), filesAfter.end());
@@ -810,8 +811,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           for (fit = result.begin(); fit != diff; ++fit) {
             localFileName =
               cmSystemTools::RelativePath(InstallPrefix, fit->c_str());
-            localFileName = localFileName.substr(
-              localFileName.find_first_not_of('/'), std::string::npos);
+            localFileName =
+              localFileName.substr(localFileName.find_first_not_of('/'));
             Components[installComponent].Files.push_back(localFileName);
             cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file <"
                             << localFileName << "> to component <"
@@ -1394,6 +1395,11 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
     const char* archiveFile = this->GetOption(macroPrefix + "_ARCHIVE_FILE");
     if (archiveFile && *archiveFile) {
       component->ArchiveFile = archiveFile;
+    }
+
+    const char* plist = this->GetOption(macroPrefix + "_PLIST");
+    if (plist && *plist) {
+      component->Plist = plist;
     }
 
     const char* groupName = this->GetOption(macroPrefix + "_GROUP");

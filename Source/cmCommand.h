@@ -3,12 +3,10 @@
 #ifndef cmCommand_h
 #define cmCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
-
-#include "cmCommandArgumentsHelper.h"
-#include "cmPolicies.h"
 
 class cmExecutionStatus;
 class cmMakefile;
@@ -26,6 +24,8 @@ struct cmListFileArgument;
  */
 class cmCommand
 {
+  CM_DISABLE_COPY(cmCommand)
+
 public:
   /**
    * Construct the command. By default it has no makefile.
@@ -80,22 +80,6 @@ public:
   virtual cmCommand* Clone() = 0;
 
   /**
-   * This determines if the command is invoked when in script mode.
-   */
-  virtual bool IsScriptable() const { return false; }
-
-  /**
-   * This determines if the command is defined in a cmake script.
-   * It is the case for cmMacroHelperCommand and cmFunctionHelperCommand.
-   */
-  virtual bool IsUserDefined() const { return false; }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  virtual std::string GetName() const = 0;
-
-  /**
    * Return the last error string.
    */
   const char* GetError();
@@ -105,12 +89,8 @@ public:
    */
   void SetError(const std::string& e);
 
-  /** Check if the command is disallowed by a policy.  */
-  bool Disallowed(cmPolicies::PolicyID pol, const char* e);
-
 protected:
   cmMakefile* Makefile;
-  cmCommandArgumentsHelper Helper;
 
 private:
   std::string Error;

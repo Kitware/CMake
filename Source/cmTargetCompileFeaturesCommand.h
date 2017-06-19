@@ -3,7 +3,8 @@
 #ifndef cmTargetCompileFeaturesCommand_h
 #define cmTargetCompileFeaturesCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 
@@ -19,8 +20,6 @@ class cmTargetCompileFeaturesCommand : public cmTargetPropCommandBase
 
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
-
-  std::string GetName() const CM_OVERRIDE { return "target_compile_features"; }
 
 private:
   void HandleImportedTarget(const std::string& tgt) CM_OVERRIDE;

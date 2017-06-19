@@ -4,8 +4,8 @@
 #include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -42,17 +42,20 @@ public:
       size_t beginPos = line.find("begin");
 
       // Check that the begin is the first non-space string on the line
-      if ((beginPos == line.find_first_not_of(' ')) && beginPos != line.npos) {
+      if ((beginPos == line.find_first_not_of(' ')) &&
+          beginPos != std::string::npos) {
         beginSet.push_back("begin");
         coverageVector.push_back(-1);
         continue;
-      } else if (line.find('{') != line.npos) {
+      }
+      if (line.find('{') != std::string::npos) {
         blockComFlag = true;
-      } else if (line.find('}') != line.npos) {
+      } else if (line.find('}') != std::string::npos) {
         blockComFlag = false;
         coverageVector.push_back(-1);
         continue;
-      } else if ((line.find("end;") != line.npos) && !beginSet.empty()) {
+      } else if ((line.find("end;") != std::string::npos) &&
+                 !beginSet.empty()) {
         beginSet.pop_back();
         coverageVector.push_back(-1);
         continue;
@@ -61,7 +64,7 @@ public:
       //  This checks for comments after lines of code, finding the
       //  comment symbol after the ending semicolon.
       comPos = line.find("//");
-      if (comPos != line.npos) {
+      if (comPos != std::string::npos) {
         semiPos = line.find(';');
         if (comPos < semiPos) {
           lineComFlag = true;
@@ -90,20 +93,20 @@ public:
     size_t pos = 0;
 
     /*
-    *  This first 'while' section goes through the found HTML
-    *  file name and attempts to capture the source file name
-    *   which is set as part of the HTML file name: the name of
-    *   the file is found in parenthesis '()'
-    *
-    *   See test HTML file name: UTCovTest(UTCovTest.pas).html.
-    *
-    *   Find the text inside each pair of parenthesis and check
-    *   to see if it ends in '.pas'.  If it can't be found,
-    *   exit the function.
-    */
+     *  This first 'while' section goes through the found HTML
+     *  file name and attempts to capture the source file name
+     *   which is set as part of the HTML file name: the name of
+     *   the file is found in parenthesis '()'
+     *
+     *   See test HTML file name: UTCovTest(UTCovTest.pas).html.
+     *
+     *   Find the text inside each pair of parenthesis and check
+     *   to see if it ends in '.pas'.  If it can't be found,
+     *   exit the function.
+     */
     while (true) {
       lastoffset = line.find('(', pos);
-      if (lastoffset == line.npos) {
+      if (lastoffset == std::string::npos) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, endnamepos
                              << "File not found  " << lastoffset << std::endl,
                            this->Coverage.Quiet);
@@ -111,7 +114,7 @@ public:
       }
       endnamepos = line.find(')', lastoffset);
       filename = line.substr(lastoffset + 1, (endnamepos - 1) - lastoffset);
-      if (filename.find(".pas") != filename.npos) {
+      if (filename.find(".pas") != std::string::npos) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                            "Coverage found for file:  " << filename
                                                         << std::endl,
@@ -121,9 +124,9 @@ public:
       pos = lastoffset + 1;
     }
     /*
-    *  Glob through the source directory for the
-    *  file found above
-    */
+     *  Glob through the source directory for the
+     *  file found above
+     */
     cmsys::Glob gl;
     gl.RecurseOn();
     gl.RecurseThroughSymlinksOff();
@@ -132,9 +135,9 @@ public:
     std::vector<std::string> const& files = gl.GetFiles();
     if (files.empty()) {
       /*
-      *  If that doesn't find any matching files
-      *  return a failure.
-      */
+       *  If that doesn't find any matching files
+       *  return a failure.
+       */
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                          "Unable to find file matching" << glob << std::endl,
                          this->Coverage.Quiet);
@@ -143,9 +146,9 @@ public:
     FileLinesType& coverageVector = this->Coverage.TotalCoverage[files[0]];
 
     /*
-    *  Initialize the file to have all code between 'begin' and
-    *  'end' tags marked as executable
-    */
+     *  Initialize the file to have all code between 'begin' and
+     *  'end' tags marked as executable
+     */
 
     this->initializeDelphiFile(files[0], coverageVector);
 
@@ -155,19 +158,19 @@ public:
     }
 
     /*
-    *  Now read the HTML file, looking for the lines that have an
-    *  "inline" in it. Then parse out the "class" value of that
-    *  line to determine if the line is executed or not.
-    *
-    *  Sample HTML line:
-    *
-    *  <tr class="covered"><td>47</td><td><pre style="display:inline;">
-    *    &nbsp;CheckEquals(1,2-1);</pre></td></tr>
-    *
-    */
+     *  Now read the HTML file, looking for the lines that have an
+     *  "inline" in it. Then parse out the "class" value of that
+     *  line to determine if the line is executed or not.
+     *
+     *  Sample HTML line:
+     *
+     *  <tr class="covered"><td>47</td><td><pre style="display:inline;">
+     *    &nbsp;CheckEquals(1,2-1);</pre></td></tr>
+     *
+     */
 
     while (cmSystemTools::GetLineFromStream(in, line)) {
-      if (line.find("inline") == line.npos) {
+      if (line.find("inline") == std::string::npos) {
         continue;
       }
 

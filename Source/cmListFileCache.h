@@ -3,7 +3,7 @@
 #ifndef cmListFileCache_h
 #define cmListFileCache_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <string>
@@ -43,12 +43,6 @@ struct cmListFileArgument
     : Value()
     , Delim(Unquoted)
     , Line(0)
-  {
-  }
-  cmListFileArgument(const cmListFileArgument& r)
-    : Value(r.Value)
-    , Delim(r.Delim)
-    , Line(r.Line)
   {
   }
   cmListFileArgument(const std::string& v, Delimiter d, long line)
@@ -113,7 +107,7 @@ public:
 
   // Construct an empty backtrace whose bottom sits in the directory
   // indicated by the given valid snapshot.
-  cmListFileBacktrace(cmStateSnapshot snapshot);
+  cmListFileBacktrace(cmStateSnapshot const& snapshot);
 
   // Backtraces may be copied and assigned as values.
   cmListFileBacktrace(cmListFileBacktrace const& r);
@@ -149,9 +143,9 @@ private:
 
   cmStateSnapshot Bottom;
   Entry* Cur;
-  cmListFileBacktrace(cmStateSnapshot bottom, Entry* up,
+  cmListFileBacktrace(cmStateSnapshot const& bottom, Entry* up,
                       cmListFileContext const& lfc);
-  cmListFileBacktrace(cmStateSnapshot bottom, Entry* cur);
+  cmListFileBacktrace(cmStateSnapshot const& bottom, Entry* cur);
 };
 
 struct cmListFile

@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestGIT.h"
 
-#include <cmsys/FStream.hxx>
-#include <cmsys/Process.h>
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,19 +67,21 @@ std::string cmCTestGIT::GetWorkingRevision()
   return rev;
 }
 
-void cmCTestGIT::NoteOldRevision()
+bool cmCTestGIT::NoteOldRevision()
 {
   this->OldRevision = this->GetWorkingRevision();
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Old revision of repository is: "
                << this->OldRevision << "\n");
   this->PriorRev.Rev = this->OldRevision;
+  return true;
 }
 
-void cmCTestGIT::NoteNewRevision()
+bool cmCTestGIT::NoteNewRevision()
 {
   this->NewRevision = this->GetWorkingRevision();
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   New revision of repository is: "
                << this->NewRevision << "\n");
+  return true;
 }
 
 std::string cmCTestGIT::FindGitDir()
@@ -189,9 +191,9 @@ bool cmCTestGIT::UpdateByFetchAndReset()
     std::string line;
     while (sha1.empty() && cmSystemTools::GetLineFromStream(fin, line)) {
       this->Log << "FETCH_HEAD> " << line << "\n";
-      if (line.find("\tnot-for-merge\t") == line.npos) {
+      if (line.find("\tnot-for-merge\t") == std::string::npos) {
         std::string::size_type pos = line.find('\t');
-        if (pos != line.npos) {
+        if (pos != std::string::npos) {
           sha1 = line.substr(0, pos);
         }
       }
@@ -607,7 +609,7 @@ private:
 char const cmCTestGIT::CommitParser::SectionSep[SectionCount] = { '\n', '\n',
                                                                   '\0' };
 
-void cmCTestGIT::LoadRevisions()
+bool cmCTestGIT::LoadRevisions()
 {
   // Use 'git rev-list ... | git diff-tree ...' to get revisions.
   std::string range = this->OldRevision + ".." + this->NewRevision;
@@ -634,9 +636,10 @@ void cmCTestGIT::LoadRevisions()
   out.Process("", 1);
 
   cmsysProcess_Delete(cp);
+  return true;
 }
 
-void cmCTestGIT::LoadModifications()
+bool cmCTestGIT::LoadModifications()
 {
   const char* git = this->CommandLineTool.c_str();
 
@@ -660,4 +663,5 @@ void cmCTestGIT::LoadModifications()
        ci != out.Changes.end(); ++ci) {
     this->DoModification(PathModified, ci->Path);
   }
+  return true;
 }

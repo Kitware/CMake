@@ -3,7 +3,7 @@
 #ifndef cmScriptGenerator_h
 #define cmScriptGenerator_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h"
 
 #include <ostream>
 #include <string>
@@ -35,7 +35,7 @@ private:
   int Level;
 };
 inline std::ostream& operator<<(std::ostream& os,
-                                cmScriptGeneratorIndent const& indent)
+                                cmScriptGeneratorIndent indent)
 {
   indent.Write(os);
   return os;
@@ -47,6 +47,8 @@ inline std::ostream& operator<<(std::ostream& os,
  */
 class cmScriptGenerator
 {
+  CM_DISABLE_COPY(cmScriptGenerator)
+
 public:
   cmScriptGenerator(const std::string& config_var,
                     std::vector<std::string> const& configurations);
@@ -58,12 +60,12 @@ public:
 protected:
   typedef cmScriptGeneratorIndent Indent;
   virtual void GenerateScript(std::ostream& os);
-  virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
-  virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
+  virtual void GenerateScriptConfigs(std::ostream& os, Indent indent);
+  virtual void GenerateScriptActions(std::ostream& os, Indent indent);
   virtual void GenerateScriptForConfig(std::ostream& os,
                                        const std::string& config,
-                                       Indent const& indent);
-  virtual void GenerateScriptNoConfig(std::ostream&, Indent const&) {}
+                                       Indent indent);
+  virtual void GenerateScriptNoConfig(std::ostream&, Indent) {}
   virtual bool NeedsScriptNoConfig() const { return false; }
 
   // Test if this generator does something for a given configuration.
@@ -87,8 +89,8 @@ protected:
   bool ActionsPerConfig;
 
 private:
-  void GenerateScriptActionsOnce(std::ostream& os, Indent const& indent);
-  void GenerateScriptActionsPerConfig(std::ostream& os, Indent const& indent);
+  void GenerateScriptActionsOnce(std::ostream& os, Indent indent);
+  void GenerateScriptActionsPerConfig(std::ostream& os, Indent indent);
 };
 
 #endif

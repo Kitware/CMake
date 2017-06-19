@@ -3,7 +3,7 @@
 #ifndef cmComputeTargetDepends_h
 #define cmComputeTargetDepends_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmGraphAdjacencyList.h"
 
@@ -50,6 +50,7 @@ private:
                        bool linking);
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
   void AddInterfaceDepends(int depender_index, cmLinkItem const& dependee_name,
+                           const std::string& config,
                            std::set<std::string>& emitted);
   void AddInterfaceDepends(int depender_index,
                            cmGeneratorTarget const* dependee,

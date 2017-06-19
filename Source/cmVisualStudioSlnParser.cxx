@@ -4,7 +4,7 @@
 
 #include "cmSystemTools.h"
 #include "cmVisualStudioSlnData.h"
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 
 #include <cassert>
 #include <stack>

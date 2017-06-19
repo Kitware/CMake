@@ -2,14 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportLibraryDependenciesCommand.h"
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 #include <map>
 #include <utility>
 
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -23,12 +22,6 @@ class cmExecutionStatus;
 bool cmExportLibraryDependenciesCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  if (this->Disallowed(
-        cmPolicies::CMP0033,
-        "The export_library_dependencies command should not be called; "
-        "see CMP0033.")) {
-    return true;
-  }
   if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;

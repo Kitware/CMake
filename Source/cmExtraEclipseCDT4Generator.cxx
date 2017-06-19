@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExtraEclipseCDT4Generator.h"
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/RegularExpression.hxx>
 #include <map>
 #include <sstream>
 #include <stdio.h>
@@ -453,7 +453,7 @@ void cmExtraEclipseCDT4Generator::WriteGroups(
     for (std::vector<const cmSourceFile*>::const_iterator fileIt =
            sFiles.begin();
          fileIt != sFiles.end(); ++fileIt) {
-      std::string fullPath = (*fileIt)->GetFullPath();
+      std::string const& fullPath = (*fileIt)->GetFullPath();
 
       if (!cmSystemTools::FileIsDirectory(fullPath)) {
         std::string linkName4 = linkName3;
@@ -508,7 +508,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
           for (std::vector<cmSourceFile*>::const_iterator sfIt = files.begin();
                sfIt != files.end(); sfIt++) {
             // Add the file to the list of sources.
-            std::string source = (*sfIt)->GetFullPath();
+            std::string const& source = (*sfIt)->GetFullPath();
             cmSourceGroup* sourceGroup =
               makefile->FindSourceGroup(source.c_str(), sourceGroups);
             sourceGroup->AssignSource(*sfIt);

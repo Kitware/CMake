@@ -3,7 +3,7 @@
 #ifndef cmCTestSubmitCommand_h
 #define cmCTestSubmitCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTest.h"
 #include "cmCTestHandlerCommand.h"
@@ -70,6 +70,7 @@ protected:
     ArgumentDoingRetryCount,
     ArgumentDoingCDashUpload,
     ArgumentDoingCDashUploadType,
+    ArgumentDoingHttpHeader,
     ArgumentDoingLast2
   };
 
@@ -83,6 +84,7 @@ protected:
   bool CDashUpload;
   std::string CDashUploadFile;
   std::string CDashUploadType;
+  std::vector<std::string> HttpHeaders;
 };
 
 #endif

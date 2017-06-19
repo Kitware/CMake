@@ -6,7 +6,7 @@
 #include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -22,7 +22,7 @@ public:
 
   virtual ~JSONParser() {}
 
-  std::string getValue(std::string line, int type)
+  std::string getValue(std::string const& line, int type)
   {
     size_t begIndex;
     size_t endIndex;
@@ -35,7 +35,7 @@ public:
         line.substr(begIndex + 3, endIndex - (begIndex + 4));
       return foundFileName;
     }
-    return line.substr(begIndex, line.npos);
+    return line.substr(begIndex);
   }
   bool ParseFile(std::string const& file)
   {
@@ -51,13 +51,13 @@ public:
       return false;
     }
     while (cmSystemTools::GetLineFromStream(in, line)) {
-      if (line.find("filename") != line.npos) {
+      if (line.find("filename") != std::string::npos) {
         if (foundFile) {
           /*
-          * Upon finding a second file name, generate a
-          * vector within the total coverage to capture the
-          * information in the local vector
-          */
+           * Upon finding a second file name, generate a
+           * vector within the total coverage to capture the
+           * information in the local vector
+           */
           FileLinesType& CoverageVector =
             this->Coverage.TotalCoverage[filename];
           CoverageVector = localCoverageVector;
@@ -66,19 +66,19 @@ public:
         foundFile = true;
         inSource = false;
         filename = getValue(line, 0);
-      } else if ((line.find("coverage") != line.npos) && foundFile &&
+      } else if ((line.find("coverage") != std::string::npos) && foundFile &&
                  inSource) {
         /*
-        *  two types of "coverage" in the JSON structure
-        *
-        *  The coverage result over the file or set of files
-        *  and the coverage for each individual line
-        *
-        *  FoundFile and foundSource ensure that
-        *  only the value of the line coverage is captured
-        */
+         *  two types of "coverage" in the JSON structure
+         *
+         *  The coverage result over the file or set of files
+         *  and the coverage for each individual line
+         *
+         *  FoundFile and foundSource ensure that
+         *  only the value of the line coverage is captured
+         */
         std::string result = getValue(line, 1);
-        result = result.substr(2, result.npos);
+        result = result.substr(2);
         if (result == "\"\"") {
           // Empty quotation marks indicate that the
           // line is not executable
@@ -87,7 +87,7 @@ public:
           // Else, it contains the number of time executed
           localCoverageVector.push_back(atoi(result.c_str()));
         }
-      } else if (line.find("source") != line.npos) {
+      } else if (line.find("source") != std::string::npos) {
         inSource = true;
       }
     }

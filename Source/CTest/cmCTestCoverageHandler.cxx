@@ -12,14 +12,15 @@
 #include "cmParseJacocoCoverage.h"
 #include "cmParsePHPCoverage.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/Process.h"
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/Process.h>
-#include <cmsys/RegularExpression.hxx>
 #include <iomanip>
 #include <iterator>
 #include <sstream>
@@ -102,6 +103,7 @@ public:
     return this->PipeState;
   }
   int GetProcessState() { return this->PipeState; }
+
 private:
   int PipeState;
   cmsysProcess* Process;
@@ -895,7 +897,7 @@ int cmCTestCoverageHandler::HandleBlanketJSCoverage(
     cmsys::ifstream in(files[fileEntry].c_str());
     cmSystemTools::GetLineFromStream(in, line);
     cmSystemTools::GetLineFromStream(in, line);
-    if (line.find("node-jscoverage") != line.npos) {
+    if (line.find("node-jscoverage") != std::string::npos) {
       blanketFiles.push_back(files[fileEntry]);
     }
   }
@@ -969,9 +971,8 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
   std::string testingDir = this->CTest->GetBinaryDir() + "/Testing";
   std::string tempDir = testingDir + "/CoverageInfo";
-  std::string currentDirectory = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::MakeDirectory(tempDir.c_str());
-  cmSystemTools::ChangeDirectory(tempDir);
+  cmWorkingDirectory workdir(tempDir);
 
   int gcovStyle = 0;
 
@@ -1222,7 +1223,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
               // Initially all entries are -1 (not used). If we get coverage
               // information, increment it to 0 first.
               if (vec[lineIdx] < 0) {
-                if (cov > 0 || prefix.find('#') != prefix.npos) {
+                if (cov > 0 || prefix.find('#') != std::string::npos) {
                   vec[lineIdx] = 0;
                 }
               }
@@ -1294,7 +1295,6 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     }
   }
 
-  cmSystemTools::ChangeDirectory(currentDirectory);
   return file_count;
 }
 
@@ -1340,7 +1340,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     return 0;
   }
   std::string testingDir = this->CTest->GetBinaryDir();
-  std::string currentDirectory = cmSystemTools::GetCurrentWorkingDirectory();
 
   std::set<std::string> missingFiles;
 
@@ -1362,7 +1361,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "." << std::flush,
                        this->Quiet);
     std::string fileDir = cmSystemTools::GetFilenamePath(*it);
-    cmSystemTools::ChangeDirectory(fileDir);
+    cmWorkingDirectory workdir(fileDir);
     std::string command = "\"" + lcovCommand + "\" " + lcovExtraFlags + " ";
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -1526,7 +1525,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
                 // Initially all entries are -1 (not used). If we get coverage
                 // information, increment it to 0 first.
                 if (vec[lineIdx] < 0) {
-                  if (cov > 0 || prefix.find('#') != prefix.npos) {
+                  if (cov > 0 || prefix.find('#') != std::string::npos) {
                     vec[lineIdx] = 0;
                   }
                 }
@@ -1552,7 +1551,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     }
   }
 
-  cmSystemTools::ChangeDirectory(currentDirectory);
   return file_count;
 }
 
@@ -1591,13 +1589,8 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
   gl.RecurseOff(); // No need of recurse if -prof_dir${BUILD_DIR} flag is
                    // used while compiling.
   gl.RecurseThroughSymlinksOff();
-  std::string prevBinaryDir;
   std::string buildDir = this->CTest->GetCTestConfiguration("BuildDirectory");
-  if (cmSystemTools::ChangeDirectory(buildDir)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error changing directory to "
-                 << buildDir << std::endl);
-    return false;
-  }
+  cmWorkingDirectory workdir(buildDir);
 
   // Run profmerge to merge all *.dyn files into dpi files
   if (!cmSystemTools::RunSingleCommand("profmerge")) {
@@ -1605,11 +1598,9 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
     return false;
   }
 
-  prevBinaryDir = cmSystemTools::GetCurrentWorkingDirectory();
-
   // DPI file should appear in build directory
   std::string daGlob;
-  daGlob = prevBinaryDir;
+  daGlob = buildDir;
   daGlob += "/*.dpi";
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "   looking for dpi files in: " << daGlob << std::endl,
@@ -1646,11 +1637,7 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
 
   std::string testingDir = this->CTest->GetBinaryDir() + "/Testing";
   std::string tempDir = testingDir + "/CoverageInfo";
-  std::string currentDirectory = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::MakeDirectory(tempDir.c_str());
-  cmSystemTools::ChangeDirectory(tempDir);
-
-  cmSystemTools::ChangeDirectory(currentDirectory);
 
   std::vector<std::string>::iterator fileIt;
   int file_count = 0;
@@ -1737,7 +1724,6 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
     }
     ++file_count;
   }
-  cmSystemTools::ChangeDirectory(currentDirectory);
   return file_count;
 }
 
@@ -2142,7 +2128,7 @@ bool cmCTestCoverageHandler::GetNextInt(std::string const& inputLine,
   std::string::size_type start = pos;
   pos = inputLine.find(',', start);
   value = atoi(inputLine.substr(start, pos).c_str());
-  if (pos == inputLine.npos) {
+  if (pos == std::string::npos) {
     return true;
   }
   pos++;
@@ -2156,7 +2142,7 @@ bool cmCTestCoverageHandler::ParseBullsEyeCovsrcLine(
 {
   // find the first comma
   std::string::size_type pos = inputLine.find(',');
-  if (pos == inputLine.npos) {
+  if (pos == std::string::npos) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Error parsing string : " << inputLine << "\n");
     return false;
@@ -2183,7 +2169,7 @@ bool cmCTestCoverageHandler::ParseBullsEyeCovsrcLine(
     return false;
   }
   // should be at the end now
-  if (pos != inputLine.npos) {
+  if (pos != std::string::npos) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error parsing input : "
                  << inputLine << " last pos not npos =  " << pos << "\n");
   }
@@ -2237,7 +2223,8 @@ void cmCTestCoverageHandler::LoadLabels(const char* dir)
     if (line.empty() || line[0] == '#') {
       // Ignore blank and comment lines.
       continue;
-    } else if (line[0] == ' ') {
+    }
+    if (line[0] == ' ') {
       // Label lines appear indented by one space.
       std::string label = line.substr(1);
       int id = this->GetLabelId(label);

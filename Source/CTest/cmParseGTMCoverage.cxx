@@ -4,8 +4,8 @@
 #include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
 #include <map>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,7 +56,7 @@ bool cmParseGTMCoverage::ReadMCovFile(const char* file)
   int lastoffset = 0;
   while (cmSystemTools::GetLineFromStream(in, line)) {
     // only look at lines that have coverage data
-    if (line.find("^ZZCOVERAGE") == line.npos) {
+    if (line.find("^ZZCOVERAGE") == std::string::npos) {
       continue;
     }
     std::string filepath;
@@ -199,7 +199,7 @@ bool cmParseGTMCoverage::ParseMCOVLine(std::string const& line,
   // now parse the right hand side of the =
   pos = line.find('=');
   // no = found, this is an error
-  if (pos == line.npos) {
+  if (pos == std::string::npos) {
     return false;
   }
   pos++; // move past =

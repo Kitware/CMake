@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCommonTargetGenerator.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 #include <set>
 #include <sstream>
 #include <utility>
@@ -26,7 +26,6 @@ cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
   , GlobalGenerator(static_cast<cmGlobalCommonGenerator*>(
       gt->LocalGenerator->GetGlobalGenerator()))
   , ConfigName(LocalGenerator->GetConfigName())
-  , ModuleDefinitionFile(GeneratorTarget->GetModuleDefinitionFile(ConfigName))
 {
 }
 
@@ -44,33 +43,12 @@ const char* cmCommonTargetGenerator::GetFeature(const std::string& feature)
   return this->GeneratorTarget->GetFeature(feature, this->ConfigName);
 }
 
-bool cmCommonTargetGenerator::GetFeatureAsBool(const std::string& feature)
-{
-  return this->GeneratorTarget->GetFeatureAsBool(feature, this->ConfigName);
-}
-
-void cmCommonTargetGenerator::AddFeatureFlags(std::string& flags,
-                                              const std::string& lang)
-{
-  // Add language-specific flags.
-  this->LocalGenerator->AddLanguageFlags(flags, lang, this->ConfigName);
-
-  if (this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION")) {
-    this->LocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
-  }
-}
-
 void cmCommonTargetGenerator::AddModuleDefinitionFlag(
   cmLinkLineComputer* linkLineComputer, std::string& flags)
 {
-  // A module definition file only makes sense on certain target types.
-  if (this->GeneratorTarget->GetType() != cmStateEnums::SHARED_LIBRARY &&
-      this->GeneratorTarget->GetType() != cmStateEnums::MODULE_LIBRARY &&
-      this->GeneratorTarget->GetType() != cmStateEnums::EXECUTABLE) {
-    return;
-  }
-
-  if (!this->ModuleDefinitionFile) {
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    this->GeneratorTarget->GetModuleDefinitionInfo(this->GetConfigName());
+  if (!mdi || mdi->DefFile.empty()) {
     return;
   }
 
@@ -85,8 +63,7 @@ void cmCommonTargetGenerator::AddModuleDefinitionFlag(
   // vs6's "cl -link" pass it to the linker.
   std::string flag = defFileFlag;
   flag += this->LocalGenerator->ConvertToOutputFormat(
-    linkLineComputer->ConvertToLinkReference(
-      this->ModuleDefinitionFile->GetFullPath()),
+    linkLineComputer->ConvertToLinkReference(mdi->DefFile),
     cmOutputConverter::SHELL);
   this->LocalGenerator->AppendFlags(flags, flag);
 }

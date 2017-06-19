@@ -1,11 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-// include these first, otherwise there will be problems on Windows
-// with GetCurrentDirectory() being redefined
-#ifdef CMAKE_BUILD_WITH_CMAKE
-#include "cmDocumentation.h"
-#include "cmDynamicLoader.h"
-#endif
+#include "cmConfigure.h"
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
@@ -17,10 +12,14 @@
 #include "cmake.h"
 #include "cmcmd.h"
 
-#include <cmConfigure.h>
-#include <cmsys/Encoding.hxx>
+#ifdef CMAKE_BUILD_WITH_CMAKE
+#include "cmDocumentation.h"
+#include "cmDynamicLoader.h"
+#endif
+
+#include "cmsys/Encoding.hxx"
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-#include <cmsys/ConsoleBuf.hxx>
+#include "cmsys/ConsoleBuf.hxx"
 #endif
 #include <iostream>
 #include <string.h>
@@ -28,7 +27,11 @@
 #include <vector>
 
 #ifdef CMAKE_USE_LIBUV
-#include <cm_uv.h>
+#ifdef _WIN32
+#include <fcntl.h>  /* _O_TEXT */
+#include <stdlib.h> /* _set_fmode, _fmode */
+#endif
+#include "cm_uv.h"
 #endif
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -169,6 +172,18 @@ int main(int ac, char const* const* av)
   ac = args.argc();
   av = args.argv();
 
+#if defined(CMAKE_USE_LIBUV) && defined(_WIN32)
+  // Perform libuv one-time initialization now, and then un-do its
+  // global _fmode setting so that using libuv does not change the
+  // default file text/binary mode.  See libuv issue 840.
+  uv_loop_close(uv_default_loop());
+#ifdef _MSC_VER
+  _set_fmode(_O_TEXT);
+#else
+  _fmode = _O_TEXT;
+#endif
+#endif
+
   cmSystemTools::EnableMSVCDebugHook();
   cmSystemTools::FindCMakeResources(av[0]);
   if (ac > 1) {
@@ -202,7 +217,7 @@ int do_cmake(int ac, char const* const* av)
   doc.addCMakeStandardDocSections();
   if (doc.CheckOptions(ac, av)) {
     // Construct and print requested documentation.
-    cmake hcm;
+    cmake hcm(cmake::RoleInternal);
     hcm.SetHomeDirectory("");
     hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
@@ -284,13 +299,15 @@ int do_cmake(int ac, char const* const* av)
     }
   }
   if (sysinfo) {
-    cmake cm;
+    cmake cm(cmake::RoleProject);
     cm.SetHomeDirectory("");
     cm.SetHomeOutputDirectory("");
     int ret = cm.GetSystemInformation(args);
     return ret;
   }
-  cmake cm;
+  cmake::Role const role =
+    workingMode == cmake::NORMAL_MODE ? cmake::RoleProject : cmake::RoleScript;
+  cmake cm(role);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cmSystemTools::SetMessageCallback(cmakemainMessageCallback, (void*)&cm);
@@ -408,7 +425,7 @@ static int do_build(int ac, char const* const* av)
     return 1;
   }
 
-  cmake cm;
+  cmake cm(cmake::RoleInternal);
   cmSystemTools::SetMessageCallback(cmakemainMessageCallback, (void*)&cm);
   cm.SetProgressCallback(cmakemainProgressCallback, (void*)&cm);
   return cm.Build(dir, target, config, nativeOptions, clean);

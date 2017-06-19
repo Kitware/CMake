@@ -32,12 +32,12 @@
 #include "cmVisualStudioWCEPlatformParser.h"
 #endif
 
+#include "cmConfigure.h"
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
+#include "cmsys/Terminal.h"
 #include <algorithm>
-#include <cmConfigure.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Process.h>
-#include <cmsys/Terminal.h>
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
@@ -258,11 +258,18 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
                   << "\n";
         return 1;
       }
-      std::string objfile;
+      std::string file;
       bindexplib deffile;
-      while (cmSystemTools::GetLineFromStream(fin, objfile)) {
-        if (!deffile.AddObjectFile(objfile.c_str())) {
-          return 1;
+      while (cmSystemTools::GetLineFromStream(fin, file)) {
+        std::string const& ext = cmSystemTools::GetFilenameLastExtension(file);
+        if (cmSystemTools::LowerCase(ext) == ".def") {
+          if (!deffile.AddDefinitionFile(file.c_str())) {
+            return 1;
+          }
+        } else {
+          if (!deffile.AddObjectFile(file.c_str())) {
+            return 1;
+          }
         }
       }
       deffile.WriteFile(fout);
@@ -344,8 +351,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
 
         // Warn if iwyu reported anything.
-        if (stdErr.find("should remove these lines:") != stdErr.npos ||
-            stdErr.find("should add these lines:") != stdErr.npos) {
+        if (stdErr.find("should remove these lines:") != std::string::npos ||
+            stdErr.find("should add these lines:") != std::string::npos) {
           std::cerr << "Warning: include-what-you-use reported diagnostics:\n"
                     << stdErr << "\n";
         }
@@ -405,7 +412,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
         // Output the stdout from ldd -r -u to stderr
         // Warn if lwyu reported anything.
-        if (stdOut.find("Unused direct dependencies:") != stdOut.npos) {
+        if (stdOut.find("Unused direct dependencies:") != std::string::npos) {
           std::cerr << "Warning: " << stdOut;
         }
       }
@@ -473,7 +480,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           std::cerr << "cmake -E env: unknown option '" << a << "'"
                     << std::endl;
           return 1;
-        } else if (a.find('=') != a.npos) {
+        } else if (a.find('=') != std::string::npos) {
           // Set environment variable.
           cmSystemTools::PutEnv(a);
         } else {
@@ -576,7 +583,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         std::cerr << "-E capabilities accepts no additional arguments\n";
         return 1;
       }
-      cmake cm;
+      cmake cm(cmake::RoleInternal);
 #if defined(HAVE_SERVER_MODE) && HAVE_SERVER_MODE
       std::cout << cm.ReportCapabilities(true);
 #else
@@ -656,7 +663,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
     // Command to change directory and run a program.
     if (args[1] == "chdir" && args.size() >= 4) {
-      std::string directory = args[2];
+      std::string const& directory = args[2];
       if (!cmSystemTools::FileExists(directory.c_str())) {
         cmSystemTools::Error("Directory does not exist for chdir command: ",
                              args[2].c_str());
@@ -753,7 +760,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       const bool verbose = isCMakeVerbose();
 
       // Create a cmake object instance to process dependencies.
-      cmake cm;
+      cmake cm(cmake::RoleScript); // All we need is the `set` command.
       std::string gen;
       std::string homeDir;
       std::string startDir;
@@ -876,8 +883,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     if (args[1] == "tar" && args.size() > 3) {
       const char* knownFormats[] = { "7zip", "gnutar", "pax", "paxr", "zip" };
 
-      std::string flags = args[2];
-      std::string outFile = args[3];
+      std::string const& flags = args[2];
+      std::string const& outFile = args[3];
       std::vector<std::string> files;
       std::string mtime;
       std::string format;
@@ -917,15 +924,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         cmSystemTools::TarCompressNone;
       bool verbose = false;
       int nCompress = 0;
-      if (flags.find_first_of('j') != flags.npos) {
+      if (flags.find_first_of('j') != std::string::npos) {
         compress = cmSystemTools::TarCompressBZip2;
         ++nCompress;
       }
-      if (flags.find_first_of('J') != flags.npos) {
+      if (flags.find_first_of('J') != std::string::npos) {
         compress = cmSystemTools::TarCompressXZ;
         ++nCompress;
       }
-      if (flags.find_first_of('z') != flags.npos) {
+      if (flags.find_first_of('z') != std::string::npos) {
         compress = cmSystemTools::TarCompressGZip;
         ++nCompress;
       }
@@ -939,22 +946,22 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
                              "at most one flag of z, j, or J may be used");
         return 1;
       }
-      if (flags.find_first_of('v') != flags.npos) {
+      if (flags.find_first_of('v') != std::string::npos) {
         verbose = true;
       }
 
-      if (flags.find_first_of('t') != flags.npos) {
+      if (flags.find_first_of('t') != std::string::npos) {
         if (!cmSystemTools::ListTar(outFile.c_str(), verbose)) {
           cmSystemTools::Error("Problem listing tar: ", outFile.c_str());
           return 1;
         }
-      } else if (flags.find_first_of('c') != flags.npos) {
+      } else if (flags.find_first_of('c') != std::string::npos) {
         if (!cmSystemTools::CreateTar(outFile.c_str(), files, compress,
                                       verbose, mtime, format)) {
           cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
           return 1;
         }
-      } else if (flags.find_first_of('x') != flags.npos) {
+      } else if (flags.find_first_of('x') != std::string::npos) {
         if (!cmSystemTools::ExtractTar(outFile.c_str(), verbose)) {
           cmSystemTools::Error("Problem extracting tar: ", outFile.c_str());
           return 1;
@@ -1070,9 +1077,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 int cmcmd::SymlinkLibrary(std::vector<std::string>& args)
 {
   int result = 0;
-  std::string realName = args[2];
-  std::string soName = args[3];
-  std::string name = args[4];
+  std::string const& realName = args[2];
+  std::string const& soName = args[3];
+  std::string const& name = args[4];
   if (soName != realName) {
     if (!cmcmd::SymlinkInternal(realName, soName)) {
       cmSystemTools::ReportLastSystemError("cmake_symlink_library");
@@ -1091,8 +1098,8 @@ int cmcmd::SymlinkLibrary(std::vector<std::string>& args)
 int cmcmd::SymlinkExecutable(std::vector<std::string>& args)
 {
   int result = 0;
-  std::string realName = args[2];
-  std::string name = args[3];
+  std::string const& realName = args[2];
+  std::string const& name = args[3];
   if (name != realName) {
     if (!cmcmd::SymlinkInternal(realName, name)) {
       cmSystemTools::ReportLastSystemError("cmake_symlink_executable");
@@ -1265,7 +1272,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
   int result = 0;
   while (result == 0 && cmSystemTools::GetLineFromStream(fin, command)) {
     // Skip empty command lines.
-    if (command.find_first_not_of(" \t") == command.npos) {
+    if (command.find_first_not_of(" \t") == std::string::npos) {
       continue;
     }
 
@@ -1413,7 +1420,7 @@ static bool RunCommand(const char* comment, std::vector<std::string>& command,
   // it is the dumb rc command banner, but if the command
   // returned an error code then print the output anyway as
   // the banner may be mixed with some other important information.
-  if (output.find("Resource Compiler Version") == output.npos || !res ||
+  if (output.find("Resource Compiler Version") == std::string::npos || !res ||
       retCode) {
     std::cout << output;
   }
@@ -1443,7 +1450,8 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
     if (*arg == "--") {
       ++arg;
       break;
-    } else if (*arg == "--manifests") {
+    }
+    if (*arg == "--manifests") {
       for (++arg; arg != argEnd && !cmHasLiteralPrefix(*arg, "-"); ++arg) {
         this->UserManifests.push_back(*arg);
       }

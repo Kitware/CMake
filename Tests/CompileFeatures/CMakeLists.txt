@@ -1,10 +1,11 @@
 
 cmake_minimum_required(VERSION 3.1)
+cmake_policy(SET CMP0057 NEW)
 
 project(CompileFeatures)
 
 macro(run_test feature lang)
-  if (";${CMAKE_${lang}_COMPILE_FEATURES};" MATCHES ${feature})
+  if (${feature} IN_LIST CMAKE_${lang}_COMPILE_FEATURES)
     add_library(test_${feature} OBJECT ${feature})
     set_property(TARGET test_${feature}
       PROPERTY COMPILE_FEATURES "${feature}"
@@ -15,12 +16,13 @@ macro(run_test feature lang)
 endmacro()
 
 get_property(c_features GLOBAL PROPERTY CMAKE_C_KNOWN_FEATURES)
-list(REMOVE_ITEM c_features c_std_90 c_std_99 c_std_11)
+list(FILTER c_features EXCLUDE REGEX "^c_std_[0-9][0-9]")
 foreach(feature ${c_features})
   run_test(${feature} C)
 endforeach()
+
 get_property(cxx_features GLOBAL PROPERTY CMAKE_CXX_KNOWN_FEATURES)
-list(REMOVE_ITEM cxx_features cxx_std_98 cxx_std_11 cxx_std_14 cxx_std_17)
+list(FILTER cxx_features EXCLUDE REGEX "^cxx_std_[0-9][0-9]")
 foreach(feature ${cxx_features})
   run_test(${feature} CXX)
 endforeach()
@@ -171,12 +173,20 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
   endif()
 endif()
 
+if (CMAKE_C_COMPILE_FEATURES)
+  set(C_expected_features ${CMAKE_C_COMPILE_FEATURES})
+  list(FILTER C_expected_features EXCLUDE REGEX "^c_std_[0-9][0-9]")
+endif()
+if (CMAKE_CXX_COMPILE_FEATURES)
+  set(CXX_expected_features ${CMAKE_CXX_COMPILE_FEATURES})
+  list(FILTER CXX_expected_features EXCLUDE REGEX "^cxx_std_[0-9][0-9]")
+endif ()
 set(C_ext c)
 set(C_standard_flag 11)
 set(CXX_ext cpp)
 set(CXX_standard_flag 14)
 foreach(lang CXX C)
-  if (CMAKE_${lang}_COMPILE_FEATURES)
+  if (${lang}_expected_features)
     foreach(feature ${${lang}_non_features})
       message("Testing feature : ${feature}")
       try_compile(${feature}_works
@@ -198,7 +208,7 @@ foreach(lang CXX C)
   endif()
 endforeach()
 
-if (CMAKE_C_COMPILE_FEATURES)
+if (C_expected_features)
   if (CMAKE_C_STANDARD_DEFAULT)
     string(FIND "${CMAKE_C_FLAGS}" "-std=" std_flag_idx)
     if (std_flag_idx EQUAL -1)
@@ -239,6 +249,16 @@ if (CMAKE_C_COMPILE_FEATURES)
         EXPECT_C_STATIC_ASSERT=0
         )
     endif()
+  elseif (CMAKE_C_COMPILER_ID STREQUAL "SunPro")
+    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.13)
+      list(APPEND expected_defs
+        EXPECT_C_STATIC_ASSERT=1
+        )
+    else()
+      list(APPEND expected_defs
+        EXPECT_C_STATIC_ASSERT=0
+        )
+    endif()
   endif()
 
   list(APPEND expected_defs
@@ -270,7 +290,8 @@ if (CMAKE_CXX_COMPILE_FEATURES)
 endif ()
 
 # always add a target "CompileFeatures"
-if (NOT ";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";cxx_auto_type;")
+if ((NOT CXX_expected_features) OR
+    (NOT cxx_auto_type IN_LIST CXX_expected_features))
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp"
     "int main(int,char**) { return 0; }\n"
   )

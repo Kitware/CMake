@@ -3,7 +3,7 @@
 #ifndef cmCTestHandlerCommand_h
 #define cmCTestHandlerCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestCommand.h"
 
@@ -23,6 +23,11 @@ class cmCTestHandlerCommand : public cmCTestCommand
 {
 public:
   cmCTestHandlerCommand();
+
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual std::string GetName() const = 0;
 
   /**
    * This is called when the command is first encountered in

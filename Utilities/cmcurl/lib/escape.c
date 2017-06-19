@@ -31,6 +31,7 @@
 #include "warnless.h"
 #include "non-ascii.h"
 #include "escape.h"
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -42,7 +43,7 @@
 */
 static bool Curl_isunreserved(unsigned char in)
 {
-  switch (in) {
+  switch(in) {
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
     case 'a': case 'b': case 'c': case 'd': case 'e':
@@ -109,14 +110,10 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
       newlen += 2; /* the size grows with two, since this'll become a %XX */
       if(newlen > alloc) {
         alloc *= 2;
-        testing_ptr = realloc(ns, alloc);
-        if(!testing_ptr) {
-          free(ns);
+        testing_ptr = Curl_saferealloc(ns, alloc);
+        if(!testing_ptr)
           return NULL;
-        }
-        else {
-          ns = testing_ptr;
-        }
+        ns = testing_ptr;
       }
 
       result = Curl_convert_to_network(data, &in, 1);

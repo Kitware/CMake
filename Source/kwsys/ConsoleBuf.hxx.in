@@ -25,8 +25,7 @@ namespace @KWSYS_NAMESPACE@ {
 #if defined(_WIN32)
 
 template <class CharT, class Traits = std::char_traits<CharT> >
-class @KWSYS_NAMESPACE@_EXPORT BasicConsoleBuf
-  : public std::basic_streambuf<CharT, Traits>
+class BasicConsoleBuf : public std::basic_streambuf<CharT, Traits>
 {
 public:
   typedef typename Traits::int_type int_type;
@@ -339,7 +338,7 @@ private:
   }
   bool decodeInputBuffer(const std::string buffer, std::wstring& wbuffer)
   {
-    int length = int(buffer.length());
+    size_t length = buffer.length();
     if (length == 0) {
       wbuffer = std::wstring();
       return true;
@@ -354,11 +353,12 @@ private:
       data += BOMsize;
       length -= BOMsize;
     }
-    const int wlength =
-      MultiByteToWideChar(actualCodepage, 0, data, length, NULL, 0);
+    const size_t wlength = static_cast<size_t>(MultiByteToWideChar(
+      actualCodepage, 0, data, static_cast<int>(length), NULL, 0));
     wchar_t* wbuf = new wchar_t[wlength];
     const bool success =
-      MultiByteToWideChar(actualCodepage, 0, data, length, wbuf, wlength) > 0
+      MultiByteToWideChar(actualCodepage, 0, data, static_cast<int>(length),
+                          wbuf, static_cast<int>(wlength)) > 0
       ? true
       : false;
     wbuffer = std::wstring(wbuf, wlength);

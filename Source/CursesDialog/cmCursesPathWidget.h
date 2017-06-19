@@ -3,7 +3,7 @@
 #ifndef cmCursesPathWidget_h
 #define cmCursesPathWidget_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesStringWidget.h"
@@ -14,6 +14,8 @@ class cmCursesMainForm;
 
 class cmCursesPathWidget : public cmCursesStringWidget
 {
+  CM_DISABLE_COPY(cmCursesPathWidget)
+
 public:
   cmCursesPathWidget(int width, int height, int left, int top);
 
@@ -26,9 +28,6 @@ public:
   void OnType(int& key, cmCursesMainForm* fm, WINDOW* w) CM_OVERRIDE;
 
 protected:
-  cmCursesPathWidget(const cmCursesPathWidget& from);
-  void operator=(const cmCursesPathWidget&);
-
   std::string LastString;
   std::string LastGlob;
   bool Cycle;

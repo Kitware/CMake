@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -107,7 +107,7 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn,
                                           const char *initresp);
 static CURLcode imap_continue_authenticate(struct connectdata *conn,
                                            const char *resp);
-static void imap_get_message(char *buffer, char** outptr);
+static void imap_get_message(char *buffer, char **outptr);
 
 /*
  * IMAP protocol handler.
@@ -130,7 +130,8 @@ const struct Curl_handler Curl_handler_imap = {
   ZERO_NULL,                        /* readwrite */
   PORT_IMAP,                        /* defport */
   CURLPROTO_IMAP,                   /* protocol */
-  PROTOPT_CLOSEACTION               /* flags */
+  PROTOPT_CLOSEACTION|              /* flags */
+  PROTOPT_URLOPTIONS
 };
 
 #ifdef USE_SSL
@@ -390,10 +391,10 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
  *
  * Gets the authentication message from the response buffer.
  */
-static void imap_get_message(char *buffer, char** outptr)
+static void imap_get_message(char *buffer, char **outptr)
 {
   size_t len = 0;
-  char* message = NULL;
+  char *message = NULL;
 
   /* Find the start of the message */
   for(message = buffer + 2; *message == ' ' || *message == '\t'; message++)
@@ -952,7 +953,7 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
 
   if(imapcode != 'O') {
     if(data->set.use_ssl != CURLUSESSL_TRY) {
-      failf(data, "STARTTLS denied. %c", imapcode);
+      failf(data, "STARTTLS denied");
       result = CURLE_USE_SSL_FAILED;
     }
     else
@@ -1748,7 +1749,7 @@ static CURLcode imap_setup_connection(struct connectdata *conn)
  *
  * imap_sendf()
  *
- * Sends the formated string as an IMAP command to the server.
+ * Sends the formatted string as an IMAP command to the server.
  *
  * Designed to never block.
  */

@@ -1,9 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cmsys/CommandLineArguments.hxx>
-#include <cmsys/Encoding.hxx>
+#include "cmsys/CommandLineArguments.hxx"
+#include "cmsys/Encoding.hxx"
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -13,7 +13,7 @@
 #include <vector>
 
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-#include <cmsys/ConsoleBuf.hxx>
+#include "cmsys/ConsoleBuf.hxx"
 #endif
 
 #include "cmCPackGenerator.h"
@@ -23,7 +23,6 @@
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cm_auto_ptr.hxx"
@@ -189,11 +188,10 @@ int main(int argc, char const* const* argv)
   cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
               "Read CPack config file: " << cpackConfigFile << std::endl);
 
-  cmake cminst;
+  cmake cminst(cmake::RoleScript);
   cminst.SetHomeDirectory("");
   cminst.SetHomeOutputDirectory("");
   cminst.GetCurrentSnapshot().SetDefaultDefinitions();
-  cminst.GetState()->RemoveUnscriptableCommands();
   cmGlobalGenerator cmgg(&cminst);
   CM_AUTO_PTR<cmMakefile> globalMF(
     new cmMakefile(&cmgg, cminst.GetCurrentSnapshot()));

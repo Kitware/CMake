@@ -9,6 +9,11 @@ endif()
 
 include(Platform/UnixPaths)
 
+list(APPEND CMAKE_SYSTEM_PREFIX_PATH
+  /opt/csw
+  /opt/openwin
+  )
+
 # The Sun linker needs to find transitive shared library dependencies
 # in the -L path.
 set(CMAKE_LINK_DEPENDENT_LIBRARY_DIRS 1)

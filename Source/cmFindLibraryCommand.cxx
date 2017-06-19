@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindLibraryCommand.h"
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/RegularExpression.hxx>
 #include <set>
 #include <stdio.h>
 #include <string.h>
@@ -43,20 +43,29 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn,
     return true;
   }
 
-  if (this->Makefile->GetState()->GetGlobalPropertyAsBool(
-        "FIND_LIBRARY_USE_LIB32_PATHS")) {
-    // add special 32 bit paths if this is a 32 bit compile.
-    if (this->Makefile->PlatformIs32Bit()) {
-      this->AddArchitecturePaths("32");
-    }
+  // add custom lib<qual> paths instead of using fixed lib32, lib64 or
+  // libx32
+  if (const char* customLib = this->Makefile->GetDefinition(
+        "CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX")) {
+    this->AddArchitecturePaths(customLib);
   }
-
-  if (this->Makefile->GetState()->GetGlobalPropertyAsBool(
-        "FIND_LIBRARY_USE_LIB64_PATHS")) {
-    // add special 64 bit paths if this is a 64 bit compile.
-    if (this->Makefile->PlatformIs64Bit()) {
-      this->AddArchitecturePaths("64");
-    }
+  // add special 32 bit paths if this is a 32 bit compile.
+  else if (this->Makefile->PlatformIs32Bit() &&
+           this->Makefile->GetState()->GetGlobalPropertyAsBool(
+             "FIND_LIBRARY_USE_LIB32_PATHS")) {
+    this->AddArchitecturePaths("32");
+  }
+  // add special 64 bit paths if this is a 64 bit compile.
+  else if (this->Makefile->PlatformIs64Bit() &&
+           this->Makefile->GetState()->GetGlobalPropertyAsBool(
+             "FIND_LIBRARY_USE_LIB64_PATHS")) {
+    this->AddArchitecturePaths("64");
+  }
+  // add special 32 bit paths if this is an x32 compile.
+  else if (this->Makefile->PlatformIsx32() &&
+           this->Makefile->GetState()->GetGlobalPropertyAsBool(
+             "FIND_LIBRARY_USE_LIBX32_PATHS")) {
+    this->AddArchitecturePaths("x32");
   }
 
   std::string library = this->FindLibrary();
@@ -294,7 +303,7 @@ bool cmFindLibraryHelper::HasValidSuffix(std::string const& name)
     // Check if a valid library suffix is somewhere in the name,
     // this may happen e.g. for versioned shared libraries: libfoo.so.2
     suffix += ".";
-    if (name.find(suffix) != name.npos) {
+    if (name.find(suffix) != std::string::npos) {
       return true;
     }
   }

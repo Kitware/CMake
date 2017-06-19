@@ -447,7 +447,7 @@ function(write_compiler_detection_header
       endif()
 
       if(NOT _WCD_ALLOW_UNKNOWN_COMPILER_VERSIONS)
-        set(${compiler_file_content} "${${compiler_file_content}}
+        string(APPEND ${compiler_file_content} "
 #    if !(${_cmake_oldestSupported_${compiler}})
 #      error Unsupported compiler version
 #    endif\n")
@@ -462,7 +462,7 @@ function(write_compiler_detection_header
         set(MACRO_HEX)
       endif()
       string(CONFIGURE "${_compiler_id_version_compute_${compiler}}" VERSION_BLOCK @ONLY)
-      set(${compiler_file_content} "${${compiler_file_content}}${VERSION_BLOCK}\n")
+      string(APPEND ${compiler_file_content} "${VERSION_BLOCK}\n")
       set(PREFIX)
       set(MACRO_DEC)
       set(MACRO_HEX)
@@ -478,7 +478,7 @@ function(write_compiler_detection_header
           set(_define_item "\n#      define ${prefix_arg}_${feature_PP} 0\n")
           set(_define_item "\n#    if ${_cmake_feature_test_${compiler}_${feature}}\n#      define ${prefix_arg}_${feature_PP} 1\n#    else${_define_item}#    endif\n")
         endif()
-        set(${compiler_file_content} "${${compiler_file_content}}${_define_item}")
+        string(APPEND ${compiler_file_content} "${_define_item}")
       endforeach()
     endforeach()
     if(pp_if STREQUAL "elif")
@@ -503,10 +503,19 @@ function(write_compiler_detection_header
       if (feature STREQUAL cxx_static_assert)
         set(def_value "${prefix_arg}_STATIC_ASSERT(X)")
         set(def_value_msg "${prefix_arg}_STATIC_ASSERT_MSG(X, MSG)")
-        set(static_assert_struct "template<bool> struct ${prefix_arg}StaticAssert;\ntemplate<> struct ${prefix_arg}StaticAssert<true>{};\n")
-        set(def_standard "#    define ${def_value} static_assert(X, #X)\n#    define ${def_value_msg} static_assert(X, MSG)")
-        set(def_alternative "${static_assert_struct}#    define ${def_value} sizeof(${prefix_arg}StaticAssert<X>)\n#    define ${def_value_msg} sizeof(${prefix_arg}StaticAssert<X>)")
-        string(APPEND file_content "#  if defined(${def_name}) && ${def_name}\n${def_standard}\n#  else\n${def_alternative}\n#  endif\n\n")
+        set(def_fallback "enum { ${prefix_arg}_STATIC_ASSERT_JOIN(${prefix_arg}StaticAssertEnum, __LINE__) = sizeof(${prefix_arg}StaticAssert<X>) }")
+        string(APPEND file_content "#  if defined(${def_name}) && ${def_name}
+#    define ${def_value} static_assert(X, #X)
+#    define ${def_value_msg} static_assert(X, MSG)
+#  else
+#    define ${prefix_arg}_STATIC_ASSERT_JOIN(X, Y) ${prefix_arg}_STATIC_ASSERT_JOIN_IMPL(X, Y)
+#    define ${prefix_arg}_STATIC_ASSERT_JOIN_IMPL(X, Y) X##Y
+template<bool> struct ${prefix_arg}StaticAssert;
+template<> struct ${prefix_arg}StaticAssert<true>{};
+#    define ${def_value} ${def_fallback}
+#    define ${def_value_msg} ${def_fallback}
+#  endif
+\n")
       endif()
       if (feature STREQUAL cxx_alignas)
         set(def_value "${prefix_arg}_ALIGNAS(X)")

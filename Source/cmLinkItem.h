@@ -3,7 +3,7 @@
 #ifndef cmLinkItem_h
 #define cmLinkItem_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <algorithm>
 #include <map>
@@ -32,11 +32,6 @@ public:
     , Target(t)
   {
   }
-  cmLinkItem(cmLinkItem const& r)
-    : std_string(r)
-    , Target(r.Target)
-  {
-  }
   cmGeneratorTarget const* Target;
 };
 
@@ -54,12 +49,6 @@ public:
     : cmLinkItem(n, t)
     , Backtrace(bt)
     , FromGenex(fromGenex)
-  {
-  }
-  cmLinkImplItem(cmLinkImplItem const& r)
-    : cmLinkItem(r)
-    , Backtrace(r.Backtrace)
-    , FromGenex(r.FromGenex)
   {
   }
   cmListFileBacktrace Backtrace;

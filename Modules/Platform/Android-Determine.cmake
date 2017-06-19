@@ -100,11 +100,34 @@ endif()
 
 set(_ANDROID_STANDALONE_TOOLCHAIN_API "")
 if(CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
-  set(_ANDROID_API_LEVEL_H_REGEX "^[\t ]*#[\t ]*define[\t ]+__ANDROID_API__[\t ]+([0-9]+)")
-  file(STRINGS "${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/sysroot/usr/include/android/api-level.h"
-    _ANDROID_API_LEVEL_H_CONTENT REGEX "${_ANDROID_API_LEVEL_H_REGEX}")
-  if(_ANDROID_API_LEVEL_H_CONTENT MATCHES "${_ANDROID_API_LEVEL_H_REGEX}")
-    set(_ANDROID_STANDALONE_TOOLCHAIN_API "${CMAKE_MATCH_1}")
+  # Try to read the API level from the toolchain launcher.
+  if(EXISTS "${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/bin/clang")
+    set(_ANDROID_API_LEVEL_CLANG_REGEX "__ANDROID_API__=([0-9]+)")
+    file(STRINGS "${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/bin/clang" _ANDROID_STANDALONE_TOOLCHAIN_BIN_CLANG
+      REGEX "${_ANDROID_API_LEVEL_CLANG_REGEX}" LIMIT_COUNT 1 LIMIT_INPUT 65536)
+    if(_ANDROID_STANDALONE_TOOLCHAIN_BIN_CLANG MATCHES "${_ANDROID_API_LEVEL_CLANG_REGEX}")
+      set(_ANDROID_STANDALONE_TOOLCHAIN_API "${CMAKE_MATCH_1}")
+    endif()
+    unset(_ANDROID_STANDALONE_TOOLCHAIN_BIN_CLANG)
+    unset(_ANDROID_API_LEVEL_CLANG_REGEX)
+  endif()
+  if(NOT _ANDROID_STANDALONE_TOOLCHAIN_API)
+    # The compiler launcher does not know __ANDROID_API__.  Assume this
+    # is not unified headers and look for it in the api-level.h header.
+    set(_ANDROID_API_LEVEL_H_REGEX "^[\t ]*#[\t ]*define[\t ]+__ANDROID_API__[\t ]+([0-9]+)")
+    file(STRINGS "${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/sysroot/usr/include/android/api-level.h"
+      _ANDROID_API_LEVEL_H_CONTENT REGEX "${_ANDROID_API_LEVEL_H_REGEX}")
+    if(_ANDROID_API_LEVEL_H_CONTENT MATCHES "${_ANDROID_API_LEVEL_H_REGEX}")
+      set(_ANDROID_STANDALONE_TOOLCHAIN_API "${CMAKE_MATCH_1}")
+    endif()
+  endif()
+  if(NOT _ANDROID_STANDALONE_TOOLCHAIN_API)
+    message(WARNING
+      "Android: Did not detect API level from\n"
+      "  ${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/bin/clang\n"
+      "or\n"
+      "  ${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/sysroot/usr/include/android/api-level.h\n"
+      )
   endif()
 endif()
 
@@ -174,22 +197,30 @@ endif()
 
 # https://developer.android.com/ndk/guides/abis.html
 
-set(_ANDROID_ABI_arm64-v8a_PROC   "aarch64")
-set(_ANDROID_ABI_arm64-v8a_ARCH   "arm64")
-set(_ANDROID_ABI_armeabi-v7a_PROC "armv7-a")
-set(_ANDROID_ABI_armeabi-v7a_ARCH "arm")
-set(_ANDROID_ABI_armeabi-v6_PROC  "armv6")
-set(_ANDROID_ABI_armeabi-v6_ARCH  "arm")
-set(_ANDROID_ABI_armeabi_PROC     "armv5te")
-set(_ANDROID_ABI_armeabi_ARCH     "arm")
-set(_ANDROID_ABI_mips_PROC        "mips")
-set(_ANDROID_ABI_mips_ARCH        "mips")
-set(_ANDROID_ABI_mips64_PROC      "mips64")
-set(_ANDROID_ABI_mips64_ARCH      "mips64")
-set(_ANDROID_ABI_x86_PROC         "i686")
-set(_ANDROID_ABI_x86_ARCH         "x86")
-set(_ANDROID_ABI_x86_64_PROC      "x86_64")
-set(_ANDROID_ABI_x86_64_ARCH      "x86_64")
+set(_ANDROID_ABI_arm64-v8a_PROC     "aarch64")
+set(_ANDROID_ABI_arm64-v8a_ARCH     "arm64")
+set(_ANDROID_ABI_arm64-v8a_HEADER   "aarch64-linux-android")
+set(_ANDROID_ABI_armeabi-v7a_PROC   "armv7-a")
+set(_ANDROID_ABI_armeabi-v7a_ARCH   "arm")
+set(_ANDROID_ABI_armeabi-v7a_HEADER "arm-linux-androideabi")
+set(_ANDROID_ABI_armeabi-v6_PROC    "armv6")
+set(_ANDROID_ABI_armeabi-v6_ARCH    "arm")
+set(_ANDROID_ABI_armeabi-v6_HEADER  "arm-linux-androideabi")
+set(_ANDROID_ABI_armeabi_PROC       "armv5te")
+set(_ANDROID_ABI_armeabi_ARCH       "arm")
+set(_ANDROID_ABI_armeabi_HEADER     "arm-linux-androideabi")
+set(_ANDROID_ABI_mips_PROC          "mips")
+set(_ANDROID_ABI_mips_ARCH          "mips")
+set(_ANDROID_ABI_mips_HEADER        "mipsel-linux-android")
+set(_ANDROID_ABI_mips64_PROC        "mips64")
+set(_ANDROID_ABI_mips64_ARCH        "mips64")
+set(_ANDROID_ABI_mips64_HEADER      "mips64el-linux-android")
+set(_ANDROID_ABI_x86_PROC           "i686")
+set(_ANDROID_ABI_x86_ARCH           "x86")
+set(_ANDROID_ABI_x86_HEADER         "i686-linux-android")
+set(_ANDROID_ABI_x86_64_PROC        "x86_64")
+set(_ANDROID_ABI_x86_64_ARCH        "x86_64")
+set(_ANDROID_ABI_x86_64_HEADER      "x86_64-linux-android")
 
 set(_ANDROID_PROC_aarch64_ARCH_ABI "arm64-v8a")
 set(_ANDROID_PROC_armv7-a_ARCH_ABI "armeabi-v7a")
@@ -241,6 +272,7 @@ if(_ANDROID_SYSROOT_ARCH AND NOT "x${_ANDROID_SYSROOT_ARCH}" STREQUAL "x${CMAKE_
     "does not match architecture '${CMAKE_ANDROID_ARCH}' for the ABI '${CMAKE_ANDROID_ARCH_ABI}'."
     )
 endif()
+set(CMAKE_ANDROID_ARCH_HEADER_TRIPLE "${_ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_HEADER}")
 
 # Select a processor.
 if(NOT CMAKE_SYSTEM_PROCESSOR)
@@ -252,6 +284,16 @@ if(NOT _ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_PROC STREQUAL CMAKE_SYSTEM_PROCESS
   message(FATAL_ERROR "Android: The specified CMAKE_ANDROID_ARCH_ABI='${CMAKE_ANDROID_ARCH_ABI}' and CMAKE_SYSTEM_PROCESSOR='${CMAKE_SYSTEM_PROCESSOR}' is not a valid combination.")
 endif()
 
+if(CMAKE_ANDROID_NDK AND NOT DEFINED CMAKE_ANDROID_NDK_DEPRECATED_HEADERS)
+  if(IS_DIRECTORY "${CMAKE_ANDROID_NDK}/sysroot/usr/include/${CMAKE_ANDROID_ARCH_HEADER_TRIPLE}")
+    # Unified headers exist so we use them by default.
+    set(CMAKE_ANDROID_NDK_DEPRECATED_HEADERS 0)
+  else()
+    # Unified headers do not exist so use the deprecated headers.
+    set(CMAKE_ANDROID_NDK_DEPRECATED_HEADERS 1)
+  endif()
+endif()
+
 # Save the Android-specific information in CMakeSystem.cmake.
 set(CMAKE_SYSTEM_CUSTOM_CODE "
 set(CMAKE_ANDROID_NDK \"${CMAKE_ANDROID_NDK}\")
@@ -259,6 +301,13 @@ set(CMAKE_ANDROID_STANDALONE_TOOLCHAIN \"${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}\"
 set(CMAKE_ANDROID_ARCH \"${CMAKE_ANDROID_ARCH}\")
 set(CMAKE_ANDROID_ARCH_ABI \"${CMAKE_ANDROID_ARCH_ABI}\")
 ")
+
+if(CMAKE_ANDROID_NDK)
+  string(APPEND CMAKE_SYSTEM_CUSTOM_CODE
+    "set(CMAKE_ANDROID_ARCH_HEADER_TRIPLE \"${CMAKE_ANDROID_ARCH_HEADER_TRIPLE}\")\n"
+    "set(CMAKE_ANDROID_NDK_DEPRECATED_HEADERS \"${CMAKE_ANDROID_NDK_DEPRECATED_HEADERS}\")\n"
+    )
+endif()
 
 # Select an ARM variant.
 if(CMAKE_ANDROID_ARCH_ABI MATCHES "^armeabi")

@@ -6,6 +6,7 @@
 #include "cmCTestGenericHandler.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 #include "cmake.h"
 
 #include <sstream>
@@ -123,8 +124,8 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
     if (capureCMakeError) {
       this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
                                     "-1");
-      const char* err = this->GetError();
-      if (err && !cmSystemTools::FindLastString(err, "unknown error.")) {
+      std::string const err = this->GetName() + " " + this->GetError();
+      if (!cmSystemTools::FindLastString(err.c_str(), "unknown error.")) {
         cmCTestLog(this->CTest, ERROR_MESSAGE, err << " error from command\n");
       }
       // return success because failure is recorded in CAPTURE_CMAKE_ERROR
@@ -216,8 +217,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
       handler->SetSubmitIndex(atoi(this->Values[ct_SUBMIT_INDEX]));
     }
   }
-  std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(
+  cmWorkingDirectory workdir(
     this->CTest->GetCTestConfiguration("BuildDirectory"));
   int res = handler->ProcessHandler();
   if (this->Values[ct_RETURN_VALUE] && *this->Values[ct_RETURN_VALUE]) {
@@ -243,7 +243,6 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
     this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
                                   returnString);
   }
-  cmSystemTools::ChangeDirectory(current_dir);
   return true;
 }
 

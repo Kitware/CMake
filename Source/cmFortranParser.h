@@ -4,9 +4,11 @@
 #define cmFortranParser_h
 
 #if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include "cmStandardIncludes.h"
+#include <set>
+#include <string>
+#include <vector>
 #endif
 
 #include <stddef.h> /* size_t */
@@ -52,8 +54,7 @@ void cmFortranParser_RuleElse(cmFortranParser* parser);
 void cmFortranParser_RuleEndif(cmFortranParser* parser);
 
 /* Define the parser stack element type.  */
-typedef union cmFortran_yystype_u cmFortran_yystype;
-union cmFortran_yystype_u
+struct cmFortran_yystype
 {
   char* string;
 };

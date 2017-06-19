@@ -8,8 +8,8 @@
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
-#include <cm_expat.h>
-#include <cmsys/RegularExpression.hxx>
+#include "cm_expat.h"
+#include "cmsys/RegularExpression.hxx"
 #include <list>
 #include <map>
 #include <ostream>
@@ -151,22 +151,24 @@ std::string cmCTestBZR::LoadInfo()
   return rev;
 }
 
-void cmCTestBZR::NoteOldRevision()
+bool cmCTestBZR::NoteOldRevision()
 {
   this->OldRevision = this->LoadInfo();
   this->Log << "Revision before update: " << this->OldRevision << "\n";
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Old revision of repository is: "
                << this->OldRevision << "\n");
   this->PriorRev.Rev = this->OldRevision;
+  return true;
 }
 
-void cmCTestBZR::NoteNewRevision()
+bool cmCTestBZR::NoteNewRevision()
 {
   this->NewRevision = this->LoadInfo();
   this->Log << "Revision after update: " << this->NewRevision << "\n";
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   New revision of repository is: "
                << this->NewRevision << "\n");
   this->Log << "URL = " << this->URL << "\n";
+  return true;
 }
 
 class cmCTestBZR::LogParser : public cmCTestVC::OutputLogger,
@@ -386,7 +388,7 @@ bool cmCTestBZR::UpdateImpl()
   return this->RunUpdateCommand(&bzr_update[0], &out, &err);
 }
 
-void cmCTestBZR::LoadRevisions()
+bool cmCTestBZR::LoadRevisions()
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   Gathering version information (one . per revision):\n"
@@ -400,7 +402,7 @@ void cmCTestBZR::LoadRevisions()
     // DoRevision takes care of discarding the information about OldRevision
     revs = this->OldRevision + ".." + this->NewRevision;
   } else {
-    return;
+    return true;
   }
 
   // Run "bzr log" to get all global revisions of interest.
@@ -415,6 +417,7 @@ void cmCTestBZR::LoadRevisions()
     this->RunChild(bzr_log, &out, &err);
   }
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
+  return true;
 }
 
 class cmCTestBZR::StatusParser : public cmCTestVC::LineParser
@@ -460,7 +463,7 @@ private:
   }
 };
 
-void cmCTestBZR::LoadModifications()
+bool cmCTestBZR::LoadModifications()
 {
   // Run "bzr status" which reports local modifications.
   const char* bzr = this->CommandLineTool.c_str();
@@ -468,4 +471,5 @@ void cmCTestBZR::LoadModifications()
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
   this->RunChild(bzr_status, &out, &err);
+  return true;
 }

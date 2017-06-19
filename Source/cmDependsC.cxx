@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDependsC.h"
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 #include <utility>
 
 #include "cmAlgorithms.h"
@@ -449,11 +449,11 @@ void cmDependsC::ParseTransform(std::string const& xform)
   // A transform rule is of the form SOME_MACRO(%)=value-with-%
   // We can simply separate with "(%)=".
   std::string::size_type pos = xform.find("(%)=");
-  if (pos == xform.npos || pos == 0) {
+  if (pos == std::string::npos || pos == 0) {
     return;
   }
   std::string name = xform.substr(0, pos);
-  std::string value = xform.substr(pos + 4, xform.npos);
+  std::string value = xform.substr(pos + 4);
   this->TransformRules[name] = value;
 }
 

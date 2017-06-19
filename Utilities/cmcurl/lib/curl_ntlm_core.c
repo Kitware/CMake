@@ -27,7 +27,7 @@
 /*
  * NTLM details:
  *
- * http://davenport.sourceforge.net/ntlm.html
+ * https://davenport.sourceforge.io/ntlm.html
  * https://www.innovation.ch/java/ntlm.html
  */
 
@@ -80,6 +80,9 @@
 
 #  include <mbedtls/des.h>
 #  include <mbedtls/md4.h>
+#  if !defined(MBEDTLS_MD4_C)
+#    include "curl_md4.h"
+#  endif
 
 #elif defined(USE_NSS)
 
@@ -501,7 +504,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#if USE_NTRESPONSES
+#ifdef USE_NTRESPONSES
 static void ascii_to_unicode_le(unsigned char *dest, const char *src,
                                 size_t srclen)
 {
@@ -512,14 +515,14 @@ static void ascii_to_unicode_le(unsigned char *dest, const char *src,
   }
 }
 
-#if USE_NTLM_V2 && !defined(USE_WINDOWS_SSPI)
+#if defined(USE_NTLM_V2) && !defined(USE_WINDOWS_SSPI)
 
 static void ascii_uppercase_to_unicode_le(unsigned char *dest,
                                           const char *src, size_t srclen)
 {
   size_t i;
   for(i = 0; i < srclen; i++) {
-    dest[2 * i] = (unsigned char)(toupper(src[i]));
+    dest[2 * i] = (unsigned char)(Curl_raw_toupper(src[i]));
     dest[2 * i + 1] = '\0';
   }
 }
@@ -566,12 +569,13 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
     gcry_md_hd_t MD4pw;
     gcry_md_open(&MD4pw, GCRY_MD_MD4, 0);
     gcry_md_write(MD4pw, pw, 2 * len);
-    memcpy (ntbuffer, gcry_md_read (MD4pw, 0), MD4_DIGEST_LENGTH);
+    memcpy(ntbuffer, gcry_md_read(MD4pw, 0), MD4_DIGEST_LENGTH);
     gcry_md_close(MD4pw);
+#elif defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
+    (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
+    Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_MBEDTLS)
     mbedtls_md4(pw, 2 * len, ntbuffer);
-#elif defined(USE_NSS) || defined(USE_OS400CRYPTO)
-    Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_DARWINSSL)
     (void)CC_MD4(pw, (CC_LONG)(2 * len), ntbuffer);
 #elif defined(USE_WIN32_CRYPTO)
@@ -597,7 +601,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#if USE_NTLM_V2 && !defined(USE_WINDOWS_SSPI)
+#if defined(USE_NTLM_V2) && !defined(USE_WINDOWS_SSPI)
 
 /* This returns the HMAC MD5 digest */
 CURLcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,
@@ -715,8 +719,10 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   /* Create the BLOB structure */
   snprintf((char *)ptr + NTLM_HMAC_MD5_LEN, NTLMv2_BLOB_LEN,
-           NTLMv2_BLOB_SIGNATURE
+           "%c%c%c%c"   /* NTLMv2_BLOB_SIGNATURE */
            "%c%c%c%c",  /* Reserved = 0 */
+           NTLMv2_BLOB_SIGNATURE[0], NTLMv2_BLOB_SIGNATURE[1],
+           NTLMv2_BLOB_SIGNATURE[2], NTLMv2_BLOB_SIGNATURE[3],
            0, 0, 0, 0);
 
   Curl_write64_le(tw, ptr + 24);

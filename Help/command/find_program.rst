@@ -8,6 +8,8 @@ find_program
 .. |prefix_XXX_SUBDIR| replace:: ``<prefix>/[s]bin``
 .. |entry_XXX_SUBDIR| replace:: ``<entry>/[s]bin``
 
+.. |FIND_PACKAGE_ROOT_PREFIX_PATH_XXX| replace::
+   |FIND_PACKAGE_ROOT_PREFIX_PATH_XXX_SUBDIR|
 .. |CMAKE_PREFIX_PATH_XXX| replace::
    |CMAKE_PREFIX_PATH_XXX_SUBDIR|
 .. |CMAKE_XXX_PATH| replace:: :variable:`CMAKE_PROGRAM_PATH`

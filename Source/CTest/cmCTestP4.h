@@ -3,7 +3,7 @@
 #ifndef cmCTestP4_h
 #define cmCTestP4_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestGlobalVC.h"
 
@@ -51,13 +51,13 @@ private:
   void SetP4Options(std::vector<char const*>& options);
 
   std::string GetWorkingRevision();
-  void NoteOldRevision() CM_OVERRIDE;
-  void NoteNewRevision() CM_OVERRIDE;
+  bool NoteOldRevision() CM_OVERRIDE;
+  bool NoteNewRevision() CM_OVERRIDE;
   bool UpdateImpl() CM_OVERRIDE;
   bool UpdateCustom(const std::string& custom);
 
-  void LoadRevisions() CM_OVERRIDE;
-  void LoadModifications() CM_OVERRIDE;
+  bool LoadRevisions() CM_OVERRIDE;
+  bool LoadModifications() CM_OVERRIDE;
 
   class ChangesParser;
   class DescribeParser;

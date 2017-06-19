@@ -3,6 +3,7 @@
 #include "cmCTestMemCheckCommand.h"
 
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include "cmCTest.h"

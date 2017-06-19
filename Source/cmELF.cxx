@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmELF.h"
 
-#include <cm_auto_ptr.hxx>
-#include <cm_kwiml.h>
-#include <cmsys/FStream.hxx>
+#include "cm_auto_ptr.hxx"
+#include "cm_kwiml.h"
+#include "cmsys/FStream.hxx"
 #include <map>
 #include <sstream>
 #include <stddef.h>
@@ -44,23 +44,26 @@ typedef struct Elf32_Rela Elf32_Rela;
 #ifdef _SCO_DS
 #include <link.h> // For DT_SONAME etc.
 #endif
+#ifndef DT_RUNPATH
+#define DT_RUNPATH 29
+#endif
 
 // Low-level byte swapping implementation.
 template <size_t s>
 struct cmELFByteSwapSize
 {
 };
-void cmELFByteSwap(char* /*unused*/, cmELFByteSwapSize<1> const& /*unused*/)
+void cmELFByteSwap(char* /*unused*/, cmELFByteSwapSize<1> /*unused*/)
 {
 }
-void cmELFByteSwap(char* data, cmELFByteSwapSize<2> const& /*unused*/)
+void cmELFByteSwap(char* data, cmELFByteSwapSize<2> /*unused*/)
 {
   char one_byte;
   one_byte = data[0];
   data[0] = data[1];
   data[1] = one_byte;
 }
-void cmELFByteSwap(char* data, cmELFByteSwapSize<4> const& /*unused*/)
+void cmELFByteSwap(char* data, cmELFByteSwapSize<4> /*unused*/)
 {
   char one_byte;
   one_byte = data[0];
@@ -70,7 +73,7 @@ void cmELFByteSwap(char* data, cmELFByteSwapSize<4> const& /*unused*/)
   data[1] = data[2];
   data[2] = one_byte;
 }
-void cmELFByteSwap(char* data, cmELFByteSwapSize<8> const& /*unused*/)
+void cmELFByteSwap(char* data, cmELFByteSwapSize<8> /*unused*/)
 {
   char one_byte;
   one_byte = data[0];
@@ -154,11 +157,7 @@ public:
   // Lookup the RUNPATH in the DYNAMIC section.
   StringEntry const* GetRunPath()
   {
-#if defined(DT_RUNPATH)
     return this->GetDynamicSectionString(DT_RUNPATH);
-#else
-    return 0;
-#endif
   }
 
   // Return the recorded ELF type.

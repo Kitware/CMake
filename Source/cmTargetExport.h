@@ -3,7 +3,7 @@
 #ifndef cmTargetExport_h
 #define cmTargetExport_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 
@@ -26,6 +26,7 @@ public:
   cmInstallTargetGenerator* ArchiveGenerator;
   cmInstallTargetGenerator* RuntimeGenerator;
   cmInstallTargetGenerator* LibraryGenerator;
+  cmInstallTargetGenerator* ObjectsGenerator;
   cmInstallTargetGenerator* FrameworkGenerator;
   cmInstallTargetGenerator* BundleGenerator;
   cmInstallFilesGenerator* HeaderGenerator;

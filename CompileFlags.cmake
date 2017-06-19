@@ -4,10 +4,6 @@
 #-----------------------------------------------------------------------------
 # set some special flags for different compilers
 #
-if(CMAKE_GENERATOR MATCHES "Visual Studio 7")
-  set(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
-endif()
-
 if(WIN32 AND CMAKE_C_COMPILER_ID STREQUAL "Intel")
   set(_INTEL_WINDOWS 1)
 endif()
@@ -63,9 +59,17 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "^parisc")
   endif()
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro)
+if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND
+    NOT DEFINED CMAKE_CXX${CMAKE_CXX_STANDARD}_STANDARD_COMPILE_OPTION)
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.13)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++03")
+    if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD EQUAL 98)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++03")
+    elseif(CMAKE_VERSION VERSION_LESS 3.8.20170502)
+      # CMake knows how to add this flag for compilation as C++11,
+      # but has not been taught that SunPro needs it for linking too.
+      # Add it in a place that will be used for both.
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    endif()
   else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -library=stlport4")
   endif()

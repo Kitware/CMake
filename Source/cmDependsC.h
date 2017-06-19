@@ -3,11 +3,11 @@
 #ifndef cmDependsC_h
 #define cmDependsC_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmDepends.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/RegularExpression.hxx"
 #include <iosfwd>
 #include <map>
 #include <queue>
@@ -22,6 +22,8 @@ class cmLocalGenerator;
  */
 class cmDependsC : public cmDepends
 {
+  CM_DISABLE_COPY(cmDependsC)
+
 public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
@@ -93,10 +95,6 @@ protected:
 
   void WriteCacheFile() const;
   void ReadCacheFile();
-
-private:
-  cmDependsC(cmDependsC const&);     // Purposely not implemented.
-  void operator=(cmDependsC const&); // Purposely not implemented.
 };
 
 #endif

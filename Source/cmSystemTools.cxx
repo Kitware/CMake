@@ -4,11 +4,12 @@
 
 #include "cmAlgorithms.h"
 #include "cmProcessOutput.h"
+#include "cm_sys_stat.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmArchiveWrite.h"
 #include "cmLocale.h"
-#include <cm_libarchive.h>
+#include "cm_libarchive.h"
 #ifndef __LA_INT64_T
 #define __LA_INT64_T la_int64_t
 #endif
@@ -26,15 +27,14 @@
 #include "cmMachO.h"
 #endif
 
+#include "cmsys/Directory.hxx"
+#include "cmsys/Encoding.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
+#include "cmsys/System.h"
+#include "cmsys/Terminal.h"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/Encoding.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/System.h>
-#include <cmsys/SystemTools.hxx>
-#include <cmsys/Terminal.h>
 #include <ctype.h>
 #include <errno.h>
 #include <iostream>
@@ -43,8 +43,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <time.h>
+#include <utility>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -134,6 +134,7 @@ public:
   operator bool() const { return this->handle_ != INVALID_HANDLE_VALUE; }
   bool operator!() const { return this->handle_ == INVALID_HANDLE_VALUE; }
   operator HANDLE() const { return this->handle_; }
+
 private:
   HANDLE handle_;
 };
@@ -196,7 +197,6 @@ void cmSystemTools::ExpandRegistryValues(std::string& source,
   while (regEntry.find(source)) {
     // the arguments are the second match
     std::string key = regEntry.match(1);
-    std::string val;
     std::string reg = "[";
     reg += key + "]";
     cmSystemTools::ReplaceString(source, reg.c_str(), "/registry");
@@ -348,12 +348,12 @@ bool cmSystemTools::IsInternallyOn(const char* val)
   if (!val) {
     return false;
   }
-  std::basic_string<char> v = val;
+  std::string v = val;
   if (v.size() > 4) {
     return false;
   }
 
-  for (std::basic_string<char>::iterator c = v.begin(); c != v.end(); c++) {
+  for (std::string::iterator c = v.begin(); c != v.end(); c++) {
     *c = static_cast<char>(toupper(*c));
   }
   return v == "I_ON";
@@ -368,7 +368,7 @@ bool cmSystemTools::IsOn(const char* val)
   if (len > 4) {
     return false;
   }
-  std::basic_string<char> v(val, len);
+  std::string v(val, len);
 
   static std::set<std::string> onValues;
   if (onValues.empty()) {
@@ -378,7 +378,7 @@ bool cmSystemTools::IsOn(const char* val)
     onValues.insert("TRUE");
     onValues.insert("Y");
   }
-  for (std::basic_string<char>::iterator c = v.begin(); c != v.end(); c++) {
+  for (std::string::iterator c = v.begin(); c != v.end(); c++) {
     *c = static_cast<char>(toupper(*c));
   }
   return (onValues.count(v) > 0);
@@ -413,8 +413,8 @@ bool cmSystemTools::IsOff(const char* val)
     offValues.insert("IGNORE");
   }
   // Try and avoid toupper().
-  std::basic_string<char> v(val, len);
-  for (std::basic_string<char>::iterator c = v.begin(); c != v.end(); c++) {
+  std::string v(val, len);
+  for (std::string::iterator c = v.begin(); c != v.end(); c++) {
     *c = static_cast<char>(toupper(*c));
   }
   return (offValues.count(v) > 0);
@@ -505,6 +505,39 @@ void cmSystemTools::ParseUnixCommandLine(const char* command,
   argv.Store(args);
 }
 
+std::vector<std::string> cmSystemTools::HandleResponseFile(
+  std::vector<std::string>::const_iterator argBeg,
+  std::vector<std::string>::const_iterator argEnd)
+{
+  std::vector<std::string> arg_full;
+  for (std::vector<std::string>::const_iterator a = argBeg; a != argEnd; ++a) {
+    std::string const& arg = *a;
+    if (cmHasLiteralPrefix(arg, "@")) {
+      cmsys::ifstream responseFile(arg.substr(1).c_str(), std::ios::in);
+      if (!responseFile) {
+        std::string error = "failed to open for reading (";
+        error += cmSystemTools::GetLastSystemError();
+        error += "):\n  ";
+        error += arg.substr(1);
+        cmSystemTools::Error(error.c_str());
+      } else {
+        std::string line;
+        cmSystemTools::GetLineFromStream(responseFile, line);
+        std::vector<std::string> args2;
+#ifdef _WIN32
+        cmSystemTools::ParseWindowsCommandLine(line.c_str(), args2);
+#else
+        cmSystemTools::ParseUnixCommandLine(line.c_str(), args2);
+#endif
+        arg_full.insert(arg_full.end(), args2.begin(), args2.end());
+      }
+    } else {
+      arg_full.push_back(arg);
+    }
+  }
+  return arg_full;
+}
+
 std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
 {
   std::vector<std::string> args;
@@ -570,6 +603,46 @@ std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
   return args;
 }
 
+size_t cmSystemTools::CalculateCommandLineLengthLimit()
+{
+  size_t sz =
+#ifdef _WIN32
+    // There's a maximum of 65536 bytes and thus 32768 WCHARs on Windows
+    // However, cmd.exe itself can only handle 8191 WCHARs and Ninja for
+    // example uses it to spawn processes.
+    size_t(8191);
+#elif defined(__linux)
+    // MAX_ARG_STRLEN is the maximum length of a string permissible for
+    // the execve() syscall on Linux. It's defined as (PAGE_SIZE * 32)
+    // in Linux's binfmts.h
+    static_cast<size_t>(sysconf(_SC_PAGESIZE) * 32);
+#else
+    size_t(0);
+#endif
+
+#if defined(_SC_ARG_MAX)
+  // ARG_MAX is the maximum size of the command and environment
+  // that can be passed to the exec functions on UNIX.
+  // The value in limits.h does not need to be present and may
+  // depend upon runtime memory constraints, hence sysconf()
+  // should be used to query it.
+  long szArgMax = sysconf(_SC_ARG_MAX);
+  // A return value of -1 signifies an undetermined limit, but
+  // it does not imply an infinite limit, and thus is ignored.
+  if (szArgMax != -1) {
+    // We estimate the size of the environment block to be 1000.
+    // This isn't accurate at all, but leaves some headroom.
+    szArgMax = szArgMax < 1000 ? 0 : szArgMax - 1000;
+#if defined(_WIN32) || defined(__linux)
+    sz = std::min(sz, static_cast<size_t>(szArgMax));
+#else
+    sz = static_cast<size_t>(szArgMax);
+#endif
+  }
+#endif
+  return sz;
+}
+
 bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      std::string* captureStdOut,
                                      std::string* captureStdErr, int* retVal,
@@ -617,8 +690,6 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
     while ((pipe = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) >
            0) {
       // Translate NULL characters in the output into valid text.
-      // Visual Studio 7 puts these characters in the output of its
-      // build process.
       for (int i = 0; i < length; ++i) {
         if (data[i] == '\0') {
           data[i] = ' ';
@@ -1669,7 +1740,8 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
     for (; outiter != out.end(); ++outiter) {
       if ((*outiter == '\r') && ((outiter + 1) == out.end())) {
         break;
-      } else if (*outiter == '\n' || *outiter == '\0') {
+      }
+      if (*outiter == '\n' || *outiter == '\0') {
         std::vector<char>::size_type length = outiter - out.begin();
         if (length > 1 && *(outiter - 1) == '\r') {
           --length;
@@ -1686,7 +1758,8 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
     for (; erriter != err.end(); ++erriter) {
       if ((*erriter == '\r') && ((erriter + 1) == err.end())) {
         break;
-      } else if (*erriter == '\n' || *erriter == '\0') {
+      }
+      if (*erriter == '\n' || *erriter == '\0') {
         std::vector<char>::size_type length = erriter - err.begin();
         if (length > 1 && *(erriter - 1) == '\r') {
           --length;
@@ -1978,6 +2051,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     // ???
   }
 #endif
+  exe_dir = cmSystemTools::GetActualCaseForPath(exe_dir);
   cmSystemToolsCMakeCommand = exe_dir;
   cmSystemToolsCMakeCommand += "/cmake";
   cmSystemToolsCMakeCommand += cmSystemTools::GetExecutableExtension();
@@ -2015,8 +2089,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   // Install tree has
   // - "<prefix><CMAKE_BIN_DIR>/cmake"
   // - "<prefix><CMAKE_DATA_DIR>"
-  const std::string actual_case = cmSystemTools::GetActualCaseForPath(exe_dir);
-  if (cmHasSuffix(actual_case, CMAKE_BIN_DIR)) {
+  if (cmHasSuffix(exe_dir, CMAKE_BIN_DIR)) {
     std::string const prefix =
       exe_dir.substr(0, exe_dir.size() - strlen(CMAKE_BIN_DIR));
     cmSystemToolsCMakeRoot = prefix + CMAKE_DATA_DIR;
@@ -2299,8 +2372,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       // not being changed.
       rp[rp_count].Value = se[i]->Value.substr(0, prefix_len);
       rp[rp_count].Value += newRPath;
-      rp[rp_count].Value +=
-        se[i]->Value.substr(pos + oldRPath.length(), oldRPath.npos);
+      rp[rp_count].Value += se[i]->Value.substr(pos + oldRPath.length());
 
       if (!rp[rp_count].Value.empty()) {
         remove_rpath = false;
@@ -2585,29 +2657,28 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
         it = dentries.erase(it);
         entriesErased++;
         continue;
-      } else {
-        if (cmELF::TagMipsRldMapRel != 0 &&
-            it->first == cmELF::TagMipsRldMapRel) {
-          // Background: debuggers need to know the "linker map" which contains
-          // the addresses each dynamic object is loaded at. Most arches use
-          // the DT_DEBUG tag which the dynamic linker writes to (directly) and
-          // contain the location of the linker map, however on MIPS the
-          // .dynamic section is always read-only so this is not possible. MIPS
-          // objects instead contain a DT_MIPS_RLD_MAP tag which contains the
-          // address where the dyanmic linker will write to (an indirect
-          // version of DT_DEBUG). Since this doesn't work when using PIE, a
-          // relative equivalent was created - DT_MIPS_RLD_MAP_REL. Since this
-          // version contains a relative offset, moving it changes the
-          // calculated address. This may cause the dyanmic linker to write
-          // into memory it should not be changing.
-          //
-          // To fix this, we adjust the value of DT_MIPS_RLD_MAP_REL here. If
-          // we move it up by n bytes, we add n bytes to the value of this tag.
-          it->second += entriesErased * sizeof_dentry;
-        }
-
-        it++;
       }
+      if (cmELF::TagMipsRldMapRel != 0 &&
+          it->first == cmELF::TagMipsRldMapRel) {
+        // Background: debuggers need to know the "linker map" which contains
+        // the addresses each dynamic object is loaded at. Most arches use
+        // the DT_DEBUG tag which the dynamic linker writes to (directly) and
+        // contain the location of the linker map, however on MIPS the
+        // .dynamic section is always read-only so this is not possible. MIPS
+        // objects instead contain a DT_MIPS_RLD_MAP tag which contains the
+        // address where the dyanmic linker will write to (an indirect
+        // version of DT_DEBUG). Since this doesn't work when using PIE, a
+        // relative equivalent was created - DT_MIPS_RLD_MAP_REL. Since this
+        // version contains a relative offset, moving it changes the
+        // calculated address. This may cause the dyanmic linker to write
+        // into memory it should not be changing.
+        //
+        // To fix this, we adjust the value of DT_MIPS_RLD_MAP_REL here. If
+        // we move it up by n bytes, we add n bytes to the value of this tag.
+        it->second += entriesErased * sizeof_dentry;
+      }
+
+      it++;
     }
 
     // Encode new entries list

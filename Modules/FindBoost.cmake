@@ -127,7 +127,10 @@
 #                              ('n' tag).  Default is OFF.
 #   Boost_COMPILER           - Set to the compiler-specific library suffix
 #                              (e.g. "-gcc43").  Default is auto-computed
-#                              for the C++ compiler in use.
+#                              for the C++ compiler in use.  A list may be
+#                              used if multiple compatible suffixes should
+#                              be tested for, in decreasing order of
+#                              preference.
 #   Boost_THREADAPI          - Suffix for "thread" component library name,
 #                              such as "pthread" or "win32".  Names with
 #                              and without this suffix will both be tried.
@@ -204,6 +207,10 @@
 # the Boost CMake package configuration for details on what it provides.
 #
 # Set Boost_NO_BOOST_CMAKE to ON to disable the search for boost-cmake.
+
+# Save project's policies
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 #-------------------------------------------------------------------------------
 # Before we go searching, check whether boost-cmake is available, unless the
@@ -428,7 +435,7 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
     set(_boost_COMPILER "-ghs")
   elseif("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10)
-      set(_boost_COMPILER "-vc141")
+      set(_boost_COMPILER "-vc141;-vc140")
     elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
       set(_boost_COMPILER "-vc140")
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18)
@@ -862,14 +869,12 @@ function(_Boost_MISSING_DEPENDENCIES componentvar extravar)
     list(APPEND _boost_processed_components ${_boost_unprocessed_components})
     foreach(component ${_boost_unprocessed_components})
       string(TOUPPER ${component} uppercomponent)
-  set(${_ret} ${_Boost_${uppercomponent}_DEPENDENCIES} PARENT_SCOPE)
+      set(${_ret} ${_Boost_${uppercomponent}_DEPENDENCIES} PARENT_SCOPE)
       _Boost_COMPONENT_DEPENDENCIES("${component}" _Boost_${uppercomponent}_DEPENDENCIES)
       set(_Boost_${uppercomponent}_DEPENDENCIES ${_Boost_${uppercomponent}_DEPENDENCIES} PARENT_SCOPE)
       set(_Boost_IMPORTED_TARGETS ${_Boost_IMPORTED_TARGETS} PARENT_SCOPE)
       foreach(componentdep ${_Boost_${uppercomponent}_DEPENDENCIES})
-        list(FIND _boost_processed_components "${componentdep}" _boost_component_found)
-        list(FIND _boost_new_components "${componentdep}" _boost_component_new)
-        if (_boost_component_found EQUAL -1 AND _boost_component_new EQUAL -1)
+        if (NOT ("${componentdep}" IN_LIST _boost_processed_components OR "${componentdep}" IN_LIST _boost_new_components))
           list(APPEND _boost_new_components ${componentdep})
         endif()
       endforeach()
@@ -886,6 +891,33 @@ function(_Boost_MISSING_DEPENDENCIES componentvar extravar)
 endfunction()
 
 #
+# Some boost libraries may require particular set of compler features.
+# The very first one was `boost::fiber` introduced in Boost 1.62.
+# One can check required compiler features of it in
+# `${Boost_ROOT}/libs/fiber/build/Jamfile.v2`.
+#
+function(_Boost_COMPILER_FEATURES component _ret)
+  # Boost >= 1.62 and < 1.65
+  if(NOT Boost_VERSION VERSION_LESS 106200 AND Boost_VERSION VERSION_LESS 106500)
+    set(_Boost_FIBER_COMPILER_FEATURES
+        cxx_alias_templates
+        cxx_auto_type
+        cxx_constexpr
+        cxx_defaulted_functions
+        cxx_final
+        cxx_lambdas
+        cxx_noexcept
+        cxx_nullptr
+        cxx_rvalue_references
+        cxx_thread_local
+        cxx_variadic_templates
+    )
+  endif()
+  string(TOUPPER ${component} uppercomponent)
+  set(${_ret} ${_Boost_${uppercomponent}_COMPILER_FEATURES} PARENT_SCOPE)
+endfunction()
+
+#
 # Update library search directory hint variable with paths used by prebuilt boost binaries.
 #
 # Prebuilt windows binaries (https://sourceforge.net/projects/boost/files/boost-binaries/)
@@ -893,7 +925,7 @@ endfunction()
 # This function would append corresponding directories if MSVC is a current compiler,
 # so having `BOOST_ROOT` would be enough to specify to find everything.
 #
-macro(_Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS componentlibvar basedir)
+function(_Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS componentlibvar basedir)
   if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC")
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(_arch_suffix 64)
@@ -901,7 +933,8 @@ macro(_Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS componentlib
       set(_arch_suffix 32)
     endif()
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10)
-      list(APPEND ${componentlibvar} ${basedir}/lib${_arch_suffix}-msvc-15.0)
+      list(APPEND ${componentlibvar} ${basedir}/lib${_arch_suffix}-msvc-14.1)
+      list(APPEND ${componentlibvar} ${basedir}/lib${_arch_suffix}-msvc-14.0)
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
       list(APPEND ${componentlibvar} ${basedir}/lib${_arch_suffix}-msvc-14.0)
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18)
@@ -915,8 +948,9 @@ macro(_Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS componentlib
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
       list(APPEND ${componentlibvar} ${basedir}/lib${_arch_suffix}-msvc-8.0)
     endif()
+    set(${componentlibvar} ${${componentlibvar}} PARENT_SCOPE)
   endif()
-endmacro()
+endfunction()
 
 #
 # End functions/macros
@@ -1119,6 +1153,12 @@ if(NOT Boost_INCLUDE_DIR)
   if( Boost_NO_SYSTEM_PATHS)
     list(APPEND _boost_INCLUDE_SEARCH_DIRS NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
   else()
+    if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC")
+      foreach(ver ${_Boost_KNOWN_VERSIONS})
+        string(REPLACE "." "_" ver "${ver}")
+        list(APPEND _boost_INCLUDE_SEARCH_DIRS PATHS "C:/local/boost_${ver}")
+      endforeach()
+    endif()
     list(APPEND _boost_INCLUDE_SEARCH_DIRS PATHS
       C:/boost/include
       C:/boost
@@ -1392,12 +1432,16 @@ foreach(c DEBUG RELEASE)
     if( Boost_NO_SYSTEM_PATHS )
       list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
     else()
+      foreach(ver ${_Boost_KNOWN_VERSIONS})
+        string(REPLACE "." "_" ver "${ver}")
+        _Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS(_boost_LIBRARY_SEARCH_DIRS_${c} "C:/local/boost_${ver}")
+      endforeach()
+      _Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS(_boost_LIBRARY_SEARCH_DIRS_${c} "C:/boost")
       list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} PATHS
         C:/boost/lib
         C:/boost
         /sw/local/lib
         )
-      _Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS(_boost_LIBRARY_SEARCH_DIRS_${c} "C:/boost")
     endif()
   endif()
 endforeach()
@@ -1457,8 +1501,7 @@ endif()
 _Boost_MISSING_DEPENDENCIES(Boost_FIND_COMPONENTS _Boost_EXTRA_FIND_COMPONENTS)
 
 # If thread is required, get the thread libs as a dependency
-list(FIND Boost_FIND_COMPONENTS thread _Boost_THREAD_DEPENDENCY_LIBS)
-if(NOT _Boost_THREAD_DEPENDENCY_LIBS EQUAL -1)
+if("thread" IN_LIST Boost_FIND_COMPONENTS)
   include(CMakeFindDependencyMacro)
   find_dependency(Threads)
 endif()
@@ -1524,17 +1567,24 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   #
   # Find RELEASE libraries
   #
-  set(_boost_RELEASE_NAMES
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}-${Boost_LIB_VERSION}
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}
+  unset(_boost_RELEASE_NAMES)
+  foreach(compiler IN LISTS _boost_COMPILER)
+    list(APPEND _boost_RELEASE_NAMES
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG} )
+  endforeach()
+  list(APPEND _boost_RELEASE_NAMES
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}-${Boost_LIB_VERSION}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT} )
   if(_boost_STATIC_RUNTIME_WORKAROUND)
     set(_boost_RELEASE_STATIC_ABI_TAG "-s${_boost_RELEASE_ABI_TAG}")
+    foreach(compiler IN LISTS _boost_COMPILER)
+      list(APPEND _boost_RELEASE_NAMES
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG} )
+    endforeach()
     list(APPEND _boost_RELEASE_NAMES
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG} )
   endif()
@@ -1565,18 +1615,25 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   #
   # Find DEBUG libraries
   #
-  set(_boost_DEBUG_NAMES
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}-${Boost_LIB_VERSION}
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}
+  unset(_boost_DEBUG_NAMES)
+  foreach(compiler IN LISTS _boost_COMPILER)
+    list(APPEND _boost_DEBUG_NAMES
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG} )
+  endforeach()
+  list(APPEND _boost_DEBUG_NAMES
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}-${Boost_LIB_VERSION}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT} )
   if(_boost_STATIC_RUNTIME_WORKAROUND)
     set(_boost_DEBUG_STATIC_ABI_TAG "-s${_boost_DEBUG_ABI_TAG}")
+    foreach(compiler IN LISTS _boost_COMPILER)
+      list(APPEND _boost_DEBUG_NAMES
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG} )
+    endforeach()
     list(APPEND _boost_DEBUG_NAMES
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG} )
   endif()
@@ -1610,6 +1667,9 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   endif()
 
   _Boost_ADJUST_LIB_VARS(${UPPERCOMPONENT})
+
+  # Check if component requires some compiler features
+  _Boost_COMPILER_FEATURES(${COMPONENT} _Boost_${UPPERCOMPONENT}_COMPILER_FEATURES)
 
 endforeach()
 
@@ -1782,6 +1842,10 @@ if(Boost_FOUND)
           set_target_properties(Boost::${COMPONENT} PROPERTIES
             INTERFACE_LINK_LIBRARIES "${_Boost_${UPPERCOMPONENT}_TARGET_DEPENDENCIES}")
         endif()
+        if(_Boost_${UPPERCOMPONENT}_COMPILER_FEATURES)
+          set_target_properties(Boost::${COMPONENT} PROPERTIES
+            INTERFACE_COMPILE_FEATURES "${_Boost_${UPPERCOMPONENT}_COMPILER_FEATURES}")
+        endif()
       endif()
     endif()
   endforeach()
@@ -1862,3 +1926,6 @@ list(REMOVE_DUPLICATES _Boost_COMPONENTS_SEARCHED)
 list(SORT _Boost_COMPONENTS_SEARCHED)
 set(_Boost_COMPONENTS_SEARCHED "${_Boost_COMPONENTS_SEARCHED}"
   CACHE INTERNAL "Components requested for this build tree.")
+
+# Restore project's policies
+cmake_policy(POP)

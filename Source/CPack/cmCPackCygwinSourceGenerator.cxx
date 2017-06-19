@@ -9,13 +9,13 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include <cmsys/SystemTools.hxx>
+#include "cmsys/SystemTools.hxx"
 
 // Includes needed for implementation of RenameFile.  This is not in
 // system tools because it is not implemented robustly enough to move
 // files across directories.
 #ifdef _WIN32
-#include <sys/stat.h>
+#include "cm_sys_stat.h"
 #include <windows.h>
 #endif
 

@@ -3,7 +3,7 @@
 #ifndef cmDefinitions_h
 #define cmDefinitions_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -63,12 +63,6 @@ private:
       : std_string(v)
       , Exists(true)
       , Used(false)
-    {
-    }
-    Def(Def const& d)
-      : std_string(d)
-      , Exists(d.Exists)
-      , Used(d.Used)
     {
     }
     bool Exists;

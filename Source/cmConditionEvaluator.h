@@ -3,7 +3,7 @@
 #ifndef cmConditionEvaluator_h
 #define cmConditionEvaluator_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <list>
 #include <string>

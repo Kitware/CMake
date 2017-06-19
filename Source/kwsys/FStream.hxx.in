@@ -33,7 +33,7 @@ public:
   typedef std::basic_filebuf<CharType, Traits> my_base_type;
   basic_filebuf* open(char const* s, std::ios_base::openmode mode)
   {
-    const std::wstring wstr = Encoding::ToWide(s);
+    const std::wstring wstr = Encoding::ToWindowsExtendedPath(s);
     return static_cast<basic_filebuf*>(my_base_type::open(wstr.c_str(), mode));
   }
 #endif
@@ -93,7 +93,7 @@ public:
 #if defined(_MSC_VER)
     const bool success = buf_->open(file_name, mode) != 0;
 #else
-    const std::wstring wstr = Encoding::ToWide(file_name);
+    const std::wstring wstr = Encoding::ToWindowsExtendedPath(file_name);
     bool success = false;
     std::wstring cmode = getcmode(mode);
     file_ = _wfopen(wstr.c_str(), cmode.c_str());
@@ -170,8 +170,6 @@ template <typename CharType, typename Traits = std::char_traits<CharType> >
 class basic_ifstream : public std::basic_istream<CharType, Traits>,
                        public basic_efilebuf<CharType, Traits>
 {
-  using basic_efilebuf<CharType, Traits>::is_open;
-
 public:
   typedef typename basic_efilebuf<CharType, Traits>::internal_buffer_type
     internal_buffer_type;
@@ -200,6 +198,8 @@ public:
   }
 
   void close() { this->_set_state(this->_close(), this, this); }
+
+  using basic_efilebuf<CharType, Traits>::is_open;
 
   internal_buffer_type* rdbuf() const { return this->buf_; }
 
@@ -269,7 +269,7 @@ enum BOM
 // If a BOM exists, the stream is advanced to after the BOM.
 // This function requires a seekable stream (but not a relative
 // seekable stream).
-BOM ReadBOM(std::istream& in);
+@KWSYS_NAMESPACE@_EXPORT BOM ReadBOM(std::istream& in);
 }
 }
 

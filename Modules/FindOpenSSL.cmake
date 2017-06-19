@@ -145,6 +145,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(LIB_EAY_DEBUG
       NAMES
         libcrypto${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
+        libcrypto${_OPENSSL_MSVC_RT_MODE}d
         libcryptod
         libeay32${_OPENSSL_MSVC_RT_MODE}d
         libeay32d
@@ -157,9 +158,11 @@ if(WIN32 AND NOT CYGWIN)
     find_library(LIB_EAY_RELEASE
       NAMES
         libcrypto${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
+        libcrypto${_OPENSSL_MSVC_RT_MODE}
         libcrypto
         libeay32${_OPENSSL_MSVC_RT_MODE}
         libeay32
+        crypto
       NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
@@ -169,6 +172,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(SSL_EAY_DEBUG
       NAMES
         libssl${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
+        libssl${_OPENSSL_MSVC_RT_MODE}d
         libssld
         ssleay32${_OPENSSL_MSVC_RT_MODE}d
         ssleay32d
@@ -181,6 +185,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(SSL_EAY_RELEASE
       NAMES
         libssl${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
+        libssl${_OPENSSL_MSVC_RT_MODE}
         libssl
         ssleay32${_OPENSSL_MSVC_RT_MODE}
         ssleay32
@@ -371,7 +376,7 @@ set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} )
 if (OPENSSL_VERSION)
   find_package_handle_standard_args(OpenSSL
     REQUIRED_VARS
-      OPENSSL_SSL_LIBRARY
+      #OPENSSL_SSL_LIBRARY # FIXME: require based on a component request?
       OPENSSL_CRYPTO_LIBRARY
       OPENSSL_INCLUDE_DIR
     VERSION_VAR
@@ -381,7 +386,7 @@ if (OPENSSL_VERSION)
   )
 else ()
   find_package_handle_standard_args(OpenSSL "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
-    OPENSSL_SSL_LIBRARY
+    #OPENSSL_SSL_LIBRARY # FIXME: require based on a component request?
     OPENSSL_CRYPTO_LIBRARY
     OPENSSL_INCLUDE_DIR
   )

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -103,7 +103,7 @@ static CURLcode smtp_parse_custom_request(struct connectdata *conn);
 static CURLcode smtp_perform_auth(struct connectdata *conn, const char *mech,
                                   const char *initresp);
 static CURLcode smtp_continue_auth(struct connectdata *conn, const char *resp);
-static void smtp_get_message(char *buffer, char** outptr);
+static void smtp_get_message(char *buffer, char **outptr);
 
 /*
  * SMTP protocol handler.
@@ -126,7 +126,8 @@ const struct Curl_handler Curl_handler_smtp = {
   ZERO_NULL,                        /* readwrite */
   PORT_SMTP,                        /* defport */
   CURLPROTO_SMTP,                   /* protocol */
-  PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
+  PROTOPT_URLOPTIONS
 };
 
 #ifdef USE_SSL
@@ -152,7 +153,7 @@ const struct Curl_handler Curl_handler_smtps = {
   PORT_SMTPS,                       /* defport */
   CURLPROTO_SMTPS,                  /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_SSL
-  | PROTOPT_NOURLQUERY              /* flags */
+  | PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS /* flags */
 };
 #endif
 
@@ -278,10 +279,10 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
  *
  * Gets the authentication message from the response buffer.
  */
-static void smtp_get_message(char *buffer, char** outptr)
+static void smtp_get_message(char *buffer, char **outptr)
 {
   size_t len = 0;
-  char* message = NULL;
+  char *message = NULL;
 
   /* Find the start of the message */
   for(message = buffer + 4; *message == ' ' || *message == '\t'; message++)
@@ -692,7 +693,7 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
 
   if(smtpcode != 220) {
     if(data->set.use_ssl != CURLUSESSL_TRY) {
-      failf(data, "STARTTLS denied. %c", smtpcode);
+      failf(data, "STARTTLS denied, code %d", smtpcode);
       result = CURLE_USE_SSL_FAILED;
     }
     else
@@ -1590,7 +1591,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
   if(!scratch || data->set.crlf) {
     oldscratch = scratch;
 
-    scratch = newscratch = malloc(2 * BUFSIZE);
+    scratch = newscratch = malloc(2 * data->set.buffer_size);
     if(!newscratch) {
       failf(data, "Failed to alloc scratch buffer!");
 

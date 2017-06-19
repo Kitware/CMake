@@ -3,7 +3,7 @@
 #ifndef cmFindBase_h
 #define cmFindBase_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -50,6 +50,7 @@ protected:
 
 private:
   // Add pieces of the search.
+  void FillPackageRootPath();
   void FillCMakeVariablePath();
   void FillCMakeEnvironmentPath();
   void FillUserHintsPath();

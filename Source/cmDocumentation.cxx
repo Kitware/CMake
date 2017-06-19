@@ -9,9 +9,9 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
 #include <ctype.h>
 #include <string.h>
 #include <utility>
@@ -129,27 +129,18 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
     this->CurrentArgument = i->Argument;
     // If a file name was given, use it.  Otherwise, default to the
     // given stream.
-    cmsys::ofstream* fout = CM_NULLPTR;
+    cmsys::ofstream fout;
     std::ostream* s = &os;
     if (!i->Filename.empty()) {
-      fout = new cmsys::ofstream(i->Filename.c_str());
-      if (fout) {
-        s = fout;
-      } else {
-        result = false;
-      }
+      fout.open(i->Filename.c_str());
+      s = &fout;
     } else if (++count > 1) {
       os << "\n\n";
     }
 
     // Print this documentation type to the stream.
-    if (!this->PrintDocumentation(i->HelpType, *s) || !*s) {
+    if (!this->PrintDocumentation(i->HelpType, *s) || s->fail()) {
       result = false;
-    }
-
-    // Close the file if we wrote one.
-    if (fout) {
-      delete fout;
     }
   }
   return result;

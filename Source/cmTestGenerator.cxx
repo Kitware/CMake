@@ -35,15 +35,13 @@ void cmTestGenerator::Compute(cmLocalGenerator* lg)
   this->LG = lg;
 }
 
-void cmTestGenerator::GenerateScriptConfigs(std::ostream& os,
-                                            Indent const& indent)
+void cmTestGenerator::GenerateScriptConfigs(std::ostream& os, Indent indent)
 {
   // Create the tests.
   this->cmScriptGenerator::GenerateScriptConfigs(os, indent);
 }
 
-void cmTestGenerator::GenerateScriptActions(std::ostream& os,
-                                            Indent const& indent)
+void cmTestGenerator::GenerateScriptActions(std::ostream& os, Indent indent)
 {
   if (this->ActionsPerConfig) {
     // This is the per-config generation in a single-configuration
@@ -59,7 +57,7 @@ void cmTestGenerator::GenerateScriptActions(std::ostream& os,
 
 void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
                                               const std::string& config,
-                                              Indent const& indent)
+                                              Indent indent)
 {
   this->TestGenerated = true;
 
@@ -125,8 +123,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   }
 }
 
-void cmTestGenerator::GenerateScriptNoConfig(std::ostream& os,
-                                             Indent const& indent)
+void cmTestGenerator::GenerateScriptNoConfig(std::ostream& os, Indent indent)
 {
   os << indent << "add_test(" << this->Test->GetName() << " NOT_AVAILABLE)\n";
 }
@@ -139,8 +136,7 @@ bool cmTestGenerator::NeedsScriptNoConfig() const
           !this->ConfigurationTypes->empty()); // config-dependent command
 }
 
-void cmTestGenerator::GenerateOldStyle(std::ostream& fout,
-                                       Indent const& indent)
+void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
 {
   this->TestGenerated = true;
 

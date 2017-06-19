@@ -3,7 +3,7 @@
 #ifndef CM_UNORDERED_SET_HXX
 #define CM_UNORDERED_SET_HXX
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #if defined(CMake_HAVE_CXX_UNORDERED_SET)
 
@@ -12,7 +12,7 @@
 
 #elif defined(CMAKE_BUILD_WITH_CMAKE)
 
-#include <cmsys/hash_set.hxx>
+#include "cmsys/hash_set.hxx"
 #define CM_UNORDERED_SET cmsys::hash_set
 
 #else

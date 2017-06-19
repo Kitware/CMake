@@ -7,38 +7,20 @@
 #
 # ::
 #
-#     find_dependency(<dep> [<version> [EXACT]])
+#     find_dependency(<dep> [...])
 #
 #
 # ``find_dependency()`` wraps a :command:`find_package` call for a package
 # dependency. It is designed to be used in a <package>Config.cmake file, and it
-# forwards the correct parameters for EXACT, QUIET and REQUIRED which were
-# passed to the original :command:`find_package` call.  It also sets an
-# informative diagnostic message if the dependency could not be found.
+# forwards the correct parameters for QUIET and REQUIRED which were passed to
+# the original :command:`find_package` call.  It also sets an informative
+# diagnostic message if the dependency could not be found.
+#
+# Any additional arguments specified are forwarded to :command:`find_package`.
 #
 
 macro(find_dependency dep)
   if (NOT ${dep}_FOUND)
-    set(cmake_fd_version)
-    if (${ARGC} GREATER 1)
-      if ("${ARGV1}" STREQUAL "")
-        message(FATAL_ERROR "Invalid arguments to find_dependency. VERSION is empty")
-      endif()
-      if ("${ARGV1}" STREQUAL EXACT)
-        message(FATAL_ERROR "Invalid arguments to find_dependency. EXACT may only be specified if a VERSION is specified")
-      endif()
-      set(cmake_fd_version ${ARGV1})
-    endif()
-    set(cmake_fd_exact_arg)
-    if(${ARGC} GREATER 2)
-      if (NOT "${ARGV2}" STREQUAL EXACT)
-        message(FATAL_ERROR "Invalid arguments to find_dependency")
-      endif()
-      set(cmake_fd_exact_arg EXACT)
-    endif()
-    if(${ARGC} GREATER 3)
-      message(FATAL_ERROR "Invalid arguments to find_dependency")
-    endif()
     set(cmake_fd_quiet_arg)
     if(${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
       set(cmake_fd_quiet_arg QUIET)
@@ -52,10 +34,9 @@ macro(find_dependency dep)
       _CMAKE_${dep}_TRANSITIVE_DEPENDENCY
     )
 
-    find_package(${dep} ${cmake_fd_version}
-        ${cmake_fd_exact_arg}
-        ${cmake_fd_quiet_arg}
-        ${cmake_fd_required_arg}
+    find_package(${dep} ${ARGN}
+      ${cmake_fd_quiet_arg}
+      ${cmake_fd_required_arg}
     )
 
     if(NOT DEFINED cmake_fd_alreadyTransitive OR cmake_fd_alreadyTransitive)
@@ -67,7 +48,6 @@ macro(find_dependency dep)
       set(${CMAKE_FIND_PACKAGE_NAME}_FOUND False)
       return()
     endif()
-    set(cmake_fd_version)
     set(cmake_fd_required_arg)
     set(cmake_fd_quiet_arg)
     set(cmake_fd_exact_arg)

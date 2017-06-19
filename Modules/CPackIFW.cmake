@@ -28,8 +28,59 @@
 # and Mac OS X.
 #
 # You should also install QtIFW_ to use CPack ``IFW`` generator.
-# If you don't use a default path for the installation, please set
-# the used path in the variable ``QTIFWDIR``.
+#
+# Hints
+# ^^^^^
+#
+# Generally, the CPack ``IFW`` generator automatically finds QtIFW_ tools,
+# but if you don't use a default path for installation of the QtIFW_ tools,
+# the path may be specified in either a CMake or an environment variable:
+#
+# .. variable:: CPACK_IFW_ROOT
+#
+#  An CMake variable which specifies the location of the QtIFW_ tool suite.
+#
+#  The variable will be cached in the ``CPackConfig.cmake`` file and used at
+#  CPack runtime.
+#
+# .. variable:: QTIFWDIR
+#
+#  An environment variable which specifies the location of the QtIFW_ tool
+#  suite.
+#
+# .. note::
+#   The specified path should not contain "bin" at the end
+#   (for example: "D:\\DevTools\\QtIFW2.0.5").
+#
+# The :variable:`CPACK_IFW_ROOT` variable has a higher priority and overrides
+# the value of the :variable:`QTIFWDIR` variable.
+#
+# Internationalization
+# ^^^^^^^^^^^^^^^^^^^^
+#
+# Some variables and command arguments support internationalization via
+# CMake script. This is an optional feature.
+#
+# Installers created by QtIFW_ tools have built-in support for
+# internationalization and many phrases are localized to many languages,
+# but this does not apply to the description of the your components and groups
+# that will be distributed.
+#
+# Localization of the description of your components and groups is useful for
+# users of your installers.
+#
+# A localized variable or argument can contain a single default value, and a
+# set of pairs the name of the locale and the localized value.
+#
+# For example:
+#
+# .. code-block:: cmake
+#
+#    set(LOCALIZABLE_VARIABLE "Default value"
+#      en "English value"
+#      en_US "American value"
+#      en_GB "Great Britain value"
+#      )
 #
 # Variables
 # ^^^^^^^^^
@@ -197,7 +248,7 @@
 #  dependent components.
 #
 # Tools
-# """"""""
+# """""
 #
 # .. variable:: CPACK_IFW_FRAMEWORK_VERSION
 #
@@ -207,13 +258,25 @@
 #
 #  The path to "binarycreator" command line client.
 #
-#  This variable is cached and can be configured user if need.
+#  This variable is cached and may be configured if needed.
 #
 # .. variable:: CPACK_IFW_REPOGEN_EXECUTABLE
 #
 #  The path to "repogen" command line client.
 #
-#  This variable is cached and can be configured user if need.
+#  This variable is cached and may be configured if needed.
+#
+# .. variable:: CPACK_IFW_INSTALLERBASE_EXECUTABLE
+#
+#  The path to "installerbase" installer executable base.
+#
+#  This variable is cached and may be configured if needed.
+#
+# .. variable:: CPACK_IFW_DEVTOOL_EXECUTABLE
+#
+#  The path to "devtool" command line client.
+#
+#  This variable is cached and may be configured if needed.
 #
 # Commands
 # ^^^^^^^^^
@@ -229,8 +292,8 @@
 #     cpack_ifw_configure_component(<compname> [COMMON] [ESSENTIAL] [VIRTUAL]
 #                         [FORCED_INSTALLATION] [REQUIRES_ADMIN_RIGHTS]
 #                         [NAME <name>]
-#                         [DISPLAY_NAME <display_name>]
-#                         [DESCRIPTION <description>]
+#                         [DISPLAY_NAME <display_name>] # Note: Internationalization supported
+#                         [DESCRIPTION <description>] # Note: Internationalization supported
 #                         [UPDATE_TEXT <update_text>]
 #                         [VERSION <version>]
 #                         [RELEASE_DATE <release_date>]
@@ -332,8 +395,8 @@
 #     cpack_ifw_configure_component_group(<groupname> [VIRTUAL]
 #                         [FORCED_INSTALLATION] [REQUIRES_ADMIN_RIGHTS]
 #                         [NAME <name>]
-#                         [DISPLAY_NAME <display_name>]
-#                         [DESCRIPTION <description>]
+#                         [DISPLAY_NAME <display_name>] # Note: Internationalization supported
+#                         [DESCRIPTION <description>] # Note: Internationalization supported
 #                         [UPDATE_TEXT <update_text>]
 #                         [VERSION <version>]
 #                         [RELEASE_DATE <release_date>]
@@ -510,8 +573,9 @@
 #
 #    cpack_add_component(myapp
 #        DISPLAY_NAME "MyApp"
-#        DESCRIPTION "My Application")
+#        DESCRIPTION "My Application") # Default description
 #    cpack_ifw_configure_component(myapp
+#        DESCRIPTION ru_RU "Мое Приложение" # Localized description
 #        VERSION "1.2.3" # Version of component
 #        SCRIPT "operations.qs")
 #    cpack_add_component(mybigplugin
@@ -568,7 +632,7 @@
 
 # Default path
 
-foreach(_CPACK_IFW_PATH_VAR "QTIFWDIR" "QTDIR")
+foreach(_CPACK_IFW_PATH_VAR "CPACK_IFW_ROOT" "QTIFWDIR" "QTDIR")
   if(DEFINED ${_CPACK_IFW_PATH_VAR}
     AND NOT "${${_CPACK_IFW_PATH_VAR}}" STREQUAL "")
     list(APPEND _CPACK_IFW_PATHS "${${_CPACK_IFW_PATH_VAR}}")
@@ -597,6 +661,10 @@ set(_CPACK_IFW_PREFIXES
   "QtIFW-")
 
 set(_CPACK_IFW_VERSIONS
+  "3.1"
+  "3.1.0"
+  "3.0"
+  "3.0.0"
   "2.3"
   "2.3.0"
   "2.2"
@@ -604,6 +672,7 @@ set(_CPACK_IFW_VERSIONS
   "2.1"
   "2.1.0"
   "2.0"
+  "2.0.5"
   "2.0.3"
   "2.0.2"
   "2.0.1"
@@ -676,21 +745,58 @@ set(CPackIFW_CMake_INCLUDED 1)
 # Framework version
 #=============================================================================
 
-if(CPACK_IFW_INSTALLERBASE_EXECUTABLE AND CPACK_IFW_DEVTOOL_EXECUTABLE)
-  execute_process(COMMAND
-    "${CPACK_IFW_INSTALLERBASE_EXECUTABLE}" --framework-version
-    OUTPUT_VARIABLE CPACK_IFW_FRAMEWORK_VERSION)
-  if(CPACK_IFW_FRAMEWORK_VERSION)
-    string(REPLACE " " ""
-      CPACK_IFW_FRAMEWORK_VERSION "${CPACK_IFW_FRAMEWORK_VERSION}")
-    string(REPLACE "\t" ""
-      CPACK_IFW_FRAMEWORK_VERSION "${CPACK_IFW_FRAMEWORK_VERSION}")
-    string(REPLACE "\n" ""
-      CPACK_IFW_FRAMEWORK_VERSION "${CPACK_IFW_FRAMEWORK_VERSION}")
-    if(CPACK_IFW_VERBOSE)
-      message(STATUS "Found QtIFW ${CPACK_IFW_FRAMEWORK_VERSION} version")
+set(CPACK_IFW_FRAMEWORK_VERSION_FORCED ""
+  CACHE STRING "The forced version of used QtIFW tools")
+mark_as_advanced(CPACK_IFW_FRAMEWORK_VERSION_FORCED)
+set(CPACK_IFW_FRAMEWORK_VERSION_TIMEOUT 1
+  CACHE STRING "The timeout to return QtIFW framework version string from \"installerbase\" executable")
+mark_as_advanced(CPACK_IFW_FRAMEWORK_VERSION_TIMEOUT)
+if(CPACK_IFW_INSTALLERBASE_EXECUTABLE AND NOT CPACK_IFW_FRAMEWORK_VERSION_FORCED)
+  set(CPACK_IFW_FRAMEWORK_VERSION)
+  # Invoke version from "installerbase" executable
+  foreach(_ifw_version_argument --framework-version --version)
+    if(NOT CPACK_IFW_FRAMEWORK_VERSION)
+      execute_process(COMMAND
+        "${CPACK_IFW_INSTALLERBASE_EXECUTABLE}" ${_ifw_version_argument}
+        TIMEOUT ${CPACK_IFW_FRAMEWORK_VERSION_TIMEOUT}
+        RESULT_VARIABLE CPACK_IFW_FRAMEWORK_VERSION_RESULT
+        OUTPUT_VARIABLE CPACK_IFW_FRAMEWORK_VERSION_OUTPUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ENCODING UTF8)
+      if(NOT CPACK_IFW_FRAMEWORK_VERSION_RESULT AND CPACK_IFW_FRAMEWORK_VERSION_OUTPUT)
+        string(REGEX MATCH "[0-9]+(\\.[0-9]+)*"
+          CPACK_IFW_FRAMEWORK_VERSION "${CPACK_IFW_FRAMEWORK_VERSION_OUTPUT}")
+        if(CPACK_IFW_FRAMEWORK_VERSION)
+          if("${_ifw_version_argument}" STREQUAL "--framework-version")
+            set(CPACK_IFW_FRAMEWORK_VERSION_SOURCE "INSTALLERBASE_FRAMEWORK_VERSION")
+          elseif("${_ifw_version_argument}" STREQUAL "--version")
+            set(CPACK_IFW_FRAMEWORK_VERSION_SOURCE "INSTALLERBASE_FRAMEWORK_VERSION")
+          endif()
+        endif()
+      endif()
+    endif()
+  endforeach()
+  # Finaly try to get version from executable path
+  if(NOT CPACK_IFW_FRAMEWORK_VERSION)
+    string(REGEX MATCH "[0-9]+(\\.[0-9]+)*"
+      CPACK_IFW_FRAMEWORK_VERSION "${CPACK_IFW_INSTALLERBASE_EXECUTABLE}")
+    if(CPACK_IFW_FRAMEWORK_VERSION)
+      set(CPACK_IFW_FRAMEWORK_VERSION_SOURCE "INSTALLERBASE_PATH")
     endif()
   endif()
+elseif(CPACK_IFW_FRAMEWORK_VERSION_FORCED)
+  set(CPACK_IFW_FRAMEWORK_VERSION ${CPACK_IFW_FRAMEWORK_VERSION_FORCED})
+  set(CPACK_IFW_FRAMEWORK_VERSION_SOURCE "FORCED")
+endif()
+if(CPACK_IFW_VERBOSE)
+  if(CPACK_IFW_FRAMEWORK_VERSION AND CPACK_IFW_FRAMEWORK_VERSION_FORCED)
+    message(STATUS "Found QtIFW ${CPACK_IFW_FRAMEWORK_VERSION} (forced) version")
+  elseif(CPACK_IFW_FRAMEWORK_VERSION)
+    message(STATUS "Found QtIFW ${CPACK_IFW_FRAMEWORK_VERSION} version")
+  endif()
+endif()
+if(CPACK_IFW_INSTALLERBASE_EXECUTABLE AND NOT CPACK_IFW_FRAMEWORK_VERSION)
+  message(WARNING "Could not detect QtIFW tools version. Set used version to variable \"CPACK_IFW_FRAMEWORK_VERSION_FORCED\" manualy.")
 endif()
 
 #=============================================================================
@@ -757,8 +863,8 @@ macro(cpack_ifw_configure_component compname)
   string(TOUPPER ${compname} _CPACK_IFWCOMP_UNAME)
 
   set(_IFW_OPT COMMON ESSENTIAL VIRTUAL FORCED_INSTALLATION REQUIRES_ADMIN_RIGHTS)
-  set(_IFW_ARGS NAME DISPLAY_NAME DESCRIPTION VERSION RELEASE_DATE SCRIPT PRIORITY SORTING_PRIORITY UPDATE_TEXT DEFAULT)
-  set(_IFW_MULTI_ARGS DEPENDS DEPENDENCIES AUTO_DEPEND_ON LICENSES USER_INTERFACES TRANSLATIONS)
+  set(_IFW_ARGS NAME VERSION RELEASE_DATE SCRIPT PRIORITY SORTING_PRIORITY UPDATE_TEXT DEFAULT)
+  set(_IFW_MULTI_ARGS DISPLAY_NAME DESCRIPTION DEPENDS DEPENDENCIES AUTO_DEPEND_ON LICENSES USER_INTERFACES TRANSLATIONS)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
   _cpack_ifw_resolve_script(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_SCRIPT)
@@ -798,8 +904,8 @@ macro(cpack_ifw_configure_component_group grpname)
   string(TOUPPER ${grpname} _CPACK_IFWGRP_UNAME)
 
   set(_IFW_OPT VIRTUAL FORCED_INSTALLATION REQUIRES_ADMIN_RIGHTS)
-  set(_IFW_ARGS NAME DISPLAY_NAME DESCRIPTION VERSION RELEASE_DATE SCRIPT PRIORITY SORTING_PRIORITY UPDATE_TEXT DEFAULT)
-  set(_IFW_MULTI_ARGS DEPENDS DEPENDENCIES AUTO_DEPEND_ON LICENSES USER_INTERFACES TRANSLATIONS)
+  set(_IFW_ARGS NAME VERSION RELEASE_DATE SCRIPT PRIORITY SORTING_PRIORITY UPDATE_TEXT DEFAULT)
+  set(_IFW_MULTI_ARGS DISPLAY_NAME DESCRIPTION DEPENDS DEPENDENCIES AUTO_DEPEND_ON LICENSES USER_INTERFACES TRANSLATIONS)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
   _cpack_ifw_resolve_script(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_SCRIPT)

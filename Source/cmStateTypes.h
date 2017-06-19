@@ -4,7 +4,7 @@
 #ifndef cmStateTypes_h
 #define cmStateTypes_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmLinkedTree.h"
 
@@ -27,6 +27,9 @@ enum SnapshotType
   VariableScopeType
 };
 
+// There are multiple overlapping ranges represented here. Be aware that adding
+// a value to this enumeration may cause failures in numerous places which
+// assume details about the ordering.
 enum TargetType
 {
   EXECUTABLE,
@@ -49,6 +52,12 @@ enum CacheEntryType
   INTERNAL,
   STATIC,
   UNINITIALIZED
+};
+
+enum ArtifactType
+{
+  RuntimeBinaryArtifact,
+  ImportLibraryArtifact
 };
 }
 

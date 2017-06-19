@@ -3,7 +3,7 @@
 #ifndef cmMakefileUtilityTargetGenerator_h
 #define cmMakefileUtilityTargetGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmMakefileTargetGenerator.h"
 

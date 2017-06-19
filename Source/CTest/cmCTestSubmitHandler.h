@@ -3,7 +3,7 @@
 #ifndef cmCTestSubmitHandler_h
 #define cmCTestSubmitHandler_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
@@ -42,6 +42,11 @@ public:
 
   // handle the cdash file upload protocol
   int HandleCDashUploadFile(std::string const& file, std::string const& type);
+
+  void SetHttpHeaders(std::vector<std::string> const& v)
+  {
+    this->HttpHeaders = v;
+  }
 
   void ConstructCDashURL(std::string& dropMethod, std::string& url);
 
@@ -95,6 +100,7 @@ private:
   bool HasWarnings;
   bool HasErrors;
   cmCTest::SetOfStrings Files;
+  std::vector<std::string> HttpHeaders;
 };
 
 #endif

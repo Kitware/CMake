@@ -1,3 +1,8 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
+include(Compiler/SunPro)
+
 set(CMAKE_CXX_VERBOSE_FLAG "-v")
 
 set(CMAKE_CXX_COMPILE_OPTIONS_PIC -KPIC)
@@ -32,32 +37,15 @@ set(CMAKE_CXX_CREATE_STATIC_LIBRARY
   "<CMAKE_RANLIB> <TARGET> ")
 
 if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.13)
-  set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "")
-  set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION "")
+  set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "-std=c++03")
+  set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION "-std=c++03")
   set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-std=c++11")
   set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-std=c++11")
+  set(CMAKE_CXX_LINK_WITH_STANDARD_COMPILE_OPTION 1)
+else()
+  set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "-library=stlport4")
+  set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION "-library=stlport4")
+  set(CMAKE_CXX_LINK_WITH_STANDARD_COMPILE_OPTION 1)
 endif()
 
-if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.13)
-  if (NOT CMAKE_CXX_COMPILER_FORCED)
-    if (NOT CMAKE_CXX_STANDARD_COMPUTED_DEFAULT)
-      message(FATAL_ERROR "CMAKE_CXX_STANDARD_COMPUTED_DEFAULT should be set for ${CMAKE_CXX_COMPILER_ID} (${CMAKE_CXX_COMPILER}) version ${CMAKE_CXX_COMPILER_VERSION}")
-    endif()
-    set(CMAKE_CXX_STANDARD_DEFAULT ${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT})
-  elseif(NOT DEFINED CMAKE_CXX_STANDARD_DEFAULT)
-    # Compiler id was forced so just guess the default standard level.
-    set(CMAKE_CXX_STANDARD_DEFAULT 98)
-  endif()
-endif()
-
-macro(cmake_record_cxx_compile_features)
-  set(_result 0)
-  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.13)
-    if (_result EQUAL 0)
-      _record_compiler_features_cxx(11)
-    endif()
-    if (_result EQUAL 0)
-      _record_compiler_features_cxx(98)
-    endif()
-  endif()
-endmacro()
+__compiler_check_default_language_standard(CXX 1 98)

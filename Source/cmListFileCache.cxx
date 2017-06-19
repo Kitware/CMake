@@ -9,14 +9,14 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+#include "cmConfigure.h"
 #include <algorithm>
 #include <assert.h>
-#include <cmConfigure.h>
 #include <sstream>
 
 struct cmListFileParser
 {
-  cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
+  cmListFileParser(cmListFile* lf, cmListFileBacktrace const& lfbt,
                    cmMessenger* messenger, const char* filename);
   ~cmListFileParser();
   void IssueFileOpenError(std::string const& text) const;
@@ -39,7 +39,8 @@ struct cmListFileParser
   } Separation;
 };
 
-cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
+cmListFileParser::cmListFileParser(cmListFile* lf,
+                                   cmListFileBacktrace const& lfbt,
                                    cmMessenger* messenger,
                                    const char* filename)
   : ListFile(lf)
@@ -77,6 +78,13 @@ bool cmListFileParser::ParseFile()
   cmListFileLexer_BOM bom;
   if (!cmListFileLexer_SetFileName(this->Lexer, this->FileName, &bom)) {
     this->IssueFileOpenError("cmListFileCache: error can not open file.");
+    return false;
+  }
+
+  if (bom == cmListFileLexer_BOM_Broken) {
+    cmListFileLexer_SetFileName(this->Lexer, CM_NULLPTR, CM_NULLPTR);
+    this->IssueFileOpenError("Error while reading Byte-Order-Mark. "
+                             "File not seekable?");
     return false;
   }
 
@@ -299,7 +307,8 @@ struct cmListFileBacktrace::Entry : public cmListFileContext
   unsigned int RefCount;
 };
 
-cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot bottom, Entry* up,
+cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& bottom,
+                                         Entry* up,
                                          cmListFileContext const& lfc)
   : Bottom(bottom)
   , Cur(new Entry(lfc, up))
@@ -308,7 +317,8 @@ cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot bottom, Entry* up,
   this->Cur->Ref();
 }
 
-cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot bottom, Entry* cur)
+cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& bottom,
+                                         Entry* cur)
   : Bottom(bottom)
   , Cur(cur)
 {
@@ -324,7 +334,7 @@ cmListFileBacktrace::cmListFileBacktrace()
 {
 }
 
-cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot snapshot)
+cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& snapshot)
   : Bottom(snapshot.GetCallStackBottom())
   , Cur(CM_NULLPTR)
 {

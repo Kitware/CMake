@@ -3,7 +3,7 @@
 #ifndef cmExportFileGenerator_h
 #define cmExportFileGenerator_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmGeneratorExpression.h"
 #include "cmVersion.h"

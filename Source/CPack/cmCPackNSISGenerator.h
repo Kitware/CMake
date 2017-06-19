@@ -3,7 +3,7 @@
 #ifndef cmCPackNSISGenerator_h
 #define cmCPackNSISGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCPackGenerator.h"
 

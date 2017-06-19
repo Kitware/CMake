@@ -28,7 +28,7 @@
 /*
  * NTLM details:
  *
- * http://davenport.sourceforge.net/ntlm.html
+ * https://davenport.sourceforge.io/ntlm.html
  * https://www.innovation.ch/java/ntlm.html
  */
 
@@ -51,6 +51,7 @@
 #include "curl_ntlm_wb.h"
 #include "url.h"
 #include "strerror.h"
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -156,7 +157,8 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
   }
   slash = strpbrk(username, "\\/");
   if(slash) {
-    if((domain = strdup(username)) == NULL)
+    domain = strdup(username);
+    if(!domain)
       return CURLE_OUT_OF_MEMORY;
     slash = domain + (slash - username);
     *slash = '\0';
@@ -293,11 +295,10 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
       buf[len_out - 1] = '\0';
       break;
     }
-    newbuf = realloc(buf, len_out + NTLM_BUFSIZE);
-    if(!newbuf) {
-      free(buf);
+    newbuf = Curl_saferealloc(buf, len_out + NTLM_BUFSIZE);
+    if(!newbuf)
       return CURLE_OUT_OF_MEMORY;
-    }
+
     buf = newbuf;
   }
 
@@ -349,7 +350,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
 
   if(proxy) {
     allocuserpwd = &conn->allocptr.proxyuserpwd;
-    userp = conn->proxyuser;
+    userp = conn->http_proxy.user;
     ntlm = &conn->proxyntlm;
     authp = &conn->data->state.authproxy;
   }

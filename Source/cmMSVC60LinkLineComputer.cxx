@@ -3,8 +3,6 @@
 
 #include "cmMSVC60LinkLineComputer.h"
 
-#include "cmStateDirectory.h"
-
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include "cmSystemTools.h"
 #endif
@@ -12,7 +10,7 @@
 class cmOutputConverter;
 
 cmMSVC60LinkLineComputer::cmMSVC60LinkLineComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory stateDir)
+  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir)
   : cmLinkLineComputer(outputConverter, stateDir)
 {
 }
@@ -24,7 +22,7 @@ std::string cmMSVC60LinkLineComputer::ConvertToLinkReference(
   // Work-ardound command line parsing limitations in MSVC 6.0
   // Search for the last space.
   std::string::size_type pos = lib.rfind(' ');
-  if (pos != lib.npos) {
+  if (pos != std::string::npos) {
     // Find the slash after the last space, if any.
     pos = lib.find('/', pos);
 

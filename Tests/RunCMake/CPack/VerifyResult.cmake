@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION ${CMAKE_VERSION} FATAL_ERROR)
 
-function(findExpectedFile FILE_NO RESULT_VAR)
+function(findExpectedFile FILE_NO RESULT_VAR GLOBING_EXPR_VAR)
   if(NOT DEFINED EXPECTED_FILE_${FILE_NO}) # explicit file name regex was not provided - construct one from other data
     # set defaults if parameters are not provided
     if(NOT DEFINED EXPECTED_FILE_${FILE_NO}_NAME)
@@ -21,6 +21,7 @@ function(findExpectedFile FILE_NO RESULT_VAR)
   file(GLOB found_file_ RELATIVE "${bin_dir}" "${EXPECTED_FILE_${FILE_NO}}")
 
   set(${RESULT_VAR} "${found_file_}" PARENT_SCOPE)
+  set(${GLOBING_EXPR_VAR} "${EXPECTED_FILE_${FILE_NO}}" PARENT_SCOPE)
 endfunction()
 
 include("${config_file}")
@@ -39,7 +40,8 @@ include("${src_dir}/tests/${RunCMake_TEST_FILE_PREFIX}/ExpectedFiles.cmake")
 # check that expected generated files exist and contain expected content
 if(NOT EXPECTED_FILES_COUNT EQUAL 0)
   foreach(file_no_ RANGE 1 ${EXPECTED_FILES_COUNT})
-    findExpectedFile("${file_no_}" "FOUND_FILE_${file_no_}")
+    findExpectedFile("${file_no_}" "FOUND_FILE_${file_no_}"
+      "EXPECTED_FILE_${file_no_}")
     list(APPEND foundFiles_ "${FOUND_FILE_${file_no_}}")
     list(LENGTH FOUND_FILE_${file_no_} foundFilesCount_)
 

@@ -20,7 +20,7 @@ bool cmAddSubDirectoryCommand::InitialPass(
   }
 
   // store the binpath
-  std::string srcArg = args[0];
+  std::string const& srcArg = args[0];
   std::string binArg;
 
   bool excludeFromAll = false;
@@ -32,7 +32,8 @@ bool cmAddSubDirectoryCommand::InitialPass(
     if (*i == "EXCLUDE_FROM_ALL") {
       excludeFromAll = true;
       continue;
-    } else if (binArg.empty()) {
+    }
+    if (binArg.empty()) {
       binArg = *i;
     } else {
       this->SetError("called with incorrect number of arguments");

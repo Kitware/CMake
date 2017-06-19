@@ -3,7 +3,7 @@
 #ifndef cmState_h
 #define cmState_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <set>
@@ -12,6 +12,7 @@
 
 #include "cmDefinitions.h"
 #include "cmLinkedTree.h"
+#include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
@@ -35,18 +36,20 @@ public:
 
   cmStateSnapshot CreateBaseSnapshot();
   cmStateSnapshot CreateBuildsystemDirectorySnapshot(
-    cmStateSnapshot originSnapshot);
-  cmStateSnapshot CreateFunctionCallSnapshot(cmStateSnapshot originSnapshot,
-                                             std::string const& fileName);
-  cmStateSnapshot CreateMacroCallSnapshot(cmStateSnapshot originSnapshot,
-                                          std::string const& fileName);
-  cmStateSnapshot CreateIncludeFileSnapshot(cmStateSnapshot originSnapshot,
-                                            std::string const& fileName);
-  cmStateSnapshot CreateVariableScopeSnapshot(cmStateSnapshot originSnapshot);
-  cmStateSnapshot CreateInlineListFileSnapshot(cmStateSnapshot originSnapshot,
-                                               std::string const& fileName);
-  cmStateSnapshot CreatePolicyScopeSnapshot(cmStateSnapshot originSnapshot);
-  cmStateSnapshot Pop(cmStateSnapshot originSnapshot);
+    cmStateSnapshot const& originSnapshot);
+  cmStateSnapshot CreateFunctionCallSnapshot(
+    cmStateSnapshot const& originSnapshot, std::string const& fileName);
+  cmStateSnapshot CreateMacroCallSnapshot(
+    cmStateSnapshot const& originSnapshot, std::string const& fileName);
+  cmStateSnapshot CreateIncludeFileSnapshot(
+    cmStateSnapshot const& originSnapshot, std::string const& fileName);
+  cmStateSnapshot CreateVariableScopeSnapshot(
+    cmStateSnapshot const& originSnapshot);
+  cmStateSnapshot CreateInlineListFileSnapshot(
+    cmStateSnapshot const& originSnapshot, std::string const& fileName);
+  cmStateSnapshot CreatePolicyScopeSnapshot(
+    cmStateSnapshot const& originSnapshot);
+  cmStateSnapshot Pop(cmStateSnapshot const& originSnapshot);
 
   static cmStateEnums::CacheEntryType StringToCacheEntryType(const char*);
   static const char* CacheEntryTypeToString(cmStateEnums::CacheEntryType);
@@ -116,10 +119,15 @@ public:
   bool GetIsInTryCompile() const;
   void SetIsInTryCompile(bool b);
 
+  bool GetIsGeneratorMultiConfig() const;
+  void SetIsGeneratorMultiConfig(bool b);
+
   cmCommand* GetCommand(std::string const& name) const;
-  void AddCommand(cmCommand* command);
-  void RemoveUnscriptableCommands();
-  void RenameCommand(std::string const& oldName, std::string const& newName);
+  void AddBuiltinCommand(std::string const& name, cmCommand* command);
+  void AddDisallowedCommand(std::string const& name, cmCommand* command,
+                            cmPolicies::PolicyID policy, const char* message);
+  void AddUnexpectedCommand(std::string const& name, const char* error);
+  void AddScriptedCommand(std::string const& name, cmCommand* command);
   void RemoveUserDefinedCommands();
   std::vector<std::string> GetCommandNames() const;
 
@@ -158,7 +166,8 @@ private:
 
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
-  std::map<std::string, cmCommand*> Commands;
+  std::map<std::string, cmCommand*> BuiltinCommands;
+  std::map<std::string, cmCommand*> ScriptedCommands;
   cmPropertyMap GlobalProperties;
   cmCacheManager* CacheManager;
 
@@ -174,6 +183,7 @@ private:
   std::string SourceDirectory;
   std::string BinaryDirectory;
   bool IsInTryCompile;
+  bool IsGeneratorMultiConfig;
   bool WindowsShell;
   bool WindowsVSIDE;
   bool WatcomWMake;

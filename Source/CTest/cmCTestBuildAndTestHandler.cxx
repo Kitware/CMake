@@ -6,9 +6,10 @@
 #include "cmCTestTestHandler.h"
 #include "cmGlobalGenerator.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 #include "cmake.h"
 
-#include <cmsys/Process.h>
+#include "cmsys/Process.h"
 #include <stdlib.h>
 
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
@@ -42,7 +43,7 @@ int cmCTestBuildAndTestHandler::ProcessHandler()
 int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
                                          std::ostringstream& out,
                                          std::string& cmakeOutString,
-                                         std::string& cwd, cmake* cm)
+                                         cmake* cm)
 {
   unsigned int k;
   std::vector<std::string> args;
@@ -85,8 +86,6 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
   if (cm->Run(args) != 0) {
     out << "Error: cmake execution failed\n";
     out << cmakeOutString << "\n";
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd);
     if (outstring) {
       *outstring = out.str();
     } else {
@@ -99,8 +98,6 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     if (cm->Run(args) != 0) {
       out << "Error: cmake execution failed\n";
       out << cmakeOutString << "\n";
-      // return to the original directory
-      cmSystemTools::ChangeDirectory(cwd);
       if (outstring) {
         *outstring = out.str();
       } else {
@@ -170,7 +167,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     return 1;
   }
 
-  cmake cm;
+  cmake cm(cmake::RoleProject);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   std::string cmakeOutString;
@@ -199,13 +196,12 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   double clock_start = cmSystemTools::GetTime();
 
   // make sure the binary dir is there
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   out << "Internal cmake changing into directory: " << this->BinaryDir
       << std::endl;
   if (!cmSystemTools::FileIsDirectory(this->BinaryDir)) {
     cmSystemTools::MakeDirectory(this->BinaryDir.c_str());
   }
-  cmSystemTools::ChangeDirectory(this->BinaryDir);
+  cmWorkingDirectory workdir(this->BinaryDir);
 
   if (this->BuildNoCMake) {
     // Make the generator available for the Build call below.
@@ -217,7 +213,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     cm.LoadCache(this->BinaryDir);
   } else {
     // do the cmake step, no timeout here since it is not a sub process
-    if (this->RunCMake(outstring, out, cmakeOutString, cwd, &cm)) {
+    if (this->RunCMake(outstring, out, cmakeOutString, &cm)) {
       return 1;
     }
   }
@@ -304,8 +300,6 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     } else {
       cmCTestLog(this->CTest, ERROR_MESSAGE, out.str());
     }
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd);
     return 1;
   }
 

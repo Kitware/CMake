@@ -77,31 +77,43 @@ The replace expression may refer to paren-delimited subexpressions of the
 match using ``\1``, ``\2``, ..., ``\9``.  Note that two backslashes (``\\1``)
 are required in CMake code to get a backslash through argument parsing.
 
+.. _`Regex Specification`:
+
 Regex Specification
 """""""""""""""""""
 
 The following characters have special meaning in regular expressions:
 
-::
-
-   ^         Matches at beginning of input
-   $         Matches at end of input
-   .         Matches any single character
-   [ ]       Matches any character(s) inside the brackets
-   [^ ]      Matches any character(s) not inside the brackets
-    -        Inside brackets, specifies an inclusive range between
-             characters on either side e.g. [a-f] is [abcdef]
-             To match a literal - using brackets, make it the first
-             or the last character e.g. [+*/-] matches basic
-             mathematical operators.
-   *         Matches preceding pattern zero or more times
-   +         Matches preceding pattern one or more times
-   ?         Matches preceding pattern zero or once only
-   |         Matches a pattern on either side of the |
-   ()        Saves a matched subexpression, which can be referenced
-             in the REGEX REPLACE operation. Additionally it is saved
-             by all regular expression-related commands, including
-             e.g. if( MATCHES ), in the variables CMAKE_MATCH_(0..9).
+``^``
+  Matches at beginning of input
+``$``
+  Matches at end of input
+``.``
+  Matches any single character
+``[ ]``
+  Matches any character(s) inside the brackets
+``[^ ]``
+  Matches any character(s) not inside the brackets
+``-``
+  Inside brackets, specifies an inclusive range between
+  characters on either side e.g. ``[a-f]`` is ``[abcdef]``
+  To match a literal ``-`` using brackets, make it the first
+  or the last character e.g. ``[+*/-]`` matches basic
+  mathematical operators.
+``*``
+  Matches preceding pattern zero or more times
+``+``
+  Matches preceding pattern one or more times
+``?``
+  Matches preceding pattern zero or once only
+``|``
+  Matches a pattern on either side of the ``|``
+``()``
+  Saves a matched subexpression, which can be referenced
+  in the ``REGEX REPLACE`` operation. Additionally it is saved
+  by all regular expression-related commands, including
+  e.g. :command:`if(MATCHES)`, in the variables
+  :variable:`CMAKE_MATCH_<n>` for ``<n>`` 0..9.
 
 ``*``, ``+`` and ``?`` have higher precedence than concatenation.  ``|``
 has lower precedence than concatenation.  This means that the regular

@@ -14,18 +14,17 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
+#include "cmConfigure.h"
+#include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 #include <algorithm>
 #include <assert.h>
-#include <cmConfigure.h>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/String.h>
 #include <errno.h>
 #include <map>
 #include <set>
@@ -411,6 +410,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0044);
           context->LG->GetCMakeInstance()->IssueMessage(
             cmake::AUTHOR_WARNING, e.str(), context->Backtrace);
+          CM_FALLTHROUGH;
         }
         case cmPolicies::OLD:
           return "1";
@@ -1227,15 +1227,6 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
                        cmGeneratorExpressionDAGChecker* /*dagChecker*/) const
     CM_OVERRIDE
   {
-    if (!context->EvaluateForBuildsystem) {
-      std::ostringstream e;
-      e << "The evaluation of the TARGET_OBJECTS generator expression "
-           "is only suitable for consumption by CMake.  It is not suitable "
-           "for writing out elsewhere.";
-      reportError(context, content->GetOriginalExpression(), e.str());
-      return std::string();
-    }
-
     std::string tgtName = parameters.front();
     cmGeneratorTarget* gt = context->LG->FindGeneratorTargetToUse(tgtName);
     if (!gt) {
@@ -1252,40 +1243,60 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       reportError(context, content->GetOriginalExpression(), e.str());
       return std::string();
     }
-
-    std::vector<cmSourceFile const*> objectSources;
-    gt->GetObjectSources(objectSources, context->Config);
-    std::map<cmSourceFile const*, std::string> mapping;
-
-    for (std::vector<cmSourceFile const*>::const_iterator it =
-           objectSources.begin();
-         it != objectSources.end(); ++it) {
-      mapping[*it];
+    if (!context->EvaluateForBuildsystem) {
+      cmGlobalGenerator* gg = context->LG->GetGlobalGenerator();
+      std::string reason;
+      if (!gg->HasKnownObjectFileLocation(&reason)) {
+        std::ostringstream e;
+        e << "The evaluation of the TARGET_OBJECTS generator expression "
+             "is only suitable for consumption by CMake (limited"
+          << reason << ").  "
+                       "It is not suitable for writing out elsewhere.";
+        reportError(context, content->GetOriginalExpression(), e.str());
+        return std::string();
+      }
     }
 
-    gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
+    std::vector<std::string> objects;
 
-    std::string obj_dir = gt->ObjectDirectory;
-    std::string result;
-    const char* sep = "";
-    for (std::vector<cmSourceFile const*>::const_iterator it =
-           objectSources.begin();
-         it != objectSources.end(); ++it) {
-      // Find the object file name corresponding to this source file.
-      std::map<cmSourceFile const*, std::string>::const_iterator map_it =
-        mapping.find(*it);
-      // It must exist because we populated the mapping just above.
-      assert(!map_it->second.empty());
-      result += sep;
-      std::string objFile = obj_dir + map_it->second;
-      cmSourceFile* sf =
-        context->LG->GetMakefile()->GetOrCreateSource(objFile, true);
-      sf->SetObjectLibrary(tgtName);
-      sf->SetProperty("EXTERNAL_OBJECT", "1");
-      result += objFile;
-      sep = ";";
+    if (gt->IsImported()) {
+      const char* loc = CM_NULLPTR;
+      const char* imp = CM_NULLPTR;
+      std::string suffix;
+      if (gt->Target->GetMappedConfig(context->Config, &loc, &imp, suffix)) {
+        cmSystemTools::ExpandListArgument(loc, objects);
+      }
+      context->HadContextSensitiveCondition = true;
+    } else {
+      gt->GetTargetObjectNames(context->Config, objects);
+
+      std::string obj_dir;
+      if (context->EvaluateForBuildsystem) {
+        // Use object file directory with buildsystem placeholder.
+        obj_dir = gt->ObjectDirectory;
+        // Here we assume that the set of object files produced
+        // by an object library does not vary with configuration
+        // and do not set HadContextSensitiveCondition to true.
+      } else {
+        // Use object file directory with per-config location.
+        obj_dir = gt->GetObjectDirectory(context->Config);
+        context->HadContextSensitiveCondition = true;
+      }
+
+      for (std::vector<std::string>::iterator oi = objects.begin();
+           oi != objects.end(); ++oi) {
+        *oi = obj_dir + *oi;
+      }
     }
-    return result;
+
+    // Create the cmSourceFile instances in the referencing directory.
+    cmMakefile* mf = context->LG->GetMakefile();
+    for (std::vector<std::string>::iterator oi = objects.begin();
+         oi != objects.end(); ++oi) {
+      mf->AddTargetObject(tgtName, *oi);
+    }
+
+    return cmJoin(objects, ";");
   }
 } targetObjectsNode;
 
@@ -1449,6 +1460,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
             lg->IssueMessage(
               cmake::AUTHOR_WARNING,
               cmPolicies::GetPolicyWarning(policyForString(policy)));
+            CM_FALLTHROUGH;
           case cmPolicies::REQUIRED_IF_USED:
           case cmPolicies::REQUIRED_ALWAYS:
           case cmPolicies::OLD:
@@ -1504,6 +1516,8 @@ class ArtifactNameTag;
 class ArtifactPathTag;
 class ArtifactPdbTag;
 class ArtifactSonameTag;
+class ArtifactBundleDirTag;
+class ArtifactBundleContentDirTag;
 
 template <typename ArtifactT>
 struct TargetFilesystemArtifactResultCreator
@@ -1595,7 +1609,60 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
                     "executables with ENABLE_EXPORTS.");
       return std::string();
     }
-    return target->GetFullPath(context->Config, target->HasImportLibrary());
+    cmStateEnums::ArtifactType artifact = target->HasImportLibrary()
+      ? cmStateEnums::ImportLibraryArtifact
+      : cmStateEnums::RuntimeBinaryArtifact;
+    return target->GetFullPath(context->Config, artifact);
+  }
+};
+
+template <>
+struct TargetFilesystemArtifactResultCreator<ArtifactBundleDirTag>
+{
+  static std::string Create(cmGeneratorTarget* target,
+                            cmGeneratorExpressionContext* context,
+                            const GeneratorExpressionContent* content)
+  {
+    if (target->IsImported()) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_BUNDLE_DIR not allowed for IMPORTED targets.");
+      return std::string();
+    }
+    if (!target->IsBundleOnApple()) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_BUNDLE_DIR is allowed only for Bundle targets.");
+      return std::string();
+    }
+
+    std::string outpath = target->GetDirectory(context->Config) + '/';
+    return target->BuildBundleDirectory(outpath, context->Config,
+                                        cmGeneratorTarget::BundleDirLevel);
+  }
+};
+
+template <>
+struct TargetFilesystemArtifactResultCreator<ArtifactBundleContentDirTag>
+{
+  static std::string Create(cmGeneratorTarget* target,
+                            cmGeneratorExpressionContext* context,
+                            const GeneratorExpressionContent* content)
+  {
+    if (target->IsImported()) {
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_BUNDLE_CONTENT_DIR not allowed for IMPORTED targets.");
+      return std::string();
+    }
+    if (!target->IsBundleOnApple()) {
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_BUNDLE_CONTENT_DIR is allowed only for Bundle targets.");
+      return std::string();
+    }
+
+    std::string outpath = target->GetDirectory(context->Config) + '/';
+    return target->BuildBundleDirectory(outpath, context->Config,
+                                        cmGeneratorTarget::ContentLevel);
   }
 };
 
@@ -1606,7 +1673,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactNameTag>
                             cmGeneratorExpressionContext* context,
                             const GeneratorExpressionContent* /*unused*/)
   {
-    return target->GetFullPath(context->Config, false, true);
+    return target->GetFullPath(context->Config,
+                               cmStateEnums::RuntimeBinaryArtifact, true);
   }
 };
 
@@ -1716,6 +1784,13 @@ static const TargetFilesystemArtifactNodeGroup<ArtifactSonameTag>
 static const TargetFilesystemArtifactNodeGroup<ArtifactPdbTag>
   targetPdbNodeGroup;
 
+static const TargetFilesystemArtifact<ArtifactBundleDirTag, ArtifactPathTag>
+  targetBundleDirNode;
+
+static const TargetFilesystemArtifact<ArtifactBundleContentDirTag,
+                                      ArtifactPathTag>
+  targetBundleContentDirNode;
+
 static const struct ShellPathNode : public cmGeneratorExpressionNode
 {
   ShellPathNode() {}
@@ -1772,6 +1847,8 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     nodeMap["TARGET_LINKER_FILE_DIR"] = &targetLinkerNodeGroup.FileDir;
     nodeMap["TARGET_SONAME_FILE_DIR"] = &targetSoNameNodeGroup.FileDir;
     nodeMap["TARGET_PDB_FILE_DIR"] = &targetPdbNodeGroup.FileDir;
+    nodeMap["TARGET_BUNDLE_DIR"] = &targetBundleDirNode;
+    nodeMap["TARGET_BUNDLE_CONTENT_DIR"] = &targetBundleContentDirNode;
     nodeMap["STREQUAL"] = &strEqualNode;
     nodeMap["EQUAL"] = &equalNode;
     nodeMap["LOWER_CASE"] = &lowerCaseNode;

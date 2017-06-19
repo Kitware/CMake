@@ -11,4 +11,4 @@ find_package(JavaInstallExportTest REQUIRED)
 
 add_jar(${PROJECT_NAME}
   SOURCES Import.java
-  INCLUDE_JARS foo bar)
+  INCLUDE_JARS foo::foo bar::bar)

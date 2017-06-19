@@ -1,9 +1,8 @@
-CMake Error at OutputNameMatchesObjects.cmake:2 \(file\):
+CMake Error at OutputNameMatchesObjects.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<TARGET_OBJECTS:foo>
 
-  The evaluation of the TARGET_OBJECTS generator expression is only suitable
-  for consumption by CMake.  It is not suitable for writing out elsewhere.
+  Objects of target "foo" referenced but is not an OBJECT library.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:6 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

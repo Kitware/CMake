@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestSubmitHandler.h"
 
-#include <cm_curl.h>
-#include <cm_jsoncpp_reader.h>
-#include <cm_jsoncpp_value.h>
-#include <cmsys/Process.h>
+#include "cm_curl.h"
+#include "cm_jsoncpp_reader.h"
+#include "cm_jsoncpp_value.h"
+#include "cmsys/Process.h"
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,13 +19,14 @@
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmThirdParty.h"
+#include "cmWorkingDirectory.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
 
 #if defined(CTEST_USE_XMLRPC)
 #include "cmVersion.h"
-#include <cm_xmlrpc.h>
-#include <sys/stat.h>
+#include "cm_sys_stat.h"
+#include "cm_xmlrpc.h"
 #endif
 
 #define SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT 120
@@ -300,8 +301,18 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
   CURLcode res;
   FILE* ftpfile;
   char error_buffer[1024];
+  // Set Content-Type to satisfy fussy modsecurity rules.
   struct curl_slist* headers =
     ::curl_slist_append(CM_NULLPTR, "Content-Type: text/xml");
+
+  // Add any additional headers that the user specified.
+  for (std::vector<std::string>::const_iterator h = this->HttpHeaders.begin();
+       h != this->HttpHeaders.end(); ++h) {
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                       "   Add HTTP Header: \"" << *h << "\"" << std::endl,
+                       this->Quiet);
+    headers = ::curl_slist_append(headers, h->c_str());
+  }
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
@@ -375,7 +386,6 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       ::curl_easy_setopt(curl, CURLOPT_PUT, 1);
       ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 
-      // Be sure to set Content-Type to satisfy fussy modsecurity rules
       ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
       std::string local_file = *file;
@@ -585,7 +595,7 @@ void cmCTestSubmitHandler::ParseResponse(
   std::string output;
   output.append(chunk.begin(), chunk.end());
 
-  if (output.find("<cdash") != output.npos) {
+  if (output.find("<cdash") != std::string::npos) {
     ResponseParser parser;
     parser.Parse(output.c_str());
 
@@ -1013,6 +1023,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   cmSystemTools::ExpandListArgument(curlopt, args);
   curl.SetCurlOptions(args);
   curl.SetTimeOutSeconds(SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
+  curl.SetHttpHeaders(this->HttpHeaders);
   std::string dropMethod;
   std::string url;
   this->ConstructCDashURL(dropMethod, url);
@@ -1519,7 +1530,6 @@ int cmCTestSubmitHandler::ProcessHandler()
 #endif
   } else if (dropMethod == "scp") {
     std::string url;
-    std::string oldWorkingDirectory;
     if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty()) {
       url += this->CTest->GetCTestConfiguration("DropSiteUser") + "@";
     }
@@ -1528,19 +1538,16 @@ int cmCTestSubmitHandler::ProcessHandler()
 
     // change to the build directory so that we can uses a relative path
     // on windows since scp dosn't support "c:" a drive in the path
-    oldWorkingDirectory = cmSystemTools::GetCurrentWorkingDirectory();
-    cmSystemTools::ChangeDirectory(buildDirectory);
+    cmWorkingDirectory workdir(buildDirectory);
 
     if (!this->SubmitUsingSCP(this->CTest->GetCTestConfiguration("ScpCommand"),
                               "Testing/" + this->CTest->GetCurrentTag(), files,
                               prefix, url)) {
-      cmSystemTools::ChangeDirectory(oldWorkingDirectory);
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "   Problems when submitting via SCP" << std::endl);
       ofs << "   Problems when submitting via SCP" << std::endl;
       return -1;
     }
-    cmSystemTools::ChangeDirectory(oldWorkingDirectory);
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "   Submission successful" << std::endl, this->Quiet);
     ofs << "   Submission successful" << std::endl;
@@ -1550,22 +1557,18 @@ int cmCTestSubmitHandler::ProcessHandler()
 
     // change to the build directory so that we can uses a relative path
     // on windows since scp dosn't support "c:" a drive in the path
-    std::string oldWorkingDirectory =
-      cmSystemTools::GetCurrentWorkingDirectory();
-    cmSystemTools::ChangeDirectory(buildDirectory);
+    cmWorkingDirectory workdir(buildDirectory);
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "   Change directory: " << buildDirectory << std::endl,
                        this->Quiet);
 
     if (!this->SubmitUsingCP("Testing/" + this->CTest->GetCurrentTag(), files,
                              prefix, location)) {
-      cmSystemTools::ChangeDirectory(oldWorkingDirectory);
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "   Problems when submitting via CP" << std::endl);
       ofs << "   Problems when submitting via cp" << std::endl;
       return -1;
     }
-    cmSystemTools::ChangeDirectory(oldWorkingDirectory);
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "   Submission successful" << std::endl, this->Quiet);
     ofs << "   Submission successful" << std::endl;

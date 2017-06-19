@@ -3,18 +3,19 @@
 #ifndef cmCPackIFWRepository_h
 #define cmCPackIFWRepository_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
+
+#include "cmCPackIFWCommon.h"
 
 #include <string>
 #include <vector>
 
-class cmCPackIFWGenerator;
 class cmXMLWriter;
 
 /** \class cmCPackIFWRepository
  * \brief A remote repository to be created CPack IFW generator
  */
-class cmCPackIFWRepository
+class cmCPackIFWRepository : public cmCPackIFWCommon
 {
 public:
   // Types
@@ -72,13 +73,6 @@ public:
 
   bool IsValid() const;
 
-  const char* GetOption(const std::string& op) const;
-  bool IsOn(const std::string& op) const;
-
-  bool IsVersionLess(const char* version);
-  bool IsVersionGreater(const char* version);
-  bool IsVersionEqual(const char* version);
-
   bool ConfigureFromOptions();
 
   bool PatchUpdatesXml();
@@ -87,12 +81,8 @@ public:
   void WriteRepositoryUpdate(cmXMLWriter& xout);
   void WriteRepositoryUpdates(cmXMLWriter& xout);
 
-  cmCPackIFWGenerator* Generator;
   RepositoriesVector RepositoryUpdate;
   std::string Directory;
-
-protected:
-  void WriteGeneratedByToStrim(cmXMLWriter& xout);
 };
 
 #endif // cmCPackIFWRepository_h

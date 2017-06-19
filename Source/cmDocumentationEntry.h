@@ -3,7 +3,7 @@
 #ifndef cmDocumentationEntry_h
 #define cmDocumentationEntry_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 

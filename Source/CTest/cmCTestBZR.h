@@ -3,7 +3,7 @@
 #ifndef cmCTestBZR_h
 #define cmCTestBZR_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestGlobalVC.h"
 
@@ -26,16 +26,16 @@ public:
 
 private:
   // Implement cmCTestVC internal API.
-  void NoteOldRevision() CM_OVERRIDE;
-  void NoteNewRevision() CM_OVERRIDE;
+  bool NoteOldRevision() CM_OVERRIDE;
+  bool NoteNewRevision() CM_OVERRIDE;
   bool UpdateImpl() CM_OVERRIDE;
 
   // URL of repository directory checked out in the working tree.
   std::string URL;
 
   std::string LoadInfo();
-  void LoadModifications() CM_OVERRIDE;
-  void LoadRevisions() CM_OVERRIDE;
+  bool LoadModifications() CM_OVERRIDE;
+  bool LoadRevisions() CM_OVERRIDE;
 
   // Parsing helper classes.
   class InfoParser;

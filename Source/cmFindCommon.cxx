@@ -10,6 +10,8 @@
 #include "cmSystemTools.h"
 
 cmFindCommon::PathGroup cmFindCommon::PathGroup::All("ALL");
+cmFindCommon::PathLabel cmFindCommon::PathLabel::PackageRoot(
+  "PacakgeName_ROOT");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMake("CMAKE");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMakeEnvironment(
   "CMAKE_ENVIRONMENT");
@@ -23,6 +25,7 @@ cmFindCommon::cmFindCommon()
 {
   this->FindRootPathMode = RootPathModeBoth;
   this->NoDefaultPath = false;
+  this->NoPackageRootPath = false;
   this->NoCMakePath = false;
   this->NoCMakeEnvironmentPath = false;
   this->NoSystemEnvironmentPath = false;
@@ -57,6 +60,7 @@ void cmFindCommon::InitializeSearchPathGroups()
 
   // All search paths
   labels = &this->PathGroupLabelMap[PathGroup::All];
+  labels->push_back(PathLabel::PackageRoot);
   labels->push_back(PathLabel::CMake);
   labels->push_back(PathLabel::CMakeEnvironment);
   labels->push_back(PathLabel::Hints);
@@ -68,6 +72,8 @@ void cmFindCommon::InitializeSearchPathGroups()
   this->PathGroupOrder.push_back(PathGroup::All);
 
   // Create the idividual labeld search paths
+  this->LabeledPaths.insert(
+    std::make_pair(PathLabel::PackageRoot, cmSearchPath(this)));
   this->LabeledPaths.insert(
     std::make_pair(PathLabel::CMake, cmSearchPath(this)));
   this->LabeledPaths.insert(
@@ -154,10 +160,16 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   }
 
   const char* sysroot = this->Makefile->GetDefinition("CMAKE_SYSROOT");
+  const char* sysrootCompile =
+    this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE");
+  const char* sysrootLink =
+    this->Makefile->GetDefinition("CMAKE_SYSROOT_LINK");
   const char* rootPath = this->Makefile->GetDefinition("CMAKE_FIND_ROOT_PATH");
   const bool noSysroot = !sysroot || !*sysroot;
+  const bool noCompileSysroot = !sysrootCompile || !*sysrootCompile;
+  const bool noLinkSysroot = !sysrootLink || !*sysrootLink;
   const bool noRootPath = !rootPath || !*rootPath;
-  if (noSysroot && noRootPath) {
+  if (noSysroot && noCompileSysroot && noLinkSysroot && noRootPath) {
     return;
   }
 
@@ -165,6 +177,12 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   std::vector<std::string> roots;
   if (rootPath) {
     cmSystemTools::ExpandListArgument(rootPath, roots);
+  }
+  if (sysrootCompile) {
+    roots.push_back(sysrootCompile);
+  }
+  if (sysrootLink) {
+    roots.push_back(sysrootLink);
   }
   if (sysroot) {
     roots.push_back(sysroot);
@@ -259,10 +277,12 @@ bool cmFindCommon::CheckCommonArgument(std::string const& arg)
 {
   if (arg == "NO_DEFAULT_PATH") {
     this->NoDefaultPath = true;
-  } else if (arg == "NO_CMAKE_ENVIRONMENT_PATH") {
-    this->NoCMakeEnvironmentPath = true;
+  } else if (arg == "NO_PACKAGE_ROOT_PATH") {
+    this->NoPackageRootPath = true;
   } else if (arg == "NO_CMAKE_PATH") {
     this->NoCMakePath = true;
+  } else if (arg == "NO_CMAKE_ENVIRONMENT_PATH") {
+    this->NoCMakeEnvironmentPath = true;
   } else if (arg == "NO_SYSTEM_ENVIRONMENT_PATH") {
     this->NoSystemEnvironmentPath = true;
   } else if (arg == "NO_CMAKE_SYSTEM_PATH") {
@@ -291,7 +311,7 @@ void cmFindCommon::AddPathSuffix(std::string const& arg)
     return;
   }
   if (suffix[0] == '/') {
-    suffix = suffix.substr(1, suffix.npos);
+    suffix = suffix.substr(1);
   }
   if (suffix.empty()) {
     return;
@@ -333,16 +353,4 @@ void cmFindCommon::ComputeFinalPaths()
   // Add a trailing slash to all paths to aid the search process.
   std::for_each(this->SearchPaths.begin(), this->SearchPaths.end(),
                 &AddTrailingSlash);
-}
-
-void cmFindCommon::SetMakefile(cmMakefile* makefile)
-{
-  cmCommand::SetMakefile(makefile);
-
-  // If we are building for Apple (OSX or also iphone), make sure
-  // that frameworks and bundles are searched first.
-  if (this->Makefile->IsOn("APPLE")) {
-    this->SearchFrameworkFirst = true;
-    this->SearchAppBundleFirst = true;
-  }
 }

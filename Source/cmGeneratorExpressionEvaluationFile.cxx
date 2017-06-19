@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionEvaluationFile.h"
 
-#include <cmConfigure.h>
-#include <cmsys/FStream.hxx>
+#include "cmConfigure.h"
+#include "cmsys/FStream.hxx"
 #include <sstream>
 #include <utility>
 
@@ -64,8 +64,10 @@ void cmGeneratorExpressionEvaluationFile::Generate(
       return;
     }
     std::ostringstream e;
-    e << "Evaluation file to be written multiple times for different "
-         "configurations or languages with different content:\n  "
+    e << "Evaluation file to be written multiple times with different "
+         "content. "
+         "This is generally caused by the content evaluating the "
+         "configuration type, language, or location of object files:\n "
       << outputFileName;
     lg->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;

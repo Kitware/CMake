@@ -3,7 +3,7 @@
 #ifndef cmCPackComponentGroup_h
 #define cmCPackComponentGroup_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 #include <vector>
@@ -77,6 +77,10 @@ public:
   /// If IsDownloaded is true, the name of the archive file that
   /// contains the files that are part of this component.
   std::string ArchiveFile;
+
+  /// The file to pass to --component-plist when using the
+  /// productbuild generator.
+  std::string Plist;
 
   /// The components that this component depends on.
   std::vector<cmCPackComponent*> Dependencies;

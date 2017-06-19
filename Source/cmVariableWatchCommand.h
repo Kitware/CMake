@@ -3,7 +3,8 @@
 #ifndef cmVariableWatchCommand_h
 #define cmVariableWatchCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <set>
 #include <string>
 #include <vector>
@@ -37,19 +38,9 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
 
-  /**
-   * This determines if the command is invoked when in script mode.
-   */
-  bool IsScriptable() const CM_OVERRIDE { return true; }
-
   /** This command does not really have a final pass but it needs to
       stay alive since it owns variable watch callback information. */
   bool HasFinalPass() const CM_OVERRIDE { return true; }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "variable_watch"; }
 
 protected:
   std::set<std::string> WatchedVariables;

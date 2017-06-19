@@ -4,7 +4,7 @@
 #ifndef cmStatePrivate_h
 #define cmStatePrivate_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -55,11 +55,6 @@ struct cmStateDetail::PolicyStackEntry : public cmPolicies::PolicyMap
   PolicyStackEntry(derived const& d, bool w)
     : derived(d)
     , Weak(w)
-  {
-  }
-  PolicyStackEntry(PolicyStackEntry const& r)
-    : derived(r)
-    , Weak(r.Weak)
   {
   }
   bool Weak;

@@ -3,7 +3,8 @@
 #ifndef cmVariableRequiresCommand_h
 #define cmVariableRequiresCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 
@@ -17,7 +18,6 @@ public:
   cmCommand* Clone() CM_OVERRIDE { return new cmVariableRequiresCommand; }
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
-  std::string GetName() const CM_OVERRIDE { return "variable_requires"; }
 };
 
 #endif

@@ -2,23 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileCommand.h"
 
+#include "cm_kwiml.h"
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cm_kwiml.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/String.hxx>
-#include <list>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <sys/types.h>
-// include sys/stat.h after sys/types.h
-#include <sys/stat.h>
+#include <vector>
 
 #include "cmAlgorithms.h"
 #include "cmCommandArgumentsHelper.h"
@@ -35,11 +31,21 @@
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cm_auto_ptr.hxx"
+#include "cm_sys_stat.h"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmCurl.h"
 #include "cmFileLockResult.h"
+#include "cm_curl.h"
+#endif
+
+#if defined(CMAKE_USE_ELF_PARSER)
+#include "cmELF.h"
+#endif
+
+#if defined(_WIN32)
+#include <windows.h>
 #endif
 
 class cmSystemToolsFileTime;
@@ -104,7 +110,7 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("must be called with at least two arguments.");
     return false;
   }
-  std::string subCommand = args[0];
+  std::string const& subCommand = args[0];
   if (subCommand == "WRITE") {
     return this->HandleWriteCommand(args, false);
   }
@@ -165,6 +171,9 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
   }
   if (subCommand == "RPATH_REMOVE") {
     return this->HandleRPathRemoveCommand(args);
+  }
+  if (subCommand == "READ_ELF") {
+    return this->HandleReadElfCommand(args);
   }
   if (subCommand == "RELATIVE_PATH") {
     return this->HandleRelativePathCommand(args);
@@ -608,8 +617,8 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       continue;
     }
 
-    else if ((c >= 0x20 && c < 0x7F) || c == '\t' ||
-             (c == '\n' && newline_consume)) {
+    if ((c >= 0x20 && c < 0x7F) || c == '\t' ||
+        (c == '\n' && newline_consume)) {
       // This is an ASCII character that may be part of a string.
       // Cast added to avoid compiler warning. Cast is ok because
       // c is guaranteed to fit in char by the above if...
@@ -1024,8 +1033,6 @@ protected:
     {
     }
   };
-  struct MatchRule;
-  friend struct MatchRule;
   struct MatchRule
   {
     cmsys::RegularExpression Regex;
@@ -1114,9 +1121,9 @@ protected:
 
   bool InstallSymlink(const char* fromFile, const char* toFile);
   bool InstallFile(const char* fromFile, const char* toFile,
-                   MatchProperties const& match_properties);
+                   MatchProperties match_properties);
   bool InstallDirectory(const char* source, const char* destination,
-                        MatchProperties const& match_properties);
+                        MatchProperties match_properties);
   virtual bool Install(const char* fromFile, const char* toFile);
   virtual std::string const& ToName(std::string const& fromName)
   {
@@ -1144,6 +1151,7 @@ protected:
   bool UseGivenPermissionsDir;
   bool UseSourcePermissions;
   std::string Destination;
+  std::string FilesFromDir;
   std::vector<std::string> Files;
   int Doing;
 
@@ -1153,6 +1161,7 @@ protected:
     DoingNone,
     DoingError,
     DoingDestination,
+    DoingFilesFromDir,
     DoingFiles,
     DoingPattern,
     DoingRegex,
@@ -1248,6 +1257,12 @@ bool cmFileCopier::CheckKeyword(std::string const& arg)
     } else {
       this->Doing = DoingDestination;
     }
+  } else if (arg == "FILES_FROM_DIR") {
+    if (this->CurrentMatchRule) {
+      this->NotAfterMatch(arg);
+    } else {
+      this->Doing = DoingFilesFromDir;
+    }
   } else if (arg == "PATTERN") {
     this->Doing = DoingPattern;
   } else if (arg == "REGEX") {
@@ -1311,13 +1326,7 @@ bool cmFileCopier::CheckValue(std::string const& arg)
 {
   switch (this->Doing) {
     case DoingFiles:
-      if (arg.empty() || cmSystemTools::FileIsFullPath(arg.c_str())) {
-        this->Files.push_back(arg);
-      } else {
-        std::string file = this->Makefile->GetCurrentSourceDirectory();
-        file += "/" + arg;
-        this->Files.push_back(file);
-      }
+      this->Files.push_back(arg);
       break;
     case DoingDestination:
       if (arg.empty() || cmSystemTools::FileIsFullPath(arg.c_str())) {
@@ -1326,6 +1335,16 @@ bool cmFileCopier::CheckValue(std::string const& arg)
         this->Destination = this->Makefile->GetCurrentBinaryDirectory();
         this->Destination += "/" + arg;
       }
+      this->Doing = DoingNone;
+      break;
+    case DoingFilesFromDir:
+      if (cmSystemTools::FileIsFullPath(arg.c_str())) {
+        this->FilesFromDir = arg;
+      } else {
+        this->FilesFromDir = this->Makefile->GetCurrentSourceDirectory();
+        this->FilesFromDir += "/" + arg;
+      }
+      cmSystemTools::ConvertToUnixSlashes(this->FilesFromDir);
       this->Doing = DoingNone;
       break;
     case DoingPattern: {
@@ -1387,17 +1406,41 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
     return false;
   }
 
-  std::vector<std::string> const& files = this->Files;
-  for (std::vector<std::string>::size_type i = 0; i < files.size(); ++i) {
+  for (std::vector<std::string>::const_iterator i = this->Files.begin();
+       i != this->Files.end(); ++i) {
+    std::string file;
+    if (!i->empty() && !cmSystemTools::FileIsFullPath(*i)) {
+      if (!this->FilesFromDir.empty()) {
+        file = this->FilesFromDir;
+      } else {
+        file = this->Makefile->GetCurrentSourceDirectory();
+      }
+      file += "/";
+      file += *i;
+    } else if (!this->FilesFromDir.empty()) {
+      this->FileCommand->SetError("option FILES_FROM_DIR requires all files "
+                                  "to be specified as relative paths.");
+      return false;
+    } else {
+      file = *i;
+    }
+
     // Split the input file into its directory and name components.
     std::vector<std::string> fromPathComponents;
-    cmSystemTools::SplitPath(files[i], fromPathComponents);
+    cmSystemTools::SplitPath(file, fromPathComponents);
     std::string fromName = *(fromPathComponents.end() - 1);
     std::string fromDir = cmSystemTools::JoinPath(
       fromPathComponents.begin(), fromPathComponents.end() - 1);
 
     // Compute the full path to the destination file.
     std::string toFile = this->Destination;
+    if (!this->FilesFromDir.empty()) {
+      std::string dir = cmSystemTools::GetFilenamePath(*i);
+      if (!dir.empty()) {
+        toFile += "/";
+        toFile += dir;
+      }
+    }
     std::string const& toName = this->ToName(fromName);
     if (!toName.empty()) {
       toFile += "/";
@@ -1482,6 +1525,9 @@ bool cmFileCopier::InstallSymlink(const char* fromFile, const char* toFile)
     // Remove the destination file so we can always create the symlink.
     cmSystemTools::RemoveFile(toFile);
 
+    // Create destination directory if it doesn't exist
+    cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(toFile));
+
     // Create the symlink.
     if (!cmSystemTools::CreateSymlink(symlinkTarget, toFile)) {
       std::ostringstream e;
@@ -1496,7 +1542,7 @@ bool cmFileCopier::InstallSymlink(const char* fromFile, const char* toFile)
 }
 
 bool cmFileCopier::InstallFile(const char* fromFile, const char* toFile,
-                               MatchProperties const& match_properties)
+                               MatchProperties match_properties)
 {
   // Determine whether we will copy the file.
   bool copy = true;
@@ -1550,7 +1596,7 @@ bool cmFileCopier::InstallFile(const char* fromFile, const char* toFile,
 
 bool cmFileCopier::InstallDirectory(const char* source,
                                     const char* destination,
-                                    MatchProperties const& match_properties)
+                                    MatchProperties match_properties)
 {
   // Inform the user about this directory installation.
   this->ReportCopy(destination, TypeDir,
@@ -1724,6 +1770,7 @@ protected:
         if (this->Makefile->IsOn("CMAKE_INSTALL_SO_NO_EXE")) {
           break;
         }
+        CM_FALLTHROUGH;
       case cmInstallType_EXECUTABLE:
       case cmInstallType_PROGRAMS:
         this->FilePermissions |= mode_owner_execute;
@@ -1745,6 +1792,11 @@ bool cmFileInstaller::Parse(std::vector<std::string> const& args)
   }
 
   if (!this->Rename.empty()) {
+    if (!this->FilesFromDir.empty()) {
+      this->FileCommand->SetError("INSTALL option RENAME may not be "
+                                  "combined with FILES_FROM_DIR.");
+      return false;
+    }
     if (this->InstallType != cmInstallType_FILES &&
         this->InstallType != cmInstallType_PROGRAMS) {
       this->FileCommand->SetError("INSTALL option RENAME may be used "
@@ -2177,6 +2229,68 @@ bool cmFileCommand::HandleRPathCheckCommand(
   return true;
 }
 
+bool cmFileCommand::HandleReadElfCommand(std::vector<std::string> const& args)
+{
+  if (args.size() < 4) {
+    this->SetError("READ_ELF must be called with at least three additional "
+                   "arguments.");
+    return false;
+  }
+
+  cmCommandArgumentsHelper argHelper;
+  cmCommandArgumentGroup group;
+
+  cmCAString readArg(&argHelper, "READ_ELF");
+  cmCAString fileNameArg(&argHelper, CM_NULLPTR);
+
+  cmCAString rpathArg(&argHelper, "RPATH", &group);
+  cmCAString runpathArg(&argHelper, "RUNPATH", &group);
+  cmCAString errorArg(&argHelper, "CAPTURE_ERROR", &group);
+
+  readArg.Follows(CM_NULLPTR);
+  fileNameArg.Follows(&readArg);
+  group.Follows(&fileNameArg);
+  argHelper.Parse(&args, CM_NULLPTR);
+
+  if (!cmSystemTools::FileExists(fileNameArg.GetString(), true)) {
+    std::ostringstream e;
+    e << "READ_ELF given FILE \"" << fileNameArg.GetString()
+      << "\" that does not exist.";
+    this->SetError(e.str());
+    return false;
+  }
+
+#if defined(CMAKE_USE_ELF_PARSER)
+  cmELF elf(fileNameArg.GetCString());
+
+  if (!rpathArg.GetString().empty()) {
+    if (cmELF::StringEntry const* se_rpath = elf.GetRPath()) {
+      std::string rpath(se_rpath->Value);
+      std::replace(rpath.begin(), rpath.end(), ':', ';');
+      this->Makefile->AddDefinition(rpathArg.GetString(), rpath.c_str());
+    }
+  }
+  if (!runpathArg.GetString().empty()) {
+    if (cmELF::StringEntry const* se_runpath = elf.GetRunPath()) {
+      std::string runpath(se_runpath->Value);
+      std::replace(runpath.begin(), runpath.end(), ':', ';');
+      this->Makefile->AddDefinition(runpathArg.GetString(), runpath.c_str());
+    }
+  }
+
+  return true;
+#else
+  std::string error = "ELF parser not available on this platform.";
+  if (errorArg.GetString().empty()) {
+    this->SetError(error);
+    return false;
+  } else {
+    this->Makefile->AddDefinition(errorArg.GetString(), error.c_str());
+    return true;
+  }
+#endif
+}
+
 bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
 {
   cmFileInstaller installer(this);
@@ -2509,7 +2623,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   bool showProgress = false;
   std::string userpwd;
 
-  std::list<std::string> curl_headers;
+  std::vector<std::string> curl_headers;
 
   while (i != args.end()) {
     if (*i == "TIMEOUT") {
@@ -2753,7 +2867,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   }
 
   struct curl_slist* headers = CM_NULLPTR;
-  for (std::list<std::string>::const_iterator h = curl_headers.begin();
+  for (std::vector<std::string>::const_iterator h = curl_headers.begin();
        h != curl_headers.end(); ++h) {
     headers = ::curl_slist_append(headers, h->c_str());
   }
@@ -2843,7 +2957,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   bool showProgress = false;
   std::string userpwd;
 
-  std::list<std::string> curl_headers;
+  std::vector<std::string> curl_headers;
 
   while (i != args.end()) {
     if (*i == "TIMEOUT") {
@@ -3011,7 +3125,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   }
 
   struct curl_slist* headers = CM_NULLPTR;
-  for (std::list<std::string>::const_iterator h = curl_headers.begin();
+  for (std::vector<std::string>::const_iterator h = curl_headers.begin();
        h != curl_headers.end(); ++h) {
     headers = ::curl_slist_append(headers, h->c_str());
   }

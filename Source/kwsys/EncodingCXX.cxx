@@ -29,6 +29,7 @@
 #if defined(_WIN32)
 #include <windows.h>
 
+#include <ctype.h>
 #include <shellapi.h>
 #endif
 
@@ -146,11 +147,11 @@ std::wstring Encoding::ToWide(const std::string& str)
       wstr += ToWide(str.c_str() + pos);
     }
     nullPos = str.find('\0', pos);
-    if (nullPos != str.npos) {
+    if (nullPos != std::string::npos) {
       pos = nullPos + 1;
       wstr += wchar_t('\0');
     }
-  } while (nullPos != str.npos);
+  } while (nullPos != std::string::npos);
 #endif
   return wstr;
 }
@@ -180,11 +181,11 @@ std::string Encoding::ToNarrow(const std::wstring& str)
       nstr += ToNarrow(str.c_str() + pos);
     }
     nullPos = str.find(wchar_t('\0'), pos);
-    if (nullPos != str.npos) {
+    if (nullPos != std::string::npos) {
       pos = nullPos + 1;
       nstr += '\0';
     }
-  } while (nullPos != str.npos);
+  } while (nullPos != std::string::npos);
 #endif
   return nstr;
 }
@@ -214,6 +215,63 @@ std::string Encoding::ToNarrow(const wchar_t* wcstr)
   }
   return str;
 }
+
+#if defined(_WIN32)
+// Convert local paths to UNC style paths
+std::wstring Encoding::ToWindowsExtendedPath(std::string const& source)
+{
+  std::wstring wsource = Encoding::ToWide(source);
+
+  // Resolve any relative paths
+  DWORD wfull_len;
+
+  /* The +3 is a workaround for a bug in some versions of GetFullPathNameW that
+   * won't return a large enough buffer size if the input is too small */
+  wfull_len = GetFullPathNameW(wsource.c_str(), 0, NULL, NULL) + 3;
+  std::vector<wchar_t> wfull(wfull_len);
+  GetFullPathNameW(wsource.c_str(), wfull_len, &wfull[0], NULL);
+
+  /* This should get the correct size without any extra padding from the
+   * previous size workaround. */
+  wfull_len = static_cast<DWORD>(wcslen(&wfull[0]));
+
+  if (wfull_len >= 2 && isalpha(wfull[0]) &&
+      wfull[1] == L':') { /* C:\Foo\bar\FooBar.txt */
+    return L"\\\\?\\" + std::wstring(&wfull[0]);
+  } else if (wfull_len >= 2 && wfull[0] == L'\\' &&
+             wfull[1] == L'\\') { /* Starts with \\ */
+    if (wfull_len >= 4 && wfull[2] == L'?' &&
+        wfull[3] == L'\\') { /* Starts with \\?\ */
+      if (wfull_len >= 8 && wfull[4] == L'U' && wfull[5] == L'N' &&
+          wfull[6] == L'C' &&
+          wfull[7] == L'\\') { /* \\?\UNC\Foo\bar\FooBar.txt */
+        return std::wstring(&wfull[0]);
+      } else if (wfull_len >= 6 && isalpha(wfull[4]) &&
+                 wfull[5] == L':') { /* \\?\C:\Foo\bar\FooBar.txt */
+        return std::wstring(&wfull[0]);
+      } else if (wfull_len >= 5) { /* \\?\Foo\bar\FooBar.txt */
+        return L"\\\\?\\UNC\\" + std::wstring(&wfull[4]);
+      }
+    } else if (wfull_len >= 4 && wfull[2] == L'.' &&
+               wfull[3] == L'\\') { /* Starts with \\.\ a device name */
+      if (wfull_len >= 6 && isalpha(wfull[4]) &&
+          wfull[5] == L':') { /* \\.\C:\Foo\bar\FooBar.txt */
+        return L"\\\\?\\" + std::wstring(&wfull[4]);
+      } else if (wfull_len >=
+                 5) { /* \\.\Foo\bar\ Device name is left unchanged */
+        return std::wstring(&wfull[0]);
+      }
+    } else if (wfull_len >= 3) { /* \\Foo\bar\FooBar.txt */
+      return L"\\\\?\\UNC\\" + std::wstring(&wfull[2]);
+    }
+  }
+
+  // If this case has been reached, then the path is invalid.  Leave it
+  // unchanged
+  return Encoding::ToWide(source);
+}
+#endif
+
 #endif // KWSYS_STL_HAS_WSTRING
 
 } // namespace KWSYS_NAMESPACE

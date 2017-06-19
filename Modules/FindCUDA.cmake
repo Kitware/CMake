@@ -67,6 +67,13 @@
 #   -- Set to ON for Emulation mode. -D_DEVICEEMU is defined for CUDA C files
 #      when CUDA_BUILD_EMULATION is TRUE.
 #
+#   CUDA_LINK_LIBRARIES_KEYWORD (Default "")
+#    -- The <PRIVATE|PUBLIC|INTERFACE> keyword to use for internal
+#       target_link_libraries calls. The default is to use no keyword which
+#       uses the old "plain" form of target_link_libraries. Note that is matters
+#       because whatever is used inside the FindCUDA module must also be used
+#       outside - the two forms of target_link_libraries cannot be mixed.
+#
 #   CUDA_GENERATED_OUTPUT_DIR (Default CMAKE_CURRENT_BINARY_DIR)
 #   -- Set to the path you wish to have the generated files placed.  If it is
 #      blank output files will be placed in CMAKE_CURRENT_BINARY_DIR.
@@ -1740,12 +1747,12 @@ macro(CUDA_ADD_LIBRARY cuda_target)
   # variable will have been defined.
   CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS("${link_file}" ${cuda_target} "${_options}" "${${cuda_target}_SEPARABLE_COMPILATION_OBJECTS}")
 
-  target_link_libraries(${cuda_target}
+  target_link_libraries(${cuda_target} ${CUDA_LINK_LIBRARIES_KEYWORD}
     ${CUDA_LIBRARIES}
     )
 
   if(CUDA_SEPARABLE_COMPILATION)
-    target_link_libraries(${cuda_target}
+    target_link_libraries(${cuda_target} ${CUDA_LINK_LIBRARIES_KEYWORD}
       ${CUDA_cudadevrt_LIBRARY}
       )
   endif()
@@ -1790,7 +1797,7 @@ macro(CUDA_ADD_EXECUTABLE cuda_target)
   # variable will have been defined.
   CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS("${link_file}" ${cuda_target} "${_options}" "${${cuda_target}_SEPARABLE_COMPILATION_OBJECTS}")
 
-  target_link_libraries(${cuda_target}
+  target_link_libraries(${cuda_target} ${CUDA_LINK_LIBRARIES_KEYWORD}
     ${CUDA_LIBRARIES}
     )
 
@@ -1818,7 +1825,7 @@ macro(cuda_compile_base cuda_target format generated_files)
   else()
     set(_counter 1)
   endif()
-  set(_cuda_target "${_cuda_target}_${_counter}")
+  string(APPEND _cuda_target "_${_counter}")
   set_property(DIRECTORY PROPERTY _cuda_internal_phony_counter ${_counter})
 
   # Separate the sources from the options
@@ -1876,9 +1883,9 @@ endmacro()
 ###############################################################################
 macro(CUDA_ADD_CUFFT_TO_TARGET target)
   if (CUDA_BUILD_EMULATION)
-    target_link_libraries(${target} ${CUDA_cufftemu_LIBRARY})
+    target_link_libraries(${target} ${CUDA_LINK_LIBRARIES_KEYWORD} ${CUDA_cufftemu_LIBRARY})
   else()
-    target_link_libraries(${target} ${CUDA_cufft_LIBRARY})
+    target_link_libraries(${target} ${CUDA_LINK_LIBRARIES_KEYWORD} ${CUDA_cufft_LIBRARY})
   endif()
 endmacro()
 
@@ -1889,9 +1896,9 @@ endmacro()
 ###############################################################################
 macro(CUDA_ADD_CUBLAS_TO_TARGET target)
   if (CUDA_BUILD_EMULATION)
-    target_link_libraries(${target} ${CUDA_cublasemu_LIBRARY})
+    target_link_libraries(${target} ${CUDA_LINK_LIBRARIES_KEYWORD} ${CUDA_cublasemu_LIBRARY})
   else()
-    target_link_libraries(${target} ${CUDA_cublas_LIBRARY} ${CUDA_cublas_device_LIBRARY})
+    target_link_libraries(${target} ${CUDA_LINK_LIBRARIES_KEYWORD} ${CUDA_cublas_LIBRARY} ${CUDA_cublas_device_LIBRARY})
   endif()
 endmacro()
 

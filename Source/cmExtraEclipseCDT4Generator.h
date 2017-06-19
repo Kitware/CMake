@@ -3,7 +3,7 @@
 #ifndef cmExtraEclipseCDT4Generator_h
 #define cmExtraEclipseCDT4Generator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmExternalMakefileProjectGenerator.h"
 

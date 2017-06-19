@@ -893,6 +893,28 @@ else()
   endif()
 endif()
 
+# Check that all libraries are present, as wx-config does not check it
+set(_wx_lib_missing "")
+foreach(_wx_lib_ ${wxWidgets_LIBRARIES})
+  if("${_wx_lib_}" MATCHES "^-l(.*)")
+    set(_wx_lib_name "${CMAKE_MATCH_1}")
+    unset(_wx_lib_found CACHE)
+    find_library(_wx_lib_found NAMES ${_wx_lib_name} HINTS ${wxWidgets_LIBRARY_DIRS})
+    if(_wx_lib_found STREQUAL _wx_lib_found-NOTFOUND)
+      list(APPEND _wx_lib_missing ${_wx_lib_name})
+    endif()
+    unset(_wx_lib_found CACHE)
+  endif()
+endforeach()
+
+if (_wx_lib_missing)
+  string(REPLACE ";" " " _wx_lib_missing "${_wx_lib_missing}")
+  DBG_MSG_V("wxWidgets not found due to following missing libraries: ${_wx_lib_missing}")
+  set(wxWidgets_FOUND FALSE)
+  unset(wxWidgets_LIBRARIES)
+endif()
+unset(_wx_lib_missing)
+
 # Check if a specfic version was requested by find_package().
 if(wxWidgets_FOUND)
   find_file(_filename wx/version.h PATHS ${wxWidgets_INCLUDE_DIRS} NO_DEFAULT_PATH)

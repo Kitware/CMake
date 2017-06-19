@@ -8,6 +8,8 @@ if(__COMPILER_INTEL)
 endif()
 set(__COMPILER_INTEL 1)
 
+include(Compiler/CMakeCommonCompilerMacros)
+
 if(CMAKE_HOST_WIN32)
   # MSVC-like
   macro(__compiler_intel lang)
@@ -22,5 +24,7 @@ else()
     string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Os")
     string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3")
     string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -g")
+
+    set(CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "${CMAKE_${lang}_COMPILER}" "-QdM" "-P" "-Za" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
   endmacro()
 endif()

@@ -16,7 +16,6 @@
 
 #include "testConsoleBuf.hxx"
 
-//----------------------------------------------------------------------------
 int main(int argc, const char* argv[])
 {
 #if defined(_WIN32)

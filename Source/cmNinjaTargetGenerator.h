@@ -3,7 +3,7 @@
 #ifndef cmNinjaTargetGenerator_h
 #define cmNinjaTargetGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCommonTargetGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
@@ -119,8 +119,7 @@ protected:
   void WriteLanguageRules(const std::string& language);
   void WriteCompileRule(const std::string& language);
   void WriteObjectBuildStatements();
-  void WriteObjectBuildStatement(cmSourceFile const* source,
-                                 bool writeOrderDependsTargetForTarget);
+  void WriteObjectBuildStatement(cmSourceFile const* source);
   void WriteTargetDependInfo(std::string const& lang);
 
   void ExportObjectCompileCommand(

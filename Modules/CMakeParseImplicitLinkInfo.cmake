@@ -18,9 +18,13 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
     get_filename_component(linker ${CMAKE_LINKER} NAME)
     string(REGEX REPLACE "([][+.*?()^$])" "\\\\\\1" linker "${linker}")
   endif()
+  set(startfile "CMAKE_LINK_STARTFILE-NOTFOUND")
+  if(CMAKE_LINK_STARTFILE)
+    set(startfile "${CMAKE_LINK_STARTFILE}")
+  endif()
   # Construct a regex to match linker lines.  It must match both the
   # whole line and just the command (argv[0]).
-  set(linker_regex "^( *|.*[/\\])(${linker}|([^/\\]+-)?ld|collect2)[^/\\]*( |$)")
+  set(linker_regex "^( *|.*[/\\])(${linker}|${startfile}|([^/\\]+-)?ld|collect2)[^/\\]*( |$)")
   set(linker_exclude_regex "collect2 version |^[A-Za-z0-9_]+=|/ldfe ")
   string(APPEND log "  link line regex: [${linker_regex}]\n")
   string(REGEX REPLACE "\r?\n" ";" output_lines "${text}")
@@ -38,11 +42,7 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
           set(line "${xline}")
         endif()
       endif()
-      if(UNIX)
-        separate_arguments(args UNIX_COMMAND "${line}")
-      else()
-        separate_arguments(args WINDOWS_COMMAND "${line}")
-      endif()
+      separate_arguments(args NATIVE_COMMAND "${line}")
       list(GET args 0 cmd)
     endif()
     set(is_msvc 0)
@@ -59,9 +59,9 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
           string(REGEX REPLACE "^-L" "" dir "${arg}")
           list(APPEND implicit_dirs_tmp ${dir})
           string(APPEND log "    arg [${arg}] ==> dir [${dir}]\n")
-        elseif("${arg}" MATCHES "^[-/]LIBPATH:(.+)")
+        elseif("${arg}" MATCHES "^[-/](LIBPATH|libpath):(.+)")
           # MSVC search path.
-          set(dir "${CMAKE_MATCH_1}")
+          set(dir "${CMAKE_MATCH_2}")
           list(APPEND implicit_dirs_tmp ${dir})
           string(APPEND log "    arg [${arg}] ==> dir [${dir}]\n")
         elseif(is_msvc AND "${arg}" STREQUAL "-link")
@@ -83,6 +83,11 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
           # Unix library full path.
           list(APPEND implicit_libs_tmp ${arg})
           string(APPEND log "    arg [${arg}] ==> lib [${arg}]\n")
+        elseif("${arg}" MATCHES "^[-/](DEFAULTLIB|defaultlib):(.+)")
+          # Windows library.
+          set(lib "${CMAKE_MATCH_2}")
+          list(APPEND implicit_libs_tmp ${lib})
+          string(APPEND log "    arg [${arg}] ==> lib [${lib}]\n")
         elseif("${arg}" MATCHES "^(.:)?[/\\].*\\.o$"
             AND obj_regex AND "${arg}" MATCHES "${obj_regex}")
           # Object file full path.
@@ -137,7 +142,7 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
   # We remove items that are not language-specific.
   set(implicit_libs "")
   foreach(lib IN LISTS implicit_libs_tmp)
-    if("x${lib}" MATCHES "^x(crt.*\\.o|gcc.*|System.*|.*libclang_rt.*)$")
+    if("x${lib}" MATCHES "^x(crt.*\\.o|System.*|.*libclang_rt.*|msvcrt.*|libvcruntime.*|libucrt.*|libcmt.*)$")
       string(APPEND log "  remove lib [${lib}]\n")
     elseif(IS_ABSOLUTE "${lib}")
       get_filename_component(abs "${lib}" ABSOLUTE)

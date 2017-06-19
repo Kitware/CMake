@@ -102,7 +102,7 @@ function(FIND_IMAGEMAGICK_API component header)
       ${ImageMagick_INCLUDE_DIRS}
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ImageMagick\\Current;BinPath]/include"
     PATH_SUFFIXES
-      ImageMagick ImageMagick-6
+      ImageMagick ImageMagick-6 ImageMagick-7
     DOC "Path to the ImageMagick arch-independent include dir."
     )
   find_path(ImageMagick_${component}_ARCH_INCLUDE_DIR
@@ -114,7 +114,7 @@ function(FIND_IMAGEMAGICK_API component header)
       ${ImageMagick_INCLUDE_DIRS}
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ImageMagick\\Current;BinPath]/include"
     PATH_SUFFIXES
-      ImageMagick ImageMagick-6
+      ImageMagick ImageMagick-6 ImageMagick-7
     DOC "Path to the ImageMagick arch-specific include dir."
     )
   find_library(ImageMagick_${component}_LIBRARY
@@ -195,17 +195,26 @@ foreach(component ${ImageMagick_FIND_COMPONENTS}
     )
   if(component STREQUAL "Magick++")
     FIND_IMAGEMAGICK_API(Magick++ Magick++.h
-      Magick++ CORE_RL_Magick++_ Magick++-6.Q16 Magick++-Q16 Magick++-6.Q8 Magick++-Q8 Magick++-6.Q16HDRI Magick++-Q16HDRI Magick++-6.Q8HDRI Magick++-Q8HDRI
+      Magick++ CORE_RL_Magick++_
+      Magick++-Q8 Magick++-Q16 Magick++-Q16HDRI Magick++-Q8HDRI
+      Magick++-6.Q16 Magick++-6.Q8 Magick++-6.Q16HDRI Magick++-6.Q8HDRI
+      Magick++-7.Q16 Magick++-7.Q8 Magick++-7.Q16HDRI Magick++-7.Q8HDRI
       )
     list(APPEND ImageMagick_REQUIRED_VARS ImageMagick_Magick++_LIBRARY)
   elseif(component STREQUAL "MagickWand")
-    FIND_IMAGEMAGICK_API(MagickWand wand/MagickWand.h
-      Wand MagickWand CORE_RL_wand_ MagickWand-6.Q16 MagickWand-Q16 MagickWand-6.Q8 MagickWand-Q8 MagickWand-6.Q16HDRI MagickWand-Q16HDRI MagickWand-6.Q8HDRI MagickWand-Q8HDRI
+    FIND_IMAGEMAGICK_API(MagickWand "wand/MagickWand.h;MagickWand/MagickWand.h"
+      Wand MagickWand CORE_RL_wand_
+      MagickWand-Q16 MagickWand-Q8 MagickWand-Q16HDRI MagickWand-Q8HDRI
+      MagickWand-6.Q16 MagickWand-6.Q8 MagickWand-6.Q16HDRI MagickWand-6.Q8HDRI
+      MagickWand-7.Q16 MagickWand-7.Q8 MagickWand-7.Q16HDRI MagickWand-7.Q8HDRI
       )
     list(APPEND ImageMagick_REQUIRED_VARS ImageMagick_MagickWand_LIBRARY)
   elseif(component STREQUAL "MagickCore")
-    FIND_IMAGEMAGICK_API(MagickCore magick/MagickCore.h
-      Magick MagickCore CORE_RL_magick_ MagickCore-6.Q16 MagickCore-Q16 MagickCore-6.Q8 MagickCore-Q8 MagickCore-6.Q16HDRI MagickCore-Q16HDRI MagickCore-6.Q8HDRI MagickCore-Q8HDRI
+    FIND_IMAGEMAGICK_API(MagickCore "magick/MagickCore.h;MagickCore/MagickCore.h"
+      Magick MagickCore CORE_RL_magick_
+      MagickCore-Q16 MagickCore-Q8 MagickCore-Q16HDRI MagickCore-Q8HDRI
+      MagickCore-6.Q16 MagickCore-6.Q8 MagickCore-6.Q16HDRI MagickCore-6.Q8HDRI
+      MagickCore-7.Q16 MagickCore-7.Q8 MagickCore-7.Q16HDRI MagickCore-7.Q8HDRI
       )
     list(APPEND ImageMagick_REQUIRED_VARS ImageMagick_MagickCore_LIBRARY)
   else()

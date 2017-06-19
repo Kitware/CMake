@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalUnixMakefileGenerator3.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/Terminal.h"
 #include <algorithm>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Terminal.h>
 #include <functional>
 #include <sstream>
 #include <stdio.h>
@@ -79,7 +79,7 @@ static std::string cmSplitExtension(std::string const& in, std::string& base)
   std::string::size_type dot_pos = in.rfind('.');
   if (dot_pos != std::string::npos) {
     // Remove the extension first in case &base == &in.
-    ext = in.substr(dot_pos, std::string::npos);
+    ext = in.substr(dot_pos);
     base = in.substr(0, dot_pos);
   } else {
     base = in;
@@ -105,8 +105,6 @@ cmLocalUnixMakefileGenerator3::~cmLocalUnixMakefileGenerator3()
 
 void cmLocalUnixMakefileGenerator3::Generate()
 {
-  this->SetConfigName();
-
   // Record whether some options are enabled to avoid checking many
   // times later.
   if (!this->GetGlobalGenerator()->GetCMakeInstance()->GetIsInTryCompile()) {
@@ -159,12 +157,15 @@ void cmLocalUnixMakefileGenerator3::ComputeObjectFilenames(
   std::map<cmSourceFile const*, std::string>& mapping,
   cmGeneratorTarget const* gt)
 {
+  // Determine if these object files should use a custom extension
+  char const* custom_ext = gt->GetCustomObjectExtension();
   for (std::map<cmSourceFile const*, std::string>::iterator si =
          mapping.begin();
        si != mapping.end(); ++si) {
     cmSourceFile const* sf = si->first;
-    si->second =
-      this->GetObjectFileNameWithoutTarget(*sf, gt->ObjectDirectory);
+    bool keptSourceExtension;
+    si->second = this->GetObjectFileNameWithoutTarget(
+      *sf, gt->ObjectDirectory, &keptSourceExtension, custom_ext);
   }
 }
 
@@ -605,7 +606,7 @@ std::string cmLocalUnixMakefileGenerator3::MaybeConvertWatcomShellCommand(
   std::string const& cmd)
 {
   if (this->IsWatcomWMake() && cmSystemTools::FileIsFullPath(cmd.c_str()) &&
-      cmd.find_first_of("( )") != cmd.npos) {
+      cmd.find_first_of("( )") != std::string::npos) {
     // On Watcom WMake use the windows short path for the command
     // name.  This is needed to avoid funny quoting problems on
     // lines with shell redirection operators.
@@ -851,7 +852,7 @@ void cmLocalUnixMakefileGenerator3::AppendFlags(std::string& flags,
 {
   if (this->IsWatcomWMake() && !newFlags.empty()) {
     std::string newf = newFlags;
-    if (newf.find("\\\"") != newf.npos) {
+    if (newf.find("\\\"") != std::string::npos) {
       cmSystemTools::ReplaceString(newf, "\\\"", "\"");
       this->cmLocalGenerator::AppendFlags(flags, newf);
       return;
@@ -977,11 +978,11 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       cmSystemTools::ReplaceString(cmd, "/./", "/");
       // Convert the command to a relative path only if the current
       // working directory will be the start-output directory.
-      bool had_slash = cmd.find('/') != cmd.npos;
+      bool had_slash = cmd.find('/') != std::string::npos;
       if (workingDir.empty()) {
         cmd = this->MaybeConvertToRelativePath(currentBinDir, cmd);
       }
-      bool has_slash = cmd.find('/') != cmd.npos;
+      bool has_slash = cmd.find('/') != std::string::npos;
       if (had_slash && !has_slash) {
         // This command was specified as a path to a file in the
         // current directory.  Add a leading "./" so it can run
@@ -1038,9 +1039,9 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         // curly braces are removed.  The hack can be skipped if the
         // first curly brace is the last character.
         std::string::size_type lcurly = cmd.find('{');
-        if (lcurly != cmd.npos && lcurly < (cmd.size() - 1)) {
+        if (lcurly != std::string::npos && lcurly < (cmd.size() - 1)) {
           std::string::size_type rcurly = cmd.find('}');
-          if (rcurly == cmd.npos || rcurly > lcurly) {
+          if (rcurly == std::string::npos || rcurly > lcurly) {
             // The first curly is a left curly.  Use the hack.
             std::string hack_cmd = cmd.substr(0, lcurly);
             hack_cmd += "{{}";
@@ -1199,17 +1200,19 @@ void cmLocalUnixMakefileGenerator3::AppendEcho(
 }
 
 std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
-  const std::string& sin, const std::string& s2)
+  std::string const& s, std::string const& s2)
 {
-  std::string s = sin;
   std::string unmodified = s;
   unmodified += s2;
   // if there is no restriction on the length of make variables
   // and there are no "." characters in the string, then return the
   // unmodified combination.
-  if ((!this->MakefileVariableSize && unmodified.find('.') == s.npos) &&
-      (!this->MakefileVariableSize && unmodified.find('+') == s.npos) &&
-      (!this->MakefileVariableSize && unmodified.find('-') == s.npos)) {
+  if ((!this->MakefileVariableSize &&
+       unmodified.find('.') == std::string::npos) &&
+      (!this->MakefileVariableSize &&
+       unmodified.find('+') == std::string::npos) &&
+      (!this->MakefileVariableSize &&
+       unmodified.find('-') == std::string::npos)) {
     return unmodified;
   }
 
@@ -1864,10 +1867,7 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
     std::string binaryDir = this->GetState()->GetBinaryDirectory();
     if (this->Makefile->IsOn("CMAKE_DEPENDS_IN_PROJECT_ONLY")) {
       const char* sourceDir = this->GetState()->GetSourceDirectory();
-      std::vector<std::string>::iterator itr =
-        std::remove_if(includes.begin(), includes.end(),
-                       ::NotInProjectDir(sourceDir, binaryDir));
-      includes.erase(itr, includes.end());
+      cmEraseIf(includes, ::NotInProjectDir(sourceDir, binaryDir));
     }
     for (std::vector<std::string>::iterator i = includes.begin();
          i != includes.end(); ++i) {

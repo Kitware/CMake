@@ -13,13 +13,10 @@ function(framework_layout_test Name Toolchain Type)
   run_cmake_command(${Name} ${CMAKE_COMMAND} --build .)
 endfunction()
 
-# build check cannot cope with multi-configuration generators directory layout
-if(NOT RunCMake_GENERATOR STREQUAL "Xcode")
-  framework_layout_test(iOSFrameworkLayout-build ios SHARED)
-  framework_layout_test(iOSFrameworkLayout-build ios STATIC)
-  framework_layout_test(OSXFrameworkLayout-build osx SHARED)
-  framework_layout_test(OSXFrameworkLayout-build osx STATIC)
-endif()
+framework_layout_test(iOSFrameworkLayout-build ios SHARED)
+framework_layout_test(iOSFrameworkLayout-build ios STATIC)
+framework_layout_test(OSXFrameworkLayout-build osx SHARED)
+framework_layout_test(OSXFrameworkLayout-build osx STATIC)
 
 function(framework_type_test Toolchain Type)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${Toolchain}${Type}FrameworkType-build)

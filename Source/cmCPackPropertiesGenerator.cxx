@@ -19,7 +19,7 @@ cmCPackPropertiesGenerator::cmCPackPropertiesGenerator(
 }
 
 void cmCPackPropertiesGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent const& indent)
+  std::ostream& os, const std::string& config, Indent indent)
 {
   std::string const& expandedFileName =
     this->InstalledFile.GetNameExpression().Evaluate(this->LG, config);

@@ -3,7 +3,7 @@
 #ifndef cmInstallGenerator_h
 #define cmInstallGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmInstallType.h"
 #include "cmScriptGenerator.h"
@@ -21,6 +21,8 @@ class cmMakefile;
  */
 class cmInstallGenerator : public cmScriptGenerator
 {
+  CM_DISABLE_COPY(cmInstallGenerator)
+
 public:
   enum MessageLevel
   {
@@ -41,7 +43,7 @@ public:
     std::vector<std::string> const& files, bool optional = false,
     const char* permissions_file = CM_NULLPTR,
     const char* permissions_dir = CM_NULLPTR, const char* rename = CM_NULLPTR,
-    const char* literal_args = CM_NULLPTR, Indent const& indent = Indent());
+    const char* literal_args = CM_NULLPTR, Indent indent = Indent());
 
   /** Get the install destination as it should appear in the
       installation script.  */

@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmState.h"
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
-#include <cmsys/RegularExpression.hxx>
 #include <string.h>
 #include <utility>
 
@@ -12,14 +12,17 @@
 #include "cmCacheManager.h"
 #include "cmCommand.h"
 #include "cmDefinitions.h"
+#include "cmDisallowedCommand.h"
 #include "cmListFileCache.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
+#include "cmUnexpectedCommand.h"
 #include "cmake.h"
 
 cmState::cmState()
   : IsInTryCompile(false)
+  , IsGeneratorMultiConfig(false)
   , WindowsShell(false)
   , WindowsVSIDE(false)
   , WatcomWMake(false)
@@ -33,7 +36,8 @@ cmState::cmState()
 cmState::~cmState()
 {
   delete this->CacheManager;
-  cmDeleteAll(this->Commands);
+  cmDeleteAll(this->BuiltinCommands);
+  cmDeleteAll(this->ScriptedCommands);
 }
 
 const char* cmState::GetTargetTypeName(cmStateEnums::TargetType targetType)
@@ -364,99 +368,102 @@ void cmState::SetIsInTryCompile(bool b)
   this->IsInTryCompile = b;
 }
 
-void cmState::RenameCommand(std::string const& oldName,
-                            std::string const& newName)
+bool cmState::GetIsGeneratorMultiConfig() const
 {
-  // if the command already exists, free the old one
-  std::string sOldName = cmSystemTools::LowerCase(oldName);
-  std::string sNewName = cmSystemTools::LowerCase(newName);
-  std::map<std::string, cmCommand*>::iterator pos =
-    this->Commands.find(sOldName);
-  if (pos == this->Commands.end()) {
-    return;
-  }
-  cmCommand* cmd = pos->second;
-
-  pos = this->Commands.find(sNewName);
-  if (pos != this->Commands.end()) {
-    delete pos->second;
-    this->Commands.erase(pos);
-  }
-  this->Commands.insert(std::make_pair(sNewName, cmd));
-  pos = this->Commands.find(sOldName);
-  this->Commands.erase(pos);
+  return this->IsGeneratorMultiConfig;
 }
 
-void cmState::AddCommand(cmCommand* command)
+void cmState::SetIsGeneratorMultiConfig(bool b)
 {
-  std::string name = cmSystemTools::LowerCase(command->GetName());
-  // if the command already exists, free the old one
-  std::map<std::string, cmCommand*>::iterator pos = this->Commands.find(name);
-  if (pos != this->Commands.end()) {
-    delete pos->second;
-    this->Commands.erase(pos);
-  }
-  this->Commands.insert(std::make_pair(name, command));
+  this->IsGeneratorMultiConfig = b;
 }
 
-void cmState::RemoveUnscriptableCommands()
+void cmState::AddBuiltinCommand(std::string const& name, cmCommand* command)
 {
-  std::vector<std::string> unscriptableCommands;
-  for (std::map<std::string, cmCommand*>::iterator pos =
-         this->Commands.begin();
-       pos != this->Commands.end();) {
-    if (!pos->second->IsScriptable()) {
+  assert(name == cmSystemTools::LowerCase(name));
+  assert(this->BuiltinCommands.find(name) == this->BuiltinCommands.end());
+  this->BuiltinCommands.insert(std::make_pair(name, command));
+}
+
+void cmState::AddDisallowedCommand(std::string const& name, cmCommand* command,
+                                   cmPolicies::PolicyID policy,
+                                   const char* message)
+{
+  this->AddBuiltinCommand(name,
+                          new cmDisallowedCommand(command, policy, message));
+}
+
+void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
+{
+  this->AddBuiltinCommand(name, new cmUnexpectedCommand(name, error));
+}
+
+void cmState::AddScriptedCommand(std::string const& name, cmCommand* command)
+{
+  std::string sName = cmSystemTools::LowerCase(name);
+
+  // if the command already exists, give a new name to the old command.
+  if (cmCommand* oldCmd = this->GetCommand(sName)) {
+    std::string const newName = "_" + sName;
+    std::map<std::string, cmCommand*>::iterator pos =
+      this->ScriptedCommands.find(newName);
+    if (pos != this->ScriptedCommands.end()) {
       delete pos->second;
-      this->Commands.erase(pos++);
-    } else {
-      ++pos;
+      this->ScriptedCommands.erase(pos);
     }
+    this->ScriptedCommands.insert(std::make_pair(newName, oldCmd->Clone()));
   }
+
+  // if the command already exists, free the old one
+  std::map<std::string, cmCommand*>::iterator pos =
+    this->ScriptedCommands.find(sName);
+  if (pos != this->ScriptedCommands.end()) {
+    delete pos->second;
+    this->ScriptedCommands.erase(pos);
+  }
+  this->ScriptedCommands.insert(std::make_pair(sName, command));
 }
 
 cmCommand* cmState::GetCommand(std::string const& name) const
 {
-  cmCommand* command = CM_NULLPTR;
   std::string sName = cmSystemTools::LowerCase(name);
-  std::map<std::string, cmCommand*>::const_iterator pos =
-    this->Commands.find(sName);
-  if (pos != this->Commands.end()) {
-    command = (*pos).second;
+  std::map<std::string, cmCommand*>::const_iterator pos;
+  pos = this->ScriptedCommands.find(sName);
+  if (pos != this->ScriptedCommands.end()) {
+    return pos->second;
   }
-  return command;
+  pos = this->BuiltinCommands.find(sName);
+  if (pos != this->BuiltinCommands.end()) {
+    return pos->second;
+  }
+  return CM_NULLPTR;
 }
 
 std::vector<std::string> cmState::GetCommandNames() const
 {
   std::vector<std::string> commandNames;
-  commandNames.reserve(this->Commands.size());
-  std::map<std::string, cmCommand*>::const_iterator cmds =
-    this->Commands.begin();
-  for (; cmds != this->Commands.end(); ++cmds) {
+  commandNames.reserve(this->BuiltinCommands.size() +
+                       this->ScriptedCommands.size());
+  for (std::map<std::string, cmCommand*>::const_iterator cmds =
+         this->BuiltinCommands.begin();
+       cmds != this->BuiltinCommands.end(); ++cmds) {
     commandNames.push_back(cmds->first);
   }
+  for (std::map<std::string, cmCommand*>::const_iterator cmds =
+         this->ScriptedCommands.begin();
+       cmds != this->ScriptedCommands.end(); ++cmds) {
+    commandNames.push_back(cmds->first);
+  }
+  std::sort(commandNames.begin(), commandNames.end());
+  commandNames.erase(std::unique(commandNames.begin(), commandNames.end()),
+                     commandNames.end());
   return commandNames;
 }
 
 void cmState::RemoveUserDefinedCommands()
 {
-  std::vector<cmCommand*> renamedCommands;
-  for (std::map<std::string, cmCommand*>::iterator j = this->Commands.begin();
-       j != this->Commands.end();) {
-    if (j->second->IsUserDefined()) {
-      delete j->second;
-      this->Commands.erase(j++);
-    } else if (j->first != j->second->GetName()) {
-      renamedCommands.push_back(j->second);
-      this->Commands.erase(j++);
-    } else {
-      ++j;
-    }
-  }
-  for (std::vector<cmCommand*>::const_iterator it = renamedCommands.begin();
-       it != renamedCommands.end(); ++it) {
-    this->Commands[cmSystemTools::LowerCase((*it)->GetName())] = *it;
-  }
+  cmDeleteAll(this->ScriptedCommands);
+  this->ScriptedCommands.clear();
 }
 
 void cmState::SetGlobalProperty(const std::string& prop, const char* value)
@@ -481,6 +488,9 @@ const char* cmState::GetGlobalProperty(const std::string& prop)
   } else if (prop == "IN_TRY_COMPILE") {
     this->SetGlobalProperty("IN_TRY_COMPILE",
                             this->IsInTryCompile ? "1" : "0");
+  } else if (prop == "GENERATOR_IS_MULTI_CONFIG") {
+    this->SetGlobalProperty("GENERATOR_IS_MULTI_CONFIG",
+                            this->IsGeneratorMultiConfig ? "1" : "0");
   } else if (prop == "ENABLED_LANGUAGES") {
     std::string langs;
     langs = cmJoin(this->EnabledLanguages, ";");
@@ -623,7 +633,7 @@ cmStateSnapshot cmState::CreateBaseSnapshot()
 }
 
 cmStateSnapshot cmState::CreateBuildsystemDirectorySnapshot(
-  cmStateSnapshot originSnapshot)
+  cmStateSnapshot const& originSnapshot)
 {
   assert(originSnapshot.IsValid());
   cmStateDetail::PositionType pos =
@@ -657,7 +667,7 @@ cmStateSnapshot cmState::CreateBuildsystemDirectorySnapshot(
 }
 
 cmStateSnapshot cmState::CreateFunctionCallSnapshot(
-  cmStateSnapshot originSnapshot, std::string const& fileName)
+  cmStateSnapshot const& originSnapshot, std::string const& fileName)
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -676,7 +686,7 @@ cmStateSnapshot cmState::CreateFunctionCallSnapshot(
 }
 
 cmStateSnapshot cmState::CreateMacroCallSnapshot(
-  cmStateSnapshot originSnapshot, std::string const& fileName)
+  cmStateSnapshot const& originSnapshot, std::string const& fileName)
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -691,7 +701,7 @@ cmStateSnapshot cmState::CreateMacroCallSnapshot(
 }
 
 cmStateSnapshot cmState::CreateIncludeFileSnapshot(
-  cmStateSnapshot originSnapshot, const std::string& fileName)
+  cmStateSnapshot const& originSnapshot, std::string const& fileName)
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -706,7 +716,7 @@ cmStateSnapshot cmState::CreateIncludeFileSnapshot(
 }
 
 cmStateSnapshot cmState::CreateVariableScopeSnapshot(
-  cmStateSnapshot originSnapshot)
+  cmStateSnapshot const& originSnapshot)
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -724,7 +734,7 @@ cmStateSnapshot cmState::CreateVariableScopeSnapshot(
 }
 
 cmStateSnapshot cmState::CreateInlineListFileSnapshot(
-  cmStateSnapshot originSnapshot, const std::string& fileName)
+  cmStateSnapshot const& originSnapshot, std::string const& fileName)
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -738,7 +748,7 @@ cmStateSnapshot cmState::CreateInlineListFileSnapshot(
 }
 
 cmStateSnapshot cmState::CreatePolicyScopeSnapshot(
-  cmStateSnapshot originSnapshot)
+  cmStateSnapshot const& originSnapshot)
 {
   cmStateDetail::PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -749,7 +759,7 @@ cmStateSnapshot cmState::CreatePolicyScopeSnapshot(
   return cmStateSnapshot(this, pos);
 }
 
-cmStateSnapshot cmState::Pop(cmStateSnapshot originSnapshot)
+cmStateSnapshot cmState::Pop(cmStateSnapshot const& originSnapshot)
 {
   cmStateDetail::PositionType pos = originSnapshot.Position;
   cmStateDetail::PositionType prevPos = pos;

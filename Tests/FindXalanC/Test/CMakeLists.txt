@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 project(TestFindXalanC CXX)
 include(CTest)
 
-# CMake does not actually provide FindXalanC publicly.
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../Source/Modules)
-
 find_package(XalanC REQUIRED)
 
 add_executable(test_xalanc_tgt main.cxx)

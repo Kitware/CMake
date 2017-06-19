@@ -47,7 +47,7 @@ protected:
     }
 
     // check all strings for a match
-    foreach (QString str, strs) {
+    foreach (QString const& str, strs) {
       if (str.contains(this->filterRegExp())) {
         return true;
       }
@@ -236,12 +236,12 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
     qSort(newP);
     qSort(newP2);
     int row_count = 0;
-    foreach (QCMakeProperty p, newP) {
+    foreach (QCMakeProperty const& p, newP) {
       this->insertRow(row_count);
       this->setPropertyData(this->index(row_count, 0), p, true);
       row_count++;
     }
-    foreach (QCMakeProperty p, newP2) {
+    foreach (QCMakeProperty const& p, newP2) {
       this->insertRow(row_count);
       this->setPropertyData(this->index(row_count, 0), p, false);
       row_count++;
@@ -254,8 +254,11 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
 
     QStandardItem* root = this->invisibleRootItem();
 
-    foreach (QString key, newPropsTree.keys()) {
-      QCMakePropertyList props2 = newPropsTree[key];
+    for (QMap<QString, QCMakePropertyList>::const_iterator iter =
+           newPropsTree.begin();
+         iter != newPropsTree.end(); ++iter) {
+      QString const& key = iter.key();
+      QCMakePropertyList const& props2 = iter.value();
 
       QList<QStandardItem*> parentItems;
       parentItems.append(
@@ -280,8 +283,11 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
       }
     }
 
-    foreach (QString key, newPropsTree2.keys()) {
-      QCMakePropertyList props2 = newPropsTree2[key];
+    for (QMap<QString, QCMakePropertyList>::const_iterator iter =
+           newPropsTree2.begin();
+         iter != newPropsTree2.end(); ++iter) {
+      QString const& key = iter.key();
+      QCMakePropertyList const& props2 = iter.value();
 
       QStandardItem* parentItem =
         new QStandardItem(key.isEmpty() ? tr("Ungrouped Entries") : key);
@@ -393,7 +399,7 @@ void QCMakeCacheModel::breakProperties(
 {
   QMap<QString, QCMakePropertyList> tmp;
   // return a map of properties grouped by prefixes, and sorted
-  foreach (QCMakeProperty p, props) {
+  foreach (QCMakeProperty const& p, props) {
     QString prefix = QCMakeCacheModel::prefix(p.Key);
     tmp[prefix].append(p);
   }
@@ -423,7 +429,7 @@ QCMakePropertyList QCMakeCacheModel::properties() const
     return props;
   }
 
-  QList<QModelIndex> idxs;
+  QVector<QModelIndex> idxs;
   idxs.append(this->index(0, 0));
 
   // walk the entire model for property entries
@@ -448,7 +454,7 @@ QCMakePropertyList QCMakeCacheModel::properties() const
                (idxs.last().row() + 1) >= rowCount(idxs.last().parent()) ||
 #endif
                !idxs.last().sibling(idxs.last().row() + 1, 0).isValid())) {
-        idxs.removeLast();
+        idxs.remove(idxs.size() - 1);
       }
       if (!idxs.isEmpty()) {
         idxs.last() = idxs.last().sibling(idxs.last().row() + 1, 0);

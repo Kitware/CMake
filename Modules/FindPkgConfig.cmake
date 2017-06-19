@@ -65,7 +65,7 @@ macro(_pkgconfig_invoke _pkglist _prefix _varname _regexp)
     set(_pkgconfig_${_varname} "")
     _pkgconfig_unset(${_prefix}_${_varname})
   else()
-    string(REGEX REPLACE "[\r\n]"                  " " _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
+    string(REGEX REPLACE "[\r\n]"       " " _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
 
     if (NOT ${_regexp} STREQUAL "")
       string(REGEX REPLACE "${_regexp}" " " _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
@@ -85,6 +85,9 @@ endmacro()
   Retrieves the value of a variable from a package::
 
     pkg_get_variable(<RESULT> <MODULE> <VARIABLE>)
+
+  If multiple values are returned variable will contain a
+  :ref:`;-list <CMake Language Lists>`.
 
   For example:
 
@@ -190,10 +193,12 @@ function(_pkg_create_imp_target _prefix _no_cmake_path _no_cmake_environment_pat
     string(APPEND _find_opts " NO_CMAKE_ENVIRONMENT_PATH")
   endif()
 
+  unset(_search_paths)
   foreach (flag IN LISTS ${_prefix}_LDFLAGS)
     if (flag MATCHES "^-L(.*)")
       # only look into the given paths from now on
-      set(_find_opts HINTS ${CMAKE_MATCH_1} NO_DEFAULT_PATH)
+      list(APPEND _search_paths ${CMAKE_MATCH_1})
+      set(_find_opts HINTS ${_search_paths} NO_DEFAULT_PATH)
       continue()
     endif()
     if (flag MATCHES "^-l(.*)")
@@ -312,6 +317,10 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
           if(uselib64 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
             list(APPEND _lib_dirs "lib64/pkgconfig")
           endif()
+          get_property(uselibx32 GLOBAL PROPERTY FIND_LIBRARY_USE_LIBX32_PATHS)
+          if(uselibx32 AND CMAKE_INTERNAL_PLATFORM_ABI STREQUAL "ELF X32")
+            list(APPEND _lib_dirs "libx32/pkgconfig")
+          endif()
         endif()
       endif()
       list(APPEND _lib_dirs "lib/pkgconfig")
@@ -360,38 +369,25 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
         set(_pkg_check_modules_pkg_ver)
       endif()
 
-      # handle the operands
-      if (_pkg_check_modules_pkg_op STREQUAL ">=")
-        list(APPEND _pkg_check_modules_exist_query --atleast-version)
-      endif()
-
-      if (_pkg_check_modules_pkg_op STREQUAL "=")
-        list(APPEND _pkg_check_modules_exist_query --exact-version)
-      endif()
-
-      if (_pkg_check_modules_pkg_op STREQUAL "<=")
-        list(APPEND _pkg_check_modules_exist_query --max-version)
-      endif()
-
-      # create the final query which is of the format:
-      # * --atleast-version <version> <pkg-name>
-      # * --exact-version <version> <pkg-name>
-      # * --max-version <version> <pkg-name>
-      # * --exists <pkg-name>
-      if (_pkg_check_modules_pkg_op)
-        list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_ver}")
-      else()
-        list(APPEND _pkg_check_modules_exist_query --exists)
-      endif()
-      list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors)
-
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_VERSION)
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_PREFIX)
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_INCLUDEDIR)
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_LIBDIR)
 
-      list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_name}")
       list(APPEND _pkg_check_modules_packages    "${_pkg_check_modules_pkg_name}")
+
+      # create the final query which is of the format:
+      # * <pkg-name> >= <version>
+      # * <pkg-name> = <version>
+      # * <pkg-name> <= <version>
+      # * --exists <pkg-name>
+      list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors)
+      if (_pkg_check_modules_pkg_op)
+        list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_name} ${_pkg_check_modules_pkg_op} ${_pkg_check_modules_pkg_ver}")
+      else()
+        list(APPEND _pkg_check_modules_exist_query --exists)
+        list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_name}")
+      endif()
 
       # execute the query
       execute_process(
@@ -530,6 +526,9 @@ endmacro()
 
     <XPREFIX> = <PREFIX>        for common case
     <XPREFIX> = <PREFIX>_STATIC for static linking
+
+ Every variable containing multiple values will be a
+ :ref:`;-list <CMake Language Lists>`.
 
  There are some special variables whose prefix depends on the count of
  given modules.  When there is only one module, <PREFIX> stays

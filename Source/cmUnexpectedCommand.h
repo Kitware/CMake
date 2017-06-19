@@ -3,7 +3,8 @@
 #ifndef cmUnexpectedCommand_h
 #define cmUnexpectedCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 
@@ -27,10 +28,6 @@ public:
 
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
-
-  bool IsScriptable() const CM_OVERRIDE { return true; }
-
-  std::string GetName() const CM_OVERRIDE { return this->Name; }
 
 private:
   std::string Name;

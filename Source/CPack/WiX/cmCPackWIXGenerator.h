@@ -3,7 +3,7 @@
 #ifndef cmCPackWIXGenerator_h
 #define cmCPackWIXGenerator_h
 
-#include <CPack/cmCPackGenerator.h>
+#include "cmCPackGenerator.h"
 
 #include "cmWIXPatch.h"
 #include "cmWIXShortcut.h"
@@ -65,7 +65,7 @@ private:
 
   bool CreateWiXSourceFiles();
 
-  std::string GetProgramFilesFolderId() const;
+  std::string GetRootFolderId() const;
 
   bool GenerateMainSourceFileFromTemplate();
 
@@ -104,7 +104,7 @@ private:
 
   bool RunLightCommand(std::string const& objectFiles);
 
-  void AddDirectoryAndFileDefinitons(
+  void AddDirectoryAndFileDefinitions(
     std::string const& topdir, std::string const& directoryId,
     cmWIXDirectoriesSourceWriter& directoryDefinitions,
     cmWIXFilesSourceWriter& fileDefinitions,

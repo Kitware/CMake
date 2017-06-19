@@ -1,7 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "windows.h" // this must be first to define GetCurrentDirectory
-
 #include "cmGlobalVisualStudio7Generator.h"
 
 #include "cmGeneratedFileStream.h"
@@ -11,9 +9,11 @@
 #include "cmState.h"
 #include "cmUuid.h"
 #include "cmake.h"
-#include <cmsys/Encoding.hxx>
+#include "cmsys/Encoding.hxx"
 
 #include <assert.h>
+#include <vector>
+#include <windows.h>
 
 static cmVS7FlagTable cmVS7ExtraFlagTable[] = {
   // Precompiled header and related options.  Note that the
@@ -47,6 +47,7 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   this->IntelProjectVersion = 0;
   this->DevEnvCommandInitialized = false;
   this->MasmEnabled = false;
+  this->NasmEnabled = false;
 
   if (platformName.empty()) {
     this->DefaultPlatformName = "Win32";
@@ -54,7 +55,6 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
     this->DefaultPlatformName = platformName;
   }
   this->ExtraFlagTable = cmVS7ExtraFlagTable;
-  this->Version = VS7;
 }
 
 cmGlobalVisualStudio7Generator::~cmGlobalVisualStudio7Generator()
@@ -295,16 +295,16 @@ void cmGlobalVisualStudio7Generator::Generate()
     this->CallVisualStudioMacro(MacroReload);
   }
 
-  if (this->Version == VS71 && !this->CMakeInstance->GetIsInTryCompile()) {
-    const char* cmakeWarnVS71 =
-      this->CMakeInstance->GetState()->GetCacheEntryValue("CMAKE_WARN_VS71");
-    if (!cmakeWarnVS71 || !cmSystemTools::IsOff(cmakeWarnVS71)) {
+  if (this->Version == VS8 && !this->CMakeInstance->GetIsInTryCompile()) {
+    const char* cmakeWarnVS8 =
+      this->CMakeInstance->GetState()->GetCacheEntryValue("CMAKE_WARN_VS8");
+    if (!cmakeWarnVS8 || !cmSystemTools::IsOff(cmakeWarnVS8)) {
       this->CMakeInstance->IssueMessage(
         cmake::WARNING,
-        "The \"Visual Studio 7 .NET 2003\" generator is deprecated "
+        "The \"Visual Studio 8 2005\" generator is deprecated "
         "and will be removed in a future version of CMake."
         "\n"
-        "Add CMAKE_WARN_VS71=OFF to the cache to disable this warning.");
+        "Add CMAKE_WARN_VS8=OFF to the cache to disable this warning.");
     }
   }
 }
@@ -356,16 +356,16 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
     if (expath) {
       std::set<std::string> allConfigurations(configs.begin(), configs.end());
       const char* mapping = target->GetProperty("VS_PLATFORM_MAPPING");
-      this->WriteProjectConfigurations(
-        fout, target->GetName().c_str(), target->GetType(), configs,
-        allConfigurations, mapping ? mapping : "");
+      this->WriteProjectConfigurations(fout, target->GetName().c_str(),
+                                       *target, configs, allConfigurations,
+                                       mapping ? mapping : "");
     } else {
       const std::set<std::string>& configsPartOfDefaultBuild =
         this->IsPartOfDefaultBuild(configs, projectTargets, target);
       const char* vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
       if (vcprojName) {
-        this->WriteProjectConfigurations(fout, vcprojName, target->GetType(),
-                                         configs, configsPartOfDefaultBuild);
+        this->WriteProjectConfigurations(fout, vcprojName, *target, configs,
+                                         configsPartOfDefaultBuild);
       }
     }
   }
@@ -681,10 +681,10 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   // default build if another target depends on it
   int type = target->GetType();
   if (type == cmStateEnums::GLOBAL_TARGET) {
-    std::list<std::string> targetNames;
+    std::vector<std::string> targetNames;
     targetNames.push_back("INSTALL");
     targetNames.push_back("PACKAGE");
-    for (std::list<std::string>::const_iterator t = targetNames.begin();
+    for (std::vector<std::string>::const_iterator t = targetNames.begin();
          t != targetNames.end(); ++t) {
       // check if target <*t> is part of default build
       if (target->GetName() == *t) {

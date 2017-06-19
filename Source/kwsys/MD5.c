@@ -13,8 +13,6 @@
 #include <stdlib.h> /* malloc, free */
 #include <string.h> /* memcpy, strlen */
 
-/*--------------------------------------------------------------------------*/
-
 /* This MD5 implementation has been taken from a third party.  Slight
    modifications to the arrangement of the code have been made to put
    it in a single source file instead of a separate header and
@@ -425,14 +423,12 @@ static void md5_finish(md5_state_t* pms, md5_byte_t digest[16])
 #pragma clang diagnostic pop
 #endif
 
-/*--------------------------------------------------------------------------*/
 /* Wrap up the MD5 state in our opaque structure.  */
 struct kwsysMD5_s
 {
   md5_state_t md5_state;
 };
 
-/*--------------------------------------------------------------------------*/
 kwsysMD5* kwsysMD5_New(void)
 {
   /* Allocate a process control structure.  */
@@ -443,7 +439,6 @@ kwsysMD5* kwsysMD5_New(void)
   return md5;
 }
 
-/*--------------------------------------------------------------------------*/
 void kwsysMD5_Delete(kwsysMD5* md5)
 {
   /* Make sure we have an instance.  */
@@ -455,13 +450,11 @@ void kwsysMD5_Delete(kwsysMD5* md5)
   free(md5);
 }
 
-/*--------------------------------------------------------------------------*/
 void kwsysMD5_Initialize(kwsysMD5* md5)
 {
   md5_init(&md5->md5_state);
 }
 
-/*--------------------------------------------------------------------------*/
 void kwsysMD5_Append(kwsysMD5* md5, unsigned char const* data, int length)
 {
   size_t dlen;
@@ -473,13 +466,11 @@ void kwsysMD5_Append(kwsysMD5* md5, unsigned char const* data, int length)
   md5_append(&md5->md5_state, (md5_byte_t const*)data, dlen);
 }
 
-/*--------------------------------------------------------------------------*/
 void kwsysMD5_Finalize(kwsysMD5* md5, unsigned char digest[16])
 {
   md5_finish(&md5->md5_state, (md5_byte_t*)digest);
 }
 
-/*--------------------------------------------------------------------------*/
 void kwsysMD5_FinalizeHex(kwsysMD5* md5, char buffer[32])
 {
   unsigned char digest[16];
@@ -487,7 +478,6 @@ void kwsysMD5_FinalizeHex(kwsysMD5* md5, char buffer[32])
   kwsysMD5_DigestToHex(digest, buffer);
 }
 
-/*--------------------------------------------------------------------------*/
 void kwsysMD5_DigestToHex(unsigned char const digest[16], char buffer[32])
 {
   /* Map from 4-bit index to hexadecimal representation.  */

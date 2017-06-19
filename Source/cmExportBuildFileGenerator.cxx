@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportBuildFileGenerator.h"
 
+#include "cmAlgorithms.h"
 #include "cmExportSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -20,6 +21,8 @@
 #include <set>
 #include <sstream>
 #include <utility>
+
+class cmSourceFile;
 
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 {
@@ -171,29 +174,51 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
   // Get the makefile in which to lookup target information.
   cmMakefile* mf = target->Makefile;
 
-  // Add the main target file.
-  {
-    std::string prop = "IMPORTED_LOCATION";
+  if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+    std::string prop = "IMPORTED_OBJECTS";
     prop += suffix;
-    std::string value;
-    if (target->IsAppBundleOnApple()) {
-      value = target->GetFullPath(config, false);
-    } else {
-      value = target->GetFullPath(config, false, true);
-    }
-    properties[prop] = value;
-  }
 
-  // Add the import library for windows DLLs.
-  if (target->IsDLLPlatform() &&
-      (target->GetType() == cmStateEnums::SHARED_LIBRARY ||
-       target->IsExecutableWithExports()) &&
-      mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
-    std::string prop = "IMPORTED_IMPLIB";
-    prop += suffix;
-    std::string value = target->GetFullPath(config, true);
-    target->GetImplibGNUtoMS(value, value, "${CMAKE_IMPORT_LIBRARY_SUFFIX}");
-    properties[prop] = value;
+    // Compute all the object files inside this target and setup
+    // IMPORTED_OBJECTS as a list of object files
+    std::vector<cmSourceFile const*> objectSources;
+    target->GetObjectSources(objectSources, config);
+    std::string const obj_dir = target->GetObjectDirectory(config);
+    std::vector<std::string> objects;
+    for (std::vector<cmSourceFile const*>::const_iterator si =
+           objectSources.begin();
+         si != objectSources.end(); ++si) {
+      const std::string& obj = target->GetObjectName(*si);
+      objects.push_back(obj_dir + obj);
+    }
+
+    // Store the property.
+    properties[prop] = cmJoin(objects, ";");
+  } else {
+    // Add the main target file.
+    {
+      std::string prop = "IMPORTED_LOCATION";
+      prop += suffix;
+      std::string value;
+      if (target->IsAppBundleOnApple()) {
+        value =
+          target->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
+      } else {
+        value = target->GetFullPath(config,
+                                    cmStateEnums::RuntimeBinaryArtifact, true);
+      }
+      properties[prop] = value;
+    }
+
+    // Add the import library for windows DLLs.
+    if (target->HasImportLibrary() &&
+        mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
+      std::string prop = "IMPORTED_IMPLIB";
+      prop += suffix;
+      std::string value =
+        target->GetFullPath(config, cmStateEnums::ImportLibraryArtifact);
+      target->GetImplibGNUtoMS(value, value, "${CMAKE_IMPORT_LIBRARY_SUFFIX}");
+      properties[prop] = value;
+    }
   }
 }
 

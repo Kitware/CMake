@@ -20,7 +20,6 @@
 
 namespace KWSYS_NAMESPACE {
 
-//----------------------------------------------------------------------------
 class DirectoryInternals
 {
 public:
@@ -31,25 +30,21 @@ public:
   std::string Path;
 };
 
-//----------------------------------------------------------------------------
 Directory::Directory()
 {
   this->Internal = new DirectoryInternals;
 }
 
-//----------------------------------------------------------------------------
 Directory::~Directory()
 {
   delete this->Internal;
 }
 
-//----------------------------------------------------------------------------
 unsigned long Directory::GetNumberOfFiles() const
 {
   return static_cast<unsigned long>(this->Internal->Files.size());
 }
 
-//----------------------------------------------------------------------------
 const char* Directory::GetFile(unsigned long dindex) const
 {
   if (dindex >= this->Internal->Files.size()) {
@@ -58,13 +53,11 @@ const char* Directory::GetFile(unsigned long dindex) const
   return this->Internal->Files[dindex].c_str();
 }
 
-//----------------------------------------------------------------------------
 const char* Directory::GetPath() const
 {
   return this->Internal->Path.c_str();
 }
 
-//----------------------------------------------------------------------------
 void Directory::Clear()
 {
   this->Internal->Path.resize(0);
@@ -116,7 +109,7 @@ bool Directory::Load(const std::string& name)
     // Make sure the slashes in the wildcard suffix are consistent with the
     // rest of the path
     buf = new char[n + 2 + 1];
-    if (name.find('\\') != name.npos) {
+    if (name.find('\\') != std::string::npos) {
       sprintf(buf, "%s\\*", name.c_str());
     } else {
       sprintf(buf, "%s/*", name.c_str());

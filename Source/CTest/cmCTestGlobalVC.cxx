@@ -102,14 +102,15 @@ void cmCTestGlobalVC::WriteXMLGlobal(cmXMLWriter& xml)
 
 bool cmCTestGlobalVC::WriteXMLUpdates(cmXMLWriter& xml)
 {
+  bool result = true;
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   Gathering version information (one . per revision):\n"
              "    "
                << std::flush);
-  this->LoadRevisions();
+  result = this->LoadRevisions() && result;
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
 
-  this->LoadModifications();
+  result = this->LoadModifications() && result;
 
   this->WriteXMLGlobal(xml);
 
@@ -119,5 +120,5 @@ bool cmCTestGlobalVC::WriteXMLUpdates(cmXMLWriter& xml)
     this->WriteXMLDirectory(xml, di->first, di->second);
   }
 
-  return true;
+  return result;
 }

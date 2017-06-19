@@ -44,6 +44,8 @@ void cmWIXFeaturesSourceWriter::EmitFeatureForComponentGroup(
   AddAttributeUnlessEmpty("Title", group.DisplayName);
   AddAttributeUnlessEmpty("Description", group.Description);
 
+  patch.ApplyFragment("CM_G_" + group.Name, *this);
+
   for (std::vector<cmCPackComponentGroup*>::const_iterator i =
          group.Subgroups.begin();
        i != group.Subgroups.end(); ++i) {
@@ -55,8 +57,6 @@ void cmWIXFeaturesSourceWriter::EmitFeatureForComponentGroup(
        i != group.Components.end(); ++i) {
     EmitFeatureForComponent(**i, patch);
   }
-
-  patch.ApplyFragment("CM_G_" + group.Name, *this);
 
   EndElement("Feature");
 }

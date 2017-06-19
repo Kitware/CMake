@@ -3,13 +3,15 @@
 #ifndef cmCLocaleEnvironmentScope_h
 #define cmCLocaleEnvironmentScope_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h"
 
 #include <map>
 #include <string>
 
 class cmCLocaleEnvironmentScope
 {
+  CM_DISABLE_COPY(cmCLocaleEnvironmentScope)
+
 public:
   cmCLocaleEnvironmentScope();
   ~cmCLocaleEnvironmentScope();

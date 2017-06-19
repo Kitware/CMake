@@ -3,7 +3,8 @@
 #ifndef cmFortran_h
 #define cmFortran_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <iosfwd>
 #include <set>
 #include <string>
@@ -20,6 +21,8 @@ class cmLocalGenerator;
  */
 class cmDependsFortran : public cmDepends
 {
+  CM_DISABLE_COPY(cmDependsFortran)
+
 public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
@@ -76,9 +79,6 @@ protected:
   cmDependsFortranInternals* Internal;
 
 private:
-  cmDependsFortran(cmDependsFortran const&); // Purposely not implemented.
-  void operator=(cmDependsFortran const&);   // Purposely not implemented.
-
   std::string MaybeConvertToRelativePath(std::string const& base,
                                          std::string const& path);
 };

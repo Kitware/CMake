@@ -3,7 +3,8 @@
 #ifndef cmFindProgramCommand_h
 #define cmFindProgramCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 
@@ -36,23 +37,13 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
 
-  /**
-   * This determines if the command is invoked when in script mode.
-   */
-  bool IsScriptable() const CM_OVERRIDE { return true; }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "find_program"; }
-
 private:
   std::string FindProgram();
   std::string FindNormalProgram();
   std::string FindNormalProgramDirsPerName();
   std::string FindNormalProgramNamesPerDir();
   std::string FindAppBundle();
-  std::string GetBundleExecutable(std::string bundlePath);
+  std::string GetBundleExecutable(std::string const& bundlePath);
 };
 
 #endif

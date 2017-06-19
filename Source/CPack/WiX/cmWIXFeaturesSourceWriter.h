@@ -6,7 +6,7 @@
 #include "cmWIXPatch.h"
 #include "cmWIXSourceWriter.h"
 
-#include <CPack/cmCPackGenerator.h>
+#include "cmCPackGenerator.h"
 
 /** \class cmWIXFeaturesSourceWriter
  * \brief Helper class to generate features.wxs

@@ -415,7 +415,7 @@ file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines
 foreach(line IN LISTS lines)
   if("${line}" MATCHES "^\\.\\. command:: ([A-Za-z0-9_]+)")
     if(_ep_func)
-      set(_ep_keywords_${_ep_func} "${_ep_keywords_${_ep_func}})$")
+      string(APPEND _ep_keywords_${_ep_func} ")$")
     endif()
     set(_ep_func "${CMAKE_MATCH_1}")
     #message("function [${_ep_func}]")
@@ -424,13 +424,13 @@ foreach(line IN LISTS lines)
   elseif("${line}" MATCHES "^  ``([A-Z0-9_]+) .*``$")
     set(_ep_key "${CMAKE_MATCH_1}")
     #message("  keyword [${_ep_key}]")
-    set(_ep_keywords_${_ep_func}
-      "${_ep_keywords_${_ep_func}}${_ep_keyword_sep}${_ep_key}")
+    string(APPEND _ep_keywords_${_ep_func}
+      "${_ep_keyword_sep}${_ep_key}")
     set(_ep_keyword_sep "|")
   endif()
 endforeach()
 if(_ep_func)
-  set(_ep_keywords_${_ep_func} "${_ep_keywords_${_ep_func}})$")
+  string(APPEND _ep_keywords_${_ep_func} ")$")
 endif()
 
 # Save regex matching supported hash algorithm names.
@@ -531,6 +531,15 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
   else()
     set(git_clone_shallow_options "--depth 1")
   endif()
+  if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
+    # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
+    set(git_checkout_explicit-- "--")
+  else()
+    # Use `git checkout <branch>` even though this risks ambiguity with a
+    # local path.  Unfortunately we cannot use `git checkout <tree-ish> --`
+    # because that will not search for remote branch names, a common use case.
+    set(git_checkout_explicit-- "")
+  endif()
   file(WRITE ${script_filename}
 "if(\"${git_tag}\" STREQUAL \"\")
   message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
@@ -600,11 +609,8 @@ if(error_code)
   message(FATAL_ERROR \"Failed to clone repository: '${git_repository}'\")
 endif()
 
-# Use `git checkout <branch>` even though this risks ambiguity with a
-# local path.  Unfortunately we cannot use `git checkout <tree-ish> --`
-# because that will not search for remote branch names, a common use case.
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" \${git_options} checkout ${git_tag}
+  COMMAND \"${git_EXECUTABLE}\" \${git_options} checkout ${git_tag} ${git_checkout_explicit--}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -1990,11 +1996,10 @@ function(_ep_add_download_command name)
         set(comment "Performing download step (${steps}) for '${name}'")
         _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${hash}")
       endif()
-      list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake
-        COMMAND)
+      list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake)
       if (NOT no_extract)
         _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${name}" "${file}" "${source_dir}")
-        list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
+        list(APPEND cmd COMMAND ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
       else ()
         set_property(TARGET ${name} PROPERTY _EP_DOWNLOADED_FILE ${file})
       endif ()

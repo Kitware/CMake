@@ -128,18 +128,7 @@
 /*  please, do it beyond the point further indicated in this file.  */
 /* ================================================================ */
 
-/*
- * libcurl's external interface definitions are also used internally,
- * and might also include required system header files to define them.
- */
-
-#include <curl/curlbuild.h>
-
-/*
- * Compile time sanity checks must also be done when building the library.
- */
-
-#include <curl/curlrules.h>
+#include <curl/curl.h>
 
 /*
  * Ensure that no one is using the old SIZEOF_CURL_OFF_T macro
@@ -482,8 +471,8 @@
 
 #  ifdef __minix
      /* Minix 3 versions up to at least 3.1.3 are missing these prototypes */
-     extern char * strtok_r(char *s, const char *delim, char **last);
-     extern struct tm * gmtime_r(const time_t * const timep, struct tm *tmp);
+     extern char *strtok_r(char *s, const char *delim, char **last);
+     extern struct tm *gmtime_r(const time_t * const timep, struct tm *tmp);
 #  endif
 
 #  define DIR_CHAR      "/"
@@ -614,9 +603,13 @@ int netware_init(void);
 #endif
 #endif
 
-#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H)
+#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H) && !defined(USE_WIN32_IDN)
 /* The lib and header are present */
 #define USE_LIBIDN2
+#endif
+
+#if defined(USE_LIBIDN2) && defined(USE_WIN32_IDN)
+#error "Both libidn2 and WinIDN are enabled, choose one."
 #endif
 
 #ifndef SIZEOF_TIME_T
@@ -649,14 +642,14 @@ int netware_init(void);
 #if !defined(CURL_DISABLE_NTLM) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 #if defined(USE_OPENSSL) || defined(USE_WINDOWS_SSPI) || \
     defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_DARWINSSL) || \
-    defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
+    defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) || \
+    defined(USE_MBEDTLS)
 
 #define USE_NTLM
 
-#elif defined(USE_MBEDTLS)
+#  if defined(USE_MBEDTLS)
+/* Get definition of MBEDTLS_MD4_C */
 #  include <mbedtls/md4.h>
-#  if defined(MBEDTLS_MD4_C)
-#define USE_NTLM
 #  endif
 
 #endif

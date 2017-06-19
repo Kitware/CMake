@@ -95,13 +95,13 @@ function(compiler_id_detection outvar lang)
 
     if(CID_ID_DEFINE)
       foreach(Id ${ordered_compilers})
-        set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}# define ${CID_PREFIX}COMPILER_IS_${Id} 0\n")
+        string(APPEND CMAKE_${lang}_COMPILER_ID_CONTENT "# define ${CID_PREFIX}COMPILER_IS_${Id} 0\n")
       endforeach()
     endif()
 
     set(pp_if "#if")
     if (CID_VERSION_STRINGS)
-      set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}\n/* Version number components: V=Version, R=Revision, P=Patch
+      string(APPEND CMAKE_${lang}_COMPILER_ID_CONTENT "\n/* Version number components: V=Version, R=Revision, P=Patch
    Version date components:   YYYY=Year, MM=Month,   DD=Day  */\n")
     endif()
 
@@ -126,7 +126,7 @@ function(compiler_id_detection outvar lang)
         string(CONFIGURE "${_compiler_id_version_compute_${Id}}" VERSION_BLOCK @ONLY)
         string(APPEND id_content "${VERSION_BLOCK}\n")
       endif()
-      set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}\n${id_content}")
+      string(APPEND CMAKE_${lang}_COMPILER_ID_CONTENT "\n${id_content}")
       set(pp_if "#elif")
     endforeach()
 
@@ -145,7 +145,7 @@ function(compiler_id_detection outvar lang)
 # define ${CID_PREFIX}COMPILER_ID \"\"")
     endif()
 
-    set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}\n${platform_compiler_detection}\n#endif")
+    string(APPEND CMAKE_${lang}_COMPILER_ID_CONTENT "\n${platform_compiler_detection}\n#endif")
   endif()
 
   set(${outvar} ${CMAKE_${lang}_COMPILER_ID_CONTENT} PARENT_SCOPE)

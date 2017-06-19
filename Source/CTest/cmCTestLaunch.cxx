@@ -2,11 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestLaunch.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cmsys/FStream.hxx>
-#include <cmsys/Process.h>
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
+#include "cmsys/RegularExpression.hxx"
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
@@ -306,7 +306,8 @@ void cmCTestLaunch::LoadLabels()
     if (line.empty() || line[0] == '#') {
       // Ignore blank and comment lines.
       continue;
-    } else if (line[0] == ' ') {
+    }
+    if (line[0] == ' ') {
       // Label lines appear indented by one space.
       if (inTarget || inSource) {
         this->Labels.insert(line.c_str() + 1);
@@ -622,7 +623,7 @@ int cmCTestLaunch::Main(int argc, const char* const argv[])
 
 void cmCTestLaunch::LoadConfig()
 {
-  cmake cm;
+  cmake cm(cmake::RoleScript);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();

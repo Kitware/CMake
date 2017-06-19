@@ -24,10 +24,10 @@ bool cmAddCustomTargetCommand::InitialPass(
     return false;
   }
 
-  std::string targetName = args[0];
+  std::string const& targetName = args[0];
 
   // Check the target name.
-  if (targetName.find_first_of("/\\") != targetName.npos) {
+  if (targetName.find_first_of("/\\") != std::string::npos) {
     std::ostringstream e;
     e << "called with invalid target name \"" << targetName
       << "\".  Target names may not contain a slash.  "
@@ -144,7 +144,7 @@ bool cmAddCustomTargetCommand::InitialPass(
   }
 
   std::string::size_type pos = targetName.find_first_of("#<>");
-  if (pos != targetName.npos) {
+  if (pos != std::string::npos) {
     std::ostringstream msg;
     msg << "called with target name containing a \"" << targetName[pos]
         << "\".  This character is not allowed.";

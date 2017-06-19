@@ -3,7 +3,7 @@
 #ifndef cmGlobalNinjaGenerator_h
 #define cmGlobalNinjaGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <map>
@@ -75,11 +75,10 @@ public:
   static std::string EncodeIdent(const std::string& ident, std::ostream& vars);
   static std::string EncodeLiteral(const std::string& lit);
   std::string EncodePath(const std::string& path);
-  static std::string EncodeDepfileSpace(const std::string& path);
 
   cmLinkLineComputer* CreateLinkLineComputer(
     cmOutputConverter* outputConverter,
-    cmStateDirectory stateDir) const CM_OVERRIDE;
+    cmStateDirectory const& stateDir) const CM_OVERRIDE;
 
   /**
    * Write the given @a comment to the output stream @a os. It
@@ -98,6 +97,8 @@ public:
    * supports platforms.
    */
   static bool SupportsPlatform() { return false; }
+
+  bool IsIPOSupported() const CM_OVERRIDE { return true; }
 
   /**
    * Write a build statement to @a os with the @a comment using
@@ -314,10 +315,12 @@ public:
     ASD.insert(deps.begin(), deps.end());
   }
 
-  void AppendTargetOutputs(cmGeneratorTarget const* target,
-                           cmNinjaDeps& outputs);
-  void AppendTargetDepends(cmGeneratorTarget const* target,
-                           cmNinjaDeps& outputs);
+  void AppendTargetOutputs(
+    cmGeneratorTarget const* target, cmNinjaDeps& outputs,
+    cmNinjaTargetDepends depends = DependOnTargetArtifact);
+  void AppendTargetDepends(
+    cmGeneratorTarget const* target, cmNinjaDeps& outputs,
+    cmNinjaTargetDepends depends = DependOnTargetArtifact);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaDeps& outputs);
   void AddDependencyToAll(cmGeneratorTarget* target);

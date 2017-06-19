@@ -2,15 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCommandArgumentParserHelper.h"
 
-#include <cm_kwiml.h>
-
 #include "cmCommandArgumentLexer.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include <cmConfigure.h>
 #include <iostream>
 #include <sstream>
 #include <string.h>

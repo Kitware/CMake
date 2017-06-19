@@ -3,7 +3,7 @@
 #ifndef cmLocalCommonGenerator_h
 #define cmLocalCommonGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <string>
 
@@ -33,7 +33,6 @@ public:
 protected:
   std::string WorkingDirectory;
 
-  void SetConfigName();
   std::string ConfigName;
 
   friend class cmCommonTargetGenerator;

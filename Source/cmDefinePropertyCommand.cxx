@@ -20,23 +20,25 @@ bool cmDefinePropertyCommand::InitialPass(std::vector<std::string> const& args,
 
   // Get the scope in which to define the property.
   cmProperty::ScopeType scope;
-  if (args[0] == "GLOBAL") {
+  std::string const& scope_arg = args[0];
+
+  if (scope_arg == "GLOBAL") {
     scope = cmProperty::GLOBAL;
-  } else if (args[0] == "DIRECTORY") {
+  } else if (scope_arg == "DIRECTORY") {
     scope = cmProperty::DIRECTORY;
-  } else if (args[0] == "TARGET") {
+  } else if (scope_arg == "TARGET") {
     scope = cmProperty::TARGET;
-  } else if (args[0] == "SOURCE") {
+  } else if (scope_arg == "SOURCE") {
     scope = cmProperty::SOURCE_FILE;
-  } else if (args[0] == "TEST") {
+  } else if (scope_arg == "TEST") {
     scope = cmProperty::TEST;
-  } else if (args[0] == "VARIABLE") {
+  } else if (scope_arg == "VARIABLE") {
     scope = cmProperty::VARIABLE;
-  } else if (args[0] == "CACHED_VARIABLE") {
+  } else if (scope_arg == "CACHED_VARIABLE") {
     scope = cmProperty::CACHED_VARIABLE;
   } else {
     std::ostringstream e;
-    e << "given invalid scope " << args[0] << ".  "
+    e << "given invalid scope " << scope_arg << ".  "
       << "Valid scopes are "
       << "GLOBAL, DIRECTORY, TARGET, SOURCE, "
       << "TEST, VARIABLE, CACHED_VARIABLE.";

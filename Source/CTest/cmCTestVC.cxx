@@ -6,7 +6,7 @@
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
-#include <cmsys/Process.h>
+#include "cmsys/Process.h"
 #include <sstream>
 #include <stdio.h>
 #include <time.h>
@@ -147,23 +147,25 @@ bool cmCTestVC::Update()
   // just note the current version and finish
   if (!cmSystemTools::IsOn(
         this->CTest->GetCTestConfiguration("UpdateVersionOnly").c_str())) {
-    this->NoteOldRevision();
+    result = this->NoteOldRevision() && result;
     this->Log << "--- Begin Update ---\n";
-    result = this->UpdateImpl();
+    result = this->UpdateImpl() && result;
     this->Log << "--- End Update ---\n";
   }
-  this->NoteNewRevision();
+  result = this->NoteNewRevision() && result;
   return result;
 }
 
-void cmCTestVC::NoteOldRevision()
+bool cmCTestVC::NoteOldRevision()
 {
   // We do nothing by default.
+  return true;
 }
 
-void cmCTestVC::NoteNewRevision()
+bool cmCTestVC::NoteNewRevision()
 {
   // We do nothing by default.
+  return true;
 }
 
 bool cmCTestVC::UpdateImpl()

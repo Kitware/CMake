@@ -2,13 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmLinkLineDeviceComputer.h"
+
+#include <set>
+#include <sstream>
+#include <vector>
+
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
-#include "cmOutputConverter.h"
+#include "cmStateTypes.h"
+
+class cmOutputConverter;
 
 cmLinkLineDeviceComputer::cmLinkLineDeviceComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory stateDir)
+  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir)
   : cmLinkLineComputer(outputConverter, stateDir)
 {
 }
@@ -31,9 +38,24 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
       continue;
     }
 
-    if (li->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-        li->Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
-        li->Target->GetType() == cmStateEnums::MODULE_LIBRARY) {
+    bool skippable = false;
+    switch (li->Target->GetType()) {
+      case cmStateEnums::SHARED_LIBRARY:
+      case cmStateEnums::MODULE_LIBRARY:
+      case cmStateEnums::INTERFACE_LIBRARY:
+        skippable = true;
+        break;
+      case cmStateEnums::STATIC_LIBRARY:
+        // If a static library is resolving its device linking, it should
+        // be removed for other device linking
+        skippable =
+          li->Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
+        break;
+      default:
+        break;
+    }
+
+    if (skippable) {
       continue;
     }
 
@@ -66,7 +88,7 @@ std::string cmLinkLineDeviceComputer::GetLinkerLanguage(cmGeneratorTarget*,
 }
 
 cmNinjaLinkLineDeviceComputer::cmNinjaLinkLineDeviceComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory stateDir,
+  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir,
   cmGlobalNinjaGenerator const* gg)
   : cmLinkLineDeviceComputer(outputConverter, stateDir)
   , GG(gg)

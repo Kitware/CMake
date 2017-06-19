@@ -2,18 +2,15 @@
 #
 include(GetPrerequisites)
 
-set(CMAKE_BUILD_TYPE "@CMAKE_BUILD_TYPE@")
-set(CMAKE_CONFIGURATION_TYPES "@CMAKE_CONFIGURATION_TYPES@")
 set(CMAKE_EXECUTABLE_SUFFIX "@CMAKE_EXECUTABLE_SUFFIX@")
 
 
 message(STATUS "=============================================================================")
 message(STATUS "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
 message(STATUS "")
-message(STATUS "CMAKE_BUILD_TYPE='${CMAKE_BUILD_TYPE}'")
-message(STATUS "CMAKE_CONFIGURATION_TYPES='${CMAKE_CONFIGURATION_TYPES}'")
+message(STATUS "Configuration '${Configuration}'")
+message(STATUS "CMAKE_COMMAND='${CMAKE_COMMAND}'")
 message(STATUS "CMAKE_EXECUTABLE_SUFFIX='${CMAKE_EXECUTABLE_SUFFIX}'")
-message(STATUS "CTEST_CONFIGURATION_TYPE='${CTEST_CONFIGURATION_TYPE}'")
 message(STATUS "")
 
 

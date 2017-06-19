@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackLog.h"
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 #include <iostream>
 
 #include "cmGeneratedFileStream.h"

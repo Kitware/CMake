@@ -1,6 +1,6 @@
 CMAKE_HOST_WIN32
 ----------------
 
-``True`` on Windows systems, including Win64.
+``True`` if the host system is running Windows, including Windows 64-bit and MSYS.
 
-Set to ``true`` when the host system is Windows and on Cygwin.
+Set to ``false`` on Cygwin.

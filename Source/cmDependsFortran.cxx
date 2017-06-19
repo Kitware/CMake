@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDependsFortran.h"
 
+#include "cmsys/FStream.hxx"
 #include <assert.h>
-#include <cmsys/FStream.hxx>
 #include <iostream>
 #include <map>
 #include <stdlib.h>

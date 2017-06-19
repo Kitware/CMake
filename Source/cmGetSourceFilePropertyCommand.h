@@ -3,7 +3,8 @@
 #ifndef cmGetSourceFilePropertyCommand_h
 #define cmGetSourceFilePropertyCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 
@@ -22,14 +23,6 @@ public:
    */
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE
-  {
-    return "get_source_file_property";
-  }
 };
 
 #endif

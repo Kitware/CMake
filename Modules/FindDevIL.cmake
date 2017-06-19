@@ -25,7 +25,7 @@
 #                     library interfaces with OpenGL. It is not strictly needed
 #                     in applications.
 #    IL_INCLUDE_DIR - where to find the il.h, ilu.h and ilut.h files.
-#    IL_FOUND -       this is set to TRUE if all the above variables were set.
+#    DevIL_FOUND    - this is set to TRUE if all the above variables were set.
 #                     This will be set to false if ILU or ILUT are not found,
 #                     even if they are not needed. In most systems, if one
 #                     library is found all the others are as well. That's the
@@ -45,7 +45,7 @@ find_path(IL_INCLUDE_DIR il.h
 
 find_library(IL_LIBRARIES
   NAMES IL DEVIL
-  PATH_SUFFIXES lib64 lib lib32
+  PATH_SUFFIXES libx32 lib64 lib lib32
   DOC "The file that corresponds to the base il library."
 )
 
@@ -53,7 +53,7 @@ find_library(IL_LIBRARIES
 
 find_library(ILUT_LIBRARIES
   NAMES ILUT
-  PATH_SUFFIXES lib64 lib lib32
+  PATH_SUFFIXES libx32 lib64 lib lib32
   DOC "The file that corresponds to the il (system?) utility library."
 )
 
@@ -61,7 +61,7 @@ find_library(ILUT_LIBRARIES
 
 find_library(ILU_LIBRARIES
   NAMES ILU
-  PATH_SUFFIXES lib64 lib lib32
+  PATH_SUFFIXES libx32 lib64 lib lib32
   DOC "The file that corresponds to the il utility library."
 )
 
@@ -70,3 +70,5 @@ find_library(ILU_LIBRARIES
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(DevIL DEFAULT_MSG
                                   IL_LIBRARIES ILU_LIBRARIES
                                   IL_INCLUDE_DIR)
+# provide legacy variable for compatiblity
+set(IL_FOUND ${DevIL_FOUND})

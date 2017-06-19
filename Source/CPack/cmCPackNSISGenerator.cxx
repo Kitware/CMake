@@ -8,9 +8,9 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
+#include "cmsys/Directory.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/Directory.hxx>
-#include <cmsys/RegularExpression.hxx>
 #include <map>
 #include <sstream>
 #include <stdlib.h>
@@ -76,7 +76,7 @@ int cmCPackNSISGenerator::PackageFiles()
       }
 
       // Strip off the component part of the path.
-      fileN = fileN.substr(pos + 1, std::string::npos);
+      fileN = fileN.substr(pos + 1);
     }
     std::replace(fileN.begin(), fileN.end(), '/', '\\');
 
@@ -106,7 +106,7 @@ int cmCPackNSISGenerator::PackageFiles()
         componentName = fileN.substr(0, slash);
 
         // Strip off the component part of the path.
-        fileN = fileN.substr(slash + 1, std::string::npos);
+        fileN = fileN.substr(slash + 1);
       }
     }
     std::replace(fileN.begin(), fileN.end(), '/', '\\');

@@ -1,12 +1,13 @@
 .git*            export-ignore
 
-*.c              whitespace=tab-in-indent,no-lf-at-eof
-*.h              whitespace=tab-in-indent,no-lf-at-eof
-*.h.in           whitespace=tab-in-indent,no-lf-at-eof
-*.cxx            whitespace=tab-in-indent,no-lf-at-eof
-*.hxx            whitespace=tab-in-indent,no-lf-at-eof
-*.hxx.in         whitespace=tab-in-indent,no-lf-at-eof
-*.txt            whitespace=tab-in-indent,no-lf-at-eof
-*.cmake          whitespace=tab-in-indent,no-lf-at-eof
+*.c              kwsys-c-style
+*.c.in           kwsys-c-style
+*.cxx            kwsys-c-style
+*.h              kwsys-c-style
+*.h.in           kwsys-c-style
+*.hxx            kwsys-c-style
+*.hxx.in         kwsys-c-style
 
+*.cmake          whitespace=tab-in-indent
 *.rst            whitespace=tab-in-indent conflict-marker-size=79
+*.txt            whitespace=tab-in-indent

@@ -78,7 +78,7 @@ bool cmTargetPropCommandBase::ProcessContentArgs(
   std::vector<std::string> const& args, unsigned int& argIndex, bool prepend,
   bool system)
 {
-  const std::string scope = args[argIndex];
+  std::string const& scope = args[argIndex];
 
   if (scope != "PUBLIC" && scope != "PRIVATE" && scope != "INTERFACE") {
     this->SetError("called with invalid arguments");

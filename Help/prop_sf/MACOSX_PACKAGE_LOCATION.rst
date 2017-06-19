@@ -21,3 +21,10 @@ extension is changed).  See the :prop_tgt:`PUBLIC_HEADER`,
 :prop_tgt:`PRIVATE_HEADER`, and :prop_tgt:`RESOURCE` target properties for
 specifying files meant for ``Headers``, ``PrivateHeaders``, or
 ``Resources`` directories.
+
+If the specified location is equal to ``Resources``, the resulting location
+will be the same as if the :prop_tgt:`RESOURCE` property had been used. If
+the specified location is a sub-folder of ``Resources``, it will be placed
+into the respective sub-folder. Note: For iOS Apple uses a flat bundle layout
+where no ``Resources`` folder exist. Therefore CMake strips the ``Resources``
+folder name from the specified location.

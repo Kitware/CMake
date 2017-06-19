@@ -3,7 +3,7 @@
 #ifndef cmCPackRPMGenerator_h
 #define cmCPackRPMGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCPackGenerator.h"
 

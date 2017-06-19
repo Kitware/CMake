@@ -2,15 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOutputRequiredFilesCommand.h"
 
-#include <cmsys/FStream.hxx>
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <map>
 #include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
-#include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -189,9 +188,8 @@ protected:
           if (qstart == std::string::npos) {
             cmSystemTools::Error("unknown include directive ", line.c_str());
             continue;
-          } else {
-            qend = line.find('>', qstart + 1);
           }
+          qend = line.find('>', qstart + 1);
         } else {
           qend = line.find('\"', qstart + 1);
         }
@@ -495,11 +493,6 @@ protected:
 bool cmOutputRequiredFilesCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  if (this->Disallowed(cmPolicies::CMP0032, "The output_required_files "
-                                            "command should not be called; "
-                                            "see CMP0032.")) {
-    return true;
-  }
   if (args.size() != 2) {
     this->SetError("called with incorrect number of arguments");
     return false;

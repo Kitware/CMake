@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,6 +40,7 @@
 #include "strcase.h"
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
 #include "curl_printf.h"
+#include "rand.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -59,7 +60,7 @@
    what ultimately goes over the network.
 */
 #define CURL_OUTPUT_DIGEST_CONV(a, b) \
-  result = Curl_convert_to_network(a, (char *)b, strlen((const char*)b)); \
+  result = Curl_convert_to_network(a, (char *)b, strlen((const char *)b)); \
   if(result) { \
     free(b); \
     return result; \
@@ -204,7 +205,7 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
 {
   char *tmp;
   char *token;
-  char *tok_buf;
+  char *tok_buf = NULL;
 
   /* Initialise the output */
   *value = 0;
@@ -236,7 +237,7 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
  * auth_decode_digest_md5_message()
  *
  * This is used internally to decode an already encoded DIGEST-MD5 challenge
- * message into the seperate attributes.
+ * message into the separate attributes.
  *
  * Parameters:
  *
@@ -359,13 +360,12 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   char qop_options[64];
   int qop_values;
   char cnonce[33];
-  unsigned int entropy[4];
   char nonceCount[] = "00000001";
   char method[]     = "AUTHENTICATE";
   char qop[]        = DIGEST_QOP_VALUE_STRING_AUTH;
   char *spn         = NULL;
 
-  /* Decode the challange message */
+  /* Decode the challenge message */
   result = auth_decode_digest_md5_message(chlg64, nonce, sizeof(nonce),
                                           realm, sizeof(realm),
                                           algorithm, sizeof(algorithm),
@@ -386,15 +386,10 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   if(!(qop_values & DIGEST_QOP_VALUE_AUTH))
     return CURLE_BAD_CONTENT_ENCODING;
 
-  /* Generate 16 bytes of random data */
-  entropy[0] = Curl_rand(data);
-  entropy[1] = Curl_rand(data);
-  entropy[2] = Curl_rand(data);
-  entropy[3] = Curl_rand(data);
-
-  /* Convert the random data into a 32 byte hex string */
-  snprintf(cnonce, sizeof(cnonce), "%08x%08x%08x%08x",
-           entropy[0], entropy[1], entropy[2], entropy[3]);
+  /* Generate 32 random hex chars, 32 bytes + 1 zero termination */
+  result = Curl_rand_hex(data, (unsigned char *)cnonce, sizeof(cnonce));
+  if(result)
+    return result;
 
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
@@ -502,7 +497,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 /*
  * Curl_auth_decode_digest_http_message()
  *
- * This is used to decode a HTTP DIGEST challenge message into the seperate
+ * This is used to decode a HTTP DIGEST challenge message into the separate
  * attributes.
  *
  * Parameters:
@@ -563,7 +558,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
           return CURLE_OUT_OF_MEMORY;
       }
       else if(strcasecompare(value, "qop")) {
-        char *tok_buf;
+        char *tok_buf = NULL;
         /* Tokenize the list and choose auth if possible, use a temporary
            clone of the buffer since strtok_r() ruins it */
         tmp = strdup(content);
@@ -684,9 +679,10 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     digest->nc = 1;
 
   if(!digest->cnonce) {
-    snprintf(cnoncebuf, sizeof(cnoncebuf), "%08x%08x%08x%08x",
-             Curl_rand(data), Curl_rand(data),
-             Curl_rand(data), Curl_rand(data));
+    result = Curl_rand_hex(data, (unsigned char *)cnoncebuf,
+                           sizeof(cnoncebuf));
+    if(result)
+      return result;
 
     result = Curl_base64_encode(data, cnoncebuf, strlen(cnoncebuf),
                                 &cnonce, &cnonce_sz);

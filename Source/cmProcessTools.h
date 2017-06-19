@@ -3,8 +3,8 @@
 #ifndef cmProcessTools_h
 #define cmProcessTools_h
 
+#include "cmConfigure.h"
 #include "cmProcessOutput.h"
-#include <cmConfigure.h>
 
 #include <iosfwd>
 #include <string.h>

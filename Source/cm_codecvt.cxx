@@ -1,18 +1,23 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cm_codecvt.hxx"
-#include <limits>
 
 #if defined(_WIN32)
+#include <assert.h>
+#include <string.h>
 #include <windows.h>
 #undef max
-#include <cmsys/Encoding.hxx>
+#include "cmsys/Encoding.hxx"
+#endif
+
+#if defined(_WIN32)
+/* Number of leading ones before a zero in the byte (see cm_utf8.c).  */
+extern "C" unsigned char const cm_utf8_ones[256];
 #endif
 
 codecvt::codecvt(Encoding e)
-  : m_lastState(0)
 #if defined(_WIN32)
-  , m_codepage(0)
+  : m_codepage(0)
 #endif
 {
   switch (e) {
@@ -45,76 +50,68 @@ std::codecvt_base::result codecvt::do_out(mbstate_t& state, const char* from,
                                           const char*& from_next, char* to,
                                           char* to_end, char*& to_next) const
 {
-  if (m_noconv) {
-    return noconv;
-  }
-  std::codecvt_base::result res = error;
-#if defined(_WIN32)
   from_next = from;
   to_next = to;
-  bool convert = true;
-  size_t count = from_end - from;
-  const char* data = from;
-  unsigned int& stateId = reinterpret_cast<unsigned int&>(state);
-  if (count == 0) {
-    return codecvt::ok;
-  } else if (count == 1) {
-    if (stateId == 0) {
-      // decode first byte for UTF-8
-      if ((*from & 0xF8) == 0xF0 || // 1111 0xxx; 4 bytes for codepoint
-          (*from & 0xF0) == 0xE0 || // 1110 xxxx; 3 bytes for codepoint
-          (*from & 0xE0) == 0xC0)   // 110x xxxx; 2 bytes for codepoint
-      {
-        stateId = findStateId();
-        codecvt::State& s = m_states.at(stateId - 1);
-        s.bytes[0] = *from;
-        convert = false;
-        if ((*from & 0xF8) == 0xF0) {
-          s.totalBytes = 4;
-        } else if ((*from & 0xF0) == 0xE0) {
-          s.totalBytes = 3;
-        } else if ((*from & 0xE0) == 0xC0) {
-          s.totalBytes = 2;
-        }
-        s.bytesLeft = s.totalBytes - 1;
-      };
-      // else 1 byte for codepoint
-    } else {
-      codecvt::State& s = m_states.at(stateId - 1);
-      s.bytes[s.totalBytes - s.bytesLeft] = *from;
-      s.bytesLeft--;
-      data = s.bytes;
-      count = s.totalBytes - s.bytesLeft;
-      if ((*from & 0xC0) == 0x80) { // 10xx xxxx
-        convert = s.bytesLeft == 0;
-      } else {
-        // invalid multi-byte
-        convert = true;
-      }
-      if (convert) {
-        s.used = false;
-        if (stateId == m_lastState) {
-          m_lastState--;
-        }
-        stateId = 0;
-      }
+  if (m_noconv) {
+    return std::codecvt_base::noconv;
+  }
+#if defined(_WIN32)
+  // Use a const view of the state because we should not modify it until we
+  // have fully processed and consume a byte (with sufficient space in the
+  // output buffer).  We call helpers to re-cast and modify the state
+  State const& lstate = reinterpret_cast<State&>(state);
+
+  while (from_next != from_end) {
+    // Count leading ones in the bits of the next byte.
+    unsigned char const ones =
+      cm_utf8_ones[static_cast<unsigned char>(*from_next)];
+
+    if (ones != 1 && lstate.buffered != 0) {
+      // We have a buffered partial codepoint that we never completed.
+      return std::codecvt_base::error;
+    } else if (ones == 1 && lstate.buffered == 0) {
+      // This is a continuation of a codepoint that never started.
+      return std::codecvt_base::error;
     }
-    if (convert) {
-      std::wstring wide = cmsys::Encoding::ToWide(std::string(data, count));
-      int r = WideCharToMultiByte(m_codepage, 0, wide.c_str(),
-                                  static_cast<int>(wide.size()), to,
-                                  to_end - to, NULL, NULL);
-      if (r > 0) {
-        from_next = from_end;
-        to_next = to + r;
-        res = ok;
+
+    // Compute the number of bytes in the current codepoint.
+    int need = 0;
+    switch (ones) {
+      case 0: // 0xxx xxxx: new codepoint of size 1
+        need = 1;
+        break;
+      case 1: // 10xx xxxx: continues a codepoint
+        assert(lstate.size != 0);
+        need = lstate.size;
+        break;
+      case 2: // 110x xxxx: new codepoint of size 2
+        need = 2;
+        break;
+      case 3: // 1110 xxxx: new codepoint of size 3
+        need = 3;
+        break;
+      case 4: // 1111 0xxx: new codepoint of size 4
+        need = 4;
+        break;
+      default: // invalid byte
+        return std::codecvt_base::error;
+    }
+    assert(need > 0);
+
+    if (lstate.buffered + 1 == need) {
+      // This byte completes a codepoint.
+      std::codecvt_base::result decode_result =
+        this->Decode(state, need, from_next, to_next, to_end);
+      if (decode_result != std::codecvt_base::ok) {
+        return decode_result;
       }
     } else {
-      res = partial;
-      from_next = from_end;
-      to_next = to;
+      // This byte does not complete a codepoint.
+      this->BufferPartial(state, need, from_next);
     }
   }
+
+  return std::codecvt_base::ok;
 #else
   static_cast<void>(state);
   static_cast<void>(from);
@@ -123,45 +120,117 @@ std::codecvt_base::result codecvt::do_out(mbstate_t& state, const char* from,
   static_cast<void>(to);
   static_cast<void>(to_end);
   static_cast<void>(to_next);
-  res = codecvt::noconv;
+  return std::codecvt_base::noconv;
 #endif
-  return res;
 };
 
 std::codecvt_base::result codecvt::do_unshift(mbstate_t& state, char* to,
                                               char* to_end,
                                               char*& to_next) const
 {
-  std::codecvt_base::result res = error;
   to_next = to;
-#if defined(_WIN32)
-  unsigned int& stateId = reinterpret_cast<unsigned int&>(state);
-  if (stateId > 0) {
-    codecvt::State& s = m_states.at(stateId - 1);
-    s.used = false;
-    if (stateId == m_lastState) {
-      m_lastState--;
-    }
-    stateId = 0;
-    std::wstring wide = cmsys::Encoding::ToWide(
-      std::string(s.bytes, s.totalBytes - s.bytesLeft));
-    int r = WideCharToMultiByte(m_codepage, 0, wide.c_str(),
-                                static_cast<int>(wide.size()), to, to_end - to,
-                                NULL, NULL);
-    if (r > 0) {
-      to_next = to + r;
-      res = ok;
-    }
-  } else {
-    res = ok;
+  if (m_noconv) {
+    return std::codecvt_base::noconv;
   }
+#if defined(_WIN32)
+  State& lstate = reinterpret_cast<State&>(state);
+  if (lstate.buffered != 0) {
+    return this->DecodePartial(state, to_next, to_end);
+  }
+  return std::codecvt_base::ok;
 #else
   static_cast<void>(state);
   static_cast<void>(to_end);
-  res = ok;
+  return std::codecvt_base::ok;
 #endif
-  return res;
 };
+
+#if defined(_WIN32)
+std::codecvt_base::result codecvt::Decode(mbstate_t& state, int size,
+                                          const char*& from_next,
+                                          char*& to_next, char* to_end) const
+{
+  State& lstate = reinterpret_cast<State&>(state);
+
+  // Collect all the bytes for this codepoint.
+  char buf[4];
+  memcpy(buf, lstate.partial, lstate.buffered);
+  buf[lstate.buffered] = *from_next;
+
+  // Convert the encoding.
+  wchar_t wbuf[2];
+  int wlen =
+    MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, buf, size, wbuf, 2);
+  if (wlen <= 0) {
+    return std::codecvt_base::error;
+  }
+
+  int tlen = WideCharToMultiByte(m_codepage, 0, wbuf, wlen, to_next,
+                                 to_end - to_next, NULL, NULL);
+  if (tlen <= 0) {
+    if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+      return std::codecvt_base::partial;
+    }
+    return std::codecvt_base::error;
+  }
+
+  // Move past the now-consumed byte in the input buffer.
+  ++from_next;
+
+  // Move past the converted codepoint in the output buffer.
+  to_next += tlen;
+
+  // Re-initialize the state for the next codepoint to start.
+  lstate = State();
+
+  return std::codecvt_base::ok;
+}
+
+std::codecvt_base::result codecvt::DecodePartial(mbstate_t& state,
+                                                 char*& to_next,
+                                                 char* to_end) const
+{
+  State& lstate = reinterpret_cast<State&>(state);
+
+  // Try converting the partial codepoint.
+  wchar_t wbuf[2];
+  int wlen = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, lstate.partial,
+                                 lstate.buffered, wbuf, 2);
+  if (wlen <= 0) {
+    return std::codecvt_base::error;
+  }
+
+  int tlen = WideCharToMultiByte(m_codepage, 0, wbuf, wlen, to_next,
+                                 to_end - to_next, NULL, NULL);
+  if (tlen <= 0) {
+    if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+      return std::codecvt_base::partial;
+    }
+    return std::codecvt_base::error;
+  }
+
+  // Move past the converted codepoint in the output buffer.
+  to_next += tlen;
+
+  // Re-initialize the state for the next codepoint to start.
+  lstate = State();
+
+  return std::codecvt_base::ok;
+}
+
+void codecvt::BufferPartial(mbstate_t& state, int size,
+                            const char*& from_next) const
+{
+  State& lstate = reinterpret_cast<State&>(state);
+
+  // Save the byte in our buffer for later.
+  lstate.partial[lstate.buffered++] = *from_next;
+  lstate.size = size;
+
+  // Move past the now-consumed byte in the input buffer.
+  ++from_next;
+}
+#endif
 
 int codecvt::do_max_length() const throw()
 {
@@ -171,45 +240,4 @@ int codecvt::do_max_length() const throw()
 int codecvt::do_encoding() const throw()
 {
   return 0;
-};
-
-unsigned int codecvt::findStateId() const
-{
-  unsigned int stateId = 0;
-  bool add = false;
-  const unsigned int maxSize = std::numeric_limits<unsigned int>::max();
-  if (m_lastState >= maxSize) {
-    m_lastState = 0;
-  }
-  if (m_states.size() <= m_lastState) {
-    add = true;
-  } else {
-    unsigned int i = m_lastState;
-    while (i < maxSize) {
-      codecvt::State& s = m_states.at(i);
-      i++;
-      if (!s.used) {
-        m_lastState = i;
-        stateId = m_lastState;
-        s.used = true;
-        s.totalBytes = 0;
-        s.bytesLeft = 0;
-        break;
-      }
-      if (i >= m_states.size()) {
-        i = 0;
-      }
-      if (i == m_lastState) {
-        add = true;
-        break;
-      }
-    }
-  };
-  if (add) {
-    codecvt::State s = { true, 0, 0, { 0, 0, 0, 0 } };
-    m_states.push_back(s);
-    m_lastState = (unsigned int)m_states.size();
-    stateId = m_lastState;
-  }
-  return stateId;
 };

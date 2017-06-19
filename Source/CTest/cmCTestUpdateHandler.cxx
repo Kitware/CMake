@@ -16,7 +16,7 @@
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
 
-#include <cm_auto_ptr.hxx>
+#include "cm_auto_ptr.hxx"
 #include <sstream>
 
 static const char* cmCTestUpdateHandlerUpdateStrings[] = {
@@ -198,7 +198,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   xml.Element("UpdateType",
               cmCTestUpdateHandlerUpdateToString(this->UpdateType));
 
-  vc->WriteXML(xml);
+  bool loadedMods = vc->WriteXML(xml);
 
   int localModifications = 0;
   int numUpdated = vc->GetPathCount(cmCTestVC::PathUpdated);
@@ -246,7 +246,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   xml.EndElement(); // UpdateReturnStatus
   xml.EndElement(); // Update
   xml.EndDocument();
-  return updated ? numUpdated : -1;
+  return updated && loadedMods ? numUpdated : -1;
 }
 
 int cmCTestUpdateHandler::DetectVCS(const char* dir)

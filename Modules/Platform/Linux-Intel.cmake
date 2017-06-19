@@ -30,12 +30,18 @@ macro(__linux_compiler_intel lang)
   # executables that use dlopen but do not set ENABLE_EXPORTS.
   set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-rdynamic")
 
+  set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
+
   if(XIAR)
     # INTERPROCEDURAL_OPTIMIZATION
     set(CMAKE_${lang}_COMPILE_OPTIONS_IPO -ipo)
     set(CMAKE_${lang}_CREATE_STATIC_LIBRARY_IPO
       "${XIAR} cr <TARGET> <LINK_FLAGS> <OBJECTS> "
       "${XIAR} -s <TARGET> ")
+    set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
+    set(_CMAKE_${lang}_IPO_LEGACY_BEHAVIOR YES)
+  else()
+    set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER NO)
   endif()
 
   if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 12.0)

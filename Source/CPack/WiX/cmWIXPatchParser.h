@@ -3,12 +3,12 @@
 #ifndef cmCPackWIXPatchParser_h
 #define cmCPackWIXPatchParser_h
 
-#include <CPack/cmCPackLog.h>
+#include "cmCPackLog.h"
 
-#include <cmXMLParser.h>
+#include "cmXMLParser.h"
 
-#include <list>
 #include <map>
+#include <vector>
 
 struct cmWIXPatchNode
 {
@@ -36,7 +36,7 @@ struct cmWIXPatchElement : cmWIXPatchNode
 
   ~cmWIXPatchElement();
 
-  typedef std::list<cmWIXPatchNode*> child_list_t;
+  typedef std::vector<cmWIXPatchNode*> child_list_t;
   typedef std::map<std::string, std::string> attributes_t;
 
   std::string name;
@@ -84,7 +84,7 @@ private:
 
   fragment_map_t& Fragments;
 
-  std::list<cmWIXPatchElement*> ElementStack;
+  std::vector<cmWIXPatchElement*> ElementStack;
 };
 
 #endif

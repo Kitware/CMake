@@ -3,7 +3,7 @@
 #ifndef cmExportBuildAndroidMKGenerator_h
 #define cmExportBuildAndroidMKGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <string>

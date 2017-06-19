@@ -3,7 +3,7 @@
 #ifndef cmCTestTestCommand_h
 #define cmCTestTestCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestHandlerCommand.h"
 
@@ -53,6 +53,9 @@ protected:
     ctt_INCLUDE,
     ctt_EXCLUDE_LABEL,
     ctt_INCLUDE_LABEL,
+    ctt_EXCLUDE_FIXTURE,
+    ctt_EXCLUDE_FIXTURE_SETUP,
+    ctt_EXCLUDE_FIXTURE_CLEANUP,
     ctt_PARALLEL_LEVEL,
     ctt_SCHEDULE_RANDOM,
     ctt_STOP_TIME,

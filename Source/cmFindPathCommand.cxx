@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindPathCommand.h"
 
-#include <cmsys/Glob.hxx>
+#include "cmsys/Glob.hxx"
 
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
@@ -76,14 +76,14 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
   // if there is a / in the name try to find the header as a framework
   // For example bar/foo.h would look for:
   // bar.framework/Headers/foo.h
-  if (pos != fileName.npos) {
+  if (pos != std::string::npos) {
     // remove the name from the slash;
     fileName = fileName.substr(pos + 1);
     frameWorkName = file;
     frameWorkName =
       frameWorkName.substr(0, frameWorkName.size() - fileName.size() - 1);
     // if the framework has a path in it then just use the filename
-    if (frameWorkName.find('/') != frameWorkName.npos) {
+    if (frameWorkName.find('/') != std::string::npos) {
       fileName = file;
       frameWorkName = "";
     }

@@ -3,7 +3,7 @@
 #ifndef cmCursesBoolWidget_h
 #define cmCursesBoolWidget_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"
@@ -12,6 +12,8 @@ class cmCursesMainForm;
 
 class cmCursesBoolWidget : public cmCursesWidget
 {
+  CM_DISABLE_COPY(cmCursesBoolWidget)
+
 public:
   cmCursesBoolWidget(int width, int height, int left, int top);
 
@@ -25,10 +27,6 @@ public:
   // Set/Get the value (on/off).
   void SetValueAsBool(bool value);
   bool GetValueAsBool();
-
-protected:
-  cmCursesBoolWidget(const cmCursesBoolWidget& from);
-  void operator=(const cmCursesBoolWidget&);
 };
 
 #endif // cmCursesBoolWidget_h

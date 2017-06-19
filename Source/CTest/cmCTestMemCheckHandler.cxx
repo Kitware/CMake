@@ -7,9 +7,9 @@
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include <iostream>
 #include <sstream>
 #include <string.h>
@@ -801,7 +801,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
   std::vector<std::string> lines;
   cmSystemTools::Split(str.c_str(), lines);
   bool unlimitedOutput = false;
-  if (str.find("CTEST_FULL_OUTPUT") != str.npos ||
+  if (str.find("CTEST_FULL_OUTPUT") != std::string::npos ||
       this->CustomMaximumFailedTestOutputSize == 0) {
     unlimitedOutput = true;
   }
@@ -953,7 +953,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
       std::string& theLine = lines[cc];
       // check for command line arguments that are not escaped
       // correctly by BC
-      if (theLine.find("TargetArgs=") != theLine.npos) {
+      if (theLine.find("TargetArgs=") != std::string::npos) {
         // skip this because BC gets it wrong and we can't parse it
       } else if (!parser.ParseChunk(theLine.c_str(), theLine.size())) {
         cmCTestLog(this->CTest, ERROR_MESSAGE,

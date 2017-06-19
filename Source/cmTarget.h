@@ -3,7 +3,7 @@
 #ifndef cmTarget_h
 #define cmTarget_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <map>
@@ -267,11 +267,13 @@ public:
   };
 
   std::string ImportedGetFullPath(const std::string& config,
-                                  bool implib) const;
+                                  cmStateEnums::ArtifactType artifact) const;
 
 private:
-  const char* GetSuffixVariableInternal(bool implib) const;
-  const char* GetPrefixVariableInternal(bool implib) const;
+  const char* GetSuffixVariableInternal(
+    cmStateEnums::ArtifactType artifact) const;
+  const char* GetPrefixVariableInternal(
+    cmStateEnums::ArtifactType artifact) const;
 
   // Use a makefile variable to set a default for the given property.
   // If the variable is not defined use the given default instead.

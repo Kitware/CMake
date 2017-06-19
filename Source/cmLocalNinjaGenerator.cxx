@@ -37,8 +37,9 @@ cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
 cmRulePlaceholderExpander*
 cmLocalNinjaGenerator::CreateRulePlaceholderExpander() const
 {
-  cmRulePlaceholderExpander* ret = new cmRulePlaceholderExpander(
-    this->Compilers, this->VariableMappings, this->CompilerSysroot);
+  cmRulePlaceholderExpander* ret =
+    new cmRulePlaceholderExpander(this->Compilers, this->VariableMappings,
+                                  this->CompilerSysroot, this->LinkerSysroot);
   ret->SetTargetImpLib("$TARGET_IMPLIB");
   return ret;
 }
@@ -56,8 +57,6 @@ void cmLocalNinjaGenerator::Generate()
   if (this->HomeRelativeOutputPath == ".") {
     this->HomeRelativeOutputPath = "";
   }
-
-  this->SetConfigName();
 
   this->WriteProcessedMakefile(this->GetBuildFileStream());
 #ifdef NINJA_GEN_VERBOSE_FILES
@@ -214,7 +213,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
     std::vector<std::string> pools;
     cmSystemTools::ExpandListArgument(jobpools, pools);
     for (size_t i = 0; i < pools.size(); ++i) {
-      const std::string pool = pools[i];
+      std::string const& pool = pools[i];
       const std::string::size_type eq = pool.find('=');
       unsigned int jobs;
       if (eq != std::string::npos &&
@@ -249,12 +248,15 @@ void cmLocalNinjaGenerator::ComputeObjectFilenames(
   std::map<cmSourceFile const*, std::string>& mapping,
   cmGeneratorTarget const* gt)
 {
+  // Determine if these object files should use a custom extension
+  char const* custom_ext = gt->GetCustomObjectExtension();
   for (std::map<cmSourceFile const*, std::string>::iterator si =
          mapping.begin();
        si != mapping.end(); ++si) {
     cmSourceFile const* sf = si->first;
-    si->second =
-      this->GetObjectFileNameWithoutTarget(*sf, gt->ObjectDirectory);
+    bool keptSourceExtension;
+    si->second = this->GetObjectFileNameWithoutTarget(
+      *sf, gt->ObjectDirectory, &keptSourceExtension, custom_ext);
   }
 }
 
@@ -278,9 +280,11 @@ void cmLocalNinjaGenerator::AppendTargetOutputs(cmGeneratorTarget* target,
 }
 
 void cmLocalNinjaGenerator::AppendTargetDepends(cmGeneratorTarget* target,
-                                                cmNinjaDeps& outputs)
+                                                cmNinjaDeps& outputs,
+                                                cmNinjaTargetDepends depends)
 {
-  this->GetGlobalNinjaGenerator()->AppendTargetDepends(target, outputs);
+  this->GetGlobalNinjaGenerator()->AppendTargetDepends(target, outputs,
+                                                       depends);
 }
 
 void cmLocalNinjaGenerator::AppendCustomCommandDeps(
@@ -317,7 +321,13 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
     } else if (cmdLines.size() > 1) {
       cmd << "cmd.exe /C \"";
     }
-    cmd << *li;
+    // Put current cmdLine in brackets if it contains "||" because it has
+    // higher precedence than "&&" in cmd.exe
+    if (li->find("||") != std::string::npos) {
+      cmd << "( " << *li << " )";
+    } else {
+      cmd << *li;
+    }
   }
   if (cmdLines.size() > 1) {
     cmd << "\"";

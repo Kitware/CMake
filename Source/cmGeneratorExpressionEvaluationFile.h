@@ -3,7 +3,7 @@
 #ifndef cmGeneratorExpressionEvaluationFile_h
 #define cmGeneratorExpressionEvaluationFile_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <string>
@@ -11,12 +11,7 @@
 
 #include "cmGeneratorExpression.h"
 #include "cm_auto_ptr.hxx"
-
-#if defined(_MSC_VER)
-typedef unsigned short mode_t;
-#else
-#include <sys/types.h>
-#endif
+#include "cm_sys_stat.h"
 
 class cmLocalGenerator;
 

@@ -6,18 +6,15 @@
 #include "cmServerDictionary.h"
 #include "cmServerProtocol.h"
 #include "cmSystemTools.h"
-#include "cmVersionMacros.h"
-#include "cmake.h"
-
-#if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cm_jsoncpp_reader.h"
-#include "cm_jsoncpp_value.h"
-#endif
+#include "cm_jsoncpp_writer.h"
+#include "cmake.h"
+#include "cmsys/FStream.hxx"
 
 #include <algorithm>
-#include <fstream>
-#include <iostream>
-#include <memory>
+#include <cassert>
+#include <cstdint>
+#include <utility>
 
 class cmServer::DebugInfo
 {
@@ -157,7 +154,7 @@ void cmServer::reportProgress(const char* msg, float progress, void* data)
 {
   const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
   assert(request);
-  if (progress < 0.0 || progress > 1.0) {
+  if (progress < 0.0f || progress > 1.0f) {
     request->ReportMessage(msg, "");
   } else {
     request->ReportProgress(0, static_cast<int>(progress * 1000), 1000, msg);
@@ -277,10 +274,8 @@ void cmServer::WriteJsonObject(const Json::Value& jsonValue,
     }
 
     if (!debug->OutputFile.empty()) {
-      std::ofstream myfile;
-      myfile.open(debug->OutputFile);
+      cmsys::ofstream myfile(debug->OutputFile.c_str());
       myfile << result;
-      myfile.close();
     }
   }
 

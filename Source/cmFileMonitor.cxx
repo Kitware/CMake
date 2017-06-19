@@ -2,12 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileMonitor.h"
 
-#include <cmsys/SystemTools.hxx>
+#include "cmAlgorithms.h"
+#include "cmsys/SystemTools.hxx"
 
 #include <cassert>
-#include <iostream>
-#include <set>
+#include <stddef.h>
 #include <unordered_map>
+#include <utility>
 
 namespace {
 void on_directory_change(uv_fs_event_t* handle, const char* filename,
@@ -36,12 +37,7 @@ public:
 class cmVirtualDirectoryWatcher : public cmIBaseWatcher
 {
 public:
-  ~cmVirtualDirectoryWatcher() override
-  {
-    for (auto i : this->Children) {
-      delete i.second;
-    }
-  }
+  ~cmVirtualDirectoryWatcher() override { cmDeleteAll(this->Children); }
 
   cmIBaseWatcher* Find(const std::string& ps)
   {
@@ -102,9 +98,7 @@ public:
 
   void Reset()
   {
-    for (auto c : this->Children) {
-      delete c.second;
-    }
+    cmDeleteAll(this->Children);
     this->Children.clear();
   }
 
@@ -236,7 +230,7 @@ public:
                 cmFileMonitor::Callback cb)
     : Parent(p)
     , PathSegment(ps)
-    , CbList({ cb })
+    , CbList({ std::move(cb) })
   {
     assert(p);
     assert(!ps.empty());

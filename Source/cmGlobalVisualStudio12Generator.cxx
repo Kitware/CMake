@@ -109,19 +109,15 @@ bool cmGlobalVisualStudio12Generator::MatchesGeneratorName(
   return false;
 }
 
-bool cmGlobalVisualStudio12Generator::ParseGeneratorToolset(
-  std::string const& ts, cmMakefile* mf)
+bool cmGlobalVisualStudio12Generator::ProcessGeneratorToolsetField(
+  std::string const& key, std::string const& value)
 {
-  std::string::size_type ts_end = ts.size();
-  if (cmHasLiteralSuffix(ts, ",host=x64")) {
+  if (key == "host" && value == "x64") {
     this->GeneratorToolsetHostArchitecture = "x64";
-    ts_end -= 9;
-  } else if (ts == "host=x64") {
-    this->GeneratorToolsetHostArchitecture = "x64";
-    ts_end = 0;
+    return true;
   }
-  return this->cmGlobalVisualStudio11Generator::ParseGeneratorToolset(
-    ts.substr(0, ts_end), mf);
+  return this->cmGlobalVisualStudio11Generator::ProcessGeneratorToolsetField(
+    key, value);
 }
 
 bool cmGlobalVisualStudio12Generator::InitializeWindowsPhone(cmMakefile* mf)

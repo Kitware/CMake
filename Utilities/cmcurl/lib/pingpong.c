@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,12 +44,12 @@
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
-long Curl_pp_state_timeout(struct pingpong *pp)
+time_t Curl_pp_state_timeout(struct pingpong *pp)
 {
   struct connectdata *conn = pp->conn;
   struct Curl_easy *data=conn->data;
-  long timeout_ms; /* in milliseconds */
-  long timeout2_ms; /* in milliseconds */
+  time_t timeout_ms; /* in milliseconds */
+  time_t timeout2_ms; /* in milliseconds */
   long response_time= (data->set.server_response_timeout)?
     data->set.server_response_timeout: pp->response_time;
 
@@ -83,8 +83,8 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block)
   struct connectdata *conn = pp->conn;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc;
-  long interval_ms;
-  long timeout_ms = Curl_pp_state_timeout(pp);
+  time_t interval_ms;
+  time_t timeout_ms = Curl_pp_state_timeout(pp);
   struct Curl_easy *data=conn->data;
   CURLcode result = CURLE_OK;
 
@@ -101,7 +101,9 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block)
   else
     interval_ms = 0; /* immediate */
 
-  if(Curl_pp_moredata(pp))
+  if(Curl_ssl_data_pending(conn, FIRSTSOCKET))
+    rc = 1;
+  else if(Curl_pp_moredata(pp))
     /* We are receiving and there is data in the cache so just read it */
     rc = 1;
   else if(!pp->sendleft && Curl_ssl_data_pending(conn, FIRSTSOCKET))
@@ -150,7 +152,7 @@ void Curl_pp_init(struct pingpong *pp)
  *
  * Curl_pp_vsendf()
  *
- * Send the formated string as a command to a pingpong server. Note that
+ * Send the formatted string as a command to a pingpong server. Note that
  * the string should not have any CRLF appended, as this function will
  * append the necessary things itself.
  *
@@ -237,7 +239,7 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
  *
  * Curl_pp_sendf()
  *
- * Send the formated string as a command to a pingpong server. Note that
+ * Send the formatted string as a command to a pingpong server. Note that
  * the string should not have any CRLF appended, as this function will
  * append the necessary things itself.
  *
@@ -284,7 +286,8 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
   /* number of bytes in the current line, so far */
   perline = (ssize_t)(ptr-pp->linestart_resp);
 
-  while((pp->nread_resp<BUFSIZE) && (keepon && !result)) {
+  while((pp->nread_resp < (size_t)data->set.buffer_size) &&
+        (keepon && !result)) {
 
     if(pp->cache) {
       /* we had data in the "cache", copy that instead of doing an actual
@@ -294,7 +297,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
        * it would have been populated with something of size int to begin
        * with, even though its datatype may be larger than an int.
        */
-      DEBUGASSERT((ptr+pp->cache_size) <= (buf+BUFSIZE+1));
+      DEBUGASSERT((ptr+pp->cache_size) <= (buf+data->set.buffer_size+1));
       memcpy(ptr, pp->cache, pp->cache_size);
       gotbytes = (ssize_t)pp->cache_size;
       free(pp->cache);    /* free the cache */
@@ -306,8 +309,10 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
       enum protection_level prot = conn->data_prot;
       conn->data_prot = PROT_CLEAR;
 #endif
-      DEBUGASSERT((ptr+BUFSIZE-pp->nread_resp) <= (buf+BUFSIZE+1));
-      result = Curl_read(conn, sockfd, ptr, BUFSIZE-pp->nread_resp,
+      DEBUGASSERT((ptr + data->set.buffer_size - pp->nread_resp) <=
+                  (buf + data->set.buffer_size + 1));
+      result = Curl_read(conn, sockfd, ptr,
+                         data->set.buffer_size - pp->nread_resp,
                          &gotbytes);
 #ifdef HAVE_GSSAPI
       DEBUGASSERT(prot  > PROT_NONE && prot < PROT_LAST);
@@ -400,7 +405,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
       }
       else if(keepon) {
 
-        if((perline == gotbytes) && (gotbytes > BUFSIZE/2)) {
+        if((perline == gotbytes) && (gotbytes > data->set.buffer_size/2)) {
           /* We got an excessive line without newlines and we need to deal
              with it. We keep the first bytes of the line then we throw
              away the rest. */
@@ -412,7 +417,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
              interested in the first piece */
           clipamount = 40;
         }
-        else if(pp->nread_resp > BUFSIZE/2) {
+        else if(pp->nread_resp > (size_t)data->set.buffer_size/2) {
           /* We got a large chunk of data and there's potentially still
              trailing data to take care of, so we put any such part in the
              "cache", clear the buffer to make space and restart. */

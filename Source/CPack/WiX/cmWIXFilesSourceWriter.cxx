@@ -4,14 +4,12 @@
 
 #include "cmWIXAccessControlList.h"
 
-#include <cmInstalledFile.h>
+#include "cmInstalledFile.h"
 
-#include <cmSystemTools.h>
-#include <cmUuid.h>
+#include "cmSystemTools.h"
+#include "cmUuid.h"
 
-#include <sys/types.h>
-// include sys/stat.h after sys/types.h
-#include <sys/stat.h>
+#include "cm_sys_stat.h"
 
 cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(cmCPackLog* logger,
                                                std::string const& filename,
@@ -138,6 +136,7 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
     }
   }
 
+  patch.ApplyFragment(componentId, *this);
   BeginElement("File");
   AddAttribute("Id", fileId);
   AddAttribute("Source", filePath);
@@ -149,16 +148,15 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
   if (!(fileMode & S_IWRITE)) {
     AddAttribute("ReadOnly", "yes");
   }
+  patch.ApplyFragment(fileId, *this);
 
   if (installedFile) {
     cmWIXAccessControlList acl(Logger, *installedFile, *this);
     acl.Apply();
   }
 
-  patch.ApplyFragment(fileId, *this);
   EndElement("File");
 
-  patch.ApplyFragment(componentId, *this);
   EndElement("Component");
   EndElement("DirectoryRef");
 

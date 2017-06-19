@@ -3,7 +3,8 @@
 #ifndef cmInstallFilesCommand_h
 #define cmInstallFilesCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 
@@ -31,11 +32,6 @@ public:
    */
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "install_files"; }
 
   /**
    * This is called at the end after all the information

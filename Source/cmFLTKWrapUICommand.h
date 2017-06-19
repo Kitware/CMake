@@ -3,7 +3,8 @@
 #ifndef cmFLTKWrapUICommand_h
 #define cmFLTKWrapUICommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 
@@ -41,11 +42,6 @@ public:
    */
   void FinalPass() CM_OVERRIDE;
   bool HasFinalPass() const CM_OVERRIDE { return true; }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "fltk_wrap_ui"; }
 
 private:
   /**

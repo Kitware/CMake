@@ -3,10 +3,10 @@
 #ifndef cmCTestBatchTestHandler_h
 #define cmCTestBatchTestHandler_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cmCTestMultiProcessHandler.h>
-#include <cmsys/FStream.hxx>
+#include "cmCTestMultiProcessHandler.h"
+#include "cmsys/FStream.hxx"
 #include <string>
 
 /** \class cmCTestBatchTestHandler

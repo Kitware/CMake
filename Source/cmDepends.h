@@ -3,7 +3,7 @@
 #ifndef cmDepends_h
 #define cmDepends_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <map>
@@ -24,6 +24,8 @@ class cmLocalGenerator;
  */
 class cmDepends
 {
+  CM_DISABLE_COPY(cmDepends)
+
 public:
   /** Instances need to know the build directory name and the relative
       path from the build directory to the target file.  */
@@ -116,10 +118,6 @@ protected:
   std::vector<std::string> IncludePath;
 
   void SetIncludePathFromLanguage(const std::string& lang);
-
-private:
-  cmDepends(cmDepends const&);      // Purposely not implemented.
-  void operator=(cmDepends const&); // Purposely not implemented.
 };
 
 #endif

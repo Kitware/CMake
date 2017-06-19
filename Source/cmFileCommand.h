@@ -3,7 +3,8 @@
 #ifndef cmFileCommand_h
 #define cmFileCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <string>
 #include <vector>
 
@@ -30,16 +31,6 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
 
-  /**
-   * This determines if the command is invoked when in script mode.
-   */
-  bool IsScriptable() const CM_OVERRIDE { return true; }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const CM_OVERRIDE { return "file"; }
-
 protected:
   bool HandleRename(std::vector<std::string> const& args);
   bool HandleRemove(std::vector<std::string> const& args, bool recurse);
@@ -53,6 +44,7 @@ protected:
   bool HandleRelativePathCommand(std::vector<std::string> const& args);
   bool HandleCMakePathCommand(std::vector<std::string> const& args,
                               bool nativePath);
+  bool HandleReadElfCommand(std::vector<std::string> const& args);
   bool HandleRPathChangeCommand(std::vector<std::string> const& args);
   bool HandleRPathCheckCommand(std::vector<std::string> const& args);
   bool HandleRPathRemoveCommand(std::vector<std::string> const& args);

@@ -3,7 +3,7 @@
 #ifndef cmLocalNinjaGenerator_h
 #define cmLocalNinjaGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <iosfwd>
 #include <map>
@@ -63,7 +63,9 @@ public:
   std::string BuildCommandLine(const std::vector<std::string>& cmdLines);
 
   void AppendTargetOutputs(cmGeneratorTarget* target, cmNinjaDeps& outputs);
-  void AppendTargetDepends(cmGeneratorTarget* target, cmNinjaDeps& outputs);
+  void AppendTargetDepends(
+    cmGeneratorTarget* target, cmNinjaDeps& outputs,
+    cmNinjaTargetDepends depends = DependOnTargetArtifact);
 
   void AddCustomCommandTarget(cmCustomCommand const* cc,
                               cmGeneratorTarget* target);

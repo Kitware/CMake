@@ -3,7 +3,8 @@
 #ifndef cmOutputRequiredFilesCommand_h
 #define cmOutputRequiredFilesCommand_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <set>
 #include <stdio.h>
 #include <string>
@@ -20,7 +21,6 @@ public:
   cmCommand* Clone() CM_OVERRIDE { return new cmOutputRequiredFilesCommand; }
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) CM_OVERRIDE;
-  std::string GetName() const CM_OVERRIDE { return "output_required_files"; }
 
   void ListDependencies(cmDependInformation const* info, FILE* fout,
                         std::set<cmDependInformation const*>* visited);

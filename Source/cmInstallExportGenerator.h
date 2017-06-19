@@ -3,7 +3,7 @@
 #ifndef cmInstallExportGenerator_h
 #define cmInstallExportGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmInstallGenerator.h"
 #include "cmScriptGenerator.h"
@@ -44,10 +44,8 @@ public:
 
 protected:
   void GenerateScript(std::ostream& os) CM_OVERRIDE;
-  void GenerateScriptConfigs(std::ostream& os,
-                             Indent const& indent) CM_OVERRIDE;
-  void GenerateScriptActions(std::ostream& os,
-                             Indent const& indent) CM_OVERRIDE;
+  void GenerateScriptConfigs(std::ostream& os, Indent indent) CM_OVERRIDE;
+  void GenerateScriptActions(std::ostream& os, Indent indent) CM_OVERRIDE;
   void GenerateImportFile(cmExportSet const* exportSet);
   void GenerateImportFile(const char* config, cmExportSet const* exportSet);
   void ComputeTempDir();

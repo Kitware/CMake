@@ -3,7 +3,8 @@
 #ifndef cmCommonTargetGenerator_h
 #define cmCommonTargetGenerator_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
+
 #include <map>
 #include <string>
 #include <vector>
@@ -27,12 +28,8 @@ public:
   std::string const& GetConfigName() const;
 
 protected:
-  // Add language feature flags.
-  void AddFeatureFlags(std::string& flags, const std::string& lang);
-
   // Feature query methods.
   const char* GetFeature(const std::string& feature);
-  bool GetFeatureAsBool(const std::string& feature);
 
   // Helper to add flag for windows .def file.
   void AddModuleDefinitionFlag(cmLinkLineComputer* linkLineComputer,
@@ -43,9 +40,6 @@ protected:
   cmLocalCommonGenerator* LocalGenerator;
   cmGlobalCommonGenerator* GlobalGenerator;
   std::string ConfigName;
-
-  // The windows module definition source file (.def), if any.
-  cmSourceFile const* ModuleDefinitionFile;
 
   void AppendFortranFormatFlags(std::string& flags,
                                 cmSourceFile const& source);

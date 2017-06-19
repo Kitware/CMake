@@ -4,27 +4,32 @@
 
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkLineComputer.h"
-#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmServer.h"
 #include "cmServerDictionary.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cm_uv.h"
 #include "cmake.h"
 
-#include "cmServerDictionary.h"
-
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cm_jsoncpp_reader.h"
-#include "cm_jsoncpp_value.h"
-#endif
-
 #include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <functional>
+#include <limits>
+#include <map>
+#include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <memory>
 
@@ -51,9 +56,8 @@ std::vector<std::string> getConfigurations(const cmake* cm)
 bool hasString(const Json::Value& v, const std::string& s)
 {
   return !v.isNull() &&
-    std::find_if(v.begin(), v.end(), [s](const Json::Value& i) {
-      return i.asString() == s;
-    }) != v.end();
+    std::any_of(v.begin(), v.end(),
+                [s](const Json::Value& i) { return i.asString() == s; });
 }
 
 template <class T>
@@ -223,7 +227,7 @@ bool cmServerProtocol::Activate(cmServer* server,
 {
   assert(server);
   this->m_Server = server;
-  this->m_CMakeInstance = std::make_unique<cmake>();
+  this->m_CMakeInstance = std::make_unique<cmake>(cmake::RoleProject);
   const bool result = this->DoActivate(request, errorMessage);
   if (!result) {
     this->m_CMakeInstance = CM_NULLPTR;
@@ -511,16 +515,14 @@ cmServerResponse cmServerProtocol1_0::ProcessCache(
   if (keys.empty()) {
     keys = allKeys;
   } else {
-    for (auto i : keys) {
-      if (std::find_if(allKeys.begin(), allKeys.end(),
-                       [i](const std::string& j) { return i == j; }) ==
-          allKeys.end()) {
+    for (const auto& i : keys) {
+      if (std::find(allKeys.begin(), allKeys.end(), i) == allKeys.end()) {
         return request.ReportError("Key \"" + i + "\" not found in cache.");
       }
     }
   }
   std::sort(keys.begin(), keys.end());
-  for (auto key : keys) {
+  for (const auto& key : keys) {
     Json::Value entry = Json::objectValue;
     entry[kKEY_KEY] = key;
     entry[kTYPE_KEY] =
@@ -529,7 +531,7 @@ cmServerResponse cmServerProtocol1_0::ProcessCache(
 
     Json::Value props = Json::objectValue;
     bool haveProperties = false;
-    for (auto prop : state->GetCacheEntryPropertyList(key)) {
+    for (const auto& prop : state->GetCacheEntryPropertyList(key)) {
       haveProperties = true;
       props[prop] = state->GetCacheEntryProperty(key, prop);
     }
@@ -621,7 +623,7 @@ bool LanguageData::operator==(const LanguageData& other) const
 void LanguageData::SetDefines(const std::set<std::string>& defines)
 {
   std::vector<std::string> result;
-  for (auto i : defines) {
+  for (const auto& i : defines) {
     result.push_back(i);
   }
   std::sort(result.begin(), result.end());
@@ -638,11 +640,11 @@ struct hash<LanguageData>
     using std::hash;
     size_t result =
       hash<std::string>()(in.Language) ^ hash<std::string>()(in.Flags);
-    for (auto i : in.IncludePathList) {
+    for (const auto& i : in.IncludePathList) {
       result = result ^ (hash<std::string>()(i.first) ^
                          (i.second ? std::numeric_limits<size_t>::max() : 0));
     }
-    for (auto i : in.Defines) {
+    for (const auto& i : in.Defines) {
       result = result ^ hash<std::string>()(i);
     }
     result =
@@ -666,7 +668,7 @@ static Json::Value DumpSourceFileGroup(const LanguageData& data,
     }
     if (!data.IncludePathList.empty()) {
       Json::Value includes = Json::arrayValue;
-      for (auto i : data.IncludePathList) {
+      for (const auto& i : data.IncludePathList) {
         Json::Value tmp = Json::objectValue;
         tmp[kPATH_KEY] = i.first;
         if (i.second) {
@@ -696,7 +698,7 @@ static Json::Value DumpSourceFileGroup(const LanguageData& data,
   result[kIS_GENERATED_KEY] = data.IsGenerated;
 
   Json::Value sourcesValue = Json::arrayValue;
-  for (auto i : files) {
+  for (const auto& i : files) {
     const std::string relPath =
       cmSystemTools::RelativePath(baseDir.c_str(), i.c_str());
     sourcesValue.append(relPath.size() < i.size() ? relPath : i);
@@ -819,9 +821,11 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
 
   if (target->HaveWellDefinedOutputFiles()) {
     Json::Value artifacts = Json::arrayValue;
-    artifacts.append(target->GetFullPath(config, false));
+    artifacts.append(
+      target->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact));
     if (target->IsDLLPlatform()) {
-      artifacts.append(target->GetFullPath(config, true));
+      artifacts.append(
+        target->GetFullPath(config, cmStateEnums::ImportLibraryArtifact));
       const cmGeneratorTarget::OutputInfo* output =
         target->GetOutputInfo(config);
       if (output && !output->PdbDir.empty()) {
@@ -873,7 +877,7 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
   std::set<std::string> languages;
   target->GetLanguages(languages, config);
   std::map<std::string, LanguageData> languageDataMap;
-  for (auto lang : languages) {
+  for (const auto& lang : languages) {
     LanguageData& ld = languageDataMap[lang];
     ld.Language = lang;
     lg->GetTargetCompileFlags(target, config, lang, ld.Flags);
@@ -1149,7 +1153,7 @@ cmServerResponse cmServerProtocol1_0::ProcessSetGlobalSettings(
     kWARN_UNINITIALIZED_KEY, kWARN_UNUSED_KEY, kWARN_UNUSED_CLI_KEY,
     kCHECK_SYSTEM_VARS_KEY
   };
-  for (auto i : boolValues) {
+  for (const auto& i : boolValues) {
     if (!request.Data[i].isNull() && !request.Data[i].isBool()) {
       return request.ReportError("\"" + i +
                                  "\" must be unset or a bool value.");

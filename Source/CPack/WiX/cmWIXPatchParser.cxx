@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXPatchParser.h"
 
-#include <CPack/cmCPackGenerator.h>
+#include "cmCPackGenerator.h"
 
-#include <cm_expat.h>
+#include "cm_expat.h"
 
 cmWIXPatchNode::Type cmWIXPatchText::type()
 {
@@ -72,9 +72,11 @@ void cmWIXPatchParser::StartElement(const std::string& name, const char** atts)
 
 void cmWIXPatchParser::StartFragment(const char** attributes)
 {
+  cmWIXPatchElement* new_element = CM_NULLPTR;
+  /* find the id of for fragment */
   for (size_t i = 0; attributes[i]; i += 2) {
-    std::string key = attributes[i];
-    std::string value = attributes[i + 1];
+    const std::string key = attributes[i];
+    const std::string value = attributes[i + 1];
 
     if (key == "Id") {
       if (Fragments.find(value) != Fragments.end()) {
@@ -83,10 +85,22 @@ void cmWIXPatchParser::StartFragment(const char** attributes)
         ReportValidationError(tmp.str());
       }
 
-      ElementStack.push_back(&Fragments[value]);
-    } else {
-      ReportValidationError(
-        "The only allowed 'CPackWixFragment' attribute is 'Id'");
+      new_element = &Fragments[value];
+      ElementStack.push_back(new_element);
+    }
+  }
+
+  /* add any additional attributes for the fragement */
+  if (!new_element) {
+    ReportValidationError("No 'Id' specified for 'CPackWixFragment' element");
+  } else {
+    for (size_t i = 0; attributes[i]; i += 2) {
+      const std::string key = attributes[i];
+      const std::string value = attributes[i + 1];
+
+      if (key != "Id") {
+        new_element->attributes[key] = value;
+      }
     }
   }
 }

@@ -32,6 +32,7 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
   std::map<cmSourceFile const*, std::string>& mapping,
   cmGeneratorTarget const* gt)
 {
+  char const* custom_ext = gt->GetCustomObjectExtension();
   std::string dir_max = this->ComputeLongestObjectDirectory(gt);
 
   // Count the number of object files with each name.  Note that
@@ -44,7 +45,12 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
     cmSourceFile const* sf = si->first;
     std::string objectNameLower = cmSystemTools::LowerCase(
       cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()));
-    objectNameLower += this->GlobalGenerator->GetLanguageOutputExtension(*sf);
+    if (custom_ext) {
+      objectNameLower += custom_ext;
+    } else {
+      objectNameLower +=
+        this->GlobalGenerator->GetLanguageOutputExtension(*sf);
+    }
     counts[objectNameLower] += 1;
   }
 
@@ -57,10 +63,16 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
     cmSourceFile const* sf = si->first;
     std::string objectName =
       cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
-    objectName += this->GlobalGenerator->GetLanguageOutputExtension(*sf);
+    if (custom_ext) {
+      objectName += custom_ext;
+    } else {
+      objectName += this->GlobalGenerator->GetLanguageOutputExtension(*sf);
+    }
     if (counts[cmSystemTools::LowerCase(objectName)] > 1) {
       const_cast<cmGeneratorTarget*>(gt)->AddExplicitObjectName(sf);
-      objectName = this->GetObjectFileNameWithoutTarget(*sf, dir_max);
+      bool keptSourceExtension;
+      objectName = this->GetObjectFileNameWithoutTarget(
+        *sf, dir_max, &keptSourceExtension, custom_ext);
     }
     si->second = objectName;
   }
@@ -80,8 +92,10 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
       !(isFortran && target->GetType() == cmStateEnums::SHARED_LIBRARY)) {
     return pcc;
   }
-  std::string outDir = target->GetDirectory(config, false);
-  std::string impDir = target->GetDirectory(config, true);
+  std::string outDir =
+    target->GetDirectory(config, cmStateEnums::RuntimeBinaryArtifact);
+  std::string impDir =
+    target->GetDirectory(config, cmStateEnums::ImportLibraryArtifact);
   if (impDir == outDir) {
     return pcc;
   }

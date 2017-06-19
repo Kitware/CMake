@@ -3,7 +3,7 @@
 #ifndef cmCTestScriptHandler_h
 #define cmCTestScriptHandler_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCTestGenericHandler.h"
 
@@ -126,7 +126,7 @@ private:
   int RunConfigurationDashboard();
 
   // Add ctest command
-  void AddCTestCommand(cmCTestCommand* command);
+  void AddCTestCommand(std::string const& name, cmCTestCommand* command);
 
   // Try to remove the binary directory once
   static bool TryToRemoveBinaryDirectoryOnce(const std::string& directoryPath);

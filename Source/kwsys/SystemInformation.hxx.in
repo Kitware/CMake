@@ -26,6 +26,33 @@ class @KWSYS_NAMESPACE@_EXPORT SystemInformation
   SystemInformationImplementation* Implementation;
 
 public:
+  // possible parameter values for DoesCPUSupportFeature()
+  static const long int CPU_FEATURE_MMX = 1 << 0;
+  static const long int CPU_FEATURE_MMX_PLUS = 1 << 1;
+  static const long int CPU_FEATURE_SSE = 1 << 2;
+  static const long int CPU_FEATURE_SSE2 = 1 << 3;
+  static const long int CPU_FEATURE_AMD_3DNOW = 1 << 4;
+  static const long int CPU_FEATURE_AMD_3DNOW_PLUS = 1 << 5;
+  static const long int CPU_FEATURE_IA64 = 1 << 6;
+  static const long int CPU_FEATURE_MP_CAPABLE = 1 << 7;
+  static const long int CPU_FEATURE_HYPERTHREAD = 1 << 8;
+  static const long int CPU_FEATURE_SERIALNUMBER = 1 << 9;
+  static const long int CPU_FEATURE_APIC = 1 << 10;
+  static const long int CPU_FEATURE_SSE_FP = 1 << 11;
+  static const long int CPU_FEATURE_SSE_MMX = 1 << 12;
+  static const long int CPU_FEATURE_CMOV = 1 << 13;
+  static const long int CPU_FEATURE_MTRR = 1 << 14;
+  static const long int CPU_FEATURE_L1CACHE = 1 << 15;
+  static const long int CPU_FEATURE_L2CACHE = 1 << 16;
+  static const long int CPU_FEATURE_L3CACHE = 1 << 17;
+  static const long int CPU_FEATURE_ACPI = 1 << 18;
+  static const long int CPU_FEATURE_THERMALMONITOR = 1 << 19;
+  static const long int CPU_FEATURE_TEMPSENSEDIODE = 1 << 20;
+  static const long int CPU_FEATURE_FREQUENCYID = 1 << 21;
+  static const long int CPU_FEATURE_VOLTAGEID_FREQUENCY = 1 << 22;
+  static const long int CPU_FEATURE_FPU = 1 << 23;
+
+public:
   SystemInformation();
   ~SystemInformation();
 
@@ -65,9 +92,10 @@ public:
   // on this system.
   std::string GetOSDescription();
 
+  // returns if the operating system is 64bit or not.
   bool Is64Bits();
 
-  unsigned int GetNumberOfLogicalCPU(); // per physical cpu
+  unsigned int GetNumberOfLogicalCPU();
   unsigned int GetNumberOfPhysicalCPU();
 
   bool DoesCPUSupportCPUID();

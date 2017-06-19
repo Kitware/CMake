@@ -3,7 +3,7 @@
 #ifndef cmXMLWiter_h
 #define cmXMLWiter_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h"
 
 #include "cmXMLSafe.h"
 
@@ -14,6 +14,8 @@
 
 class cmXMLWriter
 {
+  CM_DISABLE_COPY(cmXMLWriter)
+
 public:
   cmXMLWriter(std::ostream& output, std::size_t level = 0);
   ~cmXMLWriter();
@@ -60,10 +62,9 @@ public:
 
   void FragmentFile(const char* fname);
 
-private:
-  cmXMLWriter(const cmXMLWriter&);
-  cmXMLWriter& operator=(const cmXMLWriter&);
+  void SetIndentationElement(std::string const& element);
 
+private:
   void ConditionalLineBreak(bool condition, std::size_t indent);
 
   void PreAttribute();
@@ -107,6 +108,7 @@ private:
 private:
   std::ostream& Output;
   std::stack<std::string, std::vector<std::string> > Elements;
+  std::string IndentationElement;
   std::size_t Level;
   bool ElementOpen;
   bool BreakAttrib;

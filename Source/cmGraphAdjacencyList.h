@@ -3,7 +3,7 @@
 #ifndef cmGraphAdjacencyList_h
 #define cmGraphAdjacencyList_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <vector>
 
@@ -15,24 +15,9 @@
 class cmGraphEdge
 {
 public:
-  cmGraphEdge()
-    : Dest(0)
-    , Strong(true)
-  {
-  }
-  cmGraphEdge(int n)
-    : Dest(n)
-    , Strong(true)
-  {
-  }
-  cmGraphEdge(int n, bool s)
+  cmGraphEdge(int n = 0, bool s = true)
     : Dest(n)
     , Strong(s)
-  {
-  }
-  cmGraphEdge(cmGraphEdge const& r)
-    : Dest(r.Dest)
-    , Strong(r.Strong)
   {
   }
   operator int() const { return this->Dest; }

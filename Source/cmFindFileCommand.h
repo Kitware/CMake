@@ -3,8 +3,7 @@
 #ifndef cmFindFileCommand_h
 #define cmFindFileCommand_h
 
-#include <cmConfigure.h>
-#include <string>
+#include "cmConfigure.h"
 
 #include "cmFindPathCommand.h"
 
@@ -26,7 +25,6 @@ public:
    * This is a virtual constructor for the command.
    */
   cmCommand* Clone() CM_OVERRIDE { return new cmFindFileCommand; }
-  std::string GetName() const CM_OVERRIDE { return "find_file"; }
 };
 
 #endif

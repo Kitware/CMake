@@ -46,26 +46,26 @@ endif()
 
 get_property(QT_COMPILE_FEATURES TARGET ${QT_QTCORE_TARGET} PROPERTY INTERFACE_COMPILE_FEATURES)
 
-# -- Test: AUTORCC
+# -- Test
 # RCC only
 add_executable(rccOnly rccOnly.cpp rccOnlyRes.qrc)
 set_property(TARGET rccOnly PROPERTY AUTORCC ON)
 target_link_libraries(rccOnly ${QT_QTCORE_TARGET})
 
-# -- Test: AUTORCC
+# -- Test
 # RCC empty
 add_executable(rccEmpty rccEmpty.cpp rccEmptyRes.qrc)
 set_property(TARGET rccEmpty PROPERTY AUTORCC ON)
 target_link_libraries(rccEmpty ${QT_QTCORE_TARGET})
 
-# -- Test: AUTOUIC
+# -- Test
 # UIC only
 qtx_wrap_cpp(uicOnlyMoc uicOnlySource/uiconly.h)
 add_executable(uicOnly uicOnlySource/uiconly.cpp ${uicOnlyMoc})
 set_property(TARGET uicOnly PROPERTY AUTOUIC ON)
 target_link_libraries(uicOnly ${QT_LIBRARIES})
 
-# -- Test: AUTOMOC, AUTORCC
+# -- Test
 # Add not_generated_file.qrc to the source list to get the file-level
 # dependency, but don't generate a c++ file from it.  Disable the AUTORCC
 # feature for this target.  This tests that qrc files in the sources don't
@@ -80,66 +80,134 @@ set_target_properties(no_link_language PROPERTIES AUTOMOC TRUE)
 target_compile_features(no_link_language PRIVATE ${QT_COMPILE_FEATURES})
 target_compile_features(empty PRIVATE ${QT_COMPILE_FEATURES})
 
-# -- Test: AUTORCC
+# -- Test
 # When a file listed in a .qrc file changes the target must be rebuilt
+set(timeformat "%Y%j%H%M%S")
+set(RCC_DEPENDS_SRC "${CMAKE_CURRENT_SOURCE_DIR}/rccDepends")
+set(RCC_DEPENDS_BIN "${CMAKE_CURRENT_BINARY_DIR}/rccDepends")
+configure_file(${RCC_DEPENDS_SRC}/res1a.qrc.in ${RCC_DEPENDS_BIN}/res1.qrc COPYONLY)
+configure_file(${RCC_DEPENDS_SRC}/res2a.qrc.in ${RCC_DEPENDS_BIN}/res2.qrc.in COPYONLY)
 try_compile(RCC_DEPENDS
-  "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"
-  "${CMAKE_CURRENT_SOURCE_DIR}/autorcc_depends"
-  autorcc_depends
-  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}" "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+  "${RCC_DEPENDS_BIN}"
+  "${RCC_DEPENDS_SRC}"
+  rccDepends
+  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
+              "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
               "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
   OUTPUT_VARIABLE output
 )
 if (NOT RCC_DEPENDS)
-  message(SEND_ERROR "Initial build of autorcc_depends failed. Output: ${output}")
+  message(SEND_ERROR "Initial build of rccDepends failed. Output: ${output}")
 endif()
-
-file(STRINGS "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends/info_file.txt" qrc_files)
-
-list(GET qrc_files 0 qrc_file1)
-
-set(timeformat "%Y%j%H%M%S")
-
-file(TIMESTAMP "${qrc_file1}" file1_before "${timeformat}")
-
+# Get name and timestamp of the output binary
+file(STRINGS "${RCC_DEPENDS_BIN}/target.txt" targetList)
+list(GET targetList 0 rccDependsBin)
+file(TIMESTAMP "${rccDependsBin}" timeBegin "${timeformat}")
+# Sleep, touch regular qrc input file, rebuild and compare timestamp
 execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends/res1/input.txt")
-
-execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"
-)
-
-file(TIMESTAMP "${qrc_file1}" file1_step1 "${timeformat}")
-
-if (NOT file1_step1 GREATER file1_before)
-  message(SEND_ERROR "file1 (${qrc_file1}) should have changed in the first step!")
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${RCC_DEPENDS_BIN}/res1/input.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${RCC_DEPENDS_BIN}" RESULT_VARIABLE result)
+if (result)
+  message(SEND_ERROR "Second build of rccDepends failed.")
+endif()
+file(TIMESTAMP "${rccDependsBin}" timeStep1 "${timeformat}")
+if (NOT timeStep1 GREATER timeBegin)
+  message(SEND_ERROR "File (${rccDependsBin}) should have changed in the first step!")
+endif()
+# Sleep, update regular qrc file, rebuild and compare timestamp
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
+configure_file(${RCC_DEPENDS_SRC}/res1b.qrc.in ${RCC_DEPENDS_BIN}/res1.qrc COPYONLY)
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${RCC_DEPENDS_BIN}" RESULT_VARIABLE result)
+if (result)
+  message(SEND_ERROR "Third build of rccDepends failed.")
+endif()
+file(TIMESTAMP "${rccDependsBin}" timeStep2 "${timeformat}")
+if (NOT timeStep2 GREATER timeStep1)
+  message(SEND_ERROR "File (${rccDependsBin}) should have changed in the second step!")
+endif()
+# Sleep, touch regular qrc newly added input file, rebuild and compare timestamp
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${RCC_DEPENDS_BIN}/res1/inputAdded.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${RCC_DEPENDS_BIN}" RESULT_VARIABLE result)
+if (result)
+  message(SEND_ERROR "Fourth build of rccDepends failed.")
+endif()
+file(TIMESTAMP "${rccDependsBin}" timeStep3 "${timeformat}")
+if (NOT timeStep3 GREATER timeStep2)
+  message(SEND_ERROR "File (${rccDependsBin}) should have changed in the third step!")
+endif()
+# Sleep, touch generated qrc input file, rebuild and compare timestamp
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${RCC_DEPENDS_BIN}/res2/input.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${RCC_DEPENDS_BIN}" RESULT_VARIABLE result)
+if (result)
+  message(SEND_ERROR "Fifth build of rccDepends failed.")
+endif()
+file(TIMESTAMP "${rccDependsBin}" timeStep4 "${timeformat}")
+if (NOT timeStep4 GREATER timeStep3)
+  message(SEND_ERROR "File (${rccDependsBin}) should have changed in the fourth step!")
+endif()
+# Sleep, update generated qrc file, rebuild and compare timestamp
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
+configure_file(${RCC_DEPENDS_SRC}/res2b.qrc.in ${RCC_DEPENDS_BIN}/res2.qrc.in COPYONLY)
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${RCC_DEPENDS_BIN}" RESULT_VARIABLE result)
+if (result)
+  message(SEND_ERROR "Sixth build of rccDepends failed.")
+endif()
+file(TIMESTAMP "${rccDependsBin}" timeStep5 "${timeformat}")
+if (NOT timeStep5 GREATER timeStep4)
+  message(SEND_ERROR "File (${rccDependsBin}) should have changed in the fitfh step!")
+endif()
+# Sleep, touch generated qrc newly added input file, rebuild and compare timestamp
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${RCC_DEPENDS_BIN}/res2/inputAdded.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${RCC_DEPENDS_BIN}" RESULT_VARIABLE result)
+if (result)
+  message(SEND_ERROR "Seventh build of rccDepends failed.")
+endif()
+file(TIMESTAMP "${rccDependsBin}" timeStep6 "${timeformat}")
+if (NOT timeStep6 GREATER timeStep5)
+  message(SEND_ERROR "File (${rccDependsBin}) should have changed in the sixth step!")
 endif()
 
-# -- Test: AUTOMOC
+
+# -- Test
 # Ensure a repeated build succeeds when a header containing a QObject changes
+set(timeformat "%Y%j%H%M%S")
+configure_file(mocRerun/test1a.h.in mocRerun/test1.h COPYONLY)
 try_compile(MOC_RERUN
-  "${CMAKE_CURRENT_BINARY_DIR}/automoc_rerun"
-  "${CMAKE_CURRENT_SOURCE_DIR}/automoc_rerun"
-  automoc_rerun
-  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}" "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+  "${CMAKE_CURRENT_BINARY_DIR}/mocRerun"
+  "${CMAKE_CURRENT_SOURCE_DIR}/mocRerun"
+  mocRerun
+  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
+              "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
               "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
   OUTPUT_VARIABLE output
 )
 if (NOT MOC_RERUN)
-  message(SEND_ERROR "Initial build of automoc_rerun failed. Output: ${output}")
+  message(SEND_ERROR "Initial build of mocRerun failed. Output: ${output}")
 endif()
-
-configure_file(automoc_rerun/test1.h.in2 automoc_rerun/test1.h COPYONLY)
-
+# Get name and timestamp of the output binary
+file(STRINGS "${CMAKE_CURRENT_BINARY_DIR}/mocRerun/target1.txt" target1List)
+list(GET target1List 0 binFile)
+file(TIMESTAMP "${binFile}" timeBegin "${timeformat}")
+# Change file content and rebuild
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
+configure_file(mocRerun/test1b.h.in mocRerun/test1.h COPYONLY)
 execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/automoc_rerun"
-  RESULT_VARIABLE automoc_rerun_result
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mocRerun"
+  RESULT_VARIABLE mocRerun_result
   )
-if (automoc_rerun_result)
-  message(SEND_ERROR "Second build of automoc_rerun failed.")
+if (mocRerun_result)
+  message(SEND_ERROR "Second build of mocRerun failed.")
+endif()
+# Compare timestamps
+file(TIMESTAMP "${binFile}" timeStep1 "${timeformat}")
+if (NOT timeStep1 GREATER timeBegin)
+  message(SEND_ERROR "File (${binFile}) should have changed in the first step!")
 endif()
 
-# -- Test: AUTOMOC, SKIP_AUTOMOC
+# -- Test
 # Test for SKIP_AUTOMOC and SKIP_AUTOGEN on an AUTOMOC enabled target
 qtx_wrap_cpp(skipMocWrapMoc
   skipSource/qItemA.hpp
@@ -161,7 +229,7 @@ set_property(TARGET skipMocB PROPERTY AUTOMOC ON)
 set_property(TARGET skipMocB PROPERTY AUTOUIC ON)
 target_link_libraries(skipMocB ${QT_LIBRARIES})
 
-# -- Test: AUTOUIC, SKIP_AUTOUIC
+# -- Test
 # Test for SKIP_AUTOUIC and SKIP_AUTOGEN on an AUTOUIC enabled target
 set(skipUicSources
   skipUic.cpp
@@ -181,7 +249,7 @@ set_property(TARGET skipUicB PROPERTY AUTOUIC ON)
 set_property(TARGET skipUicB PROPERTY AUTOMOC ON)
 target_link_libraries(skipUicB ${QT_LIBRARIES})
 
-# -- Test: AUTORCC, SKIP_AUTORCC
+# -- Test
 # Test for SKIP_AUTORCC and SKIP_AUTOGEN on an AUTORCC enabled target
 set(skipRccSources
   skipRcc.cpp
@@ -202,10 +270,96 @@ set_property(TARGET skipRccB PROPERTY AUTOUIC ON)
 set_property(TARGET skipRccB PROPERTY AUTOMOC ON)
 target_link_libraries(skipRccB ${QT_LIBRARIES})
 
-# -- Test: AUTOMOC AUTORCC
+# -- Test
 # Source files with the same basename in different subdirectories
 add_subdirectory(sameName)
 
-# -- Test: AUTOMOC AUTORCC AUTOUIC
+# -- Test
+# Tests AUTOMOC with generated sources
+add_subdirectory(mocDepends)
+
+# -- Test
+# Tests various include moc patterns
+add_subdirectory(mocIncludeStrict)
+
+# -- Test
+# Tests various include moc patterns
+add_subdirectory(mocIncludeRelaxed)
+
+# -- Test
+# Tests Q_PLUGIN_METADATA json file change detection
+if (NOT QT_TEST_VERSION STREQUAL 4)
+  try_compile(MOC_PLUGIN
+    "${CMAKE_CURRENT_BINARY_DIR}/mocPlugin"
+    "${CMAKE_CURRENT_SOURCE_DIR}/mocPlugin"
+    mocPlugin
+    CMAKE_FLAGS "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+                "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
+    OUTPUT_VARIABLE output
+  )
+  if (NOT MOC_PLUGIN)
+    message(SEND_ERROR "Initial build of mocPlugin failed. Output: ${output}")
+  endif()
+
+  set(timeformat "%Y%j%H%M%S")
+  set(mocPlugSrcDir "${CMAKE_CURRENT_SOURCE_DIR}/mocPlugin")
+  set(mocPlugBinDir "${CMAKE_CURRENT_BINARY_DIR}/mocPlugin")
+  find_library(plAFile "PlugA" PATHS "${mocPlugBinDir}/Debug" "${mocPlugBinDir}" NO_DEFAULT_PATH)
+  find_library(plBFile "PlugB" PATHS "${mocPlugBinDir}/Debug" "${mocPlugBinDir}" NO_DEFAULT_PATH)
+  find_library(plCFile "PlugC" PATHS "${mocPlugBinDir}/Debug" "${mocPlugBinDir}" NO_DEFAULT_PATH)
+  find_library(plDFile "PlugD" PATHS "${mocPlugBinDir}/Debug" "${mocPlugBinDir}" NO_DEFAULT_PATH)
+
+  file(TIMESTAMP "${plAFile}" plABefore "${timeformat}")
+  file(TIMESTAMP "${plBFile}" plBBefore "${timeformat}")
+  file(TIMESTAMP "${plCFile}" plCBefore "${timeformat}")
+  file(TIMESTAMP "${plDFile}" plDBefore "${timeformat}")
+
+  # Ensure that the timestamp will change and change the json files
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
+  configure_file("${mocPlugSrcDir}/jsonIn/StyleD.json" "${mocPlugBinDir}/jsonFiles/StyleC.json")
+  configure_file("${mocPlugSrcDir}/jsonIn/StyleC.json" "${mocPlugBinDir}/jsonFiles/sub/StyleD.json")
+  execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${mocPlugBinDir}")
+
+  file(TIMESTAMP "${plAFile}" plAAfter "${timeformat}")
+  file(TIMESTAMP "${plBFile}" plBAfter "${timeformat}")
+  file(TIMESTAMP "${plCFile}" plCAfter "${timeformat}")
+  file(TIMESTAMP "${plDFile}" plDAfter "${timeformat}")
+
+  if (plAAfter GREATER plABefore)
+    message(SEND_ERROR "file (${plAFile}) should not have changed!")
+  endif()
+  if (plBAfter GREATER plBBefore)
+    message(SEND_ERROR "file (${plBFile}) should not have changed!")
+  endif()
+  if (NOT plCAfter GREATER plCBefore)
+    message(SEND_ERROR "file (${plCFile}) should have changed!")
+  endif()
+  if (NOT plDAfter GREATER plDBefore)
+    message(SEND_ERROR "file (${plDFile}) should have changed!")
+  endif()
+
+  # Test custom macro
+  file(TIMESTAMP "${plCFile}" plCBefore "${timeformat}")
+  file(TIMESTAMP "${plDFile}" plDBefore "${timeformat}")
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
+  configure_file("${mocPlugSrcDir}/jsonIn/StyleD.json" "${mocPlugBinDir}/jsonFiles/StyleC_Custom.json")
+  configure_file("${mocPlugSrcDir}/jsonIn/StyleC.json" "${mocPlugBinDir}/jsonFiles/sub/StyleD_Custom.json")
+  execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${mocPlugBinDir}")
+  file(TIMESTAMP "${plCFile}" plCAfter "${timeformat}")
+  file(TIMESTAMP "${plDFile}" plDAfter "${timeformat}")
+  if (NOT plCAfter GREATER plCBefore)
+    message(SEND_ERROR "file (${plCFile}) should have changed!")
+  endif()
+  if (NOT plDAfter GREATER plDBefore)
+    message(SEND_ERROR "file (${plDFile}) should have changed!")
+  endif()
+
+endif()
+
+# -- Test
+# Tests various .ui include directories
+add_subdirectory(uicInclude)
+
+# -- Test
 # Complex test case
 add_subdirectory(complex)

@@ -59,12 +59,19 @@
 #                       bindings, if the HL component is enabled
 #
 # Available components are: C CXX Fortran and HL.  For each enabled language
-# binding, a corresponding HDF5_${LANG}_LIBRARIES variable will be defined.
+# binding, a corresponding HDF5_${LANG}_LIBRARIES variable, and potentially
+# HDF5_${LANG}_DEFINITIONS, will be defined.
 # If the HL component is enabled, then an HDF5_${LANG}_HL_LIBRARIES will
 # also be defined.  With all components enabled, the following variables will be defined:
 #
 # ::
 #
+#   HDF5_C_DEFINITIONS -- Required compiler definitions for HDF5 C bindings
+#   HDF5_CXX_DEFINITIONS -- Required compiler definitions for HDF5 C++ bindings
+#   HDF5_Fortran_DEFINITIONS -- Required compiler definitions for HDF5 Fortran bindings
+#   HDF5_C_INCLUDE_DIRS -- Required include directories for HDF5 C bindings
+#   HDF5_CXX_INCLUDE_DIRS -- Required include directories for HDF5 C++ bindings
+#   HDF5_Fortran_INCLUDE_DIRS -- Required include directories for HDF5 Fortran bindings
 #   HDF5_C_LIBRARIES - Required libraries for the HDF5 C bindings
 #   HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
 #   HDF5_Fortran_LIBRARIES - Required libraries for the HDF5 Fortran bindings
@@ -91,6 +98,9 @@
 #
 # ``HDF5_ROOT``
 #   Specify the path to the HDF5 installation to use.
+#
+# ``HDF5_FIND_DEBUG``
+#   Set to a true value to get some extra debugging output.
 #
 # ``HDF5_NO_FIND_PACKAGE_CONFIG_FILE``
 #   Set to a true value to skip trying to find ``hdf5-config.cmake``.
@@ -344,11 +354,7 @@ macro( _HDF5_parse_compile_line
     libraries
     libraries_hl)
 
-  if(UNIX)
-    separate_arguments(_HDF5_COMPILE_ARGS UNIX_COMMAND "${${compile_line_var}}")
-  else()
-    separate_arguments(_HDF5_COMPILE_ARGS WINDOWS_COMMAND "${${compile_line_var}}")
-  endif()
+  separate_arguments(_HDF5_COMPILE_ARGS NATIVE_COMMAND "${${compile_line_var}}")
 
   foreach(arg IN LISTS _HDF5_COMPILE_ARGS)
     if("${arg}" MATCHES "^-I(.*)$")
@@ -400,15 +406,23 @@ if(NOT HDF5_FOUND AND NOT HDF5_NO_FIND_PACKAGE_CONFIG_FILE)
       ${_HDF5_SEARCH_OPTS}
       )
     if( HDF5_FOUND)
+        if(HDF5_FIND_DEBUG)
+            message(STATUS "Found HDF5 at ${HDF5_DIR} via NO_MODULE. Now trying to extract locations etc.")
+        endif()
         set(HDF5_IS_PARALLEL ${HDF5_ENABLE_PARALLEL})
         set(HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
         set(HDF5_LIBRARIES)
-        set(HDF5_C_TARGET hdf5)
-        set(HDF5_C_HL_TARGET hdf5_hl)
-        set(HDF5_CXX_TARGET hdf5_cpp)
-        set(HDF5_CXX_HL_TARGET hdf5_hl_cpp)
-        set(HDF5_Fortran_TARGET hdf5_fortran)
-        set(HDF5_Fortran_HL_TARGET hdf5_hl_fortran)
+        if (NOT TARGET hdf5 AND NOT TARGET hdf5-static AND NOT TARGET hdf5-shared)
+            # Some HDF5 versions (e.g. 1.8.18) used hdf5::hdf5 etc
+            set(_target_prefix "hdf5::")
+        endif()
+        set(HDF5_C_TARGET ${_target_prefix}hdf5)
+        set(HDF5_C_HL_TARGET ${_target_prefix}hdf5_hl)
+        set(HDF5_CXX_TARGET ${_target_prefix}hdf5_cpp)
+        set(HDF5_CXX_HL_TARGET ${_target_prefix}hdf5_hl_cpp)
+        set(HDF5_Fortran_TARGET ${_target_prefix}hdf5_fortran)
+        set(HDF5_Fortran_HL_TARGET ${_target_prefix}hdf5_hl_fortran)
+        set(HDF5_DEFINITIONS "")
         if(HDF5_USE_STATIC_LIBRARIES)
             set(_suffix "-static")
         else()
@@ -420,7 +434,7 @@ if(NOT HDF5_FOUND AND NOT HDF5_NO_FIND_PACKAGE_CONFIG_FILE)
             #if we detect that occurrence clear the suffix
             if(_suffix AND NOT TARGET ${HDF5_${_lang}_TARGET}${_suffix})
               if(NOT TARGET ${HDF5_${_lang}_TARGET})
-                #cant find this component with our without the suffix
+                #cant find this component with or without the suffix
                 #so bail out, and let the following locate HDF5
                 set(HDF5_FOUND FALSE)
                 break()
@@ -428,21 +442,29 @@ if(NOT HDF5_FOUND AND NOT HDF5_NO_FIND_PACKAGE_CONFIG_FILE)
               set(_suffix "")
             endif()
 
-            get_target_property(_lang_location ${HDF5_${_lang}_TARGET}${_suffix} LOCATION)
+            if(HDF5_FIND_DEBUG)
+                message(STATUS "Trying to get properties of target ${HDF5_${_lang}_TARGET}${_suffix}")
+            endif()
+            # Find library for this target. Complicated as on Windows with a DLL, we need to search for the import-lib.
+            get_target_property(_imported_conf ${HDF5_${_lang}_TARGET}${_suffix} IMPORTED_CONFIGURATIONS)
+            get_target_property(_lang_location ${HDF5_${_lang}_TARGET}${_suffix} IMPORTED_IMPLIB_${_imported_conf} )
+            if (NOT _lang_location)
+                # no import lib, just try LOCATION
+                get_target_property(_lang_location ${HDF5_${_lang}_TARGET}${_suffix} LOCATION)
+            endif()
             if( _lang_location )
-                set(HDF5_${_lang}_LIBRARY ${_lang_location} CACHE PATH
-                    "HDF5 ${_lang} library" )
-                mark_as_advanced(HDF5_${_lang}_LIBRARY)
+                set(HDF5_${_lang}_LIBRARY ${_lang_location})
                 list(APPEND HDF5_LIBRARIES ${HDF5_${_lang}_TARGET}${_suffix})
                 set(HDF5_${_lang}_LIBRARIES ${HDF5_${_lang}_TARGET}${_suffix})
                 set(HDF5_${_lang}_FOUND True)
             endif()
             if(FIND_HL)
-                get_target_property(_lang_hl_location ${HDF5_${_lang}_HL_TARGET}${_suffix} LOCATION)
+                get_target_property(__lang_hl_location ${HDF5_${_lang}_HL_TARGET}${_suffix} IMPORTED_IMPLIB_${_imported_conf} )
+                if (NOT _lang_hl_location)
+                    get_target_property(_lang_hl_location ${HDF5_${_lang}_HL_TARGET}${_suffix} LOCATION)
+                endif()
                 if( _lang_hl_location )
-                    set(HDF5_${_lang}_HL_LIBRARY ${_lang_hl_location} CACHE PATH
-                        "HDF5 ${_lang} HL library" )
-                    mark_as_advanced(HDF5_${_lang}_HL_LIBRARY)
+                    set(HDF5_${_lang}_HL_LIBRARY ${_lang_hl_location})
                     list(APPEND HDF5_HL_LIBRARIES ${HDF5_${_lang}_TARGET}${_suffix})
                     set(HDF5_${_lang}_HL_LIBRARIES ${HDF5_${_lang}_TARGET}${_suffix})
                     set(HDF5_HL_FOUND True)
@@ -487,10 +509,6 @@ if(NOT HDF5_FOUND)
       set(HDF5_${__lang}_HL_LIBRARIES)
 
       mark_as_advanced(HDF5_${__lang}_COMPILER_EXECUTABLE_NO_INTERROGATE)
-      mark_as_advanced(HDF5_${__lang}_DEFINITIONS)
-      mark_as_advanced(HDF5_${__lang}_INCLUDE_DIRS)
-      mark_as_advanced(HDF5_${__lang}_LIBRARIES)
-      mark_as_advanced(HDF5_${__lang}_HL_LIBRARIES)
 
       set(HDF5_${__lang}_FOUND True)
       set(HDF5_HL_FOUND True)
@@ -580,9 +598,6 @@ if(NOT HDF5_FOUND)
           endif()
 
           set(HDF5_${__lang}_FOUND True)
-          mark_as_advanced(HDF5_${__lang}_DEFINITIONS)
-          mark_as_advanced(HDF5_${__lang}_INCLUDE_DIRS)
-          mark_as_advanced(HDF5_${__lang}_LIBRARIES)
           _HDF5_remove_duplicates_from_beginning(HDF5_${__lang}_DEFINITIONS)
           _HDF5_remove_duplicates_from_beginning(HDF5_${__lang}_INCLUDE_DIRS)
           _HDF5_remove_duplicates_from_beginning(HDF5_${__lang}_LIBRARIES)
@@ -685,6 +700,8 @@ if( NOT HDF5_FOUND )
             ${_HDF5_SEARCH_OPTS}
         )
         mark_as_advanced(HDF5_${__lang}_INCLUDE_DIR)
+        # set the _DIRS variable as this is what the user will normally use
+        set(HDF5_${__lang}_INCLUDE_DIRS ${HDF5_${__lang}_INCLUDE_DIR})
         list(APPEND HDF5_INCLUDE_DIRS ${HDF5_${__lang}_INCLUDE_DIR})
 
         # find the HDF5 libraries
@@ -826,3 +843,23 @@ find_package_handle_standard_args(HDF5
 )
 
 unset(_HDF5_SEARCH_OPTS)
+
+if( HDF5_FOUND AND NOT HDF5_DIR)
+  # hide HDF5_DIR for the non-advanced user to avoid confusion with
+  # HDF5_DIR-NOT_FOUND while HDF5 was found.
+  mark_as_advanced(HDF5_DIR)
+endif()
+
+if (HDF5_FIND_DEBUG)
+  message(STATUS "HDF5_DIR: ${HDF5_DIR}")
+  message(STATUS "HDF5_DEFINITIONS: ${HDF5_DEFINITIONS}")
+  message(STATUS "HDF5_INCLUDE_DIRS: ${HDF5_INCLUDE_DIRS}")
+  message(STATUS "HDF5_LIBRARIES: ${HDF5_LIBRARIES}")
+  foreach(__lang IN LISTS HDF5_LANGUAGE_BINDINGS)
+    message(STATUS "HDF5_${__lang}_DEFINITIONS: ${HDF5_${__lang}_DEFINITIONS}")
+    message(STATUS "HDF5_${__lang}_INCLUDE_DIR: ${HDF5_${__lang}_INCLUDE_DIR}")
+    message(STATUS "HDF5_${__lang}_INCLUDE_DIRS: ${HDF5_${__lang}_INCLUDE_DIRS}")
+    message(STATUS "HDF5_${__lang}_LIBRARY: ${HDF5_${__lang}_LIBRARY}")
+    message(STATUS "HDF5_${__lang}_LIBRARIES: ${HDF5_${__lang}_LIBRARIES}")
+  endforeach()
+endif()

@@ -1,9 +1,5 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.4) # new enough for CMP0017
 project(AllFindModules)
-
-if (POLICY CMP0017)
-  cmake_policy(SET CMP0017 NEW)
-endif ()
 
 # Avoid ctest truncation of output
 message(STATUS "CTEST_FULL_OUTPUT")
@@ -56,7 +52,10 @@ if (NOT QT4_FOUND)
 endif ()
 
 macro(check_version_string MODULE_NAME VERSION_VAR)
-    if (${MODULE_NAME}_FOUND)
+    string(FIND " ${CMake_TEST_CMakeOnly.AllFindModules_NO_VERSION} " " ${MODULE_NAME} " _exclude_pos)
+    if (NOT _exclude_pos EQUAL -1)
+        message(STATUS "excluding check of ${VERSION_VAR}='${${VERSION_VAR}}' due to local configuration")
+    elseif (${MODULE_NAME}_FOUND)
         if (DEFINED ${VERSION_VAR})
             message(STATUS "${VERSION_VAR}='${${VERSION_VAR}}'")
             if (NOT ${VERSION_VAR} MATCHES "^[0-9]")

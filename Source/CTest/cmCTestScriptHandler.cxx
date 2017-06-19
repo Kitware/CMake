@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestScriptHandler.h"
 
-#include <cmsys/Directory.hxx>
-#include <cmsys/Process.h>
+#include "cmsys/Directory.hxx"
+#include "cmsys/Process.h"
 #include <map>
 #include <sstream>
 #include <stdio.h>
@@ -166,12 +166,12 @@ void cmCTestScriptHandler::UpdateElapsedTime()
   }
 }
 
-void cmCTestScriptHandler::AddCTestCommand(cmCTestCommand* command)
+void cmCTestScriptHandler::AddCTestCommand(std::string const& name,
+                                           cmCTestCommand* command)
 {
-  cmCTestCommand* newCom = command;
-  newCom->CTest = this->CTest;
-  newCom->CTestScriptHandler = this;
-  this->CMake->GetState()->AddCommand(newCom);
+  command->CTest = this->CTest;
+  command->CTestScriptHandler = this;
+  this->CMake->GetState()->AddBuiltinCommand(name, command);
 }
 
 int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
@@ -275,7 +275,7 @@ void cmCTestScriptHandler::CreateCMake()
     delete this->GlobalGenerator;
     delete this->Makefile;
   }
-  this->CMake = new cmake;
+  this->CMake = new cmake(cmake::RoleScript);
   this->CMake->SetHomeDirectory("");
   this->CMake->SetHomeOutputDirectory("");
   this->CMake->GetCurrentSnapshot().SetDefaultDefinitions();
@@ -290,26 +290,21 @@ void cmCTestScriptHandler::CreateCMake()
 
   this->CMake->SetProgressCallback(ctestScriptProgressCallback, this->CTest);
 
-  // remove all cmake commands which are not scriptable, since they can't be
-  // used in ctest scripts
-  this->CMake->GetState()->RemoveUnscriptableCommands();
-
-  // add any ctest specific commands, probably should have common superclass
-  // for ctest commands to clean this up. If a couple more commands are
-  // created with the same format lets do that - ken
-  this->AddCTestCommand(new cmCTestBuildCommand);
-  this->AddCTestCommand(new cmCTestConfigureCommand);
-  this->AddCTestCommand(new cmCTestCoverageCommand);
-  this->AddCTestCommand(new cmCTestEmptyBinaryDirectoryCommand);
-  this->AddCTestCommand(new cmCTestMemCheckCommand);
-  this->AddCTestCommand(new cmCTestReadCustomFilesCommand);
-  this->AddCTestCommand(new cmCTestRunScriptCommand);
-  this->AddCTestCommand(new cmCTestSleepCommand);
-  this->AddCTestCommand(new cmCTestStartCommand);
-  this->AddCTestCommand(new cmCTestSubmitCommand);
-  this->AddCTestCommand(new cmCTestTestCommand);
-  this->AddCTestCommand(new cmCTestUpdateCommand);
-  this->AddCTestCommand(new cmCTestUploadCommand);
+  this->AddCTestCommand("ctest_build", new cmCTestBuildCommand);
+  this->AddCTestCommand("ctest_configure", new cmCTestConfigureCommand);
+  this->AddCTestCommand("ctest_coverage", new cmCTestCoverageCommand);
+  this->AddCTestCommand("ctest_empty_binary_directory",
+                        new cmCTestEmptyBinaryDirectoryCommand);
+  this->AddCTestCommand("ctest_memcheck", new cmCTestMemCheckCommand);
+  this->AddCTestCommand("ctest_read_custom_files",
+                        new cmCTestReadCustomFilesCommand);
+  this->AddCTestCommand("ctest_run_script", new cmCTestRunScriptCommand);
+  this->AddCTestCommand("ctest_sleep", new cmCTestSleepCommand);
+  this->AddCTestCommand("ctest_start", new cmCTestStartCommand);
+  this->AddCTestCommand("ctest_submit", new cmCTestSubmitCommand);
+  this->AddCTestCommand("ctest_test", new cmCTestTestCommand);
+  this->AddCTestCommand("ctest_update", new cmCTestUpdateCommand);
+  this->AddCTestCommand("ctest_upload", new cmCTestUploadCommand);
 }
 
 // this sets up some variables for the script to use, creates the required

@@ -3,7 +3,7 @@
 #ifndef cmQtAutoGeneratorInitializer_h
 #define cmQtAutoGeneratorInitializer_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 class cmGeneratorTarget;
 class cmLocalGenerator;

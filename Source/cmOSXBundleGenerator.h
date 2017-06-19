@@ -3,7 +3,7 @@
 #ifndef cmOSXBundleGenerator_h
 #define cmOSXBundleGenerator_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <set>
 #include <string>

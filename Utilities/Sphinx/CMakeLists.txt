@@ -128,18 +128,20 @@ endforeach()
 
 add_custom_target(documentation ALL DEPENDS ${doc_format_outputs})
 
-foreach(t
-    cmake
-    ccmake
-    cmake-gui
-    cpack
-    ctest
-    )
-  if(TARGET ${t})
-    # Build documentation after main executables.
-    add_dependencies(documentation ${t})
-  endif()
-endforeach()
+if(CMake_SPHINX_DEPEND_ON_EXECUTABLES)
+  foreach(t
+      cmake
+      ccmake
+      cmake-gui
+      cpack
+      ctest
+      )
+    if(TARGET ${t})
+      # Build documentation after main executables.
+      add_dependencies(documentation ${t})
+    endif()
+  endforeach()
+endif()
 
 if(SPHINX_MAN)
   file(GLOB man_rst RELATIVE ${CMake_SOURCE_DIR}/Help/manual

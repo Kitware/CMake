@@ -4,7 +4,7 @@
 #ifndef cmLinkLineComputer_h
 #define cmLinkLineComputer_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h"
 
 #include <string>
 
@@ -16,9 +16,11 @@ class cmOutputConverter;
 
 class cmLinkLineComputer
 {
+  CM_DISABLE_COPY(cmLinkLineComputer)
+
 public:
   cmLinkLineComputer(cmOutputConverter* outputConverter,
-                     cmStateDirectory stateDir);
+                     cmStateDirectory const& stateDir);
   virtual ~cmLinkLineComputer();
 
   void SetUseWatcomQuote(bool useWatcomQuote);

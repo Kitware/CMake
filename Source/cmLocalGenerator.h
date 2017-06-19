@@ -3,9 +3,9 @@
 #ifndef cmLocalGenerator_h
 #define cmLocalGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
-#include <cm_kwiml.h>
+#include "cm_kwiml.h"
 #include <iosfwd>
 #include <map>
 #include <set>
@@ -70,6 +70,8 @@ public:
    */
   void ComputeTargetManifest();
 
+  bool ComputeTargetCompileFeatures();
+
   bool IsRootMakefile() const;
 
   ///! Get the makefile for this generator
@@ -98,8 +100,12 @@ public:
                             const std::string& lang,
                             const std::string& config);
 
-  void AddLanguageFlags(std::string& flags, const std::string& lang,
-                        const std::string& config);
+  void AddLanguageFlags(std::string& flags, cmGeneratorTarget const* target,
+                        const std::string& lang, const std::string& config);
+  void AddLanguageFlagsForLinking(std::string& flags,
+                                  cmGeneratorTarget const* target,
+                                  const std::string& lang,
+                                  const std::string& config);
   void AddCMP0018Flags(std::string& flags, cmGeneratorTarget const* target,
                        std::string const& lang, const std::string& config);
   void AddVisibilityPresetFlags(std::string& flags,
@@ -115,6 +121,9 @@ public:
   virtual void AppendFlags(std::string& flags, const char* newFlags);
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag);
+  void AppendIPOLinkerFlags(std::string& flags, cmGeneratorTarget* target,
+                            const std::string& config,
+                            const std::string& lang);
   ///! Get the include flags for the current makefile and language
   std::string GetIncludeFlags(const std::vector<std::string>& includes,
                               cmGeneratorTarget* target,
@@ -273,7 +282,8 @@ public:
   // Compute object file names.
   std::string GetObjectFileNameWithoutTarget(
     const cmSourceFile& source, std::string const& dir_max,
-    bool* hasSourceExtension = CM_NULLPTR);
+    bool* hasSourceExtension = CM_NULLPTR,
+    char const* customOutputExtension = CM_NULLPTR);
 
   /** Fill out the static linker flags for the given target.  */
   void GetStaticLibraryFlags(std::string& flags, std::string const& config,
@@ -352,6 +362,7 @@ protected:
   std::map<std::string, std::string> Compilers;
   std::map<std::string, std::string> VariableMappings;
   std::string CompilerSysroot;
+  std::string LinkerSysroot;
 
   bool EmitUniversalBinaryFlags;
 

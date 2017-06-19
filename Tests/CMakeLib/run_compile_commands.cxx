@@ -1,6 +1,6 @@
 #include <cmConfigure.h>
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 #include <iostream>
 #include <map>
 #include <stdlib.h>

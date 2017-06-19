@@ -3,7 +3,8 @@
 #ifndef cmGlobalXCodeGenerator_h
 #define cmGlobalXCodeGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
+
 #include <iosfwd>
 #include <map>
 #include <set>
@@ -31,7 +32,8 @@ struct cmDocumentationEntry;
 class cmGlobalXCodeGenerator : public cmGlobalGenerator
 {
 public:
-  cmGlobalXCodeGenerator(cmake* cm, std::string const& version);
+  cmGlobalXCodeGenerator(cmake* cm, std::string const& version_string,
+                         unsigned int version_number);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
@@ -86,7 +88,13 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   bool IsMultiConfig() const CM_OVERRIDE;
 
+  bool HasKnownObjectFileLocation(std::string* reason) const CM_OVERRIDE;
+
+  bool IsIPOSupported() const CM_OVERRIDE { return true; }
+
   bool UseEffectivePlatformName(cmMakefile* mf) const CM_OVERRIDE;
+
+  bool ShouldStripResourcePath(cmMakefile*) const CM_OVERRIDE;
 
   bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) CM_OVERRIDE;
   void AppendFlag(std::string& flags, std::string const& flag);
@@ -165,6 +173,9 @@ private:
                           std::vector<cmLocalGenerator*>& generators);
   void OutputXCodeProject(cmLocalGenerator* root,
                           std::vector<cmLocalGenerator*>& generators);
+  // Write shared scheme files for all the native targets
+  void OutputXCodeSharedSchemes(const std::string& xcProjDir);
+  void OutputXCodeWorkspaceSettings(const std::string& xcProjDir);
   void WriteXCodePBXProj(std::ostream& fout, cmLocalGenerator* root,
                          std::vector<cmLocalGenerator*>& generators);
   cmXCodeObject* CreateXCodeFileReferenceFromPath(const std::string& fullpath,
@@ -235,12 +246,13 @@ private:
                                         const std::string& configName,
                                         const cmGeneratorTarget* t) const;
 
+  void ComputeArchitectures(cmMakefile* mf);
+  void ComputeObjectDirArch();
+
   void addObject(cmXCodeObject* obj);
   std::string PostBuildMakeTarget(std::string const& tName,
                                   std::string const& configName);
   cmXCodeObject* MainGroupChildren;
-  cmXCodeObject* SourcesGroupChildren;
-  cmXCodeObject* ResourcesGroupChildren;
   cmMakefile* CurrentMakefile;
   cmLocalGenerator* CurrentLocalGenerator;
   std::vector<std::string> CurrentConfigurationTypes;
@@ -256,6 +268,8 @@ private:
   std::map<std::string, cmXCodeObject*> FileRefs;
   std::map<cmGeneratorTarget const*, cmXCodeObject*> XCodeObjectMap;
   std::vector<std::string> Architectures;
+  std::string ObjectDirArchDefault;
+  std::string ObjectDirArch;
   std::string GeneratorToolset;
 };
 

@@ -17,9 +17,9 @@
 #include "cmTargetExport.h"
 #include "cmake.h"
 
+#include "cm_auto_ptr.hxx"
+#include "cmsys/FStream.hxx"
 #include <assert.h>
-#include <cm_auto_ptr.hxx>
-#include <cmsys/FStream.hxx>
 #include <sstream>
 #include <string.h>
 #include <utility>
@@ -273,6 +273,7 @@ static bool checkInterfaceDirs(const std::string& prepro,
                 << std::endl;
               target->GetLocalGenerator()->IssueMessage(cmake::AUTHOR_WARNING,
                                                         s.str());
+              CM_FALLTHROUGH;
             }
             case cmPolicies::OLD:
               shouldContinue = true;
@@ -441,6 +442,11 @@ void getCompatibleInterfaceProperties(cmGeneratorTarget* target,
                                       std::set<std::string>& ifaceProperties,
                                       const std::string& config)
 {
+  if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+    // object libraries have no link information, so nothing to compute
+    return;
+  }
+
   cmComputeLinkInformation* info = target->GetLinkInformation(config);
 
   if (!info) {
@@ -585,16 +591,17 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
 
-  while ((pos = input.find("$<TARGET_PROPERTY:", lastPos)) != input.npos) {
+  while ((pos = input.find("$<TARGET_PROPERTY:", lastPos)) !=
+         std::string::npos) {
     std::string::size_type nameStartPos =
       pos + sizeof("$<TARGET_PROPERTY:") - 1;
     std::string::size_type closePos = input.find('>', nameStartPos);
     std::string::size_type commaPos = input.find(',', nameStartPos);
     std::string::size_type nextOpenPos = input.find("$<", nameStartPos);
-    if (commaPos == input.npos     // Implied 'this' target
-        || closePos == input.npos  // Imcomplete expression.
-        || closePos < commaPos     // Implied 'this' target
-        || nextOpenPos < commaPos) // Non-literal
+    if (commaPos == std::string::npos    // Implied 'this' target
+        || closePos == std::string::npos // Imcomplete expression.
+        || closePos < commaPos           // Implied 'this' target
+        || nextOpenPos < commaPos)       // Non-literal
     {
       lastPos = nameStartPos;
       continue;
@@ -612,15 +619,15 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
   std::string errorString;
   pos = 0;
   lastPos = pos;
-  while ((pos = input.find("$<TARGET_NAME:", lastPos)) != input.npos) {
+  while ((pos = input.find("$<TARGET_NAME:", lastPos)) != std::string::npos) {
     std::string::size_type nameStartPos = pos + sizeof("$<TARGET_NAME:") - 1;
     std::string::size_type endPos = input.find('>', nameStartPos);
-    if (endPos == input.npos) {
+    if (endPos == std::string::npos) {
       errorString = "$<TARGET_NAME:...> expression incomplete";
       break;
     }
     std::string targetName = input.substr(nameStartPos, endPos - nameStartPos);
-    if (targetName.find("$<") != input.npos) {
+    if (targetName.find("$<") != std::string::npos) {
       errorString = "$<TARGET_NAME:...> requires its parameter to be a "
                     "literal.";
       break;
@@ -637,10 +644,10 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
   pos = 0;
   lastPos = pos;
   while (errorString.empty() &&
-         (pos = input.find("$<LINK_ONLY:", lastPos)) != input.npos) {
+         (pos = input.find("$<LINK_ONLY:", lastPos)) != std::string::npos) {
     std::string::size_type nameStartPos = pos + sizeof("$<LINK_ONLY:") - 1;
     std::string::size_type endPos = input.find('>', nameStartPos);
-    if (endPos == input.npos) {
+    if (endPos == std::string::npos) {
       errorString = "$<LINK_ONLY:...> expression incomplete";
       break;
     }
@@ -926,6 +933,9 @@ void cmExportFileGenerator::GenerateImportTargetCode(
       break;
     case cmStateEnums::UNKNOWN_LIBRARY:
       os << "add_library(" << targetName << " UNKNOWN IMPORTED)\n";
+      break;
+    case cmStateEnums::OBJECT_LIBRARY:
+      os << "add_library(" << targetName << " OBJECT IMPORTED)\n";
       break;
     case cmStateEnums::INTERFACE_LIBRARY:
       os << "add_library(" << targetName << " INTERFACE IMPORTED)\n";

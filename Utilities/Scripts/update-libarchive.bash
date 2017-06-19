@@ -8,7 +8,7 @@ readonly name="LibArchive"
 readonly ownership="LibArchive Upstream <libarchive-discuss@googlegroups.com>"
 readonly subtree="Utilities/cmlibarchive"
 readonly repo="https://github.com/libarchive/libarchive.git"
-readonly tag="master"
+readonly tag="v3.3.1"
 readonly shortlog=false
 readonly paths="
   CMakeLists.txt

@@ -4,8 +4,8 @@
 
 #include "cmAlgorithms.h"
 
+#include "cm_auto_ptr.hxx"
 #include <algorithm>
-#include <cm_auto_ptr.hxx>
 #include <utility>
 
 static const char* const cmVariableWatchAccessStrings[] = {

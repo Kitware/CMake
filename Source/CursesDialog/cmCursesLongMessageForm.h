@@ -3,7 +3,7 @@
 #ifndef cmCursesLongMessageForm_h
 #define cmCursesLongMessageForm_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmCursesForm.h"
 #include "cmCursesStandardIncludes.h"
@@ -13,6 +13,8 @@
 
 class cmCursesLongMessageForm : public cmCursesForm
 {
+  CM_DISABLE_COPY(cmCursesLongMessageForm)
+
 public:
   cmCursesLongMessageForm(std::vector<std::string> const& messages,
                           const char* title);
@@ -38,9 +40,6 @@ public:
   void UpdateStatusBar() CM_OVERRIDE;
 
 protected:
-  cmCursesLongMessageForm(const cmCursesLongMessageForm& from);
-  void operator=(const cmCursesLongMessageForm&);
-
   std::string Messages;
   std::string Title;
 

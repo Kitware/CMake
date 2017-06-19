@@ -68,7 +68,7 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 #else
   if(sa->sa_family == AF_INET6) {
     const struct sockaddr_in6 * sa6 = (const struct sockaddr_in6 *)(void *) sa;
-    const unsigned char * b = sa6->sin6_addr.s6_addr;
+    const unsigned char *b = sa6->sin6_addr.s6_addr;
     unsigned short w = (unsigned short) ((b[0] << 8) | b[1]);
 
     switch(w & 0xFFC0) {
@@ -239,7 +239,7 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
     return IF2IP_NOT_FOUND;
   }
 
-  s = (struct sockaddr_in *)&req.ifr_addr;
+  s = (struct sockaddr_in *)(void *)&req.ifr_addr;
   memcpy(&in, &s->sin_addr, sizeof(in));
   Curl_inet_ntop(s->sin_family, &in, buf, buf_size);
 

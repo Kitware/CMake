@@ -3,14 +3,16 @@
 #ifndef cmCursesForm_h
 #define cmCursesForm_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h"
 
 #include "cmCursesStandardIncludes.h"
 
-#include <cmsys/FStream.hxx>
+#include "cmsys/FStream.hxx"
 
 class cmCursesForm
 {
+  CM_DISABLE_COPY(cmCursesForm)
+
 public:
   cmCursesForm();
   virtual ~cmCursesForm();
@@ -54,9 +56,6 @@ public:
 protected:
   static cmsys::ofstream DebugFile;
   static bool Debug;
-
-  cmCursesForm(const cmCursesForm& form);
-  void operator=(const cmCursesForm&);
 
   FORM* Form;
 };

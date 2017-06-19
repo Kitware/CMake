@@ -40,7 +40,7 @@ macro(__cygwin_compiler_gnu lang)
 
   set(CMAKE_EXE_EXPORTS_${lang}_FLAG "-Wl,--export-all-symbols")
   # TODO: Is -Wl,--enable-auto-import now always default?
-  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS} -Wl,--enable-auto-import")
+  string(APPEND CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS " -Wl,--enable-auto-import")
   set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS}")
 
   if(NOT CMAKE_RC_COMPILER_INIT)

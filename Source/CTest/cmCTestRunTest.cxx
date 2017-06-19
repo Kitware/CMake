@@ -7,13 +7,14 @@
 #include "cmCTestTestHandler.h"
 #include "cmProcess.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 
-#include <cmConfigure.h>
-#include <cm_curl.h>
-#include <cm_zlib.h>
-#include <cmsys/Base64.h>
-#include <cmsys/Process.h>
-#include <cmsys/RegularExpression.hxx>
+#include "cmConfigure.h"
+#include "cm_curl.h"
+#include "cm_zlib.h"
+#include "cmsys/Base64.h"
+#include "cmsys/Process.h"
+#include "cmsys/RegularExpression.hxx"
 #include <iomanip>
 #include <sstream>
 #include <stdio.h>
@@ -166,6 +167,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   std::vector<std::pair<cmsys::RegularExpression, std::string> >::iterator
     passIt;
   bool forceFail = false;
+  bool skipped = false;
   bool outputTestErrorsToConsole = false;
   if (!this->TestProperties->RequiredRegularExpressions.empty() &&
       this->FailedDependencies.empty()) {
@@ -214,7 +216,11 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     if (this->TestProperties->SkipReturnCode >= 0 &&
         this->TestProperties->SkipReturnCode == retVal) {
       this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+      std::ostringstream s;
+      s << "SKIP_RETURN_CODE=" << this->TestProperties->SkipReturnCode;
+      this->TestResult.CompletionStatus = s.str();
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Skipped ");
+      skipped = true;
     } else if ((success && !this->TestProperties->WillFail) ||
                (!success && this->TestProperties->WillFail)) {
       this->TestResult.Status = cmCTestTestHandler::COMPLETED;
@@ -252,6 +258,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "Other");
         this->TestResult.Status = cmCTestTestHandler::OTHER_FAULT;
     }
+  } else if ("Disabled" == this->TestResult.CompletionStatus) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run (Disabled) ");
   } else // cmsysProcess_State_Error
   {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run ");
@@ -270,14 +278,11 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     *this->TestHandler->LogFile << "Test time = " << buf << std::endl;
   }
 
-  // Set the working directory to the tests directory
-  std::string oldpath = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(this->TestProperties->Directory);
-
-  this->DartProcessing();
-
-  // restore working directory
-  cmSystemTools::ChangeDirectory(oldpath);
+  // Set the working directory to the tests directory to process Dart files.
+  {
+    cmWorkingDirectory workdir(this->TestProperties->Directory);
+    this->DartProcessing();
+  }
 
   // if this is doing MemCheck then all the output needs to be put into
   // Output since that is what is parsed by cmCTestMemCheckHandler
@@ -335,7 +340,9 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       compress ? this->CompressedOutput : this->ProcessOutput;
     this->TestResult.CompressOutput = compress;
     this->TestResult.ReturnValue = this->TestProcess->GetExitValue();
-    this->TestResult.CompletionStatus = "Completed";
+    if (!skipped) {
+      this->TestResult.CompletionStatus = "Completed";
+    }
     this->TestResult.ExecutionTime = this->TestProcess->GetTotalTime();
     this->MemCheckPostProcess();
     this->ComputeWeightedCost();
@@ -346,7 +353,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     this->TestHandler->TestResults.push_back(this->TestResult);
   }
   delete this->TestProcess;
-  return passed;
+  return passed || skipped;
 }
 
 bool cmCTestRunTest::StartAgain()
@@ -356,11 +363,8 @@ bool cmCTestRunTest::StartAgain()
   }
   this->RunAgain = false; // reset
   // change to tests directory
-  std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(this->TestProperties->Directory);
+  cmWorkingDirectory workdir(this->TestProperties->Directory);
   this->StartTest(this->TotalNumberOfTests);
-  // change back
-  cmSystemTools::ChangeDirectory(current_dir);
   return true;
 }
 
@@ -418,6 +422,24 @@ bool cmCTestRunTest::StartTest(size_t total)
                << this->TestProperties->Index << ": "
                << this->TestProperties->Name << std::endl);
   this->ProcessOutput.clear();
+
+  // Return immediately if test is disabled
+  if (this->TestProperties->Disabled) {
+    this->TestResult.Properties = this->TestProperties;
+    this->TestResult.ExecutionTime = 0;
+    this->TestResult.CompressOutput = false;
+    this->TestResult.ReturnValue = -1;
+    this->TestResult.CompletionStatus = "Disabled";
+    this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+    this->TestResult.TestCount = this->TestProperties->Index;
+    this->TestResult.Name = this->TestProperties->Name;
+    this->TestResult.Path = this->TestProperties->Directory;
+    this->TestProcess = new cmProcess;
+    this->TestResult.Output = "Disabled";
+    this->TestResult.FullCommandLine = "";
+    return false;
+  }
+
   this->ComputeArguments();
   std::vector<std::string>& args = this->TestProperties->Args;
   this->TestResult.Properties = this->TestProperties;
@@ -442,7 +464,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     cmCTestLog(this->CTest, HANDLER_OUTPUT, msg << std::endl);
     this->TestResult.Output = msg;
     this->TestResult.FullCommandLine = "";
-    this->TestResult.CompletionStatus = "Not Run";
+    this->TestResult.CompletionStatus = "Fixture dependency failed";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
     return false;
   }
@@ -462,7 +484,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     cmCTestLog(this->CTest, ERROR_MESSAGE, msg << std::endl);
     this->TestResult.Output = msg;
     this->TestResult.FullCommandLine = "";
-    this->TestResult.CompletionStatus = "Not Run";
+    this->TestResult.CompletionStatus = "Missing Configuration";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
     return false;
   }
@@ -482,7 +504,7 @@ bool cmCTestRunTest::StartTest(size_t total)
                  "Unable to find required file: " << file << std::endl);
       this->TestResult.Output = "Unable to find required file: " + file;
       this->TestResult.FullCommandLine = "";
-      this->TestResult.CompletionStatus = "Not Run";
+      this->TestResult.CompletionStatus = "Required Files Missing";
       this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
       return false;
     }
@@ -498,7 +520,7 @@ bool cmCTestRunTest::StartTest(size_t total)
                "Unable to find executable: " << args[1] << std::endl);
     this->TestResult.Output = "Unable to find executable: " + args[1];
     this->TestResult.FullCommandLine = "";
-    this->TestResult.CompletionStatus = "Not Run";
+    this->TestResult.CompletionStatus = "Unable to find executable";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
     return false;
   }
@@ -574,8 +596,7 @@ void cmCTestRunTest::ComputeArguments()
 void cmCTestRunTest::DartProcessing()
 {
   if (!this->ProcessOutput.empty() &&
-      this->ProcessOutput.find("<DartMeasurement") !=
-        this->ProcessOutput.npos) {
+      this->ProcessOutput.find("<DartMeasurement") != std::string::npos) {
     if (this->TestHandler->DartStuff.find(this->ProcessOutput.c_str())) {
       this->TestResult.DartString = this->TestHandler->DartStuff.match(1);
       // keep searching and replacing until none are left

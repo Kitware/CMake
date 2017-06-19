@@ -30,10 +30,6 @@
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
-#ifndef _WIN32
-#include <unistd.h>
-#endif
-
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
   : cmCommonTargetGenerator(target)
   , OSXBundleGenerator(CM_NULLPTR)
@@ -509,8 +505,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
         this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
         this->GeneratorTarget->GetType() == cmStateEnums::MODULE_LIBRARY) {
-      targetFullPathReal =
-        this->GeneratorTarget->GetFullPath(this->ConfigName, false, true);
+      targetFullPathReal = this->GeneratorTarget->GetFullPath(
+        this->ConfigName, cmStateEnums::RuntimeBinaryArtifact, true);
       targetFullPathPDB =
         this->GeneratorTarget->GetPDBDirectory(this->ConfigName);
       targetFullPathPDB += "/";
@@ -593,6 +589,9 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       if (this->GeneratorTarget->GetPropertyAsBool(
             "CUDA_SEPARABLE_COMPILATION")) {
         cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+      } else if (this->GeneratorTarget->GetPropertyAsBool(
+                   "CUDA_PTX_COMPILATION")) {
+        cmdVar = std::string("CMAKE_CUDA_COMPILE_PTX_COMPILATION");
       } else {
         cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
       }
@@ -1256,7 +1255,7 @@ class cmMakefileTargetGeneratorObjectStrings
 public:
   cmMakefileTargetGeneratorObjectStrings(std::vector<std::string>& strings,
                                          cmOutputConverter* outputConverter,
-                                         cmStateDirectory stateDir,
+                                         cmStateDirectory const& stateDir,
                                          std::string::size_type limit)
     : Strings(strings)
     , OutputConverter(outputConverter)
@@ -1288,6 +1287,7 @@ public:
     this->CurrentString += this->NextObject;
   }
   void Done() { this->Strings.push_back(this->CurrentString); }
+
 private:
   std::string MaybeConvertToRelativePath(std::string const& obj)
   {
@@ -1414,8 +1414,14 @@ void cmMakefileTargetGenerator::AppendLinkDepends(
   this->AppendTargetDepends(depends);
 
   // Add a dependency on the link definitions file, if any.
-  if (this->ModuleDefinitionFile) {
-    depends.push_back(this->ModuleDefinitionFile->GetFullPath());
+  if (cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+        this->GeneratorTarget->GetModuleDefinitionInfo(
+          this->GetConfigName())) {
+    for (std::vector<cmSourceFile const*>::const_iterator i =
+           mdi->Sources.begin();
+         i != mdi->Sources.end(); ++i) {
+      depends.push_back((*i)->GetFullPath());
+    }
   }
 
   // Add a dependency on user-specified manifest files, if any.
@@ -1486,15 +1492,6 @@ void cmMakefileTargetGenerator::CreateLinkScript(
   makefile_depends.push_back(linkScriptName);
 }
 
-static size_t calculateCommandLineLengthLimit()
-{
-#if defined(_SC_ARG_MAX)
-  return ((size_t)sysconf(_SC_ARG_MAX)) - 1000;
-#else
-  return 0;
-#endif
-}
-
 bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
   std::string const& l) const
 {
@@ -1508,7 +1505,7 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
   }
 
   // Check for a system limit.
-  if (size_t const limit = calculateCommandLineLengthLimit()) {
+  if (size_t const limit = cmSystemTools::CalculateCommandLineLengthLimit()) {
     // Compute the total length of our list of object files with room
     // for argument separation and quoting.  This does not convert paths
     // relative to CMAKE_CURRENT_BINARY_DIR like the final list will be, so the
@@ -1577,7 +1574,7 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
 }
 
 cmLinkLineComputer* cmMakefileTargetGenerator::CreateLinkLineComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory stateDir)
+  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir)
 {
   if (this->Makefile->IsOn("MSVC60")) {
     return this->GlobalGenerator->CreateMSVC60LinkLineComputer(outputConverter,
@@ -1600,7 +1597,8 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
                                             frameworkPath, linkPath);
   linkLibs = frameworkPath + linkPath + linkLibs;
 
-  if (useResponseFile && linkLibs.find_first_not_of(' ') != linkLibs.npos) {
+  if (useResponseFile &&
+      linkLibs.find_first_not_of(' ') != std::string::npos) {
     // Lookup the response file reference flag.
     std::string responseFlagVar = "CMAKE_";
     responseFlagVar +=
@@ -1718,31 +1716,32 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
 }
 
 void cmMakefileTargetGenerator::GenDefFile(
-  std::vector<std::string>& real_link_commands, std::string& linkFlags)
+  std::vector<std::string>& real_link_commands)
 {
-  if (this->GeneratorTarget->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS")) {
-    std::string name_of_def_file =
-      this->GeneratorTarget->GetSupportDirectory();
-    name_of_def_file += std::string("/") + this->GeneratorTarget->GetName();
-    name_of_def_file += ".def";
-    std::string cmd = cmSystemTools::GetCMakeCommand();
-    cmd = this->LocalGenerator->ConvertToOutputFormat(
-      cmd, cmOutputConverter::SHELL);
-    cmd += " -E __create_def ";
-    cmd += this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), name_of_def_file),
-      cmOutputConverter::SHELL);
-    cmd += " ";
-    std::string objlist_file = name_of_def_file;
-    objlist_file += ".objs";
-    cmd += this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), objlist_file),
-      cmOutputConverter::SHELL);
-    real_link_commands.insert(real_link_commands.begin(), cmd);
-    // create a list of obj files for the -E __create_def to read
-    cmGeneratedFileStream fout(objlist_file.c_str());
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    this->GeneratorTarget->GetModuleDefinitionInfo(this->GetConfigName());
+  if (!mdi || !mdi->DefFileGenerated) {
+    return;
+  }
+  std::string cmd = cmSystemTools::GetCMakeCommand();
+  cmd =
+    this->LocalGenerator->ConvertToOutputFormat(cmd, cmOutputConverter::SHELL);
+  cmd += " -E __create_def ";
+  cmd += this->LocalGenerator->ConvertToOutputFormat(
+    this->LocalGenerator->MaybeConvertToRelativePath(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), mdi->DefFile),
+    cmOutputConverter::SHELL);
+  cmd += " ";
+  std::string objlist_file = mdi->DefFile + ".objs";
+  cmd += this->LocalGenerator->ConvertToOutputFormat(
+    this->LocalGenerator->MaybeConvertToRelativePath(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), objlist_file),
+    cmOutputConverter::SHELL);
+  real_link_commands.insert(real_link_commands.begin(), cmd);
+  // create a list of obj files for the -E __create_def to read
+  cmGeneratedFileStream fout(objlist_file.c_str());
+
+  if (mdi->WindowsExportAllSymbols) {
     for (std::vector<std::string>::const_iterator i = this->Objects.begin();
          i != this->Objects.end(); ++i) {
       if (cmHasLiteralSuffix(*i, ".obj")) {
@@ -1754,13 +1753,11 @@ void cmMakefileTargetGenerator::GenDefFile(
          i != this->ExternalObjects.end(); ++i) {
       fout << *i << "\n";
     }
-    // now add the def file link flag
-    linkFlags += " ";
-    linkFlags += this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-    linkFlags += this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), name_of_def_file),
-      cmOutputConverter::SHELL);
-    linkFlags += " ";
+  }
+
+  for (std::vector<cmSourceFile const*>::const_iterator i =
+         mdi->Sources.begin();
+       i != mdi->Sources.end(); ++i) {
+    fout << (*i)->GetFullPath() << "\n";
   }
 }

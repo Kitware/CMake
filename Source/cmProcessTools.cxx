@@ -3,7 +3,7 @@
 #include "cmProcessTools.h"
 #include "cmProcessOutput.h"
 
-#include <cmsys/Process.h>
+#include "cmsys/Process.h"
 #include <ostream>
 
 void cmProcessTools::RunProcess(struct cmsysProcess_s* cp, OutputParser* out,

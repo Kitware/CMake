@@ -133,6 +133,27 @@ if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
     )
 endif()
 
+if(CMAKE_SYSTEM_NAME MATCHES "CYGWIN")
+  list(APPEND uv_libraries
+    )
+  list(APPEND uv_headers
+    include/uv-posix.h
+    )
+  list(APPEND uv_defines
+    )
+  list(APPEND uv_sources
+    src/unix/cygwin.c
+    src/unix/bsd-ifaddrs.c
+    src/unix/no-fsevents.c
+    src/unix/no-proctitle.c
+    src/unix/posix-hrtime.c
+    src/unix/posix-poll.c
+    src/unix/procfs-exepath.c
+    src/unix/sysinfo-loadavg.c
+    src/unix/sysinfo-memory.c
+    )
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   list(APPEND uv_headers
     include/uv-darwin.h
@@ -143,6 +164,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     _DARWIN_UNLIMITED_SELECT=1
     )
   list(APPEND uv_sources
+    src/unix/bsd-ifaddrs.c
     src/unix/darwin.c
     src/unix/darwin-proctitle.c
     src/unix/fsevents.c
@@ -163,7 +185,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     src/unix/linux-inotify.c
     src/unix/linux-syscalls.c
     src/unix/linux-syscalls.h
+    src/unix/procfs-exepath.c
     src/unix/proctitle.c
+    src/unix/sysinfo-loadavg.c
+    src/unix/sysinfo-memory.c
     )
 endif()
 
@@ -175,8 +200,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
     include/uv-bsd.h
     )
   list(APPEND uv_sources
+    src/unix/bsd-ifaddrs.c
     src/unix/freebsd.c
     src/unix/kqueue.c
+    src/unix/posix-hrtime.c
     )
 endif()
 
@@ -188,8 +215,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
     include/uv-bsd.h
     )
   list(APPEND uv_sources
+    src/unix/bsd-ifaddrs.c
     src/unix/netbsd.c
     src/unix/kqueue.c
+    src/unix/posix-hrtime.c
     )
 endif()
 
@@ -201,8 +230,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
     include/uv-bsd.h
     )
   list(APPEND uv_sources
+    src/unix/bsd-ifaddrs.c
     src/unix/openbsd.c
     src/unix/kqueue.c
+    src/unix/posix-hrtime.c
     )
 endif()
 
@@ -212,6 +243,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
     nsl
     sendfile
     socket
+    rt
     )
   list(APPEND uv_headers
     include/uv-sunos.h
@@ -220,15 +252,28 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
     __EXTENSIONS__
     )
   if(CMAKE_SYSTEM_VERSION STREQUAL "5.10")
+    set(CMAKE_C_STANDARD 90)
+    if(CMAKE_VERSION VERSION_LESS 3.8.20170504 AND CMAKE_C_COMPILER_ID STREQUAL "SunPro" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.14)
+      # The running version of CMake does not know how to add this flag.
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c90")
+    endif()
     list(APPEND uv_defines
       _XOPEN_SOURCE=500
       )
   else()
+    if(NOT CMAKE_C_STANDARD OR CMAKE_C_STANDARD EQUAL 90)
+      set(CMAKE_C_STANDARD 11)
+    endif()
+    if(CMAKE_VERSION VERSION_LESS 3.8.20170505 AND CMAKE_C_COMPILER_ID STREQUAL "SunPro" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 5.14)
+      # The running version of CMake does not know how to add this flag.
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -xc99")
+    endif()
     list(APPEND uv_defines
       _XOPEN_SOURCE=600
       )
   endif()
   list(APPEND uv_sources
+    src/unix/no-proctitle.c
     src/unix/sunos.c
     )
 endif()

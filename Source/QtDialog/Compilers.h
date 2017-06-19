@@ -3,7 +3,7 @@
 #ifndef COMPILERS_HPP
 #define COMPILERS_HPP
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include <QWidget>
 

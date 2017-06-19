@@ -1,6 +1,9 @@
 # a macro for tests that have a simple format where the name matches the
 # directory and project
-macro(ADD_TEST_MACRO NAME COMMAND)
+macro(ADD_TEST_MACRO NAME)
+  if(${ARGC} GREATER 1)
+    set(_test_command --test-command ${ARGN})
+  endif()
   string(REPLACE "." "/" dir "${NAME}")
   string(REGEX REPLACE "[^.]*\\." "" proj "${NAME}")
   add_test(NAME "${NAME}" COMMAND "${CMAKE_CTEST_COMMAND}"
@@ -13,7 +16,8 @@ macro(ADD_TEST_MACRO NAME COMMAND)
     ${${NAME}_CTEST_OPTIONS}
     --build-options ${build_options}
     ${${NAME}_BUILD_OPTIONS}
-    --test-command ${COMMAND} ${ARGN})
+    ${_test_command})
+  unset(_test_command)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 endmacro()
 
@@ -46,7 +50,7 @@ if(BUILD_TESTING)
   set(CMake_TEST_DEVENV "")
   if(CMAKE_VS_DEVENV_COMMAND)
     set(CMake_TEST_DEVENV "${CMAKE_VS_DEVENV_COMMAND}")
-  elseif(CMAKE_GENERATOR MATCHES "Visual Studio [7-9] " AND
+  elseif(CMAKE_GENERATOR MATCHES "Visual Studio [89] " AND
       NOT CMAKE_MAKE_PROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
     set(CMake_TEST_DEVENV "${CMAKE_MAKE_PROGRAM}")
   endif()
@@ -271,7 +275,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(SystemInformation SystemInformation)
   ADD_TEST_MACRO(MathTest MathTest)
   ADD_TEST_MACRO(CompileFeatures CompileFeatures)
-  ADD_TEST_MACRO(CMakeCommands.target_compile_features target_compile_features)
+  ADD_TEST_MACRO(CMakeCommands.target_compile_features)
 
   if(CMake_TEST_RESOURCES)
     ADD_TEST_MACRO(VSResource VSResource)
@@ -325,7 +329,7 @@ if(BUILD_TESTING)
     endif()
   endif()
 
-  if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^789]|[789][0-9])")
+  if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^89]|[89][0-9])")
     ADD_TEST_MACRO(CSharpOnly CSharpOnly)
   endif()
 
@@ -477,6 +481,17 @@ if(BUILD_TESTING)
 
   ADD_TEST_MACRO(Module.CheckTypeSize CheckTypeSize)
 
+  set(Module.CheckIPOSupported-C_BUILD_OPTIONS -DCMake_TEST_IPO_WORKS_C=${CMake_TEST_IPO_WORKS_C})
+  ADD_TEST_MACRO(Module.CheckIPOSupported-C CheckIPOSupported-C)
+
+  set(Module.CheckIPOSupported-CXX_BUILD_OPTIONS -DCMake_TEST_IPO_WORKS_CXX=${CMake_TEST_IPO_WORKS_CXX})
+  ADD_TEST_MACRO(Module.CheckIPOSupported-CXX CheckIPOSupported-CXX)
+
+  if(CMAKE_Fortran_COMPILER)
+    set(Module.CheckIPOSupported-Fortran_BUILD_OPTIONS -DCMake_TEST_IPO_WORKS_Fortran=${CMake_TEST_IPO_WORKS_Fortran})
+    ADD_TEST_MACRO(Module.CheckIPOSupported-Fortran CheckIPOSupported-Fortran)
+  endif()
+
   add_test(Module.ExternalData ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Module/ExternalData"
@@ -615,8 +630,8 @@ if(BUILD_TESTING)
   endif()
 
   # test for correct sub-project generation
-  # not implemented in VS 7.0, Xcode, or Ninja
-  if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 7$|Xcode|Ninja")
+  # not implemented in Xcode or Ninja
+  if(NOT CMAKE_GENERATOR MATCHES "Xcode|Ninja")
     # run cmake and configure all of SubProject
     # but only build the independent executable car
     add_test(SubProject ${CMAKE_CTEST_COMMAND}
@@ -1158,6 +1173,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       )
     list(APPEND TEST_BUILD_DIRS
       "${CMake_BINARY_DIR}/Tests/CMakeTestAllGenerators")
+    # This test runs a lot of processes.  Do not make them compete
+    # for resources with other tests.
+    set_property(TEST CMakeTestAllGenerators PROPERTY RUN_SERIAL 1)
   endif()
 
   if(NOT DEFINED CTEST_RUN_CMakeTestMultipleConfigures)
@@ -1371,12 +1389,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindBZip2)
   endif()
 
+  if(CMake_TEST_FindDoxygen)
+    add_subdirectory(FindDoxygen)
+  endif()
+
   if(CMake_TEST_FindGSL)
     add_subdirectory(FindGSL)
   endif()
 
   if(CMake_TEST_FindGTest)
     add_subdirectory(FindGTest)
+    add_subdirectory(GoogleTest)
   endif()
 
   if(CMake_TEST_FindICU)
@@ -1407,12 +1430,24 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindOpenGL)
   endif()
 
+  if(CMake_TEST_FindOpenMP)
+    add_subdirectory(FindOpenMP)
+  endif()
+
   if(CMake_TEST_FindOpenSSL)
     add_subdirectory(FindOpenSSL)
   endif()
 
+  if(CMake_TEST_FindMPI)
+    add_subdirectory(FindMPI)
+  endif()
+
   if(CMake_TEST_FindPNG)
     add_subdirectory(FindPNG)
+  endif()
+
+  if(CMake_TEST_FindProtobuf)
+    add_subdirectory(FindProtobuf)
   endif()
 
   if(CMake_TEST_FindTIFF)
@@ -1697,6 +1732,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
   if(CMake_TEST_XCODE_VERSION AND NOT CMake_TEST_XCODE_VERSION VERSION_LESS 5
      AND OSX_VERSION MATCHES "^([0-9]+\\.[0-9]+)")
+    set(XCTest_CTEST_OPTIONS --build-config $<CONFIGURATION>)
     set(XCTest_BUILD_OPTIONS -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_MATCH_1} -DCMAKE_OSX_SYSROOT=macosx)
     ADD_TEST_MACRO(XCTest ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> -V)
   endif()
@@ -1924,7 +1960,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   endif()
 
   if(MSVC AND NOT MSVC_VERSION LESS 1310
-     AND NOT CMAKE_GENERATOR MATCHES "Visual Studio 7( |$)"
      AND (NOT CMAKE_GENERATOR MATCHES "Visual Studio [89]( |$)"
           OR CMAKE_SIZEOF_VOID_P EQUAL 4)
       )
@@ -1936,7 +1971,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       ADD_TEST_MACRO(SBCS SBCS)
     endif()
 
-    if(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio [789]( |$)"
+    if(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio [89]( |$)"
         AND NOT CMAKE_GENERATOR_TOOLSET)
       ADD_TEST_MACRO(VSWindowsFormsResx VSWindowsFormsResx)
     endif()
@@ -2043,7 +2078,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     set(reg_wp81 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\WindowsPhone\\v8.1;InstallationFolder]")
     select_wince_sdk(reg_wince wince_sdk)
     set(reg_tegra "[HKEY_LOCAL_MACHINE\\SOFTWARE\\NVIDIA Corporation\\Nsight Tegra;sdkRoot]")
-    foreach(reg vs10 vs11 vs12 vs14 ws80 ws81 ws10_0 wp80 wp81 wince tegra)
+    set(reg_nasm "[HKEY_CURRENT_USER\\SOFTWARE\\nasm]")
+    foreach(reg vs10 vs11 vs12 vs14 ws80 ws81 ws10_0 wp80 wp81 wince tegra nasm)
       get_filename_component(r "${reg_${reg}}" ABSOLUTE)
       if(IS_DIRECTORY "${r}")
         set(${reg} 1)
@@ -2132,6 +2168,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     if(vs12)
       add_test_VSWinCE(vs12-ce80-ARM "Visual Studio 12 2013" WindowsCE 8.0 ${wince_sdk})
     endif()
+  endif()
+
+  if(CMAKE_GENERATOR MATCHES "Visual Studio ([^89]|[89][0-9])" AND nasm)
+    ADD_TEST_MACRO(VSNASM VSNASM)
   endif()
 
   if (CMake_TEST_GreenHillsMULTI)
@@ -3074,6 +3114,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endif ()
   endif ()
 
+  if(CMake_TEST_EXTERNAL_CMAKE)
+    set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
+  endif()
   if("${CMAKE_GENERATOR}" MATCHES Xcode)
     set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
   endif()

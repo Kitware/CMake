@@ -12,10 +12,11 @@
 cmRulePlaceholderExpander::cmRulePlaceholderExpander(
   std::map<std::string, std::string> const& compilers,
   std::map<std::string, std::string> const& variableMappings,
-  std::string const& compilerSysroot)
+  std::string const& compilerSysroot, std::string const& linkerSysroot)
   : Compilers(compilers)
   , VariableMappings(variableMappings)
   , CompilerSysroot(compilerSysroot)
+  , LinkerSysroot(linkerSysroot)
 {
 }
 
@@ -154,7 +155,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
         // Strip the last extension off the target name.
         std::string targetBase = replaceValues.Target;
         std::string::size_type pos = targetBase.rfind('.');
-        if (pos != targetBase.npos) {
+        if (pos != std::string::npos) {
           return targetBase.substr(0, pos);
         }
         return targetBase;
@@ -249,10 +250,19 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       ret += compilerOptionExternalToolchain;
       ret += outputConverter->EscapeForShell(compilerExternalToolchain, true);
     }
-    if (!this->CompilerSysroot.empty() && !compilerOptionSysroot.empty()) {
+    std::string sysroot;
+    // Some platforms may use separate sysroots for compiling and linking.
+    // If we detect link flags, then we pass the link sysroot instead.
+    // FIXME: Use a more robust way to detect link line expansion.
+    if (replaceValues.LinkFlags) {
+      sysroot = this->LinkerSysroot;
+    } else {
+      sysroot = this->CompilerSysroot;
+    }
+    if (!sysroot.empty() && !compilerOptionSysroot.empty()) {
       ret += " ";
       ret += compilerOptionSysroot;
-      ret += outputConverter->EscapeForShell(this->CompilerSysroot, true);
+      ret += outputConverter->EscapeForShell(sysroot, true);
     }
     return ret;
   }
@@ -260,7 +270,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   std::map<std::string, std::string>::iterator mapIt =
     this->VariableMappings.find(variable);
   if (mapIt != this->VariableMappings.end()) {
-    if (variable.find("_FLAG") == variable.npos) {
+    if (variable.find("_FLAG") == std::string::npos) {
       return outputConverter->ConvertToOutputForExisting(mapIt->second);
     }
     return mapIt->second;
@@ -274,15 +284,15 @@ void cmRulePlaceholderExpander::ExpandRuleVariables(
 {
   std::string::size_type start = s.find('<');
   // no variables to expand
-  if (start == s.npos) {
+  if (start == std::string::npos) {
     return;
   }
   std::string::size_type pos = 0;
   std::string expandedInput;
-  while (start != s.npos && start < s.size() - 2) {
+  while (start != std::string::npos && start < s.size() - 2) {
     std::string::size_type end = s.find('>', start);
     // if we find a < with no > we are done
-    if (end == s.npos) {
+    if (end == std::string::npos) {
       return;
     }
     char c = s[start + 1];

@@ -7,8 +7,8 @@
 #include "cmProcessTools.h"
 #include "cmSystemTools.h"
 
+#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <cmsys/RegularExpression.hxx>
 #include <ostream>
 #include <time.h>
 #include <utility>
@@ -369,24 +369,26 @@ std::string cmCTestP4::GetWorkingRevision()
   return rev;
 }
 
-void cmCTestP4::NoteOldRevision()
+bool cmCTestP4::NoteOldRevision()
 {
   this->OldRevision = this->GetWorkingRevision();
 
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Old revision of repository is: "
                << this->OldRevision << "\n");
   this->PriorRev.Rev = this->OldRevision;
+  return true;
 }
 
-void cmCTestP4::NoteNewRevision()
+bool cmCTestP4::NoteNewRevision()
 {
   this->NewRevision = this->GetWorkingRevision();
 
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   New revision of repository is: "
                << this->NewRevision << "\n");
+  return true;
 }
 
-void cmCTestP4::LoadRevisions()
+bool cmCTestP4::LoadRevisions()
 {
   std::vector<char const*> p4_changes;
   SetP4Options(p4_changes);
@@ -399,7 +401,7 @@ void cmCTestP4::LoadRevisions()
   if (this->OldRevision == "<unknown>" || this->NewRevision == "<unknown>") {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   At least one of the revisions "
                  << "is unknown. No repository changes will be reported.\n");
-    return;
+    return false;
   }
 
   range.append("@")
@@ -418,7 +420,7 @@ void cmCTestP4::LoadRevisions()
   this->RunChild(&p4_changes[0], &out, &err);
 
   if (ChangeLists.empty()) {
-    return;
+    return true;
   }
 
   // p4 describe -s ...@1111111,2222222
@@ -435,9 +437,10 @@ void cmCTestP4::LoadRevisions()
     OutputLogger errDescribe(this->Log, "p4_describe-err> ");
     this->RunChild(&p4_describe[0], &outDescribe, &errDescribe);
   }
+  return true;
 }
 
-void cmCTestP4::LoadModifications()
+bool cmCTestP4::LoadModifications()
 {
   std::vector<char const*> p4_diff;
   SetP4Options(p4_diff);
@@ -453,6 +456,7 @@ void cmCTestP4::LoadModifications()
   DiffParser out(this, "p4_diff-out> ");
   OutputLogger err(this->Log, "p4_diff-err> ");
   this->RunChild(&p4_diff[0], &out, &err);
+  return true;
 }
 
 bool cmCTestP4::UpdateCustom(const std::string& custom)

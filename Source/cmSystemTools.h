@@ -3,20 +3,14 @@
 #ifndef cmSystemTools_h
 #define cmSystemTools_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h"
 
-#include <cmProcessOutput.h>
-#include <cmsys/Process.h>
-#include <cmsys/SystemTools.hxx>
+#include "cmProcessOutput.h"
+#include "cmsys/Process.h"
+#include "cmsys/SystemTools.hxx" // IWYU pragma: export
 #include <stddef.h>
 #include <string>
 #include <vector>
-
-#if defined(_MSC_VER)
-typedef unsigned short mode_t;
-#else
-#include <sys/types.h>
-#endif
 
 class cmSystemToolsFileTime;
 
@@ -259,6 +253,15 @@ public:
   static void ParseUnixCommandLine(const char* command,
                                    std::vector<std::string>& args);
 
+  /**
+   * Handle response file in an argument list and return a new argument list
+   * **/
+  static std::vector<std::string> HandleResponseFile(
+    std::vector<std::string>::const_iterator argBeg,
+    std::vector<std::string>::const_iterator argEnd);
+
+  static size_t CalculateCommandLineLengthLimit();
+
   static void EnableMessages() { s_DisableMessages = false; }
   static void DisableMessages() { s_DisableMessages = true; }
   static void DisableRunCommandOutput() { s_DisableRunCommandOutput = true; }
@@ -383,9 +386,10 @@ public:
       original environment. */
   class SaveRestoreEnvironment
   {
+    CM_DISABLE_COPY(SaveRestoreEnvironment)
   public:
     SaveRestoreEnvironment();
-    virtual ~SaveRestoreEnvironment();
+    ~SaveRestoreEnvironment();
 
   private:
     std::vector<std::string> Env;

@@ -3,7 +3,7 @@
 #ifndef cmInstallScriptGenerator_h
 #define cmInstallScriptGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h"
 
 #include "cmInstallGenerator.h"
 

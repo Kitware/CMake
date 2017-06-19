@@ -35,8 +35,13 @@
 #include "SystemInformation.hxx.in"
 #endif
 
+#include <algorithm>
+#include <bitset>
+#include <cassert>
 #include <fstream>
 #include <iostream>
+#include <limits>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -394,7 +399,6 @@ public:
     bool SupportsMP;
     bool HasMMXPlus;
     bool HasSSEMMX;
-    bool SupportsHyperthreading;
     unsigned int LogicalProcessorsPerPhysical;
     int APIC_ID;
     CPUPowerManagement PowerManagement;
@@ -463,10 +467,9 @@ protected:
   unsigned int NumberOfLogicalCPU;
   unsigned int NumberOfPhysicalCPU;
 
-  int CPUCount(); // For windows
-  unsigned char LogicalCPUPerPhysicalCPU();
+  void CPUCountWindows();    // For windows
   unsigned char GetAPICId(); // For windows
-  bool IsHyperThreadingSupported();
+  bool IsSMTSupported();
   static LongLong GetCyclesDifference(DELAY_FUNC, unsigned int); // For windows
 
   // For Linux and Cygwin, /proc/cpuinfo formats are slightly different
@@ -536,6 +539,7 @@ protected:
   std::string OSRelease;
   std::string OSVersion;
   std::string OSPlatform;
+  bool OSIs64Bit;
 };
 
 SystemInformation::SystemInformation()
@@ -834,37 +838,12 @@ void SystemInformation::RunMemoryCheck()
   this->Implementation->RunMemoryCheck();
 }
 
-// --------------------------------------------------------------
 // SystemInformationImplementation starts here
 
 #define STORE_TLBCACHE_INFO(x, y) x = (x < (y)) ? (y) : x
 #define TLBCACHE_INFO_UNITS (15)
 #define CLASSICAL_CPU_FREQ_LOOP 10000000
 #define RDTSC_INSTRUCTION _asm _emit 0x0f _asm _emit 0x31
-
-#define MMX_FEATURE 0x00000001
-#define MMX_PLUS_FEATURE 0x00000002
-#define SSE_FEATURE 0x00000004
-#define SSE2_FEATURE 0x00000008
-#define AMD_3DNOW_FEATURE 0x00000010
-#define AMD_3DNOW_PLUS_FEATURE 0x00000020
-#define IA64_FEATURE 0x00000040
-#define MP_CAPABLE 0x00000080
-#define HYPERTHREAD_FEATURE 0x00000100
-#define SERIALNUMBER_FEATURE 0x00000200
-#define APIC_FEATURE 0x00000400
-#define SSE_FP_FEATURE 0x00000800
-#define SSE_MMX_FEATURE 0x00001000
-#define CMOV_FEATURE 0x00002000
-#define MTRR_FEATURE 0x00004000
-#define L1CACHE_FEATURE 0x00008000
-#define L2CACHE_FEATURE 0x00010000
-#define L3CACHE_FEATURE 0x00020000
-#define ACPI_FEATURE 0x00040000
-#define THERMALMONITOR_FEATURE 0x00080000
-#define TEMPSENSEDIODE_FEATURE 0x00100000
-#define FREQUENCYID_FEATURE 0x00200000
-#define VOLTAGEID_FREQUENCY 0x00400000
 
 // Status Flag
 #define HT_NOT_CAPABLE 0
@@ -939,7 +918,8 @@ int LoadLines(const char* fileName, std::vector<std::string>& lines)
 
 // ****************************************************************************
 template <typename T>
-int NameValue(std::vector<std::string>& lines, std::string name, T& value)
+int NameValue(std::vector<std::string> const& lines, std::string const& name,
+              T& value)
 {
   size_t nLines = lines.size();
   for (size_t i = 0; i < nLines; ++i) {
@@ -1310,7 +1290,6 @@ private:
   int ReportPath;
 };
 
-// --------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& os, const SymbolProperties& sp)
 {
 #if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
@@ -1329,7 +1308,6 @@ std::ostream& operator<<(std::ostream& os, const SymbolProperties& sp)
   return os;
 }
 
-// --------------------------------------------------------------------------
 SymbolProperties::SymbolProperties()
 {
   // not using an initializer list
@@ -1348,20 +1326,18 @@ SymbolProperties::SymbolProperties()
   this->GetLineNumber();
 }
 
-// --------------------------------------------------------------------------
 std::string SymbolProperties::GetFileName(const std::string& path) const
 {
   std::string file(path);
   if (!this->ReportPath) {
     size_t at = file.rfind("/");
     if (at != std::string::npos) {
-      file = file.substr(at + 1, std::string::npos);
+      file = file.substr(at + 1);
     }
   }
   return file;
 }
 
-// --------------------------------------------------------------------------
 std::string SymbolProperties::GetBinary() const
 {
 // only linux has proc fs
@@ -1382,7 +1358,6 @@ std::string SymbolProperties::GetBinary() const
   return this->GetFileName(this->Binary);
 }
 
-// --------------------------------------------------------------------------
 std::string SymbolProperties::Demangle(const char* symbol) const
 {
   std::string result = safes(symbol);
@@ -1402,7 +1377,6 @@ std::string SymbolProperties::Demangle(const char* symbol) const
   return result;
 }
 
-// --------------------------------------------------------------------------
 void SymbolProperties::Initialize(void* address)
 {
   this->Address = address;
@@ -1421,7 +1395,6 @@ void SymbolProperties::Initialize(void* address)
 }
 #endif // don't define this class if we're not using it
 
-// --------------------------------------------------------------------------
 #if defined(_WIN32) || defined(__CYGWIN__)
 #define KWSYS_SYSTEMINFORMATION_USE_GetSystemTimes
 #endif
@@ -1496,6 +1469,7 @@ SystemInformationImplementation::SystemInformationImplementation()
   this->OSRelease = "";
   this->OSVersion = "";
   this->OSPlatform = "";
+  this->OSIs64Bit = (sizeof(void*) == 8);
 }
 
 SystemInformationImplementation::~SystemInformationImplementation()
@@ -1542,7 +1516,7 @@ void SystemInformationImplementation::RunCPUCheck()
     RetrieveProcessorSerialNumber();
   }
 
-  this->CPUCount();
+  this->CPUCountWindows();
 
 #elif defined(__APPLE__)
   this->ParseSysCtl();
@@ -1870,11 +1844,11 @@ int SystemInformationImplementation::GetProcessorCacheSize()
 int SystemInformationImplementation::GetProcessorCacheXSize(long int dwCacheID)
 {
   switch (dwCacheID) {
-    case L1CACHE_FEATURE:
+    case SystemInformation::CPU_FEATURE_L1CACHE:
       return this->Features.L1CacheSize;
-    case L2CACHE_FEATURE:
+    case SystemInformation::CPU_FEATURE_L2CACHE:
       return this->Features.L2CacheSize;
-    case L3CACHE_FEATURE:
+    case SystemInformation::CPU_FEATURE_L3CACHE:
       return this->Features.L3CacheSize;
   }
   return -1;
@@ -1885,102 +1859,119 @@ bool SystemInformationImplementation::DoesCPUSupportFeature(long int dwFeature)
   bool bHasFeature = false;
 
   // Check for MMX instructions.
-  if (((dwFeature & MMX_FEATURE) != 0) && this->Features.HasMMX)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_MMX) != 0) &&
+      this->Features.HasMMX)
     bHasFeature = true;
 
   // Check for MMX+ instructions.
-  if (((dwFeature & MMX_PLUS_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_MMX_PLUS) != 0) &&
       this->Features.ExtendedFeatures.HasMMXPlus)
     bHasFeature = true;
 
   // Check for SSE FP instructions.
-  if (((dwFeature & SSE_FEATURE) != 0) && this->Features.HasSSE)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_SSE) != 0) &&
+      this->Features.HasSSE)
     bHasFeature = true;
 
   // Check for SSE FP instructions.
-  if (((dwFeature & SSE_FP_FEATURE) != 0) && this->Features.HasSSEFP)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_SSE_FP) != 0) &&
+      this->Features.HasSSEFP)
     bHasFeature = true;
 
   // Check for SSE MMX instructions.
-  if (((dwFeature & SSE_MMX_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_SSE_MMX) != 0) &&
       this->Features.ExtendedFeatures.HasSSEMMX)
     bHasFeature = true;
 
   // Check for SSE2 instructions.
-  if (((dwFeature & SSE2_FEATURE) != 0) && this->Features.HasSSE2)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_SSE2) != 0) &&
+      this->Features.HasSSE2)
     bHasFeature = true;
 
   // Check for 3DNow! instructions.
-  if (((dwFeature & AMD_3DNOW_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_AMD_3DNOW) != 0) &&
       this->Features.ExtendedFeatures.Has3DNow)
     bHasFeature = true;
 
   // Check for 3DNow+ instructions.
-  if (((dwFeature & AMD_3DNOW_PLUS_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_AMD_3DNOW_PLUS) != 0) &&
       this->Features.ExtendedFeatures.Has3DNowPlus)
     bHasFeature = true;
 
   // Check for IA64 instructions.
-  if (((dwFeature & IA64_FEATURE) != 0) && this->Features.HasIA64)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_IA64) != 0) &&
+      this->Features.HasIA64)
     bHasFeature = true;
 
   // Check for MP capable.
-  if (((dwFeature & MP_CAPABLE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_MP_CAPABLE) != 0) &&
       this->Features.ExtendedFeatures.SupportsMP)
     bHasFeature = true;
 
   // Check for a serial number for the processor.
-  if (((dwFeature & SERIALNUMBER_FEATURE) != 0) && this->Features.HasSerial)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_SERIALNUMBER) != 0) &&
+      this->Features.HasSerial)
     bHasFeature = true;
 
   // Check for a local APIC in the processor.
-  if (((dwFeature & APIC_FEATURE) != 0) && this->Features.HasAPIC)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_APIC) != 0) &&
+      this->Features.HasAPIC)
     bHasFeature = true;
 
   // Check for CMOV instructions.
-  if (((dwFeature & CMOV_FEATURE) != 0) && this->Features.HasCMOV)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_CMOV) != 0) &&
+      this->Features.HasCMOV)
     bHasFeature = true;
 
   // Check for MTRR instructions.
-  if (((dwFeature & MTRR_FEATURE) != 0) && this->Features.HasMTRR)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_MTRR) != 0) &&
+      this->Features.HasMTRR)
     bHasFeature = true;
 
   // Check for L1 cache size.
-  if (((dwFeature & L1CACHE_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_L1CACHE) != 0) &&
       (this->Features.L1CacheSize != -1))
     bHasFeature = true;
 
   // Check for L2 cache size.
-  if (((dwFeature & L2CACHE_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_L2CACHE) != 0) &&
       (this->Features.L2CacheSize != -1))
     bHasFeature = true;
 
   // Check for L3 cache size.
-  if (((dwFeature & L3CACHE_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_L3CACHE) != 0) &&
       (this->Features.L3CacheSize != -1))
     bHasFeature = true;
 
   // Check for ACPI capability.
-  if (((dwFeature & ACPI_FEATURE) != 0) && this->Features.HasACPI)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_ACPI) != 0) &&
+      this->Features.HasACPI)
     bHasFeature = true;
 
   // Check for thermal monitor support.
-  if (((dwFeature & THERMALMONITOR_FEATURE) != 0) && this->Features.HasThermal)
+  if (((dwFeature & SystemInformation::CPU_FEATURE_THERMALMONITOR) != 0) &&
+      this->Features.HasThermal)
     bHasFeature = true;
 
   // Check for temperature sensing diode support.
-  if (((dwFeature & TEMPSENSEDIODE_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_TEMPSENSEDIODE) != 0) &&
       this->Features.ExtendedFeatures.PowerManagement.HasTempSenseDiode)
     bHasFeature = true;
 
   // Check for frequency ID support.
-  if (((dwFeature & FREQUENCYID_FEATURE) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_FREQUENCYID) != 0) &&
       this->Features.ExtendedFeatures.PowerManagement.HasFrequencyID)
     bHasFeature = true;
 
   // Check for voltage ID support.
-  if (((dwFeature & VOLTAGEID_FREQUENCY) != 0) &&
+  if (((dwFeature & SystemInformation::CPU_FEATURE_VOLTAGEID_FREQUENCY) !=
+       0) &&
       this->Features.ExtendedFeatures.PowerManagement.HasVoltageID)
+    bHasFeature = true;
+
+  // Check for FPU support.
+  if (((dwFeature & SystemInformation::CPU_FEATURE_FPU) != 0) &&
+      this->Features.HasFPU)
     bHasFeature = true;
 
   return bHasFeature;
@@ -2090,16 +2081,10 @@ bool SystemInformationImplementation::RetrieveCPUFeatures()
 
   // Retrieve Intel specific extended features.
   if (this->ChipManufacturer == Intel) {
-    this->Features.ExtendedFeatures.SupportsHyperthreading =
-      ((cpuinfo[3] & 0x10000000) !=
-       0); // Intel specific: Hyperthreading --> Bit 28
-    this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical =
-      (this->Features.ExtendedFeatures.SupportsHyperthreading)
-      ? ((cpuinfo[1] & 0x00FF0000) >> 16)
-      : 1;
+    bool SupportsSMT =
+      ((cpuinfo[3] & 0x10000000) != 0); // Intel specific: SMT --> Bit 28
 
-    if ((this->Features.ExtendedFeatures.SupportsHyperthreading) &&
-        (this->Features.HasAPIC)) {
+    if ((SupportsSMT) && (this->Features.HasAPIC)) {
       // Retrieve APIC information if there is one present.
       this->Features.ExtendedFeatures.APIC_ID =
         ((cpuinfo[1] & 0xFF000000) >> 24);
@@ -3357,11 +3342,11 @@ std::string SystemInformationImplementation::ExtractValueFromCpuInfoFile(
   std::string buffer, const char* word, size_t init)
 {
   size_t pos = buffer.find(word, init);
-  if (pos != buffer.npos) {
+  if (pos != std::string::npos) {
     this->CurrentPositionInFile = pos;
     pos = buffer.find(":", pos);
     size_t pos2 = buffer.find("\n", pos);
-    if (pos != buffer.npos && pos2 != buffer.npos) {
+    if (pos != std::string::npos && pos2 != std::string::npos) {
       // It may happen that the beginning matches, but this is still not the
       // requested key.
       // An example is looking for "cpu" when "cpu family" comes first. So we
@@ -3376,7 +3361,7 @@ std::string SystemInformationImplementation::ExtractValueFromCpuInfoFile(
       return buffer.substr(pos + 2, pos2 - pos - 2);
     }
   }
-  this->CurrentPositionInFile = buffer.npos;
+  this->CurrentPositionInFile = std::string::npos;
   return "";
 }
 
@@ -3401,38 +3386,33 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   fclose(fd);
   buffer.resize(fileSize - 2);
   // Number of logical CPUs (combination of multiple processors, multi-core
-  // and hyperthreading)
+  // and SMT)
   size_t pos = buffer.find("processor\t");
-  while (pos != buffer.npos) {
+  while (pos != std::string::npos) {
     this->NumberOfLogicalCPU++;
     pos = buffer.find("processor\t", pos + 1);
   }
 
 #ifdef __linux
-  // Find the largest physical id.
-  int maxId = -1;
+  // Count sockets.
+  std::set<int> PhysicalIDs;
   std::string idc = this->ExtractValueFromCpuInfoFile(buffer, "physical id");
-  while (this->CurrentPositionInFile != buffer.npos) {
+  while (this->CurrentPositionInFile != std::string::npos) {
     int id = atoi(idc.c_str());
-    if (id > maxId) {
-      maxId = id;
-    }
+    PhysicalIDs.insert(id);
     idc = this->ExtractValueFromCpuInfoFile(buffer, "physical id",
                                             this->CurrentPositionInFile + 1);
   }
+  uint64_t NumberOfSockets = PhysicalIDs.size();
+  NumberOfSockets = std::max(NumberOfSockets, (uint64_t)1);
   // Physical ids returned by Linux don't distinguish cores.
   // We want to record the total number of cores in this->NumberOfPhysicalCPU
   // (checking only the first proc)
-  std::string cores = this->ExtractValueFromCpuInfoFile(buffer, "cpu cores");
-  int numberOfCoresPerCPU = atoi(cores.c_str());
-  if (maxId > 0) {
-    this->NumberOfPhysicalCPU =
-      static_cast<unsigned int>(numberOfCoresPerCPU * (maxId + 1));
-  } else {
-    // Linux Sparc: get cpu count
-    this->NumberOfPhysicalCPU =
-      atoi(this->ExtractValueFromCpuInfoFile(buffer, "ncpus active").c_str());
-  }
+  std::string Cores = this->ExtractValueFromCpuInfoFile(buffer, "cpu cores");
+  unsigned int NumberOfCoresPerSocket = (unsigned int)atoi(Cores.c_str());
+  NumberOfCoresPerSocket = std::max(NumberOfCoresPerSocket, 1u);
+  this->NumberOfPhysicalCPU =
+    NumberOfCoresPerSocket * (unsigned int)NumberOfSockets;
 
 #else // __CYGWIN__
   // does not have "physical id" entries, neither "cpu cores"
@@ -3447,7 +3427,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   if (this->NumberOfPhysicalCPU <= 0) {
     this->NumberOfPhysicalCPU = 1;
   }
-  // LogicalProcessorsPerPhysical>1 => hyperthreading.
+  // LogicalProcessorsPerPhysical>1 => SMT.
   this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical =
     this->NumberOfLogicalCPU / this->NumberOfPhysicalCPU;
 
@@ -3527,7 +3507,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
       this->ExtractValueFromCpuInfoFile(buffer, cachename[index]);
     if (!cacheSize.empty()) {
       pos = cacheSize.find(" KB");
-      if (pos != cacheSize.npos) {
+      if (pos != std::string::npos) {
         cacheSize = cacheSize.substr(0, pos);
       }
       this->Features.L1CacheSize += atoi(cacheSize.c_str());
@@ -4322,68 +4302,10 @@ void SystemInformationImplementation::DelayOverhead(unsigned int uiMS)
   (void)uiMS;
 }
 
-/** Return the number of logical CPU per physical CPUs Works only for windows
- */
-unsigned char SystemInformationImplementation::LogicalCPUPerPhysicalCPU(void)
-{
-#ifdef __APPLE__
-  size_t len = 4;
-  int cores_per_package = 0;
-  int err = sysctlbyname("machdep.cpu.cores_per_package", &cores_per_package,
-                         &len, NULL, 0);
-  if (err != 0) {
-    return 1; // That name was not found, default to 1
-  }
-  return static_cast<unsigned char>(cores_per_package);
-#else
-  int Regs[4] = { 0, 0, 0, 0 };
-#if USE_CPUID
-  if (!this->IsHyperThreadingSupported()) {
-    return static_cast<unsigned char>(1); // HT not supported
-  }
-  call_cpuid(1, Regs);
-#endif
-  return static_cast<unsigned char>((Regs[1] & NUM_LOGICAL_BITS) >> 16);
-#endif
-}
-
 /** Works only for windows */
-bool SystemInformationImplementation::IsHyperThreadingSupported()
+bool SystemInformationImplementation::IsSMTSupported()
 {
-  if (this->Features.ExtendedFeatures.SupportsHyperthreading) {
-    return true;
-  }
-
-#if USE_CPUID
-  int Regs[4] = { 0, 0, 0, 0 }, VendorId[4] = { 0, 0, 0, 0 };
-  // Get vendor id string
-  if (!call_cpuid(0, VendorId)) {
-    return false;
-  }
-  // eax contains family processor type
-  // edx has info about the availability of hyper-Threading
-  if (!call_cpuid(1, Regs)) {
-    return false;
-  }
-
-  if (((Regs[0] & FAMILY_ID) == PENTIUM4_ID) || (Regs[0] & EXT_FAMILY_ID)) {
-    if (VendorId[1] == 0x756e6547) // 'uneG'
-    {
-      if (VendorId[3] == 0x49656e69) // 'Ieni'
-      {
-        if (VendorId[2] == 0x6c65746e) // 'letn'
-        {
-          // Genuine Intel with hyper-Threading technology
-          this->Features.ExtendedFeatures.SupportsHyperthreading =
-            ((Regs[3] & HT_BIT) != 0);
-          return this->Features.ExtendedFeatures.SupportsHyperthreading;
-        }
-      }
-    }
-  }
-#endif
-
-  return 0; // Not genuine Intel processor
+  return this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical > 1;
 }
 
 /** Return the APIC Id. Works only for windows. */
@@ -4392,7 +4314,7 @@ unsigned char SystemInformationImplementation::GetAPICId()
   int Regs[4] = { 0, 0, 0, 0 };
 
 #if USE_CPUID
-  if (!this->IsHyperThreadingSupported()) {
+  if (!this->IsSMTSupported()) {
     return static_cast<unsigned char>(-1); // HT not supported
   }                                        // Logical processor = 1
   call_cpuid(1, Regs);
@@ -4402,102 +4324,63 @@ unsigned char SystemInformationImplementation::GetAPICId()
 }
 
 /** Count the number of CPUs. Works only on windows. */
-int SystemInformationImplementation::CPUCount()
+void SystemInformationImplementation::CPUCountWindows()
 {
 #if defined(_WIN32)
-  unsigned char StatusFlag = 0;
-  SYSTEM_INFO info;
-
   this->NumberOfPhysicalCPU = 0;
   this->NumberOfLogicalCPU = 0;
-  info.dwNumberOfProcessors = 0;
-  GetSystemInfo(&info);
 
-  // Number of physical processors in a non-Intel system
-  // or in a 32-bit Intel system with Hyper-Threading technology disabled
-  this->NumberOfPhysicalCPU = (unsigned char)info.dwNumberOfProcessors;
+  typedef BOOL(WINAPI * GetLogicalProcessorInformationType)(
+    PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
+  static GetLogicalProcessorInformationType pGetLogicalProcessorInformation =
+    (GetLogicalProcessorInformationType)GetProcAddress(
+      GetModuleHandleW(L"kernel32"), "GetLogicalProcessorInformation");
 
-  if (this->IsHyperThreadingSupported()) {
-    unsigned char HT_Enabled = 0;
-    this->NumberOfLogicalCPU = this->LogicalCPUPerPhysicalCPU();
-    if (this->NumberOfLogicalCPU >=
-        1) // >1 Doesn't mean HT is enabled in the BIOS
-    {
-      HANDLE hCurrentProcessHandle;
-#ifndef _WIN64
-#define DWORD_PTR DWORD
-#endif
-      DWORD_PTR dwProcessAffinity;
-      DWORD_PTR dwSystemAffinity;
-      DWORD dwAffinityMask;
-
-      // Calculate the appropriate  shifts and mask based on the
-      // number of logical processors.
-      unsigned int i = 1;
-      unsigned char PHY_ID_MASK = 0xFF;
-      // unsigned char PHY_ID_SHIFT = 0;
-
-      while (i < this->NumberOfLogicalCPU) {
-        i *= 2;
-        PHY_ID_MASK <<= 1;
-        // PHY_ID_SHIFT++;
-      }
-
-      hCurrentProcessHandle = GetCurrentProcess();
-      GetProcessAffinityMask(hCurrentProcessHandle, &dwProcessAffinity,
-                             &dwSystemAffinity);
-
-      // Check if available process affinity mask is equal to the
-      // available system affinity mask
-      if (dwProcessAffinity != dwSystemAffinity) {
-        StatusFlag = HT_CANNOT_DETECT;
-        this->NumberOfPhysicalCPU = (unsigned char)-1;
-        return StatusFlag;
-      }
-
-      dwAffinityMask = 1;
-      while (dwAffinityMask != 0 && dwAffinityMask <= dwProcessAffinity) {
-        // Check if this CPU is available
-        if (dwAffinityMask & dwProcessAffinity) {
-          if (SetProcessAffinityMask(hCurrentProcessHandle, dwAffinityMask)) {
-            unsigned char APIC_ID, LOG_ID;
-            Sleep(0); // Give OS time to switch CPU
-
-            APIC_ID = GetAPICId();
-            LOG_ID = APIC_ID & ~PHY_ID_MASK;
-
-            if (LOG_ID != 0) {
-              HT_Enabled = 1;
-            }
-          }
-        }
-        dwAffinityMask = dwAffinityMask << 1;
-      }
-      // Reset the processor affinity
-      SetProcessAffinityMask(hCurrentProcessHandle, dwProcessAffinity);
-
-      if (this->NumberOfLogicalCPU ==
-          1) // Normal P4 : HT is disabled in hardware
-      {
-        StatusFlag = HT_DISABLED;
-      } else {
-        if (HT_Enabled) {
-          // Total physical processors in a Hyper-Threading enabled system.
-          this->NumberOfPhysicalCPU /= (this->NumberOfLogicalCPU);
-          StatusFlag = HT_ENABLED;
-        } else {
-          StatusFlag = HT_SUPPORTED_NOT_ENABLED;
-        }
-      }
-    }
-  } else {
-    // Processors do not have Hyper-Threading technology
-    StatusFlag = HT_NOT_CAPABLE;
-    this->NumberOfLogicalCPU = 1;
+  if (!pGetLogicalProcessorInformation) {
+    // Fallback to approximate implementation on ancient Windows versions.
+    SYSTEM_INFO info;
+    ZeroMemory(&info, sizeof(info));
+    GetSystemInfo(&info);
+    this->NumberOfPhysicalCPU =
+      static_cast<unsigned int>(info.dwNumberOfProcessors);
+    this->NumberOfLogicalCPU = this->NumberOfPhysicalCPU;
+    return;
   }
-  return StatusFlag;
+
+  std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> ProcInfo;
+  {
+    DWORD Length = 0;
+    DWORD rc = pGetLogicalProcessorInformation(NULL, &Length);
+    assert(FALSE == rc);
+    (void)rc; // Silence unused variable warning in Borland C++ 5.81
+    assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER);
+    ProcInfo.resize(Length / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION));
+    rc = pGetLogicalProcessorInformation(&ProcInfo[0], &Length);
+    assert(rc != FALSE);
+    (void)rc; // Silence unused variable warning in Borland C++ 5.81
+  }
+
+  typedef std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION>::iterator
+    pinfoIt_t;
+  for (pinfoIt_t it = ProcInfo.begin(); it != ProcInfo.end(); ++it) {
+    SYSTEM_LOGICAL_PROCESSOR_INFORMATION PInfo = *it;
+    if (PInfo.Relationship != RelationProcessorCore) {
+      continue;
+    }
+
+    std::bitset<std::numeric_limits<ULONG_PTR>::digits> ProcMask(
+      (unsigned long long)PInfo.ProcessorMask);
+    unsigned int count = (unsigned int)ProcMask.count();
+    if (count == 0) { // I think this should never happen, but just to be safe.
+      continue;
+    }
+    this->NumberOfPhysicalCPU++;
+    this->NumberOfLogicalCPU += (unsigned int)count;
+    this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical = count;
+  }
+  this->NumberOfPhysicalCPU = std::max(1u, this->NumberOfPhysicalCPU);
+  this->NumberOfLogicalCPU = std::max(1u, this->NumberOfLogicalCPU);
 #else
-  return 0;
 #endif
 }
 
@@ -4559,8 +4442,14 @@ bool SystemInformationImplementation::ParseSysCtl()
   sysctlbyname("hw.physicalcpu", &this->NumberOfPhysicalCPU, &len, NULL, 0);
   len = sizeof(this->NumberOfLogicalCPU);
   sysctlbyname("hw.logicalcpu", &this->NumberOfLogicalCPU, &len, NULL, 0);
+
+  int cores_per_package = 0;
+  len = sizeof(cores_per_package);
+  err = sysctlbyname("machdep.cpu.cores_per_package", &cores_per_package, &len,
+                     NULL, 0);
+  // That name was not found, default to 1
   this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical =
-    this->LogicalCPUPerPhysicalCPU();
+    err != 0 ? 1 : static_cast<unsigned char>(cores_per_package);
 
   len = sizeof(value);
   sysctlbyname("hw.cpufrequency", &value, &len, NULL, 0);
@@ -4697,10 +4586,10 @@ std::string SystemInformationImplementation::ExtractValueFromSysCtl(
   const char* word)
 {
   size_t pos = this->SysCtlBuffer.find(word);
-  if (pos != this->SysCtlBuffer.npos) {
+  if (pos != std::string::npos) {
     pos = this->SysCtlBuffer.find(": ", pos);
     size_t pos2 = this->SysCtlBuffer.find("\n", pos);
-    if (pos != this->SysCtlBuffer.npos && pos2 != this->SysCtlBuffer.npos) {
+    if (pos != std::string::npos && pos2 != std::string::npos) {
       return this->SysCtlBuffer.substr(pos + 2, pos2 - pos - 2);
     }
   }
@@ -4772,14 +4661,14 @@ std::string SystemInformationImplementation::ParseValueFromKStat(
   args.push_back("-p");
 
   std::string command = arguments;
-  size_t start = command.npos;
+  size_t start = std::string::npos;
   size_t pos = command.find(' ', 0);
-  while (pos != command.npos) {
+  while (pos != std::string::npos) {
     bool inQuotes = false;
     // Check if we are between quotes
     size_t b0 = command.find('"', 0);
     size_t b1 = command.find('"', b0 + 1);
-    while (b0 != command.npos && b1 != command.npos && b1 > b0) {
+    while (b0 != std::string::npos && b1 != std::string::npos && b1 > b0) {
       if (pos > b0 && pos < b1) {
         inQuotes = true;
         break;
@@ -4793,7 +4682,7 @@ std::string SystemInformationImplementation::ParseValueFromKStat(
 
       // Remove the quotes if any
       size_t quotes = arg.find('"');
-      while (quotes != arg.npos) {
+      while (quotes != std::string::npos) {
         arg.erase(quotes, 1);
         quotes = arg.find('"');
       }
@@ -4976,11 +4865,11 @@ bool SystemInformationImplementation::QueryQNXMemory()
   args.clear();
 
   size_t pos = buffer.find("System RAM:");
-  if (pos == buffer.npos)
+  if (pos == std::string::npos)
     return false;
   pos = buffer.find(":", pos);
   size_t pos2 = buffer.find("M (", pos);
-  if (pos2 == buffer.npos)
+  if (pos2 == std::string::npos)
     return false;
 
   pos++;
@@ -5034,11 +4923,11 @@ bool SystemInformationImplementation::QueryQNXProcessor()
   args.clear();
 
   size_t pos = buffer.find("Processor1:");
-  if (pos == buffer.npos)
+  if (pos == std::string::npos)
     return false;
 
   size_t pos2 = buffer.find("MHz", pos);
-  if (pos2 == buffer.npos)
+  if (pos2 == std::string::npos)
     return false;
 
   size_t pos3 = pos2;
@@ -5048,9 +4937,9 @@ bool SystemInformationImplementation::QueryQNXProcessor()
   this->CPUSpeedInMHz = atoi(buffer.substr(pos3 + 1, pos2 - pos3 - 1).c_str());
 
   pos2 = buffer.find(" Stepping", pos);
-  if (pos2 != buffer.npos) {
+  if (pos2 != std::string::npos) {
     pos2 = buffer.find(" ", pos2 + 1);
-    if (pos2 != buffer.npos && pos2 < pos3) {
+    if (pos2 != std::string::npos && pos2 < pos3) {
       this->ChipID.Revision =
         atoi(buffer.substr(pos2 + 1, pos3 - pos2).c_str());
     }
@@ -5060,7 +4949,7 @@ bool SystemInformationImplementation::QueryQNXProcessor()
   do {
     pos = buffer.find("\nProcessor", pos + 1);
     ++this->NumberOfPhysicalCPU;
-  } while (pos != buffer.npos);
+  } while (pos != std::string::npos);
   this->NumberOfLogicalCPU = 1;
 
   return true;
@@ -5436,8 +5325,18 @@ bool SystemInformationImplementation::QueryOSInformation()
   this->Hostname = name;
 
   const char* arch = getenv("PROCESSOR_ARCHITECTURE");
+  const char* wow64 = getenv("PROCESSOR_ARCHITEW6432");
   if (arch) {
     this->OSPlatform = arch;
+  }
+
+  if (wow64) {
+    // the PROCESSOR_ARCHITEW6432 is only defined when running 32bit programs
+    // on 64bit OS
+    this->OSIs64Bit = true;
+  } else if (arch) {
+    // all values other than x86 map to 64bit architectures
+    this->OSIs64Bit = (strncmp(arch, "x86", 3) != 0);
   }
 
 #else
@@ -5450,6 +5349,12 @@ bool SystemInformationImplementation::QueryOSInformation()
     this->OSRelease = unameInfo.release;
     this->OSVersion = unameInfo.version;
     this->OSPlatform = unameInfo.machine;
+
+    // This is still insufficient to capture 64bit architecture such
+    // powerpc and possible mips and sparc
+    if (this->OSPlatform.find_first_of("64") != std::string::npos) {
+      this->OSIs64Bit = true;
+    }
   }
 
 #ifdef __APPLE__
@@ -5503,6 +5408,6 @@ void SystemInformationImplementation::TrimNewline(std::string& output)
 /** Return true if the machine is 64 bits */
 bool SystemInformationImplementation::Is64Bits()
 {
-  return (sizeof(void*) == 8);
+  return this->OSIs64Bit;
 }
 }

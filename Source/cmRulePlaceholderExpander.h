@@ -4,7 +4,7 @@
 #ifndef cmRulePlaceholderExpander_h
 #define cmRulePlaceholderExpander_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <string>
@@ -17,7 +17,7 @@ public:
   cmRulePlaceholderExpander(
     std::map<std::string, std::string> const& compilers,
     std::map<std::string, std::string> const& variableMappings,
-    std::string const& compilerSysroot);
+    std::string const& compilerSysroot, std::string const& linkerSysroot);
 
   void SetTargetImpLib(std::string const& targetImpLib)
   {
@@ -76,6 +76,7 @@ private:
   std::map<std::string, std::string> Compilers;
   std::map<std::string, std::string> VariableMappings;
   std::string CompilerSysroot;
+  std::string LinkerSysroot;
 };
 
 #endif

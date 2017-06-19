@@ -3,28 +3,18 @@
 #ifndef cmExprParserHelper_h
 #define cmExprParserHelper_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
 
-#define YYSTYPE cmExprParserHelper::ParserType
-#define YYSTYPE_IS_DECLARED
-#define YY_EXTRA_TYPE cmExprParserHelper*
-#define YY_DECL int cmExpr_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
-
-/** \class cmExprParserHelper
- * \brief Helper class for parsing java source files
- *
- * Finds dependencies for java file and list of outputs
- */
 class cmExprParserHelper
 {
 public:
-  typedef struct
+  struct ParserType
   {
     int Number;
-  } ParserType;
+  };
 
   cmExprParserHelper();
   ~cmExprParserHelper();
@@ -56,5 +46,10 @@ private:
   long FileLine;
   std::string ErrorString;
 };
+
+#define YYSTYPE cmExprParserHelper::ParserType
+#define YYSTYPE_IS_DECLARED
+#define YY_EXTRA_TYPE cmExprParserHelper*
+#define YY_DECL int cmExpr_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
 
 #endif

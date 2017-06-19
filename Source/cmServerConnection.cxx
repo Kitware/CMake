@@ -2,10 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServerConnection.h"
 
-#include "cmServerDictionary.h"
-
 #include "cmFileMonitor.h"
 #include "cmServer.h"
+#include "cmServerDictionary.h"
 
 #include <assert.h>
 #include <string.h>

@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include "cmConfigure.h"
+
 #include <functional>
 #include <string>
 #include <vector>
@@ -12,6 +14,8 @@ class cmRootWatcher;
 
 class cmFileMonitor
 {
+  CM_DISABLE_COPY(cmFileMonitor)
+
 public:
   cmFileMonitor(uv_loop_t* l);
   ~cmFileMonitor();
