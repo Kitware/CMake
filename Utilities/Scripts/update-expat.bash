@@ -7,8 +7,8 @@ shopt -s dotglob
 readonly name="expat"
 readonly ownership="Expat Upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmexpat"
-readonly repo="http://git.code.sf.net/p/expat/code_git"
-readonly tag="master"
+readonly repo="https://github.com/libexpat/libexpat.git"
+readonly tag="R_2_2_1"
 readonly shortlog=false
 readonly paths="
   expat/lib/asciitab.h
@@ -22,6 +22,7 @@ readonly paths="
   expat/lib/utf8tab.h
   expat/lib/nametab.h
   expat/lib/ascii.h
+  expat/lib/siphash.h
   expat/lib/xmltok_impl.h
   expat/lib/xmltok_ns.c
   expat/lib/winconfig.h

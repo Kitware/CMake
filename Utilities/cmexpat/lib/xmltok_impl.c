@@ -1198,6 +1198,8 @@ PREFIX(attributeValueTok)(const ENCODING *enc, const char *ptr,
   const char *start;
   if (ptr >= end)
     return XML_TOK_NONE;
+  else if (! HAS_CHAR(enc, ptr, end))
+    return XML_TOK_PARTIAL;
   start = ptr;
   while (HAS_CHAR(enc, ptr, end)) {
     switch (BYTE_TYPE(enc, ptr)) {
@@ -1256,6 +1258,8 @@ PREFIX(entityValueTok)(const ENCODING *enc, const char *ptr,
   const char *start;
   if (ptr >= end)
     return XML_TOK_NONE;
+  else if (! HAS_CHAR(enc, ptr, end))
+    return XML_TOK_PARTIAL;
   start = ptr;
   while (HAS_CHAR(enc, ptr, end)) {
     switch (BYTE_TYPE(enc, ptr)) {
