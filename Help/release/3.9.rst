@@ -16,6 +16,8 @@ Languages
 * ``CUDA`` is now supported by the :ref:`Visual Studio Generators`
   for VS 2010 and above.  This complements the existing support by the
   :ref:`Makefile Generators` and the :generator:`Ninja` generator.
+  CUDA 8.0.61 or higher is recommended due to known bugs in the VS
+  integration by earlier versions.
 
 Generators
 ----------
