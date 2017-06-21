@@ -15,6 +15,10 @@ set(CMAKE_CUDA_STANDARD 11)
 
 add_library(CUDASeparateLibA STATIC file1.cu file2.cu file3.cu)
 
+if(CMAKE_CUDA_SIMULATE_ID STREQUAL "MSVC")
+  target_compile_options(CUDASeparateLibA PRIVATE -Xcompiler=-bigobj)
+endif()
+
 #Having file4/file5 in a shared library causes serious problems
 #with the nvcc linker and it will generate bad entries that will
 #cause a segv when trying to run the executable

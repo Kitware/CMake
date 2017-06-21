@@ -2523,9 +2523,16 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   cudaOptions.AddTable(gg->GetCudaHostFlagTable());
   cudaOptions.Reparse("AdditionalCompilerOptions");
 
-  // `CUDA 8.0.targets` places these before nvcc!  Just drop whatever
-  // did not parse and hope it works.
-  cudaOptions.RemoveFlag("AdditionalCompilerOptions");
+  // `CUDA 8.0.targets` places AdditionalCompilerOptions before nvcc!
+  // Pass them through -Xcompiler in AdditionalOptions instead.
+  if (const char* acoPtr = cudaOptions.GetFlag("AdditionalCompilerOptions")) {
+    std::string aco = acoPtr;
+    cudaOptions.RemoveFlag("AdditionalCompilerOptions");
+    if (!aco.empty()) {
+      aco = this->LocalGenerator->EscapeForShell(aco, false);
+      cudaOptions.AppendFlag("AdditionalOptions", "-Xcompiler=" + aco);
+    }
+  }
 
   cudaOptions.FixCudaCodeGeneration();
 
