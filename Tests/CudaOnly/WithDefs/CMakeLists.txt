@@ -28,6 +28,7 @@ add_executable(CudaOnlyWithDefs ${main})
 
 target_compile_options(CudaOnlyWithDefs
   PRIVATE
+    -Xcompiler=-DHOST_DEFINE
     $<$<CONFIG:DEBUG>:$<BUILD_INTERFACE:${debug_compile_flags}>>
   )
 

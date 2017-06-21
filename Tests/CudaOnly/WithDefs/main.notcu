@@ -2,6 +2,10 @@
 #include <cuda_runtime.h>
 #include <iostream>
 
+#ifndef HOST_DEFINE
+#error "HOST_DEFINE not defined!"
+#endif
+
 #ifndef PACKED_DEFINE
 #error "PACKED_DEFINE not defined!"
 #endif
