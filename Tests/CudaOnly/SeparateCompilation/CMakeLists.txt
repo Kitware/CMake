@@ -39,8 +39,7 @@ if (CMAKE_GENERATOR MATCHES "^Visual Studio")
                         PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 endif()
 
-if (APPLE)
-  # We need to add the default path to the driver (libcuda.dylib) as an rpath, so that
-  # the static cuda runtime can find it at runtime.
-  target_link_libraries(CudaOnlySeparateCompilation PRIVATE -Wl,-rpath,/usr/local/cuda/lib)
+if(APPLE)
+  # Help the static cuda runtime find the driver (libcuda.dyllib) at runtime.
+  set_property(TARGET CudaOnlySeparateCompilation PROPERTY BUILD_RPATH ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 endif()
