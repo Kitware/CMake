@@ -61,6 +61,21 @@ if(NON_ASCII_BDIR AND WIN32)
 endif()
 
 # -- Test
+# MOC only
+add_executable(mocOnly mocOnlySource/main.cpp mocOnlySource/StyleA.cpp mocOnlySource/StyleB.cpp)
+set_property(TARGET mocOnly PROPERTY AUTOMOC ON)
+target_link_libraries(mocOnly ${QT_LIBRARIES})
+
+# -- Test
+# UIC only
+if(ALLOW_WRAP_CPP)
+  qtx_wrap_cpp(uicOnlyMoc uicOnlySource/uiconly.h)
+  add_executable(uicOnly uicOnlySource/uiconly.cpp ${uicOnlyMoc})
+  set_property(TARGET uicOnly PROPERTY AUTOUIC ON)
+  target_link_libraries(uicOnly ${QT_LIBRARIES})
+endif()
+
+# -- Test
 # RCC only
 add_executable(rccOnly rccOnly.cpp rccOnlyRes.qrc)
 set_property(TARGET rccOnly PROPERTY AUTORCC ON)
@@ -71,15 +86,6 @@ target_link_libraries(rccOnly ${QT_QTCORE_TARGET})
 add_executable(rccEmpty rccEmpty.cpp rccEmptyRes.qrc)
 set_property(TARGET rccEmpty PROPERTY AUTORCC ON)
 target_link_libraries(rccEmpty ${QT_QTCORE_TARGET})
-
-# -- Test
-# UIC only
-if(ALLOW_WRAP_CPP)
-  qtx_wrap_cpp(uicOnlyMoc uicOnlySource/uiconly.h)
-  add_executable(uicOnly uicOnlySource/uiconly.cpp ${uicOnlyMoc})
-  set_property(TARGET uicOnly PROPERTY AUTOUIC ON)
-  target_link_libraries(uicOnly ${QT_LIBRARIES})
-endif()
 
 # -- Test
 # Add not_generated_file.qrc to the source list to get the file-level
