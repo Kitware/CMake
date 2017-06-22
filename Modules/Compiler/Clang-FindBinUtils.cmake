@@ -16,6 +16,7 @@ find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR NAMES
     HINTS ${__clang_hints}
     DOC "LLVM archiver"
 )
+mark_as_advanced(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR)
 
 # http://manpages.ubuntu.com/manpages/precise/en/man1/llvm-ranlib.1.html
 find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_RANLIB NAMES
@@ -23,3 +24,4 @@ find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_RANLIB NAMES
     HINTS ${__clang_hints}
     DOC "Generate index for LLVM archive"
 )
+mark_as_advanced(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_RANLIB)
