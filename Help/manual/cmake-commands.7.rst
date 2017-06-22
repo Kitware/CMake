@@ -44,6 +44,7 @@ These commands are always available.
    /command/get_property
    /command/if
    /command/include
+   /command/include_guard
    /command/list
    /command/macro
    /command/mark_as_advanced
