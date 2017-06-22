@@ -6,7 +6,6 @@ string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=compute_30")
 add_executable(CudaWithC main.c cuda.cu)
 
 if(APPLE)
-  # We need to add the default path to the driver (libcuda.dylib) as an rpath, so that
-  # the static cuda runtime can find it at runtime.
-  target_link_libraries(CudaWithC PRIVATE -Wl,-rpath,/usr/local/cuda/lib)
+  # Help the static cuda runtime find the driver (libcuda.dyllib) at runtime.
+  set_property(TARGET CudaWithC PROPERTY BUILD_RPATH ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 endif()
