@@ -51,5 +51,9 @@ add_library(ResourceLib STATIC lib.cpp lib.rc)
 add_executable(VSResource main.cpp test.rc)
 target_link_libraries(VSResource ResourceLib)
 
+if(MSVC AND NOT MSVC_VERSION VERSION_LESS 1600)
+  set_property(SOURCE test.rc PROPERTY COMPILE_FLAGS /nologo)
+endif()
+
 set_property(TARGET VSResource
   PROPERTY VS_GLOBAL_CMakeTestVsGlobalVariable "test val")
