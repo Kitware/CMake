@@ -3392,6 +3392,9 @@ void cmVisualStudio10TargetGenerator::WriteMidlOptions(
 
 void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
 {
+  if (this->ProjectType == csproj) {
+    return;
+  }
   for (std::vector<std::string>::const_iterator i =
          this->Configurations.begin();
        i != this->Configurations.end(); ++i) {
