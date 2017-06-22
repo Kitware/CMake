@@ -376,3 +376,7 @@ if(CMake_TEST_ANDROID_NDK OR CMake_TEST_ANDROID_STANDALONE_TOOLCHAIN)
   endif()
   set_property(TEST RunCMake.Android PROPERTY TIMEOUT ${CMake_TEST_ANDROID_TIMEOUT})
 endif()
+
+if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^89]|[89][0-9])")
+  add_RunCMake_test(CSharpCustomCommand)
+endif()
