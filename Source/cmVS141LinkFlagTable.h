@@ -38,6 +38,12 @@ static cmVS7FlagTable cmVS141LinkFlagTable[] = {
   { "GenerateDebugInformation", "DEBUG:FASTLINK",
     "Generate Debug Information optimized for faster links", "DebugFastLink",
     cmVS7FlagTable::CaseInsensitive },
+  { "GenerateDebugInformation", "DEBUG:FULL",
+    "Generate Debug Information optimized for sharing and publishing",
+    "DebugFull", cmVS7FlagTable::CaseInsensitive },
+  { "GenerateDebugInformation", "DEBUG:NONE",
+    "Produces no debugging information", "false",
+    cmVS7FlagTable::CaseInsensitive },
   { "GenerateDebugInformation", "DEBUG", "Generate Debug Information", "true",
     cmVS7FlagTable::CaseInsensitive },
 
