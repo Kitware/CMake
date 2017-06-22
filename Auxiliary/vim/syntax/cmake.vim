@@ -203,6 +203,9 @@ syn keyword cmakeKWinclude_directories contained
 syn keyword cmakeKWinclude_external_msproject contained
             \ GUID MAP_IMPORTED_CONFIG_ PLATFORM TYPE WIX
 
+syn keyword cmakeKWinclude_guard contained
+            \ DIRECTORY GLOBAL
+
 syn keyword cmakeKWinstall contained
             \ ARCHIVE BUNDLE CODE COMPONENT CONFIGURATIONS CVS DESTDIR DESTINATION DIRECTORY DIRECTORY_PERMISSIONS DLL EXCLUDE_FROM_ALL EXPORT EXPORT_ANDROID_MK EXPORT_LINK_INTERFACE_LIBRARIES FILES FILES_MATCHING FILE_PERMISSIONS FRAMEWORK GROUP_EXECUTE GROUP_READ GROUP_WRITE IMPORTED_ INCLUDES INSTALL_PREFIX INTERFACE_INCLUDE_DIRECTORIES LIBRARY MACOSX_BUNDLE MESSAGE_NEVER NAMELINK_ONLY NAMELINK_SKIP NAMESPACE NDK OBJECTS OPTIONAL OWNER_EXECUTE OWNER_READ OWNER_WRITE PATTERN PERMISSIONS POST_INSTALL_SCRIPT PRE_INSTALL_SCRIPT PRIVATE_HEADER PROGRAMS PUBLIC_HEADER REGEX RENAME RESOURCE RUNTIME SCRIPT SETGID SETUID SOVERSION TARGETS TRUE USE_SOURCE_PERMISSIONS VERSION WORLD_EXECUTE WORLD_READ WORLD_WRITE
 
@@ -327,7 +330,7 @@ syn keyword cmakeGeneratorExpressions contained
 syn case ignore
 
 syn keyword cmakeCommand
-            \ add_compile_options add_custom_command add_custom_target add_definitions add_dependencies add_executable add_library add_subdirectory add_test aux_source_directory break build_command cmake_host_system_information cmake_minimum_required cmake_parse_arguments cmake_policy configure_file continue create_test_sourcelist ctest_build ctest_configure ctest_coverage ctest_empty_binary_directory ctest_memcheck ctest_read_custom_files ctest_run_script ctest_sleep ctest_start ctest_submit ctest_test ctest_update ctest_upload define_property enable_language enable_testing endfunction endmacro execute_process export file find_file find_library find_package find_path find_program fltk_wrap_ui function get_cmake_property get_directory_property get_filename_component get_property get_source_file_property get_target_property get_test_property include include_directories include_external_msproject include_regular_expression install link_directories list load_cache load_command macro mark_as_advanced math message option project qt_wrap_cpp qt_wrap_ui remove_definitions return separate_arguments set set_directory_properties set_property set_source_files_properties set_target_properties set_tests_properties site_name source_group string target_compile_definitions target_compile_features target_compile_options target_include_directories target_link_libraries target_sources try_compile try_run unset variable_watch
+            \ add_compile_options add_custom_command add_custom_target add_definitions add_dependencies add_executable add_library add_subdirectory add_test aux_source_directory break build_command cmake_host_system_information cmake_minimum_required cmake_parse_arguments cmake_policy configure_file continue create_test_sourcelist ctest_build ctest_configure ctest_coverage ctest_empty_binary_directory ctest_memcheck ctest_read_custom_files ctest_run_script ctest_sleep ctest_start ctest_submit ctest_test ctest_update ctest_upload define_property enable_language enable_testing endfunction endmacro execute_process export file find_file find_library find_package find_path find_program fltk_wrap_ui function get_cmake_property get_directory_property get_filename_component get_property get_source_file_property get_target_property get_test_property include include_directories include_external_msproject include_guard include_regular_expression install link_directories list load_cache load_command macro mark_as_advanced math message option project qt_wrap_cpp qt_wrap_ui remove_definitions return separate_arguments set set_directory_properties set_property set_source_files_properties set_target_properties set_tests_properties site_name source_group string target_compile_definitions target_compile_features target_compile_options target_include_directories target_link_libraries target_sources try_compile try_run unset variable_watch
             \ nextgroup=cmakeArguments
 
 syn keyword cmakeCommandConditional
@@ -420,6 +423,7 @@ hi def link cmakeKWif ModeMsg
 hi def link cmakeKWinclude ModeMsg
 hi def link cmakeKWinclude_directories ModeMsg
 hi def link cmakeKWinclude_external_msproject ModeMsg
+hi def link cmakeKWinclude_guard ModeMsg
 hi def link cmakeKWinstall ModeMsg
 hi def link cmakeKWinstall_files ModeMsg
 hi def link cmakeKWinstall_programs ModeMsg
