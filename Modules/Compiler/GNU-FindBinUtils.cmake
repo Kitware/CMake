@@ -22,6 +22,7 @@ find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR NAMES
     HINTS ${__gcc_hints}
     DOC "A wrapper around 'ar' adding the appropriate '--plugin' option for the GCC compiler"
 )
+mark_as_advanced(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR)
 
 # http://manpages.ubuntu.com/manpages/wily/en/man1/gcc-ranlib.1.html
 find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_RANLIB NAMES
@@ -31,3 +32,4 @@ find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_RANLIB NAMES
     HINTS ${__gcc_hints}
     DOC "A wrapper around 'ranlib' adding the appropriate '--plugin' option for the GCC compiler"
 )
+mark_as_advanced(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_RANLIB)
