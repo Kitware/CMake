@@ -3495,10 +3495,6 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
           ->TargetIsFortranOnly(dt)) {
       continue;
     }
-    if (csproj == this->ProjectType &&
-        !this->GlobalGenerator->TargetIsCSharpOnly(dt)) {
-      continue;
-    }
     this->WriteString("<ProjectReference Include=\"", 2);
     cmLocalGenerator* lg = dt->GetLocalGenerator();
     std::string name = dt->GetName();

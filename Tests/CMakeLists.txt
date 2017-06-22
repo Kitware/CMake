@@ -331,6 +331,7 @@ if(BUILD_TESTING)
 
   if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^89]|[89][0-9])")
     ADD_TEST_MACRO(CSharpOnly CSharpOnly)
+    ADD_TEST_MACRO(CSharpLinkToCxx CSharpLinkToCxx)
   endif()
 
   ADD_TEST_MACRO(COnly COnly)
