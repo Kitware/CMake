@@ -36,9 +36,9 @@ static cmVS7FlagTable cmVS141LinkFlagTable[] = {
     "requireAdministrator", "RequireAdministrator", 0 },
 
   { "GenerateDebugInformation", "DEBUG:FASTLINK",
-    "Optimize for faster linking", "DebugFastLink",
+    "Generate Debug Information optimized for faster links", "DebugFastLink",
     cmVS7FlagTable::CaseInsensitive },
-  { "GenerateDebugInformation", "DEBUG", "Optimize for debugging", "Debug",
+  { "GenerateDebugInformation", "DEBUG", "Generate Debug Information", "Debug",
     cmVS7FlagTable::CaseInsensitive },
 
   { "SubSystem", "", "Not Set", "NotSet", 0 },
