@@ -1,4 +1,4 @@
-static cmVS7FlagTable cmVS14LinkFlagTable[] = {
+static cmVS7FlagTable cmVS140LinkFlagTable[] = {
 
   // Enum Properties
   { "ShowProgress", "", "Not Set", "NotSet", 0 },

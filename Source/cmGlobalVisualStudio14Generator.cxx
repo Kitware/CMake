@@ -8,8 +8,8 @@
 #include "cmMakefile.h"
 #include "cmVS140CLFlagTable.h"
 #include "cmVS140CSharpFlagTable.h"
+#include "cmVS140LinkFlagTable.h"
 #include "cmVS14LibFlagTable.h"
-#include "cmVS14LinkFlagTable.h"
 #include "cmVS14MASMFlagTable.h"
 #include "cmVS14RCFlagTable.h"
 
@@ -93,7 +93,7 @@ cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
   this->DefaultClFlagTable = cmVS140CLFlagTable;
   this->DefaultCSharpFlagTable = cmVS140CSharpFlagTable;
   this->DefaultLibFlagTable = cmVS14LibFlagTable;
-  this->DefaultLinkFlagTable = cmVS14LinkFlagTable;
+  this->DefaultLinkFlagTable = cmVS140LinkFlagTable;
   this->DefaultMasmFlagTable = cmVS14MASMFlagTable;
   this->DefaultRcFlagTable = cmVS14RCFlagTable;
   this->Version = VS14;
