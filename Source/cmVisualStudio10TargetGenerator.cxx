@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVisualStudio10TargetGenerator.h"
 
+#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
@@ -2241,10 +2242,27 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       this->Name.c_str());
     return false;
   }
-  if (linkLanguage == "C" || linkLanguage == "CXX" ||
-      linkLanguage == "Fortran" || linkLanguage == "CSharp") {
+
+  // Choose a language whose flags to use for ClCompile.
+  static const char* clLangs[] = { "CXX", "C", "Fortran", "CSharp" };
+  std::string langForClCompile;
+  if (std::find(cmArrayBegin(clLangs), cmArrayEnd(clLangs), linkLanguage) !=
+      cmArrayEnd(clLangs)) {
+    langForClCompile = linkLanguage;
+  } else {
+    std::set<std::string> languages;
+    this->GeneratorTarget->GetLanguages(languages, configName);
+    for (const char* const* l = cmArrayBegin(clLangs);
+         l != cmArrayEnd(clLangs); ++l) {
+      if (languages.find(*l) != languages.end()) {
+        langForClCompile = *l;
+        break;
+      }
+    }
+  }
+  if (!langForClCompile.empty()) {
     std::string baseFlagVar = "CMAKE_";
-    baseFlagVar += linkLanguage;
+    baseFlagVar += langForClCompile;
     baseFlagVar += "_FLAGS";
     flags =
       this->GeneratorTarget->Target->GetMakefile()->GetRequiredDefinition(
@@ -2255,6 +2273,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     flags +=
       this->GeneratorTarget->Target->GetMakefile()->GetRequiredDefinition(
         flagVar.c_str());
+    this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
+                                            langForClCompile, configName);
   }
   // set the correct language
   if (linkLanguage == "C") {
@@ -2262,10 +2282,6 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   }
   if (linkLanguage == "CXX") {
     clOptions.AddFlag("CompileAs", "CompileAsCpp");
-  }
-  if (linkLanguage != "CUDA") {
-    this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
-                                            linkLanguage, configName.c_str());
   }
 
   // Check IPO related warning/error.
@@ -2500,6 +2516,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
     std::string(this->Makefile->GetSafeDefinition("CMAKE_CUDA_FLAGS")) +
     std::string(" ") +
     std::string(this->Makefile->GetSafeDefinition(configFlagsVar));
+  this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget, "CUDA",
+                                          configName);
 
   // Get preprocessor definitions for this directory.
   std::string defineFlags =
@@ -2525,9 +2543,16 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   cudaOptions.AddTable(gg->GetCudaHostFlagTable());
   cudaOptions.Reparse("AdditionalCompilerOptions");
 
-  // `CUDA 8.0.targets` places these before nvcc!  Just drop whatever
-  // did not parse and hope it works.
-  cudaOptions.RemoveFlag("AdditionalCompilerOptions");
+  // `CUDA 8.0.targets` places AdditionalCompilerOptions before nvcc!
+  // Pass them through -Xcompiler in AdditionalOptions instead.
+  if (const char* acoPtr = cudaOptions.GetFlag("AdditionalCompilerOptions")) {
+    std::string aco = acoPtr;
+    cudaOptions.RemoveFlag("AdditionalCompilerOptions");
+    if (!aco.empty()) {
+      aco = this->LocalGenerator->EscapeForShell(aco, false);
+      cudaOptions.AppendFlag("AdditionalOptions", "-Xcompiler=" + aco);
+    }
+  }
 
   cudaOptions.FixCudaCodeGeneration();
 
