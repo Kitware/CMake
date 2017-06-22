@@ -29,6 +29,8 @@ command to integrate a merge request.  Please check at least the following:
 * If a commit fixes a tracked issue, its commit message should have
   a trailing line such as ``Fixes: #00000``.
 
+* Ensure that the MR adds sufficient documentation and test cases.
+
 * Ensure that the MR has been tested sufficiently.  Typically it should
   be staged for nightly testing with ``Do: stage``.  Then manually
   review the `CMake CDash Page`_ to verify that no regressions were
