@@ -238,6 +238,36 @@ bool cmCTestSetTestsPropertiesCommand::InitialPass(
   return this->TestHandler->SetTestsProperties(args);
 }
 
+class cmCTestSetDirectoryPropertiesCommand : public cmCommand
+{
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  cmCommand* Clone() CM_OVERRIDE
+  {
+    cmCTestSetDirectoryPropertiesCommand* c =
+      new cmCTestSetDirectoryPropertiesCommand;
+    c->TestHandler = this->TestHandler;
+    return c;
+  }
+
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+  */
+  bool InitialPass(std::vector<std::string> const& /*unused*/,
+                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
+
+  cmCTestTestHandler* TestHandler;
+};
+
+bool cmCTestSetDirectoryPropertiesCommand::InitialPass(
+  std::vector<std::string> const& args, cmExecutionStatus&)
+{
+  return this->TestHandler->SetDirectoryProperties(args);
+}
+
 // get the next number in a string with numbers separated by ,
 // pos is the start of the search and pos2 is the end of the search
 // pos becomes pos2 after a call to GetNextNumber.
@@ -1661,6 +1691,12 @@ void cmCTestTestHandler::GetListOfTests()
   newCom4->TestHandler = this;
   cm.GetState()->AddBuiltinCommand("set_tests_properties", newCom4);
 
+  // Add handler for SET_DIRECTORY_PROPERTIES
+  cmCTestSetDirectoryPropertiesCommand* newCom5 =
+    new cmCTestSetDirectoryPropertiesCommand;
+  newCom5->TestHandler = this;
+  cm.GetState()->AddBuiltinCommand("set_directory_properties", newCom5);
+
   const char* testFilename;
   if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
     // does the CTestTestfile.cmake exist ?
@@ -2172,7 +2208,16 @@ bool cmCTestTestHandler::SetTestsProperties(
             cmSystemTools::ExpandListArgument(val, rtit->Environment);
           }
           if (key == "LABELS") {
-            cmSystemTools::ExpandListArgument(val, rtit->Labels);
+            std::vector<std::string> Labels;
+            cmSystemTools::ExpandListArgument(val, Labels);
+            rtit->Labels.insert(rtit->Labels.end(), Labels.begin(),
+                                Labels.end());
+            // sort the array
+            std::sort(rtit->Labels.begin(), rtit->Labels.end());
+            // remove duplicates
+            std::vector<std::string>::iterator new_end =
+              std::unique(rtit->Labels.begin(), rtit->Labels.end());
+            rtit->Labels.erase(new_end, rtit->Labels.end());
           }
           if (key == "MEASUREMENT") {
             size_t pos = val.find_first_of('=');
@@ -2218,6 +2263,54 @@ bool cmCTestTestHandler::SetTestsProperties(
               }
             }
           }
+        }
+      }
+    }
+  }
+  return true;
+}
+
+bool cmCTestTestHandler::SetDirectoryProperties(
+  const std::vector<std::string>& args)
+{
+  std::vector<std::string>::const_iterator it;
+  std::vector<std::string> tests;
+  bool found = false;
+  for (it = args.begin(); it != args.end(); ++it) {
+    if (*it == "PROPERTIES") {
+      found = true;
+      break;
+    }
+    tests.push_back(*it);
+  }
+
+  if (!found) {
+    return false;
+  }
+  ++it; // skip PROPERTIES
+  for (; it != args.end(); ++it) {
+    std::string key = *it;
+    ++it;
+    if (it == args.end()) {
+      break;
+    }
+    std::string val = *it;
+    cmCTestTestHandler::ListOfTests::iterator rtit;
+    for (rtit = this->TestList.begin(); rtit != this->TestList.end(); ++rtit) {
+      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+      if (cwd == rtit->Directory) {
+        if (key == "LABELS") {
+          std::vector<std::string> DirectoryLabels;
+          cmSystemTools::ExpandListArgument(val, DirectoryLabels);
+          rtit->Labels.insert(rtit->Labels.end(), DirectoryLabels.begin(),
+                              DirectoryLabels.end());
+
+          // sort the array
+          std::sort(rtit->Labels.begin(), rtit->Labels.end());
+          // remove duplicates
+          std::vector<std::string>::iterator new_end =
+            std::unique(rtit->Labels.begin(), rtit->Labels.end());
+          rtit->Labels.erase(new_end, rtit->Labels.end());
         }
       }
     }

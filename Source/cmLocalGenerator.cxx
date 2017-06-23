@@ -277,6 +277,25 @@ void cmLocalGenerator::GenerateTestFiles()
     outP = cmOutputConverter::EscapeForCMake(outP);
     fout << "subdirs(" << outP << ")" << std::endl;
   }
+
+  // Add directory labels property
+  const char* directoryLabels =
+    this->Makefile->GetDefinition("CMAKE_DIRECTORY_LABELS");
+  const char* labels = this->Makefile->GetProperty("LABELS");
+
+  if (labels || directoryLabels) {
+    fout << "set_directory_properties(PROPERTIES LABELS ";
+    if (labels) {
+      fout << cmOutputConverter::EscapeForCMake(labels);
+    }
+    if (labels && directoryLabels) {
+      fout << ";";
+    }
+    if (directoryLabels) {
+      fout << cmOutputConverter::EscapeForCMake(directoryLabels);
+    }
+    fout << ")" << std::endl;
+  }
 }
 
 void cmLocalGenerator::CreateEvaluationFileOutputs(std::string const& config)
@@ -327,6 +346,7 @@ void cmLocalGenerator::GenerateInstallRules()
 {
   // Compute the install prefix.
   const char* prefix = this->Makefile->GetDefinition("CMAKE_INSTALL_PREFIX");
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
   std::string prefix_win32;
   if (!prefix) {

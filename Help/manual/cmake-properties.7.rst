@@ -74,6 +74,7 @@ Properties on Directories
    /prop_dir/INCLUDE_REGULAR_EXPRESSION
    /prop_dir/INTERPROCEDURAL_OPTIMIZATION_CONFIG
    /prop_dir/INTERPROCEDURAL_OPTIMIZATION
+   /prop_dir/LABELS
    /prop_dir/LINK_DIRECTORIES
    /prop_dir/LISTFILE_STACK
    /prop_dir/MACROS
