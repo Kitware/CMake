@@ -253,6 +253,7 @@ std::string cmCTest::DecodeURL(const std::string& in)
 cmCTest::cmCTest()
 {
   this->LabelSummary = true;
+  this->SubprojectSummary = true;
   this->ParallelLevel = 1;
   this->ParallelLevelSetInCli = false;
   this->TestLoad = 0;
@@ -1793,6 +1794,9 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   }
   if (this->CheckArgument(arg, "--no-label-summary")) {
     this->LabelSummary = false;
+  }
+  if (this->CheckArgument(arg, "--no-subproject-summary")) {
+    this->SubprojectSummary = false;
   }
   if (this->CheckArgument(arg, "-Q", "--quiet")) {
     this->Quiet = true;

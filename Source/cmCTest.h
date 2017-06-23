@@ -438,7 +438,9 @@ public:
     this->StreamErr = err;
   }
   void AddSiteProperties(cmXMLWriter& xml);
+
   bool GetLabelSummary() { return this->LabelSummary; }
+  bool GetSubprojectSummary() { return this->SubprojectSummary; }
 
   std::string GetCostDataFile();
 
@@ -467,6 +469,7 @@ private:
   bool ExtraVerbose;
   bool ProduceXML;
   bool LabelSummary;
+  bool SubprojectSummary;
   bool UseHTTP10;
   bool PrintLabels;
   bool Failover;

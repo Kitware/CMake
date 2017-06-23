@@ -232,6 +232,8 @@ private:
   virtual void GenerateDartOutput(cmXMLWriter& xml);
 
   void PrintLabelSummary();
+  void PrintSubprojectSummary();
+
   /**
    * Run the tests for a directory and any subdirectories
    */

@@ -250,6 +250,13 @@ Options
  label associated with the tests run.  If there are no labels on the
  tests, nothing extra is printed.
 
+ ``--no-subproject-summary``
+ Disable timing summary information for subprojects.
+
+ This option tells ctest not to print summary information for each
+ subproject associated with the tests run.  If there are no subprojects on the
+ tests, nothing extra is printed.
+
 ``--build-and-test <path-to-source> <path-to-build>``
  Configure, build and run a test.
 
