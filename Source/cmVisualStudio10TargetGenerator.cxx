@@ -2530,7 +2530,7 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
     cudaOptions.RemoveFlag("AdditionalCompilerOptions");
     if (!aco.empty()) {
       aco = this->LocalGenerator->EscapeForShell(aco, false);
-      cudaOptions.AppendFlag("AdditionalOptions", "-Xcompiler=" + aco);
+      cudaOptions.AppendFlagString("AdditionalOptions", "-Xcompiler=" + aco);
     }
   }
 
@@ -2619,8 +2619,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
   // Suppress deprecation warnings for default GPU targets during device link.
   if (cmSystemTools::VersionCompareGreaterEq(
         this->GlobalGenerator->GetPlatformToolsetCudaString(), "8.0")) {
-    cudaLinkOptions.AppendFlag("AdditionalOptions",
-                               "-Wno-deprecated-gpu-targets");
+    cudaLinkOptions.AppendFlagString("AdditionalOptions",
+                                     "-Wno-deprecated-gpu-targets");
   }
 
   this->CudaLinkOptions[configName] = pOptions.release();
