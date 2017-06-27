@@ -1277,6 +1277,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
   }
 
   this->CTest->StartXML(xml, this->AppendXML);
+  this->CTest->GenerateSubprojectsOutput(xml);
   xml.StartElement("Testing");
   xml.Element("StartDateTime", this->StartTest);
   xml.Element("StartTestTime", this->StartTestTime);

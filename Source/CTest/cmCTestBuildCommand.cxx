@@ -153,6 +153,12 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
                                        this->Quiet);
   }
 
+  if (const char* labelsForSubprojects =
+        this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
+    this->CTest->SetCTestConfiguration("LabelsForSubprojects",
+                                       labelsForSubprojects, this->Quiet);
+  }
+
   handler->SetQuiet(this->Quiet);
   return handler;
 }

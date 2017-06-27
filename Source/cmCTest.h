@@ -453,6 +453,9 @@ public:
   /** Return true if test should run until fail */
   bool GetRepeatUntilFail() { return this->RepeatUntilFail; }
 
+  void GenerateSubprojectsOutput(cmXMLWriter& xml);
+  std::vector<std::string> GetLabelsForSubprojects();
+
 private:
   int RepeatTests;
   bool RepeatUntilFail;

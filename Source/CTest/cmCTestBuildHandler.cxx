@@ -488,6 +488,7 @@ int cmCTestBuildHandler::ProcessHandler()
 void cmCTestBuildHandler::GenerateXMLHeader(cmXMLWriter& xml)
 {
   this->CTest->StartXML(xml, this->AppendXML);
+  this->CTest->GenerateSubprojectsOutput(xml);
   xml.StartElement("Build");
   xml.Element("StartDateTime", this->StartBuild);
   xml.Element("StartBuildTime",
