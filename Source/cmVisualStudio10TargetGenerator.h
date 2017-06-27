@@ -127,6 +127,16 @@ private:
   void OutputLinkIncremental(std::string const& configName);
   void WriteCustomRule(cmSourceFile const* source,
                        cmCustomCommand const& command);
+  void WriteCustomRuleCpp(std::string const& config, std::string const& script,
+                          std::string const& inputs,
+                          std::string const& outputs,
+                          std::string const& comment);
+  void WriteCustomRuleCSharp(std::string const& config,
+                             std::string const& commandName,
+                             std::string const& script,
+                             std::string const& inputs,
+                             std::string const& outputs,
+                             std::string const& comment);
   void WriteCustomCommands();
   void WriteCustomCommand(cmSourceFile const* sf);
   void WriteGroups();
@@ -158,6 +168,7 @@ private:
                                  std::map<std::string, std::string>& tags);
   void WriteCSharpSourceProperties(
     const std::map<std::string, std::string>& tags);
+  void GetCSharpSourceLink(cmSourceFile const* sf, std::string& link);
 
 private:
   typedef cmVisualStudioGeneratorOptions Options;
@@ -193,6 +204,7 @@ private:
   cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio7Generator* LocalGenerator;
   std::set<cmSourceFile const*> SourcesVisited;
+  std::set<std::string> CSharpCustomCommandNames;
   bool IsMissingFiles;
   std::vector<std::string> AddedFiles;
   std::string DefaultArtifactDir;

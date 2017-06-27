@@ -27,6 +27,12 @@ static std::string cmVS10EscapeXML(std::string arg)
   return arg;
 }
 
+static std::string cmVS10EscapeQuotes(std::string arg)
+{
+  cmSystemTools::ReplaceString(arg, "\"", "&quot;");
+  return arg;
+}
+
 static std::string cmVS10EscapeComment(std::string comment)
 {
   // MSBuild takes the CDATA of a <Message></Message> element and just
@@ -578,6 +584,18 @@ void cmVisualStudio10TargetGenerator::Generate()
       this->WriteEvents(*i);
       this->WriteString("</PropertyGroup>\n", 1);
     }
+    // make sure custom commands are executed before build (if necessary)
+    this->WriteString("<PropertyGroup>\n", 1);
+    this->WriteString("<BuildDependsOn>\n", 2);
+    for (std::set<std::string>::const_iterator i =
+           this->CSharpCustomCommandNames.begin();
+         i != this->CSharpCustomCommandNames.end(); ++i) {
+      this->WriteString(i->c_str(), 3);
+      (*this->BuildFileStream) << ";\n";
+    }
+    this->WriteString("$(BuildDependsOn)\n", 3);
+    this->WriteString("</BuildDependsOn>\n", 2);
+    this->WriteString("</PropertyGroup>\n", 1);
   }
   this->WriteString("</Project>", 0);
   // The groups are stored in a separate file for VS 10
@@ -1151,6 +1169,7 @@ void cmVisualStudio10TargetGenerator::WriteNsightTegraConfigurationValues(
 void cmVisualStudio10TargetGenerator::WriteCustomCommands()
 {
   this->SourcesVisited.clear();
+  this->CSharpCustomCommandNames.clear();
   std::vector<cmSourceFile const*> customCommands;
   this->GeneratorTarget->GetCustomCommands(customCommands, "");
   for (std::vector<cmSourceFile const*>::const_iterator si =
@@ -1172,9 +1191,14 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommand(
       }
     }
     if (cmCustomCommand const* command = sf->GetCustomCommand()) {
-      this->WriteString("<ItemGroup>\n", 1);
+      // C# projects write their <Target> within WriteCustomRule()
+      if (this->ProjectType != csproj) {
+        this->WriteString("<ItemGroup>\n", 1);
+      }
       this->WriteCustomRule(sf, *command);
-      this->WriteString("</ItemGroup>\n", 1);
+      if (this->ProjectType != csproj) {
+        this->WriteString("</ItemGroup>\n", 1);
+      }
     }
   }
 }
@@ -1209,8 +1233,20 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
   }
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
 
-  this->WriteSource("CustomBuild", source, ">\n");
-
+  if (this->ProjectType != csproj) {
+    this->WriteSource("CustomBuild", source, ">\n");
+  } else {
+    this->WriteString("<ItemGroup>\n", 1);
+    std::string link;
+    this->GetCSharpSourceLink(source, link);
+    this->WriteSource("None", source, ">\n");
+    if (!link.empty()) {
+      this->WriteString("<Link>", 3);
+      (*this->BuildFileStream) << link << "</Link>\n";
+    }
+    this->WriteString("</None>\n", 2);
+    this->WriteString("</ItemGroup>\n", 1);
+  }
   for (std::vector<std::string>::const_iterator i =
          this->Configurations.begin();
        i != this->Configurations.end(); ++i) {
@@ -1218,41 +1254,91 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     std::string comment = lg->ConstructComment(ccg);
     comment = cmVS10EscapeComment(comment);
     std::string script = cmVS10EscapeXML(lg->ConstructScript(ccg));
-    this->WritePlatformConfigTag("Message", i->c_str(), 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(comment) << "</Message>\n";
-    this->WritePlatformConfigTag("Command", i->c_str(), 3);
-    (*this->BuildFileStream) << script << "</Command>\n";
-    this->WritePlatformConfigTag("AdditionalInputs", i->c_str(), 3);
-
-    (*this->BuildFileStream) << cmVS10EscapeXML(source->GetFullPath());
+    // input files for custom command
+    std::stringstream inputs;
+    inputs << cmVS10EscapeXML(source->GetFullPath());
     for (std::vector<std::string>::const_iterator d = ccg.GetDepends().begin();
          d != ccg.GetDepends().end(); ++d) {
       std::string dep;
       if (this->LocalGenerator->GetRealDependency(d->c_str(), i->c_str(),
                                                   dep)) {
         this->ConvertToWindowsSlash(dep);
-        (*this->BuildFileStream) << ";" << cmVS10EscapeXML(dep);
+        inputs << ";" << cmVS10EscapeXML(dep);
       }
     }
-    (*this->BuildFileStream) << ";%(AdditionalInputs)</AdditionalInputs>\n";
-    this->WritePlatformConfigTag("Outputs", i->c_str(), 3);
+    // output files for custom command
+    std::stringstream outputs;
     const char* sep = "";
     for (std::vector<std::string>::const_iterator o = ccg.GetOutputs().begin();
          o != ccg.GetOutputs().end(); ++o) {
       std::string out = *o;
       this->ConvertToWindowsSlash(out);
-      (*this->BuildFileStream) << sep << cmVS10EscapeXML(out);
+      outputs << sep << cmVS10EscapeXML(out);
       sep = ";";
     }
-    (*this->BuildFileStream) << "</Outputs>\n";
-    if (this->LocalGenerator->GetVersion() >
-        cmGlobalVisualStudioGenerator::VS10) {
-      // VS >= 11 let us turn off linking of custom command outputs.
-      this->WritePlatformConfigTag("LinkObjects", i->c_str(), 3);
-      (*this->BuildFileStream) << "false</LinkObjects>\n";
+    if (this->ProjectType == csproj) {
+      std::string name = "CustomCommand_" + *i + "_" +
+        cmSystemTools::ComputeStringMD5(sourcePath);
+      std::string inputs_s = inputs.str();
+      std::string outputs_s = outputs.str();
+      comment = cmVS10EscapeQuotes(comment);
+      script = cmVS10EscapeQuotes(script);
+      inputs_s = cmVS10EscapeQuotes(inputs_s);
+      outputs_s = cmVS10EscapeQuotes(outputs_s);
+      this->WriteCustomRuleCSharp(*i, name, script, inputs_s, outputs_s,
+                                  comment);
+    } else {
+      this->WriteCustomRuleCpp(*i, script, inputs.str(), outputs.str(),
+                               comment);
     }
   }
-  this->WriteString("</CustomBuild>\n", 2);
+  if (this->ProjectType != csproj) {
+    this->WriteString("</CustomBuild>\n", 2);
+  }
+}
+
+void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
+  std::string const& config, std::string const& script,
+  std::string const& inputs, std::string const& outputs,
+  std::string const& comment)
+{
+  this->WritePlatformConfigTag("Message", config, 3);
+  (*this->BuildFileStream) << cmVS10EscapeXML(comment) << "</Message>\n";
+  this->WritePlatformConfigTag("Command", config, 3);
+  (*this->BuildFileStream) << script << "</Command>\n";
+  this->WritePlatformConfigTag("AdditionalInputs", config, 3);
+  (*this->BuildFileStream) << inputs;
+  (*this->BuildFileStream) << ";%(AdditionalInputs)</AdditionalInputs>\n";
+  this->WritePlatformConfigTag("Outputs", config, 3);
+  (*this->BuildFileStream) << outputs << "</Outputs>\n";
+  if (this->LocalGenerator->GetVersion() >
+      cmGlobalVisualStudioGenerator::VS10) {
+    // VS >= 11 let us turn off linking of custom command outputs.
+    this->WritePlatformConfigTag("LinkObjects", config, 3);
+    (*this->BuildFileStream) << "false</LinkObjects>\n";
+  }
+}
+
+void cmVisualStudio10TargetGenerator::WriteCustomRuleCSharp(
+  std::string const& config, std::string const& name,
+  std::string const& script, std::string const& inputs,
+  std::string const& outputs, std::string const& comment)
+{
+  this->CSharpCustomCommandNames.insert(name);
+  std::stringstream attributes;
+  attributes << "\n    Name=\"" << name << "\"";
+  attributes << "\n    Inputs=\"" << inputs << "\"";
+  attributes << "\n    Outputs=\"" << outputs << "\"";
+  this->WritePlatformConfigTag("Target", config, 1, attributes.str().c_str(),
+                               "\n");
+  if (!comment.empty()) {
+    this->WriteString("<Exec Command=\"", 2);
+    (*this->BuildFileStream) << "echo " << cmVS10EscapeXML(comment)
+                             << "\" />\n";
+  }
+  this->WriteString("<Exec Command=\"", 2);
+  (*this->BuildFileStream) << script << "\" />\n";
+  this->WriteString("</Target>\n", 1);
 }
 
 std::string cmVisualStudio10TargetGenerator::ConvertPath(
@@ -2044,14 +2130,10 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     typedef std::map<std::string, std::string> CsPropMap;
     CsPropMap sourceFileTags;
     // set <Link> tag if necessary
-    if (!this->InSourceBuild) {
-      const std::string stripFromPath =
-        this->Makefile->GetCurrentSourceDirectory();
-      if (f.find(stripFromPath) != std::string::npos) {
-        std::string link = f.substr(stripFromPath.length() + 1);
-        this->ConvertToWindowsSlash(link);
-        sourceFileTags["Link"] = link;
-      }
+    std::string link;
+    this->GetCSharpSourceLink(source, link);
+    if (!link.empty()) {
+      sourceFileTags["Link"] = link;
     }
     this->GetCSharpSourceProperties(&sf, sourceFileTags);
     // write source file specific tags
@@ -4364,6 +4446,23 @@ void cmVisualStudio10TargetGenerator::WriteCSharpSourceProperties(
       this->WriteString("<", 3);
       (*this->BuildFileStream) << i->first << ">" << cmVS10EscapeXML(i->second)
                                << "</" << i->first << ">\n";
+    }
+  }
+}
+
+void cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
+  cmSourceFile const* sf, std::string& link)
+{
+  std::string f = sf->GetFullPath();
+  if (!this->InSourceBuild) {
+    const std::string stripFromPath =
+      this->Makefile->GetCurrentSourceDirectory();
+    if (f.find(stripFromPath) != std::string::npos) {
+      link = f.substr(stripFromPath.length() + 1);
+      if (const char* l = sf->GetProperty("VS_CSHARP_Link")) {
+        link = l;
+      }
+      this->ConvertToWindowsSlash(link);
     }
   }
 }
