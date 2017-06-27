@@ -389,10 +389,10 @@ macro(_Doxygen_find_doxygen)
             COMMAND "${DOXYGEN_EXECUTABLE}" --version
             OUTPUT_VARIABLE DOXYGEN_VERSION
             OUTPUT_STRIP_TRAILING_WHITESPACE
-            RESULT_VARIABLE result
+            RESULT_VARIABLE _Doxygen_version_result
         )
-        if(result)
-            message(WARNING "Unable to determine doxygen version: ${result}")
+        if(_Doxygen_version_result)
+            message(WARNING "Unable to determine doxygen version: ${_Doxygen_version_result}")
         endif()
 
         # Create an imported target for Doxygen
@@ -623,11 +623,11 @@ if(TARGET Doxygen::doxygen)
     execute_process(
         COMMAND "${DOXYGEN_EXECUTABLE}" -s -g "${_Doxygen_tpl}"
         OUTPUT_QUIET
-        RESULT_VARIABLE result
+        RESULT_VARIABLE _Doxygen_tpl_result
     )
-    if(result)
+    if(_Doxygen_tpl_result)
         message(FATAL_ERROR
-                "Unable to generate Doxyfile template: ${result}")
+                "Unable to generate Doxyfile template: ${_Doxygen_tpl_result}")
     elseif(NOT EXISTS "${_Doxygen_tpl}")
         message(FATAL_ERROR
                 "Doxygen has failed to generate a Doxyfile template")
