@@ -4190,6 +4190,23 @@ bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
 const char* cmMakefile::CompileFeaturesAvailable(const std::string& lang,
                                                  std::string* error) const
 {
+  if (!this->GlobalGenerator->GetLanguageEnabled(lang)) {
+    std::ostringstream e;
+    if (error) {
+      e << "cannot";
+    } else {
+      e << "Cannot";
+    }
+    e << " use features from non-enabled language " << lang;
+    if (error) {
+      *error = e.str();
+    } else {
+      this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                                             this->Backtrace);
+    }
+    return CM_NULLPTR;
+  }
+
   const char* featuresKnown =
     this->GetDefinition("CMAKE_" + lang + "_COMPILE_FEATURES");
 
@@ -4201,9 +4218,9 @@ const char* cmMakefile::CompileFeaturesAvailable(const std::string& lang,
       e << "No";
     }
     e << " known features for " << lang << " compiler\n\""
-      << this->GetDefinition("CMAKE_" + lang + "_COMPILER_ID")
+      << this->GetSafeDefinition("CMAKE_" + lang + "_COMPILER_ID")
       << "\"\nversion "
-      << this->GetDefinition("CMAKE_" + lang + "_COMPILER_VERSION") << ".";
+      << this->GetSafeDefinition("CMAKE_" + lang + "_COMPILER_VERSION") << ".";
     if (error) {
       *error = e.str();
     } else {

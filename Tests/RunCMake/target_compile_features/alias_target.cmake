@@ -1,3 +1,4 @@
+enable_language(CXX)
 
 add_executable(main empty.cpp)
 add_executable(Alias::Main ALIAS main)
