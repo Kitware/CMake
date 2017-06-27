@@ -170,6 +170,13 @@ foreach(_var
   set(_CMAKE_ASM_${_var} "${CMAKE_ASM${ASM_DIALECT}_${_var}}")
 endforeach()
 
+if(CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID)
+  set(_SET_CMAKE_ASM_COMPILER_ARCHITECTURE_ID
+    "set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID ${CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID})")
+else()
+  set(_SET_CMAKE_ASM_COMPILER_ARCHITECTURE_ID "")
+endif()
+
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeASMCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeASM${ASM_DIALECT}Compiler.cmake @ONLY)
