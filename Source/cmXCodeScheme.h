@@ -26,8 +26,6 @@ public:
 private:
   const cmXCodeObject* const Target;
   const std::string& TargetName;
-  const std::string BuildableName;
-  const std::string& TargetId;
   const std::vector<std::string>& ConfigList;
   const unsigned int XcodeVersion;
 
@@ -40,6 +38,9 @@ private:
   void WriteProfileAction(cmXMLWriter& xout, std::string configuration);
   void WriteAnalyzeAction(cmXMLWriter& xout, std::string configuration);
   void WriteArchiveAction(cmXMLWriter& xout, std::string configuration);
+
+  void WriteBuildableReference(cmXMLWriter& xout, const cmXCodeObject* xcObj,
+                               const std::string& container);
 
   std::string WriteVersionString();
   std::string FindConfiguration(const std::string& name);

@@ -15,8 +15,6 @@ cmXCodeScheme::cmXCodeScheme(cmXCodeObject* xcObj,
                              unsigned int xcVersion)
   : Target(xcObj)
   , TargetName(xcObj->GetTarget()->GetName())
-  , BuildableName(xcObj->GetTarget()->GetFullName())
-  , TargetId(xcObj->GetId())
   , ConfigList(configList)
   , XcodeVersion(xcVersion)
 {
@@ -84,14 +82,7 @@ void cmXCodeScheme::WriteBuildAction(cmXMLWriter& xout,
   xout.Attribute("buildForArchiving", "YES");
   xout.Attribute("buildForAnalyzing", "YES");
 
-  xout.StartElement("BuildableReference");
-  xout.BreakAttributes();
-  xout.Attribute("BuildableIdentifier", "primary");
-  xout.Attribute("BlueprintIdentifier", this->TargetId);
-  xout.Attribute("BuildableName", this->BuildableName);
-  xout.Attribute("BlueprintName", this->TargetName);
-  xout.Attribute("ReferencedContainer", "container:" + container);
-  xout.EndElement();
+  WriteBuildableReference(xout, this->Target, container);
 
   xout.EndElement(); // BuildActionEntry
   xout.EndElement(); // BuildActionEntries
@@ -146,14 +137,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
     xout.StartElement("MacroExpansion");
   }
 
-  xout.StartElement("BuildableReference");
-  xout.BreakAttributes();
-  xout.Attribute("BuildableIdentifier", "primary");
-  xout.Attribute("BlueprintIdentifier", this->TargetId);
-  xout.Attribute("BuildableName", this->BuildableName);
-  xout.Attribute("BlueprintName", this->TargetName);
-  xout.Attribute("ReferencedContainer", "container:" + container);
-  xout.EndElement();
+  WriteBuildableReference(xout, this->Target, container);
 
   xout.EndElement(); // MacroExpansion
 
@@ -192,6 +176,20 @@ void cmXCodeScheme::WriteArchiveAction(cmXMLWriter& xout,
   xout.BreakAttributes();
   xout.Attribute("buildConfiguration", configuration);
   xout.Attribute("revealArchiveInOrganizer", "YES");
+  xout.EndElement();
+}
+
+void cmXCodeScheme::WriteBuildableReference(cmXMLWriter& xout,
+                                            const cmXCodeObject* xcObj,
+                                            const std::string& container)
+{
+  xout.StartElement("BuildableReference");
+  xout.BreakAttributes();
+  xout.Attribute("BuildableIdentifier", "primary");
+  xout.Attribute("BlueprintIdentifier", xcObj->GetId());
+  xout.Attribute("BuildableName", xcObj->GetTarget()->GetFullName());
+  xout.Attribute("BlueprintName", xcObj->GetTarget()->GetName());
+  xout.Attribute("ReferencedContainer", "container:" + container);
   xout.EndElement();
 }
 
