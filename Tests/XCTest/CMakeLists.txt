@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(XCTest)
+project(XCTest C)
 enable_testing()
 
 find_package(XCTest REQUIRED)
