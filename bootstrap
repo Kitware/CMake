@@ -330,6 +330,7 @@ CMAKE_CXX_SOURCES="\
   cmHexFileConverter \
   cmIfCommand \
   cmIncludeCommand \
+  cmIncludeGuardCommand \
   cmIncludeDirectoryCommand \
   cmIncludeRegularExpressionCommand \
   cmInstallCommand \

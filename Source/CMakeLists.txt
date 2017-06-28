@@ -469,6 +469,8 @@ set(SRCS
   cmIncludeDirectoryCommand.h
   cmIncludeExternalMSProjectCommand.cxx
   cmIncludeExternalMSProjectCommand.h
+  cmIncludeGuardCommand.cxx
+  cmIncludeGuardCommand.h
   cmIncludeRegularExpressionCommand.cxx
   cmIncludeRegularExpressionCommand.h
   cmInstallCommand.cxx
