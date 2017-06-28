@@ -17,8 +17,6 @@
 
 #include "cm_auto_ptr.hxx"
 
-static std::string const kWINDOWS_7_1_SDK = "Windows7.1SDK";
-
 static std::string cmVS10EscapeXML(std::string arg)
 {
   cmSystemTools::ReplaceString(arg, "&", "&amp;");
@@ -3130,12 +3128,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
       linkOptions.AddFlag("StackReserveSize", stackVal);
     }
 
-    if (this->LocalGenerator->GetVersion() >=
-        cmGlobalVisualStudioGenerator::VS14) {
-      linkOptions.AddFlag("GenerateDebugInformation", "No");
-    } else {
-      linkOptions.AddFlag("GenerateDebugInformation", "false");
-    }
+    linkOptions.AddFlag("GenerateDebugInformation", "false");
 
     std::string pdb = this->GeneratorTarget->GetPDBDirectory(config.c_str());
     pdb += "/";
@@ -3182,26 +3175,14 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
                            "%(IgnoreSpecificDefaultLibraries)");
   }
 
-  // Hack to fix flag version selection in a common use case.
-  // FIXME: Select flag table based on toolset instead of VS version.
-  if (this->LocalGenerator->GetVersion() >=
-      cmGlobalVisualStudioGenerator::VS14) {
-    const char* toolset = gg->GetPlatformToolset();
-    if (toolset &&
-        (toolset == kWINDOWS_7_1_SDK || /* clang-format please break here */
-         cmHasLiteralPrefix(toolset, "v80") ||
-         cmHasLiteralPrefix(toolset, "v90") ||
-         cmHasLiteralPrefix(toolset, "v100") ||
-         cmHasLiteralPrefix(toolset, "v110") ||
-         cmHasLiteralPrefix(toolset, "v120"))) {
-      if (const char* debug =
-            linkOptions.GetFlag("GenerateDebugInformation")) {
-        // Convert value from enumeration back to boolean for older toolsets.
-        if (strcmp(debug, "No") == 0) {
-          linkOptions.AddFlag("GenerateDebugInformation", "false");
-        } else if (strcmp(debug, "Debug") == 0) {
-          linkOptions.AddFlag("GenerateDebugInformation", "true");
-        }
+  // VS 2015 without all updates has a v140 toolset whose
+  // GenerateDebugInformation expects No/Debug instead of false/true.
+  if (gg->GetPlatformToolsetNeedsDebugEnum()) {
+    if (const char* debug = linkOptions.GetFlag("GenerateDebugInformation")) {
+      if (strcmp(debug, "false") == 0) {
+        linkOptions.AddFlag("GenerateDebugInformation", "No");
+      } else if (strcmp(debug, "true") == 0) {
+        linkOptions.AddFlag("GenerateDebugInformation", "Debug");
       }
     }
   }

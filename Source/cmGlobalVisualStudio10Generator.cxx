@@ -130,6 +130,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->DefaultNasmFlagTable = cmVS10NASMFlagTable;
   this->DefaultRcFlagTable = cmVS10RCFlagTable;
   this->Version = VS10;
+  this->PlatformToolsetNeedsDebugEnum = false;
 }
 
 bool cmGlobalVisualStudio10Generator::MatchesGeneratorName(
@@ -193,6 +194,24 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
 
   if (!this->FindVCTargetsPath(mf)) {
     return false;
+  }
+
+  if (cmHasLiteralPrefix(this->GetPlatformToolsetString(), "v140")) {
+    // The GenerateDebugInformation link setting for the v140 toolset
+    // in VS 2015 was originally an enum with "No" and "Debug" values,
+    // differing from the "false" and "true" values used in older toolsets.
+    // A VS 2015 update changed it back.  Parse the "link.xml" file to
+    // discover which one we need.
+    std::string const link_xml = this->VCTargetsPath + "/1033/link.xml";
+    cmsys::ifstream fin(link_xml.c_str());
+    std::string line;
+    while (fin && cmSystemTools::GetLineFromStream(fin, line)) {
+      if (line.find(" Switch=\"DEBUG\" ") != std::string::npos) {
+        this->PlatformToolsetNeedsDebugEnum =
+          line.find(" Name=\"Debug\" ") != std::string::npos;
+        break;
+      }
+    }
   }
 
   if (this->GeneratorToolsetCuda.empty()) {
