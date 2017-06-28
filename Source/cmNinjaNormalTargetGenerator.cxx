@@ -409,10 +409,14 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
       this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
     if (targetType == cmStateEnums::EXECUTABLE) {
+      std::vector<std::string> commandLines;
+      commandLines.push_back(cmakeCommand +
+                             " -E cmake_symlink_executable $in $out");
+      commandLines.push_back("$POST_BUILD");
+
       this->GetGlobalGenerator()->AddRule(
         "CMAKE_SYMLINK_EXECUTABLE",
-        cmakeCommand + " -E cmake_symlink_executable"
-                       " $in $out && $POST_BUILD",
+        this->GetLocalGenerator()->BuildCommandLine(commandLines),
         "Creating executable symlink $out", "Rule for creating "
                                             "executable symlink.",
         /*depfile*/ "",
@@ -422,10 +426,14 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
         /*restat*/ "",
         /*generator*/ false);
     } else {
+      std::vector<std::string> commandLines;
+      commandLines.push_back(cmakeCommand +
+                             " -E cmake_symlink_library $in $SONAME $out");
+      commandLines.push_back("$POST_BUILD");
+
       this->GetGlobalGenerator()->AddRule(
         "CMAKE_SYMLINK_LIBRARY",
-        cmakeCommand + " -E cmake_symlink_library"
-                       " $in $SONAME $out && $POST_BUILD",
+        this->GetLocalGenerator()->BuildCommandLine(commandLines),
         "Creating library symlink $out", "Rule for creating "
                                          "library symlink.",
         /*depfile*/ "",
