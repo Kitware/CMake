@@ -1494,14 +1494,14 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     return;
   }
   std::string extProp = lang + "_EXTENSIONS";
-  std::string type = "EXTENSION";
   bool ext = true;
   if (const char* extPropValue = target->GetProperty(extProp)) {
     if (cmSystemTools::IsOff(extPropValue)) {
       ext = false;
-      type = "STANDARD";
     }
   }
+
+  std::string const type = ext ? "EXTENSION" : "STANDARD";
 
   if (target->GetPropertyAsBool(lang + "_STANDARD_REQUIRED")) {
     std::string option_flag =
