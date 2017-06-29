@@ -3298,6 +3298,31 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
 void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
   const std::string& xcProjDir)
 {
+  // collect all tests for the targets
+  std::map<std::string, cmXCodeScheme::TestObjects> testables;
+
+  for (std::vector<cmXCodeObject*>::const_iterator i =
+         this->XCodeObjects.begin();
+       i != this->XCodeObjects.end(); ++i) {
+    cmXCodeObject* obj = *i;
+    if (obj->GetType() != cmXCodeObject::OBJECT ||
+        obj->GetIsA() != cmXCodeObject::PBXNativeTarget) {
+      continue;
+    }
+
+    if (!obj->GetTarget()->IsXCTestOnApple()) {
+      continue;
+    }
+
+    const char* testee = obj->GetTarget()->GetProperty("XCTEST_TESTEE");
+    if (!testee) {
+      continue;
+    }
+
+    testables[testee].push_back(obj);
+  }
+
+  // generate scheme
   for (std::vector<cmXCodeObject*>::const_iterator i =
          this->XCodeObjects.begin();
        i != this->XCodeObjects.end(); ++i) {
@@ -3305,8 +3330,9 @@ void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
     if (obj->GetType() == cmXCodeObject::OBJECT &&
         (obj->GetIsA() == cmXCodeObject::PBXNativeTarget ||
          obj->GetIsA() == cmXCodeObject::PBXAggregateTarget)) {
-      cmXCodeScheme schm(obj, this->CurrentConfigurationTypes,
-                         this->XcodeVersion);
+      const std::string& targetName = obj->GetTarget()->GetName();
+      cmXCodeScheme schm(obj, testables[targetName],
+                         this->CurrentConfigurationTypes, this->XcodeVersion);
       schm.WriteXCodeSharedScheme(xcProjDir,
                                   this->RelativeToSource(xcProjDir.c_str()));
     }
