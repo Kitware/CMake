@@ -1488,17 +1488,17 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     // This compiler has no notion of language standard levels.
     return;
   }
-  std::string stdProp = lang + "_STANDARD";
-  const char* standardProp = target->GetProperty(stdProp);
-  if (!standardProp) {
-    return;
-  }
   std::string extProp = lang + "_EXTENSIONS";
   bool ext = true;
   if (const char* extPropValue = target->GetProperty(extProp)) {
     if (cmSystemTools::IsOff(extPropValue)) {
       ext = false;
     }
+  }
+  std::string stdProp = lang + "_STANDARD";
+  const char* standardProp = target->GetProperty(stdProp);
+  if (!standardProp) {
+    return;
   }
 
   std::string const type = ext ? "EXTENSION" : "STANDARD";
