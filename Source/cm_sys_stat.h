@@ -7,6 +7,11 @@
 typedef unsigned short mode_t;
 #endif
 
+#if defined(WIN32)
+typedef unsigned short uid_t;
+typedef unsigned short gid_t;
+#endif
+
 #include <sys/types.h>
 // include sys/stat.h after sys/types.h
 #include <sys/stat.h>
