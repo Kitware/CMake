@@ -1498,6 +1498,16 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
   std::string stdProp = lang + "_STANDARD";
   const char* standardProp = target->GetProperty(stdProp);
   if (!standardProp) {
+    if (ext) {
+      // No language standard is specified and extensions are not disabled.
+      // Check if this compiler needs a flag to enable extensions.
+      std::string const option_flag =
+        "CMAKE_" + lang + "_EXTENSION_COMPILE_OPTION";
+      if (const char* opt =
+            target->Target->GetMakefile()->GetDefinition(option_flag)) {
+        this->AppendFlagEscape(flags, opt);
+      }
+    }
     return;
   }
 
