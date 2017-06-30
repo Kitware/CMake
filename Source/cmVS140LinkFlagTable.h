@@ -134,9 +134,6 @@ static cmVS7FlagTable cmVS140LinkFlagTable[] = {
   { "CLRSupportLastError", "CLRSupportLastError:SYSTEMDLL", "System Dlls Only",
     "SystemDlls", 0 },
 
-  { "LinkControlFlowGuard", "guard:cf", "Enable Security Check with Guard",
-    "Guard", 0 },
-
   // Bool Properties
   { "LinkIncremental", "INCREMENTAL:NO", "", "false", 0 },
   { "LinkIncremental", "INCREMENTAL", "", "true", 0 },
