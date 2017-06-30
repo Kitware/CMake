@@ -147,7 +147,7 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(
   this->XcodeBuildCommandInitialized = false;
 
   this->ObjectDirArchDefault = "$(CURRENT_ARCH)";
-  this->ComputeObjectDirArch();
+  this->ObjectDirArch = this->ObjectDirArchDefault;
 
   cm->GetState()->SetIsGeneratorMultiConfig(true);
 }
@@ -3087,12 +3087,12 @@ void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
     }
   }
 
-  this->ComputeObjectDirArch();
+  this->ComputeObjectDirArch(mf);
 }
 
-void cmGlobalXCodeGenerator::ComputeObjectDirArch()
+void cmGlobalXCodeGenerator::ComputeObjectDirArch(cmMakefile* mf)
 {
-  if (this->Architectures.size() > 1) {
+  if (this->Architectures.size() > 1 || this->UseEffectivePlatformName(mf)) {
     this->ObjectDirArch = "$(CURRENT_ARCH)";
   } else if (!this->Architectures.empty()) {
     this->ObjectDirArch = this->Architectures[0];
