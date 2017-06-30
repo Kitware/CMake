@@ -15,6 +15,22 @@
 # Variables for using MPI
 # ^^^^^^^^^^^^^^^^^^^^^^^
 #
+# The module exposes the components ``C``, ``CXX``, ``MPICXX`` and ``Fortran``.
+# Each of these controls the various MPI languages to search for.
+# The difference between ``CXX`` and ``MPICXX`` is that ``CXX`` refers to the
+# MPI C API being usable from C++, whereas ``MPICXX`` refers to the MPI-2 C++ API
+# that was removed again in MPI-3.
+#
+# Depending on the enabled components the following variables will be set:
+#
+# ``MPI_FOUND``
+#   Variable indicating that MPI settings for all requested languages have been found.
+#   If no components are specified, this is true if MPI settings for all enabled languages
+#   were detected. Note that the ``MPICXX`` component does not affect this variable.
+# ``MPI_VERSION``
+#   Minimal version of MPI detected among the requested languages, or all enabled languages
+#   if no components were specified.
+#
 # This module will set the following variables per language in your
 # project, where ``<lang>`` is one of C, CXX, or Fortran:
 #
@@ -41,7 +57,7 @@
 #
 # The following variables indicating which bindings are present will be defined:
 #
-# ``MPI_CXX_HAVE_MPICXX``
+# ``MPI_MPICXX_FOUND``
 #   Variable indicating whether the MPI-2 C++ bindings are present (introduced in MPI-2, removed with MPI-3).
 # ``MPI_Fortran_HAVE_F77_HEADER``
 #   True if the Fortran 77 header ``mpif.h`` is available.
@@ -213,9 +229,9 @@
 #
 # ::
 #
-#    MPI_FOUND           MPI_COMPILER        MPI_LIBRARY
-#    MPI_COMPILE_FLAGS   MPI_INCLUDE_PATH    MPI_EXTRA_LIBRARY
-#    MPI_LINK_FLAGS      MPI_LIBRARIES
+#    MPI_COMPILER        MPI_LIBRARY        MPI_EXTRA_LIBRARY
+#    MPI_COMPILE_FLAGS   MPI_INCLUDE_PATH   MPI_LINK_FLAGS
+#    MPI_LIBRARIES
 #
 # In new projects, please use the ``MPI_<lang>_XXX`` equivalents.
 # Additionally, the following variables are deprecated:
@@ -1055,14 +1071,32 @@ foreach (LANG IN ITEMS C CXX)
 endforeach()
 #=============================================================================
 
-if(CMAKE_CXX_COMPILER_LOADED)
-  set(MPI_CXX_SKIP_MPICXX FALSE CACHE BOOL "If true, the MPI-2 C++ bindings are disabled using definitions.")
-  mark_as_advanced(MPI_CXX_SKIP_MPICXX)
-endif()
+unset(MPI_VERSION)
+unset(MPI_VERSION_MAJOR)
+unset(MPI_VERSION_MINOR)
+
+unset(_MPI_MIN_VERSION)
 
 # This loop finds the compilers and sends them off for interrogation.
 foreach(LANG IN ITEMS C CXX Fortran)
-  if (CMAKE_${LANG}_COMPILER_LOADED)
+  if(CMAKE_${LANG}_COMPILER_LOADED)
+    if(NOT MPI_FIND_COMPONENTS)
+      set(_MPI_FIND_${LANG} TRUE)
+    elseif( ${LANG} IN_LIST MPI_FIND_COMPONENTS)
+      set(_MPI_FIND_${LANG} TRUE)
+    elseif( ${LANG} STREQUAL CXX AND NOT MPI_CXX_SKIP_MPICXX AND MPICXX IN_LIST MPI_FIND_COMPONENTS )
+      set(_MPI_FIND_${LANG} TRUE)
+    else()
+      set(_MPI_FIND_${LANG} FALSE)
+    endif()
+  else()
+    set(_MPI_FIND_${LANG} FALSE)
+  endif()
+  if(_MPI_FIND_${LANG})
+    if( ${LANG} STREQUAL CXX AND NOT MPICXX IN_LIST MPI_FIND_COMPONENTS )
+      set(MPI_CXX_SKIP_MPICXX FALSE CACHE BOOL "If true, the MPI-2 C++ bindings are disabled using definitions.")
+      mark_as_advanced(MPI_CXX_SKIP_MPICXX)
+    endif()
     if(NOT (MPI_${LANG}_LIB_NAMES AND (MPI_${LANG}_INCLUDE_PATH OR MPI_${LANG}_INCLUDE_DIRS OR MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS)))
       if(NOT MPI_${LANG}_COMPILER AND NOT MPI_ASSUME_NO_BUILTIN_MPI)
         # Should the imported targets be empty, we effectively try whether the compiler supports MPI on its own, which is the case on e.g.
@@ -1167,16 +1201,16 @@ foreach(LANG IN ITEMS C CXX Fortran)
     # If we've found MPI, then we'll perform additional analysis: Determine the MPI version, MPI library version, supported
     # MPI APIs (i.e. MPI-2 C++ bindings). For Fortran we also need to find specific parameters if we're under MPI-3.
     if(MPI_${LANG}_WORKS)
-      if("${LANG}" STREQUAL "CXX" AND NOT DEFINED MPI_${LANG}_HAVE_MPICXX)
-        if(NOT MPI_CXX_SKIP_MPICXX)
+      if("${LANG}" STREQUAL "CXX" AND NOT DEFINED MPI_MPICXX_FOUND)
+        if(NOT MPI_CXX_SKIP_MPICXX AND NOT MPI_CXX_VALIDATE_SKIP_MPICXX)
           _MPI_try_staged_settings(${LANG} test_mpi MPICXX FALSE)
           if(MPI_RESULT_${LANG}_test_mpi_MPICXX)
-            set(MPI_${LANG}_HAVE_MPICXX TRUE)
+            set(MPI_MPICXX_FOUND TRUE)
           else()
-            set(MPI_${LANG}_HAVE_MPICXX FALSE)
+            set(MPI_MPICXX_FOUND FALSE)
           endif()
         else()
-          set(MPI_${LANG}_HAVE_MPICXX FALSE)
+          set(MPI_MPICXX_FOUND FALSE)
         endif()
       endif()
 
@@ -1276,7 +1310,6 @@ foreach(LANG IN ITEMS C CXX Fortran)
     endif()
 
     set(MPI_${LANG}_FIND_QUIETLY ${MPI_FIND_QUIETLY})
-    set(MPI_${LANG}_FIND_REQUIRED ${MPI_FIND_REQUIRED})
     set(MPI_${LANG}_FIND_VERSION ${MPI_FIND_VERSION})
     set(MPI_${LANG}_FIND_VERSION_EXACT ${MPI_FIND_VERSION_EXACT})
 
@@ -1314,8 +1347,30 @@ foreach(LANG IN ITEMS C CXX Fortran)
     endif()
     find_package_handle_standard_args(MPI_${LANG} REQUIRED_VARS ${MPI_${LANG}_REQUIRED_VARS}
       VERSION_VAR MPI_${LANG}_VERSION)
+
+    if(DEFINED MPI_${LANG}_VERSION)
+      if(NOT _MPI_MIN_VERSION OR _MPI_MIN_VERSION VERSION_GREATER MPI_${LANG}_VERSION)
+        set(_MPI_MIN_VERSION MPI_${LANG}_VERSION)
+      endif()
+    endif()
   endif()
 endforeach()
+
+unset(_MPI_REQ_VARS)
+foreach(LANG IN ITEMS C CXX Fortran)
+  if((NOT MPI_FIND_COMPONENTS AND CMAKE_${LANG}_COMPILER_LOADED) OR LANG IN_LIST MPI_FIND_COMPONENTS)
+    list(APPEND _MPI_REQ_VARS "MPI_${LANG}_FOUND")
+  endif()
+endforeach()
+
+if(MPICXX IN_LIST MPI_FIND_COMPONENTS)
+  list(APPEND _MPI_REQ_VARS "MPI_MPICXX_FOUND")
+endif()
+
+find_package_handle_standard_args(MPI
+    REQUIRED_VARS ${_MPI_REQ_VARS}
+    VERSION_VAR ${_MPI_MIN_VERSION}
+    HANDLE_COMPONENTS)
 
 #=============================================================================
 # More backward compatibility stuff
@@ -1341,7 +1396,7 @@ endforeach()
 
 # Bare MPI sans ${LANG} vars are set to CXX then C, depending on what was found.
 # This mimics the behavior of the old language-oblivious FindMPI.
-set(_MPI_OLD_VARS FOUND COMPILER INCLUDE_PATH COMPILE_FLAGS LINK_FLAGS LIBRARIES)
+set(_MPI_OLD_VARS COMPILER INCLUDE_PATH COMPILE_FLAGS LINK_FLAGS LIBRARIES)
 if (MPI_CXX_FOUND)
   foreach (var ${_MPI_OLD_VARS})
     set(MPI_${var} ${MPI_CXX_${var}})
@@ -1350,9 +1405,6 @@ elseif (MPI_C_FOUND)
   foreach (var ${_MPI_OLD_VARS})
     set(MPI_${var} ${MPI_C_${var}})
   endforeach()
-else()
-  # Note that we might still have found Fortran, but you'll need to use MPI_Fortran_FOUND
-  set(MPI_FOUND FALSE)
 endif()
 
 # Chop MPI_LIBRARIES into the old-style MPI_LIBRARY and MPI_EXTRA_LIBRARY, and set them in cache.

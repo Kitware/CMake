@@ -3,6 +3,8 @@ findmpi-overhaul
 
 * :module:`FindMPI` gained a number of new features, including:
 
+  * Language-specific components have been added to the module.
+  * Many more MPI environments are now supported.
   * The environmental support for Fortran has been improved.
   * A user now has fine-grained control over the MPI selection process,
     including passing custom parameters to the MPI compiler.
@@ -11,3 +13,4 @@ findmpi-overhaul
   * The available Fortran bindings are now being detected and verified.
   * Various MPI-3 information can be requested, including the library version
     and Fortran capabilities of the individual bindings.
+  * Statically linked MPI implementations are supported.
