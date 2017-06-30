@@ -619,7 +619,7 @@ if(TARGET Doxygen::doxygen)
     # If doxygen was found, use it to generate a minimal default Doxyfile.
     # We will delete this file after we have finished using it below to
     # generate the other files that doxygen_add_docs() will use.
-    set(_Doxygen_tpl "${PROJECT_BINARY_DIR}/CMakeDoxyfile.tpl")
+    set(_Doxygen_tpl "${CMAKE_BINARY_DIR}/CMakeDoxyfile.tpl")
     execute_process(
         COMMAND "${DOXYGEN_EXECUTABLE}" -s -g "${_Doxygen_tpl}"
         OUTPUT_QUIET
@@ -646,8 +646,8 @@ if(TARGET Doxygen::doxygen)
     # content is only dependent on the version of Doxygen being used. Therefore
     # we always put them at the top of the build tree so that they are in a
     # predictable location.
-    set(_doxyfile_in       "${PROJECT_BINARY_DIR}/CMakeDoxyfile.in")
-    set(_doxyfile_defaults "${PROJECT_BINARY_DIR}/CMakeDoxygenDefaults.cmake")
+    set(_doxyfile_in       "${CMAKE_BINARY_DIR}/CMakeDoxyfile.in")
+    set(_doxyfile_defaults "${CMAKE_BINARY_DIR}/CMakeDoxygenDefaults.cmake")
 
     file(WRITE "${_doxyfile_in}"       ${_Doxygen_dne_header})
     file(WRITE "${_doxyfile_defaults}" ${_Doxygen_dne_header})
@@ -896,7 +896,7 @@ doxygen_add_docs() for target ${targetName}")
 
     # Now bring in Doxgen's defaults for those things the project has not
     # already set and we have not provided above
-    include("${PROJECT_BINARY_DIR}/CMakeDoxygenDefaults.cmake" OPTIONAL)
+    include("${CMAKE_BINARY_DIR}/CMakeDoxygenDefaults.cmake" OPTIONAL)
 
     # Cleanup built HTMLs on "make clean"
     # TODO Any other dirs?
@@ -1025,7 +1025,7 @@ doxygen_add_docs() for target ${targetName}")
     endforeach()
 
     # Prepare doxygen configuration file
-    set(_doxyfile_template "${PROJECT_BINARY_DIR}/CMakeDoxyfile.in")
+    set(_doxyfile_template "${CMAKE_BINARY_DIR}/CMakeDoxyfile.in")
     set(_target_doxyfile "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.${targetName}")
     configure_file("${_doxyfile_template}" "${_target_doxyfile}")
 
