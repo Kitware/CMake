@@ -1003,7 +1003,7 @@ bool cmQtAutoGenerators::MocParseSourceContent(
             // In relaxed mode try to find a header instead but issue a warning
             const std::string headerToMoc =
               this->MocFindHeader(scannedFileAbsPath, incSubDir + incBasename);
-            if (!headerToMoc.empty()) {
+            if (!headerToMoc.empty() && !this->MocSkip(headerToMoc)) {
               // This is for KDE4 compatibility:
               fileToMoc = headerToMoc;
               if (!requiresMoc && (incBasename == scannedFileBasename)) {
