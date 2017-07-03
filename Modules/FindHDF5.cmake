@@ -733,6 +733,9 @@ if( NOT HDF5_FOUND )
             else()
                 set( THIS_LIBRARY_SEARCH_DEBUG ${LIB}d ${LIB}_D ${LIB}_debug ${LIB}d-shared ${LIB}_D-shared ${LIB}_debug-shared)
                 set( THIS_LIBRARY_SEARCH_RELEASE ${LIB} ${LIB}-shared)
+                if(WIN32)
+                  list(APPEND HDF5_DEFINITIONS "-DH5_BUILT_AS_DYNAMIC_LIB")
+                endif()
             endif()
             find_library(HDF5_${LIB}_LIBRARY_DEBUG
                 NAMES ${THIS_LIBRARY_SEARCH_DEBUG}
@@ -794,6 +797,7 @@ if( NOT HDF5_FOUND )
         set(HDF5_HL_FOUND True)
     endif()
 
+    _HDF5_remove_duplicates_from_beginning(HDF5_DEFINITIONS)
     _HDF5_remove_duplicates_from_beginning(HDF5_INCLUDE_DIRS)
     _HDF5_remove_duplicates_from_beginning(HDF5_LIBRARIES)
     _HDF5_remove_duplicates_from_beginning(HDF5_HL_LIBRARIES)
