@@ -23,7 +23,7 @@
 # Fortran_HL.  If the COMPONENTS argument is not given, the module will
 # attempt to find only the C bindings.
 #
-# On UNIX systems, this module will read the variable
+# This module will read the variable
 # HDF5_USE_STATIC_LIBRARIES to determine whether or not to prefer a
 # static link to a dynamic link for HDF5 and all of it's dependencies.
 # To use this feature, make sure that the HDF5_USE_STATIC_LIBRARIES
@@ -551,8 +551,12 @@ if(NOT HDF5_FOUND)
             if("x${L}" MATCHES "hdf5")
               # hdf5 library
               set(_HDF5_SEARCH_OPTS_LOCAL ${_HDF5_SEARCH_OPTS})
-              if(UNIX AND HDF5_USE_STATIC_LIBRARIES)
-                set(_HDF5_SEARCH_NAMES_LOCAL lib${L}.a)
+              if(HDF5_USE_STATIC_LIBRARIES)
+                if(WIN32)
+                  set(_HDF5_SEARCH_NAMES_LOCAL lib${L})
+                else()
+                  set(_HDF5_SEARCH_NAMES_LOCAL lib${L}.a)
+                endif()
               endif()
             else()
               # external library
@@ -579,8 +583,12 @@ if(NOT HDF5_FOUND)
               if("x${L}" MATCHES "hdf5")
                 # hdf5 library
                 set(_HDF5_SEARCH_OPTS_LOCAL ${_HDF5_SEARCH_OPTS})
-                if(UNIX AND HDF5_USE_STATIC_LIBRARIES)
-                  set(_HDF5_SEARCH_NAMES_LOCAL lib${L}.a)
+                if(HDF5_USE_STATIC_LIBRARIES)
+                  if(WIN32)
+                    set(_HDF5_SEARCH_NAMES_LOCAL lib${L})
+                  else()
+                    set(_HDF5_SEARCH_NAMES_LOCAL lib${L}.a)
+                  endif()
                 endif()
               else()
                 # external library
@@ -712,18 +720,18 @@ if( NOT HDF5_FOUND )
 
         # find the HDF5 libraries
         foreach(LIB IN LISTS HDF5_${__lang}_LIBRARY_NAMES)
-            if(UNIX AND HDF5_USE_STATIC_LIBRARIES)
+            if(HDF5_USE_STATIC_LIBRARIES)
                 # According to bug 1643 on the CMake bug tracker, this is the
                 # preferred method for searching for a static library.
                 # See https://gitlab.kitware.com/cmake/cmake/issues/1643.  We search
                 # first for the full static library name, but fall back to a
                 # generic search on the name if the static search fails.
                 set( THIS_LIBRARY_SEARCH_DEBUG
-                    lib${LIB}d.a lib${LIB}_debug.a ${LIB}d ${LIB}_debug
-                    lib${LIB}d-static.a lib${LIB}_debug-static.a ${LIB}d-static ${LIB}_debug-static )
-                set( THIS_LIBRARY_SEARCH_RELEASE lib${LIB}.a ${LIB} lib${LIB}-static.a ${LIB}-static)
+                    lib${LIB}d.a lib${LIB}_debug.a lib${LIB}d lib${LIB}_D lib${LIB}_debug
+                    lib${LIB}d-static.a lib${LIB}_debug-static.a ${LIB}d-static ${LIB}_D-static ${LIB}_debug-static )
+                set( THIS_LIBRARY_SEARCH_RELEASE lib${LIB}.a lib${LIB} lib${LIB}-static.a ${LIB}-static)
             else()
-                set( THIS_LIBRARY_SEARCH_DEBUG ${LIB}d ${LIB}_debug ${LIB}d-shared ${LIB}_debug-shared)
+                set( THIS_LIBRARY_SEARCH_DEBUG ${LIB}d ${LIB}_D ${LIB}_debug ${LIB}d-shared ${LIB}_D-shared ${LIB}_debug-shared)
                 set( THIS_LIBRARY_SEARCH_RELEASE ${LIB} ${LIB}-shared)
             endif()
             find_library(HDF5_${LIB}_LIBRARY_DEBUG
@@ -749,18 +757,18 @@ if( NOT HDF5_FOUND )
 
         if(FIND_HL)
             foreach(LIB IN LISTS HDF5_${__lang}_HL_LIBRARY_NAMES)
-                if(UNIX AND HDF5_USE_STATIC_LIBRARIES)
+                if(HDF5_USE_STATIC_LIBRARIES)
                     # According to bug 1643 on the CMake bug tracker, this is the
                     # preferred method for searching for a static library.
                     # See https://gitlab.kitware.com/cmake/cmake/issues/1643.  We search
                     # first for the full static library name, but fall back to a
                     # generic search on the name if the static search fails.
                     set( THIS_LIBRARY_SEARCH_DEBUG
-                        lib${LIB}d.a lib${LIB}_debug.a ${LIB}d ${LIB}_debug
-                        lib${LIB}d-static.a lib${LIB}_debug-static.a ${LIB}d-static ${LIB}_debug-static )
-                    set( THIS_LIBRARY_SEARCH_RELEASE lib${LIB}.a ${LIB} lib${LIB}-static.a ${LIB}-static)
+                        lib${LIB}d.a lib${LIB}_debug.a lib${LIB}d lib${LIB}_D lib${LIB}_debug
+                        lib${LIB}d-static.a lib${LIB}_debug-static.a lib${LIB}d-static lib${LIB}_D-static lib${LIB}_debug-static )
+                    set( THIS_LIBRARY_SEARCH_RELEASE lib${LIB}.a ${LIB} lib${LIB}-static.a lib${LIB}-static)
                 else()
-                    set( THIS_LIBRARY_SEARCH_DEBUG ${LIB}d ${LIB}_debug ${LIB}d-shared ${LIB}_debug-shared)
+                    set( THIS_LIBRARY_SEARCH_DEBUG ${LIB}d ${LIB}_D ${LIB}_debug ${LIB}d-shared ${LIB}_D-shared ${LIB}_debug-shared)
                     set( THIS_LIBRARY_SEARCH_RELEASE ${LIB} ${LIB}-shared)
                 endif()
                 find_library(HDF5_${LIB}_LIBRARY_DEBUG
