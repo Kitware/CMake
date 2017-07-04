@@ -306,8 +306,8 @@ from the input content to produce the output content.  The options are:
 
 Exactly one ``CONTENT`` or ``INPUT`` option must be given.  A specific
 ``OUTPUT`` file may be named by at most one invocation of ``file(GENERATE)``.
-Generated files are modified on subsequent cmake runs only if their content
-is changed.
+Generated files are modified and their timestamp updated on subsequent cmake
+runs only if their content is changed.
 
 Note also that ``file(GENERATE)`` does not create the output file until the
 generation phase. The output file will not yet have been written when the

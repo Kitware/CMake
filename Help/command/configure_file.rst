@@ -33,6 +33,8 @@ either ``#define VAR 1`` or ``#define VAR 0`` similarly.
 
 If the input file is modified the build system will re-run CMake to
 re-configure the file and generate the build system again.
+The generated file is modified and its timestamp updated on subsequent
+cmake runs only if its content is changed.
 
 The arguments are:
 
