@@ -190,7 +190,8 @@ int cmCTest::HTTPRequest(std::string url, HTTPMethod method,
       ::curl_easy_setopt(curl, CURLOPT_PUT, 1);
       file = cmsys::SystemTools::Fopen(putFile, "rb");
       ::curl_easy_setopt(curl, CURLOPT_INFILE, file);
-    // fall through to append GET fields
+      // fall through to append GET fields
+      CM_FALLTHROUGH;
     case cmCTest::HTTP_GET:
       if (!fields.empty()) {
         url += "?" + fields;
