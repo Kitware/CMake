@@ -92,7 +92,7 @@ fi
 
 # Verify that we have a tool.
 if ! type -p "$clang_format" >/dev/null; then
-    echo "Unable to locate '$clang_format'"
+    echo "Unable to locate a 'clang-format' tool."
     exit 1
 fi
 
