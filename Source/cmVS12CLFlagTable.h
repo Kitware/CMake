@@ -78,7 +78,8 @@ static cmVS7FlagTable cmVS12CLFlagTable[] = {
     cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue },
   { "PrecompiledHeader", "Yu", "Use", "Use",
     cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue },
-  { "PrecompiledHeader", "", "Not Using Precompiled Headers", "NotUsing", 0 },
+  { "PrecompiledHeader", "Y-", "Not Using Precompiled Headers", "NotUsing",
+    0 },
 
   { "AssemblerOutput", "", "No Listing", "NoListing", 0 },
   { "AssemblerOutput", "FA", "Assembly-Only Listing", "AssemblyCode", 0 },
