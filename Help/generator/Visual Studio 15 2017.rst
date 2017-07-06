@@ -15,6 +15,18 @@ a target platform name optionally at the end of this generator name:
 ``Visual Studio 15 2017 ARM``
   Specify target platform ``ARM``.
 
+Instance Selection
+^^^^^^^^^^^^^^^^^^
+
+VS 2017 supports multiple installations on the same machine.
+CMake queries the Visual Studio Installer to locate VS instances.
+If more than one instance is installed we do not define which one
+is chosen by default.  If the ``VS150COMNTOOLS`` environment variable
+is set and points to the ``Common7/Tools`` directory within one of
+the instances, that instance will be used.  The environment variable
+must remain consistently set whenever CMake is re-run within a given
+build tree.
+
 Toolset Selection
 ^^^^^^^^^^^^^^^^^
 
