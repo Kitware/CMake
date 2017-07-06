@@ -1162,7 +1162,6 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
       if (!this->UicSkip(absFilename) && !this->UicSkip(headerName)) {
         uicHeaderFiles.insert(headerName);
       }
-      break;
     }
   }
 }
