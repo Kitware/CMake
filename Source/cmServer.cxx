@@ -36,7 +36,7 @@ cmServer::cmServer(cmServerConnection* conn, bool supportExperimental)
 {
   this->Connection->SetServer(this);
   // Register supported protocols:
-  this->RegisterProtocol(new cmServerProtocol1_0);
+  this->RegisterProtocol(new cmServerProtocol1);
 }
 
 cmServer::~cmServer()
