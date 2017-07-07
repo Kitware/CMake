@@ -179,7 +179,8 @@ Functions
     will be converted to an absolute path relative to the current binary
     directory. This is necessary because doxygen will normally be run from a
     directory within the source tree so that relative source paths work as
-    expected.
+    expected. If this directory does not exist, it will be recursively created
+    prior to executing the doxygen commands.
 
 To change any of these defaults or override any other Doxygen config option,
 set relevant variables before calling ``doxygen_add_docs()``. For example:
@@ -1020,6 +1021,13 @@ doxygen_add_docs() for target ${targetName}")
         WARN_LOGFILE
         XML_OUTPUT
     )
+
+    # Store the unmodified value of DOXYGEN_OUTPUT_DIRECTORY prior to invoking
+    # doxygen_quote_value() below. This will mutate the string specifically for
+    # consumption by Doxygen's config file, which we do not want when we use it
+    # later in the custom target's commands.
+    set( _original_doxygen_output_dir ${DOXYGEN_OUTPUT_DIRECTORY} )
+
     foreach(_item IN LISTS _doxygen_quoted_options)
         doxygen_quote_value(DOXYGEN_${_item})
     endforeach()
@@ -1030,8 +1038,8 @@ doxygen_add_docs() for target ${targetName}")
     configure_file("${_doxyfile_template}" "${_target_doxyfile}")
 
     # Add the target
-    add_custom_target(
-        ${targetName}
+    add_custom_target( ${targetName} VERBATIM
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${_original_doxygen_output_dir}
         COMMAND "${DOXYGEN_EXECUTABLE}" "${_target_doxyfile}"
         WORKING_DIRECTORY "${_args_WORKING_DIRECTORY}"
         DEPENDS "${_target_doxyfile}"
