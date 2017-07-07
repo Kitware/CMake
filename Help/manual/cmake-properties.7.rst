@@ -83,7 +83,7 @@ Properties on Directories
    /prop_dir/RULE_LAUNCH_LINK
    /prop_dir/SOURCE_DIR
    /prop_dir/SUBDIRECTORIES
-   /prop_dir/TEST_INCLUDE_FILE
+   /prop_dir/TEST_INCLUDE_FILES
    /prop_dir/VARIABLES
    /prop_dir/VS_GLOBAL_SECTION_POST_section
    /prop_dir/VS_GLOBAL_SECTION_PRE_section
@@ -435,6 +435,7 @@ Deprecated Properties on Directories
    :maxdepth: 1
 
    /prop_dir/COMPILE_DEFINITIONS_CONFIG
+   /prop_dir/TEST_INCLUDE_FILE
 
 
 Deprecated Properties on Targets
