@@ -1501,20 +1501,30 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     // This compiler has no notion of language standard levels.
     return;
   }
-  std::string stdProp = lang + "_STANDARD";
-  const char* standardProp = target->GetProperty(stdProp);
-  if (!standardProp) {
-    return;
-  }
   std::string extProp = lang + "_EXTENSIONS";
-  std::string type = "EXTENSION";
   bool ext = true;
   if (const char* extPropValue = target->GetProperty(extProp)) {
     if (cmSystemTools::IsOff(extPropValue)) {
       ext = false;
-      type = "STANDARD";
     }
   }
+  std::string stdProp = lang + "_STANDARD";
+  const char* standardProp = target->GetProperty(stdProp);
+  if (!standardProp) {
+    if (ext) {
+      // No language standard is specified and extensions are not disabled.
+      // Check if this compiler needs a flag to enable extensions.
+      std::string const option_flag =
+        "CMAKE_" + lang + "_EXTENSION_COMPILE_OPTION";
+      if (const char* opt =
+            target->Target->GetMakefile()->GetDefinition(option_flag)) {
+        this->AppendFlagEscape(flags, opt);
+      }
+    }
+    return;
+  }
+
+  std::string const type = ext ? "EXTENSION" : "STANDARD";
 
   if (target->GetPropertyAsBool(lang + "_STANDARD_REQUIRED")) {
     std::string option_flag =

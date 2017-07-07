@@ -2,46 +2,75 @@
 # Documentation can be downloaded here: http://www.iar.com/website1/1.0.1.0/675/1/
 # The initial feature request is here: https://gitlab.kitware.com/cmake/cmake/issues/10176
 # It also contains additional links and information.
+# See USER GUIDES -> C/C++ Development Guide and ReleaseNotes for:
+# version 6.30.8: http://supp.iar.com/FilesPublic/UPDINFO/006607/arm/doc/infocenter/index.ENU.html
+# version 7.60.1: http://supp.iar.com/FilesPublic/UPDINFO/011006/arm/doc/infocenter/index.ENU.html
+# version 8.10.1: http://netstorage.iar.com/SuppDB/Public/UPDINFO/011854/arm/doc/infocenter/index.ENU.html
 
-if(_IAR_CMAKE_LOADED)
+# C/C++ Standard versions
+#
+# IAR typically only supports one C and C++ Standard version,
+# the exception is C89 which is always supported and can be selected
+# if its not the default
+#
+# C++ is trickier, there were historically 3 switches,
+# and some IAR versions support multiple of those.
+# they are --eec++, --ec++ and --c++ and where used to
+# enable various language features like exceptions
+#
+# recent versions only have --c++ for full support
+# but can choose to disable features with further arguments
+#
+# C/C++ Standard compliance
+#
+# IAR has 3 modes: default, strict and extended
+# the extended mode is needed for popular libraries like CMSIS
+#
+# "Silent" Operation
+#
+# this really is different to most programs I know.
+# nothing meaningfull from the operation is lost, just some redundant
+# code and data size printouts (that can be inspected with common tools).
+
+# This module is shared by multiple languages; use include blocker.
+if(_IARARM_CMAKE_LOADED)
   return()
 endif()
-set(_IAR_CMAKE_LOADED TRUE)
+set(_IARARM_CMAKE_LOADED 1)
 
-
-get_filename_component(_CMAKE_C_TOOLCHAIN_LOCATION "${CMAKE_C_COMPILER}" PATH)
-get_filename_component(_CMAKE_CXX_TOOLCHAIN_LOCATION "${CMAKE_CXX_COMPILER}" PATH)
-get_filename_component(_CMAKE_ASM_TOOLCHAIN_LOCATION "${CMAKE_ASM_COMPILER}" PATH)
-
-
-if("${CMAKE_C_COMPILER}" MATCHES "arm"  OR  "${CMAKE_CXX_COMPILER}" MATCHES "arm"  OR  "${CMAKE_ASM_COMPILER}" MATCHES "arm")
+macro(__compiler_iar_ARM lang)
   set(CMAKE_EXECUTABLE_SUFFIX ".elf")
+  if (${lang} STREQUAL "C" OR ${lang} STREQUAL "CXX")
 
-  # For arm, IAR uses the "ilinkarm" linker and "iarchive" archiver:
-  find_program(CMAKE_IAR_LINKER ilinkarm HINTS "${_CMAKE_C_TOOLCHAIN_LOCATION}" "${_CMAKE_CXX_TOOLCHAIN_LOCATION}" "${_CMAKE_ASM_TOOLCHAIN_LOCATION}")
-  find_program(CMAKE_IAR_AR iarchive HINTS "${_CMAKE_C_TOOLCHAIN_LOCATION}" "${_CMAKE_CXX_TOOLCHAIN_LOCATION}" "${_CMAKE_ASM_TOOLCHAIN_LOCATION}" )
+    set(CMAKE_${lang}_COMPILE_OBJECT             "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT>")
+    set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> --preprocess=cnl <PREPROCESSED_SOURCE>")
+    set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE     "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> -lAH <ASSEMBLY_SOURCE> -o <OBJECT>.dummy")
 
-  set(IAR_TARGET_ARCHITECTURE "ARM" CACHE STRING "IAR compiler target architecture")
-endif()
+    set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "-f ")
+    set(CMAKE_DEPFILE_FLAGS_${lang} "--dependencies=ns <DEPFILE>")
 
-if("${CMAKE_C_COMPILER}" MATCHES "avr"  OR  "${CMAKE_CXX_COMPILER}" MATCHES "avr"  OR  "${CMAKE_ASM_COMPILER}" MATCHES "avr")
+    string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
+    string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -r")
+    string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Ohz -DNDEBUG")
+    string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -Oh -DNDEBUG")
+    string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -Oh -r -DNDEBUG")
+  endif()
+
+  set(CMAKE_${lang}_LINK_EXECUTABLE "\"${CMAKE_IAR_LINKARM}\" --silent <OBJECTS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
+  set(CMAKE_${lang}_CREATE_STATIC_LIBRARY "\"${CMAKE_IAR_ARCHIVE}\" <TARGET> --create <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_CREATE "\"${CMAKE_IAR_ARCHIVE}\" <TARGET> --create <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_APPEND "\"${CMAKE_IAR_ARCHIVE}\" <TARGET> --replace <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_FINISH "")
+
+  set(CMAKE_LINKER "${CMAKE_IAR_LINKARM}" CACHE FILEPATH "The IAR linker" FORCE)
+  set(CMAKE_AR "${CMAKE_IAR_ARCHIVE}" CACHE FILEPATH "The IAR archiver" FORCE)
+endmacro()
+
+macro(__compiler_iar_AVR lang)
   set(CMAKE_EXECUTABLE_SUFFIX ".bin")
-
-  # For AVR and AVR32, IAR uses the "xlink" linker and the "xar" archiver:
-  find_program(CMAKE_IAR_LINKER xlink HINTS "${_CMAKE_C_TOOLCHAIN_LOCATION}" "${_CMAKE_CXX_TOOLCHAIN_LOCATION}" "${_CMAKE_ASM_TOOLCHAIN_LOCATION}" )
-  find_program(CMAKE_IAR_AR xar HINTS "${_CMAKE_C_TOOLCHAIN_LOCATION}" "${_CMAKE_CXX_TOOLCHAIN_LOCATION}" "${_CMAKE_ASM_TOOLCHAIN_LOCATION}" )
-
-  set(IAR_TARGET_ARCHITECTURE "AVR" CACHE STRING "IAR compiler target architecture")
 
   set(CMAKE_LIBRARY_PATH_FLAG "-I")
 
-endif()
-
-if(NOT IAR_TARGET_ARCHITECTURE)
-  message(FATAL_ERROR "The IAR compiler for this architecture is not yet supported "
-          "by CMake. Please go to https://gitlab.kitware.com/cmake/cmake/issues "
-          "and enter a feature request there.")
-endif()
-
-set(CMAKE_LINKER "${CMAKE_IAR_LINKER}" CACHE FILEPATH "The IAR linker" FORCE)
-set(CMAKE_AR "${CMAKE_IAR_AR}" CACHE FILEPATH "The IAR archiver" FORCE)
+  set(CMAKE_LINKER "${CMAKE_IAR_LINKER}" CACHE FILEPATH "The IAR linker" FORCE)
+  set(CMAKE_AR "${CMAKE_IAR_AR}" CACHE FILEPATH "The IAR archiver" FORCE)
+endmacro()

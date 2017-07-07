@@ -73,6 +73,9 @@ else()
   set(CMAKE_CXX_COMPILER_ID_TEST_FLAGS
     # Try compiling to an object file only.
     "-c"
+    # IAR does not detect language automatically
+    "--c++"
+    "--ec++"
     )
 endif()
 
@@ -164,6 +167,13 @@ include(CMakeFindBinUtils)
 set(_CMAKE_PROCESSING_LANGUAGE "CXX")
 include(Compiler/${CMAKE_CXX_COMPILER_ID}-FindBinUtils OPTIONAL)
 unset(_CMAKE_PROCESSING_LANGUAGE)
+
+if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID)
+  set(_SET_CMAKE_CXX_COMPILER_ARCHITECTURE_ID
+    "set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID ${CMAKE_CXX_COMPILER_ARCHITECTURE_ID})")
+else()
+  set(_SET_CMAKE_CXX_COMPILER_ARCHITECTURE_ID "")
+endif()
 
 if(MSVC_CXX_ARCHITECTURE_ID)
   set(SET_MSVC_CXX_ARCHITECTURE_ID
