@@ -20,6 +20,7 @@ include:
   G95 = G95 Fortran (g95.org)
   GNU = GNU Compiler Collection (gcc.gnu.org)
   HP = Hewlett-Packard Compiler (hp.com)
+  IAR = IAR Systems (iar.com)
   Intel = Intel Compiler (intel.com)
   MIPSpro = SGI MIPSpro (sgi.com)
   MSVC = Microsoft Visual Studio (microsoft.com)

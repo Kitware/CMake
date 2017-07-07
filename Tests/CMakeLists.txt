@@ -331,6 +331,7 @@ if(BUILD_TESTING)
 
   if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^89]|[89][0-9])")
     ADD_TEST_MACRO(CSharpOnly CSharpOnly)
+    ADD_TEST_MACRO(CSharpLinkToCxx CSharpLinkToCxx)
   endif()
 
   ADD_TEST_MACRO(COnly COnly)
@@ -2081,7 +2082,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     set(reg_nasm "[HKEY_CURRENT_USER\\SOFTWARE\\nasm]")
     foreach(reg vs10 vs11 vs12 vs14 ws80 ws81 ws10_0 wp80 wp81 wince tegra nasm)
       get_filename_component(r "${reg_${reg}}" ABSOLUTE)
-      if(IS_DIRECTORY "${r}")
+      if(IS_DIRECTORY "${r}" AND NOT "${r}" STREQUAL "/registry")
         set(${reg} 1)
       else()
         set(${reg} 0)

@@ -26,10 +26,11 @@
 #include "cmVS12RCFlagTable.h"
 #include "cmVS140CLFlagTable.h"
 #include "cmVS140CSharpFlagTable.h"
+#include "cmVS140LinkFlagTable.h"
 #include "cmVS141CLFlagTable.h"
 #include "cmVS141CSharpFlagTable.h"
+#include "cmVS141LinkFlagTable.h"
 #include "cmVS14LibFlagTable.h"
-#include "cmVS14LinkFlagTable.h"
 #include "cmVS14MASMFlagTable.h"
 #include "cmVS14RCFlagTable.h"
 
@@ -114,8 +115,10 @@ cmIDEFlagTable const* cmVisualStudio10ToolsetOptions::GetLinkFlagTable(
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
-  if ((useToolset == "v140") || (useToolset == "v141")) {
-    return cmVS14LinkFlagTable;
+  if (useToolset == "v141") {
+    return cmVS141LinkFlagTable;
+  } else if (useToolset == "v140") {
+    return cmVS140LinkFlagTable;
   } else if (useToolset == "v120") {
     return cmVS12LinkFlagTable;
   } else if (useToolset == "v110") {

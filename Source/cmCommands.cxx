@@ -42,6 +42,7 @@
 #include "cmIfCommand.h"
 #include "cmIncludeCommand.h"
 #include "cmIncludeDirectoryCommand.h"
+#include "cmIncludeGuardCommand.h"
 #include "cmIncludeRegularExpressionCommand.h"
 #include "cmInstallCommand.h"
 #include "cmInstallFilesCommand.h"
@@ -132,6 +133,7 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("get_property", new cmGetPropertyCommand);
   state->AddBuiltinCommand("if", new cmIfCommand);
   state->AddBuiltinCommand("include", new cmIncludeCommand);
+  state->AddBuiltinCommand("include_guard", new cmIncludeGuardCommand);
   state->AddBuiltinCommand("list", new cmListCommand);
   state->AddBuiltinCommand("macro", new cmMacroCommand);
   state->AddBuiltinCommand("make_directory", new cmMakeDirectoryCommand);

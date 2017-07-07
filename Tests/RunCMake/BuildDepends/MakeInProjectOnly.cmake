@@ -3,7 +3,7 @@ get_filename_component(include_dir "${CMAKE_BINARY_DIR}" PATH)
 include_directories("${include_dir}")
 add_executable(MakeInProjectOnly MakeInProjectOnly.c)
 set(CMAKE_DEPENDS_IN_PROJECT_ONLY 1)
-file(GENERATE OUTPUT check-$<LOWER_CASE:$<CONFIG>>.cmake CONTENT "
+file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/check-$<LOWER_CASE:$<CONFIG>>.cmake CONTENT "
 if (check_step EQUAL 1)
   set(check_pairs
     \"$<TARGET_FILE:MakeInProjectOnly>|${include_dir}/MakeInProjectOnly.h\"

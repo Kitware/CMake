@@ -25,7 +25,8 @@ static cmVS7FlagTable cmVS11CSharpFlagTable[] = {
   { "ApplicationIcon", "win32icon", "", "",
     cmIDEFlagTable::UserValueRequired },
 
-  { "Win32Manifest", "win32manifest:", "", "true", 0 },
+  { "ApplicationManifest", "win32manifest:", "", "",
+    cmIDEFlagTable::UserValueRequired },
 
   { "NoWin32Manifest", "nowin32manifest", "", "true", 0 },
 

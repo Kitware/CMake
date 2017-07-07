@@ -254,6 +254,11 @@ versions supported by the cmake server. These are JSON objects with "major" and
 as experimental. These will contain the "isExperimental" key set to true. Enabling
 these requires a special command line argument when starting the cmake server mode.
 
+Within a "major" version all "minor" versions are fully backwards compatible.
+New "minor" versions may introduce functionality in such a way that existing
+clients of the same "major" version will continue to work, provided they
+ignore keys in the output that they do not know about.
+
 Example::
 
   [== "CMake Server" ==[
@@ -268,6 +273,9 @@ The first request that the client may send to the server is of type "handshake".
 
 This request needs to pass one of the "supportedProtocolVersions" of the "hello"
 type response received earlier back to the server in the "protocolVersion" field.
+Giving the "major" version of the requested protocol version will make the server
+use the latest minor version of that protocol. Use this if you do not explicitly
+need to depend on a specific minor version.
 
 Each protocol version may request additional attributes to be present.
 

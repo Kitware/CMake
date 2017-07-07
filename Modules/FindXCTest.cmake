@@ -136,7 +136,7 @@ function(xctest_add_bundle target testee)
         XCODE_ATTRIBUTE_TEST_HOST "$<TARGET_FILE:${testee}>")
       if(NOT XCODE_VERSION VERSION_LESS 7.3)
         set_target_properties(${target} PROPERTIES
-          LIBRARY_OUTPUT_DIRECTORY "$<TARGET_FILE_DIR:${testee}>/../PlugIns")
+          LIBRARY_OUTPUT_DIRECTORY "$<TARGET_BUNDLE_CONTENT_DIR:${testee}>/PlugIns")
       endif()
     else(XCODE)
       target_link_libraries(${target}
@@ -183,7 +183,7 @@ function(xctest_add_test name bundle)
 
   add_test(
     NAME ${name}
-    COMMAND ${XCTest_EXECUTABLE} $<TARGET_LINKER_FILE_DIR:${bundle}>/../..)
+    COMMAND ${XCTest_EXECUTABLE} $<TARGET_BUNDLE_DIR:${bundle}>)
 
   # point loader to testee in case rpath is disabled
 

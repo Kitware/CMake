@@ -281,9 +281,11 @@ cmQtAutoGenerators::cmQtAutoGenerators()
 
   // Moc macro filters
   this->MocMacroFilters[0].first = "Q_OBJECT";
-  this->MocMacroFilters[0].second.compile("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
+  this->MocMacroFilters[0].second.compile(
+    "[\n][ \t]*{?[ \t]*Q_OBJECT[^a-zA-Z0-9_]");
   this->MocMacroFilters[1].first = "Q_GADGET";
-  this->MocMacroFilters[1].second.compile("[\n][ \t]*Q_GADGET[^a-zA-Z0-9_]");
+  this->MocMacroFilters[1].second.compile(
+    "[\n][ \t]*{?[ \t]*Q_GADGET[^a-zA-Z0-9_]");
 
   // Precompile regular expressions
   this->MocRegExpInclude.compile(
@@ -1003,7 +1005,7 @@ bool cmQtAutoGenerators::MocParseSourceContent(
             // In relaxed mode try to find a header instead but issue a warning
             const std::string headerToMoc =
               this->MocFindHeader(scannedFileAbsPath, incSubDir + incBasename);
-            if (!headerToMoc.empty()) {
+            if (!headerToMoc.empty() && !this->MocSkip(headerToMoc)) {
               // This is for KDE4 compatibility:
               fileToMoc = headerToMoc;
               if (!requiresMoc && (incBasename == scannedFileBasename)) {
@@ -1160,7 +1162,6 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
       if (!this->UicSkip(absFilename) && !this->UicSkip(headerName)) {
         uicHeaderFiles.insert(headerName);
       }
-      break;
     }
   }
 }

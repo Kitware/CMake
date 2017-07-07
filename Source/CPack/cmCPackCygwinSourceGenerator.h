@@ -17,7 +17,7 @@ public:
    * Construct generator
    */
   cmCPackCygwinSourceGenerator();
-  virtual ~cmCPackCygwinSourceGenerator();
+  ~cmCPackCygwinSourceGenerator() CM_OVERRIDE;
 
 protected:
   const char* GetPackagingInstallPrefix();

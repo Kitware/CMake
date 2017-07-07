@@ -1,4 +1,4 @@
-static cmVS7FlagTable cmVS14LinkFlagTable[] = {
+static cmVS7FlagTable cmVS141LinkFlagTable[] = {
 
   // Enum Properties
   { "ShowProgress", "", "Not Set", "NotSet", 0 },
@@ -36,9 +36,15 @@ static cmVS7FlagTable cmVS14LinkFlagTable[] = {
     "requireAdministrator", "RequireAdministrator", 0 },
 
   { "GenerateDebugInformation", "DEBUG:FASTLINK",
-    "Optimize for faster linking", "DebugFastLink",
+    "Generate Debug Information optimized for faster links", "DebugFastLink",
     cmVS7FlagTable::CaseInsensitive },
-  { "GenerateDebugInformation", "DEBUG", "Optimize for debugging", "Debug",
+  { "GenerateDebugInformation", "DEBUG:FULL",
+    "Generate Debug Information optimized for sharing and publishing",
+    "DebugFull", cmVS7FlagTable::CaseInsensitive },
+  { "GenerateDebugInformation", "DEBUG:NONE",
+    "Produces no debugging information", "false",
+    cmVS7FlagTable::CaseInsensitive },
+  { "GenerateDebugInformation", "DEBUG", "Generate Debug Information", "true",
     cmVS7FlagTable::CaseInsensitive },
 
   { "SubSystem", "", "Not Set", "NotSet", 0 },
@@ -128,9 +134,6 @@ static cmVS7FlagTable cmVS14LinkFlagTable[] = {
     0 },
   { "CLRSupportLastError", "CLRSupportLastError:SYSTEMDLL", "System Dlls Only",
     "SystemDlls", 0 },
-
-  { "LinkControlFlowGuard", "guard:cf", "Enable Security Check with Guard",
-    "Guard", 0 },
 
   // Bool Properties
   { "LinkIncremental", "INCREMENTAL:NO", "", "false", 0 },

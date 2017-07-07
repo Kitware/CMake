@@ -778,28 +778,24 @@ else()
         )
       if(RET EQUAL 0)
         string(STRIP "${wxWidgets_CXX_FLAGS}" wxWidgets_CXX_FLAGS)
-        separate_arguments(wxWidgets_CXX_FLAGS)
+        separate_arguments(wxWidgets_CXX_FLAGS_LIST NATIVE_COMMAND "${wxWidgets_CXX_FLAGS}")
 
         DBG_MSG_V("wxWidgets_CXX_FLAGS=${wxWidgets_CXX_FLAGS}")
 
-        # parse definitions from cxxflags;
-        #   drop -D* from CXXFLAGS and the -D prefix
-        string(REGEX MATCHALL "-D[^;]+"
-          wxWidgets_DEFINITIONS  "${wxWidgets_CXX_FLAGS}")
-        string(REGEX REPLACE "-D[^;]+(;|$)" ""
-          wxWidgets_CXX_FLAGS "${wxWidgets_CXX_FLAGS}")
-        string(REGEX REPLACE ";$" ""
-          wxWidgets_CXX_FLAGS "${wxWidgets_CXX_FLAGS}")
-        string(REPLACE "-D" ""
-          wxWidgets_DEFINITIONS "${wxWidgets_DEFINITIONS}")
-
-        # parse include dirs from cxxflags; drop -I prefix
-        string(REGEX MATCHALL "-I[^;]+"
-          wxWidgets_INCLUDE_DIRS "${wxWidgets_CXX_FLAGS}")
-        string(REGEX REPLACE "-I[^;]+;" ""
-          wxWidgets_CXX_FLAGS "${wxWidgets_CXX_FLAGS}")
-        string(REPLACE "-I" ""
-          wxWidgets_INCLUDE_DIRS "${wxWidgets_INCLUDE_DIRS}")
+        # parse definitions and include dirs from cxxflags
+        #   drop the -D and -I prefixes
+        set(wxWidgets_CXX_FLAGS)
+        foreach(arg IN LISTS wxWidgets_CXX_FLAGS_LIST)
+          if("${arg}" MATCHES "^-I(.*)$")
+            # include directory
+            list(APPEND wxWidgets_INCLUDE_DIRS "${CMAKE_MATCH_1}")
+          elseif("${arg}" MATCHES "^-D(.*)$")
+            # compile definition
+            list(APPEND wxWidgets_DEFINITIONS "${CMAKE_MATCH_1}")
+          else()
+            list(APPEND wxWidgets_CXX_FLAGS "${arg}")
+          endif()
+        endforeach()
 
         DBG_MSG_V("wxWidgets_DEFINITIONS=${wxWidgets_DEFINITIONS}")
         DBG_MSG_V("wxWidgets_INCLUDE_DIRS=${wxWidgets_INCLUDE_DIRS}")

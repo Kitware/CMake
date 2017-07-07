@@ -247,7 +247,7 @@ private:
                                         const cmGeneratorTarget* t) const;
 
   void ComputeArchitectures(cmMakefile* mf);
-  void ComputeObjectDirArch();
+  void ComputeObjectDirArch(cmMakefile* mf);
 
   void addObject(cmXCodeObject* obj);
   std::string PostBuildMakeTarget(std::string const& tName,

@@ -42,7 +42,6 @@ add_executable(CudaComplex main.cpp)
 target_link_libraries(CudaComplex PUBLIC CudaComplexMixedLib)
 
 if(APPLE)
-  # We need to add the default path to the driver (libcuda.dylib) as an rpath, so that
-  # the static cuda runtime can find it at runtime.
-  target_link_libraries(CudaComplex PRIVATE -Wl,-rpath,/usr/local/cuda/lib)
+  # Help the static cuda runtime find the driver (libcuda.dyllib) at runtime.
+  set_property(TARGET CudaComplex PROPERTY BUILD_RPATH ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 endif()

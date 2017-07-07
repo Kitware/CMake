@@ -1,3 +1,4 @@
+enable_language(CXX)
 
 if (NOT ";${CMAKE_C_COMPILE_FEATURES};" MATCHES ";gnu_c_typeof;")
   # Simulate passing the test.

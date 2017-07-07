@@ -1,5 +1,9 @@
 include(RunCMake)
 
+run_cmake(CMP0070-NEW)
+run_cmake(CMP0070-OLD)
+run_cmake(CMP0070-WARN)
+
 run_cmake(CommandConflict)
 if("${RunCMake_GENERATOR}" MATCHES "Visual Studio|Xcode")
   run_cmake(OutputConflict)

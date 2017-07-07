@@ -179,7 +179,8 @@ Functions
     will be converted to an absolute path relative to the current binary
     directory. This is necessary because doxygen will normally be run from a
     directory within the source tree so that relative source paths work as
-    expected.
+    expected. If this directory does not exist, it will be recursively created
+    prior to executing the doxygen commands.
 
 To change any of these defaults or override any other Doxygen config option,
 set relevant variables before calling ``doxygen_add_docs()``. For example:
@@ -389,10 +390,10 @@ macro(_Doxygen_find_doxygen)
             COMMAND "${DOXYGEN_EXECUTABLE}" --version
             OUTPUT_VARIABLE DOXYGEN_VERSION
             OUTPUT_STRIP_TRAILING_WHITESPACE
-            RESULT_VARIABLE result
+            RESULT_VARIABLE _Doxygen_version_result
         )
-        if(result)
-            message(WARNING "Unable to determine doxygen version: ${result}")
+        if(_Doxygen_version_result)
+            message(WARNING "Unable to determine doxygen version: ${_Doxygen_version_result}")
         endif()
 
         # Create an imported target for Doxygen
@@ -619,15 +620,15 @@ if(TARGET Doxygen::doxygen)
     # If doxygen was found, use it to generate a minimal default Doxyfile.
     # We will delete this file after we have finished using it below to
     # generate the other files that doxygen_add_docs() will use.
-    set(_Doxygen_tpl "${PROJECT_BINARY_DIR}/CMakeDoxyfile.tpl")
+    set(_Doxygen_tpl "${CMAKE_BINARY_DIR}/CMakeDoxyfile.tpl")
     execute_process(
         COMMAND "${DOXYGEN_EXECUTABLE}" -s -g "${_Doxygen_tpl}"
         OUTPUT_QUIET
-        RESULT_VARIABLE result
+        RESULT_VARIABLE _Doxygen_tpl_result
     )
-    if(result)
+    if(_Doxygen_tpl_result)
         message(FATAL_ERROR
-                "Unable to generate Doxyfile template: ${result}")
+                "Unable to generate Doxyfile template: ${_Doxygen_tpl_result}")
     elseif(NOT EXISTS "${_Doxygen_tpl}")
         message(FATAL_ERROR
                 "Doxygen has failed to generate a Doxyfile template")
@@ -646,8 +647,8 @@ if(TARGET Doxygen::doxygen)
     # content is only dependent on the version of Doxygen being used. Therefore
     # we always put them at the top of the build tree so that they are in a
     # predictable location.
-    set(_doxyfile_in       "${PROJECT_BINARY_DIR}/CMakeDoxyfile.in")
-    set(_doxyfile_defaults "${PROJECT_BINARY_DIR}/CMakeDoxygenDefaults.cmake")
+    set(_doxyfile_in       "${CMAKE_BINARY_DIR}/CMakeDoxyfile.in")
+    set(_doxyfile_defaults "${CMAKE_BINARY_DIR}/CMakeDoxygenDefaults.cmake")
 
     file(WRITE "${_doxyfile_in}"       ${_Doxygen_dne_header})
     file(WRITE "${_doxyfile_defaults}" ${_Doxygen_dne_header})
@@ -896,7 +897,7 @@ doxygen_add_docs() for target ${targetName}")
 
     # Now bring in Doxgen's defaults for those things the project has not
     # already set and we have not provided above
-    include("${PROJECT_BINARY_DIR}/CMakeDoxygenDefaults.cmake" OPTIONAL)
+    include("${CMAKE_BINARY_DIR}/CMakeDoxygenDefaults.cmake" OPTIONAL)
 
     # Cleanup built HTMLs on "make clean"
     # TODO Any other dirs?
@@ -1020,18 +1021,25 @@ doxygen_add_docs() for target ${targetName}")
         WARN_LOGFILE
         XML_OUTPUT
     )
+
+    # Store the unmodified value of DOXYGEN_OUTPUT_DIRECTORY prior to invoking
+    # doxygen_quote_value() below. This will mutate the string specifically for
+    # consumption by Doxygen's config file, which we do not want when we use it
+    # later in the custom target's commands.
+    set( _original_doxygen_output_dir ${DOXYGEN_OUTPUT_DIRECTORY} )
+
     foreach(_item IN LISTS _doxygen_quoted_options)
         doxygen_quote_value(DOXYGEN_${_item})
     endforeach()
 
     # Prepare doxygen configuration file
-    set(_doxyfile_template "${PROJECT_BINARY_DIR}/CMakeDoxyfile.in")
+    set(_doxyfile_template "${CMAKE_BINARY_DIR}/CMakeDoxyfile.in")
     set(_target_doxyfile "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.${targetName}")
     configure_file("${_doxyfile_template}" "${_target_doxyfile}")
 
     # Add the target
-    add_custom_target(
-        ${targetName}
+    add_custom_target( ${targetName} VERBATIM
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${_original_doxygen_output_dir}
         COMMAND "${DOXYGEN_EXECUTABLE}" "${_target_doxyfile}"
         WORKING_DIRECTORY "${_args_WORKING_DIRECTORY}"
         DEPENDS "${_target_doxyfile}"

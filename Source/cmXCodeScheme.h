@@ -5,6 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <vector>
+
 #include "cmGlobalXCodeGenerator.h"
 #include "cmSystemTools.h"
 #include "cmXCodeObject.h"
@@ -16,7 +18,9 @@
 class cmXCodeScheme
 {
 public:
-  cmXCodeScheme(cmXCodeObject* xcObj,
+  typedef std::vector<const cmXCodeObject*> TestObjects;
+
+  cmXCodeScheme(cmXCodeObject* xcObj, const TestObjects& tests,
                 const std::vector<std::string>& configList,
                 unsigned int xcVersion);
 
@@ -25,24 +29,29 @@ public:
 
 private:
   const cmXCodeObject* const Target;
+  const TestObjects Tests;
   const std::string& TargetName;
-  const std::string BuildableName;
-  const std::string& TargetId;
   const std::vector<std::string>& ConfigList;
   const unsigned int XcodeVersion;
 
   void WriteXCodeXCScheme(std::ostream& fout, const std::string& container);
 
   void WriteBuildAction(cmXMLWriter& xout, const std::string& container);
-  void WriteTestAction(cmXMLWriter& xout, std::string configuration);
+  void WriteTestAction(cmXMLWriter& xout, std::string configuration,
+                       const std::string& container);
   void WriteLaunchAction(cmXMLWriter& xout, std::string configuration,
                          const std::string& container);
   void WriteProfileAction(cmXMLWriter& xout, std::string configuration);
   void WriteAnalyzeAction(cmXMLWriter& xout, std::string configuration);
   void WriteArchiveAction(cmXMLWriter& xout, std::string configuration);
 
+  void WriteBuildableReference(cmXMLWriter& xout, const cmXCodeObject* xcObj,
+                               const std::string& container);
+
   std::string WriteVersionString();
   std::string FindConfiguration(const std::string& name);
+
+  bool IsTestable() const;
 
   static bool IsExecutable(const cmXCodeObject* target);
 };

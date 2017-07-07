@@ -929,6 +929,8 @@ if(HAVE_LIBWS2_32)
   set(CMAKE_REQUIRED_LIBRARIES ws2_32)
 elseif(HAVE_LIBSOCKET)
   set(CMAKE_REQUIRED_LIBRARIES socket)
+elseif(HAVE_LIBNETWORK)
+  set(CMAKE_REQUIRED_LIBRARIES network)
 endif()
 
 check_symbol_exists(basename      "${CURL_INCLUDES}" HAVE_BASENAME)

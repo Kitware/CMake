@@ -15,6 +15,15 @@ set(CMAKE_CUDA_STANDARD 11)
 
 add_library(CUDASeparateLibA STATIC file1.cu file2.cu file3.cu)
 
+if(CMAKE_CUDA_SIMULATE_ID STREQUAL "MSVC")
+  # Test adding a flag that is not in our CUDA flag table for VS.
+  if(NOT CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 8)
+    string(APPEND CMAKE_CUDA_FLAGS " --ftemplate-depth 50")
+  endif()
+  # Test adding a flag that nvcc should pass to the host compiler.
+  target_compile_options(CUDASeparateLibA PRIVATE -Xcompiler=-bigobj)
+endif()
+
 #Having file4/file5 in a shared library causes serious problems
 #with the nvcc linker and it will generate bad entries that will
 #cause a segv when trying to run the executable
@@ -39,8 +48,7 @@ if (CMAKE_GENERATOR MATCHES "^Visual Studio")
                         PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 endif()
 
-if (APPLE)
-  # We need to add the default path to the driver (libcuda.dylib) as an rpath, so that
-  # the static cuda runtime can find it at runtime.
-  target_link_libraries(CudaOnlySeparateCompilation PRIVATE -Wl,-rpath,/usr/local/cuda/lib)
+if(APPLE)
+  # Help the static cuda runtime find the driver (libcuda.dyllib) at runtime.
+  set_property(TARGET CudaOnlySeparateCompilation PROPERTY BUILD_RPATH ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 endif()

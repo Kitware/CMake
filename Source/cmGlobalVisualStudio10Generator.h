@@ -59,6 +59,13 @@ public:
   const char* GetPlatformToolsetCuda() const;
   std::string const& GetPlatformToolsetCudaString() const;
 
+  /** Return whether we need to use No/Debug instead of false/true
+      for GenerateDebugInformation.  */
+  bool GetPlatformToolsetNeedsDebugEnum() const
+  {
+    return this->PlatformToolsetNeedsDebugEnum;
+  }
+
   /** Return the CMAKE_SYSTEM_NAME.  */
   std::string const& GetSystemName() const { return this->SystemName; }
 
@@ -168,6 +175,8 @@ private:
   virtual std::string FindMSBuildCommand();
   virtual std::string FindDevEnvCommand();
   virtual std::string GetVSMakeProgram() { return this->GetMSBuildCommand(); }
+
+  bool PlatformToolsetNeedsDebugEnum;
 
   bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
 

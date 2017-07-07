@@ -21,7 +21,7 @@ public:
   cmCPackTypeMacro(cmCPackBundleGenerator, cmCPackDragNDropGenerator);
 
   cmCPackBundleGenerator();
-  virtual ~cmCPackBundleGenerator();
+  ~cmCPackBundleGenerator() CM_OVERRIDE;
 
 protected:
   int InitializeInternal() CM_OVERRIDE;

@@ -469,6 +469,8 @@ set(SRCS
   cmIncludeDirectoryCommand.h
   cmIncludeExternalMSProjectCommand.cxx
   cmIncludeExternalMSProjectCommand.h
+  cmIncludeGuardCommand.cxx
+  cmIncludeGuardCommand.h
   cmIncludeRegularExpressionCommand.cxx
   cmIncludeRegularExpressionCommand.h
   cmInstallCommand.cxx
@@ -874,6 +876,7 @@ set(CPACK_SRCS
   CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackZIPGenerator.cxx
   CPack/cmCPack7zGenerator.cxx
+  CPack/cmCPackDebGenerator.cxx
   )
 # CPack IFW generator
 set(CPACK_SRCS ${CPACK_SRCS}
@@ -896,11 +899,39 @@ if(CYGWIN)
     )
 endif()
 
+option(CPACK_ENABLE_FREEBSD_PKG "Add FreeBSD pkg(8) generator to CPack." OFF)
+
 if(UNIX)
   set(CPACK_SRCS ${CPACK_SRCS}
-    CPack/cmCPackDebGenerator.cxx
     CPack/cmCPackRPMGenerator.cxx
     )
+
+  # Optionally, try to use pkg(8)
+  if(CPACK_ENABLE_FREEBSD_PKG)
+    # On UNIX, you may find FreeBSD's pkg(8) and attendant
+    # library -- it can be used on FreeBSD, Dragonfly, NetBSD,
+    # OpenBSD and also Linux and OSX. Look for the header and
+    # the library; it's a warning on FreeBSD if they're not
+    # found, and informational on other platforms.
+    find_path(FREEBSD_PKG_INCLUDE_DIRS "pkg.h" PATHS /usr/local)
+    if(FREEBSD_PKG_INCLUDE_DIRS)
+      find_library(FREEBSD_PKG_LIBRARIES
+        pkg
+        DOC "FreeBSD pkg(8) library")
+      if(FREEBSD_PKG_LIBRARIES)
+        set(CPACK_SRCS ${CPACK_SRCS}
+          CPack/cmCPackFreeBSDGenerator.cxx
+          )
+      endif()
+    endif()
+
+    if (NOT FREEBSD_PKG_INCLUDE_DIRS OR NOT FREEBSD_PKG_LIBRARIES)
+      message(FATAL_ERROR "CPack needs libpkg(3) to produce FreeBSD packages natively.")
+    endif()
+  else()
+    set(FREEBSD_PKG_INCLUDE_DIRS NOTFOUND)
+    set(FREEBSD_PKG_LIBRARIES NOTFOUND)
+  endif()
 endif()
 
 if(WIN32)
@@ -957,6 +988,11 @@ if(APPLE)
       "Some CPack functionality may be limited.\n"
       "See CMakeFiles/CMakeError.log for details of the failure.")
   endif()
+endif()
+if(CPACK_ENABLE_FREEBSD_PKG AND FREEBSD_PKG_INCLUDE_DIRS AND FREEBSD_PKG_LIBRARIES)
+  target_link_libraries(CPackLib ${FREEBSD_PKG_LIBRARIES})
+  include_directories(${FREEBSD_PKG_INCLUDE_DIRS})
+  add_definitions(-DHAVE_FREEBSD_PKG)
 endif()
 
 if(APPLE)

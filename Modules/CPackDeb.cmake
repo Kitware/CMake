@@ -497,6 +497,16 @@
 #
 #    This value is not interpreted. It is possible to pass an optional
 #    revision number of the referenced source package as well.
+#
+# Building Debian packages on Windows
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# To communicate UNIX file permissions from the install stage
+# to the CPack DEB generator the "cmake_mode_t" NTFS
+# alternate data stream (ADT) is used.
+#
+# When a filesystem without ADT support is used only owner read/write
+# permissions can be preserved.
 
 # CPack script for creating Debian package
 # Author: Mathieu Malaterre
@@ -505,10 +515,6 @@
 
 if(CMAKE_BINARY_DIR)
   message(FATAL_ERROR "CPackDeb.cmake may only be used by CPack internally.")
-endif()
-
-if(NOT UNIX)
-  message(FATAL_ERROR "CPackDeb.cmake may only be used under UNIX.")
 endif()
 
 function(cpack_deb_variable_fallback OUTPUT_VAR_NAME)

@@ -1,3 +1,4 @@
+enable_language(CXX)
 
 if (NOT ";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";gnu_cxx_typeof;"
     AND NOT ";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";msvc_cxx_sealed;" )

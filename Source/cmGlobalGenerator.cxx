@@ -91,7 +91,7 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->TryCompileTimeout = 0;
 
   this->ExtraGenerator = CM_NULLPTR;
-  this->CurrentMakefile = CM_NULLPTR;
+  this->CurrentConfigureMakefile = CM_NULLPTR;
   this->TryCompileOuterMakefile = CM_NULLPTR;
 
   this->ConfigureDoneCMP0026AndCMP0024 = false;
@@ -491,7 +491,6 @@ void cmGlobalGenerator::EnableLanguage(
     windowsVersionString << osviex.dwMajorVersion << "."
                          << osviex.dwMinorVersion << "."
                          << osviex.dwBuildNumber;
-    windowsVersionString.str();
     mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION",
                       windowsVersionString.str().c_str());
 #endif
@@ -1076,7 +1075,7 @@ bool cmGlobalGenerator::GetLanguageEnabled(const std::string& l) const
 
 void cmGlobalGenerator::ClearEnabledLanguages()
 {
-  return this->CMakeInstance->GetState()->ClearEnabledLanguages();
+  this->CMakeInstance->GetState()->ClearEnabledLanguages();
 }
 
 void cmGlobalGenerator::CreateLocalGenerators()

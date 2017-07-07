@@ -55,6 +55,11 @@
 #   ICU_<C>_FOUND - ON if component was found
 #   ICU_<C>_LIBRARIES - libraries for component
 #
+# ICU datafiles are reported in::
+#
+#   ICU_MAKEFILE_INC - Makefile.inc
+#   ICU_PKGDATA_INC - pkgdata.inc
+#
 # Note that ``<C>`` is the uppercased name of the component.
 #
 # This module reads hints about search results from::
@@ -100,6 +105,10 @@ set(icu_programs
   icupkg
   gencmn)
 
+set(icu_data
+  Makefile.inc
+  pkgdata.inc)
+
 # The ICU checks are contained in a function due to the large number
 # of temporary variables needed.
 function(_ICU_FIND)
@@ -116,32 +125,8 @@ function(_ICU_FIND)
     endif()
   endif()
 
-  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    # 64-bit binary directory
-    set(_bin64 "bin64")
-    # 64-bit library directory
-    set(_lib64 "lib64")
-  endif()
-
-  # Generic 64-bit and 32-bit directories
-  list(APPEND icu_binary_suffixes "${_bin64}" "bin")
-  list(APPEND icu_library_suffixes "${_lib64}" "lib")
-  list(APPEND icu_include_suffixes "include")
-
-  # Find all ICU programs
-  foreach(program ${icu_programs})
-    string(TOUPPER "${program}" program_upcase)
-    set(cache_var "ICU_${program_upcase}_EXECUTABLE")
-    set(program_var "ICU_${program_upcase}_EXECUTABLE")
-    find_program("${cache_var}" "${program}"
-      HINTS ${icu_roots}
-      PATH_SUFFIXES ${icu_binary_suffixes}
-      DOC "ICU ${program} executable")
-    mark_as_advanced(cache_var)
-    set("${program_var}" "${${cache_var}}" PARENT_SCOPE)
-  endforeach()
-
   # Find include directory
+  list(APPEND icu_include_suffixes "include")
   find_path(ICU_INCLUDE_DIR
             NAMES "unicode/utypes.h"
             HINTS ${icu_roots}
@@ -156,12 +141,36 @@ function(_ICU_FIND)
 
     string(REGEX REPLACE "^#define[\t ]+U_ICU_VERSION[\t ]+\"([^ \\n]*)\".*"
       "\\1" icu_version_string "${icu_header_str}")
+    set(ICU_VERSION "${icu_version_string}")
     set(ICU_VERSION "${icu_version_string}" PARENT_SCOPE)
     unset(icu_header_str)
     unset(icu_version_string)
   endif()
 
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    # 64-bit binary directory
+    set(_bin64 "bin64")
+    # 64-bit library directory
+    set(_lib64 "lib64")
+  endif()
+
+
+  # Find all ICU programs
+  list(APPEND icu_binary_suffixes "${_bin64}" "bin")
+  foreach(program ${icu_programs})
+    string(TOUPPER "${program}" program_upcase)
+    set(cache_var "ICU_${program_upcase}_EXECUTABLE")
+    set(program_var "ICU_${program_upcase}_EXECUTABLE")
+    find_program("${cache_var}" "${program}"
+      HINTS ${icu_roots}
+      PATH_SUFFIXES ${icu_binary_suffixes}
+      DOC "ICU ${program} executable")
+    mark_as_advanced(cache_var)
+    set("${program_var}" "${${cache_var}}" PARENT_SCOPE)
+  endforeach()
+
   # Find all ICU libraries
+  list(APPEND icu_library_suffixes "${_lib64}" "lib")
   set(ICU_REQUIRED_LIBS_FOUND ON)
   foreach(component ${ICU_FIND_COMPONENTS})
     string(TOUPPER "${component}" component_upcase)
@@ -232,6 +241,32 @@ function(_ICU_FIND)
   endforeach()
   set(_ICU_REQUIRED_LIBS_FOUND "${ICU_REQUIRED_LIBS_FOUND}" PARENT_SCOPE)
   set(ICU_LIBRARY "${ICU_LIBRARY}" PARENT_SCOPE)
+
+  # Find all ICU data files
+  if(CMAKE_LIBRARY_ARCHITECTURE)
+    list(APPEND icu_data_suffixes
+      "${_lib64}/${CMAKE_LIBRARY_ARCHITECTURE}/icu/${ICU_VERSION}"
+      "lib/${CMAKE_LIBRARY_ARCHITECTURE}/icu/${ICU_VERSION}"
+      "${_lib64}/${CMAKE_LIBRARY_ARCHITECTURE}/icu"
+      "lib/${CMAKE_LIBRARY_ARCHITECTURE}/icu")
+  endif()
+  list(APPEND icu_data_suffixes
+    "${_lib64}/icu/${ICU_VERSION}"
+    "lib/icu/${ICU_VERSION}"
+    "${_lib64}/icu"
+    "lib/icu")
+  foreach(data ${icu_data})
+    string(TOUPPER "${data}" data_upcase)
+    string(REPLACE "." "_" data_upcase "${data_upcase}")
+    set(cache_var "ICU_${data_upcase}")
+    set(data_var "ICU_${data_upcase}")
+    find_file("${cache_var}" "${data}"
+      HINTS ${icu_roots}
+      PATH_SUFFIXES ${icu_data_suffixes}
+      DOC "ICU ${data} data file")
+    mark_as_advanced(cache_var)
+    set("${data_var}" "${${cache_var}}" PARENT_SCOPE)
+  endforeach()
 
   if(NOT ICU_FIND_QUIETLY)
     if(ICU_LIBS_FOUND)
@@ -332,6 +367,15 @@ if(ICU_DEBUG)
     message(STATUS "${program} program: ${${program_lib}}")
     unset(program_upcase)
     unset(program_lib)
+  endforeach()
+
+  foreach(data IN LISTS icu_data)
+    string(TOUPPER "${data}" data_upcase)
+    string(REPLACE "." "_" data_upcase "${data_upcase}")
+    set(data_lib "ICU_${data_upcase}")
+    message(STATUS "${data} data: ${${data_lib}}")
+    unset(data_upcase)
+    unset(data_lib)
   endforeach()
 
   foreach(component IN LISTS ICU_FIND_COMPONENTS)

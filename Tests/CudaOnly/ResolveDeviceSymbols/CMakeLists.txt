@@ -46,7 +46,6 @@ add_executable(CudaOnlyResolveDeviceSymbols main.cu)
 target_link_libraries(CudaOnlyResolveDeviceSymbols PRIVATE CUDAResolveDeviceLib)
 
 if(APPLE)
-  # We need to add the default path to the driver (libcuda.dylib) as an rpath, so that
-  # the static cuda runtime can find it at runtime.
-  target_link_libraries(CudaOnlyResolveDeviceSymbols PRIVATE -Wl,-rpath,/usr/local/cuda/lib)
+  # Help the static cuda runtime find the driver (libcuda.dyllib) at runtime.
+  set_property(TARGET CudaOnlyResolveDeviceSymbols PROPERTY BUILD_RPATH ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 endif()

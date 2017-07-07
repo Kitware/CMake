@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The following individuals and institutions are among the Contributors:
 
 * Aaron C. Meadows <cmake@shadowguarddev.com>
+* Adriaan de Groot <groot@kde.org>
 * Aleksey Avdeev <solo@altlinux.ru>
 * Alexander Neundorf <neundorf@kde.org>
 * Alexander Smorkalov <alexander.smorkalov@itseez.com>
