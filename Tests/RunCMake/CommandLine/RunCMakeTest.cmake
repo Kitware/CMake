@@ -173,10 +173,27 @@ run_cmake_command(E_env-set   ${CMAKE_COMMAND} -E env TEST_ENV=1 ${CMAKE_COMMAND
 run_cmake_command(E_env-unset ${CMAKE_COMMAND} -E env TEST_ENV=1 ${CMAKE_COMMAND} -E env --unset=TEST_ENV ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_env-unset.cmake)
 
 run_cmake_command(E_md5sum-dir ${CMAKE_COMMAND} -E md5sum .)
+run_cmake_command(E_sha1sum-dir ${CMAKE_COMMAND} -E sha1sum .)
+run_cmake_command(E_sha224sum-dir ${CMAKE_COMMAND} -E sha224sum .)
+run_cmake_command(E_sha256sum-dir ${CMAKE_COMMAND} -E sha256sum .)
+run_cmake_command(E_sha384sum-dir ${CMAKE_COMMAND} -E sha384sum .)
+run_cmake_command(E_sha512sum-dir ${CMAKE_COMMAND} -E sha512sum .)
+
 run_cmake_command(E_md5sum-no-file ${CMAKE_COMMAND} -E md5sum nonexisting)
+run_cmake_command(E_sha1sum-no-file ${CMAKE_COMMAND} -E sha1sum nonexisting)
+run_cmake_command(E_sha224sum-no-file ${CMAKE_COMMAND} -E sha224sum nonexisting)
+run_cmake_command(E_sha256sum-no-file ${CMAKE_COMMAND} -E sha256sum nonexisting)
+run_cmake_command(E_sha384sum-no-file ${CMAKE_COMMAND} -E sha384sum nonexisting)
+run_cmake_command(E_sha512sum-no-file ${CMAKE_COMMAND} -E sha512sum nonexisting)
+
 file(WRITE "${RunCMake_BINARY_DIR}/dummy" "dummy")
 run_cmake_command(E_md5sum ${CMAKE_COMMAND} -E md5sum ../dummy)
 run_cmake_command(E_md5sum-mixed ${CMAKE_COMMAND} -E md5sum . ../dummy nonexisting)
+run_cmake_command(E_sha1sum ${CMAKE_COMMAND} -E sha1sum ../dummy)
+run_cmake_command(E_sha224sum ${CMAKE_COMMAND} -E sha224sum ../dummy)
+run_cmake_command(E_sha256sum ${CMAKE_COMMAND} -E sha256sum ../dummy)
+run_cmake_command(E_sha384sum ${CMAKE_COMMAND} -E sha384sum ../dummy)
+run_cmake_command(E_sha512sum ${CMAKE_COMMAND} -E sha512sum ../dummy)
 file(REMOVE "${RunCMake_BINARY_DIR}/dummy")
 
 set(RunCMake_DEFAULT_stderr ".")
