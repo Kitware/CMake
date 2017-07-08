@@ -6,6 +6,7 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
@@ -527,15 +528,13 @@ int cmCPackDebGenerator::createDeb()
         continue;
       }
 
-      char md5sum[33];
-      if (!cmSystemTools::ComputeFileMD5(*fileIt, md5sum)) {
+      std::string output =
+        cmSystemTools::ComputeFileHash(*fileIt, cmCryptoHash::AlgoMD5);
+      if (output.empty()) {
         cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem computing the md5 of "
                         << *fileIt << std::endl);
       }
 
-      md5sum[32] = 0;
-
-      std::string output(md5sum);
       output += "  " + *fileIt + "\n";
       // debian md5sums entries are like this:
       // 014f3604694729f3bf19263bac599765  usr/bin/ccmake
