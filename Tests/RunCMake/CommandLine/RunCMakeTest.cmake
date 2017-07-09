@@ -172,6 +172,13 @@ run_cmake_command(E_env-bad-arg1 ${CMAKE_COMMAND} -E env -bad-arg1)
 run_cmake_command(E_env-set   ${CMAKE_COMMAND} -E env TEST_ENV=1 ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_env-set.cmake)
 run_cmake_command(E_env-unset ${CMAKE_COMMAND} -E env TEST_ENV=1 ${CMAKE_COMMAND} -E env --unset=TEST_ENV ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_env-unset.cmake)
 
+run_cmake_command(E_md5sum-dir ${CMAKE_COMMAND} -E md5sum .)
+run_cmake_command(E_md5sum-no-file ${CMAKE_COMMAND} -E md5sum nonexisting)
+file(WRITE "${RunCMake_BINARY_DIR}/dummy" "dummy")
+run_cmake_command(E_md5sum ${CMAKE_COMMAND} -E md5sum ../dummy)
+run_cmake_command(E_md5sum-mixed ${CMAKE_COMMAND} -E md5sum . ../dummy nonexisting)
+file(REMOVE "${RunCMake_BINARY_DIR}/dummy")
+
 set(RunCMake_DEFAULT_stderr ".")
 run_cmake_command(E_sleep-no-args ${CMAKE_COMMAND} -E sleep)
 unset(RunCMake_DEFAULT_stderr)
