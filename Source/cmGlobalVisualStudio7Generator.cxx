@@ -520,6 +520,7 @@ std::string cmGlobalVisualStudio7Generator::ConvertToSolutionPath(
 void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
   std::ostream& fout, cmLocalGenerator* root)
 {
+  std::string const guid = this->GetGUID(root->GetProjectName() + ".sln");
   bool extensibilityGlobalsOverridden = false;
   bool extensibilityAddInsOverridden = false;
   const std::vector<std::string> propKeys =
@@ -538,11 +539,14 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
       } else
         continue;
       if (!name.empty()) {
-        if (name == "ExtensibilityGlobals" && sectionType == "postSolution")
+        bool addGuid = false;
+        if (name == "ExtensibilityGlobals" && sectionType == "postSolution") {
+          addGuid = true;
           extensibilityGlobalsOverridden = true;
-        else if (name == "ExtensibilityAddIns" &&
-                 sectionType == "postSolution")
+        } else if (name == "ExtensibilityAddIns" &&
+                   sectionType == "postSolution") {
           extensibilityAddInsOverridden = true;
+        }
         fout << "\tGlobalSection(" << name << ") = " << sectionType << "\n";
         std::vector<std::string> keyValuePairs;
         cmSystemTools::ExpandListArgument(
@@ -557,15 +561,23 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
             const std::string value =
               cmSystemTools::TrimWhitespace(itPair->substr(posEqual + 1));
             fout << "\t\t" << key << " = " << value << "\n";
+            if (key == "SolutionGuid") {
+              addGuid = false;
+            }
           }
+        }
+        if (addGuid) {
+          fout << "\t\tSolutionGuid = {" << guid << "}\n";
         }
         fout << "\tEndGlobalSection\n";
       }
     }
   }
-  if (!extensibilityGlobalsOverridden)
+  if (!extensibilityGlobalsOverridden) {
     fout << "\tGlobalSection(ExtensibilityGlobals) = postSolution\n"
+         << "\t\tSolutionGuid = {" << guid << "}\n"
          << "\tEndGlobalSection\n";
+  }
   if (!extensibilityAddInsOverridden)
     fout << "\tGlobalSection(ExtensibilityAddIns) = postSolution\n"
          << "\tEndGlobalSection\n";
