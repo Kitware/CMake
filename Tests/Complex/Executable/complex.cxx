@@ -261,6 +261,12 @@ int main()
   cmPassed("ONE_VAR is defined.");
 #endif
 
+#ifndef ONE_VAR_AND_INDENTED
+  cmFailed("cmakedefine is broken, ONE_VAR_AND_INDENTED is not defined.");
+#else
+  cmPassed("ONE_VAR_AND_INDENTED is defined.");
+#endif
+
 #ifndef ONE_VAR_IS_DEFINED
   cmFailed("cmakedefine, SET or VARIABLE_REQUIRES is broken, "
            "ONE_VAR_IS_DEFINED is not defined.");
@@ -272,6 +278,12 @@ int main()
   cmFailed("cmakedefine is broken, ZERO_VAR is defined.");
 #else
   cmPassed("ZERO_VAR is not defined.");
+#endif
+
+#ifdef ZERO_VAR_AND_INDENTED
+  cmFailed("cmakedefine is broken, ZERO_VAR_AND_INDENTED is defined.");
+#else
+  cmPassed("ZERO_VAR_AND_INDENTED is not defined.");
 #endif
 
 #ifndef STRING_VAR
@@ -1029,6 +1041,16 @@ int main()
     cmPassed("cmakedefine01 is working for 1");
   } else {
     cmFailed("cmakedefine01 is not working for 1");
+  }
+  if (SHOULD_BE_ZERO_AND_INDENTED == 0) {
+    cmPassed("cmakedefine01 is working for 0 and indented");
+  } else {
+    cmFailed("cmakedefine01 is not working for 0 and indented");
+  }
+  if (SHOULD_BE_ONE_AND_INDENTED == 1) {
+    cmPassed("cmakedefine01 is working for 1 and indented");
+  } else {
+    cmFailed("cmakedefine01 is not working for 1 and indented");
   }
 #ifdef FORCE_TEST
   cmFailed("CMake SET CACHE FORCE");

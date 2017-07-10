@@ -356,6 +356,8 @@ endwhile()
 
 set(SHOULD_BE_ZERO )
 set(SHOULD_BE_ONE 1)
+set(SHOULD_BE_ZERO_AND_INDENTED )
+set(SHOULD_BE_ONE_AND_INDENTED 1)
 
 # test elseif functionality, the mess below tries to catch problem
 # of clauses being executed early or late etc

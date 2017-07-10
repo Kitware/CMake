@@ -66,8 +66,8 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 
   this->DefineFlags = " ";
 
-  this->cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
-  this->cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
+  this->cmDefineRegex.compile("#([ \t]*)cmakedefine[ \t]+([A-Za-z_0-9]*)");
+  this->cmDefine01Regex.compile("#([ \t]*)cmakedefine01[ \t]+([A-Za-z_0-9]*)");
   this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");
   this->cmNamedCurly.compile("^[A-Za-z0-9/_.+-]+{");
 
@@ -3433,18 +3433,22 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
 
     // Replace #cmakedefine instances.
     if (this->cmDefineRegex.find(line)) {
-      const char* def = this->GetDefinition(this->cmDefineRegex.match(1));
+      const char* def = this->GetDefinition(this->cmDefineRegex.match(2));
       if (!cmSystemTools::IsOff(def)) {
-        cmSystemTools::ReplaceString(line, "#cmakedefine", "#define");
+        const std::string indentation = this->cmDefineRegex.match(1);
+        cmSystemTools::ReplaceString(line, "#" + indentation + "cmakedefine",
+                                     "#" + indentation + "define");
         output += line;
       } else {
         output += "/* #undef ";
-        output += this->cmDefineRegex.match(1);
+        output += this->cmDefineRegex.match(2);
         output += " */";
       }
     } else if (this->cmDefine01Regex.find(line)) {
-      const char* def = this->GetDefinition(this->cmDefine01Regex.match(1));
-      cmSystemTools::ReplaceString(line, "#cmakedefine01", "#define");
+      const std::string indentation = this->cmDefine01Regex.match(1);
+      const char* def = this->GetDefinition(this->cmDefine01Regex.match(2));
+      cmSystemTools::ReplaceString(line, "#" + indentation + "cmakedefine01",
+                                   "#" + indentation + "define");
       output += line;
       if (!cmSystemTools::IsOff(def)) {
         output += " 1";
