@@ -13,14 +13,6 @@ int WINAPI foo();
 int bar();
 int objlib();
 void justnop();
-
-// test const export
-#ifdef _WIN32
-// data symbols must be explicitly imported
-__declspec(dllimport) extern const char testconst[];
-#else
-extern const char testconst[];
-#endif
 }
 
 // test c++ functions
@@ -50,8 +42,6 @@ int main()
   printf("\n");
   bar();
   objlib();
-  printf("\n");
-  printf("%s", testconst);
   printf("\n");
 #ifdef HAS_JUSTNOP
   justnop();
