@@ -303,6 +303,13 @@ static void AcquireScanFiles(cmGeneratorTarget const* target,
         !(fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
       continue;
     }
+    if (PropertyEnabled(sf, "GENERATED") &&
+        !target->GetPropertyAsBool("__UNDOCUMENTED_AUTOGEN_GENERATED_FILES")) {
+      // FIXME: Add a policy whose NEW behavior allows generated files.
+      // The implementation already works.  We disable it here to avoid
+      // changing behavior for existing projects that do not expect it.
+      continue;
+    }
     const std::string absFile =
       cmsys::SystemTools::GetRealPath(sf->GetFullPath());
     // Skip flags
