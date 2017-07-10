@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2003-2007 Tim Kientzle
+ * Copyright (c) 2017 Martin Matuska
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -21,28 +21,29 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * $FreeBSD$
  */
-#ifndef ARCHIVE_OPENSSL_HMAC_PRIVATE_H_INCLUDED
-#define ARCHIVE_OPENSSL_HMAC_PRIVATE_H_INCLUDED
 
-#include <openssl/hmac.h>
-#include <openssl/opensslv.h>
+/* !!ONLY FOR USE INTERNALLY TO LIBARCHIVE!! */
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-#include <stdlib.h> /* malloc, free */
-#include <string.h> /* memset */
-static inline HMAC_CTX *HMAC_CTX_new(void)
-{
-	HMAC_CTX *ctx = (HMAC_CTX *)calloc(1, sizeof(HMAC_CTX));
-	return ctx;
-}
+#ifndef ARCHIVE_PLATFORM_ACL_H_INCLUDED
+#define ARCHIVE_PLATFORM_ACL_H_INCLUDED
 
-static inline void HMAC_CTX_free(HMAC_CTX *ctx)
-{
-	HMAC_CTX_cleanup(ctx);
-	memset(ctx, 0, sizeof(*ctx));
-	free(ctx);
-}
+/*
+ * Determine what ACL types are supported
+ */
+#if ARCHIVE_ACL_FREEBSD || ARCHIVE_ACL_SUNOS || ARCHIVE_ACL_LIBACL
+#define ARCHIVE_ACL_POSIX1E     1
 #endif
 
+#if ARCHIVE_ACL_FREEBSD_NFS4 || ARCHIVE_ACL_SUNOS_NFS4 || \
+    ARCHIVE_ACL_DARWIN  || ARCHIVE_ACL_LIBRICHACL
+#define ARCHIVE_ACL_NFS4        1
 #endif
+
+#if ARCHIVE_ACL_POSIX1E || ARCHIVE_ACL_NFS4
+#define ARCHIVE_ACL_SUPPORT     1
+#endif
+
+#endif	/* ARCHIVE_PLATFORM_ACL_H_INCLUDED */
