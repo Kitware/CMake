@@ -11,7 +11,7 @@
 
 cmFindCommon::PathGroup cmFindCommon::PathGroup::All("ALL");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::PackageRoot(
-  "PacakgeName_ROOT");
+  "PackageName_ROOT");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMake("CMAKE");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMakeEnvironment(
   "CMAKE_ENVIRONMENT");
