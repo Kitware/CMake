@@ -216,6 +216,8 @@ void cmFindBase::FillPackageRootPath()
     paths.AddCMakePrefixPath(varName);
     paths.AddEnvPrefixPath(varName);
   }
+
+  paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
 void cmFindBase::FillCMakeVariablePath()
