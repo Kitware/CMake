@@ -231,18 +231,6 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   }
 }
 
-void cmFindCommon::FilterPaths(const std::vector<std::string>& inPaths,
-                               const std::set<std::string>& ignore,
-                               std::vector<std::string>& outPaths)
-{
-  for (std::vector<std::string>::const_iterator i = inPaths.begin();
-       i != inPaths.end(); ++i) {
-    if (ignore.count(*i) == 0) {
-      outPaths.push_back(*i);
-    }
-  }
-}
-
 void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
 {
   // null-terminated list of paths.
