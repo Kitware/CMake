@@ -973,17 +973,19 @@ bool cmQtAutoGenerators::MocParseSourceContent(
         const std::string headerToMoc =
           this->MocFindHeader(scannedFileAbsPath, incSubDir + incRealBasename);
         if (!headerToMoc.empty()) {
-          // Register moc job
-          mocsIncluded[headerToMoc] = incString;
-          this->MocFindDepends(headerToMoc, contentText, mocDepends);
-          // Store meta information for relaxed mode
-          if (relaxed && (incRealBasename == scannedFileBasename)) {
-            ownMocUnderscoreInclude = incString;
-            ownMocUnderscoreHeader = headerToMoc;
+          if (!this->MocSkip(headerToMoc)) {
+            // Register moc job
+            mocsIncluded[headerToMoc] = incString;
+            this->MocFindDepends(headerToMoc, contentText, mocDepends);
+            // Store meta information for relaxed mode
+            if (relaxed && (incRealBasename == scannedFileBasename)) {
+              ownMocUnderscoreInclude = incString;
+              ownMocUnderscoreHeader = headerToMoc;
+            }
           }
         } else {
           std::ostringstream ost;
-          ost << "AutoMoc: Error: " << absFilename << "\n"
+          ost << "AutoMoc: Error: " << Quoted(absFilename) << "\n"
               << "The file includes the moc file " << Quoted(incString)
               << ", but could not find header "
               << Quoted(incRealBasename + "{" +
@@ -1005,36 +1007,39 @@ bool cmQtAutoGenerators::MocParseSourceContent(
             // In relaxed mode try to find a header instead but issue a warning
             const std::string headerToMoc =
               this->MocFindHeader(scannedFileAbsPath, incSubDir + incBasename);
-            if (!headerToMoc.empty() && !this->MocSkip(headerToMoc)) {
-              // This is for KDE4 compatibility:
-              fileToMoc = headerToMoc;
-              if (!requiresMoc && (incBasename == scannedFileBasename)) {
-                std::ostringstream ost;
-                ost << "AutoMoc: Warning: " << Quoted(absFilename) << "\n"
+            if (!headerToMoc.empty()) {
+              if (!this->MocSkip(headerToMoc)) {
+                // This is for KDE4 compatibility:
+                fileToMoc = headerToMoc;
+                if (!requiresMoc && (incBasename == scannedFileBasename)) {
+                  std::ostringstream ost;
+                  ost
+                    << "AutoMoc: Warning: " << Quoted(absFilename) << "\n"
                     << "The file includes the moc file " << Quoted(incString)
                     << ", but does not contain a Q_OBJECT or Q_GADGET macro.\n"
                     << "Running moc on " << Quoted(headerToMoc) << "!\n"
                     << "Include " << Quoted("moc_" + incBasename + ".cpp")
                     << " for a compatibility with strict mode (see "
                        "CMAKE_AUTOMOC_RELAXED_MODE).\n";
-                this->LogWarning(ost.str());
-              } else {
-                std::ostringstream ost;
-                ost << "AutoMoc: Warning: " << Quoted(absFilename) << "\n"
-                    << "The file includes the moc file " << Quoted(incString)
-                    << " instead of " << Quoted("moc_" + incBasename + ".cpp")
-                    << ".\n"
-                    << "Running moc on " << Quoted(headerToMoc) << "!\n"
-                    << "Include " << Quoted("moc_" + incBasename + ".cpp")
-                    << " for compatibility with strict mode (see "
-                       "CMAKE_AUTOMOC_RELAXED_MODE).\n";
-                this->LogWarning(ost.str());
+                  this->LogWarning(ost.str());
+                } else {
+                  std::ostringstream ost;
+                  ost << "AutoMoc: Warning: " << Quoted(absFilename) << "\n"
+                      << "The file includes the moc file " << Quoted(incString)
+                      << " instead of "
+                      << Quoted("moc_" + incBasename + ".cpp") << ".\n"
+                      << "Running moc on " << Quoted(headerToMoc) << "!\n"
+                      << "Include " << Quoted("moc_" + incBasename + ".cpp")
+                      << " for compatibility with strict mode (see "
+                         "CMAKE_AUTOMOC_RELAXED_MODE).\n";
+                  this->LogWarning(ost.str());
+                }
               }
             } else {
               std::ostringstream ost;
               ost << "AutoMoc: Error: " << Quoted(absFilename) << "\n"
                   << "The file includes the moc file " << Quoted(incString)
-                  << ". which seems to be the moc file from a different "
+                  << ", which seems to be the moc file from a different "
                      "source file. CMake also could not find a matching "
                      "header.";
               this->LogError(ost.str());
@@ -1050,7 +1055,7 @@ bool cmQtAutoGenerators::MocParseSourceContent(
             // Accept but issue a warning if moc isn't required
             if (!requiresMoc) {
               std::ostringstream ost;
-              ost << "AutoMoc: Error: " << Quoted(absFilename) << "\n"
+              ost << "AutoMoc: Warning: " << Quoted(absFilename) << "\n"
                   << "The file includes the moc file " << Quoted(incString)
                   << ", but does not contain a Q_OBJECT or Q_GADGET "
                      "macro.";
