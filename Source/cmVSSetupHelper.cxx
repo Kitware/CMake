@@ -1,6 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVSSetupHelper.h"
+#include "cmSystemTools.h"
 
 #ifndef VSSetupConstants
 #define VSSetupConstants
@@ -240,6 +241,22 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
       setupHelper == NULL)
     return false;
 
+  std::string envVSCommonToolsDir;
+
+  // FIXME: When we support VS versions beyond 2017, the version
+  // to choose will be passed in by the caller.  We need to map that
+  // to a per-version name of this environment variable.
+  if (cmSystemTools::GetEnv("VS150COMNTOOLS", envVSCommonToolsDir)) {
+    cmSystemTools::ConvertToUnixSlashes(envVSCommonToolsDir);
+  }
+  // FIXME: If the environment variable value changes between runs
+  // of CMake within a given build tree the results are not defined.
+  // Instead we should save a CMAKE_GENERATOR_INSTANCE value in the cache
+  // (similar to CMAKE_GENERATOR_TOOLSET) to hold it persistently.
+  // Unfortunately doing so will require refactoring elsewhere in
+  // order to make sure the value is available in time to create
+  // the generator.
+
   std::vector<VSInstanceInfo> vecVSInstances;
   SmartCOMPtr<IEnumSetupInstances> enumInstances = NULL;
   if (FAILED(
@@ -263,6 +280,17 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     instance = instance2 = NULL;
 
     if (isInstalled) {
+      if (!envVSCommonToolsDir.empty()) {
+        std::string currentVSLocation(instanceInfo.VSInstallLocation.begin(),
+                                      instanceInfo.VSInstallLocation.end());
+        cmSystemTools::ConvertToUnixSlashes(currentVSLocation);
+        currentVSLocation += "/Common7/Tools";
+        if (cmSystemTools::ComparePath(currentVSLocation,
+                                       envVSCommonToolsDir)) {
+          chosenInstanceInfo = instanceInfo;
+          return true;
+        }
+      }
       vecVSInstances.push_back(instanceInfo);
     }
   }
