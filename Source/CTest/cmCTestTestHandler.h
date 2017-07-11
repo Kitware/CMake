@@ -144,6 +144,7 @@ public:
     double ExecutionTime;
     int ReturnValue;
     int Status;
+    std::string ExceptionStatus;
     bool CompressOutput;
     std::string CompletionStatus;
     std::string Output;
@@ -262,7 +263,7 @@ private:
    */
   std::string FindTheExecutable(const char* exe);
 
-  const char* GetTestStatus(int status);
+  const char* GetTestStatus(const cmCTestTestResult*);
   void ExpandTestsToRunInformation(size_t numPossibleTests);
   void ExpandTestsToRunInformationForRerunFailed();
 
