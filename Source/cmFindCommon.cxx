@@ -11,7 +11,7 @@
 
 cmFindCommon::PathGroup cmFindCommon::PathGroup::All("ALL");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::PackageRoot(
-  "PacakgeName_ROOT");
+  "PackageName_ROOT");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMake("CMAKE");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMakeEnvironment(
   "CMAKE_ENVIRONMENT");
@@ -228,18 +228,6 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   // paths again.
   if (this->FindRootPathMode == RootPathModeBoth) {
     paths.insert(paths.end(), unrootedPaths.begin(), unrootedPaths.end());
-  }
-}
-
-void cmFindCommon::FilterPaths(const std::vector<std::string>& inPaths,
-                               const std::set<std::string>& ignore,
-                               std::vector<std::string>& outPaths)
-{
-  for (std::vector<std::string>::const_iterator i = inPaths.begin();
-       i != inPaths.end(); ++i) {
-    if (ignore.count(*i) == 0) {
-      outPaths.push_back(*i);
-    }
   }
 }
 

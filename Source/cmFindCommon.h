@@ -81,11 +81,6 @@ protected:
   void GetIgnoredPaths(std::vector<std::string>& ignore);
   void GetIgnoredPaths(std::set<std::string>& ignore);
 
-  /** Remove paths in the ignore set from the supplied vector.  */
-  void FilterPaths(const std::vector<std::string>& inPaths,
-                   const std::set<std::string>& ignore,
-                   std::vector<std::string>& outPaths);
-
   /** Compute final search path list (reroot + trailing slash).  */
   void ComputeFinalPaths();
 
