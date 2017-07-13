@@ -394,7 +394,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   return 0;
 }
 
-// extract variabels from the script to set ivars
+// extract variables from the script to set ivars
 int cmCTestScriptHandler::ExtractVariables()
 {
   // Temporary variables

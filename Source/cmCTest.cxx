@@ -11,6 +11,7 @@
 #include "cmsys/Process.h"
 #include "cmsys/String.hxx"
 #include "cmsys/SystemInformation.hxx"
+#include <algorithm>
 #include <ctype.h>
 #include <iostream>
 #include <map>
@@ -253,6 +254,7 @@ std::string cmCTest::DecodeURL(const std::string& in)
 cmCTest::cmCTest()
 {
   this->LabelSummary = true;
+  this->SubprojectSummary = true;
   this->ParallelLevel = 1;
   this->ParallelLevelSetInCli = false;
   this->TestLoad = 0;
@@ -1364,6 +1366,35 @@ void cmCTest::AddSiteProperties(cmXMLWriter& xml)
   }
 }
 
+void cmCTest::GenerateSubprojectsOutput(cmXMLWriter& xml)
+{
+  std::vector<std::string> subprojects = this->GetLabelsForSubprojects();
+  std::vector<std::string>::const_iterator i;
+  for (i = subprojects.begin(); i != subprojects.end(); ++i) {
+    xml.StartElement("Subproject");
+    xml.Attribute("name", *i);
+    xml.Element("Label", *i);
+    xml.EndElement(); // Subproject
+  }
+}
+
+std::vector<std::string> cmCTest::GetLabelsForSubprojects()
+{
+  std::string labelsForSubprojects =
+    this->GetCTestConfiguration("LabelsForSubprojects");
+  std::vector<std::string> subprojects;
+  cmSystemTools::ExpandListArgument(labelsForSubprojects, subprojects);
+
+  // sort the array
+  std::sort(subprojects.begin(), subprojects.end());
+  // remove duplicates
+  std::vector<std::string>::iterator new_end =
+    std::unique(subprojects.begin(), subprojects.end());
+  subprojects.erase(new_end, subprojects.end());
+
+  return subprojects;
+}
+
 void cmCTest::EndXML(cmXMLWriter& xml)
 {
   xml.EndElement(); // Site
@@ -1764,6 +1795,9 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   }
   if (this->CheckArgument(arg, "--no-label-summary")) {
     this->LabelSummary = false;
+  }
+  if (this->CheckArgument(arg, "--no-subproject-summary")) {
+    this->SubprojectSummary = false;
   }
   if (this->CheckArgument(arg, "-Q", "--quiet")) {
     this->Quiet = true;

@@ -238,6 +238,36 @@ bool cmCTestSetTestsPropertiesCommand::InitialPass(
   return this->TestHandler->SetTestsProperties(args);
 }
 
+class cmCTestSetDirectoryPropertiesCommand : public cmCommand
+{
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  cmCommand* Clone() CM_OVERRIDE
+  {
+    cmCTestSetDirectoryPropertiesCommand* c =
+      new cmCTestSetDirectoryPropertiesCommand;
+    c->TestHandler = this->TestHandler;
+    return c;
+  }
+
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+  */
+  bool InitialPass(std::vector<std::string> const& /*unused*/,
+                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
+
+  cmCTestTestHandler* TestHandler;
+};
+
+bool cmCTestSetDirectoryPropertiesCommand::InitialPass(
+  std::vector<std::string> const& args, cmExecutionStatus&)
+{
+  return this->TestHandler->SetDirectoryProperties(args);
+}
+
 // get the next number in a string with numbers separated by ,
 // pos is the start of the search and pos2 is the end of the search
 // pos becomes pos2 after a call to GetNextNumber.
@@ -506,9 +536,14 @@ int cmCTestTestHandler::ProcessHandler()
                  << static_cast<int>(percent + .5f) << "% tests passed, "
                  << failed.size() << " tests failed out of " << total
                  << std::endl);
-    if (this->CTest->GetLabelSummary()) {
+
+    if (!this->CTest->GetLabelsForSubprojects().empty() &&
+        this->CTest->GetSubprojectSummary()) {
+      this->PrintSubprojectSummary();
+    } else if (this->CTest->GetLabelSummary()) {
       this->PrintLabelSummary();
     }
+
     char realBuf[1024];
     sprintf(realBuf, "%6.2f sec", (double)(clock_finish - clock_start));
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
@@ -658,6 +693,84 @@ void cmCTestTestHandler::PrintLabelSummary()
   }
 }
 
+void cmCTestTestHandler::PrintSubprojectSummary()
+{
+  std::vector<std::string> subprojects =
+    this->CTest->GetLabelsForSubprojects();
+
+  cmCTestTestHandler::ListOfTests::iterator it = this->TestList.begin();
+  std::map<std::string, double> labelTimes;
+  std::map<std::string, int> labelCounts;
+  std::set<std::string> labels;
+  // initialize maps
+  std::string::size_type maxlen = 0;
+  for (; it != this->TestList.end(); ++it) {
+    cmCTestTestProperties& p = *it;
+    for (std::vector<std::string>::iterator l = p.Labels.begin();
+         l != p.Labels.end(); ++l) {
+      std::vector<std::string>::iterator subproject =
+        std::find(subprojects.begin(), subprojects.end(), *l);
+      if (subproject != subprojects.end()) {
+        if ((*l).size() > maxlen) {
+          maxlen = (*l).size();
+        }
+        labels.insert(*l);
+        labelTimes[*l] = 0;
+        labelCounts[*l] = 0;
+      }
+    }
+  }
+  cmCTestTestHandler::TestResultsVector::iterator ri =
+    this->TestResults.begin();
+  // fill maps
+  for (; ri != this->TestResults.end(); ++ri) {
+    cmCTestTestResult& result = *ri;
+    cmCTestTestProperties& p = *result.Properties;
+    for (std::vector<std::string>::iterator l = p.Labels.begin();
+         l != p.Labels.end(); ++l) {
+      std::vector<std::string>::iterator subproject =
+        std::find(subprojects.begin(), subprojects.end(), *l);
+      if (subproject != subprojects.end()) {
+        labelTimes[*l] += result.ExecutionTime;
+        ++labelCounts[*l];
+      }
+    }
+  }
+  // now print times
+  if (!labels.empty()) {
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                       "\nSubproject Time Summary:", this->Quiet);
+  }
+  for (std::set<std::string>::const_iterator i = labels.begin();
+       i != labels.end(); ++i) {
+    std::string label = *i;
+    label.resize(maxlen + 3, ' ');
+
+    char buf[1024];
+    sprintf(buf, "%6.2f sec", labelTimes[*i]);
+
+    std::ostringstream labelCountStr;
+    labelCountStr << "(" << labelCounts[*i] << " test";
+    if (labelCounts[*i] > 1) {
+      labelCountStr << "s";
+    }
+    labelCountStr << ")";
+
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "\n"
+                         << label << " = " << buf << " "
+                         << labelCountStr.str(),
+                       this->Quiet);
+    if (this->LogFile) {
+      *this->LogFile << "\n" << *i << " = " << buf << "\n";
+    }
+  }
+  if (!labels.empty()) {
+    if (this->LogFile) {
+      *this->LogFile << "\n";
+    }
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "\n", this->Quiet);
+  }
+}
 void cmCTestTestHandler::CheckLabelFilterInclude(cmCTestTestProperties& it)
 {
   // if not using Labels to filter then return
@@ -1277,6 +1390,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
   }
 
   this->CTest->StartXML(xml, this->AppendXML);
+  this->CTest->GenerateSubprojectsOutput(xml);
   xml.StartElement("Testing");
   xml.Element("StartDateTime", this->StartTest);
   xml.Element("StartTestTime", this->StartTestTime);
@@ -1659,6 +1773,12 @@ void cmCTestTestHandler::GetListOfTests()
     new cmCTestSetTestsPropertiesCommand;
   newCom4->TestHandler = this;
   cm.GetState()->AddBuiltinCommand("set_tests_properties", newCom4);
+
+  // Add handler for SET_DIRECTORY_PROPERTIES
+  cmCTestSetDirectoryPropertiesCommand* newCom5 =
+    new cmCTestSetDirectoryPropertiesCommand;
+  newCom5->TestHandler = this;
+  cm.GetState()->AddBuiltinCommand("set_directory_properties", newCom5);
 
   const char* testFilename;
   if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
@@ -2171,7 +2291,16 @@ bool cmCTestTestHandler::SetTestsProperties(
             cmSystemTools::ExpandListArgument(val, rtit->Environment);
           }
           if (key == "LABELS") {
-            cmSystemTools::ExpandListArgument(val, rtit->Labels);
+            std::vector<std::string> Labels;
+            cmSystemTools::ExpandListArgument(val, Labels);
+            rtit->Labels.insert(rtit->Labels.end(), Labels.begin(),
+                                Labels.end());
+            // sort the array
+            std::sort(rtit->Labels.begin(), rtit->Labels.end());
+            // remove duplicates
+            std::vector<std::string>::iterator new_end =
+              std::unique(rtit->Labels.begin(), rtit->Labels.end());
+            rtit->Labels.erase(new_end, rtit->Labels.end());
           }
           if (key == "MEASUREMENT") {
             size_t pos = val.find_first_of('=');
@@ -2217,6 +2346,54 @@ bool cmCTestTestHandler::SetTestsProperties(
               }
             }
           }
+        }
+      }
+    }
+  }
+  return true;
+}
+
+bool cmCTestTestHandler::SetDirectoryProperties(
+  const std::vector<std::string>& args)
+{
+  std::vector<std::string>::const_iterator it;
+  std::vector<std::string> tests;
+  bool found = false;
+  for (it = args.begin(); it != args.end(); ++it) {
+    if (*it == "PROPERTIES") {
+      found = true;
+      break;
+    }
+    tests.push_back(*it);
+  }
+
+  if (!found) {
+    return false;
+  }
+  ++it; // skip PROPERTIES
+  for (; it != args.end(); ++it) {
+    std::string key = *it;
+    ++it;
+    if (it == args.end()) {
+      break;
+    }
+    std::string val = *it;
+    cmCTestTestHandler::ListOfTests::iterator rtit;
+    for (rtit = this->TestList.begin(); rtit != this->TestList.end(); ++rtit) {
+      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+      if (cwd == rtit->Directory) {
+        if (key == "LABELS") {
+          std::vector<std::string> DirectoryLabels;
+          cmSystemTools::ExpandListArgument(val, DirectoryLabels);
+          rtit->Labels.insert(rtit->Labels.end(), DirectoryLabels.begin(),
+                              DirectoryLabels.end());
+
+          // sort the array
+          std::sort(rtit->Labels.begin(), rtit->Labels.end());
+          // remove duplicates
+          std::vector<std::string>::iterator new_end =
+            std::unique(rtit->Labels.begin(), rtit->Labels.end());
+          rtit->Labels.erase(new_end, rtit->Labels.end());
         }
       }
     }

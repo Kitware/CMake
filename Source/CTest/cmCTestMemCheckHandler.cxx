@@ -291,6 +291,7 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
     return;
   }
   this->CTest->StartXML(xml, this->AppendXML);
+  this->CTest->GenerateSubprojectsOutput(xml);
   xml.StartElement("DynamicAnalysis");
   switch (this->MemoryTesterStyle) {
     case cmCTestMemCheckHandler::VALGRIND:

@@ -2811,7 +2811,12 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Check whether labels are enabled for this target.
-  if (const char* value = target->GetProperty("LABELS")) {
+  const char* targetLabels = target->GetProperty("LABELS");
+  const char* directoryLabels =
+    target->Target->GetMakefile()->GetProperty("LABELS");
+  const char* cmakeDirectoryLabels =
+    target->Target->GetMakefile()->GetDefinition("CMAKE_DIRECTORY_LABELS");
+  if (targetLabels || directoryLabels || cmakeDirectoryLabels) {
     Json::Value lj_root(Json::objectValue);
     Json::Value& lj_target = lj_root["target"] = Json::objectValue;
     lj_target["name"] = target->GetName();
@@ -2821,17 +2826,51 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     cmSystemTools::MakeDirectory(dir.c_str());
     cmGeneratedFileStream fout(file.c_str());
 
+    std::vector<std::string> labels;
+
     // List the target-wide labels.  All sources in the target get
     // these labels.
-    std::vector<std::string> labels;
-    cmSystemTools::ExpandListArgument(value, labels);
-    if (!labels.empty()) {
-      fout << "# Target labels\n";
-      for (std::vector<std::string>::const_iterator li = labels.begin();
-           li != labels.end(); ++li) {
-        fout << " " << *li << "\n";
-        lj_target_labels.append(*li);
+    if (targetLabels) {
+      cmSystemTools::ExpandListArgument(targetLabels, labels);
+      if (!labels.empty()) {
+        fout << "# Target labels\n";
+        for (std::vector<std::string>::const_iterator li = labels.begin();
+             li != labels.end(); ++li) {
+          fout << " " << *li << "\n";
+          lj_target_labels.append(*li);
+        }
       }
+    }
+
+    // List directory labels
+    std::vector<std::string> directoryLabelsList;
+    std::vector<std::string> cmakeDirectoryLabelsList;
+
+    if (directoryLabels) {
+      cmSystemTools::ExpandListArgument(directoryLabels, directoryLabelsList);
+    }
+
+    if (cmakeDirectoryLabels) {
+      cmSystemTools::ExpandListArgument(cmakeDirectoryLabels,
+                                        cmakeDirectoryLabelsList);
+    }
+
+    if (!directoryLabelsList.empty() || !cmakeDirectoryLabelsList.empty()) {
+      fout << "# Directory labels\n";
+    }
+
+    for (std::vector<std::string>::const_iterator li =
+           directoryLabelsList.begin();
+         li != directoryLabelsList.end(); ++li) {
+      fout << " " << *li << "\n";
+      lj_target_labels.append(*li);
+    }
+
+    for (std::vector<std::string>::const_iterator li =
+           cmakeDirectoryLabelsList.begin();
+         li != cmakeDirectoryLabelsList.end(); ++li) {
+      fout << " " << *li << "\n";
+      lj_target_labels.append(*li);
     }
 
     // List the source files with any per-source labels.

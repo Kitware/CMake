@@ -32,6 +32,7 @@ Variables that Provide Information
    /variable/CMAKE_CURRENT_LIST_FILE
    /variable/CMAKE_CURRENT_LIST_LINE
    /variable/CMAKE_CURRENT_SOURCE_DIR
+   /variable/CMAKE_DIRECTORY_LABELS
    /variable/CMAKE_DL_LIBS
    /variable/CMAKE_EDIT_COMMAND
    /variable/CMAKE_EXECUTABLE_SUFFIX
@@ -482,6 +483,7 @@ Variables for CTest
    /variable/CTEST_GIT_UPDATE_OPTIONS
    /variable/CTEST_HG_COMMAND
    /variable/CTEST_HG_UPDATE_OPTIONS
+   /variable/CTEST_LABELS_FOR_SUBPROJECTS
    /variable/CTEST_MEMORYCHECK_COMMAND
    /variable/CTEST_MEMORYCHECK_COMMAND_OPTIONS
    /variable/CTEST_MEMORYCHECK_SANITIZER_OPTIONS

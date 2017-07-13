@@ -1235,6 +1235,9 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
     }
   }
 
+  // labels
+  this->SetProperty("LABELS", parent->GetProperty("LABELS"));
+
   // link libraries
   this->SetProperty("LINK_LIBRARIES", parent->GetProperty("LINK_LIBRARIES"));
 

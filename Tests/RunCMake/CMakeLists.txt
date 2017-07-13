@@ -348,6 +348,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
   endif()
   add_RunCMake_test(CompilerLauncher)
+  add_RunCMake_test(ctest_labels_for_subprojects)
 endif()
 
 add_RunCMake_test_group(CPack "DEB;RPM;7Z;TBZ2;TGZ;TXZ;TZ;ZIP;STGZ")

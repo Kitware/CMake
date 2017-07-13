@@ -90,6 +90,11 @@ public:
    */
   bool SetTestsProperties(const std::vector<std::string>& args);
 
+  /**
+   * Set directory properties
+   */
+  bool SetDirectoryProperties(const std::vector<std::string>& args);
+
   void Initialize() CM_OVERRIDE;
 
   // NOTE: This struct is Saved/Restored
@@ -227,6 +232,8 @@ private:
   virtual void GenerateDartOutput(cmXMLWriter& xml);
 
   void PrintLabelSummary();
+  void PrintSubprojectSummary();
+
   /**
    * Run the tests for a directory and any subdirectories
    */
