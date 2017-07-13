@@ -557,17 +557,11 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     // Write the rule for ninja dyndep file generation.
     std::vector<std::string> ddCmds;
 
-#ifdef _WIN32
-    // Windows command line length is limited -> use response file for dyndep
-    // rules
+    // Command line length is almost always limited -> use response file for
+    // dyndep rules
     std::string ddRspFile = "$out.rsp";
     std::string ddRspContent = "$in";
     std::string ddInput = "@" + ddRspFile;
-#else
-    std::string ddRspFile;
-    std::string ddRspContent;
-    std::string ddInput = "$in";
-#endif
 
     // Run CMake dependency scanner on preprocessed output.
     std::string const cmake = this->GetLocalGenerator()->ConvertToOutputFormat(
