@@ -48,6 +48,8 @@
 #   The protobuf lite library.
 # ``protobuf::libprotoc``
 #   The protoc library.
+# ``protobuf::protoc``
+#   The protoc compiler.
 #
 # The following cache variables are also available to set or use:
 #
@@ -172,9 +174,9 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
     add_custom_command(
       OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc"
              "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h"
-      COMMAND  ${Protobuf_PROTOC_EXECUTABLE}
+      COMMAND  protobuf::protoc
       ARGS "--cpp_out=${DLL_EXPORT_DECL}${CMAKE_CURRENT_BINARY_DIR}" ${_protobuf_include_path} ${ABS_FIL}
-      DEPENDS ${ABS_FIL} ${Protobuf_PROTOC_EXECUTABLE}
+      DEPENDS ${ABS_FIL} protobuf::protoc
       COMMENT "Running C++ protocol buffer compiler on ${FIL}"
       VERBATIM )
   endforeach()
@@ -232,8 +234,8 @@ function(PROTOBUF_GENERATE_PYTHON SRCS)
     list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}_pb2.py")
     add_custom_command(
       OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}_pb2.py"
-      COMMAND  ${Protobuf_PROTOC_EXECUTABLE} --python_out ${CMAKE_CURRENT_BINARY_DIR} ${_protobuf_include_path} ${ABS_FIL}
-      DEPENDS ${ABS_FIL} ${Protobuf_PROTOC_EXECUTABLE}
+      COMMAND  protobuf::protoc --python_out ${CMAKE_CURRENT_BINARY_DIR} ${_protobuf_include_path} ${ABS_FIL}
+      DEPENDS ${ABS_FIL} protobuf::protoc
       COMMENT "Running Python protocol buffer compiler on ${FIL}"
       VERBATIM )
   endforeach()
@@ -498,6 +500,16 @@ if(Protobuf_INCLUDE_DIR)
               IMPORTED_CONFIGURATIONS DEBUG)
             set_target_properties(protobuf::libprotoc PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_PROTOC_LIBRARY_DEBUG}")
+          endif()
+      endif()
+  endif()
+
+  if(Protobuf_PROTOC_EXECUTABLE)
+      if(NOT TARGET protobuf::protoc)
+          add_executable(protobuf::protoc IMPORTED)
+          if(EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
+            set_target_properties(protobuf::protoc PROPERTIES
+              IMPORTED_LOCATION "${Protobuf_PROTOC_EXECUTABLE}")
           endif()
       endif()
   endif()
