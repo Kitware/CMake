@@ -2,12 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServerProtocol.h"
 
+#include "cmAlgorithms.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkLineComputer.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmServer.h"
@@ -18,6 +20,7 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cm_uv.h"
 #include "cmake.h"
 
@@ -247,9 +250,9 @@ bool cmServerProtocol::DoActivate(const cmServerRequest& /*request*/,
   return true;
 }
 
-std::pair<int, int> cmServerProtocol1_0::ProtocolVersion() const
+std::pair<int, int> cmServerProtocol1::ProtocolVersion() const
 {
-  return std::make_pair(1, 0);
+  return std::make_pair(1, 1);
 }
 
 static void setErrorMessage(std::string* errorMessage, const std::string& text)
@@ -297,8 +300,8 @@ static bool testValue(cmState* state, const std::string& key,
   return true;
 }
 
-bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
-                                     std::string* errorMessage)
+bool cmServerProtocol1::DoActivate(const cmServerRequest& request,
+                                   std::string* errorMessage)
 {
   std::string sourceDirectory = request.Data[kSOURCE_DIRECTORY_KEY].asString();
   const std::string buildDirectory =
@@ -417,8 +420,8 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
   return true;
 }
 
-void cmServerProtocol1_0::HandleCMakeFileChanges(const std::string& path,
-                                                 int event, int status)
+void cmServerProtocol1::HandleCMakeFileChanges(const std::string& path,
+                                               int event, int status)
 {
   assert(status == 0);
   static_cast<void>(status);
@@ -441,7 +444,7 @@ void cmServerProtocol1_0::HandleCMakeFileChanges(const std::string& path,
   SendSignal(kFILE_CHANGE_SIGNAL, obj);
 }
 
-const cmServerResponse cmServerProtocol1_0::Process(
+const cmServerResponse cmServerProtocol1::Process(
   const cmServerRequest& request)
 {
   assert(this->m_State >= STATE_ACTIVE);
@@ -474,12 +477,12 @@ const cmServerResponse cmServerProtocol1_0::Process(
   return request.ReportError("Unknown command!");
 }
 
-bool cmServerProtocol1_0::IsExperimental() const
+bool cmServerProtocol1::IsExperimental() const
 {
   return true;
 }
 
-cmServerResponse cmServerProtocol1_0::ProcessCache(
+cmServerResponse cmServerProtocol1::ProcessCache(
   const cmServerRequest& request)
 {
   if (this->m_State < STATE_CONFIGURED) {
@@ -528,7 +531,7 @@ cmServerResponse cmServerProtocol1_0::ProcessCache(
   return request.Reply(result);
 }
 
-cmServerResponse cmServerProtocol1_0::ProcessCMakeInputs(
+cmServerResponse cmServerProtocol1::ProcessCMakeInputs(
   const cmServerRequest& request)
 {
   if (this->m_State < STATE_CONFIGURED) {
@@ -729,6 +732,37 @@ static Json::Value DumpSourceFilesList(
   return result;
 }
 
+static Json::Value DumpBacktrace(const cmListFileBacktrace& backtrace)
+{
+  Json::Value result = Json::arrayValue;
+
+  cmListFileBacktrace backtraceCopy = backtrace;
+  while (!backtraceCopy.Top().FilePath.empty()) {
+    Json::Value entry = Json::objectValue;
+    entry[kPATH_KEY] = backtraceCopy.Top().FilePath;
+    if (backtraceCopy.Top().Line) {
+      entry[kLINE_NUMBER_KEY] = (int)backtraceCopy.Top().Line;
+    }
+    if (!backtraceCopy.Top().Name.empty()) {
+      entry[kNAME_KEY] = backtraceCopy.Top().Name;
+    }
+    result.append(std::move(entry));
+    backtraceCopy = backtraceCopy.Pop();
+  }
+  return result;
+}
+
+static void DumpBacktraceRange(Json::Value& result, const std::string& type,
+                               const cmBacktraceRange& range)
+{
+  for (const auto& bt : range) {
+    Json::Value obj = Json::objectValue;
+    obj[kTYPE_KEY] = type;
+    obj[kBACKTRACE_KEY] = DumpBacktrace(bt);
+    result.append(obj);
+  }
+}
+
 static Json::Value DumpTarget(cmGeneratorTarget* target,
                               const std::string& config)
 {
@@ -762,6 +796,22 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
   }
 
   result[kFULL_NAME_KEY] = target->GetFullName(config);
+
+  Json::Value crossRefs = Json::objectValue;
+  crossRefs[kBACKTRACE_KEY] = DumpBacktrace(target->Target->GetBacktrace());
+
+  Json::Value statements = Json::arrayValue;
+  DumpBacktraceRange(statements, "target_compile_definitions",
+                     target->Target->GetCompileDefinitionsBacktraces());
+  DumpBacktraceRange(statements, "target_include_directories",
+                     target->Target->GetIncludeDirectoriesBacktraces());
+  DumpBacktraceRange(statements, "target_compile_options",
+                     target->Target->GetCompileOptionsBacktraces());
+  DumpBacktraceRange(statements, "target_link_libraries",
+                     target->Target->GetLinkImplementationBacktraces());
+
+  crossRefs[kRELATED_STATEMENTS_KEY] = std::move(statements);
+  result[kTARGET_CROSS_REFERENCES_KEY] = std::move(crossRefs);
 
   if (target->HaveWellDefinedOutputFiles()) {
     Json::Value artifacts = Json::arrayValue;
@@ -915,7 +965,7 @@ static Json::Value DumpConfigurationsList(const cmake* cm)
   return result;
 }
 
-cmServerResponse cmServerProtocol1_0::ProcessCodeModel(
+cmServerResponse cmServerProtocol1::ProcessCodeModel(
   const cmServerRequest& request)
 {
   if (this->m_State != STATE_COMPUTED) {
@@ -927,7 +977,7 @@ cmServerResponse cmServerProtocol1_0::ProcessCodeModel(
   return request.Reply(result);
 }
 
-cmServerResponse cmServerProtocol1_0::ProcessCompute(
+cmServerResponse cmServerProtocol1::ProcessCompute(
   const cmServerRequest& request)
 {
   if (this->m_State > STATE_CONFIGURED) {
@@ -947,7 +997,7 @@ cmServerResponse cmServerProtocol1_0::ProcessCompute(
   return request.Reply(Json::Value());
 }
 
-cmServerResponse cmServerProtocol1_0::ProcessConfigure(
+cmServerResponse cmServerProtocol1::ProcessConfigure(
   const cmServerRequest& request)
 {
   if (this->m_State == STATE_INACTIVE) {
@@ -1053,7 +1103,7 @@ cmServerResponse cmServerProtocol1_0::ProcessConfigure(
   return request.Reply(Json::Value());
 }
 
-cmServerResponse cmServerProtocol1_0::ProcessGlobalSettings(
+cmServerResponse cmServerProtocol1::ProcessGlobalSettings(
   const cmServerRequest& request)
 {
   cmake* cm = this->CMakeInstance();
@@ -1089,7 +1139,7 @@ static void setBool(const cmServerRequest& request, const std::string& key,
   setter(request.Data[key].asBool());
 }
 
-cmServerResponse cmServerProtocol1_0::ProcessSetGlobalSettings(
+cmServerResponse cmServerProtocol1::ProcessSetGlobalSettings(
   const cmServerRequest& request)
 {
   const std::vector<std::string> boolValues = {
@@ -1121,7 +1171,7 @@ cmServerResponse cmServerProtocol1_0::ProcessSetGlobalSettings(
   return request.Reply(Json::Value());
 }
 
-cmServerResponse cmServerProtocol1_0::ProcessFileSystemWatchers(
+cmServerResponse cmServerProtocol1::ProcessFileSystemWatchers(
   const cmServerRequest& request)
 {
   const cmFileMonitor* const fm = FileMonitor();
@@ -1140,7 +1190,7 @@ cmServerResponse cmServerProtocol1_0::ProcessFileSystemWatchers(
   return request.Reply(result);
 }
 
-cmServerProtocol1_0::GeneratorInformation::GeneratorInformation(
+cmServerProtocol1::GeneratorInformation::GeneratorInformation(
   const std::string& generatorName, const std::string& extraGeneratorName,
   const std::string& toolset, const std::string& platform,
   const std::string& sourceDirectory, const std::string& buildDirectory)
@@ -1153,7 +1203,7 @@ cmServerProtocol1_0::GeneratorInformation::GeneratorInformation(
 {
 }
 
-void cmServerProtocol1_0::GeneratorInformation::SetupGenerator(
+void cmServerProtocol1::GeneratorInformation::SetupGenerator(
   cmake* cm, std::string* errorMessage)
 {
   const std::string fullGeneratorName =

@@ -98,7 +98,7 @@ private:
   friend class cmServer;
 };
 
-class cmServerProtocol1_0 : public cmServerProtocol
+class cmServerProtocol1 : public cmServerProtocol
 {
 public:
   std::pair<int, int> ProtocolVersion() const override;
