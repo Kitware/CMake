@@ -1,12 +1,10 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestTestHandler.h"
-
-#include "cmsys/Base64.h"
-#include "cmsys/Directory.hxx"
-#include "cmsys/FStream.hxx"
-#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
+#include <cmsys/Base64.h>
+#include <cmsys/Directory.hxx>
+#include <cmsys/RegularExpression.hxx>
 #include <functional>
 #include <iomanip>
 #include <iterator>
@@ -33,6 +31,7 @@
 #include "cm_auto_ptr.hxx"
 #include "cm_utf8.h"
 #include "cmake.h"
+#include "cmsys/FStream.hxx"
 
 class cmExecutionStatus;
 
@@ -584,10 +583,10 @@ int cmCTestTestHandler::ProcessHandler()
             !cmHasLiteralPrefix(ftit->CompletionStatus, "SKIP_RETURN_CODE=") &&
             ftit->CompletionStatus != "Disabled") {
           ofs << ftit->TestCount << ":" << ftit->Name << std::endl;
-          cmCTestLog(
-            this->CTest, HANDLER_OUTPUT, "\t"
-              << std::setw(3) << ftit->TestCount << " - " << ftit->Name << " ("
-              << this->GetTestStatus(ftit->Status) << ")" << std::endl);
+          cmCTestLog(this->CTest, HANDLER_OUTPUT, "\t"
+                       << std::setw(3) << ftit->TestCount << " - "
+                       << ftit->Name << " (" << this->GetTestStatus(&*ftit)
+                       << ")" << std::endl);
         }
       }
     }
@@ -1413,7 +1412,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
         xml.StartElement("NamedMeasurement");
         xml.Attribute("type", "text/string");
         xml.Attribute("name", "Exit Code");
-        xml.Element("Value", this->GetTestStatus(result->Status));
+        xml.Element("Value", this->GetTestStatus(result));
         xml.EndElement(); // NamedMeasurement
 
         xml.StartElement("NamedMeasurement");
@@ -1813,16 +1812,19 @@ void cmCTestTestHandler::UseExcludeRegExp()
   this->UseExcludeRegExpFirst = !this->UseIncludeRegExpFlag;
 }
 
-const char* cmCTestTestHandler::GetTestStatus(int status)
+const char* cmCTestTestHandler::GetTestStatus(const cmCTestTestResult* result)
 {
   static const char* statuses[] = { "Not Run",     "Timeout",   "SEGFAULT",
                                     "ILLEGAL",     "INTERRUPT", "NUMERICAL",
                                     "OTHER_FAULT", "Failed",    "BAD_COMMAND",
                                     "Completed" };
-
+  int status = result->Status;
   if (status < cmCTestTestHandler::NOT_RUN ||
       status > cmCTestTestHandler::COMPLETED) {
     return "No Status";
+  }
+  if (status == cmCTestTestHandler::OTHER_FAULT) {
+    return result->ExceptionStatus.c_str();
   }
   return statuses[status];
 }

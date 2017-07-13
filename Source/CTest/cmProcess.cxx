@@ -240,3 +240,8 @@ int cmProcess::GetExitException()
 {
   return cmsysProcess_GetExitException(this->Process);
 }
+
+std::string cmProcess::GetExitExceptionString()
+{
+  return cmsysProcess_GetExceptionString(this->Process);
+}

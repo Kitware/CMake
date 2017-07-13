@@ -38,6 +38,7 @@ public:
   int GetExitValue() { return this->ExitValue; }
   double GetTotalTime() { return this->TotalTime; }
   int GetExitException();
+  std::string GetExitExceptionString();
   /**
    * Read one line of output but block for no more than timeout.
    * Returns:

@@ -237,6 +237,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   } else if (res == cmsysProcess_State_Exception) {
     outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Exception: ");
+    this->TestResult.ExceptionStatus =
+      this->TestProcess->GetExitExceptionString();
     switch (this->TestProcess->GetExitException()) {
       case cmsysProcess_Exception_Fault:
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "SegFault");
@@ -255,7 +257,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         this->TestResult.Status = cmCTestTestHandler::NUMERICAL;
         break;
       default:
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "Other");
+        cmCTestLog(this->CTest, HANDLER_OUTPUT,
+                   this->TestResult.ExceptionStatus);
         this->TestResult.Status = cmCTestTestHandler::OTHER_FAULT;
     }
   } else if ("Disabled" == this->TestResult.CompletionStatus) {
