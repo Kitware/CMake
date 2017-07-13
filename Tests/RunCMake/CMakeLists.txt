@@ -223,6 +223,7 @@ add_RunCMake_test(return)
 add_RunCMake_test(separate_arguments)
 add_RunCMake_test(set_property)
 add_RunCMake_test(string)
+add_RunCMake_test(test_include_dirs)
 foreach(var
     CMAKE_C_COMPILER_ID
     CMAKE_C_COMPILER_VERSION

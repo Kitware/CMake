@@ -259,6 +259,17 @@ void cmLocalGenerator::GenerateTestFiles()
     fout << "include(\"" << testIncludeFile << "\")" << std::endl;
   }
 
+  const char* testIncludeFiles =
+    this->Makefile->GetProperty("TEST_INCLUDE_FILES");
+  if (testIncludeFiles) {
+    std::vector<std::string> includesList;
+    cmSystemTools::ExpandListArgument(testIncludeFiles, includesList);
+    for (std::vector<std::string>::const_iterator i = includesList.begin();
+         i != includesList.end(); ++i) {
+      fout << "include(\"" << *i << "\")" << std::endl;
+    }
+  }
+
   // Ask each test generator to write its code.
   std::vector<cmTestGenerator*> const& testers =
     this->Makefile->GetTestGenerators();
