@@ -34,6 +34,8 @@ Generators
   This is an experimental feature and can be activated by setting the
   :variable:`CMAKE_XCODE_GENERATE_SCHEME` variable to a ``TRUE`` value.
 
+* The :generator:`Xcode` generator now supports Xcode 9.
+
 Commands
 --------
 
