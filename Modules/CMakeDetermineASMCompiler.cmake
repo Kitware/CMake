@@ -103,7 +103,7 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
   include(CMakeDetermineCompilerId)
   set(userflags)
   CMAKE_DETERMINE_COMPILER_ID_VENDOR(ASM${ASM_DIALECT} "${userflags}")
-  if("${CMAKE_ASM${ASM_DIALECT}_COMPILER_ID}" STREQUAL "IAR")
+  if("x${CMAKE_ASM${ASM_DIALECT}_COMPILER_ID}" STREQUAL "xIAR")
     # primary necessary to detect architecture, so the right archiver and linker can be picked
     # eg. IAR Assembler V8.10.1.12857/W32 for ARM
     # Cut out identification first, newline handling is a pain
