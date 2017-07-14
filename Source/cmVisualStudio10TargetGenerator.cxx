@@ -3553,7 +3553,11 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
     (*this->BuildFileStream) << cmVS10EscapeXML(comment) << "</Message>\n";
     this->WriteString("<Command>", 3);
   } else {
-    if (!comment.empty()) {
+    std::string strippedComment = comment;
+    strippedComment.erase(
+      std::remove(strippedComment.begin(), strippedComment.end(), '\t'),
+      strippedComment.end());
+    if (!comment.empty() && !strippedComment.empty()) {
       (*this->BuildFileStream) << "echo " << cmVS10EscapeXML(comment) << "\n";
     }
   }
