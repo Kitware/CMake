@@ -1563,7 +1563,11 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
         "CMAKE_" + lang + "_EXTENSION_COMPILE_OPTION";
       if (const char* opt =
             target->Target->GetMakefile()->GetDefinition(option_flag)) {
-        this->AppendFlagEscape(flags, opt);
+        std::vector<std::string> optVec;
+        cmSystemTools::ExpandListArgument(opt, optVec);
+        for (size_t i = 0; i < optVec.size(); ++i) {
+          this->AppendFlagEscape(flags, optVec[i]);
+        }
       }
     }
     return;
