@@ -32,8 +32,8 @@ static functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
   { NULL, NULL } /* NOLINT */
 };
 
-static const int NumTests =
-  (sizeof(cmakeGeneratedFunctionMapEntries) / sizeof(functionMapEntry)) - 1;
+static const int NumTests = CM_CAST(int,
+  sizeof(cmakeGeneratedFunctionMapEntries) / sizeof(functionMapEntry)) - 1;
 
 /* Allocate and create a lowercased copy of string
    (note that it has to be free'd manually) */
