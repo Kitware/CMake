@@ -1637,8 +1637,10 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     return;
   }
 
-  // Greater or equal because the standards are stored in
-  // backward chronological order.
+  // If the standard requested is older than the compiler's default
+  // then we need to use a flag to change it.  The comparison is
+  // greater-or-equal because the standards are stored in backward
+  // chronological order.
   if (stdIt >= defaultStdIt) {
     std::string option_flag =
       "CMAKE_" + lang + *stdIt + "_" + type + "_COMPILE_OPTION";
@@ -1649,6 +1651,9 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     return;
   }
 
+  // The standard requested is at least as new as the compiler's default,
+  // and the standard request is not required.  Decay to the newest standard
+  // for which a flag is defined.
   for (; stdIt < defaultStdIt; ++stdIt) {
     std::string option_flag =
       "CMAKE_" + lang + *stdIt + "_" + type + "_COMPILE_OPTION";
