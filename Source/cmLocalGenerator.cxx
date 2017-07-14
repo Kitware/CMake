@@ -1577,7 +1577,11 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
 
     const char* opt =
       target->Target->GetMakefile()->GetRequiredDefinition(option_flag);
-    this->AppendFlagEscape(flags, opt);
+    std::vector<std::string> optVec;
+    cmSystemTools::ExpandListArgument(opt, optVec);
+    for (size_t i = 0; i < optVec.size(); ++i) {
+      this->AppendFlagEscape(flags, optVec[i]);
+    }
     return;
   }
 
@@ -1587,7 +1591,11 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
 
     if (const char* opt =
           target->Target->GetMakefile()->GetDefinition(option_flag)) {
-      this->AppendFlagEscape(flags, opt);
+      std::vector<std::string> optVec;
+      cmSystemTools::ExpandListArgument(opt, optVec);
+      for (size_t i = 0; i < optVec.size(); ++i) {
+        this->AppendFlagEscape(flags, optVec[i]);
+      }
       return;
     }
   }
