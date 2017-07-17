@@ -1025,12 +1025,23 @@ cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
   std::string const key = cmSystemTools::UpperCase(config);
   KindedSourcesMapType::iterator it = this->KindedSourcesMap.find(key);
   if (it != this->KindedSourcesMap.end()) {
+    if (!it->second.Initialized) {
+      std::ostringstream e;
+      e << "The SOURCES of \"" << this->GetName()
+        << "\" use a generator expression that depends on the "
+           "SOURCES themselves.";
+      this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
+        cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
+      static KindedSources empty;
+      return empty;
+    }
     return it->second;
   }
 
   // Add an entry to the map for this configuration.
   KindedSources& files = this->KindedSourcesMap[key];
   this->ComputeKindedSources(files, config);
+  files.Initialized = true;
   return files;
 }
 
