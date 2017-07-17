@@ -1563,7 +1563,11 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
         "CMAKE_" + lang + "_EXTENSION_COMPILE_OPTION";
       if (const char* opt =
             target->Target->GetMakefile()->GetDefinition(option_flag)) {
-        this->AppendFlagEscape(flags, opt);
+        std::vector<std::string> optVec;
+        cmSystemTools::ExpandListArgument(opt, optVec);
+        for (size_t i = 0; i < optVec.size(); ++i) {
+          this->AppendFlagEscape(flags, optVec[i]);
+        }
       }
     }
     return;
@@ -1637,25 +1641,38 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     return;
   }
 
-  // Greater or equal because the standards are stored in
-  // backward chronological order.
+  // If the standard requested is older than the compiler's default
+  // then we need to use a flag to change it.  The comparison is
+  // greater-or-equal because the standards are stored in backward
+  // chronological order.
   if (stdIt >= defaultStdIt) {
     std::string option_flag =
       "CMAKE_" + lang + *stdIt + "_" + type + "_COMPILE_OPTION";
 
     const char* opt =
       target->Target->GetMakefile()->GetRequiredDefinition(option_flag);
-    this->AppendFlagEscape(flags, opt);
+    std::vector<std::string> optVec;
+    cmSystemTools::ExpandListArgument(opt, optVec);
+    for (size_t i = 0; i < optVec.size(); ++i) {
+      this->AppendFlagEscape(flags, optVec[i]);
+    }
     return;
   }
 
+  // The standard requested is at least as new as the compiler's default,
+  // and the standard request is not required.  Decay to the newest standard
+  // for which a flag is defined.
   for (; stdIt < defaultStdIt; ++stdIt) {
     std::string option_flag =
       "CMAKE_" + lang + *stdIt + "_" + type + "_COMPILE_OPTION";
 
     if (const char* opt =
           target->Target->GetMakefile()->GetDefinition(option_flag)) {
-      this->AppendFlagEscape(flags, opt);
+      std::vector<std::string> optVec;
+      cmSystemTools::ExpandListArgument(opt, optVec);
+      for (size_t i = 0; i < optVec.size(); ++i) {
+        this->AppendFlagEscape(flags, optVec[i]);
+      }
       return;
     }
   }
