@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h"
 
+#include "cmCryptoHash.h"
 #include "cmProcessOutput.h"
 #include "cmsys/Process.h"
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
@@ -179,8 +180,9 @@ public:
       if possible).  */
   static bool RenameFile(const char* oldname, const char* newname);
 
-  ///! Compute the md5sum of a file
-  static bool ComputeFileMD5(const std::string& source, char* md5out);
+  ///! Compute the hash of a file
+  static std::string ComputeFileHash(const std::string& source,
+                                     cmCryptoHash::Algo algo);
 
   /** Compute the md5sum of a string.  */
   static std::string ComputeStringMD5(const std::string& input);

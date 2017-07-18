@@ -934,19 +934,17 @@ bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
 #endif
 }
 
-bool cmSystemTools::ComputeFileMD5(const std::string& source, char* md5out)
+std::string cmSystemTools::ComputeFileHash(const std::string& source,
+                                           cmCryptoHash::Algo algo)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  cmCryptoHash md5(cmCryptoHash::AlgoMD5);
-  std::string const str = md5.HashFile(source);
-  strncpy(md5out, str.c_str(), 32);
-  return !str.empty();
+  cmCryptoHash hash(algo);
+  return hash.HashFile(source);
 #else
   (void)source;
-  (void)md5out;
-  cmSystemTools::Message("md5sum not supported in bootstrapping mode",
+  cmSystemTools::Message("hashsum not supported in bootstrapping mode",
                          "Error");
-  return false;
+  return std::string();
 #endif
 }
 

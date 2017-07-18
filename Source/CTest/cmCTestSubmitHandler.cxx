@@ -13,6 +13,7 @@
 #include "cmCTest.h"
 #include "cmCTestCurl.h"
 #include "cmCTestScriptHandler.h"
+#include "cmCryptoHash.h"
 #include "cmCurl.h"
 #include "cmGeneratedFileStream.h"
 #include "cmProcessOutput.h"
@@ -428,10 +429,8 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       if (cmSystemTools::IsOn(this->GetOption("InternalTest"))) {
         upload_as += "bad_md5sum";
       } else {
-        char md5[33];
-        cmSystemTools::ComputeFileMD5(local_file, md5);
-        md5[32] = 0;
-        upload_as += md5;
+        upload_as +=
+          cmSystemTools::ComputeFileHash(local_file, cmCryptoHash::AlgoMD5);
       }
 
       if (!cmSystemTools::FileExists(local_file.c_str())) {
@@ -1058,9 +1057,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
     }
   }
 
-  char md5sum[33];
-  md5sum[32] = 0;
-  cmSystemTools::ComputeFileMD5(file, md5sum);
+  std::string md5sum =
+    cmSystemTools::ComputeFileHash(file, cmCryptoHash::AlgoMD5);
   // 1. request the buildid and check to see if the file
   //    has already been uploaded
   // TODO I added support for subproject. You would need to add

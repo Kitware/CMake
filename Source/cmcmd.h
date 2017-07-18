@@ -4,6 +4,7 @@
 #define cmcmd_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
+#include "cmCryptoHash.h"
 
 #include <string>
 #include <vector>
@@ -18,6 +19,8 @@ public:
   static int ExecuteCMakeCommand(std::vector<std::string>&);
 
 protected:
+  static int HashSumFile(std::vector<std::string>& args,
+                         cmCryptoHash::Algo algo);
   static int SymlinkLibrary(std::vector<std::string>& args);
   static int SymlinkExecutable(std::vector<std::string>& args);
   static bool SymlinkInternal(std::string const& file,

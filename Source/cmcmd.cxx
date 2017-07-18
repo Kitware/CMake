@@ -88,6 +88,11 @@ void CMakeCommandUsage(const char* program)
     << "  environment               - display the current environment\n"
     << "  make_directory <dir>...   - create parent and <dir> directories\n"
     << "  md5sum <file>...          - create MD5 checksum of files\n"
+    << "  sha1sum <file>...         - create SHA1 checksum of files\n"
+    << "  sha224sum <file>...       - create SHA224 checksum of files\n"
+    << "  sha256sum <file>...       - create SHA256 checksum of files\n"
+    << "  sha384sum <file>...       - create SHA384 checksum of files\n"
+    << "  sha512sum <file>...       - create SHA512 checksum of files\n"
     << "  remove [-f] <file>...     - remove the file(s), use -f to force "
        "it\n"
     << "  remove_directory dir      - remove a directory and its contents\n"
@@ -641,24 +646,28 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
     // Command to calculate the md5sum of a file
     if (args[1] == "md5sum" && args.size() >= 3) {
-      char md5out[32];
-      int retval = 0;
-      for (std::string::size_type cc = 2; cc < args.size(); cc++) {
-        const char* filename = args[cc].c_str();
-        // Cannot compute md5sum of a directory
-        if (cmSystemTools::FileIsDirectory(filename)) {
-          std::cerr << "Error: " << filename << " is a directory" << std::endl;
-          retval++;
-        } else if (!cmSystemTools::ComputeFileMD5(filename, md5out)) {
-          // To mimic md5sum behavior in a shell:
-          std::cerr << filename << ": No such file or directory" << std::endl;
-          retval++;
-        } else {
-          std::cout << std::string(md5out, 32) << "  " << filename
-                    << std::endl;
-        }
-      }
-      return retval;
+      return HashSumFile(args, cmCryptoHash::AlgoMD5);
+    }
+
+    // Command to calculate the sha1sum of a file
+    if (args[1] == "sha1sum" && args.size() >= 3) {
+      return HashSumFile(args, cmCryptoHash::AlgoSHA1);
+    }
+
+    if (args[1] == "sha224sum" && args.size() >= 3) {
+      return HashSumFile(args, cmCryptoHash::AlgoSHA224);
+    }
+
+    if (args[1] == "sha256sum" && args.size() >= 3) {
+      return HashSumFile(args, cmCryptoHash::AlgoSHA256);
+    }
+
+    if (args[1] == "sha384sum" && args.size() >= 3) {
+      return HashSumFile(args, cmCryptoHash::AlgoSHA384);
+    }
+
+    if (args[1] == "sha512sum" && args.size() >= 3) {
+      return HashSumFile(args, cmCryptoHash::AlgoSHA512);
     }
 
     // Command to change directory and run a program.
@@ -1072,6 +1081,33 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
   ::CMakeCommandUsage(args[0].c_str());
   return 1;
+}
+
+int cmcmd::HashSumFile(std::vector<std::string>& args, cmCryptoHash::Algo algo)
+{
+  if (args.size() < 3) {
+    return -1;
+  }
+  int retval = 0;
+
+  for (std::string::size_type cc = 2; cc < args.size(); cc++) {
+    const char* filename = args[cc].c_str();
+    // Cannot compute sum of a directory
+    if (cmSystemTools::FileIsDirectory(filename)) {
+      std::cerr << "Error: " << filename << " is a directory" << std::endl;
+      retval++;
+    } else {
+      std::string value = cmSystemTools::ComputeFileHash(filename, algo);
+      if (value.empty()) {
+        // To mimic "md5sum/shasum" behavior in a shell:
+        std::cerr << filename << ": No such file or directory" << std::endl;
+        retval++;
+      } else {
+        std::cout << value << "  " << filename << std::endl;
+      }
+    }
+  }
+  return retval;
 }
 
 int cmcmd::SymlinkLibrary(std::vector<std::string>& args)
