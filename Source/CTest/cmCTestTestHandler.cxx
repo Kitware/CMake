@@ -1441,6 +1441,12 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
     }
 
     xml.StartElement("NamedMeasurement");
+    xml.Attribute("type", "numeric/double");
+    xml.Attribute("name", "Processors");
+    xml.Element("Value", result->Properties->Processors);
+    xml.EndElement(); // NamedMeasurement
+
+    xml.StartElement("NamedMeasurement");
     xml.Attribute("type", "text/string");
     xml.Attribute("name", "Completion Status");
     xml.Element("Value", result->CompletionStatus);
