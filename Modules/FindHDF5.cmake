@@ -396,6 +396,45 @@ macro( _HDF5_parse_compile_line
   endforeach()
 endmacro()
 
+# Select a preferred imported configuration from a target
+function(_HDF5_select_imported_config target imported_conf)
+    # We will first assign the value to a local variable _imported_conf, then assign
+    # it to the function argument at the end.
+    get_target_property(_imported_conf ${target} MAP_IMPORTED_CONFIG_${CMAKE_BUILD_TYPE})
+    if (NOT _imported_conf)
+        # Get available imported configurations by examining target properties
+        get_target_property(_imported_conf ${target} IMPORTED_CONFIGURATIONS)
+        if(HDF5_FIND_DEBUG)
+            message(STATUS "Found imported configurations: ${_imported_conf}")
+        endif()
+        # Find the imported configuration that we prefer.
+        # We do this by making list of configurations in order of preference,
+        # starting with ${CMAKE_BUILD_TYPE} and ending with the first imported_conf
+        set(_preferred_confs ${CMAKE_BUILD_TYPE})
+        list(GET _imported_conf 0 _fallback_conf)
+        list(APPEND _preferred_confs RELWITHDEBINFO RELEASE DEBUG ${_fallback_conf})
+        if(HDF5_FIND_DEBUG)
+            message(STATUS "Start search through imported configurations in the following order: ${_preferred_confs}")
+        endif()
+        # Now find the first of these that is present in imported_conf
+        cmake_policy(PUSH)
+        cmake_policy(SET CMP0057 NEW) # support IN_LISTS
+        foreach (_conf IN LISTS _preferred_confs)
+            if (${_conf} IN_LIST _imported_conf)
+               set(_imported_conf ${_conf})
+               break()
+            endif()
+        endforeach()
+        cmake_policy(POP)
+    endif()
+    if(HDF5_FIND_DEBUG)
+        message(STATUS "Selected imported configuration: ${_imported_conf}")
+    endif()
+    # assign value to function argument
+    set(${imported_conf} ${_imported_conf} PARENT_SCOPE)
+endfunction()
+
+
 if(NOT HDF5_ROOT)
     set(HDF5_ROOT $ENV{HDF5_ROOT})
 endif()
@@ -452,8 +491,8 @@ if(NOT HDF5_FOUND AND NOT HDF5_NO_FIND_PACKAGE_CONFIG_FILE)
                 message(STATUS "Trying to get properties of target ${HDF5_${_lang}_TARGET}${_suffix}")
             endif()
             # Find library for this target. Complicated as on Windows with a DLL, we need to search for the import-lib.
-            get_target_property(_imported_conf ${HDF5_${_lang}_TARGET}${_suffix} IMPORTED_CONFIGURATIONS)
-            get_target_property(_lang_location ${HDF5_${_lang}_TARGET}${_suffix} IMPORTED_IMPLIB_${_imported_conf} )
+            _HDF5_select_imported_config(${HDF5_${_lang}_TARGET}${_suffix} _hdf5_imported_conf)
+            get_target_property(_lang_location ${HDF5_${_lang}_TARGET}${_suffix} IMPORTED_IMPLIB_${_hdf5_imported_conf} )
             if (NOT _lang_location)
                 # no import lib, just try LOCATION
                 get_target_property(_lang_location ${HDF5_${_lang}_TARGET}${_suffix} LOCATION)
@@ -465,7 +504,7 @@ if(NOT HDF5_FOUND AND NOT HDF5_NO_FIND_PACKAGE_CONFIG_FILE)
                 set(HDF5_${_lang}_FOUND True)
             endif()
             if(FIND_HL)
-                get_target_property(__lang_hl_location ${HDF5_${_lang}_HL_TARGET}${_suffix} IMPORTED_IMPLIB_${_imported_conf} )
+                get_target_property(__lang_hl_location ${HDF5_${_lang}_HL_TARGET}${_suffix} IMPORTED_IMPLIB_${_hdf5_imported_conf} )
                 if (NOT _lang_hl_location)
                     get_target_property(_lang_hl_location ${HDF5_${_lang}_HL_TARGET}${_suffix} LOCATION)
                 endif()
@@ -476,6 +515,7 @@ if(NOT HDF5_FOUND AND NOT HDF5_NO_FIND_PACKAGE_CONFIG_FILE)
                     set(HDF5_HL_FOUND True)
                 endif()
             endif()
+            unset( _hdf5_imported_conf)
         endforeach()
     endif()
 endif()
