@@ -309,6 +309,7 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
   std::string output;
   const char* p = input.c_str();
   while (re.find(p)) {
+    this->Makefile->ClearMatches();
     this->Makefile->StoreMatches(re);
     std::string::size_type l = re.start();
     std::string::size_type r = re.end();
@@ -391,6 +392,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   std::string output;
   std::string::size_type base = 0;
   while (re.find(input.c_str() + base)) {
+    this->Makefile->ClearMatches();
     this->Makefile->StoreMatches(re);
     std::string::size_type l2 = re.start();
     std::string::size_type r = re.end();
