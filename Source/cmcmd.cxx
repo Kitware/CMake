@@ -44,6 +44,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+class cmConnection;
+
 int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
                               std::vector<std::string>::const_iterator argEnd);
 int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
@@ -1022,7 +1024,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       }
 #if defined(HAVE_SERVER_MODE) && HAVE_SERVER_MODE
-      cmServerConnection* conn;
+      cmConnection* conn;
       if (isDebug) {
         conn = new cmServerStdIoConnection;
       } else {

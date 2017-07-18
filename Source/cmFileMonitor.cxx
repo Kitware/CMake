@@ -171,7 +171,9 @@ public:
   {
     if (this->Handle) {
       uv_fs_event_stop(this->Handle);
-      uv_close(reinterpret_cast<uv_handle_t*>(this->Handle), &on_fs_close);
+      if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(this->Handle))) {
+        uv_close(reinterpret_cast<uv_handle_t*>(this->Handle), &on_fs_close);
+      }
       this->Handle = nullptr;
     }
     cmVirtualDirectoryWatcher::StopWatching();

@@ -128,11 +128,13 @@ void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
 
 } // namespace
 
-cmServerRequest::cmServerRequest(cmServer* server, const std::string& t,
-                                 const std::string& c, const Json::Value& d)
+cmServerRequest::cmServerRequest(cmServer* server, cmConnection* connection,
+                                 const std::string& t, const std::string& c,
+                                 const Json::Value& d)
   : Type(t)
   , Cookie(c)
   , Data(d)
+  , Connection(connection)
   , m_Server(server)
 {
 }

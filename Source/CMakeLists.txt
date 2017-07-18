@@ -1012,7 +1012,9 @@ target_link_libraries(cmake CMakeLib)
 
 if(CMake_ENABLE_SERVER_MODE)
   add_library(CMakeServerLib
+    cmConnection.h cmConnection.cxx
     cmFileMonitor.cxx cmFileMonitor.h
+    cmPipeConnection.cxx cmPipeConnection.h
     cmServer.cxx cmServer.h
     cmServerConnection.cxx cmServerConnection.h
     cmServerProtocol.cxx cmServerProtocol.h
