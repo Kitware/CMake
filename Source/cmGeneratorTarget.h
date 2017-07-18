@@ -107,6 +107,11 @@ public:
     std::set<std::string> ExpectedResxHeaders;
     std::set<std::string> ExpectedXamlHeaders;
     std::set<std::string> ExpectedXamlSources;
+    bool Initialized;
+    KindedSources()
+      : Initialized(false)
+    {
+    }
   };
 
   /** Get all sources needed for a configuration with kinds assigned.  */
