@@ -7,9 +7,11 @@ cpack_usage()
 Usage: $0 [options]
 Options: [defaults in brackets after descriptions]
   --help            print this message
+  --version         print cmake installer version
   --prefix=dir      directory in which to install
   --include-subdir  include the @CPACK_PACKAGE_FILE_NAME@ subdirectory
   --exclude-subdir  exclude the @CPACK_PACKAGE_FILE_NAME@ subdirectory
+  --skip-license    accept license
 EOF
   exit 1
 }
