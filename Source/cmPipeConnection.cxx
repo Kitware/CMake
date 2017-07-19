@@ -19,7 +19,8 @@ void cmPipeConnection::Connect(uv_stream_t* server)
 
     uv_pipe_init(this->Server->GetLoop(), rejectPipe, 0);
     uv_accept(server, reinterpret_cast<uv_stream_t*>(rejectPipe));
-    uv_close(reinterpret_cast<uv_handle_t*>(rejectPipe), &on_close_delete);
+    uv_close(reinterpret_cast<uv_handle_t*>(rejectPipe),
+             &on_close_delete<uv_pipe_t>);
     return;
   }
 
@@ -28,7 +29,8 @@ void cmPipeConnection::Connect(uv_stream_t* server)
   this->ClientPipe->data = static_cast<cmEventBasedConnection*>(this);
   auto client = reinterpret_cast<uv_stream_t*>(this->ClientPipe);
   if (uv_accept(server, client) != 0) {
-    uv_close(reinterpret_cast<uv_handle_t*>(client), &on_close_delete);
+    uv_close(reinterpret_cast<uv_handle_t*>(client),
+             &on_close_delete<uv_pipe_t>);
     this->ClientPipe = nullptr;
     return;
   }
@@ -65,15 +67,16 @@ bool cmPipeConnection::OnConnectionShuttingDown()
 {
   if (this->ClientPipe) {
     uv_close(reinterpret_cast<uv_handle_t*>(this->ClientPipe),
-             &on_close_delete);
+             &on_close_delete<uv_pipe_t>);
     this->WriteStream->data = nullptr;
   }
-  uv_close(reinterpret_cast<uv_handle_t*>(this->ServerPipe), &on_close_delete);
+  uv_close(reinterpret_cast<uv_handle_t*>(this->ServerPipe),
+           &on_close_delete<uv_pipe_t>);
 
   this->ClientPipe = nullptr;
   this->ServerPipe = nullptr;
   this->WriteStream = nullptr;
   this->ReadStream = nullptr;
 
-  return cmConnection::OnConnectionShuttingDown();
+  return cmEventBasedConnection::OnConnectionShuttingDown();
 }

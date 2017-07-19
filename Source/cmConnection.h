@@ -100,7 +100,12 @@ public:
   uv_stream_t* WriteStream = nullptr;
 
   static void on_close(uv_handle_t* handle);
-  static void on_close_delete(uv_handle_t* handle);
+
+  template <typename T>
+  static void on_close_delete(uv_handle_t* handle)
+  {
+    delete reinterpret_cast<T*>(handle);
+  }
 
 protected:
   std::string RawReadBuffer;

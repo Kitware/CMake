@@ -66,6 +66,7 @@ protected:
 
   bool ServeThreadRunning = false;
   uv_thread_t ServeThread;
+  uv_async_t ShutdownSignal;
 
   uv_loop_t Loop;
 

@@ -62,14 +62,14 @@ bool cmStdIoConnection::OnConnectionShuttingDown()
   if (usesTty) {
     uv_read_stop(reinterpret_cast<uv_stream_t*>(this->Input.tty));
     uv_close(reinterpret_cast<uv_handle_t*>(this->Input.tty),
-             &on_close_delete);
+             &on_close_delete<uv_tty_t>);
     uv_close(reinterpret_cast<uv_handle_t*>(this->Output.tty),
-             &on_close_delete);
+             &on_close_delete<uv_tty_t>);
   } else {
     uv_close(reinterpret_cast<uv_handle_t*>(this->Input.pipe),
-             &on_close_delete);
+             &on_close_delete<uv_pipe_t>);
     uv_close(reinterpret_cast<uv_handle_t*>(this->Output.pipe),
-             &on_close_delete);
+             &on_close_delete<uv_pipe_t>);
   }
 
   return true;

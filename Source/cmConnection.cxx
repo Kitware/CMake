@@ -38,11 +38,6 @@ void cmEventBasedConnection::on_read(uv_stream_t* stream, ssize_t nread,
   delete[](buf->base);
 }
 
-void cmEventBasedConnection::on_close_delete(uv_handle_t* handle)
-{
-  delete handle;
-}
-
 void cmEventBasedConnection::on_close(uv_handle_t* /*handle*/)
 {
 }
