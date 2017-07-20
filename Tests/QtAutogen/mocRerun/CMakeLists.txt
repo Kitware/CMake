@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.9)
+cmake_policy(SET CMP0071 NEW)
 project(mocRerun CXX)
 
 if (QT_TEST_VERSION STREQUAL 4)
@@ -27,7 +28,6 @@ add_executable(mocRerun
   ${CMAKE_CURRENT_BINARY_DIR}/main.cpp
   res1.qrc
   )
-set_property(TARGET mocRerun PROPERTY __UNDOCUMENTED_AUTOGEN_GENERATED_FILES 1)
 target_include_directories(mocRerun PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(mocRerun ${QT_CORE_TARGET})
 # Write target name to text file

@@ -11,6 +11,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
 #include "cmState.h"
@@ -28,6 +29,7 @@
 #include <algorithm>
 #include <map>
 #include <set>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -290,6 +292,8 @@ static void AcquireScanFiles(cmGeneratorTarget const* target,
 {
   const bool mocTarget = target->GetPropertyAsBool("AUTOMOC");
   const bool uicTarget = target->GetPropertyAsBool("AUTOUIC");
+  const cmPolicies::PolicyStatus CMP0071_status =
+    target->Makefile->GetPolicyStatus(cmPolicies::CMP0071);
 
   std::vector<cmSourceFile*> srcFiles;
   target->GetConfigCommonSourceFiles(srcFiles);
@@ -298,24 +302,46 @@ static void AcquireScanFiles(cmGeneratorTarget const* target,
     cmSourceFile* sf = *fileIt;
     const cmSystemTools::FileFormat fileType =
       cmSystemTools::GetFileFormat(sf->GetExtension().c_str());
-
     if (!(fileType == cmSystemTools::CXX_FILE_FORMAT) &&
         !(fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
       continue;
     }
-    if (PropertyEnabled(sf, "GENERATED") &&
-        !target->GetPropertyAsBool("__UNDOCUMENTED_AUTOGEN_GENERATED_FILES")) {
-      // FIXME: Add a policy whose NEW behavior allows generated files.
-      // The implementation already works.  We disable it here to avoid
-      // changing behavior for existing projects that do not expect it.
-      continue;
-    }
+
     const std::string absFile =
       cmsys::SystemTools::GetRealPath(sf->GetFullPath());
     // Skip flags
     const bool skipAll = PropertyEnabled(sf, "SKIP_AUTOGEN");
     const bool mocSkip = skipAll || PropertyEnabled(sf, "SKIP_AUTOMOC");
     const bool uicSkip = skipAll || PropertyEnabled(sf, "SKIP_AUTOUIC");
+    const bool accept = (mocTarget && !mocSkip) || (uicTarget && !uicSkip);
+
+    // For GENERATED files check status of policy CMP0071
+    if (accept && PropertyEnabled(sf, "GENERATED")) {
+      bool policyAccept = false;
+      switch (CMP0071_status) {
+        case cmPolicies::WARN: {
+          std::ostringstream ost;
+          ost << cmPolicies::GetPolicyWarning(cmPolicies::CMP0071) << "\n";
+          ost << "AUTOMOC/AUTOUIC: Ignoring GENERATED source file:\n";
+          ost << "  " << cmQtAutoGeneratorCommon::Quoted(absFile) << "\n";
+          target->Makefile->IssueMessage(cmake::AUTHOR_WARNING, ost.str());
+        }
+          CM_FALLTHROUGH;
+        case cmPolicies::OLD:
+          // Ignore GENERATED file
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+          // Process GENERATED file
+          policyAccept = true;
+          break;
+      }
+      if (!policyAccept) {
+        continue;
+      }
+    }
+
     // Add file name to skip lists.
     // Do this even when the file is not added to the sources/headers lists
     // because the file name may be extracted from an other file when
@@ -327,7 +353,7 @@ static void AcquireScanFiles(cmGeneratorTarget const* target,
       uicSkipList.push_back(absFile);
     }
 
-    if ((mocTarget && !mocSkip) || (uicTarget && !uicSkip)) {
+    if (accept) {
       // Add file name to sources or headers list
       switch (fileType) {
         case cmSystemTools::CXX_FILE_FORMAT:

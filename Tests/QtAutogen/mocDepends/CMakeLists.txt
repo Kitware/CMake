@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 3.7)
-project(mocDepends)
+cmake_minimum_required(VERSION 3.9)
+cmake_policy(SET CMP0071 NEW)
+project(mocDepends CXX)
 
 if (QT_TEST_VERSION STREQUAL 4)
   find_package(Qt4 REQUIRED)
@@ -28,7 +29,6 @@ add_executable(mocDepends1 test1.cpp
 )
 target_link_libraries(mocDepends1 ${QT_CORE_TARGET})
 set_target_properties(mocDepends1 PROPERTIES AUTOMOC TRUE)
-set_property(TARGET mocDepends1 PROPERTY __UNDOCUMENTED_AUTOGEN_GENERATED_FILES 1)
 
 # -- Test 2 using generated library
 # This tests the dependency of AUTOMOC of mocDepends2 to the
@@ -44,4 +44,3 @@ add_library(SimpleLib STATIC simpleLib.hpp simpleLib.cpp)
 add_executable(mocDepends2 test2.cpp )
 target_link_libraries(mocDepends2 SimpleLib ${QT_CORE_TARGET})
 set_target_properties(mocDepends2 PROPERTIES AUTOMOC TRUE)
-set_property(TARGET mocDepends2 PROPERTY __UNDOCUMENTED_AUTOGEN_GENERATED_FILES 1)

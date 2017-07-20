@@ -1,0 +1,34 @@
+CMP0071
+-------
+
+Let :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC` process
+:prop_sf:`GENERATED` files.
+
+CMake 3.10 and newer process regular *and* :prop_sf:`GENERATED` source files
+in :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC`.
+In CMake 3.9 and lower, only regular source files were processed in
+:prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC`,
+:prop_sf:`GENERATED` source files were ignored.
+
+This policy affects how :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC` process
+source files that are :prop_sf:`GENERATED`.
+
+The ``OLD`` behavior for this policy is to *ignore* :prop_sf:`GENERATED`
+source files in :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC`.
+
+The ``NEW`` behavior for this policy is to process :prop_sf:`GENERATED`
+source files in :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC` just like regular
+source files.
+
+.. note::
+  To exclude source files from :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC`
+  processing, the boolean source file properties
+  :prop_sf:`SKIP_AUTOMOC`, :prop_sf:`SKIP_AUTOUIC` and :prop_sf:`SKIP_AUTOGEN`
+  can be set accordingly.
+
+This policy was introduced in CMake version 3.10.  CMake version
+|release| warns when the policy is not set and uses ``OLD`` behavior.
+Use the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW``
+explicitly.
+
+.. include:: DEPRECATED.txt

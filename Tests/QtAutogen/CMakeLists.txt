@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.7)
-
+cmake_minimum_required(VERSION 3.9)
+cmake_policy(SET CMP0071 NEW)
 project(QtAutogen)
 
 # Tell find_package(Qt5) where to find Qt.
@@ -304,11 +304,16 @@ add_subdirectory(mocDepends)
 
 # -- Test
 # Tests various include moc patterns
-add_subdirectory(mocIncludeStrict)
+if(ALLOW_WRAP_CPP)
+  add_subdirectory(mocIncludeStrict)
+  add_subdirectory(mocIncludeRelaxed)
+endif()
 
 # -- Test
-# Tests various include moc patterns
-add_subdirectory(mocIncludeRelaxed)
+# Tests policy 0071
+if(ALLOW_WRAP_CPP)
+  add_subdirectory(mocCMP0071)
+endif()
 
 # -- Test
 # Tests Q_PLUGIN_METADATA json file change detection
