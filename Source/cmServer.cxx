@@ -282,8 +282,7 @@ void cmServer::WriteJsonObject(cmConnection* connection,
     }
   }
 
-  connection->WriteData(std::string("\n") + kSTART_MAGIC + std::string("\n") +
-                        result + kEND_MAGIC + std::string("\n"));
+  connection->WriteData(result);
 }
 
 cmServerProtocol* cmServer::FindMatchingProtocol(

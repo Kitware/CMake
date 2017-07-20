@@ -153,6 +153,13 @@ void cmConnectionBufferStrategy::clear()
 {
 }
 
+std::string cmServerBufferStrategy::BufferOutMessage(
+  const std::string& rawBuffer) const
+{
+  return std::string("\n") + kSTART_MAGIC + std::string("\n") + rawBuffer +
+    kEND_MAGIC + std::string("\n");
+}
+
 std::string cmServerBufferStrategy::BufferMessage(std::string& RawReadBuffer)
 {
   for (;;) {

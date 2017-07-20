@@ -67,9 +67,13 @@ bool cmEventBasedConnection::IsOpen() const
   return this->WriteStream != nullptr;
 }
 
-void cmEventBasedConnection::WriteData(const std::string& data)
+void cmEventBasedConnection::WriteData(const std::string& _data)
 {
+  auto data = _data;
   assert(this->WriteStream);
+  if (BufferStrategy) {
+    data = BufferStrategy->BufferOutMessage(data);
+  }
 
   auto ds = data.size();
 
