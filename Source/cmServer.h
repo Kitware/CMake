@@ -61,6 +61,7 @@ public:
   void OnDisconnect(cmConnection* pConnection);
 
 protected:
+  mutable uv_rwlock_t ConnectionsMutex;
   std::vector<std::unique_ptr<cmConnection>> Connections;
 
   bool ServeThreadRunning = false;
