@@ -2,25 +2,30 @@
 template <long l>
 struct Outputter;
 
+#if defined(_MSC_VER) && defined(_MSVC_LANG)
+#define CXX_STD _MSVC_LANG
+#else
+#define CXX_STD __cplusplus
+#endif
+
 #if DEFAULT_CXX17
-#if __cplusplus <= 201402L
-Outputter<__cplusplus> o;
+#if CXX_STD <= 201402L
+Outputter<CXX_STD> o;
 #endif
 #elif DEFAULT_CXX14
-#if __cplusplus != 201402L
-Outputter<__cplusplus> o;
+#if CXX_STD != 201402L
+Outputter<CXX_STD> o;
 #endif
 #elif DEFAULT_CXX11
-#if __cplusplus != 201103L
-Outputter<__cplusplus> o;
+#if CXX_STD != 201103L
+Outputter<CXX_STD> o;
 #endif
 #else
 #if !DEFAULT_CXX98
 #error Buildsystem error
 #endif
-#if __cplusplus != 199711L && __cplusplus != 1 &&                             \
-  !defined(__GXX_EXPERIMENTAL_CXX0X__)
-Outputter<__cplusplus> o;
+#if CXX_STD != 199711L && CXX_STD != 1 && !defined(__GXX_EXPERIMENTAL_CXX0X__)
+Outputter<CXX_STD> o;
 #endif
 #endif
 
