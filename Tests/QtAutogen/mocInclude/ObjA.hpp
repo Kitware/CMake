@@ -3,11 +3,17 @@
 
 #include <QObject>
 
+// Object source comes without any _moc/.moc includes
+class ObjAPrivate;
 class ObjA : public QObject
 {
   Q_OBJECT
-  Q_SLOT
-  void go();
+public:
+  ObjA();
+  ~ObjA();
+
+private:
+  ObjAPrivate* const d;
 };
 
 #endif

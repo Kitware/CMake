@@ -1,25 +1,22 @@
 #include "ObjB.hpp"
+#include "ObjB_p.h"
 
-class SubObjB : public QObject
-{
-  Q_OBJECT
-
-public:
-  SubObjB() {}
-  ~SubObjB() {}
-
-  Q_SLOT
-  void aSlot();
-};
-
-void SubObjB::aSlot()
+ObjBPrivate::ObjBPrivate()
 {
 }
 
-void ObjB::go()
+ObjBPrivate::~ObjBPrivate()
 {
-  SubObjB subObj;
 }
 
-#include "ObjB.moc"
+ObjB::ObjB()
+  : d(new ObjBPrivate)
+{
+}
+
+ObjB::~ObjB()
+{
+  delete d;
+}
+
 #include "moc_ObjB.cpp"
