@@ -2,75 +2,135 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServerConnection.h"
 
+#include "cmConfigure.h"
 #include "cmServer.h"
 #include "cmServerDictionary.h"
+#ifdef _WIN32
+#include "io.h"
+#else
+#include <unistd.h>
+#endif
+#include <cassert>
 
 cmStdIoConnection::cmStdIoConnection(
   cmConnectionBufferStrategy* bufferStrategy)
   : cmEventBasedConnection(bufferStrategy)
-  , Input()
-  , Output()
 {
+}
+
+void cmStdIoConnection::SetupStream(uv_stream_t*& stream, int file_id)
+{
+  assert(stream == nullptr);
+  switch (uv_guess_handle(file_id)) {
+    case UV_TTY: {
+      auto tty = new uv_tty_t();
+      uv_tty_init(this->Server->GetLoop(), tty, file_id, file_id == 0);
+      uv_tty_set_mode(tty, UV_TTY_MODE_NORMAL);
+      stream = reinterpret_cast<uv_stream_t*>(tty);
+      break;
+    }
+    case UV_FILE:
+      if (file_id == 0) {
+        return;
+      }
+      // Intentional fallthrough; stdin can _not_ be treated as a named
+      // pipe, however stdout can be.
+      CM_FALLTHROUGH;
+    case UV_NAMED_PIPE: {
+      auto pipe = new uv_pipe_t();
+      uv_pipe_init(this->Server->GetLoop(), pipe, 0);
+      uv_pipe_open(pipe, file_id);
+      stream = reinterpret_cast<uv_stream_t*>(pipe);
+      break;
+    }
+    default:
+      assert(false && "Unable to determine stream type");
+      return;
+  }
+  stream->data = static_cast<cmEventBasedConnection*>(this);
 }
 
 void cmStdIoConnection::SetServer(cmServerBase* s)
 {
   cmConnection::SetServer(s);
 
-  if (uv_guess_handle(1) == UV_TTY) {
-    usesTty = true;
+  SetupStream(this->ReadStream, 0);
+  SetupStream(this->WriteStream, 1);
+}
 
-    this->Input.tty = new uv_tty_t();
-    uv_tty_init(this->Server->GetLoop(), this->Input.tty, 0, 1);
-    uv_tty_set_mode(this->Input.tty, UV_TTY_MODE_NORMAL);
-    this->Input.tty->data = static_cast<cmEventBasedConnection*>(this);
-    this->ReadStream = reinterpret_cast<uv_stream_t*>(this->Input.tty);
+void shutdown_connection(uv_prepare_t* prepare)
+{
+  cmStdIoConnection* connection =
+    reinterpret_cast<cmStdIoConnection*>(prepare->data);
 
-    this->Output.tty = new uv_tty_t();
-    uv_tty_init(this->Server->GetLoop(), this->Output.tty, 1, 0);
-    uv_tty_set_mode(this->Output.tty, UV_TTY_MODE_NORMAL);
-    this->Output.tty->data = static_cast<cmEventBasedConnection*>(this);
-    this->WriteStream = reinterpret_cast<uv_stream_t*>(this->Output.tty);
-  } else {
-    usesTty = false;
-
-    this->Input.pipe = new uv_pipe_t();
-    uv_pipe_init(this->Server->GetLoop(), this->Input.pipe, 0);
-    uv_pipe_open(this->Input.pipe, 0);
-    this->Input.pipe->data = static_cast<cmEventBasedConnection*>(this);
-    this->ReadStream = reinterpret_cast<uv_stream_t*>(this->Input.pipe);
-
-    this->Output.pipe = new uv_pipe_t();
-    uv_pipe_init(this->Server->GetLoop(), this->Output.pipe, 0);
-    uv_pipe_open(this->Output.pipe, 1);
-    this->Output.pipe->data = static_cast<cmEventBasedConnection*>(this);
-    this->WriteStream = reinterpret_cast<uv_stream_t*>(this->Output.pipe);
+  if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(prepare))) {
+    uv_close(reinterpret_cast<uv_handle_t*>(prepare),
+             &cmEventBasedConnection::on_close_delete<uv_prepare_t>);
   }
+  connection->OnDisconnect(0);
 }
 
 bool cmStdIoConnection::OnServeStart(std::string* pString)
 {
-  uv_read_start(this->ReadStream, on_alloc_buffer, on_read);
   Server->OnConnected(this);
+  if (this->ReadStream) {
+    uv_read_start(this->ReadStream, on_alloc_buffer, on_read);
+  } else if (uv_guess_handle(0) == UV_FILE) {
+    char buffer[1024];
+    while (auto len = read(0, buffer, sizeof(buffer))) {
+      ReadData(std::string(buffer, buffer + len));
+    }
+
+    // We can't start the disconnect from here, add a prepare hook to do that
+    // for us
+    auto prepare = new uv_prepare_t();
+    prepare->data = this;
+    uv_prepare_init(Server->GetLoop(), prepare);
+    uv_prepare_start(prepare, shutdown_connection);
+  }
   return cmConnection::OnServeStart(pString);
+}
+
+void cmStdIoConnection::ShutdownStream(uv_stream_t*& stream)
+{
+  if (!stream) {
+    return;
+  }
+  switch (stream->type) {
+    case UV_TTY: {
+      assert(!uv_is_closing(reinterpret_cast<uv_handle_t*>(stream)));
+      if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(stream))) {
+        uv_close(reinterpret_cast<uv_handle_t*>(stream),
+                 &on_close_delete<uv_tty_t>);
+      }
+      break;
+    }
+    case UV_FILE:
+    case UV_NAMED_PIPE: {
+      assert(!uv_is_closing(reinterpret_cast<uv_handle_t*>(stream)));
+      if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(stream))) {
+        uv_close(reinterpret_cast<uv_handle_t*>(stream),
+                 &on_close_delete<uv_pipe_t>);
+      }
+      break;
+    }
+    default:
+      assert(false && "Unable to determine stream type");
+  }
+
+  stream = nullptr;
 }
 
 bool cmStdIoConnection::OnConnectionShuttingDown()
 {
-  cmEventBasedConnection::OnConnectionShuttingDown();
-
-  if (usesTty) {
-    uv_read_stop(reinterpret_cast<uv_stream_t*>(this->Input.tty));
-    uv_close(reinterpret_cast<uv_handle_t*>(this->Input.tty),
-             &on_close_delete<uv_tty_t>);
-    uv_close(reinterpret_cast<uv_handle_t*>(this->Output.tty),
-             &on_close_delete<uv_tty_t>);
-  } else {
-    uv_close(reinterpret_cast<uv_handle_t*>(this->Input.pipe),
-             &on_close_delete<uv_pipe_t>);
-    uv_close(reinterpret_cast<uv_handle_t*>(this->Output.pipe),
-             &on_close_delete<uv_pipe_t>);
+  if (ReadStream) {
+    uv_read_stop(ReadStream);
   }
+
+  ShutdownStream(ReadStream);
+  ShutdownStream(WriteStream);
+
+  cmEventBasedConnection::OnConnectionShuttingDown();
 
   return true;
 }

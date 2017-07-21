@@ -144,9 +144,12 @@ bool cmConnection::OnServeStart(std::string* errString)
 
 bool cmEventBasedConnection::OnConnectionShuttingDown()
 {
-  this->WriteStream->data = nullptr;
-  this->ReadStream->data = nullptr;
-
+  if (this->WriteStream) {
+    this->WriteStream->data = nullptr;
+  }
+  if (this->ReadStream) {
+    this->ReadStream->data = nullptr;
+  }
   this->ReadStream = nullptr;
   this->WriteStream = nullptr;
   return true;
