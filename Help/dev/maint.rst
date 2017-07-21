@@ -37,6 +37,48 @@ command to integrate a merge request.  Please check at least the following:
   introduced.  (Learn to tolerate spurious failures due to idiosyncrasies
   of various nightly builders.)
 
+* Ensure that the MR targets the ``master`` branch.  A MR intended for
+  the ``release`` branch should be based on ``release`` but still merged
+  to ``master`` first (via ``Do: merge``).  A maintainer may then merge
+  the MR topic to ``release`` manually.
+
+Maintain Current Release
+========================
+
+The ``release`` branch is used to maintain the current release or release
+candidate.  The branch is published with no version number but maintained
+using a local branch named ``release-$ver``, where ``$ver`` is the version
+number of the current release in the form ``$major.$minor``.  It is always
+merged into ``master`` before publishing.
+
+To merge some ``$topic`` branch into ``release``, first create the local
+branch:
+
+.. code-block:: shell
+
+  git fetch origin
+  git checkout -b release-$ver origin/release
+
+Merge the ``$topic`` branch into the local ``release-$ver`` branch:
+
+.. code-block:: shell
+
+  git merge --no-ff $topic
+
+Merge the ``release-$ver`` branch to ``master``:
+
+.. code-block:: shell
+
+  git checkout master
+  git pull
+  git merge --no-ff release-$ver
+
+Publish both ``master`` and ``release`` simultaneously:
+
+.. code-block:: shell
+
+  git push --atomic origin master release-$ver:release
+
 .. _`CMake Review Process`: review.rst
 .. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
 
