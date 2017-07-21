@@ -118,7 +118,9 @@ void cmEventBasedConnection::OnDisconnect(int onerror)
 {
   (void)onerror;
   this->OnConnectionShuttingDown();
-  this->Server->OnDisconnect(this);
+  if (this->Server) {
+    this->Server->OnDisconnect(this);
+  }
 }
 
 cmConnection::~cmConnection()
@@ -127,6 +129,7 @@ cmConnection::~cmConnection()
 
 bool cmConnection::OnConnectionShuttingDown()
 {
+  this->Server = nullptr;
   return true;
 }
 

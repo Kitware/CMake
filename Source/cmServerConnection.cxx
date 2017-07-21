@@ -53,6 +53,9 @@ void cmStdIoConnection::SetupStream(uv_stream_t*& stream, int file_id)
 void cmStdIoConnection::SetServer(cmServerBase* s)
 {
   cmConnection::SetServer(s);
+  if (!s) {
+    return;
+  }
 
   SetupStream(this->ReadStream, 0);
   SetupStream(this->WriteStream, 1);
