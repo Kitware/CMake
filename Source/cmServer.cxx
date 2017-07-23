@@ -57,10 +57,6 @@ cmServer::cmServer(cmConnection* conn, bool supportExperimental)
 
 cmServer::~cmServer()
 {
-  if (!this->Protocol) { // Server was never fully started!
-    return;
-  }
-
   for (cmServerProtocol* p : this->SupportedProtocols) {
     delete p;
   }
@@ -110,6 +106,7 @@ void cmServer::ProcessRequest(cmConnection* connection,
 void cmServer::RegisterProtocol(cmServerProtocol* protocol)
 {
   if (protocol->IsExperimental() && !this->SupportExperimental) {
+    delete protocol;
     return;
   }
   auto version = protocol->ProtocolVersion();
