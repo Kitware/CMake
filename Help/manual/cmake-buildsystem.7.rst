@@ -266,7 +266,7 @@ The :command:`target_link_libraries` command has ``PRIVATE``,
 
 Because ``archive`` is a ``PUBLIC`` dependency of ``archiveExtras``, the
 usage requirements of it are propagated to ``consumer`` too.  Because
-``serialization`` is a ``PRIVATE`` dependency of ``archive``, the usage
+``serialization`` is a ``PRIVATE`` dependency of ``archiveExtras``, the usage
 requirements of it are not propagated to ``consumer``.
 
 Generally, a dependency should be specified in a use of
