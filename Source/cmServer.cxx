@@ -464,10 +464,6 @@ void cmServerBase::OnConnected(cmConnection*)
 {
 }
 
-void cmServerBase::OnDisconnect()
-{
-}
-
 void cmServerBase::OnServeStart()
 {
 }
