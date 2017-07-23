@@ -8,7 +8,7 @@
 
 #include "cmConnection.h"
 #include "cmPipeConnection.h"
-#include "cm_uv.h"
+#include "cmUVHandlePtr.h"
 
 class cmServerBase;
 
@@ -46,8 +46,8 @@ public:
   bool OnServeStart(std::string* pString) override;
 
 private:
-  void SetupStream(uv_stream_t*& stream, int file_id);
-  void ShutdownStream(uv_stream_t*& stream);
+  cm::uv_stream_ptr SetupStream(int file_id);
+  cm::uv_stream_ptr ReadStream;
 };
 
 /***
