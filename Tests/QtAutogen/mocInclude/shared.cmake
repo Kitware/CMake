@@ -29,9 +29,11 @@ set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/SObjB.cpp PROPERTY SKIP_AUTOMOC 
 qtx_generate_moc(
   ${CMAKE_CURRENT_SOURCE_DIR}/../mocInclude/SObjCExtra.hpp
   ${CMAKE_CURRENT_BINARY_DIR}/SObjCExtra_extMoc.cpp)
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../mocInclude/SObjCExtra.hpp PROPERTY SKIP_AUTOMOC ON)
+set_property(
+  SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../mocInclude/SObjCExtra.hpp
+  PROPERTY SKIP_AUTOMOC ON)
 # Custom target to depend on
-set(SOBJC_MOC ${CMAKE_CURRENT_BINARY_DIR}/${MOC_INCLUDE_NAME}_autogen/include/moc_SObjCExtra.cpp)
+set(SOBJC_MOC ${CMAKE_CURRENT_BINARY_DIR}/moc_SObjCExtra.cpp)
 add_custom_target("${MOC_INCLUDE_NAME}_SOBJC"
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/SObjCExtra_extMoc.cpp
   BYPRODUCTS ${SOBJC_MOC}
