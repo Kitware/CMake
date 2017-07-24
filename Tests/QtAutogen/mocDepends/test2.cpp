@@ -1,10 +1,9 @@
 
-#include "test2.hpp"
+#include "moc_test2_object.cpp"
+#include "test2_object.hpp"
 
 int main()
 {
-  SimpleLib obj;
-  LObject lobject;
-
+  Object obj;
   return 0;
 }
