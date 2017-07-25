@@ -284,7 +284,9 @@ static bool testValue(cmState* state, const std::string& key,
                       std::string& value, const std::string& keyDescription,
                       std::string* errorMessage)
 {
-  const std::string cachedValue = std::string(state->GetCacheEntryValue(key));
+  const char* entry = state->GetCacheEntryValue(key);
+  const std::string cachedValue =
+    entry == nullptr ? std::string() : std::string(entry);
   if (!cachedValue.empty() && !value.empty() && cachedValue != value) {
     setErrorMessage(errorMessage, std::string("\"") + key +
                       "\" is set but incompatible with configured " +
