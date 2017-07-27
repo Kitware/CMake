@@ -1029,6 +1029,7 @@ list(APPEND _tools cmake)
 target_link_libraries(cmake CMakeLib)
 
 add_library(CMakeServerLib
+  cmUVHandlePtr.h cmUVHandlePtr.cxx
   cmConnection.h cmConnection.cxx
   cmFileMonitor.cxx cmFileMonitor.h
   cmPipeConnection.cxx cmPipeConnection.h
