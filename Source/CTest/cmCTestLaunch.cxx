@@ -508,7 +508,11 @@ void cmCTestLaunch::DumpFileToXML(cmXMLWriter& xml, std::string const& fname)
     if (MatchesFilterPrefix(line)) {
       continue;
     }
-
+    if (this->Match(line, this->RegexWarningSuppress)) {
+      line = "[CTest: warning suppressed] " + line;
+    } else if (this->Match(line, this->RegexWarning)) {
+      line = "[CTest: warning matched] " + line;
+    }
     xml.Content(sep);
     xml.Content(line);
     sep = "\n";
