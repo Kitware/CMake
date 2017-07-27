@@ -242,24 +242,26 @@ public:
 
           // Check whether it is "Scalar deleting destructor" and "Vector
           // deleting destructor"
-          // if scalarPrefix and vectorPrefix are not found then print the
-          // symbol
+          // if scalarPrefix and vectorPrefix are not found then print
+          // the symbol
           const char* scalarPrefix = "??_G";
           const char* vectorPrefix = "??_E";
+          // The original code had a check for
+          //     symbol.find("real@") == std::string::npos)
+          // but this disallows member functions with the name "real".
           if (symbol.compare(0, 4, scalarPrefix) &&
               symbol.compare(0, 4, vectorPrefix)) {
             SectChar = this->SectionHeaders[pSymbolTable->SectionNumber - 1]
                          .Characteristics;
-
             // skip symbols containing a dot
             if (symbol.find('.') == std::string::npos) {
-              if (SectChar & IMAGE_SCN_MEM_EXECUTE) {
-                this->Symbols.insert(symbol);
-              } else if (SectChar & IMAGE_SCN_MEM_READ) {
-                // skip __real@ and __xmm@
-                if (symbol.find("_real") == std::string::npos &&
-                    symbol.find("_xmm") == std::string::npos) {
-                  this->DataSymbols.insert(symbol);
+              if (!pSymbolTable->Type && (SectChar & IMAGE_SCN_MEM_WRITE)) {
+                // Read only (i.e. constants) must be excluded
+                this->DataSymbols.insert(symbol);
+              } else {
+                if (pSymbolTable->Type || !(SectChar & IMAGE_SCN_MEM_READ) ||
+                    (SectChar & IMAGE_SCN_MEM_EXECUTE)) {
+                  this->Symbols.insert(symbol);
                 }
               }
             }

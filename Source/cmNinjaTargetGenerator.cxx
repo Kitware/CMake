@@ -1065,13 +1065,28 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   compileObjectVars.Includes = includes.c_str();
 
   // Rule for compiling object file.
-  std::string compileCmdVar = "CMAKE_";
-  compileCmdVar += language;
-  compileCmdVar += "_COMPILE_OBJECT";
-  std::string compileCmd =
-    this->GetMakefile()->GetRequiredDefinition(compileCmdVar);
   std::vector<std::string> compileCmds;
-  cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+  if (language == "CUDA") {
+    std::string cmdVar;
+    if (this->GeneratorTarget->GetPropertyAsBool(
+          "CUDA_SEPARABLE_COMPILATION")) {
+      cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+    } else if (this->GeneratorTarget->GetPropertyAsBool(
+                 "CUDA_PTX_COMPILATION")) {
+      cmdVar = std::string("CMAKE_CUDA_COMPILE_PTX_COMPILATION");
+    } else {
+      cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
+    }
+    std::string compileCmd =
+      this->GetMakefile()->GetRequiredDefinition(cmdVar);
+    cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+  } else {
+    const std::string cmdVar =
+      std::string("CMAKE_") + language + "_COMPILE_OBJECT";
+    std::string compileCmd =
+      this->GetMakefile()->GetRequiredDefinition(cmdVar);
+    cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+  }
 
   CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->GetLocalGenerator()->CreateRulePlaceholderExpander());

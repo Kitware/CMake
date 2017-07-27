@@ -34,6 +34,8 @@ Generators
   This is an experimental feature and can be activated by setting the
   :variable:`CMAKE_XCODE_GENERATE_SCHEME` variable to a ``TRUE`` value.
 
+* The :generator:`Xcode` generator now supports Xcode 9.
+
 Commands
 --------
 
@@ -319,3 +321,8 @@ Other Changes
 
 * On macOS, ``RPATH`` settings such as :prop_tgt:`BUILD_WITH_INSTALL_RPATH`
   no longer affect the ``install_name`` field.  See policy :policy:`CMP0068`.
+
+* The :generator:`Visual Studio 14 2015` generator has been taught about
+  a change to the ``v140`` toolset made by a VS 2015 update.  VS changed
+  the set of values it understands for the ``GenerateDebugInformation``
+  linker setting that produces the ``-DEBUG`` linker flag variants.

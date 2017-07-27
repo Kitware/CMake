@@ -739,7 +739,8 @@ bool cmFindPackageCommand::HandlePackageMode()
   if (result && !found) {
     // warn if package required or neither quiet nor in config mode
     if (this->Required ||
-        !(this->Quiet || (this->UseConfigFiles && !this->UseFindModules))) {
+        !(this->Quiet || (this->UseConfigFiles && !this->UseFindModules &&
+                          this->ConsideredConfigs.empty()))) {
       // The variable is not set.
       std::ostringstream e;
       std::ostringstream aw;

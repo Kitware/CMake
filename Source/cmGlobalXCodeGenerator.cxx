@@ -1517,6 +1517,17 @@ void cmGlobalXCodeGenerator::AddCommandsToBuildPhase(
   makecmd += " all";
   buildphase->AddAttribute("shellScript", this->CreateString(makecmd));
   buildphase->AddAttribute("showEnvVarsInLog", this->CreateString("0"));
+
+  cmXCodeObject* outputFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  for (std::vector<cmCustomCommand>::const_iterator i = commands.begin();
+       i != commands.end(); ++i) {
+    std::vector<std::string> const& outputs = i->GetOutputs();
+    for (std::vector<std::string>::const_iterator j = outputs.begin();
+         j != outputs.end(); ++j) {
+      outputFiles->AddObject(this->CreateString(*j));
+    }
+  }
+  buildphase->AddAttribute("outputPaths", outputFiles);
 }
 
 void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(

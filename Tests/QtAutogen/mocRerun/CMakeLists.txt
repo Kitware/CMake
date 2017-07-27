@@ -27,6 +27,7 @@ add_executable(mocRerun
   ${CMAKE_CURRENT_BINARY_DIR}/main.cpp
   res1.qrc
   )
+set_property(TARGET mocRerun PROPERTY __UNDOCUMENTED_AUTOGEN_GENERATED_FILES 1)
 target_include_directories(mocRerun PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(mocRerun ${QT_CORE_TARGET})
 # Write target name to text file

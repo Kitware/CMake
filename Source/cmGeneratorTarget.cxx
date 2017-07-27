@@ -1025,12 +1025,23 @@ cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
   std::string const key = cmSystemTools::UpperCase(config);
   KindedSourcesMapType::iterator it = this->KindedSourcesMap.find(key);
   if (it != this->KindedSourcesMap.end()) {
+    if (!it->second.Initialized) {
+      std::ostringstream e;
+      e << "The SOURCES of \"" << this->GetName()
+        << "\" use a generator expression that depends on the "
+           "SOURCES themselves.";
+      this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
+        cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
+      static KindedSources empty;
+      return empty;
+    }
     return it->second;
   }
 
   // Add an entry to the map for this configuration.
   KindedSources& files = this->KindedSourcesMap[key];
   this->ComputeKindedSources(files, config);
+  files.Initialized = true;
   return files;
 }
 
@@ -2632,18 +2643,6 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
                             debugIncludes, lang);
 
   cmDeleteAll(linkInterfaceIncludeDirectoriesEntries);
-
-  // Add standard include directories for this language.
-  std::string const standardIncludesVar =
-    "CMAKE_" + lang + "_STANDARD_INCLUDE_DIRECTORIES";
-  std::string const standardIncludes =
-    this->Makefile->GetSafeDefinition(standardIncludesVar);
-  std::vector<std::string>::size_type const before = includes.size();
-  cmSystemTools::ExpandListArgument(standardIncludes, includes);
-  for (std::vector<std::string>::iterator i = includes.begin() + before;
-       i != includes.end(); ++i) {
-    cmSystemTools::ConvertToUnixSlashes(*i);
-  }
 
   return includes;
 }

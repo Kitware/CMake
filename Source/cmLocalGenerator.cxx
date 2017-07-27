@@ -932,6 +932,20 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     }
   }
 
+  // Add standard include directories for this language.
+  // We do not filter out implicit directories here.
+  std::string const standardIncludesVar =
+    "CMAKE_" + lang + "_STANDARD_INCLUDE_DIRECTORIES";
+  std::string const standardIncludes =
+    this->Makefile->GetSafeDefinition(standardIncludesVar);
+  std::vector<std::string>::size_type const before = includes.size();
+  cmSystemTools::ExpandListArgument(standardIncludes, includes);
+  for (std::vector<std::string>::iterator i = includes.begin() + before;
+       i != includes.end(); ++i) {
+    cmSystemTools::ConvertToUnixSlashes(*i);
+    dirs.push_back(*i);
+  }
+
   for (std::vector<std::string>::const_iterator i = implicitDirs.begin();
        i != implicitDirs.end(); ++i) {
     if (std::find(includes.begin(), includes.end(), *i) != includes.end()) {
@@ -1603,7 +1617,11 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
 
     const char* opt =
       target->Target->GetMakefile()->GetRequiredDefinition(option_flag);
-    this->AppendFlagEscape(flags, opt);
+    std::vector<std::string> optVec;
+    cmSystemTools::ExpandListArgument(opt, optVec);
+    for (size_t i = 0; i < optVec.size(); ++i) {
+      this->AppendFlagEscape(flags, optVec[i]);
+    }
     return;
   }
 
@@ -1613,7 +1631,11 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
 
     if (const char* opt =
           target->Target->GetMakefile()->GetDefinition(option_flag)) {
-      this->AppendFlagEscape(flags, opt);
+      std::vector<std::string> optVec;
+      cmSystemTools::ExpandListArgument(opt, optVec);
+      for (size_t i = 0; i < optVec.size(); ++i) {
+        this->AppendFlagEscape(flags, optVec[i]);
+      }
       return;
     }
   }
