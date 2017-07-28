@@ -13,8 +13,11 @@ File manipulation command.
 Write ``<content>`` into a file called ``<filename>``.  If the file does
 not exist, it will be created.  If the file already exists, ``WRITE``
 mode will overwrite it and ``APPEND`` mode will append to the end.
-(If the file is a build input, use the :command:`configure_file` command
-to update the file only when its content changes.)
+Any directories in the path specified by ``<filename>`` that do not
+exist will be created.
+
+If the file is a build input, use the :command:`configure_file` command
+to update the file only when its content changes.
 
 ------------------------------------------------------------------------------
 
