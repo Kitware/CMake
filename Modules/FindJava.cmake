@@ -143,7 +143,7 @@ if(Java_JAVA_EXECUTABLE)
       if(var MATCHES "java version \"([0-9]+\\.[0-9]+\\.[0-9_.]+.*)\"")
         # This is most likely Sun / OpenJDK, or maybe GCJ-java compat layer
         set(Java_VERSION_STRING "${CMAKE_MATCH_1}")
-      elseif(var MATCHES "openjdk version \"([0-9]+)-[a-z]+\"")
+      elseif(var MATCHES "openjdk version \"([0-9]+)-[A-Za-z]+\"")
         # OpenJDK 9 early access builds or locally built
         set(Java_VERSION_STRING "1.${CMAKE_MATCH_1}.0")
       elseif(var MATCHES "java full version \"kaffe-([0-9]+\\.[0-9]+\\.[0-9_]+)\"")
