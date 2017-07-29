@@ -721,7 +721,7 @@ endfunction()
 #     matlab_add_unit_test(
 #         NAME <name>
 #         UNITTEST_FILE matlab_file_containing_unittest.m
-#         [CUSTOM_MATLAB_COMMAND matlab_command_to_run_as_test]
+#         [CUSTOM_TEST_COMMAND matlab_command_to_run_as_test]
 #         [UNITTEST_PRECOMMAND matlab_command_to_run]
 #         [TIMEOUT timeout]
 #         [ADDITIONAL_PATH path1 [path2 ...]]
@@ -737,7 +737,7 @@ endfunction()
 #   ``UNITTEST_FILE``
 #     the matlab unittest file. Its path will be automatically
 #     added to the Matlab path.
-#   ``CUSTOM_MATLAB_COMMAND``
+#   ``CUSTOM_TEST_COMMAND``
 #     Matlab script command to run as the test.
 #     If this is not set, then the following is run:
 #     ``runtests('matlab_file_name'), exit(max([ans(1,:).Failed]))``
