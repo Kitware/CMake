@@ -9,10 +9,12 @@
 
 if (WIN32)
   find_program(CYGWIN_INSTALL_PATH
-    cygwin.bat
-    "C:/Cygwin"
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygwin\\setup;rootdir]"
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygnus Solutions\\Cygwin\\mounts v2\\/;native]"
+    NAMES cygwin.bat
+    PATHS
+      "C:/Cygwin"
+      "C:/Cygwin64"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygwin\\setup;rootdir]"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygnus Solutions\\Cygwin\\mounts v2\\/;native]"
   )
   get_filename_component(CYGWIN_INSTALL_PATH "${CYGWIN_INSTALL_PATH}" DIRECTORY)
   mark_as_advanced(
