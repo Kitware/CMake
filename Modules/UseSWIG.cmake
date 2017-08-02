@@ -125,8 +125,10 @@ macro(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
 
   endif()
   foreach(it ${SWIG_${language}_EXTRA_FILE_EXTENSIONS})
-    set(${outfiles} ${${outfiles}}
-      "${generatedpath}/${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename}${it}")
+    set(extra_file "${generatedpath}/${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename}${it}")
+    list(APPEND ${outfiles} ${extra_file})
+    # Treat extra outputs as plain files regardless of language.
+    set_property(SOURCE "${extra_file}" PROPERTY LANGUAGE "")
   endforeach()
 endmacro()
 
