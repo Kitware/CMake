@@ -50,6 +50,13 @@ find_path(LIBXML2_INCLUDE_DIR NAMES libxml/xpath.h
    PATH_SUFFIXES libxml2
    )
 
+# CMake 3.9 and below used 'LIBXML2_LIBRARIES' as the name of
+# the cache entry storing the find_library result.  Use the
+# value if it was set by the project or user.
+if(DEFINED LIBXML2_LIBRARIES AND NOT DEFINED LIBXML2_LIBRARY)
+  set(LIBXML2_LIBRARY ${LIBXML2_LIBRARIES})
+endif()
+
 find_library(LIBXML2_LIBRARY NAMES xml2 libxml2
    HINTS
    ${PC_LIBXML_LIBDIR}
