@@ -529,42 +529,21 @@ macro (CMAKE_BUILD_UTILITIES)
 
   #---------------------------------------------------------------------
   # Build libuv library.
-  if(NOT DEFINED CMAKE_USE_LIBUV)
-    set(CMAKE_USE_LIBUV 1)
-    if(APPLE)
-      include(CheckCSourceCompiles)
-      check_c_source_compiles("
-#include <CoreServices/CoreServices.h>
-#include <AvailabilityMacros.h>
-#ifndef MAC_OS_X_VERSION_10_5
-#error \"MAC_OS_X_VERSION_10_5 is not defined\"
-#endif
-int main(void) { return 0; }
-" HAVE_CoreServices_OS_X_10_5)
-      if(NOT HAVE_CoreServices_OS_X_10_5)
-        set(CMAKE_USE_LIBUV 0)
-      endif()
-    endif()
-  endif()
-  if(CMAKE_USE_LIBUV)
-    if(CMAKE_USE_SYSTEM_LIBUV)
-      if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-        find_package(LibUV 1.0.0)
-      else()
-        message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBUV requires CMake >= 3.0")
-      endif()
-      if(NOT LIBUV_FOUND)
-        message(FATAL_ERROR
-          "CMAKE_USE_SYSTEM_LIBUV is ON but a libuv is not found!")
-      endif()
-      set(CMAKE_LIBUV_LIBRARIES LibUV::LibUV)
+  if(CMAKE_USE_SYSTEM_LIBUV)
+    if(NOT CMAKE_VERSION VERSION_LESS 3.0)
+      find_package(LibUV 1.0.0)
     else()
-      set(CMAKE_LIBUV_LIBRARIES cmlibuv)
-      add_subdirectory(Utilities/cmlibuv)
-      CMAKE_SET_TARGET_FOLDER(cmlibuv "Utilities/3rdParty")
+      message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBUV requires CMake >= 3.0")
     endif()
+    if(NOT LIBUV_FOUND)
+      message(FATAL_ERROR
+        "CMAKE_USE_SYSTEM_LIBUV is ON but a libuv is not found!")
+    endif()
+    set(CMAKE_LIBUV_LIBRARIES LibUV::LibUV)
   else()
-    set(CMAKE_LIBUV_LIBRARIES)
+    set(CMAKE_LIBUV_LIBRARIES cmlibuv)
+    add_subdirectory(Utilities/cmlibuv)
+    CMAKE_SET_TARGET_FOLDER(cmlibuv "Utilities/3rdParty")
   endif()
 
   #---------------------------------------------------------------------
@@ -758,8 +737,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(NOT DEFINED CMake_ENABLE_SERVER_MODE)
     list(FIND CMAKE_CXX_COMPILE_FEATURES cxx_auto_type CMake_HAVE_CXX_AUTO_TYPE)
     list(FIND CMAKE_CXX_COMPILE_FEATURES cxx_range_for CMake_HAVE_CXX_RANGE_FOR)
-    if(CMAKE_USE_LIBUV
-        AND CMake_HAVE_CXX_AUTO_TYPE
+    if(CMake_HAVE_CXX_AUTO_TYPE
         AND CMake_HAVE_CXX_MAKE_UNIQUE
         AND CMake_HAVE_CXX_RANGE_FOR
         )
@@ -767,9 +745,6 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     else()
       set(CMake_ENABLE_SERVER_MODE 0)
     endif()
-  endif()
-  if(CMake_ENABLE_SERVER_MODE AND NOT CMAKE_USE_LIBUV)
-    message(FATAL_ERROR "The server mode requires libuv!")
   endif()
 else()
   set(CMake_ENABLE_SERVER_MODE 0)
