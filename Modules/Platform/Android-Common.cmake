@@ -160,13 +160,19 @@ macro(__android_compiler_common lang)
   # Do not do this for a standalone toolchain because it is already
   # tied to a specific API version.
   if(CMAKE_ANDROID_NDK)
+    if(CMAKE_SYSROOT_COMPILE)
+      set(_cmake_sysroot_compile "${CMAKE_SYSROOT_COMPILE}")
+    else()
+      set(_cmake_sysroot_compile "${CMAKE_SYSROOT}")
+    endif()
     if(NOT CMAKE_ANDROID_NDK_DEPRECATED_HEADERS)
       list(APPEND CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES
-        "${CMAKE_SYSROOT_COMPILE}/usr/include"
-        "${CMAKE_SYSROOT_COMPILE}/usr/include/${CMAKE_ANDROID_ARCH_HEADER_TRIPLE}"
+        "${_cmake_sysroot_compile}/usr/include"
+        "${_cmake_sysroot_compile}/usr/include/${CMAKE_ANDROID_ARCH_HEADER_TRIPLE}"
         )
     else()
-      list(APPEND CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES "${CMAKE_SYSROOT}/usr/include")
+      list(APPEND CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES "${_cmake_sysroot_compile}/usr/include")
     endif()
+    unset(_cmake_sysroot_compile)
   endif()
 endmacro()
