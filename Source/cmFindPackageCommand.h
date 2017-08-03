@@ -100,6 +100,7 @@ private:
   void StoreVersionFound();
 
   void ComputePrefixes();
+  void FillPrefixesPackageRoot();
   void FillPrefixesCMakeEnvironment();
   void FillPrefixesCMakeVariable();
   void FillPrefixesSystemEnvironment();

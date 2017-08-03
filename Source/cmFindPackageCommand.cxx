@@ -1090,6 +1090,9 @@ void cmFindPackageCommand::AppendSuccessInformation()
 void cmFindPackageCommand::ComputePrefixes()
 {
   if (!this->NoDefaultPath) {
+    if (!this->NoPackageRootPath) {
+      this->FillPrefixesPackageRoot();
+    }
     if (!this->NoCMakePath) {
       this->FillPrefixesCMakeVariable();
     }
@@ -1115,6 +1118,23 @@ void cmFindPackageCommand::ComputePrefixes()
   this->FillPrefixesUserGuess();
 
   this->ComputeFinalPaths();
+}
+
+void cmFindPackageCommand::FillPrefixesPackageRoot()
+{
+  cmSearchPath& paths = this->LabeledPaths[PathLabel::PackageRoot];
+
+  // Add package specific search prefixes
+  // NOTE: This should be using const_reverse_iterator but HP aCC and
+  //       Oracle sunCC both currently have standard library issues
+  //       with the reverse iterator APIs.
+  for (std::deque<std::string>::reverse_iterator pkg =
+         this->Makefile->FindPackageModuleStack.rbegin();
+       pkg != this->Makefile->FindPackageModuleStack.rend(); ++pkg) {
+    std::string varName = *pkg + "_ROOT";
+    paths.AddCMakePath(varName);
+    paths.AddEnvPath(varName);
+  }
 }
 
 void cmFindPackageCommand::FillPrefixesCMakeEnvironment()
