@@ -757,6 +757,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
   std::vector<std::string> cmd;
   cmd.push_back(this->GetMSBuildCommand());
   cmd.push_back(vcxproj);
+  cmd.push_back("/p:Configuration=Debug");
   cmd.push_back(std::string("/p:VisualStudioVersion=") +
                 this->GetIDEVersion());
   std::string out;
