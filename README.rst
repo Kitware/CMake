@@ -36,6 +36,7 @@ Supported Platforms
 * FreeBSD
 * OpenBSD
 * Solaris
+* AIX
 * HP-UX
 
 Other UNIX-like operating systems may work too out of the box, if not
