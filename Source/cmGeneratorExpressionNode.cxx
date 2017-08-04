@@ -813,7 +813,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
       reportError(
         context, content->GetOriginalExpression(),
         "$<COMPILE_LANGUAGE:...> may only be used to specify include "
-        "directories compile definitions, compile options and to evaluate "
+        "directories, compile definitions, compile options, and to evaluate "
         "components of the file(GENERATE) command.");
       return std::string();
     }
