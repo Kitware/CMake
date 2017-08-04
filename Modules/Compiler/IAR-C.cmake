@@ -5,6 +5,9 @@ include(Compiler/CMakeCommonCompilerMacros)
 
 # The toolchains for ARM and AVR are quite different:
 if("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
+
+  set(CMAKE_C_EXTENSION_COMPILE_OPTION -e)
+
   set(CMAKE_C90_STANDARD_COMPILE_OPTION "")
   set(CMAKE_C90_EXTENSION_COMPILE_OPTION -e)
 
