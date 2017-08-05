@@ -647,7 +647,9 @@ void cmQtAutoGenerators::Init(cmMakefile* makefile)
 
   // Moc predefs file
   if (!this->MocPredefsCmd.empty()) {
-    this->MocPredefsFileRel = "moc_predefs.h";
+    this->MocPredefsFileRel = "moc_predefs";
+    this->MocPredefsFileRel += this->ConfigSuffix;
+    this->MocPredefsFileRel += ".h";
     this->MocPredefsFileAbs = cmSystemTools::CollapseCombinedPath(
       this->AutogenBuildDir, this->MocPredefsFileRel);
   }
