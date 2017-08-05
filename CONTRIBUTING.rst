@@ -29,7 +29,8 @@ To contribute patches:
 #. Base all new work on the upstream ``master`` branch.
    Base work on the upstream ``release`` branch only if it fixes a
    regression or bug in a feature new to that release.
-#. Create commits making incremental, distinct, logically complete changes.
+#. Create commits making incremental, distinct, logically complete changes
+   with appropriate `commit messages`_.
 #. Push a topic branch to a personal repository fork on GitLab.
 #. Create a GitLab Merge Request targeting the upstream ``master`` branch
    (even if the change is intended for merge to the ``release`` branch).
@@ -40,6 +41,7 @@ The merge request will enter the `CMake Review Process`_ for consideration.
 .. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
 .. _`Utilities/SetupForDevelopment.sh`: Utilities/SetupForDevelopment.sh
 .. _`CMake Source Code Guide`: Help/dev/source.rst
+.. _`commit messages`: Help/dev/review.rst#commit-messages
 .. _`CMake Review Process`: Help/dev/review.rst
 
 License
