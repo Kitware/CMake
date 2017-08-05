@@ -158,16 +158,6 @@ static void GetCompileDefinitionsAndDirectories(
 
 static bool IsMultiConfig(cmGlobalGenerator* globalGen)
 {
-  // FIXME: Xcode does not support per-config sources, yet.
-  //        (EXCLUDED_SOURCE_FILE_NAMES)
-  //        Treat it as a single configuration generator meanwhile.
-  if (globalGen->GetName().find("Xcode") != std::string::npos) {
-    return false;
-  }
-  // FIXME: Visual Studio does not fully support per-config sources yet.
-  if (globalGen->GetName().find("Visual Studio") != std::string::npos) {
-    return false;
-  }
   return globalGen->IsMultiConfig();
 }
 
