@@ -707,24 +707,11 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenSources(
 {
   if (target->GetPropertyAsBool("AUTOMOC")) {
     cmMakefile* makefile = target->Target->GetMakefile();
-    const std::vector<std::string> suffixes =
-      GetConfigurationSuffixes(makefile);
-    // Get build directory
-    const std::string autogenBuildDir = GetAutogenTargetBuildDir(target);
-    // Register all compilation files as generated
-    for (std::vector<std::string>::const_iterator it = suffixes.begin();
-         it != suffixes.end(); ++it) {
-      std::string mcFile = autogenBuildDir + "/mocs_compilation";
-      mcFile += *it;
-      mcFile += ".cpp";
-      AddGeneratedSource(makefile, mcFile, cmQtAutoGeneratorCommon::MOC);
-    }
     // Mocs compilation file
-    if (IsMultiConfig(target->GetGlobalGenerator())) {
-      target->AddSource(autogenBuildDir + "/mocs_compilation_$<CONFIG>.cpp");
-    } else {
-      target->AddSource(autogenBuildDir + "/mocs_compilation.cpp");
-    }
+    const std::string mocsComp =
+      GetAutogenTargetBuildDir(target) + "/mocs_compilation.cpp";
+    AddGeneratedSource(makefile, mocsComp, cmQtAutoGeneratorCommon::MOC);
+    target->AddSource(mocsComp);
   }
 }
 
@@ -803,13 +790,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 
   // Add moc compilation to generated files list
   if (mocEnabled) {
-    for (std::vector<std::string>::const_iterator it = suffixes.begin();
-         it != suffixes.end(); ++it) {
-      std::string mcFile = autogenBuildDir + "/mocs_compilation";
-      mcFile += *it;
-      mcFile += ".cpp";
-      autogenProvides.push_back(mcFile);
-    }
+    const std::string mocsComp = autogenBuildDir + "/mocs_compilation.cpp";
+    autogenProvides.push_back(mocsComp);
   }
 
   // Add autogen includes directory to the origin target INCLUDE_DIRECTORIES

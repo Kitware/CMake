@@ -636,9 +636,7 @@ bool cmQtAutoGenerators::SettingsFileWrite()
 void cmQtAutoGenerators::Init(cmMakefile* makefile)
 {
   // Mocs compilation file
-  this->MocCompFileRel = "mocs_compilation";
-  this->MocCompFileRel += this->ConfigSuffix;
-  this->MocCompFileRel += ".cpp";
+  this->MocCompFileRel = "mocs_compilation.cpp";
   this->MocCompFileAbs = cmSystemTools::CollapseCombinedPath(
     this->AutogenBuildDir, this->MocCompFileRel);
 
@@ -724,10 +722,10 @@ bool cmQtAutoGenerators::RunAutogen()
   // the program goes through all .cpp files to see which moc files are
   // included. It is not really interesting how the moc file is named, but
   // what file the moc is created from. Once a moc is included the same moc
-  // may not be included in the mocs_compilation_$<CONFIG>.cpp file anymore.
+  // may not be included in the mocs_compilation.cpp file anymore.
   // OTOH if there's a header containing Q_OBJECT where no corresponding
   // moc file is included anywhere a moc_<filename>.cpp file is created and
-  // included in the mocs_compilation_$<CONFIG>.cpp file.
+  // included in the mocs_compilation.cpp file.
 
   // key = moc source filepath, value = moc output filepath
   std::map<std::string, std::string> mocsIncluded;
