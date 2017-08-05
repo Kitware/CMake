@@ -366,6 +366,9 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     return false;
   }
 
+  // -- Meta
+  InfoGetConfig(makefile, "AM_CONFIG_SUFFIX", config, this->ConfigSuffix);
+
   // - Old settings file
   {
     this->SettingsFile = cmSystemTools::CollapseFullPath(targetDirectory);
@@ -374,9 +377,6 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     this->SettingsFile += this->ConfigSuffix;
     this->SettingsFile += ".cmake";
   }
-
-  // -- Meta
-  InfoGetConfig(makefile, "AM_CONFIG_SUFFIX", config, this->ConfigSuffix);
 
   // - Files and directories
   InfoGet(makefile, "AM_CMAKE_SOURCE_DIR", this->ProjectSourceDir);

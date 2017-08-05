@@ -796,13 +796,11 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 
   // Add autogen includes directory to the origin target INCLUDE_DIRECTORIES
   if (mocEnabled || uicEnabled) {
+    std::string includeDir = autogenBuildDir + "/include";
     if (multiConfig) {
-      target->AddIncludeDirectory(autogenBuildDir + "/include_$<CONFIG>",
-                                  true);
-
-    } else {
-      target->AddIncludeDirectory(autogenBuildDir + "/include", true);
+      includeDir += "_$<CONFIG>";
     }
+    target->AddIncludeDirectory(includeDir, true);
   }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -1017,7 +1015,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
   if (IsMultiConfig(target->GetGlobalGenerator())) {
     for (std::vector<std::string>::const_iterator it = configs.begin();
          it != configs.end(); ++it) {
-      configSuffix[*it] = "_" + *it;
+      configSuffix[*it] = cmOutputConverter::EscapeForCMake("_" + *it);
     }
   }
 
