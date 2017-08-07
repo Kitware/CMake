@@ -53,8 +53,9 @@ set_property(TARGET KI18n APPEND PROPERTY
 
 # END upstream
 
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
-set(INC_DIR "include_${CMAKE_BUILD_TYPE}" )
+get_property(_GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_GENERATOR_IS_MULTI_CONFIG)
+set(INC_DIR "include_$<CONFIG>" )
 else()
 set(INC_DIR "include" )
 endif()
