@@ -68,6 +68,8 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   }
   this->AlreadyInCache = false;
 
+  this->SelectDefaultNoPackageRootPath();
+
   // Find the current root path mode.
   this->SelectDefaultRootPathMode();
 

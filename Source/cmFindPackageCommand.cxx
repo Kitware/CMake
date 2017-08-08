@@ -209,6 +209,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
     this->SortDirection = strcmp(sd, "ASC") == 0 ? Asc : Dec;
   }
 
+  this->SelectDefaultNoPackageRootPath();
+
   // Find the current root path mode.
   this->SelectDefaultRootPathMode();
 
