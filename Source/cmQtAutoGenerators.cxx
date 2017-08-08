@@ -727,6 +727,17 @@ bool cmQtAutoGenerators::RunAutogen()
   // moc file is included anywhere a moc_<filename>.cpp file is created and
   // included in the mocs_compilation_$<CONFIG>.cpp file.
 
+  // Create AUTOGEN include directory
+  {
+    const std::string incDirAbs = cmSystemTools::CollapseCombinedPath(
+      this->AutogenBuildDir, this->AutogenIncludeDir);
+    if (!cmsys::SystemTools::MakeDirectory(incDirAbs)) {
+      this->LogError("AutoGen: Error: Could not create include directory " +
+                     Quoted(incDirAbs));
+      return false;
+    }
+  }
+
   // key = moc source filepath, value = moc output filepath
   std::map<std::string, std::string> mocsIncluded;
   std::map<std::string, std::string> mocsNotIncluded;
