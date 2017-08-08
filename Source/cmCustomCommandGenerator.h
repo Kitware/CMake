@@ -21,9 +21,8 @@ class cmCustomCommandGenerator
   bool OldStyle;
   bool MakeVars;
   cmGeneratorExpression* GE;
-  mutable bool DependsDone;
-  mutable std::vector<std::string> Depends;
   cmCustomCommandLines CommandLines;
+  std::vector<std::string> Depends;
 
   const char* GetCrossCompilingEmulator(unsigned int c) const;
   const char* GetArgv0Location(unsigned int c) const;

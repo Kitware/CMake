@@ -24,7 +24,6 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
   , OldStyle(cc.GetEscapeOldStyle())
   , MakeVars(cc.GetEscapeAllowMakeVars())
   , GE(new cmGeneratorExpression(cc.GetBacktrace()))
-  , DependsDone(false)
 {
   const cmCustomCommandLines& cmdlines = this->CC.GetCommandLines();
   for (cmCustomCommandLines::const_iterator cmdline = cmdlines.begin();
@@ -43,6 +42,22 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
       }
     }
     this->CommandLines.push_back(argv);
+  }
+
+  std::vector<std::string> depends = this->CC.GetDepends();
+  for (std::vector<std::string>::const_iterator i = depends.begin();
+       i != depends.end(); ++i) {
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(*i);
+    std::vector<std::string> result;
+    cmSystemTools::ExpandListArgument(cge->Evaluate(this->LG, this->Config),
+                                      result);
+    for (std::vector<std::string>::iterator it = result.begin();
+         it != result.end(); ++it) {
+      if (cmSystemTools::FileIsFullPath(it->c_str())) {
+        *it = cmSystemTools::CollapseFullPath(*it);
+      }
+    }
+    this->Depends.insert(this->Depends.end(), result.begin(), result.end());
   }
 }
 
@@ -171,23 +186,5 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
 {
-  if (!this->DependsDone) {
-    this->DependsDone = true;
-    std::vector<std::string> depends = this->CC.GetDepends();
-    for (std::vector<std::string>::const_iterator i = depends.begin();
-         i != depends.end(); ++i) {
-      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(*i);
-      std::vector<std::string> result;
-      cmSystemTools::ExpandListArgument(cge->Evaluate(this->LG, this->Config),
-                                        result);
-      for (std::vector<std::string>::iterator it = result.begin();
-           it != result.end(); ++it) {
-        if (cmSystemTools::FileIsFullPath(it->c_str())) {
-          *it = cmSystemTools::CollapseFullPath(*it);
-        }
-      }
-      this->Depends.insert(this->Depends.end(), result.begin(), result.end());
-    }
-  }
   return this->Depends;
 }
