@@ -37,18 +37,6 @@ if(CMAKE_SYSTEM MATCHES "OSF1-V")
   endif()
 endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES "HP-UX" AND CMAKE_CXX_COMPILER_ID MATCHES "HP")
-  # HP aCC since version 3.80 supports the flag +hpxstd98 to get ANSI C++98
-  # template support. It is known that version 6.25 doesn't need that flag.
-  # Versions prior to 3.80 will not be able to build CMake. Current assumption:
-  # it is needed for every version from 3.80 to 4 to get it working.
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4 AND
-         NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.80)
-    # use new C++ library and improved template support
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AA +hpxstd98")
-  endif()
-endif()
-
 # Workaround for short jump tables on PA-RISC
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "^parisc")
   if(CMAKE_COMPILER_IS_GNUCC)

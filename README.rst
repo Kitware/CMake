@@ -36,7 +36,7 @@ Supported Platforms
 * FreeBSD
 * OpenBSD
 * Solaris
-* HP-UX
+* AIX
 
 Other UNIX-like operating systems may work too out of the box, if not
 it should not be a major problem to port CMake to this platform.

@@ -21,6 +21,14 @@ if(CMAKE_BOOTSTRAP)
 endif()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
+  if(CMAKE_SYSTEM_NAME STREQUAL "HP-UX")
+    message(FATAL_ERROR
+      "CMake no longer compiles on HP-UX.  See\n"
+      "  https://gitlab.kitware.com/cmake/cmake/issues/17137\n"
+      "Use CMake 3.9 or lower instead."
+      )
+  endif()
+
   set(CMake_BIN_DIR ${CMake_BINARY_DIR}/bin)
 endif()
 
@@ -536,9 +544,6 @@ int main(void) { return 0; }
       if(NOT HAVE_CoreServices_OS_X_10_5)
         set(CMAKE_USE_LIBUV 0)
       endif()
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "HP-UX")
-      # Disable until it can be ported.
-      set(CMAKE_USE_LIBUV 0)
     endif()
   endif()
   if(CMAKE_USE_LIBUV)
