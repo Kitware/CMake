@@ -88,6 +88,13 @@ void cmFindCommon::InitializeSearchPathGroups()
     std::make_pair(PathLabel::Guess, cmSearchPath(this)));
 }
 
+void cmFindCommon::SelectDefaultNoPackageRootPath()
+{
+  if (!this->Makefile->IsOn("__UNDOCUMENTED_CMAKE_FIND_PACKAGE_ROOT")) {
+    this->NoPackageRootPath = true;
+  }
+}
+
 void cmFindCommon::SelectDefaultRootPathMode()
 {
   // Check the policy variable for this find command type.
