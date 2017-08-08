@@ -164,6 +164,7 @@ int cmCPackIFWGenerator::PackageFiles()
       ifwCmd += " " + this->packageFileNames[0];
     } else {
       ifwCmd += " installer";
+      ifwCmd += this->OutputExtension;
     }
     cmCPackIFWLogger(VERBOSE, "Execute: " << ifwCmd << std::endl);
     std::string output;
@@ -205,7 +206,7 @@ const char* cmCPackIFWGenerator::GetPackagingInstallPrefix()
 
 const char* cmCPackIFWGenerator::GetOutputExtension()
 {
-  return this->ExecutableSuffix.c_str();
+  return this->OutputExtension.c_str();
 }
 
 int cmCPackIFWGenerator::InitializeInternal()
@@ -305,16 +306,29 @@ int cmCPackIFWGenerator::InitializeInternal()
   }
 
   // Executable suffix
-  if (const char* optExeSuffix = this->GetOption("CMAKE_EXECUTABLE_SUFFIX")) {
-    this->ExecutableSuffix = optExeSuffix;
-    if (this->ExecutableSuffix.empty()) {
-      std::string sysName(this->GetOption("CMAKE_SYSTEM_NAME"));
-      if (sysName == "Linux") {
-        this->ExecutableSuffix = ".run";
-      }
-    }
+  std::string exeSuffix(this->GetOption("CMAKE_EXECUTABLE_SUFFIX"));
+  std::string sysName(this->GetOption("CMAKE_SYSTEM_NAME"));
+  if (sysName == "Linux") {
+    this->ExecutableSuffix = ".run";
+  } else if (sysName == "Windows") {
+    this->ExecutableSuffix = ".exe";
+  } else if (sysName == "Darwin") {
+    this->ExecutableSuffix = ".app";
   } else {
-    this->ExecutableSuffix = this->cmCPackGenerator::GetOutputExtension();
+    this->ExecutableSuffix = exeSuffix;
+  }
+
+  // Output extension
+  if (const char* optOutExt =
+        this->GetOption("CPACK_IFW_PACKAGE_FILE_EXTENSION")) {
+    this->OutputExtension = optOutExt;
+  } else if (sysName == "Darwin") {
+    this->OutputExtension = ".dmg";
+  } else {
+    this->OutputExtension = this->ExecutableSuffix;
+  }
+  if (this->OutputExtension.empty()) {
+    this->OutputExtension = this->cmCPackGenerator::GetOutputExtension();
   }
 
   return this->Superclass::InitializeInternal();
