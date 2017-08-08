@@ -323,6 +323,9 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
           endif()
         endif()
       endif()
+      if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" AND NOT CMAKE_CROSSCOMPILING)
+        list(APPEND _lib_dirs "libdata/pkgconfig")
+      endif()
       list(APPEND _lib_dirs "lib/pkgconfig")
       list(APPEND _lib_dirs "share/pkgconfig")
 
