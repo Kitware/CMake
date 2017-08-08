@@ -2,7 +2,8 @@ FIXTURES_CLEANUP
 ----------------
 
 Specifies a list of fixtures for which the test is to be treated as a cleanup
-test.
+test. These fixture names are distinct from test case names and are not
+required to have any similarity to the names of tests associated with them.
 
 Fixture cleanup tests are ordinary tests with all of the usual test
 functionality. Setting the ``FIXTURES_CLEANUP`` property for a test has two
