@@ -11,7 +11,6 @@ class cmLocalGenerator;
 class cmQtAutoGeneratorInitializer
 {
 public:
-  static void InitializeAutogenSources(cmGeneratorTarget* target);
   static void InitializeAutogenTarget(cmLocalGenerator* lg,
                                       cmGeneratorTarget* target);
   static void SetupAutoGenerateTarget(cmGeneratorTarget const* target);
