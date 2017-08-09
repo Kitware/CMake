@@ -488,6 +488,9 @@ const cmServerResponse cmServerProtocol1_0::Process(
   if (request.Type == kSET_GLOBAL_SETTINGS_TYPE) {
     return this->ProcessSetGlobalSettings(request);
   }
+  if (request.Type == kCTEST_INFO_TYPE) {
+    return this->ProcessCTests(request);
+  }
 
   return request.ReportError("Unknown command!");
 }
@@ -655,6 +658,132 @@ struct hash<LanguageData>
 
 } // namespace std
 
+static Json::Value DumpCTestInfo(std::pair<std::string, std::string> &testInfo)
+{
+  Json::Value result = Json::objectValue;
+  result[kCTEST_NAME] = testInfo.first;
+  result[kCTEST_COMMAND] = testInfo.second;
+  return result;
+}
+
+static Json::Value DumpCTestTarget(cmGeneratorTarget* target,
+  const std::string& config)
+{
+  cmLocalGenerator* lg = target->GetLocalGenerator();
+  const cmState* state = lg->GetState();
+
+  const cmStateEnums::TargetType type = target->GetType();
+  const std::string typeName = state->GetTargetTypeName(type);
+
+  Json::Value ttl = Json::arrayValue;
+  ttl.append("EXECUTABLE");
+  ttl.append("STATIC_LIBRARY");
+  ttl.append("SHARED_LIBRARY");
+  ttl.append("MODULE_LIBRARY");
+  ttl.append("OBJECT_LIBRARY");
+  ttl.append("UTILITY");
+  ttl.append("INTERFACE_LIBRARY");
+
+  if (!hasString(ttl, typeName) || target->IsImported()) {
+    return Json::Value();
+  }
+
+  Json::Value result = Json::objectValue;
+  result[kNAME_KEY] = target->GetName();
+  result[kTYPE_KEY] = typeName;
+
+  if (type == cmStateEnums::INTERFACE_LIBRARY) {
+    return result;
+  }
+  result[kFULL_NAME_KEY] = target->GetFullName(config);
+
+  if (target->Makefile->IsOn("CMAKE_TESTING_ENABLED")) {
+    result[kHAS_ENABLED_TESTS] = true;
+    std::vector<std::string> CTestNames;
+
+    Json::Value testInfos = Json::arrayValue;
+    std::vector<std::pair<std::string, std::string>> testDetails;
+    target->Makefile->GetTestDetails(testDetails);
+    for (auto &testInfo : testDetails) {
+      testInfos.append(DumpCTestInfo(testInfo));
+    }
+    result[kCTESTS_INFO] = testInfos;
+  }
+  else {
+    result[kHAS_ENABLED_TESTS] = false;
+  }
+
+  return result;
+}
+
+static Json::Value DumpCTestTargetsList(
+  const std::vector<cmLocalGenerator*>& generators, const std::string& config)
+{
+  Json::Value result = Json::arrayValue;
+
+  std::vector<cmGeneratorTarget*> targetList;
+  for (const auto& lgIt : generators) {
+    auto list = lgIt->GetGeneratorTargets();
+    targetList.insert(targetList.end(), list.begin(), list.end());
+  }
+  std::sort(targetList.begin(), targetList.end());
+
+  for (cmGeneratorTarget* target : targetList) {
+    Json::Value tmp = DumpCTestTarget(target, config);
+    if (!tmp.isNull()) {
+      result.append(tmp);
+    }
+  }
+
+  return result;
+}
+
+static Json::Value DumpCTestProjectList(const cmake* cm, std::string const& config)
+{
+  Json::Value result = Json::arrayValue;
+
+  auto globalGen = cm->GetGlobalGenerator();
+
+  for (const auto& projectIt : globalGen->GetProjectMap()) {
+    Json::Value pObj = Json::objectValue;
+    pObj[kNAME_KEY] = projectIt.first;
+
+    // All Projects must have at least one local generator
+    assert(!projectIt.second.empty());
+    const cmLocalGenerator* lg = projectIt.second.at(0);
+
+    // Project structure information:
+    const cmMakefile* mf = lg->GetMakefile();
+    pObj[kTARGETS_KEY] = DumpCTestTargetsList(projectIt.second, config);
+
+    result.append(pObj);
+  }
+
+  return result;
+}
+
+static Json::Value DumpCTestConfiguration(const cmake* cm,
+  const std::string& config)
+{
+  Json::Value result = Json::objectValue;
+  result[kNAME_KEY] = config;
+
+  result[kPROJECTS_KEY] = DumpCTestProjectList(cm, config);
+
+  return result;
+}
+
+static Json::Value DumpCTestConfigurationsList(const cmake* cm)
+{
+  Json::Value result = Json::arrayValue;
+
+  for (const std::string& c : getConfigurations(cm)) {
+    result.append(DumpCTestConfiguration(cm, c));
+  }
+
+  return result;
+}
+
 static Json::Value DumpSourceFileGroup(const LanguageData& data,
                                        const std::vector<std::string>& files,
                                        const std::string& baseDir)
@@ -818,6 +947,8 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
   } else {
     result[kHAS_INSTALL_RULE] = false;
   }
+
+  result[kHAS_ENABLED_TESTS] = target->Makefile->IsOn("CMAKE_TESTING_ENABLED");
 
   if (target->HaveWellDefinedOutputFiles()) {
     Json::Value artifacts = Json::arrayValue;
@@ -1311,6 +1442,18 @@ cmServerResponse cmServerProtocol1_0::ProcessSystemIncludePaths(
     result[kVC_SYSTEM_INCLUDE_PATHS] = paths.GetPaths();
   }
 
+  return request.Reply(result);
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessCTests(
+  const cmServerRequest & request)
+{
+  if (this->m_State < STATE_COMPUTED) {
+    return request.ReportError("This instance was not yet computed.");
+  }
+
+  Json::Value result = Json::objectValue;
+  result[kCONFIGURATIONS_KEY] = DumpCTestConfigurationsList(this->CMakeInstance());
   return request.Reply(result);
 }
 

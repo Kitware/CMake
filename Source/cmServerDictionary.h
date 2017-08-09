@@ -26,6 +26,7 @@ static const std::string kPROGRESS_TYPE = "progress";
 static const std::string kREPLY_TYPE = "reply";
 static const std::string kSET_GLOBAL_SETTINGS_TYPE = "setGlobalSettings";
 static const std::string kSIGNAL_TYPE = "signal";
+static const std::string kCTEST_INFO_TYPE = "ctestsInfo";
 
 static const std::string kARTIFACTS_KEY = "artifacts";
 static const std::string kBUILD_DIRECTORY_KEY = "buildDirectory";
@@ -99,6 +100,10 @@ static const std::string kCMAKE_CXX_COMPILER_VERSION = "cmakeCXXCompilerVersion"
 static const std::string kVC_SYSTEM_INCLUDE_PATHS = "vcSytemIncludePaths";
 static const std::string kHAS_INSTALL_RULE = "hasInstallRule";
 static const std::string kINSTALL_PATH = "installPath";
+static const std::string kHAS_ENABLED_TESTS = "hasEnabledTests";
+static const std::string kCTEST_NAME = "ctestName";
+static const std::string kCTEST_COMMAND = "ctestCommand";
+static const std::string kCTESTS_INFO= "ctestsInfo";
 
 static const std::string kSTART_MAGIC = "[== \"CMake Server\" ==[";
 static const std::string kEND_MAGIC = "]== \"CMake Server\" ==]";

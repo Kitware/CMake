@@ -607,6 +607,8 @@ public:
   cmMessenger* GetMessenger() const;
   cmGlobalGenerator* GetGlobalGenerator() const;
 
+  void cmMakefile::GetTestDetails(std::vector<std::pair<std::string, std::string>> &testDetails);
+
   /**
    * Get all the source files this makefile knows about
    */
