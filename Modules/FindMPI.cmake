@@ -989,13 +989,40 @@ macro(_MPI_check_lang_works LANG)
   endif()
 endmacro()
 
+# Some systems install various MPI implementations in separate folders in some MPI prefix
+# This macro enumerates all such subfolders and adds them to the list of hints that will be searched.
+macro(MPI_search_mpi_prefix_folder PREFIX_FOLDER)
+  if(EXISTS "${PREFIX_FOLDER}")
+    file(GLOB _MPI_folder_children RELATIVE "${PREFIX_FOLDER}" "${PREFIX_FOLDER}/*")
+    foreach(_MPI_folder_child IN LISTS _MPI_folder_children)
+      if(IS_DIRECTORY "${PREFIX_FOLDER}/${_MPI_folder_child}")
+        list(APPEND MPI_HINT_DIRS "${PREFIX_FOLDER}/${_MPI_folder_child}")
+      endif()
+    endforeach()
+  endif()
+endmacro()
+
+set(MPI_HINT_DIRS ${MPI_HOME} $ENV{MPI_HOME} $ENV{I_MPI_ROOT})
+if("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
+  # SUSE Linux Enterprise Server stores its MPI implementations under /usr/lib64/mpi/gcc/<name>
+  # We enumerate the subfolders and append each as a prefix
+  MPI_search_mpi_prefix_folder("/usr/lib64/mpi/gcc")
+elseif("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
+  # MSMPI stores its runtime in a special folder, this adds the possible locations to the hints.
+  list(APPEND MPI_HINT_DIRS $ENV{MSMPI_BIN} "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MPI;InstallRoot]")
+elseif("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "FreeBSD")
+  # FreeBSD ships mpich under the normal system paths - but available openmpi implementations
+  # will be found in /usr/local/mpi/<name>
+  MPI_search_mpi_prefix_folder("/usr/local/mpi/")
+endif()
+
 # Most MPI distributions have some form of mpiexec or mpirun which gives us something we can look for.
 # The MPI standard does not mandate the existence of either, but instead only makes requirements if a distribution
 # ships an mpiexec program (mpirun executables are not regulated by the standard).
 find_program(MPIEXEC_EXECUTABLE
   NAMES ${_MPIEXEC_NAMES}
-  HINTS ${MPI_HOME} $ENV{MPI_HOME} $ENV{I_MPI_ROOT} $ENV{MSMPI_BIN}
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MPI;InstallRoot]"
+  PATH_SUFFIXES bin sbin
+  HINTS ${MPI_HINT_DIRS}
   DOC "Executable for running MPI programs.")
 
 # call get_filename_component twice to remove mpiexec and the directory it exists in (typically bin).
