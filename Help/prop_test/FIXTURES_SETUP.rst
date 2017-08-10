@@ -2,14 +2,15 @@ FIXTURES_SETUP
 --------------
 
 Specifies a list of fixtures for which the test is to be treated as a setup
-test.
+test. These fixture names are distinct from test case names and are not
+required to have any similarity to the names of tests associated with them.
 
 Fixture setup tests are ordinary tests with all of the usual test
 functionality. Setting the ``FIXTURES_SETUP`` property for a test has two
 primary effects:
 
 - CTest will ensure the test executes before any other test which lists the
-  fixture(s) in its :prop_test:`FIXTURES_REQUIRED` property.
+  fixture name(s) in its :prop_test:`FIXTURES_REQUIRED` property.
 
 - If CTest is asked to run only a subset of tests (e.g. using regular
   expressions or the ``--rerun-failed`` option) and the setup test is not in
