@@ -193,5 +193,9 @@ endif()
 add_subdirectory(uicInclude)
 
 # -- Test
+# OBJECT libraries
+add_subdirectory(objectLibrary)
+
+# -- Test
 # Complex test case
 add_subdirectory(complex)
