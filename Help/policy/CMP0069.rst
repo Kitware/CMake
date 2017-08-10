@@ -55,8 +55,8 @@ Produce a fatal error if support is not available:
   cmake_minimum_required(VERSION 3.9) # CMP0069 NEW
   project(foo)
 
-  include(CheckIPOSupport)
-  check_ipo_support()
+  include(CheckIPOSupported)
+  check_ipo_supported()
 
   # ...
 
@@ -69,11 +69,11 @@ Apply IPO flags only if compiler supports it:
   cmake_minimum_required(VERSION 3.9) # CMP0069 NEW
   project(foo)
 
-  include(CheckIPOSupport)
+  include(CheckIPOSupported)
 
   # ...
 
-  check_ipo_support(RESULT result)
+  check_ipo_supported(RESULT result)
   if(result)
     set_property(TARGET ... PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
   endif()
