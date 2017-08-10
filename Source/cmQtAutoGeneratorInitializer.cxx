@@ -919,6 +919,12 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     }
   }
 
+  // cmGeneratorTarget::GetConfigCommonSourceFiles computes the target's
+  // sources meta data cache. Clear it so that OBJECT library targets that
+  // are AUTOGEN initialized after this target get their added
+  // mocs_compilation.cpp source acknowledged by this target.
+  target->ClearSourcesCache();
+
   // Convert std::set to std::vector
   const std::vector<std::string> autogenDepends(autogenDependsSet.begin(),
                                                 autogenDependsSet.end());

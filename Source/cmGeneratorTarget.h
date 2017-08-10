@@ -491,6 +491,11 @@ public:
   std::string GetOutputName(const std::string& config,
                             cmStateEnums::ArtifactType artifact) const;
 
+  /** Clears cached meta data for local and external source files.
+    * The meta data will be recomputed on demand.
+    */
+  void ClearSourcesCache();
+
   void AddSource(const std::string& src);
   void AddTracedSources(std::vector<std::string> const& srcs);
 
