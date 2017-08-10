@@ -2,6 +2,20 @@
 # FindCUDA
 # --------
 #
+# .. note::
+#
+#   The FindCUDA module has been superseded by first-class support
+#   for the CUDA language in CMake.  It is no longer necessary to
+#   use this module or call ``find_package(CUDA)``.  This module
+#   now exists only for compatibility with projects that have not
+#   been ported.
+#
+#   Instead, list ``CUDA`` among the languages named in the top-level
+#   call to the :command:`project` command, or call the
+#   :command:`enable_language` command with ``CUDA``.
+#   Then one can add CUDA (``.cu``) sources to programs directly
+#   in calls to :command:`add_library` and :command:`add_executable`.
+#
 # Tools for building CUDA C files: libraries and build dependencies.
 #
 # This script locates the NVIDIA CUDA C tools.  It should work on linux,
