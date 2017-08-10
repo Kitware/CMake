@@ -185,6 +185,54 @@ commands to ``@kwrobot`` using the form ``Do: ...``:
 See the corresponding sections for details on permissions and options
 for each command.
 
+Commit Messages
+---------------
+
+Part of the human review is to check that each commit message is appropriate.
+The first line of the message should begin with one or two words indicating the
+area the commit applies to, followed by a colon and then a brief summary.
+Committers should aim to keep this first line short. Any subsequent lines
+should be separated from the first by a blank line and provide relevant, useful
+information.
+
+The appropriateness of the initial word describing the area the commit applies
+to is not something the automatic robot review can judge, so it is up to the
+human reviewer to confirm that the area is specified and that it is
+appropriate. Good area words include the module name the commit is primarily
+fixing, the main C++ source file being edited, ``Help`` for generic
+documentation changes or a feature or functionality theme the changes apply to
+(e.g. ``server`` or ``Autogen``). Examples of suitable first lines of a commit
+message include:
+
+* ``Help: Fix example in cmake-buildsystem(7) manual``
+* ``FindBoost: Add support for 1.64``
+* ``Autogen: Extended mocInclude tests``
+* ``cmLocalGenerator: Explain standard flag selection logic in comments``
+
+If the commit fixes a particular reported issue, this information should
+ideally also be part of the commit message. The recommended way to do this is
+to place a line at the end of the message in the form ``Fixes: #xxxxx`` where
+``xxxxx`` is the GitLab issue number and to separate it from the rest of the
+text by a blank line. For example::
+
+  Help: Fix FooBar example robustness issue
+
+  FooBar supports option X, but the example provided
+  would not work if Y was also specified.
+
+  Fixes: #12345
+
+GitLab will automatically create relevant links to the merge request and will
+close the issue when the commit is merged into master. GitLab understands a few
+other synonyms for ``Fixes`` and allows much more flexible forms than the
+above, but committers should aim for this format for consistency. Note that
+such details can alternatively be specified in the merge request description.
+
+Reviewers are encouraged to ask the committer to amend commit messages to
+follow these guidelines, but prefer to focus on the changes themselves as a
+first priority. Maintainers will also make a check of commit messages before
+merging.
+
 Topic Testing
 =============
 
