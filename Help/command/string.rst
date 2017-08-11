@@ -132,6 +132,15 @@ APPEND
 
 Append all the input arguments to the string.
 
+PREPEND
+"""""""
+
+::
+
+  string(PREPEND <string variable> [<input>...])
+
+Prepend all the input arguments to the string.
+
 CONCAT
 """"""
 

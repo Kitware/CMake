@@ -46,6 +46,7 @@ protected:
   bool HandleLengthCommand(std::vector<std::string> const& args);
   bool HandleSubstringCommand(std::vector<std::string> const& args);
   bool HandleAppendCommand(std::vector<std::string> const& args);
+  bool HandlePrependCommand(std::vector<std::string> const& args);
   bool HandleConcatCommand(std::vector<std::string> const& args);
   bool HandleStripCommand(std::vector<std::string> const& args);
   bool HandleRandomCommand(std::vector<std::string> const& args);
