@@ -475,7 +475,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
          this->GlobalGenerator->GetLocalGenerators().begin();
        lgIt != this->GlobalGenerator->GetLocalGenerators().end(); ++lgIt) {
     cmMakefile* makefile = (*lgIt)->GetMakefile();
-    const std::vector<cmGeneratorTarget*> targets =
+    const std::vector<cmGeneratorTarget*>& targets =
       (*lgIt)->GetGeneratorTargets();
 
     for (std::vector<cmGeneratorTarget*>::const_iterator ti = targets.begin();
@@ -853,8 +853,9 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   for (std::vector<cmLocalGenerator*>::const_iterator it =
          this->GlobalGenerator->GetLocalGenerators().begin();
        it != this->GlobalGenerator->GetLocalGenerators().end(); ++it) {
-    std::vector<cmGeneratorTarget*> targets = (*it)->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator l = targets.begin();
+    const std::vector<cmGeneratorTarget*>& targets =
+      (*it)->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::const_iterator l = targets.begin();
          l != targets.end(); ++l) {
       std::vector<std::string> includeDirs;
       std::string config = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
@@ -910,7 +911,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   for (std::vector<cmLocalGenerator*>::const_iterator it =
          this->GlobalGenerator->GetLocalGenerators().begin();
        it != this->GlobalGenerator->GetLocalGenerators().end(); ++it) {
-    const std::vector<cmGeneratorTarget*> targets =
+    const std::vector<cmGeneratorTarget*>& targets =
       (*it)->GetGeneratorTargets();
     std::string subdir = (*it)->ConvertToRelativePath(
       this->HomeOutputDirectory, (*it)->GetCurrentBinaryDirectory());

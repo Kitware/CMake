@@ -161,7 +161,7 @@ void cmComputeTargetDepends::CollectTargets()
   std::vector<cmLocalGenerator*> const& lgens =
     this->GlobalGenerator->GetLocalGenerators();
   for (unsigned int i = 0; i < lgens.size(); ++i) {
-    const std::vector<cmGeneratorTarget*> targets =
+    const std::vector<cmGeneratorTarget*>& targets =
       lgens[i]->GetGeneratorTargets();
     for (std::vector<cmGeneratorTarget*>::const_iterator ti = targets.begin();
          ti != targets.end(); ++ti) {

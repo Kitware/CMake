@@ -16,6 +16,7 @@
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmStateSnapshot.h"
+#include "cm_unordered_map.hxx"
 #include "cmake.h"
 
 class cmComputeLinkInformation;
@@ -353,8 +354,11 @@ protected:
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;
 
-  std::set<cmGeneratorTarget const*> WarnCMP0063;
+  typedef CM_UNORDERED_MAP<std::string, cmGeneratorTarget*> GeneratorTargetMap;
+  GeneratorTargetMap GeneratorTargetSearchIndex;
   std::vector<cmGeneratorTarget*> GeneratorTargets;
+
+  std::set<cmGeneratorTarget const*> WarnCMP0063;
   std::vector<cmGeneratorTarget*> ImportedGeneratorTargets;
   std::vector<cmGeneratorTarget*> OwnedImportedGeneratorTargets;
   std::map<std::string, std::string> AliasTargets;

@@ -185,8 +185,9 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
   for (std::vector<cmLocalGenerator*>::const_iterator lg = lgs.begin();
        lg != lgs.end(); lg++) {
     cmMakefile* makefile = (*lg)->GetMakefile();
-    std::vector<cmGeneratorTarget*> targets = (*lg)->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
+    const std::vector<cmGeneratorTarget*>& targets =
+      (*lg)->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::const_iterator ti = targets.begin();
          ti != targets.end(); ti++) {
       std::string targetName = (*ti)->GetName();
       switch ((*ti)->GetType()) {

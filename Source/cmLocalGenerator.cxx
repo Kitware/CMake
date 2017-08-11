@@ -214,8 +214,8 @@ void cmLocalGenerator::TraceDependencies()
     this->GlobalGenerator->CreateEvaluationSourceFiles(*ci);
   }
   // Generate the rule files for each target.
-  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
+  for (std::vector<cmGeneratorTarget*>::const_iterator t = targets.begin();
        t != targets.end(); ++t) {
     if ((*t)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
@@ -548,6 +548,8 @@ void cmLocalGenerator::GenerateInstallRules()
 void cmLocalGenerator::AddGeneratorTarget(cmGeneratorTarget* gt)
 {
   this->GeneratorTargets.push_back(gt);
+  this->GeneratorTargetSearchIndex.insert(
+    std::pair<std::string, cmGeneratorTarget*>(gt->GetName(), gt));
   this->GlobalGenerator->IndexGeneratorTarget(gt);
 }
 
@@ -581,11 +583,10 @@ private:
 cmGeneratorTarget* cmLocalGenerator::FindLocalNonAliasGeneratorTarget(
   const std::string& name) const
 {
-  std::vector<cmGeneratorTarget*>::const_iterator ti =
-    std::find_if(this->GeneratorTargets.begin(), this->GeneratorTargets.end(),
-                 NamedGeneratorTargetFinder(name));
-  if (ti != this->GeneratorTargets.end()) {
-    return *ti;
+  GeneratorTargetMap::const_iterator ti =
+    this->GeneratorTargetSearchIndex.find(name);
+  if (ti != this->GeneratorTargetSearchIndex.end()) {
+    return ti->second;
   }
   return CM_NULLPTR;
 }
@@ -600,8 +601,8 @@ void cmLocalGenerator::ComputeTargetManifest()
   }
 
   // Add our targets to the manifest for each configuration.
-  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
+  for (std::vector<cmGeneratorTarget*>::const_iterator t = targets.begin();
        t != targets.end(); ++t) {
     cmGeneratorTarget* target = *t;
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
@@ -625,8 +626,8 @@ bool cmLocalGenerator::ComputeTargetCompileFeatures()
   }
 
   // Process compile features of all targets.
-  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
+  for (std::vector<cmGeneratorTarget*>::const_iterator t = targets.begin();
        t != targets.end(); ++t) {
     cmGeneratorTarget* target = *t;
     for (std::vector<std::string>::iterator ci = configNames.begin();
@@ -2121,8 +2122,8 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 {
   // Convert the old-style install specification from each target to
   // an install generator and run it.
-  std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+  const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
+  for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
        l != tgts.end(); ++l) {
     if ((*l)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;

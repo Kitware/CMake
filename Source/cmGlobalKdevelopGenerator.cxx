@@ -128,8 +128,9 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
     }
 
     // get all sources
-    std::vector<cmGeneratorTarget*> targets = (*it)->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
+    const std::vector<cmGeneratorTarget*>& targets =
+      (*it)->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::const_iterator ti = targets.begin();
          ti != targets.end(); ti++) {
       std::vector<cmSourceFile*> sources;
       cmGeneratorTarget* gt = *ti;

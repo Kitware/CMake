@@ -2594,9 +2594,9 @@ void cmGlobalGenerator::GetTargetSets(TargetDependSet& projectTargets,
       continue;
     }
     // Get the targets in the makefile
-    std::vector<cmGeneratorTarget*> tgts = (*i)->GetGeneratorTargets();
+    const std::vector<cmGeneratorTarget*>& tgts = (*i)->GetGeneratorTargets();
     // loop over all the targets
-    for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+    for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
          l != tgts.end(); ++l) {
       cmGeneratorTarget* target = *l;
       if (this->IsRootOnlyTarget(target) &&
@@ -2789,9 +2789,9 @@ void cmGlobalGenerator::WriteSummary()
   cmGeneratedFileStream fout(fname.c_str());
 
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-    std::vector<cmGeneratorTarget*> tgts =
+    const std::vector<cmGeneratorTarget*>& tgts =
       this->LocalGenerators[i]->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator it = tgts.begin();
+    for (std::vector<cmGeneratorTarget*>::const_iterator it = tgts.begin();
          it != tgts.end(); ++it) {
       if ((*it)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;

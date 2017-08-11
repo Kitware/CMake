@@ -115,7 +115,7 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
   for (std::vector<cmLocalGenerator*>::const_iterator it =
          this->GlobalGenerator->GetLocalGenerators().begin();
        it != this->GlobalGenerator->GetLocalGenerators().end(); ++it) {
-    const std::vector<cmGeneratorTarget*> targets =
+    const std::vector<cmGeneratorTarget*>& targets =
       (*it)->GetGeneratorTargets();
     std::string currentDir = (*it)->GetCurrentBinaryDirectory();
     bool topLevel = (currentDir == (*it)->GetBinaryDirectory());
