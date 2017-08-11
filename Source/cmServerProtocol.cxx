@@ -7,6 +7,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -937,12 +938,28 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
 
   if (target->Target->GetHaveInstallRule()) {
     result[kHAS_INSTALL_RULE] = true;
-    std::string installPrefix = target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
-    if (!installPrefix.empty()) {
-      result[kINSTALL_PATH] = installPrefix + '/' + target->Target->GetInstallPath();
-    }
-    else {
-      result[kINSTALL_PATH] = target->Target->GetInstallPath();
+
+    auto targetGenerators = target->Makefile->GetInstallGenerators();
+    for (auto iter = targetGenerators.begin(); iter != targetGenerators.end(); iter++)
+    {
+      auto installTargetGenerator = dynamic_cast<cmInstallTargetGenerator*>(*iter);
+      if (installTargetGenerator != nullptr &&
+        installTargetGenerator->GetTarget()->Target == target->Target) {
+        auto dest = installTargetGenerator->GetDestination(config);
+        
+        std::string installPath;
+        if (!dest.empty() && cmSystemTools::FileIsFullPath(dest.c_str()))
+        {
+          installPath = dest;
+        }
+        else
+        {
+          std::string installPrefix = target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
+          installPath = installPrefix + '/' + dest;
+        }
+        
+        result[kINSTALL_PATH] = installPath;
+      }
     }
   } else {
     result[kHAS_INSTALL_RULE] = false;
