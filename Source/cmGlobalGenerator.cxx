@@ -1433,31 +1433,36 @@ cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
   std::vector<const cmGeneratorTarget*> autogenTargets;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-    std::vector<cmGeneratorTarget*> targets =
-      this->LocalGenerators[i]->GetGeneratorTargets();
+  for (std::vector<cmLocalGenerator*>::const_iterator lgit =
+         this->LocalGenerators.begin();
+       lgit != this->LocalGenerators.end(); ++lgit) {
+    cmLocalGenerator* localGen = *lgit;
+    const std::vector<cmGeneratorTarget*>& targets =
+      localGen->GetGeneratorTargets();
+    // Find targets that require AUTOGEN processing
     std::vector<cmGeneratorTarget*> filteredTargets;
     filteredTargets.reserve(targets.size());
-    for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
+    for (std::vector<cmGeneratorTarget*>::const_iterator ti = targets.begin();
          ti != targets.end(); ++ti) {
-      if ((*ti)->GetType() == cmStateEnums::GLOBAL_TARGET) {
+      cmGeneratorTarget* target = *ti;
+      if (target->GetType() == cmStateEnums::GLOBAL_TARGET) {
         continue;
       }
-      if ((*ti)->GetType() != cmStateEnums::EXECUTABLE &&
-          (*ti)->GetType() != cmStateEnums::STATIC_LIBRARY &&
-          (*ti)->GetType() != cmStateEnums::SHARED_LIBRARY &&
-          (*ti)->GetType() != cmStateEnums::MODULE_LIBRARY &&
-          (*ti)->GetType() != cmStateEnums::OBJECT_LIBRARY) {
+      if (target->GetType() != cmStateEnums::EXECUTABLE &&
+          target->GetType() != cmStateEnums::STATIC_LIBRARY &&
+          target->GetType() != cmStateEnums::SHARED_LIBRARY &&
+          target->GetType() != cmStateEnums::MODULE_LIBRARY &&
+          target->GetType() != cmStateEnums::OBJECT_LIBRARY) {
         continue;
       }
-      if ((!(*ti)->GetPropertyAsBool("AUTOMOC") &&
-           !(*ti)->GetPropertyAsBool("AUTOUIC") &&
-           !(*ti)->GetPropertyAsBool("AUTORCC")) ||
-          (*ti)->IsImported()) {
+      if ((!target->GetPropertyAsBool("AUTOMOC") &&
+           !target->GetPropertyAsBool("AUTOUIC") &&
+           !target->GetPropertyAsBool("AUTORCC")) ||
+          target->IsImported()) {
         continue;
       }
-      // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
-      cmMakefile* mf = (*ti)->Target->GetMakefile();
+      // don't do anything if there is no Qt4 or Qt5Core (which contains moc)
+      cmMakefile* mf = target->Target->GetMakefile();
       std::string qtMajorVersion = mf->GetSafeDefinition("QT_VERSION_MAJOR");
       if (qtMajorVersion == "") {
         qtMajorVersion = mf->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
@@ -1465,17 +1470,13 @@ cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
       if (qtMajorVersion != "4" && qtMajorVersion != "5") {
         continue;
       }
-
-      cmGeneratorTarget* gt = *ti;
-
-      cmQtAutoGeneratorInitializer::InitializeAutogenSources(gt);
-      filteredTargets.push_back(gt);
+      filteredTargets.push_back(target);
     }
+    // Initialize AUTOGEN targets
     for (std::vector<cmGeneratorTarget*>::iterator ti =
            filteredTargets.begin();
          ti != filteredTargets.end(); ++ti) {
-      cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
-        this->LocalGenerators[i], *ti);
+      cmQtAutoGeneratorInitializer::InitializeAutogenTarget(localGen, *ti);
       autogenTargets.push_back(*ti);
     }
   }

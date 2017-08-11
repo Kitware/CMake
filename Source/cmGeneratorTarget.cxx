@@ -326,6 +326,13 @@ std::string cmGeneratorTarget::GetOutputName(
   return i->second;
 }
 
+void cmGeneratorTarget::ClearSourcesCache()
+{
+  this->KindedSourcesMap.clear();
+  this->LinkImplementationLanguageIsContextDependent = true;
+  this->Objects.clear();
+}
+
 void cmGeneratorTarget::AddSourceCommon(const std::string& src)
 {
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
@@ -333,8 +340,7 @@ void cmGeneratorTarget::AddSourceCommon(const std::string& src)
   CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(src);
   cge->SetEvaluateForBuildsystem(true);
   this->SourceEntries.push_back(new TargetPropertyEntry(cge));
-  this->KindedSourcesMap.clear();
-  this->LinkImplementationLanguageIsContextDependent = true;
+  this->ClearSourcesCache();
 }
 
 void cmGeneratorTarget::AddSource(const std::string& src)
