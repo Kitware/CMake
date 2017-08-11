@@ -4381,6 +4381,18 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
                    cmStrCmp(existingCxxStandard))
     : cmArrayEnd(CXX_STANDARDS);
 
+  if (needCxx17 &&
+      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
+                                   cmArrayEnd(CXX_STANDARDS),
+                                   cmStrCmp("17"))) {
+    return false;
+  }
+  if (needCxx14 &&
+      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
+                                   cmArrayEnd(CXX_STANDARDS),
+                                   cmStrCmp("14"))) {
+    return false;
+  }
   if (needCxx11 &&
       existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
                                    cmArrayEnd(CXX_STANDARDS),

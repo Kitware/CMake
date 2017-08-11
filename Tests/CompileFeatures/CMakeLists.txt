@@ -428,6 +428,14 @@ else()
     HAVE_FINAL=$<COMPILE_FEATURES:cxx_final>
     HAVE_INHERITING_CONSTRUCTORS_AND_FINAL=$<COMPILE_FEATURES:cxx_inheriting_constructors,cxx_final>
   )
+  if (CMAKE_CXX_STANDARD_DEFAULT)
+    target_compile_definitions(CompileFeaturesGenex PRIVATE
+      TEST_CXX_STD
+      HAVE_CXX_STD_11=$<COMPILE_FEATURES:cxx_std_11>
+      HAVE_CXX_STD_14=$<COMPILE_FEATURES:cxx_std_14>
+      HAVE_CXX_STD_17=$<COMPILE_FEATURES:cxx_std_17>
+    )
+  endif()
 
   add_executable(CompileFeaturesGenex2 genex_test.cpp)
   target_compile_features(CompileFeaturesGenex2 PRIVATE cxx_std_11)
