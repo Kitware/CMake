@@ -758,6 +758,30 @@ static bool CheckGetPath()
   return res;
 }
 
+static bool CheckGetFilenameName()
+{
+  const char* windowsFilepath = "C:\\somewhere\\something";
+  const char* unixFilepath = "/somewhere/something";
+
+  std::string expectedFilename = "something";
+
+  bool res = true;
+  std::string filename = kwsys::SystemTools::GetFilenameName(windowsFilepath);
+  if (filename != expectedFilename) {
+    std::cerr << "GetFilenameName(" << windowsFilepath << ") yielded "
+              << filename << " instead of " << expectedFilename << std::endl;
+    res = false;
+  }
+
+  filename = kwsys::SystemTools::GetFilenameName(unixFilepath);
+  if (filename != expectedFilename) {
+    std::cerr << "GetFilenameName(" << unixFilepath << ") yielded " << filename
+              << " instead of " << expectedFilename << std::endl;
+    res = false;
+  }
+  return res;
+}
+
 static bool CheckFind()
 {
   bool res = true;
@@ -874,6 +898,8 @@ int testSystemTools(int, char* [])
   res &= CheckFind();
 
   res &= CheckGetLineFromStream();
+
+  res &= CheckGetFilenameName();
 
   return res ? 0 : 1;
 }
