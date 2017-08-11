@@ -80,6 +80,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
 
   # check for available C++ features
   include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx_features.cmake)
+
+  if(NOT CMake_HAVE_CXX_UNIQUE_PTR)
+    message(FATAL_ERROR "The C++ compiler does not support C++11 (e.g. std::unique_ptr).")
+  endif()
 endif()
 
 # set the internal encoding of CMake to UTF-8
