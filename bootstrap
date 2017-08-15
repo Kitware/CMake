@@ -855,16 +855,6 @@ if ${cmake_system_haiku}; then
   cmake_ld_flags="${LDFLAGS} -lroot -lbe"
 fi
 
-# Workaround for short jump tables on PA-RISC
-if ${cmake_machine_parisc}; then
-  if ${cmake_c_compiler_is_gnu}; then
-    cmake_c_flags="${CFLAGS} -mlong-calls"
-  fi
-  if ${cmake_cxx_compiler_is_gnu}; then
-    cmake_cxx_flags="${CXXFLAGS} -mlong-calls"
-  fi
-fi
-
 #-----------------------------------------------------------------------------
 # Detect known toolchains on some platforms.
 cmake_toolchains=''
