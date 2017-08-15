@@ -61,8 +61,8 @@ protected:
   const char* GetPackagingInstallPrefix() CM_OVERRIDE;
 
   /**
-   * @brief Extension of binary installer
-   * @return Executable suffix or value from default implementation
+   * @brief Target binary extension
+   * @return Executable suffix or disk image format
    */
   const char* GetOutputExtension() CM_OVERRIDE;
 
@@ -143,6 +143,7 @@ private:
   std::string BinCreator;
   std::string FrameworkVersion;
   std::string ExecutableSuffix;
+  std::string OutputExtension;
 
   bool OnlineOnly;
   bool ResolveDuplicateNames;
