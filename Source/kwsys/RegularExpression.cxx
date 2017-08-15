@@ -258,11 +258,6 @@ const unsigned char MAGIC = 0234;
 
 #define UCHARAT(p) (reinterpret_cast<const unsigned char*>(p))[0]
 
-#define FAIL(m)                                                               \
-  {                                                                           \
-    regerror(m);                                                              \
-    return (0);                                                               \
-  }
 #define ISMULT(c) ((c) == '*' || (c) == '+' || (c) == '?')
 #define META "^$.[()|?+*\\"
 
