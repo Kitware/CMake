@@ -8,7 +8,11 @@
 # this module looks for Cygwin
 
 if (WIN32)
-  find_program(CYGWIN_INSTALL_PATH
+  if(CYGWIN_INSTALL_PATH)
+    set(CYGWIN_BAT "${CYGWIN_INSTALL_PATH}/cygwin.bat")
+  endif()
+
+  find_program(CYGWIN_BAT
     NAMES cygwin.bat
     PATHS
       "C:/Cygwin"
@@ -16,8 +20,7 @@ if (WIN32)
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygwin\\setup;rootdir]"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygnus Solutions\\Cygwin\\mounts v2\\/;native]"
   )
-  get_filename_component(CYGWIN_INSTALL_PATH "${CYGWIN_INSTALL_PATH}" DIRECTORY)
-  mark_as_advanced(
-    CYGWIN_INSTALL_PATH
-  )
+  get_filename_component(CYGWIN_INSTALL_PATH "${CYGWIN_BAT}" DIRECTORY)
+  mark_as_advanced(CYGWIN_BAT)
+
 endif ()
