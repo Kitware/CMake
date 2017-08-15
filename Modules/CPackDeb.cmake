@@ -73,7 +73,8 @@
 #
 #    <PackageName>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
 #
-#  Alternatively provided package file name must end with ``.deb`` suffix.
+#  Alternatively provided package file name must end
+#  with either ``.deb`` or ``.ipk`` suffix.
 #
 #  .. note::
 #
@@ -977,9 +978,9 @@ function(cpack_deb_prepare_package_vars)
     else()
       cmake_policy(PUSH)
         cmake_policy(SET CMP0010 NEW)
-        if(NOT CPACK_DEBIAN_FILE_NAME MATCHES ".*\\.deb")
+        if(NOT CPACK_DEBIAN_FILE_NAME MATCHES ".*\\.(deb|ipk)")
       cmake_policy(POP)
-          message(FATAL_ERROR "'${CPACK_DEBIAN_FILE_NAME}' is not a valid DEB package file name as it must end with '.deb'!")
+          message(FATAL_ERROR "'${CPACK_DEBIAN_FILE_NAME}' is not a valid DEB package file name as it must end with '.deb' or '.ipk'!")
         endif()
       cmake_policy(POP)
 
