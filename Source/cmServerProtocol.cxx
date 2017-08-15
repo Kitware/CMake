@@ -269,6 +269,10 @@ static bool testHomeDirectory(cmState* state, std::string& value,
 {
   const std::string cachedValue =
     std::string(state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY"));
+  if (value.empty()) {
+    value = cachedValue;
+    return true;
+  }
   const std::string suffix = "/CMakeLists.txt";
   const std::string cachedValueCML = cachedValue + suffix;
   const std::string valueCML = value + suffix;
@@ -278,9 +282,6 @@ static bool testHomeDirectory(cmState* state, std::string& value,
                                 "incompatible with configured "
                                 "source directory value."));
     return false;
-  }
-  if (value.empty()) {
-    value = cachedValue;
   }
   return true;
 }
@@ -292,14 +293,14 @@ static bool testValue(cmState* state, const std::string& key,
   const char* entry = state->GetCacheEntryValue(key);
   const std::string cachedValue =
     entry == nullptr ? std::string() : std::string(entry);
-  if (!cachedValue.empty() && !value.empty() && cachedValue != value) {
+  if (value.empty()) {
+    value = cachedValue;
+  }
+  if (!cachedValue.empty() && cachedValue != value) {
     setErrorMessage(errorMessage, std::string("\"") + key +
                       "\" is set but incompatible with configured " +
                       keyDescription + " value.");
     return false;
-  }
-  if (value.empty()) {
-    value = cachedValue;
   }
   return true;
 }
@@ -489,10 +490,6 @@ bool cmServerProtocol1::IsExperimental() const
 cmServerResponse cmServerProtocol1::ProcessCache(
   const cmServerRequest& request)
 {
-  if (this->m_State < STATE_CONFIGURED) {
-    return request.ReportError("This project was not configured yet.");
-  }
-
   cmState* state = this->CMakeInstance()->GetState();
 
   Json::Value result = Json::objectValue;

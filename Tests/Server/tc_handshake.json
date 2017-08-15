@@ -11,6 +11,10 @@
 { "send": {"test": "sometext","cookie":"monster"} },
 { "recv": {"cookie":"monster","errorMessage":"No type given in request.","inReplyTo":"","type":"error"} },
 
+{ "message": "Testing commands before handshake" },
+{ "send": {"type": "cache","cookie":"monster"} },
+{ "recv": {"cookie":"monster","errorMessage":"Waiting for type \"handshake\".","inReplyTo":"cache","type":"error"} },
+
 { "message": "Testing handshake" },
 { "send": {"type": "sometype","cookie":"monster2"} },
 { "recv": {"cookie":"monster2","errorMessage":"Waiting for type \"handshake\".","inReplyTo":"sometype","type":"error"} },
