@@ -1446,31 +1446,62 @@ bool cmQtAutoGenerators::MocGenerateFile(
 
 bool cmQtAutoGenerators::UicFindIncludedFile(std::string& absFile,
                                              const std::string& sourceFile,
-                                             const std::string& includeString)
+                                             const std::string& searchPath,
+                                             const std::string& searchFile)
 {
   bool success = false;
-  // Search in vicinity of the source
+  std::vector<std::string> testFiles;
+  // Collect search paths list
   {
-    std::string testPath = SubDirPrefix(sourceFile);
-    testPath += includeString;
-    if (cmsys::SystemTools::FileExists(testPath.c_str())) {
-      absFile = cmsys::SystemTools::GetRealPath(testPath);
-      success = true;
+    const std::string searchFileFull = searchPath + searchFile;
+    // Vicinity of the source
+    {
+      const std::string sourcePath = SubDirPrefix(sourceFile);
+      testFiles.push_back(sourcePath + searchFile);
+      if (!searchPath.empty()) {
+        testFiles.push_back(sourcePath + searchFileFull);
+      }
     }
-  }
-  // Search in include directories
-  if (!success) {
-    for (std::vector<std::string>::const_iterator iit =
-           this->UicSearchPaths.begin();
-         iit != this->UicSearchPaths.end(); ++iit) {
-      const std::string fullPath = ((*iit) + '/' + includeString);
-      if (cmsys::SystemTools::FileExists(fullPath.c_str())) {
-        absFile = cmsys::SystemTools::GetRealPath(fullPath);
-        success = true;
-        break;
+    // AUTOUIC search paths
+    if (!this->UicSearchPaths.empty()) {
+      for (std::vector<std::string>::const_iterator iit =
+             this->UicSearchPaths.begin();
+           iit != this->UicSearchPaths.end(); ++iit) {
+        testFiles.push_back(*iit + "/" + searchFile);
+      }
+      if (!searchPath.empty()) {
+        for (std::vector<std::string>::const_iterator iit =
+               this->UicSearchPaths.begin();
+             iit != this->UicSearchPaths.end(); ++iit) {
+          testFiles.push_back(*iit + "/" + searchFileFull);
+        }
       }
     }
   }
+
+  // Search for the .ui file!
+  for (std::vector<std::string>::const_iterator iit = testFiles.begin();
+       iit != testFiles.end(); ++iit) {
+    const std::string& testFile = *iit;
+    if (cmsys::SystemTools::FileExists(testFile.c_str())) {
+      absFile = cmsys::SystemTools::GetRealPath(testFile);
+      success = true;
+      break;
+    }
+  }
+
+  // Log error
+  if (!success) {
+    std::ostringstream ost;
+    ost << "AutoUic: Error: " << Quoted(sourceFile) << "\n";
+    ost << "Could not find " << Quoted(searchFile) << " in\n";
+    for (std::vector<std::string>::const_iterator iit = testFiles.begin();
+         iit != testFiles.end(); ++iit) {
+      ost << "  " << Quoted(*iit) << "\n";
+    }
+    this->LogError(ost.str());
+  }
+
   return success;
 }
 
@@ -1500,16 +1531,14 @@ bool cmQtAutoGenerators::UicGenerateAll(
         const std::string uiBasePath = SubDirPrefix(*uit);
         const std::string uiBaseName =
           cmsys::SystemTools::GetFilenameWithoutLastExtension(*uit).substr(3);
-        const std::string searchFileName = uiBasePath + uiBaseName + ".ui";
+        const std::string uiFileName = uiBaseName + ".ui";
         std::string uiInputFile;
-        if (UicFindIncludedFile(uiInputFile, source, searchFileName)) {
+        if (UicFindIncludedFile(uiInputFile, source, uiBasePath, uiFileName)) {
           std::string uiOutputFile = uiBasePath + "ui_" + uiBaseName + ".h";
           cmSystemTools::ReplaceString(uiOutputFile, "..", "__");
           uiGenMap[uiInputFile] = uiOutputFile;
           testMap[uiInputFile] = uiOutputFile;
         } else {
-          this->LogError("AutoUic: Error: " + Quoted(sit->first) +
-                         "\nCould not find " + Quoted(searchFileName));
           return false;
         }
       }
