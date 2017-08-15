@@ -1,13 +1,7 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-cmake_minimum_required(VERSION 2.8.12.2 FATAL_ERROR)
-if(POLICY CMP0025)
-  cmake_policy(SET CMP0025 NEW)
-endif()
-if(POLICY CMP0053)
-  cmake_policy(SET CMP0053 NEW)
-endif()
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(CMake)
 
 # Make sure we can find internal find_package modules only used for
@@ -341,11 +335,7 @@ macro (CMAKE_BUILD_UTILITIES)
   endif()
 
   if(CMAKE_USE_SYSTEM_LIBRHASH)
-    if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-      find_package(LibRHash)
-    else()
-      message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBRHASH requires CMake >= 3.0")
-    endif()
+    find_package(LibRHash)
     if(NOT LibRHash_FOUND)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_LIBRHASH is ON but LibRHash is not found!")
@@ -511,11 +501,7 @@ macro (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
   # Build jsoncpp library.
   if(CMAKE_USE_SYSTEM_JSONCPP)
-    if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-      find_package(JsonCpp)
-    else()
-      message(FATAL_ERROR "CMAKE_USE_SYSTEM_JSONCPP requires CMake >= 3.0")
-    endif()
+    find_package(JsonCpp)
     if(NOT JsonCpp_FOUND)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_JSONCPP is ON but a JsonCpp is not found!")
@@ -530,11 +516,7 @@ macro (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
   # Build libuv library.
   if(CMAKE_USE_SYSTEM_LIBUV)
-    if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-      find_package(LibUV 1.0.0)
-    else()
-      message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBUV requires CMake >= 3.0")
-    endif()
+    find_package(LibUV 1.0.0)
     if(NOT LIBUV_FOUND)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_LIBUV is ON but a libuv is not found!")
