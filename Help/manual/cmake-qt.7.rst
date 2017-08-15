@@ -70,8 +70,8 @@ be included by the user in the C++ implementation file with a preprocessor
 Included ``moc_*.cpp`` and ``*.moc`` files will be generated in the
 ``<AUTOGEN_BUILD_DIR>/include`` directory which is
 automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
-(This differs from CMake 3.7 and below; see their documentation for details.)
 
+* This differs from CMake 3.7 and below; see their documentation for details.
 * See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
 Not included ``moc_<basename>.cpp`` files will be generated in custom
@@ -107,16 +107,23 @@ inspects the C++ files in the target to determine if they require ``uic`` to
 be run, and to create rules to execute ``uic`` at the appropriate time.
 
 If a preprocessor ``#include`` directive is found which matches
-``ui_<basename>.h``, and a ``<basename>.ui`` file exists, then ``uic`` will
-be executed to generate the appropriate file. The ``<basename>.ui`` file is
-searched for first in the vicinity of including file and afterwards in the
-optional :prop_tgt:`AUTOUIC_SEARCH_PATHS` of the target.
+``<path>ui_<basename>.h``, and a ``<basename>.ui`` file exists,
+then ``uic`` will be executed to generate the appropriate file.
+The ``<basename>.ui`` file is searched for in the following places
+
+1. ``<source_dir>/<basename>.ui``
+2. ``<source_dir>/<path><basename>.ui``
+3. ``<AUTOUIC_SEARCH_PATHS>/<basename>.ui``
+4. ``<AUTOUIC_SEARCH_PATHS>/<path><basename>.ui``
+
+where ``<source_dir>`` is the directory of the C++ file and
+:prop_tgt:`AUTOUIC_SEARCH_PATHS` is a list of additional search paths.
 
 The generated generated ``ui_*.h`` files are placed in the
 ``<AUTOGEN_BUILD_DIR>/include`` directory which is
 automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
-(This differs from CMake 3.7 and below; see their documentation for details.)
 
+* This differs from CMake 3.7 and below; see their documentation for details.
 * See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
 The :prop_tgt:`AUTOUIC` target property may be pre-set for all following
