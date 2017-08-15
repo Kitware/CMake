@@ -935,35 +935,26 @@ echo '
 # error "The CMAKE_C_COMPILER is set to a C++ compiler"
 #endif
 
-#include<stdio.h>
+#include <stdio.h>
 
-#if defined(__CLASSIC_C__)
-int main(argc, argv)
-  int argc;
-  char* argv[];
-#else
 int main(int argc, char* argv[])
-#endif
 {
   printf("%d%c", (argv != 0), (char)0x0a);
-  return argc-1;
+  return argc - 1;
 }
 ' > "${TMPFILE}.c"
-for a in ${cmake_c_compilers}; do
-  if [ -z "${cmake_c_compiler}" ] && \
-    cmake_try_run "${a}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
-    cmake_c_compiler="${a}"
-  fi
-done
 for std in 11 99 90; do
   try_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" C \"${std}\"`"
-  for flag in $try_flags; do
-    echo "Checking whether ${cmake_c_compiler} supports ${flag}" >> cmake_bootstrap.log 2>&1
-    if cmake_try_run "${cmake_c_compiler}" "${cmake_c_flags} ${flag}" \
-      "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
-      cmake_c_flags="${cmake_c_flags} ${flag}"
-      break 2
-    fi
+  for compiler in ${cmake_c_compilers}; do
+    for flag in '' $try_flags; do
+      echo "Checking whether '${compiler} ${cmake_c_flags} ${flag}' works." >> cmake_bootstrap.log 2>&1
+      if cmake_try_run "${compiler}" "${cmake_c_flags} ${flag}" \
+        "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
+        cmake_c_compiler="${compiler}"
+        cmake_c_flags="${cmake_c_flags} ${flag}"
+        break 3
+      fi
+    done
   done
 done
 rm -f "${TMPFILE}.c"
