@@ -1255,7 +1255,9 @@ bool cmQtAutoGenerators::MocGenerateAll(
   if (!this->MocPredefsCmd.empty()) {
     if (this->MocSettingsChanged ||
         FileAbsentOrOlder(this->MocPredefsFileAbs, this->SettingsFile)) {
-      this->LogBold("Generating MOC predefs " + this->MocPredefsFileRel);
+      if (this->Verbose) {
+        this->LogBold("Generating MOC predefs " + this->MocPredefsFileRel);
+      }
 
       std::string output;
       {
@@ -1342,7 +1344,9 @@ bool cmQtAutoGenerators::MocGenerateAll(
 
   if (this->FileDiffers(this->MocCompFileAbs, automocSource)) {
     // Actually write mocs compilation file
-    this->LogBold("Generating MOC compilation " + this->MocCompFileRel);
+    if (this->Verbose) {
+      this->LogBold("Generating MOC compilation " + this->MocCompFileRel);
+    }
     if (!this->FileWrite("AutoMoc", this->MocCompFileAbs, automocSource)) {
       return false;
     }
@@ -1393,7 +1397,9 @@ bool cmQtAutoGenerators::MocGenerateFile(
   }
   if (generateMoc) {
     // Log
-    this->LogBold("Generating MOC source " + mocFileRel);
+    if (this->Verbose) {
+      this->LogBold("Generating MOC source " + mocFileRel);
+    }
 
     // Make sure the parent directory exists
     if (this->MakeParentDirectory("AutoMoc", mocFileAbs)) {
@@ -1569,7 +1575,9 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
   }
   if (generateUic) {
     // Log
-    this->LogBold("Generating UIC header " + uicFileRel);
+    if (this->Verbose) {
+      this->LogBold("Generating UIC header " + uicFileRel);
+    }
 
     // Make sure the parent directory exists
     if (this->MakeParentDirectory("AutoUic", uicFileAbs)) {
@@ -1714,7 +1722,9 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
   // Regenerate on demand
   if (generateRcc) {
     // Log
-    this->LogBold("Generating RCC source " + rccOutputFile);
+    if (this->Verbose) {
+      this->LogBold("Generating RCC source " + rccOutputFile);
+    }
 
     // Make sure the parent directory exists
     if (this->MakeParentDirectory("AutoRcc", rccBuildFile)) {
@@ -1785,7 +1795,9 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
     // Write content to file
     if (this->FileDiffers(wrapperFileAbs, content)) {
       // Write new wrapper file if the content differs
-      this->LogBold("Generating RCC wrapper " + wrapperFileRel);
+      if (this->Verbose) {
+        this->LogBold("Generating RCC wrapper " + wrapperFileRel);
+      }
       if (!this->FileWrite("AutoRcc", wrapperFileAbs, content)) {
         // Error
         rccGenerated = false;
