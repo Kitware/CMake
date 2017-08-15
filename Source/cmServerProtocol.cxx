@@ -747,7 +747,7 @@ static Json::Value DumpBacktrace(const cmListFileBacktrace& backtrace)
     if (!backtraceCopy.Top().Name.empty()) {
       entry[kNAME_KEY] = backtraceCopy.Top().Name;
     }
-    result.append(std::move(entry));
+    result.append(entry);
     backtraceCopy = backtraceCopy.Pop();
   }
   return result;
