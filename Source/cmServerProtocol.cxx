@@ -754,7 +754,7 @@ static Json::Value DumpBacktrace(const cmListFileBacktrace& backtrace)
 }
 
 static void DumpBacktraceRange(Json::Value& result, const std::string& type,
-                               const cmBacktraceRange& range)
+                               cmBacktraceRange range)
 {
   for (const auto& bt : range) {
     Json::Value obj = Json::objectValue;
