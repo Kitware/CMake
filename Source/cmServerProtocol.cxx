@@ -747,14 +747,14 @@ static Json::Value DumpBacktrace(const cmListFileBacktrace& backtrace)
     if (!backtraceCopy.Top().Name.empty()) {
       entry[kNAME_KEY] = backtraceCopy.Top().Name;
     }
-    result.append(std::move(entry));
+    result.append(entry);
     backtraceCopy = backtraceCopy.Pop();
   }
   return result;
 }
 
 static void DumpBacktraceRange(Json::Value& result, const std::string& type,
-                               const cmBacktraceRange& range)
+                               cmBacktraceRange range)
 {
   for (const auto& bt : range) {
     Json::Value obj = Json::objectValue;
