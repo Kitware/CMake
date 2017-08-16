@@ -80,7 +80,7 @@ cmake_sphinx_build=""
 cmake_sphinx_flags=""
 
 # Determine whether this is a Cygwin environment.
-if echo "${cmake_system}" | grep -q CYGWIN; then
+if echo "${cmake_system}" | grep CYGWIN >/dev/null 2>&1; then
   cmake_system_cygwin=true
   cmake_doc_dir_keyword="CYGWIN"
   cmake_man_dir_keyword="CYGWIN"
@@ -89,21 +89,21 @@ else
 fi
 
 # Determine whether this is a MinGW environment.
-if echo "${cmake_system}" | grep -q 'MINGW\|MSYS'; then
+if echo "${cmake_system}" | grep 'MINGW\|MSYS' >/dev/null 2>&1; then
   cmake_system_mingw=true
 else
   cmake_system_mingw=false
 fi
 
 # Determine whether this is OS X
-if echo "${cmake_system}" | grep -q Darwin; then
+if echo "${cmake_system}" | grep Darwin >/dev/null 2>&1; then
   cmake_system_darwin=true
 else
   cmake_system_darwin=false
 fi
 
 # Determine whether this is BeOS
-if echo "${cmake_system}" | grep -q BeOS; then
+if echo "${cmake_system}" | grep BeOS >/dev/null 2>&1; then
   cmake_system_beos=true
   cmake_doc_dir_keyword="HAIKU"
   cmake_man_dir_keyword="HAIKU"
@@ -112,7 +112,7 @@ else
 fi
 
 # Determine whether this is Haiku
-if echo "${cmake_system}" | grep -q Haiku; then
+if echo "${cmake_system}" | grep Haiku >/dev/null 2>&1; then
   cmake_system_haiku=true
   cmake_doc_dir_keyword="HAIKU"
   cmake_man_dir_keyword="HAIKU"
@@ -121,14 +121,14 @@ else
 fi
 
 # Determine whether this is OpenVMS
-if echo "${cmake_system}" | grep -q OpenVMS; then
+if echo "${cmake_system}" | grep OpenVMS >/dev/null 2>&1; then
   cmake_system_openvms=true
 else
   cmake_system_openvms=false
 fi
 
 # Determine whether this is HP-UX
-if echo "${cmake_system}" | grep -q HP-UX; then
+if echo "${cmake_system}" | grep HP-UX >/dev/null 2>&1; then
   die 'CMake no longer compiles on HP-UX.  See
 
   https://gitlab.kitware.com/cmake/cmake/issues/17137
@@ -140,7 +140,7 @@ else
 fi
 
 # Determine whether this is Linux
-if echo "${cmake_system}" | grep -q Linux; then
+if echo "${cmake_system}" | grep Linux >/dev/null 2>&1; then
   cmake_system_linux=true
 else
   cmake_system_linux=false
@@ -151,11 +151,11 @@ else
 # may falsely detect parisc on HP-UX m68k
 cmake_machine_parisc=false
 if ${cmake_system_linux}; then
-  if uname -m | grep -q parisc; then
+  if uname -m | grep parisc >/dev/null 2>&1; then
     cmake_machine_parisc=true
   fi
 elif ${cmake_system_hpux}; then
-  if uname -m | grep -q ia64; then : ; else
+  if uname -m | grep ia64 >/dev/null 2>&1; then : ; else
     cmake_machine_parisc=true
   fi
 fi
