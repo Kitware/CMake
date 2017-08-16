@@ -112,7 +112,8 @@ private:
 
   // -- Uic file generation
   bool UicFindIncludedFile(std::string& absFile, const std::string& sourceFile,
-                           const std::string& includeString);
+                           const std::string& searchPath,
+                           const std::string& searchFile);
   bool UicGenerateAll(
     const std::map<std::string, std::vector<std::string> >& includedUis);
   bool UicGenerateFile(const std::string& realName,
