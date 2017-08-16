@@ -891,8 +891,14 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     // The actual compilation will now use the preprocessed source.
     explicitDeps.push_back(ppFileName);
 
-    // Preprocessing and compilation use the same flags.
+    // Preprocessing and compilation generally use the same flags.
     ppVars["FLAGS"] = vars["FLAGS"];
+
+    // In case compilation requires flags that are incompatible with
+    // preprocessing, include them here.
+    std::string const postFlag =
+      this->Makefile->GetSafeDefinition("CMAKE_Fortran_POSTPROCESS_FLAG");
+    this->LocalGenerator->AppendFlags(vars["FLAGS"], postFlag);
 
     // Move preprocessor definitions to the preprocessor build statement.
     std::swap(ppVars["DEFINES"], vars["DEFINES"]);
