@@ -302,6 +302,7 @@ Variables that Control the Build
    /variable/CMAKE_IOS_INSTALL_COMBINED
    /variable/CMAKE_LANG_CLANG_TIDY
    /variable/CMAKE_LANG_COMPILER_LAUNCHER
+   /variable/CMAKE_LANG_CPPCHECK
    /variable/CMAKE_LANG_CPPLINT
    /variable/CMAKE_LANG_INCLUDE_WHAT_YOU_USE
    /variable/CMAKE_LANG_VISIBILITY_PRESET
