@@ -3,6 +3,9 @@ include(RunCMake)
 run_cmake(Append)
 run_cmake(AppendNoArgs)
 
+run_cmake(Prepend)
+run_cmake(PrependNoArgs)
+
 run_cmake(Concat)
 run_cmake(ConcatNoArgs)
 

@@ -62,6 +62,9 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args,
   if (subCommand == "APPEND") {
     return this->HandleAppendCommand(args);
   }
+  if (subCommand == "PREPEND") {
+    return this->HandlePrependCommand(args);
+  }
   if (subCommand == "CONCAT") {
     return this->HandleConcatCommand(args);
   }
@@ -639,6 +642,30 @@ bool cmStringCommand::HandleAppendCommand(std::vector<std::string> const& args)
     value = oldValue;
   }
   value += cmJoin(cmMakeRange(args).advance(2), std::string());
+  this->Makefile->AddDefinition(variable, value.c_str());
+  return true;
+}
+
+bool cmStringCommand::HandlePrependCommand(
+  std::vector<std::string> const& args)
+{
+  if (args.size() < 2) {
+    this->SetError("sub-command PREPEND requires at least one argument.");
+    return false;
+  }
+
+  // Skip if nothing to prepend.
+  if (args.size() < 3) {
+    return true;
+  }
+
+  const std::string& variable = args[1];
+
+  std::string value = cmJoin(cmMakeRange(args).advance(2), std::string());
+  const char* oldValue = this->Makefile->GetDefinition(variable);
+  if (oldValue) {
+    value += oldValue;
+  }
   this->Makefile->AddDefinition(variable, value.c_str());
   return true;
 }
