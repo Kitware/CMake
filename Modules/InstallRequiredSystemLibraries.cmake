@@ -56,6 +56,13 @@
 #   Specify the :command:`install(PROGRAMS)` command ``COMPONENT``
 #   option.  If not specified, no such option will be used.
 
+set(_IRSL_HAVE_MSVC FALSE)
+foreach(LANG IN ITEMS C CXX)
+  if(CMAKE_${LANG}_COMPILER_ID STREQUAL MSVC)
+    set(_IRSL_HAVE_MSVC TRUE)
+  endif()
+endforeach()
+
 if(MSVC)
   file(TO_CMAKE_PATH "$ENV{SYSTEMROOT}" SYSTEMROOT)
 
@@ -487,7 +494,7 @@ if(MSVC)
 
   # MSVC 8 was the first version with OpenMP
   # Furthermore, there is no debug version of this
-  if(CMAKE_INSTALL_OPENMP_LIBRARIES)
+  if(CMAKE_INSTALL_OPENMP_LIBRARIES AND _IRSL_HAVE_MSVC)
     if(MSVC_VERSION EQUAL 1911)
       set(_MSOMP_DLL_VERSION 140)
       set(_MSOMP_IDE_VERSION 15)
