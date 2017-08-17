@@ -260,6 +260,12 @@
 #  Additional prepared packages dirs that will be used to resolve
 #  dependent components.
 #
+# .. variable:: CPACK_IFW_REPOSITORIES_DIRECTORIES
+#
+#  Additional prepared repository dirs that will be used to resolve and
+#  repack dependent components. This feature available only
+#  since QtIFW_ 3.1.
+#
 # Tools
 # """""
 #

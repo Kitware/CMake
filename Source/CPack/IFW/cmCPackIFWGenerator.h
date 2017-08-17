@@ -148,6 +148,7 @@ private:
   bool OnlineOnly;
   bool ResolveDuplicateNames;
   std::vector<std::string> PkgsDirsVector;
+  std::vector<std::string> RepoDirsVector;
 };
 
 #endif

@@ -56,6 +56,22 @@ int cmCPackIFWGenerator::PackageFiles()
       }
     }
 
+    if (!this->RepoDirsVector.empty()) {
+      if (!this->IsVersionLess("3.1")) {
+        for (std::vector<std::string>::iterator it =
+               this->RepoDirsVector.begin();
+             it != this->RepoDirsVector.end(); ++it) {
+          ifwCmd += " --repository " + *it;
+        }
+      } else {
+        cmCPackIFWLogger(WARNING, "The \"CPACK_IFW_REPOSITORIES_DIRECTORIES\" "
+                           << "variable is set, but content will be skiped, "
+                           << "because this feature available only since "
+                           << "QtIFW 3.1. Please update your QtIFW instance."
+                           << std::endl);
+      }
+    }
+
     if (!this->OnlineOnly && !this->DownloadedPackages.empty()) {
       ifwCmd += " -i ";
       std::set<cmCPackIFWPackage*>::iterator it =
@@ -125,6 +141,22 @@ int cmCPackIFWGenerator::PackageFiles()
              this->PkgsDirsVector.begin();
            it != this->PkgsDirsVector.end(); ++it) {
         ifwCmd += " -p " + *it;
+      }
+    }
+
+    if (!this->RepoDirsVector.empty()) {
+      if (!this->IsVersionLess("3.1")) {
+        for (std::vector<std::string>::iterator it =
+               this->RepoDirsVector.begin();
+             it != this->RepoDirsVector.end(); ++it) {
+          ifwCmd += " --repository " + *it;
+        }
+      } else {
+        cmCPackIFWLogger(WARNING, "The \"CPACK_IFW_REPOSITORIES_DIRECTORIES\" "
+                           << "variable is set, but content will be skipped, "
+                           << "because this feature available only since "
+                           << "QtIFW 3.1. Please update your QtIFW instance."
+                           << std::endl);
       }
     }
 
@@ -264,6 +296,13 @@ int cmCPackIFWGenerator::InitializeInternal()
   this->PkgsDirsVector.clear();
   if (const char* dirs = this->GetOption("CPACK_IFW_PACKAGES_DIRECTORIES")) {
     cmSystemTools::ExpandListArgument(dirs, this->PkgsDirsVector);
+  }
+
+  // Additional repositories dirs
+  this->RepoDirsVector.clear();
+  if (const char* dirs =
+        this->GetOption("CPACK_IFW_REPOSITORIES_DIRECTORIES")) {
+    cmSystemTools::ExpandListArgument(dirs, this->RepoDirsVector);
   }
 
   // Installer
