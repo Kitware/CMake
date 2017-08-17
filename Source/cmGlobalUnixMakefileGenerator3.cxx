@@ -382,8 +382,8 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefileLanguageRules(
   for (unsigned int i = 0; i < lGenerators.size(); ++i) {
     lg = static_cast<cmLocalUnixMakefileGenerator3*>(lGenerators[i]);
     // for all of out targets
-    std::vector<cmGeneratorTarget*> tgts = lg->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+    const std::vector<cmGeneratorTarget*>& tgts = lg->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
          l != tgts.end(); l++) {
       if (((*l)->GetType() == cmStateEnums::EXECUTABLE) ||
           ((*l)->GetType() == cmStateEnums::STATIC_LIBRARY) ||
@@ -414,8 +414,8 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
   // The directory-level rule should depend on the target-level rules
   // for all targets in the directory.
   std::vector<std::string> depends;
-  std::vector<cmGeneratorTarget*> targets = lg->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::iterator l = targets.begin();
+  const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
+  for (std::vector<cmGeneratorTarget*>::const_iterator l = targets.begin();
        l != targets.end(); ++l) {
     cmGeneratorTarget* gtarget = *l;
     int type = gtarget->GetType();
@@ -547,8 +547,8 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
   for (i = 0; i < this->LocalGenerators.size(); ++i) {
     lg = static_cast<cmLocalUnixMakefileGenerator3*>(this->LocalGenerators[i]);
     // for each target Generate the rule files for each target.
-    std::vector<cmGeneratorTarget*> targets = lg->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+    const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::const_iterator t = targets.begin();
          t != targets.end(); ++t) {
       cmGeneratorTarget* gtarget = *t;
       // Don't emit the same rule twice (e.g. two targets with the same
@@ -629,8 +629,8 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
   depends.push_back("cmake_check_build_system");
 
   // for each target Generate the rule files for each target.
-  std::vector<cmGeneratorTarget*> targets = lg->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+  const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
+  for (std::vector<cmGeneratorTarget*>::const_iterator t = targets.begin();
        t != targets.end(); ++t) {
     cmGeneratorTarget* gtarget = *t;
     int type = gtarget->GetType();
@@ -807,7 +807,7 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
          this->LocalGenerators.begin();
        lgi != this->LocalGenerators.end(); ++lgi) {
     cmLocalGenerator* lg = *lgi;
-    std::vector<cmGeneratorTarget*> targets = lg->GetGeneratorTargets();
+    const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
     for (std::vector<cmGeneratorTarget*>::const_iterator t = targets.begin();
          t != targets.end(); ++t) {
       cmGeneratorTarget* gt = *t;
@@ -952,8 +952,9 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
     // the targets
     if (lg2 == lg || lg->IsRootMakefile()) {
       // for each target Generate the rule files for each target.
-      std::vector<cmGeneratorTarget*> targets = lg2->GetGeneratorTargets();
-      for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+      const std::vector<cmGeneratorTarget*>& targets =
+        lg2->GetGeneratorTargets();
+      for (std::vector<cmGeneratorTarget*>::const_iterator t = targets.begin();
            t != targets.end(); ++t) {
         cmGeneratorTarget* target = *t;
         cmStateEnums::TargetType type = target->GetType();

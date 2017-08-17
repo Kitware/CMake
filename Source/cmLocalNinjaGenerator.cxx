@@ -79,8 +79,8 @@ void cmLocalNinjaGenerator::Generate()
     }
   }
 
-  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
+  for (std::vector<cmGeneratorTarget*>::const_iterator t = targets.begin();
        t != targets.end(); ++t) {
     if ((*t)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;

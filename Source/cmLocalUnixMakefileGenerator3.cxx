@@ -116,10 +116,10 @@ void cmLocalUnixMakefileGenerator3::Generate()
     this->Makefile->IsOn("CMAKE_SKIP_ASSEMBLY_SOURCE_RULES");
 
   // Generate the rule files for each target.
-  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
+  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
   cmGlobalUnixMakefileGenerator3* gg =
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-  for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+  for (std::vector<cmGeneratorTarget*>::const_iterator t = targets.begin();
        t != targets.end(); ++t) {
     if ((*t)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
@@ -172,8 +172,8 @@ void cmLocalUnixMakefileGenerator3::ComputeObjectFilenames(
 void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
   std::map<std::string, LocalObjectInfo>& localObjectFiles)
 {
-  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
+  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
+  for (std::vector<cmGeneratorTarget*>::const_iterator ti = targets.begin();
        ti != targets.end(); ++ti) {
     cmGeneratorTarget* gt = *ti;
     if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
@@ -382,9 +382,9 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefileTargets(
 
   // for each target we just provide a rule to cd up to the top and do a make
   // on the target
-  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
+  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
   std::string localName;
-  for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+  for (std::vector<cmGeneratorTarget*>::const_iterator t = targets.begin();
        t != targets.end(); ++t) {
     if (((*t)->GetType() == cmStateEnums::EXECUTABLE) ||
         ((*t)->GetType() == cmStateEnums::STATIC_LIBRARY) ||
@@ -1562,8 +1562,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   this->WriteDivider(ruleFileStream);
   ruleFileStream << "# Targets provided globally by CMake.\n"
                  << "\n";
-  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
-  std::vector<cmGeneratorTarget*>::iterator glIt;
+  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
+  std::vector<cmGeneratorTarget*>::const_iterator glIt;
   for (glIt = targets.begin(); glIt != targets.end(); ++glIt) {
     if ((*glIt)->GetType() == cmStateEnums::GLOBAL_TARGET) {
       std::string targetString =

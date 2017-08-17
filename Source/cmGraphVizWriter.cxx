@@ -420,7 +420,8 @@ int cmGraphVizWriter::CollectAllTargets()
   for (std::vector<cmLocalGenerator*>::const_iterator lit =
          this->LocalGenerators.begin();
        lit != this->LocalGenerators.end(); ++lit) {
-    std::vector<cmGeneratorTarget*> targets = (*lit)->GetGeneratorTargets();
+    const std::vector<cmGeneratorTarget*>& targets =
+      (*lit)->GetGeneratorTargets();
     for (std::vector<cmGeneratorTarget*>::const_iterator it = targets.begin();
          it != targets.end(); ++it) {
       const char* realTargetName = (*it)->GetName().c_str();
@@ -445,7 +446,8 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
   for (std::vector<cmLocalGenerator*>::const_iterator lit =
          this->LocalGenerators.begin();
        lit != this->LocalGenerators.end(); ++lit) {
-    std::vector<cmGeneratorTarget*> targets = (*lit)->GetGeneratorTargets();
+    const std::vector<cmGeneratorTarget*>& targets =
+      (*lit)->GetGeneratorTargets();
     for (std::vector<cmGeneratorTarget*>::const_iterator it = targets.begin();
          it != targets.end(); ++it) {
       const char* realTargetName = (*it)->GetName().c_str();
