@@ -623,7 +623,6 @@ public:
   {
     return this->SourceFiles;
   }
-  std::vector<cmSourceFile*>& GetSourceFiles() { return this->SourceFiles; }
 
   /**
    * Is there a source file that has the provided source file as an output?
