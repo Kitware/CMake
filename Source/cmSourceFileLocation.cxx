@@ -28,21 +28,6 @@ cmSourceFileLocation::cmSourceFileLocation(const cmSourceFileLocation& loc)
   this->Name = loc.Name;
 }
 
-cmSourceFileLocation& cmSourceFileLocation::operator=(
-  const cmSourceFileLocation& loc)
-{
-  if (this == &loc) {
-    return *this;
-  }
-  this->Makefile = loc.Makefile;
-  this->AmbiguousDirectory = loc.AmbiguousDirectory;
-  this->AmbiguousExtension = loc.AmbiguousExtension;
-  this->Directory = loc.Directory;
-  this->Name = loc.Name;
-  this->UpdateExtension(this->Name);
-  return *this;
-}
-
 cmSourceFileLocation::cmSourceFileLocation(cmMakefile const* mf,
                                            const std::string& name)
   : Makefile(mf)
