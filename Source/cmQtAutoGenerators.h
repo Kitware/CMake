@@ -201,7 +201,7 @@ private:
   std::vector<std::string> MocOptions;
   std::vector<std::string> MocPredefsCmd;
   std::vector<MocDependFilter> MocDependFilters;
-  MocMacroFilter MocMacroFilters[2];
+  std::vector<MocMacroFilter> MocMacroFilters;
   cmsys::RegularExpression MocRegExpInclude;
   // -- Uic
   bool UicSettingsChanged;
