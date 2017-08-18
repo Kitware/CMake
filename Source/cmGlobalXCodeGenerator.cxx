@@ -440,8 +440,8 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
       continue;
     }
 
-    std::vector<cmGeneratorTarget*> tgts = lg->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+    const std::vector<cmGeneratorTarget*>& tgts = lg->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
          l != tgts.end(); l++) {
       cmGeneratorTarget* target = *l;
 
@@ -925,12 +925,12 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
   cmLocalGenerator* gen, std::vector<cmXCodeObject*>& targets)
 {
   this->SetCurrentLocalGenerator(gen);
-  std::vector<cmGeneratorTarget*> tgts =
+  const std::vector<cmGeneratorTarget*>& tgts =
     this->CurrentLocalGenerator->GetGeneratorTargets();
   typedef std::map<std::string, cmGeneratorTarget*, cmCompareTargets>
     cmSortedTargets;
   cmSortedTargets sortedTargets;
-  for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+  for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
        l != tgts.end(); l++) {
     sortedTargets[(*l)->GetName()] = *l;
   }
@@ -1210,7 +1210,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
 void cmGlobalXCodeGenerator::ForceLinkerLanguages()
 {
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-    std::vector<cmGeneratorTarget*> tgts =
+    const std::vector<cmGeneratorTarget*>& tgts =
       this->LocalGenerators[i]->GetGeneratorTargets();
     // All targets depend on the build-system check target.
     for (std::vector<cmGeneratorTarget*>::const_iterator ti = tgts.begin();
@@ -2706,8 +2706,8 @@ bool cmGlobalXCodeGenerator::CreateGroups(
        i != generators.end(); ++i) {
     cmMakefile* mf = (*i)->GetMakefile();
     std::vector<cmSourceGroup> sourceGroups = mf->GetSourceGroups();
-    std::vector<cmGeneratorTarget*> tgts = (*i)->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+    const std::vector<cmGeneratorTarget*>& tgts = (*i)->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
          l != tgts.end(); l++) {
       cmGeneratorTarget* gtgt = *l;
 

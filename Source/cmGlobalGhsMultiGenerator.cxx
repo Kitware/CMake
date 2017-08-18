@@ -260,7 +260,7 @@ void cmGlobalGhsMultiGenerator::Generate()
     for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
       cmLocalGhsMultiGenerator* lg =
         static_cast<cmLocalGhsMultiGenerator*>(this->LocalGenerators[i]);
-      std::vector<cmGeneratorTarget*> tgts = lg->GetGeneratorTargets();
+      const std::vector<cmGeneratorTarget*>& tgts = lg->GetGeneratorTargets();
       this->UpdateBuildFiles(tgts);
     }
   }
@@ -436,9 +436,9 @@ std::string cmGlobalGhsMultiGenerator::GetFileNameFromPath(
 }
 
 void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
-  std::vector<cmGeneratorTarget*> tgts)
+  const std::vector<cmGeneratorTarget*>& tgts)
 {
-  for (std::vector<cmGeneratorTarget*>::iterator tgtsI = tgts.begin();
+  for (std::vector<cmGeneratorTarget*>::const_iterator tgtsI = tgts.begin();
        tgtsI != tgts.end(); ++tgtsI) {
     const cmGeneratorTarget* tgt = *tgtsI;
     if (IsTgtForBuild(tgt)) {

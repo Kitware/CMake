@@ -62,8 +62,8 @@ cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
 void cmLocalVisualStudio7Generator::AddHelperCommands()
 {
   // Now create GUIDs for targets
-  std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+  const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
+  for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
        l != tgts.end(); ++l) {
     if ((*l)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
@@ -91,8 +91,9 @@ void cmLocalVisualStudio7Generator::AddCMakeListsRules()
     // specification source changes.
     if (cmSourceFile* sf = this->CreateVCProjBuildRule()) {
       // Add the rule to targets that need it.
-      std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
-      for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+      const std::vector<cmGeneratorTarget*>& tgts =
+        this->GetGeneratorTargets();
+      for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
            l != tgts.end(); ++l) {
         if ((*l)->GetType() == cmStateEnums::GLOBAL_TARGET) {
           continue;
@@ -110,8 +111,8 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
   // Visual Studio .NET 2003 Service Pack 1 will not run post-build
   // commands for targets in which no sources are built.  Add dummy
   // rules to force these targets to build.
-  std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+  const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
+  for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
        l != tgts.end(); l++) {
     if ((*l)->GetType() == cmStateEnums::GLOBAL_TARGET) {
       std::vector<std::string> no_depends;
@@ -150,10 +151,10 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
   }
 
   // Get the set of targets in this directory.
-  std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
+  const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
 
   // Create the project file for each target.
-  for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+  for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
        l != tgts.end(); l++) {
     if ((*l)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
