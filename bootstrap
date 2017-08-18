@@ -403,8 +403,14 @@ CMAKE_CXX_SOURCES="\
   cmSubdirCommand \
   cmSystemTools \
   cmTarget \
+  cmTargetCompileDefinitionsCommand \
+  cmTargetCompileFeaturesCommand \
+  cmTargetCompileOptionsCommand \
+  cmTargetIncludeDirectoriesCommand \
   cmTargetLinkLibrariesCommand \
+  cmTargetPropCommandBase \
   cmTargetPropertyComputer \
+  cmTargetSourcesCommand \
   cmTest \
   cmTestGenerator \
   cmTimestamp \
