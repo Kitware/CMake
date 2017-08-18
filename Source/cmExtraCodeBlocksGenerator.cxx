@@ -235,7 +235,14 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
       // We don't want paths with CMakeFiles in them
       // or do we?
       // In speedcrunch those where purely internal
+      //
+      // Also we can disable external (outside the project) files by setting ON
+      // CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES variable.
+      const bool excludeExternal =
+        cmSystemTools::IsOn(it.second[0]->GetMakefile()->GetSafeDefinition(
+          "CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES"));
       if (!splitted.empty() &&
+          (!excludeExternal || (relative.find("..") == std::string::npos)) &&
           relative.find("CMakeFiles") == std::string::npos) {
         tree.InsertPath(splitted, 1, fileName);
       }
@@ -379,6 +386,19 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             }
 
             std::string const& fullPath = s->GetFullPath();
+
+            // Check file position relative to project root dir.
+            const std::string& relative = cmSystemTools::RelativePath(
+              (*lg).GetSourceDirectory(), fullPath.c_str());
+            // Do not add this file if it has ".." in relative path and
+            // if CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES variable is on.
+            const bool excludeExternal =
+              cmSystemTools::IsOn((*lg).GetMakefile()->GetSafeDefinition(
+                "CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES"));
+            if (excludeExternal &&
+                (relative.find("..") != std::string::npos)) {
+              continue;
+            }
 
             if (isCFile) {
               cFiles.push_back(fullPath);
