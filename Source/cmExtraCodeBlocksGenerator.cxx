@@ -4,6 +4,7 @@
 
 #include <map>
 #include <ostream>
+#include <set>
 #include <string.h>
 #include <utility>
 
@@ -95,7 +96,7 @@ struct Tree
 {
   std::string path; // only one component of the path
   std::vector<Tree> folders;
-  std::vector<std::string> files;
+  std::set<std::string> files;
   void InsertPath(const std::vector<std::string>& splitted,
                   std::vector<std::string>::size_type start,
                   const std::string& fileName);
@@ -112,7 +113,7 @@ void Tree::InsertPath(const std::vector<std::string>& splitted,
                       const std::string& fileName)
 {
   if (start == splitted.size()) {
-    files.push_back(fileName);
+    files.insert(fileName);
     return;
   }
   for (std::vector<Tree>::iterator it = folders.begin(); it != folders.end();
@@ -123,7 +124,7 @@ void Tree::InsertPath(const std::vector<std::string>& splitted,
         return;
       }
       // last part of splitted
-      it->files.push_back(fileName);
+      it->files.insert(fileName);
       return;
     }
   }
@@ -136,7 +137,7 @@ void Tree::InsertPath(const std::vector<std::string>& splitted,
     return;
   }
   // last part of splitted
-  newFolder.files.push_back(fileName);
+  newFolder.files.insert(fileName);
   folders.push_back(newFolder);
 }
 
@@ -164,7 +165,7 @@ void Tree::BuildVirtualFolderImpl(std::string& virtualFolders,
 
 void Tree::BuildUnit(cmXMLWriter& xml, const std::string& fsPath) const
 {
-  for (std::vector<std::string>::const_iterator it = files.begin();
+  for (std::set<std::string>::const_iterator it = files.begin();
        it != files.end(); ++it) {
     xml.StartElement("Unit");
     xml.Attribute("filename", fsPath + *it);
@@ -185,7 +186,7 @@ void Tree::BuildUnitImpl(cmXMLWriter& xml,
                          const std::string& virtualFolderPath,
                          const std::string& fsPath) const
 {
-  for (std::vector<std::string>::const_iterator it = files.begin();
+  for (std::set<std::string>::const_iterator it = files.begin();
        it != files.end(); ++it) {
     xml.StartElement("Unit");
     xml.Attribute("filename", fsPath + path + "/" + *it);
