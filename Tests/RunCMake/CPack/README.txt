@@ -91,6 +91,11 @@ If test will be used for multiple generators but some of them require some
 generator specific commands then those commands should be added to 'test.cmake'
 script wrapped with 'if(GENERATOR_TYPE STREQUAL <name_of_the_generator>)'.
 
+NOTE: In some cases (for example when testing CPackComponent.cmake functions)
+the test has to run some functions after CPack.cmake is included. In such cases
+a function run_after_include_cpack can be declared in test.cmake file and that
+function will run after the inclusion of CPack.cmake.
+
 build phase (optional and not available for source package tests)
 -----------------------------------------------------------------
 
