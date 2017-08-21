@@ -89,6 +89,8 @@ if(MSVC)
   endif()
 
   if(MSVC_VERSION EQUAL 1400)
+    set(MSVC_REDIST_NAME VC80)
+
     # Find the runtime library redistribution directory.
     get_filename_component(msvc_install_dir
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0;InstallDir]" ABSOLUTE)
@@ -129,6 +131,8 @@ if(MSVC)
   endif()
 
   if(MSVC_VERSION EQUAL 1500)
+    set(MSVC_REDIST_NAME VC90)
+
     # Find the runtime library redistribution directory.
     get_filename_component(msvc_install_dir
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0;InstallDir]" ABSOLUTE)
@@ -172,21 +176,27 @@ if(MSVC)
   endif()
 
   if(MSVC_VERSION EQUAL 1910)
+    set(MSVC_REDIST_NAME VC150)
     set(_MSVCRT_DLL_VERSION 140)
     set(_MSVCRT_IDE_VERSION 15)
   elseif(MSVC_VERSION EQUAL 1900)
+    set(MSVC_REDIST_NAME VC140)
     set(_MSVCRT_DLL_VERSION 140)
     set(_MSVCRT_IDE_VERSION 14)
   elseif(MSVC_VERSION EQUAL 1800)
+    set(MSVC_REDIST_NAME VC120)
     set(_MSVCRT_DLL_VERSION 120)
     set(_MSVCRT_IDE_VERSION 12)
   elseif(MSVC_VERSION EQUAL 1700)
+    set(MSVC_REDIST_NAME VC110)
     set(_MSVCRT_DLL_VERSION 110)
     set(_MSVCRT_IDE_VERSION 11)
   elseif(MSVC_VERSION EQUAL 1600)
+    set(MSVC_REDIST_NAME VC100)
     set(_MSVCRT_DLL_VERSION 100)
     set(_MSVCRT_IDE_VERSION 10)
   else()
+    set(MSVC_REDIST_NAME "")
     set(_MSVCRT_DLL_VERSION "")
     set(_MSVCRT_IDE_VERSION "")
   endif()
@@ -219,10 +229,10 @@ if(MSVC)
       unset(_vs_dir)
       unset(programfilesx86)
     endif()
-    find_path(MSVC_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.CRT PATHS ${_vs_redist_paths})
+    find_path(MSVC_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.CRT PATHS ${_vs_redist_paths})
     unset(_vs_redist_paths)
     mark_as_advanced(MSVC_REDIST_DIR)
-    set(MSVC_CRT_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.CRT")
+    set(MSVC_CRT_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.CRT")
 
     if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
       set(__install__libs
@@ -242,7 +252,7 @@ if(MSVC)
 
     if(CMAKE_INSTALL_DEBUG_LIBRARIES)
       set(MSVC_CRT_DIR
-        "${MSVC_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.DebugCRT")
+        "${MSVC_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.DebugCRT")
       set(__install__libs ${__install__libs}
         "${MSVC_CRT_DIR}/msvcp${v}d.dll"
         )
@@ -410,7 +420,7 @@ if(MSVC)
       # Starting with VS 15 the MFC DLLs may be in a different directory.
       if (NOT vs VERSION_LESS 15)
         file(GLOB _MSVC_REDIST_DIRS "${MSVC_REDIST_DIR}/../*")
-        find_path(MSVC_REDIST_MFC_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.MFC
+        find_path(MSVC_REDIST_MFC_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.MFC
           PATHS ${_MSVC_REDIST_DIRS} NO_DEFAULT_PATH)
         mark_as_advanced(MSVC_REDIST_MFC_DIR)
         unset(_MSVC_REDIST_DIRS)
@@ -424,7 +434,7 @@ if(MSVC)
 
       if(CMAKE_INSTALL_DEBUG_LIBRARIES)
         set(MSVC_MFC_DIR
-          "${MSVC_REDIST_MFC_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.DebugMFC")
+          "${MSVC_REDIST_MFC_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.DebugMFC")
         set(__install__libs ${__install__libs}
           "${MSVC_MFC_DIR}/mfc${v}ud.dll"
           "${MSVC_MFC_DIR}/mfcm${v}ud.dll"
@@ -437,7 +447,7 @@ if(MSVC)
         endif()
       endif()
 
-      set(MSVC_MFC_DIR "${MSVC_REDIST_MFC_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.MFC")
+      set(MSVC_MFC_DIR "${MSVC_REDIST_MFC_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.MFC")
       if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
         set(__install__libs ${__install__libs}
           "${MSVC_MFC_DIR}/mfc${v}u.dll"
@@ -452,7 +462,7 @@ if(MSVC)
       endif()
 
       # include the language dll's as well as the actuall dll's
-      set(MSVC_MFCLOC_DIR "${MSVC_REDIST_MFC_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.MFCLOC")
+      set(MSVC_MFCLOC_DIR "${MSVC_REDIST_MFC_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.MFCLOC")
       set(__install__libs ${__install__libs}
         "${MSVC_MFCLOC_DIR}/mfc${v}chs.dll"
         "${MSVC_MFCLOC_DIR}/mfc${v}cht.dll"
@@ -500,7 +510,7 @@ if(MSVC)
     if(_MSOMP_DLL_VERSION)
       set(v "${_MSOMP_DLL_VERSION}")
       set(vs "${_MSOMP_IDE_VERSION}")
-      set(MSVC_OPENMP_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.OPENMP")
+      set(MSVC_OPENMP_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.OPENMP")
 
       if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
         set(__install__libs ${__install__libs}
