@@ -1004,58 +1004,45 @@ fi
 # Check if C++ compiler works
 TMPFILE=`cmake_tmp_file`
 echo '
-#if defined(TEST1)
-# include <iostream>
-#else
-# include <iostream.h>
-#endif
+#include <iostream>
+#include <memory>
 
 #if __cplusplus >= 201103L && defined(__SUNPRO_CC) && __SUNPRO_CC < 0x5140
 #error "SunPro <= 5.13 C++ 11 mode not supported due to bug in move semantics."
 #endif
 
-class NeedCXX
+class Class
 {
 public:
-  NeedCXX() { this->Foo = 1; }
-  int GetFoo() { return this->Foo; }
+  int Get() const { return this->Member; }
 private:
-  int Foo;
+  int Member = 1;
 };
 int main()
 {
-  NeedCXX c;
-#ifdef TEST3
-  cout << c.GetFoo() << endl;
-#else
-  std::cout << c.GetFoo() << std::endl;
-#endif
+  auto const c = std::unique_ptr<Class>(new Class);
+  std::cout << c->Get() << std::endl;
   return 0;
 }
 ' > "${TMPFILE}.cxx"
-for a in ${cmake_cxx_compilers}; do
-  for b in 1 2 3; do
-    if [ -z "${cmake_cxx_compiler}" ] && \
-      cmake_try_run "${a}" "${cmake_cxx_flags} -DTEST${b}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-      cmake_cxx_compiler="${a}"
-    fi
-  done
-done
-for std in 14 11 98; do
+for std in 17 14 11; do
   try_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" CXX \"${std}\"`"
-  for flag in $try_flags; do
-    echo "Checking for wheter ${cmake_cxx_flags} supports ${flag}" >> cmake_bootstrap.log 2>&1
-    if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags} ${flag} -DTEST1" \
-      "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-      cmake_cxx_flags="${cmake_cxx_flags} ${flag} "
-      break 2
-    fi
+  for compiler in ${cmake_cxx_compilers}; do
+    for flag in '' $try_flags; do
+      echo "Checking whether '${compiler} ${cmake_cxx_flags} ${flag}' works." >> cmake_bootstrap.log 2>&1
+      if cmake_try_run "${compiler}" "${cmake_cxx_flags} ${flag}" \
+        "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+        cmake_cxx_compiler="${compiler}"
+        cmake_cxx_flags="${cmake_cxx_flags} ${flag} "
+        break 3
+      fi
+    done
   done
 done
 rm -f "${TMPFILE}.cxx"
 
 if [ -z "${cmake_cxx_compiler}" ]; then
-  cmake_error 7 "Cannot find appropriate C++ compiler on this system.
+cmake_error 7 "Cannot find a C++ compiler supporting C++11 on this system.
 Please specify one using environment variable CXX.
 See cmake_bootstrap.log for compilers attempted."
 fi
