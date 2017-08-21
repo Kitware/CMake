@@ -20,9 +20,9 @@ cmLocalGhsMultiGenerator::~cmLocalGhsMultiGenerator()
 
 void cmLocalGhsMultiGenerator::Generate()
 {
-  std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
+  const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
 
-  for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+  for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
        l != tgts.end(); ++l) {
     if ((*l)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;

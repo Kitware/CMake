@@ -903,7 +903,7 @@ static Json::Value DumpTargetsList(
 
   std::vector<cmGeneratorTarget*> targetList;
   for (const auto& lgIt : generators) {
-    auto list = lgIt->GetGeneratorTargets();
+    const auto& list = lgIt->GetGeneratorTargets();
     targetList.insert(targetList.end(), list.begin(), list.end());
   }
   std::sort(targetList.begin(), targetList.end());

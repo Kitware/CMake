@@ -82,8 +82,10 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
       // Now make all targets depend on the ALL_BUILD target
       for (std::vector<cmLocalGenerator*>::iterator i = gen.begin();
            i != gen.end(); ++i) {
-        std::vector<cmGeneratorTarget*> targets = (*i)->GetGeneratorTargets();
-        for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+        const std::vector<cmGeneratorTarget*>& targets =
+          (*i)->GetGeneratorTargets();
+        for (std::vector<cmGeneratorTarget*>::const_iterator t =
+               targets.begin();
              t != targets.end(); ++t) {
           cmGeneratorTarget* tgt = *t;
           if (tgt->GetType() == cmStateEnums::GLOBAL_TARGET ||
@@ -298,8 +300,10 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
     std::vector<cmLocalGenerator*>& gen = it->second;
     for (std::vector<cmLocalGenerator*>::iterator i = gen.begin();
          i != gen.end(); ++i) {
-      std::vector<cmGeneratorTarget*> targets = (*i)->GetGeneratorTargets();
-      for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
+      const std::vector<cmGeneratorTarget*>& targets =
+        (*i)->GetGeneratorTargets();
+      for (std::vector<cmGeneratorTarget*>::const_iterator ti =
+             targets.begin();
            ti != targets.end(); ++ti) {
         this->ComputeVSTargetDepends(*ti);
       }
