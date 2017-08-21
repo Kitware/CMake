@@ -855,16 +855,6 @@ if ${cmake_system_haiku}; then
   cmake_ld_flags="${LDFLAGS} -lroot -lbe"
 fi
 
-# Workaround for short jump tables on PA-RISC
-if ${cmake_machine_parisc}; then
-  if ${cmake_c_compiler_is_gnu}; then
-    cmake_c_flags="${CFLAGS} -mlong-calls"
-  fi
-  if ${cmake_cxx_compiler_is_gnu}; then
-    cmake_cxx_flags="${CXXFLAGS} -mlong-calls"
-  fi
-fi
-
 #-----------------------------------------------------------------------------
 # Detect known toolchains on some platforms.
 cmake_toolchains=''
@@ -945,35 +935,26 @@ echo '
 # error "The CMAKE_C_COMPILER is set to a C++ compiler"
 #endif
 
-#include<stdio.h>
+#include <stdio.h>
 
-#if defined(__CLASSIC_C__)
-int main(argc, argv)
-  int argc;
-  char* argv[];
-#else
 int main(int argc, char* argv[])
-#endif
 {
   printf("%d%c", (argv != 0), (char)0x0a);
-  return argc-1;
+  return argc - 1;
 }
 ' > "${TMPFILE}.c"
-for a in ${cmake_c_compilers}; do
-  if [ -z "${cmake_c_compiler}" ] && \
-    cmake_try_run "${a}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
-    cmake_c_compiler="${a}"
-  fi
-done
 for std in 11 99 90; do
   try_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" C \"${std}\"`"
-  for flag in $try_flags; do
-    echo "Checking whether ${cmake_c_compiler} supports ${flag}" >> cmake_bootstrap.log 2>&1
-    if cmake_try_run "${cmake_c_compiler}" "${cmake_c_flags} ${flag}" \
-      "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
-      cmake_c_flags="${cmake_c_flags} ${flag}"
-      break 2
-    fi
+  for compiler in ${cmake_c_compilers}; do
+    for flag in '' $try_flags; do
+      echo "Checking whether '${compiler} ${cmake_c_flags} ${flag}' works." >> cmake_bootstrap.log 2>&1
+      if cmake_try_run "${compiler}" "${cmake_c_flags} ${flag}" \
+        "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
+        cmake_c_compiler="${compiler}"
+        cmake_c_flags="${cmake_c_flags} ${flag}"
+        break 3
+      fi
+    done
   done
 done
 rm -f "${TMPFILE}.c"
@@ -1106,31 +1087,6 @@ if [ "x${cmake_full_make_flags}" != "x${cmake_make_flags}" ]; then
   echo "Makefile processor ${cmake_make_processor} does not support parallel build"
   echo "---------------------------------------------"
 fi
-
-# Ok, we have CC, CXX, and MAKE.
-
-# Test C++ compiler features
-
-# Are we GCC?
-
-TMPFILE=`cmake_tmp_file`
-echo '
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-#include <iostream>
-int main() { std::cout << "This is GNU" << std::endl; return 0;}
-#endif
-' > ${TMPFILE}.cxx
-cmake_cxx_compiler_is_gnu=0
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-  cmake_cxx_compiler_is_gnu=1
-fi
-if [ "x${cmake_cxx_compiler_is_gnu}" = "x1" ]; then
-  echo "${cmake_cxx_compiler} is GNU compiler"
-else
-  echo "${cmake_cxx_compiler} is not GNU compiler"
-fi
-rm -f "${TMPFILE}.cxx"
 
 # Test for kwsys features
 KWSYS_NAME_IS_KWSYS=0
