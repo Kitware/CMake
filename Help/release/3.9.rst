@@ -310,9 +310,6 @@ Other Changes
   in dependent targets may now compile without waiting for their targets'
   dependencies to link.
 
-* On macOS, the default application bundle ``Info.plist`` file now enables
-  Hi-DPI support.
-
 * On macOS, ``RPATH`` settings such as :prop_tgt:`BUILD_WITH_INSTALL_RPATH`
   no longer affect the ``install_name`` field.  See policy :policy:`CMP0068`.
 
@@ -333,3 +330,10 @@ Changes made since CMake 3.9.0 include the following.
   CMake 3.9.0 has been removed for the 3.9 series due to regressions
   caused by new use of ``<PackageName>_ROOT`` variables.  The behavior
   may be re-introduced in the future in a more-compatible way.
+
+3.9.2
+-----
+
+* On macOS, the default application bundle ``Info.plist`` file no longer
+  enables Hi-DPI support as it did in 3.9.0 and 3.9.1.  The change had
+  to be reverted because it broke iOS applications.
