@@ -593,6 +593,7 @@ set(SRCS
   cm_utf8.c
   cm_codecvt.hxx
   cm_codecvt.cxx
+  cm_thread.hxx
   )
 
 SET_PROPERTY(SOURCE cmProcessOutput.cxx APPEND PROPERTY COMPILE_DEFINITIONS
