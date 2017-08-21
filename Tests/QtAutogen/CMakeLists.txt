@@ -66,6 +66,15 @@ set_property(TARGET mocOnly PROPERTY AUTOMOC ON)
 target_link_libraries(mocOnly ${QT_LIBRARIES})
 
 # -- Test
+# MOC AUTOMOC_MACRO_NAMES
+if (NOT QT_TEST_VERSION STREQUAL 4)
+  add_executable(mocMacroName mocMacroName/main.cpp mocMacroName/MacroName.cpp)
+  set_property(TARGET mocMacroName PROPERTY AUTOMOC ON)
+  set_property(TARGET mocMacroName PROPERTY AUTOMOC_MACRO_NAMES "QO_ALIAS")
+  target_link_libraries(mocMacroName ${QT_LIBRARIES})
+endif()
+
+# -- Test
 # UIC only
 if(ALLOW_WRAP_CPP)
   qtx_wrap_cpp(uicOnlyMoc uicOnlySource/uiconly.h)

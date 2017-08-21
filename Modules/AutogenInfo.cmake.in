@@ -18,6 +18,7 @@ set(AM_MOC_DEFINITIONS @_moc_compile_defs@)
 set(AM_MOC_INCLUDES @_moc_incs@)
 set(AM_MOC_OPTIONS @_moc_options@)
 set(AM_MOC_RELAXED_MODE @_moc_relaxed_mode@)
+set(AM_MOC_MACRO_NAMES @_moc_macro_names@)
 set(AM_MOC_DEPEND_FILTERS @_moc_depend_filters@)
 set(AM_MOC_PREDEFS_CMD @_moc_predefs_cmd@)
 # UIC settings

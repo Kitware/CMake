@@ -123,6 +123,7 @@ Properties on Targets
    /prop_tgt/AUTOGEN_BUILD_DIR
    /prop_tgt/AUTOGEN_TARGET_DEPENDS
    /prop_tgt/AUTOMOC_DEPEND_FILTERS
+   /prop_tgt/AUTOMOC_MACRO_NAMES
    /prop_tgt/AUTOMOC_MOC_OPTIONS
    /prop_tgt/AUTOMOC
    /prop_tgt/AUTOUIC

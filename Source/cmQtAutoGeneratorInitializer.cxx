@@ -380,6 +380,8 @@ static void MocSetupAutoTarget(
   AddDefinitionEscaped(makefile, "_moc_relaxed_mode",
                        makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE") ? "TRUE"
                                                                     : "FALSE");
+  AddDefinitionEscaped(makefile, "_moc_macro_names",
+                       GetSafeProperty(target, "AUTOMOC_MACRO_NAMES"));
   AddDefinitionEscaped(makefile, "_moc_depend_filters",
                        GetSafeProperty(target, "AUTOMOC_DEPEND_FILTERS"));
 

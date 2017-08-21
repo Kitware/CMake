@@ -280,12 +280,10 @@ cmQtAutoGenerators::cmQtAutoGenerators()
   }
 
   // Moc macro filters
-  this->MocMacroFilters[0].first = "Q_OBJECT";
-  this->MocMacroFilters[0].second.compile(
-    "[\n][ \t]*{?[ \t]*Q_OBJECT[^a-zA-Z0-9_]");
-  this->MocMacroFilters[1].first = "Q_GADGET";
-  this->MocMacroFilters[1].second.compile(
-    "[\n][ \t]*{?[ \t]*Q_GADGET[^a-zA-Z0-9_]");
+  this->MocMacroFilters.push_back(
+    MocMacroFilter("Q_OBJECT", "[\n][ \t]*{?[ \t]*Q_OBJECT[^a-zA-Z0-9_]"));
+  this->MocMacroFilters.push_back(
+    MocMacroFilter("Q_GADGET", "[\n][ \t]*{?[ \t]*Q_GADGET[^a-zA-Z0-9_]"));
 
   // Precompile regular expressions
   this->MocRegExpInclude.compile(
@@ -402,7 +400,6 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   InfoGet(makefile, "AM_QT_UIC_EXECUTABLE", this->UicExecutable);
   InfoGet(makefile, "AM_QT_RCC_EXECUTABLE", this->RccExecutable);
 
-  InfoGet(makefile, "AM_MOC_PREDEFS_CMD", this->MocPredefsCmd);
   // Check Qt version
   if ((this->QtMajorVersion != "4") && (this->QtMajorVersion != "5")) {
     this->LogError("AutoGen: Error: Unsupported Qt version: " +
@@ -426,6 +423,16 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     InfoGetConfig(makefile, "AM_MOC_INCLUDES", config, this->MocIncludePaths);
     InfoGet(makefile, "AM_MOC_OPTIONS", this->MocOptions);
     InfoGet(makefile, "AM_MOC_RELAXED_MODE", this->MocRelaxedMode);
+    {
+      std::vector<std::string> MocMacroNames;
+      InfoGet(makefile, "AM_MOC_MACRO_NAMES", MocMacroNames);
+      for (std::vector<std::string>::const_iterator dit =
+             MocMacroNames.begin();
+           dit != MocMacroNames.end(); ++dit) {
+        this->MocMacroFilters.push_back(
+          MocMacroFilter(*dit, "[^a-zA-Z0-9_]" + *dit + "[^a-zA-Z0-9_]"));
+      }
+    }
     {
       std::vector<std::string> mocDependFilters;
       InfoGet(makefile, "AM_MOC_DEPEND_FILTERS", mocDependFilters);
@@ -452,6 +459,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
         return false;
       }
     }
+    InfoGet(makefile, "AM_MOC_PREDEFS_CMD", this->MocPredefsCmd);
   }
 
   // - Uic
@@ -800,8 +808,10 @@ bool cmQtAutoGenerators::RunAutogen()
 bool cmQtAutoGenerators::MocRequired(const std::string& contentText,
                                      std::string* macroName)
 {
-  for (unsigned int ii = 0; ii != cmArraySize(this->MocMacroFilters); ++ii) {
-    MocMacroFilter& filter = this->MocMacroFilters[ii];
+  for (std::vector<MocMacroFilter>::iterator fit =
+         this->MocMacroFilters.begin();
+       fit != this->MocMacroFilters.end(); ++fit) {
+    MocMacroFilter& filter = *fit;
     // Run a simple find string operation before the expensive
     // regular expression check
     if (contentText.find(filter.first) != std::string::npos) {
