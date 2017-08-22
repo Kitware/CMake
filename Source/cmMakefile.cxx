@@ -3902,16 +3902,6 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
   return false;
 }
 
-void cmMakefile::AddQtUiFileWithOptions(cmSourceFile* sf)
-{
-  this->QtUiFilesWithOptions.push_back(sf);
-}
-
-std::vector<cmSourceFile*> cmMakefile::GetQtUiFilesWithOptions() const
-{
-  return this->QtUiFilesWithOptions;
-}
-
 static std::string const matchVariables[] = {
   "CMAKE_MATCH_0", "CMAKE_MATCH_1", "CMAKE_MATCH_2", "CMAKE_MATCH_3",
   "CMAKE_MATCH_4", "CMAKE_MATCH_5", "CMAKE_MATCH_6", "CMAKE_MATCH_7",

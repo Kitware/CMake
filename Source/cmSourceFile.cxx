@@ -17,8 +17,6 @@ cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name)
 {
   this->CustomCommand = CM_NULLPTR;
   this->FindFullPathFailed = false;
-  this->IsUiFile = (".ui" == cmSystemTools::GetFilenameLastExtension(
-                               this->Location.GetName()));
 }
 
 cmSourceFile::~cmSourceFile()
@@ -245,13 +243,6 @@ bool cmSourceFile::Matches(cmSourceFileLocation const& loc)
 void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 {
   this->Properties.SetProperty(prop, value);
-
-  if (this->IsUiFile) {
-    cmMakefile const* mf = this->Location.GetMakefile();
-    if (prop == "AUTOUIC_OPTIONS") {
-      const_cast<cmMakefile*>(mf)->AddQtUiFileWithOptions(this);
-    }
-  }
 }
 
 void cmSourceFile::AppendProperty(const std::string& prop, const char* value,
