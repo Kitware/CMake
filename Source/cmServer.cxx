@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <iostream>
 #include <memory>
 #include <utility>
 
@@ -411,7 +412,10 @@ static void __start_thread(void* arg)
 {
   auto server = reinterpret_cast<cmServerBase*>(arg);
   std::string error;
-  server->Serve(&error);
+  bool success = server->Serve(&error);
+  if (!success || error.empty() == false) {
+    std::cerr << "Error during serve: " << error << std::endl;
+  }
 }
 
 static void __shutdownThread(uv_async_t* arg)
@@ -457,8 +461,12 @@ bool cmServerBase::Serve(std::string* errorMessage)
   }
 
   if (uv_run(&Loop, UV_RUN_DEFAULT) != 0) {
+    // It is important we don't ever let the event loop exit with open handles
+    // at best this is a memory leak, but it can also introduce race conditions
+    // which can hang the program.
+    assert(false && "Event loop stopped in unclean state.");
+
     *errorMessage = "Internal Error: Event loop stopped in unclean state.";
-    StartShutDown();
     return false;
   }
 
