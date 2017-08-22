@@ -194,6 +194,13 @@ static void AddDefinitionEscaped(cmMakefile* makefile, const char* key,
     key, cmOutputConverter::EscapeForCMake(cmJoin(values, ";")).c_str());
 }
 
+static void AddDefinitionEscaped(cmMakefile* makefile, const char* key,
+                                 const std::set<std::string>& values)
+{
+  makefile->AddDefinition(
+    key, cmOutputConverter::EscapeForCMake(cmJoin(values, ";")).c_str());
+}
+
 static bool AddToSourceGroup(cmMakefile* makefile, const std::string& fileName,
                              cmQtAutoGeneratorCommon::GeneratorType genType)
 {
@@ -275,8 +282,8 @@ struct AutogenSetup
   std::vector<std::string> sources;
   std::vector<std::string> headers;
 
-  std::vector<std::string> mocSkip;
-  std::vector<std::string> uicSkip;
+  std::set<std::string> mocSkip;
+  std::set<std::string> uicSkip;
 
   std::map<std::string, std::string> configSuffix;
   std::map<std::string, std::string> configMocIncludes;
@@ -289,9 +296,40 @@ static void SetupAcquireScanFiles(cmGeneratorTarget const* target,
                                   const std::vector<cmSourceFile*>& srcFiles,
                                   AutogenSetup& setup)
 {
+  // Read skip files from makefile sources
+  {
+    const std::vector<cmSourceFile*>& allSources =
+      target->Makefile->GetSourceFiles();
+    for (std::vector<cmSourceFile*>::const_iterator fit = allSources.begin();
+         fit != allSources.end(); ++fit) {
+      cmSourceFile* sf = *fit;
+      // sf->GetExtension() is only valid after sf->GetFullPath() ...
+      const std::string& fPath = sf->GetFullPath();
+      const cmSystemTools::FileFormat fileType =
+        cmSystemTools::GetFileFormat(sf->GetExtension().c_str());
+      if (!(fileType == cmSystemTools::CXX_FILE_FORMAT) &&
+          !(fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
+        continue;
+      }
+      const bool skipAll = sf->GetPropertyAsBool("SKIP_AUTOGEN");
+      const bool mocSkip =
+        mocEnabled && (skipAll || sf->GetPropertyAsBool("SKIP_AUTOMOC"));
+      const bool uicSkip =
+        uicEnabled && (skipAll || sf->GetPropertyAsBool("SKIP_AUTOUIC"));
+      if (mocSkip || uicSkip) {
+        const std::string absFile = cmsys::SystemTools::GetRealPath(fPath);
+        if (mocSkip) {
+          setup.mocSkip.insert(absFile);
+        }
+        if (uicSkip) {
+          setup.uicSkip.insert(absFile);
+        }
+      }
+    }
+  }
+
   const cmPolicies::PolicyStatus CMP0071_status =
     target->Makefile->GetPolicyStatus(cmPolicies::CMP0071);
-
   for (std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
        fileIt != srcFiles.end(); ++fileIt) {
     cmSourceFile* sf = *fileIt;
@@ -305,14 +343,15 @@ static void SetupAcquireScanFiles(cmGeneratorTarget const* target,
     }
     // Real file path
     const std::string absFile = cmsys::SystemTools::GetRealPath(fPath);
-    // Skip flags
-    const bool skipAll = sf->GetPropertyAsBool("SKIP_AUTOGEN");
-    const bool mocSkip = skipAll || sf->GetPropertyAsBool("SKIP_AUTOMOC");
-    const bool uicSkip = skipAll || sf->GetPropertyAsBool("SKIP_AUTOUIC");
-    const bool accept = (mocEnabled && !mocSkip) || (uicEnabled && !uicSkip);
+    // Skip test
+    const bool mocSkip = !mocEnabled || (setup.mocSkip.count(absFile) != 0);
+    const bool uicSkip = !uicEnabled || (setup.uicSkip.count(absFile) != 0);
+    if (mocSkip && uicSkip) {
+      continue;
+    }
 
     // For GENERATED files check status of policy CMP0071
-    if (accept && sf->GetPropertyAsBool("GENERATED")) {
+    if (sf->GetPropertyAsBool("GENERATED")) {
       bool policyAccept = false;
       switch (CMP0071_status) {
         case cmPolicies::WARN: {
@@ -338,29 +377,16 @@ static void SetupAcquireScanFiles(cmGeneratorTarget const* target,
       }
     }
 
-    // Add file name to skip lists.
-    // Do this even when the file is not added to the sources/headers lists
-    // because the file name may be extracted from an other file when
-    // processing
-    if (mocSkip) {
-      setup.mocSkip.push_back(absFile);
-    }
-    if (uicSkip) {
-      setup.uicSkip.push_back(absFile);
-    }
-
-    if (accept) {
-      // Add file name to sources or headers list
-      switch (fileType) {
-        case cmSystemTools::CXX_FILE_FORMAT:
-          setup.sources.push_back(absFile);
-          break;
-        case cmSystemTools::HEADER_FILE_FORMAT:
-          setup.headers.push_back(absFile);
-          break;
-        default:
-          break;
-      }
+    // Add file name to sources or headers list
+    switch (fileType) {
+      case cmSystemTools::CXX_FILE_FORMAT:
+        setup.sources.push_back(absFile);
+        break;
+      case cmSystemTools::HEADER_FILE_FORMAT:
+        setup.headers.push_back(absFile);
+        break;
+      default:
+        break;
     }
   }
 }
