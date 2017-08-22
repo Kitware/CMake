@@ -4,6 +4,8 @@
 #include "cmQtAutoGeneratorCommon.h"
 
 #include "cmAlgorithms.h"
+#include "cmConfigure.h"
+#include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmFilePathChecksum.h"
 #include "cmGeneratorTarget.h"
@@ -19,13 +21,8 @@
 #include "cmTarget.h"
 #include "cm_sys_stat.h"
 #include "cmake.h"
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#include "cmGlobalVisualStudioGenerator.h"
-#endif
-
-#include "cmConfigure.h"
 #include "cmsys/FStream.hxx"
+
 #include <algorithm>
 #include <map>
 #include <set>
@@ -710,12 +707,13 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   cmLocalGenerator* localGen, cmGeneratorTarget* target)
 {
   cmMakefile* makefile = target->Target->GetMakefile();
+  cmGlobalGenerator* globalGen = localGen->GetGlobalGenerator();
 
   // Create a custom target for running generators at buildtime
   const bool mocEnabled = target->GetPropertyAsBool("AUTOMOC");
   const bool uicEnabled = target->GetPropertyAsBool("AUTOUIC");
   const bool rccEnabled = target->GetPropertyAsBool("AUTORCC");
-  const bool multiConfig = AutogenMultiConfig(target->GetGlobalGenerator());
+  const bool multiConfig = AutogenMultiConfig(globalGen);
   const std::string autogenTargetName = GetAutogenTargetName(target);
   const std::string autogenBuildDir = GetAutogenTargetBuildDir(target);
   const std::string workingDirectory =
@@ -723,6 +721,15 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   const std::vector<std::string> suffixes = GetConfigurationSuffixes(makefile);
   std::set<std::string> autogenDependsSet;
   std::vector<std::string> autogenProvides;
+
+  bool usePRE_BUILD = false;
+  if (globalGen->GetName().find("Visual Studio") != std::string::npos) {
+    // Under VS use a PRE_BUILD event instead of a separate target to
+    // reduce the number of targets loaded into the IDE.
+    // This also works around a VS 11 bug that may skip updating the target:
+    //  https://connect.microsoft.com/VisualStudio/feedback/details/769495
+    usePRE_BUILD = true;
+  }
 
   // Remove build directories on cleanup
   AddCleanFile(makefile, autogenBuildDir);
@@ -790,18 +797,6 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     }
     target->AddIncludeDirectory(includeDir, true);
   }
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  bool usePRE_BUILD = false;
-  cmGlobalGenerator* gg = localGen->GetGlobalGenerator();
-  if (gg->GetName().find("Visual Studio") != std::string::npos) {
-    // Under VS use a PRE_BUILD event instead of a separate target to
-    // reduce the number of targets loaded into the IDE.
-    // This also works around a VS 11 bug that may skip updating the target:
-    //  https://connect.microsoft.com/VisualStudio/feedback/details/769495
-    usePRE_BUILD = true;
-  }
-#endif
 
   // Add user defined autogen target dependencies
   {
@@ -938,7 +933,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   // Convert std::set to std::vector
   const std::vector<std::string> autogenDepends(autogenDependsSet.begin(),
                                                 autogenDependsSet.end());
-#if defined(_WIN32) && !defined(__CYGWIN__)
+  // Disable PRE_BUILD on demand
   if (usePRE_BUILD) {
     if (!generatedSources.empty() || !qrcSources.empty()) {
       // - Cannot use PRE_BUILD with generated files
@@ -947,14 +942,15 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
       // target needs to re-build at all.
       usePRE_BUILD = false;
     }
-  }
-  if (usePRE_BUILD) {
-    // If the autogen target depends on an other target don't use PRE_BUILD
-    for (std::vector<std::string>::const_iterator it = autogenDepends.begin();
-         it != autogenDepends.end(); ++it) {
-      if (makefile->FindTargetToUse(*it) != CM_NULLPTR) {
-        usePRE_BUILD = false;
-        break;
+    if (usePRE_BUILD) {
+      // If the autogen target depends on an other target don't use PRE_BUILD
+      for (std::vector<std::string>::const_iterator it =
+             autogenDepends.begin();
+           it != autogenDepends.end(); ++it) {
+        if (makefile->FindTargetToUse(*it) != CM_NULLPTR) {
+          usePRE_BUILD = false;
+          break;
+        }
       }
     }
   }
@@ -969,9 +965,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     cc.SetEscapeOldStyle(false);
     cc.SetEscapeAllowMakeVars(true);
     target->Target->AddPreBuildCommand(cc);
-  } else
-#endif
-  {
+  } else {
     cmTarget* autogenTarget = makefile->AddUtilityCommand(
       autogenTargetName, true, workingDirectory.c_str(),
       /*byproducts=*/autogenProvides, autogenDepends, commandLines, false,
