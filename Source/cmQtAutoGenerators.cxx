@@ -81,7 +81,7 @@ static void InfoGet(cmMakefile* makefile, const char* key,
 static void InfoGetConfig(cmMakefile* makefile, const char* key,
                           const std::string& config, std::string& value)
 {
-  const char* valueConf = CM_NULLPTR;
+  const char* valueConf = nullptr;
   {
     std::string keyConf = key;
     if (!config.empty()) {
@@ -90,7 +90,7 @@ static void InfoGetConfig(cmMakefile* makefile, const char* key,
     }
     valueConf = makefile->GetDefinition(keyConf);
   }
-  if (valueConf == CM_NULLPTR) {
+  if (valueConf == nullptr) {
     valueConf = makefile->GetSafeDefinition(key);
   }
   value = valueConf;
@@ -817,7 +817,7 @@ bool cmQtAutoGenerators::MocRequired(const std::string& contentText,
     if (contentText.find(filter.first) != std::string::npos) {
       if (filter.second.find(contentText)) {
         // Return macro name on demand
-        if (macroName != CM_NULLPTR) {
+        if (macroName != nullptr) {
           *macroName = filter.first;
         }
         return true;
@@ -939,7 +939,7 @@ void cmQtAutoGenerators::UicParseContent(
   }
 
   const char* contentChars = contentText.c_str();
-  if (strstr(contentChars, "ui_") != CM_NULLPTR) {
+  if (strstr(contentChars, "ui_") != nullptr) {
     while (this->UicRegExpInclude.find(contentChars)) {
       uisIncluded[absFilename].push_back(this->UicRegExpInclude.match(1));
       contentChars += this->UicRegExpInclude.end();
@@ -973,7 +973,7 @@ bool cmQtAutoGenerators::MocParseSourceContent(
   // and if the string search already fails, we don't have to try the
   // expensive regexp
   const char* contentChars = contentText.c_str();
-  if (strstr(contentChars, "moc") != CM_NULLPTR) {
+  if (strstr(contentChars, "moc") != nullptr) {
     // Iterate over all included moc files
     while (this->MocRegExpInclude.find(contentChars)) {
       const std::string incString = this->MocRegExpInclude.match(1);
@@ -1741,13 +1741,13 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
               readFiles, &error)) {
           files = &readFiles;
         } else {
-          files = CM_NULLPTR;
+          files = nullptr;
           this->LogError(error);
           this->RccRunFailed = true;
         }
       }
       // Test if any input file is newer than the build file
-      if (files != CM_NULLPTR) {
+      if (files != nullptr) {
         for (std::vector<std::string>::const_iterator it = files->begin();
              it != files->end(); ++it) {
           if (FileAbsentOrOlder(rccBuildFile, *it)) {
@@ -2043,7 +2043,7 @@ bool cmQtAutoGenerators::RunCommand(const std::vector<std::string>& command,
   // Execute command
   int retVal = 0;
   bool res = cmSystemTools::RunSingleCommand(
-    command, &output, &output, &retVal, CM_NULLPTR,
+    command, &output, &output, &retVal, nullptr,
     verbose ? cmSystemTools::OUTPUT_MERGE : cmSystemTools::OUTPUT_NONE);
   return (res && (retVal == 0));
 }

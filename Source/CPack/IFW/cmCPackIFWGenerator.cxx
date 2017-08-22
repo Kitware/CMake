@@ -73,7 +73,7 @@ int cmCPackIFWGenerator::PackageFiles()
     int retVal = 1;
     cmCPackIFWLogger(OUTPUT, "- Generate repository" << std::endl);
     bool res = cmSystemTools::RunSingleCommand(ifwCmd.c_str(), &output,
-                                               &output, &retVal, CM_NULLPTR,
+                                               &output, &retVal, nullptr,
                                                this->GeneratorVerbose, 0);
     if (!res || retVal) {
       cmGeneratedFileStream ofs(ifwTmpFile.c_str());
@@ -171,7 +171,7 @@ int cmCPackIFWGenerator::PackageFiles()
     int retVal = 1;
     cmCPackIFWLogger(OUTPUT, "- Generate package" << std::endl);
     bool res = cmSystemTools::RunSingleCommand(ifwCmd.c_str(), &output,
-                                               &output, &retVal, CM_NULLPTR,
+                                               &output, &retVal, nullptr,
                                                this->GeneratorVerbose, 0);
     if (!res || retVal) {
       cmGeneratedFileStream ofs(ifwTmpFile.c_str());
@@ -534,7 +534,7 @@ cmCPackIFWPackage* cmCPackIFWGenerator::GetGroupPackage(
 {
   std::map<cmCPackComponentGroup*, cmCPackIFWPackage*>::const_iterator pit =
     this->GroupPackages.find(group);
-  return pit != this->GroupPackages.end() ? pit->second : CM_NULLPTR;
+  return pit != this->GroupPackages.end() ? pit->second : nullptr;
 }
 
 cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
@@ -542,7 +542,7 @@ cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
 {
   std::map<cmCPackComponent*, cmCPackIFWPackage*>::const_iterator pit =
     this->ComponentPackages.find(component);
-  return pit != this->ComponentPackages.end() ? pit->second : CM_NULLPTR;
+  return pit != this->ComponentPackages.end() ? pit->second : nullptr;
 }
 
 cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
@@ -564,7 +564,7 @@ cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
     }
   } else {
     this->Repositories.erase(repositoryName);
-    repository = CM_NULLPTR;
+    repository = nullptr;
     cmCPackIFWLogger(WARNING, "Invalid repository \""
                        << repositoryName << "\""
                        << " configuration. Repository will be skipped."

@@ -18,7 +18,7 @@ cmDepends::cmDepends(cmLocalGenerator* lg, const char* targetDir)
   : CompileDirectory()
   , LocalGenerator(lg)
   , Verbose(false)
-  , FileComparison(CM_NULLPTR)
+  , FileComparison(nullptr)
   , TargetDirectory(targetDir)
   , MaxPath(16384)
   , Dependee(new char[MaxPath])
@@ -125,7 +125,7 @@ bool cmDepends::CheckDependencies(
   // regenerated.
   bool okay = true;
   bool dependerExists = false;
-  DependencyVector* currentDependencies = CM_NULLPTR;
+  DependencyVector* currentDependencies = nullptr;
 
   while (internalDepends.getline(this->Dependee, this->MaxPath)) {
     if (this->Dependee[0] == 0 || this->Dependee[0] == '#' ||
@@ -167,7 +167,7 @@ bool cmDepends::CheckDependencies(
     bool regenerate = false;
     const char* dependee = this->Dependee + 1;
     const char* depender = this->Depender;
-    if (currentDependencies != CM_NULLPTR) {
+    if (currentDependencies != nullptr) {
       currentDependencies->push_back(dependee);
     }
 
@@ -227,9 +227,9 @@ bool cmDepends::CheckDependencies(
 
       // Remove the information of this depender from the map, it needs
       // to be rescanned
-      if (currentDependencies != CM_NULLPTR) {
+      if (currentDependencies != nullptr) {
         validDeps.erase(this->Depender);
-        currentDependencies = CM_NULLPTR;
+        currentDependencies = nullptr;
       }
 
       // Remove the depender to be sure it is rebuilt.
@@ -246,7 +246,7 @@ bool cmDepends::CheckDependencies(
 void cmDepends::SetIncludePathFromLanguage(const std::string& lang)
 {
   // Look for the new per "TARGET_" variant first:
-  const char* includePath = CM_NULLPTR;
+  const char* includePath = nullptr;
   std::string includePathVar = "CMAKE_";
   includePathVar += lang;
   includePathVar += "_TARGET_INCLUDE_PATH";

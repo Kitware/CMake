@@ -71,7 +71,7 @@ cmSourceGroup* addSourceGroup(const std::vector<std::string>& tokenizedPath,
     makefile.AddSourceGroup(tokenizedPath);
     sg = makefile.GetSourceGroup(tokenizedPath);
     if (!sg) {
-      return CM_NULLPTR;
+      return nullptr;
     }
   }
 
@@ -166,7 +166,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
   std::vector<std::string> folders =
     cmSystemTools::tokenize(args[0], delimiter);
 
-  cmSourceGroup* sg = CM_NULLPTR;
+  cmSourceGroup* sg = nullptr;
   sg = this->Makefile->GetSourceGroup(folders);
   if (!sg) {
     this->Makefile->AddSourceGroup(folders);

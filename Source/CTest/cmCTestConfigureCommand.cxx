@@ -16,7 +16,7 @@
 cmCTestConfigureCommand::cmCTestConfigureCommand()
 {
   this->Arguments[ctc_OPTIONS] = "OPTIONS";
-  this->Arguments[ctc_LAST] = CM_NULLPTR;
+  this->Arguments[ctc_LAST] = nullptr;
   this->Last = ctc_LAST;
 }
 
@@ -33,7 +33,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       "Build directory not specified. Either use BUILD "
       "argument to CTEST_CONFIGURE command or set CTEST_BINARY_DIRECTORY "
       "variable");
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   const char* ctestConfigureCommand =
@@ -53,7 +53,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
           "Source directory not specified. Either use SOURCE "
           "argument to CTEST_CONFIGURE command or set CTEST_SOURCE_DIRECTORY "
           "variable");
-        return CM_NULLPTR;
+        return nullptr;
       }
 
       const std::string cmakelists_file = source_dir + "/CMakeLists.txt";
@@ -61,7 +61,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
         std::ostringstream e;
         e << "CMakeLists.txt file does not exist [" << cmakelists_file << "]";
         this->SetError(e.str());
-        return CM_NULLPTR;
+        return nullptr;
       }
 
       bool multiConfig = false;
@@ -88,9 +88,8 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
         cmakeConfigureCommand += option;
         cmakeConfigureCommand += "\"";
 
-        if ((CM_NULLPTR != strstr(option.c_str(), "CMAKE_BUILD_TYPE=")) ||
-            (CM_NULLPTR !=
-             strstr(option.c_str(), "CMAKE_BUILD_TYPE:STRING="))) {
+        if ((nullptr != strstr(option.c_str(), "CMAKE_BUILD_TYPE=")) ||
+            (nullptr != strstr(option.c_str(), "CMAKE_BUILD_TYPE:STRING="))) {
           cmakeBuildTypeInOptions = true;
         }
       }
@@ -137,7 +136,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
         "Configure command is not specified. If this is a "
         "\"built with CMake\" project, set CTEST_CMAKE_GENERATOR. If not, "
         "set CTEST_CONFIGURE_COMMAND.");
-      return CM_NULLPTR;
+      return nullptr;
     }
   }
 
@@ -152,7 +151,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
   if (!handler) {
     this->SetError(
       "internal CTest error. Cannot instantiate configure handler");
-    return CM_NULLPTR;
+    return nullptr;
   }
   handler->SetQuiet(this->Quiet);
   return handler;

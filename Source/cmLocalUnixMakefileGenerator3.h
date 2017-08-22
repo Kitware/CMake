@@ -108,8 +108,7 @@ public:
     std::string Arg;
   };
   void AppendEcho(std::vector<std::string>& commands, std::string const& text,
-                  EchoColor color = EchoNormal,
-                  EchoProgress const* = CM_NULLPTR);
+                  EchoColor color = EchoNormal, EchoProgress const* = nullptr);
 
   /** Get whether the makefile is to have color.  */
   bool GetColorMakefile() const { return this->ColorMakefile; }
@@ -238,11 +237,11 @@ protected:
                            cmGeneratorTarget* target,
                            std::string const& relative,
                            bool echo_comment = false,
-                           std::ostream* content = CM_NULLPTR);
+                           std::ostream* content = nullptr);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files,
                           cmGeneratorTarget* target,
-                          const char* filename = CM_NULLPTR);
+                          const char* filename = nullptr);
 
   // Helper methods for dependeny updates.
   bool ScanDependencies(
@@ -255,7 +254,7 @@ private:
 
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* gt = CM_NULLPTR) CM_OVERRIDE;
+    cmGeneratorTarget const* gt = nullptr) CM_OVERRIDE;
 
   friend class cmMakefileTargetGenerator;
   friend class cmMakefileExecutableTargetGenerator;
@@ -272,7 +271,7 @@ private:
     cmGeneratorTarget* Target;
     std::string Language;
     LocalObjectEntry()
-      : Target(CM_NULLPTR)
+      : Target(nullptr)
       , Language()
     {
     }

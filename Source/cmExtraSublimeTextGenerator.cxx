@@ -174,9 +174,9 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
   std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::string compiler;
   if (!lgs.empty()) {
-    this->AppendTarget(fout, "all", lgs[0], CM_NULLPTR, make.c_str(), mf,
+    this->AppendTarget(fout, "all", lgs[0], nullptr, make.c_str(), mf,
                        compiler.c_str(), sourceFileFlags, true);
-    this->AppendTarget(fout, "clean", lgs[0], CM_NULLPTR, make.c_str(), mf,
+    this->AppendTarget(fout, "clean", lgs[0], nullptr, make.c_str(), mf,
                        compiler.c_str(), sourceFileFlags, false);
   }
 
@@ -196,7 +196,7 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
           // not from the subdirs
           if (strcmp((*lg)->GetCurrentBinaryDirectory(),
                      (*lg)->GetBinaryDirectory()) == 0) {
-            this->AppendTarget(fout, targetName, *lg, CM_NULLPTR, make.c_str(),
+            this->AppendTarget(fout, targetName, *lg, nullptr, make.c_str(),
                                makefile, compiler.c_str(), sourceFileFlags,
                                false);
           }
@@ -213,7 +213,7 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
             break;
           }
 
-          this->AppendTarget(fout, targetName, *lg, CM_NULLPTR, make.c_str(),
+          this->AppendTarget(fout, targetName, *lg, nullptr, make.c_str(),
                              makefile, compiler.c_str(), sourceFileFlags,
                              false);
           break;
@@ -245,7 +245,7 @@ void cmExtraSublimeTextGenerator::AppendTarget(
   MapSourceFileFlags& sourceFileFlags, bool firstTarget)
 {
 
-  if (target != CM_NULLPTR) {
+  if (target != nullptr) {
     std::vector<cmSourceFile*> sourceFiles;
     target->GetSourceFiles(sourceFiles,
                            makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));

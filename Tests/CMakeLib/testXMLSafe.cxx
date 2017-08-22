@@ -21,7 +21,7 @@ static test_pair const pairs[] = {
   { "angles <>", "angles &lt;&gt;" },
   { "ampersand &", "ampersand &amp;" },
   { "bad-byte \x80", "bad-byte [NON-UTF-8-BYTE-0x80]" },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, nullptr }
 };
 
 int testXMLSafe(int /*unused*/, char* /*unused*/ [])

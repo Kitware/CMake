@@ -155,7 +155,7 @@ cmCTestP4::User cmCTestP4::GetUserData(const std::string& username)
     p4_users.push_back("-m");
     p4_users.push_back("1");
     p4_users.push_back(username.c_str());
-    p4_users.push_back(CM_NULLPTR);
+    p4_users.push_back(nullptr);
 
     UserParser out(this, "users-out> ");
     OutputLogger err(this->Log, "users-err> ");
@@ -350,7 +350,7 @@ std::string cmCTestP4::GetWorkingRevision()
 
   std::string source = this->SourceDirectory + "/...#have";
   p4_identify.push_back(source.c_str());
-  p4_identify.push_back(CM_NULLPTR);
+  p4_identify.push_back(nullptr);
 
   std::string rev;
   IdentifyParser out(this, "p4_changes-out> ", rev);
@@ -411,7 +411,7 @@ bool cmCTestP4::LoadRevisions()
 
   p4_changes.push_back("changes");
   p4_changes.push_back(range.c_str());
-  p4_changes.push_back(CM_NULLPTR);
+  p4_changes.push_back(nullptr);
 
   ChangesParser out(this, "p4_changes-out> ");
   OutputLogger err(this->Log, "p4_changes-err> ");
@@ -431,7 +431,7 @@ bool cmCTestP4::LoadRevisions()
     p4_describe.push_back("describe");
     p4_describe.push_back("-s");
     p4_describe.push_back(i->c_str());
-    p4_describe.push_back(CM_NULLPTR);
+    p4_describe.push_back(nullptr);
 
     DescribeParser outDescribe(this, "p4_describe-out> ");
     OutputLogger errDescribe(this->Log, "p4_describe-err> ");
@@ -451,7 +451,7 @@ bool cmCTestP4::LoadModifications()
   p4_diff.push_back("-dn");
   std::string source = this->SourceDirectory + "/...";
   p4_diff.push_back(source.c_str());
-  p4_diff.push_back(CM_NULLPTR);
+  p4_diff.push_back(nullptr);
 
   DiffParser out(this, "p4_diff-out> ");
   OutputLogger err(this->Log, "p4_diff-err> ");
@@ -469,7 +469,7 @@ bool cmCTestP4::UpdateCustom(const std::string& custom)
        i != p4_custom_command.end(); ++i) {
     p4_custom.push_back(i->c_str());
   }
-  p4_custom.push_back(CM_NULLPTR);
+  p4_custom.push_back(nullptr);
 
   OutputLogger custom_out(this->Log, "p4_customsync-out> ");
   OutputLogger custom_err(this->Log, "p4_customsync-err> ");
@@ -520,7 +520,7 @@ bool cmCTestP4::UpdateImpl()
   }
 
   p4_sync.push_back(source.c_str());
-  p4_sync.push_back(CM_NULLPTR);
+  p4_sync.push_back(nullptr);
 
   OutputLogger out(this->Log, "p4_sync-out> ");
   OutputLogger err(this->Log, "p4_sync-err> ");

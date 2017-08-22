@@ -52,7 +52,7 @@ public:
 };
 
 cmDependsFortran::cmDependsFortran()
-  : Internal(CM_NULLPTR)
+  : Internal(nullptr)
 {
 }
 

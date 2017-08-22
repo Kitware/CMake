@@ -71,12 +71,12 @@ class cmCompiledGeneratorExpression
   CM_DISABLE_COPY(cmCompiledGeneratorExpression)
 
 public:
-  const char* Evaluate(
-    cmLocalGenerator* lg, const std::string& config, bool quiet = false,
-    cmGeneratorTarget const* headTarget = CM_NULLPTR,
-    cmGeneratorTarget const* currentTarget = CM_NULLPTR,
-    cmGeneratorExpressionDAGChecker* dagChecker = CM_NULLPTR,
-    std::string const& language = std::string()) const;
+  const char* Evaluate(cmLocalGenerator* lg, const std::string& config,
+                       bool quiet = false,
+                       cmGeneratorTarget const* headTarget = nullptr,
+                       cmGeneratorTarget const* currentTarget = nullptr,
+                       cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
+                       std::string const& language = std::string()) const;
   const char* Evaluate(cmLocalGenerator* lg, const std::string& config,
                        bool quiet, cmGeneratorTarget const* headTarget,
                        cmGeneratorExpressionDAGChecker* dagChecker,

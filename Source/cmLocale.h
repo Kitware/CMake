@@ -14,7 +14,7 @@ class cmLocaleRAII
 
 public:
   cmLocaleRAII()
-    : OldLocale(setlocale(LC_CTYPE, CM_NULLPTR))
+    : OldLocale(setlocale(LC_CTYPE, nullptr))
   {
     setlocale(LC_CTYPE, "");
   }

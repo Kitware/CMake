@@ -17,7 +17,7 @@ cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   bool optional)
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all)
-  , LocalGenerator(CM_NULLPTR)
+  , LocalGenerator(nullptr)
   , Directories(dirs)
   , FilePermissions(file_permissions)
   , DirPermissions(dir_permissions)
@@ -86,7 +86,7 @@ void cmInstallDirectoryGenerator::AddDirectoryInstallRule(
   std::vector<std::string> const& dirs)
 {
   // Write code to install the directories.
-  const char* no_rename = CM_NULLPTR;
+  const char* no_rename = nullptr;
   this->AddInstallRule(os, this->GetDestination(config),
                        cmInstallType_DIRECTORY, dirs, this->Optional,
                        this->FilePermissions.c_str(),

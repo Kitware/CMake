@@ -730,8 +730,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
     CM_OVERRIDE
   {
     if (parameters.empty()) {
-      return configurationNode.Evaluate(parameters, context, content,
-                                        CM_NULLPTR);
+      return configurationNode.Evaluate(parameters, context, content, nullptr);
     }
     static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
     if (!configValidator.find(*parameters.begin())) {
@@ -750,8 +749,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
     }
 
     if (context->CurrentTarget && context->CurrentTarget->IsImported()) {
-      const char* loc = CM_NULLPTR;
-      const char* imp = CM_NULLPTR;
+      const char* loc = nullptr;
+      const char* imp = nullptr;
       std::string suffix;
       if (context->CurrentTarget->Target->GetMappedConfig(
             context->Config, &loc, &imp, suffix)) {
@@ -864,7 +863,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
 #define TRANSITIVE_PROPERTY_NAME(PROPERTY) , "INTERFACE_" #PROPERTY
 
 static const char* targetPropertyTransitiveWhitelist[] = {
-  CM_NULLPTR CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_NAME)
+  nullptr CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_NAME)
 };
 
 #undef TRANSITIVE_PROPERTY_NAME
@@ -1260,8 +1259,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     std::vector<std::string> objects;
 
     if (gt->IsImported()) {
-      const char* loc = CM_NULLPTR;
-      const char* imp = CM_NULLPTR;
+      const char* loc = nullptr;
+      const char* imp = nullptr;
       std::string suffix;
       if (gt->Target->GetMappedConfig(context->Config, &loc, &imp, suffix)) {
         cmSystemTools::ExpandListArgument(loc, objects);
@@ -1389,7 +1388,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
 } compileFeaturesNode;
 
 static const char* targetPolicyWhitelist[] = {
-  CM_NULLPTR
+  nullptr
 #define TARGET_POLICY_STRING(POLICY) , #POLICY
 
     CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_STRING)
@@ -1873,7 +1872,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
   }
   NodeMap::const_iterator i = nodeMap.find(identifier);
   if (i == nodeMap.end()) {
-    return CM_NULLPTR;
+    return nullptr;
   }
   return i->second;
 }

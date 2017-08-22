@@ -89,9 +89,9 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   // how long to let try compiles run
   this->TryCompileTimeout = 0;
 
-  this->ExtraGenerator = CM_NULLPTR;
-  this->CurrentConfigureMakefile = CM_NULLPTR;
-  this->TryCompileOuterMakefile = CM_NULLPTR;
+  this->ExtraGenerator = nullptr;
+  this->CurrentConfigureMakefile = nullptr;
+  this->TryCompileOuterMakefile = nullptr;
 
   this->ConfigureDoneCMP0026AndCMP0024 = false;
   this->FirstTimeProgress = 0.0f;
@@ -252,7 +252,7 @@ bool cmGlobalGenerator::GenerateImportFile(const std::string& file)
     }
 
     delete it->second;
-    it->second = CM_NULLPTR;
+    it->second = nullptr;
     this->BuildExportSets.erase(it);
     return result;
   }
@@ -1144,7 +1144,7 @@ void cmGlobalGenerator::Configure()
     std::ostringstream msg;
     if (cmSystemTools::GetErrorOccuredFlag()) {
       msg << "Configuring incomplete, errors occurred!";
-      const char* logs[] = { "CMakeOutput.log", "CMakeError.log", CM_NULLPTR };
+      const char* logs[] = { "CMakeOutput.log", "CMakeError.log", nullptr };
       for (const char** log = logs; *log; ++log) {
         std::string f = this->CMakeInstance->GetHomeOutputDirectory();
         f += this->CMakeInstance->GetCMakeFilesDirectory();
@@ -1191,7 +1191,7 @@ cmExportBuildFileGenerator* cmGlobalGenerator::GetExportedTargetsFile(
 {
   std::map<std::string, cmExportBuildFileGenerator*>::const_iterator it =
     this->BuildExportSets.find(filename);
-  return it == this->BuildExportSets.end() ? CM_NULLPTR : it->second;
+  return it == this->BuildExportSets.end() ? nullptr : it->second;
 }
 
 void cmGlobalGenerator::AddCMP0042WarnTarget(const std::string& target)
@@ -1351,7 +1351,7 @@ void cmGlobalGenerator::Generate()
       "Generating", (static_cast<float>(i) + 1.0f) /
         static_cast<float>(this->LocalGenerators.size()));
   }
-  this->SetCurrentMakefile(CM_NULLPTR);
+  this->SetCurrentMakefile(nullptr);
 
   if (!this->GenerateCPackPropertiesFile()) {
     this->GetCMakeInstance()->IssueMessage(
@@ -1374,7 +1374,7 @@ void cmGlobalGenerator::Generate()
 
   this->WriteSummary();
 
-  if (this->ExtraGenerator != CM_NULLPTR) {
+  if (this->ExtraGenerator != nullptr) {
     this->ExtraGenerator->Generate();
   }
 
@@ -1815,7 +1815,7 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
     output += "\n";
 
     if (!cmSystemTools::RunSingleCommand(cleanCommand, outputPtr, outputPtr,
-                                         &retVal, CM_NULLPTR, outputflag,
+                                         &retVal, nullptr, outputflag,
                                          timeout)) {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error("Generator: execution of make clean failed.");
@@ -1834,7 +1834,7 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
   output += "\n";
 
   if (!cmSystemTools::RunSingleCommand(makeCommand, outputPtr, outputPtr,
-                                       &retVal, CM_NULLPTR, outputflag,
+                                       &retVal, nullptr, outputflag,
                                        timeout)) {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
     cmSystemTools::Error(
@@ -2057,7 +2057,7 @@ cmMakefile* cmGlobalGenerator::FindMakefile(const std::string& start_dir) const
   if (i != this->MakefileSearchIndex.end()) {
     return i->second;
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 ///! Find a local generator by its startdirectory
@@ -2072,7 +2072,7 @@ cmLocalGenerator* cmGlobalGenerator::FindLocalGenerator(
       return *it;
     }
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 void cmGlobalGenerator::AddAlias(const std::string& name,
@@ -2117,7 +2117,7 @@ cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const
   if (i != this->TargetSearchIndex.end()) {
     return i->second;
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmGeneratorTarget* cmGlobalGenerator::FindGeneratorTargetImpl(
@@ -2128,7 +2128,7 @@ cmGeneratorTarget* cmGlobalGenerator::FindGeneratorTargetImpl(
   if (i != this->GeneratorTargetSearchIndex.end()) {
     return i->second;
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmTarget* cmGlobalGenerator::FindTarget(const std::string& name,
@@ -2413,7 +2413,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
 
     // install_strip
     const char* install_strip = this->GetInstallStripTargetName();
-    if ((install_strip != CM_NULLPTR) && (mf->IsSet("CMAKE_STRIP"))) {
+    if ((install_strip != nullptr) && (mf->IsSet("CMAKE_STRIP"))) {
       gti.Name = install_strip;
       gti.Message = "Installing the project stripped...";
       gti.UsesTerminal = true;
@@ -2470,8 +2470,8 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
   std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
   // Store the custom command in the target.
-  cmCustomCommand cc(CM_NULLPTR, no_outputs, no_byproducts, no_depends,
-                     gti.CommandLines, CM_NULLPTR, gti.WorkingDir.c_str());
+  cmCustomCommand cc(nullptr, no_outputs, no_byproducts, no_depends,
+                     gti.CommandLines, nullptr, gti.WorkingDir.c_str());
   cc.SetUsesTerminal(gti.UsesTerminal);
   target.AddPostBuildCommand(cc);
   if (!gti.Message.empty()) {
@@ -2556,7 +2556,7 @@ void cmGlobalGenerator::SetExternalMakefileProjectGenerator(
   cmExternalMakefileProjectGenerator* extraGenerator)
 {
   this->ExtraGenerator = extraGenerator;
-  if (this->ExtraGenerator != CM_NULLPTR) {
+  if (this->ExtraGenerator != nullptr) {
     this->ExtraGenerator->SetGlobalGenerator(this);
   }
 }

@@ -193,7 +193,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
   if (version_number < 30) {
     cm->IssueMessage(cmake::FATAL_ERROR,
                      "Xcode " + version_string + " not supported.");
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   CM_AUTO_PTR<cmGlobalXCodeGenerator> gg(
@@ -3609,7 +3609,7 @@ bool cmGlobalXCodeGenerator::HasKnownObjectFileLocation(
   std::string* reason) const
 {
   if (this->ObjectDirArch.find('$') != std::string::npos) {
-    if (reason != CM_NULLPTR) {
+    if (reason != nullptr) {
       *reason = " under Xcode with multiple architectures";
     }
     return false;

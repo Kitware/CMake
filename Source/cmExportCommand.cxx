@@ -35,7 +35,7 @@ cmExportCommand::cmExportCommand()
   , ExportOld(&Helper, "EXPORT_LINK_INTERFACE_LIBRARIES", &ArgumentGroup)
   , AndroidMKFile(&Helper, "ANDROID_MK")
 {
-  this->ExportSet = CM_NULLPTR;
+  this->ExportSet = nullptr;
 }
 
 // cmExportCommand
@@ -51,10 +51,10 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
     return this->HandlePackage(args);
   }
   if (args[0] == "EXPORT") {
-    this->ExportSetName.Follows(CM_NULLPTR);
+    this->ExportSetName.Follows(nullptr);
     this->ArgumentGroup.Follows(&this->ExportSetName);
   } else {
-    this->Targets.Follows(CM_NULLPTR);
+    this->Targets.Follows(nullptr);
     this->ArgumentGroup.Follows(&this->Targets);
   }
 
@@ -186,7 +186,7 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // Setup export file generation.
-  cmExportBuildFileGenerator* ebfg = CM_NULLPTR;
+  cmExportBuildFileGenerator* ebfg = nullptr;
   if (android) {
     ebfg = new cmExportBuildAndroidMKGenerator;
   } else {

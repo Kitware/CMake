@@ -29,13 +29,13 @@
 #include "cmake.h"
 
 static const char* cmDocumentationName[][2] = {
-  { CM_NULLPTR, "  cpack - Packaging driver provided by CMake." },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, "  cpack - Packaging driver provided by CMake." },
+  { nullptr, nullptr }
 };
 
 static const char* cmDocumentationUsage[][2] = {
-  { CM_NULLPTR, "  cpack -G <generator> [options]" },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, "  cpack -G <generator> [options]" },
+  { nullptr, nullptr }
 };
 
 static const char* cmDocumentationOptions[][2] = {
@@ -49,7 +49,7 @@ static const char* cmDocumentationOptions[][2] = {
   { "-R <package version>", "override/define CPACK_PACKAGE_VERSION" },
   { "-B <package directory>", "override/define CPACK_PACKAGE_DIRECTORY" },
   { "--vendor <vendor name>", "override/define CPACK_PACKAGE_VENDOR" },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, nullptr }
 };
 
 int cpackUnknownArgument(const char* /*unused*/, void* /*unused*/)
@@ -208,7 +208,7 @@ int main(int argc, char const* const* argv)
 
   cmCPackGeneratorFactory generators;
   generators.SetLogger(&log);
-  cmCPackGenerator* cpackGenerator = CM_NULLPTR;
+  cmCPackGenerator* cpackGenerator = nullptr;
 
   cmDocumentation doc;
   doc.addCPackStandardDocSections();

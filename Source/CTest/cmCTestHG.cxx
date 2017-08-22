@@ -96,7 +96,7 @@ std::string cmCTestHG::GetWorkingRevision()
 {
   // Run plumbing "hg identify" to get work tree revision.
   const char* hg = this->CommandLineTool.c_str();
-  const char* hg_identify[] = { hg, "identify", "-i", CM_NULLPTR };
+  const char* hg_identify[] = { hg, "identify", "-i", nullptr };
   std::string rev;
   IdentifyParser out(this, "rev-out> ", rev);
   OutputLogger err(this->Log, "rev-err> ");
@@ -126,7 +126,7 @@ bool cmCTestHG::UpdateImpl()
   // Use "hg pull" followed by "hg update" to update the working tree.
   {
     const char* hg = this->CommandLineTool.c_str();
-    const char* hg_pull[] = { hg, "pull", "-v", CM_NULLPTR };
+    const char* hg_pull[] = { hg, "pull", "-v", nullptr };
     OutputLogger out(this->Log, "pull-out> ");
     OutputLogger err(this->Log, "pull-err> ");
     this->RunChild(&hg_pull[0], &out, &err);
@@ -151,7 +151,7 @@ bool cmCTestHG::UpdateImpl()
   }
 
   // Sentinel argument.
-  hg_update.push_back(CM_NULLPTR);
+  hg_update.push_back(nullptr);
 
   OutputLogger out(this->Log, "update-out> ");
   OutputLogger err(this->Log, "update-err> ");
@@ -286,7 +286,7 @@ bool cmCTestHG::LoadRevisions()
                               "</logentry>\n";
   const char* hg_log[] = {
     hg,           "log",         "--removed", "-r", range.c_str(),
-    "--template", hgXMLTemplate, CM_NULLPTR
+    "--template", hgXMLTemplate, nullptr
   };
 
   LogParser out(this, "log-out> ");
@@ -302,7 +302,7 @@ bool cmCTestHG::LoadModifications()
 {
   // Use 'hg status' to get modified files.
   const char* hg = this->CommandLineTool.c_str();
-  const char* hg_status[] = { hg, "status", CM_NULLPTR };
+  const char* hg_status[] = { hg, "status", nullptr };
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
   this->RunChild(hg_status, &out, &err);

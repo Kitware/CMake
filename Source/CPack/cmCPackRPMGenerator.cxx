@@ -148,7 +148,7 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
         for (compIt = this->Components.begin();
              compIt != this->Components.end(); ++compIt) {
           // Does the component belong to a group?
-          if (compIt->second.Group == CM_NULLPTR) {
+          if (compIt->second.Group == nullptr) {
             std::string component(compIt->first);
             std::transform(component.begin(), component.end(),
                            component.begin(), ::toupper);
@@ -214,7 +214,7 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
       for (compIt = this->Components.begin(); compIt != this->Components.end();
            ++compIt) {
         // Does the component belong to a group?
-        if (compIt->second.Group == CM_NULLPTR) {
+        if (compIt->second.Group == nullptr) {
           std::string component(compIt->first);
           std::transform(component.begin(), component.end(), component.begin(),
                          ::toupper);
@@ -299,7 +299,7 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
       for (compIt = this->Components.begin(); compIt != this->Components.end();
            ++compIt) {
         // Does the component belong to a group?
-        if (compIt->second.Group == CM_NULLPTR) {
+        if (compIt->second.Group == nullptr) {
           cmCPackLogger(
             cmCPackLog::LOG_VERBOSE, "Component <"
               << compIt->second.Name
@@ -430,7 +430,7 @@ std::string cmCPackRPMGenerator::GetComponentInstallDirNameSuffix(
   // the current COMPONENT belongs to.
   std::string groupVar =
     "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
-  if (CM_NULLPTR != GetOption(groupVar)) {
+  if (nullptr != GetOption(groupVar)) {
     return std::string(GetOption(groupVar));
   }
   return componentName;

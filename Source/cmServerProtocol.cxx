@@ -223,7 +223,7 @@ bool cmServerProtocol::Activate(cmServer* server,
   this->m_CMakeInstance = std::make_unique<cmake>(cmake::RoleProject);
   const bool result = this->DoActivate(request, errorMessage);
   if (!result) {
-    this->m_CMakeInstance = CM_NULLPTR;
+    this->m_CMakeInstance = nullptr;
   }
   return result;
 }

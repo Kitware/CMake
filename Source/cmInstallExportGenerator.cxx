@@ -29,7 +29,7 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   , FileName(filename)
   , Namespace(name_space)
   , ExportOld(exportOld)
-  , LocalGenerator(CM_NULLPTR)
+  , LocalGenerator(nullptr)
 {
   if (android) {
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -181,8 +181,8 @@ void cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
     std::string config_test = this->CreateConfigTest(i->first);
     os << indent << "if(" << config_test << ")\n";
     this->AddInstallRule(os, this->Destination, cmInstallType_FILES, files,
-                         false, this->FilePermissions.c_str(), CM_NULLPTR,
-                         CM_NULLPTR, CM_NULLPTR, indent.Next());
+                         false, this->FilePermissions.c_str(), nullptr,
+                         nullptr, nullptr, indent.Next());
     os << indent << "endif()\n";
     files.clear();
   }
@@ -221,6 +221,6 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
   std::vector<std::string> files;
   files.push_back(this->MainImportFile);
   this->AddInstallRule(os, this->Destination, cmInstallType_FILES, files,
-                       false, this->FilePermissions.c_str(), CM_NULLPTR,
-                       CM_NULLPTR, CM_NULLPTR, indent);
+                       false, this->FilePermissions.c_str(), nullptr, nullptr,
+                       nullptr, indent);
 }

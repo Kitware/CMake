@@ -335,7 +335,7 @@ bool cmFindBase::CheckForVariableInCache()
     cmState* state = this->Makefile->GetState();
     const char* cacheEntry = state->GetCacheEntryValue(this->VariableName);
     bool found = !cmSystemTools::IsNOTFOUND(cacheValue);
-    bool cached = cacheEntry != CM_NULLPTR;
+    bool cached = cacheEntry != nullptr;
     if (found) {
       // If the user specifies the entry on the command line without a
       // type we should add the type and docstring but keep the

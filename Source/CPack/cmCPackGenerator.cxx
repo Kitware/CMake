@@ -28,14 +28,14 @@
 cmCPackGenerator::cmCPackGenerator()
 {
   this->GeneratorVerbose = cmSystemTools::OUTPUT_NONE;
-  this->MakefileMap = CM_NULLPTR;
-  this->Logger = CM_NULLPTR;
+  this->MakefileMap = nullptr;
+  this->Logger = nullptr;
   this->componentPackageMethod = ONE_PACKAGE_PER_GROUP;
 }
 
 cmCPackGenerator::~cmCPackGenerator()
 {
-  this->MakefileMap = CM_NULLPTR;
+  this->MakefileMap = nullptr;
 }
 
 void cmCPackGeneratorProgress(const char* msg, float prog, void* ptr)
@@ -156,7 +156,7 @@ int cmCPackGenerator::PrepareNames()
   }
   const char* algoSignature = this->GetOption("CPACK_PACKAGE_CHECKSUM");
   if (algoSignature) {
-    if (cmCryptoHash::New(algoSignature).get() == CM_NULLPTR) {
+    if (cmCryptoHash::New(algoSignature).get() == nullptr) {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot recognize algorithm: "
                       << algoSignature << std::endl);
       return 0;
@@ -256,7 +256,7 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
       int retVal = 1;
       bool resB =
         cmSystemTools::RunSingleCommand(it->c_str(), &output, &output, &retVal,
-                                        CM_NULLPTR, this->GeneratorVerbose, 0);
+                                        nullptr, this->GeneratorVerbose, 0);
       if (!resB || retVal) {
         std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
         tmpFile += "/InstallOutput.log";
@@ -820,8 +820,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           }
         }
 
-        if (CM_NULLPTR !=
-            mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
+        if (nullptr != mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
           if (!absoluteDestFiles.empty()) {
             absoluteDestFiles += ";";
           }
@@ -835,7 +834,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
             std::string absoluteDestFileComponent =
               std::string("CPACK_ABSOLUTE_DESTINATION_FILES") + "_" +
               GetComponentInstallDirNameSuffix(installComponent);
-            if (CM_NULLPTR != this->GetOption(absoluteDestFileComponent)) {
+            if (nullptr != this->GetOption(absoluteDestFileComponent)) {
               std::string absoluteDestFilesListComponent =
                 this->GetOption(absoluteDestFileComponent);
               absoluteDestFilesListComponent += ";";
@@ -1016,7 +1015,7 @@ int cmCPackGenerator::DoPackage()
                     << packageFileName << " generated." << std::endl);
 
     /* Generate checksum file */
-    if (crypto.get() != CM_NULLPTR) {
+    if (crypto.get() != nullptr) {
       std::string hashFile(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"));
       hashFile +=
         "/" + filename.substr(0, filename.rfind(this->GetOutputExtension()));
@@ -1225,7 +1224,7 @@ int cmCPackGenerator::PrepareGroupingKind()
   std::string groupingType;
 
   // Second way to specify grouping
-  if (CM_NULLPTR != this->GetOption("CPACK_COMPONENTS_GROUPING")) {
+  if (nullptr != this->GetOption("CPACK_COMPONENTS_GROUPING")) {
     groupingType = this->GetOption("CPACK_COMPONENTS_GROUPING");
   }
 
@@ -1407,7 +1406,7 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
       component->Group = GetComponentGroup(projectName, groupName);
       component->Group->Components.push_back(component);
     } else {
-      component->Group = CM_NULLPTR;
+      component->Group = nullptr;
     }
 
     const char* description = this->GetOption(macroPrefix + "_DESCRIPTION");
@@ -1475,7 +1474,7 @@ cmCPackComponentGroup* cmCPackGenerator::GetComponentGroup(
       group->ParentGroup = GetComponentGroup(projectName, parentGroupName);
       group->ParentGroup->Subgroups.push_back(group);
     } else {
-      group->ParentGroup = CM_NULLPTR;
+      group->ParentGroup = nullptr;
     }
   }
   return group;

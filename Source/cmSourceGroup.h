@@ -27,7 +27,7 @@ class cmSourceGroup
 {
 public:
   cmSourceGroup(const char* name, const char* regex,
-                const char* parentName = CM_NULLPTR);
+                const char* parentName = nullptr);
   cmSourceGroup(cmSourceGroup const& r);
   ~cmSourceGroup();
   cmSourceGroup& operator=(cmSourceGroup const&);

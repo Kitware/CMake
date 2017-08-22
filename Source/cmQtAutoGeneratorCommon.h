@@ -33,7 +33,7 @@ public:
                             const std::string& rccCommand,
                             const std::string& fileName,
                             std::vector<std::string>& files,
-                            std::string* errorMessage = CM_NULLPTR);
+                            std::string* errorMessage = nullptr);
 };
 
 #endif

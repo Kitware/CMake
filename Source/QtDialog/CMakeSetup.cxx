@@ -22,19 +22,18 @@
 
 #include "cmSystemTools.h" // IWYU pragma: keep
 
-static const char* cmDocumentationName[][2] = { { CM_NULLPTR,
+static const char* cmDocumentationName[][2] = { { nullptr,
                                                   "  cmake-gui - CMake GUI." },
-                                                { CM_NULLPTR, CM_NULLPTR } };
+                                                { nullptr, nullptr } };
 
 static const char* cmDocumentationUsage[][2] = {
-  { CM_NULLPTR, "  cmake-gui [options]\n"
-                "  cmake-gui [options] <path-to-source>\n"
-                "  cmake-gui [options] <path-to-existing-build>" },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, "  cmake-gui [options]\n"
+             "  cmake-gui [options] <path-to-source>\n"
+             "  cmake-gui [options] <path-to-existing-build>" },
+  { nullptr, nullptr }
 };
 
-static const char* cmDocumentationOptions[]
-                                         [2] = { { CM_NULLPTR, CM_NULLPTR } };
+static const char* cmDocumentationOptions[][2] = { { nullptr, nullptr } };
 
 #if defined(Q_OS_MAC)
 static int cmOSXInstall(std::string dir);

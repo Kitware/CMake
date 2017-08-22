@@ -283,8 +283,8 @@ public:
   // Compute object file names.
   std::string GetObjectFileNameWithoutTarget(
     const cmSourceFile& source, std::string const& dir_max,
-    bool* hasSourceExtension = CM_NULLPTR,
-    char const* customOutputExtension = CM_NULLPTR);
+    bool* hasSourceExtension = nullptr,
+    char const* customOutputExtension = nullptr);
 
   /** Fill out the static linker flags for the given target.  */
   void GetStaticLibraryFlags(std::string& flags, std::string const& config,
@@ -312,7 +312,7 @@ public:
 
   virtual void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* gt = CM_NULLPTR);
+    cmGeneratorTarget const* gt = nullptr);
 
   bool IsWindowsShell() const;
   bool IsWatcomWMake() const;

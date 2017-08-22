@@ -70,7 +70,7 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
     return true;
   }
 
-  const char* prop = CM_NULLPTR;
+  const char* prop = nullptr;
   if (!i->empty()) {
     if (*i == "DEFINITIONS") {
       switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0059)) {

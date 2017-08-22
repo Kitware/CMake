@@ -41,12 +41,12 @@ static const char* cmDocumentationStandardOptions[][2] = {
   { "--help-variable-list [<f>]",
     "List variables with help available and exit." },
   { "--help-variables [<f>]", "Print cmake-variables manual and exit." },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, nullptr }
 };
 
 static const char* cmDocumentationGeneratorsHeader[][2] = {
-  { CM_NULLPTR, "The following generators are available on this platform:" },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, "The following generators are available on this platform:" },
+  { nullptr, nullptr }
 };
 
 cmDocumentation::cmDocumentation()
@@ -403,7 +403,7 @@ void cmDocumentation::SetSections(
 
 void cmDocumentation::PrependSection(const char* name, const char* docs[][2])
 {
-  cmDocumentationSection* sec = CM_NULLPTR;
+  cmDocumentationSection* sec = nullptr;
   if (this->AllSections.find(name) == this->AllSections.end()) {
     sec =
       new cmDocumentationSection(name, cmSystemTools::UpperCase(name).c_str());
@@ -417,7 +417,7 @@ void cmDocumentation::PrependSection(const char* name, const char* docs[][2])
 void cmDocumentation::PrependSection(const char* name,
                                      std::vector<cmDocumentationEntry>& docs)
 {
-  cmDocumentationSection* sec = CM_NULLPTR;
+  cmDocumentationSection* sec = nullptr;
   if (this->AllSections.find(name) == this->AllSections.end()) {
     sec =
       new cmDocumentationSection(name, cmSystemTools::UpperCase(name).c_str());
@@ -430,7 +430,7 @@ void cmDocumentation::PrependSection(const char* name,
 
 void cmDocumentation::AppendSection(const char* name, const char* docs[][2])
 {
-  cmDocumentationSection* sec = CM_NULLPTR;
+  cmDocumentationSection* sec = nullptr;
   if (this->AllSections.find(name) == this->AllSections.end()) {
     sec =
       new cmDocumentationSection(name, cmSystemTools::UpperCase(name).c_str());
@@ -444,7 +444,7 @@ void cmDocumentation::AppendSection(const char* name, const char* docs[][2])
 void cmDocumentation::AppendSection(const char* name,
                                     std::vector<cmDocumentationEntry>& docs)
 {
-  cmDocumentationSection* sec = CM_NULLPTR;
+  cmDocumentationSection* sec = nullptr;
   if (this->AllSections.find(name) == this->AllSections.end()) {
     sec =
       new cmDocumentationSection(name, cmSystemTools::UpperCase(name).c_str());

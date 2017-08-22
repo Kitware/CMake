@@ -135,8 +135,8 @@ bool cmParseMumpsCoverage::FindMumpsFile(std::string const& routine,
     return true;
   }
   // try some alternate names
-  const char* tryname[] = { "GUX", "GTM", "ONT", CM_NULLPTR };
-  for (int k = 0; tryname[k] != CM_NULLPTR; k++) {
+  const char* tryname[] = { "GUX", "GTM", "ONT", nullptr };
+  for (int k = 0; tryname[k] != nullptr; k++) {
     std::string routine2 = routine + tryname[k];
     i = this->RoutineToDirectory.find(routine2);
     if (i != this->RoutineToDirectory.end()) {

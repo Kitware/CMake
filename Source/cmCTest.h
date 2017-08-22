@@ -95,7 +95,7 @@ public:
   typedef std::set<std::string> SetOfStrings;
 
   /** Process Command line arguments */
-  int Run(std::vector<std::string>&, std::string* output = CM_NULLPTR);
+  int Run(std::vector<std::string>&, std::string* output = nullptr);
 
   /**
    * Initialize and finalize testing
@@ -252,8 +252,8 @@ public:
    * escaped for this to with spaces.
    */
   bool RunCommand(const char* command, std::string* stdOut,
-                  std::string* stdErr, int* retVal = CM_NULLPTR,
-                  const char* dir = CM_NULLPTR, double timeout = 0.0,
+                  std::string* stdErr, int* retVal = nullptr,
+                  const char* dir = nullptr, double timeout = 0.0,
                   Encoding encoding = cmProcessOutput::Auto);
 
   /**
@@ -577,7 +577,7 @@ private:
 
   /** Check if the argument is the one specified */
   bool CheckArgument(const std::string& arg, const char* varg1,
-                     const char* varg2 = CM_NULLPTR);
+                     const char* varg2 = nullptr);
 
   /** Output errors from a test */
   void OutputTestErrors(std::vector<char> const& process_output);

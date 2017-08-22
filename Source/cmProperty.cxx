@@ -24,5 +24,5 @@ const char* cmProperty::GetValue() const
   if (this->ValueHasBeenSet) {
     return this->Value.c_str();
   }
-  return CM_NULLPTR;
+  return nullptr;
 }

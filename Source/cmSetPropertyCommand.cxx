@@ -141,7 +141,7 @@ bool cmSetPropertyCommand::HandleGlobalMode()
   std::string const& name = this->PropertyName;
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
-    value = CM_NULLPTR;
+    value = nullptr;
   }
   if (this->AppendMode) {
     cm->AppendProperty(name, value ? value : "", this->AppendAsString);
@@ -191,7 +191,7 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
   std::string const& name = this->PropertyName;
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
-    value = CM_NULLPTR;
+    value = nullptr;
   }
   if (this->AppendMode) {
     mf->AppendProperty(name, value ? value : "", this->AppendAsString);
@@ -232,7 +232,7 @@ bool cmSetPropertyCommand::HandleTarget(cmTarget* target)
   std::string const& name = this->PropertyName;
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
-    value = CM_NULLPTR;
+    value = nullptr;
   }
   if (this->AppendMode) {
     target->AppendProperty(name, value, this->AppendAsString);
@@ -271,7 +271,7 @@ bool cmSetPropertyCommand::HandleSource(cmSourceFile* sf)
   std::string const& name = this->PropertyName;
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
-    value = CM_NULLPTR;
+    value = nullptr;
   }
 
   if (this->AppendMode) {
@@ -319,7 +319,7 @@ bool cmSetPropertyCommand::HandleTest(cmTest* test)
   std::string const& name = this->PropertyName;
   const char* value = this->PropertyValue.c_str();
   if (this->Remove) {
-    value = CM_NULLPTR;
+    value = nullptr;
   }
   if (this->AppendMode) {
     test->AppendProperty(name, value, this->AppendAsString);

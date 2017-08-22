@@ -129,7 +129,7 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
     for (compIt = this->Components.begin(); compIt != this->Components.end();
          ++compIt) {
       // Does the component belong to a group?
-      if (compIt->second.Group == CM_NULLPTR) {
+      if (compIt->second.Group == nullptr) {
         cmCPackLogger(
           cmCPackLog::LOG_VERBOSE, "Component <"
             << compIt->second.Name
@@ -713,7 +713,7 @@ std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
   // the current COMPONENT belongs to.
   std::string groupVar =
     "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
-  if (CM_NULLPTR != GetOption(groupVar)) {
+  if (nullptr != GetOption(groupVar)) {
     return std::string(GetOption(groupVar));
   }
   return componentName;
@@ -928,18 +928,18 @@ static int ar_append(const char* archive,
 {
   int eval = 0;
   FILE* aFile = cmSystemTools::Fopen(archive, "wb+");
-  if (aFile != CM_NULLPTR) {
+  if (aFile != nullptr) {
     fwrite(ARMAG, SARMAG, 1, aFile);
     if (fseek(aFile, 0, SEEK_END) != -1) {
       CF cf;
       struct stat sb;
       /* Read from disk, write to an archive; pad on write. */
-      SETCF(CM_NULLPTR, CM_NULLPTR, aFile, archive, WPAD);
+      SETCF(nullptr, nullptr, aFile, archive, WPAD);
       for (std::vector<std::string>::const_iterator fileIt = files.begin();
            fileIt != files.end(); ++fileIt) {
         const char* filename = fileIt->c_str();
         FILE* file = cmSystemTools::Fopen(filename, "rb");
-        if (file == CM_NULLPTR) {
+        if (file == nullptr) {
           eval = -1;
           continue;
         }

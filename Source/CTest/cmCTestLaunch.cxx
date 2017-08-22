@@ -31,7 +31,7 @@
 cmCTestLaunch::cmCTestLaunch(int argc, const char* const* argv)
 {
   this->Passthru = true;
-  this->Process = CM_NULLPTR;
+  this->Process = nullptr;
   this->ExitCode = 1;
   this->CWD = cmSystemTools::GetCurrentWorkingDirectory();
 
@@ -129,7 +129,7 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
     return true;
   }
   this->RealArgC = 0;
-  this->RealArgV = CM_NULLPTR;
+  this->RealArgV = nullptr;
   std::cerr << "No launch/command separator ('--') found!\n";
   return false;
 }
@@ -224,11 +224,11 @@ void cmCTestLaunch::RunChild()
 
   // Record child stdout and stderr if necessary.
   if (!this->Passthru) {
-    char* data = CM_NULLPTR;
+    char* data = nullptr;
     int length = 0;
     cmProcessOutput processOutput;
     std::string strdata;
-    while (int p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) {
+    while (int p = cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {
       if (p == cmsysProcess_Pipe_STDOUT) {
         processOutput.DecodeText(data, length, strdata, 1);
         fout.write(strdata.c_str(), strdata.size());
@@ -254,7 +254,7 @@ void cmCTestLaunch::RunChild()
   }
 
   // Wait for the real command to finish.
-  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+  cmsysProcess_WaitForExit(cp, nullptr);
   this->ExitCode = cmsysProcess_GetExitValue(cp);
 }
 
@@ -396,7 +396,7 @@ void cmCTestLaunch::WriteXMLAction(cmXMLWriter& xml)
   }
 
   // OutputType
-  const char* outputType = CM_NULLPTR;
+  const char* outputType = nullptr;
   if (!this->OptionTargetType.empty()) {
     if (this->OptionTargetType == "EXECUTABLE") {
       outputType = "executable";

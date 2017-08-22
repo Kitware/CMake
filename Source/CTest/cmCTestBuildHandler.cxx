@@ -74,7 +74,7 @@ static const char* cmCTestErrorMatches[] = {
   "^The project cannot be built\\.",
   "^\\[ERROR\\]",
   "^Command .* failed with exit code",
-  CM_NULLPTR
+  nullptr
 };
 
 static const char* cmCTestErrorExceptions[] = {
@@ -89,7 +89,7 @@ static const char* cmCTestErrorExceptions[] = {
   ":[ \\t]+Where:",
   "([^ :]+):([0-9]+): Warning",
   "------ Build started: .* ------",
-  CM_NULLPTR
+  nullptr
 };
 
 static const char* cmCTestWarningMatches[] = {
@@ -114,7 +114,7 @@ static const char* cmCTestWarningMatches[] = {
   "cc-[0-9]* CC: REMARK File = .*, Line = [0-9]*",
   "^CMake Warning.*:",
   "^\\[WARNING\\]",
-  CM_NULLPTR
+  nullptr
 };
 
 static const char* cmCTestWarningExceptions[] = {
@@ -134,7 +134,7 @@ static const char* cmCTestWarningExceptions[] = {
   "ld32: WARNING 85: definition of dataKey in",
   "cc: warning 422: Unknown option \"\\+b",
   "_with_warning_C",
-  CM_NULLPTR
+  nullptr
 };
 
 struct cmCTestBuildCompileErrorWarningRex
@@ -152,7 +152,7 @@ static cmCTestBuildCompileErrorWarningRex cmCTestWarningErrorFileLine[] = {
   { "^([a-zA-Z./0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2 },
   { "\"([a-zA-Z./0-9_+ ~-]+)\", line ([0-9]+)", 1, 2 },
   { "File = ([a-zA-Z./0-9_+ ~-]+), Line = ([0-9]+)", 1, 2 },
-  { CM_NULLPTR, 0, 0 }
+  { nullptr, 0, 0 }
 };
 
 cmCTestBuildHandler::cmCTestBuildHandler()
@@ -504,7 +504,7 @@ public:
   {
   }
   FragmentCompare()
-    : FTC(CM_NULLPTR)
+    : FTC(nullptr)
   {
   }
   bool operator()(std::string const& l, std::string const& r) const
@@ -781,7 +781,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
        a != args.end(); ++a) {
     argv.push_back(a->c_str());
   }
-  argv.push_back(CM_NULLPTR);
+  argv.push_back(nullptr);
 
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run command:",
                      this->Quiet);
@@ -835,7 +835,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 
   // For every chunk of data
   int res;
-  while ((res = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR))) {
+  while ((res = cmsysProcess_WaitForData(cp, &data, &length, nullptr))) {
     // Replace '\0' with '\n', since '\0' does not really make sense. This is
     // for Visual Studio output
     for (int cc = 0; cc < length; ++cc) {
@@ -866,9 +866,9 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
                         &this->BuildProcessingQueue);
   }
 
-  this->ProcessBuffer(CM_NULLPTR, 0, tick, tick_len, ofs,
+  this->ProcessBuffer(nullptr, 0, tick, tick_len, ofs,
                       &this->BuildProcessingQueue);
-  this->ProcessBuffer(CM_NULLPTR, 0, tick, tick_len, ofs,
+  this->ProcessBuffer(nullptr, 0, tick, tick_len, ofs,
                       &this->BuildProcessingErrorQueue);
   cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT, " Size of output: "
                        << ((this->BuildOutputLogSize + 512) / 1024) << "K"
@@ -876,7 +876,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
                      this->Quiet);
 
   // Properly handle output of the build command
-  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+  cmsysProcess_WaitForExit(cp, nullptr);
   int result = cmsysProcess_GetState(cp);
 
   if (result == cmsysProcess_State_Exited) {

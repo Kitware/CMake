@@ -26,8 +26,8 @@ cmCursesLongMessageForm::cmCursesLongMessageForm(
     this->Messages += "\n\n";
   }
   this->Title = title;
-  this->Fields[0] = CM_NULLPTR;
-  this->Fields[1] = CM_NULLPTR;
+  this->Fields[0] = nullptr;
+  this->Fields[1] = nullptr;
 }
 
 cmCursesLongMessageForm::~cmCursesLongMessageForm()
@@ -105,7 +105,7 @@ void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
   if (this->Form) {
     unpost_form(this->Form);
     free_form(this->Form);
-    this->Form = CM_NULLPTR;
+    this->Form = nullptr;
   }
 
   const char* msg = this->Messages.c_str();
@@ -114,7 +114,7 @@ void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
 
   if (this->Fields[0]) {
     free_field(this->Fields[0]);
-    this->Fields[0] = CM_NULLPTR;
+    this->Fields[0] = nullptr;
   }
 
   this->Fields[0] = new_field(y - 6, x - 2, 1, 1, 0, 0);

@@ -89,7 +89,7 @@ void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
 void cmVisualStudioGeneratorOptions::ClearTables()
 {
   for (int i = 0; i < FlagTableCount; ++i) {
-    this->FlagTable[i] = CM_NULLPTR;
+    this->FlagTable[i] = nullptr;
   }
 }
 

@@ -219,7 +219,7 @@ cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
 
   std::string errorMessage;
   if (!this->Protocol->Activate(this, request, &errorMessage)) {
-    this->Protocol = CM_NULLPTR;
+    this->Protocol = nullptr;
     return request.ReportError("Failed to activate protocol version: " +
                                errorMessage);
   }
@@ -484,7 +484,7 @@ void cmServerBase::StartShutDown()
 
   uv_stop(&Loop);
 
-  uv_walk(&Loop, on_walk_to_shutdown, CM_NULLPTR);
+  uv_walk(&Loop, on_walk_to_shutdown, nullptr);
 
   uv_run(&Loop, UV_RUN_DEFAULT);
 }

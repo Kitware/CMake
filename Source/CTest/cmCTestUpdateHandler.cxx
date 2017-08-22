@@ -309,7 +309,7 @@ bool cmCTestUpdateHandler::SelectVCS()
 
   // If no update command was specified, lookup one for this VCS tool.
   if (this->UpdateCommand.empty()) {
-    const char* key = CM_NULLPTR;
+    const char* key = nullptr;
     switch (this->UpdateType) {
       case e_CVS:
         key = "CVSCommand";

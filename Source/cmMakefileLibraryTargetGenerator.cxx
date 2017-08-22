@@ -117,7 +117,7 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
   this->AppendObjectDepends(depends);
 
   // Write the rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
                                       this->GeneratorTarget->GetName(),
                                       depends, commands, true);
 
@@ -454,7 +454,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
   std::vector<std::string> outputs(1, targetOutputReal);
 
   // Write the build rule.
-  this->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR, outputs, depends,
+  this->WriteMakeRule(*this->BuildFileStream, nullptr, outputs, depends,
                       commands, false);
 
   // Write the main driver rule to build everything in this target.
@@ -1008,7 +1008,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   }
 
   // Write the build rule.
-  this->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR, outputs, depends,
+  this->WriteMakeRule(*this->BuildFileStream, nullptr, outputs, depends,
                       commands, false);
 
   // Write the main driver rule to build everything in this target.

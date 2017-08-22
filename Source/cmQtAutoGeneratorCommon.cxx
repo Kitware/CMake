@@ -38,7 +38,7 @@ static bool RccListInputsQt4(const std::string& fileName,
       osst << ifs.rdbuf();
       qrcContents = osst.str();
     } else {
-      if (errorMessage != CM_NULLPTR) {
+      if (errorMessage != nullptr) {
         std::ostringstream ost;
         ost << "AutoRcc: Error: Rcc file not readable:\n"
             << cmQtAutoGeneratorCommon::Quoted(fileName) << "\n";
@@ -98,7 +98,7 @@ static bool RccListInputsQt5(const std::string& rccCommand,
     int retVal = 0;
     bool result =
       cmSystemTools::RunSingleCommand(command, &rccStdOut, &rccStdErr, &retVal,
-                                      CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
+                                      nullptr, cmSystemTools::OUTPUT_NONE);
     if (result && retVal == 0 &&
         rccStdOut.find("--list") != std::string::npos) {
       hasDashDashList = true;
@@ -117,10 +117,10 @@ static bool RccListInputsQt5(const std::string& rccCommand,
     command.push_back(fileName);
     result =
       cmSystemTools::RunSingleCommand(command, &rccStdOut, &rccStdErr, &retVal,
-                                      CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
+                                      nullptr, cmSystemTools::OUTPUT_NONE);
   }
   if (!result || retVal) {
-    if (errorMessage != CM_NULLPTR) {
+    if (errorMessage != nullptr) {
       std::ostringstream ost;
       ost << "AutoRcc: Error: Rcc list process for " << fileName
           << " failed:\n"
@@ -153,7 +153,7 @@ static bool RccListInputsQt5(const std::string& rccCommand,
 
         std::string::size_type pos = eline.find(searchString);
         if (pos == std::string::npos) {
-          if (errorMessage != CM_NULLPTR) {
+          if (errorMessage != nullptr) {
             std::ostringstream ost;
             ost << "AutoRcc: Error: Rcc lists unparsable output:\n"
                 << cmQtAutoGeneratorCommon::Quoted(eline) << "\n";
@@ -205,7 +205,7 @@ bool cmQtAutoGeneratorCommon::RccListInputs(const std::string& qtMajorVersion,
       allGood = RccListInputsQt5(rccCommand, fileName, files, errorMessage);
     }
   } else {
-    if (errorMessage != CM_NULLPTR) {
+    if (errorMessage != nullptr) {
       std::ostringstream ost;
       ost << "AutoRcc: Error: Rcc file does not exist:\n"
           << cmQtAutoGeneratorCommon::Quoted(fileName) << "\n";

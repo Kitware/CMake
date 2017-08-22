@@ -21,8 +21,8 @@
 
 cmExportBuildAndroidMKGenerator::cmExportBuildAndroidMKGenerator()
 {
-  this->LG = CM_NULLPTR;
-  this->ExportSet = CM_NULLPTR;
+  this->LG = nullptr;
+  this->ExportSet = nullptr;
 }
 
 void cmExportBuildAndroidMKGenerator::GenerateImportHeaderCode(

@@ -62,8 +62,8 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
 
   cmGeneratorExpression ge;
 
-  cmGeneratorExpressionDAGChecker dagChecker(tgt->GetName(), propName,
-                                             CM_NULLPTR, CM_NULLPTR);
+  cmGeneratorExpressionDAGChecker dagChecker(tgt->GetName(), propName, nullptr,
+                                             nullptr);
 
   CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
 

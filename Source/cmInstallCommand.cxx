@@ -204,7 +204,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
   cmCommandArgumentsHelper argHelper;
   cmCommandArgumentGroup group;
-  cmCAStringVector genericArgVector(&argHelper, CM_NULLPTR);
+  cmCAStringVector genericArgVector(&argHelper, nullptr);
   cmCAStringVector archiveArgVector(&argHelper, "ARCHIVE", &group);
   cmCAStringVector libraryArgVector(&argHelper, "LIBRARY", &group);
   cmCAStringVector runtimeArgVector(&argHelper, "RUNTIME", &group);
@@ -216,10 +216,10 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
                                           &group);
   cmCAStringVector publicHeaderArgVector(&argHelper, "PUBLIC_HEADER", &group);
   cmCAStringVector resourceArgVector(&argHelper, "RESOURCE", &group);
-  genericArgVector.Follows(CM_NULLPTR);
+  genericArgVector.Follows(nullptr);
   group.Follows(&genericArgVector);
 
-  argHelper.Parse(&args, CM_NULLPTR);
+  argHelper.Parse(&args, nullptr);
 
   // now parse the generic args (i.e. the ones not specialized on LIBRARY/
   // ARCHIVE, RUNTIME etc. (see above)
@@ -229,7 +229,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   cmCAStringVector targetList(&genericArgs.Parser, "TARGETS");
   cmCAString exports(&genericArgs.Parser, "EXPORT",
                      &genericArgs.ArgumentGroup);
-  targetList.Follows(CM_NULLPTR);
+  targetList.Follows(nullptr);
   genericArgs.ArgumentGroup.Follows(&targetList);
   genericArgs.Parse(&genericArgVector.GetVector(), &unknownArgs);
   bool success = genericArgs.Finalize();
@@ -402,15 +402,15 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
        ti != targets.end(); ++ti) {
     // Handle each target type.
     cmTarget& target = *(*ti);
-    cmInstallTargetGenerator* archiveGenerator = CM_NULLPTR;
-    cmInstallTargetGenerator* libraryGenerator = CM_NULLPTR;
-    cmInstallTargetGenerator* runtimeGenerator = CM_NULLPTR;
-    cmInstallTargetGenerator* objectGenerator = CM_NULLPTR;
-    cmInstallTargetGenerator* frameworkGenerator = CM_NULLPTR;
-    cmInstallTargetGenerator* bundleGenerator = CM_NULLPTR;
-    cmInstallFilesGenerator* privateHeaderGenerator = CM_NULLPTR;
-    cmInstallFilesGenerator* publicHeaderGenerator = CM_NULLPTR;
-    cmInstallFilesGenerator* resourceGenerator = CM_NULLPTR;
+    cmInstallTargetGenerator* archiveGenerator = nullptr;
+    cmInstallTargetGenerator* libraryGenerator = nullptr;
+    cmInstallTargetGenerator* runtimeGenerator = nullptr;
+    cmInstallTargetGenerator* objectGenerator = nullptr;
+    cmInstallTargetGenerator* frameworkGenerator = nullptr;
+    cmInstallTargetGenerator* bundleGenerator = nullptr;
+    cmInstallFilesGenerator* privateHeaderGenerator = nullptr;
+    cmInstallFilesGenerator* publicHeaderGenerator = nullptr;
+    cmInstallFilesGenerator* resourceGenerator = nullptr;
 
     // Track whether this is a namelink-only rule.
     bool namelinkOnly = false;
@@ -437,8 +437,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             runtimeGenerator =
               CreateInstallTargetGenerator(target, runtimeArgs, false);
           }
-          if ((archiveGenerator == CM_NULLPTR) &&
-              (runtimeGenerator == CM_NULLPTR)) {
+          if ((archiveGenerator == nullptr) && (runtimeGenerator == nullptr)) {
             this->SetError("Library TARGETS given no DESTINATION!");
             return false;
           }
@@ -688,16 +687,16 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     }
 
     // Keep track of whether we're installing anything in each category
-    installsArchive = installsArchive || archiveGenerator != CM_NULLPTR;
-    installsLibrary = installsLibrary || libraryGenerator != CM_NULLPTR;
-    installsRuntime = installsRuntime || runtimeGenerator != CM_NULLPTR;
-    installsObject = installsObject || objectGenerator != CM_NULLPTR;
-    installsFramework = installsFramework || frameworkGenerator != CM_NULLPTR;
-    installsBundle = installsBundle || bundleGenerator != CM_NULLPTR;
+    installsArchive = installsArchive || archiveGenerator != nullptr;
+    installsLibrary = installsLibrary || libraryGenerator != nullptr;
+    installsRuntime = installsRuntime || runtimeGenerator != nullptr;
+    installsObject = installsObject || objectGenerator != nullptr;
+    installsFramework = installsFramework || frameworkGenerator != nullptr;
+    installsBundle = installsBundle || bundleGenerator != nullptr;
     installsPrivateHeader =
-      installsPrivateHeader || privateHeaderGenerator != CM_NULLPTR;
+      installsPrivateHeader || privateHeaderGenerator != nullptr;
     installsPublicHeader =
-      installsPublicHeader || publicHeaderGenerator != CM_NULLPTR;
+      installsPublicHeader || publicHeaderGenerator != nullptr;
     installsResource = installsResource || resourceGenerator;
 
     this->Makefile->AddInstallGenerator(archiveGenerator);
@@ -779,7 +778,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   bool programs = (args[0] == "PROGRAMS");
   cmInstallCommandArguments ica(this->DefaultComponentName);
   cmCAStringVector files(&ica.Parser, programs ? "PROGRAMS" : "FILES");
-  files.Follows(CM_NULLPTR);
+  files.Follows(nullptr);
   ica.ArgumentGroup.Follows(&files);
   std::vector<std::string> unknownArgs;
   ica.Parse(&args, &unknownArgs);
@@ -819,7 +818,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   for (std::vector<std::string>::const_iterator fileIt = filesVector.begin();
        fileIt != filesVector.end(); ++fileIt) {
     if (gg->IsExportedTargetsFile(*fileIt)) {
-      const char* modal = CM_NULLPTR;
+      const char* modal = nullptr;
       std::ostringstream e;
       cmake::MessageType messageType = cmake::AUTHOR_WARNING;
 
@@ -895,7 +894,7 @@ bool cmInstallCommand::HandleDirectoryMode(
   bool exclude_from_all = false;
   bool message_never = false;
   std::vector<std::string> dirs;
-  const char* destination = CM_NULLPTR;
+  const char* destination = nullptr;
   std::string permissions_file;
   std::string permissions_dir;
   std::vector<std::string> configurations;
@@ -1181,7 +1180,7 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
   cmCAEnabler exportOld(&ica.Parser, "EXPORT_LINK_INTERFACE_LIBRARIES",
                         &ica.ArgumentGroup);
   cmCAString filename(&ica.Parser, "FILE", &ica.ArgumentGroup);
-  exp.Follows(CM_NULLPTR);
+  exp.Follows(nullptr);
 
   ica.ArgumentGroup.Follows(&exp);
   std::vector<std::string> unknownArgs;
@@ -1273,7 +1272,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   cmCAEnabler exportOld(&ica.Parser, "EXPORT_LINK_INTERFACE_LIBRARIES",
                         &ica.ArgumentGroup);
   cmCAString filename(&ica.Parser, "FILE", &ica.ArgumentGroup);
-  exp.Follows(CM_NULLPTR);
+  exp.Follows(nullptr);
 
   ica.ArgumentGroup.Follows(&exp);
   std::vector<std::string> unknownArgs;

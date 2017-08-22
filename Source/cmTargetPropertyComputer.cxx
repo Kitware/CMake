@@ -16,7 +16,7 @@ bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
   cmListFileBacktrace const& context)
 {
   std::ostringstream e;
-  const char* modal = CM_NULLPTR;
+  const char* modal = nullptr;
   cmake::MessageType messageType = cmake::AUTHOR_WARNING;
   switch (context.GetBottom().GetPolicy(cmPolicies::CMP0026)) {
     case cmPolicies::WARN:

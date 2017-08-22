@@ -15,7 +15,7 @@
 #include <vector>
 
 cmSourceFileLocation::cmSourceFileLocation()
-  : Makefile(CM_NULLPTR)
+  : Makefile(nullptr)
   , AmbiguousDirectory(true)
   , AmbiguousExtension(true)
 {

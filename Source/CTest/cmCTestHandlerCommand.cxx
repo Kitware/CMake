@@ -20,7 +20,7 @@ cmCTestHandlerCommand::cmCTestHandlerCommand()
   size_t cc;
   this->Arguments.reserve(INIT_SIZE);
   for (cc = 0; cc < INIT_SIZE; ++cc) {
-    this->Arguments.push_back(CM_NULLPTR);
+    this->Arguments.push_back(nullptr);
   }
   this->Arguments[ct_RETURN_VALUE] = "RETURN_VALUE";
   this->Arguments[ct_CAPTURE_CMAKE_ERROR] = "CAPTURE_CMAKE_ERROR";
@@ -89,7 +89,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   SaveRestoreErrorState errorState;
   // Allocate space for argument values.
   this->Values.clear();
-  this->Values.resize(this->Last, CM_NULLPTR);
+  this->Values.resize(this->Last, nullptr);
 
   // Process input arguments.
   this->ArgumentDoing = ArgumentDoingNone;

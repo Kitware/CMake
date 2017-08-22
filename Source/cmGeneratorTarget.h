@@ -524,7 +524,7 @@ public:
   {
     SourceFileFlags()
       : Type(SourceFileTypeNormal)
-      , MacFolder(CM_NULLPTR)
+      , MacFolder(nullptr)
     {
     }
     SourceFileType Type;
@@ -570,7 +570,7 @@ public:
   /** Convert the given GNU import library name (.dll.a) to a name with a new
       extension (.lib or ${CMAKE_IMPORT_LIBRARY_SUFFIX}).  */
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
-                        const char* newExt = CM_NULLPTR) const;
+                        const char* newExt = nullptr) const;
 
   bool IsExecutableWithExports() const;
 

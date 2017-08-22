@@ -163,9 +163,9 @@ cmake::cmake(Role role)
   }
 #endif
 
-  this->GlobalGenerator = CM_NULLPTR;
-  this->ProgressCallback = CM_NULLPTR;
-  this->ProgressCallbackClientData = CM_NULLPTR;
+  this->GlobalGenerator = nullptr;
+  this->ProgressCallback = nullptr;
+  this->ProgressCallbackClientData = nullptr;
   this->CurrentWorkingMode = NORMAL_MODE;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -215,7 +215,7 @@ cmake::~cmake()
   delete this->Messenger;
   if (this->GlobalGenerator) {
     delete this->GlobalGenerator;
-    this->GlobalGenerator = CM_NULLPTR;
+    this->GlobalGenerator = nullptr;
   }
   cmDeleteAll(this->Generators);
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -555,7 +555,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     gg->CreateGenerationObjects();
     cmLocalGenerator* lg = gg->LocalGenerators[0];
     std::string includeFlags =
-      lg->GetIncludeFlags(includeDirs, CM_NULLPTR, language);
+      lg->GetIncludeFlags(includeDirs, nullptr, language);
 
     std::string definitions = mf->GetSafeDefinition("PACKAGE_DEFINITIONS");
     printf("%s %s\n", includeFlags.c_str(), definitions.c_str());
@@ -983,7 +983,7 @@ createExtraGenerator(
     }
   }
   return std::make_pair(
-    static_cast<cmExternalMakefileProjectGenerator*>(CM_NULLPTR), name);
+    static_cast<cmExternalMakefileProjectGenerator*>(nullptr), name);
 }
 
 cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
@@ -993,7 +993,7 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
   cmExternalMakefileProjectGenerator* extraGenerator = extra.first;
   const std::string name = extra.second;
 
-  cmGlobalGenerator* generator = CM_NULLPTR;
+  cmGlobalGenerator* generator = nullptr;
   for (RegisteredGeneratorsVector::const_iterator i = this->Generators.begin();
        i != this->Generators.end(); ++i) {
     generator = (*i)->CreateGlobalGenerator(name, this);
@@ -2127,7 +2127,7 @@ cmInstalledFile const* cmake::GetInstalledFile(const std::string& name) const
     cmInstalledFile const& file = i->second;
     return &file;
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 int cmake::GetSystemInformation(std::vector<std::string>& args)

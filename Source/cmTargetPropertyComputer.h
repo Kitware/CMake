@@ -26,12 +26,12 @@ public:
       return loc;
     }
     if (cmSystemTools::GetFatalErrorOccured()) {
-      return CM_NULLPTR;
+      return nullptr;
     }
     if (prop == "SOURCES") {
       return GetSources(tgt, messenger, context);
     }
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   static bool WhiteListedInterfaceProperty(const std::string& prop);
@@ -69,7 +69,7 @@ private:
         if (!tgt->IsImported() &&
             !HandleLocationPropertyPolicy(tgt->GetName(), messenger,
                                           context)) {
-          return CM_NULLPTR;
+          return nullptr;
         }
         return ComputeLocationForBuild(tgt);
       }
@@ -79,7 +79,7 @@ private:
         if (!tgt->IsImported() &&
             !HandleLocationPropertyPolicy(tgt->GetName(), messenger,
                                           context)) {
-          return CM_NULLPTR;
+          return nullptr;
         }
         const char* configName = prop.c_str() + 9;
         return ComputeLocation(tgt, configName);
@@ -93,13 +93,13 @@ private:
           if (!tgt->IsImported() &&
               !HandleLocationPropertyPolicy(tgt->GetName(), messenger,
                                             context)) {
-            return CM_NULLPTR;
+            return nullptr;
           }
           return ComputeLocation(tgt, configName);
         }
       }
     }
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   template <typename Target>

@@ -33,7 +33,7 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
 
   bool haveCacheValue = false;
   if (this->Makefile->IsOn("CMAKE_CROSSCOMPILING")) {
-    haveCacheValue = (cacheValue != CM_NULLPTR);
+    haveCacheValue = (cacheValue != nullptr);
     if (!haveCacheValue) {
       std::string msg = "UTILITY_SOURCE is used in cross compiling mode for ";
       msg += cacheEntry;
@@ -45,7 +45,7 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
   } else {
     cmState* state = this->Makefile->GetState();
     haveCacheValue =
-      (cacheValue && (strstr(cacheValue, "(IntDir)") == CM_NULLPTR ||
+      (cacheValue && (strstr(cacheValue, "(IntDir)") == nullptr ||
                       (intDir && strcmp(intDir, "$(IntDir)") == 0)) &&
        (state->GetCacheMajorVersion() != 0 &&
         state->GetCacheMinorVersion() != 0));

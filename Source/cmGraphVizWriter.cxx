@@ -150,7 +150,7 @@ void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
   for (std::map<std::string, const cmGeneratorTarget*>::const_iterator ptrIt =
          this->TargetPtrs.begin();
        ptrIt != this->TargetPtrs.end(); ++ptrIt) {
-    if (ptrIt->second == CM_NULLPTR) {
+    if (ptrIt->second == nullptr) {
       continue;
     }
 
@@ -194,7 +194,7 @@ void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
   for (std::map<std::string, const cmGeneratorTarget*>::const_iterator ptrIt =
          this->TargetPtrs.begin();
        ptrIt != this->TargetPtrs.end(); ++ptrIt) {
-    if (ptrIt->second == CM_NULLPTR) {
+    if (ptrIt->second == nullptr) {
       continue;
     }
 
@@ -240,7 +240,7 @@ void cmGraphVizWriter::WriteGlobalFile(const char* fileName)
   for (std::map<std::string, const cmGeneratorTarget*>::const_iterator ptrIt =
          this->TargetPtrs.begin();
        ptrIt != this->TargetPtrs.end(); ++ptrIt) {
-    if (ptrIt->second == CM_NULLPTR) {
+    if (ptrIt->second == nullptr) {
       continue;
     }
 
@@ -279,7 +279,7 @@ void cmGraphVizWriter::WriteConnections(
 
   this->WriteNode(targetName, targetPtrIt->second, insertedNodes, str);
 
-  if (targetPtrIt->second == CM_NULLPTR) // it's an external library
+  if (targetPtrIt->second == nullptr) // it's an external library
   {
     return;
   }
@@ -330,7 +330,7 @@ void cmGraphVizWriter::WriteDependerConnections(
 
   this->WriteNode(targetName, targetPtrIt->second, insertedNodes, str);
 
-  if (targetPtrIt->second == CM_NULLPTR) // it's an external library
+  if (targetPtrIt->second == nullptr) // it's an external library
   {
     return;
   }
@@ -341,7 +341,7 @@ void cmGraphVizWriter::WriteDependerConnections(
   for (std::map<std::string, const cmGeneratorTarget*>::const_iterator
          dependerIt = this->TargetPtrs.begin();
        dependerIt != this->TargetPtrs.end(); ++dependerIt) {
-    if (dependerIt->second == CM_NULLPTR) {
+    if (dependerIt->second == nullptr) {
       continue;
     }
 
@@ -471,7 +471,7 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
           std::ostringstream ostr;
           ostr << this->GraphNodePrefix << cnt++;
           this->TargetNamesNodes[libName] = ostr.str();
-          this->TargetPtrs[libName] = CM_NULLPTR;
+          this->TargetPtrs[libName] = nullptr;
           // str << "    \"" << ostr << "\" [ label=\"" << libName
           // <<  "\" shape=\"ellipse\"];" << std::endl;
         }

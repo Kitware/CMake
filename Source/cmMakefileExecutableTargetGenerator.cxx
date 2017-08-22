@@ -284,7 +284,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   commands1.clear();
 
   // Write the build rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
                                       targetOutputReal, depends, commands,
                                       false);
 
@@ -687,7 +687,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   }
 
   // Write the build rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
                                       targetFullPathReal, depends, commands,
                                       false);
 
@@ -698,7 +698,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     depends.clear();
     commands.clear();
     depends.push_back(targetFullPathReal);
-    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
                                         targetFullPath, depends, commands,
                                         false);
   }

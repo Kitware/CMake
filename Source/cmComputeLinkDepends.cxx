@@ -194,7 +194,7 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
   this->OldLinkDirMode = false;
 
   // No computation has been done.
-  this->CCG = CM_NULLPTR;
+  this->CCG = nullptr;
 }
 
 cmComputeLinkDepends::~cmComputeLinkDepends()
@@ -286,7 +286,7 @@ std::map<std::string, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
   std::map<std::string, int>::iterator lei =
     this->LinkEntryIndex.insert(index_entry).first;
   this->EntryList.push_back(LinkEntry());
-  this->InferredDependSets.push_back(CM_NULLPTR);
+  this->InferredDependSets.push_back(nullptr);
   this->EntryConstraintGraph.push_back(EdgeList());
   return lei;
 }
@@ -314,7 +314,7 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
   // If the item has dependencies queue it to follow them.
   if (entry.Target) {
     // Target dependencies are always known.  Follow them.
-    BFSEntry qe = { index, CM_NULLPTR };
+    BFSEntry qe = { index, nullptr };
     this->BFSQueue.push(qe);
   } else {
     // Look for an old-style <item>_LIB_DEPENDS variable.

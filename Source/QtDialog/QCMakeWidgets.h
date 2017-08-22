@@ -35,7 +35,7 @@ class QCMakePathEditor : public QCMakeFileEditor
 {
   Q_OBJECT
 public:
-  QCMakePathEditor(QWidget* p = CM_NULLPTR, const QString& var = QString());
+  QCMakePathEditor(QWidget* p = nullptr, const QString& var = QString());
   void chooseFile();
 };
 
@@ -44,8 +44,7 @@ class QCMakeFilePathEditor : public QCMakeFileEditor
 {
   Q_OBJECT
 public:
-  QCMakeFilePathEditor(QWidget* p = CM_NULLPTR,
-                       const QString& var = QString());
+  QCMakeFilePathEditor(QWidget* p = nullptr, const QString& var = QString());
   void chooseFile();
 };
 

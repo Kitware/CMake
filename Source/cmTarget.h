@@ -184,7 +184,7 @@ public:
    * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
    * commands. It is not a full path nor does it have an extension.
    */
-  void AddUtility(const std::string& u, cmMakefile* makefile = CM_NULLPTR);
+  void AddUtility(const std::string& u, cmMakefile* makefile = nullptr);
   ///! Get the utilities used by this target
   std::set<std::string> const& GetUtilities() const { return this->Utilities; }
   cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;

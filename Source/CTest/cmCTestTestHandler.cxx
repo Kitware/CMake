@@ -334,7 +334,7 @@ cmCTestTestHandler::cmCTestTestHandler()
 
   this->MemCheck = false;
 
-  this->LogFile = CM_NULLPTR;
+  this->LogFile = nullptr;
 
   // regex to detect <DartMeasurement>...</DartMeasurement>
   this->DartStuff.compile("(<DartMeasurement.*/DartMeasurement[a-zA-Z]*>)");
@@ -600,7 +600,7 @@ int cmCTestTestHandler::ProcessHandler()
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create "
                    << (this->MemCheck ? "memory check" : "testing")
                    << " XML file" << std::endl);
-      this->LogFile = CM_NULLPTR;
+      this->LogFile = nullptr;
       return 1;
     }
     cmXMLWriter xml(xmlfile);
@@ -608,15 +608,15 @@ int cmCTestTestHandler::ProcessHandler()
   }
 
   if (!this->PostProcessHandler()) {
-    this->LogFile = CM_NULLPTR;
+    this->LogFile = nullptr;
     return -1;
   }
 
   if (!failed.empty()) {
-    this->LogFile = CM_NULLPTR;
+    this->LogFile = nullptr;
     return -1;
   }
-  this->LogFile = CM_NULLPTR;
+  this->LogFile = nullptr;
   return 0;
 }
 
@@ -1327,7 +1327,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
 
   bool randomSchedule = this->CTest->GetScheduleType() == "Random";
   if (randomSchedule) {
-    srand((unsigned)time(CM_NULLPTR));
+    srand((unsigned)time(nullptr));
   }
 
   for (ListOfTests::iterator it = this->TestList.begin();
@@ -1556,8 +1556,8 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
     int retVal = 0;
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Run command: " << *it << std::endl, this->Quiet);
-    if (!cmSystemTools::RunSingleCommand(it->c_str(), CM_NULLPTR, CM_NULLPTR,
-                                         &retVal, CM_NULLPTR,
+    if (!cmSystemTools::RunSingleCommand(it->c_str(), nullptr, nullptr,
+                                         &retVal, nullptr,
                                          cmSystemTools::OUTPUT_MERGE
                                          /*this->Verbose*/) ||
         retVal != 0) {

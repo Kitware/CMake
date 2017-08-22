@@ -38,7 +38,7 @@ class cmCommandArgument
 {
 public:
   cmCommandArgument(cmCommandArgumentsHelper* args, const char* key,
-                    cmCommandArgumentGroup* group = CM_NULLPTR);
+                    cmCommandArgumentGroup* group = nullptr);
   virtual ~cmCommandArgument() {}
 
   /// this argument may follow after arg. 0 means it comes first.
@@ -90,7 +90,7 @@ class cmCAStringVector : public cmCommandArgument
 {
 public:
   cmCAStringVector(cmCommandArgumentsHelper* args, const char* key,
-                   cmCommandArgumentGroup* group = CM_NULLPTR);
+                   cmCommandArgumentGroup* group = nullptr);
 
   /// Return the vector of strings
   const std::vector<std::string>& GetVector() const { return this->Vector; }
@@ -113,7 +113,7 @@ class cmCAString : public cmCommandArgument
 {
 public:
   cmCAString(cmCommandArgumentsHelper* args, const char* key,
-             cmCommandArgumentGroup* group = CM_NULLPTR);
+             cmCommandArgumentGroup* group = nullptr);
 
   /// Return the string
   const std::string& GetString() const { return this->String; }
@@ -132,7 +132,7 @@ class cmCAEnabler : public cmCommandArgument
 {
 public:
   cmCAEnabler(cmCommandArgumentsHelper* args, const char* key,
-              cmCommandArgumentGroup* group = CM_NULLPTR);
+              cmCommandArgumentGroup* group = nullptr);
 
   /// Has it been enabled ?
   bool IsEnabled() const { return this->Enabled; }
@@ -149,7 +149,7 @@ class cmCADisabler : public cmCommandArgument
 {
 public:
   cmCADisabler(cmCommandArgumentsHelper* args, const char* key,
-               cmCommandArgumentGroup* group = CM_NULLPTR);
+               cmCommandArgumentGroup* group = nullptr);
 
   /// Is it still enabled ?
   bool IsEnabled() const { return this->Enabled; }

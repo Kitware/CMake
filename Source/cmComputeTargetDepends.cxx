@@ -290,7 +290,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
   // within the project.
   if (dependee && dependee->GetType() == cmStateEnums::EXECUTABLE &&
       !dependee->IsExecutableWithExports()) {
-    dependee = CM_NULLPTR;
+    dependee = nullptr;
   }
 
   if (dependee) {
@@ -348,7 +348,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
   // within the project.
   if (linking && dependee && dependee->GetType() == cmStateEnums::EXECUTABLE &&
       !dependee->IsExecutableWithExports()) {
-    dependee = CM_NULLPTR;
+    dependee = nullptr;
   }
 
   if (dependee) {

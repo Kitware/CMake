@@ -401,7 +401,7 @@ void cmLocalGenerator::GenerateInstallRules()
   // Choose a default install configuration.
   std::string default_config = config;
   const char* default_order[] = { "RELEASE", "MINSIZEREL", "RELWITHDEBINFO",
-                                  "DEBUG", CM_NULLPTR };
+                                  "DEBUG", nullptr };
   for (const char** c = default_order; *c && default_config.empty(); ++c) {
     for (std::vector<std::string>::iterator i = configurationTypes.begin();
          i != configurationTypes.end(); ++i) {
@@ -588,7 +588,7 @@ cmGeneratorTarget* cmLocalGenerator::FindLocalNonAliasGeneratorTarget(
   if (ti != this->GeneratorTargetSearchIndex.end()) {
     return ti->second;
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 void cmLocalGenerator::ComputeTargetManifest()
@@ -708,7 +708,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
   // normal flag is repeated for each directory.
   std::string sysFlagVar = "CMAKE_INCLUDE_SYSTEM_FLAG_";
   sysFlagVar += lang;
-  const char* sysIncludeFlag = CM_NULLPTR;
+  const char* sysIncludeFlag = nullptr;
   if (repeatFlag) {
     sysIncludeFlag = this->Makefile->GetDefinition(sysFlagVar);
   }
@@ -1346,7 +1346,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     target->GetAppleArchs(config, archs);
     const char* sysroot = this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
     if (sysroot && sysroot[0] == '/' && !sysroot[1]) {
-      sysroot = CM_NULLPTR;
+      sysroot = nullptr;
     }
     std::string sysrootFlagVar =
       std::string("CMAKE_") + lang + "_SYSROOT_FLAG";
@@ -1743,7 +1743,7 @@ void cmLocalGenerator::AddVisibilityPresetFlags(
   }
 
   std::string warnCMP0063;
-  std::string* pWarnCMP0063 = CM_NULLPTR;
+  std::string* pWarnCMP0063 = nullptr;
   if (target->GetType() != cmStateEnums::SHARED_LIBRARY &&
       target->GetType() != cmStateEnums::MODULE_LIBRARY &&
       !target->IsExecutableWithExports()) {
@@ -1854,7 +1854,7 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
                                                    std::string const& lang,
                                                    int targetType)
 {
-  const char* picFlags = CM_NULLPTR;
+  const char* picFlags = nullptr;
 
   if (targetType == cmStateEnums::EXECUTABLE) {
     std::string flagsVar = "CMAKE_";
@@ -1937,7 +1937,7 @@ void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
 
   const std::string name = "CMAKE_" + lang + "_LINK_OPTIONS_IPO";
   const char* rawFlagsList = this->Makefile->GetDefinition(name);
-  if (rawFlagsList == CM_NULLPTR) {
+  if (rawFlagsList == nullptr) {
     return;
   }
 
@@ -2067,7 +2067,7 @@ const char* cmLocalGenerator::GetFeature(const std::string& feature,
     }
     snp = snp.GetBuildsystemDirectoryParent();
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 std::string cmLocalGenerator::GetProjectName() const
@@ -2131,7 +2131,7 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 
     // Include the user-specified pre-install script for this target.
     if (const char* preinstall = (*l)->GetProperty("PRE_INSTALL_SCRIPT")) {
-      cmInstallScriptGenerator g(preinstall, false, CM_NULLPTR, false);
+      cmInstallScriptGenerator g(preinstall, false, nullptr, false);
       g.Generate(os, config, configurationTypes);
     }
 
@@ -2184,7 +2184,7 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 
     // Include the user-specified post-install script for this target.
     if (const char* postinstall = (*l)->GetProperty("POST_INSTALL_SCRIPT")) {
-      cmInstallScriptGenerator g(postinstall, false, CM_NULLPTR, false);
+      cmInstallScriptGenerator g(postinstall, false, nullptr, false);
       g.Generate(os, config, configurationTypes);
     }
   }

@@ -145,7 +145,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
   ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGFUNCTION, curlDebugCallback);
   // Set Content-Type to satisfy fussy modsecurity rules.
   struct curl_slist* headers =
-    ::curl_slist_append(CM_NULLPTR, "Content-Type: text/xml");
+    ::curl_slist_append(nullptr, "Content-Type: text/xml");
   // Add any additional headers that the user specified.
   for (std::vector<std::string>::const_iterator h = this->HttpHeaders.begin();
        h != this->HttpHeaders.end(); ++h) {
@@ -212,7 +212,7 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
   ::curl_easy_setopt(this->Curl, CURLOPT_FAILONERROR, 1);
 
   // Add headers if any were specified.
-  struct curl_slist* headers = CM_NULLPTR;
+  struct curl_slist* headers = nullptr;
   if (!this->HttpHeaders.empty()) {
     for (std::vector<std::string>::const_iterator h =
            this->HttpHeaders.begin();

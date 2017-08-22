@@ -30,7 +30,7 @@ void cmPipeConnection::Connect(uv_stream_t* server)
   auto client = reinterpret_cast<uv_stream_t*>(this->ClientPipe);
   if (uv_accept(server, client) != 0) {
     uv_close(reinterpret_cast<uv_handle_t*>(client), &on_close_delete);
-    this->ClientPipe = CM_NULLPTR;
+    this->ClientPipe = nullptr;
     return;
   }
   this->ReadStream = client;

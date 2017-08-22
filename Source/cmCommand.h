@@ -31,7 +31,7 @@ public:
    * Construct the command. By default it has no makefile.
    */
   cmCommand()
-    : Makefile(CM_NULLPTR)
+    : Makefile(nullptr)
   {
   }
 
