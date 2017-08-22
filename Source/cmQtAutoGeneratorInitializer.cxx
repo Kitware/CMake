@@ -531,25 +531,25 @@ static void SetupAutoTargetUic(cmGeneratorTarget const* target,
     std::vector<std::string> uiFileFiles;
     std::vector<std::string> uiFileOptions;
     {
-      const std::set<std::string> skipped(setup.uicSkip.begin(),
-                                          setup.uicSkip.end());
-
-      const std::vector<cmSourceFile*> uiFilesWithOptions =
-        makefile->GetQtUiFilesWithOptions();
-      for (std::vector<cmSourceFile*>::const_iterator fileIt =
-             uiFilesWithOptions.begin();
-           fileIt != uiFilesWithOptions.end(); ++fileIt) {
-        cmSourceFile* sf = *fileIt;
-        const std::string absFile =
-          cmsys::SystemTools::GetRealPath(sf->GetFullPath());
-        if (skipped.find(absFile) == skipped.end()) {
-          // The file wasn't skipped
-          uiFileFiles.push_back(absFile);
-          {
-            std::string opts = sf->GetProperty("AUTOUIC_OPTIONS");
-            cmSystemTools::ReplaceString(opts, ";",
-                                         cmQtAutoGeneratorCommon::listSep);
-            uiFileOptions.push_back(opts);
+      const std::string uiExt = "ui";
+      const std::vector<cmSourceFile*>& srcFiles = makefile->GetSourceFiles();
+      for (std::vector<cmSourceFile*>::const_iterator fit = srcFiles.begin();
+           fit != srcFiles.end(); ++fit) {
+        cmSourceFile* sf = *fit;
+        // sf->GetExtension() is only valid after sf->GetFullPath() ...
+        const std::string& fPath = sf->GetFullPath();
+        if (sf->GetExtension() == uiExt) {
+          // Check if the files has uic options
+          std::string uicOpts = sf->GetProperty("AUTOUIC_OPTIONS");
+          if (!uicOpts.empty()) {
+            const std::string absFile = cmsys::SystemTools::GetRealPath(fPath);
+            // Check if file isn't skipped
+            if (setup.uicSkip.count(absFile) == 0) {
+              uiFileFiles.push_back(absFile);
+              cmSystemTools::ReplaceString(uicOpts, ";",
+                                           cmQtAutoGeneratorCommon::listSep);
+              uiFileOptions.push_back(uicOpts);
+            }
           }
         }
       }
