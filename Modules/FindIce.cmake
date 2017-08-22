@@ -304,6 +304,7 @@ function(_Ice_FIND)
     foreach(ice_version ${ice_versions})
       foreach(vcver IN LISTS vcvers)
         list(APPEND ice_nuget_dirs "zeroc.ice.v${vcver}.${ice_version}")
+        list(APPEND freeze_nuget_dirs "zeroc.freeze.v${vcver}.${ice_version}")
       endforeach()
     endforeach()
     find_path(Ice_NUGET_DIR
@@ -312,6 +313,13 @@ function(_Ice_FIND)
               DOC "Ice NuGet directory")
     if(Ice_NUGET_DIR)
       list(APPEND ice_roots "${Ice_NUGET_DIR}")
+    endif()
+    find_path(Freeze_NUGET_DIR
+              NAMES "tools/slice2freeze.exe"
+              PATH_SUFFIXES ${freeze_nuget_dirs}
+              DOC "Freeze NuGet directory")
+    if(Freeze_NUGET_DIR)
+      list(APPEND ice_roots "${Freeze_NUGET_DIR}")
     endif()
     foreach(ice_version ${ice_versions})
       # Ice 3.3 releases use a Visual Studio year suffix and value is
@@ -389,6 +397,13 @@ function(_Ice_FIND)
             PATH_SUFFIXES ${ice_include_suffixes}
             DOC "Ice include directory")
   set(Ice_INCLUDE_DIR "${Ice_INCLUDE_DIR}" PARENT_SCOPE)
+
+  find_path(Freeze_INCLUDE_DIR
+            NAMES "Freeze/Freeze.h"
+            HINTS ${ice_roots}
+            PATH_SUFFIXES ${ice_include_suffixes}
+            DOC "Freeze include directory")
+  set(Freeze_INCLUDE_DIR "${Freeze_INCLUDE_DIR}" PARENT_SCOPE)
 
   # In common use on Linux, MacOS X (homebrew) and FreeBSD; prefer
   # version-specific dir
@@ -527,6 +542,9 @@ unset(_Ice_REQUIRED_LIBS_FOUND)
 
 if(Ice_FOUND)
   set(Ice_INCLUDE_DIRS "${Ice_INCLUDE_DIR}")
+  if (Freeze_INCLUDE_DIR)
+    list(APPEND Ice_INCLUDE_DIRS "${Freeze_INCLUDE_DIR}")
+  endif()
   set(Ice_SLICE_DIRS "${Ice_SLICE_DIR}")
   set(Ice_LIBRARIES "${Ice_LIBRARY}")
   foreach(_Ice_component ${Ice_FIND_COMPONENTS})
@@ -541,10 +559,8 @@ if(Ice_FOUND)
       set("${_Ice_component_lib}" "${${_Ice_component_cache}}")
       if(NOT TARGET ${_Ice_imported_target})
         add_library(${_Ice_imported_target} UNKNOWN IMPORTED)
-        if()
-          set_target_properties(${_Ice_imported_target} PROPERTIES
-            INTERFACE_INCLUDE_DIRECTORIES "${Ice_INCLUDE_DIR}")
-        endif()
+        set_target_properties(${_Ice_imported_target} PROPERTIES
+          INTERFACE_INCLUDE_DIRECTORIES "${Ice_INCLUDE_DIRS}")
         if(EXISTS "${${_Ice_component_cache}}")
           set_target_properties(${_Ice_imported_target} PROPERTIES
             IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
@@ -581,6 +597,8 @@ if(Ice_DEBUG)
   message(STATUS "Ice_INCLUDE_DIR directory: ${Ice_INCLUDE_DIR}")
   message(STATUS "Ice_SLICE_DIR directory: ${Ice_SLICE_DIR}")
   message(STATUS "Ice_LIBRARIES: ${Ice_LIBRARIES}")
+  message(STATUS "Freeze_INCLUDE_DIR directory: ${Freeze_INCLUDE_DIR}")
+  message(STATUS "Ice_INCLUDE_DIRS directory: ${Ice_INCLUDE_DIRS}")
 
   foreach(program ${_Ice_db_programs} ${_Ice_programs} ${_Ice_slice_programs})
     string(TOUPPER "${program}" program_upcase)
