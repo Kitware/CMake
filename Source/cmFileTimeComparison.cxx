@@ -4,9 +4,8 @@
 
 #include <string>
 #include <time.h>
+#include <unordered_map>
 #include <utility>
-
-#include "cm_unordered_map.hxx"
 
 // Use a platform-specific API to get file times efficiently.
 #if !defined(_WIN32) || defined(__CYGWIN__)
@@ -27,7 +26,7 @@ public:
   bool FileTimesDiffer(const char* f1, const char* f2);
 
 private:
-  typedef CM_UNORDERED_MAP<std::string, cmFileTimeComparison_Type>
+  typedef std::unordered_map<std::string, cmFileTimeComparison_Type>
     FileStatsMap;
   FileStatsMap Files;
 

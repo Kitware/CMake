@@ -10,13 +10,13 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "cmListFileCache.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmStateSnapshot.h"
-#include "cm_unordered_map.hxx"
 #include "cmake.h"
 
 class cmComputeLinkInformation;
@@ -354,7 +354,8 @@ protected:
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;
 
-  typedef CM_UNORDERED_MAP<std::string, cmGeneratorTarget*> GeneratorTargetMap;
+  typedef std::unordered_map<std::string, cmGeneratorTarget*>
+    GeneratorTargetMap;
   GeneratorTargetMap GeneratorTargetSearchIndex;
   std::vector<cmGeneratorTarget*> GeneratorTargets;
 

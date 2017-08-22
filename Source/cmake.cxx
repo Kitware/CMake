@@ -32,7 +32,7 @@
 
 #include "cmGraphVizWriter.h"
 #include "cmVariableWatch.h"
-#include "cm_unordered_map.hxx"
+#include <unordered_map>
 #endif
 
 // only build kdevelop generator on non-windows platforms
@@ -120,7 +120,7 @@
 namespace {
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-typedef CM_UNORDERED_MAP<std::string, Json::Value> JsonValueMapType;
+typedef std::unordered_map<std::string, Json::Value> JsonValueMapType;
 #endif
 
 } // namespace

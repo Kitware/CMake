@@ -9,6 +9,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -19,7 +20,6 @@
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cm_codecvt.hxx"
-#include "cm_unordered_map.hxx"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmFileLockPool.h"
@@ -488,9 +488,10 @@ protected:
   const char* GetPredefinedTargetsFolder();
 
 private:
-  typedef CM_UNORDERED_MAP<std::string, cmTarget*> TargetMap;
-  typedef CM_UNORDERED_MAP<std::string, cmGeneratorTarget*> GeneratorTargetMap;
-  typedef CM_UNORDERED_MAP<std::string, cmMakefile*> MakefileMap;
+  typedef std::unordered_map<std::string, cmTarget*> TargetMap;
+  typedef std::unordered_map<std::string, cmGeneratorTarget*>
+    GeneratorTargetMap;
+  typedef std::unordered_map<std::string, cmMakefile*> MakefileMap;
   // Map efficiently from target name to cmTarget instance.
   // Do not use this structure for looping over all targets.
   // It contains both normal and globally visible imported targets.

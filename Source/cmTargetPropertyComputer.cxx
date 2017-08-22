@@ -4,11 +4,11 @@
 #include "cmTargetPropertyComputer.h"
 
 #include <sstream>
+#include <unordered_set>
 
 #include "cmMessenger.h"
 #include "cmPolicies.h"
 #include "cmStateSnapshot.h"
-#include "cm_unordered_set.hxx"
 #include "cmake.h"
 
 bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
@@ -49,7 +49,7 @@ bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
   if (cmHasLiteralPrefix(prop, "INTERFACE_")) {
     return true;
   }
-  static CM_UNORDERED_SET<std::string> builtIns;
+  static std::unordered_set<std::string> builtIns;
   if (builtIns.empty()) {
     builtIns.insert("COMPATIBLE_INTERFACE_BOOL");
     builtIns.insert("COMPATIBLE_INTERFACE_NUMBER_MAX");

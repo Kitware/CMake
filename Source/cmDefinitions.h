@@ -6,10 +6,10 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "cmLinkedTree.h"
-#include "cm_unordered_map.hxx"
 
 /** \class cmDefinitions
  * \brief Store a scope of variable definitions for CMake language.
@@ -70,7 +70,7 @@ private:
   };
   static Def NoDef;
 
-  typedef CM_UNORDERED_MAP<std::string, Def> MapType;
+  typedef std::unordered_map<std::string, Def> MapType;
   MapType Map;
 
   static Def const& GetInternal(const std::string& key, StackIter begin,
