@@ -8,11 +8,11 @@
 # Do not perform whitespace checks.  Do not format.
 [attr]generated  whitespace=-tab-in-indent,-indent-with-non-tab -format.clang-format
 
-bootstrap        crlf=input
-configure        crlf=input
-*.[1-9]          crlf=input
-*.sh             crlf=input
-*.sh.in          crlf=input
+bootstrap        eol=lf
+configure        eol=lf
+*.[1-9]          eol=lf
+*.sh             eol=lf
+*.sh.in          eol=lf
 
 *.bat           -crlf
 *.bat.in        -crlf
