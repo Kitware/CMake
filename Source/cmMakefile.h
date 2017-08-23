@@ -736,9 +736,6 @@ public:
   cmStringRange GetCompileDefinitionsEntries() const;
   cmBacktraceRange GetCompileDefinitionsBacktraces() const;
 
-  void AddQtUiFileWithOptions(cmSourceFile* sf);
-  std::vector<cmSourceFile*> GetQtUiFilesWithOptions() const;
-
   std::set<std::string> const& GetSystemIncludeDirectories() const
   {
     return this->SystemIncludeDirectories;
@@ -916,8 +913,6 @@ private:
                                cmSourceFile* source);
   void UpdateOutputToSourceMap(std::string const& output,
                                cmSourceFile* source);
-
-  std::vector<cmSourceFile*> QtUiFilesWithOptions;
 
   bool AddRequiredTargetCFeature(cmTarget* target, const std::string& feature,
                                  std::string* error = CM_NULLPTR) const;

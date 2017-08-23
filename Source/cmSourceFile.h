@@ -107,7 +107,6 @@ private:
   std::string ObjectLibrary;
   std::vector<std::string> Depends;
   bool FindFullPathFailed;
-  bool IsUiFile;
 
   bool FindFullPath(std::string* error);
   bool TryFullPath(const std::string& path, const std::string& ext);
