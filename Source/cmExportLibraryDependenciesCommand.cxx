@@ -4,6 +4,7 @@
 
 #include "cmsys/FStream.hxx"
 #include <map>
+#include <unordered_map>
 #include <utility>
 
 #include "cmGeneratedFileStream.h"
@@ -14,7 +15,6 @@
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
 #include "cm_auto_ptr.hxx"
-#include "cm_unordered_map.hxx"
 #include "cmake.h"
 
 class cmExecutionStatus;

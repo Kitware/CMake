@@ -9,6 +9,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -19,7 +20,6 @@
 #include "cmPropertyMap.h"
 #include "cmStateTypes.h"
 #include "cmTargetLinkLibraryType.h"
-#include "cm_unordered_map.hxx"
 
 class cmGlobalGenerator;
 class cmMakefile;
@@ -323,7 +323,7 @@ private:
   cmListFileBacktrace Backtrace;
 };
 
-typedef CM_UNORDERED_MAP<std::string, cmTarget> cmTargets;
+typedef std::unordered_map<std::string, cmTarget> cmTargets;
 
 class cmTargetSet : public std::set<std::string>
 {

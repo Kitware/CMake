@@ -12,6 +12,7 @@
 #include <stack>
 #include <stddef.h>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "cmAlgorithms.h"
@@ -22,7 +23,6 @@
 #include "cmStateTypes.h"
 #include "cmTarget.h"
 #include "cm_auto_ptr.hxx"
-#include "cm_unordered_map.hxx"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -871,7 +871,7 @@ private:
   friend class cmParseFileScope;
 
   std::vector<cmTarget*> ImportedTargetsOwned;
-  typedef CM_UNORDERED_MAP<std::string, cmTarget*> TargetMap;
+  typedef std::unordered_map<std::string, cmTarget*> TargetMap;
   TargetMap ImportedTargets;
 
   // Internal policy stack management.
@@ -909,7 +909,7 @@ private:
   cmSourceFile* LinearGetSourceFileWithOutput(const std::string& cname) const;
 
   // A map for fast output to input look up.
-  typedef CM_UNORDERED_MAP<std::string, cmSourceFile*> OutputToSourceMap;
+  typedef std::unordered_map<std::string, cmSourceFile*> OutputToSourceMap;
   OutputToSourceMap OutputToSource;
 
   void UpdateOutputToSourceMap(std::vector<std::string> const& outputs,

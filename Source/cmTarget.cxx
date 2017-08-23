@@ -9,6 +9,7 @@
 #include <set>
 #include <sstream>
 #include <string.h>
+#include <unordered_set>
 
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
@@ -26,7 +27,6 @@
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmTargetPropertyComputer.h"
-#include "cm_unordered_set.hxx"
 #include "cmake.h"
 
 template <>
@@ -1180,7 +1180,7 @@ const char* cmTarget::GetComputedProperty(
 
 const char* cmTarget::GetProperty(const std::string& prop) const
 {
-  static CM_UNORDERED_SET<std::string> specialProps;
+  static std::unordered_set<std::string> specialProps;
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
   MAKE_STATIC_PROP(LINK_LIBRARIES);
   MAKE_STATIC_PROP(TYPE);

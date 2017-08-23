@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unordered_set>
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
@@ -32,7 +33,6 @@
 #include "cmTargetLinkLibraryType.h"
 #include "cmTargetPropertyComputer.h"
 #include "cm_auto_ptr.hxx"
-#include "cm_unordered_set.hxx"
 #include "cmake.h"
 
 class cmMessenger;
@@ -823,7 +823,7 @@ static void AddInterfaceEntries(
 static bool processSources(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
-  std::vector<std::string>& srcs, CM_UNORDERED_SET<std::string>& uniqueSrcs,
+  std::vector<std::string>& srcs, std::unordered_set<std::string>& uniqueSrcs,
   cmGeneratorExpressionDAGChecker* dagChecker, std::string const& config,
   bool debugSources)
 {
@@ -950,7 +950,7 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<std::string>& files,
   cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), "SOURCES",
                                              CM_NULLPTR, CM_NULLPTR);
 
-  CM_UNORDERED_SET<std::string> uniqueSrcs;
+  std::unordered_set<std::string> uniqueSrcs;
   bool contextDependentDirectSources =
     processSources(this, this->SourceEntries, files, uniqueSrcs, &dagChecker,
                    config, debugSources);
@@ -1728,7 +1728,7 @@ class cmTargetCollectLinkLanguages
 public:
   cmTargetCollectLinkLanguages(cmGeneratorTarget const* target,
                                const std::string& config,
-                               CM_UNORDERED_SET<std::string>& languages,
+                               std::unordered_set<std::string>& languages,
                                cmGeneratorTarget const* head)
     : Config(config)
     , Languages(languages)
@@ -1795,7 +1795,7 @@ public:
 
 private:
   std::string Config;
-  CM_UNORDERED_SET<std::string>& Languages;
+  std::unordered_set<std::string>& Languages;
   cmGeneratorTarget const* HeadTarget;
   const cmGeneratorTarget* Target;
   std::set<cmGeneratorTarget const*> Visited;
@@ -1867,7 +1867,7 @@ void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
                                            LinkClosure& lc) const
 {
   // Get languages built in this target.
-  CM_UNORDERED_SET<std::string> languages;
+  std::unordered_set<std::string> languages;
   cmLinkImplementation const* impl = this->GetLinkImplementation(config);
   assert(impl);
   for (std::vector<std::string>::const_iterator li = impl->Languages.begin();
@@ -1884,7 +1884,7 @@ void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
   }
 
   // Store the transitive closure of languages.
-  for (CM_UNORDERED_SET<std::string>::const_iterator li = languages.begin();
+  for (std::unordered_set<std::string>::const_iterator li = languages.begin();
        li != languages.end(); ++li) {
     lc.Languages.push_back(*li);
   }
@@ -1905,7 +1905,8 @@ void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
     }
 
     // Now consider languages that propagate from linked targets.
-    for (CM_UNORDERED_SET<std::string>::const_iterator sit = languages.begin();
+    for (std::unordered_set<std::string>::const_iterator sit =
+           languages.begin();
          sit != languages.end(); ++sit) {
       std::string propagates =
         "CMAKE_" + *sit + "_LINKER_PREFERENCE_PROPAGATES";
@@ -2477,7 +2478,7 @@ static void processIncludeDirectories(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<std::string>& includes,
-  CM_UNORDERED_SET<std::string>& uniqueIncludes,
+  std::unordered_set<std::string>& uniqueIncludes,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   bool debugIncludes, const std::string& language)
 {
@@ -2591,7 +2592,7 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
   const std::string& config, const std::string& lang) const
 {
   std::vector<std::string> includes;
-  CM_UNORDERED_SET<std::string> uniqueIncludes;
+  std::unordered_set<std::string> uniqueIncludes;
 
   cmGeneratorExpressionDAGChecker dagChecker(
     this->GetName(), "INCLUDE_DIRECTORIES", CM_NULLPTR, CM_NULLPTR);
@@ -2657,7 +2658,7 @@ static void processCompileOptionsInternal(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<std::string>& options,
-  CM_UNORDERED_SET<std::string>& uniqueOptions,
+  std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   bool debugOptions, const char* logName, std::string const& language)
 {
@@ -2695,7 +2696,7 @@ static void processCompileOptions(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<std::string>& options,
-  CM_UNORDERED_SET<std::string>& uniqueOptions,
+  std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   bool debugOptions, std::string const& language)
 {
@@ -2708,7 +2709,7 @@ void cmGeneratorTarget::GetCompileOptions(std::vector<std::string>& result,
                                           const std::string& config,
                                           const std::string& language) const
 {
-  CM_UNORDERED_SET<std::string> uniqueOptions;
+  std::unordered_set<std::string> uniqueOptions;
 
   cmGeneratorExpressionDAGChecker dagChecker(
     this->GetName(), "COMPILE_OPTIONS", CM_NULLPTR, CM_NULLPTR);
@@ -2749,7 +2750,7 @@ static void processCompileFeatures(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<std::string>& options,
-  CM_UNORDERED_SET<std::string>& uniqueOptions,
+  std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   bool debugOptions)
 {
@@ -2761,7 +2762,7 @@ static void processCompileFeatures(
 void cmGeneratorTarget::GetCompileFeatures(std::vector<std::string>& result,
                                            const std::string& config) const
 {
-  CM_UNORDERED_SET<std::string> uniqueFeatures;
+  std::unordered_set<std::string> uniqueFeatures;
 
   cmGeneratorExpressionDAGChecker dagChecker(
     this->GetName(), "COMPILE_FEATURES", CM_NULLPTR, CM_NULLPTR);
@@ -2799,7 +2800,7 @@ static void processCompileDefinitions(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<std::string>& options,
-  CM_UNORDERED_SET<std::string>& uniqueOptions,
+  std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   bool debugOptions, std::string const& language)
 {
@@ -2812,7 +2813,7 @@ void cmGeneratorTarget::GetCompileDefinitions(
   std::vector<std::string>& list, const std::string& config,
   const std::string& language) const
 {
-  CM_UNORDERED_SET<std::string> uniqueOptions;
+  std::unordered_set<std::string> uniqueOptions;
 
   cmGeneratorExpressionDAGChecker dagChecker(
     this->GetName(), "COMPILE_DEFINITIONS", CM_NULLPTR, CM_NULLPTR);
@@ -4363,7 +4364,7 @@ void cmGeneratorTarget::ComputeLinkInterface(
         this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       // Shared libraries may have runtime implementation dependencies
       // on other shared libraries that are not in the interface.
-      CM_UNORDERED_SET<std::string> emitted;
+      std::unordered_set<std::string> emitted;
       for (std::vector<cmLinkItem>::const_iterator li =
              iface.Libraries.begin();
            li != iface.Libraries.end(); ++li) {
