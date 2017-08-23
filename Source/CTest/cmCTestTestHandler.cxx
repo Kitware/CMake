@@ -544,7 +544,7 @@ int cmCTestTestHandler::ProcessHandler()
     }
 
     char realBuf[1024];
-    sprintf(realBuf, "%6.2f sec", (double)(clock_finish - clock_start));
+    sprintf(realBuf, "%6.2f sec", clock_finish - clock_start);
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "\nTotal Test time (real) = " << realBuf << "\n",
                        this->Quiet);
@@ -851,7 +851,7 @@ void cmCTestTestHandler::ComputeTestList()
   }
   // expand the test list based on the union flag
   if (this->UseUnion) {
-    this->ExpandTestsToRunInformation((int)tmsize);
+    this->ExpandTestsToRunInformation(static_cast<int>(tmsize));
   } else {
     this->ExpandTestsToRunInformation(inREcnt);
   }
@@ -1327,7 +1327,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
 
   bool randomSchedule = this->CTest->GetScheduleType() == "Random";
   if (randomSchedule) {
-    srand((unsigned)time(nullptr));
+    srand(static_cast<unsigned>(time(nullptr)));
   }
 
   for (ListOfTests::iterator it = this->TestList.begin();

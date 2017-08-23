@@ -529,7 +529,7 @@ void cmCursesMainForm::UpdateProgress(const char* msg, float prog, void* vp)
   char tmp[1024];
   const char* cmsg = tmp;
   if (prog >= 0) {
-    sprintf(tmp, "%s %i%%", msg, (int)(100 * prog));
+    sprintf(tmp, "%s %i%%", msg, static_cast<int>(100 * prog));
   } else {
     cmsg = msg;
   }

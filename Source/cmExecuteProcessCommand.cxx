@@ -16,7 +16,7 @@ class cmExecutionStatus;
 
 static bool cmExecuteProcessCommandIsWhitespace(char c)
 {
-  return (isspace((int)c) || c == '\n' || c == '\r');
+  return (isspace(static_cast<int>(c)) || c == '\n' || c == '\r');
 }
 
 void cmExecuteProcessCommandFixText(std::vector<char>& output,

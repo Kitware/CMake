@@ -469,11 +469,13 @@ void cmServerBase::OnServeStart()
 
 void cmServerBase::StartShutDown()
 {
-  if (!uv_is_closing((const uv_handle_t*)&this->SIGINTHandler)) {
+  if (!uv_is_closing(
+        reinterpret_cast<const uv_handle_t*>(&this->SIGINTHandler))) {
     uv_signal_stop(&this->SIGINTHandler);
   }
 
-  if (!uv_is_closing((const uv_handle_t*)&this->SIGHUPHandler)) {
+  if (!uv_is_closing(
+        reinterpret_cast<const uv_handle_t*>(&this->SIGHUPHandler))) {
     uv_signal_stop(&this->SIGHUPHandler);
   }
 

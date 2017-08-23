@@ -2454,7 +2454,7 @@ namespace {
 
 size_t cmWriteToFileCallback(void* ptr, size_t size, size_t nmemb, void* data)
 {
-  int realsize = (int)(size * nmemb);
+  int realsize = static_cast<int>(size * nmemb);
   cmsys::ofstream* fout = static_cast<cmsys::ofstream*>(data);
   const char* chPtr = static_cast<char*>(ptr);
   fout->write(chPtr, realsize);
@@ -2464,7 +2464,7 @@ size_t cmWriteToFileCallback(void* ptr, size_t size, size_t nmemb, void* data)
 size_t cmWriteToMemoryCallback(void* ptr, size_t size, size_t nmemb,
                                void* data)
 {
-  int realsize = (int)(size * nmemb);
+  int realsize = static_cast<int>(size * nmemb);
   cmFileCommandVectorOfChar* vec =
     static_cast<cmFileCommandVectorOfChar*>(data);
   const char* chPtr = static_cast<char*>(ptr);
@@ -2758,7 +2758,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       msg += "\"";
       if (!statusVar.empty()) {
         std::ostringstream result;
-        result << (int)0 << ";\"" << msg;
+        result << 0 << ";\"" << msg;
         this->Makefile->AddDefinition(statusVar, result.str().c_str());
       }
       return true;
@@ -2831,10 +2831,10 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 
   cmFileCommandVectorOfChar chunkDebug;
 
-  res = ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&fout);
+  res = ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, &fout);
   check_curl_result(res, "DOWNLOAD cannot set write data: ");
 
-  res = ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void*)&chunkDebug);
+  res = ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
   check_curl_result(res, "DOWNLOAD cannot set debug data: ");
 
   res = ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -2898,7 +2898,8 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 
   if (!statusVar.empty()) {
     std::ostringstream result;
-    result << (int)res << ";\"" << ::curl_easy_strerror(res) << "\"";
+    result << static_cast<int>(res) << ";\"" << ::curl_easy_strerror(res)
+           << "\"";
     this->Makefile->AddDefinition(statusVar, result.str().c_str());
   }
 
@@ -2924,7 +2925,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
           << "  for file: [" << file << "]" << std::endl
           << "    expected hash: [" << expectedHash << "]" << std::endl
           << "      actual hash: [" << actualHash << "]" << std::endl
-          << "           status: [" << (int)res << ";\""
+          << "           status: [" << static_cast<int>(res) << ";\""
           << ::curl_easy_strerror(res) << "\"]" << std::endl;
 
       if (!statusVar.empty() && res == 0) {
@@ -3080,10 +3081,10 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   cmFileCommandVectorOfChar chunkResponse;
   cmFileCommandVectorOfChar chunkDebug;
 
-  res = ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&chunkResponse);
+  res = ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, &chunkResponse);
   check_curl_result(res, "UPLOAD cannot set write data: ");
 
-  res = ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void*)&chunkDebug);
+  res = ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
   check_curl_result(res, "UPLOAD cannot set debug data: ");
 
   res = ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -3156,7 +3157,8 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
 
   if (!statusVar.empty()) {
     std::ostringstream result;
-    result << (int)res << ";\"" << ::curl_easy_strerror(res) << "\"";
+    result << static_cast<int>(res) << ";\"" << ::curl_easy_strerror(res)
+           << "\"";
     this->Makefile->AddDefinition(statusVar, result.str().c_str());
   }
 

@@ -1519,21 +1519,21 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
   /* Use uname if it's present, else uid. */
   p = archive_entry_uname(entry);
   if ((p == nullptr) || (*p == '\0')) {
-    sprintf(tmp, "%lu ", (unsigned long)archive_entry_uid(entry));
+    sprintf(tmp, "%lu ", static_cast<unsigned long>(archive_entry_uid(entry)));
     p = tmp;
   }
   w = strlen(p);
   if (w > u_width) {
     u_width = w;
   }
-  fprintf(out, "%-*s ", (int)u_width, p);
+  fprintf(out, "%-*s ", static_cast<int>(u_width), p);
   /* Use gname if it's present, else gid. */
   p = archive_entry_gname(entry);
   if (p != nullptr && p[0] != '\0') {
     fprintf(out, "%s", p);
     w = strlen(p);
   } else {
-    sprintf(tmp, "%lu", (unsigned long)archive_entry_gid(entry));
+    sprintf(tmp, "%lu", static_cast<unsigned long>(archive_entry_gid(entry)));
     w = strlen(tmp);
     fprintf(out, "%s", tmp);
   }
@@ -1545,8 +1545,9 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
    */
   if (archive_entry_filetype(entry) == AE_IFCHR ||
       archive_entry_filetype(entry) == AE_IFBLK) {
-    sprintf(tmp, "%lu,%lu", (unsigned long)archive_entry_rdevmajor(entry),
-            (unsigned long)archive_entry_rdevminor(entry));
+    unsigned long rdevmajor = archive_entry_rdevmajor(entry);
+    unsigned long rdevminor = archive_entry_rdevminor(entry);
+    sprintf(tmp, "%lu,%lu", rdevmajor, rdevminor);
   } else {
     /*
      * Note the use of platform-dependent macros to format
@@ -1554,12 +1555,12 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
      * corresponding type for the cast.
      */
     sprintf(tmp, BSDTAR_FILESIZE_PRINTF,
-            (BSDTAR_FILESIZE_TYPE)archive_entry_size(entry));
+            static_cast<BSDTAR_FILESIZE_TYPE>(archive_entry_size(entry)));
   }
   if (w + strlen(tmp) >= gs_width) {
     gs_width = w + strlen(tmp) + 1;
   }
-  fprintf(out, "%*s", (int)(gs_width - w), tmp);
+  fprintf(out, "%*s", static_cast<int>(gs_width - w), tmp);
 
   /* Format the time using 'ls -l' conventions. */
   tim = archive_entry_mtime(entry);

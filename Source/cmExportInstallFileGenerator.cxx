@@ -445,7 +445,7 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
   const std::string name = dependee->GetName();
   cmGlobalGenerator* gg = dependee->GetLocalGenerator()->GetGlobalGenerator();
   std::vector<std::string> namespaces = this->FindNamespaces(gg, name);
-  int targetOccurrences = (int)namespaces.size();
+  int targetOccurrences = static_cast<int>(namespaces.size());
   if (targetOccurrences == 1) {
     std::string missingTarget = namespaces[0];
 

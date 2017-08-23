@@ -153,7 +153,7 @@ std::string GeneratorExpressionContent::EvaluateParameters(
   }
 
   if ((numExpected > cmGeneratorExpressionNode::DynamicParameters &&
-       (unsigned int)numExpected != parameters.size())) {
+       static_cast<unsigned int>(numExpected) != parameters.size())) {
     if (numExpected == 0) {
       reportError(context, this->GetOriginalExpression(),
                   "$<" + identifier + "> expression requires no parameters.");

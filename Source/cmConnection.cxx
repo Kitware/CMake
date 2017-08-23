@@ -31,7 +31,7 @@ void cmEventBasedConnection::on_read(uv_stream_t* stream, ssize_t nread,
     if (nread >= 0) {
       conn->ReadData(std::string(buf->base, buf->base + nread));
     } else {
-      conn->OnDisconnect((int)nread);
+      conn->OnDisconnect(static_cast<int>(nread));
     }
   }
 

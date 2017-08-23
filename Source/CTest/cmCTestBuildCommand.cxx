@@ -43,7 +43,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
     this->SetError("internal CTest error. Cannot instantiate build handler");
     return nullptr;
   }
-  this->Handler = (cmCTestBuildHandler*)handler;
+  this->Handler = static_cast<cmCTestBuildHandler*>(handler);
 
   const char* ctestBuildCommand =
     this->Makefile->GetDefinition("CTEST_BUILD_COMMAND");

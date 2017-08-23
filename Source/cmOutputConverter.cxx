@@ -389,7 +389,7 @@ int cmOutputConverter::Shell__CharNeedsQuotes(char c, int flags)
 
 int cmOutputConverter::Shell__CharIsMakeVariableName(char c)
 {
-  return c && (c == '_' || isalpha(((int)c)));
+  return c && (c == '_' || isalpha((static_cast<int>(c))));
 }
 
 const char* cmOutputConverter::Shell__SkipMakeVariables(const char* c)
