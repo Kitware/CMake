@@ -1,1 +1,1 @@
-*.cmcov  -crlf  -whitespace
+*.cmcov  eol=crlf

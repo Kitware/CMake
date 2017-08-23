@@ -14,10 +14,10 @@ configure        eol=lf
 *.sh             eol=lf
 *.sh.in          eol=lf
 
-*.bat           -crlf
-*.bat.in        -crlf
-*.sln           -crlf
-*.vcproj        -crlf
+*.bat            eol=crlf
+*.bat.in         eol=crlf
+*.sln            eol=crlf
+*.vcproj         eol=crlf
 
 *.pfx            -text
 *.png            -text
