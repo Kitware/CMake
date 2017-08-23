@@ -870,6 +870,14 @@ foreach(line IN LISTS lines)
     set(_ep_keyword_sep)
   elseif("${line}" MATCHES "^ +``([A-Z0-9_]+) [^`]*``$")
     set(_ep_key "${CMAKE_MATCH_1}")
+    # COMMAND should never be included as a keyword,
+    # for ExternalProject_Add(), as it is treated as a
+    # special case by argument parsing as an extension
+    # of a previous ..._COMMAND
+    if("x${_ep_key}x" STREQUAL "xCOMMANDx" AND
+       "x${_ep_func}x" STREQUAL "xExternalProject_Addx")
+      continue()
+    endif()
     #message("  keyword [${_ep_key}]")
     string(APPEND _ep_keywords_${_ep_func}
       "${_ep_keyword_sep}${_ep_key}")
