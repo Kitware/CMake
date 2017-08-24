@@ -34,8 +34,6 @@ Generators
   This is an experimental feature and can be activated by setting the
   :variable:`CMAKE_XCODE_GENERATE_SCHEME` variable to a ``TRUE`` value.
 
-* The :generator:`Xcode` generator now supports Xcode 9.
-
 Commands
 --------
 
@@ -337,3 +335,8 @@ Changes made since CMake 3.9.0 include the following.
 * On macOS, the default application bundle ``Info.plist`` file no longer
   enables Hi-DPI support as it did in 3.9.0 and 3.9.1.  The change had
   to be reverted because it broke iOS applications.
+
+* The Xcode generator no longer adds "outputPaths" to custom script
+  build phases as it did in 3.9.0 and 3.9.1.  This was added in an
+  attempt to support Xcode 9's new build system, but broke incremental
+  rebuilds for both the old and new Xcode build systems.
