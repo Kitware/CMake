@@ -7,14 +7,12 @@ This file must be translated to C and modified to build everywhere.
 
 Run flex >= 2.6 like this:
 
-  flex --nounistd -DFLEXINT_H --prefix=cmListFileLexer_yy -ocmListFileLexer.c cmListFileLexer.in.l
+  flex --nounistd -DFLEXINT_H --noline -ocmListFileLexer.c cmListFileLexer.in.l
 
 Modify cmListFileLexer.c:
-  - remove trailing whitespace: sed -i 's/\s*$//' cmListFileLexer.c
-  - remove blank lines at end of file
-  - #include "cmStandardLexer.h" at the top
-  - add cast in yy_scan_bytes for loop condition of _yybytes_len to size_t
-  - change type of variable yyl under yy_find_action from yy_size_t to int
+  - remove trailing whitespace:              sed -i 's/\s*$//' cmListFileLexer.c
+  - remove blank lines at end of file:       sed -i '${/^$/d;}' cmListFileLexer.c
+  - #include "cmStandardLexer.h" at the top: sed -i '1i#include "cmStandardLexer.h"' cmListFileLexer.c
 
 */
 
@@ -63,6 +61,8 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 
 /*--------------------------------------------------------------------------*/
 %}
+
+%option prefix="cmListFileLexer_yy"
 
 %option reentrant
 %option yylineno
