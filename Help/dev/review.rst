@@ -195,6 +195,9 @@ Committers should aim to keep this first line short. Any subsequent lines
 should be separated from the first by a blank line and provide relevant, useful
 information.
 
+Area Prefix on Commit Messages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 The appropriateness of the initial word describing the area the commit applies
 to is not something the automatic robot review can judge, so it is up to the
 human reviewer to confirm that the area is specified and that it is
@@ -208,6 +211,9 @@ message include:
 * ``FindBoost: Add support for 1.64``
 * ``Autogen: Extended mocInclude tests``
 * ``cmLocalGenerator: Explain standard flag selection logic in comments``
+
+Referencing Issues in Commit Messages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If the commit fixes a particular reported issue, this information should
 ideally also be part of the commit message. The recommended way to do this is
@@ -227,6 +233,9 @@ close the issue when the commit is merged into master. GitLab understands a few
 other synonyms for ``Fixes`` and allows much more flexible forms than the
 above, but committers should aim for this format for consistency. Note that
 such details can alternatively be specified in the merge request description.
+
+Revising Commit Messages
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 Reviewers are encouraged to ask the committer to amend commit messages to
 follow these guidelines, but prefer to focus on the changes themselves as a
