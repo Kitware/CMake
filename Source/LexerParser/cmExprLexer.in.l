@@ -7,13 +7,12 @@ This file must be translated to C++ and modified to build everywhere.
 
 Run flex >= 2.6 like this:
 
-  flex --nounistd -DFLEXINT_H --prefix=cmExpr_yy --header-file=cmExprLexer.h -ocmExprLexer.cxx cmExprLexer.in.l
+  flex --nounistd -DFLEXINT_H --noline --header-file=cmExprLexer.h -ocmExprLexer.cxx cmExprLexer.in.l
 
 Modify cmExprLexer.cxx:
-  - remove trailing whitespace: sed -i 's/\s*$//' cmExprLexer.h cmExprLexer.cxx
-  - remove blank lines at end of file
-  - #include "cmStandardLexer.h" at the top
-  - add cast in yy_scan_bytes for loop condition of _yybytes_len to size_t
+  - remove trailing whitespace:              sed -i 's/\s*$//' cmExprLexer.h cmExprLexer.cxx
+  - remove blank lines at end of file:       sed -i '${/^$/d;}' cmExprLexer.h cmExprLexer.cxx
+  - #include "cmStandardLexer.h" at the top: sed -i '1i#include "cmStandardLexer.h"' cmExprLexer.cxx
 
 */
 
@@ -31,6 +30,8 @@ Modify cmExprLexer.cxx:
 
 /*--------------------------------------------------------------------------*/
 %}
+
+%option prefix="cmExpr_yy"
 
 %option reentrant
 %option noyywrap
