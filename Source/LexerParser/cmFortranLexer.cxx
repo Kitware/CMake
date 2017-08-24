@@ -1,7 +1,4 @@
 #include "cmStandardLexer.h"
-#line 2 "cmFortranLexer.cxx"
-
-#line 4 "cmFortranLexer.cxx"
 
 #define FLEXINT_H 1
 #define  YY_INT_ALIGNED short int
@@ -11,9 +8,219 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 6
-#define YY_FLEX_SUBMINOR_VERSION 1
+#define YY_FLEX_SUBMINOR_VERSION 4
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
+#endif
+
+#ifdef yy_create_buffer
+#define cmFortran_yy_create_buffer_ALREADY_DEFINED
+#else
+#define yy_create_buffer cmFortran_yy_create_buffer
+#endif
+
+#ifdef yy_delete_buffer
+#define cmFortran_yy_delete_buffer_ALREADY_DEFINED
+#else
+#define yy_delete_buffer cmFortran_yy_delete_buffer
+#endif
+
+#ifdef yy_scan_buffer
+#define cmFortran_yy_scan_buffer_ALREADY_DEFINED
+#else
+#define yy_scan_buffer cmFortran_yy_scan_buffer
+#endif
+
+#ifdef yy_scan_string
+#define cmFortran_yy_scan_string_ALREADY_DEFINED
+#else
+#define yy_scan_string cmFortran_yy_scan_string
+#endif
+
+#ifdef yy_scan_bytes
+#define cmFortran_yy_scan_bytes_ALREADY_DEFINED
+#else
+#define yy_scan_bytes cmFortran_yy_scan_bytes
+#endif
+
+#ifdef yy_init_buffer
+#define cmFortran_yy_init_buffer_ALREADY_DEFINED
+#else
+#define yy_init_buffer cmFortran_yy_init_buffer
+#endif
+
+#ifdef yy_flush_buffer
+#define cmFortran_yy_flush_buffer_ALREADY_DEFINED
+#else
+#define yy_flush_buffer cmFortran_yy_flush_buffer
+#endif
+
+#ifdef yy_load_buffer_state
+#define cmFortran_yy_load_buffer_state_ALREADY_DEFINED
+#else
+#define yy_load_buffer_state cmFortran_yy_load_buffer_state
+#endif
+
+#ifdef yy_switch_to_buffer
+#define cmFortran_yy_switch_to_buffer_ALREADY_DEFINED
+#else
+#define yy_switch_to_buffer cmFortran_yy_switch_to_buffer
+#endif
+
+#ifdef yypush_buffer_state
+#define cmFortran_yypush_buffer_state_ALREADY_DEFINED
+#else
+#define yypush_buffer_state cmFortran_yypush_buffer_state
+#endif
+
+#ifdef yypop_buffer_state
+#define cmFortran_yypop_buffer_state_ALREADY_DEFINED
+#else
+#define yypop_buffer_state cmFortran_yypop_buffer_state
+#endif
+
+#ifdef yyensure_buffer_stack
+#define cmFortran_yyensure_buffer_stack_ALREADY_DEFINED
+#else
+#define yyensure_buffer_stack cmFortran_yyensure_buffer_stack
+#endif
+
+#ifdef yylex
+#define cmFortran_yylex_ALREADY_DEFINED
+#else
+#define yylex cmFortran_yylex
+#endif
+
+#ifdef yyrestart
+#define cmFortran_yyrestart_ALREADY_DEFINED
+#else
+#define yyrestart cmFortran_yyrestart
+#endif
+
+#ifdef yylex_init
+#define cmFortran_yylex_init_ALREADY_DEFINED
+#else
+#define yylex_init cmFortran_yylex_init
+#endif
+
+#ifdef yylex_init_extra
+#define cmFortran_yylex_init_extra_ALREADY_DEFINED
+#else
+#define yylex_init_extra cmFortran_yylex_init_extra
+#endif
+
+#ifdef yylex_destroy
+#define cmFortran_yylex_destroy_ALREADY_DEFINED
+#else
+#define yylex_destroy cmFortran_yylex_destroy
+#endif
+
+#ifdef yyget_debug
+#define cmFortran_yyget_debug_ALREADY_DEFINED
+#else
+#define yyget_debug cmFortran_yyget_debug
+#endif
+
+#ifdef yyset_debug
+#define cmFortran_yyset_debug_ALREADY_DEFINED
+#else
+#define yyset_debug cmFortran_yyset_debug
+#endif
+
+#ifdef yyget_extra
+#define cmFortran_yyget_extra_ALREADY_DEFINED
+#else
+#define yyget_extra cmFortran_yyget_extra
+#endif
+
+#ifdef yyset_extra
+#define cmFortran_yyset_extra_ALREADY_DEFINED
+#else
+#define yyset_extra cmFortran_yyset_extra
+#endif
+
+#ifdef yyget_in
+#define cmFortran_yyget_in_ALREADY_DEFINED
+#else
+#define yyget_in cmFortran_yyget_in
+#endif
+
+#ifdef yyset_in
+#define cmFortran_yyset_in_ALREADY_DEFINED
+#else
+#define yyset_in cmFortran_yyset_in
+#endif
+
+#ifdef yyget_out
+#define cmFortran_yyget_out_ALREADY_DEFINED
+#else
+#define yyget_out cmFortran_yyget_out
+#endif
+
+#ifdef yyset_out
+#define cmFortran_yyset_out_ALREADY_DEFINED
+#else
+#define yyset_out cmFortran_yyset_out
+#endif
+
+#ifdef yyget_leng
+#define cmFortran_yyget_leng_ALREADY_DEFINED
+#else
+#define yyget_leng cmFortran_yyget_leng
+#endif
+
+#ifdef yyget_text
+#define cmFortran_yyget_text_ALREADY_DEFINED
+#else
+#define yyget_text cmFortran_yyget_text
+#endif
+
+#ifdef yyget_lineno
+#define cmFortran_yyget_lineno_ALREADY_DEFINED
+#else
+#define yyget_lineno cmFortran_yyget_lineno
+#endif
+
+#ifdef yyset_lineno
+#define cmFortran_yyset_lineno_ALREADY_DEFINED
+#else
+#define yyset_lineno cmFortran_yyset_lineno
+#endif
+
+#ifdef yyget_column
+#define cmFortran_yyget_column_ALREADY_DEFINED
+#else
+#define yyget_column cmFortran_yyget_column
+#endif
+
+#ifdef yyset_column
+#define cmFortran_yyset_column_ALREADY_DEFINED
+#else
+#define yyset_column cmFortran_yyset_column
+#endif
+
+#ifdef yywrap
+#define cmFortran_yywrap_ALREADY_DEFINED
+#else
+#define yywrap cmFortran_yywrap
+#endif
+
+#ifdef yyalloc
+#define cmFortran_yyalloc_ALREADY_DEFINED
+#else
+#define yyalloc cmFortran_yyalloc
+#endif
+
+#ifdef yyrealloc
+#define cmFortran_yyrealloc_ALREADY_DEFINED
+#else
+#define yyrealloc cmFortran_yyrealloc
+#endif
+
+#ifdef yyfree
+#define cmFortran_yyfree_ALREADY_DEFINED
+#else
+#define yyfree cmFortran_yyfree
 #endif
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
@@ -86,9 +293,15 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#ifndef SIZE_MAX
+#define SIZE_MAX               (~(size_t)0)
+#endif
+
 #endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
+
+/* begin standard C++ headers. */
 
 /* TODO: this is always defined, so inline it */
 #define yyconst const
@@ -102,12 +315,10 @@ typedef unsigned int flex_uint32_t;
 /* Returned upon end-of-file. */
 #define YY_NULL 0
 
-/* Promotes a possibly negative, possibly signed char to an unsigned
- * integer for use as an array index.  If the signed char is negative,
- * we want to instead treat it as an 8-bit unsigned char, hence the
- * double cast.
+/* Promotes a possibly negative, possibly signed char to an
+ *   integer in range [0..255] for use as an array index.
  */
-#define YY_SC_TO_UI(c) ((unsigned int) (unsigned char) c)
+#define YY_SC_TO_UI(c) ((YY_CHAR) (c))
 
 /* An opaque pointer. */
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -131,20 +342,16 @@ typedef void* yyscan_t;
  * definition of BEGIN.
  */
 #define BEGIN yyg->yy_start = 1 + 2 *
-
 /* Translate the current start state into a value that can be later handed
  * to BEGIN to return to the state.  The YYSTATE alias is for lex
  * compatibility.
  */
 #define YY_START ((yyg->yy_start - 1) / 2)
 #define YYSTATE YY_START
-
 /* Action number for EOF rule of a given start state. */
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
-
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE cmFortran_yyrestart(yyin ,yyscanner )
-
+#define YY_NEW_FILE yyrestart( yyin , yyscanner )
 #define YY_END_OF_BUFFER_CHAR 0
 
 /* Size of default input buffer. */
@@ -194,7 +401,6 @@ typedef size_t yy_size_t;
 		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
 		} \
 	while ( 0 )
-
 #define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
@@ -254,7 +460,7 @@ struct yy_buffer_state
 	 * possible backing-up.
 	 *
 	 * When we actually see the EOF, we change the status to "new"
-	 * (via cmFortran_yyrestart()), so that the user can continue scanning by
+	 * (via yyrestart()), so that the user can continue scanning by
 	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
@@ -271,73 +477,67 @@ struct yy_buffer_state
 #define YY_CURRENT_BUFFER ( yyg->yy_buffer_stack \
                           ? yyg->yy_buffer_stack[yyg->yy_buffer_stack_top] \
                           : NULL)
-
 /* Same as previous macro, but useful when we know that the buffer stack is not
  * NULL or when we need an lvalue. For internal use only.
  */
 #define YY_CURRENT_BUFFER_LVALUE yyg->yy_buffer_stack[yyg->yy_buffer_stack_top]
 
-void cmFortran_yyrestart (FILE *input_file ,yyscan_t yyscanner );
-void cmFortran_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmFortran_yy_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void cmFortran_yy_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmFortran_yy_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void cmFortran_yypop_buffer_state (yyscan_t yyscanner );
+void yyrestart ( FILE *input_file , yyscan_t yyscanner );
+void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size , yyscan_t yyscanner );
+void yy_delete_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
+void yy_flush_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
+void yypush_buffer_state ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
+void yypop_buffer_state ( yyscan_t yyscanner );
 
-static void cmFortran_yyensure_buffer_stack (yyscan_t yyscanner );
-static void cmFortran_yy_load_buffer_state (yyscan_t yyscanner );
-static void cmFortran_yy_init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
+static void yyensure_buffer_stack ( yyscan_t yyscanner );
+static void yy_load_buffer_state ( yyscan_t yyscanner );
+static void yy_init_buffer ( YY_BUFFER_STATE b, FILE *file , yyscan_t yyscanner );
+#define YY_FLUSH_BUFFER yy_flush_buffer( YY_CURRENT_BUFFER , yyscanner)
 
-#define YY_FLUSH_BUFFER cmFortran_yy_flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
+YY_BUFFER_STATE yy_scan_buffer ( char *base, yy_size_t size , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_string ( const char *yy_str , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, int len , yyscan_t yyscanner );
 
-YY_BUFFER_STATE cmFortran_yy_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmFortran_yy_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmFortran_yy_scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+void *yyalloc ( yy_size_t , yyscan_t yyscanner );
+void *yyrealloc ( void *, yy_size_t , yyscan_t yyscanner );
+void yyfree ( void * , yyscan_t yyscanner );
 
-void *cmFortran_yyalloc (yy_size_t ,yyscan_t yyscanner );
-void *cmFortran_yyrealloc (void *,yy_size_t ,yyscan_t yyscanner );
-void cmFortran_yyfree (void * ,yyscan_t yyscanner );
-
-#define yy_new_buffer cmFortran_yy_create_buffer
-
+#define yy_new_buffer yy_create_buffer
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        cmFortran_yyensure_buffer_stack (yyscanner); \
+        yyensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            cmFortran_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            yy_create_buffer( yyin, YY_BUF_SIZE , yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
-
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        cmFortran_yyensure_buffer_stack (yyscanner); \
+        yyensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            cmFortran_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            yy_create_buffer( yyin, YY_BUF_SIZE , yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
-
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 /* Begin user sect3 */
 
 #define cmFortran_yywrap(yyscanner) (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
-
-typedef unsigned char YY_CHAR;
+typedef flex_uint8_t YY_CHAR;
 
 typedef int yy_state_type;
 
 #define yytext_ptr yytext_r
 
-static yy_state_type yy_get_previous_state (yyscan_t yyscanner );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  ,yyscan_t yyscanner);
-static int yy_get_next_buffer (yyscan_t yyscanner );
-static void yynoreturn yy_fatal_error (yyconst char* msg ,yyscan_t yyscanner );
+static yy_state_type yy_get_previous_state ( yyscan_t yyscanner );
+static yy_state_type yy_try_NUL_trans ( yy_state_type current_state  , yyscan_t yyscanner);
+static int yy_get_next_buffer ( yyscan_t yyscanner );
+static void yynoreturn yy_fatal_error ( const char* msg , yyscan_t yyscanner );
 
 /* Done after the current pattern has been matched and before the
  * corresponding action - sets up yytext.
@@ -348,7 +548,6 @@ static void yynoreturn yy_fatal_error (yyconst char* msg ,yyscan_t yyscanner );
 	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
-
 #define YY_NUM_RULES 54
 #define YY_END_OF_BUFFER 55
 /* This struct is not used in this scanner,
@@ -358,7 +557,7 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_accept[210] =
+static const flex_int16_t yy_accept[210] =
     {   0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
        55,   49,   51,   50,   53,    1,   49,   33,    2,   47,
@@ -368,16 +567,16 @@ static yyconst flex_int16_t yy_accept[210] =
         0,    0,   33,   33,   34,   36,   39,   49,   46,   46,
        46,   46,   46,   46,    0,   52,   46,    0,    0,    0,
        12,    0,    0,    0,    0,    0,    0,   49,    0,   11,
-       46,    0,    0,    5,    0,    0,    0,   29,    0,    0,
+       46,    0,    0,    5,    0,    0,    0,    0,   29,    0,
        33,   33,   33,   33,    0,    0,   40,   46,   46,   46,
 
        46,   45,   12,   12,    0,    0,    0,   23,    0,    0,
         0,    0,    0,    0,    6,    0,    0,    0,    0,    0,
         0,    0,    0,    0,   46,   46,   46,   46,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-       30,   31,    0,    0,    0,    0,    0,    0,   46,   46,
+        0,   30,   31,    0,    0,    0,    0,    0,   46,   46,
        46,   46,    0,   24,   25,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,   32,   27,    0,    0,   20,    0,
+        0,    0,    0,    0,   20,   32,   27,    0,    0,    0,
        46,   46,   43,   46,    0,   26,   21,    0,    0,    0,
        19,    0,    0,   18,   28,    0,    0,   41,   46,   46,
        17,   22,    0,    7,   38,    7,   15,    0,   46,   46,
@@ -385,7 +584,7 @@ static yyconst flex_int16_t yy_accept[210] =
        14,   16,   42,   44,    0,    0,    0,   13,    0
     } ;
 
-static yyconst YY_CHAR yy_ec[256] =
+static const YY_CHAR yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    4,    1,    1,    1,    1,    1,    1,    1,
@@ -394,13 +593,13 @@ static yyconst YY_CHAR yy_ec[256] =
        13,   14,    1,   15,    1,    1,    1,   16,   16,   16,
        16,   16,   16,   16,   16,   16,   16,   17,   18,   19,
        20,   21,   22,    1,   23,   24,   25,   26,   27,   28,
-       29,   29,   30,   29,   29,   31,   32,   33,   34,   29,
-       29,   35,   36,   37,   38,   29,   29,   29,   29,   29,
-        1,   39,    1,    1,   40,    1,   23,   24,   41,   42,
+       24,   24,   29,   24,   24,   30,   31,   32,   33,   24,
+       24,   34,   35,   36,   37,   24,   24,   24,   24,   24,
+        1,   38,    1,    1,   39,    1,   23,   40,   41,   42,
 
-       43,   44,   29,   29,   45,   29,   29,   46,   32,   47,
-       34,   29,   29,   35,   48,   37,   49,   29,   29,   29,
-       29,   29,    1,    1,    1,    1,    1,    1,    1,    1,
+       43,   44,   24,   24,   45,   24,   24,   46,   31,   47,
+       33,   24,   24,   34,   48,   36,   49,   24,   24,   24,
+       24,   24,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -417,49 +616,49 @@ static yyconst YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst YY_CHAR yy_meta[50] =
+static const YY_CHAR yy_meta[50] =
     {   0,
         1,    2,    2,    3,    4,    3,    3,    1,    1,    3,
         3,    3,    3,    1,    3,    5,    3,    3,    1,    3,
         6,    1,    7,    7,    7,    7,    7,    7,    7,    7,
-        7,    7,    7,    7,    7,    7,    7,    7,    1,    5,
+        7,    7,    7,    7,    7,    7,    7,    1,    5,    7,
         7,    7,    7,    7,    7,    7,    7,    7,    7
     } ;
 
-static yyconst flex_uint16_t yy_base[219] =
+static const flex_int16_t yy_base[219] =
     {   0,
-        0,   48,    0,   49,  513,   56,   52,   57,   62,   68,
-      515,    0,  583,  583,  509,  583,   97,   74,  583,  583,
-      583,  583,  491,  583,  423,  421,    0,   19,   40,  392,
-       36,   47,   86,  146,   88,  186,  413,  235,  275,  583,
-      407,   98,  583,  583,    0,  386,  583,  323,   65,   73,
-       81,   74,  127,  146,  583,  583,  583,  108,    0,   89,
-      120,   92,  362,  116,  161,  583,    0,  167,  371,    0,
-      168,  131,  146,  171,   81,   89,  352,  420,  353,  583,
-        0,  349,  178,  196,  175,  197,  188,  208,  196,  197,
-      256,  262,  324,  330,  337,  143,    0,  151,  220,   56,
+        0,   48,    0,   49,  464,   56,   52,   57,   62,   68,
+      466,    0,  468,  468,  462,  468,   74,   81,  468,  468,
+      468,  468,  447,  468,  442,  440,    0,   41,   42,  428,
+       43,   42,   91,  119,   97,  157,  455,  206,  245,  468,
+      454,  101,  468,  468,    0,  455,  468,  105,  430,  424,
+       62,   68,  119,  141,  468,  468,  468,  111,    0,   59,
+       98,   88,  415,  109,  158,  468,    0,  162,  293,    0,
+      163,  411,  107,  122,  408,  405,  446,  342,  447,  468,
+        0,  444,  169,  173,  420,  421,  132,  404,   90,  404,
+      179,  185,  191,  227,  295,  397,    0,  146,  178,  149,
 
-      305,    0,  336,  139,  225,  315,  305,  322,  318,  163,
-      320,  268,  266,  369,  583,  340,  347,  350,  350,  351,
-      357,  350,  357,  363,  140,  235,  359,  218,  362,  375,
-      379,  380,  381,  385,  384,  404,  405,  243,  235,  213,
-      583,  583,  405,  407,  410,  171,  410,  409,  419,  418,
-      423,  426,  311,  583,  583,  428,  429,  431,  173,  462,
-      435,  166,  145,  438,  583,  583,  441,  444,  583,  433,
-      448,   89,    0,  438,  450,  583,  583,  452,  457,  487,
-      583,  114,    0,  583,  583,  457,  462,    0,  465,  463,
-      583,  583,  468,  583,  583,  583,  583,  470,  471,  474,
+      412,    0,  208,  206,  398,  171,  399,  170,  399,  391,
+      387,  422,  417,  221,  468,  374,  365,  347,  347,  334,
+      335,  335,  330,  334,  259,  340,  188,  340,  327,  327,
+      327,  324,  325,  325,  320,  322,  319,  355,  354,  325,
+      327,  468,  468,  310,  309,  309,  300,  301,  273,  273,
+      275,  277,  297,  468,  468,  293,  289,  283,  275,  305,
+      261,  238,  237,  214,  468,  468,  468,  196,  197,  189,
+      277,  181,    0,  274,  112,  468,  468,  105,  103,  311,
+      468,  233,    0,  468,  468,   83,   76,    0,  281,  282,
+      468,  468,   52,  468,  468,  468,  468,   23,  287,  298,
 
-      500,  583,    0,    0,  505,    0,   65,  583,  583,  524,
-      531,  537,  540,  547,  554,  561,  568,  575
+      327,  468,    0,    0,  329,    0,   31,  468,  468,  381,
+      388,  394,  397,  404,  411,  418,  425,  432
     } ;
 
-static yyconst flex_int16_t yy_def[219] =
+static const flex_int16_t yy_def[219] =
     {   0,
       209,    1,    1,    1,    1,    1,  210,  210,  210,  210,
       209,  211,  209,  209,  212,  209,  211,  209,  209,  209,
       209,  209,  209,  209,  209,  211,  213,  213,  213,  213,
-      213,  213,  211,  213,  209,  209,  209,  214,  209,  209,
+      213,  213,  211,  213,  209,  211,  209,  214,  209,  209,
       209,  209,  209,  209,  211,  212,  209,  209,  209,  209,
       209,  209,  209,  215,  209,  209,  209,  211,  213,  213,
       213,  213,  213,  213,  209,  209,   34,  209,  209,   69,
@@ -482,152 +681,126 @@ static yyconst flex_int16_t yy_def[219] =
       209,  209,  209,  209,  209,  209,  209,  209
     } ;
 
-static yyconst flex_uint16_t yy_nxt[633] =
+static const flex_int16_t yy_nxt[518] =
     {   0,
        12,   13,   14,   13,   13,   15,   16,   12,   17,   18,
        19,   20,   21,   12,   22,   12,   23,   24,   12,   25,
-       12,   26,   27,   27,   27,   27,   28,   27,   27,   29,
-       27,   30,   27,   27,   27,   31,   27,   32,   33,   34,
+       12,   26,   27,   27,   27,   27,   28,   27,   29,   27,
+       30,   27,   27,   27,   31,   27,   32,   33,   34,   27,
        27,   27,   28,   27,   29,   27,   27,   31,   32,   35,
-       35,   60,   35,   35,   41,   36,   36,   35,   37,   41,
-       35,   42,   43,   36,   41,   60,   42,   43,   44,   38,
-       41,   42,   61,   63,   44,   53,   53,   42,   53,   54,
-       39,   39,   64,   55,   63,  208,   61,   65,   66,   68,
-       65,   85,   68,  127,   64,   69,   39,   39,   48,   83,
+       35,  208,   35,   35,   41,   36,   36,   35,   37,   41,
+       35,   42,   43,   36,   41,  202,   42,   43,   44,   38,
+       41,   42,   60,   61,   44,   48,   64,   42,   48,   63,
+       39,   39,   53,   53,   97,   53,   54,   60,   61,   64,
+       55,   63,   65,   66,  201,   65,   39,   39,   68,   49,
 
-       84,   48,   83,   86,  127,   87,   90,   85,   88,   95,
-      110,  189,   95,   89,   97,  195,  195,  100,   86,   87,
-       90,  111,   49,   50,   88,  110,   51,   89,   53,   53,
-       97,   53,   54,  100,   52,  111,   55,   96,   49,   50,
-      104,   51,  102,  104,   98,   52,   45,   92,   53,  183,
-       92,   93,   96,   45,   45,   94,   99,  105,  102,   45,
-       98,   67,   65,   66,   45,   65,   45,   45,   68,  104,
-      182,   68,  104,  105,   69,  124,  106,  149,  107,   83,
-       84,  125,   83,   71,   45,   67,   45,   70,  149,  124,
-       70,  106,  107,   45,   45,  136,  125,  114,  108,   45,
+       97,   68,   83,   84,   69,   83,   48,   87,   88,   48,
+       50,   89,   95,  100,   90,   95,   51,  198,   52,   45,
+       53,   53,   98,   53,   54,  197,   45,   45,   55,  100,
+       49,  121,   45,   99,   67,  102,  122,   45,   98,   45,
+       45,   50,   92,   53,  193,   92,   93,   51,  192,   52,
+       94,  102,  106,  107,  191,   96,   45,   67,   70,   65,
+       66,   70,   65,   68,  104,  108,   68,  104,  109,   69,
+       83,   84,   71,   83,  114,  125,  118,  114,   71,  119,
+       92,   53,  115,   92,   93,  127,   92,   53,   94,   92,
+       93,  125,   92,   53,   94,   92,   93,  127,   72,   73,
 
-      114,   71,  116,  109,   45,  115,   45,   45,  168,  136,
-      179,   72,   73,  119,  108,   74,   75,  109,  116,  168,
-      122,  179,  123,   76,   45,   45,  117,   72,   73,  119,
-       74,   75,  118,  120,   76,   78,  122,   80,  123,  163,
-      121,  117,   78,   78,  118,  164,  126,  162,   78,  120,
-       78,  152,  129,   78,  121,   78,   78,   92,   53,  164,
-       92,   93,  126,   92,   53,   94,   92,   93,  129,  150,
-      139,   94,  138,   78,   78,   79,   79,   80,   79,   79,
+       94,   74,   75,  189,  126,   76,   78,  104,   80,  104,
+      104,  133,  104,   78,   78,  130,  134,  151,  131,   78,
+      126,   78,  114,  103,   78,  114,   78,   78,   92,   53,
+      115,   92,   93,  151,  195,  195,   94,  187,  186,  185,
+      184,  183,  182,   78,   78,   79,   79,   80,   79,   79,
        79,   79,   79,   79,   79,   79,   79,   79,   79,   79,
        81,   79,   79,   79,   79,   79,   79,   81,   81,   81,
-
        81,   81,   81,   81,   81,   81,   81,   81,   81,   81,
-       81,   81,   81,   79,   81,   81,   81,   81,   81,   81,
-       81,   81,   81,   81,   48,   92,   53,   48,   92,   93,
-      132,   92,   53,   94,   92,   93,  128,  104,   95,   94,
-      104,   95,  135,  175,  130,  137,  132,  133,   49,   50,
-      131,  103,   51,  113,  134,   80,  112,  175,  135,  130,
-       52,  137,  131,  133,   49,   50,   96,   51,  134,  140,
-      114,   52,   70,  114,  141,   70,  142,  144,  115,  143,
-      146,   96,  145,  147,  140,  101,  103,  148,   47,  151,
-      141,  153,  142,  144,  143,  146,   72,   73,  145,  147,
+       81,   81,   79,   81,   81,   81,   81,   81,   81,   81,
+       81,   81,   81,   81,   70,  149,   95,   70,  171,   95,
 
-       74,   75,  154,  148,  151,  155,  153,  157,   76,  156,
-      158,   82,   72,   73,  159,   74,   75,   77,  154,   76,
-       78,  155,   80,  157,  156,   62,  158,   78,   78,  159,
-      160,  161,  165,   78,  166,   78,  167,  169,   78,  170,
-       78,   78,   58,   57,  171,  172,  160,  161,  165,  173,
-      166,  174,  167,  169,  170,  176,  177,  178,   78,   78,
-      171,  172,  181,  180,  184,  173,  180,  174,  185,  186,
-      187,  176,  177,  178,  188,  190,  191,  103,  181,  192,
-      184,  187,  193,  197,  185,  186,  190,  198,  180,  199,
-      188,  180,  191,  200,  201,  192,  202,  203,  193,  197,
+      172,  173,  174,  188,  181,  199,  180,  149,  103,  180,
+      190,  200,  180,  203,  171,  180,  172,  173,  174,  188,
+      103,  199,  190,  179,  204,  178,  103,  200,  205,  203,
+      205,  205,  177,  205,   72,   73,  176,   74,   75,   96,
+      204,   76,   78,  175,   80,  206,  170,  206,  169,   78,
+       78,  168,  167,  166,  165,   78,  164,   78,  163,  162,
+       78,  161,   78,   78,  160,  159,  158,  157,  156,  155,
+      154,  153,  152,  150,  148,  147,  146,  145,  144,   78,
+       78,   40,   40,   40,   40,   40,   40,   40,   45,  143,
+      142,  141,   45,   45,   46,   46,   46,   46,   46,   46,
 
-      204,  205,  103,  198,  205,  199,  205,   56,  200,  205,
-      201,   47,  202,  203,  209,   37,  204,  209,  206,  209,
-      209,  209,  209,  206,   40,   40,   40,   40,   40,   40,
-       40,   45,  209,  209,  209,   45,   45,   46,   46,   46,
-       46,   46,   46,   46,   59,  209,   59,   79,   79,   79,
-       79,   79,   79,   79,   91,   91,   91,   91,   91,   91,
-       91,  194,  194,  194,  209,  194,  194,  194,  196,  209,
-      196,  209,  196,  196,  196,  207,  207,  207,  207,  207,
-      209,  207,   11,  209,  209,  209,  209,  209,  209,  209,
+       46,   59,  140,   59,   79,   79,   79,   79,   79,   79,
+       79,   91,   91,   91,   91,   91,   91,   91,  194,  194,
+      194,  139,  194,  194,  194,  196,  138,  196,  137,  196,
+      196,  196,  207,  207,  207,  207,  207,  136,  207,  135,
+      132,  129,  128,  124,  123,  120,  117,  116,  113,   80,
+      112,  111,  110,  105,  101,   86,   85,   47,   82,   77,
+       62,   58,   57,   56,   47,  209,   37,   11,  209,  209,
+      209,  209,  209,  209,  209,  209,  209,  209,  209,  209,
+      209,  209,  209,  209,  209,  209,  209,  209,  209,  209,
       209,  209,  209,  209,  209,  209,  209,  209,  209,  209,
 
       209,  209,  209,  209,  209,  209,  209,  209,  209,  209,
-      209,  209,  209,  209,  209,  209,  209,  209,  209,  209,
-      209,  209,  209,  209,  209,  209,  209,  209,  209,  209,
-      209,  209
+      209,  209,  209,  209,  209,  209,  209
     } ;
 
-static yyconst flex_int16_t yy_chk[633] =
+static const flex_int16_t yy_chk[518] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    2,
-        4,   28,    2,    4,    7,    2,    4,    6,    6,    8,
-        6,    7,    7,    6,    9,   28,    8,    8,    9,    6,
-       10,    9,   29,   31,   10,   18,   18,   10,   18,   18,
-        6,    6,   32,   18,   31,  207,   29,   33,   33,   35,
-       33,   49,   35,  100,   32,   35,    6,    6,   17,   42,
+        4,  207,    2,    4,    7,    2,    4,    6,    6,    8,
+        6,    7,    7,    6,    9,  198,    8,    8,    9,    6,
+       10,    9,   28,   29,   10,   17,   32,   10,   17,   31,
+        6,    6,   18,   18,   60,   18,   18,   28,   29,   32,
+       18,   31,   33,   33,  193,   33,    6,    6,   35,   17,
 
-       42,   17,   42,   50,  100,   50,   52,   49,   51,   58,
-       75,  172,   58,   51,   60,  182,  182,   62,   50,   50,
-       52,   76,   17,   17,   51,   75,   17,   51,   53,   53,
-       60,   53,   53,   62,   17,   76,   53,   58,   17,   17,
-      104,   17,   64,  104,   61,   17,   34,   54,   54,  163,
-       54,   54,   58,   34,   34,   54,   61,   72,   64,   34,
-       61,   34,   65,   65,   34,   65,   34,   34,   68,   71,
-      162,   68,   71,   72,   68,   96,   73,  125,   73,   83,
-       83,   98,   83,   71,   34,   34,   36,   36,  125,   96,
-       36,   73,   73,   36,   36,  110,   98,   84,   74,   36,
+       60,   35,   42,   42,   35,   42,   48,   51,   51,   48,
+       17,   52,   58,   62,   52,   58,   17,  187,   17,   34,
+       53,   53,   61,   53,   53,  186,   34,   34,   53,   62,
+       48,   89,   34,   61,   34,   64,   89,   34,   61,   34,
+       34,   48,   54,   54,  179,   54,   54,   48,  178,   48,
+       54,   64,   73,   73,  175,   58,   34,   34,   36,   65,
+       65,   36,   65,   68,   71,   74,   68,   71,   74,   68,
+       83,   83,   36,   83,   84,   98,   87,   84,   71,   87,
+       91,   91,   84,   91,   91,  100,   92,   92,   91,   92,
+       92,   98,   93,   93,   92,   93,   93,  100,   36,   36,
 
-       84,   36,   85,   74,   36,   84,   36,   36,  146,  110,
-      159,   36,   36,   87,   74,   36,   36,   74,   85,  146,
-       89,  159,   90,   36,   36,   36,   86,   36,   36,   87,
-       36,   36,   86,   88,   36,   38,   89,   38,   90,  139,
-       88,   86,   38,   38,   86,  140,   99,  138,   38,   88,
-       38,  128,  105,   38,   88,   38,   38,   91,   91,  140,
-       91,   91,   99,   92,   92,   91,   92,   92,  105,  126,
-      113,   92,  112,   38,   38,   39,   39,   39,   39,   39,
+       93,   36,   36,  172,   99,   36,   38,  104,   38,  103,
+      104,  108,  103,   38,   38,  106,  108,  127,  106,   38,
+       99,   38,  114,  103,   38,  114,   38,   38,   94,   94,
+      114,   94,   94,  127,  182,  182,   94,  170,  169,  168,
+      164,  163,  162,   38,   38,   39,   39,   39,   39,   39,
        39,   39,   39,   39,   39,   39,   39,   39,   39,   39,
        39,   39,   39,   39,   39,   39,   39,   39,   39,   39,
-
        39,   39,   39,   39,   39,   39,   39,   39,   39,   39,
        39,   39,   39,   39,   39,   39,   39,   39,   39,   39,
-       39,   39,   39,   39,   48,   93,   93,   48,   93,   93,
-      107,   94,   94,   93,   94,   94,  101,  103,   95,   94,
-      103,   95,  109,  153,  106,  111,  107,  108,   48,   48,
-      106,  103,   48,   82,  108,   79,   77,  153,  109,  106,
-       48,  111,  106,  108,   48,   48,   95,   48,  108,  116,
-      114,   48,   69,  114,  117,   69,  118,  120,  114,  119,
-      122,   95,  121,  123,  116,   63,   69,  124,   46,  127,
-      117,  129,  118,  120,  119,  122,   69,   69,  121,  123,
+       39,   39,   39,   39,   69,  125,   95,   69,  149,   95,
 
-       69,   69,  130,  124,  127,  131,  129,  133,   69,  132,
-      134,   41,   69,   69,  135,   69,   69,   37,  130,   69,
-       78,  131,   78,  133,  132,   30,  134,   78,   78,  135,
-      136,  137,  143,   78,  144,   78,  145,  147,   78,  148,
-       78,   78,   26,   25,  149,  150,  136,  137,  143,  151,
-      144,  152,  145,  147,  148,  156,  157,  158,   78,   78,
-      149,  150,  161,  160,  164,  151,  160,  152,  167,  168,
-      170,  156,  157,  158,  171,  174,  175,  160,  161,  178,
-      164,  170,  179,  186,  167,  168,  174,  187,  180,  189,
-      171,  180,  175,  190,  193,  178,  198,  199,  179,  186,
+      150,  151,  152,  171,  161,  189,  160,  125,   69,  160,
+      174,  190,  180,  199,  149,  180,  150,  151,  152,  171,
+      160,  189,  174,  159,  200,  158,  180,  190,  201,  199,
+      205,  201,  157,  205,   69,   69,  156,   69,   69,   95,
+      200,   69,   78,  153,   78,  201,  148,  205,  147,   78,
+       78,  146,  145,  144,  141,   78,  140,   78,  139,  138,
+       78,  137,   78,   78,  136,  135,  134,  133,  132,  131,
+      130,  129,  128,  126,  124,  123,  122,  121,  120,   78,
+       78,  210,  210,  210,  210,  210,  210,  210,  211,  119,
+      118,  117,  211,  211,  212,  212,  212,  212,  212,  212,
 
-      200,  201,  180,  187,  201,  189,  205,   23,  190,  205,
-      193,   15,  198,  199,   11,    5,  200,    0,  201,    0,
-        0,    0,    0,  205,  210,  210,  210,  210,  210,  210,
-      210,  211,    0,    0,    0,  211,  211,  212,  212,  212,
-      212,  212,  212,  212,  213,    0,  213,  214,  214,  214,
-      214,  214,  214,  214,  215,  215,  215,  215,  215,  215,
-      215,  216,  216,  216,    0,  216,  216,  216,  217,    0,
-      217,    0,  217,  217,  217,  218,  218,  218,  218,  218,
-        0,  218,  209,  209,  209,  209,  209,  209,  209,  209,
-      209,  209,  209,  209,  209,  209,  209,  209,  209,  209,
-
+      212,  213,  116,  213,  214,  214,  214,  214,  214,  214,
+      214,  215,  215,  215,  215,  215,  215,  215,  216,  216,
+      216,  113,  216,  216,  216,  217,  112,  217,  111,  217,
+      217,  217,  218,  218,  218,  218,  218,  110,  218,  109,
+      107,  105,  101,   96,   90,   88,   86,   85,   82,   79,
+       77,   76,   75,   72,   63,   50,   49,   46,   41,   37,
+       30,   26,   25,   23,   15,   11,    5,  209,  209,  209,
       209,  209,  209,  209,  209,  209,  209,  209,  209,  209,
       209,  209,  209,  209,  209,  209,  209,  209,  209,  209,
       209,  209,  209,  209,  209,  209,  209,  209,  209,  209,
-      209,  209
+
+      209,  209,  209,  209,  209,  209,  209,  209,  209,  209,
+      209,  209,  209,  209,  209,  209,  209
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -637,8 +810,6 @@ static yyconst flex_int16_t yy_chk[633] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "cmFortranLexer.in.l"
-#line 2 "cmFortranLexer.in.l"
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 /*-------------------------------------------------------------------------
@@ -657,14 +828,12 @@ This file must be translated to C++ and modified to build everywhere.
 
 Run flex >= 2.6 like this:
 
-  flex -i --nounistd -DFLEXINT_H --prefix=cmFortran_yy --header-file=cmFortranLexer.h -ocmFortranLexer.cxx cmFortranLexer.in.l
+  flex -i --nounistd -DFLEXINT_H --noline --header-file=cmFortranLexer.h -ocmFortranLexer.cxx cmFortranLexer.in.l
 
 Modify cmFortranLexer.cxx:
-  - remove trailing whitespace: sed -i 's/\s*$//' cmFortranLexer.h cmFortranLexer.cxx
-  - remove blank lines at end of file
-  - #include "cmStandardLexer.h" at the top
-  - add cast in cmFortran_yy_scan_bytes for loop condition of _yybytes_len to size_t
-
+  - remove trailing whitespace:              sed -i 's/\s*$//' cmFortranLexer.h cmFortranLexer.cxx
+  - remove blank lines at end of file:       sed -i '${/^$/d;}' cmFortranLexer.h cmFortranLexer.cxx
+  - #include "cmStandardLexer.h" at the top: sed -i '1i#include "cmStandardLexer.h"' cmFortranLexer.cxx
 */
 
 /* IWYU pragma: no_forward_declare yyguts_t */
@@ -683,9 +852,6 @@ Modify cmFortranLexer.cxx:
 #include "cmFortranParserTokens.h"
 
 /*--------------------------------------------------------------------------*/
-
-
-#line 688 "cmFortranLexer.cxx"
 
 #define INITIAL 0
 #define free_fmt 1
@@ -731,44 +897,44 @@ struct yyguts_t
 
     }; /* end struct yyguts_t */
 
-static int yy_init_globals (yyscan_t yyscanner );
+static int yy_init_globals ( yyscan_t yyscanner );
 
-int cmFortran_yylex_init (yyscan_t* scanner);
+int yylex_init (yyscan_t* scanner);
 
-int cmFortran_yylex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int yylex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner);
 
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int cmFortran_yylex_destroy (yyscan_t yyscanner );
+int yylex_destroy ( yyscan_t yyscanner );
 
-int cmFortran_yyget_debug (yyscan_t yyscanner );
+int yyget_debug ( yyscan_t yyscanner );
 
-void cmFortran_yyset_debug (int debug_flag ,yyscan_t yyscanner );
+void yyset_debug ( int debug_flag , yyscan_t yyscanner );
 
-YY_EXTRA_TYPE cmFortran_yyget_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE yyget_extra ( yyscan_t yyscanner );
 
-void cmFortran_yyset_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void yyset_extra ( YY_EXTRA_TYPE user_defined , yyscan_t yyscanner );
 
-FILE *cmFortran_yyget_in (yyscan_t yyscanner );
+FILE *yyget_in ( yyscan_t yyscanner );
 
-void cmFortran_yyset_in  (FILE * _in_str ,yyscan_t yyscanner );
+void yyset_in  ( FILE * _in_str , yyscan_t yyscanner );
 
-FILE *cmFortran_yyget_out (yyscan_t yyscanner );
+FILE *yyget_out ( yyscan_t yyscanner );
 
-void cmFortran_yyset_out  (FILE * _out_str ,yyscan_t yyscanner );
+void yyset_out  ( FILE * _out_str , yyscan_t yyscanner );
 
-			int cmFortran_yyget_leng (yyscan_t yyscanner );
+			int yyget_leng ( yyscan_t yyscanner );
 
-char *cmFortran_yyget_text (yyscan_t yyscanner );
+char *yyget_text ( yyscan_t yyscanner );
 
-int cmFortran_yyget_lineno (yyscan_t yyscanner );
+int yyget_lineno ( yyscan_t yyscanner );
 
-void cmFortran_yyset_lineno (int _line_number ,yyscan_t yyscanner );
+void yyset_lineno ( int _line_number , yyscan_t yyscanner );
 
-int cmFortran_yyget_column  (yyscan_t yyscanner );
+int yyget_column  ( yyscan_t yyscanner );
 
-void cmFortran_yyset_column (int _column_no ,yyscan_t yyscanner );
+void yyset_column ( int _column_no , yyscan_t yyscanner );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -776,32 +942,31 @@ void cmFortran_yyset_column (int _column_no ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int cmFortran_yywrap (yyscan_t yyscanner );
+extern "C" int yywrap ( yyscan_t yyscanner );
 #else
-extern int cmFortran_yywrap (yyscan_t yyscanner );
+extern int yywrap ( yyscan_t yyscanner );
 #endif
 #endif
 
 #ifndef YY_NO_UNPUT
 
-    static void yyunput (int c,char *buf_ptr  ,yyscan_t yyscanner);
+    static void yyunput ( int c, char *buf_ptr  , yyscan_t yyscanner);
 
 #endif
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
+static void yy_flex_strncpy ( char *, const char *, int , yyscan_t yyscanner);
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
+static int yy_flex_strlen ( const char * , yyscan_t yyscanner);
 #endif
 
 #ifndef YY_NO_INPUT
-
 #ifdef __cplusplus
-static int yyinput (yyscan_t yyscanner );
+static int yyinput ( yyscan_t yyscanner );
 #else
-static int input (yyscan_t yyscanner );
+static int input ( yyscan_t yyscanner );
 #endif
 
 #endif
@@ -832,7 +997,7 @@ static int input (yyscan_t yyscanner );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -845,7 +1010,7 @@ static int input (yyscan_t yyscanner );
 	else \
 		{ \
 		errno=0; \
-		while ( (result = (int) fread(buf, 1, max_size, yyin))==0 && ferror(yyin)) \
+		while ( (result = (int) fread(buf, 1, (yy_size_t) max_size, yyin)) == 0 && ferror(yyin)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
@@ -886,9 +1051,9 @@ static int input (yyscan_t yyscanner );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int cmFortran_yylex (yyscan_t yyscanner);
+extern int yylex (yyscan_t yyscanner);
 
-#define YY_DECL int cmFortran_yylex (yyscan_t yyscanner)
+#define YY_DECL int yylex (yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
 /* Code executed at the beginning of each rule, after yytext and yyleng
@@ -936,19 +1101,15 @@ YY_DECL
 			yyout = stdout;
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			cmFortran_yyensure_buffer_stack (yyscanner);
+			yyensure_buffer_stack (yyscanner);
 			YY_CURRENT_BUFFER_LVALUE =
-				cmFortran_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+				yy_create_buffer( yyin, YY_BUF_SIZE , yyscanner);
 		}
 
-		cmFortran_yy_load_buffer_state(yyscanner );
+		yy_load_buffer_state( yyscanner );
 		}
 
 	{
-#line 56 "cmFortranLexer.in.l"
-
-
-#line 951 "cmFortranLexer.cxx"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -977,12 +1138,12 @@ yy_match:
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
 				if ( yy_current_state >= 210 )
-					yy_c = yy_meta[(unsigned int) yy_c];
+					yy_c = yy_meta[yy_c];
 				}
-			yy_current_state = yy_nxt[yy_base[yy_current_state] + (flex_int16_t) yy_c];
+			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 583 );
+		while ( yy_base[yy_current_state] != 468 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -1008,7 +1169,6 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 58 "cmFortranLexer.in.l"
 {
   cmFortranParser_StringStart(yyextra);
   cmFortranParser_SetOldStartcond(yyextra, YY_START);
@@ -1017,7 +1177,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 64 "cmFortranLexer.in.l"
 {
   cmFortranParser_StringStart(yyextra);
   cmFortranParser_SetOldStartcond(yyextra, YY_START);
@@ -1025,10 +1184,8 @@ YY_RULE_SETUP
 }
 	YY_BREAK
 case 3:
-#line 71 "cmFortranLexer.in.l"
 case 4:
 YY_RULE_SETUP
-#line 71 "cmFortranLexer.in.l"
 {
   BEGIN(cmFortranParser_GetOldStartcond(yyextra) );
   yylvalp->string = strdup(cmFortranParser_StringEnd(yyextra));
@@ -1037,17 +1194,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 /* rule 5 can match eol */
-#line 78 "cmFortranLexer.in.l"
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 78 "cmFortranLexer.in.l"
 /* Ignore (continued strings, free fmt) */
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 80 "cmFortranLexer.in.l"
 {
   if (cmFortranParser_GetOldStartcond(yyextra) == fixed_fmt)
     ; /* Ignore (cont. strings, fixed fmt) */
@@ -1060,7 +1214,6 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 90 "cmFortranLexer.in.l"
 {
   unput ('\n');
   BEGIN(INITIAL);
@@ -1069,7 +1222,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 96 "cmFortranLexer.in.l"
 {
   cmFortranParser_StringAppend(yyextra, yytext[0]);
 }
@@ -1077,24 +1229,20 @@ YY_RULE_SETUP
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 100 "cmFortranLexer.in.l"
 { return EOSTMT; } /* Treat comments like */
 	YY_BREAK
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 101 "cmFortranLexer.in.l"
 { return EOSTMT; } /* empty lines */
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 103 "cmFortranLexer.in.l"
 { return CPP_LINE_DIRECTIVE; }
 	YY_BREAK
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-#line 104 "cmFortranLexer.in.l"
 {
   yytext[yyleng-1] = 0;
   yylvalp->string = strdup(strchr(yytext, '<')+1);
@@ -1103,171 +1251,138 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 109 "cmFortranLexer.in.l"
 { return CPP_INCLUDE; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 110 "cmFortranLexer.in.l"
 { return F90PPR_INCLUDE; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 111 "cmFortranLexer.in.l"
 { return COCO_INCLUDE; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 113 "cmFortranLexer.in.l"
 { return CPP_DEFINE; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 114 "cmFortranLexer.in.l"
 { return F90PPR_DEFINE; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 116 "cmFortranLexer.in.l"
 { return CPP_UNDEF; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 117 "cmFortranLexer.in.l"
 { return F90PPR_UNDEF; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 119 "cmFortranLexer.in.l"
 { return CPP_IFDEF; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 120 "cmFortranLexer.in.l"
 { return CPP_IFNDEF; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 121 "cmFortranLexer.in.l"
 { return CPP_IF; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 122 "cmFortranLexer.in.l"
 { return CPP_ELIF; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 123 "cmFortranLexer.in.l"
 { return CPP_ELSE; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 124 "cmFortranLexer.in.l"
 { return CPP_ENDIF; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 126 "cmFortranLexer.in.l"
 { return F90PPR_IFDEF; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 127 "cmFortranLexer.in.l"
 { return F90PPR_IFNDEF; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 128 "cmFortranLexer.in.l"
 { return F90PPR_IF; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 129 "cmFortranLexer.in.l"
 { return F90PPR_ELIF; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 130 "cmFortranLexer.in.l"
 { return F90PPR_ELSE; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 131 "cmFortranLexer.in.l"
 { return F90PPR_ENDIF; }
 	YY_BREAK
 /* Line continuations, possible involving comments.  */
 case 33:
 /* rule 33 can match eol */
 YY_RULE_SETUP
-#line 134 "cmFortranLexer.in.l"
 
 	YY_BREAK
 case 34:
 /* rule 34 can match eol */
 YY_RULE_SETUP
-#line 135 "cmFortranLexer.in.l"
 
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 137 "cmFortranLexer.in.l"
 { return COMMA; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 139 "cmFortranLexer.in.l"
 { return DCOLON; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 140 "cmFortranLexer.in.l"
 { return COLON; }
 	YY_BREAK
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
-#line 142 "cmFortranLexer.in.l"
 { return GARBAGE; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 144 "cmFortranLexer.in.l"
 { return ASSIGNMENT_OP; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 146 "cmFortranLexer.in.l"
 { return END; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 147 "cmFortranLexer.in.l"
 { return INCLUDE; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 148 "cmFortranLexer.in.l"
 { return INTERFACE; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 149 "cmFortranLexer.in.l"
 { return MODULE; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 150 "cmFortranLexer.in.l"
 { return SUBMODULE; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 151 "cmFortranLexer.in.l"
 { return USE; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 153 "cmFortranLexer.in.l"
 {
   yylvalp->string = strdup(yytext);
   return WORD;
@@ -1275,39 +1390,32 @@ YY_RULE_SETUP
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 158 "cmFortranLexer.in.l"
 { return LPAREN; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 159 "cmFortranLexer.in.l"
 { return RPAREN; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 161 "cmFortranLexer.in.l"
 { return GARBAGE; }
 	YY_BREAK
 case 50:
 /* rule 50 can match eol */
 YY_RULE_SETUP
-#line 163 "cmFortranLexer.in.l"
 { return EOSTMT; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 166 "cmFortranLexer.in.l"
 /* Ignore */
 	YY_BREAK
 case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
-#line 167 "cmFortranLexer.in.l"
 /* Ignore line-endings preceded by \ */
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 169 "cmFortranLexer.in.l"
 { return *yytext; }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
@@ -1315,7 +1423,6 @@ case YY_STATE_EOF(free_fmt):
 case YY_STATE_EOF(fixed_fmt):
 case YY_STATE_EOF(str_sq):
 case YY_STATE_EOF(str_dq):
-#line 171 "cmFortranLexer.in.l"
 {
   if(!cmFortranParser_FilePop(yyextra) )
     {
@@ -1325,10 +1432,8 @@ case YY_STATE_EOF(str_dq):
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 178 "cmFortranLexer.in.l"
 ECHO;
 	YY_BREAK
-#line 1331 "cmFortranLexer.cxx"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1344,7 +1449,7 @@ ECHO;
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
 			 * just pointed yyin at a new source and called
-			 * cmFortran_yylex().  If so, then we have to assure
+			 * yylex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
@@ -1404,7 +1509,7 @@ ECHO;
 				{
 				yyg->yy_did_buffer_switch_on_eof = 0;
 
-				if ( cmFortran_yywrap(yyscanner ) )
+				if ( yywrap( yyscanner ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
@@ -1458,7 +1563,7 @@ ECHO;
 	} /* end of action switch */
 		} /* end of scanning one token */
 	} /* end of user's declarations */
-} /* end of cmFortran_yylex */
+} /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
  *
@@ -1472,7 +1577,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
 	char *source = yyg->yytext_ptr;
-	yy_size_t number_to_move, i;
+	int number_to_move, i;
 	int ret_val;
 
 	if ( yyg->yy_c_buf_p > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] )
@@ -1501,7 +1606,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	/* Try to read more data. */
 
 	/* First move last chars to start of buffer. */
-	number_to_move = (yy_size_t) (yyg->yy_c_buf_p - yyg->yytext_ptr) - 1;
+	number_to_move = (int) (yyg->yy_c_buf_p - yyg->yytext_ptr - 1);
 
 	for ( i = 0; i < number_to_move; ++i )
 		*(dest++) = *(source++);
@@ -1537,7 +1642,8 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					cmFortran_yyrealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
+					yyrealloc( (void *) b->yy_ch_buf,
+							 (yy_size_t) (b->yy_buf_size + 2) , yyscanner );
 				}
 			else
 				/* Can't grow it, we don't own it. */
@@ -1569,7 +1675,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			cmFortran_yyrestart(yyin  ,yyscanner);
+			yyrestart( yyin  , yyscanner);
 			}
 
 		else
@@ -1583,12 +1689,15 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	if ((int) (yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+	if ((yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
 		int new_size = yyg->yy_n_chars + number_to_move + (yyg->yy_n_chars >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) cmFortran_yyrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) yyrealloc(
+			(void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf, (yy_size_t) new_size , yyscanner );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+		/* "- 2" to take care of EOB's */
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_size = (int) (new_size - 2);
 	}
 
 	yyg->yy_n_chars += number_to_move;
@@ -1623,9 +1732,9 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
 			if ( yy_current_state >= 210 )
-				yy_c = yy_meta[(unsigned int) yy_c];
+				yy_c = yy_meta[yy_c];
 			}
-		yy_current_state = yy_nxt[yy_base[yy_current_state] + (flex_int16_t) yy_c];
+		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 		}
 
 	return yy_current_state;
@@ -1652,9 +1761,9 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
 		if ( yy_current_state >= 210 )
-			yy_c = yy_meta[(unsigned int) yy_c];
+			yy_c = yy_meta[yy_c];
 		}
-	yy_current_state = yy_nxt[yy_base[yy_current_state] + (flex_int16_t) yy_c];
+	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 	yy_is_jam = (yy_current_state == 209);
 
 	(void)yyg;
@@ -1728,7 +1837,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 		else
 			{ /* need more input */
-			int offset = yyg->yy_c_buf_p - yyg->yytext_ptr;
+			int offset = (int) (yyg->yy_c_buf_p - yyg->yytext_ptr);
 			++yyg->yy_c_buf_p;
 
 			switch ( yy_get_next_buffer( yyscanner ) )
@@ -1745,13 +1854,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 					 */
 
 					/* Reset buffer status. */
-					cmFortran_yyrestart(yyin ,yyscanner);
+					yyrestart( yyin , yyscanner);
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( cmFortran_yywrap(yyscanner ) )
+					if ( yywrap( yyscanner ) )
 						return 0;
 
 					if ( ! yyg->yy_did_buffer_switch_on_eof )
@@ -1785,34 +1894,34 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @note This function does not reset the start condition to @c INITIAL .
  */
-    void cmFortran_yyrestart  (FILE * input_file , yyscan_t yyscanner)
+    void yyrestart  (FILE * input_file , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if ( ! YY_CURRENT_BUFFER ){
-        cmFortran_yyensure_buffer_stack (yyscanner);
+        yyensure_buffer_stack (yyscanner);
 		YY_CURRENT_BUFFER_LVALUE =
-            cmFortran_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+            yy_create_buffer( yyin, YY_BUF_SIZE , yyscanner);
 	}
 
-	cmFortran_yy_init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
-	cmFortran_yy_load_buffer_state(yyscanner );
+	yy_init_buffer( YY_CURRENT_BUFFER, input_file , yyscanner);
+	yy_load_buffer_state( yyscanner );
 }
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
  * @param yyscanner The scanner object.
  */
-    void cmFortran_yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
+    void yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	/* TODO. We should be able to replace this entire function body
 	 * with
-	 *		cmFortran_yypop_buffer_state();
-	 *		cmFortran_yypush_buffer_state(new_buffer);
+	 *		yypop_buffer_state();
+	 *		yypush_buffer_state(new_buffer);
      */
-	cmFortran_yyensure_buffer_stack (yyscanner);
+	yyensure_buffer_stack (yyscanner);
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
@@ -1825,17 +1934,17 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	cmFortran_yy_load_buffer_state(yyscanner );
+	yy_load_buffer_state( yyscanner );
 
 	/* We don't actually know whether we did this switch during
-	 * EOF (cmFortran_yywrap()) processing, but the only time this flag
-	 * is looked at is after cmFortran_yywrap() is called, so it's safe
+	 * EOF (yywrap()) processing, but the only time this flag
+	 * is looked at is after yywrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
 	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
-static void cmFortran_yy_load_buffer_state  (yyscan_t yyscanner)
+static void yy_load_buffer_state  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
@@ -1850,35 +1959,35 @@ static void cmFortran_yy_load_buffer_state  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @return the allocated buffer state.
  */
-    YY_BUFFER_STATE cmFortran_yy_create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
+    YY_BUFFER_STATE yy_create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 
-	b = (YY_BUFFER_STATE) cmFortran_yyalloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state ) , yyscanner );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in cmFortran_yy_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
-	b->yy_buf_size = (yy_size_t)size;
+	b->yy_buf_size = size;
 
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) cmFortran_yyalloc(b->yy_buf_size + 2 ,yyscanner );
+	b->yy_ch_buf = (char *) yyalloc( (yy_size_t) (b->yy_buf_size + 2) , yyscanner );
 	if ( ! b->yy_ch_buf )
-		YY_FATAL_ERROR( "out of dynamic memory in cmFortran_yy_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	cmFortran_yy_init_buffer(b,file ,yyscanner);
+	yy_init_buffer( b, file , yyscanner);
 
 	return b;
 }
 
 /** Destroy the buffer.
- * @param b a buffer created with cmFortran_yy_create_buffer()
+ * @param b a buffer created with yy_create_buffer()
  * @param yyscanner The scanner object.
  */
-    void cmFortran_yy_delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void yy_delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
@@ -1889,28 +1998,28 @@ static void cmFortran_yy_load_buffer_state  (yyscan_t yyscanner)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		cmFortran_yyfree((void *) b->yy_ch_buf ,yyscanner );
+		yyfree( (void *) b->yy_ch_buf , yyscanner );
 
-	cmFortran_yyfree((void *) b ,yyscanner );
+	yyfree( (void *) b , yyscanner );
 }
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
- * such as during a cmFortran_yyrestart() or at EOF.
+ * such as during a yyrestart() or at EOF.
  */
-    static void cmFortran_yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
+    static void yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
 
 {
 	int oerrno = errno;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-	cmFortran_yy_flush_buffer(b ,yyscanner);
+	yy_flush_buffer( b , yyscanner);
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then cmFortran_yy_init_buffer was _probably_
-     * called from cmFortran_yyrestart() or through yy_get_next_buffer.
+    /* If b is the current buffer, then yy_init_buffer was _probably_
+     * called from yyrestart() or through yy_get_next_buffer.
      * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
@@ -1927,7 +2036,7 @@ static void cmFortran_yy_load_buffer_state  (yyscan_t yyscanner)
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
  * @param yyscanner The scanner object.
  */
-    void cmFortran_yy_flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void yy_flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if ( ! b )
@@ -1948,7 +2057,7 @@ static void cmFortran_yy_load_buffer_state  (yyscan_t yyscanner)
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		cmFortran_yy_load_buffer_state(yyscanner );
+		yy_load_buffer_state( yyscanner );
 }
 
 /** Pushes the new state onto the stack. The new state becomes
@@ -1957,15 +2066,15 @@ static void cmFortran_yy_load_buffer_state  (yyscan_t yyscanner)
  *  @param new_buffer The new state.
  *  @param yyscanner The scanner object.
  */
-void cmFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
+void yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (new_buffer == NULL)
 		return;
 
-	cmFortran_yyensure_buffer_stack(yyscanner);
+	yyensure_buffer_stack(yyscanner);
 
-	/* This block is copied from cmFortran_yy_switch_to_buffer. */
+	/* This block is copied from yy_switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
@@ -1979,8 +2088,8 @@ void cmFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscan
 		yyg->yy_buffer_stack_top++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-	/* copied from cmFortran_yy_switch_to_buffer. */
-	cmFortran_yy_load_buffer_state(yyscanner );
+	/* copied from yy_switch_to_buffer. */
+	yy_load_buffer_state( yyscanner );
 	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
@@ -1988,19 +2097,19 @@ void cmFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscan
  *  The next element becomes the new top.
  *  @param yyscanner The scanner object.
  */
-void cmFortran_yypop_buffer_state (yyscan_t yyscanner)
+void yypop_buffer_state (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (!YY_CURRENT_BUFFER)
 		return;
 
-	cmFortran_yy_delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
+	yy_delete_buffer(YY_CURRENT_BUFFER , yyscanner);
 	YY_CURRENT_BUFFER_LVALUE = NULL;
 	if (yyg->yy_buffer_stack_top > 0)
 		--yyg->yy_buffer_stack_top;
 
 	if (YY_CURRENT_BUFFER) {
-		cmFortran_yy_load_buffer_state(yyscanner );
+		yy_load_buffer_state( yyscanner );
 		yyg->yy_did_buffer_switch_on_eof = 1;
 	}
 }
@@ -2008,9 +2117,9 @@ void cmFortran_yypop_buffer_state (yyscan_t yyscanner)
 /* Allocates the stack if it does not exist.
  *  Guarantees space for at least one push.
  */
-static void cmFortran_yyensure_buffer_stack (yyscan_t yyscanner)
+static void yyensure_buffer_stack (yyscan_t yyscanner)
 {
-	int num_to_alloc;
+	yy_size_t num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if (!yyg->yy_buffer_stack) {
@@ -2020,11 +2129,11 @@ static void cmFortran_yyensure_buffer_stack (yyscan_t yyscanner)
 		 * immediate realloc on the next call.
          */
       num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)cmFortran_yyalloc
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)yyalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		if ( ! yyg->yy_buffer_stack )
-			YY_FATAL_ERROR( "out of dynamic memory in cmFortran_yyensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
 
@@ -2039,12 +2148,12 @@ static void cmFortran_yyensure_buffer_stack (yyscan_t yyscanner)
 		yy_size_t grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)cmFortran_yyrealloc
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)yyrealloc
 								(yyg->yy_buffer_stack,
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		if ( ! yyg->yy_buffer_stack )
-			YY_FATAL_ERROR( "out of dynamic memory in cmFortran_yyensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -2058,7 +2167,7 @@ static void cmFortran_yyensure_buffer_stack (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE cmFortran_yy_scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
+YY_BUFFER_STATE yy_scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 
@@ -2068,11 +2177,11 @@ YY_BUFFER_STATE cmFortran_yy_scan_buffer  (char * base, yy_size_t  size , yyscan
 		/* They forgot to leave room for the EOB's. */
 		return NULL;
 
-	b = (YY_BUFFER_STATE) cmFortran_yyalloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state ) , yyscanner );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in cmFortran_yy_scan_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_buffer()" );
 
-	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
+	b->yy_buf_size = (int) (size - 2);	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
 	b->yy_is_our_buffer = 0;
 	b->yy_input_file = NULL;
@@ -2082,53 +2191,53 @@ YY_BUFFER_STATE cmFortran_yy_scan_buffer  (char * base, yy_size_t  size , yyscan
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	cmFortran_yy_switch_to_buffer(b ,yyscanner );
+	yy_switch_to_buffer( b , yyscanner );
 
 	return b;
 }
 
-/** Setup the input buffer state to scan a string. The next call to cmFortran_yylex() will
+/** Setup the input buffer state to scan a string. The next call to yylex() will
  * scan from a @e copy of @a str.
  * @param yystr a NUL-terminated string to scan
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
- *       cmFortran_yy_scan_bytes() instead.
+ *       yy_scan_bytes() instead.
  */
-YY_BUFFER_STATE cmFortran_yy_scan_string (yyconst char * yystr , yyscan_t yyscanner)
+YY_BUFFER_STATE yy_scan_string (const char * yystr , yyscan_t yyscanner)
 {
 
-	return cmFortran_yy_scan_bytes(yystr,(int) strlen(yystr) ,yyscanner);
+	return yy_scan_bytes( yystr, (int) strlen(yystr) , yyscanner);
 }
 
-/** Setup the input buffer state to scan the given bytes. The next call to cmFortran_yylex() will
+/** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
  * @param yybytes the byte buffer to scan
  * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE cmFortran_yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
+YY_BUFFER_STATE yy_scan_bytes  (const char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 	char *buf;
 	yy_size_t n;
-	yy_size_t i;
+	int i;
 
 	/* Get memory for full buffer, including space for trailing EOB's. */
-	n = (yy_size_t) _yybytes_len + 2;
-	buf = (char *) cmFortran_yyalloc(n ,yyscanner );
+	n = (yy_size_t) (_yybytes_len + 2);
+	buf = (char *) yyalloc( n , yyscanner );
 	if ( ! buf )
-		YY_FATAL_ERROR( "out of dynamic memory in cmFortran_yy_scan_bytes()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_bytes()" );
 
-	for ( i = 0; i < (size_t)_yybytes_len; ++i )
+	for ( i = 0; i < _yybytes_len; ++i )
 		buf[i] = yybytes[i];
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = cmFortran_yy_scan_buffer(buf,n ,yyscanner);
+	b = yy_scan_buffer( buf, n , yyscanner);
 	if ( ! b )
-		YY_FATAL_ERROR( "bad buffer in cmFortran_yy_scan_bytes()" );
+		YY_FATAL_ERROR( "bad buffer in yy_scan_bytes()" );
 
 	/* It's okay to grow etc. this buffer, and we should throw it
 	 * away when we're done.
@@ -2142,11 +2251,11 @@ YY_BUFFER_STATE cmFortran_yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yynoreturn yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
+static void yynoreturn yy_fatal_error (const char* msg , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
-	(void) fprintf( stderr, "%s\n", msg );
+	fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 
@@ -2172,7 +2281,7 @@ static void yynoreturn yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 /** Get the user-defined data for this scanner.
  * @param yyscanner The scanner object.
  */
-YY_EXTRA_TYPE cmFortran_yyget_extra  (yyscan_t yyscanner)
+YY_EXTRA_TYPE yyget_extra  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyextra;
@@ -2181,7 +2290,7 @@ YY_EXTRA_TYPE cmFortran_yyget_extra  (yyscan_t yyscanner)
 /** Get the current line number.
  * @param yyscanner The scanner object.
  */
-int cmFortran_yyget_lineno  (yyscan_t yyscanner)
+int yyget_lineno  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
@@ -2194,7 +2303,7 @@ int cmFortran_yyget_lineno  (yyscan_t yyscanner)
 /** Get the current column number.
  * @param yyscanner The scanner object.
  */
-int cmFortran_yyget_column  (yyscan_t yyscanner)
+int yyget_column  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
@@ -2207,7 +2316,7 @@ int cmFortran_yyget_column  (yyscan_t yyscanner)
 /** Get the input stream.
  * @param yyscanner The scanner object.
  */
-FILE *cmFortran_yyget_in  (yyscan_t yyscanner)
+FILE *yyget_in  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyin;
@@ -2216,7 +2325,7 @@ FILE *cmFortran_yyget_in  (yyscan_t yyscanner)
 /** Get the output stream.
  * @param yyscanner The scanner object.
  */
-FILE *cmFortran_yyget_out  (yyscan_t yyscanner)
+FILE *yyget_out  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyout;
@@ -2225,7 +2334,7 @@ FILE *cmFortran_yyget_out  (yyscan_t yyscanner)
 /** Get the length of the current token.
  * @param yyscanner The scanner object.
  */
-int cmFortran_yyget_leng  (yyscan_t yyscanner)
+int yyget_leng  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyleng;
@@ -2235,7 +2344,7 @@ int cmFortran_yyget_leng  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  */
 
-char *cmFortran_yyget_text  (yyscan_t yyscanner)
+char *yyget_text  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yytext;
@@ -2245,7 +2354,7 @@ char *cmFortran_yyget_text  (yyscan_t yyscanner)
  * @param user_defined The data to be associated with this scanner.
  * @param yyscanner The scanner object.
  */
-void cmFortran_yyset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
+void yyset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyextra = user_defined ;
@@ -2255,13 +2364,13 @@ void cmFortran_yyset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
  * @param _line_number line number
  * @param yyscanner The scanner object.
  */
-void cmFortran_yyset_lineno (int  _line_number , yyscan_t yyscanner)
+void yyset_lineno (int  _line_number , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "cmFortran_yyset_lineno called with no buffer" );
+           YY_FATAL_ERROR( "yyset_lineno called with no buffer" );
 
     yylineno = _line_number;
 }
@@ -2270,13 +2379,13 @@ void cmFortran_yyset_lineno (int  _line_number , yyscan_t yyscanner)
  * @param _column_no column number
  * @param yyscanner The scanner object.
  */
-void cmFortran_yyset_column (int  _column_no , yyscan_t yyscanner)
+void yyset_column (int  _column_no , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "cmFortran_yyset_column called with no buffer" );
+           YY_FATAL_ERROR( "yyset_column called with no buffer" );
 
     yycolumn = _column_no;
 }
@@ -2285,27 +2394,27 @@ void cmFortran_yyset_column (int  _column_no , yyscan_t yyscanner)
  * input buffer.
  * @param _in_str A readable stream.
  * @param yyscanner The scanner object.
- * @see cmFortran_yy_switch_to_buffer
+ * @see yy_switch_to_buffer
  */
-void cmFortran_yyset_in (FILE *  _in_str , yyscan_t yyscanner)
+void yyset_in (FILE *  _in_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyin = _in_str ;
 }
 
-void cmFortran_yyset_out (FILE *  _out_str , yyscan_t yyscanner)
+void yyset_out (FILE *  _out_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyout = _out_str ;
 }
 
-int cmFortran_yyget_debug  (yyscan_t yyscanner)
+int yyget_debug  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yy_flex_debug;
 }
 
-void cmFortran_yyset_debug (int  _bdebug , yyscan_t yyscanner)
+void yyset_debug (int  _bdebug , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yy_flex_debug = _bdebug ;
@@ -2315,20 +2424,18 @@ void cmFortran_yyset_debug (int  _bdebug , yyscan_t yyscanner)
 
 /* User-visible API */
 
-/* cmFortran_yylex_init is special because it creates the scanner itself, so it is
+/* yylex_init is special because it creates the scanner itself, so it is
  * the ONLY reentrant function that doesn't take the scanner as the last argument.
  * That's why we explicitly handle the declaration, instead of using our macros.
  */
-
-int cmFortran_yylex_init(yyscan_t* ptr_yy_globals)
-
+int yylex_init(yyscan_t* ptr_yy_globals)
 {
     if (ptr_yy_globals == NULL){
         errno = EINVAL;
         return 1;
     }
 
-    *ptr_yy_globals = (yyscan_t) cmFortran_yyalloc ( sizeof( struct yyguts_t ), NULL );
+    *ptr_yy_globals = (yyscan_t) yyalloc ( sizeof( struct yyguts_t ), NULL );
 
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
@@ -2341,27 +2448,25 @@ int cmFortran_yylex_init(yyscan_t* ptr_yy_globals)
     return yy_init_globals ( *ptr_yy_globals );
 }
 
-/* cmFortran_yylex_init_extra has the same functionality as cmFortran_yylex_init, but follows the
+/* yylex_init_extra has the same functionality as yylex_init, but follows the
  * convention of taking the scanner as the last argument. Note however, that
  * this is a *pointer* to a scanner, as it will be allocated by this call (and
  * is the reason, too, why this function also must handle its own declaration).
- * The user defined value in the first argument will be available to cmFortran_yyalloc in
+ * The user defined value in the first argument will be available to yyalloc in
  * the yyextra field.
  */
-
-int cmFortran_yylex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
-
+int yylex_init_extra( YY_EXTRA_TYPE yy_user_defined, yyscan_t* ptr_yy_globals )
 {
     struct yyguts_t dummy_yyguts;
 
-    cmFortran_yyset_extra (yy_user_defined, &dummy_yyguts);
+    yyset_extra (yy_user_defined, &dummy_yyguts);
 
     if (ptr_yy_globals == NULL){
         errno = EINVAL;
         return 1;
     }
 
-    *ptr_yy_globals = (yyscan_t) cmFortran_yyalloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
+    *ptr_yy_globals = (yyscan_t) yyalloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
 
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
@@ -2372,7 +2477,7 @@ int cmFortran_yylex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_gl
     yy_init_globals. Leave at 0x00 for releases. */
     memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
 
-    cmFortran_yyset_extra (yy_user_defined, *ptr_yy_globals);
+    yyset_extra (yy_user_defined, *ptr_yy_globals);
 
     return yy_init_globals ( *ptr_yy_globals );
 }
@@ -2381,7 +2486,7 @@ static int yy_init_globals (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from cmFortran_yylex_destroy(), so don't allocate here.
+     * This function is called from yylex_destroy(), so don't allocate here.
      */
 
     yyg->yy_buffer_stack = NULL;
@@ -2405,37 +2510,37 @@ static int yy_init_globals (yyscan_t yyscanner)
 #endif
 
     /* For future reference: Set errno on error, since we are called by
-     * cmFortran_yylex_init()
+     * yylex_init()
      */
     return 0;
 }
 
-/* cmFortran_yylex_destroy is for both reentrant and non-reentrant scanners. */
-int cmFortran_yylex_destroy  (yyscan_t yyscanner)
+/* yylex_destroy is for both reentrant and non-reentrant scanners. */
+int yylex_destroy  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		cmFortran_yy_delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
+		yy_delete_buffer( YY_CURRENT_BUFFER , yyscanner );
 		YY_CURRENT_BUFFER_LVALUE = NULL;
-		cmFortran_yypop_buffer_state(yyscanner);
+		yypop_buffer_state(yyscanner);
 	}
 
 	/* Destroy the stack itself. */
-	cmFortran_yyfree(yyg->yy_buffer_stack ,yyscanner);
+	yyfree(yyg->yy_buffer_stack , yyscanner);
 	yyg->yy_buffer_stack = NULL;
 
     /* Destroy the start condition stack. */
-        cmFortran_yyfree(yyg->yy_start_stack ,yyscanner );
+        yyfree( yyg->yy_start_stack , yyscanner );
         yyg->yy_start_stack = NULL;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * cmFortran_yylex() is called, initialization will occur. */
+     * yylex() is called, initialization will occur. */
     yy_init_globals( yyscanner);
 
     /* Destroy the main struct (reentrant only). */
-    cmFortran_yyfree ( yyscanner , yyscanner );
+    yyfree ( yyscanner , yyscanner );
     yyscanner = NULL;
     return 0;
 }
@@ -2445,7 +2550,7 @@ int cmFortran_yylex_destroy  (yyscan_t yyscanner)
  */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, yyconst char * s2, int n , yyscan_t yyscanner)
+static void yy_flex_strncpy (char* s1, const char * s2, int n , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
@@ -2457,7 +2562,7 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n , yyscan_t yysca
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
+static int yy_flex_strlen (const char * s , yyscan_t yyscanner)
 {
 	int n;
 	for ( n = 0; s[n]; ++n )
@@ -2467,14 +2572,14 @@ static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
 }
 #endif
 
-void *cmFortran_yyalloc (yy_size_t  size , yyscan_t yyscanner)
+void *yyalloc (yy_size_t  size , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
 	return malloc(size);
 }
 
-void *cmFortran_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
+void *yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
@@ -2489,18 +2594,14 @@ void *cmFortran_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 	return realloc(ptr, size);
 }
 
-void cmFortran_yyfree (void * ptr , yyscan_t yyscanner)
+void yyfree (void * ptr , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
-	free( (char *) ptr );	/* see cmFortran_yyrealloc() for (char *) cast */
+	free( (char *) ptr );	/* see yyrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
-
-#line 178 "cmFortranLexer.in.l"
-
-
 
 /*--------------------------------------------------------------------------*/
 YY_BUFFER_STATE cmFortranLexer_GetCurrentBuffer(yyscan_t yyscanner)
