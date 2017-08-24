@@ -234,6 +234,26 @@ other synonyms for ``Fixes`` and allows much more flexible forms than the
 above, but committers should aim for this format for consistency. Note that
 such details can alternatively be specified in the merge request description.
 
+Referencing Commits in Commit Messages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The preferred form for references to other commits is
+``commit <commit> (<subject>, <date>)``, where:
+
+* ``<commit>``:
+  If available, a tag-relative name of the commit produced by
+  ``git describe --contains <commit-ish>``.  Otherwise, the first
+  8-10 characters of the commit ``<hash>``.
+
+* ``<subject>``:
+  The first line of the commit message.
+
+* ``<date>``:
+  The author date of the commit, in its original time zone, formatted as
+  ``CCYY-MM-DD``.  ``git-log(1)`` shows the original time zone by default.
+
+Alternatively, the full commit ``<hash>`` may be used.
+
 Revising Commit Messages
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
