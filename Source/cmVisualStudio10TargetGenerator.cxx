@@ -3698,10 +3698,10 @@ void cmVisualStudio10TargetGenerator::WriteSDKReferences()
         this->WriteSingleSDKReference("WindowsIoT", iotExtensionsVersion);
       }
     }
+  }
 
-    if (hasWrittenItemGroup) {
-      this->WriteString("</ItemGroup>\n", 1);
-    }
+  if (hasWrittenItemGroup) {
+    this->WriteString("</ItemGroup>\n", 1);
   }
 }
 
