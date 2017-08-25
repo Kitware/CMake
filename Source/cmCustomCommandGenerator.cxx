@@ -75,7 +75,7 @@ const char* cmCustomCommandGenerator::GetCrossCompilingEmulator(
   unsigned int c) const
 {
   if (!this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING")) {
-    return CM_NULLPTR;
+    return nullptr;
   }
   std::string const& argv0 = this->CommandLines[c][0];
   cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(argv0);
@@ -83,7 +83,7 @@ const char* cmCustomCommandGenerator::GetCrossCompilingEmulator(
       !target->IsImported()) {
     return target->GetProperty("CROSSCOMPILING_EMULATOR");
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 const char* cmCustomCommandGenerator::GetArgv0Location(unsigned int c) const
@@ -96,7 +96,7 @@ const char* cmCustomCommandGenerator::GetArgv0Location(unsigned int c) const
        !this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING"))) {
     return target->GetLocation(this->Config);
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
@@ -140,14 +140,13 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
                                                std::string& cmd) const
 {
   unsigned int offset = 1;
-  if (this->GetCrossCompilingEmulator(c) != CM_NULLPTR) {
+  if (this->GetCrossCompilingEmulator(c) != nullptr) {
     offset = 0;
   }
   cmCustomCommandLine const& commandLine = this->CommandLines[c];
   for (unsigned int j = offset; j < commandLine.size(); ++j) {
     std::string arg;
-    if (const char* location =
-          j == 0 ? this->GetArgv0Location(c) : CM_NULLPTR) {
+    if (const char* location = j == 0 ? this->GetArgv0Location(c) : nullptr) {
       // GetCommand returned the emulator instead of the argv0 location,
       // so transform the latter now.
       arg = location;

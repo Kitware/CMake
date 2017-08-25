@@ -69,7 +69,7 @@ void cmEventBasedConnection::on_new_connection(uv_stream_t* stream, int status)
 
 bool cmEventBasedConnection::IsOpen() const
 {
-  return this->WriteStream != CM_NULLPTR;
+  return this->WriteStream != nullptr;
 }
 
 void cmEventBasedConnection::WriteData(const std::string& data)

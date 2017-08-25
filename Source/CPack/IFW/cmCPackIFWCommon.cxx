@@ -15,14 +15,14 @@
 #include <vector>
 
 cmCPackIFWCommon::cmCPackIFWCommon()
-  : Generator(CM_NULLPTR)
+  : Generator(nullptr)
 {
 }
 
 const char* cmCPackIFWCommon::GetOption(const std::string& op) const
 {
   return this->Generator ? this->Generator->cmCPackGenerator::GetOption(op)
-                         : CM_NULLPTR;
+                         : nullptr;
 }
 
 bool cmCPackIFWCommon::IsOn(const std::string& op) const

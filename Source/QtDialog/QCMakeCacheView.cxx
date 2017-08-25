@@ -539,7 +539,7 @@ QWidget* QCMakeCacheModelDelegate::createEditor(
   QModelIndex var = idx.sibling(idx.row(), 0);
   int type = var.data(QCMakeCacheModel::TypeRole).toInt();
   if (type == QCMakeProperty::BOOL) {
-    return CM_NULLPTR;
+    return nullptr;
   }
   if (type == QCMakeProperty::PATH) {
     QCMakePathEditor* editor =
@@ -642,7 +642,7 @@ QSize QCMakeCacheModelDelegate::sizeHint(const QStyleOptionViewItem& option,
   QStyleOptionButton opt;
   opt.QStyleOption::operator=(option);
   sz = sz.expandedTo(
-    style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, CM_NULLPTR)
+    style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, nullptr)
       .size());
 
   return sz;

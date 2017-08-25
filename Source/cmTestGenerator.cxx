@@ -23,7 +23,7 @@ cmTestGenerator::cmTestGenerator(
 {
   this->ActionsPerConfig = !test->GetOldStyle();
   this->TestGenerated = false;
-  this->LG = CM_NULLPTR;
+  this->LG = nullptr;
 }
 
 cmTestGenerator::~cmTestGenerator()
@@ -80,7 +80,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
     // Prepend with the emulator when cross compiling if required.
     const char* emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
-    if (emulator != CM_NULLPTR) {
+    if (emulator != nullptr) {
       std::vector<std::string> emulatorWithArgs;
       cmSystemTools::ExpandListArgument(emulator, emulatorWithArgs);
       std::string emulatorExe(emulatorWithArgs[0]);

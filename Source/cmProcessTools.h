@@ -70,7 +70,7 @@ public:
   class OutputLogger : public LineParser
   {
   public:
-    OutputLogger(std::ostream& log, const char* prefix = CM_NULLPTR)
+    OutputLogger(std::ostream& log, const char* prefix = nullptr)
     {
       this->SetLog(&log, prefix);
     }
@@ -81,7 +81,7 @@ public:
 
   /** Run a process and send output to given parsers.  */
   static void RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
-                         OutputParser* err = CM_NULLPTR,
+                         OutputParser* err = nullptr,
                          Encoding encoding = cmProcessOutput::Auto);
 };
 

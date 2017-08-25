@@ -75,9 +75,9 @@ cmCTestScriptHandler::cmCTestScriptHandler()
   this->Backup = false;
   this->EmptyBinDir = false;
   this->EmptyBinDirOnce = false;
-  this->Makefile = CM_NULLPTR;
-  this->CMake = CM_NULLPTR;
-  this->GlobalGenerator = CM_NULLPTR;
+  this->Makefile = nullptr;
+  this->CMake = nullptr;
+  this->GlobalGenerator = nullptr;
 
   this->ScriptStartTime = 0;
 
@@ -114,10 +114,10 @@ void cmCTestScriptHandler::Initialize()
   this->ScriptStartTime = 0;
 
   delete this->Makefile;
-  this->Makefile = CM_NULLPTR;
+  this->Makefile = nullptr;
 
   delete this->GlobalGenerator;
-  this->GlobalGenerator = CM_NULLPTR;
+  this->GlobalGenerator = nullptr;
 
   delete this->CMake;
 }
@@ -193,7 +193,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   for (size_t i = 1; i < initArgs.size(); ++i) {
     argv.push_back(initArgs[i].c_str());
   }
-  argv.push_back(CM_NULLPTR);
+  argv.push_back(nullptr);
 
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
@@ -219,7 +219,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   }
 
   // Properly handle output of the build command
-  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+  cmsysProcess_WaitForExit(cp, nullptr);
   int result = cmsysProcess_GetState(cp);
   int retVal = 0;
   bool failed = false;
@@ -852,7 +852,7 @@ bool cmCTestScriptHandler::WriteInitialCache(const char* directory,
     return false;
   }
 
-  if (text != CM_NULLPTR) {
+  if (text != nullptr) {
     fout.write(text, strlen(text));
   }
 

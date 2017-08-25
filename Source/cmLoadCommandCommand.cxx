@@ -63,7 +63,7 @@ public:
   void FinalPass() CM_OVERRIDE;
   bool HasFinalPass() const CM_OVERRIDE
   {
-    return this->info.FinalPass != CM_NULLPTR;
+    return this->info.FinalPass != nullptr;
   }
 
   static const char* LastName;
@@ -86,11 +86,11 @@ public:
 #endif
       signal(SIGILL, TrapsForSignalsCFunction);
     } else {
-      signal(SIGSEGV, CM_NULLPTR);
+      signal(SIGSEGV, nullptr);
 #ifdef SIGBUS
-      signal(SIGBUS, CM_NULLPTR);
+      signal(SIGBUS, nullptr);
 #endif
-      signal(SIGILL, CM_NULLPTR);
+      signal(SIGILL, nullptr);
     }
   }
 
@@ -102,7 +102,7 @@ extern "C" void TrapsForSignalsCFunction(int sig)
   cmLoadedCommand::TrapsForSignals(sig);
 }
 
-const char* cmLoadedCommand::LastName = CM_NULLPTR;
+const char* cmLoadedCommand::LastName = nullptr;
 
 bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
                                   cmExecutionStatus&)
@@ -118,7 +118,7 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
 
   // create argc and argv and then invoke the command
   int argc = static_cast<int>(args.size());
-  char** argv = CM_NULLPTR;
+  char** argv = nullptr;
   if (argc) {
     argv = (char**)malloc(argc * sizeof(char*));
   }

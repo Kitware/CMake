@@ -2063,7 +2063,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       hasFlags = true;
       cmGlobalVisualStudio10Generator* gg =
         static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
-      cmIDEFlagTable const* flagtable = CM_NULLPTR;
+      cmIDEFlagTable const* flagtable = nullptr;
       const std::string& srclang = source->GetLanguage();
       if (srclang == "C" || srclang == "CXX") {
         flagtable = gg->GetClFlagTable();

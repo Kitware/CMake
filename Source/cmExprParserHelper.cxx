@@ -14,7 +14,7 @@ int cmExpr_yyparse(yyscan_t yyscanner);
 cmExprParserHelper::cmExprParserHelper()
 {
   this->FileLine = -1;
-  this->FileName = CM_NULLPTR;
+  this->FileName = nullptr;
 }
 
 cmExprParserHelper::~cmExprParserHelper()

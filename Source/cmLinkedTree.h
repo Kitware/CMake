@@ -49,7 +49,7 @@ public:
 
   public:
     iterator()
-      : Tree(CM_NULLPTR)
+      : Tree(nullptr)
       , Position(0)
     {
     }

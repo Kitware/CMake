@@ -96,7 +96,7 @@ bool cmCTestCVS::UpdateImpl()
        ai != args.end(); ++ai) {
     cvs_update.push_back(ai->c_str());
   }
-  cvs_update.push_back(CM_NULLPTR);
+  cvs_update.push_back(nullptr);
 
   UpdateParser out(this, "up-out> ");
   UpdateParser err(this, "up-err> ");
@@ -221,8 +221,9 @@ void cmCTestCVS::LoadRevisions(std::string const& file, const char* branchFlag,
 
   // Run "cvs log" to get revisions of this file on this branch.
   const char* cvs = this->CommandLineTool.c_str();
-  const char* cvs_log[] = { cvs,        "log",        "-N",
-                            branchFlag, file.c_str(), CM_NULLPTR };
+  const char* cvs_log[] = {
+    cvs, "log", "-N", branchFlag, file.c_str(), nullptr
+  };
 
   LogParser out(this, "log-out> ", revisions);
   OutputLogger err(this->Log, "log-err> ");

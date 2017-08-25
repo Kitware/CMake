@@ -29,12 +29,12 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 
   size_t cnt = 0;
   const char* smodel = args[cnt].c_str();
-  const char* src_dir = CM_NULLPTR;
-  const char* bld_dir = CM_NULLPTR;
+  const char* src_dir = nullptr;
+  const char* bld_dir = nullptr;
 
   cnt++;
 
-  this->CTest->SetSpecificTrack(CM_NULLPTR);
+  this->CTest->SetSpecificTrack(nullptr);
   if (cnt < args.size() - 1) {
     if (args[cnt] == "TRACK") {
       cnt++;

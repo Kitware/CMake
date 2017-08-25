@@ -11,7 +11,7 @@
 #include <utility>
 
 cmInstalledFile::cmInstalledFile()
-  : NameExpression(CM_NULLPTR)
+  : NameExpression(nullptr)
 {
 }
 

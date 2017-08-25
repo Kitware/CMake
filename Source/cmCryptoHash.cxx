@@ -75,7 +75,7 @@ CM_AUTO_PTR<cmCryptoHash> cmCryptoHash::New(const char* algo)
   if (strcmp(algo, "SHA3_512") == 0) {
     return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA3_512));
   }
-  return CM_AUTO_PTR<cmCryptoHash>(CM_NULLPTR);
+  return CM_AUTO_PTR<cmCryptoHash>(nullptr);
 }
 
 bool cmCryptoHash::IntFromHexDigit(char input, char& output)

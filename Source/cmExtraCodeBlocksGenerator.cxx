@@ -289,7 +289,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
 
   xml.StartElement("Build");
 
-  this->AppendTarget(xml, "all", CM_NULLPTR, make.c_str(), lgs[0],
+  this->AppendTarget(xml, "all", nullptr, make.c_str(), lgs[0],
                      compiler.c_str(), makeArgs);
 
   // add all executable and library targets and some of the GLOBAL
@@ -307,7 +307,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
           // not from the subdirs
           if (strcmp((*lg)->GetCurrentBinaryDirectory(),
                      (*lg)->GetBinaryDirectory()) == 0) {
-            this->AppendTarget(xml, targetName, CM_NULLPTR, make.c_str(), *lg,
+            this->AppendTarget(xml, targetName, nullptr, make.c_str(), *lg,
                                compiler.c_str(), makeArgs);
           }
         } break;
@@ -323,7 +323,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             break;
           }
 
-          this->AppendTarget(xml, targetName, CM_NULLPTR, make.c_str(), *lg,
+          this->AppendTarget(xml, targetName, nullptr, make.c_str(), *lg,
                              compiler.c_str(), makeArgs);
           break;
         case cmStateEnums::EXECUTABLE:
@@ -517,7 +517,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
   xml.StartElement("Target");
   xml.Attribute("title", targetName);
 
-  if (target != CM_NULLPTR) {
+  if (target != nullptr) {
     int cbTargetType = this->GetCBTargetType(target);
     std::string workingDir = lg->GetCurrentBinaryDirectory();
     if (target->GetType() == cmStateEnums::EXECUTABLE) {
@@ -525,12 +525,12 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
       // set the working directory to this dir.
       const char* runtimeOutputDir =
         makefile->GetDefinition("CMAKE_RUNTIME_OUTPUT_DIRECTORY");
-      if (runtimeOutputDir != CM_NULLPTR) {
+      if (runtimeOutputDir != nullptr) {
         workingDir = runtimeOutputDir;
       } else {
         const char* executableOutputDir =
           makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-        if (executableOutputDir != CM_NULLPTR) {
+        if (executableOutputDir != nullptr) {
           workingDir = executableOutputDir;
         }
       }

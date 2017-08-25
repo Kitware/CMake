@@ -59,7 +59,7 @@ private:
 
   // -- Content analysis
   bool MocRequired(const std::string& contentText,
-                   std::string* macroName = CM_NULLPTR);
+                   std::string* macroName = nullptr);
   void MocFindDepends(
     const std::string& absFilename, const std::string& contentText,
     std::map<std::string, std::set<std::string> >& mocDepends);

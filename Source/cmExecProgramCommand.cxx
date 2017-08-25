@@ -86,7 +86,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
                                               args[1].c_str(), verbose);
   } else {
     result = cmExecProgramCommand::RunCommand(command.c_str(), output, retVal,
-                                              CM_NULLPTR, verbose);
+                                              nullptr, verbose);
   }
   if (!result) {
     retVal = -1;
@@ -205,7 +205,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   }
   fflush(stdout);
   fflush(stderr);
-  const char* cmd[] = { "/bin/sh", "-c", command, CM_NULLPTR };
+  const char* cmd[] = { "/bin/sh", "-c", command, nullptr };
   cmsysProcess_SetCommand(cp, cmd);
 #endif
 
@@ -217,7 +217,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   int p;
   cmProcessOutput processOutput(encoding);
   std::string strdata;
-  while ((p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR), p)) {
+  while ((p = cmsysProcess_WaitForData(cp, &data, &length, nullptr), p)) {
     if (p == cmsysProcess_Pipe_STDOUT || p == cmsysProcess_Pipe_STDERR) {
       if (verbose) {
         processOutput.DecodeText(data, length, strdata);
@@ -235,7 +235,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   }
 
   // All output has been read.  Wait for the process to exit.
-  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+  cmsysProcess_WaitForExit(cp, nullptr);
   processOutput.DecodeText(output, output);
 
   // Check the result of running the process.

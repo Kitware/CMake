@@ -260,7 +260,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     this->GlobalGenerator, target, "linker search path");
   this->OrderRuntimeSearchPath = new cmOrderDirectories(
     this->GlobalGenerator, target, "runtime search path");
-  this->OrderDependentRPath = CM_NULLPTR;
+  this->OrderDependentRPath = nullptr;
 
   // Get the language used for linking this target.
   this->LinkLanguage = this->Target->GetLinkerLanguage(config);
@@ -281,7 +281,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
   // On platforms without import libraries there may be a special flag
   // to use when creating a plugin (module) that obtains symbols from
   // the program that will load it.
-  this->LoaderFlag = CM_NULLPTR;
+  this->LoaderFlag = nullptr;
   if (!this->UseImportLibrary &&
       this->Target->GetType() == cmStateEnums::MODULE_LIBRARY) {
     std::string loader_flag_var = "CMAKE_SHARED_MODULE_LOADER_";
@@ -562,7 +562,7 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
     for (std::vector<std::string>::const_iterator i = libsVec.begin();
          i != libsVec.end(); ++i) {
       if (this->ImplicitLinkLibs.find(*i) == this->ImplicitLinkLibs.end()) {
-        this->AddItem(*i, CM_NULLPTR);
+        this->AddItem(*i, nullptr);
       }
     }
   }
@@ -616,7 +616,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // Also add the item the interface specifies to be used in its place.
       std::string const& libName = tgt->GetImportedLibName(config);
       if (!libName.empty()) {
-        this->AddItem(libName, CM_NULLPTR);
+        this->AddItem(libName, nullptr);
       }
     } else {
       // Decide whether to use an import library.
@@ -710,7 +710,7 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
 
   // Check if we need to include the dependent shared library in other
   // path ordering.
-  cmOrderDirectories* order = CM_NULLPTR;
+  cmOrderDirectories* order = nullptr;
   if (this->SharedDependencyMode == SharedDepModeLibDir &&
       !this->LinkWithRuntimePath /* AddLibraryRuntimeInfo adds it */) {
     // Add the item to the linker search path.
@@ -722,7 +722,7 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
   if (order) {
     if (tgt) {
       std::string soName = tgt->GetSOName(this->Config);
-      const char* soname = soName.empty() ? CM_NULLPTR : soName.c_str();
+      const char* soname = soName.empty() ? nullptr : soName.c_str();
       order->AddRuntimeLibrary(lib, soname);
     } else {
       order->AddRuntimeLibrary(lib);
@@ -741,9 +741,9 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
   this->LinkTypeEnabled = false;
 
   // Lookup link type selection flags.
-  const char* static_link_type_flag = CM_NULLPTR;
-  const char* shared_link_type_flag = CM_NULLPTR;
-  const char* target_type_str = CM_NULLPTR;
+  const char* static_link_type_flag = nullptr;
+  const char* shared_link_type_flag = nullptr;
+  const char* target_type_str = nullptr;
   switch (this->Target->GetType()) {
     case cmStateEnums::EXECUTABLE:
       target_type_str = "EXE";
@@ -1623,7 +1623,7 @@ void cmComputeLinkInformation::AddLibraryRuntimeInfo(
   // Try to get the soname of the library.  Only files with this name
   // could possibly conflict.
   std::string soName = target->GetSOName(this->Config);
-  const char* soname = soName.empty() ? CM_NULLPTR : soName.c_str();
+  const char* soname = soName.empty() ? nullptr : soName.c_str();
 
   // Include this library in the runtime path ordering.
   this->OrderRuntimeSearchPath->AddRuntimeLibrary(fullPath, soname);

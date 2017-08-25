@@ -19,13 +19,13 @@ cmCPackLog::cmCPackLog()
   this->DefaultOutput = &std::cout;
   this->DefaultError = &std::cerr;
 
-  this->LogOutput = CM_NULLPTR;
+  this->LogOutput = nullptr;
   this->LogOutputCleanup = false;
 }
 
 cmCPackLog::~cmCPackLog()
 {
-  this->SetLogOutputStream(CM_NULLPTR);
+  this->SetLogOutputStream(nullptr);
 }
 
 void cmCPackLog::SetLogOutputStream(std::ostream* os)
@@ -39,13 +39,13 @@ void cmCPackLog::SetLogOutputStream(std::ostream* os)
 
 bool cmCPackLog::SetLogOutputFile(const char* fname)
 {
-  cmGeneratedFileStream* cg = CM_NULLPTR;
+  cmGeneratedFileStream* cg = nullptr;
   if (fname) {
     cg = new cmGeneratedFileStream(fname);
   }
   if (cg && !*cg) {
     delete cg;
-    cg = CM_NULLPTR;
+    cg = nullptr;
   }
   this->SetLogOutputStream(cg);
   if (!cg) {

@@ -176,7 +176,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
       return false;
     }
     // Add the null terminating pointer to the command argument list.
-    cmds[i].push_back(CM_NULLPTR);
+    cmds[i].push_back(nullptr);
   }
 
   // Parse the timeout string.
@@ -244,7 +244,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   int p;
   cmProcessOutput processOutput(encoding);
   std::string strdata;
-  while ((p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR), p)) {
+  while ((p = cmsysProcess_WaitForData(cp, &data, &length, nullptr), p)) {
     // Put the output in the right place.
     if (p == cmsysProcess_Pipe_STDOUT && !output_quiet) {
       if (output_variable.empty()) {
@@ -276,7 +276,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // All output has been read.  Wait for the process to exit.
-  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+  cmsysProcess_WaitForExit(cp, nullptr);
   processOutput.DecodeText(tempOutput, tempOutput);
   processOutput.DecodeText(tempError, tempError);
 

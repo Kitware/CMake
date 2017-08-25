@@ -49,7 +49,7 @@ bool cmAddCustomTargetCommand::InitialPass(
   bool uses_terminal = false;
   bool command_expand_lists = false;
   std::string comment_buffer;
-  const char* comment = CM_NULLPTR;
+  const char* comment = nullptr;
   std::vector<std::string> sources;
 
   // Keep track of parser state.

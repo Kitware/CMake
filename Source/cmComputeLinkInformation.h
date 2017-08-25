@@ -33,11 +33,11 @@ public:
     Item()
       : Value()
       , IsPath(true)
-      , Target(CM_NULLPTR)
+      , Target(nullptr)
     {
     }
     Item(std::string const& v, bool p,
-         cmGeneratorTarget const* target = CM_NULLPTR)
+         cmGeneratorTarget const* target = nullptr)
       : Value(v)
       , IsPath(p)
       , Target(target)

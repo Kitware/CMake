@@ -28,7 +28,7 @@ cmInstallTargetGenerator::cmInstallTargetGenerator(
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all)
   , TargetName(targetName)
-  , Target(CM_NULLPTR)
+  , Target(nullptr)
   , FilePermissions(file_permissions)
   , ImportLibrary(implib)
   , Optional(optional)
@@ -312,8 +312,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
                  &cmInstallTargetGenerator::PreReplacementTweaks);
 
   // Write code to install the target file.
-  const char* no_dir_permissions = CM_NULLPTR;
-  const char* no_rename = CM_NULLPTR;
+  const char* no_dir_permissions = nullptr;
+  const char* no_rename = nullptr;
   bool optional = this->Optional || this->ImportLibrary;
   this->AddInstallRule(os, this->GetDestination(config), type, filesFrom,
                        optional, this->FilePermissions.c_str(),
@@ -351,8 +351,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfigObjectLibrary(
   std::string const obj_dir = this->Target->GetObjectDirectory(config);
   std::string const literal_args = " FILES_FROM_DIR \"" + obj_dir + "\"";
 
-  const char* no_dir_permissions = CM_NULLPTR;
-  const char* no_rename = CM_NULLPTR;
+  const char* no_dir_permissions = nullptr;
+  const char* no_rename = nullptr;
   this->AddInstallRule(os, dest, cmInstallType_FILES, objects, this->Optional,
                        this->FilePermissions.c_str(), no_dir_permissions,
                        no_rename, literal_args.c_str(), indent);

@@ -67,7 +67,7 @@ private:
                            const std::string& make,
                            const std::string& makeArguments,
                            const std::string& path, const char* prefix = "",
-                           const char* makeTarget = CM_NULLPTR);
+                           const char* makeTarget = nullptr);
   static void AppendScannerProfile(
     cmXMLWriter& xml, const std::string& profileID, bool openActionEnabled,
     const std::string& openActionFilePath, bool pParserEnabled,

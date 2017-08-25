@@ -59,7 +59,7 @@ const char* cmPropertyMap::GetPropertyValue(const std::string& name) const
 
   cmPropertyMap::const_iterator it = this->find(name);
   if (it == this->end()) {
-    return CM_NULLPTR;
+    return nullptr;
   }
   return it->second.GetValue();
 }

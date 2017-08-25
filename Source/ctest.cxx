@@ -18,13 +18,13 @@
 #include <vector>
 
 static const char* cmDocumentationName[][2] = {
-  { CM_NULLPTR, "  ctest - Testing driver provided by CMake." },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, "  ctest - Testing driver provided by CMake." },
+  { nullptr, nullptr }
 };
 
-static const char* cmDocumentationUsage[][2] = { { CM_NULLPTR,
+static const char* cmDocumentationUsage[][2] = { { nullptr,
                                                    "  ctest [options]" },
-                                                 { CM_NULLPTR, CM_NULLPTR } };
+                                                 { nullptr, nullptr } };
 
 static const char* cmDocumentationOptions[][2] = {
   { "-C <cfg>, --build-config <cfg>", "Choose configuration to test." },
@@ -120,7 +120,7 @@ static const char* cmDocumentationOptions[][2] = {
   { "--http1.0", "Submit using HTTP 1.0." },
   { "--no-compress-output", "Do not compress test output when submitting." },
   { "--print-labels", "Print all available test labels." },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, nullptr }
 };
 
 // this is a test driver program for cmCTest.

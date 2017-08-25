@@ -38,7 +38,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   std::string rawCondition = this->Condition->GetInput();
   if (!rawCondition.empty()) {
     std::string condResult = this->Condition->Evaluate(
-      lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, lang);
+      lg, config, false, nullptr, nullptr, nullptr, lang);
     if (condResult == "0") {
       return;
     }
@@ -54,9 +54,9 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   }
 
   std::string outputFileName = this->OutputFileExpr->Evaluate(
-    lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, lang);
+    lg, config, false, nullptr, nullptr, nullptr, lang);
   const std::string outputContent = inputExpression->Evaluate(
-    lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, lang);
+    lg, config, false, nullptr, nullptr, nullptr, lang);
 
   if (cmSystemTools::FileIsFullPath(outputFileName)) {
     outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
@@ -103,7 +103,7 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
   for (std::vector<std::string>::const_iterator le = enabledLanguages.begin();
        le != enabledLanguages.end(); ++le) {
     std::string name = this->OutputFileExpr->Evaluate(
-      lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, *le);
+      lg, config, false, nullptr, nullptr, nullptr, *le);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(name);
     sf->SetProperty("GENERATED", "1");
 

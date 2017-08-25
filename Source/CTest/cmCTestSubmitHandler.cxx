@@ -145,7 +145,7 @@ void cmCTestSubmitHandler::Initialize()
   this->HTTPProxyAuth = "";
   this->FTPProxy = "";
   this->FTPProxyType = 0;
-  this->LogFile = CM_NULLPTR;
+  this->LogFile = nullptr;
   this->Files.clear();
 }
 
@@ -304,7 +304,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
   char error_buffer[1024];
   // Set Content-Type to satisfy fussy modsecurity rules.
   struct curl_slist* headers =
-    ::curl_slist_append(CM_NULLPTR, "Content-Type: text/xml");
+    ::curl_slist_append(nullptr, "Content-Type: text/xml");
 
   // Add any additional headers that the user specified.
   for (std::vector<std::string>::const_iterator h = this->HttpHeaders.begin();
@@ -495,10 +495,10 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       // If curl failed for any reason, or checksum fails, wait and retry
       //
       if (res != CURLE_OK || this->HasErrors) {
-        std::string retryDelay = this->GetOption("RetryDelay") == CM_NULLPTR
+        std::string retryDelay = this->GetOption("RetryDelay") == nullptr
           ? ""
           : this->GetOption("RetryDelay");
-        std::string retryCount = this->GetOption("RetryCount") == CM_NULLPTR
+        std::string retryCount = this->GetOption("RetryCount") == nullptr
           ? ""
           : this->GetOption("RetryCount");
 
@@ -764,7 +764,7 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
   argv.push_back(scp_command.c_str()); // Scp command
   argv.push_back(scp_command.c_str()); // Dummy string for file
   argv.push_back(scp_command.c_str()); // Dummy string for remote url
-  argv.push_back(CM_NULLPTR);
+  argv.push_back(nullptr);
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
@@ -797,7 +797,7 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
     cmProcessOutput processOutput;
     std::string strdata;
 
-    while (cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) {
+    while (cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {
       processOutput.DecodeText(data, length, strdata);
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                          cmCTestLogWrite(strdata.c_str(), strdata.size()),
@@ -810,7 +810,7 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
                          this->Quiet);
     }
 
-    cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+    cmsysProcess_WaitForExit(cp, nullptr);
 
     int result = cmsysProcess_GetState(cp);
 
@@ -1036,10 +1036,10 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   bool internalTest = cmSystemTools::IsOn(this->GetOption("InternalTest"));
 
   // Get RETRY_COUNT and RETRY_DELAY values if they were set.
-  std::string retryDelayString = this->GetOption("RetryDelay") == CM_NULLPTR
+  std::string retryDelayString = this->GetOption("RetryDelay") == nullptr
     ? ""
     : this->GetOption("RetryDelay");
-  std::string retryCountString = this->GetOption("RetryCount") == CM_NULLPTR
+  std::string retryCountString = this->GetOption("RetryCount") == nullptr
     ? ""
     : this->GetOption("RetryCount");
   unsigned long retryDelay = 0;

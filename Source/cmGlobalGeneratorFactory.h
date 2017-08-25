@@ -48,7 +48,7 @@ public:
                                            cmake* cm) const CM_OVERRIDE
   {
     if (name != T::GetActualName()) {
-      return CM_NULLPTR;
+      return nullptr;
     }
     return new T(cm);
   }

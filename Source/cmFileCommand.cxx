@@ -269,17 +269,17 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
   cmCommandArgumentGroup group;
 
   cmCAString readArg(&argHelper, "READ");
-  cmCAString fileNameArg(&argHelper, CM_NULLPTR);
-  cmCAString resultArg(&argHelper, CM_NULLPTR);
+  cmCAString fileNameArg(&argHelper, nullptr);
+  cmCAString resultArg(&argHelper, nullptr);
 
   cmCAString offsetArg(&argHelper, "OFFSET", &group);
   cmCAString limitArg(&argHelper, "LIMIT", &group);
   cmCAEnabler hexOutputArg(&argHelper, "HEX", &group);
-  readArg.Follows(CM_NULLPTR);
+  readArg.Follows(nullptr);
   fileNameArg.Follows(&readArg);
   resultArg.Follows(&fileNameArg);
   group.Follows(&resultArg);
-  argHelper.Parse(&args, CM_NULLPTR);
+  argHelper.Parse(&args, nullptr);
 
   std::string fileName = fileNameArg.GetString();
   if (!cmsys::SystemTools::FileIsFullPath(fileName.c_str())) {
@@ -940,9 +940,9 @@ bool cmFileCommand::HandleDifferentCommand(
    */
 
   // Evaluate arguments.
-  const char* file_lhs = CM_NULLPTR;
-  const char* file_rhs = CM_NULLPTR;
-  const char* var = CM_NULLPTR;
+  const char* file_lhs = nullptr;
+  const char* file_rhs = nullptr;
+  const char* var = nullptr;
   enum Doing
   {
     DoingNone,
@@ -997,7 +997,7 @@ struct cmFileCopier
     , MatchlessFiles(true)
     , FilePermissions(0)
     , DirPermissions(0)
-    , CurrentMatchRule(CM_NULLPTR)
+    , CurrentMatchRule(nullptr)
     , UseGivenPermissionsFile(false)
     , UseGivenPermissionsDir(false)
     , UseSourcePermissions(true)
@@ -2043,9 +2043,9 @@ bool cmFileCommand::HandleRPathChangeCommand(
   std::vector<std::string> const& args)
 {
   // Evaluate arguments.
-  const char* file = CM_NULLPTR;
-  const char* oldRPath = CM_NULLPTR;
-  const char* newRPath = CM_NULLPTR;
+  const char* file = nullptr;
+  const char* oldRPath = nullptr;
+  const char* newRPath = nullptr;
   enum Doing
   {
     DoingNone,
@@ -2133,7 +2133,7 @@ bool cmFileCommand::HandleRPathRemoveCommand(
   std::vector<std::string> const& args)
 {
   // Evaluate arguments.
-  const char* file = CM_NULLPTR;
+  const char* file = nullptr;
   enum Doing
   {
     DoingNone,
@@ -2197,8 +2197,8 @@ bool cmFileCommand::HandleRPathCheckCommand(
   std::vector<std::string> const& args)
 {
   // Evaluate arguments.
-  const char* file = CM_NULLPTR;
-  const char* rpath = CM_NULLPTR;
+  const char* file = nullptr;
+  const char* rpath = nullptr;
   enum Doing
   {
     DoingNone,
@@ -2256,16 +2256,16 @@ bool cmFileCommand::HandleReadElfCommand(std::vector<std::string> const& args)
   cmCommandArgumentGroup group;
 
   cmCAString readArg(&argHelper, "READ_ELF");
-  cmCAString fileNameArg(&argHelper, CM_NULLPTR);
+  cmCAString fileNameArg(&argHelper, nullptr);
 
   cmCAString rpathArg(&argHelper, "RPATH", &group);
   cmCAString runpathArg(&argHelper, "RUNPATH", &group);
   cmCAString errorArg(&argHelper, "CAPTURE_ERROR", &group);
 
-  readArg.Follows(CM_NULLPTR);
+  readArg.Follows(nullptr);
   fileNameArg.Follows(&readArg);
   group.Follows(&fileNameArg);
-  argHelper.Parse(&args, CM_NULLPTR);
+  argHelper.Parse(&args, nullptr);
 
   if (!cmSystemTools::FileExists(fileNameArg.GetString(), true)) {
     std::ostringstream e;
@@ -2596,7 +2596,7 @@ public:
     }
   }
 
-  void release() { this->Easy = CM_NULLPTR; }
+  void release() { this->Easy = nullptr; }
 
 private:
   ::CURL* Easy;
@@ -2881,7 +2881,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     check_curl_result(res, "DOWNLOAD cannot set user password: ");
   }
 
-  struct curl_slist* headers = CM_NULLPTR;
+  struct curl_slist* headers = nullptr;
   for (std::vector<std::string>::const_iterator h = curl_headers.begin();
        h != curl_headers.end(); ++h) {
     headers = ::curl_slist_append(headers, h->c_str());
@@ -3139,7 +3139,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
     check_curl_result(res, "UPLOAD cannot set user password: ");
   }
 
-  struct curl_slist* headers = CM_NULLPTR;
+  struct curl_slist* headers = nullptr;
   for (std::vector<std::string>::const_iterator h = curl_headers.begin();
        h != curl_headers.end(); ++h) {
     headers = ::curl_slist_append(headers, h->c_str());
@@ -3163,7 +3163,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   ::curl_global_cleanup();
 
   fclose(fin);
-  fin = CM_NULLPTR;
+  fin = nullptr;
 
   if (!logVar.empty()) {
     std::string log;

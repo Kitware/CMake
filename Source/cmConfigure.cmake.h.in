@@ -25,7 +25,6 @@
 #cmakedefine CMake_HAVE_CXX_GNU_FALLTHROUGH
 #cmakedefine CMake_HAVE_CXX_ATTRIBUTE_FALLTHROUGH
 #cmakedefine CMake_HAVE_CXX_MAKE_UNIQUE
-#cmakedefine CMake_HAVE_CXX_NULLPTR
 #cmakedefine CMake_HAVE_CXX_OVERRIDE
 #cmakedefine CMake_HAVE_CXX_UNIQUE_PTR
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
@@ -45,12 +44,6 @@ elif defined(CMake_HAVE_CXX_ATTRIBUTE_FALLTHROUGH)
 #define CM_FALLTHROUGH __attribute__((fallthrough))
 #else
 #define CM_FALLTHROUGH
-#endif
-
-#ifdef CMake_HAVE_CXX_NULLPTR
-#define CM_NULLPTR nullptr
-#else
-#define CM_NULLPTR 0
 #endif
 
 #ifdef CMake_HAVE_CXX_OVERRIDE

@@ -22,7 +22,7 @@ private:
   static cmDynamicLoaderCache* Instance;
 };
 
-cmDynamicLoaderCache* cmDynamicLoaderCache::Instance = CM_NULLPTR;
+cmDynamicLoaderCache* cmDynamicLoaderCache::Instance = nullptr;
 
 cmDynamicLoaderCache::~cmDynamicLoaderCache()
 {
@@ -71,7 +71,7 @@ void cmDynamicLoaderCache::FlushCache()
     cmsys::DynamicLoader::CloseLibrary(it->second);
   }
   delete cmDynamicLoaderCache::Instance;
-  cmDynamicLoaderCache::Instance = CM_NULLPTR;
+  cmDynamicLoaderCache::Instance = nullptr;
 }
 
 cmDynamicLoaderCache* cmDynamicLoaderCache::GetInstance()

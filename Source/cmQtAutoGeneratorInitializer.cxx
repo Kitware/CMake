@@ -33,7 +33,7 @@
 
 inline static const char* SafeString(const char* value)
 {
-  return (value != CM_NULLPTR) ? value : "";
+  return (value != nullptr) ? value : "";
 }
 
 static std::string GetSafeProperty(cmGeneratorTarget const* target,
@@ -86,7 +86,7 @@ static std::string GetQtMajorVersion(cmGeneratorTarget const* target)
   }
   const char* targetQtVersion =
     target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", "");
-  if (targetQtVersion != CM_NULLPTR) {
+  if (targetQtVersion != nullptr) {
     qtMajorVersion = targetQtVersion;
   }
   return qtMajorVersion;
@@ -106,7 +106,7 @@ static std::string GetQtMinorVersion(cmGeneratorTarget const* target,
 
   const char* targetQtVersion =
     target->GetLinkInterfaceDependentStringProperty("QT_MINOR_VERSION", "");
-  if (targetQtVersion != CM_NULLPTR) {
+  if (targetQtVersion != nullptr) {
     qtMinorVersion = targetQtVersion;
   }
   return qtMinorVersion;
@@ -148,12 +148,12 @@ static void GetCompileDefinitionsAndDirectories(
 }
 
 static std::vector<std::string> GetConfigurations(
-  cmMakefile* makefile, std::string* config = CM_NULLPTR)
+  cmMakefile* makefile, std::string* config = nullptr)
 {
   std::vector<std::string> configs;
   {
     std::string cfg = makefile->GetConfigurations(configs);
-    if (config != CM_NULLPTR) {
+    if (config != nullptr) {
       *config = cfg;
     }
   }
@@ -204,10 +204,10 @@ static void AddDefinitionEscaped(cmMakefile* makefile, const char* key,
 static bool AddToSourceGroup(cmMakefile* makefile, const std::string& fileName,
                              cmQtAutoGeneratorCommon::GeneratorType genType)
 {
-  cmSourceGroup* sourceGroup = CM_NULLPTR;
+  cmSourceGroup* sourceGroup = nullptr;
   // Acquire source group
   {
-    const char* groupName = CM_NULLPTR;
+    const char* groupName = nullptr;
     // Use generator specific group name
     switch (genType) {
       case cmQtAutoGeneratorCommon::MOC:
@@ -222,27 +222,27 @@ static bool AddToSourceGroup(cmMakefile* makefile, const std::string& fileName,
         break;
     }
     // Use default group name on demand
-    if ((groupName == CM_NULLPTR) || (*groupName == 0)) {
+    if ((groupName == nullptr) || (*groupName == 0)) {
       groupName =
         makefile->GetState()->GetGlobalProperty("AUTOGEN_SOURCE_GROUP");
     }
     // Generate a source group on demand
-    if ((groupName != CM_NULLPTR) && (*groupName != 0)) {
+    if ((groupName != nullptr) && (*groupName != 0)) {
       {
         const char* delimiter =
           makefile->GetDefinition("SOURCE_GROUP_DELIMITER");
-        if (delimiter == CM_NULLPTR) {
+        if (delimiter == nullptr) {
           delimiter = "\\";
         }
         std::vector<std::string> folders =
           cmSystemTools::tokenize(groupName, delimiter);
         sourceGroup = makefile->GetSourceGroup(folders);
-        if (sourceGroup == CM_NULLPTR) {
+        if (sourceGroup == nullptr) {
           makefile->AddSourceGroup(folders);
           sourceGroup = makefile->GetSourceGroup(folders);
         }
       }
-      if (sourceGroup == CM_NULLPTR) {
+      if (sourceGroup == nullptr) {
         cmSystemTools::Error(
           "Autogen: Could not create or find source group: ",
           cmQtAutoGeneratorCommon::Quoted(groupName).c_str());
@@ -250,7 +250,7 @@ static bool AddToSourceGroup(cmMakefile* makefile, const std::string& fileName,
       }
     }
   }
-  if (sourceGroup != CM_NULLPTR) {
+  if (sourceGroup != nullptr) {
     sourceGroup->AddGroupFile(fileName);
   }
   return true;
@@ -449,14 +449,14 @@ static void SetupAutoTargetMoc(cmGeneratorTarget const* target,
 
     if (qtMajorVersion == "5") {
       cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse("Qt5::moc");
-      if (tgt != CM_NULLPTR) {
+      if (tgt != nullptr) {
         mocExec = SafeString(tgt->ImportedGetLocation(""));
       } else {
         err = "AUTOMOC: Qt5::moc target not found";
       }
     } else if (qtMajorVersion == "4") {
       cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse("Qt4::moc");
-      if (tgt != CM_NULLPTR) {
+      if (tgt != nullptr) {
         mocExec = SafeString(tgt->ImportedGetLocation(""));
       } else {
         err = "AUTOMOC: Qt4::moc target not found";
@@ -565,14 +565,14 @@ static void SetupAutoTargetUic(cmGeneratorTarget const* target,
 
     if (qtMajorVersion == "5") {
       cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse("Qt5::uic");
-      if (tgt != CM_NULLPTR) {
+      if (tgt != nullptr) {
         uicExec = SafeString(tgt->ImportedGetLocation(""));
       } else {
         // Project does not use Qt5Widgets, but has AUTOUIC ON anyway
       }
     } else if (qtMajorVersion == "4") {
       cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse("Qt4::uic");
-      if (tgt != CM_NULLPTR) {
+      if (tgt != nullptr) {
         uicExec = SafeString(tgt->ImportedGetLocation(""));
       } else {
         err = "AUTOUIC: Qt4::uic target not found";
@@ -599,14 +599,14 @@ static std::string RccGetExecutable(cmGeneratorTarget const* target,
   cmLocalGenerator* localGen = target->GetLocalGenerator();
   if (qtMajorVersion == "5") {
     cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse("Qt5::rcc");
-    if (tgt != CM_NULLPTR) {
+    if (tgt != nullptr) {
       rccExec = SafeString(tgt->ImportedGetLocation(""));
     } else {
       err = "AUTORCC: Qt5::rcc target not found";
     }
   } else if (qtMajorVersion == "4") {
     cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse("Qt4::rcc");
-    if (tgt != CM_NULLPTR) {
+    if (tgt != nullptr) {
       rccExec = SafeString(tgt->ImportedGetLocation(""));
     } else {
       err = "AUTORCC: Qt4::rcc target not found";
@@ -839,7 +839,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     for (std::set<std::string>::const_iterator it = utils.begin();
          it != utils.end(); ++it) {
       const std::string& targetName = *it;
-      if (makefile->FindTargetToUse(targetName) != CM_NULLPTR) {
+      if (makefile->FindTargetToUse(targetName) != nullptr) {
         autogenDependsSet.insert(targetName);
       }
     }
@@ -851,7 +851,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     for (cmTarget::LinkLibraryVectorType::const_iterator it = libVec.begin();
          it != libVec.end(); ++it) {
       const std::string& libName = it->first;
-      if (makefile->FindTargetToUse(libName) != CM_NULLPTR) {
+      if (makefile->FindTargetToUse(libName) != nullptr) {
         autogenDependsSet.insert(libName);
       }
     }
@@ -973,7 +973,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
       for (std::vector<std::string>::const_iterator it =
              autogenDepends.begin();
            it != autogenDepends.end(); ++it) {
-        if (makefile->FindTargetToUse(*it) != CM_NULLPTR) {
+        if (makefile->FindTargetToUse(*it) != nullptr) {
           usePRE_BUILD = false;
           break;
         }
@@ -1004,15 +1004,15 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     {
       const char* autogenFolder =
         makefile->GetState()->GetGlobalProperty("AUTOMOC_TARGETS_FOLDER");
-      if (autogenFolder == CM_NULLPTR) {
+      if (autogenFolder == nullptr) {
         autogenFolder =
           makefile->GetState()->GetGlobalProperty("AUTOGEN_TARGETS_FOLDER");
       }
       // Inherit FOLDER property from target (#13688)
-      if (autogenFolder == CM_NULLPTR) {
+      if (autogenFolder == nullptr) {
         autogenFolder = target->Target->GetProperty("FOLDER");
       }
-      if ((autogenFolder != CM_NULLPTR) && (*autogenFolder != '\0')) {
+      if ((autogenFolder != nullptr) && (*autogenFolder != '\0')) {
         autogenTarget->SetProperty("FOLDER", autogenFolder);
       }
     }

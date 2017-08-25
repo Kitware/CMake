@@ -21,7 +21,7 @@ cmOSXBundleGenerator::cmOSXBundleGenerator(cmGeneratorTarget* target,
   , Makefile(target->Target->GetMakefile())
   , LocalGenerator(target->GetLocalGenerator())
   , ConfigName(configName)
-  , MacContentFolders(CM_NULLPTR)
+  , MacContentFolders(nullptr)
 {
   if (this->MustSkip()) {
     return;

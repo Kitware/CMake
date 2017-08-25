@@ -202,7 +202,7 @@ void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
        i != configs.end(); ++i) {
     const char* dstConfig = target.GetProperty("MAP_IMPORTED_CONFIG_" +
                                                cmSystemTools::UpperCase(*i));
-    if (dstConfig == CM_NULLPTR) {
+    if (dstConfig == nullptr) {
       dstConfig = i->c_str();
     }
     fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << dstConfig

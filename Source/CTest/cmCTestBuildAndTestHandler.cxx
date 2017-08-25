@@ -65,7 +65,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     args.push_back(toolset);
   }
 
-  const char* config = CM_NULLPTR;
+  const char* config = nullptr;
   if (!this->CTest->GetConfigType().empty()) {
     config = this->CTest->GetConfigType().c_str();
   }
@@ -148,10 +148,10 @@ public:
   }
   ~cmCTestBuildAndTestCaptureRAII()
   {
-    this->CM.SetProgressCallback(CM_NULLPTR, CM_NULLPTR);
-    cmSystemTools::SetStderrCallback(CM_NULLPTR, CM_NULLPTR);
-    cmSystemTools::SetStdoutCallback(CM_NULLPTR, CM_NULLPTR);
-    cmSystemTools::SetMessageCallback(CM_NULLPTR, CM_NULLPTR);
+    this->CM.SetProgressCallback(nullptr, nullptr);
+    cmSystemTools::SetStderrCallback(nullptr, nullptr);
+    cmSystemTools::SetStdoutCallback(nullptr, nullptr);
+    cmSystemTools::SetMessageCallback(nullptr, nullptr);
   }
 };
 
@@ -236,7 +236,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       }
     }
     std::string output;
-    const char* config = CM_NULLPTR;
+    const char* config = nullptr;
     if (!this->CTest->GetConfigType().empty()) {
       config = this->CTest->GetConfigType().c_str();
     }
@@ -308,7 +308,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   for (size_t k = 0; k < this->TestCommandArgs.size(); ++k) {
     testCommand.push_back(this->TestCommandArgs[k].c_str());
   }
-  testCommand.push_back(CM_NULLPTR);
+  testCommand.push_back(nullptr);
   std::string outs;
   int retval = 0;
   // run the test from the this->BuildRunDir if set
@@ -334,8 +334,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     }
   }
 
-  int runTestRes = this->CTest->RunTest(testCommand, &outs, &retval,
-                                        CM_NULLPTR, remainingTime, CM_NULLPTR);
+  int runTestRes = this->CTest->RunTest(testCommand, &outs, &retval, nullptr,
+                                        remainingTime, nullptr);
 
   if (runTestRes != cmsysProcess_State_Exited || retval != 0) {
     out << "Test command failed: " << testCommand[0] << "\n";

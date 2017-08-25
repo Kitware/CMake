@@ -40,7 +40,7 @@ public:
     bool IsFlag;
     LinkEntry()
       : Item()
-      , Target(CM_NULLPTR)
+      , Target(nullptr)
       , IsSharedDep(false)
       , IsFlag(false)
     {

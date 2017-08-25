@@ -38,8 +38,7 @@ public:
 
 private:
   static bool RunCommand(const char* command, std::string& output, int& retVal,
-                         const char* directory = CM_NULLPTR,
-                         bool verbose = true,
+                         const char* directory = nullptr, bool verbose = true,
                          Encoding encoding = cmProcessOutput::Auto);
 };
 

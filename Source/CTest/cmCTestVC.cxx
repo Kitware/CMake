@@ -60,7 +60,7 @@ bool cmCTestVC::InitialCheckout(const char* command)
        ai != args.end(); ++ai) {
     vc_co.push_back(ai->c_str());
   }
-  vc_co.push_back(CM_NULLPTR);
+  vc_co.push_back(nullptr);
 
   // Run the initial checkout command and log its output.
   this->Log << "--- Begin Initial Checkout ---\n";
@@ -113,7 +113,7 @@ bool cmCTestVC::RunUpdateCommand(char const* const* cmd, OutputParser* out,
   }
 
   // Run the command.
-  return this->RunChild(cmd, out, err, CM_NULLPTR, encoding);
+  return this->RunChild(cmd, out, err, nullptr, encoding);
 }
 
 std::string cmCTestVC::GetNightlyTime()

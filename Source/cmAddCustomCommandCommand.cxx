@@ -31,7 +31,7 @@ bool cmAddCustomCommandCommand::InitialPass(
 
   std::string source, target, main_dependency, working, depfile;
   std::string comment_buffer;
-  const char* comment = CM_NULLPTR;
+  const char* comment = nullptr;
   std::vector<std::string> depends, outputs, output, byproducts;
   bool verbatim = false;
   bool append = false;

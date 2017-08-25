@@ -19,7 +19,7 @@ class cmStateDirectory;
 class cmStateSnapshot
 {
 public:
-  cmStateSnapshot(cmState* state = CM_NULLPTR);
+  cmStateSnapshot(cmState* state = nullptr);
   cmStateSnapshot(cmState* state, cmStateDetail::PositionType position);
 
   const char* GetDefinition(std::string const& name) const;

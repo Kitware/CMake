@@ -10,22 +10,22 @@ void cmProcessTools::RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
                                 OutputParser* err, Encoding encoding)
 {
   cmsysProcess_Execute(cp);
-  char* data = CM_NULLPTR;
+  char* data = nullptr;
   int length = 0;
   int p;
   cmProcessOutput processOutput(encoding);
   std::string strdata;
   while ((out || err) &&
-         (p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR), p)) {
+         (p = cmsysProcess_WaitForData(cp, &data, &length, nullptr), p)) {
     if (out && p == cmsysProcess_Pipe_STDOUT) {
       processOutput.DecodeText(data, length, strdata, 1);
       if (!out->Process(strdata.c_str(), int(strdata.size()))) {
-        out = CM_NULLPTR;
+        out = nullptr;
       }
     } else if (err && p == cmsysProcess_Pipe_STDERR) {
       processOutput.DecodeText(data, length, strdata, 2);
       if (!err->Process(strdata.c_str(), int(strdata.size()))) {
-        err = CM_NULLPTR;
+        err = nullptr;
       }
     }
   }
@@ -41,12 +41,12 @@ void cmProcessTools::RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
       out->Process(strdata.c_str(), int(strdata.size()));
     }
   }
-  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+  cmsysProcess_WaitForExit(cp, nullptr);
 }
 
 cmProcessTools::LineParser::LineParser(char sep, bool ignoreCR)
-  : Log(CM_NULLPTR)
-  , Prefix(CM_NULLPTR)
+  : Log(nullptr)
+  , Prefix(nullptr)
   , Separator(sep)
   , LineEnd('\0')
   , IgnoreCR(ignoreCR)

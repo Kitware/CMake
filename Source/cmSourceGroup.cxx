@@ -114,7 +114,7 @@ cmSourceGroup* cmSourceGroup::LookupChild(const char* name) const
   }
 
   // if no child with this name was found return NULL
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmSourceGroup* cmSourceGroup::MatchChildrenFiles(const char* name)
@@ -134,7 +134,7 @@ cmSourceGroup* cmSourceGroup::MatchChildrenFiles(const char* name)
       return result;
     }
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmSourceGroup* cmSourceGroup::MatchChildrenRegex(const char* name)
@@ -155,7 +155,7 @@ cmSourceGroup* cmSourceGroup::MatchChildrenRegex(const char* name)
     return this;
   }
 
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 std::vector<cmSourceGroup> const& cmSourceGroup::GetGroupChildren() const

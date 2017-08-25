@@ -95,8 +95,8 @@ void cmInstallExportAndroidMKGenerator::GenerateScriptConfigs(
     std::string config_test = this->CreateConfigTest(i->first);
     os << indent << "if(" << config_test << ")\n";
     this->AddInstallRule(os, this->Destination, cmInstallType_FILES, files,
-                         false, this->FilePermissions.c_str(), CM_NULLPTR,
-                         CM_NULLPTR, CM_NULLPTR, indent.Next());
+                         false, this->FilePermissions.c_str(), nullptr,
+                         nullptr, nullptr, indent.Next());
     os << indent << "endif()\n";
     files.clear();
   }
@@ -135,6 +135,6 @@ void cmInstallExportAndroidMKGenerator::GenerateScriptActions(
   std::vector<std::string> files;
   files.push_back(this->MainImportFile);
   this->AddInstallRule(os, this->Destination, cmInstallType_FILES, files,
-                       false, this->FilePermissions.c_str(), CM_NULLPTR,
-                       CM_NULLPTR, CM_NULLPTR, indent);
+                       false, this->FilePermissions.c_str(), nullptr, nullptr,
+                       nullptr, indent);
 }

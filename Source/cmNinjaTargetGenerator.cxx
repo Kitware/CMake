@@ -47,14 +47,14 @@ cmNinjaTargetGenerator* cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
       return new cmNinjaUtilityTargetGenerator(target);
 
     default:
-      return CM_NULLPTR;
+      return nullptr;
   }
 }
 
 cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmGeneratorTarget* target)
   : cmCommonTargetGenerator(target)
-  , MacOSXContentGenerator(CM_NULLPTR)
-  , OSXBundleGenerator(CM_NULLPTR)
+  , MacOSXContentGenerator(nullptr)
+  , OSXBundleGenerator(nullptr)
   , MacContentFolders()
   , LocalGenerator(
       static_cast<cmLocalNinjaGenerator*>(target->GetLocalGenerator()))

@@ -150,8 +150,7 @@ int main()
        it != end; ++it) {
     std::vector<std::string> command;
     cmSystemTools::ParseUnixCommandLine(it->at("command").c_str(), command);
-    if (!cmSystemTools::RunSingleCommand(command, CM_NULLPTR, CM_NULLPTR,
-                                         CM_NULLPTR,
+    if (!cmSystemTools::RunSingleCommand(command, nullptr, nullptr, nullptr,
                                          it->at("directory").c_str())) {
       std::cout << "ERROR: Failed to run command \"" << command[0] << "\""
                 << std::endl;

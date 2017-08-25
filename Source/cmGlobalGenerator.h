@@ -295,15 +295,15 @@ public:
 
   virtual const char* GetAllTargetName() const { return "ALL_BUILD"; }
   virtual const char* GetInstallTargetName() const { return "INSTALL"; }
-  virtual const char* GetInstallLocalTargetName() const { return CM_NULLPTR; }
-  virtual const char* GetInstallStripTargetName() const { return CM_NULLPTR; }
-  virtual const char* GetPreinstallTargetName() const { return CM_NULLPTR; }
+  virtual const char* GetInstallLocalTargetName() const { return nullptr; }
+  virtual const char* GetInstallStripTargetName() const { return nullptr; }
+  virtual const char* GetPreinstallTargetName() const { return nullptr; }
   virtual const char* GetTestTargetName() const { return "RUN_TESTS"; }
   virtual const char* GetPackageTargetName() const { return "PACKAGE"; }
-  virtual const char* GetPackageSourceTargetName() const { return CM_NULLPTR; }
-  virtual const char* GetEditCacheTargetName() const { return CM_NULLPTR; }
-  virtual const char* GetRebuildCacheTargetName() const { return CM_NULLPTR; }
-  virtual const char* GetCleanTargetName() const { return CM_NULLPTR; }
+  virtual const char* GetPackageSourceTargetName() const { return nullptr; }
+  virtual const char* GetEditCacheTargetName() const { return nullptr; }
+  virtual const char* GetRebuildCacheTargetName() const { return nullptr; }
+  virtual const char* GetCleanTargetName() const { return nullptr; }
 
   // Lookup edit_cache target command preferred by this generator.
   virtual std::string GetEditCacheCommand() const { return ""; }
@@ -557,7 +557,7 @@ private:
 
   void IndexMakefile(cmMakefile* mf);
 
-  virtual const char* GetBuildIgnoreErrorsFlag() const { return CM_NULLPTR; }
+  virtual const char* GetBuildIgnoreErrorsFlag() const { return nullptr; }
 
   // Cache directory content and target files to be built.
   struct DirectoryContent

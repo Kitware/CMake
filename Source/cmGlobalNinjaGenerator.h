@@ -114,7 +114,7 @@ public:
                   const cmNinjaDeps& orderOnlyDeps,
                   const cmNinjaVars& variables,
                   const std::string& rspfile = std::string(),
-                  int cmdLineLimit = 0, bool* usedResponseFile = CM_NULLPTR);
+                  int cmdLineLimit = 0, bool* usedResponseFile = nullptr);
 
   /**
    * Helper to write a build statement with the special 'phony' rule.

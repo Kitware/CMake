@@ -63,7 +63,7 @@ class QCMake : public QObject
 {
   Q_OBJECT
 public:
-  QCMake(QObject* p = CM_NULLPTR);
+  QCMake(QObject* p = nullptr);
   ~QCMake();
 public slots:
   /// load the cache file in a directory

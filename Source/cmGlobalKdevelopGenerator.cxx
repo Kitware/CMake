@@ -115,13 +115,13 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
       // make sure the file is part of this source tree
       if ((tmp[0] != '/') &&
           (strstr(tmp.c_str(), cmake::GetCMakeFilesDirectoryPostSlash()) ==
-           CM_NULLPTR)) {
+           nullptr)) {
         files.insert(tmp);
         tmp = cmSystemTools::GetFilenameName(tmp);
         // add all files which dont match the default
         // */CMakeLists.txt;*cmake; to the file pattern
         if ((tmp != "CMakeLists.txt") &&
-            (strstr(tmp.c_str(), ".cmake") == CM_NULLPTR)) {
+            (strstr(tmp.c_str(), ".cmake") == nullptr)) {
           cmakeFilePattern += tmp + ";";
         }
       }
@@ -147,7 +147,7 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
 
         if ((tmp[0] != '/') &&
             (strstr(tmp.c_str(), cmake::GetCMakeFilesDirectoryPostSlash()) ==
-             CM_NULLPTR) &&
+             nullptr) &&
             (cmSystemTools::GetFilenameExtension(tmp) != ".moc")) {
           files.insert(tmp);
 
@@ -171,7 +171,7 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
         cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
         if ((tmp[0] != '/') &&
             (strstr(tmp.c_str(), cmake::GetCMakeFilesDirectoryPostSlash()) ==
-             CM_NULLPTR)) {
+             nullptr)) {
           files.insert(tmp);
         }
       }
@@ -301,12 +301,12 @@ void cmGlobalKdevelopGenerator::MergeProjectFiles(
        it != lines.end(); it++) {
     const char* line = (*it).c_str();
     // skip these tags as they are always replaced
-    if ((strstr(line, "<projectdirectory>") != CM_NULLPTR) ||
-        (strstr(line, "<projectmanagement>") != CM_NULLPTR) ||
-        (strstr(line, "<absoluteprojectpath>") != CM_NULLPTR) ||
-        (strstr(line, "<filelistdirectory>") != CM_NULLPTR) ||
-        (strstr(line, "<buildtool>") != CM_NULLPTR) ||
-        (strstr(line, "<builddir>") != CM_NULLPTR)) {
+    if ((strstr(line, "<projectdirectory>") != nullptr) ||
+        (strstr(line, "<projectmanagement>") != nullptr) ||
+        (strstr(line, "<absoluteprojectpath>") != nullptr) ||
+        (strstr(line, "<filelistdirectory>") != nullptr) ||
+        (strstr(line, "<buildtool>") != nullptr) ||
+        (strstr(line, "<builddir>") != nullptr)) {
       continue;
     }
 

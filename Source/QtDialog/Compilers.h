@@ -13,7 +13,7 @@ class Compilers : public QWidget, public Ui::Compilers
 {
   Q_OBJECT
 public:
-  Compilers(QWidget* p = CM_NULLPTR)
+  Compilers(QWidget* p = nullptr)
     : QWidget(p)
   {
     this->setupUi(this);

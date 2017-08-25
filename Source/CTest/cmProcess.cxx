@@ -9,7 +9,7 @@
 
 cmProcess::cmProcess()
 {
-  this->Process = CM_NULLPTR;
+  this->Process = nullptr;
   this->Timeout = 0;
   this->TotalTime = 0;
   this->ExitValue = 0;
@@ -45,7 +45,7 @@ bool cmProcess::StartProcess()
        i != this->Arguments.end(); ++i) {
     this->ProcessArgs.push_back(i->c_str());
   }
-  this->ProcessArgs.push_back(CM_NULLPTR); // null terminate the list
+  this->ProcessArgs.push_back(nullptr); // null terminate the list
   this->Process = cmsysProcess_New();
   cmsysProcess_SetCommand(this->Process, &*this->ProcessArgs.begin());
   if (!this->WorkingDirectory.empty()) {

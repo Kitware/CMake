@@ -1203,7 +1203,6 @@ cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-insal
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP"
 cmake_report cmConfigure.h${_tmp} "#define CM_EQ_DELETE"
 cmake_report cmConfigure.h${_tmp} "#define CM_FALLTHROUGH"
-cmake_report cmConfigure.h${_tmp} "#define CM_NULLPTR 0"
 cmake_report cmConfigure.h${_tmp} "#define CM_OVERRIDE"
 cmake_report cmConfigure.h${_tmp} "#define CM_DISABLE_COPY(Class)"
 

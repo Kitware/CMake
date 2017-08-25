@@ -594,7 +594,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
     if (dssi->second.Position > 0) {
       return &dssi->second;
     }
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   // Create an entry for this tag.  Assume it is missing until found.
@@ -605,14 +605,14 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
 
   // Try reading the dynamic section.
   if (!this->LoadDynamicSection()) {
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   // Get the string table referenced by the DYNAMIC section.
   ELF_Shdr const& sec = this->SectionHeaders[this->DynamicSectionIndex];
   if (sec.sh_link >= this->SectionHeaders.size()) {
     this->SetErrorMessage("Section DYNAMIC has invalid string table index.");
-    return CM_NULLPTR;
+    return nullptr;
   }
   ELF_Shdr const& strtab = this->SectionHeaders[sec.sh_link];
 
@@ -627,7 +627,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
       if (dyn.d_un.d_val >= strtab.sh_size) {
         this->SetErrorMessage("Section DYNAMIC references string beyond "
                               "the end of its string section.");
-        return CM_NULLPTR;
+        return nullptr;
       }
 
       // Seek to the position reported by the entry.
@@ -656,7 +656,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
       if (!this->Stream) {
         this->SetErrorMessage("Dynamic section specifies unreadable RPATH.");
         se.Value = "";
-        return CM_NULLPTR;
+        return nullptr;
       }
 
       // The value has been read successfully.  Report it.
@@ -667,7 +667,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
       return &se;
     }
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 //============================================================================
@@ -683,7 +683,7 @@ const long cmELF::TagMipsRldMapRel = 0;
 #endif
 
 cmELF::cmELF(const char* fname)
-  : Internal(CM_NULLPTR)
+  : Internal(nullptr)
 {
   // Try to open the file.
   CM_AUTO_PTR<cmsys::ifstream> fin(new cmsys::ifstream(fname));
@@ -811,7 +811,7 @@ cmELF::StringEntry const* cmELF::GetSOName()
       this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary) {
     return this->Internal->GetSOName();
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmELF::StringEntry const* cmELF::GetRPath()
@@ -821,7 +821,7 @@ cmELF::StringEntry const* cmELF::GetRPath()
        this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary)) {
     return this->Internal->GetRPath();
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmELF::StringEntry const* cmELF::GetRunPath()
@@ -831,7 +831,7 @@ cmELF::StringEntry const* cmELF::GetRunPath()
        this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary)) {
     return this->Internal->GetRunPath();
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 void cmELF::PrintInfo(std::ostream& os) const

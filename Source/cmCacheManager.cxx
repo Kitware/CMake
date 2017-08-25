@@ -173,7 +173,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
 }
 
 const char* cmCacheManager::PersistentProperties[] = { "ADVANCED", "MODIFIED",
-                                                       "STRINGS", CM_NULLPTR };
+                                                       "STRINGS", nullptr };
 
 bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
                                        CacheEntry& e)
@@ -440,7 +440,7 @@ cmCacheManager::CacheEntry* cmCacheManager::GetCacheEntry(
   if (i != this->Cache.end()) {
     return &i->second;
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(const char* key)
@@ -455,7 +455,7 @@ const char* cmCacheManager::GetInitializedCacheValue(
   if (i != this->Cache.end() && i->second.Initialized) {
     return i->second.Value.c_str();
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 void cmCacheManager::PrintCache(std::ostream& out) const
@@ -610,7 +610,7 @@ const char* cmCacheManager::CacheIterator::GetProperty(
   if (!this->IsAtEnd()) {
     return this->GetEntry().GetProperty(prop);
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 void cmCacheManager::CacheIterator::SetProperty(const std::string& p,
@@ -647,5 +647,5 @@ void cmCacheManager::CacheIterator::SetProperty(const std::string& p, bool v)
 bool cmCacheManager::CacheIterator::PropertyExists(
   const std::string& prop) const
 {
-  return this->GetProperty(prop) != CM_NULLPTR;
+  return this->GetProperty(prop) != nullptr;
 }

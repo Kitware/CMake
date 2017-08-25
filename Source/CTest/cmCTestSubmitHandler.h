@@ -25,7 +25,7 @@ public:
   typedef cmCTestGenericHandler Superclass;
 
   cmCTestSubmitHandler();
-  ~cmCTestSubmitHandler() CM_OVERRIDE { this->LogFile = CM_NULLPTR; }
+  ~cmCTestSubmitHandler() CM_OVERRIDE { this->LogFile = nullptr; }
 
   /*
    * The main entry point for this class

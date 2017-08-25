@@ -349,8 +349,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         // Run the iwyu command line.  Capture its stderr and hide its stdout.
         // Ignore its return code because the tool always returns non-zero.
         std::string stdErr;
-        if (!cmSystemTools::RunSingleCommand(iwyu_cmd, CM_NULLPTR, &stdErr,
-                                             &ret, CM_NULLPTR,
+        if (!cmSystemTools::RunSingleCommand(iwyu_cmd, nullptr, &stdErr, &ret,
+                                             nullptr,
                                              cmSystemTools::OUTPUT_NONE)) {
           std::cerr << "Error running '" << iwyu_cmd[0] << "': " << stdErr
                     << "\n";
@@ -380,7 +380,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         std::string stdOut;
         std::string stdErr;
         if (!cmSystemTools::RunSingleCommand(tidy_cmd, &stdOut, &stdErr, &ret,
-                                             CM_NULLPTR,
+                                             nullptr,
                                              cmSystemTools::OUTPUT_NONE)) {
           std::cerr << "Error running '" << tidy_cmd[0] << "': " << stdErr
                     << "\n";
@@ -410,7 +410,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         std::string stdOut;
         std::string stdErr;
         if (!cmSystemTools::RunSingleCommand(lwyu_cmd, &stdOut, &stdErr, &ret,
-                                             CM_NULLPTR,
+                                             nullptr,
                                              cmSystemTools::OUTPUT_NONE)) {
           std::cerr << "Error running '" << lwyu_cmd[0] << "': " << stdErr
                     << "\n";
@@ -433,7 +433,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         // Run the cpplint command line.  Capture its output.
         std::string stdOut;
         if (!cmSystemTools::RunSingleCommand(cpplint_cmd, &stdOut, &stdOut,
-                                             &ret, CM_NULLPTR,
+                                             &ret, nullptr,
                                              cmSystemTools::OUTPUT_NONE)) {
           std::cerr << "Error running '" << cpplint_cmd[0] << "': " << stdOut
                     << "\n";
@@ -453,7 +453,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       // Now run the real compiler command and return its result value.
       if (lwyu.empty() &&
           !cmSystemTools::RunSingleCommand(
-            orig_cmd, CM_NULLPTR, CM_NULLPTR, &ret, CM_NULLPTR,
+            orig_cmd, nullptr, nullptr, &ret, nullptr,
             cmSystemTools::OUTPUT_PASSTHROUGH)) {
         std::cerr << "Error running '" << orig_cmd[0] << "'\n";
         return 1;
@@ -504,8 +504,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       // Execute command from remaining arguments.
       std::vector<std::string> cmd(ai, ae);
       int retval;
-      if (cmSystemTools::RunSingleCommand(cmd, CM_NULLPTR, CM_NULLPTR, &retval,
-                                          CM_NULLPTR,
+      if (cmSystemTools::RunSingleCommand(cmd, nullptr, nullptr, &retval,
+                                          nullptr,
                                           cmSystemTools::OUTPUT_PASSTHROUGH)) {
         return retval;
       }
@@ -630,7 +630,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       time(&time_start);
       clock_start = clock();
       int ret = 0;
-      cmSystemTools::RunSingleCommand(command, CM_NULLPTR, CM_NULLPTR, &ret);
+      cmSystemTools::RunSingleCommand(command, nullptr, nullptr, &ret);
 
       clock_finish = clock();
       time(&time_finish);
@@ -686,8 +686,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       int retval = 0;
       int timeout = 0;
       if (cmSystemTools::RunSingleCommand(
-            command.c_str(), CM_NULLPTR, CM_NULLPTR, &retval,
-            directory.c_str(), cmSystemTools::OUTPUT_PASSTHROUGH, timeout)) {
+            command.c_str(), nullptr, nullptr, &retval, directory.c_str(),
+            cmSystemTools::OUTPUT_PASSTHROUGH, timeout)) {
         return retval;
       }
 
@@ -1315,7 +1315,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
     }
 
     // Setup this command line.
-    const char* cmd[2] = { command.c_str(), CM_NULLPTR };
+    const char* cmd[2] = { command.c_str(), nullptr };
     cmsysProcess_SetCommand(cp, cmd);
 
     // Report the command if verbose output is enabled.
@@ -1325,7 +1325,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
 
     // Run the command and wait for it to exit.
     cmsysProcess_Execute(cp);
-    cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+    cmsysProcess_WaitForExit(cp, nullptr);
 
     // Report failure if any.
     switch (cmsysProcess_GetState(cp)) {
@@ -1442,7 +1442,7 @@ int cmcmd::VisualStudioLink(std::vector<std::string>& args, int type)
 }
 
 static bool RunCommand(const char* comment, std::vector<std::string>& command,
-                       bool verbose, int* retCodeOut = CM_NULLPTR)
+                       bool verbose, int* retCodeOut = nullptr)
 {
   if (verbose) {
     std::cout << comment << ":\n";
@@ -1451,9 +1451,8 @@ static bool RunCommand(const char* comment, std::vector<std::string>& command,
   std::string output;
   int retCode = 0;
   // use rc command to create .res file
-  bool res =
-    cmSystemTools::RunSingleCommand(command, &output, &output, &retCode,
-                                    CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
+  bool res = cmSystemTools::RunSingleCommand(
+    command, &output, &output, &retCode, nullptr, cmSystemTools::OUTPUT_NONE);
   // always print the output of the command, unless
   // it is the dumb rc command banner, but if the command
   // returned an error code then print the output anyway as

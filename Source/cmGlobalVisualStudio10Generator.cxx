@@ -495,7 +495,7 @@ const char* cmGlobalVisualStudio10Generator::GetPlatformToolset() const
 {
   std::string const& toolset = this->GetPlatformToolsetString();
   if (toolset.empty()) {
-    return CM_NULLPTR;
+    return nullptr;
   }
   return toolset.c_str();
 }
@@ -519,7 +519,7 @@ cmGlobalVisualStudio10Generator::GetPlatformToolsetHostArchitecture() const
   if (!this->GeneratorToolsetHostArchitecture.empty()) {
     return this->GeneratorToolsetHostArchitecture.c_str();
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 const char* cmGlobalVisualStudio10Generator::GetPlatformToolsetCuda() const
@@ -527,7 +527,7 @@ const char* cmGlobalVisualStudio10Generator::GetPlatformToolsetCuda() const
   if (!this->GeneratorToolsetCuda.empty()) {
     return this->GeneratorToolsetCuda.c_str();
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 std::string const&
@@ -971,7 +971,7 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetClFlagTable() const
   cmIDEFlagTable const* table = this->ToolsetOptions.GetClFlagTable(
     this->GetPlatformName(), this->GetPlatformToolsetString());
 
-  return (table != CM_NULLPTR) ? table : this->DefaultClFlagTable;
+  return (table != nullptr) ? table : this->DefaultClFlagTable;
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCSharpFlagTable()
@@ -980,7 +980,7 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCSharpFlagTable()
   cmIDEFlagTable const* table = this->ToolsetOptions.GetCSharpFlagTable(
     this->GetPlatformName(), this->GetPlatformToolsetString());
 
-  return (table != CM_NULLPTR) ? table : this->DefaultCSharpFlagTable;
+  return (table != nullptr) ? table : this->DefaultCSharpFlagTable;
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetRcFlagTable() const
@@ -988,7 +988,7 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetRcFlagTable() const
   cmIDEFlagTable const* table = this->ToolsetOptions.GetRcFlagTable(
     this->GetPlatformName(), this->GetPlatformToolsetString());
 
-  return (table != CM_NULLPTR) ? table : this->DefaultRcFlagTable;
+  return (table != nullptr) ? table : this->DefaultRcFlagTable;
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLibFlagTable() const
@@ -996,7 +996,7 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLibFlagTable() const
   cmIDEFlagTable const* table = this->ToolsetOptions.GetLibFlagTable(
     this->GetPlatformName(), this->GetPlatformToolsetString());
 
-  return (table != CM_NULLPTR) ? table : this->DefaultLibFlagTable;
+  return (table != nullptr) ? table : this->DefaultLibFlagTable;
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLinkFlagTable() const
@@ -1004,7 +1004,7 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLinkFlagTable() const
   cmIDEFlagTable const* table = this->ToolsetOptions.GetLinkFlagTable(
     this->GetPlatformName(), this->GetPlatformToolsetString());
 
-  return (table != CM_NULLPTR) ? table : this->DefaultLinkFlagTable;
+  return (table != nullptr) ? table : this->DefaultLinkFlagTable;
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCudaFlagTable() const
@@ -1023,7 +1023,7 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMasmFlagTable() const
   cmIDEFlagTable const* table = this->ToolsetOptions.GetMasmFlagTable(
     this->GetPlatformName(), this->GetPlatformToolsetString());
 
-  return (table != CM_NULLPTR) ? table : this->DefaultMasmFlagTable;
+  return (table != nullptr) ? table : this->DefaultMasmFlagTable;
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetNasmFlagTable() const

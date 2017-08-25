@@ -8,6 +8,6 @@
 #include "cm_curl.h"
 #include <string>
 
-std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile = CM_NULLPTR);
+std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile = nullptr);
 
 #endif

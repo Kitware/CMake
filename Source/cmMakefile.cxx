@@ -779,7 +779,7 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
   // Make sure there is at least one output.
   if (outputs.empty()) {
     cmSystemTools::Error("Attempt to add a custom rule with no output!");
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   // Validate custom commands.  TODO: More strict?
@@ -790,12 +790,12 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
       std::ostringstream e;
       e << "COMMAND may not contain literal quotes:\n  " << cl[0] << "\n";
       this->IssueMessage(cmake::FATAL_ERROR, e.str());
-      return CM_NULLPTR;
+      return nullptr;
     }
   }
 
   // Choose a source file on which to store the custom command.
-  cmSourceFile* file = CM_NULLPTR;
+  cmSourceFile* file = nullptr;
   if (!commandLines.empty() && !main_dependency.empty()) {
     // The main dependency was specified.  Use it unless a different
     // custom command already used it.
@@ -809,7 +809,7 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
       }
       // The existing custom command is different.  We need to
       // generate a rule file for this new command.
-      file = CM_NULLPTR;
+      file = nullptr;
     } else if (!file) {
       file = this->CreateSource(main_dependency);
     }
@@ -933,7 +933,7 @@ void cmMakefile::AddCustomCommandOldStyle(
     std::vector<std::string> no_byproducts;
     this->AddCustomCommandToTarget(target, no_byproducts, depends,
                                    commandLines, cmTarget::POST_BUILD, comment,
-                                   CM_NULLPTR);
+                                   nullptr);
     return;
   }
 
@@ -951,14 +951,14 @@ void cmMakefile::AddCustomCommandOldStyle(
     if (sourceFiles.find(source)) {
       // The source looks like a real file.  Use it as the main dependency.
       sf = this->AddCustomCommandToOutput(output, depends, source,
-                                          commandLines, comment, CM_NULLPTR);
+                                          commandLines, comment, nullptr);
     } else {
       // The source may not be a real file.  Do not use a main dependency.
       std::string no_main_dependency;
       std::vector<std::string> depends2 = depends;
       depends2.push_back(source);
       sf = this->AddCustomCommandToOutput(output, depends2, no_main_dependency,
-                                          commandLines, comment, CM_NULLPTR);
+                                          commandLines, comment, nullptr);
     }
 
     // If the rule was added to the source (and not a .rule file),
@@ -1759,7 +1759,7 @@ void cmMakefile::RemoveDefinition(const std::string& name)
   cmVariableWatch* vv = this->GetVariableWatch();
   if (vv) {
     vv->VariableAccessed(name, cmVariableWatch::VARIABLE_REMOVED_ACCESS,
-                         CM_NULLPTR, this);
+                         nullptr, this);
   }
 #endif
 }
@@ -1910,7 +1910,7 @@ cmSourceFile* cmMakefile::LinearGetSourceFileWithOutput(
   }
 
   // otherwise return NULL
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmSourceFile* cmMakefile::GetSourceFileWithOutput(
@@ -1926,14 +1926,14 @@ cmSourceFile* cmMakefile::GetSourceFileWithOutput(
   if (o != this->OutputToSource.end()) {
     return (*o).second;
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 cmSourceGroup* cmMakefile::GetSourceGroup(
   const std::vector<std::string>& name) const
 {
-  cmSourceGroup* sg = CM_NULLPTR;
+  cmSourceGroup* sg = nullptr;
 
   // first look for source group starting with the same as the one we want
   for (std::vector<cmSourceGroup>::const_iterator sgIt =
@@ -1946,11 +1946,11 @@ cmSourceGroup* cmMakefile::GetSourceGroup(
     }
   }
 
-  if (sg != CM_NULLPTR) {
+  if (sg != nullptr) {
     // iterate through its children to find match source group
     for (unsigned int i = 1; i < name.size(); ++i) {
       sg = sg->LookupChild(name[i].c_str());
-      if (sg == CM_NULLPTR) {
+      if (sg == nullptr) {
         break;
       }
     }
@@ -1968,14 +1968,14 @@ void cmMakefile::AddSourceGroup(const std::string& name, const char* regex)
 void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
                                 const char* regex)
 {
-  cmSourceGroup* sg = CM_NULLPTR;
+  cmSourceGroup* sg = nullptr;
   std::vector<std::string> currentName;
   int i = 0;
   const int lastElement = static_cast<int>(name.size() - 1);
   for (i = lastElement; i >= 0; --i) {
     currentName.assign(name.begin(), name.begin() + i + 1);
     sg = this->GetSourceGroup(currentName);
-    if (sg != CM_NULLPTR) {
+    if (sg != nullptr) {
       break;
     }
   }
@@ -2003,8 +2003,7 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   }
   // build the whole source group path
   for (++i; i <= lastElement; ++i) {
-    sg->AddChild(
-      cmSourceGroup(name[i].c_str(), CM_NULLPTR, sg->GetFullName()));
+    sg->AddChild(cmSourceGroup(name[i].c_str(), nullptr, sg->GetFullName()));
     sg = sg->LookupChild(name[i].c_str());
   }
 
@@ -2254,7 +2253,7 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
     }
   }
 #endif
-  return def != CM_NULLPTR;
+  return def != nullptr;
 }
 
 const char* cmMakefile::GetDefinition(const std::string& name) const
@@ -2563,7 +2562,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
           openstack.pop_back();
           result.append(last, in - last);
           std::string const& lookup = result.substr(var.loc);
-          const char* value = CM_NULLPTR;
+          const char* value = nullptr;
           std::string varresult;
           std::string svalue;
           static const std::string lineVar = "CMAKE_CURRENT_LIST_LINE";
@@ -2619,7 +2618,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
         if (!atOnly) {
           t_lookup lookup;
           const char* next = in + 1;
-          const char* start = CM_NULLPTR;
+          const char* start = nullptr;
           char nextc = *next;
           if (nextc == '{') {
             // Looking for a variable.
@@ -3103,7 +3102,7 @@ cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
       return sf;
     }
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
@@ -3304,7 +3303,7 @@ cmVariableWatch* cmMakefile::GetVariableWatch() const
       this->GetCMakeInstance()->GetVariableWatch()) {
     return this->GetCMakeInstance()->GetVariableWatch();
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 #endif
 
@@ -3469,7 +3468,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
   }
 
   // Perform variable replacements.
-  this->ExpandVariablesInString(output, escapeQuotes, true, atOnly, CM_NULLPTR,
+  this->ExpandVariablesInString(output, escapeQuotes, true, atOnly, nullptr,
                                 -1, true, true);
 }
 
@@ -3609,7 +3608,7 @@ cmTarget* cmMakefile::FindLocalNonAliasTarget(const std::string& name) const
   if (i != this->Targets.end()) {
     return &i->second;
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmTest* cmMakefile::CreateTest(const std::string& testName)
@@ -3631,7 +3630,7 @@ cmTest* cmMakefile::GetTest(const std::string& testName) const
   if (mi != this->Tests.end()) {
     return mi->second;
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 void cmMakefile::AddCMakeDependFilesFromUser()
@@ -4089,10 +4088,10 @@ bool cmMakefile::IgnoreErrorsCMP0061() const
 }
 
 #define FEATURE_STRING(F) , #F
-static const char* const C_FEATURES[] = { CM_NULLPTR FOR_EACH_C_FEATURE(
+static const char* const C_FEATURES[] = { nullptr FOR_EACH_C_FEATURE(
   FEATURE_STRING) };
 
-static const char* const CXX_FEATURES[] = { CM_NULLPTR FOR_EACH_CXX_FEATURE(
+static const char* const CXX_FEATURES[] = { nullptr FOR_EACH_CXX_FEATURE(
   FEATURE_STRING) };
 #undef FEATURE_STRING
 
@@ -4200,7 +4199,7 @@ const char* cmMakefile::CompileFeaturesAvailable(const std::string& lang,
       this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
                                              this->Backtrace);
     }
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   const char* featuresKnown =
@@ -4223,7 +4222,7 @@ const char* cmMakefile::CompileFeaturesAvailable(const std::string& lang,
       this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
                                              this->Backtrace);
     }
-    return CM_NULLPTR;
+    return nullptr;
   }
   return featuresKnown;
 }
