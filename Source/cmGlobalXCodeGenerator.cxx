@@ -330,7 +330,7 @@ cmLocalGenerator* cmGlobalXCodeGenerator::CreateLocalGenerator(cmMakefile* mf)
 
 void cmGlobalXCodeGenerator::AddExtraIDETargets()
 {
-  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*>>::iterator it;
   // make sure extra targets are added before calling
   // the parent generate which will call trace depends
   for (it = this->ProjectMap.begin(); it != this->ProjectMap.end(); ++it) {
@@ -347,7 +347,7 @@ void cmGlobalXCodeGenerator::Generate()
   if (cmSystemTools::GetErrorOccuredFlag()) {
     return;
   }
-  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*>>::iterator it;
   for (it = this->ProjectMap.begin(); it != this->ProjectMap.end(); ++it) {
     cmLocalGenerator* root = it->second[0];
     this->SetGenerationRoot(root);
@@ -1089,7 +1089,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
     // framework or bundle targets
     std::vector<cmXCodeObject*> contentBuildPhases;
     if (isFrameworkTarget || isBundleTarget || isCFBundleTarget) {
-      typedef std::map<std::string, std::vector<cmSourceFile*> >
+      typedef std::map<std::string, std::vector<cmSourceFile*>>
         mapOfVectorOfSourceFiles;
       mapOfVectorOfSourceFiles bundleFiles;
       for (std::vector<cmSourceFile*>::const_iterator i = classes.begin();
@@ -1140,7 +1140,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
     // create vector of "resource content file" build phases - only for
     // framework or bundle targets
     if (isFrameworkTarget || isBundleTarget || isCFBundleTarget) {
-      typedef std::map<std::string, std::vector<cmSourceFile*> >
+      typedef std::map<std::string, std::vector<cmSourceFile*>>
         mapOfVectorOfSourceFiles;
       mapOfVectorOfSourceFiles bundleFiles;
       for (std::vector<cmSourceFile*>::const_iterator i = classes.begin();
@@ -2924,7 +2924,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     this->CreateObject(cmXCodeObject::XCConfigurationList);
   cmXCodeObject* buildConfigurations =
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  typedef std::vector<std::pair<std::string, cmXCodeObject*> > Configs;
+  typedef std::vector<std::pair<std::string, cmXCodeObject*>> Configs;
   Configs configs;
   const char* defaultConfigName = "Debug";
   for (unsigned int i = 0; i < this->CurrentConfigurationTypes.size(); ++i) {

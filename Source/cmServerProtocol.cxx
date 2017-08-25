@@ -591,7 +591,7 @@ public:
   std::string Language;
   std::string Flags;
   std::vector<std::string> Defines;
-  std::vector<std::pair<std::string, bool> > IncludePathList;
+  std::vector<std::pair<std::string, bool>> IncludePathList;
 };
 
 bool LanguageData::operator==(const LanguageData& other) const
@@ -686,7 +686,7 @@ static Json::Value DumpSourceFilesList(
   std::vector<cmSourceFile*> files;
   target->GetSourceFiles(files, config);
 
-  std::unordered_map<LanguageData, std::vector<std::string> > fileGroups;
+  std::unordered_map<LanguageData, std::vector<std::string>> fileGroups;
   for (cmSourceFile* file : files) {
     LanguageData fileData;
     fileData.Language = file->GetLanguage();

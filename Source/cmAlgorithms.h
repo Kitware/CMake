@@ -120,7 +120,7 @@ struct cmIsPair
 };
 
 template <typename K, typename V>
-struct cmIsPair<std::pair<K, V> >
+struct cmIsPair<std::pair<K, V>>
 {
   enum
   {

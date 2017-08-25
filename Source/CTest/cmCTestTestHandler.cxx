@@ -994,8 +994,8 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
   // tests array for tests which require that fixture and tests which are
   // setups for that fixture. They are needed at the end to populate
   // dependencies of the cleanup tests in our final list of tests.
-  std::map<std::string, std::vector<size_t> > fixtureRequirements;
-  std::map<std::string, std::vector<size_t> > setupFixturesAdded;
+  std::map<std::string, std::vector<size_t>> fixtureRequirements;
+  std::map<std::string, std::vector<size_t>> setupFixturesAdded;
 
   // Use integer index for iteration because we append to
   // the tests vector as we go
@@ -1150,7 +1150,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
       // This cleanup test could be part of the original test list that was
       // passed in. It is then possible that no other test requires the
       // fIt fixture, so we have to check for this.
-      std::map<std::string, std::vector<size_t> >::const_iterator cIt =
+      std::map<std::string, std::vector<size_t>>::const_iterator cIt =
         fixtureRequirements.find(fixture);
       if (cIt != fixtureRequirements.end()) {
         const std::vector<size_t>& indices = cIt->second;

@@ -82,7 +82,7 @@ private:
   const cmGeneratorExpressionDAGChecker* const Parent;
   const std::string Target;
   const std::string Property;
-  std::map<std::string, std::set<std::string> > Seen;
+  std::map<std::string, std::set<std::string>> Seen;
   const GeneratorExpressionContent* const Content;
   const cmListFileBacktrace Backtrace;
   Result CheckResult;

@@ -952,7 +952,7 @@ void cmGlobalNinjaGenerator::AddDependencyToAll(const std::string& input)
 
 void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
 {
-  for (std::map<std::string, std::set<std::string> >::iterator i =
+  for (std::map<std::string, std::set<std::string>>::iterator i =
          this->AssumedSourceDependencies.begin();
        i != this->AssumedSourceDependencies.end(); ++i) {
     cmNinjaDeps deps;
@@ -1260,7 +1260,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
   }
 
   // remove all source files we know will exist.
-  typedef std::map<std::string, std::set<std::string> >::const_iterator map_it;
+  typedef std::map<std::string, std::set<std::string>>::const_iterator map_it;
   for (map_it i = this->AssumedSourceDependencies.begin();
        i != this->AssumedSourceDependencies.end(); ++i) {
     knownDependencies.insert(this->ConvertToNinjaPath(i->first));

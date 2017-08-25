@@ -63,7 +63,7 @@ cmExtraCodeBlocksGenerator::GetFactory()
 void cmExtraCodeBlocksGenerator::Generate()
 {
   // for each sub project in the project create a codeblocks project
-  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*>>::const_iterator
          it = this->GlobalGenerator->GetProjectMap().begin();
        it != this->GlobalGenerator->GetProjectMap().end(); ++it) {
     // create a project file
@@ -217,7 +217,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   Tree tree;
 
   // build tree of virtual folders
-  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*>>::const_iterator
          it = this->GlobalGenerator->GetProjectMap().begin();
        it != this->GlobalGenerator->GetProjectMap().end(); ++it) {
     // Collect all files

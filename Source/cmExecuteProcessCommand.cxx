@@ -32,7 +32,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("called with incorrect number of arguments");
     return false;
   }
-  std::vector<std::vector<const char*> > cmds;
+  std::vector<std::vector<const char*>> cmds;
   std::string arguments;
   bool doing_command = false;
   size_t command_index = 0;

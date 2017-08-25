@@ -446,13 +446,13 @@ private:
   std::set<std::string> CombinedBuildOutputs;
 
   /// The mapping from source file to assumed dependencies.
-  std::map<std::string, std::set<std::string> > AssumedSourceDependencies;
+  std::map<std::string, std::set<std::string>> AssumedSourceDependencies;
 
   typedef std::map<std::string, cmGeneratorTarget*> TargetAliasMap;
   TargetAliasMap TargetAliases;
 
   typedef std::map<cmGeneratorTarget const*,
-                   std::set<cmGeneratorTarget const*> >
+                   std::set<cmGeneratorTarget const*>>
     TargetDependsClosureMap;
   TargetDependsClosureMap TargetDependsClosures;
 

@@ -112,7 +112,7 @@ protected:
 
   std::vector<std::string> SearchPathSuffixes;
 
-  std::map<PathGroup, std::vector<PathLabel> > PathGroupLabelMap;
+  std::map<PathGroup, std::vector<PathLabel>> PathGroupLabelMap;
   std::vector<PathGroup> PathGroupOrder;
   std::map<std::string, PathLabel> PathLabelStringMap;
   std::map<PathLabel, cmSearchPath> LabeledPaths;

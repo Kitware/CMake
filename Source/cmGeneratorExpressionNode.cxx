@@ -1320,7 +1320,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
     }
     context->HadHeadSensitiveCondition = true;
 
-    typedef std::map<std::string, std::vector<std::string> > LangMap;
+    typedef std::map<std::string, std::vector<std::string>> LangMap;
     static LangMap availableFeatures;
 
     LangMap testedFeatures;
@@ -1390,7 +1390,7 @@ static const char* targetPolicyWhitelist[] = {
   nullptr
 #define TARGET_POLICY_STRING(POLICY) , #POLICY
 
-    CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_STRING)
+  CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_STRING)
 
 #undef TARGET_POLICY_STRING
 };

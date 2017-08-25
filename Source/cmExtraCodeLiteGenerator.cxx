@@ -54,13 +54,13 @@ void cmExtraCodeLiteGenerator::Generate()
   std::string workspaceFileName;
   std::string workspaceSourcePath;
 
-  const std::map<std::string, std::vector<cmLocalGenerator*> >& projectMap =
+  const std::map<std::string, std::vector<cmLocalGenerator*>>& projectMap =
     this->GlobalGenerator->GetProjectMap();
 
   // loop projects and locate the root project.
   // and extract the information for creating the worspace
   // root makefile
-  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*>>::const_iterator
          it = projectMap.begin();
        it != projectMap.end(); ++it) {
     const cmMakefile* mf = it->second[0]->GetMakefile();
@@ -165,7 +165,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByProjectMaps(
 {
   std::vector<std::string> retval;
   // for each sub project in the workspace create a codelite project
-  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*>>::const_iterator
          it = this->GlobalGenerator->GetProjectMap().begin();
        it != this->GlobalGenerator->GetProjectMap().end(); it++) {
 

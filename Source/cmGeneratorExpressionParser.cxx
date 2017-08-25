@@ -97,7 +97,7 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
     return;
   }
 
-  std::vector<std::vector<cmGeneratorExpressionEvaluator*> > parameters;
+  std::vector<std::vector<cmGeneratorExpressionEvaluator*>> parameters;
   std::vector<std::vector<cmGeneratorExpressionToken>::const_iterator>
     commaTokens;
   std::vector<cmGeneratorExpressionToken>::const_iterator colonToken;

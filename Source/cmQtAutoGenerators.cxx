@@ -750,8 +750,8 @@ bool cmQtAutoGenerators::RunAutogen()
   // key = moc source filepath, value = moc output filepath
   std::map<std::string, std::string> mocsIncluded;
   std::map<std::string, std::string> mocsNotIncluded;
-  std::map<std::string, std::set<std::string> > mocDepends;
-  std::map<std::string, std::vector<std::string> > uisIncluded;
+  std::map<std::string, std::set<std::string>> mocDepends;
+  std::map<std::string, std::vector<std::string>> uisIncluded;
   // collects all headers which may need to be mocced
   std::set<std::string> mocHeaderFiles;
   std::set<std::string> uicHeaderFiles;
@@ -828,7 +828,7 @@ bool cmQtAutoGenerators::MocRequired(const std::string& contentText,
 
 void cmQtAutoGenerators::MocFindDepends(
   const std::string& absFilename, const std::string& contentText,
-  std::map<std::string, std::set<std::string> >& mocDepends)
+  std::map<std::string, std::set<std::string>>& mocDepends)
 {
   for (std::vector<MocDependFilter>::iterator fit =
          this->MocDependFilters.begin();
@@ -899,8 +899,8 @@ bool cmQtAutoGenerators::UicSkip(const std::string& absFilename) const
 bool cmQtAutoGenerators::ParseSourceFile(
   const std::string& absFilename,
   std::map<std::string, std::string>& mocsIncluded,
-  std::map<std::string, std::set<std::string> >& mocDepends,
-  std::map<std::string, std::vector<std::string> >& uisIncluded, bool relaxed)
+  std::map<std::string, std::set<std::string>>& mocDepends,
+  std::map<std::string, std::vector<std::string>>& uisIncluded, bool relaxed)
 {
   std::string contentText;
   bool success = ReadAll(contentText, absFilename);
@@ -931,7 +931,7 @@ bool cmQtAutoGenerators::ParseSourceFile(
 
 void cmQtAutoGenerators::UicParseContent(
   const std::string& absFilename, const std::string& contentText,
-  std::map<std::string, std::vector<std::string> >& uisIncluded)
+  std::map<std::string, std::vector<std::string>>& uisIncluded)
 {
   if (this->Verbose) {
     this->LogInfo("AutoUic: Checking " + absFilename);
@@ -952,7 +952,7 @@ void cmQtAutoGenerators::UicParseContent(
 bool cmQtAutoGenerators::MocParseSourceContent(
   const std::string& absFilename, const std::string& contentText,
   std::map<std::string, std::string>& mocsIncluded,
-  std::map<std::string, std::set<std::string> >& mocDepends, bool relaxed)
+  std::map<std::string, std::set<std::string>>& mocDepends, bool relaxed)
 {
   if (this->Verbose) {
     this->LogInfo("AutoMoc: Checking " + absFilename);
@@ -1148,7 +1148,7 @@ bool cmQtAutoGenerators::MocParseSourceContent(
 void cmQtAutoGenerators::MocParseHeaderContent(
   const std::string& absFilename, const std::string& contentText,
   std::map<std::string, std::string>& mocsNotIncluded,
-  std::map<std::string, std::set<std::string> >& mocDepends)
+  std::map<std::string, std::set<std::string>>& mocDepends)
 {
   // Log
   if (this->Verbose) {
@@ -1196,8 +1196,8 @@ bool cmQtAutoGenerators::ParseHeaders(
   const std::set<std::string>& uicHeaderFiles,
   const std::map<std::string, std::string>& mocsIncluded,
   std::map<std::string, std::string>& mocsNotIncluded,
-  std::map<std::string, std::set<std::string> >& mocDepends,
-  std::map<std::string, std::vector<std::string> >& uisIncluded)
+  std::map<std::string, std::set<std::string>>& mocDepends,
+  std::map<std::string, std::vector<std::string>>& uisIncluded)
 {
   bool success = true;
   // Merged header files list to read files only once
@@ -1235,7 +1235,7 @@ bool cmQtAutoGenerators::ParseHeaders(
 bool cmQtAutoGenerators::MocGenerateAll(
   const std::map<std::string, std::string>& mocsIncluded,
   const std::map<std::string, std::string>& mocsNotIncluded,
-  const std::map<std::string, std::set<std::string> >& mocDepends)
+  const std::map<std::string, std::set<std::string>>& mocDepends)
 {
   if (!this->MocEnabled()) {
     return true;
@@ -1375,7 +1375,7 @@ bool cmQtAutoGenerators::MocGenerateAll(
  */
 bool cmQtAutoGenerators::MocGenerateFile(
   const std::string& sourceFile, const std::string& mocFileName,
-  const std::map<std::string, std::set<std::string> >& mocDepends,
+  const std::map<std::string, std::set<std::string>>& mocDepends,
   bool included)
 {
   bool mocGenerated = false;
@@ -1391,7 +1391,7 @@ bool cmQtAutoGenerators::MocGenerateFile(
     generateMoc = FileAbsentOrOlder(mocFileAbs, sourceFile);
     if (!generateMoc) {
       // Test if a dependency file changed
-      std::map<std::string, std::set<std::string> >::const_iterator dit =
+      std::map<std::string, std::set<std::string>>::const_iterator dit =
         mocDepends.find(sourceFile);
       if (dit != mocDepends.end()) {
         for (std::set<std::string>::const_iterator fit = dit->second.begin();
@@ -1523,19 +1523,19 @@ bool cmQtAutoGenerators::UicFindIncludedFile(std::string& absFile,
 }
 
 bool cmQtAutoGenerators::UicGenerateAll(
-  const std::map<std::string, std::vector<std::string> >& uisIncluded)
+  const std::map<std::string, std::vector<std::string>>& uisIncluded)
 {
   if (!this->UicEnabled()) {
     return true;
   }
 
   // single map with input / output names
-  std::map<std::string, std::map<std::string, std::string> > sourceGenMap;
+  std::map<std::string, std::map<std::string, std::string>> sourceGenMap;
   {
     // Collision lookup map
     std::map<std::string, std::string> testMap;
     // Compile maps
-    for (std::map<std::string, std::vector<std::string> >::const_iterator sit =
+    for (std::map<std::string, std::vector<std::string>>::const_iterator sit =
            uisIncluded.begin();
          sit != uisIncluded.end(); ++sit) {
       const std::string& source(sit->first);
@@ -1576,7 +1576,7 @@ bool cmQtAutoGenerators::UicGenerateAll(
 
   // generate ui files
   for (std::map<std::string,
-                std::map<std::string, std::string> >::const_iterator it =
+                std::map<std::string, std::string>>::const_iterator it =
          sourceGenMap.begin();
        it != sourceGenMap.end(); ++it) {
     for (std::map<std::string, std::string>::const_iterator sit =
