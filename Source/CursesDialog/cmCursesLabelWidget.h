@@ -3,7 +3,7 @@
 #ifndef cmCursesLabelWidget_h
 #define cmCursesLabelWidget_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"

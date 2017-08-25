@@ -9,7 +9,6 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include "cmConfigure.h"
 #include <algorithm>
 #include <assert.h>
 #include <sstream>

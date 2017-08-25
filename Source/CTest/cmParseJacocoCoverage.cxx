@@ -1,7 +1,5 @@
 #include "cmParseJacocoCoverage.h"
 
-#include "cmConfigure.h"
-
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"

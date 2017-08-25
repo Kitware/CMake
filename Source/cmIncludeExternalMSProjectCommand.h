@@ -3,7 +3,7 @@
 #ifndef cmIncludeExternalMSProjectCommand_h
 #define cmIncludeExternalMSProjectCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

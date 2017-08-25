@@ -7,7 +7,6 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
-#include "cmConfigure.h"
 #include <utility>
 
 cmInstalledFile::cmInstalledFile()

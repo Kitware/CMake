@@ -5,7 +5,6 @@
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
-#include "cmConfigure.h"
 #include "cmsys/FStream.hxx"
 #include <stdlib.h>
 #include <string.h>

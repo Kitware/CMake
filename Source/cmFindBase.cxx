@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindBase.h"
 
-#include "cmConfigure.h"
 #include <deque>
 #include <iostream>
 #include <iterator>

@@ -3,7 +3,7 @@
 #ifndef cmFindFileCommand_h
 #define cmFindFileCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmFindPathCommand.h"
 

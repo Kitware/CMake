@@ -3,7 +3,7 @@
 #ifndef cmCPackArchiveGenerator_h
 #define cmCPackArchiveGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmArchiveWrite.h"
 #include "cmCPackGenerator.h"

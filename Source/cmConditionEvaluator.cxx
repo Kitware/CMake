@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmConditionEvaluator.h"
 
-#include "cmConfigure.h"
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <sstream>

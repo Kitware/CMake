@@ -3,7 +3,7 @@
 #ifndef cmFindCommon_h
 #define cmFindCommon_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <set>

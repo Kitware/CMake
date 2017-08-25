@@ -20,7 +20,6 @@
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
-#include "cmConfigure.h"
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/String.h"
 #include <algorithm>

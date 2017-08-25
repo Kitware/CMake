@@ -3,7 +3,7 @@
 #ifndef cmCMakeHostSystemInformationCommand_h
 #define cmCMakeHostSystemInformationCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <stddef.h>
 #include <string>

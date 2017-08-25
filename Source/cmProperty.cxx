@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProperty.h"
 
-#include "cmConfigure.h"
-
 void cmProperty::Set(const char* value)
 {
   this->Value = value;

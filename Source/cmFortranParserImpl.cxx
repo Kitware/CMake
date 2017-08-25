@@ -3,7 +3,6 @@
 #include "cmFortranParser.h"
 #include "cmSystemTools.h"
 
-#include "cmConfigure.h"
 #include <assert.h>
 #include <set>
 #include <stack>

@@ -4,7 +4,6 @@
 #include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
 
-#include "cmConfigure.h"
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include <map>

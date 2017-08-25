@@ -4,7 +4,6 @@
 #include "cmQtAutoGeneratorCommon.h"
 
 #include "cmAlgorithms.h"
-#include "cmConfigure.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmFilePathChecksum.h"

@@ -3,7 +3,7 @@
 #ifndef cmExportInstallAndroidMKGenerator_h
 #define cmExportInstallAndroidMKGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <set>

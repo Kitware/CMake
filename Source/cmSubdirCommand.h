@@ -3,7 +3,7 @@
 #ifndef cmSubdirCommand_h
 #define cmSubdirCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

@@ -3,7 +3,7 @@
 #ifndef cmAddCompileOptionsCommand_h
 #define cmAddCompileOptionsCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

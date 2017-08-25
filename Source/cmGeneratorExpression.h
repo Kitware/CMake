@@ -3,7 +3,7 @@
 #ifndef cmGeneratorExpression_h
 #define cmGeneratorExpression_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmListFileCache.h"
 

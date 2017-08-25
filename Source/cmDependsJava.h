@@ -3,7 +3,7 @@
 #ifndef cmDependsJava_h
 #define cmDependsJava_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmDepends.h"
 

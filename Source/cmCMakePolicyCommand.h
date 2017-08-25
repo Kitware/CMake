@@ -3,7 +3,7 @@
 #ifndef cmCMakePolicyCommand_h
 #define cmCMakePolicyCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

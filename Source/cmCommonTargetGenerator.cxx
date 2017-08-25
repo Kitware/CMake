@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCommonTargetGenerator.h"
 
-#include "cmConfigure.h"
 #include <set>
 #include <sstream>
 #include <utility>

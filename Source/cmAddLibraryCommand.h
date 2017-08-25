@@ -3,7 +3,7 @@
 #ifndef cmLibrarysCommand_h
 #define cmLibrarysCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

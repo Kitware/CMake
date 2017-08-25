@@ -3,7 +3,7 @@
 #ifndef cmCTestGIT_h
 #define cmCTestGIT_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGlobalVC.h"
 
