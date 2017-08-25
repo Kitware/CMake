@@ -32,7 +32,8 @@ endfunction()
 
 run_BuildDepends(C-Exe)
 if(NOT RunCMake_GENERATOR STREQUAL "Xcode")
-  if(RunCMake_GENERATOR MATCHES "Visual Studio 10")
+  if(RunCMake_GENERATOR MATCHES "Visual Studio 10" OR
+      RunCMake_GENERATOR_TOOLSET MATCHES "^(v80|v90|v100)$")
     # VS 10 forgets to re-link when a manifest changes
     set(run_BuildDepends_skip_step_2 1)
   endif()
