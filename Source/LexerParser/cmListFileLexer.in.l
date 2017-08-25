@@ -439,11 +439,15 @@ static cmListFileLexer_BOM cmListFileLexer_ReadBOM(FILE* f)
       if (fread(b, 1, 2, f) == 2 && b[0] == 0 && b[1] == 0) {
         return cmListFileLexer_BOM_UTF32LE;
       }
-      fsetpos(f, &p);
+      if (fsetpos(f, &p) != 0) {
+        return cmListFileLexer_BOM_Broken;
+      }
       return cmListFileLexer_BOM_UTF16LE;
     }
   }
-  rewind(f);
+  if (fseek(f, 0, SEEK_SET) != 0) {
+    return cmListFileLexer_BOM_Broken;
+  }
   return cmListFileLexer_BOM_None;
 }
 
