@@ -1263,8 +1263,7 @@ bool cmGlobalGenerator::Compute()
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
   // the AUTOMOC, AUTOUIC or AUTORCC property set
-  std::vector<cmGeneratorTarget const*> autogenTargets =
-    this->CreateQtAutoGeneratorsTargets();
+  cmQtAutoGenDigestUPV autogenDigests = this->CreateQtAutoGeneratorsTargets();
 #endif
 
   unsigned int i;
@@ -1287,11 +1286,10 @@ bool cmGlobalGenerator::Compute()
   }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  for (std::vector<cmGeneratorTarget const*>::iterator it =
-         autogenTargets.begin();
-       it != autogenTargets.end(); ++it) {
-    cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(*it);
+  for (const cmQtAutoGenDigestUP& digest : autogenDigests) {
+    cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(*digest);
   }
+  autogenDigests.clear();
 #endif
 
   for (i = 0; i < this->LocalGenerators.size(); ++i) {
@@ -1427,24 +1425,16 @@ bool cmGlobalGenerator::ComputeTargetDepends()
   return true;
 }
 
-std::vector<const cmGeneratorTarget*>
-cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
+cmQtAutoGenDigestUPV cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
 {
-  std::vector<const cmGeneratorTarget*> autogenTargets;
+  cmQtAutoGenDigestUPV autogenDigests;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  for (std::vector<cmLocalGenerator*>::const_iterator lgit =
-         this->LocalGenerators.begin();
-       lgit != this->LocalGenerators.end(); ++lgit) {
-    cmLocalGenerator* localGen = *lgit;
+  for (cmLocalGenerator* localGen : this->LocalGenerators) {
     const std::vector<cmGeneratorTarget*>& targets =
       localGen->GetGeneratorTargets();
     // Find targets that require AUTOGEN processing
-    std::vector<cmGeneratorTarget*> filteredTargets;
-    filteredTargets.reserve(targets.size());
-    for (std::vector<cmGeneratorTarget*>::const_iterator ti = targets.begin();
-         ti != targets.end(); ++ti) {
-      cmGeneratorTarget* target = *ti;
+    for (cmGeneratorTarget* target : targets) {
       if (target->GetType() == cmStateEnums::GLOBAL_TARGET) {
         continue;
       }
@@ -1455,33 +1445,43 @@ cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
           target->GetType() != cmStateEnums::OBJECT_LIBRARY) {
         continue;
       }
-      if ((!target->GetPropertyAsBool("AUTOMOC") &&
-           !target->GetPropertyAsBool("AUTOUIC") &&
-           !target->GetPropertyAsBool("AUTORCC")) ||
-          target->IsImported()) {
+      if (target->IsImported()) {
         continue;
       }
+
+      const bool mocEnabled = target->GetPropertyAsBool("AUTOMOC");
+      const bool uicEnabled = target->GetPropertyAsBool("AUTOUIC");
+      const bool rccEnabled = target->GetPropertyAsBool("AUTORCC");
+      if (!mocEnabled && !uicEnabled && !rccEnabled) {
+        continue;
+      }
+
+      std::string qtVersionMajor =
+        cmQtAutoGeneratorInitializer::GetQtMajorVersion(target);
       // don't do anything if there is no Qt4 or Qt5Core (which contains moc)
-      cmMakefile* mf = target->Target->GetMakefile();
-      std::string qtMajorVersion = mf->GetSafeDefinition("QT_VERSION_MAJOR");
-      if (qtMajorVersion == "") {
-        qtMajorVersion = mf->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
-      }
-      if (qtMajorVersion != "4" && qtMajorVersion != "5") {
+      if (qtVersionMajor != "4" && qtVersionMajor != "5") {
         continue;
       }
-      filteredTargets.push_back(target);
-    }
-    // Initialize AUTOGEN targets
-    for (std::vector<cmGeneratorTarget*>::iterator ti =
-           filteredTargets.begin();
-         ti != filteredTargets.end(); ++ti) {
-      cmQtAutoGeneratorInitializer::InitializeAutogenTarget(localGen, *ti);
-      autogenTargets.push_back(*ti);
+
+      {
+        cmQtAutoGenDigestUP digest(new cmQtAutoGenDigest(target));
+        digest->QtVersionMajor = std::move(qtVersionMajor);
+        digest->QtVersionMinor =
+          cmQtAutoGeneratorInitializer::GetQtMinorVersion(
+            target, digest->QtVersionMajor);
+        digest->MocEnabled = mocEnabled;
+        digest->UicEnabled = uicEnabled;
+        digest->RccEnabled = rccEnabled;
+        autogenDigests.emplace_back(std::move(digest));
+      }
     }
   }
+  // Initialize autogen targets
+  for (const cmQtAutoGenDigestUP& digest : autogenDigests) {
+    cmQtAutoGeneratorInitializer::InitializeAutogenTarget(*digest);
+  }
 #endif
-  return autogenTargets;
+  return autogenDigests;
 }
 
 cmLinkLineComputer* cmGlobalGenerator::CreateLinkLineComputer(

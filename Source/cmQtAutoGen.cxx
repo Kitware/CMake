@@ -1,6 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmQtAutoGeneratorCommon.h"
+#include "cmQtAutoGen.h"
 #include "cmAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -9,6 +9,13 @@
 
 #include <sstream>
 #include <stddef.h>
+
+// - Static variables
+
+const std::string genNameGen = "AutoGen";
+const std::string genNameMoc = "AutoMoc";
+const std::string genNameUic = "AutoUic";
+const std::string genNameRcc = "AutoRcc";
 
 // - Static functions
 
@@ -41,7 +48,7 @@ static bool RccListInputsQt4(const std::string& fileName,
       if (errorMessage != nullptr) {
         std::ostringstream ost;
         ost << "AutoRcc: Error: Rcc file not readable:\n"
-            << cmQtAutoGeneratorCommon::Quoted(fileName) << "\n";
+            << cmQtAutoGen::Quoted(fileName) << "\n";
         *errorMessage = ost.str();
       }
       allGood = false;
@@ -156,7 +163,7 @@ static bool RccListInputsQt5(const std::string& rccCommand,
           if (errorMessage != nullptr) {
             std::ostringstream ost;
             ost << "AutoRcc: Error: Rcc lists unparsable output:\n"
-                << cmQtAutoGeneratorCommon::Quoted(eline) << "\n";
+                << cmQtAutoGen::Quoted(eline) << "\n";
             *errorMessage = ost.str();
           }
           return false;
@@ -173,9 +180,29 @@ static bool RccListInputsQt5(const std::string& rccCommand,
 
 // - Class definitions
 
-const char* cmQtAutoGeneratorCommon::listSep = "@LSEP@";
+const std::string cmQtAutoGen::listSep = "@LSEP@";
 
-std::string cmQtAutoGeneratorCommon::Quoted(const std::string& text)
+const std::string& cmQtAutoGen::GeneratorName(GeneratorType type)
+{
+  switch (type) {
+    case GeneratorType::GEN:
+      return genNameGen;
+    case GeneratorType::MOC:
+      return genNameMoc;
+    case GeneratorType::UIC:
+      return genNameUic;
+    case GeneratorType::RCC:
+      return genNameRcc;
+  }
+  return genNameGen;
+}
+
+std::string cmQtAutoGen::GeneratorNameUpper(GeneratorType genType)
+{
+  return cmSystemTools::UpperCase(cmQtAutoGen::GeneratorName(genType));
+}
+
+std::string cmQtAutoGen::Quoted(const std::string& text)
 {
   static const char* rep[18] = { "\\", "\\\\", "\"", "\\\"", "\a", "\\a",
                                  "\b", "\\b",  "\f", "\\f",  "\n", "\\n",
@@ -191,11 +218,11 @@ std::string cmQtAutoGeneratorCommon::Quoted(const std::string& text)
   return res;
 }
 
-bool cmQtAutoGeneratorCommon::RccListInputs(const std::string& qtMajorVersion,
-                                            const std::string& rccCommand,
-                                            const std::string& fileName,
-                                            std::vector<std::string>& files,
-                                            std::string* errorMessage)
+bool cmQtAutoGen::RccListInputs(const std::string& qtMajorVersion,
+                                const std::string& rccCommand,
+                                const std::string& fileName,
+                                std::vector<std::string>& files,
+                                std::string* errorMessage)
 {
   bool allGood = false;
   if (cmsys::SystemTools::FileExists(fileName.c_str())) {
@@ -208,7 +235,7 @@ bool cmQtAutoGeneratorCommon::RccListInputs(const std::string& qtMajorVersion,
     if (errorMessage != nullptr) {
       std::ostringstream ost;
       ost << "AutoRcc: Error: Rcc file does not exist:\n"
-          << cmQtAutoGeneratorCommon::Quoted(fileName) << "\n";
+          << cmQtAutoGen::Quoted(fileName) << "\n";
       *errorMessage = ost.str();
     }
   }

@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmFilePathChecksum.h"
+#include "cmQtAutoGen.h"
 #include "cmsys/RegularExpression.hxx"
 
 #include <map>
@@ -142,11 +143,11 @@ private:
   std::string ChecksumedPath(const std::string& sourceFile,
                              const std::string& basePrefix,
                              const std::string& baseSuffix) const;
-  bool MakeParentDirectory(const char* logPrefix,
+  bool MakeParentDirectory(cmQtAutoGen::GeneratorType genType,
                            const std::string& filename) const;
   bool FileDiffers(const std::string& filename, const std::string& content);
-  bool FileWrite(const char* logPrefix, const std::string& filename,
-                 const std::string& content);
+  bool FileWrite(cmQtAutoGen::GeneratorType genType,
+                 const std::string& filename, const std::string& content);
 
   bool RunCommand(const std::vector<std::string>& command, std::string& output,
                   bool verbose = true) const;

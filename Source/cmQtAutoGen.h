@@ -1,27 +1,35 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmQtAutoGeneratorCommon_h
-#define cmQtAutoGeneratorCommon_h
+#ifndef cmQtAutoGen_h
+#define cmQtAutoGen_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
 
-class cmQtAutoGeneratorCommon
+/** \class cmQtAutoGen
+ * \brief Class used as namespace for QtAutogen related types  and functions
+ */
+class cmQtAutoGen
 {
-  // - Types and statics
 public:
-  static const char* listSep;
+  static const std::string listSep;
 
   enum GeneratorType
   {
+    GEN, // General
     MOC,
     UIC,
     RCC
   };
 
 public:
+  /// @brief Returns the generator name
+  static const std::string& GeneratorName(GeneratorType genType);
+  /// @brief Returns the generator name in upper case
+  static std::string GeneratorNameUpper(GeneratorType genType);
+
   /// @brief Returns a the string escaped and enclosed in quotes
   ///
   static std::string Quoted(const std::string& text);
