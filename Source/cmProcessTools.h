@@ -3,7 +3,7 @@
 #ifndef cmProcessTools_h
 #define cmProcessTools_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 #include "cmProcessOutput.h"
 
 #include <iosfwd>

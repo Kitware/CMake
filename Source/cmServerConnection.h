@@ -2,12 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "cmConnection.h"
-
-#include "cmPipeConnection.h"
-#include "cm_uv.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+
+#include "cmConnection.h"
+#include "cmPipeConnection.h"
+#include "cm_uv.h"
 
 class cmServerBase;
 

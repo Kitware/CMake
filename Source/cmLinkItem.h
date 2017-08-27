@@ -3,7 +3,7 @@
 #ifndef cmLinkItem_h
 #define cmLinkItem_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <algorithm>
 #include <map>

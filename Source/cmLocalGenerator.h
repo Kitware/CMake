@@ -3,7 +3,7 @@
 #ifndef cmLocalGenerator_h
 #define cmLocalGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cm_kwiml.h"
 #include <iosfwd>

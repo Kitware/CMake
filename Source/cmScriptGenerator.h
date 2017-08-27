@@ -3,7 +3,7 @@
 #ifndef cmScriptGenerator_h
 #define cmScriptGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <ostream>
 #include <string>

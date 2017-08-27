@@ -3,7 +3,7 @@
 #ifndef cmSearchPath_h
 #define cmSearchPath_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <set>
 #include <string>

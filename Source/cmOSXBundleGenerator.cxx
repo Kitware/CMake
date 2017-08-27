@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOSXBundleGenerator.h"
 
-#include "cmConfigure.h"
-
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"

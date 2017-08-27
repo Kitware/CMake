@@ -3,7 +3,7 @@
 #ifndef cmCryptoHash_h
 #define cmCryptoHash_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <stddef.h>
 #include <string>

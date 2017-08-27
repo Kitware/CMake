@@ -3,7 +3,7 @@
 #ifndef cmLocalCommonGenerator_h
 #define cmLocalCommonGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 

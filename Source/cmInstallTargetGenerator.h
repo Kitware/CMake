@@ -3,7 +3,7 @@
 #ifndef cmInstallTargetGenerator_h
 #define cmInstallTargetGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmInstallGenerator.h"
 #include "cmScriptGenerator.h"

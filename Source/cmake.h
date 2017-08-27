@@ -3,7 +3,7 @@
 #ifndef cmake_h
 #define cmake_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <set>

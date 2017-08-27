@@ -3,7 +3,7 @@
 #ifndef cmSystemTools_h
 #define cmSystemTools_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCryptoHash.h"
 #include "cmProcessOutput.h"

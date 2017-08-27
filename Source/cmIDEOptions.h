@@ -3,7 +3,7 @@
 #ifndef cmIDEOptions_h
 #define cmIDEOptions_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <string>

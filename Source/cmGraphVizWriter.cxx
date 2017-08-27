@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGraphVizWriter.h"
 
-#include "cmConfigure.h"
 #include <iostream>
 #include <sstream>
 #include <utility>

@@ -3,7 +3,7 @@
 #ifndef cmNinjaTargetGenerator_h
 #define cmNinjaTargetGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCommonTargetGenerator.h"
 #include "cmGlobalNinjaGenerator.h"

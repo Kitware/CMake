@@ -32,7 +32,6 @@
 #include "cmVisualStudioWCEPlatformParser.h"
 #endif
 
-#include "cmConfigure.h"
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/Process.h"

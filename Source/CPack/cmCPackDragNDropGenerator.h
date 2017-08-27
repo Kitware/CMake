@@ -3,7 +3,7 @@
 #ifndef cmCPackDragNDropGenerator_h
 #define cmCPackDragNDropGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <sstream>
 #include <stddef.h>

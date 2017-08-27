@@ -3,7 +3,7 @@
 #ifndef cmForEachCommand_h
 #define cmForEachCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

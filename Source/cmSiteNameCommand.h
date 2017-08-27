@@ -3,7 +3,7 @@
 #ifndef cmSiteNameCommand_h
 #define cmSiteNameCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

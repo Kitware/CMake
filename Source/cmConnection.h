@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cm_uv.h"
 

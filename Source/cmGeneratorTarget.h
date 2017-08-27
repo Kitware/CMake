@@ -3,7 +3,7 @@
 #ifndef cmGeneratorTarget_h
 #define cmGeneratorTarget_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"

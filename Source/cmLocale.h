@@ -3,7 +3,7 @@
 #ifndef cmLocale_h
 #define cmLocale_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <locale.h>
 #include <string>

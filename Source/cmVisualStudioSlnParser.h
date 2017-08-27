@@ -3,7 +3,7 @@
 #ifndef cmVisualStudioSlnParser_h
 #define cmVisualStudioSlnParser_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <bitset>
 #include <iosfwd>

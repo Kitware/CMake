@@ -9,7 +9,6 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
-#include "cmConfigure.h"
 #include "cm_curl.h"
 #include "cm_zlib.h"
 #include "cmsys/Base64.h"

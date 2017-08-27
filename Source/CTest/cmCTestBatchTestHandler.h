@@ -3,7 +3,7 @@
 #ifndef cmCTestBatchTestHandler_h
 #define cmCTestBatchTestHandler_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestMultiProcessHandler.h"
 #include "cmsys/FStream.hxx"

@@ -6,7 +6,7 @@
 #include "cmInstallGenerator.h"
 #include "cmScriptGenerator.h"
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <string>

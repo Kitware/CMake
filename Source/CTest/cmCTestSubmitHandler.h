@@ -3,7 +3,7 @@
 #ifndef cmCTestSubmitHandler_h
 #define cmCTestSubmitHandler_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"

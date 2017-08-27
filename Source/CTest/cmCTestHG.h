@@ -3,7 +3,7 @@
 #ifndef cmCTestHG_h
 #define cmCTestHG_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGlobalVC.h"
 

@@ -3,7 +3,7 @@
 #ifndef cmLinkDirectoriesCommand_h
 #define cmLinkDirectoriesCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

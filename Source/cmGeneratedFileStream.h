@@ -3,7 +3,7 @@
 #ifndef cmGeneratedFileStream_h
 #define cmGeneratedFileStream_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cm_codecvt.hxx"
 #include "cmsys/FStream.hxx"

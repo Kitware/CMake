@@ -3,7 +3,7 @@
 #ifndef cmCommandArgumentParserHelper_h
 #define cmCommandArgumentParserHelper_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

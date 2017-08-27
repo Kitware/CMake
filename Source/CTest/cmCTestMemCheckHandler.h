@@ -3,7 +3,7 @@
 #ifndef cmCTestMemCheckHandler_h
 #define cmCTestMemCheckHandler_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestTestHandler.h"
 

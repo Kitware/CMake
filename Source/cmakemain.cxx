@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmConfigure.h"
 
+#include "cmake.h"
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
@@ -9,7 +9,6 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 #include "cmcmd.h"
 
 #ifdef CMAKE_BUILD_WITH_CMAKE

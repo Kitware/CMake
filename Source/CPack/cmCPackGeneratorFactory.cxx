@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackGeneratorFactory.h"
 
-#include "cmConfigure.h"
 #include <ostream>
 #include <utility>
 

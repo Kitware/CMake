@@ -3,7 +3,7 @@
 #ifndef cmCPackPropertiesGenerator_h
 #define cmCPackPropertiesGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmScriptGenerator.h"
 

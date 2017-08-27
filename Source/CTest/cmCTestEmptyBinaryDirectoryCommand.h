@@ -3,7 +3,7 @@
 #ifndef cmCTestEmptyBinaryDirectoryCommand_h
 #define cmCTestEmptyBinaryDirectoryCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestCommand.h"
 

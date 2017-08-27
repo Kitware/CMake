@@ -3,7 +3,7 @@
 #ifndef cmCTest_h
 #define cmCTest_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmProcessOutput.h"
 #include "cmsys/String.hxx"

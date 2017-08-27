@@ -3,7 +3,7 @@
 #ifndef cmCTestSVN_h
 #define cmCTestSVN_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGlobalVC.h"
 

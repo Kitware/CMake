@@ -3,7 +3,7 @@
 #ifndef cmLocalVisualStudio7Generator_h
 #define cmLocalVisualStudio7Generator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <string>

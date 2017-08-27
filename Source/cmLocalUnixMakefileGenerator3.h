@@ -3,7 +3,7 @@
 #ifndef cmLocalUnixMakefileGenerator3_h
 #define cmLocalUnixMakefileGenerator3_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmDepends.h"
 #include "cmLocalCommonGenerator.h"

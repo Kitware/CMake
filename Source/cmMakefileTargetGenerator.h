@@ -3,7 +3,7 @@
 #ifndef cmMakefileTargetGenerator_h
 #define cmMakefileTargetGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <map>

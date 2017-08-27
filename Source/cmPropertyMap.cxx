@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmPropertyMap.h"
 
-#include "cmConfigure.h"
 #include <algorithm>
 #include <assert.h>
 #include <utility>

@@ -3,7 +3,7 @@
 #ifndef cmParseGTMCoverage_h
 #define cmParseGTMCoverage_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmParseMumpsCoverage.h"
 

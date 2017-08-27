@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestGenericHandler.h"
 
-#include "cmConfigure.h"
 #include <sstream>
 #include <utility>
 

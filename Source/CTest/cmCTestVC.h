@@ -3,7 +3,7 @@
 #ifndef cmCTestVC_h
 #define cmCTestVC_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <string>

@@ -3,7 +3,7 @@
 #ifndef cmTestGenerator_h
 #define cmTestGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmScriptGenerator.h"
 

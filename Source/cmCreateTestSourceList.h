@@ -3,7 +3,7 @@
 #ifndef cmCreateTestSourceList_h
 #define cmCreateTestSourceList_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

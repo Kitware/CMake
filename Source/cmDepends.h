@@ -3,7 +3,7 @@
 #ifndef cmDepends_h
 #define cmDepends_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <map>

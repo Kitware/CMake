@@ -3,7 +3,7 @@
 #ifndef cmCPackTGZGenerator_h
 #define cmCPackTGZGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCPackArchiveGenerator.h"
 #include "cmCPackGenerator.h"

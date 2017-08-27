@@ -3,7 +3,7 @@
 #ifndef cmMakefile_h
 #define cmMakefile_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmsys/RegularExpression.hxx"
 #include <deque>

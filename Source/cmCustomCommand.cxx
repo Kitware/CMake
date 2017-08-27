@@ -4,8 +4,6 @@
 
 #include "cmMakefile.h"
 
-#include "cmConfigure.h"
-
 cmCustomCommand::cmCustomCommand()
   : Backtrace()
 {

@@ -3,7 +3,7 @@
 #ifndef cmExtraKateGenerator_h
 #define cmExtraKateGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmExternalMakefileProjectGenerator.h"
 

@@ -3,7 +3,7 @@
 #ifndef cmSetTestsPropertiesCommand_h
 #define cmSetTestsPropertiesCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>

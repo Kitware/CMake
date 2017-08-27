@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmPipeConnection.h"
 
-#include "cmConfigure.h"
 #include "cmServer.h"
 
 cmPipeConnection::cmPipeConnection(const std::string& name,

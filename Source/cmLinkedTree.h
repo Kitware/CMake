@@ -3,7 +3,7 @@
 #ifndef cmLinkedTree_h
 #define cmLinkedTree_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <assert.h>
 #include <iterator>
