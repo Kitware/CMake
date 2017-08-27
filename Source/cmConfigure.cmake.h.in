@@ -40,7 +40,7 @@
 #define CM_FALLTHROUGH [[fallthrough]]
 #elif defined(CMake_HAVE_CXX_GNU_FALLTHROUGH)
 #define CM_FALLTHROUGH [[gnu::fallthrough]]
-elif defined(CMake_HAVE_CXX_ATTRIBUTE_FALLTHROUGH)
+#elif defined(CMake_HAVE_CXX_ATTRIBUTE_FALLTHROUGH)
 #define CM_FALLTHROUGH __attribute__((fallthrough))
 #else
 #define CM_FALLTHROUGH
