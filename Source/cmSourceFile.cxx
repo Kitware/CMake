@@ -136,10 +136,10 @@ bool cmSourceFile::FindFullPath(std::string* error)
   } else {
     tryDirs[0] = "";
   }
-  const std::vector<std::string>& srcExts =
-    mf->GetCMakeInstance()->GetSourceExtensions();
-  std::vector<std::string> hdrExts =
-    mf->GetCMakeInstance()->GetHeaderExtensions();
+
+  cmake const* const cmakeInst = mf->GetCMakeInstance();
+  std::vector<std::string> const& srcExts = cmakeInst->GetSourceExtensions();
+  std::vector<std::string> const& hdrExts = cmakeInst->GetHeaderExtensions();
   for (const char* const* di = tryDirs; *di; ++di) {
     std::string tryPath = this->Location.GetDirectory();
     if (!tryPath.empty()) {
