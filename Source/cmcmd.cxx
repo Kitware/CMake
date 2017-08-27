@@ -15,13 +15,10 @@
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
-#if defined(HAVE_SERVER_MODE) && HAVE_SERVER_MODE
-#include "cmServer.h"
-#include "cmServerConnection.h"
-#endif
-
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
+#include "cmServer.h"
+#include "cmServerConnection.h"
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32)
@@ -590,7 +587,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         return 1;
       }
       cmake cm(cmake::RoleInternal);
-#if defined(HAVE_SERVER_MODE) && HAVE_SERVER_MODE
+#if defined(CMAKE_BUILD_WITH_CMAKE)
       std::cout << cm.ReportCapabilities(true);
 #else
       std::cout << cm.ReportCapabilities(false);
@@ -1022,7 +1019,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           return 1;
         }
       }
-#if defined(HAVE_SERVER_MODE) && HAVE_SERVER_MODE
+#if defined(CMAKE_BUILD_WITH_CMAKE)
       cmConnection* conn;
       if (isDebug) {
         conn = new cmServerStdIoConnection;

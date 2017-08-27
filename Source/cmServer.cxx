@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServer.h"
 
+#include "cmAlgorithms.h"
 #include "cmConnection.h"
 #include "cmFileMonitor.h"
 #include "cmServerDictionary.h"
@@ -78,7 +79,7 @@ void cmServer::ProcessRequest(cmConnection* connection,
   std::unique_ptr<DebugInfo> debug;
   Json::Value debugValue = value["debug"];
   if (!debugValue.isNull()) {
-    debug = std::make_unique<DebugInfo>();
+    debug = cm::make_unique<DebugInfo>();
     debug->OutputFile = debugValue["dumpToFile"].asString();
     debug->PrintStatistics = debugValue["showStats"].asBool();
   }

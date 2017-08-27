@@ -72,7 +72,6 @@ cmake_init_file=""
 cmake_bootstrap_system_libs=""
 cmake_bootstrap_qt_gui=""
 cmake_bootstrap_qt_qmake=""
-cmake_bootstrap_server=""
 cmake_sphinx_man=""
 cmake_sphinx_html=""
 cmake_sphinx_qthelp=""
@@ -520,9 +519,6 @@ Configuration:
   --no-qt-gui             do not build the Qt-based GUI (default)
   --qt-qmake=<qmake>      use <qmake> as the qmake executable to find Qt
 
-  --server                enable the server mode (default if supported)
-  --no-server             disable the server mode
-
   --sphinx-man            build man pages with Sphinx
   --sphinx-html           build html help with Sphinx
   --sphinx-qthelp         build qch help with Sphinx
@@ -755,8 +751,6 @@ while test $# != 0; do
   --qt-gui) cmake_bootstrap_qt_gui="1" ;;
   --no-qt-gui) cmake_bootstrap_qt_gui="0" ;;
   --qt-qmake=*) cmake_bootstrap_qt_qmake=`cmake_arg "$1"` ;;
-  --server) cmake_bootstrap_server="1" ;;
-  --no-server) cmake_bootstrap_server="0" ;;
   --sphinx-man) cmake_sphinx_man="1" ;;
   --sphinx-html) cmake_sphinx_html="1" ;;
   --sphinx-qthelp) cmake_sphinx_qthelp="1" ;;
@@ -1336,11 +1330,6 @@ fi
 if [ "x${cmake_bootstrap_qt_qmake}" != "x" ]; then
   echo '
 set (QT_QMAKE_EXECUTABLE "'"${cmake_bootstrap_qt_qmake}"'" CACHE FILEPATH "Location of Qt qmake" FORCE)
-' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
-fi
-if [ "x${cmake_bootstrap_server}" != "x" ]; then
-  echo '
-set (CMake_ENABLE_SERVER_MODE '"${cmake_bootstrap_server}"' CACHE BOOL "Enable server mode" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if [ "x${cmake_sphinx_man}" != "x" ]; then

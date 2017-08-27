@@ -1010,20 +1010,16 @@ add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h ${MANIFEST_FILE})
 list(APPEND _tools cmake)
 target_link_libraries(cmake CMakeLib)
 
-if(CMake_ENABLE_SERVER_MODE)
-  add_library(CMakeServerLib
-    cmConnection.h cmConnection.cxx
-    cmFileMonitor.cxx cmFileMonitor.h
-    cmPipeConnection.cxx cmPipeConnection.h
-    cmServer.cxx cmServer.h
-    cmServerConnection.cxx cmServerConnection.h
-    cmServerProtocol.cxx cmServerProtocol.h
-    )
-  target_link_libraries(CMakeServerLib CMakeLib)
-  set_property(SOURCE cmcmd.cxx APPEND PROPERTY COMPILE_DEFINITIONS HAVE_SERVER_MODE=1)
-
-  target_link_libraries(cmake CMakeServerLib)
-endif()
+add_library(CMakeServerLib
+  cmConnection.h cmConnection.cxx
+  cmFileMonitor.cxx cmFileMonitor.h
+  cmPipeConnection.cxx cmPipeConnection.h
+  cmServer.cxx cmServer.h
+  cmServerConnection.cxx cmServerConnection.h
+  cmServerProtocol.cxx cmServerProtocol.h
+  )
+target_link_libraries(CMakeServerLib CMakeLib)
+target_link_libraries(cmake CMakeServerLib)
 
 # Build CTest executable
 add_executable(ctest ctest.cxx ${MANIFEST_FILE})

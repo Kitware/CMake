@@ -2818,13 +2818,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   ADD_TEST_MACRO(CMakeCommands.target_compile_definitions target_compile_definitions)
   ADD_TEST_MACRO(CMakeCommands.target_compile_options target_compile_options)
 
-  if(CMake_TEST_SERVER_MODE)
-    # The cmake server-mode test requires python for a simple client.
-    find_package(PythonInterp QUIET)
-    if(PYTHON_EXECUTABLE)
-      set(Server_BUILD_OPTIONS -DPYTHON_EXECUTABLE:FILEPATH=${PYTHON_EXECUTABLE})
-      ADD_TEST_MACRO(Server Server)
-    endif()
+  # The cmake server-mode test requires python for a simple client.
+  find_package(PythonInterp QUIET)
+  if(PYTHON_EXECUTABLE)
+    set(Server_BUILD_OPTIONS -DPYTHON_EXECUTABLE:FILEPATH=${PYTHON_EXECUTABLE})
+    ADD_TEST_MACRO(Server Server)
   endif()
 
   configure_file(
