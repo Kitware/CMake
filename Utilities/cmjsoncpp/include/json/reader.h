@@ -30,7 +30,7 @@ namespace Json {
 /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a
  *Value.
  *
- * \deprecated Use CharReader and CharReaderBuilder.
+ * deprecated Use CharReader and CharReaderBuilder.
  */
 class JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead") JSON_API Reader {
 public:
@@ -110,7 +110,7 @@ public:
    *         the parsed document. An empty string is returned if no error
    * occurred
    *         during parsing.
-   * \deprecated Use getFormattedErrorMessages() instead (typo fix).
+   * deprecated Use getFormattedErrorMessages() instead (typo fix).
    */
   JSONCPP_DEPRECATED("Use getFormattedErrorMessages() instead.")
   JSONCPP_STRING getFormatedErrorMessages() const;

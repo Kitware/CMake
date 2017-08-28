@@ -139,7 +139,7 @@ public:
 };
 
 /** \brief Abstract class for writers.
- * \deprecated Use StreamWriter. (And really, this is an implementation detail.)
+ * deprecated Use StreamWriter. (And really, this is an implementation detail.)
  */
 class JSONCPP_DEPRECATED("Use StreamWriter instead") JSON_API Writer {
 public:
@@ -155,7 +155,7 @@ public:
  *consumption,
  * but may be usefull to support feature such as RPC where bandwith is limited.
  * \sa Reader, Value
- * \deprecated Use StreamWriterBuilder.
+ * deprecated Use StreamWriterBuilder.
  */
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API FastWriter : public Writer {
 
@@ -208,7 +208,7 @@ private:
  *#CommentPlacement.
  *
  * \sa Reader, Value, Value::setComment()
- * \deprecated Use StreamWriterBuilder.
+ * deprecated Use StreamWriterBuilder.
  */
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API StyledWriter : public Writer {
 public:
@@ -269,7 +269,7 @@ private:
  #CommentPlacement.
  *
  * \sa Reader, Value, Value::setComment()
- * \deprecated Use StreamWriterBuilder.
+ * deprecated Use StreamWriterBuilder.
  */
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API StyledStreamWriter {
 public:

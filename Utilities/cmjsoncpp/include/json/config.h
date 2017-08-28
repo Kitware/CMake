@@ -138,6 +138,7 @@
 #  endif  // GNUC version
 #endif // __clang__ || __GNUC__
 
+#undef JSONCPP_DEPRECATED // no deprecations in CMake copy
 #if !defined(JSONCPP_DEPRECATED)
 #define JSONCPP_DEPRECATED(message)
 #endif // if !defined(JSONCPP_DEPRECATED)

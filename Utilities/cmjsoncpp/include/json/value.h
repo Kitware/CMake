@@ -242,7 +242,7 @@ private:
     bool operator<(CZString const& other) const;
     bool operator==(CZString const& other) const;
     ArrayIndex index() const;
-    //const char* c_str() const; ///< \deprecated
+    //const char* c_str() const; ///< deprecated
     char const* data() const;
     unsigned length() const;
     bool isStaticString() const;
@@ -517,12 +517,12 @@ Json::Value obj_value(Json::objectValue); // {}
   /// \return the removed Value, or null.
   /// \pre type() is objectValue or nullValue
   /// \post type() is unchanged
-  /// \deprecated
+  /// deprecated
   JSONCPP_DEPRECATED("")
   Value removeMember(const char* key);
   /// Same as removeMember(const char*)
   /// \param key may contain embedded nulls.
-  /// \deprecated
+  /// deprecated
   JSONCPP_DEPRECATED("")
   Value removeMember(const JSONCPP_STRING& key);
   /// Same as removeMember(const char* begin, const char* end, Value* removed),
@@ -570,7 +570,7 @@ Json::Value obj_value(Json::objectValue); // {}
   //      EnumValues enumValues() const;
   //# endif
 
-  /// \deprecated Always pass len.
+  /// deprecated Always pass len.
   JSONCPP_DEPRECATED("Use setComment(JSONCPP_STRING const&) instead.")
   void setComment(const char* comment, CommentPlacement placement);
   /// Comments must be //... or /* ... */
@@ -734,7 +734,7 @@ public:
 
   /// Return the member name of the referenced Value. "" if it is not an
   /// objectValue.
-  /// \deprecated This cannot be used for UTF-8 strings, since there can be embedded nulls.
+  /// deprecated This cannot be used for UTF-8 strings, since there can be embedded nulls.
   JSONCPP_DEPRECATED("Use `key = name();` instead.")
   char const* memberName() const;
   /// Return the member name of the referenced Value, or NULL if it is not an
