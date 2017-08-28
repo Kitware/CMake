@@ -7,14 +7,12 @@ This file must be translated to C and modified to build everywhere.
 
 Run flex >= 2.6 like this:
 
-  flex --nounistd -DFLEXINT_H --prefix=cmListFileLexer_yy -ocmListFileLexer.c cmListFileLexer.in.l
+  flex --nounistd -DFLEXINT_H --noline -ocmListFileLexer.c cmListFileLexer.in.l
 
 Modify cmListFileLexer.c:
-  - remove trailing whitespace: sed -i 's/\s*$//' cmListFileLexer.c
-  - remove blank lines at end of file
-  - #include "cmStandardLexer.h" at the top
-  - add cast in yy_scan_bytes for loop condition of _yybytes_len to size_t
-  - change type of variable yyl under yy_find_action from yy_size_t to int
+  - remove trailing whitespace:              sed -i 's/\s*$//' cmListFileLexer.c
+  - remove blank lines at end of file:       sed -i '${/^$/d;}' cmListFileLexer.c
+  - #include "cmStandardLexer.h" at the top: sed -i '1i#include "cmStandardLexer.h"' cmListFileLexer.c
 
 */
 
@@ -63,6 +61,8 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 
 /*--------------------------------------------------------------------------*/
 %}
+
+%option prefix="cmListFileLexer_yy"
 
 %option reentrant
 %option yylineno
@@ -439,11 +439,15 @@ static cmListFileLexer_BOM cmListFileLexer_ReadBOM(FILE* f)
       if (fread(b, 1, 2, f) == 2 && b[0] == 0 && b[1] == 0) {
         return cmListFileLexer_BOM_UTF32LE;
       }
-      fsetpos(f, &p);
+      if (fsetpos(f, &p) != 0) {
+        return cmListFileLexer_BOM_Broken;
+      }
       return cmListFileLexer_BOM_UTF16LE;
     }
   }
-  rewind(f);
+  if (fseek(f, 0, SEEK_SET) != 0) {
+    return cmListFileLexer_BOM_Broken;
+  }
   return cmListFileLexer_BOM_None;
 }
 
