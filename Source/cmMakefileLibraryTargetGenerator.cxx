@@ -939,7 +939,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
           (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY)) {
         std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(
           cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
-        cmakeCommand += " -E __run_iwyu --lwyu=";
+        cmakeCommand += " -E __run_co_compile --lwyu=";
         cmakeCommand += targetOutPathReal;
         real_link_commands.push_back(cmakeCommand);
       }

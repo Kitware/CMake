@@ -623,7 +623,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
         (cppcheck && *cppcheck)) {
       std::string run_iwyu = this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
-      run_iwyu += " -E __run_iwyu";
+      run_iwyu += " -E __run_co_compile";
       if (iwyu && *iwyu) {
         run_iwyu += " --iwyu=";
         run_iwyu += this->GetLocalGenerator()->EscapeForShell(iwyu);

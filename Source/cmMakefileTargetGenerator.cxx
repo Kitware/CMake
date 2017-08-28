@@ -637,7 +637,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       const char* cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
       if ((iwyu && *iwyu) || (tidy && *tidy) || (cpplint && *cpplint) ||
           (cppcheck && *cppcheck)) {
-        std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_iwyu";
+        std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_co_compile";
         if (iwyu && *iwyu) {
           run_iwyu += " --iwyu=";
           run_iwyu += this->LocalGenerator->EscapeForShell(iwyu);
