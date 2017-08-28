@@ -988,8 +988,12 @@ echo '
 #include <iostream>
 #include <memory>
 
-#if __cplusplus >= 201103L && defined(__SUNPRO_CC) && __SUNPRO_CC < 0x5140
-#error "SunPro <= 5.13 C++ 11 mode not supported due to bug in move semantics."
+#if __cplusplus < 201103L
+#error "Compiler is not in a mode aware of C++11."
+#endif
+
+#if defined(__SUNPRO_CC) && __SUNPRO_CC < 0x5140
+#error "SunPro <= 5.13 mode not supported due to bug in move semantics."
 #endif
 
 class Class
