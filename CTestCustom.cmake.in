@@ -74,6 +74,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   # other warning expression:
   "[0-9,]+ warnings? generated." # Clang
   "compilation completed with warnings" # PGI
+  "[0-9]+ Warning\\(s\\) detected" # SunPro
 
 # scanbuild exceptions
   "char_traits.h:.*: warning: Null pointer argument in call to string length function"
