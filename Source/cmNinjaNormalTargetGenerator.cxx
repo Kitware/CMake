@@ -485,7 +485,16 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
       this->TargetLinkLanguage, this->GetConfigName());
     const char* linkCmd = mf->GetDefinition(linkCmdVar);
     if (linkCmd) {
-      cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
+      std::string linkCmdStr = linkCmd;
+      if (this->GetGeneratorTarget()->HasImplibGNUtoMS()) {
+        std::string ruleVar = "CMAKE_";
+        ruleVar += this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
+        ruleVar += "_GNUtoMS_RULE";
+        if (const char* rule = this->Makefile->GetDefinition(ruleVar)) {
+          linkCmdStr += rule;
+        }
+      }
+      cmSystemTools::ExpandListArgument(linkCmdStr, linkCmds);
       if (this->GetGeneratorTarget()->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
         std::string cmakeCommand =
           this->GetLocalGenerator()->ConvertToOutputFormat(
