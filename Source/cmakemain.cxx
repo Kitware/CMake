@@ -306,7 +306,7 @@ int do_cmake(int ac, char const* const* av)
     return ret;
   }
   cmake::Role const role =
-    workingMode == cmake::NORMAL_MODE ? cmake::RoleProject : cmake::RoleScript;
+    workingMode == cmake::SCRIPT_MODE ? cmake::RoleScript : cmake::RoleProject;
   cmake cm(role);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
