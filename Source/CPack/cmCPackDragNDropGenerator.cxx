@@ -9,6 +9,7 @@
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
+#include <algorithm>
 #include <iomanip>
 #include <map>
 #include <stdlib.h>
