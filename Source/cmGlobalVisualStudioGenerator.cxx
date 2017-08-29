@@ -778,6 +778,19 @@ bool cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(
   return false;
 }
 
+bool cmGlobalVisualStudioGenerator::TargetCanBeReferenced(
+  cmGeneratorTarget const* gt)
+{
+  if (this->TargetIsCSharpOnly(gt)) {
+    return true;
+  }
+  if (gt->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      gt->GetType() != cmStateEnums::EXECUTABLE) {
+    return false;
+  }
+  return true;
+}
+
 bool cmGlobalVisualStudioGenerator::TargetCompare::operator()(
   cmGeneratorTarget const* l, cmGeneratorTarget const* r) const
 {
