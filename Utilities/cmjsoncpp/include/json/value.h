@@ -42,7 +42,9 @@
 #pragma warning(disable : 4251)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
+#if !defined(__SUNPRO_CC)
 #pragma pack(push, 8)
+#endif
 
 /** \brief JSON (JavaScript Object Notation).
  */
@@ -878,7 +880,9 @@ template<>
 inline void swap(Json::Value& a, Json::Value& b) { a.swap(b); }
 }
 
+#if !defined(__SUNPRO_CC)
 #pragma pack(pop)
+#endif
 
 #if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 #pragma warning(pop)

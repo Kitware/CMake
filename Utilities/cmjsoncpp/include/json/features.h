@@ -10,7 +10,9 @@
 #include "forwards.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
+#if !defined(__SUNPRO_CC)
 #pragma pack(push, 8)
+#endif
 
 namespace Json {
 
@@ -56,6 +58,8 @@ public:
 
 } // namespace Json
 
+#if !defined(__SUNPRO_CC)
 #pragma pack(pop)
+#endif
 
 #endif // CPPTL_JSON_FEATURES_H_INCLUDED
