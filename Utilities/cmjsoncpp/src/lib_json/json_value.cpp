@@ -348,7 +348,7 @@ bool Value::CZString::isStaticString() const { return storage_.policy_ == noDupl
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-/*! \internal Default constructor initialization must be equivalent to:
+/*! internal Default constructor initialization must be equivalent to:
  * memset( this, 0, sizeof(Value) )
  * This optimization is used in ValueInternalMap fast allocator.
  */

@@ -787,7 +787,7 @@ public:
   ValueConstIterator(ValueIterator const& other);
 
 private:
-/*! \internal Use by Value to create an iterator.
+/*! internal Use by Value to create an iterator.
  */
   explicit ValueConstIterator(const Value::ObjectValues::iterator& current);
 public:
@@ -838,7 +838,7 @@ public:
   ValueIterator(const ValueIterator& other);
 
 private:
-/*! \internal Use by Value to create an iterator.
+/*! internal Use by Value to create an iterator.
  */
   explicit ValueIterator(const Value::ObjectValues::iterator& current);
 public:
