@@ -1728,6 +1728,7 @@ bool OurReader::decodeUnicodeCodePoint(Token& token,
                                     Location end,
                                     unsigned int& unicode) {
 
+  unicode = 0; // Convince scanbuild this is always initialized before use.
   if (!decodeUnicodeEscapeSequence(token, current, end, unicode))
     return false;
   if (unicode >= 0xD800 && unicode <= 0xDBFF) {
