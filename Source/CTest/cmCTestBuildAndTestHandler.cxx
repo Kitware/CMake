@@ -115,21 +115,21 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
 void CMakeMessageCallback(const char* m, const char* /*unused*/,
                           bool& /*unused*/, void* s)
 {
-  std::string* out = (std::string*)s;
+  std::string* out = reinterpret_cast<std::string*>(s);
   *out += m;
   *out += "\n";
 }
 
 void CMakeProgressCallback(const char* msg, float /*unused*/, void* s)
 {
-  std::string* out = (std::string*)s;
+  std::string* out = reinterpret_cast<std::string*>(s);
   *out += msg;
   *out += "\n";
 }
 
 void CMakeOutputCallback(const char* m, size_t len, void* s)
 {
-  std::string* out = (std::string*)s;
+  std::string* out = reinterpret_cast<std::string*>(s);
   out->append(m, len);
 }
 

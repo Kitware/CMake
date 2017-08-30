@@ -1,5 +1,6 @@
 ---
 Checks: "-*,\
+google-readability-casting,\
 misc-*,\
 -misc-incorrect-roundings,\
 -misc-macro-parentheses,\

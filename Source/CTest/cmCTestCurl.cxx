@@ -41,7 +41,7 @@ namespace {
 size_t curlWriteMemoryCallback(void* ptr, size_t size, size_t nmemb,
                                void* data)
 {
-  int realsize = (int)(size * nmemb);
+  int realsize = static_cast<int>(size * nmemb);
 
   std::vector<char>* vec = static_cast<std::vector<char>*>(data);
   const char* chPtr = static_cast<char*>(ptr);
@@ -156,8 +156,8 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
   ::curl_easy_setopt(this->Curl, CURLOPT_HTTPHEADER, headers);
   std::vector<char> responseData;
   std::vector<char> debugData;
-  ::curl_easy_setopt(this->Curl, CURLOPT_FILE, (void*)&responseData);
-  ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGDATA, (void*)&debugData);
+  ::curl_easy_setopt(this->Curl, CURLOPT_FILE, &responseData);
+  ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGDATA, &debugData);
   ::curl_easy_setopt(this->Curl, CURLOPT_FAILONERROR, 1);
   // Now run off and do what you've been told!
   ::curl_easy_perform(this->Curl);
@@ -206,8 +206,8 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
   ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGFUNCTION, curlDebugCallback);
   std::vector<char> responseData;
   std::vector<char> debugData;
-  ::curl_easy_setopt(this->Curl, CURLOPT_FILE, (void*)&responseData);
-  ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGDATA, (void*)&debugData);
+  ::curl_easy_setopt(this->Curl, CURLOPT_FILE, &responseData);
+  ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGDATA, &debugData);
   ::curl_easy_setopt(this->Curl, CURLOPT_FAILONERROR, 1);
 
   // Add headers if any were specified.

@@ -818,7 +818,7 @@ bool cmStringCommand::HandleRandomCommand(std::vector<std::string> const& args)
   const char* alphaPtr = alphabet.c_str();
   int cc;
   for (cc = 0; cc < length; cc++) {
-    int idx = (int)(sizeofAlphabet * rand() / (RAND_MAX + 1.0));
+    int idx = static_cast<int>(sizeofAlphabet * rand() / (RAND_MAX + 1.0));
     result.push_back(*(alphaPtr + idx));
   }
   result.push_back(0);

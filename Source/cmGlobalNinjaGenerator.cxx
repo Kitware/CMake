@@ -741,7 +741,7 @@ void cmGlobalNinjaGenerator::AddRule(
                                     description, comment, depfile, deptype,
                                     rspfile, rspcontent, restat, generator);
 
-  this->RuleCmdLength[name] = (int)command.size();
+  this->RuleCmdLength[name] = static_cast<int>(command.size());
 }
 
 bool cmGlobalNinjaGenerator::HasRule(const std::string& name)

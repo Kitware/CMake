@@ -107,7 +107,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
 
   if (!haveDeps) {
     // Walk the dependency graph starting with the source file.
-    int srcFiles = (int)sources.size();
+    int srcFiles = static_cast<int>(sources.size());
     this->Encountered.clear();
 
     for (std::set<std::string>::const_iterator srcIt = sources.begin();

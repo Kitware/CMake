@@ -157,7 +157,7 @@ std::string cmCTest::GetCostDataFile()
 static size_t HTTPResponseCallback(void* ptr, size_t size, size_t nmemb,
                                    void* data)
 {
-  int realsize = (int)(size * nmemb);
+  int realsize = static_cast<int>(size * nmemb);
 
   std::string* response = static_cast<std::string*>(data);
   const char* chPtr = static_cast<char*>(ptr);
@@ -206,7 +206,7 @@ int cmCTest::HTTPRequest(std::string url, HTTPMethod method,
 
   // set response options
   ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, HTTPResponseCallback);
-  ::curl_easy_setopt(curl, CURLOPT_FILE, (void*)&response);
+  ::curl_easy_setopt(curl, CURLOPT_FILE, &response);
   ::curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
 
   CURLcode res = ::curl_easy_perform(curl);
@@ -227,7 +227,7 @@ std::string cmCTest::MakeURLSafe(const std::string& str)
     if ((ch > 126 || ch < 32 || ch == '&' || ch == '%' || ch == '+' ||
          ch == '=' || ch == '@') &&
         ch != 9) {
-      sprintf(buffer, "%02x;", (unsigned int)ch);
+      sprintf(buffer, "%02x;", static_cast<unsigned int>(ch));
       ost << buffer;
     } else {
       ost << ch;
@@ -1767,7 +1767,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
 
   if (this->CheckArgument(arg, "--timeout") && i < args.size() - 1) {
     i++;
-    double timeout = (double)atof(args[i].c_str());
+    double timeout = atof(args[i].c_str());
     this->GlobalTimeout = timeout;
   }
 

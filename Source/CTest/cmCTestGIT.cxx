@@ -510,8 +510,8 @@ private:
     const char* email_last = *c ? c++ : c;
     person.EMail.assign(email_first, email_last - email_first);
 
-    person.Time = strtoul(c, (char**)&c, 10);
-    person.TimeZone = strtol(c, (char**)&c, 10);
+    person.Time = strtoul(c, const_cast<char**>(&c), 10);
+    person.TimeZone = strtol(c, const_cast<char**>(&c), 10);
   }
 
   bool ProcessLine() CM_OVERRIDE

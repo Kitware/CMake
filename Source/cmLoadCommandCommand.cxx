@@ -120,15 +120,14 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
   int argc = static_cast<int>(args.size());
   char** argv = nullptr;
   if (argc) {
-    argv = (char**)malloc(argc * sizeof(char*));
+    argv = reinterpret_cast<char**>(malloc(argc * sizeof(char*)));
   }
   int i;
   for (i = 0; i < argc; ++i) {
     argv[i] = strdup(args[i].c_str());
   }
   cmLoadedCommand::InstallSignalHandlers(info.Name);
-  int result =
-    info.InitialPass((void*)&info, (void*)this->Makefile, argc, argv);
+  int result = info.InitialPass(&info, this->Makefile, argc, argv);
   cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
   cmFreeArguments(argc, argv);
 
@@ -147,7 +146,7 @@ void cmLoadedCommand::FinalPass()
 {
   if (this->info.FinalPass) {
     cmLoadedCommand::InstallSignalHandlers(info.Name);
-    this->info.FinalPass((void*)&this->info, (void*)this->Makefile);
+    this->info.FinalPass(&this->info, this->Makefile);
     cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
   }
 }
@@ -156,7 +155,7 @@ cmLoadedCommand::~cmLoadedCommand()
 {
   if (this->info.Destructor) {
     cmLoadedCommand::InstallSignalHandlers(info.Name);
-    this->info.Destructor((void*)&this->info);
+    this->info.Destructor(&this->info);
     cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
   }
   if (this->info.Error) {
@@ -225,14 +224,13 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
 
   // find the init function
   std::string initFuncName = args[0] + "Init";
-  CM_INIT_FUNCTION initFunction =
-    (CM_INIT_FUNCTION)cmsys::DynamicLoader::GetSymbolAddress(lib,
-                                                             initFuncName);
+  CM_INIT_FUNCTION initFunction = reinterpret_cast<CM_INIT_FUNCTION>(
+    cmsys::DynamicLoader::GetSymbolAddress(lib, initFuncName));
   if (!initFunction) {
     initFuncName = "_";
     initFuncName += args[0];
     initFuncName += "Init";
-    initFunction = (CM_INIT_FUNCTION)(
+    initFunction = reinterpret_cast<CM_INIT_FUNCTION>(
       cmsys::DynamicLoader::GetSymbolAddress(lib, initFuncName));
   }
   // if the symbol is found call it to set the name on the

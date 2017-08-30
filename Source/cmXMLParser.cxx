@@ -26,7 +26,7 @@ cmXMLParser::~cmXMLParser()
 
 int cmXMLParser::Parse(const char* string)
 {
-  return (int)this->InitializeParser() &&
+  return this->InitializeParser() &&
     this->ParseChunk(string, strlen(string)) && this->CleanupParser();
 }
 

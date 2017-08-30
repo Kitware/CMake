@@ -55,7 +55,7 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
   struct tm timeStruct;
   memset(&timeStruct, 0, sizeof(timeStruct));
 
-  struct tm* ptr = (struct tm*)nullptr;
+  struct tm* ptr = nullptr;
   if (utcFlag) {
     ptr = gmtime(&timeT);
   } else {

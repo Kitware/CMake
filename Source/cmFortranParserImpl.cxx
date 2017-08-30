@@ -120,7 +120,7 @@ int cmFortranParser_Input(cmFortranParser* parser, char* buffer,
       n = 1;
       ff.LastCharWasNewline = true;
     }
-    return (int)n;
+    return static_cast<int>(n);
   }
   return 0;
 }

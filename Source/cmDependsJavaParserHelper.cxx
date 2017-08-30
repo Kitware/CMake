@@ -94,9 +94,9 @@ void cmDependsJavaParserHelper::SafePrintMissing(const char* str, int line,
     for (cc = 0; cc < strlen(str); cc++) {
       unsigned char ch = str[cc];
       if (ch >= 32 && ch <= 126) {
-        std::cout << (char)ch;
+        std::cout << static_cast<char>(ch);
       } else {
-        std::cout << "<" << (int)ch << ">";
+        std::cout << "<" << static_cast<int>(ch) << ">";
         break;
       }
     }
@@ -164,7 +164,7 @@ void cmDependsJavaParserHelper::AllocateParserType(
 {
   pt->str = nullptr;
   if (len == 0) {
-    len = (int)strlen(str);
+    len = static_cast<int>(strlen(str));
   }
   if (len == 0) {
     return;

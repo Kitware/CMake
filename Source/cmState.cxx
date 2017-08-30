@@ -224,7 +224,7 @@ void cmState::RemoveCacheEntryProperty(std::string const& key,
                                        std::string const& propertyName)
 {
   this->CacheManager->GetCacheIterator(key.c_str())
-    .SetProperty(propertyName, (void*)nullptr);
+    .SetProperty(propertyName, nullptr);
 }
 
 cmStateSnapshot cmState::Reset()

@@ -175,7 +175,7 @@ public:
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propName)
   {
-    this->GetCacheIterator(key.c_str()).SetProperty(propName, (void*)nullptr);
+    this->GetCacheIterator(key.c_str()).SetProperty(propName, nullptr);
   }
 
   void AppendCacheEntryProperty(std::string const& key,

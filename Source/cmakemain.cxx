@@ -102,7 +102,7 @@ static int do_build(int ac, char const* const* av);
 
 static cmMakefile* cmakemainGetMakefile(void* clientdata)
 {
-  cmake* cm = (cmake*)clientdata;
+  cmake* cm = reinterpret_cast<cmake*>(clientdata);
   if (cm && cm->GetDebugOutput()) {
     cmGlobalGenerator* gg = cm->GetGlobalGenerator();
     if (gg) {
@@ -303,8 +303,8 @@ int do_cmake(int ac, char const* const* av)
   cmake cm(role);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
-  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, (void*)&cm);
-  cm.SetProgressCallback(cmakemainProgressCallback, (void*)&cm);
+  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
+  cm.SetProgressCallback(cmakemainProgressCallback, &cm);
   cm.SetWorkingMode(workingMode);
 
   int res = cm.Run(args, view_only);
@@ -419,8 +419,8 @@ static int do_build(int ac, char const* const* av)
   }
 
   cmake cm(cmake::RoleInternal);
-  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, (void*)&cm);
-  cm.SetProgressCallback(cmakemainProgressCallback, (void*)&cm);
+  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
+  cm.SetProgressCallback(cmakemainProgressCallback, &cm);
   return cm.Build(dir, target, config, nativeOptions, clean);
 #endif
 }

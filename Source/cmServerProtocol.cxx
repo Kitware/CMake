@@ -742,7 +742,7 @@ static Json::Value DumpBacktrace(const cmListFileBacktrace& backtrace)
     Json::Value entry = Json::objectValue;
     entry[kPATH_KEY] = backtraceCopy.Top().FilePath;
     if (backtraceCopy.Top().Line) {
-      entry[kLINE_NUMBER_KEY] = (int)backtraceCopy.Top().Line;
+      entry[kLINE_NUMBER_KEY] = static_cast<int>(backtraceCopy.Top().Line);
     }
     if (!backtraceCopy.Top().Name.empty()) {
       entry[kNAME_KEY] = backtraceCopy.Top().Name;

@@ -100,7 +100,7 @@ private:
 static size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
                                                       size_t nmemb, void* data)
 {
-  int realsize = (int)(size * nmemb);
+  int realsize = static_cast<int>(size * nmemb);
 
   cmCTestSubmitHandlerVectorOfChar* vec =
     static_cast<cmCTestSubmitHandlerVectorOfChar*>(data);
@@ -239,8 +239,8 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
       /* we pass our 'chunk' struct to the callback function */
       cmCTestSubmitHandlerVectorOfChar chunk;
       cmCTestSubmitHandlerVectorOfChar chunkDebug;
-      ::curl_easy_setopt(curl, CURLOPT_FILE, (void*)&chunk);
-      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void*)&chunkDebug);
+      ::curl_easy_setopt(curl, CURLOPT_FILE, &chunk);
+      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
 
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
@@ -413,7 +413,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
           case ' ':
           case '=':
           case '%':
-            sprintf(hexCh, "%%%02X", (int)c);
+            sprintf(hexCh, "%%%02X", static_cast<int>(c));
             ofile.append(hexCh);
             break;
           default:
@@ -471,8 +471,8 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       /* we pass our 'chunk' struct to the callback function */
       cmCTestSubmitHandlerVectorOfChar chunk;
       cmCTestSubmitHandlerVectorOfChar chunkDebug;
-      ::curl_easy_setopt(curl, CURLOPT_FILE, (void*)&chunk);
-      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void*)&chunkDebug);
+      ::curl_easy_setopt(curl, CURLOPT_FILE, &chunk);
+      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
 
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
@@ -667,8 +667,8 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<std::string>& files,
       /* we pass our 'chunk' struct to the callback function */
       cmCTestSubmitHandlerVectorOfChar chunk;
       cmCTestSubmitHandlerVectorOfChar chunkDebug;
-      ::curl_easy_setopt(curl, CURLOPT_FILE, (void*)&chunk);
-      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void*)&chunkDebug);
+      ::curl_easy_setopt(curl, CURLOPT_FILE, &chunk);
+      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
 
       std::string rfile = remoteprefix + cmSystemTools::GetFilenameName(*file);
       std::string ofile;
@@ -686,7 +686,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<std::string>& files,
           case ' ':
           case '=':
           case '%':
-            sprintf(hexCh, "%%%02X", (int)c);
+            sprintf(hexCh, "%%%02X", static_cast<int>(c));
             ofile.append(hexCh);
             break;
           default:
@@ -948,8 +948,9 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
 
     char remoteCommand[] = "Submit.put";
     char* pRealURL = const_cast<char*>(realURL.c_str());
-    result = xmlrpc_client_call(&env, pRealURL, remoteCommand, "(6)",
-                                fileBuffer, (xmlrpc_int32)fileSize);
+    result =
+      xmlrpc_client_call(&env, pRealURL, remoteCommand, "(6)", fileBuffer,
+                         static_cast<xmlrpc_int32>(fileSize));
 
     delete[] fileBuffer;
 
@@ -1082,8 +1083,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
       << "site=" << curl.Escape(this->CTest->GetCTestConfiguration("Site"))
       << "&"
       << "track=" << curl.Escape(this->CTest->GetTestModelString()) << "&"
-      << "starttime=" << (int)cmSystemTools::GetTime() << "&"
-      << "endtime=" << (int)cmSystemTools::GetTime() << "&"
+      << "starttime=" << static_cast<int>(cmSystemTools::GetTime()) << "&"
+      << "endtime=" << static_cast<int>(cmSystemTools::GetTime()) << "&"
       << "datafilesmd5[0]=" << md5sum << "&"
       << "type=" << curl.Escape(typeString);
   std::string fields = str.str();
