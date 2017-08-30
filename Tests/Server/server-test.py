@@ -111,4 +111,5 @@ for obj in testData:
     print("Completed")
 
 cmakelib.exitProc(proc)
+print('cmake-server exited: %d' % proc.returncode)
 sys.exit(proc.returncode)

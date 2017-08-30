@@ -16,7 +16,7 @@ macro(do_test bsname file)
     )
 
   if (NOT test_result EQUAL 0)
-    message(SEND_ERROR "TEST FAILED")
+    message(SEND_ERROR "TEST FAILED: ${test_result}")
   endif()
 endmacro()
 
