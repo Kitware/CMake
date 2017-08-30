@@ -1,15 +1,19 @@
 CMAKE_FIND_NO_INSTALL_PREFIX
 ----------------------------
 
-Ignore the :variable:`CMAKE_INSTALL_PREFIX` when searching for assets.
+Exclude the values of the :variable:`CMAKE_INSTALL_PREFIX` and
+:variable:`CMAKE_STAGING_PREFIX` variables from
+:variable:`CMAKE_SYSTEM_PREFIX_PATH`.  CMake adds these project-destination
+prefixes to :variable:`CMAKE_SYSTEM_PREFIX_PATH` by default in order to
+support building a series of dependent packages and installing them into
+a common prefix.  Set ``CMAKE_FIND_NO_INSTALL_PREFIX`` to ``TRUE``
+to suppress this behavior.
 
-CMake adds the :variable:`CMAKE_INSTALL_PREFIX` and the
-:variable:`CMAKE_STAGING_PREFIX` variable to the
-:variable:`CMAKE_SYSTEM_PREFIX_PATH` by default. This variable may be set
-on the command line to control that behavior.
+The :variable:`CMAKE_SYSTEM_PREFIX_PATH` is initialized on the first call to a
+:command:`project` or :command:`enable_language` command.  Therefore one must
+set ``CMAKE_FIND_NO_INSTALL_PREFIX`` before this in order to take effect.  A
+user may set the variable as a cache entry on the command line to achieve this.
 
-Set ``CMAKE_FIND_NO_INSTALL_PREFIX`` to ``TRUE`` to tell
-:command:`find_package` not to search in the :variable:`CMAKE_INSTALL_PREFIX`
-or :variable:`CMAKE_STAGING_PREFIX` by default.  Note that the
-prefix may still be searched for other reasons, such as being the same prefix
-as the CMake installation, or for being a built-in system prefix.
+Note that the prefix(es) may still be searched for other reasons, such as being
+the same prefix as the CMake installation, or for being a built-in system
+prefix.
