@@ -633,7 +633,10 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       const char* tidy = this->GeneratorTarget->GetProperty(tidy_prop);
       std::string const cpplint_prop = lang + "_CPPLINT";
       const char* cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
-      if ((iwyu && *iwyu) || (tidy && *tidy) || (cpplint && *cpplint)) {
+      std::string const cppcheck_prop = lang + "_CPPCHECK";
+      const char* cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
+      if ((iwyu && *iwyu) || (tidy && *tidy) || (cpplint && *cpplint) ||
+          (cppcheck && *cppcheck)) {
         std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_iwyu";
         if (iwyu && *iwyu) {
           run_iwyu += " --iwyu=";
@@ -647,7 +650,12 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
           run_iwyu += " --cpplint=";
           run_iwyu += this->LocalGenerator->EscapeForShell(cpplint);
         }
-        if ((tidy && *tidy) || (cpplint && *cpplint)) {
+        if (cppcheck && *cppcheck) {
+          run_iwyu += " --cppcheck=";
+          run_iwyu += this->LocalGenerator->EscapeForShell(cppcheck);
+        }
+        if ((tidy && *tidy) || (cpplint && *cpplint) ||
+            (cppcheck && *cppcheck)) {
           run_iwyu += " --source=";
           run_iwyu += sourceFile;
         }

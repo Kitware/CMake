@@ -262,6 +262,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("C_CLANG_TIDY", nullptr);
     this->SetPropertyDefault("C_COMPILER_LAUNCHER", nullptr);
     this->SetPropertyDefault("C_CPPLINT", nullptr);
+    this->SetPropertyDefault("C_CPPCHECK", nullptr);
     this->SetPropertyDefault("C_INCLUDE_WHAT_YOU_USE", nullptr);
     this->SetPropertyDefault("LINK_WHAT_YOU_USE", nullptr);
     this->SetPropertyDefault("C_STANDARD", nullptr);
@@ -270,6 +271,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("CXX_CLANG_TIDY", nullptr);
     this->SetPropertyDefault("CXX_COMPILER_LAUNCHER", nullptr);
     this->SetPropertyDefault("CXX_CPPLINT", nullptr);
+    this->SetPropertyDefault("CXX_CPPCHECK", nullptr);
     this->SetPropertyDefault("CXX_INCLUDE_WHAT_YOU_USE", nullptr);
     this->SetPropertyDefault("CXX_STANDARD", nullptr);
     this->SetPropertyDefault("CXX_STANDARD_REQUIRED", nullptr);

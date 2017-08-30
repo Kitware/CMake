@@ -617,7 +617,10 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     const char* tidy = this->GeneratorTarget->GetProperty(tidy_prop);
     std::string const cpplint_prop = lang + "_CPPLINT";
     const char* cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
-    if ((iwyu && *iwyu) || (tidy && *tidy) || (cpplint && *cpplint)) {
+    std::string const cppcheck_prop = lang + "_CPPCHECK";
+    const char* cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
+    if ((iwyu && *iwyu) || (tidy && *tidy) || (cpplint && *cpplint) ||
+        (cppcheck && *cppcheck)) {
       std::string run_iwyu = this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
       run_iwyu += " -E __run_iwyu";
@@ -633,7 +636,12 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
         run_iwyu += " --cpplint=";
         run_iwyu += this->GetLocalGenerator()->EscapeForShell(cpplint);
       }
-      if ((tidy && *tidy) || (cpplint && *cpplint)) {
+      if (cppcheck && *cppcheck) {
+        run_iwyu += " --cppcheck=";
+        run_iwyu += this->GetLocalGenerator()->EscapeForShell(cppcheck);
+      }
+      if ((tidy && *tidy) || (cpplint && *cpplint) ||
+          (cppcheck && *cppcheck)) {
         run_iwyu += " --source=$in";
       }
       run_iwyu += " -- ";

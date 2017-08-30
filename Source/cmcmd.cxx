@@ -297,6 +297,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string sourceFile;
       std::string lwyu;
       std::string cpplint;
+      std::string cppcheck;
       for (std::string::size_type cc = 2; cc < args.size(); cc++) {
         std::string const& arg = args[cc];
         if (arg == "--") {
@@ -311,6 +312,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           lwyu = arg.substr(7);
         } else if (doing_options && cmHasLiteralPrefix(arg, "--cpplint=")) {
           cpplint = arg.substr(10);
+        } else if (doing_options && cmHasLiteralPrefix(arg, "--cppcheck=")) {
+          cppcheck = arg.substr(11);
         } else if (doing_options) {
           std::cerr << "__run_iwyu given unknown argument: " << arg << "\n";
           return 1;
@@ -318,14 +321,16 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           orig_cmd.push_back(arg);
         }
       }
-      if (tidy.empty() && iwyu.empty() && lwyu.empty() && cpplint.empty()) {
-        std::cerr << "__run_iwyu missing --cpplint=, --iwyu=, --lwyu=, and/or"
-                     " --tidy=\n";
+      if (tidy.empty() && iwyu.empty() && lwyu.empty() && cpplint.empty() &&
+          cppcheck.empty()) {
+        std::cerr << "__run_iwyu missing --cpplint=, --iwyu=, --lwyu=, "
+                     "--cppcheck= and/or --tidy=\n";
         return 1;
       }
-      if ((!cpplint.empty() || !tidy.empty()) && sourceFile.empty()) {
-        std::cerr << "__run_iwyu --cpplint= and/or __run_iwyu --tidy="
-                     " require --source=\n";
+      if ((!cpplint.empty() || !tidy.empty() || !cppcheck.empty()) &&
+          sourceFile.empty()) {
+        std::cerr << "__run_iwyu --cpplint=, __run_iwyu --tidy="
+                     ", __run_iwyu --cppcheck require --source=\n";
         return 1;
       }
       if (orig_cmd.empty() && lwyu.empty()) {
@@ -445,8 +450,56 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       }
 
+      if (!cppcheck.empty()) {
+        // Construct the cpplint command line.
+        std::vector<std::string> cppcheck_cmd;
+        cmSystemTools::ExpandListArgument(cppcheck, cppcheck_cmd, true);
+        // extract all the -D, -U, and -I options from the compile line
+        for (size_t i = 0; i < orig_cmd.size(); i++) {
+          std::string& opt = orig_cmd[i];
+          if (opt.size() > 2) {
+            if ((opt[0] == '-') &&
+                ((opt[1] == 'D') || (opt[1] == 'I') || (opt[1] == 'U'))) {
+              cppcheck_cmd.push_back(opt);
+#if defined(_WIN32)
+            } else if ((opt[0] == '/') &&
+                       ((opt[1] == 'D') || (opt[1] == 'I') ||
+                        (opt[1] == 'U'))) {
+              std::string optcopy = opt;
+              optcopy[0] = '-';
+              cppcheck_cmd.push_back(optcopy);
+#endif
+            }
+          }
+        }
+        // add the source file
+        cppcheck_cmd.push_back(sourceFile);
+
+        // Run the cpplint command line.  Capture its output.
+        std::string stdOut;
+        if (!cmSystemTools::RunSingleCommand(cppcheck_cmd, &stdOut, &stdOut,
+                                             &ret, nullptr,
+                                             cmSystemTools::OUTPUT_NONE)) {
+          std::cerr << "Error running '" << cppcheck_cmd[0] << "': " << stdOut
+                    << "\n";
+          return 1;
+        }
+        // Output the output from cpplint to stderr
+        if (stdOut.find("(error)") != std::string::npos ||
+            stdOut.find("(warning)") != std::string::npos ||
+            stdOut.find("(style)") != std::string::npos ||
+            stdOut.find("(performance)") != std::string::npos ||
+            stdOut.find("(portability)") != std::string::npos ||
+            stdOut.find("(information)") != std::string::npos) {
+          std::cerr << "Warning: cppcheck reported diagnostics:\n";
+        }
+        std::cerr << stdOut;
+      }
+      // ignore the cppcheck error code because it is likely to have them
+      // from bad -D stuff
       ret = 0;
-      // Now run the real compiler command and return its result value.
+      // Now run the real compiler command and return its result value
+      // unless we are lwyu
       if (lwyu.empty() &&
           !cmSystemTools::RunSingleCommand(
             orig_cmd, nullptr, nullptr, &ret, nullptr,
