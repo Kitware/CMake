@@ -34,6 +34,16 @@ public:
   ///
   static std::string Quoted(const std::string& text);
 
+  /// @brief Merges newOpts into baseOpts
+  static void UicMergeOptions(std::vector<std::string>& baseOpts,
+                              const std::vector<std::string>& newOpts,
+                              bool isQt5);
+
+  /// @brief Merges newOpts into baseOpts
+  static void RccMergeOptions(std::vector<std::string>& baseOpts,
+                              const std::vector<std::string>& newOpts,
+                              bool isQt5);
+
   /// @brief Reads the resource files list from from a .qrc file
   /// @arg fileName Must be the absolute path of the .qrc file
   /// @return True if the rcc file was successfully parsed

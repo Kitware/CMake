@@ -7,10 +7,8 @@
 #include "cmsys/Terminal.h"
 #include <algorithm>
 #include <array>
-#include <assert.h>
 #include <list>
 #include <sstream>
-#include <stdlib.h>
 #include <string.h>
 #include <utility>
 
@@ -199,40 +197,6 @@ static std::string JoinOptionsMap(
     result += item.second;
   }
   return result;
-}
-
-static void UicMergeOptions(std::vector<std::string>& opts,
-                            const std::vector<std::string>& fileOpts,
-                            bool isQt5)
-{
-  static const char* valueOptions[] = { "tr",      "translate",
-                                        "postfix", "generator",
-                                        "include", // Since Qt 5.3
-                                        "g" };
-  std::vector<std::string> extraOpts;
-  for (std::vector<std::string>::const_iterator it = fileOpts.begin();
-       it != fileOpts.end(); ++it) {
-    std::vector<std::string>::iterator existingIt =
-      std::find(opts.begin(), opts.end(), *it);
-    if (existingIt != opts.end()) {
-      const char* o = it->c_str();
-      if (*o == '-') {
-        ++o;
-      }
-      if (isQt5 && *o == '-') {
-        ++o;
-      }
-      if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
-                       cmStrCmp(*it)) != cmArrayEnd(valueOptions)) {
-        assert(existingIt + 1 != opts.end());
-        *(existingIt + 1) = *(it + 1);
-        ++it;
-      }
-    } else {
-      extraOpts.push_back(*it);
-    }
-  }
-  opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
 }
 
 // -- Class methods
@@ -1580,7 +1544,8 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
         if (optionIt != this->UicOptions.end()) {
           std::vector<std::string> fileOpts;
           cmSystemTools::ExpandListArgument(optionIt->second, fileOpts);
-          UicMergeOptions(allOpts, fileOpts, (this->QtMajorVersion == "5"));
+          cmQtAutoGen::UicMergeOptions(allOpts, fileOpts,
+                                       (this->QtMajorVersion == "5"));
         }
         cmd.insert(cmd.end(), allOpts.begin(), allOpts.end());
       }

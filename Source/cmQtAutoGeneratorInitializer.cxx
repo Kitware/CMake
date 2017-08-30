@@ -562,46 +562,6 @@ static std::string RccGetExecutable(cmGeneratorTarget const* target,
   return rccExec;
 }
 
-static void RccMergeOptions(std::vector<std::string>& opts,
-                            const std::vector<std::string>& fileOpts,
-                            bool isQt5)
-{
-  typedef std::vector<std::string>::iterator Iter;
-  typedef std::vector<std::string>::const_iterator CIter;
-  static const char* valueOptions[4] = { "name", "root", "compress",
-                                         "threshold" };
-
-  std::vector<std::string> extraOpts;
-  for (CIter fit = fileOpts.begin(), fitEnd = fileOpts.end(); fit != fitEnd;
-       ++fit) {
-    Iter existIt = std::find(opts.begin(), opts.end(), *fit);
-    if (existIt != opts.end()) {
-      const char* optName = fit->c_str();
-      if (*optName == '-') {
-        ++optName;
-        if (isQt5 && *optName == '-') {
-          ++optName;
-        }
-      }
-      // Test if this is a value option and change the existing value
-      if ((optName != fit->c_str()) &&
-          std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
-                       cmStrCmp(optName)) != cmArrayEnd(valueOptions)) {
-        const Iter existItNext(existIt + 1);
-        const CIter fitNext(fit + 1);
-        if ((existItNext != opts.end()) && (fitNext != fitEnd)) {
-          *existItNext = *fitNext;
-          ++fit;
-        }
-      }
-    } else {
-      extraOpts.push_back(*fit);
-    }
-  }
-  // Append options
-  opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
-}
-
 static void SetupAutoTargetRcc(const cmQtAutoGenDigest& digest)
 {
   cmGeneratorTarget const* target = digest.Target;
@@ -871,7 +831,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
       {
         std::vector<std::string> opts = optionsTarget;
         if (!qrcDigest.Options.empty()) {
-          RccMergeOptions(opts, qrcDigest.Options, QtV5);
+          cmQtAutoGen::RccMergeOptions(opts, qrcDigest.Options, QtV5);
         }
         qrcDigest.Options = std::move(opts);
       }

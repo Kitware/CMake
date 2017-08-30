@@ -7,6 +7,7 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#include <algorithm>
 #include <sstream>
 #include <stddef.h>
 
@@ -18,6 +19,60 @@ const std::string genNameUic = "AutoUic";
 const std::string genNameRcc = "AutoRcc";
 
 // - Static functions
+
+/// @brief Merges newOpts into baseOpts
+/// @arg valueOpts list of options that accept a value
+void MergeOptions(std::vector<std::string>& baseOpts,
+                  const std::vector<std::string>& newOpts,
+                  const std::vector<std::string>& valueOpts, bool isQt5)
+{
+  typedef std::vector<std::string>::iterator Iter;
+  typedef std::vector<std::string>::const_iterator CIter;
+  if (newOpts.empty()) {
+    return;
+  }
+  if (baseOpts.empty()) {
+    baseOpts = newOpts;
+    return;
+  }
+
+  std::vector<std::string> extraOpts;
+  for (CIter fit = newOpts.begin(), fitEnd = newOpts.end(); fit != fitEnd;
+       ++fit) {
+    const std::string& newOpt = *fit;
+    Iter existIt = std::find(baseOpts.begin(), baseOpts.end(), newOpt);
+    if (existIt != baseOpts.end()) {
+      if (newOpt.size() >= 2) {
+        // Acquire the option name
+        std::string optName;
+        {
+          auto oit = newOpt.begin();
+          if (*oit == '-') {
+            ++oit;
+            if (isQt5 && (*oit == '-')) {
+              ++oit;
+            }
+            optName.assign(oit, newOpt.end());
+          }
+        }
+        // Test if this is a value option and change the existing value
+        if (!optName.empty() && (std::find(valueOpts.begin(), valueOpts.end(),
+                                           optName) != valueOpts.end())) {
+          const Iter existItNext(existIt + 1);
+          const CIter fitNext(fit + 1);
+          if ((existItNext != baseOpts.end()) && (fitNext != fitEnd)) {
+            *existItNext = *fitNext;
+            ++fit;
+          }
+        }
+      }
+    } else {
+      extraOpts.push_back(newOpt);
+    }
+  }
+  // Append options
+  baseOpts.insert(baseOpts.end(), extraOpts.begin(), extraOpts.end());
+}
 
 static std::string utilStripCR(std::string const& line)
 {
@@ -216,6 +271,28 @@ std::string cmQtAutoGen::Quoted(const std::string& text)
   res = '"' + res;
   res += '"';
   return res;
+}
+
+void cmQtAutoGen::UicMergeOptions(std::vector<std::string>& baseOpts,
+                                  const std::vector<std::string>& newOpts,
+                                  bool isQt5)
+{
+  static const std::vector<std::string> valueOpts = {
+    "tr",      "translate", "postfix", "generator",
+    "include", // Since Qt 5.3
+    "g"
+  };
+  MergeOptions(baseOpts, newOpts, valueOpts, isQt5);
+}
+
+void cmQtAutoGen::RccMergeOptions(std::vector<std::string>& baseOpts,
+                                  const std::vector<std::string>& newOpts,
+                                  bool isQt5)
+{
+  static const std::vector<std::string> valueOpts = { "name", "root",
+                                                      "compress",
+                                                      "threshold" };
+  MergeOptions(baseOpts, newOpts, valueOpts, isQt5);
 }
 
 bool cmQtAutoGen::RccListInputs(const std::string& qtMajorVersion,
