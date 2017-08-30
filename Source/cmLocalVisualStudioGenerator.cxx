@@ -191,12 +191,16 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
 
   // Write each command on a single line.
   for (unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c) {
+    // Add this command line.
+    std::string cmd = ccg.GetCommand(c);
+
+    if (cmd.empty()) {
+      continue;
+    }
+
     // Start a new line.
     script += newline;
     newline = newline_text;
-
-    // Add this command line.
-    std::string cmd = ccg.GetCommand(c);
 
     // Use "call " before any invocations of .bat or .cmd files
     // invoked as custom commands.
