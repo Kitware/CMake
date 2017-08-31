@@ -70,7 +70,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
   // options, single values and multi values
   typedef std::map<std::string, bool> options_map;
   typedef std::map<std::string, std::string> single_map;
-  typedef std::map<std::string, std::vector<std::string> > multi_map;
+  typedef std::map<std::string, std::vector<std::string>> multi_map;
   options_map options;
   single_map single;
   multi_map multi;

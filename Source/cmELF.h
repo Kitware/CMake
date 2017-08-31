@@ -64,7 +64,7 @@ public:
   };
 
   /** Represent entire dynamic section header */
-  typedef std::vector<std::pair<long, unsigned long> > DynamicEntryList;
+  typedef std::vector<std::pair<long, unsigned long>> DynamicEntryList;
 
   /** Get the type of the file opened.  */
   FileType GetFileType() const;

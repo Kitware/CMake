@@ -714,7 +714,7 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
   const char* sigString =
     (sig == cmTarget::KeywordTLLSignature ? "keyword" : "plain");
   s << "The uses of the " << sigString << " signature are here:\n";
-  typedef std::vector<std::pair<TLLSignature, cmListFileContext> > Container;
+  typedef std::vector<std::pair<TLLSignature, cmListFileContext>> Container;
   cmOutputConverter converter(this->GetMakefile()->GetStateSnapshot());
   for (Container::const_iterator it = this->TLLCommands.begin();
        it != this->TLLCommands.end(); ++it) {

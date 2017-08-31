@@ -42,7 +42,7 @@ bool cmDepends::Write(std::ostream& makeDepends, std::ostream& internalDepends)
   std::vector<std::string> pairs;
   cmSystemTools::ExpandListArgument(srcStr, pairs);
 
-  std::map<std::string, std::set<std::string> > dependencies;
+  std::map<std::string, std::set<std::string>> dependencies;
   for (std::vector<std::string>::iterator si = pairs.begin();
        si != pairs.end();) {
     // Get the source and object file.
@@ -53,7 +53,7 @@ bool cmDepends::Write(std::ostream& makeDepends, std::ostream& internalDepends)
     std::string const& obj = *si++;
     dependencies[obj].insert(src);
   }
-  for (std::map<std::string, std::set<std::string> >::const_iterator it =
+  for (std::map<std::string, std::set<std::string>>::const_iterator it =
          dependencies.begin();
        it != dependencies.end(); ++it) {
 

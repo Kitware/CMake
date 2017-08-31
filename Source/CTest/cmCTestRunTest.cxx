@@ -64,8 +64,8 @@ bool cmCTestRunTest::CheckOutput()
 
       // Check for TIMEOUT_AFTER_MATCH property.
       if (!this->TestProperties->TimeoutRegularExpressions.empty()) {
-        std::vector<
-          std::pair<cmsys::RegularExpression, std::string> >::iterator regIt;
+        std::vector<std::pair<cmsys::RegularExpression, std::string>>::iterator
+          regIt;
         for (regIt = this->TestProperties->TimeoutRegularExpressions.begin();
              regIt != this->TestProperties->TimeoutRegularExpressions.end();
              ++regIt) {
@@ -163,7 +163,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   int res =
     started ? this->TestProcess->GetProcessStatus() : cmsysProcess_State_Error;
   int retVal = this->TestProcess->GetExitValue();
-  std::vector<std::pair<cmsys::RegularExpression, std::string> >::iterator
+  std::vector<std::pair<cmsys::RegularExpression, std::string>>::iterator
     passIt;
   bool forceFail = false;
   bool skipped = false;

@@ -71,7 +71,7 @@ struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
   }
 
   void SetParameters(
-    std::vector<std::vector<cmGeneratorExpressionEvaluator*> > const&
+    std::vector<std::vector<cmGeneratorExpressionEvaluator*>> const&
       parameters)
   {
     this->ParamChildren = parameters;
@@ -100,12 +100,12 @@ private:
     const cmGeneratorExpressionNode* node, const std::string& identifier,
     cmGeneratorExpressionContext* context,
     cmGeneratorExpressionDAGChecker* dagChecker,
-    std::vector<std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator
+    std::vector<std::vector<cmGeneratorExpressionEvaluator*>>::const_iterator
       pit) const;
 
 private:
   std::vector<cmGeneratorExpressionEvaluator*> IdentifierChildren;
-  std::vector<std::vector<cmGeneratorExpressionEvaluator*> > ParamChildren;
+  std::vector<std::vector<cmGeneratorExpressionEvaluator*>> ParamChildren;
   const char* StartContent;
   size_t ContentLength;
 };

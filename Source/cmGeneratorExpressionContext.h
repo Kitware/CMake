@@ -26,7 +26,7 @@ struct cmGeneratorExpressionContext
   std::set<cmGeneratorTarget const*> AllTargets;
   std::set<std::string> SeenTargetProperties;
   std::set<cmGeneratorTarget const*> SourceSensitiveTargets;
-  std::map<cmGeneratorTarget const*, std::map<std::string, std::string> >
+  std::map<cmGeneratorTarget const*, std::map<std::string, std::string>>
     MaxLanguageStandard;
   cmLocalGenerator* LG;
   std::string Config;

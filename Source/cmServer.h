@@ -62,7 +62,7 @@ public:
   void OnDisconnect(cmConnection* pConnection);
 
 protected:
-  std::vector<std::unique_ptr<cmConnection> > Connections;
+  std::vector<std::unique_ptr<cmConnection>> Connections;
 
   bool ServeThreadRunning = false;
   uv_thread_t ServeThread;

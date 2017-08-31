@@ -642,7 +642,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
         this->WriteDotNetReference(*ri, "");
       }
     }
-    for (std::vector<std::pair<std::string, std::string> >::const_iterator i =
+    for (std::vector<std::pair<std::string, std::string>>::const_iterator i =
            hintReferences.begin();
          i != hintReferences.end(); ++i) {
       this->WriteDotNetReference(i->first, i->second);

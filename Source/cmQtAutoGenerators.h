@@ -62,7 +62,7 @@ private:
                    std::string* macroName = nullptr);
   void MocFindDepends(
     const std::string& absFilename, const std::string& contentText,
-    std::map<std::string, std::set<std::string> >& mocDepends);
+    std::map<std::string, std::set<std::string>>& mocDepends);
 
   bool MocSkip(const std::string& absFilename) const;
   bool UicSkip(const std::string& absFilename) const;
@@ -70,8 +70,8 @@ private:
   bool ParseSourceFile(
     const std::string& absFilename,
     std::map<std::string, std::string>& mocsIncluded,
-    std::map<std::string, std::set<std::string> >& mocDepends,
-    std::map<std::string, std::vector<std::string> >& includedUis,
+    std::map<std::string, std::set<std::string>>& mocDepends,
+    std::map<std::string, std::vector<std::string>>& includedUis,
     bool relaxed);
 
   void SearchHeadersForSourceFile(const std::string& absFilename,
@@ -83,31 +83,31 @@ private:
     const std::set<std::string>& uicHeaderFiles,
     const std::map<std::string, std::string>& mocsIncluded,
     std::map<std::string, std::string>& mocsNotIncluded,
-    std::map<std::string, std::set<std::string> >& mocDepends,
-    std::map<std::string, std::vector<std::string> >& includedUis);
+    std::map<std::string, std::set<std::string>>& mocDepends,
+    std::map<std::string, std::vector<std::string>>& includedUis);
 
   void UicParseContent(
     const std::string& fileName, const std::string& contentText,
-    std::map<std::string, std::vector<std::string> >& includedUis);
+    std::map<std::string, std::vector<std::string>>& includedUis);
 
   bool MocParseSourceContent(
     const std::string& absFilename, const std::string& contentText,
     std::map<std::string, std::string>& mocsIncluded,
-    std::map<std::string, std::set<std::string> >& mocDepends, bool relaxed);
+    std::map<std::string, std::set<std::string>>& mocDepends, bool relaxed);
 
   void MocParseHeaderContent(
     const std::string& absFilename, const std::string& contentText,
     std::map<std::string, std::string>& mocsNotIncluded,
-    std::map<std::string, std::set<std::string> >& mocDepends);
+    std::map<std::string, std::set<std::string>>& mocDepends);
 
   // -- Moc file generation
   bool MocGenerateAll(
     const std::map<std::string, std::string>& mocsIncluded,
     const std::map<std::string, std::string>& mocsNotIncluded,
-    const std::map<std::string, std::set<std::string> >& mocDepends);
+    const std::map<std::string, std::set<std::string>>& mocDepends);
   bool MocGenerateFile(
     const std::string& sourceFile, const std::string& mocFileName,
-    const std::map<std::string, std::set<std::string> >& mocDepends,
+    const std::map<std::string, std::set<std::string>>& mocDepends,
     bool included);
 
   // -- Uic file generation
@@ -115,7 +115,7 @@ private:
                            const std::string& searchPath,
                            const std::string& searchFile);
   bool UicGenerateAll(
-    const std::map<std::string, std::vector<std::string> >& includedUis);
+    const std::map<std::string, std::vector<std::string>>& includedUis);
   bool UicGenerateFile(const std::string& realName,
                        const std::string& uiInputFile,
                        const std::string& uiOutputFile);
@@ -216,7 +216,7 @@ private:
   bool RccRunFailed;
   std::vector<std::string> RccSources;
   std::map<std::string, std::string> RccOptions;
-  std::map<std::string, std::vector<std::string> > RccInputs;
+  std::map<std::string, std::vector<std::string>> RccInputs;
 };
 
 #endif

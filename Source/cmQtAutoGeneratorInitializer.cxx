@@ -858,7 +858,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 
   // Extract relevant source files
   std::vector<std::string> generatedSources;
-  std::vector<std::pair<std::string, bool> > qrcSources;
+  std::vector<std::pair<std::string, bool>> qrcSources;
   {
     const std::string qrcExt = "qrc";
     std::vector<cmSourceFile*> srcFiles;
@@ -914,7 +914,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     const std::string qtMajorVersion = GetQtMajorVersion(target);
     const std::string rccCommand = RccGetExecutable(target, qtMajorVersion);
     const cmFilePathChecksum fpathCheckSum(makefile);
-    for (std::vector<std::pair<std::string, bool> >::const_iterator it =
+    for (std::vector<std::pair<std::string, bool>>::const_iterator it =
            qrcSources.begin();
          it != qrcSources.end(); ++it) {
       const std::string& absFile = it->first;

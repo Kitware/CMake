@@ -5,5 +5,4 @@ AlignOperands: false
 AlwaysBreakAfterReturnType: None
 AlwaysBreakAfterDefinitionReturnType: None
 ColumnLimit: 79
-Standard: Cpp03
 ...

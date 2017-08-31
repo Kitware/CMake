@@ -58,7 +58,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
   const char* no_working_dir = 0;
   std::vector<std::string> no_depends;
   cmCustomCommandLines no_commands;
-  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*>>::iterator it;
   for (it = this->ProjectMap.begin(); it != this->ProjectMap.end(); ++it) {
     std::vector<cmLocalGenerator*>& gen = it->second;
     // add the ALL_BUILD to the first local generator of each project
@@ -295,7 +295,7 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
   if (!this->cmGlobalGenerator::ComputeTargetDepends()) {
     return false;
   }
-  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*>>::iterator it;
   for (it = this->ProjectMap.begin(); it != this->ProjectMap.end(); ++it) {
     std::vector<cmLocalGenerator*>& gen = it->second;
     for (std::vector<cmLocalGenerator*>::iterator i = gen.begin();

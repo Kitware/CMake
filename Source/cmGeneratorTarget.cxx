@@ -749,7 +749,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
     config_upper = cmSystemTools::UpperCase(config);
   }
 
-  typedef std::map<std::string, std::vector<std::string> > IncludeCacheType;
+  typedef std::map<std::string, std::vector<std::string>> IncludeCacheType;
   IncludeCacheType::const_iterator iter =
     this->SystemIncludesCache.find(config_upper);
 

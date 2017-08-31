@@ -316,7 +316,7 @@ public:
   TargetDependSet const& GetTargetDirectDepends(
     const cmGeneratorTarget* target);
 
-  const std::map<std::string, std::vector<cmLocalGenerator*> >& GetProjectMap()
+  const std::map<std::string, std::vector<cmLocalGenerator*>>& GetProjectMap()
     const
   {
     return this->ProjectMap;
@@ -468,7 +468,7 @@ protected:
   std::vector<cmLocalGenerator*> LocalGenerators;
   cmMakefile* CurrentConfigureMakefile;
   // map from project name to vector of local generators in that project
-  std::map<std::string, std::vector<cmLocalGenerator*> > ProjectMap;
+  std::map<std::string, std::vector<cmLocalGenerator*>> ProjectMap;
 
   // Set of named installation components requested by the project.
   std::set<std::string> InstallComponents;
@@ -580,7 +580,7 @@ private:
   // track targets to issue CMP0068 warning for.
   std::set<std::string> CMP0068WarnTargets;
 
-  mutable std::map<cmSourceFile*, std::set<cmGeneratorTarget const*> >
+  mutable std::map<cmSourceFile*, std::set<cmGeneratorTarget const*>>
     FilenameTargetDepends;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
