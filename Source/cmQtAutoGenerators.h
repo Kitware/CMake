@@ -25,13 +25,26 @@ public:
 private:
   // -- Types
 
-  /// @brief Used to extract additional dependencies from content text
-  struct MocDependFilter
+  /// @brief Search key plus regular expression pair
+  struct KeyRegExp
   {
-    std::string key;
-    cmsys::RegularExpression regExp;
+    KeyRegExp() = default;
+
+    KeyRegExp(const char* key, const char* regExp)
+      : Key(key)
+      , RegExp(regExp)
+    {
+    }
+
+    KeyRegExp(const std::string& key, const std::string& regExp)
+      : Key(key)
+      , RegExp(regExp)
+    {
+    }
+
+    std::string Key;
+    cmsys::RegularExpression RegExp;
   };
-  typedef std::pair<std::string, cmsys::RegularExpression> MocMacroFilter;
 
   // -- Configuration
   bool MocDependFilterPush(const std::string& key, const std::string& regExp);
@@ -200,8 +213,8 @@ private:
   std::vector<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
   std::vector<std::string> MocPredefsCmd;
-  std::vector<MocDependFilter> MocDependFilters;
-  std::vector<MocMacroFilter> MocMacroFilters;
+  std::vector<KeyRegExp> MocDependFilters;
+  std::vector<KeyRegExp> MocMacroFilters;
   cmsys::RegularExpression MocRegExpInclude;
   // -- Uic
   bool UicSettingsChanged;

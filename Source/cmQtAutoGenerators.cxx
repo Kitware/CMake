@@ -224,10 +224,10 @@ cmQtAutoGenerators::cmQtAutoGenerators()
   }
 
   // Moc macro filters
-  this->MocMacroFilters.push_back(
-    MocMacroFilter("Q_OBJECT", "[\n][ \t]*{?[ \t]*Q_OBJECT[^a-zA-Z0-9_]"));
-  this->MocMacroFilters.push_back(
-    MocMacroFilter("Q_GADGET", "[\n][ \t]*{?[ \t]*Q_GADGET[^a-zA-Z0-9_]"));
+  this->MocMacroFilters.emplace_back(
+    "Q_OBJECT", "[\n][ \t]*{?[ \t]*Q_OBJECT[^a-zA-Z0-9_]");
+  this->MocMacroFilters.emplace_back(
+    "Q_GADGET", "[\n][ \t]*{?[ \t]*Q_GADGET[^a-zA-Z0-9_]");
 
   // Precompile regular expressions
   this->MocRegExpInclude.compile(
@@ -275,15 +275,15 @@ bool cmQtAutoGenerators::MocDependFilterPush(const std::string& key,
   bool success = false;
   if (!key.empty()) {
     if (!regExp.empty()) {
-      MocDependFilter filter;
-      filter.key = key;
-      if (filter.regExp.compile(regExp)) {
-        this->MocDependFilters.push_back(filter);
+      KeyRegExp filter;
+      filter.Key = key;
+      if (filter.RegExp.compile(regExp)) {
+        this->MocDependFilters.push_back(std::move(filter));
         success = true;
       } else {
         this->LogError("AutoMoc: Error in AUTOMOC_DEPEND_FILTERS: Compiling "
-                       "regular expression failed.\nKey:  " +
-                       Quoted(key) + "\nExp.: " + Quoted(regExp));
+                       "regular expression failed.\n  Key: " +
+                       Quoted(key) + "\n  RegExp.: " + Quoted(regExp));
       }
     } else {
       this->LogError("AutoMoc: Error in AUTOMOC_DEPEND_FILTERS: Regular "
@@ -739,14 +739,14 @@ bool cmQtAutoGenerators::RunAutogen()
 bool cmQtAutoGenerators::MocRequired(const std::string& contentText,
                                      std::string* macroName)
 {
-  for (MocMacroFilter& filter : this->MocMacroFilters) {
+  for (KeyRegExp& filter : this->MocMacroFilters) {
     // Run a simple find string operation before the expensive
     // regular expression check
-    if (contentText.find(filter.first) != std::string::npos) {
-      if (filter.second.find(contentText)) {
+    if (contentText.find(filter.Key) != std::string::npos) {
+      if (filter.RegExp.find(contentText)) {
         // Return macro name on demand
         if (macroName != nullptr) {
-          *macroName = filter.first;
+          *macroName = filter.Key;
         }
         return true;
       }
@@ -759,16 +759,16 @@ void cmQtAutoGenerators::MocFindDepends(
   const std::string& absFilename, const std::string& contentText,
   std::map<std::string, std::set<std::string>>& mocDepends)
 {
-  for (MocDependFilter& filter : this->MocDependFilters) {
+  for (KeyRegExp& filter : this->MocDependFilters) {
     // Run a simple find string operation before the expensive
     // regular expression check
-    if (contentText.find(filter.key) != std::string::npos) {
+    if (contentText.find(filter.Key) != std::string::npos) {
       // Run regular expression check loop
       const std::string sourcePath = SubDirPrefix(absFilename);
       const char* contentChars = contentText.c_str();
-      while (filter.regExp.find(contentChars)) {
+      while (filter.RegExp.find(contentChars)) {
         // Evaluate match
-        const std::string match = filter.regExp.match(1);
+        const std::string match = filter.RegExp.match(1);
         if (!match.empty()) {
           // Find the dependency file
           std::string incFile;
@@ -784,7 +784,7 @@ void cmQtAutoGenerators::MocFindDepends(
                              Quoted(match));
           }
         }
-        contentChars += filter.regExp.end();
+        contentChars += filter.RegExp.end();
       }
     }
   }
