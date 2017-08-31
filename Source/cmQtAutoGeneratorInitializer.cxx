@@ -134,26 +134,6 @@ static bool QtVersionGreaterOrEqual(const std::string& major,
   return false;
 }
 
-static void GetCompileDefinitionsAndDirectories(
-  cmGeneratorTarget const* target, const std::string& config,
-  std::string& incs, std::string& defs)
-{
-  cmLocalGenerator* localGen = target->GetLocalGenerator();
-  {
-    std::vector<std::string> includeDirs;
-    // Get the include dirs for this target, without stripping the implicit
-    // include dirs off, see
-    // https://gitlab.kitware.com/cmake/cmake/issues/13667
-    localGen->GetIncludeDirectories(includeDirs, target, "CXX", config, false);
-    incs = cmJoin(includeDirs, ";");
-  }
-  {
-    std::set<std::string> defines;
-    localGen->AddCompileDefinitions(defines, target, config, "CXX");
-    defs += cmJoin(defines, ";");
-  }
-}
-
 static std::vector<std::string> GetConfigurations(
   cmMakefile* makefile, std::string* config = nullptr)
 {
@@ -381,10 +361,28 @@ static void SetupAutoTargetMoc(const cmQtAutoGenDigest& digest,
   }
   // Moc includes and compile definitions
   {
+    auto GetCompileDefinitionsAndDirectories = [target, localGen](
+      const std::string& cfg, std::string& incs, std::string& defs) {
+      {
+        std::vector<std::string> includeDirs;
+        // Get the include dirs for this target, without stripping the implicit
+        // include dirs off, see
+        // https://gitlab.kitware.com/cmake/cmake/issues/13667
+        localGen->GetIncludeDirectories(includeDirs, target, "CXX", cfg,
+                                        false);
+        incs = cmJoin(includeDirs, ";");
+      }
+      {
+        std::set<std::string> defines;
+        localGen->AddCompileDefinitions(defines, target, cfg, "CXX");
+        defs += cmJoin(defines, ";");
+      }
+    };
+
     // Default settings
     std::string incs;
     std::string compileDefs;
-    GetCompileDefinitionsAndDirectories(target, config, incs, compileDefs);
+    GetCompileDefinitionsAndDirectories(config, incs, compileDefs);
     AddDefinitionEscaped(makefile, "_moc_incs", incs);
     AddDefinitionEscaped(makefile, "_moc_compile_defs", compileDefs);
 
@@ -392,8 +390,7 @@ static void SetupAutoTargetMoc(const cmQtAutoGenDigest& digest,
     for (const std::string& cfg : configs) {
       std::string configIncs;
       std::string configCompileDefs;
-      GetCompileDefinitionsAndDirectories(target, cfg, configIncs,
-                                          configCompileDefs);
+      GetCompileDefinitionsAndDirectories(cfg, configIncs, configCompileDefs);
       if (configIncs != incs) {
         setup.ConfigMocIncludes[cfg] = configIncs;
       }
@@ -435,14 +432,6 @@ static void SetupAutoTargetMoc(const cmQtAutoGenDigest& digest,
   }
 }
 
-static void UicGetOpts(cmGeneratorTarget const* target,
-                       const std::string& config, std::string& optString)
-{
-  std::vector<std::string> opts;
-  target->GetAutoUicOptions(opts, config);
-  optString = cmJoin(opts, ";");
-}
-
 static void SetupAutoTargetUic(const cmQtAutoGenDigest& digest,
                                std::string const& config,
                                std::vector<std::string> const& configs,
@@ -470,15 +459,19 @@ static void SetupAutoTargetUic(const cmQtAutoGenDigest& digest,
   }
   // Uic target options
   {
+    auto UicGetOpts = [target](const std::string& cfg) -> std::string {
+      std::vector<std::string> opts;
+      target->GetAutoUicOptions(opts, cfg);
+      return cmJoin(opts, ";");
+    };
+
     // Default settings
-    std::string uicOpts;
-    UicGetOpts(target, config, uicOpts);
+    const std::string uicOpts = UicGetOpts(config);
     AddDefinitionEscaped(makefile, "_uic_target_options", uicOpts);
 
     // Configuration specific settings
     for (const std::string& cfg : configs) {
-      std::string configUicOpts;
-      UicGetOpts(target, cfg, configUicOpts);
+      const std::string configUicOpts = UicGetOpts(cfg);
       if (configUicOpts != uicOpts) {
         setup.ConfigUicOptions[cfg] = configUicOpts;
       }
