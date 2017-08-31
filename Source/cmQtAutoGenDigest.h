@@ -16,13 +16,17 @@ class cmQtAutoGenDigestQrc
 public:
   cmQtAutoGenDigestQrc()
     : Generated(false)
+    , Unique(false)
   {
   }
 
 public:
   std::string QrcFile;
+  std::string QrcName;
+  std::string PathChecksum;
   std::string RccFile;
   bool Generated;
+  bool Unique;
   std::vector<std::string> Options;
   std::vector<std::string> Resources;
 };

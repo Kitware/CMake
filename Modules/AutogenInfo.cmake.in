@@ -30,6 +30,6 @@ set(AM_UIC_OPTIONS_OPTIONS @_qt_uic_options_options@)
 set(AM_UIC_SEARCH_PATHS @_uic_search_paths@)
 # RCC settings
 set(AM_RCC_SOURCES @_rcc_files@)
+set(AM_RCC_BUILDS @_rcc_builds@)
+set(AM_RCC_OPTIONS @_rcc_options@)
 set(AM_RCC_INPUTS @_rcc_inputs@)
-set(AM_RCC_OPTIONS_FILES @_rcc_options_files@)
-set(AM_RCC_OPTIONS_OPTIONS @_rcc_options_options@)

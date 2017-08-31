@@ -46,6 +46,15 @@ private:
     cmsys::RegularExpression RegExp;
   };
 
+  /// @brief RCC job
+  struct RccJob
+  {
+    std::string QrcFile;
+    std::string RccFile;
+    std::vector<std::string> Options;
+    std::vector<std::string> Inputs;
+  };
+
   // -- Configuration
   bool MocDependFilterPush(const std::string& key, const std::string& regExp);
   bool ReadAutogenInfoFile(cmMakefile* makefile,
@@ -135,8 +144,7 @@ private:
 
   // -- Rcc file generation
   bool RccGenerateAll();
-  bool RccGenerateFile(const std::string& qrcInputFile,
-                       const std::string& qrcOutputFile, bool unique_n);
+  bool RccGenerateFile(const RccJob& rccJob);
 
   // -- Logging
   void LogErrorNameCollision(
@@ -227,9 +235,7 @@ private:
   // -- Rcc
   bool RccSettingsChanged;
   bool RccRunFailed;
-  std::vector<std::string> RccSources;
-  std::map<std::string, std::string> RccOptions;
-  std::map<std::string, std::vector<std::string>> RccInputs;
+  std::vector<RccJob> RccJobs;
 };
 
 #endif

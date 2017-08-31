@@ -166,22 +166,6 @@ static std::string SubDirPrefix(const std::string& fileName)
   return res;
 }
 
-static bool FileNameIsUnique(const std::string& filePath,
-                             const std::map<std::string, std::string>& fileMap)
-{
-  size_t count(0);
-  const std::string fileName = cmSystemTools::GetFilenameName(filePath);
-  for (const auto& item : fileMap) {
-    if (cmSystemTools::GetFilenameName(item.first) == fileName) {
-      ++count;
-      if (count > 1) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
 static bool ReadAll(std::string& content, const std::string& filename)
 {
   bool success = false;
@@ -473,51 +457,51 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
 
   // - Rcc
   if (this->RccEnabled()) {
-    InfoGet(makefile, "AM_RCC_SOURCES", this->RccSources);
-    // File options
-    {
-      std::vector<std::string> rccFilesVec;
-      std::vector<std::string> rccOptionsVec;
-      InfoGet(makefile, "AM_RCC_OPTIONS_FILES", rccFilesVec);
-      InfoGet(makefile, "AM_RCC_OPTIONS_OPTIONS", rccOptionsVec);
-      if (rccFilesVec.size() == rccOptionsVec.size()) {
-        for (std::vector<std::string>::iterator
-               fileIt = rccFilesVec.begin(),
-               optionIt = rccOptionsVec.begin();
-             fileIt != rccFilesVec.end(); ++fileIt, ++optionIt) {
-          // Replace item separator
-          cmSystemTools::ReplaceString(*optionIt, cmQtAutoGen::listSep, ";");
-          this->RccOptions[*fileIt] = *optionIt;
-        }
-      } else {
-        this->LogError(
-          "AutoGen: Error: RCC files/options lists size missmatch in:\n" +
-          Quoted(filename));
-        return false;
-      }
-    }
     // File lists
+    auto sources = InfoGetList(makefile, "AM_RCC_SOURCES");
+    auto builds = InfoGetList(makefile, "AM_RCC_BUILDS");
+    auto options = InfoGetLists(makefile, "AM_RCC_OPTIONS");
+    auto inputs = InfoGetLists(makefile, "AM_RCC_INPUTS");
+
+    if (sources.size() != builds.size()) {
+      std::ostringstream ost;
+      ost << "AutoRcc: Error: sources/builds list sizes missmatch ("
+          << sources.size() << "/" << builds.size() << ")"
+          << " in\n  " << Quoted(filename);
+      this->LogError(ost.str());
+      return false;
+    }
+    if (sources.size() != options.size()) {
+      std::ostringstream ost;
+      ost << "AutoRcc: Error: sources/options list sizes missmatch ("
+          << sources.size() << "/" << options.size() << ")"
+          << " in\n  " << Quoted(filename);
+      this->LogError(ost.str());
+      return false;
+    }
+    if (sources.size() != inputs.size()) {
+      std::ostringstream ost;
+      ost << "AutoRcc: Error: sources/inputs list sizes missmatch ("
+          << sources.size() << "/" << inputs.size() << ")"
+          << " in\n  " << Quoted(filename);
+      this->LogError(ost.str());
+      return false;
+    }
+
     {
-      std::vector<std::string> rccInputLists;
-      InfoGet(makefile, "AM_RCC_INPUTS", rccInputLists);
-      if (this->RccSources.size() == rccInputLists.size()) {
-        for (std::vector<std::string>::iterator
-               fileIt = this->RccSources.begin(),
-               inputIt = rccInputLists.begin();
-             fileIt != this->RccSources.end(); ++fileIt, ++inputIt) {
-          // Remove braces
-          *inputIt = inputIt->substr(1, inputIt->size() - 2);
-          // Replace item separator
-          cmSystemTools::ReplaceString(*inputIt, cmQtAutoGen::listSep, ";");
-          std::vector<std::string> rccInputFiles;
-          cmSystemTools::ExpandListArgument(*inputIt, rccInputFiles);
-          this->RccInputs[*fileIt] = rccInputFiles;
-        }
-      } else {
-        this->LogError(
-          "AutoGen: Error: RCC sources/inputs lists size missmatch in:\n" +
-          Quoted(filename));
-        return false;
+      auto srcItEnd = sources.end();
+      auto srcIt = sources.begin();
+      auto bldIt = builds.begin();
+      auto optIt = options.begin();
+      auto inpIt = inputs.begin();
+      while (srcIt != srcItEnd) {
+        this->RccJobs.push_back(RccJob{ std::move(*srcIt), std::move(*bldIt),
+                                        std::move(*optIt),
+                                        std::move(*inpIt) });
+        ++srcIt;
+        ++bldIt;
+        ++optIt;
+        ++inpIt;
       }
     }
   }
@@ -560,8 +544,14 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile)
     if (this->RccEnabled()) {
       std::string str;
       str += this->RccExecutable;
-      str += sep;
-      str += JoinOptionsMap(this->RccOptions);
+      for (const RccJob& rccJob : this->RccJobs) {
+        str += sep;
+        str += rccJob.QrcFile;
+        str += sep;
+        str += rccJob.RccFile;
+        str += sep;
+        str += JoinOptionsList(rccJob.Options);
+      }
       str += sep;
       this->SettingsStringRcc = crypt.HashString(str);
     }
@@ -1622,33 +1612,9 @@ bool cmQtAutoGenerators::RccGenerateAll()
     return true;
   }
 
-  // generate single map with input / output names
-  std::map<std::string, std::string> qrcGenMap;
-  {
-    const std::string qrcPrefix = "qrc_";
-    const std::string qrcSuffix = this->ConfigSuffix + ".cpp";
-    for (const std::string& src : this->RccSources) {
-      qrcGenMap[src] = this->ChecksumedPath(src, qrcPrefix, qrcSuffix);
-    }
-  }
-
-  // look for name collisions
-  {
-    std::multimap<std::string, std::string> collisions;
-    if (this->NameCollisionTest(qrcGenMap, collisions)) {
-      std::ostringstream ost;
-      ost << "AutoRcc: Error: The same qrc_NAME.cpp file"
-             " will be generated from different sources.\n"
-             "To avoid this error rename the source .qrc files.\n";
-      this->LogErrorNameCollision(ost.str(), collisions);
-      return false;
-    }
-  }
-
-  // generate qrc files
-  for (const auto& item : qrcGenMap) {
-    bool unique = FileNameIsUnique(item.first, qrcGenMap);
-    if (!this->RccGenerateFile(item.first, item.second, unique)) {
+  // Generate qrc files
+  for (const RccJob& rccJob : this->RccJobs) {
+    if (!this->RccGenerateFile(rccJob)) {
       if (this->RccRunFailed) {
         return false;
       }
@@ -1660,28 +1626,37 @@ bool cmQtAutoGenerators::RccGenerateAll()
 /**
  * @return True if a rcc file was created. False may indicate an error.
  */
-bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
-                                         const std::string& rccOutputFile,
-                                         bool unique_n)
+bool cmQtAutoGenerators::RccGenerateFile(const RccJob& rccJob)
 {
   bool rccGenerated = false;
   bool generateRcc = this->RccSettingsChanged;
-  const std::string rccBuildFile =
-    cmSystemTools::CollapseCombinedPath(this->AutogenBuildDir, rccOutputFile);
+
+  std::string rccFileAbs;
+  if (this->ConfigSuffix.empty()) {
+    rccFileAbs = rccJob.RccFile;
+  } else {
+    rccFileAbs = SubDirPrefix(rccJob.RccFile);
+    rccFileAbs +=
+      cmSystemTools::GetFilenameWithoutLastExtension(rccJob.RccFile);
+    rccFileAbs += this->ConfigSuffix;
+    rccFileAbs += cmSystemTools::GetFilenameLastExtension(rccJob.RccFile);
+  }
+  const std::string rccFileRel = cmSystemTools::RelativePath(
+    this->AutogenBuildDir.c_str(), rccFileAbs.c_str());
 
   // Check if regeneration is required
   if (!generateRcc) {
     // Test if the resources list file is newer than build file
-    generateRcc = FileAbsentOrOlder(rccBuildFile, rccInputFile);
+    generateRcc = FileAbsentOrOlder(rccFileAbs, rccJob.QrcFile);
     if (!generateRcc) {
       // Acquire input file list
       std::vector<std::string> readFiles;
-      const std::vector<std::string>* files = &this->RccInputs[rccInputFile];
+      const std::vector<std::string>* files = &rccJob.Inputs;
       if (files->empty()) {
         // Read input file list from qrc file
         std::string error;
         if (cmQtAutoGen::RccListInputs(this->QtMajorVersion,
-                                       this->RccExecutable, rccInputFile,
+                                       this->RccExecutable, rccJob.QrcFile,
                                        readFiles, &error)) {
           files = &readFiles;
         } else {
@@ -1693,7 +1668,7 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
       // Test if any input file is newer than the build file
       if (files != nullptr) {
         for (const std::string& file : *files) {
-          if (FileAbsentOrOlder(rccBuildFile, file)) {
+          if (FileAbsentOrOlder(rccFileAbs, file)) {
             generateRcc = true;
             break;
           }
@@ -1705,37 +1680,18 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
   if (generateRcc) {
     // Log
     if (this->Verbose) {
-      this->LogBold("Generating RCC source " + rccOutputFile);
+      this->LogBold("Generating RCC source " + rccFileRel);
     }
 
     // Make sure the parent directory exists
-    if (this->MakeParentDirectory(cmQtAutoGen::RCC, rccBuildFile)) {
-      // Compose symbol name
-      std::string symbolName =
-        cmSystemTools::GetFilenameWithoutLastExtension(rccInputFile);
-      if (!unique_n) {
-        symbolName += "_";
-        symbolName += FPathChecksum.getPart(rccInputFile);
-      }
-      // Replace '-' with '_'. The former is valid for
-      // file names but not for symbol names.
-      std::replace(symbolName.begin(), symbolName.end(), '-', '_');
-
+    if (this->MakeParentDirectory(cmQtAutoGen::RCC, rccFileAbs)) {
       // Compose rcc command
       std::vector<std::string> cmd;
       cmd.push_back(this->RccExecutable);
-      {
-        std::map<std::string, std::string>::const_iterator optionIt =
-          this->RccOptions.find(rccInputFile);
-        if (optionIt != this->RccOptions.end()) {
-          cmSystemTools::ExpandListArgument(optionIt->second, cmd);
-        }
-      }
-      cmd.push_back("-name");
-      cmd.push_back(symbolName);
+      cmd.insert(cmd.end(), rccJob.Options.begin(), rccJob.Options.end());
       cmd.push_back("-o");
-      cmd.push_back(rccBuildFile);
-      cmd.push_back(rccInputFile);
+      cmd.push_back(rccFileAbs);
+      cmd.push_back(rccJob.QrcFile);
 
       std::string output;
       if (this->RunCommand(cmd, output)) {
@@ -1746,12 +1702,12 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
         {
           std::ostringstream ost;
           ost << "AutoRcc: Error: rcc process failed for\n";
-          ost << Quoted(rccOutputFile) << "\n";
+          ost << Quoted(rccFileRel) << "\n";
           ost << "AutoRcc: Command:\n" << QuotedCommand(cmd) << "\n";
           ost << "AutoRcc: Command output:\n" << output << "\n";
           this->LogError(ost.str());
         }
-        cmSystemTools::RemoveFile(rccBuildFile);
+        cmSystemTools::RemoveFile(rccFileAbs);
         this->RccRunFailed = true;
       }
     } else {
@@ -1762,17 +1718,14 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
   // For a multi configuration generator generate a wrapper file
   if (!this->ConfigSuffix.empty() && !this->RccRunFailed) {
     // Wrapper file name
-    const std::string cppSuffix = ".cpp";
-    const size_t suffixLength = this->ConfigSuffix.size() + cppSuffix.size();
-    const std::string wrapperFileRel =
-      rccOutputFile.substr(0, rccOutputFile.size() - suffixLength) + cppSuffix;
-    const std::string wrapperFileAbs = cmSystemTools::CollapseCombinedPath(
-      this->AutogenBuildDir, wrapperFileRel);
+    const std::string& wrapperFileAbs = rccJob.RccFile;
+    const std::string wrapperFileRel = cmSystemTools::RelativePath(
+      this->AutogenBuildDir.c_str(), wrapperFileAbs.c_str());
     // Wrapper file content
-    std::string content =
-      "// This is an autogenerated configuration wrapper file. Do not edit.\n"
-      "#include \"";
-    content += cmSystemTools::GetFilenameName(rccBuildFile);
+    std::string content = "// This is an autogenerated configuration "
+                          "wrapper file. Do not edit.\n"
+                          "#include \"";
+    content += cmSystemTools::GetFilenameName(rccFileRel);
     content += "\"\n";
     // Write content to file
     if (this->FileDiffers(wrapperFileAbs, content)) {

@@ -580,40 +580,25 @@ static std::string RccGetExecutable(cmGeneratorTarget const* target,
 
 static void SetupAutoTargetRcc(const cmQtAutoGenDigest& digest)
 {
-  cmGeneratorTarget const* target = digest.Target;
-  cmMakefile* makefile = target->Target->GetMakefile();
   std::vector<std::string> rccFiles;
-  std::vector<std::string> rccInputs;
-  std::vector<std::string> rccFileFiles;
-  std::vector<std::string> rccFileOptions;
+  std::vector<std::string> rccBuilds;
+  std::vector<std::vector<std::string>> rccOptions;
+  std::vector<std::vector<std::string>> rccInputs;
 
   for (const cmQtAutoGenDigestQrc& qrcDigest : digest.Qrcs) {
-    const std::string absFile = qrcDigest.QrcFile;
-    // Register file
-    rccFiles.push_back(absFile);
-    // Register (known) resource files
-    {
-      std::string entriesList = "{";
-      if (!qrcDigest.Generated) {
-        entriesList += cmJoin(qrcDigest.Resources, cmQtAutoGen::listSep);
-      }
-      entriesList += "}";
-      rccInputs.push_back(entriesList);
-    }
-    // rcc options for this qrc file
-    if (!qrcDigest.Options.empty()) {
-      rccFileFiles.push_back(absFile);
-      rccFileOptions.push_back(
-        cmJoin(qrcDigest.Options, cmQtAutoGen::listSep));
-    }
+    rccFiles.push_back(qrcDigest.QrcFile);
+    rccBuilds.push_back(qrcDigest.RccFile);
+    rccOptions.push_back(qrcDigest.Options);
+    rccInputs.push_back(qrcDigest.Resources);
   }
 
+  cmMakefile* makefile = digest.Target->Target->GetMakefile();
   AddDefinitionEscaped(makefile, "_qt_rcc_executable",
-                       RccGetExecutable(target, digest.QtVersionMajor));
+                       RccGetExecutable(digest.Target, digest.QtVersionMajor));
   AddDefinitionEscaped(makefile, "_rcc_files", rccFiles);
+  AddDefinitionEscaped(makefile, "_rcc_builds", rccBuilds);
+  AddDefinitionEscaped(makefile, "_rcc_options", rccOptions);
   AddDefinitionEscaped(makefile, "_rcc_inputs", rccInputs);
-  AddDefinitionEscaped(makefile, "_rcc_options_files", rccFileFiles);
-  AddDefinitionEscaped(makefile, "_rcc_options_options", rccFileOptions);
 }
 
 void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
@@ -746,6 +731,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
         {
           cmQtAutoGenDigestQrc qrcDigest;
           qrcDigest.QrcFile = cmSystemTools::GetRealPath(fPath);
+          qrcDigest.QrcName =
+            cmSystemTools::GetFilenameWithoutLastExtension(qrcDigest.QrcFile);
           qrcDigest.Generated = sf->GetPropertyAsBool("GENERATED");
           // RCC options
           {
@@ -822,36 +809,65 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   // Process qrc files
   if (!digest.Qrcs.empty()) {
     const bool QtV5 = (digest.QtVersionMajor == "5");
-    const cmFilePathChecksum fpathCheckSum(makefile);
     const std::string rcc = RccGetExecutable(target, digest.QtVersionMajor);
     // Target rcc options
     std::vector<std::string> optionsTarget;
     cmSystemTools::ExpandListArgument(
       GetSafeProperty(target, "AUTORCC_OPTIONS"), optionsTarget);
 
+    // Check if file name is unique
     for (cmQtAutoGenDigestQrc& qrcDigest : digest.Qrcs) {
-      // RCC output file name
-      {
-        std::string rccFile = autogenBuildDir + "/";
-        rccFile += fpathCheckSum.getPart(qrcDigest.QrcFile);
-        rccFile += "/qrc_";
-        rccFile +=
-          cmSystemTools::GetFilenameWithoutLastExtension(qrcDigest.QrcFile);
-        rccFile += ".cpp";
-
-        AddGeneratedSource(target, rccFile, cmQtAutoGen::RCC);
-        autogenProvides.push_back(rccFile);
-        qrcDigest.RccFile = std::move(rccFile);
-      }
-      // RCC options
-      {
-        std::vector<std::string> opts = optionsTarget;
-        if (!qrcDigest.Options.empty()) {
-          cmQtAutoGen::RccMergeOptions(opts, qrcDigest.Options, QtV5);
+      qrcDigest.Unique = true;
+      for (const cmQtAutoGenDigestQrc& qrcDig2 : digest.Qrcs) {
+        if ((&qrcDigest != &qrcDig2) &&
+            (qrcDigest.QrcName == qrcDig2.QrcName)) {
+          qrcDigest.Unique = false;
+          break;
         }
-        qrcDigest.Options = std::move(opts);
       }
-      // GENERATED or not
+    }
+    // Path checksum
+    {
+      const cmFilePathChecksum fpathCheckSum(makefile);
+      for (cmQtAutoGenDigestQrc& qrcDigest : digest.Qrcs) {
+        qrcDigest.PathChecksum = fpathCheckSum.getPart(qrcDigest.QrcFile);
+      }
+    }
+    // RCC output file name
+    for (cmQtAutoGenDigestQrc& qrcDigest : digest.Qrcs) {
+      std::string rccFile = autogenBuildDir + "/";
+      rccFile += qrcDigest.PathChecksum;
+      rccFile += "/qrc_";
+      rccFile += qrcDigest.QrcName;
+      rccFile += ".cpp";
+      qrcDigest.RccFile = std::move(rccFile);
+    }
+    // RCC options
+    for (cmQtAutoGenDigestQrc& qrcDigest : digest.Qrcs) {
+      // Target options
+      std::vector<std::string> opts = optionsTarget;
+      // Merge computed "-name XYZ" option
+      {
+        std::string name = qrcDigest.QrcName;
+        // Replace '-' with '_'. The former is not valid for symbol names.
+        std::replace(name.begin(), name.end(), '-', '_');
+        if (!qrcDigest.Unique) {
+          name += "_";
+          name += qrcDigest.PathChecksum;
+        }
+        std::vector<std::string> nameOpts;
+        nameOpts.emplace_back("-name");
+        nameOpts.emplace_back(std::move(name));
+        cmQtAutoGen::RccMergeOptions(opts, nameOpts, QtV5);
+      }
+      // Merge file option
+      cmQtAutoGen::RccMergeOptions(opts, qrcDigest.Options, QtV5);
+      qrcDigest.Options = std::move(opts);
+    }
+    for (cmQtAutoGenDigestQrc& qrcDigest : digest.Qrcs) {
+      // Register file at target
+      AddGeneratedSource(target, qrcDigest.RccFile, cmQtAutoGen::RCC);
+      autogenProvides.push_back(qrcDigest.RccFile);
       if (qrcDigest.Generated) {
         // Add GENERATED qrc file to the dependencies
         autogenDepends.insert(qrcDigest.QrcFile);
