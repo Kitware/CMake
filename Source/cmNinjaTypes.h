@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -16,6 +17,7 @@ enum cmNinjaTargetDepends
 };
 
 typedef std::vector<std::string> cmNinjaDeps;
+typedef std::set<std::string> cmNinjaOuts;
 typedef std::map<std::string, std::string> cmNinjaVars;
 
 #endif // ! cmNinjaTypes_h

@@ -320,6 +320,8 @@ public:
     cmNinjaTargetDepends depends = DependOnTargetArtifact);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaDeps& outputs);
+  void AppendTargetDependsClosure(cmGeneratorTarget const* target,
+                                  cmNinjaOuts& outputs, bool omit_self);
   void AddDependencyToAll(cmGeneratorTarget* target);
   void AddDependencyToAll(const std::string& input);
 
@@ -448,10 +450,7 @@ private:
   typedef std::map<std::string, cmGeneratorTarget*> TargetAliasMap;
   TargetAliasMap TargetAliases;
 
-  typedef std::map<cmGeneratorTarget const*,
-                   std::set<cmGeneratorTarget const*>>
-    TargetDependsClosureMap;
-  TargetDependsClosureMap TargetDependsClosures;
+  std::map<cmGeneratorTarget const*, cmNinjaOuts> TargetDependsClosures;
 
   std::string NinjaCommand;
   std::string NinjaVersion;
