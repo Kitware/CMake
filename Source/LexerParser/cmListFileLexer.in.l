@@ -74,7 +74,7 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 %x COMMENT
 
 MAKEVAR \$\([A-Za-z0-9_]*\)
-UNQUOTED ([^ \t\r\n\(\)#\\\"[=]|\\.)
+UNQUOTED ([^ \0\t\r\n\(\)#\\\"[=]|\\.)
 LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
 
 %%
@@ -113,7 +113,7 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
   BEGIN(COMMENT);
 }
 
-<COMMENT>.* {
+<COMMENT>[^\0\n]* {
   lexer->column += yyleng;
 }
 
@@ -168,7 +168,7 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
   BEGIN(BRACKET);
 }
 
-<BRACKET,BRACKETEND>. {
+<BRACKET,BRACKETEND>[^\0\n] {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
   BEGIN(BRACKET);
@@ -231,7 +231,7 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
   return 1;
 }
 
-<STRING>. {
+<STRING>[^\0\n] {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
 }
