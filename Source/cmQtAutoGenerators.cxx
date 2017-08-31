@@ -75,6 +75,43 @@ static void InfoGet(cmMakefile* makefile, const char* key,
   cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition(key), list);
 }
 
+static std::vector<std::string> InfoGetList(cmMakefile* makefile,
+                                            const char* key)
+{
+  std::vector<std::string> list;
+  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition(key), list);
+  return list;
+}
+
+static std::vector<std::vector<std::string>> InfoGetLists(cmMakefile* makefile,
+                                                          const char* key)
+{
+  std::vector<std::vector<std::string>> lists;
+  {
+    const std::string value = makefile->GetSafeDefinition(key);
+    std::string::size_type pos = 0;
+    while (pos < value.size()) {
+      std::string::size_type next = value.find(cmQtAutoGen::listSep, pos);
+      std::string::size_type length =
+        (next != std::string::npos) ? next - pos : value.size() - pos;
+      // Remove enclosing braces
+      if (length >= 2) {
+        std::string::const_iterator itBeg = value.begin() + (pos + 1);
+        std::string::const_iterator itEnd = itBeg + (length - 2);
+        {
+          std::string subValue(itBeg, itEnd);
+          std::vector<std::string> list;
+          cmSystemTools::ExpandListArgument(subValue, list);
+          lists.push_back(std::move(list));
+        }
+      }
+      pos += length;
+      pos += cmQtAutoGen::listSep.size();
+    }
+  }
+  return lists;
+}
+
 static void InfoGetConfig(cmMakefile* makefile, const char* key,
                           const std::string& config, std::string& value)
 {

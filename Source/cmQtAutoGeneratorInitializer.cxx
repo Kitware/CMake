@@ -207,6 +207,22 @@ static void AddDefinitionEscaped(cmMakefile* makefile, const char* key,
     key, cmOutputConverter::EscapeForCMake(cmJoin(values, ";")).c_str());
 }
 
+static void AddDefinitionEscaped(
+  cmMakefile* makefile, const char* key,
+  const std::vector<std::vector<std::string>>& lists)
+{
+  std::vector<std::string> seplist;
+  for (const std::vector<std::string>& list : lists) {
+    std::string blist = "{";
+    blist += cmJoin(list, ";");
+    blist += "}";
+    seplist.push_back(std::move(blist));
+  }
+  makefile->AddDefinition(key, cmOutputConverter::EscapeForCMake(
+                                 cmJoin(seplist, cmQtAutoGen::listSep))
+                                 .c_str());
+}
+
 static bool AddToSourceGroup(cmMakefile* makefile, const std::string& fileName,
                              cmQtAutoGen::GeneratorType genType)
 {
