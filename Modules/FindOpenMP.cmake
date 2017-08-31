@@ -95,6 +95,7 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     set(OMP_FLAG_NAG "-openmp")
     set(OMP_FLAG_Absoft "-openmp")
     set(OMP_FLAG_PGI "-mp")
+    set(OMP_FLAG_Flang "-fopenmp")
     set(OMP_FLAG_SunPro "-xopenmp")
     set(OMP_FLAG_XL "-qsmp=omp")
     # Cray compiles with OpenMP automatically
