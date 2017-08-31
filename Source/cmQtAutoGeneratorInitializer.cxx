@@ -325,7 +325,7 @@ static void SetupAcquireSkipFiles(cmQtAutoGenDigest const& digest,
       const bool uicSkip = digest.UicEnabled &&
         (skipAll || sf->GetPropertyAsBool("SKIP_AUTOUIC"));
       if (mocSkip || uicSkip) {
-        const std::string absFile = cmsys::SystemTools::GetRealPath(fPath);
+        const std::string absFile = cmSystemTools::GetRealPath(fPath);
         if (mocSkip) {
           setup.MocSkip.insert(absFile);
         }
@@ -482,7 +482,7 @@ static void SetupAutoTargetUic(const cmQtAutoGenDigest& digest,
           // Check if the files has uic options
           std::string uicOpts = GetSafeProperty(sf, "AUTOUIC_OPTIONS");
           if (!uicOpts.empty()) {
-            const std::string absFile = cmsys::SystemTools::GetRealPath(fPath);
+            const std::string absFile = cmSystemTools::GetRealPath(fPath);
             // Check if file isn't skipped
             if (setup.UicSkip.count(absFile) == 0) {
               uiFileFiles.push_back(absFile);
@@ -742,7 +742,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
           cmSystemTools::GetFileFormat(ext.c_str());
         if ((fileType == cmSystemTools::CXX_FILE_FORMAT) ||
             (fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
-          const std::string absPath = cmsys::SystemTools::GetRealPath(fPath);
+          const std::string absPath = cmSystemTools::GetRealPath(fPath);
           if ((digest.MocEnabled && !sf->GetPropertyAsBool("SKIP_AUTOMOC")) ||
               (digest.UicEnabled && !sf->GetPropertyAsBool("SKIP_AUTOUIC"))) {
             // Register source
@@ -769,7 +769,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
         // Register qrc file
         {
           cmQtAutoGenDigestQrc qrcDigest;
-          qrcDigest.QrcFile = cmsys::SystemTools::GetRealPath(fPath);
+          qrcDigest.QrcFile = cmSystemTools::GetRealPath(fPath);
           qrcDigest.Generated = sf->GetPropertyAsBool("GENERATED");
           // RCC options
           {
@@ -859,8 +859,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
         std::string rccFile = autogenBuildDir + "/";
         rccFile += fpathCheckSum.getPart(qrcDigest.QrcFile);
         rccFile += "/qrc_";
-        rccFile += cmsys::SystemTools::GetFilenameWithoutLastExtension(
-          qrcDigest.QrcFile);
+        rccFile +=
+          cmSystemTools::GetFilenameWithoutLastExtension(qrcDigest.QrcFile);
         rccFile += ".cpp";
 
         AddGeneratedSource(target, rccFile, cmQtAutoGen::RCC);

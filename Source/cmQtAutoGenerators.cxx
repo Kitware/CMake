@@ -124,7 +124,7 @@ static void SettingAppend(std::string& str, const char* key,
 
 static std::string SubDirPrefix(const std::string& fileName)
 {
-  std::string res(cmsys::SystemTools::GetFilenamePath(fileName));
+  std::string res(cmSystemTools::GetFilenamePath(fileName));
   if (!res.empty()) {
     res += '/';
   }
@@ -135,9 +135,9 @@ static bool FileNameIsUnique(const std::string& filePath,
                              const std::map<std::string, std::string>& fileMap)
 {
   size_t count(0);
-  const std::string fileName = cmsys::SystemTools::GetFilenameName(filePath);
+  const std::string fileName = cmSystemTools::GetFilenameName(filePath);
   for (const auto& item : fileMap) {
-    if (cmsys::SystemTools::GetFilenameName(item.first) == fileName) {
+    if (cmSystemTools::GetFilenameName(item.first) == fileName) {
       ++count;
       if (count > 1) {
         return false;
@@ -171,7 +171,7 @@ static bool FileAbsentOrOlder(const std::string& buildFile,
 {
   int result = 0;
   bool success =
-    cmsys::SystemTools::FileTimeCompare(buildFile, sourceFile, &result);
+    cmSystemTools::FileTimeCompare(buildFile, sourceFile, &result);
   return (!success || (result <= 0));
 }
 
@@ -238,7 +238,7 @@ static void UicMergeOptions(std::vector<std::string>& opts,
 // -- Class methods
 
 cmQtAutoGenerators::cmQtAutoGenerators()
-  : Verbose(cmsys::SystemTools::HasEnv("VERBOSE"))
+  : Verbose(cmSystemTools::HasEnv("VERBOSE"))
   , ColorOutput(true)
   , MocSettingsChanged(false)
   , MocPredefsChanged(false)
@@ -250,7 +250,7 @@ cmQtAutoGenerators::cmQtAutoGenerators()
 {
 
   std::string colorEnv;
-  cmsys::SystemTools::GetEnv("COLOR", colorEnv);
+  cmSystemTools::GetEnv("COLOR", colorEnv);
   if (!colorEnv.empty()) {
     if (cmSystemTools::IsOn(colorEnv.c_str())) {
       this->ColorOutput = true;
@@ -685,8 +685,8 @@ void cmQtAutoGenerators::Init(cmMakefile* makefile)
       if (cmHasLiteralSuffix(path, ".framework/Headers")) {
         // Go up twice to get to the framework root
         std::vector<std::string> pathComponents;
-        cmsys::SystemTools::SplitPath(path, pathComponents);
-        std::string frameworkPath = cmsys::SystemTools::JoinPath(
+        cmSystemTools::SplitPath(path, pathComponents);
+        std::string frameworkPath = cmSystemTools::JoinPath(
           pathComponents.begin(), pathComponents.end() - 2);
         frameworkPaths.insert(frameworkPath);
       }
@@ -713,7 +713,7 @@ bool cmQtAutoGenerators::RunAutogen()
   {
     const std::string incDirAbs = cmSystemTools::CollapseCombinedPath(
       this->AutogenBuildDir, this->AutogenIncludeDir);
-    if (!cmsys::SystemTools::MakeDirectory(incDirAbs)) {
+    if (!cmSystemTools::MakeDirectory(incDirAbs)) {
       this->LogError("AutoGen: Error: Could not create include directory " +
                      Quoted(incDirAbs));
       return false;
@@ -922,7 +922,7 @@ bool cmQtAutoGenerators::MocParseSourceContent(
 
   const std::string scannedFileAbsPath = SubDirPrefix(absFilename);
   const std::string scannedFileBasename =
-    cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
+    cmSystemTools::GetFilenameWithoutLastExtension(absFilename);
 
   std::string macroName;
   const bool requiresMoc = this->MocRequired(contentText, &macroName);
@@ -941,7 +941,7 @@ bool cmQtAutoGenerators::MocParseSourceContent(
       // Basename of the moc include
       const std::string incSubDir(SubDirPrefix(incString));
       const std::string incBasename =
-        cmsys::SystemTools::GetFilenameWithoutLastExtension(incString);
+        cmSystemTools::GetFilenameWithoutLastExtension(incString);
 
       // If the moc include is of the moc_foo.cpp style we expect
       // the Q_OBJECT class declaration in a header file.
@@ -1130,7 +1130,7 @@ void cmQtAutoGenerators::SearchHeadersForSourceFile(
   std::array<std::string, 2> basepaths;
   {
     std::string bpath = SubDirPrefix(absFilename);
-    bpath += cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
+    bpath += cmSystemTools::GetFilenameWithoutLastExtension(absFilename);
     // search for default header files and private header files
     basepaths[0] = bpath;
     basepaths[1] = bpath;
@@ -1455,8 +1455,8 @@ bool cmQtAutoGenerators::UicFindIncludedFile(std::string& absFile,
 
   // Search for the .ui file!
   for (const std::string& testFile : testFiles) {
-    if (cmsys::SystemTools::FileExists(testFile.c_str())) {
-      absFile = cmsys::SystemTools::GetRealPath(testFile);
+    if (cmSystemTools::FileExists(testFile.c_str())) {
+      absFile = cmSystemTools::GetRealPath(testFile);
       success = true;
       break;
     }
@@ -1500,7 +1500,7 @@ bool cmQtAutoGenerators::UicGenerateAll(
         // Remove ui_ from the begin filename by substr()
         const std::string uiBasePath = SubDirPrefix(inc);
         const std::string uiBaseName =
-          cmsys::SystemTools::GetFilenameWithoutLastExtension(inc).substr(3);
+          cmSystemTools::GetFilenameWithoutLastExtension(inc).substr(3);
         const std::string uiFileName = uiBaseName + ".ui";
         std::string uiInputFile;
         if (UicFindIncludedFile(uiInputFile, source, uiBasePath, uiFileName)) {
@@ -1710,7 +1710,7 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
     if (this->MakeParentDirectory(cmQtAutoGen::RCC, rccBuildFile)) {
       // Compose symbol name
       std::string symbolName =
-        cmsys::SystemTools::GetFilenameWithoutLastExtension(rccInputFile);
+        cmSystemTools::GetFilenameWithoutLastExtension(rccInputFile);
       if (!unique_n) {
         symbolName += "_";
         symbolName += FPathChecksum.getPart(rccInputFile);
@@ -1770,7 +1770,7 @@ bool cmQtAutoGenerators::RccGenerateFile(const std::string& rccInputFile,
     std::string content =
       "// This is an autogenerated configuration wrapper file. Do not edit.\n"
       "#include \"";
-    content += cmsys::SystemTools::GetFilenameName(rccBuildFile);
+    content += cmSystemTools::GetFilenameName(rccBuildFile);
     content += "\"\n";
     // Write content to file
     if (this->FileDiffers(wrapperFileAbs, content)) {
@@ -1899,7 +1899,7 @@ std::string cmQtAutoGenerators::ChecksumedPath(
   std::string res = FPathChecksum.getPart(sourceFile);
   res += "/";
   res += basePrefix;
-  res += cmsys::SystemTools::GetFilenameWithoutLastExtension(sourceFile);
+  res += cmSystemTools::GetFilenameWithoutLastExtension(sourceFile);
   res += baseSuffix;
   return res;
 }
@@ -1914,7 +1914,7 @@ bool cmQtAutoGenerators::MakeParentDirectory(
   bool success = true;
   const std::string dirName = cmSystemTools::GetFilenamePath(filename);
   if (!dirName.empty()) {
-    success = cmsys::SystemTools::MakeDirectory(dirName);
+    success = cmSystemTools::MakeDirectory(dirName);
     if (!success) {
       std::string error = cmQtAutoGen::GeneratorName(genType);
       error += ": Error: Parent directory creation failed for ";
@@ -2001,7 +2001,7 @@ bool cmQtAutoGenerators::FindHeader(std::string& header,
     std::string testFilePath(testBasePath);
     testFilePath.push_back('.');
     testFilePath += ext;
-    if (cmsys::SystemTools::FileExists(testFilePath.c_str())) {
+    if (cmSystemTools::FileExists(testFilePath.c_str())) {
       header = testFilePath;
       return true;
     }
@@ -2027,7 +2027,7 @@ std::string cmQtAutoGenerators::MocFindHeader(
   }
   // Sanitize
   if (!header.empty()) {
-    header = cmsys::SystemTools::GetRealPath(header);
+    header = cmSystemTools::GetRealPath(header);
   }
   return header;
 }
@@ -2041,8 +2041,8 @@ bool cmQtAutoGenerators::MocFindIncludedFile(
   {
     std::string testPath = sourcePath;
     testPath += includeString;
-    if (cmsys::SystemTools::FileExists(testPath.c_str())) {
-      absFile = cmsys::SystemTools::GetRealPath(testPath);
+    if (cmSystemTools::FileExists(testPath.c_str())) {
+      absFile = cmSystemTools::GetRealPath(testPath);
       success = true;
     }
   }
@@ -2052,8 +2052,8 @@ bool cmQtAutoGenerators::MocFindIncludedFile(
       std::string fullPath = path;
       fullPath.push_back('/');
       fullPath += includeString;
-      if (cmsys::SystemTools::FileExists(fullPath.c_str())) {
-        absFile = cmsys::SystemTools::GetRealPath(fullPath);
+      if (cmSystemTools::FileExists(fullPath.c_str())) {
+        absFile = cmSystemTools::GetRealPath(fullPath);
         success = true;
         break;
       }

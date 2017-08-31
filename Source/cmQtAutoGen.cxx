@@ -56,7 +56,7 @@ static bool RccListInputsQt4(const std::string& fileName,
   }
   if (allGood) {
     // qrc file directory
-    std::string qrcDir(cmsys::SystemTools::GetFilenamePath(fileName));
+    std::string qrcDir(cmSystemTools::GetFilenamePath(fileName));
     if (!qrcDir.empty()) {
       qrcDir += '/';
     }
@@ -225,7 +225,7 @@ bool cmQtAutoGen::RccListInputs(const std::string& qtMajorVersion,
                                 std::string* errorMessage)
 {
   bool allGood = false;
-  if (cmsys::SystemTools::FileExists(fileName.c_str())) {
+  if (cmSystemTools::FileExists(fileName.c_str())) {
     if (qtMajorVersion == "4") {
       allGood = RccListInputsQt4(fileName, files, errorMessage);
     } else {
