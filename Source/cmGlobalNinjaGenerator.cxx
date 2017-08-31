@@ -861,18 +861,24 @@ static void EnsureTrailingSlash(std::string& path)
 #endif
 }
 
-std::string cmGlobalNinjaGenerator::ConvertToNinjaPath(
+std::string const& cmGlobalNinjaGenerator::ConvertToNinjaPath(
   const std::string& path) const
 {
+  auto const f = ConvertToNinjaPathCache.find(path);
+  if (f != ConvertToNinjaPathCache.end()) {
+    return f->second;
+  }
+
   cmLocalNinjaGenerator* ng =
     static_cast<cmLocalNinjaGenerator*>(this->LocalGenerators[0]);
-  std::string convPath = ng->ConvertToRelativePath(
-    this->LocalGenerators[0]->GetState()->GetBinaryDirectory(), path);
+  const char* bin_dir = ng->GetState()->GetBinaryDirectory();
+  std::string convPath = ng->ConvertToRelativePath(bin_dir, path);
   convPath = this->NinjaOutputPath(convPath);
 #ifdef _WIN32
   std::replace(convPath.begin(), convPath.end(), '/', '\\');
 #endif
-  return convPath;
+  return ConvertToNinjaPathCache.emplace(path, std::move(convPath))
+    .first->second;
 }
 
 void cmGlobalNinjaGenerator::AddCXXCompileCommand(

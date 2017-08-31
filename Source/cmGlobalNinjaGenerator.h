@@ -9,6 +9,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -245,7 +246,7 @@ public:
     return this->RulesFileStream;
   }
 
-  std::string ConvertToNinjaPath(const std::string& path) const;
+  std::string const& ConvertToNinjaPath(const std::string& path) const;
 
   struct MapToNinjaPathImpl
   {
@@ -451,6 +452,9 @@ private:
   TargetAliasMap TargetAliases;
 
   std::map<cmGeneratorTarget const*, cmNinjaOuts> TargetDependsClosures;
+
+  /// the local cache for calls to ConvertToNinjaPath
+  mutable std::unordered_map<std::string, std::string> ConvertToNinjaPathCache;
 
   std::string NinjaCommand;
   std::string NinjaVersion;
