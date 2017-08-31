@@ -32,6 +32,7 @@ run_cmake(COMPILE_LANGUAGE-unknown-lang)
 run_cmake(TARGET_FILE-recursion)
 run_cmake(OUTPUT_NAME-recursion)
 run_cmake(TARGET_PROPERTY-LOCATION)
+run_cmake(TARGET_PROPERTY-SOURCES)
 run_cmake(LINK_ONLY-not-linking)
 
 run_cmake(ImportedTarget-TARGET_BUNDLE_DIR)
