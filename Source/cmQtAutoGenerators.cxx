@@ -1227,6 +1227,7 @@ bool cmQtAutoGenerators::MocGenerateAll(
           return false;
         }
       }
+
       // (Re)write predefs file only on demand
       if (this->FileDiffers(this->MocPredefsFileAbs, output)) {
         if (this->FileWrite(cmQtAutoGen::MOC, this->MocPredefsFileAbs,
@@ -1235,6 +1236,12 @@ bool cmQtAutoGenerators::MocGenerateAll(
         } else {
           return false;
         }
+      } else {
+        // Touch to update the time stamp
+        if (this->Verbose) {
+          this->LogInfo("Touching MOC predefs " + this->MocPredefsFileRel);
+        }
+        cmSystemTools::Touch(this->MocPredefsFileAbs, false);
       }
     }
   }
