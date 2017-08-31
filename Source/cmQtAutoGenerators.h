@@ -229,7 +229,7 @@ private:
   bool UicRunFailed;
   std::vector<std::string> UicSkipList;
   std::vector<std::string> UicTargetOptions;
-  std::map<std::string, std::string> UicOptions;
+  std::map<std::string, std::vector<std::string>> UicOptions;
   std::vector<std::string> UicSearchPaths;
   cmsys::RegularExpression UicRegExpInclude;
   // -- Rcc

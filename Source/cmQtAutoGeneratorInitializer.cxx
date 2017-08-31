@@ -487,7 +487,7 @@ static void SetupAutoTargetUic(const cmQtAutoGenDigest& digest,
   // Uic files options
   {
     std::vector<std::string> uiFileFiles;
-    std::vector<std::string> uiFileOptions;
+    std::vector<std::vector<std::string>> uiFileOptions;
     {
       const std::string uiExt = "ui";
       const std::vector<cmSourceFile*>& srcFiles = makefile->GetSourceFiles();
@@ -496,14 +496,15 @@ static void SetupAutoTargetUic(const cmQtAutoGenDigest& digest,
         const std::string& fPath = sf->GetFullPath();
         if (sf->GetExtension() == uiExt) {
           // Check if the files has uic options
-          std::string uicOpts = GetSafeProperty(sf, "AUTOUIC_OPTIONS");
+          const std::string uicOpts = GetSafeProperty(sf, "AUTOUIC_OPTIONS");
           if (!uicOpts.empty()) {
             const std::string absFile = cmSystemTools::GetRealPath(fPath);
             // Check if file isn't skipped
             if (setup.UicSkip.count(absFile) == 0) {
               uiFileFiles.push_back(absFile);
-              cmSystemTools::ReplaceString(uicOpts, ";", cmQtAutoGen::listSep);
-              uiFileOptions.push_back(uicOpts);
+              std::vector<std::string> optsVec;
+              cmSystemTools::ExpandListArgument(uicOpts, optsVec);
+              uiFileOptions.push_back(std::move(optsVec));
             }
           }
         }

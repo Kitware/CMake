@@ -200,26 +200,6 @@ static bool ListContains(const std::vector<std::string>& list,
   return (std::find(list.begin(), list.end(), entry) != list.end());
 }
 
-static std::string JoinOptionsList(const std::vector<std::string>& opts)
-{
-  return cmOutputConverter::EscapeForCMake(cmJoin(opts, ";"));
-}
-
-static std::string JoinOptionsMap(
-  const std::map<std::string, std::string>& opts)
-{
-  std::string result;
-  for (const auto& item : opts) {
-    if (!result.empty()) {
-      result += cmQtAutoGen::listSep;
-    }
-    result += item.first;
-    result += "===";
-    result += item.second;
-  }
-  return result;
-}
-
 // -- Class methods
 
 cmQtAutoGenerators::cmQtAutoGenerators()
@@ -433,18 +413,17 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     InfoGetConfig(makefile, "AM_UIC_TARGET_OPTIONS", config,
                   this->UicTargetOptions);
     {
-      std::vector<std::string> uicFilesVec;
-      std::vector<std::string> uicOptionsVec;
-      InfoGet(makefile, "AM_UIC_OPTIONS_FILES", uicFilesVec);
-      InfoGet(makefile, "AM_UIC_OPTIONS_OPTIONS", uicOptionsVec);
+      auto uicFiles = InfoGetList(makefile, "AM_UIC_OPTIONS_FILES");
+      auto uicOptions = InfoGetLists(makefile, "AM_UIC_OPTIONS_OPTIONS");
       // Compare list sizes
-      if (uicFilesVec.size() == uicOptionsVec.size()) {
-        for (std::vector<std::string>::iterator
-               fileIt = uicFilesVec.begin(),
-               optionIt = uicOptionsVec.begin();
-             fileIt != uicFilesVec.end(); ++fileIt, ++optionIt) {
-          cmSystemTools::ReplaceString(*optionIt, cmQtAutoGen::listSep, ";");
-          this->UicOptions[*fileIt] = *optionIt;
+      if (uicFiles.size() == uicOptions.size()) {
+        auto fitEnd = uicFiles.cend();
+        auto fit = uicFiles.begin();
+        auto oit = uicOptions.begin();
+        while (fit != fitEnd) {
+          this->UicOptions[*fit] = std::move(*oit);
+          ++fit;
+          ++oit;
         }
       } else {
         this->LogError(
@@ -519,15 +498,15 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile)
       std::string str;
       str += this->MocExecutable;
       str += sep;
-      str += JoinOptionsList(this->MocDefinitions);
+      str += cmJoin(this->MocDefinitions, ";");
       str += sep;
-      str += JoinOptionsList(this->MocIncludePaths);
+      str += cmJoin(this->MocIncludePaths, ";");
       str += sep;
-      str += JoinOptionsList(this->MocOptions);
+      str += cmJoin(this->MocOptions, ";");
       str += sep;
       str += this->IncludeProjectDirsBefore ? "TRUE" : "FALSE";
       str += sep;
-      str += JoinOptionsList(this->MocPredefsCmd);
+      str += cmJoin(this->MocPredefsCmd, ";");
       str += sep;
       this->SettingsStringMoc = crypt.HashString(str);
     }
@@ -535,9 +514,13 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile)
       std::string str;
       str += this->UicExecutable;
       str += sep;
-      str += JoinOptionsList(this->UicTargetOptions);
-      str += sep;
-      str += JoinOptionsMap(this->UicOptions);
+      str += cmJoin(this->UicTargetOptions, ";");
+      for (const auto& item : this->UicOptions) {
+        str += sep;
+        str += item.first;
+        str += sep;
+        str += cmJoin(item.second, ";");
+      }
       str += sep;
       this->SettingsStringUic = crypt.HashString(str);
     }
@@ -550,7 +533,7 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile)
         str += sep;
         str += rccJob.RccFile;
         str += sep;
-        str += JoinOptionsList(rccJob.Options);
+        str += cmJoin(rccJob.Options, ";");
       }
       str += sep;
       this->SettingsStringRcc = crypt.HashString(str);
@@ -1566,12 +1549,9 @@ bool cmQtAutoGenerators::UicGenerateFile(const std::string& realName,
       cmd.push_back(this->UicExecutable);
       {
         std::vector<std::string> allOpts = this->UicTargetOptions;
-        std::map<std::string, std::string>::const_iterator optionIt =
-          this->UicOptions.find(uiInputFile);
+        auto optionIt = this->UicOptions.find(uiInputFile);
         if (optionIt != this->UicOptions.end()) {
-          std::vector<std::string> fileOpts;
-          cmSystemTools::ExpandListArgument(optionIt->second, fileOpts);
-          cmQtAutoGen::UicMergeOptions(allOpts, fileOpts,
+          cmQtAutoGen::UicMergeOptions(allOpts, optionIt->second,
                                        (this->QtMajorVersion == "5"));
         }
         cmd.insert(cmd.end(), allOpts.begin(), allOpts.end());
