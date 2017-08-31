@@ -139,24 +139,6 @@ static void InfoGetConfig(cmMakefile* makefile, const char* key,
   cmSystemTools::ExpandListArgument(value, list);
 }
 
-inline static bool SettingsMatch(cmMakefile* makefile, const char* key,
-                                 const std::string& value)
-{
-  return (value == makefile->GetSafeDefinition(key));
-}
-
-static void SettingAppend(std::string& str, const char* key,
-                          const std::string& value)
-{
-  if (!value.empty()) {
-    str += "set(";
-    str += key;
-    str += " ";
-    str += cmOutputConverter::EscapeForCMake(value);
-    str += ")\n";
-  }
-}
-
 static std::string SubDirPrefix(const std::string& fileName)
 {
   std::string res(cmSystemTools::GetFilenamePath(fileName));
@@ -542,14 +524,19 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile)
 
   // Read old settings
   if (makefile->ReadListFile(this->SettingsFile.c_str())) {
-    if (!SettingsMatch(makefile, SettingsKeyMoc, this->SettingsStringMoc)) {
-      this->MocSettingsChanged = true;
-    }
-    if (!SettingsMatch(makefile, SettingsKeyUic, this->SettingsStringUic)) {
-      this->UicSettingsChanged = true;
-    }
-    if (!SettingsMatch(makefile, SettingsKeyRcc, this->SettingsStringRcc)) {
-      this->RccSettingsChanged = true;
+    {
+      auto SMatch = [makefile](const char* key, const std::string& value) {
+        return (value == makefile->GetSafeDefinition(key));
+      };
+      if (!SMatch(SettingsKeyMoc, this->SettingsStringMoc)) {
+        this->MocSettingsChanged = true;
+      }
+      if (!SMatch(SettingsKeyUic, this->SettingsStringUic)) {
+        this->UicSettingsChanged = true;
+      }
+      if (!SMatch(SettingsKeyRcc, this->SettingsStringRcc)) {
+        this->RccSettingsChanged = true;
+      }
     }
     // In case any setting changed remove the old settings file.
     // This triggers a full rebuild on the next run if the current
@@ -576,9 +563,19 @@ bool cmQtAutoGenerators::SettingsFileWrite()
     }
     // Compose settings file content
     std::string settings;
-    SettingAppend(settings, SettingsKeyMoc, this->SettingsStringMoc);
-    SettingAppend(settings, SettingsKeyUic, this->SettingsStringUic);
-    SettingAppend(settings, SettingsKeyRcc, this->SettingsStringRcc);
+    {
+      auto SettingAppend = [&settings](const char* key,
+                                       const std::string& value) {
+        settings += "set(";
+        settings += key;
+        settings += " ";
+        settings += cmOutputConverter::EscapeForCMake(value);
+        settings += ")\n";
+      };
+      SettingAppend(SettingsKeyMoc, this->SettingsStringMoc);
+      SettingAppend(SettingsKeyUic, this->SettingsStringUic);
+      SettingAppend(SettingsKeyRcc, this->SettingsStringRcc);
+    }
     // Write settings file
     if (!this->FileWrite(cmQtAutoGen::GEN, this->SettingsFile, settings)) {
       this->LogError("AutoGen: Error: Could not write old settings file " +
