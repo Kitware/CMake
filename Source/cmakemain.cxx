@@ -160,6 +160,21 @@ static void cmakemainProgressCallback(const char* m, float prog,
 
 int main(int ac, char const* const* av)
 {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  // Debugging aid. This allows us to set up a registry 
+  // key indicating a sleep period when the process starts,
+  // giving us enough time to attach the debugger.
+  std::string sleepval;
+  if (cmSystemTools::ReadRegistryValue(
+    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\"
+    "VCCMake;Sleep",
+    sleepval, cmSystemTools::KeyWOW64_32))
+  {
+    int sleepinMS = atoi(sleepval.c_str());
+    Sleep(sleepinMS);
+  }
+#endif
+
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
   // Replace streambuf so we can output Unicode to console
   cmsys::ConsoleBuf::Manager consoleOut(std::cout);
