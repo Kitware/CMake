@@ -79,6 +79,7 @@ static cmVS7FlagTable cmVS141CLFlagTable[] = {
   { "FloatingPointModel", "fp:strict", "Strict", "Strict", 0 },
   { "FloatingPointModel", "fp:fast", "Fast", "Fast", 0 },
 
+  { "LanguageStandard", "std:c++17", "ISO C++17 Standard", "stdcpp17", 0 },
   { "LanguageStandard", "std:c++14", "ISO C++14 Standard", "stdcpp14", 0 },
   { "LanguageStandard", "std:c++latest", "ISO C++ Latest Draft Standard",
     "stdcpplatest", 0 },
