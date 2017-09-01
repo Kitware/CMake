@@ -102,8 +102,8 @@ static bool RccListInputsQt4(const std::string& fileName,
     } else {
       if (errorMessage != nullptr) {
         std::ostringstream ost;
-        ost << "AutoRcc: Error: Rcc file not readable:\n"
-            << cmQtAutoGen::Quoted(fileName) << "\n";
+        ost << "rcc file not readable:\n"
+            << "  " << cmQtAutoGen::Quoted(fileName) << "\n";
         *errorMessage = ost.str();
       }
       allGood = false;
@@ -145,7 +145,7 @@ static bool RccListInputsQt5(const std::string& rccCommand,
                              std::string* errorMessage)
 {
   if (rccCommand.empty()) {
-    cmSystemTools::Error("AutoRcc: Error: rcc executable not available\n");
+    cmSystemTools::Error("rcc executable not available");
     return false;
   }
 
@@ -184,7 +184,7 @@ static bool RccListInputsQt5(const std::string& rccCommand,
   if (!result || retVal) {
     if (errorMessage != nullptr) {
       std::ostringstream ost;
-      ost << "AutoRcc: Error: Rcc list process for " << fileName
+      ost << "rcc list process for " << cmQtAutoGen::Quoted(fileName)
           << " failed:\n"
           << rccStdOut << "\n"
           << rccStdErr << "\n";
@@ -217,7 +217,7 @@ static bool RccListInputsQt5(const std::string& rccCommand,
         if (pos == std::string::npos) {
           if (errorMessage != nullptr) {
             std::ostringstream ost;
-            ost << "AutoRcc: Error: Rcc lists unparsable output:\n"
+            ost << "rcc lists unparsable output:\n"
                 << cmQtAutoGen::Quoted(eline) << "\n";
             *errorMessage = ost.str();
           }
@@ -311,8 +311,8 @@ bool cmQtAutoGen::RccListInputs(const std::string& qtMajorVersion,
   } else {
     if (errorMessage != nullptr) {
       std::ostringstream ost;
-      ost << "AutoRcc: Error: Rcc file does not exist:\n"
-          << cmQtAutoGen::Quoted(fileName) << "\n";
+      ost << "rcc file does not exist:\n"
+          << "  " << cmQtAutoGen::Quoted(fileName) << "\n";
       *errorMessage = ost.str();
     }
   }

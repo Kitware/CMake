@@ -112,6 +112,9 @@ private:
     const std::string& fileName, const std::string& contentText,
     std::map<std::string, std::vector<std::string>>& includedUis);
 
+  std::string MocMacroNamesString() const;
+  std::string MocHeaderSuffixesString() const;
+
   bool MocParseSourceContent(
     const std::string& absFilename, const std::string& contentText,
     std::map<std::string, std::string>& mocsIncluded,
@@ -146,15 +149,29 @@ private:
   bool RccGenerateAll();
   bool RccGenerateFile(const RccJob& rccJob);
 
-  // -- Logging
-  void LogErrorNameCollision(
-    const std::string& message,
-    const std::multimap<std::string, std::string>& collisions) const;
+  // -- Log info
   void LogBold(const std::string& message) const;
-  void LogInfo(const std::string& message) const;
-  void LogWarning(const std::string& message) const;
-  void LogError(const std::string& message) const;
-  void LogCommand(const std::vector<std::string>& command) const;
+  void LogInfo(cmQtAutoGen::GeneratorType genType,
+               const std::string& message) const;
+  // -- Log warning
+  void LogWarning(cmQtAutoGen::GeneratorType genType,
+                  const std::string& message) const;
+  void LogFileWarning(cmQtAutoGen::GeneratorType genType,
+                      const std::string& filename,
+                      const std::string& message) const;
+  // -- Log error
+  void LogError(cmQtAutoGen::GeneratorType genType,
+                const std::string& message) const;
+  void LogFileError(cmQtAutoGen::GeneratorType genType,
+                    const std::string& filename,
+                    const std::string& message) const;
+  void LogCommandError(cmQtAutoGen::GeneratorType genType,
+                       const std::string& message,
+                       const std::vector<std::string>& command,
+                       const std::string& output) const;
+  void LogNameCollisionError(
+    cmQtAutoGen::GeneratorType genType, const std::string& message,
+    const std::multimap<std::string, std::string>& collisions) const;
 
   // -- Utility
   bool NameCollisionTest(
@@ -169,8 +186,8 @@ private:
   bool FileWrite(cmQtAutoGen::GeneratorType genType,
                  const std::string& filename, const std::string& content);
 
-  bool RunCommand(const std::vector<std::string>& command, std::string& output,
-                  bool verbose = true) const;
+  bool RunCommand(const std::vector<std::string>& command,
+                  std::string& output) const;
 
   bool FindHeader(std::string& header, const std::string& testBasePath) const;
 
