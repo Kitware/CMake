@@ -190,6 +190,7 @@ private:
   std::string AutogenIncludeDir;
   // -- Qt environment
   std::string QtMajorVersion;
+  std::string QtMinorVersion;
   std::string MocExecutable;
   std::string UicExecutable;
   std::string RccExecutable;

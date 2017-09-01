@@ -59,86 +59,6 @@ static std::string QuotedCommand(const std::vector<std::string>& command)
   return res;
 }
 
-static void InfoGet(cmMakefile* makefile, const char* key, std::string& value)
-{
-  value = makefile->GetSafeDefinition(key);
-}
-
-static void InfoGet(cmMakefile* makefile, const char* key, bool& value)
-{
-  value = makefile->IsOn(key);
-}
-
-static void InfoGet(cmMakefile* makefile, const char* key,
-                    std::vector<std::string>& list)
-{
-  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition(key), list);
-}
-
-static std::vector<std::string> InfoGetList(cmMakefile* makefile,
-                                            const char* key)
-{
-  std::vector<std::string> list;
-  cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition(key), list);
-  return list;
-}
-
-static std::vector<std::vector<std::string>> InfoGetLists(cmMakefile* makefile,
-                                                          const char* key)
-{
-  std::vector<std::vector<std::string>> lists;
-  {
-    const std::string value = makefile->GetSafeDefinition(key);
-    std::string::size_type pos = 0;
-    while (pos < value.size()) {
-      std::string::size_type next = value.find(cmQtAutoGen::listSep, pos);
-      std::string::size_type length =
-        (next != std::string::npos) ? next - pos : value.size() - pos;
-      // Remove enclosing braces
-      if (length >= 2) {
-        std::string::const_iterator itBeg = value.begin() + (pos + 1);
-        std::string::const_iterator itEnd = itBeg + (length - 2);
-        {
-          std::string subValue(itBeg, itEnd);
-          std::vector<std::string> list;
-          cmSystemTools::ExpandListArgument(subValue, list);
-          lists.push_back(std::move(list));
-        }
-      }
-      pos += length;
-      pos += cmQtAutoGen::listSep.size();
-    }
-  }
-  return lists;
-}
-
-static void InfoGetConfig(cmMakefile* makefile, const char* key,
-                          const std::string& config, std::string& value)
-{
-  const char* valueConf = nullptr;
-  {
-    std::string keyConf = key;
-    if (!config.empty()) {
-      keyConf += "_";
-      keyConf += config;
-    }
-    valueConf = makefile->GetDefinition(keyConf);
-  }
-  if (valueConf == nullptr) {
-    valueConf = makefile->GetSafeDefinition(key);
-  }
-  value = valueConf;
-}
-
-static void InfoGetConfig(cmMakefile* makefile, const char* key,
-                          const std::string& config,
-                          std::vector<std::string>& list)
-{
-  std::string value;
-  InfoGetConfig(makefile, key, config, value);
-  cmSystemTools::ExpandListArgument(value, list);
-}
-
 static std::string SubDirPrefix(const std::string& fileName)
 {
   std::string res(cmSystemTools::GetFilenamePath(fileName));
@@ -282,6 +202,67 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   cmMakefile* makefile, const std::string& targetDirectory,
   const std::string& config)
 {
+  // Lambdas
+  auto InfoGet = [makefile](const char* key) {
+    return makefile->GetSafeDefinition(key);
+  };
+  auto InfoGetBool = [makefile](const char* key) {
+    return makefile->IsOn(key);
+  };
+  auto InfoGetList = [makefile](const char* key) -> std::vector<std::string> {
+    std::vector<std::string> list;
+    cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition(key), list);
+    return list;
+  };
+  auto InfoGetLists =
+    [makefile](const char* key) -> std::vector<std::vector<std::string>> {
+    std::vector<std::vector<std::string>> lists;
+    {
+      const std::string value = makefile->GetSafeDefinition(key);
+      std::string::size_type pos = 0;
+      while (pos < value.size()) {
+        std::string::size_type next = value.find(cmQtAutoGen::listSep, pos);
+        std::string::size_type length =
+          (next != std::string::npos) ? next - pos : value.size() - pos;
+        // Remove enclosing braces
+        if (length >= 2) {
+          std::string::const_iterator itBeg = value.begin() + (pos + 1);
+          std::string::const_iterator itEnd = itBeg + (length - 2);
+          {
+            std::string subValue(itBeg, itEnd);
+            std::vector<std::string> list;
+            cmSystemTools::ExpandListArgument(subValue, list);
+            lists.push_back(std::move(list));
+          }
+        }
+        pos += length;
+        pos += cmQtAutoGen::listSep.size();
+      }
+    }
+    return lists;
+  };
+  auto InfoGetConfig = [makefile, &config](const char* key) -> std::string {
+    const char* valueConf = nullptr;
+    {
+      std::string keyConf = key;
+      if (!config.empty()) {
+        keyConf += '_';
+        keyConf += config;
+      }
+      valueConf = makefile->GetDefinition(keyConf);
+    }
+    if (valueConf == nullptr) {
+      valueConf = makefile->GetSafeDefinition(key);
+    }
+    return std::string(valueConf);
+  };
+  auto InfoGetConfigList =
+    [&InfoGetConfig](const char* key) -> std::vector<std::string> {
+    std::vector<std::string> list;
+    cmSystemTools::ExpandListArgument(InfoGetConfig(key), list);
+    return list;
+  };
+
   std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutogenInfo.cmake";
@@ -292,7 +273,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   }
 
   // -- Meta
-  InfoGetConfig(makefile, "AM_CONFIG_SUFFIX", config, this->ConfigSuffix);
+  this->ConfigSuffix = InfoGetConfig("AM_CONFIG_SUFFIX");
 
   // - Old settings file
   {
@@ -304,28 +285,26 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   }
 
   // - Files and directories
-  InfoGet(makefile, "AM_CMAKE_SOURCE_DIR", this->ProjectSourceDir);
-  InfoGet(makefile, "AM_CMAKE_BINARY_DIR", this->ProjectBinaryDir);
-  InfoGet(makefile, "AM_CMAKE_CURRENT_SOURCE_DIR", this->CurrentSourceDir);
-  InfoGet(makefile, "AM_CMAKE_CURRENT_BINARY_DIR", this->CurrentBinaryDir);
-  InfoGet(makefile, "AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE",
-          this->IncludeProjectDirsBefore);
-  InfoGet(makefile, "AM_BUILD_DIR", this->AutogenBuildDir);
+  this->ProjectSourceDir = InfoGet("AM_CMAKE_SOURCE_DIR");
+  this->ProjectBinaryDir = InfoGet("AM_CMAKE_BINARY_DIR");
+  this->CurrentSourceDir = InfoGet("AM_CMAKE_CURRENT_SOURCE_DIR");
+  this->CurrentBinaryDir = InfoGet("AM_CMAKE_CURRENT_BINARY_DIR");
+  this->IncludeProjectDirsBefore =
+    InfoGetBool("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE");
+  this->AutogenBuildDir = InfoGet("AM_BUILD_DIR");
   if (this->AutogenBuildDir.empty()) {
     this->LogError("AutoGen: Error: Missing autogen build directory ");
     return false;
   }
-  InfoGet(makefile, "AM_SOURCES", this->Sources);
-  InfoGet(makefile, "AM_HEADERS", this->Headers);
+  this->Sources = InfoGetList("AM_SOURCES");
+  this->Headers = InfoGetList("AM_HEADERS");
 
   // - Qt environment
-  InfoGet(makefile, "AM_QT_VERSION_MAJOR", this->QtMajorVersion);
-  if (this->QtMajorVersion.empty()) {
-    InfoGet(makefile, "AM_Qt5Core_VERSION_MAJOR", this->QtMajorVersion);
-  }
-  InfoGet(makefile, "AM_QT_MOC_EXECUTABLE", this->MocExecutable);
-  InfoGet(makefile, "AM_QT_UIC_EXECUTABLE", this->UicExecutable);
-  InfoGet(makefile, "AM_QT_RCC_EXECUTABLE", this->RccExecutable);
+  this->QtMajorVersion = InfoGet("AM_QT_VERSION_MAJOR");
+  this->QtMinorVersion = InfoGet("AM_QT_VERSION_MINOR");
+  this->MocExecutable = InfoGet("AM_QT_MOC_EXECUTABLE");
+  this->UicExecutable = InfoGet("AM_QT_UIC_EXECUTABLE");
+  this->RccExecutable = InfoGet("AM_QT_RCC_EXECUTABLE");
 
   // Check Qt version
   if ((this->QtMajorVersion != "4") && (this->QtMajorVersion != "5")) {
@@ -336,9 +315,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
 
   // - Moc
   if (this->MocEnabled()) {
-    InfoGet(makefile, "AM_MOC_SKIP", this->MocSkipList);
-    InfoGetConfig(makefile, "AM_MOC_DEFINITIONS", config,
-                  this->MocDefinitions);
+    this->MocSkipList = InfoGetList("AM_MOC_SKIP");
+    this->MocDefinitions = InfoGetConfigList("AM_MOC_DEFINITIONS");
 #ifdef _WIN32
     {
       const std::string win32("WIN32");
@@ -347,20 +325,20 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
       }
     }
 #endif
-    InfoGetConfig(makefile, "AM_MOC_INCLUDES", config, this->MocIncludePaths);
-    InfoGet(makefile, "AM_MOC_OPTIONS", this->MocOptions);
-    InfoGet(makefile, "AM_MOC_RELAXED_MODE", this->MocRelaxedMode);
+    this->MocIncludePaths = InfoGetConfigList("AM_MOC_INCLUDES");
+    this->MocOptions = InfoGetList("AM_MOC_OPTIONS");
+    this->MocRelaxedMode = InfoGetBool("AM_MOC_RELAXED_MODE");
     {
-      std::vector<std::string> MocMacroNames;
-      InfoGet(makefile, "AM_MOC_MACRO_NAMES", MocMacroNames);
+      const std::vector<std::string> MocMacroNames =
+        InfoGetList("AM_MOC_MACRO_NAMES");
       for (const std::string& item : MocMacroNames) {
         this->MocMacroFilters.emplace_back(
           item, ("[^a-zA-Z0-9_]" + item).append("[^a-zA-Z0-9_]"));
       }
     }
     {
-      std::vector<std::string> mocDependFilters;
-      InfoGet(makefile, "AM_MOC_DEPEND_FILTERS", mocDependFilters);
+      const std::vector<std::string> mocDependFilters =
+        InfoGetList("AM_MOC_DEPEND_FILTERS");
       // Insert Q_PLUGIN_METADATA dependency filter
       if (this->QtMajorVersion != "4") {
         this->MocDependFilterPush("Q_PLUGIN_METADATA",
@@ -385,18 +363,17 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
         return false;
       }
     }
-    InfoGet(makefile, "AM_MOC_PREDEFS_CMD", this->MocPredefsCmd);
+    this->MocPredefsCmd = InfoGetList("AM_MOC_PREDEFS_CMD");
   }
 
   // - Uic
   if (this->UicEnabled()) {
-    InfoGet(makefile, "AM_UIC_SKIP", this->UicSkipList);
-    InfoGet(makefile, "AM_UIC_SEARCH_PATHS", this->UicSearchPaths);
-    InfoGetConfig(makefile, "AM_UIC_TARGET_OPTIONS", config,
-                  this->UicTargetOptions);
+    this->UicSkipList = InfoGetList("AM_UIC_SKIP");
+    this->UicSearchPaths = InfoGetList("AM_UIC_SEARCH_PATHS");
+    this->UicTargetOptions = InfoGetConfigList("AM_UIC_TARGET_OPTIONS");
     {
-      auto uicFiles = InfoGetList(makefile, "AM_UIC_OPTIONS_FILES");
-      auto uicOptions = InfoGetLists(makefile, "AM_UIC_OPTIONS_OPTIONS");
+      auto uicFiles = InfoGetList("AM_UIC_OPTIONS_FILES");
+      auto uicOptions = InfoGetLists("AM_UIC_OPTIONS_OPTIONS");
       // Compare list sizes
       if (uicFiles.size() == uicOptions.size()) {
         auto fitEnd = uicFiles.cend();
@@ -419,10 +396,10 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
   // - Rcc
   if (this->RccEnabled()) {
     // File lists
-    auto sources = InfoGetList(makefile, "AM_RCC_SOURCES");
-    auto builds = InfoGetList(makefile, "AM_RCC_BUILDS");
-    auto options = InfoGetLists(makefile, "AM_RCC_OPTIONS");
-    auto inputs = InfoGetLists(makefile, "AM_RCC_INPUTS");
+    auto sources = InfoGetList("AM_RCC_SOURCES");
+    auto builds = InfoGetList("AM_RCC_BUILDS");
+    auto options = InfoGetLists("AM_RCC_OPTIONS");
+    auto inputs = InfoGetLists("AM_RCC_INPUTS");
 
     if (sources.size() != builds.size()) {
       std::ostringstream ost;
