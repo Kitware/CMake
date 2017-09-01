@@ -3,7 +3,10 @@
 
 include(Compiler/CMakeCommonCompilerMacros)
 
-if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.10.25017)
+if ((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.0.24215.1 AND
+     CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10) OR
+   CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.10.25017)
+
   # VS 2015 Update 3 and above support language standard level flags,
   # with the default and minimum level being C++14.
   set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "")
