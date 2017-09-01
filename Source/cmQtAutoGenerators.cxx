@@ -21,7 +21,6 @@
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 #if defined(__APPLE__)
@@ -148,15 +147,15 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   snapshot.GetDirectory().SetCurrentBinary(targetDirectory);
   snapshot.GetDirectory().SetCurrentSource(targetDirectory);
 
-  CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(&gg, snapshot));
-  gg.SetCurrentMakefile(mf.get());
+  std::unique_ptr<cmMakefile> makefile(new cmMakefile(&gg, snapshot));
+  gg.SetCurrentMakefile(makefile.get());
 
   bool success = false;
-  if (this->ReadAutogenInfoFile(mf.get(), targetDirectory, config)) {
+  if (this->ReadAutogenInfoFile(makefile.get(), targetDirectory, config)) {
     // Read old settings
-    this->SettingsFileRead(mf.get());
+    this->SettingsFileRead(makefile.get());
     // Init and run
-    this->Init(mf.get());
+    this->Init(makefile.get());
     if (this->RunAutogen()) {
       // Write current settings
       if (this->SettingsFileWrite()) {
