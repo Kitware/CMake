@@ -138,6 +138,8 @@ Options
 
 .. include:: OPTIONS_HELP.txt
 
+.. _`Build Tool Mode`:
+
 Build Tool Mode
 ===============
 
