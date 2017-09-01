@@ -1032,6 +1032,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       testSystemTools
       testCommandLineArguments
       testCommandLineArguments1
+      testDirectory
       )
     IF(KWSYS_STL_HAS_WSTRING)
       SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
