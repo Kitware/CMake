@@ -2269,11 +2269,7 @@ bool SystemTools::CopyADirectory(const std::string& source,
                                  const std::string& destination, bool always)
 {
   Directory dir;
-#ifdef _WIN32
-  dir.Load(Encoding::ToNarrow(Encoding::ToWindowsExtendedPath(source)));
-#else
   dir.Load(source);
-#endif
   size_t fileNum;
   if (!SystemTools::MakeDirectory(destination)) {
     return false;
@@ -2626,11 +2622,7 @@ bool SystemTools::RemoveADirectory(const std::string& source)
   }
 
   Directory dir;
-#ifdef _WIN32
-  dir.Load(Encoding::ToNarrow(Encoding::ToWindowsExtendedPath(source)));
-#else
   dir.Load(source);
-#endif
   size_t fileNum;
   for (fileNum = 0; fileNum < dir.GetNumberOfFiles(); ++fileNum) {
     if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)), ".") &&
