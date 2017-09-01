@@ -1063,23 +1063,18 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     // Open and write file
     cmsys::ofstream ofs(infoFile.c_str(), std::ios::app);
     if (ofs) {
+      auto OfsWriteMap = [&ofs](
+        const char* key, const std::map<std::string, std::string>& map) {
+        for (const auto& item : map) {
+          ofs << "set(" << key << "_" << item.first << " "
+              << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
+        }
+      };
       ofs << "# Configuration specific options\n";
-      for (const auto& item : configSuffix) {
-        ofs << "set(AM_CONFIG_SUFFIX_" << item.first << " "
-            << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
-      }
-      for (const auto& item : setup.ConfigMocDefines) {
-        ofs << "set(AM_MOC_DEFINITIONS_" << item.first << " "
-            << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
-      }
-      for (const auto& item : setup.ConfigMocIncludes) {
-        ofs << "set(AM_MOC_INCLUDES_" << item.first << " "
-            << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
-      }
-      for (const auto& item : setup.ConfigUicOptions) {
-        ofs << "set(AM_UIC_TARGET_OPTIONS_" << item.first << " "
-            << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
-      }
+      OfsWriteMap("AM_CONFIG_SUFFIX", configSuffix);
+      OfsWriteMap("AM_MOC_DEFINITIONS", setup.ConfigMocDefines);
+      OfsWriteMap("AM_MOC_INCLUDES", setup.ConfigMocIncludes);
+      OfsWriteMap("AM_UIC_TARGET_OPTIONS", setup.ConfigUicOptions);
     } else {
       // File open error
       std::string error = "Internal CMake error when trying to open file: ";
