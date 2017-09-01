@@ -33,7 +33,7 @@ static CatToErrorType cmCTestMemCheckBoundsChecker[] = {
 
 static void xmlReportError(int line, const char* msg, void* data)
 {
-  cmCTest* ctest = reinterpret_cast<cmCTest*>(data);
+  cmCTest* ctest = static_cast<cmCTest*>(data);
   cmCTestLog(ctest, ERROR_MESSAGE, "Error parsing XML in stream at line "
                << line << ": " << msg << std::endl);
 }
