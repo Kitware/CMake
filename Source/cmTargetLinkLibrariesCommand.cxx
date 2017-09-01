@@ -366,6 +366,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
 
       if (tgt && (tgt->GetType() != cmStateEnums::STATIC_LIBRARY) &&
           (tgt->GetType() != cmStateEnums::SHARED_LIBRARY) &&
+          (tgt->GetType() != cmStateEnums::UNKNOWN_LIBRARY) &&
           (tgt->GetType() != cmStateEnums::INTERFACE_LIBRARY) &&
           !tgt->IsExecutableWithExports()) {
         std::ostringstream e;
