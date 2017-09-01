@@ -18,6 +18,7 @@ class cmMakefile;
 
 class cmQtAutoGenerators
 {
+  CM_DISABLE_COPY(cmQtAutoGenerators)
 public:
   cmQtAutoGenerators();
   bool Run(const std::string& targetDirectory, const std::string& config);
