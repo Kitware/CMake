@@ -39,6 +39,17 @@ public:
   virtual std::string BufferMessage(std::string& rawBuffer) = 0;
 
   /***
+   * Called to properly buffer an outgoing message.
+   *
+   * @param rawBuffer Message to format in the correct way
+   *
+   * @return Formatted message
+   */
+  virtual std::string BufferOutMessage(const std::string& rawBuffer) const
+  {
+    return rawBuffer;
+  };
+  /***
    * Resets the internal state of the buffering
    */
   virtual void clear();
@@ -100,7 +111,12 @@ public:
   uv_stream_t* WriteStream = nullptr;
 
   static void on_close(uv_handle_t* handle);
-  static void on_close_delete(uv_handle_t* handle);
+
+  template <typename T>
+  static void on_close_delete(uv_handle_t* handle)
+  {
+    delete reinterpret_cast<T*>(handle);
+  }
 
 protected:
   std::string RawReadBuffer;

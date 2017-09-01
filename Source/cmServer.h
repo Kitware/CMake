@@ -37,13 +37,12 @@ public:
    * This should almost always be called by the given connections
    * directly.
    *
-   * @param connection The connectiont the request was received on
+   * @param connection The connection the request was received on
    * @param request The actual request
    */
   virtual void ProcessRequest(cmConnection* connection,
                               const std::string& request) = 0;
   virtual void OnConnected(cmConnection* connection);
-  virtual void OnDisconnect();
 
   /***
    * Start a dedicated thread. If this is used to start the server, it will
@@ -62,10 +61,21 @@ public:
   void OnDisconnect(cmConnection* pConnection);
 
 protected:
+  mutable uv_rwlock_t ConnectionsMutex;
   std::vector<std::unique_ptr<cmConnection>> Connections;
 
   bool ServeThreadRunning = false;
   uv_thread_t ServeThread;
+  uv_async_t ShutdownSignal;
+#ifndef NDEBUG
+public:
+  // When the server starts it will mark down it's current thread ID,
+  // which is useful in other contexts to just assert that operations
+  // are performed on that same thread.
+  uv_thread_t ServeThreadId = {};
+
+protected:
+#endif
 
   uv_loop_t Loop;
 
@@ -139,22 +149,6 @@ private:
 
   cmServerProtocol* Protocol = nullptr;
   std::vector<cmServerProtocol*> SupportedProtocols;
-
-  std::string DataBuffer;
-  std::string JsonData;
-
-  typedef union
-  {
-    uv_tty_t tty;
-    uv_pipe_t pipe;
-  } InOutUnion;
-
-  InOutUnion Input;
-  InOutUnion Output;
-  uv_stream_t* InputStream = nullptr;
-  uv_stream_t* OutputStream = nullptr;
-
-  mutable bool Writing = false;
 
   friend class cmServerProtocol;
   friend class cmServerRequest;

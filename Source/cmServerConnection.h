@@ -25,6 +25,7 @@ class cmServerBufferStrategy : public cmConnectionBufferStrategy
 {
 public:
   std::string BufferMessage(std::string& rawBuffer) override;
+  std::string BufferOutMessage(const std::string& rawBuffer) const override;
 
 private:
   std::string RequestBuffer;
@@ -45,16 +46,8 @@ public:
   bool OnServeStart(std::string* pString) override;
 
 private:
-  typedef union
-  {
-    uv_tty_t* tty;
-    uv_pipe_t* pipe;
-  } InOutUnion;
-
-  bool usesTty = false;
-
-  InOutUnion Input;
-  InOutUnion Output;
+  void SetupStream(uv_stream_t*& stream, int file_id);
+  void ShutdownStream(uv_stream_t*& stream);
 };
 
 /***

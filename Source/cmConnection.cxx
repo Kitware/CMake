@@ -38,11 +38,6 @@ void cmEventBasedConnection::on_read(uv_stream_t* stream, ssize_t nread,
   delete[](buf->base);
 }
 
-void cmEventBasedConnection::on_close_delete(uv_handle_t* handle)
-{
-  delete handle;
-}
-
 void cmEventBasedConnection::on_close(uv_handle_t* /*handle*/)
 {
 }
@@ -72,9 +67,19 @@ bool cmEventBasedConnection::IsOpen() const
   return this->WriteStream != nullptr;
 }
 
-void cmEventBasedConnection::WriteData(const std::string& data)
+void cmEventBasedConnection::WriteData(const std::string& _data)
 {
+#ifndef NDEBUG
+  auto curr_thread_id = uv_thread_self();
+  assert(this->Server);
+  assert(uv_thread_equal(&curr_thread_id, &this->Server->ServeThreadId));
+#endif
+
+  auto data = _data;
   assert(this->WriteStream);
+  if (BufferStrategy) {
+    data = BufferStrategy->BufferOutMessage(data);
+  }
 
   auto ds = data.size();
 
@@ -119,7 +124,9 @@ void cmEventBasedConnection::OnDisconnect(int onerror)
 {
   (void)onerror;
   this->OnConnectionShuttingDown();
-  this->Server->OnDisconnect(this);
+  if (this->Server) {
+    this->Server->OnDisconnect(this);
+  }
 }
 
 cmConnection::~cmConnection()
@@ -128,6 +135,7 @@ cmConnection::~cmConnection()
 
 bool cmConnection::OnConnectionShuttingDown()
 {
+  this->Server = nullptr;
   return true;
 }
 
@@ -149,9 +157,12 @@ bool cmConnection::OnServeStart(std::string* errString)
 
 bool cmEventBasedConnection::OnConnectionShuttingDown()
 {
-  this->WriteStream->data = nullptr;
-  this->ReadStream->data = nullptr;
-
+  if (this->WriteStream) {
+    this->WriteStream->data = nullptr;
+  }
+  if (this->ReadStream) {
+    this->ReadStream->data = nullptr;
+  }
   this->ReadStream = nullptr;
   this->WriteStream = nullptr;
   return true;
