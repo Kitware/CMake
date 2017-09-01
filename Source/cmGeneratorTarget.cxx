@@ -158,7 +158,7 @@ const char* cmGeneratorTarget::GetSourcesProperty() const
   }
   static std::string value;
   value.clear();
-  value = cmJoin(values, "");
+  value = cmJoin(values, ";");
   return value.c_str();
 }
 
