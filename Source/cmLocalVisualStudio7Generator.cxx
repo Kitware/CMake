@@ -526,6 +526,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] = {
   { "TargetMachine", "MACHINE:SH5", "Machine SH5", "15", 0 },
   { "TargetMachine", "MACHINE:THUMB", "Machine THUMB", "16", 0 },
   { "TargetMachine", "MACHINE:X64", "Machine x64", "17", 0 },
+  { "TargetMachine", "MACHINE:ARM64", "Machine ARM64", "18", 0 },
   { "TurnOffAssemblyGeneration", "NOASSEMBLY",
     "No assembly even if CLR information is present in objects.", "true", 0 },
   { "ModuleDefinitionFile", "DEF:", "add an export def file", "",

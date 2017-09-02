@@ -114,6 +114,9 @@
 # elif defined(_M_IX86)
 #  define ARCHITECTURE_ID "X86"
 
+# elif defined(_M_ARM64)
+#  define ARCHITECTURE_ID "ARM64"
+
 # elif defined(_M_ARM)
 #  if _M_ARM == 4
 #   define ARCHITECTURE_ID "ARMV4I"

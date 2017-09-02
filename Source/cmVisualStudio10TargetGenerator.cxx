@@ -3893,6 +3893,10 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
     this->WriteString("<AppContainerApplication>true"
                       "</AppContainerApplication>\n",
                       2);
+  } else if (this->Platform == "ARM64") {
+    this->WriteString("<WindowsSDKDesktopARM64Support>true"
+                      "</WindowsSDKDesktopARM64Support>\n",
+                      2);
   } else if (this->Platform == "ARM") {
     this->WriteString("<WindowsSDKDesktopARMSupport>true"
                       "</WindowsSDKDesktopARMSupport>\n",
