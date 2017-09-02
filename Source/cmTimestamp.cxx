@@ -123,7 +123,9 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
 
   switch (flag) {
     case 'a':
+    case 'A':
     case 'b':
+    case 'B':
     case 'd':
     case 'H':
     case 'I':
