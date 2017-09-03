@@ -2,22 +2,21 @@
 
 namespace ccc {
 
-void Item::go()
-{
-}
-
-class MocTest : public QObject
+class MocLocal : public QObject
 {
   Q_OBJECT;
-  Q_SLOT
-  void go();
+
+public:
+  MocLocal() = default;
+  ~MocLocal() = default;
 };
 
-void MocTest::go()
+void Item::go()
 {
+  MocLocal obj;
 }
 }
 
 // Include own moc files
-#include "item.moc"
+#include "ccc/item.moc"
 #include "moc_item.cpp"
