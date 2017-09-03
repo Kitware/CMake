@@ -1,4 +1,6 @@
 #include "item.hpp"
+// Include ui_view.h only in source
+#include <bbb/ui_view.h>
 
 namespace bbb {
 
@@ -13,6 +15,7 @@ public:
 
 void Item::go()
 {
+  Ui_ViewBBB ui;
   MocLocal obj;
 }
 }

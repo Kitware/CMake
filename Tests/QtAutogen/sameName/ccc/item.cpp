@@ -1,4 +1,6 @@
 #include "item.hpp"
+// Include ui_view.h in source and header
+#include <ccc/ui_view.h>
 
 namespace ccc {
 
@@ -13,6 +15,7 @@ public:
 
 void Item::go()
 {
+  Ui_ViewCCC ui;
   MocLocal obj;
 }
 }

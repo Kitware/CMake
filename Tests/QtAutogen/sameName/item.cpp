@@ -1,4 +1,6 @@
 #include "item.hpp"
+// Include ui_view.h in source and header
+#include <ui_view.h>
 
 class MocLocal : public QObject
 {
@@ -11,6 +13,7 @@ public:
 
 void Item::go()
 {
+  Ui_View ui;
   MocLocal obj;
 }
 

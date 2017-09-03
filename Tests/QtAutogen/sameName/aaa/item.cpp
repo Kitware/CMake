@@ -1,4 +1,5 @@
 #include "item.hpp"
+// Include ui_view.h only in header
 
 namespace aaa {
 
@@ -13,6 +14,7 @@ public:
 
 void Item::go()
 {
+  Ui_ViewAAA ui;
   MocLocal obj;
 }
 }
