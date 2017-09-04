@@ -186,7 +186,7 @@ else()
   if(_MSVC_C_ARCHITECTURE_FAMILY STREQUAL "ARM" OR _MSVC_CXX_ARCHITECTURE_FAMILY STREQUAL "ARM")
     set(CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib")
   elseif(MSVC_VERSION GREATER 1310)
-    if(CMAKE_VS_PLATFORM_TOOLSET MATCHES "(v[0-9]+_clang_.*|LLVM-vs[0-9]+.*)")
+    if(CMAKE_VS_PLATFORM_TOOLSET MATCHES "v[0-9]+_clang_.*")
       # Clang/C2 in MSVC14 Update 1 seems to not support -fsantinize (yet?)
       # set(_RTC1 "-fsantinize=memory,safe-stack")
       set(_FLAGS_CXX " -frtti -fexceptions")
@@ -285,7 +285,7 @@ macro(__windows_compiler_msvc lang)
 
   if("x${lang}" STREQUAL "xC" OR
       "x${lang}" STREQUAL "xCXX")
-    if(CMAKE_VS_PLATFORM_TOOLSET MATCHES "(v[0-9]+_clang_.*|LLVM-vs[0-9]+.*)")
+    if(CMAKE_VS_PLATFORM_TOOLSET MATCHES "v[0-9]+_clang_.*")
       # note: MSVC 14 2015 Update 1 sets -fno-ms-compatibility by default, but this does not allow one to compile many projects
       # that include MS's own headers. CMake itself is affected project too.
       string(APPEND CMAKE_${lang}_FLAGS_INIT " ${_PLATFORM_DEFINES}${_PLATFORM_DEFINES_${lang}} -fms-extensions -fms-compatibility -D_WINDOWS -Wall${_FLAGS_${lang}}")
