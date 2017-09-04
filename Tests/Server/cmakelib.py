@@ -1,5 +1,5 @@
 from __future__ import print_function
-import sys, subprocess, json, os, select
+import sys, subprocess, json, os, select, shutil, time, socket
 
 termwidth = 150
 
@@ -40,25 +40,35 @@ def col_print(title, array):
 
 filterPacket = lambda x: x
 
+STDIN = 0
+PIPE = 1
+
+communicationMethods = [STDIN]
+
+if hasattr(socket, 'AF_UNIX'):
+  communicationMethods.append(PIPE)
+
 def defaultExitWithError(proc):
   data = ""
   try:
-    while select.select([proc.stdout], [], [], 3.)[0]:
-      data = data + proc.stdout.read(1)
+    while select.select([proc.outPipe], [], [], 3.)[0]:
+      data = data + proc.outPipe.read(1)
     if len(data):
       print("Rest of raw buffer from server:")
       printServer(data)
   except:
     pass
-  proc.stdout.close()
-  proc.stdin.close()
+  proc.outPipe.close()
+  proc.inPipe.close()
   proc.kill()
   sys.exit(1)
 
 exitWithError = lambda proc: defaultExitWithError(proc)
 
+serverTag = "SERVER"
+
 def printServer(*args):
-    print("SERVER>", *args)
+    print(serverTag + ">", *args)
     print()
     sys.stdout.flush()
 
@@ -71,7 +81,7 @@ def waitForRawMessage(cmakeCommand):
   stdoutdata = ""
   payload = ""
   while not cmakeCommand.poll():
-    stdoutdataLine = cmakeCommand.stdout.readline()
+    stdoutdataLine = cmakeCommand.outPipe.readline()
     if stdoutdataLine:
       stdoutdata += stdoutdataLine.decode('utf-8')
     else:
@@ -106,26 +116,51 @@ def writeRawData(cmakeCommand, content):
   if print_communication:
     printClient(content, "(Use \\r\\n:", rn, ")")
 
-  cmakeCommand.stdin.write(payload.encode('utf-8'))
-  cmakeCommand.stdin.flush()
+  cmakeCommand.write(payload.encode('utf-8'))
+
 writeRawData.counter = 0
 
 def writePayload(cmakeCommand, obj):
   writeRawData(cmakeCommand, json.dumps(obj))
 
-def initServerProc(cmakeCommand):
-  cmakeCommand = subprocess.Popen([cmakeCommand, "-E", "server", "--experimental", "--debug"],
-                                  stdin=subprocess.PIPE,
-                                  stdout=subprocess.PIPE)
+def getPipeName():
+  return "/tmp/server-test-socket"
+
+def attachPipe(cmakeCommand, pipeName):
+  time.sleep(1)
+  sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+  sock.connect(pipeName)
+  global serverTag
+  serverTag = "SERVER(PIPE)"
+  cmakeCommand.outPipe = sock.makefile()
+  cmakeCommand.inPipe = sock
+  cmakeCommand.write = cmakeCommand.inPipe.sendall
+
+def writeAndFlush(pipe, val):
+  pipe.write(val)
+  pipe.flush()
+
+def initServerProc(cmakeCommand, comm):
+  if comm == PIPE:
+    pipeName = getPipeName()
+    cmakeCommand = subprocess.Popen([cmakeCommand, "-E", "server", "--experimental", "--pipe=" + pipeName])
+    attachPipe(cmakeCommand, pipeName)
+  else:
+    cmakeCommand = subprocess.Popen([cmakeCommand, "-E", "server", "--experimental", "--debug"],
+                                    stdin=subprocess.PIPE,
+                                    stdout=subprocess.PIPE)
+    cmakeCommand.outPipe = cmakeCommand.stdout
+    cmakeCommand.inPipe = cmakeCommand.stdin
+    cmakeCommand.write = lambda val: writeAndFlush(cmakeCommand.inPipe, val)
 
   packet = waitForRawMessage(cmakeCommand)
   if packet == None:
     print("Not in server mode")
-    sys.exit(1)
+    sys.exit(2)
 
   if packet['type'] != 'hello':
     print("No hello message")
-    sys.exit(1)
+    sys.exit(3)
 
   return cmakeCommand
 
@@ -159,25 +194,27 @@ def waitForReply(cmakeCommand, originalType, cookie, skipProgress):
     packet = waitForRawMessage(cmakeCommand)
     t = packet['type']
     if packet['cookie'] != cookie or packet['inReplyTo'] != originalType:
-      sys.exit(1)
+      print("cookie or inReplyTo mismatch")
+      sys.exit(4)
     if t == 'message' or t == 'progress':
       if skipProgress:
         continue
     if t == 'reply':
         break
-    sys.exit(1)
+    print("Unrecognized message", packet)
+    sys.exit(5)
 
   return packet
 
 def waitForError(cmakeCommand, originalType, cookie, message):
   packet = waitForRawMessage(cmakeCommand)
   if packet['cookie'] != cookie or packet['type'] != 'error' or packet['inReplyTo'] != originalType or packet['errorMessage'] != message:
-    sys.exit(1)
+    sys.exit(6)
 
 def waitForProgress(cmakeCommand, originalType, cookie, current, message):
   packet = waitForRawMessage(cmakeCommand)
   if packet['cookie'] != cookie or packet['type'] != 'progress' or packet['inReplyTo'] != originalType or packet['progressCurrent'] != current or packet['progressMessage'] != message:
-    sys.exit(1)
+    sys.exit(7)
 
 def handshake(cmakeCommand, major, minor, source, build, generator, extraGenerator):
   version = { 'major': major }
@@ -202,9 +239,9 @@ def validateGlobalSettings(cmakeCommand, cmakeCommandPath, data):
   versionString = version['string']
   vs = str(version['major']) + '.' + str(version['minor']) + '.' + str(version['patch'])
   if (versionString != vs and not versionString.startswith(vs + '-')):
-    sys.exit(1)
+    sys.exit(8)
   if (versionString != cmakeVersion):
-    sys.exit(1)
+    sys.exit(9)
 
   # validate generators:
   generatorObjects = capabilities['generators']
@@ -237,16 +274,16 @@ def validateGlobalSettings(cmakeCommand, cmakeCommandPath, data):
 
   for gen in cmakeGenerators:
     if (not gen in generators):
-        sys.exit(1)
+        sys.exit(10)
 
   gen = packet['generator']
   if (gen != '' and not (gen in generators)):
-    sys.exit(1)
+    sys.exit(11)
 
   for i in data:
     print("Validating", i)
     if (packet[i] != data[i]):
-      sys.exit(1)
+      sys.exit(12)
 
 def validateCache(cmakeCommand, data):
   packet = waitForReply(cmakeCommand, 'cache', '', False)
@@ -296,8 +333,8 @@ def handleBasicMessage(proc, obj, debug):
 
 def shutdownProc(proc):
   # Tell the server to exit.
-  proc.stdin.close()
-  proc.stdout.close()
+  proc.inPipe.close()
+  proc.outPipe.close()
 
   # Wait for the server to exit.
   # If this version of python supports it, terminate the server after a timeout.
