@@ -1,5 +1,5 @@
 from __future__ import print_function
-import sys, subprocess, json
+import sys, subprocess, json, os, select
 
 termwidth = 150
 
@@ -38,6 +38,35 @@ def col_print(title, array):
   for index in range(numRows):
     print(indent + pad.join(item.ljust(maxitemwidth) for item in array[index::numRows]))
 
+filterPacket = lambda x: x
+
+def defaultExitWithError(proc):
+  data = ""
+  try:
+    while select.select([proc.stdout], [], [], 3.)[0]:
+      data = data + proc.stdout.read(1)
+    if len(data):
+      print("Rest of raw buffer from server:")
+      printServer(data)
+  except:
+    pass
+  proc.stdout.close()
+  proc.stdin.close()
+  proc.kill()
+  sys.exit(1)
+
+exitWithError = lambda proc: defaultExitWithError(proc)
+
+def printServer(*args):
+    print("SERVER>", *args)
+    print()
+    sys.stdout.flush()
+
+def printClient(*args):
+    print("CLIENT>", *args)
+    print()
+    sys.stdout.flush()
+
 def waitForRawMessage(cmakeCommand):
   stdoutdata = ""
   payload = ""
@@ -50,12 +79,16 @@ def waitForRawMessage(cmakeCommand):
     begin = stdoutdata.find('[== "CMake Server" ==[\n')
     end = stdoutdata.find(']== "CMake Server" ==]')
 
-    if (begin != -1 and end != -1):
+    if begin != -1 and end != -1:
       begin += len('[== "CMake Server" ==[\n')
       payload = stdoutdata[begin:end]
-      if print_communication:
-        print("\nSERVER>", json.loads(payload), "\n")
-      return json.loads(payload)
+      jsonPayload = json.loads(payload)
+      filteredPayload = filterPacket(jsonPayload)
+      if print_communication and filteredPayload:
+        printServer(filteredPayload)
+      if filteredPayload is not None or jsonPayload is None:
+          return jsonPayload
+      stdoutdata = stdoutdata[(end+len(']== "CMake Server" ==]')):]
 
 def writeRawData(cmakeCommand, content):
   writeRawData.counter += 1
@@ -71,7 +104,8 @@ def writeRawData(cmakeCommand, content):
     payload = payload.replace('\n', '\r\n')
 
   if print_communication:
-    print("\nCLIENT>", content, "(Use \\r\\n:", rn, ")\n")
+    printClient(content, "(Use \\r\\n:", rn, ")")
+
   cmakeCommand.stdin.write(payload.encode('utf-8'))
   cmakeCommand.stdin.flush()
 writeRawData.counter = 0
@@ -79,7 +113,7 @@ writeRawData.counter = 0
 def writePayload(cmakeCommand, obj):
   writeRawData(cmakeCommand, json.dumps(obj))
 
-def initProc(cmakeCommand):
+def initServerProc(cmakeCommand):
   cmakeCommand = subprocess.Popen([cmakeCommand, "-E", "server", "--experimental", "--debug"],
                                   stdin=subprocess.PIPE,
                                   stdout=subprocess.PIPE)
@@ -115,7 +149,8 @@ def waitForMessage(cmakeCommand, expected):
   packet = ordered(waitForRawMessage(cmakeCommand))
 
   if packet != data:
-    sys.exit(-1)
+    print ("Received unexpected message; test failed")
+    exitWithError(cmakeCommand)
   return packet
 
 def waitForReply(cmakeCommand, originalType, cookie, skipProgress):
@@ -236,3 +271,43 @@ def validateCache(cmakeCommand, data):
   if (not hadHomeDir):
     print('No CMAKE_HOME_DIRECTORY found in cache.')
     sys.exit(1)
+
+def handleBasicMessage(proc, obj, debug):
+  if 'sendRaw' in obj:
+    data = obj['sendRaw']
+    if debug: print("Sending raw:", data)
+    writeRawData(proc, data)
+    return True
+  elif 'send' in obj:
+    data = obj['send']
+    if debug: print("Sending:", json.dumps(data))
+    writePayload(proc, data)
+    return True
+  elif 'recv' in obj:
+    data = obj['recv']
+    if debug: print("Waiting for:", json.dumps(data))
+    waitForMessage(proc, data)
+    return True
+  elif 'message' in obj:
+    print("MESSAGE:", obj["message"])
+    sys.stdout.flush()
+    return True
+  return False
+
+def shutdownProc(proc):
+  # Tell the server to exit.
+  proc.stdin.close()
+  proc.stdout.close()
+
+  # Wait for the server to exit.
+  # If this version of python supports it, terminate the server after a timeout.
+  try:
+    proc.wait(timeout=5)
+  except TypeError:
+    proc.wait()
+  except:
+    proc.terminate()
+    raise
+
+  print('cmake-server exited: %d' % proc.returncode)
+  sys.exit(proc.returncode)
