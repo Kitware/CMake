@@ -1,14 +1,15 @@
-# When a file listed in a .qrc file changes the target must be rebuilt
+# When a .qrc or a file listed in a .qrc file changes,
+# the target must be rebuilt
 set(timeformat "%Y%j%H%M%S")
-set(rccDependsSrcDir "${CMAKE_CURRENT_SOURCE_DIR}/rccDepends")
-set(rccDependsBinDir "${CMAKE_CURRENT_BINARY_DIR}/rccDepends")
+set(rccDepSD "${CMAKE_CURRENT_SOURCE_DIR}/rccDepends")
+set(rccDepBD "${CMAKE_CURRENT_BINARY_DIR}/rccDepends")
 
 # Initial build
-configure_file(${rccDependsSrcDir}/res1a.qrc.in ${rccDependsBinDir}/res1.qrc COPYONLY)
-configure_file(${rccDependsSrcDir}/res2a.qrc.in ${rccDependsBinDir}/res2.qrc.in COPYONLY)
+configure_file(${rccDepSD}/resPlainA.qrc.in ${rccDepBD}/resPlain.qrc COPYONLY)
+configure_file(${rccDepSD}/resGenA.qrc.in ${rccDepBD}/resGen.qrc.in COPYONLY)
 try_compile(RCC_DEPENDS
-  "${rccDependsBinDir}"
-  "${rccDependsSrcDir}"
+  "${rccDepBD}"
+  "${rccDepSD}"
   rccDepends
   CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
               "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
@@ -18,74 +19,113 @@ try_compile(RCC_DEPENDS
 if (NOT RCC_DEPENDS)
   message(SEND_ERROR "Initial build of rccDepends failed. Output: ${output}")
 endif()
-# Get name of the output binary
-file(STRINGS "${rccDependsBinDir}/target.txt" targetList ENCODING UTF-8)
-list(GET targetList 0 rccDependsBin)
 
-file(TIMESTAMP "${rccDependsBin}" timeBegin "${timeformat}")
-# Sleep, touch regular qrc input file, rebuild and compare timestamp
-execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${rccDependsBinDir}/res1/input.txt")
-execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${rccDependsBinDir}" RESULT_VARIABLE result)
+# Get name of the output binaries
+file(STRINGS "${rccDepBD}/targetPlain.txt" targetListPlain ENCODING UTF-8)
+file(STRINGS "${rccDepBD}/targetGen.txt" targetListGen ENCODING UTF-8)
+list(GET targetListPlain 0 rccDepBinPlain)
+list(GET targetListGen 0 rccDepBinGen)
+message("Target that uses a plain .qrc file is:\n  ${rccDepBinPlain}")
+message("Target that uses a GENERATED .qrc file is:\n  ${rccDepBinGen}")
+
+
+message("Changing a resource files listed in the .qrc file")
+# - Acquire binary timestamps before the build
+file(TIMESTAMP "${rccDepBinPlain}" rdPlainBefore "${timeformat}")
+file(TIMESTAMP "${rccDepBinGen}" rdGenBefore "${timeformat}")
+# - Ensure that the timestamp will change
+# - Change a resource files listed in the .qrc file
+# - Rebuild
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${rccDepBD}/resPlain/input.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${rccDepBD}/resGen/input.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${rccDepBD}" RESULT_VARIABLE result)
 if (result)
   message(SEND_ERROR "Second build of rccDepends failed.")
 endif()
-file(TIMESTAMP "${rccDependsBin}" timeStep1 "${timeformat}")
-if (NOT timeStep1 GREATER timeBegin)
-  message(SEND_ERROR "File (${rccDependsBin}) should have changed in the first step!")
+# - Acquire binary timestamps after the build
+file(TIMESTAMP "${rccDepBinPlain}" rdPlainAfter "${timeformat}")
+file(TIMESTAMP "${rccDepBinGen}" rdGenAfter "${timeformat}")
+# - Test if timestamps changed
+if (NOT rdPlainAfter GREATER rdPlainBefore)
+  message(SEND_ERROR "Plain .qrc binary ${rccDepBinPlain}) should have changed!")
 endif()
-# Sleep, update regular qrc file, rebuild and compare timestamp
-execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
-configure_file(${rccDependsSrcDir}/res1b.qrc.in ${rccDependsBinDir}/res1.qrc COPYONLY)
-execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${rccDependsBinDir}" RESULT_VARIABLE result)
+if (NOT rdGenAfter GREATER rdGenBefore)
+  message(SEND_ERROR "GENERATED .qrc binary ${rccDepBinGen} should have changed!")
+endif()
+
+
+message("Changing a the .qrc file")
+# - Acquire binary timestamps before the build
+file(TIMESTAMP "${rccDepBinPlain}" rdPlainBefore "${timeformat}")
+file(TIMESTAMP "${rccDepBinGen}" rdGenBefore "${timeformat}")
+# - Ensure that the timestamp will change
+# - Change the .qrc file
+# - Rebuild
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
+configure_file(${rccDepSD}/resPlainB.qrc.in ${rccDepBD}/resPlain.qrc COPYONLY)
+configure_file(${rccDepSD}/resGenB.qrc.in ${rccDepBD}/resGen.qrc.in COPYONLY)
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${rccDepBD}" RESULT_VARIABLE result)
 if (result)
   message(SEND_ERROR "Third build of rccDepends failed.")
 endif()
-file(TIMESTAMP "${rccDependsBin}" timeStep2 "${timeformat}")
-if (NOT timeStep2 GREATER timeStep1)
-  message(SEND_ERROR "File (${rccDependsBin}) should have changed in the second step!")
+# - Acquire binary timestamps after the build
+file(TIMESTAMP "${rccDepBinPlain}" rdPlainAfter "${timeformat}")
+file(TIMESTAMP "${rccDepBinGen}" rdGenAfter "${timeformat}")
+# - Test if timestamps changed
+if (NOT rdPlainAfter GREATER rdPlainBefore)
+  message(SEND_ERROR "Plain .qrc binary ${rccDepBinPlain}) should have changed!")
 endif()
-# Sleep, touch regular qrc newly added input file, rebuild and compare timestamp
-execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${rccDependsBinDir}/res1/inputAdded.txt")
-execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${rccDependsBinDir}" RESULT_VARIABLE result)
+if (NOT rdGenAfter GREATER rdGenBefore)
+  message(SEND_ERROR "GENERATED .qrc binary ${rccDepBinGen} should have changed!")
+endif()
+
+
+message("Changing a newly added resource files listed in the .qrc file")
+# - Acquire binary timestamps before the build
+file(TIMESTAMP "${rccDepBinPlain}" rdPlainBefore "${timeformat}")
+file(TIMESTAMP "${rccDepBinGen}" rdGenBefore "${timeformat}")
+# - Ensure that the timestamp will change
+# - Change a newly added resource files listed in the .qrc file
+# - Rebuild
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${rccDepBD}/resPlain/inputAdded.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${rccDepBD}/resGen/inputAdded.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${rccDepBD}" RESULT_VARIABLE result)
 if (result)
   message(SEND_ERROR "Fourth build of rccDepends failed.")
 endif()
-file(TIMESTAMP "${rccDependsBin}" timeStep3 "${timeformat}")
-if (NOT timeStep3 GREATER timeStep2)
-  message(SEND_ERROR "File (${rccDependsBin}) should have changed in the third step!")
+# - Acquire binary timestamps after the build
+file(TIMESTAMP "${rccDepBinPlain}" rdPlainAfter "${timeformat}")
+file(TIMESTAMP "${rccDepBinGen}" rdGenAfter "${timeformat}")
+# - Test if timestamps changed
+if (NOT rdPlainAfter GREATER rdPlainBefore)
+  message(SEND_ERROR "Plain .qrc binary ${rccDepBinPlain}) should have changed!")
 endif()
-# Sleep, touch generated qrc input file, rebuild and compare timestamp
-execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${rccDependsBinDir}/res2/input.txt")
-execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${rccDependsBinDir}" RESULT_VARIABLE result)
+if (NOT rdGenAfter GREATER rdGenBefore)
+  message(SEND_ERROR "GENERATED .qrc binary ${rccDepBinGen} should have changed!")
+endif()
+
+
+message("Changing nothing in the .qrc file")
+# - Acquire binary timestamps before the build
+file(TIMESTAMP "${rccDepBinPlain}" rdPlainBefore "${timeformat}")
+file(TIMESTAMP "${rccDepBinGen}" rdGenBefore "${timeformat}")
+# - Ensure that the timestamp will change
+# - Change nothing
+# - Rebuild
+execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${rccDepBD}" RESULT_VARIABLE result)
 if (result)
   message(SEND_ERROR "Fifth build of rccDepends failed.")
 endif()
-file(TIMESTAMP "${rccDependsBin}" timeStep4 "${timeformat}")
-if (NOT timeStep4 GREATER timeStep3)
-  message(SEND_ERROR "File (${rccDependsBin}) should have changed in the fourth step!")
+# - Acquire binary timestamps after the build
+file(TIMESTAMP "${rccDepBinPlain}" rdPlainAfter "${timeformat}")
+file(TIMESTAMP "${rccDepBinGen}" rdGenAfter "${timeformat}")
+# - Test if timestamps changed
+if (rdPlainAfter GREATER rdPlainBefore)
+  message(SEND_ERROR "Plain .qrc binary ${rccDepBinPlain}) should NOT have changed!")
 endif()
-# Sleep, update generated qrc file, rebuild and compare timestamp
-execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
-configure_file(${rccDependsSrcDir}/res2b.qrc.in ${rccDependsBinDir}/res2.qrc.in COPYONLY)
-execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${rccDependsBinDir}" RESULT_VARIABLE result)
-if (result)
-  message(SEND_ERROR "Sixth build of rccDepends failed.")
-endif()
-file(TIMESTAMP "${rccDependsBin}" timeStep5 "${timeformat}")
-if (NOT timeStep5 GREATER timeStep4)
-  message(SEND_ERROR "File (${rccDependsBin}) should have changed in the fitfh step!")
-endif()
-# Sleep, touch generated qrc newly added input file, rebuild and compare timestamp
-execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${rccDependsBinDir}/res2/inputAdded.txt")
-execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${rccDependsBinDir}" RESULT_VARIABLE result)
-if (result)
-  message(SEND_ERROR "Seventh build of rccDepends failed.")
-endif()
-file(TIMESTAMP "${rccDependsBin}" timeStep6 "${timeformat}")
-if (NOT timeStep6 GREATER timeStep5)
-  message(SEND_ERROR "File (${rccDependsBin}) should have changed in the sixth step!")
+if (rdGenAfter GREATER rdGenBefore)
+  message(SEND_ERROR "GENERATED .qrc binary ${rccDepBinGen} should NOT have changed!")
 endif()
