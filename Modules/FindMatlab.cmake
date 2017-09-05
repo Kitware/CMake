@@ -1134,7 +1134,14 @@ else()
 
     # testing if we are able to extract the needed information from the registry
     set(_matlab_versions_from_registry)
-    matlab_extract_all_installed_versions_from_registry(CMAKE_CL_64 _matlab_versions_from_registry)
+
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set(_matlab_win64 ON)
+    else()
+      set(_matlab_win64 OFF)
+    endif()
+
+    matlab_extract_all_installed_versions_from_registry(_matlab_win64 _matlab_versions_from_registry)
 
     # the returned list is empty, doing the search on all known versions
     if(NOT _matlab_versions_from_registry)
