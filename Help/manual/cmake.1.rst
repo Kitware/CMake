@@ -69,11 +69,11 @@ Options
  See `Find-Package Tool Mode`_.
 
 ``--graphviz=[file]``
- Generate graphviz of dependencies, see CMakeGraphVizOptions.cmake for more.
+ Generate graphviz of dependencies, see :module:`CMakeGraphVizOptions` for more.
 
  Generate a graphviz input file that will contain all the library and
  executable dependencies in the project.  See the documentation for
- CMakeGraphVizOptions.cmake for more details.
+ :module:`CMakeGraphVizOptions` for more details.
 
 ``--system-information [file]``
  Dump information about this system.
