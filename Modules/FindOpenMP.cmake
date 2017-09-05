@@ -429,6 +429,8 @@ foreach(LANG IN ITEMS C CXX Fortran)
   endif()
 endforeach()
 
+set(OpenMP_FOUND ${OPENMP_FOUND})
+
 if(CMAKE_Fortran_COMPILER_LOADED AND OpenMP_Fortran_FOUND)
   if(NOT DEFINED OpenMP_Fortran_HAVE_OMPLIB_MODULE)
     set(OpenMP_Fortran_HAVE_OMPLIB_MODULE FALSE CACHE BOOL INTERNAL "")
