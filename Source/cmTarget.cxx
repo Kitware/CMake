@@ -884,6 +884,13 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
+  if (prop == "IMPORTED_GLOBAL" && !this->IsImported()) {
+    std::ostringstream e;
+    e << "IMPORTED_GLOBAL property can't be set on non-imported targets (\""
+      << this->Name << "\")\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  }
 
   if (prop == "INCLUDE_DIRECTORIES") {
     this->Internal->IncludeDirectoriesEntries.clear();
@@ -933,6 +940,19 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       this->Internal->SourceEntries.push_back(value);
       this->Internal->SourceBacktraces.push_back(lfbt);
     }
+  } else if (prop == "IMPORTED_GLOBAL") {
+    if (!cmSystemTools::IsOn(value)) {
+      std::ostringstream e;
+      e << "IMPORTED_GLOBAL property can't be set to FALSE on targets (\""
+        << this->Name << "\")\n";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return;
+    }
+    /* no need to change anything if value does not change */
+    if (!this->ImportedGloballyVisible) {
+      this->ImportedGloballyVisible = true;
+      this->GetGlobalGenerator()->IndexTarget(this);
+    }
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME") &&
              !this->CheckImportedLibName(prop, value ? value : "")) {
     /* error was reported by check method */
@@ -974,6 +994,14 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     std::ostringstream e;
     e << "SOURCES property can't be set on imported targets (\"" << this->Name
       << "\")\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  }
+  if (prop == "IMPORTED_GLOBAL") {
+    std::ostringstream e;
+    e << "IMPORTED_GLOBAL property can't be appended, only set on imported "
+         "targets (\""
+      << this->Name << "\")\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
@@ -1143,6 +1171,21 @@ static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const char* value,
   context->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
+static void cmTargetCheckIMPORTED_GLOBAL(const cmTarget* target,
+                                         cmMakefile* context)
+{
+  std::vector<cmTarget*> targets = context->GetOwnedImportedTargets();
+  std::vector<cmTarget*>::const_iterator it =
+    std::find(targets.begin(), targets.end(), target);
+  if (it == targets.end()) {
+    std::ostringstream e;
+    e << "Attempt to promote imported target \"" << target->GetName()
+      << "\" to global scope (by setting IMPORTED_GLOBAL) "
+         "which is not built in this directory.";
+    context->IssueMessage(cmake::FATAL_ERROR, e.str());
+  }
+}
+
 void cmTarget::CheckProperty(const std::string& prop,
                              cmMakefile* context) const
 {
@@ -1160,6 +1203,11 @@ void cmTarget::CheckProperty(const std::string& prop,
   if (prop == "INTERFACE_LINK_LIBRARIES") {
     if (const char* value = this->GetProperty(prop)) {
       cmTargetCheckINTERFACE_LINK_LIBRARIES(value, context);
+    }
+  }
+  if (prop == "IMPORTED_GLOBAL") {
+    if (this->IsImported()) {
+      cmTargetCheckIMPORTED_GLOBAL(this, context);
     }
   }
 }
@@ -1182,6 +1230,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
   MAKE_STATIC_PROP(COMPILE_OPTIONS);
   MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
   MAKE_STATIC_PROP(IMPORTED);
+  MAKE_STATIC_PROP(IMPORTED_GLOBAL);
   MAKE_STATIC_PROP(MANUALLY_ADDED_DEPENDENCIES);
   MAKE_STATIC_PROP(NAME);
   MAKE_STATIC_PROP(BINARY_DIR);
@@ -1196,6 +1245,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     specialProps.insert(propCOMPILE_OPTIONS);
     specialProps.insert(propCOMPILE_DEFINITIONS);
     specialProps.insert(propIMPORTED);
+    specialProps.insert(propIMPORTED_GLOBAL);
     specialProps.insert(propMANUALLY_ADDED_DEPENDENCIES);
     specialProps.insert(propNAME);
     specialProps.insert(propBINARY_DIR);
@@ -1263,6 +1313,9 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     }
     if (prop == propIMPORTED) {
       return this->IsImported() ? "TRUE" : "FALSE";
+    }
+    if (prop == propIMPORTED_GLOBAL) {
+      return this->IsImportedGloballyVisible() ? "TRUE" : "FALSE";
     }
     if (prop == propNAME) {
       return this->GetName().c_str();

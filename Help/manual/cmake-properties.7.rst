@@ -184,6 +184,7 @@ Properties on Targets
    /prop_tgt/HAS_CXX
    /prop_tgt/IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
    /prop_tgt/IMPORTED_CONFIGURATIONS
+   /prop_tgt/IMPORTED_GLOBAL
    /prop_tgt/IMPORTED_IMPLIB_CONFIG
    /prop_tgt/IMPORTED_IMPLIB
    /prop_tgt/IMPORTED_LIBNAME_CONFIG
