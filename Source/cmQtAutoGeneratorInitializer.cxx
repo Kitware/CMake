@@ -610,7 +610,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   const std::string workingDirectory =
     cmSystemTools::CollapseFullPath("", makefile->GetCurrentBinaryDirectory());
   const std::vector<std::string> suffixes = GetConfigurationSuffixes(makefile);
-  std::set<std::string> autogenDepends;
+  std::set<std::string> autogenDependFiles;
+  std::set<std::string> autogenDependTargets;
   std::vector<std::string> autogenProvides;
 
   // Remove build directories on cleanup
@@ -680,6 +681,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   }
 
   // Extract relevant source files
+  std::vector<std::string> generatedSources;
+  std::vector<std::string> generatedHeaders;
   {
     const std::string qrcExt = "qrc";
     std::vector<cmSourceFile*> srcFiles;
@@ -704,13 +707,13 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
             const bool generated = sf->GetPropertyAsBool("GENERATED");
             if (fileType == cmSystemTools::HEADER_FILE_FORMAT) {
               if (generated) {
-                digest.HeadersGenerated.push_back(absPath);
+                generatedHeaders.push_back(absPath);
               } else {
                 digest.Headers.push_back(absPath);
               }
             } else {
               if (generated) {
-                digest.SourcesGenerated.push_back(absPath);
+                generatedSources.push_back(absPath);
               } else {
                 digest.Sources.push_back(absPath);
               }
@@ -747,7 +750,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   }
 
   // Process GENERATED sources and headers
-  if (!digest.SourcesGenerated.empty() || !digest.HeadersGenerated.empty()) {
+  if (!generatedSources.empty() || !generatedHeaders.empty()) {
     // Check status of policy CMP0071
     bool policyAccept = false;
     bool policyWarn = false;
@@ -770,30 +773,43 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 
     if (policyAccept) {
       // Accept GENERATED sources
-      for (const std::string& absFile : digest.HeadersGenerated) {
+      for (const std::string& absFile : generatedHeaders) {
         digest.Headers.push_back(absFile);
+        autogenDependFiles.insert(absFile);
       }
-      for (const std::string& absFile : digest.SourcesGenerated) {
+      for (const std::string& absFile : generatedSources) {
         digest.Sources.push_back(absFile);
+        autogenDependFiles.insert(absFile);
       }
-    } else if (policyWarn) {
-      std::ostringstream ost;
-      ost << cmPolicies::GetPolicyWarning(cmPolicies::CMP0071) << "\n";
-      ost << "AUTOMOC,AUTOUIC: Ignoring GENERATED source file(s):\n";
-      for (const std::string& absFile : digest.HeadersGenerated) {
-        ost << "  " << cmQtAutoGen::Quoted(absFile) << "\n";
+    } else {
+      if (policyWarn) {
+        std::string msg;
+        msg += cmPolicies::GetPolicyWarning(cmPolicies::CMP0071);
+        msg += "\n";
+        std::string tools;
+        if (digest.MocEnabled) {
+          tools += "AUTOMOC";
+        }
+        if (digest.UicEnabled) {
+          if (!tools.empty()) {
+            tools += ",";
+          }
+          tools += "AUTOUIC";
+        }
+        if (!generatedHeaders.empty()) {
+          msg.append(tools).append(": Ignoring GENERATED header file(s):\n");
+          for (const std::string& absFile : generatedHeaders) {
+            msg.append("  ").append(cmQtAutoGen::Quoted(absFile)).append("\n");
+          }
+        }
+        if (!generatedSources.empty()) {
+          msg.append(tools).append(": Ignoring GENERATED source file(s):\n");
+          for (const std::string& absFile : generatedSources) {
+            msg.append("  ").append(cmQtAutoGen::Quoted(absFile)).append("\n");
+          }
+        }
+        makefile->IssueMessage(cmake::AUTHOR_WARNING, msg);
       }
-      for (const std::string& absFile : digest.SourcesGenerated) {
-        ost << "  " << cmQtAutoGen::Quoted(absFile) << "\n";
-      }
-      makefile->IssueMessage(cmake::AUTHOR_WARNING, ost.str());
-    }
-    // Depend on GENERATED sources even when they are not processed by AUTOGEN
-    for (const std::string& absFile : digest.HeadersGenerated) {
-      autogenDepends.insert(absFile);
-    }
-    for (const std::string& absFile : digest.SourcesGenerated) {
-      autogenDepends.insert(absFile);
     }
   }
   // Sort headers and sources
@@ -825,16 +841,14 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
       const cmFilePathChecksum fpathCheckSum(makefile);
       for (cmQtAutoGenDigestQrc& qrcDigest : digest.Qrcs) {
         qrcDigest.PathChecksum = fpathCheckSum.getPart(qrcDigest.QrcFile);
+        // RCC output file name
+        std::string rccFile = autogenBuildDir + "/";
+        rccFile += qrcDigest.PathChecksum;
+        rccFile += "/qrc_";
+        rccFile += qrcDigest.QrcName;
+        rccFile += ".cpp";
+        qrcDigest.RccFile = std::move(rccFile);
       }
-    }
-    // RCC output file name
-    for (cmQtAutoGenDigestQrc& qrcDigest : digest.Qrcs) {
-      std::string rccFile = autogenBuildDir + "/";
-      rccFile += qrcDigest.PathChecksum;
-      rccFile += "/qrc_";
-      rccFile += qrcDigest.QrcName;
-      rccFile += ".cpp";
-      qrcDigest.RccFile = std::move(rccFile);
     }
     // RCC options
     for (cmQtAutoGenDigestQrc& qrcDigest : digest.Qrcs) {
@@ -862,9 +876,10 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
       // Register file at target
       AddGeneratedSource(target, qrcDigest.RccFile, cmQtAutoGen::RCC);
       autogenProvides.push_back(qrcDigest.RccFile);
+      // Dependencies
       if (qrcDigest.Generated) {
-        // Add GENERATED qrc file to the dependencies
-        autogenDepends.insert(qrcDigest.QrcFile);
+        // Add the GENERATED .qrc file to the dependencies
+        autogenDependFiles.insert(qrcDigest.QrcFile);
       } else {
         // Add the resource files to the dependencies
         {
@@ -872,8 +887,9 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
           if (cmQtAutoGen::RccListInputs(digest.QtVersionMajor, rcc,
                                          qrcDigest.QrcFile,
                                          qrcDigest.Resources, &error)) {
-            autogenDepends.insert(qrcDigest.Resources.begin(),
-                                  qrcDigest.Resources.end());
+            for (const std::string& fileName : qrcDigest.Resources) {
+              autogenDependFiles.insert(fileName);
+            }
           } else {
             cmSystemTools::Error(error.c_str());
           }
@@ -890,32 +906,17 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     if (!deps.empty()) {
       std::vector<std::string> extraDeps;
       cmSystemTools::ExpandListArgument(deps, extraDeps);
-      autogenDepends.insert(extraDeps.begin(), extraDeps.end());
-    }
-  }
-  // Add utility target dependencies to the autogen target dependencies
-  {
-    const std::set<std::string>& utils = target->Target->GetUtilities();
-    for (const std::string& targetName : utils) {
-      if (makefile->FindTargetToUse(targetName) != nullptr) {
-        autogenDepends.insert(targetName);
+      for (const std::string& depName : extraDeps) {
+        // Allow target and file dependencies
+        auto* depTarget = makefile->FindTargetToUse(depName);
+        if (depTarget != nullptr) {
+          autogenDependTargets.insert(depTarget->GetName());
+        } else {
+          autogenDependFiles.insert(depName);
+        }
       }
     }
   }
-  // Add link library target dependencies to the autogen target dependencies
-  {
-    const auto& libVec = target->Target->GetOriginalLinkLibraries();
-    for (const auto& item : libVec) {
-      if (makefile->FindTargetToUse(item.first) != nullptr) {
-        autogenDepends.insert(item.first);
-      }
-    }
-  }
-
-  // Convert std::set to std::vector
-  const std::vector<std::string> depends(autogenDepends.begin(),
-                                         autogenDepends.end());
-  autogenDepends.clear();
 
   // Use PRE_BUILD on demand
   bool usePRE_BUILD = false;
@@ -928,38 +929,62 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   }
   // Disable PRE_BUILD in some cases
   if (usePRE_BUILD) {
-    // - Cannot use PRE_BUILD with GENERATED qrc files because the
-    // resource files themselves may not be sources within the target
-    // so VS may not know the target needs to re-build at all.
-    for (cmQtAutoGenDigestQrc& qrcDigest : digest.Qrcs) {
-      if (qrcDigest.Generated) {
-        usePRE_BUILD = false;
-        break;
-      }
+    // Cannot use PRE_BUILD with file depends
+    if (!autogenDependFiles.empty()) {
+      usePRE_BUILD = false;
     }
   }
   // Create the autogen target/command
   if (usePRE_BUILD) {
+    // Add additional autogen target dependencies to origin target
+    for (const std::string& depTarget : autogenDependTargets) {
+      target->Target->AddUtility(depTarget, makefile);
+    }
+
     // Add the pre-build command directly to bypass the OBJECT_LIBRARY
     // rejection in cmMakefile::AddCustomCommandToTarget because we know
     // PRE_BUILD will work for an OBJECT_LIBRARY in this specific case.
+    //
+    // PRE_BUILD does not support file dependencies!
     const std::vector<std::string> no_output;
-    cmCustomCommand cc(makefile, no_output, autogenProvides, depends,
+    const std::vector<std::string> no_deps;
+    cmCustomCommand cc(makefile, no_output, autogenProvides, no_deps,
                        commandLines, autogenComment.c_str(),
                        workingDirectory.c_str());
     cc.SetEscapeOldStyle(false);
     cc.SetEscapeAllowMakeVars(true);
     target->Target->AddPreBuildCommand(cc);
   } else {
+
+    // Add utility target dependencies to the autogen target dependencies
+    for (const std::string& depTarget : target->Target->GetUtilities()) {
+      autogenDependTargets.insert(depTarget);
+    }
+    // Add link library target dependencies to the autogen target dependencies
+    for (const auto& item : target->Target->GetOriginalLinkLibraries()) {
+      if (makefile->FindTargetToUse(item.first) != nullptr) {
+        autogenDependTargets.insert(item.first);
+      }
+    }
+
+    // Convert file dependencies std::set to std::vector
+    const std::vector<std::string> autogenDepends(autogenDependFiles.begin(),
+                                                  autogenDependFiles.end());
+    // Create autogen target
     cmTarget* autogenTarget = makefile->AddUtilityCommand(
       autogenTargetName, true, workingDirectory.c_str(),
-      /*byproducts=*/autogenProvides, depends, commandLines, false,
+      /*byproducts=*/autogenProvides, autogenDepends, commandLines, false,
       autogenComment.c_str());
-
+    // Create autogen generator target
     localGen->AddGeneratorTarget(
       new cmGeneratorTarget(autogenTarget, localGen));
 
-    // Set autogen target FOLDER
+    // Add additional autogen target dependencies to autogen target
+    for (const std::string& depTarget : autogenDependTargets) {
+      autogenTarget->AddUtility(depTarget, makefile);
+    }
+
+    // Set FOLDER property in autogen target
     {
       const char* autogenFolder =
         makefile->GetState()->GetGlobalProperty("AUTOMOC_TARGETS_FOLDER");
@@ -977,7 +1002,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     }
 
     // Add autogen target to the origin target dependencies
-    target->Target->AddUtility(autogenTargetName);
+    target->Target->AddUtility(autogenTargetName, makefile);
   }
 }
 

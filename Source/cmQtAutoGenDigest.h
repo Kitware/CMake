@@ -53,9 +53,7 @@ public:
   bool UicEnabled;
   bool RccEnabled;
   std::vector<std::string> Headers;
-  std::vector<std::string> HeadersGenerated;
   std::vector<std::string> Sources;
-  std::vector<std::string> SourcesGenerated;
   std::vector<cmQtAutoGenDigestQrc> Qrcs;
 };
 
