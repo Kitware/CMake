@@ -68,6 +68,7 @@ The following individuals and institutions are among the Contributors:
 * Matthaeus G. Chajdas
 * Matthias Kretz <kretz@kde.org>
 * Matthias Maennich <matthias@maennich.net>
+* Michael Stürmer
 * Miguel A. Figueroa-Villanueva
 * Mike Jackson
 * Mike McQuaid <mike@mikemcquaid.com>

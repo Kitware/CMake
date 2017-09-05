@@ -43,7 +43,7 @@ endif()
 # on the initial values computed in the platform/*.cmake files
 # use _INIT variables so that this only happens the first time
 # and you can set these flags in the cmake cache
-set(CMAKE_CSharp_FLAGS_INIT "$ENV{CSharpFLAGS} ${CMAKE_CSharp_FLAGS_INIT}")
+set(CMAKE_CSharp_FLAGS_INIT "$ENV{CSFLAGS} ${CMAKE_CSharp_FLAGS_INIT}")
 # avoid just having a space as the initial value for the cache
 if(CMAKE_CSharp_FLAGS_INIT STREQUAL " ")
   set(CMAKE_CSharp_FLAGS_INIT)
