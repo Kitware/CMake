@@ -175,11 +175,12 @@ endmacro()
 
 function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
-# set up the arguments for CMAKE_PARSE_ARGUMENTS and check whether we are in
-# new extended or in the "old" mode:
+# Set up the arguments for `cmake_parse_arguments`.
   set(options  CONFIG_MODE  HANDLE_COMPONENTS)
   set(oneValueArgs  FAIL_MESSAGE  VERSION_VAR  FOUND_VAR)
   set(multiValueArgs REQUIRED_VARS)
+
+# Check whether we are in 'simple' or 'extended' mode:
   set(_KEYWORDS_FOR_EXTENDED_MODE  ${options} ${oneValueArgs} ${multiValueArgs} )
   list(FIND _KEYWORDS_FOR_EXTENDED_MODE "${_FIRST_ARG}" INDEX)
 
@@ -188,8 +189,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     set(FPHSA_REQUIRED_VARS ${ARGN})
     set(FPHSA_VERSION_VAR)
   else()
-
-    CMAKE_PARSE_ARGUMENTS(FPHSA "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${_FIRST_ARG} ${ARGN})
+    cmake_parse_arguments(FPHSA "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${_FIRST_ARG} ${ARGN})
 
     if(FPHSA_UNPARSED_ARGUMENTS)
       message(FATAL_ERROR "Unknown keywords given to FIND_PACKAGE_HANDLE_STANDARD_ARGS(): \"${FPHSA_UNPARSED_ARGUMENTS}\"")
@@ -198,24 +198,24 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     if(NOT FPHSA_FAIL_MESSAGE)
       set(FPHSA_FAIL_MESSAGE  "DEFAULT_MSG")
     endif()
+
+    # In config-mode, we rely on the variable <package>_CONFIG, which is set by find_package()
+    # when it successfully found the config-file, including version checking:
+    if(FPHSA_CONFIG_MODE)
+      list(INSERT FPHSA_REQUIRED_VARS 0 ${_NAME}_CONFIG)
+      list(REMOVE_DUPLICATES FPHSA_REQUIRED_VARS)
+      set(FPHSA_VERSION_VAR ${_NAME}_VERSION)
+    endif()
+
+    if(NOT FPHSA_REQUIRED_VARS)
+      message(FATAL_ERROR "No REQUIRED_VARS specified for FIND_PACKAGE_HANDLE_STANDARD_ARGS()")
+    endif()
   endif()
 
 # now that we collected all arguments, process them
 
   if("x${FPHSA_FAIL_MESSAGE}" STREQUAL "xDEFAULT_MSG")
     set(FPHSA_FAIL_MESSAGE "Could NOT find ${_NAME}")
-  endif()
-
-  # In config-mode, we rely on the variable <package>_CONFIG, which is set by find_package()
-  # when it successfully found the config-file, including version checking:
-  if(FPHSA_CONFIG_MODE)
-    list(INSERT FPHSA_REQUIRED_VARS 0 ${_NAME}_CONFIG)
-    list(REMOVE_DUPLICATES FPHSA_REQUIRED_VARS)
-    set(FPHSA_VERSION_VAR ${_NAME}_VERSION)
-  endif()
-
-  if(NOT FPHSA_REQUIRED_VARS)
-    message(FATAL_ERROR "No REQUIRED_VARS specified for FIND_PACKAGE_HANDLE_STANDARD_ARGS()")
   endif()
 
   list(GET FPHSA_REQUIRED_VARS 0 _FIRST_REQUIRED_VAR)
