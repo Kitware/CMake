@@ -664,7 +664,7 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
          l != p.Labels.end(); ++l) {
       // only use labels found in labels
       if (labels.find(*l) != labels.end()) {
-        labelTimes[*l] += result.ExecutionTime;
+        labelTimes[*l] += result.ExecutionTime * result.Properties->Processors;
         ++labelCounts[*l];
       }
     }
@@ -687,7 +687,7 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
     label.resize(maxlen + 3, ' ');
 
     char buf[1024];
-    sprintf(buf, "%6.2f sec", labelTimes[*i]);
+    sprintf(buf, "%6.2f sec*proc", labelTimes[*i]);
 
     std::ostringstream labelCountStr;
     labelCountStr << "(" << labelCounts[*i] << " test";
