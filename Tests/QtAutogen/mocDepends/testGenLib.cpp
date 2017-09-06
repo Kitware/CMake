@@ -1,5 +1,5 @@
 
-#include "test3.hpp"
+#include "testGenLib.hpp"
 
 int main()
 {
@@ -8,5 +8,5 @@ int main()
   return 0;
 }
 
-// AUTOMOC the SimpleLib header simpleLib.hpp
+// Depend on and AUTOMOC the SimpleLib header simpleLib.hpp
 #include "moc_simpleLib.cpp"
