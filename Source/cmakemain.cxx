@@ -102,7 +102,7 @@ static int do_build(int ac, char const* const* av);
 
 static cmMakefile* cmakemainGetMakefile(void* clientdata)
 {
-  cmake* cm = reinterpret_cast<cmake*>(clientdata);
+  cmake* cm = static_cast<cmake*>(clientdata);
   if (cm && cm->GetDebugOutput()) {
     cmGlobalGenerator* gg = cm->GetGlobalGenerator();
     if (gg) {

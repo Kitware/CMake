@@ -120,7 +120,7 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
   int argc = static_cast<int>(args.size());
   char** argv = nullptr;
   if (argc) {
-    argv = reinterpret_cast<char**>(malloc(argc * sizeof(char*)));
+    argv = static_cast<char**>(malloc(argc * sizeof(char*)));
   }
   int i;
   for (i = 0; i < argc; ++i) {
