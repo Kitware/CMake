@@ -3,4 +3,7 @@
 Subproject Time Summary:
 MyThirdPartyDependency += +[0-9.]+ sec \(1 test\)
 +
+Label Time Summary:
+NotASubproject += +[0-9.]+ sec \(1 test\)
++
 Total Test time \(real\) = +[0-9.]+ sec
