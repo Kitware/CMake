@@ -208,10 +208,6 @@
 #
 # Set Boost_NO_BOOST_CMAKE to ON to disable the search for boost-cmake.
 
-# Save project's policies
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
-
 #-------------------------------------------------------------------------------
 # Before we go searching, check whether boost-cmake is available, unless the
 # user specifically asked NOT to search for boost-cmake.
@@ -899,7 +895,9 @@ function(_Boost_MISSING_DEPENDENCIES componentvar extravar)
       set(_Boost_${uppercomponent}_DEPENDENCIES ${_Boost_${uppercomponent}_DEPENDENCIES} PARENT_SCOPE)
       set(_Boost_IMPORTED_TARGETS ${_Boost_IMPORTED_TARGETS} PARENT_SCOPE)
       foreach(componentdep ${_Boost_${uppercomponent}_DEPENDENCIES})
-        if (NOT ("${componentdep}" IN_LIST _boost_processed_components OR "${componentdep}" IN_LIST _boost_new_components))
+        list(FIND _boost_processed_components "${componentdep}" _boost_component_found)
+        list(FIND _boost_new_components "${componentdep}" _boost_component_new)
+        if (_boost_component_found EQUAL -1 AND _boost_component_new EQUAL -1)
           list(APPEND _boost_new_components ${componentdep})
         endif()
       endforeach()
@@ -1527,7 +1525,8 @@ endif()
 _Boost_MISSING_DEPENDENCIES(Boost_FIND_COMPONENTS _Boost_EXTRA_FIND_COMPONENTS)
 
 # If thread is required, get the thread libs as a dependency
-if("thread" IN_LIST Boost_FIND_COMPONENTS)
+list(FIND Boost_FIND_COMPONENTS thread _Boost_THREAD_DEPENDENCY_LIBS)
+if(NOT _Boost_THREAD_DEPENDENCY_LIBS EQUAL -1)
   include(CMakeFindDependencyMacro)
   find_dependency(Threads)
 endif()
@@ -1952,6 +1951,3 @@ list(REMOVE_DUPLICATES _Boost_COMPONENTS_SEARCHED)
 list(SORT _Boost_COMPONENTS_SEARCHED)
 set(_Boost_COMPONENTS_SEARCHED "${_Boost_COMPONENTS_SEARCHED}"
   CACHE INTERNAL "Components requested for this build tree.")
-
-# Restore project's policies
-cmake_policy(POP)
