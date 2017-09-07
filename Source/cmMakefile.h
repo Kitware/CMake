@@ -270,21 +270,6 @@ public:
                        bool excludeFromAll = false);
   void AddAlias(const std::string& libname, const std::string& tgt);
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-  /**
-   * Add a root source group for consideration when adding a new source.
-   */
-  void AddSourceGroup(const std::string& name, const char* regex = nullptr);
-
-  /**
-   * Add a source group for consideration when adding a new source.
-   * name is tokenized.
-   */
-  void AddSourceGroup(const std::vector<std::string>& name,
-                      const char* regex = nullptr);
-
-#endif
-
   //@{
   /**
      * Set, Push, Pop policy values for CMake.
@@ -476,6 +461,24 @@ public:
    * Get the source group
    */
   cmSourceGroup* GetSourceGroup(const std::vector<std::string>& name) const;
+
+  /**
+   * Add a root source group for consideration when adding a new source.
+   */
+  void AddSourceGroup(const std::string& name, const char* regex = nullptr);
+
+  /**
+   * Add a source group for consideration when adding a new source.
+   * name is tokenized.
+   */
+  void AddSourceGroup(const std::vector<std::string>& name,
+                      const char* regex = nullptr);
+
+  /**
+   * find what source group this source is in
+   */
+  cmSourceGroup* FindSourceGroup(const char* source,
+                                 std::vector<cmSourceGroup>& groups) const;
 #endif
 
   /**
@@ -551,14 +554,6 @@ public:
   int ConfigureFile(const char* infile, const char* outfile, bool copyonly,
                     bool atOnly, bool escapeQuotes,
                     cmNewLineStyle = cmNewLineStyle());
-
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-  /**
-   * find what source group this source is in
-   */
-  cmSourceGroup* FindSourceGroup(const char* source,
-                                 std::vector<cmSourceGroup>& groups) const;
-#endif
 
   /**
    * Print a command's invocation
