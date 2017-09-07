@@ -475,6 +475,18 @@ public:
                       const char* regex = nullptr);
 
   /**
+   * Get and existing or create a new source group.
+   */
+  cmSourceGroup* GetOrCreateSourceGroup(
+    const std::vector<std::string>& folders);
+
+  /**
+   * Get and existing or create a new source group.
+   * The name will be tokenized.
+   */
+  cmSourceGroup* GetOrCreateSourceGroup(const std::string& name);
+
+  /**
    * find what source group this source is in
    */
   cmSourceGroup* FindSourceGroup(const char* source,

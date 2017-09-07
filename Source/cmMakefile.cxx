@@ -2010,6 +2010,27 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   sg->SetGroupRegex(regex);
 }
 
+cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(
+  const std::vector<std::string>& folders)
+{
+  cmSourceGroup* sg = this->GetSourceGroup(folders);
+  if (sg == nullptr) {
+    this->AddSourceGroup(folders);
+    sg = this->GetSourceGroup(folders);
+  }
+  return sg;
+}
+
+cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(const std::string& name)
+{
+  const char* delimiter = this->GetDefinition("SOURCE_GROUP_DELIMITER");
+  if (delimiter == nullptr) {
+    delimiter = "\\";
+  }
+  return this->GetOrCreateSourceGroup(
+    cmSystemTools::tokenize(name, delimiter));
+}
+
 /**
  * Find a source group whose regular expression matches the filename
  * part of the given source name.  Search backward through the list of
