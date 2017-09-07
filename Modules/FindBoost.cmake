@@ -107,6 +107,10 @@
 # Users or projects may tell this module which variant to find by
 # setting variables::
 #
+#   Boost_USE_DEBUG_LIBS     - Set to ON or OFF to specify whether to search
+#                              and use the debug libraries.  Default is ON.
+#   Boost_USE_RELEASE_LIBS   - Set to ON or OFF to specify whether to search
+#                              and use the release libraries.  Default is ON.
 #   Boost_USE_MULTITHREADED  - Set to OFF to use the non-multithreaded
 #                              libraries ('mt' tag).  Default is ON.
 #   Boost_USE_STATIC_LIBS    - Set to ON to force the use of the static
@@ -183,9 +187,11 @@
 #   target_link_libraries(foo Boost::date_time Boost::filesystem
 #                             Boost::iostreams)
 #
-# Example to find Boost headers and some *static* libraries::
+# Example to find Boost headers and some *static* (release only) libraries::
 #
-#   set(Boost_USE_STATIC_LIBS        ON) # only find static libs
+#   set(Boost_USE_STATIC_LIBS        ON)  # only find static libs
+#   set(Boost_USE_DEBUG_LIBS         OFF) # ignore debug libs and
+#   set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
 #   set(Boost_USE_MULTITHREADED      ON)
 #   set(Boost_USE_STATIC_RUNTIME    OFF)
 #   find_package(Boost 1.36.0 COMPONENTS date_time filesystem system ...)
@@ -294,7 +300,7 @@ macro(_Boost_ADJUST_LIB_VARS basename)
     endif()
 
     # If the debug & release library ends up being the same, omit the keywords
-    if(${Boost_${basename}_LIBRARY_RELEASE} STREQUAL ${Boost_${basename}_LIBRARY_DEBUG})
+    if("${Boost_${basename}_LIBRARY_RELEASE}" STREQUAL "${Boost_${basename}_LIBRARY_DEBUG}")
       set(Boost_${basename}_LIBRARY   ${Boost_${basename}_LIBRARY_RELEASE} )
       set(Boost_${basename}_LIBRARIES ${Boost_${basename}_LIBRARY_RELEASE} )
     endif()
@@ -994,8 +1000,14 @@ if(NOT Boost_LIBRARY_DIR_DEBUG AND Boost_LIBRARY_DIR)
   set(Boost_LIBRARY_DIR_DEBUG   "${Boost_LIBRARY_DIR}")
 endif()
 
+if(NOT DEFINED Boost_USE_DEBUG_LIBS)
+  set(Boost_USE_DEBUG_LIBS TRUE)
+endif()
+if(NOT DEFINED Boost_USE_RELEASE_LIBS)
+  set(Boost_USE_RELEASE_LIBS TRUE)
+endif()
 if(NOT DEFINED Boost_USE_MULTITHREADED)
-    set(Boost_USE_MULTITHREADED TRUE)
+  set(Boost_USE_MULTITHREADED TRUE)
 endif()
 if(NOT DEFINED Boost_USE_DEBUG_RUNTIME)
   set(Boost_USE_DEBUG_RUNTIME TRUE)
@@ -1630,12 +1642,14 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   # Avoid passing backslashes to _Boost_FIND_LIBRARY due to macro re-parsing.
   string(REPLACE "\\" "/" _boost_LIBRARY_SEARCH_DIRS_tmp "${_boost_LIBRARY_SEARCH_DIRS_RELEASE}")
 
-  _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE RELEASE
-    NAMES ${_boost_RELEASE_NAMES}
-    HINTS ${_boost_LIBRARY_SEARCH_DIRS_tmp}
-    NAMES_PER_DIR
-    DOC "${_boost_docstring_release}"
-    )
+  if(Boost_USE_RELEASE_LIBS)
+    _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE RELEASE
+      NAMES ${_boost_RELEASE_NAMES}
+      HINTS ${_boost_LIBRARY_SEARCH_DIRS_tmp}
+      NAMES_PER_DIR
+      DOC "${_boost_docstring_release}"
+      )
+  endif()
 
   #
   # Find DEBUG libraries
@@ -1679,12 +1693,14 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   # Avoid passing backslashes to _Boost_FIND_LIBRARY due to macro re-parsing.
   string(REPLACE "\\" "/" _boost_LIBRARY_SEARCH_DIRS_tmp "${_boost_LIBRARY_SEARCH_DIRS_DEBUG}")
 
-  _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG DEBUG
-    NAMES ${_boost_DEBUG_NAMES}
-    HINTS ${_boost_LIBRARY_SEARCH_DIRS_tmp}
-    NAMES_PER_DIR
-    DOC "${_boost_docstring_debug}"
-    )
+  if(Boost_USE_DEBUG_LIBS)
+    _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG DEBUG
+      NAMES ${_boost_DEBUG_NAMES}
+      HINTS ${_boost_LIBRARY_SEARCH_DIRS_tmp}
+      NAMES_PER_DIR
+      DOC "${_boost_docstring_debug}"
+      )
+  endif ()
 
   if(Boost_REALPATH)
     _Boost_SWAP_WITH_REALPATH(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE "${_boost_docstring_release}")
