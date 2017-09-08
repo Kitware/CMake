@@ -1,16 +1,78 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmQtAutoGeneratorCommon.h"
+#include "cmQtAutoGen.h"
 #include "cmAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#include <algorithm>
 #include <sstream>
 #include <stddef.h>
 
+// - Static variables
+
+const std::string genNameGen = "AutoGen";
+const std::string genNameMoc = "AutoMoc";
+const std::string genNameUic = "AutoUic";
+const std::string genNameRcc = "AutoRcc";
+
 // - Static functions
+
+/// @brief Merges newOpts into baseOpts
+/// @arg valueOpts list of options that accept a value
+void MergeOptions(std::vector<std::string>& baseOpts,
+                  const std::vector<std::string>& newOpts,
+                  const std::vector<std::string>& valueOpts, bool isQt5)
+{
+  typedef std::vector<std::string>::iterator Iter;
+  typedef std::vector<std::string>::const_iterator CIter;
+  if (newOpts.empty()) {
+    return;
+  }
+  if (baseOpts.empty()) {
+    baseOpts = newOpts;
+    return;
+  }
+
+  std::vector<std::string> extraOpts;
+  for (CIter fit = newOpts.begin(), fitEnd = newOpts.end(); fit != fitEnd;
+       ++fit) {
+    const std::string& newOpt = *fit;
+    Iter existIt = std::find(baseOpts.begin(), baseOpts.end(), newOpt);
+    if (existIt != baseOpts.end()) {
+      if (newOpt.size() >= 2) {
+        // Acquire the option name
+        std::string optName;
+        {
+          auto oit = newOpt.begin();
+          if (*oit == '-') {
+            ++oit;
+            if (isQt5 && (*oit == '-')) {
+              ++oit;
+            }
+            optName.assign(oit, newOpt.end());
+          }
+        }
+        // Test if this is a value option and change the existing value
+        if (!optName.empty() && (std::find(valueOpts.begin(), valueOpts.end(),
+                                           optName) != valueOpts.end())) {
+          const Iter existItNext(existIt + 1);
+          const CIter fitNext(fit + 1);
+          if ((existItNext != baseOpts.end()) && (fitNext != fitEnd)) {
+            *existItNext = *fitNext;
+            ++fit;
+          }
+        }
+      }
+    } else {
+      extraOpts.push_back(newOpt);
+    }
+  }
+  // Append options
+  baseOpts.insert(baseOpts.end(), extraOpts.begin(), extraOpts.end());
+}
 
 static std::string utilStripCR(std::string const& line)
 {
@@ -40,8 +102,8 @@ static bool RccListInputsQt4(const std::string& fileName,
     } else {
       if (errorMessage != nullptr) {
         std::ostringstream ost;
-        ost << "AutoRcc: Error: Rcc file not readable:\n"
-            << cmQtAutoGeneratorCommon::Quoted(fileName) << "\n";
+        ost << "rcc file not readable:\n"
+            << "  " << cmQtAutoGen::Quoted(fileName) << "\n";
         *errorMessage = ost.str();
       }
       allGood = false;
@@ -49,7 +111,7 @@ static bool RccListInputsQt4(const std::string& fileName,
   }
   if (allGood) {
     // qrc file directory
-    std::string qrcDir(cmsys::SystemTools::GetFilenamePath(fileName));
+    std::string qrcDir(cmSystemTools::GetFilenamePath(fileName));
     if (!qrcDir.empty()) {
       qrcDir += '/';
     }
@@ -83,7 +145,7 @@ static bool RccListInputsQt5(const std::string& rccCommand,
                              std::string* errorMessage)
 {
   if (rccCommand.empty()) {
-    cmSystemTools::Error("AutoRcc: Error: rcc executable not available\n");
+    cmSystemTools::Error("rcc executable not available");
     return false;
   }
 
@@ -122,7 +184,7 @@ static bool RccListInputsQt5(const std::string& rccCommand,
   if (!result || retVal) {
     if (errorMessage != nullptr) {
       std::ostringstream ost;
-      ost << "AutoRcc: Error: Rcc list process for " << fileName
+      ost << "rcc list process for " << cmQtAutoGen::Quoted(fileName)
           << " failed:\n"
           << rccStdOut << "\n"
           << rccStdErr << "\n";
@@ -155,8 +217,8 @@ static bool RccListInputsQt5(const std::string& rccCommand,
         if (pos == std::string::npos) {
           if (errorMessage != nullptr) {
             std::ostringstream ost;
-            ost << "AutoRcc: Error: Rcc lists unparsable output:\n"
-                << cmQtAutoGeneratorCommon::Quoted(eline) << "\n";
+            ost << "rcc lists unparsable output:\n"
+                << cmQtAutoGen::Quoted(eline) << "\n";
             *errorMessage = ost.str();
           }
           return false;
@@ -173,9 +235,29 @@ static bool RccListInputsQt5(const std::string& rccCommand,
 
 // - Class definitions
 
-const char* cmQtAutoGeneratorCommon::listSep = "@LSEP@";
+const std::string cmQtAutoGen::listSep = "@LSEP@";
 
-std::string cmQtAutoGeneratorCommon::Quoted(const std::string& text)
+const std::string& cmQtAutoGen::GeneratorName(GeneratorType type)
+{
+  switch (type) {
+    case GeneratorType::GEN:
+      return genNameGen;
+    case GeneratorType::MOC:
+      return genNameMoc;
+    case GeneratorType::UIC:
+      return genNameUic;
+    case GeneratorType::RCC:
+      return genNameRcc;
+  }
+  return genNameGen;
+}
+
+std::string cmQtAutoGen::GeneratorNameUpper(GeneratorType genType)
+{
+  return cmSystemTools::UpperCase(cmQtAutoGen::GeneratorName(genType));
+}
+
+std::string cmQtAutoGen::Quoted(const std::string& text)
 {
   static const char* rep[18] = { "\\", "\\\\", "\"", "\\\"", "\a", "\\a",
                                  "\b", "\\b",  "\f", "\\f",  "\n", "\\n",
@@ -191,14 +273,36 @@ std::string cmQtAutoGeneratorCommon::Quoted(const std::string& text)
   return res;
 }
 
-bool cmQtAutoGeneratorCommon::RccListInputs(const std::string& qtMajorVersion,
-                                            const std::string& rccCommand,
-                                            const std::string& fileName,
-                                            std::vector<std::string>& files,
-                                            std::string* errorMessage)
+void cmQtAutoGen::UicMergeOptions(std::vector<std::string>& baseOpts,
+                                  const std::vector<std::string>& newOpts,
+                                  bool isQt5)
+{
+  static const std::vector<std::string> valueOpts = {
+    "tr",      "translate", "postfix", "generator",
+    "include", // Since Qt 5.3
+    "g"
+  };
+  MergeOptions(baseOpts, newOpts, valueOpts, isQt5);
+}
+
+void cmQtAutoGen::RccMergeOptions(std::vector<std::string>& baseOpts,
+                                  const std::vector<std::string>& newOpts,
+                                  bool isQt5)
+{
+  static const std::vector<std::string> valueOpts = { "name", "root",
+                                                      "compress",
+                                                      "threshold" };
+  MergeOptions(baseOpts, newOpts, valueOpts, isQt5);
+}
+
+bool cmQtAutoGen::RccListInputs(const std::string& qtMajorVersion,
+                                const std::string& rccCommand,
+                                const std::string& fileName,
+                                std::vector<std::string>& files,
+                                std::string* errorMessage)
 {
   bool allGood = false;
-  if (cmsys::SystemTools::FileExists(fileName.c_str())) {
+  if (cmSystemTools::FileExists(fileName.c_str())) {
     if (qtMajorVersion == "4") {
       allGood = RccListInputsQt4(fileName, files, errorMessage);
     } else {
@@ -207,8 +311,8 @@ bool cmQtAutoGeneratorCommon::RccListInputs(const std::string& qtMajorVersion,
   } else {
     if (errorMessage != nullptr) {
       std::ostringstream ost;
-      ost << "AutoRcc: Error: Rcc file does not exist:\n"
-          << cmQtAutoGeneratorCommon::Quoted(fileName) << "\n";
+      ost << "rcc file does not exist:\n"
+          << "  " << cmQtAutoGen::Quoted(fileName) << "\n";
       *errorMessage = ost.str();
     }
   }

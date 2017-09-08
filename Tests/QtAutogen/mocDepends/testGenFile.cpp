@@ -1,5 +1,5 @@
 
-#include "test1_object.hpp"
+#include "GenFile.hpp"
 
 int main()
 {

@@ -15,6 +15,7 @@
 
 #include "cmCustomCommandLines.h"
 #include "cmExportSetMap.h"
+#include "cmQtAutoGenDigest.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -422,7 +423,8 @@ protected:
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
-  std::vector<const cmGeneratorTarget*> CreateQtAutoGeneratorsTargets();
+  // Qt auto generators
+  cmQtAutoGenDigestUPV CreateQtAutoGeneratorsTargets();
 
   std::string SelectMakeProgram(const std::string& makeProgram,
                                 const std::string& makeDefault = "") const;
