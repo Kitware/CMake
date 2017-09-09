@@ -57,7 +57,11 @@ if (NOT plDAfter GREATER plDBefore)
   message(SEND_ERROR "file (${plDFile}) should have changed!")
 endif()
 if (NOT plEAfter GREATER plEBefore)
-  message(SEND_ERROR "file (${plEFile}) should have changed!")
+  # There's a bug in Ninja on Windows
+  # https://gitlab.kitware.com/cmake/cmake/issues/16776
+  if(NOT ("${CMAKE_GENERATOR}" MATCHES "Ninja"))
+    message(SEND_ERROR "file (${plEFile}) should have changed!")
+  endif()
 endif()
 
 # - Ensure that the timestamp will change.
@@ -83,6 +87,10 @@ endif()
 if (NOT plDAfter GREATER plDBefore)
   message(SEND_ERROR "file (${plDFile}) should have changed!")
 endif()
-  if (NOT plEAfter GREATER plEBefore)
-  message(SEND_ERROR "file (${plEFile}) should have changed!")
+if (NOT plEAfter GREATER plEBefore)
+  # There's a bug in Ninja on Windows
+  # https://gitlab.kitware.com/cmake/cmake/issues/16776
+  if(NOT ("${CMAKE_GENERATOR}" MATCHES "Ninja"))
+    message(SEND_ERROR "file (${plEFile}) should have changed!")
+  endif()
 endif()
