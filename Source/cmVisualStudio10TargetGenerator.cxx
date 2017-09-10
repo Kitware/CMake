@@ -3261,6 +3261,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   }
 
   linkOptions.Parse(flags.c_str());
+  linkOptions.FixManifestUACFlags();
 
   if (this->MSTools) {
     cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
