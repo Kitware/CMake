@@ -535,14 +535,13 @@ int cmCTestTestHandler::ProcessHandler()
                  << static_cast<int>(percent + .5f) << "% tests passed, "
                  << failed.size() << " tests failed out of " << total
                  << std::endl);
-
-    if (!this->CTest->GetLabelsForSubprojects().empty() &&
-        this->CTest->GetSubprojectSummary()) {
-      this->PrintSubprojectSummary();
-    } else if (this->CTest->GetLabelSummary()) {
-      this->PrintLabelSummary();
+    if ((!this->CTest->GetLabelsForSubprojects().empty() &&
+         this->CTest->GetSubprojectSummary())) {
+      this->PrintLabelOrSubprojectSummary(true);
     }
-
+    if (this->CTest->GetLabelSummary()) {
+      this->PrintLabelOrSubprojectSummary(false);
+    }
     char realBuf[1024];
     sprintf(realBuf, "%6.2f sec", clock_finish - clock_start);
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
@@ -620,19 +619,32 @@ int cmCTestTestHandler::ProcessHandler()
   return 0;
 }
 
-void cmCTestTestHandler::PrintLabelSummary()
+void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
 {
-  cmCTestTestHandler::ListOfTests::iterator it = this->TestList.begin();
+  // collect subproject labels
+  std::vector<std::string> subprojects =
+    this->CTest->GetLabelsForSubprojects();
   std::map<std::string, double> labelTimes;
   std::map<std::string, int> labelCounts;
   std::set<std::string> labels;
-  // initialize maps
   std::string::size_type maxlen = 0;
-  for (; it != this->TestList.end(); ++it) {
+  // initialize maps
+  for (cmCTestTestHandler::ListOfTests::iterator it = this->TestList.begin();
+       it != this->TestList.end(); ++it) {
     cmCTestTestProperties& p = *it;
-    if (!p.Labels.empty()) {
-      for (std::vector<std::string>::iterator l = p.Labels.begin();
-           l != p.Labels.end(); ++l) {
+    for (std::vector<std::string>::iterator l = p.Labels.begin();
+         l != p.Labels.end(); ++l) {
+      // first check to see if the current label is a subproject label
+      bool isSubprojectLabel = false;
+      std::vector<std::string>::iterator subproject =
+        std::find(subprojects.begin(), subprojects.end(), *l);
+      if (subproject != subprojects.end()) {
+        isSubprojectLabel = true;
+      }
+      // if we are doing sub projects and this label is one, then use it
+      // if we are not doing sub projects and the label is not one use it
+      if ((doSubProject && isSubprojectLabel) ||
+          (!doSubProject && !isSubprojectLabel)) {
         if ((*l).size() > maxlen) {
           maxlen = (*l).size();
         }
@@ -642,22 +654,30 @@ void cmCTestTestHandler::PrintLabelSummary()
       }
     }
   }
-  cmCTestTestHandler::TestResultsVector::iterator ri =
-    this->TestResults.begin();
   // fill maps
-  for (; ri != this->TestResults.end(); ++ri) {
+  for (cmCTestTestHandler::TestResultsVector::iterator ri =
+         this->TestResults.begin();
+       ri != this->TestResults.end(); ++ri) {
     cmCTestTestResult& result = *ri;
     cmCTestTestProperties& p = *result.Properties;
-    if (!p.Labels.empty()) {
-      for (std::vector<std::string>::iterator l = p.Labels.begin();
-           l != p.Labels.end(); ++l) {
-        labelTimes[*l] += result.ExecutionTime;
+    for (std::vector<std::string>::iterator l = p.Labels.begin();
+         l != p.Labels.end(); ++l) {
+      // only use labels found in labels
+      if (labels.find(*l) != labels.end()) {
+        labelTimes[*l] += result.ExecutionTime * result.Properties->Processors;
         ++labelCounts[*l];
       }
     }
   }
+  // if no labels are found return and print nothing
+  if (labels.empty()) {
+    return;
+  }
   // now print times
-  if (!labels.empty()) {
+  if (doSubProject) {
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                       "\nSubproject Time Summary:", this->Quiet);
+  } else {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "\nLabel Time Summary:",
                        this->Quiet);
   }
@@ -667,7 +687,7 @@ void cmCTestTestHandler::PrintLabelSummary()
     label.resize(maxlen + 3, ' ');
 
     char buf[1024];
-    sprintf(buf, "%6.2f sec", labelTimes[*i]);
+    sprintf(buf, "%6.2f sec*proc", labelTimes[*i]);
 
     std::ostringstream labelCountStr;
     labelCountStr << "(" << labelCounts[*i] << " test";
@@ -675,7 +695,6 @@ void cmCTestTestHandler::PrintLabelSummary()
       labelCountStr << "s";
     }
     labelCountStr << ")";
-
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "\n"
                          << label << " = " << buf << " "
                          << labelCountStr.str(),
@@ -684,92 +703,12 @@ void cmCTestTestHandler::PrintLabelSummary()
       *this->LogFile << "\n" << *i << " = " << buf << "\n";
     }
   }
-  if (!labels.empty()) {
-    if (this->LogFile) {
-      *this->LogFile << "\n";
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "\n", this->Quiet);
+  if (this->LogFile) {
+    *this->LogFile << "\n";
   }
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "\n", this->Quiet);
 }
 
-void cmCTestTestHandler::PrintSubprojectSummary()
-{
-  std::vector<std::string> subprojects =
-    this->CTest->GetLabelsForSubprojects();
-
-  cmCTestTestHandler::ListOfTests::iterator it = this->TestList.begin();
-  std::map<std::string, double> labelTimes;
-  std::map<std::string, int> labelCounts;
-  std::set<std::string> labels;
-  // initialize maps
-  std::string::size_type maxlen = 0;
-  for (; it != this->TestList.end(); ++it) {
-    cmCTestTestProperties& p = *it;
-    for (std::vector<std::string>::iterator l = p.Labels.begin();
-         l != p.Labels.end(); ++l) {
-      std::vector<std::string>::iterator subproject =
-        std::find(subprojects.begin(), subprojects.end(), *l);
-      if (subproject != subprojects.end()) {
-        if ((*l).size() > maxlen) {
-          maxlen = (*l).size();
-        }
-        labels.insert(*l);
-        labelTimes[*l] = 0;
-        labelCounts[*l] = 0;
-      }
-    }
-  }
-  cmCTestTestHandler::TestResultsVector::iterator ri =
-    this->TestResults.begin();
-  // fill maps
-  for (; ri != this->TestResults.end(); ++ri) {
-    cmCTestTestResult& result = *ri;
-    cmCTestTestProperties& p = *result.Properties;
-    for (std::vector<std::string>::iterator l = p.Labels.begin();
-         l != p.Labels.end(); ++l) {
-      std::vector<std::string>::iterator subproject =
-        std::find(subprojects.begin(), subprojects.end(), *l);
-      if (subproject != subprojects.end()) {
-        labelTimes[*l] += result.ExecutionTime;
-        ++labelCounts[*l];
-      }
-    }
-  }
-  // now print times
-  if (!labels.empty()) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "\nSubproject Time Summary:", this->Quiet);
-  }
-  for (std::set<std::string>::const_iterator i = labels.begin();
-       i != labels.end(); ++i) {
-    std::string label = *i;
-    label.resize(maxlen + 3, ' ');
-
-    char buf[1024];
-    sprintf(buf, "%6.2f sec", labelTimes[*i]);
-
-    std::ostringstream labelCountStr;
-    labelCountStr << "(" << labelCounts[*i] << " test";
-    if (labelCounts[*i] > 1) {
-      labelCountStr << "s";
-    }
-    labelCountStr << ")";
-
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "\n"
-                         << label << " = " << buf << " "
-                         << labelCountStr.str(),
-                       this->Quiet);
-    if (this->LogFile) {
-      *this->LogFile << "\n" << *i << " = " << buf << "\n";
-    }
-  }
-  if (!labels.empty()) {
-    if (this->LogFile) {
-      *this->LogFile << "\n";
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "\n", this->Quiet);
-  }
-}
 void cmCTestTestHandler::CheckLabelFilterInclude(cmCTestTestProperties& it)
 {
   // if not using Labels to filter then return
