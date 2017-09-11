@@ -10,3 +10,7 @@ run_cmake(SourceByproducts)
 run_cmake(SourceUsesTerminal)
 run_cmake(TargetImported)
 run_cmake(TargetNotInDir)
+
+if(${RunCMake_GENERATOR} MATCHES "Visual Studio ([^89]|[89][0-9])")
+  run_cmake(RemoveEmptyCommands)
+endif()

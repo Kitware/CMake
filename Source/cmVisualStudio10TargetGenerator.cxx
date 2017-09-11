@@ -3536,11 +3536,13 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
   for (std::vector<cmCustomCommand>::const_iterator i = commands.begin();
        i != commands.end(); ++i) {
     cmCustomCommandGenerator ccg(*i, configName, this->LocalGenerator);
-    comment += pre;
-    comment += lg->ConstructComment(ccg);
-    script += pre;
-    pre = "\n";
-    script += cmVS10EscapeXML(lg->ConstructScript(ccg));
+    if (!ccg.HasOnlyEmptyCommandLines()) {
+      comment += pre;
+      comment += lg->ConstructComment(ccg);
+      script += pre;
+      pre = "\n";
+      script += cmVS10EscapeXML(lg->ConstructScript(ccg));
+    }
   }
   comment = cmVS10EscapeComment(comment);
   if (this->ProjectType != csproj) {

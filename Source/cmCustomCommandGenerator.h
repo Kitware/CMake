@@ -40,6 +40,7 @@ public:
   std::vector<std::string> const& GetOutputs() const;
   std::vector<std::string> const& GetByproducts() const;
   std::vector<std::string> const& GetDepends() const;
+  bool HasOnlyEmptyCommandLines() const;
 };
 
 #endif

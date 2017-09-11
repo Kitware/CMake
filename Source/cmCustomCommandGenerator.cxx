@@ -97,6 +97,18 @@ const char* cmCustomCommandGenerator::GetArgv0Location(unsigned int c) const
   return nullptr;
 }
 
+bool cmCustomCommandGenerator::HasOnlyEmptyCommandLines() const
+{
+  for (size_t i = 0; i < this->CommandLines.size(); ++i) {
+    for (size_t j = 0; j < this->CommandLines[i].size(); ++j) {
+      if (!this->CommandLines[i][j].empty()) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
 {
   if (const char* emulator = this->GetCrossCompilingEmulator(c)) {
