@@ -43,7 +43,18 @@ if(WIN32)
 
   # minimize windows.h content
   add_definitions(-DWIN32_LEAN_AND_MEAN)
+
+  # version support for generated exes
+  configure_file(
+    "${CMake_SOURCE_DIR}/Source/cmakeversion.rc.in"
+    "${CMake_BINARY_DIR}/Source/cmakeversion.rc"
+    )
+
+	set(VERSION_RC_FILE "${CMake_BINARY_DIR}/Source/cmakeversion.rc")
 endif()
+
+set(CMAKE_VERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
+set(CMAKE_SOVERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
 
 # configure the .dox.in file
 if(CMake_BUILD_DEVELOPER_REFERENCE)
@@ -723,9 +734,11 @@ set(_tools)
 
 if(WIN32 AND NOT CYGWIN)
   set_source_files_properties(cmcldeps.cxx PROPERTIES COMPILE_DEFINITIONS _WIN32_WINNT=0x0501)
-  add_executable(cmcldeps cmcldeps.cxx ${MANIFEST_FILE})
+  add_executable(cmcldeps cmcldeps.cxx ${MANIFEST_FILE} ${VERSION_RC_FILE})
   list(APPEND _tools cmcldeps)
   target_link_libraries(cmcldeps CMakeLib)
+  set_target_properties(cmcldeps PROPERTIES VERSION ${CMAKE_VERSION})
+  set_target_properties(cmcldeps PROPERTIES SOVERSION ${CMAKE_SOVERSION})
 endif()
 
 foreach(v CURL_CA_BUNDLE CURL_CA_PATH)
@@ -1006,9 +1019,11 @@ if(APPLE)
 endif()
 
 # Build CMake executable
-add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h ${MANIFEST_FILE})
+add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h ${MANIFEST_FILE} ${VERSION_RC_FILE})
 list(APPEND _tools cmake)
 target_link_libraries(cmake CMakeLib)
+set_target_properties(cmake PROPERTIES VERSION ${CMAKE_VERSION})
+set_target_properties(cmake PROPERTIES SOVERSION ${CMAKE_SOVERSION})
 
 if(CMake_ENABLE_SERVER_MODE)
   add_library(CMakeServerLib
@@ -1024,14 +1039,18 @@ if(CMake_ENABLE_SERVER_MODE)
 endif()
 
 # Build CTest executable
-add_executable(ctest ctest.cxx ${MANIFEST_FILE})
+add_executable(ctest ctest.cxx ${MANIFEST_FILE} ${VERSION_RC_FILE})
 list(APPEND _tools ctest)
 target_link_libraries(ctest CTestLib)
+set_target_properties(ctest PROPERTIES VERSION ${CMAKE_VERSION})
+set_target_properties(ctest PROPERTIES SOVERSION ${CMAKE_SOVERSION})
 
 # Build CPack executable
-add_executable(cpack CPack/cpack.cxx ${MANIFEST_FILE})
+add_executable(cpack CPack/cpack.cxx ${MANIFEST_FILE} ${VERSION_RC_FILE})
 list(APPEND _tools cpack)
 target_link_libraries(cpack CPackLib)
+set_target_properties(cpack PROPERTIES VERSION ${CMAKE_VERSION})
+set_target_properties(cpack PROPERTIES SOVERSION ${CMAKE_SOVERSION})
 
 # Curses GUI
 if(BUILD_CursesDialog)
