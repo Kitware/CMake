@@ -419,11 +419,10 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
 
     // Expand placeholders.
-    for (std::vector<std::string>::iterator i = real_link_commands.begin();
-         i != real_link_commands.end(); ++i) {
-      *i = launcher + *i;
-      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, *i,
-                                                   vars);
+    for (std::string& real_link_command : real_link_commands) {
+      real_link_command = launcher + real_link_command;
+      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
+                                                   real_link_command, vars);
     }
     // Restore path conversion to normal shells.
     this->LocalGenerator->SetLinkScriptShell(false);
@@ -897,10 +896,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       std::vector<std::string>::iterator osi = object_strings.begin();
       {
         vars.Objects = osi->c_str();
-        for (std::vector<std::string>::const_iterator i =
-               archiveCreateCommands.begin();
-             i != archiveCreateCommands.end(); ++i) {
-          std::string cmd = launcher + *i;
+        for (std::string const& acc : archiveCreateCommands) {
+          std::string cmd = launcher + acc;
           rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                        cmd, vars);
           real_link_commands.push_back(cmd);
@@ -909,10 +906,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       // Append to the archive with the other object sets.
       for (++osi; osi != object_strings.end(); ++osi) {
         vars.Objects = osi->c_str();
-        for (std::vector<std::string>::const_iterator i =
-               archiveAppendCommands.begin();
-             i != archiveAppendCommands.end(); ++i) {
-          std::string cmd = launcher + *i;
+        for (std::string const& aac : archiveAppendCommands) {
+          std::string cmd = launcher + aac;
           rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                        cmd, vars);
           real_link_commands.push_back(cmd);
@@ -920,10 +915,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       }
       // Finish the archive.
       vars.Objects = "";
-      for (std::vector<std::string>::const_iterator i =
-             archiveFinishCommands.begin();
-           i != archiveFinishCommands.end(); ++i) {
-        std::string cmd = launcher + *i;
+      for (std::string const& afc : archiveFinishCommands) {
+        std::string cmd = launcher + afc;
         rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, cmd,
                                                      vars);
         // If there is no ranlib the command will be ":".  Skip it.
@@ -945,11 +938,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       }
 
       // Expand placeholders.
-      for (std::vector<std::string>::iterator i = real_link_commands.begin();
-           i != real_link_commands.end(); ++i) {
-        *i = launcher + *i;
-        rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, *i,
-                                                     vars);
+      for (std::string& real_link_command : real_link_commands) {
+        real_link_command = launcher + real_link_command;
+        rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
+                                                     real_link_command, vars);
       }
     }
 

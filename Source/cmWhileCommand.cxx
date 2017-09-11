@@ -60,11 +60,10 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       while (isTrue) {
         if (!errorString.empty()) {
           std::string err = "had incorrect arguments: ";
-          unsigned int i;
-          for (i = 0; i < this->Args.size(); ++i) {
-            err += (this->Args[i].Delim ? "\"" : "");
-            err += this->Args[i].Value;
-            err += (this->Args[i].Delim ? "\"" : "");
+          for (cmListFileArgument const& arg : this->Args) {
+            err += (arg.Delim ? "\"" : "");
+            err += arg.Value;
+            err += (arg.Delim ? "\"" : "");
             err += " ";
           }
           err += "(";
@@ -78,9 +77,9 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
         }
 
         // Invoke all the functions that were collected in the block.
-        for (unsigned int c = 0; c < this->Functions.size(); ++c) {
+        for (cmListFileFunction const& fn : this->Functions) {
           cmExecutionStatus status;
-          mf.ExecuteCommand(this->Functions[c], status);
+          mf.ExecuteCommand(fn, status);
           if (status.GetReturnInvoked()) {
             inStatus.SetReturnInvoked();
             return true;

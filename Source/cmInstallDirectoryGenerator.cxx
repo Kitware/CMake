@@ -62,19 +62,17 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
 {
   std::vector<std::string> dirs;
   cmGeneratorExpression ge;
-  for (std::vector<std::string>::const_iterator i = this->Directories.begin();
-       i != this->Directories.end(); ++i) {
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(*i);
+  for (std::string const& d : this->Directories) {
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(d);
     cmSystemTools::ExpandListArgument(
       cge->Evaluate(this->LocalGenerator, config), dirs);
   }
 
   // Make sure all dirs have absolute paths.
   cmMakefile const& mf = *this->LocalGenerator->GetMakefile();
-  for (std::vector<std::string>::iterator i = dirs.begin(); i != dirs.end();
-       ++i) {
-    if (!cmSystemTools::FileIsFullPath(i->c_str())) {
-      *i = std::string(mf.GetCurrentSourceDirectory()) + "/" + *i;
+  for (std::string& d : dirs) {
+    if (!cmSystemTools::FileIsFullPath(d.c_str())) {
+      d = std::string(mf.GetCurrentSourceDirectory()) + "/" + d;
     }
   }
 

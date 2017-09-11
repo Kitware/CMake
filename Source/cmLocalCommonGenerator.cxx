@@ -67,10 +67,9 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
         this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG")) {
     std::vector<std::string> includes;
     this->GetIncludeDirectories(includes, target, "C", config);
-    for (std::vector<std::string>::const_iterator idi = includes.begin();
-         idi != includes.end(); ++idi) {
+    for (std::string const& id : includes) {
       std::string flg = modpath_flag;
-      flg += this->ConvertToOutputFormat(*idi, cmOutputConverter::SHELL);
+      flg += this->ConvertToOutputFormat(id, cmOutputConverter::SHELL);
       this->AppendFlags(flags, flg);
     }
   }

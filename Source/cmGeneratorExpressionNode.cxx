@@ -877,13 +877,12 @@ std::string getLinkedTargetsContent(
   std::string linkedTargetsContent;
   std::string sep;
   std::string depString;
-  for (typename std::vector<T>::const_iterator it = libraries.begin();
-       it != libraries.end(); ++it) {
+  for (T const& l : libraries) {
     // Broken code can have a target in its own link interface.
     // Don't follow such link interface entries so as not to create a
     // self-referencing loop.
-    if (it->Target && it->Target != target) {
-      depString += sep + "$<TARGET_PROPERTY:" + it->Target->GetName() + "," +
+    if (l.Target && l.Target != target) {
+      depString += sep + "$<TARGET_PROPERTY:" + l.Target->GetName() + "," +
         interfacePropertyName + ">";
       sep = ";";
     }
@@ -1281,17 +1280,15 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
         context->HadContextSensitiveCondition = true;
       }
 
-      for (std::vector<std::string>::iterator oi = objects.begin();
-           oi != objects.end(); ++oi) {
-        *oi = obj_dir + *oi;
+      for (std::string& o : objects) {
+        o = obj_dir + o;
       }
     }
 
     // Create the cmSourceFile instances in the referencing directory.
     cmMakefile* mf = context->LG->GetMakefile();
-    for (std::vector<std::string>::iterator oi = objects.begin();
-         oi != objects.end(); ++oi) {
-      mf->AddTargetObject(tgtName, *oi);
+    for (std::string& o : objects) {
+      mf->AddTargetObject(tgtName, o);
     }
 
     return cmJoin(objects, ";");
@@ -1325,16 +1322,15 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
 
     LangMap testedFeatures;
 
-    for (std::vector<std::string>::const_iterator it = parameters.begin();
-         it != parameters.end(); ++it) {
+    for (std::string const& p : parameters) {
       std::string error;
       std::string lang;
       if (!context->LG->GetMakefile()->CompileFeatureKnown(
-            context->HeadTarget->Target, *it, lang, &error)) {
+            context->HeadTarget->Target, p, lang, &error)) {
         reportError(context, content->GetOriginalExpression(), error);
         return std::string();
       }
-      testedFeatures[lang].push_back(*it);
+      testedFeatures[lang].push_back(p);
 
       if (availableFeatures.find(lang) == availableFeatures.end()) {
         const char* featuresKnown =
@@ -1350,15 +1346,13 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
 
     bool evalLL = dagChecker && dagChecker->EvaluatingLinkLibraries();
 
-    for (LangMap::const_iterator lit = testedFeatures.begin();
-         lit != testedFeatures.end(); ++lit) {
+    for (auto const& lit : testedFeatures) {
       std::vector<std::string> const& langAvailable =
-        availableFeatures[lit->first];
+        availableFeatures[lit.first];
       const char* standardDefault = context->LG->GetMakefile()->GetDefinition(
-        "CMAKE_" + lit->first + "_STANDARD_DEFAULT");
-      for (std::vector<std::string>::const_iterator it = lit->second.begin();
-           it != lit->second.end(); ++it) {
-        if (std::find(langAvailable.begin(), langAvailable.end(), *it) ==
+        "CMAKE_" + lit.first + "_STANDARD_DEFAULT");
+      for (std::string const& it : lit.second) {
+        if (std::find(langAvailable.begin(), langAvailable.end(), it) ==
             langAvailable.end()) {
           return "0";
         }
@@ -1368,14 +1362,14 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
           continue;
         }
         if (!context->LG->GetMakefile()->HaveStandardAvailable(
-              target->Target, lit->first, *it)) {
+              target->Target, lit.first, it)) {
           if (evalLL) {
-            const char* l = target->GetProperty(lit->first + "_STANDARD");
+            const char* l = target->GetProperty(lit.first + "_STANDARD");
             if (!l) {
               l = standardDefault;
             }
             assert(l);
-            context->MaxLanguageStandard[target][lit->first] = l;
+            context->MaxLanguageStandard[target][lit.first] = l;
           } else {
             return "0";
           }

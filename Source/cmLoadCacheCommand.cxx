@@ -27,17 +27,16 @@ bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& args,
   // If this set is empty, all cache entries are brought in
   // and they can not be overridden.
   bool excludeFiles = false;
-  unsigned int i;
   std::set<std::string> excludes;
 
-  for (i = 0; i < args.size(); i++) {
+  for (std::string const& arg : args) {
     if (excludeFiles) {
-      excludes.insert(args[i]);
+      excludes.insert(arg);
     }
-    if (args[i] == "EXCLUDE") {
+    if (arg == "EXCLUDE") {
       excludeFiles = true;
     }
-    if (excludeFiles && (args[i] == "INCLUDE_INTERNALS")) {
+    if (excludeFiles && (arg == "INCLUDE_INTERNALS")) {
       break;
     }
   }
@@ -48,25 +47,25 @@ bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& args,
   bool includeFiles = false;
   std::set<std::string> includes;
 
-  for (i = 0; i < args.size(); i++) {
+  for (std::string const& arg : args) {
     if (includeFiles) {
-      includes.insert(args[i]);
+      includes.insert(arg);
     }
-    if (args[i] == "INCLUDE_INTERNALS") {
+    if (arg == "INCLUDE_INTERNALS") {
       includeFiles = true;
     }
-    if (includeFiles && (args[i] == "EXCLUDE")) {
+    if (includeFiles && (arg == "EXCLUDE")) {
       break;
     }
   }
 
   // Loop over each build directory listed in the arguments.  Each
   // directory has a cache file.
-  for (i = 0; i < args.size(); i++) {
-    if ((args[i] == "EXCLUDE") || (args[i] == "INCLUDE_INTERNALS")) {
+  for (std::string const& arg : args) {
+    if ((arg == "EXCLUDE") || (arg == "INCLUDE_INTERNALS")) {
       break;
     }
-    this->Makefile->GetCMakeInstance()->LoadCache(args[i], false, excludes,
+    this->Makefile->GetCMakeInstance()->LoadCache(arg, false, excludes,
                                                   includes);
   }
 

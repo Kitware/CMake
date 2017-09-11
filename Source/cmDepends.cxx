@@ -53,12 +53,10 @@ bool cmDepends::Write(std::ostream& makeDepends, std::ostream& internalDepends)
     std::string const& obj = *si++;
     dependencies[obj].insert(src);
   }
-  for (std::map<std::string, std::set<std::string>>::const_iterator it =
-         dependencies.begin();
-       it != dependencies.end(); ++it) {
+  for (auto const& d : dependencies) {
 
     // Write the dependencies for this pair.
-    if (!this->WriteDependencies(it->second, it->first, makeDepends,
+    if (!this->WriteDependencies(d.second, d.first, makeDepends,
                                  internalDepends)) {
       return false;
     }

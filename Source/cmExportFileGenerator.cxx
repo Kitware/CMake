@@ -206,9 +206,8 @@ static bool checkInterfaceDirs(const std::string& prepro,
 
   bool hadFatalError = false;
 
-  for (std::vector<std::string>::iterator li = parts.begin();
-       li != parts.end(); ++li) {
-    size_t genexPos = cmGeneratorExpression::Find(*li);
+  for (std::string const& li : parts) {
+    size_t genexPos = cmGeneratorExpression::Find(li);
     if (genexPos == 0) {
       continue;
     }
@@ -233,20 +232,20 @@ static bool checkInterfaceDirs(const std::string& prepro,
         hadFatalError = true;
       }
     }
-    if (cmHasLiteralPrefix(li->c_str(), "${_IMPORT_PREFIX}")) {
+    if (cmHasLiteralPrefix(li.c_str(), "${_IMPORT_PREFIX}")) {
       continue;
     }
-    if (!cmSystemTools::FileIsFullPath(li->c_str())) {
+    if (!cmSystemTools::FileIsFullPath(li.c_str())) {
       /* clang-format off */
       e << "Target \"" << target->GetName() << "\" " << prop <<
            " property contains relative path:\n"
-           "  \"" << *li << "\"";
+           "  \"" << li << "\"";
       /* clang-format on */
       target->GetLocalGenerator()->IssueMessage(messageType, e.str());
     }
-    bool inBinary = isSubDirectory(li->c_str(), topBinaryDir);
-    bool inSource = isSubDirectory(li->c_str(), topSourceDir);
-    if (isSubDirectory(li->c_str(), installDir)) {
+    bool inBinary = isSubDirectory(li.c_str(), topBinaryDir);
+    bool inSource = isSubDirectory(li.c_str(), topSourceDir);
+    if (isSubDirectory(li.c_str(), installDir)) {
       // The include directory is inside the install tree.  If the
       // install tree is not inside the source tree or build tree then
       // fall through to the checks below that the include directory is not
@@ -261,7 +260,7 @@ static bool checkInterfaceDirs(const std::string& prepro,
             case cmPolicies::WARN: {
               std::ostringstream s;
               s << cmPolicies::GetPolicyWarning(cmPolicies::CMP0052) << "\n";
-              s << "Directory:\n    \"" << *li
+              s << "Directory:\n    \"" << li
                 << "\"\nin "
                    "INTERFACE_INCLUDE_DIRECTORIES of target \""
                 << target->GetName() << "\" is a subdirectory of the install "
@@ -293,7 +292,7 @@ static bool checkInterfaceDirs(const std::string& prepro,
       /* clang-format off */
       e << "Target \"" << target->GetName() << "\" " << prop <<
            " property contains path:\n"
-           "  \"" << *li << "\"\nwhich is prefixed in the build directory.";
+           "  \"" << li << "\"\nwhich is prefixed in the build directory.";
       /* clang-format on */
       target->GetLocalGenerator()->IssueMessage(messageType, e.str());
     }
@@ -302,7 +301,7 @@ static bool checkInterfaceDirs(const std::string& prepro,
         e << "Target \"" << target->GetName() << "\" " << prop
           << " property contains path:\n"
              "  \""
-          << *li << "\"\nwhich is prefixed in the source directory.";
+          << li << "\"\nwhich is prefixed in the source directory.";
         target->GetLocalGenerator()->IssueMessage(messageType, e.str());
       }
     }
@@ -316,15 +315,14 @@ static void prefixItems(std::string& exportDirs)
   cmGeneratorExpression::Split(exportDirs, entries);
   exportDirs = "";
   const char* sep = "";
-  for (std::vector<std::string>::const_iterator ei = entries.begin();
-       ei != entries.end(); ++ei) {
+  for (std::string const& e : entries) {
     exportDirs += sep;
     sep = ";";
-    if (!cmSystemTools::FileIsFullPath(ei->c_str()) &&
-        ei->find("${_IMPORT_PREFIX}") == std::string::npos) {
+    if (!cmSystemTools::FileIsFullPath(e.c_str()) &&
+        e.find("${_IMPORT_PREFIX}") == std::string::npos) {
       exportDirs += "${_IMPORT_PREFIX}/";
     }
-    exportDirs += *ei;
+    exportDirs += e;
   }
 }
 
@@ -461,18 +459,17 @@ void getCompatibleInterfaceProperties(cmGeneratorTarget* target,
 
   const cmComputeLinkInformation::ItemVector& deps = info->GetItems();
 
-  for (cmComputeLinkInformation::ItemVector::const_iterator li = deps.begin();
-       li != deps.end(); ++li) {
-    if (!li->Target) {
+  for (auto const& dep : deps) {
+    if (!dep.Target) {
       continue;
     }
-    getPropertyContents(li->Target, "COMPATIBLE_INTERFACE_BOOL",
+    getPropertyContents(dep.Target, "COMPATIBLE_INTERFACE_BOOL",
                         ifaceProperties);
-    getPropertyContents(li->Target, "COMPATIBLE_INTERFACE_STRING",
+    getPropertyContents(dep.Target, "COMPATIBLE_INTERFACE_STRING",
                         ifaceProperties);
-    getPropertyContents(li->Target, "COMPATIBLE_INTERFACE_NUMBER_MIN",
+    getPropertyContents(dep.Target, "COMPATIBLE_INTERFACE_NUMBER_MIN",
                         ifaceProperties);
-    getPropertyContents(li->Target, "COMPATIBLE_INTERFACE_NUMBER_MAX",
+    getPropertyContents(dep.Target, "COMPATIBLE_INTERFACE_NUMBER_MAX",
                         ifaceProperties);
   }
 }
@@ -504,15 +501,13 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
     std::vector<std::string> configNames;
     gtarget->Target->GetMakefile()->GetConfigurations(configNames);
 
-    for (std::vector<std::string>::const_iterator ci = configNames.begin();
-         ci != configNames.end(); ++ci) {
-      getCompatibleInterfaceProperties(gtarget, ifaceProperties, *ci);
+    for (std::string const& cn : configNames) {
+      getCompatibleInterfaceProperties(gtarget, ifaceProperties, cn);
     }
   }
 
-  for (std::set<std::string>::const_iterator it = ifaceProperties.begin();
-       it != ifaceProperties.end(); ++it) {
-    this->PopulateInterfaceProperty("INTERFACE_" + *it, gtarget, properties);
+  for (std::string const& ip : ifaceProperties) {
+    this->PopulateInterfaceProperty("INTERFACE_" + ip, gtarget, properties);
   }
 }
 
@@ -524,10 +519,9 @@ void cmExportFileGenerator::GenerateInterfaceProperties(
     std::string targetName = this->Namespace;
     targetName += target->GetExportName();
     os << "set_target_properties(" << targetName << " PROPERTIES\n";
-    for (ImportPropertyMap::const_iterator pi = properties.begin();
-         pi != properties.end(); ++pi) {
-      os << "  " << pi->first << " " << cmExportFileGeneratorEscape(pi->second)
-         << "\n";
+    for (auto const& property : properties) {
+      os << "  " << property.first << " "
+         << cmExportFileGeneratorEscape(property.second) << "\n";
     }
     os << ")\n\n";
   }
@@ -572,14 +566,13 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
 
   std::string sep;
   input = "";
-  for (std::vector<std::string>::iterator li = parts.begin();
-       li != parts.end(); ++li) {
-    if (cmGeneratorExpression::Find(*li) == std::string::npos) {
-      this->AddTargetNamespace(*li, target, missingTargets);
+  for (std::string& li : parts) {
+    if (cmGeneratorExpression::Find(li) == std::string::npos) {
+      this->AddTargetNamespace(li, target, missingTargets);
     } else {
-      this->ResolveTargetsInGeneratorExpression(*li, target, missingTargets);
+      this->ResolveTargetsInGeneratorExpression(li, target, missingTargets);
     }
-    input += sep + *li;
+    input += sep + li;
     sep = ";";
   }
 }
@@ -797,13 +790,12 @@ void cmExportFileGenerator::SetImportLinkProperty(
   // Construct the property value.
   std::string link_entries;
   const char* sep = "";
-  for (typename std::vector<T>::const_iterator li = entries.begin();
-       li != entries.end(); ++li) {
+  for (T const& l : entries) {
     // Separate this from the previous entry.
     link_entries += sep;
     sep = ";";
 
-    std::string temp = *li;
+    std::string temp = l;
     this->AddTargetNamespace(temp, target, missingTargets);
     link_entries += temp;
   }
@@ -988,10 +980,9 @@ void cmExportFileGenerator::GenerateImportPropertyCode(
   }
   os << ")\n";
   os << "set_target_properties(" << targetName << " PROPERTIES\n";
-  for (ImportPropertyMap::const_iterator pi = properties.begin();
-       pi != properties.end(); ++pi) {
-    os << "  " << pi->first << " " << cmExportFileGeneratorEscape(pi->second)
-       << "\n";
+  for (auto const& property : properties) {
+    os << "  " << property.first << " "
+       << cmExportFileGeneratorEscape(property.second) << "\n";
   }
   os << "  )\n"
      << "\n";
@@ -1015,9 +1006,9 @@ void cmExportFileGenerator::GenerateMissingTargetsCheckCode(
         "foreach(_target ";
   /* clang-format on */
   std::set<std::string> emitted;
-  for (unsigned int i = 0; i < missingTargets.size(); ++i) {
-    if (emitted.insert(missingTargets[i]).second) {
-      os << "\"" << missingTargets[i] << "\" ";
+  for (std::string const& missingTarget : missingTargets) {
+    if (emitted.insert(missingTarget).second) {
+      os << "\"" << missingTarget << "\" ";
     }
   }
   /* clang-format off */
@@ -1094,9 +1085,8 @@ void cmExportFileGenerator::GenerateImportedFileChecksCode(
         "list(APPEND _IMPORT_CHECK_FILES_FOR_"
      << targetName << " ";
 
-  for (std::set<std::string>::const_iterator li = importedLocations.begin();
-       li != importedLocations.end(); ++li) {
-    ImportPropertyMap::const_iterator pi = properties.find(*li);
+  for (std::string const& li : importedLocations) {
+    ImportPropertyMap::const_iterator pi = properties.find(li);
     if (pi != properties.end()) {
       os << cmExportFileGeneratorEscape(pi->second) << " ";
     }

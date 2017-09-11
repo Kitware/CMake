@@ -444,15 +444,11 @@ std::vector<std::string> cmState::GetCommandNames() const
   std::vector<std::string> commandNames;
   commandNames.reserve(this->BuiltinCommands.size() +
                        this->ScriptedCommands.size());
-  for (std::map<std::string, cmCommand*>::const_iterator cmds =
-         this->BuiltinCommands.begin();
-       cmds != this->BuiltinCommands.end(); ++cmds) {
-    commandNames.push_back(cmds->first);
+  for (auto const& bc : this->BuiltinCommands) {
+    commandNames.push_back(bc.first);
   }
-  for (std::map<std::string, cmCommand*>::const_iterator cmds =
-         this->ScriptedCommands.begin();
-       cmds != this->ScriptedCommands.end(); ++cmds) {
-    commandNames.push_back(cmds->first);
+  for (auto const& sc : this->ScriptedCommands) {
+    commandNames.push_back(sc.first);
   }
   std::sort(commandNames.begin(), commandNames.end());
   commandNames.erase(std::unique(commandNames.begin(), commandNames.end()),

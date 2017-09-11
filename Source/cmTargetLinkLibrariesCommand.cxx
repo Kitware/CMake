@@ -429,10 +429,9 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
   // Include this library in the link interface for the target.
   if (llt == DEBUG_LibraryType || llt == GENERAL_LibraryType) {
     // Put in the DEBUG configuration interfaces.
-    for (std::vector<std::string>::const_iterator i = debugConfigs.begin();
-         i != debugConfigs.end(); ++i) {
+    for (std::string const& dc : debugConfigs) {
       prop = "LINK_INTERFACE_LIBRARIES_";
-      prop += *i;
+      prop += dc;
       this->Target->AppendProperty(prop, lib.c_str());
     }
   }
@@ -442,10 +441,9 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
 
     // Make sure the DEBUG configuration interfaces exist so that the
     // general one will not be used as a fall-back.
-    for (std::vector<std::string>::const_iterator i = debugConfigs.begin();
-         i != debugConfigs.end(); ++i) {
+    for (std::string const& dc : debugConfigs) {
       prop = "LINK_INTERFACE_LIBRARIES_";
-      prop += *i;
+      prop += dc;
       if (!this->Target->GetProperty(prop)) {
         this->Target->SetProperty(prop, "");
       }

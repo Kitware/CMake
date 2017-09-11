@@ -69,11 +69,10 @@ std::string cmScriptGenerator::CreateConfigTest(
   result += this->RuntimeConfigVariable;
   result += "}\" MATCHES \"^(";
   const char* sep = "";
-  for (std::vector<std::string>::const_iterator ci = configs.begin();
-       ci != configs.end(); ++ci) {
+  for (std::string const& config : configs) {
     result += sep;
     sep = "|";
-    cmScriptGeneratorEncodeConfig(*ci, result);
+    cmScriptGeneratorEncodeConfig(config, result);
   }
   result += ")$\"";
   return result;
@@ -123,10 +122,8 @@ bool cmScriptGenerator::GeneratesForConfig(const std::string& config)
   // This is a configuration-specific rule.  Check if the config
   // matches this rule.
   std::string config_upper = cmSystemTools::UpperCase(config);
-  for (std::vector<std::string>::const_iterator i =
-         this->Configurations.begin();
-       i != this->Configurations.end(); ++i) {
-    if (cmSystemTools::UpperCase(*i) == config_upper) {
+  for (std::string const& cfg : this->Configurations) {
+    if (cmSystemTools::UpperCase(cfg) == config_upper) {
       return true;
     }
   }
@@ -163,15 +160,12 @@ void cmScriptGenerator::GenerateScriptActionsPerConfig(std::ostream& os,
     // in a block for each configuration that is built.  We restrict
     // the list of configurations to those to which this rule applies.
     bool first = true;
-    for (std::vector<std::string>::const_iterator i =
-           this->ConfigurationTypes->begin();
-         i != this->ConfigurationTypes->end(); ++i) {
-      const char* config = i->c_str();
-      if (this->GeneratesForConfig(config)) {
+    for (std::string const& cfgType : *this->ConfigurationTypes) {
+      if (this->GeneratesForConfig(cfgType)) {
         // Generate a per-configuration block.
-        std::string config_test = this->CreateConfigTest(config);
+        std::string config_test = this->CreateConfigTest(cfgType);
         os << indent << (first ? "if(" : "elseif(") << config_test << ")\n";
-        this->GenerateScriptForConfig(os, config, indent.Next());
+        this->GenerateScriptForConfig(os, cfgType, indent.Next());
         first = false;
       }
     }

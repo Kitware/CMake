@@ -21,9 +21,8 @@ cmProperty* cmPropertyMap::GetOrCreateProperty(const std::string& name)
 std::vector<std::string> cmPropertyMap::GetPropertyList() const
 {
   std::vector<std::string> keyList;
-  for (cmPropertyMap::const_iterator i = this->begin(), e = this->end();
-       i != e; ++i) {
-    keyList.push_back(i->first);
+  for (auto const& i : *this) {
+    keyList.push_back(i.first);
   }
   std::sort(keyList.begin(), keyList.end());
   return keyList;

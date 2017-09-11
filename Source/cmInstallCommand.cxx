@@ -141,23 +141,23 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
   // Scan the args again, this time adding install generators each time we
   // encounter a SCRIPT or CODE arg:
   //
-  for (size_t i = 0; i < args.size(); ++i) {
-    if (args[i] == "SCRIPT") {
+  for (std::string const& arg : args) {
+    if (arg == "SCRIPT") {
       doing_script = true;
       doing_code = false;
-    } else if (args[i] == "CODE") {
+    } else if (arg == "CODE") {
       doing_script = false;
       doing_code = true;
-    } else if (args[i] == "COMPONENT") {
+    } else if (arg == "COMPONENT") {
       doing_script = false;
       doing_code = false;
     } else if (doing_script) {
       doing_script = false;
-      std::string script = args[i];
+      std::string script = arg;
       if (!cmSystemTools::FileIsFullPath(script.c_str())) {
         script = this->Makefile->GetCurrentSourceDirectory();
         script += "/";
-        script += args[i];
+        script += arg;
       }
       if (cmSystemTools::FileIsDirectory(script)) {
         this->SetError("given a directory as value of SCRIPT argument.");
@@ -167,7 +167,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
         script.c_str(), false, component.c_str(), exclude_from_all));
     } else if (doing_code) {
       doing_code = false;
-      std::string const& code = args[i];
+      std::string const& code = arg;
       this->Makefile->AddInstallGenerator(new cmInstallScriptGenerator(
         code.c_str(), true, component.c_str(), exclude_from_all));
     }
@@ -336,19 +336,16 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     (this->Makefile->IsOn("WIN32") || this->Makefile->IsOn("CYGWIN") ||
      this->Makefile->IsOn("MINGW"));
 
-  for (std::vector<std::string>::const_iterator targetIt =
-         targetList.GetVector().begin();
-       targetIt != targetList.GetVector().end(); ++targetIt) {
+  for (std::string const& tgt : targetList.GetVector()) {
 
-    if (this->Makefile->IsAlias(*targetIt)) {
+    if (this->Makefile->IsAlias(tgt)) {
       std::ostringstream e;
-      e << "TARGETS given target \"" << (*targetIt) << "\" which is an alias.";
+      e << "TARGETS given target \"" << tgt << "\" which is an alias.";
       this->SetError(e.str());
       return false;
     }
     // Lookup this target in the current directory.
-    if (cmTarget* target =
-          this->Makefile->FindLocalNonAliasTarget(*targetIt)) {
+    if (cmTarget* target = this->Makefile->FindLocalNonAliasTarget(tgt)) {
       // Found the target.  Check its type.
       if (target->GetType() != cmStateEnums::EXECUTABLE &&
           target->GetType() != cmStateEnums::STATIC_LIBRARY &&
@@ -357,7 +354,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           target->GetType() != cmStateEnums::OBJECT_LIBRARY &&
           target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
         std::ostringstream e;
-        e << "TARGETS given target \"" << (*targetIt)
+        e << "TARGETS given target \"" << tgt
           << "\" which is not an executable, library, or module.";
         this->SetError(e.str());
         return false;
@@ -367,7 +364,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         if (!this->Makefile->GetGlobalGenerator()->HasKnownObjectFileLocation(
               &reason)) {
           std::ostringstream e;
-          e << "TARGETS given OBJECT library \"" << (*targetIt)
+          e << "TARGETS given OBJECT library \"" << tgt
             << "\" which may not be installed" << reason << ".";
           this->SetError(e.str());
           return false;
@@ -378,7 +375,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     } else {
       // Did not find the target.
       std::ostringstream e;
-      e << "TARGETS given target \"" << (*targetIt)
+      e << "TARGETS given target \"" << tgt
         << "\" which does not exist in this directory.";
       this->SetError(e.str());
       return false;
@@ -398,10 +395,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   bool installsResource = false;
 
   // Generate install script code to install the given targets.
-  for (std::vector<cmTarget*>::iterator ti = targets.begin();
-       ti != targets.end(); ++ti) {
+  for (cmTarget* ti : targets) {
     // Handle each target type.
-    cmTarget& target = *(*ti);
+    cmTarget& target = *ti;
     cmInstallTargetGenerator* archiveGenerator = nullptr;
     cmInstallTargetGenerator* libraryGenerator = nullptr;
     cmInstallTargetGenerator* runtimeGenerator = nullptr;
@@ -815,9 +811,8 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0062);
 
   cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
-  for (std::vector<std::string>::const_iterator fileIt = filesVector.begin();
-       fileIt != filesVector.end(); ++fileIt) {
-    if (gg->IsExportedTargetsFile(*fileIt)) {
+  for (std::string const& file : filesVector) {
+    if (gg->IsExportedTargetsFile(file)) {
       const char* modal = nullptr;
       std::ostringstream e;
       cmake::MessageType messageType = cmake::AUTHOR_WARNING;
@@ -835,8 +830,8 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
           messageType = cmake::FATAL_ERROR;
       }
       if (modal) {
-        e << "The file\n  " << *fileIt << "\nwas generated by the export() "
-                                          "command.  It "
+        e << "The file\n  " << file << "\nwas generated by the export() "
+                                       "command.  It "
           << modal << " not be installed with the "
                       "install() command.  Use the install(EXPORT) mechanism "
                       "instead.  See the cmake-packages(7) manual for more.\n";
@@ -1339,10 +1334,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   cmExportSet* exportSet =
     this->Makefile->GetGlobalGenerator()->GetExportSets()[exp.GetString()];
   if (exportOld.IsEnabled()) {
-    for (std::vector<cmTargetExport*>::const_iterator tei =
-           exportSet->GetTargetExports()->begin();
-         tei != exportSet->GetTargetExports()->end(); ++tei) {
-      cmTargetExport const* te = *tei;
+    for (cmTargetExport* te : *exportSet->GetTargetExports()) {
       cmTarget* tgt =
         this->Makefile->GetGlobalGenerator()->FindTarget(te->TargetName);
       const bool newCMP0022Behavior =
@@ -1379,20 +1371,19 @@ bool cmInstallCommand::MakeFilesFullPath(
   const char* modeName, const std::vector<std::string>& relFiles,
   std::vector<std::string>& absFiles)
 {
-  for (std::vector<std::string>::const_iterator fileIt = relFiles.begin();
-       fileIt != relFiles.end(); ++fileIt) {
-    std::string file = (*fileIt);
+  for (std::string const& relFile : relFiles) {
+    std::string file = relFile;
     std::string::size_type gpos = cmGeneratorExpression::Find(file);
     if (gpos != 0 && !cmSystemTools::FileIsFullPath(file.c_str())) {
       file = this->Makefile->GetCurrentSourceDirectory();
       file += "/";
-      file += *fileIt;
+      file += relFile;
     }
 
     // Make sure the file is not a directory.
     if (gpos == std::string::npos && cmSystemTools::FileIsDirectory(file)) {
       std::ostringstream e;
-      e << modeName << " given directory \"" << (*fileIt) << "\" to install.";
+      e << modeName << " given directory \"" << relFile << "\" to install.";
       this->SetError(e.str());
       return false;
     }

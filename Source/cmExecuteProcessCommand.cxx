@@ -170,13 +170,13 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError(" called with no COMMAND argument.");
     return false;
   }
-  for (unsigned int i = 0; i < cmds.size(); ++i) {
-    if (cmds[i].empty()) {
+  for (auto& cmd : cmds) {
+    if (cmd.empty()) {
       this->SetError(" given COMMAND argument with no value.");
       return false;
     }
     // Add the null terminating pointer to the command argument list.
-    cmds[i].push_back(nullptr);
+    cmd.push_back(nullptr);
   }
 
   // Parse the timeout string.
@@ -192,8 +192,8 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   cmsysProcess* cp = cmsysProcess_New();
 
   // Set the command sequence.
-  for (unsigned int i = 0; i < cmds.size(); ++i) {
-    cmsysProcess_AddCommand(cp, &*cmds[i].begin());
+  for (auto const& cmd : cmds) {
+    cmsysProcess_AddCommand(cp, &*cmd.begin());
   }
 
   // Set the process working directory.

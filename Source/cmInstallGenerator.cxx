@@ -113,9 +113,8 @@ void cmInstallGenerator::AddInstallRule(
   if (files.size() == 1) {
     os << " \"" << files[0] << "\"";
   } else {
-    for (std::vector<std::string>::const_iterator fi = files.begin();
-         fi != files.end(); ++fi) {
-      os << "\n" << indent << "  \"" << *fi << "\"";
+    for (std::string const& f : files) {
+      os << "\n" << indent << "  \"" << f << "\"";
     }
     os << "\n" << indent << " ";
     if (!(literal_args && *literal_args)) {

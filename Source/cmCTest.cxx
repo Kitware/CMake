@@ -222,8 +222,7 @@ std::string cmCTest::MakeURLSafe(const std::string& str)
 {
   std::ostringstream ost;
   char buffer[10];
-  for (std::string::size_type pos = 0; pos < str.size(); pos++) {
-    unsigned char ch = str[pos];
+  for (unsigned char ch : str) {
     if ((ch > 126 || ch < 32 || ch == '&' || ch == '%' || ch == '+' ||
          ch == '=' || ch == '@') &&
         ch != 9) {
@@ -973,9 +972,8 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
   }
 
   std::vector<const char*> argv;
-  for (std::vector<std::string>::const_iterator a = args.begin();
-       a != args.end(); ++a) {
-    argv.push_back(a->c_str());
+  for (std::string const& a : args) {
+    argv.push_back(a.c_str());
   }
   argv.push_back(nullptr);
 
@@ -1009,9 +1007,9 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
                << "    " << std::flush);
   while (cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {
     processOutput.DecodeText(data, length, strdata);
-    for (size_t cc = 0; cc < strdata.size(); ++cc) {
-      if (strdata[cc] == 0) {
-        strdata[cc] = '\n';
+    for (char& cc : strdata) {
+      if (cc == 0) {
+        cc = '\n';
       }
     }
     output.append(strdata);
@@ -1107,18 +1105,18 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
     inst.SetStreams(&oss, &oss);
 
     std::vector<std::string> args;
-    for (unsigned int i = 0; i < argv.size(); ++i) {
-      if (argv[i]) {
+    for (char const* i : argv) {
+      if (i) {
         // make sure we pass the timeout in for any build and test
         // invocations. Since --build-generator is required this is a
         // good place to check for it, and to add the arguments in
-        if (strcmp(argv[i], "--build-generator") == 0 && timeout > 0) {
+        if (strcmp(i, "--build-generator") == 0 && timeout > 0) {
           args.push_back("--test-timeout");
           std::ostringstream msg;
           msg << timeout;
           args.push_back(msg.str());
         }
-        args.push_back(argv[i]);
+        args.push_back(i);
       }
     }
     if (log) {
@@ -1348,9 +1346,8 @@ void cmCTest::AddSiteProperties(cmXMLWriter& xml)
       std::string l = labels;
       std::vector<std::string> args;
       cmSystemTools::ExpandListArgument(l, args);
-      for (std::vector<std::string>::iterator i = args.begin();
-           i != args.end(); ++i) {
-        xml.Element("Label", *i);
+      for (std::string const& i : args) {
+        xml.Element("Label", i);
       }
       xml.EndElement();
     }
@@ -2352,9 +2349,8 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
   vec.clear();
   cmSystemTools::ExpandListArgument(dval, vec);
 
-  for (std::vector<std::string>::const_iterator it = vec.begin();
-       it != vec.end(); ++it) {
-    cmCTestLog(this, DEBUG, "  -- " << *it << std::endl);
+  for (std::string const& it : vec) {
+    cmCTestLog(this, DEBUG, "  -- " << it << std::endl);
   }
 }
 
@@ -2592,9 +2588,8 @@ bool cmCTest::RunCommand(const char* command, std::string* stdOut,
   }
 
   std::vector<const char*> argv;
-  for (std::vector<std::string>::const_iterator a = args.begin();
-       a != args.end(); ++a) {
-    argv.push_back(a->c_str());
+  for (std::string const& a : args) {
+    argv.push_back(a.c_str());
   }
   argv.push_back(nullptr);
 

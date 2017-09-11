@@ -123,23 +123,21 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
   bool result = true;
 
   // Loop over requested documentation types.
-  for (std::vector<RequestedHelpItem>::const_iterator i =
-         this->RequestedHelpItems.begin();
-       i != this->RequestedHelpItems.end(); ++i) {
-    this->CurrentArgument = i->Argument;
+  for (RequestedHelpItem const& rhi : this->RequestedHelpItems) {
+    this->CurrentArgument = rhi.Argument;
     // If a file name was given, use it.  Otherwise, default to the
     // given stream.
     cmsys::ofstream fout;
     std::ostream* s = &os;
-    if (!i->Filename.empty()) {
-      fout.open(i->Filename.c_str());
+    if (!rhi.Filename.empty()) {
+      fout.open(rhi.Filename.c_str());
       s = &fout;
     } else if (++count > 1) {
       os << "\n\n";
     }
 
     // Print this documentation type to the stream.
-    if (!this->PrintDocumentation(i->HelpType, *s) || s->fail()) {
+    if (!this->PrintDocumentation(rhi.HelpType, *s) || s->fail()) {
       result = false;
     }
   }
@@ -394,10 +392,8 @@ void cmDocumentation::SetSection(const char* name, const char* docs[][2])
 void cmDocumentation::SetSections(
   std::map<std::string, cmDocumentationSection*>& sections)
 {
-  for (std::map<std::string, cmDocumentationSection*>::const_iterator it =
-         sections.begin();
-       it != sections.end(); ++it) {
-    this->SetSection(it->first.c_str(), it->second);
+  for (auto const& s : sections) {
+    this->SetSection(s.first.c_str(), s.second);
   }
 }
 
@@ -489,10 +485,9 @@ void cmDocumentation::PrintNames(std::ostream& os, std::string const& pattern)
   std::vector<std::string> files;
   this->GlobHelp(files, pattern);
   std::vector<std::string> names;
-  for (std::vector<std::string>::const_iterator i = files.begin();
-       i != files.end(); ++i) {
+  for (std::string const& f : files) {
     std::string line;
-    cmsys::ifstream fin(i->c_str());
+    cmsys::ifstream fin(f.c_str());
     while (fin && cmSystemTools::GetLineFromStream(fin, line)) {
       if (!line.empty() && (isalnum(line[0]) || line[0] == '<')) {
         names.push_back(line);
@@ -501,9 +496,8 @@ void cmDocumentation::PrintNames(std::ostream& os, std::string const& pattern)
     }
   }
   std::sort(names.begin(), names.end());
-  for (std::vector<std::string>::iterator i = names.begin(); i != names.end();
-       ++i) {
-    os << *i << "\n";
+  for (std::string const& n : names) {
+    os << n << "\n";
   }
 }
 
@@ -514,9 +508,8 @@ bool cmDocumentation::PrintFiles(std::ostream& os, std::string const& pattern)
   this->GlobHelp(files, pattern);
   std::sort(files.begin(), files.end());
   cmRST r(os, cmSystemTools::GetCMakeRoot() + "/Help");
-  for (std::vector<std::string>::const_iterator i = files.begin();
-       i != files.end(); ++i) {
-    found = r.ProcessFile(*i) || found;
+  for (std::string const& f : files) {
+    found = r.ProcessFile(f) || found;
   }
   return found;
 }
@@ -586,15 +579,13 @@ bool cmDocumentation::PrintHelpListModules(std::ostream& os)
   std::vector<std::string> files;
   this->GlobHelp(files, "module/*");
   std::vector<std::string> modules;
-  for (std::vector<std::string>::iterator fi = files.begin();
-       fi != files.end(); ++fi) {
-    std::string module = cmSystemTools::GetFilenameName(*fi);
+  for (std::string const& f : files) {
+    std::string module = cmSystemTools::GetFilenameName(f);
     modules.push_back(module.substr(0, module.size() - 4));
   }
   std::sort(modules.begin(), modules.end());
-  for (std::vector<std::string>::iterator i = modules.begin();
-       i != modules.end(); ++i) {
-    os << *i << "\n";
+  for (std::string const& m : modules) {
+    os << m << "\n";
   }
   return true;
 }

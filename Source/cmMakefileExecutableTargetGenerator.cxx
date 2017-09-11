@@ -256,11 +256,10 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 
     // Expand placeholders in the commands.
     rulePlaceholderExpander->SetTargetImpLib(targetOutputReal);
-    for (std::vector<std::string>::iterator i = real_link_commands.begin();
-         i != real_link_commands.end(); ++i) {
-      *i = launcher + *i;
-      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, *i,
-                                                   vars);
+    for (std::string& real_link_command : real_link_commands) {
+      real_link_command = launcher + real_link_command;
+      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
+                                                   real_link_command, vars);
     }
 
     // Restore path conversion to normal shells.
@@ -638,11 +637,10 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
     // Expand placeholders in the commands.
     rulePlaceholderExpander->SetTargetImpLib(targetOutPathImport);
-    for (std::vector<std::string>::iterator i = real_link_commands.begin();
-         i != real_link_commands.end(); ++i) {
-      *i = launcher + *i;
-      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, *i,
-                                                   vars);
+    for (std::string& real_link_command : real_link_commands) {
+      real_link_command = launcher + real_link_command;
+      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
+                                                   real_link_command, vars);
     }
 
     // Restore path conversion to normal shells.

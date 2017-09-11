@@ -367,14 +367,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
   if (!this->UseFindModules && !this->UseConfigFiles) {
     std::ostringstream e;
     e << "given options exclusive to Module mode:\n";
-    for (std::set<unsigned int>::const_iterator si = moduleArgs.begin();
-         si != moduleArgs.end(); ++si) {
-      e << "  " << args[*si] << "\n";
+    for (unsigned int si : moduleArgs) {
+      e << "  " << args[si] << "\n";
     }
     e << "and options exclusive to Config mode:\n";
-    for (std::set<unsigned int>::const_iterator si = configArgs.begin();
-         si != configArgs.end(); ++si) {
-      e << "  " << args[*si] << "\n";
+    for (unsigned int si : configArgs) {
+      e << "  " << args[si] << "\n";
     }
     e << "The options are incompatible.";
     this->SetError(e.str());
@@ -518,13 +516,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
 
   // Add the default configs.
   if (this->Configs.empty()) {
-    for (std::vector<std::string>::const_iterator ni = this->Names.begin();
-         ni != this->Names.end(); ++ni) {
-      std::string config = *ni;
+    for (std::string const& n : this->Names) {
+      std::string config = n;
       config += "Config.cmake";
       this->Configs.push_back(config);
 
-      config = cmSystemTools::LowerCase(*ni);
+      config = cmSystemTools::LowerCase(n);
       config += "-config.cmake";
       this->Configs.push_back(config);
     }
@@ -611,14 +608,12 @@ void cmFindPackageCommand::AddFindDefinition(const std::string& var,
 
 void cmFindPackageCommand::RestoreFindDefinitions()
 {
-  for (std::map<std::string, OriginalDef>::iterator i =
-         this->OriginalDefs.begin();
-       i != this->OriginalDefs.end(); ++i) {
-    OriginalDef const& od = i->second;
+  for (auto const& i : this->OriginalDefs) {
+    OriginalDef const& od = i.second;
     if (od.exists) {
-      this->Makefile->AddDefinition(i->first, od.value.c_str());
+      this->Makefile->AddDefinition(i.first, od.value.c_str());
     } else {
-      this->Makefile->RemoveDefinition(i->first);
+      this->Makefile->RemoveDefinition(i.first);
     }
   }
 }
@@ -874,13 +869,11 @@ bool cmFindPackageCommand::HandlePackageMode()
   std::string consideredVersions;
 
   const char* sep = "";
-  for (std::vector<ConfigFileInfo>::const_iterator i =
-         this->ConsideredConfigs.begin();
-       i != this->ConsideredConfigs.end(); ++i) {
+  for (ConfigFileInfo const& i : this->ConsideredConfigs) {
     consideredConfigFiles += sep;
     consideredVersions += sep;
-    consideredConfigFiles += i->filename;
-    consideredVersions += i->version;
+    consideredConfigFiles += i.filename;
+    consideredVersions += i.version;
     sep = ";";
   }
 
@@ -946,9 +939,8 @@ bool cmFindPackageCommand::FindConfig()
 bool cmFindPackageCommand::FindPrefixedConfig()
 {
   std::vector<std::string> const& prefixes = this->SearchPaths;
-  for (std::vector<std::string>::const_iterator pi = prefixes.begin();
-       pi != prefixes.end(); ++pi) {
-    if (this->SearchPrefix(*pi)) {
+  for (std::string const& p : prefixes) {
+    if (this->SearchPrefix(p)) {
       return true;
     }
   }
@@ -958,9 +950,8 @@ bool cmFindPackageCommand::FindPrefixedConfig()
 bool cmFindPackageCommand::FindFrameworkConfig()
 {
   std::vector<std::string> const& prefixes = this->SearchPaths;
-  for (std::vector<std::string>::const_iterator i = prefixes.begin();
-       i != prefixes.end(); ++i) {
-    if (this->SearchFrameworkPrefix(*i)) {
+  for (std::string const& p : prefixes) {
+    if (this->SearchFrameworkPrefix(p)) {
       return true;
     }
   }
@@ -970,9 +961,8 @@ bool cmFindPackageCommand::FindFrameworkConfig()
 bool cmFindPackageCommand::FindAppBundleConfig()
 {
   std::vector<std::string> const& prefixes = this->SearchPaths;
-  for (std::vector<std::string>::const_iterator i = prefixes.begin();
-       i != prefixes.end(); ++i) {
-    if (this->SearchAppBundlePrefix(*i)) {
+  for (std::string const& p : prefixes) {
+    if (this->SearchAppBundlePrefix(p)) {
       return true;
     }
   }
@@ -1171,14 +1161,12 @@ void cmFindPackageCommand::FillPrefixesSystemEnvironment()
   // working directory.
   std::vector<std::string> tmp;
   cmSystemTools::GetPath(tmp);
-  for (std::vector<std::string>::iterator i = tmp.begin(); i != tmp.end();
-       ++i) {
+  for (std::string const& i : tmp) {
     // If the path is a PREFIX/bin case then add its parent instead.
-    if ((cmHasLiteralSuffix(*i, "/bin")) ||
-        (cmHasLiteralSuffix(*i, "/sbin"))) {
-      paths.AddPath(cmSystemTools::GetFilenamePath(*i));
+    if ((cmHasLiteralSuffix(i, "/bin")) || (cmHasLiteralSuffix(i, "/sbin"))) {
+      paths.AddPath(cmSystemTools::GetFilenamePath(i));
     } else {
-      paths.AddPath(*i);
+      paths.AddPath(i);
     }
   }
 }
@@ -1296,9 +1284,8 @@ void cmFindPackageCommand::LoadPackageRegistryWin(bool user, unsigned int view,
   if (user && !bad.empty() &&
       RegOpenKeyExW(HKEY_CURRENT_USER, key.c_str(), 0, KEY_SET_VALUE | view,
                     &hKey) == ERROR_SUCCESS) {
-    for (std::set<std::wstring>::const_iterator vi = bad.begin();
-         vi != bad.end(); ++vi) {
-      RegDeleteValueW(hKey, vi->c_str());
+    for (std::wstring const& v : bad) {
+      RegDeleteValueW(hKey, v.c_str());
     }
     RegCloseKey(hKey);
   }
@@ -1395,10 +1382,8 @@ void cmFindPackageCommand::FillPrefixesUserGuess()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::Guess];
 
-  for (std::vector<std::string>::const_iterator p =
-         this->UserGuessArgs.begin();
-       p != this->UserGuessArgs.end(); ++p) {
-    paths.AddUserPath(*p);
+  for (std::string const& p : this->UserGuessArgs) {
+    paths.AddUserPath(p);
   }
 }
 
@@ -1406,10 +1391,8 @@ void cmFindPackageCommand::FillPrefixesUserHints()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::Hints];
 
-  for (std::vector<std::string>::const_iterator p =
-         this->UserHintsArgs.begin();
-       p != this->UserHintsArgs.end(); ++p) {
-    paths.AddUserPath(*p);
+  for (std::string const& p : this->UserHintsArgs) {
+    paths.AddUserPath(p);
   }
 }
 
@@ -1418,12 +1401,10 @@ bool cmFindPackageCommand::SearchDirectory(std::string const& dir)
   assert(!dir.empty() && dir[dir.size() - 1] == '/');
 
   // Check each path suffix on this directory.
-  for (std::vector<std::string>::const_iterator si =
-         this->SearchPathSuffixes.begin();
-       si != this->SearchPathSuffixes.end(); ++si) {
+  for (std::string const& s : this->SearchPathSuffixes) {
     std::string d = dir;
-    if (!si->empty()) {
-      d += *si;
+    if (!s.empty()) {
+      d += s;
       d += "/";
     }
     if (this->CheckDirectory(d)) {
@@ -1454,11 +1435,10 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
     return false;
   }
 
-  for (std::vector<std::string>::const_iterator ci = this->Configs.begin();
-       ci != this->Configs.end(); ++ci) {
+  for (std::string const& c : this->Configs) {
     file = dir;
     file += "/";
-    file += *ci;
+    file += c;
     if (this->DebugMode) {
       fprintf(stderr, "Checking file [%s]\n", file.c_str());
     }
@@ -1761,9 +1741,8 @@ private:
   std::vector<std::string> const& Vector;
   bool Search(std::string const& parent, cmFileList& lister) CM_OVERRIDE
   {
-    for (std::vector<std::string>::const_iterator i = this->Vector.begin();
-         i != this->Vector.end(); ++i) {
-      if (this->Consider(parent + *i, lister)) {
+    for (std::string const& i : this->Vector) {
+      if (this->Consider(parent + i, lister)) {
         return true;
       }
     }
@@ -1820,9 +1799,8 @@ private:
       if (strcmp(fname, ".") == 0 || strcmp(fname, "..") == 0) {
         continue;
       }
-      for (std::vector<std::string>::const_iterator ni = this->Names.begin();
-           ni != this->Names.end(); ++ni) {
-        if (cmsysString_strncasecmp(fname, ni->c_str(), ni->length()) == 0) {
+      for (std::string const& n : this->Names) {
+        if (cmsysString_strncasecmp(fname, n.c_str(), n.length()) == 0) {
           matches.push_back(fname);
         }
       }
@@ -1835,9 +1813,8 @@ private:
                                  SortDirection);
     }
 
-    for (std::vector<std::string>::const_iterator i = matches.begin();
-         i != matches.end(); ++i) {
-      if (this->Consider(parent + *i, lister)) {
+    for (std::string const& i : matches) {
+      if (this->Consider(parent + i, lister)) {
         return true;
       }
     }
@@ -1882,9 +1859,7 @@ private:
       if (strcmp(fname, ".") == 0 || strcmp(fname, "..") == 0) {
         continue;
       }
-      for (std::vector<std::string>::const_iterator ni = this->Names.begin();
-           ni != this->Names.end(); ++ni) {
-        std::string name = *ni;
+      for (std::string name : this->Names) {
         name += this->Extension;
         if (cmsysString_strcasecmp(fname, name.c_str()) == 0) {
           matches.push_back(fname);
@@ -1892,9 +1867,8 @@ private:
       }
     }
 
-    for (std::vector<std::string>::const_iterator i = matches.begin();
-         i != matches.end(); ++i) {
-      if (this->Consider(parent + *i, lister)) {
+    for (std::string const& i : matches) {
+      if (this->Consider(parent + i, lister)) {
         return true;
       }
     }
@@ -1980,10 +1954,9 @@ private:
     std::vector<std::string> const& files = g.GetFiles();
 
     // Look for directories among the matches.
-    for (std::vector<std::string>::const_iterator fi = files.begin();
-         fi != files.end(); ++fi) {
-      if (cmSystemTools::FileIsDirectory(*fi)) {
-        if (this->Consider(*fi, lister)) {
+    for (std::string const& f : files) {
+      if (cmSystemTools::FileIsDirectory(f)) {
+        if (this->Consider(f, lister)) {
           return true;
         }
       }

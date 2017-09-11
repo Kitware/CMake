@@ -19,9 +19,8 @@ bool cmLinkDirectoriesCommand::InitialPass(
     return true;
   }
 
-  for (std::vector<std::string>::const_iterator i = args.begin();
-       i != args.end(); ++i) {
-    this->AddLinkDir(*i);
+  for (std::string const& i : args) {
+    this->AddLinkDir(i);
   }
   return true;
 }

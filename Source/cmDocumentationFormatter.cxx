@@ -168,26 +168,25 @@ void cmDocumentationFormatter::PrintSection(
   os << section.GetName() << "\n";
 
   const std::vector<cmDocumentationEntry>& entries = section.GetEntries();
-  for (std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
-       op != entries.end(); ++op) {
-    if (!op->Name.empty()) {
-      os << "  " << op->Name;
+  for (cmDocumentationEntry const& entry : entries) {
+    if (!entry.Name.empty()) {
+      os << "  " << entry.Name;
       this->TextIndent = "                                 ";
       int align = static_cast<int>(strlen(this->TextIndent)) - 4;
-      for (int i = static_cast<int>(op->Name.size()); i < align; ++i) {
+      for (int i = static_cast<int>(entry.Name.size()); i < align; ++i) {
         os << " ";
       }
-      if (op->Name.size() > strlen(this->TextIndent) - 4) {
+      if (entry.Name.size() > strlen(this->TextIndent) - 4) {
         os << "\n";
         os.write(this->TextIndent, strlen(this->TextIndent) - 2);
       }
       os << "= ";
-      this->PrintColumn(os, op->Brief.c_str());
+      this->PrintColumn(os, entry.Brief.c_str());
       os << "\n";
     } else {
       os << "\n";
       this->TextIndent = "";
-      this->PrintFormatted(os, op->Brief.c_str());
+      this->PrintFormatted(os, entry.Brief.c_str());
     }
   }
   os << "\n";

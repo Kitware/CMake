@@ -723,20 +723,18 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   // Encode the result in a CMake list.
   const char* sep = "";
   std::string output;
-  for (std::vector<std::string>::const_iterator si = strings.begin();
-       si != strings.end(); ++si) {
+  for (std::string const& sr : strings) {
     // Separate the strings in the output to make it a list.
     output += sep;
     sep = ";";
 
     // Store the string in the output, but escape semicolons to
     // make sure it is a list.
-    std::string const& sr = *si;
-    for (unsigned int i = 0; i < sr.size(); ++i) {
-      if (sr[i] == ';') {
+    for (char i : sr) {
+      if (i == ';') {
         output += '\\';
       }
-      output += sr[i];
+      output += i;
     }
   }
 
@@ -841,17 +839,16 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
 
     if (!globMessages.empty()) {
       bool shouldExit = false;
-      for (cmsys::Glob::GlobMessagesIterator it = globMessages.begin();
-           it != globMessages.end(); ++it) {
-        if (it->type == cmsys::Glob::cyclicRecursion) {
+      for (cmsys::Glob::Message const& globMessage : globMessages) {
+        if (globMessage.type == cmsys::Glob::cyclicRecursion) {
           this->Makefile->IssueMessage(
             cmake::AUTHOR_WARNING,
             "Cyclic recursion detected while globbing for '" + *i + "':\n" +
-              it->content);
+              globMessage.content);
         } else {
           this->Makefile->IssueMessage(
             cmake::FATAL_ERROR, "Error has occurred while globbing for '" +
-              *i + "' - " + it->content);
+              *i + "' - " + globMessage.content);
           shouldExit = true;
         }
       }
@@ -1060,12 +1057,11 @@ protected:
     // Collect properties from all matching rules.
     bool matched = false;
     MatchProperties result;
-    for (std::vector<MatchRule>::iterator mr = this->MatchRules.begin();
-         mr != this->MatchRules.end(); ++mr) {
-      if (mr->Regex.find(file_to_match)) {
+    for (MatchRule& mr : this->MatchRules) {
+      if (mr.Regex.find(file_to_match)) {
         matched = true;
-        result.Exclude |= mr->Properties.Exclude;
-        result.Permissions |= mr->Properties.Permissions;
+        result.Exclude |= mr.Properties.Exclude;
+        result.Permissions |= mr.Properties.Permissions;
       }
     }
     if (!matched && !this->MatchlessFiles) {
@@ -1421,23 +1417,22 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
     return false;
   }
 
-  for (std::vector<std::string>::const_iterator i = this->Files.begin();
-       i != this->Files.end(); ++i) {
+  for (std::string const& f : this->Files) {
     std::string file;
-    if (!i->empty() && !cmSystemTools::FileIsFullPath(*i)) {
+    if (!f.empty() && !cmSystemTools::FileIsFullPath(f)) {
       if (!this->FilesFromDir.empty()) {
         file = this->FilesFromDir;
       } else {
         file = this->Makefile->GetCurrentSourceDirectory();
       }
       file += "/";
-      file += *i;
+      file += f;
     } else if (!this->FilesFromDir.empty()) {
       this->FileCommand->SetError("option FILES_FROM_DIR requires all files "
                                   "to be specified as relative paths.");
       return false;
     } else {
-      file = *i;
+      file = f;
     }
 
     // Split the input file into its directory and name components.
@@ -1450,7 +1445,7 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
     // Compute the full path to the destination file.
     std::string toFile = this->Destination;
     if (!this->FilesFromDir.empty()) {
-      std::string dir = cmSystemTools::GetFilenamePath(*i);
+      std::string dir = cmSystemTools::GetFilenamePath(f);
       if (!dir.empty()) {
         toFile += "/";
         toFile += dir;
@@ -2882,9 +2877,8 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   }
 
   struct curl_slist* headers = nullptr;
-  for (std::vector<std::string>::const_iterator h = curl_headers.begin();
-       h != curl_headers.end(); ++h) {
-    headers = ::curl_slist_append(headers, h->c_str());
+  for (std::string const& h : curl_headers) {
+    headers = ::curl_slist_append(headers, h.c_str());
   }
   ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
@@ -3141,9 +3135,8 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   }
 
   struct curl_slist* headers = nullptr;
-  for (std::vector<std::string>::const_iterator h = curl_headers.begin();
-       h != curl_headers.end(); ++h) {
-    headers = ::curl_slist_append(headers, h->c_str());
+  for (std::string const& h : curl_headers) {
+    headers = ::curl_slist_append(headers, h.c_str());
   }
   ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 

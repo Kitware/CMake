@@ -362,9 +362,8 @@ void cmInstallTargetGenerator::GetInstallObjectNames(
   std::string const& config, std::vector<std::string>& objects) const
 {
   this->Target->GetTargetObjectNames(config, objects);
-  for (std::vector<std::string>::iterator i = objects.begin();
-       i != objects.end(); ++i) {
-    *i = computeInstallObjectDir(this->Target, config) + "/" + *i;
+  for (std::string& o : objects) {
+    o = computeInstallObjectDir(this->Target, config) + "/" + o;
   }
 }
 
@@ -476,9 +475,8 @@ void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent indent,
     if (!tws.empty()) {
       Indent indent2 = indent.Next().Next();
       os << indent << "foreach(file\n";
-      for (std::vector<std::string>::const_iterator i = files.begin();
-           i != files.end(); ++i) {
-        os << indent2 << "\"" << this->GetDestDirPath(*i) << "\"\n";
+      for (std::string const& f : files) {
+        os << indent2 << "\"" << this->GetDestDirPath(f) << "\"\n";
       }
       os << indent2 << ")\n";
       os << tws;
@@ -546,11 +544,7 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(
         this->Target->GetLinkInformation(config)) {
     std::set<cmGeneratorTarget const*> const& sharedLibs =
       cli->GetSharedLibrariesLinked();
-    for (std::set<cmGeneratorTarget const*>::const_iterator j =
-           sharedLibs.begin();
-         j != sharedLibs.end(); ++j) {
-      cmGeneratorTarget const* tgt = *j;
-
+    for (cmGeneratorTarget const* tgt : sharedLibs) {
       // The install_name of an imported target does not change.
       if (tgt->IsImported()) {
         continue;
@@ -609,12 +603,9 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(
     if (!new_id.empty()) {
       os << "\n" << indent << "  -id \"" << new_id << "\"";
     }
-    for (std::map<std::string, std::string>::const_iterator i =
-           install_name_remap.begin();
-         i != install_name_remap.end(); ++i) {
+    for (auto const& i : install_name_remap) {
       os << "\n"
-         << indent << "  -change \"" << i->first << "\" \"" << i->second
-         << "\"";
+         << indent << "  -change \"" << i.first << "\" \"" << i.second << "\"";
     }
     os << "\n" << indent << "  \"" << toDestDirPath << "\")\n";
   }
@@ -702,10 +693,9 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
       // Note: These paths are kept unique to avoid
       // install_name_tool corruption.
       std::set<std::string> runpaths;
-      for (std::vector<std::string>::const_iterator i = oldRuntimeDirs.begin();
-           i != oldRuntimeDirs.end(); ++i) {
+      for (std::string const& i : oldRuntimeDirs) {
         std::string runpath =
-          mf->GetGlobalGenerator()->ExpandCFGIntDir(*i, config);
+          mf->GetGlobalGenerator()->ExpandCFGIntDir(i, config);
 
         if (runpaths.find(runpath) == runpaths.end()) {
           runpaths.insert(runpath);
@@ -717,10 +707,9 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
       }
 
       runpaths.clear();
-      for (std::vector<std::string>::const_iterator i = newRuntimeDirs.begin();
-           i != newRuntimeDirs.end(); ++i) {
+      for (std::string const& i : newRuntimeDirs) {
         std::string runpath =
-          mf->GetGlobalGenerator()->ExpandCFGIntDir(*i, config);
+          mf->GetGlobalGenerator()->ExpandCFGIntDir(i, config);
 
         if (runpaths.find(runpath) == runpaths.end()) {
           os << indent << "execute_process(COMMAND " << installNameTool

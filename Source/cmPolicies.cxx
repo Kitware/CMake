@@ -120,9 +120,8 @@ static void DiagnoseAncientPolicies(
   e << "The project requests behavior compatible with CMake version \""
     << majorVer << "." << minorVer << "." << patchVer
     << "\", which requires the OLD behavior for some policies:\n";
-  for (std::vector<cmPolicies::PolicyID>::const_iterator i = ancient.begin();
-       i != ancient.end(); ++i) {
-    e << "  " << idToString(*i) << ": " << idToShortDescription(*i) << "\n";
+  for (cmPolicies::PolicyID i : ancient) {
+    e << "  " << idToString(i) << ": " << idToShortDescription(i) << "\n";
   }
   e << "However, this version of CMake no longer supports the OLD "
     << "behavior for these policies.  "

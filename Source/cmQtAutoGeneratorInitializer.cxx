@@ -387,7 +387,7 @@ static void SetupAutoTargetMoc(const cmQtAutoGenDigest& digest,
     AddDefinitionEscaped(makefile, "_moc_compile_defs", compileDefs);
 
     // Configuration specific settings
-    for (const std::string& cfg : configs) {
+    for (std::string const& cfg : configs) {
       std::string configIncs;
       std::string configCompileDefs;
       GetCompileDefinitionsAndDirectories(cfg, configIncs, configCompileDefs);
@@ -470,7 +470,7 @@ static void SetupAutoTargetUic(const cmQtAutoGenDigest& digest,
     AddDefinitionEscaped(makefile, "_uic_target_options", uicOpts);
 
     // Configuration specific settings
-    for (const std::string& cfg : configs) {
+    for (std::string const& cfg : configs) {
       const std::string configUicOpts = UicGetOpts(cfg);
       if (configUicOpts != uicOpts) {
         setup.ConfigUicOptions[cfg] = configUicOpts;
@@ -579,7 +579,7 @@ static void SetupAutoTargetRcc(const cmQtAutoGenDigest& digest)
   std::vector<std::vector<std::string>> rccOptions;
   std::vector<std::vector<std::string>> rccInputs;
 
-  for (const cmQtAutoGenDigestQrc& qrcDigest : digest.Qrcs) {
+  for (cmQtAutoGenDigestQrc const& qrcDigest : digest.Qrcs) {
     rccFiles.push_back(qrcDigest.QrcFile);
     rccBuilds.push_back(qrcDigest.RccFile);
     rccOptions.push_back(qrcDigest.Options);
@@ -621,7 +621,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   {
     std::string base = GetAutogenTargetFilesDir(target);
     base += "/AutogenOldSettings";
-    for (const std::string& suffix : suffixes) {
+    for (std::string const& suffix : suffixes) {
       AddCleanFile(makefile, (base + suffix).append(".cmake"));
     }
   }
@@ -773,11 +773,11 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 
     if (policyAccept) {
       // Accept GENERATED sources
-      for (const std::string& absFile : generatedHeaders) {
+      for (std::string const& absFile : generatedHeaders) {
         digest.Headers.push_back(absFile);
         autogenDependFiles.insert(absFile);
       }
-      for (const std::string& absFile : generatedSources) {
+      for (std::string const& absFile : generatedSources) {
         digest.Sources.push_back(absFile);
         autogenDependFiles.insert(absFile);
       }
@@ -828,7 +828,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     // Check if file name is unique
     for (cmQtAutoGenDigestQrc& qrcDigest : digest.Qrcs) {
       qrcDigest.Unique = true;
-      for (const cmQtAutoGenDigestQrc& qrcDig2 : digest.Qrcs) {
+      for (cmQtAutoGenDigestQrc const& qrcDig2 : digest.Qrcs) {
         if ((&qrcDigest != &qrcDig2) &&
             (qrcDigest.QrcName == qrcDig2.QrcName)) {
           qrcDigest.Unique = false;
@@ -887,7 +887,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
           if (cmQtAutoGen::RccListInputs(digest.QtVersionMajor, rcc,
                                          qrcDigest.QrcFile,
                                          qrcDigest.Resources, &error)) {
-            for (const std::string& fileName : qrcDigest.Resources) {
+            for (std::string const& fileName : qrcDigest.Resources) {
               autogenDependFiles.insert(fileName);
             }
           } else {
@@ -906,7 +906,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     if (!deps.empty()) {
       std::vector<std::string> extraDeps;
       cmSystemTools::ExpandListArgument(deps, extraDeps);
-      for (const std::string& depName : extraDeps) {
+      for (std::string const& depName : extraDeps) {
         // Allow target and file dependencies
         auto* depTarget = makefile->FindTargetToUse(depName);
         if (depTarget != nullptr) {
@@ -1023,7 +1023,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
   // Configuration suffixes
   std::map<std::string, std::string> configSuffix;
   if (AutogenMultiConfig(target->GetGlobalGenerator())) {
-    for (const std::string& cfg : configs) {
+    for (std::string const& cfg : configs) {
       configSuffix[cfg] = "_" + cfg;
     }
   }
@@ -1083,7 +1083,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     if (ofs) {
       auto OfsWriteMap = [&ofs](
         const char* key, const std::map<std::string, std::string>& map) {
-        for (const auto& item : map) {
+        for (auto const& item : map) {
           ofs << "set(" << key << "_" << item.first << " "
               << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
         }

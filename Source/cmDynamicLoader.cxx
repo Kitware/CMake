@@ -65,10 +65,8 @@ bool cmDynamicLoaderCache::FlushCache(const char* path)
 
 void cmDynamicLoaderCache::FlushCache()
 {
-  for (std::map<std::string, cmsys::DynamicLoader::LibraryHandle>::iterator
-         it = this->CacheMap.begin();
-       it != this->CacheMap.end(); it++) {
-    cmsys::DynamicLoader::CloseLibrary(it->second);
+  for (auto const& it : this->CacheMap) {
+    cmsys::DynamicLoader::CloseLibrary(it.second);
   }
   delete cmDynamicLoaderCache::Instance;
   cmDynamicLoaderCache::Instance = nullptr;

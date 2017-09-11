@@ -80,22 +80,18 @@ const char* cmTargetPropertyComputer::GetSources<cmTarget>(
 
   std::ostringstream ss;
   const char* sep = "";
-  for (std::vector<std::string>::const_iterator i = entries.begin();
-       i != entries.end(); ++i) {
-    std::string const& entry = *i;
-
+  for (std::string const& entry : entries) {
     std::vector<std::string> files;
     cmSystemTools::ExpandListArgument(entry, files);
-    for (std::vector<std::string>::const_iterator li = files.begin();
-         li != files.end(); ++li) {
-      if (cmHasLiteralPrefix(*li, "$<TARGET_OBJECTS:") &&
-          (*li)[li->size() - 1] == '>') {
-        std::string objLibName = li->substr(17, li->size() - 18);
+    for (std::string const& file : files) {
+      if (cmHasLiteralPrefix(file, "$<TARGET_OBJECTS:") &&
+          file[file.size() - 1] == '>') {
+        std::string objLibName = file.substr(17, file.size() - 18);
 
         if (cmGeneratorExpression::Find(objLibName) != std::string::npos) {
           ss << sep;
           sep = ";";
-          ss << *li;
+          ss << file;
           continue;
         }
 
@@ -130,14 +126,14 @@ const char* cmTargetPropertyComputer::GetSources<cmTarget>(
         if (addContent) {
           ss << sep;
           sep = ";";
-          ss << *li;
+          ss << file;
         }
-      } else if (cmGeneratorExpression::Find(*li) == std::string::npos) {
+      } else if (cmGeneratorExpression::Find(file) == std::string::npos) {
         ss << sep;
         sep = ";";
-        ss << *li;
+        ss << file;
       } else {
-        cmSourceFile* sf = tgt->GetMakefile()->GetOrCreateSource(*li);
+        cmSourceFile* sf = tgt->GetMakefile()->GetOrCreateSource(file);
         // Construct what is known about this source file location.
         cmSourceFileLocation const& location = sf->GetLocation();
         std::string sname = location.GetDirectory();
@@ -301,9 +297,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       "COMPILE_PDB_OUTPUT_DIRECTORY_", "MAP_IMPORTED_CONFIG_",
       "INTERPROCEDURAL_OPTIMIZATION_", nullptr
     };
-    for (std::vector<std::string>::iterator ci = configNames.begin();
-         ci != configNames.end(); ++ci) {
-      std::string configUpper = cmSystemTools::UpperCase(*ci);
+    for (std::string const& configName : configNames) {
+      std::string configUpper = cmSystemTools::UpperCase(configName);
       for (const char** p = configProps; *p; ++p) {
         // Interface libraries have no output locations, so honor only
         // the configuration map.
@@ -323,7 +318,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       // property directly.
       if (this->TargetTypeValue != cmStateEnums::EXECUTABLE &&
           this->TargetTypeValue != cmStateEnums::INTERFACE_LIBRARY) {
-        std::string property = cmSystemTools::UpperCase(*ci);
+        std::string property = cmSystemTools::UpperCase(configName);
         property += "_POSTFIX";
         this->SetPropertyDefault(property, nullptr);
       }
@@ -483,9 +478,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
 {
   std::string srcFiles;
   const char* sep = "";
-  for (std::vector<std::string>::const_iterator i = srcs.begin();
-       i != srcs.end(); ++i) {
-    std::string filename = *i;
+  for (auto filename : srcs) {
     const char* src = filename.c_str();
 
     if (!(src[0] == '$' && src[1] == '<')) {
@@ -714,12 +707,10 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
   const char* sigString =
     (sig == cmTarget::KeywordTLLSignature ? "keyword" : "plain");
   s << "The uses of the " << sigString << " signature are here:\n";
-  typedef std::vector<std::pair<TLLSignature, cmListFileContext>> Container;
   cmOutputConverter converter(this->GetMakefile()->GetStateSnapshot());
-  for (Container::const_iterator it = this->TLLCommands.begin();
-       it != this->TLLCommands.end(); ++it) {
-    if (it->first == sig) {
-      cmListFileContext lfc = it->second;
+  for (auto const& cmd : this->TLLCommands) {
+    if (cmd.first == sig) {
+      cmListFileContext lfc = cmd.second;
       lfc.FilePath = converter.ConvertToRelativePath(
         this->Makefile->GetState()->GetSourceDirectory(), lfc.FilePath);
       s << " * " << lfc << std::endl;

@@ -26,8 +26,8 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
   bool haveoutput_variable = false;
   std::string return_variable;
   bool havereturn_variable = false;
-  for (size_t i = 0; i < args.size(); ++i) {
-    if (args[i] == "OUTPUT_VARIABLE") {
+  for (std::string const& arg : args) {
+    if (arg == "OUTPUT_VARIABLE") {
       count++;
       doingargs = false;
       havereturn_variable = false;
@@ -37,10 +37,10 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
         this->SetError("called with incorrect number of arguments");
         return false;
       }
-      output_variable = args[i];
+      output_variable = arg;
       haveoutput_variable = false;
       count++;
-    } else if (args[i] == "RETURN_VALUE") {
+    } else if (arg == "RETURN_VALUE") {
       count++;
       doingargs = false;
       haveoutput_variable = false;
@@ -50,16 +50,16 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
         this->SetError("called with incorrect number of arguments");
         return false;
       }
-      return_variable = args[i];
+      return_variable = arg;
       havereturn_variable = false;
       count++;
-    } else if (args[i] == "ARGS") {
+    } else if (arg == "ARGS") {
       count++;
       havereturn_variable = false;
       haveoutput_variable = false;
       doingargs = true;
     } else if (doingargs) {
-      arguments += args[i];
+      arguments += arg;
       arguments += " ";
       count++;
     }

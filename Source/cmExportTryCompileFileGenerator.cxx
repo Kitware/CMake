@@ -77,11 +77,9 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
 
   const std::set<cmGeneratorTarget const*>& allTargets =
     cge->GetAllTargetsSeen();
-  for (std::set<cmGeneratorTarget const*>::const_iterator li =
-         allTargets.begin();
-       li != allTargets.end(); ++li) {
-    if (emitted.insert(*li).second) {
-      this->Exports.push_back(*li);
+  for (cmGeneratorTarget const* target : allTargets) {
+    if (emitted.insert(target).second) {
+      this->Exports.push_back(target);
     }
   }
   return result;
@@ -92,22 +90,20 @@ void cmExportTryCompileFileGenerator::PopulateProperties(
   std::set<cmGeneratorTarget const*>& emitted)
 {
   std::vector<std::string> props = target->GetPropertyKeys();
-  for (std::vector<std::string>::const_iterator i = props.begin();
-       i != props.end(); ++i) {
+  for (std::string const& p : props) {
 
-    properties[*i] = target->GetProperty(*i);
+    properties[p] = target->GetProperty(p);
 
-    if (i->find("IMPORTED_LINK_INTERFACE_LIBRARIES") == 0 ||
-        i->find("IMPORTED_LINK_DEPENDENT_LIBRARIES") == 0 ||
-        i->find("INTERFACE_LINK_LIBRARIES") == 0) {
-      std::string evalResult = this->FindTargets(*i, target, emitted);
+    if (p.find("IMPORTED_LINK_INTERFACE_LIBRARIES") == 0 ||
+        p.find("IMPORTED_LINK_DEPENDENT_LIBRARIES") == 0 ||
+        p.find("INTERFACE_LINK_LIBRARIES") == 0) {
+      std::string evalResult = this->FindTargets(p, target, emitted);
 
       std::vector<std::string> depends;
       cmSystemTools::ExpandListArgument(evalResult, depends);
-      for (std::vector<std::string>::const_iterator li = depends.begin();
-           li != depends.end(); ++li) {
+      for (std::string const& li : depends) {
         cmGeneratorTarget* tgt =
-          target->GetLocalGenerator()->FindGeneratorTargetToUse(*li);
+          target->GetLocalGenerator()->FindGeneratorTargetToUse(li);
         if (tgt && emitted.insert(tgt).second) {
           this->Exports.push_back(tgt);
         }

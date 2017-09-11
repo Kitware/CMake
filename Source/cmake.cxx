@@ -244,31 +244,28 @@ Json::Value cmake::ReportCapabilitiesJson(bool haveServerMode) const
   this->GetRegisteredGenerators(generatorInfoList);
 
   JsonValueMapType generatorMap;
-  for (std::vector<cmake::GeneratorInfo>::const_iterator i =
-         generatorInfoList.begin();
-       i != generatorInfoList.end(); ++i) {
-    if (i->isAlias) { // skip aliases, they are there for compatibility reasons
+  for (cmake::GeneratorInfo const& gi : generatorInfoList) {
+    if (gi.isAlias) { // skip aliases, they are there for compatibility reasons
                       // only
       continue;
     }
 
-    if (i->extraName.empty()) {
+    if (gi.extraName.empty()) {
       Json::Value gen = Json::objectValue;
-      gen["name"] = i->name;
-      gen["toolsetSupport"] = i->supportsToolset;
-      gen["platformSupport"] = i->supportsPlatform;
+      gen["name"] = gi.name;
+      gen["toolsetSupport"] = gi.supportsToolset;
+      gen["platformSupport"] = gi.supportsPlatform;
       gen["extraGenerators"] = Json::arrayValue;
-      generatorMap[i->name] = gen;
+      generatorMap[gi.name] = gen;
     } else {
-      Json::Value& gen = generatorMap[i->baseName];
-      gen["extraGenerators"].append(i->extraName);
+      Json::Value& gen = generatorMap[gi.baseName];
+      gen["extraGenerators"].append(gi.extraName);
     }
   }
 
   Json::Value generators = Json::arrayValue;
-  for (JsonValueMapType::const_iterator i = generatorMap.begin();
-       i != generatorMap.end(); ++i) {
-    generators.append(i->second);
+  for (auto const& i : generatorMap) {
+    generators.append(i.second);
   }
   obj["generators"] = generators;
   obj["serverMode"] = haveServerMode;
@@ -407,21 +404,18 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       // removed
       std::vector<std::string> entriesToDelete;
       std::vector<std::string> cacheKeys = this->State->GetCacheEntryKeys();
-      for (std::vector<std::string>::const_iterator it = cacheKeys.begin();
-           it != cacheKeys.end(); ++it) {
-        cmStateEnums::CacheEntryType t = this->State->GetCacheEntryType(*it);
+      for (std::string const& ck : cacheKeys) {
+        cmStateEnums::CacheEntryType t = this->State->GetCacheEntryType(ck);
         if (t != cmStateEnums::STATIC) {
-          if (regex.find(it->c_str())) {
-            entriesToDelete.push_back(*it);
+          if (regex.find(ck.c_str())) {
+            entriesToDelete.push_back(ck);
           }
         }
       }
 
       // now remove them from the cache
-      for (std::vector<std::string>::const_iterator currentEntry =
-             entriesToDelete.begin();
-           currentEntry != entriesToDelete.end(); ++currentEntry) {
-        this->State->RemoveCacheEntry(*currentEntry);
+      for (std::string const& currentEntry : entriesToDelete) {
+        this->State->RemoveCacheEntry(currentEntry);
       }
     } else if (arg.find("-C", 0) == 0) {
       std::string path = arg.substr(2);
@@ -568,9 +562,8 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     std::string libs = mf->GetSafeDefinition("PACKAGE_LIBRARIES");
     std::vector<std::string> libList;
     cmSystemTools::ExpandListArgument(libs, libList);
-    for (std::vector<std::string>::const_iterator libIt = libList.begin();
-         libIt != libList.end(); ++libIt) {
-      tgt->AddLinkLibrary(*mf, *libIt, GENERAL_LibraryType);
+    for (std::string const& lib : libList) {
+      tgt->AddLinkLibrary(*mf, lib, GENERAL_LibraryType);
     }
 
     std::string buildType = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
@@ -906,49 +899,42 @@ void cmake::AddDefaultExtraGenerators()
 void cmake::GetRegisteredGenerators(
   std::vector<GeneratorInfo>& generators) const
 {
-  for (RegisteredGeneratorsVector::const_iterator i = this->Generators.begin(),
-                                                  e = this->Generators.end();
-       i != e; ++i) {
+  for (cmGlobalGeneratorFactory* gen : this->Generators) {
     std::vector<std::string> names;
-    (*i)->GetGenerators(names);
+    gen->GetGenerators(names);
 
-    for (size_t j = 0; j < names.size(); ++j) {
+    for (std::string const& name : names) {
       GeneratorInfo info;
-      info.supportsToolset = (*i)->SupportsToolset();
-      info.supportsPlatform = (*i)->SupportsPlatform();
-      info.name = names[j];
-      info.baseName = names[j];
+      info.supportsToolset = gen->SupportsToolset();
+      info.supportsPlatform = gen->SupportsPlatform();
+      info.name = name;
+      info.baseName = name;
       info.isAlias = false;
       generators.push_back(info);
     }
   }
 
-  for (RegisteredExtraGeneratorsVector::const_iterator
-         i = this->ExtraGenerators.begin(),
-         e = this->ExtraGenerators.end();
-       i != e; ++i) {
+  for (cmExternalMakefileProjectGeneratorFactory* eg : this->ExtraGenerators) {
     const std::vector<std::string> genList =
-      (*i)->GetSupportedGlobalGenerators();
-    for (std::vector<std::string>::const_iterator gen = genList.begin();
-         gen != genList.end(); ++gen) {
+      eg->GetSupportedGlobalGenerators();
+    for (std::string const& gen : genList) {
       GeneratorInfo info;
       info.name = cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
-        *gen, (*i)->GetName());
-      info.baseName = *gen;
-      info.extraName = (*i)->GetName();
+        gen, eg->GetName());
+      info.baseName = gen;
+      info.extraName = eg->GetName();
       info.supportsPlatform = false;
       info.supportsToolset = false;
       info.isAlias = false;
       generators.push_back(info);
     }
-    for (std::vector<std::string>::const_iterator a = (*i)->Aliases.begin();
-         a != (*i)->Aliases.end(); ++a) {
+    for (std::string const& a : eg->Aliases) {
       GeneratorInfo info;
-      info.name = *a;
+      info.name = a;
       if (!genList.empty()) {
         info.baseName = genList.at(0);
       }
-      info.extraName = (*i)->GetName();
+      info.extraName = eg->GetName();
       info.supportsPlatform = false;
       info.supportsToolset = false;
       info.isAlias = true;
@@ -962,23 +948,19 @@ createExtraGenerator(
   const std::vector<cmExternalMakefileProjectGeneratorFactory*>& in,
   const std::string& name)
 {
-  for (std::vector<cmExternalMakefileProjectGeneratorFactory*>::const_iterator
-         i = in.begin();
-       i != in.end(); ++i) {
+  for (cmExternalMakefileProjectGeneratorFactory* i : in) {
     const std::vector<std::string> generators =
-      (*i)->GetSupportedGlobalGenerators();
-    if ((*i)->GetName() == name) { // Match aliases
-      return std::make_pair((*i)->CreateExternalMakefileProjectGenerator(),
+      i->GetSupportedGlobalGenerators();
+    if (i->GetName() == name) { // Match aliases
+      return std::make_pair(i->CreateExternalMakefileProjectGenerator(),
                             generators.at(0));
     }
-    for (std::vector<std::string>::const_iterator g = generators.begin();
-         g != generators.end(); ++g) {
+    for (std::string const& g : generators) {
       const std::string fullName =
         cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
-          *g, (*i)->GetName());
+          g, i->GetName());
       if (fullName == name) {
-        return std::make_pair((*i)->CreateExternalMakefileProjectGenerator(),
-                              *g);
+        return std::make_pair(i->CreateExternalMakefileProjectGenerator(), g);
       }
     }
   }
@@ -994,9 +976,8 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
   const std::string name = extra.second;
 
   cmGlobalGenerator* generator = nullptr;
-  for (RegisteredGeneratorsVector::const_iterator i = this->Generators.begin();
-       i != this->Generators.end(); ++i) {
-    generator = (*i)->CreateGlobalGenerator(name, this);
+  for (cmGlobalGeneratorFactory* g : this->Generators) {
+    generator = g->CreateGlobalGenerator(name, this);
     if (generator) {
       break;
     }
@@ -1192,9 +1173,8 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
   // load the empty cache
   this->LoadCache();
   // restore the changed compilers
-  for (std::vector<SaveCacheEntry>::iterator i = saved.begin();
-       i != saved.end(); ++i) {
-    this->AddCacheEntry(i->key, i->value.c_str(), i->help.c_str(), i->type);
+  for (SaveCacheEntry const& i : saved) {
+    this->AddCacheEntry(i.key, i.value.c_str(), i.help.c_str(), i.type);
   }
   cmSystemTools::Message(warning.str().c_str());
   // avoid reconfigure if there were errors
@@ -1791,35 +1771,30 @@ void cmake::SetIsInTryCompile(bool b)
 
 void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
 {
-  for (RegisteredGeneratorsVector::const_iterator i = this->Generators.begin();
-       i != this->Generators.end(); ++i) {
+  for (cmGlobalGeneratorFactory* g : this->Generators) {
     cmDocumentationEntry e;
-    (*i)->GetDocumentation(e);
+    g->GetDocumentation(e);
     v.push_back(e);
   }
-  for (RegisteredExtraGeneratorsVector::const_iterator i =
-         this->ExtraGenerators.begin();
-       i != this->ExtraGenerators.end(); ++i) {
-    const std::string doc = (*i)->GetDocumentation();
-    const std::string name = (*i)->GetName();
+  for (cmExternalMakefileProjectGeneratorFactory* eg : this->ExtraGenerators) {
+    const std::string doc = eg->GetDocumentation();
+    const std::string name = eg->GetName();
 
     // Aliases:
-    for (std::vector<std::string>::const_iterator a = (*i)->Aliases.begin();
-         a != (*i)->Aliases.end(); ++a) {
+    for (std::string const& a : eg->Aliases) {
       cmDocumentationEntry e;
-      e.Name = *a;
+      e.Name = a;
       e.Brief = doc;
       v.push_back(e);
     }
 
     // Full names:
     const std::vector<std::string> generators =
-      (*i)->GetSupportedGlobalGenerators();
-    for (std::vector<std::string>::const_iterator g = generators.begin();
-         g != generators.end(); ++g) {
+      eg->GetSupportedGlobalGenerators();
+    for (std::string const& g : generators) {
       cmDocumentationEntry e;
       e.Name =
-        cmExternalMakefileProjectGenerator::CreateFullGeneratorName(*g, name);
+        cmExternalMakefileProjectGenerator::CreateFullGeneratorName(g, name);
       e.Brief = doc;
       v.push_back(e);
     }
@@ -1935,13 +1910,12 @@ int cmake::CheckBuildSystem()
   if (const char* productStr = mf->GetDefinition("CMAKE_MAKEFILE_PRODUCTS")) {
     cmSystemTools::ExpandListArgument(productStr, products);
   }
-  for (std::vector<std::string>::const_iterator pi = products.begin();
-       pi != products.end(); ++pi) {
-    if (!(cmSystemTools::FileExists(pi->c_str()) ||
-          cmSystemTools::FileIsSymlink(*pi))) {
+  for (std::string const& p : products) {
+    if (!(cmSystemTools::FileExists(p.c_str()) ||
+          cmSystemTools::FileIsSymlink(p))) {
       if (verbose) {
         std::ostringstream msg;
-        msg << "Re-run cmake, missing byproduct: " << *pi << "\n";
+        msg << "Re-run cmake, missing byproduct: " << p << "\n";
         cmSystemTools::Stdout(msg.str().c_str());
       }
       return 1;
@@ -2479,12 +2453,10 @@ void cmake::RunCheckForUnusedVariables()
   bool haveUnused = false;
   std::ostringstream msg;
   msg << "Manually-specified variables were not used by the project:";
-  for (std::map<std::string, bool>::const_iterator it =
-         this->UsedCliVariables.begin();
-       it != this->UsedCliVariables.end(); ++it) {
-    if (!it->second) {
+  for (auto const& it : this->UsedCliVariables) {
+    if (!it.second) {
       haveUnused = true;
-      msg << "\n  " << it->first;
+      msg << "\n  " << it.first;
     }
   }
   if (haveUnused) {

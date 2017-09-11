@@ -154,10 +154,8 @@ void cmInstallCommandArguments::Parse(const std::vector<std::string>* args,
 bool cmInstallCommandArguments::CheckPermissions()
 {
   this->PermissionsString = "";
-  for (std::vector<std::string>::const_iterator permIt =
-         this->Permissions.GetVector().begin();
-       permIt != this->Permissions.GetVector().end(); ++permIt) {
-    if (!this->CheckPermissions(*permIt, this->PermissionsString)) {
+  for (std::string const& perm : this->Permissions.GetVector()) {
+    if (!this->CheckPermissions(perm, this->PermissionsString)) {
       return false;
     }
   }

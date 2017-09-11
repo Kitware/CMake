@@ -90,11 +90,9 @@ bool cmInstalledFile::GetProperty(const std::string& prop,
   std::string output;
   std::string separator;
 
-  for (ExpressionVectorType::const_iterator j =
-         property.ValueExpressions.begin();
-       j != property.ValueExpressions.end(); ++j) {
+  for (auto ve : property.ValueExpressions) {
     output += separator;
-    output += (*j)->GetInput();
+    output += ve->GetInput();
     separator = ";";
   }
 
