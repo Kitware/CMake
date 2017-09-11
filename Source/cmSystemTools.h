@@ -255,6 +255,11 @@ public:
   static void ParseUnixCommandLine(const char* command,
                                    std::vector<std::string>& args);
 
+  /** Split a command-line string into the parsed command and the unparsed
+      arguments.  Returns false on unfinished quoting or escaping.  */
+  static bool SplitProgramFromArgs(std::string const& command,
+                                   std::string& program, std::string& args);
+
   /**
    * Handle response file in an argument list and return a new argument list
    * **/
