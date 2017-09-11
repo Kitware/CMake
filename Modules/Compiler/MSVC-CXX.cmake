@@ -24,6 +24,16 @@ if ((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.0.24215.1 AND
   endif()
 
   __compiler_check_default_language_standard(CXX 19.0 14)
+
+  # All features that we define are available in the base mode, except
+  # for meta-features for C++14 and above.  Override the default macro
+  # to avoid doing unnecessary work.
+  macro(cmake_record_cxx_compile_features)
+    list(APPEND CMAKE_CXX17_COMPILE_FEATURES cxx_std_17)
+    list(APPEND CMAKE_CXX14_COMPILE_FEATURES cxx_std_14)
+    list(APPEND CMAKE_CXX98_COMPILE_FEATURES cxx_std_11) # no flag needed for 11
+    _record_compiler_features_cxx(98)
+  endmacro()
 elseif (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0)
   # MSVC has no specific options to set language standards, but set them as
   # empty strings anyways so the feature test infrastructure can at least check
@@ -39,4 +49,18 @@ elseif (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0)
 
   # There is no meaningful default for this
   set(CMAKE_CXX_STANDARD_DEFAULT "")
+
+  # There are no compiler modes so we only need to test features once.
+  # Override the default macro for this special case.  Pretend that
+  # all language standards are available so that at least compilation
+  # can be attempted.
+  macro(cmake_record_cxx_compile_features)
+    list(APPEND CMAKE_CXX_COMPILE_FEATURES
+      cxx_std_98
+      cxx_std_11
+      cxx_std_14
+      cxx_std_17
+      )
+    _record_compiler_features(CXX "" CMAKE_CXX_COMPILE_FEATURES)
+  endmacro()
 endif()
