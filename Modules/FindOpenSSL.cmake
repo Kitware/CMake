@@ -149,6 +149,7 @@ if(WIN32 AND NOT CYGWIN)
         libcryptod
         libeay32${_OPENSSL_MSVC_RT_MODE}d
         libeay32d
+        cryptod
       NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
@@ -176,6 +177,7 @@ if(WIN32 AND NOT CYGWIN)
         libssld
         ssleay32${_OPENSSL_MSVC_RT_MODE}d
         ssleay32d
+        ssld
       NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
