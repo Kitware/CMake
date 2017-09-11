@@ -13,6 +13,8 @@
 #include "cmSystemTools.h"
 #include "cm_auto_ptr.hxx"
 
+#include <stddef.h>
+
 cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
                                                    const std::string& config,
                                                    cmLocalGenerator* lg)
