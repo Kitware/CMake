@@ -237,20 +237,7 @@ static bool AddToSourceGroup(cmMakefile* makefile, const std::string& fileName,
     }
     // Generate a source group on demand
     if (!groupName.empty()) {
-      {
-        const char* delimiter =
-          makefile->GetDefinition("SOURCE_GROUP_DELIMITER");
-        if (delimiter == nullptr) {
-          delimiter = "\\";
-        }
-        std::vector<std::string> folders =
-          cmSystemTools::tokenize(groupName, delimiter);
-        sourceGroup = makefile->GetSourceGroup(folders);
-        if (sourceGroup == nullptr) {
-          makefile->AddSourceGroup(folders);
-          sourceGroup = makefile->GetSourceGroup(folders);
-        }
-      }
+      sourceGroup = makefile->GetOrCreateSourceGroup(groupName);
       if (sourceGroup == nullptr) {
         std::ostringstream ost;
         ost << cmQtAutoGen::GeneratorNameUpper(genType);

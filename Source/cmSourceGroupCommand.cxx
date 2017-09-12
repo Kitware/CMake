@@ -61,23 +61,6 @@ bool rootIsPrefix(const std::string& root,
   return true;
 }
 
-cmSourceGroup* addSourceGroup(const std::vector<std::string>& tokenizedPath,
-                              cmMakefile& makefile)
-{
-  cmSourceGroup* sg;
-
-  sg = makefile.GetSourceGroup(tokenizedPath);
-  if (!sg) {
-    makefile.AddSourceGroup(tokenizedPath);
-    sg = makefile.GetSourceGroup(tokenizedPath);
-    if (!sg) {
-      return nullptr;
-    }
-  }
-
-  return sg;
-}
-
 std::string prepareFilePathForTree(const std::string& path,
                                    const std::string& currentSourceDir)
 {
@@ -121,7 +104,7 @@ bool addFilesToItsSourceGroups(const std::string& root,
     if (tokenizedPath.size() > 1) {
       tokenizedPath.pop_back();
 
-      sg = addSourceGroup(tokenizedPath, makefile);
+      sg = makefile.GetOrCreateSourceGroup(tokenizedPath);
 
       if (!sg) {
         errorMsg = "Could not create source group for file: " + *it;
@@ -158,20 +141,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
 
-  std::string delimiter = "\\";
-  if (this->Makefile->GetDefinition("SOURCE_GROUP_DELIMITER")) {
-    delimiter = this->Makefile->GetDefinition("SOURCE_GROUP_DELIMITER");
-  }
-
-  std::vector<std::string> folders =
-    cmSystemTools::tokenize(args[0], delimiter);
-
-  cmSourceGroup* sg = nullptr;
-  sg = this->Makefile->GetSourceGroup(folders);
-  if (!sg) {
-    this->Makefile->AddSourceGroup(folders);
-    sg = this->Makefile->GetSourceGroup(folders);
-  }
+  cmSourceGroup* sg = this->Makefile->GetOrCreateSourceGroup(args[0]);
 
   if (!sg) {
     this->SetError("Could not create or find source group");
