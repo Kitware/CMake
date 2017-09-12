@@ -14,18 +14,22 @@
 
 // - Static variables
 
-const std::string genNameGen = "AutoGen";
-const std::string genNameMoc = "AutoMoc";
-const std::string genNameUic = "AutoUic";
-const std::string genNameRcc = "AutoRcc";
+std::string const genNameGen = "AutoGen";
+std::string const genNameMoc = "AutoMoc";
+std::string const genNameUic = "AutoUic";
+std::string const genNameRcc = "AutoRcc";
+
+std::string const mcNameSingle = "SINGLE";
+std::string const mcNameWrap = "WRAP";
+std::string const mcNameFull = "FULL";
 
 // - Static functions
 
 /// @brief Merges newOpts into baseOpts
 /// @arg valueOpts list of options that accept a value
 void MergeOptions(std::vector<std::string>& baseOpts,
-                  const std::vector<std::string>& newOpts,
-                  const std::vector<std::string>& valueOpts, bool isQt5)
+                  std::vector<std::string> const& newOpts,
+                  std::vector<std::string> const& valueOpts, bool isQt5)
 {
   typedef std::vector<std::string>::iterator Iter;
   typedef std::vector<std::string>::const_iterator CIter;
@@ -40,7 +44,7 @@ void MergeOptions(std::vector<std::string>& baseOpts,
   std::vector<std::string> extraOpts;
   for (CIter fit = newOpts.begin(), fitEnd = newOpts.end(); fit != fitEnd;
        ++fit) {
-    const std::string& newOpt = *fit;
+    std::string const& newOpt = *fit;
     Iter existIt = std::find(baseOpts.begin(), baseOpts.end(), newOpt);
     if (existIt != baseOpts.end()) {
       if (newOpt.size() >= 2) {
@@ -87,7 +91,7 @@ static std::string utilStripCR(std::string const& line)
 
 /// @brief Reads the resource files list from from a .qrc file - Qt4 version
 /// @return True if the .qrc file was successfully parsed
-static bool RccListInputsQt4(const std::string& fileName,
+static bool RccListInputsQt4(std::string const& fileName,
                              std::vector<std::string>& files,
                              std::string* errorMessage)
 {
@@ -140,8 +144,8 @@ static bool RccListInputsQt4(const std::string& fileName,
 
 /// @brief Reads the resource files list from from a .qrc file - Qt5 version
 /// @return True if the .qrc file was successfully parsed
-static bool RccListInputsQt5(const std::string& rccCommand,
-                             const std::string& fileName,
+static bool RccListInputsQt5(std::string const& rccCommand,
+                             std::string const& fileName,
                              std::vector<std::string>& files,
                              std::string* errorMessage)
 {
@@ -244,9 +248,9 @@ static bool RccListInputsQt5(const std::string& rccCommand,
 
 // - Class definitions
 
-const std::string cmQtAutoGen::listSep = "@LSEP@";
+std::string const cmQtAutoGen::listSep = "@LSEP@";
 
-const std::string& cmQtAutoGen::GeneratorName(Generator type)
+std::string const& cmQtAutoGen::GeneratorName(Generator type)
 {
   switch (type) {
     case Generator::GEN:
@@ -266,7 +270,31 @@ std::string cmQtAutoGen::GeneratorNameUpper(Generator genType)
   return cmSystemTools::UpperCase(cmQtAutoGen::GeneratorName(genType));
 }
 
-std::string cmQtAutoGen::Quoted(const std::string& text)
+std::string const& cmQtAutoGen::MultiConfigName(MultiConfig config)
+{
+  switch (config) {
+    case MultiConfig::SINGLE:
+      return mcNameSingle;
+    case MultiConfig::WRAP:
+      return mcNameWrap;
+    case MultiConfig::FULL:
+      return mcNameFull;
+  }
+  return mcNameWrap;
+}
+
+cmQtAutoGen::MultiConfig cmQtAutoGen::MultiConfigType(std::string const& name)
+{
+  if (name == mcNameSingle) {
+    return MultiConfig::SINGLE;
+  }
+  if (name == mcNameFull) {
+    return MultiConfig::FULL;
+  }
+  return MultiConfig::WRAP;
+}
+
+std::string cmQtAutoGen::Quoted(std::string const& text)
 {
   static const char* rep[18] = { "\\", "\\\\", "\"", "\\\"", "\a", "\\a",
                                  "\b", "\\b",  "\f", "\\f",  "\n", "\\n",
@@ -282,11 +310,28 @@ std::string cmQtAutoGen::Quoted(const std::string& text)
   return res;
 }
 
+std::string cmQtAutoGen::AppendFilenameSuffix(std::string const& filename,
+                                              std::string const& suffix)
+{
+  std::string res;
+  auto pos = filename.rfind('.');
+  if (pos != std::string::npos) {
+    const auto it_dot = filename.begin() + pos;
+    res.assign(filename.begin(), it_dot);
+    res.append(suffix);
+    res.append(it_dot, filename.end());
+  } else {
+    res = filename;
+    res.append(suffix);
+  }
+  return res;
+}
+
 void cmQtAutoGen::UicMergeOptions(std::vector<std::string>& baseOpts,
-                                  const std::vector<std::string>& newOpts,
+                                  std::vector<std::string> const& newOpts,
                                   bool isQt5)
 {
-  static const std::vector<std::string> valueOpts = {
+  static std::vector<std::string> const valueOpts = {
     "tr",      "translate", "postfix", "generator",
     "include", // Since Qt 5.3
     "g"
@@ -295,18 +340,18 @@ void cmQtAutoGen::UicMergeOptions(std::vector<std::string>& baseOpts,
 }
 
 void cmQtAutoGen::RccMergeOptions(std::vector<std::string>& baseOpts,
-                                  const std::vector<std::string>& newOpts,
+                                  std::vector<std::string> const& newOpts,
                                   bool isQt5)
 {
-  static const std::vector<std::string> valueOpts = { "name", "root",
+  static std::vector<std::string> const valueOpts = { "name", "root",
                                                       "compress",
                                                       "threshold" };
   MergeOptions(baseOpts, newOpts, valueOpts, isQt5);
 }
 
-bool cmQtAutoGen::RccListInputs(const std::string& qtMajorVersion,
-                                const std::string& rccCommand,
-                                const std::string& fileName,
+bool cmQtAutoGen::RccListInputs(std::string const& qtMajorVersion,
+                                std::string const& rccCommand,
+                                std::string const& fileName,
                                 std::vector<std::string>& files,
                                 std::string* errorMessage)
 {

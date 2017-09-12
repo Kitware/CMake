@@ -14,7 +14,7 @@
 class cmQtAutoGen
 {
 public:
-  static const std::string listSep;
+  static std::string const listSep;
 
   enum Generator
   {
@@ -24,32 +24,47 @@ public:
     RCC
   };
 
+  enum MultiConfig
+  {
+    SINGLE, // Single configuration
+    WRAP,   // Multi configuration using wrapper files
+    FULL    // Full multi configuration using per config sources
+  };
+
 public:
   /// @brief Returns the generator name
-  static const std::string& GeneratorName(Generator genType);
+  static std::string const& GeneratorName(Generator genType);
   /// @brief Returns the generator name in upper case
   static std::string GeneratorNameUpper(Generator genType);
 
+  /// @brief Returns the multi configuration name string
+  static std::string const& MultiConfigName(MultiConfig config);
+  /// @brief Returns the multi configuration type
+  static MultiConfig MultiConfigType(std::string const& name);
+
   /// @brief Returns a the string escaped and enclosed in quotes
-  ///
-  static std::string Quoted(const std::string& text);
+  static std::string Quoted(std::string const& text);
+
+  /// @brief Appends the suffix to the filename before the last dot
+  static std::string AppendFilenameSuffix(std::string const& filename,
+                                          std::string const& suffix);
 
   /// @brief Merges newOpts into baseOpts
   static void UicMergeOptions(std::vector<std::string>& baseOpts,
-                              const std::vector<std::string>& newOpts,
+                              std::vector<std::string> const& newOpts,
                               bool isQt5);
 
   /// @brief Merges newOpts into baseOpts
   static void RccMergeOptions(std::vector<std::string>& baseOpts,
-                              const std::vector<std::string>& newOpts,
+                              std::vector<std::string> const& newOpts,
                               bool isQt5);
 
   /// @brief Reads the resource files list from from a .qrc file
   /// @arg fileName Must be the absolute path of the .qrc file
   /// @return True if the rcc file was successfully parsed
-  static bool RccListInputs(const std::string& qtMajorVersion,
-                            const std::string& rccCommand,
-                            const std::string& fileName,
+  static bool RccListInputs(std::string const& qtMajorVersion,
+                            std::string const& rccCommand,
+                            std::string const& fileName,
                             std::vector<std::string>& files,
                             std::string* errorMessage = nullptr);
 };

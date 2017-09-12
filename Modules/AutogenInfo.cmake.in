@@ -1,3 +1,5 @@
+# Meta
+set(AM_MULTI_CONFIG @_multi_config@)
 # Directories and files
 set(AM_CMAKE_BINARY_DIR "@CMAKE_BINARY_DIR@/")
 set(AM_CMAKE_SOURCE_DIR "@CMAKE_SOURCE_DIR@/")
@@ -16,7 +18,7 @@ set(AM_QT_RCC_EXECUTABLE @_qt_rcc_executable@)
 # MOC settings
 set(AM_MOC_SKIP @_moc_skip@)
 set(AM_MOC_DEFINITIONS @_moc_compile_defs@)
-set(AM_MOC_INCLUDES @_moc_incs@)
+set(AM_MOC_INCLUDES @_moc_include_dirs@)
 set(AM_MOC_OPTIONS @_moc_options@)
 set(AM_MOC_RELAXED_MODE @_moc_relaxed_mode@)
 set(AM_MOC_MACRO_NAMES @_moc_macro_names@)

@@ -131,7 +131,8 @@ static bool ListContains(std::vector<std::string> const& list,
 // -- Class methods
 
 cmQtAutoGenerators::cmQtAutoGenerators()
-  : IncludeProjectDirsBefore(false)
+  : MultiConfig(cmQtAutoGen::WRAP)
+  , IncludeProjectDirsBefore(false)
   , Verbose(cmSystemTools::HasEnv("VERBOSE"))
   , ColorOutput(true)
   , MocSettingsChanged(false)
@@ -196,6 +197,9 @@ bool cmQtAutoGenerators::InitInfoFile(cmMakefile* makefile,
                                       std::string const& targetDirectory,
                                       std::string const& config)
 {
+  // -- Meta
+  this->HeaderExtensions = makefile->GetCMakeInstance()->GetHeaderExtensions();
+
   // Utility lambdas
   auto InfoGet = [makefile](const char* key) {
     return makefile->GetSafeDefinition(key);
@@ -239,10 +243,8 @@ bool cmQtAutoGenerators::InitInfoFile(cmMakefile* makefile,
     const char* valueConf = nullptr;
     {
       std::string keyConf = key;
-      if (!config.empty()) {
-        keyConf += '_';
-        keyConf += config;
-      }
+      keyConf += '_';
+      keyConf += config;
       valueConf = makefile->GetDefinition(keyConf);
     }
     if (valueConf == nullptr) {
@@ -257,10 +259,10 @@ bool cmQtAutoGenerators::InitInfoFile(cmMakefile* makefile,
     return list;
   };
 
+  // -- Read info file
   this->InfoFile = cmSystemTools::CollapseFullPath(targetDirectory);
   cmSystemTools::ConvertToUnixSlashes(this->InfoFile);
   this->InfoFile += "/AutogenInfo.cmake";
-
   if (!makefile->ReadListFile(this->InfoFile.c_str())) {
     this->LogFileError(cmQtAutoGen::GEN, this->InfoFile,
                        "File processing failed");
@@ -268,16 +270,11 @@ bool cmQtAutoGenerators::InitInfoFile(cmMakefile* makefile,
   }
 
   // -- Meta
-  this->HeaderExtensions = makefile->GetCMakeInstance()->GetHeaderExtensions();
+  this->MultiConfig = cmQtAutoGen::MultiConfigType(InfoGet("AM_MULTI_CONFIG"));
   this->ConfigSuffix = InfoGetConfig("AM_CONFIG_SUFFIX");
-
-  // - Old settings file
-  {
-    this->SettingsFile = cmSystemTools::CollapseFullPath(targetDirectory);
-    cmSystemTools::ConvertToUnixSlashes(this->SettingsFile);
-    this->SettingsFile += "/AutogenOldSettings";
-    this->SettingsFile += this->ConfigSuffix;
-    this->SettingsFile += ".cmake";
+  if (this->ConfigSuffix.empty()) {
+    this->ConfigSuffix = "_";
+    this->ConfigSuffix += config;
   }
 
   // - Files and directories
@@ -499,19 +496,28 @@ bool cmQtAutoGenerators::InitInfoFile(cmMakefile* makefile,
 
   // include directory
   this->AutogenIncludeDir = "include";
-  this->AutogenIncludeDir += this->ConfigSuffix;
+  if (this->MultiConfig != cmQtAutoGen::SINGLE) {
+    this->AutogenIncludeDir += this->ConfigSuffix;
+  }
   this->AutogenIncludeDir += "/";
 
+  // Moc variables
   if (this->MocEnabled()) {
     // Mocs compilation file
-    this->MocCompFileRel = "mocs_compilation.cpp";
+    this->MocCompFileRel = "mocs_compilation";
+    if (this->MultiConfig == cmQtAutoGen::FULL) {
+      this->MocCompFileRel += this->ConfigSuffix;
+    }
+    this->MocCompFileRel += ".cpp";
     this->MocCompFileAbs = cmSystemTools::CollapseCombinedPath(
       this->AutogenBuildDir, this->MocCompFileRel);
 
     // Moc predefs file
     if (!this->MocPredefsCmd.empty()) {
       this->MocPredefsFileRel = "moc_predefs";
-      this->MocPredefsFileRel += this->ConfigSuffix;
+      if (this->MultiConfig != cmQtAutoGen::SINGLE) {
+        this->MocPredefsFileRel += this->ConfigSuffix;
+      }
       this->MocPredefsFileRel += ".h";
       this->MocPredefsFileAbs = cmSystemTools::CollapseCombinedPath(
         this->AutogenBuildDir, this->MocPredefsFileRel);
@@ -583,6 +589,17 @@ bool cmQtAutoGenerators::InitInfoFile(cmMakefile* makefile,
                                  this->MocOptions.begin(),
                                  this->MocOptions.end());
     }
+  }
+
+  // - Old settings file
+  {
+    this->SettingsFile = cmSystemTools::CollapseFullPath(targetDirectory);
+    cmSystemTools::ConvertToUnixSlashes(this->SettingsFile);
+    this->SettingsFile += "/AutogenOldSettings";
+    if (this->MultiConfig != cmQtAutoGen::SINGLE) {
+      this->SettingsFile += this->ConfigSuffix;
+    }
+    this->SettingsFile += ".cmake";
   }
 
   return true;
@@ -1299,18 +1316,18 @@ void cmQtAutoGenerators::MocParseHeaderContent(std::string const& absFilename,
                  });
   if (fit == this->MocJobsIncluded.cend()) {
     if (this->MocRequired(contentText)) {
-      static std::string const prefix = "moc_";
-      static std::string const suffix = this->ConfigSuffix + ".cpp";
-
       auto job = cm::make_unique<MocJobAuto>();
       job->SourceFile = absFilename;
       {
         std::string& bld = job->BuildFileRel;
         bld = this->FilePathChecksum.getPart(absFilename);
-        bld += "/";
-        bld += prefix;
+        bld += '/';
+        bld += "moc_";
         bld += cmSystemTools::GetFilenameWithoutLastExtension(absFilename);
-        bld += suffix;
+        if (this->MultiConfig != cmQtAutoGen::SINGLE) {
+          bld += this->ConfigSuffix;
+        }
+        bld += ".cpp";
       }
       this->MocFindDepends(absFilename, contentText, job->Depends);
       this->MocJobsAuto.push_back(std::move(job));
@@ -1437,9 +1454,12 @@ bool cmQtAutoGenerators::MocGenerateAll()
 
   // Compose mocs compilation file content
   {
-    std::string mocs = "/* This file is autogenerated, do not edit*/\n";
+    std::string mocs =
+      "// This file is autogenerated. Changes will be overwritten.\n";
     if (this->MocJobsAuto.empty()) {
-      // Dummy content
+      // Placeholder content
+      mocs +=
+        "// No files found that require moc or the moc files are included\n";
       mocs += "enum some_compilers { need_more_than_nothing };\n";
     } else {
       // Valid content
@@ -1917,14 +1937,11 @@ bool cmQtAutoGenerators::RccGenerateFile(const RccJob& rccJob)
   bool rccGenerated = false;
 
   std::string rccFileAbs;
-  if (this->ConfigSuffix.empty()) {
+  if (this->MultiConfig == cmQtAutoGen::SINGLE) {
     rccFileAbs = rccJob.RccFile;
   } else {
-    rccFileAbs = SubDirPrefix(rccJob.RccFile);
-    rccFileAbs +=
-      cmSystemTools::GetFilenameWithoutLastExtension(rccJob.RccFile);
-    rccFileAbs += this->ConfigSuffix;
-    rccFileAbs += cmSystemTools::GetFilenameLastExtension(rccJob.RccFile);
+    rccFileAbs =
+      cmQtAutoGen::AppendFilenameSuffix(rccJob.RccFile, this->ConfigSuffix);
   }
   std::string const rccFileRel = cmSystemTools::RelativePath(
     this->AutogenBuildDir.c_str(), rccFileAbs.c_str());
@@ -2064,15 +2081,16 @@ bool cmQtAutoGenerators::RccGenerateFile(const RccJob& rccJob)
       success = false;
     }
   }
-  // For a multi configuration generator generate a wrapper file
-  if (success && !this->ConfigSuffix.empty()) {
+
+  // Generate a wrapper source file on demand
+  if (success && (this->MultiConfig == cmQtAutoGen::WRAP)) {
     // Wrapper file name
     std::string const& wrapperFileAbs = rccJob.RccFile;
     std::string const wrapperFileRel = cmSystemTools::RelativePath(
       this->AutogenBuildDir.c_str(), wrapperFileAbs.c_str());
     // Wrapper file content
     std::string content = "// This is an autogenerated configuration "
-                          "wrapper file. Do not edit.\n"
+                          "wrapper file. Changes will be overwritten.\n"
                           "#include \"";
     content += cmSystemTools::GetFilenameName(rccFileRel);
     content += "\"\n";

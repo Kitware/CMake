@@ -183,8 +183,9 @@ private:
                   std::string& output) const;
 
   // -- Meta
-  std::string ConfigSuffix;
   std::string InfoFile;
+  std::string ConfigSuffix;
+  cmQtAutoGen::MultiConfig MultiConfig;
   // -- Settings
   bool IncludeProjectDirsBefore;
   bool Verbose;
