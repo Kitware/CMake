@@ -20,8 +20,8 @@ source files at build time and invoke moc accordingly.
   This allows the compiler to find the included ``moc_<basename>.cpp`` file
   regardless of the location the original source.
 
-  * For multi configuration generators, the include directory is
-    ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
+  * For :prop_gbl:`multi configuration generators <GENERATOR_IS_MULTI_CONFIG>`,
+    the include directory is ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
 
   * See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
