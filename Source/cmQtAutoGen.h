@@ -16,7 +16,7 @@ class cmQtAutoGen
 public:
   static const std::string listSep;
 
-  enum GeneratorType
+  enum Generator
   {
     GEN, // General
     MOC,
@@ -26,9 +26,9 @@ public:
 
 public:
   /// @brief Returns the generator name
-  static const std::string& GeneratorName(GeneratorType genType);
+  static const std::string& GeneratorName(Generator genType);
   /// @brief Returns the generator name in upper case
-  static std::string GeneratorNameUpper(GeneratorType genType);
+  static std::string GeneratorNameUpper(Generator genType);
 
   /// @brief Returns a the string escaped and enclosed in quotes
   ///

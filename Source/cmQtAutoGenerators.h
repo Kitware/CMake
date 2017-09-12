@@ -153,31 +153,31 @@ private:
 
   // -- Log info
   void LogBold(std::string const& message) const;
-  void LogInfo(cmQtAutoGen::GeneratorType genType,
+  void LogInfo(cmQtAutoGen::Generator genType,
                std::string const& message) const;
   // -- Log warning
-  void LogWarning(cmQtAutoGen::GeneratorType genType,
+  void LogWarning(cmQtAutoGen::Generator genType,
                   std::string const& message) const;
-  void LogFileWarning(cmQtAutoGen::GeneratorType genType,
+  void LogFileWarning(cmQtAutoGen::Generator genType,
                       std::string const& filename,
                       std::string const& message) const;
   // -- Log error
-  void LogError(cmQtAutoGen::GeneratorType genType,
+  void LogError(cmQtAutoGen::Generator genType,
                 std::string const& message) const;
-  void LogFileError(cmQtAutoGen::GeneratorType genType,
+  void LogFileError(cmQtAutoGen::Generator genType,
                     std::string const& filename,
                     std::string const& message) const;
-  void LogCommandError(cmQtAutoGen::GeneratorType genType,
+  void LogCommandError(cmQtAutoGen::Generator genType,
                        std::string const& message,
                        std::vector<std::string> const& command,
                        std::string const& output) const;
 
   // -- Utility
-  bool MakeParentDirectory(cmQtAutoGen::GeneratorType genType,
+  bool MakeParentDirectory(cmQtAutoGen::Generator genType,
                            std::string const& filename) const;
   bool FileDiffers(std::string const& filename, std::string const& content);
-  bool FileWrite(cmQtAutoGen::GeneratorType genType,
-                 std::string const& filename, std::string const& content);
+  bool FileWrite(cmQtAutoGen::Generator genType, std::string const& filename,
+                 std::string const& content);
   bool FindHeader(std::string& header, std::string const& testBasePath) const;
   bool RunCommand(std::vector<std::string> const& command,
                   std::string& output) const;

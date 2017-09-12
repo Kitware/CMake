@@ -246,22 +246,22 @@ static bool RccListInputsQt5(const std::string& rccCommand,
 
 const std::string cmQtAutoGen::listSep = "@LSEP@";
 
-const std::string& cmQtAutoGen::GeneratorName(GeneratorType type)
+const std::string& cmQtAutoGen::GeneratorName(Generator type)
 {
   switch (type) {
-    case GeneratorType::GEN:
+    case Generator::GEN:
       return genNameGen;
-    case GeneratorType::MOC:
+    case Generator::MOC:
       return genNameMoc;
-    case GeneratorType::UIC:
+    case Generator::UIC:
       return genNameUic;
-    case GeneratorType::RCC:
+    case Generator::RCC:
       return genNameRcc;
   }
   return genNameGen;
 }
 
-std::string cmQtAutoGen::GeneratorNameUpper(GeneratorType genType)
+std::string cmQtAutoGen::GeneratorNameUpper(Generator genType)
 {
   return cmSystemTools::UpperCase(cmQtAutoGen::GeneratorName(genType));
 }

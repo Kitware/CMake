@@ -204,7 +204,7 @@ static void AddDefinitionEscaped(
 }
 
 static bool AddToSourceGroup(cmMakefile* makefile, const std::string& fileName,
-                             cmQtAutoGen::GeneratorType genType)
+                             cmQtAutoGen::Generator genType)
 {
   cmSourceGroup* sourceGroup = nullptr;
   // Acquire source group
@@ -263,7 +263,7 @@ static void AddCleanFile(cmMakefile* makefile, const std::string& fileName)
 
 static void AddGeneratedSource(cmGeneratorTarget* target,
                                const std::string& filename,
-                               cmQtAutoGen::GeneratorType genType)
+                               cmQtAutoGen::Generator genType)
 {
   cmMakefile* makefile = target->Target->GetMakefile();
   {

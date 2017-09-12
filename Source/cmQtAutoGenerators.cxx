@@ -2107,7 +2107,7 @@ void cmQtAutoGenerators::LogBold(std::string const& message) const
                                    message.c_str(), true, this->ColorOutput);
 }
 
-void cmQtAutoGenerators::LogInfo(cmQtAutoGen::GeneratorType genType,
+void cmQtAutoGenerators::LogInfo(cmQtAutoGen::Generator genType,
                                  std::string const& message) const
 {
   std::string msg = cmQtAutoGen::GeneratorName(genType);
@@ -2119,7 +2119,7 @@ void cmQtAutoGenerators::LogInfo(cmQtAutoGen::GeneratorType genType,
   cmSystemTools::Stdout(msg.c_str(), msg.size());
 }
 
-void cmQtAutoGenerators::LogWarning(cmQtAutoGen::GeneratorType genType,
+void cmQtAutoGenerators::LogWarning(cmQtAutoGen::Generator genType,
                                     std::string const& message) const
 {
   std::string msg = cmQtAutoGen::GeneratorName(genType);
@@ -2140,7 +2140,7 @@ void cmQtAutoGenerators::LogWarning(cmQtAutoGen::GeneratorType genType,
   cmSystemTools::Stdout(msg.c_str(), msg.size());
 }
 
-void cmQtAutoGenerators::LogFileWarning(cmQtAutoGen::GeneratorType genType,
+void cmQtAutoGenerators::LogFileWarning(cmQtAutoGen::Generator genType,
                                         std::string const& filename,
                                         std::string const& message) const
 {
@@ -2152,7 +2152,7 @@ void cmQtAutoGenerators::LogFileWarning(cmQtAutoGen::GeneratorType genType,
   this->LogWarning(genType, msg);
 }
 
-void cmQtAutoGenerators::LogError(cmQtAutoGen::GeneratorType genType,
+void cmQtAutoGenerators::LogError(cmQtAutoGen::Generator genType,
                                   std::string const& message) const
 {
   std::string msg;
@@ -2167,7 +2167,7 @@ void cmQtAutoGenerators::LogError(cmQtAutoGen::GeneratorType genType,
   cmSystemTools::Stderr(msg.c_str(), msg.size());
 }
 
-void cmQtAutoGenerators::LogFileError(cmQtAutoGen::GeneratorType genType,
+void cmQtAutoGenerators::LogFileError(cmQtAutoGen::Generator genType,
                                       std::string const& filename,
                                       std::string const& message) const
 {
@@ -2180,7 +2180,7 @@ void cmQtAutoGenerators::LogFileError(cmQtAutoGen::GeneratorType genType,
 }
 
 void cmQtAutoGenerators::LogCommandError(
-  cmQtAutoGen::GeneratorType genType, std::string const& message,
+  cmQtAutoGen::Generator genType, std::string const& message,
   std::vector<std::string> const& command, std::string const& output) const
 {
   std::string msg;
@@ -2210,8 +2210,8 @@ void cmQtAutoGenerators::LogCommandError(
  * @brief Generates the parent directory of the given file on demand
  * @return True on success
  */
-bool cmQtAutoGenerators::MakeParentDirectory(
-  cmQtAutoGen::GeneratorType genType, std::string const& filename) const
+bool cmQtAutoGenerators::MakeParentDirectory(cmQtAutoGen::Generator genType,
+                                             std::string const& filename) const
 {
   bool success = true;
   std::string const dirName = cmSystemTools::GetFilenamePath(filename);
@@ -2238,7 +2238,7 @@ bool cmQtAutoGenerators::FileDiffers(std::string const& filename,
   return differs;
 }
 
-bool cmQtAutoGenerators::FileWrite(cmQtAutoGen::GeneratorType genType,
+bool cmQtAutoGenerators::FileWrite(cmQtAutoGen::Generator genType,
                                    std::string const& filename,
                                    std::string const& content)
 {
