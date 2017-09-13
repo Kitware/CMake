@@ -860,6 +860,24 @@ int cmCTestCoverageHandler::HandleDelphiCoverage(
   return static_cast<int>(cont->TotalCoverage.size());
 }
 
+static std::string joinCommandLine(const std::vector<std::string>& args)
+{
+  std::string ret;
+
+  for (std::string const& s : args) {
+    if (s.find(' ') == std::string::npos) {
+      ret += s + ' ';
+    } else {
+      ret += "\"" + s + "\" ";
+    }
+  }
+
+  // drop trailing whitespace
+  ret.erase(ret.size() - 1);
+
+  return ret;
+}
+
 int cmCTestCoverageHandler::HandleBlanketJSCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -974,6 +992,11 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
   cmCTestCoverageHandlerLocale locale_C;
   static_cast<void>(locale_C);
 
+  std::vector<std::string> basecovargs =
+    cmSystemTools::ParseArguments(gcovExtraFlags.c_str());
+  basecovargs.insert(basecovargs.begin(), gcovCommand);
+  basecovargs.push_back("-o");
+
   // files is a list of *.da and *.gcda files with coverage data in them.
   // These are binary files that you give as input to gcov so that it will
   // give us text output we can analyze to summarize coverage.
@@ -985,8 +1008,10 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     // Call gcov to get coverage data for this *.gcda file:
     //
     std::string fileDir = cmSystemTools::GetFilenamePath(f);
-    std::string command = "\"" + gcovCommand + "\" " + gcovExtraFlags + " " +
-      "-o \"" + fileDir + "\" " + "\"" + f + "\"";
+    std::vector<std::string> covargs = basecovargs;
+    covargs.push_back(fileDir);
+    covargs.push_back(f);
+    const std::string command = joinCommandLine(covargs);
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        command << std::endl, this->Quiet);
@@ -996,9 +1021,8 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     int retVal = 0;
     *cont->OFS << "* Run coverage for: " << fileDir << std::endl;
     *cont->OFS << "  Command: " << command << std::endl;
-    int res =
-      this->CTest->RunCommand(command.c_str(), &output, &errors, &retVal,
-                              tempDir.c_str(), 0 /*this->TimeOut*/);
+    int res = this->CTest->RunCommand(covargs, &output, &errors, &retVal,
+                                      tempDir.c_str(), 0 /*this->TimeOut*/);
 
     *cont->OFS << "  Output: " << output << std::endl;
     *cont->OFS << "  Errors: " << errors << std::endl;
@@ -1337,6 +1361,11 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
   cmCTestCoverageHandlerLocale locale_C;
   static_cast<void>(locale_C);
 
+  std::vector<std::string> covargs =
+    cmSystemTools::ParseArguments(lcovExtraFlags.c_str());
+  covargs.insert(covargs.begin(), lcovCommand);
+  const std::string command = joinCommandLine(covargs);
+
   // In intel compiler we have to call codecov only once in each executable
   // directory. It collects all *.dyn files to generate .dpi file.
   for (std::string const& f : files) {
@@ -1344,7 +1373,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
                        this->Quiet);
     std::string fileDir = cmSystemTools::GetFilenamePath(f);
     cmWorkingDirectory workdir(fileDir);
-    std::string command = "\"" + lcovCommand + "\" " + lcovExtraFlags + " ";
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Current coverage dir: " << fileDir << std::endl,
@@ -1357,9 +1385,8 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     int retVal = 0;
     *cont->OFS << "* Run coverage for: " << fileDir << std::endl;
     *cont->OFS << "  Command: " << command << std::endl;
-    int res =
-      this->CTest->RunCommand(command.c_str(), &output, &errors, &retVal,
-                              fileDir.c_str(), 0 /*this->TimeOut*/);
+    int res = this->CTest->RunCommand(covargs, &output, &errors, &retVal,
+                                      fileDir.c_str(), 0 /*this->TimeOut*/);
 
     *cont->OFS << "  Output: " << output << std::endl;
     *cont->OFS << "  Errors: " << errors << std::endl;
