@@ -695,7 +695,12 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
         xw.Content(this->WindowsTargetPlatformVersion);
        xw.EndElement(); // WindowsTargetPlatformVersion
      }
-     if (this->GetPlatformName() == "ARM") {
+     if (this->GetPlatformName() == "ARM64") {
+       xw.StartElement("WindowsSDKDesktopARM64Support");
+        xw.Content("true");
+       xw.EndElement(); // WindowsSDK64DesktopARMSupport
+     }
+     else if (this->GetPlatformName() == "ARM") {
        xw.StartElement("WindowsSDKDesktopARMSupport");
         xw.Content("true");
        xw.EndElement(); // WindowsSDKDesktopARMSupport
