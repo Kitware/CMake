@@ -14,12 +14,13 @@
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #include "cmDocumentation.h"
 #include "cmDynamicLoader.h"
+#endif
+
 #ifdef _WIN32
 #include <fcntl.h>  /* _O_TEXT */
 #include <stdlib.h> /* _set_fmode, _fmode */
 #endif
 #include "cm_uv.h"
-#endif
 
 #include "cmsys/Encoding.hxx"
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
@@ -167,7 +168,7 @@ int main(int ac, char const* const* av)
   ac = args.argc();
   av = args.argv();
 
-#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32)
+#if defined(_WIN32)
   // Perform libuv one-time initialization now, and then un-do its
   // global _fmode setting so that using libuv does not change the
   // default file text/binary mode.  See libuv issue 840.
@@ -192,8 +193,8 @@ int main(int ac, char const* const* av)
   int ret = do_cmake(ac, av);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDynamicLoader::FlushCache();
-  uv_loop_close(uv_default_loop());
 #endif
+  uv_loop_close(uv_default_loop());
   return ret;
 }
 
