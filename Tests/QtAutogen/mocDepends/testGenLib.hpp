@@ -1,5 +1,5 @@
-#ifndef TEST2_HPP
-#define TEST2_HPP
+#ifndef TEST3_HPP
+#define TEST3_HPP
 
 #include "simpleLib.hpp"
 #include <QObject>
