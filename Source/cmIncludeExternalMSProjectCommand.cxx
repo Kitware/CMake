@@ -91,9 +91,8 @@ bool cmIncludeExternalMSProjectCommand::InitialPass(
     if (!platformMapping.empty())
       target->SetProperty("VS_PLATFORM_MAPPING", platformMapping.c_str());
 
-    for (std::vector<std::string>::const_iterator it = depends.begin();
-         it != depends.end(); ++it) {
-      target->AddUtility(it->c_str());
+    for (std::string const& d : depends) {
+      target->AddUtility(d.c_str());
     }
   }
 #endif

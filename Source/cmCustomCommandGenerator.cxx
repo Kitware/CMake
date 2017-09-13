@@ -26,12 +26,10 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
   , GE(new cmGeneratorExpression(cc.GetBacktrace()))
 {
   const cmCustomCommandLines& cmdlines = this->CC.GetCommandLines();
-  for (cmCustomCommandLines::const_iterator cmdline = cmdlines.begin();
-       cmdline != cmdlines.end(); ++cmdline) {
+  for (cmCustomCommandLine const& cmdline : cmdlines) {
     cmCustomCommandLine argv;
-    for (cmCustomCommandLine::const_iterator clarg = cmdline->begin();
-         clarg != cmdline->end(); ++clarg) {
-      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(*clarg);
+    for (std::string const& clarg : cmdline) {
+      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(clarg);
       std::string parsed_arg = cge->Evaluate(this->LG, this->Config);
       if (this->CC.GetCommandExpandLists()) {
         std::vector<std::string> ExpandedArg;
@@ -45,16 +43,14 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
   }
 
   std::vector<std::string> depends = this->CC.GetDepends();
-  for (std::vector<std::string>::const_iterator i = depends.begin();
-       i != depends.end(); ++i) {
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(*i);
+  for (std::string const& d : depends) {
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(d);
     std::vector<std::string> result;
     cmSystemTools::ExpandListArgument(cge->Evaluate(this->LG, this->Config),
                                       result);
-    for (std::vector<std::string>::iterator it = result.begin();
-         it != result.end(); ++it) {
-      if (cmSystemTools::FileIsFullPath(it->c_str())) {
-        *it = cmSystemTools::CollapseFullPath(*it);
+    for (std::string& it : result) {
+      if (cmSystemTools::FileIsFullPath(it.c_str())) {
+        it = cmSystemTools::CollapseFullPath(it);
       }
     }
     this->Depends.insert(this->Depends.end(), result.begin(), result.end());

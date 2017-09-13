@@ -41,12 +41,11 @@ std::string cmTargetCompileDefinitionsCommand::Join(
 {
   std::string defs;
   std::string sep;
-  for (std::vector<std::string>::const_iterator it = content.begin();
-       it != content.end(); ++it) {
-    if (cmHasLiteralPrefix(it->c_str(), "-D")) {
-      defs += sep + it->substr(2);
+  for (std::string const& it : content) {
+    if (cmHasLiteralPrefix(it.c_str(), "-D")) {
+      defs += sep + it.substr(2);
     } else {
-      defs += sep + *it;
+      defs += sep + it;
     }
     sep = ";";
   }

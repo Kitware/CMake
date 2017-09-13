@@ -412,13 +412,13 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
     }
 
     // Concatenate the replacement for the match.
-    for (unsigned int i = 0; i < replacement.size(); ++i) {
-      if (replacement[i].number < 0) {
+    for (RegexReplacement const& i : replacement) {
+      if (i.number < 0) {
         // This is just a plain-text part of the replacement.
-        output += replacement[i].value;
+        output += i.value;
       } else {
         // Replace with part of the match.
-        int n = replacement[i].number;
+        int n = i.number;
         std::string::size_type start = re.start(n);
         std::string::size_type end = re.end(n);
         std::string::size_type len = input.length() - base;

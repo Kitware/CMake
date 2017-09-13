@@ -45,10 +45,9 @@ void cmCLocaleEnvironmentScope::SetEnv(std::string const& key,
 
 cmCLocaleEnvironmentScope::~cmCLocaleEnvironmentScope()
 {
-  for (backup_map_t::const_iterator i = this->EnvironmentBackup.begin();
-       i != this->EnvironmentBackup.end(); ++i) {
+  for (auto const& envb : this->EnvironmentBackup) {
     std::ostringstream tmp;
-    tmp << i->first << "=" << i->second;
+    tmp << envb.first << "=" << envb.second;
     cmSystemTools::PutEnv(tmp.str());
   }
 }

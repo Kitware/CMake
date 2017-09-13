@@ -104,9 +104,9 @@ bool cmFunctionHelperCommand::InvokeInitialPass(
 
   // Invoke all the functions that were collected in the block.
   // for each function
-  for (unsigned int c = 0; c < this->Functions.size(); ++c) {
+  for (cmListFileFunction const& func : this->Functions) {
     cmExecutionStatus status;
-    if (!this->Makefile->ExecuteCommand(this->Functions[c], status) ||
+    if (!this->Makefile->ExecuteCommand(func, status) ||
         status.GetNestedError()) {
       // The error message should have already included the call stack
       // so we do not need to report an error here.

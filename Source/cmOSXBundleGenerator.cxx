@@ -195,12 +195,11 @@ void cmOSXBundleGenerator::GenerateMacOSXContentStatements(
     return;
   }
 
-  for (std::vector<cmSourceFile const*>::const_iterator si = sources.begin();
-       si != sources.end(); ++si) {
+  for (cmSourceFile const* source : sources) {
     cmGeneratorTarget::SourceFileFlags tsFlags =
-      this->GT->GetTargetSourceFileFlags(*si);
+      this->GT->GetTargetSourceFileFlags(source);
     if (tsFlags.Type != cmGeneratorTarget::SourceFileTypeNormal) {
-      (*generator)(**si, tsFlags.MacFolder);
+      (*generator)(*source, tsFlags.MacFolder);
     }
   }
 }

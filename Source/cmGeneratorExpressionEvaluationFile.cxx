@@ -99,10 +99,9 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
   cmGlobalGenerator* gg = lg->GetGlobalGenerator();
   gg->GetEnabledLanguages(enabledLanguages);
 
-  for (std::vector<std::string>::const_iterator le = enabledLanguages.begin();
-       le != enabledLanguages.end(); ++le) {
+  for (std::string const& le : enabledLanguages) {
     std::string name = this->OutputFileExpr->Evaluate(
-      lg, config, false, nullptr, nullptr, nullptr, *le);
+      lg, config, false, nullptr, nullptr, nullptr, le);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(name);
     sf->SetProperty("GENERATED", "1");
 
@@ -161,11 +160,9 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
   cmGlobalGenerator* gg = lg->GetGlobalGenerator();
   gg->GetEnabledLanguages(enabledLanguages);
 
-  for (std::vector<std::string>::const_iterator le = enabledLanguages.begin();
-       le != enabledLanguages.end(); ++le) {
-    for (std::vector<std::string>::const_iterator li = allConfigs.begin();
-         li != allConfigs.end(); ++li) {
-      this->Generate(lg, *li, *le, inputExpression.get(), outputFiles, perm);
+  for (std::string const& le : enabledLanguages) {
+    for (std::string const& li : allConfigs) {
+      this->Generate(lg, li, le, inputExpression.get(), outputFiles, perm);
       if (cmSystemTools::GetFatalErrorOccured()) {
         return;
       }

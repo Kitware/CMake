@@ -81,9 +81,8 @@ void cmInstallFilesGenerator::GenerateScriptForConfig(
 {
   std::vector<std::string> files;
   cmGeneratorExpression ge;
-  for (std::vector<std::string>::const_iterator i = this->Files.begin();
-       i != this->Files.end(); ++i) {
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(*i);
+  for (std::string const& f : this->Files) {
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(f);
     cmSystemTools::ExpandListArgument(
       cge->Evaluate(this->LocalGenerator, config), files);
   }

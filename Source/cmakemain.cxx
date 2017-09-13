@@ -311,22 +311,20 @@ int do_cmake(int ac, char const* const* av)
   if (list_cached || list_all_cached) {
     std::cout << "-- Cache values" << std::endl;
     std::vector<std::string> keys = cm.GetState()->GetCacheEntryKeys();
-    for (std::vector<std::string>::const_iterator it = keys.begin();
-         it != keys.end(); ++it) {
-      cmStateEnums::CacheEntryType t = cm.GetState()->GetCacheEntryType(*it);
+    for (std::string const& k : keys) {
+      cmStateEnums::CacheEntryType t = cm.GetState()->GetCacheEntryType(k);
       if (t != cmStateEnums::INTERNAL && t != cmStateEnums::STATIC &&
           t != cmStateEnums::UNINITIALIZED) {
         const char* advancedProp =
-          cm.GetState()->GetCacheEntryProperty(*it, "ADVANCED");
+          cm.GetState()->GetCacheEntryProperty(k, "ADVANCED");
         if (list_all_cached || !advancedProp) {
           if (list_help) {
             std::cout << "// "
-                      << cm.GetState()->GetCacheEntryProperty(*it,
-                                                              "HELPSTRING")
+                      << cm.GetState()->GetCacheEntryProperty(k, "HELPSTRING")
                       << std::endl;
           }
-          std::cout << *it << ":" << cmState::CacheEntryTypeToString(t) << "="
-                    << cm.GetState()->GetCacheEntryValue(*it) << std::endl;
+          std::cout << k << ":" << cmState::CacheEntryTypeToString(t) << "="
+                    << cm.GetState()->GetCacheEntryValue(k) << std::endl;
           if (list_help) {
             std::cout << std::endl;
           }

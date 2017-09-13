@@ -66,7 +66,7 @@ template <class T>
 Json::Value fromStringList(const T& in)
 {
   Json::Value result = Json::arrayValue;
-  for (const std::string& i : in) {
+  for (std::string const& i : in) {
     result.append(i);
   }
   return result;
@@ -75,7 +75,7 @@ Json::Value fromStringList(const T& in)
 std::vector<std::string> toStringList(const Json::Value& in)
 {
   std::vector<std::string> result;
-  for (const auto& it : in) {
+  for (auto const& it : in) {
     result.push_back(it.asString());
   }
   return result;
@@ -89,19 +89,17 @@ void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
 {
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
   std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();
-  for (auto it = makefiles.begin(); it != makefiles.end(); ++it) {
-    const std::vector<std::string> listFiles = (*it)->GetListFiles();
+  for (cmMakefile const* mf : makefiles) {
+    for (std::string const& lf : mf->GetListFiles()) {
 
-    for (auto jt = listFiles.begin(); jt != listFiles.end(); ++jt) {
-
-      const std::string startOfFile = jt->substr(0, cmakeRootDir.size());
+      const std::string startOfFile = lf.substr(0, cmakeRootDir.size());
       const bool isInternal = (startOfFile == cmakeRootDir);
-      const bool isTemporary = !isInternal && (jt->find(buildDir + '/') == 0);
+      const bool isTemporary = !isInternal && (lf.find(buildDir + '/') == 0);
 
-      std::string toAdd = *jt;
+      std::string toAdd = lf;
       if (!sourceDir.empty()) {
         const std::string& relative =
-          cmSystemTools::RelativePath(sourceDir.c_str(), jt->c_str());
+          cmSystemTools::RelativePath(sourceDir.c_str(), lf.c_str());
         if (toAdd.size() > relative.size()) {
           toAdd = relative;
         }
@@ -501,14 +499,14 @@ cmServerResponse cmServerProtocol1::ProcessCache(
   if (keys.empty()) {
     keys = allKeys;
   } else {
-    for (const auto& i : keys) {
+    for (auto const& i : keys) {
       if (std::find(allKeys.begin(), allKeys.end(), i) == allKeys.end()) {
         return request.ReportError("Key \"" + i + "\" not found in cache.");
       }
     }
   }
   std::sort(keys.begin(), keys.end());
-  for (const auto& key : keys) {
+  for (auto const& key : keys) {
     Json::Value entry = Json::objectValue;
     entry[kKEY_KEY] = key;
     entry[kTYPE_KEY] =
@@ -517,7 +515,7 @@ cmServerResponse cmServerProtocol1::ProcessCache(
 
     Json::Value props = Json::objectValue;
     bool haveProperties = false;
-    for (const auto& prop : state->GetCacheEntryPropertyList(key)) {
+    for (auto const& prop : state->GetCacheEntryPropertyList(key)) {
       haveProperties = true;
       props[prop] = state->GetCacheEntryProperty(key, prop);
     }
@@ -604,7 +602,7 @@ bool LanguageData::operator==(const LanguageData& other) const
 void LanguageData::SetDefines(const std::set<std::string>& defines)
 {
   std::vector<std::string> result;
-  for (const auto& i : defines) {
+  for (std::string const& i : defines) {
     result.push_back(i);
   }
   std::sort(result.begin(), result.end());
@@ -621,11 +619,11 @@ struct hash<LanguageData>
     using std::hash;
     size_t result =
       hash<std::string>()(in.Language) ^ hash<std::string>()(in.Flags);
-    for (const auto& i : in.IncludePathList) {
+    for (auto const& i : in.IncludePathList) {
       result = result ^ (hash<std::string>()(i.first) ^
                          (i.second ? std::numeric_limits<size_t>::max() : 0));
     }
-    for (const auto& i : in.Defines) {
+    for (auto const& i : in.Defines) {
       result = result ^ hash<std::string>()(i);
     }
     result =
@@ -649,7 +647,7 @@ static Json::Value DumpSourceFileGroup(const LanguageData& data,
     }
     if (!data.IncludePathList.empty()) {
       Json::Value includes = Json::arrayValue;
-      for (const auto& i : data.IncludePathList) {
+      for (auto const& i : data.IncludePathList) {
         Json::Value tmp = Json::objectValue;
         tmp[kPATH_KEY] = i.first;
         if (i.second) {
@@ -667,7 +665,7 @@ static Json::Value DumpSourceFileGroup(const LanguageData& data,
   result[kIS_GENERATED_KEY] = data.IsGenerated;
 
   Json::Value sourcesValue = Json::arrayValue;
-  for (const auto& i : files) {
+  for (auto const& i : files) {
     const std::string relPath =
       cmSystemTools::RelativePath(baseDir.c_str(), i.c_str());
     sourcesValue.append(relPath.size() < i.size() ? relPath : i);
@@ -723,8 +721,8 @@ static Json::Value DumpSourceFilesList(
 
   const std::string baseDir = target->Makefile->GetCurrentSourceDirectory();
   Json::Value result = Json::arrayValue;
-  for (auto it = fileGroups.begin(); it != fileGroups.end(); ++it) {
-    Json::Value group = DumpSourceFileGroup(it->first, it->second, baseDir);
+  for (auto const& it : fileGroups) {
+    Json::Value group = DumpSourceFileGroup(it.first, it.second, baseDir);
     if (!group.isNull()) {
       result.append(group);
     }
@@ -756,7 +754,7 @@ static Json::Value DumpBacktrace(const cmListFileBacktrace& backtrace)
 static void DumpBacktraceRange(Json::Value& result, const std::string& type,
                                cmBacktraceRange range)
 {
-  for (const auto& bt : range) {
+  for (auto const& bt : range) {
     Json::Value obj = Json::objectValue;
     obj[kTYPE_KEY] = type;
     obj[kBACKTRACE_KEY] = DumpBacktrace(bt);
@@ -872,7 +870,7 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
   std::set<std::string> languages;
   target->GetLanguages(languages, config);
   std::map<std::string, LanguageData> languageDataMap;
-  for (const auto& lang : languages) {
+  for (std::string const& lang : languages) {
     LanguageData& ld = languageDataMap[lang];
     ld.Language = lang;
     lg->GetTargetCompileFlags(target, config, lang, ld.Flags);
@@ -881,7 +879,7 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
     ld.SetDefines(defines);
     std::vector<std::string> includePathList;
     lg->GetIncludeDirectories(includePathList, target, lang, config, true);
-    for (auto i : includePathList) {
+    for (std::string const& i : includePathList) {
       ld.IncludePathList.push_back(
         std::make_pair(i, target->IsSystemIncludeDirectory(i, config)));
     }
@@ -902,7 +900,7 @@ static Json::Value DumpTargetsList(
   Json::Value result = Json::arrayValue;
 
   std::vector<cmGeneratorTarget*> targetList;
-  for (const auto& lgIt : generators) {
+  for (auto const& lgIt : generators) {
     const auto& list = lgIt->GetGeneratorTargets();
     targetList.insert(targetList.end(), list.begin(), list.end());
   }
@@ -924,7 +922,7 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
 
   auto globalGen = cm->GetGlobalGenerator();
 
-  for (const auto& projectIt : globalGen->GetProjectMap()) {
+  for (auto const& projectIt : globalGen->GetProjectMap()) {
     Json::Value pObj = Json::objectValue;
     pObj[kNAME_KEY] = projectIt.first;
 
@@ -959,7 +957,7 @@ static Json::Value DumpConfigurationsList(const cmake* cm)
 {
   Json::Value result = Json::arrayValue;
 
-  for (const std::string& c : getConfigurations(cm)) {
+  for (std::string const& c : getConfigurations(cm)) {
     result.append(DumpConfiguration(cm, c));
   }
 
@@ -1022,12 +1020,12 @@ cmServerResponse cmServerProtocol1::ProcessConfigure(
     if (passedArgs.isString()) {
       cacheArgs.push_back(passedArgs.asString());
     } else if (passedArgs.isArray()) {
-      for (auto i = passedArgs.begin(); i != passedArgs.end(); ++i) {
-        if (!i->isString()) {
+      for (auto const& arg : passedArgs) {
+        if (!arg.isString()) {
           cacheArgumentsError = true;
           break;
         }
-        cacheArgs.push_back(i->asString());
+        cacheArgs.push_back(arg.asString());
       }
     } else {
       cacheArgumentsError = true;
@@ -1148,7 +1146,7 @@ cmServerResponse cmServerProtocol1::ProcessSetGlobalSettings(
     kWARN_UNINITIALIZED_KEY, kWARN_UNUSED_KEY, kWARN_UNUSED_CLI_KEY,
     kCHECK_SYSTEM_VARS_KEY
   };
-  for (const auto& i : boolValues) {
+  for (std::string const& i : boolValues) {
     if (!request.Data[i].isNull() && !request.Data[i].isBool()) {
       return request.ReportError("\"" + i +
                                  "\" must be unset or a bool value.");
@@ -1178,11 +1176,11 @@ cmServerResponse cmServerProtocol1::ProcessFileSystemWatchers(
   const cmFileMonitor* const fm = FileMonitor();
   Json::Value result = Json::objectValue;
   Json::Value files = Json::arrayValue;
-  for (const auto& f : fm->WatchedFiles()) {
+  for (auto const& f : fm->WatchedFiles()) {
     files.append(f);
   }
   Json::Value directories = Json::arrayValue;
-  for (const auto& d : fm->WatchedDirectories()) {
+  for (auto const& d : fm->WatchedDirectories()) {
     directories.append(d);
   }
   result[kWATCHED_FILES_KEY] = files;

@@ -297,10 +297,8 @@ bool cmCacheManager::SaveCache(const std::string& path)
   fout << "########################\n";
   fout << "\n";
 
-  for (std::map<std::string, CacheEntry>::const_iterator i =
-         this->Cache.begin();
-       i != this->Cache.end(); ++i) {
-    const CacheEntry& ce = (*i).second;
+  for (auto const& i : this->Cache) {
+    CacheEntry const& ce = i.second;
     cmStateEnums::CacheEntryType t = ce.Type;
     if (!ce.Initialized) {
       /*
@@ -315,7 +313,7 @@ bool cmCacheManager::SaveCache(const std::string& path)
       } else {
         cmCacheManager::OutputHelpString(fout, "Missing description");
       }
-      this->OutputKey(fout, i->first);
+      this->OutputKey(fout, i.first);
       fout << ":" << cmState::CacheEntryTypeToString(t) << "=";
       this->OutputValue(fout, ce.Value);
       fout << "\n\n";
@@ -462,11 +460,9 @@ void cmCacheManager::PrintCache(std::ostream& out) const
 {
   out << "=================================================" << std::endl;
   out << "CMakeCache Contents:" << std::endl;
-  for (std::map<std::string, CacheEntry>::const_iterator i =
-         this->Cache.begin();
-       i != this->Cache.end(); ++i) {
-    if ((*i).second.Type != cmStateEnums::INTERNAL) {
-      out << (*i).first << " = " << (*i).second.Value << std::endl;
+  for (auto const& i : this->Cache) {
+    if (i.second.Type != cmStateEnums::INTERNAL) {
+      out << i.first << " = " << i.second.Value << std::endl;
     }
   }
   out << "\n\n";
@@ -494,11 +490,10 @@ void cmCacheManager::AddCacheEntry(const std::string& key, const char* value,
       cmSystemTools::ExpandListArgument(e.Value, paths);
       const char* sep = "";
       e.Value = "";
-      for (std::vector<std::string>::iterator i = paths.begin();
-           i != paths.end(); ++i) {
-        cmSystemTools::ConvertToUnixSlashes(*i);
+      for (std::string& i : paths) {
+        cmSystemTools::ConvertToUnixSlashes(i);
         e.Value += sep;
-        e.Value += *i;
+        e.Value += i;
         sep = ";";
       }
     } else {

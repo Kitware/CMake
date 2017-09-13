@@ -75,16 +75,15 @@ cmFileLockResult cmFileLockPool::LockProcessScope(const std::string& filename,
 
 cmFileLockResult cmFileLockPool::Release(const std::string& filename)
 {
-  for (It i = this->FunctionScopes.begin(); i != this->FunctionScopes.end();
-       ++i) {
-    const cmFileLockResult result = (*i)->Release(filename);
+  for (auto& funcScope : this->FunctionScopes) {
+    const cmFileLockResult result = funcScope->Release(filename);
     if (!result.IsOk()) {
       return result;
     }
   }
 
-  for (It i = this->FileScopes.begin(); i != this->FileScopes.end(); ++i) {
-    const cmFileLockResult result = (*i)->Release(filename);
+  for (auto& fileScope : this->FileScopes) {
+    const cmFileLockResult result = fileScope->Release(filename);
     if (!result.IsOk()) {
       return result;
     }
@@ -95,16 +94,15 @@ cmFileLockResult cmFileLockPool::Release(const std::string& filename)
 
 bool cmFileLockPool::IsAlreadyLocked(const std::string& filename) const
 {
-  for (CIt i = this->FunctionScopes.begin(); i != this->FunctionScopes.end();
-       ++i) {
-    const bool result = (*i)->IsAlreadyLocked(filename);
+  for (auto const& funcScope : this->FunctionScopes) {
+    const bool result = funcScope->IsAlreadyLocked(filename);
     if (result) {
       return true;
     }
   }
 
-  for (CIt i = this->FileScopes.begin(); i != this->FileScopes.end(); ++i) {
-    const bool result = (*i)->IsAlreadyLocked(filename);
+  for (auto const& fileScope : this->FileScopes) {
+    const bool result = fileScope->IsAlreadyLocked(filename);
     if (result) {
       return true;
     }
@@ -138,9 +136,9 @@ cmFileLockResult cmFileLockPool::ScopePool::Lock(const std::string& filename,
 cmFileLockResult cmFileLockPool::ScopePool::Release(
   const std::string& filename)
 {
-  for (It i = this->Locks.begin(); i != this->Locks.end(); ++i) {
-    if ((*i)->IsLocked(filename)) {
-      return (*i)->Release();
+  for (auto& lock : this->Locks) {
+    if (lock->IsLocked(filename)) {
+      return lock->Release();
     }
   }
   return cmFileLockResult::MakeOk();
@@ -149,8 +147,8 @@ cmFileLockResult cmFileLockPool::ScopePool::Release(
 bool cmFileLockPool::ScopePool::IsAlreadyLocked(
   const std::string& filename) const
 {
-  for (CIt i = this->Locks.begin(); i != this->Locks.end(); ++i) {
-    if ((*i)->IsLocked(filename)) {
+  for (auto const& lock : this->Locks) {
+    if (lock->IsLocked(filename)) {
       return true;
     }
   }

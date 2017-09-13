@@ -504,8 +504,8 @@ public:
   typedef derived::value_type value_type;
   ~cmCPluginAPISourceFileMap()
   {
-    for (iterator i = this->begin(); i != this->end(); ++i) {
-      delete i->second;
+    for (auto const& i : *this) {
+      delete i.second;
     }
   }
 };
@@ -568,9 +568,8 @@ void* CCONV cmAddSource(void* arg, void* arg2)
   // Create the real cmSourceFile instance and copy over saved information.
   cmSourceFile* rsf = mf->GetOrCreateSource(osf->FullPath);
   rsf->GetProperties() = osf->Properties;
-  for (std::vector<std::string>::iterator i = osf->Depends.begin();
-       i != osf->Depends.end(); ++i) {
-    rsf->AddDepend(*i);
+  for (std::string const& d : osf->Depends) {
+    rsf->AddDepend(d);
   }
 
   // Create the proxy for the real source file.

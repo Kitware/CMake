@@ -292,9 +292,7 @@ std::string cmRST::ReplaceSubstitutions(std::string const& line)
 
 void cmRST::OutputMarkupLines(bool inlineMarkup)
 {
-  for (std::vector<std::string>::iterator i = this->MarkupLines.begin();
-       i != this->MarkupLines.end(); ++i) {
-    std::string line = *i;
+  for (auto line : this->MarkupLines) {
     if (!line.empty()) {
       line = " " + line;
     }
@@ -353,9 +351,7 @@ void cmRST::ProcessDirectiveReplace()
 void cmRST::ProcessDirectiveTocTree()
 {
   // Process documents referenced by toctree directive.
-  for (std::vector<std::string>::iterator i = this->MarkupLines.begin();
-       i != this->MarkupLines.end(); ++i) {
-    std::string const& line = *i;
+  for (std::string const& line : this->MarkupLines) {
     if (!line.empty() && line[0] != ':') {
       if (this->TocTreeLink.find(line)) {
         std::string const& link = this->TocTreeLink.match(1);

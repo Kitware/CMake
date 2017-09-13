@@ -1462,24 +1462,23 @@ private:
 // For visual studio 2005 and newer manifest files need to be embedded into
 // exe and dll's.  This code does that in such a way that incremental linking
 // still works.
-int cmcmd::VisualStudioLink(std::vector<std::string>& args, int type)
+int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type)
 {
   if (args.size() < 2) {
     return -1;
   }
   const bool verbose = cmSystemTools::HasEnv("VERBOSE");
   std::vector<std::string> expandedArgs;
-  for (std::vector<std::string>::iterator i = args.begin(); i != args.end();
-       ++i) {
+  for (std::string const& i : args) {
     // check for nmake temporary files
-    if ((*i)[0] == '@' && i->find("@CMakeFiles") != 0) {
-      cmsys::ifstream fin(i->substr(1).c_str());
+    if (i[0] == '@' && i.find("@CMakeFiles") != 0) {
+      cmsys::ifstream fin(i.substr(1).c_str());
       std::string line;
       while (cmSystemTools::GetLineFromStream(fin, line)) {
         cmSystemTools::ParseWindowsCommandLine(line.c_str(), expandedArgs);
       }
     } else {
-      expandedArgs.push_back(*i);
+      expandedArgs.push_back(i);
     }
   }
 

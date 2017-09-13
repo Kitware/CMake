@@ -547,10 +547,7 @@ cmELF::DynamicEntryList cmELFInternalImpl<Types>::GetDynamicEntries()
 
   // Copy into public array
   result.reserve(this->DynamicSectionEntries.size());
-  for (typename std::vector<ELF_Dyn>::iterator di =
-         this->DynamicSectionEntries.begin();
-       di != this->DynamicSectionEntries.end(); ++di) {
-    ELF_Dyn& dyn = *di;
+  for (ELF_Dyn& dyn : this->DynamicSectionEntries) {
     result.push_back(
       std::pair<unsigned long, unsigned long>(dyn.d_tag, dyn.d_un.d_val));
   }
@@ -565,12 +562,11 @@ std::vector<char> cmELFInternalImpl<Types>::EncodeDynamicEntries(
   std::vector<char> result;
   result.reserve(sizeof(ELF_Dyn) * entries.size());
 
-  for (cmELF::DynamicEntryList::const_iterator it = entries.begin();
-       it != entries.end(); it++) {
+  for (auto const& entry : entries) {
     // Store the entry in an ELF_Dyn, byteswap it, then serialize to chars
     ELF_Dyn dyn;
-    dyn.d_tag = static_cast<tagtype>(it->first);
-    dyn.d_un.d_val = static_cast<tagtype>(it->second);
+    dyn.d_tag = static_cast<tagtype>(entry.first);
+    dyn.d_un.d_val = static_cast<tagtype>(entry.second);
 
     if (this->NeedSwap) {
       ByteSwap(dyn);

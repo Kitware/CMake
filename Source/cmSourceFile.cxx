@@ -150,15 +150,13 @@ bool cmSourceFile::FindFullPath(std::string* error)
     if (this->TryFullPath(tryPath, "")) {
       return true;
     }
-    for (std::vector<std::string>::const_iterator ei = srcExts.begin();
-         ei != srcExts.end(); ++ei) {
-      if (this->TryFullPath(tryPath, *ei)) {
+    for (std::string const& ext : srcExts) {
+      if (this->TryFullPath(tryPath, ext)) {
         return true;
       }
     }
-    for (std::vector<std::string>::const_iterator ei = hdrExts.begin();
-         ei != hdrExts.end(); ++ei) {
-      if (this->TryFullPath(tryPath, *ei)) {
+    for (std::string const& ext : hdrExts) {
+      if (this->TryFullPath(tryPath, ext)) {
         return true;
       }
     }
@@ -171,13 +169,11 @@ bool cmSourceFile::FindFullPath(std::string* error)
   }
   missing += this->Location.GetName();
   e << "Cannot find source file:\n  " << missing << "\nTried extensions";
-  for (std::vector<std::string>::const_iterator ext = srcExts.begin();
-       ext != srcExts.end(); ++ext) {
-    e << " ." << *ext;
+  for (std::string const& srcExt : srcExts) {
+    e << " ." << srcExt;
   }
-  for (std::vector<std::string>::const_iterator ext = hdrExts.begin();
-       ext != hdrExts.end(); ++ext) {
-    e << " ." << *ext;
+  for (std::string const& ext : hdrExts) {
+    e << " ." << ext;
   }
   if (error) {
     *error = e.str();

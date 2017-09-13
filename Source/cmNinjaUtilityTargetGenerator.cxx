@@ -51,17 +51,15 @@ void cmNinjaUtilityTargetGenerator::Generate()
   bool uses_terminal = false;
 
   for (unsigned i = 0; i != 2; ++i) {
-    for (std::vector<cmCustomCommand>::const_iterator ci =
-           cmdLists[i]->begin();
-         ci != cmdLists[i]->end(); ++ci) {
-      cmCustomCommandGenerator ccg(*ci, this->GetConfigName(),
+    for (cmCustomCommand const& ci : *cmdLists[i]) {
+      cmCustomCommandGenerator ccg(ci, this->GetConfigName(),
                                    this->GetLocalGenerator());
       this->GetLocalGenerator()->AppendCustomCommandDeps(ccg, deps);
       this->GetLocalGenerator()->AppendCustomCommandLines(ccg, commands);
       std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
       std::transform(ccByproducts.begin(), ccByproducts.end(),
                      std::back_inserter(util_outputs), MapToNinjaPath());
-      if (ci->GetUsesTerminal()) {
+      if (ci.GetUsesTerminal()) {
         uses_terminal = true;
       }
     }
@@ -71,9 +69,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
   std::string config =
     this->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
   this->GetGeneratorTarget()->GetSourceFiles(sources, config);
-  for (std::vector<cmSourceFile*>::const_iterator source = sources.begin();
-       source != sources.end(); ++source) {
-    if (cmCustomCommand* cc = (*source)->GetCustomCommand()) {
+  for (cmSourceFile const* source : sources) {
+    if (cmCustomCommand const* cc = source->GetCustomCommand()) {
       cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
                                    this->GetLocalGenerator());
       this->GetLocalGenerator()->AddCustomCommandTarget(
@@ -132,10 +129,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
       return;
     }
 
-    for (cmNinjaDeps::const_iterator oi = util_outputs.begin(),
-                                     oe = util_outputs.end();
-         oi != oe; ++oi) {
-      this->GetGlobalGenerator()->SeenCustomCommandOutput(*oi);
+    for (std::string const& util_output : util_outputs) {
+      this->GetGlobalGenerator()->SeenCustomCommandOutput(util_output);
     }
 
     this->GetGlobalGenerator()->WriteCustomCommandBuild(

@@ -215,19 +215,16 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   if (cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
         this->GeneratorTarget->GetModuleDefinitionInfo(
           this->GetConfigName())) {
-    for (std::vector<cmSourceFile const*>::const_iterator i =
-           mdi->Sources.begin();
-         i != mdi->Sources.end(); ++i) {
-      result.push_back(this->ConvertToNinjaPath((*i)->GetFullPath()));
+    for (cmSourceFile const* src : mdi->Sources) {
+      result.push_back(this->ConvertToNinjaPath(src->GetFullPath()));
     }
   }
 
   // Add a dependency on user-specified manifest files, if any.
   std::vector<cmSourceFile const*> manifest_srcs;
   this->GeneratorTarget->GetManifests(manifest_srcs, this->ConfigName);
-  for (std::vector<cmSourceFile const*>::iterator mi = manifest_srcs.begin();
-       mi != manifest_srcs.end(); ++mi) {
-    result.push_back(this->ConvertToNinjaPath((*mi)->GetFullPath()));
+  for (cmSourceFile const* manifest_src : manifest_srcs) {
+    result.push_back(this->ConvertToNinjaPath(manifest_src->GetFullPath()));
   }
 
   // Add user-specified dependencies.
@@ -519,11 +516,10 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     std::vector<std::string> ppCmds;
     cmSystemTools::ExpandListArgument(ppCmd, ppCmds);
 
-    for (std::vector<std::string>::iterator i = ppCmds.begin();
-         i != ppCmds.end(); ++i) {
-      *i = launcher + *i;
+    for (std::string& i : ppCmds) {
+      i = launcher + i;
       rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
-                                                   *i, ppVars);
+                                                   i, ppVars);
     }
 
     // Run CMake dependency scanner on preprocessed output.
@@ -657,10 +653,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     if (clauncher && *clauncher) {
       std::vector<std::string> launcher_cmd;
       cmSystemTools::ExpandListArgument(clauncher, launcher_cmd, true);
-      for (std::vector<std::string>::iterator i = launcher_cmd.begin(),
-                                              e = launcher_cmd.end();
-           i != e; ++i) {
-        *i = this->LocalGenerator->EscapeForShell(*i);
+      for (std::string& i : launcher_cmd) {
+        i = this->LocalGenerator->EscapeForShell(i);
       }
       std::string const& run_launcher = cmJoin(launcher_cmd, " ") + " ";
       compileCmds.front().insert(0, run_launcher);
@@ -671,10 +665,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     compileCmds.front().insert(0, cldeps);
   }
 
-  for (std::vector<std::string>::iterator i = compileCmds.begin();
-       i != compileCmds.end(); ++i) {
-    *i = launcher + *i;
-    rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(), *i,
+  for (std::string& i : compileCmds) {
+    i = launcher + i;
+    rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(), i,
                                                  vars);
   }
 
@@ -705,10 +698,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   std::vector<cmSourceFile const*> customCommands;
   this->GeneratorTarget->GetCustomCommands(customCommands, config);
-  for (std::vector<cmSourceFile const*>::const_iterator si =
-         customCommands.begin();
-       si != customCommands.end(); ++si) {
-    cmCustomCommand const* cc = (*si)->GetCustomCommand();
+  for (cmSourceFile const* sf : customCommands) {
+    cmCustomCommand const* cc = sf->GetCustomCommand();
     this->GetLocalGenerator()->AddCustomCommandTarget(
       cc, this->GetGeneratorTarget());
     // Record the custom commands for this target. The container is used
@@ -725,10 +716,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
     extraSources, this->MacOSXContentGenerator);
   std::vector<cmSourceFile const*> externalObjects;
   this->GeneratorTarget->GetExternalObjects(externalObjects, config);
-  for (std::vector<cmSourceFile const*>::const_iterator si =
-         externalObjects.begin();
-       si != externalObjects.end(); ++si) {
-    this->Objects.push_back(this->GetSourceFilePath(*si));
+  for (cmSourceFile const* sf : externalObjects) {
+    this->Objects.push_back(this->GetSourceFilePath(sf));
   }
 
   cmNinjaDeps orderOnlyDeps;
@@ -740,10 +729,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
                        this->ExtraFiles.end());
 
   // Add order-only dependencies on custom command outputs.
-  for (std::vector<cmCustomCommand const*>::const_iterator cci =
-         this->CustomCommands.begin();
-       cci != this->CustomCommands.end(); ++cci) {
-    cmCustomCommand const* cc = *cci;
+  for (cmCustomCommand const* cc : this->CustomCommands) {
     cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
                                  this->GetLocalGenerator());
     const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
@@ -768,10 +754,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   }
   std::vector<cmSourceFile const*> objectSources;
   this->GeneratorTarget->GetObjectSources(objectSources, config);
-  for (std::vector<cmSourceFile const*>::const_iterator si =
-         objectSources.begin();
-       si != objectSources.end(); ++si) {
-    this->WriteObjectBuildStatement(*si);
+  for (cmSourceFile const* sf : objectSources) {
+    this->WriteObjectBuildStatement(sf);
   }
 
   if (!this->DDIFiles.empty()) {
@@ -848,10 +832,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   if (const char* objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
     std::vector<std::string> depList;
     cmSystemTools::ExpandListArgument(objectDeps, depList);
-    for (std::vector<std::string>::iterator odi = depList.begin();
-         odi != depList.end(); ++odi) {
-      if (cmSystemTools::FileIsFullPath(*odi)) {
-        *odi = cmSystemTools::CollapseFullPath(*odi);
+    for (std::string& odi : depList) {
+      if (cmSystemTools::FileIsFullPath(odi)) {
+        odi = cmSystemTools::CollapseFullPath(odi);
       }
     }
     std::transform(depList.begin(), depList.end(),
@@ -1019,19 +1002,17 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang)
   std::vector<std::string> includes;
   this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
                                               lang, this->GetConfigName());
-  for (std::vector<std::string>::iterator i = includes.begin();
-       i != includes.end(); ++i) {
+  for (std::string const& i : includes) {
     // Convert the include directories the same way we do for -I flags.
     // See upstream ninja issue 1251.
-    tdi_include_dirs.append(this->ConvertToNinjaPath(*i));
+    tdi_include_dirs.append(this->ConvertToNinjaPath(i));
   }
 
   Json::Value& tdi_linked_target_dirs = tdi["linked-target-dirs"] =
     Json::arrayValue;
   std::vector<std::string> linked = this->GetLinkedTargetDirectories();
-  for (std::vector<std::string>::iterator i = linked.begin();
-       i != linked.end(); ++i) {
-    tdi_linked_target_dirs.append(*i);
+  for (std::string const& l : linked) {
+    tdi_linked_target_dirs.append(l);
   }
 
   std::string const tdin = this->GetTargetDependInfoPath(lang);
@@ -1099,10 +1080,9 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->GetLocalGenerator()->CreateRulePlaceholderExpander());
 
-  for (std::vector<std::string>::iterator i = compileCmds.begin();
-       i != compileCmds.end(); ++i) {
+  for (std::string& i : compileCmds) {
     // no launcher for CMAKE_EXPORT_COMPILE_COMMANDS
-    rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(), *i,
+    rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(), i,
                                                  compileObjectVars);
   }
 

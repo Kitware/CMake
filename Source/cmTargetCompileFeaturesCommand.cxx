@@ -45,10 +45,9 @@ std::string cmTargetCompileFeaturesCommand::Join(
 bool cmTargetCompileFeaturesCommand::HandleDirectContent(
   cmTarget* tgt, const std::vector<std::string>& content, bool, bool)
 {
-  for (std::vector<std::string>::const_iterator it = content.begin();
-       it != content.end(); ++it) {
+  for (std::string const& it : content) {
     std::string error;
-    if (!this->Makefile->AddRequiredTargetFeature(tgt, *it, &error)) {
+    if (!this->Makefile->AddRequiredTargetFeature(tgt, it, &error)) {
       this->SetError(error);
       return false;
     }

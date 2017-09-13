@@ -61,11 +61,9 @@ bool cmCommandArgument::KeyMatches(const std::string& key) const
 void cmCommandArgument::ApplyOwnGroup()
 {
   if (this->Group != nullptr) {
-    for (std::vector<cmCommandArgument*>::const_iterator it =
-           this->Group->ContainedArguments.begin();
-         it != this->Group->ContainedArguments.end(); ++it) {
-      if (*it != this) {
-        this->ArgumentsBefore.insert(*it);
+    for (cmCommandArgument* cargs : this->Group->ContainedArguments) {
+      if (cargs != this) {
+        this->ArgumentsBefore.insert(cargs);
       }
     }
   }
@@ -180,19 +178,15 @@ void cmCADisabler::DoReset()
 
 void cmCommandArgumentGroup::Follows(const cmCommandArgument* arg)
 {
-  for (std::vector<cmCommandArgument*>::iterator it =
-         this->ContainedArguments.begin();
-       it != this->ContainedArguments.end(); ++it) {
-    (*it)->Follows(arg);
+  for (cmCommandArgument* ca : this->ContainedArguments) {
+    ca->Follows(arg);
   }
 }
 
 void cmCommandArgumentGroup::FollowsGroup(const cmCommandArgumentGroup* group)
 {
-  for (std::vector<cmCommandArgument*>::iterator it =
-         this->ContainedArguments.begin();
-       it != this->ContainedArguments.end(); ++it) {
-    (*it)->FollowsGroup(group);
+  for (cmCommandArgument* ca : this->ContainedArguments) {
+    ca->FollowsGroup(group);
   }
 }
 
@@ -203,37 +197,31 @@ void cmCommandArgumentsHelper::Parse(const std::vector<std::string>* args,
     return;
   }
 
-  for (std::vector<cmCommandArgument*>::iterator argIt =
-         this->Arguments.begin();
-       argIt != this->Arguments.end(); ++argIt) {
-    (*argIt)->ApplyOwnGroup();
-    (*argIt)->Reset();
+  for (cmCommandArgument* ca : this->Arguments) {
+    ca->ApplyOwnGroup();
+    ca->Reset();
   }
 
   cmCommandArgument* activeArgument = nullptr;
   const cmCommandArgument* previousArgument = nullptr;
-  for (std::vector<std::string>::const_iterator it = args->begin();
-       it != args->end(); ++it) {
-    for (std::vector<cmCommandArgument*>::iterator argIt =
-           this->Arguments.begin();
-         argIt != this->Arguments.end(); ++argIt) {
-      if ((*argIt)->KeyMatches(*it) &&
-          ((*argIt)->MayFollow(previousArgument))) {
-        activeArgument = *argIt;
+  for (std::string const& it : *args) {
+    for (cmCommandArgument* ca : this->Arguments) {
+      if (ca->KeyMatches(it) && (ca->MayFollow(previousArgument))) {
+        activeArgument = ca;
         activeArgument->Activate();
         break;
       }
     }
 
     if (activeArgument) {
-      bool argDone = activeArgument->Consume(*it);
+      bool argDone = activeArgument->Consume(it);
       previousArgument = activeArgument;
       if (argDone) {
         activeArgument = nullptr;
       }
     } else {
       if (unconsumedArgs != nullptr) {
-        unconsumedArgs->push_back(*it);
+        unconsumedArgs->push_back(it);
       }
     }
   }

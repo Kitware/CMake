@@ -16,12 +16,11 @@ bool cmEnableLanguageCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("called with incorrect number of arguments");
     return false;
   }
-  for (std::vector<std::string>::const_iterator it = args.begin();
-       it != args.end(); ++it) {
-    if ((*it) == "OPTIONAL") {
+  for (std::string const& it : args) {
+    if (it == "OPTIONAL") {
       optional = true;
     } else {
-      languages.push_back(*it);
+      languages.push_back(it);
     }
   }
 

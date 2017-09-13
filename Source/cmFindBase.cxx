@@ -280,10 +280,8 @@ void cmFindBase::FillUserHintsPath()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::Hints];
 
-  for (std::vector<std::string>::const_iterator p =
-         this->UserHintsArgs.begin();
-       p != this->UserHintsArgs.end(); ++p) {
-    paths.AddUserPath(*p);
+  for (std::string const& p : this->UserHintsArgs) {
+    paths.AddUserPath(p);
   }
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
@@ -292,10 +290,8 @@ void cmFindBase::FillUserGuessPath()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::Guess];
 
-  for (std::vector<std::string>::const_iterator p =
-         this->UserGuessArgs.begin();
-       p != this->UserGuessArgs.end(); ++p) {
-    paths.AddUserPath(*p);
+  for (std::string const& p : this->UserGuessArgs) {
+    paths.AddUserPath(p);
   }
   paths.AddSuffixes(this->SearchPathSuffixes);
 }

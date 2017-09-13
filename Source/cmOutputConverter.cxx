@@ -285,12 +285,11 @@ cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
   if (value && *value) {
     std::vector<std::string> fmt;
     cmSystemTools::ExpandListArgument(value, fmt);
-    for (std::vector<std::string>::iterator fi = fmt.begin(); fi != fmt.end();
-         ++fi) {
-      if (*fi == "FIXED") {
+    for (std::string const& fi : fmt) {
+      if (fi == "FIXED") {
         format = FortranFormatFixed;
       }
-      if (*fi == "FREE") {
+      if (fi == "FREE") {
         format = FortranFormatFree;
       }
     }

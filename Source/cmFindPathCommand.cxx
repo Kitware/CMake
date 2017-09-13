@@ -124,18 +124,15 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
 std::string cmFindPathCommand::FindNormalHeader()
 {
   std::string tryPath;
-  for (std::vector<std::string>::const_iterator ni = this->Names.begin();
-       ni != this->Names.end(); ++ni) {
-    for (std::vector<std::string>::const_iterator p =
-           this->SearchPaths.begin();
-         p != this->SearchPaths.end(); ++p) {
-      tryPath = *p;
-      tryPath += *ni;
+  for (std::string const& n : this->Names) {
+    for (std::string const& sp : this->SearchPaths) {
+      tryPath = sp;
+      tryPath += n;
       if (cmSystemTools::FileExists(tryPath.c_str())) {
         if (this->IncludeFileInPath) {
           return tryPath;
         }
-        return *p;
+        return sp;
       }
     }
   }
@@ -144,12 +141,9 @@ std::string cmFindPathCommand::FindNormalHeader()
 
 std::string cmFindPathCommand::FindFrameworkHeader()
 {
-  for (std::vector<std::string>::const_iterator ni = this->Names.begin();
-       ni != this->Names.end(); ++ni) {
-    for (std::vector<std::string>::const_iterator p =
-           this->SearchPaths.begin();
-         p != this->SearchPaths.end(); ++p) {
-      std::string fwPath = this->FindHeaderInFramework(*ni, *p);
+  for (std::string const& n : this->Names) {
+    for (std::string const& sp : this->SearchPaths) {
+      std::string fwPath = this->FindHeaderInFramework(n, sp);
       if (!fwPath.empty()) {
         return fwPath;
       }

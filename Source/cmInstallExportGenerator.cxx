@@ -3,7 +3,6 @@
 #include "cmInstallExportGenerator.h"
 
 #include <algorithm>
-#include <map>
 #include <sstream>
 #include <utility>
 
@@ -111,11 +110,9 @@ size_t cmInstallExportGenerator::GetMaxConfigLength() const
       len = this->ConfigurationName.size();
     }
   } else {
-    for (std::vector<std::string>::const_iterator ci =
-           this->ConfigurationTypes->begin();
-         ci != this->ConfigurationTypes->end(); ++ci) {
-      if (ci->size() > len) {
-        len = ci->size();
+    for (std::string const& c : *this->ConfigurationTypes) {
+      if (c.size() > len) {
+        len = c.size();
       }
     }
   }
@@ -153,10 +150,8 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
       this->EFGen->AddConfiguration("");
     }
   } else {
-    for (std::vector<std::string>::const_iterator ci =
-           this->ConfigurationTypes->begin();
-         ci != this->ConfigurationTypes->end(); ++ci) {
-      this->EFGen->AddConfiguration(*ci);
+    for (std::string const& c : *this->ConfigurationTypes) {
+      this->EFGen->AddConfiguration(c);
     }
   }
   this->EFGen->GenerateImportFile();
@@ -174,11 +169,9 @@ void cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
   // Now create a configuration-specific install rule for the import
   // file of each configuration.
   std::vector<std::string> files;
-  for (std::map<std::string, std::string>::const_iterator i =
-         this->EFGen->GetConfigImportFiles().begin();
-       i != this->EFGen->GetConfigImportFiles().end(); ++i) {
-    files.push_back(i->second);
-    std::string config_test = this->CreateConfigTest(i->first);
+  for (auto const& i : this->EFGen->GetConfigImportFiles()) {
+    files.push_back(i.second);
+    std::string config_test = this->CreateConfigTest(i.first);
     os << indent << "if(" << config_test << ")\n";
     this->AddInstallRule(os, this->Destination, cmInstallType_FILES, files,
                          false, this->FilePermissions.c_str(), nullptr,

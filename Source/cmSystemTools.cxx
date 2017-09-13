@@ -353,8 +353,8 @@ bool cmSystemTools::IsInternallyOn(const char* val)
     return false;
   }
 
-  for (std::string::iterator c = v.begin(); c != v.end(); c++) {
-    *c = static_cast<char>(toupper(*c));
+  for (char& c : v) {
+    c = static_cast<char>(toupper(c));
   }
   return v == "I_ON";
 }
@@ -378,8 +378,8 @@ bool cmSystemTools::IsOn(const char* val)
     onValues.insert("TRUE");
     onValues.insert("Y");
   }
-  for (std::string::iterator c = v.begin(); c != v.end(); c++) {
-    *c = static_cast<char>(toupper(*c));
+  for (char& c : v) {
+    c = static_cast<char>(toupper(c));
   }
   return (onValues.count(v) > 0);
 }
@@ -414,8 +414,8 @@ bool cmSystemTools::IsOff(const char* val)
   }
   // Try and avoid toupper().
   std::string v(val, len);
-  for (std::string::iterator c = v.begin(); c != v.end(); c++) {
-    *c = static_cast<char>(toupper(*c));
+  for (char& c : v) {
+    c = static_cast<char>(toupper(c));
   }
   return (offValues.count(v) > 0);
 }
@@ -650,9 +650,8 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      double timeout, Encoding encoding)
 {
   std::vector<const char*> argv;
-  for (std::vector<std::string>::const_iterator a = command.begin();
-       a != command.end(); ++a) {
-    argv.push_back(a->c_str());
+  for (std::string const& cmd : command) {
+    argv.push_back(cmd.c_str());
   }
   argv.push_back(nullptr);
 
@@ -814,11 +813,10 @@ bool cmSystemTools::DoesFileExistWithExtensions(
 {
   std::string hname;
 
-  for (std::vector<std::string>::const_iterator ext = headerExts.begin();
-       ext != headerExts.end(); ++ext) {
+  for (std::string const& headerExt : headerExts) {
     hname = name;
     hname += ".";
-    hname += *ext;
+    hname += headerExt;
     if (cmSystemTools::FileExists(hname.c_str())) {
       return true;
     }
@@ -1367,9 +1365,8 @@ std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
 
 void cmSystemTools::AppendEnv(std::vector<std::string> const& env)
 {
-  for (std::vector<std::string>::const_iterator eit = env.begin();
-       eit != env.end(); ++eit) {
-    cmSystemTools::PutEnv(*eit);
+  for (std::string const& eit : env) {
+    cmSystemTools::PutEnv(eit);
   }
 }
 
@@ -1382,10 +1379,7 @@ cmSystemTools::SaveRestoreEnvironment::~SaveRestoreEnvironment()
 {
   // First clear everything in the current environment:
   std::vector<std::string> currentEnv = GetEnvironmentVariables();
-  for (std::vector<std::string>::const_iterator eit = currentEnv.begin();
-       eit != currentEnv.end(); ++eit) {
-    std::string var(*eit);
-
+  for (std::string var : currentEnv) {
     std::string::size_type pos = var.find('=');
     if (pos != std::string::npos) {
       var = var.substr(0, pos);
@@ -1464,9 +1458,7 @@ bool cmSystemTools::CreateTar(const char* outFileName,
 
   a.SetMTime(mtime);
   a.SetVerbose(verbose);
-  for (std::vector<std::string>::const_iterator i = files.begin();
-       i != files.end(); ++i) {
-    std::string path = *i;
+  for (auto path : files) {
     if (cmSystemTools::FileIsFullPath(path.c_str())) {
       // Get the relative path to the file.
       path = cmSystemTools::RelativePath(cwd.c_str(), path.c_str());

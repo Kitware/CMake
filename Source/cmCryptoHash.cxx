@@ -103,10 +103,9 @@ std::string cmCryptoHash::ByteHashToString(
                                 '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
   std::string res;
-  for (std::vector<unsigned char>::const_iterator vit = hash.begin();
-       vit != hash.end(); ++vit) {
-    res.push_back(hex[(*vit) >> 4]);
-    res.push_back(hex[(*vit) & 0xF]);
+  for (unsigned char v : hash) {
+    res.push_back(hex[v >> 4]);
+    res.push_back(hex[v & 0xF]);
   }
   return res;
 }

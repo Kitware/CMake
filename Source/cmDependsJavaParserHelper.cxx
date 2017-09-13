@@ -40,10 +40,8 @@ void cmDependsJavaParserHelper::CurrentClass::AddFileNamesForPrinting(
   }
   rname += this->Name;
   files->push_back(rname);
-  std::vector<CurrentClass>::const_iterator it;
-  for (it = this->NestedClasses.begin(); it != this->NestedClasses.end();
-       ++it) {
-    it->AddFileNamesForPrinting(files, rname.c_str(), sep);
+  for (CurrentClass const& nc : this->NestedClasses) {
+    nc.AddFileNamesForPrinting(files, rname.c_str(), sep);
   }
 }
 
@@ -64,9 +62,8 @@ void cmDependsJavaParserHelper::AddClassFound(const char* sclass)
   if (!sclass) {
     return;
   }
-  std::vector<std::string>::iterator it;
-  for (it = this->ClassesFound.begin(); it != this->ClassesFound.end(); it++) {
-    if (*it == sclass) {
+  for (std::string const& cf : this->ClassesFound) {
+    if (cf == sclass) {
       return;
     }
   }
@@ -75,10 +72,8 @@ void cmDependsJavaParserHelper::AddClassFound(const char* sclass)
 
 void cmDependsJavaParserHelper::AddPackagesImport(const char* sclass)
 {
-  std::vector<std::string>::iterator it;
-  for (it = this->PackagesImport.begin(); it != this->PackagesImport.end();
-       it++) {
-    if (*it == sclass) {
+  for (std::string const& pi : this->PackagesImport) {
+    if (pi == sclass) {
       return;
     }
   }
@@ -208,10 +203,8 @@ void cmDependsJavaParserHelper::PrintClasses()
     std::cerr << "Error when parsing. No classes on class stack" << std::endl;
     abort();
   }
-  std::vector<std::string> files = this->GetFilesProduced();
-  std::vector<std::string>::iterator sit;
-  for (sit = files.begin(); sit != files.end(); ++sit) {
-    std::cout << "  " << *sit << ".class" << std::endl;
+  for (std::string const& f : this->GetFilesProduced()) {
+    std::cout << "  " << f << ".class" << std::endl;
   }
 }
 
@@ -219,10 +212,8 @@ std::vector<std::string> cmDependsJavaParserHelper::GetFilesProduced()
 {
   std::vector<std::string> files;
   CurrentClass const& toplevel = this->ClassStack.front();
-  std::vector<CurrentClass>::const_iterator it;
-  for (it = toplevel.NestedClasses.begin(); it != toplevel.NestedClasses.end();
-       ++it) {
-    it->AddFileNamesForPrinting(&files, nullptr, "$");
+  for (CurrentClass const& nc : toplevel.NestedClasses) {
+    nc.AddFileNamesForPrinting(&files, nullptr, "$");
   }
   return files;
 }
@@ -262,10 +253,8 @@ int cmDependsJavaParserHelper::ParseString(const char* str, int verb)
     std::cout << std::endl;
     std::cout << "Depends on:";
     if (!this->ClassesFound.empty()) {
-      std::vector<std::string>::iterator it;
-      for (it = this->ClassesFound.begin(); it != this->ClassesFound.end();
-           ++it) {
-        std::cout << " " << *it;
+      for (std::string const& cf : this->ClassesFound) {
+        std::cout << " " << cf;
       }
     }
     std::cout << std::endl;
@@ -282,9 +271,8 @@ int cmDependsJavaParserHelper::ParseString(const char* str, int verb)
 
 void cmDependsJavaParserHelper::CleanupParser()
 {
-  std::vector<char*>::iterator it;
-  for (it = this->Allocates.begin(); it != this->Allocates.end(); ++it) {
-    delete[] * it;
+  for (char* allocate : this->Allocates) {
+    delete[] allocate;
   }
   this->Allocates.erase(this->Allocates.begin(), this->Allocates.end());
 }

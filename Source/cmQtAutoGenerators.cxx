@@ -38,7 +38,7 @@ static const char* SettingsKeyRcc = "AM_RCC_SETTINGS_HASH";
 static std::string QuotedCommand(const std::vector<std::string>& command)
 {
   std::string res;
-  for (const std::string& item : command) {
+  for (std::string const& item : command) {
     if (!res.empty()) {
       res.push_back(' ');
     }
@@ -335,7 +335,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(
     {
       const std::vector<std::string> MocMacroNames =
         InfoGetList("AM_MOC_MACRO_NAMES");
-      for (const std::string& item : MocMacroNames) {
+      for (std::string const& item : MocMacroNames) {
         this->MocMacroFilters.emplace_back(
           item, ("[^a-zA-Z0-9_]" + item).append("[^a-zA-Z0-9_]"));
       }
@@ -628,7 +628,7 @@ void cmQtAutoGenerators::Init(cmMakefile* makefile)
   // Compose moc includes list
   {
     std::set<std::string> frameworkPaths;
-    for (const std::string& path : this->MocIncludePaths) {
+    for (std::string const& path : this->MocIncludePaths) {
       this->MocIncludes.push_back("-I" + path);
       // Extract framework path
       if (cmHasLiteralSuffix(path, ".framework/Headers")) {
@@ -641,7 +641,7 @@ void cmQtAutoGenerators::Init(cmMakefile* makefile)
       }
     }
     // Append framework includes
-    for (const std::string& path : frameworkPaths) {
+    for (std::string const& path : frameworkPaths) {
       this->MocIncludes.push_back("-F");
       this->MocIncludes.push_back(path);
     }
@@ -679,7 +679,7 @@ bool cmQtAutoGenerators::RunAutogen()
   std::set<std::string> uicHeaderFiles;
 
   // Parse sources
-  for (const std::string& src : this->Sources) {
+  for (std::string const& src : this->Sources) {
     // Parse source file for MOC/UIC
     if (!this->ParseSourceFile(src, mocsIncluded, mocDepends, uisIncluded,
                                this->MocRelaxedMode)) {
@@ -690,7 +690,7 @@ bool cmQtAutoGenerators::RunAutogen()
   }
 
   // Parse headers
-  for (const std::string& hdr : this->Headers) {
+  for (std::string const& hdr : this->Headers) {
     if (!this->MocSkip(hdr)) {
       mocHeaderFiles.insert(hdr);
     }
@@ -1155,7 +1155,7 @@ bool cmQtAutoGenerators::ParseHeaders(
   headerFiles.insert(mocHeaderFiles.begin(), mocHeaderFiles.end());
   headerFiles.insert(uicHeaderFiles.begin(), uicHeaderFiles.end());
 
-  for (const std::string& headerName : headerFiles) {
+  for (std::string const& headerName : headerFiles) {
     std::string contentText;
     if (ReadAll(contentText, headerName)) {
       // Parse header content for MOC
@@ -1220,7 +1220,7 @@ bool cmQtAutoGenerators::MocGenerateAll(
         cmd.insert(cmd.end(), this->MocIncludes.begin(),
                    this->MocIncludes.end());
         // Add definitions
-        for (const std::string& def : this->MocDefinitions) {
+        for (std::string const& def : this->MocDefinitions) {
           cmd.push_back("-D" + def);
         }
         // Add options
@@ -1254,10 +1254,8 @@ bool cmQtAutoGenerators::MocGenerateAll(
   }
 
   // Generate moc files that are included by source files.
-  for (std::map<std::string, std::string>::const_iterator it =
-         mocsIncluded.begin();
-       it != mocsIncluded.end(); ++it) {
-    if (!this->MocGenerateFile(it->first, it->second, mocDepends, true)) {
+  for (auto const& it : mocsIncluded) {
+    if (!this->MocGenerateFile(it.first, it.second, mocDepends, true)) {
       if (this->MocRunFailed) {
         return false;
       }
@@ -1266,10 +1264,8 @@ bool cmQtAutoGenerators::MocGenerateAll(
 
   // Generate moc files that are _not_ included by source files.
   bool mocCompFileGenerated = false;
-  for (std::map<std::string, std::string>::const_iterator it =
-         mocsNotIncluded.begin();
-       it != mocsNotIncluded.end(); ++it) {
-    if (this->MocGenerateFile(it->first, it->second, mocDepends, false)) {
+  for (auto const& it : mocsNotIncluded) {
+    if (this->MocGenerateFile(it.first, it.second, mocDepends, false)) {
       mocCompFileGenerated = true;
     } else {
       if (this->MocRunFailed) {
@@ -1288,10 +1284,8 @@ bool cmQtAutoGenerators::MocGenerateAll(
       ost << "enum some_compilers { need_more_than_nothing };\n";
     } else {
       // Valid content
-      for (std::map<std::string, std::string>::const_iterator it =
-             mocsNotIncluded.begin();
-           it != mocsNotIncluded.end(); ++it) {
-        ost << "#include \"" << it->second << "\"\n";
+      for (auto const& it : mocsNotIncluded) {
+        ost << "#include \"" << it.second << "\"\n";
       }
     }
     automocSource = ost.str();
@@ -1342,9 +1336,8 @@ bool cmQtAutoGenerators::MocGenerateFile(
       std::map<std::string, std::set<std::string>>::const_iterator dit =
         mocDepends.find(sourceFile);
       if (dit != mocDepends.end()) {
-        for (std::set<std::string>::const_iterator fit = dit->second.begin();
-             fit != dit->second.end(); ++fit) {
-          if (FileAbsentOrOlder(mocFileAbs, *fit)) {
+        for (std::string const& fit : dit->second) {
+          if (FileAbsentOrOlder(mocFileAbs, fit)) {
             generateMoc = true;
             break;
           }
@@ -1367,7 +1360,7 @@ bool cmQtAutoGenerators::MocGenerateFile(
       cmd.insert(cmd.end(), this->MocIncludes.begin(),
                  this->MocIncludes.end());
       // Add definitions
-      for (const std::string& def : this->MocDefinitions) {
+      for (std::string const& def : this->MocDefinitions) {
         cmd.push_back("-D" + def);
       }
       // Add options
@@ -1425,11 +1418,11 @@ bool cmQtAutoGenerators::UicFindIncludedFile(std::string& absFile,
     }
     // AUTOUIC search paths
     if (!this->UicSearchPaths.empty()) {
-      for (const std::string& sPath : this->UicSearchPaths) {
+      for (std::string const& sPath : this->UicSearchPaths) {
         testFiles.push_back((sPath + "/").append(searchFile));
       }
       if (!searchPath.empty()) {
-        for (const std::string& sPath : this->UicSearchPaths) {
+        for (std::string const& sPath : this->UicSearchPaths) {
           testFiles.push_back((sPath + "/").append(searchFileFull));
         }
       }
@@ -1437,7 +1430,7 @@ bool cmQtAutoGenerators::UicFindIncludedFile(std::string& absFile,
   }
 
   // Search for the .ui file!
-  for (const std::string& testFile : testFiles) {
+  for (std::string const& testFile : testFiles) {
     if (cmSystemTools::FileExists(testFile.c_str())) {
       absFile = cmSystemTools::GetRealPath(testFile);
       success = true;
@@ -1449,7 +1442,7 @@ bool cmQtAutoGenerators::UicFindIncludedFile(std::string& absFile,
   if (!success) {
     std::ostringstream ost;
     ost << "Could not find " << cmQtAutoGen::Quoted(searchFile) << " in\n";
-    for (const std::string& testFile : testFiles) {
+    for (std::string const& testFile : testFiles) {
       ost << "  " << cmQtAutoGen::Quoted(testFile) << "\n";
     }
     this->LogFileError(cmQtAutoGen::UIC, sourceFile, ost.str());
@@ -1471,14 +1464,12 @@ bool cmQtAutoGenerators::UicGenerateAll(
     // Collision lookup map
     std::map<std::string, std::string> testMap;
     // Compile maps
-    for (std::map<std::string, std::vector<std::string>>::const_iterator sit =
-           uisIncluded.begin();
-         sit != uisIncluded.end(); ++sit) {
-      const std::string& source(sit->first);
-      const std::vector<std::string>& sourceIncs(sit->second);
+    for (auto const& sit : uisIncluded) {
+      const std::string& source(sit.first);
+      const std::vector<std::string>& sourceIncs(sit.second);
       // insert new source/destination map
       std::map<std::string, std::string>& uiGenMap = sourceGenMap[source];
-      for (const std::string& inc : sourceIncs) {
+      for (std::string const& inc : sourceIncs) {
         // Remove ui_ from the begin filename by substr()
         const std::string uiBasePath = SubDirPrefix(inc);
         const std::string uiBaseName =
@@ -1512,8 +1503,8 @@ bool cmQtAutoGenerators::UicGenerateAll(
   }
 
   // generate ui files
-  for (const auto& srcItem : sourceGenMap) {
-    for (const auto& item : srcItem.second) {
+  for (auto const& srcItem : sourceGenMap) {
+    for (auto const& item : srcItem.second) {
       if (!this->UicGenerateFile(srcItem.first, item.first, item.second)) {
         if (this->UicRunFailed) {
           return false;
@@ -1599,7 +1590,7 @@ bool cmQtAutoGenerators::RccGenerateAll()
   }
 
   // Generate qrc files
-  for (const RccJob& rccJob : this->RccJobs) {
+  for (RccJob const& rccJob : this->RccJobs) {
     if (!this->RccGenerateFile(rccJob)) {
       if (this->RccRunFailed) {
         return false;
@@ -1653,7 +1644,7 @@ bool cmQtAutoGenerators::RccGenerateFile(const RccJob& rccJob)
       }
       // Test if any input file is newer than the build file
       if (files != nullptr) {
-        for (const std::string& file : *files) {
+        for (std::string const& file : *files) {
           if (FileAbsentOrOlder(rccFileAbs, file)) {
             generateRcc = true;
             break;
@@ -1831,7 +1822,7 @@ void cmQtAutoGenerators::LogNameCollisionError(
     }
   }
   // Append collision list
-  for (const auto& item : collisions) {
+  for (auto const& item : collisions) {
     emsg += "  ";
     emsg += item.first;
     emsg += " -> ";
@@ -2003,7 +1994,7 @@ bool cmQtAutoGenerators::RunCommand(const std::vector<std::string>& command,
 bool cmQtAutoGenerators::FindHeader(std::string& header,
                                     const std::string& testBasePath) const
 {
-  for (const std::string& ext : this->HeaderExtensions) {
+  for (std::string const& ext : this->HeaderExtensions) {
     std::string testFilePath(testBasePath);
     testFilePath.push_back('.');
     testFilePath += ext;
@@ -2022,7 +2013,7 @@ std::string cmQtAutoGenerators::MocFindHeader(
   // Search in vicinity of the source
   if (!this->FindHeader(header, sourcePath + includeBase)) {
     // Search in include directories
-    for (const std::string& path : this->MocIncludePaths) {
+    for (std::string const& path : this->MocIncludePaths) {
       std::string fullPath = path;
       fullPath.push_back('/');
       fullPath += includeBase;
@@ -2054,7 +2045,7 @@ bool cmQtAutoGenerators::MocFindIncludedFile(
   }
   // Search in include directories
   if (!success) {
-    for (const std::string& path : this->MocIncludePaths) {
+    for (std::string const& path : this->MocIncludePaths) {
       std::string fullPath = path;
       fullPath.push_back('/');
       fullPath += includeString;
