@@ -719,7 +719,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   const std::string qtMajorVersion = GetQtMajorVersion(target);
   const std::string rccCommand = RccGetExecutable(target, qtMajorVersion);
   const std::vector<std::string> suffixes = GetConfigurationSuffixes(makefile);
-  std::vector<std::string> autogenDepends;
+  std::vector<std::string> autogenDependFiles;
+  std::vector<std::string> autogenDependTargets;
   std::vector<std::string> autogenProvides;
 
   // Remove build directories on cleanup
@@ -810,18 +811,16 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 #endif
 
   // Initialize autogen target dependencies
-  if (const char* deps = target->GetProperty("AUTOGEN_TARGET_DEPENDS")) {
-    cmSystemTools::ExpandListArgument(deps, autogenDepends);
-  }
-  // Add link library targets to the autogen dependencies
-  {
-    const cmTarget::LinkLibraryVectorType& libVec =
-      target->Target->GetOriginalLinkLibraries();
-    for (cmTarget::LinkLibraryVectorType::const_iterator it = libVec.begin();
-         it != libVec.end(); ++it) {
-      const std::string& libName = it->first;
-      if (makefile->FindTargetToUse(libName) != CM_NULLPTR) {
-        autogenDepends.push_back(libName);
+  if (const char* extraDeps = target->GetProperty("AUTOGEN_TARGET_DEPENDS")) {
+    std::vector<std::string> deps;
+    cmSystemTools::ExpandListArgument(extraDeps, deps);
+    for (std::vector<std::string>::const_iterator itC = deps.begin(),
+                                                  itE = deps.end();
+         itC != itE; ++itC) {
+      if (makefile->FindTargetToUse(*itC) != CM_NULLPTR) {
+        autogenDependTargets.push_back(*itC);
+      } else {
+        autogenDependFiles.push_back(*itC);
       }
     }
   }
@@ -845,7 +844,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
             if (PropertyEnabled(sf, "GENERATED")) {
               if ((mocEnabled && !PropertyEnabled(sf, "SKIP_AUTOMOC")) ||
                   (uicEnabled && !PropertyEnabled(sf, "SKIP_AUTOUIC"))) {
-                autogenDepends.push_back(
+                autogenDependFiles.push_back(
                   cmsys::SystemTools::GetRealPath(sf->GetFullPath()));
 #if defined(_WIN32) && !defined(__CYGWIN__)
                 // Cannot use PRE_BUILD with generated files
@@ -890,7 +889,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 
           if (PropertyEnabled(sf, "GENERATED")) {
             // Add generated qrc file to the dependencies
-            autogenDepends.push_back(absFile);
+            autogenDependFiles.push_back(absFile);
           } else {
             // Run cmake again when .qrc file changes
             makefile->AddCMakeDependFile(absFile);
@@ -898,7 +897,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
             // Add the qrc input files to the dependencies
             std::string error;
             if (!cmQtAutoGeneratorCommon::RccListInputs(
-                  qtMajorVersion, rccCommand, absFile, autogenDepends,
+                  qtMajorVersion, rccCommand, absFile, autogenDependFiles,
                   &error)) {
               cmSystemTools::Error(error.c_str());
             }
@@ -916,13 +915,9 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   if (usePRE_BUILD) {
-    // If the autogen target depends on an other target don't use PRE_BUILD
-    for (std::vector<std::string>::iterator it = autogenDepends.begin();
-         it != autogenDepends.end(); ++it) {
-      if (makefile->FindTargetToUse(*it) != CM_NULLPTR) {
-        usePRE_BUILD = false;
-        break;
-      }
+    // We can't use pre-build if we depend on additional files
+    if (!autogenDependFiles.empty()) {
+      usePRE_BUILD = false;
     }
   }
   if (usePRE_BUILD) {
@@ -930,22 +925,62 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     // rejection in cmMakefile::AddCustomCommandToTarget because we know
     // PRE_BUILD will work for an OBJECT_LIBRARY in this specific case.
     std::vector<std::string> no_output;
-    cmCustomCommand cc(makefile, no_output, autogenProvides, autogenDepends,
+    std::vector<std::string> no_depends;
+    cmCustomCommand cc(makefile, no_output, autogenProvides, no_depends,
                        commandLines, autogenComment.c_str(),
                        workingDirectory.c_str());
     cc.SetEscapeOldStyle(false);
     cc.SetEscapeAllowMakeVars(true);
     target->Target->AddPreBuildCommand(cc);
+
+    // Add additional target dependencies to the origin target
+    for (std::vector<std::string>::const_iterator
+           itC = autogenDependTargets.begin(),
+           itE = autogenDependTargets.end();
+         itC != itE; ++itC) {
+      target->Target->AddUtility(*itC);
+    }
   } else
 #endif
   {
     cmTarget* autogenTarget = makefile->AddUtilityCommand(
       autogenTargetName, true, workingDirectory.c_str(),
-      /*byproducts=*/autogenProvides, autogenDepends, commandLines, false,
+      /*byproducts=*/autogenProvides, autogenDependFiles, commandLines, false,
       autogenComment.c_str());
 
     cmGeneratorTarget* gt = new cmGeneratorTarget(autogenTarget, lg);
     lg->AddGeneratorTarget(gt);
+
+    // Add origin link library targets to the autogen target dependencies
+    {
+      const cmTarget::LinkLibraryVectorType& libVec =
+        target->Target->GetOriginalLinkLibraries();
+      for (cmTarget::LinkLibraryVectorType::const_iterator
+             itC = libVec.begin(),
+             itE = libVec.end();
+           itC != itE; ++itC) {
+        const std::string& libName = itC->first;
+        if (makefile->FindTargetToUse(libName) != CM_NULLPTR) {
+          autogenDependTargets.push_back(libName);
+        }
+      }
+    }
+    // Add origin utility targets to the autogen target dependencies
+    {
+      const std::set<std::string>& utils = target->Target->GetUtilities();
+      for (std::set<std::string>::const_iterator itC = utils.begin(),
+                                                 itE = utils.end();
+           itC != itE; ++itC) {
+        autogenDependTargets.push_back(*itC);
+      }
+    }
+    // Add additional target dependencies to the autogen target
+    for (std::vector<std::string>::const_iterator
+           itC = autogenDependTargets.begin(),
+           itE = autogenDependTargets.end();
+         itC != itE; ++itC) {
+      autogenTarget->AddUtility(*itC);
+    }
 
     // Set target folder
     const char* autogenFolder =
