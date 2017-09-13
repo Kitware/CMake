@@ -830,6 +830,12 @@ rm -f "${cmake_bootstrap_dir}/cmake_bootstrap.log"
 rm -f "${cmake_bootstrap_dir}/cmConfigure.h${_tmp}"
 rm -f "${cmake_bootstrap_dir}/cmVersionConfig.h${_tmp}"
 
+# If building in-source, remove any cmConfigure.h that may
+# have been created by a previous run of the bootstrap cmake.
+if [ -n "${cmake_in_source_build}" ]; then
+  rm -f "${cmake_source_dir}/Source/cmConfigure.h"
+fi
+
 # If exist compiler flags, set them
 cmake_c_flags=${CFLAGS}
 cmake_cxx_flags=${CXXFLAGS}
