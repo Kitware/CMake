@@ -354,10 +354,16 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
   std::string guid = this->GetGUID(name);
   for (std::vector<std::string>::const_iterator i = configs.begin();
        i != configs.end(); ++i) {
-    const char* dstConfig = target.GetProperty("MAP_IMPORTED_CONFIG_" +
-                                               cmSystemTools::UpperCase(*i));
-    if (dstConfig == CM_NULLPTR) {
-      dstConfig = i->c_str();
+    std::vector<std::string> mapConfig;
+    const char* dstConfig = i->c_str();
+    if (target.GetProperty("EXTERNAL_MSPROJECT")) {
+      if (const char* m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
+                                             cmSystemTools::UpperCase(*i))) {
+        cmSystemTools::ExpandListArgument(m, mapConfig);
+        if (!mapConfig.empty()) {
+          dstConfig = mapConfig[0].c_str();
+        }
+      }
     }
     fout << "\t\t{" << guid << "}." << *i << "|" << this->GetPlatformName()
          << ".ActiveCfg = " << dstConfig << "|"
