@@ -98,8 +98,8 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     set(OMP_FLAG_Flang "-fopenmp")
     set(OMP_FLAG_SunPro "-xopenmp")
     set(OMP_FLAG_XL "-qsmp=omp")
-    # Cray compiles with OpenMP automatically
-    set(OMP_FLAG_Cray " ")
+    # Cray compiler activate OpenMP with -h omp, which is enabled by default.
+    set(OMP_FLAG_Cray " " "-h omp")
 
     # If we know the correct flags, use those
     if(DEFINED OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID})
@@ -286,6 +286,8 @@ endfunction()
 
 macro(_OPENMP_SET_VERSION_BY_SPEC_DATE LANG)
   set(OpenMP_SPEC_DATE_MAP
+    # Preview versions
+    "201611=5.0" # OpenMP 5.0 preview 1
     # Combined versions, 2.5 onwards
     "201511=4.5"
     "201307=4.0"
