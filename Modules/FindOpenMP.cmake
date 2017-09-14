@@ -16,6 +16,19 @@
 # Variables
 # ^^^^^^^^^
 #
+# The module exposes the components ``C``, ``CXX``, and ``Fortran``.
+# Each of these controls the various languages to search OpenMP support for.
+#
+# Depending on the enabled components the following variables will be set:
+#
+# ``OpenMP_FOUND``
+#   Variable indicating that OpenMP flags for all requested languages have been found.
+#   If no components are specified, this is true if OpenMP settings for all enabled languages
+#   were detected.
+# ``OpenMP_VERSION``
+#   Minimal version of the OpenMP standard detected among the requested languages,
+#   or all enabled languages if no components were specified.
+#
 # This module will set the following variables per language in your
 # project, where ``<lang>`` is one of C, CXX, or Fortran:
 #
@@ -60,16 +73,6 @@
 # The specification date is formatted as given in the OpenMP standard:
 # ``yyyymm`` where ``yyyy`` and ``mm`` represents the year and month of
 # the OpenMP specification implemented by the ``<lang>`` compiler.
-#
-# Backward Compatibility
-# ^^^^^^^^^^^^^^^^^^^^^^
-#
-# For backward compatibility with older versions of FindOpenMP, these
-# variables are set, but deprecated::
-#
-#   OpenMP_FOUND
-#
-# In new projects, please use the ``OpenMP_<lang>_XXX`` equivalents.
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
@@ -375,9 +378,15 @@ if(CMAKE_Fortran_COMPILER_LOADED)
   endif()
 endif()
 
-set(OPENMP_FOUND TRUE)
+if(NOT OpenMP_FIND_COMPONENTS)
+  set(OpenMP_FINDLIST C CXX Fortran)
+else()
+  set(OpenMP_FINDLIST ${OpenMP_FIND_COMPONENTS})
+endif()
 
-foreach(LANG IN ITEMS C CXX Fortran)
+unset(_OpenMP_MIN_VERSION)
+
+foreach(LANG IN LISTS OpenMP_FINDLIST)
   if(CMAKE_${LANG}_COMPILER_LOADED)
     if (NOT OpenMP_${LANG}_SPEC_DATE)
       _OPENMP_GET_SPEC_DATE("${LANG}" OpenMP_${LANG}_SPEC_DATE_INTERNAL)
@@ -408,6 +417,11 @@ foreach(LANG IN ITEMS C CXX Fortran)
     )
 
     if(OpenMP_${LANG}_FOUND)
+      if(DEFINED OpenMP_${LANG}_VERSION)
+        if(NOT _OpenMP_MIN_VERSION OR _OpenMP_MIN_VERSION VERSION_GREATER OpenMP_${LANG}_VERSION)
+          set(_OpenMP_MIN_VERSION OpenMP_${LANG}_VERSION)
+        endif()
+      endif()
       set(OpenMP_${LANG}_LIBRARIES "")
       foreach(_OPENMP_IMPLICIT_LIB IN LISTS OpenMP_${LANG}_LIB_NAMES)
         list(APPEND OpenMP_${LANG}_LIBRARIES "${OpenMP_${_OPENMP_IMPLICIT_LIB}_LIBRARY}")
@@ -426,13 +440,23 @@ foreach(LANG IN ITEMS C CXX Fortran)
         set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
           INTERFACE_LINK_LIBRARIES "${OpenMP_${LANG}_LIBRARIES}")
       endif()
-    else()
-      set(OPENMP_FOUND FALSE)
     endif()
   endif()
 endforeach()
 
-set(OpenMP_FOUND ${OPENMP_FOUND})
+unset(_OpenMP_REQ_VARS)
+foreach(LANG IN ITEMS C CXX Fortran)
+  if((NOT OpenMP_FIND_COMPONENTS AND CMAKE_${LANG}_COMPILER_LOADED) OR LANG IN_LIST OpenMP_FIND_COMPONENTS)
+    list(APPEND _OpenMP_REQ_VARS "OpenMP_${LANG}_FOUND")
+  endif()
+endforeach()
+
+find_package_handle_standard_args(OpenMP
+    REQUIRED_VARS ${_OpenMP_REQ_VARS}
+    VERSION_VAR ${_OpenMP_MIN_VERSION}
+    HANDLE_COMPONENTS)
+
+set(OPENMP_FOUND ${OpenMP_FOUND})
 
 if(CMAKE_Fortran_COMPILER_LOADED AND OpenMP_Fortran_FOUND)
   if(NOT DEFINED OpenMP_Fortran_HAVE_OMPLIB_MODULE)
