@@ -603,6 +603,56 @@ std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
   return args;
 }
 
+bool cmSystemTools::SplitProgramFromArgs(std::string const& command,
+                                         std::string& program,
+                                         std::string& args)
+{
+  const char* c = command.c_str();
+
+  // Skip leading whitespace.
+  while (isspace(static_cast<unsigned char>(*c))) {
+    ++c;
+  }
+
+  // Parse one command-line element up to an unquoted space.
+  bool in_escape = false;
+  bool in_double = false;
+  bool in_single = false;
+  for (; *c; ++c) {
+    if (in_single) {
+      if (*c == '\'') {
+        in_single = false;
+      } else {
+        program += *c;
+      }
+    } else if (in_escape) {
+      in_escape = false;
+      program += *c;
+    } else if (*c == '\\') {
+      in_escape = true;
+    } else if (in_double) {
+      if (*c == '"') {
+        in_double = false;
+      } else {
+        program += *c;
+      }
+    } else if (*c == '"') {
+      in_double = true;
+    } else if (*c == '\'') {
+      in_single = true;
+    } else if (isspace(static_cast<unsigned char>(*c))) {
+      break;
+    } else {
+      program += *c;
+    }
+  }
+
+  // The remainder of the command line holds unparsed arguments.
+  args = c;
+
+  return !in_single && !in_escape && !in_double;
+}
+
 size_t cmSystemTools::CalculateCommandLineLengthLimit()
 {
   size_t sz =
