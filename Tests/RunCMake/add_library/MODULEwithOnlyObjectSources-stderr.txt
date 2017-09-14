@@ -1,0 +1,1 @@
+^You have called ADD_LIBRARY for library TestModuleLibWithoutSources without any source files. This typically indicates a problem with your CMakeLists.txt file$

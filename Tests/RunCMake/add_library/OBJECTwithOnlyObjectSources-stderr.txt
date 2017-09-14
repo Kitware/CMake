@@ -1,0 +1,17 @@
+^You have called ADD_LIBRARY for library TestObjectLibWithoutSources without any source files. This typically indicates a problem with your CMakeLists.txt file
+CMake Error at OBJECTwithOnlyObjectSources.cmake:[0-9]+ \(add_library\):
+  OBJECT library \"TestObjectLibWithoutSources\" contains:
+
+    [^
+]*test(\.cpp)?\.o(bj)?
+
+  but may contain only sources that compile, header files, and other files
+  that would not affect linking of a normal library.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at OBJECTwithOnlyObjectSources.cmake:[0-9]+ \(add_library\):
+  Only executables and non-OBJECT libraries may reference target objects.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

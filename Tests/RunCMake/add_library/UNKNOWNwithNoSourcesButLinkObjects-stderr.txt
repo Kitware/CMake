@@ -1,0 +1,5 @@
+^CMake Error at UNKNOWNwithNoSourcesButLinkObjects.cmake:[0-9]+ \(target_link_libraries\):
+  Cannot specify link libraries for target \"TestUnknownLibWithoutSources\"
+  which is not built by this project.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$
