@@ -2,7 +2,7 @@
 enable_language(CXX)
 
 
-add_executable(test-exe IMPORTED)
+add_executable(test-exe IMPORTED GLOBAL)
 add_executable(alias-test-exe ALIAS test-exe)
 
 if(TARGET alias-test-exe)
@@ -24,7 +24,7 @@ else()
 endif()
 
 
-add_library(test-lib SHARED IMPORTED)
+add_library(test-lib SHARED IMPORTED GLOBAL)
 add_library(alias-test-lib ALIAS test-lib)
 
 if(TARGET alias-test-lib)

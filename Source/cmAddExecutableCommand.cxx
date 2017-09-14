@@ -140,8 +140,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
     if (!aliasedTarget) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" does not already "
-                          "exist.";
+        << aliasedName << "\" does not already exist.";
       this->SetError(e.str());
       return false;
     }
@@ -149,15 +148,15 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
     if (type != cmStateEnums::EXECUTABLE) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" is not an "
-                          "executable.";
+        << aliasedName << "\" is not an executable.";
       this->SetError(e.str());
       return false;
     }
-    if (aliasedTarget->IsImported()) {
+    if (aliasedTarget->IsImported() &&
+        !aliasedTarget->IsImportedGloballyVisible()) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" is IMPORTED.";
+        << aliasedName << "\" is imported but not globally visible.";
       this->SetError(e.str());
       return false;
     }
