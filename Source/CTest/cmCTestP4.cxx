@@ -332,9 +332,8 @@ void cmCTestP4::SetP4Options(std::vector<char const*>& CommandOptions)
   }
 
   CommandOptions.clear();
-  for (std::vector<std::string>::iterator i = P4Options.begin();
-       i != P4Options.end(); ++i) {
-    CommandOptions.push_back(i->c_str());
+  for (std::string const& o : P4Options) {
+    CommandOptions.push_back(o.c_str());
   }
 }
 
@@ -465,9 +464,8 @@ bool cmCTestP4::UpdateCustom(const std::string& custom)
   cmSystemTools::ExpandListArgument(custom, p4_custom_command, true);
 
   std::vector<char const*> p4_custom;
-  for (std::vector<std::string>::const_iterator i = p4_custom_command.begin();
-       i != p4_custom_command.end(); ++i) {
-    p4_custom.push_back(i->c_str());
+  for (std::string const& i : p4_custom_command) {
+    p4_custom.push_back(i.c_str());
   }
   p4_custom.push_back(nullptr);
 
@@ -502,9 +500,8 @@ bool cmCTestP4::UpdateImpl()
     opts = this->CTest->GetCTestConfiguration("P4UpdateOptions");
   }
   std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
-  for (std::vector<std::string>::const_iterator ai = args.begin();
-       ai != args.end(); ++ai) {
-    p4_sync.push_back(ai->c_str());
+  for (std::string const& arg : args) {
+    p4_sync.push_back(arg.c_str());
   }
 
   std::string source = this->SourceDirectory + "/...";

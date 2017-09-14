@@ -97,12 +97,11 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   // bad one so that CAPTURE_CMAKE_ERROR can override setting the
   // global error state
   bool foundBadArgument = false;
-  for (unsigned int i = 0; i < args.size(); ++i) {
+  for (std::string const& arg : args) {
     // Check this argument.
-    if (!this->CheckArgumentKeyword(args[i]) &&
-        !this->CheckArgumentValue(args[i])) {
+    if (!this->CheckArgumentKeyword(arg) && !this->CheckArgumentValue(arg)) {
       std::ostringstream e;
-      e << "called with unknown argument \"" << args[i] << "\".";
+      e << "called with unknown argument \"" << arg << "\".";
       this->SetError(e.str());
       foundBadArgument = true;
     }

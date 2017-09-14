@@ -188,10 +188,12 @@ protected:
   virtual void GenerateTestCommand(std::vector<std::string>& args, int test);
   int ExecuteCommands(std::vector<std::string>& vec);
 
-  void WriteTestResultHeader(cmXMLWriter& xml, cmCTestTestResult* result);
-  void WriteTestResultFooter(cmXMLWriter& xml, cmCTestTestResult* result);
+  void WriteTestResultHeader(cmXMLWriter& xml,
+                             cmCTestTestResult const& result);
+  void WriteTestResultFooter(cmXMLWriter& xml,
+                             cmCTestTestResult const& result);
   // Write attached test files into the xml
-  void AttachFiles(cmXMLWriter& xml, cmCTestTestResult* result);
+  void AttachFiles(cmXMLWriter& xml, cmCTestTestResult& result);
 
   //! Clean test output to specified length
   bool CleanTestOutput(std::string& output, size_t length);
@@ -269,7 +271,7 @@ private:
    */
   std::string FindTheExecutable(const char* exe);
 
-  const char* GetTestStatus(const cmCTestTestResult*);
+  const char* GetTestStatus(cmCTestTestResult const&);
   void ExpandTestsToRunInformation(size_t numPossibleTests);
   void ExpandTestsToRunInformationForRerunFailed();
 

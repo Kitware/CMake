@@ -79,11 +79,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       cmakeConfigureCommand += cmSystemTools::GetCMakeCommand();
       cmakeConfigureCommand += "\"";
 
-      std::vector<std::string>::const_iterator it;
-      std::string option;
-      for (it = options.begin(); it != options.end(); ++it) {
-        option = *it;
-
+      for (std::string const& option : options) {
         cmakeConfigureCommand += " \"";
         cmakeConfigureCommand += option;
         cmakeConfigureCommand += "\"";

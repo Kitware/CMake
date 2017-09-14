@@ -71,8 +71,8 @@ protected:
 
           // Check if this is an absolute path that falls within our
           // source or binary directories.
-          for (size_t i = 0; i < FilePaths.size(); i++) {
-            if (filename.find(FilePaths[i]) == 0) {
+          for (std::string const& filePath : FilePaths) {
+            if (filename.find(filePath) == 0) {
               this->CurFileName = filename;
               break;
             }
@@ -81,8 +81,8 @@ protected:
           if (this->CurFileName == "") {
             // Check if this is a path that is relative to our source or
             // binary directories.
-            for (size_t i = 0; i < FilePaths.size(); i++) {
-              finalpath = FilePaths[i] + "/" + filename;
+            for (std::string const& filePath : FilePaths) {
+              finalpath = filePath + "/" + filename;
               if (cmSystemTools::FileExists(finalpath.c_str())) {
                 this->CurFileName = finalpath;
                 break;

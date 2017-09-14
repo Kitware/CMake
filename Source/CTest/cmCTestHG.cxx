@@ -145,9 +145,8 @@ bool cmCTestHG::UpdateImpl()
     opts = this->CTest->GetCTestConfiguration("HGUpdateOptions");
   }
   std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
-  for (std::vector<std::string>::const_iterator ai = args.begin();
-       ai != args.end(); ++ai) {
-    hg_update.push_back(ai->c_str());
+  for (std::string const& arg : args) {
+    hg_update.push_back(arg.c_str());
   }
 
   // Sentinel argument.
@@ -217,25 +216,25 @@ private:
       this->Rev.Log.assign(&this->CData[0], this->CData.size());
     } else if (!this->CData.empty() && name == "files") {
       std::vector<std::string> paths = this->SplitCData();
-      for (unsigned int i = 0; i < paths.size(); ++i) {
+      for (std::string const& path : paths) {
         // Updated by default, will be modified using file_adds and
         // file_dels.
         this->CurChange = Change('U');
-        this->CurChange.Path = paths[i];
+        this->CurChange.Path = path;
         this->Changes.push_back(this->CurChange);
       }
     } else if (!this->CData.empty() && name == "file_adds") {
       std::string added_paths(this->CData.begin(), this->CData.end());
-      for (unsigned int i = 0; i < this->Changes.size(); ++i) {
-        if (added_paths.find(this->Changes[i].Path) != std::string::npos) {
-          this->Changes[i].Action = 'A';
+      for (Change& change : this->Changes) {
+        if (added_paths.find(change.Path) != std::string::npos) {
+          change.Action = 'A';
         }
       }
     } else if (!this->CData.empty() && name == "file_dels") {
       std::string added_paths(this->CData.begin(), this->CData.end());
-      for (unsigned int i = 0; i < this->Changes.size(); ++i) {
-        if (added_paths.find(this->Changes[i].Path) != std::string::npos) {
-          this->Changes[i].Action = 'D';
+      for (Change& change : this->Changes) {
+        if (added_paths.find(change.Path) != std::string::npos) {
+          change.Action = 'D';
         }
       }
     }
@@ -246,9 +245,9 @@ private:
   {
     std::vector<std::string> output;
     std::string currPath;
-    for (unsigned int i = 0; i < this->CData.size(); ++i) {
-      if (this->CData[i] != ' ') {
-        currPath += this->CData[i];
+    for (char i : this->CData) {
+      if (i != ' ') {
+        currPath += i;
       } else {
         output.push_back(currPath);
         currPath = "";

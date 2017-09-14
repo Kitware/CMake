@@ -45,7 +45,6 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
                                          std::string& cmakeOutString,
                                          cmake* cm)
 {
-  unsigned int k;
   std::vector<std::string> args;
   args.push_back(cmSystemTools::GetCMakeCommand());
   args.push_back(this->SourceDir);
@@ -80,8 +79,8 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     args.push_back(btype);
   }
 
-  for (k = 0; k < this->BuildOptions.size(); ++k) {
-    args.push_back(this->BuildOptions[k]);
+  for (std::string const& opt : this->BuildOptions) {
+    args.push_back(opt);
   }
   if (cm->Run(args) != 0) {
     out << "Error: cmake execution failed\n";
@@ -219,12 +218,10 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   }
 
   // do the build
-  std::vector<std::string>::iterator tarIt;
   if (this->BuildTargets.empty()) {
     this->BuildTargets.push_back("");
   }
-  for (tarIt = this->BuildTargets.begin(); tarIt != this->BuildTargets.end();
-       ++tarIt) {
+  for (std::string const& tar : this->BuildTargets) {
     double remainingTime = 0;
     if (this->Timeout > 0) {
       remainingTime = this->Timeout - cmSystemTools::GetTime() + clock_start;
@@ -249,7 +246,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       config = "Debug";
     }
     int retVal = cm.GetGlobalGenerator()->Build(
-      this->SourceDir, this->BinaryDir, this->BuildProject, *tarIt, output,
+      this->SourceDir, this->BinaryDir, this->BuildProject, tar, output,
       this->BuildMakeProgram, config, !this->BuildNoClean, false, false,
       remainingTime);
     out << output;
@@ -292,8 +289,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
         << this->TestCommand << "\n";
     out << "tried to find it in these places:\n";
     out << fullPath << "\n";
-    for (unsigned int i = 0; i < failed.size(); ++i) {
-      out << failed[i] << "\n";
+    for (std::string const& fail : failed) {
+      out << fail << "\n";
     }
     if (outstring) {
       *outstring = out.str();
@@ -305,8 +302,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   std::vector<const char*> testCommand;
   testCommand.push_back(fullPath.c_str());
-  for (size_t k = 0; k < this->TestCommandArgs.size(); ++k) {
-    testCommand.push_back(this->TestCommandArgs[k].c_str());
+  for (std::string const& testCommandArg : this->TestCommandArgs) {
+    testCommand.push_back(testCommandArg.c_str());
   }
   testCommand.push_back(nullptr);
   std::string outs;
@@ -317,8 +314,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     cmSystemTools::ChangeDirectory(this->BuildRunDir);
   }
   out << "Running test command: \"" << fullPath << "\"";
-  for (size_t k = 0; k < this->TestCommandArgs.size(); ++k) {
-    out << " \"" << this->TestCommandArgs[k] << "\"";
+  for (std::string const& testCommandArg : this->TestCommandArgs) {
+    out << " \"" << testCommandArg << "\"";
   }
   out << "\n";
 

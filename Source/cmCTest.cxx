@@ -330,10 +330,8 @@ cmCTest::cmCTest()
   this->TestingHandlers["submit"] = new cmCTestSubmitHandler;
   this->TestingHandlers["upload"] = new cmCTestUploadHandler;
 
-  cmCTest::t_TestingHandlers::iterator it;
-  for (it = this->TestingHandlers.begin(); it != this->TestingHandlers.end();
-       ++it) {
-    it->second->SetCTestInstance(this);
+  for (auto& handler : this->TestingHandlers) {
+    handler.second->SetCTestInstance(this);
   }
 
   // Make sure we can capture the build tool output.
@@ -979,9 +977,11 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
 
   output = "";
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Run command:");
-  std::vector<const char*>::iterator ait;
-  for (ait = argv.begin(); ait != argv.end() && *ait; ++ait) {
-    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, " \"" << *ait << "\"");
+  for (char const* arg : argv) {
+    if (!arg) {
+      break;
+    }
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, " \"" << arg << "\"");
   }
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, std::endl);
 
@@ -1365,12 +1365,10 @@ void cmCTest::AddSiteProperties(cmXMLWriter& xml)
 
 void cmCTest::GenerateSubprojectsOutput(cmXMLWriter& xml)
 {
-  std::vector<std::string> subprojects = this->GetLabelsForSubprojects();
-  std::vector<std::string>::const_iterator i;
-  for (i = subprojects.begin(); i != subprojects.end(); ++i) {
+  for (std::string const& subproj : this->GetLabelsForSubprojects()) {
     xml.StartElement("Subproject");
-    xml.Attribute("name", *i);
-    xml.Element("Label", *i);
+    xml.Attribute("name", subproj);
+    xml.Element("Label", subproj);
     xml.EndElement(); // Subproject
   }
 }
@@ -1403,7 +1401,6 @@ int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
 {
   std::string buildname =
     cmCTest::SafeBuildIdField(this->GetCTestConfiguration("BuildName"));
-  cmCTest::VectorOfStrings::const_iterator it;
   xml.StartDocument();
   xml.ProcessingInstruction("xml-stylesheet",
                             "type=\"text/xsl\" "
@@ -1419,15 +1416,15 @@ int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
   this->AddSiteProperties(xml);
   xml.StartElement("Notes");
 
-  for (it = files.begin(); it != files.end(); it++) {
-    cmCTestLog(this, OUTPUT, "\tAdd file: " << *it << std::endl);
+  for (cmsys::String const& file : files) {
+    cmCTestLog(this, OUTPUT, "\tAdd file: " << file << std::endl);
     std::string note_time = this->CurrentTime();
     xml.StartElement("Note");
-    xml.Attribute("Name", *it);
+    xml.Attribute("Name", file);
     xml.Element("Time", cmSystemTools::GetTime());
     xml.Element("DateTime", note_time);
     xml.StartElement("Text");
-    cmsys::ifstream ifs(it->c_str());
+    cmsys::ifstream ifs(file.c_str());
     if (ifs) {
       std::string line;
       while (cmSystemTools::GetLineFromStream(ifs, line)) {
@@ -1436,9 +1433,9 @@ int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
       }
       ifs.close();
     } else {
-      xml.Content("Problem reading file: " + *it + "\n");
+      xml.Content("Problem reading file: " + file + "\n");
       cmCTestLog(this, ERROR_MESSAGE, "Problem reading file: "
-                   << *it << " while creating notes" << std::endl);
+                   << file << " while creating notes" << std::endl);
     }
     xml.EndElement(); // Text
     xml.EndElement(); // Note
@@ -1520,14 +1517,13 @@ std::string cmCTest::Base64EncodeFile(std::string const& file)
 
 bool cmCTest::SubmitExtraFiles(const VectorOfStrings& files)
 {
-  VectorOfStrings::const_iterator it;
-  for (it = files.begin(); it != files.end(); ++it) {
-    if (!cmSystemTools::FileExists(it->c_str())) {
+  for (cmsys::String const& file : files) {
+    if (!cmSystemTools::FileExists(file.c_str())) {
       cmCTestLog(this, ERROR_MESSAGE, "Cannot find extra file: "
-                   << *it << " to submit." << std::endl;);
+                   << file << " to submit." << std::endl;);
       return false;
     }
-    this->AddSubmitFile(PartExtraFiles, it->c_str());
+    this->AddSubmitFile(PartExtraFiles, file.c_str());
   }
   return true;
 }
@@ -2101,10 +2097,8 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     // pass the argument to all the handlers as well, but i may no longer be
     // set to what it was originally so I'm not sure this is working as
     // intended
-    cmCTest::t_TestingHandlers::iterator it;
-    for (it = this->TestingHandlers.begin(); it != this->TestingHandlers.end();
-         ++it) {
-      if (!it->second->ProcessCommandLineArguments(arg, i, args)) {
+    for (auto& handler : this->TestingHandlers) {
+      if (!handler.second->ProcessCommandLineArguments(arg, i, args)) {
         cmCTestLog(this, ERROR_MESSAGE,
                    "Problem parsing command line arguments within a handler");
         return 0;
@@ -2201,11 +2195,9 @@ int cmCTest::ExecuteTests()
     if (this->ExtraVerbose) {
       cmCTestLog(this, OUTPUT, "* Extra verbosity turned on" << std::endl);
     }
-    cmCTest::t_TestingHandlers::iterator it;
-    for (it = this->TestingHandlers.begin(); it != this->TestingHandlers.end();
-         ++it) {
-      it->second->SetVerbose(this->ExtraVerbose);
-      it->second->SetSubmitIndex(this->SubmitIndex);
+    for (auto& handler : this->TestingHandlers) {
+      handler.second->SetVerbose(this->ExtraVerbose);
+      handler.second->SetSubmitIndex(this->SubmitIndex);
     }
     this->GetHandler("script")->SetVerbose(this->Verbose);
     res = this->GetHandler("script")->ProcessHandler();
@@ -2219,11 +2211,9 @@ int cmCTest::ExecuteTests()
     // and Verbose is always on in this case
     this->ExtraVerbose = this->Verbose;
     this->Verbose = true;
-    cmCTest::t_TestingHandlers::iterator it;
-    for (it = this->TestingHandlers.begin(); it != this->TestingHandlers.end();
-         ++it) {
-      it->second->SetVerbose(this->Verbose);
-      it->second->SetSubmitIndex(this->SubmitIndex);
+    for (auto& handler : this->TestingHandlers) {
+      handler.second->SetVerbose(this->Verbose);
+      handler.second->SetSubmitIndex(this->SubmitIndex);
     }
     std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
     if (!this->Initialize(cwd.c_str(), nullptr)) {
@@ -2324,13 +2314,11 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
   }
 
   if (found) {
-    cmCTest::t_TestingHandlers::iterator it;
-    for (it = this->TestingHandlers.begin(); it != this->TestingHandlers.end();
-         ++it) {
-      cmCTestLog(this, DEBUG,
-                 "* Read custom CTest configuration vectors for handler: "
-                   << it->first << " (" << it->second << ")" << std::endl);
-      it->second->PopulateCustomVectors(mf);
+    for (auto& handler : this->TestingHandlers) {
+      cmCTestLog(
+        this, DEBUG, "* Read custom CTest configuration vectors for handler: "
+          << handler.first << " (" << handler.second << ")" << std::endl);
+      handler.second->PopulateCustomVectors(mf);
     }
   }
 

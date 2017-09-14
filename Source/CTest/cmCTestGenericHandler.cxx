@@ -57,10 +57,8 @@ void cmCTestGenericHandler::Initialize()
   this->AppendXML = false;
   this->TestLoad = 0;
   this->Options.clear();
-  t_StringToString::iterator it;
-  for (it = this->PersistentOptions.begin();
-       it != this->PersistentOptions.end(); ++it) {
-    this->Options[it->first] = it->second;
+  for (auto const& po : this->PersistentOptions) {
+    this->Options[po.first] = po.second;
   }
 }
 
