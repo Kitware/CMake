@@ -134,7 +134,7 @@ private:
                              std::string const& contentText);
 
   bool MocGenerateAll();
-  bool MocGenerateFile(const MocJobAuto& job, bool* generated = nullptr);
+  bool MocGenerateFile(const MocJobAuto& mocJob, bool* generated = nullptr);
 
   // -- Uic
   bool UicEnabled() const { return !this->UicExecutable.empty(); }

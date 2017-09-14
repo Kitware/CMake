@@ -100,16 +100,26 @@ static bool ReadFile(std::string& content, std::string const& filename,
 }
 
 /**
- * @brief Tests if buildFile doesn't exist or is older than sourceFile
- * @return True if buildFile doesn't exist or is older than sourceFile
+ * @brief Tests if buildFile is older than sourceFile
+ * @return True if buildFile  is older than sourceFile.
+ *         False may indicate an error.
  */
-static bool FileAbsentOrOlder(std::string const& buildFile,
-                              std::string const& sourceFile)
+static bool FileIsOlderThan(std::string const& buildFile,
+                            std::string const& sourceFile,
+                            std::string* error = nullptr)
 {
   int result = 0;
-  bool success =
-    cmSystemTools::FileTimeCompare(buildFile, sourceFile, &result);
-  return (!success || (result < 0));
+  if (cmSystemTools::FileTimeCompare(buildFile, sourceFile, &result)) {
+    return (result < 0);
+  }
+  if (error != nullptr) {
+    error->append(
+      "File modification time comparison failed for the files\n  ");
+    error->append(cmQtAutoGen::Quoted(buildFile));
+    error->append("\nand\n  ");
+    error->append(cmQtAutoGen::Quoted(sourceFile));
+  }
+  return false;
 }
 
 static bool ListContains(std::vector<std::string> const& list,
@@ -1401,6 +1411,14 @@ bool cmQtAutoGenerators::MocGenerateAll()
         cmSystemTools::Touch(this->MocPredefsFileAbs, false);
       }
     }
+
+    // Add moc_predefs.h to moc file dependecies
+    for (auto const& item : this->MocJobsIncluded) {
+      item->Depends.insert(this->MocPredefsFileAbs);
+    }
+    for (auto const& item : this->MocJobsAuto) {
+      item->Depends.insert(this->MocPredefsFileAbs);
+    }
   }
 
   // Generate moc files that are included by source files.
@@ -1458,36 +1476,92 @@ bool cmQtAutoGenerators::MocGenerateAll()
 /**
  * @return True on success
  */
-bool cmQtAutoGenerators::MocGenerateFile(const MocJobAuto& job,
+bool cmQtAutoGenerators::MocGenerateFile(const MocJobAuto& mocJob,
                                          bool* generated)
 {
   bool success = true;
 
   std::string const mocFileAbs = cmSystemTools::CollapseCombinedPath(
-    this->AutogenBuildDir, job.BuildFileRel);
+    this->AutogenBuildDir, mocJob.BuildFileRel);
 
-  bool generateMoc = (this->MocSettingsChanged || this->MocPredefsChanged);
-  if (!generateMoc) {
-    // Test if the source file is newer that the build file
-    generateMoc = FileAbsentOrOlder(mocFileAbs, job.SourceFile);
+  bool generate = false;
+  std::string generateReason;
+  if (!generate && !cmSystemTools::FileExists(mocFileAbs.c_str())) {
+    if (this->Verbose) {
+      generateReason = "Generating ";
+      generateReason += cmQtAutoGen::Quoted(mocFileAbs);
+      generateReason += " from its source file ";
+      generateReason += cmQtAutoGen::Quoted(mocJob.SourceFile);
+      generateReason += " because it doesn't exist";
+    }
+    generate = true;
   }
-  if (!generateMoc && !this->MocPredefsFileAbs.empty()) {
-    // Check if moc_predefs is newer
-    generateMoc = FileAbsentOrOlder(mocFileAbs, this->MocPredefsFileAbs);
+  if (!generate && this->MocSettingsChanged) {
+    if (this->Verbose) {
+      generateReason = "Generating ";
+      generateReason += cmQtAutoGen::Quoted(mocFileAbs);
+      generateReason += " from ";
+      generateReason += cmQtAutoGen::Quoted(mocJob.SourceFile);
+      generateReason += " because the MOC settings changed";
+    }
+    generate = true;
   }
-  if (!generateMoc) {
+  if (!generate && this->MocPredefsChanged) {
+    if (this->Verbose) {
+      generateReason = "Generating ";
+      generateReason += cmQtAutoGen::Quoted(mocFileAbs);
+      generateReason += " from ";
+      generateReason += cmQtAutoGen::Quoted(mocJob.SourceFile);
+      generateReason += " because moc_predefs.h changed";
+    }
+    generate = true;
+  }
+  if (!generate) {
+    std::string error;
+    if (FileIsOlderThan(mocFileAbs, mocJob.SourceFile, &error)) {
+      if (this->Verbose) {
+        generateReason = "Generating ";
+        generateReason += cmQtAutoGen::Quoted(mocFileAbs);
+        generateReason += " because it's older than its source file ";
+        generateReason += cmQtAutoGen::Quoted(mocJob.SourceFile);
+      }
+      generate = true;
+    } else {
+      if (!error.empty()) {
+        this->LogError(cmQtAutoGen::MOC, error);
+        success = false;
+      }
+    }
+  }
+  if (success && !generate) {
     // Test if a dependency file is newer
-    for (std::string const& depFile : job.Depends) {
-      if (FileAbsentOrOlder(mocFileAbs, depFile)) {
-        generateMoc = true;
+    std::string error;
+    for (std::string const& depFile : mocJob.Depends) {
+      if (FileIsOlderThan(mocFileAbs, depFile, &error)) {
+        if (this->Verbose) {
+          generateReason = "Generating ";
+          generateReason += cmQtAutoGen::Quoted(mocFileAbs);
+          generateReason += " from ";
+          generateReason += cmQtAutoGen::Quoted(mocJob.SourceFile);
+          generateReason += " because it is older than ";
+          generateReason += cmQtAutoGen::Quoted(depFile);
+        }
+        generate = true;
+        break;
+      }
+      if (!error.empty()) {
+        this->LogError(cmQtAutoGen::MOC, error);
+        success = false;
         break;
       }
     }
   }
-  if (generateMoc) {
+
+  if (generate) {
     // Log
     if (this->Verbose) {
-      this->LogBold("Generating MOC source " + job.BuildFileRel);
+      this->LogBold("Generating MOC source " + mocJob.BuildFileRel);
+      this->LogInfo(cmQtAutoGen::MOC, generateReason);
     }
 
     // Make sure the parent directory exists
@@ -1505,7 +1579,7 @@ bool cmQtAutoGenerators::MocGenerateFile(const MocJobAuto& job,
       }
       cmd.push_back("-o");
       cmd.push_back(mocFileAbs);
-      cmd.push_back(job.SourceFile);
+      cmd.push_back(mocJob.SourceFile);
 
       // Execute moc command
       std::string output;
@@ -1518,7 +1592,7 @@ bool cmQtAutoGenerators::MocGenerateFile(const MocJobAuto& job,
         // Moc command failed
         {
           std::string emsg = "moc failed for\n  ";
-          emsg += cmQtAutoGen::Quoted(job.SourceFile);
+          emsg += cmQtAutoGen::Quoted(mocJob.SourceFile);
           this->LogCommandError(cmQtAutoGen::MOC, emsg, cmd, output);
         }
         cmSystemTools::RemoveFile(mocFileAbs);
@@ -1732,15 +1806,50 @@ bool cmQtAutoGenerators::UicGenerateFile(const UicJob& uicJob)
   std::string const uicFileAbs = cmSystemTools::CollapseCombinedPath(
     this->AutogenBuildDir, uicJob.BuildFileRel);
 
-  bool generateUic = this->UicSettingsChanged;
-  if (!generateUic) {
-    // Test if the source file is newer that the build file
-    generateUic = FileAbsentOrOlder(uicFileAbs, uicJob.SourceFile);
+  bool generate = false;
+  std::string generateReason;
+  if (!generate && !cmSystemTools::FileExists(uicFileAbs.c_str())) {
+    if (this->Verbose) {
+      generateReason = "Generating ";
+      generateReason += cmQtAutoGen::Quoted(uicFileAbs);
+      generateReason += " from its source file ";
+      generateReason += cmQtAutoGen::Quoted(uicJob.SourceFile);
+      generateReason += " because it doesn't exist";
+    }
+    generate = true;
   }
-  if (generateUic) {
+  if (!generate && this->UicSettingsChanged) {
+    if (this->Verbose) {
+      generateReason = "Generating ";
+      generateReason += cmQtAutoGen::Quoted(uicFileAbs);
+      generateReason += " from ";
+      generateReason += cmQtAutoGen::Quoted(uicJob.SourceFile);
+      generateReason += " because the UIC settings changed";
+    }
+    generate = true;
+  }
+  if (!generate) {
+    std::string error;
+    if (FileIsOlderThan(uicFileAbs, uicJob.SourceFile, &error)) {
+      if (this->Verbose) {
+        generateReason = "Generating ";
+        generateReason += cmQtAutoGen::Quoted(uicFileAbs);
+        generateReason += " because it's older than its source file ";
+        generateReason += cmQtAutoGen::Quoted(uicJob.SourceFile);
+      }
+      generate = true;
+    } else {
+      if (!error.empty()) {
+        this->LogError(cmQtAutoGen::UIC, error);
+        success = false;
+      }
+    }
+  }
+  if (generate) {
     // Log
     if (this->Verbose) {
       this->LogBold("Generating UIC header " + uicJob.BuildFileRel);
+      this->LogInfo(cmQtAutoGen::UIC, generateReason);
     }
 
     // Make sure the parent directory exists
@@ -1821,42 +1930,110 @@ bool cmQtAutoGenerators::RccGenerateFile(const RccJob& rccJob)
     this->AutogenBuildDir.c_str(), rccFileAbs.c_str());
 
   // Check if regeneration is required
-  bool generateRcc = this->RccSettingsChanged;
-  if (!generateRcc) {
-    // Test if the resources list file is newer than build file
-    generateRcc = FileAbsentOrOlder(rccFileAbs, rccJob.QrcFile);
+  bool generate = false;
+  std::string generateReason;
+  if (!cmSystemTools::FileExists(rccJob.QrcFile)) {
+    {
+      std::string error = "Could not find the file\n  ";
+      error += cmQtAutoGen::Quoted(rccJob.QrcFile);
+      this->LogError(cmQtAutoGen::RCC, error);
+    }
+    success = false;
   }
-  if (!generateRcc) {
+  if (success && !generate && !cmSystemTools::FileExists(rccFileAbs.c_str())) {
+    if (this->Verbose) {
+      generateReason = "Generating ";
+      generateReason += cmQtAutoGen::Quoted(rccFileAbs);
+      generateReason += " from its source file ";
+      generateReason += cmQtAutoGen::Quoted(rccJob.QrcFile);
+      generateReason += " because it doesn't exist";
+    }
+    generate = true;
+  }
+  if (success && !generate && this->RccSettingsChanged) {
+    if (this->Verbose) {
+      generateReason = "Generating ";
+      generateReason += cmQtAutoGen::Quoted(rccFileAbs);
+      generateReason += " from ";
+      generateReason += cmQtAutoGen::Quoted(rccJob.QrcFile);
+      generateReason += " because the RCC settings changed";
+    }
+    generate = true;
+  }
+  if (success && !generate) {
+    std::string error;
+    if (FileIsOlderThan(rccFileAbs, rccJob.QrcFile, &error)) {
+      if (this->Verbose) {
+        generateReason = "Generating ";
+        generateReason += cmQtAutoGen::Quoted(rccFileAbs);
+        generateReason += " because it is older than ";
+        generateReason += cmQtAutoGen::Quoted(rccJob.QrcFile);
+      }
+      generate = true;
+    } else {
+      if (!error.empty()) {
+        this->LogError(cmQtAutoGen::RCC, error);
+        success = false;
+      }
+    }
+  }
+  if (success && !generate) {
     // Acquire input file list
     std::vector<std::string> readFiles;
-    std::vector<std::string> const* files = &rccJob.Inputs;
-    if (rccJob.Inputs.empty()) {
+    std::vector<std::string> const* files = nullptr;
+    if (!rccJob.Inputs.empty()) {
+      files = &rccJob.Inputs;
+    } else {
       // Read input file list from qrc file
       std::string error;
       if (cmQtAutoGen::RccListInputs(this->QtMajorVersion, this->RccExecutable,
                                      rccJob.QrcFile, readFiles, &error)) {
         files = &readFiles;
       } else {
-        files = nullptr;
         this->LogFileError(cmQtAutoGen::RCC, rccJob.QrcFile, error);
         success = false;
       }
     }
     // Test if any input file is newer than the build file
     if (files != nullptr) {
-      for (std::string const& file : *files) {
-        if (FileAbsentOrOlder(rccFileAbs, file)) {
-          generateRcc = true;
+      std::string error;
+      for (std::string const& resFile : *files) {
+        if (!cmSystemTools::FileExists(resFile.c_str())) {
+          error = "Could not find the file\n  ";
+          error += cmQtAutoGen::Quoted(resFile);
+          error += "\nwhich is listed in\n  ";
+          error += cmQtAutoGen::Quoted(rccJob.QrcFile);
           break;
         }
+        if (FileIsOlderThan(rccFileAbs, resFile, &error)) {
+          if (this->Verbose) {
+            generateReason = "Generating ";
+            generateReason += cmQtAutoGen::Quoted(rccFileAbs);
+            generateReason += " from ";
+            generateReason += cmQtAutoGen::Quoted(rccJob.QrcFile);
+            generateReason += " because it is older than ";
+            generateReason += cmQtAutoGen::Quoted(resFile);
+          }
+          generate = true;
+          break;
+        }
+        if (!error.empty()) {
+          break;
+        }
+      }
+      // Print error
+      if (!error.empty()) {
+        this->LogError(cmQtAutoGen::RCC, error);
+        success = false;
       }
     }
   }
   // Regenerate on demand
-  if (generateRcc) {
+  if (generate) {
     // Log
     if (this->Verbose) {
       this->LogBold("Generating RCC source " + rccFileRel);
+      this->LogInfo(cmQtAutoGen::RCC, generateReason);
     }
 
     // Make sure the parent directory exists
@@ -1901,7 +2078,7 @@ bool cmQtAutoGenerators::RccGenerateFile(const RccJob& rccJob)
     content += "\"\n";
     // Write content to file
     if (this->FileDiffers(wrapperFileAbs, content)) {
-      // Write new wrapper file if the content differs
+      // Write new wrapper file
       if (this->Verbose) {
         this->LogBold("Generating RCC wrapper " + wrapperFileRel);
       }
@@ -1911,7 +2088,7 @@ bool cmQtAutoGenerators::RccGenerateFile(const RccJob& rccJob)
         success = false;
       }
     } else if (rccGenerated) {
-      // Only touch wrapper file if the content matches
+      // Just touch the wrapper file
       if (this->Verbose) {
         this->LogInfo(cmQtAutoGen::RCC,
                       "Touching RCC wrapper " + wrapperFileRel);
