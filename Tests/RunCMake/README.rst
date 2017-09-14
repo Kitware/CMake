@@ -47,11 +47,11 @@ but do not actually build anything.  To add a test:
    containing expected test results:
 
    ``<SubTest>-result.txt``
-    Process result expected if not "0"
+    Regex matching expected process result, if not ``0``
    ``<SubTest>-stdout.txt``
     Regex matching expected stdout content
    ``<SubTest>-stderr.txt``
-    Regex matching expected stderr content, if not "^$"
+    Regex matching expected stderr content, if not ``^$``
    ``<SubTest>-check.cmake``
     Custom result check.
 
