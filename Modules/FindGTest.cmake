@@ -151,13 +151,14 @@ if(GTEST_FOUND)
     _gtest_append_debugs(GTEST_MAIN_LIBRARIES GTEST_MAIN_LIBRARY)
     set(GTEST_BOTH_LIBRARIES ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES})
 
-    include(CMakeFindDependencyMacro)
-    find_dependency(Threads)
+    find_package(Threads QUIET)
 
     if(NOT TARGET GTest::GTest)
         add_library(GTest::GTest UNKNOWN IMPORTED)
-        set_target_properties(GTest::GTest PROPERTIES
-            INTERFACE_LINK_LIBRARIES "Threads::Threads")
+        if(TARGET Threads::Threads)
+            set_target_properties(GTest::GTest PROPERTIES
+                INTERFACE_LINK_LIBRARIES Threads::Threads)
+        endif()
         if(GTEST_INCLUDE_DIRS)
             set_target_properties(GTest::GTest PROPERTIES
                 INTERFACE_INCLUDE_DIRECTORIES "${GTEST_INCLUDE_DIRS}")
