@@ -9,7 +9,6 @@
 #include <map>
 #include <string>
 #include <utility>
-#include <vector>
 
 cmParseMumpsCoverage::cmParseMumpsCoverage(
   cmCTestCoverageHandlerContainer& cont, cmCTest* ctest)
@@ -112,14 +111,12 @@ bool cmParseMumpsCoverage::LoadPackages(const char* d)
   std::string pat = d;
   pat += "/*.m";
   glob.FindFiles(pat);
-  std::vector<std::string>& files = glob.GetFiles();
-  std::vector<std::string>::iterator fileIt;
-  for (fileIt = files.begin(); fileIt != files.end(); ++fileIt) {
-    std::string name = cmSystemTools::GetFilenameName(*fileIt);
-    this->RoutineToDirectory[name.substr(0, name.size() - 2)] = *fileIt;
+  for (std::string& file : glob.GetFiles()) {
+    std::string name = cmSystemTools::GetFilenameName(file);
+    this->RoutineToDirectory[name.substr(0, name.size() - 2)] = file;
     // initialze each file, this is left out until CDash is fixed
     // to handle large numbers of files
-    this->InitializeMumpsFile(*fileIt);
+    this->InitializeMumpsFile(file);
   }
   return true;
 }

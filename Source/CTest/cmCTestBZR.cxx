@@ -373,9 +373,8 @@ bool cmCTestBZR::UpdateImpl()
   bzr_update.push_back(this->CommandLineTool.c_str());
   bzr_update.push_back("pull");
 
-  for (std::vector<std::string>::const_iterator ai = args.begin();
-       ai != args.end(); ++ai) {
-    bzr_update.push_back(ai->c_str());
+  for (std::string const& arg : args) {
+    bzr_update.push_back(arg.c_str());
   }
 
   bzr_update.push_back(this->URL.c_str());

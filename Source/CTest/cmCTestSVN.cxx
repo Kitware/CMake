@@ -103,10 +103,7 @@ bool cmCTestSVN::NoteOldRevision()
     return false;
   }
 
-  std::vector<SVNInfo>::iterator itbeg = this->Repositories.begin();
-  std::vector<SVNInfo>::iterator itend = this->Repositories.end();
-  for (; itbeg != itend; itbeg++) {
-    SVNInfo& svninfo = *itbeg;
+  for (SVNInfo& svninfo : this->Repositories) {
     svninfo.OldRevision = this->LoadInfo(svninfo);
     this->Log << "Revision for repository '" << svninfo.LocalPath
               << "' before update: " << svninfo.OldRevision << "\n";
@@ -127,10 +124,7 @@ bool cmCTestSVN::NoteNewRevision()
     return false;
   }
 
-  std::vector<SVNInfo>::iterator itbeg = this->Repositories.begin();
-  std::vector<SVNInfo>::iterator itend = this->Repositories.end();
-  for (; itbeg != itend; itbeg++) {
-    SVNInfo& svninfo = *itbeg;
+  for (SVNInfo& svninfo : this->Repositories) {
     svninfo.NewRevision = this->LoadInfo(svninfo);
     this->Log << "Revision for repository '" << svninfo.LocalPath
               << "' after update: " << svninfo.NewRevision << "\n";
@@ -257,9 +251,8 @@ bool cmCTestSVN::UpdateImpl()
 
   std::vector<char const*> svn_update;
   svn_update.push_back("update");
-  for (std::vector<std::string>::const_iterator ai = args.begin();
-       ai != args.end(); ++ai) {
-    svn_update.push_back(ai->c_str());
+  for (std::string const& arg : args) {
+    svn_update.push_back(arg.c_str());
   }
 
   UpdateParser out(this, "up-out> ");
@@ -285,9 +278,8 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
 
   std::vector<std::string> parsedUserOptions =
     cmSystemTools::ParseArguments(userOptions.c_str());
-  for (std::vector<std::string>::iterator i = parsedUserOptions.begin();
-       i != parsedUserOptions.end(); ++i) {
-    args.push_back(i->c_str());
+  for (std::string const& opt : parsedUserOptions) {
+    args.push_back(opt.c_str());
   }
 
   args.push_back(nullptr);
@@ -380,10 +372,7 @@ bool cmCTestSVN::LoadRevisions()
 {
   bool result = true;
   // Get revisions for all the external repositories
-  std::vector<SVNInfo>::iterator itbeg = this->Repositories.begin();
-  std::vector<SVNInfo>::iterator itend = this->Repositories.end();
-  for (; itbeg != itend; itbeg++) {
-    SVNInfo& svninfo = *itbeg;
+  for (SVNInfo& svninfo : this->Repositories) {
     result = this->LoadRevisions(svninfo) && result;
   }
   return result;

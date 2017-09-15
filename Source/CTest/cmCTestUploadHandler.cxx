@@ -7,7 +7,6 @@
 #include "cmXMLWriter.h"
 
 #include <ostream>
-#include <set>
 #include <string>
 
 cmCTestUploadHandler::cmCTestUploadHandler()
@@ -37,7 +36,6 @@ int cmCTestUploadHandler::ProcessHandler()
   }
   std::string buildname =
     cmCTest::SafeBuildIdField(this->CTest->GetCTestConfiguration("BuildName"));
-  cmCTest::SetOfStrings::const_iterator it;
 
   cmXMLWriter xml(ofs);
   xml.StartDocument();
@@ -55,14 +53,14 @@ int cmCTestUploadHandler::ProcessHandler()
   this->CTest->AddSiteProperties(xml);
   xml.StartElement("Upload");
 
-  for (it = this->Files.begin(); it != this->Files.end(); it++) {
+  for (std::string const& file : this->Files) {
     cmCTestOptionalLog(this->CTest, OUTPUT,
-                       "\tUpload file: " << *it << std::endl, this->Quiet);
+                       "\tUpload file: " << file << std::endl, this->Quiet);
     xml.StartElement("File");
-    xml.Attribute("filename", *it);
+    xml.Attribute("filename", file);
     xml.StartElement("Content");
     xml.Attribute("encoding", "base64");
-    xml.Content(this->CTest->Base64EncodeFile(*it));
+    xml.Content(this->CTest->Base64EncodeFile(file));
     xml.EndElement(); // Content
     xml.EndElement(); // File
   }

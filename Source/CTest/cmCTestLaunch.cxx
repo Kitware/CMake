@@ -169,9 +169,8 @@ void cmCTestLaunch::ComputeFileNames()
   cmCryptoHash md5(cmCryptoHash::AlgoMD5);
   md5.Initialize();
   md5.Append(this->CWD);
-  for (std::vector<std::string>::const_iterator ai = this->RealArgs.begin();
-       ai != this->RealArgs.end(); ++ai) {
-    md5.Append(*ai);
+  for (std::string const& realArg : this->RealArgs) {
+    md5.Append(realArg);
   }
   this->LogHash = md5.FinalizeHex();
 
@@ -422,9 +421,8 @@ void cmCTestLaunch::WriteXMLCommand(cmXMLWriter& xml)
   if (!this->CWD.empty()) {
     xml.Element("WorkingDirectory", this->CWD);
   }
-  for (std::vector<std::string>::const_iterator ai = this->RealArgs.begin();
-       ai != this->RealArgs.end(); ++ai) {
-    xml.Element("Argument", *ai);
+  for (std::string const& realArg : this->RealArgs) {
+    xml.Element("Argument", realArg);
   }
   xml.EndElement(); // Command
 }
@@ -487,9 +485,8 @@ void cmCTestLaunch::WriteXMLLabels(cmXMLWriter& xml)
   if (!this->Labels.empty()) {
     xml.Comment("Interested parties");
     xml.StartElement("Labels");
-    for (std::set<std::string>::const_iterator li = this->Labels.begin();
-         li != this->Labels.end(); ++li) {
-      xml.Element("Label", *li);
+    for (std::string const& label : this->Labels) {
+      xml.Element("Label", label);
     }
     xml.EndElement(); // Labels
   }
@@ -597,9 +594,8 @@ bool cmCTestLaunch::ScrapeLog(std::string const& fname)
 bool cmCTestLaunch::Match(std::string const& line,
                           std::vector<cmsys::RegularExpression>& regexps)
 {
-  for (std::vector<cmsys::RegularExpression>::iterator ri = regexps.begin();
-       ri != regexps.end(); ++ri) {
-    if (ri->find(line.c_str())) {
+  for (cmsys::RegularExpression& r : regexps) {
+    if (r.find(line.c_str())) {
       return true;
     }
   }

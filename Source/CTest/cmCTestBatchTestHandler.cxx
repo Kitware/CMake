@@ -29,10 +29,9 @@ void cmCTestBatchTestHandler::WriteBatchScript()
   fout.open(this->Script.c_str());
   fout << "#!/bin/sh\n";
 
-  for (TestMap::iterator i = this->Tests.begin(); i != this->Tests.end();
-       ++i) {
-    this->WriteSrunArgs(i->first, fout);
-    this->WriteTestCommand(i->first, fout);
+  for (auto const& t : this->Tests) {
+    this->WriteSrunArgs(t.first, fout);
+    this->WriteTestCommand(t.first, fout);
     fout << "\n";
   }
   fout.flush();
@@ -80,9 +79,8 @@ void cmCTestBatchTestHandler::WriteTestCommand(int test, std::ostream& fout)
   this->TestHandler->GenerateTestCommand(processArgs, test);
   processArgs.push_back(command);
 
-  for (std::vector<std::string>::iterator arg = processArgs.begin();
-       arg != processArgs.end(); ++arg) {
-    fout << *arg << " ";
+  for (std::string const& arg : processArgs) {
+    fout << arg << " ";
   }
 
   std::vector<std::string>::iterator i = args.begin();

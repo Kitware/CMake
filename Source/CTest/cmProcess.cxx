@@ -40,9 +40,8 @@ bool cmProcess::StartProcess()
   // put the command as arg0
   this->ProcessArgs.push_back(this->Command.c_str());
   // now put the command arguments in
-  for (std::vector<std::string>::iterator i = this->Arguments.begin();
-       i != this->Arguments.end(); ++i) {
-    this->ProcessArgs.push_back(i->c_str());
+  for (std::string const& arg : this->Arguments) {
+    this->ProcessArgs.push_back(arg.c_str());
   }
   this->ProcessArgs.push_back(nullptr); // null terminate the list
   this->Process = cmsysProcess_New();

@@ -14,9 +14,8 @@ bool cmCTestReadCustomFilesCommand::InitialPass(
     return false;
   }
 
-  std::vector<std::string>::const_iterator dit;
-  for (dit = args.begin(); dit != args.end(); ++dit) {
-    this->CTest->ReadCustomConfigurationFileTree(dit->c_str(), this->Makefile);
+  for (std::string const& arg : args) {
+    this->CTest->ReadCustomConfigurationFileTree(arg.c_str(), this->Makefile);
   }
 
   return true;

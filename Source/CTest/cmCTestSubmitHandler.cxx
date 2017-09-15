@@ -162,8 +162,7 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
 
-  cmCTest::SetOfStrings::const_iterator file;
-  for (file = files.begin(); file != files.end(); ++file) {
+  for (std::string const& file : files) {
     /* get a curl handle */
     curl = curl_easy_init();
     if (curl) {
@@ -192,12 +191,12 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
 
       ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1);
 
-      std::string local_file = *file;
+      std::string local_file = file;
       if (!cmSystemTools::FileExists(local_file.c_str())) {
-        local_file = localprefix + "/" + *file;
+        local_file = localprefix + "/" + file;
       }
       std::string upload_as =
-        url + "/" + remoteprefix + cmSystemTools::GetFilenameName(*file);
+        url + "/" + remoteprefix + cmSystemTools::GetFilenameName(file);
 
       if (!cmSystemTools::FileExists(local_file.c_str())) {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -307,12 +306,11 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
     ::curl_slist_append(nullptr, "Content-Type: text/xml");
 
   // Add any additional headers that the user specified.
-  for (std::vector<std::string>::const_iterator h = this->HttpHeaders.begin();
-       h != this->HttpHeaders.end(); ++h) {
+  for (std::string const& h : this->HttpHeaders) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Add HTTP Header: \"" << *h << "\"" << std::endl,
+                       "   Add HTTP Header: \"" << h << "\"" << std::endl,
                        this->Quiet);
-    headers = ::curl_slist_append(headers, h->c_str());
+    headers = ::curl_slist_append(headers, h.c_str());
   }
 
   /* In windows, this will init the winsock stuff */
@@ -323,18 +321,15 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
   cmSystemTools::ExpandListArgument(curlopt, args);
   bool verifyPeerOff = false;
   bool verifyHostOff = false;
-  for (std::vector<std::string>::iterator i = args.begin(); i != args.end();
-       ++i) {
-    if (*i == "CURLOPT_SSL_VERIFYPEER_OFF") {
+  for (std::string const& arg : args) {
+    if (arg == "CURLOPT_SSL_VERIFYPEER_OFF") {
       verifyPeerOff = true;
     }
-    if (*i == "CURLOPT_SSL_VERIFYHOST_OFF") {
+    if (arg == "CURLOPT_SSL_VERIFYHOST_OFF") {
       verifyHostOff = true;
     }
   }
-  std::string::size_type kk;
-  cmCTest::SetOfStrings::const_iterator file;
-  for (file = files.begin(); file != files.end(); ++file) {
+  for (std::string const& file : files) {
     /* get a curl handle */
     curl = curl_easy_init();
     if (curl) {
@@ -389,19 +384,18 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
 
       ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-      std::string local_file = *file;
+      std::string local_file = file;
       if (!cmSystemTools::FileExists(local_file.c_str())) {
-        local_file = localprefix + "/" + *file;
+        local_file = localprefix + "/" + file;
       }
       std::string remote_file =
-        remoteprefix + cmSystemTools::GetFilenameName(*file);
+        remoteprefix + cmSystemTools::GetFilenameName(file);
 
       *this->LogFile << "\tUpload file: " << local_file << " to "
                      << remote_file << std::endl;
 
       std::string ofile;
-      for (kk = 0; kk < remote_file.size(); kk++) {
-        char c = remote_file[kk];
+      for (char c : remote_file) {
         char hexCh[4] = { 0, 0, 0, 0 };
         hexCh[0] = c;
         switch (c) {
@@ -629,8 +623,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<std::string>& files,
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
 
-  cmCTest::SetOfStrings::const_iterator file;
-  for (file = files.begin(); file != files.end(); ++file) {
+  for (std::string const& file : files) {
     /* get a curl handle */
     curl = curl_easy_init();
     if (curl) {
@@ -670,11 +663,9 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<std::string>& files,
       ::curl_easy_setopt(curl, CURLOPT_FILE, &chunk);
       ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
 
-      std::string rfile = remoteprefix + cmSystemTools::GetFilenameName(*file);
+      std::string rfile = remoteprefix + cmSystemTools::GetFilenameName(file);
       std::string ofile;
-      std::string::iterator kk;
-      for (kk = rfile.begin(); kk < rfile.end(); ++kk) {
-        char c = *kk;
+      for (char c : rfile) {
         char hexCh[4] = { 0, 0, 0, 0 };
         hexCh[0] = c;
         switch (c) {
@@ -772,16 +763,15 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
 
   int problems = 0;
 
-  cmCTest::SetOfStrings::const_iterator file;
-  for (file = files.begin(); file != files.end(); ++file) {
+  for (std::string const& file : files) {
     int retVal;
 
     std::string lfname = localprefix;
     cmSystemTools::ConvertToUnixSlashes(lfname);
-    lfname += "/" + *file;
+    lfname += "/" + file;
     lfname = cmSystemTools::ConvertToOutputPath(lfname.c_str());
     argv[1] = lfname.c_str();
-    std::string rfname = url + "/" + remoteprefix + *file;
+    std::string rfname = url + "/" + remoteprefix + file;
     argv[2] = rfname.c_str();
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Execute \""
                          << argv[0] << "\" \"" << argv[1] << "\" \"" << argv[2]
@@ -864,12 +854,11 @@ bool cmCTestSubmitHandler::SubmitUsingCP(const std::string& localprefix,
     return false;
   }
 
-  cmCTest::SetOfStrings::const_iterator file;
-  for (file = files.begin(); file != files.end(); ++file) {
+  for (std::string const& file : files) {
     std::string lfname = localprefix;
     cmSystemTools::ConvertToUnixSlashes(lfname);
-    lfname += "/" + *file;
-    std::string rfname = destination + "/" + remoteprefix + *file;
+    lfname += "/" + file;
+    std::string rfname = destination + "/" + remoteprefix + file;
     cmSystemTools::CopyFileAlways(lfname, rfname);
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   Copy file: "
                          << lfname << " to " << rfname << std::endl,
@@ -902,13 +891,12 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "   Submitting to: "
                        << realURL << " (" << remoteprefix << ")" << std::endl,
                      this->Quiet);
-  cmCTest::SetOfStrings::const_iterator file;
-  for (file = files.begin(); file != files.end(); ++file) {
+  for (std::string const& file : files) {
     xmlrpc_value* result;
 
-    std::string local_file = *file;
+    std::string local_file = file;
     if (!cmSystemTools::FileExists(local_file.c_str())) {
-      local_file = localprefix + "/" + *file;
+      local_file = localprefix + "/" + file;
     }
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "   Submit file: " << local_file << std::endl,
@@ -1323,13 +1311,11 @@ int cmCTestSubmitHandler::ProcessHandler()
     cmCTestOptionalLog(this->CTest, DEBUG,
                        "Globbing for: " << gpath << std::endl, this->Quiet);
     if (cmSystemTools::SimpleGlob(gpath, gfiles, 1)) {
-      size_t cc;
-      for (cc = 0; cc < gfiles.size(); cc++) {
-        gfiles[cc] = gfiles[cc].substr(glen);
+      for (std::string& gfile : gfiles) {
+        gfile = gfile.substr(glen);
         cmCTestOptionalLog(this->CTest, DEBUG,
-                           "Glob file: " << gfiles[cc] << std::endl,
-                           this->Quiet);
-        this->CTest->AddSubmitFile(cmCTest::PartCoverage, gfiles[cc].c_str());
+                           "Glob file: " << gfile << std::endl, this->Quiet);
+        this->CTest->AddSubmitFile(cmCTest::PartCoverage, gfile.c_str());
       }
     } else {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Problem globbing" << std::endl);
@@ -1356,9 +1342,8 @@ int cmCTestSubmitHandler::ProcessHandler()
   if (ofs) {
     ofs << "Upload files:" << std::endl;
     int cnt = 0;
-    cmCTest::SetOfStrings::iterator it;
-    for (it = files.begin(); it != files.end(); ++it) {
-      ofs << cnt << "\t" << *it << std::endl;
+    for (std::string const& file : files) {
+      ofs << cnt << "\t" << file << std::endl;
       cnt++;
     }
   }

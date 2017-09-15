@@ -163,9 +163,8 @@ bool cmCTestGIT::UpdateByFetchAndReset()
     opts = this->CTest->GetCTestConfiguration("GITUpdateOptions");
   }
   std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
-  for (std::vector<std::string>::const_iterator ai = args.begin();
-       ai != args.end(); ++ai) {
-    git_fetch.push_back(ai->c_str());
+  for (std::string const& arg : args) {
+    git_fetch.push_back(arg.c_str());
   }
 
   // Sentinel argument.
@@ -215,9 +214,8 @@ bool cmCTestGIT::UpdateByCustom(std::string const& custom)
   std::vector<std::string> git_custom_command;
   cmSystemTools::ExpandListArgument(custom, git_custom_command, true);
   std::vector<char const*> git_custom;
-  for (std::vector<std::string>::const_iterator i = git_custom_command.begin();
-       i != git_custom_command.end(); ++i) {
-    git_custom.push_back(i->c_str());
+  for (std::string const& i : git_custom_command) {
+    git_custom.push_back(i.c_str());
   }
   git_custom.push_back(nullptr);
 
@@ -655,9 +653,8 @@ bool cmCTestGIT::LoadModifications()
   OutputLogger err(this->Log, "di-err> ");
   this->RunChild(git_diff_index, &out, &err, nullptr, cmProcessOutput::UTF8);
 
-  for (std::vector<Change>::const_iterator ci = out.Changes.begin();
-       ci != out.Changes.end(); ++ci) {
-    this->DoModification(PathModified, ci->Path);
+  for (Change const& c : out.Changes) {
+    this->DoModification(PathModified, c.Path);
   }
   return true;
 }
