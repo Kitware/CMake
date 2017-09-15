@@ -1596,7 +1596,7 @@ std::string cmCTestTestHandler::FindExecutable(
   // wasn't specified
   if (fullPath.empty() && filepath.empty()) {
     std::string const path = cmSystemTools::FindProgram(filename.c_str());
-    if (path != "") {
+    if (!path.empty()) {
       resultingConfig.clear();
       return path;
     }
@@ -1802,7 +1802,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
     if (fileNameSubstring != pattern) {
       continue;
     }
-    if (logName == "") {
+    if (logName.empty()) {
       logName = fileName;
     } else {
       // if multiple matching logs were found we use the most recently

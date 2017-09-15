@@ -494,7 +494,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     }
   }
   // log and return if we did not find the executable
-  if (this->ActualCommand == "") {
+  if (this->ActualCommand.empty()) {
     // if the command was not found create a TestResult object
     // that has that information
     this->TestProcess = new cmProcess;
@@ -595,7 +595,7 @@ double cmCTestRunTest::ResolveTimeout()
 {
   double timeout = this->TestProperties->Timeout;
 
-  if (this->CTest->GetStopTime() == "") {
+  if (this->CTest->GetStopTime().empty()) {
     return timeout;
   }
   struct tm* lctime;

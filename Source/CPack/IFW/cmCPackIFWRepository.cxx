@@ -162,7 +162,7 @@ protected:
   void CharacterDataHandler(const char* data, int length) override
   {
     std::string content(data, data + length);
-    if (content == "" || content == " " || content == "  " ||
+    if (content.empty() || content == " " || content == "  " ||
         content == "\n") {
       return;
     }

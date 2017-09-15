@@ -36,7 +36,7 @@ protected:
     } else if (name == "sourcefile") {
       std::string fileName = atts[1];
 
-      if (this->PackagePath == "") {
+      if (this->PackagePath.empty()) {
         if (!this->FindPackagePath(fileName)) {
           cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot find file: "
                        << this->PackageName << "/" << fileName << std::endl);

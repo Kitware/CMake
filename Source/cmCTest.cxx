@@ -147,7 +147,7 @@ std::string cmCTest::CurrentTime()
 std::string cmCTest::GetCostDataFile()
 {
   std::string fname = this->GetCTestConfiguration("CostDataFile");
-  if (fname == "") {
+  if (fname.empty()) {
     fname = this->GetBinaryDir() + "/Testing/Temporary/CTestCostData.txt";
   }
   return fname;
@@ -1235,7 +1235,7 @@ std::string cmCTest::SafeBuildIdField(const std::string& value)
 {
   std::string safevalue(value);
 
-  if (safevalue != "") {
+  if (!safevalue.empty()) {
     // Disallow non-filename and non-space whitespace characters.
     // If they occur, replace them with ""
     //
@@ -1254,7 +1254,7 @@ std::string cmCTest::SafeBuildIdField(const std::string& value)
     }
   }
 
-  if (safevalue == "") {
+  if (safevalue.empty()) {
     safevalue = "(empty)";
   }
 

@@ -260,11 +260,11 @@ std::string cmCTestBuildHandler::GetMakeCommand()
                      "MakeCommand:" << makeCommand << "\n", this->Quiet);
 
   std::string configType = this->CTest->GetConfigType();
-  if (configType == "") {
+  if (configType.empty()) {
     configType =
       this->CTest->GetCTestConfiguration("DefaultCTestConfigurationType");
   }
-  if (configType == "") {
+  if (configType.empty()) {
     configType = "Release";
   }
 
