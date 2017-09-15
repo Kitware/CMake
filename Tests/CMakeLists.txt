@@ -268,7 +268,7 @@ if(BUILD_TESTING)
   endif()
 
   add_test(NAME CMake.Copyright
-    COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/CMakeCopyright.cmake)
+    COMMAND ${CMAKE_CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/CMakeCopyright.cmake)
 
   # add a bunch of standard build-and-test style tests
   ADD_TEST_MACRO(CommandLineTest CommandLineTest)
@@ -329,7 +329,7 @@ if(BUILD_TESTING)
       set(CMAKE_SKIP_VSGNUFortran TRUE)
     endif()
     if(NOT CMAKE_SKIP_VSGNUFortran)
-      ADD_TEST_MACRO(VSGNUFortran ${CMAKE_COMMAND} -P runtest.cmake)
+      ADD_TEST_MACRO(VSGNUFortran ${CMAKE_CMAKE_COMMAND} -P runtest.cmake)
     endif()
   endif()
 
@@ -2641,7 +2641,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   file(COPY "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/VistA-FOIA"
     DESTINATION "${CMake_BINARY_DIR}/Testing/MumpsCoverage")
   add_test(NAME CTestGTMCoverage
-    COMMAND cmake -E chdir
+    COMMAND ${CMAKE_CMAKE_COMMAND} -E chdir
     ${CMake_BINARY_DIR}/Testing/MumpsCoverage
     $<TARGET_FILE:ctest> -T Coverage --debug)
   set_tests_properties(CTestGTMCoverage PROPERTIES
@@ -2659,7 +2659,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   file(COPY "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/VistA-FOIA"
     DESTINATION "${CMake_BINARY_DIR}/Testing/MumpsCacheCoverage")
   add_test(NAME CTestCacheCoverage
-    COMMAND cmake -E chdir
+    COMMAND ${CMAKE_CMAKE_COMMAND} -E chdir
     ${CMake_BINARY_DIR}/Testing/MumpsCacheCoverage
     $<TARGET_FILE:ctest> -T Coverage --debug)
   set_tests_properties(CTestCacheCoverage PROPERTIES
@@ -2677,7 +2677,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   file(COPY "${CMake_SOURCE_DIR}/Tests/PythonCoverage/coveragetest"
     DESTINATION "${CMake_BINARY_DIR}/Testing/PythonCoverage")
   add_test(NAME CTestPythonCoverage
-    COMMAND cmake -E chdir
+    COMMAND ${CMAKE_CMAKE_COMMAND} -E chdir
     ${CMake_BINARY_DIR}/Testing/PythonCoverage
     $<TARGET_FILE:ctest> -T Coverage --debug)
   set_tests_properties(CTestPythonCoverage PROPERTIES
@@ -2695,7 +2695,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   file(COPY "${CMake_SOURCE_DIR}/Tests/CoberturaCoverage/src"
     DESTINATION "${CMake_BINARY_DIR}/Testing/CoberturaCoverage")
   add_test(NAME CTestCoberturaCoverage
-    COMMAND cmake -E chdir
+    COMMAND ${CMAKE_CMAKE_COMMAND} -E chdir
     ${CMake_BINARY_DIR}/Testing/CoberturaCoverage
     $<TARGET_FILE:ctest> -T Coverage --debug)
   set_tests_properties(CTestCoberturaCoverage PROPERTIES
@@ -2714,7 +2714,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   configure_file("${CMake_BINARY_DIR}/Testing/JacocoCoverage/Coverage/target/site/jacoco.xml.in"
     "${CMake_BINARY_DIR}/Testing/JacocoCoverage/Coverage/target/site/jacoco.xml")
   add_test(NAME CTestJacocoCoverage
-    COMMAND cmake -E chdir
+    COMMAND ${CMAKE_CMAKE_COMMAND} -E chdir
     ${CMake_BINARY_DIR}/Testing/JacocoCoverage
     $<TARGET_FILE:ctest> -T Coverage --debug)
   set_tests_properties(CTestJacocoCoverage PROPERTIES
@@ -2733,7 +2733,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     DESTINATION "${CMake_BINARY_DIR}/Testing/JavascriptCoverage"
     FILES_MATCHING PATTERN "*.js")
   add_test(NAME CTestJavascriptCoverage
-    COMMAND cmake -E chdir
+    COMMAND ${CMAKE_CMAKE_COMMAND} -E chdir
     ${CMake_BINARY_DIR}/Testing/JavascriptCoverage
     $<TARGET_FILE:ctest> -T Coverage --debug)
   set_tests_properties(CTestJavascriptCoverage PROPERTIES
@@ -2751,7 +2751,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     "${CMake_SOURCE_DIR}/Tests/DelphiCoverage/UTCovTest(UTCovTest.pas).html.in"
     "${CMake_BINARY_DIR}/Testing/DelphiCoverage/UTCovTest(UTCovTest.pas).html")
   add_test(NAME CTestDelphiCoverage
-    COMMAND cmake -E chdir
+    COMMAND ${CMAKE_CMAKE_COMMAND} -E chdir
     ${CMake_BINARY_DIR}/Testing/DelphiCoverage
     $<TARGET_FILE:ctest> -T Coverage --debug)
   set_tests_properties(CTestDelphiCoverage PROPERTIES
