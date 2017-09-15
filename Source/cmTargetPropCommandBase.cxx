@@ -17,11 +17,11 @@ bool cmTargetPropCommandBase::HandleArguments(
     return false;
   }
 
-  // Lookup the target for which libraries are specified.
   if (this->Makefile->IsAlias(args[0])) {
     this->SetError("can not be used on an ALIAS target.");
     return false;
   }
+  // Lookup the target for which property-values are specified.
   this->Target =
     this->Makefile->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(
       args[0]);
@@ -92,8 +92,7 @@ bool cmTargetPropCommandBase::ProcessContentArgs(
 
   if (this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY &&
       scope != "INTERFACE") {
-    this->SetError("may only be set INTERFACE properties on INTERFACE "
-                   "targets");
+    this->SetError("may only set INTERFACE properties on INTERFACE targets");
     return false;
   }
 
