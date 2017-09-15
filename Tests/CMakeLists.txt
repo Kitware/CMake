@@ -813,31 +813,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustomCommandWorkingDirectory")
 
-   #add_test(SimpleExclude ${CMAKE_CTEST_COMMAND}
-   #  --build-and-test
-   #  "${CMake_SOURCE_DIR}/Tests/SimpleExclude"
-   #  "${CMake_BINARY_DIR}/Tests/SimpleExclude"
-   #  ${build_generator_args}
-   #  --build-project SimpleExclude
-   #  --build-two-config
-   #  --build-options ${build_options}
-   #  --test-command t4
-   #--test-command "${CMAKE_COMMAND}"
-   #"-DCONFIGURATION=\${CTEST_CONFIGURATION_TYPE}"
-   #-P "${CMake_BINARY_DIR}/Tests/SimpleExclude/run.cmake"
-   #)
-
-#  add_test(SameName  ${CMAKE_CTEST_COMMAND}
-#    --build-and-test
-#    "${CMake_SOURCE_DIR}/Tests/SameName"
-#    "${CMake_BINARY_DIR}/Tests/SameName"
-#    ${build_generator_args}
-#    --build-project SameName
-#    --build-two-config
-#    --build-options ${build_options}
-#    --test-command
-#    "${CMake_BINARY_DIR}/Tests/SameName/Exe1/mytest2")
-
   add_test(OutOfSource ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/OutOfSource"
