@@ -1,7 +1,18 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-int main(void)
+int main(int argc, char* argv[])
 {
+  int i;
+  for (i = 1; i < argc; ++i) {
+    if (strcmp(argv[i], "-bad") == 0)
+      if (strcmp(argv[i], "-bad") == 0) {
+        fprintf(stdout, "stdout from bad command line arg '-bad'\n");
+        fprintf(stderr, "stderr from bad command line arg '-bad'\n");
+        return 1;
+      }
+  }
   fprintf(stderr,
           "[/foo/bar.c:2]: (error) Array 'abc[10]' accessed at index 12,"
           " which is out of bounds.\n");

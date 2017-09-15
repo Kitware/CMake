@@ -618,7 +618,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
       std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
-      cmakeCommand += " -E __run_iwyu --lwyu=";
+      cmakeCommand += " -E __run_co_compile --lwyu=";
       cmakeCommand += targetOutPathReal;
       real_link_commands.push_back(cmakeCommand);
     }

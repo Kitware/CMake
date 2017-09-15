@@ -34,11 +34,14 @@
 #include "cmsys/Process.h"
 #include "cmsys/Terminal.h"
 #include <algorithm>
+#include <functional>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <utility>
 
 class cmConnection;
 
@@ -155,6 +158,280 @@ static bool cmTarFilesFrom(std::string const& file,
     }
   }
   return true;
+}
+
+int cmcmd::HandleIWYU(const std::string& runCmd, const std::string&,
+                      const std::vector<std::string>& orig_cmd)
+{
+  // Construct the iwyu command line by taking what was given
+  // and adding all the arguments we give to the compiler.
+  std::vector<std::string> iwyu_cmd;
+  cmSystemTools::ExpandListArgument(runCmd, iwyu_cmd, true);
+  iwyu_cmd.insert(iwyu_cmd.end(), orig_cmd.begin() + 1, orig_cmd.end());
+  // Run the iwyu command line.  Capture its stderr and hide its stdout.
+  // Ignore its return code because the tool always returns non-zero.
+  std::string stdErr;
+  int ret;
+  if (!cmSystemTools::RunSingleCommand(iwyu_cmd, nullptr, &stdErr, &ret,
+                                       nullptr, cmSystemTools::OUTPUT_NONE)) {
+    std::cerr << "Error running '" << iwyu_cmd[0] << "': " << stdErr << "\n";
+    return 1;
+  }
+  // Warn if iwyu reported anything.
+  if (stdErr.find("should remove these lines:") != std::string::npos ||
+      stdErr.find("should add these lines:") != std::string::npos) {
+    std::cerr << "Warning: include-what-you-use reported diagnostics:\n"
+              << stdErr << "\n";
+  }
+  // always return 0 we don't want to break the compile
+  return 0;
+}
+
+int cmcmd::HandleTidy(const std::string& runCmd, const std::string& sourceFile,
+                      const std::vector<std::string>& orig_cmd)
+{
+  // Construct the clang-tidy command line by taking what was given
+  // and adding our compiler command line.  The clang-tidy tool will
+  // automatically skip over the compiler itself and extract the
+  // options.
+  int ret;
+  std::vector<std::string> tidy_cmd;
+  cmSystemTools::ExpandListArgument(runCmd, tidy_cmd, true);
+  tidy_cmd.push_back(sourceFile);
+  tidy_cmd.push_back("--");
+  tidy_cmd.insert(tidy_cmd.end(), orig_cmd.begin(), orig_cmd.end());
+
+  // Run the tidy command line.  Capture its stdout and hide its stderr.
+  std::string stdOut;
+  std::string stdErr;
+  if (!cmSystemTools::RunSingleCommand(tidy_cmd, &stdOut, &stdErr, &ret,
+                                       nullptr, cmSystemTools::OUTPUT_NONE)) {
+    std::cerr << "Error running '" << tidy_cmd[0] << "': " << stdErr << "\n";
+    return 1;
+  }
+  // Output the stdout from clang-tidy to stderr
+  std::cerr << stdOut;
+  // If clang-tidy exited with an error do the same.
+  if (ret != 0) {
+    std::cerr << stdErr;
+  }
+  return ret;
+}
+
+int cmcmd::HandleLWYU(const std::string& runCmd, const std::string&,
+                      const std::vector<std::string>&)
+{
+  // Construct the ldd -r -u (link what you use lwyu) command line
+  // ldd -u -r lwuy target
+  std::vector<std::string> lwyu_cmd;
+  lwyu_cmd.push_back("ldd");
+  lwyu_cmd.push_back("-u");
+  lwyu_cmd.push_back("-r");
+  lwyu_cmd.push_back(runCmd);
+
+  // Run the ldd -u -r command line.
+  // Capture its stdout and hide its stderr.
+  // Ignore its return code because the tool always returns non-zero
+  // if there are any warnings, but we just want to warn.
+  std::string stdOut;
+  std::string stdErr;
+  int ret;
+  if (!cmSystemTools::RunSingleCommand(lwyu_cmd, &stdOut, &stdErr, &ret,
+                                       nullptr, cmSystemTools::OUTPUT_NONE)) {
+    std::cerr << "Error running '" << lwyu_cmd[0] << "': " << stdErr << "\n";
+    return 1;
+  }
+
+  // Output the stdout from ldd -r -u to stderr
+  // Warn if lwyu reported anything.
+  if (stdOut.find("Unused direct dependencies:") != std::string::npos) {
+    std::cerr << "Warning: " << stdOut;
+  }
+  return 0;
+}
+
+int cmcmd::HandleCppLint(const std::string& runCmd,
+                         const std::string& sourceFile,
+                         const std::vector<std::string>&)
+{
+  // Construct the cpplint command line.
+  std::vector<std::string> cpplint_cmd;
+  cmSystemTools::ExpandListArgument(runCmd, cpplint_cmd, true);
+  cpplint_cmd.push_back(sourceFile);
+
+  // Run the cpplint command line.  Capture its output.
+  std::string stdOut;
+  int ret;
+  if (!cmSystemTools::RunSingleCommand(cpplint_cmd, &stdOut, &stdOut, &ret,
+                                       nullptr, cmSystemTools::OUTPUT_NONE)) {
+    std::cerr << "Error running '" << cpplint_cmd[0] << "': " << stdOut
+              << "\n";
+    return 1;
+  }
+
+  // Output the output from cpplint to stderr
+  std::cerr << stdOut;
+  return ret;
+}
+
+int cmcmd::HandleCppCheck(const std::string& runCmd,
+                          const std::string& sourceFile,
+                          const std::vector<std::string>& orig_cmd)
+{
+  // Construct the cpplint command line.
+  std::vector<std::string> cppcheck_cmd;
+  cmSystemTools::ExpandListArgument(runCmd, cppcheck_cmd, true);
+  // extract all the -D, -U, and -I options from the compile line
+  for (size_t i = 0; i < orig_cmd.size(); i++) {
+    const std::string& opt = orig_cmd[i];
+    if (opt.size() > 2) {
+      if ((opt[0] == '-') &&
+          ((opt[1] == 'D') || (opt[1] == 'I') || (opt[1] == 'U'))) {
+        cppcheck_cmd.push_back(opt);
+// convert cl / options to - options if needed
+#if defined(_WIN32)
+      } else if ((opt[0] == '/') &&
+                 ((opt[1] == 'D') || (opt[1] == 'I') || (opt[1] == 'U'))) {
+        std::string optcopy = opt;
+        optcopy[0] = '-';
+        cppcheck_cmd.push_back(optcopy);
+#endif
+      }
+    }
+  }
+  // add the source file
+  cppcheck_cmd.push_back(sourceFile);
+
+  // Run the cpplint command line.  Capture its output.
+  std::string stdOut;
+  std::string stdErr;
+  int ret;
+  if (!cmSystemTools::RunSingleCommand(cppcheck_cmd, &stdOut, &stdErr, &ret,
+                                       nullptr, cmSystemTools::OUTPUT_NONE)) {
+    std::cerr << "Error running '" << cppcheck_cmd[0] << "': " << stdOut
+              << "\n";
+    return 1;
+  }
+  std::cerr << stdOut;
+  // Output the output from cpplint to stderr
+  if (stdErr.find("(error)") != std::string::npos ||
+      stdErr.find("(warning)") != std::string::npos ||
+      stdErr.find("(style)") != std::string::npos ||
+      stdErr.find("(performance)") != std::string::npos ||
+      stdErr.find("(portability)") != std::string::npos ||
+      stdErr.find("(information)") != std::string::npos) {
+    std::cerr << "Warning: cppcheck reported diagnostics:\n";
+  }
+  std::cerr << stdErr;
+  // ignore errors so build continues
+  return 0;
+}
+
+// called when args[0] == "__run_co_compile"
+int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
+{
+  // initialize a map from command option to handler function
+  std::map<std::string,
+           std::function<int(const std::string&, const std::string&,
+                             const std::vector<std::string>&)>>
+    coCompileTypes;
+  auto a1 = std::placeholders::_1;
+  auto a2 = std::placeholders::_2;
+  auto a3 = std::placeholders::_3;
+  // create a map from option to handler function for option
+  // if the option does not call the original command then it will need
+  // to set runOriginalCmd to false later in this function
+  coCompileTypes["--iwyu="] = std::bind(&cmcmd::HandleIWYU, a1, a2, a3);
+  coCompileTypes["--tidy="] = std::bind(&cmcmd::HandleTidy, a1, a2, a3);
+  coCompileTypes["--lwyu="] = std::bind(&cmcmd::HandleLWYU, a1, a2, a3);
+  coCompileTypes["--cpplint="] = std::bind(&cmcmd::HandleCppLint, a1, a2, a3);
+  coCompileTypes["--cppcheck="] =
+    std::bind(&cmcmd::HandleCppCheck, a1, a2, a3);
+  // copy the command options to a vector of strings
+  std::vector<std::string> commandOptions;
+  for (const auto& i : coCompileTypes) {
+    commandOptions.push_back(i.first);
+  }
+
+  std::string runCmd;       // command to be run from --thing=command
+  std::string sourceFile;   // store --source=
+  std::string commandFound; // the command that was in the args list
+  std::vector<std::string> orig_cmd;
+  bool doing_options = true;
+  for (std::string::size_type cc = 2; cc < args.size(); cc++) {
+    std::string const& arg = args[cc];
+    // if the arg is -- then the rest of the args after
+    // go into orig_cmd
+    if (arg == "--") {
+      doing_options = false;
+    } else if (doing_options) {
+      bool optionFound = false;
+      // check arg against all the commandOptions
+      for (std::vector<std::string>::size_type i = 0;
+           i < commandOptions.size(); ++i) {
+        const std::string& command = commandOptions[i];
+        if (arg.compare(0, command.size(), command) == 0) {
+          optionFound = true;
+          runCmd = arg.substr(command.size());
+          commandFound = command;
+        }
+      }
+      // check arg with --source=
+      if (cmHasLiteralPrefix(arg, "--source=")) {
+        sourceFile = arg.substr(9);
+        optionFound = true;
+      }
+      // if it was not a commandOptions or --source then error
+      if (!optionFound) {
+        std::cerr << "__run_co_compile given unknown argument: " << arg
+                  << "\n";
+        return 1;
+      }
+    } else { // if not doing_options then push to orig_cmd
+      orig_cmd.push_back(arg);
+    }
+  }
+  if (commandFound.empty()) {
+    std::cerr << "__run_co_compile missing command to run. Looking for one of "
+                 "the following:\n";
+    for (const auto& i : commandOptions) {
+      std::cerr << i << "\n";
+    }
+    return 1;
+  }
+  // Default is to run the original command found after -- if the option
+  // does not need to do that, it should be specified here, currently only
+  // lwyu does that.
+  bool runOriginalCmd = true;
+  if (commandFound == "--lwyu=") {
+    runOriginalCmd = false;
+  }
+  if (runOriginalCmd && orig_cmd.empty()) {
+    std::cerr << "__run_co_compile missing compile command after --\n";
+    return 1;
+  }
+
+  // call the command handler here
+  int ret = coCompileTypes[commandFound](runCmd, sourceFile, orig_cmd);
+  // if the command returns non-zero then return and fail.
+  // for commands that do not want to break the build, they should return
+  // 0 no matter what.
+  if (ret != 0) {
+    return ret;
+  }
+  // if there is no original command to run return now
+  if (!runOriginalCmd) {
+    return ret;
+  }
+  // Now run the real compiler command and return its result value
+  if (!cmSystemTools::RunSingleCommand(orig_cmd, nullptr, nullptr, &ret,
+                                       nullptr,
+                                       cmSystemTools::OUTPUT_PASSTHROUGH)) {
+    std::cerr << "Error running '" << orig_cmd[0] << "'\n";
+    return 1;
+  }
+  // return the return value from the original compiler command
+  return ret;
 }
 
 int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
@@ -280,234 +557,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       return 0;
     }
 #endif
-    // run include what you use command and then run the compile
-    // command. This is an internal undocumented option and should
-    // only be used by CMake itself when running iwyu.
-    if (args[1] == "__run_iwyu") {
-      if (args.size() < 3) {
-        std::cerr << "__run_iwyu Usage: -E __run_iwyu [--iwyu=/path/iwyu]"
-                     " [--cpplint=/path/cpplint] [--tidy=/path/tidy]"
-                     " -- compile command\n";
-        return 1;
-      }
-      bool doing_options = true;
-      std::vector<std::string> orig_cmd;
-      std::string iwyu;
-      std::string tidy;
-      std::string sourceFile;
-      std::string lwyu;
-      std::string cpplint;
-      std::string cppcheck;
-      for (std::string::size_type cc = 2; cc < args.size(); cc++) {
-        std::string const& arg = args[cc];
-        if (arg == "--") {
-          doing_options = false;
-        } else if (doing_options && cmHasLiteralPrefix(arg, "--iwyu=")) {
-          iwyu = arg.substr(7);
-        } else if (doing_options && cmHasLiteralPrefix(arg, "--tidy=")) {
-          tidy = arg.substr(7);
-        } else if (doing_options && cmHasLiteralPrefix(arg, "--source=")) {
-          sourceFile = arg.substr(9);
-        } else if (doing_options && cmHasLiteralPrefix(arg, "--lwyu=")) {
-          lwyu = arg.substr(7);
-        } else if (doing_options && cmHasLiteralPrefix(arg, "--cpplint=")) {
-          cpplint = arg.substr(10);
-        } else if (doing_options && cmHasLiteralPrefix(arg, "--cppcheck=")) {
-          cppcheck = arg.substr(11);
-        } else if (doing_options) {
-          std::cerr << "__run_iwyu given unknown argument: " << arg << "\n";
-          return 1;
-        } else {
-          orig_cmd.push_back(arg);
-        }
-      }
-      if (tidy.empty() && iwyu.empty() && lwyu.empty() && cpplint.empty() &&
-          cppcheck.empty()) {
-        std::cerr << "__run_iwyu missing --cpplint=, --iwyu=, --lwyu=, "
-                     "--cppcheck= and/or --tidy=\n";
-        return 1;
-      }
-      if ((!cpplint.empty() || !tidy.empty() || !cppcheck.empty()) &&
-          sourceFile.empty()) {
-        std::cerr << "__run_iwyu --cpplint=, __run_iwyu --tidy="
-                     ", __run_iwyu --cppcheck require --source=\n";
-        return 1;
-      }
-      if (orig_cmd.empty() && lwyu.empty()) {
-        std::cerr << "__run_iwyu missing compile command after --\n";
-        return 1;
-      }
-
-      int ret = 0;
-
-      if (!iwyu.empty()) {
-        // Construct the iwyu command line by taking what was given
-        // and adding all the arguments we give to the compiler.
-        std::vector<std::string> iwyu_cmd;
-        cmSystemTools::ExpandListArgument(iwyu, iwyu_cmd, true);
-        iwyu_cmd.insert(iwyu_cmd.end(), orig_cmd.begin() + 1, orig_cmd.end());
-
-        // Run the iwyu command line.  Capture its stderr and hide its stdout.
-        // Ignore its return code because the tool always returns non-zero.
-        std::string stdErr;
-        if (!cmSystemTools::RunSingleCommand(iwyu_cmd, nullptr, &stdErr, &ret,
-                                             nullptr,
-                                             cmSystemTools::OUTPUT_NONE)) {
-          std::cerr << "Error running '" << iwyu_cmd[0] << "': " << stdErr
-                    << "\n";
-          return 1;
-        }
-
-        // Warn if iwyu reported anything.
-        if (stdErr.find("should remove these lines:") != std::string::npos ||
-            stdErr.find("should add these lines:") != std::string::npos) {
-          std::cerr << "Warning: include-what-you-use reported diagnostics:\n"
-                    << stdErr << "\n";
-        }
-      }
-
-      if (!tidy.empty()) {
-        // Construct the clang-tidy command line by taking what was given
-        // and adding our compiler command line.  The clang-tidy tool will
-        // automatically skip over the compiler itself and extract the
-        // options.
-        std::vector<std::string> tidy_cmd;
-        cmSystemTools::ExpandListArgument(tidy, tidy_cmd, true);
-        tidy_cmd.push_back(sourceFile);
-        tidy_cmd.push_back("--");
-        tidy_cmd.insert(tidy_cmd.end(), orig_cmd.begin(), orig_cmd.end());
-
-        // Run the tidy command line.  Capture its stdout and hide its stderr.
-        std::string stdOut;
-        std::string stdErr;
-        if (!cmSystemTools::RunSingleCommand(tidy_cmd, &stdOut, &stdErr, &ret,
-                                             nullptr,
-                                             cmSystemTools::OUTPUT_NONE)) {
-          std::cerr << "Error running '" << tidy_cmd[0] << "': " << stdErr
-                    << "\n";
-          return 1;
-        }
-        // Output the stdout from clang-tidy to stderr
-        std::cerr << stdOut;
-        // If clang-tidy exited with an error do the same.
-        if (ret != 0) {
-          std::cerr << stdErr;
-          return ret;
-        }
-      }
-      if (!lwyu.empty()) {
-        // Construct the ldd -r -u (link what you use lwyu) command line
-        // ldd -u -r lwuy target
-        std::vector<std::string> lwyu_cmd;
-        lwyu_cmd.push_back("ldd");
-        lwyu_cmd.push_back("-u");
-        lwyu_cmd.push_back("-r");
-        lwyu_cmd.push_back(lwyu);
-
-        // Run the ldd -u -r command line.
-        // Capture its stdout and hide its stderr.
-        // Ignore its return code because the tool always returns non-zero
-        // if there are any warnings, but we just want to warn.
-        std::string stdOut;
-        std::string stdErr;
-        if (!cmSystemTools::RunSingleCommand(lwyu_cmd, &stdOut, &stdErr, &ret,
-                                             nullptr,
-                                             cmSystemTools::OUTPUT_NONE)) {
-          std::cerr << "Error running '" << lwyu_cmd[0] << "': " << stdErr
-                    << "\n";
-          return 1;
-        }
-
-        // Output the stdout from ldd -r -u to stderr
-        // Warn if lwyu reported anything.
-        if (stdOut.find("Unused direct dependencies:") != std::string::npos) {
-          std::cerr << "Warning: " << stdOut;
-        }
-      }
-
-      if (!cpplint.empty()) {
-        // Construct the cpplint command line.
-        std::vector<std::string> cpplint_cmd;
-        cmSystemTools::ExpandListArgument(cpplint, cpplint_cmd, true);
-        cpplint_cmd.push_back(sourceFile);
-
-        // Run the cpplint command line.  Capture its output.
-        std::string stdOut;
-        if (!cmSystemTools::RunSingleCommand(cpplint_cmd, &stdOut, &stdOut,
-                                             &ret, nullptr,
-                                             cmSystemTools::OUTPUT_NONE)) {
-          std::cerr << "Error running '" << cpplint_cmd[0] << "': " << stdOut
-                    << "\n";
-          return 1;
-        }
-
-        // Output the output from cpplint to stderr
-        std::cerr << stdOut;
-
-        // If cpplint exited with an error do the same.
-        if (ret != 0) {
-          return ret;
-        }
-      }
-
-      if (!cppcheck.empty()) {
-        // Construct the cpplint command line.
-        std::vector<std::string> cppcheck_cmd;
-        cmSystemTools::ExpandListArgument(cppcheck, cppcheck_cmd, true);
-        // extract all the -D, -U, and -I options from the compile line
-        for (size_t i = 0; i < orig_cmd.size(); i++) {
-          std::string& opt = orig_cmd[i];
-          if (opt.size() > 2) {
-            if ((opt[0] == '-') &&
-                ((opt[1] == 'D') || (opt[1] == 'I') || (opt[1] == 'U'))) {
-              cppcheck_cmd.push_back(opt);
-#if defined(_WIN32)
-            } else if ((opt[0] == '/') &&
-                       ((opt[1] == 'D') || (opt[1] == 'I') ||
-                        (opt[1] == 'U'))) {
-              std::string optcopy = opt;
-              optcopy[0] = '-';
-              cppcheck_cmd.push_back(optcopy);
-#endif
-            }
-          }
-        }
-        // add the source file
-        cppcheck_cmd.push_back(sourceFile);
-
-        // Run the cpplint command line.  Capture its output.
-        std::string stdOut;
-        if (!cmSystemTools::RunSingleCommand(cppcheck_cmd, &stdOut, &stdOut,
-                                             &ret, nullptr,
-                                             cmSystemTools::OUTPUT_NONE)) {
-          std::cerr << "Error running '" << cppcheck_cmd[0] << "': " << stdOut
-                    << "\n";
-          return 1;
-        }
-        // Output the output from cpplint to stderr
-        if (stdOut.find("(error)") != std::string::npos ||
-            stdOut.find("(warning)") != std::string::npos ||
-            stdOut.find("(style)") != std::string::npos ||
-            stdOut.find("(performance)") != std::string::npos ||
-            stdOut.find("(portability)") != std::string::npos ||
-            stdOut.find("(information)") != std::string::npos) {
-          std::cerr << "Warning: cppcheck reported diagnostics:\n";
-        }
-        std::cerr << stdOut;
-      }
-      // ignore the cppcheck error code because it is likely to have them
-      // from bad -D stuff
-      ret = 0;
-      // Now run the real compiler command and return its result value
-      // unless we are lwyu
-      if (lwyu.empty() &&
-          !cmSystemTools::RunSingleCommand(
-            orig_cmd, nullptr, nullptr, &ret, nullptr,
-            cmSystemTools::OUTPUT_PASSTHROUGH)) {
-        std::cerr << "Error running '" << orig_cmd[0] << "'\n";
-        return 1;
-      }
-      return ret;
+    if (args[1] == "__run_co_compile") {
+      return cmcmd::HandleCoCompileCommands(args);
     }
 
     // Echo string
