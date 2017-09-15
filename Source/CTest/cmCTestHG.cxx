@@ -250,7 +250,7 @@ private:
         currPath += i;
       } else {
         output.push_back(currPath);
-        currPath = "";
+        currPath.clear();
       }
     }
     output.push_back(currPath);

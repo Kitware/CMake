@@ -126,7 +126,7 @@ int cmFortranParser_Input(cmFortranParser* parser, char* buffer,
 
 void cmFortranParser_StringStart(cmFortranParser* parser)
 {
-  parser->TokenString = "";
+  parser->TokenString.clear();
 }
 
 const char* cmFortranParser_StringEnd(cmFortranParser* parser)

@@ -1612,7 +1612,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       std::string srcDir = this->Makefile->GetCurrentSourceDirectory();
       std::string binDir = this->Makefile->GetCurrentBinaryDirectory();
       if (fullFileName.find(binDir) != std::string::npos) {
-        sourceLink = "";
+        sourceLink.clear();
       } else if (fullFileName.find(srcDir) != std::string::npos) {
         sourceLink = fullFileName.substr(srcDir.length() + 1);
       } else {

@@ -86,7 +86,7 @@ void cmRST::ProcessModule(std::istream& is)
         if (line[0] != '#') {
           this->ProcessLine(line.substr(0, pos));
         }
-        rst = "";
+        rst.clear();
         this->Reset();
         this->OutputLinePending = true;
       }
@@ -101,7 +101,7 @@ void cmRST::ProcessModule(std::istream& is)
           this->ProcessLine(line.substr(2));
           continue;
         }
-        rst = "";
+        rst.clear();
         this->Reset();
         this->OutputLinePending = true;
       }
@@ -345,7 +345,7 @@ void cmRST::ProcessDirectiveReplace()
   // Record markup lines as replacement text.
   std::string& replacement = this->Replace[this->ReplaceName];
   replacement += cmJoin(this->MarkupLines, " ");
-  this->ReplaceName = "";
+  this->ReplaceName.clear();
 }
 
 void cmRST::ProcessDirectiveTocTree()

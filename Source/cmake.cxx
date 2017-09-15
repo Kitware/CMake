@@ -1072,10 +1072,10 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator* gg)
 
   // Save the environment variables CXX and CC
   if (!cmSystemTools::GetEnv("CXX", this->CXXEnvironment)) {
-    this->CXXEnvironment = "";
+    this->CXXEnvironment.clear();
   }
   if (!cmSystemTools::GetEnv("CC", this->CCEnvironment)) {
-    this->CCEnvironment = "";
+    this->CCEnvironment.clear();
   }
 }
 

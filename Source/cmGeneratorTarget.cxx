@@ -3023,7 +3023,7 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name, std::string& soName,
     impName =
       this->GetFullNameInternal(config, cmStateEnums::ImportLibraryArtifact);
   } else {
-    impName = "";
+    impName.clear();
   }
 
   // The program database file name.
@@ -3126,9 +3126,9 @@ void cmGeneratorTarget::GetFullNameInternal(
       this->GetType() != cmStateEnums::SHARED_LIBRARY &&
       this->GetType() != cmStateEnums::MODULE_LIBRARY &&
       this->GetType() != cmStateEnums::EXECUTABLE) {
-    outPrefix = "";
+    outPrefix.clear();
     outBase = this->GetName();
-    outSuffix = "";
+    outSuffix.clear();
     return;
   }
 
@@ -3139,9 +3139,9 @@ void cmGeneratorTarget::GetFullNameInternal(
   // does not support import libraries.
   if (isImportedLibraryArtifact &&
       !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
-    outPrefix = "";
-    outBase = "";
-    outSuffix = "";
+    outPrefix.clear();
+    outBase.clear();
+    outSuffix.clear();
     return;
   }
 
@@ -4488,7 +4488,7 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
     out = cge->Evaluate(this->LocalGenerator, config);
 
     // Skip per-configuration subdirectory.
-    conf = "";
+    conf.clear();
   } else if (const char* outdir = this->GetProperty(propertyName)) {
     // Use the user-specified output directory.
     cmGeneratorExpression ge;
@@ -4498,7 +4498,7 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
     // Skip per-configuration subdirectory if the value contained a
     // generator expression.
     if (out != outdir) {
-      conf = "";
+      conf.clear();
     }
   } else if (this->GetType() == cmStateEnums::EXECUTABLE) {
     // Lookup the output path for executables.
@@ -4564,7 +4564,7 @@ bool cmGeneratorTarget::ComputePDBOutputDir(const std::string& kind,
     out = config_outdir;
 
     // Skip per-configuration subdirectory.
-    conf = "";
+    conf.clear();
   } else if (const char* outdir = this->GetProperty(propertyName)) {
     // Use the user-specified output directory.
     out = outdir;

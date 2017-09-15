@@ -36,7 +36,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args,
 
   std::string buildname = "WinNT";
   if (this->Makefile->GetDefinition("UNIX")) {
-    buildname = "";
+    buildname.clear();
     cmSystemTools::RunSingleCommand("uname -a", &buildname, &buildname);
     if (!buildname.empty()) {
       std::string RegExp = "([^ ]*) [^ ]* ([^ ]*) ";

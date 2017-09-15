@@ -140,10 +140,10 @@ void cmCTestSubmitHandler::Initialize()
   this->HasWarnings = false;
   this->HasErrors = false;
   this->Superclass::Initialize();
-  this->HTTPProxy = "";
+  this->HTTPProxy.clear();
   this->HTTPProxyType = 0;
-  this->HTTPProxyAuth = "";
-  this->FTPProxy = "";
+  this->HTTPProxyAuth.clear();
+  this->FTPProxy.clear();
   this->FTPProxyType = 0;
   this->LogFile = nullptr;
   this->Files.clear();

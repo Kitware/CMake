@@ -32,7 +32,7 @@ const char* cmCTestBuildAndTestHandler::GetOutput()
 }
 int cmCTestBuildAndTestHandler::ProcessHandler()
 {
-  this->Output = "";
+  this->Output.clear();
   std::string output;
   cmSystemTools::ResetErrorOccuredFlag();
   int retv = this->RunCMakeAndTest(&this->Output);

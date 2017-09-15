@@ -1483,7 +1483,7 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
       if (!line.empty() && (line.size() + i.size() + 2) > max_size) {
         os << line << "\n";
         sep = "  ";
-        line = "";
+        line.clear();
       }
       line += sep;
       line += i;

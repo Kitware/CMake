@@ -667,7 +667,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
     std::string t = vars["ARCH_FLAGS"];
     localGen.AddArchitectureFlags(t, &genTarget, cudaLinkLanguage, cfgName);
     vars["ARCH_FLAGS"] = t;
-    t = "";
+    t.clear();
     localGen.AddLanguageFlagsForLinking(t, &genTarget, cudaLinkLanguage,
                                         cfgName);
     vars["LANGUAGE_COMPILE_FLAGS"] = t;
@@ -884,7 +884,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     std::string t = vars["ARCH_FLAGS"];
     localGen.AddArchitectureFlags(t, &genTarget, TargetLinkLanguage, cfgName);
     vars["ARCH_FLAGS"] = t;
-    t = "";
+    t.clear();
     t += lwyuFlags;
     localGen.AddLanguageFlagsForLinking(t, &genTarget, TargetLinkLanguage,
                                         cfgName);
@@ -1070,7 +1070,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       if (targetOutputReal == soName || targetOutput == soName) {
         symlinkVars["SONAME"] = soName;
       } else {
-        symlinkVars["SONAME"] = "";
+        symlinkVars["SONAME"].clear();
         symlinks.push_back(soName);
       }
       symlinks.push_back(targetOutput);

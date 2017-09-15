@@ -656,7 +656,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
           c = current_str[current_str.size() - 1 - j];
           fin.putback(static_cast<char>(c));
         }
-        current_str = "";
+        current_str.clear();
       }
     }
 
@@ -667,14 +667,14 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       if (s.length() >= minlen && (!have_regex || regex.find(s.c_str()))) {
         output_size += static_cast<int>(s.size()) + 1;
         if (limit_output >= 0 && output_size >= limit_output) {
-          s = "";
+          s.clear();
           break;
         }
         strings.push_back(s);
       }
 
       // Reset the string to empty.
-      s = "";
+      s.clear();
     } else if (current_str.empty()) {
       // A non-string character has been found.  Check if the current
       // string matches the requirements.  We require that the length
@@ -683,14 +683,14 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
           (!have_regex || regex.find(s.c_str()))) {
         output_size += static_cast<int>(s.size()) + 1;
         if (limit_output >= 0 && output_size >= limit_output) {
-          s = "";
+          s.clear();
           break;
         }
         strings.push_back(s);
       }
 
       // Reset the string to empty.
-      s = "";
+      s.clear();
     } else {
       s += current_str;
     }
@@ -700,12 +700,12 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       if (s.length() >= minlen && (!have_regex || regex.find(s.c_str()))) {
         output_size += static_cast<int>(s.size()) + 1;
         if (limit_output >= 0 && output_size >= limit_output) {
-          s = "";
+          s.clear();
           break;
         }
         strings.push_back(s);
       }
-      s = "";
+      s.clear();
     }
   }
 

@@ -372,7 +372,7 @@ static int do_build(int ac, char const* const* av)
         hasTarget = true;
       } else {
         std::cerr << "'--target' may not be specified more than once.\n\n";
-        dir = "";
+        dir.clear();
         break;
       }
     } else if (strcmp(av[i], "--config") == 0) {
@@ -400,7 +400,7 @@ static int do_build(int ac, char const* const* av)
           break;
         default:
           std::cerr << "Unknown argument " << av[i] << std::endl;
-          dir = "";
+          dir.clear();
           break;
       }
     }

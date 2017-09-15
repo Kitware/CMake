@@ -171,8 +171,8 @@ cmCTestBuildHandler::cmCTestBuildHandler()
 void cmCTestBuildHandler::Initialize()
 {
   this->Superclass::Initialize();
-  this->StartBuild = "";
-  this->EndBuild = "";
+  this->StartBuild.clear();
+  this->EndBuild.clear();
   this->CustomErrorMatches.clear();
   this->CustomErrorExceptions.clear();
   this->CustomWarningMatches.clear();
@@ -190,8 +190,8 @@ void cmCTestBuildHandler::Initialize()
   this->BuildOutputLogSize = 0;
   this->CurrentProcessingLine.clear();
 
-  this->SimplifySourceDir = "";
-  this->SimplifyBuildDir = "";
+  this->SimplifySourceDir.clear();
+  this->SimplifyBuildDir.clear();
   this->OutputLineCounter = 0;
   this->ErrorsAndWarnings.clear();
   this->LastErrorOrWarning = this->ErrorsAndWarnings.end();
@@ -371,8 +371,8 @@ int cmCTestBuildHandler::ProcessHandler()
                                          this->WarningExceptionRegex);
 
   // Determine source and binary tree substitutions to simplify the output.
-  this->SimplifySourceDir = "";
-  this->SimplifyBuildDir = "";
+  this->SimplifySourceDir.clear();
+  this->SimplifyBuildDir.clear();
   if (this->CTest->GetCTestConfiguration("SourceDirectory").size() > 20) {
     std::string srcdir =
       this->CTest->GetCTestConfiguration("SourceDirectory") + "/";
@@ -888,8 +888,8 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
         errorwarning.Text =
           "*** WARNING non-zero return value in ctest from: ";
         errorwarning.Text += argv[0];
-        errorwarning.PreContext = "";
-        errorwarning.PostContext = "";
+        errorwarning.PreContext.clear();
+        errorwarning.PostContext.clear();
         errorwarning.Error = false;
         this->ErrorsAndWarnings.push_back(errorwarning);
         this->TotalWarnings++;
@@ -911,8 +911,8 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
     errorwarning.LogLine = 1;
     errorwarning.Text = "*** ERROR executing: ";
     errorwarning.Text += cmsysProcess_GetErrorString(cp);
-    errorwarning.PreContext = "";
-    errorwarning.PostContext = "";
+    errorwarning.PreContext.clear();
+    errorwarning.PostContext.clear();
     errorwarning.Error = true;
     this->ErrorsAndWarnings.push_back(errorwarning);
     this->TotalErrors++;
@@ -996,8 +996,8 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
         // This is an error or warning, so generate report
         errorwarning.LogLine = static_cast<int>(this->OutputLineCounter + 1);
         errorwarning.Text = line;
-        errorwarning.PreContext = "";
-        errorwarning.PostContext = "";
+        errorwarning.PreContext.clear();
+        errorwarning.PostContext.clear();
 
         // Copy pre-context to report
         for (std::string const& pc : this->PreContext) {

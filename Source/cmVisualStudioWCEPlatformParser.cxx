@@ -56,12 +56,12 @@ void cmVisualStudioWCEPlatformParser::StartElement(const std::string& name,
     return;
   }
 
-  this->CharacterData = "";
+  this->CharacterData.clear();
 
   if (name == "PlatformData") {
-    this->PlatformName = "";
-    this->OSMajorVersion = "";
-    this->OSMinorVersion = "";
+    this->PlatformName.clear();
+    this->OSMajorVersion.clear();
+    this->OSMinorVersion.clear();
     this->Macros.clear();
   }
 

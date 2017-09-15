@@ -21,7 +21,7 @@ public:
     this->SkipThisClass = false;
     this->FilePaths.push_back(this->Coverage.SourceDir);
     this->FilePaths.push_back(this->Coverage.BinaryDir);
-    this->CurFileName = "";
+    this->CurFileName.clear();
   }
 
   ~XMLParser() CM_OVERRIDE {}
@@ -67,7 +67,7 @@ protected:
                                               << std::endl,
                              this->Coverage.Quiet);
           std::string filename = atts[tagCount + 1];
-          this->CurFileName = "";
+          this->CurFileName.clear();
 
           // Check if this is an absolute path that falls within our
           // source or binary directories.
