@@ -92,6 +92,10 @@ int main(int argc, char** argv)
   cmAddPluginPath();
 #endif
 
+#if QT_VERSION >= 0x050600
+  QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
+
   QApplication app(argc, argv);
 
   setlocale(LC_NUMERIC, "C");
