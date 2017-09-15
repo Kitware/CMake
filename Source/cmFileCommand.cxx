@@ -1706,7 +1706,7 @@ struct cmFileInstaller : public cmFileCopier
     this->Manifest =
       this->Makefile->GetSafeDefinition("CMAKE_INSTALL_MANIFEST_FILES");
   }
-  ~cmFileInstaller() CM_OVERRIDE
+  ~cmFileInstaller() override
   {
     // Save the updated install manifest.
     this->Makefile->AddDefinition("CMAKE_INSTALL_MANIFEST_FILES",
@@ -1731,12 +1731,12 @@ protected:
     this->Manifest += file.substr(this->DestDirLength);
   }
 
-  std::string const& ToName(std::string const& fromName) CM_OVERRIDE
+  std::string const& ToName(std::string const& fromName) override
   {
     return this->Rename.empty() ? fromName : this->Rename;
   }
 
-  void ReportCopy(const char* toFile, Type type, bool copy) CM_OVERRIDE
+  void ReportCopy(const char* toFile, Type type, bool copy) override
   {
     if (!this->MessageNever && (copy || !this->MessageLazy)) {
       std::string message = (copy ? "Installing: " : "Up-to-date: ");
@@ -1748,11 +1748,11 @@ protected:
       this->ManifestAppend(toFile);
     }
   }
-  bool ReportMissing(const char* fromFile) CM_OVERRIDE
+  bool ReportMissing(const char* fromFile) override
   {
     return (this->Optional || this->cmFileCopier::ReportMissing(fromFile));
   }
-  bool Install(const char* fromFile, const char* toFile) CM_OVERRIDE
+  bool Install(const char* fromFile, const char* toFile) override
   {
     // Support installing from empty source to make a directory.
     if (this->InstallType == cmInstallType_DIRECTORY && !*fromFile) {
@@ -1761,16 +1761,16 @@ protected:
     return this->cmFileCopier::Install(fromFile, toFile);
   }
 
-  bool Parse(std::vector<std::string> const& args) CM_OVERRIDE;
+  bool Parse(std::vector<std::string> const& args) override;
   enum
   {
     DoingType = DoingLast1,
     DoingRename,
     DoingLast2
   };
-  bool CheckKeyword(std::string const& arg) CM_OVERRIDE;
-  bool CheckValue(std::string const& arg) CM_OVERRIDE;
-  void DefaultFilePermissions() CM_OVERRIDE
+  bool CheckKeyword(std::string const& arg) override;
+  bool CheckValue(std::string const& arg) override;
+  void DefaultFilePermissions() override
   {
     this->cmFileCopier::DefaultFilePermissions();
     // Add execute permissions based on the target type.

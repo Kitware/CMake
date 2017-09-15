@@ -21,8 +21,7 @@ public:
   cmMSVC60LinkLineComputer(cmOutputConverter* outputConverter,
                            cmStateDirectory const& stateDir);
 
-  std::string ConvertToLinkReference(std::string const& input) const
-    CM_OVERRIDE;
+  std::string ConvertToLinkReference(std::string const& input) const override;
 };
 
 #endif

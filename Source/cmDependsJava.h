@@ -25,16 +25,16 @@ public:
   cmDependsJava();
 
   /** Virtual destructor to cleanup subclasses properly.  */
-  ~cmDependsJava() CM_OVERRIDE;
+  ~cmDependsJava() override;
 
 protected:
   // Implement writing/checking methods required by superclass.
   bool WriteDependencies(const std::set<std::string>& sources,
                          const std::string& file, std::ostream& makeDepends,
-                         std::ostream& internalDepends) CM_OVERRIDE;
+                         std::ostream& internalDepends) override;
   bool CheckDependencies(
     std::istream& internalDepends, const char* internalDependsFileName,
-    std::map<std::string, DependencyVector>& validDeps) CM_OVERRIDE;
+    std::map<std::string, DependencyVector>& validDeps) override;
 };
 
 #endif

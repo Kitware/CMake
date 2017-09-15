@@ -25,7 +25,7 @@ class cmFindCommon : public cmCommand
 {
 public:
   cmFindCommon();
-  ~cmFindCommon() CM_OVERRIDE;
+  ~cmFindCommon() override;
 
 protected:
   friend class cmSearchPath;

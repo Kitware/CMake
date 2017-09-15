@@ -36,7 +36,7 @@ public:
   /**
    * The main entry point for this class
    */
-  int ProcessHandler() CM_OVERRIDE;
+  int ProcessHandler() override;
 
   /**
    * When both -R and -I are used should te resulting test list be the
@@ -54,7 +54,7 @@ public:
   /**
    * This method is called when reading CTest custom file
    */
-  void PopulateCustomVectors(cmMakefile* mf) CM_OVERRIDE;
+  void PopulateCustomVectors(cmMakefile* mf) override;
 
   ///! Control the use of the regular expresisons, call these methods to turn
   /// them on
@@ -95,7 +95,7 @@ public:
    */
   bool SetDirectoryProperties(const std::vector<std::string>& args);
 
-  void Initialize() CM_OVERRIDE;
+  void Initialize() override;
 
   // NOTE: This struct is Saved/Restored
   // in cmCTestTestHandler, if you add to this class

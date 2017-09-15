@@ -99,7 +99,7 @@ public:
   }
 
   cmExternalMakefileProjectGenerator* CreateExternalMakefileProjectGenerator()
-    const CM_OVERRIDE
+    const override
   {
     T* p = new T;
     p->SetName(GetName());

@@ -36,7 +36,7 @@ private:
   std::string& Rev;
   cmsys::RegularExpression RegexIdentify;
 
-  bool ProcessLine() CM_OVERRIDE
+  bool ProcessLine() override
   {
     if (this->RegexIdentify.find(this->Line)) {
       this->Rev = this->RegexIdentify.match(1);
@@ -60,7 +60,7 @@ private:
   cmCTestHG* HG;
   cmsys::RegularExpression RegexStatus;
 
-  bool ProcessLine() CM_OVERRIDE
+  bool ProcessLine() override
   {
     if (this->RegexStatus.find(this->Line)) {
       this->DoPath(this->RegexStatus.match(1)[0], this->RegexStatus.match(2));
@@ -167,7 +167,7 @@ public:
   {
     this->InitializeParser();
   }
-  ~LogParser() CM_OVERRIDE { this->CleanupParser(); }
+  ~LogParser() override { this->CleanupParser(); }
 private:
   cmCTestHG* HG;
 
@@ -178,14 +178,14 @@ private:
   Change CurChange;
   std::vector<char> CData;
 
-  bool ProcessChunk(const char* data, int length) CM_OVERRIDE
+  bool ProcessChunk(const char* data, int length) override
   {
     this->OutputLogger::ProcessChunk(data, length);
     this->ParseChunk(data, length);
     return true;
   }
 
-  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
+  void StartElement(const std::string& name, const char** atts) override
   {
     this->CData.clear();
     if (name == "logentry") {
@@ -197,12 +197,12 @@ private:
     }
   }
 
-  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
+  void CharacterDataHandler(const char* data, int length) override
   {
     this->CData.insert(this->CData.end(), data, data + length);
   }
 
-  void EndElement(const std::string& name) CM_OVERRIDE
+  void EndElement(const std::string& name) override
   {
     if (name == "logentry") {
       this->HG->DoRevision(this->Rev, this->Changes);
@@ -257,7 +257,7 @@ private:
     return output;
   }
 
-  void ReportError(int /*line*/, int /*column*/, const char* msg) CM_OVERRIDE
+  void ReportError(int /*line*/, int /*column*/, const char* msg) override
   {
     this->HG->Log << "Error parsing hg log xml: " << msg << "\n";
   }

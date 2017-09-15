@@ -22,7 +22,7 @@ public:
 
   static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
 private:
   void CreateKateProjectFile(const cmLocalGenerator* lg) const;

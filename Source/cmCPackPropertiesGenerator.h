@@ -29,7 +29,7 @@ public:
 
 protected:
   void GenerateScriptForConfig(std::ostream& os, const std::string& config,
-                               Indent indent) CM_OVERRIDE;
+                               Indent indent) override;
 
   cmLocalGenerator* LG;
   cmInstalledFile const& InstalledFile;

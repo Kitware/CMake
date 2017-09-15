@@ -23,13 +23,13 @@ public:
    * Construct generator
    */
   cmCPackOSXX11Generator();
-  ~cmCPackOSXX11Generator() CM_OVERRIDE;
+  ~cmCPackOSXX11Generator() override;
 
 protected:
-  virtual int InitializeInternal() CM_OVERRIDE;
-  int PackageFiles() CM_OVERRIDE;
-  const char* GetPackagingInstallPrefix() CM_OVERRIDE;
-  const char* GetOutputExtension() CM_OVERRIDE { return ".dmg"; }
+  virtual int InitializeInternal() override;
+  int PackageFiles() override;
+  const char* GetPackagingInstallPrefix() override;
+  const char* GetOutputExtension() override { return ".dmg"; }
 
   // bool CopyCreateResourceFile(const std::string& name,
   //                            const std::string& dir);

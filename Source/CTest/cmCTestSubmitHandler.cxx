@@ -38,7 +38,7 @@ class cmCTestSubmitHandler::ResponseParser : public cmXMLParser
 {
 public:
   ResponseParser() { this->Status = STATUS_OK; }
-  ~ResponseParser() CM_OVERRIDE {}
+  ~ResponseParser() override {}
 
 public:
   enum StatusType
@@ -66,17 +66,17 @@ private:
   }
 
   void StartElement(const std::string& /*name*/,
-                    const char** /*atts*/) CM_OVERRIDE
+                    const char** /*atts*/) override
   {
     this->CurrentValue.clear();
   }
 
-  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
+  void CharacterDataHandler(const char* data, int length) override
   {
     this->CurrentValue.insert(this->CurrentValue.end(), data, data + length);
   }
 
-  void EndElement(const std::string& name) CM_OVERRIDE
+  void EndElement(const std::string& name) override
   {
     if (name == "status") {
       std::string status = cmSystemTools::UpperCase(this->GetCurrentValue());

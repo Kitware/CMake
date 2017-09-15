@@ -122,7 +122,7 @@ public:
   {
   }
 
-  void write_value(cmGeneratedFileStream& s) const CM_OVERRIDE
+  void write_value(cmGeneratedFileStream& s) const override
   {
     s << EscapeQuotes(value);
   }
@@ -154,7 +154,7 @@ public:
     return *this;
   }
 
-  void write_value(cmGeneratedFileStream& s) const CM_OVERRIDE
+  void write_value(cmGeneratedFileStream& s) const override
   {
     bool with_comma = false;
 
@@ -179,7 +179,7 @@ public:
   {
   }
 
-  void write_value(cmGeneratedFileStream& s) const CM_OVERRIDE
+  void write_value(cmGeneratedFileStream& s) const override
   {
     s << "{\n";
     for (VList::const_iterator it = value.begin(); it != value.end(); ++it) {

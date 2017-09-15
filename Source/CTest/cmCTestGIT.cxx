@@ -46,7 +46,7 @@ public:
 
 private:
   std::string& Line1;
-  bool ProcessLine() CM_OVERRIDE
+  bool ProcessLine() override
   {
     // Only the first line is of interest.
     this->Line1 = this->Line;
@@ -354,7 +354,7 @@ protected:
     this->Changes.clear();
   }
 
-  bool ProcessLine() CM_OVERRIDE
+  bool ProcessLine() override
   {
     if (this->Line[0] == ':') {
       this->DiffField = DiffFieldChange;
@@ -512,7 +512,7 @@ private:
     person.TimeZone = strtol(c, const_cast<char**>(&c), 10);
   }
 
-  bool ProcessLine() CM_OVERRIDE
+  bool ProcessLine() override
   {
     if (this->Line.empty()) {
       if (this->Section == SectionBody && this->LineEnd == '\0') {

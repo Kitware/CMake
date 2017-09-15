@@ -1662,7 +1662,7 @@ public:
   }
 
 private:
-  bool Visit(std::string const& fullPath) CM_OVERRIDE
+  bool Visit(std::string const& fullPath) override
   {
     if (this->UseSuffixes) {
       return this->FPC->SearchDirectory(fullPath);
@@ -1710,12 +1710,12 @@ public:
 
 private:
   std::string String;
-  bool Search(std::string const& parent, cmFileList& lister) CM_OVERRIDE
+  bool Search(std::string const& parent, cmFileList& lister) override
   {
     std::string fullPath = parent + this->String;
     return this->Consider(fullPath, lister);
   }
-  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
+  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const override
   {
     CM_AUTO_PTR<cmFileListGeneratorBase> g(
       new cmFileListGeneratorFixed(*this));
@@ -1739,7 +1739,7 @@ public:
 
 private:
   std::vector<std::string> const& Vector;
-  bool Search(std::string const& parent, cmFileList& lister) CM_OVERRIDE
+  bool Search(std::string const& parent, cmFileList& lister) override
   {
     for (std::string const& i : this->Vector) {
       if (this->Consider(parent + i, lister)) {
@@ -1748,7 +1748,7 @@ private:
     }
     return false;
   }
-  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
+  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const override
   {
     CM_AUTO_PTR<cmFileListGeneratorBase> g(
       new cmFileListGeneratorEnumerate(*this));
@@ -1788,7 +1788,7 @@ protected:
 
 private:
   std::vector<std::string> const& Names;
-  bool Search(std::string const& parent, cmFileList& lister) CM_OVERRIDE
+  bool Search(std::string const& parent, cmFileList& lister) override
   {
     // Construct a list of matches.
     std::vector<std::string> matches;
@@ -1820,7 +1820,7 @@ private:
     }
     return false;
   }
-  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
+  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const override
   {
     CM_AUTO_PTR<cmFileListGeneratorBase> g(
       new cmFileListGeneratorProject(*this));
@@ -1848,7 +1848,7 @@ public:
 private:
   std::vector<std::string> const& Names;
   std::string Extension;
-  bool Search(std::string const& parent, cmFileList& lister) CM_OVERRIDE
+  bool Search(std::string const& parent, cmFileList& lister) override
   {
     // Construct a list of matches.
     std::vector<std::string> matches;
@@ -1874,7 +1874,7 @@ private:
     }
     return false;
   }
-  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
+  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const override
   {
     CM_AUTO_PTR<cmFileListGeneratorBase> g(
       new cmFileListGeneratorMacProject(*this));
@@ -1899,7 +1899,7 @@ public:
 
 private:
   std::string String;
-  bool Search(std::string const& parent, cmFileList& lister) CM_OVERRIDE
+  bool Search(std::string const& parent, cmFileList& lister) override
   {
     // Look for matching files.
     std::vector<std::string> matches;
@@ -1918,7 +1918,7 @@ private:
     }
     return false;
   }
-  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
+  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const override
   {
     CM_AUTO_PTR<cmFileListGeneratorBase> g(
       new cmFileListGeneratorCaseInsensitive(*this));
@@ -1942,7 +1942,7 @@ public:
 
 private:
   std::string Pattern;
-  bool Search(std::string const& parent, cmFileList& lister) CM_OVERRIDE
+  bool Search(std::string const& parent, cmFileList& lister) override
   {
     // Glob the set of matching files.
     std::string expr = parent;
@@ -1963,7 +1963,7 @@ private:
     }
     return false;
   }
-  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
+  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const override
   {
     CM_AUTO_PTR<cmFileListGeneratorBase> g(new cmFileListGeneratorGlob(*this));
     return g;

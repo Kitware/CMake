@@ -47,7 +47,7 @@ public:
     this->CTest = c;
     this->SetErrorCallback(xmlReportError, c);
   }
-  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
+  void StartElement(const std::string& name, const char** atts) override
   {
     if (name == "MemoryLeak" || name == "ResourceLeak") {
       this->Errors.push_back(cmCTestMemCheckHandler::MLK);
@@ -64,7 +64,7 @@ public:
     ostr << "\n";
     this->Log += ostr.str();
   }
-  void EndElement(const std::string& /*name*/) CM_OVERRIDE {}
+  void EndElement(const std::string& /*name*/) override {}
 
   const char* GetAttribute(const char* name, const char** atts)
   {

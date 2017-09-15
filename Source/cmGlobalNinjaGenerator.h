@@ -78,7 +78,7 @@ public:
 
   cmLinkLineComputer* CreateLinkLineComputer(
     cmOutputConverter* outputConverter,
-    cmStateDirectory const& stateDir) const CM_OVERRIDE;
+    cmStateDirectory const& stateDir) const override;
 
   /**
    * Write the given @a comment to the output stream @a os. It
@@ -98,7 +98,7 @@ public:
    */
   static bool SupportsPlatform() { return false; }
 
-  bool IsIPOSupported() const CM_OVERRIDE { return true; }
+  bool IsIPOSupported() const override { return true; }
 
   /**
    * Write a build statement to @a os with the @a comment using
@@ -183,11 +183,11 @@ public:
     return new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaGenerator>();
   }
 
-  ~cmGlobalNinjaGenerator() CM_OVERRIDE {}
+  ~cmGlobalNinjaGenerator() override {}
 
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) CM_OVERRIDE;
+  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
-  std::string GetName() const CM_OVERRIDE
+  std::string GetName() const override
   {
     return cmGlobalNinjaGenerator::GetActualName();
   }
@@ -195,12 +195,12 @@ public:
   static std::string GetActualName() { return "Ninja"; }
 
   /** Get encoding used by generator for ninja files */
-  codecvt::Encoding GetMakefileEncoding() const CM_OVERRIDE;
+  codecvt::Encoding GetMakefileEncoding() const override;
 
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   void EnableLanguage(std::vector<std::string> const& languages,
-                      cmMakefile* mf, bool optional) CM_OVERRIDE;
+                      cmMakefile* mf, bool optional) override;
 
   void GenerateBuildCommand(std::vector<std::string>& makeCommand,
                             const std::string& makeProgram,
@@ -209,34 +209,31 @@ public:
                             const std::string& targetName,
                             const std::string& config, bool fast, bool verbose,
                             std::vector<std::string> const& makeOptions =
-                              std::vector<std::string>()) CM_OVERRIDE;
+                              std::vector<std::string>()) override;
 
   // Setup target names
-  const char* GetAllTargetName() const CM_OVERRIDE { return "all"; }
-  const char* GetInstallTargetName() const CM_OVERRIDE { return "install"; }
-  const char* GetInstallLocalTargetName() const CM_OVERRIDE
+  const char* GetAllTargetName() const override { return "all"; }
+  const char* GetInstallTargetName() const override { return "install"; }
+  const char* GetInstallLocalTargetName() const override
   {
     return "install/local";
   }
-  const char* GetInstallStripTargetName() const CM_OVERRIDE
+  const char* GetInstallStripTargetName() const override
   {
     return "install/strip";
   }
-  const char* GetTestTargetName() const CM_OVERRIDE { return "test"; }
-  const char* GetPackageTargetName() const CM_OVERRIDE { return "package"; }
-  const char* GetPackageSourceTargetName() const CM_OVERRIDE
+  const char* GetTestTargetName() const override { return "test"; }
+  const char* GetPackageTargetName() const override { return "package"; }
+  const char* GetPackageSourceTargetName() const override
   {
     return "package_source";
   }
-  const char* GetEditCacheTargetName() const CM_OVERRIDE
-  {
-    return "edit_cache";
-  }
-  const char* GetRebuildCacheTargetName() const CM_OVERRIDE
+  const char* GetEditCacheTargetName() const override { return "edit_cache"; }
+  const char* GetRebuildCacheTargetName() const override
   {
     return "rebuild_cache";
   }
-  const char* GetCleanTargetName() const CM_OVERRIDE { return "clean"; }
+  const char* GetCleanTargetName() const override { return "clean"; }
 
   cmGeneratedFileStream* GetBuildFileStream() const
   {
@@ -340,7 +337,7 @@ public:
 
   void AddTargetAlias(const std::string& alias, cmGeneratorTarget* target);
 
-  void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const CM_OVERRIDE;
+  void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
 
   // Ninja generator uses 'deps' and 'msvc_deps_prefix' introduced in 1.3
   static std::string RequiredNinjaVersion() { return "1.3"; }
@@ -363,16 +360,16 @@ public:
                        std::vector<std::string> const& linked_target_dirs);
 
 protected:
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
-  bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const CM_OVERRIDE { return true; }
+  bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const override { return true; }
 
 private:
-  std::string GetEditCacheCommand() const CM_OVERRIDE;
-  bool FindMakeProgram(cmMakefile* mf) CM_OVERRIDE;
+  std::string GetEditCacheCommand() const override;
+  bool FindMakeProgram(cmMakefile* mf) override;
   void CheckNinjaFeatures();
   bool CheckLanguages(std::vector<std::string> const& languages,
-                      cmMakefile* mf) const CM_OVERRIDE;
+                      cmMakefile* mf) const override;
   bool CheckFortran(cmMakefile* mf) const;
 
   void OpenBuildFileStream();

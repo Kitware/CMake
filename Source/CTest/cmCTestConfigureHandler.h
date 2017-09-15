@@ -19,11 +19,11 @@ public:
   /*
    * The main entry point for this class
    */
-  int ProcessHandler() CM_OVERRIDE;
+  int ProcessHandler() override;
 
   cmCTestConfigureHandler();
 
-  void Initialize() CM_OVERRIDE;
+  void Initialize() override;
 };
 
 #endif

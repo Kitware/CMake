@@ -20,10 +20,10 @@ public:
    * Construct generator
    */
   cmCPackZIPGenerator();
-  ~cmCPackZIPGenerator() CM_OVERRIDE;
+  ~cmCPackZIPGenerator() override;
 
 protected:
-  const char* GetOutputExtension() CM_OVERRIDE { return ".zip"; }
+  const char* GetOutputExtension() override { return ".zip"; }
 };
 
 #endif

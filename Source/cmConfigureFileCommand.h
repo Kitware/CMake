@@ -16,14 +16,14 @@ class cmExecutionStatus;
 class cmConfigureFileCommand : public cmCommand
 {
 public:
-  cmCommand* Clone() CM_OVERRIDE { return new cmConfigureFileCommand; }
+  cmCommand* Clone() override { return new cmConfigureFileCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
 private:
   int ConfigureFile();

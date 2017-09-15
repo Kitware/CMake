@@ -19,12 +19,12 @@ public:
   cmMacroHelperCommand() {}
 
   ///! clean up any memory allocated by the macro
-  ~cmMacroHelperCommand() CM_OVERRIDE {}
+  ~cmMacroHelperCommand() override {}
 
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmMacroHelperCommand* newC = new cmMacroHelperCommand;
     // we must copy when we clone
@@ -40,10 +40,10 @@ public:
    * the CMakeLists.txt file.
    */
   bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
-                         cmExecutionStatus&) CM_OVERRIDE;
+                         cmExecutionStatus&) override;
 
   bool InitialPass(std::vector<std::string> const&,
-                   cmExecutionStatus&) CM_OVERRIDE
+                   cmExecutionStatus&) override
   {
     return false;
   }

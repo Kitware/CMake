@@ -22,13 +22,13 @@ public:
    * Construct generator
    */
   cmCPackFreeBSDGenerator();
-  ~cmCPackFreeBSDGenerator() CM_OVERRIDE;
+  ~cmCPackFreeBSDGenerator() override;
 
-  int InitializeInternal() CM_OVERRIDE;
-  int PackageFiles() CM_OVERRIDE;
+  int InitializeInternal() override;
+  int PackageFiles() override;
 
 protected:
-  const char* GetOutputExtension() CM_OVERRIDE { return ".txz"; }
+  const char* GetOutputExtension() override { return ".txz"; }
 
   std::string var_lookup(const char* var_name);
   void write_manifest_fields(cmGeneratedFileStream&);

@@ -24,10 +24,10 @@ public:
     this->CurFileName = "";
   }
 
-  ~XMLParser() CM_OVERRIDE {}
+  ~XMLParser() override {}
 
 protected:
-  void EndElement(const std::string& name) CM_OVERRIDE
+  void EndElement(const std::string& name) override
   {
     if (name == "source") {
       this->InSource = false;
@@ -38,7 +38,7 @@ protected:
     }
   }
 
-  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
+  void CharacterDataHandler(const char* data, int length) override
   {
     std::string tmp;
     tmp.insert(0, data, length);
@@ -50,7 +50,7 @@ protected:
     }
   }
 
-  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
+  void StartElement(const std::string& name, const char** atts) override
   {
     std::string FoundSource;
     std::string finalpath;

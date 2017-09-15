@@ -299,7 +299,7 @@ private:
 
 #define cmCPackTypeMacro(klass, superclass)                                   \
   typedef superclass Superclass;                                              \
-  const char* GetNameOfClass() CM_OVERRIDE { return #klass; }                 \
+  const char* GetNameOfClass() override { return #klass; }                    \
   static cmCPackGenerator* CreateGenerator() { return new klass; }            \
   class cmCPackTypeMacro_UseTrailingSemicolon
 

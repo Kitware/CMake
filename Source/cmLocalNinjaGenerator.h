@@ -38,14 +38,14 @@ class cmLocalNinjaGenerator : public cmLocalCommonGenerator
 public:
   cmLocalNinjaGenerator(cmGlobalGenerator* gg, cmMakefile* mf);
 
-  ~cmLocalNinjaGenerator() CM_OVERRIDE;
+  ~cmLocalNinjaGenerator() override;
 
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
-  cmRulePlaceholderExpander* CreateRulePlaceholderExpander() const CM_OVERRIDE;
+  cmRulePlaceholderExpander* CreateRulePlaceholderExpander() const override;
 
-  std::string GetTargetDirectory(cmGeneratorTarget const* target) const
-    CM_OVERRIDE;
+  std::string GetTargetDirectory(
+    cmGeneratorTarget const* target) const override;
 
   const cmGlobalNinjaGenerator* GetGlobalNinjaGenerator() const;
   cmGlobalNinjaGenerator* GetGlobalNinjaGenerator();
@@ -76,13 +76,13 @@ public:
 
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* gt = nullptr) CM_OVERRIDE;
+    cmGeneratorTarget const* gt = nullptr) override;
 
 protected:
   std::string ConvertToIncludeReference(
     std::string const& path,
     cmOutputConverter::OutputFormat format = cmOutputConverter::SHELL,
-    bool forceFullPaths = false) CM_OVERRIDE;
+    bool forceFullPaths = false) override;
 
 private:
   cmGeneratedFileStream& GetBuildFileStream() const;

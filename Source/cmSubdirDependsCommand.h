@@ -15,9 +15,9 @@ class cmExecutionStatus;
 class cmSubdirDependsCommand : public cmCommand
 {
 public:
-  cmCommand* Clone() CM_OVERRIDE { return new cmSubdirDependsCommand; }
+  cmCommand* Clone() override { return new cmSubdirDependsCommand; }
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 };
 
 #endif

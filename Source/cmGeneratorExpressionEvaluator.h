@@ -42,12 +42,12 @@ struct TextContent : public cmGeneratorExpressionEvaluator
   }
 
   std::string Evaluate(cmGeneratorExpressionContext*,
-                       cmGeneratorExpressionDAGChecker*) const CM_OVERRIDE
+                       cmGeneratorExpressionDAGChecker*) const override
   {
     return std::string(this->Content, this->Length);
   }
 
-  Type GetType() const CM_OVERRIDE
+  Type GetType() const override
   {
     return cmGeneratorExpressionEvaluator::Text;
   }
@@ -77,17 +77,17 @@ struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
     this->ParamChildren = parameters;
   }
 
-  Type GetType() const CM_OVERRIDE
+  Type GetType() const override
   {
     return cmGeneratorExpressionEvaluator::Generator;
   }
 
   std::string Evaluate(cmGeneratorExpressionContext* context,
-                       cmGeneratorExpressionDAGChecker*) const CM_OVERRIDE;
+                       cmGeneratorExpressionDAGChecker*) const override;
 
   std::string GetOriginalExpression() const;
 
-  ~GeneratorExpressionContent() CM_OVERRIDE;
+  ~GeneratorExpressionContent() override;
 
 private:
   std::string EvaluateParameters(const cmGeneratorExpressionNode* node,

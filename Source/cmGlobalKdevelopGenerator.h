@@ -30,7 +30,7 @@ public:
 
   static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
 private:
   /*** Create the foo.kdevelop.filelist file, return false if it doesn't

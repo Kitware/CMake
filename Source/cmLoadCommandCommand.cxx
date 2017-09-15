@@ -34,12 +34,12 @@ public:
   }
 
   ///! clean up any memory allocated by the plugin
-  ~cmLoadedCommand() CM_OVERRIDE;
+  ~cmLoadedCommand() override;
 
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmLoadedCommand* newC = new cmLoadedCommand;
     // we must copy when we clone
@@ -52,7 +52,7 @@ public:
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus&) CM_OVERRIDE;
+                   cmExecutionStatus&) override;
 
   /**
    * This is called at the end after all the information
@@ -60,8 +60,8 @@ public:
    * not implement this method.  At this point, reading and
    * writing to the cache can be done.
    */
-  void FinalPass() CM_OVERRIDE;
-  bool HasFinalPass() const CM_OVERRIDE
+  void FinalPass() override;
+  bool HasFinalPass() const override
   {
     return this->info.FinalPass != nullptr;
   }

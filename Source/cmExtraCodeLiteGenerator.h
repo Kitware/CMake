@@ -60,7 +60,7 @@ public:
 
   static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,

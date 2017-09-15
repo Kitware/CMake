@@ -26,11 +26,11 @@ public:
   /** Construct with a CTest instance and update log stream.  */
   cmCTestGlobalVC(cmCTest* ctest, std::ostream& log);
 
-  ~cmCTestGlobalVC() CM_OVERRIDE;
+  ~cmCTestGlobalVC() override;
 
 protected:
   // Implement cmCTestVC internal API.
-  bool WriteXMLUpdates(cmXMLWriter& xml) CM_OVERRIDE;
+  bool WriteXMLUpdates(cmXMLWriter& xml) override;
 
   /** Represent a vcs-reported action for one path in a revision.  */
   struct Change

@@ -117,20 +117,20 @@ class cmGlobalXCodeGenerator::Factory : public cmGlobalGeneratorFactory
 {
 public:
   cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                           cmake* cm) const CM_OVERRIDE;
+                                           cmake* cm) const override;
 
-  void GetDocumentation(cmDocumentationEntry& entry) const CM_OVERRIDE
+  void GetDocumentation(cmDocumentationEntry& entry) const override
   {
     cmGlobalXCodeGenerator::GetDocumentation(entry);
   }
 
-  void GetGenerators(std::vector<std::string>& names) const CM_OVERRIDE
+  void GetGenerators(std::vector<std::string>& names) const override
   {
     names.push_back(cmGlobalXCodeGenerator::GetActualName());
   }
 
-  bool SupportsToolset() const CM_OVERRIDE { return true; }
-  bool SupportsPlatform() const CM_OVERRIDE { return false; }
+  bool SupportsToolset() const override { return true; }
+  bool SupportsPlatform() const override { return false; }
 };
 
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(

@@ -17,8 +17,8 @@
 class cmCTestBatchTestHandler : public cmCTestMultiProcessHandler
 {
 public:
-  ~cmCTestBatchTestHandler() CM_OVERRIDE;
-  void RunTests() CM_OVERRIDE;
+  ~cmCTestBatchTestHandler() override;
+  void RunTests() override;
 
 protected:
   void WriteBatchScript();

@@ -149,7 +149,7 @@ public:
     }
   }
 
-  void Report(std::ostream& e) CM_OVERRIDE
+  void Report(std::ostream& e) override
   {
     e << "runtime library [";
     if (this->SOName.empty()) {
@@ -160,7 +160,7 @@ public:
     e << "]";
   }
 
-  bool FindConflict(std::string const& dir) CM_OVERRIDE;
+  bool FindConflict(std::string const& dir) override;
 
 private:
   // The soname of the shared library if it is known.
@@ -204,12 +204,12 @@ public:
   {
   }
 
-  void Report(std::ostream& e) CM_OVERRIDE
+  void Report(std::ostream& e) override
   {
     e << "link library [" << this->FileName << "]";
   }
 
-  bool FindConflict(std::string const& dir) CM_OVERRIDE;
+  bool FindConflict(std::string const& dir) override;
 };
 
 bool cmOrderDirectoriesConstraintLibrary::FindConflict(std::string const& dir)
