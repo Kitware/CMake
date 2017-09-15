@@ -95,6 +95,56 @@ function(_gtest_find_library _name)
     mark_as_advanced(${_name})
 endfunction()
 
+macro(_gtest_determine_windows_library_type _var)
+    if(EXISTS "${${_var}}")
+        file(TO_NATIVE_PATH "${${_var}}" _lib_path)
+        get_filename_component(_name "${${_var}}" NAME_WE)
+        file(STRINGS "${${_var}}" _match REGEX "${_name}\\.dll" LIMIT_COUNT 1)
+        if(NOT _match STREQUAL "")
+            set(${_var}_TYPE SHARED PARENT_SCOPE)
+        else()
+            set(${_var}_TYPE UNKNOWN PARENT_SCOPE)
+        endif()
+        return()
+    endif()
+endmacro()
+
+function(_gtest_determine_library_type _var)
+    if(WIN32)
+        # For now, at least, only Windows really needs to know the library type
+        _gtest_determine_windows_library_type(${_var})
+        _gtest_determine_windows_library_type(${_var}_RELEASE)
+        _gtest_determine_windows_library_type(${_var}_DEBUG)
+    endif()
+    # If we get here, no determination was made from the above checks
+    set(${_var}_TYPE UNKNOWN PARENT_SCOPE)
+endfunction()
+
+function(_gtest_import_library _target _var _config)
+    if(_config)
+        set(_config_suffix "_${_config}")
+    else()
+        set(_config_suffix "")
+    endif()
+
+    set(_lib "${${_var}${_config_suffix}}")
+    if(EXISTS "${_lib}")
+        if(_config)
+            set_property(TARGET ${_target} APPEND PROPERTY
+                IMPORTED_CONFIGURATIONS ${_config})
+        endif()
+        set_target_properties(${_target} PROPERTIES
+            IMPORTED_LINK_INTERFACE_LANGUAGES${_config_suffix} "CXX")
+        if(WIN32 AND ${_var}_TYPE STREQUAL SHARED)
+            set_target_properties(${_target} PROPERTIES
+                IMPORTED_IMPLIB${_config_suffix} "${_lib}")
+        else()
+            set_target_properties(${_target} PROPERTIES
+                IMPORTED_LOCATION${_config_suffix} "${_lib}")
+        endif()
+    endif()
+endfunction()
+
 #
 
 if(NOT DEFINED GTEST_MSVC_SEARCH)
@@ -154,57 +204,31 @@ if(GTEST_FOUND)
     find_package(Threads QUIET)
 
     if(NOT TARGET GTest::GTest)
-        add_library(GTest::GTest UNKNOWN IMPORTED)
+        _gtest_determine_library_type(GTEST_LIBRARY)
+        add_library(GTest::GTest ${GTEST_LIBRARY_TYPE} IMPORTED)
         if(TARGET Threads::Threads)
             set_target_properties(GTest::GTest PROPERTIES
                 INTERFACE_LINK_LIBRARIES Threads::Threads)
+        endif()
+        if(GTEST_LIBRARY_TYPE STREQUAL "SHARED")
+            set_target_properties(GTest::GTest PROPERTIES
+                INTERFACE_COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
         endif()
         if(GTEST_INCLUDE_DIRS)
             set_target_properties(GTest::GTest PROPERTIES
                 INTERFACE_INCLUDE_DIRECTORIES "${GTEST_INCLUDE_DIRS}")
         endif()
-        if(EXISTS "${GTEST_LIBRARY}")
-            set_target_properties(GTest::GTest PROPERTIES
-                IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
-                IMPORTED_LOCATION "${GTEST_LIBRARY}")
-        endif()
-        if(EXISTS "${GTEST_LIBRARY_RELEASE}")
-            set_property(TARGET GTest::GTest APPEND PROPERTY
-                IMPORTED_CONFIGURATIONS RELEASE)
-            set_target_properties(GTest::GTest PROPERTIES
-                IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
-                IMPORTED_LOCATION_RELEASE "${GTEST_LIBRARY_RELEASE}")
-        endif()
-        if(EXISTS "${GTEST_LIBRARY_DEBUG}")
-            set_property(TARGET GTest::GTest APPEND PROPERTY
-                IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(GTest::GTest PROPERTIES
-                IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
-                IMPORTED_LOCATION_DEBUG "${GTEST_LIBRARY_DEBUG}")
-        endif()
-      endif()
-      if(NOT TARGET GTest::Main)
-          add_library(GTest::Main UNKNOWN IMPORTED)
-          set_target_properties(GTest::Main PROPERTIES
-              INTERFACE_LINK_LIBRARIES "GTest::GTest")
-          if(EXISTS "${GTEST_MAIN_LIBRARY}")
-              set_target_properties(GTest::Main PROPERTIES
-                  IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
-                  IMPORTED_LOCATION "${GTEST_MAIN_LIBRARY}")
-          endif()
-          if(EXISTS "${GTEST_MAIN_LIBRARY_RELEASE}")
-            set_property(TARGET GTest::Main APPEND PROPERTY
-                IMPORTED_CONFIGURATIONS RELEASE)
-            set_target_properties(GTest::Main PROPERTIES
-                IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
-                IMPORTED_LOCATION_RELEASE "${GTEST_MAIN_LIBRARY_RELEASE}")
-          endif()
-          if(EXISTS "${GTEST_MAIN_LIBRARY_DEBUG}")
-            set_property(TARGET GTest::Main APPEND PROPERTY
-                IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(GTest::Main PROPERTIES
-                IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
-                IMPORTED_LOCATION_DEBUG "${GTEST_MAIN_LIBRARY_DEBUG}")
-          endif()
+        _gtest_import_library(GTest::GTest GTEST_LIBRARY "")
+        _gtest_import_library(GTest::GTest GTEST_LIBRARY "RELEASE")
+        _gtest_import_library(GTest::GTest GTEST_LIBRARY "DEBUG")
+    endif()
+    if(NOT TARGET GTest::Main)
+        _gtest_determine_library_type(GTEST_MAIN_LIBRARY)
+        add_library(GTest::Main ${GTEST_MAIN_LIBRARY_TYPE} IMPORTED)
+        set_target_properties(GTest::Main PROPERTIES
+            INTERFACE_LINK_LIBRARIES "GTest::GTest")
+        _gtest_import_library(GTest::Main GTEST_MAIN_LIBRARY "")
+        _gtest_import_library(GTest::Main GTEST_MAIN_LIBRARY "RELEASE")
+        _gtest_import_library(GTest::Main GTEST_MAIN_LIBRARY "DEBUG")
     endif()
 endif()
