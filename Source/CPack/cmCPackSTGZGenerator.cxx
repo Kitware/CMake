@@ -6,7 +6,6 @@
 #include <sstream>
 #include <stdio.h>
 #include <string>
-#include <vector>
 
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
@@ -48,9 +47,8 @@ int cmCPackSTGZGenerator::PackageFiles()
    * have generated several packages (component packaging)
    * so we must iterate over generated packages.
    */
-  for (std::vector<std::string>::iterator it = packageFileNames.begin();
-       it != packageFileNames.end(); ++it) {
-    retval &= cmSystemTools::SetPermissions((*it).c_str(),
+  for (std::string const& pfn : packageFileNames) {
+    retval &= cmSystemTools::SetPermissions(pfn.c_str(),
 #if defined(_MSC_VER) || defined(__MINGW32__)
                                             S_IREAD | S_IWRITE | S_IEXEC
 #else

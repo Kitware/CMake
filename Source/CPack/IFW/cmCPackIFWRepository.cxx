@@ -279,9 +279,8 @@ void cmCPackIFWRepository::WriteRepositoryUpdates(cmXMLWriter& xout)
 {
   if (!this->RepositoryUpdate.empty()) {
     xout.StartElement("RepositoryUpdate");
-    for (RepositoriesVector::iterator rit = this->RepositoryUpdate.begin();
-         rit != this->RepositoryUpdate.end(); ++rit) {
-      (*rit)->WriteRepositoryUpdate(xout);
+    for (cmCPackIFWRepository* r : this->RepositoryUpdate) {
+      r->WriteRepositoryUpdate(xout);
     }
     xout.EndElement();
   }

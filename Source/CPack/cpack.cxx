@@ -293,10 +293,8 @@ int main(int argc, char const* const* argv)
                                 cpackProjectDirectory.c_str());
       }
     }
-    cpackDefinitions::MapType::iterator cdit;
-    for (cdit = definitions.Map.begin(); cdit != definitions.Map.end();
-         ++cdit) {
-      globalMF->AddDefinition(cdit->first, cdit->second.c_str());
+    for (auto const& cd : definitions.Map) {
+      globalMF->AddDefinition(cd.first, cd.second.c_str());
     }
 
     const char* cpackModulesPath =
@@ -311,9 +309,7 @@ int main(int argc, char const* const* argv)
     } else {
       std::vector<std::string> generatorsVector;
       cmSystemTools::ExpandListArgument(genList, generatorsVector);
-      std::vector<std::string>::iterator it;
-      for (it = generatorsVector.begin(); it != generatorsVector.end(); ++it) {
-        const char* gen = it->c_str();
+      for (std::string const& gen : generatorsVector) {
         cmMakefile::ScopePushPop raii(globalMF.get());
         cmMakefile* mf = globalMF.get();
         cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
@@ -413,12 +409,10 @@ int main(int argc, char const* const* argv)
     doc.PrependSection("Options", cmDocumentationOptions);
 
     std::vector<cmDocumentationEntry> v;
-    cmCPackGeneratorFactory::DescriptionsMap::const_iterator generatorIt;
-    for (generatorIt = generators.GetGeneratorsList().begin();
-         generatorIt != generators.GetGeneratorsList().end(); ++generatorIt) {
+    for (auto const& g : generators.GetGeneratorsList()) {
       cmDocumentationEntry e;
-      e.Name = generatorIt->first;
-      e.Brief = generatorIt->second;
+      e.Name = g.first;
+      e.Brief = g.second;
       v.push_back(e);
     }
     doc.SetSection("Generators", v);

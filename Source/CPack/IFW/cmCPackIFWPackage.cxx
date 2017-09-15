@@ -203,10 +203,8 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
 
   // CMake dependencies
   if (!component->Dependencies.empty()) {
-    std::vector<cmCPackComponent*>::iterator dit;
-    for (dit = component->Dependencies.begin();
-         dit != component->Dependencies.end(); ++dit) {
-      this->Dependencies.insert(this->Generator->ComponentPackages[*dit]);
+    for (cmCPackComponent* dep : component->Dependencies) {
+      this->Dependencies.insert(this->Generator->ComponentPackages[dep]);
     }
   }
 
@@ -413,9 +411,8 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   if (const char* value = this->GetOption(option)) {
     cmSystemTools::ExpandListArgument(value, deps);
   }
-  for (std::vector<std::string>::iterator dit = deps.begin();
-       dit != deps.end(); ++dit) {
-    DependenceStruct dep(*dit);
+  for (std::string const& d : deps) {
+    DependenceStruct dep(d);
     if (this->Generator->Packages.count(dep.Name)) {
       cmCPackIFWPackage& depPkg = this->Generator->Packages[dep.Name];
       dep.Name = depPkg.Name;
@@ -435,9 +432,8 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   } else if (const char* value = this->GetOption(option)) {
     std::vector<std::string> depsOn;
     cmSystemTools::ExpandListArgument(value, depsOn);
-    for (std::vector<std::string>::iterator dit = depsOn.begin();
-         dit != depsOn.end(); ++dit) {
-      DependenceStruct dep(*dit);
+    for (std::string const& d : depsOn) {
+      DependenceStruct dep(d);
       if (this->Generator->Packages.count(dep.Name)) {
         cmCPackIFWPackage& depPkg = this->Generator->Packages[dep.Name];
         dep.Name = depPkg.Name;
@@ -521,26 +517,22 @@ void cmCPackIFWPackage::GeneratePackageFile()
   xout.StartElement("Package");
 
   // DisplayName (with translations)
-  for (std::map<std::string, std::string>::iterator it =
-         this->DisplayName.begin();
-       it != this->DisplayName.end(); ++it) {
+  for (auto const& dn : this->DisplayName) {
     xout.StartElement("DisplayName");
-    if (!it->first.empty()) {
-      xout.Attribute("xml:lang", it->first);
+    if (!dn.first.empty()) {
+      xout.Attribute("xml:lang", dn.first);
     }
-    xout.Content(it->second);
+    xout.Content(dn.second);
     xout.EndElement();
   }
 
   // Description (with translations)
-  for (std::map<std::string, std::string>::iterator it =
-         this->Description.begin();
-       it != this->Description.end(); ++it) {
+  for (auto const& d : this->Description) {
     xout.StartElement("Description");
-    if (!it->first.empty()) {
-      xout.Attribute("xml:lang", it->first);
+    if (!d.first.empty()) {
+      xout.Attribute("xml:lang", d.first);
     }
-    xout.Content(it->second);
+    xout.Content(d.second);
     xout.EndElement();
   }
 
@@ -568,46 +560,43 @@ void cmCPackIFWPackage::GeneratePackageFile()
 
   // User Interfaces (copy to meta dir)
   std::vector<std::string> userInterfaces = UserInterfaces;
-  for (size_t i = 0; i < userInterfaces.size(); i++) {
-    std::string name = cmSystemTools::GetFilenameName(userInterfaces[i]);
+  for (std::string& userInterface : userInterfaces) {
+    std::string name = cmSystemTools::GetFilenameName(userInterface);
     std::string path = this->Directory + "/meta/" + name;
-    cmsys::SystemTools::CopyFileIfDifferent(userInterfaces[i], path);
-    userInterfaces[i] = name;
+    cmsys::SystemTools::CopyFileIfDifferent(userInterface, path);
+    userInterface = name;
   }
   if (!userInterfaces.empty()) {
     xout.StartElement("UserInterfaces");
-    for (size_t i = 0; i < userInterfaces.size(); i++) {
-      xout.Element("UserInterface", userInterfaces[i]);
+    for (std::string const& userInterface : userInterfaces) {
+      xout.Element("UserInterface", userInterface);
     }
     xout.EndElement();
   }
 
   // Translations (copy to meta dir)
   std::vector<std::string> translations = Translations;
-  for (size_t i = 0; i < translations.size(); i++) {
-    std::string name = cmSystemTools::GetFilenameName(translations[i]);
+  for (std::string& translation : translations) {
+    std::string name = cmSystemTools::GetFilenameName(translation);
     std::string path = this->Directory + "/meta/" + name;
-    cmsys::SystemTools::CopyFileIfDifferent(translations[i], path);
-    translations[i] = name;
+    cmsys::SystemTools::CopyFileIfDifferent(translation, path);
+    translation = name;
   }
   if (!translations.empty()) {
     xout.StartElement("Translations");
-    for (size_t i = 0; i < translations.size(); i++) {
-      xout.Element("Translation", translations[i]);
+    for (std::string const& translation : translations) {
+      xout.Element("Translation", translation);
     }
     xout.EndElement();
   }
 
   // Dependencies
   std::set<DependenceStruct> compDepSet;
-  for (std::set<DependenceStruct*>::iterator ait =
-         this->AlienDependencies.begin();
-       ait != this->AlienDependencies.end(); ++ait) {
-    compDepSet.insert(*(*ait));
+  for (DependenceStruct* ad : this->AlienDependencies) {
+    compDepSet.insert(*ad);
   }
-  for (std::set<cmCPackIFWPackage*>::iterator it = this->Dependencies.begin();
-       it != this->Dependencies.end(); ++it) {
-    compDepSet.insert(DependenceStruct((*it)->Name));
+  for (cmCPackIFWPackage* d : this->Dependencies) {
+    compDepSet.insert(DependenceStruct(d->Name));
   }
   // Write dependencies
   if (!compDepSet.empty()) {
@@ -624,10 +613,8 @@ void cmCPackIFWPackage::GeneratePackageFile()
 
   // Automatic dependency on
   std::set<DependenceStruct> compAutoDepSet;
-  for (std::set<DependenceStruct*>::iterator ait =
-         this->AlienAutoDependOn.begin();
-       ait != this->AlienAutoDependOn.end(); ++ait) {
-    compAutoDepSet.insert(*(*ait));
+  for (DependenceStruct* aad : this->AlienAutoDependOn) {
+    compAutoDepSet.insert(*aad);
   }
   // Write automatic dependency on
   if (!compAutoDepSet.empty()) {

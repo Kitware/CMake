@@ -20,8 +20,8 @@ bool cmWIXAccessControlList::Apply()
   std::vector<std::string> entries;
   this->InstalledFile.GetPropertyAsList("CPACK_WIX_ACL", entries);
 
-  for (size_t i = 0; i < entries.size(); ++i) {
-    this->CreatePermissionElement(entries[i]);
+  for (std::string const& entry : entries) {
+    this->CreatePermissionElement(entry);
   }
 
   return true;
@@ -56,9 +56,9 @@ void cmWIXAccessControlList::CreatePermissionElement(std::string const& entry)
   if (!domain.empty()) {
     this->SourceWriter.AddAttribute("Domain", domain);
   }
-  for (size_t i = 0; i < permissions.size(); ++i) {
+  for (std::string const& permission : permissions) {
     this->EmitBooleanAttribute(entry,
-                               cmSystemTools::TrimWhitespace(permissions[i]));
+                               cmSystemTools::TrimWhitespace(permission));
   }
   this->SourceWriter.EndElement("Permission");
 }

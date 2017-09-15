@@ -22,8 +22,8 @@ cmWIXPatchNode::~cmWIXPatchNode()
 
 cmWIXPatchElement::~cmWIXPatchElement()
 {
-  for (child_list_t::iterator i = children.begin(); i != children.end(); ++i) {
-    delete *i;
+  for (cmWIXPatchNode* child : children) {
+    delete child;
   }
 }
 

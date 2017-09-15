@@ -406,9 +406,8 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   // Remote repositories
   if (!this->RemoteRepositories.empty()) {
     xout.StartElement("RemoteRepositories");
-    for (RepositoriesVector::iterator rit = this->RemoteRepositories.begin();
-         rit != this->RemoteRepositories.end(); ++rit) {
-      (*rit)->WriteRepositoryConfig(xout);
+    for (cmCPackIFWRepository* r : this->RemoteRepositories) {
+      r->WriteRepositoryConfig(xout);
     }
     xout.EndElement();
   }
@@ -492,9 +491,8 @@ void cmCPackIFWInstaller::GeneratePackageFiles()
   }
 
   // Generate packages meta information
-  for (PackagesMap::iterator pit = this->Packages.begin();
-       pit != this->Packages.end(); ++pit) {
-    cmCPackIFWPackage* package = pit->second;
+  for (auto& p : this->Packages) {
+    cmCPackIFWPackage* package = p.second;
     package->GeneratePackageFile();
   }
 }
