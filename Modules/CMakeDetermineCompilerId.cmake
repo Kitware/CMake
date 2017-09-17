@@ -328,6 +328,12 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     else()
       set(id_sdkroot "")
     endif()
+    if(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM)
+      set(id_development_team
+        "DEVELOPMENT_TEAM = \"${CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM}\";")
+    else()
+      set(id_development_team "")
+    endif()
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/Xcode-3.pbxproj.in
       ${id_dir}/CompilerId${lang}.xcodeproj/project.pbxproj @ONLY)
     unset(_ENV_MACOSX_DEPLOYMENT_TARGET)
