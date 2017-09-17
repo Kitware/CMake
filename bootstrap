@@ -935,6 +935,10 @@ echo '
 # error "The CMAKE_C_COMPILER is set to a C++ compiler"
 #endif
 
+#if defined(__sun) && __STDC_VERSION__ < 199901L
+#error "On Solaris we need C99."
+#endif
+
 #include <stdio.h>
 
 int main(int argc, char* argv[])
