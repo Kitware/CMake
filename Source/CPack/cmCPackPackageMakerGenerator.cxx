@@ -294,9 +294,9 @@ int cmCPackPackageMakerGenerator::PackageFiles()
   int numTries = 10;
   bool res = false;
   while (numTries > 0) {
-    res =
-      cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output, &output,
-                                      &retVal, 0, this->GeneratorVerbose, 0);
+    res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
+                                          &output, &retVal, nullptr,
+                                          this->GeneratorVerbose, 0);
     if (res && !retVal) {
       numTries = -1;
       break;
@@ -466,7 +466,7 @@ bool cmCPackPackageMakerGenerator::RunPackageMaker(const char* command,
   std::string output;
   int retVal = 1;
   bool res = cmSystemTools::RunSingleCommand(
-    command, &output, &output, &retVal, 0, this->GeneratorVerbose, 0);
+    command, &output, &output, &retVal, nullptr, this->GeneratorVerbose, 0);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Done running package maker"
                   << std::endl);
   if (!res || retVal) {

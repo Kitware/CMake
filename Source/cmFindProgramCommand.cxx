@@ -229,7 +229,7 @@ std::string cmFindProgramCommand::GetBundleExecutable(
   // returned executableURL is relative to <appbundle>/Contents/MacOS/
   CFURLRef executableURL = CFBundleCopyExecutableURL(appBundle);
 
-  if (executableURL != NULL) {
+  if (executableURL != nullptr) {
     const int MAX_OSX_PATH_SIZE = 1024;
     char buffer[MAX_OSX_PATH_SIZE];
 

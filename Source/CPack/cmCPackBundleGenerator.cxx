@@ -19,7 +19,7 @@ cmCPackBundleGenerator::~cmCPackBundleGenerator()
 int cmCPackBundleGenerator::InitializeInternal()
 {
   const char* name = this->GetOption("CPACK_BUNDLE_NAME");
-  if (0 == name) {
+  if (nullptr == name) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "CPACK_BUNDLE_NAME must be set to use the Bundle generator."
                     << std::endl);
