@@ -12,14 +12,15 @@ Add compile definitions to a target.
 Specify compile definitions to use when compiling a given ``<target>``.  The
 named ``<target>`` must have been created by a command such as
 :command:`add_executable` or :command:`add_library` and must not be an
-:ref:`Imported Target <Imported Targets>`.
+:ref:`ALIAS target <Alias Targets>`.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
 specify the scope of the following arguments.  ``PRIVATE`` and ``PUBLIC``
 items will populate the :prop_tgt:`COMPILE_DEFINITIONS` property of
 ``<target>``. ``PUBLIC`` and ``INTERFACE`` items will populate the
-:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` property of ``<target>``.  The
-following arguments specify compile definitions.  Repeated calls for the
+:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` property of ``<target>``.
+(:ref:`IMPORTED targets <Imported Targets>` only support ``INTERFACE`` items.)
+The following arguments specify compile definitions.  Repeated calls for the
 same ``<target>`` append items in the order called.
 
 Arguments to ``target_compile_definitions`` may use "generator expressions"

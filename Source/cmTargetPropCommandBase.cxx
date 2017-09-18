@@ -84,15 +84,13 @@ bool cmTargetPropCommandBase::ProcessContentArgs(
     this->SetError("called with invalid arguments");
     return false;
   }
-
-  if (this->Target->IsImported()) {
-    this->HandleImportedTarget(args[0]);
-    return false;
-  }
-
   if (this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY &&
       scope != "INTERFACE") {
     this->SetError("may only set INTERFACE properties on INTERFACE targets");
+    return false;
+  }
+  if (this->Target->IsImported() && scope != "INTERFACE") {
+    this->SetError("may only set INTERFACE properties on IMPORTED targets");
     return false;
   }
 

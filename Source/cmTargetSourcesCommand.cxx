@@ -17,13 +17,6 @@ bool cmTargetSourcesCommand::InitialPass(std::vector<std::string> const& args,
   return this->HandleArguments(args, "SOURCES");
 }
 
-void cmTargetSourcesCommand::HandleImportedTarget(const std::string& tgt)
-{
-  std::ostringstream e;
-  e << "Cannot specify sources for imported target \"" << tgt << "\".";
-  this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-}
-
 void cmTargetSourcesCommand::HandleMissingTarget(const std::string& name)
 {
   std::ostringstream e;
@@ -43,5 +36,5 @@ bool cmTargetSourcesCommand::HandleDirectContent(
   cmTarget* tgt, const std::vector<std::string>& content, bool, bool)
 {
   tgt->AppendProperty("SOURCES", this->Join(content).c_str());
-  return true;
+  return true; // Successfully handled.
 }
