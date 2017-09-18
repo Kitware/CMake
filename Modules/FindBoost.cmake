@@ -76,7 +76,7 @@
 # Boost::system will be automatically detected and satisfied, even
 # if system is not specified when using find_package and if
 # Boost::system is not added to target_link_libraries.  If using
-# Boost::thread, then Thread::Thread will also be added automatically.
+# Boost::thread, then Threads::Threads will also be added automatically.
 #
 # It is important to note that the imported targets behave differently
 # than variables created by this module: multiple calls to
@@ -307,6 +307,10 @@ macro(_Boost_ADJUST_LIB_VARS basename)
 
     if(Boost_${basename}_LIBRARY AND Boost_${basename}_HEADER)
       set(Boost_${basename}_FOUND ON)
+      if("x${basename}" STREQUAL "xTHREAD" AND NOT TARGET Threads::Threads)
+        string(APPEND Boost_ERROR_REASON_THREAD " (missing dependency: Threads)")
+        set(Boost_THREAD_FOUND OFF)
+      endif()
     endif()
 
   endif()
@@ -1539,8 +1543,13 @@ _Boost_MISSING_DEPENDENCIES(Boost_FIND_COMPONENTS _Boost_EXTRA_FIND_COMPONENTS)
 # If thread is required, get the thread libs as a dependency
 list(FIND Boost_FIND_COMPONENTS thread _Boost_THREAD_DEPENDENCY_LIBS)
 if(NOT _Boost_THREAD_DEPENDENCY_LIBS EQUAL -1)
-  include(CMakeFindDependencyMacro)
-  find_dependency(Threads)
+  if(Boost_FIND_QUIETLY)
+    set(_Boost_find_quiet QUIET)
+  else()
+    set(_Boost_find_quiet "")
+  endif()
+  find_package(Threads ${_Boost_find_quiet})
+  unset(_Boost_find_quiet)
 endif()
 
 # If the user changed any of our control inputs flush previous results.
@@ -1770,8 +1779,9 @@ if(Boost_FOUND)
     string(APPEND Boost_ERROR_REASON
       " Boost libraries:\n")
     foreach(COMPONENT ${_Boost_MISSING_COMPONENTS})
+      string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
       string(APPEND Boost_ERROR_REASON
-        "        ${Boost_NAMESPACE}_${COMPONENT}\n")
+        "        ${Boost_NAMESPACE}_${COMPONENT}${Boost_ERROR_REASON_${UPPERCOMPONENT}}\n")
     endforeach()
 
     list(LENGTH Boost_FIND_COMPONENTS Boost_NUM_COMPONENTS_WANTED)
