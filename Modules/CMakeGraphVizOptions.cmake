@@ -20,6 +20,9 @@
 # * a ``foo.dot.<target>`` file for each target, file showing on which other targets the respective target depends
 # * a ``foo.dot.<target>.dependers`` file, showing which other targets depend on the respective target
 #
+# The different dependency types ``PUBLIC``, ``PRIVATE`` and ``INTERFACE``
+# are represented as solid, dashed and dotted edges.
+#
 # This can result in huge graphs.  Using the file
 # ``CMakeGraphVizOptions.cmake`` the look and content of the generated
 # graphs can be influenced.  This file is searched first in

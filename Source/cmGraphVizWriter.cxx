@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGraphVizWriter.h"
 
+#include <cstddef>
 #include <iostream>
 #include <sstream>
 #include <utility>
@@ -17,7 +18,18 @@
 #include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
-static const char* getShapeForTarget(const cmGeneratorTarget* target)
+namespace {
+enum LinkLibraryScopeType
+{
+  LLT_SCOPE_PUBLIC,
+  LLT_SCOPE_PRIVATE,
+  LLT_SCOPE_INTERFACE
+};
+
+const char* const GRAPHVIZ_PRIVATE_EDEGE_STYLE = "dashed";
+const char* const GRAPHVIZ_INTERFACE_EDEGE_STYLE = "dotted";
+
+const char* getShapeForTarget(const cmGeneratorTarget* target)
 {
   if (!target) {
     return "ellipse";
@@ -37,6 +49,76 @@ static const char* getShapeForTarget(const cmGeneratorTarget* target)
   }
 
   return "box";
+}
+
+std::map<std::string, LinkLibraryScopeType> getScopedLinkLibrariesFromTarget(
+  cmTarget* Target)
+{
+  char sep = ';';
+  std::map<std::string, LinkLibraryScopeType> tokens;
+  size_t start = 0, end = 0;
+
+  const char* pInterfaceLinkLibraries =
+    Target->GetProperty("INTERFACE_LINK_LIBRARIES");
+  const char* pLinkLibraries = Target->GetProperty("LINK_LIBRARIES");
+
+  if (!pInterfaceLinkLibraries && !pLinkLibraries) {
+    return tokens; // target is not linked against any other libraries
+  }
+
+  // make sure we don't touch a null-ptr
+  auto interfaceLinkLibraries =
+    std::string(pInterfaceLinkLibraries ? pInterfaceLinkLibraries : "");
+  auto linkLibraries = std::string(pLinkLibraries ? pLinkLibraries : "");
+
+  // first extract interfaceLinkLibraries
+  while (start < interfaceLinkLibraries.length()) {
+
+    if ((end = interfaceLinkLibraries.find(sep, start)) == std::string::npos) {
+      end = interfaceLinkLibraries.length();
+    }
+
+    std::string element = interfaceLinkLibraries.substr(start, end - start);
+    if (std::string::npos == element.find("$<LINK_ONLY:", 0)) {
+      // we assume first, that this library is an interface library.
+      // if we find it again in the linklibraries property, we promote it to an
+      // public library.
+      tokens[element] = LLT_SCOPE_INTERFACE;
+    } else {
+      // this is an private linked static library.
+      // we take care of this case in the second iterator.
+    }
+    start = end + 1;
+  }
+
+  // second extract linkLibraries
+  start = 0;
+  while (start < linkLibraries.length()) {
+
+    if ((end = linkLibraries.find(sep, start)) == std::string::npos) {
+      end = linkLibraries.length();
+    }
+
+    std::string element = linkLibraries.substr(start, end - start);
+
+    if (tokens.find(element) == tokens.end()) {
+      // this library is not found in interfaceLinkLibraries but in
+      // linkLibraries.
+      // this results in a private linked library.
+      tokens[element] = LLT_SCOPE_PRIVATE;
+    } else if (LLT_SCOPE_INTERFACE == tokens[element]) {
+      // this library is found in interfaceLinkLibraries and linkLibraries.
+      // this results in a public linked library.
+      tokens[element] = LLT_SCOPE_PUBLIC;
+    } else {
+      // private and public linked libraries should not be changed anymore.
+    }
+
+    start = end + 1;
+  }
+
+  return tokens;
+}
 }
 
 cmGraphVizWriter::cmGraphVizWriter(
@@ -273,11 +355,10 @@ void cmGraphVizWriter::WriteConnections(
   }
 
   std::string myNodeName = this->TargetNamesNodes.find(targetName)->second;
+  std::map<std::string, LinkLibraryScopeType> ll =
+    getScopedLinkLibrariesFromTarget(targetPtrIt->second->Target);
 
-  const cmTarget::LinkLibraryVectorType* ll =
-    &(targetPtrIt->second->Target->GetOriginalLinkLibraries());
-
-  for (auto const& llit : *ll) {
+  for (auto const& llit : ll) {
     const char* libName = llit.first.c_str();
     std::map<std::string, std::string>::const_iterator libNameIt =
       this->TargetNamesNodes.find(libName);
@@ -297,6 +378,18 @@ void cmGraphVizWriter::WriteConnections(
                       insertedNodes, str);
 
       str << "    \"" << myNodeName << "\" -> \"" << libNameIt->second << "\"";
+
+      switch (llit.second) {
+        case LLT_SCOPE_PRIVATE:
+          str << "[style = " << GRAPHVIZ_PRIVATE_EDEGE_STYLE << "]";
+          break;
+        case LLT_SCOPE_INTERFACE:
+          str << "[style = " << GRAPHVIZ_INTERFACE_EDEGE_STYLE << "]";
+          break;
+        default:
+          break;
+      }
+
       str << " // " << targetName << " -> " << libName << std::endl;
       this->WriteConnections(libName, insertedNodes, insertedConnections, str);
     }
