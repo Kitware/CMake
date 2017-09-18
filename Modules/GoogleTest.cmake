@@ -5,7 +5,33 @@
 GoogleTest
 ----------
 
-This module defines functions to help use the Google Test infrastructure.
+This module defines functions to help use the Google Test infrastructure.  Two
+mechanisms for adding tests are provided. :command:`gtest_add_tests` has been
+around for some time, originally via ``find_package(GTest)``.
+:command:`gtest_discover_tests` was introduced in CMake 3.10.
+
+The (older) :command:`gtest_add_tests` scans source files to identify tests.
+This is usually effective, with some caveats, including in cross-compiling
+environments, and makes setting additional properties on tests more convenient.
+However, its handling of parameterized tests is less comprehensive, and it
+requires re-running CMake to detect changes to the list of tests.
+
+The (newer) :command:`gtest_discover_tests` discovers tests by asking the
+compiled test executable to enumerate its tests.  This is more robust and
+provides better handling of parameterized tests, and does not require CMake
+to be re-run when tests change.  However, it may not work in a cross-compiling
+environment, and setting test properties is less convenient.
+
+More details can be found in the documentation of the respective functions.
+
+Both commands are intended to replace use of :command:`add_test` to register
+tests, and will create a separate CTest test for each Google Test test case.
+Note that this is in some cases less efficient, as common set-up and tear-down
+logic cannot be shared by multiple test cases executing in the same instance.
+However, it provides more fine-grained pass/fail information to CTest, which is
+usually considered as more beneficial.  By default, the CTest test name is the
+same as the Google Test name (i.e. ``suite.testcase``); see also
+``TEST_PREFIX`` and ``TEST_SUFFIX``.
 
 .. command:: gtest_add_tests
 
@@ -22,12 +48,25 @@ This module defines functions to help use the Google Test infrastructure.
                     [TEST_LIST outVar]
     )
 
+  ``gtest_add_tests`` attempts to identify tests by scanning source files.
+  Although this is generally effective, it uses only a basic regular expression
+  match, which can be defeated by atypical test declarations, and is unable to
+  fully "split" parameterized tests.  Additionally, it requires that CMake be
+  re-run to discover any newly added, removed or renamed tests (by default,
+  this means that CMake is re-run when any test source file is changed, but see
+  ``SKIP_DEPENDENCY``).  However, it has the advantage of declaring tests at
+  CMake time, which somewhat simplifies setting additional properties on tests,
+  and always works in a cross-compiling environment.
+
+  The options are:
+
   ``TARGET target``
-    This must be a known CMake target. CMake will substitute the location of
-    the built executable when running the test.
+    Specifies the Google Test executable, which must be a known CMake
+    executable target.  CMake will substitute the location of the built
+    executable when running the test.
 
   ``SOURCES src1...``
-    When provided, only the listed files will be scanned for test cases. If
+    When provided, only the listed files will be scanned for test cases.  If
     this option is not given, the :prop_tgt:`SOURCES` property of the
     specified ``target`` will be used to obtain the list of sources.
 
@@ -35,31 +74,30 @@ This module defines functions to help use the Google Test infrastructure.
     Any extra arguments to pass on the command line to each test case.
 
   ``WORKING_DIRECTORY dir``
-    Specifies the directory in which to run the discovered test cases. If this
+    Specifies the directory in which to run the discovered test cases.  If this
     option is not provided, the current binary directory is used.
 
   ``TEST_PREFIX prefix``
-    Allows the specified ``prefix`` to be prepended to the name of each
-    discovered test case. This can be useful when the same source files are
-    being used in multiple calls to ``gtest_add_test()`` but with different
-    ``EXTRA_ARGS``.
+    Specifies a ``prefix`` to be prepended to the name of each discovered test
+    case.  This can be useful when the same source files are being used in
+    multiple calls to ``gtest_add_test()`` but with different ``EXTRA_ARGS``.
 
   ``TEST_SUFFIX suffix``
     Similar to ``TEST_PREFIX`` except the ``suffix`` is appended to the name of
-    every discovered test case. Both ``TEST_PREFIX`` and ``TEST_SUFFIX`` can be
-    specified.
+    every discovered test case.  Both ``TEST_PREFIX`` and ``TEST_SUFFIX`` may
+    be specified.
 
   ``SKIP_DEPENDENCY``
     Normally, the function creates a dependency which will cause CMake to be
-    re-run if any of the sources being scanned are changed. This is to ensure
-    that the list of discovered tests is updated. If this behavior is not
+    re-run if any of the sources being scanned are changed.  This is to ensure
+    that the list of discovered tests is updated.  If this behavior is not
     desired (as may be the case while actually writing the test cases), this
     option can be used to prevent the dependency from being added.
 
   ``TEST_LIST outVar``
     The variable named by ``outVar`` will be populated in the calling scope
-    with the list of discovered test cases. This allows the caller to do things
-    like manipulate test properties of the discovered tests.
+    with the list of discovered test cases.  This allows the caller to do
+    things like manipulate test properties of the discovered tests.
 
   .. code-block:: cmake
 
@@ -77,7 +115,7 @@ This module defines functions to help use the Google Test infrastructure.
     set_tests_properties(${noArgsTests}   PROPERTIES TIMEOUT 10)
     set_tests_properties(${withArgsTests} PROPERTIES TIMEOUT 20)
 
-  For backward compatibility reasons, the following form is also supported::
+  For backward compatibility, the following form is also supported::
 
     gtest_add_tests(exe args files...)
 
@@ -99,8 +137,89 @@ This module defines functions to help use the Google Test infrastructure.
     add_executable(FooTest FooUnitTest.cxx)
     gtest_add_tests(FooTest "${FooTestArgs}" AUTO)
 
+.. command:: gtest_discover_tests
+
+  Automatically add tests with CTest by querying the compiled test executable
+  for available tests::
+
+    gtest_discover_tests(target
+                         [EXTRA_ARGS arg1...]
+                         [WORKING_DIRECTORY dir]
+                         [TEST_PREFIX prefix]
+                         [TEST_SUFFIX suffix]
+                         [NO_PRETTY_TYPES] [NO_PRETTY_VALUES]
+                         [PROPERTIES name1 value1...]
+                         [TEST_LIST var]
+    )
+
+  ``gtest_discover_tests`` sets up a post-build command on the test executable
+  that generates the list of tests by parsing the output from running the test
+  with the ``--gtest_list_tests`` argument.  Compared to the source parsing
+  approach of :command:`gtest_add_tests`, this ensures that the full list of
+  tests, including instantiations of parameterized tests, is obtained.  Since
+  test discovery occurs at build time, it is not necessary to re-run CMake when
+  the list of tests changes.
+  However, it requires that :prop_tgt:`CROSSCOMPILING_EMULATOR` is properly set
+  in order to function in a cross-compiling environment.
+
+  Additionally, setting properties on tests is somewhat less convenient, since
+  the tests are not available at CMake time.  Additional test properties may be
+  assigned to the set of tests as a whole using the ``PROPERTIES`` option.  If
+  more fine-grained test control is needed, custom content may be provided
+  through an external CTest script using the :prop_dir:`TEST_INCLUDE_FILES`
+  directory property.  The set of discovered tests is made accessible to such a
+  script via the ``<target>_TESTS`` variable.
+
+  The options are:
+
+  ``target``
+    Specifies the Google Test executable, which must be a known CMake
+    executable target.  CMake will substitute the location of the built
+    executable when running the test.
+
+  ``EXTRA_ARGS arg1...``
+    Any extra arguments to pass on the command line to each test case.
+
+  ``WORKING_DIRECTORY dir``
+    Specifies the directory in which to run the discovered test cases.  If this
+    option is not provided, the current binary directory is used.
+
+  ``TEST_PREFIX prefix``
+    Specifies a ``prefix`` to be prepended to the name of each discovered test
+    case.  This can be useful when the same test executable is being used in
+    multiple calls to ``gtest_discover_tests()`` but with different
+    ``EXTRA_ARGS``.
+
+  ``TEST_SUFFIX suffix``
+    Similar to ``TEST_PREFIX`` except the ``suffix`` is appended to the name of
+    every discovered test case.  Both ``TEST_PREFIX`` and ``TEST_SUFFIX`` may
+    be specified.
+
+  ``NO_PRETTY_TYPES``
+    By default, the type index of type-parameterized tests is replaced by the
+    actual type name in the CTest test name.  If this behavior is undesirable
+    (e.g. because the type names are unwieldy), this option will suppress this
+    behavior.
+
+  ``NO_PRETTY_VALUES``
+    By default, the value index of value-parameterized tests is replaced by the
+    actual value in the CTest test name.  If this behavior is undesirable
+    (e.g. because the value strings are unwieldy), this option will suppress
+    this behavior.
+
+  ``PROPERTIES name1 value1...``
+    Specifies additional properties to be set on all tests discovered by this
+    invocation of ``gtest_discover_tests``.
+
+  ``TEST_LIST var``
+    Make the list of tests available in the variable ``var``, rather than the
+    default ``<target>_TESTS``.  This can be useful when the same test
+    executable is being used in multiple calls to ``gtest_discover_tests()``.
+    Note that this variable is only available in CTest.
+
 #]=======================================================================]
 
+#------------------------------------------------------------------------------
 function(gtest_add_tests)
 
   if (ARGC LESS 1)
@@ -224,3 +343,68 @@ function(gtest_add_tests)
   endif()
 
 endfunction()
+
+#------------------------------------------------------------------------------
+function(gtest_discover_tests TARGET)
+  cmake_parse_arguments(
+    ""
+    "NO_PRETTY_TYPES;NO_PRETTY_VALUES"
+    "TEST_PREFIX;TEST_SUFFIX;WORKING_DIRECTORY;TEST_LIST"
+    "EXTRA_ARGS;PROPERTIES"
+    ${ARGN}
+  )
+
+  if(NOT _WORKING_DIRECTORY)
+    set(_WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+  endif()
+  if(NOT _TEST_LIST)
+    set(_TEST_LIST ${TARGET}_TESTS)
+  endif()
+
+  # Define rule to generate test list for aforementioned test executable
+  set(ctest_include_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_include.cmake")
+  set(ctest_tests_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_tests.cmake")
+  get_property(crosscompiling_emulator
+    TARGET ${TARGET}
+    PROPERTY CROSSCOMPILING_EMULATOR
+  )
+  add_custom_command(
+    TARGET ${TARGET} POST_BUILD
+    BYPRODUCTS "${ctest_tests_file}"
+    COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_TARGET=${TARGET}"
+            -D "TEST_EXECUTABLE=$<TARGET_FILE:${TARGET}>"
+            -D "TEST_EXECUTOR=${crosscompiling_emulator}"
+            -D "TEST_WORKING_DIR=${_WORKING_DIRECTORY}"
+            -D "TEST_EXTRA_ARGS=${_EXTRA_ARGS}"
+            -D "TEST_PROPERTIES=${_PROPERTIES}"
+            -D "TEST_PREFIX=${_TEST_PREFIX}"
+            -D "TEST_SUFFIX=${_TEST_SUFFIX}"
+            -D "NO_PRETTY_TYPES=${_NO_PRETTY_TYPES}"
+            -D "NO_PRETTY_VALUES=${_NO_PRETTY_VALUES}"
+            -D "TEST_LIST=${_TEST_LIST}"
+            -D "CTEST_FILE=${ctest_tests_file}"
+            -P "${_GOOGLETEST_DISCOVER_TESTS_SCRIPT}"
+    VERBATIM
+  )
+
+  file(WRITE "${ctest_include_file}"
+    "if(EXISTS \"${ctest_tests_file}\")\n"
+    "  include(\"${ctest_tests_file}\")\n"
+    "else()\n"
+    "  add_test(${TARGET}_NOT_BUILT ${TARGET}_NOT_BUILT)\n"
+    "endif()\n"
+  )
+
+  # Add discovered tests to directory TEST_INCLUDE_FILES
+  set_property(DIRECTORY
+    APPEND PROPERTY TEST_INCLUDE_FILES "${ctest_include_file}"
+  )
+
+endfunction()
+
+###############################################################################
+
+set(_GOOGLETEST_DISCOVER_TESTS_SCRIPT
+  ${CMAKE_CURRENT_LIST_DIR}/GoogleTestAddTests.cmake
+)

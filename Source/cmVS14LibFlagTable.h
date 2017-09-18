@@ -11,6 +11,7 @@ static cmVS7FlagTable cmVS14LibFlagTable[] = {
     0 },
 
   { "TargetMachine", "MACHINE:ARM", "MachineARM", "MachineARM", 0 },
+  { "TargetMachine", "MACHINE:ARM64", "MachineARM64", "MachineARM64", 0 },
   { "TargetMachine", "MACHINE:EBC", "MachineEBC", "MachineEBC", 0 },
   { "TargetMachine", "MACHINE:IA64", "MachineIA64", "MachineIA64", 0 },
   { "TargetMachine", "MACHINE:MIPS", "MachineMIPS", "MachineMIPS", 0 },

@@ -52,6 +52,7 @@ else()
       #  frt: Fujitsu F77 compiler
       #  pathf90/pathf95/pathf2003: PathScale Fortran compiler
       #  pgf77/pgf90/pgf95/pgfortran: Portland Group F77/F90/F95 compilers
+      #  flang: Flang Fortran compiler
       #  xlf/xlf90/xlf95: IBM (AIX) F77/F90/F95 compilers
       #  lf95: Lahey-Fujitsu F95 compiler
       #  fl32: Microsoft Fortran 77 "PowerStation" compiler
@@ -68,7 +69,7 @@ else()
       set(CMAKE_Fortran_COMPILER_LIST
         ftn
         ifort ifc af95 af90 efc f95 pathf2003 pathf95 pgf95 pgfortran lf95 xlf95
-        fort gfortran gfortran-4 g95 f90 pathf90 pgf90 xlf90 epcf90 fort77
+        fort flang gfortran gfortran-4 g95 f90 pathf90 pgf90 xlf90 epcf90 fort77
         frt pgf77 xlf fl32 af77 g77 f77 nag
         )
 
@@ -77,10 +78,11 @@ else()
       set(_Fortran_COMPILER_NAMES_Intel     ifort ifc efc)
       set(_Fortran_COMPILER_NAMES_Absoft    af95 af90 af77)
       set(_Fortran_COMPILER_NAMES_PGI       pgf95 pgfortran pgf90 pgf77)
+      set(_Fortran_COMPILER_NAMES_Flang     flang)
       set(_Fortran_COMPILER_NAMES_PathScale pathf2003 pathf95 pathf90)
       set(_Fortran_COMPILER_NAMES_XL        xlf)
       set(_Fortran_COMPILER_NAMES_VisualAge xlf95 xlf90 xlf)
-      set(_Fortran_COMPILER_NAMES_NAG nagfor)
+      set(_Fortran_COMPILER_NAMES_NAG       nagfor)
     endif()
 
     _cmake_find_compiler(Fortran)

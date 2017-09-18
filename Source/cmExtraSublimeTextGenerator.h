@@ -3,7 +3,7 @@
 #ifndef cmExtraSublimeTextGenerator_h
 #define cmExtraSublimeTextGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmExternalMakefileProjectGenerator.h"
 
@@ -24,10 +24,10 @@ class cmExtraSublimeTextGenerator : public cmExternalMakefileProjectGenerator
 {
 public:
   static cmExternalMakefileProjectGeneratorFactory* GetFactory();
-  typedef std::map<std::string, std::vector<std::string> > MapSourceFileFlags;
+  typedef std::map<std::string, std::vector<std::string>> MapSourceFileFlags;
   cmExtraSublimeTextGenerator();
 
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
 private:
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);

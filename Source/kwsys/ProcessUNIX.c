@@ -99,7 +99,8 @@ static inline void kwsysProcess_usleep(unsigned int msec)
  * pipes' file handles to be non-blocking and just poll them directly
  * without select().
  */
-#if !defined(__BEOS__) && !defined(__VMS) && !defined(__MINT__)
+#if !defined(__BEOS__) && !defined(__VMS) && !defined(__MINT__) &&            \
+  !defined(KWSYSPE_USE_SELECT)
 #define KWSYSPE_USE_SELECT 1
 #endif
 

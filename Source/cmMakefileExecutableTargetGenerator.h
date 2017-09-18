@@ -3,7 +3,7 @@
 #ifndef cmMakefileExecutableTargetGenerator_h
 #define cmMakefileExecutableTargetGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 
@@ -15,11 +15,11 @@ class cmMakefileExecutableTargetGenerator : public cmMakefileTargetGenerator
 {
 public:
   cmMakefileExecutableTargetGenerator(cmGeneratorTarget* target);
-  ~cmMakefileExecutableTargetGenerator() CM_OVERRIDE;
+  ~cmMakefileExecutableTargetGenerator() override;
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
-  void WriteRuleFiles() CM_OVERRIDE;
+  void WriteRuleFiles() override;
 
 protected:
   virtual void WriteExecutableRule(bool relink);

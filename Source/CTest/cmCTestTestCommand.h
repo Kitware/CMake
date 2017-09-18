@@ -3,7 +3,7 @@
 #ifndef cmCTestTestCommand_h
 #define cmCTestTestCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestHandlerCommand.h"
 
@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmCTestTestCommand* ni = new cmCTestTestCommand;
     ni->CTest = this->CTest;
@@ -36,11 +36,11 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  std::string GetName() const CM_OVERRIDE { return "ctest_test"; }
+  std::string GetName() const override { return "ctest_test"; }
 
 protected:
   virtual cmCTestGenericHandler* InitializeActualHandler();
-  cmCTestGenericHandler* InitializeHandler() CM_OVERRIDE;
+  cmCTestGenericHandler* InitializeHandler() override;
 
   enum
   {

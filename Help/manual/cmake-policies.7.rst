@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.10
 .. toctree::
    :maxdepth: 1
 
+   CMP0071: Let AUTOMOC and AUTOUIC process GENERATED files. </policy/CMP0071>
    CMP0070: Define file(GENERATE) behavior for relative paths. </policy/CMP0070>
 
 Policies Introduced by CMake 3.9

@@ -1,6 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmConfigure.h"
 
 #include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
@@ -18,30 +17,29 @@
 #include <vector>
 
 static const char* cmDocumentationName[][2] = {
-  { CM_NULLPTR, "  ccmake - Curses Interface for CMake." },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, "  ccmake - Curses Interface for CMake." },
+  { nullptr, nullptr }
 };
 
 static const char* cmDocumentationUsage[][2] = {
-  { CM_NULLPTR, "  ccmake <path-to-source>\n"
-                "  ccmake <path-to-existing-build>" },
-  { CM_NULLPTR,
-    "Specify a source directory to (re-)generate a build system for "
-    "it in the current working directory.  Specify an existing build "
-    "directory to re-generate its build system." },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, "  ccmake <path-to-source>\n"
+             "  ccmake <path-to-existing-build>" },
+  { nullptr, "Specify a source directory to (re-)generate a build system for "
+             "it in the current working directory.  Specify an existing build "
+             "directory to re-generate its build system." },
+  { nullptr, nullptr }
 };
 
 static const char* cmDocumentationUsageNote[][2] = {
-  { CM_NULLPTR, "Run 'ccmake --help' for more information." },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, "Run 'ccmake --help' for more information." },
+  { nullptr, nullptr }
 };
 
 static const char* cmDocumentationOptions[]
                                          [2] = { CMAKE_STANDARD_OPTIONS_TABLE,
-                                                 { CM_NULLPTR, CM_NULLPTR } };
+                                                 { nullptr, nullptr } };
 
-cmCursesForm* cmCursesForm::CurrentForm = CM_NULLPTR;
+cmCursesForm* cmCursesForm::CurrentForm = nullptr;
 
 extern "C" {
 
@@ -169,7 +167,7 @@ int main(int argc, char const* const* argv)
   touchwin(stdscr);
   endwin();
   delete cmCursesForm::CurrentForm;
-  cmCursesForm::CurrentForm = CM_NULLPTR;
+  cmCursesForm::CurrentForm = nullptr;
 
   std::cout << std::endl << std::endl;
 

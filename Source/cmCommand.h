@@ -3,7 +3,7 @@
 #ifndef cmCommand_h
 #define cmCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -31,7 +31,7 @@ public:
    * Construct the command. By default it has no makefile.
    */
   cmCommand()
-    : Makefile(CM_NULLPTR)
+    : Makefile(nullptr)
   {
   }
 

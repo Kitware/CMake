@@ -16,7 +16,6 @@
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
-#include <map>
 #include <set>
 #include <string.h>
 #include <utility>
@@ -49,15 +48,13 @@ void cmGlobalKdevelopGenerator::Generate()
 {
   // for each sub project in the project create
   // a kdevelop project
-  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
-         it = this->GlobalGenerator->GetProjectMap().begin();
-       it != this->GlobalGenerator->GetProjectMap().end(); ++it) {
-    std::string outputDir = it->second[0]->GetCurrentBinaryDirectory();
-    std::string projectDir = it->second[0]->GetSourceDirectory();
-    std::string projectName = it->second[0]->GetProjectName();
+  for (auto const& it : this->GlobalGenerator->GetProjectMap()) {
+    std::string outputDir = it.second[0]->GetCurrentBinaryDirectory();
+    std::string projectDir = it.second[0]->GetSourceDirectory();
+    std::string projectName = it.second[0]->GetProjectName();
     std::string cmakeFilePattern("CMakeLists.txt;*.cmake;");
     std::string fileToOpen;
-    const std::vector<cmLocalGenerator*>& lgs = it->second;
+    const std::vector<cmLocalGenerator*>& lgs = it.second;
     // create the project.kdevelop.filelist file
     if (!this->CreateFilelistFile(lgs, outputDir, projectDir, projectName,
                                   cmakeFilePattern, fileToOpen)) {
@@ -67,15 +64,12 @@ void cmGlobalKdevelopGenerator::Generate()
     // try to find the name of an executable so we have something to
     // run from kdevelop for now just pick the first executable found
     std::string executable;
-    for (std::vector<cmLocalGenerator*>::const_iterator lg = lgs.begin();
-         lg != lgs.end(); lg++) {
+    for (cmLocalGenerator* lg : lgs) {
       std::vector<cmGeneratorTarget*> const& targets =
-        (*lg)->GetGeneratorTargets();
-      for (std::vector<cmGeneratorTarget*>::const_iterator ti =
-             targets.begin();
-           ti != targets.end(); ti++) {
-        if ((*ti)->GetType() == cmStateEnums::EXECUTABLE) {
-          executable = (*ti)->GetLocation("");
+        lg->GetGeneratorTargets();
+      for (cmGeneratorTarget* target : targets) {
+        if (target->GetType() == cmStateEnums::EXECUTABLE) {
+          executable = target->GetLocation("");
           break;
         }
       }
@@ -104,40 +98,35 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
   std::vector<std::string> const& hdrExts =
     this->GlobalGenerator->GetCMakeInstance()->GetHeaderExtensions();
 
-  for (std::vector<cmLocalGenerator*>::const_iterator it = lgs.begin();
-       it != lgs.end(); it++) {
-    cmMakefile* makefile = (*it)->GetMakefile();
+  for (cmLocalGenerator* lg : lgs) {
+    cmMakefile* makefile = lg->GetMakefile();
     const std::vector<std::string>& listFiles = makefile->GetListFiles();
-    for (std::vector<std::string>::const_iterator lt = listFiles.begin();
-         lt != listFiles.end(); lt++) {
-      tmp = *lt;
+    for (std::string const& listFile : listFiles) {
+      tmp = listFile;
       cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
       // make sure the file is part of this source tree
       if ((tmp[0] != '/') &&
           (strstr(tmp.c_str(), cmake::GetCMakeFilesDirectoryPostSlash()) ==
-           CM_NULLPTR)) {
+           nullptr)) {
         files.insert(tmp);
         tmp = cmSystemTools::GetFilenameName(tmp);
         // add all files which dont match the default
         // */CMakeLists.txt;*cmake; to the file pattern
         if ((tmp != "CMakeLists.txt") &&
-            (strstr(tmp.c_str(), ".cmake") == CM_NULLPTR)) {
+            (strstr(tmp.c_str(), ".cmake") == nullptr)) {
           cmakeFilePattern += tmp + ";";
         }
       }
     }
 
     // get all sources
-    std::vector<cmGeneratorTarget*> targets = (*it)->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
-         ti != targets.end(); ti++) {
+    const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
+    for (cmGeneratorTarget* gt : targets) {
       std::vector<cmSourceFile*> sources;
-      cmGeneratorTarget* gt = *ti;
       gt->GetSourceFiles(sources, gt->Target->GetMakefile()->GetSafeDefinition(
                                     "CMAKE_BUILD_TYPE"));
-      for (std::vector<cmSourceFile*>::const_iterator si = sources.begin();
-           si != sources.end(); si++) {
-        tmp = (*si)->GetFullPath();
+      for (cmSourceFile* sf : sources) {
+        tmp = sf->GetFullPath();
         std::string headerBasename = cmSystemTools::GetFilenamePath(tmp);
         headerBasename += "/";
         headerBasename += cmSystemTools::GetFilenameWithoutExtension(tmp);
@@ -146,16 +135,15 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
 
         if ((tmp[0] != '/') &&
             (strstr(tmp.c_str(), cmake::GetCMakeFilesDirectoryPostSlash()) ==
-             CM_NULLPTR) &&
+             nullptr) &&
             (cmSystemTools::GetFilenameExtension(tmp) != ".moc")) {
           files.insert(tmp);
 
           // check if there's a matching header around
-          for (std::vector<std::string>::const_iterator ext = hdrExts.begin();
-               ext != hdrExts.end(); ++ext) {
+          for (std::string const& hdrExt : hdrExts) {
             std::string hname = headerBasename;
             hname += ".";
-            hname += *ext;
+            hname += hdrExt;
             if (cmSystemTools::FileExists(hname.c_str())) {
               cmSystemTools::ReplaceString(hname, projectDir.c_str(), "");
               files.insert(hname);
@@ -164,13 +152,12 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
           }
         }
       }
-      for (std::vector<std::string>::const_iterator lt = listFiles.begin();
-           lt != listFiles.end(); lt++) {
-        tmp = *lt;
+      for (std::string const& listFile : listFiles) {
+        tmp = listFile;
         cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
         if ((tmp[0] != '/') &&
             (strstr(tmp.c_str(), cmake::GetCMakeFilesDirectoryPostSlash()) ==
-             CM_NULLPTR)) {
+             nullptr)) {
           files.insert(tmp);
         }
       }
@@ -200,10 +187,9 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
   }
 
   fileToOpen = "";
-  for (std::set<std::string>::const_iterator it = files.begin();
-       it != files.end(); it++) {
+  for (std::string const& file : files) {
     // get the full path to the file
-    tmp = cmSystemTools::CollapseFullPath(*it, projectDir.c_str());
+    tmp = cmSystemTools::CollapseFullPath(file, projectDir.c_str());
     // just select the first source file
     if (fileToOpen.empty()) {
       std::string ext = cmSystemTools::GetFilenameExtension(tmp);
@@ -296,21 +282,20 @@ void cmGlobalKdevelopGenerator::MergeProjectFiles(
     return;
   }
 
-  for (std::vector<std::string>::const_iterator it = lines.begin();
-       it != lines.end(); it++) {
-    const char* line = (*it).c_str();
+  for (std::string const& l : lines) {
+    const char* line = l.c_str();
     // skip these tags as they are always replaced
-    if ((strstr(line, "<projectdirectory>") != CM_NULLPTR) ||
-        (strstr(line, "<projectmanagement>") != CM_NULLPTR) ||
-        (strstr(line, "<absoluteprojectpath>") != CM_NULLPTR) ||
-        (strstr(line, "<filelistdirectory>") != CM_NULLPTR) ||
-        (strstr(line, "<buildtool>") != CM_NULLPTR) ||
-        (strstr(line, "<builddir>") != CM_NULLPTR)) {
+    if ((strstr(line, "<projectdirectory>") != nullptr) ||
+        (strstr(line, "<projectmanagement>") != nullptr) ||
+        (strstr(line, "<absoluteprojectpath>") != nullptr) ||
+        (strstr(line, "<filelistdirectory>") != nullptr) ||
+        (strstr(line, "<buildtool>") != nullptr) ||
+        (strstr(line, "<builddir>") != nullptr)) {
       continue;
     }
 
     // output the line from the file if it is not one of the above tags
-    fout << *it << "\n";
+    fout << l << "\n";
     // if this is the <general> tag output the stuff that goes in the
     // general tag
     if (strstr(line, "<general>")) {
@@ -433,10 +418,8 @@ void cmGlobalKdevelopGenerator::CreateNewProjectFile(
   xml.EndElement(); // make
 
   xml.StartElement("blacklist");
-  for (std::vector<std::string>::const_iterator dirIt =
-         this->Blacklist.begin();
-       dirIt != this->Blacklist.end(); ++dirIt) {
-    xml.Element("path", *dirIt);
+  for (std::string const& dir : this->Blacklist) {
+    xml.Element("path", dir);
   }
   xml.EndElement();
 

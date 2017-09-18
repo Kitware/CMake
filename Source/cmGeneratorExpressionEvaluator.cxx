@@ -25,13 +25,13 @@ std::string GeneratorExpressionContent::ProcessArbitraryContent(
   const cmGeneratorExpressionNode* node, const std::string& identifier,
   cmGeneratorExpressionContext* context,
   cmGeneratorExpressionDAGChecker* dagChecker,
-  std::vector<std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator
+  std::vector<std::vector<cmGeneratorExpressionEvaluator*>>::const_iterator
     pit) const
 {
   std::string result;
 
   const std::vector<
-    std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator pend =
+    std::vector<cmGeneratorExpressionEvaluator*>>::const_iterator pend =
     this->ParamChildren.end();
   for (; pit != pend; ++pit) {
     std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it =
@@ -122,10 +122,10 @@ std::string GeneratorExpressionContent::EvaluateParameters(
 {
   const int numExpected = node->NumExpectedParameters();
   {
-    std::vector<std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator
+    std::vector<std::vector<cmGeneratorExpressionEvaluator*>>::const_iterator
       pit = this->ParamChildren.begin();
     const std::vector<
-      std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator pend =
+      std::vector<cmGeneratorExpressionEvaluator*>>::const_iterator pend =
       this->ParamChildren.end();
     const bool acceptsArbitraryContent =
       node->AcceptsArbitraryContentParameter();
@@ -153,7 +153,7 @@ std::string GeneratorExpressionContent::EvaluateParameters(
   }
 
   if ((numExpected > cmGeneratorExpressionNode::DynamicParameters &&
-       (unsigned int)numExpected != parameters.size())) {
+       static_cast<unsigned int>(numExpected) != parameters.size())) {
     if (numExpected == 0) {
       reportError(context, this->GetOriginalExpression(),
                   "$<" + identifier + "> expression requires no parameters.");
@@ -188,5 +188,5 @@ GeneratorExpressionContent::~GeneratorExpressionContent()
 {
   cmDeleteAll(this->IdentifierChildren);
   std::for_each(this->ParamChildren.begin(), this->ParamChildren.end(),
-                cmDeleteAll<std::vector<cmGeneratorExpressionEvaluator*> >);
+                cmDeleteAll<std::vector<cmGeneratorExpressionEvaluator*>>);
 }

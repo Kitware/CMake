@@ -1,13 +1,7 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-cmake_minimum_required(VERSION 2.8.12.2 FATAL_ERROR)
-if(POLICY CMP0025)
-  cmake_policy(SET CMP0025 NEW)
-endif()
-if(POLICY CMP0053)
-  cmake_policy(SET CMP0053 NEW)
-endif()
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(CMake)
 
 # Make sure we can find internal find_package modules only used for
@@ -21,6 +15,14 @@ if(CMAKE_BOOTSTRAP)
 endif()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
+  if(CMAKE_SYSTEM_NAME STREQUAL "HP-UX")
+    message(FATAL_ERROR
+      "CMake no longer compiles on HP-UX.  See\n"
+      "  https://gitlab.kitware.com/cmake/cmake/issues/17137\n"
+      "Use CMake 3.9 or lower instead."
+      )
+  endif()
+
   set(CMake_BIN_DIR ${CMake_BINARY_DIR}/bin)
 endif()
 
@@ -72,6 +74,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
 
   # check for available C++ features
   include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx_features.cmake)
+
+  if(NOT CMake_HAVE_CXX_UNIQUE_PTR)
+    message(FATAL_ERROR "The C++ compiler does not support C++11 (e.g. std::unique_ptr).")
+  endif()
 endif()
 
 # set the internal encoding of CMake to UTF-8
@@ -333,11 +339,7 @@ macro (CMAKE_BUILD_UTILITIES)
   endif()
 
   if(CMAKE_USE_SYSTEM_LIBRHASH)
-    if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-      find_package(LibRHash)
-    else()
-      message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBRHASH requires CMake >= 3.0")
-    endif()
+    find_package(LibRHash)
     if(NOT LibRHash_FOUND)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_LIBRHASH is ON but LibRHash is not found!")
@@ -503,11 +505,7 @@ macro (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
   # Build jsoncpp library.
   if(CMAKE_USE_SYSTEM_JSONCPP)
-    if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-      find_package(JsonCpp)
-    else()
-      message(FATAL_ERROR "CMAKE_USE_SYSTEM_JSONCPP requires CMake >= 3.0")
-    endif()
+    find_package(JsonCpp)
     if(NOT JsonCpp_FOUND)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_JSONCPP is ON but a JsonCpp is not found!")
@@ -521,45 +519,17 @@ macro (CMAKE_BUILD_UTILITIES)
 
   #---------------------------------------------------------------------
   # Build libuv library.
-  if(NOT DEFINED CMAKE_USE_LIBUV)
-    set(CMAKE_USE_LIBUV 1)
-    if(APPLE)
-      include(CheckCSourceCompiles)
-      check_c_source_compiles("
-#include <CoreServices/CoreServices.h>
-#include <AvailabilityMacros.h>
-#ifndef MAC_OS_X_VERSION_10_5
-#error \"MAC_OS_X_VERSION_10_5 is not defined\"
-#endif
-int main(void) { return 0; }
-" HAVE_CoreServices_OS_X_10_5)
-      if(NOT HAVE_CoreServices_OS_X_10_5)
-        set(CMAKE_USE_LIBUV 0)
-      endif()
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "HP-UX")
-      # Disable until it can be ported.
-      set(CMAKE_USE_LIBUV 0)
+  if(CMAKE_USE_SYSTEM_LIBUV)
+    find_package(LibUV 1.0.0)
+    if(NOT LIBUV_FOUND)
+      message(FATAL_ERROR
+        "CMAKE_USE_SYSTEM_LIBUV is ON but a libuv is not found!")
     endif()
-  endif()
-  if(CMAKE_USE_LIBUV)
-    if(CMAKE_USE_SYSTEM_LIBUV)
-      if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-        find_package(LibUV 1.0.0)
-      else()
-        message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBUV requires CMake >= 3.0")
-      endif()
-      if(NOT LIBUV_FOUND)
-        message(FATAL_ERROR
-          "CMAKE_USE_SYSTEM_LIBUV is ON but a libuv is not found!")
-      endif()
-      set(CMAKE_LIBUV_LIBRARIES LibUV::LibUV)
-    else()
-      set(CMAKE_LIBUV_LIBRARIES cmlibuv)
-      add_subdirectory(Utilities/cmlibuv)
-      CMAKE_SET_TARGET_FOLDER(cmlibuv "Utilities/3rdParty")
-    endif()
+    set(CMAKE_LIBUV_LIBRARIES LibUV::LibUV)
   else()
-    set(CMAKE_LIBUV_LIBRARIES)
+    set(CMAKE_LIBUV_LIBRARIES cmlibuv)
+    add_subdirectory(Utilities/cmlibuv)
+    CMAKE_SET_TARGET_FOLDER(cmlibuv "Utilities/3rdParty")
   endif()
 
   #---------------------------------------------------------------------
@@ -748,31 +718,6 @@ endif()
 # setup some Testing support (a macro defined in this file)
 CMAKE_SETUP_TESTING()
 
-# Check whether to build server mode or not:
-if(NOT CMake_TEST_EXTERNAL_CMAKE)
-  if(NOT DEFINED CMake_ENABLE_SERVER_MODE)
-    list(FIND CMAKE_CXX_COMPILE_FEATURES cxx_auto_type CMake_HAVE_CXX_AUTO_TYPE)
-    list(FIND CMAKE_CXX_COMPILE_FEATURES cxx_range_for CMake_HAVE_CXX_RANGE_FOR)
-    if(CMAKE_USE_LIBUV
-        AND CMake_HAVE_CXX_AUTO_TYPE
-        AND CMake_HAVE_CXX_MAKE_UNIQUE
-        AND CMake_HAVE_CXX_RANGE_FOR
-        )
-      set(CMake_ENABLE_SERVER_MODE 1)
-    else()
-      set(CMake_ENABLE_SERVER_MODE 0)
-    endif()
-  endif()
-  if(CMake_ENABLE_SERVER_MODE AND NOT CMAKE_USE_LIBUV)
-    message(FATAL_ERROR "The server mode requires libuv!")
-  endif()
-else()
-  set(CMake_ENABLE_SERVER_MODE 0)
-endif()
-if(NOT DEFINED CMake_TEST_SERVER_MODE)
-  set(CMake_TEST_SERVER_MODE ${CMake_ENABLE_SERVER_MODE})
-endif()
-
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(NOT CMake_VERSION_IS_RELEASE)
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
@@ -808,6 +753,9 @@ add_subdirectory(Tests)
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(BUILD_TESTING)
     CMAKE_SET_TARGET_FOLDER(CMakeLibTests "Tests")
+    IF(TARGET CMakeServerLibTests)
+      CMAKE_SET_TARGET_FOLDER(CMakeServerLibTests "Tests")
+    ENDIF()
   endif()
   if(TARGET documentation)
     CMAKE_SET_TARGET_FOLDER(documentation "Documentation")

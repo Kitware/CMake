@@ -44,6 +44,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "Warning: LINN32: Last line.*is less.*"
   "Warning: Olimit was exceeded on function.*"
   "Warning: To override Olimit for all functions in file.*"
+  "Warning: Function .* can throw only the exceptions thrown by the function .* it overrides\\."
   "WarningMessagesDialog\\.cxx"
   "warning.*directory name.*CMake-Xcode.*/bin/.*does not exist.*"
   "stl_deque.h:1051"
@@ -69,11 +70,11 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*srand.*seed choices are.*poor" # we do not do crypto
   "IPA warning: function.*multiply defined in"
 
-  # Ignore clang's summary warning, assuming prior text has matched some
+  # Ignore compiler summary warning, assuming prior text has matched some
   # other warning expression:
-  "[0-9,]+ warnings? generated."
-  # similarly for PGI
-  "compilation completed with warnings"
+  "[0-9,]+ warnings? generated." # Clang
+  "compilation completed with warnings" # PGI
+  "[0-9]+ Warning\\(s\\) detected" # SunPro
 
 # scanbuild exceptions
   "char_traits.h:.*: warning: Null pointer argument in call to string length function"

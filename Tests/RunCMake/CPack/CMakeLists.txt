@@ -15,3 +15,7 @@ include(tests/${RunCMake_TEST_FILE_PREFIX}/test.cmake)
 
 set(CPACK_GENERATOR "${GENERATOR_TYPE}")
 include(CPack)
+
+if(COMMAND run_after_include_cpack)
+  run_after_include_cpack()
+endif()

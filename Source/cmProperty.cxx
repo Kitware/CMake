@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProperty.h"
 
-#include "cmConfigure.h"
-
 void cmProperty::Set(const char* value)
 {
   this->Value = value;
@@ -24,5 +22,5 @@ const char* cmProperty::GetValue() const
   if (this->ValueHasBeenSet) {
     return this->Value.c_str();
   }
-  return CM_NULLPTR;
+  return nullptr;
 }

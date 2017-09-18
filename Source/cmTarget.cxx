@@ -9,6 +9,7 @@
 #include <set>
 #include <sstream>
 #include <string.h>
+#include <unordered_set>
 
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
@@ -26,7 +27,6 @@
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmTargetPropertyComputer.h"
-#include "cm_unordered_set.hxx"
 #include "cmake.h"
 
 template <>
@@ -75,27 +75,23 @@ const char* cmTargetPropertyComputer::GetSources<cmTarget>(
 {
   cmStringRange entries = tgt->GetSourceEntries();
   if (entries.empty()) {
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   std::ostringstream ss;
   const char* sep = "";
-  for (std::vector<std::string>::const_iterator i = entries.begin();
-       i != entries.end(); ++i) {
-    std::string const& entry = *i;
-
+  for (std::string const& entry : entries) {
     std::vector<std::string> files;
     cmSystemTools::ExpandListArgument(entry, files);
-    for (std::vector<std::string>::const_iterator li = files.begin();
-         li != files.end(); ++li) {
-      if (cmHasLiteralPrefix(*li, "$<TARGET_OBJECTS:") &&
-          (*li)[li->size() - 1] == '>') {
-        std::string objLibName = li->substr(17, li->size() - 18);
+    for (std::string const& file : files) {
+      if (cmHasLiteralPrefix(file, "$<TARGET_OBJECTS:") &&
+          file[file.size() - 1] == '>') {
+        std::string objLibName = file.substr(17, file.size() - 18);
 
         if (cmGeneratorExpression::Find(objLibName) != std::string::npos) {
           ss << sep;
           sep = ";";
-          ss << *li;
+          ss << file;
           continue;
         }
 
@@ -130,14 +126,14 @@ const char* cmTargetPropertyComputer::GetSources<cmTarget>(
         if (addContent) {
           ss << sep;
           sep = ";";
-          ss << *li;
+          ss << file;
         }
-      } else if (cmGeneratorExpression::Find(*li) == std::string::npos) {
+      } else if (cmGeneratorExpression::Find(file) == std::string::npos) {
         ss << sep;
         sep = ";";
-        ss << *li;
+        ss << file;
       } else {
-        cmSourceFile* sf = tgt->GetMakefile()->GetOrCreateSource(*li);
+        cmSourceFile* sf = tgt->GetMakefile()->GetOrCreateSource(file);
         // Construct what is known about this source file location.
         cmSourceFileLocation const& location = sf->GetLocation();
         std::string sname = location.GetDirectory();
@@ -211,78 +207,81 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   // Setup default property values.
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetType() != cmStateEnums::UTILITY) {
-    this->SetPropertyDefault("ANDROID_API", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_API_MIN", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_ARCH", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_STL_TYPE", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_SKIP_ANT_STEP", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_PROCESS_MAX", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_PROGUARD", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_PROGUARD_CONFIG_PATH", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_SECURE_PROPS_PATH", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_NATIVE_LIB_DIRECTORIES", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_NATIVE_LIB_DEPENDENCIES", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_JAVA_SOURCE_DIR", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_JAR_DIRECTORIES", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_JAR_DEPENDENCIES", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_ASSETS_DIRECTORIES", CM_NULLPTR);
-    this->SetPropertyDefault("ANDROID_ANT_ADDITIONAL_OPTIONS", CM_NULLPTR);
-    this->SetPropertyDefault("BUILD_RPATH", CM_NULLPTR);
-    this->SetPropertyDefault("INSTALL_NAME_DIR", CM_NULLPTR);
+    this->SetPropertyDefault("ANDROID_API", nullptr);
+    this->SetPropertyDefault("ANDROID_API_MIN", nullptr);
+    this->SetPropertyDefault("ANDROID_ARCH", nullptr);
+    this->SetPropertyDefault("ANDROID_STL_TYPE", nullptr);
+    this->SetPropertyDefault("ANDROID_SKIP_ANT_STEP", nullptr);
+    this->SetPropertyDefault("ANDROID_PROCESS_MAX", nullptr);
+    this->SetPropertyDefault("ANDROID_PROGUARD", nullptr);
+    this->SetPropertyDefault("ANDROID_PROGUARD_CONFIG_PATH", nullptr);
+    this->SetPropertyDefault("ANDROID_SECURE_PROPS_PATH", nullptr);
+    this->SetPropertyDefault("ANDROID_NATIVE_LIB_DIRECTORIES", nullptr);
+    this->SetPropertyDefault("ANDROID_NATIVE_LIB_DEPENDENCIES", nullptr);
+    this->SetPropertyDefault("ANDROID_JAVA_SOURCE_DIR", nullptr);
+    this->SetPropertyDefault("ANDROID_JAR_DIRECTORIES", nullptr);
+    this->SetPropertyDefault("ANDROID_JAR_DEPENDENCIES", nullptr);
+    this->SetPropertyDefault("ANDROID_ASSETS_DIRECTORIES", nullptr);
+    this->SetPropertyDefault("ANDROID_ANT_ADDITIONAL_OPTIONS", nullptr);
+    this->SetPropertyDefault("BUILD_RPATH", nullptr);
+    this->SetPropertyDefault("INSTALL_NAME_DIR", nullptr);
     this->SetPropertyDefault("INSTALL_RPATH", "");
     this->SetPropertyDefault("INSTALL_RPATH_USE_LINK_PATH", "OFF");
-    this->SetPropertyDefault("INTERPROCEDURAL_OPTIMIZATION", CM_NULLPTR);
+    this->SetPropertyDefault("INTERPROCEDURAL_OPTIMIZATION", nullptr);
     this->SetPropertyDefault("SKIP_BUILD_RPATH", "OFF");
     this->SetPropertyDefault("BUILD_WITH_INSTALL_RPATH", "OFF");
-    this->SetPropertyDefault("ARCHIVE_OUTPUT_DIRECTORY", CM_NULLPTR);
-    this->SetPropertyDefault("LIBRARY_OUTPUT_DIRECTORY", CM_NULLPTR);
-    this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", CM_NULLPTR);
-    this->SetPropertyDefault("PDB_OUTPUT_DIRECTORY", CM_NULLPTR);
-    this->SetPropertyDefault("COMPILE_PDB_OUTPUT_DIRECTORY", CM_NULLPTR);
-    this->SetPropertyDefault("Fortran_FORMAT", CM_NULLPTR);
-    this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", CM_NULLPTR);
-    this->SetPropertyDefault("GNUtoMS", CM_NULLPTR);
-    this->SetPropertyDefault("OSX_ARCHITECTURES", CM_NULLPTR);
-    this->SetPropertyDefault("IOS_INSTALL_COMBINED", CM_NULLPTR);
-    this->SetPropertyDefault("AUTOMOC", CM_NULLPTR);
-    this->SetPropertyDefault("AUTOUIC", CM_NULLPTR);
-    this->SetPropertyDefault("AUTORCC", CM_NULLPTR);
-    this->SetPropertyDefault("AUTOMOC_DEPEND_FILTERS", CM_NULLPTR);
-    this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", CM_NULLPTR);
-    this->SetPropertyDefault("AUTOUIC_OPTIONS", CM_NULLPTR);
-    this->SetPropertyDefault("AUTOUIC_SEARCH_PATHS", CM_NULLPTR);
-    this->SetPropertyDefault("AUTORCC_OPTIONS", CM_NULLPTR);
-    this->SetPropertyDefault("LINK_DEPENDS_NO_SHARED", CM_NULLPTR);
-    this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", CM_NULLPTR);
-    this->SetPropertyDefault("WIN32_EXECUTABLE", CM_NULLPTR);
-    this->SetPropertyDefault("MACOSX_BUNDLE", CM_NULLPTR);
-    this->SetPropertyDefault("MACOSX_RPATH", CM_NULLPTR);
-    this->SetPropertyDefault("BUILD_WITH_INSTALL_NAME_DIR", CM_NULLPTR);
-    this->SetPropertyDefault("C_CLANG_TIDY", CM_NULLPTR);
-    this->SetPropertyDefault("C_COMPILER_LAUNCHER", CM_NULLPTR);
-    this->SetPropertyDefault("C_CPPLINT", CM_NULLPTR);
-    this->SetPropertyDefault("C_INCLUDE_WHAT_YOU_USE", CM_NULLPTR);
-    this->SetPropertyDefault("LINK_WHAT_YOU_USE", CM_NULLPTR);
-    this->SetPropertyDefault("C_STANDARD", CM_NULLPTR);
-    this->SetPropertyDefault("C_STANDARD_REQUIRED", CM_NULLPTR);
-    this->SetPropertyDefault("C_EXTENSIONS", CM_NULLPTR);
-    this->SetPropertyDefault("CXX_CLANG_TIDY", CM_NULLPTR);
-    this->SetPropertyDefault("CXX_COMPILER_LAUNCHER", CM_NULLPTR);
-    this->SetPropertyDefault("CXX_CPPLINT", CM_NULLPTR);
-    this->SetPropertyDefault("CXX_INCLUDE_WHAT_YOU_USE", CM_NULLPTR);
-    this->SetPropertyDefault("CXX_STANDARD", CM_NULLPTR);
-    this->SetPropertyDefault("CXX_STANDARD_REQUIRED", CM_NULLPTR);
-    this->SetPropertyDefault("CXX_EXTENSIONS", CM_NULLPTR);
-    this->SetPropertyDefault("CUDA_STANDARD", CM_NULLPTR);
-    this->SetPropertyDefault("CUDA_STANDARD_REQUIRED", CM_NULLPTR);
-    this->SetPropertyDefault("CUDA_EXTENSIONS", CM_NULLPTR);
-    this->SetPropertyDefault("CUDA_COMPILER_LAUNCHER", CM_NULLPTR);
-    this->SetPropertyDefault("LINK_SEARCH_START_STATIC", CM_NULLPTR);
-    this->SetPropertyDefault("LINK_SEARCH_END_STATIC", CM_NULLPTR);
+    this->SetPropertyDefault("ARCHIVE_OUTPUT_DIRECTORY", nullptr);
+    this->SetPropertyDefault("LIBRARY_OUTPUT_DIRECTORY", nullptr);
+    this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", nullptr);
+    this->SetPropertyDefault("PDB_OUTPUT_DIRECTORY", nullptr);
+    this->SetPropertyDefault("COMPILE_PDB_OUTPUT_DIRECTORY", nullptr);
+    this->SetPropertyDefault("Fortran_FORMAT", nullptr);
+    this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", nullptr);
+    this->SetPropertyDefault("GNUtoMS", nullptr);
+    this->SetPropertyDefault("OSX_ARCHITECTURES", nullptr);
+    this->SetPropertyDefault("IOS_INSTALL_COMBINED", nullptr);
+    this->SetPropertyDefault("AUTOMOC", nullptr);
+    this->SetPropertyDefault("AUTOUIC", nullptr);
+    this->SetPropertyDefault("AUTORCC", nullptr);
+    this->SetPropertyDefault("AUTOMOC_DEPEND_FILTERS", nullptr);
+    this->SetPropertyDefault("AUTOMOC_MACRO_NAMES", nullptr);
+    this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", nullptr);
+    this->SetPropertyDefault("AUTOUIC_OPTIONS", nullptr);
+    this->SetPropertyDefault("AUTOUIC_SEARCH_PATHS", nullptr);
+    this->SetPropertyDefault("AUTORCC_OPTIONS", nullptr);
+    this->SetPropertyDefault("LINK_DEPENDS_NO_SHARED", nullptr);
+    this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", nullptr);
+    this->SetPropertyDefault("WIN32_EXECUTABLE", nullptr);
+    this->SetPropertyDefault("MACOSX_BUNDLE", nullptr);
+    this->SetPropertyDefault("MACOSX_RPATH", nullptr);
+    this->SetPropertyDefault("BUILD_WITH_INSTALL_NAME_DIR", nullptr);
+    this->SetPropertyDefault("C_CLANG_TIDY", nullptr);
+    this->SetPropertyDefault("C_COMPILER_LAUNCHER", nullptr);
+    this->SetPropertyDefault("C_CPPLINT", nullptr);
+    this->SetPropertyDefault("C_CPPCHECK", nullptr);
+    this->SetPropertyDefault("C_INCLUDE_WHAT_YOU_USE", nullptr);
+    this->SetPropertyDefault("LINK_WHAT_YOU_USE", nullptr);
+    this->SetPropertyDefault("C_STANDARD", nullptr);
+    this->SetPropertyDefault("C_STANDARD_REQUIRED", nullptr);
+    this->SetPropertyDefault("C_EXTENSIONS", nullptr);
+    this->SetPropertyDefault("CXX_CLANG_TIDY", nullptr);
+    this->SetPropertyDefault("CXX_COMPILER_LAUNCHER", nullptr);
+    this->SetPropertyDefault("CXX_CPPLINT", nullptr);
+    this->SetPropertyDefault("CXX_CPPCHECK", nullptr);
+    this->SetPropertyDefault("CXX_INCLUDE_WHAT_YOU_USE", nullptr);
+    this->SetPropertyDefault("CXX_STANDARD", nullptr);
+    this->SetPropertyDefault("CXX_STANDARD_REQUIRED", nullptr);
+    this->SetPropertyDefault("CXX_EXTENSIONS", nullptr);
+    this->SetPropertyDefault("CUDA_STANDARD", nullptr);
+    this->SetPropertyDefault("CUDA_STANDARD_REQUIRED", nullptr);
+    this->SetPropertyDefault("CUDA_EXTENSIONS", nullptr);
+    this->SetPropertyDefault("CUDA_COMPILER_LAUNCHER", nullptr);
+    this->SetPropertyDefault("LINK_SEARCH_START_STATIC", nullptr);
+    this->SetPropertyDefault("LINK_SEARCH_END_STATIC", nullptr);
   }
 
   if (this->GetType() != cmStateEnums::UTILITY) {
-    this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", CM_NULLPTR);
+    this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", nullptr);
   }
 
   // Collect the set of configuration types.
@@ -296,11 +295,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       "ARCHIVE_OUTPUT_DIRECTORY_",     "LIBRARY_OUTPUT_DIRECTORY_",
       "RUNTIME_OUTPUT_DIRECTORY_",     "PDB_OUTPUT_DIRECTORY_",
       "COMPILE_PDB_OUTPUT_DIRECTORY_", "MAP_IMPORTED_CONFIG_",
-      "INTERPROCEDURAL_OPTIMIZATION_", CM_NULLPTR
+      "INTERPROCEDURAL_OPTIMIZATION_", nullptr
     };
-    for (std::vector<std::string>::iterator ci = configNames.begin();
-         ci != configNames.end(); ++ci) {
-      std::string configUpper = cmSystemTools::UpperCase(*ci);
+    for (std::string const& configName : configNames) {
+      std::string configUpper = cmSystemTools::UpperCase(configName);
       for (const char** p = configProps; *p; ++p) {
         // Interface libraries have no output locations, so honor only
         // the configuration map.
@@ -310,7 +308,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         }
         std::string property = *p;
         property += configUpper;
-        this->SetPropertyDefault(property, CM_NULLPTR);
+        this->SetPropertyDefault(property, nullptr);
       }
 
       // Initialize per-configuration name postfix property from the
@@ -320,9 +318,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       // property directly.
       if (this->TargetTypeValue != cmStateEnums::EXECUTABLE &&
           this->TargetTypeValue != cmStateEnums::INTERFACE_LIBRARY) {
-        std::string property = cmSystemTools::UpperCase(*ci);
+        std::string property = cmSystemTools::UpperCase(configName);
         property += "_POSTFIX";
-        this->SetPropertyDefault(property, CM_NULLPTR);
+        this->SetPropertyDefault(property, nullptr);
       }
     }
   }
@@ -366,16 +364,16 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetType() != cmStateEnums::UTILITY) {
-    this->SetPropertyDefault("C_VISIBILITY_PRESET", CM_NULLPTR);
-    this->SetPropertyDefault("CXX_VISIBILITY_PRESET", CM_NULLPTR);
-    this->SetPropertyDefault("CUDA_VISIBILITY_PRESET", CM_NULLPTR);
-    this->SetPropertyDefault("VISIBILITY_INLINES_HIDDEN", CM_NULLPTR);
+    this->SetPropertyDefault("C_VISIBILITY_PRESET", nullptr);
+    this->SetPropertyDefault("CXX_VISIBILITY_PRESET", nullptr);
+    this->SetPropertyDefault("CUDA_VISIBILITY_PRESET", nullptr);
+    this->SetPropertyDefault("VISIBILITY_INLINES_HIDDEN", nullptr);
   }
 
   if (this->TargetTypeValue == cmStateEnums::EXECUTABLE) {
-    this->SetPropertyDefault("ANDROID_GUI", CM_NULLPTR);
-    this->SetPropertyDefault("CROSSCOMPILING_EMULATOR", CM_NULLPTR);
-    this->SetPropertyDefault("ENABLE_EXPORTS", CM_NULLPTR);
+    this->SetPropertyDefault("ANDROID_GUI", nullptr);
+    this->SetPropertyDefault("CROSSCOMPILING_EMULATOR", nullptr);
+    this->SetPropertyDefault("ENABLE_EXPORTS", nullptr);
   }
   if (this->TargetTypeValue == cmStateEnums::SHARED_LIBRARY ||
       this->TargetTypeValue == cmStateEnums::MODULE_LIBRARY) {
@@ -383,12 +381,12 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
   if (this->TargetTypeValue == cmStateEnums::SHARED_LIBRARY ||
       this->TargetTypeValue == cmStateEnums::EXECUTABLE) {
-    this->SetPropertyDefault("WINDOWS_EXPORT_ALL_SYMBOLS", CM_NULLPTR);
+    this->SetPropertyDefault("WINDOWS_EXPORT_ALL_SYMBOLS", nullptr);
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetType() != cmStateEnums::UTILITY) {
-    this->SetPropertyDefault("POSITION_INDEPENDENT_CODE", CM_NULLPTR);
+    this->SetPropertyDefault("POSITION_INDEPENDENT_CODE", nullptr);
   }
 
   // Record current policies for later use.
@@ -404,8 +402,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetType() != cmStateEnums::UTILITY) {
-    this->SetPropertyDefault("JOB_POOL_COMPILE", CM_NULLPTR);
-    this->SetPropertyDefault("JOB_POOL_LINK", CM_NULLPTR);
+    this->SetPropertyDefault("JOB_POOL_COMPILE", nullptr);
+    this->SetPropertyDefault("JOB_POOL_LINK", nullptr);
   }
 }
 
@@ -428,7 +426,7 @@ cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(
   std::map<std::string, cmListFileBacktrace>::const_iterator i =
     this->UtilityBacktraces.find(u);
   if (i == this->UtilityBacktraces.end()) {
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   return &i->second;
@@ -480,9 +478,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
 {
   std::string srcFiles;
   const char* sep = "";
-  for (std::vector<std::string>::const_iterator i = srcs.begin();
-       i != srcs.end(); ++i) {
-    std::string filename = *i;
+  for (auto filename : srcs) {
     const char* src = filename.c_str();
 
     if (!(src[0] == '$' && src[1] == '<')) {
@@ -546,7 +542,7 @@ cmSourceFile* cmTarget::AddSourceCMP0049(const std::string& s)
 {
   std::string src = this->ProcessSourceItemCMP0049(s);
   if (!s.empty() && src.empty()) {
-    return CM_NULLPTR;
+    return nullptr;
   }
   return this->AddSource(src);
 }
@@ -617,7 +613,7 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
     this->Internal->SourceBacktraces.push_back(lfbt);
   }
   if (cmGeneratorExpression::Find(src) != std::string::npos) {
-    return CM_NULLPTR;
+    return nullptr;
   }
   return this->Makefile->GetOrCreateSource(src);
 }
@@ -711,12 +707,10 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
   const char* sigString =
     (sig == cmTarget::KeywordTLLSignature ? "keyword" : "plain");
   s << "The uses of the " << sigString << " signature are here:\n";
-  typedef std::vector<std::pair<TLLSignature, cmListFileContext> > Container;
   cmOutputConverter converter(this->GetMakefile()->GetStateSnapshot());
-  for (Container::const_iterator it = this->TLLCommands.begin();
-       it != this->TLLCommands.end(); ++it) {
-    if (it->first == sig) {
-      cmListFileContext lfc = it->second;
+  for (auto const& cmd : this->TLLCommands) {
+    if (cmd.first == sig) {
+      cmListFileContext lfc = cmd.second;
       lfc.FilePath = converter.ConvertToRelativePath(
         this->Makefile->GetState()->GetSourceDirectory(), lfc.FilePath);
       s << " * " << lfc << std::endl;
@@ -1179,7 +1173,7 @@ const char* cmTarget::GetComputedProperty(
 
 const char* cmTarget::GetProperty(const std::string& prop) const
 {
-  static CM_UNORDERED_SET<std::string> specialProps;
+  static std::unordered_set<std::string> specialProps;
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
   MAKE_STATIC_PROP(LINK_LIBRARIES);
   MAKE_STATIC_PROP(TYPE);
@@ -1211,7 +1205,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
   if (specialProps.count(prop)) {
     if (prop == propLINK_LIBRARIES) {
       if (this->Internal->LinkImplementationPropertyEntries.empty()) {
-        return CM_NULLPTR;
+        return nullptr;
       }
 
       static std::string output;
@@ -1224,7 +1218,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     }
     if (prop == propINCLUDE_DIRECTORIES) {
       if (this->Internal->IncludeDirectoriesEntries.empty()) {
-        return CM_NULLPTR;
+        return nullptr;
       }
 
       static std::string output;
@@ -1233,7 +1227,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     }
     if (prop == propCOMPILE_FEATURES) {
       if (this->Internal->CompileFeaturesEntries.empty()) {
-        return CM_NULLPTR;
+        return nullptr;
       }
 
       static std::string output;
@@ -1242,7 +1236,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     }
     if (prop == propCOMPILE_OPTIONS) {
       if (this->Internal->CompileOptionsEntries.empty()) {
-        return CM_NULLPTR;
+        return nullptr;
       }
 
       static std::string output;
@@ -1251,7 +1245,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     }
     if (prop == propCOMPILE_DEFINITIONS) {
       if (this->Internal->CompileDefinitionsEntries.empty()) {
-        return CM_NULLPTR;
+        return nullptr;
       }
 
       static std::string output;
@@ -1260,7 +1254,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     }
     if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
       if (this->Utilities.empty()) {
-        return CM_NULLPTR;
+        return nullptr;
       }
 
       static std::string output;
@@ -1398,8 +1392,8 @@ std::string cmTarget::ImportedGetFullPath(
 
   std::string result;
 
-  const char* loc = CM_NULLPTR;
-  const char* imp = CM_NULLPTR;
+  const char* loc = nullptr;
+  const char* imp = nullptr;
   std::string suffix;
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&

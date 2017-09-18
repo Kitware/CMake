@@ -3,7 +3,7 @@
 #ifndef cmCTestSVN_h
 #define cmCTestSVN_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGlobalVC.h"
 
@@ -24,14 +24,14 @@ public:
   /** Construct with a CTest instance and update log stream.  */
   cmCTestSVN(cmCTest* ctest, std::ostream& log);
 
-  ~cmCTestSVN() CM_OVERRIDE;
+  ~cmCTestSVN() override;
 
 private:
   // Implement cmCTestVC internal API.
-  void CleanupImpl() CM_OVERRIDE;
-  bool NoteOldRevision() CM_OVERRIDE;
-  bool NoteNewRevision() CM_OVERRIDE;
-  bool UpdateImpl() CM_OVERRIDE;
+  void CleanupImpl() override;
+  bool NoteOldRevision() override;
+  bool NoteNewRevision() override;
+  bool UpdateImpl() override;
 
   bool RunSVNCommand(std::vector<char const*> const& parameters,
                      OutputParser* out, OutputParser* err);
@@ -77,8 +77,8 @@ private:
 
   std::string LoadInfo(SVNInfo& svninfo);
   bool LoadRepositories();
-  bool LoadModifications() CM_OVERRIDE;
-  bool LoadRevisions() CM_OVERRIDE;
+  bool LoadModifications() override;
+  bool LoadRevisions() override;
   bool LoadRevisions(SVNInfo& svninfo);
 
   void GuessBase(SVNInfo& svninfo, std::vector<Change> const& changes);
@@ -86,7 +86,7 @@ private:
   void DoRevisionSVN(Revision const& revision,
                      std::vector<Change> const& changes);
 
-  void WriteXMLGlobal(cmXMLWriter& xml) CM_OVERRIDE;
+  void WriteXMLGlobal(cmXMLWriter& xml) override;
 
   class ExternalParser;
   // Parsing helper classes.

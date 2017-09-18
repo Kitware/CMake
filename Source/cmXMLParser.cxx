@@ -11,10 +11,10 @@
 
 cmXMLParser::cmXMLParser()
 {
-  this->Parser = CM_NULLPTR;
+  this->Parser = nullptr;
   this->ParseError = 0;
-  this->ReportCallback = CM_NULLPTR;
-  this->ReportCallbackData = CM_NULLPTR;
+  this->ReportCallback = nullptr;
+  this->ReportCallbackData = nullptr;
 }
 
 cmXMLParser::~cmXMLParser()
@@ -26,7 +26,7 @@ cmXMLParser::~cmXMLParser()
 
 int cmXMLParser::Parse(const char* string)
 {
-  return (int)this->InitializeParser() &&
+  return this->InitializeParser() &&
     this->ParseChunk(string, strlen(string)) && this->CleanupParser();
 }
 
@@ -55,7 +55,7 @@ int cmXMLParser::InitializeParser()
   }
 
   // Create the expat XML parser.
-  this->Parser = XML_ParserCreate(CM_NULLPTR);
+  this->Parser = XML_ParserCreate(nullptr);
   XML_SetElementHandler(static_cast<XML_Parser>(this->Parser),
                         &cmXMLParserStartElement, &cmXMLParserEndElement);
   XML_SetCharacterDataHandler(static_cast<XML_Parser>(this->Parser),
@@ -99,7 +99,7 @@ int cmXMLParser::CleanupParser()
 
   // Clean up the parser.
   XML_ParserFree(static_cast<XML_Parser>(this->Parser));
-  this->Parser = CM_NULLPTR;
+  this->Parser = nullptr;
 
   return result;
 }
@@ -156,7 +156,7 @@ const char* cmXMLParser::FindAttribute(const char** atts,
       }
     }
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 void cmXMLParserStartElement(void* parser, const char* name, const char** atts)

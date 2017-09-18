@@ -3,7 +3,7 @@
 #ifndef cmCPackDragNDropGenerator_h
 #define cmCPackDragNDropGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <sstream>
 #include <stddef.h>
@@ -23,20 +23,20 @@ public:
   cmCPackTypeMacro(cmCPackDragNDropGenerator, cmCPackGenerator);
 
   cmCPackDragNDropGenerator();
-  ~cmCPackDragNDropGenerator() CM_OVERRIDE;
+  ~cmCPackDragNDropGenerator() override;
 
 protected:
-  int InitializeInternal() CM_OVERRIDE;
-  const char* GetOutputExtension() CM_OVERRIDE;
-  int PackageFiles() CM_OVERRIDE;
-  bool SupportsComponentInstallation() const CM_OVERRIDE;
+  int InitializeInternal() override;
+  const char* GetOutputExtension() override;
+  int PackageFiles() override;
+  bool SupportsComponentInstallation() const override;
 
   bool CopyFile(std::ostringstream& source, std::ostringstream& target);
   bool CreateEmptyFile(std::ostringstream& target, size_t size);
   bool RunCommand(std::ostringstream& command, std::string* output = 0);
 
   std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName) CM_OVERRIDE;
+    const std::string& componentName) override;
 
   int CreateDMG(const std::string& src_dir, const std::string& output_file);
 

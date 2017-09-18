@@ -30,7 +30,7 @@ else and endif clause is optional.  Long expressions can be used and
 there is a traditional order of precedence.  Parenthetical expressions
 are evaluated first followed by unary tests such as ``EXISTS``,
 ``COMMAND``, and ``DEFINED``.  Then any binary tests such as
-``EQUAL``, ``LESS``, ``LESS_EQUAL, ``GREATER``, ``GREATER_EQUAL``,
+``EQUAL``, ``LESS``, ``LESS_EQUAL``, ``GREATER``, ``GREATER_EQUAL``,
 ``STREQUAL``, ``STRLESS``, ``STRLESS_EQUAL``, ``STRGREATER``,
 ``STRGREATER_EQUAL``, ``VERSION_EQUAL``, ``VERSION_LESS``,
 ``VERSION_LESS_EQUAL``, ``VERSION_GREATER``, ``VERSION_GREATER_EQUAL``,

@@ -72,7 +72,6 @@ cmake_init_file=""
 cmake_bootstrap_system_libs=""
 cmake_bootstrap_qt_gui=""
 cmake_bootstrap_qt_qmake=""
-cmake_bootstrap_server=""
 cmake_sphinx_man=""
 cmake_sphinx_html=""
 cmake_sphinx_qthelp=""
@@ -80,7 +79,7 @@ cmake_sphinx_build=""
 cmake_sphinx_flags=""
 
 # Determine whether this is a Cygwin environment.
-if echo "${cmake_system}" | grep -q CYGWIN; then
+if echo "${cmake_system}" | grep CYGWIN >/dev/null 2>&1; then
   cmake_system_cygwin=true
   cmake_doc_dir_keyword="CYGWIN"
   cmake_man_dir_keyword="CYGWIN"
@@ -89,21 +88,21 @@ else
 fi
 
 # Determine whether this is a MinGW environment.
-if echo "${cmake_system}" | grep -q 'MINGW\|MSYS'; then
+if echo "${cmake_system}" | grep 'MINGW\|MSYS' >/dev/null 2>&1; then
   cmake_system_mingw=true
 else
   cmake_system_mingw=false
 fi
 
 # Determine whether this is OS X
-if echo "${cmake_system}" | grep -q Darwin; then
+if echo "${cmake_system}" | grep Darwin >/dev/null 2>&1; then
   cmake_system_darwin=true
 else
   cmake_system_darwin=false
 fi
 
 # Determine whether this is BeOS
-if echo "${cmake_system}" | grep -q BeOS; then
+if echo "${cmake_system}" | grep BeOS >/dev/null 2>&1; then
   cmake_system_beos=true
   cmake_doc_dir_keyword="HAIKU"
   cmake_man_dir_keyword="HAIKU"
@@ -112,7 +111,7 @@ else
 fi
 
 # Determine whether this is Haiku
-if echo "${cmake_system}" | grep -q Haiku; then
+if echo "${cmake_system}" | grep Haiku >/dev/null 2>&1; then
   cmake_system_haiku=true
   cmake_doc_dir_keyword="HAIKU"
   cmake_man_dir_keyword="HAIKU"
@@ -121,21 +120,26 @@ else
 fi
 
 # Determine whether this is OpenVMS
-if echo "${cmake_system}" | grep -q OpenVMS; then
+if echo "${cmake_system}" | grep OpenVMS >/dev/null 2>&1; then
   cmake_system_openvms=true
 else
   cmake_system_openvms=false
 fi
 
 # Determine whether this is HP-UX
-if echo "${cmake_system}" | grep -q HP-UX; then
+if echo "${cmake_system}" | grep HP-UX >/dev/null 2>&1; then
+  die 'CMake no longer compiles on HP-UX.  See
+
+  https://gitlab.kitware.com/cmake/cmake/issues/17137
+
+Use CMake 3.9 or lower instead.'
   cmake_system_hpux=true
 else
   cmake_system_hpux=false
 fi
 
 # Determine whether this is Linux
-if echo "${cmake_system}" | grep -q Linux; then
+if echo "${cmake_system}" | grep Linux >/dev/null 2>&1; then
   cmake_system_linux=true
 else
   cmake_system_linux=false
@@ -146,11 +150,11 @@ else
 # may falsely detect parisc on HP-UX m68k
 cmake_machine_parisc=false
 if ${cmake_system_linux}; then
-  if uname -m | grep -q parisc; then
+  if uname -m | grep parisc >/dev/null 2>&1; then
     cmake_machine_parisc=true
   fi
 elif ${cmake_system_hpux}; then
-  if uname -m | grep -q ia64; then : ; else
+  if uname -m | grep ia64 >/dev/null 2>&1; then : ; else
     cmake_machine_parisc=true
   fi
 fi
@@ -398,8 +402,14 @@ CMAKE_CXX_SOURCES="\
   cmSubdirCommand \
   cmSystemTools \
   cmTarget \
+  cmTargetCompileDefinitionsCommand \
+  cmTargetCompileFeaturesCommand \
+  cmTargetCompileOptionsCommand \
+  cmTargetIncludeDirectoriesCommand \
   cmTargetLinkLibrariesCommand \
+  cmTargetPropCommandBase \
   cmTargetPropertyComputer \
+  cmTargetSourcesCommand \
   cmTest \
   cmTestGenerator \
   cmTimestamp \
@@ -470,6 +480,59 @@ KWSYS_FILES="\
   SystemTools.hxx \
   Terminal.h"
 
+if ${cmake_system_mingw}; then
+  LIBUV_C_SOURCES="\
+    src/fs-poll.c \
+    src/inet.c \
+    src/threadpool.c \
+    src/uv-common.c \
+    src/win/async.c \
+    src/win/core.c \
+    src/win/detect-wakeup.c \
+    src/win/dl.c \
+    src/win/error.c \
+    src/win/fs-event.c \
+    src/win/fs.c \
+    src/win/getaddrinfo.c \
+    src/win/getnameinfo.c \
+    src/win/handle.c \
+    src/win/loop-watcher.c \
+    src/win/pipe.c \
+    src/win/poll.c \
+    src/win/process-stdio.c \
+    src/win/process.c \
+    src/win/req.c \
+    src/win/signal.c \
+    src/win/stream.c \
+    src/win/tcp.c \
+    src/win/thread.c \
+    src/win/timer.c \
+    src/win/tty.c \
+    src/win/udp.c \
+    src/win/util.c \
+    src/win/winapi.c \
+    src/win/winsock.c \
+    "
+else
+  LIBUV_C_SOURCES="\
+    src/uv-common.c \
+    src/unix/cmake-bootstrap.c \
+    src/unix/core.c \
+    src/unix/fs.c \
+    src/unix/loop.c \
+    src/unix/loop-watcher.c \
+    src/unix/no-fsevents.c \
+    src/unix/pipe.c \
+    src/unix/poll.c \
+    src/unix/posix-hrtime.c \
+    src/unix/posix-poll.c \
+    src/unix/process.c \
+    src/unix/signal.c \
+    src/unix/stream.c \
+    src/unix/timer.c \
+    "
+fi
+
 # Display CMake bootstrap usage
 cmake_usage()
 {
@@ -508,9 +571,6 @@ Configuration:
   --qt-gui                build the Qt-based GUI (requires Qt >= 4.2)
   --no-qt-gui             do not build the Qt-based GUI (default)
   --qt-qmake=<qmake>      use <qmake> as the qmake executable to find Qt
-
-  --server                enable the server mode (default if supported)
-  --no-server             disable the server mode
 
   --sphinx-man            build man pages with Sphinx
   --sphinx-html           build html help with Sphinx
@@ -634,6 +694,12 @@ cmake_escape ()
   echo $1 | sed "s/ /\\\\ /g"
 }
 
+# Encode object file names.
+cmake_obj ()
+{
+  echo $1 | sed 's/\//-/g' | sed 's/$/\.o/'
+}
+
 # Strip prefix from argument
 cmake_arg ()
 {
@@ -744,8 +810,6 @@ while test $# != 0; do
   --qt-gui) cmake_bootstrap_qt_gui="1" ;;
   --no-qt-gui) cmake_bootstrap_qt_gui="0" ;;
   --qt-qmake=*) cmake_bootstrap_qt_qmake=`cmake_arg "$1"` ;;
-  --server) cmake_bootstrap_server="1" ;;
-  --no-server) cmake_bootstrap_server="0" ;;
   --sphinx-man) cmake_sphinx_man="1" ;;
   --sphinx-html) cmake_sphinx_html="1" ;;
   --sphinx-qthelp) cmake_sphinx_qthelp="1" ;;
@@ -825,6 +889,12 @@ rm -f "${cmake_bootstrap_dir}/cmake_bootstrap.log"
 rm -f "${cmake_bootstrap_dir}/cmConfigure.h${_tmp}"
 rm -f "${cmake_bootstrap_dir}/cmVersionConfig.h${_tmp}"
 
+# If building in-source, remove any cmConfigure.h that may
+# have been created by a previous run of the bootstrap cmake.
+if [ -n "${cmake_in_source_build}" ]; then
+  rm -f "${cmake_source_dir}/Source/cmConfigure.h"
+fi
+
 # If exist compiler flags, set them
 cmake_c_flags=${CFLAGS}
 cmake_cxx_flags=${CXXFLAGS}
@@ -848,16 +918,6 @@ fi
 # Add Haiku toolkits...
 if ${cmake_system_haiku}; then
   cmake_ld_flags="${LDFLAGS} -lroot -lbe"
-fi
-
-# Workaround for short jump tables on PA-RISC
-if ${cmake_machine_parisc}; then
-  if ${cmake_c_compiler_is_gnu}; then
-    cmake_c_flags="${CFLAGS} -mlong-calls"
-  fi
-  if ${cmake_cxx_compiler_is_gnu}; then
-    cmake_cxx_flags="${CXXFLAGS} -mlong-calls"
-  fi
 fi
 
 #-----------------------------------------------------------------------------
@@ -940,35 +1000,30 @@ echo '
 # error "The CMAKE_C_COMPILER is set to a C++ compiler"
 #endif
 
-#include<stdio.h>
-
-#if defined(__CLASSIC_C__)
-int main(argc, argv)
-  int argc;
-  char* argv[];
-#else
-int main(int argc, char* argv[])
+#if defined(__sun) && __STDC_VERSION__ < 199901L
+#error "On Solaris we need C99."
 #endif
+
+#include <stdio.h>
+
+int main(int argc, char* argv[])
 {
   printf("%d%c", (argv != 0), (char)0x0a);
-  return argc-1;
+  return argc - 1;
 }
 ' > "${TMPFILE}.c"
-for a in ${cmake_c_compilers}; do
-  if [ -z "${cmake_c_compiler}" ] && \
-    cmake_try_run "${a}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
-    cmake_c_compiler="${a}"
-  fi
-done
 for std in 11 99 90; do
   try_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" C \"${std}\"`"
-  for flag in $try_flags; do
-    echo "Checking whether ${cmake_c_compiler} supports ${flag}" >> cmake_bootstrap.log 2>&1
-    if cmake_try_run "${cmake_c_compiler}" "${cmake_c_flags} ${flag}" \
-      "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
-      cmake_c_flags="${cmake_c_flags} ${flag}"
-      break 2
-    fi
+  for compiler in ${cmake_c_compilers}; do
+    for flag in '' $try_flags; do
+      echo "Checking whether '${compiler} ${cmake_c_flags} ${flag}' works." >> cmake_bootstrap.log 2>&1
+      if cmake_try_run "${compiler}" "${cmake_c_flags} ${flag}" \
+        "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
+        cmake_c_compiler="${compiler}"
+        cmake_c_flags="${cmake_c_flags} ${flag}"
+        break 3
+      fi
+    done
   done
 done
 rm -f "${TMPFILE}.c"
@@ -999,58 +1054,49 @@ fi
 # Check if C++ compiler works
 TMPFILE=`cmake_tmp_file`
 echo '
-#if defined(TEST1)
-# include <iostream>
-#else
-# include <iostream.h>
+#include <iostream>
+#include <memory>
+
+#if __cplusplus < 201103L
+#error "Compiler is not in a mode aware of C++11."
 #endif
 
-#if __cplusplus >= 201103L && defined(__SUNPRO_CC) && __SUNPRO_CC < 0x5140
-#error "SunPro <= 5.13 C++ 11 mode not supported due to bug in move semantics."
+#if defined(__SUNPRO_CC) && __SUNPRO_CC < 0x5140
+#error "SunPro <= 5.13 mode not supported due to bug in move semantics."
 #endif
 
-class NeedCXX
+class Class
 {
 public:
-  NeedCXX() { this->Foo = 1; }
-  int GetFoo() { return this->Foo; }
+  int Get() const { return this->Member; }
 private:
-  int Foo;
+  int Member = 1;
 };
 int main()
 {
-  NeedCXX c;
-#ifdef TEST3
-  cout << c.GetFoo() << endl;
-#else
-  std::cout << c.GetFoo() << std::endl;
-#endif
+  auto const c = std::unique_ptr<Class>(new Class);
+  std::cout << c->Get() << std::endl;
   return 0;
 }
 ' > "${TMPFILE}.cxx"
-for a in ${cmake_cxx_compilers}; do
-  for b in 1 2 3; do
-    if [ -z "${cmake_cxx_compiler}" ] && \
-      cmake_try_run "${a}" "${cmake_cxx_flags} -DTEST${b}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-      cmake_cxx_compiler="${a}"
-    fi
-  done
-done
-for std in 14 11 98; do
+for std in 17 14 11; do
   try_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" CXX \"${std}\"`"
-  for flag in $try_flags; do
-    echo "Checking for wheter ${cmake_cxx_flags} supports ${flag}" >> cmake_bootstrap.log 2>&1
-    if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags} ${flag} -DTEST1" \
-      "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-      cmake_cxx_flags="${cmake_cxx_flags} ${flag} "
-      break 2
-    fi
+  for compiler in ${cmake_cxx_compilers}; do
+    for flag in '' $try_flags; do
+      echo "Checking whether '${compiler} ${cmake_cxx_flags} ${flag}' works." >> cmake_bootstrap.log 2>&1
+      if cmake_try_run "${compiler}" "${cmake_cxx_flags} ${flag}" \
+        "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+        cmake_cxx_compiler="${compiler}"
+        cmake_cxx_flags="${cmake_cxx_flags} ${flag} "
+        break 3
+      fi
+    done
   done
 done
 rm -f "${TMPFILE}.cxx"
 
 if [ -z "${cmake_cxx_compiler}" ]; then
-  cmake_error 7 "Cannot find appropriate C++ compiler on this system.
+cmake_error 7 "Cannot find a C++ compiler supporting C++11 on this system.
 Please specify one using environment variable CXX.
 See cmake_bootstrap.log for compilers attempted."
 fi
@@ -1114,85 +1160,6 @@ if [ "x${cmake_full_make_flags}" != "x${cmake_make_flags}" ]; then
   echo "Makefile processor ${cmake_make_processor} does not support parallel build"
   echo "---------------------------------------------"
 fi
-
-# Ok, we have CC, CXX, and MAKE.
-
-# Test C++ compiler features
-
-# Are we GCC?
-
-TMPFILE=`cmake_tmp_file`
-echo '
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-#include <iostream>
-int main() { std::cout << "This is GNU" << std::endl; return 0;}
-#endif
-' > ${TMPFILE}.cxx
-cmake_cxx_compiler_is_gnu=0
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-  cmake_cxx_compiler_is_gnu=1
-fi
-if [ "x${cmake_cxx_compiler_is_gnu}" = "x1" ]; then
-  echo "${cmake_cxx_compiler} is GNU compiler"
-else
-  echo "${cmake_cxx_compiler} is not GNU compiler"
-fi
-rm -f "${TMPFILE}.cxx"
-
-if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
-  # Check for non-GNU compiler flags
-
-  # If we are on HP-UX, check for -Ae for the C compiler.
-  if [ "x${cmake_system}" = "xHP-UX" ]; then
-    cmake_test_flags="-Ae"
-    TMPFILE=`cmake_tmp_file`
-    echo '
-    int main(int argc, char** argv) { (void)argc; (void)argv; return 0; }
-' > ${TMPFILE}.c
-    cmake_need_Ae=0
-    if cmake_try_run "${cmake_c_compiler}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
-      :
-    else
-      if cmake_try_run "${cmake_c_compiler}" \
-        "${cmake_c_flags} ${cmake_test_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
-        cmake_need_Ae=1
-      fi
-    fi
-    if [ "x${cmake_need_Ae}" = "x1" ]; then
-      cmake_c_flags="${cmake_c_flags} ${cmake_test_flags}"
-      echo "${cmake_c_compiler} needs ${cmake_test_flags}"
-    else
-      echo "${cmake_c_compiler} does not need ${cmake_test_flags}"
-    fi
-    rm -f "${TMPFILE}.c"
-    echo '
-    #include <iostream>
-    int main(int argc, char** argv) {
-    for(int i=0; i < 1; ++i);
-    for(int i=0; i < 1; ++i);
-    (void)argc; (void)argv; return 0; }
-' > ${TMPFILE}.cxx
-    cmake_need_AAstd98=0
-    cmake_test_flags="-AA +hpxstd98"
-    if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-      :
-    else
-      if cmake_try_run "${cmake_cxx_compiler}" \
-        "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-        cmake_need_AAstd98=1
-      fi
-    fi
-    if [ "x${cmake_need_AAstd98}" = "x1" ]; then
-      cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
-      echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
-    else
-      echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
-    fi
-  fi
-  cmake_test_flags=
-fi
-
 
 # Test for kwsys features
 KWSYS_NAME_IS_KWSYS=0
@@ -1276,6 +1243,8 @@ cmake_compiler_settings_comment="/*
  * ${LexerParser_CXX_SOURCES} ${LexerParser_C_SOURCES}
  * kwSys Sources:
  * ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}
+ * libuv Sources:
+ * ${LIBUV_C_SOURCES}
  */
 "
 
@@ -1303,8 +1272,6 @@ cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-insal
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP"
 cmake_report cmConfigure.h${_tmp} "#define CM_EQ_DELETE"
 cmake_report cmConfigure.h${_tmp} "#define CM_FALLTHROUGH"
-cmake_report cmConfigure.h${_tmp} "#define CM_NULLPTR 0"
-cmake_report cmConfigure.h${_tmp} "#define CM_OVERRIDE"
 cmake_report cmConfigure.h${_tmp} "#define CM_DISABLE_COPY(Class)"
 
 # Regenerate configured headers
@@ -1339,6 +1306,48 @@ objs=""
 for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${LexerParser_CXX_SOURCES} ${LexerParser_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}; do
   objs="${objs} ${a}.o"
 done
+for a in ${LIBUV_C_SOURCES}; do
+  objs="${objs} uv-`cmake_obj ${a}`"
+done
+
+libs=""
+
+uv_c_flags=""
+if ${cmake_system_mingw}; then
+  uv_c_flags="${uv_c_flags} -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600"
+  libs="${libs} -lws2_32 -lpsapi -liphlpapi -lshell32 -luserenv"
+else
+  uv_c_flags="${uv_c_flags} -DCMAKE_BOOTSTRAP"
+  case "${cmake_system}" in
+    *AIX*)
+      uv_c_flags="${uv_c_flags} -D_ALL_SOURCE -D_XOPEN_SOURCE=500 -D_LINUX_SOURCE_COMPAT -D_THREAD_SAFE"
+      libs="${libs} -lperfstat"
+      ;;
+    *Darwin*)
+      uv_c_flags="${uv_c_flags} -D_DARWIN_USE_64_BIT_INODE=1 -D_DARWIN_UNLIMITED_SELECT=1"
+      ;;
+    *Linux*)
+      uv_c_flags="${uv_c_flags} -D_GNU_SOURCE"
+      libs="${libs} -ldl -lrt"
+      ;;
+    *BSD*)
+      libs="${libs} -lkvm"
+      ;;
+    *SunOS*)
+      # Normally libuv uses '-D_XOPEN_SOURCE=500 -std=c90' on Solaris 5.10,
+      # but we do not need to do that because we bootstrap using POSIX APIs.
+      uv_c_flags="${uv_c_flags} -D__EXTENSIONS__ -D_XOPEN_SOURCE=600"
+      libs="${libs} -lkstat -lnsl -lsendfile -lsocket -lrt"
+      ;;
+  esac
+fi
+uv_c_flags="${uv_c_flags} `cmake_escape "-I${cmake_source_dir}/Utilities/cmlibuv/include"`"
+if ${cmake_system_mingw}; then
+  uv_c_flags="${uv_c_flags} `cmake_escape "-I${cmake_source_dir}/Utilities/cmlibuv/src/win"`"
+else
+  uv_c_flags="${uv_c_flags} `cmake_escape "-I${cmake_source_dir}/Utilities/cmlibuv/src/unix"`"
+fi
+uv_c_flags="${uv_c_flags} `cmake_escape "-I${cmake_source_dir}/Utilities/cmlibuv/src"`"
 
 if [ "x${cmake_ansi_cxx_flags}" != "x" ]; then
   cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags}"
@@ -1376,7 +1385,7 @@ cmake_cxx_flags="${cmake_cxx_flags} \
   -I`cmake_escape \"${cmake_source_dir}/Source/LexerParser\"` \
   -I`cmake_escape \"${cmake_source_dir}/Utilities\"`"
 echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
-echo "	${cmake_cxx_compiler} ${cmake_ld_flags} ${cmake_cxx_flags} ${objs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
+echo "	${cmake_cxx_compiler} ${cmake_ld_flags} ${cmake_cxx_flags} ${objs} ${libs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
 for a in ${CMAKE_CXX_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/${a}.cxx"`
   src_flags=`eval echo \\${cmake_cxx_flags_\${a}}`
@@ -1411,6 +1420,11 @@ for a in ${KWSYS_CXX_SOURCES}; do
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -DKWSYS_NAMESPACE=cmsys ${src_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
 done
+for a in ${LIBUV_C_SOURCES}; do
+  src=`cmake_escape "${cmake_source_dir}/Utilities/cmlibuv/${a}"`
+  echo "uv-`cmake_obj ${a}` : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_c_compiler} ${cmake_c_flags} ${uv_c_flags} -c ${src} -o uv-`cmake_obj ${a}`" >> "${cmake_bootstrap_dir}/Makefile"
+done
 echo '
 rebuild_cache:
 	cd "${cmake_binary_dir}" && "${cmake_source_dir}/bootstrap"
@@ -1437,11 +1451,6 @@ fi
 if [ "x${cmake_bootstrap_qt_qmake}" != "x" ]; then
   echo '
 set (QT_QMAKE_EXECUTABLE "'"${cmake_bootstrap_qt_qmake}"'" CACHE FILEPATH "Location of Qt qmake" FORCE)
-' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
-fi
-if [ "x${cmake_bootstrap_server}" != "x" ]; then
-  echo '
-set (CMake_ENABLE_SERVER_MODE '"${cmake_bootstrap_server}"' CACHE BOOL "Enable server mode" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if [ "x${cmake_sphinx_man}" != "x" ]; then

@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallTargetsCommand.h"
 
+#include <unordered_map>
 #include <utility>
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
-#include "cm_unordered_map.hxx"
 
 class cmExecutionStatus;
 

@@ -56,6 +56,36 @@
 #   Specify the :command:`install(PROGRAMS)` command ``COMPONENT``
 #   option.  If not specified, no such option will be used.
 
+set(_IRSL_HAVE_Intel FALSE)
+set(_IRSL_HAVE_MSVC FALSE)
+foreach(LANG IN ITEMS C CXX Fortran)
+  if(CMAKE_${LANG}_COMPILER_ID STREQUAL Intel)
+    if(NOT _IRSL_HAVE_Intel)
+      get_filename_component(_Intel_basedir "${CMAKE_${LANG}_COMPILER}" PATH)
+      if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(_Intel_archdir intel64)
+      else()
+        set(_Intel_archdir x86)
+      endif()
+      set(_Intel_compiler_ver ${CMAKE_${LANG}_COMPILER_VERSION})
+      if(WIN32)
+        get_filename_component(_Intel_redistdir "${_Intel_basedir}/../../redist/${_Intel_archdir}/compiler" ABSOLUTE)
+      elseif(APPLE)
+        get_filename_component(_Intel_redistdir "${_Intel_basedir}/../../compiler/lib" ABSOLUTE)
+      else()
+        if(EXISTS "${_Intel_basedir}/../lib/${_Intel_archdir}_lin")
+          get_filename_component(_Intel_redistdir "${_Intel_basedir}/../lib/${_Intel_archdir}" ABSOLUTE)
+        else()
+          get_filename_component(_Intel_redistdir "${_Intel_basedir}/../../compiler/lib/${_Intel_archdir}_lin" ABSOLUTE)
+        endif()
+      endif()
+      set(_IRSL_HAVE_Intel TRUE)
+    endif()
+  elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL MSVC)
+    set(_IRSL_HAVE_MSVC TRUE)
+  endif()
+endforeach()
+
 if(MSVC)
   file(TO_CMAKE_PATH "$ENV{SYSTEMROOT}" SYSTEMROOT)
 
@@ -89,6 +119,8 @@ if(MSVC)
   endif()
 
   if(MSVC_VERSION EQUAL 1400)
+    set(MSVC_REDIST_NAME VC80)
+
     # Find the runtime library redistribution directory.
     get_filename_component(msvc_install_dir
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0;InstallDir]" ABSOLUTE)
@@ -129,6 +161,8 @@ if(MSVC)
   endif()
 
   if(MSVC_VERSION EQUAL 1500)
+    set(MSVC_REDIST_NAME VC90)
+
     # Find the runtime library redistribution directory.
     get_filename_component(msvc_install_dir
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0;InstallDir]" ABSOLUTE)
@@ -171,24 +205,35 @@ if(MSVC)
     endif()
   endif()
 
-  if(MSVC_VERSION EQUAL 1910)
+  set(MSVC_REDIST_NAME "")
+  set(_MSVCRT_DLL_VERSION "")
+  set(_MSVCRT_IDE_VERSION "")
+  if(MSVC_VERSION GREATER_EQUAL 2000)
+    message(WARNING "MSVC ${MSVC_VERSION} not yet supported.")
+  elseif(MSVC_VERSION GREATER_EQUAL 1911)
+    set(MSVC_REDIST_NAME VC141)
+    set(_MSVCRT_DLL_VERSION 140)
+    set(_MSVCRT_IDE_VERSION 15)
+  elseif(MSVC_VERSION EQUAL 1910)
+    set(MSVC_REDIST_NAME VC150)
     set(_MSVCRT_DLL_VERSION 140)
     set(_MSVCRT_IDE_VERSION 15)
   elseif(MSVC_VERSION EQUAL 1900)
+    set(MSVC_REDIST_NAME VC140)
     set(_MSVCRT_DLL_VERSION 140)
     set(_MSVCRT_IDE_VERSION 14)
   elseif(MSVC_VERSION EQUAL 1800)
+    set(MSVC_REDIST_NAME VC120)
     set(_MSVCRT_DLL_VERSION 120)
     set(_MSVCRT_IDE_VERSION 12)
   elseif(MSVC_VERSION EQUAL 1700)
+    set(MSVC_REDIST_NAME VC110)
     set(_MSVCRT_DLL_VERSION 110)
     set(_MSVCRT_IDE_VERSION 11)
   elseif(MSVC_VERSION EQUAL 1600)
+    set(MSVC_REDIST_NAME VC100)
     set(_MSVCRT_DLL_VERSION 100)
     set(_MSVCRT_IDE_VERSION 10)
-  else()
-    set(_MSVCRT_DLL_VERSION "")
-    set(_MSVCRT_IDE_VERSION "")
   endif()
 
   if(_MSVCRT_DLL_VERSION)
@@ -219,10 +264,10 @@ if(MSVC)
       unset(_vs_dir)
       unset(programfilesx86)
     endif()
-    find_path(MSVC_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.CRT PATHS ${_vs_redist_paths})
+    find_path(MSVC_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.CRT PATHS ${_vs_redist_paths})
     unset(_vs_redist_paths)
     mark_as_advanced(MSVC_REDIST_DIR)
-    set(MSVC_CRT_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.CRT")
+    set(MSVC_CRT_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.CRT")
 
     if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
       set(__install__libs
@@ -242,7 +287,7 @@ if(MSVC)
 
     if(CMAKE_INSTALL_DEBUG_LIBRARIES)
       set(MSVC_CRT_DIR
-        "${MSVC_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.DebugCRT")
+        "${MSVC_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.DebugCRT")
       set(__install__libs ${__install__libs}
         "${MSVC_CRT_DIR}/msvcp${v}d.dll"
         )
@@ -383,7 +428,11 @@ if(MSVC)
         )
     endif()
 
-    if(MSVC_VERSION EQUAL 1910)
+    set(_MFC_DLL_VERSION "")
+    set(_MFC_IDE_VERSION "")
+    if(MSVC_VERSION GREATER_EQUAL 2000)
+      # Version not yet supported.
+    elseif(MSVC_VERSION GREATER_EQUAL 1910)
       set(_MFC_DLL_VERSION 140)
       set(_MFC_IDE_VERSION 15)
     elseif(MSVC_VERSION EQUAL 1900)
@@ -398,9 +447,6 @@ if(MSVC)
     elseif(MSVC_VERSION EQUAL 1600)
       set(_MFC_DLL_VERSION 100)
       set(_MFC_IDE_VERSION 10)
-    else()
-      set(_MFC_DLL_VERSION "")
-      set(_MFC_IDE_VERSION "")
     endif()
 
     if(_MFC_DLL_VERSION)
@@ -410,7 +456,7 @@ if(MSVC)
       # Starting with VS 15 the MFC DLLs may be in a different directory.
       if (NOT vs VERSION_LESS 15)
         file(GLOB _MSVC_REDIST_DIRS "${MSVC_REDIST_DIR}/../*")
-        find_path(MSVC_REDIST_MFC_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.MFC
+        find_path(MSVC_REDIST_MFC_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.MFC
           PATHS ${_MSVC_REDIST_DIRS} NO_DEFAULT_PATH)
         mark_as_advanced(MSVC_REDIST_MFC_DIR)
         unset(_MSVC_REDIST_DIRS)
@@ -424,7 +470,7 @@ if(MSVC)
 
       if(CMAKE_INSTALL_DEBUG_LIBRARIES)
         set(MSVC_MFC_DIR
-          "${MSVC_REDIST_MFC_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.DebugMFC")
+          "${MSVC_REDIST_MFC_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.DebugMFC")
         set(__install__libs ${__install__libs}
           "${MSVC_MFC_DIR}/mfc${v}ud.dll"
           "${MSVC_MFC_DIR}/mfcm${v}ud.dll"
@@ -437,7 +483,7 @@ if(MSVC)
         endif()
       endif()
 
-      set(MSVC_MFC_DIR "${MSVC_REDIST_MFC_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.MFC")
+      set(MSVC_MFC_DIR "${MSVC_REDIST_MFC_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.MFC")
       if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
         set(__install__libs ${__install__libs}
           "${MSVC_MFC_DIR}/mfc${v}u.dll"
@@ -452,7 +498,7 @@ if(MSVC)
       endif()
 
       # include the language dll's as well as the actuall dll's
-      set(MSVC_MFCLOC_DIR "${MSVC_REDIST_MFC_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.MFCLOC")
+      set(MSVC_MFCLOC_DIR "${MSVC_REDIST_MFC_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.MFCLOC")
       set(__install__libs ${__install__libs}
         "${MSVC_MFCLOC_DIR}/mfc${v}chs.dll"
         "${MSVC_MFCLOC_DIR}/mfc${v}cht.dll"
@@ -470,8 +516,12 @@ if(MSVC)
 
   # MSVC 8 was the first version with OpenMP
   # Furthermore, there is no debug version of this
-  if(CMAKE_INSTALL_OPENMP_LIBRARIES)
-    if(MSVC_VERSION EQUAL 1910)
+  if(CMAKE_INSTALL_OPENMP_LIBRARIES AND _IRSL_HAVE_MSVC)
+    set(_MSOMP_DLL_VERSION "")
+    set(_MSOMP_IDE_VERSION "")
+    if(MSVC_VERSION GREATER_EQUAL 2000)
+      # Version not yet supported.
+    elseif(MSVC_VERSION GREATER_EQUAL 1910)
       set(_MSOMP_DLL_VERSION 140)
       set(_MSOMP_IDE_VERSION 15)
     elseif(MSVC_VERSION EQUAL 1900)
@@ -492,15 +542,12 @@ if(MSVC)
     elseif(MSVC_VERSION EQUAL 1400)
       set(_MSOMP_DLL_VERSION 80)
       set(_MSOMP_IDE_VERSION 8)
-    else()
-      set(_MSOMP_DLL_VERSION "")
-      set(_MSOMP_IDE_VERSION "")
     endif()
 
     if(_MSOMP_DLL_VERSION)
       set(v "${_MSOMP_DLL_VERSION}")
       set(vs "${_MSOMP_IDE_VERSION}")
-      set(MSVC_OPENMP_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${vs}0.OPENMP")
+      set(MSVC_OPENMP_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.OPENMP")
 
       if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
         set(__install__libs ${__install__libs}
@@ -523,6 +570,109 @@ if(MSVC)
         # If you would like to avoid this warning, fix the real problem, or
         # set CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS before including
         # this file.
+      endif()
+    endif()
+  endforeach()
+endif()
+
+if(_IRSL_HAVE_Intel)
+  unset(__install_libs)
+  if(CMAKE_INSTALL_OPENMP_LIBRARIES)
+    if(WIN32)
+      list(APPEND __install_libs "${_Intel_redistdir}/libiomp5md.dll" "${_Intel_redistdir}/libiompstubs5md.dll")
+    elseif(APPLE)
+      list(APPEND __install_libs "${_Intel_redistdir}/libiomp5.dylib" "${_Intel_redistdir}/libiompstubs5.dylib")
+    else()
+      list(APPEND __install_libs "${_Intel_redistdir}/libiomp5.so" "${_Intel_redistdir}/libiompstubs5.so")
+      if(_Intel_compiler_ver VERSION_LESS 17)
+        list(APPEND __install_libs "${_Intel_redistdir}/libomp_db.so")
+      endif()
+      if(_Intel_compiler_ver VERSION_LESS 13)
+        list(APPEND __install_libs "${_Intel_redistdir}/libiompprof5.so")
+      endif()
+    endif()
+  endif()
+  if(WIN32)
+    set(__install_dirs "${_Intel_redistdir}/irml" "${_Intel_redistdir}/irml_c"
+      "${_Intel_redistdir}/1033" "${_Intel_redistdir}/1041")
+    foreach(__Intel_lib IN ITEMS cilkrts20.dll libchkp.dll libgfxoffload.dll libioffload_host.dll libirngmd.dll
+      libmmd.dll libmmdd.dll libmpx.dll liboffload.dll svml_dispmd.dll)
+
+      list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
+    endforeach()
+    if(CMAKE_Fortran_COMPILER_ID STREQUAL Intel)
+      foreach(__Intel_lib IN ITEMS libicaf.dll libifcoremd.dll libifcoremdd.dll libifcorert.dll libifcorertd.dll libifportmd.dll)
+
+        list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
+      endforeach()
+    endif()
+  elseif(APPLE)
+    foreach(__Intel_lib IN ITEMS libchkp.dylib libcilkrts.5.dylib libcilkrts.dylib libimf.dylib libintlc.dylib libirc.dylib libirng.dylib libsvml.dylib)
+      list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
+    endforeach()
+    if(_Intel_compiler_ver VERSION_LESS 17)
+      list(APPEND __install_libs "${_Intel_redistdir}/libistrconv.dylib")
+    endif()
+    if(CMAKE_Fortran_COMPILER_ID STREQUAL Intel)
+      foreach(__Intel_lib IN ITEMS libifcore.dylib libifcoremt.dylib libifport.dylib libifportmt.dylib)
+
+        list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
+      endforeach()
+    endif()
+  else()
+    set(__install_dirs "${_Intel_redistdir}/irml")
+    foreach(__Intel_lib IN ITEMS cilk_db.so libchkp.so libcilkrts.so libcilkrts.so.5 libimf.so libintlc.so libintlc.so.5 libirc.so libpdbx.so libpdbx.so.5 libsvml.so)
+
+      list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
+    endforeach()
+    if(_Intel_compiler_ver VERSION_GREATER_EQUAL 13)
+      foreach(__Intel_lib IN ITEMS libirng.so liboffload.so liboffload.so.5)
+
+        list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
+      endforeach()
+    endif()
+    if(_Intel_compiler_ver VERSION_GREATER_EQUAL 15)
+      foreach(__Intel_lib IN ITEMS libgfxoffload.so libistrconv.so)
+
+        list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
+      endforeach()
+    endif()
+    if(_Intel_compiler_ver VERSION_GREATER_EQUAL 16)
+      foreach(__Intel_lib IN ITEMS libioffload_host.so libioffload_host.so.5 libioffload_target.so libioffload_target.so.5 libmpx.so offload_main)
+
+        list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
+      endforeach()
+    endif()
+    if(_Intel_compiler_ver VERSION_LESS 15)
+      foreach(__Intel_lib IN ITEMS libcxaguard.so libcxaguard.so.5)
+
+        list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
+      endforeach()
+    endif()
+    if(CMAKE_Fortran_COMPILER_ID STREQUAL Intel)
+      foreach(__Intel_lib IN ITEMS libicaf.so libifcore.so libifcore.so.5 libifcoremt.so libifcoremt.so.5 libifport.so libifport.so.5)
+
+        list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
+      endforeach()
+    endif()
+  endif()
+
+  foreach(lib IN LISTS __install_libs)
+    if(EXISTS ${lib})
+      list(APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS ${lib})
+    else()
+      if(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS)
+        message(WARNING "system runtime library file does not exist: '${lib}'")
+      endif()
+    endif()
+  endforeach()
+
+  foreach(dir IN LISTS __install_dirs)
+    if(EXISTS ${dir})
+      list(APPEND CMAKE_INSTALL_SYSTEM_RUNTIME_DIRECTORIES ${dir})
+    else()
+      if(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS)
+        message(WARNING "system runtime library file does not exist: '${dir}'")
       endif()
     endif()
   endforeach()
@@ -578,6 +728,11 @@ if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
         COMPONENT ${CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT})
     endif()
     install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+      DESTINATION ${CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION}
+      ${_CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT}
+      )
+
+    install(DIRECTORY ${CMAKE_INSTALL_SYSTEM_RUNTIME_DIRECTORIES}
       DESTINATION ${CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION}
       ${_CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT}
       )

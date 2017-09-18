@@ -3,7 +3,7 @@
 #ifndef cmInstallProgramsCommand_h
 #define cmInstallProgramsCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -24,14 +24,14 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE { return new cmInstallProgramsCommand; }
+  cmCommand* Clone() override { return new cmInstallProgramsCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
   /**
    * This is called at the end after all the information
@@ -39,9 +39,9 @@ public:
    * not implement this method.  At this point, reading and
    * writing to the cache can be done.
    */
-  void FinalPass() CM_OVERRIDE;
+  void FinalPass() override;
 
-  bool HasFinalPass() const CM_OVERRIDE { return true; }
+  bool HasFinalPass() const override { return true; }
 
 protected:
   std::string FindInstallSource(const char* name) const;

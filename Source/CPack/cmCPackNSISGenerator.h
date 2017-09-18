@@ -3,7 +3,7 @@
 #ifndef cmCPackNSISGenerator_h
 #define cmCPackNSISGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCPackGenerator.h"
 
@@ -34,22 +34,22 @@ public:
    * Construct generator
    */
   cmCPackNSISGenerator(bool nsis64 = false);
-  ~cmCPackNSISGenerator() CM_OVERRIDE;
+  ~cmCPackNSISGenerator() override;
 
 protected:
-  int InitializeInternal() CM_OVERRIDE;
+  int InitializeInternal() override;
   void CreateMenuLinks(std::ostream& str, std::ostream& deleteStr);
-  int PackageFiles() CM_OVERRIDE;
-  const char* GetOutputExtension() CM_OVERRIDE { return ".exe"; }
-  const char* GetOutputPostfix() CM_OVERRIDE { return "win32"; }
+  int PackageFiles() override;
+  const char* GetOutputExtension() override { return ".exe"; }
+  const char* GetOutputPostfix() override { return "win32"; }
 
   bool GetListOfSubdirectories(const char* dir,
                                std::vector<std::string>& dirs);
 
-  enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir() const
-    CM_OVERRIDE;
-  bool SupportsAbsoluteDestination() const CM_OVERRIDE;
-  bool SupportsComponentInstallation() const CM_OVERRIDE;
+  enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir()
+    const override;
+  bool SupportsAbsoluteDestination() const override;
+  bool SupportsComponentInstallation() const override;
 
   /// Produce a string that contains the NSIS code to describe a
   /// particular component. Any added macros will be emitted via

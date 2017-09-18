@@ -3,7 +3,7 @@
 #ifndef cmMakefile_h
 #define cmMakefile_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmsys/RegularExpression.hxx"
 #include <deque>
@@ -12,6 +12,7 @@
 #include <stack>
 #include <stddef.h>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "cmAlgorithms.h"
@@ -22,7 +23,6 @@
 #include "cmStateTypes.h"
 #include "cmTarget.h"
 #include "cm_auto_ptr.hxx"
-#include "cm_unordered_map.hxx"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -187,24 +187,26 @@ public:
    * Add a utility to the build.  A utiltity target is a command that
    * is run every time the target is built.
    */
-  cmTarget* AddUtilityCommand(
-    const std::string& utilityName, bool excludeFromAll,
-    const std::vector<std::string>& depends, const char* workingDirectory,
-    const char* command, const char* arg1 = CM_NULLPTR,
-    const char* arg2 = CM_NULLPTR, const char* arg3 = CM_NULLPTR,
-    const char* arg4 = CM_NULLPTR);
+  cmTarget* AddUtilityCommand(const std::string& utilityName,
+                              bool excludeFromAll,
+                              const std::vector<std::string>& depends,
+                              const char* workingDirectory,
+                              const char* command, const char* arg1 = nullptr,
+                              const char* arg2 = nullptr,
+                              const char* arg3 = nullptr,
+                              const char* arg4 = nullptr);
   cmTarget* AddUtilityCommand(
     const std::string& utilityName, bool excludeFromAll,
     const char* workingDirectory, const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
-    const char* comment = CM_NULLPTR, bool uses_terminal = false,
+    const char* comment = nullptr, bool uses_terminal = false,
     bool command_expand_lists = false);
   cmTarget* AddUtilityCommand(
     const std::string& utilityName, bool excludeFromAll,
     const char* workingDirectory, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
-    const char* comment = CM_NULLPTR, bool uses_terminal = false,
+    const char* comment = nullptr, bool uses_terminal = false,
     bool command_expand_lists = false);
 
   /**
@@ -267,21 +269,6 @@ public:
                        const std::vector<std::string>& srcs,
                        bool excludeFromAll = false);
   void AddAlias(const std::string& libname, const std::string& tgt);
-
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-  /**
-   * Add a root source group for consideration when adding a new source.
-   */
-  void AddSourceGroup(const std::string& name, const char* regex = CM_NULLPTR);
-
-  /**
-   * Add a source group for consideration when adding a new source.
-   * name is tokenized.
-   */
-  void AddSourceGroup(const std::vector<std::string>& name,
-                      const char* regex = CM_NULLPTR);
-
-#endif
 
   //@{
   /**
@@ -474,6 +461,36 @@ public:
    * Get the source group
    */
   cmSourceGroup* GetSourceGroup(const std::vector<std::string>& name) const;
+
+  /**
+   * Add a root source group for consideration when adding a new source.
+   */
+  void AddSourceGroup(const std::string& name, const char* regex = nullptr);
+
+  /**
+   * Add a source group for consideration when adding a new source.
+   * name is tokenized.
+   */
+  void AddSourceGroup(const std::vector<std::string>& name,
+                      const char* regex = nullptr);
+
+  /**
+   * Get and existing or create a new source group.
+   */
+  cmSourceGroup* GetOrCreateSourceGroup(
+    const std::vector<std::string>& folders);
+
+  /**
+   * Get and existing or create a new source group.
+   * The name will be tokenized.
+   */
+  cmSourceGroup* GetOrCreateSourceGroup(const std::string& name);
+
+  /**
+   * find what source group this source is in
+   */
+  cmSourceGroup* FindSourceGroup(const char* source,
+                                 std::vector<cmSourceGroup>& groups) const;
 #endif
 
   /**
@@ -521,7 +538,7 @@ public:
   const char* ExpandVariablesInString(std::string& source) const;
   const char* ExpandVariablesInString(std::string& source, bool escapeQuotes,
                                       bool noEscapes, bool atOnly = false,
-                                      const char* filename = CM_NULLPTR,
+                                      const char* filename = nullptr,
                                       long line = -1, bool removeEmpty = false,
                                       bool replaceAt = false) const;
 
@@ -549,14 +566,6 @@ public:
   int ConfigureFile(const char* infile, const char* outfile, bool copyonly,
                     bool atOnly, bool escapeQuotes,
                     cmNewLineStyle = cmNewLineStyle());
-
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-  /**
-   * find what source group this source is in
-   */
-  cmSourceGroup* FindSourceGroup(const char* source,
-                                 std::vector<cmSourceGroup>& groups) const;
-#endif
 
   /**
    * Print a command's invocation
@@ -594,11 +603,11 @@ public:
    */
   bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
                        std::vector<std::string>& outArgs,
-                       const char* filename = CM_NULLPTR) const;
+                       const char* filename = nullptr) const;
 
   bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
                        std::vector<cmExpandedCommandArgument>& outArgs,
-                       const char* filename = CM_NULLPTR) const;
+                       const char* filename = nullptr) const;
 
   /**
    * Get the instance
@@ -738,9 +747,6 @@ public:
   cmStringRange GetCompileDefinitionsEntries() const;
   cmBacktraceRange GetCompileDefinitionsBacktraces() const;
 
-  void AddQtUiFileWithOptions(cmSourceFile* sf);
-  std::vector<cmSourceFile*> GetQtUiFilesWithOptions() const;
-
   std::set<std::string> const& GetSystemIncludeDirectories() const
   {
     return this->SystemIncludeDirectories;
@@ -749,7 +755,7 @@ public:
   bool PolicyOptionalWarningEnabled(std::string const& var);
 
   bool AddRequiredTargetFeature(cmTarget* target, const std::string& feature,
-                                std::string* error = CM_NULLPTR) const;
+                                std::string* error = nullptr) const;
 
   bool CompileFeatureKnown(cmTarget const* target, const std::string& feature,
                            std::string& lang, std::string* error) const;
@@ -873,7 +879,7 @@ private:
   friend class cmParseFileScope;
 
   std::vector<cmTarget*> ImportedTargetsOwned;
-  typedef CM_UNORDERED_MAP<std::string, cmTarget*> TargetMap;
+  typedef std::unordered_map<std::string, cmTarget*> TargetMap;
   TargetMap ImportedTargets;
 
   // Internal policy stack management.
@@ -911,7 +917,7 @@ private:
   cmSourceFile* LinearGetSourceFileWithOutput(const std::string& cname) const;
 
   // A map for fast output to input look up.
-  typedef CM_UNORDERED_MAP<std::string, cmSourceFile*> OutputToSourceMap;
+  typedef std::unordered_map<std::string, cmSourceFile*> OutputToSourceMap;
   OutputToSourceMap OutputToSource;
 
   void UpdateOutputToSourceMap(std::vector<std::string> const& outputs,
@@ -919,14 +925,12 @@ private:
   void UpdateOutputToSourceMap(std::string const& output,
                                cmSourceFile* source);
 
-  std::vector<cmSourceFile*> QtUiFilesWithOptions;
-
   bool AddRequiredTargetCFeature(cmTarget* target, const std::string& feature,
-                                 std::string* error = CM_NULLPTR) const;
+                                 std::string* error = nullptr) const;
 
   bool AddRequiredTargetCxxFeature(cmTarget* target,
                                    const std::string& feature,
-                                   std::string* error = CM_NULLPTR) const;
+                                   std::string* error = nullptr) const;
 
   void CheckNeededCLanguage(const std::string& feature, bool& needC90,
                             bool& needC99, bool& needC11) const;

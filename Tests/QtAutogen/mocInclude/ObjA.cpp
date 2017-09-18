@@ -1,24 +1,20 @@
 #include "ObjA.hpp"
+#include "ObjA_p.h"
 
-class SubObjA : public QObject
-{
-  Q_OBJECT
-
-public:
-  SubObjA() {}
-  ~SubObjA() {}
-
-  Q_SLOT
-  void aSlot();
-};
-
-void SubObjA::aSlot()
+ObjAPrivate::ObjAPrivate()
 {
 }
 
-void ObjA::go()
+ObjAPrivate::~ObjAPrivate()
 {
-  SubObjA subObj;
 }
 
-#include "ObjA.moc"
+ObjA::ObjA()
+  : d(new ObjAPrivate)
+{
+}
+
+ObjA::~ObjA()
+{
+  delete d;
+}

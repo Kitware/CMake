@@ -175,6 +175,7 @@ const char* uv_strerror(int err) {
 }
 #undef UV_STRERROR_GEN
 
+#if !defined(CMAKE_BOOTSTRAP) || defined(_WIN32)
 
 int uv_ip4_addr(const char* ip, int port, struct sockaddr_in* addr) {
   memset(addr, 0, sizeof(*addr));
@@ -343,6 +344,7 @@ int uv_udp_recv_stop(uv_udp_t* handle) {
     return uv__udp_recv_stop(handle);
 }
 
+#endif
 
 void uv_walk(uv_loop_t* loop, uv_walk_cb walk_cb, void* arg) {
   QUEUE queue;

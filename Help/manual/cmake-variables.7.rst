@@ -32,6 +32,7 @@ Variables that Provide Information
    /variable/CMAKE_CURRENT_LIST_FILE
    /variable/CMAKE_CURRENT_LIST_LINE
    /variable/CMAKE_CURRENT_SOURCE_DIR
+   /variable/CMAKE_DIRECTORY_LABELS
    /variable/CMAKE_DL_LIBS
    /variable/CMAKE_EDIT_COMMAND
    /variable/CMAKE_EXECUTABLE_SUFFIX
@@ -120,6 +121,7 @@ Variables that Change Behavior
    /variable/CMAKE_AUTOMOC_RELAXED_MODE
    /variable/CMAKE_BACKWARDS_COMPATIBILITY
    /variable/CMAKE_BUILD_TYPE
+   /variable/CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES
    /variable/CMAKE_CODELITE_USE_TARGETS
    /variable/CMAKE_COLOR_MAKEFILE
    /variable/CMAKE_CONFIGURATION_TYPES
@@ -269,6 +271,7 @@ Variables that Control the Build
    /variable/CMAKE_ARCHIVE_OUTPUT_DIRECTORY_CONFIG
    /variable/CMAKE_AUTOMOC
    /variable/CMAKE_AUTOMOC_DEPEND_FILTERS
+   /variable/CMAKE_AUTOMOC_MACRO_NAMES
    /variable/CMAKE_AUTOMOC_MOC_OPTIONS
    /variable/CMAKE_AUTORCC
    /variable/CMAKE_AUTORCC_OPTIONS
@@ -300,6 +303,7 @@ Variables that Control the Build
    /variable/CMAKE_IOS_INSTALL_COMBINED
    /variable/CMAKE_LANG_CLANG_TIDY
    /variable/CMAKE_LANG_COMPILER_LAUNCHER
+   /variable/CMAKE_LANG_CPPCHECK
    /variable/CMAKE_LANG_CPPLINT
    /variable/CMAKE_LANG_INCLUDE_WHAT_YOU_USE
    /variable/CMAKE_LANG_VISIBILITY_PRESET
@@ -482,6 +486,7 @@ Variables for CTest
    /variable/CTEST_GIT_UPDATE_OPTIONS
    /variable/CTEST_HG_COMMAND
    /variable/CTEST_HG_UPDATE_OPTIONS
+   /variable/CTEST_LABELS_FOR_SUBPROJECTS
    /variable/CTEST_MEMORYCHECK_COMMAND
    /variable/CTEST_MEMORYCHECK_COMMAND_OPTIONS
    /variable/CTEST_MEMORYCHECK_SANITIZER_OPTIONS

@@ -7,7 +7,7 @@ bool cmCursesForm::Debug = false;
 
 cmCursesForm::cmCursesForm()
 {
-  this->Form = CM_NULLPTR;
+  this->Form = nullptr;
 }
 
 cmCursesForm::~cmCursesForm()
@@ -15,7 +15,7 @@ cmCursesForm::~cmCursesForm()
   if (this->Form) {
     unpost_form(this->Form);
     free_form(this->Form);
-    this->Form = CM_NULLPTR;
+    this->Form = nullptr;
   }
 }
 

@@ -3,7 +3,7 @@
 #ifndef cmExportTryCompileFileGenerator_h
 #define cmExportTryCompileFileGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmExportFileGenerator.h"
 
@@ -27,15 +27,15 @@ public:
   void SetConfig(const std::string& config) { this->Config = config; }
 protected:
   // Implement virtual methods from the superclass.
-  bool GenerateMainFile(std::ostream& os) CM_OVERRIDE;
+  bool GenerateMainFile(std::ostream& os) override;
 
   void GenerateImportTargetsConfig(std::ostream&, const std::string&,
                                    std::string const&,
-                                   std::vector<std::string>&) CM_OVERRIDE
+                                   std::vector<std::string>&) override
   {
   }
   void HandleMissingTarget(std::string&, std::vector<std::string>&,
-                           cmGeneratorTarget*, cmGeneratorTarget*) CM_OVERRIDE
+                           cmGeneratorTarget*, cmGeneratorTarget*) override
   {
   }
 
@@ -44,7 +44,7 @@ protected:
                           std::set<const cmGeneratorTarget*>& emitted);
 
   std::string InstallNameDir(cmGeneratorTarget* target,
-                             const std::string& config) CM_OVERRIDE;
+                             const std::string& config) override;
 
 private:
   std::string FindTargets(const std::string& prop,

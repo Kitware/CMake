@@ -16,7 +16,7 @@ class cmExecutionStatus;
 
 static bool cmExecuteProcessCommandIsWhitespace(char c)
 {
-  return (isspace((int)c) || c == '\n' || c == '\r');
+  return (isspace(static_cast<int>(c)) || c == '\n' || c == '\r');
 }
 
 void cmExecuteProcessCommandFixText(std::vector<char>& output,
@@ -32,7 +32,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("called with incorrect number of arguments");
     return false;
   }
-  std::vector<std::vector<const char*> > cmds;
+  std::vector<std::vector<const char*>> cmds;
   std::string arguments;
   bool doing_command = false;
   size_t command_index = 0;
@@ -170,13 +170,13 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError(" called with no COMMAND argument.");
     return false;
   }
-  for (unsigned int i = 0; i < cmds.size(); ++i) {
-    if (cmds[i].empty()) {
+  for (auto& cmd : cmds) {
+    if (cmd.empty()) {
       this->SetError(" given COMMAND argument with no value.");
       return false;
     }
     // Add the null terminating pointer to the command argument list.
-    cmds[i].push_back(CM_NULLPTR);
+    cmd.push_back(nullptr);
   }
 
   // Parse the timeout string.
@@ -192,8 +192,8 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   cmsysProcess* cp = cmsysProcess_New();
 
   // Set the command sequence.
-  for (unsigned int i = 0; i < cmds.size(); ++i) {
-    cmsysProcess_AddCommand(cp, &*cmds[i].begin());
+  for (auto const& cmd : cmds) {
+    cmsysProcess_AddCommand(cp, &*cmd.begin());
   }
 
   // Set the process working directory.
@@ -244,7 +244,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   int p;
   cmProcessOutput processOutput(encoding);
   std::string strdata;
-  while ((p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR), p)) {
+  while ((p = cmsysProcess_WaitForData(cp, &data, &length, nullptr), p)) {
     // Put the output in the right place.
     if (p == cmsysProcess_Pipe_STDOUT && !output_quiet) {
       if (output_variable.empty()) {
@@ -276,7 +276,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // All output has been read.  Wait for the process to exit.
-  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+  cmsysProcess_WaitForExit(cp, nullptr);
   processOutput.DecodeText(tempOutput, tempOutput);
   processOutput.DecodeText(tempError, tempError);
 

@@ -13,7 +13,7 @@
 #include "cmSystemTools.h"
 #include "cm_auto_ptr.hxx"
 
-#include "cmConfigure.h"
+#include <stddef.h>
 
 cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
                                                    const std::string& config,
@@ -24,15 +24,12 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
   , OldStyle(cc.GetEscapeOldStyle())
   , MakeVars(cc.GetEscapeAllowMakeVars())
   , GE(new cmGeneratorExpression(cc.GetBacktrace()))
-  , DependsDone(false)
 {
   const cmCustomCommandLines& cmdlines = this->CC.GetCommandLines();
-  for (cmCustomCommandLines::const_iterator cmdline = cmdlines.begin();
-       cmdline != cmdlines.end(); ++cmdline) {
+  for (cmCustomCommandLine const& cmdline : cmdlines) {
     cmCustomCommandLine argv;
-    for (cmCustomCommandLine::const_iterator clarg = cmdline->begin();
-         clarg != cmdline->end(); ++clarg) {
-      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(*clarg);
+    for (std::string const& clarg : cmdline) {
+      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(clarg);
       std::string parsed_arg = cge->Evaluate(this->LG, this->Config);
       if (this->CC.GetCommandExpandLists()) {
         std::vector<std::string> ExpandedArg;
@@ -43,6 +40,20 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
       }
     }
     this->CommandLines.push_back(argv);
+  }
+
+  std::vector<std::string> depends = this->CC.GetDepends();
+  for (std::string const& d : depends) {
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(d);
+    std::vector<std::string> result;
+    cmSystemTools::ExpandListArgument(cge->Evaluate(this->LG, this->Config),
+                                      result);
+    for (std::string& it : result) {
+      if (cmSystemTools::FileIsFullPath(it.c_str())) {
+        it = cmSystemTools::CollapseFullPath(it);
+      }
+    }
+    this->Depends.insert(this->Depends.end(), result.begin(), result.end());
   }
 }
 
@@ -60,7 +71,7 @@ const char* cmCustomCommandGenerator::GetCrossCompilingEmulator(
   unsigned int c) const
 {
   if (!this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING")) {
-    return CM_NULLPTR;
+    return nullptr;
   }
   std::string const& argv0 = this->CommandLines[c][0];
   cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(argv0);
@@ -68,7 +79,7 @@ const char* cmCustomCommandGenerator::GetCrossCompilingEmulator(
       !target->IsImported()) {
     return target->GetProperty("CROSSCOMPILING_EMULATOR");
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 const char* cmCustomCommandGenerator::GetArgv0Location(unsigned int c) const
@@ -81,7 +92,19 @@ const char* cmCustomCommandGenerator::GetArgv0Location(unsigned int c) const
        !this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING"))) {
     return target->GetLocation(this->Config);
   }
-  return CM_NULLPTR;
+  return nullptr;
+}
+
+bool cmCustomCommandGenerator::HasOnlyEmptyCommandLines() const
+{
+  for (size_t i = 0; i < this->CommandLines.size(); ++i) {
+    for (size_t j = 0; j < this->CommandLines[i].size(); ++j) {
+      if (!this->CommandLines[i][j].empty()) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
@@ -125,14 +148,13 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
                                                std::string& cmd) const
 {
   unsigned int offset = 1;
-  if (this->GetCrossCompilingEmulator(c) != CM_NULLPTR) {
+  if (this->GetCrossCompilingEmulator(c) != nullptr) {
     offset = 0;
   }
   cmCustomCommandLine const& commandLine = this->CommandLines[c];
   for (unsigned int j = offset; j < commandLine.size(); ++j) {
     std::string arg;
-    if (const char* location =
-          j == 0 ? this->GetArgv0Location(c) : CM_NULLPTR) {
+    if (const char* location = j == 0 ? this->GetArgv0Location(c) : nullptr) {
       // GetCommand returned the emulator instead of the argv0 location,
       // so transform the latter now.
       arg = location;
@@ -171,23 +193,5 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
 {
-  if (!this->DependsDone) {
-    this->DependsDone = true;
-    std::vector<std::string> depends = this->CC.GetDepends();
-    for (std::vector<std::string>::const_iterator i = depends.begin();
-         i != depends.end(); ++i) {
-      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(*i);
-      std::vector<std::string> result;
-      cmSystemTools::ExpandListArgument(cge->Evaluate(this->LG, this->Config),
-                                        result);
-      for (std::vector<std::string>::iterator it = result.begin();
-           it != result.end(); ++it) {
-        if (cmSystemTools::FileIsFullPath(it->c_str())) {
-          *it = cmSystemTools::CollapseFullPath(*it);
-        }
-      }
-      this->Depends.insert(this->Depends.end(), result.begin(), result.end());
-    }
-  }
   return this->Depends;
 }

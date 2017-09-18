@@ -3,7 +3,7 @@
 #ifndef cmCPackGenerator_h
 #define cmCPackGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <sstream>
@@ -105,7 +105,7 @@ protected:
   cmInstalledFile const* GetInstalledFile(std::string const& name) const;
 
   virtual const char* GetOutputExtension() { return ".cpack"; }
-  virtual const char* GetOutputPostfix() { return CM_NULLPTR; }
+  virtual const char* GetOutputPostfix() { return nullptr; }
 
   /**
    * Prepare requested grouping kind from CPACK_xxx vars
@@ -299,7 +299,7 @@ private:
 
 #define cmCPackTypeMacro(klass, superclass)                                   \
   typedef superclass Superclass;                                              \
-  const char* GetNameOfClass() CM_OVERRIDE { return #klass; }                 \
+  const char* GetNameOfClass() override { return #klass; }                    \
   static cmCPackGenerator* CreateGenerator() { return new klass; }            \
   class cmCPackTypeMacro_UseTrailingSemicolon
 

@@ -17,10 +17,6 @@ set( CURSES_SRCS
               CursesDialog/ccmake
    )
 
-if( NOT CMAKE_USE_SYSTEM_FORM )
-  include_directories(${CMake_SOURCE_DIR}/Source/CursesDialog/form
-                      ${CMake_BINARY_DIR}/Source/CursesDialog/form)
-endif()
 include_directories(${CURSES_INCLUDE_PATH})
 
 

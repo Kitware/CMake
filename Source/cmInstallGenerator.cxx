@@ -113,9 +113,8 @@ void cmInstallGenerator::AddInstallRule(
   if (files.size() == 1) {
     os << " \"" << files[0] << "\"";
   } else {
-    for (std::vector<std::string>::const_iterator fi = files.begin();
-         fi != files.end(); ++fi) {
-      os << "\n" << indent << "  \"" << *fi << "\"";
+    for (std::string const& f : files) {
+      os << "\n" << indent << "  \"" << f << "\"";
     }
     os << "\n" << indent << " ";
     if (!(literal_args && *literal_args)) {
@@ -131,9 +130,9 @@ void cmInstallGenerator::AddInstallRule(
 std::string cmInstallGenerator::CreateComponentTest(const char* component,
                                                     bool exclude_from_all)
 {
-  std::string result = "\"${CMAKE_INSTALL_COMPONENT}\" STREQUAL \"";
+  std::string result = "\"x${CMAKE_INSTALL_COMPONENT}x\" STREQUAL \"x";
   result += component;
-  result += "\"";
+  result += "x\"";
   if (!exclude_from_all) {
     result += " OR NOT CMAKE_INSTALL_COMPONENT";
   }

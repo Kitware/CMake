@@ -86,23 +86,16 @@ macro(_check_pthreads_flag)
         set(_threads_src ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindThreads/CheckForPthreads.cxx)
         configure_file(${CMAKE_CURRENT_LIST_DIR}/CheckForPthreads.c "${_threads_src}" COPYONLY)
       endif()
-      try_run(THREADS_PTHREAD_ARG THREADS_HAVE_PTHREAD_ARG
+      try_compile(THREADS_HAVE_PTHREAD_ARG
         ${CMAKE_BINARY_DIR}
         ${_threads_src}
         CMAKE_FLAGS -DLINK_LIBRARIES:STRING=-pthread
-        COMPILE_OUTPUT_VARIABLE OUTPUT)
+        OUTPUT_VARIABLE OUTPUT)
       unset(_threads_src)
 
       if(THREADS_HAVE_PTHREAD_ARG)
-        if(THREADS_PTHREAD_ARG STREQUAL "2")
-          set(Threads_FOUND TRUE)
-          message(STATUS "Check if compiler accepts -pthread - yes")
-        else()
-          message(STATUS "Check if compiler accepts -pthread - no")
-          file(APPEND
-            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-            "Determining if compiler accepts -pthread returned ${THREADS_PTHREAD_ARG} instead of 2. The compiler had the following output:\n${OUTPUT}\n\n")
-        endif()
+        set(Threads_FOUND TRUE)
+        message(STATUS "Check if compiler accepts -pthread - yes")
       else()
         message(STATUS "Check if compiler accepts -pthread - no")
         file(APPEND

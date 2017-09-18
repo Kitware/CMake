@@ -3,7 +3,7 @@
 #ifndef cmIfCommand_h
 #define cmIfCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -25,10 +25,10 @@ public:
     this->ElseSeen = false;
     this->ScopeDepth = 0;
   }
-  ~cmIfFunctionBlocker() CM_OVERRIDE {}
+  ~cmIfFunctionBlocker() override {}
   bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                         cmExecutionStatus&) CM_OVERRIDE;
-  bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) CM_OVERRIDE;
+                         cmExecutionStatus&) override;
+  bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
 
   std::vector<cmListFileArgument> Args;
   std::vector<cmListFileFunction> Functions;
@@ -45,21 +45,21 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE { return new cmIfCommand; }
+  cmCommand* Clone() override { return new cmIfCommand; }
 
   /**
    * This overrides the default InvokeInitialPass implementation.
    * It records the arguments before expansion.
    */
   bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
-                         cmExecutionStatus&) CM_OVERRIDE;
+                         cmExecutionStatus&) override;
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const&,
-                   cmExecutionStatus&) CM_OVERRIDE
+                   cmExecutionStatus&) override
   {
     return false;
   }

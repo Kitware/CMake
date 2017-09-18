@@ -3,7 +3,7 @@
 #ifndef cmCursesMainForm_h
 #define cmCursesMainForm_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCursesForm.h"
 #include "cmCursesStandardIncludes.h"
@@ -27,7 +27,7 @@ class cmCursesMainForm : public cmCursesForm
 
 public:
   cmCursesMainForm(std::vector<std::string> const& args, int initwidth);
-  ~cmCursesMainForm() CM_OVERRIDE;
+  ~cmCursesMainForm() override;
 
   /**
    * Set the widgets which represent the cache entries.
@@ -37,13 +37,13 @@ public:
   /**
    * Handle user input.
    */
-  void HandleInput() CM_OVERRIDE;
+  void HandleInput() override;
 
   /**
    * Display form. Use a window of size width x height, starting
    * at top, left.
    */
-  void Render(int left, int top, int width, int height) CM_OVERRIDE;
+  void Render(int left, int top, int width, int height) override;
 
   /**
    * Returns true if an entry with the given key is in the
@@ -64,7 +64,7 @@ public:
    * exception is during a resize. The optional argument specifies the
    * string to be displayed in the status bar.
    */
-  void UpdateStatusBar() CM_OVERRIDE { this->UpdateStatusBar(CM_NULLPTR); }
+  void UpdateStatusBar() override { this->UpdateStatusBar(nullptr); }
   virtual void UpdateStatusBar(const char* message);
 
   /**
@@ -80,7 +80,7 @@ public:
    * During a CMake run, an error handle should add errors
    * to be displayed afterwards.
    */
-  void AddError(const char* message, const char* title) CM_OVERRIDE;
+  void AddError(const char* message, const char* title) override;
 
   /**
    * Used to do a configure. If argument is specified, it does only the check

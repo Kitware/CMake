@@ -54,14 +54,11 @@ std::string cmFileLockResult::GetOutputMessage() const
     case SYSTEM:
 #if defined(_WIN32)
     {
-     // cmExportCommand.cxx (ReportRegistryError)
-     char winmsg[WINMSG_BUF_LEN];
-
-      DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS;
+      char winmsg[WINMSG_BUF_LEN];
+      DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
       if (FormatMessageA(flags, NULL, this->ErrorValue,
-                       MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                       (LPSTR)winmsg, WINMSG_BUF_LEN, NULL)) {
+                         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                         (LPSTR)winmsg, WINMSG_BUF_LEN, NULL)) {
         const std::string message = winmsg;
         return message;
       } else {

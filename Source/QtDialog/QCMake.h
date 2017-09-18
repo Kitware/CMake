@@ -3,7 +3,7 @@
 #ifndef QCMake_h
 #define QCMake_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmake.h"
 
@@ -63,7 +63,7 @@ class QCMake : public QObject
 {
   Q_OBJECT
 public:
-  QCMake(QObject* p = CM_NULLPTR);
+  QCMake(QObject* p = nullptr);
   ~QCMake();
 public slots:
   /// load the cache file in a directory

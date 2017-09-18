@@ -3,7 +3,7 @@
 #ifndef cmGeneratorExpressionDAGChecker_h
 #define cmGeneratorExpressionDAGChecker_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmListFileCache.h"
 
@@ -61,7 +61,7 @@ struct cmGeneratorExpressionDAGChecker
   void ReportError(cmGeneratorExpressionContext* context,
                    const std::string& expr);
 
-  bool EvaluatingLinkLibraries(const char* tgt = CM_NULLPTR);
+  bool EvaluatingLinkLibraries(const char* tgt = nullptr);
 
 #define DECLARE_TRANSITIVE_PROPERTY_METHOD(METHOD) bool METHOD() const;
 
@@ -82,7 +82,7 @@ private:
   const cmGeneratorExpressionDAGChecker* const Parent;
   const std::string Target;
   const std::string Property;
-  std::map<std::string, std::set<std::string> > Seen;
+  std::map<std::string, std::set<std::string>> Seen;
   const GeneratorExpressionContent* const Content;
   const cmListFileBacktrace Backtrace;
   Result CheckResult;

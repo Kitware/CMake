@@ -10,8 +10,11 @@ documentation.
 
 By default this contains the standard directories for the current system, the
 :variable:`CMAKE_INSTALL_PREFIX`, and the :variable:`CMAKE_STAGING_PREFIX`.
-It is *not* intended to be modified by the project; use
-:variable:`CMAKE_PREFIX_PATH` for this.
+The installation and staging prefixes may be excluded by setting
+the :variable:`CMAKE_FIND_NO_INSTALL_PREFIX` variable.
+
+``CMAKE_SYSTEM_PREFIX_PATH`` is *not* intended to be modified by the project;
+use :variable:`CMAKE_PREFIX_PATH` for this.
 
 See also :variable:`CMAKE_SYSTEM_INCLUDE_PATH`,
 :variable:`CMAKE_SYSTEM_LIBRARY_PATH`, :variable:`CMAKE_SYSTEM_PROGRAM_PATH`,

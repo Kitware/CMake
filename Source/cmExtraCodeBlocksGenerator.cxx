@@ -4,6 +4,7 @@
 
 #include <map>
 #include <ostream>
+#include <set>
 #include <string.h>
 #include <utility>
 
@@ -62,11 +63,9 @@ cmExtraCodeBlocksGenerator::GetFactory()
 void cmExtraCodeBlocksGenerator::Generate()
 {
   // for each sub project in the project create a codeblocks project
-  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
-         it = this->GlobalGenerator->GetProjectMap().begin();
-       it != this->GlobalGenerator->GetProjectMap().end(); ++it) {
+  for (auto const& it : this->GlobalGenerator->GetProjectMap()) {
     // create a project file
-    this->CreateProjectFile(it->second);
+    this->CreateProjectFile(it.second);
   }
 }
 
@@ -95,7 +94,7 @@ struct Tree
 {
   std::string path; // only one component of the path
   std::vector<Tree> folders;
-  std::vector<std::string> files;
+  std::set<std::string> files;
   void InsertPath(const std::vector<std::string>& splitted,
                   std::vector<std::string>::size_type start,
                   const std::string& fileName);
@@ -112,18 +111,17 @@ void Tree::InsertPath(const std::vector<std::string>& splitted,
                       const std::string& fileName)
 {
   if (start == splitted.size()) {
-    files.push_back(fileName);
+    files.insert(fileName);
     return;
   }
-  for (std::vector<Tree>::iterator it = folders.begin(); it != folders.end();
-       ++it) {
-    if ((*it).path == splitted[start]) {
+  for (Tree& folder : folders) {
+    if (folder.path == splitted[start]) {
       if (start + 1 < splitted.size()) {
-        it->InsertPath(splitted, start + 1, fileName);
+        folder.InsertPath(splitted, start + 1, fileName);
         return;
       }
       // last part of splitted
-      it->files.push_back(fileName);
+      folder.files.insert(fileName);
       return;
     }
   }
@@ -136,7 +134,7 @@ void Tree::InsertPath(const std::vector<std::string>& splitted,
     return;
   }
   // last part of splitted
-  newFolder.files.push_back(fileName);
+  newFolder.files.insert(fileName);
   folders.push_back(newFolder);
 }
 
@@ -144,9 +142,8 @@ void Tree::BuildVirtualFolder(cmXMLWriter& xml) const
 {
   xml.StartElement("Option");
   std::string virtualFolders = "CMake Files\\;";
-  for (std::vector<Tree>::const_iterator it = folders.begin();
-       it != folders.end(); ++it) {
-    it->BuildVirtualFolderImpl(virtualFolders, "");
+  for (Tree const& folder : folders) {
+    folder.BuildVirtualFolderImpl(virtualFolders, "");
   }
   xml.Attribute("virtualFolders", virtualFolders);
   xml.EndElement();
@@ -156,18 +153,16 @@ void Tree::BuildVirtualFolderImpl(std::string& virtualFolders,
                                   const std::string& prefix) const
 {
   virtualFolders += "CMake Files\\" + prefix + path + "\\;";
-  for (std::vector<Tree>::const_iterator it = folders.begin();
-       it != folders.end(); ++it) {
-    it->BuildVirtualFolderImpl(virtualFolders, prefix + path + "\\");
+  for (Tree const& folder : folders) {
+    folder.BuildVirtualFolderImpl(virtualFolders, prefix + path + "\\");
   }
 }
 
 void Tree::BuildUnit(cmXMLWriter& xml, const std::string& fsPath) const
 {
-  for (std::vector<std::string>::const_iterator it = files.begin();
-       it != files.end(); ++it) {
+  for (std::string const& f : files) {
     xml.StartElement("Unit");
-    xml.Attribute("filename", fsPath + *it);
+    xml.Attribute("filename", fsPath + f);
 
     xml.StartElement("Option");
     xml.Attribute("virtualFolder", "CMake Files\\");
@@ -175,9 +170,8 @@ void Tree::BuildUnit(cmXMLWriter& xml, const std::string& fsPath) const
 
     xml.EndElement();
   }
-  for (std::vector<Tree>::const_iterator it = folders.begin();
-       it != folders.end(); ++it) {
-    it->BuildUnitImpl(xml, "", fsPath);
+  for (Tree const& folder : folders) {
+    folder.BuildUnitImpl(xml, "", fsPath);
   }
 }
 
@@ -185,10 +179,9 @@ void Tree::BuildUnitImpl(cmXMLWriter& xml,
                          const std::string& virtualFolderPath,
                          const std::string& fsPath) const
 {
-  for (std::vector<std::string>::const_iterator it = files.begin();
-       it != files.end(); ++it) {
+  for (std::string const& f : files) {
     xml.StartElement("Unit");
-    xml.Attribute("filename", fsPath + path + "/" + *it);
+    xml.Attribute("filename", fsPath + path + "/" + f);
 
     xml.StartElement("Option");
     xml.Attribute("virtualFolder",
@@ -197,10 +190,9 @@ void Tree::BuildUnitImpl(cmXMLWriter& xml,
 
     xml.EndElement();
   }
-  for (std::vector<Tree>::const_iterator it = folders.begin();
-       it != folders.end(); ++it) {
-    it->BuildUnitImpl(xml, virtualFolderPath + path + "\\",
-                      fsPath + path + "/");
+  for (Tree const& folder : folders) {
+    folder.BuildUnitImpl(xml, virtualFolderPath + path + "\\",
+                         fsPath + path + "/");
   }
 }
 
@@ -216,29 +208,24 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   Tree tree;
 
   // build tree of virtual folders
-  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
-         it = this->GlobalGenerator->GetProjectMap().begin();
-       it != this->GlobalGenerator->GetProjectMap().end(); ++it) {
+  for (auto const& it : this->GlobalGenerator->GetProjectMap()) {
     // Collect all files
     std::vector<std::string> listFiles;
-    for (std::vector<cmLocalGenerator*>::const_iterator jt =
-           it->second.begin();
-         jt != it->second.end(); ++jt) {
+    for (cmLocalGenerator* lg : it.second) {
       const std::vector<std::string>& files =
-        (*jt)->GetMakefile()->GetListFiles();
+        lg->GetMakefile()->GetListFiles();
       listFiles.insert(listFiles.end(), files.begin(), files.end());
     }
 
     // Convert
-    for (std::vector<std::string>::const_iterator jt = listFiles.begin();
-         jt != listFiles.end(); ++jt) {
+    for (std::string const& listFile : listFiles) {
       // don't put cmake's own files into the project (#12110):
-      if (jt->find(cmSystemTools::GetCMakeRoot()) == 0) {
+      if (listFile.find(cmSystemTools::GetCMakeRoot()) == 0) {
         continue;
       }
 
       const std::string& relative = cmSystemTools::RelativePath(
-        it->second[0]->GetSourceDirectory(), jt->c_str());
+        it.second[0]->GetSourceDirectory(), listFile.c_str());
       std::vector<std::string> splitted;
       cmSystemTools::SplitPath(relative, splitted, false);
       // Split filename from path
@@ -248,7 +235,14 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
       // We don't want paths with CMakeFiles in them
       // or do we?
       // In speedcrunch those where purely internal
+      //
+      // Also we can disable external (outside the project) files by setting ON
+      // CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES variable.
+      const bool excludeExternal =
+        cmSystemTools::IsOn(it.second[0]->GetMakefile()->GetSafeDefinition(
+          "CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES"));
       if (!splitted.empty() &&
+          (!excludeExternal || (relative.find("..") == std::string::npos)) &&
           relative.find("CMakeFiles") == std::string::npos) {
         tree.InsertPath(splitted, 1, fileName);
       }
@@ -289,24 +283,22 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
 
   xml.StartElement("Build");
 
-  this->AppendTarget(xml, "all", CM_NULLPTR, make.c_str(), lgs[0],
+  this->AppendTarget(xml, "all", nullptr, make.c_str(), lgs[0],
                      compiler.c_str(), makeArgs);
 
   // add all executable and library targets and some of the GLOBAL
   // and UTILITY targets
-  for (std::vector<cmLocalGenerator*>::const_iterator lg = lgs.begin();
-       lg != lgs.end(); lg++) {
-    std::vector<cmGeneratorTarget*> targets = (*lg)->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
-         ti != targets.end(); ti++) {
-      std::string targetName = (*ti)->GetName();
-      switch ((*ti)->GetType()) {
+  for (cmLocalGenerator* lg : lgs) {
+    const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
+    for (cmGeneratorTarget* target : targets) {
+      std::string targetName = target->GetName();
+      switch (target->GetType()) {
         case cmStateEnums::GLOBAL_TARGET: {
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
-          if (strcmp((*lg)->GetCurrentBinaryDirectory(),
-                     (*lg)->GetBinaryDirectory()) == 0) {
-            this->AppendTarget(xml, targetName, CM_NULLPTR, make.c_str(), *lg,
+          if (strcmp(lg->GetCurrentBinaryDirectory(),
+                     lg->GetBinaryDirectory()) == 0) {
+            this->AppendTarget(xml, targetName, nullptr, make.c_str(), lg,
                                compiler.c_str(), makeArgs);
           }
         } break;
@@ -322,7 +314,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             break;
           }
 
-          this->AppendTarget(xml, targetName, CM_NULLPTR, make.c_str(), *lg,
+          this->AppendTarget(xml, targetName, nullptr, make.c_str(), lg,
                              compiler.c_str(), makeArgs);
           break;
         case cmStateEnums::EXECUTABLE:
@@ -330,12 +322,12 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
         case cmStateEnums::SHARED_LIBRARY:
         case cmStateEnums::MODULE_LIBRARY:
         case cmStateEnums::OBJECT_LIBRARY: {
-          cmGeneratorTarget* gt = *ti;
-          this->AppendTarget(xml, targetName, gt, make.c_str(), *lg,
+          cmGeneratorTarget* gt = target;
+          this->AppendTarget(xml, targetName, gt, make.c_str(), lg,
                              compiler.c_str(), makeArgs);
           std::string fastTarget = targetName;
           fastTarget += "/fast";
-          this->AppendTarget(xml, fastTarget, gt, make.c_str(), *lg,
+          this->AppendTarget(xml, fastTarget, gt, make.c_str(), lg,
                              compiler.c_str(), makeArgs);
         } break;
         default:
@@ -356,13 +348,11 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   std::vector<std::string> const& srcExts =
     this->GlobalGenerator->GetCMakeInstance()->GetSourceExtensions();
 
-  for (std::vector<cmLocalGenerator*>::const_iterator lg = lgs.begin();
-       lg != lgs.end(); lg++) {
-    cmMakefile* makefile = (*lg)->GetMakefile();
-    std::vector<cmGeneratorTarget*> targets = (*lg)->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
-         ti != targets.end(); ti++) {
-      switch ((*ti)->GetType()) {
+  for (cmLocalGenerator* lg : lgs) {
+    cmMakefile* makefile = lg->GetMakefile();
+    const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
+    for (cmGeneratorTarget* target : targets) {
+      switch (target->GetType()) {
         case cmStateEnums::EXECUTABLE:
         case cmStateEnums::STATIC_LIBRARY:
         case cmStateEnums::SHARED_LIBRARY:
@@ -371,41 +361,51 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
         case cmStateEnums::UTILITY: // can have sources since 2.6.3
         {
           std::vector<cmSourceFile*> sources;
-          cmGeneratorTarget* gt = *ti;
+          cmGeneratorTarget* gt = target;
           gt->GetSourceFiles(sources,
                              makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
-          for (std::vector<cmSourceFile*>::const_iterator si = sources.begin();
-               si != sources.end(); si++) {
+          for (cmSourceFile* s : sources) {
             // don't add source files from UTILITY target which have the
             // GENERATED property set:
             if (gt->GetType() == cmStateEnums::UTILITY &&
-                (*si)->GetPropertyAsBool("GENERATED")) {
+                s->GetPropertyAsBool("GENERATED")) {
               continue;
             }
 
             // check whether it is a C/C++ implementation file
             bool isCFile = false;
-            std::string lang = (*si)->GetLanguage();
+            std::string lang = s->GetLanguage();
             if (lang == "C" || lang == "CXX") {
-              std::string const& srcext = (*si)->GetExtension();
-              for (std::vector<std::string>::const_iterator ext =
-                     srcExts.begin();
-                   ext != srcExts.end(); ++ext) {
-                if (srcext == *ext) {
+              std::string const& srcext = s->GetExtension();
+              for (std::string const& ext : srcExts) {
+                if (srcext == ext) {
                   isCFile = true;
                   break;
                 }
               }
             }
 
-            std::string const& fullPath = (*si)->GetFullPath();
+            std::string const& fullPath = s->GetFullPath();
+
+            // Check file position relative to project root dir.
+            const std::string& relative = cmSystemTools::RelativePath(
+              (*lg).GetSourceDirectory(), fullPath.c_str());
+            // Do not add this file if it has ".." in relative path and
+            // if CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES variable is on.
+            const bool excludeExternal =
+              cmSystemTools::IsOn((*lg).GetMakefile()->GetSafeDefinition(
+                "CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES"));
+            if (excludeExternal &&
+                (relative.find("..") != std::string::npos)) {
+              continue;
+            }
 
             if (isCFile) {
               cFiles.push_back(fullPath);
             }
 
             CbpUnit& cbpUnit = allFiles[fullPath];
-            cbpUnit.Targets.push_back(*ti);
+            cbpUnit.Targets.push_back(target);
           }
         }
         default: // intended fallthrough
@@ -424,19 +424,16 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   // file exists. If it does, it is inserted into the map of files.
   // A very similar version of that code exists also in the kdevelop
   // project generator.
-  for (std::vector<std::string>::const_iterator sit = cFiles.begin();
-       sit != cFiles.end(); ++sit) {
-    std::string const& fileName = *sit;
+  for (std::string const& fileName : cFiles) {
     std::string headerBasename = cmSystemTools::GetFilenamePath(fileName);
     headerBasename += "/";
     headerBasename += cmSystemTools::GetFilenameWithoutExtension(fileName);
 
     // check if there's a matching header around
-    for (std::vector<std::string>::const_iterator ext = headerExts.begin();
-         ext != headerExts.end(); ++ext) {
+    for (std::string const& ext : headerExts) {
       std::string hname = headerBasename;
       hname += ".";
-      hname += *ext;
+      hname += ext;
       // if it's already in the set, don't check if it exists on disk
       if (allFiles.find(hname) != allFiles.end()) {
         break;
@@ -450,19 +447,16 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   }
 
   // insert all source files in the CodeBlocks project
-  for (all_files_map_t::const_iterator sit = allFiles.begin();
-       sit != allFiles.end(); ++sit) {
-    std::string const& unitFilename = sit->first;
-    CbpUnit const& unit = sit->second;
+  for (auto const& s : allFiles) {
+    std::string const& unitFilename = s.first;
+    CbpUnit const& unit = s.second;
 
     xml.StartElement("Unit");
     xml.Attribute("filename", unitFilename);
 
-    for (std::vector<const cmGeneratorTarget*>::const_iterator ti =
-           unit.Targets.begin();
-         ti != unit.Targets.end(); ++ti) {
+    for (cmGeneratorTarget const* tgt : unit.Targets) {
       xml.StartElement("Option");
-      xml.Attribute("target", (*ti)->GetName());
+      xml.Attribute("target", tgt->GetName());
       xml.EndElement();
     }
 
@@ -515,7 +509,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
   xml.StartElement("Target");
   xml.Attribute("title", targetName);
 
-  if (target != CM_NULLPTR) {
+  if (target != nullptr) {
     int cbTargetType = this->GetCBTargetType(target);
     std::string workingDir = lg->GetCurrentBinaryDirectory();
     if (target->GetType() == cmStateEnums::EXECUTABLE) {
@@ -523,12 +517,12 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
       // set the working directory to this dir.
       const char* runtimeOutputDir =
         makefile->GetDefinition("CMAKE_RUNTIME_OUTPUT_DIRECTORY");
-      if (runtimeOutputDir != CM_NULLPTR) {
+      if (runtimeOutputDir != nullptr) {
         workingDir = runtimeOutputDir;
       } else {
         const char* executableOutputDir =
           makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-        if (executableOutputDir != CM_NULLPTR) {
+        if (executableOutputDir != nullptr) {
           workingDir = executableOutputDir;
         }
       }
@@ -572,10 +566,9 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
     target->GetCompileDefinitions(cdefs, buildType, "C");
 
     // Expand the list.
-    for (std::vector<std::string>::const_iterator di = cdefs.begin();
-         di != cdefs.end(); ++di) {
+    for (std::string const& d : cdefs) {
       xml.StartElement("Add");
-      xml.Attribute("option", "-D" + *di);
+      xml.Attribute("option", "-D" + d);
       xml.EndElement();
     }
 

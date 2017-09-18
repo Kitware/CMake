@@ -19,10 +19,10 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
   // Process arguments.
   std::string version_string;
   bool doing_version = false;
-  for (unsigned int i = 0; i < args.size(); ++i) {
-    if (args[i] == "VERSION") {
+  for (std::string const& arg : args) {
+    if (arg == "VERSION") {
       doing_version = true;
-    } else if (args[i] == "FATAL_ERROR") {
+    } else if (arg == "FATAL_ERROR") {
       if (doing_version) {
         this->SetError("called with no value for VERSION.");
         return false;
@@ -30,9 +30,9 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
       doing_version = false;
     } else if (doing_version) {
       doing_version = false;
-      version_string = args[i];
+      version_string = arg;
     } else {
-      this->UnknownArguments.push_back(args[i]);
+      this->UnknownArguments.push_back(arg);
     }
   }
   if (doing_version) {

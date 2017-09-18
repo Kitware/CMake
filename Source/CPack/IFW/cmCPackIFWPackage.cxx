@@ -92,7 +92,7 @@ std::string cmCPackIFWPackage::DependenceStruct::NameWithCompare() const
 
 //------------------------------------------------------ cmCPackIFWPackage ---
 cmCPackIFWPackage::cmCPackIFWPackage()
-  : Installer(CM_NULLPTR)
+  : Installer(nullptr)
 {
 }
 

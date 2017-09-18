@@ -182,9 +182,9 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
     value += sep;
     sep = ";";
     if (item < 0) {
-      item = (int)nitem + item;
+      item = static_cast<int>(nitem) + item;
     }
-    if (item < 0 || nitem <= (size_t)item) {
+    if (item < 0 || nitem <= static_cast<size_t>(item)) {
       std::ostringstream str;
       str << "index: " << item << " out of range (-" << nitem << ", "
           << nitem - 1 << ")";
@@ -273,9 +273,9 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
   if (!varArgsExpanded.empty()) {
     size_t nitem = varArgsExpanded.size();
     if (item < 0) {
-      item = (int)nitem + item;
+      item = static_cast<int>(nitem) + item;
     }
-    if (item < 0 || nitem <= (size_t)item) {
+    if (item < 0 || nitem <= static_cast<size_t>(item)) {
       std::ostringstream str;
       str << "index: " << item << " out of range (-" << varArgsExpanded.size()
           << ", "
@@ -423,9 +423,9 @@ bool cmListCommand::HandleRemoveAtCommand(std::vector<std::string> const& args)
   for (cc = 2; cc < args.size(); ++cc) {
     int item = atoi(args[cc].c_str());
     if (item < 0) {
-      item = (int)nitem + item;
+      item = static_cast<int>(nitem) + item;
     }
-    if (item < 0 || nitem <= (size_t)item) {
+    if (item < 0 || nitem <= static_cast<size_t>(item)) {
       std::ostringstream str;
       str << "index: " << item << " out of range (-" << nitem << ", "
           << nitem - 1 << ")";

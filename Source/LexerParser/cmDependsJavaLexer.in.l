@@ -7,13 +7,12 @@ This file must be translated to C++ and modified to build everywhere.
 
 Run flex >= 2.6 like this:
 
-  flex --nounistd -DFLEXINT_H --prefix=cmDependsJava_yy --header-file=cmDependsJavaLexer.h -ocmDependsJavaLexer.cxx cmDependsJavaLexer.in.l
+  flex --nounistd -DFLEXINT_H --noline --header-file=cmDependsJavaLexer.h -ocmDependsJavaLexer.cxx cmDependsJavaLexer.in.l
 
 Modify cmDependsJavaLexer.cxx:
-  - remove trailing whitespace: sed -i 's/\s*$//' cmDependsJavaLexer.h cmDependsJavaLexer.cxx
-  - remove blank lines at end of file
-  - #include "cmStandardLexer.h" at the top
-  - add cast in yy_scan_bytes for loop condition of _yybytes_len to size_t
+  - remove trailing whitespace:              sed -i 's/\s*$//' cmDependsJavaLexer.h cmDependsJavaLexer.cxx
+  - remove blank lines at end of file:       sed -i '${/^$/d;}' cmDependsJavaLexer.h cmDependsJavaLexer.cxx
+  - #include "cmStandardLexer.h" at the top: sed -i '1i#include "cmStandardLexer.h"' cmDependsJavaLexer.cxx
 
 */
 
@@ -37,6 +36,8 @@ Modify cmDependsJavaLexer.cxx:
 
 /*--------------------------------------------------------------------------*/
 %}
+
+%option prefix="cmDependsJava_yy"
 
 %option reentrant
 %option noyywrap

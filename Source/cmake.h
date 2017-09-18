@@ -3,7 +3,7 @@
 #ifndef cmake_h
 #define cmake_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
 #include <set>
@@ -268,8 +268,7 @@ public:
    *  number provided may be negative in cases where a message is
    *  to be displayed without any progress percentage.
    */
-  void SetProgressCallback(ProgressCallbackType f,
-                           void* clientData = CM_NULLPTR);
+  void SetProgressCallback(ProgressCallbackType f, void* clientData = nullptr);
 
   ///! this is called by generators to update the progress
   void UpdateProgress(const char* msg, float prog);

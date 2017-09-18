@@ -3,7 +3,7 @@
 #ifndef cmInstallExportGenerator_h
 #define cmInstallExportGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmInstallGenerator.h"
 #include "cmScriptGenerator.h"
@@ -30,11 +30,11 @@ public:
                            bool exclude_from_all, const char* filename,
                            const char* name_space, bool exportOld,
                            bool android);
-  ~cmInstallExportGenerator() CM_OVERRIDE;
+  ~cmInstallExportGenerator() override;
 
   cmExportSet* GetExportSet() { return this->ExportSet; }
 
-  void Compute(cmLocalGenerator* lg) CM_OVERRIDE;
+  void Compute(cmLocalGenerator* lg) override;
 
   cmLocalGenerator* GetLocalGenerator() const { return this->LocalGenerator; }
 
@@ -43,9 +43,9 @@ public:
   std::string const& GetDestination() const { return this->Destination; }
 
 protected:
-  void GenerateScript(std::ostream& os) CM_OVERRIDE;
-  void GenerateScriptConfigs(std::ostream& os, Indent indent) CM_OVERRIDE;
-  void GenerateScriptActions(std::ostream& os, Indent indent) CM_OVERRIDE;
+  void GenerateScript(std::ostream& os) override;
+  void GenerateScriptConfigs(std::ostream& os, Indent indent) override;
+  void GenerateScriptActions(std::ostream& os, Indent indent) override;
   void GenerateImportFile(cmExportSet const* exportSet);
   void GenerateImportFile(const char* config, cmExportSet const* exportSet);
   void ComputeTempDir();

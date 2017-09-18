@@ -3,7 +3,7 @@
 #ifndef cmCTestCoverageHandler_h
 #define cmCTestCoverageHandler_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGenericHandler.h"
 
@@ -42,16 +42,16 @@ public:
   /*
    * The main entry point for this class
    */
-  int ProcessHandler() CM_OVERRIDE;
+  int ProcessHandler() override;
 
   cmCTestCoverageHandler();
 
-  void Initialize() CM_OVERRIDE;
+  void Initialize() override;
 
   /**
    * This method is called when reading CTest custom file
    */
-  void PopulateCustomVectors(cmMakefile* mf) CM_OVERRIDE;
+  void PopulateCustomVectors(cmMakefile* mf) override;
 
   /** Report coverage only for sources with these labels.  */
   void SetLabelFilter(std::set<std::string> const& labels);

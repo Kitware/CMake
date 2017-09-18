@@ -13,9 +13,8 @@ cmExportSet::~cmExportSet()
 
 void cmExportSet::Compute(cmLocalGenerator* lg)
 {
-  for (std::vector<cmTargetExport*>::iterator it = this->TargetExports.begin();
-       it != this->TargetExports.end(); ++it) {
-    (*it)->Target = lg->FindGeneratorTargetToUse((*it)->TargetName);
+  for (cmTargetExport* tgtExport : this->TargetExports) {
+    tgtExport->Target = lg->FindGeneratorTargetToUse(tgtExport->TargetName);
   }
 }
 

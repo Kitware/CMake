@@ -105,6 +105,11 @@ static const std::string kCTEST_NAME = "ctestName";
 static const std::string kCTEST_COMMAND = "ctestCommand";
 static const std::string kCTESTS_INFO= "ctestsInfo";
 
+static const std::string kTARGET_CROSS_REFERENCES_KEY = "crossReferences";
+static const std::string kLINE_NUMBER_KEY = "line";
+static const std::string kBACKTRACE_KEY = "backtrace";
+static const std::string kRELATED_STATEMENTS_KEY = "relatedStatements";
+
 static const std::string kSTART_MAGIC = "[== \"CMake Server\" ==[";
 static const std::string kEND_MAGIC = "]== \"CMake Server\" ==]";
 

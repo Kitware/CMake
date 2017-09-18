@@ -5,7 +5,6 @@
 #include <map>
 #include <set>
 #include <sstream>
-#include <stddef.h>
 #include <utility>
 
 #include "cmAlgorithms.h"
@@ -19,11 +18,11 @@ static std::string escape_arg(const std::string& arg)
 {
   // replace ";" with "\;" so output argument lists will split correctly
   std::string escapedArg;
-  for (size_t i = 0; i < arg.size(); ++i) {
-    if (arg[i] == ';') {
+  for (char i : arg) {
+    if (i == ';') {
       escapedArg += '\\';
     }
-    escapedArg += arg[i];
+    escapedArg += i;
   }
   return escapedArg;
 }
@@ -70,7 +69,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
   // options, single values and multi values
   typedef std::map<std::string, bool> options_map;
   typedef std::map<std::string, std::string> single_map;
-  typedef std::map<std::string, std::vector<std::string> > multi_map;
+  typedef std::map<std::string, std::vector<std::string>> multi_map;
   options_map options;
   single_map single;
   multi_map multi;
@@ -85,37 +84,31 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
   // the second argument is a (cmake) list of options without argument
   std::vector<std::string> list;
   cmSystemTools::ExpandListArgument(*argIter++, list);
-  for (std::vector<std::string>::const_iterator iter = list.begin(),
-                                                end = list.end();
-       iter != end; ++iter) {
-    if (!used_keywords.insert(*iter).second) {
-      this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + *iter);
+  for (std::string const& iter : list) {
+    if (!used_keywords.insert(iter).second) {
+      this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + iter);
     }
-    options[*iter]; // default initialize
+    options[iter]; // default initialize
   }
 
   // the third argument is a (cmake) list of single argument options
   list.clear();
   cmSystemTools::ExpandListArgument(*argIter++, list);
-  for (std::vector<std::string>::const_iterator iter = list.begin(),
-                                                end = list.end();
-       iter != end; ++iter) {
-    if (!used_keywords.insert(*iter).second) {
-      this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + *iter);
+  for (std::string const& iter : list) {
+    if (!used_keywords.insert(iter).second) {
+      this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + iter);
     }
-    single[*iter]; // default initialize
+    single[iter]; // default initialize
   }
 
   // the fourth argument is a (cmake) list of multi argument options
   list.clear();
   cmSystemTools::ExpandListArgument(*argIter++, list);
-  for (std::vector<std::string>::const_iterator iter = list.begin(),
-                                                end = list.end();
-       iter != end; ++iter) {
-    if (!used_keywords.insert(*iter).second) {
-      this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + *iter);
+  for (std::string const& iter : list) {
+    if (!used_keywords.insert(iter).second) {
+      this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + iter);
     }
-    multi[*iter]; // default initialize
+    multi[iter]; // default initialize
   }
 
   enum insideValues
@@ -160,46 +153,45 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // iterate over the arguments list and fill in the values where applicable
-  for (argIter = list.begin(), argEnd = list.end(); argIter != argEnd;
-       ++argIter) {
-    const options_map::iterator optIter = options.find(*argIter);
+  for (std::string const& arg : list) {
+    const options_map::iterator optIter = options.find(arg);
     if (optIter != options.end()) {
       insideValues = NONE;
       optIter->second = true;
       continue;
     }
 
-    const single_map::iterator singleIter = single.find(*argIter);
+    const single_map::iterator singleIter = single.find(arg);
     if (singleIter != single.end()) {
       insideValues = SINGLE;
-      currentArgName = *argIter;
+      currentArgName = arg;
       continue;
     }
 
-    const multi_map::iterator multiIter = multi.find(*argIter);
+    const multi_map::iterator multiIter = multi.find(arg);
     if (multiIter != multi.end()) {
       insideValues = MULTI;
-      currentArgName = *argIter;
+      currentArgName = arg;
       continue;
     }
 
     switch (insideValues) {
       case SINGLE:
-        single[currentArgName] = *argIter;
+        single[currentArgName] = arg;
         insideValues = NONE;
         break;
       case MULTI:
         if (parseFromArgV) {
-          multi[currentArgName].push_back(escape_arg(*argIter));
+          multi[currentArgName].push_back(escape_arg(arg));
         } else {
-          multi[currentArgName].push_back(*argIter);
+          multi[currentArgName].push_back(arg);
         }
         break;
       default:
         if (parseFromArgV) {
-          unparsed.push_back(escape_arg(*argIter));
+          unparsed.push_back(escape_arg(arg));
         } else {
-          unparsed.push_back(*argIter);
+          unparsed.push_back(arg);
         }
         break;
     }
@@ -208,28 +200,24 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
   // now iterate over the collected values and update their definition
   // within the current scope. undefine if necessary.
 
-  for (options_map::const_iterator iter = options.begin(), end = options.end();
-       iter != end; ++iter) {
-    this->Makefile->AddDefinition(prefix + iter->first,
-                                  iter->second ? "TRUE" : "FALSE");
+  for (auto const& iter : options) {
+    this->Makefile->AddDefinition(prefix + iter.first,
+                                  iter.second ? "TRUE" : "FALSE");
   }
-  for (single_map::const_iterator iter = single.begin(), end = single.end();
-       iter != end; ++iter) {
-    if (!iter->second.empty()) {
-      this->Makefile->AddDefinition(prefix + iter->first,
-                                    iter->second.c_str());
+  for (auto const& iter : single) {
+    if (!iter.second.empty()) {
+      this->Makefile->AddDefinition(prefix + iter.first, iter.second.c_str());
     } else {
-      this->Makefile->RemoveDefinition(prefix + iter->first);
+      this->Makefile->RemoveDefinition(prefix + iter.first);
     }
   }
 
-  for (multi_map::const_iterator iter = multi.begin(), end = multi.end();
-       iter != end; ++iter) {
-    if (!iter->second.empty()) {
+  for (auto const& iter : multi) {
+    if (!iter.second.empty()) {
       this->Makefile->AddDefinition(
-        prefix + iter->first, cmJoin(cmMakeRange(iter->second), ";").c_str());
+        prefix + iter.first, cmJoin(cmMakeRange(iter.second), ";").c_str());
     } else {
-      this->Makefile->RemoveDefinition(prefix + iter->first);
+      this->Makefile->RemoveDefinition(prefix + iter.first);
     }
   }
 

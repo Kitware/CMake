@@ -14,7 +14,7 @@
 cmCTestMemCheckCommand::cmCTestMemCheckCommand()
 {
   this->Arguments[ctm_DEFECT_COUNT] = "DEFECT_COUNT";
-  this->Arguments[ctm_LAST] = CM_NULLPTR;
+  this->Arguments[ctm_LAST] = nullptr;
   this->Last = ctm_LAST;
 }
 

@@ -23,7 +23,7 @@ public:
   }
 
 protected:
-  bool filterAcceptsRow(int row, const QModelIndex& p) const CM_OVERRIDE
+  bool filterAcceptsRow(int row, const QModelIndex& p) const override
   {
     QStringList strs;
     const QAbstractItemModel* m = this->sourceModel();
@@ -77,7 +77,7 @@ public:
 protected:
   bool ShowAdvanced;
 
-  bool filterAcceptsRow(int row, const QModelIndex& p) const CM_OVERRIDE
+  bool filterAcceptsRow(int row, const QModelIndex& p) const override
   {
     const QAbstractItemModel* m = this->sourceModel();
     QModelIndex idx = m->index(row, 0, p);
@@ -539,7 +539,7 @@ QWidget* QCMakeCacheModelDelegate::createEditor(
   QModelIndex var = idx.sibling(idx.row(), 0);
   int type = var.data(QCMakeCacheModel::TypeRole).toInt();
   if (type == QCMakeProperty::BOOL) {
-    return CM_NULLPTR;
+    return nullptr;
   }
   if (type == QCMakeProperty::PATH) {
     QCMakePathEditor* editor =
@@ -642,7 +642,7 @@ QSize QCMakeCacheModelDelegate::sizeHint(const QStyleOptionViewItem& option,
   QStyleOptionButton opt;
   opt.QStyleOption::operator=(option);
   sz = sz.expandedTo(
-    style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, CM_NULLPTR)
+    style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, nullptr)
       .size());
 
   return sz;

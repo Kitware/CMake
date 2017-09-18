@@ -71,7 +71,7 @@
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # See :module:`GoogleTest` for information on the :command:`gtest_add_tests`
-# command.
+# and :command:`gtest_discover_tests` commands.
 
 include(${CMAKE_CURRENT_LIST_DIR}/GoogleTest.cmake)
 

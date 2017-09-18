@@ -30,9 +30,23 @@ a false constant by the :command:`if` command.  The "..." content on the
 line after the variable name, if any, is processed as above.
 Input file lines of the form ``#cmakedefine01 VAR`` will be replaced with
 either ``#define VAR 1`` or ``#define VAR 0`` similarly.
+The result lines (with the exception of the ``#undef`` comments) can be
+indented using spaces and/or tabs between the ``#`` character
+and the ``cmakedefine`` or ``cmakedefine01`` words. This whitespace
+indentation will be preserved in the output lines::
+
+  #  cmakedefine VAR
+  #  cmakedefine01 VAR
+
+will be replaced, if ``VAR`` is defined, with::
+
+  #  define VAR
+  #  define VAR 1
 
 If the input file is modified the build system will re-run CMake to
 re-configure the file and generate the build system again.
+The generated file is modified and its timestamp updated on subsequent
+cmake runs only if its content is changed.
 
 The arguments are:
 

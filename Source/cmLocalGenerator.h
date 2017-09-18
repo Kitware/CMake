@@ -3,13 +3,14 @@
 #ifndef cmLocalGenerator_h
 #define cmLocalGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cm_kwiml.h"
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "cmListFileCache.h"
@@ -282,8 +283,8 @@ public:
   // Compute object file names.
   std::string GetObjectFileNameWithoutTarget(
     const cmSourceFile& source, std::string const& dir_max,
-    bool* hasSourceExtension = CM_NULLPTR,
-    char const* customOutputExtension = CM_NULLPTR);
+    bool* hasSourceExtension = nullptr,
+    char const* customOutputExtension = nullptr);
 
   /** Fill out the static linker flags for the given target.  */
   void GetStaticLibraryFlags(std::string& flags, std::string const& config,
@@ -311,7 +312,7 @@ public:
 
   virtual void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* gt = CM_NULLPTR);
+    cmGeneratorTarget const* gt = nullptr);
 
   bool IsWindowsShell() const;
   bool IsWatcomWMake() const;
@@ -353,8 +354,12 @@ protected:
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;
 
-  std::set<cmGeneratorTarget const*> WarnCMP0063;
+  typedef std::unordered_map<std::string, cmGeneratorTarget*>
+    GeneratorTargetMap;
+  GeneratorTargetMap GeneratorTargetSearchIndex;
   std::vector<cmGeneratorTarget*> GeneratorTargets;
+
+  std::set<cmGeneratorTarget const*> WarnCMP0063;
   std::vector<cmGeneratorTarget*> ImportedGeneratorTargets;
   std::vector<cmGeneratorTarget*> OwnedImportedGeneratorTargets;
   std::map<std::string, std::string> AliasTargets;

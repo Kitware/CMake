@@ -38,11 +38,10 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
   cmSystemTools::MakeDirectory(destDir);
-  for (std::vector<std::string>::iterator i = files.begin(); i != files.end();
-       ++i) {
+  for (std::string const& f : files) {
     std::string path = inputDir;
     path += "/";
-    path += *i;
+    path += f;
     this->CopyAndFullPathMesaHeader(path.c_str(), destDir);
   }
 

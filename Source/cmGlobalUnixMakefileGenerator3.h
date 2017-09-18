@@ -3,7 +3,7 @@
 #ifndef cmGlobalUnixMakefileGenerator3_h
 #define cmGlobalUnixMakefileGenerator3_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <map>
@@ -68,7 +68,7 @@ public:
   }
 
   ///! Get the name for the generator.
-  std::string GetName() const CM_OVERRIDE
+  std::string GetName() const override
   {
     return cmGlobalUnixMakefileGenerator3::GetActualName();
   }
@@ -89,23 +89,23 @@ public:
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) CM_OVERRIDE;
+  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
   /**
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
   void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
-                      bool optional) CM_OVERRIDE;
+                      bool optional) override;
 
-  void Configure() CM_OVERRIDE;
+  void Configure() override;
 
   /**
    * Generate the all required files for building this project/tree. This
    * basically creates a series of LocalGenerators for each directory and
    * requests that they Generate.
    */
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
   void WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream,
                                        std::vector<cmLocalGenerator*>&);
@@ -134,7 +134,7 @@ public:
                             const std::string& targetName,
                             const std::string& config, bool fast, bool verbose,
                             std::vector<std::string> const& makeOptions =
-                              std::vector<std::string>()) CM_OVERRIDE;
+                              std::vector<std::string>()) override;
 
   /** Record per-target progress information.  */
   void RecordTargetProgress(cmMakefileTargetGenerator* tg);
@@ -149,9 +149,9 @@ public:
   /** Does the make tool tolerate .DELETE_ON_ERROR? */
   virtual bool AllowDeleteOnError() const { return true; }
 
-  bool IsIPOSupported() const CM_OVERRIDE { return true; }
+  bool IsIPOSupported() const override { return true; }
 
-  void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const CM_OVERRIDE;
+  void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
 
   std::string IncludeDirective;
   bool DefineWindowsNULL;
@@ -178,37 +178,31 @@ protected:
   bool NeedRequiresStep(cmGeneratorTarget const*);
 
   // Target name hooks for superclass.
-  const char* GetAllTargetName() const CM_OVERRIDE { return "all"; }
-  const char* GetInstallTargetName() const CM_OVERRIDE { return "install"; }
-  const char* GetInstallLocalTargetName() const CM_OVERRIDE
+  const char* GetAllTargetName() const override { return "all"; }
+  const char* GetInstallTargetName() const override { return "install"; }
+  const char* GetInstallLocalTargetName() const override
   {
     return "install/local";
   }
-  const char* GetInstallStripTargetName() const CM_OVERRIDE
+  const char* GetInstallStripTargetName() const override
   {
     return "install/strip";
   }
-  const char* GetPreinstallTargetName() const CM_OVERRIDE
-  {
-    return "preinstall";
-  }
-  const char* GetTestTargetName() const CM_OVERRIDE { return "test"; }
-  const char* GetPackageTargetName() const CM_OVERRIDE { return "package"; }
-  const char* GetPackageSourceTargetName() const CM_OVERRIDE
+  const char* GetPreinstallTargetName() const override { return "preinstall"; }
+  const char* GetTestTargetName() const override { return "test"; }
+  const char* GetPackageTargetName() const override { return "package"; }
+  const char* GetPackageSourceTargetName() const override
   {
     return "package_source";
   }
-  const char* GetEditCacheTargetName() const CM_OVERRIDE
-  {
-    return "edit_cache";
-  }
-  const char* GetRebuildCacheTargetName() const CM_OVERRIDE
+  const char* GetEditCacheTargetName() const override { return "edit_cache"; }
+  const char* GetRebuildCacheTargetName() const override
   {
     return "rebuild_cache";
   }
-  const char* GetCleanTargetName() const CM_OVERRIDE { return "clean"; }
+  const char* GetCleanTargetName() const override { return "clean"; }
 
-  bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const CM_OVERRIDE { return true; }
+  bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const override { return true; }
 
   // Some make programs (Borland) do not keep a rule if there are no
   // dependencies or commands.  This is a problem for creating rules
@@ -247,13 +241,13 @@ protected:
   cmGeneratedFileStream* CommandDatabase;
 
 private:
-  const char* GetBuildIgnoreErrorsFlag() const CM_OVERRIDE { return "-i"; }
-  std::string GetEditCacheCommand() const CM_OVERRIDE;
+  const char* GetBuildIgnoreErrorsFlag() const override { return "-i"; }
+  std::string GetEditCacheCommand() const override;
 
   std::map<cmStateSnapshot, std::set<cmGeneratorTarget const*>,
            cmStateSnapshot::StrictWeakOrder>
     DirectoryTargetsMap;
-  void InitializeProgressMarks() CM_OVERRIDE;
+  void InitializeProgressMarks() override;
 };
 
 #endif

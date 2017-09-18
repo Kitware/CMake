@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTestGenerator.h"
 
-#include <map>
 #include <ostream>
 #include <utility>
 
@@ -23,7 +22,7 @@ cmTestGenerator::cmTestGenerator(
 {
   this->ActionsPerConfig = !test->GetOldStyle();
   this->TestGenerated = false;
-  this->LG = CM_NULLPTR;
+  this->LG = nullptr;
 }
 
 cmTestGenerator::~cmTestGenerator()
@@ -80,7 +79,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
     // Prepend with the emulator when cross compiling if required.
     const char* emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
-    if (emulator != CM_NULLPTR) {
+    if (emulator != nullptr) {
       std::vector<std::string> emulatorWithArgs;
       cmSystemTools::ExpandListArgument(emulator, emulatorWithArgs);
       std::string emulatorExe(emulatorWithArgs[0]);
@@ -114,10 +113,10 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   if (!pm.empty()) {
     os << indent << "set_tests_properties(" << this->Test->GetName()
        << " PROPERTIES ";
-    for (cmPropertyMap::const_iterator i = pm.begin(); i != pm.end(); ++i) {
-      os << " " << i->first << " "
+    for (auto const& i : pm) {
+      os << " " << i.first << " "
          << cmOutputConverter::EscapeForCMake(
-              ge.Parse(i->second.GetValue())->Evaluate(this->LG, config));
+              ge.Parse(i.second.GetValue())->Evaluate(this->LG, config));
     }
     os << ")" << std::endl;
   }
@@ -154,15 +153,14 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
     // Just double-quote all arguments so they are re-parsed
     // correctly by the test system.
     fout << " \"";
-    for (std::string::const_iterator c = argit->begin(); c != argit->end();
-         ++c) {
+    for (char c : *argit) {
       // Escape quotes within arguments.  We should escape
       // backslashes too but we cannot because it makes the result
       // inconsistent with previous behavior of this command.
-      if ((*c == '"')) {
+      if (c == '"') {
         fout << '\\';
       }
-      fout << *c;
+      fout << c;
     }
     fout << "\"";
   }
@@ -173,9 +171,9 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
   if (!pm.empty()) {
     fout << indent << "set_tests_properties(" << this->Test->GetName()
          << " PROPERTIES ";
-    for (cmPropertyMap::const_iterator i = pm.begin(); i != pm.end(); ++i) {
-      fout << " " << i->first << " "
-           << cmOutputConverter::EscapeForCMake(i->second.GetValue());
+    for (auto const& i : pm) {
+      fout << " " << i.first << " "
+           << cmOutputConverter::EscapeForCMake(i.second.GetValue());
     }
     fout << ")" << std::endl;
   }

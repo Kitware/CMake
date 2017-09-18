@@ -5,7 +5,6 @@
 
 #include <set>
 #include <sstream>
-#include <vector>
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
@@ -32,14 +31,13 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
   typedef cmComputeLinkInformation::ItemVector ItemVector;
   ItemVector const& items = cli.GetItems();
   std::string config = cli.GetConfig();
-  for (ItemVector::const_iterator li = items.begin(); li != items.end();
-       ++li) {
-    if (!li->Target) {
+  for (auto const& item : items) {
+    if (!item.Target) {
       continue;
     }
 
     bool skippable = false;
-    switch (li->Target->GetType()) {
+    switch (item.Target->GetType()) {
       case cmStateEnums::SHARED_LIBRARY:
       case cmStateEnums::MODULE_LIBRARY:
       case cmStateEnums::INTERFACE_LIBRARY:
@@ -49,7 +47,7 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
         // If a static library is resolving its device linking, it should
         // be removed for other device linking
         skippable =
-          li->Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
+          item.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
         break;
       default:
         break;
@@ -60,16 +58,16 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
     }
 
     std::set<std::string> langs;
-    li->Target->GetLanguages(langs, config);
+    item.Target->GetLanguages(langs, config);
     if (langs.count("CUDA") == 0) {
       continue;
     }
 
-    if (li->IsPath) {
+    if (item.IsPath) {
       fout << this->ConvertToOutputFormat(
-        this->ConvertToLinkReference(li->Value));
+        this->ConvertToLinkReference(item.Value));
     } else {
-      fout << li->Value;
+      fout << item.Value;
     }
     fout << " ";
   }

@@ -334,7 +334,7 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(
 // output the SLN file
 void cmGlobalVisualStudio7Generator::OutputSLNFile()
 {
-  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*>>::iterator it;
   for (it = this->ProjectMap.begin(); it != this->ProjectMap.end(); ++it) {
     this->OutputSLNFile(it->second[0], it->second);
   }
@@ -467,7 +467,7 @@ void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
   const char* prefix = "CMAKE_FOLDER_GUID_";
   const std::string::size_type skip_prefix = strlen(prefix);
   std::string guidProjectTypeFolder = "2150E333-8FDC-42A3-9474-1A3956D46DE8";
-  for (std::map<std::string, std::set<std::string> >::iterator iter =
+  for (std::map<std::string, std::set<std::string>>::iterator iter =
          VisualStudioFolders.begin();
        iter != VisualStudioFolders.end(); ++iter) {
     std::string fullName = iter->first;
@@ -487,7 +487,7 @@ void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
 
 void cmGlobalVisualStudio7Generator::WriteFoldersContent(std::ostream& fout)
 {
-  for (std::map<std::string, std::set<std::string> >::iterator iter =
+  for (std::map<std::string, std::set<std::string>>::iterator iter =
          VisualStudioFolders.begin();
        iter != VisualStudioFolders.end(); ++iter) {
     std::string key(iter->first);

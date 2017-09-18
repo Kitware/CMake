@@ -3,7 +3,7 @@
 #ifndef cmCPackRPMGenerator_h
 #define cmCPackRPMGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCPackGenerator.h"
 
@@ -26,7 +26,7 @@ public:
    * Construct generator
    */
   cmCPackRPMGenerator();
-  ~cmCPackRPMGenerator() CM_OVERRIDE;
+  ~cmCPackRPMGenerator() override;
 
   static bool CanGenerate()
   {
@@ -43,8 +43,8 @@ public:
   }
 
 protected:
-  int InitializeInternal() CM_OVERRIDE;
-  int PackageFiles() CM_OVERRIDE;
+  int InitializeInternal() override;
+  int PackageFiles() override;
   /**
    * This method factors out the work done in component packaging case.
    */
@@ -61,10 +61,10 @@ protected:
    * components will be put in a single installer.
    */
   int PackageComponentsAllInOne(const std::string& compInstDirName);
-  const char* GetOutputExtension() CM_OVERRIDE { return ".rpm"; }
-  bool SupportsComponentInstallation() const CM_OVERRIDE;
+  const char* GetOutputExtension() override { return ".rpm"; }
+  bool SupportsComponentInstallation() const override;
   std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName) CM_OVERRIDE;
+    const std::string& componentName) override;
 
   void AddGeneratedPackageNames();
 };

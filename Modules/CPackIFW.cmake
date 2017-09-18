@@ -221,6 +221,19 @@
 #  You can use :command:`cpack_ifw_add_package_resources` command to resolve
 #  relative paths.
 #
+# .. variable:: CPACK_IFW_PACKAGE_FILE_EXTENSION
+#
+#  The target binary extension.
+#
+#  On Linux, the name of the target binary is automatically extended with
+#  '.run', if you do not specify the extension.
+#
+#  On Windows, the target is created as an application with the extension
+#  '.exe', which is automatically added, if not supplied.
+#
+#  On Mac, the target is created as an DMG disk image with the extension
+#  '.dmg', which is automatically added, if not supplied.
+#
 # .. variable:: CPACK_IFW_REPOSITORIES_ALL
 #
 #  The list of remote repositories.
@@ -246,6 +259,12 @@
 #
 #  Additional prepared packages dirs that will be used to resolve
 #  dependent components.
+#
+# .. variable:: CPACK_IFW_REPOSITORIES_DIRECTORIES
+#
+#  Additional prepared repository dirs that will be used to resolve and
+#  repack dependent components. This feature available only
+#  since QtIFW_ 3.1.
 #
 # Tools
 # """""

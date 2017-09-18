@@ -34,11 +34,8 @@ void cmExportInstallAndroidMKGenerator::GenerateImportHeaderCode(
   }
   os << "_IMPORT_PREFIX := "
      << "$(LOCAL_PATH)" << path << "\n\n";
-  for (std::vector<cmTargetExport*>::const_iterator tei =
-         this->IEGen->GetExportSet()->GetTargetExports()->begin();
-       tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei) {
+  for (cmTargetExport* te : *this->IEGen->GetExportSet()->GetTargetExports()) {
     // Collect import properties for this target.
-    cmTargetExport const* te = *tei;
     if (te->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }

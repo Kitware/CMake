@@ -56,6 +56,22 @@ int cmCPackIFWGenerator::PackageFiles()
       }
     }
 
+    if (!this->RepoDirsVector.empty()) {
+      if (!this->IsVersionLess("3.1")) {
+        for (std::vector<std::string>::iterator it =
+               this->RepoDirsVector.begin();
+             it != this->RepoDirsVector.end(); ++it) {
+          ifwCmd += " --repository " + *it;
+        }
+      } else {
+        cmCPackIFWLogger(WARNING, "The \"CPACK_IFW_REPOSITORIES_DIRECTORIES\" "
+                           << "variable is set, but content will be skiped, "
+                           << "because this feature available only since "
+                           << "QtIFW 3.1. Please update your QtIFW instance."
+                           << std::endl);
+      }
+    }
+
     if (!this->OnlineOnly && !this->DownloadedPackages.empty()) {
       ifwCmd += " -i ";
       std::set<cmCPackIFWPackage*>::iterator it =
@@ -73,7 +89,7 @@ int cmCPackIFWGenerator::PackageFiles()
     int retVal = 1;
     cmCPackIFWLogger(OUTPUT, "- Generate repository" << std::endl);
     bool res = cmSystemTools::RunSingleCommand(ifwCmd.c_str(), &output,
-                                               &output, &retVal, CM_NULLPTR,
+                                               &output, &retVal, nullptr,
                                                this->GeneratorVerbose, 0);
     if (!res || retVal) {
       cmGeneratedFileStream ofs(ifwTmpFile.c_str());
@@ -128,6 +144,22 @@ int cmCPackIFWGenerator::PackageFiles()
       }
     }
 
+    if (!this->RepoDirsVector.empty()) {
+      if (!this->IsVersionLess("3.1")) {
+        for (std::vector<std::string>::iterator it =
+               this->RepoDirsVector.begin();
+             it != this->RepoDirsVector.end(); ++it) {
+          ifwCmd += " --repository " + *it;
+        }
+      } else {
+        cmCPackIFWLogger(WARNING, "The \"CPACK_IFW_REPOSITORIES_DIRECTORIES\" "
+                           << "variable is set, but content will be skipped, "
+                           << "because this feature available only since "
+                           << "QtIFW 3.1. Please update your QtIFW instance."
+                           << std::endl);
+      }
+    }
+
     if (this->OnlineOnly) {
       ifwCmd += " --online-only";
     } else if (!this->DownloadedPackages.empty() &&
@@ -164,13 +196,14 @@ int cmCPackIFWGenerator::PackageFiles()
       ifwCmd += " " + this->packageFileNames[0];
     } else {
       ifwCmd += " installer";
+      ifwCmd += this->OutputExtension;
     }
     cmCPackIFWLogger(VERBOSE, "Execute: " << ifwCmd << std::endl);
     std::string output;
     int retVal = 1;
     cmCPackIFWLogger(OUTPUT, "- Generate package" << std::endl);
     bool res = cmSystemTools::RunSingleCommand(ifwCmd.c_str(), &output,
-                                               &output, &retVal, CM_NULLPTR,
+                                               &output, &retVal, nullptr,
                                                this->GeneratorVerbose, 0);
     if (!res || retVal) {
       cmGeneratedFileStream ofs(ifwTmpFile.c_str());
@@ -205,7 +238,7 @@ const char* cmCPackIFWGenerator::GetPackagingInstallPrefix()
 
 const char* cmCPackIFWGenerator::GetOutputExtension()
 {
-  return this->ExecutableSuffix.c_str();
+  return this->OutputExtension.c_str();
 }
 
 int cmCPackIFWGenerator::InitializeInternal()
@@ -265,6 +298,13 @@ int cmCPackIFWGenerator::InitializeInternal()
     cmSystemTools::ExpandListArgument(dirs, this->PkgsDirsVector);
   }
 
+  // Additional repositories dirs
+  this->RepoDirsVector.clear();
+  if (const char* dirs =
+        this->GetOption("CPACK_IFW_REPOSITORIES_DIRECTORIES")) {
+    cmSystemTools::ExpandListArgument(dirs, this->RepoDirsVector);
+  }
+
   // Installer
   this->Installer.Generator = this;
   this->Installer.ConfigureFromOptions();
@@ -305,16 +345,29 @@ int cmCPackIFWGenerator::InitializeInternal()
   }
 
   // Executable suffix
-  if (const char* optExeSuffix = this->GetOption("CMAKE_EXECUTABLE_SUFFIX")) {
-    this->ExecutableSuffix = optExeSuffix;
-    if (this->ExecutableSuffix.empty()) {
-      std::string sysName(this->GetOption("CMAKE_SYSTEM_NAME"));
-      if (sysName == "Linux") {
-        this->ExecutableSuffix = ".run";
-      }
-    }
+  std::string exeSuffix(this->GetOption("CMAKE_EXECUTABLE_SUFFIX"));
+  std::string sysName(this->GetOption("CMAKE_SYSTEM_NAME"));
+  if (sysName == "Linux") {
+    this->ExecutableSuffix = ".run";
+  } else if (sysName == "Windows") {
+    this->ExecutableSuffix = ".exe";
+  } else if (sysName == "Darwin") {
+    this->ExecutableSuffix = ".app";
   } else {
-    this->ExecutableSuffix = this->cmCPackGenerator::GetOutputExtension();
+    this->ExecutableSuffix = exeSuffix;
+  }
+
+  // Output extension
+  if (const char* optOutExt =
+        this->GetOption("CPACK_IFW_PACKAGE_FILE_EXTENSION")) {
+    this->OutputExtension = optOutExt;
+  } else if (sysName == "Darwin") {
+    this->OutputExtension = ".dmg";
+  } else {
+    this->OutputExtension = this->ExecutableSuffix;
+  }
+  if (this->OutputExtension.empty()) {
+    this->OutputExtension = this->cmCPackGenerator::GetOutputExtension();
   }
 
   return this->Superclass::InitializeInternal();
@@ -520,7 +573,7 @@ cmCPackIFWPackage* cmCPackIFWGenerator::GetGroupPackage(
 {
   std::map<cmCPackComponentGroup*, cmCPackIFWPackage*>::const_iterator pit =
     this->GroupPackages.find(group);
-  return pit != this->GroupPackages.end() ? pit->second : CM_NULLPTR;
+  return pit != this->GroupPackages.end() ? pit->second : nullptr;
 }
 
 cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
@@ -528,7 +581,7 @@ cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
 {
   std::map<cmCPackComponent*, cmCPackIFWPackage*>::const_iterator pit =
     this->ComponentPackages.find(component);
-  return pit != this->ComponentPackages.end() ? pit->second : CM_NULLPTR;
+  return pit != this->ComponentPackages.end() ? pit->second : nullptr;
 }
 
 cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
@@ -550,7 +603,7 @@ cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
     }
   } else {
     this->Repositories.erase(repositoryName);
-    repository = CM_NULLPTR;
+    repository = nullptr;
     cmCPackIFWLogger(WARNING, "Invalid repository \""
                        << repositoryName << "\""
                        << " configuration. Repository will be skipped."

@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExprParserHelper.h"
 
-#include "cmConfigure.h"
-
 #include "cmExprLexer.h"
 
 #include <iostream>
@@ -14,7 +12,7 @@ int cmExpr_yyparse(yyscan_t yyscanner);
 cmExprParserHelper::cmExprParserHelper()
 {
   this->FileLine = -1;
-  this->FileName = CM_NULLPTR;
+  this->FileName = nullptr;
 }
 
 cmExprParserHelper::~cmExprParserHelper()

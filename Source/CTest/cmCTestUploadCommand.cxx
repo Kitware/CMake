@@ -18,7 +18,7 @@ cmCTestGenericHandler* cmCTestUploadCommand::InitializeHandler()
     this->CTest->GetInitializedHandler("upload");
   if (!handler) {
     this->SetError("internal CTest error. Cannot instantiate upload handler");
-    return CM_NULLPTR;
+    return nullptr;
   }
   static_cast<cmCTestUploadHandler*>(handler)->SetFiles(this->Files);
 

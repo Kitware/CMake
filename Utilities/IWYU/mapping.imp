@@ -21,6 +21,7 @@
   { include: [ "<wctype.h>", public, "<cwctype>", public ] },
 
   # HACK: check whether this can be removed with next iwyu release.
+  { include: [ "<bits/shared_ptr.h>", private, "<memory>", public ] },
   { include: [ "<bits/std_function.h>", private, "<functional>", public ] },
   { include: [ "<bits/time.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/clock_t.h>", private, "<time.h>", public ] },
@@ -67,18 +68,6 @@
   { symbol: [ "std::__decay_and_strip<cmFindPackageCommand::PathLabel &>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<__gnu_cxx::__normal_iterator<const cmCTestTestHandler::cmCTestTestProperties *, std::vector<cmCTestTestHandler::cmCTestTestProperties, std::allocator<cmCTestTestHandler::cmCTestTestProperties> > > &>::__type", private, "\"cmConfigure.h\"", public ] },
 
-  # Wrappers for headers added in TR1 / C++11
-  # { include: [ "<array>", public, "\"cm_array.hxx\"", public ] },
-  # { include: [ "<functional>", public, "\"cm_functional.hxx\"", public ] },
-  # { include: [ "<memory>", public, "\"cm_memory.hxx\"", public ] },
-  { include: [ "<unordered_map>", public, "\"cm_unordered_map.hxx\"", public ] },
-  { include: [ "<unordered_set>", public, "\"cm_unordered_set.hxx\"", public ] },
-  # { include: [ "<tr1/array>", public, "\"cm_array.hxx\"", public ] },
-  # { include: [ "<tr1/functional>", public, "\"cm_functional.hxx\"", public ] },
-  # { include: [ "<tr1/memory>", public, "\"cm_memory.hxx\"", public ] },
-  { include: [ "<tr1/unordered_map>", public, "\"cm_unordered_map.hxx\"", public ] },
-  { include: [ "<tr1/unordered_set>", public, "\"cm_unordered_set.hxx\"", public ] },
-
   # KWIML
   { include: [ "<stdint.h>", public, "\"cm_kwiml.h\"", public ] },
   { include: [ "<inttypes.h>", public, "\"cm_kwiml.h\"", public ] },
@@ -86,14 +75,6 @@
   # Self-sufficient wrapper for <sys/stat.h>
   { include: [ "<sys/stat.h>", public, "\"cm_sys_stat.h\"", public ] },
   { symbol: [ "mode_t", private, "\"cm_sys_stat.h\"", public ] },
-
-  # TODO: remove once TR1 / C++11 is required.
-  { include: [ "\"cmsys/hash_fun.hxx\"", private, "\"cm_unordered_map.hxx\"", public ] },
-  { include: [ "\"cmsys/hash_fun.hxx\"", private, "\"cm_unordered_set.hxx\"", public ] },
-  { include: [ "\"cmsys/hash_map.hxx\"", private, "\"cm_unordered_map.hxx\"", public ] },
-  { include: [ "\"cmsys/hash_set.hxx\"", private, "\"cm_unordered_set.hxx\"", public ] },
-  { include: [ "\"cmsys/hashtable.hxx\"", private, "\"cm_unordered_map.hxx\"", public ] },
-  { include: [ "\"cmsys/hashtable.hxx\"", private, "\"cm_unordered_set.hxx\"", public ] },
 
   # Wrappers for 3rd-party libraries used from the system.
   { include: [ "<archive.h>", private, "\"cm_libarchive.h\"", public ] },

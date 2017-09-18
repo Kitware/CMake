@@ -3,7 +3,7 @@
 #ifndef cmCTestStartCommand_h
 #define cmCTestStartCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestCommand.h"
 
@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmCTestStartCommand* ni = new cmCTestStartCommand;
     ni->CTest = this->CTest;
@@ -42,7 +42,7 @@ public:
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
   /**
    * Will this invocation of ctest_start create a new TAG file?

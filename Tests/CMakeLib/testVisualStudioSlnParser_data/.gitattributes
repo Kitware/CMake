@@ -1,1 +1,1 @@
-*.sln-file      -crlf  whitespace=cr-at-eol
+*.sln-file      eol=crlf

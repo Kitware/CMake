@@ -3,7 +3,7 @@
 #ifndef cmCPackPropertiesGenerator_h
 #define cmCPackPropertiesGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmScriptGenerator.h"
 
@@ -29,7 +29,7 @@ public:
 
 protected:
   void GenerateScriptForConfig(std::ostream& os, const std::string& config,
-                               Indent indent) CM_OVERRIDE;
+                               Indent indent) override;
 
   cmLocalGenerator* LG;
   cmInstalledFile const& InstalledFile;

@@ -13,8 +13,11 @@ File manipulation command.
 Write ``<content>`` into a file called ``<filename>``.  If the file does
 not exist, it will be created.  If the file already exists, ``WRITE``
 mode will overwrite it and ``APPEND`` mode will append to the end.
-(If the file is a build input, use the :command:`configure_file` command
-to update the file only when its content changes.)
+Any directories in the path specified by ``<filename>`` that do not
+exist will be created.
+
+If the file is a build input, use the :command:`configure_file` command
+to update the file only when its content changes.
 
 ------------------------------------------------------------------------------
 
@@ -105,9 +108,7 @@ Generate a list of files that match the ``<globbing-expressions>`` and
 store it into the ``<variable>``.  Globbing expressions are similar to
 regular expressions, but much simpler.  If ``RELATIVE`` flag is
 specified, the results will be returned as relative paths to the given
-path.  No specific order of results is defined other than that it is
-deterministic.  If order is important then sort the list explicitly
-(e.g. using the :command:`list(SORT)` command).
+path.  The results will be ordered lexicographically.
 
 By default ``GLOB`` lists directories - directories are omited in result if
 ``LIST_DIRECTORIES`` is set to false.
@@ -306,8 +307,8 @@ from the input content to produce the output content.  The options are:
 
 Exactly one ``CONTENT`` or ``INPUT`` option must be given.  A specific
 ``OUTPUT`` file may be named by at most one invocation of ``file(GENERATE)``.
-Generated files are modified on subsequent cmake runs only if their content
-is changed.
+Generated files are modified and their timestamp updated on subsequent cmake
+runs only if their content is changed.
 
 Note also that ``file(GENERATE)`` does not create the output file until the
 generation phase. The output file will not yet have been written when the

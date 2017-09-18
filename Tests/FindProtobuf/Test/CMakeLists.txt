@@ -30,3 +30,5 @@ add_executable(test_var_protoc main-protoc.cxx)
 target_include_directories(test_var_protoc PRIVATE ${Protobuf_INCLUDE_DIRS})
 target_link_libraries(test_var_protoc PRIVATE ${Protobuf_PROTOC_LIBRARIES})
 add_test(NAME test_var_protoc COMMAND test_var_protoc)
+
+add_test(NAME test_tgt_protoc_version COMMAND protobuf::protoc --version)

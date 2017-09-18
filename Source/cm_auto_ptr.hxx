@@ -112,7 +112,7 @@ public:
    *
    *   auto_ptr<X> ptr(new X());
    */
-  explicit auto_ptr(X* p = CM_NULLPTR) throw()
+  explicit auto_ptr(X* p = nullptr) throw()
     : x_(p)
   {
   }
@@ -154,7 +154,7 @@ public:
   X* release() throw()
   {
     X* x = this->x_;
-    this->x_ = CM_NULLPTR;
+    this->x_ = nullptr;
     return x;
   }
 

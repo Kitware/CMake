@@ -1,23 +1,34 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# CMakeFindDependencyMacro
-# -------------------------
-#
-# ::
-#
-#     find_dependency(<dep> [...])
-#
-#
-# ``find_dependency()`` wraps a :command:`find_package` call for a package
-# dependency. It is designed to be used in a <package>Config.cmake file, and it
-# forwards the correct parameters for QUIET and REQUIRED which were passed to
-# the original :command:`find_package` call.  It also sets an informative
-# diagnostic message if the dependency could not be found.
-#
-# Any additional arguments specified are forwarded to :command:`find_package`.
-#
+#[=======================================================================[.rst:
+CMakeFindDependencyMacro
+-------------------------
+
+.. command:: find_dependency
+
+  The ``find_dependency()`` macro wraps a :command:`find_package` call for
+  a package dependency::
+
+    find_dependency(<dep> [...])
+
+  It is designed to be used in a
+  :ref:`Package Configuration File <Config File Packages>`
+  (``<package>Config.cmake``).  ``find_dependency`` forwards the correct
+  parameters for ``QUIET`` and ``REQUIRED`` which were passed to
+  the original :command:`find_package` call.  Any additional arguments
+  specified are forwarded to :command:`find_package`.
+
+  If the dependency could not be found it sets an informative diagnostic
+  message and calls :command:`return` to end processing of the calling
+  package configuration file and return to the :command:`find_package`
+  command that loaded it.
+
+  .. note::
+
+    The call to :command:`return` makes this macro unsuitable to call
+    from :ref:`Find Modules`.
+#]=======================================================================]
 
 macro(find_dependency dep)
   if (NOT ${dep}_FOUND)

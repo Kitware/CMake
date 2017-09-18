@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTimestamp.h"
 
-#include "cmConfigure.h"
 #include <cstring>
 #include <sstream>
 #include <stdlib.h>
@@ -12,7 +11,7 @@
 std::string cmTimestamp::CurrentTime(const std::string& formatString,
                                      bool utcFlag)
 {
-  time_t currentTimeT = time(CM_NULLPTR);
+  time_t currentTimeT = time(nullptr);
   std::string source_date_epoch;
   cmSystemTools::GetEnv("SOURCE_DATE_EPOCH", source_date_epoch);
   if (!source_date_epoch.empty()) {
@@ -56,14 +55,14 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
   struct tm timeStruct;
   memset(&timeStruct, 0, sizeof(timeStruct));
 
-  struct tm* ptr = (struct tm*)CM_NULLPTR;
+  struct tm* ptr = nullptr;
   if (utcFlag) {
     ptr = gmtime(&timeT);
   } else {
     ptr = localtime(&timeT);
   }
 
-  if (ptr == CM_NULLPTR) {
+  if (ptr == nullptr) {
     return std::string();
   }
 
@@ -124,7 +123,9 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
 
   switch (flag) {
     case 'a':
+    case 'A':
     case 'b':
+    case 'B':
     case 'd':
     case 'H':
     case 'I':

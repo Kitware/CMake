@@ -87,9 +87,8 @@ void cmFindLibraryCommand::AddArchitecturePaths(const char* suffix)
 {
   std::vector<std::string> original;
   original.swap(this->SearchPaths);
-  for (std::vector<std::string>::const_iterator i = original.begin();
-       i != original.end(); ++i) {
-    this->AddArchitecturePath(*i, 0, suffix);
+  for (std::string const& o : original) {
+    this->AddArchitecturePath(o, 0, suffix);
   }
 }
 
@@ -254,8 +253,7 @@ cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf)
 void cmFindLibraryHelper::RegexFromLiteral(std::string& out,
                                            std::string const& in)
 {
-  for (std::string::const_iterator ci = in.begin(); ci != in.end(); ++ci) {
-    char ch = *ci;
+  for (char ch : in) {
     if (ch == '[' || ch == ']' || ch == '(' || ch == ')' || ch == '\\' ||
         ch == '.' || ch == '*' || ch == '+' || ch == '?' || ch == '-' ||
         ch == '^' || ch == '$') {
@@ -276,23 +274,20 @@ void cmFindLibraryHelper::RegexFromList(std::string& out,
   // else and the result can be checked after matching.
   out += "(";
   const char* sep = "";
-  for (std::vector<std::string>::const_iterator si = in.begin();
-       si != in.end(); ++si) {
+  for (std::string const& s : in) {
     // Separate from previous item.
     out += sep;
     sep = "|";
 
     // Append this item.
-    this->RegexFromLiteral(out, *si);
+    this->RegexFromLiteral(out, s);
   }
   out += ")";
 }
 
 bool cmFindLibraryHelper::HasValidSuffix(std::string const& name)
 {
-  for (std::vector<std::string>::const_iterator si = this->Suffixes.begin();
-       si != this->Suffixes.end(); ++si) {
-    std::string suffix = *si;
+  for (std::string suffix : this->Suffixes) {
     if (name.length() <= suffix.length()) {
       continue;
     }
@@ -339,9 +334,8 @@ void cmFindLibraryHelper::SetName(std::string const& name)
 
 bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
 {
-  for (std::vector<Name>::iterator i = this->Names.begin();
-       i != this->Names.end(); ++i) {
-    if (this->CheckDirectoryForName(path, *i)) {
+  for (Name& i : this->Names) {
+    if (this->CheckDirectoryForName(path, i)) {
       return true;
     }
   }
@@ -376,9 +370,7 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
   std::string dir = path;
   cmSystemTools::ConvertToUnixSlashes(dir);
   std::set<std::string> const& files = this->GG->GetDirectoryContent(dir);
-  for (std::set<std::string>::const_iterator fi = files.begin();
-       fi != files.end(); ++fi) {
-    std::string const& origName = *fi;
+  for (std::string const& origName : files) {
 #if defined(_WIN32) || defined(__APPLE__)
     std::string testName = cmSystemTools::LowerCase(origName);
 #else
@@ -430,14 +422,12 @@ std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
 {
   // Search for all names in each directory.
   cmFindLibraryHelper helper(this->Makefile);
-  for (std::vector<std::string>::const_iterator ni = this->Names.begin();
-       ni != this->Names.end(); ++ni) {
-    helper.AddName(*ni);
+  for (std::string const& n : this->Names) {
+    helper.AddName(n);
   }
   // Search every directory.
-  for (std::vector<std::string>::const_iterator p = this->SearchPaths.begin();
-       p != this->SearchPaths.end(); ++p) {
-    if (helper.CheckDirectory(*p)) {
+  for (std::string const& sp : this->SearchPaths) {
+    if (helper.CheckDirectory(sp)) {
       return helper.BestPath;
     }
   }
@@ -449,16 +439,13 @@ std::string cmFindLibraryCommand::FindNormalLibraryDirsPerName()
 {
   // Search the entire path for each name.
   cmFindLibraryHelper helper(this->Makefile);
-  for (std::vector<std::string>::const_iterator ni = this->Names.begin();
-       ni != this->Names.end(); ++ni) {
+  for (std::string const& n : this->Names) {
     // Switch to searching for this name.
-    helper.SetName(*ni);
+    helper.SetName(n);
 
     // Search every directory.
-    for (std::vector<std::string>::const_iterator p =
-           this->SearchPaths.begin();
-         p != this->SearchPaths.end(); ++p) {
-      if (helper.CheckDirectory(*p)) {
+    for (std::string const& sp : this->SearchPaths) {
+      if (helper.CheckDirectory(sp)) {
         return helper.BestPath;
       }
     }
@@ -479,12 +466,10 @@ std::string cmFindLibraryCommand::FindFrameworkLibraryNamesPerDir()
 {
   std::string fwPath;
   // Search for all names in each search path.
-  for (std::vector<std::string>::const_iterator di = this->SearchPaths.begin();
-       di != this->SearchPaths.end(); ++di) {
-    for (std::vector<std::string>::const_iterator ni = this->Names.begin();
-         ni != this->Names.end(); ++ni) {
-      fwPath = *di;
-      fwPath += *ni;
+  for (std::string const& d : this->SearchPaths) {
+    for (std::string const& n : this->Names) {
+      fwPath = d;
+      fwPath += n;
       fwPath += ".framework";
       if (cmSystemTools::FileIsDirectory(fwPath)) {
         return cmSystemTools::CollapseFullPath(fwPath);
@@ -500,13 +485,10 @@ std::string cmFindLibraryCommand::FindFrameworkLibraryDirsPerName()
 {
   std::string fwPath;
   // Search for each name in all search paths.
-  for (std::vector<std::string>::const_iterator ni = this->Names.begin();
-       ni != this->Names.end(); ++ni) {
-    for (std::vector<std::string>::const_iterator di =
-           this->SearchPaths.begin();
-         di != this->SearchPaths.end(); ++di) {
-      fwPath = *di;
-      fwPath += *ni;
+  for (std::string const& n : this->Names) {
+    for (std::string const& d : this->SearchPaths) {
+      fwPath = d;
+      fwPath += n;
       fwPath += ".framework";
       if (cmSystemTools::FileIsDirectory(fwPath)) {
         return cmSystemTools::CollapseFullPath(fwPath);

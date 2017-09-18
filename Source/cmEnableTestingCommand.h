@@ -3,7 +3,7 @@
 #ifndef cmEnableTestingCommand_h
 #define cmEnableTestingCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -31,14 +31,14 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE { return new cmEnableTestingCommand; }
+  cmCommand* Clone() override { return new cmEnableTestingCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const&,
-                   cmExecutionStatus&) CM_OVERRIDE;
+                   cmExecutionStatus&) override;
 };
 
 #endif

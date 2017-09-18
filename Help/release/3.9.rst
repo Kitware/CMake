@@ -34,19 +34,11 @@ Generators
   This is an experimental feature and can be activated by setting the
   :variable:`CMAKE_XCODE_GENERATE_SCHEME` variable to a ``TRUE`` value.
 
-* The :generator:`Xcode` generator now supports Xcode 9.
-
 Commands
 --------
 
 * The :command:`add_library` command ``IMPORTED`` option learned to support
   :ref:`Object Libraries`.
-
-* All ``find_`` commands now have a ``PACKAGE_ROOT`` search path group that
-  is first in the search heuristics.  If a ``find_`` command is called from
-  inside a find module, then the CMake variable and environment variable named
-  ``<PackageName>_ROOT`` are used as prefixes and are the first set of paths
-  to be searched.
 
 * The :command:`find_library` command learned to search ``libx32`` paths
   when the build targets the ``x32`` ABI.  See the
@@ -316,9 +308,6 @@ Other Changes
   in dependent targets may now compile without waiting for their targets'
   dependencies to link.
 
-* On macOS, the default application bundle ``Info.plist`` file now enables
-  Hi-DPI support.
-
 * On macOS, ``RPATH`` settings such as :prop_tgt:`BUILD_WITH_INSTALL_RPATH`
   no longer affect the ``install_name`` field.  See policy :policy:`CMP0068`.
 
@@ -326,3 +315,28 @@ Other Changes
   a change to the ``v140`` toolset made by a VS 2015 update.  VS changed
   the set of values it understands for the ``GenerateDebugInformation``
   linker setting that produces the ``-DEBUG`` linker flag variants.
+
+Updates
+=======
+
+Changes made since CMake 3.9.0 include the following.
+
+3.9.1
+-----
+
+* The ``find_`` command ``PACKAGE_ROOT`` search path group added by
+  CMake 3.9.0 has been removed for the 3.9 series due to regressions
+  caused by new use of ``<PackageName>_ROOT`` variables.  The behavior
+  may be re-introduced in the future in a more-compatible way.
+
+3.9.2
+-----
+
+* On macOS, the default application bundle ``Info.plist`` file no longer
+  enables Hi-DPI support as it did in 3.9.0 and 3.9.1.  The change had
+  to be reverted because it broke iOS applications.
+
+* The Xcode generator no longer adds "outputPaths" to custom script
+  build phases as it did in 3.9.0 and 3.9.1.  This was added in an
+  attempt to support Xcode 9's new build system, but broke incremental
+  rebuilds for both the old and new Xcode build systems.

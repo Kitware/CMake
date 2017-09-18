@@ -3,7 +3,7 @@
 #ifndef cmCTestP4_h
 #define cmCTestP4_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGlobalVC.h"
 
@@ -24,7 +24,7 @@ public:
   /** Construct with a CTest instance and update log stream.  */
   cmCTestP4(cmCTest* ctest, std::ostream& log);
 
-  ~cmCTestP4() CM_OVERRIDE;
+  ~cmCTestP4() override;
 
 private:
   std::vector<std::string> ChangeLists;
@@ -51,13 +51,13 @@ private:
   void SetP4Options(std::vector<char const*>& options);
 
   std::string GetWorkingRevision();
-  bool NoteOldRevision() CM_OVERRIDE;
-  bool NoteNewRevision() CM_OVERRIDE;
-  bool UpdateImpl() CM_OVERRIDE;
+  bool NoteOldRevision() override;
+  bool NoteNewRevision() override;
+  bool UpdateImpl() override;
   bool UpdateCustom(const std::string& custom);
 
-  bool LoadRevisions() CM_OVERRIDE;
-  bool LoadModifications() CM_OVERRIDE;
+  bool LoadRevisions() override;
+  bool LoadModifications() override;
 
   class ChangesParser;
   class DescribeParser;

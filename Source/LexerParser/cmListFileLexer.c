@@ -1,7 +1,4 @@
 #include "cmStandardLexer.h"
-#line 2 "cmListFileLexer.c"
-
-#line 4 "cmListFileLexer.c"
 
 #define FLEXINT_H 1
 #define  YY_INT_ALIGNED short int
@@ -11,9 +8,219 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 6
-#define YY_FLEX_SUBMINOR_VERSION 1
+#define YY_FLEX_SUBMINOR_VERSION 4
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
+#endif
+
+#ifdef yy_create_buffer
+#define cmListFileLexer_yy_create_buffer_ALREADY_DEFINED
+#else
+#define yy_create_buffer cmListFileLexer_yy_create_buffer
+#endif
+
+#ifdef yy_delete_buffer
+#define cmListFileLexer_yy_delete_buffer_ALREADY_DEFINED
+#else
+#define yy_delete_buffer cmListFileLexer_yy_delete_buffer
+#endif
+
+#ifdef yy_scan_buffer
+#define cmListFileLexer_yy_scan_buffer_ALREADY_DEFINED
+#else
+#define yy_scan_buffer cmListFileLexer_yy_scan_buffer
+#endif
+
+#ifdef yy_scan_string
+#define cmListFileLexer_yy_scan_string_ALREADY_DEFINED
+#else
+#define yy_scan_string cmListFileLexer_yy_scan_string
+#endif
+
+#ifdef yy_scan_bytes
+#define cmListFileLexer_yy_scan_bytes_ALREADY_DEFINED
+#else
+#define yy_scan_bytes cmListFileLexer_yy_scan_bytes
+#endif
+
+#ifdef yy_init_buffer
+#define cmListFileLexer_yy_init_buffer_ALREADY_DEFINED
+#else
+#define yy_init_buffer cmListFileLexer_yy_init_buffer
+#endif
+
+#ifdef yy_flush_buffer
+#define cmListFileLexer_yy_flush_buffer_ALREADY_DEFINED
+#else
+#define yy_flush_buffer cmListFileLexer_yy_flush_buffer
+#endif
+
+#ifdef yy_load_buffer_state
+#define cmListFileLexer_yy_load_buffer_state_ALREADY_DEFINED
+#else
+#define yy_load_buffer_state cmListFileLexer_yy_load_buffer_state
+#endif
+
+#ifdef yy_switch_to_buffer
+#define cmListFileLexer_yy_switch_to_buffer_ALREADY_DEFINED
+#else
+#define yy_switch_to_buffer cmListFileLexer_yy_switch_to_buffer
+#endif
+
+#ifdef yypush_buffer_state
+#define cmListFileLexer_yypush_buffer_state_ALREADY_DEFINED
+#else
+#define yypush_buffer_state cmListFileLexer_yypush_buffer_state
+#endif
+
+#ifdef yypop_buffer_state
+#define cmListFileLexer_yypop_buffer_state_ALREADY_DEFINED
+#else
+#define yypop_buffer_state cmListFileLexer_yypop_buffer_state
+#endif
+
+#ifdef yyensure_buffer_stack
+#define cmListFileLexer_yyensure_buffer_stack_ALREADY_DEFINED
+#else
+#define yyensure_buffer_stack cmListFileLexer_yyensure_buffer_stack
+#endif
+
+#ifdef yylex
+#define cmListFileLexer_yylex_ALREADY_DEFINED
+#else
+#define yylex cmListFileLexer_yylex
+#endif
+
+#ifdef yyrestart
+#define cmListFileLexer_yyrestart_ALREADY_DEFINED
+#else
+#define yyrestart cmListFileLexer_yyrestart
+#endif
+
+#ifdef yylex_init
+#define cmListFileLexer_yylex_init_ALREADY_DEFINED
+#else
+#define yylex_init cmListFileLexer_yylex_init
+#endif
+
+#ifdef yylex_init_extra
+#define cmListFileLexer_yylex_init_extra_ALREADY_DEFINED
+#else
+#define yylex_init_extra cmListFileLexer_yylex_init_extra
+#endif
+
+#ifdef yylex_destroy
+#define cmListFileLexer_yylex_destroy_ALREADY_DEFINED
+#else
+#define yylex_destroy cmListFileLexer_yylex_destroy
+#endif
+
+#ifdef yyget_debug
+#define cmListFileLexer_yyget_debug_ALREADY_DEFINED
+#else
+#define yyget_debug cmListFileLexer_yyget_debug
+#endif
+
+#ifdef yyset_debug
+#define cmListFileLexer_yyset_debug_ALREADY_DEFINED
+#else
+#define yyset_debug cmListFileLexer_yyset_debug
+#endif
+
+#ifdef yyget_extra
+#define cmListFileLexer_yyget_extra_ALREADY_DEFINED
+#else
+#define yyget_extra cmListFileLexer_yyget_extra
+#endif
+
+#ifdef yyset_extra
+#define cmListFileLexer_yyset_extra_ALREADY_DEFINED
+#else
+#define yyset_extra cmListFileLexer_yyset_extra
+#endif
+
+#ifdef yyget_in
+#define cmListFileLexer_yyget_in_ALREADY_DEFINED
+#else
+#define yyget_in cmListFileLexer_yyget_in
+#endif
+
+#ifdef yyset_in
+#define cmListFileLexer_yyset_in_ALREADY_DEFINED
+#else
+#define yyset_in cmListFileLexer_yyset_in
+#endif
+
+#ifdef yyget_out
+#define cmListFileLexer_yyget_out_ALREADY_DEFINED
+#else
+#define yyget_out cmListFileLexer_yyget_out
+#endif
+
+#ifdef yyset_out
+#define cmListFileLexer_yyset_out_ALREADY_DEFINED
+#else
+#define yyset_out cmListFileLexer_yyset_out
+#endif
+
+#ifdef yyget_leng
+#define cmListFileLexer_yyget_leng_ALREADY_DEFINED
+#else
+#define yyget_leng cmListFileLexer_yyget_leng
+#endif
+
+#ifdef yyget_text
+#define cmListFileLexer_yyget_text_ALREADY_DEFINED
+#else
+#define yyget_text cmListFileLexer_yyget_text
+#endif
+
+#ifdef yyget_lineno
+#define cmListFileLexer_yyget_lineno_ALREADY_DEFINED
+#else
+#define yyget_lineno cmListFileLexer_yyget_lineno
+#endif
+
+#ifdef yyset_lineno
+#define cmListFileLexer_yyset_lineno_ALREADY_DEFINED
+#else
+#define yyset_lineno cmListFileLexer_yyset_lineno
+#endif
+
+#ifdef yyget_column
+#define cmListFileLexer_yyget_column_ALREADY_DEFINED
+#else
+#define yyget_column cmListFileLexer_yyget_column
+#endif
+
+#ifdef yyset_column
+#define cmListFileLexer_yyset_column_ALREADY_DEFINED
+#else
+#define yyset_column cmListFileLexer_yyset_column
+#endif
+
+#ifdef yywrap
+#define cmListFileLexer_yywrap_ALREADY_DEFINED
+#else
+#define yywrap cmListFileLexer_yywrap
+#endif
+
+#ifdef yyalloc
+#define cmListFileLexer_yyalloc_ALREADY_DEFINED
+#else
+#define yyalloc cmListFileLexer_yyalloc
+#endif
+
+#ifdef yyrealloc
+#define cmListFileLexer_yyrealloc_ALREADY_DEFINED
+#else
+#define yyrealloc cmListFileLexer_yyrealloc
+#endif
+
+#ifdef yyfree
+#define cmListFileLexer_yyfree_ALREADY_DEFINED
+#else
+#define yyfree cmListFileLexer_yyfree
 #endif
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
@@ -86,9 +293,15 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#ifndef SIZE_MAX
+#define SIZE_MAX               (~(size_t)0)
+#endif
+
 #endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
+
+/* begin standard C++ headers. */
 
 /* TODO: this is always defined, so inline it */
 #define yyconst const
@@ -102,12 +315,10 @@ typedef unsigned int flex_uint32_t;
 /* Returned upon end-of-file. */
 #define YY_NULL 0
 
-/* Promotes a possibly negative, possibly signed char to an unsigned
- * integer for use as an array index.  If the signed char is negative,
- * we want to instead treat it as an 8-bit unsigned char, hence the
- * double cast.
+/* Promotes a possibly negative, possibly signed char to an
+ *   integer in range [0..255] for use as an array index.
  */
-#define YY_SC_TO_UI(c) ((unsigned int) (unsigned char) c)
+#define YY_SC_TO_UI(c) ((YY_CHAR) (c))
 
 /* An opaque pointer. */
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -131,20 +342,16 @@ typedef void* yyscan_t;
  * definition of BEGIN.
  */
 #define BEGIN yyg->yy_start = 1 + 2 *
-
 /* Translate the current start state into a value that can be later handed
  * to BEGIN to return to the state.  The YYSTATE alias is for lex
  * compatibility.
  */
 #define YY_START ((yyg->yy_start - 1) / 2)
 #define YYSTATE YY_START
-
 /* Action number for EOF rule of a given start state. */
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
-
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE cmListFileLexer_yyrestart(yyin ,yyscanner )
-
+#define YY_NEW_FILE yyrestart( yyin , yyscanner )
 #define YY_END_OF_BUFFER_CHAR 0
 
 /* Size of default input buffer. */
@@ -180,7 +387,7 @@ typedef size_t yy_size_t;
 
     /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
      *       access to the local variable yy_act. Since yyless() is a macro, it would break
-     *       existing scanners that call yyless() from OUTSIDE cmListFileLexer_yylex.
+     *       existing scanners that call yyless() from OUTSIDE yylex.
      *       One obvious solution it to make yy_act a global. I tried that, and saw
      *       a 5% performance hit in a non-yylineno scanner, because yy_act is
      *       normally declared as a register variable-- so it is not worth it.
@@ -213,7 +420,6 @@ typedef size_t yy_size_t;
 		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
 		} \
 	while ( 0 )
-
 #define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
@@ -273,7 +479,7 @@ struct yy_buffer_state
 	 * possible backing-up.
 	 *
 	 * When we actually see the EOF, we change the status to "new"
-	 * (via cmListFileLexer_yyrestart()), so that the user can continue scanning by
+	 * (via yyrestart()), so that the user can continue scanning by
 	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
@@ -290,73 +496,67 @@ struct yy_buffer_state
 #define YY_CURRENT_BUFFER ( yyg->yy_buffer_stack \
                           ? yyg->yy_buffer_stack[yyg->yy_buffer_stack_top] \
                           : NULL)
-
 /* Same as previous macro, but useful when we know that the buffer stack is not
  * NULL or when we need an lvalue. For internal use only.
  */
 #define YY_CURRENT_BUFFER_LVALUE yyg->yy_buffer_stack[yyg->yy_buffer_stack_top]
 
-void cmListFileLexer_yyrestart (FILE *input_file ,yyscan_t yyscanner );
-void cmListFileLexer_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmListFileLexer_yy_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void cmListFileLexer_yy_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmListFileLexer_yy_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmListFileLexer_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void cmListFileLexer_yypop_buffer_state (yyscan_t yyscanner );
+void yyrestart ( FILE *input_file , yyscan_t yyscanner );
+void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size , yyscan_t yyscanner );
+void yy_delete_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
+void yy_flush_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
+void yypush_buffer_state ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
+void yypop_buffer_state ( yyscan_t yyscanner );
 
-static void cmListFileLexer_yyensure_buffer_stack (yyscan_t yyscanner );
-static void cmListFileLexer_yy_load_buffer_state (yyscan_t yyscanner );
-static void cmListFileLexer_yy_init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
+static void yyensure_buffer_stack ( yyscan_t yyscanner );
+static void yy_load_buffer_state ( yyscan_t yyscanner );
+static void yy_init_buffer ( YY_BUFFER_STATE b, FILE *file , yyscan_t yyscanner );
+#define YY_FLUSH_BUFFER yy_flush_buffer( YY_CURRENT_BUFFER , yyscanner)
 
-#define YY_FLUSH_BUFFER cmListFileLexer_yy_flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
+YY_BUFFER_STATE yy_scan_buffer ( char *base, yy_size_t size , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_string ( const char *yy_str , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, int len , yyscan_t yyscanner );
 
-YY_BUFFER_STATE cmListFileLexer_yy_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmListFileLexer_yy_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmListFileLexer_yy_scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+void *yyalloc ( yy_size_t , yyscan_t yyscanner );
+void *yyrealloc ( void *, yy_size_t , yyscan_t yyscanner );
+void yyfree ( void * , yyscan_t yyscanner );
 
-void *cmListFileLexer_yyalloc (yy_size_t ,yyscan_t yyscanner );
-void *cmListFileLexer_yyrealloc (void *,yy_size_t ,yyscan_t yyscanner );
-void cmListFileLexer_yyfree (void * ,yyscan_t yyscanner );
-
-#define yy_new_buffer cmListFileLexer_yy_create_buffer
-
+#define yy_new_buffer yy_create_buffer
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        cmListFileLexer_yyensure_buffer_stack (yyscanner); \
+        yyensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            cmListFileLexer_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            yy_create_buffer( yyin, YY_BUF_SIZE , yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
-
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        cmListFileLexer_yyensure_buffer_stack (yyscanner); \
+        yyensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            cmListFileLexer_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            yy_create_buffer( yyin, YY_BUF_SIZE , yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
-
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 /* Begin user sect3 */
 
 #define cmListFileLexer_yywrap(yyscanner) (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
-
-typedef unsigned char YY_CHAR;
+typedef flex_uint8_t YY_CHAR;
 
 typedef int yy_state_type;
 
 #define yytext_ptr yytext_r
 
-static yy_state_type yy_get_previous_state (yyscan_t yyscanner );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  ,yyscan_t yyscanner);
-static int yy_get_next_buffer (yyscan_t yyscanner );
-static void yynoreturn yy_fatal_error (yyconst char* msg ,yyscan_t yyscanner );
+static yy_state_type yy_get_previous_state ( yyscan_t yyscanner );
+static yy_state_type yy_try_NUL_trans ( yy_state_type current_state  , yyscan_t yyscanner);
+static int yy_get_next_buffer ( yyscan_t yyscanner );
+static void yynoreturn yy_fatal_error ( const char* msg , yyscan_t yyscanner );
 
 /* Done after the current pattern has been matched and before the
  * corresponding action - sets up yytext.
@@ -367,7 +567,6 @@ static void yynoreturn yy_fatal_error (yyconst char* msg ,yyscan_t yyscanner );
 	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
-
 #define YY_NUM_RULES 24
 #define YY_END_OF_BUFFER 25
 /* This struct is not used in this scanner,
@@ -377,19 +576,19 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_accept[77] =
+static const flex_int16_t yy_accept[81] =
     {   0,
         0,    0,    0,    0,    0,    0,    0,    0,    4,    4,
        25,   13,   22,    1,   16,    3,   13,    5,    6,    7,
-       15,   23,   17,   19,   20,   21,   10,   11,    8,   12,
-        9,    4,   13,    0,   13,    0,   22,    0,    0,    7,
-       13,    0,   13,    0,    2,    0,   13,   17,    0,   18,
-       10,    8,    4,    0,   14,    0,    0,    0,    0,   14,
-        0,    0,   14,    0,    0,    0,    2,   14,    0,    0,
-        0,    0,    0,    0,    0,    0
+       15,   23,   23,   17,   19,   20,   21,   17,   10,   11,
+        8,   10,   12,    9,   24,    4,   13,    0,   13,    0,
+       22,    0,    0,    7,   13,    0,   13,    0,    2,    0,
+       13,   17,    0,   18,   10,    8,    4,    0,   14,    0,
+        0,    0,    0,   14,    0,    0,   14,    0,    0,    0,
+        2,   14,    0,    0,    0,    0,    0,    0,    0,    0
     } ;
 
-static yyconst YY_CHAR yy_ec[256] =
+static const YY_CHAR yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    4,    1,    1,    1,    1,    1,    1,    1,
@@ -421,108 +620,126 @@ static yyconst YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst YY_CHAR yy_meta[16] =
+static const YY_CHAR yy_meta[17] =
     {   0,
         1,    1,    2,    3,    4,    3,    1,    3,    5,    6,
-        1,    6,    1,    1,    7
+        1,    6,    1,    1,    7,    8
     } ;
 
-static yyconst flex_uint16_t yy_base[95] =
+static const flex_int16_t yy_base[99] =
     {   0,
-        0,    0,   13,   25,   14,   16,   17,   18,   90,   88,
-       88,   39,   20,  237,  237,   74,   78,  237,  237,   13,
-       54,    0,   71,  237,  237,   31,    0,  237,   73,  237,
-      237,    0,    0,   65,   75,    0,   33,   30,   72,    0,
-        0,   75,   70,    0,   74,    0,    0,   62,   70,  237,
-        0,   63,    0,   85,   99,   65,  111,   62,   34,    0,
-       54,  116,    0,   54,  127,   51,  237,   50,    0,   48,
-       47,   39,   33,   29,   17,  237,  136,  143,  150,  157,
-      164,  171,  178,  184,  191,  198,  201,  207,  214,  217,
-      219,  225,  228,  230
+        0,    0,   14,   28,   42,   56,   70,   84,   18,   19,
+       69,  100,   16,  323,  323,   55,   59,  323,  323,   13,
+      115,    0,  323,   52,  323,  323,   21,   51,    0,  323,
+       53,    0,  323,  323,  323,    0,    0,  126,   55,    0,
+       25,   25,   53,    0,    0,  136,   53,    0,   57,    0,
+        0,   42,   50,  323,    0,   43,    0,  146,  160,   45,
+      172,   43,   26,    0,   42,  184,    0,   42,  195,   40,
+      323,   40,    0,   38,   37,   34,   32,   31,   23,  323,
+      211,  219,  227,  235,  243,  251,  259,  267,  274,  281,
+      285,  291,  298,  302,  304,  310,  314,  316
 
     } ;
 
-static yyconst flex_int16_t yy_def[95] =
+static const flex_int16_t yy_def[99] =
     {   0,
-       76,    1,   77,   77,   78,   78,   79,   79,   80,   80,
-       76,   76,   76,   76,   76,   76,   12,   76,   76,   12,
-       76,   81,   82,   76,   76,   82,   83,   76,   76,   76,
-       76,   84,   12,   85,   12,   86,   76,   76,   87,   20,
-       12,   88,   12,   21,   76,   89,   12,   82,   82,   76,
-       83,   76,   84,   85,   76,   54,   85,   90,   76,   55,
-       87,   88,   55,   62,   88,   91,   76,   55,   92,   93,
-       90,   94,   91,   93,   94,    0,   76,   76,   76,   76,
-       76,   76,   76,   76,   76,   76,   76,   76,   76,   76,
-       76,   76,   76,   76
+       80,    1,   81,   81,   82,   82,   83,   83,   84,   84,
+       80,   80,   80,   80,   80,   80,   12,   80,   80,   12,
+       80,   85,   80,   86,   80,   80,   86,   86,   87,   80,
+       80,   87,   80,   80,   80,   88,   12,   89,   12,   90,
+       80,   80,   91,   20,   12,   92,   12,   21,   80,   93,
+       12,   86,   86,   80,   87,   80,   88,   89,   80,   58,
+       89,   94,   80,   59,   91,   92,   59,   66,   92,   95,
+       80,   59,   96,   97,   94,   98,   95,   97,   98,    0,
+       80,   80,   80,   80,   80,   80,   80,   80,   80,   80,
+       80,   80,   80,   80,   80,   80,   80,   80
 
     } ;
 
-static yyconst flex_uint16_t yy_nxt[253] =
+static const flex_int16_t yy_nxt[340] =
     {   0,
        12,   13,   14,   13,   15,   16,   17,   18,   19,   12,
-       12,   20,   21,   22,   12,   24,   28,   25,   28,   28,
-       28,   37,   40,   37,   40,   62,   26,   24,   29,   25,
-       29,   31,   31,   50,   37,   48,   37,   54,   26,   33,
-       59,   63,   45,   34,   59,   35,   45,   62,   33,   33,
-       33,   33,   36,   33,   41,   55,   54,   58,   42,   63,
-       43,   72,   60,   41,   44,   41,   45,   46,   41,   55,
-       55,   56,   70,   52,   48,   49,   67,   66,   57,   63,
-       60,   64,   58,   52,   49,   39,   38,   76,   65,   55,
-       14,   56,   14,   76,   76,   76,   76,   76,   57,   55,
+       12,   20,   21,   22,   12,   23,   25,   41,   26,   41,
+       14,   14,   44,   54,   44,   52,   41,   27,   41,   28,
+       25,   66,   26,   35,   35,   63,   63,   49,   49,   58,
+       67,   27,   66,   28,   30,   59,   58,   62,   67,   76,
+       64,   59,   74,   56,   52,   53,   31,   32,   30,   71,
+       70,   64,   62,   56,   53,   53,   43,   42,   80,   80,
+       31,   32,   30,   80,   80,   80,   80,   80,   80,   80,
+       80,   80,   80,   80,   34,   35,   30,   80,   80,   80,
+       80,   80,   80,   80,   80,   80,   80,   80,   34,   35,
 
-       76,   76,   76,   34,   76,   68,   76,   76,   55,   55,
-       55,   55,   69,   55,   54,   76,   54,   76,   54,   54,
-       63,   76,   64,   76,   76,   76,   76,   76,   76,   65,
-       62,   76,   62,   76,   62,   62,   23,   23,   23,   23,
-       23,   23,   23,   27,   27,   27,   27,   27,   27,   27,
-       30,   30,   30,   30,   30,   30,   30,   32,   32,   32,
-       32,   32,   32,   32,   47,   76,   47,   47,   47,   47,
-       47,   48,   76,   48,   76,   48,   48,   48,   51,   76,
-       51,   51,   51,   51,   53,   76,   53,   53,   53,   53,
-       53,   54,   76,   76,   54,   76,   54,   54,   33,   76,
+       37,   80,   80,   80,   38,   80,   39,   80,   80,   37,
+       37,   37,   37,   40,   37,   45,   80,   80,   80,   46,
+       80,   47,   80,   80,   45,   48,   45,   49,   50,   45,
+       59,   80,   60,   80,   80,   80,   80,   80,   80,   61,
+       67,   80,   68,   80,   80,   80,   80,   80,   80,   69,
+       59,   80,   60,   80,   80,   80,   80,   80,   80,   61,
+       59,   80,   80,   80,   38,   80,   72,   80,   80,   59,
+       59,   59,   59,   73,   59,   58,   80,   58,   80,   58,
+       58,   80,   80,   80,   80,   80,   80,   58,   67,   80,
+       68,   80,   80,   80,   80,   80,   80,   69,   66,   80,
 
-       33,   33,   33,   33,   33,   61,   61,   62,   76,   76,
-       62,   76,   62,   62,   41,   76,   41,   41,   41,   41,
-       41,   71,   71,   73,   73,   55,   76,   55,   55,   55,
-       55,   55,   74,   74,   75,   75,   11,   76,   76,   76,
-       76,   76,   76,   76,   76,   76,   76,   76,   76,   76,
-       76,   76
+       66,   80,   66,   66,   80,   80,   80,   80,   80,   80,
+       66,   24,   24,   24,   24,   24,   24,   24,   24,   29,
+       29,   29,   29,   29,   29,   29,   29,   33,   33,   33,
+       33,   33,   33,   33,   33,   36,   36,   36,   36,   36,
+       36,   36,   36,   51,   80,   51,   51,   51,   51,   51,
+       51,   52,   80,   52,   80,   52,   52,   52,   52,   55,
+       80,   55,   55,   55,   55,   80,   55,   57,   80,   57,
+       57,   57,   57,   57,   58,   80,   80,   58,   80,   58,
+       58,   37,   80,   37,   37,   37,   37,   37,   37,   65,
+       65,   66,   80,   80,   66,   80,   66,   66,   45,   80,
+
+       45,   45,   45,   45,   45,   45,   75,   75,   77,   77,
+       59,   80,   59,   59,   59,   59,   59,   59,   78,   78,
+       79,   79,   11,   80,   80,   80,   80,   80,   80,   80,
+       80,   80,   80,   80,   80,   80,   80,   80,   80
     } ;
 
-static yyconst flex_int16_t yy_chk[253] =
+static const flex_int16_t yy_chk[340] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    3,    5,    3,    6,    7,
-        8,   13,   20,   13,   20,   75,    3,    4,    5,    4,
-        6,    7,    8,   26,   37,   26,   37,   74,    4,   12,
-       38,   73,   38,   12,   59,   12,   59,   72,   12,   12,
-       12,   12,   12,   12,   21,   71,   70,   68,   21,   66,
-       21,   64,   61,   21,   21,   21,   21,   21,   21,   34,
-       58,   34,   56,   52,   49,   48,   45,   43,   34,   42,
-       39,   42,   35,   29,   23,   17,   16,   11,   42,   54,
-       10,   54,    9,    0,    0,    0,    0,    0,   54,   55,
+        1,    1,    1,    1,    1,    1,    3,   13,    3,   13,
+        9,   10,   20,   27,   20,   27,   41,    3,   41,    3,
+        4,   79,    4,    9,   10,   42,   63,   42,   63,   78,
+       77,    4,   76,    4,    5,   75,   74,   72,   70,   68,
+       65,   62,   60,   56,   53,   52,    5,    5,    6,   49,
+       47,   43,   39,   31,   28,   24,   17,   16,   11,    0,
+        6,    6,    7,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    7,    7,    8,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    8,    8,
 
-        0,    0,    0,   55,    0,   55,    0,    0,   55,   55,
-       55,   55,   55,   55,   57,    0,   57,    0,   57,   57,
-       62,    0,   62,    0,    0,    0,    0,    0,    0,   62,
-       65,    0,   65,    0,   65,   65,   77,   77,   77,   77,
-       77,   77,   77,   78,   78,   78,   78,   78,   78,   78,
-       79,   79,   79,   79,   79,   79,   79,   80,   80,   80,
-       80,   80,   80,   80,   81,    0,   81,   81,   81,   81,
-       81,   82,    0,   82,    0,   82,   82,   82,   83,    0,
-       83,   83,   83,   83,   84,    0,   84,   84,   84,   84,
-       84,   85,    0,    0,   85,    0,   85,   85,   86,    0,
+       12,    0,    0,    0,   12,    0,   12,    0,    0,   12,
+       12,   12,   12,   12,   12,   21,    0,    0,    0,   21,
+        0,   21,    0,    0,   21,   21,   21,   21,   21,   21,
+       38,    0,   38,    0,    0,    0,    0,    0,    0,   38,
+       46,    0,   46,    0,    0,    0,    0,    0,    0,   46,
+       58,    0,   58,    0,    0,    0,    0,    0,    0,   58,
+       59,    0,    0,    0,   59,    0,   59,    0,    0,   59,
+       59,   59,   59,   59,   59,   61,    0,   61,    0,   61,
+       61,    0,    0,    0,    0,    0,    0,   61,   66,    0,
+       66,    0,    0,    0,    0,    0,    0,   66,   69,    0,
 
-       86,   86,   86,   86,   86,   87,   87,   88,    0,    0,
-       88,    0,   88,   88,   89,    0,   89,   89,   89,   89,
-       89,   90,   90,   91,   91,   92,    0,   92,   92,   92,
-       92,   92,   93,   93,   94,   94,   76,   76,   76,   76,
-       76,   76,   76,   76,   76,   76,   76,   76,   76,   76,
-       76,   76
+       69,    0,   69,   69,    0,    0,    0,    0,    0,    0,
+       69,   81,   81,   81,   81,   81,   81,   81,   81,   82,
+       82,   82,   82,   82,   82,   82,   82,   83,   83,   83,
+       83,   83,   83,   83,   83,   84,   84,   84,   84,   84,
+       84,   84,   84,   85,    0,   85,   85,   85,   85,   85,
+       85,   86,    0,   86,    0,   86,   86,   86,   86,   87,
+        0,   87,   87,   87,   87,    0,   87,   88,    0,   88,
+       88,   88,   88,   88,   89,    0,    0,   89,    0,   89,
+       89,   90,    0,   90,   90,   90,   90,   90,   90,   91,
+       91,   92,    0,    0,   92,    0,   92,   92,   93,    0,
+
+       93,   93,   93,   93,   93,   93,   94,   94,   95,   95,
+       96,    0,   96,   96,   96,   96,   96,   96,   97,   97,
+       98,   98,   80,   80,   80,   80,   80,   80,   80,   80,
+       80,   80,   80,   80,   80,   80,   80,   80,   80
     } ;
 
 /* Table of booleans, true if rule could match eol. */
-static yyconst flex_int32_t yy_rule_can_match_eol[25] =
+static const flex_int32_t yy_rule_can_match_eol[25] =
     {   0,
 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1,
     0, 0, 0, 0, 0,     };
@@ -534,8 +751,6 @@ static yyconst flex_int32_t yy_rule_can_match_eol[25] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "cmListFileLexer.in.l"
-#line 2 "cmListFileLexer.in.l"
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 /*
@@ -544,14 +759,12 @@ This file must be translated to C and modified to build everywhere.
 
 Run flex >= 2.6 like this:
 
-  flex --nounistd -DFLEXINT_H --prefix=cmListFileLexer_yy -ocmListFileLexer.c cmListFileLexer.in.l
+  flex --nounistd -DFLEXINT_H --noline -ocmListFileLexer.c cmListFileLexer.in.l
 
 Modify cmListFileLexer.c:
-  - remove trailing whitespace: sed -i 's/\s*$//' cmListFileLexer.c
-  - remove blank lines at end of file
-  - #include "cmStandardLexer.h" at the top
-  - add cast in cmListFileLexer_yy_scan_bytes for loop condition of _yybytes_len to size_t
-  - change type of variable yyl under yy_find_action from yy_size_t to int
+  - remove trailing whitespace:              sed -i 's/\s*$//' cmListFileLexer.c
+  - remove blank lines at end of file:       sed -i '${/^$/d;}' cmListFileLexer.c
+  - #include "cmStandardLexer.h" at the top: sed -i '1i#include "cmStandardLexer.h"' cmListFileLexer.c
 
 */
 
@@ -600,11 +813,6 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 
 /*--------------------------------------------------------------------------*/
 
-
-
-
-#line 606 "cmListFileLexer.c"
-
 #define INITIAL 0
 #define STRING 1
 #define BRACKET 2
@@ -649,44 +857,44 @@ struct yyguts_t
 
     }; /* end struct yyguts_t */
 
-static int yy_init_globals (yyscan_t yyscanner );
+static int yy_init_globals ( yyscan_t yyscanner );
 
-int cmListFileLexer_yylex_init (yyscan_t* scanner);
+int yylex_init (yyscan_t* scanner);
 
-int cmListFileLexer_yylex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int yylex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner);
 
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int cmListFileLexer_yylex_destroy (yyscan_t yyscanner );
+int yylex_destroy ( yyscan_t yyscanner );
 
-int cmListFileLexer_yyget_debug (yyscan_t yyscanner );
+int yyget_debug ( yyscan_t yyscanner );
 
-void cmListFileLexer_yyset_debug (int debug_flag ,yyscan_t yyscanner );
+void yyset_debug ( int debug_flag , yyscan_t yyscanner );
 
-YY_EXTRA_TYPE cmListFileLexer_yyget_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE yyget_extra ( yyscan_t yyscanner );
 
-void cmListFileLexer_yyset_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void yyset_extra ( YY_EXTRA_TYPE user_defined , yyscan_t yyscanner );
 
-FILE *cmListFileLexer_yyget_in (yyscan_t yyscanner );
+FILE *yyget_in ( yyscan_t yyscanner );
 
-void cmListFileLexer_yyset_in  (FILE * _in_str ,yyscan_t yyscanner );
+void yyset_in  ( FILE * _in_str , yyscan_t yyscanner );
 
-FILE *cmListFileLexer_yyget_out (yyscan_t yyscanner );
+FILE *yyget_out ( yyscan_t yyscanner );
 
-void cmListFileLexer_yyset_out  (FILE * _out_str ,yyscan_t yyscanner );
+void yyset_out  ( FILE * _out_str , yyscan_t yyscanner );
 
-			int cmListFileLexer_yyget_leng (yyscan_t yyscanner );
+			int yyget_leng ( yyscan_t yyscanner );
 
-char *cmListFileLexer_yyget_text (yyscan_t yyscanner );
+char *yyget_text ( yyscan_t yyscanner );
 
-int cmListFileLexer_yyget_lineno (yyscan_t yyscanner );
+int yyget_lineno ( yyscan_t yyscanner );
 
-void cmListFileLexer_yyset_lineno (int _line_number ,yyscan_t yyscanner );
+void yyset_lineno ( int _line_number , yyscan_t yyscanner );
 
-int cmListFileLexer_yyget_column  (yyscan_t yyscanner );
+int yyget_column  ( yyscan_t yyscanner );
 
-void cmListFileLexer_yyset_column (int _column_no ,yyscan_t yyscanner );
+void yyset_column ( int _column_no , yyscan_t yyscanner );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -694,32 +902,31 @@ void cmListFileLexer_yyset_column (int _column_no ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int cmListFileLexer_yywrap (yyscan_t yyscanner );
+extern "C" int yywrap ( yyscan_t yyscanner );
 #else
-extern int cmListFileLexer_yywrap (yyscan_t yyscanner );
+extern int yywrap ( yyscan_t yyscanner );
 #endif
 #endif
 
 #ifndef YY_NO_UNPUT
 
-    static void yyunput (int c,char *buf_ptr  ,yyscan_t yyscanner);
+    static void yyunput ( int c, char *buf_ptr  , yyscan_t yyscanner);
 
 #endif
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
+static void yy_flex_strncpy ( char *, const char *, int , yyscan_t yyscanner);
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
+static int yy_flex_strlen ( const char * , yyscan_t yyscanner);
 #endif
 
 #ifndef YY_NO_INPUT
-
 #ifdef __cplusplus
-static int yyinput (yyscan_t yyscanner );
+static int yyinput ( yyscan_t yyscanner );
 #else
-static int input (yyscan_t yyscanner );
+static int input ( yyscan_t yyscanner );
 #endif
 
 #endif
@@ -750,7 +957,7 @@ static int input (yyscan_t yyscanner );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -763,7 +970,7 @@ static int input (yyscan_t yyscanner );
 	else \
 		{ \
 		errno=0; \
-		while ( (result = (int) fread(buf, 1, max_size, yyin))==0 && ferror(yyin)) \
+		while ( (result = (int) fread(buf, 1, (yy_size_t) max_size, yyin)) == 0 && ferror(yyin)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
@@ -804,9 +1011,9 @@ static int input (yyscan_t yyscanner );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int cmListFileLexer_yylex (yyscan_t yyscanner);
+extern int yylex (yyscan_t yyscanner);
 
-#define YY_DECL int cmListFileLexer_yylex (yyscan_t yyscanner)
+#define YY_DECL int yylex (yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
 /* Code executed at the beginning of each rule, after yytext and yyleng
@@ -851,19 +1058,15 @@ YY_DECL
 			yyout = stdout;
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			cmListFileLexer_yyensure_buffer_stack (yyscanner);
+			yyensure_buffer_stack (yyscanner);
 			YY_CURRENT_BUFFER_LVALUE =
-				cmListFileLexer_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+				yy_create_buffer( yyin, YY_BUF_SIZE , yyscanner);
 		}
 
-		cmListFileLexer_yy_load_buffer_state(yyscanner );
+		yy_load_buffer_state( yyscanner );
 		}
 
 	{
-#line 80 "cmListFileLexer.in.l"
-
-
-#line 866 "cmListFileLexer.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -890,13 +1093,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 77 )
-					yy_c = yy_meta[(unsigned int) yy_c];
+				if ( yy_current_state >= 81 )
+					yy_c = yy_meta[yy_c];
 				}
-			yy_current_state = yy_nxt[yy_base[yy_current_state] + (flex_int16_t) yy_c];
+			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 237 );
+		while ( yy_base[yy_current_state] != 323 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -935,7 +1138,6 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 82 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_Newline;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -948,7 +1150,6 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 91 "cmListFileLexer.in.l"
 {
   const char* bracket = yytext;
   lexer->comment = yytext[0] == '#';
@@ -971,7 +1172,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 111 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
   BEGIN(COMMENT);
@@ -979,14 +1179,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 116 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
 }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 120 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ParenLeft;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -996,7 +1194,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 127 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ParenRight;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -1006,7 +1203,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 134 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_Identifier;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -1016,7 +1212,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 141 "cmListFileLexer.in.l"
 {
   /* Handle ]]====]=======]*/
   cmListFileLexerAppend(lexer, yytext, yyleng);
@@ -1028,7 +1223,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 150 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
   /* Erase the partial bracket from the token.  */
@@ -1040,7 +1234,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 159 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
@@ -1049,7 +1242,6 @@ YY_RULE_SETUP
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 164 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   ++lexer->line;
@@ -1059,7 +1251,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 171 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
@@ -1068,7 +1259,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case YY_STATE_EOF(BRACKET):
 case YY_STATE_EOF(BRACKETEND):
-#line 177 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_BadBracket;
   BEGIN(INITIAL);
@@ -1077,7 +1267,6 @@ case YY_STATE_EOF(BRACKETEND):
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 183 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -1087,7 +1276,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 190 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -1097,7 +1285,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 197 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -1107,7 +1294,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 204 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ArgumentQuoted;
   cmListFileLexerSetToken(lexer, "", 0);
@@ -1117,7 +1303,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 211 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
@@ -1126,7 +1311,6 @@ YY_RULE_SETUP
 case 18:
 /* rule 18 can match eol */
 YY_RULE_SETUP
-#line 216 "cmListFileLexer.in.l"
 {
   /* Continuation: text is not part of string */
   ++lexer->line;
@@ -1136,7 +1320,6 @@ YY_RULE_SETUP
 case 19:
 /* rule 19 can match eol */
 YY_RULE_SETUP
-#line 222 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   ++lexer->line;
@@ -1145,7 +1328,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 228 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
   BEGIN(INITIAL);
@@ -1154,14 +1336,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 234 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
 }
 	YY_BREAK
 case YY_STATE_EOF(STRING):
-#line 239 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_BadString;
   BEGIN(INITIAL);
@@ -1170,7 +1350,6 @@ case YY_STATE_EOF(STRING):
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 245 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_Space;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -1180,7 +1359,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 252 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_BadCharacter;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -1190,7 +1368,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
-#line 259 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_None;
   cmListFileLexerSetToken(lexer, 0, 0);
@@ -1199,10 +1376,8 @@ case YY_STATE_EOF(COMMENT):
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 265 "cmListFileLexer.in.l"
 ECHO;
 	YY_BREAK
-#line 1205 "cmListFileLexer.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1218,7 +1393,7 @@ ECHO;
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
 			 * just pointed yyin at a new source and called
-			 * cmListFileLexer_yylex().  If so, then we have to assure
+			 * yylex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
@@ -1278,7 +1453,7 @@ ECHO;
 				{
 				yyg->yy_did_buffer_switch_on_eof = 0;
 
-				if ( cmListFileLexer_yywrap(yyscanner ) )
+				if ( yywrap( yyscanner ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
@@ -1332,7 +1507,7 @@ ECHO;
 	} /* end of action switch */
 		} /* end of scanning one token */
 	} /* end of user's declarations */
-} /* end of cmListFileLexer_yylex */
+} /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
  *
@@ -1346,7 +1521,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
 	char *source = yyg->yytext_ptr;
-	yy_size_t number_to_move, i;
+	int number_to_move, i;
 	int ret_val;
 
 	if ( yyg->yy_c_buf_p > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] )
@@ -1375,7 +1550,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	/* Try to read more data. */
 
 	/* First move last chars to start of buffer. */
-	number_to_move = (yy_size_t) (yyg->yy_c_buf_p - yyg->yytext_ptr) - 1;
+	number_to_move = (int) (yyg->yy_c_buf_p - yyg->yytext_ptr - 1);
 
 	for ( i = 0; i < number_to_move; ++i )
 		*(dest++) = *(source++);
@@ -1411,7 +1586,8 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					cmListFileLexer_yyrealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
+					yyrealloc( (void *) b->yy_ch_buf,
+							 (yy_size_t) (b->yy_buf_size + 2) , yyscanner );
 				}
 			else
 				/* Can't grow it, we don't own it. */
@@ -1443,7 +1619,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			cmListFileLexer_yyrestart(yyin  ,yyscanner);
+			yyrestart( yyin  , yyscanner);
 			}
 
 		else
@@ -1457,12 +1633,15 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	if ((int) (yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+	if ((yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
 		int new_size = yyg->yy_n_chars + number_to_move + (yyg->yy_n_chars >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) cmListFileLexer_yyrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) yyrealloc(
+			(void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf, (yy_size_t) new_size , yyscanner );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+		/* "- 2" to take care of EOB's */
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_size = (int) (new_size - 2);
 	}
 
 	yyg->yy_n_chars += number_to_move;
@@ -1486,7 +1665,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 	for ( yy_cp = yyg->yytext_ptr + YY_MORE_ADJ; yy_cp < yyg->yy_c_buf_p; ++yy_cp )
 		{
-		YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
+		YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 16);
 		if ( yy_accept[yy_current_state] )
 			{
 			yyg->yy_last_accepting_state = yy_current_state;
@@ -1495,10 +1674,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 77 )
-				yy_c = yy_meta[(unsigned int) yy_c];
+			if ( yy_current_state >= 81 )
+				yy_c = yy_meta[yy_c];
 			}
-		yy_current_state = yy_nxt[yy_base[yy_current_state] + (flex_int16_t) yy_c];
+		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 		}
 
 	return yy_current_state;
@@ -1515,7 +1694,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner; /* This var may be unused depending upon options. */
 	char *yy_cp = yyg->yy_c_buf_p;
 
-	YY_CHAR yy_c = 1;
+	YY_CHAR yy_c = 16;
 	if ( yy_accept[yy_current_state] )
 		{
 		yyg->yy_last_accepting_state = yy_current_state;
@@ -1524,11 +1703,11 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 77 )
-			yy_c = yy_meta[(unsigned int) yy_c];
+		if ( yy_current_state >= 81 )
+			yy_c = yy_meta[yy_c];
 		}
-	yy_current_state = yy_nxt[yy_base[yy_current_state] + (flex_int16_t) yy_c];
-	yy_is_jam = (yy_current_state == 76);
+	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
+	yy_is_jam = (yy_current_state == 80);
 
 	(void)yyg;
 	return yy_is_jam ? 0 : yy_current_state;
@@ -1605,7 +1784,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 		else
 			{ /* need more input */
-			int offset = yyg->yy_c_buf_p - yyg->yytext_ptr;
+			int offset = (int) (yyg->yy_c_buf_p - yyg->yytext_ptr);
 			++yyg->yy_c_buf_p;
 
 			switch ( yy_get_next_buffer( yyscanner ) )
@@ -1622,13 +1801,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 					 */
 
 					/* Reset buffer status. */
-					cmListFileLexer_yyrestart(yyin ,yyscanner);
+					yyrestart( yyin , yyscanner);
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( cmListFileLexer_yywrap(yyscanner ) )
+					if ( yywrap( yyscanner ) )
 						return 0;
 
 					if ( ! yyg->yy_did_buffer_switch_on_eof )
@@ -1667,34 +1846,34 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @note This function does not reset the start condition to @c INITIAL .
  */
-    void cmListFileLexer_yyrestart  (FILE * input_file , yyscan_t yyscanner)
+    void yyrestart  (FILE * input_file , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if ( ! YY_CURRENT_BUFFER ){
-        cmListFileLexer_yyensure_buffer_stack (yyscanner);
+        yyensure_buffer_stack (yyscanner);
 		YY_CURRENT_BUFFER_LVALUE =
-            cmListFileLexer_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+            yy_create_buffer( yyin, YY_BUF_SIZE , yyscanner);
 	}
 
-	cmListFileLexer_yy_init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
-	cmListFileLexer_yy_load_buffer_state(yyscanner );
+	yy_init_buffer( YY_CURRENT_BUFFER, input_file , yyscanner);
+	yy_load_buffer_state( yyscanner );
 }
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
  * @param yyscanner The scanner object.
  */
-    void cmListFileLexer_yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
+    void yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	/* TODO. We should be able to replace this entire function body
 	 * with
-	 *		cmListFileLexer_yypop_buffer_state();
-	 *		cmListFileLexer_yypush_buffer_state(new_buffer);
+	 *		yypop_buffer_state();
+	 *		yypush_buffer_state(new_buffer);
      */
-	cmListFileLexer_yyensure_buffer_stack (yyscanner);
+	yyensure_buffer_stack (yyscanner);
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
@@ -1707,17 +1886,17 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	cmListFileLexer_yy_load_buffer_state(yyscanner );
+	yy_load_buffer_state( yyscanner );
 
 	/* We don't actually know whether we did this switch during
-	 * EOF (cmListFileLexer_yywrap()) processing, but the only time this flag
-	 * is looked at is after cmListFileLexer_yywrap() is called, so it's safe
+	 * EOF (yywrap()) processing, but the only time this flag
+	 * is looked at is after yywrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
 	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
-static void cmListFileLexer_yy_load_buffer_state  (yyscan_t yyscanner)
+static void yy_load_buffer_state  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
@@ -1732,35 +1911,35 @@ static void cmListFileLexer_yy_load_buffer_state  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @return the allocated buffer state.
  */
-    YY_BUFFER_STATE cmListFileLexer_yy_create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
+    YY_BUFFER_STATE yy_create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 
-	b = (YY_BUFFER_STATE) cmListFileLexer_yyalloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state ) , yyscanner );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in cmListFileLexer_yy_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
-	b->yy_buf_size = (yy_size_t)size;
+	b->yy_buf_size = size;
 
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) cmListFileLexer_yyalloc(b->yy_buf_size + 2 ,yyscanner );
+	b->yy_ch_buf = (char *) yyalloc( (yy_size_t) (b->yy_buf_size + 2) , yyscanner );
 	if ( ! b->yy_ch_buf )
-		YY_FATAL_ERROR( "out of dynamic memory in cmListFileLexer_yy_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	cmListFileLexer_yy_init_buffer(b,file ,yyscanner);
+	yy_init_buffer( b, file , yyscanner);
 
 	return b;
 }
 
 /** Destroy the buffer.
- * @param b a buffer created with cmListFileLexer_yy_create_buffer()
+ * @param b a buffer created with yy_create_buffer()
  * @param yyscanner The scanner object.
  */
-    void cmListFileLexer_yy_delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void yy_delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
@@ -1771,28 +1950,28 @@ static void cmListFileLexer_yy_load_buffer_state  (yyscan_t yyscanner)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		cmListFileLexer_yyfree((void *) b->yy_ch_buf ,yyscanner );
+		yyfree( (void *) b->yy_ch_buf , yyscanner );
 
-	cmListFileLexer_yyfree((void *) b ,yyscanner );
+	yyfree( (void *) b , yyscanner );
 }
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
- * such as during a cmListFileLexer_yyrestart() or at EOF.
+ * such as during a yyrestart() or at EOF.
  */
-    static void cmListFileLexer_yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
+    static void yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
 
 {
 	int oerrno = errno;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-	cmListFileLexer_yy_flush_buffer(b ,yyscanner);
+	yy_flush_buffer( b , yyscanner);
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then cmListFileLexer_yy_init_buffer was _probably_
-     * called from cmListFileLexer_yyrestart() or through yy_get_next_buffer.
+    /* If b is the current buffer, then yy_init_buffer was _probably_
+     * called from yyrestart() or through yy_get_next_buffer.
      * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
@@ -1809,7 +1988,7 @@ static void cmListFileLexer_yy_load_buffer_state  (yyscan_t yyscanner)
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
  * @param yyscanner The scanner object.
  */
-    void cmListFileLexer_yy_flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void yy_flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if ( ! b )
@@ -1830,7 +2009,7 @@ static void cmListFileLexer_yy_load_buffer_state  (yyscan_t yyscanner)
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		cmListFileLexer_yy_load_buffer_state(yyscanner );
+		yy_load_buffer_state( yyscanner );
 }
 
 /** Pushes the new state onto the stack. The new state becomes
@@ -1839,15 +2018,15 @@ static void cmListFileLexer_yy_load_buffer_state  (yyscan_t yyscanner)
  *  @param new_buffer The new state.
  *  @param yyscanner The scanner object.
  */
-void cmListFileLexer_yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
+void yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (new_buffer == NULL)
 		return;
 
-	cmListFileLexer_yyensure_buffer_stack(yyscanner);
+	yyensure_buffer_stack(yyscanner);
 
-	/* This block is copied from cmListFileLexer_yy_switch_to_buffer. */
+	/* This block is copied from yy_switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
@@ -1861,8 +2040,8 @@ void cmListFileLexer_yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t 
 		yyg->yy_buffer_stack_top++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-	/* copied from cmListFileLexer_yy_switch_to_buffer. */
-	cmListFileLexer_yy_load_buffer_state(yyscanner );
+	/* copied from yy_switch_to_buffer. */
+	yy_load_buffer_state( yyscanner );
 	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
@@ -1870,19 +2049,19 @@ void cmListFileLexer_yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t 
  *  The next element becomes the new top.
  *  @param yyscanner The scanner object.
  */
-void cmListFileLexer_yypop_buffer_state (yyscan_t yyscanner)
+void yypop_buffer_state (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (!YY_CURRENT_BUFFER)
 		return;
 
-	cmListFileLexer_yy_delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
+	yy_delete_buffer(YY_CURRENT_BUFFER , yyscanner);
 	YY_CURRENT_BUFFER_LVALUE = NULL;
 	if (yyg->yy_buffer_stack_top > 0)
 		--yyg->yy_buffer_stack_top;
 
 	if (YY_CURRENT_BUFFER) {
-		cmListFileLexer_yy_load_buffer_state(yyscanner );
+		yy_load_buffer_state( yyscanner );
 		yyg->yy_did_buffer_switch_on_eof = 1;
 	}
 }
@@ -1890,9 +2069,9 @@ void cmListFileLexer_yypop_buffer_state (yyscan_t yyscanner)
 /* Allocates the stack if it does not exist.
  *  Guarantees space for at least one push.
  */
-static void cmListFileLexer_yyensure_buffer_stack (yyscan_t yyscanner)
+static void yyensure_buffer_stack (yyscan_t yyscanner)
 {
-	int num_to_alloc;
+	yy_size_t num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if (!yyg->yy_buffer_stack) {
@@ -1902,11 +2081,11 @@ static void cmListFileLexer_yyensure_buffer_stack (yyscan_t yyscanner)
 		 * immediate realloc on the next call.
          */
       num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)cmListFileLexer_yyalloc
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)yyalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		if ( ! yyg->yy_buffer_stack )
-			YY_FATAL_ERROR( "out of dynamic memory in cmListFileLexer_yyensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
 
@@ -1921,12 +2100,12 @@ static void cmListFileLexer_yyensure_buffer_stack (yyscan_t yyscanner)
 		yy_size_t grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)cmListFileLexer_yyrealloc
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)yyrealloc
 								(yyg->yy_buffer_stack,
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		if ( ! yyg->yy_buffer_stack )
-			YY_FATAL_ERROR( "out of dynamic memory in cmListFileLexer_yyensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -1940,7 +2119,7 @@ static void cmListFileLexer_yyensure_buffer_stack (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE cmListFileLexer_yy_scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
+YY_BUFFER_STATE yy_scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 
@@ -1950,11 +2129,11 @@ YY_BUFFER_STATE cmListFileLexer_yy_scan_buffer  (char * base, yy_size_t  size , 
 		/* They forgot to leave room for the EOB's. */
 		return NULL;
 
-	b = (YY_BUFFER_STATE) cmListFileLexer_yyalloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state ) , yyscanner );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in cmListFileLexer_yy_scan_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_buffer()" );
 
-	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
+	b->yy_buf_size = (int) (size - 2);	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
 	b->yy_is_our_buffer = 0;
 	b->yy_input_file = NULL;
@@ -1964,53 +2143,53 @@ YY_BUFFER_STATE cmListFileLexer_yy_scan_buffer  (char * base, yy_size_t  size , 
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	cmListFileLexer_yy_switch_to_buffer(b ,yyscanner );
+	yy_switch_to_buffer( b , yyscanner );
 
 	return b;
 }
 
-/** Setup the input buffer state to scan a string. The next call to cmListFileLexer_yylex() will
+/** Setup the input buffer state to scan a string. The next call to yylex() will
  * scan from a @e copy of @a str.
  * @param yystr a NUL-terminated string to scan
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
- *       cmListFileLexer_yy_scan_bytes() instead.
+ *       yy_scan_bytes() instead.
  */
-YY_BUFFER_STATE cmListFileLexer_yy_scan_string (yyconst char * yystr , yyscan_t yyscanner)
+YY_BUFFER_STATE yy_scan_string (const char * yystr , yyscan_t yyscanner)
 {
 
-	return cmListFileLexer_yy_scan_bytes(yystr,(int) strlen(yystr) ,yyscanner);
+	return yy_scan_bytes( yystr, (int) strlen(yystr) , yyscanner);
 }
 
-/** Setup the input buffer state to scan the given bytes. The next call to cmListFileLexer_yylex() will
+/** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
  * @param yybytes the byte buffer to scan
  * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE cmListFileLexer_yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
+YY_BUFFER_STATE yy_scan_bytes  (const char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 	char *buf;
 	yy_size_t n;
-	yy_size_t i;
+	int i;
 
 	/* Get memory for full buffer, including space for trailing EOB's. */
-	n = (yy_size_t) _yybytes_len + 2;
-	buf = (char *) cmListFileLexer_yyalloc(n ,yyscanner );
+	n = (yy_size_t) (_yybytes_len + 2);
+	buf = (char *) yyalloc( n , yyscanner );
 	if ( ! buf )
-		YY_FATAL_ERROR( "out of dynamic memory in cmListFileLexer_yy_scan_bytes()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_bytes()" );
 
-	for ( i = 0; i < (size_t)_yybytes_len; ++i )
+	for ( i = 0; i < _yybytes_len; ++i )
 		buf[i] = yybytes[i];
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = cmListFileLexer_yy_scan_buffer(buf,n ,yyscanner);
+	b = yy_scan_buffer( buf, n , yyscanner);
 	if ( ! b )
-		YY_FATAL_ERROR( "bad buffer in cmListFileLexer_yy_scan_bytes()" );
+		YY_FATAL_ERROR( "bad buffer in yy_scan_bytes()" );
 
 	/* It's okay to grow etc. this buffer, and we should throw it
 	 * away when we're done.
@@ -2024,11 +2203,11 @@ YY_BUFFER_STATE cmListFileLexer_yy_scan_bytes  (yyconst char * yybytes, int  _yy
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yynoreturn yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
+static void yynoreturn yy_fatal_error (const char* msg , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
-	(void) fprintf( stderr, "%s\n", msg );
+	fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 
@@ -2054,7 +2233,7 @@ static void yynoreturn yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 /** Get the user-defined data for this scanner.
  * @param yyscanner The scanner object.
  */
-YY_EXTRA_TYPE cmListFileLexer_yyget_extra  (yyscan_t yyscanner)
+YY_EXTRA_TYPE yyget_extra  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyextra;
@@ -2063,7 +2242,7 @@ YY_EXTRA_TYPE cmListFileLexer_yyget_extra  (yyscan_t yyscanner)
 /** Get the current line number.
  * @param yyscanner The scanner object.
  */
-int cmListFileLexer_yyget_lineno  (yyscan_t yyscanner)
+int yyget_lineno  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
@@ -2076,7 +2255,7 @@ int cmListFileLexer_yyget_lineno  (yyscan_t yyscanner)
 /** Get the current column number.
  * @param yyscanner The scanner object.
  */
-int cmListFileLexer_yyget_column  (yyscan_t yyscanner)
+int yyget_column  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
@@ -2089,7 +2268,7 @@ int cmListFileLexer_yyget_column  (yyscan_t yyscanner)
 /** Get the input stream.
  * @param yyscanner The scanner object.
  */
-FILE *cmListFileLexer_yyget_in  (yyscan_t yyscanner)
+FILE *yyget_in  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyin;
@@ -2098,7 +2277,7 @@ FILE *cmListFileLexer_yyget_in  (yyscan_t yyscanner)
 /** Get the output stream.
  * @param yyscanner The scanner object.
  */
-FILE *cmListFileLexer_yyget_out  (yyscan_t yyscanner)
+FILE *yyget_out  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyout;
@@ -2107,7 +2286,7 @@ FILE *cmListFileLexer_yyget_out  (yyscan_t yyscanner)
 /** Get the length of the current token.
  * @param yyscanner The scanner object.
  */
-int cmListFileLexer_yyget_leng  (yyscan_t yyscanner)
+int yyget_leng  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyleng;
@@ -2117,7 +2296,7 @@ int cmListFileLexer_yyget_leng  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  */
 
-char *cmListFileLexer_yyget_text  (yyscan_t yyscanner)
+char *yyget_text  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yytext;
@@ -2127,7 +2306,7 @@ char *cmListFileLexer_yyget_text  (yyscan_t yyscanner)
  * @param user_defined The data to be associated with this scanner.
  * @param yyscanner The scanner object.
  */
-void cmListFileLexer_yyset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
+void yyset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyextra = user_defined ;
@@ -2137,13 +2316,13 @@ void cmListFileLexer_yyset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscann
  * @param _line_number line number
  * @param yyscanner The scanner object.
  */
-void cmListFileLexer_yyset_lineno (int  _line_number , yyscan_t yyscanner)
+void yyset_lineno (int  _line_number , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "cmListFileLexer_yyset_lineno called with no buffer" );
+           YY_FATAL_ERROR( "yyset_lineno called with no buffer" );
 
     yylineno = _line_number;
 }
@@ -2152,13 +2331,13 @@ void cmListFileLexer_yyset_lineno (int  _line_number , yyscan_t yyscanner)
  * @param _column_no column number
  * @param yyscanner The scanner object.
  */
-void cmListFileLexer_yyset_column (int  _column_no , yyscan_t yyscanner)
+void yyset_column (int  _column_no , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "cmListFileLexer_yyset_column called with no buffer" );
+           YY_FATAL_ERROR( "yyset_column called with no buffer" );
 
     yycolumn = _column_no;
 }
@@ -2167,27 +2346,27 @@ void cmListFileLexer_yyset_column (int  _column_no , yyscan_t yyscanner)
  * input buffer.
  * @param _in_str A readable stream.
  * @param yyscanner The scanner object.
- * @see cmListFileLexer_yy_switch_to_buffer
+ * @see yy_switch_to_buffer
  */
-void cmListFileLexer_yyset_in (FILE *  _in_str , yyscan_t yyscanner)
+void yyset_in (FILE *  _in_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyin = _in_str ;
 }
 
-void cmListFileLexer_yyset_out (FILE *  _out_str , yyscan_t yyscanner)
+void yyset_out (FILE *  _out_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyout = _out_str ;
 }
 
-int cmListFileLexer_yyget_debug  (yyscan_t yyscanner)
+int yyget_debug  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yy_flex_debug;
 }
 
-void cmListFileLexer_yyset_debug (int  _bdebug , yyscan_t yyscanner)
+void yyset_debug (int  _bdebug , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yy_flex_debug = _bdebug ;
@@ -2197,20 +2376,18 @@ void cmListFileLexer_yyset_debug (int  _bdebug , yyscan_t yyscanner)
 
 /* User-visible API */
 
-/* cmListFileLexer_yylex_init is special because it creates the scanner itself, so it is
+/* yylex_init is special because it creates the scanner itself, so it is
  * the ONLY reentrant function that doesn't take the scanner as the last argument.
  * That's why we explicitly handle the declaration, instead of using our macros.
  */
-
-int cmListFileLexer_yylex_init(yyscan_t* ptr_yy_globals)
-
+int yylex_init(yyscan_t* ptr_yy_globals)
 {
     if (ptr_yy_globals == NULL){
         errno = EINVAL;
         return 1;
     }
 
-    *ptr_yy_globals = (yyscan_t) cmListFileLexer_yyalloc ( sizeof( struct yyguts_t ), NULL );
+    *ptr_yy_globals = (yyscan_t) yyalloc ( sizeof( struct yyguts_t ), NULL );
 
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
@@ -2223,27 +2400,25 @@ int cmListFileLexer_yylex_init(yyscan_t* ptr_yy_globals)
     return yy_init_globals ( *ptr_yy_globals );
 }
 
-/* cmListFileLexer_yylex_init_extra has the same functionality as cmListFileLexer_yylex_init, but follows the
+/* yylex_init_extra has the same functionality as yylex_init, but follows the
  * convention of taking the scanner as the last argument. Note however, that
  * this is a *pointer* to a scanner, as it will be allocated by this call (and
  * is the reason, too, why this function also must handle its own declaration).
- * The user defined value in the first argument will be available to cmListFileLexer_yyalloc in
+ * The user defined value in the first argument will be available to yyalloc in
  * the yyextra field.
  */
-
-int cmListFileLexer_yylex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
-
+int yylex_init_extra( YY_EXTRA_TYPE yy_user_defined, yyscan_t* ptr_yy_globals )
 {
     struct yyguts_t dummy_yyguts;
 
-    cmListFileLexer_yyset_extra (yy_user_defined, &dummy_yyguts);
+    yyset_extra (yy_user_defined, &dummy_yyguts);
 
     if (ptr_yy_globals == NULL){
         errno = EINVAL;
         return 1;
     }
 
-    *ptr_yy_globals = (yyscan_t) cmListFileLexer_yyalloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
+    *ptr_yy_globals = (yyscan_t) yyalloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
 
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
@@ -2254,7 +2429,7 @@ int cmListFileLexer_yylex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr
     yy_init_globals. Leave at 0x00 for releases. */
     memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
 
-    cmListFileLexer_yyset_extra (yy_user_defined, *ptr_yy_globals);
+    yyset_extra (yy_user_defined, *ptr_yy_globals);
 
     return yy_init_globals ( *ptr_yy_globals );
 }
@@ -2263,7 +2438,7 @@ static int yy_init_globals (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from cmListFileLexer_yylex_destroy(), so don't allocate here.
+     * This function is called from yylex_destroy(), so don't allocate here.
      */
 
     yyg->yy_buffer_stack = NULL;
@@ -2287,37 +2462,37 @@ static int yy_init_globals (yyscan_t yyscanner)
 #endif
 
     /* For future reference: Set errno on error, since we are called by
-     * cmListFileLexer_yylex_init()
+     * yylex_init()
      */
     return 0;
 }
 
-/* cmListFileLexer_yylex_destroy is for both reentrant and non-reentrant scanners. */
-int cmListFileLexer_yylex_destroy  (yyscan_t yyscanner)
+/* yylex_destroy is for both reentrant and non-reentrant scanners. */
+int yylex_destroy  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		cmListFileLexer_yy_delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
+		yy_delete_buffer( YY_CURRENT_BUFFER , yyscanner );
 		YY_CURRENT_BUFFER_LVALUE = NULL;
-		cmListFileLexer_yypop_buffer_state(yyscanner);
+		yypop_buffer_state(yyscanner);
 	}
 
 	/* Destroy the stack itself. */
-	cmListFileLexer_yyfree(yyg->yy_buffer_stack ,yyscanner);
+	yyfree(yyg->yy_buffer_stack , yyscanner);
 	yyg->yy_buffer_stack = NULL;
 
     /* Destroy the start condition stack. */
-        cmListFileLexer_yyfree(yyg->yy_start_stack ,yyscanner );
+        yyfree( yyg->yy_start_stack , yyscanner );
         yyg->yy_start_stack = NULL;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * cmListFileLexer_yylex() is called, initialization will occur. */
+     * yylex() is called, initialization will occur. */
     yy_init_globals( yyscanner);
 
     /* Destroy the main struct (reentrant only). */
-    cmListFileLexer_yyfree ( yyscanner , yyscanner );
+    yyfree ( yyscanner , yyscanner );
     yyscanner = NULL;
     return 0;
 }
@@ -2327,7 +2502,7 @@ int cmListFileLexer_yylex_destroy  (yyscan_t yyscanner)
  */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, yyconst char * s2, int n , yyscan_t yyscanner)
+static void yy_flex_strncpy (char* s1, const char * s2, int n , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
@@ -2339,7 +2514,7 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n , yyscan_t yysca
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
+static int yy_flex_strlen (const char * s , yyscan_t yyscanner)
 {
 	int n;
 	for ( n = 0; s[n]; ++n )
@@ -2349,14 +2524,14 @@ static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
 }
 #endif
 
-void *cmListFileLexer_yyalloc (yy_size_t  size , yyscan_t yyscanner)
+void *yyalloc (yy_size_t  size , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
 	return malloc(size);
 }
 
-void *cmListFileLexer_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
+void *yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
@@ -2371,18 +2546,14 @@ void *cmListFileLexer_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscann
 	return realloc(ptr, size);
 }
 
-void cmListFileLexer_yyfree (void * ptr , yyscan_t yyscanner)
+void yyfree (void * ptr , yyscan_t yyscanner)
 {
 	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	(void)yyg;
-	free( (char *) ptr );	/* see cmListFileLexer_yyrealloc() for (char *) cast */
+	free( (char *) ptr );	/* see yyrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
-
-#line 265 "cmListFileLexer.in.l"
-
-
 
 /*--------------------------------------------------------------------------*/
 static void cmListFileLexerSetToken(cmListFileLexer* lexer, const char* text,

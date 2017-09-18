@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDefinitions.h"
 
-#include "cmConfigure.h"
 #include <assert.h>
 #include <set>
 #include <utility>
@@ -35,7 +34,7 @@ const char* cmDefinitions::Get(const std::string& key, StackIter begin,
                                StackIter end)
 {
   Def const& def = cmDefinitions::GetInternal(key, begin, end, false);
-  return def.Exists ? def.c_str() : CM_NULLPTR;
+  return def.Exists ? def.c_str() : nullptr;
 }
 
 void cmDefinitions::Raise(const std::string& key, StackIter begin,
@@ -67,10 +66,9 @@ std::vector<std::string> cmDefinitions::UnusedKeys() const
   std::vector<std::string> keys;
   keys.reserve(this->Map.size());
   // Consider local definitions.
-  for (MapType::const_iterator mi = this->Map.begin(); mi != this->Map.end();
-       ++mi) {
-    if (!mi->second.Used) {
-      keys.push_back(mi->first);
+  for (auto const& mi : this->Map) {
+    if (!mi.second.Used) {
+      keys.push_back(mi.first);
     }
   }
   return keys;
@@ -82,15 +80,14 @@ cmDefinitions cmDefinitions::MakeClosure(StackIter begin, StackIter end)
   std::set<std::string> undefined;
   for (StackIter it = begin; it != end; ++it) {
     // Consider local definitions.
-    for (MapType::const_iterator mi = it->Map.begin(); mi != it->Map.end();
-         ++mi) {
+    for (auto const& mi : it->Map) {
       // Use this key if it is not already set or unset.
-      if (closure.Map.find(mi->first) == closure.Map.end() &&
-          undefined.find(mi->first) == undefined.end()) {
-        if (mi->second.Exists) {
-          closure.Map.insert(*mi);
+      if (closure.Map.find(mi.first) == closure.Map.end() &&
+          undefined.find(mi.first) == undefined.end()) {
+        if (mi.second.Exists) {
+          closure.Map.insert(mi);
         } else {
-          undefined.insert(mi->first);
+          undefined.insert(mi.first);
         }
       }
     }
@@ -106,11 +103,10 @@ std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
 
   for (StackIter it = begin; it != end; ++it) {
     defined.reserve(defined.size() + it->Map.size());
-    for (MapType::const_iterator mi = it->Map.begin(); mi != it->Map.end();
-         ++mi) {
+    for (auto const& mi : it->Map) {
       // Use this key if it is not already set or unset.
-      if (bound.insert(mi->first).second && mi->second.Exists) {
-        defined.push_back(mi->first);
+      if (bound.insert(mi.first).second && mi.second.Exists) {
+        defined.push_back(mi.first);
       }
     }
   }

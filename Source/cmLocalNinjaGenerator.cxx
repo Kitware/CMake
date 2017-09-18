@@ -79,19 +79,19 @@ void cmLocalNinjaGenerator::Generate()
     }
   }
 
-  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
-       t != targets.end(); ++t) {
-    if ((*t)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
+  for (cmGeneratorTarget* target : targets) {
+    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
-    cmNinjaTargetGenerator* tg = cmNinjaTargetGenerator::New(*t);
+    cmNinjaTargetGenerator* tg = cmNinjaTargetGenerator::New(target);
     if (tg) {
       tg->Generate();
       // Add the target to "all" if required.
       if (!this->GetGlobalNinjaGenerator()->IsExcluded(
-            this->GetGlobalNinjaGenerator()->GetLocalGenerators()[0], *t)) {
-        this->GetGlobalNinjaGenerator()->AddDependencyToAll(*t);
+            this->GetGlobalNinjaGenerator()->GetLocalGenerators()[0],
+            target)) {
+        this->GetGlobalNinjaGenerator()->AddDependencyToAll(target);
       }
       delete tg;
     }
@@ -212,8 +212,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
       os, "Pools defined by global property JOB_POOLS");
     std::vector<std::string> pools;
     cmSystemTools::ExpandListArgument(jobpools, pools);
-    for (size_t i = 0; i < pools.size(); ++i) {
-      std::string const& pool = pools[i];
+    for (std::string const& pool : pools) {
       const std::string::size_type eq = pool.find('=');
       unsigned int jobs;
       if (eq != std::string::npos &&
@@ -250,12 +249,10 @@ void cmLocalNinjaGenerator::ComputeObjectFilenames(
 {
   // Determine if these object files should use a custom extension
   char const* custom_ext = gt->GetCustomObjectExtension();
-  for (std::map<cmSourceFile const*, std::string>::iterator si =
-         mapping.begin();
-       si != mapping.end(); ++si) {
-    cmSourceFile const* sf = si->first;
+  for (auto& si : mapping) {
+    cmSourceFile const* sf = si.first;
     bool keptSourceExtension;
-    si->second = this->GetObjectFileNameWithoutTarget(
+    si.second = this->GetObjectFileNameWithoutTarget(
       *sf, gt->ObjectDirectory, &keptSourceExtension, custom_ext);
   }
 }
@@ -291,10 +288,9 @@ void cmLocalNinjaGenerator::AppendCustomCommandDeps(
   cmCustomCommandGenerator const& ccg, cmNinjaDeps& ninjaDeps)
 {
   const std::vector<std::string>& deps = ccg.GetDepends();
-  for (std::vector<std::string>::const_iterator i = deps.begin();
-       i != deps.end(); ++i) {
+  for (std::string const& i : deps) {
     std::string dep;
-    if (this->GetRealDependency(*i, this->GetConfigName(), dep)) {
+    if (this->GetRealDependency(i, this->GetConfigName(), dep)) {
       ninjaDeps.push_back(
         this->GetGlobalNinjaGenerator()->ConvertToNinjaPath(dep));
     }
@@ -408,9 +404,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
                  this->GetGlobalNinjaGenerator()->MapToNinjaPath());
   this->AppendCustomCommandDeps(ccg, ninjaDeps);
 
-  for (cmNinjaDeps::iterator i = ninjaOutputs.begin(); i != ninjaOutputs.end();
-       ++i) {
-    this->GetGlobalNinjaGenerator()->SeenCustomCommandOutput(*i);
+  for (std::string const& ninjaOutput : ninjaOutputs) {
+    this->GetGlobalNinjaGenerator()->SeenCustomCommandOutput(ninjaOutput);
   }
 
   std::vector<std::string> cmdLines;
@@ -445,10 +440,9 @@ void cmLocalNinjaGenerator::AddCustomCommandTarget(cmCustomCommand const* cc,
 
 void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
 {
-  for (std::vector<cmCustomCommand const*>::iterator vi =
-         this->CustomCommands.begin();
-       vi != this->CustomCommands.end(); ++vi) {
-    CustomCommandTargetMap::iterator i = this->CustomCommandTargets.find(*vi);
+  for (cmCustomCommand const* customCommand : this->CustomCommands) {
+    CustomCommandTargetMap::iterator i =
+      this->CustomCommandTargets.find(customCommand);
     assert(i != this->CustomCommandTargets.end());
 
     // A custom command may appear on multiple targets.  However, some build

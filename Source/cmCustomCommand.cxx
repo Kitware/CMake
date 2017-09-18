@@ -4,8 +4,6 @@
 
 #include "cmMakefile.h"
 
-#include "cmConfigure.h"
-
 cmCustomCommand::cmCustomCommand()
   : Backtrace()
 {
@@ -30,7 +28,7 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
   , Backtrace()
   , Comment(comment ? comment : "")
   , WorkingDirectory(workingDirectory ? workingDirectory : "")
-  , HaveComment(comment != CM_NULLPTR)
+  , HaveComment(comment != nullptr)
   , EscapeAllowMakeVars(false)
   , EscapeOldStyle(true)
   , CommandExpandLists(false)
@@ -62,7 +60,7 @@ const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
 
 const char* cmCustomCommand::GetComment() const
 {
-  const char* no_comment = CM_NULLPTR;
+  const char* no_comment = nullptr;
   return this->HaveComment ? this->Comment.c_str() : no_comment;
 }
 

@@ -9,6 +9,7 @@
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
+#include <algorithm>
 #include <iomanip>
 #include <map>
 #include <stdlib.h>
@@ -447,6 +448,8 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     cmsys::RegularExpression mountpoint_regex(".*(/Volumes/[^\n]+)\n.*");
     mountpoint_regex.find(attach_output.c_str());
     std::string const temp_mount = mountpoint_regex.match(1);
+    std::string const temp_mount_name =
+      temp_mount.substr(sizeof("/Volumes/") - 1);
 
     // Remove dummy padding file so we have enough space on RW image ...
     std::ostringstream dummy_padding;
@@ -480,7 +483,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       std::ostringstream setup_script_command;
       setup_script_command << "osascript"
                            << " \"" << cpack_dmg_ds_store_setup_script << "\""
-                           << " \"" << cpack_dmg_volume_name << "\"";
+                           << " \"" << temp_mount_name << "\"";
       std::string error;
       if (!this->RunCommand(setup_script_command, &error)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,

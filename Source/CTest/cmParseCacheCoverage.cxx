@@ -53,10 +53,8 @@ void cmParseCacheCoverage::RemoveUnCoveredFiles()
   while (ci != this->Coverage.TotalCoverage.end()) {
     cmCTestCoverageHandlerContainer::SingleFileCoverageVector& v = ci->second;
     bool nothing = true;
-    for (cmCTestCoverageHandlerContainer::SingleFileCoverageVector::iterator
-           i = v.begin();
-         i != v.end(); ++i) {
-      if (*i > 0) {
+    for (int i : v) {
+      if (i > 0) {
         nothing = false;
         break;
       }

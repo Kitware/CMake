@@ -3,7 +3,7 @@
 #ifndef cmCTestTestHandler_h
 #define cmCTestTestHandler_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGenericHandler.h"
 
@@ -36,7 +36,7 @@ public:
   /**
    * The main entry point for this class
    */
-  int ProcessHandler() CM_OVERRIDE;
+  int ProcessHandler() override;
 
   /**
    * When both -R and -I are used should te resulting test list be the
@@ -54,7 +54,7 @@ public:
   /**
    * This method is called when reading CTest custom file
    */
-  void PopulateCustomVectors(cmMakefile* mf) CM_OVERRIDE;
+  void PopulateCustomVectors(cmMakefile* mf) override;
 
   ///! Control the use of the regular expresisons, call these methods to turn
   /// them on
@@ -90,7 +90,12 @@ public:
    */
   bool SetTestsProperties(const std::vector<std::string>& args);
 
-  void Initialize() CM_OVERRIDE;
+  /**
+   * Set directory properties
+   */
+  bool SetDirectoryProperties(const std::vector<std::string>& args);
+
+  void Initialize() override;
 
   // NOTE: This struct is Saved/Restored
   // in cmCTestTestHandler, if you add to this class
@@ -105,11 +110,11 @@ public:
     std::vector<std::string> Depends;
     std::vector<std::string> AttachedFiles;
     std::vector<std::string> AttachOnFail;
-    std::vector<std::pair<cmsys::RegularExpression, std::string> >
+    std::vector<std::pair<cmsys::RegularExpression, std::string>>
       ErrorRegularExpressions;
-    std::vector<std::pair<cmsys::RegularExpression, std::string> >
+    std::vector<std::pair<cmsys::RegularExpression, std::string>>
       RequiredRegularExpressions;
-    std::vector<std::pair<cmsys::RegularExpression, std::string> >
+    std::vector<std::pair<cmsys::RegularExpression, std::string>>
       TimeoutRegularExpressions;
     std::map<std::string, std::string> Measurements;
     bool IsInBasedOnREOptions;
@@ -144,6 +149,7 @@ public:
     double ExecutionTime;
     int ReturnValue;
     int Status;
+    std::string ExceptionStatus;
     bool CompressOutput;
     std::string CompletionStatus;
     std::string Output;
@@ -182,10 +188,12 @@ protected:
   virtual void GenerateTestCommand(std::vector<std::string>& args, int test);
   int ExecuteCommands(std::vector<std::string>& vec);
 
-  void WriteTestResultHeader(cmXMLWriter& xml, cmCTestTestResult* result);
-  void WriteTestResultFooter(cmXMLWriter& xml, cmCTestTestResult* result);
+  void WriteTestResultHeader(cmXMLWriter& xml,
+                             cmCTestTestResult const& result);
+  void WriteTestResultFooter(cmXMLWriter& xml,
+                             cmCTestTestResult const& result);
   // Write attached test files into the xml
-  void AttachFiles(cmXMLWriter& xml, cmCTestTestResult* result);
+  void AttachFiles(cmXMLWriter& xml, cmCTestTestResult& result);
 
   //! Clean test output to specified length
   bool CleanTestOutput(std::string& output, size_t length);
@@ -226,7 +234,8 @@ private:
    */
   virtual void GenerateDartOutput(cmXMLWriter& xml);
 
-  void PrintLabelSummary();
+  void PrintLabelOrSubprojectSummary(bool isSubProject);
+
   /**
    * Run the tests for a directory and any subdirectories
    */
@@ -262,7 +271,7 @@ private:
    */
   std::string FindTheExecutable(const char* exe);
 
-  const char* GetTestStatus(int status);
+  const char* GetTestStatus(cmCTestTestResult const&);
   void ExpandTestsToRunInformation(size_t numPossibleTests);
   void ExpandTestsToRunInformationForRerunFailed();
 

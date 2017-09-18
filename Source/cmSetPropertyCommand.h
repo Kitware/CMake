@@ -3,7 +3,7 @@
 #ifndef cmSetsPropertiesCommand_h
 #define cmSetsPropertiesCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <set>
 #include <string>
@@ -22,14 +22,14 @@ class cmSetPropertyCommand : public cmCommand
 public:
   cmSetPropertyCommand();
 
-  cmCommand* Clone() CM_OVERRIDE { return new cmSetPropertyCommand; }
+  cmCommand* Clone() override { return new cmSetPropertyCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
 private:
   std::set<std::string> Names;

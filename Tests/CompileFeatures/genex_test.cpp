@@ -11,6 +11,18 @@
 #error EXPECT_OVERRIDE_CONTROL not defined
 #endif
 
+#ifdef TEST_CXX_STD
+#if !HAVE_CXX_STD_11
+#error HAVE_CXX_STD_11 is false with CXX_STANDARD == 11
+#endif
+#if HAVE_CXX_STD_14
+#error HAVE_CXX_STD_14 is true with CXX_STANDARD == 11
+#endif
+#if HAVE_CXX_STD_17
+#error HAVE_CXX_STD_17 is true with CXX_STANDARD == 11
+#endif
+#endif
+
 #if !HAVE_OVERRIDE_CONTROL
 #if EXPECT_OVERRIDE_CONTROL
 #error "Expect override control feature"

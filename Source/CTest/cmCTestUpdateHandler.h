@@ -3,7 +3,7 @@
 #ifndef cmCTestUpdateHandler_h
 #define cmCTestUpdateHandler_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGenericHandler.h"
 
@@ -23,7 +23,7 @@ public:
   /*
    * The main entry point for this class
    */
-  int ProcessHandler() CM_OVERRIDE;
+  int ProcessHandler() override;
 
   cmCTestUpdateHandler();
 
@@ -42,7 +42,7 @@ public:
   /**
    * Initialize handler
    */
-  void Initialize() CM_OVERRIDE;
+  void Initialize() override;
 
 private:
   // Some structures needed for update

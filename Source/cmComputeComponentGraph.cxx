@@ -57,8 +57,8 @@ void cmComputeComponentGraph::TarjanVisit(int i)
 
   // Follow outgoing edges.
   EdgeList const& nl = this->InputGraph[i];
-  for (EdgeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni) {
-    int j = *ni;
+  for (cmGraphEdge const& ni : nl) {
+    int j = ni;
 
     // Ignore edges to nodes that have been reached by a previous DFS
     // walk.  Since we did not reach the current node from that walk
@@ -119,14 +119,14 @@ void cmComputeComponentGraph::TransferEdges()
   for (int i = 0; i < n; ++i) {
     int i_component = this->TarjanComponents[i];
     EdgeList const& nl = this->InputGraph[i];
-    for (EdgeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni) {
-      int j = *ni;
+    for (cmGraphEdge const& ni : nl) {
+      int j = ni;
       int j_component = this->TarjanComponents[j];
       if (i_component != j_component) {
         // We do not attempt to combine duplicate edges, but instead
         // store the inter-component edges with suitable multiplicity.
         this->ComponentGraph[i_component].push_back(
-          cmGraphEdge(j_component, ni->IsStrong()));
+          cmGraphEdge(j_component, ni.IsStrong()));
       }
     }
   }

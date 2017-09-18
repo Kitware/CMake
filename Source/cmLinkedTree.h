@@ -3,7 +3,7 @@
 #ifndef cmLinkedTree_h
 #define cmLinkedTree_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <assert.h>
 #include <iterator>
@@ -49,7 +49,7 @@ public:
 
   public:
     iterator()
-      : Tree(CM_NULLPTR)
+      : Tree(nullptr)
       , Position(0)
     {
     }

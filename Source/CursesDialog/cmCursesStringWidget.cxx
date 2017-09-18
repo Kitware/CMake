@@ -74,7 +74,7 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
     return false;
   }
 
-  this->OriginalString = CM_NULLPTR;
+  this->OriginalString = nullptr;
   this->Done = false;
 
   char debugMessage[128];

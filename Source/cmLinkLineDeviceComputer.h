@@ -4,7 +4,7 @@
 #ifndef cmLinkLineDeviceComputer_h
 #define cmLinkLineDeviceComputer_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 
@@ -23,14 +23,13 @@ class cmLinkLineDeviceComputer : public cmLinkLineComputer
 public:
   cmLinkLineDeviceComputer(cmOutputConverter* outputConverter,
                            cmStateDirectory const& stateDir);
-  ~cmLinkLineDeviceComputer() CM_OVERRIDE;
+  ~cmLinkLineDeviceComputer() override;
 
   std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
-                                   std::string const& stdLibString)
-    CM_OVERRIDE;
+                                   std::string const& stdLibString) override;
 
   std::string GetLinkerLanguage(cmGeneratorTarget* target,
-                                std::string const& config) CM_OVERRIDE;
+                                std::string const& config) override;
 };
 
 class cmNinjaLinkLineDeviceComputer : public cmLinkLineDeviceComputer
@@ -42,8 +41,7 @@ public:
                                 cmStateDirectory const& stateDir,
                                 cmGlobalNinjaGenerator const* gg);
 
-  std::string ConvertToLinkReference(std::string const& input) const
-    CM_OVERRIDE;
+  std::string ConvertToLinkReference(std::string const& input) const override;
 
 private:
   cmGlobalNinjaGenerator const* GG;

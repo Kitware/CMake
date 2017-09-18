@@ -16,6 +16,9 @@ Site: @SITE@
 # Build name is osname-revision-compiler, i.e. Linux-2.4.2-2smp-c++
 BuildName: @BUILDNAME@
 
+# Subprojects
+LabelsForSubprojects: @CTEST_LABELS_FOR_SUBPROJECTS@
+
 # Submission information
 IsCDash: @CTEST_DROP_SITE_CDASH@
 CDashVersion: @CTEST_CDASH_VERSION@

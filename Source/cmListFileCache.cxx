@@ -9,7 +9,6 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include "cmConfigure.h"
 #include <algorithm>
 #include <assert.h>
 #include <sstream>
@@ -82,7 +81,7 @@ bool cmListFileParser::ParseFile()
   }
 
   if (bom == cmListFileLexer_BOM_Broken) {
-    cmListFileLexer_SetFileName(this->Lexer, CM_NULLPTR, CM_NULLPTR);
+    cmListFileLexer_SetFileName(this->Lexer, nullptr, nullptr);
     this->IssueFileOpenError("Error while reading Byte-Order-Mark. "
                              "File not seekable?");
     return false;
@@ -90,7 +89,7 @@ bool cmListFileParser::ParseFile()
 
   // Verify the Byte-Order-Mark, if any.
   if (bom != cmListFileLexer_BOM_None && bom != cmListFileLexer_BOM_UTF8) {
-    cmListFileLexer_SetFileName(this->Lexer, CM_NULLPTR, CM_NULLPTR);
+    cmListFileLexer_SetFileName(this->Lexer, nullptr, nullptr);
     this->IssueFileOpenError(
       "File starts with a Byte-Order-Mark that is not UTF-8.");
     return false;
@@ -330,13 +329,13 @@ cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& bottom,
 
 cmListFileBacktrace::cmListFileBacktrace()
   : Bottom()
-  , Cur(CM_NULLPTR)
+  , Cur(nullptr)
 {
 }
 
 cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& snapshot)
   : Bottom(snapshot.GetCallStackBottom())
-  , Cur(CM_NULLPTR)
+  , Cur(nullptr)
 {
 }
 

@@ -45,17 +45,15 @@ bool cmVariableWatch::AddWatch(const std::string& variable, WatchMethod method,
   p->Method = method;
   p->ClientData = client_data;
   p->DeleteDataCall = delete_data;
-  cmVariableWatch::VectorOfPairs* vp = &this->WatchMap[variable];
-  cmVariableWatch::VectorOfPairs::size_type cc;
-  for (cc = 0; cc < vp->size(); cc++) {
-    cmVariableWatch::Pair* pair = (*vp)[cc];
+  cmVariableWatch::VectorOfPairs& vp = this->WatchMap[variable];
+  for (cmVariableWatch::Pair* pair : vp) {
     if (pair->Method == method && client_data &&
         client_data == pair->ClientData) {
       // Callback already exists
       return false;
     }
   }
-  vp->push_back(p.release());
+  vp.push_back(p.release());
   return true;
 }
 
@@ -87,9 +85,8 @@ bool cmVariableWatch::VariableAccessed(const std::string& variable,
     this->WatchMap.find(variable);
   if (mit != this->WatchMap.end()) {
     const cmVariableWatch::VectorOfPairs* vp = &mit->second;
-    cmVariableWatch::VectorOfPairs::const_iterator it;
-    for (it = vp->begin(); it != vp->end(); it++) {
-      (*it)->Method(variable, access_type, (*it)->ClientData, newValue, mf);
+    for (cmVariableWatch::Pair* it : *vp) {
+      it->Method(variable, access_type, it->ClientData, newValue, mf);
     }
     return true;
   }

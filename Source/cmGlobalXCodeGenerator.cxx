@@ -117,20 +117,20 @@ class cmGlobalXCodeGenerator::Factory : public cmGlobalGeneratorFactory
 {
 public:
   cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                           cmake* cm) const CM_OVERRIDE;
+                                           cmake* cm) const override;
 
-  void GetDocumentation(cmDocumentationEntry& entry) const CM_OVERRIDE
+  void GetDocumentation(cmDocumentationEntry& entry) const override
   {
     cmGlobalXCodeGenerator::GetDocumentation(entry);
   }
 
-  void GetGenerators(std::vector<std::string>& names) const CM_OVERRIDE
+  void GetGenerators(std::vector<std::string>& names) const override
   {
     names.push_back(cmGlobalXCodeGenerator::GetActualName());
   }
 
-  bool SupportsToolset() const CM_OVERRIDE { return true; }
-  bool SupportsPlatform() const CM_OVERRIDE { return false; }
+  bool SupportsToolset() const override { return true; }
+  bool SupportsPlatform() const override { return false; }
 };
 
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(
@@ -193,7 +193,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
   if (version_number < 30) {
     cm->IssueMessage(cmake::FATAL_ERROR,
                      "Xcode " + version_string + " not supported.");
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   CM_AUTO_PTR<cmGlobalXCodeGenerator> gg(
@@ -330,7 +330,7 @@ cmLocalGenerator* cmGlobalXCodeGenerator::CreateLocalGenerator(cmMakefile* mf)
 
 void cmGlobalXCodeGenerator::AddExtraIDETargets()
 {
-  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*>>::iterator it;
   // make sure extra targets are added before calling
   // the parent generate which will call trace depends
   for (it = this->ProjectMap.begin(); it != this->ProjectMap.end(); ++it) {
@@ -347,7 +347,7 @@ void cmGlobalXCodeGenerator::Generate()
   if (cmSystemTools::GetErrorOccuredFlag()) {
     return;
   }
-  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*>>::iterator it;
   for (it = this->ProjectMap.begin(); it != this->ProjectMap.end(); ++it) {
     cmLocalGenerator* root = it->second[0];
     this->SetGenerationRoot(root);
@@ -440,8 +440,8 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
       continue;
     }
 
-    std::vector<cmGeneratorTarget*> tgts = lg->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+    const std::vector<cmGeneratorTarget*>& tgts = lg->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
          l != tgts.end(); l++) {
       cmGeneratorTarget* target = *l;
 
@@ -925,12 +925,12 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
   cmLocalGenerator* gen, std::vector<cmXCodeObject*>& targets)
 {
   this->SetCurrentLocalGenerator(gen);
-  std::vector<cmGeneratorTarget*> tgts =
+  const std::vector<cmGeneratorTarget*>& tgts =
     this->CurrentLocalGenerator->GetGeneratorTargets();
   typedef std::map<std::string, cmGeneratorTarget*, cmCompareTargets>
     cmSortedTargets;
   cmSortedTargets sortedTargets;
-  for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+  for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
        l != tgts.end(); l++) {
     sortedTargets[(*l)->GetName()] = *l;
   }
@@ -1089,7 +1089,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
     // framework or bundle targets
     std::vector<cmXCodeObject*> contentBuildPhases;
     if (isFrameworkTarget || isBundleTarget || isCFBundleTarget) {
-      typedef std::map<std::string, std::vector<cmSourceFile*> >
+      typedef std::map<std::string, std::vector<cmSourceFile*>>
         mapOfVectorOfSourceFiles;
       mapOfVectorOfSourceFiles bundleFiles;
       for (std::vector<cmSourceFile*>::const_iterator i = classes.begin();
@@ -1140,7 +1140,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
     // create vector of "resource content file" build phases - only for
     // framework or bundle targets
     if (isFrameworkTarget || isBundleTarget || isCFBundleTarget) {
-      typedef std::map<std::string, std::vector<cmSourceFile*> >
+      typedef std::map<std::string, std::vector<cmSourceFile*>>
         mapOfVectorOfSourceFiles;
       mapOfVectorOfSourceFiles bundleFiles;
       for (std::vector<cmSourceFile*>::const_iterator i = classes.begin();
@@ -1210,7 +1210,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
 void cmGlobalXCodeGenerator::ForceLinkerLanguages()
 {
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-    std::vector<cmGeneratorTarget*> tgts =
+    const std::vector<cmGeneratorTarget*>& tgts =
       this->LocalGenerators[i]->GetGeneratorTargets();
     // All targets depend on the build-system check target.
     for (std::vector<cmGeneratorTarget*>::const_iterator ti = tgts.begin();
@@ -1517,17 +1517,6 @@ void cmGlobalXCodeGenerator::AddCommandsToBuildPhase(
   makecmd += " all";
   buildphase->AddAttribute("shellScript", this->CreateString(makecmd));
   buildphase->AddAttribute("showEnvVarsInLog", this->CreateString("0"));
-
-  cmXCodeObject* outputFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  for (std::vector<cmCustomCommand>::const_iterator i = commands.begin();
-       i != commands.end(); ++i) {
-    std::vector<std::string> const& outputs = i->GetOutputs();
-    for (std::vector<std::string>::const_iterator j = outputs.begin();
-         j != outputs.end(); ++j) {
-      outputFiles->AddObject(this->CreateString(*j));
-    }
-  }
-  buildphase->AddAttribute("outputPaths", outputFiles);
 }
 
 void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
@@ -2706,8 +2695,8 @@ bool cmGlobalXCodeGenerator::CreateGroups(
        i != generators.end(); ++i) {
     cmMakefile* mf = (*i)->GetMakefile();
     std::vector<cmSourceGroup> sourceGroups = mf->GetSourceGroups();
-    std::vector<cmGeneratorTarget*> tgts = (*i)->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+    const std::vector<cmGeneratorTarget*>& tgts = (*i)->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
          l != tgts.end(); l++) {
       cmGeneratorTarget* gtgt = *l;
 
@@ -2935,7 +2924,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     this->CreateObject(cmXCodeObject::XCConfigurationList);
   cmXCodeObject* buildConfigurations =
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  typedef std::vector<std::pair<std::string, cmXCodeObject*> > Configs;
+  typedef std::vector<std::pair<std::string, cmXCodeObject*>> Configs;
   Configs configs;
   const char* defaultConfigName = "Debug";
   for (unsigned int i = 0; i < this->CurrentConfigurationTypes.size(); ++i) {
@@ -3609,7 +3598,7 @@ bool cmGlobalXCodeGenerator::HasKnownObjectFileLocation(
   std::string* reason) const
 {
   if (this->ObjectDirArch.find('$') != std::string::npos) {
-    if (reason != CM_NULLPTR) {
+    if (reason != nullptr) {
       *reason = " under Xcode with multiple architectures";
     }
     return false;

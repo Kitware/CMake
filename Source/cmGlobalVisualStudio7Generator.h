@@ -91,7 +91,7 @@ public:
 
   const char* GetIntelProjectVersion();
 
-  bool FindMakeProgram(cmMakefile* mf) CM_OVERRIDE;
+  bool FindMakeProgram(cmMakefile* mf) override;
 
   /** Is the Microsoft Assembler enabled?  */
   bool IsMasmEnabled() const { return this->MasmEnabled; }
@@ -156,7 +156,7 @@ protected:
 
   virtual void WriteFolders(std::ostream& fout);
   virtual void WriteFoldersContent(std::ostream& fout);
-  std::map<std::string, std::set<std::string> > VisualStudioFolders;
+  std::map<std::string, std::set<std::string>> VisualStudioFolders;
 
   // Set during OutputSLNFile with the name of the current project.
   // There is one SLN file per project.

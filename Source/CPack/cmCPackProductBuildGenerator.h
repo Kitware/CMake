@@ -3,7 +3,7 @@
 #ifndef cmCPackProductBuildGenerator_h
 #define cmCPackProductBuildGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 
@@ -25,12 +25,12 @@ public:
    * Construct generator
    */
   cmCPackProductBuildGenerator();
-  ~cmCPackProductBuildGenerator() CM_OVERRIDE;
+  ~cmCPackProductBuildGenerator() override;
 
 protected:
-  int InitializeInternal() CM_OVERRIDE;
-  int PackageFiles() CM_OVERRIDE;
-  const char* GetOutputExtension() CM_OVERRIDE { return ".pkg"; }
+  int InitializeInternal() override;
+  int PackageFiles() override;
+  const char* GetOutputExtension() override { return ".pkg"; }
 
   // Run ProductBuild with the given command line, which will (if
   // successful) produce the given package file. Returns true if

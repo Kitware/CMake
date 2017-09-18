@@ -86,7 +86,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
                          extraFiles.end());
     if (!this->CTest->SubmitExtraFiles(newExtraFiles)) {
       this->SetError("problem submitting extra files.");
-      return CM_NULLPTR;
+      return nullptr;
     }
   }
 
@@ -94,7 +94,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     this->CTest->GetInitializedHandler("submit");
   if (!handler) {
     this->SetError("internal CTest error. Cannot instantiate submit handler");
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   // If no FILES or PARTS given, *all* PARTS are submitted by default.

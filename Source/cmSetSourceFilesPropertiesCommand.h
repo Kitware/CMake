@@ -3,7 +3,7 @@
 #ifndef cmSetSourceFilesPropertiesCommand_h
 #define cmSetSourceFilesPropertiesCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -16,17 +16,14 @@ class cmMakefile;
 class cmSetSourceFilesPropertiesCommand : public cmCommand
 {
 public:
-  cmCommand* Clone() CM_OVERRIDE
-  {
-    return new cmSetSourceFilesPropertiesCommand;
-  }
+  cmCommand* Clone() override { return new cmSetSourceFilesPropertiesCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
   static bool RunCommand(cmMakefile* mf,
                          std::vector<std::string>::const_iterator filebeg,

@@ -3,23 +3,24 @@
 #ifndef cmGlobalGenerator_h
 #define cmGlobalGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 #include "cmCustomCommandLines.h"
 #include "cmExportSetMap.h"
+#include "cmQtAutoGenDigest.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cm_codecvt.hxx"
-#include "cm_unordered_map.hxx"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmFileLockPool.h"
@@ -295,15 +296,15 @@ public:
 
   virtual const char* GetAllTargetName() const { return "ALL_BUILD"; }
   virtual const char* GetInstallTargetName() const { return "INSTALL"; }
-  virtual const char* GetInstallLocalTargetName() const { return CM_NULLPTR; }
-  virtual const char* GetInstallStripTargetName() const { return CM_NULLPTR; }
-  virtual const char* GetPreinstallTargetName() const { return CM_NULLPTR; }
+  virtual const char* GetInstallLocalTargetName() const { return nullptr; }
+  virtual const char* GetInstallStripTargetName() const { return nullptr; }
+  virtual const char* GetPreinstallTargetName() const { return nullptr; }
   virtual const char* GetTestTargetName() const { return "RUN_TESTS"; }
   virtual const char* GetPackageTargetName() const { return "PACKAGE"; }
-  virtual const char* GetPackageSourceTargetName() const { return CM_NULLPTR; }
-  virtual const char* GetEditCacheTargetName() const { return CM_NULLPTR; }
-  virtual const char* GetRebuildCacheTargetName() const { return CM_NULLPTR; }
-  virtual const char* GetCleanTargetName() const { return CM_NULLPTR; }
+  virtual const char* GetPackageSourceTargetName() const { return nullptr; }
+  virtual const char* GetEditCacheTargetName() const { return nullptr; }
+  virtual const char* GetRebuildCacheTargetName() const { return nullptr; }
+  virtual const char* GetCleanTargetName() const { return nullptr; }
 
   // Lookup edit_cache target command preferred by this generator.
   virtual std::string GetEditCacheCommand() const { return ""; }
@@ -316,7 +317,7 @@ public:
   TargetDependSet const& GetTargetDirectDepends(
     const cmGeneratorTarget* target);
 
-  const std::map<std::string, std::vector<cmLocalGenerator*> >& GetProjectMap()
+  const std::map<std::string, std::vector<cmLocalGenerator*>>& GetProjectMap()
     const
   {
     return this->ProjectMap;
@@ -422,7 +423,8 @@ protected:
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
-  std::vector<const cmGeneratorTarget*> CreateQtAutoGeneratorsTargets();
+  // Qt auto generators
+  cmQtAutoGenDigestUPV CreateQtAutoGeneratorsTargets();
 
   std::string SelectMakeProgram(const std::string& makeProgram,
                                 const std::string& makeDefault = "") const;
@@ -468,7 +470,7 @@ protected:
   std::vector<cmLocalGenerator*> LocalGenerators;
   cmMakefile* CurrentConfigureMakefile;
   // map from project name to vector of local generators in that project
-  std::map<std::string, std::vector<cmLocalGenerator*> > ProjectMap;
+  std::map<std::string, std::vector<cmLocalGenerator*>> ProjectMap;
 
   // Set of named installation components requested by the project.
   std::set<std::string> InstallComponents;
@@ -488,9 +490,10 @@ protected:
   const char* GetPredefinedTargetsFolder();
 
 private:
-  typedef CM_UNORDERED_MAP<std::string, cmTarget*> TargetMap;
-  typedef CM_UNORDERED_MAP<std::string, cmGeneratorTarget*> GeneratorTargetMap;
-  typedef CM_UNORDERED_MAP<std::string, cmMakefile*> MakefileMap;
+  typedef std::unordered_map<std::string, cmTarget*> TargetMap;
+  typedef std::unordered_map<std::string, cmGeneratorTarget*>
+    GeneratorTargetMap;
+  typedef std::unordered_map<std::string, cmMakefile*> MakefileMap;
   // Map efficiently from target name to cmTarget instance.
   // Do not use this structure for looping over all targets.
   // It contains both normal and globally visible imported targets.
@@ -556,7 +559,7 @@ private:
 
   void IndexMakefile(cmMakefile* mf);
 
-  virtual const char* GetBuildIgnoreErrorsFlag() const { return CM_NULLPTR; }
+  virtual const char* GetBuildIgnoreErrorsFlag() const { return nullptr; }
 
   // Cache directory content and target files to be built.
   struct DirectoryContent
@@ -579,7 +582,7 @@ private:
   // track targets to issue CMP0068 warning for.
   std::set<std::string> CMP0068WarnTargets;
 
-  mutable std::map<cmSourceFile*, std::set<cmGeneratorTarget const*> >
+  mutable std::map<cmSourceFile*, std::set<cmGeneratorTarget const*>>
     FilenameTargetDepends;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

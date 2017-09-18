@@ -721,7 +721,7 @@ endfunction()
 #     matlab_add_unit_test(
 #         NAME <name>
 #         UNITTEST_FILE matlab_file_containing_unittest.m
-#         [CUSTOM_MATLAB_COMMAND matlab_command_to_run_as_test]
+#         [CUSTOM_TEST_COMMAND matlab_command_to_run_as_test]
 #         [UNITTEST_PRECOMMAND matlab_command_to_run]
 #         [TIMEOUT timeout]
 #         [ADDITIONAL_PATH path1 [path2 ...]]
@@ -737,7 +737,7 @@ endfunction()
 #   ``UNITTEST_FILE``
 #     the matlab unittest file. Its path will be automatically
 #     added to the Matlab path.
-#   ``CUSTOM_MATLAB_COMMAND``
+#   ``CUSTOM_TEST_COMMAND``
 #     Matlab script command to run as the test.
 #     If this is not set, then the following is run:
 #     ``runtests('matlab_file_name'), exit(max([ans(1,:).Failed]))``
@@ -1134,7 +1134,14 @@ else()
 
     # testing if we are able to extract the needed information from the registry
     set(_matlab_versions_from_registry)
-    matlab_extract_all_installed_versions_from_registry(CMAKE_CL_64 _matlab_versions_from_registry)
+
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set(_matlab_win64 ON)
+    else()
+      set(_matlab_win64 OFF)
+    endif()
+
+    matlab_extract_all_installed_versions_from_registry(_matlab_win64 _matlab_versions_from_registry)
 
     # the returned list is empty, doing the search on all known versions
     if(NOT _matlab_versions_from_registry)

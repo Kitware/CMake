@@ -3,7 +3,7 @@
 #ifndef cmCPackTarCompressGenerator_h
 #define cmCPackTarCompressGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCPackArchiveGenerator.h"
 #include "cmCPackGenerator.h"
@@ -19,10 +19,10 @@ public:
    * Construct generator
    */
   cmCPackTarCompressGenerator();
-  ~cmCPackTarCompressGenerator() CM_OVERRIDE;
+  ~cmCPackTarCompressGenerator() override;
 
 protected:
-  const char* GetOutputExtension() CM_OVERRIDE { return ".tar.Z"; }
+  const char* GetOutputExtension() override { return ".tar.Z"; }
 };
 
 #endif

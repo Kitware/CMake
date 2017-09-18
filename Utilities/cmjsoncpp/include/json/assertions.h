@@ -1,4 +1,4 @@
-// Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2007-2010 Baptiste Lepilleur and The JsonCpp Authors
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
@@ -11,31 +11,44 @@
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
 #include <stdlib.h>
+#include <sstream>
 
+/** It should not be possible for a maliciously designed file to
+ *  cause an abort() or seg-fault, so these macros are used only
+ *  for pre-condition violations and internal logic errors.
+ */
 #if JSON_USE_EXCEPTION
-#include <stdexcept>
-#define JSON_ASSERT(condition)                                                 \
-  assert(condition); // @todo <= change this into an exception throw
-#define JSON_FAIL_MESSAGE(message) throw std::runtime_error(message);
+
+// @todo <= add detail about condition in exception
+# define JSON_ASSERT(condition)                                                \
+  {if (!(condition)) {Json::throwLogicError( "assert json failed" );}}
+
+# define JSON_FAIL_MESSAGE(message)                                            \
+  {                                                                            \
+    JSONCPP_OSTRINGSTREAM oss; oss << message;                                    \
+    Json::throwLogicError(oss.str());                                          \
+    abort();                                                                   \
+  }
+
 #else // JSON_USE_EXCEPTION
-#define JSON_ASSERT(condition) assert(condition);
+
+# define JSON_ASSERT(condition) assert(condition)
 
 // The call to assert() will show the failure message in debug builds. In
-// release bugs we write to invalid memory in order to crash hard, so that a
-// debugger or crash reporter gets the chance to take over. We still call exit()
-// afterward in order to tell the compiler that this macro doesn't return.
-#define JSON_FAIL_MESSAGE(message)                                             \
+// release builds we abort, for a core-dump or debugger.
+# define JSON_FAIL_MESSAGE(message)                                            \
   {                                                                            \
-    assert(false&& message);                                                   \
-    strcpy(reinterpret_cast<char*>(666), message);                             \
-    exit(123);                                                                 \
+    JSONCPP_OSTRINGSTREAM oss; oss << message;                                    \
+    assert(false && oss.str().c_str());                                        \
+    abort();                                                                   \
   }
+
 
 #endif
 
 #define JSON_ASSERT_MESSAGE(condition, message)                                \
   if (!(condition)) {                                                          \
-    JSON_FAIL_MESSAGE(message)                                                 \
+    JSON_FAIL_MESSAGE(message);                                                \
   }
 
 #endif // CPPTL_JSON_ASSERTIONS_H_INCLUDED

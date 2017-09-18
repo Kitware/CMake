@@ -78,12 +78,12 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
     this->CTest->GetInitializedHandler("update");
   if (!handler) {
     this->SetError("internal CTest error. Cannot instantiate update handler");
-    return CM_NULLPTR;
+    return nullptr;
   }
   handler->SetCommand(this);
   if (source_dir.empty()) {
     this->SetError("source directory not specified. Please use SOURCE tag");
-    return CM_NULLPTR;
+    return nullptr;
   }
   handler->SetOption("SourceDirectory", source_dir.c_str());
   handler->SetQuiet(this->Quiet);

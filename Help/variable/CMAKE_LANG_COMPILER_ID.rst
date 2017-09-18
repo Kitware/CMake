@@ -27,6 +27,7 @@ include:
   NVIDIA = NVIDIA CUDA Compiler (nvidia.com)
   OpenWatcom = Open Watcom (openwatcom.org)
   PGI = The Portland Group (pgroup.com)
+  Flang = Flang Fortran Compiler
   PathScale = PathScale (pathscale.com)
   SDCC = Small Device C Compiler (sdcc.sourceforge.net)
   SunPro = Oracle Solaris Studio (oracle.com)

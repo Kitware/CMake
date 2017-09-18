@@ -2,379 +2,193 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServerConnection.h"
 
-#include "cmFileMonitor.h"
+#include "cmConfigure.h"
 #include "cmServer.h"
 #include "cmServerDictionary.h"
+#ifdef _WIN32
+#include "io.h"
+#else
+#include <unistd.h>
+#endif
+#include <cassert>
 
-#include <assert.h>
-#include <string.h>
-
-namespace {
-
-struct write_req_t
+cmStdIoConnection::cmStdIoConnection(
+  cmConnectionBufferStrategy* bufferStrategy)
+  : cmEventBasedConnection(bufferStrategy)
 {
-  uv_write_t req;
-  uv_buf_t buf;
-};
-
-void on_alloc_buffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
-{
-  (void)(handle);
-  char* rawBuffer = new char[suggested_size];
-  *buf = uv_buf_init(rawBuffer, static_cast<unsigned int>(suggested_size));
 }
 
-void on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf)
+void cmStdIoConnection::SetupStream(uv_stream_t*& stream, int file_id)
 {
-  auto conn = reinterpret_cast<cmServerConnection*>(stream->data);
-  if (nread >= 0) {
-    conn->ReadData(std::string(buf->base, buf->base + nread));
-  } else {
-    conn->TriggerShutdown();
-  }
-
-  delete[](buf->base);
-}
-
-void on_write(uv_write_t* req, int status)
-{
-  (void)(status);
-  auto conn = reinterpret_cast<cmServerConnection*>(req->data);
-
-  // Free req and buffer
-  write_req_t* wr = reinterpret_cast<write_req_t*>(req);
-  delete[](wr->buf.base);
-  delete wr;
-
-  conn->ProcessNextRequest();
-}
-
-void on_new_connection(uv_stream_t* stream, int status)
-{
-  (void)(status);
-  auto conn = reinterpret_cast<cmServerConnection*>(stream->data);
-  conn->Connect(stream);
-}
-
-void on_signal(uv_signal_t* signal, int signum)
-{
-  auto conn = reinterpret_cast<cmServerConnection*>(signal->data);
-  (void)(signum);
-  conn->TriggerShutdown();
-}
-
-void on_signal_close(uv_handle_t* handle)
-{
-  delete reinterpret_cast<uv_signal_t*>(handle);
-}
-
-void on_pipe_close(uv_handle_t* handle)
-{
-  delete reinterpret_cast<uv_pipe_t*>(handle);
-}
-
-void on_tty_close(uv_handle_t* handle)
-{
-  delete reinterpret_cast<uv_tty_t*>(handle);
-}
-
-} // namespace
-
-class LoopGuard
-{
-public:
-  LoopGuard(cmServerConnection* connection)
-    : Connection(connection)
-  {
-    this->Connection->mLoop = uv_default_loop();
-    if (!this->Connection->mLoop) {
+  assert(stream == nullptr);
+  switch (uv_guess_handle(file_id)) {
+    case UV_TTY: {
+      auto tty = new uv_tty_t();
+      uv_tty_init(this->Server->GetLoop(), tty, file_id, file_id == 0);
+      uv_tty_set_mode(tty, UV_TTY_MODE_NORMAL);
+      stream = reinterpret_cast<uv_stream_t*>(tty);
+      break;
+    }
+    case UV_FILE:
+      if (file_id == 0) {
+        return;
+      }
+      // Intentional fallthrough; stdin can _not_ be treated as a named
+      // pipe, however stdout can be.
+      CM_FALLTHROUGH;
+    case UV_NAMED_PIPE: {
+      auto pipe = new uv_pipe_t();
+      uv_pipe_init(this->Server->GetLoop(), pipe, 0);
+      uv_pipe_open(pipe, file_id);
+      stream = reinterpret_cast<uv_stream_t*>(pipe);
+      break;
+    }
+    default:
+      assert(false && "Unable to determine stream type");
       return;
-    }
-    this->Connection->mFileMonitor =
-      new cmFileMonitor(this->Connection->mLoop);
   }
-
-  ~LoopGuard()
-  {
-    if (!this->Connection->mLoop) {
-      return;
-    }
-
-    if (this->Connection->mFileMonitor) {
-      delete this->Connection->mFileMonitor;
-    }
-    uv_loop_close(this->Connection->mLoop);
-    this->Connection->mLoop = nullptr;
-  }
-
-private:
-  cmServerConnection* Connection;
-};
-
-cmServerConnection::cmServerConnection()
-{
+  stream->data = static_cast<cmEventBasedConnection*>(this);
 }
 
-cmServerConnection::~cmServerConnection()
+void cmStdIoConnection::SetServer(cmServerBase* s)
 {
+  cmConnection::SetServer(s);
+  if (!s) {
+    return;
+  }
+
+  SetupStream(this->ReadStream, 0);
+  SetupStream(this->WriteStream, 1);
 }
 
-void cmServerConnection::SetServer(cmServer* s)
+void shutdown_connection(uv_prepare_t* prepare)
 {
-  this->Server = s;
+  cmStdIoConnection* connection =
+    reinterpret_cast<cmStdIoConnection*>(prepare->data);
+
+  if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(prepare))) {
+    uv_close(reinterpret_cast<uv_handle_t*>(prepare),
+             &cmEventBasedConnection::on_close_delete<uv_prepare_t>);
+  }
+  connection->OnDisconnect(0);
 }
 
-bool cmServerConnection::ProcessEvents(std::string* errorMessage)
+bool cmStdIoConnection::OnServeStart(std::string* pString)
 {
-  assert(this->Server);
-  errorMessage->clear();
+  Server->OnConnected(this);
+  if (this->ReadStream) {
+    uv_read_start(this->ReadStream, on_alloc_buffer, on_read);
+  } else if (uv_guess_handle(0) == UV_FILE) {
+    char buffer[1024];
+    while (auto len = read(0, buffer, sizeof(buffer))) {
+      ReadData(std::string(buffer, buffer + len));
+    }
 
-  this->RawReadBuffer.clear();
-  this->RequestBuffer.clear();
+    // We can't start the disconnect from here, add a prepare hook to do that
+    // for us
+    auto prepare = new uv_prepare_t();
+    prepare->data = this;
+    uv_prepare_init(Server->GetLoop(), prepare);
+    uv_prepare_start(prepare, shutdown_connection);
+  }
+  return cmConnection::OnServeStart(pString);
+}
 
-  LoopGuard guard(this);
-  (void)(guard);
-  if (!this->mLoop) {
-    *errorMessage = "Internal Error: Failed to create event loop.";
-    return false;
+void cmStdIoConnection::ShutdownStream(uv_stream_t*& stream)
+{
+  if (!stream) {
+    return;
+  }
+  switch (stream->type) {
+    case UV_TTY: {
+      assert(!uv_is_closing(reinterpret_cast<uv_handle_t*>(stream)));
+      if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(stream))) {
+        uv_close(reinterpret_cast<uv_handle_t*>(stream),
+                 &on_close_delete<uv_tty_t>);
+      }
+      break;
+    }
+    case UV_FILE:
+    case UV_NAMED_PIPE: {
+      assert(!uv_is_closing(reinterpret_cast<uv_handle_t*>(stream)));
+      if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(stream))) {
+        uv_close(reinterpret_cast<uv_handle_t*>(stream),
+                 &on_close_delete<uv_pipe_t>);
+      }
+      break;
+    }
+    default:
+      assert(false && "Unable to determine stream type");
   }
 
-  this->SIGINTHandler = new uv_signal_t;
-  uv_signal_init(this->mLoop, this->SIGINTHandler);
-  this->SIGINTHandler->data = static_cast<void*>(this);
-  uv_signal_start(this->SIGINTHandler, &on_signal, SIGINT);
+  stream = nullptr;
+}
 
-  this->SIGHUPHandler = new uv_signal_t;
-  uv_signal_init(this->mLoop, this->SIGHUPHandler);
-  this->SIGHUPHandler->data = static_cast<void*>(this);
-  uv_signal_start(this->SIGHUPHandler, &on_signal, SIGHUP);
-
-  if (!DoSetup(errorMessage)) {
-    return false;
+bool cmStdIoConnection::OnConnectionShuttingDown()
+{
+  if (ReadStream) {
+    uv_read_stop(ReadStream);
   }
 
-  if (uv_run(this->mLoop, UV_RUN_DEFAULT) != 0) {
-    *errorMessage = "Internal Error: Event loop stopped in unclean state.";
-    return false;
-  }
+  ShutdownStream(ReadStream);
+  ShutdownStream(WriteStream);
 
-  // These need to be cleaned up by now:
-  assert(!this->ReadStream);
-  assert(!this->WriteStream);
-
-  this->RawReadBuffer.clear();
-  this->RequestBuffer.clear();
+  cmEventBasedConnection::OnConnectionShuttingDown();
 
   return true;
 }
 
-void cmServerConnection::ReadData(const std::string& data)
+cmServerPipeConnection::cmServerPipeConnection(const std::string& name)
+  : cmPipeConnection(name, new cmServerBufferStrategy)
 {
-  this->RawReadBuffer += data;
+}
 
+cmServerStdIoConnection::cmServerStdIoConnection()
+  : cmStdIoConnection(new cmServerBufferStrategy)
+{
+}
+
+cmConnectionBufferStrategy::~cmConnectionBufferStrategy()
+{
+}
+
+void cmConnectionBufferStrategy::clear()
+{
+}
+
+std::string cmServerBufferStrategy::BufferOutMessage(
+  const std::string& rawBuffer) const
+{
+  return std::string("\n") + kSTART_MAGIC + std::string("\n") + rawBuffer +
+    kEND_MAGIC + std::string("\n");
+}
+
+std::string cmServerBufferStrategy::BufferMessage(std::string& RawReadBuffer)
+{
   for (;;) {
-    auto needle = this->RawReadBuffer.find('\n');
+    auto needle = RawReadBuffer.find('\n');
 
     if (needle == std::string::npos) {
-      return;
+      return "";
     }
-    std::string line = this->RawReadBuffer.substr(0, needle);
+    std::string line = RawReadBuffer.substr(0, needle);
     const auto ls = line.size();
     if (ls > 1 && line.at(ls - 1) == '\r') {
       line.erase(ls - 1, 1);
     }
-    this->RawReadBuffer.erase(this->RawReadBuffer.begin(),
-                              this->RawReadBuffer.begin() +
-                                static_cast<long>(needle) + 1);
+    RawReadBuffer.erase(RawReadBuffer.begin(),
+                        RawReadBuffer.begin() + static_cast<long>(needle) + 1);
     if (line == kSTART_MAGIC) {
-      this->RequestBuffer.clear();
+      RequestBuffer.clear();
       continue;
     }
     if (line == kEND_MAGIC) {
-      bool quitRequest = this->Server->QueueRequest(this->RequestBuffer);
-      this->RequestBuffer.clear();
-      if (quitRequest) {
-        TriggerShutdown();
-      }
-    } else {
-      this->RequestBuffer += line;
-      this->RequestBuffer += "\n";
+      std::string rtn;
+      rtn.swap(this->RequestBuffer);
+      return rtn;
     }
+
+    this->RequestBuffer += line;
+    this->RequestBuffer += "\n";
   }
-}
-
-void cmServerConnection::TriggerShutdown()
-{
-  this->FileMonitor()->StopMonitoring();
-
-  uv_signal_stop(this->SIGINTHandler);
-  uv_signal_stop(this->SIGHUPHandler);
-
-  uv_close(reinterpret_cast<uv_handle_t*>(this->SIGINTHandler),
-           &on_signal_close); // delete handle
-  uv_close(reinterpret_cast<uv_handle_t*>(this->SIGHUPHandler),
-           &on_signal_close); // delete handle
-
-  this->SIGINTHandler = nullptr;
-  this->SIGHUPHandler = nullptr;
-
-  this->TearDown();
-}
-
-void cmServerConnection::WriteData(const std::string& data)
-{
-  assert(this->WriteStream);
-
-  auto ds = data.size();
-
-  write_req_t* req = new write_req_t;
-  req->req.data = this;
-  req->buf = uv_buf_init(new char[ds], static_cast<unsigned int>(ds));
-  memcpy(req->buf.base, data.c_str(), ds);
-
-  uv_write(reinterpret_cast<uv_write_t*>(req),
-           static_cast<uv_stream_t*>(this->WriteStream), &req->buf, 1,
-           on_write);
-}
-
-void cmServerConnection::ProcessNextRequest()
-{
-  Server->PopOne();
-}
-
-void cmServerConnection::SendGreetings()
-{
-  Server->PrintHello();
-}
-
-cmServerStdIoConnection::cmServerStdIoConnection()
-{
-  this->Input.tty = nullptr;
-  this->Output.tty = nullptr;
-}
-
-bool cmServerStdIoConnection::DoSetup(std::string* errorMessage)
-{
-  (void)(errorMessage);
-
-  if (uv_guess_handle(1) == UV_TTY) {
-    usesTty = true;
-    this->Input.tty = new uv_tty_t;
-    uv_tty_init(this->Loop(), this->Input.tty, 0, 1);
-    uv_tty_set_mode(this->Input.tty, UV_TTY_MODE_NORMAL);
-    Input.tty->data = this;
-    this->ReadStream = reinterpret_cast<uv_stream_t*>(this->Input.tty);
-
-    this->Output.tty = new uv_tty_t;
-    uv_tty_init(this->Loop(), this->Output.tty, 1, 0);
-    uv_tty_set_mode(this->Output.tty, UV_TTY_MODE_NORMAL);
-    Output.tty->data = this;
-    this->WriteStream = reinterpret_cast<uv_stream_t*>(this->Output.tty);
-  } else {
-    usesTty = false;
-    this->Input.pipe = new uv_pipe_t;
-    uv_pipe_init(this->Loop(), this->Input.pipe, 0);
-    uv_pipe_open(this->Input.pipe, 0);
-    Input.pipe->data = this;
-    this->ReadStream = reinterpret_cast<uv_stream_t*>(this->Input.pipe);
-
-    this->Output.pipe = new uv_pipe_t;
-    uv_pipe_init(this->Loop(), this->Output.pipe, 0);
-    uv_pipe_open(this->Output.pipe, 1);
-    Output.pipe->data = this;
-    this->WriteStream = reinterpret_cast<uv_stream_t*>(this->Output.pipe);
-  }
-
-  SendGreetings();
-  uv_read_start(this->ReadStream, on_alloc_buffer, on_read);
-
-  return true;
-}
-
-void cmServerStdIoConnection::TearDown()
-{
-  if (usesTty) {
-    uv_close(reinterpret_cast<uv_handle_t*>(this->Input.tty), &on_tty_close);
-    uv_close(reinterpret_cast<uv_handle_t*>(this->Output.tty), &on_tty_close);
-    this->Input.tty = nullptr;
-    this->Output.tty = nullptr;
-  } else {
-    uv_close(reinterpret_cast<uv_handle_t*>(this->Input.pipe), &on_pipe_close);
-    uv_close(reinterpret_cast<uv_handle_t*>(this->Output.pipe),
-             &on_pipe_close);
-    this->Input.pipe = nullptr;
-    this->Input.pipe = nullptr;
-  }
-  this->ReadStream = nullptr;
-  this->WriteStream = nullptr;
-}
-
-cmServerPipeConnection::cmServerPipeConnection(const std::string& name)
-  : PipeName(name)
-{
-}
-
-bool cmServerPipeConnection::DoSetup(std::string* errorMessage)
-{
-  this->ServerPipe = new uv_pipe_t;
-  uv_pipe_init(this->Loop(), this->ServerPipe, 0);
-  this->ServerPipe->data = this;
-
-  int r;
-  if ((r = uv_pipe_bind(this->ServerPipe, this->PipeName.c_str())) != 0) {
-    *errorMessage = std::string("Internal Error with ") + this->PipeName +
-      ": " + uv_err_name(r);
-    return false;
-  }
-  auto serverStream = reinterpret_cast<uv_stream_t*>(this->ServerPipe);
-  if ((r = uv_listen(serverStream, 1, on_new_connection)) != 0) {
-    *errorMessage = std::string("Internal Error listening on ") +
-      this->PipeName + ": " + uv_err_name(r);
-    return false;
-  }
-
-  return true;
-}
-
-void cmServerPipeConnection::TearDown()
-{
-  if (this->ClientPipe) {
-    uv_close(reinterpret_cast<uv_handle_t*>(this->ClientPipe), &on_pipe_close);
-    this->WriteStream->data = nullptr;
-  }
-  uv_close(reinterpret_cast<uv_handle_t*>(this->ServerPipe), &on_pipe_close);
-
-  this->ClientPipe = nullptr;
-  this->ServerPipe = nullptr;
-  this->WriteStream = nullptr;
-  this->ReadStream = nullptr;
-}
-
-void cmServerPipeConnection::Connect(uv_stream_t* server)
-{
-  if (this->ClientPipe) {
-    // Accept and close all pipes but the first:
-    uv_pipe_t* rejectPipe = new uv_pipe_t;
-
-    uv_pipe_init(this->Loop(), rejectPipe, 0);
-    auto rejecter = reinterpret_cast<uv_stream_t*>(rejectPipe);
-    uv_accept(server, rejecter);
-    uv_close(reinterpret_cast<uv_handle_t*>(rejecter), &on_pipe_close);
-    return;
-  }
-
-  this->ClientPipe = new uv_pipe_t;
-  uv_pipe_init(this->Loop(), this->ClientPipe, 0);
-  this->ClientPipe->data = this;
-  auto client = reinterpret_cast<uv_stream_t*>(this->ClientPipe);
-  if (uv_accept(server, client) != 0) {
-    uv_close(reinterpret_cast<uv_handle_t*>(client), nullptr);
-    return;
-  }
-  this->ReadStream = client;
-  this->WriteStream = client;
-
-  uv_read_start(this->ReadStream, on_alloc_buffer, on_read);
-
-  this->SendGreetings();
 }

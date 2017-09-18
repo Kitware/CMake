@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <memory>
 #include <sstream>
 #include <string.h>
 #include <string>
@@ -119,7 +120,7 @@ struct cmIsPair
 };
 
 template <typename K, typename V>
-struct cmIsPair<std::pair<K, V> >
+struct cmIsPair<std::pair<K, V>>
 {
   enum
   {
@@ -401,5 +402,23 @@ inline void cmStripSuffixIfExists(std::string& str, const std::string& suffix)
     str.resize(str.size() - suffix.size());
   }
 }
+
+namespace cm {
+
+#if defined(CMake_HAVE_CXX_MAKE_UNIQUE)
+
+using std::make_unique;
+
+#else
+
+template <typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+#endif
+
+} // namespace cm
 
 #endif

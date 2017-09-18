@@ -3,7 +3,7 @@
 #ifndef cmUnexpectedCommand_h
 #define cmUnexpectedCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -21,13 +21,13 @@ public:
   {
   }
 
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     return new cmUnexpectedCommand(this->Name, this->Error);
   }
 
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
 private:
   std::string Name;

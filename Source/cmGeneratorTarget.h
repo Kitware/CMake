@@ -3,7 +3,7 @@
 #ifndef cmGeneratorTarget_h
 #define cmGeneratorTarget_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
@@ -491,6 +491,11 @@ public:
   std::string GetOutputName(const std::string& config,
                             cmStateEnums::ArtifactType artifact) const;
 
+  /** Clears cached meta data for local and external source files.
+    * The meta data will be recomputed on demand.
+    */
+  void ClearSourcesCache();
+
   void AddSource(const std::string& src);
   void AddTracedSources(std::vector<std::string> const& srcs);
 
@@ -519,7 +524,7 @@ public:
   {
     SourceFileFlags()
       : Type(SourceFileTypeNormal)
-      , MacFolder(CM_NULLPTR)
+      , MacFolder(nullptr)
     {
     }
     SourceFileType Type;
@@ -565,7 +570,7 @@ public:
   /** Convert the given GNU import library name (.dll.a) to a name with a new
       extension (.lib or ${CMAKE_IMPORT_LIBRARY_SUFFIX}).  */
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
-                        const char* newExt = CM_NULLPTR) const;
+                        const char* newExt = nullptr) const;
 
   bool IsExecutableWithExports() const;
 
@@ -656,7 +661,7 @@ private:
   SourceEntriesType SourceDepends;
   mutable std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
-  mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
+  mutable std::map<std::string, std::vector<std::string>> SystemIncludesCache;
 
   mutable std::string ExportMacro;
 

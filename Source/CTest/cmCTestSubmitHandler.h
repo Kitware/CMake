@@ -3,7 +3,7 @@
 #ifndef cmCTestSubmitHandler_h
 #define cmCTestSubmitHandler_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
@@ -25,14 +25,14 @@ public:
   typedef cmCTestGenericHandler Superclass;
 
   cmCTestSubmitHandler();
-  ~cmCTestSubmitHandler() CM_OVERRIDE { this->LogFile = CM_NULLPTR; }
+  ~cmCTestSubmitHandler() override { this->LogFile = nullptr; }
 
   /*
    * The main entry point for this class
    */
-  int ProcessHandler() CM_OVERRIDE;
+  int ProcessHandler() override;
 
-  void Initialize() CM_OVERRIDE;
+  void Initialize() override;
 
   /** Specify a set of parts (by name) to submit.  */
   void SelectParts(std::set<cmCTest::Part> const& parts);

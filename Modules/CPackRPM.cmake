@@ -2422,7 +2422,11 @@ mv *.rpm %_rpmdir"
     set(RPMBUILD_FLAGS "-bs")
 
      file(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
-      "# -*- rpm-spec -*-
+      "# Restore old style debuginfo creation for rpm >= 4.14.
+%undefine _debugsource_packages
+%undefine _debuginfo_subpackages
+
+# -*- rpm-spec -*-
 BuildRoot:      %_topdir/\@CPACK_PACKAGE_FILE_NAME\@
 Summary:        \@CPACK_RPM_PACKAGE_SUMMARY\@
 Name:           \@CPACK_RPM_PACKAGE_NAME\@
@@ -2527,7 +2531,11 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
     if(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE OR NOT CPACK_RPM_USER_BINARY_SPECFILE)
 
       file(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
-        "# -*- rpm-spec -*-
+        "# Restore old style debuginfo creation for rpm >= 4.14.
+%undefine _debugsource_packages
+%undefine _debuginfo_subpackages
+
+# -*- rpm-spec -*-
 BuildRoot:      %_topdir/\@CPACK_PACKAGE_FILE_NAME\@\@CPACK_RPM_PACKAGE_COMPONENT_PART_PATH\@
 Summary:        \@CPACK_RPM_PACKAGE_SUMMARY\@
 Name:           \@CPACK_RPM_PACKAGE_NAME\@
