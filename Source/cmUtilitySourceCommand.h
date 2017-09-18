@@ -15,9 +15,9 @@ class cmExecutionStatus;
 class cmUtilitySourceCommand : public cmCommand
 {
 public:
-  cmCommand* Clone() CM_OVERRIDE { return new cmUtilitySourceCommand; }
+  cmCommand* Clone() override { return new cmUtilitySourceCommand; }
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 };
 
 #endif

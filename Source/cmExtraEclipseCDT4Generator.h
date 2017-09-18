@@ -35,9 +35,9 @@ public:
   static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
   void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
-                      bool optional) CM_OVERRIDE;
+                      bool optional) override;
 
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
 private:
   // create .project file in the source tree

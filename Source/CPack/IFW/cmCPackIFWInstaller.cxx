@@ -262,7 +262,7 @@ public:
   std::string path, basePath;
 
 protected:
-  void StartElement(const std::string& name, const char** /*atts*/) CM_OVERRIDE
+  void StartElement(const std::string& name, const char** /*atts*/) override
   {
     this->file = name == "file";
     if (file) {
@@ -270,7 +270,7 @@ protected:
     }
   }
 
-  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
+  void CharacterDataHandler(const char* data, int length) override
   {
     if (this->file) {
       std::string content(data, data + length);
@@ -284,7 +284,7 @@ protected:
     }
   }
 
-  void EndElement(const std::string& /*name*/) CM_OVERRIDE {}
+  void EndElement(const std::string& /*name*/) override {}
 };
 
 void cmCPackIFWInstaller::GenerateInstallerFile()

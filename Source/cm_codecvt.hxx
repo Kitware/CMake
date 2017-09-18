@@ -3,7 +3,7 @@
 #ifndef cm_codecvt_hxx
 #define cm_codecvt_hxx
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <locale>
 #include <wchar.h>
@@ -23,15 +23,15 @@ public:
   codecvt(Encoding e);
 
 protected:
-  ~codecvt() CM_OVERRIDE;
-  bool do_always_noconv() const throw() CM_OVERRIDE;
+  ~codecvt() override;
+  bool do_always_noconv() const throw() override;
   result do_out(mbstate_t& state, const char* from, const char* from_end,
                 const char*& from_next, char* to, char* to_end,
-                char*& to_next) const CM_OVERRIDE;
+                char*& to_next) const override;
   result do_unshift(mbstate_t& state, char* to, char*,
-                    char*& to_next) const CM_OVERRIDE;
-  int do_max_length() const throw() CM_OVERRIDE;
-  int do_encoding() const throw() CM_OVERRIDE;
+                    char*& to_next) const override;
+  int do_max_length() const throw() override;
+  int do_encoding() const throw() override;
 
 private:
   // The mbstate_t argument to do_out and do_unshift is responsible

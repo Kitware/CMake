@@ -24,7 +24,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE { return new cmFindFileCommand; }
+  cmCommand* Clone() override { return new cmFindFileCommand; }
 };
 
 #endif

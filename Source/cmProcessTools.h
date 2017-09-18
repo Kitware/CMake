@@ -59,7 +59,7 @@ public:
     char Separator;
     char LineEnd;
     bool IgnoreCR;
-    bool ProcessChunk(const char* data, int length) CM_OVERRIDE;
+    bool ProcessChunk(const char* data, int length) override;
 
     /** Implement in a subclass to process one line of input.  It
         should return true only if it is interested in more data.  */
@@ -76,7 +76,7 @@ public:
     }
 
   private:
-    bool ProcessLine() CM_OVERRIDE { return true; }
+    bool ProcessLine() override { return true; }
   };
 
   /** Run a process and send output to given parsers.  */

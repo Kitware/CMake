@@ -27,7 +27,7 @@ public:
   typedef std::map<std::string, std::vector<std::string>> MapSourceFileFlags;
   cmExtraSublimeTextGenerator();
 
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
 private:
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);

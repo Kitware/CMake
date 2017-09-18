@@ -103,8 +103,8 @@ private:
   unsigned int DataStart;
   const char* Ignore;
   cmCAStringVector();
-  bool DoConsume(const std::string& arg, unsigned int index) CM_OVERRIDE;
-  void DoReset() CM_OVERRIDE;
+  bool DoConsume(const std::string& arg, unsigned int index) override;
+  void DoReset() override;
 };
 
 /** cmCAString is to be used for arguments which consist of one value,
@@ -121,8 +121,8 @@ public:
 private:
   std::string String;
   unsigned int DataStart;
-  bool DoConsume(const std::string& arg, unsigned int index) CM_OVERRIDE;
-  void DoReset() CM_OVERRIDE;
+  bool DoConsume(const std::string& arg, unsigned int index) override;
+  void DoReset() override;
   cmCAString();
 };
 
@@ -138,8 +138,8 @@ public:
   bool IsEnabled() const { return this->Enabled; }
 private:
   bool Enabled;
-  bool DoConsume(const std::string& arg, unsigned int index) CM_OVERRIDE;
-  void DoReset() CM_OVERRIDE;
+  bool DoConsume(const std::string& arg, unsigned int index) override;
+  void DoReset() override;
   cmCAEnabler();
 };
 
@@ -155,8 +155,8 @@ public:
   bool IsEnabled() const { return this->Enabled; }
 private:
   bool Enabled;
-  bool DoConsume(const std::string& arg, unsigned int index) CM_OVERRIDE;
-  void DoReset() CM_OVERRIDE;
+  bool DoConsume(const std::string& arg, unsigned int index) override;
+  void DoReset() override;
   cmCADisabler();
 };
 

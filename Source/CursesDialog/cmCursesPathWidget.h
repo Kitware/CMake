@@ -23,9 +23,9 @@ public:
    * This method is called when different keys are pressed. The
    * subclass can have a special implementation handler for this.
    */
-  void OnTab(cmCursesMainForm* fm, WINDOW* w) CM_OVERRIDE;
-  void OnReturn(cmCursesMainForm* fm, WINDOW* w) CM_OVERRIDE;
-  void OnType(int& key, cmCursesMainForm* fm, WINDOW* w) CM_OVERRIDE;
+  void OnTab(cmCursesMainForm* fm, WINDOW* w) override;
+  void OnReturn(cmCursesMainForm* fm, WINDOW* w) override;
+  void OnType(int& key, cmCursesMainForm* fm, WINDOW* w) override;
 
 protected:
   std::string LastString;

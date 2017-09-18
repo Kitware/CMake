@@ -32,7 +32,7 @@ public:
   virtual const char* GetToolsVersion() { return "12.0"; }
 protected:
   bool ProcessGeneratorToolsetField(std::string const& key,
-                                    std::string const& value) CM_OVERRIDE;
+                                    std::string const& value) override;
 
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);

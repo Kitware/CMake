@@ -27,7 +27,7 @@ public:
   static std::string GetActualName() { return "NMake Makefiles"; }
 
   /** Get encoding used by generator for makefile files */
-  codecvt::Encoding GetMakefileEncoding() const CM_OVERRIDE
+  codecvt::Encoding GetMakefileEncoding() const override
   {
     return codecvt::ANSI;
   }

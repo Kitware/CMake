@@ -23,12 +23,12 @@ public:
     this->PackageName = "";
   }
 
-  ~XMLParser() CM_OVERRIDE {}
+  ~XMLParser() override {}
 
 protected:
-  void EndElement(const std::string& /*name*/) CM_OVERRIDE {}
+  void EndElement(const std::string& /*name*/) override {}
 
-  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
+  void StartElement(const std::string& name, const char** atts) override
   {
     if (name == "package") {
       this->PackageName = atts[1];

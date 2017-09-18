@@ -41,7 +41,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmCTestSubdirCommand* c = new cmCTestSubdirCommand;
     c->TestHandler = this->TestHandler;
@@ -53,7 +53,7 @@ public:
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
+                   cmExecutionStatus& /*unused*/) override;
 
   cmCTestTestHandler* TestHandler;
 };
@@ -115,7 +115,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmCTestAddSubdirectoryCommand* c = new cmCTestAddSubdirectoryCommand;
     c->TestHandler = this->TestHandler;
@@ -127,7 +127,7 @@ public:
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
+                   cmExecutionStatus& /*unused*/) override;
 
   cmCTestTestHandler* TestHandler;
 };
@@ -180,7 +180,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmCTestAddTestCommand* c = new cmCTestAddTestCommand;
     c->TestHandler = this->TestHandler;
@@ -192,7 +192,7 @@ public:
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& /*args*/,
-                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
+                   cmExecutionStatus& /*unused*/) override;
 
   cmCTestTestHandler* TestHandler;
 };
@@ -213,7 +213,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmCTestSetTestsPropertiesCommand* c = new cmCTestSetTestsPropertiesCommand;
     c->TestHandler = this->TestHandler;
@@ -225,7 +225,7 @@ public:
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& /*args*/,
-                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
+                   cmExecutionStatus& /*unused*/) override;
 
   cmCTestTestHandler* TestHandler;
 };
@@ -242,7 +242,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmCTestSetDirectoryPropertiesCommand* c =
       new cmCTestSetDirectoryPropertiesCommand;
@@ -255,7 +255,7 @@ public:
    * the CMakeLists.txt file.
   */
   bool InitialPass(std::vector<std::string> const& /*unused*/,
-                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
+                   cmExecutionStatus& /*unused*/) override;
 
   cmCTestTestHandler* TestHandler;
 };

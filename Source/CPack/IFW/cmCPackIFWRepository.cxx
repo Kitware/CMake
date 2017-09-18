@@ -128,7 +128,7 @@ public:
   bool patched;
 
 protected:
-  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
+  void StartElement(const std::string& name, const char** atts) override
   {
     this->xout.StartElement(name);
     this->StartFragment(atts);
@@ -143,7 +143,7 @@ protected:
     }
   }
 
-  void EndElement(const std::string& name) CM_OVERRIDE
+  void EndElement(const std::string& name) override
   {
     if (name == "Updates" && !this->patched) {
       this->repository->WriteRepositoryUpdates(this->xout);
@@ -159,7 +159,7 @@ protected:
     }
   }
 
-  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
+  void CharacterDataHandler(const char* data, int length) override
   {
     std::string content(data, data + length);
     if (content == "" || content == " " || content == "  " ||

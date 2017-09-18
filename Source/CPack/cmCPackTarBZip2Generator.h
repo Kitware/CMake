@@ -19,10 +19,10 @@ public:
    * Construct generator
    */
   cmCPackTarBZip2Generator();
-  ~cmCPackTarBZip2Generator() CM_OVERRIDE;
+  ~cmCPackTarBZip2Generator() override;
 
 protected:
-  const char* GetOutputExtension() CM_OVERRIDE { return ".tar.bz2"; }
+  const char* GetOutputExtension() override { return ".tar.bz2"; }
 };
 
 #endif

@@ -25,7 +25,7 @@ public:
 
   static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
 private:
   struct CbpUnit
