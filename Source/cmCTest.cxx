@@ -2565,24 +2565,18 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(
   return true;
 }
 
-bool cmCTest::RunCommand(const char* command, std::string* stdOut,
-                         std::string* stdErr, int* retVal, const char* dir,
-                         double timeout, Encoding encoding)
+bool cmCTest::RunCommand(std::vector<std::string> const& args,
+                         std::string* stdOut, std::string* stdErr, int* retVal,
+                         const char* dir, double timeout, Encoding encoding)
 {
-  std::vector<std::string> args = cmSystemTools::ParseArguments(command);
-
-  if (args.empty()) {
-    return false;
-  }
-
   std::vector<const char*> argv;
   for (std::string const& a : args) {
     argv.push_back(a.c_str());
   }
   argv.push_back(nullptr);
 
-  *stdOut = "";
-  *stdErr = "";
+  stdOut->clear();
+  stdErr->clear();
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());

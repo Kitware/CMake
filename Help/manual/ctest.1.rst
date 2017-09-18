@@ -886,6 +886,8 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_COVERAGE_EXTRA_FLAGS`
   * :module:`CTest` module variable: ``COVERAGE_EXTRA_FLAGS``
 
+  These options are the first arguments passed to ``CoverageCommand``.
+
 .. _`CTest MemCheck Step`:
 
 CTest MemCheck Step
