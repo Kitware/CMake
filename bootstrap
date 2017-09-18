@@ -480,6 +480,59 @@ KWSYS_FILES="\
   SystemTools.hxx \
   Terminal.h"
 
+if ${cmake_system_mingw}; then
+  LIBUV_C_SOURCES="\
+    src/fs-poll.c \
+    src/inet.c \
+    src/threadpool.c \
+    src/uv-common.c \
+    src/win/async.c \
+    src/win/core.c \
+    src/win/detect-wakeup.c \
+    src/win/dl.c \
+    src/win/error.c \
+    src/win/fs-event.c \
+    src/win/fs.c \
+    src/win/getaddrinfo.c \
+    src/win/getnameinfo.c \
+    src/win/handle.c \
+    src/win/loop-watcher.c \
+    src/win/pipe.c \
+    src/win/poll.c \
+    src/win/process-stdio.c \
+    src/win/process.c \
+    src/win/req.c \
+    src/win/signal.c \
+    src/win/stream.c \
+    src/win/tcp.c \
+    src/win/thread.c \
+    src/win/timer.c \
+    src/win/tty.c \
+    src/win/udp.c \
+    src/win/util.c \
+    src/win/winapi.c \
+    src/win/winsock.c \
+    "
+else
+  LIBUV_C_SOURCES="\
+    src/uv-common.c \
+    src/unix/cmake-bootstrap.c \
+    src/unix/core.c \
+    src/unix/fs.c \
+    src/unix/loop.c \
+    src/unix/loop-watcher.c \
+    src/unix/no-fsevents.c \
+    src/unix/pipe.c \
+    src/unix/poll.c \
+    src/unix/posix-hrtime.c \
+    src/unix/posix-poll.c \
+    src/unix/process.c \
+    src/unix/signal.c \
+    src/unix/stream.c \
+    src/unix/timer.c \
+    "
+fi
+
 # Display CMake bootstrap usage
 cmake_usage()
 {
@@ -639,6 +692,12 @@ cmake_report ()
 cmake_escape ()
 {
   echo $1 | sed "s/ /\\\\ /g"
+}
+
+# Encode object file names.
+cmake_obj ()
+{
+  echo $1 | sed 's/\//-/g' | sed 's/$/\.o/'
 }
 
 # Strip prefix from argument
@@ -941,6 +1000,10 @@ echo '
 # error "The CMAKE_C_COMPILER is set to a C++ compiler"
 #endif
 
+#if defined(__sun) && __STDC_VERSION__ < 199901L
+#error "On Solaris we need C99."
+#endif
+
 #include <stdio.h>
 
 int main(int argc, char* argv[])
@@ -1180,6 +1243,8 @@ cmake_compiler_settings_comment="/*
  * ${LexerParser_CXX_SOURCES} ${LexerParser_C_SOURCES}
  * kwSys Sources:
  * ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}
+ * libuv Sources:
+ * ${LIBUV_C_SOURCES}
  */
 "
 
@@ -1241,6 +1306,48 @@ objs=""
 for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${LexerParser_CXX_SOURCES} ${LexerParser_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}; do
   objs="${objs} ${a}.o"
 done
+for a in ${LIBUV_C_SOURCES}; do
+  objs="${objs} uv-`cmake_obj ${a}`"
+done
+
+libs=""
+
+uv_c_flags=""
+if ${cmake_system_mingw}; then
+  uv_c_flags="${uv_c_flags} -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600"
+  libs="${libs} -lws2_32 -lpsapi -liphlpapi -lshell32 -luserenv"
+else
+  uv_c_flags="${uv_c_flags} -DCMAKE_BOOTSTRAP"
+  case "${cmake_system}" in
+    *AIX*)
+      uv_c_flags="${uv_c_flags} -D_ALL_SOURCE -D_XOPEN_SOURCE=500 -D_LINUX_SOURCE_COMPAT -D_THREAD_SAFE"
+      libs="${libs} -lperfstat"
+      ;;
+    *Darwin*)
+      uv_c_flags="${uv_c_flags} -D_DARWIN_USE_64_BIT_INODE=1 -D_DARWIN_UNLIMITED_SELECT=1"
+      ;;
+    *Linux*)
+      uv_c_flags="${uv_c_flags} -D_GNU_SOURCE"
+      libs="${libs} -ldl -lrt"
+      ;;
+    *BSD*)
+      libs="${libs} -lkvm"
+      ;;
+    *SunOS*)
+      # Normally libuv uses '-D_XOPEN_SOURCE=500 -std=c90' on Solaris 5.10,
+      # but we do not need to do that because we bootstrap using POSIX APIs.
+      uv_c_flags="${uv_c_flags} -D__EXTENSIONS__ -D_XOPEN_SOURCE=600"
+      libs="${libs} -lkstat -lnsl -lsendfile -lsocket -lrt"
+      ;;
+  esac
+fi
+uv_c_flags="${uv_c_flags} `cmake_escape "-I${cmake_source_dir}/Utilities/cmlibuv/include"`"
+if ${cmake_system_mingw}; then
+  uv_c_flags="${uv_c_flags} `cmake_escape "-I${cmake_source_dir}/Utilities/cmlibuv/src/win"`"
+else
+  uv_c_flags="${uv_c_flags} `cmake_escape "-I${cmake_source_dir}/Utilities/cmlibuv/src/unix"`"
+fi
+uv_c_flags="${uv_c_flags} `cmake_escape "-I${cmake_source_dir}/Utilities/cmlibuv/src"`"
 
 if [ "x${cmake_ansi_cxx_flags}" != "x" ]; then
   cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags}"
@@ -1278,7 +1385,7 @@ cmake_cxx_flags="${cmake_cxx_flags} \
   -I`cmake_escape \"${cmake_source_dir}/Source/LexerParser\"` \
   -I`cmake_escape \"${cmake_source_dir}/Utilities\"`"
 echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
-echo "	${cmake_cxx_compiler} ${cmake_ld_flags} ${cmake_cxx_flags} ${objs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
+echo "	${cmake_cxx_compiler} ${cmake_ld_flags} ${cmake_cxx_flags} ${objs} ${libs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
 for a in ${CMAKE_CXX_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/${a}.cxx"`
   src_flags=`eval echo \\${cmake_cxx_flags_\${a}}`
@@ -1312,6 +1419,11 @@ for a in ${KWSYS_CXX_SOURCES}; do
   src_flags=`eval echo \\${cmake_cxx_flags_\${a}}`
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -DKWSYS_NAMESPACE=cmsys ${src_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
+done
+for a in ${LIBUV_C_SOURCES}; do
+  src=`cmake_escape "${cmake_source_dir}/Utilities/cmlibuv/${a}"`
+  echo "uv-`cmake_obj ${a}` : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_c_compiler} ${cmake_c_flags} ${uv_c_flags} -c ${src} -o uv-`cmake_obj ${a}`" >> "${cmake_bootstrap_dir}/Makefile"
 done
 echo '
 rebuild_cache:

@@ -244,7 +244,7 @@ skip:
 #endif
 }
 
-#if defined(__sun) && _XOPEN_SOURCE < 600
+#if defined(__sun) && (_XOPEN_SOURCE < 600 || defined(CMAKE_BOOTSTRAP))
 static char* uv__mkdtemp(char *template)
 {
   if (!mktemp(template) || mkdir(template, 0700))

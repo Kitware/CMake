@@ -44,7 +44,9 @@
 
 #include "uv-threadpool.h"
 
-#if defined(__linux__)
+#ifdef CMAKE_BOOTSTRAP
+# include "uv-posix.h"
+#elif defined(__linux__)
 # include "uv-linux.h"
 #elif defined (__MVS__)
 # include "uv-os390.h"
@@ -124,6 +126,17 @@ typedef int uv_file;
 typedef int uv_os_sock_t;
 typedef int uv_os_fd_t;
 
+#ifdef CMAKE_BOOTSTRAP
+#define UV_ONCE_INIT 0
+typedef int uv_once_t;
+typedef int uv_thread_t;
+typedef int uv_mutex_t;
+typedef int uv_rwlock_t;
+typedef int uv_sem_t;
+typedef int uv_cond_t;
+typedef int uv_key_t;
+typedef int uv_barrier_t;
+#else
 #define UV_ONCE_INIT PTHREAD_ONCE_INIT
 
 typedef pthread_once_t uv_once_t;
@@ -134,6 +147,7 @@ typedef UV_PLATFORM_SEM_T uv_sem_t;
 typedef pthread_cond_t uv_cond_t;
 typedef pthread_key_t uv_key_t;
 typedef pthread_barrier_t uv_barrier_t;
+#endif
 
 
 /* Platform-specific definitions for uv_spawn support. */
