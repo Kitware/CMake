@@ -134,7 +134,7 @@ public:
     : cmMachOHeaderAndLoadCommands(_swap)
   {
   }
-  bool read_mach_o(cmsys::ifstream& fin)
+  bool read_mach_o(cmsys::ifstream& fin) override
   {
     if (!read(fin, this->Header)) {
       return false;

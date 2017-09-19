@@ -47,8 +47,11 @@ public:
     : Version("1.5")
   {
   }
-  void StartElement(const std::string&, const char**) { this->Data = ""; }
-  void EndElement(const std::string& name)
+  void StartElement(const std::string&, const char**) override
+  {
+    this->Data = "";
+  }
+  void EndElement(const std::string& name) override
   {
     if (name == "key") {
       this->Key = this->Data;
@@ -58,7 +61,7 @@ public:
       }
     }
   }
-  void CharacterDataHandler(const char* data, int length)
+  void CharacterDataHandler(const char* data, int length) override
   {
     this->Data.append(data, length);
   }
