@@ -15,3 +15,4 @@ Known version numbers are::
   1800 = VS 12.0
   1900 = VS 14.0
   1910 = VS 15.0
+  1911 = VS 15.0
