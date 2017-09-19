@@ -573,7 +573,7 @@ void cmGlobalXCodeGenerator::ClearXCodeObjects()
 void cmGlobalXCodeGenerator::addObject(cmXCodeObject* obj)
 {
   if (obj->GetType() == cmXCodeObject::OBJECT) {
-    std::string id = obj->GetId();
+    const std::string& id = obj->GetId();
 
     // If this is a duplicate id, it's an error:
     //
@@ -2748,7 +2748,7 @@ bool cmGlobalXCodeGenerator::CreateGroups(
 }
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreatePBXGroup(cmXCodeObject* parent,
-                                                      std::string name)
+                                                      const std::string& name)
 {
   cmXCodeObject* parentChildren = nullptr;
   if (parent)

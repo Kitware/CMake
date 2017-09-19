@@ -91,7 +91,7 @@ void cmXCodeScheme::WriteBuildAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteTestAction(cmXMLWriter& xout,
-                                    std::string configuration,
+                                    const std::string& configuration,
                                     const std::string& container)
 {
   xout.StartElement("TestAction");
@@ -127,7 +127,7 @@ void cmXCodeScheme::WriteTestAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
-                                      std::string configuration,
+                                      const std::string& configuration,
                                       const std::string& container)
 {
   xout.StartElement("LaunchAction");
@@ -164,7 +164,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteProfileAction(cmXMLWriter& xout,
-                                       std::string configuration)
+                                       const std::string& configuration)
 {
   xout.StartElement("ProfileAction");
   xout.BreakAttributes();
@@ -177,7 +177,7 @@ void cmXCodeScheme::WriteProfileAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteAnalyzeAction(cmXMLWriter& xout,
-                                       std::string configuration)
+                                       const std::string& configuration)
 {
   xout.StartElement("AnalyzeAction");
   xout.BreakAttributes();
@@ -186,7 +186,7 @@ void cmXCodeScheme::WriteAnalyzeAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteArchiveAction(cmXMLWriter& xout,
-                                       std::string configuration)
+                                       const std::string& configuration)
 {
   xout.StartElement("ArchiveAction");
   xout.BreakAttributes();

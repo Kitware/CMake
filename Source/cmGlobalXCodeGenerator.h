@@ -106,7 +106,8 @@ protected:
 private:
   cmXCodeObject* CreateOrGetPBXGroup(cmGeneratorTarget* gtgt,
                                      cmSourceGroup* sg);
-  cmXCodeObject* CreatePBXGroup(cmXCodeObject* parent, std::string name);
+  cmXCodeObject* CreatePBXGroup(cmXCodeObject* parent,
+                                const std::string& name);
   bool CreateGroups(std::vector<cmLocalGenerator*>& generators);
   std::string XCodeEscapePath(const std::string& p);
   std::string RelativeToSource(const char* p);

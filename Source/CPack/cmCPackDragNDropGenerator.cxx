@@ -769,7 +769,8 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallDirNameSuffix(
 
 bool cmCPackDragNDropGenerator::WriteLicense(
   cmGeneratedFileStream& outputStream, int licenseNumber,
-  std::string licenseLanguage, std::string licenseFile, std::string* error)
+  std::string licenseLanguage, const std::string& licenseFile,
+  std::string* error)
 {
   if (!licenseFile.empty() && !singleLicense) {
     licenseNumber = 5002;

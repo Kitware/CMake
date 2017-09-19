@@ -130,7 +130,7 @@ void cmXCodeObject::Print(std::ostream& out)
 }
 
 void cmXCodeObject::PrintAttribute(std::ostream& out, const int level,
-                                   const std::string separator,
+                                   const std::string& separator,
                                    const int factor, const std::string& name,
                                    const cmXCodeObject* object,
                                    const cmXCodeObject* parent)

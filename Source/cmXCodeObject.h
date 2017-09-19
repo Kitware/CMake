@@ -95,7 +95,7 @@ public:
   static void Indent(int level, std::ostream& out);
   void Print(std::ostream& out);
   void PrintAttribute(std::ostream& out, const int level,
-                      const std::string separator, const int factor,
+                      const std::string& separator, const int factor,
                       const std::string& name, const cmXCodeObject* object,
                       const cmXCodeObject* parent);
   virtual void PrintComment(std::ostream&) {}
