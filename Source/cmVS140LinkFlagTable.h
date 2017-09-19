@@ -29,6 +29,8 @@ static cmVS7FlagTable cmVS140LinkFlagTable[] = {
   { "CreateHotPatchableImage", "FUNCTIONPADMIN:16", "Itanium Image Only",
     "ItaniumImage", 0 },
 
+  // correct flags for uac should be /MANIFESTUAC, but some projects already
+  // use this bug to access uac field, so keep these for compatibility
   { "UACExecutionLevel", "level='asInvoker'", "asInvoker", "AsInvoker", 0 },
   { "UACExecutionLevel", "level='highestAvailable'", "highestAvailable",
     "HighestAvailable", 0 },
@@ -148,8 +150,12 @@ static cmVS7FlagTable cmVS140LinkFlagTable[] = {
   { "GenerateManifest", "MANIFEST:NO", "", "false", 0 },
   { "GenerateManifest", "MANIFEST", "", "true", 0 },
   { "AllowIsolation", "ALLOWISOLATION:NO", "", "false", 0 },
+
+  // correct flags for uac should be /MANIFESTUAC, but some projects already
+  // use this bug to access uac field, so keep these for compatibility
   { "UACUIAccess", "uiAccess='false'", "", "false", 0 },
   { "UACUIAccess", "uiAccess='true'", "", "true", 0 },
+
   { "ManifestEmbed", "manifest:embed", "", "true", 0 },
   { "MapExports", "MAPINFO:EXPORTS", "", "true", 0 },
   { "AssemblyDebug", "ASSEMBLYDEBUG:DISABLE", "", "false", 0 },
@@ -190,11 +196,8 @@ static cmVS7FlagTable cmVS140LinkFlagTable[] = {
   { "LinkDLL", "DLL", "", "true", 0 },
 
   // Bool Properties With Argument
-  { "EnableUAC", "MANIFESTUAC:NO", "", "false", 0 },
-  { "EnableUAC", "MANIFESTUAC:", "", "true",
-    cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue },
-  { "UACUIAccess", "MANIFESTUAC:", "Enable User Account Control (UAC)", "",
-    cmVS7FlagTable::UserValueRequired },
+  { "EnableUAC", "MANIFESTUAC:", "", "",
+    cmVS7FlagTable::UserValueRequired | cmVS7FlagTable::SpaceAppendable },
   { "GenerateMapFile", "MAP", "", "true",
     cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue },
   { "MapFileName", "MAP:", "Generate Map File", "",
