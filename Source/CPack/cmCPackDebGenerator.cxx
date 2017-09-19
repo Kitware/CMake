@@ -12,7 +12,6 @@
 #include "cm_sys_stat.h"
 
 #include "cmsys/Glob.hxx"
-#include <map>
 #include <ostream>
 #include <set>
 #include <string.h>
@@ -105,37 +104,31 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
   // The default behavior is to have one package by component group
   // unless CPACK_COMPONENTS_IGNORE_GROUP is specified.
   if (!ignoreGroup) {
-    std::map<std::string, cmCPackComponentGroup>::iterator compGIt;
-    for (compGIt = this->ComponentGroups.begin();
-         compGIt != this->ComponentGroups.end(); ++compGIt) {
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Packaging component group: "
-                      << compGIt->first << std::endl);
+    for (auto const& compG : this->ComponentGroups) {
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                    "Packaging component group: " << compG.first << std::endl);
       // Begin the archive for this group
-      retval &= PackageOnePack(initialTopLevel, compGIt->first);
+      retval &= PackageOnePack(initialTopLevel, compG.first);
     }
     // Handle Orphan components (components not belonging to any groups)
-    std::map<std::string, cmCPackComponent>::iterator compIt;
-    for (compIt = this->Components.begin(); compIt != this->Components.end();
-         ++compIt) {
+    for (auto const& comp : this->Components) {
       // Does the component belong to a group?
-      if (compIt->second.Group == nullptr) {
+      if (comp.second.Group == nullptr) {
         cmCPackLogger(
           cmCPackLog::LOG_VERBOSE, "Component <"
-            << compIt->second.Name
+            << comp.second.Name
             << "> does not belong to any group, package it separately."
             << std::endl);
         // Begin the archive for this orphan component
-        retval &= PackageOnePack(initialTopLevel, compIt->first);
+        retval &= PackageOnePack(initialTopLevel, comp.first);
       }
     }
   }
   // CPACK_COMPONENTS_IGNORE_GROUPS is set
   // We build 1 package per component
   else {
-    std::map<std::string, cmCPackComponent>::iterator compIt;
-    for (compIt = this->Components.begin(); compIt != this->Components.end();
-         ++compIt) {
-      retval &= PackageOnePack(initialTopLevel, compIt->first);
+    for (auto const& comp : this->Components) {
+      retval &= PackageOnePack(initialTopLevel, comp.first);
     }
   }
   return retval;
@@ -336,10 +329,8 @@ int cmCPackDebGenerator::createDeb()
     {
       std::string dirName = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
       dirName += '/';
-      for (std::vector<std::string>::const_iterator fileIt =
-             packageFiles.begin();
-           fileIt != packageFiles.end(); ++fileIt) {
-        totalSize += cmSystemTools::FileLength(*fileIt);
+      for (std::string const& file : packageFiles) {
+        totalSize += cmSystemTools::FileLength(file);
       }
     }
     out << "Installed-Size: " << (totalSize + 1023) / 1024 << "\n";
@@ -446,10 +437,7 @@ int cmCPackDebGenerator::createDeb()
 
     // we have to reconstruct the parent folders as well
 
-    for (std::vector<std::string>::const_iterator fileIt =
-           packageFiles.begin();
-         fileIt != packageFiles.end(); ++fileIt) {
-      std::string currentPath = *fileIt;
+    for (std::string currentPath : packageFiles) {
       while (currentPath != strGenWDIR) {
         // the last one IS strGenWDIR, but we do not want this one:
         // XXX/application/usr/bin/myprogram with GEN_WDIR=XXX/application
@@ -459,18 +447,17 @@ int cmCPackDebGenerator::createDeb()
       }
     }
 
-    for (std::set<std::string>::const_iterator fileIt = orderedFiles.begin();
-         fileIt != orderedFiles.end(); ++fileIt) {
-      cmCPackLogger(cmCPackLog::LOG_DEBUG, "FILEIT: \"" << *fileIt << "\""
+    for (std::string const& file : orderedFiles) {
+      cmCPackLogger(cmCPackLog::LOG_DEBUG, "FILEIT: \"" << file << "\""
                                                         << std::endl);
-      std::string::size_type slashPos = fileIt->find('/', topLevelLength + 1);
+      std::string::size_type slashPos = file.find('/', topLevelLength + 1);
       std::string relativeDir =
-        fileIt->substr(topLevelLength, slashPos - topLevelLength);
+        file.substr(topLevelLength, slashPos - topLevelLength);
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "RELATIVEDIR: \""
                       << relativeDir << "\"" << std::endl);
 
 #ifdef WIN32
-      std::string mode_t_adt_filename = *fileIt + ":cmake_mode_t";
+      std::string mode_t_adt_filename = file + ":cmake_mode_t";
       cmsys::ifstream permissionStream(mode_t_adt_filename.c_str());
 
       mode_t permissions = 0;
@@ -481,7 +468,7 @@ int cmCPackDebGenerator::createDeb()
 
       if (permissions != 0) {
         data_tar.SetPermissions(permissions);
-      } else if (cmSystemTools::FileIsDirectory(*fileIt)) {
+      } else if (cmSystemTools::FileIsDirectory(file)) {
         data_tar.SetPermissions(0755);
       } else {
         data_tar.ClearPermissions();
@@ -489,11 +476,11 @@ int cmCPackDebGenerator::createDeb()
 #endif
 
       // do not recurse because the loop will do it
-      if (!data_tar.Add(*fileIt, topLevelLength, ".", false)) {
+      if (!data_tar.Add(file, topLevelLength, ".", false)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem adding file to tar:"
                         << std::endl
                         << "#top level directory: " << strGenWDIR << std::endl
-                        << "#file: " << *fileIt << std::endl
+                        << "#file: " << file << std::endl
                         << "#error:" << data_tar.GetError() << std::endl);
         return 0;
       }
@@ -508,23 +495,21 @@ int cmCPackDebGenerator::createDeb()
     std::string topLevelWithTrailingSlash =
       this->GetOption("CPACK_TEMPORARY_DIRECTORY");
     topLevelWithTrailingSlash += '/';
-    for (std::vector<std::string>::const_iterator fileIt =
-           packageFiles.begin();
-         fileIt != packageFiles.end(); ++fileIt) {
+    for (std::string const& file : packageFiles) {
       // hash only regular files
-      if (cmSystemTools::FileIsDirectory(*fileIt) ||
-          cmSystemTools::FileIsSymlink(*fileIt)) {
+      if (cmSystemTools::FileIsDirectory(file) ||
+          cmSystemTools::FileIsSymlink(file)) {
         continue;
       }
 
       std::string output =
-        cmSystemTools::ComputeFileHash(*fileIt, cmCryptoHash::AlgoMD5);
+        cmSystemTools::ComputeFileHash(file, cmCryptoHash::AlgoMD5);
       if (output.empty()) {
         cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem computing the md5 of "
-                        << *fileIt << std::endl);
+                        << file << std::endl);
       }
 
-      output += "  " + *fileIt + "\n";
+      output += "  " + file + "\n";
       // debian md5sums entries are like this:
       // 014f3604694729f3bf19263bac599765  usr/bin/ccmake
       // thus strip the full path (with the trailing slash)
@@ -641,9 +626,8 @@ int cmCPackDebGenerator::createDeb()
 
       std::vector<std::string> controlExtraList;
       cmSystemTools::ExpandListArgument(controlExtra, controlExtraList);
-      for (std::vector<std::string>::iterator i = controlExtraList.begin();
-           i != controlExtraList.end(); ++i) {
-        std::string filenamename = cmsys::SystemTools::GetFilenameName(*i);
+      for (std::string const& i : controlExtraList) {
+        std::string filenamename = cmsys::SystemTools::GetFilenameName(i);
         std::string localcopy = strGenWDIR + "/" + filenamename;
 
         if (permissionStrictPolicy) {
@@ -653,7 +637,7 @@ int cmCPackDebGenerator::createDeb()
         }
 
         // if we can copy the file, it means it does exist, let's add it:
-        if (cmsys::SystemTools::CopyFileIfDifferent(*i, localcopy)) {
+        if (cmsys::SystemTools::CopyFileIfDifferent(i, localcopy)) {
           control_tar.Add(localcopy, strGenWDIR.length(), ".");
         }
       }

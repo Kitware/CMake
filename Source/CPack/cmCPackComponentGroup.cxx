@@ -5,7 +5,6 @@
 #include "cmSystemTools.h"
 
 #include <string>
-#include <vector>
 
 unsigned long cmCPackComponent::GetInstalledSize(
   const std::string& installDir) const
@@ -14,11 +13,10 @@ unsigned long cmCPackComponent::GetInstalledSize(
     return this->TotalSize;
   }
 
-  std::vector<std::string>::const_iterator fileIt;
-  for (fileIt = this->Files.begin(); fileIt != this->Files.end(); ++fileIt) {
+  for (std::string const& file : this->Files) {
     std::string path = installDir;
     path += '/';
-    path += *fileIt;
+    path += file;
     this->TotalSize += cmSystemTools::FileLength(path);
   }
 
