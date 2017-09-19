@@ -1471,7 +1471,7 @@ void cmGlobalXCodeGenerator::FilterConfigurationAttribute(
     return;
   }
 
-  std::string::size_type endVariant = attribute.find("]", beginVariant + 9);
+  std::string::size_type endVariant = attribute.find(']', beginVariant + 9);
   if (endVariant == std::string::npos) {
     // There is no terminating bracket.
     return;
@@ -2894,7 +2894,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   std::string project_id = "PROJECT_";
   project_id += root->GetProjectName();
   this->RootObject->SetId(
-    this->GetOrCreateId(project_id.c_str(), this->RootObject->GetId()));
+    this->GetOrCreateId(project_id, this->RootObject->GetId()));
 
   group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   this->RootObject->AddAttribute("mainGroup",
