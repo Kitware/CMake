@@ -41,8 +41,8 @@ protected:
   // of the toolset is installed
   bool IsWindowsStoreToolsetInstalled() const;
 
-  std::string FindMSBuildCommand() CM_OVERRIDE;
-  std::string FindDevEnvCommand() CM_OVERRIDE;
+  std::string FindMSBuildCommand() override;
+  std::string FindDevEnvCommand() override;
 
   std::string const& GetMSBuildCommand();
   std::string MSBuildCommand;
@@ -50,9 +50,6 @@ protected:
 
   // Check for a Win 8 SDK known to the registry or VS installer tool.
   bool IsWin81SDKInstalled() const;
-
-  std::string FindMSBuildCommand() override;
-  std::string FindDevEnvCommand() override;
 
 private:
   class Factory;

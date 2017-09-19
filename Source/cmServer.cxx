@@ -83,11 +83,7 @@ void cmServer::ProcessRequest(cmConnection* connection,
 
   const cmServerRequest request(this, connection, value[kTYPE_KEY].asString(),
                                 value[kCOOKIE_KEY].asString(), value);
-
-  if (request.Type == kQUIT_TYPE) {
-    return true;
-  }
-
+  
   if (request.Type == "") {
     cmServerResponse response(request);
     response.SetError("No type given in request.");
@@ -106,8 +102,6 @@ void cmServer::ProcessRequest(cmConnection* connection,
     this->WriteResponse(connection, this->SetProtocolVersion(request),
                         debug.get());
   }
-
-  return false;
 }
 
 void cmServer::RegisterProtocol(cmServerProtocol* protocol)

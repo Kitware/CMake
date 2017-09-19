@@ -1392,7 +1392,7 @@ cmServerResponse cmServerProtocol1::ProcessFileSystemWatchers(
   return request.Reply(result);
 }
 
-cmServerResponse cmServerProtocol1_0::ProcessCMakeVariables(
+cmServerResponse cmServerProtocol1::ProcessCMakeVariables(
   const cmServerRequest& request)
 {
   if (this->m_State < STATE_CONFIGURED) {
@@ -1487,7 +1487,7 @@ namespace
   };
 }
 
-cmServerResponse cmServerProtocol1_0::ProcessSystemIncludePaths(
+cmServerResponse cmServerProtocol1::ProcessSystemIncludePaths(
   const cmServerRequest & request)
 {
   if (this->m_State < STATE_CONFIGURED) {
@@ -1510,7 +1510,7 @@ cmServerResponse cmServerProtocol1_0::ProcessSystemIncludePaths(
   return request.Reply(result);
 }
 
-cmServerResponse cmServerProtocol1_0::ProcessCTests(
+cmServerResponse cmServerProtocol1::ProcessCTests(
   const cmServerRequest & request)
 {
   if (this->m_State < STATE_COMPUTED) {
