@@ -88,6 +88,13 @@ void cmFindCommon::InitializeSearchPathGroups()
     std::make_pair(PathLabel::Guess, cmSearchPath(this)));
 }
 
+void cmFindCommon::SelectDefaultNoPackageRootPath()
+{
+  if (!this->Makefile->IsOn("__UNDOCUMENTED_CMAKE_FIND_PACKAGE_ROOT")) {
+    this->NoPackageRootPath = true;
+  }
+}
+
 void cmFindCommon::SelectDefaultRootPathMode()
 {
   // Check the policy variable for this find command type.
@@ -148,10 +155,9 @@ void cmFindCommon::SelectDefaultMacMode()
 void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
 {
 #if 0
-  for(std::vector<std::string>::const_iterator i = paths.begin();
-      i != paths.end(); ++i)
+  for(std::string const& p : paths)
     {
-    fprintf(stderr, "[%s]\n", i->c_str());
+    fprintf(stderr, "[%s]\n", p.c_str());
     }
 #endif
   // Short-circuit if there is nothing to do.
@@ -187,9 +193,8 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   if (sysroot) {
     roots.push_back(sysroot);
   }
-  for (std::vector<std::string>::iterator ri = roots.begin();
-       ri != roots.end(); ++ri) {
-    cmSystemTools::ConvertToUnixSlashes(*ri);
+  for (std::string& r : roots) {
+    cmSystemTools::ConvertToUnixSlashes(r);
   }
 
   const char* stagePrefix =
@@ -199,24 +204,22 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   std::vector<std::string> unrootedPaths = paths;
   paths.clear();
 
-  for (std::vector<std::string>::const_iterator ri = roots.begin();
-       ri != roots.end(); ++ri) {
-    for (std::vector<std::string>::const_iterator ui = unrootedPaths.begin();
-         ui != unrootedPaths.end(); ++ui) {
+  for (std::string const& r : roots) {
+    for (std::string const& up : unrootedPaths) {
       // Place the unrooted path under the current root if it is not
       // already inside.  Skip the unrooted path if it is relative to
       // a user home directory or is empty.
       std::string rootedDir;
-      if (cmSystemTools::IsSubDirectory(*ui, *ri) ||
-          (stagePrefix && cmSystemTools::IsSubDirectory(*ui, stagePrefix))) {
-        rootedDir = *ui;
-      } else if (!ui->empty() && (*ui)[0] != '~') {
+      if (cmSystemTools::IsSubDirectory(up, r) ||
+          (stagePrefix && cmSystemTools::IsSubDirectory(up, stagePrefix))) {
+        rootedDir = up;
+      } else if (!up.empty() && up[0] != '~') {
         // Start with the new root.
-        rootedDir = *ri;
+        rootedDir = r;
         rootedDir += "/";
 
         // Append the original path with its old root removed.
-        rootedDir += cmSystemTools::SplitPathRootComponent(*ui);
+        rootedDir += cmSystemTools::SplitPathRootComponent(up);
       }
 
       // Store the new path.
@@ -235,22 +238,21 @@ void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
 {
   // null-terminated list of paths.
   static const char* paths[] = { "CMAKE_SYSTEM_IGNORE_PATH",
-                                 "CMAKE_IGNORE_PATH", CM_NULLPTR };
+                                 "CMAKE_IGNORE_PATH", nullptr };
 
   // Construct the list of path roots with no trailing slashes.
   for (const char** pathName = paths; *pathName; ++pathName) {
     // Get the list of paths to ignore from the variable.
     const char* ignorePath = this->Makefile->GetDefinition(*pathName);
-    if ((ignorePath == CM_NULLPTR) || (strlen(ignorePath) == 0)) {
+    if ((ignorePath == nullptr) || (strlen(ignorePath) == 0)) {
       continue;
     }
 
     cmSystemTools::ExpandListArgument(ignorePath, ignore);
   }
 
-  for (std::vector<std::string>::iterator i = ignore.begin();
-       i != ignore.end(); ++i) {
-    cmSystemTools::ConvertToUnixSlashes(*i);
+  for (std::string& i : ignore) {
+    cmSystemTools::ConvertToUnixSlashes(i);
   }
 }
 
@@ -330,9 +332,8 @@ void cmFindCommon::ComputeFinalPaths()
   // Combine the seperate path types, filtering out ignores
   this->SearchPaths.clear();
   std::vector<PathLabel>& allLabels = this->PathGroupLabelMap[PathGroup::All];
-  for (std::vector<PathLabel>::const_iterator l = allLabels.begin();
-       l != allLabels.end(); ++l) {
-    this->LabeledPaths[*l].ExtractWithout(ignored, this->SearchPaths);
+  for (PathLabel const& l : allLabels) {
+    this->LabeledPaths[l].ExtractWithout(ignored, this->SearchPaths);
   }
 
   // Expand list of paths inside all search roots.

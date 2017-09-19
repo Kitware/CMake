@@ -10,8 +10,16 @@
 #
 # This module supports multiple components.
 # Components can include any of: ``Freeze``, ``Glacier2``, ``Ice``,
-# ``IceBox``, ``IceDB``, ``IceGrid``, ``IcePatch``, ``IceSSL``,
-# ``IceStorm``, ``IceUtil``, ``IceXML``, or ``Slice``.
+# ``IceBox``, ``IceDB``, ``IceDiscovery``, ``IceGrid``,
+# ``IceLocatorDiscovery``, ``IcePatch``, ``IceSSL``, ``IceStorm``,
+# ``IceUtil``, ``IceXML``, or ``Slice``.
+#
+# Ice 3.7 and later also include C++11-specific components:
+# ``Glacier2++11``, ``Ice++11``, ``IceBox++11``, ``IceDiscovery++11``
+# ``IceGrid``, ``IceLocatorDiscovery++11``, ``IceSSL++11``,
+# ``IceStorm++11``
+#
+# Note that the set of supported components is Ice version-specific.
 #
 # This module reports information about the Ice installation in
 # several variables.  General variables::
@@ -28,7 +36,7 @@
 #   Ice::<C>
 #
 # Where ``<C>`` is the name of an Ice component, for example
-# ``Ice::Glacier2``.
+# ``Ice::Glacier2`` or ``Ice++11``.
 #
 # Ice slice programs are reported in::
 #
@@ -39,6 +47,7 @@
 #   Ice_SLICE2HTML_EXECUTABLE - path to slice2html executable
 #   Ice_SLICE2JAVA_EXECUTABLE - path to slice2java executable
 #   Ice_SLICE2JS_EXECUTABLE - path to slice2js executable
+#   Ice_SLICE2OBJC_EXECUTABLE - path to slice2objc executable
 #   Ice_SLICE2PHP_EXECUTABLE - path to slice2php executable
 #   Ice_SLICE2PY_EXECUTABLE - path to slice2py executable
 #   Ice_SLICE2RB_EXECUTABLE - path to slice2rb executable
@@ -47,10 +56,13 @@
 #
 #   Ice_GLACIER2ROUTER_EXECUTABLE - path to glacier2router executable
 #   Ice_ICEBOX_EXECUTABLE - path to icebox executable
+#   Ice_ICEBOXXX11_EXECUTABLE - path to icebox++11 executable
 #   Ice_ICEBOXADMIN_EXECUTABLE - path to iceboxadmin executable
 #   Ice_ICEBOXD_EXECUTABLE - path to iceboxd executable
 #   Ice_ICEBOXNET_EXECUTABLE - path to iceboxnet executable
+#   Ice_ICEBRIDGE_EXECUTABLE - path to icebridge executable
 #   Ice_ICEGRIDADMIN_EXECUTABLE - path to icegridadmin executable
+#   Ice_ICEGRIDDB_EXECUTABLE - path to icegriddb executable
 #   Ice_ICEGRIDNODE_EXECUTABLE - path to icegridnode executable
 #   Ice_ICEGRIDNODED_EXECUTABLE - path to icegridnoded executable
 #   Ice_ICEGRIDREGISTRY_EXECUTABLE - path to icegridregistry executable
@@ -60,6 +72,7 @@
 #   Ice_ICEPATCH2SERVER_EXECUTABLE - path to icepatch2server executable
 #   Ice_ICESERVICEINSTALL_EXECUTABLE - path to iceserviceinstall executable
 #   Ice_ICESTORMADMIN_EXECUTABLE - path to icestormadmin executable
+#   Ice_ICESTORMDB_EXECUTABLE - path to icestormdb executable
 #   Ice_ICESTORMMIGRATE_EXECUTABLE - path to icestormmigrate executable
 #
 # Ice db programs (Windows only; standard system versions on all other
@@ -95,6 +108,13 @@
 # The environment variable ``ICE_HOME`` may also be used; the
 # Ice_HOME variable takes precedence.
 #
+# .. note::
+#   On Windows, Ice 3.7.0 and later provide libraries via the NuGet
+#   package manager.  Appropriate NuGet packages will be searched for
+#   using ``CMAKE_PREFIX_PATH``, or alternatively ``Ice_HOME`` may be
+#   set to the location of a specific NuGet package to restrict the
+#   search.
+#
 # The following cache variables may also be set::
 #
 #   Ice_<P>_EXECUTABLE - the path to executable <P>
@@ -124,12 +144,67 @@
 
 # Written by Roger Leigh <rleigh@codelibre.net>
 
+  set(_Ice_db_programs
+      db_archive
+      db_checkpoint
+      db_deadlock
+      db_dump
+      db_hotbackup
+      db_load
+      db_log_verify
+      db_printlog
+      db_recover
+      db_stat
+      db_tuner
+      db_upgrade
+      db_verify
+      dumpdb
+      transformdb)
+
+  set(_Ice_programs
+      glacier2router
+      icebox
+      icebox++11
+      iceboxadmin
+      iceboxd
+      iceboxnet
+      icebridge
+      icegridadmin
+      icegriddb
+      icegridnode
+      icegridnoded
+      icegridregistry
+      icegridregistryd
+      icepatch2calc
+      icepatch2client
+      icepatch2server
+      iceserviceinstall
+      icestormadmin
+      icestormdb
+      icestormmigrate)
+
+  set(_Ice_slice_programs
+      slice2cpp
+      slice2cs
+      slice2freezej
+      slice2freeze
+      slice2html
+      slice2java
+      slice2js
+      slice2objc
+      slice2php
+      slice2py
+      slice2rb)
+
+
 # The Ice checks are contained in a function due to the large number
 # of temporary variables needed.
 function(_Ice_FIND)
   # Released versions of Ice, including generic short forms
   set(ice_versions
       3
+      3.7
+      3.7.0
       3.6
       3.6.3
       3.6.2
@@ -146,6 +221,14 @@ function(_Ice_FIND)
       3.3.1
       3.3.0)
 
+  foreach(ver ${ice_versions})
+    string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\$" two_digit_version_match "${ver}")
+    if(two_digit_version_match)
+      string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\$" "\\1\\2" two_digit_version "${ver}")
+      list(APPEND ice_suffix_versions "${two_digit_version}")
+    endif()
+  endforeach()
+
   # Set up search paths, taking compiler into account.  Search Ice_HOME,
   # with ICE_HOME in the environment as a fallback if unset.
   if(Ice_HOME)
@@ -159,52 +242,85 @@ function(_Ice_FIND)
     endif()
   endif()
 
+  set(_bin "bin/Win32")
+  set(_lib "lib/Win32")
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(_bin "bin/x64")
+    set(_lib "lib/x64")
     # 64-bit path suffix
     set(_x64 "/x64")
     # 64-bit library directory
     set(_lib64 "lib64")
   endif()
 
-  if(MSVC_VERSION)
-    # VS 8.0
-    if(NOT MSVC_VERSION VERSION_LESS 1400 AND MSVC_VERSION VERSION_LESS 1500)
-      set(vcver "vc80")
-      set(vcyear "2005")
-    # VS 9.0
-    elseif(NOT MSVC_VERSION VERSION_LESS 1500 AND MSVC_VERSION VERSION_LESS 1600)
-      set(vcver "vc90")
+  unset(vcvers)
+  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10)
+      set(vcvers "141;140")
+    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
+      set(vcvers "140")
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18)
+      set(vcvers "120")
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17)
+      set(vcvers "110")
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16)
+      set(vcvers "100")
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15)
+      set(vcvers "90")
       set(vcyear "2008")
-    # VS 10.0
-    elseif(NOT MSVC_VERSION VERSION_LESS 1600 AND MSVC_VERSION VERSION_LESS 1700)
-      set(vcver "vc100")
-    # VS 11.0
-    elseif(NOT MSVC_VERSION VERSION_LESS 1700 AND MSVC_VERSION VERSION_LESS 1800)
-      set(vcver "vc110")
-    # VS 12.0
-    elseif(NOT MSVC_VERSION VERSION_LESS 1800 AND MSVC_VERSION VERSION_LESS 1900)
-      set(vcver "vc120")
-    # VS 14.0
-    elseif(NOT MSVC_VERSION VERSION_LESS 1900 AND MSVC_VERSION VERSION_LESS 2000)
-      set(vcver "vc140")
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
+      set(vcvers "80")
+      set(vcyear "2005")
+    else() # Unknown version
+      set(vcvers Unknown)
     endif()
   endif()
 
   # For compatibility with ZeroC Windows builds.
-  if(vcver)
-    # Earlier Ice (3.3) builds don't use vcnnn subdirectories, but are harmless to check.
-    list(APPEND ice_binary_suffixes "bin/${vcver}${_x64}" "bin/${vcver}")
-    list(APPEND ice_library_suffixes "lib/${vcver}${_x64}" "lib/${vcver}")
+  if(vcvers)
+    list(APPEND ice_binary_suffixes "build/native/${_bin}/Release" "tools")
+    list(APPEND ice_debug_library_suffixes "build/native/${_lib}/Debug")
+    list(APPEND ice_release_library_suffixes "build/native/${_lib}/Release")
+    foreach(vcver IN LISTS vcvers)
+      # Earlier Ice (3.3) builds don't use vcnnn subdirectories, but are harmless to check.
+      list(APPEND ice_binary_suffixes "bin/vc${vcver}${_x64}" "bin/vc${vcver}")
+      list(APPEND ice_debug_library_suffixes "lib/vc${vcver}${_x64}" "lib/vc${vcver}")
+      list(APPEND ice_release_library_suffixes "lib/vc${vcver}${_x64}" "lib/vc${vcver}")
+    endforeach()
   endif()
   # Generic 64-bit and 32-bit directories
   list(APPEND ice_binary_suffixes "bin${_x64}" "bin")
-  list(APPEND ice_library_suffixes "libx32" "${_lib64}" "lib${_x64}" "lib")
+  list(APPEND ice_debug_library_suffixes "libx32" "${_lib64}" "lib${_x64}" "lib")
+  list(APPEND ice_release_library_suffixes "libx32" "${_lib64}" "lib${_x64}" "lib")
+  if(vcvers)
+    list(APPEND ice_include_suffixes "build/native/include")
+  endif()
   list(APPEND ice_include_suffixes "include")
   list(APPEND ice_slice_suffixes "slice")
 
   # On Windows, look in the registry for install locations.  Different
   # versions of Ice install support different compiler versions.
-  if(vcver)
+  if(vcvers)
+    foreach(ice_version ${ice_versions})
+      foreach(vcver IN LISTS vcvers)
+        list(APPEND ice_nuget_dirs "zeroc.ice.v${vcver}.${ice_version}")
+        list(APPEND freeze_nuget_dirs "zeroc.freeze.v${vcver}.${ice_version}")
+      endforeach()
+    endforeach()
+    find_path(Ice_NUGET_DIR
+              NAMES "tools/slice2cpp.exe"
+              PATH_SUFFIXES ${ice_nuget_dirs}
+              DOC "Ice NuGet directory")
+    if(Ice_NUGET_DIR)
+      list(APPEND ice_roots "${Ice_NUGET_DIR}")
+    endif()
+    find_path(Freeze_NUGET_DIR
+              NAMES "tools/slice2freeze.exe"
+              PATH_SUFFIXES ${freeze_nuget_dirs}
+              DOC "Freeze NuGet directory")
+    if(Freeze_NUGET_DIR)
+      list(APPEND ice_roots "${Freeze_NUGET_DIR}")
+    endif()
     foreach(ice_version ${ice_versions})
       # Ice 3.3 releases use a Visual Studio year suffix and value is
       # enclosed in double quotes, though only the leading quote is
@@ -239,55 +355,8 @@ function(_Ice_FIND)
     endforeach()
   endif()
 
-  set(db_programs
-      db_archive
-      db_checkpoint
-      db_deadlock
-      db_dump
-      db_hotbackup
-      db_load
-      db_log_verify
-      db_printlog
-      db_recover
-      db_stat
-      db_tuner
-      db_upgrade
-      db_verify
-      dumpdb
-      transformdb)
-
-  set(ice_programs
-      glacier2router
-      icebox
-      iceboxadmin
-      iceboxd
-      iceboxnet
-      icegridadmin
-      icegridnode
-      icegridnoded
-      icegridregistry
-      icegridregistryd
-      icepatch2calc
-      icepatch2client
-      icepatch2server
-      iceserviceinstall
-      icestormadmin
-      icestormmigrate)
-
-  set(slice_programs
-      slice2cpp
-      slice2cs
-      slice2freezej
-      slice2freeze
-      slice2html
-      slice2java
-      slice2js
-      slice2php
-      slice2py
-      slice2rb)
-
   # Find all Ice programs
-  foreach(program ${db_programs} ${ice_programs} ${slice_programs})
+  foreach(program ${_Ice_db_programs} ${_Ice_programs} ${_Ice_slice_programs})
     string(TOUPPER "${program}" program_upcase)
     set(cache_var "Ice_${program_upcase}_EXECUTABLE")
     set(program_var "Ice_${program_upcase}_EXECUTABLE")
@@ -329,6 +398,13 @@ function(_Ice_FIND)
             DOC "Ice include directory")
   set(Ice_INCLUDE_DIR "${Ice_INCLUDE_DIR}" PARENT_SCOPE)
 
+  find_path(Freeze_INCLUDE_DIR
+            NAMES "Freeze/Freeze.h"
+            HINTS ${ice_roots}
+            PATH_SUFFIXES ${ice_include_suffixes}
+            DOC "Freeze include directory")
+  set(Freeze_INCLUDE_DIR "${Freeze_INCLUDE_DIR}" PARENT_SCOPE)
+
   # In common use on Linux, MacOS X (homebrew) and FreeBSD; prefer
   # version-specific dir
   list(APPEND ice_slice_paths
@@ -336,6 +412,7 @@ function(_Ice_FIND)
   list(APPEND ice_slice_suffixes
        "Ice-${Ice_VERSION_SLICE2CPP_FULL}/slice"
        "Ice-${Ice_VERSION_SLICE2CPP_SHORT}/slice"
+       "ice/slice"
        Ice)
 
   # Find slice directory
@@ -356,13 +433,39 @@ function(_Ice_FIND)
     set(component_cache_release "${component_cache}_RELEASE")
     set(component_cache_debug "${component_cache}_DEBUG")
     set(component_found "${component_upcase}_FOUND")
-    find_library("${component_cache_release}" "${component}"
+    set(component_library "${component}")
+    unset(component_library_release_names)
+    unset(component_library_debug_names)
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+      string(REGEX MATCH ".+\\+\\+11$" component_library_cpp11 "${component_library}")
+      if(component_library_cpp11)
+        string(REGEX REPLACE "^(.+)(\\+\\+11)$" "\\1" component_library "${component_library}")
+      endif()
+      foreach(suffix_ver ${ice_suffix_versions})
+        set(_name "${component_library}${suffix_ver}")
+        if(component_library_cpp11)
+          string(APPEND _name "++11")
+        endif()
+        list(APPEND component_library_debug_names "${_name}d")
+        list(APPEND component_library_release_names "${_name}")
+      endforeach()
+      set(_name "${component_library}")
+      if(component_library_cpp11)
+        string(APPEND _name "++11")
+      endif()
+      list(APPEND component_library_debug_names "${_name}d")
+      list(APPEND component_library_release_names "${_name}")
+    else()
+      list(APPEND component_library_debug_names "${component_library}d")
+      list(APPEND component_library_release_names "${component_library}")
+    endif()
+    find_library("${component_cache_release}" ${component_library_release_names}
       HINTS ${ice_roots}
-      PATH_SUFFIXES ${ice_library_suffixes}
+      PATH_SUFFIXES ${ice_release_library_suffixes}
       DOC "Ice ${component} library (release)")
-    find_library("${component_cache_debug}" "${component}d"
+    find_library("${component_cache_debug}" ${component_library_debug_names}
       HINTS ${ice_roots}
-      PATH_SUFFIXES ${ice_library_suffixes}
+      PATH_SUFFIXES ${ice_debug_library_suffixes}
       DOC "Ice ${component} library (debug)")
     include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
     select_library_configurations(Ice_${component_upcase})
@@ -410,9 +513,14 @@ function(_Ice_FIND)
   if(Ice_DEBUG)
     message(STATUS "--------FindIce.cmake search debug--------")
     message(STATUS "ICE binary path search order: ${ice_roots}")
+    message(STATUS "ICE binary suffixes: ${ice_binary_suffixes}")
     message(STATUS "ICE include path search order: ${ice_roots}")
+    message(STATUS "ICE include suffixes: ${ice_include_suffixes}")
     message(STATUS "ICE slice path search order: ${ice_roots} ${ice_slice_paths}")
+    message(STATUS "ICE slice suffixes: ${ice_slice_suffixes}")
     message(STATUS "ICE library path search order: ${ice_roots}")
+    message(STATUS "ICE debug library suffixes: ${ice_debug_library_suffixes}")
+    message(STATUS "ICE release library suffixes: ${ice_release_library_suffixes}")
     message(STATUS "----------------")
   endif()
 endfunction()
@@ -434,6 +542,9 @@ unset(_Ice_REQUIRED_LIBS_FOUND)
 
 if(Ice_FOUND)
   set(Ice_INCLUDE_DIRS "${Ice_INCLUDE_DIR}")
+  if (Freeze_INCLUDE_DIR)
+    list(APPEND Ice_INCLUDE_DIRS "${Freeze_INCLUDE_DIR}")
+  endif()
   set(Ice_SLICE_DIRS "${Ice_SLICE_DIR}")
   set(Ice_LIBRARIES "${Ice_LIBRARY}")
   foreach(_Ice_component ${Ice_FIND_COMPONENTS})
@@ -448,10 +559,8 @@ if(Ice_FOUND)
       set("${_Ice_component_lib}" "${${_Ice_component_cache}}")
       if(NOT TARGET ${_Ice_imported_target})
         add_library(${_Ice_imported_target} UNKNOWN IMPORTED)
-        if()
-          set_target_properties(${_Ice_imported_target} PROPERTIES
-            INTERFACE_INCLUDE_DIRECTORIES "${Ice_INCLUDE_DIR}")
-        endif()
+        set_target_properties(${_Ice_imported_target} PROPERTIES
+          INTERFACE_INCLUDE_DIRECTORIES "${Ice_INCLUDE_DIRS}")
         if(EXISTS "${${_Ice_component_cache}}")
           set_target_properties(${_Ice_imported_target} PROPERTIES
             IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
@@ -488,50 +597,13 @@ if(Ice_DEBUG)
   message(STATUS "Ice_INCLUDE_DIR directory: ${Ice_INCLUDE_DIR}")
   message(STATUS "Ice_SLICE_DIR directory: ${Ice_SLICE_DIR}")
   message(STATUS "Ice_LIBRARIES: ${Ice_LIBRARIES}")
+  message(STATUS "Freeze_INCLUDE_DIR directory: ${Freeze_INCLUDE_DIR}")
+  message(STATUS "Ice_INCLUDE_DIRS directory: ${Ice_INCLUDE_DIRS}")
 
-  message(STATUS "slice2cpp executable: ${Ice_SLICE2CPP_EXECUTABLE}")
-  message(STATUS "slice2cs executable: ${Ice_SLICE2CS_EXECUTABLE}")
-  message(STATUS "slice2freezej executable: ${Ice_SLICE2FREEZEJ_EXECUTABLE}")
-  message(STATUS "slice2freeze executable: ${Ice_SLICE2FREEZE_EXECUTABLE}")
-  message(STATUS "slice2html executable: ${Ice_SLICE2HTML_EXECUTABLE}")
-  message(STATUS "slice2java executable: ${Ice_SLICE2JAVA_EXECUTABLE}")
-  message(STATUS "slice2js executable: ${Ice_SLICE2JS_EXECUTABLE}")
-  message(STATUS "slice2php executable: ${Ice_SLICE2PHP_EXECUTABLE}")
-  message(STATUS "slice2py executable: ${Ice_SLICE2PY_EXECUTABLE}")
-  message(STATUS "slice2rb executable: ${Ice_SLICE2RB_EXECUTABLE}")
-  message(STATUS "glacier2router executable: ${Ice_GLACIER2ROUTER_EXECUTABLE}")
-
-  message(STATUS "icebox executable: ${Ice_ICEBOX_EXECUTABLE}")
-  message(STATUS "iceboxadmin executable: ${Ice_ICEBOXADMIN_EXECUTABLE}")
-  message(STATUS "iceboxd executable: ${Ice_ICEBOXD_EXECUTABLE}")
-  message(STATUS "iceboxnet executable: ${Ice_ICEBOXNET_EXECUTABLE}")
-  message(STATUS "icegridadmin executable: ${Ice_ICEGRIDADMIN_EXECUTABLE}")
-  message(STATUS "icegridnode executable: ${Ice_ICEGRIDNODE_EXECUTABLE}")
-  message(STATUS "icegridnoded executable: ${Ice_ICEGRIDNODED_EXECUTABLE}")
-  message(STATUS "icegridregistry executable: ${Ice_ICEGRIDREGISTRY_EXECUTABLE}")
-  message(STATUS "icegridregistryd executable: ${Ice_ICEGRIDREGISTRYD_EXECUTABLE}")
-  message(STATUS "icepatch2calc executable: ${Ice_ICEPATCH2CALC_EXECUTABLE}")
-  message(STATUS "icepatch2client executable: ${Ice_ICEPATCH2CLIENT_EXECUTABLE}")
-  message(STATUS "icepatch2server executable: ${Ice_ICEPATCH2SERVER_EXECUTABLE}")
-  message(STATUS "iceserviceinstall executable: ${Ice_ICESERVICEINSTALL_EXECUTABLE}")
-  message(STATUS "icestormadmin executable: ${Ice_ICESTORMADMIN_EXECUTABLE}")
-  message(STATUS "icestormmigrate executable: ${Ice_ICESTORMMIGRATE_EXECUTABLE}")
-
-  message(STATUS "db_archive executable: ${Ice_DB_ARCHIVE_EXECUTABLE}")
-  message(STATUS "db_checkpoint executable: ${Ice_DB_CHECKPOINT_EXECUTABLE}")
-  message(STATUS "db_deadlock executable: ${Ice_DB_DEADLOCK_EXECUTABLE}")
-  message(STATUS "db_dump executable: ${Ice_DB_DUMP_EXECUTABLE}")
-  message(STATUS "db_hotbackup executable: ${Ice_DB_HOTBACKUP_EXECUTABLE}")
-  message(STATUS "db_load executable: ${Ice_DB_LOAD_EXECUTABLE}")
-  message(STATUS "db_log_verify executable: ${Ice_DB_LOG_VERIFY_EXECUTABLE}")
-  message(STATUS "db_printlog executable: ${Ice_DB_PRINTLOG_EXECUTABLE}")
-  message(STATUS "db_recover executable: ${Ice_DB_RECOVER_EXECUTABLE}")
-  message(STATUS "db_stat executable: ${Ice_DB_STAT_EXECUTABLE}")
-  message(STATUS "db_tuner executable: ${Ice_DB_TUNER_EXECUTABLE}")
-  message(STATUS "db_upgrade executable: ${Ice_DB_UPGRADE_EXECUTABLE}")
-  message(STATUS "db_verify executable: ${Ice_DB_VERIFY_EXECUTABLE}")
-  message(STATUS "dumpdb executable: ${Ice_DUMPDB_EXECUTABLE}")
-  message(STATUS "transformdb executable: ${Ice_TRANSFORMDB_EXECUTABLE}")
+  foreach(program ${_Ice_db_programs} ${_Ice_programs} ${_Ice_slice_programs})
+    string(TOUPPER "${program}" program_upcase)
+    message(STATUS "${program} executable: ${Ice_${program_upcase}_EXECUTABLE}")
+  endforeach()
 
   foreach(component ${Ice_FIND_COMPONENTS})
     string(TOUPPER "${component}" component_upcase)
@@ -542,3 +614,7 @@ if(Ice_DEBUG)
   endforeach()
   message(STATUS "----------------")
 endif()
+
+unset(_Ice_db_programs)
+unset(_Ice_programs)
+unset(_Ice_slice_programs)

@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCommonTargetGenerator.h"
 
-#include "cmConfigure.h"
 #include <set>
 #include <sstream>
 #include <utility>
@@ -79,7 +78,7 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
     const char* tgtfmt = this->GeneratorTarget->GetProperty("Fortran_FORMAT");
     format = cmOutputConverter::GetFortranFormat(tgtfmt);
   }
-  const char* var = CM_NULLPTR;
+  const char* var = nullptr;
   switch (format) {
     case cmOutputConverter::FortranFormatFixed:
       var = "CMAKE_Fortran_FORMAT_FIXED_FLAG";
@@ -148,10 +147,8 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories()
   if (cmComputeLinkInformation* cli =
         this->GeneratorTarget->GetLinkInformation(this->ConfigName)) {
     cmComputeLinkInformation::ItemVector const& items = cli->GetItems();
-    for (cmComputeLinkInformation::ItemVector::const_iterator i =
-           items.begin();
-         i != items.end(); ++i) {
-      cmGeneratorTarget const* linkee = i->Target;
+    for (auto const& item : items) {
+      cmGeneratorTarget const* linkee = item.Target;
       if (linkee && !linkee->IsImported()
           // We can ignore the INTERFACE_LIBRARY items because
           // Target->GetLinkInformation already processed their
@@ -197,12 +194,11 @@ std::string cmCommonTargetGenerator::GetManifests()
   this->GeneratorTarget->GetManifests(manifest_srcs, this->ConfigName);
 
   std::vector<std::string> manifests;
-  for (std::vector<cmSourceFile const*>::iterator mi = manifest_srcs.begin();
-       mi != manifest_srcs.end(); ++mi) {
+  for (cmSourceFile const* manifest_src : manifest_srcs) {
     manifests.push_back(this->LocalCommonGenerator->ConvertToOutputFormat(
       this->LocalCommonGenerator->ConvertToRelativePath(
         this->LocalCommonGenerator->GetWorkingDirectory(),
-        (*mi)->GetFullPath()),
+        manifest_src->GetFullPath()),
       cmOutputConverter::SHELL));
   }
 

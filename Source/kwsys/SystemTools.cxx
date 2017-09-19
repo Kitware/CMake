@@ -847,6 +847,8 @@ void SystemTools::ReplaceString(std::string& source, const char* replace,
   free(orig);
 }
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+
 #if defined(KEY_WOW64_32KEY) && defined(KEY_WOW64_64KEY)
 #define KWSYS_ST_KEY_WOW64_32KEY KEY_WOW64_32KEY
 #define KWSYS_ST_KEY_WOW64_64KEY KEY_WOW64_64KEY
@@ -855,7 +857,6 @@ void SystemTools::ReplaceString(std::string& source, const char* replace,
 #define KWSYS_ST_KEY_WOW64_64KEY 0x0100
 #endif
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
 static bool SystemToolsParseRegistryKey(const std::string& key,
                                         HKEY& primaryKey, std::string& second,
                                         std::string& valuename)
@@ -2268,11 +2269,7 @@ bool SystemTools::CopyADirectory(const std::string& source,
                                  const std::string& destination, bool always)
 {
   Directory dir;
-#ifdef _WIN32
-  dir.Load(Encoding::ToNarrow(Encoding::ToWindowsExtendedPath(source)));
-#else
   dir.Load(source);
-#endif
   size_t fileNum;
   if (!SystemTools::MakeDirectory(destination)) {
     return false;
@@ -2625,11 +2622,7 @@ bool SystemTools::RemoveADirectory(const std::string& source)
   }
 
   Directory dir;
-#ifdef _WIN32
-  dir.Load(Encoding::ToNarrow(Encoding::ToWindowsExtendedPath(source)));
-#else
   dir.Load(source);
-#endif
   size_t fileNum;
   for (fileNum = 0; fileNum < dir.GetNumberOfFiles(); ++fileNum) {
     if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)), ".") &&
@@ -3796,11 +3789,7 @@ std::string SystemTools::GetFilenamePath(const std::string& filename)
  */
 std::string SystemTools::GetFilenameName(const std::string& filename)
 {
-#if defined(_WIN32)
   std::string::size_type slash_pos = filename.find_last_of("/\\");
-#else
-  std::string::size_type slash_pos = filename.rfind('/');
-#endif
   if (slash_pos != std::string::npos) {
     return filename.substr(slash_pos + 1);
   } else {
@@ -4111,66 +4100,6 @@ bool SystemTools::GetShortPath(const std::string& path, std::string& shortPath)
   shortPath = path;
   return true;
 #endif
-}
-
-void SystemTools::SplitProgramFromArgs(const std::string& path,
-                                       std::string& program, std::string& args)
-{
-  // see if this is a full path to a program
-  // if so then set program to path and args to nothing
-  if (SystemTools::FileExists(path)) {
-    program = path;
-    args = "";
-    return;
-  }
-  // Try to find the program in the path, note the program
-  // may have spaces in its name so we have to look for it
-  std::vector<std::string> e;
-  std::string findProg = SystemTools::FindProgram(path, e);
-  if (!findProg.empty()) {
-    program = findProg;
-    args = "";
-    return;
-  }
-
-  // Now try and peel off space separated chunks from the end of the string
-  // so the largest path possible is found allowing for spaces in the path
-  std::string dir = path;
-  std::string::size_type spacePos = dir.rfind(' ');
-  while (spacePos != std::string::npos) {
-    std::string tryProg = dir.substr(0, spacePos);
-    // See if the file exists
-    if (SystemTools::FileExists(tryProg)) {
-      program = tryProg;
-      // remove trailing spaces from program
-      std::string::size_type pos = program.size() - 1;
-      while (program[pos] == ' ') {
-        program.erase(pos);
-        pos--;
-      }
-      args = dir.substr(spacePos, dir.size() - spacePos);
-      return;
-    }
-    // Now try and find the program in the path
-    findProg = SystemTools::FindProgram(tryProg, e);
-    if (!findProg.empty()) {
-      program = findProg;
-      // remove trailing spaces from program
-      std::string::size_type pos = program.size() - 1;
-      while (program[pos] == ' ') {
-        program.erase(pos);
-        pos--;
-      }
-      args = dir.substr(spacePos, dir.size() - spacePos);
-      return;
-    }
-    // move past the space for the next search
-    spacePos--;
-    spacePos = dir.rfind(' ', spacePos);
-  }
-
-  program = "";
-  args = "";
 }
 
 std::string SystemTools::GetCurrentDateTime(const char* format)

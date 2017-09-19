@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#include <cmConfigure.h>
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <sstream>
 #include <stdio.h>
@@ -21,7 +21,7 @@ static test_pair const pairs[] = {
   { "angles <>", "angles &lt;&gt;" },
   { "ampersand &", "ampersand &amp;" },
   { "bad-byte \x80", "bad-byte [NON-UTF-8-BYTE-0x80]" },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, nullptr }
 };
 
 int testXMLSafe(int /*unused*/, char* /*unused*/ [])

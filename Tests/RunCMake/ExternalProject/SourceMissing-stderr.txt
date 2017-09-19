@@ -6,12 +6,12 @@
   is not an existing non-empty directory.  Please specify one of:
 
    \* SOURCE_DIR with an existing non-empty directory
+   \* DOWNLOAD_COMMAND
    \* URL
    \* GIT_REPOSITORY
+   \* SVN_REPOSITORY
    \* HG_REPOSITORY
    \* CVS_REPOSITORY and CVS_MODULE
-   \* SVN_REVISION
-   \* DOWNLOAD_COMMAND
 Call Stack \(most recent call first\):
   .*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_download_command\)
   SourceMissing.cmake:[0-9]+ \(ExternalProject_Add\)

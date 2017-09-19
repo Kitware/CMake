@@ -3,7 +3,7 @@
 #ifndef cmGlobalKdevelopGenerator_h
 #define cmGlobalKdevelopGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmExternalMakefileProjectGenerator.h"
 
@@ -30,7 +30,7 @@ public:
 
   static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
 private:
   /*** Create the foo.kdevelop.filelist file, return false if it doesn't

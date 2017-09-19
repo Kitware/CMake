@@ -323,6 +323,9 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
           endif()
         endif()
       endif()
+      if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" AND NOT CMAKE_CROSSCOMPILING)
+        list(APPEND _lib_dirs "libdata/pkgconfig")
+      endif()
       list(APPEND _lib_dirs "lib/pkgconfig")
       list(APPEND _lib_dirs "share/pkgconfig")
 
@@ -584,7 +587,9 @@ endmacro()
 macro(pkg_check_modules _prefix _module0)
   _pkgconfig_parse_options(_pkg_modules _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target "${_module0}" ${ARGN})
   # check cached value
-  if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND OR NOT "${__pkg_config_arguments_${_prefix}}" STREQUAL "${_module0};${ARGN}")
+  if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND OR
+      (NOT "${ARGN}" STREQUAL "" AND NOT "${__pkg_config_arguments_${_prefix}}" STREQUAL "${_module0};${ARGN}") OR
+      (    "${ARGN}" STREQUAL "" AND NOT "${__pkg_config_arguments_${_prefix}}" STREQUAL "${_module0}"))
     _pkg_check_modules_internal("${_pkg_is_required}" "${_pkg_is_silent}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} "${_prefix}" ${_pkg_modules})
 
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})

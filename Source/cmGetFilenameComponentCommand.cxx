@@ -60,7 +60,30 @@ bool cmGetFilenameComponentCommand::InitialPass(
         }
       }
     }
-    cmSystemTools::SplitProgramFromArgs(filename, result, programArgs);
+
+    // First assume the path to the program was specified with no
+    // arguments and with no quoting or escaping for spaces.
+    // Only bother doing this if there is non-whitespace.
+    if (!cmSystemTools::TrimWhitespace(filename).empty()) {
+      result = cmSystemTools::FindProgram(filename);
+    }
+
+    // If that failed then assume a command-line string was given
+    // and split the program part from the rest of the arguments.
+    if (result.empty()) {
+      std::string program;
+      if (cmSystemTools::SplitProgramFromArgs(filename, program,
+                                              programArgs)) {
+        if (cmSystemTools::FileExists(program)) {
+          result = program;
+        } else {
+          result = cmSystemTools::FindProgram(program);
+        }
+      }
+      if (result.empty()) {
+        programArgs.clear();
+      }
+    }
   } else if (args[2] == "EXT") {
     result = cmSystemTools::GetFilenameExtension(filename);
   } else if (args[2] == "NAME_WE") {

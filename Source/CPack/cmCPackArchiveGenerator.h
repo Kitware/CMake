@@ -3,7 +3,7 @@
 #ifndef cmCPackArchiveGenerator_h
 #define cmCPackArchiveGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmArchiveWrite.h"
 #include "cmCPackGenerator.h"
@@ -28,11 +28,11 @@ public:
    * Construct generator
    */
   cmCPackArchiveGenerator(cmArchiveWrite::Compress, std::string const& format);
-  ~cmCPackArchiveGenerator() CM_OVERRIDE;
+  ~cmCPackArchiveGenerator() override;
   // Used to add a header to the archive
   virtual int GenerateHeader(std::ostream* os);
   // component support
-  bool SupportsComponentInstallation() const CM_OVERRIDE;
+  bool SupportsComponentInstallation() const override;
 
 private:
   // get archive component filename
@@ -40,7 +40,7 @@ private:
                                           bool isGroupName);
 
 protected:
-  int InitializeInternal() CM_OVERRIDE;
+  int InitializeInternal() override;
   /**
    * Add the files belonging to the specified component
    * to the provided (already opened) archive.
@@ -56,7 +56,7 @@ protected:
    * method will call either PackageComponents or
    * PackageComponentsAllInOne.
    */
-  int PackageFiles() CM_OVERRIDE;
+  int PackageFiles() override;
   /**
    * The method used to package files when component
    * install is used. This will create one
@@ -68,7 +68,7 @@ protected:
    * components will be put in a single installer.
    */
   int PackageComponentsAllInOne();
-  const char* GetOutputExtension() CM_OVERRIDE = 0;
+  const char* GetOutputExtension() override = 0;
   cmArchiveWrite::Compress Compress;
   std::string ArchiveFormat;
 };

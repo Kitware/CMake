@@ -3,7 +3,7 @@
 #ifndef cmCTestBuildHandler_h
 #define cmCTestBuildHandler_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGenericHandler.h"
 
@@ -31,16 +31,16 @@ public:
   /*
    * The main entry point for this class
    */
-  int ProcessHandler() CM_OVERRIDE;
+  int ProcessHandler() override;
 
   cmCTestBuildHandler();
 
-  void PopulateCustomVectors(cmMakefile* mf) CM_OVERRIDE;
+  void PopulateCustomVectors(cmMakefile* mf) override;
 
   /**
    * Initialize handler
    */
-  void Initialize() CM_OVERRIDE;
+  void Initialize() override;
 
   int GetTotalErrors() { return this->TotalErrors; }
   int GetTotalWarnings() { return this->TotalWarnings; }

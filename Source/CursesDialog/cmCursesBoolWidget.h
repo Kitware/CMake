@@ -3,7 +3,7 @@
 #ifndef cmCursesBoolWidget_h
 #define cmCursesBoolWidget_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"
@@ -21,7 +21,7 @@ public:
   // Handle user input. Called by the container of this widget
   // when this widget has focus. Returns true if the input was
   // handled.
-  bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w) CM_OVERRIDE;
+  bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w) override;
 
   // Description:
   // Set/Get the value (on/off).

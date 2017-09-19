@@ -3,7 +3,7 @@
 #ifndef cmXMLWiter_h
 #define cmXMLWiter_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmXMLSafe.h"
 
@@ -107,7 +107,7 @@ private:
 
 private:
   std::ostream& Output;
-  std::stack<std::string, std::vector<std::string> > Elements;
+  std::stack<std::string, std::vector<std::string>> Elements;
   std::string IndentationElement;
   std::size_t Level;
   bool ElementOpen;

@@ -11,19 +11,19 @@
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # CMake
-# can generate graphviz files, showing the dependencies between the
+# can generate `graphviz <http://www.graphviz.org/>`_ files, showing the dependencies between the
 # targets in a project and also external libraries which are linked
-# against.  When CMake is run with the --graphviz=foo.dot option, it will
+# against.  When CMake is run with the ``--graphviz=foo.dot`` option, it will
 # produce:
 #
-# * a foo.dot file showing all dependencies in the project
-# * a foo.dot.<target> file for each target, file showing on which other targets the respective target depends
-# * a foo.dot.<target>.dependers file, showing which other targets depend on the respective target
+# * a ``foo.dot`` file showing all dependencies in the project
+# * a ``foo.dot.<target>`` file for each target, file showing on which other targets the respective target depends
+# * a ``foo.dot.<target>.dependers`` file, showing which other targets depend on the respective target
 #
 # This can result in huge graphs.  Using the file
-# CMakeGraphVizOptions.cmake the look and content of the generated
+# ``CMakeGraphVizOptions.cmake`` the look and content of the generated
 # graphs can be influenced.  This file is searched first in
-# ${CMAKE_BINARY_DIR} and then in ${CMAKE_SOURCE_DIR}.  If found, it is
+# :variable:`CMAKE_BINARY_DIR` and then in :variable:`CMAKE_SOURCE_DIR`.  If found, it is
 # read and the variables set in it are used to adjust options for the
 # generated graphviz files.
 #

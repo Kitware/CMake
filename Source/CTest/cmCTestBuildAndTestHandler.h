@@ -3,7 +3,7 @@
 #ifndef cmCTestBuildAndTestHandler_h
 #define cmCTestBuildAndTestHandler_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGenericHandler.h"
 
@@ -26,12 +26,12 @@ public:
   /*
    * The main entry point for this class
    */
-  int ProcessHandler() CM_OVERRIDE;
+  int ProcessHandler() override;
 
   //! Set all the build and test arguments
-  int ProcessCommandLineArguments(const std::string& currentArg, size_t& idx,
-                                  const std::vector<std::string>& allArgs)
-    CM_OVERRIDE;
+  int ProcessCommandLineArguments(
+    const std::string& currentArg, size_t& idx,
+    const std::vector<std::string>& allArgs) override;
 
   /*
    * Get the output variable
@@ -40,7 +40,7 @@ public:
 
   cmCTestBuildAndTestHandler();
 
-  void Initialize() CM_OVERRIDE;
+  void Initialize() override;
 
 protected:
   ///! Run CMake and build a test and then run it as a single test.

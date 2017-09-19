@@ -61,7 +61,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   // SET (VAR PARENT_SCOPE) // Removes the definition of VAR
   // in the parent scope.
   if (args.size() == 2 && args[args.size() - 1] == "PARENT_SCOPE") {
-    this->Makefile->RaiseScope(variable, CM_NULLPTR);
+    this->Makefile->RaiseScope(variable, nullptr);
     return true;
   }
 
@@ -75,8 +75,8 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   bool force = false; // optional
   bool parentScope = false;
   cmStateEnums::CacheEntryType type =
-    cmStateEnums::STRING;             // required if cache
-  const char* docstring = CM_NULLPTR; // required if cache
+    cmStateEnums::STRING;          // required if cache
+  const char* docstring = nullptr; // required if cache
 
   unsigned int ignoreLastArgs = 0;
   // look for PARENT_SCOPE argument

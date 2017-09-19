@@ -3,7 +3,7 @@
 #ifndef cmInstallTargetGenerator_h
 #define cmInstallTargetGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmInstallGenerator.h"
 #include "cmScriptGenerator.h"
@@ -26,7 +26,7 @@ public:
                            std::vector<std::string> const& configurations,
                            const char* component, MessageLevel message,
                            bool exclude_from_all, bool optional);
-  ~cmInstallTargetGenerator() CM_OVERRIDE;
+  ~cmInstallTargetGenerator() override;
 
   /** Select the policy for installing shared library linkable name
       symlinks.  */
@@ -56,7 +56,7 @@ public:
                                         const std::string& config,
                                         NameType nameType = NameNormal);
 
-  void Compute(cmLocalGenerator* lg) CM_OVERRIDE;
+  void Compute(cmLocalGenerator* lg) override;
 
   cmGeneratorTarget* GetTarget() const { return this->Target; }
 
@@ -65,9 +65,9 @@ public:
   std::string GetDestination(std::string const& config) const;
 
 protected:
-  void GenerateScript(std::ostream& os) CM_OVERRIDE;
+  void GenerateScript(std::ostream& os) override;
   void GenerateScriptForConfig(std::ostream& os, const std::string& config,
-                               Indent indent) CM_OVERRIDE;
+                               Indent indent) override;
   void GenerateScriptForConfigObjectLibrary(std::ostream& os,
                                             const std::string& config,
                                             Indent indent);

@@ -26,8 +26,8 @@ class cmSourceFile;
 
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 {
-  this->LG = CM_NULLPTR;
-  this->ExportSet = CM_NULLPTR;
+  this->LG = nullptr;
+  this->ExportSet = nullptr;
 }
 
 void cmExportBuildFileGenerator::Compute(cmLocalGenerator* lg)
@@ -45,9 +45,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     std::string sep;
     std::vector<std::string> targets;
     this->GetTargets(targets);
-    for (std::vector<std::string>::const_iterator tei = targets.begin();
-         tei != targets.end(); ++tei) {
-      cmGeneratorTarget* te = this->LG->FindGeneratorTargetToUse(*tei);
+    for (std::string const& tei : targets) {
+      cmGeneratorTarget* te = this->LG->FindGeneratorTargetToUse(tei);
       expectedTargets += sep + this->Namespace + te->GetExportName();
       sep = " ";
       if (this->ExportedTargets.insert(te).second) {
@@ -71,10 +70,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
   std::vector<std::string> missingTargets;
 
   // Create all the imported targets.
-  for (std::vector<cmGeneratorTarget*>::const_iterator tei =
-         this->Exports.begin();
-       tei != this->Exports.end(); ++tei) {
-    cmGeneratorTarget* gte = *tei;
+  for (cmGeneratorTarget* gte : this->Exports) {
     this->GenerateImportTargetCode(os, gte);
 
     gte->Target->AppendBuildInterfaceIncludes();
@@ -115,10 +111,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
   }
 
   // Generate import file content for each configuration.
-  for (std::vector<std::string>::const_iterator ci =
-         this->Configurations.begin();
-       ci != this->Configurations.end(); ++ci) {
-    this->GenerateImportConfig(os, *ci, missingTargets);
+  for (std::string const& c : this->Configurations) {
+    this->GenerateImportConfig(os, c, missingTargets);
   }
 
   this->GenerateMissingTargetsCheckCode(os, missingTargets);
@@ -130,11 +124,8 @@ void cmExportBuildFileGenerator::GenerateImportTargetsConfig(
   std::ostream& os, const std::string& config, std::string const& suffix,
   std::vector<std::string>& missingTargets)
 {
-  for (std::vector<cmGeneratorTarget*>::const_iterator tei =
-         this->Exports.begin();
-       tei != this->Exports.end(); ++tei) {
+  for (cmGeneratorTarget* target : this->Exports) {
     // Collect import properties for this target.
-    cmGeneratorTarget* target = *tei;
     ImportPropertyMap properties;
 
     if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
@@ -184,10 +175,8 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
     target->GetObjectSources(objectSources, config);
     std::string const obj_dir = target->GetObjectDirectory(config);
     std::vector<std::string> objects;
-    for (std::vector<cmSourceFile const*>::const_iterator si =
-           objectSources.begin();
-         si != objectSources.end(); ++si) {
-      const std::string& obj = target->GetObjectName(*si);
+    for (cmSourceFile const* sf : objectSources) {
+      const std::string& obj = target->GetObjectName(sf);
       objects.push_back(obj_dir + obj);
     }
 
@@ -233,7 +222,7 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
       dependee->GetLocalGenerator()->GetGlobalGenerator();
     std::vector<std::string> namespaces = this->FindNamespaces(gg, name);
 
-    int targetOccurrences = (int)namespaces.size();
+    int targetOccurrences = static_cast<int>(namespaces.size());
     if (targetOccurrences == 1) {
       std::string missingTarget = namespaces[0];
 
@@ -256,10 +245,8 @@ void cmExportBuildFileGenerator::GetTargets(
   std::vector<std::string>& targets) const
 {
   if (this->ExportSet) {
-    for (std::vector<cmTargetExport*>::const_iterator tei =
-           this->ExportSet->GetTargetExports()->begin();
-         tei != this->ExportSet->GetTargetExports()->end(); ++tei) {
-      targets.push_back((*tei)->TargetName);
+    for (cmTargetExport* te : *this->ExportSet->GetTargetExports()) {
+      targets.push_back(te->TargetName);
     }
     return;
   }
@@ -274,10 +261,8 @@ std::vector<std::string> cmExportBuildFileGenerator::FindNamespaces(
   std::map<std::string, cmExportBuildFileGenerator*>& exportSets =
     gg->GetBuildExportSets();
 
-  for (std::map<std::string, cmExportBuildFileGenerator*>::const_iterator
-         expIt = exportSets.begin();
-       expIt != exportSets.end(); ++expIt) {
-    const cmExportBuildFileGenerator* exportSet = expIt->second;
+  for (auto const& exp : exportSets) {
+    const cmExportBuildFileGenerator* exportSet = exp.second;
     std::vector<std::string> targets;
     exportSet->GetTargets(targets);
     if (std::find(targets.begin(), targets.end(), name) != targets.end()) {

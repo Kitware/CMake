@@ -3,7 +3,7 @@
 #ifndef cmCTestHG_h
 #define cmCTestHG_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGlobalVC.h"
 
@@ -22,16 +22,16 @@ public:
   /** Construct with a CTest instance and update log stream.  */
   cmCTestHG(cmCTest* ctest, std::ostream& log);
 
-  ~cmCTestHG() CM_OVERRIDE;
+  ~cmCTestHG() override;
 
 private:
   std::string GetWorkingRevision();
-  bool NoteOldRevision() CM_OVERRIDE;
-  bool NoteNewRevision() CM_OVERRIDE;
-  bool UpdateImpl() CM_OVERRIDE;
+  bool NoteOldRevision() override;
+  bool NoteNewRevision() override;
+  bool UpdateImpl() override;
 
-  bool LoadRevisions() CM_OVERRIDE;
-  bool LoadModifications() CM_OVERRIDE;
+  bool LoadRevisions() override;
+  bool LoadModifications() override;
 
   // Parsing helper classes.
   class IdentifyParser;

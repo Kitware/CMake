@@ -3,7 +3,7 @@
 #ifndef cmInstallScriptGenerator_h
 #define cmInstallScriptGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmInstallGenerator.h"
 
@@ -18,10 +18,10 @@ class cmInstallScriptGenerator : public cmInstallGenerator
 public:
   cmInstallScriptGenerator(const char* script, bool code,
                            const char* component, bool exclude_from_all);
-  ~cmInstallScriptGenerator() CM_OVERRIDE;
+  ~cmInstallScriptGenerator() override;
 
 protected:
-  void GenerateScript(std::ostream& os) CM_OVERRIDE;
+  void GenerateScript(std::ostream& os) override;
   std::string Script;
   bool Code;
 };

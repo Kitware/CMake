@@ -3,7 +3,7 @@
 #ifndef cmExtraKateGenerator_h
 #define cmExtraKateGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmExternalMakefileProjectGenerator.h"
 
@@ -22,7 +22,7 @@ public:
 
   static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
 private:
   void CreateKateProjectFile(const cmLocalGenerator* lg) const;

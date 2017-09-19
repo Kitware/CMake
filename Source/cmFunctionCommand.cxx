@@ -18,12 +18,12 @@ public:
   cmFunctionHelperCommand() {}
 
   ///! clean up any memory allocated by the function
-  ~cmFunctionHelperCommand() CM_OVERRIDE {}
+  ~cmFunctionHelperCommand() override {}
 
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmFunctionHelperCommand* newC = new cmFunctionHelperCommand;
     // we must copy when we clone
@@ -39,10 +39,10 @@ public:
    * the CMakeLists.txt file.
    */
   bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
-                         cmExecutionStatus&) CM_OVERRIDE;
+                         cmExecutionStatus&) override;
 
   bool InitialPass(std::vector<std::string> const&,
-                   cmExecutionStatus&) CM_OVERRIDE
+                   cmExecutionStatus&) override
   {
     return false;
   }
@@ -104,9 +104,9 @@ bool cmFunctionHelperCommand::InvokeInitialPass(
 
   // Invoke all the functions that were collected in the block.
   // for each function
-  for (unsigned int c = 0; c < this->Functions.size(); ++c) {
+  for (cmListFileFunction const& func : this->Functions) {
     cmExecutionStatus status;
-    if (!this->Makefile->ExecuteCommand(this->Functions[c], status) ||
+    if (!this->Makefile->ExecuteCommand(func, status) ||
         status.GetNestedError()) {
       // The error message should have already included the call stack
       // so we do not need to report an error here.

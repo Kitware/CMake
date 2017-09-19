@@ -4,13 +4,6 @@ project(AliasTarget)
 
 set(CMAKE_CXX_STANDARD 98)
 
-# Those versions of the HP compiler that need a flag to get proper C++98
-# template support also need a flag to use the newer C++ library.
-if (CMAKE_CXX_COMPILER_ID STREQUAL HP AND
-    CMAKE_CXX98_STANDARD_COMPILE_OPTION STREQUAL "+hpxstd98")
-  string(APPEND CMAKE_CXX_FLAGS " -AA")
-endif ()
-
 # Clang/C2 in C++98 mode cannot properly handle some of MSVC headers
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
     CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")

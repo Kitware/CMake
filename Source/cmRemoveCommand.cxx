@@ -37,10 +37,10 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
 
   // now create the new value
   std::string value;
-  for (unsigned int j = 0; j < varArgsExpanded.size(); ++j) {
+  for (std::string const& varArgExpanded : varArgsExpanded) {
     int found = 0;
-    for (unsigned int k = 0; k < argsExpanded.size(); ++k) {
-      if (varArgsExpanded[j] == argsExpanded[k]) {
+    for (std::string const& argExpanded : argsExpanded) {
+      if (varArgExpanded == argExpanded) {
         found = 1;
         break;
       }
@@ -49,7 +49,7 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
       if (!value.empty()) {
         value += ";";
       }
-      value += varArgsExpanded[j];
+      value += varArgExpanded;
     }
   }
 

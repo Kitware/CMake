@@ -6,27 +6,17 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
 
 #include "cmsys/Glob.hxx"
-#include <limits.h>
 #include <map>
 #include <ostream>
 #include <set>
-#include <stdio.h>
 #include <string.h>
 #include <utility>
-
-// NOTE:
-// A debian package .deb is simply an 'ar' archive. The only subtle difference
-// is that debian uses the BSD ar style archive whereas most Linux distro have
-// a GNU ar.
-// See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=161593 for more info
-// Therefore we provide our own implementation of a BSD-ar:
-static int ar_append(const char* archive,
-                     const std::vector<std::string>& files);
 
 cmCPackDebGenerator::cmCPackDebGenerator()
 {
@@ -128,7 +118,7 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
     for (compIt = this->Components.begin(); compIt != this->Components.end();
          ++compIt) {
       // Does the component belong to a group?
-      if (compIt->second.Group == CM_NULLPTR) {
+      if (compIt->second.Group == nullptr) {
         cmCPackLogger(
           cmCPackLog::LOG_VERBOSE, "Component <"
             << compIt->second.Name
@@ -527,15 +517,13 @@ int cmCPackDebGenerator::createDeb()
         continue;
       }
 
-      char md5sum[33];
-      if (!cmSystemTools::ComputeFileMD5(*fileIt, md5sum)) {
+      std::string output =
+        cmSystemTools::ComputeFileHash(*fileIt, cmCryptoHash::AlgoMD5);
+      if (output.empty()) {
         cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem computing the md5 of "
                         << *fileIt << std::endl);
       }
 
-      md5sum[32] = 0;
-
-      std::string output(md5sum);
       output += "  " + *fileIt + "\n";
       // debian md5sums entries are like this:
       // 014f3604694729f3bf19263bac599765  usr/bin/ccmake
@@ -673,23 +661,25 @@ int cmCPackDebGenerator::createDeb()
   }
 
   // ar -r your-package-name.deb debian-binary control.tar.* data.tar.*
-  // since debian packages require BSD ar (most Linux distros and even
-  // FreeBSD and NetBSD ship GNU ar) we use a copy of OpenBSD ar here.
-  std::vector<std::string> arFiles;
-  std::string topLevelString = strGenWDIR + "/";
-  arFiles.push_back(topLevelString + "debian-binary");
-  arFiles.push_back(topLevelString + "control.tar.gz");
-  arFiles.push_back(topLevelString + "data.tar" + compression_suffix);
-  std::string outputFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  outputFileName += "/";
-  outputFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
-  int res = ar_append(outputFileName.c_str(), arFiles);
-  if (res != 0) {
-    std::string tmpFile =
-      this->GetOption("GEN_CPACK_TEMPORARY_PACKAGE_FILE_NAME");
-    tmpFile += "/Deb.log";
-    cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Problem creating archive using: " << res << std::endl;
+  // A debian package .deb is simply an 'ar' archive. The only subtle
+  // difference is that debian uses the BSD ar style archive whereas most
+  // Linux distro have a GNU ar.
+  // See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=161593 for more info
+  std::string const outputDir = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+  std::string const outputName = this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
+  std::string const outputPath = outputDir + "/" + outputName;
+  std::string const tlDir = strGenWDIR + "/";
+  cmGeneratedFileStream debStream;
+  debStream.Open(outputPath.c_str(), false, true);
+  cmArchiveWrite deb(debStream, cmArchiveWrite::CompressNone, "arbsd");
+  if (!deb.Add(tlDir + "debian-binary", tlDir.length()) ||
+      !deb.Add(tlDir + "control.tar.gz", tlDir.length()) ||
+      !deb.Add(tlDir + "data.tar" + compression_suffix, tlDir.length())) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Error creating debian package:"
+                    << std::endl
+                    << "#top level directory: " << outputDir << std::endl
+                    << "#file: " << outputName << std::endl
+                    << "#error:" << deb.GetError() << std::endl);
     return 0;
   }
   return 1;
@@ -714,251 +704,8 @@ std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
   // the current COMPONENT belongs to.
   std::string groupVar =
     "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
-  if (CM_NULLPTR != GetOption(groupVar)) {
+  if (nullptr != GetOption(groupVar)) {
     return std::string(GetOption(groupVar));
   }
   return componentName;
-}
-
-// The following code is taken from OpenBSD ar:
-// http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/ar/
-// It has been slightly modified:
-// -return error codes instead exit() in functions
-// -use the stdio file I/O functions instead the file descriptor based ones
-// -merged into one cxx file
-// -no additional options supported
-// The coding style hasn't been modified.
-
-/*-
- * Copyright (c) 1990, 1993, 1994
- *      The Regents of the University of California.  All rights reserved.
- *
- * This code is derived from software contributed to Berkeley by
- * Hugh Smith at The University of Guelph.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- */
-
-#define ARMAG "!<arch>\n" /* ar "magic number" */
-#define SARMAG 8          /* strlen(ARMAG); */
-
-#define AR_EFMT1 "#1/" /* extended format #1 */
-#define ARFMAG "`\n"
-
-/* Header format strings. */
-#define HDR1 "%s%-13d%-12ld%-6u%-6u%-8o%-10lld%2s"
-#define HDR2 "%-16.16s%-12ld%-6u%-6u%-8o%-10lld%2s"
-
-struct ar_hdr
-{
-  char ar_name[16]; /* name */
-  char ar_date[12]; /* modification time */
-  char ar_uid[6];   /* user id */
-  char ar_gid[6];   /* group id */
-  char ar_mode[8];  /* octal file permissions */
-  char ar_size[10]; /* size in bytes */
-  char ar_fmag[2];  /* consistency check */
-};
-
-/* Set up file copy. */
-#define SETCF(from, fromname, to, toname, pad)                                \
-  {                                                                           \
-    cf.rFile = from;                                                          \
-    cf.rname = fromname;                                                      \
-    cf.wFile = to;                                                            \
-    cf.wname = toname;                                                        \
-    cf.flags = pad;                                                           \
-  }
-
-/* File copy structure. */
-typedef struct
-{
-  FILE* rFile;        /* read file descriptor */
-  const char* rname;  /* read name */
-  FILE* wFile;        /* write file descriptor */
-  const char* wname;  /* write name */
-#define NOPAD 0x00    /* don't pad */
-#define WPAD 0x02     /* pad on writes */
-  unsigned int flags; /* pad flags */
-} CF;
-
-/* misc.c */
-
-static const char* ar_rname(const char* path)
-{
-  const char* ind = strrchr(path, '/');
-  return (ind) ? ind + 1 : path;
-}
-
-/* archive.c */
-
-typedef struct ar_hdr HDR;
-static char ar_hb[sizeof(HDR) + 1]; /* real header */
-
-static size_t ar_already_written;
-
-/* copy_ar --
- *      Copy size bytes from one file to another - taking care to handle the
- *      extra byte (for odd size files) when reading archives and writing an
- *      extra byte if necessary when adding files to archive.  The length of
- *      the object is the long name plus the object itself; the variable
- *      already_written gets set if a long name was written.
- *
- *      The padding is really unnecessary, and is almost certainly a remnant
- *      of early archive formats where the header included binary data which
- *      a PDP-11 required to start on an even byte boundary.  (Or, perhaps,
- *      because 16-bit word addressed copies were faster?)  Anyhow, it should
- *      have been ripped out long ago.
- */
-static int copy_ar(CF* cfp, off_t size)
-{
-  static char pad = '\n';
-  off_t sz = size;
-  size_t nr, nw;
-  char buf[8 * 1024];
-
-  if (sz == 0) {
-    return 0;
-  }
-
-  FILE* from = cfp->rFile;
-  FILE* to = cfp->wFile;
-  while (sz &&
-         (nr = fread(buf, 1, sz < static_cast<off_t>(sizeof(buf))
-                       ? static_cast<size_t>(sz)
-                       : sizeof(buf),
-                     from)) > 0) {
-    sz -= static_cast<off_t>(nr);
-    for (size_t off = 0; off < nr; nr -= off, off += nw) {
-      if ((nw = fwrite(buf + off, 1, nr, to)) < nr) {
-        return -1;
-      }
-    }
-  }
-  if (sz) {
-    return -2;
-  }
-
-  if (cfp->flags & WPAD && (size + ar_already_written) & 1 &&
-      fwrite(&pad, 1, 1, to) != 1) {
-    return -4;
-  }
-
-  return 0;
-}
-
-/* put_arobj --  Write an archive member to a file. */
-static int put_arobj(CF* cfp, struct stat* sb)
-{
-  int result = 0;
-
-  /* If passed an sb structure, reading a file from disk.  Get stat(2)
-   * information, build a name and construct a header.  (Files are named
-   * by their last component in the archive.) */
-  const char* name = ar_rname(cfp->rname);
-  (void)stat(cfp->rname, sb);
-
-  /* If not truncating names and the name is too long or contains
-   * a space, use extended format 1.   */
-  size_t lname = strlen(name);
-  uid_t uid = sb->st_uid;
-  gid_t gid = sb->st_gid;
-  if (uid > USHRT_MAX) {
-    uid = USHRT_MAX;
-  }
-  if (gid > USHRT_MAX) {
-    gid = USHRT_MAX;
-  }
-  if (lname > sizeof(ar_hdr().ar_name) || strchr(name, ' ')) {
-    (void)sprintf(ar_hb, HDR1, AR_EFMT1, (int)lname, (long int)sb->st_mtime,
-                  (unsigned)uid, (unsigned)gid, (unsigned)sb->st_mode,
-                  (long long)sb->st_size + lname, ARFMAG);
-  } else {
-    lname = 0;
-    (void)sprintf(ar_hb, HDR2, name, (long int)sb->st_mtime, (unsigned)uid,
-                  (unsigned)gid, (unsigned)sb->st_mode, (long long)sb->st_size,
-                  ARFMAG);
-  }
-  off_t size = sb->st_size;
-
-  if (fwrite(ar_hb, 1, sizeof(HDR), cfp->wFile) != sizeof(HDR)) {
-    return -1;
-  }
-
-  if (lname) {
-    if (fwrite(name, 1, lname, cfp->wFile) != lname) {
-      return -2;
-    }
-    ar_already_written = lname;
-  }
-  result = copy_ar(cfp, size);
-  ar_already_written = 0;
-  return result;
-}
-
-/* append.c */
-
-/* append --
- *      Append files to the archive - modifies original archive or creates
- *      a new archive if named archive does not exist.
- */
-static int ar_append(const char* archive,
-                     const std::vector<std::string>& files)
-{
-  int eval = 0;
-  FILE* aFile = cmSystemTools::Fopen(archive, "wb+");
-  if (aFile != CM_NULLPTR) {
-    fwrite(ARMAG, SARMAG, 1, aFile);
-    if (fseek(aFile, 0, SEEK_END) != -1) {
-      CF cf;
-      struct stat sb;
-      /* Read from disk, write to an archive; pad on write. */
-      SETCF(CM_NULLPTR, CM_NULLPTR, aFile, archive, WPAD);
-      for (std::vector<std::string>::const_iterator fileIt = files.begin();
-           fileIt != files.end(); ++fileIt) {
-        const char* filename = fileIt->c_str();
-        FILE* file = cmSystemTools::Fopen(filename, "rb");
-        if (file == CM_NULLPTR) {
-          eval = -1;
-          continue;
-        }
-        cf.rFile = file;
-        cf.rname = filename;
-        int result = put_arobj(&cf, &sb);
-        (void)fclose(file);
-        if (result != 0) {
-          eval = -2;
-          break;
-        }
-      }
-    } else {
-      eval = -3;
-    }
-    fclose(aFile);
-  } else {
-    eval = -4;
-  }
-  return eval;
 }

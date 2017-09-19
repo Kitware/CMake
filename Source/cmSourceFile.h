@@ -3,7 +3,7 @@
 #ifndef cmSourceFile_h
 #define cmSourceFile_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmPropertyMap.h"
 #include "cmSourceFileLocation.h"
@@ -57,7 +57,7 @@ public:
    * horrible interface, but is necessary for backwards
    * compatibility).
    */
-  std::string const& GetFullPath(std::string* error = CM_NULLPTR);
+  std::string const& GetFullPath(std::string* error = nullptr);
   std::string const& GetFullPath() const;
 
   /**
@@ -107,7 +107,6 @@ private:
   std::string ObjectLibrary;
   std::vector<std::string> Depends;
   bool FindFullPathFailed;
-  bool IsUiFile;
 
   bool FindFullPath(std::string* error);
   bool TryFullPath(const std::string& path, const std::string& ext);
@@ -119,5 +118,11 @@ private:
 
 // TODO: Factor out into platform information modules.
 #define CM_HEADER_REGEX "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$"
+
+#define CM_SOURCE_REGEX                                                       \
+  "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp|ftn|m|mm|rc|def|r|odl|idl|hpj"  \
+  "|bat)$"
+
+#define CM_RESOURCE_REGEX "\\.(pdf|plist|png|jpeg|jpg|storyboard|xcassets)$"
 
 #endif

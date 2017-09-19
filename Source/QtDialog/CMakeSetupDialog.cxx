@@ -32,7 +32,7 @@
 
 QCMakeThread::QCMakeThread(QObject* p)
   : QThread(p)
-  , CMakeInstance(CM_NULLPTR)
+  , CMakeInstance(nullptr)
 {
 }
 
@@ -48,7 +48,7 @@ void QCMakeThread::run()
   emit this->cmakeInitialized();
   this->exec();
   delete this->CMakeInstance;
-  this->CMakeInstance = CM_NULLPTR;
+  this->CMakeInstance = nullptr;
 }
 
 CMakeSetupDialog::CMakeSetupDialog()

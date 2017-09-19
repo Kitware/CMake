@@ -3,7 +3,7 @@
 #ifndef cmGlobalVisualStudio12Generator_h
 #define cmGlobalVisualStudio12Generator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <string>
@@ -32,7 +32,7 @@ public:
   virtual const char* GetToolsVersion() { return "12.0"; }
 protected:
   bool ProcessGeneratorToolsetField(std::string const& key,
-                                    std::string const& value) CM_OVERRIDE;
+                                    std::string const& value) override;
 
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);

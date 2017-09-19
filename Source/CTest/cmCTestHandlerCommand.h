@@ -3,7 +3,7 @@
 #ifndef cmCTestHandlerCommand_h
 #define cmCTestHandlerCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestCommand.h"
 
@@ -34,7 +34,7 @@ public:
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
   enum
   {

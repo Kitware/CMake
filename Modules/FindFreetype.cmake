@@ -5,24 +5,41 @@
 # FindFreetype
 # ------------
 #
-# Locate FreeType library
+# Find the FreeType font renderer includes and library.
 #
-# This module defines
+# Imported Targets
+# ^^^^^^^^^^^^^^^^
 #
-# ::
+# This module defines the following :prop_tgt:`IMPORTED` target:
 #
-#   FREETYPE_LIBRARIES, the library to link against
-#   FREETYPE_FOUND, if false, do not try to link to FREETYPE
-#   FREETYPE_INCLUDE_DIRS, where to find headers.
-#   FREETYPE_VERSION_STRING, the version of freetype found (since CMake 2.8.8)
-#   This is the concatenation of the paths:
-#   FREETYPE_INCLUDE_DIR_ft2build
-#   FREETYPE_INCLUDE_DIR_freetype2
+# ``Freetype::Freetype``
+#   The Freetype ``freetype`` library, if found
 #
+# Result Variables
+# ^^^^^^^^^^^^^^^^
 #
+# This module will set the following variables in your project:
 #
-# $FREETYPE_DIR is an environment variable that would correspond to the
-# ./configure --prefix=$FREETYPE_DIR used in building FREETYPE.
+# ``FREETYPE_FOUND``
+#   true if the Freetype headers and libraries were found
+# ``FREETYPE_INCLUDE_DIRS``
+#   directories containing the Freetype headers. This is the
+#   concatenation of the variables:
+#
+#   ``FREETYPE_INCLUDE_DIR_ft2build``
+#     directory holding the main Freetype API configuration header
+#   ``FREETYPE_INCLUDE_DIR_freetype2``
+#     directory holding Freetype public headers
+# ``FREETYPE_LIBRARIES``
+#   the library to link against
+# ``FREETYPE_VERSION_STRING``
+#   the version of freetype found (since CMake 2.8.8)
+#
+# Hints
+# ^^^^^
+#
+# The user may set the environment variable ``FREETYPE_DIR`` to the root
+# directory of a Freetype installation.
 
 # Created by Eric Wing.
 # Modifications by Alexander Neundorf.
@@ -150,3 +167,33 @@ mark_as_advanced(
   FREETYPE_INCLUDE_DIR_freetype2
   FREETYPE_INCLUDE_DIR_ft2build
 )
+
+if(Freetype_FOUND)
+  if(NOT TARGET Freetype::Freetype)
+    add_library(Freetype::Freetype UNKNOWN IMPORTED)
+    set_target_properties(Freetype::Freetype PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${FREETYPE_INCLUDE_DIRS}")
+
+    if(FREETYPE_LIBRARY_RELEASE)
+      set_property(TARGET Freetype::Freetype APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS RELEASE)
+      set_target_properties(Freetype::Freetype PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
+        IMPORTED_LOCATION_RELEASE "${FREETYPE_LIBRARY_RELEASE}")
+    endif()
+
+    if(FREETYPE_LIBRARY_DEBUG)
+      set_property(TARGET Freetype::Freetype APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG)
+      set_target_properties(Freetype::Freetype PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
+        IMPORTED_LOCATION_DEBUG "${FREETYPE_LIBRARY_DEBUG}")
+    endif()
+
+    if(NOT FREETYPE_LIBRARY_RELEASE AND NOT FREETYPE_LIBRARY_DEBUG)
+      set_target_properties(Freetype::Freetype PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        IMPORTED_LOCATION "${FREETYPE_LIBRARY}")
+    endif()
+  endif()
+endif()

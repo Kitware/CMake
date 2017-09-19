@@ -57,7 +57,7 @@ public:
   /*
   * Determine what program to use for building the project.
   */
-  bool FindMakeProgram(cmMakefile* mf) CM_OVERRIDE;
+  bool FindMakeProgram(cmMakefile* mf) override;
 
   cmGeneratedFileStream* GetBuildFileStream()
   {
@@ -116,7 +116,7 @@ private:
     std::vector<cmsys::String>::const_iterator end,
     GhsMultiGpj::Types projType);
   static std::string GetFileNameFromPath(std::string const& path);
-  void UpdateBuildFiles(std::vector<cmGeneratorTarget*> tgts);
+  void UpdateBuildFiles(const std::vector<cmGeneratorTarget*>& tgts);
   bool IsTgtForBuild(const cmGeneratorTarget* tgt);
 
   std::vector<cmGeneratedFileStream*> TargetSubProjects;

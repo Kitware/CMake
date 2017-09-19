@@ -37,7 +37,7 @@ bool cmGetCMakePropertyCommand::InitialPass(
       this->Makefile->GetGlobalGenerator()->GetInstallComponents();
     output = cmJoin(*components, ";");
   } else {
-    const char* prop = CM_NULLPTR;
+    const char* prop = nullptr;
     if (!args[1].empty()) {
       prop = this->Makefile->GetState()->GetGlobalProperty(args[1]);
     }

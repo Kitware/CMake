@@ -36,29 +36,29 @@ bool cmSeparateArgumentsCommand::InitialPass(
     DoingCommand
   };
   Doing doing = DoingVariable;
-  for (unsigned int i = 0; i < args.size(); ++i) {
+  for (std::string const& arg : args) {
     if (doing == DoingVariable) {
-      var = args[i];
+      var = arg;
       doing = DoingMode;
-    } else if (doing == DoingMode && args[i] == "NATIVE_COMMAND") {
+    } else if (doing == DoingMode && arg == "NATIVE_COMMAND") {
 #ifdef _WIN32
       mode = ModeWindows;
 #else
       mode = ModeUnix;
 #endif
       doing = DoingCommand;
-    } else if (doing == DoingMode && args[i] == "UNIX_COMMAND") {
+    } else if (doing == DoingMode && arg == "UNIX_COMMAND") {
       mode = ModeUnix;
       doing = DoingCommand;
-    } else if (doing == DoingMode && args[i] == "WINDOWS_COMMAND") {
+    } else if (doing == DoingMode && arg == "WINDOWS_COMMAND") {
       mode = ModeWindows;
       doing = DoingCommand;
     } else if (doing == DoingCommand) {
-      command = args[i];
+      command = arg;
       doing = DoingNone;
     } else {
       std::ostringstream e;
-      e << "given unknown argument " << args[i];
+      e << "given unknown argument " << arg;
       this->SetError(e.str());
       return false;
     }
@@ -84,19 +84,17 @@ bool cmSeparateArgumentsCommand::InitialPass(
     // Construct the result list value.
     std::string value;
     const char* sep = "";
-    for (std::vector<std::string>::const_iterator vi = vec.begin();
-         vi != vec.end(); ++vi) {
+    for (std::string const& vi : vec) {
       // Separate from the previous argument.
       value += sep;
       sep = ";";
 
       // Preserve semicolons.
-      for (std::string::const_iterator si = vi->begin(); si != vi->end();
-           ++si) {
-        if (*si == ';') {
+      for (char si : vi) {
+        if (si == ';') {
           value += '\\';
         }
-        value += *si;
+        value += si;
       }
     }
     this->Makefile->AddDefinition(var, value.c_str());

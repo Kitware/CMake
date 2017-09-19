@@ -35,7 +35,7 @@ struct eval
 };
 
 template <template <typename...> class T, typename... U>
-struct eval<T<U...> >
+struct eval<T<U...>>
 {
   enum
   {
@@ -62,11 +62,11 @@ struct D
 
 // Note: This test assumes that a compiler supporting this feature
 // supports static_assert. Add a workaround if that does not hold.
-static_assert(eval<A<> >::Matched, "A Matches");
-static_assert(eval<A<int> >::Matched, "A Matches");
-static_assert(eval<A<int, char> >::Matched, "A Matches");
-static_assert(eval<B<int> >::Matched, "B Matches");
-static_assert(eval<C<int, char> >::Matched, "C Matches");
-static_assert(eval<D<int, char> >::Matched, "D Matches");
-static_assert(eval<D<int, char, bool> >::Matched, "D Matches");
-static_assert(eval<D<int, char, bool, double> >::Matched, "D Matches");
+static_assert(eval<A<>>::Matched, "A Matches");
+static_assert(eval<A<int>>::Matched, "A Matches");
+static_assert(eval<A<int, char>>::Matched, "A Matches");
+static_assert(eval<B<int>>::Matched, "B Matches");
+static_assert(eval<C<int, char>>::Matched, "C Matches");
+static_assert(eval<D<int, char>>::Matched, "D Matches");
+static_assert(eval<D<int, char, bool>>::Matched, "D Matches");
+static_assert(eval<D<int, char, bool, double>>::Matched, "D Matches");

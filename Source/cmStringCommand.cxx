@@ -62,6 +62,9 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args,
   if (subCommand == "APPEND") {
     return this->HandleAppendCommand(args);
   }
+  if (subCommand == "PREPEND") {
+    return this->HandlePrependCommand(args);
+  }
   if (subCommand == "CONCAT") {
     return this->HandleConcatCommand(args);
   }
@@ -309,6 +312,7 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
   std::string output;
   const char* p = input.c_str();
   while (re.find(p)) {
+    this->Makefile->ClearMatches();
     this->Makefile->StoreMatches(re);
     std::string::size_type l = re.start();
     std::string::size_type r = re.end();
@@ -391,6 +395,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   std::string output;
   std::string::size_type base = 0;
   while (re.find(input.c_str() + base)) {
+    this->Makefile->ClearMatches();
     this->Makefile->StoreMatches(re);
     std::string::size_type l2 = re.start();
     std::string::size_type r = re.end();
@@ -407,13 +412,13 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
     }
 
     // Concatenate the replacement for the match.
-    for (unsigned int i = 0; i < replacement.size(); ++i) {
-      if (replacement[i].number < 0) {
+    for (RegexReplacement const& i : replacement) {
+      if (i.number < 0) {
         // This is just a plain-text part of the replacement.
-        output += replacement[i].value;
+        output += i.value;
       } else {
         // Replace with part of the match.
-        int n = replacement[i].number;
+        int n = i.number;
         std::string::size_type start = re.start(n);
         std::string::size_type end = re.end(n);
         std::string::size_type len = input.length() - base;
@@ -641,6 +646,30 @@ bool cmStringCommand::HandleAppendCommand(std::vector<std::string> const& args)
   return true;
 }
 
+bool cmStringCommand::HandlePrependCommand(
+  std::vector<std::string> const& args)
+{
+  if (args.size() < 2) {
+    this->SetError("sub-command PREPEND requires at least one argument.");
+    return false;
+  }
+
+  // Skip if nothing to prepend.
+  if (args.size() < 3) {
+    return true;
+  }
+
+  const std::string& variable = args[1];
+
+  std::string value = cmJoin(cmMakeRange(args).advance(2), std::string());
+  const char* oldValue = this->Makefile->GetDefinition(variable);
+  if (oldValue) {
+    value += oldValue;
+  }
+  this->Makefile->AddDefinition(variable, value.c_str());
+  return true;
+}
+
 bool cmStringCommand::HandleConcatCommand(std::vector<std::string> const& args)
 {
   if (args.size() < 2) {
@@ -789,7 +818,7 @@ bool cmStringCommand::HandleRandomCommand(std::vector<std::string> const& args)
   const char* alphaPtr = alphabet.c_str();
   int cc;
   for (cc = 0; cc < length; cc++) {
-    int idx = (int)(sizeofAlphabet * rand() / (RAND_MAX + 1.0));
+    int idx = static_cast<int>(sizeofAlphabet * rand() / (RAND_MAX + 1.0));
     result.push_back(*(alphaPtr + idx));
   }
   result.push_back(0);

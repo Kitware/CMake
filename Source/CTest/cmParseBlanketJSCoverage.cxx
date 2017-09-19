@@ -112,17 +112,15 @@ cmParseBlanketJSCoverage::cmParseBlanketJSCoverage(
 
 bool cmParseBlanketJSCoverage::LoadCoverageData(std::vector<std::string> files)
 {
-  size_t i = 0;
-  std::string path;
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Found " << files.size() << " Files" << std::endl,
                      this->Coverage.Quiet);
-  for (i = 0; i < files.size(); i++) {
+  for (std::string const& file : files) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "Reading JSON File " << files[i] << std::endl,
+                       "Reading JSON File " << file << std::endl,
                        this->Coverage.Quiet);
 
-    if (!this->ReadJSONFile(files[i])) {
+    if (!this->ReadJSONFile(file)) {
       return false;
     }
   }

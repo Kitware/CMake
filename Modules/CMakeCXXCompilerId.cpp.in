@@ -27,12 +27,18 @@ char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 @CMAKE_CXX_COMPILER_ID_PLATFORM_CONTENT@
 @CMAKE_CXX_COMPILER_ID_ERROR_FOR_TEST@
 
+#if defined(_MSC_VER) && defined(_MSVC_LANG)
+#define CXX_STD _MSVC_LANG
+#else
+#define CXX_STD __cplusplus
+#endif
+
 const char* info_language_dialect_default = "INFO" ":" "dialect_default["
-#if __cplusplus > 201402L
+#if CXX_STD > 201402L
   "17"
-#elif __cplusplus >= 201402L
+#elif CXX_STD >= 201402L
   "14"
-#elif __cplusplus >= 201103L
+#elif CXX_STD >= 201103L
   "11"
 #else
   "98"

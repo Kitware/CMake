@@ -285,12 +285,11 @@ cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
   if (value && *value) {
     std::vector<std::string> fmt;
     cmSystemTools::ExpandListArgument(value, fmt);
-    for (std::vector<std::string>::iterator fi = fmt.begin(); fi != fmt.end();
-         ++fi) {
-      if (*fi == "FIXED") {
+    for (std::string const& fi : fmt) {
+      if (fi == "FIXED") {
         format = FortranFormatFixed;
       }
-      if (*fi == "FREE") {
+      if (fi == "FREE") {
         format = FortranFormatFree;
       }
     }
@@ -389,7 +388,7 @@ int cmOutputConverter::Shell__CharNeedsQuotes(char c, int flags)
 
 int cmOutputConverter::Shell__CharIsMakeVariableName(char c)
 {
-  return c && (c == '_' || isalpha(((int)c)));
+  return c && (c == '_' || isalpha((static_cast<int>(c))));
 }
 
 const char* cmOutputConverter::Shell__SkipMakeVariables(const char* c)

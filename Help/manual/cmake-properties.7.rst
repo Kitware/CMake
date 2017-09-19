@@ -74,6 +74,7 @@ Properties on Directories
    /prop_dir/INCLUDE_REGULAR_EXPRESSION
    /prop_dir/INTERPROCEDURAL_OPTIMIZATION_CONFIG
    /prop_dir/INTERPROCEDURAL_OPTIMIZATION
+   /prop_dir/LABELS
    /prop_dir/LINK_DIRECTORIES
    /prop_dir/LISTFILE_STACK
    /prop_dir/MACROS
@@ -83,7 +84,7 @@ Properties on Directories
    /prop_dir/RULE_LAUNCH_LINK
    /prop_dir/SOURCE_DIR
    /prop_dir/SUBDIRECTORIES
-   /prop_dir/TEST_INCLUDE_FILE
+   /prop_dir/TEST_INCLUDE_FILES
    /prop_dir/VARIABLES
    /prop_dir/VS_GLOBAL_SECTION_POST_section
    /prop_dir/VS_GLOBAL_SECTION_PRE_section
@@ -122,6 +123,7 @@ Properties on Targets
    /prop_tgt/AUTOGEN_BUILD_DIR
    /prop_tgt/AUTOGEN_TARGET_DEPENDS
    /prop_tgt/AUTOMOC_DEPEND_FILTERS
+   /prop_tgt/AUTOMOC_MACRO_NAMES
    /prop_tgt/AUTOMOC_MOC_OPTIONS
    /prop_tgt/AUTOMOC
    /prop_tgt/AUTOUIC
@@ -225,6 +227,7 @@ Properties on Targets
    /prop_tgt/LABELS
    /prop_tgt/LANG_CLANG_TIDY
    /prop_tgt/LANG_COMPILER_LAUNCHER
+   /prop_tgt/LANG_CPPCHECK
    /prop_tgt/LANG_CPPLINT
    /prop_tgt/LANG_INCLUDE_WHAT_YOU_USE
    /prop_tgt/LANG_VISIBILITY_PRESET
@@ -435,6 +438,7 @@ Deprecated Properties on Directories
    :maxdepth: 1
 
    /prop_dir/COMPILE_DEFINITIONS_CONFIG
+   /prop_dir/TEST_INCLUDE_FILE
 
 
 Deprecated Properties on Targets

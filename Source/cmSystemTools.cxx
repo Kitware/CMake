@@ -353,8 +353,8 @@ bool cmSystemTools::IsInternallyOn(const char* val)
     return false;
   }
 
-  for (std::string::iterator c = v.begin(); c != v.end(); c++) {
-    *c = static_cast<char>(toupper(*c));
+  for (char& c : v) {
+    c = static_cast<char>(toupper(c));
   }
   return v == "I_ON";
 }
@@ -378,8 +378,8 @@ bool cmSystemTools::IsOn(const char* val)
     onValues.insert("TRUE");
     onValues.insert("Y");
   }
-  for (std::string::iterator c = v.begin(); c != v.end(); c++) {
-    *c = static_cast<char>(toupper(*c));
+  for (char& c : v) {
+    c = static_cast<char>(toupper(c));
   }
   return (onValues.count(v) > 0);
 }
@@ -414,8 +414,8 @@ bool cmSystemTools::IsOff(const char* val)
   }
   // Try and avoid toupper().
   std::string v(val, len);
-  for (std::string::iterator c = v.begin(); c != v.end(); c++) {
-    *c = static_cast<char>(toupper(*c));
+  for (char& c : v) {
+    c = static_cast<char>(toupper(c));
   }
   return (offValues.count(v) > 0);
 }
@@ -603,6 +603,56 @@ std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
   return args;
 }
 
+bool cmSystemTools::SplitProgramFromArgs(std::string const& command,
+                                         std::string& program,
+                                         std::string& args)
+{
+  const char* c = command.c_str();
+
+  // Skip leading whitespace.
+  while (isspace(static_cast<unsigned char>(*c))) {
+    ++c;
+  }
+
+  // Parse one command-line element up to an unquoted space.
+  bool in_escape = false;
+  bool in_double = false;
+  bool in_single = false;
+  for (; *c; ++c) {
+    if (in_single) {
+      if (*c == '\'') {
+        in_single = false;
+      } else {
+        program += *c;
+      }
+    } else if (in_escape) {
+      in_escape = false;
+      program += *c;
+    } else if (*c == '\\') {
+      in_escape = true;
+    } else if (in_double) {
+      if (*c == '"') {
+        in_double = false;
+      } else {
+        program += *c;
+      }
+    } else if (*c == '"') {
+      in_double = true;
+    } else if (*c == '\'') {
+      in_single = true;
+    } else if (isspace(static_cast<unsigned char>(*c))) {
+      break;
+    } else {
+      program += *c;
+    }
+  }
+
+  // The remainder of the command line holds unparsed arguments.
+  args = c;
+
+  return !in_single && !in_escape && !in_double;
+}
+
 size_t cmSystemTools::CalculateCommandLineLengthLimit()
 {
   size_t sz =
@@ -650,11 +700,10 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      double timeout, Encoding encoding)
 {
   std::vector<const char*> argv;
-  for (std::vector<std::string>::const_iterator a = command.begin();
-       a != command.end(); ++a) {
-    argv.push_back(a->c_str());
+  for (std::string const& cmd : command) {
+    argv.push_back(cmd.c_str());
   }
-  argv.push_back(CM_NULLPTR);
+  argv.push_back(nullptr);
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());
@@ -666,12 +715,12 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
   if (outputflag == OUTPUT_PASSTHROUGH) {
     cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDOUT, 1);
     cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDERR, 1);
-    captureStdOut = CM_NULLPTR;
-    captureStdErr = CM_NULLPTR;
+    captureStdOut = nullptr;
+    captureStdErr = nullptr;
   } else if (outputflag == OUTPUT_MERGE ||
              (captureStdErr && captureStdErr == captureStdOut)) {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_MergeOutput, 1);
-    captureStdErr = CM_NULLPTR;
+    captureStdErr = nullptr;
   }
   assert(!captureStdErr || captureStdErr != captureStdOut);
 
@@ -687,7 +736,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
   std::string strdata;
   if (outputflag != OUTPUT_PASSTHROUGH &&
       (captureStdOut || captureStdErr || outputflag != OUTPUT_NONE)) {
-    while ((pipe = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) >
+    while ((pipe = cmsysProcess_WaitForData(cp, &data, &length, nullptr)) >
            0) {
       // Translate NULL characters in the output into valid text.
       for (int i = 0; i < length; ++i) {
@@ -727,7 +776,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
     }
   }
 
-  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+  cmsysProcess_WaitForExit(cp, nullptr);
 
   if (captureStdOut) {
     captureStdOut->assign(tempStdOut.begin(), tempStdOut.end());
@@ -814,11 +863,10 @@ bool cmSystemTools::DoesFileExistWithExtensions(
 {
   std::string hname;
 
-  for (std::vector<std::string>::const_iterator ext = headerExts.begin();
-       ext != headerExts.end(); ++ext) {
+  for (std::string const& headerExt : headerExts) {
     hname = name;
     hname += ".";
-    hname += *ext;
+    hname += headerExt;
     if (cmSystemTools::FileExists(hname.c_str())) {
       return true;
     }
@@ -934,19 +982,17 @@ bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
 #endif
 }
 
-bool cmSystemTools::ComputeFileMD5(const std::string& source, char* md5out)
+std::string cmSystemTools::ComputeFileHash(const std::string& source,
+                                           cmCryptoHash::Algo algo)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  cmCryptoHash md5(cmCryptoHash::AlgoMD5);
-  std::string const str = md5.HashFile(source);
-  strncpy(md5out, str.c_str(), 32);
-  return !str.empty();
+  cmCryptoHash hash(algo);
+  return hash.HashFile(source);
 #else
   (void)source;
-  (void)md5out;
-  cmSystemTools::Message("md5sum not supported in bootstrapping mode",
+  cmSystemTools::Message("hashsum not supported in bootstrapping mode",
                          "Error");
-  return false;
+  return std::string();
 #endif
 }
 
@@ -1369,9 +1415,8 @@ std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
 
 void cmSystemTools::AppendEnv(std::vector<std::string> const& env)
 {
-  for (std::vector<std::string>::const_iterator eit = env.begin();
-       eit != env.end(); ++eit) {
-    cmSystemTools::PutEnv(*eit);
+  for (std::string const& eit : env) {
+    cmSystemTools::PutEnv(eit);
   }
 }
 
@@ -1384,10 +1429,7 @@ cmSystemTools::SaveRestoreEnvironment::~SaveRestoreEnvironment()
 {
   // First clear everything in the current environment:
   std::vector<std::string> currentEnv = GetEnvironmentVariables();
-  for (std::vector<std::string>::const_iterator eit = currentEnv.begin();
-       eit != currentEnv.end(); ++eit) {
-    std::string var(*eit);
-
+  for (std::string var : currentEnv) {
     std::string::size_type pos = var.find('=');
     if (pos != std::string::npos) {
       var = var.substr(0, pos);
@@ -1466,9 +1508,7 @@ bool cmSystemTools::CreateTar(const char* outFileName,
 
   a.SetMTime(mtime);
   a.SetVerbose(verbose);
-  for (std::vector<std::string>::const_iterator i = files.begin();
-       i != files.end(); ++i) {
-    std::string path = *i;
+  for (auto path : files) {
     if (cmSystemTools::FileIsFullPath(path.c_str())) {
       // Get the relative path to the file.
       path = cmSystemTools::RelativePath(cwd.c_str(), path.c_str());
@@ -1520,22 +1560,22 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
 
   /* Use uname if it's present, else uid. */
   p = archive_entry_uname(entry);
-  if ((p == CM_NULLPTR) || (*p == '\0')) {
-    sprintf(tmp, "%lu ", (unsigned long)archive_entry_uid(entry));
+  if ((p == nullptr) || (*p == '\0')) {
+    sprintf(tmp, "%lu ", static_cast<unsigned long>(archive_entry_uid(entry)));
     p = tmp;
   }
   w = strlen(p);
   if (w > u_width) {
     u_width = w;
   }
-  fprintf(out, "%-*s ", (int)u_width, p);
+  fprintf(out, "%-*s ", static_cast<int>(u_width), p);
   /* Use gname if it's present, else gid. */
   p = archive_entry_gname(entry);
-  if (p != CM_NULLPTR && p[0] != '\0') {
+  if (p != nullptr && p[0] != '\0') {
     fprintf(out, "%s", p);
     w = strlen(p);
   } else {
-    sprintf(tmp, "%lu", (unsigned long)archive_entry_gid(entry));
+    sprintf(tmp, "%lu", static_cast<unsigned long>(archive_entry_gid(entry)));
     w = strlen(tmp);
     fprintf(out, "%s", tmp);
   }
@@ -1547,8 +1587,9 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
    */
   if (archive_entry_filetype(entry) == AE_IFCHR ||
       archive_entry_filetype(entry) == AE_IFBLK) {
-    sprintf(tmp, "%lu,%lu", (unsigned long)archive_entry_rdevmajor(entry),
-            (unsigned long)archive_entry_rdevminor(entry));
+    unsigned long rdevmajor = archive_entry_rdevmajor(entry);
+    unsigned long rdevminor = archive_entry_rdevminor(entry);
+    sprintf(tmp, "%lu,%lu", rdevmajor, rdevminor);
   } else {
     /*
      * Note the use of platform-dependent macros to format
@@ -1556,12 +1597,12 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
      * corresponding type for the cast.
      */
     sprintf(tmp, BSDTAR_FILESIZE_PRINTF,
-            (BSDTAR_FILESIZE_TYPE)archive_entry_size(entry));
+            static_cast<BSDTAR_FILESIZE_TYPE>(archive_entry_size(entry)));
   }
   if (w + strlen(tmp) >= gs_width) {
     gs_width = w + strlen(tmp) + 1;
   }
-  fprintf(out, "%*s", (int)(gs_width - w), tmp);
+  fprintf(out, "%*s", static_cast<int>(gs_width - w), tmp);
 
   /* Format the time using 'ls -l' conventions. */
   tim = archive_entry_mtime(entry);
@@ -1973,7 +2014,7 @@ unsigned int cmSystemTools::RandomSeed()
 
   // Try using a real random source.
   cmsys::ifstream fin;
-  fin.rdbuf()->pubsetbuf(CM_NULLPTR, 0); // Unbuffered read.
+  fin.rdbuf()->pubsetbuf(nullptr, 0); // Unbuffered read.
   fin.open("/dev/urandom");
   if (fin.good() && fin.read(seed.bytes, sizeof(seed)) &&
       fin.gcount() == sizeof(seed)) {
@@ -1982,7 +2023,7 @@ unsigned int cmSystemTools::RandomSeed()
 
   // Fall back to the time and pid.
   struct timeval t;
-  gettimeofday(&t, CM_NULLPTR);
+  gettimeofday(&t, nullptr);
   unsigned int pid = static_cast<unsigned int>(getpid());
   unsigned int tv_sec = static_cast<unsigned int>(t.tv_sec);
   unsigned int tv_usec = static_cast<unsigned int>(t.tv_usec);
@@ -2298,8 +2339,8 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 
     // Get the RPATH and RUNPATH entries from it.
     int se_count = 0;
-    cmELF::StringEntry const* se[2] = { CM_NULLPTR, CM_NULLPTR };
-    const char* se_name[2] = { CM_NULLPTR, CM_NULLPTR };
+    cmELF::StringEntry const* se[2] = { nullptr, nullptr };
+    const char* se_name[2] = { nullptr, nullptr };
     if (cmELF::StringEntry const* se_rpath = elf.GetRPath()) {
       se[se_count] = se_rpath;
       se_name[se_count] = "RPATH";
@@ -2612,7 +2653,7 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
     // Get the RPATH and RUNPATH entries from it and sort them by index
     // in the dynamic section header.
     int se_count = 0;
-    cmELF::StringEntry const* se[2] = { CM_NULLPTR, CM_NULLPTR };
+    cmELF::StringEntry const* se[2] = { nullptr, nullptr };
     if (cmELF::StringEntry const* se_rpath = elf.GetRPath()) {
       se[se_count++] = se_rpath;
     }

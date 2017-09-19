@@ -35,7 +35,7 @@ class cmGlobalVisualStudio11Generator::Factory
 {
 public:
   cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                           cmake* cm) const CM_OVERRIDE
+                                           cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS11GenName(name, genName);
@@ -68,14 +68,14 @@ public:
     return ret;
   }
 
-  void GetDocumentation(cmDocumentationEntry& entry) const CM_OVERRIDE
+  void GetDocumentation(cmDocumentationEntry& entry) const override
   {
     entry.Name = std::string(vs11generatorName) + " [arch]";
     entry.Brief = "Generates Visual Studio 2012 project files.  "
                   "Optional [arch] can be \"Win64\" or \"ARM\".";
   }
 
-  void GetGenerators(std::vector<std::string>& names) const CM_OVERRIDE
+  void GetGenerators(std::vector<std::string>& names) const override
   {
     names.push_back(vs11generatorName);
     names.push_back(vs11generatorName + std::string(" ARM"));
@@ -89,8 +89,8 @@ public:
     }
   }
 
-  bool SupportsToolset() const CM_OVERRIDE { return true; }
-  bool SupportsPlatform() const CM_OVERRIDE { return true; }
+  bool SupportsToolset() const override { return true; }
+  bool SupportsPlatform() const override { return true; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio11Generator::NewFactory()

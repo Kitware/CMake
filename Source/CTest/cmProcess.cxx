@@ -2,14 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProcess.h"
 
-#include "cmConfigure.h"
 #include "cmProcessOutput.h"
 #include "cmSystemTools.h"
 #include <iostream>
 
 cmProcess::cmProcess()
 {
-  this->Process = CM_NULLPTR;
+  this->Process = nullptr;
   this->Timeout = 0;
   this->TotalTime = 0;
   this->ExitValue = 0;
@@ -41,11 +40,10 @@ bool cmProcess::StartProcess()
   // put the command as arg0
   this->ProcessArgs.push_back(this->Command.c_str());
   // now put the command arguments in
-  for (std::vector<std::string>::iterator i = this->Arguments.begin();
-       i != this->Arguments.end(); ++i) {
-    this->ProcessArgs.push_back(i->c_str());
+  for (std::string const& arg : this->Arguments) {
+    this->ProcessArgs.push_back(arg.c_str());
   }
-  this->ProcessArgs.push_back(CM_NULLPTR); // null terminate the list
+  this->ProcessArgs.push_back(nullptr); // null terminate the list
   this->Process = cmsysProcess_New();
   cmsysProcess_SetCommand(this->Process, &*this->ProcessArgs.begin());
   if (!this->WorkingDirectory.empty()) {
@@ -239,4 +237,9 @@ void cmProcess::ResetStartTime()
 int cmProcess::GetExitException()
 {
   return cmsysProcess_GetExitException(this->Process);
+}
+
+std::string cmProcess::GetExitExceptionString()
+{
+  return cmsysProcess_GetExceptionString(this->Process);
 }

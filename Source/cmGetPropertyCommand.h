@@ -3,7 +3,7 @@
 #ifndef cmGetPropertyCommand_h
 #define cmGetPropertyCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -17,14 +17,14 @@ class cmGetPropertyCommand : public cmCommand
 public:
   cmGetPropertyCommand();
 
-  cmCommand* Clone() CM_OVERRIDE { return new cmGetPropertyCommand; }
+  cmCommand* Clone() override { return new cmGetPropertyCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
 private:
   enum OutType

@@ -195,15 +195,14 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     vv.push_back(projectName + "_VERSION_PATCH");
     vv.push_back(projectName + "_VERSION_TWEAK");
     std::string vw;
-    for (std::vector<std::string>::iterator i = vv.begin(); i != vv.end();
-         ++i) {
-      const char* v = this->Makefile->GetDefinition(*i);
+    for (std::string const& i : vv) {
+      const char* v = this->Makefile->GetDefinition(i);
       if (v && *v) {
         if (cmp0048 == cmPolicies::WARN) {
           vw += "\n  ";
-          vw += *i;
+          vw += i;
         } else {
-          this->Makefile->AddDefinition(*i, "");
+          this->Makefile->AddDefinition(i, "");
         }
       }
     }

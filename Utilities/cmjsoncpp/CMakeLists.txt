@@ -9,11 +9,9 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PathScale")
 endif()
 
 set(JSONCPP_SOURCES
-  src/lib_json/json_batchallocator.h
   src/lib_json/json_reader.cpp
   src/lib_json/json_tool.h
   src/lib_json/json_value.cpp
-  src/lib_json/json_valueiterator.inl
   src/lib_json/json_writer.cpp
   )
 

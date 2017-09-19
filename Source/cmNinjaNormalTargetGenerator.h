@@ -3,7 +3,7 @@
 #ifndef cmNinjaNormalTargetGenerator_h
 #define cmNinjaNormalTargetGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmNinjaTargetGenerator.h"
 
@@ -16,9 +16,9 @@ class cmNinjaNormalTargetGenerator : public cmNinjaTargetGenerator
 {
 public:
   cmNinjaNormalTargetGenerator(cmGeneratorTarget* target);
-  ~cmNinjaNormalTargetGenerator() CM_OVERRIDE;
+  ~cmNinjaNormalTargetGenerator() override;
 
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
 private:
   std::string LanguageLinkerRule() const;

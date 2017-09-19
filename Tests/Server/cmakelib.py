@@ -95,6 +95,21 @@ def initProc(cmakeCommand):
 
   return cmakeCommand
 
+def exitProc(cmakeCommand):
+  # Tell the server to exit.
+  cmakeCommand.stdin.close()
+  cmakeCommand.stdout.close()
+
+  # Wait for the server to exit.
+  # If this version of python supports it, terminate the server after a timeout.
+  try:
+    cmakeCommand.wait(timeout=5)
+  except TypeError:
+    cmakeCommand.wait()
+  except:
+    cmakeCommand.terminate()
+    raise
+
 def waitForMessage(cmakeCommand, expected):
   data = ordered(expected)
   packet = ordered(waitForRawMessage(cmakeCommand))
@@ -197,3 +212,27 @@ def validateGlobalSettings(cmakeCommand, cmakeCommandPath, data):
     print("Validating", i)
     if (packet[i] != data[i]):
       sys.exit(1)
+
+def validateCache(cmakeCommand, data):
+  packet = waitForReply(cmakeCommand, 'cache', '', False)
+
+  cache = packet['cache']
+
+  if (data['isEmpty']):
+    if (cache != []):
+      print('Expected empty cache, but got data.\n')
+      sys.exit(1)
+    return;
+
+  if (cache == []):
+    print('Expected cache contents, but got none.\n')
+    sys.exit(1)
+
+  hadHomeDir = False
+  for value in cache:
+    if (value['key'] == 'CMAKE_HOME_DIRECTORY'):
+      hadHomeDir = True
+
+  if (not hadHomeDir):
+    print('No CMAKE_HOME_DIRECTORY found in cache.')
+    sys.exit(1)

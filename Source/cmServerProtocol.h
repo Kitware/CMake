@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cm_jsoncpp_value.h"
 #include "cmake.h"
@@ -11,6 +11,7 @@
 #include <string>
 #include <utility>
 
+class cmConnection;
 class cmFileMonitor;
 class cmServer;
 class cmServerRequest;
@@ -52,9 +53,11 @@ public:
   const std::string Type;
   const std::string Cookie;
   const Json::Value Data;
+  cmConnection* Connection;
 
 private:
-  cmServerRequest(cmServer* server, const std::string& t, const std::string& c,
+  cmServerRequest(cmServer* server, cmConnection* connection,
+                  const std::string& t, const std::string& c,
                   const Json::Value& d);
 
   void ReportProgress(int min, int current, int max,
@@ -98,7 +101,7 @@ private:
   friend class cmServer;
 };
 
-class cmServerProtocol1_0 : public cmServerProtocol
+class cmServerProtocol1 : public cmServerProtocol
 {
 public:
   std::pair<int, int> ProtocolVersion() const override;

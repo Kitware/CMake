@@ -3,7 +3,7 @@
 #ifndef cmNinjaTargetGenerator_h
 #define cmNinjaTargetGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCommonTargetGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
@@ -31,7 +31,7 @@ public:
   cmNinjaTargetGenerator(cmGeneratorTarget* target);
 
   /// Destructor.
-  ~cmNinjaTargetGenerator() CM_OVERRIDE;
+  ~cmNinjaTargetGenerator() override;
 
   virtual void Generate() = 0;
 
@@ -77,8 +77,7 @@ protected:
   std::string ComputeFlagsForObject(cmSourceFile const* source,
                                     const std::string& language);
 
-  void AddIncludeFlags(std::string& flags,
-                       std::string const& lang) CM_OVERRIDE;
+  void AddIncludeFlags(std::string& flags, std::string const& lang) override;
 
   std::string ComputeDefines(cmSourceFile const* source,
                              const std::string& language);
@@ -142,8 +141,7 @@ protected:
     {
     }
 
-    void operator()(cmSourceFile const& source,
-                    const char* pkgloc) CM_OVERRIDE;
+    void operator()(cmSourceFile const& source, const char* pkgloc) override;
 
   private:
     cmNinjaTargetGenerator* Generator;

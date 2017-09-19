@@ -3,7 +3,6 @@
 #include "cmFortranParser.h"
 #include "cmSystemTools.h"
 
-#include "cmConfigure.h"
 #include <assert.h>
 #include <set>
 #include <stack>
@@ -31,9 +30,8 @@ bool cmFortranParser_s::FindIncludeFile(const char* dir,
   }
 
   // Search the include path for the file.
-  for (std::vector<std::string>::const_iterator i = this->IncludePath.begin();
-       i != this->IncludePath.end(); ++i) {
-    fullName = *i;
+  for (std::string const& i : this->IncludePath) {
+    fullName = i;
     fullName += "/";
     fullName += includeName;
     if (cmSystemTools::FileExists(fullName.c_str(), true)) {
@@ -61,7 +59,7 @@ cmFortranParser_s::cmFortranParser_s(std::vector<std::string> const& includes,
   // Create a dummy buffer that is never read but is the fallback
   // buffer when the last file is popped off the stack.
   YY_BUFFER_STATE buffer =
-    cmFortran_yy_create_buffer(CM_NULLPTR, 4, this->Scanner);
+    cmFortran_yy_create_buffer(nullptr, 4, this->Scanner);
   cmFortran_yy_switch_to_buffer(buffer, this->Scanner);
 }
 
@@ -79,7 +77,7 @@ bool cmFortranParser_FilePush(cmFortranParser* parser, const char* fname)
     std::string dir = cmSystemTools::GetParentDirectory(fname);
     cmFortranFile f(file, current, dir);
     YY_BUFFER_STATE buffer =
-      cmFortran_yy_create_buffer(CM_NULLPTR, 16384, parser->Scanner);
+      cmFortran_yy_create_buffer(nullptr, 16384, parser->Scanner);
     cmFortran_yy_switch_to_buffer(buffer, parser->Scanner);
     parser->FileStack.push(f);
     return true;
@@ -121,7 +119,7 @@ int cmFortranParser_Input(cmFortranParser* parser, char* buffer,
       n = 1;
       ff.LastCharWasNewline = true;
     }
-    return (int)n;
+    return static_cast<int>(n);
   }
   return 0;
 }

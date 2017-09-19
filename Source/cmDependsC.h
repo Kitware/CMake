@@ -3,7 +3,7 @@
 #ifndef cmDependsC_h
 #define cmDependsC_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmDepends.h"
 
@@ -33,13 +33,13 @@ public:
              const std::map<std::string, DependencyVector>* validDeps);
 
   /** Virtual destructor to cleanup subclasses properly.  */
-  ~cmDependsC() CM_OVERRIDE;
+  ~cmDependsC() override;
 
 protected:
   // Implement writing/checking methods required by superclass.
   bool WriteDependencies(const std::set<std::string>& sources,
                          const std::string& obj, std::ostream& makeDepends,
-                         std::ostream& internalDepends) CM_OVERRIDE;
+                         std::ostream& internalDepends) override;
 
   // Method to scan a single file.
   void Scan(std::istream& is, const char* directory,

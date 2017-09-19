@@ -3,7 +3,7 @@
 #ifndef cmMakefileTargetGenerator_h
 #define cmMakefileTargetGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <map>
@@ -33,7 +33,7 @@ class cmMakefileTargetGenerator : public cmCommonTargetGenerator
 public:
   // constructor to set the ivars
   cmMakefileTargetGenerator(cmGeneratorTarget* target);
-  ~cmMakefileTargetGenerator() CM_OVERRIDE;
+  ~cmMakefileTargetGenerator() override;
 
   // construct using this factory call
   static cmMakefileTargetGenerator* New(cmGeneratorTarget* tgt);
@@ -81,8 +81,7 @@ protected:
     {
     }
 
-    void operator()(cmSourceFile const& source,
-                    const char* pkgloc) CM_OVERRIDE;
+    void operator()(cmSourceFile const& source, const char* pkgloc) override;
 
   private:
     cmMakefileTargetGenerator* Generator;
@@ -168,8 +167,7 @@ protected:
   /** Add commands for generate def files */
   void GenDefFile(std::vector<std::string>& real_link_commands);
 
-  void AddIncludeFlags(std::string& flags,
-                       const std::string& lang) CM_OVERRIDE;
+  void AddIncludeFlags(std::string& flags, const std::string& lang) override;
 
   virtual void CloseFileStreams();
   cmLocalUnixMakefileGenerator3* LocalGenerator;

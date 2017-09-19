@@ -37,6 +37,16 @@
 #  components defined by the project.  The user may set it to only include the
 #  specified components.
 #
+#  Instead of specifying all the desired components, it is possible to obtain a
+#  list of all defined components and then remove the unwanted ones from the
+#  list. The :command:`get_cmake_property` command can be used to obtain the
+#  ``COMPONENTS`` property, then the :command:`list(REMOVE_ITEM)` command can be
+#  used to remove the unwanted ones. For example, to use all defined components
+#  except ``foo`` and ``bar``::
+#
+#    get_cmake_property(CPACK_COMPONENTS_ALL COMPONENTS)
+#    list(REMOVE_ITEM CPACK_COMPONENTS_ALL "foo" "bar")
+#
 # .. variable:: CPACK_<GENNAME>_COMPONENT_INSTALL
 #
 #  Enable/Disable component install for CPack generator <GENNAME>.

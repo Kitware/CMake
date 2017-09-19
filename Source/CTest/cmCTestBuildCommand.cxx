@@ -17,14 +17,14 @@ class cmExecutionStatus;
 
 cmCTestBuildCommand::cmCTestBuildCommand()
 {
-  this->GlobalGenerator = CM_NULLPTR;
+  this->GlobalGenerator = nullptr;
   this->Arguments[ctb_NUMBER_ERRORS] = "NUMBER_ERRORS";
   this->Arguments[ctb_NUMBER_WARNINGS] = "NUMBER_WARNINGS";
   this->Arguments[ctb_TARGET] = "TARGET";
   this->Arguments[ctb_CONFIGURATION] = "CONFIGURATION";
   this->Arguments[ctb_FLAGS] = "FLAGS";
   this->Arguments[ctb_PROJECT_NAME] = "PROJECT_NAME";
-  this->Arguments[ctb_LAST] = CM_NULLPTR;
+  this->Arguments[ctb_LAST] = nullptr;
   this->Last = ctb_LAST;
 }
 
@@ -32,7 +32,7 @@ cmCTestBuildCommand::~cmCTestBuildCommand()
 {
   if (this->GlobalGenerator) {
     delete this->GlobalGenerator;
-    this->GlobalGenerator = CM_NULLPTR;
+    this->GlobalGenerator = nullptr;
   }
 }
 
@@ -41,9 +41,9 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
   cmCTestGenericHandler* handler = this->CTest->GetInitializedHandler("build");
   if (!handler) {
     this->SetError("internal CTest error. Cannot instantiate build handler");
-    return CM_NULLPTR;
+    return nullptr;
   }
-  this->Handler = (cmCTestBuildHandler*)handler;
+  this->Handler = static_cast<cmCTestBuildHandler*>(handler);
 
   const char* ctestBuildCommand =
     this->Makefile->GetDefinition("CTEST_BUILD_COMMAND");
@@ -89,7 +89,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       if (this->GlobalGenerator) {
         if (this->GlobalGenerator->GetName() != cmakeGeneratorName) {
           delete this->GlobalGenerator;
-          this->GlobalGenerator = CM_NULLPTR;
+          this->GlobalGenerator = nullptr;
         }
       }
       if (!this->GlobalGenerator) {
@@ -102,11 +102,11 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
           e += "\"";
           this->Makefile->IssueMessage(cmake::FATAL_ERROR, e);
           cmSystemTools::SetFatalErrorOccured();
-          return CM_NULLPTR;
+          return nullptr;
         }
       }
       if (strlen(cmakeBuildConfiguration) == 0) {
-        const char* config = CM_NULLPTR;
+        const char* config = nullptr;
 #ifdef CMAKE_INTDIR
         config = CMAKE_INTDIR;
 #endif
@@ -143,7 +143,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
         "with a custom command line.";
       /* clang-format on */
       this->SetError(ostr.str());
-      return CM_NULLPTR;
+      return nullptr;
     }
   }
 
@@ -151,6 +151,12 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
         this->Makefile->GetDefinition("CTEST_USE_LAUNCHERS")) {
     this->CTest->SetCTestConfiguration("UseLaunchers", useLaunchers,
                                        this->Quiet);
+  }
+
+  if (const char* labelsForSubprojects =
+        this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
+    this->CTest->SetCTestConfiguration("LabelsForSubprojects",
+                                       labelsForSubprojects, this->Quiet);
   }
 
   handler->SetQuiet(this->Quiet);

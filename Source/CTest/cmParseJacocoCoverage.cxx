@@ -1,7 +1,5 @@
 #include "cmParseJacocoCoverage.h"
 
-#include "cmConfigure.h"
-
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
@@ -25,12 +23,12 @@ public:
     this->PackageName = "";
   }
 
-  ~XMLParser() CM_OVERRIDE {}
+  ~XMLParser() override {}
 
 protected:
-  void EndElement(const std::string& /*name*/) CM_OVERRIDE {}
+  void EndElement(const std::string& /*name*/) override {}
 
-  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
+  void StartElement(const std::string& name, const char** atts) override
   {
     if (name == "package") {
       this->PackageName = atts[1];
@@ -121,9 +119,8 @@ protected:
     }
 
     // Check if any of the locations found match our package.
-    for (std::vector<std::string>::const_iterator fi = files.begin();
-         fi != files.end(); ++fi) {
-      std::string dir = cmsys::SystemTools::GetParentDirectory(*fi);
+    for (std::string const& f : files) {
+      std::string dir = cmsys::SystemTools::GetParentDirectory(f);
       if (cmsys::SystemTools::StringEndsWith(dir, this->PackageName.c_str())) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                            "Found package directory for " << fileName << ": "

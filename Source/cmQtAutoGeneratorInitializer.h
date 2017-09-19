@@ -4,17 +4,21 @@
 #define cmQtAutoGeneratorInitializer_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
+#include "cmQtAutoGenDigest.h"
+
+#include <string>
 
 class cmGeneratorTarget;
-class cmLocalGenerator;
 
 class cmQtAutoGeneratorInitializer
 {
 public:
-  static void InitializeAutogenSources(cmGeneratorTarget* target);
-  static void InitializeAutogenTarget(cmLocalGenerator* lg,
-                                      cmGeneratorTarget* target);
-  static void SetupAutoGenerateTarget(cmGeneratorTarget const* target);
+  static std::string GetQtMajorVersion(cmGeneratorTarget const* target);
+  static std::string GetQtMinorVersion(cmGeneratorTarget const* target,
+                                       const std::string& qtVersionMajor);
+
+  static void InitializeAutogenTarget(cmQtAutoGenDigest& digest);
+  static void SetupAutoGenerateTarget(cmQtAutoGenDigest const& digest);
 };
 
 #endif

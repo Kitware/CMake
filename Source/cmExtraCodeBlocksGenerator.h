@@ -3,7 +3,7 @@
 #ifndef cmExtraCodeBlocksGenerator_h
 #define cmExtraCodeBlocksGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmExternalMakefileProjectGenerator.h"
 
@@ -25,7 +25,7 @@ public:
 
   static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
-  void Generate() CM_OVERRIDE;
+  void Generate() override;
 
 private:
   struct CbpUnit

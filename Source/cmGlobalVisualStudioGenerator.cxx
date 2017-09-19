@@ -58,7 +58,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
   const char* no_working_dir = 0;
   std::vector<std::string> no_depends;
   cmCustomCommandLines no_commands;
-  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*>>::iterator it;
   for (it = this->ProjectMap.begin(); it != this->ProjectMap.end(); ++it) {
     std::vector<cmLocalGenerator*>& gen = it->second;
     // add the ALL_BUILD to the first local generator of each project
@@ -82,8 +82,10 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
       // Now make all targets depend on the ALL_BUILD target
       for (std::vector<cmLocalGenerator*>::iterator i = gen.begin();
            i != gen.end(); ++i) {
-        std::vector<cmGeneratorTarget*> targets = (*i)->GetGeneratorTargets();
-        for (std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+        const std::vector<cmGeneratorTarget*>& targets =
+          (*i)->GetGeneratorTargets();
+        for (std::vector<cmGeneratorTarget*>::const_iterator t =
+               targets.begin();
              t != targets.end(); ++t) {
           cmGeneratorTarget* tgt = *t;
           if (tgt->GetType() == cmStateEnums::GLOBAL_TARGET ||
@@ -296,13 +298,15 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
   if (!this->cmGlobalGenerator::ComputeTargetDepends()) {
     return false;
   }
-  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*>>::iterator it;
   for (it = this->ProjectMap.begin(); it != this->ProjectMap.end(); ++it) {
     std::vector<cmLocalGenerator*>& gen = it->second;
     for (std::vector<cmLocalGenerator*>::iterator i = gen.begin();
          i != gen.end(); ++i) {
-      std::vector<cmGeneratorTarget*> targets = (*i)->GetGeneratorTargets();
-      for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
+      const std::vector<cmGeneratorTarget*>& targets =
+        (*i)->GetGeneratorTargets();
+      for (std::vector<cmGeneratorTarget*>::const_iterator ti =
+             targets.begin();
            ti != targets.end(); ++ti) {
         this->ComputeVSTargetDepends(*ti);
       }
@@ -779,6 +783,19 @@ bool cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(
     }
   }
   return false;
+}
+
+bool cmGlobalVisualStudioGenerator::TargetCanBeReferenced(
+  cmGeneratorTarget const* gt)
+{
+  if (this->TargetIsCSharpOnly(gt)) {
+    return true;
+  }
+  if (gt->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      gt->GetType() != cmStateEnums::EXECUTABLE) {
+    return false;
+  }
+  return true;
 }
 
 bool cmGlobalVisualStudioGenerator::TargetCompare::operator()(

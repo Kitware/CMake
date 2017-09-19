@@ -36,7 +36,7 @@ private:
   std::string& Rev;
   cmsys::RegularExpression RegexIdentify;
 
-  bool ProcessLine() CM_OVERRIDE
+  bool ProcessLine() override
   {
     if (this->RegexIdentify.find(this->Line)) {
       this->Rev = this->RegexIdentify.match(1);
@@ -60,7 +60,7 @@ private:
   cmCTestHG* HG;
   cmsys::RegularExpression RegexStatus;
 
-  bool ProcessLine() CM_OVERRIDE
+  bool ProcessLine() override
   {
     if (this->RegexStatus.find(this->Line)) {
       this->DoPath(this->RegexStatus.match(1)[0], this->RegexStatus.match(2));
@@ -96,7 +96,7 @@ std::string cmCTestHG::GetWorkingRevision()
 {
   // Run plumbing "hg identify" to get work tree revision.
   const char* hg = this->CommandLineTool.c_str();
-  const char* hg_identify[] = { hg, "identify", "-i", CM_NULLPTR };
+  const char* hg_identify[] = { hg, "identify", "-i", nullptr };
   std::string rev;
   IdentifyParser out(this, "rev-out> ", rev);
   OutputLogger err(this->Log, "rev-err> ");
@@ -126,7 +126,7 @@ bool cmCTestHG::UpdateImpl()
   // Use "hg pull" followed by "hg update" to update the working tree.
   {
     const char* hg = this->CommandLineTool.c_str();
-    const char* hg_pull[] = { hg, "pull", "-v", CM_NULLPTR };
+    const char* hg_pull[] = { hg, "pull", "-v", nullptr };
     OutputLogger out(this->Log, "pull-out> ");
     OutputLogger err(this->Log, "pull-err> ");
     this->RunChild(&hg_pull[0], &out, &err);
@@ -145,13 +145,12 @@ bool cmCTestHG::UpdateImpl()
     opts = this->CTest->GetCTestConfiguration("HGUpdateOptions");
   }
   std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
-  for (std::vector<std::string>::const_iterator ai = args.begin();
-       ai != args.end(); ++ai) {
-    hg_update.push_back(ai->c_str());
+  for (std::string const& arg : args) {
+    hg_update.push_back(arg.c_str());
   }
 
   // Sentinel argument.
-  hg_update.push_back(CM_NULLPTR);
+  hg_update.push_back(nullptr);
 
   OutputLogger out(this->Log, "update-out> ");
   OutputLogger err(this->Log, "update-err> ");
@@ -168,7 +167,7 @@ public:
   {
     this->InitializeParser();
   }
-  ~LogParser() CM_OVERRIDE { this->CleanupParser(); }
+  ~LogParser() override { this->CleanupParser(); }
 private:
   cmCTestHG* HG;
 
@@ -179,14 +178,14 @@ private:
   Change CurChange;
   std::vector<char> CData;
 
-  bool ProcessChunk(const char* data, int length) CM_OVERRIDE
+  bool ProcessChunk(const char* data, int length) override
   {
     this->OutputLogger::ProcessChunk(data, length);
     this->ParseChunk(data, length);
     return true;
   }
 
-  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
+  void StartElement(const std::string& name, const char** atts) override
   {
     this->CData.clear();
     if (name == "logentry") {
@@ -198,12 +197,12 @@ private:
     }
   }
 
-  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
+  void CharacterDataHandler(const char* data, int length) override
   {
     this->CData.insert(this->CData.end(), data, data + length);
   }
 
-  void EndElement(const std::string& name) CM_OVERRIDE
+  void EndElement(const std::string& name) override
   {
     if (name == "logentry") {
       this->HG->DoRevision(this->Rev, this->Changes);
@@ -217,25 +216,25 @@ private:
       this->Rev.Log.assign(&this->CData[0], this->CData.size());
     } else if (!this->CData.empty() && name == "files") {
       std::vector<std::string> paths = this->SplitCData();
-      for (unsigned int i = 0; i < paths.size(); ++i) {
+      for (std::string const& path : paths) {
         // Updated by default, will be modified using file_adds and
         // file_dels.
         this->CurChange = Change('U');
-        this->CurChange.Path = paths[i];
+        this->CurChange.Path = path;
         this->Changes.push_back(this->CurChange);
       }
     } else if (!this->CData.empty() && name == "file_adds") {
       std::string added_paths(this->CData.begin(), this->CData.end());
-      for (unsigned int i = 0; i < this->Changes.size(); ++i) {
-        if (added_paths.find(this->Changes[i].Path) != std::string::npos) {
-          this->Changes[i].Action = 'A';
+      for (Change& change : this->Changes) {
+        if (added_paths.find(change.Path) != std::string::npos) {
+          change.Action = 'A';
         }
       }
     } else if (!this->CData.empty() && name == "file_dels") {
       std::string added_paths(this->CData.begin(), this->CData.end());
-      for (unsigned int i = 0; i < this->Changes.size(); ++i) {
-        if (added_paths.find(this->Changes[i].Path) != std::string::npos) {
-          this->Changes[i].Action = 'D';
+      for (Change& change : this->Changes) {
+        if (added_paths.find(change.Path) != std::string::npos) {
+          change.Action = 'D';
         }
       }
     }
@@ -246,9 +245,9 @@ private:
   {
     std::vector<std::string> output;
     std::string currPath;
-    for (unsigned int i = 0; i < this->CData.size(); ++i) {
-      if (this->CData[i] != ' ') {
-        currPath += this->CData[i];
+    for (char i : this->CData) {
+      if (i != ' ') {
+        currPath += i;
       } else {
         output.push_back(currPath);
         currPath = "";
@@ -258,7 +257,7 @@ private:
     return output;
   }
 
-  void ReportError(int /*line*/, int /*column*/, const char* msg) CM_OVERRIDE
+  void ReportError(int /*line*/, int /*column*/, const char* msg) override
   {
     this->HG->Log << "Error parsing hg log xml: " << msg << "\n";
   }
@@ -286,7 +285,7 @@ bool cmCTestHG::LoadRevisions()
                               "</logentry>\n";
   const char* hg_log[] = {
     hg,           "log",         "--removed", "-r", range.c_str(),
-    "--template", hgXMLTemplate, CM_NULLPTR
+    "--template", hgXMLTemplate, nullptr
   };
 
   LogParser out(this, "log-out> ");
@@ -302,7 +301,7 @@ bool cmCTestHG::LoadModifications()
 {
   // Use 'hg status' to get modified files.
   const char* hg = this->CommandLineTool.c_str();
-  const char* hg_status[] = { hg, "status", CM_NULLPTR };
+  const char* hg_status[] = { hg, "status", nullptr };
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
   this->RunChild(hg_status, &out, &err);

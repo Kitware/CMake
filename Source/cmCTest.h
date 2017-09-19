@@ -3,7 +3,7 @@
 #ifndef cmCTest_h
 #define cmCTest_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmProcessOutput.h"
 #include "cmsys/String.hxx"
@@ -95,7 +95,7 @@ public:
   typedef std::set<std::string> SetOfStrings;
 
   /** Process Command line arguments */
-  int Run(std::vector<std::string>&, std::string* output = CM_NULLPTR);
+  int Run(std::vector<std::string>&, std::string* output = nullptr);
 
   /**
    * Initialize and finalize testing
@@ -245,15 +245,10 @@ public:
    * exit code will be stored. If the retVal is not specified and
    * the program exits with a code other than 0, then the this
    * function will return false.
-   *
-   * If the command has spaces in the path the caller MUST call
-   * cmSystemTools::ConvertToRunCommandPath on the command before passing
-   * it into this function or it will not work.  The command must be correctly
-   * escaped for this to with spaces.
    */
-  bool RunCommand(const char* command, std::string* stdOut,
-                  std::string* stdErr, int* retVal = CM_NULLPTR,
-                  const char* dir = CM_NULLPTR, double timeout = 0.0,
+  bool RunCommand(std::vector<std::string> const& args, std::string* stdOut,
+                  std::string* stdErr, int* retVal = nullptr,
+                  const char* dir = nullptr, double timeout = 0.0,
                   Encoding encoding = cmProcessOutput::Auto);
 
   /**
@@ -438,7 +433,9 @@ public:
     this->StreamErr = err;
   }
   void AddSiteProperties(cmXMLWriter& xml);
+
   bool GetLabelSummary() { return this->LabelSummary; }
+  bool GetSubprojectSummary() { return this->SubprojectSummary; }
 
   std::string GetCostDataFile();
 
@@ -453,6 +450,9 @@ public:
   /** Return true if test should run until fail */
   bool GetRepeatUntilFail() { return this->RepeatUntilFail; }
 
+  void GenerateSubprojectsOutput(cmXMLWriter& xml);
+  std::vector<std::string> GetLabelsForSubprojects();
+
 private:
   int RepeatTests;
   bool RepeatUntilFail;
@@ -464,6 +464,7 @@ private:
   bool ExtraVerbose;
   bool ProduceXML;
   bool LabelSummary;
+  bool SubprojectSummary;
   bool UseHTTP10;
   bool PrintLabels;
   bool Failover;
@@ -571,7 +572,7 @@ private:
 
   /** Check if the argument is the one specified */
   bool CheckArgument(const std::string& arg, const char* varg1,
-                     const char* varg2 = CM_NULLPTR);
+                     const char* varg2 = nullptr);
 
   /** Output errors from a test */
   void OutputTestErrors(std::vector<char> const& process_output);

@@ -5,15 +5,28 @@
 # FindEXPAT
 # ---------
 #
-# Find expat
+# Find the native Expat headers and library.
 #
-# Find the native EXPAT headers and libraries.
+# Imported Targets
+# ^^^^^^^^^^^^^^^^
 #
-# ::
+# This module defines the following :prop_tgt:`IMPORTED` targets:
 #
-#   EXPAT_INCLUDE_DIRS - where to find expat.h, etc.
-#   EXPAT_LIBRARIES    - List of libraries when using expat.
-#   EXPAT_FOUND        - True if expat found.
+# ``EXPAT::EXPAT``
+#   The Expat ``expat`` library, if found.
+#
+# Result Variables
+# ^^^^^^^^^^^^^^^^
+#
+# This module will set the following variables in your project:
+#
+# ``EXPAT_INCLUDE_DIRS``
+#   where to find expat.h, etc.
+# ``EXPAT_LIBRARIES``
+#   the libraries to link against to use Expat.
+# ``EXPAT_FOUND``
+#   true if the Expat headers and libraries were found.
+#
 
 find_package(PkgConfig QUIET)
 
@@ -49,10 +62,18 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(EXPAT
                                   REQUIRED_VARS EXPAT_LIBRARY EXPAT_INCLUDE_DIR
                                   VERSION_VAR EXPAT_VERSION_STRING)
 
-# Copy the results to the output variables.
+# Copy the results to the output variables and target.
 if(EXPAT_FOUND)
   set(EXPAT_LIBRARIES ${EXPAT_LIBRARY})
   set(EXPAT_INCLUDE_DIRS ${EXPAT_INCLUDE_DIR})
+
+  if(NOT TARGET EXPAT::EXPAT)
+    add_library(EXPAT::EXPAT UNKNOWN IMPORTED)
+    set_target_properties(EXPAT::EXPAT PROPERTIES
+      IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+      IMPORTED_LOCATION "${EXPAT_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${EXPAT_INCLUDE_DIRS}")
+  endif()
 endif()
 
 mark_as_advanced(EXPAT_INCLUDE_DIR EXPAT_LIBRARY)

@@ -3,7 +3,7 @@
 #ifndef cmWIXRichTextFormatWriter_h
 #define cmWIXRichTextFormatWriter_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmsys/FStream.hxx"
 #include <string>

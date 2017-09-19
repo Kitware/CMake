@@ -132,6 +132,15 @@ APPEND
 
 Append all the input arguments to the string.
 
+PREPEND
+"""""""
+
+::
+
+  string(PREPEND <string variable> [<input>...])
+
+Prepend all the input arguments to the string.
+
 CONCAT
 """"""
 
@@ -315,6 +324,7 @@ specifiers:
    %j        The day of the current year (001-366).
    %m        The month of the current year (01-12).
    %b        Abbreviated month name (e.g. Oct).
+   %B        Full month name (e.g. October).
    %M        The minute of the current hour (00-59).
    %s        Seconds since midnight (UTC) 1-Jan-1970 (UNIX time).
    %S        The second of the current minute.
@@ -322,6 +332,7 @@ specifiers:
    %U        The week number of the current year (00-53).
    %w        The day of the current week. 0 is Sunday. (0-6)
    %a        Abbreviated weekday name (e.g. Fri).
+   %A        Full weekday name (e.g. Friday).
    %y        The last two digits of the current year (00-99)
    %Y        The current year.
 

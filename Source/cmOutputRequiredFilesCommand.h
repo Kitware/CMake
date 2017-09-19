@@ -3,7 +3,7 @@
 #ifndef cmOutputRequiredFilesCommand_h
 #define cmOutputRequiredFilesCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <set>
 #include <stdio.h>
@@ -18,9 +18,9 @@ class cmExecutionStatus;
 class cmOutputRequiredFilesCommand : public cmCommand
 {
 public:
-  cmCommand* Clone() CM_OVERRIDE { return new cmOutputRequiredFilesCommand; }
+  cmCommand* Clone() override { return new cmOutputRequiredFilesCommand; }
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
   void ListDependencies(cmDependInformation const* info, FILE* fout,
                         std::set<cmDependInformation const*>* visited);

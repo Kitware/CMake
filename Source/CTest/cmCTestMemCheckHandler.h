@@ -3,7 +3,7 @@
 #ifndef cmCTestMemCheckHandler_h
 #define cmCTestMemCheckHandler_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestTestHandler.h"
 
@@ -24,19 +24,18 @@ class cmCTestMemCheckHandler : public cmCTestTestHandler
 public:
   typedef cmCTestTestHandler Superclass;
 
-  void PopulateCustomVectors(cmMakefile* mf) CM_OVERRIDE;
+  void PopulateCustomVectors(cmMakefile* mf) override;
 
   cmCTestMemCheckHandler();
 
-  void Initialize() CM_OVERRIDE;
+  void Initialize() override;
 
   int GetDefectCount();
 
 protected:
-  int PreProcessHandler() CM_OVERRIDE;
-  int PostProcessHandler() CM_OVERRIDE;
-  void GenerateTestCommand(std::vector<std::string>& args,
-                           int test) CM_OVERRIDE;
+  int PreProcessHandler() override;
+  int PostProcessHandler() override;
+  void GenerateTestCommand(std::vector<std::string>& args, int test) override;
 
 private:
   enum
@@ -121,7 +120,7 @@ private:
   /**
    * Generate the Dart compatible output
    */
-  void GenerateDartOutput(cmXMLWriter& xml) CM_OVERRIDE;
+  void GenerateDartOutput(cmXMLWriter& xml) override;
 
   std::vector<std::string> CustomPreMemCheck;
   std::vector<std::string> CustomPostMemCheck;

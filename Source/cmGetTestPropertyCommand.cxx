@@ -20,7 +20,7 @@ bool cmGetTestPropertyCommand::InitialPass(
   std::string const& var = args[2];
   cmTest* test = this->Makefile->GetTest(testName);
   if (test) {
-    const char* prop = CM_NULLPTR;
+    const char* prop = nullptr;
     if (!args[1].empty()) {
       prop = test->GetProperty(args[1]);
     }

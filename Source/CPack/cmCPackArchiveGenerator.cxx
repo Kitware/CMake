@@ -79,7 +79,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
        ++fileIt) {
     std::string rp = filePrefix + *fileIt;
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file: " << rp << std::endl);
-    archive.Add(rp, 0, CM_NULLPTR, false);
+    archive.Add(rp, 0, nullptr, false);
     if (!archive) {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "ERROR while packaging files: "
                       << archive.GetError() << std::endl);
@@ -146,7 +146,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
     for (compIt = this->Components.begin(); compIt != this->Components.end();
          ++compIt) {
       // Does the component belong to a group?
-      if (compIt->second.Group == CM_NULLPTR) {
+      if (compIt->second.Group == nullptr) {
         cmCPackLogger(
           cmCPackLog::LOG_VERBOSE, "Component <"
             << compIt->second.Name
@@ -255,7 +255,7 @@ int cmCPackArchiveGenerator::PackageFiles()
     // Get the relative path to the file
     std::string rp =
       cmSystemTools::RelativePath(toplevel.c_str(), fileIt->c_str());
-    archive.Add(rp, 0, CM_NULLPTR, false);
+    archive.Add(rp, 0, nullptr, false);
     if (!archive) {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem while adding file< "
                       << *fileIt << "> to archive <" << packageFileNames[0]

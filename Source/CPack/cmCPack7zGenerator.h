@@ -3,7 +3,7 @@
 #ifndef cmCPack7zGenerator_h
 #define cmCPack7zGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCPackArchiveGenerator.h"
 #include "cmCPackGenerator.h"
@@ -20,10 +20,10 @@ public:
    * Construct generator
    */
   cmCPack7zGenerator();
-  ~cmCPack7zGenerator() CM_OVERRIDE;
+  ~cmCPack7zGenerator() override;
 
 protected:
-  const char* GetOutputExtension() CM_OVERRIDE { return ".7z"; }
+  const char* GetOutputExtension() override { return ".7z"; }
 };
 
 #endif

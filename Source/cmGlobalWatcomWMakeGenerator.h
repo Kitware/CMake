@@ -3,7 +3,7 @@
 #ifndef cmGlobalWatcomWMakeGenerator_h
 #define cmGlobalWatcomWMakeGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
@@ -29,7 +29,7 @@ public:
     return new cmGlobalGeneratorSimpleFactory<cmGlobalWatcomWMakeGenerator>();
   }
   ///! Get the name for the generator.
-  std::string GetName() const CM_OVERRIDE
+  std::string GetName() const override
   {
     return cmGlobalWatcomWMakeGenerator::GetActualName();
   }
@@ -43,10 +43,10 @@ public:
    * extension, pthreads, byte order etc.
    */
   void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
-                      bool optional) CM_OVERRIDE;
+                      bool optional) override;
 
-  bool AllowNotParallel() const CM_OVERRIDE { return false; }
-  bool AllowDeleteOnError() const CM_OVERRIDE { return false; }
+  bool AllowNotParallel() const override { return false; }
+  bool AllowDeleteOnError() const override { return false; }
 };
 
 #endif

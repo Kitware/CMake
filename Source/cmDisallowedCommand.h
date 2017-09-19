@@ -3,7 +3,7 @@
 #ifndef cmDisallowedCommand_h
 #define cmDisallowedCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -24,23 +24,20 @@ public:
   {
   }
 
-  ~cmDisallowedCommand() CM_OVERRIDE { delete this->Command; }
+  ~cmDisallowedCommand() override { delete this->Command; }
 
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     return new cmDisallowedCommand(this->Command->Clone(), this->Policy,
                                    this->Message);
   }
 
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
-  void FinalPass() CM_OVERRIDE { this->Command->FinalPass(); }
+  void FinalPass() override { this->Command->FinalPass(); }
 
-  bool HasFinalPass() const CM_OVERRIDE
-  {
-    return this->Command->HasFinalPass();
-  }
+  bool HasFinalPass() const override { return this->Command->HasFinalPass(); }
 
 private:
   cmCommand* Command;

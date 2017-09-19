@@ -16,10 +16,11 @@ macro(do_test bsname file)
     )
 
   if (NOT test_result EQUAL 0)
-    message(SEND_ERROR "TEST FAILED")
+    message(SEND_ERROR "TEST FAILED: ${test_result}")
   endif()
 endmacro()
 
+do_test("test_cache" "tc_cache.json")
 do_test("test_handshake" "tc_handshake.json")
 do_test("test_globalSettings" "tc_globalSettings.json")
 do_test("test_buildsystem1" "tc_buildsystem1.json")

@@ -4,7 +4,7 @@
 #ifndef cmLinkLineComputer_h
 #define cmLinkLineComputer_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 

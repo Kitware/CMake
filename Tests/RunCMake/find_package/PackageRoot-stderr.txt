@@ -1,383 +1,43 @@
+----------
 Foo_ROOT      :
 ENV{Foo_ROOT} :
+
+find_package\(Foo\)
 FOO_TEST_FILE_FOO :FOO_TEST_FILE_FOO-NOTFOUND
 FOO_TEST_FILE_ZOT :FOO_TEST_FILE_ZOT-NOTFOUND
 FOO_TEST_PATH_FOO :FOO_TEST_PATH_FOO-NOTFOUND
 FOO_TEST_PATH_ZOT :FOO_TEST_PATH_ZOT-NOTFOUND
 FOO_TEST_PROG_FOO :FOO_TEST_PROG_FOO-NOTFOUND
 
-Foo_ROOT      :
+----------
+Foo_ROOT      :<base>/foo/cmake_root
 ENV{Foo_ROOT} :
-Bar_ROOT      :
-ENV{Bar_ROOT} :
-FOO_TEST_FILE_FOO :FOO_TEST_FILE_FOO-NOTFOUND
-FOO_TEST_PATH_FOO :FOO_TEST_PATH_FOO-NOTFOUND
-FOO_TEST_PROG_FOO :FOO_TEST_PROG_FOO-NOTFOUND
-BAR_TEST_FILE_FOO :BAR_TEST_FILE_FOO-NOTFOUND
-BAR_TEST_FILE_BAR :BAR_TEST_FILE_BAR-NOTFOUND
-BAR_TEST_FILE_ZOT :BAR_TEST_FILE_ZOT-NOTFOUND
-BAR_TEST_PATH_FOO :BAR_TEST_PATH_FOO-NOTFOUND
-BAR_TEST_PATH_BAR :BAR_TEST_PATH_BAR-NOTFOUND
-BAR_TEST_PATH_ZOT :BAR_TEST_PATH_ZOT-NOTFOUND
-BAR_TEST_PROG_FOO :BAR_TEST_PROG_FOO-NOTFOUND
-BAR_TEST_PROG_BAR :BAR_TEST_PROG_BAR-NOTFOUND
 
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
+find_package\(Foo\)
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
+FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
 
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :
-Bar_ROOT      :
-ENV{Bar_ROOT} :
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :.*/PackageRoot/foo/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-BAR_TEST_PATH_BAR :.*/PackageRoot/foo/cmake_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :.*/PackageRoot/foo/cmake_root/bin/bar.exe
-
+----------
 Foo_ROOT      :
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/env_root/include/foo.h
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/env_root/include
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/env_root/bin/foo.exe
+ENV{Foo_ROOT} :<base>/foo/env_root
 
-Foo_ROOT      :
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-Bar_ROOT      :
-ENV{Bar_ROOT} :
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/env_root/include/foo.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/env_root/include
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/env_root/bin/foo.exe
-BAR_TEST_FILE_FOO :.*/PackageRoot/foo/env_root/include/foo.h
-BAR_TEST_FILE_BAR :.*/PackageRoot/foo/env_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :.*/PackageRoot/foo/env_root/include
-BAR_TEST_PATH_BAR :.*/PackageRoot/foo/env_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :.*/PackageRoot/foo/env_root/bin/foo.exe
-BAR_TEST_PROG_BAR :.*/PackageRoot/foo/env_root/bin/bar.exe
+find_package\(Foo\)
+FOO_TEST_FILE_FOO :<base>/foo/env_root/include/foo.h
+FOO_TEST_FILE_ZOT :<base>/foo/env_root/include/zot/zot.h
+FOO_TEST_PATH_FOO :<base>/foo/env_root/include
+FOO_TEST_PATH_ZOT :<base>/foo/env_root/include/zot
+FOO_TEST_PROG_FOO :<base>/foo/env_root/bin/foo.exe
 
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
+----------
+Foo_ROOT      :<base>/foo/cmake_root
+ENV{Foo_ROOT} :<base>/foo/env_root
 
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-Bar_ROOT      :
-ENV{Bar_ROOT} :
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :.*/PackageRoot/foo/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-BAR_TEST_PATH_BAR :.*/PackageRoot/foo/cmake_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :.*/PackageRoot/foo/cmake_root/bin/bar.exe
-
-Foo_ROOT      :
-ENV{Foo_ROOT} :
-FOO_TEST_FILE_FOO :FOO_TEST_FILE_FOO-NOTFOUND
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :FOO_TEST_PATH_FOO-NOTFOUND
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :FOO_TEST_PROG_FOO-NOTFOUND
-
-Foo_ROOT      :
-ENV{Foo_ROOT} :
-Bar_ROOT      :.*/PackageRoot/bar/cmake_root
-ENV{Bar_ROOT} :
-FOO_TEST_FILE_FOO :FOO_TEST_FILE_FOO-NOTFOUND
-FOO_TEST_PATH_FOO :FOO_TEST_PATH_FOO-NOTFOUND
-FOO_TEST_PROG_FOO :FOO_TEST_PROG_FOO-NOTFOUND
-BAR_TEST_FILE_FOO :BAR_TEST_FILE_FOO-NOTFOUND
-BAR_TEST_FILE_BAR :.*/PackageRoot/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :BAR_TEST_PATH_FOO-NOTFOUND
-BAR_TEST_PATH_BAR :.*/PackageRoot/bar/cmake_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :BAR_TEST_PROG_FOO-NOTFOUND
-BAR_TEST_PROG_BAR :.*/PackageRoot/bar/cmake_root/bin/bar.exe
-
-Foo_ROOT      :
-ENV{Foo_ROOT} :
-FOO_TEST_FILE_FOO :FOO_TEST_FILE_FOO-NOTFOUND
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :FOO_TEST_PATH_FOO-NOTFOUND
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :FOO_TEST_PROG_FOO-NOTFOUND
-
-Foo_ROOT      :
-ENV{Foo_ROOT} :
-Bar_ROOT      :
-ENV{Bar_ROOT} :.*/PackageRoot/bar/env_root
-FOO_TEST_FILE_FOO :FOO_TEST_FILE_FOO-NOTFOUND
-FOO_TEST_PATH_FOO :FOO_TEST_PATH_FOO-NOTFOUND
-FOO_TEST_PROG_FOO :FOO_TEST_PROG_FOO-NOTFOUND
-BAR_TEST_FILE_FOO :BAR_TEST_FILE_FOO-NOTFOUND
-BAR_TEST_FILE_BAR :.*/PackageRoot/bar/env_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :BAR_TEST_PATH_FOO-NOTFOUND
-BAR_TEST_PATH_BAR :.*/PackageRoot/bar/env_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :BAR_TEST_PROG_FOO-NOTFOUND
-BAR_TEST_PROG_BAR :.*/PackageRoot/bar/env_root/bin/bar.exe
-
-Foo_ROOT      :
-ENV{Foo_ROOT} :
-FOO_TEST_FILE_FOO :FOO_TEST_FILE_FOO-NOTFOUND
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :FOO_TEST_PATH_FOO-NOTFOUND
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :FOO_TEST_PROG_FOO-NOTFOUND
-
-Foo_ROOT      :
-ENV{Foo_ROOT} :
-Bar_ROOT      :.*/PackageRoot/bar/cmake_root
-ENV{Bar_ROOT} :.*/PackageRoot/bar/env_root
-FOO_TEST_FILE_FOO :FOO_TEST_FILE_FOO-NOTFOUND
-FOO_TEST_PATH_FOO :FOO_TEST_PATH_FOO-NOTFOUND
-FOO_TEST_PROG_FOO :FOO_TEST_PROG_FOO-NOTFOUND
-BAR_TEST_FILE_FOO :BAR_TEST_FILE_FOO-NOTFOUND
-BAR_TEST_FILE_BAR :.*/PackageRoot/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :BAR_TEST_PATH_FOO-NOTFOUND
-BAR_TEST_PATH_BAR :.*/PackageRoot/bar/cmake_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :BAR_TEST_PROG_FOO-NOTFOUND
-BAR_TEST_PROG_BAR :.*/PackageRoot/bar/cmake_root/bin/bar.exe
-
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :
-Bar_ROOT      :.*/PackageRoot/bar/cmake_root
-ENV{Bar_ROOT} :
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :.*/PackageRoot/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-BAR_TEST_PATH_BAR :.*/PackageRoot/bar/cmake_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :.*/PackageRoot/bar/cmake_root/bin/bar.exe
-
-Foo_ROOT      :
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/env_root/include/foo.h
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/env_root/include
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/env_root/bin/foo.exe
-
-Foo_ROOT      :
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-Bar_ROOT      :.*/PackageRoot/bar/cmake_root
-ENV{Bar_ROOT} :
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/env_root/include/foo.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/env_root/include
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/env_root/bin/foo.exe
-BAR_TEST_FILE_FOO :.*/PackageRoot/foo/env_root/include/foo.h
-BAR_TEST_FILE_BAR :.*/PackageRoot/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :.*/PackageRoot/foo/env_root/include
-BAR_TEST_PATH_BAR :.*/PackageRoot/bar/cmake_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :.*/PackageRoot/foo/env_root/bin/foo.exe
-BAR_TEST_PROG_BAR :.*/PackageRoot/bar/cmake_root/bin/bar.exe
-
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-Bar_ROOT      :.*/PackageRoot/bar/cmake_root
-ENV{Bar_ROOT} :
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :.*/PackageRoot/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-BAR_TEST_PATH_BAR :.*/PackageRoot/bar/cmake_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :.*/PackageRoot/bar/cmake_root/bin/bar.exe
-
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :
-Bar_ROOT      :
-ENV{Bar_ROOT} :.*/PackageRoot/bar/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :.*/PackageRoot/bar/env_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-BAR_TEST_PATH_BAR :.*/PackageRoot/bar/env_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :.*/PackageRoot/bar/env_root/bin/bar.exe
-
-Foo_ROOT      :
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/env_root/include/foo.h
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/env_root/include
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/env_root/bin/foo.exe
-
-Foo_ROOT      :
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-Bar_ROOT      :
-ENV{Bar_ROOT} :.*/PackageRoot/bar/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/env_root/include/foo.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/env_root/include
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/env_root/bin/foo.exe
-BAR_TEST_FILE_FOO :.*/PackageRoot/foo/env_root/include/foo.h
-BAR_TEST_FILE_BAR :.*/PackageRoot/bar/env_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :.*/PackageRoot/foo/env_root/include
-BAR_TEST_PATH_BAR :.*/PackageRoot/bar/env_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :.*/PackageRoot/foo/env_root/bin/foo.exe
-BAR_TEST_PROG_BAR :.*/PackageRoot/bar/env_root/bin/bar.exe
-
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-Bar_ROOT      :
-ENV{Bar_ROOT} :.*/PackageRoot/bar/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :.*/PackageRoot/bar/env_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-BAR_TEST_PATH_BAR :.*/PackageRoot/bar/env_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :.*/PackageRoot/bar/env_root/bin/bar.exe
-
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :
-Bar_ROOT      :.*/PackageRoot/bar/cmake_root
-ENV{Bar_ROOT} :.*/PackageRoot/bar/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :.*/PackageRoot/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-BAR_TEST_PATH_BAR :.*/PackageRoot/bar/cmake_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :.*/PackageRoot/bar/cmake_root/bin/bar.exe
-
-Foo_ROOT      :
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/env_root/include/foo.h
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/env_root/include
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/env_root/bin/foo.exe
-
-Foo_ROOT      :
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-Bar_ROOT      :.*/PackageRoot/bar/cmake_root
-ENV{Bar_ROOT} :.*/PackageRoot/bar/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/env_root/include/foo.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/env_root/include
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/env_root/bin/foo.exe
-BAR_TEST_FILE_FOO :.*/PackageRoot/foo/env_root/include/foo.h
-BAR_TEST_FILE_BAR :.*/PackageRoot/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :.*/PackageRoot/foo/env_root/include
-BAR_TEST_PATH_BAR :.*/PackageRoot/bar/cmake_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :.*/PackageRoot/foo/env_root/bin/foo.exe
-BAR_TEST_PROG_BAR :.*/PackageRoot/bar/cmake_root/bin/bar.exe
-
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-
-Foo_ROOT      :.*/PackageRoot/foo/cmake_root
-ENV{Foo_ROOT} :.*/PackageRoot/foo/env_root
-Bar_ROOT      :.*/PackageRoot/bar/cmake_root
-ENV{Bar_ROOT} :.*/PackageRoot/bar/env_root
-FOO_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-FOO_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-FOO_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_FILE_FOO :.*/PackageRoot/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :.*/PackageRoot/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :.*/PackageRoot/foo/cmake_root/include/zot/zot.h
-BAR_TEST_PATH_FOO :.*/PackageRoot/foo/cmake_root/include
-BAR_TEST_PATH_BAR :.*/PackageRoot/bar/cmake_root/include
-BAR_TEST_PATH_ZOT :.*/PackageRoot/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :.*/PackageRoot/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :.*/PackageRoot/bar/cmake_root/bin/bar.exe
+find_package\(Foo\)
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
+FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe

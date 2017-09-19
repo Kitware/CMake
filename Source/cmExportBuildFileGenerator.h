@@ -3,7 +3,7 @@
 #ifndef cmExportBuildFileGenerator_h
 #define cmExportBuildFileGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmExportFileGenerator.h"
 
@@ -49,14 +49,14 @@ public:
 
 protected:
   // Implement virtual methods from the superclass.
-  bool GenerateMainFile(std::ostream& os) CM_OVERRIDE;
+  bool GenerateMainFile(std::ostream& os) override;
   void GenerateImportTargetsConfig(
     std::ostream& os, const std::string& config, std::string const& suffix,
-    std::vector<std::string>& missingTargets) CM_OVERRIDE;
+    std::vector<std::string>& missingTargets) override;
   void HandleMissingTarget(std::string& link_libs,
                            std::vector<std::string>& missingTargets,
                            cmGeneratorTarget* depender,
-                           cmGeneratorTarget* dependee) CM_OVERRIDE;
+                           cmGeneratorTarget* dependee) override;
 
   void ComplainAboutMissingTarget(cmGeneratorTarget* depender,
                                   cmGeneratorTarget* dependee,
@@ -69,7 +69,7 @@ protected:
                                  ImportPropertyMap& properties);
 
   std::string InstallNameDir(cmGeneratorTarget* target,
-                             const std::string& config) CM_OVERRIDE;
+                             const std::string& config) override;
 
   std::vector<std::string> FindNamespaces(cmGlobalGenerator* gg,
                                           const std::string& name);

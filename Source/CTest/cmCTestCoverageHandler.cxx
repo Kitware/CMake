@@ -67,12 +67,10 @@ public:
   bool StartProcess()
   {
     std::vector<const char*> args;
-    for (std::vector<std::string>::iterator i =
-           this->CommandLineStrings.begin();
-         i != this->CommandLineStrings.end(); ++i) {
-      args.push_back(i->c_str());
+    for (std::string const& cl : this->CommandLineStrings) {
+      args.push_back(cl.c_str());
     }
-    args.push_back(CM_NULLPTR); // null terminate
+    args.push_back(nullptr); // null terminate
     cmsysProcess_SetCommand(this->Process, &*args.begin());
     if (!this->WorkingDirectory.empty()) {
       cmsysProcess_SetWorkingDirectory(this->Process,
@@ -97,7 +95,7 @@ public:
   {
     cmsysProcess_SetPipeFile(this->Process, cmsysProcess_Pipe_STDERR, fname);
   }
-  int WaitForExit(double* timeout = CM_NULLPTR)
+  int WaitForExit(double* timeout = nullptr)
   {
     this->PipeState = cmsysProcess_WaitForExit(this->Process, timeout);
     return this->PipeState;
@@ -136,10 +134,9 @@ void cmCTestCoverageHandler::CleanCoverageLogFiles(std::ostream& log)
   cmsys::Glob gl;
   gl.FindFiles(logGlob);
   std::vector<std::string> const& files = gl.GetFiles();
-  for (std::vector<std::string>::const_iterator fi = files.begin();
-       fi != files.end(); ++fi) {
-    log << "Removing old coverage log: " << *fi << "\n";
-    cmSystemTools::RemoveFile(*fi);
+  for (std::string const& f : files) {
+    log << "Removing old coverage log: " << f << "\n";
+    cmSystemTools::RemoveFile(f);
   }
 }
 
@@ -196,10 +193,8 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
     return false;
   }
 
-  std::vector<cmsys::RegularExpression>::iterator sit;
-  for (sit = this->CustomCoverageExcludeRegex.begin();
-       sit != this->CustomCoverageExcludeRegex.end(); ++sit) {
-    if (sit->find(file)) {
+  for (cmsys::RegularExpression& rx : this->CustomCoverageExcludeRegex) {
+    if (rx.find(file)) {
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "  File "
                            << file << " is excluded in CTestCustom.ctest"
                            << std::endl;
@@ -319,11 +314,9 @@ int cmCTestCoverageHandler::ProcessHandler()
 
   // setup the regex exclude stuff
   this->CustomCoverageExcludeRegex.clear();
-  std::vector<std::string>::iterator rexIt;
-  for (rexIt = this->CustomCoverageExclude.begin();
-       rexIt != this->CustomCoverageExclude.end(); ++rexIt) {
+  for (std::string const& rex : this->CustomCoverageExclude) {
     this->CustomCoverageExcludeRegex.push_back(
-      cmsys::RegularExpression(rexIt->c_str()));
+      cmsys::RegularExpression(rex.c_str()));
   }
 
   if (this->HandleBullseyeCoverage(&cont)) {
@@ -414,7 +407,6 @@ int cmCTestCoverageHandler::ProcessHandler()
     return -1;
   }
   this->StartCoverageLogXML(covLogXML);
-  cmCTestCoverageHandlerContainer::TotalCoverageMap::iterator fileIterator;
   int cnt = 0;
   long total_tested = 0;
   long total_untested = 0;
@@ -430,8 +422,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   std::vector<std::string> errorsWhileAccumulating;
 
   file_count = 0;
-  for (fileIterator = cont.TotalCoverage.begin();
-       fileIterator != cont.TotalCoverage.end(); ++fileIterator) {
+  for (auto const& file : cont.TotalCoverage) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "." << std::flush,
                        this->Quiet);
     file_count++;
@@ -443,7 +434,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "    ", this->Quiet);
     }
 
-    const std::string fullFileName = fileIterator->first;
+    const std::string fullFileName = file.first;
     bool shouldIDoCoverage = this->ShouldIDoCoverage(
       fullFileName.c_str(), sourceDir.c_str(), binaryDir.c_str());
     if (!shouldIDoCoverage) {
@@ -478,7 +469,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     std::string shortFileName =
       this->CTest->GetShortPathToFile(fullFileName.c_str());
     const cmCTestCoverageHandlerContainer::SingleFileCoverageVector& fcov =
-      fileIterator->second;
+      file.second;
     covLogXML.StartElement("File");
     covLogXML.Attribute("Name", fileName);
     covLogXML.Attribute("FullPath", shortFileName);
@@ -554,14 +545,13 @@ int cmCTestCoverageHandler::ProcessHandler()
   }
 
   // Handle all the files in the extra coverage globs that have no cov data
-  for (std::set<std::string>::iterator i = uncovered.begin();
-       i != uncovered.end(); ++i) {
-    std::string fileName = cmSystemTools::GetFilenameName(*i);
-    std::string fullPath = cont.SourceDir + "/" + *i;
+  for (std::string const& u : uncovered) {
+    std::string fileName = cmSystemTools::GetFilenameName(u);
+    std::string fullPath = cont.SourceDir + "/" + u;
 
     covLogXML.StartElement("File");
     covLogXML.Attribute("Name", fileName);
-    covLogXML.Attribute("FullPath", *i);
+    covLogXML.Attribute("FullPath", u);
     covLogXML.StartElement("Report");
 
     cmsys::ifstream ifs(fullPath.c_str());
@@ -575,7 +565,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     int untested = 0;
     std::string line;
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "Actually performing coverage for: " << *i << std::endl,
+                       "Actually performing coverage for: " << u << std::endl,
                        this->Quiet);
     while (cmSystemTools::GetLineFromStream(ifs, line)) {
       covLogXML.StartElement("Line");
@@ -591,13 +581,13 @@ int cmCTestCoverageHandler::ProcessHandler()
     total_untested += untested;
     covSumXML.StartElement("File");
     covSumXML.Attribute("Name", fileName);
-    covSumXML.Attribute("FullPath", *i);
+    covSumXML.Attribute("FullPath", u);
     covSumXML.Attribute("Covered", "true");
     covSumXML.Element("LOCTested", 0);
     covSumXML.Element("LOCUnTested", untested);
     covSumXML.Element("PercentCoverage", 0);
     covSumXML.Element("CoverageMetric", 0);
-    this->WriteXMLLabels(covSumXML, *i);
+    this->WriteXMLLabels(covSumXML, u);
     covSumXML.EndElement(); // File
   }
 
@@ -608,10 +598,8 @@ int cmCTestCoverageHandler::ProcessHandler()
     cmCTestLog(this->CTest, ERROR_MESSAGE, std::endl);
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Error(s) while accumulating results:" << std::endl);
-    std::vector<std::string>::iterator erIt;
-    for (erIt = errorsWhileAccumulating.begin();
-         erIt != errorsWhileAccumulating.end(); ++erIt) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, "  " << *erIt << std::endl);
+    for (std::string const& er : errorsWhileAccumulating) {
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "  " << er << std::endl);
     }
   }
 
@@ -668,17 +656,14 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile* mf)
                                     this->CustomCoverageExclude);
   this->CTest->PopulateCustomVector(mf, "CTEST_EXTRA_COVERAGE_GLOB",
                                     this->ExtraCoverageGlobs);
-  std::vector<std::string>::iterator it;
-  for (it = this->CustomCoverageExclude.begin();
-       it != this->CustomCoverageExclude.end(); ++it) {
+  for (std::string const& cce : this->CustomCoverageExclude) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       " Add coverage exclude: " << *it << std::endl,
+                       " Add coverage exclude: " << cce << std::endl,
                        this->Quiet);
   }
-  for (it = this->ExtraCoverageGlobs.begin();
-       it != this->ExtraCoverageGlobs.end(); ++it) {
+  for (std::string const& ecg : this->ExtraCoverageGlobs) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       " Add coverage glob: " << *it << std::endl,
+                       " Add coverage glob: " << ecg << std::endl,
                        this->Quiet);
   }
 }
@@ -875,6 +860,24 @@ int cmCTestCoverageHandler::HandleDelphiCoverage(
   return static_cast<int>(cont->TotalCoverage.size());
 }
 
+static std::string joinCommandLine(const std::vector<std::string>& args)
+{
+  std::string ret;
+
+  for (std::string const& s : args) {
+    if (s.find(' ') == std::string::npos) {
+      ret += s + ' ';
+    } else {
+      ret += "\"" + s + "\" ";
+    }
+  }
+
+  // drop trailing whitespace
+  ret.erase(ret.size() - 1);
+
+  return ret;
+}
+
 int cmCTestCoverageHandler::HandleBlanketJSCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -893,12 +896,12 @@ int cmCTestCoverageHandler::HandleBlanketJSCoverage(
   // Blanket.js output. Check for the "node-jscoverage"
   // string on the second line
   std::string line;
-  for (unsigned int fileEntry = 0; fileEntry < files.size(); fileEntry++) {
-    cmsys::ifstream in(files[fileEntry].c_str());
+  for (std::string const& fileEntry : files) {
+    cmsys::ifstream in(fileEntry.c_str());
     cmSystemTools::GetLineFromStream(in, line);
     cmSystemTools::GetLineFromStream(in, line);
     if (line.find("node-jscoverage") != std::string::npos) {
-      blanketFiles.push_back(files[fileEntry]);
+      blanketFiles.push_back(fileEntry);
     }
   }
   //  Take all files with the node-jscoverage string and parse those
@@ -959,7 +962,6 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
   std::vector<std::string> files;
   this->FindGCovFiles(files);
-  std::vector<std::string>::iterator it;
 
   if (files.empty()) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -990,19 +992,26 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
   cmCTestCoverageHandlerLocale locale_C;
   static_cast<void>(locale_C);
 
+  std::vector<std::string> basecovargs =
+    cmSystemTools::ParseArguments(gcovExtraFlags.c_str());
+  basecovargs.insert(basecovargs.begin(), gcovCommand);
+  basecovargs.push_back("-o");
+
   // files is a list of *.da and *.gcda files with coverage data in them.
   // These are binary files that you give as input to gcov so that it will
   // give us text output we can analyze to summarize coverage.
   //
-  for (it = files.begin(); it != files.end(); ++it) {
+  for (std::string const& f : files) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "." << std::flush,
                        this->Quiet);
 
     // Call gcov to get coverage data for this *.gcda file:
     //
-    std::string fileDir = cmSystemTools::GetFilenamePath(*it);
-    std::string command = "\"" + gcovCommand + "\" " + gcovExtraFlags + " " +
-      "-o \"" + fileDir + "\" " + "\"" + *it + "\"";
+    std::string fileDir = cmSystemTools::GetFilenamePath(f);
+    std::vector<std::string> covargs = basecovargs;
+    covargs.push_back(fileDir);
+    covargs.push_back(f);
+    const std::string command = joinCommandLine(covargs);
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        command << std::endl, this->Quiet);
@@ -1012,15 +1021,14 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     int retVal = 0;
     *cont->OFS << "* Run coverage for: " << fileDir << std::endl;
     *cont->OFS << "  Command: " << command << std::endl;
-    int res =
-      this->CTest->RunCommand(command.c_str(), &output, &errors, &retVal,
-                              tempDir.c_str(), 0 /*this->TimeOut*/);
+    int res = this->CTest->RunCommand(covargs, &output, &errors, &retVal,
+                                      tempDir.c_str(), 0 /*this->TimeOut*/);
 
     *cont->OFS << "  Output: " << output << std::endl;
     *cont->OFS << "  Errors: " << errors << std::endl;
     if (!res) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Problem running coverage on file: " << *it << std::endl);
+                 "Problem running coverage on file: " << f << std::endl);
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Command produced error: " << errors << std::endl);
       cont->Error++;
@@ -1028,7 +1036,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     }
     if (retVal != 0) {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Coverage command returned: "
-                   << retVal << " while processing: " << *it << std::endl);
+                   << retVal << " while processing: " << f << std::endl);
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Command produced error: " << cont->Error << std::endl);
     }
@@ -1042,20 +1050,19 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
       this->Quiet);
 
     std::vector<std::string> lines;
-    std::vector<std::string>::iterator line;
 
     cmSystemTools::Split(output.c_str(), lines);
 
-    for (line = lines.begin(); line != lines.end(); ++line) {
+    for (std::string const& line : lines) {
       std::string sourceFile;
       std::string gcovFile;
 
       cmCTestOptionalLog(this->CTest, DEBUG,
-                         "Line: [" << *line << "]" << std::endl, this->Quiet);
+                         "Line: [" << line << "]" << std::endl, this->Quiet);
 
-      if (line->empty()) {
+      if (line.empty()) {
         // Ignore empty line; probably style 2
-      } else if (st1re1.find(line->c_str())) {
+      } else if (st1re1.find(line.c_str())) {
         if (gcovStyle == 0) {
           gcovStyle = 1;
         }
@@ -1068,7 +1075,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
         actualSourceFile = "";
         sourceFile = st1re1.match(2);
-      } else if (st1re2.find(line->c_str())) {
+      } else if (st1re2.find(line.c_str())) {
         if (gcovStyle == 0) {
           gcovStyle = 1;
         }
@@ -1080,7 +1087,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         }
 
         gcovFile = st1re2.match(1);
-      } else if (st2re1.find(line->c_str())) {
+      } else if (st2re1.find(line.c_str())) {
         if (gcovStyle == 0) {
           gcovStyle = 2;
         }
@@ -1093,7 +1100,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
         actualSourceFile = "";
         sourceFile = st2re1.match(1);
-      } else if (st2re2.find(line->c_str())) {
+      } else if (st2re2.find(line.c_str())) {
         if (gcovStyle == 0) {
           gcovStyle = 2;
         }
@@ -1103,7 +1110,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           cont->Error++;
           break;
         }
-      } else if (st2re3.find(line->c_str())) {
+      } else if (st2re3.find(line.c_str())) {
         if (gcovStyle == 0) {
           gcovStyle = 2;
         }
@@ -1115,7 +1122,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         }
 
         gcovFile = st2re3.match(2);
-      } else if (st2re4.find(line->c_str())) {
+      } else if (st2re4.find(line.c_str())) {
         if (gcovStyle == 0) {
           gcovStyle = 2;
         }
@@ -1130,7 +1137,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
                            "Warning: " << st2re4.match(1)
                                        << " had unexpected EOF" << std::endl,
                            this->Quiet);
-      } else if (st2re5.find(line->c_str())) {
+      } else if (st2re5.find(line.c_str())) {
         if (gcovStyle == 0) {
           gcovStyle = 2;
         }
@@ -1144,7 +1151,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         cmCTestOptionalLog(this->CTest, WARNING, "Warning: Cannot open file: "
                              << st2re5.match(1) << std::endl,
                            this->Quiet);
-      } else if (st2re6.find(line->c_str())) {
+      } else if (st2re6.find(line.c_str())) {
         if (gcovStyle == 0) {
           gcovStyle = 2;
         }
@@ -1162,10 +1169,10 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
       } else {
         // gcov 4.7 can have output lines saying "No executable lines" and
         // "Removing 'filename.gcov'"... Don't log those as "errors."
-        if (*line != "No executable lines" &&
-            !cmSystemTools::StringStartsWith(line->c_str(), "Removing ")) {
+        if (line != "No executable lines" &&
+            !cmSystemTools::StringStartsWith(line.c_str(), "Removing ")) {
           cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output line: ["
-                       << *line << "]" << std::endl);
+                       << line << "]" << std::endl);
           cont->Error++;
           // abort();
         }
@@ -1330,7 +1337,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
                "Error while finding LCov files.\n");
     return 0;
   }
-  std::vector<std::string>::iterator it;
 
   if (files.empty()) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -1355,14 +1361,18 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
   cmCTestCoverageHandlerLocale locale_C;
   static_cast<void>(locale_C);
 
+  std::vector<std::string> covargs =
+    cmSystemTools::ParseArguments(lcovExtraFlags.c_str());
+  covargs.insert(covargs.begin(), lcovCommand);
+  const std::string command = joinCommandLine(covargs);
+
   // In intel compiler we have to call codecov only once in each executable
   // directory. It collects all *.dyn files to generate .dpi file.
-  for (it = files.begin(); it != files.end(); ++it) {
+  for (std::string const& f : files) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "." << std::flush,
                        this->Quiet);
-    std::string fileDir = cmSystemTools::GetFilenamePath(*it);
+    std::string fileDir = cmSystemTools::GetFilenamePath(f);
     cmWorkingDirectory workdir(fileDir);
-    std::string command = "\"" + lcovCommand + "\" " + lcovExtraFlags + " ";
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Current coverage dir: " << fileDir << std::endl,
@@ -1375,15 +1385,14 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     int retVal = 0;
     *cont->OFS << "* Run coverage for: " << fileDir << std::endl;
     *cont->OFS << "  Command: " << command << std::endl;
-    int res =
-      this->CTest->RunCommand(command.c_str(), &output, &errors, &retVal,
-                              fileDir.c_str(), 0 /*this->TimeOut*/);
+    int res = this->CTest->RunCommand(covargs, &output, &errors, &retVal,
+                                      fileDir.c_str(), 0 /*this->TimeOut*/);
 
     *cont->OFS << "  Output: " << output << std::endl;
     *cont->OFS << "  Errors: " << errors << std::endl;
     if (!res) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Problem running coverage on file: " << *it << std::endl);
+                 "Problem running coverage on file: " << f << std::endl);
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Command produced error: " << errors << std::endl);
       cont->Error++;
@@ -1391,7 +1400,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     }
     if (retVal != 0) {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Coverage command returned: "
-                   << retVal << " while processing: " << *it << std::endl);
+                   << retVal << " while processing: " << f << std::endl);
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Command produced error: " << cont->Error << std::endl);
     }
@@ -1405,15 +1414,14 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
       this->Quiet);
 
     std::vector<std::string> lines;
-    std::vector<std::string>::iterator line;
 
     cmSystemTools::Split(output.c_str(), lines);
 
-    for (line = lines.begin(); line != lines.end(); ++line) {
+    for (std::string const& line : lines) {
       std::string sourceFile;
       std::string lcovFile;
 
-      if (line->empty()) {
+      if (line.empty()) {
         // Ignore empty line
       }
       // Look for LCOV files in binary directory
@@ -1436,9 +1444,8 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
       lcovFiles.insert(lcovFiles.end(), gl.GetFiles().begin(),
                        gl.GetFiles().end());
 
-      for (std::vector<std::string>::iterator a = lcovFiles.begin();
-           a != lcovFiles.end(); ++a) {
-        lcovFile = *a;
+      for (std::string const& file : lcovFiles) {
+        lcovFile = file;
         cmsys::ifstream srcead(lcovFile.c_str());
         if (!srcead) {
           cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -1460,10 +1467,9 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
         sourceFile = srcname;
         actualSourceFile = srcname;
 
-        for (std::vector<std::string>::iterator t = lcovFiles.begin();
-             t != lcovFiles.end(); ++t) {
+        for (std::string const& t : lcovFiles) {
           cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                             "Found LCOV File: " << *t << std::endl,
+                             "Found LCOV File: " << t << std::endl,
                              this->Quiet);
         }
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -1560,10 +1566,9 @@ void cmCTestCoverageHandler::FindGCovFiles(std::vector<std::string>& files)
   gl.RecurseOn();
   gl.RecurseThroughSymlinksOff();
 
-  for (LabelMapType::const_iterator lmi = this->TargetDirs.begin();
-       lmi != this->TargetDirs.end(); ++lmi) {
+  for (auto const& lm : this->TargetDirs) {
     // Skip targets containing no interesting labels.
-    if (!this->IntersectsFilter(lmi->second)) {
+    if (!this->IntersectsFilter(lm.second)) {
       continue;
     }
 
@@ -1571,12 +1576,12 @@ void cmCTestCoverageHandler::FindGCovFiles(std::vector<std::string>& files)
     // support directory.
     cmCTestOptionalLog(
       this->CTest, HANDLER_VERBOSE_OUTPUT,
-      "   globbing for coverage in: " << lmi->first << std::endl, this->Quiet);
-    std::string daGlob = lmi->first;
+      "   globbing for coverage in: " << lm.first << std::endl, this->Quiet);
+    std::string daGlob = lm.first;
     daGlob += "/*.da";
     gl.FindFiles(daGlob);
     files.insert(files.end(), gl.GetFiles().begin(), gl.GetFiles().end());
-    daGlob = lmi->first;
+    daGlob = lm.first;
     daGlob += "/*.gcda";
     gl.FindFiles(daGlob);
     files.insert(files.end(), gl.GetFiles().begin(), gl.GetFiles().end());
@@ -1639,14 +1644,13 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
   std::string tempDir = testingDir + "/CoverageInfo";
   cmSystemTools::MakeDirectory(tempDir.c_str());
 
-  std::vector<std::string>::iterator fileIt;
   int file_count = 0;
-  for (fileIt = files.begin(); fileIt != files.end(); ++fileIt) {
-    std::string fileName = this->FindFile(cont, *fileIt);
+  for (std::string const& file : files) {
+    std::string fileName = this->FindFile(cont, file);
     if (fileName.empty()) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Cannot find source Python file corresponding to: "
-                   << *fileIt << std::endl);
+                   << file << std::endl);
       continue;
     }
 
@@ -1658,11 +1662,11 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
     cmCTestCoverageHandlerContainer::SingleFileCoverageVector* vec =
       &cont->TotalCoverage[actualSourceFile];
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "   in file: " << *fileIt << std::endl, this->Quiet);
-    cmsys::ifstream ifile(fileIt->c_str());
+                       "   in file: " << file << std::endl, this->Quiet);
+    cmsys::ifstream ifile(file.c_str());
     if (!ifile) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Cannot open file: " << *fileIt << std::endl);
+                 "Cannot open file: " << file << std::endl);
     } else {
       long cnt = -1;
       std::string nl;
@@ -1759,7 +1763,7 @@ const char* bullseyeHelp[] = {
   "      condition evaluated true or false, respectively.",
   "    * A k indicates a constant decision or condition.",
   "    * The slash / means this probe is excluded from summary results. ",
-  CM_NULLPTR
+  nullptr
 };
 }
 
@@ -1787,7 +1791,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "run covbr: " << std::endl, this->Quiet);
 
-  if (!this->RunBullseyeCommand(cont, "covbr", CM_NULLPTR, outputFile)) {
+  if (!this->RunBullseyeCommand(cont, "covbr", nullptr, outputFile)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "error running covbr for."
                  << "\n");
     return -1;
@@ -1860,7 +1864,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
         covLogXML.StartElement("Report");
         // write the bullseye header
         line = 0;
-        for (int k = 0; bullseyeHelp[k] != CM_NULLPTR; ++k) {
+        for (int k = 0; bullseyeHelp[k] != nullptr; ++k) {
           covLogXML.StartElement("Line");
           covLogXML.Attribute("Number", line);
           covLogXML.Attribute("Count", -1);
@@ -2254,9 +2258,8 @@ void cmCTestCoverageHandler::WriteXMLLabels(cmXMLWriter& xml,
   LabelMapType::const_iterator li = this->SourceLabels.find(source);
   if (li != this->SourceLabels.end() && !li->second.empty()) {
     xml.StartElement("Labels");
-    for (LabelSet::const_iterator lsi = li->second.begin();
-         lsi != li->second.end(); ++lsi) {
-      xml.Element("Label", this->Labels[*lsi]);
+    for (auto const& ls : li->second) {
+      xml.Element("Label", this->Labels[ls]);
     }
     xml.EndElement(); // Labels
   }
@@ -2266,9 +2269,8 @@ void cmCTestCoverageHandler::SetLabelFilter(
   std::set<std::string> const& labels)
 {
   this->LabelFilter.clear();
-  for (std::set<std::string>::const_iterator li = labels.begin();
-       li != labels.end(); ++li) {
-    this->LabelFilter.insert(this->GetLabelId(*li));
+  for (std::string const& l : labels) {
+    this->LabelFilter.insert(this->GetLabelId(l));
   }
 }
 
@@ -2308,29 +2310,24 @@ std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
 {
   std::set<std::string> extraMatches;
 
-  for (std::vector<std::string>::iterator i = this->ExtraCoverageGlobs.begin();
-       i != this->ExtraCoverageGlobs.end(); ++i) {
+  for (std::string const& ecg : this->ExtraCoverageGlobs) {
     cmsys::Glob gl;
     gl.RecurseOn();
     gl.RecurseThroughSymlinksOff();
-    std::string glob = cont->SourceDir + "/" + *i;
+    std::string glob = cont->SourceDir + "/" + ecg;
     gl.FindFiles(glob);
     std::vector<std::string> files = gl.GetFiles();
-    for (std::vector<std::string>::iterator f = files.begin();
-         f != files.end(); ++f) {
-      if (this->ShouldIDoCoverage(f->c_str(), cont->SourceDir.c_str(),
+    for (std::string const& f : files) {
+      if (this->ShouldIDoCoverage(f.c_str(), cont->SourceDir.c_str(),
                                   cont->BinaryDir.c_str())) {
-        extraMatches.insert(this->CTest->GetShortPathToFile(f->c_str()));
+        extraMatches.insert(this->CTest->GetShortPathToFile(f.c_str()));
       }
     }
   }
 
   if (!extraMatches.empty()) {
-    for (cmCTestCoverageHandlerContainer::TotalCoverageMap::iterator i =
-           cont->TotalCoverage.begin();
-         i != cont->TotalCoverage.end(); ++i) {
-      std::string shortPath =
-        this->CTest->GetShortPathToFile(i->first.c_str());
+    for (auto const& i : cont->TotalCoverage) {
+      std::string shortPath = this->CTest->GetShortPathToFile(i.first.c_str());
       extraMatches.erase(shortPath);
     }
   }

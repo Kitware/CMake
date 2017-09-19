@@ -3,7 +3,7 @@
 #ifndef cmCTestBuildCommand_h
 #define cmCTestBuildCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestHandlerCommand.h"
 
@@ -25,12 +25,12 @@ class cmCTestBuildCommand : public cmCTestHandlerCommand
 {
 public:
   cmCTestBuildCommand();
-  ~cmCTestBuildCommand() CM_OVERRIDE;
+  ~cmCTestBuildCommand() override;
 
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmCTestBuildCommand* ni = new cmCTestBuildCommand;
     ni->CTest = this->CTest;
@@ -41,10 +41,10 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  std::string GetName() const CM_OVERRIDE { return "ctest_build"; }
+  std::string GetName() const override { return "ctest_build"; }
 
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
   cmGlobalGenerator* GlobalGenerator;
 
@@ -62,7 +62,7 @@ protected:
     ctb_LAST
   };
 
-  cmCTestGenericHandler* InitializeHandler() CM_OVERRIDE;
+  cmCTestGenericHandler* InitializeHandler() override;
 };
 
 #endif

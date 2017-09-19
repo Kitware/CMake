@@ -7,9 +7,9 @@ ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
 ENDIF()
 
 include(ConfigureChecks.cmake)
-if(WIN32)
-  add_definitions(-DCOMPILING_FOR_WINDOWS)
-endif(WIN32)
+if(NOT WIN32)
+  add_definitions(-DXML_DEV_URANDOM)
+endif()
 
 include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
@@ -17,6 +17,7 @@ include_directories(
   )
 
 add_library(cmexpat STATIC
+  lib/loadlibrary.c
   lib/xmlparse.c
   lib/xmlrole.c
   lib/xmltok.c

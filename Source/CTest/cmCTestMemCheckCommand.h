@@ -3,7 +3,7 @@
 #ifndef cmCTestMemCheckCommand_h
 #define cmCTestMemCheckCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestTestCommand.h"
 
@@ -23,7 +23,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmCTestMemCheckCommand* ni = new cmCTestMemCheckCommand;
     ni->CTest = this->CTest;
@@ -32,9 +32,9 @@ public:
   }
 
 protected:
-  cmCTestGenericHandler* InitializeActualHandler() CM_OVERRIDE;
+  cmCTestGenericHandler* InitializeActualHandler() override;
 
-  void ProcessAdditionalValues(cmCTestGenericHandler* handler) CM_OVERRIDE;
+  void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
 
   enum
   {

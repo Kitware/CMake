@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestLaunch.h"
 
-#include "cmConfigure.h"
-
 #include "cmsys/FStream.hxx"
 #include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
@@ -31,7 +29,7 @@
 cmCTestLaunch::cmCTestLaunch(int argc, const char* const* argv)
 {
   this->Passthru = true;
-  this->Process = CM_NULLPTR;
+  this->Process = nullptr;
   this->ExitCode = 1;
   this->CWD = cmSystemTools::GetCurrentWorkingDirectory();
 
@@ -129,7 +127,7 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
     return true;
   }
   this->RealArgC = 0;
-  this->RealArgV = CM_NULLPTR;
+  this->RealArgV = nullptr;
   std::cerr << "No launch/command separator ('--') found!\n";
   return false;
 }
@@ -171,9 +169,8 @@ void cmCTestLaunch::ComputeFileNames()
   cmCryptoHash md5(cmCryptoHash::AlgoMD5);
   md5.Initialize();
   md5.Append(this->CWD);
-  for (std::vector<std::string>::const_iterator ai = this->RealArgs.begin();
-       ai != this->RealArgs.end(); ++ai) {
-    md5.Append(*ai);
+  for (std::string const& realArg : this->RealArgs) {
+    md5.Append(realArg);
   }
   this->LogHash = md5.FinalizeHex();
 
@@ -224,11 +221,11 @@ void cmCTestLaunch::RunChild()
 
   // Record child stdout and stderr if necessary.
   if (!this->Passthru) {
-    char* data = CM_NULLPTR;
+    char* data = nullptr;
     int length = 0;
     cmProcessOutput processOutput;
     std::string strdata;
-    while (int p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) {
+    while (int p = cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {
       if (p == cmsysProcess_Pipe_STDOUT) {
         processOutput.DecodeText(data, length, strdata, 1);
         fout.write(strdata.c_str(), strdata.size());
@@ -254,7 +251,7 @@ void cmCTestLaunch::RunChild()
   }
 
   // Wait for the real command to finish.
-  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
+  cmsysProcess_WaitForExit(cp, nullptr);
   this->ExitCode = cmsysProcess_GetExitValue(cp);
 }
 
@@ -396,7 +393,7 @@ void cmCTestLaunch::WriteXMLAction(cmXMLWriter& xml)
   }
 
   // OutputType
-  const char* outputType = CM_NULLPTR;
+  const char* outputType = nullptr;
   if (!this->OptionTargetType.empty()) {
     if (this->OptionTargetType == "EXECUTABLE") {
       outputType = "executable";
@@ -424,9 +421,8 @@ void cmCTestLaunch::WriteXMLCommand(cmXMLWriter& xml)
   if (!this->CWD.empty()) {
     xml.Element("WorkingDirectory", this->CWD);
   }
-  for (std::vector<std::string>::const_iterator ai = this->RealArgs.begin();
-       ai != this->RealArgs.end(); ++ai) {
-    xml.Element("Argument", *ai);
+  for (std::string const& realArg : this->RealArgs) {
+    xml.Element("Argument", realArg);
   }
   xml.EndElement(); // Command
 }
@@ -489,9 +485,8 @@ void cmCTestLaunch::WriteXMLLabels(cmXMLWriter& xml)
   if (!this->Labels.empty()) {
     xml.Comment("Interested parties");
     xml.StartElement("Labels");
-    for (std::set<std::string>::const_iterator li = this->Labels.begin();
-         li != this->Labels.end(); ++li) {
-      xml.Element("Label", *li);
+    for (std::string const& label : this->Labels) {
+      xml.Element("Label", label);
     }
     xml.EndElement(); // Labels
   }
@@ -508,7 +503,11 @@ void cmCTestLaunch::DumpFileToXML(cmXMLWriter& xml, std::string const& fname)
     if (MatchesFilterPrefix(line)) {
       continue;
     }
-
+    if (this->Match(line, this->RegexWarningSuppress)) {
+      line = "[CTest: warning suppressed] " + line;
+    } else if (this->Match(line, this->RegexWarning)) {
+      line = "[CTest: warning matched] " + line;
+    }
     xml.Content(sep);
     xml.Content(line);
     sep = "\n";
@@ -595,9 +594,8 @@ bool cmCTestLaunch::ScrapeLog(std::string const& fname)
 bool cmCTestLaunch::Match(std::string const& line,
                           std::vector<cmsys::RegularExpression>& regexps)
 {
-  for (std::vector<cmsys::RegularExpression>::iterator ri = regexps.begin();
-       ri != regexps.end(); ++ri) {
-    if (ri->find(line.c_str())) {
+  for (cmsys::RegularExpression& r : regexps) {
+    if (r.find(line.c_str())) {
       return true;
     }
   }

@@ -23,20 +23,18 @@ format only a subset of files, such as those that are locally modified.
 C++ Subset Permitted
 ====================
 
-CMake supports compiling as C++98 in addition to C++11 and C++14.
-In order to support building on older toolchains some constructs
-need to be handled with care:
+CMake requires compiling as C++11 or above.  However, in order to support
+building on older toolchains some constructs need to be handled with care:
 
-* Use ``CM_AUTO_PTR`` instead of ``std::auto_ptr``.
+* Do not use ``CM_AUTO_PTR`` or ``std::auto_ptr``.
 
-  The ``std::auto_ptr`` template is deprecated in C++11.  We want to use it
-  so we can build on C++98 compilers but we do not want to turn off compiler
-  warnings about deprecated interfaces in general.  Use the ``CM_AUTO_PTR``
-  macro instead.
+  The ``std::auto_ptr`` template is deprecated in C++11.  The ``CM_AUTO_PTR``
+  macro remains leftover from C++98 support until its uses can be ported to
+  ``std::unique_ptr``.  Do not add new uses of the macro.
 
 * Use ``CM_EQ_DELETE;`` instead of ``= delete;``.
 
-  Defining functions as *deleted* is not supported in C++98.  Using
+  Older C++11 compilers do not support deleting functions.  Using
   ``CM_EQ_DELETE`` will delete the functions if the compiler supports it and
   give them no implementation otherwise.  Calling such a function will lead
   to compiler errors if the compiler supports *deleted* functions and linker

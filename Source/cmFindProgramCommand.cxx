@@ -45,9 +45,8 @@ struct cmFindProgramHelper
   }
   bool CheckDirectory(std::string const& path)
   {
-    for (std::vector<std::string>::iterator i = this->Names.begin();
-         i != this->Names.end(); ++i) {
-      if (this->CheckDirectoryForName(path, *i)) {
+    for (std::string const& n : this->Names) {
+      if (this->CheckDirectoryForName(path, n)) {
         return true;
       }
     }
@@ -55,14 +54,13 @@ struct cmFindProgramHelper
   }
   bool CheckDirectoryForName(std::string const& path, std::string const& name)
   {
-    for (std::vector<std::string>::iterator ext = this->Extensions.begin();
-         ext != this->Extensions.end(); ++ext) {
+    for (std::string const& ext : this->Extensions) {
       this->TestPath = path;
       this->TestPath += name;
-      if (!ext->empty() && cmSystemTools::StringEndsWith(name, ext->c_str())) {
+      if (!ext.empty() && cmSystemTools::StringEndsWith(name, ext.c_str())) {
         continue;
       }
-      this->TestPath += *ext;
+      this->TestPath += ext;
       if (cmSystemTools::FileExists(this->TestPath, true)) {
         this->BestPath = cmSystemTools::CollapseFullPath(this->TestPath);
         return true;
@@ -143,9 +141,8 @@ std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
 {
   // Search for all names in each directory.
   cmFindProgramHelper helper;
-  for (std::vector<std::string>::const_iterator ni = this->Names.begin();
-       ni != this->Names.end(); ++ni) {
-    helper.AddName(*ni);
+  for (std::string const& n : this->Names) {
+    helper.AddName(n);
   }
 
   // Check for the names themselves (e.g. absolute paths).
@@ -154,9 +151,8 @@ std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
   }
 
   // Search every directory.
-  for (std::vector<std::string>::const_iterator p = this->SearchPaths.begin();
-       p != this->SearchPaths.end(); ++p) {
-    if (helper.CheckDirectory(*p)) {
+  for (std::string const& sp : this->SearchPaths) {
+    if (helper.CheckDirectory(sp)) {
       return helper.BestPath;
     }
   }
@@ -168,10 +164,9 @@ std::string cmFindProgramCommand::FindNormalProgramDirsPerName()
 {
   // Search the entire path for each name.
   cmFindProgramHelper helper;
-  for (std::vector<std::string>::const_iterator ni = this->Names.begin();
-       ni != this->Names.end(); ++ni) {
+  for (std::string const& n : this->Names) {
     // Switch to searching for this name.
-    helper.SetName(*ni);
+    helper.SetName(n);
 
     // Check for the name by itself (e.g. an absolute path).
     if (helper.CheckDirectory(std::string())) {
@@ -179,10 +174,8 @@ std::string cmFindProgramCommand::FindNormalProgramDirsPerName()
     }
 
     // Search every directory.
-    for (std::vector<std::string>::const_iterator p =
-           this->SearchPaths.begin();
-         p != this->SearchPaths.end(); ++p) {
-      if (helper.CheckDirectory(*p)) {
+    for (std::string const& sp : this->SearchPaths) {
+      if (helper.CheckDirectory(sp)) {
         return helper.BestPath;
       }
     }
@@ -193,10 +186,9 @@ std::string cmFindProgramCommand::FindNormalProgramDirsPerName()
 
 std::string cmFindProgramCommand::FindAppBundle()
 {
-  for (std::vector<std::string>::const_iterator name = this->Names.begin();
-       name != this->Names.end(); ++name) {
+  for (std::string const& name : this->Names) {
 
-    std::string appName = *name + std::string(".app");
+    std::string appName = name + std::string(".app");
     std::string appPath =
       cmSystemTools::FindDirectory(appName, this->SearchPaths, true);
 

@@ -41,8 +41,8 @@ std::set<std::string> getSourceGroupFilesPaths(
   std::set<std::string> ret;
   const std::string::size_type rootLength = root.length();
 
-  for (size_t i = 0; i < files.size(); ++i) {
-    ret.insert(files[i].substr(rootLength + 1)); // +1 to also omnit last '/'
+  for (std::string const& file : files) {
+    ret.insert(file.substr(rootLength + 1)); // +1 to also omnit last '/'
   }
 
   return ret;
@@ -51,31 +51,14 @@ std::set<std::string> getSourceGroupFilesPaths(
 bool rootIsPrefix(const std::string& root,
                   const std::vector<std::string>& files, std::string& error)
 {
-  for (size_t i = 0; i < files.size(); ++i) {
-    if (!cmSystemTools::StringStartsWith(files[i], root.c_str())) {
-      error = "ROOT: " + root + " is not a prefix of file: " + files[i];
+  for (std::string const& file : files) {
+    if (!cmSystemTools::StringStartsWith(file, root.c_str())) {
+      error = "ROOT: " + root + " is not a prefix of file: " + file;
       return false;
     }
   }
 
   return true;
-}
-
-cmSourceGroup* addSourceGroup(const std::vector<std::string>& tokenizedPath,
-                              cmMakefile& makefile)
-{
-  cmSourceGroup* sg;
-
-  sg = makefile.GetSourceGroup(tokenizedPath);
-  if (!sg) {
-    makefile.AddSourceGroup(tokenizedPath);
-    sg = makefile.GetSourceGroup(tokenizedPath);
-    if (!sg) {
-      return CM_NULLPTR;
-    }
-  }
-
-  return sg;
 }
 
 std::string prepareFilePathForTree(const std::string& path,
@@ -108,26 +91,25 @@ bool addFilesToItsSourceGroups(const std::string& root,
 {
   cmSourceGroup* sg;
 
-  for (std::set<std::string>::const_iterator it = sgFilesPaths.begin();
-       it != sgFilesPaths.end(); ++it) {
+  for (std::string const& sgFilesPath : sgFilesPaths) {
 
     std::vector<std::string> tokenizedPath;
     if (!prefix.empty()) {
-      tokenizedPath = tokenizePath(prefix + '/' + *it);
+      tokenizedPath = tokenizePath(prefix + '/' + sgFilesPath);
     } else {
-      tokenizedPath = tokenizePath(*it);
+      tokenizedPath = tokenizePath(sgFilesPath);
     }
 
     if (tokenizedPath.size() > 1) {
       tokenizedPath.pop_back();
 
-      sg = addSourceGroup(tokenizedPath, makefile);
+      sg = makefile.GetOrCreateSourceGroup(tokenizedPath);
 
       if (!sg) {
-        errorMsg = "Could not create source group for file: " + *it;
+        errorMsg = "Could not create source group for file: " + sgFilesPath;
         return false;
       }
-      const std::string fullPath = getFullFilePath(root, *it);
+      const std::string fullPath = getFullFilePath(root, sgFilesPath);
       sg->AddGroupFile(fullPath);
     }
   }
@@ -158,20 +140,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
 
-  std::string delimiter = "\\";
-  if (this->Makefile->GetDefinition("SOURCE_GROUP_DELIMITER")) {
-    delimiter = this->Makefile->GetDefinition("SOURCE_GROUP_DELIMITER");
-  }
-
-  std::vector<std::string> folders =
-    cmSystemTools::tokenize(args[0], delimiter);
-
-  cmSourceGroup* sg = CM_NULLPTR;
-  sg = this->Makefile->GetSourceGroup(folders);
-  if (!sg) {
-    this->Makefile->AddSourceGroup(folders);
-    sg = this->Makefile->GetSourceGroup(folders);
-  }
+  cmSourceGroup* sg = this->Makefile->GetOrCreateSourceGroup(args[0]);
 
   if (!sg) {
     this->SetError("Could not create or find source group");

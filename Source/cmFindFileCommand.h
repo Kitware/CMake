@@ -3,7 +3,7 @@
 #ifndef cmFindFileCommand_h
 #define cmFindFileCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmFindPathCommand.h"
 
@@ -24,7 +24,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE { return new cmFindFileCommand; }
+  cmCommand* Clone() override { return new cmFindFileCommand; }
 };
 
 #endif

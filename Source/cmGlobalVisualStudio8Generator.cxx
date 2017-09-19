@@ -17,7 +17,7 @@ class cmGlobalVisualStudio8Generator::Factory : public cmGlobalGeneratorFactory
 {
 public:
   cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                           cmake* cm) const CM_OVERRIDE
+                                           cmake* cm) const override
   {
     if (strncmp(name.c_str(), vs8generatorName,
                 sizeof(vs8generatorName) - 1) != 0) {
@@ -51,14 +51,14 @@ public:
     return ret;
   }
 
-  void GetDocumentation(cmDocumentationEntry& entry) const CM_OVERRIDE
+  void GetDocumentation(cmDocumentationEntry& entry) const override
   {
     entry.Name = std::string(vs8generatorName) + " [arch]";
     entry.Brief = "Deprecated.  Generates Visual Studio 2005 project files.  "
                   "Optional [arch] can be \"Win64\".";
   }
 
-  void GetGenerators(std::vector<std::string>& names) const CM_OVERRIDE
+  void GetGenerators(std::vector<std::string>& names) const override
   {
     names.push_back(vs8generatorName);
     names.push_back(vs8generatorName + std::string(" Win64"));
@@ -73,8 +73,8 @@ public:
     }
   }
 
-  bool SupportsToolset() const CM_OVERRIDE { return false; }
-  bool SupportsPlatform() const CM_OVERRIDE { return true; }
+  bool SupportsToolset() const override { return false; }
+  bool SupportsPlatform() const override { return true; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio8Generator::NewFactory()
@@ -320,10 +320,10 @@ void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
   cmGlobalVisualStudio7Generator::AddExtraIDETargets();
   if (this->AddCheckTarget()) {
     for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-      std::vector<cmGeneratorTarget*> tgts =
+      const std::vector<cmGeneratorTarget*>& tgts =
         this->LocalGenerators[i]->GetGeneratorTargets();
       // All targets depend on the build-system check target.
-      for (std::vector<cmGeneratorTarget*>::iterator ti = tgts.begin();
+      for (std::vector<cmGeneratorTarget*>::const_iterator ti = tgts.begin();
            ti != tgts.end(); ++ti) {
         if ((*ti)->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
           (*ti)->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
@@ -354,10 +354,16 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
   std::string guid = this->GetGUID(name);
   for (std::vector<std::string>::const_iterator i = configs.begin();
        i != configs.end(); ++i) {
-    const char* dstConfig = target.GetProperty("MAP_IMPORTED_CONFIG_" +
-                                               cmSystemTools::UpperCase(*i));
-    if (dstConfig == CM_NULLPTR) {
-      dstConfig = i->c_str();
+    std::vector<std::string> mapConfig;
+    const char* dstConfig = i->c_str();
+    if (target.GetProperty("EXTERNAL_MSPROJECT")) {
+      if (const char* m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
+                                             cmSystemTools::UpperCase(*i))) {
+        cmSystemTools::ExpandListArgument(m, mapConfig);
+        if (!mapConfig.empty()) {
+          dstConfig = mapConfig[0].c_str();
+        }
+      }
     }
     fout << "\t\t{" << guid << "}." << *i << "|" << this->GetPlatformName()
          << ".ActiveCfg = " << dstConfig << "|"

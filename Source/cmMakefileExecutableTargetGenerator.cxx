@@ -256,11 +256,10 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 
     // Expand placeholders in the commands.
     rulePlaceholderExpander->SetTargetImpLib(targetOutputReal);
-    for (std::vector<std::string>::iterator i = real_link_commands.begin();
-         i != real_link_commands.end(); ++i) {
-      *i = launcher + *i;
-      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, *i,
-                                                   vars);
+    for (std::string& real_link_command : real_link_commands) {
+      real_link_command = launcher + real_link_command;
+      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
+                                                   real_link_command, vars);
     }
 
     // Restore path conversion to normal shells.
@@ -284,7 +283,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   commands1.clear();
 
   // Write the build rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
                                       targetOutputReal, depends, commands,
                                       false);
 
@@ -619,7 +618,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
       std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
-      cmakeCommand += " -E __run_iwyu --lwyu=";
+      cmakeCommand += " -E __run_co_compile --lwyu=";
       cmakeCommand += targetOutPathReal;
       real_link_commands.push_back(cmakeCommand);
     }
@@ -638,11 +637,10 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
     // Expand placeholders in the commands.
     rulePlaceholderExpander->SetTargetImpLib(targetOutPathImport);
-    for (std::vector<std::string>::iterator i = real_link_commands.begin();
-         i != real_link_commands.end(); ++i) {
-      *i = launcher + *i;
-      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator, *i,
-                                                   vars);
+    for (std::string& real_link_command : real_link_commands) {
+      real_link_command = launcher + real_link_command;
+      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
+                                                   real_link_command, vars);
     }
 
     // Restore path conversion to normal shells.
@@ -687,7 +685,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   }
 
   // Write the build rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
                                       targetFullPathReal, depends, commands,
                                       false);
 
@@ -698,7 +696,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     depends.clear();
     commands.clear();
     depends.push_back(targetFullPathReal);
-    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
                                         targetFullPath, depends, commands,
                                         false);
   }

@@ -66,10 +66,14 @@ if(GETTEXT_MSGMERGE_EXECUTABLE)
                   OUTPUT_VARIABLE gettext_version
                   ERROR_QUIET
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
-   if (gettext_version MATCHES "^msgmerge \\([^\\)]*\\) ([0-9\\.]+[^ \n]*)")
-      set(GETTEXT_VERSION_STRING "${CMAKE_MATCH_1}")
+   get_filename_component(msgmerge_name ${GETTEXT_MSGMERGE_EXECUTABLE} NAME)
+   get_filename_component(msgmerge_namewe ${GETTEXT_MSGMERGE_EXECUTABLE} NAME_WE)
+   if (gettext_version MATCHES "^(${msgmerge_name}|${msgmerge_namewe}) \\([^\\)]*\\) ([0-9\\.]+[^ \n]*)")
+      set(GETTEXT_VERSION_STRING "${CMAKE_MATCH_2}")
    endif()
    unset(gettext_version)
+   unset(msgmerge_name)
+   unset(msgmerge_namewe)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)

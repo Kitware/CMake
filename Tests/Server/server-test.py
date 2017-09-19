@@ -84,7 +84,7 @@ for obj in testData:
         if 'extraGenerator' in data: extraGenerator = data['extraGenerator']
         if not os.path.isabs(buildDirectory):
             buildDirectory = buildDir + "/" + buildDirectory
-        if not os.path.isabs(sourceDirectory):
+        if sourceDirectory != '' and not os.path.isabs(sourceDirectory):
             sourceDirectory = sourceDir + "/" + sourceDirectory
         cmakelib.handshake(proc, major, minor, sourceDirectory, buildDirectory,
           generator, extraGenerator)
@@ -95,26 +95,21 @@ for obj in testData:
         if not 'generator' in data: data['generator'] = cmakeGenerator
         if not 'extraGenerator' in data: data['extraGenerator'] = ''
         cmakelib.validateGlobalSettings(proc, cmakeCommand, data)
+    elif 'validateCache' in obj:
+        data = obj['validateCache']
+        if not 'isEmpty' in data: data['isEmpty'] = false
+        cmakelib.validateCache(proc, data)
     elif 'message' in obj:
         print("MESSAGE:", obj["message"])
+    elif 'reconnect' in obj:
+        cmakelib.exitProc(proc)
+        proc = cmakelib.initProc(cmakeCommand)
     else:
         print("Unknown command:", json.dumps(obj))
         sys.exit(2)
 
     print("Completed")
 
-# Tell the server to exit.
-proc.stdin.close()
-proc.stdout.close()
-
-# Wait for the server to exit.
-# If this version of python supports it, terminate the server after a timeout.
-try:
-    proc.wait(timeout=5)
-except TypeError:
-    proc.wait()
-except:
-    proc.terminate()
-    raise
-
-sys.exit(0)
+cmakelib.exitProc(proc)
+print('cmake-server exited: %d' % proc.returncode)
+sys.exit(proc.returncode)

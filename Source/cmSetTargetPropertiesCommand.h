@@ -3,7 +3,7 @@
 #ifndef cmSetTargetsPropertiesCommand_h
 #define cmSetTargetsPropertiesCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -16,14 +16,14 @@ class cmMakefile;
 class cmSetTargetPropertiesCommand : public cmCommand
 {
 public:
-  cmCommand* Clone() CM_OVERRIDE { return new cmSetTargetPropertiesCommand; }
+  cmCommand* Clone() override { return new cmSetTargetPropertiesCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
   /**
    *  Used by this command and cmSetPropertiesCommand

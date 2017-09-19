@@ -2480,7 +2480,7 @@ lzh_huffman_free(struct huffman *hf)
 	free(hf->tree);
 }
 
-static char bitlen_tbl[0x400] = {
+static const char bitlen_tbl[0x400] = {
 	 7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,
 	 7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,
 	 7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,

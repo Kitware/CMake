@@ -14,7 +14,7 @@ cmCursesWidget::~cmCursesWidget()
 {
   if (this->Field) {
     free_field(this->Field);
-    this->Field = CM_NULLPTR;
+    this->Field = nullptr;
   }
 }
 

@@ -23,7 +23,7 @@
 # Fortran_HL.  If the COMPONENTS argument is not given, the module will
 # attempt to find only the C bindings.
 #
-# On UNIX systems, this module will read the variable
+# This module will read the variable
 # HDF5_USE_STATIC_LIBRARIES to determine whether or not to prefer a
 # static link to a dynamic link for HDF5 and all of it's dependencies.
 # To use this feature, make sure that the HDF5_USE_STATIC_LIBRARIES
@@ -396,6 +396,45 @@ macro( _HDF5_parse_compile_line
   endforeach()
 endmacro()
 
+# Select a preferred imported configuration from a target
+function(_HDF5_select_imported_config target imported_conf)
+    # We will first assign the value to a local variable _imported_conf, then assign
+    # it to the function argument at the end.
+    get_target_property(_imported_conf ${target} MAP_IMPORTED_CONFIG_${CMAKE_BUILD_TYPE})
+    if (NOT _imported_conf)
+        # Get available imported configurations by examining target properties
+        get_target_property(_imported_conf ${target} IMPORTED_CONFIGURATIONS)
+        if(HDF5_FIND_DEBUG)
+            message(STATUS "Found imported configurations: ${_imported_conf}")
+        endif()
+        # Find the imported configuration that we prefer.
+        # We do this by making list of configurations in order of preference,
+        # starting with ${CMAKE_BUILD_TYPE} and ending with the first imported_conf
+        set(_preferred_confs ${CMAKE_BUILD_TYPE})
+        list(GET _imported_conf 0 _fallback_conf)
+        list(APPEND _preferred_confs RELWITHDEBINFO RELEASE DEBUG ${_fallback_conf})
+        if(HDF5_FIND_DEBUG)
+            message(STATUS "Start search through imported configurations in the following order: ${_preferred_confs}")
+        endif()
+        # Now find the first of these that is present in imported_conf
+        cmake_policy(PUSH)
+        cmake_policy(SET CMP0057 NEW) # support IN_LISTS
+        foreach (_conf IN LISTS _preferred_confs)
+            if (${_conf} IN_LIST _imported_conf)
+               set(_imported_conf ${_conf})
+               break()
+            endif()
+        endforeach()
+        cmake_policy(POP)
+    endif()
+    if(HDF5_FIND_DEBUG)
+        message(STATUS "Selected imported configuration: ${_imported_conf}")
+    endif()
+    # assign value to function argument
+    set(${imported_conf} ${_imported_conf} PARENT_SCOPE)
+endfunction()
+
+
 if(NOT HDF5_ROOT)
     set(HDF5_ROOT $ENV{HDF5_ROOT})
 endif()
@@ -452,30 +491,39 @@ if(NOT HDF5_FOUND AND NOT HDF5_NO_FIND_PACKAGE_CONFIG_FILE)
                 message(STATUS "Trying to get properties of target ${HDF5_${_lang}_TARGET}${_suffix}")
             endif()
             # Find library for this target. Complicated as on Windows with a DLL, we need to search for the import-lib.
-            get_target_property(_imported_conf ${HDF5_${_lang}_TARGET}${_suffix} IMPORTED_CONFIGURATIONS)
-            get_target_property(_lang_location ${HDF5_${_lang}_TARGET}${_suffix} IMPORTED_IMPLIB_${_imported_conf} )
-            if (NOT _lang_location)
+            _HDF5_select_imported_config(${HDF5_${_lang}_TARGET}${_suffix} _hdf5_imported_conf)
+            get_target_property(_hdf5_lang_location ${HDF5_${_lang}_TARGET}${_suffix} IMPORTED_IMPLIB_${_hdf5_imported_conf} )
+            if (NOT _hdf5_lang_location)
                 # no import lib, just try LOCATION
-                get_target_property(_lang_location ${HDF5_${_lang}_TARGET}${_suffix} LOCATION)
+                get_target_property(_hdf5_lang_location ${HDF5_${_lang}_TARGET}${_suffix} LOCATION_${_hdf5_imported_conf})
+                if (NOT _hdf5_lang_location)
+                    get_target_property(_hdf5_lang_location ${HDF5_${_lang}_TARGET}${_suffix} LOCATION)
+                endif()
             endif()
-            if( _lang_location )
-                set(HDF5_${_lang}_LIBRARY ${_lang_location})
+            if( _hdf5_lang_location )
+                set(HDF5_${_lang}_LIBRARY ${_hdf5_lang_location})
                 list(APPEND HDF5_LIBRARIES ${HDF5_${_lang}_TARGET}${_suffix})
                 set(HDF5_${_lang}_LIBRARIES ${HDF5_${_lang}_TARGET}${_suffix})
                 set(HDF5_${_lang}_FOUND True)
             endif()
             if(FIND_HL)
-                get_target_property(__lang_hl_location ${HDF5_${_lang}_HL_TARGET}${_suffix} IMPORTED_IMPLIB_${_imported_conf} )
-                if (NOT _lang_hl_location)
-                    get_target_property(_lang_hl_location ${HDF5_${_lang}_HL_TARGET}${_suffix} LOCATION)
+                get_target_property(__lang_hl_location ${HDF5_${_lang}_HL_TARGET}${_suffix} IMPORTED_IMPLIB_${_hdf5_imported_conf} )
+                if (NOT _hdf5_lang_hl_location)
+                    get_target_property(_hdf5_lang_hl_location ${HDF5_${_lang}_HL_TARGET}${_suffix} LOCATION_${_hdf5_imported_conf})
+                    if (NOT _hdf5_hl_lang_location)
+                        get_target_property(_hdf5_hl_lang_location ${HDF5_${_lang}_HL_TARGET}${_suffix} LOCATION)
+                    endif()
                 endif()
-                if( _lang_hl_location )
-                    set(HDF5_${_lang}_HL_LIBRARY ${_lang_hl_location})
-                    list(APPEND HDF5_HL_LIBRARIES ${HDF5_${_lang}_TARGET}${_suffix})
-                    set(HDF5_${_lang}_HL_LIBRARIES ${HDF5_${_lang}_TARGET}${_suffix})
+                if( _hdf5_lang_hl_location )
+                    set(HDF5_${_lang}_HL_LIBRARY ${_hdf5_lang_hl_location})
+                    list(APPEND HDF5_HL_LIBRARIES ${HDF5_${_lang}_HL_TARGET}${_suffix})
+                    set(HDF5_${_lang}_HL_LIBRARIES ${HDF5_${_lang}_HL_TARGET}${_suffix})
                     set(HDF5_HL_FOUND True)
                 endif()
+                unset(_hdf5_lang_hl_location)
             endif()
+            unset(_hdf5_imported_conf)
+            unset(_hdf5_lang_location)
         endforeach()
     endif()
 endif()
@@ -551,8 +599,12 @@ if(NOT HDF5_FOUND)
             if("x${L}" MATCHES "hdf5")
               # hdf5 library
               set(_HDF5_SEARCH_OPTS_LOCAL ${_HDF5_SEARCH_OPTS})
-              if(UNIX AND HDF5_USE_STATIC_LIBRARIES)
-                set(_HDF5_SEARCH_NAMES_LOCAL lib${L}.a)
+              if(HDF5_USE_STATIC_LIBRARIES)
+                if(WIN32)
+                  set(_HDF5_SEARCH_NAMES_LOCAL lib${L})
+                else()
+                  set(_HDF5_SEARCH_NAMES_LOCAL lib${L}.a)
+                endif()
               endif()
             else()
               # external library
@@ -579,8 +631,12 @@ if(NOT HDF5_FOUND)
               if("x${L}" MATCHES "hdf5")
                 # hdf5 library
                 set(_HDF5_SEARCH_OPTS_LOCAL ${_HDF5_SEARCH_OPTS})
-                if(UNIX AND HDF5_USE_STATIC_LIBRARIES)
-                  set(_HDF5_SEARCH_NAMES_LOCAL lib${L}.a)
+                if(HDF5_USE_STATIC_LIBRARIES)
+                  if(WIN32)
+                    set(_HDF5_SEARCH_NAMES_LOCAL lib${L})
+                  else()
+                    set(_HDF5_SEARCH_NAMES_LOCAL lib${L}.a)
+                  endif()
                 endif()
               else()
                 # external library
@@ -712,19 +768,22 @@ if( NOT HDF5_FOUND )
 
         # find the HDF5 libraries
         foreach(LIB IN LISTS HDF5_${__lang}_LIBRARY_NAMES)
-            if(UNIX AND HDF5_USE_STATIC_LIBRARIES)
+            if(HDF5_USE_STATIC_LIBRARIES)
                 # According to bug 1643 on the CMake bug tracker, this is the
                 # preferred method for searching for a static library.
                 # See https://gitlab.kitware.com/cmake/cmake/issues/1643.  We search
                 # first for the full static library name, but fall back to a
                 # generic search on the name if the static search fails.
                 set( THIS_LIBRARY_SEARCH_DEBUG
-                    lib${LIB}d.a lib${LIB}_debug.a ${LIB}d ${LIB}_debug
-                    lib${LIB}d-static.a lib${LIB}_debug-static.a ${LIB}d-static ${LIB}_debug-static )
-                set( THIS_LIBRARY_SEARCH_RELEASE lib${LIB}.a ${LIB} lib${LIB}-static.a ${LIB}-static)
+                    lib${LIB}d.a lib${LIB}_debug.a lib${LIB}d lib${LIB}_D lib${LIB}_debug
+                    lib${LIB}d-static.a lib${LIB}_debug-static.a ${LIB}d-static ${LIB}_D-static ${LIB}_debug-static )
+                set( THIS_LIBRARY_SEARCH_RELEASE lib${LIB}.a lib${LIB} lib${LIB}-static.a ${LIB}-static)
             else()
-                set( THIS_LIBRARY_SEARCH_DEBUG ${LIB}d ${LIB}_debug ${LIB}d-shared ${LIB}_debug-shared)
+                set( THIS_LIBRARY_SEARCH_DEBUG ${LIB}d ${LIB}_D ${LIB}_debug ${LIB}d-shared ${LIB}_D-shared ${LIB}_debug-shared)
                 set( THIS_LIBRARY_SEARCH_RELEASE ${LIB} ${LIB}-shared)
+                if(WIN32)
+                  list(APPEND HDF5_DEFINITIONS "-DH5_BUILT_AS_DYNAMIC_LIB")
+                endif()
             endif()
             find_library(HDF5_${LIB}_LIBRARY_DEBUG
                 NAMES ${THIS_LIBRARY_SEARCH_DEBUG}
@@ -749,18 +808,18 @@ if( NOT HDF5_FOUND )
 
         if(FIND_HL)
             foreach(LIB IN LISTS HDF5_${__lang}_HL_LIBRARY_NAMES)
-                if(UNIX AND HDF5_USE_STATIC_LIBRARIES)
+                if(HDF5_USE_STATIC_LIBRARIES)
                     # According to bug 1643 on the CMake bug tracker, this is the
                     # preferred method for searching for a static library.
                     # See https://gitlab.kitware.com/cmake/cmake/issues/1643.  We search
                     # first for the full static library name, but fall back to a
                     # generic search on the name if the static search fails.
                     set( THIS_LIBRARY_SEARCH_DEBUG
-                        lib${LIB}d.a lib${LIB}_debug.a ${LIB}d ${LIB}_debug
-                        lib${LIB}d-static.a lib${LIB}_debug-static.a ${LIB}d-static ${LIB}_debug-static )
-                    set( THIS_LIBRARY_SEARCH_RELEASE lib${LIB}.a ${LIB} lib${LIB}-static.a ${LIB}-static)
+                        lib${LIB}d.a lib${LIB}_debug.a lib${LIB}d lib${LIB}_D lib${LIB}_debug
+                        lib${LIB}d-static.a lib${LIB}_debug-static.a lib${LIB}d-static lib${LIB}_D-static lib${LIB}_debug-static )
+                    set( THIS_LIBRARY_SEARCH_RELEASE lib${LIB}.a ${LIB} lib${LIB}-static.a lib${LIB}-static)
                 else()
-                    set( THIS_LIBRARY_SEARCH_DEBUG ${LIB}d ${LIB}_debug ${LIB}d-shared ${LIB}_debug-shared)
+                    set( THIS_LIBRARY_SEARCH_DEBUG ${LIB}d ${LIB}_D ${LIB}_debug ${LIB}d-shared ${LIB}_D-shared ${LIB}_debug-shared)
                     set( THIS_LIBRARY_SEARCH_RELEASE ${LIB} ${LIB}-shared)
                 endif()
                 find_library(HDF5_${LIB}_LIBRARY_DEBUG
@@ -786,6 +845,7 @@ if( NOT HDF5_FOUND )
         set(HDF5_HL_FOUND True)
     endif()
 
+    _HDF5_remove_duplicates_from_beginning(HDF5_DEFINITIONS)
     _HDF5_remove_duplicates_from_beginning(HDF5_INCLUDE_DIRS)
     _HDF5_remove_duplicates_from_beginning(HDF5_LIBRARIES)
     _HDF5_remove_duplicates_from_beginning(HDF5_HL_LIBRARIES)
@@ -861,11 +921,14 @@ if (HDF5_FIND_DEBUG)
   message(STATUS "HDF5_DEFINITIONS: ${HDF5_DEFINITIONS}")
   message(STATUS "HDF5_INCLUDE_DIRS: ${HDF5_INCLUDE_DIRS}")
   message(STATUS "HDF5_LIBRARIES: ${HDF5_LIBRARIES}")
+  message(STATUS "HDF5_HL_LIBRARIES: ${HDF5_HL_LIBRARIES}")
   foreach(__lang IN LISTS HDF5_LANGUAGE_BINDINGS)
     message(STATUS "HDF5_${__lang}_DEFINITIONS: ${HDF5_${__lang}_DEFINITIONS}")
     message(STATUS "HDF5_${__lang}_INCLUDE_DIR: ${HDF5_${__lang}_INCLUDE_DIR}")
     message(STATUS "HDF5_${__lang}_INCLUDE_DIRS: ${HDF5_${__lang}_INCLUDE_DIRS}")
     message(STATUS "HDF5_${__lang}_LIBRARY: ${HDF5_${__lang}_LIBRARY}")
     message(STATUS "HDF5_${__lang}_LIBRARIES: ${HDF5_${__lang}_LIBRARIES}")
+    message(STATUS "HDF5_${__lang}_HL_LIBRARY: ${HDF5_${__lang}_HL_LIBRARY}")
+    message(STATUS "HDF5_${__lang}_HL_LIBRARIES: ${HDF5_${__lang}_HL_LIBRARIES}")
   endforeach()
 endif()

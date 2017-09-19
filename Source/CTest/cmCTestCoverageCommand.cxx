@@ -23,7 +23,7 @@ cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
     this->CTest->GetInitializedHandler("coverage"));
   if (!handler) {
     this->SetError("internal CTest error. Cannot instantiate test handler");
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   // If a LABELS option was given, select only files with the labels.

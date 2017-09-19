@@ -318,8 +318,9 @@ set(SRCS
   cmPropertyDefinitionMap.h
   cmPropertyMap.cxx
   cmPropertyMap.h
-  cmQtAutoGeneratorCommon.cxx
-  cmQtAutoGeneratorCommon.h
+  cmQtAutoGen.cxx
+  cmQtAutoGen.h
+  cmQtAutoGenDigest.h
   cmQtAutoGeneratorInitializer.cxx
   cmQtAutoGeneratorInitializer.h
   cmQtAutoGenerators.cxx
@@ -1025,18 +1026,16 @@ target_link_libraries(cmake CMakeLib)
 set_target_properties(cmake PROPERTIES VERSION ${CMAKE_VERSION})
 set_target_properties(cmake PROPERTIES SOVERSION ${CMAKE_SOVERSION})
 
-if(CMake_ENABLE_SERVER_MODE)
-  add_library(CMakeServerLib
-    cmFileMonitor.cxx cmFileMonitor.h
-    cmServer.cxx cmServer.h
-    cmServerConnection.cxx cmServerConnection.h
-    cmServerProtocol.cxx cmServerProtocol.h
-    )
-  target_link_libraries(CMakeServerLib CMakeLib)
-  set_property(SOURCE cmcmd.cxx APPEND PROPERTY COMPILE_DEFINITIONS HAVE_SERVER_MODE=1)
-
-  target_link_libraries(cmake CMakeServerLib)
-endif()
+add_library(CMakeServerLib
+  cmConnection.h cmConnection.cxx
+  cmFileMonitor.cxx cmFileMonitor.h
+  cmPipeConnection.cxx cmPipeConnection.h
+  cmServer.cxx cmServer.h
+  cmServerConnection.cxx cmServerConnection.h
+  cmServerProtocol.cxx cmServerProtocol.h
+  )
+target_link_libraries(CMakeServerLib CMakeLib)
+target_link_libraries(cmake CMakeServerLib)
 
 # Build CTest executable
 add_executable(ctest ctest.cxx ${MANIFEST_FILE} ${VERSION_RC_FILE})

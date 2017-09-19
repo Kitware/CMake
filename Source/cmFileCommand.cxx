@@ -269,17 +269,17 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
   cmCommandArgumentGroup group;
 
   cmCAString readArg(&argHelper, "READ");
-  cmCAString fileNameArg(&argHelper, CM_NULLPTR);
-  cmCAString resultArg(&argHelper, CM_NULLPTR);
+  cmCAString fileNameArg(&argHelper, nullptr);
+  cmCAString resultArg(&argHelper, nullptr);
 
   cmCAString offsetArg(&argHelper, "OFFSET", &group);
   cmCAString limitArg(&argHelper, "LIMIT", &group);
   cmCAEnabler hexOutputArg(&argHelper, "HEX", &group);
-  readArg.Follows(CM_NULLPTR);
+  readArg.Follows(nullptr);
   fileNameArg.Follows(&readArg);
   resultArg.Follows(&fileNameArg);
   group.Follows(&resultArg);
-  argHelper.Parse(&args, CM_NULLPTR);
+  argHelper.Parse(&args, nullptr);
 
   std::string fileName = fileNameArg.GetString();
   if (!cmsys::SystemTools::FileIsFullPath(fileName.c_str())) {
@@ -723,20 +723,18 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   // Encode the result in a CMake list.
   const char* sep = "";
   std::string output;
-  for (std::vector<std::string>::const_iterator si = strings.begin();
-       si != strings.end(); ++si) {
+  for (std::string const& sr : strings) {
     // Separate the strings in the output to make it a list.
     output += sep;
     sep = ";";
 
     // Store the string in the output, but escape semicolons to
     // make sure it is a list.
-    std::string const& sr = *si;
-    for (unsigned int i = 0; i < sr.size(); ++i) {
-      if (sr[i] == ';') {
+    for (char i : sr) {
+      if (i == ';') {
         output += '\\';
       }
-      output += sr[i];
+      output += i;
     }
   }
 
@@ -841,17 +839,16 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
 
     if (!globMessages.empty()) {
       bool shouldExit = false;
-      for (cmsys::Glob::GlobMessagesIterator it = globMessages.begin();
-           it != globMessages.end(); ++it) {
-        if (it->type == cmsys::Glob::cyclicRecursion) {
+      for (cmsys::Glob::Message const& globMessage : globMessages) {
+        if (globMessage.type == cmsys::Glob::cyclicRecursion) {
           this->Makefile->IssueMessage(
             cmake::AUTHOR_WARNING,
             "Cyclic recursion detected while globbing for '" + *i + "':\n" +
-              it->content);
+              globMessage.content);
         } else {
           this->Makefile->IssueMessage(
             cmake::FATAL_ERROR, "Error has occurred while globbing for '" +
-              *i + "' - " + it->content);
+              *i + "' - " + globMessage.content);
           shouldExit = true;
         }
       }
@@ -940,9 +937,9 @@ bool cmFileCommand::HandleDifferentCommand(
    */
 
   // Evaluate arguments.
-  const char* file_lhs = CM_NULLPTR;
-  const char* file_rhs = CM_NULLPTR;
-  const char* var = CM_NULLPTR;
+  const char* file_lhs = nullptr;
+  const char* file_rhs = nullptr;
+  const char* var = nullptr;
   enum Doing
   {
     DoingNone,
@@ -997,7 +994,7 @@ struct cmFileCopier
     , MatchlessFiles(true)
     , FilePermissions(0)
     , DirPermissions(0)
-    , CurrentMatchRule(CM_NULLPTR)
+    , CurrentMatchRule(nullptr)
     , UseGivenPermissionsFile(false)
     , UseGivenPermissionsDir(false)
     , UseSourcePermissions(true)
@@ -1060,12 +1057,11 @@ protected:
     // Collect properties from all matching rules.
     bool matched = false;
     MatchProperties result;
-    for (std::vector<MatchRule>::iterator mr = this->MatchRules.begin();
-         mr != this->MatchRules.end(); ++mr) {
-      if (mr->Regex.find(file_to_match)) {
+    for (MatchRule& mr : this->MatchRules) {
+      if (mr.Regex.find(file_to_match)) {
         matched = true;
-        result.Exclude |= mr->Properties.Exclude;
-        result.Permissions |= mr->Properties.Permissions;
+        result.Exclude |= mr.Properties.Exclude;
+        result.Permissions |= mr.Properties.Permissions;
       }
     }
     if (!matched && !this->MatchlessFiles) {
@@ -1421,23 +1417,22 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
     return false;
   }
 
-  for (std::vector<std::string>::const_iterator i = this->Files.begin();
-       i != this->Files.end(); ++i) {
+  for (std::string const& f : this->Files) {
     std::string file;
-    if (!i->empty() && !cmSystemTools::FileIsFullPath(*i)) {
+    if (!f.empty() && !cmSystemTools::FileIsFullPath(f)) {
       if (!this->FilesFromDir.empty()) {
         file = this->FilesFromDir;
       } else {
         file = this->Makefile->GetCurrentSourceDirectory();
       }
       file += "/";
-      file += *i;
+      file += f;
     } else if (!this->FilesFromDir.empty()) {
       this->FileCommand->SetError("option FILES_FROM_DIR requires all files "
                                   "to be specified as relative paths.");
       return false;
     } else {
-      file = *i;
+      file = f;
     }
 
     // Split the input file into its directory and name components.
@@ -1450,7 +1445,7 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
     // Compute the full path to the destination file.
     std::string toFile = this->Destination;
     if (!this->FilesFromDir.empty()) {
-      std::string dir = cmSystemTools::GetFilenamePath(*i);
+      std::string dir = cmSystemTools::GetFilenamePath(f);
       if (!dir.empty()) {
         toFile += "/";
         toFile += dir;
@@ -1711,7 +1706,7 @@ struct cmFileInstaller : public cmFileCopier
     this->Manifest =
       this->Makefile->GetSafeDefinition("CMAKE_INSTALL_MANIFEST_FILES");
   }
-  ~cmFileInstaller() CM_OVERRIDE
+  ~cmFileInstaller() override
   {
     // Save the updated install manifest.
     this->Makefile->AddDefinition("CMAKE_INSTALL_MANIFEST_FILES",
@@ -1736,12 +1731,12 @@ protected:
     this->Manifest += file.substr(this->DestDirLength);
   }
 
-  std::string const& ToName(std::string const& fromName) CM_OVERRIDE
+  std::string const& ToName(std::string const& fromName) override
   {
     return this->Rename.empty() ? fromName : this->Rename;
   }
 
-  void ReportCopy(const char* toFile, Type type, bool copy) CM_OVERRIDE
+  void ReportCopy(const char* toFile, Type type, bool copy) override
   {
     if (!this->MessageNever && (copy || !this->MessageLazy)) {
       std::string message = (copy ? "Installing: " : "Up-to-date: ");
@@ -1753,11 +1748,11 @@ protected:
       this->ManifestAppend(toFile);
     }
   }
-  bool ReportMissing(const char* fromFile) CM_OVERRIDE
+  bool ReportMissing(const char* fromFile) override
   {
     return (this->Optional || this->cmFileCopier::ReportMissing(fromFile));
   }
-  bool Install(const char* fromFile, const char* toFile) CM_OVERRIDE
+  bool Install(const char* fromFile, const char* toFile) override
   {
     // Support installing from empty source to make a directory.
     if (this->InstallType == cmInstallType_DIRECTORY && !*fromFile) {
@@ -1766,16 +1761,16 @@ protected:
     return this->cmFileCopier::Install(fromFile, toFile);
   }
 
-  bool Parse(std::vector<std::string> const& args) CM_OVERRIDE;
+  bool Parse(std::vector<std::string> const& args) override;
   enum
   {
     DoingType = DoingLast1,
     DoingRename,
     DoingLast2
   };
-  bool CheckKeyword(std::string const& arg) CM_OVERRIDE;
-  bool CheckValue(std::string const& arg) CM_OVERRIDE;
-  void DefaultFilePermissions() CM_OVERRIDE
+  bool CheckKeyword(std::string const& arg) override;
+  bool CheckValue(std::string const& arg) override;
+  void DefaultFilePermissions() override
   {
     this->cmFileCopier::DefaultFilePermissions();
     // Add execute permissions based on the target type.
@@ -2043,9 +2038,9 @@ bool cmFileCommand::HandleRPathChangeCommand(
   std::vector<std::string> const& args)
 {
   // Evaluate arguments.
-  const char* file = CM_NULLPTR;
-  const char* oldRPath = CM_NULLPTR;
-  const char* newRPath = CM_NULLPTR;
+  const char* file = nullptr;
+  const char* oldRPath = nullptr;
+  const char* newRPath = nullptr;
   enum Doing
   {
     DoingNone,
@@ -2133,7 +2128,7 @@ bool cmFileCommand::HandleRPathRemoveCommand(
   std::vector<std::string> const& args)
 {
   // Evaluate arguments.
-  const char* file = CM_NULLPTR;
+  const char* file = nullptr;
   enum Doing
   {
     DoingNone,
@@ -2197,8 +2192,8 @@ bool cmFileCommand::HandleRPathCheckCommand(
   std::vector<std::string> const& args)
 {
   // Evaluate arguments.
-  const char* file = CM_NULLPTR;
-  const char* rpath = CM_NULLPTR;
+  const char* file = nullptr;
+  const char* rpath = nullptr;
   enum Doing
   {
     DoingNone,
@@ -2256,16 +2251,16 @@ bool cmFileCommand::HandleReadElfCommand(std::vector<std::string> const& args)
   cmCommandArgumentGroup group;
 
   cmCAString readArg(&argHelper, "READ_ELF");
-  cmCAString fileNameArg(&argHelper, CM_NULLPTR);
+  cmCAString fileNameArg(&argHelper, nullptr);
 
   cmCAString rpathArg(&argHelper, "RPATH", &group);
   cmCAString runpathArg(&argHelper, "RUNPATH", &group);
   cmCAString errorArg(&argHelper, "CAPTURE_ERROR", &group);
 
-  readArg.Follows(CM_NULLPTR);
+  readArg.Follows(nullptr);
   fileNameArg.Follows(&readArg);
   group.Follows(&fileNameArg);
-  argHelper.Parse(&args, CM_NULLPTR);
+  argHelper.Parse(&args, nullptr);
 
   if (!cmSystemTools::FileExists(fileNameArg.GetString(), true)) {
     std::ostringstream e;
@@ -2454,7 +2449,7 @@ namespace {
 
 size_t cmWriteToFileCallback(void* ptr, size_t size, size_t nmemb, void* data)
 {
-  int realsize = (int)(size * nmemb);
+  int realsize = static_cast<int>(size * nmemb);
   cmsys::ofstream* fout = static_cast<cmsys::ofstream*>(data);
   const char* chPtr = static_cast<char*>(ptr);
   fout->write(chPtr, realsize);
@@ -2464,7 +2459,7 @@ size_t cmWriteToFileCallback(void* ptr, size_t size, size_t nmemb, void* data)
 size_t cmWriteToMemoryCallback(void* ptr, size_t size, size_t nmemb,
                                void* data)
 {
-  int realsize = (int)(size * nmemb);
+  int realsize = static_cast<int>(size * nmemb);
   cmFileCommandVectorOfChar* vec =
     static_cast<cmFileCommandVectorOfChar*>(data);
   const char* chPtr = static_cast<char*>(ptr);
@@ -2596,7 +2591,7 @@ public:
     }
   }
 
-  void release() { this->Easy = CM_NULLPTR; }
+  void release() { this->Easy = nullptr; }
 
 private:
   ::CURL* Easy;
@@ -2758,7 +2753,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       msg += "\"";
       if (!statusVar.empty()) {
         std::ostringstream result;
-        result << (int)0 << ";\"" << msg;
+        result << 0 << ";\"" << msg;
         this->Makefile->AddDefinition(statusVar, result.str().c_str());
       }
       return true;
@@ -2831,10 +2826,10 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 
   cmFileCommandVectorOfChar chunkDebug;
 
-  res = ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&fout);
+  res = ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, &fout);
   check_curl_result(res, "DOWNLOAD cannot set write data: ");
 
-  res = ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void*)&chunkDebug);
+  res = ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
   check_curl_result(res, "DOWNLOAD cannot set debug data: ");
 
   res = ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -2881,10 +2876,9 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     check_curl_result(res, "DOWNLOAD cannot set user password: ");
   }
 
-  struct curl_slist* headers = CM_NULLPTR;
-  for (std::vector<std::string>::const_iterator h = curl_headers.begin();
-       h != curl_headers.end(); ++h) {
-    headers = ::curl_slist_append(headers, h->c_str());
+  struct curl_slist* headers = nullptr;
+  for (std::string const& h : curl_headers) {
+    headers = ::curl_slist_append(headers, h.c_str());
   }
   ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
@@ -2898,7 +2892,8 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 
   if (!statusVar.empty()) {
     std::ostringstream result;
-    result << (int)res << ";\"" << ::curl_easy_strerror(res) << "\"";
+    result << static_cast<int>(res) << ";\"" << ::curl_easy_strerror(res)
+           << "\"";
     this->Makefile->AddDefinition(statusVar, result.str().c_str());
   }
 
@@ -2924,7 +2919,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
           << "  for file: [" << file << "]" << std::endl
           << "    expected hash: [" << expectedHash << "]" << std::endl
           << "      actual hash: [" << actualHash << "]" << std::endl
-          << "           status: [" << (int)res << ";\""
+          << "           status: [" << static_cast<int>(res) << ";\""
           << ::curl_easy_strerror(res) << "\"]" << std::endl;
 
       if (!statusVar.empty() && res == 0) {
@@ -3080,10 +3075,10 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   cmFileCommandVectorOfChar chunkResponse;
   cmFileCommandVectorOfChar chunkDebug;
 
-  res = ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&chunkResponse);
+  res = ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, &chunkResponse);
   check_curl_result(res, "UPLOAD cannot set write data: ");
 
-  res = ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void*)&chunkDebug);
+  res = ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
   check_curl_result(res, "UPLOAD cannot set debug data: ");
 
   res = ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -3139,10 +3134,9 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
     check_curl_result(res, "UPLOAD cannot set user password: ");
   }
 
-  struct curl_slist* headers = CM_NULLPTR;
-  for (std::vector<std::string>::const_iterator h = curl_headers.begin();
-       h != curl_headers.end(); ++h) {
-    headers = ::curl_slist_append(headers, h->c_str());
+  struct curl_slist* headers = nullptr;
+  for (std::string const& h : curl_headers) {
+    headers = ::curl_slist_append(headers, h.c_str());
   }
   ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
@@ -3156,14 +3150,15 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
 
   if (!statusVar.empty()) {
     std::ostringstream result;
-    result << (int)res << ";\"" << ::curl_easy_strerror(res) << "\"";
+    result << static_cast<int>(res) << ";\"" << ::curl_easy_strerror(res)
+           << "\"";
     this->Makefile->AddDefinition(statusVar, result.str().c_str());
   }
 
   ::curl_global_cleanup();
 
   fclose(fin);
-  fin = CM_NULLPTR;
+  fin = nullptr;
 
   if (!logVar.empty()) {
     std::string log;

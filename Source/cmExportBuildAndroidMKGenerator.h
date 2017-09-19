@@ -3,7 +3,7 @@
 #ifndef cmExportBuildAndroidMKGenerator_h
 #define cmExportBuildAndroidMKGenerator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <string>
@@ -42,25 +42,24 @@ public:
 
 protected:
   // Implement virtual methods from the superclass.
-  void GeneratePolicyHeaderCode(std::ostream&) CM_OVERRIDE {}
-  void GeneratePolicyFooterCode(std::ostream&) CM_OVERRIDE {}
+  void GeneratePolicyHeaderCode(std::ostream&) override {}
+  void GeneratePolicyFooterCode(std::ostream&) override {}
   void GenerateImportHeaderCode(std::ostream& os,
-                                const std::string& config = "") CM_OVERRIDE;
-  void GenerateImportFooterCode(std::ostream& os) CM_OVERRIDE;
+                                const std::string& config = "") override;
+  void GenerateImportFooterCode(std::ostream& os) override;
   void GenerateImportTargetCode(std::ostream& os,
-                                const cmGeneratorTarget* target) CM_OVERRIDE;
+                                const cmGeneratorTarget* target) override;
   void GenerateExpectedTargetsCode(
-    std::ostream& os, const std::string& expectedTargets) CM_OVERRIDE;
-  void GenerateImportPropertyCode(std::ostream& os, const std::string& config,
-                                  cmGeneratorTarget const* target,
-                                  ImportPropertyMap const& properties)
-    CM_OVERRIDE;
+    std::ostream& os, const std::string& expectedTargets) override;
+  void GenerateImportPropertyCode(
+    std::ostream& os, const std::string& config,
+    cmGeneratorTarget const* target,
+    ImportPropertyMap const& properties) override;
   void GenerateMissingTargetsCheckCode(
-    std::ostream& os,
-    const std::vector<std::string>& missingTargets) CM_OVERRIDE;
+    std::ostream& os, const std::vector<std::string>& missingTargets) override;
   void GenerateInterfaceProperties(
     cmGeneratorTarget const* target, std::ostream& os,
-    const ImportPropertyMap& properties) CM_OVERRIDE;
+    const ImportPropertyMap& properties) override;
 };
 
 #endif

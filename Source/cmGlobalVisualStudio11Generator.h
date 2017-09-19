@@ -3,7 +3,7 @@
 #ifndef cmGlobalVisualStudio11Generator_h
 #define cmGlobalVisualStudio11Generator_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <set>

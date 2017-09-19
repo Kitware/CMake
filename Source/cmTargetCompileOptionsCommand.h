@@ -3,7 +3,7 @@
 #ifndef cmTargetCompileOptionsCommand_h
 #define cmTargetCompileOptionsCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
@@ -20,23 +20,23 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE { return new cmTargetCompileOptionsCommand; }
+  cmCommand* Clone() override { return new cmTargetCompileOptionsCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 
 private:
-  void HandleImportedTarget(const std::string& tgt) CM_OVERRIDE;
-  void HandleMissingTarget(const std::string& name) CM_OVERRIDE;
+  void HandleImportedTarget(const std::string& tgt) override;
+  void HandleMissingTarget(const std::string& name) override;
 
   bool HandleDirectContent(cmTarget* tgt,
                            const std::vector<std::string>& content,
-                           bool prepend, bool system) CM_OVERRIDE;
-  std::string Join(const std::vector<std::string>& content) CM_OVERRIDE;
+                           bool prepend, bool system) override;
+  std::string Join(const std::vector<std::string>& content) override;
 };
 
 #endif

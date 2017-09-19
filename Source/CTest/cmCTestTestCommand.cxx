@@ -27,7 +27,7 @@ cmCTestTestCommand::cmCTestTestCommand()
   this->Arguments[ctt_SCHEDULE_RANDOM] = "SCHEDULE_RANDOM";
   this->Arguments[ctt_STOP_TIME] = "STOP_TIME";
   this->Arguments[ctt_TEST_LOAD] = "TEST_LOAD";
-  this->Arguments[ctt_LAST] = CM_NULLPTR;
+  this->Arguments[ctt_LAST] = nullptr;
   this->Last = ctt_LAST;
 }
 
@@ -123,6 +123,12 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     testLoad = this->CTest->GetTestLoad();
   }
   handler->SetTestLoad(testLoad);
+
+  if (const char* labelsForSubprojects =
+        this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
+    this->CTest->SetCTestConfiguration("LabelsForSubprojects",
+                                       labelsForSubprojects, this->Quiet);
+  }
 
   handler->SetQuiet(this->Quiet);
   return handler;

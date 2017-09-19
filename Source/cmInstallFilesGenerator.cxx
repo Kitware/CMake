@@ -16,7 +16,7 @@ cmInstallFilesGenerator::cmInstallFilesGenerator(
   const char* rename, bool optional)
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all)
-  , LocalGenerator(CM_NULLPTR)
+  , LocalGenerator(nullptr)
   , Files(files)
   , FilePermissions(file_permissions)
   , Rename(rename)
@@ -58,12 +58,12 @@ void cmInstallFilesGenerator::AddFilesInstallRule(
   std::vector<std::string> const& files)
 {
   // Write code to install the files.
-  const char* no_dir_permissions = CM_NULLPTR;
+  const char* no_dir_permissions = nullptr;
   this->AddInstallRule(
     os, this->GetDestination(config),
     (this->Programs ? cmInstallType_PROGRAMS : cmInstallType_FILES), files,
     this->Optional, this->FilePermissions.c_str(), no_dir_permissions,
-    this->Rename.c_str(), CM_NULLPTR, indent);
+    this->Rename.c_str(), nullptr, indent);
 }
 
 void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
@@ -81,9 +81,8 @@ void cmInstallFilesGenerator::GenerateScriptForConfig(
 {
   std::vector<std::string> files;
   cmGeneratorExpression ge;
-  for (std::vector<std::string>::const_iterator i = this->Files.begin();
-       i != this->Files.end(); ++i) {
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(*i);
+  for (std::string const& f : this->Files) {
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(f);
     cmSystemTools::ExpandListArgument(
       cge->Evaluate(this->LocalGenerator, config), files);
   }

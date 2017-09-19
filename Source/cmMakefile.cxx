@@ -66,8 +66,8 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 
   this->DefineFlags = " ";
 
-  this->cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
-  this->cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
+  this->cmDefineRegex.compile("#([ \t]*)cmakedefine[ \t]+([A-Za-z_0-9]*)");
+  this->cmDefine01Regex.compile("#([ \t]*)cmakedefine01[ \t]+([A-Za-z_0-9]*)");
   this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");
   this->cmNamedCurly.compile("^[A-Za-z0-9/_.+-]+{");
 
@@ -87,12 +87,10 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   this->AddSourceGroup("", "^.*$");
-  this->AddSourceGroup("Source Files",
-                       "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp"
-                       "|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$");
+  this->AddSourceGroup("Source Files", CM_SOURCE_REGEX);
   this->AddSourceGroup("Header Files", CM_HEADER_REGEX);
   this->AddSourceGroup("CMake Rules", "\\.rule$");
-  this->AddSourceGroup("Resources", "\\.plist$");
+  this->AddSourceGroup("Resources", CM_RESOURCE_REGEX);
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
 
   this->ObjectLibrariesSourceGroupIndex = this->SourceGroups.size();
@@ -208,15 +206,13 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
   msg << lff.Name << "(";
   bool expand = this->GetCMakeInstance()->GetTraceExpand();
   std::string temp;
-  for (std::vector<cmListFileArgument>::const_iterator i =
-         lff.Arguments.begin();
-       i != lff.Arguments.end(); ++i) {
+  for (cmListFileArgument const& arg : lff.Arguments) {
     if (expand) {
-      temp = i->Value;
+      temp = arg.Value;
       this->ExpandVariablesInString(temp);
       msg << temp;
     } else {
-      msg << i->Value;
+      msg << arg.Value;
     }
     msg << " ";
   }
@@ -642,9 +638,8 @@ void cmMakefile::FinalPass()
 
   // give all the commands a chance to do something
   // after the file has been parsed before generation
-  for (std::vector<cmCommand*>::iterator i = this->FinalPassCommands.begin();
-       i != this->FinalPassCommands.end(); ++i) {
-    (*i)->FinalPass();
+  for (cmCommand* fpCommand : this->FinalPassCommands) {
+    fpCommand->FinalPass();
   }
 
   // go through all configured files and see which ones still exist.
@@ -741,9 +736,8 @@ void cmMakefile::AddCustomCommandToTarget(
   }
 
   // Always create the byproduct sources and mark them generated.
-  for (std::vector<std::string>::const_iterator o = byproducts.begin();
-       o != byproducts.end(); ++o) {
-    if (cmSourceFile* out = this->GetOrCreateSource(*o, true)) {
+  for (std::string const& o : byproducts) {
+    if (cmSourceFile* out = this->GetOrCreateSource(o, true)) {
       out->SetProperty("GENERATED", "1");
     }
   }
@@ -781,23 +775,21 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
   // Make sure there is at least one output.
   if (outputs.empty()) {
     cmSystemTools::Error("Attempt to add a custom rule with no output!");
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   // Validate custom commands.  TODO: More strict?
-  for (cmCustomCommandLines::const_iterator i = commandLines.begin();
-       i != commandLines.end(); ++i) {
-    cmCustomCommandLine const& cl = *i;
+  for (cmCustomCommandLine const& cl : commandLines) {
     if (!cl.empty() && !cl[0].empty() && cl[0][0] == '"') {
       std::ostringstream e;
       e << "COMMAND may not contain literal quotes:\n  " << cl[0] << "\n";
       this->IssueMessage(cmake::FATAL_ERROR, e.str());
-      return CM_NULLPTR;
+      return nullptr;
     }
   }
 
   // Choose a source file on which to store the custom command.
-  cmSourceFile* file = CM_NULLPTR;
+  cmSourceFile* file = nullptr;
   if (!commandLines.empty() && !main_dependency.empty()) {
     // The main dependency was specified.  Use it unless a different
     // custom command already used it.
@@ -811,7 +803,7 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
       }
       // The existing custom command is different.  We need to
       // generate a rule file for this new command.
-      file = CM_NULLPTR;
+      file = nullptr;
     } else if (!file) {
       file = this->CreateSource(main_dependency);
     }
@@ -844,15 +836,13 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
   }
 
   // Always create the output sources and mark them generated.
-  for (std::vector<std::string>::const_iterator o = outputs.begin();
-       o != outputs.end(); ++o) {
-    if (cmSourceFile* out = this->GetOrCreateSource(*o, true)) {
+  for (std::string const& o : outputs) {
+    if (cmSourceFile* out = this->GetOrCreateSource(o, true)) {
       out->SetProperty("GENERATED", "1");
     }
   }
-  for (std::vector<std::string>::const_iterator o = byproducts.begin();
-       o != byproducts.end(); ++o) {
-    if (cmSourceFile* out = this->GetOrCreateSource(*o, true)) {
+  for (std::string const& o : byproducts) {
+    if (cmSourceFile* out = this->GetOrCreateSource(o, true)) {
       out->SetProperty("GENERATED", "1");
     }
   }
@@ -881,9 +871,8 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
 void cmMakefile::UpdateOutputToSourceMap(
   std::vector<std::string> const& outputs, cmSourceFile* source)
 {
-  for (std::vector<std::string>::const_iterator o = outputs.begin();
-       o != outputs.end(); ++o) {
-    this->UpdateOutputToSourceMap(*o, source);
+  for (std::string const& o : outputs) {
+    this->UpdateOutputToSourceMap(o, source);
   }
 }
 
@@ -935,7 +924,7 @@ void cmMakefile::AddCustomCommandOldStyle(
     std::vector<std::string> no_byproducts;
     this->AddCustomCommandToTarget(target, no_byproducts, depends,
                                    commandLines, cmTarget::POST_BUILD, comment,
-                                   CM_NULLPTR);
+                                   nullptr);
     return;
   }
 
@@ -943,24 +932,23 @@ void cmMakefile::AddCustomCommandOldStyle(
   cmsys::RegularExpression sourceFiles("\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|"
                                        "rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|"
                                        "hm|hpp|hxx|in|txx|inl)$");
-  for (std::vector<std::string>::const_iterator oi = outputs.begin();
-       oi != outputs.end(); ++oi) {
+  for (std::string const& oi : outputs) {
     // Get the name of this output.
-    const char* output = oi->c_str();
+    const char* output = oi.c_str();
     cmSourceFile* sf;
 
     // Choose whether to use a main dependency.
     if (sourceFiles.find(source)) {
       // The source looks like a real file.  Use it as the main dependency.
       sf = this->AddCustomCommandToOutput(output, depends, source,
-                                          commandLines, comment, CM_NULLPTR);
+                                          commandLines, comment, nullptr);
     } else {
       // The source may not be a real file.  Do not use a main dependency.
       std::string no_main_dependency;
       std::vector<std::string> depends2 = depends;
       depends2.push_back(source);
       sf = this->AddCustomCommandToOutput(output, depends2, no_main_dependency,
-                                          commandLines, comment, CM_NULLPTR);
+                                          commandLines, comment, nullptr);
     }
 
     // If the rule was added to the source (and not a .rule file),
@@ -1064,9 +1052,8 @@ cmTarget* cmMakefile::AddUtilityCommand(
     }
 
     // Always create the byproduct sources and mark them generated.
-    for (std::vector<std::string>::const_iterator o = byproducts.begin();
-         o != byproducts.end(); ++o) {
-      if (cmSourceFile* out = this->GetOrCreateSource(*o, true)) {
+    for (std::string const& byproduct : byproducts) {
+      if (cmSourceFile* out = this->GetOrCreateSource(byproduct, true)) {
         out->SetProperty("GENERATED", "1");
       }
     }
@@ -1228,14 +1215,16 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
                       parent->GetProperty("COMPILE_DEFINITIONS"));
     std::vector<std::string> configs;
     this->GetConfigurations(configs);
-    for (std::vector<std::string>::const_iterator ci = configs.begin();
-         ci != configs.end(); ++ci) {
+    for (std::string const& config : configs) {
       std::string defPropName = "COMPILE_DEFINITIONS_";
-      defPropName += cmSystemTools::UpperCase(*ci);
+      defPropName += cmSystemTools::UpperCase(config);
       const char* prop = parent->GetProperty(defPropName);
       this->SetProperty(defPropName, prop);
     }
   }
+
+  // labels
+  this->SetProperty("LABELS", parent->GetProperty("LABELS"));
 
   // link libraries
   this->SetProperty("LINK_LIBRARIES", parent->GetProperty("LINK_LIBRARIES"));
@@ -1390,10 +1379,8 @@ void cmMakefile::Configure()
   if (this->IsRootMakefile()) {
     bool hasVersion = false;
     // search for the right policy command
-    for (std::vector<cmListFileFunction>::iterator i =
-           listFile.Functions.begin();
-         i != listFile.Functions.end(); ++i) {
-      if (cmSystemTools::LowerCase(i->Name) == "cmake_minimum_required") {
+    for (cmListFileFunction const& func : listFile.Functions) {
+      if (cmSystemTools::LowerCase(func.Name) == "cmake_minimum_required") {
         hasVersion = true;
         break;
       }
@@ -1419,10 +1406,8 @@ void cmMakefile::Configure()
         allowedCommands.insert("option");
         allowedCommands.insert("message");
         isProblem = false;
-        for (std::vector<cmListFileFunction>::iterator i =
-               listFile.Functions.begin();
-             i != listFile.Functions.end(); ++i) {
-          std::string name = cmSystemTools::LowerCase(i->Name);
+        for (cmListFileFunction const& func : listFile.Functions) {
+          std::string name = cmSystemTools::LowerCase(func.Name);
           if (allowedCommands.find(name) == allowedCommands.end()) {
             isProblem = true;
             break;
@@ -1441,10 +1426,8 @@ void cmMakefile::Configure()
     }
     bool hasProject = false;
     // search for a project command
-    for (std::vector<cmListFileFunction>::iterator i =
-           listFile.Functions.begin();
-         i != listFile.Functions.end(); ++i) {
-      if (cmSystemTools::LowerCase(i->Name) == "project") {
+    for (cmListFileFunction const& func : listFile.Functions) {
+      if (cmSystemTools::LowerCase(func.Name) == "project") {
         hasProject = true;
         break;
       }
@@ -1576,9 +1559,8 @@ std::vector<cmTarget*> cmMakefile::GetImportedTargets() const
 {
   std::vector<cmTarget*> tgts;
   tgts.reserve(this->ImportedTargets.size());
-  for (TargetMap::const_iterator it = this->ImportedTargets.begin();
-       it != this->ImportedTargets.end(); ++it) {
-    tgts.push_back(it->second);
+  for (auto const& impTarget : this->ImportedTargets) {
+    tgts.push_back(impTarget.second);
   }
   return tgts;
 }
@@ -1601,9 +1583,8 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string>& incs,
   }
 
   // Property on each target:
-  for (cmTargets::iterator l = this->Targets.begin(); l != this->Targets.end();
-       ++l) {
-    cmTarget& t = l->second;
+  for (auto& target : this->Targets) {
+    cmTarget& t = target.second;
     t.InsertInclude(entryString, lfbt, before);
   }
 }
@@ -1616,9 +1597,8 @@ void cmMakefile::AddSystemIncludeDirectories(const std::set<std::string>& incs)
 
   this->SystemIncludeDirectories.insert(incs.begin(), incs.end());
 
-  for (cmTargets::iterator l = this->Targets.begin(); l != this->Targets.end();
-       ++l) {
-    cmTarget& t = l->second;
+  for (auto& target : this->Targets) {
+    cmTarget& t = target.second;
     t.AddSystemIncludeDirectories(incs);
   }
 }
@@ -1758,7 +1738,7 @@ void cmMakefile::RemoveDefinition(const std::string& name)
   cmVariableWatch* vv = this->GetVariableWatch();
   if (vv) {
     vv->VariableAccessed(name, cmVariableWatch::VARIABLE_REMOVED_ACCESS,
-                         CM_NULLPTR, this);
+                         nullptr, this);
   }
 #endif
 }
@@ -1787,14 +1767,13 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
     std::vector<std::string> linkDirs;
     cmSystemTools::ExpandListArgument(linkDirsProp, linkDirs);
 
-    for (std::vector<std::string>::iterator j = linkDirs.begin();
-         j != linkDirs.end(); ++j) {
-      std::string newdir = *j;
+    for (std::string const& linkDir : linkDirs) {
+      std::string newdir = linkDir;
       // remove trailing slashes
-      if (*j->rbegin() == '/') {
-        newdir = j->substr(0, j->size() - 1);
+      if (*linkDir.rbegin() == '/') {
+        newdir = linkDir.substr(0, linkDir.size() - 1);
       }
-      target.AddLinkDirectory(*j);
+      target.AddLinkDirectory(linkDir);
     }
   }
 
@@ -1887,29 +1866,26 @@ cmSourceFile* cmMakefile::LinearGetSourceFileWithOutput(
 
   // look through all the source files that have custom commands
   // and see if the custom command has the passed source file as an output
-  for (std::vector<cmSourceFile*>::const_iterator i =
-         this->SourceFiles.begin();
-       i != this->SourceFiles.end(); ++i) {
+  for (cmSourceFile* src : this->SourceFiles) {
     // does this source file have a custom command?
-    if ((*i)->GetCustomCommand()) {
+    if (src->GetCustomCommand()) {
       // Does the output of the custom command match the source file name?
       const std::vector<std::string>& outputs =
-        (*i)->GetCustomCommand()->GetOutputs();
-      for (std::vector<std::string>::const_iterator o = outputs.begin();
-           o != outputs.end(); ++o) {
-        out = *o;
+        src->GetCustomCommand()->GetOutputs();
+      for (std::string const& output : outputs) {
+        out = output;
         std::string::size_type pos = out.rfind(name);
         // If the output matches exactly
         if (pos != std::string::npos && pos == out.size() - name.size() &&
             (pos == 0 || out[pos - 1] == '/')) {
-          return *i;
+          return src;
         }
       }
     }
   }
 
   // otherwise return NULL
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmSourceFile* cmMakefile::GetSourceFileWithOutput(
@@ -1925,31 +1901,29 @@ cmSourceFile* cmMakefile::GetSourceFileWithOutput(
   if (o != this->OutputToSource.end()) {
     return (*o).second;
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 cmSourceGroup* cmMakefile::GetSourceGroup(
   const std::vector<std::string>& name) const
 {
-  cmSourceGroup* sg = CM_NULLPTR;
+  cmSourceGroup* sg = nullptr;
 
   // first look for source group starting with the same as the one we want
-  for (std::vector<cmSourceGroup>::const_iterator sgIt =
-         this->SourceGroups.begin();
-       sgIt != this->SourceGroups.end(); ++sgIt) {
-    std::string sgName = sgIt->GetName();
+  for (cmSourceGroup const& srcGroup : this->SourceGroups) {
+    std::string sgName = srcGroup.GetName();
     if (sgName == name[0]) {
-      sg = const_cast<cmSourceGroup*>(&(*sgIt));
+      sg = const_cast<cmSourceGroup*>(&srcGroup);
       break;
     }
   }
 
-  if (sg != CM_NULLPTR) {
+  if (sg != nullptr) {
     // iterate through its children to find match source group
     for (unsigned int i = 1; i < name.size(); ++i) {
       sg = sg->LookupChild(name[i].c_str());
-      if (sg == CM_NULLPTR) {
+      if (sg == nullptr) {
         break;
       }
     }
@@ -1967,14 +1941,14 @@ void cmMakefile::AddSourceGroup(const std::string& name, const char* regex)
 void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
                                 const char* regex)
 {
-  cmSourceGroup* sg = CM_NULLPTR;
+  cmSourceGroup* sg = nullptr;
   std::vector<std::string> currentName;
   int i = 0;
   const int lastElement = static_cast<int>(name.size() - 1);
   for (i = lastElement; i >= 0; --i) {
     currentName.assign(name.begin(), name.begin() + i + 1);
     sg = this->GetSourceGroup(currentName);
-    if (sg != CM_NULLPTR) {
+    if (sg != nullptr) {
       break;
     }
   }
@@ -2002,14 +1976,65 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   }
   // build the whole source group path
   for (++i; i <= lastElement; ++i) {
-    sg->AddChild(
-      cmSourceGroup(name[i].c_str(), CM_NULLPTR, sg->GetFullName()));
+    sg->AddChild(cmSourceGroup(name[i].c_str(), nullptr, sg->GetFullName()));
     sg = sg->LookupChild(name[i].c_str());
   }
 
   sg->SetGroupRegex(regex);
 }
 
+cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(
+  const std::vector<std::string>& folders)
+{
+  cmSourceGroup* sg = this->GetSourceGroup(folders);
+  if (sg == nullptr) {
+    this->AddSourceGroup(folders);
+    sg = this->GetSourceGroup(folders);
+  }
+  return sg;
+}
+
+cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(const std::string& name)
+{
+  const char* delimiter = this->GetDefinition("SOURCE_GROUP_DELIMITER");
+  if (delimiter == nullptr) {
+    delimiter = "\\";
+  }
+  return this->GetOrCreateSourceGroup(
+    cmSystemTools::tokenize(name, delimiter));
+}
+
+/**
+ * Find a source group whose regular expression matches the filename
+ * part of the given source name.  Search backward through the list of
+ * source groups, and take the first matching group found.  This way
+ * non-inherited SOURCE_GROUP commands will have precedence over
+ * inherited ones.
+ */
+cmSourceGroup* cmMakefile::FindSourceGroup(
+  const char* source, std::vector<cmSourceGroup>& groups) const
+{
+  // First search for a group that lists the file explicitly.
+  for (std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
+       sg != groups.rend(); ++sg) {
+    cmSourceGroup* result = sg->MatchChildrenFiles(source);
+    if (result) {
+      return result;
+    }
+  }
+
+  // Now search for a group whose regex matches the file.
+  for (std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
+       sg != groups.rend(); ++sg) {
+    cmSourceGroup* result = sg->MatchChildrenRegex(source);
+    if (result) {
+      return result;
+    }
+  }
+
+  // Shouldn't get here, but just in case, return the default group.
+  return &groups.front();
+}
 #endif
 
 static bool mightExpandVariablesCMP0019(const char* s)
@@ -2042,9 +2067,8 @@ void cmMakefile::ExpandVariablesCMP0019()
   }
 
   // Also for each target's INCLUDE_DIRECTORIES property:
-  for (cmTargets::iterator l = this->Targets.begin(); l != this->Targets.end();
-       ++l) {
-    cmTarget& t = l->second;
+  for (auto& target : this->Targets) {
+    cmTarget& t = target.second;
     if (t.GetType() == cmStateEnums::INTERFACE_LIBRARY ||
         t.GetType() == cmStateEnums::GLOBAL_TARGET) {
       continue;
@@ -2191,9 +2215,9 @@ bool cmMakefile::PlatformIsAppleIos() const
     "iphonesimulator", "watchos",          "watchsimulator",
   };
 
-  for (size_t i = 0; i < sizeof(embedded) / sizeof(embedded[0]); ++i) {
-    if (sdkRoot.find(embedded[i]) == 0 ||
-        sdkRoot.find(std::string("/") + embedded[i]) != std::string::npos) {
+  for (std::string const& i : embedded) {
+    if (sdkRoot.find(i) == 0 ||
+        sdkRoot.find(std::string("/") + i) != std::string::npos) {
       return true;
     }
   }
@@ -2253,7 +2277,7 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
     }
   }
 #endif
-  return def != CM_NULLPTR;
+  return def != nullptr;
 }
 
 const char* cmMakefile::GetDefinition(const std::string& name) const
@@ -2562,7 +2586,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
           openstack.pop_back();
           result.append(last, in - last);
           std::string const& lookup = result.substr(var.loc);
-          const char* value = CM_NULLPTR;
+          const char* value = nullptr;
           std::string varresult;
           std::string svalue;
           static const std::string lineVar = "CMAKE_CURRENT_LIST_LINE";
@@ -2618,7 +2642,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
         if (!atOnly) {
           t_lookup lookup;
           const char* next = in + 1;
-          const char* start = CM_NULLPTR;
+          const char* start = nullptr;
           char nextc = *next;
           if (nextc == '{') {
             // Looking for a variable.
@@ -2818,40 +2842,6 @@ std::string cmMakefile::GetConfigurations(std::vector<std::string>& configs,
   return buildType;
 }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-/**
- * Find a source group whose regular expression matches the filename
- * part of the given source name.  Search backward through the list of
- * source groups, and take the first matching group found.  This way
- * non-inherited SOURCE_GROUP commands will have precedence over
- * inherited ones.
- */
-cmSourceGroup* cmMakefile::FindSourceGroup(
-  const char* source, std::vector<cmSourceGroup>& groups) const
-{
-  // First search for a group that lists the file explicitly.
-  for (std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
-       sg != groups.rend(); ++sg) {
-    cmSourceGroup* result = sg->MatchChildrenFiles(source);
-    if (result) {
-      return result;
-    }
-  }
-
-  // Now search for a group whose regex matches the file.
-  for (std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
-       sg != groups.rend(); ++sg) {
-    cmSourceGroup* result = sg->MatchChildrenRegex(source);
-    if (result) {
-      return result;
-    }
-  }
-
-  // Shouldn't get here, but just in case, return the default group.
-  return &groups.front();
-}
-#endif
-
 bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
                                    cmExecutionStatus& status)
 {
@@ -2949,23 +2939,22 @@ bool cmMakefile::ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
   if (!filename) {
     filename = efp.c_str();
   }
-  std::vector<cmListFileArgument>::const_iterator i;
   std::string value;
   outArgs.reserve(inArgs.size());
-  for (i = inArgs.begin(); i != inArgs.end(); ++i) {
+  for (cmListFileArgument const& i : inArgs) {
     // No expansion in a bracket argument.
-    if (i->Delim == cmListFileArgument::Bracket) {
-      outArgs.push_back(i->Value);
+    if (i.Delim == cmListFileArgument::Bracket) {
+      outArgs.push_back(i.Value);
       continue;
     }
     // Expand the variables in the argument.
-    value = i->Value;
-    this->ExpandVariablesInString(value, false, false, false, filename,
-                                  i->Line, false, false);
+    value = i.Value;
+    this->ExpandVariablesInString(value, false, false, false, filename, i.Line,
+                                  false, false);
 
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.
-    if (i->Delim == cmListFileArgument::Quoted) {
+    if (i.Delim == cmListFileArgument::Quoted) {
       outArgs.push_back(value);
     } else {
       cmSystemTools::ExpandListArgument(value, outArgs);
@@ -2982,29 +2971,28 @@ bool cmMakefile::ExpandArguments(
   if (!filename) {
     filename = efp.c_str();
   }
-  std::vector<cmListFileArgument>::const_iterator i;
   std::string value;
   outArgs.reserve(inArgs.size());
-  for (i = inArgs.begin(); i != inArgs.end(); ++i) {
+  for (cmListFileArgument const& i : inArgs) {
     // No expansion in a bracket argument.
-    if (i->Delim == cmListFileArgument::Bracket) {
-      outArgs.push_back(cmExpandedCommandArgument(i->Value, true));
+    if (i.Delim == cmListFileArgument::Bracket) {
+      outArgs.push_back(cmExpandedCommandArgument(i.Value, true));
       continue;
     }
     // Expand the variables in the argument.
-    value = i->Value;
-    this->ExpandVariablesInString(value, false, false, false, filename,
-                                  i->Line, false, false);
+    value = i.Value;
+    this->ExpandVariablesInString(value, false, false, false, filename, i.Line,
+                                  false, false);
 
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.
-    if (i->Delim == cmListFileArgument::Quoted) {
+    if (i.Delim == cmListFileArgument::Quoted) {
       outArgs.push_back(cmExpandedCommandArgument(value, true));
     } else {
       std::vector<std::string> stringArgs;
       cmSystemTools::ExpandListArgument(value, stringArgs);
-      for (size_t j = 0; j < stringArgs.size(); ++j) {
-        outArgs.push_back(cmExpandedCommandArgument(stringArgs[j], false));
+      for (std::string const& stringArg : stringArgs) {
+        outArgs.push_back(cmExpandedCommandArgument(stringArg, false));
       }
     }
   }
@@ -3094,15 +3082,12 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
 {
   cmSourceFileLocation sfl(this, sourceName);
-  for (std::vector<cmSourceFile*>::const_iterator sfi =
-         this->SourceFiles.begin();
-       sfi != this->SourceFiles.end(); ++sfi) {
-    cmSourceFile* sf = *sfi;
+  for (cmSourceFile* sf : this->SourceFiles) {
     if (sf->Matches(sfl)) {
       return sf;
     }
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
@@ -3148,12 +3133,11 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const& lang,
   std::vector<std::string> langs;
   std::vector<std::string> langsRC;
   langs.reserve(lang.size());
-  for (std::vector<std::string>::const_iterator i = lang.begin();
-       i != lang.end(); ++i) {
-    if (*i == "RC") {
-      langsRC.push_back(*i);
+  for (std::string const& i : lang) {
+    if (i == "RC") {
+      langsRC.push_back(i);
     } else {
-      langs.push_back(*i);
+      langs.push_back(i);
     }
   }
   if (!langs.empty()) {
@@ -3317,7 +3301,7 @@ cmVariableWatch* cmMakefile::GetVariableWatch() const
       this->GetCMakeInstance()->GetVariableWatch()) {
     return this->GetCMakeInstance()->GetVariableWatch();
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 #endif
 
@@ -3361,9 +3345,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
     cmSystemTools::ExpandListArgument(cmakeModulePath, modulePath);
 
     // Look through the possible module directories.
-    for (std::vector<std::string>::iterator i = modulePath.begin();
-         i != modulePath.end(); ++i) {
-      std::string itempl = *i;
+    for (std::string itempl : modulePath) {
       cmSystemTools::ConvertToUnixSlashes(itempl);
       itempl += "/";
       itempl += filename;
@@ -3447,18 +3429,22 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
 
     // Replace #cmakedefine instances.
     if (this->cmDefineRegex.find(line)) {
-      const char* def = this->GetDefinition(this->cmDefineRegex.match(1));
+      const char* def = this->GetDefinition(this->cmDefineRegex.match(2));
       if (!cmSystemTools::IsOff(def)) {
-        cmSystemTools::ReplaceString(line, "#cmakedefine", "#define");
+        const std::string indentation = this->cmDefineRegex.match(1);
+        cmSystemTools::ReplaceString(line, "#" + indentation + "cmakedefine",
+                                     "#" + indentation + "define");
         output += line;
       } else {
         output += "/* #undef ";
-        output += this->cmDefineRegex.match(1);
+        output += this->cmDefineRegex.match(2);
         output += " */";
       }
     } else if (this->cmDefine01Regex.find(line)) {
-      const char* def = this->GetDefinition(this->cmDefine01Regex.match(1));
-      cmSystemTools::ReplaceString(line, "#cmakedefine01", "#define");
+      const std::string indentation = this->cmDefine01Regex.match(1);
+      const char* def = this->GetDefinition(this->cmDefine01Regex.match(2));
+      cmSystemTools::ReplaceString(line, "#" + indentation + "cmakedefine01",
+                                   "#" + indentation + "define");
       output += line;
       if (!cmSystemTools::IsOff(def)) {
         output += " 1";
@@ -3478,7 +3464,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
   }
 
   // Perform variable replacements.
-  this->ExpandVariablesInString(output, escapeQuotes, true, atOnly, CM_NULLPTR,
+  this->ExpandVariablesInString(output, escapeQuotes, true, atOnly, nullptr,
                                 -1, true, true);
 }
 
@@ -3618,7 +3604,7 @@ cmTarget* cmMakefile::FindLocalNonAliasTarget(const std::string& name) const
   if (i != this->Targets.end()) {
     return &i->second;
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 cmTest* cmMakefile::CreateTest(const std::string& testName)
@@ -3640,7 +3626,7 @@ cmTest* cmMakefile::GetTest(const std::string& testName) const
   if (mi != this->Tests.end()) {
     return mi->second;
   }
-  return CM_NULLPTR;
+  return nullptr;
 }
 
 void cmMakefile::AddCMakeDependFilesFromUser()
@@ -3649,14 +3635,13 @@ void cmMakefile::AddCMakeDependFilesFromUser()
   if (const char* deps_str = this->GetProperty("CMAKE_CONFIGURE_DEPENDS")) {
     cmSystemTools::ExpandListArgument(deps_str, deps);
   }
-  for (std::vector<std::string>::iterator i = deps.begin(); i != deps.end();
-       ++i) {
-    if (cmSystemTools::FileIsFullPath(i->c_str())) {
-      this->AddCMakeDependFile(*i);
+  for (std::string const& dep : deps) {
+    if (cmSystemTools::FileIsFullPath(dep.c_str())) {
+      this->AddCMakeDependFile(dep);
     } else {
       std::string f = this->GetCurrentSourceDirectory();
       f += "/";
-      f += *i;
+      f += dep;
       this->AddCMakeDependFile(f);
     }
   }
@@ -3911,16 +3896,6 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
   return false;
 }
 
-void cmMakefile::AddQtUiFileWithOptions(cmSourceFile* sf)
-{
-  this->QtUiFilesWithOptions.push_back(sf);
-}
-
-std::vector<cmSourceFile*> cmMakefile::GetQtUiFilesWithOptions() const
-{
-  return this->QtUiFilesWithOptions;
-}
-
 static std::string const matchVariables[] = {
   "CMAKE_MATCH_0", "CMAKE_MATCH_1", "CMAKE_MATCH_2", "CMAKE_MATCH_3",
   "CMAKE_MATCH_4", "CMAKE_MATCH_5", "CMAKE_MATCH_6", "CMAKE_MATCH_7",
@@ -4108,10 +4083,10 @@ bool cmMakefile::IgnoreErrorsCMP0061() const
 }
 
 #define FEATURE_STRING(F) , #F
-static const char* const C_FEATURES[] = { CM_NULLPTR FOR_EACH_C_FEATURE(
+static const char* const C_FEATURES[] = { nullptr FOR_EACH_C_FEATURE(
   FEATURE_STRING) };
 
-static const char* const CXX_FEATURES[] = { CM_NULLPTR FOR_EACH_CXX_FEATURE(
+static const char* const CXX_FEATURES[] = { nullptr FOR_EACH_CXX_FEATURE(
   FEATURE_STRING) };
 #undef FEATURE_STRING
 
@@ -4219,7 +4194,7 @@ const char* cmMakefile::CompileFeaturesAvailable(const std::string& lang,
       this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
                                              this->Backtrace);
     }
-    return CM_NULLPTR;
+    return nullptr;
   }
 
   const char* featuresKnown =
@@ -4242,7 +4217,7 @@ const char* cmMakefile::CompileFeaturesAvailable(const std::string& lang,
       this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
                                              this->Backtrace);
     }
-    return CM_NULLPTR;
+    return nullptr;
   }
   return featuresKnown;
 }
@@ -4390,6 +4365,18 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
                    cmStrCmp(existingCxxStandard))
     : cmArrayEnd(CXX_STANDARDS);
 
+  if (needCxx17 &&
+      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
+                                   cmArrayEnd(CXX_STANDARDS),
+                                   cmStrCmp("17"))) {
+    return false;
+  }
+  if (needCxx14 &&
+      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
+                                   cmArrayEnd(CXX_STANDARDS),
+                                   cmStrCmp("14"))) {
+    return false;
+  }
   if (needCxx11 &&
       existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
                                    cmArrayEnd(CXX_STANDARDS),

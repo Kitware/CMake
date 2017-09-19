@@ -1,6 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmConfigure.h"
 
 #include "CTest/cmCTestLaunch.h"
 #include "CTest/cmCTestScriptHandler.h"
@@ -18,13 +17,13 @@
 #include <vector>
 
 static const char* cmDocumentationName[][2] = {
-  { CM_NULLPTR, "  ctest - Testing driver provided by CMake." },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, "  ctest - Testing driver provided by CMake." },
+  { nullptr, nullptr }
 };
 
-static const char* cmDocumentationUsage[][2] = { { CM_NULLPTR,
+static const char* cmDocumentationUsage[][2] = { { nullptr,
                                                    "  ctest [options]" },
-                                                 { CM_NULLPTR, CM_NULLPTR } };
+                                                 { nullptr, nullptr } };
 
 static const char* cmDocumentationOptions[][2] = {
   { "-C <cfg>, --build-config <cfg>", "Choose configuration to test." },
@@ -83,6 +82,8 @@ static const char* cmDocumentationOptions[][2] = {
   { "--max-width <width>", "Set the max width for a test name to output" },
   { "--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1." },
   { "--no-label-summary", "Disable timing summary information for labels." },
+  { "--no-subproject-summary", "Disable timing summary information for "
+                               "subprojects." },
   { "--build-and-test", "Configure, build and run a test." },
   { "--build-target", "Specify a specific target to build." },
   { "--build-nocmake", "Run the build without running cmake first." },
@@ -118,7 +119,7 @@ static const char* cmDocumentationOptions[][2] = {
   { "--http1.0", "Submit using HTTP 1.0." },
   { "--no-compress-output", "Do not compress test output when submitting." },
   { "--print-labels", "Print all available test labels." },
-  { CM_NULLPTR, CM_NULLPTR }
+  { nullptr, nullptr }
 };
 
 // this is a test driver program for cmCTest.

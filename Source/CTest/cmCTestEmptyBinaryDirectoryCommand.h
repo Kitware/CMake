@@ -3,7 +3,7 @@
 #ifndef cmCTestEmptyBinaryDirectoryCommand_h
 #define cmCTestEmptyBinaryDirectoryCommand_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestCommand.h"
 
@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() CM_OVERRIDE
+  cmCommand* Clone() override
   {
     cmCTestEmptyBinaryDirectoryCommand* ni =
       new cmCTestEmptyBinaryDirectoryCommand;
@@ -41,7 +41,7 @@ public:
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) CM_OVERRIDE;
+                   cmExecutionStatus& status) override;
 };
 
 #endif

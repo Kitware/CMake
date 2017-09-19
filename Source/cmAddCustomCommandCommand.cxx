@@ -31,7 +31,7 @@ bool cmAddCustomCommandCommand::InitialPass(
 
   std::string source, target, main_dependency, working, depfile;
   std::string comment_buffer;
-  const char* comment = CM_NULLPTR;
+  const char* comment = nullptr;
   std::vector<std::string> depends, outputs, output, byproducts;
   bool verbatim = false;
   bool append = false;
@@ -68,9 +68,7 @@ bool cmAddCustomCommandCommand::InitialPass(
 
   tdoing doing = doing_nothing;
 
-  for (unsigned int j = 0; j < args.size(); ++j) {
-    std::string const& copy = args[j];
-
+  for (std::string const& copy : args) {
     if (copy == "SOURCE") {
       doing = doing_source;
     } else if (copy == "COMMAND") {
@@ -355,12 +353,11 @@ bool cmAddCustomCommandCommand::InitialPass(
 bool cmAddCustomCommandCommand::CheckOutputs(
   const std::vector<std::string>& outputs)
 {
-  for (std::vector<std::string>::const_iterator o = outputs.begin();
-       o != outputs.end(); ++o) {
+  for (std::string const& o : outputs) {
     // Make sure the file will not be generated into the source
     // directory during an out of source build.
-    if (!this->Makefile->CanIWriteThisFile(o->c_str())) {
-      std::string e = "attempted to have a file \"" + *o +
+    if (!this->Makefile->CanIWriteThisFile(o.c_str())) {
+      std::string e = "attempted to have a file \"" + o +
         "\" in a source directory as an output of custom command.";
       this->SetError(e);
       cmSystemTools::SetFatalErrorOccured();
@@ -368,10 +365,10 @@ bool cmAddCustomCommandCommand::CheckOutputs(
     }
 
     // Make sure the output file name has no invalid characters.
-    std::string::size_type pos = o->find_first_of("#<>");
+    std::string::size_type pos = o.find_first_of("#<>");
     if (pos != std::string::npos) {
       std::ostringstream msg;
-      msg << "called with OUTPUT containing a \"" << (*o)[pos]
+      msg << "called with OUTPUT containing a \"" << o[pos]
           << "\".  This character is not allowed.";
       this->SetError(msg.str());
       return false;

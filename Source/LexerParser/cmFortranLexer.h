@@ -2,10 +2,6 @@
 #define cmFortran_yyHEADER_H 1
 #define cmFortran_yyIN_HEADER 1
 
-#line 6 "cmFortranLexer.h"
-
-#line 8 "cmFortranLexer.h"
-
 #define FLEXINT_H 1
 #define  YY_INT_ALIGNED short int
 
@@ -14,9 +10,219 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 6
-#define YY_FLEX_SUBMINOR_VERSION 1
+#define YY_FLEX_SUBMINOR_VERSION 4
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
+#endif
+
+#ifdef yy_create_buffer
+#define cmFortran_yy_create_buffer_ALREADY_DEFINED
+#else
+#define yy_create_buffer cmFortran_yy_create_buffer
+#endif
+
+#ifdef yy_delete_buffer
+#define cmFortran_yy_delete_buffer_ALREADY_DEFINED
+#else
+#define yy_delete_buffer cmFortran_yy_delete_buffer
+#endif
+
+#ifdef yy_scan_buffer
+#define cmFortran_yy_scan_buffer_ALREADY_DEFINED
+#else
+#define yy_scan_buffer cmFortran_yy_scan_buffer
+#endif
+
+#ifdef yy_scan_string
+#define cmFortran_yy_scan_string_ALREADY_DEFINED
+#else
+#define yy_scan_string cmFortran_yy_scan_string
+#endif
+
+#ifdef yy_scan_bytes
+#define cmFortran_yy_scan_bytes_ALREADY_DEFINED
+#else
+#define yy_scan_bytes cmFortran_yy_scan_bytes
+#endif
+
+#ifdef yy_init_buffer
+#define cmFortran_yy_init_buffer_ALREADY_DEFINED
+#else
+#define yy_init_buffer cmFortran_yy_init_buffer
+#endif
+
+#ifdef yy_flush_buffer
+#define cmFortran_yy_flush_buffer_ALREADY_DEFINED
+#else
+#define yy_flush_buffer cmFortran_yy_flush_buffer
+#endif
+
+#ifdef yy_load_buffer_state
+#define cmFortran_yy_load_buffer_state_ALREADY_DEFINED
+#else
+#define yy_load_buffer_state cmFortran_yy_load_buffer_state
+#endif
+
+#ifdef yy_switch_to_buffer
+#define cmFortran_yy_switch_to_buffer_ALREADY_DEFINED
+#else
+#define yy_switch_to_buffer cmFortran_yy_switch_to_buffer
+#endif
+
+#ifdef yypush_buffer_state
+#define cmFortran_yypush_buffer_state_ALREADY_DEFINED
+#else
+#define yypush_buffer_state cmFortran_yypush_buffer_state
+#endif
+
+#ifdef yypop_buffer_state
+#define cmFortran_yypop_buffer_state_ALREADY_DEFINED
+#else
+#define yypop_buffer_state cmFortran_yypop_buffer_state
+#endif
+
+#ifdef yyensure_buffer_stack
+#define cmFortran_yyensure_buffer_stack_ALREADY_DEFINED
+#else
+#define yyensure_buffer_stack cmFortran_yyensure_buffer_stack
+#endif
+
+#ifdef yylex
+#define cmFortran_yylex_ALREADY_DEFINED
+#else
+#define yylex cmFortran_yylex
+#endif
+
+#ifdef yyrestart
+#define cmFortran_yyrestart_ALREADY_DEFINED
+#else
+#define yyrestart cmFortran_yyrestart
+#endif
+
+#ifdef yylex_init
+#define cmFortran_yylex_init_ALREADY_DEFINED
+#else
+#define yylex_init cmFortran_yylex_init
+#endif
+
+#ifdef yylex_init_extra
+#define cmFortran_yylex_init_extra_ALREADY_DEFINED
+#else
+#define yylex_init_extra cmFortran_yylex_init_extra
+#endif
+
+#ifdef yylex_destroy
+#define cmFortran_yylex_destroy_ALREADY_DEFINED
+#else
+#define yylex_destroy cmFortran_yylex_destroy
+#endif
+
+#ifdef yyget_debug
+#define cmFortran_yyget_debug_ALREADY_DEFINED
+#else
+#define yyget_debug cmFortran_yyget_debug
+#endif
+
+#ifdef yyset_debug
+#define cmFortran_yyset_debug_ALREADY_DEFINED
+#else
+#define yyset_debug cmFortran_yyset_debug
+#endif
+
+#ifdef yyget_extra
+#define cmFortran_yyget_extra_ALREADY_DEFINED
+#else
+#define yyget_extra cmFortran_yyget_extra
+#endif
+
+#ifdef yyset_extra
+#define cmFortran_yyset_extra_ALREADY_DEFINED
+#else
+#define yyset_extra cmFortran_yyset_extra
+#endif
+
+#ifdef yyget_in
+#define cmFortran_yyget_in_ALREADY_DEFINED
+#else
+#define yyget_in cmFortran_yyget_in
+#endif
+
+#ifdef yyset_in
+#define cmFortran_yyset_in_ALREADY_DEFINED
+#else
+#define yyset_in cmFortran_yyset_in
+#endif
+
+#ifdef yyget_out
+#define cmFortran_yyget_out_ALREADY_DEFINED
+#else
+#define yyget_out cmFortran_yyget_out
+#endif
+
+#ifdef yyset_out
+#define cmFortran_yyset_out_ALREADY_DEFINED
+#else
+#define yyset_out cmFortran_yyset_out
+#endif
+
+#ifdef yyget_leng
+#define cmFortran_yyget_leng_ALREADY_DEFINED
+#else
+#define yyget_leng cmFortran_yyget_leng
+#endif
+
+#ifdef yyget_text
+#define cmFortran_yyget_text_ALREADY_DEFINED
+#else
+#define yyget_text cmFortran_yyget_text
+#endif
+
+#ifdef yyget_lineno
+#define cmFortran_yyget_lineno_ALREADY_DEFINED
+#else
+#define yyget_lineno cmFortran_yyget_lineno
+#endif
+
+#ifdef yyset_lineno
+#define cmFortran_yyset_lineno_ALREADY_DEFINED
+#else
+#define yyset_lineno cmFortran_yyset_lineno
+#endif
+
+#ifdef yyget_column
+#define cmFortran_yyget_column_ALREADY_DEFINED
+#else
+#define yyget_column cmFortran_yyget_column
+#endif
+
+#ifdef yyset_column
+#define cmFortran_yyset_column_ALREADY_DEFINED
+#else
+#define yyset_column cmFortran_yyset_column
+#endif
+
+#ifdef yywrap
+#define cmFortran_yywrap_ALREADY_DEFINED
+#else
+#define yywrap cmFortran_yywrap
+#endif
+
+#ifdef yyalloc
+#define cmFortran_yyalloc_ALREADY_DEFINED
+#else
+#define yyalloc cmFortran_yyalloc
+#endif
+
+#ifdef yyrealloc
+#define cmFortran_yyrealloc_ALREADY_DEFINED
+#else
+#define yyrealloc cmFortran_yyrealloc
+#endif
+
+#ifdef yyfree
+#define cmFortran_yyfree_ALREADY_DEFINED
+#else
+#define yyfree cmFortran_yyfree
 #endif
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
@@ -89,9 +295,15 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#ifndef SIZE_MAX
+#define SIZE_MAX               (~(size_t)0)
+#endif
+
 #endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
+
+/* begin standard C++ headers. */
 
 /* TODO: this is always defined, so inline it */
 #define yyconst const
@@ -193,21 +405,21 @@ struct yy_buffer_state
 	};
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
 
-void cmFortran_yyrestart (FILE *input_file ,yyscan_t yyscanner );
-void cmFortran_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmFortran_yy_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void cmFortran_yy_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmFortran_yy_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void cmFortran_yypop_buffer_state (yyscan_t yyscanner );
+void yyrestart ( FILE *input_file , yyscan_t yyscanner );
+void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size , yyscan_t yyscanner );
+void yy_delete_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
+void yy_flush_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
+void yypush_buffer_state ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
+void yypop_buffer_state ( yyscan_t yyscanner );
 
-YY_BUFFER_STATE cmFortran_yy_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmFortran_yy_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmFortran_yy_scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_buffer ( char *base, yy_size_t size , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_string ( const char *yy_str , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, int len , yyscan_t yyscanner );
 
-void *cmFortran_yyalloc (yy_size_t ,yyscan_t yyscanner );
-void *cmFortran_yyrealloc (void *,yy_size_t ,yyscan_t yyscanner );
-void cmFortran_yyfree (void * ,yyscan_t yyscanner );
+void *yyalloc ( yy_size_t , yyscan_t yyscanner );
+void *yyrealloc ( void *, yy_size_t , yyscan_t yyscanner );
+void yyfree ( void * , yyscan_t yyscanner );
 
 /* Begin user sect3 */
 
@@ -229,42 +441,42 @@ void cmFortran_yyfree (void * ,yyscan_t yyscanner );
 #define YY_EXTRA_TYPE void *
 #endif
 
-int cmFortran_yylex_init (yyscan_t* scanner);
+int yylex_init (yyscan_t* scanner);
 
-int cmFortran_yylex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int yylex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner);
 
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int cmFortran_yylex_destroy (yyscan_t yyscanner );
+int yylex_destroy ( yyscan_t yyscanner );
 
-int cmFortran_yyget_debug (yyscan_t yyscanner );
+int yyget_debug ( yyscan_t yyscanner );
 
-void cmFortran_yyset_debug (int debug_flag ,yyscan_t yyscanner );
+void yyset_debug ( int debug_flag , yyscan_t yyscanner );
 
-YY_EXTRA_TYPE cmFortran_yyget_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE yyget_extra ( yyscan_t yyscanner );
 
-void cmFortran_yyset_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void yyset_extra ( YY_EXTRA_TYPE user_defined , yyscan_t yyscanner );
 
-FILE *cmFortran_yyget_in (yyscan_t yyscanner );
+FILE *yyget_in ( yyscan_t yyscanner );
 
-void cmFortran_yyset_in  (FILE * _in_str ,yyscan_t yyscanner );
+void yyset_in  ( FILE * _in_str , yyscan_t yyscanner );
 
-FILE *cmFortran_yyget_out (yyscan_t yyscanner );
+FILE *yyget_out ( yyscan_t yyscanner );
 
-void cmFortran_yyset_out  (FILE * _out_str ,yyscan_t yyscanner );
+void yyset_out  ( FILE * _out_str , yyscan_t yyscanner );
 
-			int cmFortran_yyget_leng (yyscan_t yyscanner );
+			int yyget_leng ( yyscan_t yyscanner );
 
-char *cmFortran_yyget_text (yyscan_t yyscanner );
+char *yyget_text ( yyscan_t yyscanner );
 
-int cmFortran_yyget_lineno (yyscan_t yyscanner );
+int yyget_lineno ( yyscan_t yyscanner );
 
-void cmFortran_yyset_lineno (int _line_number ,yyscan_t yyscanner );
+void yyset_lineno ( int _line_number , yyscan_t yyscanner );
 
-int cmFortran_yyget_column  (yyscan_t yyscanner );
+int yyget_column  ( yyscan_t yyscanner );
 
-void cmFortran_yyset_column (int _column_no ,yyscan_t yyscanner );
+void yyset_column ( int _column_no , yyscan_t yyscanner );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -272,18 +484,18 @@ void cmFortran_yyset_column (int _column_no ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int cmFortran_yywrap (yyscan_t yyscanner );
+extern "C" int yywrap ( yyscan_t yyscanner );
 #else
-extern int cmFortran_yywrap (yyscan_t yyscanner );
+extern int yywrap ( yyscan_t yyscanner );
 #endif
 #endif
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
+static void yy_flex_strncpy ( char *, const char *, int , yyscan_t yyscanner);
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
+static int yy_flex_strlen ( const char * , yyscan_t yyscanner);
 #endif
 
 #ifndef YY_NO_INPUT
@@ -311,9 +523,9 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int cmFortran_yylex (yyscan_t yyscanner);
+extern int yylex (yyscan_t yyscanner);
 
-#define YY_DECL int cmFortran_yylex (yyscan_t yyscanner)
+#define YY_DECL int yylex (yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
 /* yy_get_previous_state - get the state just before the EOB char was reached */
@@ -330,9 +542,150 @@ extern int cmFortran_yylex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-#line 178 "cmFortranLexer.in.l"
+#ifndef cmFortran_yy_create_buffer_ALREADY_DEFINED
+#undef yy_create_buffer
+#endif
+#ifndef cmFortran_yy_delete_buffer_ALREADY_DEFINED
+#undef yy_delete_buffer
+#endif
+#ifndef cmFortran_yy_scan_buffer_ALREADY_DEFINED
+#undef yy_scan_buffer
+#endif
+#ifndef cmFortran_yy_scan_string_ALREADY_DEFINED
+#undef yy_scan_string
+#endif
+#ifndef cmFortran_yy_scan_bytes_ALREADY_DEFINED
+#undef yy_scan_bytes
+#endif
+#ifndef cmFortran_yy_init_buffer_ALREADY_DEFINED
+#undef yy_init_buffer
+#endif
+#ifndef cmFortran_yy_flush_buffer_ALREADY_DEFINED
+#undef yy_flush_buffer
+#endif
+#ifndef cmFortran_yy_load_buffer_state_ALREADY_DEFINED
+#undef yy_load_buffer_state
+#endif
+#ifndef cmFortran_yy_switch_to_buffer_ALREADY_DEFINED
+#undef yy_switch_to_buffer
+#endif
+#ifndef cmFortran_yypush_buffer_state_ALREADY_DEFINED
+#undef yypush_buffer_state
+#endif
+#ifndef cmFortran_yypop_buffer_state_ALREADY_DEFINED
+#undef yypop_buffer_state
+#endif
+#ifndef cmFortran_yyensure_buffer_stack_ALREADY_DEFINED
+#undef yyensure_buffer_stack
+#endif
+#ifndef cmFortran_yylex_ALREADY_DEFINED
+#undef yylex
+#endif
+#ifndef cmFortran_yyrestart_ALREADY_DEFINED
+#undef yyrestart
+#endif
+#ifndef cmFortran_yylex_init_ALREADY_DEFINED
+#undef yylex_init
+#endif
+#ifndef cmFortran_yylex_init_extra_ALREADY_DEFINED
+#undef yylex_init_extra
+#endif
+#ifndef cmFortran_yylex_destroy_ALREADY_DEFINED
+#undef yylex_destroy
+#endif
+#ifndef cmFortran_yyget_debug_ALREADY_DEFINED
+#undef yyget_debug
+#endif
+#ifndef cmFortran_yyset_debug_ALREADY_DEFINED
+#undef yyset_debug
+#endif
+#ifndef cmFortran_yyget_extra_ALREADY_DEFINED
+#undef yyget_extra
+#endif
+#ifndef cmFortran_yyset_extra_ALREADY_DEFINED
+#undef yyset_extra
+#endif
+#ifndef cmFortran_yyget_in_ALREADY_DEFINED
+#undef yyget_in
+#endif
+#ifndef cmFortran_yyset_in_ALREADY_DEFINED
+#undef yyset_in
+#endif
+#ifndef cmFortran_yyget_out_ALREADY_DEFINED
+#undef yyget_out
+#endif
+#ifndef cmFortran_yyset_out_ALREADY_DEFINED
+#undef yyset_out
+#endif
+#ifndef cmFortran_yyget_leng_ALREADY_DEFINED
+#undef yyget_leng
+#endif
+#ifndef cmFortran_yyget_text_ALREADY_DEFINED
+#undef yyget_text
+#endif
+#ifndef cmFortran_yyget_lineno_ALREADY_DEFINED
+#undef yyget_lineno
+#endif
+#ifndef cmFortran_yyset_lineno_ALREADY_DEFINED
+#undef yyset_lineno
+#endif
+#ifndef cmFortran_yyget_column_ALREADY_DEFINED
+#undef yyget_column
+#endif
+#ifndef cmFortran_yyset_column_ALREADY_DEFINED
+#undef yyset_column
+#endif
+#ifndef cmFortran_yywrap_ALREADY_DEFINED
+#undef yywrap
+#endif
+#ifndef cmFortran_yyget_lval_ALREADY_DEFINED
+#undef yyget_lval
+#endif
+#ifndef cmFortran_yyset_lval_ALREADY_DEFINED
+#undef yyset_lval
+#endif
+#ifndef cmFortran_yyget_lloc_ALREADY_DEFINED
+#undef yyget_lloc
+#endif
+#ifndef cmFortran_yyset_lloc_ALREADY_DEFINED
+#undef yyset_lloc
+#endif
+#ifndef cmFortran_yyalloc_ALREADY_DEFINED
+#undef yyalloc
+#endif
+#ifndef cmFortran_yyrealloc_ALREADY_DEFINED
+#undef yyrealloc
+#endif
+#ifndef cmFortran_yyfree_ALREADY_DEFINED
+#undef yyfree
+#endif
+#ifndef cmFortran_yytext_ALREADY_DEFINED
+#undef yytext
+#endif
+#ifndef cmFortran_yyleng_ALREADY_DEFINED
+#undef yyleng
+#endif
+#ifndef cmFortran_yyin_ALREADY_DEFINED
+#undef yyin
+#endif
+#ifndef cmFortran_yyout_ALREADY_DEFINED
+#undef yyout
+#endif
+#ifndef cmFortran_yy_flex_debug_ALREADY_DEFINED
+#undef yy_flex_debug
+#endif
+#ifndef cmFortran_yylineno_ALREADY_DEFINED
+#undef yylineno
+#endif
+#ifndef cmFortran_yytables_fload_ALREADY_DEFINED
+#undef yytables_fload
+#endif
+#ifndef cmFortran_yytables_destroy_ALREADY_DEFINED
+#undef yytables_destroy
+#endif
+#ifndef cmFortran_yyTABLES_NAME_ALREADY_DEFINED
+#undef yyTABLES_NAME
+#endif
 
-
-#line 337 "cmFortranLexer.h"
 #undef cmFortran_yyIN_HEADER
 #endif /* cmFortran_yyHEADER_H */

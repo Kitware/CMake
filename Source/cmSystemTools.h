@@ -3,8 +3,9 @@
 #ifndef cmSystemTools_h
 #define cmSystemTools_h
 
-#include "cmConfigure.h"
+#include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmCryptoHash.h"
 #include "cmProcessOutput.h"
 #include "cmsys/Process.h"
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
@@ -61,34 +62,34 @@ public:
    *  set to false, will disable furthur messages (cancel).
    */
   static void SetMessageCallback(MessageCallback f,
-                                 void* clientData = CM_NULLPTR);
+                                 void* clientData = nullptr);
 
   /**
    * Display an error message.
    */
-  static void Error(const char* m, const char* m2 = CM_NULLPTR,
-                    const char* m3 = CM_NULLPTR, const char* m4 = CM_NULLPTR);
+  static void Error(const char* m, const char* m2 = nullptr,
+                    const char* m3 = nullptr, const char* m4 = nullptr);
 
   /**
    * Display a message.
    */
-  static void Message(const char* m, const char* title = CM_NULLPTR);
+  static void Message(const char* m, const char* title = nullptr);
 
   typedef void (*OutputCallback)(const char*, size_t length, void*);
 
   ///! Send a string to stdout
   static void Stdout(const char* s);
   static void Stdout(const char* s, size_t length);
-  static void SetStdoutCallback(OutputCallback, void* clientData = CM_NULLPTR);
+  static void SetStdoutCallback(OutputCallback, void* clientData = nullptr);
 
   ///! Send a string to stderr
   static void Stderr(const char* s);
   static void Stderr(const char* s, size_t length);
-  static void SetStderrCallback(OutputCallback, void* clientData = CM_NULLPTR);
+  static void SetStderrCallback(OutputCallback, void* clientData = nullptr);
 
   typedef bool (*InterruptCallback)(void*);
   static void SetInterruptCallback(InterruptCallback f,
-                                   void* clientData = CM_NULLPTR);
+                                   void* clientData = nullptr);
   static bool GetInterruptFlag();
 
   ///! Return true if there was an error at any point.
@@ -179,8 +180,9 @@ public:
       if possible).  */
   static bool RenameFile(const char* oldname, const char* newname);
 
-  ///! Compute the md5sum of a file
-  static bool ComputeFileMD5(const std::string& source, char* md5out);
+  ///! Compute the hash of a file
+  static std::string ComputeFileHash(const std::string& source,
+                                     cmCryptoHash::Algo algo);
 
   /** Compute the md5sum of a string.  */
   static std::string ComputeStringMD5(const std::string& input);
@@ -218,10 +220,10 @@ public:
     OUTPUT_PASSTHROUGH
   };
   static bool RunSingleCommand(const char* command,
-                               std::string* captureStdOut = CM_NULLPTR,
-                               std::string* captureStdErr = CM_NULLPTR,
-                               int* retVal = CM_NULLPTR,
-                               const char* dir = CM_NULLPTR,
+                               std::string* captureStdOut = nullptr,
+                               std::string* captureStdErr = nullptr,
+                               int* retVal = nullptr,
+                               const char* dir = nullptr,
                                OutputOption outputflag = OUTPUT_MERGE,
                                double timeout = 0.0);
   /**
@@ -230,10 +232,10 @@ public:
    * be in comand[1]...command[command.size()]
    */
   static bool RunSingleCommand(std::vector<std::string> const& command,
-                               std::string* captureStdOut = CM_NULLPTR,
-                               std::string* captureStdErr = CM_NULLPTR,
-                               int* retVal = CM_NULLPTR,
-                               const char* dir = CM_NULLPTR,
+                               std::string* captureStdOut = nullptr,
+                               std::string* captureStdErr = nullptr,
+                               int* retVal = nullptr,
+                               const char* dir = nullptr,
                                OutputOption outputflag = OUTPUT_MERGE,
                                double timeout = 0.0,
                                Encoding encoding = cmProcessOutput::Auto);
@@ -252,6 +254,11 @@ public:
   /** Parse arguments out of a unix command line string.  */
   static void ParseUnixCommandLine(const char* command,
                                    std::vector<std::string>& args);
+
+  /** Split a command-line string into the parsed command and the unparsed
+      arguments.  Returns false on unfinished quoting or escaping.  */
+  static bool SplitProgramFromArgs(std::string const& command,
+                                   std::string& program, std::string& args);
 
   /**
    * Handle response file in an argument list and return a new argument list
@@ -461,13 +468,12 @@ public:
   /** Try to set the RPATH in an ELF binary.  */
   static bool ChangeRPath(std::string const& file, std::string const& oldRPath,
                           std::string const& newRPath,
-                          std::string* emsg = CM_NULLPTR,
-                          bool* changed = CM_NULLPTR);
+                          std::string* emsg = nullptr,
+                          bool* changed = nullptr);
 
   /** Try to remove the RPATH from an ELF binary.  */
-  static bool RemoveRPath(std::string const& file,
-                          std::string* emsg = CM_NULLPTR,
-                          bool* removed = CM_NULLPTR);
+  static bool RemoveRPath(std::string const& file, std::string* emsg = nullptr,
+                          bool* removed = nullptr);
 
   /** Check whether the RPATH in an ELF binary contains the path
       given.  */
