@@ -274,7 +274,7 @@ void cmExtraSublimeTextGenerator::AppendTarget(
         if (flagRegex.end() < workString.size()) {
           workString = workString.substr(flagRegex.end());
         } else {
-          workString = "";
+          workString.clear();
         }
       }
     }

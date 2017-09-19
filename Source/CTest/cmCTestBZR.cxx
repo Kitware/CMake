@@ -309,11 +309,11 @@ private:
 
           // Hand this line to the subclass implementation.
           if (!this->ProcessLine()) {
-            this->Line = "";
+            this->Line.clear();
             return false;
           }
 
-          this->Line = "";
+          this->Line.clear();
           last_is_new_line = true;
         }
       } else {

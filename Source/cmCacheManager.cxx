@@ -480,7 +480,7 @@ void cmCacheManager::AddCacheEntry(const std::string& key, const char* value,
     e.Value = value;
     e.Initialized = true;
   } else {
-    e.Value = "";
+    e.Value.clear();
   }
   e.Type = type;
   // make sure we only use unix style paths
@@ -543,7 +543,7 @@ void cmCacheManager::CacheIterator::SetValue(const char* value)
     entry->Value = value;
     entry->Initialized = true;
   } else {
-    entry->Value = "";
+    entry->Value.clear();
   }
 }
 

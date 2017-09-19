@@ -1261,7 +1261,7 @@ public:
         (this->CurrentString.length() + 1 + this->NextObject.length() >
          this->LengthLimit)) {
       this->Strings.push_back(this->CurrentString);
-      this->CurrentString = "";
+      this->CurrentString.clear();
       this->Space = "";
     }
 

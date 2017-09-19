@@ -83,7 +83,7 @@ bool cmConditionEvaluator::IsTrue(
   const std::vector<cmExpandedCommandArgument>& args, std::string& errorString,
   cmake::MessageType& status)
 {
-  errorString = "";
+  errorString.clear();
 
   // handle empty invocation
   if (args.empty()) {

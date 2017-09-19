@@ -258,7 +258,7 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   const char* BinCreatorStr = this->GetOption(BinCreatorOpt);
   if (!BinCreatorStr || cmSystemTools::IsNOTFOUND(BinCreatorStr)) {
-    this->BinCreator = "";
+    this->BinCreator.clear();
   } else {
     this->BinCreator = BinCreatorStr;
   }
@@ -274,7 +274,7 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   const char* RepoGenStr = this->GetOption(RepoGenOpt);
   if (!RepoGenStr || cmSystemTools::IsNOTFOUND(RepoGenStr)) {
-    this->RepoGen = "";
+    this->RepoGen.clear();
   } else {
     this->RepoGen = RepoGenStr;
   }

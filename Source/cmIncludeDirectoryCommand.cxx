@@ -116,7 +116,7 @@ void cmIncludeDirectoryCommand::NormalizeInclude(std::string& inc)
   if ((b != std::string::npos) && (e != std::string::npos)) {
     inc.assign(inc, b, 1 + e - b); // copy the remaining substring
   } else {
-    inc = "";
+    inc.clear();
     return;
   }
 

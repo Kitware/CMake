@@ -1645,7 +1645,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
       nvalue = value ? value : "";
 
       cmSystemTools::ExpandListArgument(nvalue, files);
-      nvalue = "";
+      nvalue.clear();
       for (cc = 0; cc < files.size(); cc++) {
         if (!cmSystemTools::IsOff(files[cc].c_str())) {
           files[cc] = cmSystemTools::CollapseFullPath(files[cc]);
@@ -2448,7 +2448,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
     std::string input = source;
 
     // Start with empty output.
-    source = "";
+    source.clear();
 
     // Look for one @VAR@ at a time.
     const char* in = input.c_str();
@@ -3348,7 +3348,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
   moduleInCMakeRoot += filename;
   cmSystemTools::ConvertToUnixSlashes(moduleInCMakeRoot);
   if (!cmSystemTools::FileExists(moduleInCMakeRoot.c_str())) {
-    moduleInCMakeRoot = "";
+    moduleInCMakeRoot.clear();
   }
 
   // Normally, prefer the files found in CMAKE_MODULE_PATH. Only when the file
@@ -3532,7 +3532,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     std::string inLine;
     std::string outLine;
     while (cmSystemTools::GetLineFromStream(fin, inLine)) {
-      outLine = "";
+      outLine.clear();
       this->ConfigureString(inLine, outLine, atOnly, escapeQuotes);
       fout << outLine << newLineCharacters;
     }

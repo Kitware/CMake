@@ -93,18 +93,18 @@ void cmCTestScriptHandler::Initialize()
   this->EmptyBinDir = false;
   this->EmptyBinDirOnce = false;
 
-  this->SourceDir = "";
-  this->BinaryDir = "";
-  this->BackupSourceDir = "";
-  this->BackupBinaryDir = "";
-  this->CTestRoot = "";
-  this->CVSCheckOut = "";
-  this->CTestCmd = "";
-  this->UpdateCmd = "";
-  this->CTestEnv = "";
-  this->InitialCache = "";
-  this->CMakeCmd = "";
-  this->CMOutFile = "";
+  this->SourceDir.clear();
+  this->BinaryDir.clear();
+  this->BackupSourceDir.clear();
+  this->BackupBinaryDir.clear();
+  this->CTestRoot.clear();
+  this->CVSCheckOut.clear();
+  this->CTestCmd.clear();
+  this->UpdateCmd.clear();
+  this->CTestEnv.clear();
+  this->InitialCache.clear();
+  this->CMakeCmd.clear();
+  this->CMOutFile.clear();
   this->ExtraUpdates.clear();
 
   this->MinimumInterval = 20 * 60;
@@ -593,7 +593,7 @@ int cmCTestScriptHandler::CheckOutSourceDir()
   if (!cmSystemTools::FileExists(this->SourceDir.c_str()) &&
       !this->CVSCheckOut.empty()) {
     // we must now checkout the src dir
-    output = "";
+    output.clear();
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                "Run cvs: " << this->CVSCheckOut << std::endl);
     res = cmSystemTools::RunSingleCommand(
@@ -659,7 +659,7 @@ int cmCTestScriptHandler::PerformExtraUpdates()
       std::string fullCommand = command;
       fullCommand += " update ";
       fullCommand += cvsArgs[1];
-      output = "";
+      output.clear();
       retVal = 0;
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "Run Update: " << fullCommand << std::endl);
@@ -762,7 +762,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     command = this->CMakeCmd;
     command += " \"";
     command += this->SourceDir;
-    output = "";
+    output.clear();
     command += "\"";
     retVal = 0;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -802,7 +802,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   // for each variable/argument do a putenv
   for (std::string const& ctestCommand : ctestCommands) {
     command = ctestCommand;
-    output = "";
+    output.clear();
     retVal = 0;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                "Run ctest command: " << command << std::endl);

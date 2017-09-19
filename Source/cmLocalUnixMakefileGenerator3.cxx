@@ -144,7 +144,7 @@ void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
   this->HomeRelativeOutputPath = this->MaybeConvertToRelativePath(
     this->GetBinaryDirectory(), this->GetCurrentBinaryDirectory());
   if (this->HomeRelativeOutputPath == ".") {
-    this->HomeRelativeOutputPath = "";
+    this->HomeRelativeOutputPath.clear();
   }
   if (!this->HomeRelativeOutputPath.empty()) {
     this->HomeRelativeOutputPath += "/";
@@ -1163,7 +1163,7 @@ void cmLocalUnixMakefileGenerator3::AppendEcho(
       }
 
       // Reset the line to emtpy.
-      line = "";
+      line.clear();
 
       // Progress appears only on first line.
       progress = nullptr;

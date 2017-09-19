@@ -362,7 +362,7 @@ protected:
       } else {
         // Destroy the name of the file so that it won't be output as a
         // dependency.
-        info->FullPath = "";
+        info->FullPath.clear();
       }
     }
   }

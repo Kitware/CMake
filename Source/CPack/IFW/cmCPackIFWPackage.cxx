@@ -111,19 +111,19 @@ void cmCPackIFWPackage::DefaultConfiguration()
 {
   this->DisplayName.clear();
   this->Description.clear();
-  this->Version = "";
-  this->ReleaseDate = "";
-  this->Script = "";
+  this->Version.clear();
+  this->ReleaseDate.clear();
+  this->Script.clear();
   this->Licenses.clear();
   this->UserInterfaces.clear();
   this->Translations.clear();
-  this->SortingPriority = "";
-  this->UpdateText = "";
-  this->Default = "";
-  this->Essential = "";
-  this->Virtual = "";
-  this->ForcedInstallation = "";
-  this->RequiresAdminRights = "";
+  this->SortingPriority.clear();
+  this->UpdateText.clear();
+  this->Default.clear();
+  this->Essential.clear();
+  this->Virtual.clear();
+  this->ForcedInstallation.clear();
+  this->RequiresAdminRights.clear();
 }
 
 // Defaul configuration (all in one package)

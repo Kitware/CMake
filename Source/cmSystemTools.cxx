@@ -458,7 +458,7 @@ void cmSystemTools::ParseWindowsCommandLine(const char* command,
           arg.append(1, *c);
         } else if (in_argument) {
           args.push_back(arg);
-          arg = "";
+          arg.clear();
           in_argument = false;
         }
       } else {
@@ -559,7 +559,7 @@ std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
     while (*c == ' ' || *c == '\t') {
       ++c;
     }
-    arg = "";
+    arg.clear();
     if (*c == '"') {
       // Parse a quoted argument.
       ++c;
@@ -1184,7 +1184,7 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
           if (!newArg.empty() || emptyArgs) {
             // Add the last argument if the string is not empty.
             newargs.push_back(newArg);
-            newArg = "";
+            newArg.clear();
           }
         }
       } break;
@@ -1771,7 +1771,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
                                double timeout, std::vector<char>& out,
                                std::vector<char>& err)
 {
-  line = "";
+  line.clear();
   std::vector<char>::iterator outiter = out.begin();
   std::vector<char>::iterator erriter = err.begin();
   cmProcessOutput processOutput;
@@ -2111,19 +2111,19 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   cmSystemToolsCMakeGUICommand += "/cmake-gui";
   cmSystemToolsCMakeGUICommand += cmSystemTools::GetExecutableExtension();
   if (!cmSystemTools::FileExists(cmSystemToolsCMakeGUICommand.c_str())) {
-    cmSystemToolsCMakeGUICommand = "";
+    cmSystemToolsCMakeGUICommand.clear();
   }
   cmSystemToolsCMakeCursesCommand = exe_dir;
   cmSystemToolsCMakeCursesCommand += "/ccmake";
   cmSystemToolsCMakeCursesCommand += cmSystemTools::GetExecutableExtension();
   if (!cmSystemTools::FileExists(cmSystemToolsCMakeCursesCommand.c_str())) {
-    cmSystemToolsCMakeCursesCommand = "";
+    cmSystemToolsCMakeCursesCommand.clear();
   }
   cmSystemToolsCMClDepsCommand = exe_dir;
   cmSystemToolsCMClDepsCommand += "/cmcldeps";
   cmSystemToolsCMClDepsCommand += cmSystemTools::GetExecutableExtension();
   if (!cmSystemTools::FileExists(cmSystemToolsCMClDepsCommand.c_str())) {
-    cmSystemToolsCMClDepsCommand = "";
+    cmSystemToolsCMClDepsCommand.clear();
   }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE

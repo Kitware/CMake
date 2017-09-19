@@ -219,7 +219,7 @@ void cmDependsFortran::LocateModules()
                                           info.Provides.end());
 
     for (std::string const& r : info.Requires) {
-      this->Internal->TargetRequires[r] = "";
+      this->Internal->TargetRequires[r].clear();
     }
   }
 

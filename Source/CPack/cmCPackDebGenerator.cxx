@@ -400,7 +400,7 @@ int cmCPackDebGenerator::createDeb()
     compression_suffix = ".gz";
     tar_compression_type = cmArchiveWrite::CompressGZip;
   } else if (!strcmp(debian_compression_type, "none")) {
-    compression_suffix = "";
+    compression_suffix.clear();
     tar_compression_type = cmArchiveWrite::CompressNone;
   } else {
     cmCPackLogger(cmCPackLog::LOG_ERROR,

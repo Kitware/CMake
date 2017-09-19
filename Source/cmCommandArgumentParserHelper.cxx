@@ -234,7 +234,7 @@ int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)
   this->InputBufferPos = 0;
   this->CurrentLine = 0;
 
-  this->Result = "";
+  this->Result.clear();
 
   yyscan_t yyscanner;
   cmCommandArgument_yylex_init(&yyscanner);
@@ -298,7 +298,7 @@ void cmCommandArgumentParserHelper::SetMakefile(const cmMakefile* mf)
 void cmCommandArgumentParserHelper::SetResult(const char* value)
 {
   if (!value) {
-    this->Result = "";
+    this->Result.clear();
     return;
   }
   this->Result = value;

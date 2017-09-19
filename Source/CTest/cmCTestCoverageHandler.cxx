@@ -1073,7 +1073,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           break;
         }
 
-        actualSourceFile = "";
+        actualSourceFile.clear();
         sourceFile = st1re1.match(2);
       } else if (st1re2.find(line.c_str())) {
         if (gcovStyle == 0) {
@@ -1098,7 +1098,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           break;
         }
 
-        actualSourceFile = "";
+        actualSourceFile.clear();
         sourceFile = st2re1.match(1);
       } else if (st2re2.find(line.c_str())) {
         if (gcovStyle == 0) {
@@ -1240,11 +1240,11 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           }
         }
 
-        actualSourceFile = "";
+        actualSourceFile.clear();
       }
 
       if (!sourceFile.empty() && actualSourceFile.empty()) {
-        gcovFile = "";
+        gcovFile.clear();
 
         // Is it in the source dir or the binary dir?
         //
@@ -1541,7 +1541,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
             }
           }
 
-          actualSourceFile = "";
+          actualSourceFile.clear();
         }
       }
     }

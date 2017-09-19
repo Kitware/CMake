@@ -135,7 +135,7 @@ int main(int argc, char const* const* argv)
   cpackDefinitions definitions;
   definitions.Log = &log;
 
-  cpackConfigFile = "";
+  cpackConfigFile.clear();
 
   cmsys::CommandLineArguments arg;
   arg.Initialize(argc, argv);

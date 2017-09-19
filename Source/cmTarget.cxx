@@ -1530,7 +1530,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
       }
       // If it was found, set the suffix.
       if (*loc || *imp) {
-        suffix = "";
+        suffix.clear();
       }
     } else {
       std::string mcUpper = cmSystemTools::UpperCase(*mci);
@@ -1577,7 +1577,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   // configurations and no exact match.
   if (!*loc && !*imp) {
     // The suffix computed above is not useful.
-    suffix = "";
+    suffix.clear();
 
     // Look for a configuration-less location.  This may be set by
     // manually-written code.
