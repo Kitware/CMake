@@ -700,6 +700,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      double timeout, Encoding encoding)
 {
   std::vector<const char*> argv;
+  argv.reserve(command.size() + 1);
   for (std::string const& cmd : command) {
     argv.push_back(cmd.c_str());
   }
