@@ -226,13 +226,13 @@ bool cmCPackDragNDropGenerator::CreateEmptyFile(std::ostringstream& target,
   cmsys::ofstream fout(target.str().c_str(), std::ios::out | std::ios::binary);
   if (!fout) {
     return false;
-  } else {
-    // Seek to desired size - 1 byte
-    fout.seekp(size - 1, std::ios::beg);
-    char byte = 0;
-    // Write one byte to ensure file grows
-    fout.write(&byte, 1);
   }
+
+  // Seek to desired size - 1 byte
+  fout.seekp(size - 1, std::ios::beg);
+  char byte = 0;
+  // Write one byte to ensure file grows
+  fout.write(&byte, 1);
 
   return true;
 }

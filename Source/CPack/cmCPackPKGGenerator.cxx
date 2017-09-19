@@ -42,9 +42,9 @@ std::string cmCPackPKGGenerator::GetPackageName(
     out << cmSystemTools::GetFilenameWithoutLastExtension(packagesDir) << "-"
         << component.Name << ".pkg";
     return out.str();
-  } else {
-    return component.ArchiveFile + ".pkg";
   }
+
+  return component.ArchiveFile + ".pkg";
 }
 
 void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)

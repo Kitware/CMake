@@ -111,9 +111,8 @@ public:
   {
     if (this->Group) {
       return this->Group;
-    } else {
-      return this->Generator->CreateString(this->String);
     }
+    return this->Generator->CreateString(this->String);
   }
 };
 
@@ -240,10 +239,9 @@ std::string cmGlobalXCodeGenerator::FindXcodeBuildCommand()
       makeProgram = "xcodebuild";
     }
     return makeProgram;
-  } else {
-    // Use cmakexbuild wrapper to suppress environment dump from output.
-    return cmSystemTools::GetCMakeCommand() + "xbuild";
   }
+  // Use cmakexbuild wrapper to suppress environment dump from output.
+  return cmSystemTools::GetCMakeCommand() + "xbuild";
 }
 
 bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
@@ -2355,9 +2353,8 @@ const char* cmGlobalXCodeGenerator::GetTargetLinkFlagsVar(
       (target->GetType() == cmStateEnums::STATIC_LIBRARY ||
        target->GetType() == cmStateEnums::OBJECT_LIBRARY)) {
     return "OTHER_LIBTOOLFLAGS";
-  } else {
-    return "OTHER_LDFLAGS";
   }
+  return "OTHER_LDFLAGS";
 }
 
 const char* cmGlobalXCodeGenerator::GetTargetFileType(
@@ -2376,10 +2373,9 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(
     case cmStateEnums::MODULE_LIBRARY:
       if (target->IsXCTestOnApple())
         return "wrapper.cfbundle";
-      else if (target->IsCFBundleOnApple())
+      if (target->IsCFBundleOnApple())
         return "wrapper.plug-in";
-      else
-        return "compiled.mach-o.executable";
+      return "compiled.mach-o.executable";
     case cmStateEnums::SHARED_LIBRARY:
       return (target->GetPropertyAsBool("FRAMEWORK")
                 ? "wrapper.framework"
