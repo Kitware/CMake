@@ -250,6 +250,12 @@ if(CMake_RUN_CLANG_TIDY)
     message(FATAL_ERROR "CMake_RUN_CLANG_TIDY is ON but clang-tidy is not found!")
   endif()
   set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
+
+  # provide definitions for targets that require a rebuild once .clang-tidy changes
+  file(SHA1 ${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy clang_tidy_sha1)
+  set(CLANG_TIDY_DEFINITIONS "CLANG_TIDY_SHA1=${clang_tidy_sha1}")
+  unset(clang_tidy_sha1)
+
 endif()
 configure_file(.clang-tidy .clang-tidy COPYONLY)
 
