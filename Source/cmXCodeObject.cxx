@@ -129,9 +129,9 @@ void cmXCodeObject::Print(std::ostream& out)
   out << "};\n";
 }
 
-void cmXCodeObject::PrintAttribute(std::ostream& out, const int level,
-                                   const std::string& separator,
-                                   const int factor, const std::string& name,
+void cmXCodeObject::PrintAttribute(std::ostream& out, int level,
+                                   const std::string& separator, int factor,
+                                   const std::string& name,
                                    const cmXCodeObject* object,
                                    const cmXCodeObject* parent)
 {
