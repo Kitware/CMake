@@ -57,8 +57,8 @@ public:
   void SetLabelFilter(std::set<std::string> const& labels);
 
 private:
-  bool ShouldIDoCoverage(const char* file, const char* srcDir,
-                         const char* binDir);
+  bool ShouldIDoCoverage(std::string const& file, std::string const& srcDir,
+                         std::string const& binDir);
   void CleanCoverageLogFiles(std::ostream& log);
   bool StartCoverageLogFile(cmGeneratedFileStream& ostr, int logFileCount);
   void EndCoverageLogFile(cmGeneratedFileStream& ostr, int logFileCount);
