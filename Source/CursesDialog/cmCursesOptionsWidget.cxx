@@ -75,9 +75,8 @@ void cmCursesOptionsWidget::SetOption(const std::string& value)
   this->CurrentOption = 0; // default to 0 index
   this->SetValue(value);
   int index = 0;
-  for (std::vector<std::string>::iterator i = this->Options.begin();
-       i != this->Options.end(); ++i) {
-    if (*i == value) {
+  for (auto const& opt : this->Options) {
+    if (opt == value) {
       this->CurrentOption = index;
     }
     index++;

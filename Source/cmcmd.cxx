@@ -282,8 +282,7 @@ int cmcmd::HandleCppCheck(const std::string& runCmd,
   std::vector<std::string> cppcheck_cmd;
   cmSystemTools::ExpandListArgument(runCmd, cppcheck_cmd, true);
   // extract all the -D, -U, and -I options from the compile line
-  for (size_t i = 0; i < orig_cmd.size(); i++) {
-    const std::string& opt = orig_cmd[i];
+  for (auto const& opt : orig_cmd) {
     if (opt.size() > 2) {
       if ((opt[0] == '-') &&
           ((opt[1] == 'D') || (opt[1] == 'I') || (opt[1] == 'U'))) {
@@ -367,9 +366,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
     } else if (doing_options) {
       bool optionFound = false;
       // check arg against all the commandOptions
-      for (std::vector<std::string>::size_type i = 0;
-           i < commandOptions.size(); ++i) {
-        const std::string& command = commandOptions[i];
+      for (auto const& command : commandOptions) {
         if (arg.compare(0, command.size(), command) == 0) {
           optionFound = true;
           runCmd = arg.substr(command.size());
