@@ -1280,7 +1280,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateBuildPhase(
   const char* name, const char* name2, cmGeneratorTarget* target,
   const std::vector<cmCustomCommand>& commands)
 {
-  if (commands.size() == 0 && strcmp(name, "CMake ReRun") != 0) {
+  if (commands.empty() && strcmp(name, "CMake ReRun") != 0) {
     return nullptr;
   }
   cmXCodeObject* buildPhase =
@@ -2651,7 +2651,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       std::string linkDirs;
       for (std::vector<std::string>::const_iterator libDir = libDirs.begin();
            libDir != libDirs.end(); ++libDir) {
-        if (libDir->size() && *libDir != "/usr/lib") {
+        if (!libDir->empty() && *libDir != "/usr/lib") {
           // Now add the same one but append
           // $(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME) to it:
           linkDirs += " ";
@@ -2814,7 +2814,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateOrGetPBXGroup(
   // If it's the default source group (empty name) then put the source file
   // directly in the tgroup...
   //
-  if (std::string(sg->GetFullName()) == "") {
+  if (std::string(sg->GetFullName()).empty()) {
     this->GroupNameMap[s] = tgroup;
     return tgroup;
   }
@@ -3253,7 +3253,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
 void cmGlobalXCodeGenerator::OutputXCodeProject(
   cmLocalGenerator* root, std::vector<cmLocalGenerator*>& generators)
 {
-  if (generators.size() == 0) {
+  if (generators.empty()) {
     return;
   }
   // Skip local generators that are excluded from this project.

@@ -223,7 +223,7 @@ std::string cmXCodeScheme::FindConfiguration(const std::string& name)
   //
   if (std::find(this->ConfigList.begin(), this->ConfigList.end(), name) ==
         this->ConfigList.end() &&
-      this->ConfigList.size() > 0)
+      !this->ConfigList.empty())
     return this->ConfigList[0];
 
   return name;
