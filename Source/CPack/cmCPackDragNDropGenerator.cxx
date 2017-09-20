@@ -866,10 +866,11 @@ bool cmCPackDragNDropGenerator::BreakLongLine(const std::string& line,
     size_t line_length = max_line_length;
     if (i + line_length > line.size()) {
       line_length = line.size() - i;
-    } else
+    } else {
       while (line_length > 0 && line[i + line_length - 1] != ' ') {
         line_length = line_length - 1;
       }
+    }
 
     if (line_length == 0) {
       *error = "Please make sure there are no words "

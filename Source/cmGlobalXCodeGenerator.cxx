@@ -163,8 +163,9 @@ cmGlobalGeneratorFactory* cmGlobalXCodeGenerator::NewFactory()
 cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
   const std::string& name, cmake* cm) const
 {
-  if (name != GetActualName())
+  if (name != GetActualName()) {
     return nullptr;
+  }
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   cmXcodeVersionParser parser;
   std::string versionFile;
@@ -2344,10 +2345,12 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(
       return (target->GetPropertyAsBool("FRAMEWORK") ? "wrapper.framework"
                                                      : "archive.ar");
     case cmStateEnums::MODULE_LIBRARY:
-      if (target->IsXCTestOnApple())
+      if (target->IsXCTestOnApple()) {
         return "wrapper.cfbundle";
-      if (target->IsCFBundleOnApple())
+      }
+      if (target->IsCFBundleOnApple()) {
         return "wrapper.plug-in";
+      }
       return "compiled.mach-o.executable";
     case cmStateEnums::SHARED_LIBRARY:
       return (target->GetPropertyAsBool("FRAMEWORK")
@@ -2376,12 +2379,13 @@ const char* cmGlobalXCodeGenerator::GetTargetProductType(
                 ? "com.apple.product-type.framework"
                 : "com.apple.product-type.library.static");
     case cmStateEnums::MODULE_LIBRARY:
-      if (target->IsXCTestOnApple())
+      if (target->IsXCTestOnApple()) {
         return "com.apple.product-type.bundle.unit-test";
-      else if (target->IsCFBundleOnApple())
+      } else if (target->IsCFBundleOnApple()) {
         return "com.apple.product-type.bundle";
-      else
+      } else {
         return "com.apple.product-type.tool";
+      }
     case cmStateEnums::SHARED_LIBRARY:
       return (target->GetPropertyAsBool("FRAMEWORK")
                 ? "com.apple.product-type.framework"
@@ -2710,16 +2714,18 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreatePBXGroup(cmXCodeObject* parent,
                                                       const std::string& name)
 {
   cmXCodeObject* parentChildren = nullptr;
-  if (parent)
+  if (parent) {
     parentChildren = parent->GetObject("children");
+  }
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::PBXGroup);
   cmXCodeObject* groupChildren =
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
   group->AddAttribute("name", this->CreateString(name));
   group->AddAttribute("children", groupChildren);
   group->AddAttribute("sourceTree", this->CreateString("<group>"));
-  if (parentChildren)
+  if (parentChildren) {
     parentChildren->AddObject(group);
+  }
   return group;
 }
 
@@ -2866,15 +2872,16 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   v << std::setfill('0') << std::setw(4) << XcodeVersion * 10;
   group->AddAttribute("LastUpgradeCheck", this->CreateString(v.str()));
   this->RootObject->AddAttribute("attributes", group);
-  if (this->XcodeVersion >= 32)
+  if (this->XcodeVersion >= 32) {
     this->RootObject->AddAttribute("compatibilityVersion",
                                    this->CreateString("Xcode 3.2"));
-  else if (this->XcodeVersion >= 31)
+  } else if (this->XcodeVersion >= 31) {
     this->RootObject->AddAttribute("compatibilityVersion",
                                    this->CreateString("Xcode 3.1"));
-  else
+  } else {
     this->RootObject->AddAttribute("compatibilityVersion",
                                    this->CreateString("Xcode 3.0"));
+  }
   // Point Xcode at the top of the source tree.
   {
     std::string pdir =
@@ -3333,12 +3340,13 @@ void cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
   cmXCodeObject::Indent(1, fout);
   fout << "};\n";
   cmXCodeObject::Indent(1, fout);
-  if (this->XcodeVersion >= 32)
+  if (this->XcodeVersion >= 32) {
     fout << "objectVersion = 46;\n";
-  else if (this->XcodeVersion >= 31)
+  } else if (this->XcodeVersion >= 31) {
     fout << "objectVersion = 45;\n";
-  else
+  } else {
     fout << "objectVersion = 44;\n";
+  }
   cmXCode21Object::PrintList(this->XCodeObjects, fout);
   cmXCodeObject::Indent(1, fout);
   fout << "rootObject = " << this->RootObject->GetId()

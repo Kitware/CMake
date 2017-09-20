@@ -120,8 +120,9 @@ void cmXCodeObject::Print(std::ostream& out)
   out << "isa = " << PBXTypeNames[this->IsA] << ";" << separator;
   for (i = this->ObjectAttributes.begin(); i != this->ObjectAttributes.end();
        ++i) {
-    if (i->first == "isa")
+    if (i->first == "isa") {
       continue;
+    }
 
     PrintAttribute(out, 3, separator, indentFactor, i->first, i->second, this);
   }
