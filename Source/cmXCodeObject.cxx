@@ -42,8 +42,8 @@ cmXCodeObject::~cmXCodeObject()
 cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
 {
   this->Version = 15;
-  this->Target = 0;
-  this->Object = 0;
+  this->Target = nullptr;
+  this->Object = nullptr;
 
   this->IsA = ptype;
 
@@ -71,7 +71,7 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
 
   this->TypeValue = type;
   if (this->TypeValue == OBJECT) {
-    this->AddAttribute("isa", 0);
+    this->AddAttribute("isa", nullptr);
   }
 }
 
@@ -86,7 +86,7 @@ bool cmXCodeObject::IsEmpty() const
       return this->ObjectAttributes.empty();
     case OBJECT_REF:
     case OBJECT:
-      return this->Object == 0;
+      return this->Object == nullptr;
   }
   return true; // unreachable, but quiets warnings
 }
