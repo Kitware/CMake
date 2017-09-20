@@ -136,17 +136,17 @@ int cmCPackDragNDropGenerator::InitializeInternal()
                     "CPACK_DMG_SLA_LANGUAGES set but empty" << std::endl);
       return 0;
     }
-    for (size_t i = 0; i < languages.size(); ++i) {
-      std::string license = slaDirectory + "/" + languages[i] + ".license.txt";
+    for (auto const& language : languages) {
+      std::string license = slaDirectory + "/" + language + ".license.txt";
       if (!singleLicense && !cmSystemTools::FileExists(license)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR, "Missing license file "
-                        << languages[i] << ".license.txt" << std::endl);
+                        << language << ".license.txt" << std::endl);
         return 0;
       }
-      std::string menu = slaDirectory + "/" + languages[i] + ".menu.txt";
+      std::string menu = slaDirectory + "/" + language + ".menu.txt";
       if (!cmSystemTools::FileExists(menu)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR, "Missing menu file "
-                        << languages[i] << ".menu.txt" << std::endl);
+                        << language << ".menu.txt" << std::endl);
         return 0;
       }
     }
@@ -185,19 +185,19 @@ int cmCPackDragNDropGenerator::PackageFiles()
 
   // loop to create dmg files
   packageFileNames.clear();
-  for (size_t i = 0; i < package_files.size(); i++) {
+  for (auto const& package_file : package_files) {
     std::string full_package_name = std::string(toplevel) + std::string("/");
-    if (package_files[i] == "ALL_IN_ONE") {
+    if (package_file == "ALL_IN_ONE") {
       full_package_name += this->GetOption("CPACK_PACKAGE_FILE_NAME");
     } else {
-      full_package_name += package_files[i];
+      full_package_name += package_file;
     }
     full_package_name += std::string(GetOutputExtension());
     packageFileNames.push_back(full_package_name);
 
     std::string src_dir = toplevel;
     src_dir += "/";
-    src_dir += package_files[i];
+    src_dir += package_file;
 
     if (0 == this->CreateDMG(src_dir, full_package_name)) {
       return 0;
@@ -796,8 +796,8 @@ bool cmCPackDragNDropGenerator::WriteLicense(
         if (!this->BreakLongLine(line, lines, error)) {
           return false;
         }
-        for (size_t i = 0; i < lines.size(); ++i) {
-          outputStream << "        \"" << lines[i] << "\"\n";
+        for (auto const& l : lines) {
+          outputStream << "        \"" << l << "\"\n";
         }
       }
       outputStream << "        \"\\n\"\n";

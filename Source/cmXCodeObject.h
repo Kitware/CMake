@@ -119,9 +119,7 @@ public:
   // search the attribute list for an object of the specified type
   cmXCodeObject* GetObject(cmXCodeObject::PBXType t) const
   {
-    for (std::vector<cmXCodeObject*>::const_iterator i = this->List.begin();
-         i != this->List.end(); ++i) {
-      cmXCodeObject* o = *i;
+    for (auto o : this->List) {
       if (o->IsA == t) {
         return o;
       }

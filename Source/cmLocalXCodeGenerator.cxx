@@ -43,9 +43,8 @@ void cmLocalXCodeGenerator::Generate()
   cmLocalGenerator::Generate();
 
   const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::const_iterator iter = targets.begin();
-       iter != targets.end(); ++iter) {
-    (*iter)->HasMacOSXRpathInstallNameDir("");
+  for (auto target : targets) {
+    target->HasMacOSXRpathInstallNameDir("");
   }
 }
 
@@ -54,9 +53,8 @@ void cmLocalXCodeGenerator::GenerateInstallRules()
   cmLocalGenerator::GenerateInstallRules();
 
   const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::const_iterator iter = targets.begin();
-       iter != targets.end(); ++iter) {
-    (*iter)->HasMacOSXRpathInstallNameDir("");
+  for (auto target : targets) {
+    target->HasMacOSXRpathInstallNameDir("");
   }
 }
 
@@ -69,10 +67,8 @@ void cmLocalXCodeGenerator::ComputeObjectFilenames(
   // to avoid exact duplicate file names. Note that Mac file names are not
   // typically case sensitive, hence the LowerCase.
   std::map<std::string, int> counts;
-  for (std::map<cmSourceFile const*, std::string>::iterator si =
-         mapping.begin();
-       si != mapping.end(); ++si) {
-    cmSourceFile const* sf = si->first;
+  for (auto& si : mapping) {
+    cmSourceFile const* sf = si.first;
     std::string objectName =
       cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
     objectName += ".o";
@@ -82,6 +78,6 @@ void cmLocalXCodeGenerator::ComputeObjectFilenames(
     if (2 == counts[objectNameLower]) {
       // TODO: emit warning about duplicate name?
     }
-    si->second = objectName;
+    si.second = objectName;
   }
 }
