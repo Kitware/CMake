@@ -42,9 +42,10 @@ if(NOT CMAKE_CUDA_COMPILER_WORKS)
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determining if the CUDA compiler works failed with "
     "the following output:\n${__CMAKE_CUDA_COMPILER_OUTPUT}\n\n")
-  message(FATAL_ERROR "The CUDA compiler \"${CMAKE_CUDA_COMPILER}\" "
+  string(REPLACE "\n" "\n  " _output "${__CMAKE_CUDA_COMPILER_OUTPUT}")
+  message(FATAL_ERROR "The CUDA compiler\n  \"${CMAKE_CUDA_COMPILER}\"\n"
     "is not able to compile a simple test program.\nIt fails "
-    "with the following output:\n ${__CMAKE_CUDA_COMPILER_OUTPUT}\n\n"
+    "with the following output:\n  ${_output}\n\n"
     "CMake will not be able to correctly generate this project.")
 else()
   if(CUDA_TEST_WAS_RUN)
