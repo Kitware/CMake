@@ -560,6 +560,8 @@ int cmCTestCoverageHandler::ProcessHandler()
       ostr << "Cannot open source file: " << fullPath;
       errorsWhileAccumulating.push_back(ostr.str());
       error++;
+      covLogXML.EndElement(); // Report
+      covLogXML.EndElement(); // File
       continue;
     }
     int untested = 0;
