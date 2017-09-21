@@ -350,13 +350,14 @@ int main(int argc, char const* const* argv)
           }
 
           if (!mf->GetDefinition("CPACK_INSTALL_COMMANDS") &&
+              !mf->GetDefinition("CPACK_INSTALL_SCRIPT") &&
               !mf->GetDefinition("CPACK_INSTALLED_DIRECTORIES") &&
               !mf->GetDefinition("CPACK_INSTALL_CMAKE_PROJECTS")) {
             cmCPack_Log(
               &log, cmCPackLog::LOG_ERROR,
               "Please specify build tree of the project that uses CMake "
               "using CPACK_INSTALL_CMAKE_PROJECTS, specify "
-              "CPACK_INSTALL_COMMANDS, or specify "
+              "CPACK_INSTALL_COMMANDS, CPACK_INSTALL_SCRIPT, or "
               "CPACK_INSTALLED_DIRECTORIES."
                 << std::endl);
             parsed = 0;
