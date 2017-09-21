@@ -23,6 +23,9 @@ function(getPackageNameGlobexpr NAME COMPONENT VERSION REVISION FILE_NO RESULT_V
   endif()
 
   if(GENERATOR_SPECIFIC_FORMAT)
+    if(NOT REVISION)
+      set(REVISION "1")
+    endif()
     set(${RESULT_VAR} "${NAME}${COMPONENT}-${VERSION}-${REVISION}.*.rpm" PARENT_SCOPE)
   else()
     set(${RESULT_VAR} "${NAME}-${VERSION}-*${COMPONENT}.rpm" PARENT_SCOPE)

@@ -23,7 +23,7 @@ function(getPackageNameGlobexpr NAME COMPONENT VERSION REVISION FILE_NO RESULT_V
   endif()
 
   if(GENERATOR_SPECIFIC_FORMAT)
-    set(${RESULT_VAR} "${NAME}${COMPONENT}_${VERSION}-${REVISION}_*.deb" PARENT_SCOPE)
+    set(${RESULT_VAR} "${NAME}${COMPONENT}_${VERSION}_*.deb" PARENT_SCOPE)
   else()
     set(${RESULT_VAR} "${NAME}-${VERSION}-*${COMPONENT}.deb" PARENT_SCOPE)
   endif()
