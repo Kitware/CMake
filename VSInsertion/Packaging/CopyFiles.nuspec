@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>VS.ExternalAPIs.Microsoft.CMake</id>
+    <version>0.0.0.0</version>
+    <authors>cmakeworks</authors>
+    <owners>cmakeworks</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Package containing VS.ExternalAPIs.Microsoft.CMake artifacts</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags></tags>
+  </metadata>
+  <files>
+    <file src="**\*" target="" exclude="CopyFiles.*;logs\**;obj\**;VersionSeed.xml;bin\**" />
+  </files>
+</package>
