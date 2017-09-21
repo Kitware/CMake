@@ -15,6 +15,7 @@
 #include <ctype.h>
 #include <iostream>
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,7 +51,6 @@
 #include "cmVersion.h"
 #include "cmVersionConfig.h"
 #include "cmXMLWriter.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 #if defined(__BEOS__) || defined(__HAIKU__)
@@ -421,9 +421,8 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
-  CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
-  if (!this->ReadCustomConfigurationFileTree(this->BinaryDir.c_str(),
-                                             mf.get())) {
+  cmMakefile mf(&gg, cm.GetCurrentSnapshot());
+  if (!this->ReadCustomConfigurationFileTree(this->BinaryDir.c_str(), &mf)) {
     cmCTestOptionalLog(
       this, DEBUG, "Cannot find custom configuration file tree" << std::endl,
       quiet);
@@ -1123,9 +1122,9 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
       *log << "* Run internal CTest" << std::endl;
     }
 
-    CM_AUTO_PTR<cmSystemTools::SaveRestoreEnvironment> saveEnv;
+    std::unique_ptr<cmSystemTools::SaveRestoreEnvironment> saveEnv;
     if (modifyEnv) {
-      saveEnv.reset(new cmSystemTools::SaveRestoreEnvironment);
+      saveEnv = cm::make_unique<cmSystemTools::SaveRestoreEnvironment>();
       cmSystemTools::AppendEnv(*environment);
     }
 
@@ -1150,9 +1149,9 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
     output->clear();
   }
 
-  CM_AUTO_PTR<cmSystemTools::SaveRestoreEnvironment> saveEnv;
+  std::unique_ptr<cmSystemTools::SaveRestoreEnvironment> saveEnv;
   if (modifyEnv) {
-    saveEnv.reset(new cmSystemTools::SaveRestoreEnvironment);
+    saveEnv = cm::make_unique<cmSystemTools::SaveRestoreEnvironment>();
     cmSystemTools::AppendEnv(*environment);
   }
 

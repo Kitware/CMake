@@ -6,6 +6,7 @@
 #include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
 #include <iostream>
+#include <memory> // IWYU pragma: keep
 #include <stdlib.h>
 #include <string.h>
 
@@ -17,7 +18,6 @@
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 #ifdef _WIN32
@@ -626,12 +626,12 @@ void cmCTestLaunch::LoadConfig()
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
-  CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
+  cmMakefile mf(&gg, cm.GetCurrentSnapshot());
   std::string fname = this->LogDir;
   fname += "CTestLaunchConfig.cmake";
   if (cmSystemTools::FileExists(fname.c_str()) &&
-      mf->ReadListFile(fname.c_str())) {
-    this->SourceDir = mf->GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
+      mf.ReadListFile(fname.c_str())) {
+    this->SourceDir = mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
     cmSystemTools::ConvertToUnixSlashes(this->SourceDir);
   }
 }

@@ -5,10 +5,12 @@
 #include "cmsys/RegularExpression.hxx"
 #include <assert.h>
 #include <iomanip>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
 
+#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmDocumentationEntry.h"
@@ -29,7 +31,6 @@
 #include "cmXCode21Object.h"
 #include "cmXCodeObject.h"
 #include "cmXCodeScheme.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 struct cmLinkImplementation;
@@ -197,8 +198,8 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
     return nullptr;
   }
 
-  CM_AUTO_PTR<cmGlobalXCodeGenerator> gg(
-    new cmGlobalXCodeGenerator(cm, version_string, version_number));
+  auto gg = cm::make_unique<cmGlobalXCodeGenerator>(cm, version_string,
+                                                    version_number);
   return gg.release();
 #else
   std::cerr << "CMake should be built with cmake to use Xcode, "
@@ -669,7 +670,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   if (const char* cflags = sf->GetProperty("COMPILE_FLAGS")) {
     cmGeneratorExpression ge;
     std::string configName = "NO-PER-CONFIG-SUPPORT-IN-XCODE";
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> compiledExpr = ge.Parse(cflags);
+    std::unique_ptr<cmCompiledGeneratorExpression> compiledExpr =
+      ge.Parse(cflags);
     const char* processed = compiledExpr->Evaluate(lg, configName);
     if (compiledExpr->GetHadContextSensitiveCondition()) {
       std::ostringstream e;

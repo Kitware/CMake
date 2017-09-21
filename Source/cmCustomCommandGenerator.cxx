@@ -11,8 +11,8 @@
 #include "cmOutputConverter.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
 
+#include <memory> // IWYU pragma: keep
 #include <stddef.h>
 
 cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
@@ -29,7 +29,8 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
   for (cmCustomCommandLine const& cmdline : cmdlines) {
     cmCustomCommandLine argv;
     for (std::string const& clarg : cmdline) {
-      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(clarg);
+      std::unique_ptr<cmCompiledGeneratorExpression> cge =
+        this->GE->Parse(clarg);
       std::string parsed_arg = cge->Evaluate(this->LG, this->Config);
       if (this->CC.GetCommandExpandLists()) {
         std::vector<std::string> ExpandedArg;
@@ -44,7 +45,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
 
   std::vector<std::string> depends = this->CC.GetDepends();
   for (std::string const& d : depends) {
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(d);
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = this->GE->Parse(d);
     std::vector<std::string> result;
     cmSystemTools::ExpandListArgument(cge->Evaluate(this->LG, this->Config),
                                       result);

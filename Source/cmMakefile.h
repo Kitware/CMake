@@ -8,6 +8,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <deque>
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <set>
 #include <stack>
 #include <stddef.h>
@@ -23,7 +24,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmTarget.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -93,7 +93,7 @@ public:
    * Remove the function blocker whose scope ends with the given command.
    * This returns ownership of the function blocker object.
    */
-  CM_AUTO_PTR<cmFunctionBlocker> RemoveFunctionBlocker(
+  std::unique_ptr<cmFunctionBlocker> RemoveFunctionBlocker(
     cmFunctionBlocker* fb, const cmListFileFunction& lff);
 
   /**
@@ -782,10 +782,11 @@ public:
 
   void EnforceDirectoryLevelRules() const;
 
-  void AddEvaluationFile(const std::string& inputFile,
-                         CM_AUTO_PTR<cmCompiledGeneratorExpression> outputName,
-                         CM_AUTO_PTR<cmCompiledGeneratorExpression> condition,
-                         bool inputIsContent);
+  void AddEvaluationFile(
+    const std::string& inputFile,
+    std::unique_ptr<cmCompiledGeneratorExpression> outputName,
+    std::unique_ptr<cmCompiledGeneratorExpression> condition,
+    bool inputIsContent);
   std::vector<cmGeneratorExpressionEvaluationFile*> GetEvaluationFiles() const;
 
   std::vector<cmExportBuildFileGenerator*> GetExportBuildFileGenerators()

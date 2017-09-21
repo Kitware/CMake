@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestUpdateHandler.h"
 
+#include "cmAlgorithms.h"
 #include "cmCLocaleEnvironmentScope.h"
 #include "cmCTest.h"
 #include "cmCTestBZR.h"
@@ -16,7 +17,7 @@
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
 
-#include "cm_auto_ptr.hxx"
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 
 static const char* cmCTestUpdateHandlerUpdateStrings[] = {
@@ -134,28 +135,28 @@ int cmCTestUpdateHandler::ProcessHandler()
                      , this->Quiet);
 
   // Create an object to interact with the VCS tool.
-  CM_AUTO_PTR<cmCTestVC> vc;
+  std::unique_ptr<cmCTestVC> vc;
   switch (this->UpdateType) {
     case e_CVS:
-      vc.reset(new cmCTestCVS(this->CTest, ofs));
+      vc = cm::make_unique<cmCTestCVS>(this->CTest, ofs);
       break;
     case e_SVN:
-      vc.reset(new cmCTestSVN(this->CTest, ofs));
+      vc = cm::make_unique<cmCTestSVN>(this->CTest, ofs);
       break;
     case e_BZR:
-      vc.reset(new cmCTestBZR(this->CTest, ofs));
+      vc = cm::make_unique<cmCTestBZR>(this->CTest, ofs);
       break;
     case e_GIT:
-      vc.reset(new cmCTestGIT(this->CTest, ofs));
+      vc = cm::make_unique<cmCTestGIT>(this->CTest, ofs);
       break;
     case e_HG:
-      vc.reset(new cmCTestHG(this->CTest, ofs));
+      vc = cm::make_unique<cmCTestHG>(this->CTest, ofs);
       break;
     case e_P4:
-      vc.reset(new cmCTestP4(this->CTest, ofs));
+      vc = cm::make_unique<cmCTestP4>(this->CTest, ofs);
       break;
     default:
-      vc.reset(new cmCTestVC(this->CTest, ofs));
+      vc = cm::make_unique<cmCTestVC>(this->CTest, ofs);
       break;
   }
   vc->SetCommandLineTool(this->UpdateCommand);

@@ -3,6 +3,7 @@
 #include "cmMakefileExecutableTargetGenerator.h"
 
 #include <algorithm>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <string>
 #include <vector>
@@ -23,7 +24,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 cmMakefileExecutableTargetGenerator::cmMakefileExecutableTargetGenerator(
@@ -193,7 +193,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     // Set path conversion for link script shells.
     this->LocalGenerator->SetLinkScriptShell(useLinkScript);
 
-    CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+    std::unique_ptr<cmLinkLineComputer> linkLineComputer(
       new cmLinkLineDeviceComputer(
         this->LocalGenerator,
         this->LocalGenerator->GetStateSnapshot().GetDirectory()));
@@ -251,7 +251,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
       launcher += " ";
     }
 
-    CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
       this->LocalGenerator->CreateRulePlaceholderExpander());
 
     // Expand placeholders in the commands.
@@ -448,7 +448,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     linkFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
 
   {
-    CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+    std::unique_ptr<cmLinkLineComputer> linkLineComputer(
       this->CreateLinkLineComputer(
         this->LocalGenerator,
         this->LocalGenerator->GetStateSnapshot().GetDirectory()));
@@ -538,7 +538,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     // Set path conversion for link script shells.
     this->LocalGenerator->SetLinkScriptShell(useLinkScript);
 
-    CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+    std::unique_ptr<cmLinkLineComputer> linkLineComputer(
       this->CreateLinkLineComputer(
         this->LocalGenerator,
         this->LocalGenerator->GetStateSnapshot().GetDirectory()));
@@ -632,7 +632,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       launcher += " ";
     }
 
-    CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
       this->LocalGenerator->CreateRulePlaceholderExpander());
 
     // Expand placeholders in the commands.

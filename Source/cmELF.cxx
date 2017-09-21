@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmELF.h"
 
-#include "cm_auto_ptr.hxx"
 #include "cm_kwiml.h"
 #include "cmsys/FStream.hxx"
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stddef.h>
 #include <utility>
@@ -108,7 +108,7 @@ public:
   };
 
   // Construct and take ownership of the file stream object.
-  cmELFInternal(cmELF* external, CM_AUTO_PTR<cmsys::ifstream>& fin,
+  cmELFInternal(cmELF* external, std::unique_ptr<cmsys::ifstream>& fin,
                 ByteOrderType order)
     : External(external)
     , Stream(*fin.release())
@@ -231,7 +231,7 @@ public:
   typedef typename Types::tagtype tagtype;
 
   // Construct with a stream and byte swap indicator.
-  cmELFInternalImpl(cmELF* external, CM_AUTO_PTR<cmsys::ifstream>& fin,
+  cmELFInternalImpl(cmELF* external, std::unique_ptr<cmsys::ifstream>& fin,
                     ByteOrderType order);
 
   // Return the number of sections as specified by the ELF header.
@@ -424,9 +424,8 @@ private:
 };
 
 template <class Types>
-cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
-                                            CM_AUTO_PTR<cmsys::ifstream>& fin,
-                                            ByteOrderType order)
+cmELFInternalImpl<Types>::cmELFInternalImpl(
+  cmELF* external, std::unique_ptr<cmsys::ifstream>& fin, ByteOrderType order)
   : cmELFInternal(external, fin, order)
 {
   // Read the main header.
@@ -682,7 +681,7 @@ cmELF::cmELF(const char* fname)
   : Internal(nullptr)
 {
   // Try to open the file.
-  CM_AUTO_PTR<cmsys::ifstream> fin(new cmsys::ifstream(fname));
+  std::unique_ptr<cmsys::ifstream> fin(new cmsys::ifstream(fname));
 
   // Quit now if the file could not be opened.
   if (!fin.get() || !*fin) {

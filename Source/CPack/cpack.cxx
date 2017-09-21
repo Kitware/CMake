@@ -5,6 +5,7 @@
 #include "cmsys/Encoding.hxx"
 #include <iostream>
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stddef.h>
 #include <string>
@@ -24,7 +25,6 @@
 #include "cmMakefile.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 static const char* cmDocumentationName[][2] = {
@@ -192,8 +192,7 @@ int main(int argc, char const* const* argv)
   cminst.SetHomeOutputDirectory("");
   cminst.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator cmgg(&cminst);
-  CM_AUTO_PTR<cmMakefile> globalMF(
-    new cmMakefile(&cmgg, cminst.GetCurrentSnapshot()));
+  cmMakefile globalMF(&cmgg, cminst.GetCurrentSnapshot());
 #if defined(__CYGWIN__)
   globalMF->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
 #endif
@@ -225,16 +224,16 @@ int main(int argc, char const* const* argv)
     // find out which system cpack is running on, so it can setup the search
     // paths, so FIND_XXX() commands can be used in scripts
     std::string systemFile =
-      globalMF->GetModulesFile("CMakeDetermineSystem.cmake");
-    if (!globalMF->ReadListFile(systemFile.c_str())) {
+      globalMF.GetModulesFile("CMakeDetermineSystem.cmake");
+    if (!globalMF.ReadListFile(systemFile.c_str())) {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                   "Error reading CMakeDetermineSystem.cmake" << std::endl);
       return 1;
     }
 
     systemFile =
-      globalMF->GetModulesFile("CMakeSystemSpecificInformation.cmake");
-    if (!globalMF->ReadListFile(systemFile.c_str())) {
+      globalMF.GetModulesFile("CMakeSystemSpecificInformation.cmake");
+    if (!globalMF.ReadListFile(systemFile.c_str())) {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                   "Error reading CMakeSystemSpecificInformation.cmake"
                     << std::endl);
@@ -242,7 +241,7 @@ int main(int argc, char const* const* argv)
     }
 
     if (!cpackBuildConfig.empty()) {
-      globalMF->AddDefinition("CPACK_BUILD_CONFIG", cpackBuildConfig.c_str());
+      globalMF.AddDefinition("CPACK_BUILD_CONFIG", cpackBuildConfig.c_str());
     }
 
     if (cmSystemTools::FileExists(cpackConfigFile.c_str())) {
@@ -250,7 +249,7 @@ int main(int argc, char const* const* argv)
       cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
                   "Read CPack configuration file: " << cpackConfigFile
                                                     << std::endl);
-      if (!globalMF->ReadListFile(cpackConfigFile.c_str())) {
+      if (!globalMF.ReadListFile(cpackConfigFile.c_str())) {
         cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                     "Problem reading CPack config file: \""
                       << cpackConfigFile << "\"" << std::endl);
@@ -264,45 +263,44 @@ int main(int argc, char const* const* argv)
     }
 
     if (!generator.empty()) {
-      globalMF->AddDefinition("CPACK_GENERATOR", generator.c_str());
+      globalMF.AddDefinition("CPACK_GENERATOR", generator.c_str());
     }
     if (!cpackProjectName.empty()) {
-      globalMF->AddDefinition("CPACK_PACKAGE_NAME", cpackProjectName.c_str());
+      globalMF.AddDefinition("CPACK_PACKAGE_NAME", cpackProjectName.c_str());
     }
     if (!cpackProjectVersion.empty()) {
-      globalMF->AddDefinition("CPACK_PACKAGE_VERSION",
-                              cpackProjectVersion.c_str());
+      globalMF.AddDefinition("CPACK_PACKAGE_VERSION",
+                             cpackProjectVersion.c_str());
     }
     if (!cpackProjectVendor.empty()) {
-      globalMF->AddDefinition("CPACK_PACKAGE_VENDOR",
-                              cpackProjectVendor.c_str());
+      globalMF.AddDefinition("CPACK_PACKAGE_VENDOR",
+                             cpackProjectVendor.c_str());
     }
     // if this is not empty it has been set on the command line
     // go for it. Command line override values set in config file.
     if (!cpackProjectDirectory.empty()) {
-      globalMF->AddDefinition("CPACK_PACKAGE_DIRECTORY",
-                              cpackProjectDirectory.c_str());
+      globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY",
+                             cpackProjectDirectory.c_str());
     }
     // The value has not been set on the command line
     else {
       // get a default value (current working directory)
       cpackProjectDirectory = cmsys::SystemTools::GetCurrentWorkingDirectory();
       // use default value iff no value has been provided by the config file
-      if (!globalMF->IsSet("CPACK_PACKAGE_DIRECTORY")) {
-        globalMF->AddDefinition("CPACK_PACKAGE_DIRECTORY",
-                                cpackProjectDirectory.c_str());
+      if (!globalMF.IsSet("CPACK_PACKAGE_DIRECTORY")) {
+        globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY",
+                               cpackProjectDirectory.c_str());
       }
     }
     for (auto const& cd : definitions.Map) {
-      globalMF->AddDefinition(cd.first, cd.second.c_str());
+      globalMF.AddDefinition(cd.first, cd.second.c_str());
     }
 
-    const char* cpackModulesPath =
-      globalMF->GetDefinition("CPACK_MODULE_PATH");
+    const char* cpackModulesPath = globalMF.GetDefinition("CPACK_MODULE_PATH");
     if (cpackModulesPath) {
-      globalMF->AddDefinition("CMAKE_MODULE_PATH", cpackModulesPath);
+      globalMF.AddDefinition("CMAKE_MODULE_PATH", cpackModulesPath);
     }
-    const char* genList = globalMF->GetDefinition("CPACK_GENERATOR");
+    const char* genList = globalMF.GetDefinition("CPACK_GENERATOR");
     if (!genList) {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "CPack generator not specified"
                     << std::endl);
@@ -310,8 +308,8 @@ int main(int argc, char const* const* argv)
       std::vector<std::string> generatorsVector;
       cmSystemTools::ExpandListArgument(genList, generatorsVector);
       for (std::string const& gen : generatorsVector) {
-        cmMakefile::ScopePushPop raii(globalMF.get());
-        cmMakefile* mf = globalMF.get();
+        cmMakefile::ScopePushPop raii(&globalMF);
+        cmMakefile* mf = &globalMF;
         cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
                     "Specified generator: " << gen << std::endl);
         if (parsed && !mf->GetDefinition("CPACK_PACKAGE_NAME")) {

@@ -7,7 +7,8 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
+
+#include <memory> // IWYU pragma: keep
 
 cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   std::vector<std::string> const& dirs, const char* dest,
@@ -63,7 +64,7 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
   std::vector<std::string> dirs;
   cmGeneratorExpression ge;
   for (std::string const& d : this->Directories) {
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(d);
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(d);
     cmSystemTools::ExpandListArgument(
       cge->Evaluate(this->LocalGenerator, config), dirs);
   }

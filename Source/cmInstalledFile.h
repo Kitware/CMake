@@ -6,9 +6,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmGeneratorExpression.h"
-#include "cm_auto_ptr.hxx"
 
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <string>
 #include <vector>
 
@@ -22,7 +22,7 @@ class cmMakefile;
 class cmInstalledFile
 {
 public:
-  typedef CM_AUTO_PTR<cmCompiledGeneratorExpression>
+  typedef std::unique_ptr<cmCompiledGeneratorExpression>
     CompiledGeneratorExpressionPtrType;
 
   typedef std::vector<cmCompiledGeneratorExpression*> ExpressionVectorType;

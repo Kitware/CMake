@@ -15,7 +15,7 @@
 #include "cmVisualStudioGeneratorOptions.h"
 #include "windows.h"
 
-#include "cm_auto_ptr.hxx"
+#include <memory> // IWYU pragma: keep
 
 static std::string cmVS10EscapeXML(std::string arg)
 {
@@ -1722,7 +1722,8 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
 
     if (!deployContent.empty()) {
       cmGeneratorExpression ge;
-      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(deployContent);
+      std::unique_ptr<cmCompiledGeneratorExpression> cge =
+        ge.Parse(deployContent);
       // Deployment location cannot be set on a configuration basis
       if (!deployLocation.empty()) {
         this->WriteString("<Link>", 3);
@@ -2089,7 +2090,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       }
       if (configDependentFlags) {
         cmGeneratorExpression ge;
-        CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(flags);
+        std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(flags);
         std::string evaluatedFlags =
           cge->Evaluate(this->LocalGenerator, *config);
         clOptions.Parse(evaluatedFlags.c_str());
@@ -2297,16 +2298,16 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
 
   cmGlobalVisualStudio10Generator* gg =
     static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
-  CM_AUTO_PTR<Options> pOptions;
+  std::unique_ptr<Options> pOptions;
   switch (this->ProjectType) {
     case vcxproj:
-      pOptions = CM_AUTO_PTR<Options>(new Options(
-        this->LocalGenerator, Options::Compiler, gg->GetClFlagTable()));
+      pOptions = cm::make_unique<Options>(
+        this->LocalGenerator, Options::Compiler, gg->GetClFlagTable());
       break;
     case csproj:
-      pOptions = CM_AUTO_PTR<Options>(new Options(this->LocalGenerator,
-                                                  Options::CSharpCompiler,
-                                                  gg->GetCSharpFlagTable()));
+      pOptions =
+        cm::make_unique<Options>(this->LocalGenerator, Options::CSharpCompiler,
+                                 gg->GetCSharpFlagTable());
       break;
   }
   Options& clOptions = *pOptions;
@@ -2520,8 +2521,8 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
 {
   cmGlobalVisualStudio10Generator* gg =
     static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
-  CM_AUTO_PTR<Options> pOptions(new Options(
-    this->LocalGenerator, Options::ResourceCompiler, gg->GetRcFlagTable()));
+  auto pOptions = cm::make_unique<Options>(
+    this->LocalGenerator, Options::ResourceCompiler, gg->GetRcFlagTable());
   Options& rcOptions = *pOptions;
 
   std::string CONFIG = cmSystemTools::UpperCase(configName);
@@ -2581,8 +2582,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
 {
   cmGlobalVisualStudio10Generator* gg =
     static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
-  CM_AUTO_PTR<Options> pOptions(new Options(
-    this->LocalGenerator, Options::CudaCompiler, gg->GetCudaFlagTable()));
+  auto pOptions = cm::make_unique<Options>(
+    this->LocalGenerator, Options::CudaCompiler, gg->GetCudaFlagTable());
   Options& cudaOptions = *pOptions;
 
   // Get compile flags for CUDA in this directory.
@@ -2689,8 +2690,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
 {
   cmGlobalVisualStudio10Generator* gg =
     static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
-  CM_AUTO_PTR<Options> pOptions(new Options(
-    this->LocalGenerator, Options::CudaCompiler, gg->GetCudaFlagTable()));
+  auto pOptions = cm::make_unique<Options>(
+    this->LocalGenerator, Options::CudaCompiler, gg->GetCudaFlagTable());
   Options& cudaLinkOptions = *pOptions;
 
   // Determine if we need to do a device link
@@ -2760,8 +2761,8 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
 {
   cmGlobalVisualStudio10Generator* gg =
     static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
-  CM_AUTO_PTR<Options> pOptions(new Options(
-    this->LocalGenerator, Options::MasmCompiler, gg->GetMasmFlagTable()));
+  auto pOptions = cm::make_unique<Options>(
+    this->LocalGenerator, Options::MasmCompiler, gg->GetMasmFlagTable());
   Options& masmOptions = *pOptions;
 
   std::string CONFIG = cmSystemTools::UpperCase(configName);
@@ -2818,8 +2819,8 @@ bool cmVisualStudio10TargetGenerator::ComputeNasmOptions(
 {
   cmGlobalVisualStudio10Generator* gg =
     static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
-  CM_AUTO_PTR<Options> pOptions(new Options(
-    this->LocalGenerator, Options::NasmCompiler, gg->GetNasmFlagTable()));
+  auto pOptions = cm::make_unique<Options>(
+    this->LocalGenerator, Options::NasmCompiler, gg->GetNasmFlagTable());
   Options& nasmOptions = *pOptions;
 
   std::string CONFIG = cmSystemTools::UpperCase(configName);
@@ -2980,7 +2981,7 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
   if (const char* nativeLibDirectoriesExpression =
         this->GeneratorTarget->GetProperty("ANDROID_NATIVE_LIB_DIRECTORIES")) {
     cmGeneratorExpression ge;
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
+    std::unique_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(nativeLibDirectoriesExpression);
     std::string nativeLibDirs =
       cge->Evaluate(this->LocalGenerator, configName);
@@ -2993,7 +2994,7 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
         this->GeneratorTarget->GetProperty(
           "ANDROID_NATIVE_LIB_DEPENDENCIES")) {
     cmGeneratorExpression ge;
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
+    std::unique_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(nativeLibDependenciesExpression);
     std::string nativeLibDeps =
       cge->Evaluate(this->LocalGenerator, configName);
@@ -3012,7 +3013,7 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
   if (const char* jarDirectoriesExpression =
         this->GeneratorTarget->GetProperty("ANDROID_JAR_DIRECTORIES")) {
     cmGeneratorExpression ge;
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
+    std::unique_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(jarDirectoriesExpression);
     std::string jarDirectories =
       cge->Evaluate(this->LocalGenerator, configName);
@@ -3074,8 +3075,9 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
 {
   cmGlobalVisualStudio10Generator* gg =
     static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
-  CM_AUTO_PTR<Options> pOptions(new Options(
-    this->LocalGenerator, Options::Linker, gg->GetLinkFlagTable(), 0, this));
+  auto pOptions =
+    cm::make_unique<Options>(this->LocalGenerator, Options::Linker,
+                             gg->GetLinkFlagTable(), nullptr, this);
   Options& linkOptions = *pOptions;
 
   cmGeneratorTarget::LinkClosure const* linkClosure =

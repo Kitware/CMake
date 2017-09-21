@@ -10,6 +10,7 @@
 #include "cmsys/String.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,7 +31,6 @@
 #include "cmPolicies.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
-#include "cm_auto_ptr.hxx"
 #include "cm_sys_stat.h"
 #include "cmake.h"
 
@@ -368,8 +368,8 @@ bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  CM_AUTO_PTR<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
-  if (hash.get()) {
+  std::unique_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
+  if (hash) {
     std::string out = hash->HashFile(args[1]);
     if (!out.empty()) {
       this->Makefile->AddDefinition(args[2], out.c_str());
@@ -2629,7 +2629,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   const char* cainfo = this->Makefile->GetDefinition("CMAKE_TLS_CAINFO");
   std::string expectedHash;
   std::string hashMatchMSG;
-  CM_AUTO_PTR<cmCryptoHash> hash;
+  std::unique_ptr<cmCryptoHash> hash;
   bool showProgress = false;
   std::string userpwd;
 
@@ -2688,8 +2688,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         this->SetError("DOWNLOAD missing sum value for EXPECTED_MD5.");
         return false;
       }
-      hash =
-        CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(cmCryptoHash::AlgoMD5));
+      hash = cm::make_unique<cmCryptoHash>(cmCryptoHash::AlgoMD5);
       hashMatchMSG = "MD5 sum";
       expectedHash = cmSystemTools::LowerCase(*i);
     } else if (*i == "SHOW_PROGRESS") {
@@ -2710,7 +2709,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       }
       std::string algo = i->substr(0, pos);
       expectedHash = cmSystemTools::LowerCase(i->substr(pos + 1));
-      hash = CM_AUTO_PTR<cmCryptoHash>(cmCryptoHash::New(algo.c_str()));
+      hash = std::unique_ptr<cmCryptoHash>(cmCryptoHash::New(algo.c_str()));
       if (!hash.get()) {
         std::string err = "DOWNLOAD EXPECTED_HASH given unknown ALGO: ";
         err += algo;
@@ -2906,7 +2905,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 
   // Verify MD5 sum if requested:
   //
-  if (hash.get()) {
+  if (hash) {
     std::string actualHash = hash->HashFile(file);
     if (actualHash.empty()) {
       this->SetError("DOWNLOAD cannot compute hash on downloaded file");
@@ -3195,15 +3194,15 @@ void cmFileCommand::AddEvaluationFile(const std::string& inputName,
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
 
   cmGeneratorExpression outputGe(lfbt);
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> outputCge =
+  std::unique_ptr<cmCompiledGeneratorExpression> outputCge =
     outputGe.Parse(outputExpr);
 
   cmGeneratorExpression conditionGe(lfbt);
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> conditionCge =
+  std::unique_ptr<cmCompiledGeneratorExpression> conditionCge =
     conditionGe.Parse(condition);
 
-  this->Makefile->AddEvaluationFile(inputName, outputCge, conditionCge,
-                                    inputIsContent);
+  this->Makefile->AddEvaluationFile(inputName, std::move(outputCge),
+                                    std::move(conditionCge), inputIsContent);
 }
 
 bool cmFileCommand::HandleGenerateCommand(std::vector<std::string> const& args)

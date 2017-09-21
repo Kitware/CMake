@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefileTargetGenerator.h"
 
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <utility>
@@ -27,7 +28,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
@@ -134,7 +134,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   if (const char* additional_clean_files =
         this->Makefile->GetProperty("ADDITIONAL_MAKE_CLEAN_FILES")) {
     cmGeneratorExpression ge;
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
+    std::unique_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(additional_clean_files);
 
     cmSystemTools::ExpandListArgument(
@@ -434,7 +434,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   // Add flags from source file properties.
   if (const char* cflags = source.GetProperty("COMPILE_FLAGS")) {
     cmGeneratorExpression ge;
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
     const char* evaluatedFlags = cge->Evaluate(this->LocalGenerator, config,
                                                false, this->GeneratorTarget);
     this->LocalGenerator->AppendFlags(flags, evaluatedFlags);
@@ -570,7 +570,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   bool const lang_has_assembly = lang_has_preprocessor;
   bool const lang_can_export_cmds = lang_has_preprocessor;
 
-  CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->LocalGenerator->CreateRulePlaceholderExpander());
 
   // Construct the compile rules.

@@ -3,6 +3,7 @@
 #include "cmMakefileLibraryTargetGenerator.h"
 
 #include <algorithm>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <vector>
 
@@ -22,7 +23,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 cmMakefileLibraryTargetGenerator::cmMakefileLibraryTargetGenerator(
@@ -199,7 +199,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   this->LocalGenerator->AddConfigVariableFlags(
     extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->ConfigName);
 
-  CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+  std::unique_ptr<cmLinkLineComputer> linkLineComputer(
     this->CreateLinkLineComputer(
       this->LocalGenerator,
       this->LocalGenerator->GetStateSnapshot().GetDirectory()));
@@ -248,7 +248,7 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
   this->LocalGenerator->AddConfigVariableFlags(
     extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->ConfigName);
 
-  CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+  std::unique_ptr<cmLinkLineComputer> linkLineComputer(
     this->CreateLinkLineComputer(
       this->LocalGenerator,
       this->LocalGenerator->GetStateSnapshot().GetDirectory()));
@@ -348,7 +348,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     std::string linkLibs;
     if (this->GeneratorTarget->GetType() != cmStateEnums::STATIC_LIBRARY) {
 
-      CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+      std::unique_ptr<cmLinkLineComputer> linkLineComputer(
         new cmLinkLineDeviceComputer(
           this->LocalGenerator,
           this->LocalGenerator->GetStateSnapshot().GetDirectory()));
@@ -410,7 +410,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
       launcher += " ";
     }
 
-    CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
       this->LocalGenerator->CreateRulePlaceholderExpander());
 
     // Construct the main link rule and expand placeholders.
@@ -754,7 +754,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     std::string linkLibs;
     if (this->GeneratorTarget->GetType() != cmStateEnums::STATIC_LIBRARY) {
 
-      CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+      std::unique_ptr<cmLinkLineComputer> linkLineComputer(
         this->CreateLinkLineComputer(
           this->LocalGenerator,
           this->LocalGenerator->GetStateSnapshot().GetDirectory()));
@@ -873,7 +873,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       launcher += " ";
     }
 
-    CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
       this->LocalGenerator->CreateRulePlaceholderExpander());
     // Construct the main link rule and expand placeholders.
     rulePlaceholderExpander->SetTargetImpLib(targetOutPathImport);

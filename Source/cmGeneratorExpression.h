@@ -7,8 +7,8 @@
 
 #include "cmListFileCache.h"
 
-#include "cm_auto_ptr.hxx"
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <set>
 #include <string>
 #include <vector>
@@ -39,8 +39,9 @@ public:
     cmListFileBacktrace const& backtrace = cmListFileBacktrace());
   ~cmGeneratorExpression();
 
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> Parse(std::string const& input);
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> Parse(const char* input);
+  std::unique_ptr<cmCompiledGeneratorExpression> Parse(
+    std::string const& input);
+  std::unique_ptr<cmCompiledGeneratorExpression> Parse(const char* input);
 
   enum PreprocessContext
   {

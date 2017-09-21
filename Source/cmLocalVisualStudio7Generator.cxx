@@ -1453,7 +1453,7 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     }
     if (const char* cflags = sf.GetProperty("COMPILE_FLAGS")) {
       cmGeneratorExpression ge;
-      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
+      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
       fc.CompileFlags = cge->Evaluate(lg, *i);
       needfc = true;
     }
@@ -1849,7 +1849,7 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(
   if (!addedPrelink) {
     event.Write(target->GetPreLinkCommands());
   }
-  CM_AUTO_PTR<cmCustomCommand> pcc(
+  std::unique_ptr<cmCustomCommand> pcc(
     this->MaybeCreateImplibDir(target, configName, this->FortranProject));
   if (pcc.get()) {
     event.Write(*pcc);

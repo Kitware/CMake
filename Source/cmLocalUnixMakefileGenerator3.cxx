@@ -5,6 +5,7 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Terminal.h"
 #include <algorithm>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <utility>
@@ -28,7 +29,6 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 // Include dependency scanners for supported languages.  Only the
@@ -121,9 +121,9 @@ void cmLocalUnixMakefileGenerator3::Generate()
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
-    CM_AUTO_PTR<cmMakefileTargetGenerator> tg(
+    std::unique_ptr<cmMakefileTargetGenerator> tg(
       cmMakefileTargetGenerator::New(target));
-    if (tg.get()) {
+    if (tg) {
       tg->WriteRuleFiles();
       gg->RecordTargetProgress(tg.get());
     }
@@ -930,7 +930,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
     *content << dir;
   }
 
-  CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->CreateRulePlaceholderExpander());
 
   // Add each command line to the set of commands.
