@@ -999,8 +999,7 @@ int cmCPackGenerator::DoPackage()
     /* Generate checksum file */
     if (crypto.get() != nullptr) {
       std::string hashFile(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"));
-      hashFile +=
-        "/" + filename.substr(0, filename.rfind(this->GetOutputExtension()));
+      hashFile += "/" + filename;
       hashFile += "." + cmSystemTools::LowerCase(algo);
       cmsys::ofstream outF(hashFile.c_str());
       if (!outF) {
