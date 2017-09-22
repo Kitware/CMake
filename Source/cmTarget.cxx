@@ -5,6 +5,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <iterator>
 #include <map>
 #include <set>
 #include <sstream>
@@ -592,8 +593,9 @@ public:
   {
     std::vector<std::string> files;
     cmSystemTools::ExpandListArgument(entry, files);
-    std::vector<cmSourceFileLocation> locations(files.size());
-    std::transform(files.begin(), files.end(), locations.begin(),
+    std::vector<cmSourceFileLocation> locations;
+    locations.reserve(files.size());
+    std::transform(files.begin(), files.end(), std::back_inserter(locations),
                    CreateLocation(this->Needle.GetMakefile()));
 
     return std::find_if(locations.begin(), locations.end(),
