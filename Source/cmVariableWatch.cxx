@@ -2,11 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVariableWatch.h"
 
-#include "cmAlgorithms.h"
-
-#include "cm_auto_ptr.hxx"
-#include <algorithm>
+#include <memory>
 #include <utility>
+#include <vector>
 
 static const char* const cmVariableWatchAccessStrings[] = {
   "READ_ACCESS",     "UNKNOWN_READ_ACCESS", "UNKNOWN_DEFINED_ACCESS",
@@ -25,35 +23,27 @@ cmVariableWatch::cmVariableWatch()
 {
 }
 
-template <typename C>
-void deleteAllSecond(typename C::value_type it)
-{
-  cmDeleteAll(it.second);
-}
-
 cmVariableWatch::~cmVariableWatch()
 {
-  std::for_each(this->WatchMap.begin(), this->WatchMap.end(),
-                deleteAllSecond<cmVariableWatch::StringToVectorOfPairs>);
 }
 
 bool cmVariableWatch::AddWatch(const std::string& variable, WatchMethod method,
                                void* client_data /*=0*/,
                                DeleteData delete_data /*=0*/)
 {
-  CM_AUTO_PTR<cmVariableWatch::Pair> p(new cmVariableWatch::Pair);
+  auto p = std::make_shared<cmVariableWatch::Pair>();
   p->Method = method;
   p->ClientData = client_data;
   p->DeleteDataCall = delete_data;
   cmVariableWatch::VectorOfPairs& vp = this->WatchMap[variable];
-  for (cmVariableWatch::Pair* pair : vp) {
+  for (auto& pair : vp) {
     if (pair->Method == method && client_data &&
         client_data == pair->ClientData) {
       // Callback already exists
       return false;
     }
   }
-  vp.push_back(p.release());
+  vp.push_back(std::move(p));
   return true;
 }
 
@@ -70,7 +60,6 @@ void cmVariableWatch::RemoveWatch(const std::string& variable,
         // If client_data is NULL, we want to disconnect all watches against
         // the given method; otherwise match ClientData as well.
         (!client_data || (client_data == (*it)->ClientData))) {
-      delete *it;
       vp->erase(it);
       return;
     }
@@ -84,9 +73,17 @@ bool cmVariableWatch::VariableAccessed(const std::string& variable,
   cmVariableWatch::StringToVectorOfPairs::const_iterator mit =
     this->WatchMap.find(variable);
   if (mit != this->WatchMap.end()) {
-    const cmVariableWatch::VectorOfPairs* vp = &mit->second;
-    for (cmVariableWatch::Pair* it : *vp) {
-      it->Method(variable, access_type, it->ClientData, newValue, mf);
+    // The strategy here is to copy the list of callbacks, and ignore
+    // new callbacks that existing ones may add.
+    std::vector<std::weak_ptr<Pair>> vp(mit->second.begin(),
+                                        mit->second.end());
+    for (auto& weak_it : vp) {
+      // In the case where a callback was removed, the weak_ptr will not be
+      // lockable, and so this ensures we don't attempt to call into freed
+      // memory
+      if (auto it = weak_it.lock()) {
+        it->Method(variable, access_type, it->ClientData, newValue, mf);
+      }
     }
     return true;
   }

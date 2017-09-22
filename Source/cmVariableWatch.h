@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <string>
 #include <vector>
 
@@ -79,7 +80,7 @@ protected:
     }
   };
 
-  typedef std::vector<Pair*> VectorOfPairs;
+  typedef std::vector<std::shared_ptr<Pair>> VectorOfPairs;
   typedef std::map<std::string, VectorOfPairs> StringToVectorOfPairs;
 
   StringToVectorOfPairs WatchMap;
