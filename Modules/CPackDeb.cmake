@@ -88,6 +88,16 @@
 #    get overwritten and it is up to the packager to set the variables in a
 #    manner that will prevent such errors.
 #
+# .. variable:: CPACK_DEBIAN_PACKAGE_EPOCH
+#
+#  The Debian package epoch
+#
+#  * Mandatory : No
+#  * Default   : -
+#
+#  Optional number that should be incremented when changing versioning schemas
+#  or fixing mistakes in the version numbers of older packages.
+#
 # .. variable:: CPACK_DEBIAN_PACKAGE_VERSION
 #
 #  The Debian package version
@@ -95,12 +105,17 @@
 #  * Mandatory : YES
 #  * Default   : :variable:`CPACK_PACKAGE_VERSION`
 #
+#  This variable may contain only alphanumerics (A-Za-z0-9) and the characters
+#  . + - ~ (full stop, plus, hyphen, tilde) and should start with a digit. If
+#  :variable:`CPACK_DEBIAN_PACKAGE_RELEASE` is not set then hyphens are not
+#  allowed.
+#
 # .. variable:: CPACK_DEBIAN_PACKAGE_RELEASE
 #
 #  The Debian package release - Debian revision number.
 #
-#  * Mandatory : YES
-#  * Default   : 1
+#  * Mandatory : No
+#  * Default   : -
 #
 #  This is the numbering of the DEB package itself, i.e. the version of the
 #  packaging and not the version of the content (see
@@ -738,6 +753,32 @@ function(cpack_deb_prepare_package_vars)
     set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION})
   endif()
 
+  if(NOT CPACK_DEBIAN_PACKAGE_VERSION MATCHES "^[0-9][A-Za-z0-9.+-~]*$")
+    message(FATAL_ERROR
+      "CPackDeb: Debian package version must confirm to \"^[0-9][A-Za-z0-9.+-~]*$\" regex!")
+  endif()
+
+  if(CPACK_DEBIAN_PACKAGE_RELEASE)
+    if(NOT CPACK_DEBIAN_PACKAGE_RELEASE MATCHES "^[A-Za-z0-9.+~]+$")
+      message(FATAL_ERROR
+        "CPackDeb: Debian package release must confirm to \"^[A-Za-z0-9.+~]+$\" regex!")
+    endif()
+    string(APPEND CPACK_DEBIAN_PACKAGE_VERSION
+      "-${CPACK_DEBIAN_PACKAGE_RELEASE}")
+  elseif(CPACK_DEBIAN_PACKAGE_VERSION MATCHES ".*-.*")
+    message(FATAL_ERROR
+      "CPackDeb: Debian package version must not contain hyphens when CPACK_DEBIAN_PACKAGE_RELEASE is not provided!")
+  endif()
+
+  if(CPACK_DEBIAN_PACKAGE_EPOCH)
+    if(NOT CPACK_DEBIAN_PACKAGE_EPOCH MATCHES "^[0-9]+$")
+      message(FATAL_ERROR
+        "CPackDeb: Debian package epoch must confirm to \"^[0-9]+$\" regex!")
+    endif()
+    set(CPACK_DEBIAN_PACKAGE_VERSION
+      "${CPACK_DEBIAN_PACKAGE_EPOCH}:${CPACK_DEBIAN_PACKAGE_VERSION}")
+  endif()
+
   # Architecture: (mandatory)
   if(CPACK_DEB_PACKAGE_COMPONENT AND CPACK_DEBIAN_${_local_component_name}_PACKAGE_ARCHITECTURE)
     set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CPACK_DEBIAN_${_local_component_name}_PACKAGE_ARCHITECTURE}")
@@ -961,11 +1002,6 @@ function(cpack_deb_prepare_package_vars)
     set(CPACK_DEBIAN_GENERATE_POSTRM 0)
   endif()
 
-  if(NOT CPACK_DEBIAN_PACKAGE_RELEASE)
-    set(CPACK_DEBIAN_PACKAGE_RELEASE 1)
-  endif()
-
-
   cpack_deb_variable_fallback("CPACK_DEBIAN_FILE_NAME"
     "CPACK_DEBIAN_${_local_component_name}_FILE_NAME"
     "CPACK_DEBIAN_FILE_NAME")
@@ -974,7 +1010,7 @@ function(cpack_deb_prepare_package_vars)
       # Patch package file name to be in corrent debian format:
       # <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
       set(CPACK_OUTPUT_FILE_NAME
-        "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_DEBIAN_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
+        "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
     else()
       cmake_policy(PUSH)
         cmake_policy(SET CMP0010 NEW)
