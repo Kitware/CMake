@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>VS.ExternalAPIs.Microsoft.CMake</id>
-    <version>0.0.0.0</version>
+    <version>$version$</version>
     <authors>cmakeworks</authors>
     <owners>cmakeworks</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

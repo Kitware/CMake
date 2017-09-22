@@ -46,7 +46,6 @@
     <ItemGroup>
       <FilesToSign Include="@(FilesToCopy->'$(OutDir)%(Filename)%(Extension)')">
         <Authenticode>Microsoft</Authenticode>
-        <StrongName>StrongName</StrongName>
       </FilesToSign>
     </ItemGroup>
   </Target>
