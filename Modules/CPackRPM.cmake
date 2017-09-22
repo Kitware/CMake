@@ -530,7 +530,9 @@
 #  list of path to be excluded.
 #
 #  * Mandatory : NO
-#  * Default   : /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/include
+#  * Default   : /etc /etc/init.d /usr /usr/bin /usr/include /usr/lib
+#                /usr/libx32 /usr/lib64 /usr/share /usr/share/aclocal
+#                /usr/share/doc
 #
 #  May be used to exclude path (directories or files) from the auto-generated
 #  list of paths discovered by CPack RPM. The defaut value contains a
@@ -1083,7 +1085,9 @@ function(cpack_rpm_prepare_content_list)
   endif()
 
   if(NOT DEFINED CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
-    set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/libx32 /usr/include)
+    set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /etc /etc/init.d /usr /usr/bin
+        /usr/include /usr/lib /usr/libx32 /usr/lib64
+        /usr/share /usr/share/aclocal /usr/share/doc )
     if(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION)
       if(CPACK_RPM_PACKAGE_DEBUG)
         message("CPackRPM:Debug: Adding ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION} to builtin omit list.")
