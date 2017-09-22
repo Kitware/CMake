@@ -140,7 +140,7 @@ static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
     *defaultSetting = cmPolicies::NEW;
   } else if (defaultValue == "OLD") {
     *defaultSetting = cmPolicies::OLD;
-  } else if (defaultValue == "") {
+  } else if (defaultValue.empty()) {
     *defaultSetting = cmPolicies::WARN;
   } else {
     std::ostringstream e;

@@ -1591,7 +1591,7 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
 
   // If the group has a name, write the header.
   std::string name = sg->GetName();
-  if (name != "") {
+  if (!name.empty()) {
     this->WriteVCProjBeginGroup(fout, name.c_str(), "");
   }
 
@@ -1709,7 +1709,7 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
   }
 
   // If the group has a name, write the footer.
-  if (name != "") {
+  if (!name.empty()) {
     this->WriteVCProjEndGroup(fout);
   }
 
@@ -2006,7 +2006,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFooter(
        i != props.end(); ++i) {
     if (i->find("VS_GLOBAL_") == 0) {
       std::string name = i->substr(10);
-      if (name != "") {
+      if (!name.empty()) {
         /* clang-format off */
         fout << "\t\t<Global\n"
              << "\t\t\tName=\"" << name << "\"\n"

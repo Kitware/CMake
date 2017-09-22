@@ -84,7 +84,7 @@ void cmServer::ProcessRequest(cmConnection* connection,
   const cmServerRequest request(this, connection, value[kTYPE_KEY].asString(),
                                 value[kCOOKIE_KEY].asString(), value);
 
-  if (request.Type == "") {
+  if (request.Type.empty()) {
     cmServerResponse response(request);
     response.SetError("No type given in request.");
     this->WriteResponse(connection, response, nullptr);

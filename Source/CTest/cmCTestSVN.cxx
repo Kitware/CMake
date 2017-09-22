@@ -410,7 +410,7 @@ void cmCTestSVN::DoRevisionSVN(Revision const& revision,
 
   // Ignore changes in the old revision for external repositories
   if (revision.Rev == revision.SVNInfo->OldRevision &&
-      revision.SVNInfo->LocalPath != "") {
+      !revision.SVNInfo->LocalPath.empty()) {
     return;
   }
 

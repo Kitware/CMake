@@ -1375,7 +1375,7 @@ std::string cmSystemTools::CollapseCombinedPath(std::string const& dir,
   if (fileComponents.empty()) {
     return dir;
   }
-  if (fileComponents[0] != "") {
+  if (!fileComponents[0].empty()) {
     // File is not a relative path.
     return file;
   }

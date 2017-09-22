@@ -78,7 +78,7 @@ protected:
             }
           }
 
-          if (this->CurFileName == "") {
+          if (this->CurFileName.empty()) {
             // Check if this is a path that is relative to our source or
             // binary directories.
             for (std::string const& filePath : FilePaths) {
@@ -91,7 +91,7 @@ protected:
           }
 
           cmsys::ifstream fin(this->CurFileName.c_str());
-          if (this->CurFileName == "" || !fin) {
+          if (this->CurFileName.empty() || !fin) {
             this->CurFileName =
               this->Coverage.BinaryDir + "/" + atts[tagCount + 1];
             fin.open(this->CurFileName.c_str());
