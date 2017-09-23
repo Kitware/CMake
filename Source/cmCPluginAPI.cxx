@@ -505,13 +505,12 @@ cmCPluginAPISourceFileMap cmCPluginAPISourceFiles;
 
 void* CCONV cmCreateSourceFile(void)
 {
-  return (void*)new cmCPluginAPISourceFile;
+  return new cmCPluginAPISourceFile;
 }
 
 void* CCONV cmCreateNewSourceFile(void*)
 {
-  cmCPluginAPISourceFile* sf = new cmCPluginAPISourceFile;
-  return (void*)sf;
+  return new cmCPluginAPISourceFile;
 }
 
 void CCONV cmDestroySourceFile(void* arg)
@@ -544,7 +543,7 @@ void CCONV* cmGetSource(void* arg, const char* name)
       cmCPluginAPISourceFileMap::value_type entry(rsf, sf);
       i = cmCPluginAPISourceFiles.insert(entry).first;
     }
-    return (void*)i->second;
+    return i->second;
   }
   return nullptr;
 }
@@ -573,7 +572,7 @@ void* CCONV cmAddSource(void* arg, void* arg2)
 
   // Store the proxy in the map so it can be re-used and deleted later.
   cmCPluginAPISourceFiles[rsf] = sf;
-  return (void*)sf;
+  return sf;
 }
 
 const char* CCONV cmSourceFileGetSourceName(void* arg)
