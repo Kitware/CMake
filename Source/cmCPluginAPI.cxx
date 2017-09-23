@@ -454,9 +454,7 @@ void CCONV cmFreeArguments(int argc, char** argv)
   for (i = 0; i < argc; ++i) {
     free(argv[i]);
   }
-  if (argv) {
-    free(argv);
-  }
+  free(argv);
 }
 
 int CCONV cmGetTotalArgumentSize(int argc, char** argv)
