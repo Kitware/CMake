@@ -405,14 +405,8 @@ char CCONV* cmExpandVariablesInString(void* arg, const char* source,
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
   std::string barf = source;
-  std::string result = mf->ExpandVariablesInString(
-    barf, (escapeQuotes ? true : false), (atOnly ? true : false));
-  char* res = static_cast<char*>(malloc(result.size() + 1));
-  if (!result.empty()) {
-    strcpy(res, result.c_str());
-  }
-  res[result.size()] = '\0';
-  return res;
+  std::string result = mf->ExpandVariablesInString(barf, escapeQuotes, atOnly);
+  return strdup(result.c_str());
 }
 
 int CCONV cmExecuteCommand(void* arg, const char* name, int numArgs,
@@ -762,25 +756,19 @@ void CCONV cmSourceFileSetName2(void* arg, const char* name, const char* dir,
 char* CCONV cmGetFilenameWithoutExtension(const char* name)
 {
   std::string sres = cmSystemTools::GetFilenameWithoutExtension(name);
-  char* result = (char*)malloc(sres.size() + 1);
-  strcpy(result, sres.c_str());
-  return result;
+  return strdup(sres.c_str());
 }
 
 char* CCONV cmGetFilenamePath(const char* name)
 {
   std::string sres = cmSystemTools::GetFilenamePath(name);
-  char* result = (char*)malloc(sres.size() + 1);
-  strcpy(result, sres.c_str());
-  return result;
+  return strdup(sres.c_str());
 }
 
 char* CCONV cmCapitalized(const char* name)
 {
   std::string sres = cmSystemTools::Capitalized(name);
-  char* result = (char*)malloc(sres.size() + 1);
-  strcpy(result, sres.c_str());
-  return result;
+  return strdup(sres.c_str());
 }
 
 void CCONV cmCopyFileIfDifferent(const char* name1, const char* name2)
