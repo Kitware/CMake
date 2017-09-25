@@ -438,7 +438,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
         : mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
       cldeps = "\"";
       cldeps += cmSystemTools::GetCMClDepsCommand();
-      cldeps += "\" " + lang + " " + vars.Source + " \"$DEP_FILE\" $out \"";
+      cldeps += "\" " + lang + " " + vars.Source + " $DEP_FILE $out \"";
       cldeps += mf->GetSafeDefinition("CMAKE_CL_SHOWINCLUDES_PREFIX");
       cldeps += "\" \"" + cl + "\" ";
     }
