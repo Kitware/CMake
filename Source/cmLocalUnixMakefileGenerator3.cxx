@@ -5,7 +5,6 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Terminal.h"
 #include <algorithm>
-#include <functional>
 #include <sstream>
 #include <stdio.h>
 #include <utility>
@@ -2073,7 +2072,7 @@ void cmLocalUnixMakefileGenerator3::CreateCDCommand(
     std::string outputForExisting = this->ConvertToOutputForExisting(tgtDir);
     std::string prefix = cd_cmd + outputForExisting + " && ";
     std::transform(commands.begin(), commands.end(), commands.begin(),
-                   std::bind1st(std::plus<std::string>(), prefix));
+                   [&prefix](std::string const& s) { return prefix + s; });
   }
 }
 

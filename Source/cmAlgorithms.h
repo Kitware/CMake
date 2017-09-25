@@ -370,8 +370,7 @@ std::string cmWrap(char prefix, Range const& r, char suffix,
 template <typename Range, typename T>
 typename Range::const_iterator cmFindNot(Range const& r, T const& t)
 {
-  return std::find_if(r.begin(), r.end(),
-                      std::bind1st(std::not_equal_to<T>(), t));
+  return std::find_if(r.begin(), r.end(), [&t](T const& i) { return i != t; });
 }
 
 template <typename Range>
