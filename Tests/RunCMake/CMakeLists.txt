@@ -227,20 +227,38 @@ add_RunCMake_test(separate_arguments)
 add_RunCMake_test(set_property)
 add_RunCMake_test(string)
 add_RunCMake_test(test_include_dirs)
-foreach(var
-    CMAKE_C_COMPILER_ID
-    CMAKE_C_COMPILER_VERSION
-    CMAKE_C_STANDARD_DEFAULT
-    CMAKE_CXX_COMPILER_ID
-    CMAKE_CXX_COMPILER_VERSION
-    CMAKE_CXX_STANDARD_DEFAULT
-    CMake_TEST_CUDA
-    )
-  if(DEFINED ${var})
-    list(APPEND try_compile_ARGS -D${var}=${${var}})
+
+function(add_RunCMake_test_try_compile)
+  if(CMAKE_VERSION VERSION_LESS 3.9.20170907 AND "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC")
+    # Older CMake versions do not know about MSVC language standards.
+    # Approximate our logic from MSVC-CXX.cmake.
+    if ((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.0.24215.1 AND
+         CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10) OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.10.25017)
+      set(CMAKE_CXX_STANDARD_DEFAULT 14)
+    elseif (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0)
+      set(CMAKE_CXX_STANDARD_DEFAULT "")
+    else()
+      unset(CMAKE_CXX_STANDARD_DEFAULT)
+    endif()
   endif()
-endforeach()
-add_RunCMake_test(try_compile)
+  foreach(var
+      CMAKE_C_COMPILER_ID
+      CMAKE_C_COMPILER_VERSION
+      CMAKE_C_STANDARD_DEFAULT
+      CMAKE_CXX_COMPILER_ID
+      CMAKE_CXX_COMPILER_VERSION
+      CMAKE_CXX_STANDARD_DEFAULT
+      CMake_TEST_CUDA
+      )
+    if(DEFINED ${var})
+      list(APPEND try_compile_ARGS -D${var}=${${var}})
+    endif()
+  endforeach()
+  add_RunCMake_test(try_compile)
+endfunction()
+add_RunCMake_test_try_compile()
+
 add_RunCMake_test(try_run)
 add_RunCMake_test(set)
 add_RunCMake_test(variable_watch)
