@@ -30,8 +30,8 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = 0;
   this->TestResult.Properties = nullptr;
-  this->ProcessOutput = "";
-  this->CompressedOutput = "";
+  this->ProcessOutput.clear();
+  this->CompressedOutput.clear();
   this->CompressionRatio = 2;
   this->StopTimePassed = false;
   this->NumberOfRunsLeft = 1; // default to 1 run of the test
@@ -426,7 +426,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     this->TestResult.Path = this->TestProperties->Directory;
     this->TestProcess = new cmProcess;
     this->TestResult.Output = "Disabled";
-    this->TestResult.FullCommandLine = "";
+    this->TestResult.FullCommandLine.clear();
     return false;
   }
 
@@ -451,7 +451,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     *this->TestHandler->LogFile << msg << std::endl;
     cmCTestLog(this->CTest, HANDLER_OUTPUT, msg << std::endl);
     this->TestResult.Output = msg;
-    this->TestResult.FullCommandLine = "";
+    this->TestResult.FullCommandLine.clear();
     this->TestResult.CompletionStatus = "Fixture dependency failed";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
     return false;
@@ -471,7 +471,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     *this->TestHandler->LogFile << msg << std::endl;
     cmCTestLog(this->CTest, ERROR_MESSAGE, msg << std::endl);
     this->TestResult.Output = msg;
-    this->TestResult.FullCommandLine = "";
+    this->TestResult.FullCommandLine.clear();
     this->TestResult.CompletionStatus = "Missing Configuration";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
     return false;
@@ -487,14 +487,14 @@ bool cmCTestRunTest::StartTest(size_t total)
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Unable to find required file: " << file << std::endl);
       this->TestResult.Output = "Unable to find required file: " + file;
-      this->TestResult.FullCommandLine = "";
+      this->TestResult.FullCommandLine.clear();
       this->TestResult.CompletionStatus = "Required Files Missing";
       this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
       return false;
     }
   }
   // log and return if we did not find the executable
-  if (this->ActualCommand == "") {
+  if (this->ActualCommand.empty()) {
     // if the command was not found create a TestResult object
     // that has that information
     this->TestProcess = new cmProcess;
@@ -503,7 +503,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Unable to find executable: " << args[1] << std::endl);
     this->TestResult.Output = "Unable to find executable: " + args[1];
-    this->TestResult.FullCommandLine = "";
+    this->TestResult.FullCommandLine.clear();
     this->TestResult.CompletionStatus = "Unable to find executable";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
     return false;
@@ -595,7 +595,7 @@ double cmCTestRunTest::ResolveTimeout()
 {
   double timeout = this->TestProperties->Timeout;
 
-  if (this->CTest->GetStopTime() == "") {
+  if (this->CTest->GetStopTime().empty()) {
     return timeout;
   }
   struct tm* lctime;

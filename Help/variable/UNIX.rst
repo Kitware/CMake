@@ -1,7 +1,7 @@
 UNIX
 ----
 
-``True`` for UNIX and UNIX like operating systems.
-
-Set to ``true`` when the target system is UNIX or UNIX like (i.e.
-:variable:`APPLE` and :variable:`CYGWIN`).
+Set to ``True`` when the target system is UNIX or UNIX-like
+(e.g. :variable:`APPLE` and :variable:`CYGWIN`).  The
+:variable:`CMAKE_SYSTEM_NAME` variable should be queried if
+a more specific understanding of the target system is required.

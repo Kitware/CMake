@@ -172,7 +172,7 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
   } else if (this->FC->CMakePathName == "LIBRARY") {
     subdir = "lib";
   } else if (this->FC->CMakePathName == "FRAMEWORK") {
-    subdir = ""; // ? what to do for frameworks ?
+    subdir.clear(); // ? what to do for frameworks ?
   }
 
   for (std::string const& path : paths) {

@@ -411,7 +411,7 @@ void cmVisualStudio10TargetGenerator::Generate()
       continue;
     std::string globalKey = keyIt->substr(strlen(prefix));
     // Skip invalid or separately-handled properties.
-    if (globalKey == "" || globalKey == "PROJECT_TYPES" ||
+    if (globalKey.empty() || globalKey == "PROJECT_TYPES" ||
         globalKey == "ROOTNAMESPACE" || globalKey == "KEYWORD") {
       continue;
     }
@@ -618,7 +618,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
        ++i) {
     if (i->first.find("VS_DOTNET_REFERENCE_") == 0) {
       std::string name = i->first.substr(20);
-      if (name != "") {
+      if (!name.empty()) {
         std::string path = i->second.GetValue();
         if (!cmsys::SystemTools::FileIsFullPath(path)) {
           path = std::string(this->GeneratorTarget->Target->GetMakefile()
@@ -1616,7 +1616,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       std::string srcDir = this->Makefile->GetCurrentSourceDirectory();
       std::string binDir = this->Makefile->GetCurrentBinaryDirectory();
       if (fullFileName.find(binDir) != std::string::npos) {
-        sourceLink = "";
+        sourceLink.clear();
       } else if (fullFileName.find(srcDir) != std::string::npos) {
         sourceLink = fullFileName.substr(srcDir.length() + 1);
       } else {
@@ -3264,6 +3264,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   }
 
   linkOptions.Parse(flags.c_str());
+  linkOptions.FixManifestUACFlags();
 
   if (this->MSTools) {
     cmGeneratorTarget::ModuleDefinitionInfo const* mdi =

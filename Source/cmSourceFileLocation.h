@@ -29,7 +29,6 @@ public:
   cmSourceFileLocation(cmMakefile const* mf, const std::string& name);
   cmSourceFileLocation();
   cmSourceFileLocation(const cmSourceFileLocation& loc);
-  cmSourceFileLocation& operator=(const cmSourceFileLocation& loc);
 
   /**
    * Return whether the given source file location could refers to the
@@ -79,7 +78,7 @@ public:
    */
   cmMakefile const* GetMakefile() const { return this->Makefile; }
 private:
-  cmMakefile const* Makefile;
+  cmMakefile const* const Makefile;
   bool AmbiguousDirectory;
   bool AmbiguousExtension;
   std::string Directory;
@@ -90,6 +89,9 @@ private:
   // Update the location with additional knowledge.
   void Update(cmSourceFileLocation const& loc);
   void UpdateExtension(const std::string& name);
+
+  cmSourceFileLocation& operator=(const cmSourceFileLocation& loc)
+    CM_EQ_DELETE;
 };
 
 #endif

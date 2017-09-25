@@ -59,11 +59,10 @@ int cmCPackNSISGenerator::PackageFiles()
   std::string nsisInstallOptions = nsisFileName + "/NSIS.InstallOptions.ini";
   nsisFileName += "/project.nsi";
   std::ostringstream str;
-  std::vector<std::string>::const_iterator it;
-  for (it = files.begin(); it != files.end(); ++it) {
+  for (std::string const& file : files) {
     std::string outputDir = "$INSTDIR";
     std::string fileN =
-      cmSystemTools::RelativePath(toplevel.c_str(), it->c_str());
+      cmSystemTools::RelativePath(toplevel.c_str(), file.c_str());
     if (!this->Components.empty()) {
       const std::string::size_type pos = fileN.find('/');
 
@@ -87,12 +86,11 @@ int cmCPackNSISGenerator::PackageFiles()
   this->SetOptionIfNotSet("CPACK_NSIS_DELETE_FILES", str.str().c_str());
   std::vector<std::string> dirs;
   this->GetListOfSubdirectories(toplevel.c_str(), dirs);
-  std::vector<std::string>::const_iterator sit;
   std::ostringstream dstr;
-  for (sit = dirs.begin(); sit != dirs.end(); ++sit) {
+  for (std::string const& dir : dirs) {
     std::string componentName;
     std::string fileN =
-      cmSystemTools::RelativePath(toplevel.c_str(), sit->c_str());
+      cmSystemTools::RelativePath(toplevel.c_str(), dir.c_str());
     if (fileN.empty()) {
       continue;
     }
@@ -205,65 +203,57 @@ int cmCPackNSISGenerator::PackageFiles()
     // in a vector based on the indices, and print them in that order.
     std::vector<cmCPackInstallationType*> installTypes(
       this->InstallationTypes.size());
-    std::map<std::string, cmCPackInstallationType>::iterator installTypeIt;
-    for (installTypeIt = this->InstallationTypes.begin();
-         installTypeIt != this->InstallationTypes.end(); ++installTypeIt) {
-      installTypes[installTypeIt->second.Index - 1] = &installTypeIt->second;
+    for (auto& installType : this->InstallationTypes) {
+      installTypes[installType.second.Index - 1] = &installType.second;
     }
-    std::vector<cmCPackInstallationType*>::iterator installTypeIt2;
-    for (installTypeIt2 = installTypes.begin();
-         installTypeIt2 != installTypes.end(); ++installTypeIt2) {
+    for (cmCPackInstallationType* installType : installTypes) {
       installTypesCode += "InstType \"";
-      installTypesCode += (*installTypeIt2)->DisplayName;
+      installTypesCode += installType->DisplayName;
       installTypesCode += "\"\n";
     }
 
     // Create installation groups first
-    std::map<std::string, cmCPackComponentGroup>::iterator groupIt;
-    for (groupIt = this->ComponentGroups.begin();
-         groupIt != this->ComponentGroups.end(); ++groupIt) {
-      if (groupIt->second.ParentGroup == nullptr) {
+    for (auto& group : this->ComponentGroups) {
+      if (group.second.ParentGroup == nullptr) {
         componentCode +=
-          this->CreateComponentGroupDescription(&groupIt->second, macrosOut);
+          this->CreateComponentGroupDescription(&group.second, macrosOut);
       }
 
       // Add the group description, if any.
-      if (!groupIt->second.Description.empty()) {
+      if (!group.second.Description.empty()) {
         groupDescriptions += "  !insertmacro MUI_DESCRIPTION_TEXT ${" +
-          groupIt->first + "} \"" +
-          this->TranslateNewlines(groupIt->second.Description) + "\"\n";
+          group.first + "} \"" +
+          this->TranslateNewlines(group.second.Description) + "\"\n";
       }
     }
 
     // Create the remaining components, which aren't associated with groups.
-    std::map<std::string, cmCPackComponent>::iterator compIt;
-    for (compIt = this->Components.begin(); compIt != this->Components.end();
-         ++compIt) {
-      if (compIt->second.Files.empty()) {
+    for (auto& comp : this->Components) {
+      if (comp.second.Files.empty()) {
         // NSIS cannot cope with components that have no files.
         continue;
       }
 
       anyDownloadedComponents =
-        anyDownloadedComponents || compIt->second.IsDownloaded;
+        anyDownloadedComponents || comp.second.IsDownloaded;
 
-      if (!compIt->second.Group) {
+      if (!comp.second.Group) {
         componentCode +=
-          this->CreateComponentDescription(&compIt->second, macrosOut);
+          this->CreateComponentDescription(&comp.second, macrosOut);
       }
 
       // Add this component to the various section lists.
       sectionList += "  !insertmacro \"${MacroName}\" \"";
-      sectionList += compIt->first;
+      sectionList += comp.first;
       sectionList += "\"\n";
-      selectedVarsList += "Var " + compIt->first + "_selected\n";
-      selectedVarsList += "Var " + compIt->first + "_was_installed\n";
+      selectedVarsList += "Var " + comp.first + "_selected\n";
+      selectedVarsList += "Var " + comp.first + "_was_installed\n";
 
       // Add the component description, if any.
-      if (!compIt->second.Description.empty()) {
+      if (!comp.second.Description.empty()) {
         componentDescriptions += "  !insertmacro MUI_DESCRIPTION_TEXT ${" +
-          compIt->first + "} \"" +
-          this->TranslateNewlines(compIt->second.Description) + "\"\n";
+          comp.first + "} \"" +
+          this->TranslateNewlines(comp.second.Description) + "\"\n";
       }
     }
 
@@ -463,11 +453,9 @@ int cmCPackNSISGenerator::InitializeInternal()
 
     cmSystemTools::ExpandListArgument(cpackPackageDeskTopLinks,
                                       cpackPackageDesktopLinksVector);
-    for (std::vector<std::string>::iterator i =
-           cpackPackageDesktopLinksVector.begin();
-         i != cpackPackageDesktopLinksVector.end(); ++i) {
+    for (std::string const& cpdl : cpackPackageDesktopLinksVector) {
       cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                    "CPACK_CREATE_DESKTOP_LINKS: " << *i << std::endl);
+                    "CPACK_CREATE_DESKTOP_LINKS: " << cpdl << std::endl);
     }
   } else {
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "CPACK_CREATE_DESKTOP_LINKS: "
@@ -647,11 +635,9 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     componentCode += "  SectionIn RO\n";
   } else if (!component->InstallationTypes.empty()) {
     std::ostringstream out;
-    std::vector<cmCPackInstallationType*>::iterator installTypeIter;
-    for (installTypeIter = component->InstallationTypes.begin();
-         installTypeIter != component->InstallationTypes.end();
-         ++installTypeIter) {
-      out << " " << (*installTypeIter)->Index;
+    for (cmCPackInstallationType const* installType :
+         component->InstallationTypes) {
+      out << " " << installType->Index;
     }
     componentCode += "  SectionIn" + out.str() + "\n";
   }
@@ -730,19 +716,17 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     unsigned long totalSize = 0;
     { // the scope is needed for cmGeneratedFileStream
       cmGeneratedFileStream out(zipListFileName.c_str());
-      std::vector<std::string>::iterator fileIt;
-      for (fileIt = component->Files.begin(); fileIt != component->Files.end();
-           ++fileIt) {
+      for (std::string const& file : component->Files) {
         if (needQuotesInFile) {
           out << "\"";
         }
-        out << *fileIt;
+        out << file;
         if (needQuotesInFile) {
           out << "\"";
         }
         out << std::endl;
 
-        totalSize += cmSystemTools::FileLength(dirName + *fileIt);
+        totalSize += cmSystemTools::FileLength(dirName + file);
       }
     }
 
@@ -798,17 +782,14 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
   macrosOut << "!macro Remove_${" << component->Name << "}\n";
   macrosOut << "  IntCmp $" << component->Name << "_was_installed 0 noremove_"
             << component->Name << "\n";
-  std::vector<std::string>::iterator pathIt;
   std::string path;
-  for (pathIt = component->Files.begin(); pathIt != component->Files.end();
-       ++pathIt) {
-    path = *pathIt;
+  for (std::string const& pathIt : component->Files) {
+    path = pathIt;
     std::replace(path.begin(), path.end(), '/', '\\');
     macrosOut << "  Delete \"" << componentOutputDir << "\\" << path << "\"\n";
   }
-  for (pathIt = component->Directories.begin();
-       pathIt != component->Directories.end(); ++pathIt) {
-    path = *pathIt;
+  for (std::string const& pathIt : component->Directories) {
+    path = pathIt;
     std::replace(path.begin(), path.end(), '/', '\\');
     macrosOut << "  RMDir \"" << componentOutputDir << "\\" << path << "\"\n";
   }
@@ -841,17 +822,14 @@ std::string cmCPackNSISGenerator::CreateSelectionDependenciesDescription(
   visited.insert(component);
 
   std::ostringstream out;
-  std::vector<cmCPackComponent*>::iterator dependIt;
-  for (dependIt = component->Dependencies.begin();
-       dependIt != component->Dependencies.end(); ++dependIt) {
+  for (cmCPackComponent* depend : component->Dependencies) {
     // Write NSIS code to select this dependency
-    out << "  SectionGetFlags ${" << (*dependIt)->Name << "} $0\n";
+    out << "  SectionGetFlags ${" << depend->Name << "} $0\n";
     out << "  IntOp $0 $0 | ${SF_SELECTED}\n";
-    out << "  SectionSetFlags ${" << (*dependIt)->Name << "} $0\n";
-    out << "  IntOp $" << (*dependIt)->Name
-        << "_selected 0 + ${SF_SELECTED}\n";
+    out << "  SectionSetFlags ${" << depend->Name << "} $0\n";
+    out << "  IntOp $" << depend->Name << "_selected 0 + ${SF_SELECTED}\n";
     // Recurse
-    out << CreateSelectionDependenciesDescription(*dependIt, visited).c_str();
+    out << CreateSelectionDependenciesDescription(depend, visited).c_str();
   }
 
   return out.str();
@@ -867,19 +845,16 @@ std::string cmCPackNSISGenerator::CreateDeselectionDependenciesDescription(
   visited.insert(component);
 
   std::ostringstream out;
-  std::vector<cmCPackComponent*>::iterator dependIt;
-  for (dependIt = component->ReverseDependencies.begin();
-       dependIt != component->ReverseDependencies.end(); ++dependIt) {
+  for (cmCPackComponent* depend : component->ReverseDependencies) {
     // Write NSIS code to deselect this dependency
-    out << "  SectionGetFlags ${" << (*dependIt)->Name << "} $0\n";
+    out << "  SectionGetFlags ${" << depend->Name << "} $0\n";
     out << "  IntOp $1 ${SF_SELECTED} ~\n";
     out << "  IntOp $0 $0 & $1\n";
-    out << "  SectionSetFlags ${" << (*dependIt)->Name << "} $0\n";
-    out << "  IntOp $" << (*dependIt)->Name << "_selected 0 + 0\n";
+    out << "  SectionSetFlags ${" << depend->Name << "} $0\n";
+    out << "  IntOp $" << depend->Name << "_selected 0 + 0\n";
 
     // Recurse
-    out
-      << CreateDeselectionDependenciesDescription(*dependIt, visited).c_str();
+    out << CreateDeselectionDependenciesDescription(depend, visited).c_str();
   }
 
   return out.str();
@@ -903,20 +878,16 @@ std::string cmCPackNSISGenerator::CreateComponentGroupDescription(
     code += "\"" + group->DisplayName + "\" " + group->Name + "\n";
   }
 
-  std::vector<cmCPackComponentGroup*>::iterator groupIt;
-  for (groupIt = group->Subgroups.begin(); groupIt != group->Subgroups.end();
-       ++groupIt) {
-    code += this->CreateComponentGroupDescription(*groupIt, macrosOut);
+  for (cmCPackComponentGroup* g : group->Subgroups) {
+    code += this->CreateComponentGroupDescription(g, macrosOut);
   }
 
-  std::vector<cmCPackComponent*>::iterator comp;
-  for (comp = group->Components.begin(); comp != group->Components.end();
-       ++comp) {
-    if ((*comp)->Files.empty()) {
+  for (cmCPackComponent* comp : group->Components) {
+    if (comp->Files.empty()) {
       continue;
     }
 
-    code += this->CreateComponentDescription(*comp, macrosOut);
+    code += this->CreateComponentDescription(comp, macrosOut);
   }
   code += "SectionGroupEnd\n";
   return code;

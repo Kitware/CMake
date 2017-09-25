@@ -19,17 +19,15 @@ set(CMAKE_AUTORCC ON)
 
 # Generated source file
 add_custom_command(OUTPUT main.cpp
-                   COMMAND ${CMAKE_COMMAND} -E sleep 2
-                   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/main.cpp
-                   )
+  COMMAND ${CMAKE_COMMAND} -E sleep 2
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/main.cpp)
 
 add_executable(mocRerun
   ${CMAKE_CURRENT_BINARY_DIR}/test1.h
   ${CMAKE_CURRENT_BINARY_DIR}/main.cpp
-  res1.qrc
-  )
+  res1.qrc)
 target_include_directories(mocRerun PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(mocRerun ${QT_CORE_TARGET})
 # Write target name to text file
 add_custom_command(TARGET mocRerun POST_BUILD COMMAND
-  ${CMAKE_COMMAND} -E echo "$<TARGET_FILE:mocRerun>" > target1.txt)
+  ${CMAKE_COMMAND} -E echo "$<TARGET_FILE:mocRerun>" > mocRerun.txt)

@@ -70,7 +70,7 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
   std::map<std::string, cmCPackComponentGroup>::iterator groupIt;
   for (groupIt = this->ComponentGroups.begin();
        groupIt != this->ComponentGroups.end(); ++groupIt) {
-    if (groupIt->second.ParentGroup == 0) {
+    if (groupIt->second.ParentGroup == nullptr) {
       CreateChoiceOutline(groupIt->second, xout);
     }
   }

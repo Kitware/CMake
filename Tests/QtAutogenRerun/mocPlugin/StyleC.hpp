@@ -1,7 +1,7 @@
 #ifndef STYLEC_HPP
 #define STYLEC_HPP
 
-#include "StyleCommon.hpp"
+#include "UtilityMacros.hpp"
 #include <QStylePlugin>
 
 class StyleC : public QStylePlugin

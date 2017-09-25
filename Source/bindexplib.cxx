@@ -218,7 +218,7 @@ public:
           *    The name of the Function entry points
           */
           if (pSymbolTable->N.Name.Short != 0) {
-            symbol = "";
+            symbol.clear();
             symbol.insert(0, (const char*)pSymbolTable->N.ShortName, 8);
           } else {
             symbol = stringTable + pSymbolTable->N.Name.Long;

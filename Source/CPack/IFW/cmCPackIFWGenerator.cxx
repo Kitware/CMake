@@ -49,19 +49,15 @@ int cmCPackIFWGenerator::PackageFiles()
     ifwCmd += " -p " + this->toplevel + "/packages";
 
     if (!this->PkgsDirsVector.empty()) {
-      for (std::vector<std::string>::iterator it =
-             this->PkgsDirsVector.begin();
-           it != this->PkgsDirsVector.end(); ++it) {
-        ifwCmd += " -p " + *it;
+      for (std::string const& it : this->PkgsDirsVector) {
+        ifwCmd += " -p " + it;
       }
     }
 
     if (!this->RepoDirsVector.empty()) {
       if (!this->IsVersionLess("3.1")) {
-        for (std::vector<std::string>::iterator it =
-               this->RepoDirsVector.begin();
-             it != this->RepoDirsVector.end(); ++it) {
-          ifwCmd += " --repository " + *it;
+        for (std::string const& rd : this->RepoDirsVector) {
+          ifwCmd += " --repository " + rd;
         }
       } else {
         cmCPackIFWLogger(WARNING, "The \"CPACK_IFW_REPOSITORIES_DIRECTORIES\" "
@@ -137,19 +133,15 @@ int cmCPackIFWGenerator::PackageFiles()
     ifwCmd += " -p " + this->toplevel + "/packages";
 
     if (!this->PkgsDirsVector.empty()) {
-      for (std::vector<std::string>::iterator it =
-             this->PkgsDirsVector.begin();
-           it != this->PkgsDirsVector.end(); ++it) {
-        ifwCmd += " -p " + *it;
+      for (std::string const& it : this->PkgsDirsVector) {
+        ifwCmd += " -p " + it;
       }
     }
 
     if (!this->RepoDirsVector.empty()) {
       if (!this->IsVersionLess("3.1")) {
-        for (std::vector<std::string>::iterator it =
-               this->RepoDirsVector.begin();
-             it != this->RepoDirsVector.end(); ++it) {
-          ifwCmd += " --repository " + *it;
+        for (std::string const& rd : this->RepoDirsVector) {
+          ifwCmd += " --repository " + rd;
         }
       } else {
         cmCPackIFWLogger(WARNING, "The \"CPACK_IFW_REPOSITORIES_DIRECTORIES\" "
@@ -258,7 +250,7 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   const char* BinCreatorStr = this->GetOption(BinCreatorOpt);
   if (!BinCreatorStr || cmSystemTools::IsNOTFOUND(BinCreatorStr)) {
-    this->BinCreator = "";
+    this->BinCreator.clear();
   } else {
     this->BinCreator = BinCreatorStr;
   }
@@ -274,7 +266,7 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   const char* RepoGenStr = this->GetOption(RepoGenOpt);
   if (!RepoGenStr || cmSystemTools::IsNOTFOUND(RepoGenStr)) {
-    this->RepoGen = "";
+    this->RepoGen.clear();
   } else {
     this->RepoGen = RepoGenStr;
   }
@@ -321,9 +313,8 @@ int cmCPackIFWGenerator::InitializeInternal()
   if (const char* RepoAllStr = this->GetOption("CPACK_IFW_REPOSITORIES_ALL")) {
     std::vector<std::string> RepoAllVector;
     cmSystemTools::ExpandListArgument(RepoAllStr, RepoAllVector);
-    for (std::vector<std::string>::iterator rit = RepoAllVector.begin();
-         rit != RepoAllVector.end(); ++rit) {
-      this->GetRepository(*rit);
+    for (std::string const& r : RepoAllVector) {
+      this->GetRepository(r);
     }
   }
 

@@ -33,11 +33,11 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
   // build an arg list for TryCompile and extract the runArgs,
   std::vector<std::string> tryCompile;
 
-  this->CompileResultVariable = "";
-  this->RunResultVariable = "";
-  this->OutputVariable = "";
-  this->RunOutputVariable = "";
-  this->CompileOutputVariable = "";
+  this->CompileResultVariable.clear();
+  this->RunResultVariable.clear();
+  this->OutputVariable.clear();
+  this->RunOutputVariable.clear();
+  this->CompileOutputVariable.clear();
 
   std::string runArgs;
   unsigned int i;

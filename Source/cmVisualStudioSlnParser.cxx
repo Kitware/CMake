@@ -329,7 +329,7 @@ bool cmVisualStudioSlnParser::State::Process(
     case FileStateIgnore:
       if (line.GetTag() == this->EndIgnoreTag) {
         this->Stack.pop();
-        this->EndIgnoreTag = "";
+        this->EndIgnoreTag.clear();
       }
       break;
     default:

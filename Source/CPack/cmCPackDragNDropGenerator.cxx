@@ -242,9 +242,9 @@ bool cmCPackDragNDropGenerator::RunCommand(std::ostringstream& command,
 {
   int exit_code = 1;
 
-  bool result =
-    cmSystemTools::RunSingleCommand(command.str().c_str(), output, output,
-                                    &exit_code, 0, this->GeneratorVerbose, 0);
+  bool result = cmSystemTools::RunSingleCommand(command.str().c_str(), output,
+                                                output, &exit_code, nullptr,
+                                                this->GeneratorVerbose, 0);
 
   if (!result || exit_code) {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Error executing: " << command.str()
@@ -553,10 +553,10 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       header_data.push_back(languages.size());
       for (size_t i = 0; i < languages.size(); ++i) {
         CFStringRef language_cfstring = CFStringCreateWithCString(
-          NULL, languages[i].c_str(), kCFStringEncodingUTF8);
+          nullptr, languages[i].c_str(), kCFStringEncodingUTF8);
         CFStringRef iso_language =
           CFLocaleCreateCanonicalLanguageIdentifierFromString(
-            NULL, language_cfstring);
+            nullptr, language_cfstring);
         if (!iso_language) {
           cmCPackLogger(cmCPackLog::LOG_ERROR, languages[i]
                           << " is not a recognized language" << std::endl);

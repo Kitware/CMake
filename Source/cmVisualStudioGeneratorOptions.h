@@ -77,6 +77,8 @@ public:
 
   void FixCudaCodeGeneration();
 
+  void FixManifestUACFlags();
+
   bool IsDebug() const;
   bool IsWinRt() const;
   bool IsManaged() const;

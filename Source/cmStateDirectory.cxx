@@ -80,7 +80,7 @@ void cmStateDirectory::ComputeRelativePathTopBinary()
   if (result.size() < 2 || result.substr(0, 2) != "//") {
     this->DirectoryState->RelativePathTopBinary = result;
   } else {
-    this->DirectoryState->RelativePathTopBinary = "";
+    this->DirectoryState->RelativePathTopBinary.clear();
   }
 }
 
@@ -422,7 +422,7 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
                                           bool chain) const
 {
   static std::string output;
-  output = "";
+  output.clear();
   if (prop == "PARENT_DIRECTORY") {
     cmStateSnapshot parent = this->Snapshot_.GetBuildsystemDirectoryParent();
     if (parent.IsValid()) {

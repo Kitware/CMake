@@ -97,8 +97,8 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn,
     return true;
   }
 
-  std::string result = FindProgram();
-  if (result != "") {
+  std::string const result = FindProgram();
+  if (!result.empty()) {
     // Save the value in the cache
     this->Makefile->AddCacheDefinition(this->VariableName, result.c_str(),
                                        this->VariableDocumentation.c_str(),
@@ -229,7 +229,7 @@ std::string cmFindProgramCommand::GetBundleExecutable(
   // returned executableURL is relative to <appbundle>/Contents/MacOS/
   CFURLRef executableURL = CFBundleCopyExecutableURL(appBundle);
 
-  if (executableURL != NULL) {
+  if (executableURL != nullptr) {
     const int MAX_OSX_PATH_SIZE = 1024;
     char buffer[MAX_OSX_PATH_SIZE];
 

@@ -71,7 +71,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                                      bool isTryRun)
 {
   this->BinaryDirectory = argv[1];
-  this->OutputFile = "";
+  this->OutputFile.clear();
   // which signature were we called with ?
   this->SrcFileSignature = true;
 
@@ -919,8 +919,8 @@ void cmCoreTryCompile::CleanupFiles(const char* binDir)
 void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
                                       cmStateEnums::TargetType targetType)
 {
-  this->FindErrorMessage = "";
-  this->OutputFile = "";
+  this->FindErrorMessage.clear();
+  this->OutputFile.clear();
   std::string tmpOutputFile = "/";
   if (targetType == cmStateEnums::EXECUTABLE) {
     tmpOutputFile += targetName;

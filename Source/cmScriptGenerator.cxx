@@ -26,7 +26,7 @@ void cmScriptGenerator::Generate(
   this->ConfigurationName = config;
   this->ConfigurationTypes = &configurationTypes;
   this->GenerateScript(os);
-  this->ConfigurationName = "";
+  this->ConfigurationName.clear();
   this->ConfigurationTypes = nullptr;
 }
 

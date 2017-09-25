@@ -121,7 +121,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       force_command.push_back(".");
       cmCustomCommandLines force_commands;
       force_commands.push_back(force_command);
-      std::string no_main_dependency = "";
+      std::string no_main_dependency;
       std::string force = this->GetCurrentBinaryDirectory();
       force += cmake::GetCMakeFilesDirectory();
       force += "/";
@@ -1591,7 +1591,7 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
 
   // If the group has a name, write the header.
   std::string name = sg->GetName();
-  if (name != "") {
+  if (!name.empty()) {
     this->WriteVCProjBeginGroup(fout, name.c_str(), "");
   }
 
@@ -1709,7 +1709,7 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
   }
 
   // If the group has a name, write the footer.
-  if (name != "") {
+  if (!name.empty()) {
     this->WriteVCProjEndGroup(fout);
   }
 
@@ -2006,7 +2006,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFooter(
        i != props.end(); ++i) {
     if (i->find("VS_GLOBAL_") == 0) {
       std::string name = i->substr(10);
-      if (name != "") {
+      if (!name.empty()) {
         /* clang-format off */
         fout << "\t\t<Global\n"
              << "\t\t\tName=\"" << name << "\"\n"
@@ -2081,7 +2081,7 @@ public:
             this->GUID = atts[i + 1];
             this->GUID = this->GUID.substr(1, this->GUID.size() - 2);
           } else {
-            this->GUID = "";
+            this->GUID.clear();
           }
           return;
         }

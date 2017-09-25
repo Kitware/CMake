@@ -283,7 +283,7 @@ bool cmMachOInternal::read_mach_o(uint32_t file_offset)
     return false;
   }
 
-  cmMachOHeaderAndLoadCommands* f = NULL;
+  cmMachOHeaderAndLoadCommands* f = nullptr;
   if (magic == MH_CIGAM || magic == MH_MAGIC) {
     bool swap = false;
     if (magic == MH_CIGAM) {
@@ -313,7 +313,7 @@ bool cmMachOInternal::read_mach_o(uint32_t file_offset)
 // External class implementation.
 
 cmMachO::cmMachO(const char* fname)
-  : Internal(0)
+  : Internal(nullptr)
 {
   this->Internal = new cmMachOInternal(fname);
 }

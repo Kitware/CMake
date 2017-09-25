@@ -16,9 +16,11 @@ if(Qt5_POSITION_INDEPENDENT_CODE AND CMAKE_CXX_COMPILE_OPTIONS_PIC)
 endif()
 
 configure_file(jsonIn/StyleC.json jsonFiles/StyleC.json)
-configure_file(jsonIn/StyleD.json jsonFiles/sub/StyleD.json)
 configure_file(jsonIn/StyleC.json jsonFiles/StyleC_Custom.json)
+configure_file(jsonIn/StyleD.json jsonFiles/sub/StyleD.json)
 configure_file(jsonIn/StyleD.json jsonFiles/sub/StyleD_Custom.json)
+configure_file(jsonIn/StyleE.json jsonFiles/StyleE.json)
+configure_file(jsonIn/StyleE.json jsonFiles/StyleE_Custom.json)
 
 # Enable automoc
 set(CMAKE_AUTOMOC TRUE)

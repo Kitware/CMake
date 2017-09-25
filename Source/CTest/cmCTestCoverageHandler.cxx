@@ -185,9 +185,9 @@ void cmCTestCoverageHandler::EndCoverageLogXML(cmXMLWriter& xml)
   this->CTest->EndXML(xml);
 }
 
-bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
-                                               const char* srcDir,
-                                               const char* binDir)
+bool cmCTestCoverageHandler::ShouldIDoCoverage(std::string const& file,
+                                               std::string const& srcDir,
+                                               std::string const& binDir)
 {
   if (this->IsFilteredOut(file)) {
     return false;
@@ -435,8 +435,8 @@ int cmCTestCoverageHandler::ProcessHandler()
     }
 
     const std::string fullFileName = file.first;
-    bool shouldIDoCoverage = this->ShouldIDoCoverage(
-      fullFileName.c_str(), sourceDir.c_str(), binaryDir.c_str());
+    bool shouldIDoCoverage =
+      this->ShouldIDoCoverage(fullFileName, sourceDir, binaryDir);
     if (!shouldIDoCoverage) {
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                          ".NoDartCoverage found, so skip coverage check for: "
@@ -560,6 +560,8 @@ int cmCTestCoverageHandler::ProcessHandler()
       ostr << "Cannot open source file: " << fullPath;
       errorsWhileAccumulating.push_back(ostr.str());
       error++;
+      covLogXML.EndElement(); // Report
+      covLogXML.EndElement(); // File
       continue;
     }
     int untested = 0;
@@ -1073,7 +1075,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           break;
         }
 
-        actualSourceFile = "";
+        actualSourceFile.clear();
         sourceFile = st1re1.match(2);
       } else if (st1re2.find(line.c_str())) {
         if (gcovStyle == 0) {
@@ -1098,7 +1100,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           break;
         }
 
-        actualSourceFile = "";
+        actualSourceFile.clear();
         sourceFile = st2re1.match(1);
       } else if (st2re2.find(line.c_str())) {
         if (gcovStyle == 0) {
@@ -1240,11 +1242,11 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           }
         }
 
-        actualSourceFile = "";
+        actualSourceFile.clear();
       }
 
       if (!sourceFile.empty() && actualSourceFile.empty()) {
-        gcovFile = "";
+        gcovFile.clear();
 
         // Is it in the source dir or the binary dir?
         //
@@ -1541,7 +1543,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
             }
           }
 
-          actualSourceFile = "";
+          actualSourceFile.clear();
         }
       }
     }
@@ -2016,8 +2018,8 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
         file += sourceFile;
       }
       file = cmSystemTools::CollapseFullPath(file);
-      bool shouldIDoCoverage = this->ShouldIDoCoverage(
-        file.c_str(), cont->SourceDir.c_str(), cont->BinaryDir.c_str());
+      bool shouldIDoCoverage =
+        this->ShouldIDoCoverage(file, cont->SourceDir, cont->BinaryDir);
       if (!shouldIDoCoverage) {
         cmCTestOptionalLog(
           this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -2318,8 +2320,7 @@ std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
     gl.FindFiles(glob);
     std::vector<std::string> files = gl.GetFiles();
     for (std::string const& f : files) {
-      if (this->ShouldIDoCoverage(f.c_str(), cont->SourceDir.c_str(),
-                                  cont->BinaryDir.c_str())) {
+      if (this->ShouldIDoCoverage(f, cont->SourceDir, cont->BinaryDir)) {
         extraMatches.insert(this->CTest->GetShortPathToFile(f.c_str()));
       }
     }

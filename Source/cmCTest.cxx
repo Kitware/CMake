@@ -147,7 +147,7 @@ std::string cmCTest::CurrentTime()
 std::string cmCTest::GetCostDataFile()
 {
   std::string fname = this->GetCTestConfiguration("CostDataFile");
-  if (fname == "") {
+  if (fname.empty()) {
     fname = this->GetBinaryDir() + "/Testing/Temporary/CTestCostData.txt";
   }
   return fname;
@@ -281,9 +281,9 @@ cmCTest::cmCTest()
   this->GlobalTimeout = 0;
   this->LastStopTimeout = 24 * 60 * 60;
   this->CompressXMLFiles = false;
-  this->CTestConfigFile = "";
-  this->ScheduleType = "";
-  this->StopTime = "";
+  this->CTestConfigFile.clear();
+  this->ScheduleType.clear();
+  this->StopTime.clear();
   this->NextDayStopTime = false;
   this->OutputLogFile = nullptr;
   this->OutputLogFileLastTag = -1;
@@ -477,7 +477,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
                &min);
         if (year != lctime->tm_year + 1900 || mon != lctime->tm_mon + 1 ||
             day != lctime->tm_mday) {
-          tag = "";
+          tag.clear();
         }
         std::string tagmode;
         if (cmSystemTools::GetLineFromStream(tfin, tagmode)) {
@@ -975,7 +975,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
   }
   argv.push_back(nullptr);
 
-  output = "";
+  output.clear();
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Run command:");
   for (char const* arg : argv) {
     if (!arg) {
@@ -1147,7 +1147,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
   }
   std::vector<char> tempOutput;
   if (output) {
-    *output = "";
+    output->clear();
   }
 
   CM_AUTO_PTR<cmSystemTools::SaveRestoreEnvironment> saveEnv;
@@ -1235,7 +1235,7 @@ std::string cmCTest::SafeBuildIdField(const std::string& value)
 {
   std::string safevalue(value);
 
-  if (safevalue != "") {
+  if (!safevalue.empty()) {
     // Disallow non-filename and non-space whitespace characters.
     // If they occur, replace them with ""
     //
@@ -1254,7 +1254,7 @@ std::string cmCTest::SafeBuildIdField(const std::string& value)
     }
   }
 
-  if (safevalue == "") {
+  if (safevalue.empty()) {
     safevalue = "(empty)";
   }
 
@@ -2513,7 +2513,7 @@ const char* cmCTest::GetSpecificTrack()
 void cmCTest::SetSpecificTrack(const char* track)
 {
   if (!track) {
-    this->SpecificTrack = "";
+    this->SpecificTrack.clear();
     return;
   }
   this->SpecificTrack = track;

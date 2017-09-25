@@ -39,7 +39,7 @@ cmCTestUpdateHandler::cmCTestUpdateHandler()
 void cmCTestUpdateHandler::Initialize()
 {
   this->Superclass::Initialize();
-  this->UpdateCommand = "";
+  this->UpdateCommand.clear();
   this->UpdateType = e_CVS;
 }
 

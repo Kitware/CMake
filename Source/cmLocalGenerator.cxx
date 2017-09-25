@@ -1413,7 +1413,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
 
   // If the input name is the empty string, there is no real
   // dependency. Short-circuit the other checks:
-  if (name == "") {
+  if (name.empty()) {
     return false;
   }
 
@@ -2099,7 +2099,7 @@ void cmLocalGenerator::GenerateTargetInstallRules(
     }
 
     // Install this target if a destination is given.
-    if (l->Target->GetInstallPath() != "") {
+    if (!l->Target->GetInstallPath().empty()) {
       // Compute the full install destination.  Note that converting
       // to unix slashes also removes any trailing slash.
       // We also skip over the leading slash given by the user.

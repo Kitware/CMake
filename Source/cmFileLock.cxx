@@ -42,7 +42,7 @@ cmFileLockResult cmFileLock::Lock(const std::string& filename,
   }
 
   if (!result.IsOk()) {
-    this->Filename = "";
+    this->Filename.clear();
   }
 
   return result;

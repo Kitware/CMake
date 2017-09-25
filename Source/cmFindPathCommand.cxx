@@ -85,7 +85,7 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
     // if the framework has a path in it then just use the filename
     if (frameWorkName.find('/') != std::string::npos) {
       fileName = file;
-      frameWorkName = "";
+      frameWorkName.clear();
     }
     if (!frameWorkName.empty()) {
       std::string fpath = dir;

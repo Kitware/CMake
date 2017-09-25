@@ -150,7 +150,7 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
 {
   std::string dir = this->GetUserMacrosDirectory();
 
-  if (dir != "") {
+  if (!dir.empty()) {
     std::string src = cmSystemTools::GetCMakeRoot();
     src += "/Templates/" CMAKE_VSMACROS_FILENAME;
 
@@ -193,7 +193,7 @@ void cmGlobalVisualStudioGenerator::CallVisualStudioMacro(
   //  - the CMake vsmacros file is registered
   //  - there were .sln/.vcproj files changed during generation
   //
-  if (dir != "") {
+  if (!dir.empty()) {
     std::string macrosFile = dir + "/CMakeMacros/" CMAKE_VSMACROS_FILENAME;
     std::string nextSubkeyName;
     if (cmSystemTools::FileExists(macrosFile.c_str()) &&

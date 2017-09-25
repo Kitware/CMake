@@ -71,7 +71,8 @@ public:
         }
       }
       // Based up what was found, add a line to the coverageVector
-      if (!beginSet.empty() && line != "" && !blockComFlag && !lineComFlag) {
+      if (!beginSet.empty() && !line.empty() && !blockComFlag &&
+          !lineComFlag) {
         coverageVector.push_back(0);
       } else {
         coverageVector.push_back(-1);
