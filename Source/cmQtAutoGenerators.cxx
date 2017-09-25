@@ -149,12 +149,6 @@ cmQtAutoGenerators::cmQtAutoGenerators()
     }
   }
 
-  // Moc macro filters
-  this->MocMacroFilters.emplace_back(
-    "Q_OBJECT", "[\n][ \t]*{?[ \t]*Q_OBJECT[^a-zA-Z0-9_]");
-  this->MocMacroFilters.emplace_back(
-    "Q_GADGET", "[\n][ \t]*{?[ \t]*Q_GADGET[^a-zA-Z0-9_]");
-
   // Precompile regular expressions
   this->MocRegExpInclude.compile(
     "[\n][ \t]*#[ \t]*include[ \t]+"
@@ -326,7 +320,7 @@ bool cmQtAutoGenerators::InitInfoFile(cmMakefile* makefile,
         InfoGetList("AM_MOC_MACRO_NAMES");
       for (std::string const& item : MocMacroNames) {
         this->MocMacroFilters.emplace_back(
-          item, ("[^a-zA-Z0-9_]" + item).append("[^a-zA-Z0-9_]"));
+          item, ("[\n][ \t]*{?[ \t]*" + item).append("[^a-zA-Z0-9_]"));
       }
     }
     {
