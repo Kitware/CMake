@@ -114,8 +114,14 @@ public:
   /// Determines that the package must always be installed
   std::string ForcedInstallation;
 
+  /// List of components to replace
+  std::vector<std::string> Replaces;
+
   /// Package needs to be installed with elevated permissions
   std::string RequiresAdminRights;
+
+  /// Set to false if you want to hide the checkbox for an item
+  std::string Checkable;
 
 public:
   // Internal implementation

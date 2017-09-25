@@ -482,6 +482,15 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
     this->ForcedInstallation = "false";
   }
 
+  // Replaces
+  option = prefix + "REPLACES";
+  if (this->IsSetToEmpty(option)) {
+    this->Replaces.clear();
+  } else if (const char* value = this->GetOption(option)) {
+    this->Replaces.clear();
+    cmSystemTools::ExpandListArgument(value, this->Replaces);
+  }
+
   // Requires admin rights
   option = prefix + "REQUIRES_ADMIN_RIGHTS";
   if (this->IsSetToEmpty(option)) {
@@ -490,6 +499,16 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
     this->RequiresAdminRights = "true";
   } else if (this->IsSetToOff(option)) {
     this->RequiresAdminRights = "false";
+  }
+
+  // Checkable
+  option = prefix + "CHECKABLE";
+  if (this->IsSetToEmpty(option)) {
+    this->Checkable.clear();
+  } else if (this->IsOn(option)) {
+    this->Checkable = "true";
+  } else if (this->IsSetToOff(option)) {
+    this->Checkable = "false";
   }
 
   return 1;
@@ -652,6 +671,19 @@ void cmCPackIFWPackage::GeneratePackageFile()
     xout.Element("ForcedInstallation", this->ForcedInstallation);
   }
 
+  // Replaces
+  if (!this->Replaces.empty()) {
+    std::ostringstream replaces;
+    std::vector<std::string>::iterator it = this->Replaces.begin();
+    replaces << *it;
+    ++it;
+    while (it != this->Replaces.end()) {
+      replaces << "," << *it;
+      ++it;
+    }
+    xout.Element("Replaces", replaces.str());
+  }
+
   if (!this->RequiresAdminRights.empty()) {
     xout.Element("RequiresAdminRights", this->RequiresAdminRights);
   }
@@ -670,6 +702,11 @@ void cmCPackIFWPackage::GeneratePackageFile()
   // Priority
   if (!this->SortingPriority.empty()) {
     xout.Element("SortingPriority", this->SortingPriority);
+  }
+
+  // Checkable
+  if (!this->Checkable.empty()) {
+    xout.Element("Checkable", this->Checkable);
   }
 
   xout.EndElement();

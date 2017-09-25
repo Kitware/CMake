@@ -323,7 +323,9 @@
 #                         [LICENSES <display_name> <file_path> ...]
 #                         [DEFAULT <value>]
 #                         [USER_INTERFACES <file_path> <file_path> ...]
-#                         [TRANSLATIONS <file_path> <file_path> ...])
+#                         [TRANSLATIONS <file_path> <file_path> ...]
+#                         [REPLACES <comp_id> ...]
+#                         [CHECKABLE <value>])
 #
 #   This command should be called after :command:`cpack_add_component` command.
 #
@@ -404,6 +406,15 @@
 #   ``TRANSLATIONS``
 #     is a list of <file_path> ('.qm' files) representing translations to load.
 #
+#   ``REPLACES``
+#     list of identifiers of component or component group to replace.
+#
+#   ``CHECKABLE``
+#     Possible values are: TRUE, FALSE.
+#     Set to FALSE if you want to hide the checkbox for an item.
+#     This is useful when only a few subcomponents should be selected
+#     instead of all.
+#
 #
 # .. command:: cpack_ifw_configure_component_group
 #
@@ -426,7 +437,9 @@
 #                         [LICENSES <display_name> <file_path> ...]
 #                         [DEFAULT <value>]
 #                         [USER_INTERFACES <file_path> <file_path> ...]
-#                         [TRANSLATIONS <file_path> <file_path> ...])
+#                         [TRANSLATIONS <file_path> <file_path> ...]
+#                         [REPLACES <comp_id> ...]
+#                         [CHECKABLE <value>])
 #
 #   This command should be called after :command:`cpack_add_component_group`
 #   command.
@@ -498,6 +511,15 @@
 #
 #   ``TRANSLATIONS``
 #     is a list of <file_path> ('.qm' files) representing translations to load.
+#
+#   ``REPLACES``
+#     list of identifiers of component or component group to replace.
+#
+#   ``CHECKABLE``
+#     Possible values are: TRUE, FALSE.
+#     Set to FALSE if you want to hide the checkbox for an item.
+#     This is useful when only a few subcomponents should be selected
+#     instead of all.
 #
 #
 # .. command:: cpack_ifw_add_repository
@@ -882,8 +904,8 @@ macro(cpack_ifw_configure_component compname)
   string(TOUPPER ${compname} _CPACK_IFWCOMP_UNAME)
 
   set(_IFW_OPT COMMON ESSENTIAL VIRTUAL FORCED_INSTALLATION REQUIRES_ADMIN_RIGHTS)
-  set(_IFW_ARGS NAME VERSION RELEASE_DATE SCRIPT PRIORITY SORTING_PRIORITY UPDATE_TEXT DEFAULT)
-  set(_IFW_MULTI_ARGS DISPLAY_NAME DESCRIPTION DEPENDS DEPENDENCIES AUTO_DEPEND_ON LICENSES USER_INTERFACES TRANSLATIONS)
+  set(_IFW_ARGS NAME VERSION RELEASE_DATE SCRIPT PRIORITY SORTING_PRIORITY UPDATE_TEXT DEFAULT CHECKABLE)
+  set(_IFW_MULTI_ARGS DISPLAY_NAME DESCRIPTION DEPENDS DEPENDENCIES AUTO_DEPEND_ON LICENSES USER_INTERFACES TRANSLATIONS REPLACES)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
   _cpack_ifw_resolve_script(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_SCRIPT)
@@ -923,8 +945,8 @@ macro(cpack_ifw_configure_component_group grpname)
   string(TOUPPER ${grpname} _CPACK_IFWGRP_UNAME)
 
   set(_IFW_OPT VIRTUAL FORCED_INSTALLATION REQUIRES_ADMIN_RIGHTS)
-  set(_IFW_ARGS NAME VERSION RELEASE_DATE SCRIPT PRIORITY SORTING_PRIORITY UPDATE_TEXT DEFAULT)
-  set(_IFW_MULTI_ARGS DISPLAY_NAME DESCRIPTION DEPENDS DEPENDENCIES AUTO_DEPEND_ON LICENSES USER_INTERFACES TRANSLATIONS)
+  set(_IFW_ARGS NAME VERSION RELEASE_DATE SCRIPT PRIORITY SORTING_PRIORITY UPDATE_TEXT DEFAULT CHECKABLE)
+  set(_IFW_MULTI_ARGS DISPLAY_NAME DESCRIPTION DEPENDS DEPENDENCIES AUTO_DEPEND_ON LICENSES USER_INTERFACES TRANSLATIONS REPLACES)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
   _cpack_ifw_resolve_script(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_SCRIPT)
