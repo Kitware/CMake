@@ -17,6 +17,7 @@
 #include "cmVersion.h"
 #include "cmake.h"
 
+#include <algorithm>
 #include <stdio.h>
 #include <string.h>
 
@@ -353,11 +354,9 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
     char secondLine[512] = "";
     char thirdLine[512] = "";
     if (process) {
-      const char* clearLine =
-        "                                                                    ";
-      strcpy(firstLine, clearLine);
-      strcpy(secondLine, clearLine);
-      strcpy(thirdLine, clearLine);
+      memset(firstLine, ' ', 68);
+      memset(secondLine, ' ', 68);
+      memset(thirdLine, ' ', 68);
     } else {
       if (this->OkToGenerate) {
         sprintf(firstLine,
@@ -380,7 +379,7 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
     char fmt[512] =
       "Press [enter] to edit option Press [d] to delete an entry";
     if (process) {
-      strcpy(fmt, "                           ");
+      memset(fmt, ' ', 27);
     }
     printw(fmt_s, fmt);
     curses_move(y - 3, 0);
@@ -456,41 +455,27 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
   // Join the key, help string and pad with spaces
   // (or truncate) as necessary
   char bar[cmCursesMainForm::MAX_WIDTH];
-  size_t i, curFieldLen = strlen(curField);
+  size_t curFieldLen = strlen(curField);
   size_t helpLen = strlen(help);
 
-  size_t width;
-  if (x < cmCursesMainForm::MAX_WIDTH) {
-    width = x;
-  } else {
-    width = cmCursesMainForm::MAX_WIDTH;
-  }
+  size_t width = std::min<size_t>(x, cmCursesMainForm::MAX_WIDTH);
 
   if (message) {
     curField = message;
     curFieldLen = strlen(message);
+    strncpy(bar, curField, width);
     if (curFieldLen < width) {
-      strcpy(bar, curField);
-      for (i = curFieldLen; i < width; ++i) {
-        bar[i] = ' ';
-      }
-    } else {
-      strncpy(bar, curField, width);
+      memset(bar + curFieldLen, ' ', width - curFieldLen);
     }
   } else {
-    if (curFieldLen >= width) {
-      strncpy(bar, curField, width);
-    } else {
-      strcpy(bar, curField);
+    strncpy(bar, curField, width);
+    if (curFieldLen < width) {
       bar[curFieldLen] = ':';
       bar[curFieldLen + 1] = ' ';
-      if (curFieldLen + helpLen + 2 >= width) {
-        strncpy(bar + curFieldLen + 2, help, width - curFieldLen - 2);
-      } else {
-        strcpy(bar + curFieldLen + 2, help);
-        for (i = curFieldLen + helpLen + 2; i < width; ++i) {
-          bar[i] = ' ';
-        }
+      strncpy(bar + curFieldLen + 2, help, width - curFieldLen - 2);
+      if (curFieldLen + helpLen + 2 < width) {
+        memset(bar + curFieldLen + helpLen + 2, ' ',
+               width - curFieldLen + helpLen + 2);
       }
     }
   }
@@ -503,9 +488,7 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
   char vertmp[128];
   sprintf(vertmp, "CMake Version %s", cmVersion::GetCMakeVersion());
   size_t sideSpace = (width - strlen(vertmp));
-  for (i = 0; i < sideSpace; i++) {
-    version[i] = ' ';
-  }
+  memset(version, ' ', sideSpace);
   sprintf(version + sideSpace, "%s", vertmp);
   version[width] = '\0';
 
