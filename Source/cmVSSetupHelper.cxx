@@ -80,6 +80,14 @@ cmVSSetupAPIHelper::~cmVSSetupAPIHelper()
     CoUninitialize();
 }
 
+bool cmVSSetupAPIHelper::SetVSInstance(std::string const& vsInstallLocation)
+{
+  this->SpecifiedVSInstallLocation = vsInstallLocation;
+  cmSystemTools::ConvertToUnixSlashes(this->SpecifiedVSInstallLocation);
+  chosenInstanceInfo = VSInstanceInfo();
+  return this->EnumerateAndChooseVSInstance();
+}
+
 bool cmVSSetupAPIHelper::IsVS2017Installed()
 {
   return this->EnumerateAndChooseVSInstance();
@@ -296,16 +304,29 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     instance = instance2 = NULL;
 
     if (isInstalled) {
-      if (!envVSCommonToolsDir.empty()) {
+      if (!this->SpecifiedVSInstallLocation.empty()) {
+        // We are looking for a specific instance.
         std::string currentVSLocation = instanceInfo.GetInstallLocation();
-        currentVSLocation += "/Common7/Tools";
         if (cmSystemTools::ComparePath(currentVSLocation,
-                                       envVSCommonToolsDir)) {
+                                       this->SpecifiedVSInstallLocation)) {
           chosenInstanceInfo = instanceInfo;
           return true;
         }
+      } else {
+        // We are not looking for a specific instance.
+        // If we've been given a hint then use it.
+        if (!envVSCommonToolsDir.empty()) {
+          std::string currentVSLocation = instanceInfo.GetInstallLocation();
+          currentVSLocation += "/Common7/Tools";
+          if (cmSystemTools::ComparePath(currentVSLocation,
+                                         envVSCommonToolsDir)) {
+            chosenInstanceInfo = instanceInfo;
+            return true;
+          }
+        }
+        // Otherwise, add this to the list of candidates.
+        vecVSInstances.push_back(instanceInfo);
       }
-      vecVSInstances.push_back(instanceInfo);
     }
   }
 
