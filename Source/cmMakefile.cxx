@@ -3082,18 +3082,9 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
 {
   cmSourceFileLocation sfl(this, sourceName);
-
-#if defined(_WIN32) || defined(__APPLE__)
-  const auto& name = cmSystemTools::LowerCase(sfl.GetName());
-#else
-  const auto& name = sfl.GetName();
-#endif
-  auto sfsi = this->SourceFileSearchIndex.find(name);
-  if (sfsi != this->SourceFileSearchIndex.end()) {
-    for (auto sf : sfsi->second) {
-      if (sf->Matches(sfl)) {
-        return sf;
-      }
+  for (cmSourceFile* sf : this->SourceFiles) {
+    if (sf->Matches(sfl)) {
+      return sf;
     }
   }
   return nullptr;
@@ -3107,41 +3098,6 @@ cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
     sf->SetProperty("GENERATED", "1");
   }
   this->SourceFiles.push_back(sf);
-
-  auto name = sf->GetLocation().GetName();
-#if defined(_WIN32) || defined(__APPLE__)
-  name = cmSystemTools::LowerCase(name);
-#endif
-
-  // For a file in the form "a.b.c" add the cmSourceFile to the index
-  // at "a.b.c", "a.b" and "a".
-  auto partial = name;
-  while (true) {
-    this->SourceFileSearchIndex[partial].insert(sf);
-    auto i = partial.rfind('.');
-    if (i == std::string::npos) {
-      break;
-    }
-    partial = partial.substr(0, i);
-  }
-
-  if (sf->GetLocation().ExtensionIsAmbiguous()) {
-    // For an ambiguous extension also add the various "known"
-    // extensions to the original filename.
-
-    const auto& srcExts = this->GetCMakeInstance()->GetSourceExtensions();
-    for (const auto& ext : srcExts) {
-      auto name_ext = name + "." + cmSystemTools::LowerCase(ext);
-      this->SourceFileSearchIndex[name_ext].insert(sf);
-    }
-
-    const auto& hdrExts = this->GetCMakeInstance()->GetHeaderExtensions();
-    for (const auto& ext : hdrExts) {
-      auto name_ext = name + "." + cmSystemTools::LowerCase(ext);
-      this->SourceFileSearchIndex[name_ext].insert(sf);
-    }
-  }
-
   return sf;
 }
 
