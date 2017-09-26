@@ -209,22 +209,10 @@ public:
     this->GeneratorPlatform = ts;
   }
 
-  ///! Get the name of the selected generator-specific platform.
-  std::string const& GetGeneratorPlatform() const
-  {
-    return this->GeneratorPlatform;
-  }
-
   ///! Set the name of the selected generator-specific toolset.
   void SetGeneratorToolset(std::string const& ts)
   {
     this->GeneratorToolset = ts;
-  }
-
-  ///! Get the name of the selected generator-specific toolset.
-  std::string const& GetGeneratorToolset() const
-  {
-    return this->GeneratorToolset;
   }
 
   const std::vector<std::string>& GetSourceExtensions() const

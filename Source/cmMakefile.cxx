@@ -3186,8 +3186,8 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   // do a configure
   cm.SetHomeDirectory(srcdir);
   cm.SetHomeOutputDirectory(bindir);
-  cm.SetGeneratorPlatform(this->GetCMakeInstance()->GetGeneratorPlatform());
-  cm.SetGeneratorToolset(this->GetCMakeInstance()->GetGeneratorToolset());
+  cm.SetGeneratorPlatform(this->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM"));
+  cm.SetGeneratorToolset(this->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET"));
   cm.LoadCache();
   if (!gg->IsMultiConfig()) {
     if (const char* config =
