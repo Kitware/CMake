@@ -1,7 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVSSetupHelper.h"
+
 #include "cmSystemTools.h"
+#include "cmsys/Encoding.hxx"
 
 #ifndef VSSetupConstants
 #define VSSetupConstants
@@ -51,8 +53,7 @@ const WCHAR* ComponentType = L"Component";
 
 std::string VSInstanceInfo::GetInstallLocation() const
 {
-  std::string loc(this->VSInstallLocation.begin(),
-                  this->VSInstallLocation.end());
+  std::string loc = cmsys::Encoding::ToNarrow(this->VSInstallLocation);
   cmSystemTools::ConvertToUnixSlashes(loc);
   return loc;
 }
