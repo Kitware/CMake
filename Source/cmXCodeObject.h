@@ -114,7 +114,7 @@ public:
     if (i != this->ObjectAttributes.end()) {
       return i->second;
     }
-    return 0;
+    return nullptr;
   }
   // search the attribute list for an object of the specified type
   cmXCodeObject* GetObject(cmXCodeObject::PBXType t) const
@@ -126,7 +126,7 @@ public:
         return o;
       }
     }
-    return 0;
+    return nullptr;
   }
 
   void CopyAttributes(cmXCodeObject*);

@@ -197,7 +197,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
 
   // Try to find the program.
   std::string fullPath = cmSystemTools::FindFile(moduleName, path);
-  if (fullPath == "") {
+  if (fullPath.empty()) {
     std::ostringstream e;
     e << "Attempt to load command failed from file \"" << moduleName << "\"";
     this->SetError(e.str());

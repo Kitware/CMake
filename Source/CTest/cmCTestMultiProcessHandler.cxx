@@ -491,7 +491,7 @@ void cmCTestMultiProcessHandler::ReadCostData()
     }
     // Next part of the file is the failed tests
     while (std::getline(fin, line)) {
-      if (line != "") {
+      if (!line.empty()) {
         this->LastTestsFailed.push_back(line);
       }
     }

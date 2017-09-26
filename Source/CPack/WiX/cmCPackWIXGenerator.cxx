@@ -89,9 +89,8 @@ bool cmCPackWIXGenerator::RunCandleCommand(std::string const& sourceFile,
   command << " -arch " << GetArchitecture();
   command << " -out " << QuotePath(objectFile);
 
-  for (extension_set_t::const_iterator i = CandleExtensions.begin();
-       i != CandleExtensions.end(); ++i) {
-    command << " -ext " << QuotePath(*i);
+  for (std::string const& ext : CandleExtensions) {
+    command << " -ext " << QuotePath(ext);
   }
 
   AddCustomFlags("CPACK_WIX_CANDLE_EXTRA_FLAGS", command);
@@ -113,9 +112,8 @@ bool cmCPackWIXGenerator::RunLightCommand(std::string const& objectFiles)
   command << " -nologo";
   command << " -out " << QuotePath(packageFileNames.at(0));
 
-  for (extension_set_t::const_iterator i = this->LightExtensions.begin();
-       i != this->LightExtensions.end(); ++i) {
-    command << " -ext " << QuotePath(*i);
+  for (std::string const& ext : this->LightExtensions) {
+    command << " -ext " << QuotePath(ext);
   }
 
   const char* const cultures = GetOption("CPACK_WIX_CULTURES");
@@ -219,8 +217,8 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
     std::vector<std::string> patchFilePaths;
     cmSystemTools::ExpandListArgument(patchFilePath, patchFilePaths);
 
-    for (size_t i = 0; i < patchFilePaths.size(); ++i) {
-      if (!this->Patch->LoadFragments(patchFilePaths[i])) {
+    for (std::string const& p : patchFilePaths) {
+      if (!this->Patch->LoadFragments(p)) {
         return false;
       }
     }
@@ -254,9 +252,7 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
   std::set<std::string> usedBaseNames;
 
   std::ostringstream objectFiles;
-  for (size_t i = 0; i < this->WixSources.size(); ++i) {
-    std::string const& sourceFilename = this->WixSources[i];
-
+  for (std::string const& sourceFilename : this->WixSources) {
     std::string baseName =
       cmSystemTools::GetFilenameWithoutLastExtension(sourceFilename);
 
@@ -306,8 +302,8 @@ void cmCPackWIXGenerator::AppendUserSuppliedExtraObjects(std::ostream& stream)
   cmSystemTools::ExpandListArgument(cpackWixExtraObjects,
                                     expandedExtraObjects);
 
-  for (size_t i = 0; i < expandedExtraObjects.size(); ++i) {
-    stream << " " << QuotePath(expandedExtraObjects[i]);
+  for (std::string const& obj : expandedExtraObjects) {
+    stream << " " << QuotePath(obj);
   }
 }
 
@@ -345,9 +341,7 @@ void cmCPackWIXGenerator::CreateWiXPropertiesIncludeFile()
   std::string prefix = "CPACK_WIX_PROPERTY_";
   std::vector<std::string> options = GetOptions();
 
-  for (size_t i = 0; i < options.size(); ++i) {
-    std::string const& name = options[i];
-
+  for (std::string const& name : options) {
     if (name.length() > prefix.length() &&
         name.substr(0, prefix.length()) == prefix) {
       std::string id = name.substr(prefix.length());
@@ -503,16 +497,14 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
     globalShortcuts.AddShortcutTypes(emittedShortcutTypes);
   } else {
-    for (std::map<std::string, cmCPackComponent>::const_iterator i =
-           this->Components.begin();
-         i != this->Components.end(); ++i) {
-      cmCPackComponent const& component = i->second;
+    for (auto const& i : this->Components) {
+      cmCPackComponent const& component = i.second;
 
       std::string componentPath = toplevel;
       componentPath += "/";
       componentPath += component.Name;
 
-      std::string componentFeatureId = "CM_C_" + component.Name;
+      std::string const componentFeatureId = "CM_C_" + component.Name;
 
       cmWIXShortcuts featureShortcuts;
       AddComponentsToFeature(componentPath, componentFeatureId,
@@ -623,19 +615,15 @@ bool cmCPackWIXGenerator::GenerateMainSourceFileFromTemplate()
 bool cmCPackWIXGenerator::CreateFeatureHierarchy(
   cmWIXFeaturesSourceWriter& featureDefinitions)
 {
-  for (std::map<std::string, cmCPackComponentGroup>::const_iterator i =
-         ComponentGroups.begin();
-       i != ComponentGroups.end(); ++i) {
-    cmCPackComponentGroup const& group = i->second;
+  for (auto const& i : ComponentGroups) {
+    cmCPackComponentGroup const& group = i.second;
     if (group.ParentGroup == 0) {
       featureDefinitions.EmitFeatureForComponentGroup(group, *this->Patch);
     }
   }
 
-  for (std::map<std::string, cmCPackComponent>::const_iterator i =
-         this->Components.begin();
-       i != this->Components.end(); ++i) {
-    cmCPackComponent const& component = i->second;
+  for (auto const& i : this->Components) {
+    cmCPackComponent const& component = i.second;
 
     if (!component.Group) {
       featureDefinitions.EmitFeatureForComponent(component, *this->Patch);
@@ -1135,9 +1123,8 @@ void cmCPackWIXGenerator::AddCustomFlags(std::string const& variableName,
   std::vector<std::string> list;
   cmSystemTools::ExpandListArgument(variableContent, list);
 
-  for (std::vector<std::string>::const_iterator i = list.begin();
-       i != list.end(); ++i) {
-    stream << " " << QuotePath(*i);
+  for (std::string const& i : list) {
+    stream << " " << QuotePath(i);
   }
 }
 

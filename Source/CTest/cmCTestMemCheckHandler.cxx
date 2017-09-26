@@ -122,11 +122,11 @@ void cmCTestMemCheckHandler::Initialize()
   this->LogWithPID = false;
   this->CustomMaximumPassedTestOutputSize = 0;
   this->CustomMaximumFailedTestOutputSize = 0;
-  this->MemoryTester = "";
+  this->MemoryTester.clear();
   this->MemoryTesterDynamicOptions.clear();
   this->MemoryTesterOptions.clear();
   this->MemoryTesterStyle = UNKNOWN;
-  this->MemoryTesterOutputFile = "";
+  this->MemoryTesterOutputFile.clear();
   this->DefectCount = 0;
 }
 
@@ -417,8 +417,8 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
 
 bool cmCTestMemCheckHandler::InitializeMemoryChecking()
 {
-  this->MemoryTesterEnvironmentVariable = "";
-  this->MemoryTester = "";
+  this->MemoryTesterEnvironmentVariable.clear();
+  this->MemoryTester.clear();
   // Setup the command
   if (cmSystemTools::FileExists(
         this->CTest->GetCTestConfiguration("MemoryCheckCommand").c_str())) {
@@ -725,7 +725,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
   std::vector<std::string> lines;
   cmSystemTools::Split(str.c_str(), lines);
   std::ostringstream ostr;
-  log = "";
+  log.clear();
   for (std::string const& l : lines) {
     std::string resultFound;
     if (leakWarning.find(l)) {
@@ -755,7 +755,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
   std::vector<std::string> lines;
   cmSystemTools::Split(str.c_str(), lines);
   std::ostringstream ostr;
-  log = "";
+  log.clear();
 
   cmsys::RegularExpression pfW("^\\[[WEI]\\] ([A-Z][A-Z][A-Z][A-Z]*): ");
 
@@ -805,7 +805,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
   std::string::size_type cc;
 
   std::ostringstream ostr;
-  log = "";
+  log.clear();
 
   int defects = 0;
 
@@ -928,7 +928,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
 bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
   const std::string& str, std::string& log, std::vector<int>& results)
 {
-  log = "";
+  log.clear();
   double sttime = cmSystemTools::GetTime();
   std::vector<std::string> lines;
   cmSystemTools::Split(str.c_str(), lines);
@@ -1079,7 +1079,7 @@ void cmCTestMemCheckHandler::TestOutputFileNames(
     if (g.GetFiles().empty()) {
       std::string log = "Cannot find memory tester output file: " + ofile;
       cmCTestLog(this->CTest, ERROR_MESSAGE, log << std::endl);
-      ofile = "";
+      ofile.clear();
     } else {
       files = g.GetFiles();
       return;
@@ -1087,7 +1087,7 @@ void cmCTestMemCheckHandler::TestOutputFileNames(
   } else if (!cmSystemTools::FileExists(ofile.c_str())) {
     std::string log = "Cannot find memory tester output file: " + ofile;
     cmCTestLog(this->CTest, ERROR_MESSAGE, log << std::endl);
-    ofile = "";
+    ofile.clear();
   }
   files.push_back(ofile);
 }

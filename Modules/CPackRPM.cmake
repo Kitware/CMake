@@ -106,6 +106,16 @@
 #  group rpm package is generated without component suffix in filename and
 #  package name.
 #
+# .. variable:: CPACK_RPM_PACKAGE_EPOCH
+#
+#  The RPM package epoch
+#
+#  * Mandatory : No
+#  * Default   : -
+#
+#  Optional number that should be incremented when changing versioning schemas
+#  or fixing mistakes in the version numbers of older packages.
+#
 # .. variable:: CPACK_RPM_PACKAGE_VERSION
 #
 #  The RPM package version.
@@ -530,7 +540,9 @@
 #  list of path to be excluded.
 #
 #  * Mandatory : NO
-#  * Default   : /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/include
+#  * Default   : /etc /etc/init.d /usr /usr/bin /usr/include /usr/lib
+#                /usr/libx32 /usr/lib64 /usr/share /usr/share/aclocal
+#                /usr/share/doc
 #
 #  May be used to exclude path (directories or files) from the auto-generated
 #  list of paths discovered by CPack RPM. The defaut value contains a
@@ -1083,7 +1095,9 @@ function(cpack_rpm_prepare_content_list)
   endif()
 
   if(NOT DEFINED CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
-    set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/libx32 /usr/include)
+    set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /etc /etc/init.d /usr /usr/bin
+        /usr/include /usr/lib /usr/libx32 /usr/lib64
+        /usr/share /usr/share/aclocal /usr/share/doc )
     if(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION)
       if(CPACK_RPM_PACKAGE_DEBUG)
         message("CPackRPM:Debug: Adding ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION} to builtin omit list.")
@@ -1891,11 +1905,16 @@ function(cpack_rpm_generate_package)
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   string(REPLACE "\n" ";" RPMBUILD_TAG_LIST "${RPMBUILD_TAG_LIST}")
 
+  if(CPACK_RPM_PACKAGE_EPOCH)
+    set(TMP_RPM_EPOCH "Epoch: ${CPACK_RPM_PACKAGE_EPOCH}")
+  endif()
+
   # Check if additional fields for RPM spec header are given
   # There may be some COMPONENT specific variables as well
   # If component specific var is not provided we use the global one
   # for each component
   foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN)
+
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: processing ${_RPM_SPEC_HEADER}")
     endif()
@@ -2501,6 +2520,7 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@TMP_RPM_AUTOREQPROV\@
 \@TMP_RPM_BUILDARCH\@
 \@TMP_RPM_PREFIXES\@
+\@TMP_RPM_EPOCH\@
 
 %description -n \@CPACK_RPM_PACKAGE_NAME\@
 \@CPACK_RPM_PACKAGE_DESCRIPTION\@
@@ -2560,6 +2580,7 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@TMP_RPM_AUTOREQPROV\@
 \@TMP_RPM_BUILDARCH\@
 \@TMP_RPM_PREFIXES\@
+\@TMP_RPM_EPOCH\@
 
 \@TMP_RPM_DEBUGINFO\@
 

@@ -5,6 +5,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <iterator>
 #include <map>
 #include <set>
 #include <sstream>
@@ -592,8 +593,9 @@ public:
   {
     std::vector<std::string> files;
     cmSystemTools::ExpandListArgument(entry, files);
-    std::vector<cmSourceFileLocation> locations(files.size());
-    std::transform(files.begin(), files.end(), locations.begin(),
+    std::vector<cmSourceFileLocation> locations;
+    locations.reserve(files.size());
+    std::transform(files.begin(), files.end(), std::back_inserter(locations),
                    CreateLocation(this->Needle.GetMakefile()));
 
     return std::find_if(locations.begin(), locations.end(),
@@ -1530,7 +1532,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
       }
       // If it was found, set the suffix.
       if (*loc || *imp) {
-        suffix = "";
+        suffix.clear();
       }
     } else {
       std::string mcUpper = cmSystemTools::UpperCase(*mci);
@@ -1577,7 +1579,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   // configurations and no exact match.
   if (!*loc && !*imp) {
     // The suffix computed above is not useful.
-    suffix = "";
+    suffix.clear();
 
     // Look for a configuration-less location.  This may be set by
     // manually-written code.

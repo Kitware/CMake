@@ -230,7 +230,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
 
   // The all and preinstall rules might never have any dependencies
   // added to them.
-  if (this->EmptyRuleHackDepends != "") {
+  if (!this->EmptyRuleHackDepends.empty()) {
     depends.push_back(this->EmptyRuleHackDepends);
   }
 
@@ -438,7 +438,7 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
 
   // Work-around for makes that drop rules that have no dependencies
   // or commands.
-  if (depends.empty() && this->EmptyRuleHackDepends != "") {
+  if (depends.empty() && !this->EmptyRuleHackDepends.empty()) {
     depends.push_back(this->EmptyRuleHackDepends);
   }
 

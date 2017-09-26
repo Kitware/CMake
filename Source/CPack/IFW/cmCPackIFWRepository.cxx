@@ -62,49 +62,49 @@ bool cmCPackIFWRepository::ConfigureFromOptions()
   if (const char* url = this->GetOption(prefix + "URL")) {
     this->Url = url;
   } else {
-    this->Url = "";
+    this->Url.clear();
   }
 
   // Old url
   if (const char* oldUrl = this->GetOption(prefix + "OLD_URL")) {
     this->OldUrl = oldUrl;
   } else {
-    this->OldUrl = "";
+    this->OldUrl.clear();
   }
 
   // New url
   if (const char* newUrl = this->GetOption(prefix + "NEW_URL")) {
     this->NewUrl = newUrl;
   } else {
-    this->NewUrl = "";
+    this->NewUrl.clear();
   }
 
   // Enabled
   if (this->IsOn(prefix + "DISABLED")) {
     this->Enabled = "0";
   } else {
-    this->Enabled = "";
+    this->Enabled.clear();
   }
 
   // Username
   if (const char* username = this->GetOption(prefix + "USERNAME")) {
     this->Username = username;
   } else {
-    this->Username = "";
+    this->Username.clear();
   }
 
   // Password
   if (const char* password = this->GetOption(prefix + "PASSWORD")) {
     this->Password = password;
   } else {
-    this->Password = "";
+    this->Password.clear();
   }
 
   // DisplayName
   if (const char* displayName = this->GetOption(prefix + "DISPLAY_NAME")) {
     this->DisplayName = displayName;
   } else {
-    this->DisplayName = "";
+    this->DisplayName.clear();
   }
 
   return this->IsValid();
@@ -162,7 +162,7 @@ protected:
   void CharacterDataHandler(const char* data, int length) override
   {
     std::string content(data, data + length);
-    if (content == "" || content == " " || content == "  " ||
+    if (content.empty() || content == " " || content == "  " ||
         content == "\n") {
       return;
     }
@@ -279,9 +279,8 @@ void cmCPackIFWRepository::WriteRepositoryUpdates(cmXMLWriter& xout)
 {
   if (!this->RepositoryUpdate.empty()) {
     xout.StartElement("RepositoryUpdate");
-    for (RepositoriesVector::iterator rit = this->RepositoryUpdate.begin();
-         rit != this->RepositoryUpdate.end(); ++rit) {
-      (*rit)->WriteRepositoryUpdate(xout);
+    for (cmCPackIFWRepository* r : this->RepositoryUpdate) {
+      r->WriteRepositoryUpdate(xout);
     }
     xout.EndElement();
   }

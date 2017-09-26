@@ -407,14 +407,14 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
 bool cmGlobalVisualStudio10Generator::SelectWindowsPhoneToolset(
   std::string& toolset) const
 {
-  toolset = "";
+  toolset.clear();
   return false;
 }
 
 bool cmGlobalVisualStudio10Generator::SelectWindowsStoreToolset(
   std::string& toolset) const
 {
-  toolset = "";
+  toolset.clear();
   return false;
 }
 

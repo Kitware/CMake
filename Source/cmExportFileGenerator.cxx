@@ -137,7 +137,7 @@ void cmExportFileGenerator::PopulateInterfaceProperty(
   if (input) {
     if (!*input) {
       // Set to empty
-      properties[outputName] = "";
+      properties[outputName].clear();
       return;
     }
 
@@ -313,7 +313,7 @@ static void prefixItems(std::string& exportDirs)
 {
   std::vector<std::string> entries;
   cmGeneratorExpression::Split(exportDirs, entries);
-  exportDirs = "";
+  exportDirs.clear();
   const char* sep = "";
   for (std::string const& e : entries) {
     exportDirs += sep;
@@ -341,7 +341,7 @@ void cmExportFileGenerator::PopulateSourcesInterface(
   }
 
   if (!*input) {
-    properties[propName] = "";
+    properties[propName].clear();
     return;
   }
 
@@ -394,7 +394,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   }
   if ((input && !*input) && exportDirs.empty()) {
     // Set to empty
-    properties[propName] = "";
+    properties[propName].clear();
     return;
   }
 
@@ -565,7 +565,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
   cmGeneratorExpression::Split(input, parts);
 
   std::string sep;
-  input = "";
+  input.clear();
   for (std::string& li : parts) {
     if (cmGeneratorExpression::Find(li) == std::string::npos) {
       this->AddTargetNamespace(li, target, missingTargets);
@@ -713,7 +713,7 @@ void cmExportFileGenerator::SetImportLinkInterface(
   }
 
   if (!*propContent) {
-    properties["IMPORTED_LINK_INTERFACE_LIBRARIES" + suffix] = "";
+    properties["IMPORTED_LINK_INTERFACE_LIBRARIES" + suffix].clear();
     return;
   }
 

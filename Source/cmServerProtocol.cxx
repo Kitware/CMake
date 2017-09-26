@@ -91,13 +91,7 @@ void getCMakeInputs(const cmGlobalGenerator* gg,
   std::vector<std::string>* tmpFiles)
 {
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
-  std::string lcCMakeRootDir = cmakeRootDir;
-  std::transform(lcCMakeRootDir.begin(), lcCMakeRootDir.end(), lcCMakeRootDir.begin(), ::tolower);
-  std::string lcSourceDir = sourceDir;
-  std::transform(lcSourceDir.begin(), lcSourceDir.end(), lcSourceDir.begin(), ::tolower);
-  std::string lcBuildDir = buildDir;
-  std::transform(lcBuildDir.begin(), lcBuildDir.end(), lcBuildDir.begin(), ::tolower);
-
+  
   std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();
   for (cmMakefile const* mf : makefiles) {
     for (std::string const& lf : mf->GetListFiles()) {
@@ -119,14 +113,12 @@ void getCMakeInputs(const cmGlobalGenerator* gg,
         if (internalFiles) {
           internalFiles->push_back(toAdd);
         }
-      }
-      else {
+      } else {
         if (isTemporary) {
           if (tmpFiles) {
             tmpFiles->push_back(toAdd);
           }
-        }
-        else {
+        } else {
           if (explicitFiles) {
             explicitFiles->push_back(toAdd);
           }
@@ -1135,7 +1127,7 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
 
     // Project structure information:
     const cmMakefile* mf = lg->GetMakefile();
-	pObj[kHAS_INSTALL_RULE] = ((cmMakefile*)mf)->GetInstallGenerators().empty() == false;
+    pObj[kHAS_INSTALL_RULE] = ((cmMakefile*)mf)->GetInstallGenerators().empty() == false;
     pObj[kSOURCE_DIRECTORY_KEY] = mf->GetCurrentSourceDirectory();
     pObj[kBUILD_DIRECTORY_KEY] = mf->GetCurrentBinaryDirectory();
     pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config);

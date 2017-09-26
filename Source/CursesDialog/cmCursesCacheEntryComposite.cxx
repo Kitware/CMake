@@ -72,9 +72,8 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
         this->Entry = ow;
         std::vector<std::string> options;
         cmSystemTools::ExpandListArgument(stringsProp, options);
-        for (std::vector<std::string>::iterator si = options.begin();
-             si != options.end(); ++si) {
-          ow->AddOption(*si);
+        for (auto const& opt : options) {
+          ow->AddOption(opt);
         }
         ow->SetOption(value);
       } else {

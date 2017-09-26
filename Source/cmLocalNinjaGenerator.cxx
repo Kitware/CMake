@@ -55,7 +55,7 @@ void cmLocalNinjaGenerator::Generate()
   this->HomeRelativeOutputPath = this->ConvertToRelativePath(
     this->GetBinaryDirectory(), this->GetCurrentBinaryDirectory());
   if (this->HomeRelativeOutputPath == ".") {
-    this->HomeRelativeOutputPath = "";
+    this->HomeRelativeOutputPath.clear();
   }
 
   this->WriteProcessedMakefile(this->GetBuildFileStream());

@@ -124,7 +124,7 @@ bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
         if (i != end) {
           // Completed a line.
           this->CheckLine(line.c_str());
-          line = "";
+          line.clear();
 
           // Skip the newline character.
           ++i;

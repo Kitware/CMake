@@ -861,18 +861,24 @@ static void EnsureTrailingSlash(std::string& path)
 #endif
 }
 
-std::string cmGlobalNinjaGenerator::ConvertToNinjaPath(
+std::string const& cmGlobalNinjaGenerator::ConvertToNinjaPath(
   const std::string& path) const
 {
+  auto const f = ConvertToNinjaPathCache.find(path);
+  if (f != ConvertToNinjaPathCache.end()) {
+    return f->second;
+  }
+
   cmLocalNinjaGenerator* ng =
     static_cast<cmLocalNinjaGenerator*>(this->LocalGenerators[0]);
-  std::string convPath = ng->ConvertToRelativePath(
-    this->LocalGenerators[0]->GetState()->GetBinaryDirectory(), path);
+  const char* bin_dir = ng->GetState()->GetBinaryDirectory();
+  std::string convPath = ng->ConvertToRelativePath(bin_dir, path);
   convPath = this->NinjaOutputPath(convPath);
 #ifdef _WIN32
   std::replace(convPath.begin(), convPath.end(), '/', '\\');
 #endif
-  return convPath;
+  return ConvertToNinjaPathCache.emplace(path, std::move(convPath))
+    .first->second;
 }
 
 void cmGlobalNinjaGenerator::AddCXXCompileCommand(
@@ -1037,35 +1043,51 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
 void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
   cmGeneratorTarget const* target, cmNinjaDeps& outputs)
 {
-  TargetDependsClosureMap::iterator i =
-    this->TargetDependsClosures.find(target);
-  if (i == this->TargetDependsClosures.end()) {
-    TargetDependsClosureMap::value_type e(
-      target, std::set<cmGeneratorTarget const*>());
-    i = this->TargetDependsClosures.insert(e).first;
-    this->ComputeTargetDependsClosure(target, i->second);
-  }
-  std::set<cmGeneratorTarget const*> const& targets = i->second;
-  cmNinjaDeps outs;
-  for (auto tgt : targets) {
-    this->AppendTargetOutputs(tgt, outs);
-  }
-  std::sort(outs.begin(), outs.end());
+  cmNinjaOuts outs;
+  this->AppendTargetDependsClosure(target, outs, true);
+
   outputs.insert(outputs.end(), outs.begin(), outs.end());
 }
 
-void cmGlobalNinjaGenerator::ComputeTargetDependsClosure(
-  cmGeneratorTarget const* target, std::set<cmGeneratorTarget const*>& depends)
+void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
+  cmGeneratorTarget const* target, cmNinjaOuts& outputs, bool omit_self)
 {
-  cmTargetDependSet const& targetDeps = this->GetTargetDirectDepends(target);
-  for (auto targetDep : targetDeps) {
-    if (targetDep->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-      continue;
+
+  // try to locate the target in the cache
+  auto find = this->TargetDependsClosures.lower_bound(target);
+
+  if (find == this->TargetDependsClosures.end() || find->first != target) {
+    // We now calculate the closure outputs by inspecting the dependent
+    // targets recursively.
+    // For that we have to distinguish between a local result set that is only
+    // relevant for filling the cache entries properly isolated and a global
+    // result set that is relevant for the result of the top level call to
+    // AppendTargetDependsClosure.
+    auto const& targetDeps = this->GetTargetDirectDepends(target);
+    cmNinjaOuts this_outs; // this will be the new cache entry
+
+    for (auto const& dep_target : targetDeps) {
+      if (dep_target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+        continue;
+      }
+
+      // Collect the dependent targets for _this_ target
+      this->AppendTargetDependsClosure(dep_target, this_outs, false);
     }
-    if (depends.insert(targetDep).second) {
-      this->ComputeTargetDependsClosure(targetDep, depends);
-    }
+    find = this->TargetDependsClosures.emplace_hint(find, target,
+                                                    std::move(this_outs));
   }
+
+  // now fill the outputs of the final result from the newly generated cache
+  // entry
+  outputs.insert(find->second.begin(), find->second.end());
+
+  // finally generate the outputs of the target itself, if applicable
+  cmNinjaDeps outs;
+  if (!omit_self) {
+    this->AppendTargetOutputs(target, outs);
+  }
+  outputs.insert(outs.begin(), outs.end());
 }
 
 void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,

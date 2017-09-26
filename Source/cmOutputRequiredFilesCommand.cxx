@@ -362,7 +362,7 @@ protected:
       } else {
         // Destroy the name of the file so that it won't be output as a
         // dependency.
-        info->FullPath = "";
+        info->FullPath.clear();
       }
     }
   }
@@ -510,7 +510,7 @@ void cmOutputRequiredFilesCommand::ListDependencies(
   // now recurse with info's dependencies
   for (cmDependInformation* d : info->DependencySet) {
     if (visited->find(d) == visited->end()) {
-      if (info->FullPath != "") {
+      if (!info->FullPath.empty()) {
         std::string tmp = d->FullPath;
         std::string::size_type pos = tmp.rfind('.');
         if (pos != std::string::npos && (tmp.substr(pos) != ".h")) {

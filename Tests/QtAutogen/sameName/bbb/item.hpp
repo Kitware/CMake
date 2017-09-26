@@ -2,6 +2,7 @@
 #define BBB_ITEM_HPP
 
 #include <QObject>
+// Include ui_view.h only in source
 
 namespace bbb {
 

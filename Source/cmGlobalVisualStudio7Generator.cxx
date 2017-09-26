@@ -403,7 +403,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         std::string dir = lg->GetCurrentBinaryDirectory();
         dir = root->ConvertToRelativePath(rootBinaryDir, dir.c_str());
         if (dir == ".") {
-          dir = ""; // msbuild cannot handle ".\" prefix
+          dir.clear(); // msbuild cannot handle ".\" prefix
         }
         this->WriteProject(fout, vcprojName, dir.c_str(), target);
         written = true;
@@ -418,7 +418,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         std::vector<cmsys::String> tokens =
           cmSystemTools::SplitString(targetFolder, '/', false);
 
-        std::string cumulativePath = "";
+        std::string cumulativePath;
 
         for (std::vector<cmsys::String>::iterator iter = tokens.begin();
              iter != tokens.end(); ++iter) {

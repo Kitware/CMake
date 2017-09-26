@@ -19,7 +19,7 @@ list(REMOVE_ITEM all_modules ${notice_exceptions})
 # Check each module.
 set(notice_missing)
 foreach(module ${all_modules})
-  message(STATUS "module: ${dir}/${module}")
+  message(STATUS "module: ${module}")
   file(READ "${dir}/${module}" module_content)
   if(NOT "${module_content}" MATCHES "${notice_regex}")
     string(APPEND notice_missing "  ${module}\n")

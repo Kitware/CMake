@@ -68,8 +68,8 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn,
     this->AddArchitecturePaths("x32");
   }
 
-  std::string library = this->FindLibrary();
-  if (library != "") {
+  std::string const library = this->FindLibrary();
+  if (!library.empty()) {
     // Save the value in the cache
     this->Makefile->AddCacheDefinition(this->VariableName, library.c_str(),
                                        this->VariableDocumentation.c_str(),

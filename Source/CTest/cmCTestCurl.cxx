@@ -109,7 +109,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
                              std::string const& url, std::string const& fields,
                              std::string& response)
 {
-  response = "";
+  response.clear();
   if (!this->InitCurl()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Initialization of curl failed");
     return false;
@@ -185,7 +185,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
 bool cmCTestCurl::HttpRequest(std::string const& url,
                               std::string const& fields, std::string& response)
 {
-  response = "";
+  response.clear();
   cmCTestOptionalLog(this->CTest, DEBUG, "HttpRequest\n"
                        << "url: " << url << "\n"
                        << "fields " << fields << "\n",
@@ -240,10 +240,10 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
 
 void cmCTestCurl::SetProxyType()
 {
-  this->HTTPProxy = "";
+  this->HTTPProxy.clear();
   // this is the default
   this->HTTPProxyType = CURLPROXY_HTTP;
-  this->HTTPProxyAuth = "";
+  this->HTTPProxyAuth.clear();
   if (cmSystemTools::GetEnv("HTTP_PROXY", this->HTTPProxy)) {
     std::string port;
     if (cmSystemTools::GetEnv("HTTP_PROXY_PORT", port)) {

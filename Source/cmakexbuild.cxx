@@ -47,7 +47,7 @@ int RunXCode(std::vector<const char*>& argv, bool& hitbug)
     }
     pipe = cmSystemTools::WaitForLine(cp, line, 100, out, err);
   }
-  cmsysProcess_WaitForExit(cp, 0);
+  cmsysProcess_WaitForExit(cp, nullptr);
   if (cmsysProcess_GetState(cp) == cmsysProcess_State_Exited) {
     return cmsysProcess_GetExitValue(cp);
   }
@@ -64,7 +64,7 @@ int main(int ac, char* av[])
   for (int i = 1; i < ac; i++) {
     argv.push_back(av[i]);
   }
-  argv.push_back(0);
+  argv.push_back(nullptr);
   bool hitbug = true;
   int ret = 0;
   while (hitbug) {

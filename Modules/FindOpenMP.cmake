@@ -75,6 +75,7 @@
 # the OpenMP specification implemented by the ``<lang>`` compiler.
 
 cmake_policy(PUSH)
+cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 function(_OPENMP_FLAG_CANDIDATES LANG)

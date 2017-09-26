@@ -8,9 +8,7 @@ function(findExpectedFile FILE_NO RESULT_VAR GLOBING_EXPR_VAR)
     endif()
     if(NOT DEFINED EXPECTED_FILE_${FILE_NO}_VERSION)
       set(EXPECTED_FILE_${FILE_NO}_VERSION "0.1.1")
-    endif()
-    if(NOT DEFINED EXPECTED_FILE_${FILE_NO}_REVISION)
-      set(EXPECTED_FILE_${FILE_NO}_REVISION "1")
+      set(EXPECTED_FILE_${FILE_NO}_VERSION "0.1.1" PARENT_SCOPE)
     endif()
 
     getPackageNameGlobexpr("${EXPECTED_FILE_${FILE_NO}_NAME}"

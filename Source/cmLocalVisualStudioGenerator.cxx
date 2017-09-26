@@ -135,7 +135,7 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
   std::string workingDirectory = ccg.GetWorkingDirectory();
 
   // Avoid leading or trailing newlines.
-  std::string newline = "";
+  std::string newline;
 
   // Line to check for error between commands.
   std::string check_error = newline_text;

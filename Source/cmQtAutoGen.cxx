@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGen.h"
 #include "cmAlgorithms.h"
+#include "cmProcessOutput.h"
 #include "cmSystemTools.h"
 
 #include "cmsys/FStream.hxx"
@@ -158,14 +159,17 @@ static bool RccListInputsQt5(const std::string& rccCommand,
     std::string rccStdOut;
     std::string rccStdErr;
     int retVal = 0;
-    bool result =
-      cmSystemTools::RunSingleCommand(command, &rccStdOut, &rccStdErr, &retVal,
-                                      nullptr, cmSystemTools::OUTPUT_NONE);
+    bool result = cmSystemTools::RunSingleCommand(
+      command, &rccStdOut, &rccStdErr, &retVal, nullptr,
+      cmSystemTools::OUTPUT_NONE, 0.0, cmProcessOutput::Auto);
     if (result && retVal == 0 &&
         rccStdOut.find("--list") != std::string::npos) {
       hasDashDashList = true;
     }
   }
+
+  std::string const fileDir = cmSystemTools::GetFilenamePath(fileName);
+  std::string const fileNameName = cmSystemTools::GetFilenameName(fileName);
 
   // Run rcc list command
   bool result = false;
@@ -176,16 +180,16 @@ static bool RccListInputsQt5(const std::string& rccCommand,
     std::vector<std::string> command;
     command.push_back(rccCommand);
     command.push_back(hasDashDashList ? "--list" : "-list");
-    command.push_back(fileName);
-    result =
-      cmSystemTools::RunSingleCommand(command, &rccStdOut, &rccStdErr, &retVal,
-                                      nullptr, cmSystemTools::OUTPUT_NONE);
+    command.push_back(fileNameName);
+    result = cmSystemTools::RunSingleCommand(
+      command, &rccStdOut, &rccStdErr, &retVal, fileDir.c_str(),
+      cmSystemTools::OUTPUT_NONE, 0.0, cmProcessOutput::Auto);
   }
   if (!result || retVal) {
     if (errorMessage != nullptr) {
       std::ostringstream ost;
-      ost << "rcc list process for " << cmQtAutoGen::Quoted(fileName)
-          << " failed:\n"
+      ost << "rcc list process failed for\n  " << cmQtAutoGen::Quoted(fileName)
+          << "\n"
           << rccStdOut << "\n"
           << rccStdErr << "\n";
       *errorMessage = ost.str();
@@ -228,6 +232,11 @@ static bool RccListInputsQt5(const std::string& rccCommand,
         files.push_back(eline.substr(pos, sz));
       }
     }
+  }
+
+  // Convert relative paths to absolute paths
+  for (std::string& resFile : files) {
+    resFile = cmSystemTools::CollapseCombinedPath(fileDir, resFile);
   }
 
   return true;

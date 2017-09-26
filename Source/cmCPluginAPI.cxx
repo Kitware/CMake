@@ -405,14 +405,8 @@ char CCONV* cmExpandVariablesInString(void* arg, const char* source,
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
   std::string barf = source;
-  std::string result = mf->ExpandVariablesInString(
-    barf, (escapeQuotes ? true : false), (atOnly ? true : false));
-  char* res = static_cast<char*>(malloc(result.size() + 1));
-  if (!result.empty()) {
-    strcpy(res, result.c_str());
-  }
-  res[result.size()] = '\0';
-  return res;
+  std::string result = mf->ExpandVariablesInString(barf, escapeQuotes, atOnly);
+  return strdup(result.c_str());
 }
 
 int CCONV cmExecuteCommand(void* arg, const char* name, int numArgs,
@@ -460,9 +454,7 @@ void CCONV cmFreeArguments(int argc, char** argv)
   for (i = 0; i < argc; ++i) {
     free(argv[i]);
   }
-  if (argv) {
-    free(argv);
-  }
+  free(argv);
 }
 
 int CCONV cmGetTotalArgumentSize(int argc, char** argv)
@@ -513,13 +505,12 @@ cmCPluginAPISourceFileMap cmCPluginAPISourceFiles;
 
 void* CCONV cmCreateSourceFile(void)
 {
-  return (void*)new cmCPluginAPISourceFile;
+  return new cmCPluginAPISourceFile;
 }
 
 void* CCONV cmCreateNewSourceFile(void*)
 {
-  cmCPluginAPISourceFile* sf = new cmCPluginAPISourceFile;
-  return (void*)sf;
+  return new cmCPluginAPISourceFile;
 }
 
 void CCONV cmDestroySourceFile(void* arg)
@@ -552,7 +543,7 @@ void CCONV* cmGetSource(void* arg, const char* name)
       cmCPluginAPISourceFileMap::value_type entry(rsf, sf);
       i = cmCPluginAPISourceFiles.insert(entry).first;
     }
-    return (void*)i->second;
+    return i->second;
   }
   return nullptr;
 }
@@ -581,7 +572,7 @@ void* CCONV cmAddSource(void* arg, void* arg2)
 
   // Store the proxy in the map so it can be re-used and deleted later.
   cmCPluginAPISourceFiles[rsf] = sf;
-  return (void*)sf;
+  return sf;
 }
 
 const char* CCONV cmSourceFileGetSourceName(void* arg)
@@ -762,25 +753,19 @@ void CCONV cmSourceFileSetName2(void* arg, const char* name, const char* dir,
 char* CCONV cmGetFilenameWithoutExtension(const char* name)
 {
   std::string sres = cmSystemTools::GetFilenameWithoutExtension(name);
-  char* result = (char*)malloc(sres.size() + 1);
-  strcpy(result, sres.c_str());
-  return result;
+  return strdup(sres.c_str());
 }
 
 char* CCONV cmGetFilenamePath(const char* name)
 {
   std::string sres = cmSystemTools::GetFilenamePath(name);
-  char* result = (char*)malloc(sres.size() + 1);
-  strcpy(result, sres.c_str());
-  return result;
+  return strdup(sres.c_str());
 }
 
 char* CCONV cmCapitalized(const char* name)
 {
   std::string sres = cmSystemTools::Capitalized(name);
-  char* result = (char*)malloc(sres.size() + 1);
-  strcpy(result, sres.c_str());
-  return result;
+  return strdup(sres.c_str());
 }
 
 void CCONV cmCopyFileIfDifferent(const char* name1, const char* name2)

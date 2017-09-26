@@ -8,7 +8,6 @@ misc-*,\
 -misc-static-assert,\
 modernize-*,\
 -modernize-deprecated-headers,\
--modernize-loop-convert,\
 -modernize-pass-by-value,\
 -modernize-raw-string-literal,\
 -modernize-replace-auto-ptr,\

@@ -50,7 +50,7 @@ if(WIN32)
     "${CMake_BINARY_DIR}/Source/cmakeversion.rc"
     )
 
-	set(VERSION_RC_FILE "${CMake_BINARY_DIR}/Source/cmakeversion.rc")
+    set(VERSION_RC_FILE "${CMake_BINARY_DIR}/Source/cmakeversion.rc")
 endif()
 
 set(CMAKE_VERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
@@ -694,8 +694,8 @@ if (WIN32)
       cmGhsMultiTargetGenerator.h
       cmGhsMultiGpj.cxx
       cmGhsMultiGpj.h
-      cmVSSetupHelper.h
       cmVSSetupHelper.cxx
+      cmVSSetupHelper.h
       )
 
     # Add a manifest file to executables on Windows to allow for

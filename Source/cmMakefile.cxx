@@ -1645,7 +1645,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
       nvalue = value ? value : "";
 
       cmSystemTools::ExpandListArgument(nvalue, files);
-      nvalue = "";
+      nvalue.clear();
       for (cc = 0; cc < files.size(); cc++) {
         if (!cmSystemTools::IsOff(files[cc].c_str())) {
           files[cc] = cmSystemTools::CollapseFullPath(files[cc]);
@@ -2448,7 +2448,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
     std::string input = source;
 
     // Start with empty output.
-    source = "";
+    source.clear();
 
     // Look for one @VAR@ at a time.
     const char* in = input.c_str();
@@ -3082,9 +3082,18 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
 {
   cmSourceFileLocation sfl(this, sourceName);
-  for (cmSourceFile* sf : this->SourceFiles) {
-    if (sf->Matches(sfl)) {
-      return sf;
+
+#if defined(_WIN32) || defined(__APPLE__)
+  const auto& name = cmSystemTools::LowerCase(sfl.GetName());
+#else
+  const auto& name = sfl.GetName();
+#endif
+  auto sfsi = this->SourceFileSearchIndex.find(name);
+  if (sfsi != this->SourceFileSearchIndex.end()) {
+    for (auto sf : sfsi->second) {
+      if (sf->Matches(sfl)) {
+        return sf;
+      }
     }
   }
   return nullptr;
@@ -3098,6 +3107,41 @@ cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
     sf->SetProperty("GENERATED", "1");
   }
   this->SourceFiles.push_back(sf);
+
+  auto name = sf->GetLocation().GetName();
+#if defined(_WIN32) || defined(__APPLE__)
+  name = cmSystemTools::LowerCase(name);
+#endif
+
+  // For a file in the form "a.b.c" add the cmSourceFile to the index
+  // at "a.b.c", "a.b" and "a".
+  auto partial = name;
+  while (true) {
+    this->SourceFileSearchIndex[partial].insert(sf);
+    auto i = partial.rfind('.');
+    if (i == std::string::npos) {
+      break;
+    }
+    partial = partial.substr(0, i);
+  }
+
+  if (sf->GetLocation().ExtensionIsAmbiguous()) {
+    // For an ambiguous extension also add the various "known"
+    // extensions to the original filename.
+
+    const auto& srcExts = this->GetCMakeInstance()->GetSourceExtensions();
+    for (const auto& ext : srcExts) {
+      auto name_ext = name + "." + cmSystemTools::LowerCase(ext);
+      this->SourceFileSearchIndex[name_ext].insert(sf);
+    }
+
+    const auto& hdrExts = this->GetCMakeInstance()->GetHeaderExtensions();
+    for (const auto& ext : hdrExts) {
+      auto name_ext = name + "." + cmSystemTools::LowerCase(ext);
+      this->SourceFileSearchIndex[name_ext].insert(sf);
+    }
+  }
+
   return sf;
 }
 
@@ -3362,7 +3406,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
   moduleInCMakeRoot += filename;
   cmSystemTools::ConvertToUnixSlashes(moduleInCMakeRoot);
   if (!cmSystemTools::FileExists(moduleInCMakeRoot.c_str())) {
-    moduleInCMakeRoot = "";
+    moduleInCMakeRoot.clear();
   }
 
   // Normally, prefer the files found in CMAKE_MODULE_PATH. Only when the file
@@ -3546,7 +3590,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     std::string inLine;
     std::string outLine;
     while (cmSystemTools::GetLineFromStream(fin, inLine)) {
-      outLine = "";
+      outLine.clear();
       this->ConfigureString(inLine, outLine, atOnly, escapeQuotes);
       fout << outLine << newLineCharacters;
     }

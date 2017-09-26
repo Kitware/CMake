@@ -140,10 +140,10 @@ void cmCTestSubmitHandler::Initialize()
   this->HasWarnings = false;
   this->HasErrors = false;
   this->Superclass::Initialize();
-  this->HTTPProxy = "";
+  this->HTTPProxy.clear();
   this->HTTPProxyType = 0;
-  this->HTTPProxyAuth = "";
-  this->FTPProxy = "";
+  this->HTTPProxyAuth.clear();
+  this->FTPProxy.clear();
   this->FTPProxyType = 0;
   this->LogFile = nullptr;
   this->Files.clear();
@@ -496,11 +496,11 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
           ? ""
           : this->GetOption("RetryCount");
 
-        int delay = retryDelay == ""
+        int delay = retryDelay.empty()
           ? atoi(this->CTest->GetCTestConfiguration("CTestSubmitRetryDelay")
                    .c_str())
           : atoi(retryDelay.c_str());
-        int count = retryCount == ""
+        int count = retryCount.empty()
           ? atoi(this->CTest->GetCTestConfiguration("CTestSubmitRetryCount")
                    .c_str())
           : atoi(retryCount.c_str());
@@ -1032,14 +1032,14 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
     ? ""
     : this->GetOption("RetryCount");
   unsigned long retryDelay = 0;
-  if (retryDelayString != "") {
+  if (!retryDelayString.empty()) {
     if (!cmSystemTools::StringToULong(retryDelayString.c_str(), &retryDelay)) {
       cmCTestLog(this->CTest, WARNING, "Invalid value for 'RETRY_DELAY' : "
                    << retryDelayString << std::endl);
     }
   }
   unsigned long retryCount = 0;
-  if (retryCountString != "") {
+  if (!retryCountString.empty()) {
     if (!cmSystemTools::StringToULong(retryCountString.c_str(), &retryCount)) {
       cmCTestLog(this->CTest, WARNING, "Invalid value for 'RETRY_DELAY' : "
                    << retryCountString << std::endl);
@@ -1361,7 +1361,7 @@ int cmCTestSubmitHandler::ProcessHandler()
 
   std::string dropMethod(this->CTest->GetCTestConfiguration("DropMethod"));
 
-  if (dropMethod == "" || dropMethod == "ftp") {
+  if (dropMethod.empty() || dropMethod == "ftp") {
     ofs << "Using drop method: FTP" << std::endl;
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "   Using FTP submit method" << std::endl

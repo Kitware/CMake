@@ -218,7 +218,7 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
 
 bool cmVSSetupAPIHelper::GetVSInstanceInfo(std::string& vsInstallLocation)
 {
-  vsInstallLocation = "";
+  vsInstallLocation.clear();
   bool isInstalled = this->EnumerateAndChooseVSInstance();
 
   if (isInstalled) {

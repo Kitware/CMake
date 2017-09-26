@@ -222,7 +222,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
   std::string valueToUse;
   if (!envVarSet && cacheValue == nullptr) {
     // nothing known, do nothing
-    valueToUse = "";
+    valueToUse.clear();
   } else if (envVarSet && cacheValue == nullptr) {
     // The variable is in the env, but not in the cache. Use it and put it
     // in the cache
@@ -891,7 +891,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     std::string subdir = lgen->ConvertToRelativePath(
       this->HomeOutputDirectory, lgen->GetCurrentBinaryDirectory());
     if (subdir == ".") {
-      subdir = "";
+      subdir.clear();
     }
 
     for (cmGeneratorTarget* target : targets) {

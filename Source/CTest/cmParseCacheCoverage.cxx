@@ -146,7 +146,7 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
         cmCTestLog(this->CTest, ERROR_MESSAGE,
                    "Could not find mumps file for routine: " << routine
                                                              << "\n");
-        filepath = "";
+        filepath.clear();
         continue; // move to next line
       }
     }
@@ -154,8 +154,8 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
     else {
       // Totals in arg 0 marks the end of a routine
       if (separateLine[0].substr(0, 6) == "Totals") {
-        routine = ""; // at the end of this routine
-        filepath = "";
+        routine.clear(); // at the end of this routine
+        filepath.clear();
         continue; // move to next line
       }
     }

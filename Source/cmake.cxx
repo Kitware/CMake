@@ -246,52 +246,56 @@ Json::Value cmake::ReportCapabilitiesJson(bool haveServerMode) const
   unsigned int requiredMinor = 0;
   unsigned int requiredPatch = 0;
   unsigned int requiredTweak = 0;
-  
-  auto makefiles = GetGlobalGenerator()->GetMakefiles();
-  for (auto iter = makefiles.begin(); iter != makefiles.end(); iter++)
-  {
-	  auto makefileRequiredVersion = (*iter)->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
 
-	  unsigned int major = 0;
-	  unsigned int minor = 0;
-	  unsigned int patch = 0;
-	  unsigned int tweak = 0;
-	  // Parse at least two components of the version number, using 0 for those not specified.
-	  if (makefileRequiredVersion != nullptr &&
-		  sscanf(makefileRequiredVersion, "%u.%u.%u.%u", &major, &minor, &patch, &tweak) >= 2)
-	  {
-		  if ((requiredMajor < major) ||
-			  (requiredMajor == major && requiredMinor < minor) ||
-			  (requiredMajor == major && requiredMinor == minor && requiredPatch < patch) ||
-			  (requiredMajor == major && requiredMinor == minor && requiredPatch == patch && requiredTweak < tweak))
-		  {
-			  // set the new required version
-			  requiredMajor = major;
-			  requiredMinor = minor;
-			  requiredPatch = patch;
-			  requiredTweak = tweak;
-		  }
-	  }
+  // If we have a global generator and have processed the make files we can read the required version.
+  if (GetGlobalGenerator() != nullptr)
+  {
+    auto makefiles = GetGlobalGenerator()->GetMakefiles();
+    for (auto iter = makefiles.begin(); iter != makefiles.end(); iter++)
+    {
+      auto makefileRequiredVersion = (*iter)->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+
+      unsigned int major = 0;
+      unsigned int minor = 0;
+      unsigned int patch = 0;
+      unsigned int tweak = 0;
+      // Parse at least two components of the version number, using 0 for those not specified.
+      if (makefileRequiredVersion != nullptr &&
+        sscanf(makefileRequiredVersion, "%u.%u.%u.%u", &major, &minor, &patch, &tweak) >= 2)
+      {
+        if ((requiredMajor < major) ||
+          (requiredMajor == major && requiredMinor < minor) ||
+          (requiredMajor == major && requiredMinor == minor && requiredPatch < patch) ||
+          (requiredMajor == major && requiredMinor == minor && requiredPatch == patch && requiredTweak < tweak))
+        {
+          // set the new required version
+          requiredMajor = major;
+          requiredMinor = minor;
+          requiredPatch = patch;
+          requiredTweak = tweak;
+        }
+      }
+    }
   }
 
   if (requiredMajor == 0)
   {
-	  // We couldn't find the minimum required version specified so we'll just use the current CMake version
-	  requiredMajor = cmVersion::GetMajorVersion();
-	  requiredMinor = cmVersion::GetMinorVersion();
-	  requiredPatch = cmVersion::GetPatchVersion();
-	  requiredTweak = cmVersion::GetTweakVersion();
+    // We couldn't find the minimum required version specified so we'll just use the current CMake version
+    requiredMajor = cmVersion::GetMajorVersion();
+    requiredMinor = cmVersion::GetMinorVersion();
+    requiredPatch = cmVersion::GetPatchVersion();
+    requiredTweak = cmVersion::GetTweakVersion();
   }
 
   std::ostringstream requiredVersion;
   requiredVersion << requiredMajor << "." << requiredMinor;
   if (requiredPatch > 0)
   {
-	  requiredVersion << "." << requiredPatch;
+    requiredVersion << "." << requiredPatch;
   }
   if (requiredTweak > 0)
   {
-	  requiredVersion << "." << requiredTweak;
+    requiredVersion << "." << requiredTweak;
   }
   obj["requiredVersion"] = requiredVersion.str().c_str();
   
@@ -1128,10 +1132,10 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator* gg)
 
   // Save the environment variables CXX and CC
   if (!cmSystemTools::GetEnv("CXX", this->CXXEnvironment)) {
-    this->CXXEnvironment = "";
+    this->CXXEnvironment.clear();
   }
   if (!cmSystemTools::GetEnv("CC", this->CCEnvironment)) {
-    this->CCEnvironment = "";
+    this->CCEnvironment.clear();
   }
 }
 

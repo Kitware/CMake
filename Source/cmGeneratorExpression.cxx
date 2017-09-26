@@ -68,7 +68,7 @@ const char* cmCompiledGeneratorExpression::EvaluateWithContext(
     return this->Input.c_str();
   }
 
-  this->Output = "";
+  this->Output.clear();
 
   std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it =
     this->Evaluators.begin();
@@ -81,7 +81,7 @@ const char* cmCompiledGeneratorExpression::EvaluateWithContext(
     this->SeenTargetProperties.insert(context.SeenTargetProperties.begin(),
                                       context.SeenTargetProperties.end());
     if (context.HadError) {
-      this->Output = "";
+      this->Output.clear();
       break;
     }
   }
@@ -296,7 +296,7 @@ void cmGeneratorExpression::Split(const std::string& input,
       std::string::size_type startPos = input.rfind(';', pos);
       if (startPos == std::string::npos) {
         preGenex = part;
-        part = "";
+        part.clear();
       } else if (startPos != pos - 1 && startPos >= lastPos) {
         part = input.substr(lastPos, startPos - lastPos);
         preGenex = input.substr(startPos + 1, pos - startPos - 1);

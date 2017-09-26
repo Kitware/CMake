@@ -321,11 +321,18 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     set(id_product_type "com.apple.product-type.tool")
     if(CMAKE_OSX_SYSROOT)
       set(id_sdkroot "SDKROOT = \"${CMAKE_OSX_SYSROOT}\";")
-      if(CMAKE_OSX_SYSROOT MATCHES "(^|/)[Ii][Pp][Hh][Oo][Nn][Ee]")
+      if(CMAKE_OSX_SYSROOT MATCHES "(^|/)[Ii][Pp][Hh][Oo][Nn][Ee]" OR
+        CMAKE_OSX_SYSROOT MATCHES "(^|/)[Aa][Pp][Pp][Ll][Ee][Tt][Vv]")
         set(id_product_type "com.apple.product-type.bundle.unit-test")
       endif()
     else()
       set(id_sdkroot "")
+    endif()
+    if(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM)
+      set(id_development_team
+        "DEVELOPMENT_TEAM = \"${CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM}\";")
+    else()
+      set(id_development_team "")
     endif()
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/Xcode-3.pbxproj.in
       ${id_dir}/CompilerId${lang}.xcodeproj/project.pbxproj @ONLY)

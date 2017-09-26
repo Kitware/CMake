@@ -22,7 +22,7 @@ cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
     this->ConfigName = config;
   } else {
     // No configuration type given.
-    this->ConfigName = "";
+    this->ConfigName.clear();
   }
 }
 

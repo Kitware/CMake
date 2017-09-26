@@ -425,7 +425,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     // The explicit preprocessing step will handle dependency scanning.
   } else if (this->NeedDepTypeMSVC(lang)) {
     deptype = "msvc";
-    depfile = "";
+    depfile.clear();
     flags += " /showIncludes";
   } else if (mf->IsOn("CMAKE_NINJA_CMCLDEPS_" + lang)) {
     // For the MS resource compiler we need cmcldeps, but skip dependencies
