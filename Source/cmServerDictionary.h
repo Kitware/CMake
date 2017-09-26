@@ -10,7 +10,6 @@ static const std::string kDIRTY_SIGNAL = "dirty";
 static const std::string kFILE_CHANGE_SIGNAL = "fileChange";
 
 static const std::string kCACHE_TYPE = "cache";
-static const std::string kVC_SYSTEM_INCLUDE_PATHS_TYPE = "cmakeVCSystemIncludePaths";
 static const std::string kCMAKE_VARIABLES_TYPE = "cmakeVariables";
 static const std::string kCMAKE_INPUTS_TYPE = "cmakeInputs";
 static const std::string kCODE_MODEL_TYPE = "codemodel";
@@ -96,7 +95,6 @@ static const std::string kCMAKE_C_COMPILER = "cmakeCCompiler";
 static const std::string kCMAKE_C_COMPILER_VERSION = "cmakeCCompilerVersion";
 static const std::string kCMAKE_CXX_COMPILER = "cmakeCXXCompiler";
 static const std::string kCMAKE_CXX_COMPILER_VERSION = "cmakeCXXCompilerVersion";
-static const std::string kVC_SYSTEM_INCLUDE_PATHS = "vcSytemIncludePaths";
 static const std::string kHAS_INSTALL_RULE = "hasInstallRule";
 static const std::string kINSTALL_PATH = "installPath";
 static const std::string kHAS_ENABLED_TESTS = "hasEnabledTests";

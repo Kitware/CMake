@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
@@ -1796,18 +1795,6 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
   output += "\nRun Build Command:";
   output += makeCommandStr;
   output += "\n";
-
-  // inject additional flags to msbuild.exe.
-  if (!makeCommand.empty()) {
-    auto build = makeCommand[0];
-    std::transform(build.begin(), build.end(), build.begin(), tolower);
-    if (build.find("msbuild.exe") != std::string::npos) {
-      auto const flag = this->CMakeInstance->GetCacheDefinition("MSBUILD_FLAGS");
-      if (flag) {
-        makeCommand.emplace_back(flag);
-      }
-    }
-  }
 
   if (!cmSystemTools::RunSingleCommand(makeCommand, outputPtr, outputPtr,
                                        &retVal, nullptr, outputflag,

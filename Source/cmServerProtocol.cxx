@@ -459,9 +459,6 @@ const cmServerResponse cmServerProtocol1::Process(
   if (request.Type == kCACHE_TYPE) {
     return this->ProcessCache(request);
   }
-  if (request.Type == kVC_SYSTEM_INCLUDE_PATHS_TYPE) {
-    return this->ProcessSystemIncludePaths(request);
-  }
   if (request.Type == kCMAKE_VARIABLES_TYPE) {
     return this->ProcessCMakeVariables(request);
   }
@@ -1399,107 +1396,6 @@ cmServerResponse cmServerProtocol1::ProcessCMakeVariables(
   for (auto const& key : state->GetCacheEntryKeys()) {
     obj[key] = state->GetCacheEntryValue(key);
   }
-  return request.Reply(result);
-}
-
-namespace
-{
-  // we need to make sure the injected flag gets removed from cmake cache,
-  // otherwise all subsequent calls to try_compile will be affected.
-  // consequently, these operations are wrapped up in an RAII class to ensure
-  // proper removal.
-  struct VCSystemIncludePaths
-  {
-    VCSystemIncludePaths(cmake* cmake)
-      : cmake(cmake), mf(cmake->GetGlobalGenerator(), cmake->GetCurrentSnapshot())
-    {
-      if (this->cmake)
-      {
-        this->cmake->AddCacheEntry(this->entryName, "/verbosity:diagnostic",
-          nullptr, cmStateEnums::CacheEntryType::STRING);
-        this->ok = mf.ReadListFile(this->file.c_str());
-      }
-    }
-
-    ~VCSystemIncludePaths()
-    {
-      try
-      {
-        if (this->cmake)
-        {
-          this->cmake->GetState()->RemoveCacheEntry(entryName);
-          this->mf.RemoveDefinition(systemPathsFlag);
-        }
-      }
-      catch (...) {}
-    }
-
-    bool Failed() const { return !this->ok; }
-    auto const& FileName() const { return this->file; }
-
-    std::string GetPaths() const
-    {
-      auto val = this->mf.GetDefinition(systemPathsFlag);
-      if (val != nullptr)
-      {
-        return this->Extract(val);
-      }
-      else
-      {
-        return std::string();
-      }
-    }
-
-  private:
-    std::string Extract(std::string const& string) const
-    {
-      char const pattern[] = "\nIncludePath = ";
-      auto const index = string.find(pattern);
-      if (index != std::string::npos) {
-        auto const begin = index + (sizeof pattern - 1);
-        auto const end = string.find('\n', begin);
-        if (end == std::string::npos) {
-          return{ string,begin };
-        }
-        else {
-          return{ string,begin,end - begin };
-        }
-      }
-      return{};
-    }
-
-  private:
-    const std::string entryName = "MSBUILD_FLAGS";
-    const std::string systemPathsFlag = "VC_SYSTEM_INCLUDE_PATHS_OUTPUT";
-    std::string const file = cmSystemTools::GetCMakeRoot()
-      + "/Modules/VCSystemIncludePaths.cmake";
-
-    cmake* const cmake = nullptr;
-    cmMakefile mf;
-    bool ok = false;
-  };
-}
-
-cmServerResponse cmServerProtocol1::ProcessSystemIncludePaths(
-  const cmServerRequest & request)
-{
-  if (this->m_State < STATE_CONFIGURED) {
-    return request.ReportError("This instance was not yet configured.");
-  }
-
-  Json::Value result = Json::objectValue;
-  result[kVC_SYSTEM_INCLUDE_PATHS] = "";
-
-  if (!this->CMakeInstance()->GetIsInTryCompile()) {
-    VCSystemIncludePaths const paths(this->CMakeInstance());
-
-    if (paths.Failed()) {
-      return request.ReportError("Could not find cmake module file: " + paths.FileName());
-    }
-
-    result[kVC_SYSTEM_INCLUDE_PATHS] = paths.GetPaths();
-  }
-
   return request.Reply(result);
 }
 
