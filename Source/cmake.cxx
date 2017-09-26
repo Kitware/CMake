@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#define NOMINMAX  // Undefine min and max defined by Windows.h
 #include "cmake.h"
 #include "cmAlgorithms.h"
 #include "cmCommands.h"
@@ -1513,27 +1512,10 @@ void cmake::CreateDefaultGlobalGenerator()
     ";InstallDir"             //
   };
 
-  // For Dev15/VS 2017, there are no registry entries exposing the install location of VS.
-  // However a Microsoft version of CMake is installed with VS (placed relative to the root of VS). 
-  // If we are running MS version of cmake, then select VS2017 generator.
-  // For VS2017, cmake is deployed at <VSRoot>\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin
-  // Below condition works only for CMake bundled with VS.
-  std::string cmakeCommandLocation = cmSystemTools::GetCMakeCommand();
-  std::transform(cmakeCommandLocation.begin(), cmakeCommandLocation.end(), cmakeCommandLocation.begin(), ::tolower);
-  std::size_t match = cmakeCommandLocation.find("/common7/ide/commonextensions/microsoft/cmake/cmake/bin");
-  if (match != std::string::npos)
-  {
+  cmVSSetupAPIHelper vsSetupAPIHelper;
+  if (vsSetupAPIHelper.IsVS2017Installed()) {
     found = "Visual Studio 15 2017";
-  }
-
-  // Query VS Setup API to check if VS 2017 is installed.
-  if (found == "") {
-    cmVSSetupAPIHelper vsSetupAPIHelper;
-    if (vsSetupAPIHelper.IsVS2017Installed()) {
-      found = "Visual Studio 15 2017";
-    }
-  }
-  else {
+  } else {
       for (VSVersionedGenerator const* g = cmArrayBegin(vsGenerators);
           found.empty() && g != cmArrayEnd(vsGenerators); ++g) {
           for (const char* const* v = cmArrayBegin(vsVariants);

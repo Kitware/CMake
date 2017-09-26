@@ -47,10 +47,6 @@ protected:
   std::string FindMSBuildCommand() override;
   std::string FindDevEnvCommand() override;
 
-  std::string const& GetMSBuildCommand();
-  std::string MSBuildCommand;
-  bool MSBuildCommandInitialized;
-
 private:
   class Factory;
   mutable cmVSSetupAPIHelper vsSetupAPIHelper;

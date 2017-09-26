@@ -124,7 +124,6 @@ private:
   cmServerResponse ProcessSetGlobalSettings(const cmServerRequest& request);
   cmServerResponse ProcessFileSystemWatchers(const cmServerRequest& request);
   cmServerResponse ProcessCMakeVariables(const cmServerRequest& request);
-  cmServerResponse ProcessSystemIncludePaths(const cmServerRequest& request);
   cmServerResponse ProcessCTests(const cmServerRequest& request);
 
   enum State
