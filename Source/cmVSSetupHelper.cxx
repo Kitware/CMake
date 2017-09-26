@@ -49,6 +49,14 @@ const WCHAR* Win81SDKComponent =
   L"Microsoft.VisualStudio.Component.Windows81SDK";
 const WCHAR* ComponentType = L"Component";
 
+std::string VSInstanceInfo::GetInstallLocation() const
+{
+  std::string loc(this->VSInstallLocation.begin(),
+                  this->VSInstallLocation.end());
+  cmSystemTools::ConvertToUnixSlashes(loc);
+  return loc;
+}
+
 cmVSSetupAPIHelper::cmVSSetupAPIHelper()
   : setupConfig(NULL)
   , setupConfig2(NULL)
@@ -222,9 +230,7 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(std::string& vsInstallLocation)
   bool isInstalled = this->EnumerateAndChooseVSInstance();
 
   if (isInstalled) {
-    std::string str(chosenInstanceInfo.VSInstallLocation.begin(),
-                    chosenInstanceInfo.VSInstallLocation.end());
-    vsInstallLocation = str;
+    vsInstallLocation = chosenInstanceInfo.GetInstallLocation();
   }
 
   return isInstalled;
@@ -281,9 +287,7 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 
     if (isInstalled) {
       if (!envVSCommonToolsDir.empty()) {
-        std::string currentVSLocation(instanceInfo.VSInstallLocation.begin(),
-                                      instanceInfo.VSInstallLocation.end());
-        cmSystemTools::ConvertToUnixSlashes(currentVSLocation);
+        std::string currentVSLocation = instanceInfo.GetInstallLocation();
         currentVSLocation += "/Common7/Tools";
         if (cmSystemTools::ComparePath(currentVSLocation,
                                        envVSCommonToolsDir)) {

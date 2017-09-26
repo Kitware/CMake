@@ -116,6 +116,8 @@ struct VSInstanceInfo
     ullVersion = 0;
     IsWin10SDKInstalled = IsWin81SDKInstalled = false;
   }
+
+  std::string GetInstallLocation() const;
 };
 
 class cmVSSetupAPIHelper
