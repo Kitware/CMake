@@ -447,15 +447,6 @@ void cmGlobalGenerator::EnableLanguage(
       "Platform information initialized", cmStateEnums::INTERNAL);
   }
 
-  // find and make sure CMAKE_MAKE_PROGRAM is defined
-  if (!this->FindMakeProgram(mf)) {
-    return;
-  }
-
-  if (!this->CheckLanguages(languages, mf)) {
-    return;
-  }
-
   // try and load the CMakeSystem.cmake if it is there
   std::string fpath = rootBin;
   bool const readCMakeSystem = !mf->GetDefinition("CMAKE_SYSTEM_LOADED");
@@ -500,6 +491,11 @@ void cmGlobalGenerator::EnableLanguage(
   }
 
   if (readCMakeSystem) {
+    // Find the native build tool for this generator.
+    if (!this->FindMakeProgram(mf)) {
+      return;
+    }
+
     // Tell the generator about the target system.
     std::string system = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
     if (!this->SetSystemName(system, mf)) {
@@ -520,6 +516,12 @@ void cmGlobalGenerator::EnableLanguage(
       cmSystemTools::SetFatalErrorOccured();
       return;
     }
+  }
+
+  // Check that the languages are supported by the generator and its
+  // native build tool found above.
+  if (!this->CheckLanguages(languages, mf)) {
+    return;
   }
 
   // **** Load the system specific initialization if not yet loaded
