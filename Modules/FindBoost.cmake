@@ -240,8 +240,6 @@ if (NOT Boost_NO_BOOST_CMAKE)
       message("Found Boost components:")
       message("   ${Boost_FIND_COMPONENTS}")
     endif()
-    # Restore project's policies
-    cmake_policy(POP)
     return()
   endif()
 endif()
