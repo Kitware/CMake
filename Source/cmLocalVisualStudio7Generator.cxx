@@ -2079,7 +2079,10 @@ public:
         if (strcmp(atts[i], "ProjectGUID") == 0) {
           if (atts[i + 1]) {
             this->GUID = atts[i + 1];
-            this->GUID = this->GUID.substr(1, this->GUID.size() - 2);
+            if (this->GUID[0] == '{') {
+              // remove surrounding curly brackets
+              this->GUID = this->GUID.substr(1, this->GUID.size() - 2);
+            }
           } else {
             this->GUID.clear();
           }
