@@ -10,7 +10,6 @@ modernize-*,\
 -modernize-deprecated-headers,\
 -modernize-pass-by-value,\
 -modernize-raw-string-literal,\
--modernize-replace-auto-ptr,\
 -modernize-use-auto,\
 -modernize-use-default-member-init,\
 -modernize-use-emplace,\

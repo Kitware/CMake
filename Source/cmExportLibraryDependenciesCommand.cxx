@@ -4,8 +4,10 @@
 
 #include "cmsys/FStream.hxx"
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <utility>
 
+#include "cmAlgorithms.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -13,7 +15,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 class cmExecutionStatus;
@@ -47,16 +48,15 @@ void cmExportLibraryDependenciesCommand::FinalPass()
 void cmExportLibraryDependenciesCommand::ConstFinalPass() const
 {
   // Use copy-if-different if not appending.
-  CM_AUTO_PTR<cmsys::ofstream> foutPtr;
+  std::unique_ptr<cmsys::ofstream> foutPtr;
   if (this->Append) {
-    CM_AUTO_PTR<cmsys::ofstream> ap(
-      new cmsys::ofstream(this->Filename.c_str(), std::ios::app));
-    foutPtr = ap;
+    foutPtr =
+      cm::make_unique<cmsys::ofstream>(this->Filename.c_str(), std::ios::app);
   } else {
-    CM_AUTO_PTR<cmGeneratedFileStream> ap(
+    std::unique_ptr<cmGeneratedFileStream> ap(
       new cmGeneratedFileStream(this->Filename.c_str(), true));
     ap->SetCopyIfDifferent(true);
-    foutPtr = ap;
+    foutPtr = std::move(ap);
   }
   std::ostream& fout = *foutPtr;
 

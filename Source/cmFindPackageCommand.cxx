@@ -13,6 +13,7 @@
 #include <deque>
 #include <functional>
 #include <iterator>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
@@ -24,7 +25,6 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmVersion.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 #if defined(__HAIKU__)
@@ -1611,10 +1611,10 @@ protected:
 private:
   bool Search(cmFileList&);
   virtual bool Search(std::string const& parent, cmFileList&) = 0;
-  virtual CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const = 0;
+  virtual std::unique_ptr<cmFileListGeneratorBase> Clone() const = 0;
   friend class cmFileList;
   cmFileListGeneratorBase* SetNext(cmFileListGeneratorBase const& next);
-  CM_AUTO_PTR<cmFileListGeneratorBase> Next;
+  std::unique_ptr<cmFileListGeneratorBase> Next;
 };
 
 class cmFileList
@@ -1638,7 +1638,7 @@ public:
   }
   bool Search()
   {
-    if (this->First.get()) {
+    if (this->First) {
       return this->First->Search(*this);
     }
     return false;
@@ -1647,7 +1647,7 @@ public:
 private:
   virtual bool Visit(std::string const& fullPath) = 0;
   friend class cmFileListGeneratorBase;
-  CM_AUTO_PTR<cmFileListGeneratorBase> First;
+  std::unique_ptr<cmFileListGeneratorBase> First;
   cmFileListGeneratorBase* Last;
 };
 
@@ -1688,7 +1688,7 @@ cmFileListGeneratorBase* cmFileListGeneratorBase::SetNext(
 bool cmFileListGeneratorBase::Consider(std::string const& fullPath,
                                        cmFileList& listing)
 {
-  if (this->Next.get()) {
+  if (this->Next) {
     return this->Next->Search(fullPath + "/", listing);
   }
   return listing.Visit(fullPath + "/");
@@ -1715,9 +1715,9 @@ private:
     std::string fullPath = parent + this->String;
     return this->Consider(fullPath, lister);
   }
-  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const override
+  std::unique_ptr<cmFileListGeneratorBase> Clone() const override
   {
-    CM_AUTO_PTR<cmFileListGeneratorBase> g(
+    std::unique_ptr<cmFileListGeneratorBase> g(
       new cmFileListGeneratorFixed(*this));
     return g;
   }
@@ -1748,9 +1748,9 @@ private:
     }
     return false;
   }
-  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const override
+  std::unique_ptr<cmFileListGeneratorBase> Clone() const override
   {
-    CM_AUTO_PTR<cmFileListGeneratorBase> g(
+    std::unique_ptr<cmFileListGeneratorBase> g(
       new cmFileListGeneratorEnumerate(*this));
     return g;
   }
@@ -1820,9 +1820,9 @@ private:
     }
     return false;
   }
-  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const override
+  std::unique_ptr<cmFileListGeneratorBase> Clone() const override
   {
-    CM_AUTO_PTR<cmFileListGeneratorBase> g(
+    std::unique_ptr<cmFileListGeneratorBase> g(
       new cmFileListGeneratorProject(*this));
     return g;
   }
@@ -1874,9 +1874,9 @@ private:
     }
     return false;
   }
-  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const override
+  std::unique_ptr<cmFileListGeneratorBase> Clone() const override
   {
-    CM_AUTO_PTR<cmFileListGeneratorBase> g(
+    std::unique_ptr<cmFileListGeneratorBase> g(
       new cmFileListGeneratorMacProject(*this));
     return g;
   }
@@ -1918,9 +1918,9 @@ private:
     }
     return false;
   }
-  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const override
+  std::unique_ptr<cmFileListGeneratorBase> Clone() const override
   {
-    CM_AUTO_PTR<cmFileListGeneratorBase> g(
+    std::unique_ptr<cmFileListGeneratorBase> g(
       new cmFileListGeneratorCaseInsensitive(*this));
     return g;
   }
@@ -1963,10 +1963,9 @@ private:
     }
     return false;
   }
-  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const override
+  std::unique_ptr<cmFileListGeneratorBase> Clone() const override
   {
-    CM_AUTO_PTR<cmFileListGeneratorBase> g(new cmFileListGeneratorGlob(*this));
-    return g;
+    return cm::make_unique<cmFileListGeneratorGlob>(*this);
   }
 };
 

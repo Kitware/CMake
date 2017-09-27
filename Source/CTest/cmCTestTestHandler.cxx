@@ -8,6 +8,7 @@
 #include <functional>
 #include <iomanip>
 #include <iterator>
+#include <memory> // IWYU pragma: keep
 #include <set>
 #include <sstream>
 #include <stdio.h>
@@ -28,7 +29,6 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
-#include "cm_auto_ptr.hxx"
 #include "cm_utf8.h"
 #include "cmake.h"
 #include "cmsys/FStream.hxx"
@@ -1636,9 +1636,9 @@ void cmCTestTestHandler::GetListOfTests()
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
-  CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
-  mf->AddDefinition("CTEST_CONFIGURATION_TYPE",
-                    this->CTest->GetConfigType().c_str());
+  cmMakefile mf(&gg, cm.GetCurrentSnapshot());
+  mf.AddDefinition("CTEST_CONFIGURATION_TYPE",
+                   this->CTest->GetConfigType().c_str());
 
   // Add handler for ADD_TEST
   cmCTestAddTestCommand* newCom1 = new cmCTestAddTestCommand;
@@ -1678,7 +1678,7 @@ void cmCTestTestHandler::GetListOfTests()
     return;
   }
 
-  if (!mf->ReadListFile(testFilename)) {
+  if (!mf.ReadListFile(testFilename)) {
     return;
   }
   if (cmSystemTools::GetErrorOccuredFlag()) {

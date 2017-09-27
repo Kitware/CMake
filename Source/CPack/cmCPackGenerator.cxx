@@ -6,6 +6,7 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
+#include <memory> // IWYU pragma: keep
 #include <utility>
 
 #include "cmCPackComponentGroup.h"
@@ -17,7 +18,6 @@
 #include "cmStateSnapshot.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLSafe.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 #if defined(__HAIKU__)
@@ -156,7 +156,7 @@ int cmCPackGenerator::PrepareNames()
   }
   const char* algoSignature = this->GetOption("CPACK_PACKAGE_CHECKSUM");
   if (algoSignature) {
-    if (cmCryptoHash::New(algoSignature).get() == nullptr) {
+    if (!cmCryptoHash::New(algoSignature)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot recognize algorithm: "
                       << algoSignature << std::endl);
       return 0;
@@ -610,8 +610,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         cm.AddCMakePaths();
         cm.SetProgressCallback(cmCPackGeneratorProgress, this);
         cmGlobalGenerator gg(&cm);
-        CM_AUTO_PTR<cmMakefile> mf(
-          new cmMakefile(&gg, cm.GetCurrentSnapshot()));
+        cmMakefile mf(&gg, cm.GetCurrentSnapshot());
         if (!installSubDirectory.empty() && installSubDirectory != "/" &&
             installSubDirectory != ".") {
           tempInstallDirectory += installSubDirectory;
@@ -657,11 +656,11 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           if (this->GetOption("CPACK_INSTALL_PREFIX")) {
             dir += this->GetOption("CPACK_INSTALL_PREFIX");
           }
-          mf->AddDefinition("CMAKE_INSTALL_PREFIX", dir.c_str());
+          mf.AddDefinition("CMAKE_INSTALL_PREFIX", dir.c_str());
 
           cmCPackLogger(
             cmCPackLog::LOG_DEBUG,
-            "- Using DESTDIR + CPACK_INSTALL_PREFIX... (mf->AddDefinition)"
+            "- Using DESTDIR + CPACK_INSTALL_PREFIX... (mf.AddDefinition)"
               << std::endl);
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                         "- Setting CMAKE_INSTALL_PREFIX to '" << dir << "'"
@@ -698,8 +697,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
             return 0;
           }
         } else {
-          mf->AddDefinition("CMAKE_INSTALL_PREFIX",
-                            tempInstallDirectory.c_str());
+          mf.AddDefinition("CMAKE_INSTALL_PREFIX",
+                           tempInstallDirectory.c_str());
 
           if (!cmsys::SystemTools::MakeDirectory(
                 tempInstallDirectory.c_str())) {
@@ -710,7 +709,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           }
 
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                        "- Using non-DESTDIR install... (mf->AddDefinition)"
+                        "- Using non-DESTDIR install... (mf.AddDefinition)"
                           << std::endl);
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                         "- Setting CMAKE_INSTALL_PREFIX to '"
@@ -718,19 +717,19 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         }
 
         if (!buildConfig.empty()) {
-          mf->AddDefinition("BUILD_TYPE", buildConfig.c_str());
+          mf.AddDefinition("BUILD_TYPE", buildConfig.c_str());
         }
         std::string installComponentLowerCase =
           cmSystemTools::LowerCase(installComponent);
         if (installComponentLowerCase != "all") {
-          mf->AddDefinition("CMAKE_INSTALL_COMPONENT",
-                            installComponent.c_str());
+          mf.AddDefinition("CMAKE_INSTALL_COMPONENT",
+                           installComponent.c_str());
         }
 
         // strip on TRUE, ON, 1, one or several file names, but not on
         // FALSE, OFF, 0 and an empty string
         if (!cmSystemTools::IsOff(this->GetOption("CPACK_STRIP_FILES"))) {
-          mf->AddDefinition("CMAKE_INSTALL_DO_STRIP", "1");
+          mf.AddDefinition("CMAKE_INSTALL_DO_STRIP", "1");
         }
         // Remember the list of files before installation
         // of the current component (if we are in component install)
@@ -750,7 +749,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         // If CPack was asked to warn on ABSOLUTE INSTALL DESTINATION
         // then forward request to cmake_install.cmake script
         if (this->IsOn("CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION")) {
-          mf->AddDefinition("CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION", "1");
+          mf.AddDefinition("CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION", "1");
         }
         // If current CPack generator does support
         // ABSOLUTE INSTALL DESTINATION or CPack has been asked for
@@ -758,18 +757,17 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         // as soon as it occurs (before installing file)
         if (!SupportsAbsoluteDestination() ||
             this->IsOn("CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION")) {
-          mf->AddDefinition("CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION",
-                            "1");
+          mf.AddDefinition("CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION", "1");
         }
         // do installation
-        int res = mf->ReadListFile(installFile.c_str());
+        int res = mf.ReadListFile(installFile.c_str());
         // forward definition of CMAKE_ABSOLUTE_DESTINATION_FILES
         // to CPack (may be used by generators like CPack RPM or DEB)
         // in order to transparently handle ABSOLUTE PATH
-        if (mf->GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES")) {
-          mf->AddDefinition(
+        if (mf.GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES")) {
+          mf.AddDefinition(
             "CPACK_ABSOLUTE_DESTINATION_FILES",
-            mf->GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES"));
+            mf.GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES"));
         }
 
         // Now rebuild the list of files after installation
@@ -803,12 +801,12 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           }
         }
 
-        if (nullptr != mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
+        if (nullptr != mf.GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
           if (!absoluteDestFiles.empty()) {
             absoluteDestFiles += ";";
           }
           absoluteDestFiles +=
-            mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES");
+            mf.GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES");
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                         "Got some ABSOLUTE DESTINATION FILES: "
                           << absoluteDestFiles << std::endl);
@@ -822,13 +820,13 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
                 this->GetOption(absoluteDestFileComponent);
               absoluteDestFilesListComponent += ";";
               absoluteDestFilesListComponent +=
-                mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES");
+                mf.GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES");
               this->SetOption(absoluteDestFileComponent,
                               absoluteDestFilesListComponent.c_str());
             } else {
               this->SetOption(
                 absoluteDestFileComponent,
-                mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES"));
+                mf.GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES"));
             }
           }
         }
@@ -964,7 +962,7 @@ int cmCPackGenerator::DoPackage()
 
   /* Prepare checksum algorithm*/
   const char* algo = this->GetOption("CPACK_PACKAGE_CHECKSUM");
-  CM_AUTO_PTR<cmCryptoHash> crypto = cmCryptoHash::New(algo ? algo : "");
+  std::unique_ptr<cmCryptoHash> crypto = cmCryptoHash::New(algo ? algo : "");
 
   /*
    * Copy the generated packages to final destination
@@ -997,7 +995,7 @@ int cmCPackGenerator::DoPackage()
                     << packageFileName << " generated." << std::endl);
 
     /* Generate checksum file */
-    if (crypto.get() != nullptr) {
+    if (crypto) {
       std::string hashFile(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"));
       hashFile += "/" + filename;
       hashFile += "." + cmSystemTools::LowerCase(algo);

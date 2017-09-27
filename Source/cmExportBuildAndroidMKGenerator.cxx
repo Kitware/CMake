@@ -3,6 +3,7 @@
 #include "cmExportBuildAndroidMKGenerator.h"
 
 #include <algorithm>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <utility>
 
@@ -15,7 +16,6 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 cmExportBuildAndroidMKGenerator::cmExportBuildAndroidMKGenerator()
@@ -126,7 +126,7 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
             // evaluate any generator expressions with the current
             // build type of the makefile
             cmGeneratorExpression ge;
-            CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(lib);
+            std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(lib);
             std::string evaluated =
               cge->Evaluate(target->GetLocalGenerator(), config);
             bool relpath = false;

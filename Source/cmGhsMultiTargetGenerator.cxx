@@ -363,7 +363,7 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries(
       this->GeneratorTarget->GetCreateRuleVariable(language, config);
     bool useWatcomQuote =
       this->Makefile->IsOn(createRule + "_USE_WATCOM_QUOTE");
-    CM_AUTO_PTR<cmLinkLineComputer> linkLineComputer(
+    std::unique_ptr<cmLinkLineComputer> linkLineComputer(
       this->GetGlobalGenerator()->CreateLinkLineComputer(
         this->LocalGenerator,
         this->LocalGenerator->GetStateSnapshot().GetDirectory()));

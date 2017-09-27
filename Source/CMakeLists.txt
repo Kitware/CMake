@@ -587,7 +587,6 @@ set(SRCS
   cmWriteFileCommand.cxx
   cmWriteFileCommand.h
 
-  cm_auto_ptr.hxx
   cm_get_date.h
   cm_get_date.c
   cm_utf8.h

@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <functional>
 #include <iterator>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 
@@ -32,7 +33,6 @@
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmVersion.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 class cmLinkLineComputer;
@@ -1692,9 +1692,10 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     snapshot.GetDirectory().SetCurrentBinary(dir_cur_bld);
     snapshot.GetDirectory().SetRelativePathTopSource(dir_top_src.c_str());
     snapshot.GetDirectory().SetRelativePathTopBinary(dir_top_bld.c_str());
-    CM_AUTO_PTR<cmMakefile> mfd(new cmMakefile(this, snapshot));
-    CM_AUTO_PTR<cmLocalNinjaGenerator> lgd(static_cast<cmLocalNinjaGenerator*>(
-      this->CreateLocalGenerator(mfd.get())));
+    auto mfd = cm::make_unique<cmMakefile>(this, snapshot);
+    std::unique_ptr<cmLocalNinjaGenerator> lgd(
+      static_cast<cmLocalNinjaGenerator*>(
+        this->CreateLocalGenerator(mfd.get())));
     this->Makefiles.push_back(mfd.release());
     this->LocalGenerators.push_back(lgd.release());
   }
@@ -1869,7 +1870,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   cmake cm(cmake::RoleInternal);
   cm.SetHomeDirectory(dir_top_src);
   cm.SetHomeOutputDirectory(dir_top_bld);
-  CM_AUTO_PTR<cmGlobalNinjaGenerator> ggd(
+  std::unique_ptr<cmGlobalNinjaGenerator> ggd(
     static_cast<cmGlobalNinjaGenerator*>(cm.CreateGlobalGenerator("Ninja")));
   if (!ggd.get() ||
       !ggd->WriteDyndepFile(dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld,

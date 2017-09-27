@@ -24,7 +24,6 @@
 #include "cmUtils.hxx"
 #include "cmVersionConfig.h"
 #include "cmWorkingDirectory.h"
-#include "cm_auto_ptr.hxx"
 #include "cm_sys_stat.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -111,6 +110,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <iostream>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -482,15 +482,15 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     snapshot.GetDirectory().SetCurrentSource(
       cmSystemTools::GetCurrentWorkingDirectory());
     snapshot.SetDefaultDefinitions();
-    CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(gg, snapshot));
+    cmMakefile mf(gg, snapshot);
     if (this->GetWorkingMode() != NORMAL_MODE) {
       std::string file(cmSystemTools::CollapseFullPath(path));
       cmSystemTools::ConvertToUnixSlashes(file);
-      mf->SetScriptModeFile(file.c_str());
+      mf.SetScriptModeFile(file.c_str());
 
-      mf->SetArgcArgv(args);
+      mf.SetArgcArgv(args);
     }
-    if (!mf->ReadListFile(path)) {
+    if (!mf.ReadListFile(path)) {
       cmSystemTools::Error("Error processing file: ", path);
     }
     this->SetHomeDirectory(homeDir);
@@ -1874,8 +1874,8 @@ int cmake::CheckBuildSystem()
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
-  CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
-  if (!mf->ReadListFile(this->CheckBuildSystemArgument.c_str()) ||
+  cmMakefile mf(&gg, cm.GetCurrentSnapshot());
+  if (!mf.ReadListFile(this->CheckBuildSystemArgument.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag()) {
     if (verbose) {
       std::ostringstream msg;
@@ -1889,25 +1889,25 @@ int cmake::CheckBuildSystem()
 
   if (this->ClearBuildSystem) {
     // Get the generator used for this build system.
-    const char* genName = mf->GetDefinition("CMAKE_DEPENDS_GENERATOR");
+    const char* genName = mf.GetDefinition("CMAKE_DEPENDS_GENERATOR");
     if (!genName || genName[0] == '\0') {
       genName = "Unix Makefiles";
     }
 
     // Create the generator and use it to clear the dependencies.
-    CM_AUTO_PTR<cmGlobalGenerator> ggd(this->CreateGlobalGenerator(genName));
-    if (ggd.get()) {
+    std::unique_ptr<cmGlobalGenerator> ggd(
+      this->CreateGlobalGenerator(genName));
+    if (ggd) {
       cm.GetCurrentSnapshot().SetDefaultDefinitions();
-      CM_AUTO_PTR<cmMakefile> mfd(
-        new cmMakefile(ggd.get(), cm.GetCurrentSnapshot()));
-      CM_AUTO_PTR<cmLocalGenerator> lgd(ggd->CreateLocalGenerator(mfd.get()));
-      lgd->ClearDependencies(mfd.get(), verbose);
+      cmMakefile mfd(ggd.get(), cm.GetCurrentSnapshot());
+      std::unique_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator(&mfd));
+      lgd->ClearDependencies(&mfd, verbose);
     }
   }
 
   // If any byproduct of makefile generation is missing we must re-run.
   std::vector<std::string> products;
-  if (const char* productStr = mf->GetDefinition("CMAKE_MAKEFILE_PRODUCTS")) {
+  if (const char* productStr = mf.GetDefinition("CMAKE_MAKEFILE_PRODUCTS")) {
     cmSystemTools::ExpandListArgument(productStr, products);
   }
   for (std::string const& p : products) {
@@ -1925,8 +1925,8 @@ int cmake::CheckBuildSystem()
   // Get the set of dependencies and outputs.
   std::vector<std::string> depends;
   std::vector<std::string> outputs;
-  const char* dependsStr = mf->GetDefinition("CMAKE_MAKEFILE_DEPENDS");
-  const char* outputsStr = mf->GetDefinition("CMAKE_MAKEFILE_OUTPUTS");
+  const char* dependsStr = mf.GetDefinition("CMAKE_MAKEFILE_DEPENDS");
+  const char* outputsStr = mf.GetDefinition("CMAKE_MAKEFILE_OUTPUTS");
   if (dependsStr && outputsStr) {
     cmSystemTools::ExpandListArgument(dependsStr, depends);
     cmSystemTools::ExpandListArgument(outputsStr, outputs);
@@ -2039,19 +2039,18 @@ void cmake::MarkCliAsUsed(const std::string& variable)
 void cmake::GenerateGraphViz(const char* fileName) const
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  CM_AUTO_PTR<cmGraphVizWriter> gvWriter(
-    new cmGraphVizWriter(this->GetGlobalGenerator()->GetLocalGenerators()));
+  cmGraphVizWriter gvWriter(this->GetGlobalGenerator()->GetLocalGenerators());
 
   std::string settingsFile = this->GetHomeOutputDirectory();
   settingsFile += "/CMakeGraphVizOptions.cmake";
   std::string fallbackSettingsFile = this->GetHomeDirectory();
   fallbackSettingsFile += "/CMakeGraphVizOptions.cmake";
 
-  gvWriter->ReadSettings(settingsFile.c_str(), fallbackSettingsFile.c_str());
+  gvWriter.ReadSettings(settingsFile.c_str(), fallbackSettingsFile.c_str());
 
-  gvWriter->WritePerTargetFiles(fileName);
-  gvWriter->WriteTargetDependersFiles(fileName);
-  gvWriter->WriteGlobalFile(fileName);
+  gvWriter.WritePerTargetFiles(fileName);
+  gvWriter.WriteTargetDependersFiles(fileName);
+  gvWriter.WriteGlobalFile(fileName);
 
 #endif
 }
@@ -2357,7 +2356,7 @@ int cmake::Build(const std::string& dir, const std::string& target,
     std::cerr << "Error: could not find CMAKE_GENERATOR in Cache\n";
     return 1;
   }
-  CM_AUTO_PTR<cmGlobalGenerator> gen(
+  std::unique_ptr<cmGlobalGenerator> gen(
     this->CreateGlobalGenerator(cachedGenerator));
   if (!gen.get()) {
     std::cerr << "Error: could create CMAKE_GENERATOR \"" << cachedGenerator

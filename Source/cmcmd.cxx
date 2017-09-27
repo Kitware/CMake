@@ -12,7 +12,6 @@
 #include "cmSystemTools.h"
 #include "cmUtils.hxx"
 #include "cmVersion.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -37,6 +36,7 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -928,8 +928,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
         snapshot.GetDirectory().SetCurrentBinary(startOutDir);
         snapshot.GetDirectory().SetCurrentSource(startDir);
-        CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(ggd, snapshot));
-        CM_AUTO_PTR<cmLocalGenerator> lgd(ggd->CreateLocalGenerator(mf.get()));
+        cmMakefile mf(ggd, snapshot);
+        std::unique_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator(&mf));
 
         // Actually scan dependencies.
         return lgd->UpdateDependencies(depInfo.c_str(), verbose, color) ? 0

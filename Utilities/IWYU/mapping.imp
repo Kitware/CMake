@@ -49,12 +49,6 @@
   #{ symbol: [ "std::pair", private, "<map>", public ] },
   #{ symbol: [ "std::pair", private, "<set>", public ] },
 
-  # IWYU wrongly suggests to include "cm_auto_ptr.hxx" in some places.  This
-  # might be a misinterpretation of a template specialization in <utility>.
-  # As a workaround, map the symbol auto_ptr to "cmConfigure.h".
-  # This will still correctly require "cm_auto_ptr.hxx" for CM_AUTO_PTR.
-  { symbol: [ "cm::auto_ptr", private, "\"cmConfigure.h\"", public ] },
-
   # __decay_and_strip is used internally in the C++11 standard library.
   # IWYU does not classify it as internal and suggests to add <type_traits>.
   # To ignore it, we simply map it to a file that is included anyway.
