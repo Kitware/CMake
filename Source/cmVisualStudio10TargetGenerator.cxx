@@ -1592,6 +1592,8 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
   std::string shaderEntryPoint;
   std::string shaderModel;
   std::string shaderAdditionalFlags;
+  std::string outputHeaderFile;
+  std::string variableName;
   std::string settingsGenerator;
   std::string settingsLastGenOutput;
   std::string sourceLink;
@@ -1639,6 +1641,16 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     // Figure out which shader model to use if any
     if (const char* sm = sf->GetProperty("VS_SHADER_MODEL")) {
       shaderModel = sm;
+      toolHasSettings = true;
+    }
+    // Figure out which output header file to use if any
+    if (const char* ohf = sf->GetProperty("VS_SHADER_OUTPUT_HEADER_FILE")) {
+      outputHeaderFile = ohf;
+      toolHasSettings = true;
+    }
+    // Figure out which variable name to use if any
+    if (const char* vn = sf->GetProperty("VS_SHADER_VARIABLE_NAME")) {
+      variableName = vn;
       toolHasSettings = true;
     }
     // Figure out if there's any additional flags to use
@@ -1764,6 +1776,28 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       this->WriteString("<ShaderModel>", 3);
       (*this->BuildFileStream) << cmVS10EscapeXML(shaderModel)
                                << "</ShaderModel>\n";
+    }
+    if (!outputHeaderFile.empty()) {
+      for (size_t i = 0; i != this->Configurations.size(); ++i) {
+        this->WriteString("<HeaderFileOutput Condition=\""
+                          "'$(Configuration)|$(Platform)'=='",
+                          3);
+        (*this->BuildFileStream) << this->Configurations[i] << "|"
+                                 << this->Platform << "'\">"
+                                 << cmVS10EscapeXML(outputHeaderFile);
+        this->WriteString("</HeaderFileOutput>\n", 0);
+      }
+    }
+    if (!variableName.empty()) {
+      for (size_t i = 0; i != this->Configurations.size(); ++i) {
+        this->WriteString("<VariableName Condition=\""
+                          "'$(Configuration)|$(Platform)'=='",
+                          3);
+        (*this->BuildFileStream) << this->Configurations[i] << "|"
+                                 << this->Platform << "'\">"
+                                 << cmVS10EscapeXML(variableName);
+        this->WriteString("</VariableName>\n", 0);
+      }
     }
     if (!shaderAdditionalFlags.empty()) {
       this->WriteString("<AdditionalOptions>", 3);
