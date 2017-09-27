@@ -73,8 +73,8 @@ automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
 
 * This differs from CMake 3.7 and below; see their documentation for details.
 
-* For multi configuration generators, the include directory is
-  ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
+* For :prop_gbl:`multi configuration generators <GENERATOR_IS_MULTI_CONFIG>`,
+  the include directory is ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
 
 * See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
@@ -133,8 +133,8 @@ automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
 
 * This differs from CMake 3.7 and below; see their documentation for details.
 
-* For multi configuration generators, the include directory is
-  ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
+* For :prop_gbl:`multi configuration generators <GENERATOR_IS_MULTI_CONFIG>`,
+  the include directory is ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
 
 * See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 
