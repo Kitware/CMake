@@ -30,14 +30,6 @@ building on older toolchains some constructs need to be handled with care:
 
   The ``std::auto_ptr`` template is deprecated in C++11. Use ``std::unique_ptr``.
 
-* Use ``CM_EQ_DELETE;`` instead of ``= delete;``.
-
-  Older C++11 compilers do not support deleting functions.  Using
-  ``CM_EQ_DELETE`` will delete the functions if the compiler supports it and
-  give them no implementation otherwise.  Calling such a function will lead
-  to compiler errors if the compiler supports *deleted* functions and linker
-  errors otherwise.
-
 * Use ``CM_DISABLE_COPY(Class)`` to mark classes as non-copyable.
 
   The ``CM_DISABLE_COPY`` macro should be used in the private section of a
