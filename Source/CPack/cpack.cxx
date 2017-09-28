@@ -194,7 +194,7 @@ int main(int argc, char const* const* argv)
   cmGlobalGenerator cmgg(&cminst);
   cmMakefile globalMF(&cmgg, cminst.GetCurrentSnapshot());
 #if defined(__CYGWIN__)
-  globalMF->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
+  globalMF.AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
 #endif
 
   bool cpackConfigFileSpecified = true;

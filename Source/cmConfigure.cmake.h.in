@@ -19,7 +19,6 @@
 #cmakedefine HAVE_UNSETENV
 #cmakedefine CMAKE_USE_ELF_PARSER
 #cmakedefine CMAKE_USE_MACH_PARSER
-#cmakedefine CMake_HAVE_CXX_AUTO_PTR
 #cmakedefine CMake_HAVE_CXX_EQ_DELETE
 #cmakedefine CMake_HAVE_CXX_FALLTHROUGH
 #cmakedefine CMake_HAVE_CXX_GNU_FALLTHROUGH
