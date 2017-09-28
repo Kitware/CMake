@@ -24,7 +24,6 @@
 #cmakedefine CMake_HAVE_CXX_GNU_FALLTHROUGH
 #cmakedefine CMake_HAVE_CXX_ATTRIBUTE_FALLTHROUGH
 #cmakedefine CMake_HAVE_CXX_MAKE_UNIQUE
-#cmakedefine CMake_HAVE_CXX_UNIQUE_PTR
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
 #define CMAKE_DATA_DIR "/@CMAKE_DATA_DIR@"
 
