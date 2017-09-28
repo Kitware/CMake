@@ -16,6 +16,7 @@ modernize-*,\
 -modernize-use-emplace,\
 -modernize-use-equals-default,\
 -modernize-use-equals-delete,\
+-modernize-use-noexcept,\
 -modernize-use-transparent-functors,\
 -modernize-use-using,\
 performance-*,\
