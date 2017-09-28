@@ -3324,15 +3324,10 @@ cmGlobalGenerator* cmMakefile::GetGlobalGenerator() const
   return this->GlobalGenerator;
 }
 
-void cmMakefile::GetTestDetails(std::vector<std::pair<std::string, std::string>> &testDetails)
+void cmMakefile::GetTestNames(std::vector<std::string> & testNames)
 {
   for (auto it = Tests.begin(); it != Tests.end(); ++it) {
-    std::string command = "";
-    for (auto & cmd : it->second->GetCommand()) {
-      command.append(cmd);
-      command.append(" ");
-    }
-    testDetails.push_back(std::make_pair(it->first, command));
+	  testNames.push_back(it->first);
   }
 
   return;

@@ -24,6 +24,7 @@
 #include "cmTarget.h"
 #include "cm_uv.h"
 #include "cmake.h"
+#include "cmTest.h"
 
 #include <algorithm>
 #include <cassert>
@@ -256,7 +257,7 @@ bool cmServerProtocol::DoActivate(const cmServerRequest& /*request*/,
 
 std::pair<int, int> cmServerProtocol1::ProtocolVersion() const
 {
-  return std::make_pair(1, 2);
+  return std::make_pair(1, 4);
 }
 
 static void setErrorMessage(std::string* errorMessage, const std::string& text)
@@ -649,11 +650,53 @@ struct hash<LanguageData>
 
 } // namespace std
 
-static Json::Value DumpCTestInfo(std::pair<std::string, std::string> &testInfo)
+
+static Json::Value DumpBacktrace(const cmListFileBacktrace& backtrace)
+{
+    Json::Value result = Json::arrayValue;
+
+    cmListFileBacktrace backtraceCopy = backtrace;
+    while (!backtraceCopy.Top().FilePath.empty()) {
+        Json::Value entry = Json::objectValue;
+        entry[kPATH_KEY] = backtraceCopy.Top().FilePath;
+        if (backtraceCopy.Top().Line) {
+            entry[kLINE_NUMBER_KEY] = static_cast<int>(backtraceCopy.Top().Line);
+        }
+        if (!backtraceCopy.Top().Name.empty()) {
+            entry[kNAME_KEY] = backtraceCopy.Top().Name;
+        }
+        result.append(entry);
+        backtraceCopy = backtraceCopy.Pop();
+    }
+    return result;
+}
+
+static Json::Value DumpCTestInfo(const std::string & name, cmTest * testInfo)
 {
   Json::Value result = Json::objectValue;
-  result[kCTEST_NAME] = testInfo.first;
-  result[kCTEST_COMMAND] = testInfo.second;
+  result[kCTEST_NAME] = name;
+  
+  // Concat command entries together. After the first should be the arguments for the command
+  std::string command;
+  for (auto const & cmd : testInfo->GetCommand())  {
+    command.append(cmd.c_str());
+    command.append(" ");
+  }
+  result[kCTEST_COMMAND] = command;
+
+  // Build up the list of properties that may have been specified
+  Json::Value properties = Json::arrayValue;
+  for (auto & prop : testInfo->GetProperties()) {
+      Json::Value entry = Json::objectValue;
+      entry[kKEY_KEY] = prop.first;
+      entry[kVALUE_KEY] = prop.second.GetValue();
+      properties.append(entry);
+  }
+  result[kPROPERTIES_KEY] = properties;
+
+  // Need backtrace to figure out where this test was originally added
+  result[kBACKTRACE_KEY] = DumpBacktrace(testInfo->GetBacktrace());
+
   return result;
 }
 
@@ -693,10 +736,13 @@ static Json::Value DumpCTestTarget(cmGeneratorTarget* target,
     std::vector<std::string> CTestNames;
 
     Json::Value testInfos = Json::arrayValue;
-    std::vector<std::pair<std::string, std::string>> testDetails;
-    target->Makefile->GetTestDetails(testDetails);
-    for (auto &testInfo : testDetails) {
-      testInfos.append(DumpCTestInfo(testInfo));
+    std::vector<std::string> testNames;
+    target->Makefile->GetTestNames(testNames);
+    for (auto &name : testNames) {
+      auto test = target->Makefile->GetTest(name);
+      if (test != nullptr) {
+          testInfos.append(DumpCTestInfo(name, test));
+      }
     }
     result[kCTESTS_INFO] = testInfos;
   }
@@ -890,26 +936,6 @@ static Json::Value DumpSourceFilesList(
     }
   }
 
-  return result;
-}
-
-static Json::Value DumpBacktrace(const cmListFileBacktrace& backtrace)
-{
-  Json::Value result = Json::arrayValue;
-
-  cmListFileBacktrace backtraceCopy = backtrace;
-  while (!backtraceCopy.Top().FilePath.empty()) {
-    Json::Value entry = Json::objectValue;
-    entry[kPATH_KEY] = backtraceCopy.Top().FilePath;
-    if (backtraceCopy.Top().Line) {
-      entry[kLINE_NUMBER_KEY] = static_cast<int>(backtraceCopy.Top().Line);
-    }
-    if (!backtraceCopy.Top().Name.empty()) {
-      entry[kNAME_KEY] = backtraceCopy.Top().Name;
-    }
-    result.append(entry);
-    backtraceCopy = backtraceCopy.Pop();
-  }
   return result;
 }
 
