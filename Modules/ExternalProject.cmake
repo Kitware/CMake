@@ -1923,6 +1923,15 @@ function(_ep_get_step_stampfile name step stampfile_var)
 endfunction()
 
 
+function(_ep_get_complete_stampfile name stampfile_var)
+  set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
+  _ep_get_configuration_subdir_suffix(cfgdir)
+  set(stampfile "${cmf_dir}${cfgdir}/${name}-complete")
+
+  set(${stampfile_var} ${stampfile} PARENT_SCOPE)
+endfunction()
+
+
 function(ExternalProject_Add_StepTargets name)
   set(steps ${ARGN})
   if(ARGC GREATER 1 AND "${ARGV1}" STREQUAL "NO_DEPENDS")
@@ -1952,10 +1961,7 @@ endfunction()
 
 
 function(ExternalProject_Add_Step name step)
-  set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
-  _ep_get_configuration_subdir_suffix(cfgdir)
-
-  set(complete_stamp_file "${cmf_dir}${cfgdir}/${name}-complete")
+  _ep_get_complete_stampfile(${name} complete_stamp_file)
   _ep_get_step_stampfile(${name} ${step} stamp_file)
 
   _ep_parse_arguments(ExternalProject_Add_Step
@@ -2958,7 +2964,7 @@ function(ExternalProject_Add name)
 
   # Add a custom target for the external project.
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
-  set(complete_stamp_file "${cmf_dir}${cfgdir}/${name}-complete")
+  _ep_get_complete_stampfile(${name} complete_stamp_file)
 
   # The "ALL" option to add_custom_target just tells it to not set the
   # EXCLUDE_FROM_ALL target property. Later, if the EXCLUDE_FROM_ALL
