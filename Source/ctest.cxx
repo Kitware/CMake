@@ -186,6 +186,7 @@ int main(int argc, char const* const* argv)
 
   // copy the args to a vector
   std::vector<std::string> args;
+  args.reserve(argc);
   for (int i = 0; i < argc; ++i) {
     args.push_back(argv[i]);
   }

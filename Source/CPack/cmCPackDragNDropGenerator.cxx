@@ -136,17 +136,17 @@ int cmCPackDragNDropGenerator::InitializeInternal()
                     "CPACK_DMG_SLA_LANGUAGES set but empty" << std::endl);
       return 0;
     }
-    for (size_t i = 0; i < languages.size(); ++i) {
-      std::string license = slaDirectory + "/" + languages[i] + ".license.txt";
+    for (auto const& language : languages) {
+      std::string license = slaDirectory + "/" + language + ".license.txt";
       if (!singleLicense && !cmSystemTools::FileExists(license)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR, "Missing license file "
-                        << languages[i] << ".license.txt" << std::endl);
+                        << language << ".license.txt" << std::endl);
         return 0;
       }
-      std::string menu = slaDirectory + "/" + languages[i] + ".menu.txt";
+      std::string menu = slaDirectory + "/" + language + ".menu.txt";
       if (!cmSystemTools::FileExists(menu)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR, "Missing menu file "
-                        << languages[i] << ".menu.txt" << std::endl);
+                        << language << ".menu.txt" << std::endl);
         return 0;
       }
     }
@@ -185,19 +185,19 @@ int cmCPackDragNDropGenerator::PackageFiles()
 
   // loop to create dmg files
   packageFileNames.clear();
-  for (size_t i = 0; i < package_files.size(); i++) {
+  for (auto const& package_file : package_files) {
     std::string full_package_name = std::string(toplevel) + std::string("/");
-    if (package_files[i] == "ALL_IN_ONE") {
+    if (package_file == "ALL_IN_ONE") {
       full_package_name += this->GetOption("CPACK_PACKAGE_FILE_NAME");
     } else {
-      full_package_name += package_files[i];
+      full_package_name += package_file;
     }
     full_package_name += std::string(GetOutputExtension());
     packageFileNames.push_back(full_package_name);
 
     std::string src_dir = toplevel;
     src_dir += "/";
-    src_dir += package_files[i];
+    src_dir += package_file;
 
     if (0 == this->CreateDMG(src_dir, full_package_name)) {
       return 0;
@@ -226,13 +226,13 @@ bool cmCPackDragNDropGenerator::CreateEmptyFile(std::ostringstream& target,
   cmsys::ofstream fout(target.str().c_str(), std::ios::out | std::ios::binary);
   if (!fout) {
     return false;
-  } else {
-    // Seek to desired size - 1 byte
-    fout.seekp(size - 1, std::ios::beg);
-    char byte = 0;
-    // Write one byte to ensure file grows
-    fout.write(&byte, 1);
   }
+
+  // Seek to desired size - 1 byte
+  fout.seekp(size - 1, std::ios::beg);
+  char byte = 0;
+  // Write one byte to ensure file grows
+  fout.write(&byte, 1);
 
   return true;
 }
@@ -561,7 +561,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
           cmCPackLogger(cmCPackLog::LOG_ERROR, languages[i]
                           << " is not a recognized language" << std::endl);
         }
-        char* iso_language_cstr = (char*)malloc(65);
+        char* iso_language_cstr = static_cast<char*>(malloc(65));
         CFStringGetCString(iso_language, iso_language_cstr, 64,
                            kCFStringEncodingMacRoman);
         LangCode lang = 0;
@@ -769,7 +769,8 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallDirNameSuffix(
 
 bool cmCPackDragNDropGenerator::WriteLicense(
   cmGeneratedFileStream& outputStream, int licenseNumber,
-  std::string licenseLanguage, std::string licenseFile, std::string* error)
+  std::string licenseLanguage, const std::string& licenseFile,
+  std::string* error)
 {
   if (!licenseFile.empty() && !singleLicense) {
     licenseNumber = 5002;
@@ -795,8 +796,8 @@ bool cmCPackDragNDropGenerator::WriteLicense(
         if (!this->BreakLongLine(line, lines, error)) {
           return false;
         }
-        for (size_t i = 0; i < lines.size(); ++i) {
-          outputStream << "        \"" << lines[i] << "\"\n";
+        for (auto const& l : lines) {
+          outputStream << "        \"" << l << "\"\n";
         }
       }
       outputStream << "        \"\\n\"\n";
@@ -865,10 +866,11 @@ bool cmCPackDragNDropGenerator::BreakLongLine(const std::string& line,
     size_t line_length = max_line_length;
     if (i + line_length > line.size()) {
       line_length = line.size() - i;
-    } else
+    } else {
       while (line_length > 0 && line[i + line_length - 1] != ' ') {
         line_length = line_length - 1;
       }
+    }
 
     if (line_length == 0) {
       *error = "Please make sure there are no words "

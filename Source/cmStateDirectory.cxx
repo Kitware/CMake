@@ -442,6 +442,7 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
     std::vector<std::string> child_dirs;
     std::vector<cmStateSnapshot> const& children =
       this->DirectoryState->Children;
+    child_dirs.reserve(children.size());
     for (cmStateSnapshot const& ci : children) {
       child_dirs.push_back(ci.GetDirectory().GetCurrentSource());
     }

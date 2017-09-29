@@ -602,11 +602,12 @@ bool LanguageData::operator==(const LanguageData& other) const
 void LanguageData::SetDefines(const std::set<std::string>& defines)
 {
   std::vector<std::string> result;
+  result.reserve(defines.size());
   for (std::string const& i : defines) {
     result.push_back(i);
   }
   std::sort(result.begin(), result.end());
-  Defines = result;
+  Defines = std::move(result);
 }
 
 namespace std {

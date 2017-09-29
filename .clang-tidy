@@ -10,11 +10,13 @@ modernize-*,\
 -modernize-deprecated-headers,\
 -modernize-pass-by-value,\
 -modernize-raw-string-literal,\
+-modernize-return-braced-init-list,\
 -modernize-use-auto,\
 -modernize-use-default-member-init,\
 -modernize-use-emplace,\
 -modernize-use-equals-default,\
 -modernize-use-equals-delete,\
+-modernize-use-noexcept,\
 -modernize-use-transparent-functors,\
 -modernize-use-using,\
 performance-*,\

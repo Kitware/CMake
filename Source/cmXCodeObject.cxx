@@ -120,8 +120,9 @@ void cmXCodeObject::Print(std::ostream& out)
   out << "isa = " << PBXTypeNames[this->IsA] << ";" << separator;
   for (i = this->ObjectAttributes.begin(); i != this->ObjectAttributes.end();
        ++i) {
-    if (i->first == "isa")
+    if (i->first == "isa") {
       continue;
+    }
 
     PrintAttribute(out, 3, separator, indentFactor, i->first, i->second, this);
   }
@@ -129,9 +130,9 @@ void cmXCodeObject::Print(std::ostream& out)
   out << "};\n";
 }
 
-void cmXCodeObject::PrintAttribute(std::ostream& out, const int level,
-                                   const std::string separator,
-                                   const int factor, const std::string& name,
+void cmXCodeObject::PrintAttribute(std::ostream& out, int level,
+                                   const std::string& separator, int factor,
+                                   const std::string& name,
                                    const cmXCodeObject* object,
                                    const cmXCodeObject* parent)
 {
@@ -203,9 +204,9 @@ void cmXCodeObject::PrintList(std::vector<cmXCodeObject*> const& objs,
 {
   cmXCodeObject::Indent(1, out);
   out << "objects = {\n";
-  for (unsigned int i = 0; i < objs.size(); ++i) {
-    if (objs[i]->TypeValue == OBJECT) {
-      objs[i]->Print(out);
+  for (auto obj : objs) {
+    if (obj->TypeValue == OBJECT) {
+      obj->Print(out);
     }
   }
   cmXCodeObject::Indent(1, out);

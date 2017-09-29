@@ -34,9 +34,7 @@ void cmXCode21Object::PrintList(std::vector<cmXCodeObject*> const& v,
                                 std::ostream& out, PBXType t)
 {
   bool hasOne = false;
-  for (std::vector<cmXCodeObject*>::const_iterator i = v.begin(); i != v.end();
-       ++i) {
-    cmXCodeObject* obj = *i;
+  for (auto obj : v) {
     if (obj->GetType() == OBJECT && obj->GetIsA() == t) {
       hasOne = true;
       break;
@@ -46,9 +44,7 @@ void cmXCode21Object::PrintList(std::vector<cmXCodeObject*> const& v,
     return;
   }
   out << "\n/* Begin " << PBXTypeNames[t] << " section */\n";
-  for (std::vector<cmXCodeObject*>::const_iterator i = v.begin(); i != v.end();
-       ++i) {
-    cmXCodeObject* obj = *i;
+  for (auto obj : v) {
     if (obj->GetType() == OBJECT && obj->GetIsA() == t) {
       obj->Print(out);
     }

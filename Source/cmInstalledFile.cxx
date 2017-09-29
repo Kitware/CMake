@@ -16,9 +16,7 @@ cmInstalledFile::cmInstalledFile()
 
 cmInstalledFile::~cmInstalledFile()
 {
-  if (NameExpression) {
-    delete NameExpression;
-  }
+  delete NameExpression;
 }
 
 cmInstalledFile::Property::Property()

@@ -348,6 +348,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
     std::bind(&cmcmd::HandleCppCheck, a1, a2, a3);
   // copy the command options to a vector of strings
   std::vector<std::string> commandOptions;
+  commandOptions.reserve(coCompileTypes.size());
   for (const auto& i : coCompileTypes) {
     commandOptions.push_back(i.first);
   }

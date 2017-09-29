@@ -779,6 +779,8 @@ if(WIN32 AND NOT UNIX)
   target_link_libraries(CMakeLib rpcrt4 crypt32)
 endif()
 
+target_compile_definitions(CMakeLib PUBLIC ${CLANG_TIDY_DEFINITIONS})
+
 #
 # CTestLib
 #

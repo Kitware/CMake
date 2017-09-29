@@ -969,6 +969,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
   }
 
   std::vector<const char*> argv;
+  argv.reserve(args.size() + 1);
   for (std::string const& a : args) {
     argv.push_back(a.c_str());
   }
@@ -2569,6 +2570,7 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
                          const char* dir, double timeout, Encoding encoding)
 {
   std::vector<const char*> argv;
+  argv.reserve(args.size() + 1);
   for (std::string const& a : args) {
     argv.push_back(a.c_str());
   }

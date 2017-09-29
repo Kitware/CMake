@@ -275,8 +275,9 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     if (this->PackageMakerVersion > 2.0) {
       pkgCmd << " -v";
     }
-    if (!RunPackageMaker(pkgCmd.str().c_str(), packageDirFileName.c_str()))
+    if (!RunPackageMaker(pkgCmd.str().c_str(), packageDirFileName.c_str())) {
       return 0;
+    }
   } else {
     // We have built the package in place. Generate the
     // distribution.dist file to describe it for the installer.

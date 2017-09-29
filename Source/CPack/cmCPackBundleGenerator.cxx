@@ -213,8 +213,7 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
     cmSystemTools::ExpandListArgument(sign_files, relFiles);
 
     // sign the files supplied by the user, ie. frameworks.
-    for (std::vector<std::string>::iterator it = relFiles.begin();
-         it != relFiles.end(); ++it) {
+    for (auto const& file : relFiles) {
       std::ostringstream temp_sign_file_cmd;
       temp_sign_file_cmd << this->GetOption("CPACK_COMMAND_CODESIGN");
       temp_sign_file_cmd << " " << sign_parameter << " -s \""
@@ -223,11 +222,11 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
       temp_sign_file_cmd << this->GetOption("CPACK_APPLE_BUNDLE_ID");
       temp_sign_file_cmd << " \"";
       temp_sign_file_cmd << bundle_path;
-      temp_sign_file_cmd << *it << "\"";
+      temp_sign_file_cmd << file << "\"";
 
       if (!this->RunCommand(temp_sign_file_cmd, &output)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
-                      "Error signing file:" << bundle_path << *it << std::endl
+                      "Error signing file:" << bundle_path << file << std::endl
                                             << output << std::endl);
 
         return 0;

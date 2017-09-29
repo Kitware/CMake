@@ -2294,10 +2294,9 @@ bool cmFileCommand::HandleReadElfCommand(std::vector<std::string> const& args)
   if (errorArg.GetString().empty()) {
     this->SetError(error);
     return false;
-  } else {
-    this->Makefile->AddDefinition(errorArg.GetString(), error.c_str());
-    return true;
   }
+  this->Makefile->AddDefinition(errorArg.GetString(), error.c_str());
+  return true;
 #endif
 }
 

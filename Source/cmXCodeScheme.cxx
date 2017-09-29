@@ -91,7 +91,7 @@ void cmXCodeScheme::WriteBuildAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteTestAction(cmXMLWriter& xout,
-                                    std::string configuration,
+                                    const std::string& configuration,
                                     const std::string& container)
 {
   xout.StartElement("TestAction");
@@ -104,12 +104,11 @@ void cmXCodeScheme::WriteTestAction(cmXMLWriter& xout,
   xout.Attribute("shouldUseLaunchSchemeArgsEnv", "YES");
 
   xout.StartElement("Testables");
-  for (TestObjects::const_iterator it = this->Tests.begin();
-       it != this->Tests.end(); ++it) {
+  for (auto test : this->Tests) {
     xout.StartElement("TestableReference");
     xout.BreakAttributes();
     xout.Attribute("skipped", "NO");
-    WriteBuildableReference(xout, *it, container);
+    WriteBuildableReference(xout, test, container);
     xout.EndElement(); // TestableReference
   }
   xout.EndElement();
@@ -127,7 +126,7 @@ void cmXCodeScheme::WriteTestAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
-                                      std::string configuration,
+                                      const std::string& configuration,
                                       const std::string& container)
 {
   xout.StartElement("LaunchAction");
@@ -164,7 +163,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteProfileAction(cmXMLWriter& xout,
-                                       std::string configuration)
+                                       const std::string& configuration)
 {
   xout.StartElement("ProfileAction");
   xout.BreakAttributes();
@@ -177,7 +176,7 @@ void cmXCodeScheme::WriteProfileAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteAnalyzeAction(cmXMLWriter& xout,
-                                       std::string configuration)
+                                       const std::string& configuration)
 {
   xout.StartElement("AnalyzeAction");
   xout.BreakAttributes();
@@ -186,7 +185,7 @@ void cmXCodeScheme::WriteAnalyzeAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteArchiveAction(cmXMLWriter& xout,
-                                       std::string configuration)
+                                       const std::string& configuration)
 {
   xout.StartElement("ArchiveAction");
   xout.BreakAttributes();
@@ -223,8 +222,9 @@ std::string cmXCodeScheme::FindConfiguration(const std::string& name)
   //
   if (std::find(this->ConfigList.begin(), this->ConfigList.end(), name) ==
         this->ConfigList.end() &&
-      this->ConfigList.size() > 0)
+      !this->ConfigList.empty()) {
     return this->ConfigList[0];
+  }
 
   return name;
 }

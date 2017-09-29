@@ -134,7 +134,7 @@ public:
     : cmMachOHeaderAndLoadCommands(_swap)
   {
   }
-  bool read_mach_o(cmsys::ifstream& fin)
+  bool read_mach_o(cmsys::ifstream& fin) override
   {
     if (!read(fin, this->Header)) {
       return false;
@@ -251,8 +251,7 @@ cmMachOInternal::cmMachOInternal(const char* fname)
     }
 
     // parse each Mach-O file
-    for (size_t i = 0; i < this->FatArchs.size(); i++) {
-      const fat_arch& arch = this->FatArchs[i];
+    for (const auto& arch : this->FatArchs) {
       if (!this->read_mach_o(OSSwapBigToHostInt32(arch.offset))) {
         return;
       }
@@ -265,8 +264,8 @@ cmMachOInternal::cmMachOInternal(const char* fname)
 
 cmMachOInternal::~cmMachOInternal()
 {
-  for (size_t i = 0; i < this->MachOList.size(); i++) {
-    delete this->MachOList[i];
+  for (auto& i : this->MachOList) {
+    delete i;
   }
 }
 
