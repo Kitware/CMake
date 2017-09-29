@@ -662,23 +662,24 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   {
     std::vector<std::string> toolNames;
     if (digest.MocEnabled) {
-      toolNames.push_back("MOC");
+      toolNames.emplace_back("MOC");
     }
     if (digest.UicEnabled) {
-      toolNames.push_back("UIC");
+      toolNames.emplace_back("UIC");
     }
     if (digest.RccEnabled) {
-      toolNames.push_back("RCC");
+      toolNames.emplace_back("RCC");
     }
 
-    std::string tools = toolNames[0];
+    std::string tools = toolNames.front();
     toolNames.erase(toolNames.begin());
-    while (toolNames.size() > 1) {
-      tools += ", " + toolNames[0];
-      toolNames.erase(toolNames.begin());
-    }
-    if (toolNames.size() == 1) {
-      tools += " and " + toolNames[0];
+    if (!toolNames.empty()) {
+      while (toolNames.size() > 1) {
+        tools += ", ";
+        tools += toolNames.front();
+        toolNames.erase(toolNames.begin());
+      }
+      tools += " and " + toolNames.front();
     }
     autogenComment = "Automatic " + tools + " for target " + target->GetName();
   }
@@ -809,27 +810,35 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
         msg += cmPolicies::GetPolicyWarning(cmPolicies::CMP0071);
         msg += "\n";
         std::string tools;
-        if (digest.MocEnabled) {
-          tools += "AUTOMOC";
+        std::string property;
+        if (digest.MocEnabled && digest.UicEnabled) {
+          tools = "AUTOMOC and AUTOUIC";
+          property = "SKIP_AUTOGEN";
+        } else if (digest.MocEnabled) {
+          tools = "AUTOMOC";
+          property = "SKIP_AUTOMOC";
+        } else if (digest.UicEnabled) {
+          tools = "AUTOUIC";
+          property = "SKIP_AUTOUIC";
         }
-        if (digest.UicEnabled) {
-          if (!tools.empty()) {
-            tools += ",";
-          }
-          tools += "AUTOUIC";
+        msg += "For compatibility, CMake is excluding the GENERATED source "
+               "file(s):\n";
+        for (const std::string& absFile : generatedHeaders) {
+          msg.append("  ").append(cmQtAutoGen::Quoted(absFile)).append("\n");
         }
-        if (!generatedHeaders.empty()) {
-          msg.append(tools).append(": Ignoring GENERATED header file(s):\n");
-          for (std::string const& absFile : generatedHeaders) {
-            msg.append("  ").append(cmQtAutoGen::Quoted(absFile)).append("\n");
-          }
+        for (const std::string& absFile : generatedSources) {
+          msg.append("  ").append(cmQtAutoGen::Quoted(absFile)).append("\n");
         }
-        if (!generatedSources.empty()) {
-          msg.append(tools).append(": Ignoring GENERATED source file(s):\n");
-          for (std::string const& absFile : generatedSources) {
-            msg.append("  ").append(cmQtAutoGen::Quoted(absFile)).append("\n");
-          }
-        }
+        msg += "from processing by ";
+        msg += tools;
+        msg +=
+          ". If any of the files should be processed, set CMP0071 to NEW. "
+          "If any of the files should not be processed, "
+          "explicitly exclude them by setting the source file property ";
+        msg += property;
+        msg += ":\n  set_property(SOURCE file.h PROPERTY ";
+        msg += property;
+        msg += " ON)\n";
         makefile->IssueMessage(cmake::AUTHOR_WARNING, msg);
       }
     }
