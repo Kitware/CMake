@@ -613,6 +613,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   cmGlobalGenerator* globalGen = localGen->GetGlobalGenerator();
 
   std::string const autogenTargetName = GetAutogenTargetName(target);
+  std::string const autogenInfoDir = GetAutogenTargetFilesDir(target);
   std::string const autogenBuildDir = GetAutogenTargetBuildDir(target);
   std::string const workingDirectory =
     cmSystemTools::CollapseFullPath("", makefile->GetCurrentBinaryDirectory());
@@ -630,8 +631,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   AddCleanFile(makefile, autogenBuildDir);
   // Remove old settings on cleanup
   {
-    std::string base = GetAutogenTargetFilesDir(target);
-    base += "/AutogenOldSettings";
+    std::string base = autogenInfoDir + "/AutogenOldSettings";
     if (multiConfig == cmQtAutoGen::SINGLE) {
       AddCleanFile(makefile, base.append(".cmake"));
     } else {
@@ -652,7 +652,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     currentLine.push_back(cmSystemTools::GetCMakeCommand());
     currentLine.push_back("-E");
     currentLine.push_back("cmake_autogen");
-    currentLine.push_back(GetAutogenTargetFilesDir(target));
+    currentLine.push_back(autogenInfoDir);
     currentLine.push_back("$<CONFIGURATION>");
     commandLines.push_back(currentLine);
   }
@@ -1097,8 +1097,13 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
 
   // Generate info file
   {
-    std::string infoFile = GetAutogenTargetFilesDir(target);
-    infoFile += "/AutogenInfo.cmake";
+    std::string const infoDir = GetAutogenTargetFilesDir(target);
+    if (!cmSystemTools::MakeDirectory(infoDir)) {
+      std::string emsg = ("Could not create directory: ");
+      emsg += cmQtAutoGen::Quoted(infoDir);
+      cmSystemTools::Error(emsg.c_str());
+    }
+    std::string const infoFile = infoDir + "/AutogenInfo.cmake";
     {
       std::string infoFileIn = cmSystemTools::GetCMakeRoot();
       infoFileIn += "/Modules/AutogenInfo.cmake.in";
