@@ -561,8 +561,9 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
           cmCPackLogger(cmCPackLog::LOG_ERROR, languages[i]
                           << " is not a recognized language" << std::endl);
         }
-        char* iso_language_cstr = static_cast<char*>(malloc(65));
-        CFStringGetCString(iso_language, iso_language_cstr, 64,
+        char iso_language_cstr[65];
+        CFStringGetCString(iso_language, iso_language_cstr,
+                           sizeof(iso_language_cstr) - 1,
                            kCFStringEncodingMacRoman);
         LangCode lang = 0;
         RegionCode region = 0;
@@ -575,11 +576,9 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
           cmCPackLogger(cmCPackLog::LOG_ERROR,
                         "No language/region code available for "
                           << iso_language_cstr << std::endl);
-          free(iso_language_cstr);
           return 0;
         }
 #ifdef HAVE_CoreServices
-        free(iso_language_cstr);
         header_data.push_back(region);
         header_data.push_back(i);
         header_data.push_back(0);
