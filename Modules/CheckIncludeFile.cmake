@@ -34,6 +34,8 @@
 # at once.  See the :module:`CheckIncludeFileCXX` module to check for headers
 # using the ``CXX`` language.
 
+include_guard(GLOBAL)
+
 macro(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
   if(NOT DEFINED "${VARIABLE}")
     if(CMAKE_REQUIRED_INCLUDES)

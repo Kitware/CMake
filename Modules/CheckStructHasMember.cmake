@@ -38,6 +38,7 @@
 # Example: CHECK_STRUCT_HAS_MEMBER("struct timeval" tv_sec sys/select.h
 # HAVE_TIMEVAL_TV_SEC LANGUAGE C)
 
+include_guard(GLOBAL)
 include(CheckCSourceCompiles)
 include(CheckCXXSourceCompiles)
 

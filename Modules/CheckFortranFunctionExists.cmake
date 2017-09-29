@@ -24,6 +24,8 @@
 #
 #   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
+include_guard(GLOBAL)
+
 macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
   if(NOT DEFINED ${VARIABLE})
     message(STATUS "Looking for Fortran ${FUNCTION}")
