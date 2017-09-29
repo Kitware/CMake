@@ -1328,9 +1328,8 @@ int cmake::ActualConfigure()
 
   if (const char* platformName =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_PLATFORM")) {
-    if (this->GeneratorPlatform.empty()) {
-      this->GeneratorPlatform = platformName;
-    } else if (this->GeneratorPlatform != platformName) {
+    if (!this->GeneratorPlatform.empty() &&
+        this->GeneratorPlatform != platformName) {
       std::string message = "Error: generator platform: ";
       message += this->GeneratorPlatform;
       message += "\nDoes not match the platform used previously: ";
@@ -1348,9 +1347,7 @@ int cmake::ActualConfigure()
 
   if (const char* tsName =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_TOOLSET")) {
-    if (this->GeneratorToolset.empty()) {
-      this->GeneratorToolset = tsName;
-    } else if (this->GeneratorToolset != tsName) {
+    if (!this->GeneratorToolset.empty() && this->GeneratorToolset != tsName) {
       std::string message = "Error: generator toolset: ";
       message += this->GeneratorToolset;
       message += "\nDoes not match the toolset used previously: ";
