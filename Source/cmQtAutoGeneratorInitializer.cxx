@@ -363,11 +363,14 @@ static void SetupAutoTargetMoc(cmQtAutoGenDigest const& digest,
   AddDefinitionEscaped(makefile, "_moc_depend_filters",
                        GetSafeProperty(target, "AUTOMOC_DEPEND_FILTERS"));
 
-  if (QtVersionGreaterOrEqual(digest.QtVersionMajor, digest.QtVersionMinor, 5,
-                              8)) {
-    AddDefinitionEscaped(
-      makefile, "_moc_predefs_cmd",
-      makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_PREDEFINES_COMMAND"));
+  // Compiler predefines
+  if (target->GetPropertyAsBool("AUTOMOC_COMPILER_PREDEFINES")) {
+    if (QtVersionGreaterOrEqual(digest.QtVersionMajor, digest.QtVersionMinor,
+                                5, 8)) {
+      AddDefinitionEscaped(
+        makefile, "_moc_predefs_cmd",
+        makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_PREDEFINES_COMMAND"));
+    }
   }
   // Moc includes and compile definitions
   {
