@@ -206,13 +206,6 @@ public:
   static int Strucmp(const char* s1, const char* s2);
 
   /**
-   * Convert a string in __DATE__ or __TIMESTAMP__ format into a time_t.
-   * Return false on error, true on success
-   */
-  static bool ConvertDateMacroString(const char* str, time_t* tmt);
-  static bool ConvertTimeStampMacroString(const char* str, time_t* tmt);
-
-  /**
    * Split a string on its newlines into multiple lines
    * Return false only if the last line stored had no newline
    */
