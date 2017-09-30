@@ -3225,8 +3225,6 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   }
 
   if (this->MSTools) {
-    linkOptions.AddFlag("Version", "");
-
     if (this->GeneratorTarget->GetPropertyAsBool("WIN32_EXECUTABLE")) {
       if (this->GlobalGenerator->TargetsWindowsCE()) {
         linkOptions.AddFlag("SubSystem", "WindowsCE");
