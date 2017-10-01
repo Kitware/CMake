@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <array>
 #include <stddef.h>
 #include <string>
 #include <utility>
@@ -29,37 +30,35 @@ public:
   cmFilePathChecksum();
 
   /// @brief Initilizes the parent directories manually
-  cmFilePathChecksum(const std::string& currentSrcDir,
-                     const std::string& currentBinDir,
-                     const std::string& projectSrcDir,
-                     const std::string& projectBinDir);
+  cmFilePathChecksum(std::string const& currentSrcDir,
+                     std::string const& currentBinDir,
+                     std::string const& projectSrcDir,
+                     std::string const& projectBinDir);
 
   /// @brief Initilizes the parent directories from a makefile
   cmFilePathChecksum(cmMakefile* makefile);
 
   /// @brief Allows parent directories setup after construction
   ///
-  void setupParentDirs(const std::string& currentSrcDir,
-                       const std::string& currentBinDir,
-                       const std::string& projectSrcDir,
-                       const std::string& projectBinDir);
+  void setupParentDirs(std::string const& currentSrcDir,
+                       std::string const& currentBinDir,
+                       std::string const& projectSrcDir,
+                       std::string const& projectBinDir);
 
   /* @brief Calculates the path checksum for the parent directory of a file
    *
    */
-  std::string get(const std::string& filePath) const;
+  std::string get(std::string const& filePath) const;
 
   /* @brief Same as get() but returns only the first length characters
    *
    */
-  std::string getPart(const std::string& filePath,
+  std::string getPart(std::string const& filePath,
                       size_t length = partLengthDefault) const;
 
 private:
-  /// Size of the parent directory list
-  static const size_t numParentDirs = 4;
   /// List of (directory name, seed name) pairs
-  std::pair<std::string, std::string> parentDirs[numParentDirs];
+  std::array<std::pair<std::string, std::string>, 4> parentDirs;
 };
 
 #endif
