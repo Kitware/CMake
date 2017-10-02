@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdlib.h> /* free */
 #include <string.h> /* strcmp */
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <io.h> /* _umask (MSVC) / umask (Borland) */
@@ -535,15 +536,14 @@ static bool CheckStringOperations()
   }
   delete[] cres;
 
-  char* cres2 = new char[strlen("Mary Had A Little Lamb.") + 1];
-  strcpy(cres2, "Mary Had A Little Lamb.");
+  char* cres2 = strdup("Mary Had A Little Lamb.");
   kwsys::SystemTools::ReplaceChars(cres2, "aeiou", 'X');
   if (strcmp(cres2, "MXry HXd A LXttlX LXmb.")) {
     std::cerr << "Problem with ReplaceChars "
               << "\"Mary Had A Little Lamb.\"" << std::endl;
     res = false;
   }
-  delete[] cres2;
+  free(cres2);
 
   if (!kwsys::SystemTools::StringStartsWith("Mary Had A Little Lamb.",
                                             "Mary ")) {

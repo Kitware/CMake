@@ -1028,7 +1028,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
         )
     ENDIF()
     SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
-      testIOS
       testSystemTools
       testCommandLineArguments
       testCommandLineArguments1
