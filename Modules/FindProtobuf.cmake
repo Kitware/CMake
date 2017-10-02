@@ -168,12 +168,14 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
       endif()
     endif()
 
-    list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc")
-    list(APPEND ${HDRS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h")
+    set(_protobuf_protoc_src "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc")
+    set(_protobuf_protoc_hdr "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h")
+    list(APPEND ${SRCS} "${_protobuf_protoc_src}")
+    list(APPEND ${HDRS} "${_protobuf_protoc_hdr}")
 
     add_custom_command(
-      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc"
-             "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h"
+      OUTPUT "${_protobuf_protoc_src}"
+             "${_protobuf_protoc_hdr}"
       COMMAND  protobuf::protoc
       ARGS "--cpp_out=${DLL_EXPORT_DECL}${CMAKE_CURRENT_BINARY_DIR}" ${_protobuf_include_path} ${ABS_FIL}
       DEPENDS ${ABS_FIL} protobuf::protoc
@@ -181,9 +183,8 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
       VERBATIM )
   endforeach()
 
-  set_source_files_properties(${${SRCS}} ${${HDRS}} PROPERTIES GENERATED TRUE)
-  set(${SRCS} ${${SRCS}} PARENT_SCOPE)
-  set(${HDRS} ${${HDRS}} PARENT_SCOPE)
+  set(${SRCS} "${${SRCS}}" PARENT_SCOPE)
+  set(${HDRS} "${${HDRS}}" PARENT_SCOPE)
 endfunction()
 
 function(PROTOBUF_GENERATE_PYTHON SRCS)
