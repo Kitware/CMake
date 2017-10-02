@@ -23,6 +23,7 @@ set(CMAKE_DL_LIBS "dl")
 
 set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
+set(CMAKE_AUTOMOC_COMPILER_PREDEFINES ON)
 set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_NAMESPACE")
 
 # basically all general purpose OSs support shared libs

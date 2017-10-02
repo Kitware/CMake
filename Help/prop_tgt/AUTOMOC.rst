@@ -76,6 +76,9 @@ Additional macro names to search for can be added to :prop_tgt:`AUTOMOC_MACRO_NA
 Additional ``moc`` dependency file names can be extracted from source code
 by using :prop_tgt:`AUTOMOC_DEPEND_FILTERS`.
 
+Compiler pre definitions for ``moc`` are written to a ``moc_predefs.h`` file
+which is controlled by :prop_tgt:`AUTOMOC_COMPILER_PREDEFINES`.
+
 Source C++ files can be excluded from :prop_tgt:`AUTOMOC` processing by
 enabling :prop_sf:`SKIP_AUTOMOC` or the broader :prop_sf:`SKIP_AUTOGEN`.
 
