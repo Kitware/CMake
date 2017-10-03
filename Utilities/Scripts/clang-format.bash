@@ -111,7 +111,9 @@ $git_ls |
 
   # Select sources with our attribute.
   git check-attr --stdin format.clang-format |
-  sed -n '/: format\.clang-format: set$/ {s/:[^:]*:[^:]*$//p}'  |
+  grep -e ': format\.clang-format: set$'     |
+  sed -n 's/:[^:]*:[^:]*$//p'                |
 
   # Update sources in-place.
-  xargs -d '\n' "$clang_format" -i
+  tr '\n' '\0'                               |
+  xargs -0 "$clang_format" -i
