@@ -111,6 +111,26 @@ cmGlobalGenerator::~cmGlobalGenerator()
   delete this->ExtraGenerator;
 }
 
+bool cmGlobalGenerator::SetGeneratorInstance(std::string const& i,
+                                             cmMakefile* mf)
+{
+  if (i.empty()) {
+    return true;
+  }
+
+  std::ostringstream e;
+  /* clang-format off */
+  e <<
+    "Generator\n"
+    "  " << this->GetName() << "\n"
+    "does not support instance specification, but instance\n"
+    "  " << i << "\n"
+    "was specified.";
+  /* clang-format on */
+  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  return false;
+}
+
 bool cmGlobalGenerator::SetGeneratorPlatform(std::string const& p,
                                              cmMakefile* mf)
 {
@@ -491,6 +511,13 @@ void cmGlobalGenerator::EnableLanguage(
   }
 
   if (readCMakeSystem) {
+    // Tell the generator about the instance, if any.
+    std::string instance = mf->GetSafeDefinition("CMAKE_GENERATOR_INSTANCE");
+    if (!this->SetGeneratorInstance(instance, mf)) {
+      cmSystemTools::SetFatalErrorOccured();
+      return;
+    }
+
     // Find the native build tool for this generator.
     if (!this->FindMakeProgram(mf)) {
       return;

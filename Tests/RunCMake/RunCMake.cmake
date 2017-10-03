@@ -79,11 +79,17 @@ function(run_cmake test)
       ${maybe_timeout}
       )
   else()
+    if(RunCMake_GENERATOR_INSTANCE)
+      set(_D_CMAKE_GENERATOR_INSTANCE "-DCMAKE_GENERATOR_INSTANCE=${RunCMake_GENERATOR_INSTANCE}")
+    else()
+      set(_D_CMAKE_GENERATOR_INSTANCE "")
+    endif()
     execute_process(
       COMMAND ${CMAKE_COMMAND} "${RunCMake_TEST_SOURCE_DIR}"
                 -G "${RunCMake_GENERATOR}"
                 -A "${RunCMake_GENERATOR_PLATFORM}"
                 -T "${RunCMake_GENERATOR_TOOLSET}"
+                ${_D_CMAKE_GENERATOR_INSTANCE}
                 -DRunCMake_TEST=${test}
                 --no-warn-unused-cli
                 ${RunCMake_TEST_OPTIONS}

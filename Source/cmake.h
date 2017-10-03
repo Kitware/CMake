@@ -203,6 +203,12 @@ public:
   ///! Get the names of the current registered generators
   void GetRegisteredGenerators(std::vector<GeneratorInfo>& generators) const;
 
+  ///! Set the name of the selected generator-specific instance.
+  void SetGeneratorInstance(std::string const& instance)
+  {
+    this->GeneratorInstance = instance;
+  }
+
   ///! Set the name of the selected generator-specific platform.
   void SetGeneratorPlatform(std::string const& ts)
   {
@@ -431,6 +437,7 @@ protected:
 
   cmGlobalGenerator* GlobalGenerator;
   std::map<std::string, DiagLevel> DiagLevels;
+  std::string GeneratorInstance;
   std::string GeneratorPlatform;
   std::string GeneratorToolset;
 
