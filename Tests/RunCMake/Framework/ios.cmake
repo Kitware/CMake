@@ -20,6 +20,16 @@ execute_process(
   OUTPUT_VARIABLE IOS_SDK_PATH
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+execute_process(
+  COMMAND ${XCRUN_EXECUTABLE} --sdk iphoneos --show-sdk-version
+  OUTPUT_VARIABLE IOS_SDK_VERSION
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(IOS_SDK_VERSION VERSION_GREATER_EQUAL 11.0)
+  set(IOS_ARCH arm64)
+else()
+  set(IOS_ARCH armv7)
+endif()
+
 set(CMAKE_OSX_SYSROOT ${IOS_SDK_PATH} CACHE PATH "Sysroot used for iOS support")
-set(CMAKE_OSX_ARCHITECTURES "armv7" CACHE STRING "Architectures to build for")
+set(CMAKE_OSX_ARCHITECTURES "${IOS_ARCH}" CACHE STRING "Architectures to build for")
 set(CMAKE_FIND_ROOT_PATH ${IOS_SDK_PATH} CACHE PATH "Find search path root")
