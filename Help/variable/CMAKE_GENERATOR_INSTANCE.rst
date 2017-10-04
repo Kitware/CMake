@@ -17,6 +17,8 @@ for this variable, changing the value has undefined behavior.
 
 Instance specification is supported only on specific generators:
 
-* None
+* For the :generator:`Visual Studio 15 2017` generator (and above)
+  this specifies the absolute path to the VS installation directory
+  of the selected VS instance.
 
 See native build system documentation for allowed instance values.

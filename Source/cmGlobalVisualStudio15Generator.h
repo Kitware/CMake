@@ -27,6 +27,11 @@ public:
   virtual void WriteSLNHeader(std::ostream& fout);
 
   virtual const char* GetToolsVersion() { return "15.0"; }
+
+  bool SetGeneratorInstance(std::string const& i, cmMakefile* mf) override;
+
+  bool GetVSInstance(std::string& dir) const;
+
 protected:
   bool InitializeWindows(cmMakefile* mf) override;
   virtual bool SelectWindowsStoreToolset(std::string& toolset) const;

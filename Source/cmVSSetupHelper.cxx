@@ -273,13 +273,6 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
   if (cmSystemTools::GetEnv("VS150COMNTOOLS", envVSCommonToolsDir)) {
     cmSystemTools::ConvertToUnixSlashes(envVSCommonToolsDir);
   }
-  // FIXME: If the environment variable value changes between runs
-  // of CMake within a given build tree the results are not defined.
-  // Instead we should save a CMAKE_GENERATOR_INSTANCE value in the cache
-  // (similar to CMAKE_GENERATOR_TOOLSET) to hold it persistently.
-  // Unfortunately doing so will require refactoring elsewhere in
-  // order to make sure the value is available in time to create
-  // the generator.
 
   std::vector<VSInstanceInfo> vecVSInstances;
   SmartCOMPtr<IEnumSetupInstances> enumInstances = NULL;
