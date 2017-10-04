@@ -310,7 +310,11 @@ macro(_OPENMP_SET_VERSION_BY_SPEC_DATE LANG)
     "199710=1.0"
   )
 
-  string(REGEX MATCHALL "${OpenMP_${LANG}_SPEC_DATE}=([0-9]+)\\.([0-9]+)" _version_match "${OpenMP_SPEC_DATE_MAP}")
+  if(OpenMP_${LANG}_SPEC_DATE)
+    string(REGEX MATCHALL "${OpenMP_${LANG}_SPEC_DATE}=([0-9]+)\\.([0-9]+)" _version_match "${OpenMP_SPEC_DATE_MAP}")
+  else()
+    set(_version_match "")
+  endif()
   if(NOT _version_match STREQUAL "")
     set(OpenMP_${LANG}_VERSION_MAJOR ${CMAKE_MATCH_1})
     set(OpenMP_${LANG}_VERSION_MINOR ${CMAKE_MATCH_2})
@@ -389,7 +393,7 @@ unset(_OpenMP_MIN_VERSION)
 
 foreach(LANG IN LISTS OpenMP_FINDLIST)
   if(CMAKE_${LANG}_COMPILER_LOADED)
-    if (NOT OpenMP_${LANG}_SPEC_DATE)
+    if (NOT OpenMP_${LANG}_SPEC_DATE AND OpenMP_${LANG}_FLAGS)
       _OPENMP_GET_SPEC_DATE("${LANG}" OpenMP_${LANG}_SPEC_DATE_INTERNAL)
       set(OpenMP_${LANG}_SPEC_DATE "${OpenMP_${LANG}_SPEC_DATE_INTERNAL}" CACHE
         INTERNAL "${LANG} compiler's OpenMP specification date")
