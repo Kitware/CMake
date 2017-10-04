@@ -2125,8 +2125,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       if (configDependentFlags) {
         cmGeneratorExpression ge;
         std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(flags);
-        std::string evaluatedFlags =
-          cge->Evaluate(this->LocalGenerator, *config);
+        std::string evaluatedFlags = cge->Evaluate(
+          this->LocalGenerator, *config, false, this->GeneratorTarget);
         clOptions.Parse(evaluatedFlags.c_str());
       } else {
         clOptions.Parse(flags.c_str());

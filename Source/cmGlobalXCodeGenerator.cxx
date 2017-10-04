@@ -668,7 +668,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     std::string configName = "NO-PER-CONFIG-SUPPORT-IN-XCODE";
     std::unique_ptr<cmCompiledGeneratorExpression> compiledExpr =
       ge.Parse(cflags);
-    const char* processed = compiledExpr->Evaluate(lg, configName);
+    const char* processed =
+      compiledExpr->Evaluate(lg, configName, false, gtgt);
     if (compiledExpr->GetHadContextSensitiveCondition()) {
       std::ostringstream e;
       /* clang-format off */
