@@ -67,6 +67,7 @@
 #include "transfer.h"
 #include "escape.h"
 #include "http.h" /* for HTTP proxy tunnel stuff */
+#include "mime.h"
 #include "socks.h"
 #include "smtp.h"
 #include "strtoofft.h"
@@ -124,6 +125,7 @@ const struct Curl_handler Curl_handler_smtp = {
   ZERO_NULL,                        /* perform_getsock */
   smtp_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
+  ZERO_NULL,                        /* connection_check */
   PORT_SMTP,                        /* defport */
   CURLPROTO_SMTP,                   /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
@@ -150,63 +152,12 @@ const struct Curl_handler Curl_handler_smtps = {
   ZERO_NULL,                        /* perform_getsock */
   smtp_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
+  ZERO_NULL,                        /* connection_check */
   PORT_SMTPS,                       /* defport */
   CURLPROTO_SMTPS,                  /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_SSL
   | PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS /* flags */
 };
-#endif
-
-#ifndef CURL_DISABLE_HTTP
-/*
- * HTTP-proxyed SMTP protocol handler.
- */
-
-static const struct Curl_handler Curl_handler_smtp_proxy = {
-  "SMTP",                               /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  PORT_SMTP,                            /* defport */
-  CURLPROTO_HTTP,                       /* protocol */
-  PROTOPT_NONE                          /* flags */
-};
-
-#ifdef USE_SSL
-/*
- * HTTP-proxyed SMTPS protocol handler.
- */
-
-static const struct Curl_handler Curl_handler_smtps_proxy = {
-  "SMTPS",                              /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  PORT_SMTPS,                           /* defport */
-  CURLPROTO_HTTP,                       /* protocol */
-  PROTOPT_NONE                          /* flags */
-};
-#endif
 #endif
 
 /* SASL parameters for the smtp protocol */
@@ -580,8 +531,40 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
     }
   }
 
+  /* Prepare the mime data if some. */
+  if(data->set.mimepost.kind != MIMEKIND_NONE) {
+    /* Use the whole structure as data. */
+    data->set.mimepost.flags &= ~MIME_BODY_ONLY;
+
+    /* Add external headers and mime version. */
+    curl_mime_headers(&data->set.mimepost, data->set.headers, 0);
+    result = Curl_mime_prepare_headers(&data->set.mimepost, NULL,
+                                       NULL, MIMESTRATEGY_MAIL);
+
+    if(!result)
+      if(!Curl_checkheaders(conn, "Mime-Version"))
+        result = Curl_mime_add_header(&data->set.mimepost.curlheaders,
+                                      "Mime-Version: 1.0");
+
+    /* Make sure we will read the entire mime structure. */
+    if(!result)
+      result = Curl_mime_rewind(&data->set.mimepost);
+
+    if(result) {
+      free(from);
+      free(auth);
+      return result;
+    }
+
+    data->state.infilesize = Curl_mime_size(&data->set.mimepost);
+
+    /* Read from mime structure. */
+    data->state.fread_func = (curl_read_callback) Curl_mime_read;
+    data->state.in = (void *) &data->set.mimepost;
+  }
+
   /* Calculate the optional SIZE parameter */
-  if(conn->proto.smtpc.size_supported && conn->data->state.infilesize > 0) {
+  if(conn->proto.smtpc.size_supported && data->state.infilesize > 0) {
     size = aprintf("%" CURL_FORMAT_CURL_OFF_T, data->state.infilesize);
 
     if(!size) {
@@ -1209,7 +1192,8 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     connclose(conn, "SMTP done with bad status"); /* marked for closure */
     result = status;         /* use the already set error code */
   }
-  else if(!data->set.connect_only && data->set.upload && data->set.mail_rcpt) {
+  else if(!data->set.connect_only && data->set.mail_rcpt &&
+          (data->set.upload || data->set.mimepost.kind)) {
     /* Calculate the EOB taking into account any terminating CRLF from the
        previous line of the email or the CRLF of the DATA command when there
        is "no mail data". RFC-5321, sect. 4.1.1.4.
@@ -1299,7 +1283,7 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
   smtp->rcpt = data->set.mail_rcpt;
 
   /* Start the first command in the DO phase */
-  if(data->set.upload && data->set.mail_rcpt)
+  if((data->set.upload || data->set.mimepost.kind) && data->set.mail_rcpt)
     /* MAIL transfer */
     result = smtp_perform_mail(conn);
   else
@@ -1450,30 +1434,6 @@ static CURLcode smtp_setup_connection(struct connectdata *conn)
 
   /* Clear the TLS upgraded flag */
   conn->tls_upgraded = FALSE;
-
-  /* Set up the proxy if necessary */
-  if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
-    /* Unless we have asked to tunnel SMTP operations through the proxy, we
-       switch and use HTTP operations only */
-#ifndef CURL_DISABLE_HTTP
-    if(conn->handler == &Curl_handler_smtp)
-      conn->handler = &Curl_handler_smtp_proxy;
-    else {
-#ifdef USE_SSL
-      conn->handler = &Curl_handler_smtps_proxy;
-#else
-      failf(data, "SMTPS not supported!");
-      return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-    }
-    /* set it up as a HTTP connection instead */
-    return conn->handler->setup_connection(conn);
-
-#else
-    failf(data, "SMTP over http proxy requires HTTP support built-in!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
 
   /* Initialise the SMTP layer */
   result = smtp_init(conn);

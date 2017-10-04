@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -150,6 +150,7 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
   PORT_LDAP,                            /* defport */
   CURLPROTO_LDAP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
@@ -175,6 +176,7 @@ const struct Curl_handler Curl_handler_ldaps = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
   PORT_LDAPS,                           /* defport */
   CURLPROTO_LDAPS,                      /* protocol */
   PROTOPT_SSL                           /* flags */
@@ -233,7 +235,6 @@ static int ldap_win_bind(struct connectdata *conn, LDAP *server,
                          const char *user, const char *passwd)
 {
   int rc = LDAP_INVALID_CREDENTIALS;
-  ULONG method = LDAP_AUTH_SIMPLE;
 
   PTCHAR inuser = NULL;
   PTCHAR inpass = NULL;
@@ -242,7 +243,7 @@ static int ldap_win_bind(struct connectdata *conn, LDAP *server,
     inuser = Curl_convert_UTF8_to_tchar((char *) user);
     inpass = Curl_convert_UTF8_to_tchar((char *) passwd);
 
-    rc = ldap_bind_s(server, inuser, inpass, method);
+    rc = ldap_simple_bind_s(server, inuser, inpass);
 
     Curl_unicodefree(inuser);
     Curl_unicodefree(inpass);
@@ -266,7 +267,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   LDAPMessage *ldapmsg = NULL;
   LDAPMessage *entryIterator;
   int num = 0;
-  struct Curl_easy *data=conn->data;
+  struct Curl_easy *data = conn->data;
   int ldap_proto = LDAP_VERSION3;
   int ldap_ssl = 0;
   char *val_b64 = NULL;
