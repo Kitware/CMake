@@ -24,6 +24,7 @@ set(CURL_DISABLE_TFTP ON CACHE INTERNAL "Disable curl tftp protocol?")
 set(CURL_DISABLE_VERBOSE_STRINGS OFF CACHE INTERNAL "Do not disable curl verbosity")
 set(CURL_HIDDEN_SYMBOLS OFF CACHE INTERNAL "No curl hidden symbols")
 set(CURL_STATICLIB ON CACHE INTERNAL "Static curl")
+set(CURL_WERROR OFF CACHE INTERNAL "Turn compiler warnings into errors")
 set(DISABLED_THREADSAFE OFF CACHE INTERNAL "Curl can use thread-safe functions")
 set(ENABLE_ARES OFF CACHE INTERNAL "No curl c-ares support")
 set(ENABLE_CURLDEBUG OFF CACHE INTERNAL "No curl TrackMemory features")
@@ -33,6 +34,7 @@ set(ENABLE_MANUAL OFF CACHE INTERNAL "No curl built-in manual")
 set(ENABLE_THREADED_RESOLVER OFF CACHE INTERNAL "No curl POSIX threaded DNS lookup")
 set(ENABLE_UNIX_SOCKETS OFF CACHE INTERNAL "No curl Unix domain sockets support")
 set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
+set(PICKY_COMPILER OFF CACHE INTERNAL "Enable picky compiler options")
 set(USE_WIN32_LDAP OFF CACHE INTERNAL "No curl Windows LDAP")
 if(CMAKE_USE_OPENSSL)
 elseif(WIN32)
@@ -204,8 +206,10 @@ if (ENABLE_CURLDEBUG)
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS CURLDEBUG)
 endif()
 
+if(0) # This code not needed for building within CMake.
 # For debug libs and exes, add "-d" postfix
 set(CMAKE_DEBUG_POSTFIX "-d" CACHE STRING "Set debug library postfix")
+endif()
 
 # initialize CURL_LIBS
 set(CURL_LIBS "")
