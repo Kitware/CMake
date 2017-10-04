@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,7 +29,12 @@
 
 #include "curl_setup.h"
 
-struct timeval curlx_tvnow(void);
+struct curltime {
+  time_t       tv_sec;     /* seconds */
+  unsigned int tv_usec;    /* microseconds */
+};
+
+struct curltime curlx_tvnow(void);
 
 /*
  * Make sure that the first argument (t1) is the more recent time and t2 is
@@ -37,20 +42,20 @@ struct timeval curlx_tvnow(void);
  *
  * Returns: the time difference in number of milliseconds.
  */
-time_t curlx_tvdiff(struct timeval t1, struct timeval t2);
+time_t curlx_tvdiff(struct curltime t1, struct curltime t2);
 
 /*
- * Same as curlx_tvdiff but with full usec resolution.
+ * Make sure that the first argument (t1) is the more recent time and t2 is
+ * the older time, as otherwise you get a weird negative time-diff back...
  *
- * Returns: the time difference in seconds with subsecond resolution.
+ * Returns: the time difference in number of microseconds.
  */
-double curlx_tvdiff_secs(struct timeval t1, struct timeval t2);
+time_t Curl_tvdiff_us(struct curltime newer, struct curltime older);
 
 /* These two defines below exist to provide the older API for library
    internals only. */
 #define Curl_tvnow() curlx_tvnow()
 #define Curl_tvdiff(x,y) curlx_tvdiff(x,y)
-#define Curl_tvdiff_secs(x,y) curlx_tvdiff_secs(x,y)
 
 #endif /* HEADER_CURL_TIMEVAL_H */
 

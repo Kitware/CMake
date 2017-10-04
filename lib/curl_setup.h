@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +22,10 @@
  *
  ***************************************************************************/
 
+#if defined(BUILDING_LIBCURL) && !defined(CURL_NO_OLDIES)
+#define CURL_NO_OLDIES
+#endif
+
 /*
  * Define WIN32 when build target is Win32 API
  */
@@ -29,6 +33,17 @@
 #if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32) && \
     !defined(__SYMBIAN32__)
 #define WIN32
+#endif
+
+#ifdef WIN32
+/*
+ * Don't include unneeded stuff in Windows headers to avoid compiler
+ * warnings and macro clashes.
+ * Make sure to define this macro before including any Windows headers.
+ */
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
 #endif
 
 /*
@@ -126,14 +141,7 @@
 
 #include <curl/curl.h>
 
-/*
- * Ensure that no one is using the old SIZEOF_CURL_OFF_T macro
- */
-
-#ifdef SIZEOF_CURL_OFF_T
-#  error "SIZEOF_CURL_OFF_T shall not be defined!"
-   Error Compilation_aborted_SIZEOF_CURL_OFF_T_shall_not_be_defined
-#endif
+#define CURL_SIZEOF_CURL_OFF_T SIZEOF_CURL_OFF_T
 
 /*
  * Disable other protocols when http is the only one desired.
@@ -170,9 +178,6 @@
 #  ifndef CURL_DISABLE_SMTP
 #    define CURL_DISABLE_SMTP
 #  endif
-#  ifndef CURL_DISABLE_RTMP
-#    define CURL_DISABLE_RTMP
-#  endif
 #  ifndef CURL_DISABLE_GOPHER
 #    define CURL_DISABLE_GOPHER
 #  endif
@@ -191,7 +196,7 @@
 
 /* ================================================================ */
 /* No system header file shall be included in this file before this */
-/* point. The only allowed ones are those included from curlbuild.h */
+/* point. The only allowed ones are those included from curl/system.h */
 /* ================================================================ */
 
 /*
@@ -236,9 +241,6 @@
 #  endif
 #  if defined(_UNICODE) && !defined(UNICODE)
 #    define UNICODE
-#  endif
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
@@ -640,9 +642,8 @@ int netware_init(void);
 #endif
 #endif
 
-/* non-configure builds may define CURL_WANTS_CA_BUNDLE_ENV */
-#if defined(CURL_WANTS_CA_BUNDLE_ENV) && !defined(CURL_CA_BUNDLE)
-#define CURL_CA_BUNDLE getenv("CURL_CA_BUNDLE")
+#ifdef CURL_WANTS_CA_BUNDLE_ENV
+#error "No longer supported. Set CURLOPT_CAINFO at runtime instead."
 #endif
 
 /*
@@ -716,6 +717,7 @@ Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
 #if defined(WIN32) || defined(MSDOS)
 #define FOPEN_READTEXT "rt"
 #define FOPEN_WRITETEXT "wt"
+#define FOPEN_APPENDTEXT "at"
 #elif defined(__CYGWIN__)
 /* Cygwin has specific behavior we need to address when WIN32 is not defined.
 https://cygwin.com/cygwin-ug-net/using-textbinary.html
@@ -725,9 +727,11 @@ endings either CRLF or LF so 't' is appropriate.
 */
 #define FOPEN_READTEXT "rt"
 #define FOPEN_WRITETEXT "w"
+#define FOPEN_APPENDTEXT "a"
 #else
 #define FOPEN_READTEXT "r"
 #define FOPEN_WRITETEXT "w"
+#define FOPEN_APPENDTEXT "a"
 #endif
 
 /* WinSock destroys recv() buffer when send() failed.
