@@ -39,7 +39,7 @@ const std::string& cmInstallCommandArguments::GetDestination() const
   if (this->GenericArguments != nullptr) {
     return this->GenericArguments->GetDestination();
   }
-  return this->EmptyString;
+  return EmptyString;
 }
 
 const std::string& cmInstallCommandArguments::GetComponent() const
@@ -65,7 +65,7 @@ const std::string& cmInstallCommandArguments::GetRename() const
   if (this->GenericArguments != nullptr) {
     return this->GenericArguments->GetRename();
   }
-  return this->EmptyString;
+  return EmptyString;
 }
 
 const std::string& cmInstallCommandArguments::GetPermissions() const
@@ -76,7 +76,7 @@ const std::string& cmInstallCommandArguments::GetPermissions() const
   if (this->GenericArguments != nullptr) {
     return this->GenericArguments->GetPermissions();
   }
-  return this->EmptyString;
+  return EmptyString;
 }
 
 bool cmInstallCommandArguments::GetOptional() const
