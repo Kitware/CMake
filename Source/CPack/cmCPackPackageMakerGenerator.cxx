@@ -288,8 +288,8 @@ int cmCPackPackageMakerGenerator::PackageFiles()
   tmpFile += "/hdiutilOutput.log";
   std::ostringstream dmgCmd;
   dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM_DISK_IMAGE")
-         << "\" create -ov -format UDZO -srcfolder \"" << packageDirFileName
-         << "\" \"" << packageFileNames[0] << "\"";
+         << "\" create -ov -fs HFS+ -format UDZO -srcfolder \""
+         << packageDirFileName << "\" \"" << packageFileNames[0] << "\"";
   std::string output;
   int retVal = 1;
   int numTries = 10;
