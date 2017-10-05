@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <ctype.h>
+#include <iterator>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdlib.h>
@@ -4133,15 +4134,15 @@ bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
   assert(cmGeneratorExpression::Find(feature) == std::string::npos);
 
   bool isCFeature =
-    std::find_if(cmArrayBegin(C_FEATURES) + 1, cmArrayEnd(C_FEATURES),
-                 cmStrCmp(feature)) != cmArrayEnd(C_FEATURES);
+    std::find_if(cm::cbegin(C_FEATURES) + 1, cm::cend(C_FEATURES),
+                 cmStrCmp(feature)) != cm::cend(C_FEATURES);
   if (isCFeature) {
     lang = "C";
     return true;
   }
   bool isCxxFeature =
-    std::find_if(cmArrayBegin(CXX_FEATURES) + 1, cmArrayEnd(CXX_FEATURES),
-                 cmStrCmp(feature)) != cmArrayEnd(CXX_FEATURES);
+    std::find_if(cm::cbegin(CXX_FEATURES) + 1, cm::cend(CXX_FEATURES),
+                 cmStrCmp(feature)) != cm::cend(CXX_FEATURES);
   if (isCxxFeature) {
     lang = "CXX";
     return true;
@@ -4230,8 +4231,8 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
     // Return true so the caller does not try to lookup the default standard.
     return true;
   }
-  if (std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
-                   cmStrCmp(defaultCStandard)) == cmArrayEnd(C_STANDARDS)) {
+  if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
+                   cmStrCmp(defaultCStandard)) == cm::cend(C_STANDARDS)) {
     std::ostringstream e;
     e << "The CMAKE_C_STANDARD_DEFAULT variable contains an "
          "invalid value: \""
@@ -4251,8 +4252,8 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
     existingCStandard = defaultCStandard;
   }
 
-  if (std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
-                   cmStrCmp(existingCStandard)) == cmArrayEnd(C_STANDARDS)) {
+  if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
+                   cmStrCmp(existingCStandard)) == cm::cend(C_STANDARDS)) {
     std::ostringstream e;
     e << "The C_STANDARD property on target \"" << target->GetName()
       << "\" contained an invalid value: \"" << existingCStandard << "\".";
@@ -4261,23 +4262,23 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
   }
 
   const char* const* existingCIt = existingCStandard
-    ? std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
+    ? std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
                    cmStrCmp(existingCStandard))
-    : cmArrayEnd(C_STANDARDS);
+    : cm::cend(C_STANDARDS);
 
   if (needC11 && existingCStandard &&
-      existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                 cmArrayEnd(C_STANDARDS), cmStrCmp("11"))) {
+      existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
+                                 cm::cend(C_STANDARDS), cmStrCmp("11"))) {
     return false;
   }
   if (needC99 && existingCStandard &&
-      existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                 cmArrayEnd(C_STANDARDS), cmStrCmp("99"))) {
+      existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
+                                 cm::cend(C_STANDARDS), cmStrCmp("99"))) {
     return false;
   }
   if (needC90 && existingCStandard &&
-      existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                 cmArrayEnd(C_STANDARDS), cmStrCmp("90"))) {
+      existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
+                                 cm::cend(C_STANDARDS), cmStrCmp("90"))) {
     return false;
   }
   return true;
@@ -4289,16 +4290,16 @@ bool cmMakefile::IsLaterStandard(std::string const& lang,
 {
   if (lang == "C") {
     const char* const* rhsIt = std::find_if(
-      cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS), cmStrCmp(rhs));
+      cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS), cmStrCmp(rhs));
 
-    return std::find_if(rhsIt, cmArrayEnd(C_STANDARDS), cmStrCmp(lhs)) !=
-      cmArrayEnd(C_STANDARDS);
+    return std::find_if(rhsIt, cm::cend(C_STANDARDS), cmStrCmp(lhs)) !=
+      cm::cend(C_STANDARDS);
   }
   const char* const* rhsIt = std::find_if(
-    cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS), cmStrCmp(rhs));
+    cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS), cmStrCmp(rhs));
 
-  return std::find_if(rhsIt, cmArrayEnd(CXX_STANDARDS), cmStrCmp(lhs)) !=
-    cmArrayEnd(CXX_STANDARDS);
+  return std::find_if(rhsIt, cm::cend(CXX_STANDARDS), cmStrCmp(lhs)) !=
+    cm::cend(CXX_STANDARDS);
 }
 
 bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
@@ -4314,9 +4315,8 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
     // Return true so the caller does not try to lookup the default standard.
     return true;
   }
-  if (std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
-                   cmStrCmp(defaultCxxStandard)) ==
-      cmArrayEnd(CXX_STANDARDS)) {
+  if (std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
+                   cmStrCmp(defaultCxxStandard)) == cm::cend(CXX_STANDARDS)) {
     std::ostringstream e;
     e << "The CMAKE_CXX_STANDARD_DEFAULT variable contains an "
          "invalid value: \""
@@ -4337,9 +4337,8 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
     existingCxxStandard = defaultCxxStandard;
   }
 
-  if (std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
-                   cmStrCmp(existingCxxStandard)) ==
-      cmArrayEnd(CXX_STANDARDS)) {
+  if (std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
+                   cmStrCmp(existingCxxStandard)) == cm::cend(CXX_STANDARDS)) {
     std::ostringstream e;
     e << "The CXX_STANDARD property on target \"" << target->GetName()
       << "\" contained an invalid value: \"" << existingCxxStandard << "\".";
@@ -4348,32 +4347,28 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
   }
 
   const char* const* existingCxxIt = existingCxxStandard
-    ? std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
+    ? std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
                    cmStrCmp(existingCxxStandard))
-    : cmArrayEnd(CXX_STANDARDS);
+    : cm::cend(CXX_STANDARDS);
 
   if (needCxx17 &&
-      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                   cmArrayEnd(CXX_STANDARDS),
-                                   cmStrCmp("17"))) {
+      existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                   cm::cend(CXX_STANDARDS), cmStrCmp("17"))) {
     return false;
   }
   if (needCxx14 &&
-      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                   cmArrayEnd(CXX_STANDARDS),
-                                   cmStrCmp("14"))) {
+      existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                   cm::cend(CXX_STANDARDS), cmStrCmp("14"))) {
     return false;
   }
   if (needCxx11 &&
-      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                   cmArrayEnd(CXX_STANDARDS),
-                                   cmStrCmp("11"))) {
+      existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                   cm::cend(CXX_STANDARDS), cmStrCmp("11"))) {
     return false;
   }
   if (needCxx98 &&
-      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                   cmArrayEnd(CXX_STANDARDS),
-                                   cmStrCmp("98"))) {
+      existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                   cm::cend(CXX_STANDARDS), cmStrCmp("98"))) {
     return false;
   }
   return true;
@@ -4423,9 +4418,9 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
 
   const char* existingCxxStandard = target->GetProperty("CXX_STANDARD");
   if (existingCxxStandard) {
-    if (std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
+    if (std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
                      cmStrCmp(existingCxxStandard)) ==
-        cmArrayEnd(CXX_STANDARDS)) {
+        cm::cend(CXX_STANDARDS)) {
       std::ostringstream e;
       e << "The CXX_STANDARD property on target \"" << target->GetName()
         << "\" contained an invalid value: \"" << existingCxxStandard << "\".";
@@ -4439,9 +4434,9 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
     }
   }
   const char* const* existingCxxIt = existingCxxStandard
-    ? std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
+    ? std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
                    cmStrCmp(existingCxxStandard))
-    : cmArrayEnd(CXX_STANDARDS);
+    : cm::cend(CXX_STANDARDS);
 
   bool setCxx98 = needCxx98 && !existingCxxStandard;
   bool setCxx11 = needCxx11 && !existingCxxStandard;
@@ -4449,23 +4444,22 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
   bool setCxx17 = needCxx17 && !existingCxxStandard;
 
   if (needCxx17 && existingCxxStandard &&
-      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                   cmArrayEnd(CXX_STANDARDS),
-                                   cmStrCmp("17"))) {
+      existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                   cm::cend(CXX_STANDARDS), cmStrCmp("17"))) {
     setCxx17 = true;
   } else if (needCxx14 && existingCxxStandard &&
-             existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                          cmArrayEnd(CXX_STANDARDS),
+             existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                          cm::cend(CXX_STANDARDS),
                                           cmStrCmp("14"))) {
     setCxx14 = true;
   } else if (needCxx11 && existingCxxStandard &&
-             existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                          cmArrayEnd(CXX_STANDARDS),
+             existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                          cm::cend(CXX_STANDARDS),
                                           cmStrCmp("11"))) {
     setCxx11 = true;
   } else if (needCxx98 && existingCxxStandard &&
-             existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                          cmArrayEnd(CXX_STANDARDS),
+             existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                          cm::cend(CXX_STANDARDS),
                                           cmStrCmp("98"))) {
     setCxx98 = true;
   }
@@ -4522,8 +4516,8 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
 
   const char* existingCStandard = target->GetProperty("C_STANDARD");
   if (existingCStandard) {
-    if (std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
-                     cmStrCmp(existingCStandard)) == cmArrayEnd(C_STANDARDS)) {
+    if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
+                     cmStrCmp(existingCStandard)) == cm::cend(C_STANDARDS)) {
       std::ostringstream e;
       e << "The C_STANDARD property on target \"" << target->GetName()
         << "\" contained an invalid value: \"" << existingCStandard << "\".";
@@ -4537,26 +4531,26 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
     }
   }
   const char* const* existingCIt = existingCStandard
-    ? std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
+    ? std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
                    cmStrCmp(existingCStandard))
-    : cmArrayEnd(C_STANDARDS);
+    : cm::cend(C_STANDARDS);
 
   bool setC90 = needC90 && !existingCStandard;
   bool setC99 = needC99 && !existingCStandard;
   bool setC11 = needC11 && !existingCStandard;
 
   if (needC11 && existingCStandard &&
-      existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                 cmArrayEnd(C_STANDARDS), cmStrCmp("11"))) {
+      existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
+                                 cm::cend(C_STANDARDS), cmStrCmp("11"))) {
     setC11 = true;
   } else if (needC99 && existingCStandard &&
-             existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                        cmArrayEnd(C_STANDARDS),
+             existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
+                                        cm::cend(C_STANDARDS),
                                         cmStrCmp("99"))) {
     setC99 = true;
   } else if (needC90 && existingCStandard &&
-             existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                        cmArrayEnd(C_STANDARDS),
+             existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
+                                        cm::cend(C_STANDARDS),
                                         cmStrCmp("90"))) {
     setC90 = true;
   }

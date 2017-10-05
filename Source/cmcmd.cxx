@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
@@ -1013,8 +1014,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           } else if (cmHasLiteralPrefix(arg, "--format=")) {
             format = arg.substr(9);
             bool isKnown =
-              std::find(cmArrayBegin(knownFormats), cmArrayEnd(knownFormats),
-                        format) != cmArrayEnd(knownFormats);
+              std::find(cm::cbegin(knownFormats), cm::cend(knownFormats),
+                        format) != cm::cend(knownFormats);
 
             if (!isKnown) {
               cmSystemTools::Error("Unknown -E tar --format= argument: ",

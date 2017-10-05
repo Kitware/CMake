@@ -1035,7 +1035,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         // No error. We just skip cyclic references.
         return std::string();
       case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
-        for (size_t i = 1; i < cmArraySize(targetPropertyTransitiveWhitelist);
+        for (size_t i = 1; i < cm::size(targetPropertyTransitiveWhitelist);
              ++i) {
           if (targetPropertyTransitiveWhitelist[i] == propertyName) {
             // No error. We're not going to find anything new here.
@@ -1443,7 +1443,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
     context->HadContextSensitiveCondition = true;
     context->HadHeadSensitiveCondition = true;
 
-    for (size_t i = 1; i < cmArraySize(targetPolicyWhitelist); ++i) {
+    for (size_t i = 1; i < cm::size(targetPolicyWhitelist); ++i) {
       const char* policy = targetPolicyWhitelist[i];
       if (parameters.front() == policy) {
         cmLocalGenerator* lg = context->HeadTarget->GetLocalGenerator();

@@ -9,6 +9,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include <algorithm>
+#include <iterator>
 #include <sstream>
 #include <stddef.h>
 
@@ -301,8 +302,7 @@ std::string cmQtAutoGen::Quoted(std::string const& text)
                                  "\r", "\\r",  "\t", "\\t",  "\v", "\\v" };
 
   std::string res = text;
-  for (const char* const* it = cmArrayBegin(rep); it != cmArrayEnd(rep);
-       it += 2) {
+  for (const char* const* it = cm::cbegin(rep); it != cm::cend(rep); it += 2) {
     cmSystemTools::ReplaceString(res, *it, *(it + 1));
   }
   res = '"' + res;
