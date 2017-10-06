@@ -161,24 +161,15 @@ Autogen
 
 * When using :prop_tgt:`AUTOMOC`, CMake searches for the strings ``Q_OBJECT``,
   ``Q_GADGET`` or ``Q_NAMESPACE`` in a source file to determine if it needs
-  to be ``moc`` processed. The new variable
-  :variable:`CMAKE_AUTOMOC_MACRO_NAMES` allows to register additional
-  strings (macro names) so search for.
+  to be ``moc`` processed.  The new :variable:`CMAKE_AUTOMOC_MACRO_NAMES`
+  variable and :prop_tgt:`AUTOMOC_MACRO_NAMES` target property may be set
+  to register additional strings (macro names) to search for.
 
-* When using :prop_tgt:`AUTOMOC`, CMake searches for the strings ``Q_OBJECT``,
-  ``Q_GADGET`` or ``Q_NAMESPACE`` in a source file to determine if it needs
-  to be ``moc`` processed. The new target property
-  :prop_tgt:`AUTOMOC_MACRO_NAMES` allows to register additional strings
-  (macro names) so search for.
-
-* When using :prop_tgt:`AUTOMOC`, the new variable
-  :variable:`CMAKE_AUTOMOC_COMPILER_PREDEFINES` allows to default
-  enable or disable the generation of the compiler pre definitions file
+* When using :prop_tgt:`AUTOMOC`, the new
+  :variable:`CMAKE_AUTOMOC_COMPILER_PREDEFINES` variable and
+  :prop_tgt:`AUTOMOC_COMPILER_PREDEFINES` target property specify whether
+  to enable or disable the generation of the compiler pre definitions file
   ``moc_predefs.h``.
-
-* When using :prop_tgt:`AUTOMOC`, the new boolean target property
-  :prop_tgt:`AUTOMOC_COMPILER_PREDEFINES` allows to enable or disable the
-  generation of the compiler pre definitions file ``moc_predefs.h``.
 
 CTest
 -----
@@ -218,8 +209,8 @@ CPack
 * The :module:`CPackIFW` module gained new
   :variable:`CPACK_IFW_REPOSITORIES_DIRECTORIES` variable to specify
   additional repositories dirs that will be used to resolve and
-  repack dependent components. This feature available only
-  since QtIFW 3.1.
+  repack dependent components. This feature is only available when
+  using QtIFW 3.1 or later.
 
 * Modules :module:`CPackRPM` and :module:`CPackDeb` learned to set package epoch
   version.
