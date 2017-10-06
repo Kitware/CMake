@@ -1556,11 +1556,13 @@ struct NumberFormatter
 std::ostream& operator<<(std::ostream& stream,
                          NumberFormatter const& formatter)
 {
+  auto const& flags = stream.flags();
   if (formatter.Format == FORMAT_DECIMAL) {
-    stream << formatter.Value;
+    stream << std::dec << formatter.Value;
   } else {
     stream << "0x" << std::hex << formatter.Value;
   }
+  stream.flags(flags);
   return stream;
 }
 static bool RunCommand(const char* comment, std::vector<std::string>& command,
