@@ -4654,7 +4654,7 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
         "INTERFACE_LINK_LIBRARIES:\n"
         "  " << newExplicitLibraries << "\n" <<
         linkIfaceProp << ":\n"
-        "  " << (explicitLibraries ? explicitLibraries : "(empty)") << "\n";
+        "  " << explicitLibraries << "\n";
       /* clang-format on */
       this->LocalGenerator->IssueMessage(cmake::AUTHOR_WARNING, w.str());
       this->PolicyWarnedCMP0022 = true;
