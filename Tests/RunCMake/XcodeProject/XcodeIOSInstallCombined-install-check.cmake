@@ -13,11 +13,7 @@ function(verify_architectures file)
   string(REPLACE "architecture " "" actual "${architectures}")
   list(SORT actual)
 
-  if(XCODE_VERSION VERSION_GREATER_EQUAL 9)
-    set(expected arm64 x86_64)
-  else()
-    set(expected arm64 armv7 i386 x86_64)
-  endif()
+  set(expected arm64 armv7 i386 x86_64)
 
   if(NOT actual STREQUAL expected)
     message(SEND_ERROR

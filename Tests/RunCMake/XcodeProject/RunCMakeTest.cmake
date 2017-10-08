@@ -129,9 +129,7 @@ if(NOT XCODE_VERSION VERSION_LESS 6)
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
   unset(RunCMake_TEST_OPTIONS)
-endif()
 
-if(XCODE_VERSION VERSION_GREATER_EQUAL 6 AND XCODE_VERSION VERSION_LESS 9)
   # XcodeIOSInstallCombinedPrune
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeIOSInstallCombinedPrune-build)
   set(RunCMake_TEST_NO_CLEAN 1)
