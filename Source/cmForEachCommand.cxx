@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
@@ -121,7 +122,7 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // create a function blocker
-  cmForEachFunctionBlocker* f = new cmForEachFunctionBlocker(this->Makefile);
+  auto f = cm::make_unique<cmForEachFunctionBlocker>(this->Makefile);
   if (args.size() > 1) {
     if (args[1] == "RANGE") {
       int start = 0;
@@ -175,7 +176,7 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
   } else {
     f->Args = args;
   }
-  this->Makefile->AddFunctionBlocker(f);
+  this->Makefile->AddFunctionBlocker(f.release());
 
   return true;
 }
