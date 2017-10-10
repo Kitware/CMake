@@ -99,9 +99,20 @@ function(run_cmake test)
   if(NOT "${actual_result}" MATCHES "${expect_result}")
     string(APPEND msg "Result is [${actual_result}], not [${expect_result}].\n")
   endif()
+  string(CONCAT ignore_line_regex
+    "(^|\n)((==[0-9]+=="
+    "|BullseyeCoverage"
+    "|[a-z]+\\([0-9]+\\) malloc:"
+    "|Error kstat returned"
+    "|Hit xcodebuild bug"
+    "|[^\n]*is a member of multiple groups"
+    "|[^\n]*from Time Machine by path"
+    "|[^\n]*Bullseye Testing Technology"
+    ")[^\n]*\n)+"
+    )
   foreach(o out err)
     string(REGEX REPLACE "\r\n" "\n" actual_std${o} "${actual_std${o}}")
-    string(REGEX REPLACE "(^|\n)((==[0-9]+==|BullseyeCoverage|[a-z]+\\([0-9]+\\) malloc:|Error kstat returned|Hit xcodebuild bug|[^\n]*is a member of multiple groups|[^\n]*from Time Machine by path|[^\n]*Bullseye Testing Technology)[^\n]*\n)+" "\\1" actual_std${o} "${actual_std${o}}")
+    string(REGEX REPLACE "${ignore_line_regex}" "\\1" actual_std${o} "${actual_std${o}}")
     string(REGEX REPLACE "\n+$" "" actual_std${o} "${actual_std${o}}")
     set(expect_${o} "")
     if(DEFINED expect_std${o})
