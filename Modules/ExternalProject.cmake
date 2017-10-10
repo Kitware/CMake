@@ -854,6 +854,9 @@ The custom step could then be triggered from the main build like so::
 
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
+
 # Pre-compute a regex to match documented keywords for each command.
 math(EXPR _ep_documentation_line_count "${CMAKE_CURRENT_LIST_LINE} - 4")
 file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines
@@ -3035,3 +3038,5 @@ function(ExternalProject_Add name)
   #
   _ep_add_test_command(${name})
 endfunction()
+
+cmake_policy(POP)
