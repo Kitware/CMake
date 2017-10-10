@@ -103,6 +103,7 @@ function(run_cmake test)
     "(^|\n)((==[0-9]+=="
     "|BullseyeCoverage"
     "|[a-z]+\\([0-9]+\\) malloc:"
+    "|clang[^:]*: warning: the object size sanitizer has no effect at -O0, but is explicitly enabled:"
     "|Error kstat returned"
     "|Hit xcodebuild bug"
     "|[^\n]*is a member of multiple groups"
