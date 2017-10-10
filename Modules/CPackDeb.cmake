@@ -764,9 +764,9 @@ function(cpack_deb_prepare_package_vars)
   if(DEFINED CPACK_DEBIAN_PACKAGE_RELEASE OR DEFINED CPACK_DEBIAN_PACKAGE_EPOCH)
     # only test the version format if CPACK_DEBIAN_PACKAGE_RELEASE or
     # CPACK_DEBIAN_PACKAGE_EPOCH is set
-    if(NOT CPACK_DEBIAN_PACKAGE_VERSION MATCHES "^[0-9][A-Za-z0-9.+-~]*$")
+    if(NOT CPACK_DEBIAN_PACKAGE_VERSION MATCHES "^[0-9][A-Za-z0-9.+~-]*$")
       message(FATAL_ERROR
-        "CPackDeb: Debian package version must confirm to \"^[0-9][A-Za-z0-9.+-~]*$\" regex!")
+        "CPackDeb: Debian package version must confirm to \"^[0-9][A-Za-z0-9.+~-]*$\" regex!")
     endif()
   else()
     # before CMake 3.10 version format was not tested so only warn to preserve
