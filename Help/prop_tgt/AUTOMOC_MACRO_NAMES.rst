@@ -23,7 +23,8 @@ See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
 
 Example
--------
+^^^^^^^
+
 In this case the the ``Q_OBJECT`` macro is hidden inside an other macro
 called ``CUSTOM_MACRO``. To let CMake know that source files, that contain
 ``CUSTOM_MACRO``, need to be ``moc`` processed, we call::
