@@ -20,6 +20,7 @@
 #include KWSYS_HEADER(SystemTools.hxx)
 #include KWSYS_HEADER(Directory.hxx)
 #include KWSYS_HEADER(FStream.hxx)
+#include KWSYS_HEADER(Encoding.h)
 #include KWSYS_HEADER(Encoding.hxx)
 
 #include <fstream>
@@ -227,13 +228,17 @@ inline const char* Getcwd(char* buf, unsigned int len)
 {
   std::vector<wchar_t> w_buf(len);
   if (_wgetcwd(&w_buf[0], len)) {
-    // make sure the drive letter is capital
-    if (wcslen(&w_buf[0]) > 1 && w_buf[1] == L':') {
-      w_buf[0] = towupper(w_buf[0]);
+    size_t nlen = kwsysEncoding_wcstombs(buf, &w_buf[0], len);
+    if (nlen == static_cast<size_t>(-1)) {
+      return 0;
     }
-    std::string tmp = KWSYS_NAMESPACE::Encoding::ToNarrow(&w_buf[0]);
-    strcpy(buf, tmp.c_str());
-    return buf;
+    if (nlen < len) {
+      // make sure the drive letter is capital
+      if (nlen > 1 && buf[1] == ':') {
+        buf[0] = toupper(buf[0]);
+      }
+      return buf;
+    }
   }
   return 0;
 }

@@ -649,10 +649,7 @@ void CommandLineArguments::PopulateVariable(double* variable,
 void CommandLineArguments::PopulateVariable(char** variable,
                                             const std::string& value)
 {
-  if (*variable) {
-    delete[] * variable;
-    *variable = 0;
-  }
+  delete[] * variable;
   *variable = new char[value.size() + 1];
   strcpy(*variable, value.c_str());
 }
