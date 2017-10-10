@@ -105,6 +105,7 @@ if(NOT CMAKE_CXX_COMPILER_ID_RUN)
 
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(CXX CXXFLAGS CMakeCXXCompilerId.cpp)
+  CMAKE_DIAGNOSE_UNSUPPORTED_CLANG(CXX CXX)
 
   # Set old compiler and platform id variables.
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
