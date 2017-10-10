@@ -110,6 +110,14 @@
 #  :variable:`CPACK_DEBIAN_PACKAGE_RELEASE` is not set then hyphens are not
 #  allowed.
 #
+#  .. note::
+#
+#    For backward compatibility with CMake 3.9 and lower a failed test of this
+#    variable's content is not a hard error when both
+#    :variable:`CPACK_DEBIAN_PACKAGE_RELEASE` and
+#    :variable:`CPACK_DEBIAN_PACKAGE_EPOCH` variables are not set. An author
+#    warning is reported instead.
+#
 # .. variable:: CPACK_DEBIAN_PACKAGE_RELEASE
 #
 #  The Debian package release - Debian revision number.
@@ -753,9 +761,22 @@ function(cpack_deb_prepare_package_vars)
     set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION})
   endif()
 
-  if(NOT CPACK_DEBIAN_PACKAGE_VERSION MATCHES "^[0-9][A-Za-z0-9.+-~]*$")
-    message(FATAL_ERROR
-      "CPackDeb: Debian package version must confirm to \"^[0-9][A-Za-z0-9.+-~]*$\" regex!")
+  if(DEFINED CPACK_DEBIAN_PACKAGE_RELEASE OR DEFINED CPACK_DEBIAN_PACKAGE_EPOCH)
+    # only test the version format if CPACK_DEBIAN_PACKAGE_RELEASE or
+    # CPACK_DEBIAN_PACKAGE_EPOCH is set
+    if(NOT CPACK_DEBIAN_PACKAGE_VERSION MATCHES "^[0-9][A-Za-z0-9.+-~]*$")
+      message(FATAL_ERROR
+        "CPackDeb: Debian package version must confirm to \"^[0-9][A-Za-z0-9.+-~]*$\" regex!")
+    endif()
+  else()
+    # before CMake 3.10 version format was not tested so only warn to preserve
+    # backward compatibility
+    if(NOT CPACK_DEBIAN_PACKAGE_VERSION MATCHES "^([0-9]+:)?[0-9][A-Za-z0-9.+~-]*$")
+      message(AUTHOR_WARNING
+        "CPackDeb: Debian package versioning ([<epoch>:]<version>[-<release>])"
+        " should confirm to \"^([0-9]+:)?[0-9][A-Za-z0-9.+~-]*$\" regex in"
+        " order to satisfy Debian packaging rules.")
+    endif()
   endif()
 
   if(CPACK_DEBIAN_PACKAGE_RELEASE)
@@ -765,9 +786,15 @@ function(cpack_deb_prepare_package_vars)
     endif()
     string(APPEND CPACK_DEBIAN_PACKAGE_VERSION
       "-${CPACK_DEBIAN_PACKAGE_RELEASE}")
-  elseif(CPACK_DEBIAN_PACKAGE_VERSION MATCHES ".*-.*")
-    message(FATAL_ERROR
-      "CPackDeb: Debian package version must not contain hyphens when CPACK_DEBIAN_PACKAGE_RELEASE is not provided!")
+  elseif(DEFINED CPACK_DEBIAN_PACKAGE_EPOCH)
+    # only test the version format if CPACK_DEBIAN_PACKAGE_RELEASE or
+    # CPACK_DEBIAN_PACKAGE_EPOCH is set - versions CPack/Deb generator before
+    # CMake 3.10 did not check for version format so we have to preserve
+    # backward compatibility
+    if(CPACK_DEBIAN_PACKAGE_VERSION MATCHES ".*-.*")
+      message(FATAL_ERROR
+        "CPackDeb: Debian package version must not contain hyphens when CPACK_DEBIAN_PACKAGE_RELEASE is not provided!")
+    endif()
   endif()
 
   if(CPACK_DEBIAN_PACKAGE_EPOCH)
