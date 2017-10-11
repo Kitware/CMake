@@ -122,6 +122,7 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
   if(WIN32)
     find_library(PYTHON_DEBUG_LIBRARY
       NAMES python${_CURRENT_VERSION_NO_DOTS}_d python
+      NAMES_PER_DIR
       HINTS ${_Python_LIBRARY_PATH_HINT}
       PATHS
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
@@ -145,6 +146,7 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
       python${_CURRENT_VERSION}m
       python${_CURRENT_VERSION}u
       python${_CURRENT_VERSION}
+    NAMES_PER_DIR
     HINTS
       ${_Python_LIBRARY_PATH_HINT}
     PATHS
@@ -157,6 +159,7 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
   # Look for the static library in the Python config directory
   find_library(PYTHON_LIBRARY
     NAMES python${_CURRENT_VERSION_NO_DOTS} python${_CURRENT_VERSION}
+    NAMES_PER_DIR
     # Avoid finding the .dll in the PATH.  We want the .lib.
     NO_SYSTEM_ENVIRONMENT_PATH
     # This is where the static library is usually located
