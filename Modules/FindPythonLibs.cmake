@@ -153,15 +153,11 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
       ${PYTHON_FRAMEWORK_LIBRARIES}
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
-    # Avoid finding the .dll in the PATH.  We want the .lib.
-    NO_SYSTEM_ENVIRONMENT_PATH
   )
   # Look for the static library in the Python config directory
   find_library(PYTHON_LIBRARY
     NAMES python${_CURRENT_VERSION_NO_DOTS} python${_CURRENT_VERSION}
     NAMES_PER_DIR
-    # Avoid finding the .dll in the PATH.  We want the .lib.
-    NO_SYSTEM_ENVIRONMENT_PATH
     # This is where the static library is usually located
     PATH_SUFFIXES python${_CURRENT_VERSION}/config
   )
