@@ -42,9 +42,6 @@
 /* to disable RTSP */
 #cmakedefine CURL_DISABLE_RTSP 1
 
-/* to disable RTMP */
-#cmakedefine CURL_DISABLE_RTMP 1
-
 /* to disable SMB */
 #cmakedefine CURL_DISABLE_SMB 1
 
@@ -72,9 +69,6 @@
 
 /* when not building a shared library */
 #cmakedefine CURL_STATICLIB 1
-
-/* Set to explicitly specify we don't want to use thread-safe functions */
-#cmakedefine DISABLED_THREADSAFE 1
 
 /* your Entropy Gathering Daemon socket pathname */
 #cmakedefine EGD_SOCKET ${EGD_SOCKET}
@@ -885,6 +879,9 @@
 /* The size of `off_t', as computed by sizeof. */
 @SIZEOF_OFF_T_CODE@
 
+/* The size of `curl_off_t', as computed by sizeof. */
+@SIZEOF_CURL_OFF_T_CODE@
+
 /* The size of `size_t', as computed by sizeof. */
 @SIZEOF_SIZE_T_CODE@
 
@@ -959,9 +956,6 @@
 
 /* Version number of package */
 #cmakedefine VERSION ${VERSION}
-
-/* Define to avoid automatic inclusion of winsock.h */
-#cmakedefine WIN32_LEAN_AND_MEAN 1
 
 /* Define to 1 if OS is AIX. */
 #ifndef _ALL_SOURCE
