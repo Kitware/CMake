@@ -516,6 +516,8 @@ function(add_jar _TARGET_NAME)
     endforeach()
 
     set(CMAKE_JAVA_CLASS_OUTPUT_PATH "${_add_jar_OUTPUT_DIR}${CMAKE_FILES_DIRECTORY}/${_TARGET_NAME}.dir")
+    # ensure output directory exists
+    file (MAKE_DIRECTORY "${CMAKE_JAVA_CLASS_OUTPUT_PATH}")
 
     set(_JAVA_TARGET_OUTPUT_NAME "${_TARGET_NAME}.jar")
     if (_add_jar_OUTPUT_NAME AND _add_jar_VERSION)
