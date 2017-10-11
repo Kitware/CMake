@@ -28,6 +28,7 @@
 #include "http2.h"
 #include "http.h"
 #include "sendf.h"
+#include "select.h"
 #include "curl_base64.h"
 #include "strcase.h"
 #include "multiif.h"
@@ -151,6 +152,49 @@ static CURLcode http2_disconnect(struct connectdata *conn,
   return CURLE_OK;
 }
 
+/*
+ * The server may send us data at any point (e.g. PING frames). Therefore,
+ * we cannot assume that an HTTP/2 socket is dead just because it is readable.
+ *
+ * Instead, if it is readable, run Curl_connalive() to peek at the socket
+ * and distinguish between closed and data.
+ */
+static bool http2_connisdead(struct connectdata *check)
+{
+  int sval;
+  bool ret_val = TRUE;
+
+  sval = SOCKET_READABLE(check->sock[FIRSTSOCKET], 0);
+  if(sval == 0) {
+    /* timeout */
+    ret_val = FALSE;
+  }
+  else if(sval & CURL_CSELECT_ERR) {
+    /* socket is in an error state */
+    ret_val = TRUE;
+  }
+  else if(sval & CURL_CSELECT_IN) {
+    /* readable with no error. could still be closed */
+    ret_val = !Curl_connalive(check);
+  }
+
+  return ret_val;
+}
+
+
+static unsigned int http2_conncheck(struct connectdata *check,
+                                    unsigned int checks_to_perform)
+{
+  unsigned int ret_val = CONNRESULT_NONE;
+
+  if(checks_to_perform & CONNCHECK_ISDEAD) {
+    if(http2_connisdead(check))
+      ret_val |= CONNRESULT_DEAD;
+  }
+
+  return ret_val;
+}
+
 /* called from Curl_http_setup_conn */
 void Curl_http2_setup_req(struct Curl_easy *data)
 {
@@ -196,6 +240,7 @@ static const struct Curl_handler Curl_handler_http2 = {
   http2_perform_getsock,                /* perform_getsock */
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  http2_conncheck,                      /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_STREAM                        /* flags */
@@ -216,6 +261,7 @@ static const struct Curl_handler Curl_handler_http2_ssl = {
   http2_perform_getsock,                /* perform_getsock */
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  http2_conncheck,                      /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
   PROTOPT_SSL | PROTOPT_STREAM          /* flags */
@@ -338,12 +384,12 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
     struct HTTP *stream = h->data->req.protop;
     size_t len = strlen(header);
     size_t i;
-    for(i=0; i<stream->push_headers_used; i++) {
+    for(i = 0; i<stream->push_headers_used; i++) {
       if(!strncmp(header, stream->push_headers[i], len)) {
         /* sub-match, make sure that it is followed by a colon */
         if(stream->push_headers[i][len] != ':')
           continue;
-        return &stream->push_headers[i][len+1];
+        return &stream->push_headers[i][len + 1];
       }
     }
   }
@@ -418,7 +464,7 @@ static int push_promise(struct Curl_easy *data,
                               data->multi->push_userp);
 
     /* free the headers again */
-    for(i=0; i<stream->push_headers_used; i++)
+    for(i = 0; i<stream->push_headers_used; i++)
       free(stream->push_headers[i]);
     free(stream->push_headers);
     stream->push_headers = NULL;
@@ -1536,7 +1582,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       failf(data, "nghttp2_session_mem_recv() returned %d:%s\n",
             rv, nghttp2_strerror((int)rv));
       *err = CURLE_RECV_ERROR;
-      return 0;
+      return -1;
     }
     DEBUGF(infof(data, "nghttp2_session_mem_recv() returns %zd\n", rv));
     if(nread == rv) {
@@ -1554,7 +1600,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     rv = h2_session_send(data, httpc->h2);
     if(rv != 0) {
       *err = CURLE_SEND_ERROR;
-      return 0;
+      return -1;
     }
 
     if(should_close_session(httpc)) {
@@ -1909,6 +1955,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   switch(conn->data->set.httpreq) {
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
+  case HTTPREQ_POST_MIME:
   case HTTPREQ_PUT:
     if(conn->data->state.infilesize != -1)
       stream->upload_left = conn->data->state.infilesize;
@@ -2134,12 +2181,15 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   return CURLE_OK;
 }
 
-void Curl_http2_add_child(struct Curl_easy *parent, struct Curl_easy *child,
-                          bool exclusive)
+CURLcode Curl_http2_add_child(struct Curl_easy *parent,
+                              struct Curl_easy *child,
+                              bool exclusive)
 {
   if(parent) {
     struct Curl_http2_dep **tail;
     struct Curl_http2_dep *dep = calloc(1, sizeof(struct Curl_http2_dep));
+    if(!dep)
+      return CURLE_OUT_OF_MEMORY;
     dep->data = child;
 
     if(parent->set.stream_dependents && exclusive) {
@@ -2170,6 +2220,7 @@ void Curl_http2_add_child(struct Curl_easy *parent, struct Curl_easy *child,
 
   child->set.stream_depends_on = parent;
   child->set.stream_depends_e = exclusive;
+  return CURLE_OK;
 }
 
 void Curl_http2_remove_child(struct Curl_easy *parent, struct Curl_easy *child)
