@@ -57,6 +57,7 @@ if(XMLRPC_C_FOUND)
       XMLRPC_C_CONFIG_CFLAGS "${XMLRPC_C_CONFIG_CFLAGS}")
 
     # Look for -I options.
+    # FIXME: Use these as hints to a find_path call to find the headers.
     set(XMLRPC_INCLUDE_DIRS)
     foreach(flag ${XMLRPC_C_CONFIG_CFLAGS})
       if("${flag}" MATCHES "^-I(.+)")
@@ -123,5 +124,5 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(
     XMLRPC
-    REQUIRED_VARS XMLRPC_C_FOUND XMLRPC_LIBRARIES XMLRPC_INCLUDE_DIRS
+    REQUIRED_VARS XMLRPC_C_FOUND XMLRPC_LIBRARIES
     FAIL_MESSAGE "XMLRPC was not found. Make sure the entries XMLRPC_* are set.")
