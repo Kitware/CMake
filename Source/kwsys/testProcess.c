@@ -687,9 +687,7 @@ int main(int argc, const char* argv[])
     fflush(stdout);
     fflush(stderr);
 #if defined(_WIN32)
-    if (argv0) {
-      free(argv0);
-    }
+    free(argv0);
 #endif
     return r;
   } else if (argc > 2 && strcmp(argv[1], "0") == 0) {

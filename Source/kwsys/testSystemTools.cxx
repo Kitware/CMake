@@ -254,22 +254,22 @@ static bool CheckFileOperations()
   }
   // should work, was created as new file before
   if (!kwsys::SystemTools::FileExists(testNewFile)) {
-    std::cerr << "Problem with FileExists for: " << testNewDir << std::endl;
+    std::cerr << "Problem with FileExists for: " << testNewFile << std::endl;
     res = false;
   }
   if (!kwsys::SystemTools::FileExists(testNewFile.c_str())) {
-    std::cerr << "Problem with FileExists as C string for: " << testNewDir
+    std::cerr << "Problem with FileExists as C string for: " << testNewFile
               << std::endl;
     res = false;
   }
   if (!kwsys::SystemTools::FileExists(testNewFile, true)) {
-    std::cerr << "Problem with FileExists as file for: " << testNewDir
+    std::cerr << "Problem with FileExists as file for: " << testNewFile
               << std::endl;
     res = false;
   }
   if (!kwsys::SystemTools::FileExists(testNewFile.c_str(), true)) {
     std::cerr << "Problem with FileExists as C string and file for: "
-              << testNewDir << std::endl;
+              << testNewFile << std::endl;
     res = false;
   }
 
@@ -285,7 +285,7 @@ static bool CheckFileOperations()
   }
   // should work, was created as new file before
   if (!kwsys::SystemTools::PathExists(testNewFile)) {
-    std::cerr << "Problem with PathExists for: " << testNewDir << std::endl;
+    std::cerr << "Problem with PathExists for: " << testNewFile << std::endl;
     res = false;
   }
 

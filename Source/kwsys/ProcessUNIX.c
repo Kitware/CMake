@@ -359,9 +359,7 @@ void kwsysProcess_Delete(kwsysProcess* cp)
   kwsysProcess_SetPipeFile(cp, kwsysProcess_Pipe_STDIN, 0);
   kwsysProcess_SetPipeFile(cp, kwsysProcess_Pipe_STDOUT, 0);
   kwsysProcess_SetPipeFile(cp, kwsysProcess_Pipe_STDERR, 0);
-  if (cp->CommandExitCodes) {
-    free(cp->CommandExitCodes);
-  }
+  free(cp->CommandExitCodes);
   free(cp->ProcessResults);
   free(cp);
 }
@@ -498,11 +496,10 @@ int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
     cp->WorkingDirectory = 0;
   }
   if (dir) {
-    cp->WorkingDirectory = (char*)malloc(strlen(dir) + 1);
+    cp->WorkingDirectory = strdup(dir);
     if (!cp->WorkingDirectory) {
       return 0;
     }
-    strcpy(cp->WorkingDirectory, dir);
   }
   return 1;
 }
@@ -531,11 +528,10 @@ int kwsysProcess_SetPipeFile(kwsysProcess* cp, int prPipe, const char* file)
     *pfile = 0;
   }
   if (file) {
-    *pfile = (char*)malloc(strlen(file) + 1);
+    *pfile = strdup(file);
     if (!*pfile) {
       return 0;
     }
-    strcpy(*pfile, file);
   }
 
   /* If we are redirecting the pipe, do not share it or use a native
@@ -1514,9 +1510,7 @@ static int kwsysProcessInitialize(kwsysProcess* cp)
   oldForkPIDs = cp->ForkPIDs;
   cp->ForkPIDs = (volatile pid_t*)malloc(sizeof(volatile pid_t) *
                                          (size_t)(cp->NumberOfCommands));
-  if (oldForkPIDs) {
-    kwsysProcessVolatileFree(oldForkPIDs);
-  }
+  kwsysProcessVolatileFree(oldForkPIDs);
   if (!cp->ForkPIDs) {
     return 0;
   }
@@ -1524,9 +1518,7 @@ static int kwsysProcessInitialize(kwsysProcess* cp)
     cp->ForkPIDs[i] = 0; /* can't use memset due to volatile */
   }
 
-  if (cp->CommandExitCodes) {
-    free(cp->CommandExitCodes);
-  }
+  free(cp->CommandExitCodes);
   cp->CommandExitCodes =
     (int*)malloc(sizeof(int) * (size_t)(cp->NumberOfCommands));
   if (!cp->CommandExitCodes) {
@@ -1938,6 +1930,7 @@ static int kwsysProcessSetupOutputPipeFile(int* p, const char* name)
 
   /* Set close-on-exec flag on the pipe's end.  */
   if (fcntl(fout, F_SETFD, FD_CLOEXEC) < 0) {
+    close(fout);
     return 0;
   }
 
@@ -2290,6 +2283,7 @@ static void kwsysProcessChildErrorExit(int errorPipe)
   char buffer[KWSYSPE_PIPE_BUFFER_SIZE];
   kwsysProcess_ssize_t result;
   strncpy(buffer, strerror(errno), KWSYSPE_PIPE_BUFFER_SIZE);
+  buffer[KWSYSPE_PIPE_BUFFER_SIZE - 1] = '\0';
 
   /* Report the error to the parent through the special pipe.  */
   result = write(errorPipe, buffer, strlen(buffer));
