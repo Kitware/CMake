@@ -55,6 +55,13 @@ public:
    */
   void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
                       bool optional) override;
+
+  /**
+   * Open a generated IDE project given the following information.
+   */
+  bool Open(const std::string& bindir, const std::string& projectName,
+            bool dryRun) override;
+
   /**
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.

@@ -162,6 +162,12 @@ public:
             std::vector<std::string> const& nativeOptions =
               std::vector<std::string>());
 
+  /**
+   * Open a generated IDE project given the following information.
+   */
+  virtual bool Open(const std::string& bindir, const std::string& projectName,
+                    bool dryRun);
+
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand, const std::string& makeProgram,
     const std::string& projectName, const std::string& projectDir,

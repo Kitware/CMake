@@ -35,6 +35,11 @@
 
 struct cmLinkImplementation;
 
+#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(__APPLE__)
+#define HAVE_APPLICATION_SERVICES
+#include <ApplicationServices/ApplicationServices.h>
+#endif
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmXMLParser.h"
 
@@ -285,6 +290,35 @@ void cmGlobalXCodeGenerator::EnableLanguage(
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
   this->ComputeArchitectures(mf);
+}
+
+bool cmGlobalXCodeGenerator::Open(const std::string& bindir,
+                                  const std::string& projectName, bool dryRun)
+{
+  bool ret = false;
+
+#ifdef HAVE_APPLICATION_SERVICES
+  std::string url = bindir + "/" + projectName + ".xcodeproj";
+
+  if (dryRun) {
+    return cmSystemTools::FileExists(url, false);
+  }
+
+  CFStringRef cfStr = CFStringCreateWithCString(
+    kCFAllocatorDefault, url.c_str(), kCFStringEncodingUTF8);
+  if (cfStr) {
+    CFURLRef cfUrl = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, cfStr,
+                                                   kCFURLPOSIXPathStyle, true);
+    if (cfUrl) {
+      OSStatus err = LSOpenCFURLRef(cfUrl, nullptr);
+      ret = err == noErr;
+      CFRelease(cfUrl);
+    }
+    CFRelease(cfStr);
+  }
+#endif
+
+  return ret;
 }
 
 void cmGlobalXCodeGenerator::GenerateBuildCommand(

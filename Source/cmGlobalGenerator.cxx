@@ -1824,6 +1824,16 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
   return retVal;
 }
 
+bool cmGlobalGenerator::Open(const std::string& bindir,
+                             const std::string& projectName, bool dryRun)
+{
+  if (this->ExtraGenerator) {
+    return this->ExtraGenerator->Open(bindir, projectName, dryRun);
+  }
+
+  return false;
+}
+
 std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
   const std::string& target, const std::string& config,
   const std::string& native, bool ignoreErrors)

@@ -96,7 +96,7 @@ _cmake()
             _filedir
             return
             ;;
-        --build)
+        --build|--open)
             _filedir -d
             return
             ;;
