@@ -23,3 +23,12 @@ expressions.
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
+
+EXAMPLE
+^^^^^^^
+
+.. code-block:: cmake
+
+  # ...
+  set_property(TARGET tgt PROPERTY AUTOUIC_OPTIONS "--no-protection")
+  # ...

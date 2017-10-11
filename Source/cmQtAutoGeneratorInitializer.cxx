@@ -452,8 +452,6 @@ static void SetupAutoTargetUic(cmQtAutoGenDigest const& digest,
   cmGeneratorTarget const* target = digest.Target;
   cmMakefile* makefile = target->Target->GetMakefile();
 
-  AddDefinitionEscaped(makefile, "_uic_skip", setup.UicSkip);
-
   // Uic search paths
   {
     std::vector<std::string> uicSearchPaths;
@@ -489,21 +487,25 @@ static void SetupAutoTargetUic(cmQtAutoGenDigest const& digest,
       }
     }
   }
-  // Uic files options
+  // .ui files skip and options
   {
     std::vector<std::string> uiFileFiles;
     std::vector<std::vector<std::string>> uiFileOptions;
     {
       std::string const uiExt = "ui";
-      const std::vector<cmSourceFile*>& srcFiles = makefile->GetSourceFiles();
-      for (cmSourceFile* sf : srcFiles) {
+      for (cmSourceFile* sf : makefile->GetSourceFiles()) {
         // sf->GetExtension() is only valid after sf->GetFullPath() ...
         std::string const& fPath = sf->GetFullPath();
         if (sf->GetExtension() == uiExt) {
+          std::string const absFile = cmSystemTools::GetRealPath(fPath);
+          // Check if the file should be skipped
+          if (sf->GetPropertyAsBool("SKIP_AUTOUIC") ||
+              sf->GetPropertyAsBool("SKIP_AUTOGEN")) {
+            setup.UicSkip.insert(absFile);
+          }
           // Check if the files has uic options
           std::string const uicOpts = GetSafeProperty(sf, "AUTOUIC_OPTIONS");
           if (!uicOpts.empty()) {
-            std::string const absFile = cmSystemTools::GetRealPath(fPath);
             // Check if file isn't skipped
             if (setup.UicSkip.count(absFile) == 0) {
               uiFileFiles.push_back(absFile);
@@ -518,6 +520,8 @@ static void SetupAutoTargetUic(cmQtAutoGenDigest const& digest,
     AddDefinitionEscaped(makefile, "_qt_uic_options_files", uiFileFiles);
     AddDefinitionEscaped(makefile, "_qt_uic_options_options", uiFileOptions);
   }
+
+  AddDefinitionEscaped(makefile, "_uic_skip", setup.UicSkip);
 
   // Uic executable
   {
