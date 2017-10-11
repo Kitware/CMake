@@ -338,13 +338,6 @@ Options
 
  This is useful if the build will not finish in one day.
 
-``--ctest-config``
- The configuration file used to initialize CTest state when submitting dashboards.
-
- This option tells CTest to use different initialization file instead
- of CTestConfiguration.tcl.  This way multiple initialization files
- can be used for example to submit to multiple dashboards.
-
 ``--overwrite``
  Overwrite CTest configuration option.
 
