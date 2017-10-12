@@ -411,6 +411,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   std::string temp_image = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   temp_image += "/temp.dmg";
 
+  std::string create_error;
   std::ostringstream temp_image_command;
   temp_image_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
   temp_image_command << " create";
@@ -421,9 +422,11 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   temp_image_command << " -format " << temp_image_format;
   temp_image_command << " \"" << temp_image << "\"";
 
-  if (!this->RunCommand(temp_image_command)) {
+  if (!this->RunCommand(temp_image_command, &create_error)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Error generating temporary disk image." << std::endl);
+                  "Error generating temporary disk image." << std::endl
+                                                           << create_error
+                                                           << std::endl);
 
     return 0;
   }
@@ -464,15 +467,17 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
 
     // Optionally set the custom icon flag for the image ...
     if (!had_error && !cpack_package_icon.empty()) {
+      std::string error;
       std::ostringstream setfile_command;
       setfile_command << this->GetOption("CPACK_COMMAND_SETFILE");
       setfile_command << " -a C";
       setfile_command << " \"" << temp_mount << "\"";
 
-      if (!this->RunCommand(setfile_command)) {
+      if (!this->RunCommand(setfile_command, &error)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Error assigning custom icon to temporary disk image."
-                        << std::endl);
+                        << std::endl
+                        << error << std::endl);
 
         had_error = true;
       }
@@ -717,9 +722,12 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   final_image_command << " zlib-level=9";
   final_image_command << " -o \"" << output_file << "\"";
 
-  if (!this->RunCommand(final_image_command)) {
+  std::string convert_error;
+
+  if (!this->RunCommand(final_image_command, &convert_error)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Error compressing disk image."
-                    << std::endl);
+                    << std::endl
+                    << convert_error << std::endl);
 
     return 0;
   }
