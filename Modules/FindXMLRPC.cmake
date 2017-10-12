@@ -43,20 +43,12 @@ endif()
 
 # Lookup the include directories needed for the components requested.
 if(XMLRPC_C_FOUND)
-  # Use the newer EXECUTE_PROCESS command if it is available.
-  if(COMMAND EXECUTE_PROCESS)
-    execute_process(
-      COMMAND ${XMLRPC_C_CONFIG} ${XMLRPC_FIND_COMPONENTS} --cflags
-      OUTPUT_VARIABLE XMLRPC_C_CONFIG_CFLAGS
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      RESULT_VARIABLE XMLRPC_C_CONFIG_RESULT
-      )
-  else()
-    exec_program(${XMLRPC_C_CONFIG} ARGS "${XMLRPC_FIND_COMPONENTS} --cflags"
-      OUTPUT_VARIABLE XMLRPC_C_CONFIG_CFLAGS
-      RETURN_VALUE XMLRPC_C_CONFIG_RESULT
-      )
-  endif()
+  execute_process(
+    COMMAND ${XMLRPC_C_CONFIG} ${XMLRPC_FIND_COMPONENTS} --cflags
+    OUTPUT_VARIABLE XMLRPC_C_CONFIG_CFLAGS
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE XMLRPC_C_CONFIG_RESULT
+    )
 
   # Parse the include flags.
   if("${XMLRPC_C_CONFIG_RESULT}" STREQUAL "0")
@@ -65,6 +57,7 @@ if(XMLRPC_C_FOUND)
       XMLRPC_C_CONFIG_CFLAGS "${XMLRPC_C_CONFIG_CFLAGS}")
 
     # Look for -I options.
+    # FIXME: Use these as hints to a find_path call to find the headers.
     set(XMLRPC_INCLUDE_DIRS)
     foreach(flag ${XMLRPC_C_CONFIG_CFLAGS})
       if("${flag}" MATCHES "^-I(.+)")
@@ -80,20 +73,12 @@ endif()
 
 # Lookup the libraries needed for the components requested.
 if(XMLRPC_C_FOUND)
-  # Use the newer EXECUTE_PROCESS command if it is available.
-  if(COMMAND EXECUTE_PROCESS)
-    execute_process(
-      COMMAND ${XMLRPC_C_CONFIG} ${XMLRPC_FIND_COMPONENTS} --libs
-      OUTPUT_VARIABLE XMLRPC_C_CONFIG_LIBS
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      RESULT_VARIABLE XMLRPC_C_CONFIG_RESULT
-      )
-  else()
-    exec_program(${XMLRPC_C_CONFIG} ARGS "${XMLRPC_FIND_COMPONENTS} --libs"
-      OUTPUT_VARIABLE XMLRPC_C_CONFIG_LIBS
-      RETURN_VALUE XMLRPC_C_CONFIG_RESULT
-      )
-  endif()
+  execute_process(
+    COMMAND ${XMLRPC_C_CONFIG} ${XMLRPC_FIND_COMPONENTS} --libs
+    OUTPUT_VARIABLE XMLRPC_C_CONFIG_LIBS
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE XMLRPC_C_CONFIG_RESULT
+    )
 
   # Parse the library names and directories.
   if("${XMLRPC_C_CONFIG_RESULT}" STREQUAL "0")
@@ -139,5 +124,5 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(
     XMLRPC
-    REQUIRED_VARS XMLRPC_C_FOUND XMLRPC_LIBRARIES XMLRPC_INCLUDE_DIRS
+    REQUIRED_VARS XMLRPC_C_FOUND XMLRPC_LIBRARIES
     FAIL_MESSAGE "XMLRPC was not found. Make sure the entries XMLRPC_* are set.")
