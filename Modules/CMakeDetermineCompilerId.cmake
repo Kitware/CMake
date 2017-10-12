@@ -735,3 +735,38 @@ function(CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX lang userflags)
     set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "" PARENT_SCOPE)
   endif()
 endfunction()
+
+function(CMAKE_DIAGNOSE_UNSUPPORTED_CLANG lang envvar)
+  if(NOT CMAKE_HOST_WIN32 OR CMAKE_GENERATOR MATCHES "Visual Studio" OR
+      NOT "${CMAKE_${lang}_COMPILER_ID};${CMAKE_${lang}_SIMULATE_ID}" STREQUAL "Clang;MSVC")
+    return()
+  endif()
+
+  # Test whether a GNU-like command-line option works.
+  execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" --version
+    RESULT_VARIABLE _clang_result
+    OUTPUT_VARIABLE _clang_stdout
+    ERROR_VARIABLE _clang_stderr)
+  if(NOT _clang_result EQUAL 0)
+    return()
+  endif()
+
+  # Help the user configure the environment to use the MSVC-like Clang.
+  string(CONCAT _msg
+    "The Clang compiler tool\n"
+    "  \"${CMAKE_${lang}_COMPILER}\"\n"
+    "targets the MSVC ABI but has a GNU-like command-line interface.  "
+    "This is not supported.  "
+    "Use 'clang-cl' instead, e.g. by setting '${envvar}=clang-cl' in the environment."
+    )
+  execute_process(COMMAND rc -help
+    RESULT_VARIABLE _rc_result
+    OUTPUT_VARIABLE _rc_stdout
+    ERROR_VARIABLE _rc_stderr)
+  if(NOT _rc_result EQUAL 0)
+    string(APPEND _msg "  "
+      "Furthermore, use the MSVC command-line environment."
+      )
+  endif()
+  message(FATAL_ERROR "${_msg}")
+endfunction()
