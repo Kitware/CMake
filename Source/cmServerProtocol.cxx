@@ -8,6 +8,8 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstallGenerator.h"
+#include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
@@ -30,6 +32,7 @@
 #include <functional>
 #include <limits>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -252,7 +255,7 @@ bool cmServerProtocol::DoActivate(const cmServerRequest& /*request*/,
 
 std::pair<int, int> cmServerProtocol1::ProtocolVersion() const
 {
-  return std::make_pair(1, 1);
+  return std::make_pair(1, 2);
 }
 
 static void setErrorMessage(std::string* errorMessage, const std::string& text)
@@ -797,6 +800,34 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
 
   result[kFULL_NAME_KEY] = target->GetFullName(config);
 
+  if (target->Target->GetHaveInstallRule()) {
+    result[kHAS_INSTALL_RULE] = true;
+
+    Json::Value installPaths = Json::arrayValue;
+    auto targetGenerators = target->Makefile->GetInstallGenerators();
+    for (auto installGenerator : targetGenerators) {
+      auto installTargetGenerator =
+        dynamic_cast<cmInstallTargetGenerator*>(installGenerator);
+      if (installTargetGenerator != nullptr &&
+          installTargetGenerator->GetTarget()->Target == target->Target) {
+        auto dest = installTargetGenerator->GetDestination(config);
+
+        std::string installPath;
+        if (!dest.empty() && cmSystemTools::FileIsFullPath(dest.c_str())) {
+          installPath = dest;
+        } else {
+          std::string installPrefix =
+            target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
+          installPath = installPrefix + '/' + dest;
+        }
+
+        installPaths.append(installPath);
+      }
+    }
+
+    result[kINSTALL_PATHS] = installPaths;
+  }
+
   Json::Value crossRefs = Json::objectValue;
   crossRefs[kBACKTRACE_KEY] = DumpBacktrace(target->Target->GetBacktrace());
 
@@ -933,6 +964,7 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
 
     // Project structure information:
     const cmMakefile* mf = lg->GetMakefile();
+    pObj[kHAS_INSTALL_RULE] = mf->GetInstallGenerators().empty() == false;
     pObj[kSOURCE_DIRECTORY_KEY] = mf->GetCurrentSourceDirectory();
     pObj[kBUILD_DIRECTORY_KEY] = mf->GetCurrentBinaryDirectory();
     pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config);
