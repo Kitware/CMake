@@ -66,9 +66,16 @@ bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
   }
 
   if (prop == "IMPORTED_CONFIGURATIONS" || prop == "IMPORTED_LIBNAME" ||
-      prop == "NO_SYSTEM_FROM_IMPORTED" ||
       cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME_") ||
       cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_")) {
+    return true;
+  }
+
+  // This property should not be allowed but was incorrectly added in
+  // CMake 3.8.  We can't remove it from the whitelist without breaking
+  // projects that try to set it.  One day we could warn about this, but
+  // for now silently accept it.
+  if (prop == "NO_SYSTEM_FROM_IMPORTED") {
     return true;
   }
 
