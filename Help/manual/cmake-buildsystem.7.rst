@@ -970,7 +970,6 @@ are:
 * ``EXPORT_NAME``
 * ``IMPORTED``
 * ``NAME``
-* ``NO_SYSTEM_FROM_IMPORTED``
 * Properties matching ``IMPORTED_LIBNAME_*``
 * Properties matching ``MAP_IMPORTED_CONFIG_*``
 
