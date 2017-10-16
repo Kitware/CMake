@@ -2026,7 +2026,15 @@ static kwsysProcessTime kwsysProcessTimeGetCurrent(void)
 {
   kwsysProcessTime current;
   kwsysProcessTimeNative current_native;
+#if KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC
+  struct timespec current_timespec;
+  clock_gettime(CLOCK_MONOTONIC, &current_timespec);
+
+  current_native.tv_sec = current_timespec.tv_sec;
+  current_native.tv_usec = current_timespec.tv_nsec / 1000;
+#else
   gettimeofday(&current_native, 0);
+#endif
   current.tv_sec = (long)current_native.tv_sec;
   current.tv_usec = (long)current_native.tv_usec;
   return current;

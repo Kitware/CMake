@@ -163,17 +163,13 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
 {
   void* result = 0;
   // Need to prepend symbols with '_' on Apple-gcc compilers
-  size_t len = sym.size();
-  char* rsym = new char[len + 1 + 1];
-  strcpy(rsym, "_");
-  strcat(rsym + 1, sym.c_str());
+  std::string rsym = '_' + sym;
 
-  NSSymbol symbol = NSLookupSymbolInModule(lib, rsym);
+  NSSymbol symbol = NSLookupSymbolInModule(lib, rsym.c_str());
   if (symbol) {
     result = NSAddressOfSymbol(symbol);
   }
 
-  delete[] rsym;
   // Hack to cast pointer-to-data to pointer-to-function.
   return *reinterpret_cast<DynamicLoader::SymbolPointer*>(&result);
 }
@@ -237,17 +233,12 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
   void* result;
 #if defined(__BORLANDC__) || defined(__WATCOMC__)
   // Need to prepend symbols with '_'
-  size_t len = sym.size();
-  char* rsym = new char[len + 1 + 1];
-  strcpy(rsym, "_");
-  strcat(rsym, sym.c_str());
+  std::string ssym = '_' + sym;
+  const char* rsym = ssym.c_str();
 #else
   const char* rsym = sym.c_str();
 #endif
   result = (void*)GetProcAddress(lib, rsym);
-#if defined(__BORLANDC__) || defined(__WATCOMC__)
-  delete[] rsym;
-#endif
 // Hack to cast pointer-to-data to pointer-to-function.
 #ifdef __WATCOMC__
   return *(DynamicLoader::SymbolPointer*)(&result);
