@@ -687,7 +687,8 @@ property are treated as ``SYSTEM`` include directories, as if they were
 listed in the :prop_tgt:`INTERFACE_SYSTEM_INCLUDE_DIRECTORIES` of the
 dependency. This can result in omission of compiler warnings for headers
 found in those directories.  This behavior for :ref:`imported targets` may
-be controlled with the :prop_tgt:`NO_SYSTEM_FROM_IMPORTED` target property.
+be controlled by setting the :prop_tgt:`NO_SYSTEM_FROM_IMPORTED` target
+property on the *consumers* of imported targets.
 
 If a binary target is linked transitively to a Mac OX framework, the
 ``Headers`` directory of the framework is also treated as a usage requirement.
@@ -970,7 +971,6 @@ are:
 * ``EXPORT_NAME``
 * ``IMPORTED``
 * ``NAME``
-* ``NO_SYSTEM_FROM_IMPORTED``
 * Properties matching ``IMPORTED_LIBNAME_*``
 * Properties matching ``MAP_IMPORTED_CONFIG_*``
 
