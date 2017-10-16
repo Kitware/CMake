@@ -936,8 +936,13 @@ if(UNIX)
   endif()
 endif()
 
-if(WIN32)
+if(CYGWIN)
+  find_package(LibUUID)
+endif()
+if(WIN32 OR (CYGWIN AND LibUUID_FOUND))
   set(CPACK_SRCS ${CPACK_SRCS}
+    CPack/Wix/cmCMakeToWixPath.cxx
+    CPack/Wix/cmCMakeToWixPath.h
     CPack/WiX/cmCPackWIXGenerator.cxx
     CPack/WiX/cmCPackWIXGenerator.h
     CPack/WiX/cmWIXAccessControlList.cxx
@@ -958,7 +963,7 @@ if(WIN32)
     CPack/WiX/cmWIXShortcut.h
     CPack/WiX/cmWIXSourceWriter.cxx
     CPack/WiX/cmWIXSourceWriter.h
-  )
+    )
 endif()
 
 if(APPLE)
@@ -990,6 +995,11 @@ if(APPLE)
       "Some CPack functionality may be limited.\n"
       "See CMakeFiles/CMakeError.log for details of the failure.")
   endif()
+endif()
+if(CYGWIN AND LibUUID_FOUND)
+  target_link_libraries(CPackLib ${LibUUID_LIBRARIES})
+  include_directories(CPackLib ${LibUUID_INCLUDE_DIRS})
+  set_property(SOURCE CPack/cmCPackGeneratorFactory.cxx PROPERTY COMPILE_DEFINITIONS HAVE_LIBUUID)
 endif()
 if(CPACK_ENABLE_FREEBSD_PKG AND FREEBSD_PKG_INCLUDE_DIRS AND FREEBSD_PKG_LIBRARIES)
   target_link_libraries(CPackLib ${FREEBSD_PKG_LIBRARIES})

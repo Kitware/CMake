@@ -22,7 +22,13 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/SystemTools.hxx"
 
-#include <rpc.h> // for GUID generation
+#ifdef _WIN32
+#include <rpc.h> // for GUID generation (windows only)
+#else
+#include <uuid/uuid.h> // for GUID generation (libuuid)
+#endif
+
+#include "cmCMakeToWixPath.h"
 
 cmCPackWIXGenerator::cmCPackWIXGenerator()
   : Patch(0)
@@ -110,7 +116,7 @@ bool cmCPackWIXGenerator::RunLightCommand(std::string const& objectFiles)
   std::ostringstream command;
   command << QuotePath(executable);
   command << " -nologo";
-  command << " -out " << QuotePath(packageFileNames.at(0));
+  command << " -out " << QuotePath(CMakeToWixPath(packageFileNames.at(0)));
 
   for (std::string const& ext : this->LightExtensions) {
     command << " -ext " << QuotePath(ext);
@@ -270,11 +276,12 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
     std::string objectFilename =
       this->CPackTopLevel + "/" + uniqueBaseName + ".wixobj";
 
-    if (!RunCandleCommand(sourceFilename, objectFilename)) {
+    if (!RunCandleCommand(CMakeToWixPath(sourceFilename),
+                          CMakeToWixPath(objectFilename))) {
       return false;
     }
 
-    objectFiles << " " << QuotePath(objectFilename);
+    objectFiles << " " << QuotePath(CMakeToWixPath(objectFilename));
   }
 
   AppendUserSuppliedExtraObjects(objectFiles);
@@ -320,10 +327,10 @@ void cmCPackWIXGenerator::CreateWiXVariablesIncludeFile()
   CopyDefinition(includeFile, "CPACK_PACKAGE_VENDOR");
   CopyDefinition(includeFile, "CPACK_PACKAGE_NAME");
   CopyDefinition(includeFile, "CPACK_PACKAGE_VERSION");
-  CopyDefinition(includeFile, "CPACK_WIX_LICENSE_RTF");
-  CopyDefinition(includeFile, "CPACK_WIX_PRODUCT_ICON");
-  CopyDefinition(includeFile, "CPACK_WIX_UI_BANNER");
-  CopyDefinition(includeFile, "CPACK_WIX_UI_DIALOG");
+  CopyDefinition(includeFile, "CPACK_WIX_LICENSE_RTF", DefinitionType::PATH);
+  CopyDefinition(includeFile, "CPACK_WIX_PRODUCT_ICON", DefinitionType::PATH);
+  CopyDefinition(includeFile, "CPACK_WIX_UI_BANNER", DefinitionType::PATH);
+  CopyDefinition(includeFile, "CPACK_WIX_UI_DIALOG", DefinitionType::PATH);
   SetOptionIfNotSet("CPACK_WIX_PROGRAM_MENU_FOLDER",
                     GetOption("CPACK_PACKAGE_NAME"));
   CopyDefinition(includeFile, "CPACK_WIX_PROGRAM_MENU_FOLDER");
@@ -390,11 +397,16 @@ void cmCPackWIXGenerator::CreateWiXProductFragmentIncludeFile()
 }
 
 void cmCPackWIXGenerator::CopyDefinition(cmWIXSourceWriter& source,
-                                         std::string const& name)
+                                         std::string const& name,
+                                         DefinitionType type)
 {
   const char* value = GetOption(name.c_str());
   if (value) {
-    AddDefinition(source, name, value);
+    if (type == DefinitionType::PATH) {
+      AddDefinition(source, name, CMakeToWixPath(value));
+    } else {
+      AddDefinition(source, name, value);
+    }
   }
 }
 
@@ -966,6 +978,7 @@ std::string cmCPackWIXGenerator::GetArchitecture() const
 
 std::string cmCPackWIXGenerator::GenerateGUID()
 {
+#ifdef _WIN32
   UUID guid;
   UuidCreate(&guid);
 
@@ -975,6 +988,14 @@ std::string cmCPackWIXGenerator::GenerateGUID()
   std::string result =
     cmsys::Encoding::ToNarrow(reinterpret_cast<wchar_t*>(tmp));
   RpcStringFreeW(&tmp);
+#else
+  uuid_t guid;
+  char guid_ch[37] = { 0 };
+
+  uuid_generate(guid);
+  uuid_unparse(guid, guid_ch);
+  std::string result = guid_ch;
+#endif
 
   return cmSystemTools::UpperCase(result);
 }
