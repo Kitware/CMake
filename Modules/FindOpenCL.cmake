@@ -120,9 +120,12 @@ else()
     NAMES OpenCL
     PATHS
       ENV AMDAPPSDKROOT
+      ENV CUDA_PATH
     PATH_SUFFIXES
       lib/x86_64
-      lib/x64)
+      lib/x64
+      lib
+      lib64)
 endif()
 
 set(OpenCL_LIBRARIES ${OpenCL_LIBRARY})
