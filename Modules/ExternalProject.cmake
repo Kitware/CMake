@@ -193,6 +193,28 @@ External Project Definition
         ``CMAKE_TLS_CAINFO`` variable will be used instead (see
         :command:`file(DOWNLOAD)`)
 
+      ``NETRC <level>``
+        Specify whether the .netrc file is to be used for operation. If this
+        option is not specified, the value of the ``CMAKE_NETRC`` variable
+        will be used instead (see :command:`file(DOWNLOAD)`)
+        Valid levels are:
+
+        ``IGNORED``
+          The .netrc file is ignored.
+          This is the default.
+        ``OPTIONAL``
+          The .netrc file is optional, and information in the URL is preferred.
+          The file will be scanned to find which ever information is not specified
+          in the URL.
+        ``REQUIRED``
+          The .netrc file is required, and information in the URL is ignored.
+
+      ``NETRC_FILE <file>``
+        Specify an alternative .netrc file to the one in your home directory
+        if the ``NETRC`` level is ``OPTIONAL`` or ``REQUIRED``. If this option
+        is not specified, the value of the ``CMAKE_NETRC_FILE`` variable will
+        be used instead (see :command:`file(DOWNLOAD)`)
+
     *Git*
       NOTE: A git version of 1.6.5 or later is required if this download method
       is used.
@@ -1343,7 +1365,7 @@ endif()
 
 endfunction(_ep_write_gitupdate_script)
 
-function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_progress hash tls_verify tls_cainfo userpwd http_headers)
+function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_progress hash tls_verify tls_cainfo userpwd http_headers netrc netrc_file)
   if(timeout)
     set(TIMEOUT_ARGS TIMEOUT ${timeout})
     set(TIMEOUT_MSG "${timeout} seconds")
@@ -1368,6 +1390,8 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
 
   set(TLS_VERIFY_CODE "")
   set(TLS_CAINFO_CODE "")
+  set(NETRC_CODE "")
+  set(NETRC_FILE_CODE "")
 
   # check for curl globals in the project
   if(DEFINED CMAKE_TLS_VERIFY)
@@ -1375,6 +1399,12 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
   endif()
   if(DEFINED CMAKE_TLS_CAINFO)
     set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
+  endif()
+  if(DEFINED CMAKE_NETRC)
+    set(NETRC_CODE "set(CMAKE_NETRC \"${CMAKE_NETRC}\")")
+  endif()
+  if(DEFINED CMAKE_NETRC_FILE)
+    set(NETRC_FILE_CODE "set(CMAKE_NETRC_FILE \"${CMAKE_NETRC_FILE}\")")
   endif()
 
   # now check for curl locals so that the local values
@@ -1389,6 +1419,16 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
   string(LENGTH "${tls_cainfo}" tls_cainfo_len)
   if(tls_cainfo_len GREATER 0)
     set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
+  endif()
+  # check for netrc argument
+  string(LENGTH "${netrc}" netrc_len)
+  if(netrc_len GREATER 0)
+    set(NETRC_CODE "set(CMAKE_NETRC \"${netrc}\")")
+  endif()
+  # check for netrc_file argument
+  string(LENGTH "${netrc_file}" netrc_file_len)
+  if(netrc_file_len GREATER 0)
+    set(NETRC_FILE_CODE "set(CMAKE_NETRC_FILE \"${netrc_file}\")")
   endif()
 
   if(userpwd STREQUAL ":")
@@ -2433,11 +2473,13 @@ function(_ep_add_download_command name)
         get_property(no_progress TARGET ${name} PROPERTY _EP_DOWNLOAD_NO_PROGRESS)
         get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
         get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
+        get_property(netrc TARGET ${name} PROPERTY _EP_NETRC)
+        get_property(netrc_file TARGET ${name} PROPERTY _EP_NETRC_FILE)
         get_property(http_username TARGET ${name} PROPERTY _EP_HTTP_USERNAME)
         get_property(http_password TARGET ${name} PROPERTY _EP_HTTP_PASSWORD)
         get_property(http_headers TARGET ${name} PROPERTY _EP_HTTP_HEADER)
         set(download_script "${stamp_dir}/download-${name}.cmake")
-        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}" "${http_username}:${http_password}" "${http_headers}")
+        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}" "${http_username}:${http_password}" "${http_headers}" "${netrc}" "${netrc_file}")
         set(cmd ${CMAKE_COMMAND} -P "${download_script}"
           COMMAND)
         if (no_extract)

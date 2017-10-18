@@ -116,6 +116,8 @@ foreach(i RANGE ${retry_number})
 
     @TLS_VERIFY_CODE@
     @TLS_CAINFO_CODE@
+    @NETRC_CODE@
+    @NETRC_FILE_CODE@
 
     file(
         DOWNLOAD
