@@ -2425,6 +2425,49 @@ int cmake::Build(const std::string& dir, const std::string& target,
                     nativeOptions);
 }
 
+bool cmake::Open(const std::string& dir, bool dryRun)
+{
+  this->SetHomeDirectory("");
+  this->SetHomeOutputDirectory("");
+  if (!cmSystemTools::FileIsDirectory(dir)) {
+    std::cerr << "Error: " << dir << " is not a directory\n";
+    return false;
+  }
+
+  std::string cachePath = FindCacheFile(dir);
+  if (!this->LoadCache(cachePath)) {
+    std::cerr << "Error: could not load cache\n";
+    return false;
+  }
+  const char* genName = this->State->GetCacheEntryValue("CMAKE_GENERATOR");
+  if (!genName) {
+    std::cerr << "Error: could not find CMAKE_GENERATOR in Cache\n";
+    return false;
+  }
+  const char* extraGenName =
+    this->State->GetInitializedCacheValue("CMAKE_EXTRA_GENERATOR");
+  std::string fullName =
+    cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
+      genName, extraGenName ? extraGenName : "");
+
+  std::unique_ptr<cmGlobalGenerator> gen(
+    this->CreateGlobalGenerator(fullName));
+  if (!gen.get()) {
+    std::cerr << "Error: could create CMAKE_GENERATOR \"" << fullName
+              << "\"\n";
+    return false;
+  }
+
+  const char* cachedProjectName =
+    this->State->GetCacheEntryValue("CMAKE_PROJECT_NAME");
+  if (!cachedProjectName) {
+    std::cerr << "Error: could not find CMAKE_PROJECT_NAME in Cache\n";
+    return false;
+  }
+
+  return gen->Open(dir, cachedProjectName, dryRun);
+}
+
 void cmake::WatchUnusedCli(const std::string& var)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE

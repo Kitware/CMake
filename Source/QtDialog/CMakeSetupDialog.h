@@ -31,7 +31,6 @@ protected slots:
   void initialize();
   void doConfigure();
   void doGenerate();
-  QString getProjectFilename();
   void doOpenProject();
   void doInstallForCommandLine();
   void doHelp();

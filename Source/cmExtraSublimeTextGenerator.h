@@ -65,6 +65,9 @@ private:
   std::string ComputeDefines(cmSourceFile* source, cmLocalGenerator* lg,
                              cmGeneratorTarget* gtgt);
 
+  bool Open(const std::string& bindir, const std::string& projectName,
+            bool dryRun) override;
+
   bool ExcludeBuildFolder;
   std::string EnvSettings;
 };

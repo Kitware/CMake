@@ -131,6 +131,9 @@ public:
                               std::vector<cmCustomCommand>& commands,
                               std::string const& configName);
 
+  bool Open(const std::string& bindir, const std::string& projectName,
+            bool dryRun) override;
+
 protected:
   virtual void AddExtraIDETargets();
 

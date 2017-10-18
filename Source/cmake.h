@@ -401,6 +401,9 @@ public:
             const std::string& config,
             const std::vector<std::string>& nativeOptions, bool clean);
 
+  ///! run the --open option
+  bool Open(const std::string& dir, bool dryRun);
+
   void UnwatchUnusedCli(const std::string& var);
   void WatchUnusedCli(const std::string& var);
 

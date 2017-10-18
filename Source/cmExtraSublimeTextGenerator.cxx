@@ -400,3 +400,26 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
 
   return definesString;
 }
+
+bool cmExtraSublimeTextGenerator::Open(const std::string& bindir,
+                                       const std::string& projectName,
+                                       bool dryRun)
+{
+  const char* sublExecutable =
+    this->GlobalGenerator->GetCMakeInstance()->GetCacheDefinition(
+      "CMAKE_SUBLIMETEXT_EXECUTABLE");
+  if (!sublExecutable) {
+    return false;
+  }
+  if (cmSystemTools::IsNOTFOUND(sublExecutable)) {
+    return false;
+  }
+
+  std::string filename = bindir + "/" + projectName + ".sublime-project";
+  if (dryRun) {
+    return cmSystemTools::FileExists(filename, true);
+  }
+
+  return cmSystemTools::RunSingleCommand(
+    { sublExecutable, "--project", filename });
+}
