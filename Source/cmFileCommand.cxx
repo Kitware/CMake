@@ -2626,6 +2626,9 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   std::string statusVar;
   bool tls_verify = this->Makefile->IsOn("CMAKE_TLS_VERIFY");
   const char* cainfo = this->Makefile->GetDefinition("CMAKE_TLS_CAINFO");
+  std::string netrc_level = this->Makefile->GetSafeDefinition("CMAKE_NETRC");
+  std::string netrc_file =
+    this->Makefile->GetSafeDefinition("CMAKE_NETRC_FILE");
   std::string expectedHash;
   std::string hashMatchMSG;
   std::unique_ptr<cmCryptoHash> hash;
@@ -2679,6 +2682,22 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         cainfo = i->c_str();
       } else {
         this->SetError("TLS_CAFILE missing file value.");
+        return false;
+      }
+    } else if (*i == "NETRC_FILE") {
+      ++i;
+      if (i != args.end()) {
+        netrc_file = *i;
+      } else {
+        this->SetError("DOWNLOAD missing file value for NETRC_FILE.");
+        return false;
+      }
+    } else if (*i == "NETRC") {
+      ++i;
+      if (i != args.end()) {
+        netrc_level = *i;
+      } else {
+        this->SetError("DOWNLOAD missing level value for NETRC.");
         return false;
       }
     } else if (*i == "EXPECTED_MD5") {
@@ -2819,6 +2838,16 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   std::string const& cainfo_err = cmCurlSetCAInfo(curl, cainfo);
   if (!cainfo_err.empty()) {
     this->SetError(cainfo_err);
+    return false;
+  }
+
+  // check to see if netrc parameters have been specified
+  // local command args takes precedence over CMAKE_NETRC*
+  netrc_level = cmSystemTools::UpperCase(netrc_level);
+  std::string const& netrc_option_err =
+    cmCurlSetNETRCOption(curl, netrc_level, netrc_file);
+  if (!netrc_option_err.empty()) {
+    this->SetError(netrc_option_err);
     return false;
   }
 
@@ -2964,6 +2993,9 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   std::string statusVar;
   bool showProgress = false;
   std::string userpwd;
+  std::string netrc_level = this->Makefile->GetSafeDefinition("CMAKE_NETRC");
+  std::string netrc_file =
+    this->Makefile->GetSafeDefinition("CMAKE_NETRC_FILE");
 
   std::vector<std::string> curl_headers;
 
@@ -3000,6 +3032,22 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
       statusVar = *i;
     } else if (*i == "SHOW_PROGRESS") {
       showProgress = true;
+    } else if (*i == "NETRC_FILE") {
+      ++i;
+      if (i != args.end()) {
+        netrc_file = *i;
+      } else {
+        this->SetError("UPLOAD missing file value for NETRC_FILE.");
+        return false;
+      }
+    } else if (*i == "NETRC") {
+      ++i;
+      if (i != args.end()) {
+        netrc_level = *i;
+      } else {
+        this->SetError("UPLOAD missing level value for NETRC.");
+        return false;
+      }
     } else if (*i == "USERPWD") {
       ++i;
       if (i == args.end()) {
@@ -3130,6 +3178,16 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   if (!userpwd.empty()) {
     res = ::curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd.c_str());
     check_curl_result(res, "UPLOAD cannot set user password: ");
+  }
+
+  // check to see if netrc parameters have been specified
+  // local command args takes precedence over CMAKE_NETRC*
+  netrc_level = cmSystemTools::UpperCase(netrc_level);
+  std::string const& netrc_option_err =
+    cmCurlSetNETRCOption(curl, netrc_level, netrc_file);
+  if (!netrc_option_err.empty()) {
+    this->SetError(netrc_option_err);
+    return false;
   }
 
   struct curl_slist* headers = nullptr;
