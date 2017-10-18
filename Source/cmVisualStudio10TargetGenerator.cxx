@@ -2648,6 +2648,13 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
     cudaOptions.AddFlag("CompileOut", "$(IntDir)%(Filename).ptx");
   }
 
+  // CUDA automatically passes the proper '--machine' flag to nvcc
+  // for the current architecture, but does not reflect this default
+  // in the user-visible IDE settings.  Set it explicitly.
+  if (this->Platform == "x64") {
+    cudaOptions.AddFlag("TargetMachinePlatform", "64");
+  }
+
   // Convert the host compiler options to the toolset's abstractions
   // using a secondary flag table.
   cudaOptions.ClearTables();
