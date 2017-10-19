@@ -7,6 +7,4 @@ set(CMAKE_Fortran_PREPROCESS_SOURCE
 set(CMAKE_Fortran_FORMAT_FIXED_FLAG "-ffixed-form")
 set(CMAKE_Fortran_FORMAT_FREE_FLAG "-ffree-form")
 
-string(APPEND CMAKE_Fortran_FLAGS_DEBUG_INIT " -fbounds-check")
-
 set(CMAKE_Fortran_MODDIR_FLAG "-J")
