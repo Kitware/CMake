@@ -14,13 +14,14 @@ Normal Libraries
 
   add_library(<name> [STATIC | SHARED | MODULE]
               [EXCLUDE_FROM_ALL]
-              source1 [source2 ...])
+              [source1] [source2 ...])
 
 Adds a library target called ``<name>`` to be built from the source files
-listed in the command invocation.  The ``<name>`` corresponds to the
-logical target name and must be globally unique within a project.  The
-actual file name of the library built is constructed based on
-conventions of the native platform (such as ``lib<name>.a`` or
+listed in the command invocation.  (The source files can be omitted here
+if they are added later using :command:`target_sources`.)  The ``<name>``
+corresponds to the logical target name and must be globally unique within
+a project.  The actual file name of the library built is constructed based
+on conventions of the native platform (such as ``lib<name>.a`` or
 ``<name>.lib``).
 
 ``STATIC``, ``SHARED``, or ``MODULE`` may be given to specify the type of

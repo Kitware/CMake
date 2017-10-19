@@ -1,4 +1,4 @@
 ^CMake Error at NoSources.cmake:[0-9]+ \(add_executable\):
-  add_executable called with incorrect number of arguments
+  No SOURCES given to target: TestExeWithoutSources
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)$

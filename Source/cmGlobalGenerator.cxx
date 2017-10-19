@@ -261,6 +261,43 @@ void cmGlobalGenerator::ForceLinkerLanguages()
 {
 }
 
+bool cmGlobalGenerator::CheckTargetsForMissingSources() const
+{
+  bool failed = false;
+  for (cmLocalGenerator* localGen : this->LocalGenerators) {
+    const std::vector<cmGeneratorTarget*>& targets =
+      localGen->GetGeneratorTargets();
+
+    for (cmGeneratorTarget* target : targets) {
+      if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
+          target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
+          target->GetType() == cmStateEnums::TargetType::UTILITY) {
+        continue;
+      }
+
+      std::vector<std::string> configs;
+      target->Makefile->GetConfigurations(configs);
+      std::vector<cmSourceFile*> srcs;
+      if (configs.empty()) {
+        target->GetSourceFiles(srcs, "");
+      } else {
+        for (std::vector<std::string>::const_iterator ci = configs.begin();
+             ci != configs.end() && srcs.empty(); ++ci) {
+          target->GetSourceFiles(srcs, *ci);
+        }
+      }
+      if (srcs.empty()) {
+        std::ostringstream e;
+        e << "No SOURCES given to target: " << target->GetName();
+        this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                                               target->GetBacktrace());
+        failed = true;
+      }
+    }
+  }
+  return failed;
+}
+
 bool cmGlobalGenerator::IsExportedTargetsFile(
   const std::string& filename) const
 {
@@ -1290,6 +1327,11 @@ bool cmGlobalGenerator::Compute()
   // because their dependencies might not be handled correctly
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
     localGen->TraceDependencies();
+  }
+
+  // Make sure that all (non-imported) targets have source files added!
+  if (this->CheckTargetsForMissingSources()) {
+    return false;
   }
 
   this->ForceLinkerLanguages();
