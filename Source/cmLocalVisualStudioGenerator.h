@@ -44,8 +44,6 @@ public:
   virtual std::string ComputeLongestObjectDirectory(
     cmGeneratorTarget const*) const = 0;
 
-  virtual void AddCMakeListsRules() = 0;
-
   virtual void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
     cmGeneratorTarget const* = 0);

@@ -438,12 +438,6 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   cmGeneratorTarget* allBuildGt = new cmGeneratorTarget(allbuild, root);
   root->AddGeneratorTarget(allBuildGt);
 
-  // Refer to the main build configuration file for easy editing.
-  std::string listfile = root->GetCurrentSourceDirectory();
-  listfile += "/";
-  listfile += "CMakeLists.txt";
-  allBuildGt->AddSource(listfile);
-
   // Add XCODE depend helper
   std::string dir = root->GetCurrentBinaryDirectory();
   cmCustomCommandLine makeHelper;
@@ -513,12 +507,6 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
           !target->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
         allbuild->AddUtility(target->GetName());
       }
-
-      // Refer to the build configuration file for easy editing.
-      listfile = gen->GetCurrentSourceDirectory();
-      listfile += "/";
-      listfile += "CMakeLists.txt";
-      target->AddSource(listfile);
     }
   }
 }
@@ -996,6 +984,13 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
     if (!gtgt->GetConfigCommonSourceFiles(classes)) {
       return false;
     }
+
+    // Add CMakeLists.txt file for user convenience.
+    std::string listfile =
+      gtgt->GetLocalGenerator()->GetCurrentSourceDirectory();
+    listfile += "/CMakeLists.txt";
+    classes.push_back(gtgt->Makefile->GetOrCreateSource(listfile));
+
     std::sort(classes.begin(), classes.end(), cmSourceFilePathCompare());
 
     gtgt->ComputeObjectMapping();
@@ -2299,6 +2294,12 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
       return nullptr;
     }
 
+    // Add CMakeLists.txt file for user convenience.
+    std::string listfile =
+      gtgt->GetLocalGenerator()->GetCurrentSourceDirectory();
+    listfile += "/CMakeLists.txt";
+    sources.push_back(gtgt->Makefile->GetOrCreateSource(listfile));
+
     for (std::vector<cmSourceFile*>::const_iterator i = sources.begin();
          i != sources.end(); ++i) {
       if (!(*i)->GetPropertyAsBool("GENERATED")) {
@@ -2733,6 +2734,20 @@ bool cmGlobalXCodeGenerator::CreateGroups(
           continue;
         }
         // Add the file to the list of sources.
+        std::string const& source = sf->GetFullPath();
+        cmSourceGroup* sourceGroup =
+          mf->FindSourceGroup(source.c_str(), sourceGroups);
+        cmXCodeObject* pbxgroup = this->CreateOrGetPBXGroup(gtgt, sourceGroup);
+        std::string key = GetGroupMapKeyFromPath(gtgt, source);
+        this->GroupMap[key] = pbxgroup;
+      }
+
+      // Add CMakeLists.txt file for user convenience.
+      {
+        std::string listfile =
+          gtgt->GetLocalGenerator()->GetCurrentSourceDirectory();
+        listfile += "/CMakeLists.txt";
+        cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(listfile);
         std::string const& source = sf->GetFullPath();
         cmSourceGroup* sourceGroup =
           mf->FindSourceGroup(source.c_str(), sourceGroups);

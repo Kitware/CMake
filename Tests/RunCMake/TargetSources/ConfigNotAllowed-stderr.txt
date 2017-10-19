@@ -6,9 +6,7 @@ CMake Error in CMakeLists.txt:
 
     .*/Tests/RunCMake/TargetSources/empty_1.cpp
     .*/Tests/RunCMake/TargetSources/empty_2.cpp
-    .*/Tests/RunCMake/TargetSources/CMakeLists.txt
 
   Config "Release":
 
     .*/Tests/RunCMake/TargetSources/empty_1.cpp
-    .*/Tests/RunCMake/TargetSources/CMakeLists.txt

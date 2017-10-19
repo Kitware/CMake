@@ -106,15 +106,6 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
   // Configure CMake Visual Studio macros, for this user on this version
   // of Visual Studio.
   this->ConfigureCMakeVisualStudioMacros();
-
-  // Add CMakeLists.txt with custom command to rerun CMake.
-  for (std::vector<cmLocalGenerator*>::const_iterator lgi =
-         this->LocalGenerators.begin();
-       lgi != this->LocalGenerators.end(); ++lgi) {
-    cmLocalVisualStudioGenerator* lg =
-      static_cast<cmLocalVisualStudioGenerator*>(*lgi);
-    lg->AddCMakeListsRules();
-  }
 }
 
 void cmGlobalVisualStudioGenerator::ComputeTargetObjectDirectory(

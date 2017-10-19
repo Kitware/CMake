@@ -1174,6 +1174,15 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommands()
        si != customCommands.end(); ++si) {
     this->WriteCustomCommand(*si);
   }
+
+  // Add CMakeLists.txt file with rule to re-run CMake for user convenience.
+  if (this->GeneratorTarget->GetType() != cmStateEnums::GLOBAL_TARGET &&
+      this->GeneratorTarget->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
+    if (cmSourceFile const* sf =
+          this->LocalGenerator->CreateVCProjBuildRule()) {
+      this->WriteCustomCommand(sf);
+    }
+  }
 }
 
 void cmVisualStudio10TargetGenerator::WriteCustomCommand(
