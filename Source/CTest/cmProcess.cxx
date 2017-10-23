@@ -3,7 +3,6 @@
 #include "cmProcess.h"
 
 #include "cmProcessOutput.h"
-#include <iostream>
 
 cmProcess::cmProcess()
 {
@@ -164,64 +163,6 @@ int cmProcess::GetProcessStatus()
     return cmsysProcess_State_Exited;
   }
   return cmsysProcess_GetState(this->Process);
-}
-
-int cmProcess::ReportStatus()
-{
-  int result = 1;
-  switch (cmsysProcess_GetState(this->Process)) {
-    case cmsysProcess_State_Starting: {
-      std::cerr << "cmProcess: Never started " << this->Command
-                << " process.\n";
-    } break;
-    case cmsysProcess_State_Error: {
-      std::cerr << "cmProcess: Error executing " << this->Command
-                << " process: " << cmsysProcess_GetErrorString(this->Process)
-                << "\n";
-    } break;
-    case cmsysProcess_State_Exception: {
-      std::cerr << "cmProcess: " << this->Command
-                << " process exited with an exception: ";
-      switch (cmsysProcess_GetExitException(this->Process)) {
-        case cmsysProcess_Exception_None: {
-          std::cerr << "None";
-        } break;
-        case cmsysProcess_Exception_Fault: {
-          std::cerr << "Segmentation fault";
-        } break;
-        case cmsysProcess_Exception_Illegal: {
-          std::cerr << "Illegal instruction";
-        } break;
-        case cmsysProcess_Exception_Interrupt: {
-          std::cerr << "Interrupted by user";
-        } break;
-        case cmsysProcess_Exception_Numerical: {
-          std::cerr << "Numerical exception";
-        } break;
-        case cmsysProcess_Exception_Other: {
-          std::cerr << "Unknown";
-        } break;
-      }
-      std::cerr << "\n";
-    } break;
-    case cmsysProcess_State_Executing: {
-      std::cerr << "cmProcess: Never terminated " << this->Command
-                << " process.\n";
-    } break;
-    case cmsysProcess_State_Exited: {
-      result = cmsysProcess_GetExitValue(this->Process);
-      std::cerr << "cmProcess: " << this->Command
-                << " process exited with code " << result << "\n";
-    } break;
-    case cmsysProcess_State_Expired: {
-      std::cerr << "cmProcess: killed " << this->Command
-                << " process due to timeout.\n";
-    } break;
-    case cmsysProcess_State_Killed: {
-      std::cerr << "cmProcess: killed " << this->Command << " process.\n";
-    } break;
-  }
-  return result;
 }
 
 void cmProcess::ChangeTimeout(std::chrono::duration<double> t)

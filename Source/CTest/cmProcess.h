@@ -32,8 +32,6 @@ public:
 
   // return the process status
   int GetProcessStatus();
-  // Report the status of the program
-  int ReportStatus();
   int GetId() { return this->Id; }
   void SetId(int id) { this->Id = id; }
   int GetExitValue() { return this->ExitValue; }
