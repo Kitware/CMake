@@ -225,19 +225,19 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     this->TestResult.ExceptionStatus =
       this->TestProcess->GetExitExceptionString();
     switch (this->TestProcess->GetExitException()) {
-      case cmsysProcess_Exception_Fault:
+      case cmProcess::Exception::Fault:
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "SegFault");
         this->TestResult.Status = cmCTestTestHandler::SEGFAULT;
         break;
-      case cmsysProcess_Exception_Illegal:
+      case cmProcess::Exception::Illegal:
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "Illegal");
         this->TestResult.Status = cmCTestTestHandler::ILLEGAL;
         break;
-      case cmsysProcess_Exception_Interrupt:
+      case cmProcess::Exception::Interrupt:
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "Interrupt");
         this->TestResult.Status = cmCTestTestHandler::INTERRUPT;
         break;
-      case cmsysProcess_Exception_Numerical:
+      case cmProcess::Exception::Numerical:
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "Numerical");
         this->TestResult.Status = cmCTestTestHandler::NUMERICAL;
         break;

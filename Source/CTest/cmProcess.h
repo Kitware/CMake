@@ -47,8 +47,20 @@ public:
   void SetId(int id) { this->Id = id; }
   int GetExitValue() { return this->ExitValue; }
   std::chrono::duration<double> GetTotalTime() { return this->TotalTime; }
-  int GetExitException();
+
+  enum class Exception
+  {
+    None,
+    Fault,
+    Illegal,
+    Interrupt,
+    Numerical,
+    Other
+  };
+
+  Exception GetExitException();
   std::string GetExitExceptionString();
+
   /**
    * Read one line of output but block for no more than timeout.
    * Returns:

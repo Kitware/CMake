@@ -193,9 +193,23 @@ void cmProcess::ResetStartTime()
   this->StartTime = std::chrono::steady_clock::now();
 }
 
-int cmProcess::GetExitException()
+cmProcess::Exception cmProcess::GetExitException()
 {
-  return cmsysProcess_GetExitException(this->Process);
+  switch (cmsysProcess_GetExitException(this->Process)) {
+    case cmsysProcess_Exception_None:
+      return Exception::None;
+    case cmsysProcess_Exception_Fault:
+      return Exception::Fault;
+    case cmsysProcess_Exception_Illegal:
+      return Exception::Illegal;
+    case cmsysProcess_Exception_Interrupt:
+      return Exception::Interrupt;
+    case cmsysProcess_Exception_Numerical:
+      return Exception::Numerical;
+    default: // case cmsysProcess_Exception_Other:
+      break;
+  }
+  return Exception::Other;
 }
 
 std::string cmProcess::GetExitExceptionString()
