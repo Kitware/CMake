@@ -123,6 +123,9 @@
 #   allow users who create additional path variables to also compute
 #   absolute paths where necessary, using the same logic.
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
+
 # Convert a cache variable to PATH type
 
 macro(_GNUInstallDirs_cache_convert_to_path var description)
@@ -371,3 +374,5 @@ foreach(dir
     )
   GNUInstallDirs_get_absolute_install_dir(CMAKE_INSTALL_FULL_${dir} CMAKE_INSTALL_${dir})
 endforeach()
+
+cmake_policy(POP)
