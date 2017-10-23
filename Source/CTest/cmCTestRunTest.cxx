@@ -38,10 +38,6 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
   this->RunAgain = false;     // default to not having to run again
 }
 
-cmCTestRunTest::~cmCTestRunTest()
-{
-}
-
 bool cmCTestRunTest::CheckOutput()
 {
   // Read lines for up to 0.1 seconds of total time.

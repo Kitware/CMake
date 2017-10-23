@@ -24,8 +24,9 @@ class cmProcess;
 class cmCTestRunTest
 {
 public:
-  cmCTestRunTest(cmCTestTestHandler* handler);
-  ~cmCTestRunTest();
+  explicit cmCTestRunTest(cmCTestTestHandler* handler);
+
+  ~cmCTestRunTest() = default;
 
   void SetNumberOfRuns(int n) { this->NumberOfRunsLeft = n; }
   void SetRunUntilFailOn() { this->RunUntilFail = true; }
