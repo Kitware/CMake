@@ -154,8 +154,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   this->WriteLogOutputTop(completed, total);
   std::string reason;
   bool passed = true;
-  int res =
-    started ? this->TestProcess->GetProcessStatus() : cmsysProcess_State_Error;
+  cmProcess::State res =
+    started ? this->TestProcess->GetProcessStatus() : cmProcess::State::Error;
   int retVal = this->TestProcess->GetExitValue();
   bool forceFail = false;
   bool skipped = false;
@@ -194,7 +194,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       }
     }
   }
-  if (res == cmsysProcess_State_Exited) {
+  if (res == cmProcess::State::Exited) {
     bool success = !forceFail &&
       (retVal == 0 ||
        !this->TestProperties->RequiredRegularExpressions.empty());
@@ -215,11 +215,11 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Failed  " << reason);
       outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
     }
-  } else if (res == cmsysProcess_State_Expired) {
+  } else if (res == cmProcess::State::Expired) {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Timeout ");
     this->TestResult.Status = cmCTestTestHandler::TIMEOUT;
     outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
-  } else if (res == cmsysProcess_State_Exception) {
+  } else if (res == cmProcess::State::Exception) {
     outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Exception: ");
     this->TestResult.ExceptionStatus =
@@ -248,7 +248,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     }
   } else if ("Disabled" == this->TestResult.CompletionStatus) {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run (Disabled) ");
-  } else // cmsysProcess_State_Error
+  } else // cmProcess::State::Error
   {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run ");
   }

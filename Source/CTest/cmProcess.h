@@ -30,8 +30,19 @@ public:
   // Return true if the process starts
   bool StartProcess();
 
-  // return the process status
-  int GetProcessStatus();
+  enum class State
+  {
+    Starting,
+    Error,
+    Exception,
+    Executing,
+    Exited,
+    Expired,
+    Killed,
+    Disowned
+  };
+
+  State GetProcessStatus();
   int GetId() { return this->Id; }
   void SetId(int id) { this->Id = id; }
   int GetExitValue() { return this->ExitValue; }

@@ -156,13 +156,29 @@ int cmProcess::GetNextOutputLine(std::string& line,
   return cmsysProcess_Pipe_None;
 }
 
-// return the process status
-int cmProcess::GetProcessStatus()
+cmProcess::State cmProcess::GetProcessStatus()
 {
-  if (!this->Process) {
-    return cmsysProcess_State_Exited;
+  if (this->Process) {
+    switch (cmsysProcess_GetState(this->Process)) {
+      case cmsysProcess_State_Starting:
+        return State::Starting;
+      case cmsysProcess_State_Error:
+        return State::Error;
+      case cmsysProcess_State_Exception:
+        return State::Exception;
+      case cmsysProcess_State_Executing:
+        return State::Executing;
+      case cmsysProcess_State_Expired:
+        return State::Expired;
+      case cmsysProcess_State_Killed:
+        return State::Killed;
+      case cmsysProcess_State_Disowned:
+        return State::Disowned;
+      default: // case cmsysProcess_State_Exited:
+        break;
+    }
   }
-  return cmsysProcess_GetState(this->Process);
+  return State::Exited;
 }
 
 void cmProcess::ChangeTimeout(std::chrono::duration<double> t)
