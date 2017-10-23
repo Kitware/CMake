@@ -98,6 +98,8 @@ protected:
   // Return true if there are still tests running
   // check all running processes for output and exit case
   bool CheckOutput();
+  void FinishTestProcess(cmCTestRunTest* runner, bool started);
+
   void RemoveTest(int index);
   // Check if we need to resume an interrupted test set
   void CheckResume();

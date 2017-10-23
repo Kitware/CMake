@@ -195,21 +195,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
     return true;
   }
 
-  for (auto& j : this->Tests) {
-    j.second.erase(test);
-  }
-
-  this->UnlockResources(test);
-  this->Completed++;
-  this->TestFinishMap[test] = true;
-  this->TestRunningMap[test] = false;
-  this->RunningCount -= GetProcessorsUsed(test);
-  testRun->EndTest(this->Completed, this->Total, false);
-  if (!this->Properties[test]->Disabled) {
-    this->Failed->push_back(this->Properties[test]->Name);
-  }
-  delete testRun;
-
+  this->FinishTestProcess(testRun, false);
   return false;
 }
 
@@ -424,31 +410,45 @@ bool cmCTestMultiProcessHandler::CheckOutput()
     }
   }
   for (cmCTestRunTest* p : finished) {
-    this->Completed++;
-    int test = p->GetIndex();
-
-    bool testResult = p->EndTest(this->Completed, this->Total, true);
-    if (p->StartAgain()) {
-      this->Completed--; // remove the completed test because run again
-      continue;
-    }
-    if (testResult) {
-      this->Passed->push_back(p->GetTestProperties()->Name);
-    } else {
-      this->Failed->push_back(p->GetTestProperties()->Name);
-    }
-    for (auto& t : this->Tests) {
-      t.second.erase(test);
-    }
-    this->TestFinishMap[test] = true;
-    this->TestRunningMap[test] = false;
-    this->RunningTests.erase(p);
-    this->WriteCheckpoint(test);
-    this->UnlockResources(test);
-    this->RunningCount -= GetProcessorsUsed(test);
-    delete p;
+    this->FinishTestProcess(p, true);
   }
   return true;
+}
+
+void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
+                                                   bool started)
+{
+  this->Completed++;
+
+  int test = runner->GetIndex();
+  auto properties = runner->GetTestProperties();
+
+  bool testResult = runner->EndTest(this->Completed, this->Total, started);
+  if (started) {
+    if (runner->StartAgain()) {
+      this->Completed--; // remove the completed test because run again
+      return;
+    }
+    this->RunningTests.erase(runner);
+  }
+
+  if (testResult) {
+    this->Passed->push_back(properties->Name);
+  } else if (!properties->Disabled) {
+    this->Failed->push_back(properties->Name);
+  }
+
+  for (auto& t : this->Tests) {
+    t.second.erase(test);
+  }
+
+  this->TestFinishMap[test] = true;
+  this->TestRunningMap[test] = false;
+  this->WriteCheckpoint(test);
+  this->UnlockResources(test);
+  this->RunningCount -= GetProcessorsUsed(test);
+
+  delete runner;
 }
 
 void cmCTestMultiProcessHandler::UpdateCostData()
