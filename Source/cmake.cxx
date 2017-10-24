@@ -1326,6 +1326,25 @@ int cmake::ActualConfigure()
                         cmStateEnums::INTERNAL);
   }
 
+  if (const char* instance =
+        this->State->GetInitializedCacheValue("CMAKE_GENERATOR_INSTANCE")) {
+    if (!this->GeneratorInstance.empty() &&
+        this->GeneratorInstance != instance) {
+      std::string message = "Error: generator instance: ";
+      message += this->GeneratorInstance;
+      message += "\nDoes not match the instance used previously: ";
+      message += instance;
+      message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
+                 "directory or choose a different binary directory.";
+      cmSystemTools::Error(message.c_str());
+      return -2;
+    }
+  } else {
+    this->AddCacheEntry(
+      "CMAKE_GENERATOR_INSTANCE", this->GeneratorInstance.c_str(),
+      "Generator instance identifier.", cmStateEnums::INTERNAL);
+  }
+
   if (const char* platformName =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_PLATFORM")) {
     if (!this->GeneratorPlatform.empty() &&
@@ -2359,6 +2378,14 @@ int cmake::Build(const std::string& dir, const std::string& target,
     std::cerr << "Error: could create CMAKE_GENERATOR \"" << cachedGenerator
               << "\"\n";
     return 1;
+  }
+  const char* cachedGeneratorInstance =
+    this->State->GetCacheEntryValue("CMAKE_GENERATOR_INSTANCE");
+  if (cachedGeneratorInstance) {
+    cmMakefile mf(gen.get(), this->GetCurrentSnapshot());
+    if (!gen->SetGeneratorInstance(cachedGeneratorInstance, &mf)) {
+      return 1;
+    }
   }
   std::string output;
   std::string projName;

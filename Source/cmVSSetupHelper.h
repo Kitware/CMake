@@ -126,6 +126,8 @@ public:
   cmVSSetupAPIHelper();
   ~cmVSSetupAPIHelper();
 
+  bool SetVSInstance(std::string const& vsInstallLocation);
+
   bool IsVS2017Installed();
   bool GetVSInstanceInfo(std::string& vsInstallLocation);
   bool IsWin10SDKInstalled();
@@ -150,6 +152,8 @@ private:
   HRESULT comInitialized;
   // current best instance of VS selected
   VSInstanceInfo chosenInstanceInfo;
+
+  std::string SpecifiedVSInstallLocation;
 };
 
 #endif

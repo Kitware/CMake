@@ -381,6 +381,11 @@ External Project Definition
       :variable:`CMAKE_GENERATOR_TOOLSET`). It is an error to provide this
       option without the ``CMAKE_GENERATOR`` option.
 
+    ``CMAKE_GENERATOR_INSTANCE <instance>``
+      Pass a generator-specific instance selection to the CMake command (see
+      :variable:`CMAKE_GENERATOR_INSTANCE`). It is an error to provide this
+      option without the ``CMAKE_GENERATOR`` option.
+
     ``CMAKE_ARGS <arg>...``
       The specified arguments are passed to the ``cmake`` command line. They
       can be any argument the ``cmake`` command understands, not just cache
@@ -2754,6 +2759,7 @@ function(_ep_extract_configure_command var name)
     endif()
 
     get_target_property(cmake_generator ${name} _EP_CMAKE_GENERATOR)
+    get_target_property(cmake_generator_instance ${name} _EP_CMAKE_GENERATOR_INSTANCE)
     get_target_property(cmake_generator_platform ${name} _EP_CMAKE_GENERATOR_PLATFORM)
     get_target_property(cmake_generator_toolset ${name} _EP_CMAKE_GENERATOR_TOOLSET)
     if(cmake_generator)
@@ -2763,6 +2769,9 @@ function(_ep_extract_configure_command var name)
       endif()
       if(cmake_generator_toolset)
         list(APPEND cmd "-T${cmake_generator_toolset}")
+      endif()
+      if(cmake_generator_instance)
+        list(APPEND cmd "-DCMAKE_GENERATOR_INSTANCE:INTERNAL=${cmake_generator_instance}")
       endif()
     else()
       if(CMAKE_EXTRA_GENERATOR)
@@ -2781,6 +2790,12 @@ function(_ep_extract_configure_command var name)
       endif()
       if(CMAKE_GENERATOR_TOOLSET)
         list(APPEND cmd "-T${CMAKE_GENERATOR_TOOLSET}")
+      endif()
+      if(cmake_generator_instance)
+        message(FATAL_ERROR "Option CMAKE_GENERATOR_INSTANCE not allowed without CMAKE_GENERATOR.")
+      endif()
+      if(CMAKE_GENERATOR_INSTANCE)
+        list(APPEND cmd "-DCMAKE_GENERATOR_INSTANCE:INTERNAL=${CMAKE_GENERATOR_INSTANCE}")
       endif()
     endif()
 

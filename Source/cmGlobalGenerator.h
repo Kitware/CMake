@@ -70,6 +70,9 @@ public:
   /** Tell the generator about the target system.  */
   virtual bool SetSystemName(std::string const&, cmMakefile*) { return true; }
 
+  /** Set the generator-specific instance.  Returns true if supported.  */
+  virtual bool SetGeneratorInstance(std::string const& i, cmMakefile* mf);
+
   /** Set the generator-specific platform name.  Returns true if platform
       is supported and false otherwise.  */
   virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
