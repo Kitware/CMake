@@ -49,7 +49,9 @@ be returned with OpenACC_<lang>_FLAGS.
 set(OpenACC_C_CXX_TEST_SOURCE
 "
 int main(){
-#ifndef _OPENACC
+#ifdef _OPENACC
+  return 0;
+#else
   breaks_on_purpose
 #endif
 }
@@ -58,7 +60,9 @@ int main(){
 set(OpenACC_Fortran_TEST_SOURCE
 "
 program test
-#ifndef _OPENACC
+#ifdef _OPENACC
+  return 0;
+#else
   breaks_on_purpose
 #endif
 endprogram test
@@ -79,6 +83,7 @@ const char accver_str[] = { 'I', 'N', 'F', 'O', ':', 'O', 'p', 'e', 'n', 'A',
 int main()
 {
   puts(accver_str);
+  return 0;
 }
 ")
 set(OpenACC_Fortran_CHECK_VERSION_SOURCE

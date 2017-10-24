@@ -123,7 +123,9 @@ set(OpenMP_C_CXX_TEST_SOURCE
 "
 #include <omp.h>
 int main() {
-#ifndef _OPENMP
+#ifdef _OPENMP
+  return 0;
+#else
   breaks_on_purpose
 #endif
 }
@@ -248,6 +250,7 @@ const char ompver_str[] = { 'I', 'N', 'F', 'O', ':', 'O', 'p', 'e', 'n', 'M',
 int main()
 {
   puts(ompver_str);
+  return 0;
 }
 ")
 
