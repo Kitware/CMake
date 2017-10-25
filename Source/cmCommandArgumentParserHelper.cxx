@@ -44,7 +44,7 @@ void cmCommandArgumentParserHelper::SetLineFile(long line, const char* file)
   this->FileName = file;
 }
 
-char* cmCommandArgumentParserHelper::AddString(const std::string& str)
+const char* cmCommandArgumentParserHelper::AddString(const std::string& str)
 {
   if (str.empty()) {
     return this->EmptyVariable;
@@ -55,8 +55,8 @@ char* cmCommandArgumentParserHelper::AddString(const std::string& str)
   return stVal;
 }
 
-char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
-                                                           const char* var)
+const char* cmCommandArgumentParserHelper::ExpandSpecialVariable(
+  const char* key, const char* var)
 {
   if (!key) {
     return this->ExpandVariable(var);
@@ -91,7 +91,7 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
   return nullptr;
 }
 
-char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
+const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
 {
   if (!var) {
     return nullptr;
@@ -125,11 +125,11 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
   return this->AddString(value ? value : "");
 }
 
-char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
+const char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
 {
   if (this->ReplaceAtSyntax) {
     // try to expand the variable
-    char* ret = this->ExpandVariable(var);
+    const char* ret = this->ExpandVariable(var);
     // if the return was 0 and we want to replace empty strings
     // then return an empty string
     if (!ret && this->RemoveEmpty) {
@@ -150,7 +150,8 @@ char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
   return this->AddString(ref);
 }
 
-char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)
+const char* cmCommandArgumentParserHelper::CombineUnions(const char* in1,
+                                                         const char* in2)
 {
   if (!in1) {
     return in2;
@@ -176,10 +177,11 @@ void cmCommandArgumentParserHelper::AllocateParserType(
   if (len == 0) {
     return;
   }
-  pt->str = new char[len + 1];
-  strncpy(pt->str, str, len);
-  pt->str[len] = 0;
-  this->Variables.push_back(pt->str);
+  char* out = new char[len + 1];
+  strncpy(out, str, len);
+  out[len] = 0;
+  pt->str = out;
+  this->Variables.push_back(out);
 }
 
 bool cmCommandArgumentParserHelper::HandleEscapeSymbol(

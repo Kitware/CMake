@@ -17,7 +17,7 @@ class cmCommandArgumentParserHelper
 public:
   struct ParserType
   {
-    char* str;
+    const char* str;
   };
 
   cmCommandArgumentParserHelper();
@@ -35,11 +35,11 @@ public:
   void Error(const char* str);
 
   // For yacc
-  char* CombineUnions(char* in1, char* in2);
+  const char* CombineUnions(const char* in1, const char* in2);
 
-  char* ExpandSpecialVariable(const char* key, const char* var);
-  char* ExpandVariable(const char* var);
-  char* ExpandVariableForAt(const char* var);
+  const char* ExpandSpecialVariable(const char* key, const char* var);
+  const char* ExpandVariable(const char* var);
+  const char* ExpandVariableForAt(const char* var);
   void SetResult(const char* value);
 
   void SetMakefile(const cmMakefile* mf);
@@ -69,7 +69,7 @@ private:
   void Print(const char* place, const char* str);
   void SafePrintMissing(const char* str, int line, int cnt);
 
-  char* AddString(const std::string& str);
+  const char* AddString(const std::string& str);
 
   void CleanupParser();
   void SetError(std::string const& msg);
