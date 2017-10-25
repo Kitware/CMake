@@ -24,6 +24,13 @@ std::string cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
   return fullName;
 }
 
+bool cmExternalMakefileProjectGenerator::Open(
+  const std::string& /*bindir*/, const std::string& /*projectName*/,
+  bool /*dryRun*/)
+{
+  return false;
+}
+
 cmExternalMakefileProjectGeneratorFactory::
   cmExternalMakefileProjectGeneratorFactory(const std::string& n,
                                             const std::string& doc)

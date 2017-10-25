@@ -15,7 +15,7 @@ class cmQtAutoGeneratorInitializer
 public:
   static std::string GetQtMajorVersion(cmGeneratorTarget const* target);
   static std::string GetQtMinorVersion(cmGeneratorTarget const* target,
-                                       const std::string& qtVersionMajor);
+                                       std::string const& qtVersionMajor);
 
   static void InitializeAutogenTarget(cmQtAutoGenDigest& digest);
   static void SetupAutoGenerateTarget(cmQtAutoGenDigest const& digest);

@@ -11,9 +11,9 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cm_auto_ptr.hxx"
 
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <utility>
 
 cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
@@ -65,7 +65,7 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
   cmGeneratorExpressionDAGChecker dagChecker(tgt->GetName(), propName, nullptr,
                                              nullptr);
 
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
 
   cmTarget dummyHead("try_compile_dummy_exe", cmStateEnums::EXECUTABLE,
                      cmTarget::VisibilityNormal, tgt->Target->GetMakefile());

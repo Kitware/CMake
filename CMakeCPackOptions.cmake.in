@@ -208,12 +208,6 @@ if(CPACK_GENERATOR MATCHES "IFW")
 
 endif()
 
-if(CPACK_GENERATOR MATCHES "CygwinSource")
-  # when packaging source make sure the .build directory is not included
-    set(CPACK_SOURCE_IGNORE_FILES
-      "/CVS/" "/\\.build/" "/\\.svn/" "\\.swp$" "\\.#" "/#" "~$")
-endif()
-
 if("${CPACK_GENERATOR}" STREQUAL "PackageMaker")
   if(CMAKE_PACKAGE_QTGUI)
     set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")

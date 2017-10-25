@@ -25,7 +25,7 @@ with Qt.
 
 
 Example
--------
+^^^^^^^
 
 Consider a file ``FOO.hpp`` holds a custom macro ``OBJ_JSON_FILE`` and we
 want the ``moc`` file to depend on the macro`s file name argument::

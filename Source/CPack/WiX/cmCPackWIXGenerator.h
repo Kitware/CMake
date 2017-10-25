@@ -48,6 +48,12 @@ private:
   typedef std::map<std::string, size_t> ambiguity_map_t;
   typedef std::set<std::string> extension_set_t;
 
+  enum class DefinitionType
+  {
+    STRING,
+    PATH
+  };
+
   bool InitializeWiXConfiguration();
 
   bool PackageFilesImpl();
@@ -58,7 +64,8 @@ private:
 
   void CreateWiXProductFragmentIncludeFile();
 
-  void CopyDefinition(cmWIXSourceWriter& source, std::string const& name);
+  void CopyDefinition(cmWIXSourceWriter& source, std::string const& name,
+                      DefinitionType type = DefinitionType::STRING);
 
   void AddDefinition(cmWIXSourceWriter& source, std::string const& name,
                      std::string const& value);

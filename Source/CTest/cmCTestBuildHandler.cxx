@@ -769,6 +769,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
   }
 
   std::vector<const char*> argv;
+  argv.reserve(args.size() + 1);
   for (std::string const& arg : args) {
     argv.push_back(arg.c_str());
   }

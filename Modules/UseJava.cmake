@@ -481,6 +481,8 @@ function(add_jar _TARGET_NAME)
     else()
         get_filename_component(_add_jar_OUTPUT_DIR ${_add_jar_OUTPUT_DIR} ABSOLUTE)
     endif()
+    # ensure output directory exists
+    file (MAKE_DIRECTORY "${_add_jar_OUTPUT_DIR}")
 
     if (_add_jar_ENTRY_POINT)
         set(_ENTRY_POINT_OPTION e)
@@ -515,7 +517,7 @@ function(add_jar _TARGET_NAME)
        string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${CMAKE_JAVA_INCLUDE_FLAG_SEP}${JAVA_INCLUDE_DIR}")
     endforeach()
 
-    set(CMAKE_JAVA_CLASS_OUTPUT_PATH "${_add_jar_OUTPUT_DIR}${CMAKE_FILES_DIRECTORY}/${_TARGET_NAME}.dir")
+    set(CMAKE_JAVA_CLASS_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${_TARGET_NAME}.dir")
 
     set(_JAVA_TARGET_OUTPUT_NAME "${_TARGET_NAME}.jar")
     if (_add_jar_OUTPUT_NAME AND _add_jar_VERSION)
@@ -546,7 +548,7 @@ function(add_jar _TARGET_NAME)
             list(APPEND _JAVA_COMPILE_FILELISTS ${_JAVA_FULL})
 
         elseif (_JAVA_EXT MATCHES ".java")
-            file(RELATIVE_PATH _JAVA_REL_BINARY_PATH ${_add_jar_OUTPUT_DIR} ${_JAVA_FULL})
+            file(RELATIVE_PATH _JAVA_REL_BINARY_PATH ${CMAKE_CURRENT_BINARY_DIR} ${_JAVA_FULL})
             file(RELATIVE_PATH _JAVA_REL_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${_JAVA_FULL})
             string(LENGTH ${_JAVA_REL_BINARY_PATH} _BIN_LEN)
             string(LENGTH ${_JAVA_REL_SOURCE_PATH} _SRC_LEN)

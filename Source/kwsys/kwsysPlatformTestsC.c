@@ -55,6 +55,21 @@ int KWSYS_PLATFORM_TEST_C_MAIN()
 }
 #endif
 
+#ifdef TEST_KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC
+#if defined(__APPLE__)
+#include <AvailabilityMacros.h>
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 101200
+#error "clock_gettime not available on macOS < 10.12"
+#endif
+#endif
+#include <time.h>
+int KWSYS_PLATFORM_TEST_C_MAIN()
+{
+  struct timespec ts;
+  return clock_gettime(CLOCK_MONOTONIC, &ts);
+}
+#endif
+
 #ifdef TEST_KWSYS_C_TYPE_MACROS
 char* info_macros =
 #if defined(__SIZEOF_SHORT__)

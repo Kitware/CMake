@@ -194,6 +194,7 @@ std::string cmCommonTargetGenerator::GetManifests()
   this->GeneratorTarget->GetManifests(manifest_srcs, this->ConfigName);
 
   std::vector<std::string> manifests;
+  manifests.reserve(manifest_srcs.size());
   for (cmSourceFile const* manifest_src : manifest_srcs) {
     manifests.push_back(this->LocalCommonGenerator->ConvertToOutputFormat(
       this->LocalCommonGenerator->ConvertToRelativePath(

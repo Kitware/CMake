@@ -497,6 +497,10 @@ public:
     unsigned int Delay;
   };
   static WindowsFileRetry GetWindowsFileRetry();
+
+  /** Get the real path for a given path, removing all symlinks. */
+  static std::string GetRealPath(const std::string& path,
+                                 std::string* errorMessage = 0);
 #endif
 private:
   static bool s_ForceUnixPaths;

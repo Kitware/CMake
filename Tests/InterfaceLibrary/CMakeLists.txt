@@ -64,7 +64,6 @@ target_link_libraries(iface_whitelist INTERFACE $<$<BOOL:$<TARGET_PROPERTY:CUSTO
 add_executable(exec_whitelist dummy.cpp)
 target_link_libraries(exec_whitelist iface_whitelist)
 
-set(CMAKE_NO_SYSTEM_FROM_IMPORTED 1)
 add_library(iface_imported INTERFACE IMPORTED)
 set_property(TARGET iface_imported PROPERTY
   INTERFACE_COMPILE_DEFINITIONS

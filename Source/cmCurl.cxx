@@ -56,3 +56,41 @@ std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile)
 #endif
   return e;
 }
+
+std::string cmCurlSetNETRCOption(::CURL* curl, const std::string& netrc_level,
+                                 const std::string& netrc_file)
+{
+  std::string e;
+  CURL_NETRC_OPTION curl_netrc_level = CURL_NETRC_LAST;
+  ::CURLcode res;
+
+  if (!netrc_level.empty()) {
+    if (netrc_level == "OPTIONAL") {
+      curl_netrc_level = CURL_NETRC_OPTIONAL;
+    } else if (netrc_level == "REQUIRED") {
+      curl_netrc_level = CURL_NETRC_REQUIRED;
+    } else if (netrc_level == "IGNORED") {
+      curl_netrc_level = CURL_NETRC_IGNORED;
+    } else {
+      e = "NETRC accepts OPTIONAL, IGNORED or REQUIRED but got: ";
+      e += netrc_level;
+      return e;
+    }
+  }
+
+  if (curl_netrc_level != CURL_NETRC_LAST &&
+      curl_netrc_level != CURL_NETRC_IGNORED) {
+    res = ::curl_easy_setopt(curl, CURLOPT_NETRC, curl_netrc_level);
+    check_curl_result(res, "Unable to set netrc level: ");
+    if (!e.empty()) {
+      return e;
+    }
+
+    // check to see if a .netrc file has been specified
+    if (!netrc_file.empty()) {
+      res = ::curl_easy_setopt(curl, CURLOPT_NETRC_FILE, netrc_file.c_str());
+      check_curl_result(res, "Unable to set .netrc file path : ");
+    }
+  }
+  return e;
+}

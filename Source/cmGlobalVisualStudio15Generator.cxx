@@ -111,6 +111,53 @@ void cmGlobalVisualStudio15Generator::WriteSLNHeader(std::ostream& fout)
   }
 }
 
+bool cmGlobalVisualStudio15Generator::SetGeneratorInstance(
+  std::string const& i, cmMakefile* mf)
+{
+  if (!i.empty()) {
+    if (!this->vsSetupAPIHelper.SetVSInstance(i)) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "could not find specified instance of Visual Studio:\n"
+        "  " << i;
+      /* clang-format on */
+      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return false;
+    }
+  }
+
+  std::string vsInstance;
+  if (!this->vsSetupAPIHelper.GetVSInstanceInfo(vsInstance)) {
+    std::ostringstream e;
+    /* clang-format off */
+    e <<
+      "Generator\n"
+      "  " << this->GetName() << "\n"
+      "could not find any instance of Visual Studio.\n";
+    /* clang-format on */
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
+  }
+
+  // Save the selected instance persistently.
+  std::string genInstance = mf->GetSafeDefinition("CMAKE_GENERATOR_INSTANCE");
+  if (vsInstance != genInstance) {
+    this->CMakeInstance->AddCacheEntry(
+      "CMAKE_GENERATOR_INSTANCE", vsInstance.c_str(),
+      "Generator instance identifier.", cmStateEnums::INTERNAL);
+  }
+
+  return true;
+}
+
+bool cmGlobalVisualStudio15Generator::GetVSInstance(std::string& dir) const
+{
+  return vsSetupAPIHelper.GetVSInstanceInfo(dir);
+}
+
 bool cmGlobalVisualStudio15Generator::InitializeWindows(cmMakefile* mf)
 {
   // If the Win 8.1 SDK is installed then we can select a SDK matching

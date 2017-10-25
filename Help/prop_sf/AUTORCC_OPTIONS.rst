@@ -9,5 +9,14 @@ optional ``OPTIONS`` argument of the :module:`qt4_add_resources() <FindQt4>` mac
 
 By default it is empty.
 
-The options set on the ``.qrc`` source file may override :prop_tgt:`AUTORCC_OPTIONS` set
-on the target.
+The options set on the ``.qrc`` source file may override
+:prop_tgt:`AUTORCC_OPTIONS` set on the target.
+
+EXAMPLE
+^^^^^^^
+
+.. code-block:: cmake
+
+  # ...
+  set_property(SOURCE resources.qrc PROPERTY AUTORCC_OPTIONS "--compress;9")
+  # ...

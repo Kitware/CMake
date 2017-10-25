@@ -40,7 +40,7 @@
 #include "cmCPackRPMGenerator.h"
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) || (defined(__CYGWIN__) && defined(HAVE_LIBUUID))
 #include "WiX/cmCPackWIXGenerator.h"
 #endif
 
@@ -87,7 +87,7 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
     this->RegisterGenerator("7Z", "7-Zip file format",
                             cmCPack7zGenerator::CreateGenerator);
   }
-#ifdef _WIN32
+#if defined(_WIN32) || (defined(__CYGWIN__) && defined(HAVE_LIBUUID))
   if (cmCPackWIXGenerator::CanGenerate()) {
     this->RegisterGenerator("WIX", "MSI file format via WiX tools",
                             cmCPackWIXGenerator::CreateGenerator);

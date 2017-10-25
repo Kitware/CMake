@@ -18,7 +18,7 @@ class cmExecutionStatus;
 bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
                                          cmExecutionStatus&)
 {
-  if (args.size() < 2) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
@@ -189,12 +189,6 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
       this->SetError(msg);
       return false;
     }
-  }
-
-  if (s == args.end()) {
-    this->SetError(
-      "called with incorrect number of arguments, no sources provided");
-    return false;
   }
 
   std::vector<std::string> srclists(s, args.end());

@@ -225,6 +225,7 @@ if(NOT MATLAB_ADDITIONAL_VERSIONS)
 endif()
 
 set(MATLAB_VERSIONS_MAPPING
+  "R2017b=9.3"
   "R2017a=9.2"
   "R2016b=9.1"
   "R2016a=9.0"
@@ -236,7 +237,6 @@ set(MATLAB_VERSIONS_MAPPING
   "R2013a=8.1"
   "R2012b=8.0"
   "R2012a=7.14"
-
   "R2011b=7.13"
   "R2011a=7.12"
   "R2010b=7.11"
@@ -681,12 +681,12 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
 
     string(SUBSTRING ${_matlab_version_from_cmd} ${index} -1 substring_ans)
     string(
-      REGEX MATCHALL "ans[\r\n\t ]*=[\r\n\t ]*([0-9]+(\\.[0-9]+)?)"
+      REGEX MATCHALL "ans[\r\n\t ]*=[\r\n\t ]*'?([0-9]+(\\.[0-9]+)?)"
       matlab_versions_regex
       ${substring_ans})
     foreach(match IN LISTS matlab_versions_regex)
       string(
-        REGEX MATCH "ans[\r\n\t ]*=[\r\n\t ]*(([0-9]+)(\\.([0-9]+))?)"
+        REGEX MATCH "ans[\r\n\t ]*=[\r\n\t ]*'?(([0-9]+)(\\.([0-9]+))?)"
         current_match ${match})
 
       list(APPEND matlab_list_of_all_versions_tmp ${CMAKE_MATCH_1})

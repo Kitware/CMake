@@ -3,6 +3,7 @@
 #include "cmGeneratorExpressionEvaluationFile.h"
 
 #include "cmsys/FStream.hxx"
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <utility>
 
@@ -13,17 +14,16 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
   const std::string& input,
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> outputFileExpr,
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> condition, bool inputIsContent,
-  cmPolicies::PolicyStatus policyStatusCMP0070)
+  std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
+  std::unique_ptr<cmCompiledGeneratorExpression> condition,
+  bool inputIsContent, cmPolicies::PolicyStatus policyStatusCMP0070)
   : Input(input)
-  , OutputFileExpr(outputFileExpr)
-  , Condition(condition)
+  , OutputFileExpr(std::move(outputFileExpr))
+  , Condition(std::move(condition))
   , InputIsContent(inputIsContent)
   , PolicyStatusCMP0070(policyStatusCMP0070)
 {
@@ -144,7 +144,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
 
   cmListFileBacktrace lfbt = this->OutputFileExpr->GetBacktrace();
   cmGeneratorExpression contentGE(lfbt);
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> inputExpression =
+  std::unique_ptr<cmCompiledGeneratorExpression> inputExpression =
     contentGE.Parse(inputContent);
 
   std::map<std::string, std::string> outputFiles;

@@ -2,6 +2,8 @@ set(CMAKE_LIBRARY_PATH_FLAG "--search_path=")
 set(CMAKE_LINK_LIBRARY_FLAG "--library=")
 set(CMAKE_INCLUDE_FLAG_C "--include_path=")
 
+set(CMAKE_DEPFILE_FLAGS_C "--preproc_with_compile --preproc_dependency=<DEPFILE>")
+
 set(CMAKE_C_CREATE_ASSEMBLY_SOURCE "<CMAKE_C_COMPILER> --compile_only --skip_assembler --c_file=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<ASSEMBLY_SOURCE>")
 set(CMAKE_C_CREATE_PREPROCESSED_SOURCE "<CMAKE_C_COMPILER> --preproc_only --c_file=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<PREPROCESSED_SOURCE>")
 

@@ -108,6 +108,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   set(CMAKE_${lang}_XCODE_CURRENT_ARCH "${CMAKE_${lang}_XCODE_CURRENT_ARCH}" PARENT_SCOPE)
   set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "${CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_${lang}_COMPILER_VERSION}" PARENT_SCOPE)
+  set(CMAKE_${lang}_COMPILER_VERSION_INTERNAL "${CMAKE_${lang}_COMPILER_VERSION_INTERNAL}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_WRAPPER "${CMAKE_${lang}_COMPILER_WRAPPER}" PARENT_SCOPE)
   set(CMAKE_${lang}_SIMULATE_ID "${CMAKE_${lang}_SIMULATE_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_${lang}_SIMULATE_VERSION}" PARENT_SCOPE)
@@ -473,6 +474,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     set(COMPILER_VERSION_MINOR 0)
     set(COMPILER_VERSION_PATCH 0)
     set(COMPILER_VERSION_TWEAK 0)
+    set(COMPILER_VERSION_INTERNAL "")
     set(HAVE_COMPILER_VERSION_MAJOR 0)
     set(HAVE_COMPILER_VERSION_MINOR 0)
     set(HAVE_COMPILER_VERSION_PATCH 0)
@@ -513,6 +515,10 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
       if("${info}" MATCHES "INFO:compiler_version\\[([^]\"]*)\\]")
         string(REGEX REPLACE "^0+([0-9])" "\\1" COMPILER_VERSION "${CMAKE_MATCH_1}")
         string(REGEX REPLACE "\\.0+([0-9])" ".\\1" COMPILER_VERSION "${COMPILER_VERSION}")
+      endif()
+      if("${info}" MATCHES "INFO:compiler_version_internal\\[([^]\"]*)\\]")
+        string(REGEX REPLACE "^0+([0-9])" "\\1" COMPILER_VERSION_INTERNAL "${CMAKE_MATCH_1}")
+        string(REGEX REPLACE "\\.0+([0-9])" ".\\1" COMPILER_VERSION_INTERNAL "${COMPILER_VERSION_INTERNAL}")
       endif()
       foreach(comp MAJOR MINOR PATCH TWEAK)
         foreach(digit 1 2 3 4 5 6 7 8 9)
@@ -589,6 +595,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
       set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "${ARCHITECTURE_ID}")
       set(MSVC_${lang}_ARCHITECTURE_ID "${ARCHITECTURE_ID}")
       set(CMAKE_${lang}_COMPILER_VERSION "${COMPILER_VERSION}")
+      set(CMAKE_${lang}_COMPILER_VERSION_INTERNAL "${COMPILER_VERSION_INTERNAL}")
       set(CMAKE_${lang}_SIMULATE_ID "${SIMULATE_ID}")
       set(CMAKE_${lang}_SIMULATE_VERSION "${SIMULATE_VERSION}")
     endif()
@@ -640,6 +647,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
   set(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}"
     PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_${lang}_COMPILER_VERSION}" PARENT_SCOPE)
+  set(CMAKE_${lang}_COMPILER_VERSION_INTERNAL "${CMAKE_${lang}_COMPILER_VERSION_INTERNAL}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_WRAPPER "${COMPILER_WRAPPER}" PARENT_SCOPE)
   set(CMAKE_${lang}_SIMULATE_ID "${CMAKE_${lang}_SIMULATE_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_${lang}_SIMULATE_VERSION}" PARENT_SCOPE)
@@ -726,4 +734,39 @@ function(CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX lang userflags)
   else()
     set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "" PARENT_SCOPE)
   endif()
+endfunction()
+
+function(CMAKE_DIAGNOSE_UNSUPPORTED_CLANG lang envvar)
+  if(NOT CMAKE_HOST_WIN32 OR CMAKE_GENERATOR MATCHES "Visual Studio" OR
+      NOT "${CMAKE_${lang}_COMPILER_ID};${CMAKE_${lang}_SIMULATE_ID}" STREQUAL "Clang;MSVC")
+    return()
+  endif()
+
+  # Test whether a GNU-like command-line option works.
+  execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" --version
+    RESULT_VARIABLE _clang_result
+    OUTPUT_VARIABLE _clang_stdout
+    ERROR_VARIABLE _clang_stderr)
+  if(NOT _clang_result EQUAL 0)
+    return()
+  endif()
+
+  # Help the user configure the environment to use the MSVC-like Clang.
+  string(CONCAT _msg
+    "The Clang compiler tool\n"
+    "  \"${CMAKE_${lang}_COMPILER}\"\n"
+    "targets the MSVC ABI but has a GNU-like command-line interface.  "
+    "This is not supported.  "
+    "Use 'clang-cl' instead, e.g. by setting '${envvar}=clang-cl' in the environment."
+    )
+  execute_process(COMMAND rc -help
+    RESULT_VARIABLE _rc_result
+    OUTPUT_VARIABLE _rc_stdout
+    ERROR_VARIABLE _rc_stderr)
+  if(NOT _rc_result EQUAL 0)
+    string(APPEND _msg "  "
+      "Furthermore, use the MSVC command-line environment."
+      )
+  endif()
+  message(FATAL_ERROR "${_msg}")
 endfunction()

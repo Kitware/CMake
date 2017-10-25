@@ -1,5 +1,4 @@
-^You have called ADD_LIBRARY for library TestObjectLibWithoutSources without any source files. This typically indicates a problem with your CMakeLists.txt file
-CMake Error at OBJECTwithNoSourcesButLinkObjects.cmake:[0-9]+ \(target_link_libraries\):
+^CMake Error at OBJECTwithNoSourcesButLinkObjects.cmake:[0-9]+ \(target_link_libraries\):
   Object library target \"TestObjectLibWithoutSources\" may not link to
   anything.
 Call Stack \(most recent call first\):

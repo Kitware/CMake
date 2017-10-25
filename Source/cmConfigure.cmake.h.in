@@ -19,21 +19,12 @@
 #cmakedefine HAVE_UNSETENV
 #cmakedefine CMAKE_USE_ELF_PARSER
 #cmakedefine CMAKE_USE_MACH_PARSER
-#cmakedefine CMake_HAVE_CXX_AUTO_PTR
-#cmakedefine CMake_HAVE_CXX_EQ_DELETE
 #cmakedefine CMake_HAVE_CXX_FALLTHROUGH
 #cmakedefine CMake_HAVE_CXX_GNU_FALLTHROUGH
 #cmakedefine CMake_HAVE_CXX_ATTRIBUTE_FALLTHROUGH
 #cmakedefine CMake_HAVE_CXX_MAKE_UNIQUE
-#cmakedefine CMake_HAVE_CXX_UNIQUE_PTR
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
 #define CMAKE_DATA_DIR "/@CMAKE_DATA_DIR@"
-
-#ifdef CMake_HAVE_CXX_EQ_DELETE
-#define CM_EQ_DELETE = delete
-#else
-#define CM_EQ_DELETE
-#endif
 
 #if defined(CMake_HAVE_CXX_FALLTHROUGH)
 #define CM_FALLTHROUGH [[fallthrough]]
@@ -46,7 +37,7 @@
 #endif
 
 #define CM_DISABLE_COPY(Class)                                                \
-  Class(Class const&) CM_EQ_DELETE;                                           \
-  Class& operator=(Class const&) CM_EQ_DELETE;
+  Class(Class const&) = delete;                                               \
+  Class& operator=(Class const&) = delete;
 
 #endif

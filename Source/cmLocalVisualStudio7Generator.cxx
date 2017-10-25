@@ -36,6 +36,13 @@ private:
   cmLocalVisualStudio7Generator* LocalGenerator;
 };
 
+class cmLocalVisualStudio7Generator::AllConfigSources
+{
+public:
+  std::vector<cmGeneratorTarget::AllConfigSource> Sources;
+  std::map<cmSourceFile const*, size_t> Index;
+};
+
 extern cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[];
 
 static void cmConvertToWindowsSlash(std::string& s)
@@ -81,29 +88,6 @@ void cmLocalVisualStudio7Generator::Generate()
 {
   this->WriteProjectFiles();
   this->WriteStampFiles();
-}
-
-void cmLocalVisualStudio7Generator::AddCMakeListsRules()
-{
-  // Create the regeneration custom rule.
-  if (!this->Makefile->IsOn("CMAKE_SUPPRESS_REGENERATION")) {
-    // Create a rule to regenerate the build system when the target
-    // specification source changes.
-    if (cmSourceFile* sf = this->CreateVCProjBuildRule()) {
-      // Add the rule to targets that need it.
-      const std::vector<cmGeneratorTarget*>& tgts =
-        this->GetGeneratorTargets();
-      for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
-           l != tgts.end(); ++l) {
-        if ((*l)->GetType() == cmStateEnums::GLOBAL_TARGET) {
-          continue;
-        }
-        if ((*l)->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
-          (*l)->AddSource(sf->GetFullPath());
-        }
-      }
-    }
-  }
 }
 
 void cmLocalVisualStudio7Generator::FixGlobalTargets()
@@ -239,19 +223,29 @@ void cmLocalVisualStudio7Generator::CreateSingleVCProj(
 
 cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 {
+  if (this->Makefile->IsOn("CMAKE_SUPPRESS_REGENERATION")) {
+    return nullptr;
+  }
+
+  std::string makefileIn = this->GetCurrentSourceDirectory();
+  makefileIn += "/";
+  makefileIn += "CMakeLists.txt";
+  makefileIn = cmSystemTools::CollapseFullPath(makefileIn);
+  if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {
+    if (file->GetCustomCommand()) {
+      return file;
+    }
+  }
+  if (!cmSystemTools::FileExists(makefileIn)) {
+    return nullptr;
+  }
+
   std::string stampName = this->GetCurrentBinaryDirectory();
   stampName += "/";
   stampName += cmake::GetCMakeFilesDirectoryPostSlash();
   stampName += "generate.stamp";
   cmCustomCommandLine commandLine;
   commandLine.push_back(cmSystemTools::GetCMakeCommand());
-  std::string makefileIn = this->GetCurrentSourceDirectory();
-  makefileIn += "/";
-  makefileIn += "CMakeLists.txt";
-  makefileIn = cmSystemTools::CollapseFullPath(makefileIn.c_str());
-  if (!cmSystemTools::FileExists(makefileIn.c_str())) {
-    return 0;
-  }
   std::string comment = "Building Custom Rule ";
   comment += makefileIn;
   std::string args;
@@ -275,10 +269,13 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     fullpathStampName.c_str(), listFiles, makefileIn.c_str(), commandLines,
     comment.c_str(), no_working_directory, true, false);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str())) {
+    // Finalize the source file path now since we're adding this after
+    // the generator validated all project-named sources.
+    file->GetFullPath();
     return file;
   } else {
     cmSystemTools::Error("Error adding rule for ", makefileIn.c_str());
-    return 0;
+    return nullptr;
   }
 }
 
@@ -1368,13 +1365,26 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
 
-  std::vector<cmGeneratorTarget::AllConfigSource> const& sources =
-    target->GetAllConfigSources();
-  std::map<cmSourceFile const*, size_t> sourcesIndex;
+  AllConfigSources sources;
+  sources.Sources = target->GetAllConfigSources();
 
-  for (size_t si = 0; si < sources.size(); ++si) {
-    cmSourceFile const* sf = sources[si].Source;
-    sourcesIndex[sf] = si;
+  // Add CMakeLists.txt file with rule to re-run CMake for user convenience.
+  if (target->GetType() != cmStateEnums::GLOBAL_TARGET &&
+      target->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
+    if (cmSourceFile const* sf = this->CreateVCProjBuildRule()) {
+      cmGeneratorTarget::AllConfigSource acs;
+      acs.Source = sf;
+      acs.Kind = cmGeneratorTarget::SourceKindCustomCommand;
+      for (size_t ci = 0; ci < configs.size(); ++ci) {
+        acs.Configs.push_back(ci);
+      }
+      sources.Sources.emplace_back(std::move(acs));
+    }
+  }
+
+  for (size_t si = 0; si < sources.Sources.size(); ++si) {
+    cmSourceFile const* sf = sources.Sources[si].Source;
+    sources.Index[sf] = si;
     if (!sf->GetObjectLibrary().empty()) {
       if (this->FortranProject) {
         // Intel Fortran does not support per-config source locations
@@ -1400,7 +1410,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   // Loop through every source group.
   for (unsigned int i = 0; i < sourceGroups.size(); ++i) {
     cmSourceGroup sg = sourceGroups[i];
-    this->WriteGroup(&sg, target, fout, libName, configs, sourcesIndex);
+    this->WriteGroup(&sg, target, fout, libName, configs, sources);
   }
 
   fout << "\t</Files>\n";
@@ -1453,8 +1463,8 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     }
     if (const char* cflags = sf.GetProperty("COMPILE_FLAGS")) {
       cmGeneratorExpression ge;
-      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
-      fc.CompileFlags = cge->Evaluate(lg, *i);
+      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
+      fc.CompileFlags = cge->Evaluate(lg, *i, false, gt);
       needfc = true;
     }
     if (lg->FortranProject) {
@@ -1567,7 +1577,7 @@ std::string cmLocalVisualStudio7Generator::ComputeLongestObjectDirectory(
 bool cmLocalVisualStudio7Generator::WriteGroup(
   const cmSourceGroup* sg, cmGeneratorTarget* target, std::ostream& fout,
   const std::string& libName, std::vector<std::string> const& configs,
-  std::map<cmSourceFile const*, size_t> const& sourcesIndex)
+  AllConfigSources const& sources)
 {
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
@@ -1579,7 +1589,7 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
   std::ostringstream tmpOut;
   for (unsigned int i = 0; i < children.size(); ++i) {
     if (this->WriteGroup(&children[i], target, tmpOut, libName, configs,
-                         sourcesIndex)) {
+                         sources)) {
       hasChildrenWithSources = true;
     }
   }
@@ -1595,9 +1605,6 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
     this->WriteVCProjBeginGroup(fout, name.c_str(), "");
   }
 
-  std::vector<cmGeneratorTarget::AllConfigSource> const& sources =
-    target->GetAllConfigSources();
-
   // Loop through each source in the source group.
   for (std::vector<const cmSourceFile*>::const_iterator sf =
          sourceFiles.begin();
@@ -1608,10 +1615,11 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
         target->GetType() == cmStateEnums::GLOBAL_TARGET) {
       // Look up the source kind and configs.
       std::map<cmSourceFile const*, size_t>::const_iterator map_it =
-        sourcesIndex.find(*sf);
+        sources.Index.find(*sf);
       // The map entry must exist because we populated it earlier.
-      assert(map_it != sourcesIndex.end());
-      cmGeneratorTarget::AllConfigSource const& acs = sources[map_it->second];
+      assert(map_it != sources.Index.end());
+      cmGeneratorTarget::AllConfigSource const& acs =
+        sources.Sources[map_it->second];
 
       FCInfo fcinfo(this, target, acs, configs);
 
@@ -1849,7 +1857,7 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(
   if (!addedPrelink) {
     event.Write(target->GetPreLinkCommands());
   }
-  CM_AUTO_PTR<cmCustomCommand> pcc(
+  std::unique_ptr<cmCustomCommand> pcc(
     this->MaybeCreateImplibDir(target, configName, this->FortranProject));
   if (pcc.get()) {
     event.Write(*pcc);
@@ -2079,7 +2087,10 @@ public:
         if (strcmp(atts[i], "ProjectGUID") == 0) {
           if (atts[i + 1]) {
             this->GUID = atts[i + 1];
-            this->GUID = this->GUID.substr(1, this->GUID.size() - 2);
+            if (this->GUID[0] == '{') {
+              // remove surrounding curly brackets
+              this->GUID = this->GUID.substr(1, this->GUID.size() - 2);
+            }
           } else {
             this->GUID.clear();
           }

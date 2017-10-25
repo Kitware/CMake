@@ -55,6 +55,13 @@ public:
    */
   void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
                       bool optional) override;
+
+  /**
+   * Open a generated IDE project given the following information.
+   */
+  bool Open(const std::string& bindir, const std::string& projectName,
+            bool dryRun) override;
+
   /**
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
@@ -106,7 +113,8 @@ protected:
 private:
   cmXCodeObject* CreateOrGetPBXGroup(cmGeneratorTarget* gtgt,
                                      cmSourceGroup* sg);
-  cmXCodeObject* CreatePBXGroup(cmXCodeObject* parent, std::string name);
+  cmXCodeObject* CreatePBXGroup(cmXCodeObject* parent,
+                                const std::string& name);
   bool CreateGroups(std::vector<cmLocalGenerator*>& generators);
   std::string XCodeEscapePath(const std::string& p);
   std::string RelativeToSource(const char* p);

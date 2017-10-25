@@ -190,7 +190,7 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Problem creating installer directory: " << scriptDir
                                                            << std::endl);
-    return 0;
+    return false;
   }
 
   // if preflight, postflight, or postupgrade are set

@@ -80,6 +80,8 @@ public slots:
   void configure();
   /// generate the files
   void generate();
+  /// open the project
+  void open();
   /// set the property values
   void setProperties(const QCMakePropertyList&);
   /// interrupt the configure or generate process (if connecting, make a direct
@@ -111,6 +113,8 @@ public slots:
   void setWarnUninitializedMode(bool value);
   /// set whether to run cmake with warnings about unused variables
   void setWarnUnusedMode(bool value);
+  /// check if project IDE open is possible and emit openPossible signal
+  void checkOpenPossible();
 
 public:
   /// get the list of cache properties
@@ -151,6 +155,10 @@ signals:
   void debugOutputChanged(bool);
   /// signal when the toolset changes
   void toolsetChanged(const QString& toolset);
+  /// signal when open is done
+  void openDone(bool successful);
+  /// signal when open is done
+  void openPossible(bool possible);
 
 protected:
   cmake* CMakeInstance;

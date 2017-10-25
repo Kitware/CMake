@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmForEachCommand.h"
 
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +10,6 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf)
@@ -35,7 +35,8 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
     // if this is the endofreach for this statement
     if (!this->Depth) {
       // Remove the function blocker for this scope or bail.
-      CM_AUTO_PTR<cmFunctionBlocker> fb(mf.RemoveFunctionBlocker(this, lff));
+      std::unique_ptr<cmFunctionBlocker> fb(
+        mf.RemoveFunctionBlocker(this, lff));
       if (!fb.get()) {
         return false;
       }
@@ -181,7 +182,7 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
 
 bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
 {
-  CM_AUTO_PTR<cmForEachFunctionBlocker> f(
+  std::unique_ptr<cmForEachFunctionBlocker> f(
     new cmForEachFunctionBlocker(this->Makefile));
   f->Args.push_back(args[0]);
 
@@ -213,7 +214,7 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
     }
   }
 
-  this->Makefile->AddFunctionBlocker(f.release()); // TODO: pass auto_ptr
+  this->Makefile->AddFunctionBlocker(f.release()); // TODO: pass unique_ptr
 
   return true;
 }

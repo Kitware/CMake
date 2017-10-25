@@ -244,6 +244,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("AUTOMOC", nullptr);
     this->SetPropertyDefault("AUTOUIC", nullptr);
     this->SetPropertyDefault("AUTORCC", nullptr);
+    this->SetPropertyDefault("AUTOMOC_COMPILER_PREDEFINES", nullptr);
     this->SetPropertyDefault("AUTOMOC_DEPEND_FILTERS", nullptr);
     this->SetPropertyDefault("AUTOMOC_MACRO_NAMES", nullptr);
     this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", nullptr);
@@ -255,6 +256,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("WIN32_EXECUTABLE", nullptr);
     this->SetPropertyDefault("MACOSX_BUNDLE", nullptr);
     this->SetPropertyDefault("MACOSX_RPATH", nullptr);
+    this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", nullptr);
     this->SetPropertyDefault("BUILD_WITH_INSTALL_NAME_DIR", nullptr);
     this->SetPropertyDefault("C_CLANG_TIDY", nullptr);
     this->SetPropertyDefault("C_COMPILER_LAUNCHER", nullptr);
@@ -279,10 +281,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("CUDA_COMPILER_LAUNCHER", nullptr);
     this->SetPropertyDefault("LINK_SEARCH_START_STATIC", nullptr);
     this->SetPropertyDefault("LINK_SEARCH_END_STATIC", nullptr);
-  }
-
-  if (this->GetType() != cmStateEnums::UTILITY) {
-    this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", nullptr);
   }
 
   // Collect the set of configuration types.

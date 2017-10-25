@@ -41,8 +41,6 @@ function(cm_check_cxx_feature name)
   endif()
 endfunction()
 
-cm_check_cxx_feature(auto_ptr)
-cm_check_cxx_feature(eq_delete)
 cm_check_cxx_feature(fallthrough)
 if(NOT CMake_HAVE_CXX_FALLTHROUGH)
   cm_check_cxx_feature(gnu_fallthrough)

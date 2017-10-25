@@ -70,6 +70,9 @@ public:
   /** Tell the generator about the target system.  */
   virtual bool SetSystemName(std::string const&, cmMakefile*) { return true; }
 
+  /** Set the generator-specific instance.  Returns true if supported.  */
+  virtual bool SetGeneratorInstance(std::string const& i, cmMakefile* mf);
+
   /** Set the generator-specific platform name.  Returns true if platform
       is supported and false otherwise.  */
   virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
@@ -161,6 +164,12 @@ public:
                               cmSystemTools::OUTPUT_NONE,
             std::vector<std::string> const& nativeOptions =
               std::vector<std::string>());
+
+  /**
+   * Open a generated IDE project given the following information.
+   */
+  virtual bool Open(const std::string& bindir, const std::string& projectName,
+                    bool dryRun);
 
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand, const std::string& makeProgram,
@@ -532,6 +541,8 @@ private:
   void FinalizeTargetCompileInfo();
 
   virtual void ForceLinkerLanguages();
+
+  bool CheckTargetsForMissingSources() const;
 
   void CreateLocalGenerators();
 

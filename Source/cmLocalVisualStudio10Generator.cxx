@@ -17,7 +17,12 @@ public:
   virtual void CharacterDataHandler(const char* data, int length)
   {
     if (this->DoGUID) {
-      this->GUID.assign(data + 1, length - 2);
+      if (data[0] == '{') {
+        // remove surrounding curly brackets
+        this->GUID.assign(data + 1, length - 2);
+      } else {
+        this->GUID.assign(data, length);
+      }
       this->DoGUID = false;
     }
   }

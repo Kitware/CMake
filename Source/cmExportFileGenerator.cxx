@@ -17,9 +17,9 @@
 #include "cmTargetExport.h"
 #include "cmake.h"
 
-#include "cm_auto_ptr.hxx"
 #include "cmsys/FStream.hxx"
 #include <assert.h>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <string.h>
 #include <utility>
@@ -65,18 +65,17 @@ const char* cmExportFileGenerator::GetMainExportFileName() const
 bool cmExportFileGenerator::GenerateImportFile()
 {
   // Open the output file to generate it.
-  CM_AUTO_PTR<cmsys::ofstream> foutPtr;
+  std::unique_ptr<cmsys::ofstream> foutPtr;
   if (this->AppendMode) {
     // Open for append.
-    CM_AUTO_PTR<cmsys::ofstream> ap(
-      new cmsys::ofstream(this->MainImportFile.c_str(), std::ios::app));
-    foutPtr = ap;
+    foutPtr = cm::make_unique<cmsys::ofstream>(this->MainImportFile.c_str(),
+                                               std::ios::app);
   } else {
     // Generate atomically and with copy-if-different.
-    CM_AUTO_PTR<cmGeneratedFileStream> ap(
+    std::unique_ptr<cmGeneratedFileStream> ap(
       new cmGeneratedFileStream(this->MainImportFile.c_str(), true));
     ap->SetCopyIfDifferent(true);
-    foutPtr = ap;
+    foutPtr = std::move(ap);
   }
   if (!foutPtr.get() || !*foutPtr) {
     std::string se = cmSystemTools::GetLastSystemError();
@@ -372,7 +371,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   std::string dirs = cmGeneratorExpression::Preprocess(
     tei->InterfaceIncludeDirectories, preprocessRule, true);
   this->ReplaceInstallPrefix(dirs);
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);
+  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);
   std::string exportDirs =
     cge->Evaluate(target->GetLocalGenerator(), "", false, target);
 

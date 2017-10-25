@@ -8,8 +8,9 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
+
+#include <memory> // IWYU pragma: keep
 
 static std::string cmIfCommandError(
   std::vector<cmExpandedCommandArgument> const& args)
@@ -36,7 +37,8 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
     // if this is the endif for this if statement, then start executing
     if (!this->ScopeDepth) {
       // Remove the function blocker for this scope or bail.
-      CM_AUTO_PTR<cmFunctionBlocker> fb(mf.RemoveFunctionBlocker(this, lff));
+      std::unique_ptr<cmFunctionBlocker> fb(
+        mf.RemoveFunctionBlocker(this, lff));
       if (!fb.get()) {
         return false;
       }

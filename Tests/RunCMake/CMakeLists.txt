@@ -15,6 +15,7 @@ macro(add_RunCMake_test test)
   add_test(NAME RunCMake.${test} COMMAND ${CMAKE_CMAKE_COMMAND}
     -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
     -DRunCMake_GENERATOR=${CMAKE_GENERATOR}
+    -DRunCMake_GENERATOR_INSTANCE=${CMAKE_GENERATOR_INSTANCE}
     -DRunCMake_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
     -DRunCMake_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
     -DRunCMake_MAKE_PROGRAM=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
@@ -47,6 +48,7 @@ function(add_RunCMake_test_group test types)
         -DTEST_TYPE=${type}
         -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
         -DRunCMake_GENERATOR=${CMAKE_GENERATOR}
+        -DRunCMake_GENERATOR_INSTANCE=${CMAKE_GENERATOR_INSTANCE}
         -DRunCMake_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
         -DRunCMake_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
         -DRunCMake_MAKE_PROGRAM=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
@@ -141,12 +143,15 @@ add_RunCMake_test(DisallowedCommands)
 add_RunCMake_test(ExternalData)
 add_RunCMake_test(FeatureSummary)
 add_RunCMake_test(FPHSA)
+add_RunCMake_test(FindBoost)
 if(NOT CMAKE_C_COMPILER_ID MATCHES "Watcom")
   add_RunCMake_test(GenerateExportHeader)
 endif()
 add_RunCMake_test(GeneratorExpression)
+add_RunCMake_test(GeneratorInstance)
 add_RunCMake_test(GeneratorPlatform)
 add_RunCMake_test(GeneratorToolset)
+add_RunCMake_test(GetPrerequisites)
 add_RunCMake_test(GNUInstallDirs -DSYSTEM_NAME=${CMAKE_SYSTEM_NAME})
 add_RunCMake_test(GoogleTest) # Note: does not actually depend on Google Test
 add_RunCMake_test(TargetPropertyGeneratorExpressions)
@@ -325,6 +330,7 @@ add_RunCMake_test(install)
 add_RunCMake_test(CPackConfig)
 add_RunCMake_test(CPackInstallProperties)
 add_RunCMake_test(ExternalProject)
+add_RunCMake_test(FetchContent)
 add_RunCMake_test(CTestCommandLine)
 # Only run this test on unix platforms that support
 # symbolic links

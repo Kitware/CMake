@@ -90,8 +90,7 @@ private:
   void Update(cmSourceFileLocation const& loc);
   void UpdateExtension(const std::string& name);
 
-  cmSourceFileLocation& operator=(const cmSourceFileLocation& loc)
-    CM_EQ_DELETE;
+  cmSourceFileLocation& operator=(const cmSourceFileLocation& loc) = delete;
 };
 
 #endif

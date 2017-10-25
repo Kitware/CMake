@@ -9,5 +9,7 @@
 #include <string>
 
 std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile = nullptr);
+std::string cmCurlSetNETRCOption(::CURL* curl, const std::string& netrc_level,
+                                 const std::string& netrc_file);
 
 #endif

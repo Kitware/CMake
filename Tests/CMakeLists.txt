@@ -3261,6 +3261,18 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
           --build-options ${build_options}
           --test-command ${JAVA_RUNTIME} -classpath hello2.jar HelloWorld)
         list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJarSourceList")
+        add_test(Java.JarSourceListAndOutput ${CMAKE_CTEST_COMMAND}
+          --build-and-test
+          "${CMake_SOURCE_DIR}/Tests/Java"
+          "${CMake_BINARY_DIR}/Tests/JavaJarSourceListAndOutput"
+          ${build_generator_args}
+          --build-project hello
+          --build-target hello3
+          --build-two-config
+          --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJarSourceListAndOutput/hello3"
+          --build-options ${build_options}
+          --test-command ${JAVA_RUNTIME} -classpath hello3.jar HelloWorld)
+        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJarSourceListAndOutput")
 
         # For next test, java tool must have same architecture as toolchain
         math(EXPR _object_mode "${CMAKE_SIZEOF_VOID_P} * 8")

@@ -18,35 +18,36 @@
 #
 # Tools for building CUDA C files: libraries and build dependencies.
 #
-# This script locates the NVIDIA CUDA C tools.  It should work on linux,
-# windows, and mac and should be reasonably up to date with CUDA C
+# This script locates the NVIDIA CUDA C tools.  It should work on Linux,
+# Windows, and macOS and should be reasonably up to date with CUDA C
 # releases.
 #
-# This script makes use of the standard find_package arguments of
-# <VERSION>, REQUIRED and QUIET.  CUDA_FOUND will report if an
+# This script makes use of the standard :command:`find_package` arguments of
+# ``<VERSION>``, ``REQUIRED`` and ``QUIET``.  ``CUDA_FOUND`` will report if an
 # acceptable version of CUDA was found.
 #
-# The script will prompt the user to specify CUDA_TOOLKIT_ROOT_DIR if
+# The script will prompt the user to specify ``CUDA_TOOLKIT_ROOT_DIR`` if
 # the prefix cannot be determined by the location of nvcc in the system
-# path and REQUIRED is specified to find_package().  To use a different
-# installed version of the toolkit set the environment variable
-# CUDA_BIN_PATH before running cmake (e.g.
-# CUDA_BIN_PATH=/usr/local/cuda1.0 instead of the default
-# /usr/local/cuda) or set CUDA_TOOLKIT_ROOT_DIR after configuring.  If
-# you change the value of CUDA_TOOLKIT_ROOT_DIR, various components that
+# path and ``REQUIRED`` is specified to :command:`find_package`.  To use
+# a different installed version of the toolkit set the environment variable
+# ``CUDA_BIN_PATH`` before running cmake (e.g.
+# ``CUDA_BIN_PATH=/usr/local/cuda1.0`` instead of the default
+# ``/usr/local/cuda``) or set ``CUDA_TOOLKIT_ROOT_DIR`` after configuring.  If
+# you change the value of ``CUDA_TOOLKIT_ROOT_DIR``, various components that
 # depend on the path will be relocated.
 #
-# It might be necessary to set CUDA_TOOLKIT_ROOT_DIR manually on certain
-# platforms, or to use a cuda runtime not installed in the default
-# location.  In newer versions of the toolkit the cuda library is
-# included with the graphics driver- be sure that the driver version
-# matches what is needed by the cuda runtime version.
+# It might be necessary to set ``CUDA_TOOLKIT_ROOT_DIR`` manually on certain
+# platforms, or to use a CUDA runtime not installed in the default
+# location.  In newer versions of the toolkit the CUDA library is
+# included with the graphics driver -- be sure that the driver version
+# matches what is needed by the CUDA runtime version.
 #
 # The following variables affect the behavior of the macros in the
 # script (in alphebetical order).  Note that any of these flags can be
 # changed multiple times in the same directory before calling
-# CUDA_ADD_EXECUTABLE, CUDA_ADD_LIBRARY, CUDA_COMPILE, CUDA_COMPILE_PTX,
-# CUDA_COMPILE_FATBIN, CUDA_COMPILE_CUBIN or CUDA_WRAP_SRCS::
+# ``CUDA_ADD_EXECUTABLE``, ``CUDA_ADD_LIBRARY``, ``CUDA_COMPILE``,
+# ``CUDA_COMPILE_PTX``, ``CUDA_COMPILE_FATBIN``, ``CUDA_COMPILE_CUBIN``
+# or ``CUDA_WRAP_SRCS``::
 #
 #   CUDA_64_BIT_DEVICE_CODE (Default matches host bit size)
 #   -- Set to ON to compile for 64 bit device code, OFF for 32 bit device code.
@@ -339,7 +340,27 @@
 #   CUDA_nppc_LIBRARY     -- NVIDIA Performance Primitives lib (core).
 #                            Only available for CUDA version 5.5+.
 #   CUDA_nppi_LIBRARY     -- NVIDIA Performance Primitives lib (image processing).
-#                            Only available for CUDA version 5.5+.
+#                            Only available for CUDA version 5.5 - 8.0.
+#   CUDA_nppial_LIBRARY   -- NVIDIA Performance Primitives lib (image processing).
+#                            Only available for CUDA version 9.0.
+#   CUDA_nppicc_LIBRARY   -- NVIDIA Performance Primitives lib (image processing).
+#                            Only available for CUDA version 9.0.
+#   CUDA_nppicom_LIBRARY  -- NVIDIA Performance Primitives lib (image processing).
+#                            Only available for CUDA version 9.0.
+#   CUDA_nppidei_LIBRARY  -- NVIDIA Performance Primitives lib (image processing).
+#                            Only available for CUDA version 9.0.
+#   CUDA_nppif_LIBRARY    -- NVIDIA Performance Primitives lib (image processing).
+#                            Only available for CUDA version 9.0.
+#   CUDA_nppig_LIBRARY    -- NVIDIA Performance Primitives lib (image processing).
+#                            Only available for CUDA version 9.0.
+#   CUDA_nppim_LIBRARY    -- NVIDIA Performance Primitives lib (image processing).
+#                            Only available for CUDA version 9.0.
+#   CUDA_nppist_LIBRARY   -- NVIDIA Performance Primitives lib (image processing).
+#                            Only available for CUDA version 9.0.
+#   CUDA_nppisu_LIBRARY   -- NVIDIA Performance Primitives lib (image processing).
+#                            Only available for CUDA version 9.0.
+#   CUDA_nppitc_LIBRARY   -- NVIDIA Performance Primitives lib (image processing).
+#                            Only available for CUDA version 9.0.
 #   CUDA_npps_LIBRARY     -- NVIDIA Performance Primitives lib (signal processing).
 #                            Only available for CUDA version 5.5+.
 #   CUDA_nvcuvenc_LIBRARY -- CUDA Video Encoder library.
@@ -939,6 +960,24 @@ if(NOT CUDA_VERSION VERSION_LESS "3.2")
 endif()
 if(CUDA_VERSION VERSION_GREATER "5.0")
   find_cuda_helper_libs(cublas_device)
+endif()
+
+if(NOT CUDA_VERSION VERSION_LESS "9.0")
+  # In CUDA 9.0 NPP was nppi was removed
+  find_cuda_helper_libs(nppc)
+  find_cuda_helper_libs(nppial)
+  find_cuda_helper_libs(nppicc)
+  find_cuda_helper_libs(nppicom)
+  find_cuda_helper_libs(nppidei)
+  find_cuda_helper_libs(nppif)
+  find_cuda_helper_libs(nppig)
+  find_cuda_helper_libs(nppim)
+  find_cuda_helper_libs(nppist)
+  find_cuda_helper_libs(nppisu)
+  find_cuda_helper_libs(nppitc)
+  find_cuda_helper_libs(npps)
+  set(CUDA_npp_LIBRARY "${CUDA_nppc_LIBRARY};${CUDA_nppial_LIBRARY};${CUDA_nppicc_LIBRARY};${CUDA_nppicom_LIBRARY};${CUDA_nppidei_LIBRARY};${CUDA_nppif_LIBRARY};${CUDA_nppig_LIBRARY};${CUDA_nppim_LIBRARY};${CUDA_nppist_LIBRARY};${CUDA_nppisu_LIBRARY};${CUDA_nppitc_LIBRARY};${CUDA_npps_LIBRARY}")
+elseif(CUDA_VERSION VERSION_GREATER "5.0")
   # In CUDA 5.5 NPP was splitted onto 3 separate libraries.
   find_cuda_helper_libs(nppc)
   find_cuda_helper_libs(nppi)

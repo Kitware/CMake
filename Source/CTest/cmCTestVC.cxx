@@ -56,6 +56,7 @@ bool cmCTestVC::InitialCheckout(const char* command)
   // Construct the initial checkout command line.
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
   std::vector<char const*> vc_co;
+  vc_co.reserve(args.size() + 1);
   for (std::string const& arg : args) {
     vc_co.push_back(arg.c_str());
   }

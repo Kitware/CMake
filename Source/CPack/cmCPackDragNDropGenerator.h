@@ -45,8 +45,8 @@ private:
   bool singleLicense;
 
   bool WriteLicense(cmGeneratedFileStream& outputStream, int licenseNumber,
-                    std::string licenseLanguage, std::string licenseFile,
-                    std::string* error);
+                    std::string licenseLanguage,
+                    const std::string& licenseFile, std::string* error);
   bool BreakLongLine(const std::string& line, std::vector<std::string>& lines,
                      std::string* error);
   void EscapeQuotesAndBackslashes(std::string& line);

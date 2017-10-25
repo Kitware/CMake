@@ -4,7 +4,10 @@
 #include "cmGlobalVisualStudioGenerator.h"
 
 #include "cmsys/Encoding.hxx"
+#include <future>
 #include <iostream>
+#include <objbase.h>
+#include <shellapi.h>
 #include <windows.h>
 
 #include "cmAlgorithms.h"
@@ -103,15 +106,6 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
   // Configure CMake Visual Studio macros, for this user on this version
   // of Visual Studio.
   this->ConfigureCMakeVisualStudioMacros();
-
-  // Add CMakeLists.txt with custom command to rerun CMake.
-  for (std::vector<cmLocalGenerator*>::const_iterator lgi =
-         this->LocalGenerators.begin();
-       lgi != this->LocalGenerators.end(); ++lgi) {
-    cmLocalVisualStudioGenerator* lg =
-      static_cast<cmLocalVisualStudioGenerator*>(*lgi);
-    lg->AddCMakeListsRules();
-  }
 }
 
 void cmGlobalVisualStudioGenerator::ComputeTargetObjectDirectory(
@@ -930,4 +924,34 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   cmCustomCommand command(gt->Target->GetMakefile(), outputs, empty, empty,
                           commandLines, "Auto build dll exports", ".");
   commands.push_back(command);
+}
+
+static bool OpenSolution(std::string sln)
+{
+  HRESULT comInitialized =
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+  if (FAILED(comInitialized)) {
+    return false;
+  }
+
+  HINSTANCE hi =
+    ShellExecuteA(NULL, "open", sln.c_str(), NULL, NULL, SW_SHOWNORMAL);
+
+  CoUninitialize();
+
+  return reinterpret_cast<intptr_t>(hi) > 32;
+}
+
+bool cmGlobalVisualStudioGenerator::Open(const std::string& bindir,
+                                         const std::string& projectName,
+                                         bool dryRun)
+{
+  std::string buildDir = cmSystemTools::ConvertToOutputPath(bindir.c_str());
+  std::string sln = buildDir + "\\" + projectName + ".sln";
+
+  if (dryRun) {
+    return cmSystemTools::FileExists(sln, true);
+  }
+
+  return std::async(std::launch::async, OpenSolution, sln).get();
 }

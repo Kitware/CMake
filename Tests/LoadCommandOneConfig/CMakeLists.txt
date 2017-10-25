@@ -28,13 +28,6 @@ else()
     ${LoadCommand_SOURCE_DIR}/CMakeCommands
     CMAKE_LOADED_COMMANDS CMAKE_FLAGS -DMUDSLIDE_TYPE:STRING=MUCHO
     OUTPUT_VARIABLE OUTPUT )
-# do another TRY_COMPILE to get around make
-# problem on hp
-  try_compile(COMPILE_OK
-    ${LoadCommand_BINARY_DIR}/CMakeCommands
-    ${LoadCommand_SOURCE_DIR}/CMakeCommands
-    CMAKE_LOADED_COMMANDS CMAKE_FLAGS -DMUDSLIDE_TYPE:STRING=MUCHO
-    OUTPUT_VARIABLE OUTPUT )
 endif()
 
 message("Output from try compile: ${OUTPUT}")
