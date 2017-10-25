@@ -674,6 +674,13 @@ Modify cmCommandArgumentLexer.cxx:
 /* Include the set of tokens from the parser.  */
 #include "cmCommandArgumentParserTokens.h"
 
+static const char *DCURLYVariable = "${";
+static const char *RCURLYVariable = "}";
+static const char *ATVariable = "@";
+static const char *DOLLARVariable = "$";
+static const char *LCURLYVariable = "{";
+static const char *BSLASHVariable = "\\";
+
 /*--------------------------------------------------------------------------*/
 
 #define INITIAL 0
@@ -1011,7 +1018,7 @@ YY_RULE_SETUP
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext));
-  yylvalp->str = yyextra->DCURLYVariable;
+  yylvalp->str = DCURLYVariable;
   return cal_DCURLY;
 }
 	YY_BREAK
@@ -1020,7 +1027,7 @@ YY_RULE_SETUP
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext));
-  yylvalp->str = yyextra->RCURLYVariable;
+  yylvalp->str = RCURLYVariable;
   return cal_RCURLY;
 }
 	YY_BREAK
@@ -1029,7 +1036,7 @@ YY_RULE_SETUP
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext));
-  yylvalp->str = yyextra->ATVariable;
+  yylvalp->str = ATVariable;
   return cal_AT;
 }
 	YY_BREAK
@@ -1064,7 +1071,7 @@ case 10:
 YY_RULE_SETUP
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext));
-  yylvalp->str = yyextra->DOLLARVariable;
+  yylvalp->str = DOLLARVariable;
   return cal_DOLLAR;
 }
 	YY_BREAK
@@ -1072,7 +1079,7 @@ case 11:
 YY_RULE_SETUP
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext));
-  yylvalp->str = yyextra->LCURLYVariable;
+  yylvalp->str = LCURLYVariable;
   return cal_LCURLY;
 }
 	YY_BREAK
@@ -1080,7 +1087,7 @@ case 12:
 YY_RULE_SETUP
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext));
-  yylvalp->str = yyextra->BSLASHVariable;
+  yylvalp->str = BSLASHVariable;
   return cal_BSLASH;
 }
 	YY_BREAK
@@ -1088,7 +1095,7 @@ case 13:
 YY_RULE_SETUP
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext));
-  yylvalp->str = yyextra->BSLASHVariable;
+  yylvalp->str = BSLASHVariable;
   return cal_SYMBOL;
 }
 	YY_BREAK

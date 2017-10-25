@@ -53,13 +53,6 @@ public:
   void SetRemoveEmpty(bool b) { this->RemoveEmpty = b; }
 
   const char* GetError() { return this->ErrorString.c_str(); }
-  char EmptyVariable[1];
-  char DCURLYVariable[3];
-  char RCURLYVariable[3];
-  char ATVariable[3];
-  char DOLLARVariable[3];
-  char LCURLYVariable[3];
-  char BSLASHVariable[3];
 
 private:
   std::string::size_type InputBufferPos;

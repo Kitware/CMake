@@ -21,13 +21,6 @@ cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
   this->FileLine = -1;
   this->FileName = nullptr;
   this->RemoveEmpty = true;
-  this->EmptyVariable[0] = 0;
-  strcpy(this->DCURLYVariable, "${");
-  strcpy(this->RCURLYVariable, "}");
-  strcpy(this->ATVariable, "@");
-  strcpy(this->DOLLARVariable, "$");
-  strcpy(this->LCURLYVariable, "{");
-  strcpy(this->BSLASHVariable, "\\");
 
   this->NoEscapeMode = false;
   this->ReplaceAtSyntax = false;
@@ -47,7 +40,7 @@ void cmCommandArgumentParserHelper::SetLineFile(long line, const char* file)
 const char* cmCommandArgumentParserHelper::AddString(const std::string& str)
 {
   if (str.empty()) {
-    return this->EmptyVariable;
+    return "";
   }
   char* stVal = new char[str.size() + 1];
   strcpy(stVal, str.c_str());
@@ -62,7 +55,7 @@ const char* cmCommandArgumentParserHelper::ExpandSpecialVariable(
     return this->ExpandVariable(var);
   }
   if (!var) {
-    return this->EmptyVariable;
+    return "";
   }
   if (strcmp(key, "ENV") == 0) {
     std::string str;
@@ -72,7 +65,7 @@ const char* cmCommandArgumentParserHelper::ExpandSpecialVariable(
       }
       return this->AddString(str);
     }
-    return this->EmptyVariable;
+    return "";
   }
   if (strcmp(key, "CACHE") == 0) {
     if (const char* c =
@@ -82,7 +75,7 @@ const char* cmCommandArgumentParserHelper::ExpandSpecialVariable(
       }
       return this->AddString(c);
     }
-    return this->EmptyVariable;
+    return "";
   }
   std::ostringstream e;
   e << "Syntax $" << key << "{} is not supported.  "
