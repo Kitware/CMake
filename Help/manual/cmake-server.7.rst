@@ -458,6 +458,8 @@ Each project object can have the following keys:
 
 "name"
   contains the (sub-)projects name.
+"hasInstallRule"
+  true if the project contains any install rules, false otherwise.
 "sourceDirectory"
   contains the current source directory
 "buildDirectory"
@@ -481,6 +483,10 @@ Each target object can have the following keys:
   contains the current source directory.
 "buildDirectory"
   contains the current build directory.
+"hasInstallRule"
+  true if the target contains any install rules, false otherwise.
+"installPaths"
+  full path to the destination directories defined by target install rules.
 "artifacts"
   with a list of build artifacts. The list is sorted with the most
   important artifacts first (e.g. a .DLL file is listed before a

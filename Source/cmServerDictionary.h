@@ -88,6 +88,8 @@ static const std::string kWARN_UNUSED_CLI_KEY = "warnUnusedCli";
 static const std::string kWARN_UNUSED_KEY = "warnUnused";
 static const std::string kWATCHED_DIRECTORIES_KEY = "watchedDirectories";
 static const std::string kWATCHED_FILES_KEY = "watchedFiles";
+static const std::string kHAS_INSTALL_RULE = "hasInstallRule";
+static const std::string kINSTALL_PATHS = "installPaths";
 
 static const std::string kTARGET_CROSS_REFERENCES_KEY = "crossReferences";
 static const std::string kLINE_NUMBER_KEY = "line";

@@ -665,6 +665,10 @@ public:
   {
     return this->InstallGenerators;
   }
+  const std::vector<cmInstallGenerator*>& GetInstallGenerators() const
+  {
+    return this->InstallGenerators;
+  }
 
   void AddTestGenerator(cmTestGenerator* g)
   {
