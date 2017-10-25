@@ -1,6 +1,10 @@
 static cmVS7FlagTable cmVS141CLFlagTable[] = {
 
   // Enum Properties
+  { "DiagnosticsFormat", "diagnostics:classic", "Classic", "Classic", 0 },
+  { "DiagnosticsFormat", "diagnostics:column", "Column", "Column", 0 },
+  { "DiagnosticsFormat", "diagnostics:caret", "Caret", "Caret", 0 },
+
   { "DebugInformationFormat", "", "None", "None", 0 },
   { "DebugInformationFormat", "Z7", "C7 compatible", "OldStyle", 0 },
   { "DebugInformationFormat", "Zi", "Program Database", "ProgramDatabase", 0 },
