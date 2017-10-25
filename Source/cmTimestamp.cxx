@@ -33,11 +33,13 @@ std::string cmTimestamp::FileModificationTime(const char* path,
                                               const std::string& formatString,
                                               bool utcFlag)
 {
-  if (!cmsys::SystemTools::FileExists(path)) {
+  std::string real_path = cmSystemTools::GetRealPath(path);
+
+  if (!cmsys::SystemTools::FileExists(real_path)) {
     return std::string();
   }
 
-  time_t mtime = cmsys::SystemTools::ModifiedTime(path);
+  time_t mtime = cmsys::SystemTools::ModifiedTime(real_path);
   return CreateTimestampFromTimeT(mtime, formatString, utcFlag);
 }
 
