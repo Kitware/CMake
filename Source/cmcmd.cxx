@@ -12,7 +12,6 @@
 #include "cmSystemTools.h"
 #include "cmUtils.hxx"
 #include "cmVersion.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -37,6 +36,7 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -348,6 +348,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
     std::bind(&cmcmd::HandleCppCheck, a1, a2, a3);
   // copy the command options to a vector of strings
   std::vector<std::string> commandOptions;
+  commandOptions.reserve(coCompileTypes.size());
   for (const auto& i : coCompileTypes) {
     commandOptions.push_back(i.first);
   }
@@ -928,8 +929,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
         snapshot.GetDirectory().SetCurrentBinary(startOutDir);
         snapshot.GetDirectory().SetCurrentSource(startDir);
-        CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(ggd, snapshot));
-        CM_AUTO_PTR<cmLocalGenerator> lgd(ggd->CreateLocalGenerator(mf.get()));
+        cmMakefile mf(ggd, snapshot);
+        std::unique_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator(&mf));
 
         // Actually scan dependencies.
         return lgd->UpdateDependencies(depInfo.c_str(), verbose, color) ? 0
@@ -1555,11 +1556,13 @@ struct NumberFormatter
 std::ostream& operator<<(std::ostream& stream,
                          NumberFormatter const& formatter)
 {
+  auto const& flags = stream.flags();
   if (formatter.Format == FORMAT_DECIMAL) {
-    stream << formatter.Value;
+    stream << std::dec << formatter.Value;
   } else {
     stream << "0x" << std::hex << formatter.Value;
   }
+  stream.flags(flags);
   return stream;
 }
 static bool RunCommand(const char* comment, std::vector<std::string>& command,

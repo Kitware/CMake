@@ -11,6 +11,8 @@
 
 #include "cm_sys_stat.h"
 
+#include "cmCMakeToWixPath.h"
+
 cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(cmCPackLog* logger,
                                                std::string const& filename,
                                                GuidType componentGuidType)
@@ -139,7 +141,7 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
   patch.ApplyFragment(componentId, *this);
   BeginElement("File");
   AddAttribute("Id", fileId);
-  AddAttribute("Source", filePath);
+  AddAttribute("Source", CMakeToWixPath(filePath));
   AddAttribute("KeyPath", "yes");
 
   mode_t fileMode = 0;

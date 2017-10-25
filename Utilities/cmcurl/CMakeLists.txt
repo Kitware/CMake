@@ -24,6 +24,7 @@ set(CURL_DISABLE_TFTP ON CACHE INTERNAL "Disable curl tftp protocol?")
 set(CURL_DISABLE_VERBOSE_STRINGS OFF CACHE INTERNAL "Do not disable curl verbosity")
 set(CURL_HIDDEN_SYMBOLS OFF CACHE INTERNAL "No curl hidden symbols")
 set(CURL_STATICLIB ON CACHE INTERNAL "Static curl")
+set(CURL_WERROR OFF CACHE INTERNAL "Turn compiler warnings into errors")
 set(DISABLED_THREADSAFE OFF CACHE INTERNAL "Curl can use thread-safe functions")
 set(ENABLE_ARES OFF CACHE INTERNAL "No curl c-ares support")
 set(ENABLE_CURLDEBUG OFF CACHE INTERNAL "No curl TrackMemory features")
@@ -33,6 +34,7 @@ set(ENABLE_MANUAL OFF CACHE INTERNAL "No curl built-in manual")
 set(ENABLE_THREADED_RESOLVER OFF CACHE INTERNAL "No curl POSIX threaded DNS lookup")
 set(ENABLE_UNIX_SOCKETS OFF CACHE INTERNAL "No curl Unix domain sockets support")
 set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
+set(PICKY_COMPILER OFF CACHE INTERNAL "Enable picky compiler options")
 set(USE_WIN32_LDAP OFF CACHE INTERNAL "No curl Windows LDAP")
 if(CMAKE_USE_OPENSSL)
 elseif(WIN32)
@@ -88,7 +90,7 @@ endif()
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -126,6 +128,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
 include(CMakeDependentOption)
+include(CheckCCompilerFlag)
 
 project( CURL C )
 
@@ -159,19 +162,35 @@ set(OS "\"${CMAKE_SYSTEM_NAME}\"")
 include_directories(${PROJECT_BINARY_DIR}/include/curl)
 include_directories( ${CURL_SOURCE_DIR}/include )
 
+option(CURL_WERROR "Turn compiler warnings into errors" OFF)
+option(PICKY_COMPILER "Enable picky compiler options" ON)
 option(BUILD_CURL_EXE "Set to ON to build curl executable." ON)
 option(CURL_STATICLIB "Set to ON to build libcurl with static linking." OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
 if(WIN32)
-  CMAKE_DEPENDENT_OPTION(ENABLE_THREADED_RESOLVER
-                         "Set to ON to enable threaded DNS lookup"
-                         ON "NOT ENABLE_ARES"
-                         OFF)
-else()
-  option(ENABLE_THREADED_RESOLVER "Set to ON to enable POSIX threaded DNS lookup" OFF)
+  option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
+  option(ENABLE_INET_PTON "Set to OFF to prevent usage of inet_pton when building against modern SDKs while still requiring compatibility with older Windows versions, such as Windows XP, Windows Server 2003 etc." ON)
 endif()
+
+CMAKE_DEPENDENT_OPTION(ENABLE_THREADED_RESOLVER "Set to ON to enable threaded DNS lookup"
+        ON "NOT ENABLE_ARES"
+        OFF)
+
 option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OFF)
+
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
+  if (PICKY_COMPILER)
+    foreach (_CCOPT -pedantic -Wall -W -Wpointer-arith -Wwrite-strings -Wunused -Wshadow -Winline -Wnested-externs -Wmissing-declarations -Wmissing-prototypes -Wno-long-long -Wfloat-equal -Wno-multichar -Wsign-compare -Wundef -Wno-format-nonliteral -Wendif-labels -Wstrict-prototypes -Wdeclaration-after-statement -Wstrict-aliasing=3 -Wcast-align -Wtype-limits -Wold-style-declaration -Wmissing-parameter-type -Wempty-body -Wclobbered -Wignored-qualifiers -Wconversion -Wno-sign-conversion -Wvla -Wdouble-promotion -Wno-system-headers)
+      # surprisingly, CHECK_C_COMPILER_FLAG needs a new variable to store each new
+      # test result in.
+      CHECK_C_COMPILER_FLAG(${_CCOPT} OPT${_CCOPT})
+      if(OPT${_CCOPT})
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_CCOPT}")
+      endif()
+    endforeach()
+  endif(PICKY_COMPILER)
+endif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
 
 if (ENABLE_DEBUG)
   # DEBUGBUILD will be defined only for Debug builds
@@ -187,23 +206,19 @@ if (ENABLE_CURLDEBUG)
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS CURLDEBUG)
 endif()
 
+if(0) # This code not needed for building within CMake.
+# For debug libs and exes, add "-d" postfix
+set(CMAKE_DEBUG_POSTFIX "-d" CACHE STRING "Set debug library postfix")
+endif()
+
 # initialize CURL_LIBS
 set(CURL_LIBS "")
-
-if(ENABLE_THREADED_RESOLVER AND ENABLE_ARES)
-  message(FATAL_ERROR "Options ENABLE_THREADED_RESOLVER and ENABLE_ARES are mutually exclusive")
-endif()
 
 if(ENABLE_ARES)
   set(USE_ARES 1)
   find_package(CARES REQUIRED)
   list(APPEND CURL_LIBS ${CARES_LIBRARY} )
   set(CURL_LIBS ${CURL_LIBS} ${CARES_LIBRARY})
-endif()
-
-if(MSVC)
-  option(BUILD_RELEASE_DEBUG_DIRS "Set OFF to build each configuration to a separate directory" OFF)
-  mark_as_advanced(BUILD_RELEASE_DEBUG_DIRS)
 endif()
 
 if(0) # This code not needed for building within CMake.
@@ -265,8 +280,6 @@ option(CURL_DISABLE_CRYPTO_AUTH "to disable cryptographic authentication" OFF)
 mark_as_advanced(CURL_DISABLE_CRYPTO_AUTH)
 option(CURL_DISABLE_VERBOSE_STRINGS "to disable verbose strings" OFF)
 mark_as_advanced(CURL_DISABLE_VERBOSE_STRINGS)
-option(DISABLED_THREADSAFE "Set to explicitly specify we don't want to use thread-safe functions" OFF)
-mark_as_advanced(DISABLED_THREADSAFE)
 option(ENABLE_IPV6 "Define if you want to enable IPv6 support" ON)
 mark_as_advanced(ENABLE_IPV6)
 if(ENABLE_IPV6 AND NOT WIN32)
@@ -283,50 +296,47 @@ if(ENABLE_IPV6 AND NOT WIN32)
   endif()
 endif()
 
-option(ENABLE_MANUAL "to provide the built-in manual" ON)
-unset(USE_MANUAL CACHE) # TODO: cache NROFF/NROFF_MANOPT/USE_MANUAL vars?
-if(ENABLE_MANUAL)
-  find_program(NROFF NAMES gnroff nroff)
-  if(NROFF)
-    # Need a way to write to stdin, this will do
-    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/nroff-input.txt" "test")
-    # Tests for a valid nroff option to generate a manpage
-    foreach(_MANOPT "-man" "-mandoc")
-      execute_process(COMMAND "${NROFF}" ${_MANOPT}
-        OUTPUT_VARIABLE NROFF_MANOPT_OUTPUT
-        INPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/nroff-input.txt"
-        ERROR_QUIET)
-      # Save the option if it was valid
-      if(NROFF_MANOPT_OUTPUT)
-        message("Found *nroff option: -- ${_MANOPT}")
-        set(NROFF_MANOPT ${_MANOPT})
-        set(USE_MANUAL 1)
-        break()
-      endif()
-    endforeach()
-    # No need for the temporary file
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/nroff-input.txt")
-    if(NOT USE_MANUAL)
-      message(WARNING "Found no *nroff option to get plaintext from man pages")
-    endif()
-  else()
-    message(WARNING "Found no *nroff program")
-  endif()
-endif()
-
 if(0) # This code not needed for building within CMake.
+CURL_NROFF_CHECK()
 # Required for building manual, docs, tests
-find_package(Perl REQUIRED)
+find_package(Perl)
+
+CMAKE_DEPENDENT_OPTION(ENABLE_MANUAL "to provide the built-in manual"
+    ON "NROFF_USEFUL;PERL_FOUND"
+    OFF)
+
+if(NOT PERL_FOUND)
+  message(STATUS "Perl not found, testing disabled.")
+  set(BUILD_TESTING OFF)
+endif()
+if(ENABLE_MANUAL)
+  set(USE_MANUAL ON)
+endif()
 endif()
 
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_REQUIRED_FLAGS ${CMAKE_ANSI_CFLAGS})
 
+if(CURL_STATIC_CRT)
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
+endif()
+
 # Disable warnings on Borland to avoid changing 3rd party code.
 if(BORLAND)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
 endif(BORLAND)
+
+if(CURL_WERROR)
+  if(MSVC_VERSION)
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /WX")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /WX")
+  else()
+    # this assumes clang or gcc style options
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+  endif()
+endif(CURL_WERROR)
 
 # If we are on AIX, do the _ALL_SOURCE magic
 if(${CMAKE_SYSTEM_NAME} MATCHES AIX)
@@ -349,19 +359,14 @@ if(WIN32)
 endif(WIN32)
 
 if(ENABLE_THREADED_RESOLVER)
+  find_package(Threads REQUIRED)
   if(WIN32)
     set(USE_THREADS_WIN32 ON)
   else()
-    check_include_file_concat("pthread.h" HAVE_PTHREAD_H)
-    if(HAVE_PTHREAD_H)
-      set(CMAKE_THREAD_PREFER_PTHREAD 1)
-      find_package(Threads)
-      if(CMAKE_USE_PTHREADS_INIT)
-        set(CURL_LIBS ${CURL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
-        set(USE_THREADS_POSIX 1)
-      endif()
-    endif()
+    set(USE_THREADS_POSIX ${CMAKE_USE_PTHREADS_INIT})
+    set(HAVE_PTHREAD_H ${CMAKE_USE_PTHREADS_INIT})
   endif()
+  set(CURL_LIBS ${CURL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 # Check for all needed libraries
@@ -911,11 +916,6 @@ check_type_size("int"  SIZEOF_INT)
 check_type_size("__int64"  SIZEOF___INT64)
 check_type_size("time_t"  SIZEOF_TIME_T)
 
-# Make public versions of some type sizes for curlbuild.h.
-foreach(t INT LONG LONG_LONG SSIZE_T)
-  string(REPLACE "SIZEOF_" "CURL_SIZEOF_" CURL_SIZEOF_${t}_CODE "${SIZEOF_${t}_CODE}")
-endforeach()
-
 if(HAVE_SIZEOF_LONG_LONG)
   set(HAVE_LONGLONG 1)
   set(HAVE_LL 1)
@@ -1003,7 +1003,18 @@ check_symbol_exists(ioctl          "${CURL_INCLUDES}" HAVE_IOCTL)
 check_symbol_exists(setsockopt     "${CURL_INCLUDES}" HAVE_SETSOCKOPT)
 
 # symbol exists in win32, but function does not.
-check_function_exists(inet_pton HAVE_INET_PTON)
+if(WIN32)
+  if(ENABLE_INET_PTON)
+    check_function_exists(inet_pton HAVE_INET_PTON)
+    # _WIN32_WINNT_VISTA (0x0600)
+    add_definitions(-D_WIN32_WINNT=0x0600)
+  else()
+    # _WIN32_WINNT_WINXP (0x0501)
+    add_definitions(-D_WIN32_WINNT=0x0501)
+  endif()
+else()
+    check_function_exists(inet_pton HAVE_INET_PTON)
+endif()
 
 check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
@@ -1075,6 +1086,13 @@ if(HAVE_FILE_OFFSET_BITS)
   set(CMAKE_REQUIRED_FLAGS "-D_FILE_OFFSET_BITS=64")
 endif(HAVE_FILE_OFFSET_BITS)
 check_type_size("off_t"  SIZEOF_OFF_T)
+
+# include this header to get the type
+set(CMAKE_REQUIRED_INCLUDES "${CURL_SOURCE_DIR}/include")
+set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
+check_type_size("curl_off_t"  SIZEOF_CURL_OFF_T)
+set(CMAKE_EXTRA_INCLUDE_FILES "")
+
 set(CMAKE_REQUIRED_FLAGS)
 
 foreach(CURL_TEST
@@ -1190,7 +1208,7 @@ else()
   set(CURL_HAVE_SOCKLEN_T 0)
 endif()
 
-# TODO test which of these headers are required for the typedefs used in curlbuild.h
+# TODO test which of these headers are required
 if(WIN32)
   set(CURL_PULL_WS2TCPIP_H ${HAVE_WS2TCPIP_H})
 else()
@@ -1205,11 +1223,6 @@ include(CMake/OtherTests.cmake)
 
 add_definitions(-DHAVE_CONFIG_H)
 
-# For windows, do not allow the compiler to use default target (Vista).
-if(WIN32)
-  add_definitions(-D_WIN32_WINNT=0x0501)
-endif(WIN32)
-
 # For windows, all compilers used by cmake should support large files
 if(WIN32)
   set(USE_WIN32_LARGE_FILES ON)
@@ -1217,6 +1230,11 @@ endif(WIN32)
 
 if(MSVC)
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+  if(CMAKE_C_FLAGS MATCHES "/W[0-4]")
+    string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  else(CMAKE_C_FLAGS MATCHES "/W[0-4]")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
+  endif(CMAKE_C_FLAGS MATCHES "/W[0-4]")
 endif(MSVC)
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
@@ -1235,10 +1253,12 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
-if(0) # This code not needed for building within CMake.
-add_subdirectory(docs)
+if(USE_MANUAL)
+  add_subdirectory(docs)
 endif()
+
 add_subdirectory(lib)
+
 if(BUILD_CURL_EXE)
   add_subdirectory(src)
 endif()
@@ -1355,7 +1375,7 @@ set(LDFLAGS                 "${CMAKE_SHARED_LINKER_FLAGS}")
 set(LIBCURL_LIBS            "")
 set(libdir                  "${CMAKE_INSTALL_PREFIX}/lib")
 foreach(_lib ${CMAKE_C_IMPLICIT_LINK_LIBRARIES} ${CURL_LIBS})
-  if(_lib MATCHES ".*/.*")
+  if(_lib MATCHES ".*/.*" OR _lib MATCHES "^-")
     set(LIBCURL_LIBS          "${LIBCURL_LIBS} ${_lib}")
   else()
     set(LIBCURL_LIBS          "${LIBCURL_LIBS} -l${_lib}")
@@ -1391,16 +1411,10 @@ if(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
   set(CURL_CONFIG_HAS_BEEN_RUN_BEFORE 1 CACHE INTERNAL "Flag to track whether this is the first time running CMake or if CMake has been configured before")
 endif()
 
-# Installation.
-# First, install generated curlbuild.h
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/curl/curlbuild.h"
-    DESTINATION include/curl )
-# Next, install other headers excluding curlbuild.h
+# install headers
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
     DESTINATION include
-    FILES_MATCHING PATTERN "*.h"
-    PATTERN "curlbuild.h" EXCLUDE)
-
+    FILES_MATCHING PATTERN "*.h")
 
 # Workaround for MSVS10 to avoid the Dialog Hell
 # FIXME: This could be removed with future version of CMake.
@@ -1409,5 +1423,16 @@ if(MSVC_VERSION EQUAL 1600)
   if(EXISTS "${CURL_SLN_FILENAME}")
     file(APPEND "${CURL_SLN_FILENAME}" "\n# This should be regenerated!\n")
   endif()
+endif()
+
+if(NOT TARGET uninstall)
+  configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in
+      ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake
+      IMMEDIATE @ONLY)
+
+  add_custom_target(uninstall
+      COMMAND ${CMAKE_COMMAND} -P
+      ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake)
 endif()
 endif()

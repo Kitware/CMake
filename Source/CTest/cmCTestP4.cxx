@@ -464,6 +464,7 @@ bool cmCTestP4::UpdateCustom(const std::string& custom)
   cmSystemTools::ExpandListArgument(custom, p4_custom_command, true);
 
   std::vector<char const*> p4_custom;
+  p4_custom.reserve(p4_custom_command.size() + 1);
   for (std::string const& i : p4_custom_command) {
     p4_custom.push_back(i.c_str());
   }

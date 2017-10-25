@@ -1,2 +1,4 @@
-^You have called ADD_LIBRARY for library TestObjectLibWithoutSources without any source files. This typically indicates a problem with your CMakeLists.txt file(
-CMake Error: CMake can not determine linker language for target: TestObjectLibWithoutSources)*$
+^CMake Error at OBJECTwithNoSources.cmake:[0-9]+ \(add_library\):
+  No SOURCES given to target: TestObjectLibWithoutSources
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

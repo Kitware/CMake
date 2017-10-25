@@ -80,6 +80,7 @@ All Modules
    /module/ExternalData
    /module/ExternalProject
    /module/FeatureSummary
+   /module/FetchContent
    /module/FindALSA
    /module/FindArmadillo
    /module/FindASPELL

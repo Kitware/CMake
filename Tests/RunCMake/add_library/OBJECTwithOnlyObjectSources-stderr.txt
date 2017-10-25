@@ -1,5 +1,4 @@
-^You have called ADD_LIBRARY for library TestObjectLibWithoutSources without any source files. This typically indicates a problem with your CMakeLists.txt file
-CMake Error at OBJECTwithOnlyObjectSources.cmake:[0-9]+ \(add_library\):
+^CMake Error at OBJECTwithOnlyObjectSources.cmake:[0-9]+ \(add_library\):
   OBJECT library \"TestObjectLibWithoutSources\" contains:
 
     [^

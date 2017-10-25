@@ -708,7 +708,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
           const char* propertyValue =
             target->Target->GetMakefile()->GetDefinition(propertyName);
           cmGeneratorExpression ge;
-          CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
+          std::unique_ptr<cmCompiledGeneratorExpression> cge =
             ge.Parse(propertyValue);
           if (cmSystemTools::IsOn(
                 cge->Evaluate(target->GetLocalGenerator(), *i))) {

@@ -362,14 +362,6 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
 
-  if (s == args.end()) {
-    std::string msg = "You have called ADD_LIBRARY for library ";
-    msg += args[0];
-    msg += " without any source files. This typically indicates a problem ";
-    msg += "with your CMakeLists.txt file";
-    cmSystemTools::Message(msg.c_str(), "Warning");
-  }
-
   srclists.insert(srclists.end(), s, args.end());
 
   this->Makefile->AddLibrary(libName, type, srclists, excludeFromAll);

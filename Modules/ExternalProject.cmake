@@ -193,6 +193,28 @@ External Project Definition
         ``CMAKE_TLS_CAINFO`` variable will be used instead (see
         :command:`file(DOWNLOAD)`)
 
+      ``NETRC <level>``
+        Specify whether the .netrc file is to be used for operation. If this
+        option is not specified, the value of the ``CMAKE_NETRC`` variable
+        will be used instead (see :command:`file(DOWNLOAD)`)
+        Valid levels are:
+
+        ``IGNORED``
+          The .netrc file is ignored.
+          This is the default.
+        ``OPTIONAL``
+          The .netrc file is optional, and information in the URL is preferred.
+          The file will be scanned to find which ever information is not specified
+          in the URL.
+        ``REQUIRED``
+          The .netrc file is required, and information in the URL is ignored.
+
+      ``NETRC_FILE <file>``
+        Specify an alternative .netrc file to the one in your home directory
+        if the ``NETRC`` level is ``OPTIONAL`` or ``REQUIRED``. If this option
+        is not specified, the value of the ``CMAKE_NETRC_FILE`` variable will
+        be used instead (see :command:`file(DOWNLOAD)`)
+
     *Git*
       NOTE: A git version of 1.6.5 or later is required if this download method
       is used.
@@ -357,6 +379,11 @@ External Project Definition
     ``CMAKE_GENERATOR_TOOLSET <toolset>``
       Pass a generator-specific toolset name to the CMake command (see
       :variable:`CMAKE_GENERATOR_TOOLSET`). It is an error to provide this
+      option without the ``CMAKE_GENERATOR`` option.
+
+    ``CMAKE_GENERATOR_INSTANCE <instance>``
+      Pass a generator-specific instance selection to the CMake command (see
+      :variable:`CMAKE_GENERATOR_INSTANCE`). It is an error to provide this
       option without the ``CMAKE_GENERATOR`` option.
 
     ``CMAKE_ARGS <arg>...``
@@ -854,6 +881,9 @@ The custom step could then be triggered from the main build like so::
 
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
+
 # Pre-compute a regex to match documented keywords for each command.
 math(EXPR _ep_documentation_line_count "${CMAKE_CURRENT_LIST_LINE} - 4")
 file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines
@@ -1343,7 +1373,7 @@ endif()
 
 endfunction(_ep_write_gitupdate_script)
 
-function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_progress hash tls_verify tls_cainfo userpwd http_headers)
+function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_progress hash tls_verify tls_cainfo userpwd http_headers netrc netrc_file)
   if(timeout)
     set(TIMEOUT_ARGS TIMEOUT ${timeout})
     set(TIMEOUT_MSG "${timeout} seconds")
@@ -1368,6 +1398,8 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
 
   set(TLS_VERIFY_CODE "")
   set(TLS_CAINFO_CODE "")
+  set(NETRC_CODE "")
+  set(NETRC_FILE_CODE "")
 
   # check for curl globals in the project
   if(DEFINED CMAKE_TLS_VERIFY)
@@ -1375,6 +1407,12 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
   endif()
   if(DEFINED CMAKE_TLS_CAINFO)
     set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
+  endif()
+  if(DEFINED CMAKE_NETRC)
+    set(NETRC_CODE "set(CMAKE_NETRC \"${CMAKE_NETRC}\")")
+  endif()
+  if(DEFINED CMAKE_NETRC_FILE)
+    set(NETRC_FILE_CODE "set(CMAKE_NETRC_FILE \"${CMAKE_NETRC_FILE}\")")
   endif()
 
   # now check for curl locals so that the local values
@@ -1389,6 +1427,16 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
   string(LENGTH "${tls_cainfo}" tls_cainfo_len)
   if(tls_cainfo_len GREATER 0)
     set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
+  endif()
+  # check for netrc argument
+  string(LENGTH "${netrc}" netrc_len)
+  if(netrc_len GREATER 0)
+    set(NETRC_CODE "set(CMAKE_NETRC \"${netrc}\")")
+  endif()
+  # check for netrc_file argument
+  string(LENGTH "${netrc_file}" netrc_file_len)
+  if(netrc_file_len GREATER 0)
+    set(NETRC_FILE_CODE "set(CMAKE_NETRC_FILE \"${netrc_file}\")")
   endif()
 
   if(userpwd STREQUAL ":")
@@ -1923,6 +1971,15 @@ function(_ep_get_step_stampfile name step stampfile_var)
 endfunction()
 
 
+function(_ep_get_complete_stampfile name stampfile_var)
+  set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
+  _ep_get_configuration_subdir_suffix(cfgdir)
+  set(stampfile "${cmf_dir}${cfgdir}/${name}-complete")
+
+  set(${stampfile_var} ${stampfile} PARENT_SCOPE)
+endfunction()
+
+
 function(ExternalProject_Add_StepTargets name)
   set(steps ${ARGN})
   if(ARGC GREATER 1 AND "${ARGV1}" STREQUAL "NO_DEPENDS")
@@ -1952,10 +2009,7 @@ endfunction()
 
 
 function(ExternalProject_Add_Step name step)
-  set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
-  _ep_get_configuration_subdir_suffix(cfgdir)
-
-  set(complete_stamp_file "${cmf_dir}${cfgdir}/${name}-complete")
+  _ep_get_complete_stampfile(${name} complete_stamp_file)
   _ep_get_step_stampfile(${name} ${step} stamp_file)
 
   _ep_parse_arguments(ExternalProject_Add_Step
@@ -2427,11 +2481,13 @@ function(_ep_add_download_command name)
         get_property(no_progress TARGET ${name} PROPERTY _EP_DOWNLOAD_NO_PROGRESS)
         get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
         get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
+        get_property(netrc TARGET ${name} PROPERTY _EP_NETRC)
+        get_property(netrc_file TARGET ${name} PROPERTY _EP_NETRC_FILE)
         get_property(http_username TARGET ${name} PROPERTY _EP_HTTP_USERNAME)
         get_property(http_password TARGET ${name} PROPERTY _EP_HTTP_PASSWORD)
         get_property(http_headers TARGET ${name} PROPERTY _EP_HTTP_HEADER)
         set(download_script "${stamp_dir}/download-${name}.cmake")
-        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}" "${http_username}:${http_password}" "${http_headers}")
+        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}" "${http_username}:${http_password}" "${http_headers}" "${netrc}" "${netrc_file}")
         set(cmd ${CMAKE_COMMAND} -P "${download_script}"
           COMMAND)
         if (no_extract)
@@ -2703,6 +2759,7 @@ function(_ep_extract_configure_command var name)
     endif()
 
     get_target_property(cmake_generator ${name} _EP_CMAKE_GENERATOR)
+    get_target_property(cmake_generator_instance ${name} _EP_CMAKE_GENERATOR_INSTANCE)
     get_target_property(cmake_generator_platform ${name} _EP_CMAKE_GENERATOR_PLATFORM)
     get_target_property(cmake_generator_toolset ${name} _EP_CMAKE_GENERATOR_TOOLSET)
     if(cmake_generator)
@@ -2712,6 +2769,9 @@ function(_ep_extract_configure_command var name)
       endif()
       if(cmake_generator_toolset)
         list(APPEND cmd "-T${cmake_generator_toolset}")
+      endif()
+      if(cmake_generator_instance)
+        list(APPEND cmd "-DCMAKE_GENERATOR_INSTANCE:INTERNAL=${cmake_generator_instance}")
       endif()
     else()
       if(CMAKE_EXTRA_GENERATOR)
@@ -2730,6 +2790,12 @@ function(_ep_extract_configure_command var name)
       endif()
       if(CMAKE_GENERATOR_TOOLSET)
         list(APPEND cmd "-T${CMAKE_GENERATOR_TOOLSET}")
+      endif()
+      if(cmake_generator_instance)
+        message(FATAL_ERROR "Option CMAKE_GENERATOR_INSTANCE not allowed without CMAKE_GENERATOR.")
+      endif()
+      if(CMAKE_GENERATOR_INSTANCE)
+        list(APPEND cmd "-DCMAKE_GENERATOR_INSTANCE:INTERNAL=${CMAKE_GENERATOR_INSTANCE}")
       endif()
     endif()
 
@@ -2958,7 +3024,7 @@ function(ExternalProject_Add name)
 
   # Add a custom target for the external project.
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
-  set(complete_stamp_file "${cmf_dir}${cfgdir}/${name}-complete")
+  _ep_get_complete_stampfile(${name} complete_stamp_file)
 
   # The "ALL" option to add_custom_target just tells it to not set the
   # EXCLUDE_FROM_ALL target property. Later, if the EXCLUDE_FROM_ALL
@@ -3029,3 +3095,5 @@ function(ExternalProject_Add name)
   #
   _ep_add_test_command(${name})
 endfunction()
+
+cmake_policy(POP)

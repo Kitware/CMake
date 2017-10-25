@@ -17,7 +17,6 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 #include "cmsys/RegularExpression.hxx"
@@ -26,6 +25,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <set>
 #include <sstream>
 #include <stdlib.h>
@@ -39,7 +39,7 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   cmGeneratorExpressionDAGChecker* dagChecker)
 {
   cmGeneratorExpression ge(context->Backtrace);
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
   cge->SetEvaluateForBuildsystem(context->EvaluateForBuildsystem);
   std::string result =
     cge->Evaluate(lg, context->Config, context->Quiet, headTarget,

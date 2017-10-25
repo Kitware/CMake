@@ -183,18 +183,18 @@ same length:
 
 .. productionlist::
  bracket_argument: `bracket_open` `bracket_content` `bracket_close`
- bracket_open: '[' '='{len} '['
- bracket_content: <any text not containing a `bracket_close`
-                :  of the same {len} as the `bracket_open`>
- bracket_close: ']' '='{len} ']'
+ bracket_open: '[' '='* '['
+ bracket_content: <any text not containing a `bracket_close` with
+                :  the same number of '=' as the `bracket_open`>
+ bracket_close: ']' '='* ']'
 
 .. raw:: latex
 
    \end{small}
 
-An opening bracket of length *len >= 0* is written ``[`` followed
-by *len* ``=`` followed by ``[`` and the corresponding closing
-bracket is written ``]`` followed by *len* ``=`` followed by ``]``.
+An opening bracket is written ``[`` followed by zero or more ``=`` followed
+by ``[``.  The corresponding closing bracket is written ``]`` followed
+by the same number of ``=`` followed by ``]``.
 Brackets do not nest.  A unique length may always be chosen
 for the opening and closing brackets to contain closing brackets
 of other lengths.
@@ -334,6 +334,8 @@ For example:
  beginning of an unquoted argument, and are treated as part of the
  content.  For example, the unquoted arguments ``-Da="b c"``,
  ``-Da=$(v)``, and ``a" "b"c"d`` are each interpreted literally.
+ They may instead be written as quoted arguments ``"-Da=\"b c\""``,
+ ``"-Da=$(v)"``, and ``"a\" \"b\"c\"d"``, respectively.
 
  Make-style references are treated literally as part of the content
  and do not undergo variable expansion.  They are treated as part
@@ -514,7 +516,7 @@ Function Scope
  create commands that, when invoked, process the recorded commands
  in a new variable binding scope.  A variable "set" or "unset"
  binds in this scope and is visible for the current function and
- any nested calls, but not after the function returns.
+ any nested calls within it, but not after the function returns.
 
 Directory Scope
  Each of the `Directories`_ in a source tree has its own variable

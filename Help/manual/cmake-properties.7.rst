@@ -122,6 +122,7 @@ Properties on Targets
    /prop_tgt/ARCHIVE_OUTPUT_NAME
    /prop_tgt/AUTOGEN_BUILD_DIR
    /prop_tgt/AUTOGEN_TARGET_DEPENDS
+   /prop_tgt/AUTOMOC_COMPILER_PREDEFINES
    /prop_tgt/AUTOMOC_DEPEND_FILTERS
    /prop_tgt/AUTOMOC_MACRO_NAMES
    /prop_tgt/AUTOMOC_MOC_OPTIONS
@@ -392,7 +393,9 @@ Properties on Source Files
    /prop_sf/VS_SHADER_ENTRYPOINT
    /prop_sf/VS_SHADER_FLAGS
    /prop_sf/VS_SHADER_MODEL
+   /prop_sf/VS_SHADER_OUTPUT_HEADER_FILE
    /prop_sf/VS_SHADER_TYPE
+   /prop_sf/VS_SHADER_VARIABLE_NAME
    /prop_sf/VS_TOOL_OVERRIDE.rst
    /prop_sf/VS_XAML_TYPE
    /prop_sf/WRAP_EXCLUDE

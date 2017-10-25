@@ -50,6 +50,8 @@
 #include <windows.h>
 // include wincrypt.h after windows.h
 #include <wincrypt.h>
+
+#include "cm_uv.h"
 #else
 #include <sys/time.h>
 #include <unistd.h>
@@ -700,6 +702,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      double timeout, Encoding encoding)
 {
   std::vector<const char*> argv;
+  argv.reserve(command.size() + 1);
   for (std::string const& cmd : command) {
     argv.push_back(cmd.c_str());
   }
@@ -941,6 +944,39 @@ cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsFileRetry()
     retry.Delay = data[1] ? data[1] : 500;
   }
   return retry;
+}
+
+std::string cmSystemTools::GetRealPath(const std::string& path,
+                                       std::string* errorMessage)
+{
+  // uv_fs_realpath uses Windows Vista API so fallback to kwsys if not found
+  std::string resolved_path;
+  uv_fs_t req;
+  int err = uv_fs_realpath(NULL, &req, path.c_str(), NULL);
+  if (!err) {
+    resolved_path = std::string((char*)req.ptr);
+    cmSystemTools::ConvertToUnixSlashes(resolved_path);
+    // Normalize to upper-case drive letter as GetActualCaseForPath does.
+    if (resolved_path.size() > 1 && resolved_path[1] == ':') {
+      resolved_path[0] = toupper(resolved_path[0]);
+    }
+  } else if (err == UV_ENOSYS) {
+    resolved_path = cmsys::SystemTools::GetRealPath(path, errorMessage);
+  } else if (errorMessage) {
+    LPSTR message = NULL;
+    DWORD size = FormatMessageA(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS,
+      NULL, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&message, 0,
+      NULL);
+    *errorMessage = std::string(message, size);
+    LocalFree(message);
+
+    resolved_path = "";
+  } else {
+    resolved_path = path;
+  }
+  return resolved_path;
 }
 #endif
 
@@ -2065,7 +2101,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
 #undef CM_EXE_PATH_LOCAL_SIZE
   char* exe_path = exe_path_local;
   if (_NSGetExecutablePath(exe_path, &exe_path_size) < 0) {
-    exe_path = (char*)malloc(exe_path_size);
+    exe_path = static_cast<char*>(malloc(exe_path_size));
     _NSGetExecutablePath(exe_path, &exe_path_size);
   }
   exe_dir =
@@ -2325,12 +2361,12 @@ struct cmSystemToolsRPathInfo
 };
 #endif
 
+#if defined(CMAKE_USE_ELF_PARSER)
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
                                 std::string const& newRPath, std::string* emsg,
                                 bool* changed)
 {
-#if defined(CMAKE_USE_ELF_PARSER)
   if (changed) {
     *changed = false;
   }
@@ -2496,15 +2532,16 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
     *changed = true;
   }
   return true;
-#else
-  (void)file;
-  (void)oldRPath;
-  (void)newRPath;
-  (void)emsg;
-  (void)changed;
-  return false;
-#endif
 }
+#else
+bool cmSystemTools::ChangeRPath(std::string const& /*file*/,
+                                std::string const& /*oldRPath*/,
+                                std::string const& /*newRPath*/,
+                                std::string* /*emsg*/, bool* /*changed*/)
+{
+  return false;
+}
+#endif
 
 bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
                                    const char* lhss, const char* rhss)
@@ -2638,10 +2675,10 @@ int cmSystemTools::strverscmp(std::string const& lhs, std::string const& rhs)
   return cm_strverscmp(lhs.c_str(), rhs.c_str());
 }
 
+#if defined(CMAKE_USE_ELF_PARSER)
 bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
                                 bool* removed)
 {
-#if defined(CMAKE_USE_ELF_PARSER)
   if (removed) {
     *removed = false;
   }
@@ -2779,13 +2816,14 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
     *removed = true;
   }
   return true;
-#else
-  (void)file;
-  (void)emsg;
-  (void)removed;
-  return false;
-#endif
 }
+#else
+bool cmSystemTools::RemoveRPath(std::string const& /*file*/,
+                                std::string* /*emsg*/, bool* /*removed*/)
+{
+  return false;
+}
+#endif
 
 bool cmSystemTools::CheckRPath(std::string const& file,
                                std::string const& newRPath)

@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdlib.h> /* free */
 #include <string.h> /* strcmp */
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <io.h> /* _umask (MSVC) / umask (Borland) */
@@ -253,22 +254,22 @@ static bool CheckFileOperations()
   }
   // should work, was created as new file before
   if (!kwsys::SystemTools::FileExists(testNewFile)) {
-    std::cerr << "Problem with FileExists for: " << testNewDir << std::endl;
+    std::cerr << "Problem with FileExists for: " << testNewFile << std::endl;
     res = false;
   }
   if (!kwsys::SystemTools::FileExists(testNewFile.c_str())) {
-    std::cerr << "Problem with FileExists as C string for: " << testNewDir
+    std::cerr << "Problem with FileExists as C string for: " << testNewFile
               << std::endl;
     res = false;
   }
   if (!kwsys::SystemTools::FileExists(testNewFile, true)) {
-    std::cerr << "Problem with FileExists as file for: " << testNewDir
+    std::cerr << "Problem with FileExists as file for: " << testNewFile
               << std::endl;
     res = false;
   }
   if (!kwsys::SystemTools::FileExists(testNewFile.c_str(), true)) {
     std::cerr << "Problem with FileExists as C string and file for: "
-              << testNewDir << std::endl;
+              << testNewFile << std::endl;
     res = false;
   }
 
@@ -284,7 +285,7 @@ static bool CheckFileOperations()
   }
   // should work, was created as new file before
   if (!kwsys::SystemTools::PathExists(testNewFile)) {
-    std::cerr << "Problem with PathExists for: " << testNewDir << std::endl;
+    std::cerr << "Problem with PathExists for: " << testNewFile << std::endl;
     res = false;
   }
 
@@ -535,15 +536,14 @@ static bool CheckStringOperations()
   }
   delete[] cres;
 
-  char* cres2 = new char[strlen("Mary Had A Little Lamb.") + 1];
-  strcpy(cres2, "Mary Had A Little Lamb.");
+  char* cres2 = strdup("Mary Had A Little Lamb.");
   kwsys::SystemTools::ReplaceChars(cres2, "aeiou", 'X');
   if (strcmp(cres2, "MXry HXd A LXttlX LXmb.")) {
     std::cerr << "Problem with ReplaceChars "
               << "\"Mary Had A Little Lamb.\"" << std::endl;
     res = false;
   }
-  delete[] cres2;
+  free(cres2);
 
   if (!kwsys::SystemTools::StringStartsWith("Mary Had A Little Lamb.",
                                             "Mary ")) {

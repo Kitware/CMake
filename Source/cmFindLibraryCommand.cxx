@@ -260,7 +260,7 @@ void cmFindLibraryHelper::RegexFromLiteral(std::string& out,
       out += "\\";
     }
 #if defined(_WIN32) || defined(__APPLE__)
-    out += tolower(ch);
+    out += static_cast<char>(tolower(ch));
 #else
     out += ch;
 #endif

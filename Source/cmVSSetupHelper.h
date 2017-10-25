@@ -116,6 +116,8 @@ struct VSInstanceInfo
     ullVersion = 0;
     IsWin10SDKInstalled = IsWin81SDKInstalled = false;
   }
+
+  std::string GetInstallLocation() const;
 };
 
 class cmVSSetupAPIHelper
@@ -123,6 +125,8 @@ class cmVSSetupAPIHelper
 public:
   cmVSSetupAPIHelper();
   ~cmVSSetupAPIHelper();
+
+  bool SetVSInstance(std::string const& vsInstallLocation);
 
   bool IsVS2017Installed();
   bool GetVSInstanceInfo(std::string& vsInstallLocation);
@@ -134,8 +138,7 @@ private:
   bool GetVSInstanceInfo(SmartCOMPtr<ISetupInstance2> instance2,
                          VSInstanceInfo& vsInstanceInfo);
   bool CheckInstalledComponent(SmartCOMPtr<ISetupPackageReference> package,
-                               bool& bVCToolset, bool& bWin10SDK,
-                               bool& bWin81SDK);
+                               bool& bWin10SDK, bool& bWin81SDK);
   int ChooseVSInstance(const std::vector<VSInstanceInfo>& vecVSInstances);
   bool EnumerateAndChooseVSInstance();
 
@@ -149,6 +152,8 @@ private:
   HRESULT comInitialized;
   // current best instance of VS selected
   VSInstanceInfo chosenInstanceInfo;
+
+  std::string SpecifiedVSInstallLocation;
 };
 
 #endif

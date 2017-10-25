@@ -10,7 +10,6 @@ static const std::string kDIRTY_SIGNAL = "dirty";
 static const std::string kFILE_CHANGE_SIGNAL = "fileChange";
 
 static const std::string kCACHE_TYPE = "cache";
-static const std::string kCMAKE_VARIABLES_TYPE = "cmakeVariables";
 static const std::string kCMAKE_INPUTS_TYPE = "cmakeInputs";
 static const std::string kCODE_MODEL_TYPE = "codemodel";
 static const std::string kCOMPUTE_TYPE = "compute";
@@ -90,17 +89,12 @@ static const std::string kWARN_UNUSED_CLI_KEY = "warnUnusedCli";
 static const std::string kWARN_UNUSED_KEY = "warnUnused";
 static const std::string kWATCHED_DIRECTORIES_KEY = "watchedDirectories";
 static const std::string kWATCHED_FILES_KEY = "watchedFiles";
-static const std::string kIS_CMAKE_VARIABLES = "cmakeVariables";
-static const std::string kCMAKE_C_COMPILER = "cmakeCCompiler";
-static const std::string kCMAKE_C_COMPILER_VERSION = "cmakeCCompilerVersion";
-static const std::string kCMAKE_CXX_COMPILER = "cmakeCXXCompiler";
-static const std::string kCMAKE_CXX_COMPILER_VERSION = "cmakeCXXCompilerVersion";
 static const std::string kHAS_INSTALL_RULE = "hasInstallRule";
-static const std::string kINSTALL_PATH = "installPath";
+static const std::string kINSTALL_PATHS = "installPaths";
 static const std::string kHAS_ENABLED_TESTS = "hasEnabledTests";
 static const std::string kCTEST_NAME = "ctestName";
 static const std::string kCTEST_COMMAND = "ctestCommand";
-static const std::string kCTESTS_INFO= "ctestsInfo";
+static const std::string kCTESTS_INFO = "ctestsInfo";
 
 static const std::string kTARGET_CROSS_REFERENCES_KEY = "crossReferences";
 static const std::string kLINE_NUMBER_KEY = "line";

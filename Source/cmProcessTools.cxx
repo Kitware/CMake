@@ -38,7 +38,7 @@ void cmProcessTools::RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
   if (err) {
     processOutput.DecodeText(std::string(), strdata, 2);
     if (!strdata.empty()) {
-      out->Process(strdata.c_str(), int(strdata.size()));
+      err->Process(strdata.c_str(), int(strdata.size()));
     }
   }
   cmsysProcess_WaitForExit(cp, nullptr);

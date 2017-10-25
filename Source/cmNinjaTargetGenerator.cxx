@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <iterator>
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <string.h>
 
@@ -29,7 +30,6 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 cmNinjaTargetGenerator* cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
@@ -138,7 +138,7 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   if (const char* cflags = source->GetProperty("COMPILE_FLAGS")) {
     std::string config = this->LocalGenerator->GetConfigName();
     cmGeneratorExpression ge;
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
     const char* evaluatedFlags = cge->Evaluate(this->LocalGenerator, config,
                                                false, this->GeneratorTarget);
     this->LocalGenerator->AppendFlags(flags, evaluatedFlags);
@@ -438,7 +438,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
         : mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
       cldeps = "\"";
       cldeps += cmSystemTools::GetCMClDepsCommand();
-      cldeps += "\" " + lang + " " + vars.Source + " \"$DEP_FILE\" $out \"";
+      cldeps += "\" " + lang + " " + vars.Source + " $DEP_FILE $out \"";
       cldeps += mf->GetSafeDefinition("CMAKE_CL_SHOWINCLUDES_PREFIX");
       cldeps += "\" \"" + cl + "\" ";
     }
@@ -463,7 +463,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   vars.Flags = flags.c_str();
   vars.DependencyFile = depfile.c_str();
 
-  CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->GetLocalGenerator()->CreateRulePlaceholderExpander());
 
   std::string const tdi = this->GetLocalGenerator()->ConvertToOutputFormat(
@@ -1077,7 +1077,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
     cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
   }
 
-  CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->GetLocalGenerator()->CreateRulePlaceholderExpander());
 
   for (std::string& i : compileCmds) {

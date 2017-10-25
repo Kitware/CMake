@@ -5,7 +5,8 @@
 #include "cmGeneratorExpression.h"
 #include "cmInstallType.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
+
+#include <memory> // IWYU pragma: keep
 
 class cmLocalGenerator;
 
@@ -82,7 +83,7 @@ void cmInstallFilesGenerator::GenerateScriptForConfig(
   std::vector<std::string> files;
   cmGeneratorExpression ge;
   for (std::string const& f : this->Files) {
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(f);
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(f);
     cmSystemTools::ExpandListArgument(
       cge->Evaluate(this->LocalGenerator, config), files);
   }

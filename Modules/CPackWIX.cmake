@@ -289,7 +289,7 @@
 #
 
 if(NOT CPACK_WIX_ROOT)
-  file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)
+  string(REPLACE "\\" "/" CPACK_WIX_ROOT "$ENV{WIX}")
 endif()
 
 find_program(CPACK_WIX_CANDLE_EXECUTABLE candle

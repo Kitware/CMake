@@ -10,6 +10,7 @@
 #include "cmsys/String.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,7 +31,6 @@
 #include "cmPolicies.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
-#include "cm_auto_ptr.hxx"
 #include "cm_sys_stat.h"
 #include "cmake.h"
 
@@ -368,8 +368,8 @@ bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  CM_AUTO_PTR<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
-  if (hash.get()) {
+  std::unique_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
+  if (hash) {
     std::string out = hash->HashFile(args[1]);
     if (!out.empty()) {
       this->Makefile->AddDefinition(args[2], out.c_str());
@@ -2294,10 +2294,9 @@ bool cmFileCommand::HandleReadElfCommand(std::vector<std::string> const& args)
   if (errorArg.GetString().empty()) {
     this->SetError(error);
     return false;
-  } else {
-    this->Makefile->AddDefinition(errorArg.GetString(), error.c_str());
-    return true;
   }
+  this->Makefile->AddDefinition(errorArg.GetString(), error.c_str());
+  return true;
 #endif
 }
 
@@ -2627,9 +2626,12 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   std::string statusVar;
   bool tls_verify = this->Makefile->IsOn("CMAKE_TLS_VERIFY");
   const char* cainfo = this->Makefile->GetDefinition("CMAKE_TLS_CAINFO");
+  std::string netrc_level = this->Makefile->GetSafeDefinition("CMAKE_NETRC");
+  std::string netrc_file =
+    this->Makefile->GetSafeDefinition("CMAKE_NETRC_FILE");
   std::string expectedHash;
   std::string hashMatchMSG;
-  CM_AUTO_PTR<cmCryptoHash> hash;
+  std::unique_ptr<cmCryptoHash> hash;
   bool showProgress = false;
   std::string userpwd;
 
@@ -2682,14 +2684,29 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         this->SetError("TLS_CAFILE missing file value.");
         return false;
       }
+    } else if (*i == "NETRC_FILE") {
+      ++i;
+      if (i != args.end()) {
+        netrc_file = *i;
+      } else {
+        this->SetError("DOWNLOAD missing file value for NETRC_FILE.");
+        return false;
+      }
+    } else if (*i == "NETRC") {
+      ++i;
+      if (i != args.end()) {
+        netrc_level = *i;
+      } else {
+        this->SetError("DOWNLOAD missing level value for NETRC.");
+        return false;
+      }
     } else if (*i == "EXPECTED_MD5") {
       ++i;
       if (i == args.end()) {
         this->SetError("DOWNLOAD missing sum value for EXPECTED_MD5.");
         return false;
       }
-      hash =
-        CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(cmCryptoHash::AlgoMD5));
+      hash = cm::make_unique<cmCryptoHash>(cmCryptoHash::AlgoMD5);
       hashMatchMSG = "MD5 sum";
       expectedHash = cmSystemTools::LowerCase(*i);
     } else if (*i == "SHOW_PROGRESS") {
@@ -2710,7 +2727,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       }
       std::string algo = i->substr(0, pos);
       expectedHash = cmSystemTools::LowerCase(i->substr(pos + 1));
-      hash = CM_AUTO_PTR<cmCryptoHash>(cmCryptoHash::New(algo.c_str()));
+      hash = std::unique_ptr<cmCryptoHash>(cmCryptoHash::New(algo.c_str()));
       if (!hash.get()) {
         std::string err = "DOWNLOAD EXPECTED_HASH given unknown ALGO: ";
         err += algo;
@@ -2824,6 +2841,16 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     return false;
   }
 
+  // check to see if netrc parameters have been specified
+  // local command args takes precedence over CMAKE_NETRC*
+  netrc_level = cmSystemTools::UpperCase(netrc_level);
+  std::string const& netrc_option_err =
+    cmCurlSetNETRCOption(curl, netrc_level, netrc_file);
+  if (!netrc_option_err.empty()) {
+    this->SetError(netrc_option_err);
+    return false;
+  }
+
   cmFileCommandVectorOfChar chunkDebug;
 
   res = ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, &fout);
@@ -2906,7 +2933,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 
   // Verify MD5 sum if requested:
   //
-  if (hash.get()) {
+  if (hash) {
     std::string actualHash = hash->HashFile(file);
     if (actualHash.empty()) {
       this->SetError("DOWNLOAD cannot compute hash on downloaded file");
@@ -2966,6 +2993,9 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   std::string statusVar;
   bool showProgress = false;
   std::string userpwd;
+  std::string netrc_level = this->Makefile->GetSafeDefinition("CMAKE_NETRC");
+  std::string netrc_file =
+    this->Makefile->GetSafeDefinition("CMAKE_NETRC_FILE");
 
   std::vector<std::string> curl_headers;
 
@@ -3002,6 +3032,22 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
       statusVar = *i;
     } else if (*i == "SHOW_PROGRESS") {
       showProgress = true;
+    } else if (*i == "NETRC_FILE") {
+      ++i;
+      if (i != args.end()) {
+        netrc_file = *i;
+      } else {
+        this->SetError("UPLOAD missing file value for NETRC_FILE.");
+        return false;
+      }
+    } else if (*i == "NETRC") {
+      ++i;
+      if (i != args.end()) {
+        netrc_level = *i;
+      } else {
+        this->SetError("UPLOAD missing level value for NETRC.");
+        return false;
+      }
     } else if (*i == "USERPWD") {
       ++i;
       if (i == args.end()) {
@@ -3134,6 +3180,16 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
     check_curl_result(res, "UPLOAD cannot set user password: ");
   }
 
+  // check to see if netrc parameters have been specified
+  // local command args takes precedence over CMAKE_NETRC*
+  netrc_level = cmSystemTools::UpperCase(netrc_level);
+  std::string const& netrc_option_err =
+    cmCurlSetNETRCOption(curl, netrc_level, netrc_file);
+  if (!netrc_option_err.empty()) {
+    this->SetError(netrc_option_err);
+    return false;
+  }
+
   struct curl_slist* headers = nullptr;
   for (std::string const& h : curl_headers) {
     headers = ::curl_slist_append(headers, h.c_str());
@@ -3195,15 +3251,15 @@ void cmFileCommand::AddEvaluationFile(const std::string& inputName,
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
 
   cmGeneratorExpression outputGe(lfbt);
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> outputCge =
+  std::unique_ptr<cmCompiledGeneratorExpression> outputCge =
     outputGe.Parse(outputExpr);
 
   cmGeneratorExpression conditionGe(lfbt);
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> conditionCge =
+  std::unique_ptr<cmCompiledGeneratorExpression> conditionCge =
     conditionGe.Parse(condition);
 
-  this->Makefile->AddEvaluationFile(inputName, outputCge, conditionCge,
-                                    inputIsContent);
+  this->Makefile->AddEvaluationFile(inputName, std::move(outputCge),
+                                    std::move(conditionCge), inputIsContent);
 }
 
 bool cmFileCommand::HandleGenerateCommand(std::vector<std::string> const& args)

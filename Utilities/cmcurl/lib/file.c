@@ -108,6 +108,7 @@ const struct Curl_handler Curl_handler_file = {
   ZERO_NULL,                            /* perform_getsock */
   file_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
   0,                                    /* defport */
   CURLPROTO_FILE,                       /* protocol */
   PROTOPT_NONETWORK | PROTOPT_NOURLQUERY /* flags */
@@ -132,37 +133,42 @@ static CURLcode file_setup_connection(struct connectdata *conn)
 static CURLcode file_range(struct connectdata *conn)
 {
   curl_off_t from, to;
-  curl_off_t totalsize=-1;
+  curl_off_t totalsize = -1;
   char *ptr;
   char *ptr2;
   struct Curl_easy *data = conn->data;
 
   if(data->state.use_range && data->state.range) {
-    from=curlx_strtoofft(data->state.range, &ptr, 0);
-    while(*ptr && (ISSPACE(*ptr) || (*ptr=='-')))
+    CURLofft from_t;
+    CURLofft to_t;
+    from_t = curlx_strtoofft(data->state.range, &ptr, 0, &from);
+    if(from_t == CURL_OFFT_FLOW)
+      return CURLE_RANGE_ERROR;
+    while(*ptr && (ISSPACE(*ptr) || (*ptr == '-')))
       ptr++;
-    to=curlx_strtoofft(ptr, &ptr2, 0);
-    if(ptr == ptr2) {
-      /* we didn't get any digit */
-      to=-1;
-    }
-    if((-1 == to) && (from>=0)) {
+    to_t = curlx_strtoofft(ptr, &ptr2, 0, &to);
+    if(to_t == CURL_OFFT_FLOW)
+      return CURLE_RANGE_ERROR;
+    if((to_t == CURL_OFFT_INVAL) && !from_t) {
       /* X - */
       data->state.resume_from = from;
       DEBUGF(infof(data, "RANGE %" CURL_FORMAT_CURL_OFF_T " to end of file\n",
                    from));
     }
-    else if(from < 0) {
+    else if((from_t == CURL_OFFT_INVAL) && !to_t) {
       /* -Y */
-      data->req.maxdownload = -from;
-      data->state.resume_from = from;
+      data->req.maxdownload = to;
+      data->state.resume_from = -to;
       DEBUGF(infof(data, "RANGE the last %" CURL_FORMAT_CURL_OFF_T " bytes\n",
-                   -from));
+                   to));
     }
     else {
       /* X-Y */
       totalsize = to-from;
-      data->req.maxdownload = totalsize+1; /* include last byte */
+      if(totalsize == CURL_OFF_T_MAX)
+        /* this is too big to increase, so bail out */
+        return CURLE_RANGE_ERROR;
+      data->req.maxdownload = totalsize + 1; /* include last byte */
       data->state.resume_from = from;
       DEBUGF(infof(data, "RANGE from %" CURL_FORMAT_CURL_OFF_T
                    " getting %" CURL_FORMAT_CURL_OFF_T " bytes\n",
@@ -225,7 +231,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   }
 
   /* change path separators from '/' to '\\' for DOS, Windows and OS/2 */
-  for(i=0; i < real_path_len; ++i)
+  for(i = 0; i < real_path_len; ++i)
     if(actual_path[i] == '/')
       actual_path[i] = '\\';
     else if(!actual_path[i]) { /* binary zero */
@@ -427,9 +433,9 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   struct_stat statbuf; /* struct_stat instead of struct stat just to allow the
                           Windows version to have a different struct without
                           having to redefine the simple word 'stat' */
-  curl_off_t expected_size=0;
+  curl_off_t expected_size = 0;
   bool size_known;
-  bool fstated=FALSE;
+  bool fstated = FALSE;
   ssize_t nread;
   struct Curl_easy *data = conn->data;
   char *buf = data->state.buffer;
@@ -500,7 +506,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
              tm->tm_hour,
              tm->tm_min,
              tm->tm_sec);
-    result = Curl_client_write(conn, CLIENTWRITE_BOTH, buf, 0);
+    result = Curl_client_write(conn, CLIENTWRITE_BOTH, header, 0);
     if(!result)
       /* set the file size to make it available post transfer */
       Curl_pgrsSetDownloadSize(data, expected_size);

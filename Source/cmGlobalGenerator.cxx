@@ -111,6 +111,26 @@ cmGlobalGenerator::~cmGlobalGenerator()
   delete this->ExtraGenerator;
 }
 
+bool cmGlobalGenerator::SetGeneratorInstance(std::string const& i,
+                                             cmMakefile* mf)
+{
+  if (i.empty()) {
+    return true;
+  }
+
+  std::ostringstream e;
+  /* clang-format off */
+  e <<
+    "Generator\n"
+    "  " << this->GetName() << "\n"
+    "does not support instance specification, but instance\n"
+    "  " << i << "\n"
+    "was specified.";
+  /* clang-format on */
+  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  return false;
+}
+
 bool cmGlobalGenerator::SetGeneratorPlatform(std::string const& p,
                                              cmMakefile* mf)
 {
@@ -259,6 +279,43 @@ bool cmGlobalGenerator::GenerateImportFile(const std::string& file)
 
 void cmGlobalGenerator::ForceLinkerLanguages()
 {
+}
+
+bool cmGlobalGenerator::CheckTargetsForMissingSources() const
+{
+  bool failed = false;
+  for (cmLocalGenerator* localGen : this->LocalGenerators) {
+    const std::vector<cmGeneratorTarget*>& targets =
+      localGen->GetGeneratorTargets();
+
+    for (cmGeneratorTarget* target : targets) {
+      if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
+          target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
+          target->GetType() == cmStateEnums::TargetType::UTILITY) {
+        continue;
+      }
+
+      std::vector<std::string> configs;
+      target->Makefile->GetConfigurations(configs);
+      std::vector<cmSourceFile*> srcs;
+      if (configs.empty()) {
+        target->GetSourceFiles(srcs, "");
+      } else {
+        for (std::vector<std::string>::const_iterator ci = configs.begin();
+             ci != configs.end() && srcs.empty(); ++ci) {
+          target->GetSourceFiles(srcs, *ci);
+        }
+      }
+      if (srcs.empty()) {
+        std::ostringstream e;
+        e << "No SOURCES given to target: " << target->GetName();
+        this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                                               target->GetBacktrace());
+        failed = true;
+      }
+    }
+  }
+  return failed;
 }
 
 bool cmGlobalGenerator::IsExportedTargetsFile(
@@ -447,15 +504,6 @@ void cmGlobalGenerator::EnableLanguage(
       "Platform information initialized", cmStateEnums::INTERNAL);
   }
 
-  // find and make sure CMAKE_MAKE_PROGRAM is defined
-  if (!this->FindMakeProgram(mf)) {
-    return;
-  }
-
-  if (!this->CheckLanguages(languages, mf)) {
-    return;
-  }
-
   // try and load the CMakeSystem.cmake if it is there
   std::string fpath = rootBin;
   bool const readCMakeSystem = !mf->GetDefinition("CMAKE_SYSTEM_LOADED");
@@ -500,6 +548,18 @@ void cmGlobalGenerator::EnableLanguage(
   }
 
   if (readCMakeSystem) {
+    // Tell the generator about the instance, if any.
+    std::string instance = mf->GetSafeDefinition("CMAKE_GENERATOR_INSTANCE");
+    if (!this->SetGeneratorInstance(instance, mf)) {
+      cmSystemTools::SetFatalErrorOccured();
+      return;
+    }
+
+    // Find the native build tool for this generator.
+    if (!this->FindMakeProgram(mf)) {
+      return;
+    }
+
     // Tell the generator about the target system.
     std::string system = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
     if (!this->SetSystemName(system, mf)) {
@@ -520,6 +580,12 @@ void cmGlobalGenerator::EnableLanguage(
       cmSystemTools::SetFatalErrorOccured();
       return;
     }
+  }
+
+  // Check that the languages are supported by the generator and its
+  // native build tool found above.
+  if (!this->CheckLanguages(languages, mf)) {
+    return;
   }
 
   // **** Load the system specific initialization if not yet loaded
@@ -1290,6 +1356,11 @@ bool cmGlobalGenerator::Compute()
     localGen->TraceDependencies();
   }
 
+  // Make sure that all (non-imported) targets have source files added!
+  if (this->CheckTargetsForMissingSources()) {
+    return false;
+  }
+
   this->ForceLinkerLanguages();
 
   // Compute the manifest of main targets generated.
@@ -1822,6 +1893,16 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
   return retVal;
 }
 
+bool cmGlobalGenerator::Open(const std::string& bindir,
+                             const std::string& projectName, bool dryRun)
+{
+  if (this->ExtraGenerator) {
+    return this->ExtraGenerator->Open(bindir, projectName, dryRun);
+  }
+
+  return false;
+}
+
 std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
   const std::string& target, const std::string& config,
   const std::string& native, bool ignoreErrors)
@@ -2346,7 +2427,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
         singleLine.push_back(cfgArg);
         cfgArg = "-DEFFECTIVE_PLATFORM_NAME=$(EFFECTIVE_PLATFORM_NAME)";
       } else {
-        cfgArg += mf->GetSafeDefinition("CMAKE_CFG_INTDIR");
+        cfgArg += mf->GetDefinition("CMAKE_CFG_INTDIR");
       }
       singleLine.push_back(cfgArg);
     }

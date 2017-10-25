@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <iterator>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <utility>
@@ -22,7 +23,6 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
@@ -505,7 +505,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   std::string launcher = property_value;
   launcher += " ";
 
-  CM_AUTO_PTR<cmRulePlaceholderExpander> rulePlaceholderExpander(
+  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->CreateRulePlaceholderExpander());
 
   rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);

@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <iostream>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <utility>
 
@@ -15,7 +16,6 @@
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 namespace {
@@ -147,8 +147,8 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator ggi(&cm);
-  CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(&ggi, cm.GetCurrentSnapshot()));
-  CM_AUTO_PTR<cmLocalGenerator> lg(ggi.CreateLocalGenerator(mf.get()));
+  cmMakefile mf(&ggi, cm.GetCurrentSnapshot());
+  std::unique_ptr<cmLocalGenerator> lg(ggi.CreateLocalGenerator(&mf));
 
   const char* inFileName = settingsFileName;
 
@@ -159,7 +159,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
     }
   }
 
-  if (!mf->ReadListFile(inFileName)) {
+  if (!mf.ReadListFile(inFileName)) {
     cmSystemTools::Error("Problem opening GraphViz options file: ",
                          inFileName);
     return;
@@ -169,7 +169,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
 
 #define __set_if_set(var, cmakeDefinition)                                    \
   {                                                                           \
-    const char* value = mf->GetDefinition(cmakeDefinition);                   \
+    const char* value = mf.GetDefinition(cmakeDefinition);                    \
     if (value) {                                                              \
       (var) = value;                                                          \
     }                                                                         \
@@ -182,9 +182,9 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
 
 #define __set_bool_if_set(var, cmakeDefinition)                               \
   {                                                                           \
-    const char* value = mf->GetDefinition(cmakeDefinition);                   \
+    const char* value = mf.GetDefinition(cmakeDefinition);                    \
     if (value) {                                                              \
-      (var) = mf->IsOn(cmakeDefinition);                                      \
+      (var) = mf.IsOn(cmakeDefinition);                                       \
     }                                                                         \
   }
 

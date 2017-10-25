@@ -4,6 +4,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <ctype.h>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +16,6 @@
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cmUuid.h"
-#include "cm_auto_ptr.hxx"
 
 class cmExecutionStatus;
 
@@ -108,8 +108,8 @@ bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  CM_AUTO_PTR<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
-  if (hash.get()) {
+  std::unique_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
+  if (hash) {
     std::string out = hash->HashString(args[2]);
     this->Makefile->AddDefinition(args[1], out.c_str());
     return true;

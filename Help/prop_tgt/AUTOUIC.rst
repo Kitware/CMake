@@ -17,8 +17,8 @@ optional :prop_tgt:`AUTOUIC_SEARCH_PATHS` of the target.
 ``<AUTOGEN_BUILD_DIR>/include``,
 which is automatically added to the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
 
-* For multi configuration generators, the include directory is
-  ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
+* For :prop_gbl:`multi configuration generators <GENERATOR_IS_MULTI_CONFIG>`,
+  the include directory is ``<AUTOGEN_BUILD_DIR>/include_<CONFIG>``.
 
 * See :prop_tgt:`AUTOGEN_BUILD_DIR`.
 

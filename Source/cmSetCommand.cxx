@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSetCommand.h"
 
-#include <string.h>
-
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmState.h"
@@ -22,19 +20,15 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // watch for ENV signatures
-  const char* variable = args[0].c_str(); // VAR is always first
-  if (cmHasLiteralPrefix(variable, "ENV{") && strlen(variable) > 5) {
+  auto const& variable = args[0]; // VAR is always first
+  if (cmHasLiteralPrefix(variable, "ENV{") && variable.size() > 5) {
     // what is the variable name
-    char* varName = new char[strlen(variable)];
-    strncpy(varName, variable + 4, strlen(variable) - 5);
-    varName[strlen(variable) - 5] = '\0';
-    std::string putEnvArg = varName;
-    putEnvArg += "=";
+    auto const& varName = variable.substr(4, variable.size() - 5);
+    std::string putEnvArg = varName + "=";
 
     // what is the current value if any
     std::string currValue;
     const bool currValueSet = cmSystemTools::GetEnv(varName, currValue);
-    delete[] varName;
 
     // will it be set to something, then set it
     if (args.size() > 1 && !args[1].empty()) {

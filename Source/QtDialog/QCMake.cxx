@@ -115,6 +115,8 @@ void QCMake::setBinaryDirectory(const QString& _dir)
     if (toolset) {
       this->setToolset(QString::fromLocal8Bit(toolset));
     }
+
+    checkOpenPossible();
   }
 }
 
@@ -183,6 +185,26 @@ void QCMake::generate()
 #endif
 
   emit this->generateDone(err);
+  checkOpenPossible();
+}
+
+void QCMake::open()
+{
+#ifdef Q_OS_WIN
+  UINT lastErrorMode = SetErrorMode(0);
+#endif
+
+  InterruptFlag = 0;
+  cmSystemTools::ResetErrorOccuredFlag();
+
+  auto successful = this->CMakeInstance->Open(
+    this->BinaryDirectory.toLocal8Bit().data(), false);
+
+#ifdef Q_OS_WIN
+  SetErrorMode(lastErrorMode);
+#endif
+
+  emit this->openDone(successful);
 }
 
 void QCMake::setProperties(const QCMakePropertyList& newProps)
@@ -449,4 +471,11 @@ void QCMake::setWarnUninitializedMode(bool value)
 void QCMake::setWarnUnusedMode(bool value)
 {
   this->WarnUnusedMode = value;
+}
+
+void QCMake::checkOpenPossible()
+{
+  auto data = this->BinaryDirectory.toLocal8Bit().data();
+  auto possible = this->CMakeInstance->Open(data, true);
+  emit openPossible(possible);
 }

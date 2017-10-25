@@ -11,6 +11,7 @@ Synopsis
  cmake [<options>] (<path-to-source> | <path-to-existing-build>)
  cmake [(-D <var>=<value>)...] -P <cmake-script-file>
  cmake --build <dir> [<options>...] [-- <build-tool-options>...]
+ cmake --open <dir>
  cmake -E <command> [<options>...]
  cmake --find-package <options>...
 
@@ -50,6 +51,10 @@ Options
 
 ``--build <dir>``
  See `Build Tool Mode`_.
+
+``--open <dir>``
+ Open the generated project in the associated application.  This is
+ only supported by some generators.
 
 ``-N``
  View mode only.
@@ -137,6 +142,8 @@ Options
  warn about other files as well.
 
 .. include:: OPTIONS_HELP.txt
+
+.. _`Build Tool Mode`:
 
 Build Tool Mode
 ===============

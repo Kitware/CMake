@@ -1036,13 +1036,8 @@ set(MPIEXEC_NUMPROC_FLAG "-n"  CACHE STRING "Flag used by MPI to specify the num
 set(MPIEXEC_PREFLAGS     ""    CACHE STRING "These flags will be directly before the executable that is being run by mpiexec.")
 set(MPIEXEC_POSTFLAGS    ""    CACHE STRING "These flags will be placed after all flags passed to mpiexec.")
 
-# Set the number of processes to the processor count and the previous default
-# of 2 if that couldn't be determined.
-include(${CMAKE_CURRENT_LIST_DIR}/ProcessorCount.cmake)
-ProcessorCount(_MPIEXEC_NUMPROCS)
-if("${_MPIEXEC_NUMPROCS}" EQUAL "0")
-  set(_MPIEXEC_NUMPROCS 2)
-endif()
+# Set the number of processes to the physical processor count
+cmake_host_system_information(RESULT _MPIEXEC_NUMPROCS QUERY NUMBER_OF_PHYSICAL_CORES)
 set(MPIEXEC_MAX_NUMPROCS "${_MPIEXEC_NUMPROCS}" CACHE STRING "Maximum number of processors available to run MPI applications.")
 unset(_MPIEXEC_NUMPROCS)
 mark_as_advanced(MPIEXEC_EXECUTABLE MPIEXEC_NUMPROC_FLAG MPIEXEC_PREFLAGS MPIEXEC_POSTFLAGS MPIEXEC_MAX_NUMPROCS)

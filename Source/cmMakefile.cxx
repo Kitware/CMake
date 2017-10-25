@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <ctype.h>
+#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdlib.h>
 #include <string.h>
@@ -37,7 +38,6 @@
 #include "cmTestGenerator.h" // IWYU pragma: keep
 #include "cmVersion.h"
 #include "cmWorkingDirectory.h"
-#include "cm_auto_ptr.hxx"
 #include "cm_sys_stat.h"
 #include "cmake.h"
 
@@ -264,7 +264,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   // Lookup the command prototype.
   if (cmCommand* proto = this->GetState()->GetCommand(name)) {
     // Clone the prototype.
-    CM_AUTO_PTR<cmCommand> pcmd(proto->Clone());
+    std::unique_ptr<cmCommand> pcmd(proto->Clone());
     pcmd->SetMakefile(this);
 
     // Decide whether to invoke the command.
@@ -584,11 +584,12 @@ void cmMakefile::EnforceDirectoryLevelRules() const
 
 void cmMakefile::AddEvaluationFile(
   const std::string& inputFile,
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> outputName,
-  CM_AUTO_PTR<cmCompiledGeneratorExpression> condition, bool inputIsContent)
+  std::unique_ptr<cmCompiledGeneratorExpression> outputName,
+  std::unique_ptr<cmCompiledGeneratorExpression> condition,
+  bool inputIsContent)
 {
   this->EvaluationFiles.push_back(new cmGeneratorExpressionEvaluationFile(
-    inputFile, outputName, condition, inputIsContent,
+    inputFile, std::move(outputName), std::move(condition), inputIsContent,
     this->GetPolicyStatus(cmPolicies::CMP0070)));
 }
 
@@ -2874,7 +2875,7 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
   FunctionBlockersType::size_type barrier =
     this->FunctionBlockerBarriers.back();
   while (this->FunctionBlockers.size() > barrier) {
-    CM_AUTO_PTR<cmFunctionBlocker> fb(this->FunctionBlockers.back());
+    std::unique_ptr<cmFunctionBlocker> fb(this->FunctionBlockers.back());
     this->FunctionBlockers.pop_back();
     if (reportError) {
       // Report the context in which the unclosed block was opened.
@@ -3009,7 +3010,7 @@ void cmMakefile::AddFunctionBlocker(cmFunctionBlocker* fb)
   this->FunctionBlockers.push_back(fb);
 }
 
-CM_AUTO_PTR<cmFunctionBlocker> cmMakefile::RemoveFunctionBlocker(
+std::unique_ptr<cmFunctionBlocker> cmMakefile::RemoveFunctionBlocker(
   cmFunctionBlocker* fb, const cmListFileFunction& lff)
 {
   // Find the function blocker stack barrier for the current scope.
@@ -3042,11 +3043,11 @@ CM_AUTO_PTR<cmFunctionBlocker> cmMakefile::RemoveFunctionBlocker(
       }
       cmFunctionBlocker* b = *pos;
       this->FunctionBlockers.erase(pos);
-      return CM_AUTO_PTR<cmFunctionBlocker>(b);
+      return std::unique_ptr<cmFunctionBlocker>(b);
     }
   }
 
-  return CM_AUTO_PTR<cmFunctionBlocker>();
+  return std::unique_ptr<cmFunctionBlocker>();
 }
 
 const char* cmMakefile::GetHomeDirectory() const
@@ -3082,18 +3083,9 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
 {
   cmSourceFileLocation sfl(this, sourceName);
-
-#if defined(_WIN32) || defined(__APPLE__)
-  const auto& name = cmSystemTools::LowerCase(sfl.GetName());
-#else
-  const auto& name = sfl.GetName();
-#endif
-  auto sfsi = this->SourceFileSearchIndex.find(name);
-  if (sfsi != this->SourceFileSearchIndex.end()) {
-    for (auto sf : sfsi->second) {
-      if (sf->Matches(sfl)) {
-        return sf;
-      }
+  for (cmSourceFile* sf : this->SourceFiles) {
+    if (sf->Matches(sfl)) {
+      return sf;
     }
   }
   return nullptr;
@@ -3107,41 +3099,6 @@ cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
     sf->SetProperty("GENERATED", "1");
   }
   this->SourceFiles.push_back(sf);
-
-  auto name = sf->GetLocation().GetName();
-#if defined(_WIN32) || defined(__APPLE__)
-  name = cmSystemTools::LowerCase(name);
-#endif
-
-  // For a file in the form "a.b.c" add the cmSourceFile to the index
-  // at "a.b.c", "a.b" and "a".
-  auto partial = name;
-  while (true) {
-    this->SourceFileSearchIndex[partial].insert(sf);
-    auto i = partial.rfind('.');
-    if (i == std::string::npos) {
-      break;
-    }
-    partial = partial.substr(0, i);
-  }
-
-  if (sf->GetLocation().ExtensionIsAmbiguous()) {
-    // For an ambiguous extension also add the various "known"
-    // extensions to the original filename.
-
-    const auto& srcExts = this->GetCMakeInstance()->GetSourceExtensions();
-    for (const auto& ext : srcExts) {
-      auto name_ext = name + "." + cmSystemTools::LowerCase(ext);
-      this->SourceFileSearchIndex[name_ext].insert(sf);
-    }
-
-    const auto& hdrExts = this->GetCMakeInstance()->GetHeaderExtensions();
-    for (const auto& ext : hdrExts) {
-      auto name_ext = name + "." + cmSystemTools::LowerCase(ext);
-      this->SourceFileSearchIndex[name_ext].insert(sf);
-    }
-  }
-
   return sf;
 }
 
@@ -3229,8 +3186,9 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   // do a configure
   cm.SetHomeDirectory(srcdir);
   cm.SetHomeOutputDirectory(bindir);
-  cm.SetGeneratorPlatform(this->GetCMakeInstance()->GetGeneratorPlatform());
-  cm.SetGeneratorToolset(this->GetCMakeInstance()->GetGeneratorToolset());
+  cm.SetGeneratorInstance(this->GetSafeDefinition("CMAKE_GENERATOR_INSTANCE"));
+  cm.SetGeneratorPlatform(this->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM"));
+  cm.SetGeneratorToolset(this->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET"));
   cm.LoadCache();
   if (!gg->IsMultiConfig()) {
     if (const char* config =
@@ -3756,7 +3714,7 @@ cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
                                         bool global)
 {
   // Create the target.
-  CM_AUTO_PTR<cmTarget> target(
+  std::unique_ptr<cmTarget> target(
     new cmTarget(name, type, global ? cmTarget::VisibilityImportedGlobally
                                     : cmTarget::VisibilityImported,
                  this));

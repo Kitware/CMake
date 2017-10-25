@@ -1346,7 +1346,7 @@ std::string SymbolProperties::GetBinary() const
     std::string binary;
     char buf[1024] = { '\0' };
     ssize_t ll = 0;
-    if ((ll = readlink("/proc/self/exe", buf, 1024)) > 0) {
+    if ((ll = readlink("/proc/self/exe", buf, 1024)) > 0 && ll < 1024) {
       buf[ll] = '\0';
       binary = buf;
     } else {

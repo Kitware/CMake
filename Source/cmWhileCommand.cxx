@@ -7,8 +7,9 @@
 #include "cmExpandedCommandArgument.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cm_auto_ptr.hxx"
 #include "cmake.h"
+
+#include <memory> // IWYU pragma: keep
 
 cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)
@@ -34,7 +35,8 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
     // if this is the endwhile for this while loop then execute
     if (!this->Depth) {
       // Remove the function blocker for this scope or bail.
-      CM_AUTO_PTR<cmFunctionBlocker> fb(mf.RemoveFunctionBlocker(this, lff));
+      std::unique_ptr<cmFunctionBlocker> fb(
+        mf.RemoveFunctionBlocker(this, lff));
       if (!fb.get()) {
         return false;
       }

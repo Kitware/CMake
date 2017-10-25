@@ -2,10 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCryptoHash.h"
 
+#include "cmAlgorithms.h"
 #include "cm_kwiml.h"
 #include "cm_rhash.h"
 #include "cmsys/FStream.hxx"
 #include <string.h>
+
+#include <memory> // IWYU pragma: keep
 
 static unsigned int const cmCryptoHashAlgoToId[] = {
   /* clang-format needs this comment to break after the opening brace */
@@ -43,39 +46,39 @@ cmCryptoHash::~cmCryptoHash()
   rhash_free(this->CTX);
 }
 
-CM_AUTO_PTR<cmCryptoHash> cmCryptoHash::New(const char* algo)
+std::unique_ptr<cmCryptoHash> cmCryptoHash::New(const char* algo)
 {
   if (strcmp(algo, "MD5") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoMD5));
+    return cm::make_unique<cmCryptoHash>(AlgoMD5);
   }
   if (strcmp(algo, "SHA1") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA1));
+    return cm::make_unique<cmCryptoHash>(AlgoSHA1);
   }
   if (strcmp(algo, "SHA224") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA224));
+    return cm::make_unique<cmCryptoHash>(AlgoSHA224);
   }
   if (strcmp(algo, "SHA256") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA256));
+    return cm::make_unique<cmCryptoHash>(AlgoSHA256);
   }
   if (strcmp(algo, "SHA384") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA384));
+    return cm::make_unique<cmCryptoHash>(AlgoSHA384);
   }
   if (strcmp(algo, "SHA512") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA512));
+    return cm::make_unique<cmCryptoHash>(AlgoSHA512);
   }
   if (strcmp(algo, "SHA3_224") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA3_224));
+    return cm::make_unique<cmCryptoHash>(AlgoSHA3_224);
   }
   if (strcmp(algo, "SHA3_256") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA3_256));
+    return cm::make_unique<cmCryptoHash>(AlgoSHA3_256);
   }
   if (strcmp(algo, "SHA3_384") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA3_384));
+    return cm::make_unique<cmCryptoHash>(AlgoSHA3_384);
   }
   if (strcmp(algo, "SHA3_512") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHash(AlgoSHA3_512));
+    return cm::make_unique<cmCryptoHash>(AlgoSHA3_512);
   }
-  return CM_AUTO_PTR<cmCryptoHash>(nullptr);
+  return std::unique_ptr<cmCryptoHash>(nullptr);
 }
 
 bool cmCryptoHash::IntFromHexDigit(char input, char& output)

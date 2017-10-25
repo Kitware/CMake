@@ -55,6 +55,9 @@ public:
   void SetName(const std::string& n) { Name = n; }
   std::string GetName() const { return Name; }
 
+  virtual bool Open(const std::string& bindir, const std::string& projectName,
+                    bool dryRun);
+
 protected:
   ///! Contains the names of the global generators support by this generator.
   std::vector<std::string> SupportedGlobalGenerators;

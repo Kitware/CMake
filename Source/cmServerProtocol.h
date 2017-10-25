@@ -123,7 +123,6 @@ private:
   cmServerResponse ProcessGlobalSettings(const cmServerRequest& request);
   cmServerResponse ProcessSetGlobalSettings(const cmServerRequest& request);
   cmServerResponse ProcessFileSystemWatchers(const cmServerRequest& request);
-  cmServerResponse ProcessCMakeVariables(const cmServerRequest& request);
   cmServerResponse ProcessCTests(const cmServerRequest& request);
 
   enum State

@@ -188,6 +188,9 @@ CMakeSetupDialog::CMakeSetupDialog()
   connect(this->Output, SIGNAL(customContextMenuRequested(const QPoint&)),
           this, SLOT(doOutputContextMenu(const QPoint&)));
 
+  // disable open project button
+  this->OpenProjectButton->setDisabled(true);
+
   // start the cmake worker thread
   this->CMakeThread = new QCMakeThread(this);
   QObject::connect(this->CMakeThread, SIGNAL(cmakeInitialized()), this,
@@ -248,6 +251,10 @@ void CMakeSetupDialog::initialize()
   QObject::connect(this->CMakeThread->cmakeInstance(),
                    SIGNAL(outputMessage(QString)), this,
                    SLOT(message(QString)));
+
+  QObject::connect(this->CMakeThread->cmakeInstance(),
+                   SIGNAL(openPossible(bool)), this->OpenProjectButton,
+                   SLOT(setEnabled(bool)));
 
   QObject::connect(this->groupedCheck, SIGNAL(toggled(bool)), this,
                    SLOT(setGroupedView(bool)));
@@ -492,24 +499,10 @@ void CMakeSetupDialog::doGenerate()
   this->ConfigureNeeded = true;
 }
 
-QString CMakeSetupDialog::getProjectFilename()
-{
-  QStringList nameFilter;
-  nameFilter << "*.sln"
-             << "*.xcodeproj";
-  QDir directory(this->BinaryDirectory->currentText());
-  QStringList nlnFile = directory.entryList(nameFilter);
-
-  if (nlnFile.count() == 1) {
-    return this->BinaryDirectory->currentText() + "/" + nlnFile.at(0);
-  }
-
-  return QString();
-}
-
 void CMakeSetupDialog::doOpenProject()
 {
-  QDesktopServices::openUrl(QUrl::fromLocalFile(this->getProjectFilename()));
+  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(), "open",
+                            Qt::QueuedConnection);
 }
 
 void CMakeSetupDialog::closeEvent(QCloseEvent* e)
@@ -629,11 +622,6 @@ void CMakeSetupDialog::updateBinaryDirectory(const QString& dir)
     this->BinaryDirectory->blockSignals(true);
     this->BinaryDirectory->setEditText(dir);
     this->BinaryDirectory->blockSignals(false);
-  }
-  if (!this->getProjectFilename().isEmpty()) {
-    this->OpenProjectButton->setEnabled(true);
-  } else {
-    this->OpenProjectButton->setEnabled(false);
   }
 }
 
@@ -1039,9 +1027,6 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     this->GenerateButton->setEnabled(true);
     this->GenerateAction->setEnabled(true);
     this->ConfigureButton->setEnabled(true);
-    if (!this->getProjectFilename().isEmpty()) {
-      this->OpenProjectButton->setEnabled(true);
-    }
     this->ConfigureButton->setText(tr("&Configure"));
     this->GenerateButton->setText(tr("&Generate"));
   } else if (s == ReadyGenerate) {
@@ -1049,9 +1034,6 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     this->GenerateButton->setEnabled(true);
     this->GenerateAction->setEnabled(true);
     this->ConfigureButton->setEnabled(true);
-    if (!this->getProjectFilename().isEmpty()) {
-      this->OpenProjectButton->setEnabled(true);
-    }
     this->ConfigureButton->setText(tr("&Configure"));
     this->GenerateButton->setText(tr("&Generate"));
   }

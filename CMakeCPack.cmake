@@ -245,5 +245,23 @@ configure_file("${CMake_SOURCE_DIR}/CMakeCPackOptions.cmake.in"
   "${CMake_BINARY_DIR}/CMakeCPackOptions.cmake" @ONLY)
 set(CPACK_PROJECT_CONFIG_FILE "${CMake_BINARY_DIR}/CMakeCPackOptions.cmake")
 
+set(CPACK_SOURCE_IGNORE_FILES
+  # Files specific to version control.
+  "/\\\\.git/"
+  "/\\\\.gitattributes$"
+  "/\\\\.github/"
+  "/\\\\.gitignore$"
+  "/\\\\.hooks-config$"
+
+  # Cygwin package build.
+  "/\\\\.build/"
+
+  # Temporary files.
+  "\\\\.swp$"
+  "\\\\.#"
+  "/#"
+  "~$"
+  )
+
 # include CPack model once all variables are set
 include(CPack)

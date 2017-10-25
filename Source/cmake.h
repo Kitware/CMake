@@ -203,28 +203,22 @@ public:
   ///! Get the names of the current registered generators
   void GetRegisteredGenerators(std::vector<GeneratorInfo>& generators) const;
 
+  ///! Set the name of the selected generator-specific instance.
+  void SetGeneratorInstance(std::string const& instance)
+  {
+    this->GeneratorInstance = instance;
+  }
+
   ///! Set the name of the selected generator-specific platform.
   void SetGeneratorPlatform(std::string const& ts)
   {
     this->GeneratorPlatform = ts;
   }
 
-  ///! Get the name of the selected generator-specific platform.
-  std::string const& GetGeneratorPlatform() const
-  {
-    return this->GeneratorPlatform;
-  }
-
   ///! Set the name of the selected generator-specific toolset.
   void SetGeneratorToolset(std::string const& ts)
   {
     this->GeneratorToolset = ts;
-  }
-
-  ///! Get the name of the selected generator-specific toolset.
-  std::string const& GetGeneratorToolset() const
-  {
-    return this->GeneratorToolset;
   }
 
   const std::vector<std::string>& GetSourceExtensions() const
@@ -413,6 +407,9 @@ public:
             const std::string& config,
             const std::vector<std::string>& nativeOptions, bool clean);
 
+  ///! run the --open option
+  bool Open(const std::string& dir, bool dryRun);
+
   void UnwatchUnusedCli(const std::string& var);
   void WatchUnusedCli(const std::string& var);
 
@@ -440,6 +437,7 @@ protected:
 
   cmGlobalGenerator* GlobalGenerator;
   std::map<std::string, DiagLevel> DiagLevels;
+  std::string GeneratorInstance;
   std::string GeneratorPlatform;
   std::string GeneratorToolset;
 

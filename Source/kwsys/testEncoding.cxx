@@ -75,6 +75,10 @@ static int testRobustEncoding()
   // test that the conversion functions handle invalid
   // unicode correctly/gracefully
 
+  // we manipulate the format flags of stdout, remember
+  // the original state here to restore before return
+  std::ios::fmtflags const& flags = std::cout.flags();
+
   int ret = 0;
   char cstr[] = { (char)-1, 0 };
   // this conversion could fail
@@ -120,6 +124,7 @@ static int testRobustEncoding()
     ret++;
   }
 
+  std::cout.flags(flags);
   return ret;
 }
 

@@ -6,12 +6,12 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <string>
 #include <vector>
 
 #include "cmGeneratorExpression.h"
 #include "cmPolicies.h"
-#include "cm_auto_ptr.hxx"
 #include "cm_sys_stat.h"
 
 class cmLocalGenerator;
@@ -21,9 +21,9 @@ class cmGeneratorExpressionEvaluationFile
 public:
   cmGeneratorExpressionEvaluationFile(
     const std::string& input,
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> outputFileExpr,
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> condition, bool inputIsContent,
-    cmPolicies::PolicyStatus policyStatusCMP0070);
+    std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
+    std::unique_ptr<cmCompiledGeneratorExpression> condition,
+    bool inputIsContent, cmPolicies::PolicyStatus policyStatusCMP0070);
 
   void Generate(cmLocalGenerator* lg);
 
@@ -47,8 +47,8 @@ private:
 
 private:
   const std::string Input;
-  const CM_AUTO_PTR<cmCompiledGeneratorExpression> OutputFileExpr;
-  const CM_AUTO_PTR<cmCompiledGeneratorExpression> Condition;
+  const std::unique_ptr<cmCompiledGeneratorExpression> OutputFileExpr;
+  const std::unique_ptr<cmCompiledGeneratorExpression> Condition;
   std::vector<std::string> Files;
   const bool InputIsContent;
   cmPolicies::PolicyStatus PolicyStatusCMP0070;

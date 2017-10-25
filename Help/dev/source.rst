@@ -26,19 +26,9 @@ C++ Subset Permitted
 CMake requires compiling as C++11 or above.  However, in order to support
 building on older toolchains some constructs need to be handled with care:
 
-* Do not use ``CM_AUTO_PTR`` or ``std::auto_ptr``.
+* Do not use ``std::auto_ptr``.
 
-  The ``std::auto_ptr`` template is deprecated in C++11.  The ``CM_AUTO_PTR``
-  macro remains leftover from C++98 support until its uses can be ported to
-  ``std::unique_ptr``.  Do not add new uses of the macro.
-
-* Use ``CM_EQ_DELETE;`` instead of ``= delete;``.
-
-  Older C++11 compilers do not support deleting functions.  Using
-  ``CM_EQ_DELETE`` will delete the functions if the compiler supports it and
-  give them no implementation otherwise.  Calling such a function will lead
-  to compiler errors if the compiler supports *deleted* functions and linker
-  errors otherwise.
+  The ``std::auto_ptr`` template is deprecated in C++11. Use ``std::unique_ptr``.
 
 * Use ``CM_DISABLE_COPY(Class)`` to mark classes as non-copyable.
 

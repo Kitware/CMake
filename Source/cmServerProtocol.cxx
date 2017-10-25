@@ -8,6 +8,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstallGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
 #include "cmListFileCache.h"
@@ -32,6 +33,7 @@
 #include <functional>
 #include <limits>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -84,8 +86,7 @@ std::vector<std::string> toStringList(const Json::Value& in)
   return result;
 }
 
-void getCMakeInputs(const cmGlobalGenerator* gg,
-  const std::string& sourceDir,
+void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
   const std::string& buildDir,
   std::vector<std::string>* internalFiles,
   std::vector<std::string>* explicitFiles,
@@ -257,7 +258,7 @@ bool cmServerProtocol::DoActivate(const cmServerRequest& /*request*/,
 
 std::pair<int, int> cmServerProtocol1::ProtocolVersion() const
 {
-  return std::make_pair(1, 4);
+  return std::make_pair(1, 2);
 }
 
 static void setErrorMessage(std::string* errorMessage, const std::string& text)
@@ -460,9 +461,6 @@ const cmServerResponse cmServerProtocol1::Process(
   if (request.Type == kCACHE_TYPE) {
     return this->ProcessCache(request);
   }
-  if (request.Type == kCMAKE_VARIABLES_TYPE) {
-    return this->ProcessCMakeVariables(request);
-  }
   if (request.Type == kCMAKE_INPUTS_TYPE) {
     return this->ProcessCMakeInputs(request);
   }
@@ -597,11 +595,7 @@ public:
   void SetDefines(const std::set<std::string>& defines);
 
   bool IsGenerated = false;
-  std::string CCompiler;
-  std::string CCompilerVersion;
-  std::string CXXCompiler;
-  std::string CXXCompilerVersion;
-
+  
   std::string Language;
   std::string Flags;
   std::vector<std::string> Defines;
@@ -618,11 +612,12 @@ bool LanguageData::operator==(const LanguageData& other) const
 void LanguageData::SetDefines(const std::set<std::string>& defines)
 {
   std::vector<std::string> result;
+  result.reserve(defines.size());
   for (std::string const& i : defines) {
     result.push_back(i);
   }
   std::sort(result.begin(), result.end());
-  Defines = result;
+  Defines = std::move(result);
 }
 
 namespace std {
@@ -847,18 +842,6 @@ static Json::Value DumpSourceFileGroup(const LanguageData& data,
     if (!data.Defines.empty()) {
       result[kDEFINES_KEY] = fromStringList(data.Defines);
     }
-    if (!data.CCompiler.empty()) {
-      result[kCMAKE_C_COMPILER] = data.CCompiler;
-    }
-    if (!data.CCompilerVersion.empty()) {
-      result[kCMAKE_C_COMPILER_VERSION] = data.CCompilerVersion;
-    }
-    if (!data.CXXCompiler.empty()) {
-      result[kCMAKE_CXX_COMPILER] = data.CXXCompiler;
-    }
-    if (!data.CXXCompilerVersion.empty()) {
-      result[kCMAKE_CXX_COMPILER_VERSION] = data.CXXCompilerVersion;
-    }
   }
 
   result[kIS_GENERATED_KEY] = data.IsGenerated;
@@ -890,16 +873,8 @@ static Json::Value DumpSourceFilesList(
     if (!fileData.Language.empty()) {
       const LanguageData& ld = languageDataMap.at(fileData.Language);
       cmLocalGenerator* lg = target->GetLocalGenerator();
-      auto mf = lg->GetMakefile();
-
-      fileData.CCompiler = mf->GetSafeDefinition("CMAKE_C_COMPILER");
-      fileData.CCompilerVersion = mf->GetSafeDefinition("CMAKE_C_COMPILER_VERSION");
-
-      fileData.CXXCompiler = mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
-      fileData.CXXCompilerVersion = mf->GetSafeDefinition("CMAKE_CXX_COMPILER_VERSION");
-
+      
       std::string compileFlags = ld.Flags;
-      lg->AppendFlags(compileFlags, file->GetProperty("COMPILE_FLAGS"));
       if (const char* cflags = file->GetProperty("COMPILE_FLAGS")) {
         cmGeneratorExpression ge;
         auto cge = ge.Parse(cflags);
@@ -986,33 +961,30 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
   if (target->Target->GetHaveInstallRule()) {
     result[kHAS_INSTALL_RULE] = true;
 
+    Json::Value installPaths = Json::arrayValue;
     auto targetGenerators = target->Makefile->GetInstallGenerators();
-    for (auto iter = targetGenerators.begin(); iter != targetGenerators.end(); iter++)
-    {
-      auto installTargetGenerator = dynamic_cast<cmInstallTargetGenerator*>(*iter);
+    for (auto installGenerator : targetGenerators) {
+      auto installTargetGenerator =
+        dynamic_cast<cmInstallTargetGenerator*>(installGenerator);
       if (installTargetGenerator != nullptr &&
-        installTargetGenerator->GetTarget()->Target == target->Target) {
+          installTargetGenerator->GetTarget()->Target == target->Target) {
         auto dest = installTargetGenerator->GetDestination(config);
-        
+
         std::string installPath;
-        if (!dest.empty() && cmSystemTools::FileIsFullPath(dest.c_str()))
-        {
+        if (!dest.empty() && cmSystemTools::FileIsFullPath(dest.c_str())) {
           installPath = dest;
-        }
-        else
-        {
-          std::string installPrefix = target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
+        } else {
+          std::string installPrefix =
+            target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
           installPath = installPrefix + '/' + dest;
         }
-        
-        result[kINSTALL_PATH] = installPath;
+
+        installPaths.append(installPath);
       }
     }
-  } else {
-    result[kHAS_INSTALL_RULE] = false;
-  }
 
-  result[kHAS_ENABLED_TESTS] = target->Makefile->IsOn("CMAKE_TESTING_ENABLED");
+    result[kINSTALL_PATHS] = installPaths;
+  }
 
   Json::Value crossRefs = Json::objectValue;
   crossRefs[kBACKTRACE_KEY] = DumpBacktrace(target->Target->GetBacktrace());
@@ -1150,7 +1122,7 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
 
     // Project structure information:
     const cmMakefile* mf = lg->GetMakefile();
-    pObj[kHAS_INSTALL_RULE] = ((cmMakefile*)mf)->GetInstallGenerators().empty() == false;
+    pObj[kHAS_INSTALL_RULE] = mf->GetInstallGenerators().empty() == false;
     pObj[kSOURCE_DIRECTORY_KEY] = mf->GetCurrentSourceDirectory();
     pObj[kBUILD_DIRECTORY_KEY] = mf->GetCurrentBinaryDirectory();
     pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config);
@@ -1405,23 +1377,6 @@ cmServerResponse cmServerProtocol1::ProcessFileSystemWatchers(
   result[kWATCHED_FILES_KEY] = files;
   result[kWATCHED_DIRECTORIES_KEY] = directories;
 
-  return request.Reply(result);
-}
-
-cmServerResponse cmServerProtocol1::ProcessCMakeVariables(
-  const cmServerRequest& request)
-{
-  if (this->m_State < STATE_CONFIGURED) {
-    return request.ReportError("This instance was not yet configured.");
-  }
-
-  Json::Value result = Json::objectValue;
-  Json::Value& obj = result[kIS_CMAKE_VARIABLES] = Json::objectValue;
-
-  auto const state = this->CMakeInstance()->GetState();
-  for (auto const& key : state->GetCacheEntryKeys()) {
-    obj[key] = state->GetCacheEntryValue(key);
-  }
   return request.Reply(result);
 }
 
