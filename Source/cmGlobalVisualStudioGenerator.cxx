@@ -173,9 +173,6 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
 void cmGlobalVisualStudioGenerator::CallVisualStudioMacro(
   MacroName m, const char* vsSolutionFile)
 {
-  if (this->LocalGenerators.size() == 0)
-    return;
-
   // If any solution or project files changed during the generation,
   // tell Visual Studio to reload them...
   cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();

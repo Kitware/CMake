@@ -616,7 +616,7 @@ public:
   cmMessenger* GetMessenger() const;
   cmGlobalGenerator* GetGlobalGenerator() const;
 
-  void cmMakefile::GetTestNames(std::vector<std::string> &testNames);
+  void GetTestNames(std::vector<std::string> &testNames);
 
   /**
    * Get all the source files this makefile knows about
