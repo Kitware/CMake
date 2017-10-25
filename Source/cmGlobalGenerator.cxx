@@ -2235,6 +2235,12 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
   std::vector<GlobalTargetInfo>& targets)
 {
   cmMakefile* mf = this->Makefiles[0];
+  std::string configFile = mf->GetCurrentBinaryDirectory();
+  configFile += "/CPackConfig.cmake";
+  if (!cmSystemTools::FileExists(configFile.c_str())) {
+    return;
+  }
+
   const char* cmakeCfgIntDir = this->GetCMakeCFGIntDir();
   GlobalTargetInfo gti;
   gti.Name = this->GetPackageTargetName();
@@ -2248,8 +2254,6 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
     singleLine.push_back(cmakeCfgIntDir);
   }
   singleLine.push_back("--config");
-  std::string configFile = mf->GetCurrentBinaryDirectory();
-  configFile += "/CPackConfig.cmake";
   std::string relConfigFile = "./CPackConfig.cmake";
   singleLine.push_back(relConfigFile);
   gti.CommandLines.push_back(singleLine);
@@ -2262,61 +2266,65 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
       gti.Depends.push_back(this->GetAllTargetName());
     }
   }
-  if (cmSystemTools::FileExists(configFile.c_str())) {
-    targets.push_back(gti);
-  }
+  targets.push_back(gti);
 }
 
 void cmGlobalGenerator::AddGlobalTarget_PackageSource(
   std::vector<GlobalTargetInfo>& targets)
 {
-  cmMakefile* mf = this->Makefiles[0];
   const char* packageSourceTargetName = this->GetPackageSourceTargetName();
-  if (packageSourceTargetName) {
-    GlobalTargetInfo gti;
-    gti.Name = packageSourceTargetName;
-    gti.Message = "Run CPack packaging tool for source...";
-    gti.WorkingDir = mf->GetCurrentBinaryDirectory();
-    gti.UsesTerminal = true;
-    cmCustomCommandLine singleLine;
-    singleLine.push_back(cmSystemTools::GetCPackCommand());
-    singleLine.push_back("--config");
-    std::string configFile = mf->GetCurrentBinaryDirectory();
-    configFile += "/CPackSourceConfig.cmake";
-    std::string relConfigFile = "./CPackSourceConfig.cmake";
-    singleLine.push_back(relConfigFile);
-    if (cmSystemTools::FileExists(configFile.c_str())) {
-      singleLine.push_back(configFile);
-      gti.CommandLines.push_back(singleLine);
-      targets.push_back(gti);
-    }
+  if (!packageSourceTargetName) {
+    return;
   }
+
+  cmMakefile* mf = this->Makefiles[0];
+  std::string configFile = mf->GetCurrentBinaryDirectory();
+  configFile += "/CPackSourceConfig.cmake";
+  if (!cmSystemTools::FileExists(configFile.c_str())) {
+    return;
+  }
+
+  GlobalTargetInfo gti;
+  gti.Name = packageSourceTargetName;
+  gti.Message = "Run CPack packaging tool for source...";
+  gti.WorkingDir = mf->GetCurrentBinaryDirectory();
+  gti.UsesTerminal = true;
+  cmCustomCommandLine singleLine;
+  singleLine.push_back(cmSystemTools::GetCPackCommand());
+  singleLine.push_back("--config");
+  std::string relConfigFile = "./CPackSourceConfig.cmake";
+  singleLine.push_back(relConfigFile);
+  singleLine.push_back(configFile);
+  gti.CommandLines.push_back(singleLine);
+  targets.push_back(gti);
 }
 
 void cmGlobalGenerator::AddGlobalTarget_Test(
   std::vector<GlobalTargetInfo>& targets)
 {
   cmMakefile* mf = this->Makefiles[0];
-  const char* cmakeCfgIntDir = this->GetCMakeCFGIntDir();
-  if (mf->IsOn("CMAKE_TESTING_ENABLED")) {
-    GlobalTargetInfo gti;
-    gti.Name = this->GetTestTargetName();
-    gti.Message = "Running tests...";
-    gti.UsesTerminal = true;
-    cmCustomCommandLine singleLine;
-    singleLine.push_back(cmSystemTools::GetCTestCommand());
-    singleLine.push_back("--force-new-ctest-process");
-    if (cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.') {
-      singleLine.push_back("-C");
-      singleLine.push_back(cmakeCfgIntDir);
-    } else // TODO: This is a hack. Should be something to do with the
-           // generator
-    {
-      singleLine.push_back("$(ARGS)");
-    }
-    gti.CommandLines.push_back(singleLine);
-    targets.push_back(gti);
+  if (!mf->IsOn("CMAKE_TESTING_ENABLED")) {
+    return;
   }
+
+  const char* cmakeCfgIntDir = this->GetCMakeCFGIntDir();
+  GlobalTargetInfo gti;
+  gti.Name = this->GetTestTargetName();
+  gti.Message = "Running tests...";
+  gti.UsesTerminal = true;
+  cmCustomCommandLine singleLine;
+  singleLine.push_back(cmSystemTools::GetCTestCommand());
+  singleLine.push_back("--force-new-ctest-process");
+  if (cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.') {
+    singleLine.push_back("-C");
+    singleLine.push_back(cmakeCfgIntDir);
+  } else // TODO: This is a hack. Should be something to do with the
+         // generator
+  {
+    singleLine.push_back("$(ARGS)");
+  }
+  gti.CommandLines.push_back(singleLine);
+  targets.push_back(gti);
 }
 
 void cmGlobalGenerator::AddGlobalTarget_EditCache(
