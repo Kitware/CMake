@@ -156,7 +156,7 @@ function(_ICU_FIND)
 
 
   # Find all ICU programs
-  list(APPEND icu_binary_suffixes "${_bin64}" "bin")
+  list(APPEND icu_binary_suffixes "${_bin64}" "bin" "sbin")
   foreach(program ${icu_programs})
     string(TOUPPER "${program}" program_upcase)
     set(cache_var "ICU_${program_upcase}_EXECUTABLE")
