@@ -12,6 +12,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
   include(Platform/Windows-MSVC)
   macro(__windows_compiler_clang lang)
+    set(_COMPILE_${lang} "${_COMPILE_${lang}_MSVC}")
     __windows_compiler_msvc(${lang})
   endmacro()
 else()
