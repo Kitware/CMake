@@ -123,6 +123,42 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
   this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace());
 }
 
+bool cmMakefile::CheckCMP0037(std::string const& targetName,
+                              cmStateEnums::TargetType targetType) const
+{
+  cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+  std::ostringstream e;
+  bool issueMessage = false;
+  switch (this->GetPolicyStatus(cmPolicies::CMP0037)) {
+    case cmPolicies::WARN:
+      if (targetType != cmStateEnums::INTERFACE_LIBRARY) {
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << "\n";
+        issueMessage = true;
+      }
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      break;
+    case cmPolicies::NEW:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      issueMessage = true;
+      messageType = cmake::FATAL_ERROR;
+      break;
+  }
+  if (issueMessage) {
+    e << "The target name \"" << targetName
+      << "\" is reserved or not valid for certain "
+         "CMake features, such as generator expressions, and may result "
+         "in undefined behavior.";
+    this->IssueMessage(messageType, e.str());
+
+    if (messageType == cmake::FATAL_ERROR) {
+      return false;
+    }
+  }
+  return true;
+}
+
 cmStringRange cmMakefile::GetIncludeDirectoriesEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetIncludeDirectoriesEntries();
