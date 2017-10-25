@@ -628,6 +628,79 @@ CMake will reply::
   ]== "CMake Server" ==]
 
 
+Type "ctestInfo"
+^^^^^^^^^^^^^^^^
+
+The "ctestInfo" request can be used after a project was "compute"d successfully.
+
+It will list the complete project test structure as it is known to cmake.
+
+The reply will contain a key "configurations", which will contain a list of
+configuration objects. Configuration objects are used to destinquish between
+different configurations the build directory might have enabled. While most
+generators only support one configuration, others might support several.
+
+Each configuration object can have the following keys:
+
+"name"
+  contains the name of the configuration. The name may be empty.
+"projects"
+  contains a list of project objects, one for each build project.
+
+Project objects define one (sub-)project defined in the cmake build system.
+
+Each project object can have the following keys:
+
+"name"
+  contains the (sub-)projects name.
+"targets"
+  contains a list of build system target objects.
+
+Target objects define individual build targets for a certain configuration.
+
+Each target object can have the following keys:
+
+"name"
+  contains the name of the target.
+"type"
+  defines the type of build of the target. Possible values are
+  "STATIC_LIBRARY", "MODULE_LIBRARY", "SHARED_LIBRARY", "OBJECT_LIBRARY",
+  "EXECUTABLE", "UTILITY" and "INTERFACE_LIBRARY".
+"fullName"
+  contains the full name of the build result (incl. extensions, etc.).
+"hasEnabledTests"
+  true if testing is enabled for this target.
+"ctestInfo"
+  contains a list of test objects for this target.
+
+Each test object can have the following keys:
+
+"ctestName"
+  contains the name of the test.
+"ctestCommand"
+  contains the test command.
+"properties"
+  contains a list of test property objects.
+"backtrace"
+  contains a list of backtrace objects that specify where the test was defined.
+
+Each backtrace object can have the following keys:
+
+"path"
+  contains the full path to the file containing the statement.
+"line"
+  contains the line number in the file where the statement was defined.
+"name"
+  contains the name of the statement that added the test.
+
+Each test property object can have the following keys:
+
+"key"
+  contains the test property key.
+"value"
+  contains the test property value.
+
+
 Type "cmakeInputs"
 ^^^^^^^^^^^^^^^^^^
 
