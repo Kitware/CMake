@@ -1,3 +1,4 @@
-^You have called ADD_LIBRARY for library TestModuleLibWithoutSources without any source files. This typically indicates a problem with your CMakeLists.txt file(
-CMake Error: CMake can not determine linker language for target: TestModuleLibWithoutSources)+(
-CMake Error: Cannot determine link language for target \"TestModuleLibWithoutSources\".)*$
+^CMake Error at MODULEwithNoSourcesButLinkObjects.cmake:[0-9]+ \(add_library\):
+  No SOURCES given to target: TestModuleLibWithoutSources
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

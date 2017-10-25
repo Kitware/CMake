@@ -542,6 +542,8 @@ private:
 
   virtual void ForceLinkerLanguages();
 
+  bool CheckTargetsForMissingSources() const;
+
   void CreateLocalGenerators();
 
   void CheckCompilerIdCompatibility(cmMakefile* mf,
