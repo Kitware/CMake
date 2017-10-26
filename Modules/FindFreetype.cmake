@@ -115,6 +115,9 @@ if(NOT FREETYPE_LIBRARY)
   )
   include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
   select_library_configurations(FREETYPE)
+else()
+  # on Windows, ensure paths are in canonical format (forward slahes):
+  file(TO_CMAKE_PATH "${FREETYPE_LIBRARY}" FREETYPE_LIBRARY)
 endif()
 
 unset(FREETYPE_FIND_ARGS)
