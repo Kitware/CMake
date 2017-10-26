@@ -2,7 +2,7 @@ CMP0040
 -------
 
 The target in the ``TARGET`` signature of :command:`add_custom_command`
-must exist and must be defined in current directory.
+must exist and must be defined in the current directory.
 
 CMake 2.8.12 and lower silently ignored a custom command created with
 the ``TARGET`` signature of :command:`add_custom_command`
