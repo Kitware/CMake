@@ -110,6 +110,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
@@ -1472,12 +1473,12 @@ void cmake::CreateDefaultGlobalGenerator()
   if (vsSetupAPIHelper.IsVS2017Installed()) {
     found = "Visual Studio 15 2017";
   } else {
-    for (VSVersionedGenerator const* g = cmArrayBegin(vsGenerators);
-         found.empty() && g != cmArrayEnd(vsGenerators); ++g) {
-      for (const char* const* v = cmArrayBegin(vsVariants);
-           found.empty() && v != cmArrayEnd(vsVariants); ++v) {
-        for (const char* const* e = cmArrayBegin(vsEntries);
-             found.empty() && e != cmArrayEnd(vsEntries); ++e) {
+    for (VSVersionedGenerator const* g = cm::cbegin(vsGenerators);
+         found.empty() && g != cm::cend(vsGenerators); ++g) {
+      for (const char* const* v = cm::cbegin(vsVariants);
+           found.empty() && v != cm::cend(vsVariants); ++v) {
+        for (const char* const* e = cm::cbegin(vsEntries);
+             found.empty() && e != cm::cend(vsEntries); ++e) {
           std::string const reg = vsregBase + *v + g->MSVersion + *e;
           std::string dir;
           if (cmSystemTools::ReadRegistryValue(reg, dir,
@@ -1735,8 +1736,8 @@ bool cmake::LoadCache(const std::string& path, bool internal,
   bool result = this->State->LoadCache(path, internal, excludes, includes);
   static const char* entries[] = { "CMAKE_CACHE_MAJOR_VERSION",
                                    "CMAKE_CACHE_MINOR_VERSION" };
-  for (const char* const* nameIt = cmArrayBegin(entries);
-       nameIt != cmArrayEnd(entries); ++nameIt) {
+  for (const char* const* nameIt = cm::cbegin(entries);
+       nameIt != cm::cend(entries); ++nameIt) {
     this->UnwatchUnusedCli(*nameIt);
   }
   return result;
@@ -1749,8 +1750,8 @@ bool cmake::SaveCache(const std::string& path)
                                    "CMAKE_CACHE_MINOR_VERSION",
                                    "CMAKE_CACHE_PATCH_VERSION",
                                    "CMAKE_CACHEFILE_DIR" };
-  for (const char* const* nameIt = cmArrayBegin(entries);
-       nameIt != cmArrayEnd(entries); ++nameIt) {
+  for (const char* const* nameIt = cm::cbegin(entries);
+       nameIt != cm::cend(entries); ++nameIt) {
     this->UnwatchUnusedCli(*nameIt);
   }
   return result;

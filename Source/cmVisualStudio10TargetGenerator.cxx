@@ -15,6 +15,7 @@
 #include "cmVisualStudioGeneratorOptions.h"
 #include "windows.h"
 
+#include <iterator>
 #include <memory> // IWYU pragma: keep
 
 static std::string cmVS10EscapeXML(std::string arg)
@@ -2368,14 +2369,14 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // Choose a language whose flags to use for ClCompile.
   static const char* clLangs[] = { "CXX", "C", "Fortran", "CSharp" };
   std::string langForClCompile;
-  if (std::find(cmArrayBegin(clLangs), cmArrayEnd(clLangs), linkLanguage) !=
-      cmArrayEnd(clLangs)) {
+  if (std::find(cm::cbegin(clLangs), cm::cend(clLangs), linkLanguage) !=
+      cm::cend(clLangs)) {
     langForClCompile = linkLanguage;
   } else {
     std::set<std::string> languages;
     this->GeneratorTarget->GetLanguages(languages, configName);
-    for (const char* const* l = cmArrayBegin(clLangs);
-         l != cmArrayEnd(clLangs); ++l) {
+    for (const char* const* l = cm::cbegin(clLangs); l != cm::cend(clLangs);
+         ++l) {
       if (languages.find(*l) != languages.end()) {
         langForClCompile = *l;
         break;
