@@ -126,7 +126,7 @@ class cmMakefile;
          3, 0, 0, cmPolicies::WARN)                                           \
   SELECT(POLICY, CMP0040,                                                     \
          "The target in the TARGET signature of add_custom_command() must "   \
-         "exist.",                                                            \
+         "exist and must be defined in the current directory.",               \
          3, 0, 0, cmPolicies::WARN)                                           \
   SELECT(POLICY, CMP0041,                                                     \
          "Error on relative include with generator expression.", 3, 0, 0,     \
