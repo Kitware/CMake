@@ -568,6 +568,9 @@ private:
 
   void ClearGeneratorMembers();
 
+  bool CheckCMP0037(std::string const& targetName,
+                    std::string const& reason) const;
+
   void IndexMakefile(cmMakefile* mf);
 
   virtual const char* GetBuildIgnoreErrorsFlag() const { return nullptr; }
