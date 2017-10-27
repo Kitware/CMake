@@ -160,7 +160,8 @@ static bool cmTarFilesFrom(std::string const& file,
   return true;
 }
 
-int cmcmd::HandleIWYU(const std::string& runCmd, const std::string&,
+static int HandleIWYU(const std::string& runCmd,
+                      const std::string& /* sourceFile */,
                       const std::vector<std::string>& orig_cmd)
 {
   // Construct the iwyu command line by taking what was given
@@ -187,7 +188,7 @@ int cmcmd::HandleIWYU(const std::string& runCmd, const std::string&,
   return 0;
 }
 
-int cmcmd::HandleTidy(const std::string& runCmd, const std::string& sourceFile,
+static int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
                       const std::vector<std::string>& orig_cmd)
 {
   // Construct the clang-tidy command line by taking what was given
@@ -218,7 +219,8 @@ int cmcmd::HandleTidy(const std::string& runCmd, const std::string& sourceFile,
   return ret;
 }
 
-int cmcmd::HandleLWYU(const std::string& runCmd, const std::string&,
+static int HandleLWYU(const std::string& runCmd,
+                      const std::string& /* sourceFile */,
                       const std::vector<std::string>&)
 {
   // Construct the ldd -r -u (link what you use lwyu) command line
@@ -250,7 +252,7 @@ int cmcmd::HandleLWYU(const std::string& runCmd, const std::string&,
   return 0;
 }
 
-int cmcmd::HandleCppLint(const std::string& runCmd,
+static int HandleCppLint(const std::string& runCmd,
                          const std::string& sourceFile,
                          const std::vector<std::string>&)
 {
@@ -274,7 +276,7 @@ int cmcmd::HandleCppLint(const std::string& runCmd,
   return ret;
 }
 
-int cmcmd::HandleCppCheck(const std::string& runCmd,
+static int HandleCppCheck(const std::string& runCmd,
                           const std::string& sourceFile,
                           const std::vector<std::string>& orig_cmd)
 {
@@ -340,12 +342,11 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
   // create a map from option to handler function for option
   // if the option does not call the original command then it will need
   // to set runOriginalCmd to false later in this function
-  coCompileTypes["--iwyu="] = std::bind(&cmcmd::HandleIWYU, a1, a2, a3);
-  coCompileTypes["--tidy="] = std::bind(&cmcmd::HandleTidy, a1, a2, a3);
-  coCompileTypes["--lwyu="] = std::bind(&cmcmd::HandleLWYU, a1, a2, a3);
-  coCompileTypes["--cpplint="] = std::bind(&cmcmd::HandleCppLint, a1, a2, a3);
-  coCompileTypes["--cppcheck="] =
-    std::bind(&cmcmd::HandleCppCheck, a1, a2, a3);
+  coCompileTypes["--iwyu="] = std::bind(&HandleIWYU, a1, a2, a3);
+  coCompileTypes["--tidy="] = std::bind(&HandleTidy, a1, a2, a3);
+  coCompileTypes["--lwyu="] = std::bind(&HandleLWYU, a1, a2, a3);
+  coCompileTypes["--cpplint="] = std::bind(&HandleCppLint, a1, a2, a3);
+  coCompileTypes["--cppcheck="] = std::bind(&HandleCppCheck, a1, a2, a3);
   // copy the command options to a vector of strings
   std::vector<std::string> commandOptions;
   commandOptions.reserve(coCompileTypes.size());
