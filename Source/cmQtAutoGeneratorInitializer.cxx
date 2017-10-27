@@ -9,6 +9,7 @@
 #include "cmFilePathChecksum.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
@@ -16,6 +17,7 @@
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cm_sys_stat.h"
@@ -24,6 +26,7 @@
 
 #include <algorithm>
 #include <array>
+#include <deque>
 #include <map>
 #include <set>
 #include <sstream>
@@ -156,7 +159,7 @@ static void GetConfigs(cmMakefile* makefile, std::string& configDefault,
 {
   configDefault = makefile->GetConfigurations(configsList);
   if (configsList.empty()) {
-    configsList.push_back("");
+    configsList.push_back(configDefault);
   }
 }
 
@@ -297,6 +300,50 @@ static std::vector<std::string> AddGeneratedSource(
   }
 
   return genFiles;
+}
+
+/* @brief Tests if targetDepend is a STATIC_LIBRARY and if any of its
+ * recursive STATIC_LIBRARY dependencies depends on targetOrigin
+ * (STATIC_LIBRARY cycle).
+ */
+static bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
+                               cmGeneratorTarget const* targetDepend,
+                               std::string const& config)
+{
+  bool cycle = false;
+  if ((targetOrigin->GetType() == cmStateEnums::STATIC_LIBRARY) &&
+      (targetDepend->GetType() == cmStateEnums::STATIC_LIBRARY)) {
+    std::set<cmGeneratorTarget const*> knownLibs;
+    std::deque<cmGeneratorTarget const*> testLibs;
+
+    // Insert initial static_library dependency
+    knownLibs.insert(targetDepend);
+    testLibs.push_back(targetDepend);
+
+    while (!testLibs.empty()) {
+      cmGeneratorTarget const* testTarget = testLibs.front();
+      testLibs.pop_front();
+      // Check if the test target is the origin target (cycle)
+      if (testTarget == targetOrigin) {
+        cycle = true;
+        break;
+      }
+      // Collect all static_library dependencies from the test target
+      cmLinkImplementationLibraries const* libs =
+        testTarget->GetLinkImplementationLibraries(config);
+      if (libs != nullptr) {
+        for (cmLinkItem const& item : libs->Libraries) {
+          cmGeneratorTarget const* depTarget = item.Target;
+          if ((depTarget != nullptr) &&
+              (depTarget->GetType() == cmStateEnums::STATIC_LIBRARY) &&
+              knownLibs.insert(depTarget).second) {
+            testLibs.push_back(depTarget);
+          }
+        }
+      }
+    }
+  }
+  return cycle;
 }
 
 struct cmQtAutoGenSetup
@@ -631,7 +678,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   GetConfigs(makefile, configDefault, configsList);
 
   std::set<std::string> autogenDependFiles;
-  std::set<std::string> autogenDependTargets;
+  std::set<cmTarget*> autogenDependTargets;
   std::vector<std::string> autogenProvides;
 
   // Remove build directories on cleanup
@@ -953,7 +1000,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
         // Allow target and file dependencies
         auto* depTarget = makefile->FindTargetToUse(depName);
         if (depTarget != nullptr) {
-          autogenDependTargets.insert(depTarget->GetName());
+          autogenDependTargets.insert(depTarget);
         } else {
           autogenDependFiles.insert(depName);
         }
@@ -980,8 +1027,8 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
   // Create the autogen target/command
   if (usePRE_BUILD) {
     // Add additional autogen target dependencies to origin target
-    for (std::string const& depTarget : autogenDependTargets) {
-      target->Target->AddUtility(depTarget, makefile);
+    for (cmTarget* depTarget : autogenDependTargets) {
+      target->Target->AddUtility(depTarget->GetName(), makefile);
     }
 
     // Add the pre-build command directly to bypass the OBJECT_LIBRARY
@@ -999,20 +1046,35 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     target->Target->AddPreBuildCommand(cc);
   } else {
 
-    // Add utility target dependencies to the autogen target dependencies
-    for (std::string const& depTarget : target->Target->GetUtilities()) {
-      autogenDependTargets.insert(depTarget);
-    }
+    // Convert file dependencies std::set to std::vector
+    std::vector<std::string> autogenDepends(autogenDependFiles.begin(),
+                                            autogenDependFiles.end());
+
     // Add link library target dependencies to the autogen target dependencies
-    for (const auto& item : target->Target->GetOriginalLinkLibraries()) {
-      if (makefile->FindTargetToUse(item.first) != nullptr) {
-        autogenDependTargets.insert(item.first);
+    for (std::string const& config : configsList) {
+      cmLinkImplementationLibraries const* libs =
+        target->GetLinkImplementationLibraries(config);
+      if (libs != nullptr) {
+        for (cmLinkItem const& item : libs->Libraries) {
+          cmGeneratorTarget const* libTarget = item.Target;
+          if ((libTarget != nullptr) &&
+              !StaticLibraryCycle(target, libTarget, config)) {
+            std::string util;
+            if (configsList.size() > 1) {
+              util += "$<$<CONFIG:";
+              util += config;
+              util += ">:";
+            }
+            util += libTarget->GetName();
+            if (configsList.size() > 1) {
+              util += ">";
+            }
+            autogenDepends.push_back(util);
+          }
+        }
       }
     }
 
-    // Convert file dependencies std::set to std::vector
-    const std::vector<std::string> autogenDepends(autogenDependFiles.begin(),
-                                                  autogenDependFiles.end());
     // Create autogen target
     cmTarget* autogenTarget = makefile->AddUtilityCommand(
       autogenTargetName, true, workingDirectory.c_str(),
@@ -1022,9 +1084,13 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     localGen->AddGeneratorTarget(
       new cmGeneratorTarget(autogenTarget, localGen));
 
+    // Forward origin utilities to autogen target
+    for (std::string const& depName : target->Target->GetUtilities()) {
+      autogenTarget->AddUtility(depName, makefile);
+    }
     // Add additional autogen target dependencies to autogen target
-    for (std::string const& depTarget : autogenDependTargets) {
-      autogenTarget->AddUtility(depTarget, makefile);
+    for (cmTarget* depTarget : autogenDependTargets) {
+      autogenTarget->AddUtility(depTarget->GetName(), makefile);
     }
 
     // Set FOLDER property in autogen target
