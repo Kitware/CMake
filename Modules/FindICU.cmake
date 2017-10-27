@@ -156,7 +156,7 @@ function(_ICU_FIND)
 
 
   # Find all ICU programs
-  list(APPEND icu_binary_suffixes "${_bin64}" "bin")
+  list(APPEND icu_binary_suffixes "${_bin64}" "bin" "sbin")
   foreach(program ${icu_programs})
     string(TOUPPER "${program}" program_upcase)
     set(cache_var "ICU_${program_upcase}_EXECUTABLE")
@@ -172,6 +172,11 @@ function(_ICU_FIND)
   # Find all ICU libraries
   list(APPEND icu_library_suffixes "${_lib64}" "lib")
   set(ICU_REQUIRED_LIBS_FOUND ON)
+  set(static_prefix )
+  # static icu libraries compiled with MSVC have the prefix 's'
+  if(MSVC)
+    set(static_prefix "s")
+  endif()
   foreach(component ${ICU_FIND_COMPONENTS})
     string(TOUPPER "${component}" component_upcase)
     set(component_cache "ICU_${component_upcase}_LIBRARY")
@@ -206,6 +211,20 @@ function(_ICU_FIND)
       list(APPEND component_debug_libnames "icui18nd")
     endif()
 
+    if(static_prefix)
+      unset(static_component_libnames)
+      unset(static_component_debug_libnames)
+      foreach(component_libname ${component_libnames})
+        list(APPEND static_component_libnames
+          ${static_prefix}${component_libname})
+      endforeach()
+      foreach(component_libname ${component_debug_libnames})
+        list(APPEND static_component_debug_libnames
+          ${static_prefix}${component_libname})
+      endforeach()
+      list(APPEND component_libnames ${static_component_libnames})
+      list(APPEND component_debug_libnames ${static_component_debug_libnames})
+    endif()
     find_library("${component_cache_release}" ${component_libnames}
       HINTS ${icu_roots}
       PATH_SUFFIXES ${icu_library_suffixes}
