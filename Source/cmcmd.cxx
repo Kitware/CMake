@@ -33,15 +33,13 @@
 #include "cmsys/Process.h"
 #include "cmsys/Terminal.h"
 #include <algorithm>
-#include <functional>
 #include <iostream>
-#include <map>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
-#include <utility>
 
 class cmConnection;
 
@@ -160,7 +158,8 @@ static bool cmTarFilesFrom(std::string const& file,
   return true;
 }
 
-int cmcmd::HandleIWYU(const std::string& runCmd, const std::string&,
+static int HandleIWYU(const std::string& runCmd,
+                      const std::string& /* sourceFile */,
                       const std::vector<std::string>& orig_cmd)
 {
   // Construct the iwyu command line by taking what was given
@@ -187,7 +186,7 @@ int cmcmd::HandleIWYU(const std::string& runCmd, const std::string&,
   return 0;
 }
 
-int cmcmd::HandleTidy(const std::string& runCmd, const std::string& sourceFile,
+static int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
                       const std::vector<std::string>& orig_cmd)
 {
   // Construct the clang-tidy command line by taking what was given
@@ -218,7 +217,8 @@ int cmcmd::HandleTidy(const std::string& runCmd, const std::string& sourceFile,
   return ret;
 }
 
-int cmcmd::HandleLWYU(const std::string& runCmd, const std::string&,
+static int HandleLWYU(const std::string& runCmd,
+                      const std::string& /* sourceFile */,
                       const std::vector<std::string>&)
 {
   // Construct the ldd -r -u (link what you use lwyu) command line
@@ -250,7 +250,7 @@ int cmcmd::HandleLWYU(const std::string& runCmd, const std::string&,
   return 0;
 }
 
-int cmcmd::HandleCppLint(const std::string& runCmd,
+static int HandleCppLint(const std::string& runCmd,
                          const std::string& sourceFile,
                          const std::vector<std::string>&)
 {
@@ -274,7 +274,7 @@ int cmcmd::HandleCppLint(const std::string& runCmd,
   return ret;
 }
 
-int cmcmd::HandleCppCheck(const std::string& runCmd,
+static int HandleCppCheck(const std::string& runCmd,
                           const std::string& sourceFile,
                           const std::vector<std::string>& orig_cmd)
 {
@@ -326,60 +326,70 @@ int cmcmd::HandleCppCheck(const std::string& runCmd,
   return 0;
 }
 
+typedef int (*CoCompileHandler)(const std::string&, const std::string&,
+                                const std::vector<std::string>&);
+
+struct CoCompiler
+{
+  const char* Option;
+  CoCompileHandler Handler;
+  bool NoOriginalCommand;
+};
+
+static CoCompiler CoCompilers[] = { // Table of options and handlers.
+  { "--cppcheck=", HandleCppCheck, false },
+  { "--cpplint=", HandleCppLint, false },
+  { "--iwyu=", HandleIWYU, false },
+  { "--lwyu=", HandleLWYU, true },
+  { "--tidy=", HandleTidy, false }
+};
+
+struct CoCompileJob
+{
+  std::string Command;
+  CoCompileHandler Handler;
+};
+
 // called when args[0] == "__run_co_compile"
 int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
 {
-  // initialize a map from command option to handler function
-  std::map<std::string,
-           std::function<int(const std::string&, const std::string&,
-                             const std::vector<std::string>&)>>
-    coCompileTypes;
-  auto a1 = std::placeholders::_1;
-  auto a2 = std::placeholders::_2;
-  auto a3 = std::placeholders::_3;
-  // create a map from option to handler function for option
-  // if the option does not call the original command then it will need
-  // to set runOriginalCmd to false later in this function
-  coCompileTypes["--iwyu="] = std::bind(&cmcmd::HandleIWYU, a1, a2, a3);
-  coCompileTypes["--tidy="] = std::bind(&cmcmd::HandleTidy, a1, a2, a3);
-  coCompileTypes["--lwyu="] = std::bind(&cmcmd::HandleLWYU, a1, a2, a3);
-  coCompileTypes["--cpplint="] = std::bind(&cmcmd::HandleCppLint, a1, a2, a3);
-  coCompileTypes["--cppcheck="] =
-    std::bind(&cmcmd::HandleCppCheck, a1, a2, a3);
-  // copy the command options to a vector of strings
-  std::vector<std::string> commandOptions;
-  commandOptions.reserve(coCompileTypes.size());
-  for (const auto& i : coCompileTypes) {
-    commandOptions.push_back(i.first);
-  }
+  std::vector<CoCompileJob> jobs;
+  std::string sourceFile; // store --source=
 
-  std::string runCmd;       // command to be run from --thing=command
-  std::string sourceFile;   // store --source=
-  std::string commandFound; // the command that was in the args list
+  // Default is to run the original command found after -- if the option
+  // does not need to do that, it should be specified here, currently only
+  // lwyu does that.
+  bool runOriginalCmd = true;
+
   std::vector<std::string> orig_cmd;
   bool doing_options = true;
-  for (std::string::size_type cc = 2; cc < args.size(); cc++) {
-    std::string const& arg = args[cc];
+  for (std::string::size_type i = 2; i < args.size(); ++i) {
+    std::string const& arg = args[i];
     // if the arg is -- then the rest of the args after
     // go into orig_cmd
     if (arg == "--") {
       doing_options = false;
     } else if (doing_options) {
       bool optionFound = false;
-      // check arg against all the commandOptions
-      for (auto const& command : commandOptions) {
-        if (arg.compare(0, command.size(), command) == 0) {
+      for (CoCompiler const* cc = cmArrayBegin(CoCompilers);
+           cc != cmArrayEnd(CoCompilers); ++cc) {
+        size_t optionLen = strlen(cc->Option);
+        if (arg.compare(0, optionLen, cc->Option) == 0) {
           optionFound = true;
-          runCmd = arg.substr(command.size());
-          commandFound = command;
+          CoCompileJob job;
+          job.Command = arg.substr(optionLen);
+          job.Handler = cc->Handler;
+          jobs.push_back(std::move(job));
+          if (cc->NoOriginalCommand) {
+            runOriginalCmd = false;
+          }
         }
       }
-      // check arg with --source=
       if (cmHasLiteralPrefix(arg, "--source=")) {
         sourceFile = arg.substr(9);
         optionFound = true;
       }
-      // if it was not a commandOptions or --source then error
+      // if it was not a co-compiler or --source then error
       if (!optionFound) {
         std::cerr << "__run_co_compile given unknown argument: " << arg
                   << "\n";
@@ -389,39 +399,40 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
       orig_cmd.push_back(arg);
     }
   }
-  if (commandFound.empty()) {
-    std::cerr << "__run_co_compile missing command to run. Looking for one of "
-                 "the following:\n";
-    for (const auto& i : commandOptions) {
-      std::cerr << i << "\n";
+  if (jobs.empty()) {
+    std::cerr << "__run_co_compile missing command to run. "
+                 "Looking for one or more of the following:\n";
+    for (CoCompiler const* cc = cmArrayBegin(CoCompilers);
+         cc != cmArrayEnd(CoCompilers); ++cc) {
+      std::cerr << cc->Option << "\n";
     }
     return 1;
   }
-  // Default is to run the original command found after -- if the option
-  // does not need to do that, it should be specified here, currently only
-  // lwyu does that.
-  bool runOriginalCmd = true;
-  if (commandFound == "--lwyu=") {
-    runOriginalCmd = false;
-  }
+
   if (runOriginalCmd && orig_cmd.empty()) {
     std::cerr << "__run_co_compile missing compile command after --\n";
     return 1;
   }
 
-  // call the command handler here
-  int ret = coCompileTypes[commandFound](runCmd, sourceFile, orig_cmd);
-  // if the command returns non-zero then return and fail.
-  // for commands that do not want to break the build, they should return
-  // 0 no matter what.
-  if (ret != 0) {
-    return ret;
+  for (CoCompileJob const& job : jobs) {
+    // call the command handler here
+    int ret = job.Handler(job.Command, sourceFile, orig_cmd);
+
+    // if the command returns non-zero then return and fail.
+    // for commands that do not want to break the build, they should return
+    // 0 no matter what.
+    if (ret != 0) {
+      return ret;
+    }
   }
+
   // if there is no original command to run return now
   if (!runOriginalCmd) {
-    return ret;
+    return 0;
   }
+
   // Now run the real compiler command and return its result value
+  int ret;
   if (!cmSystemTools::RunSingleCommand(orig_cmd, nullptr, nullptr, &ret,
                                        nullptr,
                                        cmSystemTools::OUTPUT_PASSTHROUGH)) {
