@@ -3120,9 +3120,16 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
 {
   cmSourceFileLocation sfl(this, sourceName);
-  for (cmSourceFile* sf : this->SourceFiles) {
-    if (sf->Matches(sfl)) {
-      return sf;
+  auto name = this->GetCMakeInstance()->StripExtension(sfl.GetName());
+#if defined(_WIN32) || defined(__APPLE__)
+  name = cmSystemTools::LowerCase(name);
+#endif
+  auto sfsi = this->SourceFileSearchIndex.find(name);
+  if (sfsi != this->SourceFileSearchIndex.end()) {
+    for (auto sf : sfsi->second) {
+      if (sf->Matches(sfl)) {
+        return sf;
+      }
     }
   }
   return nullptr;
@@ -3136,6 +3143,14 @@ cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
     sf->SetProperty("GENERATED", "1");
   }
   this->SourceFiles.push_back(sf);
+
+  auto name =
+    this->GetCMakeInstance()->StripExtension(sf->GetLocation().GetName());
+#if defined(_WIN32) || defined(__APPLE__)
+  name = cmSystemTools::LowerCase(name);
+#endif
+  this->SourceFileSearchIndex[name].push_back(sf);
+
   return sf;
 }
 

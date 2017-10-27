@@ -821,7 +821,18 @@ protected:
   // libraries, classes, and executables
   mutable cmTargets Targets;
   std::map<std::string, std::string> AliasTargets;
-  std::vector<cmSourceFile*> SourceFiles;
+
+  typedef std::vector<cmSourceFile*> SourceFileVec;
+  SourceFileVec SourceFiles;
+
+  // Because cmSourceFile names are compared in a fuzzy way (see
+  // cmSourceFileLocation::Match()) we can't have a straight mapping from
+  // filename to cmSourceFile.  To make lookups more efficient we store the
+  // Name portion of the cmSourceFileLocation and then compare on the list of
+  // cmSourceFiles that might match that name.  Note that on platforms which
+  // have a case-insensitive filesystem we store the key in all lowercase.
+  typedef std::unordered_map<std::string, SourceFileVec> SourceFileMap;
+  SourceFileMap SourceFileSearchIndex;
 
   // Tests
   std::map<std::string, cmTest*> Tests;
