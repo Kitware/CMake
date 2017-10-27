@@ -256,13 +256,6 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
       this->SetError(e.str());
       return false;
     }
-    if (aliasedTarget->IsImported()) {
-      std::ostringstream e;
-      e << "cannot create ALIAS target \"" << libName << "\" because target \""
-        << aliasedName << "\" is IMPORTED.";
-      this->SetError(e.str());
-      return false;
-    }
     this->Makefile->AddAlias(libName, aliasedName);
     return true;
   }

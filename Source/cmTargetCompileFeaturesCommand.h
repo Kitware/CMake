@@ -22,7 +22,6 @@ class cmTargetCompileFeaturesCommand : public cmTargetPropCommandBase
                    cmExecutionStatus& status) override;
 
 private:
-  void HandleImportedTarget(const std::string& tgt) override;
   void HandleMissingTarget(const std::string& name) override;
 
   bool HandleDirectContent(cmTarget* tgt,

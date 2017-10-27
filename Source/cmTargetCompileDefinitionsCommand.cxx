@@ -17,15 +17,6 @@ bool cmTargetCompileDefinitionsCommand::InitialPass(
   return this->HandleArguments(args, "COMPILE_DEFINITIONS");
 }
 
-void cmTargetCompileDefinitionsCommand::HandleImportedTarget(
-  const std::string& tgt)
-{
-  std::ostringstream e;
-  e << "Cannot specify compile definitions for imported target \"" << tgt
-    << "\".";
-  this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-}
-
 void cmTargetCompileDefinitionsCommand::HandleMissingTarget(
   const std::string& name)
 {
@@ -56,5 +47,5 @@ bool cmTargetCompileDefinitionsCommand::HandleDirectContent(
   cmTarget* tgt, const std::vector<std::string>& content, bool, bool)
 {
   tgt->AppendProperty("COMPILE_DEFINITIONS", this->Join(content).c_str());
-  return true;
+  return true; // Successfully handled.
 }

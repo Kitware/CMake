@@ -19,7 +19,8 @@ All of them have the general form::
   target_link_libraries(<target> ... <item>... ...)
 
 The named ``<target>`` must have been created in the current directory by
-a command such as :command:`add_executable` or :command:`add_library`.
+a command such as :command:`add_executable` or :command:`add_library` and
+must not be an :ref:`ALIAS target <Alias Targets>`.
 Repeated calls for the same ``<target>`` append items in the order called.
 Each ``<item>`` may be:
 

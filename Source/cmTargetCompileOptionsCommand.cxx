@@ -18,21 +18,12 @@ bool cmTargetCompileOptionsCommand::InitialPass(
   return this->HandleArguments(args, "COMPILE_OPTIONS", PROCESS_BEFORE);
 }
 
-void cmTargetCompileOptionsCommand::HandleImportedTarget(
-  const std::string& tgt)
-{
-  std::ostringstream e;
-  e << "Cannot specify compile options for imported target \"" << tgt << "\".";
-  this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-}
-
 void cmTargetCompileOptionsCommand::HandleMissingTarget(
   const std::string& name)
 {
   std::ostringstream e;
   e << "Cannot specify compile options for target \"" << name
-    << "\" "
-       "which is not built by this project.";
+    << "\" which is not built by this project.";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
@@ -47,5 +38,5 @@ bool cmTargetCompileOptionsCommand::HandleDirectContent(
 {
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
   tgt->InsertCompileOption(this->Join(content), lfbt);
-  return true;
+  return true; // Successfully handled.
 }
