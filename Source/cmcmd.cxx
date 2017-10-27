@@ -358,8 +358,8 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
   std::string commandFound; // the command that was in the args list
   std::vector<std::string> orig_cmd;
   bool doing_options = true;
-  for (std::string::size_type cc = 2; cc < args.size(); cc++) {
-    std::string const& arg = args[cc];
+  for (std::string::size_type i = 2; i < args.size(); ++i) {
+    std::string const& arg = args[i];
     // if the arg is -- then the rest of the args after
     // go into orig_cmd
     if (arg == "--") {
