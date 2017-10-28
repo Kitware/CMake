@@ -987,7 +987,7 @@ function(cpack_deb_prepare_package_vars)
     if(READELF_EXECUTABLE)
       foreach(_FILE IN LISTS CPACK_DEB_SHARED_OBJECT_FILES)
         extract_so_info("${_FILE}" libname soversion)
-        if(libname AND soversion)
+        if(libname AND DEFINED soversion)
           list(APPEND CPACK_DEBIAN_PACKAGE_SHLIBS_LIST
                "${libname} ${soversion} ${CPACK_DEBIAN_PACKAGE_NAME} (${CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY} ${CPACK_DEBIAN_PACKAGE_VERSION})")
         else()
