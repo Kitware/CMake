@@ -1931,11 +1931,21 @@ bool cmQtAutoGenerators::RccGenerateFile(const RccJob& rccJob)
   bool rccGenerated = false;
 
   std::string rccFileAbs;
-  if (this->MultiConfig == cmQtAutoGen::SINGLE) {
-    rccFileAbs = rccJob.RccFile;
-  } else {
-    rccFileAbs =
-      cmQtAutoGen::AppendFilenameSuffix(rccJob.RccFile, this->ConfigSuffix);
+  {
+    std::string suffix;
+    switch (this->MultiConfig) {
+      case cmQtAutoGen::SINGLE:
+        break;
+      case cmQtAutoGen::WRAP:
+        suffix = this->ConfigSuffix;
+        suffix += "_";
+        suffix += this->FilePathChecksum.getPart(rccJob.RccFile, 4);
+        break;
+      case cmQtAutoGen::FULL:
+        suffix = this->ConfigSuffix;
+        break;
+    }
+    rccFileAbs = cmQtAutoGen::AppendFilenameSuffix(rccJob.RccFile, suffix);
   }
   std::string const rccFileRel = cmSystemTools::RelativePath(
     this->AutogenBuildDir.c_str(), rccFileAbs.c_str());
