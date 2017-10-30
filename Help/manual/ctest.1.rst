@@ -61,15 +61,15 @@ Options
 ``-F``
  Enable failover.
 
- This option allows ctest to resume a test set execution that was
+ This option allows CTest to resume a test set execution that was
  previously interrupted.  If no interruption occurred, the ``-F`` option
  will have no effect.
 
 ``-j <jobs>, --parallel <jobs>``
  Run the tests in parallel using the given number of jobs.
 
- This option tells ctest to run the tests in parallel using given
- number of jobs.  This option can also be set by setting the
+ This option tells CTest to run the tests in parallel using given
+ number of jobs. This option can also be set by setting the
  environment variable ``CTEST_PARALLEL_LEVEL``.
 
 ``--test-load <level>``
@@ -80,7 +80,7 @@ Options
  ``TestLoad`` option of the `CTest Test Step`_.
 
 ``-Q,--quiet``
- Make ctest quiet.
+ Make CTest quiet.
 
  This option will suppress all the output.  The output log file will
  still be generated if the ``--output-log`` is specified.  Options such
@@ -90,37 +90,37 @@ Options
 ``-O <file>, --output-log <file>``
  Output to log file.
 
- This option tells ctest to write all its output to a log file.
+ This option tells CTest to write all its output to a log file.
 
 ``-N,--show-only``
  Disable actual execution of tests.
 
- This option tells ctest to list the tests that would be run but not
+ This option tells CTest to list the tests that would be run but not
  actually run them.  Useful in conjunction with the ``-R`` and ``-E``
  options.
 
 ``-L <regex>, --label-regex <regex>``
  Run tests with labels matching regular expression.
 
- This option tells ctest to run only the tests whose labels match the
+ This option tells CTest to run only the tests whose labels match the
  given regular expression.
 
 ``-R <regex>, --tests-regex <regex>``
  Run tests matching regular expression.
 
- This option tells ctest to run only the tests whose names match the
+ This option tells CTest to run only the tests whose names match the
  given regular expression.
 
 ``-E <regex>, --exclude-regex <regex>``
  Exclude tests matching regular expression.
 
- This option tells ctest to NOT run the tests whose names match the
+ This option tells CTest to NOT run the tests whose names match the
  given regular expression.
 
 ``-LE <regex>, --label-exclude <regex>``
  Exclude tests with labels matching regular expression.
 
- This option tells ctest to NOT run the tests whose labels match the
+ This option tells CTest to NOT run the tests whose labels match the
  given regular expression.
 
 ``-FA <regex>, --fixture-exclude-any <regex>``
@@ -143,7 +143,7 @@ Options
 ``-D <dashboard>, --dashboard <dashboard>``
  Execute dashboard test.
 
- This option tells ctest to act as a CDash client and perform a
+ This option tells CTest to act as a CDash client and perform a
  dashboard test.  All tests are <Mode><Test>, where Mode can be
  Experimental, Nightly, and Continuous, and Test can be Start,
  Update, Configure, Build, Test, Coverage, and Submit.
@@ -161,7 +161,7 @@ Options
 ``-M <model>, --test-model <model>``
  Sets the model for a dashboard.
 
- This option tells ctest to act as a CDash client where the ``<model>``
+ This option tells CTest to act as a CDash client where the ``<model>``
  can be ``Experimental``, ``Nightly``, and ``Continuous``.
  Combining ``-M`` and ``-T`` is similar to ``-D``.
 
@@ -170,7 +170,7 @@ Options
 ``-T <action>, --test-action <action>``
  Sets the dashboard action to perform.
 
- This option tells ctest to act as a CDash client and perform some
+ This option tells CTest to act as a CDash client and perform some
  action such as ``start``, ``build``, ``test`` etc. See
  `Dashboard Client Steps`_ for the full list of actions.
  Combining ``-M`` and ``-T`` is similar to ``-D``.
@@ -180,9 +180,9 @@ Options
 ``-S <script>, --script <script>``
  Execute a dashboard for a configuration.
 
- This option tells ctest to load in a configuration script which sets
+ This option tells CTest to load in a configuration script which sets
  a number of parameters such as the binary and source directories.
- Then ctest will do what is required to create and run a dashboard.
+ Then CTest will do what is required to create and run a dashboard.
  This option basically sets up a dashboard and then runs ``ctest -D``
  with the appropriate options.
 
@@ -201,7 +201,7 @@ Options
 ``-I [Start,End,Stride,test#,test#|Test file], --tests-information``
  Run a specific number of tests by number.
 
- This option causes ctest to run tests starting at number Start,
+ This option causes CTest to run tests starting at number Start,
  ending at number End, and incrementing by Stride.  Any additional
  numbers after Stride are considered individual test numbers.  Start,
  End,or stride can be empty.  Optionally a file can be given that
@@ -216,11 +216,11 @@ Options
 ``--rerun-failed``
  Run only the tests that failed previously.
 
- This option tells ctest to perform only the tests that failed during
- its previous run.  When this option is specified, ctest ignores all
+ This option tells CTest to perform only the tests that failed during
+ its previous run.  When this option is specified, CTest ignores all
  other options intended to modify the list of tests to run (``-L``, ``-R``,
  ``-E``, ``-LE``, ``-I``, etc).  In the event that CTest runs and no tests
- fail, subsequent calls to ctest with the ``--rerun-failed`` option will run
+ fail, subsequent calls to CTest with the ``--rerun-failed`` option will run
  the set of tests that most recently failed (if any).
 
 ``--repeat-until-fail <n>``
@@ -238,7 +238,7 @@ Options
 ``--interactive-debug-mode [0|1]``
  Set the interactive mode to 0 or 1.
 
- This option causes ctest to run tests in either an interactive mode
+ This option causes CTest to run tests in either an interactive mode
  or a non-interactive mode.  On Windows this means that in
  non-interactive mode, all system debug pop up windows are blocked.
  In dashboard mode (Experimental, Nightly, Continuous), the default
@@ -248,14 +248,14 @@ Options
 ``--no-label-summary``
  Disable timing summary information for labels.
 
- This option tells ctest not to print summary information for each
+ This option tells CTest not to print summary information for each
  label associated with the tests run.  If there are no labels on the
  tests, nothing extra is printed.
 
 ``--no-subproject-summary``
  Disable timing summary information for subprojects.
 
- This option tells ctest not to print summary information for each
+ This option tells CTest not to print summary information for each
  subproject associated with the tests run.  If there are no subprojects on the
  tests, nothing extra is printed.
 
@@ -271,7 +271,7 @@ See `Build and Test Mode`_.
 ``--overwrite``
  Overwrite CTest configuration option.
 
- By default ctest uses configuration options from configuration file.
+ By default CTest uses configuration options from configuration file.
  This option will overwrite the configuration option.
 
 ``--force-new-ctest-process``
@@ -411,7 +411,7 @@ Options for Dashboard Client include:
 ``-A <file>, --add-notes <file>``
  Add a notes file with submission.
 
- This option tells ctest to include a notes file when submitting
+ This option tells CTest to include a notes file when submitting
  dashboard.
 
 ``--tomorrow-tag``
