@@ -1937,9 +1937,9 @@ bool cmQtAutoGenerators::RccGenerateFile(const RccJob& rccJob)
       case cmQtAutoGen::SINGLE:
         break;
       case cmQtAutoGen::WRAP:
-        suffix = this->ConfigSuffix;
+        suffix = "_CMAKE";
+        suffix += this->ConfigSuffix;
         suffix += "_";
-        suffix += this->FilePathChecksum.getPart(rccJob.RccFile, 4);
         break;
       case cmQtAutoGen::FULL:
         suffix = this->ConfigSuffix;
