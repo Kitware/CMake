@@ -214,5 +214,9 @@ add_subdirectory(objectLibrary)
 add_subdirectory(sameName)
 
 # -- Test
+# Tests static library cycles
+add_subdirectory(staticLibraryCycle)
+
+# -- Test
 # Complex test case
 add_subdirectory(complex)
