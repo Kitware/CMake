@@ -2288,7 +2288,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
   this->XCodeObjectMap[gtgt] = target;
 
   // Add source files without build rules for editing convenience.
-  if (gtgt->GetType() == cmStateEnums::UTILITY) {
+  if (gtgt->GetType() == cmStateEnums::UTILITY &&
+      gtgt->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
     std::vector<cmSourceFile*> sources;
     if (!gtgt->GetConfigCommonSourceFiles(sources)) {
       return nullptr;
@@ -2705,13 +2706,16 @@ bool cmGlobalXCodeGenerator::CreateGroups(
       generator->GetGeneratorTargets();
     for (auto gtgt : tgts) {
       // Same skipping logic here as in CreateXCodeTargets so that we do not
-      // end up with (empty anyhow) ALL_BUILD and XCODE_DEPEND_HELPER source
+      // end up with (empty anyhow) ZERO_CHECK, install, or test source
       // groups:
       //
       if (gtgt->GetType() == cmStateEnums::GLOBAL_TARGET) {
         continue;
       }
       if (gtgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+        continue;
+      }
+      if (gtgt->GetName() == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
         continue;
       }
 
