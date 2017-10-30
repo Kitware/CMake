@@ -18,24 +18,6 @@ public:
    */
   static int ExecuteCMakeCommand(std::vector<std::string>&);
 
-  // define co-compile command handlers they must be public
-  // because they are used in a std::function map
-  static int HandleIWYU(const std::string& runCmd,
-                        const std::string& sourceFile,
-                        const std::vector<std::string>& orig_cmd);
-  static int HandleTidy(const std::string& runCmd,
-                        const std::string& sourceFile,
-                        const std::vector<std::string>& orig_cmd);
-  static int HandleLWYU(const std::string& runCmd,
-                        const std::string& sourceFile,
-                        const std::vector<std::string>& orig_cmd);
-  static int HandleCppLint(const std::string& runCmd,
-                           const std::string& sourceFile,
-                           const std::vector<std::string>& orig_cmd);
-  static int HandleCppCheck(const std::string& runCmd,
-                            const std::string& sourceFile,
-                            const std::vector<std::string>& orig_cmd);
-
 protected:
   static int HandleCoCompileCommands(std::vector<std::string>& args);
   static int HashSumFile(std::vector<std::string>& args,
