@@ -2015,9 +2015,30 @@ bool cmFileInstaller::HandleInstallDestination()
     this->DestDirLength = int(sdestdir.size());
   }
 
+  // check if default dir creation permissions were set
+  mode_t default_dir_mode_v = 0;
+  mode_t* default_dir_mode = nullptr;
+  const char* default_dir_install_permissions = this->Makefile->GetDefinition(
+    "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
+  if (default_dir_install_permissions && *default_dir_install_permissions) {
+    std::vector<std::string> items;
+    cmSystemTools::ExpandListArgument(default_dir_install_permissions, items);
+    for (const auto& arg : items) {
+      if (!this->CheckPermissions(arg, default_dir_mode_v)) {
+        std::ostringstream e;
+        e << this->FileCommand->GetError()
+          << " Set with CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS variable.";
+        this->FileCommand->SetError(e.str());
+        return false;
+      }
+    }
+
+    default_dir_mode = &default_dir_mode_v;
+  }
+
   if (this->InstallType != cmInstallType_DIRECTORY) {
     if (!cmSystemTools::FileExists(destination.c_str())) {
-      if (!cmSystemTools::MakeDirectory(destination.c_str())) {
+      if (!cmSystemTools::MakeDirectory(destination, default_dir_mode)) {
         std::string errstring = "cannot create directory: " + destination +
           ". Maybe need administrative privileges.";
         this->FileCommand->SetError(errstring);
