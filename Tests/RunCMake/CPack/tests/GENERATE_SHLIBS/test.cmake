@@ -9,6 +9,11 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test_lib.hpp"
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test_lib.cpp"
     "#include \"test_lib.hpp\"\nint test_lib() {return 0;}\n")
 add_library(test_lib SHARED "${CMAKE_CURRENT_BINARY_DIR}/test_lib.cpp")
-set_target_properties(test_lib PROPERTIES SOVERSION "0.8")
+
+if(RunCMake_SUBTEST_SUFFIX STREQUAL "soversion_not_zero")
+  set_target_properties(test_lib PROPERTIES SOVERSION "0.8")
+else() # soversion_zero
+  set_target_properties(test_lib PROPERTIES SOVERSION "0")
+endif()
 
 install(TARGETS test_lib DESTINATION foo COMPONENT libs)
