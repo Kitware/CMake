@@ -1,4 +1,4 @@
-
+enable_language(CXX)
 cmake_policy(SET CMP0037 NEW)
 
 add_library("lib with spaces" empty.cpp)
