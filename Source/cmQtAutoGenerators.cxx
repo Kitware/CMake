@@ -1268,9 +1268,6 @@ bool cmQtAutoGenerators::MocGenerateAll(
              it != this->MocDefinitions.end(); ++it) {
           cmd.push_back("-D" + (*it));
         }
-        // Add options
-        cmd.insert(cmd.end(), this->MocOptions.begin(),
-                   this->MocOptions.end());
         // Execute command
         if (!this->RunCommand(cmd, output, false)) {
           {
