@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use POSIX qw(strftime);
 
 #my $cmake = "/home/pboettch/devel/upstream/cmake/build/bin/cmake";
 my $cmake = "cmake";
@@ -128,6 +129,10 @@ while(<IN>)
 			print OUT join("\n", @keyword_hi), "\n";
 		} elsif ($1 eq "VERSION") {
 			$_ =~ s/\@VERSION\@/$version/;
+			print OUT $_;
+		} elsif ($1 eq "DATE") {
+			my $date = strftime "%Y %b %d", localtime;
+			$_ =~ s/\@DATE\@/$date/;
 			print OUT $_;
 		} else {
 			print "ERROR do not know how to replace $1\n";
