@@ -11,7 +11,8 @@ set(__COMPILER_CLANG 1)
 include(Compiler/CMakeCommonCompilerMacros)
 
 if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
-    OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
+    OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC"
+    OR "x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC")
   macro(__compiler_clang lang)
   endmacro()
 else()
