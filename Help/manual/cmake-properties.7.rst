@@ -390,6 +390,8 @@ Properties on Source Files
    /prop_sf/VS_DEPLOYMENT_LOCATION
    /prop_sf/VS_INCLUDE_IN_VSIX
    /prop_sf/VS_RESOURCE_GENERATOR
+   /prop_sf/VS_SHADER_DISABLE_OPTIMIZATIONS
+   /prop_sf/VS_SHADER_ENABLE_DEBUG
    /prop_sf/VS_SHADER_ENTRYPOINT
    /prop_sf/VS_SHADER_FLAGS
    /prop_sf/VS_SHADER_MODEL
