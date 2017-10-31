@@ -167,6 +167,7 @@ NOTE: For subtests generator name can also be suffixed with subtest name and/or
         - generator name + packaging type
         - generator name + subtest name
         - generator name
+        - subtest name
         - default generator
       File name format: '<generator_name>-<packaging_type>-<subtest_name>-std<type>.txt'
                         where <type> can either be 'out' or 'err'.
