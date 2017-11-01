@@ -1057,6 +1057,19 @@ endif()
 include (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 include (${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
+if(WIN32)
+  # Add Windows executable version information.
+  configure_file("CMakeVersion.rc.in" "CMakeVersion.rc" @ONLY)
+
+  # We use a separate object library for this to work around a limitation of
+  # MinGW's windres tool with spaces in the path to the include directories.
+  add_library(CMakeVersion OBJECT "${CMAKE_CURRENT_BINARY_DIR}/CMakeVersion.rc")
+  set_property(TARGET CMakeVersion PROPERTY INCLUDE_DIRECTORIES "")
+  foreach(_tool ${_tools})
+    target_sources(${_tool} PRIVATE $<TARGET_OBJECTS:CMakeVersion>)
+  endforeach()
+endif()
+
 # Install tools
 
 foreach(_tool ${_tools})
