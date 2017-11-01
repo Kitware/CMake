@@ -1392,9 +1392,13 @@ bool cmQtAutoGenerators::MocGenerateAll()
       {
         // Compose command
         std::vector<std::string> cmd = this->MocPredefsCmd;
-        // Add options
-        cmd.insert(cmd.end(), this->MocAllOptions.begin(),
-                   this->MocAllOptions.end());
+        // Add includes
+        cmd.insert(cmd.end(), this->MocIncludes.begin(),
+                   this->MocIncludes.end());
+        // Add definitions
+        for (std::string const& def : this->MocDefinitions) {
+          cmd.push_back("-D" + def);
+        }
         // Execute command
         if (!this->RunCommand(cmd, output)) {
           this->LogCommandError(cmQtAutoGen::MOC,
