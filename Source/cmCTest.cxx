@@ -12,6 +12,7 @@
 #include "cmsys/String.hxx"
 #include "cmsys/SystemInformation.hxx"
 #include <algorithm>
+#include <cstdint>
 #include <ctype.h>
 #include <iostream>
 #include <map>
@@ -1421,7 +1422,7 @@ int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
     std::string note_time = this->CurrentTime();
     xml.StartElement("Note");
     xml.Attribute("Name", file);
-    xml.Element("Time", cmSystemTools::GetTime());
+    xml.Element("Time", static_cast<uint64_t>(cmSystemTools::GetTime()));
     xml.Element("DateTime", note_time);
     xml.StartElement("Text");
     cmsys::ifstream ifs(file.c_str());
