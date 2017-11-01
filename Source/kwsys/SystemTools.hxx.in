@@ -553,13 +553,20 @@ public:
    */
   static FILE* Fopen(const std::string& file, const char* mode);
 
+/**
+ * Visual C++ does not define mode_t (note that Borland does, however).
+ */
+#if defined(_MSC_VER)
+  typedef unsigned short mode_t;
+#endif
+
   /**
    * Make a new directory if it is not there.  This function
    * can make a full path even if none of the directories existed
    * prior to calling this function.
    */
-  static bool MakeDirectory(const char* path);
-  static bool MakeDirectory(const std::string& path);
+  static bool MakeDirectory(const char* path, const mode_t* mode = 0);
+  static bool MakeDirectory(const std::string& path, const mode_t* mode = 0);
 
   /**
    * Copy the source file to the destination file only
@@ -748,13 +755,6 @@ public:
    * Return file's creation time (Win32: works only for NTFS, not FAT)
    */
   static long int CreationTime(const std::string& filename);
-
-/**
- * Visual C++ does not define mode_t (note that Borland does, however).
- */
-#if defined(_MSC_VER)
-  typedef unsigned short mode_t;
-#endif
 
   /**
    * Get and set permissions of the file.  If honor_umask is set, the umask
