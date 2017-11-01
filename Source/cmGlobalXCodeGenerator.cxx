@@ -388,6 +388,17 @@ void cmGlobalXCodeGenerator::Generate()
   std::map<std::string, std::vector<cmLocalGenerator*>>::iterator it;
   for (it = this->ProjectMap.begin(); it != this->ProjectMap.end(); ++it) {
     cmLocalGenerator* root = it->second[0];
+
+    bool generateTopLevelProjectOnly =
+      root->GetMakefile()->IsOn("CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY");
+
+    if (generateTopLevelProjectOnly) {
+      cmStateSnapshot snp = root->GetStateSnapshot();
+      if (snp.GetBuildsystemDirectoryParent().IsValid()) {
+        continue;
+      }
+    }
+
     this->SetGenerationRoot(root);
     // now create the project
     this->OutputXCodeProject(root, it->second);

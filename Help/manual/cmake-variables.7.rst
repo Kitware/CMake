@@ -188,6 +188,7 @@ Variables that Change Behavior
    /variable/CMAKE_USER_MAKE_RULES_OVERRIDE
    /variable/CMAKE_WARN_DEPRECATED
    /variable/CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION
+   /variable/CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY
 
 Variables that Describe the System
 ==================================
