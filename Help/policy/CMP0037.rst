@@ -14,7 +14,12 @@ character (_), dot(.), plus(+) and minus(-).  As a special case, ALIAS
 targets and IMPORTED targets may contain two consequtive colons.
 
 Target names reserved by one or more CMake generators are not allowed.
-Among others these include "all", "help" and "test".
+Among others these include "all", "clean", "help", and "install".
+
+Target names associated with optional features, such as "test" and "package",
+may also be reserved.  CMake 3.10 and below always reserve them.  CMake 3.11
+and above reserve them only when the corresponding feature is enabled
+(e.g. by including the :module:`CTest` or :module:`CPack` modules).
 
 The OLD behavior for this policy is to allow creating targets with
 reserved names or which do not match the validity pattern.
