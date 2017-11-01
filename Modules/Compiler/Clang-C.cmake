@@ -2,7 +2,7 @@ include(Compiler/Clang)
 __compiler_clang(C)
 
 cmake_policy(GET CMP0025 appleClangPolicy)
-if(WIN32 OR (APPLE AND NOT appleClangPolicy STREQUAL NEW))
+if(APPLE AND NOT appleClangPolicy STREQUAL NEW)
   return()
 endif()
 
