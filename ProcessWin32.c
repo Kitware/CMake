@@ -1466,6 +1466,11 @@ void kwsysProcess_Kill(kwsysProcess* cp)
      for them to exit.  */
 }
 
+void kwsysProcess_KillPID(unsigned long process_id)
+{
+  kwsysProcessKillTree((DWORD)process_id);
+}
+
 /*
   Function executed for each pipe's thread.  Argument is a pointer to
   the kwsysProcessPipeData instance for this thread.
