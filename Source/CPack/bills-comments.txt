@@ -31,7 +31,7 @@ cmCPackGenericGenerator::ProcessGenerator   // DoPackage
 
 
 cmCPackGenericGenerator::InstallProject is used for both source and binary
-packages.  It is controled based on values set in CPACK_ variables.
+packages.  It is controlled based on values set in CPACK_ variables.
 
 
 InstallProject

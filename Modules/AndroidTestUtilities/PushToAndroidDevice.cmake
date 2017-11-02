@@ -31,7 +31,7 @@ function(android_push_test_files_to_device)
     set(out_var ${out_var} PARENT_SCOPE)
     if(res_var)
       string(REGEX REPLACE ";" " " com "${ARGN}")
-      message(FATAL_ERROR "Error occured during adb command: adb ${com}\nError: ${err_var}.")
+      message(FATAL_ERROR "Error occurred during adb command: adb ${com}\nError: ${err_var}.")
     endif()
   endfunction()
 

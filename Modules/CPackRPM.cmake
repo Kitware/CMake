@@ -545,7 +545,7 @@
 #                /usr/share/doc
 #
 #  May be used to exclude path (directories or files) from the auto-generated
-#  list of paths discovered by CPack RPM. The defaut value contains a
+#  list of paths discovered by CPack RPM. The default value contains a
 #  reasonable set of values if the variable is not defined by the user. If the
 #  variable is defined by the user then CPackRPM will NOT any of the default
 #  path. If you want to add some path to the default list then you can use
@@ -782,7 +782,7 @@
 #
 # .. note::
 #
-#  Each source path prefix is additionaly suffixed by ``src_<index>`` where
+#  Each source path prefix is additionally suffixed by ``src_<index>`` where
 #  index is index of the path used from :variable:`CPACK_BUILD_SOURCE_DIRS`
 #  variable. This produces ``<CPACK_RPM_BUILD_SOURCE_DIRS_PREFIX>/src_<index>``
 #  replacement path.
@@ -1985,13 +1985,13 @@ function(cpack_rpm_generate_package)
   # CPACK_RPM_POST_INSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_POST_INSTALL_SCRIPT_FILE)
   # CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE)
   # May be used to embed a post (un)installation script in the spec file.
-  # The refered script file(s) will be read and directly
+  # The referred script file(s) will be read and directly
   # put after the %post or %postun section
   # ----------------------------------------------------------------
   # CPACK_RPM_PRE_INSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE)
   # CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_UNINSTALL_SCRIPT_FILE)
   # May be used to embed a pre (un)installation script in the spec file.
-  # The refered script file(s) will be read and directly
+  # The referred script file(s) will be read and directly
   # put after the %pre or %preun section
   foreach(RPM_SCRIPT_FILE_TYPE_ "INSTALL" "UNINSTALL")
     foreach(RPM_SCRIPT_FILE_TIME_ "PRE" "POST")
@@ -2022,7 +2022,7 @@ function(cpack_rpm_generate_package)
 
   # CPACK_RPM_CHANGELOG_FILE
   # May be used to embed a changelog in the spec file.
-  # The refered file will be read and directly put after the %changelog section
+  # The referred file will be read and directly put after the %changelog section
   if(CPACK_RPM_CHANGELOG_FILE)
     if(EXISTS ${CPACK_RPM_CHANGELOG_FILE})
       file(READ ${CPACK_RPM_CHANGELOG_FILE} CPACK_RPM_SPEC_CHANGELOG)
@@ -2152,7 +2152,7 @@ function(cpack_rpm_generate_package)
     string(STRIP "${CPACK_RPM_INSTALL_FILES}" CPACK_RPM_INSTALL_FILES_LIST)
     # Transform endline separated - string into CMake List
     string(REPLACE "\n" ";" CPACK_RPM_INSTALL_FILES_LIST "${CPACK_RPM_INSTALL_FILES_LIST}")
-    # Remove unecessary quotes
+    # Remove unnecessary quotes
     string(REPLACE "\"" "" CPACK_RPM_INSTALL_FILES_LIST "${CPACK_RPM_INSTALL_FILES_LIST}")
     # Remove ABSOLUTE install file from INSTALL FILE LIST
     list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES_LIST ${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL})
@@ -2413,7 +2413,7 @@ ${TMP_DEBUGINFO_ADDITIONAL_SOURCES}
     endif()
 
     # Disable debuginfo packages - srpm generates invalid packages due to
-    # releasing controll to cpack to generate binary packages.
+    # releasing control to cpack to generate binary packages.
     # Note however that this doesn't prevent cpack to generate debuginfo
     # packages when run from srpm with --rebuild.
     set(TMP_RPM_DISABLE_DEBUGINFO "%define debug_package %{nil}")

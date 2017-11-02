@@ -40,7 +40,7 @@ if (BUILD_DOCUMENTATION)
     )
 
   #
-  # The documentation process is controled by a batch file.
+  # The documentation process is controlled by a batch file.
   # We will probably need bash to create the custom target
   #
 

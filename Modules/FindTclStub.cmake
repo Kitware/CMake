@@ -32,7 +32,7 @@
 #
 #
 # In an effort to remove some clutter and clear up some issues for
-# people who are not necessarily Tcl/Tk gurus/developpers, some
+# people who are not necessarily Tcl/Tk gurus/developers, some
 # variables were moved or removed.  Changes compared to CMake 2.4 are:
 #
 # ::

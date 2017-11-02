@@ -153,7 +153,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
       if (unixEpoch == -1) {
         cmSystemTools::Error(
           "Error generating UNIX epoch in "
-          "STRING(TIMESTAMP ...). Please, file a bug report aginst CMake");
+          "STRING(TIMESTAMP ...). Please, file a bug report against CMake");
         return std::string();
       }
 

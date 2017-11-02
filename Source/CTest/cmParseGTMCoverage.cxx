@@ -93,7 +93,7 @@ bool cmParseGTMCoverage::ReadMCovFile(const char* file)
         // This section accounts for lines that were previously marked
         // as non-executable code (-1), if the parser comes back with
         // a non-zero count, increase the count by 1 to push the line
-        // into the executable code set in addtion to the count found.
+        // into the executable code set in addition to the count found.
         if (coverageVector[lineoffset + linenumber] == -1 && count > 0) {
           coverageVector[lineoffset + linenumber] += count + 1;
         } else {

@@ -817,7 +817,7 @@ if(CPACK_IFW_INSTALLERBASE_EXECUTABLE AND NOT CPACK_IFW_FRAMEWORK_VERSION_FORCED
       endif()
     endif()
   endforeach()
-  # Finaly try to get version from executable path
+  # Finally try to get version from executable path
   if(NOT CPACK_IFW_FRAMEWORK_VERSION)
     string(REGEX MATCH "[0-9]+(\\.[0-9]+)*"
       CPACK_IFW_FRAMEWORK_VERSION "${CPACK_IFW_INSTALLERBASE_EXECUTABLE}")
@@ -864,7 +864,7 @@ macro(_cpack_ifw_resolve_script _variable)
   endif()
 endmacro()
 
-# Resolve full path to lisense file
+# Resolve full path to license file
 macro(_cpack_ifw_resolve_lisenses _variable)
   if(${_variable})
     set(_ifw_license_file FALSE)

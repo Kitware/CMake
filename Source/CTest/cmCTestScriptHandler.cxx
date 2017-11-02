@@ -81,7 +81,7 @@ cmCTestScriptHandler::cmCTestScriptHandler()
 
   this->ScriptStartTime = 0;
 
-  // the *60 is becuase the settings are in minutes but GetTime is seconds
+  // the *60 is because the settings are in minutes but GetTime is seconds
   this->MinimumInterval = 30 * 60;
   this->ContinuousDuration = -1;
 }
@@ -830,7 +830,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     }
   }
 
-  // if all was succesful, delete the backup dirs to free up disk space
+  // if all was successful, delete the backup dirs to free up disk space
   if (this->Backup) {
     cmSystemTools::RemoveADirectory(this->BackupSourceDir);
     cmSystemTools::RemoveADirectory(this->BackupBinaryDir);

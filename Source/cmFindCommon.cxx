@@ -329,7 +329,7 @@ void cmFindCommon::ComputeFinalPaths()
   std::set<std::string> ignored;
   this->GetIgnoredPaths(ignored);
 
-  // Combine the seperate path types, filtering out ignores
+  // Combine the separate path types, filtering out ignores
   this->SearchPaths.clear();
   std::vector<PathLabel>& allLabels = this->PathGroupLabelMap[PathGroup::All];
   for (PathLabel const& l : allLabels) {

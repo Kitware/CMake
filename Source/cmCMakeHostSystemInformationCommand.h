@@ -20,7 +20,7 @@ class SystemInformation;
  * \brief Query host system specific information
  *
  * cmCMakeHostSystemInformationCommand queries system information of
- * the sytem on which CMake runs.
+ * the system on which CMake runs.
  */
 class cmCMakeHostSystemInformationCommand : public cmCommand
 {
