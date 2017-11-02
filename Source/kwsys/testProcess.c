@@ -107,6 +107,7 @@ static int test3(int argc, const char* argv[])
 
 static int test4(int argc, const char* argv[])
 {
+#ifndef CRASH_USING_ABORT
   /* Prepare a pointer to an invalid address.  Don't use null, because
   dereferencing null is undefined behaviour and compilers are free to
   do whatever they want. ex: Clang will warn at compile time, or even
@@ -114,6 +115,7 @@ static int test4(int argc, const char* argv[])
   'volatile' and a slightly larger address, based on a runtime value. */
   volatile int* invalidAddress = 0;
   invalidAddress += argc ? 1 : 2;
+#endif
 
 #if defined(_WIN32)
   /* Avoid error diagnostic popups since we are crashing on purpose.  */
@@ -128,9 +130,13 @@ static int test4(int argc, const char* argv[])
   fprintf(stderr, "Output before crash on stderr from crash test.\n");
   fflush(stdout);
   fflush(stderr);
+#ifdef CRASH_USING_ABORT
+  abort();
+#else
   assert(invalidAddress); /* Quiet Clang scan-build. */
   /* Provoke deliberate crash by writing to the invalid address. */
   *invalidAddress = 0;
+#endif
   fprintf(stdout, "Output after crash on stdout from crash test.\n");
   fprintf(stderr, "Output after crash on stderr from crash test.\n");
   return 0;
@@ -149,7 +155,12 @@ static int test5(int argc, const char* argv[])
   fprintf(stderr, "Output on stderr before recursive test.\n");
   fflush(stdout);
   fflush(stderr);
-  r = runChild(cmd, kwsysProcess_State_Exception, kwsysProcess_Exception_Fault,
+  r = runChild(cmd, kwsysProcess_State_Exception,
+#ifdef CRASH_USING_ABORT
+               kwsysProcess_Exception_Other,
+#else
+               kwsysProcess_Exception_Fault,
+#endif
                1, 1, 1, 0, 15, 0, 1, 0, 0, 0);
   fprintf(stdout, "Output on stdout after recursive test.\n");
   fprintf(stderr, "Output on stderr after recursive test.\n");
@@ -628,11 +639,16 @@ int main(int argc, const char* argv[])
       kwsysProcess_State_Exception /* Process group test */
     };
     int exceptions[10] = {
-      kwsysProcess_Exception_None, kwsysProcess_Exception_None,
-      kwsysProcess_Exception_None, kwsysProcess_Exception_Fault,
-      kwsysProcess_Exception_None, kwsysProcess_Exception_None,
-      kwsysProcess_Exception_None, kwsysProcess_Exception_None,
-      kwsysProcess_Exception_None, kwsysProcess_Exception_Interrupt
+      kwsysProcess_Exception_None,  kwsysProcess_Exception_None,
+      kwsysProcess_Exception_None,
+#ifdef CRASH_USING_ABORT
+      kwsysProcess_Exception_Other,
+#else
+      kwsysProcess_Exception_Fault,
+#endif
+      kwsysProcess_Exception_None,  kwsysProcess_Exception_None,
+      kwsysProcess_Exception_None,  kwsysProcess_Exception_None,
+      kwsysProcess_Exception_None,  kwsysProcess_Exception_Interrupt
     };
     int values[10] = { 0, 123, 1, 1, 0, 0, 0, 0, 1, 1 };
     int shares[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 };

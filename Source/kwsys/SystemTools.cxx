@@ -751,15 +751,15 @@ FILE* SystemTools::Fopen(const std::string& file, const char* mode)
 #endif
 }
 
-bool SystemTools::MakeDirectory(const char* path)
+bool SystemTools::MakeDirectory(const char* path, const mode_t* mode)
 {
   if (!path) {
     return false;
   }
-  return SystemTools::MakeDirectory(std::string(path));
+  return SystemTools::MakeDirectory(std::string(path), mode);
 }
 
-bool SystemTools::MakeDirectory(const std::string& path)
+bool SystemTools::MakeDirectory(const std::string& path, const mode_t* mode)
 {
   if (SystemTools::PathExists(path)) {
     return SystemTools::FileIsDirectory(path);
@@ -774,8 +774,12 @@ bool SystemTools::MakeDirectory(const std::string& path)
   std::string topdir;
   while ((pos = dir.find('/', pos)) != std::string::npos) {
     topdir = dir.substr(0, pos);
-    Mkdir(topdir);
-    pos++;
+
+    if (Mkdir(topdir) == 0 && mode != 0) {
+      SystemTools::SetPermissions(topdir, *mode);
+    }
+
+    ++pos;
   }
   topdir = dir;
   if (Mkdir(topdir) != 0) {
@@ -790,7 +794,10 @@ bool SystemTools::MakeDirectory(const std::string& path)
           ) {
       return false;
     }
+  } else if (mode != 0) {
+    SystemTools::SetPermissions(topdir, *mode);
   }
+
   return true;
 }
 
