@@ -20,6 +20,7 @@
 #include "cmAlgorithms.h"
 #include "cmCommandArgumentsHelper.h"
 #include "cmCryptoHash.h"
+#include "cmFSPermissions.h"
 #include "cmFileLockPool.h"
 #include "cmFileTimeComparison.h"
 #include "cmGeneratorExpression.h"
@@ -50,32 +51,7 @@
 
 class cmSystemToolsFileTime;
 
-// Table of permissions flags.
-#if defined(_WIN32) && !defined(__CYGWIN__)
-static mode_t mode_owner_read = S_IREAD;
-static mode_t mode_owner_write = S_IWRITE;
-static mode_t mode_owner_execute = S_IEXEC;
-static mode_t mode_group_read = 040;
-static mode_t mode_group_write = 020;
-static mode_t mode_group_execute = 010;
-static mode_t mode_world_read = 04;
-static mode_t mode_world_write = 02;
-static mode_t mode_world_execute = 01;
-static mode_t mode_setuid = 04000;
-static mode_t mode_setgid = 02000;
-#else
-static mode_t mode_owner_read = S_IRUSR;
-static mode_t mode_owner_write = S_IWUSR;
-static mode_t mode_owner_execute = S_IXUSR;
-static mode_t mode_group_read = S_IRGRP;
-static mode_t mode_group_write = S_IWGRP;
-static mode_t mode_group_execute = S_IXGRP;
-static mode_t mode_world_read = S_IROTH;
-static mode_t mode_world_write = S_IWOTH;
-static mode_t mode_world_execute = S_IXOTH;
-static mode_t mode_setuid = S_ISUID;
-static mode_t mode_setgid = S_ISGID;
-#endif
+using namespace cmFSPermissions;
 
 #if defined(_WIN32)
 // libcurl doesn't support file:// urls for unicode filenames on Windows.
@@ -1099,29 +1075,7 @@ protected:
   // Translate an argument to a permissions bit.
   bool CheckPermissions(std::string const& arg, mode_t& permissions)
   {
-    if (arg == "OWNER_READ") {
-      permissions |= mode_owner_read;
-    } else if (arg == "OWNER_WRITE") {
-      permissions |= mode_owner_write;
-    } else if (arg == "OWNER_EXECUTE") {
-      permissions |= mode_owner_execute;
-    } else if (arg == "GROUP_READ") {
-      permissions |= mode_group_read;
-    } else if (arg == "GROUP_WRITE") {
-      permissions |= mode_group_write;
-    } else if (arg == "GROUP_EXECUTE") {
-      permissions |= mode_group_execute;
-    } else if (arg == "WORLD_READ") {
-      permissions |= mode_world_read;
-    } else if (arg == "WORLD_WRITE") {
-      permissions |= mode_world_write;
-    } else if (arg == "WORLD_EXECUTE") {
-      permissions |= mode_world_execute;
-    } else if (arg == "SETUID") {
-      permissions |= mode_setuid;
-    } else if (arg == "SETGID") {
-      permissions |= mode_setgid;
-    } else {
+    if (!cmFSPermissions::stringToModeT(arg, permissions)) {
       std::ostringstream e;
       e << this->Name << " given invalid permission \"" << arg << "\".";
       this->FileCommand->SetError(e.str());
