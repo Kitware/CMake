@@ -31,7 +31,9 @@ if(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)
   set(TEST_HOME_ENV_CODE "# Fake a user home directory to avoid polluting the real one.
 # But provide original ENV{HOME} value in ENV{CTEST_REAL_HOME} for tests that
 # need access to the real HOME directory.
-set(ENV{CTEST_REAL_HOME} \"\$ENV{HOME}\")
+if(NOT DEFINED ENV{CTEST_REAL_HOME})
+  set(ENV{CTEST_REAL_HOME} \"\$ENV{HOME}\")
+endif()
 set(ENV{HOME} \"${TEST_HOME}\")
 ")
 endif()
