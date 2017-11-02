@@ -19,4 +19,5 @@ indirectly through link dependencies.  It is simplest to enable all
 needed languages in the top-level directory of a project.
 
 The ``OPTIONAL`` keyword is a placeholder for future implementation and
-does not currently work.
+does not currently work. Instead you can use the :module:`CheckLanguage`
+module to verify support before enabling.
