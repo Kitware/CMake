@@ -1689,12 +1689,8 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
   } else if (ext == "natvis") {
     tool = "Natvis";
   } else if (ext == "settings") {
-    // remove path to current source dir (if files are in current source dir)
-    if (!sourceLink.empty()) {
-      settingsLastGenOutput = sourceLink;
-    } else {
-      settingsLastGenOutput = sf->GetFullPath();
-    }
+    settingsLastGenOutput =
+      cmsys::SystemTools::GetFilenameName(sf->GetFullPath());
     std::size_t pos = settingsLastGenOutput.find(".settings");
     settingsLastGenOutput.replace(pos, 9, ".Designer.cs");
     settingsGenerator = "SettingsSingleFileGenerator";
