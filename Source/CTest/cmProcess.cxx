@@ -3,8 +3,8 @@
 #include "cmProcess.h"
 
 #include "cmProcessOutput.h"
-#include "cmSystemTools.h"
 #include <iostream>
+#include <type_traits>
 
 cmProcess::cmProcess()
 {
@@ -13,7 +13,7 @@ cmProcess::cmProcess()
   this->TotalTime = 0;
   this->ExitValue = 0;
   this->Id = 0;
-  this->StartTime = 0;
+  this->StartTime = std::chrono::steady_clock::time_point();
 }
 
 cmProcess::~cmProcess()
@@ -35,7 +35,7 @@ bool cmProcess::StartProcess()
   if (this->Command.empty()) {
     return false;
   }
-  this->StartTime = cmSystemTools::GetTime();
+  this->StartTime = std::chrono::steady_clock::now();
   this->ProcessArgs.clear();
   // put the command as arg0
   this->ProcessArgs.push_back(this->Command.c_str());
@@ -143,7 +143,11 @@ int cmProcess::GetNextOutputLine(std::string& line, double timeout)
 
   // Record exit information.
   this->ExitValue = cmsysProcess_GetExitValue(this->Process);
-  this->TotalTime = cmSystemTools::GetTime() - this->StartTime;
+  this->TotalTime =
+    static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(
+                          std::chrono::steady_clock::now() - this->StartTime)
+                          .count()) /
+    1000.0;
   // Because of a processor clock scew the runtime may become slightly
   // negative. If someone changed the system clock while the process was
   // running this may be even more. Make sure not to report a negative
@@ -231,7 +235,7 @@ void cmProcess::ChangeTimeout(double t)
 void cmProcess::ResetStartTime()
 {
   cmsysProcess_ResetStartTime(this->Process);
-  this->StartTime = cmSystemTools::GetTime();
+  this->StartTime = std::chrono::steady_clock::now();
 }
 
 int cmProcess::GetExitException()

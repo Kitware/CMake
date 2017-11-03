@@ -8,6 +8,7 @@
 #include "cmCTestGenericHandler.h"
 
 #include "cmsys/RegularExpression.hxx"
+#include <chrono>
 #include <iosfwd>
 #include <map>
 #include <set>
@@ -198,7 +199,7 @@ protected:
   //! Clean test output to specified length
   bool CleanTestOutput(std::string& output, size_t length);
 
-  double ElapsedTestingTime;
+  std::chrono::duration<double> ElapsedTestingTime;
 
   typedef std::vector<cmCTestTestResult> TestResultsVector;
   TestResultsVector TestResults;

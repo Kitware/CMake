@@ -17,6 +17,7 @@
 #include <set>
 #include <stdlib.h>
 #include <string.h>
+#include <type_traits>
 
 static const char* cmCTestErrorMatches[] = {
   "^[Bb]us [Ee]rror",
@@ -327,7 +328,7 @@ int cmCTestBuildHandler::ProcessHandler()
 
   // Create a last build log
   cmGeneratedFileStream ofs;
-  double elapsed_time_start = cmSystemTools::GetTime();
+  auto elapsed_time_start = std::chrono::steady_clock::now();
   if (!this->StartLogFile("Build", ofs)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create build log file"
                  << std::endl);
@@ -421,7 +422,8 @@ int cmCTestBuildHandler::ProcessHandler()
   // Remember end build time and calculate elapsed time
   this->EndBuild = this->CTest->CurrentTime();
   this->EndBuildTime = cmSystemTools::GetTime();
-  double elapsed_build_time = cmSystemTools::GetTime() - elapsed_time_start;
+  auto elapsed_build_time =
+    std::chrono::steady_clock::now() - elapsed_time_start;
 
   // Cleanups strings in the errors and warnings list.
   if (!this->SimplifySourceDir.empty()) {
@@ -633,8 +635,8 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
   }
 }
 
-void cmCTestBuildHandler::GenerateXMLFooter(cmXMLWriter& xml,
-                                            double elapsed_build_time)
+void cmCTestBuildHandler::GenerateXMLFooter(
+  cmXMLWriter& xml, std::chrono::duration<double> elapsed_build_time)
 {
   xml.StartElement("Log");
   xml.Attribute("Encoding", "base64");
@@ -643,8 +645,10 @@ void cmCTestBuildHandler::GenerateXMLFooter(cmXMLWriter& xml,
 
   xml.Element("EndDateTime", this->EndBuild);
   xml.Element("EndBuildTime", static_cast<unsigned int>(this->EndBuildTime));
-  xml.Element("ElapsedMinutes",
-              static_cast<int>(elapsed_build_time / 6) / 10.0);
+  xml.Element(
+    "ElapsedMinutes",
+    std::chrono::duration_cast<std::chrono::minutes>(elapsed_build_time)
+      .count());
   xml.EndElement(); // Build
   this->CTest->EndXML(xml);
 }

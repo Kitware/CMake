@@ -10,6 +10,7 @@
 #include "cmake.h"
 
 #include "cmsys/Process.h"
+#include <chrono>
 #include <stdlib.h>
 
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
@@ -192,7 +193,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   // we need to honor the timeout specified, the timeout include cmake, build
   // and test time
-  double clock_start = cmSystemTools::GetTime();
+  auto clock_start = std::chrono::steady_clock::now();
 
   // make sure the binary dir is there
   out << "Internal cmake changing into directory: " << this->BinaryDir
@@ -222,10 +223,12 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     this->BuildTargets.push_back("");
   }
   for (std::string const& tar : this->BuildTargets) {
-    double remainingTime = 0;
+    std::chrono::duration<double> remainingTime = std::chrono::seconds(0);
     if (this->Timeout > 0) {
-      remainingTime = this->Timeout - cmSystemTools::GetTime() + clock_start;
-      if (remainingTime <= 0) {
+      remainingTime = std::chrono::duration<double>(this->Timeout) -
+        std::chrono::duration_cast<std::chrono::seconds>(
+                        std::chrono::steady_clock::now() - clock_start);
+      if (remainingTime <= std::chrono::seconds(0)) {
         if (outstring) {
           *outstring = "--build-and-test timeout exceeded. ";
         }
@@ -248,7 +251,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     int retVal = cm.GetGlobalGenerator()->Build(
       this->SourceDir, this->BinaryDir, this->BuildProject, tar, output,
       this->BuildMakeProgram, config, !this->BuildNoClean, false, false,
-      remainingTime);
+      remainingTime.count());
     out << output;
     // if the build failed then return
     if (retVal) {
@@ -320,10 +323,12 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   out << "\n";
 
   // how much time is remaining
-  double remainingTime = 0;
+  std::chrono::duration<double> remainingTime = std::chrono::seconds(0);
   if (this->Timeout > 0) {
-    remainingTime = this->Timeout - cmSystemTools::GetTime() + clock_start;
-    if (remainingTime <= 0) {
+    remainingTime = std::chrono::duration<double>(this->Timeout) -
+      std::chrono::duration_cast<std::chrono::seconds>(
+                      std::chrono::steady_clock::now() - clock_start);
+    if (remainingTime <= std::chrono::seconds(0)) {
       if (outstring) {
         *outstring = "--build-and-test timeout exceeded. ";
       }
@@ -332,7 +337,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   }
 
   int runTestRes = this->CTest->RunTest(testCommand, &outs, &retval, nullptr,
-                                        remainingTime, nullptr);
+                                        remainingTime.count(), nullptr);
 
   if (runTestRes != cmsysProcess_State_Exited || retval != 0) {
     out << "Test command failed: " << testCommand[0] << "\n";

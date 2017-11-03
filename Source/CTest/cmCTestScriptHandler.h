@@ -7,6 +7,7 @@
 
 #include "cmCTestGenericHandler.h"
 
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -104,6 +105,7 @@ public:
 
   void CreateCMake();
   cmake* GetCMake() { return this->CMake; }
+
 private:
   // reads in a script
   int ReadInScript(const std::string& total_script_arg);
@@ -156,7 +158,7 @@ private:
   double ContinuousDuration;
 
   // what time in seconds did this script start running
-  double ScriptStartTime;
+  std::chrono::steady_clock::time_point ScriptStartTime;
 
   cmMakefile* Makefile;
   cmGlobalGenerator* GlobalGenerator;

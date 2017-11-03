@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestTestHandler.h"
 #include <algorithm>
+#include <chrono>
 #include <cmsys/Base64.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/RegularExpression.hxx>
@@ -15,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <type_traits>
 
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
@@ -346,7 +348,7 @@ void cmCTestTestHandler::Initialize()
 {
   this->Superclass::Initialize();
 
-  this->ElapsedTestingTime = -1;
+  this->ElapsedTestingTime = std::chrono::duration<double>();
 
   this->TestResults.clear();
 
@@ -484,12 +486,11 @@ int cmCTestTestHandler::ProcessHandler()
   int total;
 
   // start the real time clock
-  double clock_start, clock_finish;
-  clock_start = cmSystemTools::GetTime();
+  auto clock_start = std::chrono::steady_clock::now();
 
   this->ProcessDirectory(passed, failed);
 
-  clock_finish = cmSystemTools::GetTime();
+  auto clock_finish = std::chrono::steady_clock::now();
 
   total = int(passed.size()) + int(failed.size());
 
@@ -540,7 +541,10 @@ int cmCTestTestHandler::ProcessHandler()
       this->PrintLabelOrSubprojectSummary(false);
     }
     char realBuf[1024];
-    sprintf(realBuf, "%6.2f sec", clock_finish - clock_start);
+    auto durationInMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+                          clock_finish - clock_start)
+                          .count();
+    sprintf(realBuf, "%6.2f sec", static_cast<double>(durationInMs) / 1000.0);
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "\nTotal Test time (real) = " << realBuf << "\n",
                        this->Quiet);
@@ -1201,7 +1205,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   this->ComputeTestList();
   this->StartTest = this->CTest->CurrentTime();
   this->StartTestTime = static_cast<unsigned int>(cmSystemTools::GetTime());
-  double elapsed_time_start = cmSystemTools::GetTime();
+  auto elapsed_time_start = std::chrono::steady_clock::now();
 
   cmCTestMultiProcessHandler* parallel = this->CTest->GetBatchJobs()
     ? new cmCTestBatchTestHandler
@@ -1268,7 +1272,8 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   delete parallel;
   this->EndTest = this->CTest->CurrentTime();
   this->EndTestTime = static_cast<unsigned int>(cmSystemTools::GetTime());
-  this->ElapsedTestingTime = cmSystemTools::GetTime() - elapsed_time_start;
+  this->ElapsedTestingTime =
+    std::chrono::steady_clock::now() - elapsed_time_start;
   *this->LogFile << "End testing: " << this->CTest->CurrentTime() << std::endl;
 }
 
@@ -1373,8 +1378,10 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
 
   xml.Element("EndDateTime", this->EndTest);
   xml.Element("EndTestTime", this->EndTestTime);
-  xml.Element("ElapsedMinutes",
-              static_cast<int>(this->ElapsedTestingTime / 6) / 10.0);
+  xml.Element(
+    "ElapsedMinutes",
+    std::chrono::duration_cast<std::chrono::minutes>(this->ElapsedTestingTime)
+      .count());
   xml.EndElement(); // Testing
   this->CTest->EndXML(xml);
 }

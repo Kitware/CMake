@@ -17,8 +17,10 @@
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
 
+#include <chrono>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
+#include <type_traits>
 
 static const char* cmCTestUpdateHandlerUpdateStrings[] = {
   "Unknown", "CVS", "SVN", "BZR", "GIT", "HG", "P4"
@@ -177,7 +179,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   std::string start_time = this->CTest->CurrentTime();
   unsigned int start_time_time =
     static_cast<unsigned int>(cmSystemTools::GetTime());
-  double elapsed_time_start = cmSystemTools::GetTime();
+  auto elapsed_time_start = std::chrono::steady_clock::now();
 
   bool updated = vc->Update();
   std::string buildname =
@@ -225,10 +227,10 @@ int cmCTestUpdateHandler::ProcessHandler()
   std::string end_time = this->CTest->CurrentTime();
   xml.Element("EndDateTime", end_time);
   xml.Element("EndTime", static_cast<unsigned int>(cmSystemTools::GetTime()));
-  xml.Element(
-    "ElapsedMinutes",
-    static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start) / 6) /
-      10.0);
+  xml.Element("ElapsedMinutes",
+              std::chrono::duration_cast<std::chrono::minutes>(
+                std::chrono::steady_clock::now() - elapsed_time_start)
+                .count());
 
   xml.StartElement("UpdateReturnStatus");
   if (localModifications) {
