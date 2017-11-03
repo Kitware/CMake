@@ -1157,7 +1157,7 @@ void cmTarget::CheckProperty(const std::string& prop,
       cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, value, context, true);
     }
   }
-  if (cmHasLiteralPrefix(prop, "INTERFACE_LINK_LIBRARIES")) {
+  if (prop == "INTERFACE_LINK_LIBRARIES") {
     if (const char* value = this->GetProperty(prop)) {
       cmTargetCheckINTERFACE_LINK_LIBRARIES(value, context);
     }
