@@ -2830,7 +2830,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       PASS_REGULAR_EXPRESSION "Failed")
   else()
     set_tests_properties(CTestTestCrash PROPERTIES
-      PASS_REGULAR_EXPRESSION "(Illegal|SegFault)")
+      PASS_REGULAR_EXPRESSION "(Illegal|SegFault|Child aborted)")
   endif()
 
   configure_file(
