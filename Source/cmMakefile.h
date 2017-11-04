@@ -439,6 +439,21 @@ public:
   /** Return whether the target platform is x32.  */
   bool PlatformIsx32() const;
 
+  /** Apple SDK Type */
+  enum class AppleSDK
+  {
+    MacOS,
+    IPhoneOS,
+    IPhoneSimulator,
+    AppleTVOS,
+    AppleTVSimulator,
+    WatchOS,
+    WatchSimulator,
+  };
+
+  /** What SDK type points CMAKE_OSX_SYSROOT to? */
+  AppleSDK GetAppleSDKType() const;
+
   /** Return whether the target platform is Apple iOS.  */
   bool PlatformIsAppleEmbedded() const;
 

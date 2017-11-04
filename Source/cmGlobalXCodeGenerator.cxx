@@ -2992,7 +2992,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     buildSettings->AddAttribute("ARCHS", this->CreateString(archs));
   }
   if (deploymentTarget && *deploymentTarget) {
-    buildSettings->AddAttribute("MACOSX_DEPLOYMENT_TARGET",
+    buildSettings->AddAttribute(GetDeploymentPlatform(root->GetMakefile()),
                                 this->CreateString(deploymentTarget));
   }
   if (!this->GeneratorToolset.empty()) {
@@ -3626,4 +3626,25 @@ void cmGlobalXCodeGenerator::ComputeTargetObjectDirectory(
   dir += this->ObjectDirArch;
   dir += "/";
   gt->ObjectDirectory = dir;
+}
+
+std::string cmGlobalXCodeGenerator::GetDeploymentPlatform(const cmMakefile* mf)
+{
+  switch (mf->GetAppleSDKType()) {
+    case cmMakefile::AppleSDK::AppleTVOS:
+    case cmMakefile::AppleSDK::AppleTVSimulator:
+      return "TVOS_DEPLOYMENT_TARGET";
+
+    case cmMakefile::AppleSDK::IPhoneOS:
+    case cmMakefile::AppleSDK::IPhoneSimulator:
+      return "IPHONEOS_DEPLOYMENT_TARGET";
+
+    case cmMakefile::AppleSDK::WatchOS:
+    case cmMakefile::AppleSDK::WatchSimulator:
+      return "WATCHOS_DEPLOYMENT_TARGET";
+
+    case cmMakefile::AppleSDK::MacOS:
+    default:
+      return "MACOSX_DEPLOYMENT_TARGET";
+  }
 }

@@ -3,6 +3,9 @@
 cmake_minimum_required(VERSION 3.3)
 enable_language(C)
 
+# due to lack of toolchain file it might point to running macOS version
+unset(CMAKE_OSX_DEPLOYMENT_TARGET CACHE)
+
 if(TEST_IOS)
   set(CMAKE_OSX_SYSROOT iphoneos)
   set(CMAKE_OSX_ARCHITECTURES "armv7")

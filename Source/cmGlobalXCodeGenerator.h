@@ -254,6 +254,8 @@ private:
                                         const std::string& configName,
                                         const cmGeneratorTarget* t) const;
 
+  static std::string GetDeploymentPlatform(const cmMakefile* mf);
+
   void ComputeArchitectures(cmMakefile* mf);
   void ComputeObjectDirArch(cmMakefile* mf);
 
