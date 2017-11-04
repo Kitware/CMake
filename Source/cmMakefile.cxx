@@ -2244,7 +2244,7 @@ bool cmMakefile::PlatformIsx32() const
   return false;
 }
 
-bool cmMakefile::PlatformIsAppleIos() const
+bool cmMakefile::PlatformIsAppleEmbedded() const
 {
   std::string sdkRoot;
   sdkRoot = this->GetSafeDefinition("CMAKE_OSX_SYSROOT");

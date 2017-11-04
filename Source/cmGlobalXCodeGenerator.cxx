@@ -1172,7 +1172,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
           // dstPath in frameworks is relative to Versions/<version>
           ostr << keySources.first;
         } else if (keySources.first != "MacOS") {
-          if (gtgt->Target->GetMakefile()->PlatformIsAppleIos()) {
+          if (gtgt->Target->GetMakefile()->PlatformIsAppleEmbedded()) {
             ostr << keySources.first;
           } else {
             // dstPath in bundles is relative to Contents/MacOS
@@ -3605,7 +3605,7 @@ bool cmGlobalXCodeGenerator::UseEffectivePlatformName(cmMakefile* mf) const
       "XCODE_EMIT_EFFECTIVE_PLATFORM_NAME");
 
   if (!epnValue) {
-    return mf->PlatformIsAppleIos();
+    return mf->PlatformIsAppleEmbedded();
   }
 
   return cmSystemTools::IsOn(epnValue);

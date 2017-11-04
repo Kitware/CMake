@@ -1529,7 +1529,8 @@ std::string cmGeneratorTarget::GetAppBundleDirectory(
     ext = "app";
   }
   fpath += ext;
-  if (shouldAddContentLevel(level) && !this->Makefile->PlatformIsAppleIos()) {
+  if (shouldAddContentLevel(level) &&
+      !this->Makefile->PlatformIsAppleEmbedded()) {
     fpath += "/Contents";
     if (shouldAddFullLevel(level)) {
       fpath += "/MacOS";
@@ -1559,7 +1560,8 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(
     }
   }
   fpath += ext;
-  if (shouldAddContentLevel(level) && !this->Makefile->PlatformIsAppleIos()) {
+  if (shouldAddContentLevel(level) &&
+      !this->Makefile->PlatformIsAppleEmbedded()) {
     fpath += "/Contents";
     if (shouldAddFullLevel(level)) {
       fpath += "/MacOS";
@@ -1579,7 +1581,8 @@ std::string cmGeneratorTarget::GetFrameworkDirectory(
     ext = "framework";
   }
   fpath += ext;
-  if (shouldAddFullLevel(level) && !this->Makefile->PlatformIsAppleIos()) {
+  if (shouldAddFullLevel(level) &&
+      !this->Makefile->PlatformIsAppleEmbedded()) {
     fpath += "/Versions/";
     fpath += this->GetFrameworkVersion();
   }
@@ -3004,7 +3007,7 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name, std::string& soName,
 
   if (this->IsFrameworkOnApple()) {
     realName = prefix;
-    if (!this->Makefile->PlatformIsAppleIos()) {
+    if (!this->Makefile->PlatformIsAppleEmbedded()) {
       realName += "Versions/";
       realName += this->GetFrameworkVersion();
       realName += "/";

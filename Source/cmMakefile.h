@@ -440,7 +440,7 @@ public:
   bool PlatformIsx32() const;
 
   /** Return whether the target platform is Apple iOS.  */
-  bool PlatformIsAppleIos() const;
+  bool PlatformIsAppleEmbedded() const;
 
   /** Retrieve soname flag for the specified language if supported */
   const char* GetSONameFlag(const std::string& language) const;
