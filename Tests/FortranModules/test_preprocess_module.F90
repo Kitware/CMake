@@ -1,5 +1,5 @@
 #ifdef FOO
 MODULE PPAvailable
-! no conent
+! no content
 END MODULE
 #endif

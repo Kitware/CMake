@@ -34,7 +34,7 @@ message(STATUS "squish_settingsgroup='${squish_settingsgroup}'")
 message(STATUS "squish_pre_command='${squish_pre_command}'")
 message(STATUS "squish_post_command='${squish_post_command}'")
 
-# parse enviornment variables
+# parse environment variables
 foreach(i ${squish_env_vars})
   message(STATUS "parsing env var key/value pair ${i}")
   string(REGEX MATCH "([^=]*)=(.*)" squish_env_name ${i})

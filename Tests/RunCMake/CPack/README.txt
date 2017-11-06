@@ -149,7 +149,7 @@ this step and must contain
   NOTE: This variable should be used only as last resort as it sets generator
         specific regular expression.
         EXPECTED_FILE_CONTENT_<file_number_starting_with_1>_LIST should be
-        prefered as it requires a list of expected files and directories that
+        preferred as it requires a list of expected files and directories that
         is later changed automatically depending on the generator so expected
         package content can be written only once per test for all generators.
 
@@ -209,7 +209,7 @@ To add a new generator we must
       + FILE that will contain the package file for which the package content
         should be returned.
       + RESULT_VAR that will tell the function which variable in parent scope
-        should contain the result (list of pacakge content)
+        should contain the result (list of package content)
     - toExpectedContentList: This function should convert an expected package
                              content list into one that is expected for the
                              generator (e.g. rpm packages have install/relocate

@@ -154,7 +154,7 @@
 # macro.
 #
 # Internally, this macro executes :command:`configure_file()` to create the
-# resulting version file.  Depending on the ``COMPATIBLITY``, either the file
+# resulting version file.  Depending on the ``COMPATIBILITY``, either the file
 # ``BasicConfigVersion-SameMajorVersion.cmake.in`` or
 # ``BasicConfigVersion-AnyNewerVersion.cmake.in`` is used.  Please note that
 # these two files are internal to CMake and you should not call

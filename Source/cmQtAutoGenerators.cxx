@@ -827,7 +827,7 @@ bool cmQtAutoGenerators::ParseHeaderFile(std::string const& absFilename,
 bool cmQtAutoGenerators::ParsePostprocess()
 {
   bool success = true;
-  // Read missin dependecies
+  // Read missing dependencies
   for (auto& item : this->MocJobsIncluded) {
     if (!item->DependsValid) {
       std::string content;
@@ -1427,7 +1427,7 @@ bool cmQtAutoGenerators::MocGenerateAll()
       }
     }
 
-    // Add moc_predefs.h to moc file dependecies
+    // Add moc_predefs.h to moc file dependencies
     for (auto const& item : this->MocJobsIncluded) {
       item->Depends.insert(this->MocPredefsFileAbs);
     }

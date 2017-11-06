@@ -962,7 +962,7 @@ std::string cmGlobalGenerator::GetLanguageOutputExtension(
     }
   } else {
     // if no language is found then check to see if it is already an
-    // ouput extension for some language.  In that case it should be ignored
+    // output extension for some language.  In that case it should be ignored
     // and in this map, so it will not be compiled but will just be used.
     std::string const& ext = source.GetExtension();
     if (!ext.empty()) {

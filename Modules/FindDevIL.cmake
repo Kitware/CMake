@@ -70,5 +70,5 @@ find_library(ILU_LIBRARIES
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(DevIL DEFAULT_MSG
                                   IL_LIBRARIES ILU_LIBRARIES
                                   IL_INCLUDE_DIR)
-# provide legacy variable for compatiblity
+# provide legacy variable for compatibility
 set(IL_FOUND ${DevIL_FOUND})

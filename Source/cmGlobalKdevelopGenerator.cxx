@@ -110,7 +110,7 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
            nullptr)) {
         files.insert(tmp);
         tmp = cmSystemTools::GetFilenameName(tmp);
-        // add all files which dont match the default
+        // add all files which don't match the default
         // */CMakeLists.txt;*cmake; to the file pattern
         if ((tmp != "CMakeLists.txt") &&
             (strstr(tmp.c_str(), ".cmake") == nullptr)) {

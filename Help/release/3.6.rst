@@ -111,7 +111,7 @@ Modules
 
 * The :module:`ExternalProject` module learned to initialize Git submodules
   recursively and also to initialize new submodules on updates.  Use the
-  ``GIT_SUBMODULES`` option to restrict which submodules are initalized and
+  ``GIT_SUBMODULES`` option to restrict which submodules are initialized and
   updated.
 
 * The :module:`ExternalProject` module leared the ``DOWNLOAD_NO_EXTRACT 1``

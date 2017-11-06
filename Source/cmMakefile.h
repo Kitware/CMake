@@ -561,7 +561,7 @@ public:
                        bool atOnly, bool escapeQuotes) const;
 
   /**
-   * Copy file but change lines acording to ConfigureString
+   * Copy file but change lines according to ConfigureString
    */
   int ConfigureFile(const char* infile, const char* outfile, bool copyonly,
                     bool atOnly, bool escapeQuotes,
@@ -800,7 +800,7 @@ public:
   void RemoveExportBuildFileGeneratorCMP0024(cmExportBuildFileGenerator* gen);
   void AddExportBuildFileGenerator(cmExportBuildFileGenerator* gen);
 
-  // Maintain a stack of pacakge names to determine the depth of find modules
+  // Maintain a stack of package names to determine the depth of find modules
   // we are currently being called with
   std::deque<std::string> FindPackageModuleStack;
 

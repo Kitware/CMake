@@ -90,7 +90,7 @@ void cmWIXPatchParser::StartFragment(const char** attributes)
     }
   }
 
-  /* add any additional attributes for the fragement */
+  /* add any additional attributes for the fragment */
   if (!new_element) {
     ReportValidationError("No 'Id' specified for 'CPackWixFragment' element");
   } else {

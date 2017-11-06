@@ -146,7 +146,7 @@ bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
   }
 }
 
-// ouput standard header for dsw file
+// output standard header for dsw file
 void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 9.00\n";

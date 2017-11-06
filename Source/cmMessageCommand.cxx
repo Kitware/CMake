@@ -63,7 +63,7 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
   std::string message = cmJoin(cmMakeRange(i, args.end()), std::string());
 
   if (type != cmake::MESSAGE) {
-    // we've overriden the message type, above, so display it directly
+    // we've overridden the message type, above, so display it directly
     cmMessenger* m = this->Makefile->GetMessenger();
     m->DisplayMessage(type, message, this->Makefile->GetBacktrace());
   } else {

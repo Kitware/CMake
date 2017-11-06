@@ -343,7 +343,7 @@ def __with_argument(node, value):
 
 
 def __preprocess_arguments(root):
-    """Preprocesses occurrances of Argument within the root.
+    """Preprocesses occurrences of Argument within the root.
 
     Argument XML values reference other values within the document by name. The
     referenced value does not contain a switch. This function will add the

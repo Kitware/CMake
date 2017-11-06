@@ -599,7 +599,7 @@ void cmMakefile::EnforceDirectoryLevelRules() const
         << "\"cmake --help-policy CMP0000\".";
     switch (this->GetPolicyStatus(cmPolicies::CMP0000)) {
       case cmPolicies::WARN:
-        // Warn because the user did not provide a mimimum required
+        // Warn because the user did not provide a minimum required
         // version.
         this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
                                                msg.str(), this->Backtrace);

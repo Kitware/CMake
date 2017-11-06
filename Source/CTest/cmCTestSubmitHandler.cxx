@@ -1521,7 +1521,7 @@ int cmCTestSubmitHandler::ProcessHandler()
       this->CTest->GetCTestConfiguration("DropLocation");
 
     // change to the build directory so that we can uses a relative path
-    // on windows since scp dosn't support "c:" a drive in the path
+    // on windows since scp doesn't support "c:" a drive in the path
     cmWorkingDirectory workdir(buildDirectory);
 
     if (!this->SubmitUsingSCP(this->CTest->GetCTestConfiguration("ScpCommand"),
@@ -1540,7 +1540,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     std::string location = this->CTest->GetCTestConfiguration("DropLocation");
 
     // change to the build directory so that we can uses a relative path
-    // on windows since scp dosn't support "c:" a drive in the path
+    // on windows since scp doesn't support "c:" a drive in the path
     cmWorkingDirectory workdir(buildDirectory);
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "   Change directory: " << buildDirectory << std::endl,

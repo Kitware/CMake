@@ -1198,7 +1198,7 @@ if(_numbers_of_matlab_roots EQUAL 0)
 
 
   # At this point, we have no other choice than trying to find it from PATH.
-  # If set by the user, this wont change
+  # If set by the user, this won't change
   find_program(
     _matlab_main_tmp
     NAMES matlab)

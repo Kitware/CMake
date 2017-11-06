@@ -77,7 +77,7 @@ static bool StartsWithGeneratorExpression(const std::string& input)
 // do a lot of cleanup on the arguments because this is one place where folks
 // sometimes take the output of a program and pass it directly into this
 // command not thinking that a single argument could be filled with spaces
-// and newlines etc liek below:
+// and newlines etc like below:
 //
 // "   /foo/bar
 //    /boo/hoo /dingle/berry "

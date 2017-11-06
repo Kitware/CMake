@@ -29,7 +29,7 @@
 # "Silent" Operation
 #
 # this really is different to most programs I know.
-# nothing meaningfull from the operation is lost, just some redundant
+# nothing meaningful from the operation is lost, just some redundant
 # code and data size printouts (that can be inspected with common tools).
 
 # This module is shared by multiple languages; use include blocker.
