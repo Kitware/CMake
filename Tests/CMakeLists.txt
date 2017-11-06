@@ -31,7 +31,9 @@ if(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)
   set(TEST_HOME_ENV_CODE "# Fake a user home directory to avoid polluting the real one.
 # But provide original ENV{HOME} value in ENV{CTEST_REAL_HOME} for tests that
 # need access to the real HOME directory.
-set(ENV{CTEST_REAL_HOME} \"\$ENV{HOME}\")
+if(NOT DEFINED ENV{CTEST_REAL_HOME})
+  set(ENV{CTEST_REAL_HOME} \"\$ENV{HOME}\")
+endif()
 set(ENV{HOME} \"${TEST_HOME}\")
 ")
 endif()
@@ -3386,31 +3388,30 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   set_property(TEST CMakeWizardTest PROPERTY PASS_REGULAR_EXPRESSION
     "The \"cmake -i\" wizard mode is no longer supported.")
 
-  # If the cache variable CMAKE_CONTRACT_PROJECTS is set
-  # then the dashboard will run a contract with CMake test of that
-  # name.  For example CMAKE_CONTRACT_PROJECTS = vtk542 would run
-  # the vtk542 contract test.
-  # For each Contract test, the project should provide a directory
-  # with at least one CMakeLists.txt file that uses ExternalProject
-  # to download and configure the project. The directory should also
-  # contain a RunTest.cmake file that has a single set of the format:
-  # set(project_RUN_TEST testToRun)
-  # The testToRun should be a test executable that can be run to
-  # smoke test the build.
-  foreach(project ${CMAKE_CONTRACT_PROJECTS})
-    include(Contracts/${project}/RunTest.cmake)
-    ADD_TEST_MACRO(Contracts.${project}
-      ${${project}_RUN_TEST})
-    # Contract test timeout in seconds.
-    # Default to 6 hours.
-    if(DEFINED ${project}_TEST_TIMEOUT)
-      set(timeout ${${project}_TEST_TIMEOUT})
-    elseif(CMAKE_CONTRACT_TEST_TIMEOUT_DEFAULT)
-      set(timeout ${CMAKE_CONTRACT_TEST_TIMEOUT_DEFAULT})
-    else()
-      set(timeout 21600)
+  # Define a set of "contract" tests, each activated by a cache entry
+  # named "CMake_TEST_CONTRACT_<project>".  For each Contract test,
+  # the project should provide a directory with a CMakeLists.txt file
+  # that uses ExternalProject to download and configure the project.
+  # The directory should also contain a Configure.cmake file that
+  # sets "CMake_TEST_CONTRACT_<project>_<var>" variables to configure
+  # the code below.
+  foreach(project
+      Trilinos
+      VTK
+      )
+    if(CMake_TEST_CONTRACT_${project})
+      include(Contracts/${project}/Configure.cmake)
+      ADD_TEST_MACRO(Contracts.${project} ${CMake_TEST_CONTRACT_${project}_RUN_TEST})
+      # The external projects may take a long time to build.
+      if(DEFINED CMake_TEST_CONTRACT_${project}_TIMEOUT)
+        set(timeout ${CMake_TEST_CONTRACT_${project}_TIMEOUT})
+      elseif(CMake_TEST_CONTRACT_DEFAULT_TIMEOUT)
+        set(timeout ${CMake_TEST_CONTRACT_DEFAULT_TIMEOUT})
+      else()
+        set(timeout 21600)
+      endif()
+      set_property(TEST Contracts.${project} PROPERTY TIMEOUT "${timeout}")
     endif()
-    set_tests_properties(Contracts.${project} PROPERTIES TIMEOUT ${timeout})
   endforeach()
 
   if(TEST_CompileCommandOutput)
