@@ -3396,6 +3396,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   # sets "CMake_TEST_CONTRACT_<project>_<var>" variables to configure
   # the code below.
   foreach(project
+      PLplot
       Trilinos
       VTK
       )
