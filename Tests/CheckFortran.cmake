@@ -26,6 +26,7 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
                                -A "${CMAKE_GENERATOR_PLATFORM}"
                                -T "${CMAKE_GENERATOR_TOOLSET}"
                                ${_D_CMAKE_GENERATOR_INSTANCE}
+    TIMEOUT 60
     OUTPUT_VARIABLE output
     ERROR_VARIABLE output
     RESULT_VARIABLE result
