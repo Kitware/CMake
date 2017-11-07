@@ -124,7 +124,7 @@ public:
   // are the processes comprising an mpi program which is running in
   // parallel. The amount of memory reported may differ from the host
   // total if a host wide resource limit is applied. Such reource limits
-  // are reported to us via an applicaiton specified environment variable.
+  // are reported to us via an application specified environment variable.
   LongLong GetHostMemoryAvailable(const char* hostLimitEnvVarName = NULL);
 
   // Get total system RAM in units of KiB available to this process.

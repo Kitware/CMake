@@ -109,12 +109,12 @@ namespace @KWSYS_NAMESPACE@ {
  * object as an argument and creates an object initialized with the
  * information from the given RegularExpression object.
  *
- * The  find  member function  finds   the  first  occurence   of  the regualr
+ * The  find  member function  finds   the  first  occurrence   of  the regular
  * expression of that object in the string given to find as an argument.  Find
  * returns a boolean, and  if true,  mutates  the private  data appropriately.
  * Find sets pointers to the beginning and end of  the thing last  found, they
  * are pointers into the actual string  that was searched.   The start and end
- * member functions return indicies  into the searched string that  correspond
+ * member functions return indices  into the searched string that  correspond
  * to the beginning   and  end pointers  respectively.   The    compile member
  * function takes a char* and puts the  compiled version of the char* argument
  * into the object's private data fields.  The == and  != operators only check

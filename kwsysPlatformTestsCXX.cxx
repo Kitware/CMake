@@ -281,7 +281,7 @@ int main()
 #ifdef TEST_KWSYS_CXX_HAS_BACKTRACE
 #if defined(__PATHSCALE__) || defined(__PATHCC__) ||                          \
   (defined(__LSB_VERSION__) && (__LSB_VERSION__ < 41))
-backtrace doesnt work with this compiler or os
+backtrace does not work with this compiler or os
 #endif
 #if (defined(__GNUC__) || defined(__PGI)) && !defined(_GNU_SOURCE)
 #define _GNU_SOURCE
