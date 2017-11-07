@@ -23,7 +23,7 @@ if(NOT CMAKE_CSharp_COMPILER_ID_RUN)
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(CSharp CSFLAGS CMakeCSharpCompilerId.cs)
 
-  execute_process(COMMAND "${CMAKE_CSharp_COMPILER}" "/help" OUTPUT_VARIABLE output)
+  execute_process(COMMAND "${CMAKE_CSharp_COMPILER}" "/help /preferreduilang:en-US" OUTPUT_VARIABLE output)
   string(REPLACE "\n" ";" output "${output}")
   foreach(line ${output})
     string(TOUPPER ${line} line)
