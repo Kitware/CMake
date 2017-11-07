@@ -440,9 +440,10 @@ if(OPENGL_FOUND)
   endif()
 
   # OPENGL_LIBRARIES mirrors OpenGL::GL's logic ...
-  set(OPENGL_LIBRARIES ${OPENGL_gl_LIBRARY})
   if(TARGET OpenGL::GLX AND TARGET OpenGL::OpenGL)
     set(OPENGL_LIBRARIES ${OPENGL_opengl_LIBRARY} ${OPENGL_glx_LIBRARY})
+  else()
+    set(OPENGL_LIBRARIES ${OPENGL_gl_LIBRARY})
   endif()
   # ... and also includes GLU, if available.
   if(TARGET OpenGL::GLU)
