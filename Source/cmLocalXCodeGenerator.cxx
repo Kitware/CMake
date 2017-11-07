@@ -42,8 +42,7 @@ void cmLocalXCodeGenerator::Generate()
 {
   cmLocalGenerator::Generate();
 
-  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
-  for (auto target : targets) {
+  for (auto target : this->GetGeneratorTargets()) {
     target->HasMacOSXRpathInstallNameDir("");
   }
 }
@@ -52,8 +51,7 @@ void cmLocalXCodeGenerator::GenerateInstallRules()
 {
   cmLocalGenerator::GenerateInstallRules();
 
-  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
-  for (auto target : targets) {
+  for (auto target : this->GetGeneratorTargets()) {
     target->HasMacOSXRpathInstallNameDir("");
   }
 }
