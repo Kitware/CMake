@@ -72,6 +72,10 @@ Options
  number of jobs. This option can also be set by setting the
  environment variable ``CTEST_PARALLEL_LEVEL``.
 
+ This option can be used with the :prop_test:`PROCESSORS` test property.
+
+ See `Label and Subproject Summary`_.
+
 ``--test-load <level>``
  While running tests in parallel (e.g. with ``-j``), try not to start
  tests when they may cause the CPU load to pass above a given threshold.
@@ -252,12 +256,16 @@ Options
  label associated with the tests run.  If there are no labels on the
  tests, nothing extra is printed.
 
+ See `Label and Subproject Summary`_.
+
 ``--no-subproject-summary``
  Disable timing summary information for subprojects.
 
  This option tells CTest not to print summary information for each
  subproject associated with the tests run.  If there are no subprojects on the
  tests, nothing extra is printed.
+
+ See `Label and Subproject Summary`_.
 
 ``--build-and-test``
 See `Build and Test Mode`_.
@@ -311,6 +319,21 @@ See `Build and Test Mode`_.
  all labels associated with the test set.
 
 .. include:: OPTIONS_HELP.txt
+
+.. _`Label and Subproject Summary`:
+
+Label and Subproject Summary
+============================
+
+CTest prints timing summary information for each label and subproject
+associated with the tests run. The label time summary will not include labels
+that are mapped to subprojects.
+
+When the :prop_test:`PROCESSORS` test property is set, CTest will display a
+weighted test timing result in label and subproject summaries. The wall clock
+time for the test run will be multiplied by this property to give a better
+idea of how much cpu resource CTest allocated for the test. The time is
+reported with `sec*proc` instead of just `sec`.
 
 .. _`Build and Test Mode`:
 
@@ -749,7 +772,6 @@ Configuration settings to specify the version control tool include:
   * `CTest Script`_ variable: :variable:`CTEST_UPDATE_VERSION_ONLY`
 
 
-
 Additional configuration settings include:
 
 ``NightlyStartTime``
@@ -791,6 +813,7 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_LABELS_FOR_SUBPROJECTS`
   * :module:`CTest` module variable: ``CTEST_LABELS_FOR_SUBPROJECTS``
 
+  See `Label and Subproject Summary`_.
 
 .. _`CTest Build Step`:
 
@@ -821,6 +844,8 @@ Configuration settings include:
 
   * `CTest Script`_ variable: :variable:`CTEST_LABELS_FOR_SUBPROJECTS`
   * :module:`CTest` module variable: ``CTEST_LABELS_FOR_SUBPROJECTS``
+
+  See `Label and Subproject Summary`_.
 
 ``MakeCommand``
   Command-line to launch the software build process.
@@ -865,6 +890,7 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_LABELS_FOR_SUBPROJECTS`
   * :module:`CTest` module variable: ``CTEST_LABELS_FOR_SUBPROJECTS``
 
+  See `Label and Subproject Summary`_.
 
 ``TestLoad``
   While running tests in parallel (e.g. with ``-j``), try not to start
