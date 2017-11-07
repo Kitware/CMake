@@ -617,6 +617,11 @@ public:
   cmGlobalGenerator* GetGlobalGenerator() const;
 
   /**
+   * Get all the test names this makefile knows about
+   */
+  void GetTestNames(std::vector<std::string>& testNames);
+
+  /**
    * Get all the source files this makefile knows about
    */
   const std::vector<cmSourceFile*>& GetSourceFiles() const
