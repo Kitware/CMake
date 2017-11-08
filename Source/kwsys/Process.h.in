@@ -421,7 +421,7 @@ enum kwsysProcess_Pipes_e
 
 /**
  * Block until the child process terminates or the given timeout
- * expires.  If no process is running, returns immediatly.  The
+ * expires.  If no process is running, returns immediately.  The
  * argument is:
  *
  *  timeout = Specifies the maximum time this call may block.  Upon

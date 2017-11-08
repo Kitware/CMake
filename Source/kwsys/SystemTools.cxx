@@ -1691,7 +1691,7 @@ bool SystemTools::StringEndsWith(const std::string& str1, const char* str2)
     : false;
 }
 
-// Returns a pointer to the last occurence of str2 in str1
+// Returns a pointer to the last occurrence of str2 in str1
 const char* SystemTools::FindLastString(const char* str1, const char* str2)
 {
   if (!str1 || !str2) {
