@@ -7,4 +7,10 @@ get_property: --><--
 get_target_property: -->(.*)/Tests/RunCMake/get_property<--
 get_property: -->(.*)/Tests/RunCMake/get_property<--
 get_target_property: -->(.*)/Tests/RunCMake/get_property/target_properties-build<--
-get_property: -->(.*)/Tests/RunCMake/get_property/target_properties-build<--$
+get_property: -->(.*)/Tests/RunCMake/get_property/target_properties-build<--
+get_target_property: -->FALSE<--
+get_property: -->FALSE<--
+get_target_property: -->FALSE<--
+get_property: -->FALSE<--
+get_target_property: -->TRUE<--
+get_property: -->TRUE<--$
