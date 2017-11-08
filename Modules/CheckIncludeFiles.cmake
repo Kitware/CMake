@@ -12,12 +12,15 @@
 #
 #   ::
 #
-#     CHECK_INCLUDE_FILES("<includes>" <variable>)
+#     CHECK_INCLUDE_FILES("<includes>" <variable> [LANGUAGE <language>])
 #
 #   Check if the given ``<includes>`` list may be included together
 #   in a ``C`` source file and store the result in an internal cache
 #   entry named ``<variable>``.  Specify the ``<includes>`` argument
 #   as a :ref:`;-list <CMake Language Lists>` of header file names.
+#
+# If LANGUAGE is set, the specified compiler will be used to perform the
+# check. Acceptable values are C and CXX.
 #
 # The following variables may be set before calling this macro to modify
 # the way the check is run:
@@ -37,6 +40,29 @@
 macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
   if(NOT DEFINED "${VARIABLE}")
     set(CMAKE_CONFIGURABLE_FILE_CONTENT "/* */\n")
+
+    if("x${ARGN}" STREQUAL "x")
+       if(CMAKE_C_COMPILER_LOADED)
+         set(_lang C)
+       elseif(CMAKE_CXX_COMPILER_LOADED)
+         set(_lang CXX)
+       else()
+         message(FATAL_ERROR "CHECK_INCLUDE_FILES needs either C or CXX language enabled")
+       endif()
+    elseif("x${ARGN}" MATCHES "^xLANGUAGE;([a-zA-Z]+)$")
+       set(_lang "${CMAKE_MATCH_1}")
+    else()
+       message(FATAL_ERROR "Unknown arguments:\n  ${ARGN}\n")
+    endif()
+
+    if(_lang STREQUAL "C")
+      set(src ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckIncludeFiles/${var}.c)
+    elseif(_lang STREQUAL "CXX")
+      set(src ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckIncludeFiles/${var}.cpp)
+    else()
+      message(FATAL_ERROR "Unknown language:\n  ${_lang}\nSupported languages: C, CXX.\n")
+    endif()
+
     if(CMAKE_REQUIRED_INCLUDES)
       set(CHECK_INCLUDE_FILES_INCLUDE_DIRS "-DINCLUDE_DIRECTORIES=${CMAKE_REQUIRED_INCLUDES}")
     else()
@@ -51,7 +77,7 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
     string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT
       "\n\nint main(void){return 0;}\n")
     configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
-      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c" @ONLY)
+      "${src}" @ONLY)
 
     set(_INCLUDE ${INCLUDE}) # remove empty elements
     if("${_INCLUDE}" MATCHES "^([^;]+);.+;([^;]+)$")
@@ -68,7 +94,7 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
     endif()
     try_compile(${VARIABLE}
       ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c
+      ${src}
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILES_FLAGS}
