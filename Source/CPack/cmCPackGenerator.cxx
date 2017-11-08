@@ -12,6 +12,7 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmCryptoHash.h"
+#include "cmFSPermissions.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -201,6 +202,29 @@ int cmCPackGenerator::InstallProject()
     cmSystemTools::PutEnv("DESTDIR=");
   }
 
+  // prepare default created directory permissions
+  mode_t default_dir_mode_v = 0;
+  mode_t* default_dir_mode = nullptr;
+  const char* default_dir_install_permissions =
+    this->GetOption("CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
+  if (default_dir_install_permissions && *default_dir_install_permissions) {
+    std::vector<std::string> items;
+    cmSystemTools::ExpandListArgument(default_dir_install_permissions, items);
+    for (const auto& arg : items) {
+      if (!cmFSPermissions::stringToModeT(arg, default_dir_mode_v)) {
+        cmCPackLogger(cmCPackLog::LOG_ERROR, "Invalid permission value '"
+                        << arg
+                        << "'."
+                           " CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS "
+                           "value is invalid."
+                        << std::endl);
+        return 0;
+      }
+    }
+
+    default_dir_mode = &default_dir_mode_v;
+  }
+
   // If the CPackConfig file sets CPACK_INSTALL_COMMANDS then run them
   // as listed
   if (!this->InstallProjectViaInstallCommands(setDestDir,
@@ -218,15 +242,15 @@ int cmCPackGenerator::InstallProject()
   // If the CPackConfig file sets CPACK_INSTALLED_DIRECTORIES
   // then glob it and copy it to CPACK_TEMPORARY_DIRECTORY
   // This is used in Source packaging
-  if (!this->InstallProjectViaInstalledDirectories(setDestDir,
-                                                   tempInstallDirectory)) {
+  if (!this->InstallProjectViaInstalledDirectories(
+        setDestDir, tempInstallDirectory, default_dir_mode)) {
     return 0;
   }
 
   // If the project is a CMAKE project then run pre-install
   // and then read the cmake_install script to run it
-  if (!this->InstallProjectViaInstallCMakeProjects(setDestDir,
-                                                   bareTempInstallDirectory)) {
+  if (!this->InstallProjectViaInstallCMakeProjects(
+        setDestDir, bareTempInstallDirectory, default_dir_mode)) {
     return 0;
   }
 
@@ -274,7 +298,8 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
 }
 
 int cmCPackGenerator::InstallProjectViaInstalledDirectories(
-  bool setDestDir, const std::string& tempInstallDirectory)
+  bool setDestDir, const std::string& tempInstallDirectory,
+  const mode_t* default_dir_mode)
 {
   (void)setDestDir;
   (void)tempInstallDirectory;
@@ -385,7 +410,8 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           // make sure directory exists for symlink
           std::string destDir =
             cmSystemTools::GetFilenamePath(symlinked.second);
-          if (!destDir.empty() && !cmSystemTools::MakeDirectory(destDir)) {
+          if (!destDir.empty() &&
+              !cmSystemTools::MakeDirectory(destDir, default_dir_mode)) {
             cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot create dir: "
                             << destDir << "\nTrying to create symlink: "
                             << symlinked.second << "--> " << symlinked.first
@@ -464,7 +490,8 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
 }
 
 int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
-  bool setDestDir, const std::string& baseTempInstallDirectory)
+  bool setDestDir, const std::string& baseTempInstallDirectory,
+  const mode_t* default_dir_mode)
 {
   const char* cmakeProjects = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
   const char* cmakeGenerator = this->GetOption("CPACK_CMAKE_GENERATOR");
@@ -631,6 +658,13 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           }
         }
 
+        const char* default_dir_inst_permissions =
+          this->GetOption("CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
+        if (default_dir_inst_permissions && *default_dir_inst_permissions) {
+          mf.AddDefinition("CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS",
+                           default_dir_inst_permissions);
+        }
+
         if (!setDestDir) {
           tempInstallDirectory += this->GetPackagingInstallPrefix();
         }
@@ -690,7 +724,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           cmCPackLogger(cmCPackLog::LOG_DEBUG, "- Creating directory: '"
                           << dir << "'" << std::endl);
 
-          if (!cmsys::SystemTools::MakeDirectory(dir.c_str())) {
+          if (!cmsys::SystemTools::MakeDirectory(dir, default_dir_mode)) {
             cmCPackLogger(
               cmCPackLog::LOG_ERROR,
               "Problem creating temporary directory: " << dir << std::endl);
@@ -700,8 +734,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           mf.AddDefinition("CMAKE_INSTALL_PREFIX",
                            tempInstallDirectory.c_str());
 
-          if (!cmsys::SystemTools::MakeDirectory(
-                tempInstallDirectory.c_str())) {
+          if (!cmsys::SystemTools::MakeDirectory(tempInstallDirectory,
+                                                 default_dir_mode)) {
             cmCPackLogger(cmCPackLog::LOG_ERROR,
                           "Problem creating temporary directory: "
                             << tempInstallDirectory << std::endl);
