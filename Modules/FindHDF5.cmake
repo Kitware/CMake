@@ -214,7 +214,7 @@ function(_HDF5_test_regular_compiler_C success version is_parallel)
     )
     set(${version} ${CMAKE_MATCH_1})
     if(CMAKE_MATCH_3)
-      set(${version} ${HDF5_CXX_VERSION}.${CMAKE_MATCH_3})
+      set(${version} ${HDF5_C_VERSION}.${CMAKE_MATCH_3})
     endif()
     set(${version} ${${version}} PARENT_SCOPE)
 
