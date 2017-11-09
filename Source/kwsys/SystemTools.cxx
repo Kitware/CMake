@@ -27,6 +27,7 @@
 #include <iostream>
 #include <set>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 // Work-around CMake dependency scanning limitation.  This must
@@ -3372,7 +3373,7 @@ std::string SystemTools::RelativePath(const std::string& local,
 }
 
 #ifdef _WIN32
-static std::string GetCasePathName(std::string const& pathIn)
+static std::pair<std::string, bool> GetCasePathName(std::string const& pathIn)
 {
   std::string casePath;
   std::vector<std::string> path_components;
@@ -3381,7 +3382,7 @@ static std::string GetCasePathName(std::string const& pathIn)
   {
     // Relative paths cannot be converted.
     casePath = pathIn;
-    return casePath;
+    return std::make_pair(casePath, false);
   }
 
   // Start with root component.
@@ -3433,7 +3434,7 @@ static std::string GetCasePathName(std::string const& pathIn)
 
     casePath += path_components[idx];
   }
-  return casePath;
+  return std::make_pair(casePath, converting);
 }
 #endif
 
@@ -3448,12 +3449,14 @@ std::string SystemTools::GetActualCaseForPath(const std::string& p)
   if (i != SystemTools::PathCaseMap->end()) {
     return i->second;
   }
-  std::string casePath = GetCasePathName(p);
-  if (casePath.size() > MAX_PATH) {
-    return casePath;
+  std::pair<std::string, bool> casePath = GetCasePathName(p);
+  if (casePath.first.size() > MAX_PATH) {
+    return casePath.first;
   }
-  (*SystemTools::PathCaseMap)[p] = casePath;
-  return casePath;
+  if (casePath.second) {
+    (*SystemTools::PathCaseMap)[p] = casePath.first;
+  }
+  return casePath.first;
 #endif
 }
 
