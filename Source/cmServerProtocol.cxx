@@ -712,6 +712,7 @@ static Json::Value DumpCTestTarget(cmGeneratorTarget* target,
   ttl.append("OBJECT_LIBRARY");
   ttl.append("UTILITY");
   ttl.append("INTERFACE_LIBRARY");
+  ttl.append("GLOBAL_TARGET");
 
   if (!hasString(ttl, typeName) || target->IsImported()) {
     return Json::Value();
