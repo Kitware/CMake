@@ -53,7 +53,7 @@
 #  Path to the EGL include directory.
 # ``OPENGL_LIBRARIES``
 #  Paths to the OpenGL library, windowing system libraries, and GLU libraries.
-#  On Linux, this assumes glX and is never correct for EGL-based targets.
+#  On Linux, this assumes GLX and is never correct for EGL-based targets.
 #  Clients are encouraged to use the ``OpenGL::*`` import targets instead.
 #
 # Cache variables
@@ -80,12 +80,14 @@
 # context libraries from OpenGL itself; OpenGL lives in "libOpenGL", and
 # contexts are defined in "libGLX" or "libEGL".  GLVND is currently the only way
 # to get OpenGL 3+ functionality via EGL in a manner portable across vendors.
+# Projects may use GLVND explicitly with target ``OpenGL::OpenGL`` and either
+# ``OpenGL::GLX`` or ``OpenGL::EGL``.
 #
-# On Linux systems FindOpenGL defaults to using GLVND if available.  Users can
-# utilize GLVND explicitly with targets ``OpenGL::OpenGL``, ``OpenGL::GLX``, and
-# ``OpenGL::EGL``.  Additionally, when GLVND is available the ``OpenGL::GL``
-# target is equivalent to ``OpenGL::OpenGL OpenGL::GLX``.  When the system is
-# not GLVND-based, ``OpenGL::GL`` expands to libGL as it has historically done.
+# Projects may use the ``OpenGL::GL`` target (or ``OPENGL_LIBRARIES`` variable)
+# to use legacy GL.  By default, these will use the legacy libGL library file.
+# If ``OPENGL_gl_LIBRARY`` is empty or not found and GLVND is available, the
+# ``OpenGL::GL`` target will use GLVND ``OpenGL::OpenGL`` and ``OpenGL::GLX``
+# (and the ``OPENGL_LIBRARIES`` variable will use the corresponding libraries).
 # Thus, for non-EGL-based Linux targets, the ``OpenGL::GL`` target is most
 # portable.
 #
@@ -360,18 +362,8 @@ if(OPENGL_FOUND)
                           "${OPENGL_GLX_INCLUDE_DIR}")
   endif()
 
-  if(TARGET OpenGL::OpenGL AND TARGET OpenGL::GLX AND NOT TARGET OpenGL::GL)
-    # if GLVND with GLX is available, make ::GL a synonym for 'OpenGL::OpenGL
-    # OpenGL::GLX'.
-    add_library(OpenGL::GL INTERFACE IMPORTED)
-    set_target_properties(OpenGL::GL PROPERTIES INTERFACE_LINK_LIBRARIES
-                          OpenGL::OpenGL)
-    set_property(TARGET OpenGL::GL APPEND PROPERTY INTERFACE_LINK_LIBRARIES
-                 OpenGL::GLX)
-    set_target_properties(OpenGL::GL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                          "${OPENGL_INCLUDE_DIR}")
-
-  elseif(NOT TARGET OpenGL::GL)
+  if(OPENGL_gl_LIBRARY AND NOT TARGET OpenGL::GL)
+    # A legacy GL library is available, so use it for the legacy GL target.
     if(IS_ABSOLUTE "${OPENGL_gl_LIBRARY}")
       add_library(OpenGL::GL UNKNOWN IMPORTED)
       if(OPENGL_gl_LIBRARY MATCHES "/([^/]+)\\.framework$")
@@ -392,6 +384,16 @@ if(OPENGL_FOUND)
     endif()
     set_target_properties(OpenGL::GL PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${OPENGL_INCLUDE_DIR}")
+  elseif(NOT TARGET OpenGL::GL AND TARGET OpenGL::OpenGL AND TARGET OpenGL::GLX)
+    # A legacy GL library is not available, but we can provide the legacy GL
+    # target using GLVND OpenGL+GLX.
+    add_library(OpenGL::GL INTERFACE IMPORTED)
+    set_target_properties(OpenGL::GL PROPERTIES INTERFACE_LINK_LIBRARIES
+                          OpenGL::OpenGL)
+    set_property(TARGET OpenGL::GL APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+                 OpenGL::GLX)
+    set_target_properties(OpenGL::GL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                          "${OPENGL_INCLUDE_DIR}")
   endif()
 
   # ::EGL is a GLVND library, and thus Linux-only: we don't bother checking
@@ -440,10 +442,12 @@ if(OPENGL_FOUND)
   endif()
 
   # OPENGL_LIBRARIES mirrors OpenGL::GL's logic ...
-  if(TARGET OpenGL::GLX AND TARGET OpenGL::OpenGL)
+  if(OPENGL_gl_LIBRARY)
+    set(OPENGL_LIBRARIES ${OPENGL_gl_LIBRARY})
+  elseif(TARGET OpenGL::OpenGL AND TARGET OpenGL::GLX)
     set(OPENGL_LIBRARIES ${OPENGL_opengl_LIBRARY} ${OPENGL_glx_LIBRARY})
   else()
-    set(OPENGL_LIBRARIES ${OPENGL_gl_LIBRARY})
+    set(OPENGL_LIBRARIES "")
   endif()
   # ... and also includes GLU, if available.
   if(TARGET OpenGL::GLU)
