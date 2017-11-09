@@ -1576,9 +1576,11 @@ std::ostream& operator<<(std::ostream& stream,
   stream.flags(flags);
   return stream;
 }
+
 static bool RunCommand(const char* comment, std::vector<std::string>& command,
                        bool verbose, NumberFormat exitFormat,
-                       int* retCodeOut = nullptr)
+                       int* retCodeOut = nullptr,
+                       bool (*retCodeOkay)(int) = nullptr)
 {
   if (verbose) {
     std::cout << comment << ":\n";
@@ -1588,18 +1590,17 @@ static bool RunCommand(const char* comment, std::vector<std::string>& command,
   int retCode = 0;
   bool commandResult = cmSystemTools::RunSingleCommand(
     command, &output, &output, &retCode, nullptr, cmSystemTools::OUTPUT_NONE);
-  bool returnValue;
+  bool const retCodeSuccess =
+    retCode == 0 || (retCodeOkay && retCodeOkay(retCode));
+  bool const success = commandResult && retCodeSuccess;
   if (retCodeOut) {
-    if (!commandResult) {
-      *retCodeOut = (retCode == 0) ? -1 : retCode;
-    } else {
+    if (commandResult || !retCodeOkay) {
       *retCodeOut = retCode;
+    } else {
+      *retCodeOut = -1;
     }
-    returnValue = true; // always return true if retCodeOut is requested
-  } else {
-    returnValue = commandResult && (retCode == 0);
   }
-  if (!commandResult || retCode) {
+  if (!success) {
     std::cout << comment << ": command \"" << cmJoin(command, " ")
               << "\" failed (exit code "
               << NumberFormatter(exitFormat, retCode)
@@ -1612,7 +1613,7 @@ static bool RunCommand(const char* comment, std::vector<std::string>& command,
       std::cout << output;
     }
   }
-  return returnValue;
+  return success;
 }
 
 bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
@@ -1710,6 +1711,13 @@ int cmVSLink::Link()
   return LinkNonIncremental();
 }
 
+static bool mtRetIsUpdate(int mtRet)
+{
+  // 'mt /notify_update' returns a special value (differing between
+  // Windows and POSIX hosts) when it updated the manifest file.
+  return mtRet == 0x41020001 || mtRet == 0xbb;
+}
+
 int cmVSLink::LinkIncremental()
 {
   // This follows the steps listed here:
@@ -1781,9 +1789,9 @@ int cmVSLink::LinkIncremental()
   // Run the manifest tool to create the final manifest.
   int mtRet = this->RunMT("/out:" + this->ManifestFile, true);
 
-  // If mt returns 1090650113 (or 187 on a posix host) then it updated the
-  // manifest file so we need to embed it again.  Otherwise we are done.
-  if (mtRet != 1090650113 && mtRet != 187) {
+  // If mt returns a special value then it updated the manifest file so
+  // we need to embed it again.  Otherwise we are done.
+  if (!mtRetIsUpdate(mtRet)) {
     return mtRet;
   }
 
@@ -1836,7 +1844,8 @@ int cmVSLink::RunMT(std::string const& out, bool notify)
     mtCommand.push_back("/notify_update");
   }
   int mtRet = 0;
-  if (!RunCommand("MT", mtCommand, this->Verbose, FORMAT_HEX, &mtRet)) {
+  if (!RunCommand("MT", mtCommand, this->Verbose, FORMAT_HEX, &mtRet,
+                  mtRetIsUpdate)) {
     return -1;
   }
   return mtRet;
