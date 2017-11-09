@@ -216,6 +216,8 @@ set(SRCS
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmFortranParserImpl.cxx
+  cmFSPermissions.cxx
+  cmFSPermissions.h
   cmGeneratedFileStream.cxx
   cmGeneratorExpressionContext.cxx
   cmGeneratorExpressionContext.h

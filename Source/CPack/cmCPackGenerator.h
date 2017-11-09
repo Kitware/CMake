@@ -12,6 +12,7 @@
 
 #include "cmCPackComponentGroup.h"
 #include "cmSystemTools.h"
+#include "cm_sys_stat.h"
 
 class cmCPackLog;
 class cmInstalledFile;
@@ -168,9 +169,11 @@ protected:
   virtual int InstallProjectViaInstallScript(
     bool setDestDir, const std::string& tempInstallDirectory);
   virtual int InstallProjectViaInstalledDirectories(
-    bool setDestDir, const std::string& tempInstallDirectory);
+    bool setDestDir, const std::string& tempInstallDirectory,
+    const mode_t* default_dir_mode);
   virtual int InstallProjectViaInstallCMakeProjects(
-    bool setDestDir, const std::string& tempInstallDirectory);
+    bool setDestDir, const std::string& tempInstallDirectory,
+    const mode_t* default_dir_mode);
 
   /**
    * The various level of support of

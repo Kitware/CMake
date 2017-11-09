@@ -487,6 +487,20 @@ void cmLocalGenerator::GenerateInstallRules()
     /* clang-format on */
   }
 
+  // Write default directory permissions.
+  if (const char* defaultDirPermissions = this->Makefile->GetDefinition(
+        "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS")) {
+    /* clang-format off */
+    fout <<
+      "# Set default install directory permissions.\n"
+      "if(NOT DEFINED CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS)\n"
+      "  set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS \""
+         << defaultDirPermissions << "\")\n"
+      "endif()\n"
+      "\n";
+    /* clang-format on */
+  }
+
   // Ask each install generator to write its code.
   std::vector<cmInstallGenerator*> const& installers =
     this->Makefile->GetInstallGenerators();
