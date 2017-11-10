@@ -104,8 +104,6 @@ static const char* cmDocumentationOptions[][2] = {
   { "--test-timeout", "The time limit in seconds, internal use only." },
   { "--test-load", "CPU load threshold for starting new parallel tests." },
   { "--tomorrow-tag", "Nightly or experimental starts with next day tag." },
-  { "--ctest-config", "The configuration file used to initialize CTest state "
-                      "when submitting dashboards." },
   { "--overwrite", "Overwrite CTest configuration option." },
   { "--extra-submit <file>[;<file>]", "Submit extra files to the dashboard." },
   { "--force-new-ctest-process",

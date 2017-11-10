@@ -487,7 +487,6 @@ private:
   /** Map of configuration properties */
   typedef std::map<std::string, std::string> CTestConfigurationMap;
 
-  std::string CTestConfigFile;
   // TODO: The ctest configuration should be a hierarchy of
   // configuration option sources: command-line, script, ini file.
   // Then the ini file can get re-loaded whenever it changes without
