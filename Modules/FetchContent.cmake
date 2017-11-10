@@ -754,7 +754,9 @@ function(__FetchContent_directPopulate contentName)
       list(APPEND generatorOpts "-T${CMAKE_GENERATOR_TOOLSET}")
     endif()
 
-    list(APPEND generatorOpts "-DCMAKE_MAKE_PROGRAM:FILE=${CMAKE_MAKE_PROGRAM}")
+    if(CMAKE_MAKE_PROGRAM)
+      list(APPEND generatorOpts "-DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_MAKE_PROGRAM}")
+    endif()
 
   else()
     # Likely we've been invoked via CMake's script mode where no
