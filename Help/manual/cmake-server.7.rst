@@ -458,6 +458,9 @@ Each project object can have the following keys:
 
 "name"
   contains the (sub-)projects name.
+"minimumCMakeVersion"
+  contains the minimum cmake version allowed for this project, null if the
+  project doesn't specify one.
 "hasInstallRule"
   true if the project contains any install rules, false otherwise.
 "sourceDirectory"
