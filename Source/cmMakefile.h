@@ -183,12 +183,19 @@ public:
                           const std::vector<std::string>& srcs,
                           bool excludeFromAll = false);
 
+  /** Where the target originated from. */
+  enum class TargetOrigin
+  {
+    Project,
+    Generator
+  };
+
   /**
    * Add a utility to the build.  A utiltity target is a command that
    * is run every time the target is built.
    */
   cmTarget* AddUtilityCommand(const std::string& utilityName,
-                              bool excludeFromAll,
+                              TargetOrigin origin, bool excludeFromAll,
                               const std::vector<std::string>& depends,
                               const char* workingDirectory,
                               const char* command, const char* arg1 = nullptr,
@@ -196,13 +203,13 @@ public:
                               const char* arg3 = nullptr,
                               const char* arg4 = nullptr);
   cmTarget* AddUtilityCommand(
-    const std::string& utilityName, bool excludeFromAll,
+    const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
     const char* workingDirectory, const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
     const char* comment = nullptr, bool uses_terminal = false,
     bool command_expand_lists = false);
   cmTarget* AddUtilityCommand(
-    const std::string& utilityName, bool excludeFromAll,
+    const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
     const char* workingDirectory, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,

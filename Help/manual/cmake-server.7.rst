@@ -486,6 +486,8 @@ Each target object can have the following keys:
   contains the current source directory.
 "buildDirectory"
   contains the current build directory.
+"isGeneratorProvided"
+  true if the target is auto-created by a generator, false otherwise
 "hasInstallRule"
   true if the target contains any install rules, false otherwise.
 "installPaths"

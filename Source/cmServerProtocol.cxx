@@ -942,6 +942,8 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
 
   Json::Value result = Json::objectValue;
   result[kNAME_KEY] = target->GetName();
+  result[kIS_GENERATOR_PROVIDED_KEY] =
+    target->Target->GetIsGeneratorProvided();
   result[kTYPE_KEY] = typeName;
   result[kSOURCE_DIRECTORY_KEY] = lg->GetCurrentSourceDirectory();
   result[kBUILD_DIRECTORY_KEY] = lg->GetCurrentBinaryDirectory();

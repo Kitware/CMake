@@ -176,6 +176,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
                    Visibility vis, cmMakefile* mf)
 {
   assert(mf);
+  this->IsGeneratorProvided = false;
   this->Name = name;
   this->TargetTypeValue = type;
   this->Makefile = mf;

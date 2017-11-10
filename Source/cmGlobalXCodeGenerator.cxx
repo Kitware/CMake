@@ -440,9 +440,9 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   // Add ALL_BUILD
   const char* no_working_directory = nullptr;
   std::vector<std::string> no_depends;
-  cmTarget* allbuild =
-    mf->AddUtilityCommand("ALL_BUILD", true, no_depends, no_working_directory,
-                          "echo", "Build all projects");
+  cmTarget* allbuild = mf->AddUtilityCommand(
+    "ALL_BUILD", cmMakefile::TargetOrigin::Generator, true, no_depends,
+    no_working_directory, "echo", "Build all projects");
 
   cmGeneratorTarget* allBuildGt = new cmGeneratorTarget(allbuild, root);
   root->AddGeneratorTarget(allBuildGt);
@@ -464,9 +464,9 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
     std::string file =
       this->ConvertToRelativeForMake(this->CurrentReRunCMakeMakefile.c_str());
     cmSystemTools::ReplaceString(file, "\\ ", " ");
-    cmTarget* check =
-      mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, true, no_depends,
-                            no_working_directory, "make", "-f", file.c_str());
+    cmTarget* check = mf->AddUtilityCommand(
+      CMAKE_CHECK_BUILD_SYSTEM_TARGET, cmMakefile::TargetOrigin::Generator,
+      true, no_depends, no_working_directory, "make", "-f", file.c_str());
 
     cmGeneratorTarget* checkGt = new cmGeneratorTarget(check, root);
     root->AddGeneratorTarget(checkGt);

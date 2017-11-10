@@ -209,9 +209,9 @@ bool cmAddCustomTargetCommand::InitialPass(
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
   cmTarget* target = this->Makefile->AddUtilityCommand(
-    targetName, excludeFromAll, working_directory.c_str(), byproducts, depends,
-    commandLines, escapeOldStyle, comment, uses_terminal,
-    command_expand_lists);
+    targetName, cmMakefile::TargetOrigin::Project, excludeFromAll,
+    working_directory.c_str(), byproducts, depends, commandLines,
+    escapeOldStyle, comment, uses_terminal, command_expand_lists);
 
   // Add additional user-specified source files to the target.
   target->AddSources(sources);

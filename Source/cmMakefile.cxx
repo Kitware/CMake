@@ -1007,7 +1007,7 @@ void cmMakefile::AddCustomCommandOldStyle(
 }
 
 cmTarget* cmMakefile::AddUtilityCommand(
-  const std::string& utilityName, bool excludeFromAll,
+  const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
   const std::vector<std::string>& depends, const char* workingDirectory,
   const char* command, const char* arg1, const char* arg2, const char* arg3,
   const char* arg4)
@@ -1031,25 +1031,25 @@ cmTarget* cmMakefile::AddUtilityCommand(
   commandLines.push_back(commandLine);
 
   // Call the real signature of this method.
-  return this->AddUtilityCommand(utilityName, excludeFromAll, workingDirectory,
-                                 depends, commandLines);
+  return this->AddUtilityCommand(utilityName, origin, excludeFromAll,
+                                 workingDirectory, depends, commandLines);
 }
 
 cmTarget* cmMakefile::AddUtilityCommand(
-  const std::string& utilityName, bool excludeFromAll,
+  const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
   const char* workingDirectory, const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, bool escapeOldStyle,
   const char* comment, bool uses_terminal, bool command_expand_lists)
 {
   std::vector<std::string> no_byproducts;
-  return this->AddUtilityCommand(utilityName, excludeFromAll, workingDirectory,
-                                 no_byproducts, depends, commandLines,
-                                 escapeOldStyle, comment, uses_terminal,
-                                 command_expand_lists);
+  return this->AddUtilityCommand(utilityName, origin, excludeFromAll,
+                                 workingDirectory, no_byproducts, depends,
+                                 commandLines, escapeOldStyle, comment,
+                                 uses_terminal, command_expand_lists);
 }
 
 cmTarget* cmMakefile::AddUtilityCommand(
-  const std::string& utilityName, bool excludeFromAll,
+  const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
   const char* workingDirectory, const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, bool escapeOldStyle,
@@ -1057,6 +1057,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
 {
   // Create a target instance for this utility.
   cmTarget* target = this->AddNewTarget(cmStateEnums::UTILITY, utilityName);
+  target->SetIsGeneratorProvided(origin == TargetOrigin::Generator);
   if (excludeFromAll) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
