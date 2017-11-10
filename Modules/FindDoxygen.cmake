@@ -832,7 +832,11 @@ doxygen_add_docs() for target ${targetName}")
         # and Lucent Bell Labs. The other options in this section have no
         # effect if this option is set to NO.
         # Doxygen's default value is: NO.
-        set(DOXYGEN_HAVE_DOT ${DOXYGEN_DOT_FOUND})
+        if(Doxygen_dot_FOUND)
+          set(DOXYGEN_HAVE_DOT "YES")
+        else()
+          set(DOXYGEN_HAVE_DOT "NO")
+        endif()
     endif()
 
     if(NOT DEFINED DOXYGEN_DOT_MULTI_TARGETS)
