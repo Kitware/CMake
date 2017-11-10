@@ -1595,7 +1595,7 @@ static bool RunCommand(const char* comment, std::vector<std::string>& command,
     retCode == 0 || (retCodeOkay && retCodeOkay(retCode));
   bool const success = commandResult && retCodeSuccess;
   if (retCodeOut) {
-    if (commandResult || !retCodeOkay) {
+    if (commandResult || !retCodeSuccess) {
       *retCodeOut = retCode;
     } else {
       *retCodeOut = -1;
