@@ -338,7 +338,7 @@ function(cpack_encode_variables)
         set(value "${${var}}")
       endif()
 
-      string(APPEND commands "\nSET(${var} \"${value}\")")
+      string(APPEND commands "\nset(${var} \"${value}\")")
     endif()
   endforeach()
 
