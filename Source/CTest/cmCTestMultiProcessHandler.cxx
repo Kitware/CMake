@@ -326,10 +326,22 @@ void cmCTestMultiProcessHandler::StartNextTests()
   }
 
   if (allTestsFailedTestLoadCheck) {
+    // Find out whether there are any non RUN_SERIAL tests left, so that the
+    // correct warning may be displayed.
+    bool onlyRunSerialTestsLeft = true;
+    for (auto const& test : copy) {
+      if (!this->Properties[test]->RunSerial) {
+        onlyRunSerialTestsLeft = false;
+      }
+    }
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***** WAITING, ");
+
     if (this->SerialTestRunning) {
       cmCTestLog(this->CTest, HANDLER_OUTPUT,
                  "Waiting for RUN_SERIAL test to finish.");
+    } else if (onlyRunSerialTestsLeft) {
+      cmCTestLog(this->CTest, HANDLER_OUTPUT,
+                 "Only RUN_SERIAL tests remain, awaiting available slot.");
     } else {
       /* clang-format off */
       cmCTestLog(this->CTest, HANDLER_OUTPUT,
