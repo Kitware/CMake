@@ -407,11 +407,14 @@ if(BUILD_TESTING)
 
   list(APPEND TEST_BUILD_DIRS ${CMake_TEST_INSTALL_PREFIX})
 
-  if(NOT QT4_FOUND)
+  if(NOT DEFINED CMake_TEST_Qt4)
+    set(CMake_TEST_Qt4 1)
+  endif()
+  if(CMake_TEST_Qt4 AND NOT QT4_FOUND)
     find_package(Qt4 QUIET)
   endif()
 
-  if(QT4_FOUND)
+  if(CMake_TEST_Qt4 AND QT4_FOUND)
     # test whether the Qt4 which has been found works, on some machines
     # which run nightly builds there were errors like "wrong file format"
     # for libQtCore.so. So first check it works, and only if it does add
@@ -1253,8 +1256,13 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     set(QtAutogen_BUILD_OPTIONS -DCMAKE_BUILD_TYPE=$<CONFIGURATION>)
   endif()
 
-  find_package(Qt5Widgets QUIET NO_MODULE)
-  if(Qt5Widgets_FOUND)
+  if(NOT DEFINED CMake_TEST_Qt5)
+    set(CMake_TEST_Qt5 1)
+  endif()
+  if(CMake_TEST_Qt5)
+    find_package(Qt5Widgets QUIET NO_MODULE)
+  endif()
+  if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
     add_test(NAME Qt5Autogen COMMAND ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/QtAutogen"
