@@ -3242,9 +3242,9 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
   }
   this->WriteXCodePBXProj(fout, root, generators);
 
-  // Since the lowest available Xcode version for testing was 7.0,
+  // Since the lowest available Xcode version for testing was 6.4,
   // I'm setting this as a limit then
-  if (this->XcodeVersion >= 70) {
+  if (this->XcodeVersion >= 64) {
     if (root->GetMakefile()->GetCMakeInstance()->GetIsInTryCompile() ||
         root->GetMakefile()->IsOn("CMAKE_XCODE_GENERATE_SCHEME")) {
       this->OutputXCodeSharedSchemes(xcodeDir);
