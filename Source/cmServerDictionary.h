@@ -91,7 +91,6 @@ static const std::string kWATCHED_DIRECTORIES_KEY = "watchedDirectories";
 static const std::string kWATCHED_FILES_KEY = "watchedFiles";
 static const std::string kHAS_INSTALL_RULE = "hasInstallRule";
 static const std::string kINSTALL_PATHS = "installPaths";
-static const std::string kHAS_ENABLED_TESTS = "hasEnabledTests";
 static const std::string kCTEST_NAME = "ctestName";
 static const std::string kCTEST_COMMAND = "ctestCommand";
 static const std::string kCTEST_INFO = "ctestInfo";

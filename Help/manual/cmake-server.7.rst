@@ -656,25 +656,8 @@ Each project object can have the following keys:
 
 "name"
   contains the (sub-)projects name.
-"targets"
-  contains a list of build system target objects.
-
-Target objects define individual build targets for a certain configuration.
-
-Each target object can have the following keys:
-
-"name"
-  contains the name of the target.
-"type"
-  defines the type of build of the target. Possible values are
-  "STATIC_LIBRARY", "MODULE_LIBRARY", "SHARED_LIBRARY", "OBJECT_LIBRARY",
-  "EXECUTABLE", "UTILITY" and "INTERFACE_LIBRARY".
-"fullName"
-  contains the full name of the build result (incl. extensions, etc.).
-"hasEnabledTests"
-  true if testing is enabled for this target.
 "ctestInfo"
-  contains a list of test objects for this target.
+  contains a list of test objects.
 
 Each test object can have the following keys:
 
