@@ -179,13 +179,6 @@ else()
     /opt/graphics/OpenGL/include /usr/X11R6/include
   )
 
-  find_library(OPENGL_gl_LIBRARY
-    NAMES GL MesaGL
-    PATHS /opt/graphics/OpenGL/lib
-          /usr/openwin/lib
-          /usr/shlib /usr/X11R6/lib
-          ${_OPENGL_LIB_PATH}
-  )
   # Search for the GLVND libraries.  We do this regardless of COMPONENTS; we'll
   # take into account the COMPONENTS logic later.
   find_library(OPENGL_opengl_LIBRARY
@@ -211,6 +204,14 @@ else()
           /opt/graphics/OpenGL/lib
           /usr/openwin/lib
           /usr/shlib /usr/X11R6/lib
+  )
+
+  find_library(OPENGL_gl_LIBRARY
+    NAMES GL MesaGL
+    PATHS /opt/graphics/OpenGL/lib
+          /usr/openwin/lib
+          /usr/shlib /usr/X11R6/lib
+          ${_OPENGL_LIB_PATH}
   )
 
   # FPHSA cannot handle "this OR that is required", so we conditionally set what
