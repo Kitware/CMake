@@ -84,12 +84,26 @@
 # ``OpenGL::GLX`` or ``OpenGL::EGL``.
 #
 # Projects may use the ``OpenGL::GL`` target (or ``OPENGL_LIBRARIES`` variable)
-# to use legacy GL.  By default, these will use the legacy libGL library file.
-# If ``OPENGL_gl_LIBRARY`` is empty or not found and GLVND is available, the
-# ``OpenGL::GL`` target will use GLVND ``OpenGL::OpenGL`` and ``OpenGL::GLX``
-# (and the ``OPENGL_LIBRARIES`` variable will use the corresponding libraries).
-# Thus, for non-EGL-based Linux targets, the ``OpenGL::GL`` target is most
-# portable.
+# to use legacy GL interfaces.  These will use the legacy GL library located
+# by ``OPENGL_gl_LIBRARY``, if available.  If ``OPENGL_gl_LIBRARY`` is empty or
+# not found and GLVND is available, the ``OpenGL::GL`` target will use GLVND
+# ``OpenGL::OpenGL`` and ``OpenGL::GLX`` (and the ``OPENGL_LIBRARIES``
+# variable will use the corresponding libraries).  Thus, for non-EGL-based
+# Linux targets, the ``OpenGL::GL`` target is most portable.
+#
+# A ``OpenGL_GL_PREFERENCE`` variable may be set to specify the preferred way
+# to provide legacy GL interfaces in case multiple choices are available.
+# The value may be one of:
+#
+# ``GLVND``
+#  If the GLVND OpenGL and GLX libraries are available, prefer them.
+#  This forces ``OPENGL_gl_LIBRARY`` to be empty.
+#  This is the default if components were requested (since components
+#  correspond to GLVND libraries).
+#
+# ``LEGACY``
+#  Prefer to use the legacy libGL library, if available.
+#  This is the default if no components were requested.
 #
 # For EGL targets the client must rely on GLVND support on the user's system.
 # Linking should use the ``OpenGL::OpenGL OpenGL::EGL`` targets.  Using GLES*
@@ -206,13 +220,42 @@ else()
           /usr/shlib /usr/X11R6/lib
   )
 
-  find_library(OPENGL_gl_LIBRARY
-    NAMES GL MesaGL
-    PATHS /opt/graphics/OpenGL/lib
-          /usr/openwin/lib
-          /usr/shlib /usr/X11R6/lib
-          ${_OPENGL_LIB_PATH}
-  )
+  if(NOT DEFINED OpenGL_GL_PREFERENCE)
+    set(OpenGL_GL_PREFERENCE "")
+  endif()
+  if(NOT OpenGL_GL_PREFERENCE STREQUAL "")
+    # A preference has been explicitly specified.
+    if(NOT OpenGL_GL_PREFERENCE MATCHES "^(GLVND|LEGACY)$")
+      message(FATAL_ERROR
+        "OpenGL_GL_PREFERENCE value '${OpenGL_GL_PREFERENCE}' not recognized.  "
+        "Allowed values are 'GLVND' and 'LEGACY'."
+        )
+    endif()
+  elseif(OpenGL_FIND_COMPONENTS)
+    # No preference was explicitly specified, but the caller did request
+    # at least one GLVND component.  Prefer GLVND for legacy GL.
+    set(OpenGL_GL_PREFERENCE "GLVND")
+  else()
+    # No preference was explicitly specified and no GLVND components were
+    # requested.  Prefer libGL for legacy GL.
+    set(OpenGL_GL_PREFERENCE "LEGACY")
+  endif()
+
+  if("x${OpenGL_GL_PREFERENCE}x" STREQUAL "xGLVNDx" AND OPENGL_opengl_LIBRARY AND OPENGL_glx_LIBRARY)
+    # We can provide legacy GL using GLVND libraries.
+    # Do not use any legacy GL library.
+    set(OPENGL_gl_LIBRARY "")
+  else()
+    # We cannot provide legacy GL using GLVND libraries.
+    # Search for the legacy GL library.
+    find_library(OPENGL_gl_LIBRARY
+      NAMES GL MesaGL
+      PATHS /opt/graphics/OpenGL/lib
+            /usr/openwin/lib
+            /usr/shlib /usr/X11R6/lib
+            ${_OPENGL_LIB_PATH}
+      )
+  endif()
 
   # FPHSA cannot handle "this OR that is required", so we conditionally set what
   # it must look for.  First clear any previous config we might have done:
