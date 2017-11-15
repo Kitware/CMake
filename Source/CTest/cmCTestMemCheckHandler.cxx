@@ -10,9 +10,11 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
+#include <chrono>
 #include <iostream>
 #include <sstream>
 #include <string.h>
+#include <type_traits>
 
 struct CatToErrorType
 {
@@ -408,8 +410,10 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
 
   xml.Element("EndDateTime", this->EndTest);
   xml.Element("EndTestTime", this->EndTestTime);
-  xml.Element("ElapsedMinutes",
-              static_cast<int>(this->ElapsedTestingTime / 6) / 10.0);
+  xml.Element(
+    "ElapsedMinutes",
+    std::chrono::duration_cast<std::chrono::minutes>(this->ElapsedTestingTime)
+      .count());
 
   xml.EndElement(); // DynamicAnalysis
   this->CTest->EndXML(xml);
@@ -844,7 +848,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
   cmsys::RegularExpression vgABR("== .*pthread_mutex_unlock: mutex is "
                                  "locked by a different thread");
   std::vector<std::string::size_type> nonValGrindOutput;
-  double sttime = cmSystemTools::GetTime();
+  auto sttime = std::chrono::steady_clock::now();
   cmCTestOptionalLog(this->CTest, DEBUG,
                      "Start test: " << lines.size() << std::endl, this->Quiet);
   std::string::size_type totalOutputSize = 0;
@@ -918,7 +922,10 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
     }
   }
   cmCTestOptionalLog(this->CTest, DEBUG, "End test (elapsed: "
-                       << (cmSystemTools::GetTime() - sttime) << std::endl,
+                       << std::chrono::duration_cast<std::chrono::seconds>(
+                            std::chrono::steady_clock::now() - sttime)
+                            .count()
+                       << "s)" << std::endl,
                      this->Quiet);
   log = ostr.str();
   this->DefectCount += defects;
@@ -929,7 +936,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
   const std::string& str, std::string& log, std::vector<int>& results)
 {
   log.clear();
-  double sttime = cmSystemTools::GetTime();
+  auto sttime = std::chrono::steady_clock::now();
   std::vector<std::string> lines;
   cmSystemTools::Split(str.c_str(), lines);
   cmCTestOptionalLog(this->CTest, DEBUG,
@@ -961,7 +968,10 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
     defects++;
   }
   cmCTestOptionalLog(this->CTest, DEBUG, "End test (elapsed: "
-                       << (cmSystemTools::GetTime() - sttime) << std::endl,
+                       << std::chrono::duration_cast<std::chrono::seconds>(
+                            std::chrono::steady_clock::now() - sttime)
+                            .count()
+                       << "s)" << std::endl,
                      this->Quiet);
   if (defects) {
     // only put the output of Bounds Checker if there were

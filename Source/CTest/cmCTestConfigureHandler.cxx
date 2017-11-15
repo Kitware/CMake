@@ -7,8 +7,10 @@
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
+#include <chrono>
 #include <ostream>
 #include <string>
+#include <type_traits>
 
 cmCTestConfigureHandler::cmCTestConfigureHandler()
 {
@@ -43,7 +45,7 @@ int cmCTestConfigureHandler::ProcessHandler()
     return -1;
   }
 
-  double elapsed_time_start = cmSystemTools::GetTime();
+  auto elapsed_time_start = std::chrono::steady_clock::now();
   std::string output;
   int retVal = 0;
   int res = 0;
@@ -84,10 +86,10 @@ int cmCTestConfigureHandler::ProcessHandler()
       xml.Element("EndDateTime", this->CTest->CurrentTime());
       xml.Element("EndConfigureTime",
                   static_cast<unsigned int>(cmSystemTools::GetTime()));
-      xml.Element(
-        "ElapsedMinutes",
-        static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start) / 6) /
-          10.0);
+      xml.Element("ElapsedMinutes",
+                  std::chrono::duration_cast<std::chrono::minutes>(
+                    std::chrono::steady_clock::now() - elapsed_time_start)
+                    .count());
       xml.EndElement(); // Configure
       this->CTest->EndXML(xml);
     }

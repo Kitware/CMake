@@ -21,11 +21,13 @@
 #include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
+#include <chrono>
 #include <iomanip>
 #include <iterator>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <type_traits>
 #include <utility>
 
 class cmMakefile;
@@ -290,13 +292,14 @@ int cmCTestCoverageHandler::ProcessHandler()
   this->LoadLabels();
 
   cmGeneratedFileStream ofs;
-  double elapsed_time_start = cmSystemTools::GetTime();
+  auto elapsed_time_start = std::chrono::steady_clock::now();
   if (!this->StartLogFile("Coverage", ofs)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot create LastCoverage.log file" << std::endl);
   }
 
-  ofs << "Performing coverage: " << elapsed_time_start << std::endl;
+  ofs << "Performing coverage: "
+      << elapsed_time_start.time_since_epoch().count() << std::endl;
   this->CleanCoverageLogFiles(ofs);
 
   cmSystemTools::ConvertToUnixSlashes(sourceDir);
@@ -621,10 +624,10 @@ int cmCTestCoverageHandler::ProcessHandler()
   covSumXML.Element("EndDateTime", end_time);
   covSumXML.Element("EndTime",
                     static_cast<unsigned int>(cmSystemTools::GetTime()));
-  covSumXML.Element(
-    "ElapsedMinutes",
-    static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start) / 6) /
-      10.0);
+  covSumXML.Element("ElapsedMinutes",
+                    std::chrono::duration_cast<std::chrono::minutes>(
+                      std::chrono::steady_clock::now() - elapsed_time_start)
+                      .count());
   covSumXML.EndElement(); // Coverage
   this->CTest->EndXML(covSumXML);
 
@@ -1963,7 +1966,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
     return 0;
   }
   this->CTest->StartXML(xml, this->AppendXML);
-  double elapsed_time_start = cmSystemTools::GetTime();
+  auto elapsed_time_start = std::chrono::steady_clock::now();
   std::string coverage_start_time = this->CTest->CurrentTime();
   xml.StartElement("Coverage");
   xml.Element("StartDateTime", coverage_start_time);
@@ -2090,10 +2093,10 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
   xml.Element("PercentCoverage", SAFEDIV(percent_coverage, number_files));
   xml.Element("EndDateTime", end_time);
   xml.Element("EndTime", static_cast<unsigned int>(cmSystemTools::GetTime()));
-  xml.Element(
-    "ElapsedMinutes",
-    static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start) / 6) /
-      10.0);
+  xml.Element("ElapsedMinutes",
+              std::chrono::duration_cast<std::chrono::minutes>(
+                std::chrono::steady_clock::now() - elapsed_time_start)
+                .count());
   xml.EndElement(); // Coverage
   this->CTest->EndXML(xml);
 
