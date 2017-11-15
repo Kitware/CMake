@@ -1069,6 +1069,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   if (subproject) {
     str << "subproject=" << curl.Escape(subproject) << "&";
   }
+  auto timeNow =
+    std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   str << "stamp=" << curl.Escape(this->CTest->GetCurrentTag()) << "-"
       << curl.Escape(this->CTest->GetTestModelString()) << "&"
       << "model=" << curl.Escape(this->CTest->GetTestModelString()) << "&"
@@ -1077,8 +1079,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
       << "site=" << curl.Escape(this->CTest->GetCTestConfiguration("Site"))
       << "&"
       << "track=" << curl.Escape(this->CTest->GetTestModelString()) << "&"
-      << "starttime=" << static_cast<int>(cmSystemTools::GetTime()) << "&"
-      << "endtime=" << static_cast<int>(cmSystemTools::GetTime()) << "&"
+      << "starttime=" << timeNow << "&"
+      << "endtime=" << timeNow << "&"
       << "datafilesmd5[0]=" << md5sum << "&"
       << "type=" << curl.Escape(typeString);
   std::string fields = str.str();

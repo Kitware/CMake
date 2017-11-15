@@ -177,8 +177,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     return -1;
   }
   std::string start_time = this->CTest->CurrentTime();
-  unsigned int start_time_time =
-    static_cast<unsigned int>(cmSystemTools::GetTime());
+  auto start_time_time = std::chrono::system_clock::now();
   auto elapsed_time_start = std::chrono::steady_clock::now();
 
   bool updated = vc->Update();
@@ -226,7 +225,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   cmCTestOptionalLog(this->CTest, DEBUG, "End" << std::endl, this->Quiet);
   std::string end_time = this->CTest->CurrentTime();
   xml.Element("EndDateTime", end_time);
-  xml.Element("EndTime", static_cast<unsigned int>(cmSystemTools::GetTime()));
+  xml.Element("EndTime", std::chrono::system_clock::now());
   xml.Element("ElapsedMinutes",
               std::chrono::duration_cast<std::chrono::minutes>(
                 std::chrono::steady_clock::now() - elapsed_time_start)

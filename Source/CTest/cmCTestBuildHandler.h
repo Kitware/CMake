@@ -94,8 +94,8 @@ private:
 
   std::string StartBuild;
   std::string EndBuild;
-  double StartBuildTime;
-  double EndBuildTime;
+  std::chrono::system_clock::time_point StartBuildTime;
+  std::chrono::system_clock::time_point EndBuildTime;
 
   std::vector<std::string> CustomErrorMatches;
   std::vector<std::string> CustomErrorExceptions;

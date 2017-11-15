@@ -4,7 +4,6 @@
 
 #include "cmCTest.h"
 #include "cmGeneratedFileStream.h"
-#include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
 #include <chrono>
@@ -57,8 +56,7 @@ int cmCTestConfigureHandler::ProcessHandler()
       return 1;
     }
     std::string start_time = this->CTest->CurrentTime();
-    unsigned int start_time_time =
-      static_cast<unsigned int>(cmSystemTools::GetTime());
+    auto start_time_time = std::chrono::system_clock::now();
 
     cmGeneratedFileStream ofs;
     this->StartLogFile("Configure", ofs);
@@ -84,8 +82,7 @@ int cmCTestConfigureHandler::ProcessHandler()
       xml.Element("Log", output);
       xml.Element("ConfigureStatus", retVal);
       xml.Element("EndDateTime", this->CTest->CurrentTime());
-      xml.Element("EndConfigureTime",
-                  static_cast<unsigned int>(cmSystemTools::GetTime()));
+      xml.Element("EndConfigureTime", std::chrono::system_clock::now());
       xml.Element("ElapsedMinutes",
                   std::chrono::duration_cast<std::chrono::minutes>(
                     std::chrono::steady_clock::now() - elapsed_time_start)

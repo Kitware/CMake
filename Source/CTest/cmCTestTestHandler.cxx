@@ -1204,7 +1204,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
 {
   this->ComputeTestList();
   this->StartTest = this->CTest->CurrentTime();
-  this->StartTestTime = static_cast<unsigned int>(cmSystemTools::GetTime());
+  this->StartTestTime = std::chrono::system_clock::now();
   auto elapsed_time_start = std::chrono::steady_clock::now();
 
   cmCTestMultiProcessHandler* parallel = this->CTest->GetBatchJobs()
@@ -1271,7 +1271,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   }
   delete parallel;
   this->EndTest = this->CTest->CurrentTime();
-  this->EndTestTime = static_cast<unsigned int>(cmSystemTools::GetTime());
+  this->EndTestTime = std::chrono::system_clock::now();
   this->ElapsedTestingTime =
     std::chrono::steady_clock::now() - elapsed_time_start;
   *this->LogFile << "End testing: " << this->CTest->CurrentTime() << std::endl;

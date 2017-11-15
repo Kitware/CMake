@@ -175,14 +175,13 @@ void cmCTestCoverageHandler::StartCoverageLogXML(cmXMLWriter& xml)
   this->CTest->StartXML(xml, this->AppendXML);
   xml.StartElement("CoverageLog");
   xml.Element("StartDateTime", this->CTest->CurrentTime());
-  xml.Element("StartTime",
-              static_cast<unsigned int>(cmSystemTools::GetTime()));
+  xml.Element("StartTime", std::chrono::system_clock::now());
 }
 
 void cmCTestCoverageHandler::EndCoverageLogXML(cmXMLWriter& xml)
 {
   xml.Element("EndDateTime", this->CTest->CurrentTime());
-  xml.Element("EndTime", static_cast<unsigned int>(cmSystemTools::GetTime()));
+  xml.Element("EndTime", std::chrono::system_clock::now());
   xml.EndElement(); // CoverageLog
   this->CTest->EndXML(xml);
 }
@@ -283,8 +282,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   }
 
   std::string coverage_start_time = this->CTest->CurrentTime();
-  unsigned int coverage_start_time_time =
-    static_cast<unsigned int>(cmSystemTools::GetTime());
+  auto coverage_start_time_time = std::chrono::system_clock::now();
   std::string sourceDir =
     this->CTest->GetCTestConfiguration("SourceDirectory");
   std::string binaryDir = this->CTest->GetCTestConfiguration("BuildDirectory");
@@ -622,8 +620,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   covSumXML.Element("LOC", total_lines);
   covSumXML.Element("PercentCoverage", percent_coverage);
   covSumXML.Element("EndDateTime", end_time);
-  covSumXML.Element("EndTime",
-                    static_cast<unsigned int>(cmSystemTools::GetTime()));
+  covSumXML.Element("EndTime", std::chrono::system_clock::now());
   covSumXML.Element("ElapsedMinutes",
                     std::chrono::duration_cast<std::chrono::minutes>(
                       std::chrono::steady_clock::now() - elapsed_time_start)
@@ -1970,8 +1967,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
   std::string coverage_start_time = this->CTest->CurrentTime();
   xml.StartElement("Coverage");
   xml.Element("StartDateTime", coverage_start_time);
-  xml.Element("StartTime",
-              static_cast<unsigned int>(cmSystemTools::GetTime()));
+  xml.Element("StartTime", std::chrono::system_clock::now());
   std::string stdline;
   std::string errline;
   // expected output:
@@ -2092,7 +2088,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
   xml.Element("LOC", total_functions);
   xml.Element("PercentCoverage", SAFEDIV(percent_coverage, number_files));
   xml.Element("EndDateTime", end_time);
-  xml.Element("EndTime", static_cast<unsigned int>(cmSystemTools::GetTime()));
+  xml.Element("EndTime", std::chrono::system_clock::now());
   xml.Element("ElapsedMinutes",
               std::chrono::duration_cast<std::chrono::minutes>(
                 std::chrono::steady_clock::now() - elapsed_time_start)
