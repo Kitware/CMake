@@ -489,7 +489,7 @@ void cmGhsMultiTargetGenerator::WriteSources(
     char const* sourceFullPath = (*si)->GetFullPath().c_str();
     cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(sourceFullPath, sourceGroups);
-    std::string sgPath(sourceGroup->GetFullName());
+    std::string sgPath = sourceGroup->GetFullName();
     cmSystemTools::ConvertToUnixSlashes(sgPath);
     cmGlobalGhsMultiGenerator::AddFilesUpToPath(
       this->GetFolderBuildStreams(), &this->FolderBuildStreams,
@@ -608,7 +608,7 @@ std::string cmGhsMultiTargetGenerator::ComputeLongestObjectDirectory(
   cmSourceGroup* sourceGroup =
     localGhsMultiGenerator->GetMakefile()->FindSourceGroup(sourceFullPath,
                                                            sourceGroups);
-  std::string const sgPath(sourceGroup->GetFullName());
+  std::string const& sgPath = sourceGroup->GetFullName();
   dir_max += sgPath;
   dir_max += "/Objs/libs/";
   dir_max += generatorTarget->Target->GetName();

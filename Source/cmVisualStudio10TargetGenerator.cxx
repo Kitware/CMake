@@ -1472,8 +1472,8 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   for (std::set<cmSourceGroup*>::iterator g = groupsUsed.begin();
        g != groupsUsed.end(); ++g) {
     cmSourceGroup* sg = *g;
-    const char* name = sg->GetFullName();
-    if (strlen(name) != 0) {
+    std::string const& name = sg->GetFullName();
+    if (!name.empty()) {
       this->WriteString("<Filter Include=\"", 2);
       (*this->BuildFileStream) << name << "\">\n";
       std::string guidName = "SG_Filter_";
@@ -1558,12 +1558,12 @@ void cmVisualStudio10TargetGenerator::WriteGroupSources(
     std::string const& source = sf->GetFullPath();
     cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
-    const char* filter = sourceGroup->GetFullName();
+    std::string const& filter = sourceGroup->GetFullName();
     this->WriteString("<", 2);
     std::string path = this->ConvertPath(source, s->RelativePath);
     this->ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << name << " Include=\"" << cmVS10EscapeXML(path);
-    if (strlen(filter)) {
+    if (!filter.empty()) {
       (*this->BuildFileStream) << "\">\n";
       this->WriteString("<Filter>", 3);
       (*this->BuildFileStream) << filter << "</Filter>\n";
