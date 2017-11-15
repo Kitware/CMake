@@ -1469,9 +1469,12 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   }
 
   this->WriteString("<ItemGroup>\n", 1);
-  for (std::set<cmSourceGroup*>::iterator g = groupsUsed.begin();
-       g != groupsUsed.end(); ++g) {
-    cmSourceGroup* sg = *g;
+  std::vector<cmSourceGroup*> groupsVec(groupsUsed.begin(), groupsUsed.end());
+  std::sort(groupsVec.begin(), groupsVec.end(),
+            [](cmSourceGroup* l, cmSourceGroup* r) {
+              return l->GetFullName() < r->GetFullName();
+            });
+  for (cmSourceGroup* sg : groupsVec) {
     std::string const& name = sg->GetFullName();
     if (!name.empty()) {
       this->WriteString("<Filter Include=\"", 2);
