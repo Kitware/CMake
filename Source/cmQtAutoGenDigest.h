@@ -24,6 +24,8 @@ public:
   std::string QrcFile;
   std::string QrcName;
   std::string PathChecksum;
+  std::string InfoFile;
+  std::string SettingsFile;
   std::string RccFile;
   bool Generated;
   bool Unique;

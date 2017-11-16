@@ -1,0 +1,11 @@
+# Meta
+set(ARCC_MULTI_CONFIG @_multi_config@)
+# Directories and files
+set(ARCC_CMAKE_BINARY_DIR "@CMAKE_BINARY_DIR@/")
+set(ARCC_CMAKE_SOURCE_DIR "@CMAKE_SOURCE_DIR@/")
+set(ARCC_CMAKE_CURRENT_SOURCE_DIR "@CMAKE_CURRENT_SOURCE_DIR@/")
+set(ARCC_CMAKE_CURRENT_BINARY_DIR "@CMAKE_CURRENT_BINARY_DIR@/")
+set(ARCC_BUILD_DIR @_build_dir@)
+# Qt environment
+set(ARCC_QT_VERSION_MAJOR @_qt_version_major@)
+set(ARCC_QT_RCC_EXECUTABLE @_qt_rcc_executable@)
