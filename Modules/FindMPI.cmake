@@ -346,7 +346,7 @@ function (_MPI_check_compiler LANG QUERY_FLAG OUTPUT_VARIABLE RESULT_VARIABLE)
   # library that has invalid or missing version information there would be warning
   # messages emitted by ld.so in the compiler output. In either case, we'll treat
   # the output as invalid.
-  if("${WRAPPER_OUTPUT}" MATCHES "undefined reference|unrecognized|need to set|no version information available")
+  if("${WRAPPER_OUTPUT}" MATCHES "undefined reference|unrecognized|need to set|no version information available|command not found")
     set(WRAPPER_RETURN 255)
   endif()
   # Ensure that no error output might be passed upwards.
