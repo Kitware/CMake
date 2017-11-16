@@ -316,6 +316,8 @@ set(SRCS
   cmQtAutoGeneratorInitializer.h
   cmQtAutoGenerators.cxx
   cmQtAutoGenerators.h
+  cmQtAutoGeneratorRcc.cxx
+  cmQtAutoGeneratorRcc.h
   cmRST.cxx
   cmRST.h
   cmScriptGenerator.h
