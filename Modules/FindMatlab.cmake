@@ -356,7 +356,7 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
   endif()
 
 
-  if(${win64} AND ${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "64")
+  if(${win64} AND CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "64")
     set(APPEND_REG "/reg:64")
   else()
     set(APPEND_REG "/reg:32")
