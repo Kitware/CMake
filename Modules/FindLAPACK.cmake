@@ -37,6 +37,7 @@
 #
 # * Intel(mkl)
 # * OpenBLAS
+# * FLAME
 # * ACML
 # * Apple
 # * NAS
@@ -195,6 +196,20 @@ if (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
   cheev
   ""
   "openblas"
+  "${BLAS_LIBRARIES}"
+  ""
+  )
+ endif()
+endif ()
+
+if (BLA_VENDOR STREQUAL "FLAME" OR BLA_VENDOR STREQUAL "All")
+ if(NOT LAPACK_LIBRARIES)
+  check_lapack_libraries(
+  LAPACK_LIBRARIES
+  LAPACK
+  cheev
+  ""
+  "flame"
   "${BLAS_LIBRARIES}"
   ""
   )

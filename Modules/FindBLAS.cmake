@@ -36,6 +36,7 @@
 #
 # * Goto
 # * OpenBLAS
+# * FLAME
 # * ATLAS PhiPACK
 # * CXML
 # * DXML
@@ -185,6 +186,20 @@ if (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
   sgemm
   ""
   "openblas"
+  ""
+  )
+ endif()
+endif ()
+
+if (BLA_VENDOR STREQUAL "FLAME" OR BLA_VENDOR STREQUAL "All")
+ if(NOT BLAS_LIBRARIES)
+  # FLAME's blis library (https://github.com/flame/blis)
+  check_fortran_libraries(
+  BLAS_LIBRARIES
+  BLAS
+  sgemm
+  ""
+  "blis"
   ""
   )
  endif()
