@@ -267,7 +267,7 @@ if(CMake_RUN_IWYU)
     message(FATAL_ERROR "CMake_RUN_IWYU is ON but include-what-you-use is not found!")
   endif()
   set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE
-    "${IWYU_COMMAND};-Xiwyu;--mapping_file=${CMake_SOURCE_DIR}/Utilities/IWYU/mapping.imp")
+    "${IWYU_COMMAND};-Xiwyu;--mapping_file=${CMake_SOURCE_DIR}/Utilities/IWYU/mapping.imp;-w")
 endif()
 
 
