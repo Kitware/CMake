@@ -80,15 +80,6 @@ private:
     std::string IncludeString;
   };
 
-  /// @brief RCC job
-  struct RccJob
-  {
-    std::string QrcFile;
-    std::string RccFile;
-    std::vector<std::string> Options;
-    std::vector<std::string> Inputs;
-  };
-
   // -- Initialization
   bool InitInfoFile(cmMakefile* makefile, std::string const& targetDirectory,
                     std::string const& config);
@@ -98,8 +89,7 @@ private:
   bool SettingsFileWrite();
   bool SettingsChanged() const
   {
-    return (this->MocSettingsChanged || this->RccSettingsChanged ||
-            this->UicSettingsChanged);
+    return (this->MocSettingsChanged || this->UicSettingsChanged);
   }
 
   // -- Central processing
@@ -146,11 +136,6 @@ private:
   bool UicGenerateAll();
   bool UicGenerateFile(const UicJob& uicJob);
 
-  // -- Rcc
-  bool RccEnabled() const { return !this->RccExecutable.empty(); }
-  bool RccGenerateAll();
-  bool RccGenerateFile(const RccJob& rccJob);
-
   // -- Log info
   void LogBold(std::string const& message) const;
   void LogInfo(cmQtAutoGen::Generator genType,
@@ -193,7 +178,6 @@ private:
   std::string SettingsFile;
   std::string SettingsStringMoc;
   std::string SettingsStringUic;
-  std::string SettingsStringRcc;
   // -- Directories
   std::string ProjectSourceDir;
   std::string ProjectBinaryDir;
@@ -206,7 +190,6 @@ private:
   std::string QtMinorVersion;
   std::string MocExecutable;
   std::string UicExecutable;
-  std::string RccExecutable;
   // -- File lists
   std::map<std::string, SourceJob> HeaderJobs;
   std::map<std::string, SourceJob> SourceJobs;
@@ -240,9 +223,6 @@ private:
   std::vector<std::string> UicSearchPaths;
   cmsys::RegularExpression UicRegExpInclude;
   std::vector<std::unique_ptr<UicJob>> UicJobs;
-  // -- Rcc
-  bool RccSettingsChanged;
-  std::vector<RccJob> RccJobs;
 };
 
 #endif
