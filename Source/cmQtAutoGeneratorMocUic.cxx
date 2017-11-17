@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGen.h"
-#include "cmQtAutoGenerators.h"
+#include "cmQtAutoGeneratorMocUic.h"
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Terminal.h"
@@ -129,7 +129,7 @@ static bool ListContains(std::vector<std::string> const& list,
 
 // -- Class methods
 
-cmQtAutoGenerators::cmQtAutoGenerators()
+cmQtAutoGeneratorMocUic::cmQtAutoGeneratorMocUic()
   : MultiConfig(cmQtAutoGen::WRAP)
   , IncludeProjectDirsBefore(false)
   , Verbose(cmSystemTools::HasEnv("VERBOSE"))
@@ -155,8 +155,8 @@ cmQtAutoGenerators::cmQtAutoGenerators()
                                  "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
 }
 
-bool cmQtAutoGenerators::Run(std::string const& targetDirectory,
-                             std::string const& config)
+bool cmQtAutoGeneratorMocUic::Run(std::string const& targetDirectory,
+                                  std::string const& config)
 {
   cmake cm(cmake::RoleScript);
   cm.SetHomeOutputDirectory(targetDirectory);
@@ -185,9 +185,9 @@ bool cmQtAutoGenerators::Run(std::string const& targetDirectory,
   return success;
 }
 
-bool cmQtAutoGenerators::InitInfoFile(cmMakefile* makefile,
-                                      std::string const& targetDirectory,
-                                      std::string const& config)
+bool cmQtAutoGeneratorMocUic::InitInfoFile(cmMakefile* makefile,
+                                           std::string const& targetDirectory,
+                                           std::string const& config)
 {
   // -- Meta
   this->HeaderExtensions = makefile->GetCMakeInstance()->GetHeaderExtensions();
@@ -549,7 +549,7 @@ bool cmQtAutoGenerators::InitInfoFile(cmMakefile* makefile,
   return true;
 }
 
-void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile)
+void cmQtAutoGeneratorMocUic::SettingsFileRead(cmMakefile* makefile)
 {
   // Compose current settings strings
   {
@@ -609,7 +609,7 @@ void cmQtAutoGenerators::SettingsFileRead(cmMakefile* makefile)
   }
 }
 
-bool cmQtAutoGenerators::SettingsFileWrite()
+bool cmQtAutoGeneratorMocUic::SettingsFileWrite()
 {
   bool success = true;
   // Only write if any setting changed
@@ -644,7 +644,7 @@ bool cmQtAutoGenerators::SettingsFileWrite()
   return success;
 }
 
-bool cmQtAutoGenerators::Process()
+bool cmQtAutoGeneratorMocUic::Process()
 {
   // the program goes through all .cpp files to see which moc files are
   // included. It is not really interesting how the moc file is named, but
@@ -696,8 +696,8 @@ bool cmQtAutoGenerators::Process()
 /**
  * @return True on success
  */
-bool cmQtAutoGenerators::ParseSourceFile(std::string const& absFilename,
-                                         const SourceJob& job)
+bool cmQtAutoGeneratorMocUic::ParseSourceFile(std::string const& absFilename,
+                                              const SourceJob& job)
 {
   std::string contentText;
   std::string error;
@@ -724,8 +724,8 @@ bool cmQtAutoGenerators::ParseSourceFile(std::string const& absFilename,
 /**
  * @return True on success
  */
-bool cmQtAutoGenerators::ParseHeaderFile(std::string const& absFilename,
-                                         const SourceJob& job)
+bool cmQtAutoGeneratorMocUic::ParseHeaderFile(std::string const& absFilename,
+                                              const SourceJob& job)
 {
   std::string contentText;
   std::string error;
@@ -752,7 +752,7 @@ bool cmQtAutoGenerators::ParseHeaderFile(std::string const& absFilename,
 /**
  * @return True on success
  */
-bool cmQtAutoGenerators::ParsePostprocess()
+bool cmQtAutoGeneratorMocUic::ParsePostprocess()
 {
   bool success = true;
   // Read missing dependencies
@@ -783,7 +783,7 @@ bool cmQtAutoGenerators::ParsePostprocess()
  * @brief Tests if the file should be ignored for moc scanning
  * @return True if the file should be ignored
  */
-bool cmQtAutoGenerators::MocSkip(std::string const& absFilename) const
+bool cmQtAutoGeneratorMocUic::MocSkip(std::string const& absFilename) const
 {
   if (this->MocEnabled()) {
     // Test if the file name is on the skip list
@@ -798,8 +798,8 @@ bool cmQtAutoGenerators::MocSkip(std::string const& absFilename) const
  * @brief Tests if the C++ content requires moc processing
  * @return True if moc is required
  */
-bool cmQtAutoGenerators::MocRequired(std::string const& contentText,
-                                     std::string* macroName)
+bool cmQtAutoGeneratorMocUic::MocRequired(std::string const& contentText,
+                                          std::string* macroName)
 {
   for (KeyRegExp& filter : this->MocMacroFilters) {
     // Run a simple find string operation before the expensive
@@ -817,7 +817,7 @@ bool cmQtAutoGenerators::MocRequired(std::string const& contentText,
   return false;
 }
 
-std::string cmQtAutoGenerators::MocStringMacros() const
+std::string cmQtAutoGeneratorMocUic::MocStringMacros() const
 {
   std::string res;
   const auto itB = this->MocMacroFilters.cbegin();
@@ -839,7 +839,7 @@ std::string cmQtAutoGenerators::MocStringMacros() const
   return res;
 }
 
-std::string cmQtAutoGenerators::MocStringHeaders(
+std::string cmQtAutoGeneratorMocUic::MocStringHeaders(
   std::string const& fileBase) const
 {
   std::string res = fileBase;
@@ -849,7 +849,7 @@ std::string cmQtAutoGenerators::MocStringHeaders(
   return res;
 }
 
-std::string cmQtAutoGenerators::MocFindIncludedHeader(
+std::string cmQtAutoGeneratorMocUic::MocFindIncludedHeader(
   std::string const& sourcePath, std::string const& includeBase) const
 {
   std::string header;
@@ -872,7 +872,7 @@ std::string cmQtAutoGenerators::MocFindIncludedHeader(
   return header;
 }
 
-bool cmQtAutoGenerators::MocFindIncludedFile(
+bool cmQtAutoGeneratorMocUic::MocFindIncludedFile(
   std::string& absFile, std::string const& sourcePath,
   std::string const& includeString) const
 {
@@ -902,8 +902,8 @@ bool cmQtAutoGenerators::MocFindIncludedFile(
   return success;
 }
 
-bool cmQtAutoGenerators::MocDependFilterPush(std::string const& key,
-                                             std::string const& regExp)
+bool cmQtAutoGeneratorMocUic::MocDependFilterPush(std::string const& key,
+                                                  std::string const& regExp)
 {
   std::string error;
   if (!key.empty()) {
@@ -937,9 +937,9 @@ bool cmQtAutoGenerators::MocDependFilterPush(std::string const& key,
   return true;
 }
 
-void cmQtAutoGenerators::MocFindDepends(std::string const& absFilename,
-                                        std::string const& contentText,
-                                        std::set<std::string>& depends)
+void cmQtAutoGeneratorMocUic::MocFindDepends(std::string const& absFilename,
+                                             std::string const& contentText,
+                                             std::set<std::string>& depends)
 {
   if (this->MocDependFilters.empty() && contentText.empty()) {
     return;
@@ -985,8 +985,8 @@ void cmQtAutoGenerators::MocFindDepends(std::string const& absFilename,
 /**
  * @return True on success
  */
-bool cmQtAutoGenerators::MocParseSourceContent(std::string const& absFilename,
-                                               std::string const& contentText)
+bool cmQtAutoGeneratorMocUic::MocParseSourceContent(
+  std::string const& absFilename, std::string const& contentText)
 {
   if (this->Verbose) {
     this->LogInfo(cmQtAutoGen::MOC, "Checking: " + absFilename);
@@ -1224,8 +1224,8 @@ bool cmQtAutoGenerators::MocParseSourceContent(std::string const& absFilename,
   return true;
 }
 
-void cmQtAutoGenerators::MocParseHeaderContent(std::string const& absFilename,
-                                               std::string const& contentText)
+void cmQtAutoGeneratorMocUic::MocParseHeaderContent(
+  std::string const& absFilename, std::string const& contentText)
 {
   if (this->Verbose) {
     this->LogInfo(cmQtAutoGen::MOC, "Checking: " + absFilename);
@@ -1257,7 +1257,7 @@ void cmQtAutoGenerators::MocParseHeaderContent(std::string const& absFilename,
   }
 }
 
-bool cmQtAutoGenerators::MocGenerateAll()
+bool cmQtAutoGeneratorMocUic::MocGenerateAll()
 {
   if (!this->MocEnabled()) {
     return true;
@@ -1422,8 +1422,8 @@ bool cmQtAutoGenerators::MocGenerateAll()
 /**
  * @return True on success
  */
-bool cmQtAutoGenerators::MocGenerateFile(const MocJobAuto& mocJob,
-                                         bool* generated)
+bool cmQtAutoGeneratorMocUic::MocGenerateFile(const MocJobAuto& mocJob,
+                                              bool* generated)
 {
   bool success = true;
 
@@ -1555,7 +1555,7 @@ bool cmQtAutoGenerators::MocGenerateFile(const MocJobAuto& mocJob,
 /**
  * @brief Tests if the file name is in the skip list
  */
-bool cmQtAutoGenerators::UicSkip(std::string const& absFilename) const
+bool cmQtAutoGeneratorMocUic::UicSkip(std::string const& absFilename) const
 {
   if (this->UicEnabled()) {
     // Test if the file name is on the skip list
@@ -1566,8 +1566,8 @@ bool cmQtAutoGenerators::UicSkip(std::string const& absFilename) const
   return true;
 }
 
-bool cmQtAutoGenerators::UicParseContent(std::string const& absFilename,
-                                         std::string const& contentText)
+bool cmQtAutoGeneratorMocUic::UicParseContent(std::string const& absFilename,
+                                              std::string const& contentText)
 {
   if (this->Verbose) {
     this->LogInfo(cmQtAutoGen::UIC, "Checking: " + absFilename);
@@ -1617,9 +1617,9 @@ bool cmQtAutoGenerators::UicParseContent(std::string const& absFilename,
   return true;
 }
 
-bool cmQtAutoGenerators::UicFindIncludedFile(std::string& absFile,
-                                             std::string const& sourceFile,
-                                             std::string const& includeString)
+bool cmQtAutoGeneratorMocUic::UicFindIncludedFile(
+  std::string& absFile, std::string const& sourceFile,
+  std::string const& includeString)
 {
   bool success = false;
   std::string searchFile =
@@ -1681,7 +1681,7 @@ bool cmQtAutoGenerators::UicFindIncludedFile(std::string& absFile,
   return success;
 }
 
-bool cmQtAutoGenerators::UicGenerateAll()
+bool cmQtAutoGeneratorMocUic::UicGenerateAll()
 {
   if (!this->UicEnabled()) {
     return true;
@@ -1745,7 +1745,7 @@ bool cmQtAutoGenerators::UicGenerateAll()
 /**
  * @return True on success
  */
-bool cmQtAutoGenerators::UicGenerateFile(const UicJob& uicJob)
+bool cmQtAutoGeneratorMocUic::UicGenerateFile(const UicJob& uicJob)
 {
   bool success = true;
 
@@ -1839,15 +1839,15 @@ bool cmQtAutoGenerators::UicGenerateFile(const UicJob& uicJob)
   return success;
 }
 
-void cmQtAutoGenerators::LogBold(std::string const& message) const
+void cmQtAutoGeneratorMocUic::LogBold(std::string const& message) const
 {
   cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
                                      cmsysTerminal_Color_ForegroundBold,
                                    message.c_str(), true, this->ColorOutput);
 }
 
-void cmQtAutoGenerators::LogInfo(cmQtAutoGen::Generator genType,
-                                 std::string const& message) const
+void cmQtAutoGeneratorMocUic::LogInfo(cmQtAutoGen::Generator genType,
+                                      std::string const& message) const
 {
   std::string msg = cmQtAutoGen::GeneratorName(genType);
   msg += ": ";
@@ -1858,8 +1858,8 @@ void cmQtAutoGenerators::LogInfo(cmQtAutoGen::Generator genType,
   cmSystemTools::Stdout(msg.c_str(), msg.size());
 }
 
-void cmQtAutoGenerators::LogWarning(cmQtAutoGen::Generator genType,
-                                    std::string const& message) const
+void cmQtAutoGeneratorMocUic::LogWarning(cmQtAutoGen::Generator genType,
+                                         std::string const& message) const
 {
   std::string msg = cmQtAutoGen::GeneratorName(genType);
   msg += " warning:";
@@ -1879,9 +1879,9 @@ void cmQtAutoGenerators::LogWarning(cmQtAutoGen::Generator genType,
   cmSystemTools::Stdout(msg.c_str(), msg.size());
 }
 
-void cmQtAutoGenerators::LogFileWarning(cmQtAutoGen::Generator genType,
-                                        std::string const& filename,
-                                        std::string const& message) const
+void cmQtAutoGeneratorMocUic::LogFileWarning(cmQtAutoGen::Generator genType,
+                                             std::string const& filename,
+                                             std::string const& message) const
 {
   std::string msg = "  ";
   msg += cmQtAutoGen::Quoted(filename);
@@ -1891,8 +1891,8 @@ void cmQtAutoGenerators::LogFileWarning(cmQtAutoGen::Generator genType,
   this->LogWarning(genType, msg);
 }
 
-void cmQtAutoGenerators::LogError(cmQtAutoGen::Generator genType,
-                                  std::string const& message) const
+void cmQtAutoGeneratorMocUic::LogError(cmQtAutoGen::Generator genType,
+                                       std::string const& message) const
 {
   std::string msg;
   msg.push_back('\n');
@@ -1906,9 +1906,9 @@ void cmQtAutoGenerators::LogError(cmQtAutoGen::Generator genType,
   cmSystemTools::Stderr(msg.c_str(), msg.size());
 }
 
-void cmQtAutoGenerators::LogFileError(cmQtAutoGen::Generator genType,
-                                      std::string const& filename,
-                                      std::string const& message) const
+void cmQtAutoGeneratorMocUic::LogFileError(cmQtAutoGen::Generator genType,
+                                           std::string const& filename,
+                                           std::string const& message) const
 {
   std::string emsg = "  ";
   emsg += cmQtAutoGen::Quoted(filename);
@@ -1918,7 +1918,7 @@ void cmQtAutoGenerators::LogFileError(cmQtAutoGen::Generator genType,
   this->LogError(genType, emsg);
 }
 
-void cmQtAutoGenerators::LogCommandError(
+void cmQtAutoGeneratorMocUic::LogCommandError(
   cmQtAutoGen::Generator genType, std::string const& message,
   std::vector<std::string> const& command, std::string const& output) const
 {
@@ -1949,8 +1949,8 @@ void cmQtAutoGenerators::LogCommandError(
  * @brief Generates the parent directory of the given file on demand
  * @return True on success
  */
-bool cmQtAutoGenerators::MakeParentDirectory(cmQtAutoGen::Generator genType,
-                                             std::string const& filename) const
+bool cmQtAutoGeneratorMocUic::MakeParentDirectory(
+  cmQtAutoGen::Generator genType, std::string const& filename) const
 {
   bool success = true;
   std::string const dirName = cmSystemTools::GetFilenamePath(filename);
@@ -1964,8 +1964,8 @@ bool cmQtAutoGenerators::MakeParentDirectory(cmQtAutoGen::Generator genType,
   return success;
 }
 
-bool cmQtAutoGenerators::FileDiffers(std::string const& filename,
-                                     std::string const& content)
+bool cmQtAutoGeneratorMocUic::FileDiffers(std::string const& filename,
+                                          std::string const& content)
 {
   bool differs = true;
   {
@@ -1977,9 +1977,9 @@ bool cmQtAutoGenerators::FileDiffers(std::string const& filename,
   return differs;
 }
 
-bool cmQtAutoGenerators::FileWrite(cmQtAutoGen::Generator genType,
-                                   std::string const& filename,
-                                   std::string const& content)
+bool cmQtAutoGeneratorMocUic::FileWrite(cmQtAutoGen::Generator genType,
+                                        std::string const& filename,
+                                        std::string const& content)
 {
   std::string error;
   // Make sure the parent directory exists
@@ -2008,8 +2008,8 @@ bool cmQtAutoGenerators::FileWrite(cmQtAutoGen::Generator genType,
  * @brief Runs a command and returns true on success
  * @return True on success
  */
-bool cmQtAutoGenerators::RunCommand(std::vector<std::string> const& command,
-                                    std::string& output) const
+bool cmQtAutoGeneratorMocUic::RunCommand(
+  std::vector<std::string> const& command, std::string& output) const
 {
   // Log command
   if (this->Verbose) {
@@ -2029,8 +2029,8 @@ bool cmQtAutoGenerators::RunCommand(std::vector<std::string> const& command,
  * appending different header extensions
  * @return True on success
  */
-bool cmQtAutoGenerators::FindHeader(std::string& header,
-                                    std::string const& testBasePath) const
+bool cmQtAutoGeneratorMocUic::FindHeader(std::string& header,
+                                         std::string const& testBasePath) const
 {
   for (std::string const& ext : this->HeaderExtensions) {
     std::string testFilePath(testBasePath);

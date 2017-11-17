@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmQtAutoGenerators_h
-#define cmQtAutoGenerators_h
+#ifndef cmQtAutoGeneratorMocUic_h
+#define cmQtAutoGeneratorMocUic_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -17,11 +17,11 @@
 
 class cmMakefile;
 
-class cmQtAutoGenerators
+class cmQtAutoGeneratorMocUic
 {
-  CM_DISABLE_COPY(cmQtAutoGenerators)
+  CM_DISABLE_COPY(cmQtAutoGeneratorMocUic)
 public:
-  cmQtAutoGenerators();
+  cmQtAutoGeneratorMocUic();
   bool Run(std::string const& targetDirectory, std::string const& config);
 
 private:
