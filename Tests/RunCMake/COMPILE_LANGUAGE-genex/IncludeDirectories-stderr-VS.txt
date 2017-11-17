@@ -3,6 +3,7 @@ CMake Error at IncludeDirectories.cmake:5 \(target_include_directories\):
 
     \$<COMPILE_LANGUAGE:CXX>
 
-  \$<COMPILE_LANGUAGE:...> may not be used with Visual Studio generators.
+  \$<COMPILE_LANGUAGE:...> may only be used for file\(GENERATE\) with the Visual
+  Studio generator.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
