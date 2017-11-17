@@ -838,8 +838,8 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
                          dagChecker->EvaluatingIncludeDirectories())) {
         reportError(
           context, content->GetOriginalExpression(),
-          "$<COMPILE_LANGUAGE:...> may only be used with COMPILE_OPTIONS "
-          "with the Xcode generator.");
+          "$<COMPILE_LANGUAGE:...> may only be used for COMPILE_OPTIONS "
+          "and file(GENERATE) with the Xcode generator.");
         return std::string();
       }
     } else {
