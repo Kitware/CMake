@@ -311,7 +311,6 @@ set(SRCS
   cmPropertyMap.h
   cmQtAutoGen.cxx
   cmQtAutoGen.h
-  cmQtAutoGenDigest.h
   cmQtAutoGenerator.cxx
   cmQtAutoGenerator.h
   cmQtAutoGeneratorInitializer.cxx

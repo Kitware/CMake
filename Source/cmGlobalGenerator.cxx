@@ -1314,7 +1314,10 @@ bool cmGlobalGenerator::Compute()
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
   // the AUTOMOC, AUTOUIC or AUTORCC property set
-  cmQtAutoGenDigestUPV autogenDigests = this->CreateQtAutoGeneratorsTargets();
+  auto autogenInits = this->CreateQtAutoGenInitializers();
+  for (auto& autoGen : autogenInits) {
+    autoGen->InitCustomTargets();
+  }
 #endif
 
   // Add generator specific helper commands
@@ -1335,10 +1338,11 @@ bool cmGlobalGenerator::Compute()
   }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  for (cmQtAutoGenDigestUP const& digest : autogenDigests) {
-    cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(*digest);
+  for (auto& autoGen : autogenInits) {
+    autoGen->SetupCustomTargets();
+    autoGen.reset(nullptr);
   }
-  autogenDigests.clear();
+  autogenInits.clear();
 #endif
 
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
@@ -1469,9 +1473,10 @@ bool cmGlobalGenerator::ComputeTargetDepends()
   return true;
 }
 
-cmQtAutoGenDigestUPV cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
+std::vector<std::unique_ptr<cmQtAutoGeneratorInitializer>>
+cmGlobalGenerator::CreateQtAutoGenInitializers()
 {
-  cmQtAutoGenDigestUPV autogenDigests;
+  std::vector<std::unique_ptr<cmQtAutoGeneratorInitializer>> autogenInits;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
@@ -1507,25 +1512,12 @@ cmQtAutoGenDigestUPV cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
         continue;
       }
 
-      {
-        cmQtAutoGenDigestUP digest(new cmQtAutoGenDigest(target));
-        digest->QtVersionMajor = std::move(qtVersionMajor);
-        digest->QtVersionMinor =
-          cmQtAutoGeneratorInitializer::GetQtMinorVersion(
-            target, digest->QtVersionMajor);
-        digest->MocEnabled = mocEnabled;
-        digest->UicEnabled = uicEnabled;
-        digest->RccEnabled = rccEnabled;
-        autogenDigests.emplace_back(std::move(digest));
-      }
+      autogenInits.emplace_back(new cmQtAutoGeneratorInitializer(
+        target, mocEnabled, uicEnabled, rccEnabled, qtVersionMajor));
     }
   }
-  // Initialize autogen targets
-  for (const cmQtAutoGenDigestUP& digest : autogenDigests) {
-    cmQtAutoGeneratorInitializer::InitializeAutogenTarget(*digest);
-  }
 #endif
-  return autogenDigests;
+  return autogenInits;
 }
 
 cmLinkLineComputer* cmGlobalGenerator::CreateLinkLineComputer(

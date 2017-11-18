@@ -142,14 +142,9 @@ bool cmQtAutoGeneratorMocUic::InitInfoFile(cmMakefile* makefile)
   }
 
   this->SettingsFile = InfoGetConfig("AM_SETTINGS_FILE");
-  if (!this->SettingsFile.empty()) {
-    if (this->MultiConfig != cmQtAutoGen::SINGLE) {
-      this->SettingsFile = cmQtAutoGen::AppendFilenameSuffix(
-        this->SettingsFile, this->ConfigSuffix);
-    }
-  } else {
+  if (this->SettingsFile.empty()) {
     this->LogFileError(cmQtAutoGen::GEN, this->GetInfoFile(),
-                       "Settings file is missing");
+                       "Settings file name missing");
     return false;
   }
 

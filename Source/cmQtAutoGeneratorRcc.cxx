@@ -69,12 +69,6 @@ bool cmQtAutoGeneratorRcc::InfoFileRead(cmMakefile* makefile)
   }
 
   this->SettingsFile = InfoGetConfig("ARCC_SETTINGS_FILE");
-  if (!this->SettingsFile.empty()) {
-    if (this->MultiConfig != cmQtAutoGen::SINGLE) {
-      this->SettingsFile = cmQtAutoGen::AppendFilenameSuffix(
-        this->SettingsFile, this->ConfigSuffix);
-    }
-  }
 
   // - Files and directories
   this->ProjectSourceDir = InfoGet("ARCC_CMAKE_SOURCE_DIR");
