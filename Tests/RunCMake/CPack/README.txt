@@ -153,6 +153,12 @@ this step and must contain
         is later changed automatically depending on the generator so expected
         package content can be written only once per test for all generators.
 
+- EXPECTED_FILE_PACKAGING_PREFIX and
+  EXPECTED_FILE_<file_number_starting_with_1>_PACKAGING_PREFIX variables can be
+  set to explicitly specified CPACK_PACKAGING_PREFIX value. By default this
+  variable does not need to be set as it is implicitly set to package generator
+  specific prefix.
+
 Optional verification phase is generator specific and is optionaly executed.
 This phase is executed if '<test_name>/VerifyResult.cmake' script exists.
 

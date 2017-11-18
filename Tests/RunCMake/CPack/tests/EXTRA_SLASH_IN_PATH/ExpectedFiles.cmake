@@ -2,6 +2,7 @@ set(whitespaces_ "[\t\n\r ]*")
 
 set(EXPECTED_FILES_COUNT "5")
 set(EXPECTED_FILES_NAME_GENERATOR_SPECIFIC_FORMAT TRUE)
+set(EXPECTED_FILE_PACKAGING_PREFIX "")
 
 set(EXPECTED_FILE_1_COMPONENT "applications")
 set(EXPECTED_FILE_CONTENT_1_LIST "/foo;/foo/test_prog")
